@@ -1,0 +1,141 @@
+Types of Reasoning
+
+1. Deductive Reasoning
+Definition: Logical process where a conclusion is derived from a set of premises; if the premises are true, the conclusion must be true.
+Relation: Fundamental form of reasoning.
+Example: If all mammals have hair and dogs are mammals, then dogs have hair.
+
+2. Inductive Reasoning
+Definition: Generalization made based on specific observations or instances.
+Relation: Fundamental form of reasoning.
+Example: Observing that the sun rises in the east every day and concluding that the sun always rises in the east.
+
+3. Abductive Reasoning
+Definition: Starts with observations and seeks the simplest and most likely explanation.
+Relation: Fundamental form of reasoning.
+Example: Seeing wet grass and concluding that it must have rained.
+
+4. Counterfactual Reasoning
+Definition: Considering hypothetical scenarios contrary to known facts.
+Relation: Intersects with all fundamental forms.
+Example: If I had left earlier, I would not have missed the bus.
+
+5. Analogical Reasoning
+Definition: Identifying similarities between different things and drawing conclusions based on those similarities.
+Relation: Form of inductive reasoning.
+Example: Comparing the structure of an atom to the solar system.
+
+6. Moral or Ethical Reasoning
+Definition: Determining right from wrong by applying ethical principles, values, and norms.
+Relation: May involve all fundamental forms, depending on the ethical framework.
+Example: Deciding not to steal based on moral principles or Laws.
+
+7. Spatial Reasoning
+Definition: Understanding and predicting spatial relations among objects.
+Relation: Can involve deductive reasoning.
+Example: Assembling a puzzle by understanding how pieces fit together.
+
+8. Temporal Reasoning
+Definition: Reasoning about time, sequences, and durations.
+Relation: May involve deductive reasoning.
+Example: Understanding that winter follows autumn.
+
+9. Probabilistic Reasoning
+Definition: Reasoning about probabilities and uncertain events.
+Relation: Often involves inductive reasoning.
+Example: Predicting weather based on meteorological data.
+
+10. Creative Reasoning
+Definition: Thinking outside conventional boundaries to generate new ideas.
+Relation: May not directly relate to fundamental forms.
+Example: Inventing a new product to solve a unique problem.
+
+11. Social Reasoning
+Definition: Interpreting and responding to social cues, norms, and relationships.
+Relation: May involve inductive reasoning.
+Example: Understanding a friend's feelings based on facial expressions.
+
+12. Visual Reasoning
+Definition: Interpreting and making conclusions based on visual information.
+Relation: Can involve deductive reasoning.
+Example: Analyzing a graph to understand data trends.
+
+13. Critical Reasoning
+Definition: Actively conceptualizing, analyzing, evaluating, and synthesizing information.
+Relation: Often involves deductive reasoning.
+Example: Evaluating the validity of an argument in a debate.
+
+14. Transitive Reasoning
+Definition: Recognizing logical relationships among different pairs of objects.
+Relation: A form of deductive reasoning.
+Example: If A > B and B > C, then A > C.
+
+15. Non-Monotonic Reasoning
+Definition: Reasoning that allows for retraction of conclusions with new information.
+Relation: Specialized form, not fitting neatly into fundamental categories.
+Example: Revising beliefs about a person's trustworthiness based on new evidence.
+
+16. Meta-Reasoning
+Definition: Reasoning about one's own reasoning, reflecting on cognitive processes.
+Relation: Operates at a higher level, overseeing fundamental reasoning processes.
+Example: Choosing the best problem-solving strategy for a task.
+
+17. Causal Reasoning
+Definition: Identifying relationships between cause and effect.
+Relation: Often involves inductive reasoning; can involve abductive reasoning.
+Example: Determining that smoking causes lung cancer.
+
+18. Decompositional Reasoning
+Definition: Breaking down a complex problem into smaller parts.
+Relation: Can involve deductive and inductive reasoning.
+Example: Analyzing a computer system by examining its individual components.
+
+19. Dialectical Reasoning
+Definition: A method of reasoning that involves a dialogue between two or more people holding different points of view, aiming to establish the truth through reasoned argumentation.
+Relation: May involve both deductive and inductive reasoning as participants build and analyze arguments.
+Example: A debate between political opponents where each side presents and refutes arguments to arrive at a more nuanced understanding.
+
+20. Heuristic Reasoning
+Definition: A problem-solving approach that employs a practical method or various shortcuts (heuristics) to produce solutions that may not be perfect but are sufficient for reaching immediate goals.
+Relation: May involve inductive reasoning as it often relies on pattern recognition and generalization; it may also intersect with abductive reasoning when seeking the most likely explanation.
+Example: Using the "rule of thumb" to estimate a measurement or make a quick judgment.
+
+21. Backwards Reasoning
+Definition: Reasoning backwards from the end of a problem to determine the sequence of optimal actions.
+Relation: Can involve deductive reasoning.
+Example: In chess, reasoning backward from checkmate to determine the best sequence of moves.
+
+22. Fuzzy Logic Reasoning
+Definition: A form of reasoning based on "degrees of truth" rather than binary true/false logic.
+Relation: An extension of traditional logical reasoning.
+Example: In a temperature control system, determining that if the temperature is "cold," the heater should be turned on "high."
+
+23. Defeasible Reasoning
+Definition: Reasoning that allows for conclusions to be overturned by new evidence.
+Relation: Similar to non-monotonic reasoning.
+Example: Concluding that a bird can fly, but revising that conclusion upon learning it's a penguin.
+
+24. Abductive-Deductive Reasoning
+Definition: A combination of abductive and deductive reasoning, where the most likely hypothesis is generated (abduction) and then tested deductively.
+Relation: Combines two fundamental forms of reasoning.
+Example: In a medical diagnosis, generating possible causes for symptoms (abduction) and then testing each cause to arrive at the correct diagnosis (deduction).
+
+25. Bayesian Reasoning
+Definition: Updating the probability of a hypothesis as more evidence becomes available.
+Relation: A form of probabilistic reasoning.
+Example: Adjusting the probability of a medical diagnosis based on the results of a test.
+
+26.	Evidential Reasoning
+Definition: This involves assessing the strength of evidence to support or refute a claim, often used in legal contexts.
+Relation: Can involve deductive, inductive, or abductive reasoning.
+Example: Weighing witness testimony and physical evidence to determine the likelihood of a defendant’s guilt.
+
+27.	Game-Theoretic Reasoning
+Definition: Reasoning used in strategic decision-making, often considering the actions and reactions of others.
+Relation: Can involve both deductive and inductive reasoning, with a focus on predicting behavior.
+Example: In a negotiation, predicting how the other party will respond to an offer based on their interests.
+
+28.	Commonsense Reasoning
+Definition: Applying everyday knowledge and experience to make decisions or solve problems.
+Relation: Often overlaps with other forms, particularly inductive reasoning.
+Example: Knowing that ice will melt if left in the sun and predicting that your drink will become diluted.
