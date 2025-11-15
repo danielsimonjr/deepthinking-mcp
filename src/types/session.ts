@@ -86,6 +86,7 @@ export interface SessionMetrics {
   revisionCount: number;
   timeSpent: number;
   dependencyDepth: number;
+  customMetrics: Map<string, any>;
 }
 
 /**

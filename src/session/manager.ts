@@ -202,7 +202,8 @@ export class SessionManager {
       averageUncertainty: 0,
       revisionCount: 0,
       timeSpent: 0,
-      dependencyDepth: 0
+      dependencyDepth: 0,
+      customMetrics: new Map(),
     };
   }
 
