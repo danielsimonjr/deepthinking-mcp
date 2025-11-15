@@ -23,6 +23,12 @@ import {
   MathematicsThought,
   PhysicsThought,
   HybridThought,
+  AbductiveThought,
+  CausalThought,
+  BayesianThought,
+  CounterfactualThought,
+  AnalogicalThought,
+  TemporalThought,
 } from './types/index.js';
 
 const server = new Server(
@@ -256,6 +262,80 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         assumptions: input.assumptions || [],
         uncertainty: input.uncertainty || 0.5,
       } as PhysicsThought;
+
+    case 'abductive':
+      return {
+        ...baseThought,
+        mode: ThinkingMode.ABDUCTIVE,
+        thoughtType: input.thoughtType as any,
+        observations: input.observations || [],
+        hypotheses: input.hypotheses || [],
+        evaluationCriteria: input.evaluationCriteria,
+        evidence: input.evidence || [],
+        bestExplanation: input.bestExplanation,
+      } as AbductiveThought;
+
+    case 'causal':
+      return {
+        ...baseThought,
+        mode: ThinkingMode.CAUSAL,
+        thoughtType: input.thoughtType as any,
+        causalGraph: input.causalGraph,
+        interventions: input.interventions || [],
+        mechanisms: input.mechanisms || [],
+        confounders: input.confounders || [],
+      } as CausalThought;
+
+    case 'bayesian':
+      return {
+        ...baseThought,
+        mode: ThinkingMode.BAYESIAN,
+        thoughtType: input.thoughtType as any,
+        hypothesis: input.hypothesis,
+        prior: input.prior,
+        likelihood: input.likelihood,
+        evidence: input.evidence || [],
+        posterior: input.posterior,
+        bayesFactor: input.bayesFactor,
+      } as unknown as BayesianThought;
+
+    case 'counterfactual':
+      return {
+        ...baseThought,
+        mode: ThinkingMode.COUNTERFACTUAL,
+        thoughtType: input.thoughtType as any,
+        actual: input.actual,
+        counterfactuals: input.counterfactuals || [],
+        comparison: input.comparison,
+        interventionPoint: input.interventionPoint,
+        causalChains: input.causalChains || [],
+      } as CounterfactualThought;
+
+    case 'analogical':
+      return {
+        ...baseThought,
+        mode: ThinkingMode.ANALOGICAL,
+        thoughtType: input.thoughtType as any,
+        sourceDomain: input.sourceDomain,
+        targetDomain: input.targetDomain,
+        mapping: input.mapping || [],
+        insights: input.insights || [],
+        inferences: input.inferences || [],
+        limitations: input.limitations || [],
+        analogyStrength: input.analogyStrength,
+      } as unknown as AnalogicalThought;
+
+    case 'temporal':
+      return {
+        ...baseThought,
+        mode: ThinkingMode.TEMPORAL,
+        thoughtType: input.thoughtType as any,
+        timeline: input.timeline,
+        events: input.events || [],
+        intervals: input.intervals || [],
+        constraints: input.constraints || [],
+        relations: input.relations || [],
+      } as TemporalThought;
 
     case 'hybrid':
     default:

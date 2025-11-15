@@ -636,7 +636,8 @@ export type Thought =
   | CausalThought
   | BayesianThought
   | CounterfactualThought
-  | AnalogicalThought;
+  | AnalogicalThought
+  | TemporalThought;
 
 // ========== TYPE GUARDS ==========
 

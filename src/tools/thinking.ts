@@ -47,6 +47,202 @@ export const ThinkingToolSchema = z.object({
     units: z.string(),
     conservationLaws: z.array(z.string()),
   }).optional(),
+  // Abductive reasoning properties (v2.0)
+  observations: z.array(z.object({
+    id: z.string(),
+    description: z.string(),
+    confidence: z.number().min(0).max(1),
+  })).optional(),
+  hypotheses: z.array(z.object({
+    id: z.string(),
+    explanation: z.string(),
+    assumptions: z.array(z.string()),
+    predictions: z.array(z.string()),
+    score: z.number(),
+  })).optional(),
+  evaluationCriteria: z.object({
+    parsimony: z.number(),
+    explanatoryPower: z.number(),
+    plausibility: z.number(),
+    testability: z.boolean(),
+  }).optional(),
+  evidence: z.array(z.object({
+    id: z.string(),
+    hypothesisId: z.string(),
+    type: z.enum(['supporting', 'contradicting', 'neutral']),
+    description: z.string(),
+    strength: z.number().min(0).max(1),
+  })).optional(),
+  bestExplanation: z.object({
+    id: z.string(),
+    explanation: z.string(),
+    assumptions: z.array(z.string()),
+    predictions: z.array(z.string()),
+    score: z.number(),
+  }).optional(),
+  // Causal reasoning properties (v2.0)
+  causalGraph: z.object({
+    nodes: z.array(z.object({
+      id: z.string(),
+      name: z.string(),
+      type: z.enum(['cause', 'effect', 'mediator', 'confounder']),
+      description: z.string(),
+    })),
+    edges: z.array(z.object({
+      from: z.string(),
+      to: z.string(),
+      strength: z.number(),
+      confidence: z.number().min(0).max(1),
+    })),
+  }).optional(),
+  interventions: z.array(z.object({
+    nodeId: z.string(),
+    action: z.string(),
+    expectedEffects: z.array(z.object({
+      nodeId: z.string(),
+      expectedChange: z.string(),
+      confidence: z.number(),
+    })),
+  })).optional(),
+  mechanisms: z.array(z.object({
+    from: z.string(),
+    to: z.string(),
+    description: z.string(),
+    type: z.enum(['direct', 'indirect', 'feedback']),
+  })).optional(),
+  confounders: z.array(z.object({
+    nodeId: z.string(),
+    affects: z.array(z.string()),
+    description: z.string(),
+  })).optional(),
+  // Bayesian reasoning properties (v2.0)
+  hypothesis: z.object({
+    id: z.string(),
+    statement: z.string(),
+  }).optional(),
+  prior: z.object({
+    probability: z.number().min(0).max(1),
+    justification: z.string(),
+  }).optional(),
+  likelihood: z.object({
+    probability: z.number().min(0).max(1),
+    description: z.string(),
+  }).optional(),
+  posterior: z.object({
+    probability: z.number().min(0).max(1),
+    calculation: z.string(),
+  }).optional(),
+  bayesFactor: z.number().optional(),
+  // Counterfactual reasoning properties (v2.0)
+  actual: z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    conditions: z.array(z.object({
+      factor: z.string(),
+      value: z.string(),
+    })),
+    outcomes: z.array(z.object({
+      description: z.string(),
+      impact: z.enum(['positive', 'negative', 'neutral']),
+      magnitude: z.number().optional(),
+    })),
+  }).optional(),
+  counterfactuals: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    conditions: z.array(z.object({
+      factor: z.string(),
+      value: z.string(),
+    })),
+    outcomes: z.array(z.object({
+      description: z.string(),
+      impact: z.enum(['positive', 'negative', 'neutral']),
+      magnitude: z.number().optional(),
+    })),
+  })).optional(),
+  comparison: z.object({
+    differences: z.array(z.object({
+      aspect: z.string(),
+      actual: z.string(),
+      counterfactual: z.string(),
+      significance: z.enum(['high', 'medium', 'low']),
+    })),
+    insights: z.array(z.string()),
+    lessons: z.array(z.string()),
+  }).optional(),
+  interventionPoint: z.object({
+    description: z.string(),
+    alternatives: z.array(z.string()),
+  }).optional(),
+  causalChains: z.array(z.object({
+    intervention: z.string(),
+    steps: z.array(z.string()),
+    finalOutcome: z.string(),
+  })).optional(),
+  // Analogical reasoning properties (v2.0)
+  sourceDomain: z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    entities: z.array(z.object({
+      id: z.string(),
+      name: z.string(),
+      type: z.string(),
+    })),
+    relations: z.array(z.object({
+      id: z.string(),
+      type: z.string(),
+      from: z.string(),
+      to: z.string(),
+    })),
+  }).optional(),
+  targetDomain: z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    entities: z.array(z.object({
+      id: z.string(),
+      name: z.string(),
+      type: z.string(),
+    })),
+    relations: z.array(z.object({
+      id: z.string(),
+      type: z.string(),
+      from: z.string(),
+      to: z.string(),
+    })),
+  }).optional(),
+  mapping: z.array(z.object({
+    sourceEntityId: z.string(),
+    targetEntityId: z.string(),
+    justification: z.string(),
+    confidence: z.number().min(0).max(1),
+  })).optional(),
+    properties: z.array(z.object({
+      entityId: z.string(),
+      name: z.string(),
+      value: z.string(),
+    })),
+    properties: z.array(z.object({
+      entityId: z.string(),
+      name: z.string(),
+      value: z.string(),
+    })),
+  insights: z.array(z.object({
+    description: z.string(),
+    sourceEvidence: z.string(),
+    targetApplication: z.string(),
+  })).optional(),
+  inferences: z.array(z.object({
+    sourcePattern: z.string(),
+    targetPrediction: z.string(),
+    confidence: z.number().min(0).max(1),
+    needsVerification: z.boolean(),
+  })).optional(),
+  limitations: z.array(z.string()).optional(),
+  analogyStrength: z.number().min(0).max(1).optional(),
   // Temporal reasoning properties (Phase 3, v2.1)
   timeline: z.object({
     id: z.string(),
