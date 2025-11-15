@@ -13,6 +13,7 @@ import {
   ThinkingMode,
   ExportFormat
 } from '../types/index.js';
+import { TemporalThought, isTemporalThought } from '../types/modes/temporal.js';
 
 /**
  * Default session configuration
@@ -238,6 +239,26 @@ export class SessionManager {
       const deps = (thought as any).dependencies as string[];
       if (deps && deps.length > metrics.dependencyDepth) {
         metrics.dependencyDepth = deps.length;
+      }
+    }
+
+    // Temporal-specific metrics (Phase 3, v2.1)
+    if (isTemporalThought(thought)) {
+      if (thought.events) {
+        metrics.customMetrics.set('totalEvents', thought.events.length);
+      }
+      if (thought.timeline) {
+        metrics.customMetrics.set('timelineUnit', thought.timeline.timeUnit);
+      }
+      if (thought.relations) {
+        const causalRelations = thought.relations.filter(r => r.relationType === 'causes');
+        metrics.customMetrics.set('causalRelations', causalRelations.length);
+      }
+      if (thought.constraints) {
+        metrics.customMetrics.set('temporalConstraints', thought.constraints.length);
+      }
+      if (thought.intervals) {
+        metrics.customMetrics.set('timeIntervals', thought.intervals.length);
       }
     }
   }

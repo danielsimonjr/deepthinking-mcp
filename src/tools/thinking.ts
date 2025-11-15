@@ -1,6 +1,6 @@
 /**
- * Unified thinking tool for DeepThinking MCP v2.0
- * Supports 10 thinking modes
+ * Unified thinking tool for DeepThinking MCP v2.1+
+ * Supports 13 thinking modes
  */
 
 import { z } from 'zod';
@@ -10,7 +10,7 @@ import { z } from 'zod';
  */
 export const ThinkingToolSchema = z.object({
   sessionId: z.string().optional(),
-  mode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical']).default('hybrid'),
+  mode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential']).default('hybrid'),
   thought: z.string(),
   thoughtNumber: z.number().int().positive(),
   totalThoughts: z.number().int().positive(),
@@ -47,9 +47,50 @@ export const ThinkingToolSchema = z.object({
     units: z.string(),
     conservationLaws: z.array(z.string()),
   }).optional(),
+  // Temporal reasoning properties (Phase 3, v2.1)
+  timeline: z.object({
+    id: z.string(),
+    name: z.string(),
+    timeUnit: z.enum(['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'months', 'years']),
+    startTime: z.number().optional(),
+    endTime: z.number().optional(),
+    events: z.array(z.string()),
+  }).optional(),
+  events: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    timestamp: z.number(),
+    duration: z.number().optional(),
+    type: z.enum(['instant', 'interval']),
+    properties: z.record(z.any()),
+  })).optional(),
+  intervals: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    start: z.number(),
+    end: z.number(),
+    overlaps: z.array(z.string()).optional(),
+    contains: z.array(z.string()).optional(),
+  })).optional(),
+  constraints: z.array(z.object({
+    id: z.string(),
+    type: z.enum(['before', 'after', 'during', 'overlaps', 'meets', 'starts', 'finishes', 'equals']),
+    subject: z.string(),
+    object: z.string(),
+    confidence: z.number().min(0).max(1),
+  })).optional(),
+  relations: z.array(z.object({
+    id: z.string(),
+    from: z.string(),
+    to: z.string(),
+    relationType: z.enum(['causes', 'enables', 'prevents', 'precedes', 'follows']),
+    strength: z.number().min(0).max(1),
+    delay: z.number().optional(),
+  })).optional(),
   action: z.enum(['add_thought', 'summarize', 'export', 'switch_mode', 'get_session']).default('add_thought'),
   exportFormat: z.enum(['markdown', 'latex', 'json', 'html', 'jupyter']).optional(),
-  newMode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical']).optional(),
+  newMode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential']).optional(),
 });
 
 export type ThinkingToolInput = z.infer<typeof ThinkingToolSchema>;
@@ -59,7 +100,7 @@ export type ThinkingToolInput = z.infer<typeof ThinkingToolSchema>;
  */
 export const thinkingTool = {
   name: 'deepthinking',
-  description: `Advanced deep thinking tool supporting 10 reasoning modes:
+  description: `Advanced deep thinking tool supporting 13 reasoning modes:
 
 Core Modes:
 - sequential: Iterative refinement and exploration
@@ -75,6 +116,11 @@ Advanced Modes (v2.0):
 - counterfactual: What-if scenario analysis
 - analogical: Cross-domain pattern matching and insights
 
+Phase 3 Modes (v2.1+):
+- temporal: Event timelines, temporal constraints, causal relations over time
+- gametheory: Nash equilibria, strategic analysis, payoff matrices
+- evidential: Dempster-Shafer theory, belief functions, evidence combination
+
 Choose the mode that best fits your problem type.`,
   inputSchema: {
     type: "object",
@@ -85,7 +131,7 @@ Choose the mode that best fits your problem type.`,
       },
       mode: {
         type: "string",
-        enum: ["sequential", "shannon", "mathematics", "physics", "hybrid", "abductive", "causal", "bayesian", "counterfactual", "analogical"],
+        enum: ["sequential", "shannon", "mathematics", "physics", "hybrid", "abductive", "causal", "bayesian", "counterfactual", "analogical", "temporal", "gametheory", "evidential"],
         description: "Thinking mode to use"
       },
       thought: {
@@ -212,6 +258,125 @@ Choose the mode that best fits your problem type.`,
         },
         required: ["quantity", "units", "conservationLaws"]
       },
+      // Temporal reasoning properties (Phase 3, v2.1)
+      timeline: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+          name: { type: "string" },
+          timeUnit: {
+            type: "string",
+            enum: ["milliseconds", "seconds", "minutes", "hours", "days", "months", "years"],
+            description: "Time unit for the timeline"
+          },
+          startTime: { type: "number", description: "Optional start time" },
+          endTime: { type: "number", description: "Optional end time" },
+          events: {
+            type: "array",
+            items: { type: "string" },
+            description: "Event IDs in this timeline"
+          }
+        },
+        required: ["id", "name", "timeUnit", "events"],
+        description: "Timeline structure for temporal reasoning"
+      },
+      events: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            description: { type: "string" },
+            timestamp: { type: "number", description: "Event timestamp" },
+            duration: { type: "number", description: "Duration for interval events" },
+            type: {
+              type: "string",
+              enum: ["instant", "interval"],
+              description: "Event type"
+            },
+            properties: {
+              type: "object",
+              description: "Additional event properties"
+            }
+          },
+          required: ["id", "name", "description", "timestamp", "type", "properties"]
+        },
+        description: "Temporal events"
+      },
+      intervals: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            start: { type: "number", description: "Interval start time" },
+            end: { type: "number", description: "Interval end time" },
+            overlaps: {
+              type: "array",
+              items: { type: "string" },
+              description: "IDs of overlapping intervals"
+            },
+            contains: {
+              type: "array",
+              items: { type: "string" },
+              description: "IDs of contained intervals"
+            }
+          },
+          required: ["id", "name", "start", "end"]
+        },
+        description: "Time intervals with Allen's algebra relationships"
+      },
+      constraints: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            type: {
+              type: "string",
+              enum: ["before", "after", "during", "overlaps", "meets", "starts", "finishes", "equals"],
+              description: "Allen's interval algebra constraint type"
+            },
+            subject: { type: "string", description: "Subject event/interval ID" },
+            object: { type: "string", description: "Object event/interval ID" },
+            confidence: {
+              type: "number",
+              minimum: 0,
+              maximum: 1,
+              description: "Confidence in constraint (0-1)"
+            }
+          },
+          required: ["id", "type", "subject", "object", "confidence"]
+        },
+        description: "Temporal constraints using Allen's interval algebra"
+      },
+      relations: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            from: { type: "string", description: "Source event ID" },
+            to: { type: "string", description: "Target event ID" },
+            relationType: {
+              type: "string",
+              enum: ["causes", "enables", "prevents", "precedes", "follows"],
+              description: "Type of temporal relation"
+            },
+            strength: {
+              type: "number",
+              minimum: 0,
+              maximum: 1,
+              description: "Relation strength (0-1)"
+            },
+            delay: { type: "number", description: "Optional time delay between events" }
+          },
+          required: ["id", "from", "to", "relationType", "strength"]
+        },
+        description: "Temporal causal/enabling relations"
+      },
       action: {
         type: "string",
         enum: ["add_thought", "summarize", "export", "switch_mode", "get_session"],
@@ -224,7 +389,7 @@ Choose the mode that best fits your problem type.`,
       },
       newMode: {
         type: "string",
-        enum: ["sequential", "shannon", "mathematics", "physics", "hybrid", "abductive", "causal", "bayesian", "counterfactual", "analogical"],
+        enum: ["sequential", "shannon", "mathematics", "physics", "hybrid", "abductive", "causal", "bayesian", "counterfactual", "analogical", "temporal", "gametheory", "evidential"],
         description: "New mode for switch_mode action"
       }
     },
