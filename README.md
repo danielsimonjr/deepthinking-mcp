@@ -1,10 +1,10 @@
-# DeepThinking MCP v2.0
+# DeepThinking MCP v2.1
 
-A comprehensive Model Context Protocol (MCP) server featuring **10 advanced reasoning modes** for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **11 advanced reasoning modes** for complex problem-solving, analysis, and decision-making.
 
 ## Overview
 
-DeepThinking MCP v2.0 provides a complete toolkit for structured reasoning with 10 specialized modes:
+DeepThinking MCP v2.1 provides a complete toolkit for structured reasoning with 11 specialized modes:
 
 ### Core Modes
 - **Sequential**: Iterative refinement with revision capabilities
@@ -19,10 +19,12 @@ DeepThinking MCP v2.0 provides a complete toolkit for structured reasoning with 
 - **Bayesian**: Probabilistic reasoning with evidence updates
 - **Counterfactual**: What-if scenario analysis and alternative histories
 - **Analogical**: Cross-domain pattern matching and knowledge transfer
+n### Phase 3 Modes (v2.1+)
+- **Temporal**: Event timelines, temporal constraints, Allen's interval algebra, causal relations over time
 
 ## Features
 
-### 10 Specialized Reasoning Modes
+### 11 Specialized Reasoning Modes
 
 #### Core Modes
 - **Sequential**: Iterative refinement with revision capabilities and branching
@@ -37,6 +39,8 @@ DeepThinking MCP v2.0 provides a complete toolkit for structured reasoning with 
 - **Bayesian**: Update beliefs using probabilistic reasoning with priors, likelihoods, and evidence. Essential for risk assessment and A/B testing.
 - **Counterfactual**: Explore alternative scenarios and compare outcomes. Excellent for post-mortems and strategic planning.
 - **Analogical**: Transfer knowledge across domains by identifying structural similarities. Great for design patterns and innovative problem-solving.
+n#### Phase 3 Reasoning Modes (v2.1+)
+- **Temporal**: Model events, intervals, and temporal relationships using Allen's interval algebra. Track causality over time with timestamps, durations, and temporal constraints. Perfect for timeline analysis, scheduling problems, and understanding event sequences.
 
 ### Mathematical Enhancements
 - **Symbolic computation** support with LaTeX and symbolic formats
@@ -116,7 +120,7 @@ The hybrid mode automatically selects the best features from each mode.
 - `thoughtNumber` (number, required): Position in sequence
 - `totalThoughts` (number, required): Estimated total thoughts needed
 - `nextThoughtNeeded` (boolean, required): Whether to continue thinking
-- `mode` (string, optional): `sequential`, `shannon`, `mathematics`, `physics`, `hybrid`, `abductive`, `causal`, `bayesian`, `counterfactual`, or `analogical` (default: `hybrid`)
+- `mode` (string, optional): `sequential`, `shannon`, `mathematics`, `physics`, `hybrid`, `abductive`, `causal`, `bayesian`, `counterfactual`, `analogical`, or `temporal` (default: `hybrid`)
 
 ### Mode-Specific Parameters
 
@@ -179,6 +183,12 @@ The hybrid mode automatically selects the best features from each mode.
 - `inferences`: Predictions based on analogical reasoning
 - `limitations`: Where the analogy breaks down
 - `analogyStrength`: Overall confidence in the analogy (0-1)
+n#### Temporal Mode
+- `timeline`: Timeline structure with id, name, timeUnit, events array
+- `events`: Temporal events (instant or interval) with timestamps, duration, properties
+- `intervals`: Time intervals with start, end, overlaps, contains relationships
+- `constraints`: Allen's interval algebra constraints (before, after, during, overlaps, meets, starts, finishes, equals)
+- `relations`: Temporal causal relations (causes, enables, prevents, precedes, follows) with strength and delay
 
 ### Actions
 - `add_thought` (default): Add a new thought to session
