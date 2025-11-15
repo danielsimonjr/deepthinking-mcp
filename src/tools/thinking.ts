@@ -1,6 +1,6 @@
 /**
- * Unified thinking tool for DeepThinking MCP
- * Supports all thinking modes in one tool
+ * Unified thinking tool for DeepThinking MCP v2.0
+ * Supports 10 thinking modes
  */
 
 import { z } from 'zod';
@@ -10,7 +10,7 @@ import { z } from 'zod';
  */
 export const ThinkingToolSchema = z.object({
   sessionId: z.string().optional(),
-  mode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid']).default('hybrid'),
+  mode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical']).default('hybrid'),
   thought: z.string(),
   thoughtNumber: z.number().int().positive(),
   totalThoughts: z.number().int().positive(),
@@ -49,7 +49,7 @@ export const ThinkingToolSchema = z.object({
   }).optional(),
   action: z.enum(['add_thought', 'summarize', 'export', 'switch_mode', 'get_session']).default('add_thought'),
   exportFormat: z.enum(['markdown', 'latex', 'json', 'html', 'jupyter']).optional(),
-  newMode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid']).optional(),
+  newMode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical']).optional(),
 });
 
 export type ThinkingToolInput = z.infer<typeof ThinkingToolSchema>;
@@ -59,12 +59,21 @@ export type ThinkingToolInput = z.infer<typeof ThinkingToolSchema>;
  */
 export const thinkingTool = {
   name: 'deepthinking',
-  description: `Advanced deep thinking tool supporting multiple reasoning modes:
+  description: `Advanced deep thinking tool supporting 10 reasoning modes:
+
+Core Modes:
 - sequential: Iterative refinement and exploration
 - shannon: Systematic 5-stage problem-solving
 - mathematics: Theorem proving and symbolic reasoning
 - physics: Tensor mathematics and field theory
 - hybrid: Intelligently combines multiple approaches
+
+Advanced Modes (v2.0):
+- abductive: Inference to the best explanation, hypothesis generation
+- causal: Cause-effect analysis with causal graphs
+- bayesian: Probabilistic reasoning with evidence updates
+- counterfactual: What-if scenario analysis
+- analogical: Cross-domain pattern matching and insights
 
 Choose the mode that best fits your problem type.`,
   inputSchema: {
@@ -76,7 +85,7 @@ Choose the mode that best fits your problem type.`,
       },
       mode: {
         type: "string",
-        enum: ["sequential", "shannon", "mathematics", "physics", "hybrid"],
+        enum: ["sequential", "shannon", "mathematics", "physics", "hybrid", "abductive", "causal", "bayesian", "counterfactual", "analogical"],
         description: "Thinking mode to use"
       },
       thought: {
@@ -215,7 +224,7 @@ Choose the mode that best fits your problem type.`,
       },
       newMode: {
         type: "string",
-        enum: ["sequential", "shannon", "mathematics", "physics", "hybrid"],
+        enum: ["sequential", "shannon", "mathematics", "physics", "hybrid", "abductive", "causal", "bayesian", "counterfactual", "analogical"],
         description: "New mode for switch_mode action"
       }
     },

@@ -11,11 +11,21 @@ import {
   isMathematicsThought,
   isPhysicsThought,
   isHybridThought,
+  isAbductiveThought,
+  isCausalThought,
+  isBayesianThought,
+  isCounterfactualThought,
+  isAnalogicalThought,
   type SequentialThought,
   type ShannonThought,
   type MathematicsThought,
   type PhysicsThought,
   type HybridThought,
+  type AbductiveThought,
+  type CausalThought,
+  type BayesianThought,
+  type CounterfactualThought,
+  type AnalogicalThought,
 } from '../../src/types/core.js';
 
 describe('Type Guards', () => {
@@ -133,6 +143,185 @@ describe('Type Guards', () => {
       expect(isHybridThought(thought)).toBe(true);
       expect(isSequentialThought(thought)).toBe(false);
       expect(isPhysicsThought(thought)).toBe(false);
+    });
+  });
+
+  describe('isAbductiveThought', () => {
+    it('should identify abductive thoughts correctly', () => {
+      const thought: AbductiveThought = {
+        id: 'test-6',
+        sessionId: 'session-1',
+        mode: ThinkingMode.ABDUCTIVE,
+        thoughtNumber: 1,
+        totalThoughts: 5,
+        content: 'Test abductive thought',
+        timestamp: new Date(),
+        nextThoughtNeeded: true,
+        observations: [
+          { id: 'obs-1', description: 'Test observation', confidence: 0.9 },
+        ],
+        hypotheses: [],
+        evaluationCriteria: {
+          parsimony: 0.7,
+          explanatoryPower: 0.8,
+          plausibility: 0.75,
+          testability: true,
+        },
+        evidence: [],
+      };
+
+      expect(isAbductiveThought(thought)).toBe(true);
+      expect(isCausalThought(thought)).toBe(false);
+      expect(isBayesianThought(thought)).toBe(false);
+    });
+  });
+
+  describe('isCausalThought', () => {
+    it('should identify causal thoughts correctly', () => {
+      const thought: CausalThought = {
+        id: 'test-7',
+        sessionId: 'session-1',
+        mode: ThinkingMode.CAUSAL,
+        thoughtNumber: 1,
+        totalThoughts: 5,
+        content: 'Test causal thought',
+        timestamp: new Date(),
+        nextThoughtNeeded: true,
+        causalGraph: {
+          nodes: [
+            { id: 'n1', name: 'Cause', type: 'cause', description: 'Test' },
+            { id: 'n2', name: 'Effect', type: 'effect', description: 'Test' },
+          ],
+          edges: [
+            { from: 'n1', to: 'n2', strength: 0.8, confidence: 0.9 },
+          ],
+        },
+        mechanisms: [],
+      };
+
+      expect(isCausalThought(thought)).toBe(true);
+      expect(isAbductiveThought(thought)).toBe(false);
+      expect(isBayesianThought(thought)).toBe(false);
+    });
+  });
+
+  describe('isBayesianThought', () => {
+    it('should identify Bayesian thoughts correctly', () => {
+      const thought: BayesianThought = {
+        id: 'test-8',
+        sessionId: 'session-1',
+        mode: ThinkingMode.BAYESIAN,
+        thoughtNumber: 1,
+        totalThoughts: 5,
+        content: 'Test Bayesian thought',
+        timestamp: new Date(),
+        nextThoughtNeeded: true,
+        hypothesis: {
+          id: 'h1',
+          statement: 'Test hypothesis',
+        },
+        prior: {
+          probability: 0.3,
+          justification: 'Test',
+        },
+        likelihood: {
+          probability: 0.7,
+          description: 'Test',
+        },
+        evidence: [],
+        posterior: {
+          probability: 0.5,
+          calculation: 'Bayes rule',
+        },
+      };
+
+      expect(isBayesianThought(thought)).toBe(true);
+      expect(isCausalThought(thought)).toBe(false);
+      expect(isCounterfactualThought(thought)).toBe(false);
+    });
+  });
+
+  describe('isCounterfactualThought', () => {
+    it('should identify counterfactual thoughts correctly', () => {
+      const thought: CounterfactualThought = {
+        id: 'test-9',
+        sessionId: 'session-1',
+        mode: ThinkingMode.COUNTERFACTUAL,
+        thoughtNumber: 1,
+        totalThoughts: 5,
+        content: 'Test counterfactual thought',
+        timestamp: new Date(),
+        nextThoughtNeeded: true,
+        actual: {
+          id: 'actual',
+          name: 'Actual',
+          description: 'What happened',
+          conditions: [],
+          outcomes: [],
+        },
+        counterfactuals: [
+          {
+            id: 'cf1',
+            name: 'Alternative',
+            description: 'What if',
+            conditions: [],
+            outcomes: [],
+          },
+        ],
+        comparison: {
+          differences: [],
+          insights: [],
+          lessons: [],
+        },
+        interventionPoint: {
+          description: 'Decision point',
+          alternatives: [],
+        },
+      };
+
+      expect(isCounterfactualThought(thought)).toBe(true);
+      expect(isBayesianThought(thought)).toBe(false);
+      expect(isAnalogicalThought(thought)).toBe(false);
+    });
+  });
+
+  describe('isAnalogicalThought', () => {
+    it('should identify analogical thoughts correctly', () => {
+      const thought: AnalogicalThought = {
+        id: 'test-10',
+        sessionId: 'session-1',
+        mode: ThinkingMode.ANALOGICAL,
+        thoughtNumber: 1,
+        totalThoughts: 5,
+        content: 'Test analogical thought',
+        timestamp: new Date(),
+        nextThoughtNeeded: true,
+        sourceDomain: {
+          id: 'source',
+          name: 'Source',
+          description: 'Known domain',
+          entities: [],
+          relations: [],
+          properties: [],
+        },
+        targetDomain: {
+          id: 'target',
+          name: 'Target',
+          description: 'New domain',
+          entities: [],
+          relations: [],
+          properties: [],
+        },
+        mapping: [],
+        insights: [],
+        inferences: [],
+        limitations: [],
+        analogyStrength: 0.7,
+      };
+
+      expect(isAnalogicalThought(thought)).toBe(true);
+      expect(isCounterfactualThought(thought)).toBe(false);
+      expect(isSequentialThought(thought)).toBe(false);
     });
   });
 });

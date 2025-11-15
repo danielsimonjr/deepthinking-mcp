@@ -1,6 +1,7 @@
 /**
- * Core type definitions for the DeepThinking MCP server
- * Combines sequential, Shannon, and mathematical reasoning modes
+ * Core type definitions for the DeepThinking MCP server v2.0
+ * Supports 10 thinking modes: Sequential, Shannon, Mathematics, Physics, Hybrid,
+ * Abductive, Causal, Bayesian, Counterfactual, Analogical
  */
 
 /**
@@ -12,6 +13,11 @@ export enum ThinkingMode {
   MATHEMATICS = 'mathematics',
   PHYSICS = 'physics',
   HYBRID = 'hybrid',
+  ABDUCTIVE = 'abductive',
+  CAUSAL = 'causal',
+  BAYESIAN = 'bayesian',
+  COUNTERFACTUAL = 'counterfactual',
+  ANALOGICAL = 'analogical',
   CUSTOM = 'custom'
 }
 
@@ -132,6 +138,8 @@ export interface Reference {
   url?: string;
 }
 
+// ========== EXISTING MODES ==========
+
 /**
  * Sequential-mode thought
  */
@@ -232,13 +240,405 @@ export interface HybridThought extends BaseThought {
   switchReason?: string;
 }
 
+// ========== NEW MODES (v2.0) ==========
+
+// ===== ABDUCTIVE REASONING =====
+
+/**
+ * Observation requiring explanation
+ */
+export interface Observation {
+  id: string;
+  description: string;
+  timestamp?: string;
+  confidence: number; // 0-1
+}
+
+/**
+ * Hypothesis explaining observations
+ */
+export interface Hypothesis {
+  id: string;
+  explanation: string;
+  assumptions: string[];
+  predictions: string[];
+  score: number; // Overall ranking score
+}
+
+/**
+ * Evidence supporting or refuting hypotheses
+ */
+export interface Evidence {
+  hypothesisId: string;
+  type: 'supporting' | 'contradicting' | 'neutral';
+  description: string;
+  strength: number; // 0-1
+}
+
+/**
+ * Criteria for evaluating hypotheses
+ */
+export interface EvaluationCriteria {
+  parsimony: number;      // Simplicity score (0-1)
+  explanatoryPower: number; // How well it explains observations (0-1)
+  plausibility: number;   // Prior probability (0-1)
+  testability: boolean;   // Can it be tested?
+}
+
+/**
+ * Abductive reasoning thought
+ */
+export interface AbductiveThought extends BaseThought {
+  mode: ThinkingMode.ABDUCTIVE;
+  observations: Observation[];
+  hypotheses: Hypothesis[];
+  currentHypothesis?: Hypothesis;
+  evaluationCriteria: EvaluationCriteria;
+  evidence: Evidence[];
+  bestExplanation?: Hypothesis;
+}
+
+// ===== CAUSAL REASONING =====
+
+/**
+ * Node in causal graph
+ */
+export interface CausalNode {
+  id: string;
+  name: string;
+  type: 'cause' | 'effect' | 'mediator' | 'confounder';
+  description: string;
+}
+
+/**
+ * Edge in causal graph (causal relationship)
+ */
+export interface CausalEdge {
+  from: string; // node id
+  to: string;   // node id
+  strength: number; // -1 to 1 (negative = inhibitory)
+  confidence: number; // 0-1
+  mechanism?: string;
+}
+
+/**
+ * Causal graph structure
+ */
+export interface CausalGraph {
+  nodes: CausalNode[];
+  edges: CausalEdge[];
+}
+
+/**
+ * Intervention on causal system
+ */
+export interface Intervention {
+  nodeId: string;
+  action: string;
+  expectedEffects: {
+    nodeId: string;
+    expectedChange: string;
+    confidence: number;
+  }[];
+}
+
+/**
+ * Causal mechanism description
+ */
+export interface CausalMechanism {
+  from: string;
+  to: string;
+  description: string;
+  type: 'direct' | 'indirect' | 'feedback';
+}
+
+/**
+ * Confounding variable
+ */
+export interface Confounder {
+  nodeId: string;
+  affects: string[]; // node ids
+  description: string;
+}
+
+/**
+ * Counterfactual scenario for causal analysis
+ */
+export interface CounterfactualScenario {
+  description: string;
+  modifiedNodes: { nodeId: string; newValue: string }[];
+  predictedOutcome: string;
+}
+
+/**
+ * Causal reasoning thought
+ */
+export interface CausalThought extends BaseThought {
+  mode: ThinkingMode.CAUSAL;
+  causalGraph: CausalGraph;
+  interventions?: Intervention[];
+  counterfactuals?: CounterfactualScenario[];
+  mechanisms: CausalMechanism[];
+  confounders?: Confounder[];
+}
+
+// ===== BAYESIAN REASONING =====
+
+/**
+ * Hypothesis for Bayesian analysis
+ */
+export interface BayesianHypothesis {
+  id: string;
+  statement: string;
+  alternatives?: string[];
+}
+
+/**
+ * Prior probability
+ */
+export interface PriorProbability {
+  probability: number; // 0-1
+  justification: string;
+}
+
+/**
+ * Likelihood of evidence
+ */
+export interface Likelihood {
+  probability: number; // 0-1
+  description: string;
+}
+
+/**
+ * Evidence for Bayesian update
+ */
+export interface BayesianEvidence {
+  id: string;
+  description: string;
+  likelihoodGivenHypothesis: number;    // P(E|H)
+  likelihoodGivenNotHypothesis: number; // P(E|¬H)
+  timestamp?: string;
+}
+
+/**
+ * Posterior probability (updated belief)
+ */
+export interface PosteriorProbability {
+  probability: number; // 0-1
+  calculation: string; // Show the math
+}
+
+/**
+ * Sensitivity analysis for Bayesian reasoning
+ */
+export interface SensitivityAnalysis {
+  priorRange: [number, number];
+  posteriorRange: [number, number];
+}
+
+/**
+ * Bayesian reasoning thought
+ */
+export interface BayesianThought extends BaseThought {
+  mode: ThinkingMode.BAYESIAN;
+  hypothesis: BayesianHypothesis;
+  prior: PriorProbability;
+  likelihood: Likelihood;
+  evidence: BayesianEvidence[];
+  posterior: PosteriorProbability;
+  bayesFactor?: number; // Strength of evidence
+  sensitivity?: SensitivityAnalysis;
+}
+
+// ===== COUNTERFACTUAL REASONING =====
+
+/**
+ * Condition in a scenario
+ */
+export interface Condition {
+  factor: string;
+  value: string;
+  isIntervention?: boolean; // Was this changed from actual?
+}
+
+/**
+ * Outcome of a scenario
+ */
+export interface Outcome {
+  description: string;
+  impact: 'positive' | 'negative' | 'neutral';
+  magnitude?: number; // 0-1
+}
+
+/**
+ * Scenario (actual or counterfactual)
+ */
+export interface Scenario {
+  id: string;
+  name: string;
+  description: string;
+  conditions: Condition[];
+  outcomes: Outcome[];
+  likelihood?: number; // How plausible is this scenario?
+}
+
+/**
+ * Difference between actual and counterfactual
+ */
+export interface Difference {
+  aspect: string;
+  actual: string;
+  counterfactual: string;
+  significance: 'high' | 'medium' | 'low';
+}
+
+/**
+ * Causal chain from intervention to outcome
+ */
+export interface CausalChain {
+  intervention: string;
+  steps: string[];
+  finalOutcome: string;
+}
+
+/**
+ * Point of intervention in timeline
+ */
+export interface InterventionPoint {
+  description: string;
+  timestamp?: string;
+  alternatives: string[];
+}
+
+/**
+ * Comparison between scenarios
+ */
+export interface CounterfactualComparison {
+  differences: Difference[];
+  insights: string[];
+  lessons: string[];
+}
+
+/**
+ * Counterfactual reasoning thought
+ */
+export interface CounterfactualThought extends BaseThought {
+  mode: ThinkingMode.COUNTERFACTUAL;
+  actual: Scenario;
+  counterfactuals: Scenario[];
+  comparison: CounterfactualComparison;
+  interventionPoint: InterventionPoint;
+  causalChains?: CausalChain[];
+}
+
+// ===== ANALOGICAL REASONING =====
+
+/**
+ * Entity in a domain
+ */
+export interface Entity {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+}
+
+/**
+ * Relation between entities
+ */
+export interface Relation {
+  id: string;
+  type: string;
+  from: string; // entity id
+  to: string;   // entity id
+  description: string;
+}
+
+/**
+ * Property of an entity
+ */
+export interface Property {
+  entityId: string;
+  name: string;
+  value: string;
+}
+
+/**
+ * Domain (source or target)
+ */
+export interface Domain {
+  id: string;
+  name: string;
+  description: string;
+  entities: Entity[];
+  relations: Relation[];
+  properties: Property[];
+}
+
+/**
+ * Mapping between source and target domains
+ */
+export interface Mapping {
+  sourceEntityId: string;
+  targetEntityId: string;
+  justification: string;
+  confidence: number; // 0-1
+}
+
+/**
+ * Insight from analogy
+ */
+export interface Insight {
+  description: string;
+  sourceEvidence: string;
+  targetApplication: string;
+}
+
+/**
+ * Inference based on analogy
+ */
+export interface Inference {
+  sourcePattern: string;
+  targetPrediction: string;
+  confidence: number; // 0-1
+  needsVerification: boolean;
+}
+
+/**
+ * Analogical reasoning thought
+ */
+export interface AnalogicalThought extends BaseThought {
+  mode: ThinkingMode.ANALOGICAL;
+  sourceDomain: Domain;
+  targetDomain: Domain;
+  mapping: Mapping[];
+  insights: Insight[];
+  inferences: Inference[];
+  limitations: string[];
+  analogyStrength: number; // 0-1
+}
+
+// ========== UNION TYPES ==========
+
 /**
  * Union type of all thoughts
  */
-export type Thought = SequentialThought | ShannonThought | MathematicsThought | PhysicsThought | HybridThought;
+export type Thought =
+  | SequentialThought
+  | ShannonThought
+  | MathematicsThought
+  | PhysicsThought
+  | HybridThought
+  | AbductiveThought
+  | CausalThought
+  | BayesianThought
+  | CounterfactualThought
+  | AnalogicalThought;
+
+// ========== TYPE GUARDS ==========
 
 /**
- * Type guards
+ * Type guards for existing modes
  */
 export function isSequentialThought(thought: Thought): thought is SequentialThought {
   return thought.mode === ThinkingMode.SEQUENTIAL;
@@ -258,4 +658,27 @@ export function isPhysicsThought(thought: Thought): thought is PhysicsThought {
 
 export function isHybridThought(thought: Thought): thought is HybridThought {
   return thought.mode === ThinkingMode.HYBRID;
+}
+
+/**
+ * Type guards for new modes (v2.0)
+ */
+export function isAbductiveThought(thought: Thought): thought is AbductiveThought {
+  return thought.mode === ThinkingMode.ABDUCTIVE;
+}
+
+export function isCausalThought(thought: Thought): thought is CausalThought {
+  return thought.mode === ThinkingMode.CAUSAL;
+}
+
+export function isBayesianThought(thought: Thought): thought is BayesianThought {
+  return thought.mode === ThinkingMode.BAYESIAN;
+}
+
+export function isCounterfactualThought(thought: Thought): thought is CounterfactualThought {
+  return thought.mode === ThinkingMode.COUNTERFACTUAL;
+}
+
+export function isAnalogicalThought(thought: Thought): thought is AnalogicalThought {
+  return thought.mode === ThinkingMode.ANALOGICAL;
 }

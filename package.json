@@ -1,7 +1,7 @@
 {
   "name": "deepthinking-mcp",
-  "version": "1.0.0",
-  "description": "Unified deep thinking MCP server combining sequential, Shannon, and mathematical reasoning with physics support",
+  "version": "2.0.0",
+  "description": "Comprehensive MCP server with 10 advanced reasoning modes: Sequential, Shannon, Mathematics, Physics, Hybrid, Abductive, Causal, Bayesian, Counterfactual, and Analogical reasoning",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -52,7 +52,15 @@
     "mathematics",
     "tensor",
     "deep-thinking",
-    "mathematical-reasoning"
+    "mathematical-reasoning",
+    "abductive-reasoning",
+    "causal-analysis",
+    "bayesian-inference",
+    "counterfactual-analysis",
+    "analogical-reasoning",
+    "causal-graphs",
+    "hypothesis-generation",
+    "probabilistic-reasoning"
   ],
   "repository": {
     "type": "git",

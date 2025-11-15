@@ -1,23 +1,42 @@
-# DeepThinking MCP
+# DeepThinking MCP v2.0
 
-A unified Model Context Protocol (MCP) server that combines **sequential thinking**, **Shannon's systematic methodology**, and **mathematical reasoning** with specialized support for physics and tensor mathematics.
+A comprehensive Model Context Protocol (MCP) server featuring **10 advanced reasoning modes** for complex problem-solving, analysis, and decision-making.
 
 ## Overview
 
-DeepThinking MCP merges the best approaches from:
-- **Sequential-thinking** (Anthropic): Iterative refinement and revision
-- **Shannon-thinking**: 5-stage systematic problem-solving
-- **Mathematical reasoning**: Theorem proving and symbolic computation
-- **Physics support**: Tensor mathematics and field theory
+DeepThinking MCP v2.0 provides a complete toolkit for structured reasoning with 10 specialized modes:
+
+### Core Modes
+- **Sequential**: Iterative refinement with revision capabilities
+- **Shannon**: 5-stage systematic problem-solving methodology
+- **Mathematics**: Theorem proving and symbolic computation
+- **Physics**: Tensor mathematics and field theory
+- **Hybrid**: Intelligently combines multiple approaches
+
+### Advanced Modes (v2.0)
+- **Abductive**: Inference to the best explanation, hypothesis generation and evaluation
+- **Causal**: Cause-effect analysis with causal graphs and interventions
+- **Bayesian**: Probabilistic reasoning with evidence updates
+- **Counterfactual**: What-if scenario analysis and alternative histories
+- **Analogical**: Cross-domain pattern matching and knowledge transfer
 
 ## Features
 
-### Multiple Thinking Modes
-- **Sequential**: Iterative refinement with revision capabilities
+### 10 Specialized Reasoning Modes
+
+#### Core Modes
+- **Sequential**: Iterative refinement with revision capabilities and branching
 - **Shannon**: Systematic 5-stage problem-solving (problem definition → constraints → model → proof → implementation)
 - **Mathematics**: Theorem proving, lemma derivation, symbolic computation
 - **Physics**: Tensor formulation, dimensional analysis, conservation laws
 - **Hybrid**: Intelligently combines modes based on problem characteristics
+
+#### Advanced Reasoning Modes (v2.0)
+- **Abductive**: Generate and evaluate hypotheses to explain observations. Perfect for debugging, root cause analysis, and diagnostic reasoning.
+- **Causal**: Build causal graphs with nodes and edges, analyze interventions and their effects. Ideal for impact analysis and system design.
+- **Bayesian**: Update beliefs using probabilistic reasoning with priors, likelihoods, and evidence. Essential for risk assessment and A/B testing.
+- **Counterfactual**: Explore alternative scenarios and compare outcomes. Excellent for post-mortems and strategic planning.
+- **Analogical**: Transfer knowledge across domains by identifying structural similarities. Great for design patterns and innovative problem-solving.
 
 ### Mathematical Enhancements
 - **Symbolic computation** support with LaTeX and symbolic formats
@@ -97,7 +116,7 @@ The hybrid mode automatically selects the best features from each mode.
 - `thoughtNumber` (number, required): Position in sequence
 - `totalThoughts` (number, required): Estimated total thoughts needed
 - `nextThoughtNeeded` (boolean, required): Whether to continue thinking
-- `mode` (string, optional): `sequential`, `shannon`, `mathematics`, `physics`, or `hybrid` (default)
+- `mode` (string, optional): `sequential`, `shannon`, `mathematics`, `physics`, `hybrid`, `abductive`, `causal`, `bayesian`, `counterfactual`, or `analogical` (default: `hybrid`)
 
 ### Mode-Specific Parameters
 
@@ -123,6 +142,43 @@ The hybrid mode automatically selects the best features from each mode.
 - `tensorProperties`: Rank, components, symmetries, invariants
 - `physicalInterpretation`: Quantity, units, conservation laws
 - `dimensionalAnalysis`: Unit consistency checking
+
+#### Abductive Mode
+- `observations`: Array of observations requiring explanation (id, description, confidence)
+- `hypotheses`: Generated hypotheses with assumptions and predictions
+- `evaluationCriteria`: Parsimony, explanatory power, plausibility, testability
+- `evidence`: Supporting or contradicting evidence
+- `bestExplanation`: Selected hypothesis that best explains observations
+
+#### Causal Mode
+- `causalGraph`: Nodes (causes, effects, mediators) and edges (causal relationships)
+- `interventions`: Actions on nodes with expected effects
+- `mechanisms`: Direct, indirect, or feedback mechanisms
+- `confounders`: Variables affecting multiple nodes
+
+#### Bayesian Mode
+- `hypothesis`: Statement being evaluated
+- `prior`: Prior probability with justification
+- `likelihood`: P(Evidence|Hypothesis)
+- `evidence`: Observations with likelihoods
+- `posterior`: Updated belief after seeing evidence
+- `bayesFactor`: Strength of evidence (optional)
+
+#### Counterfactual Mode
+- `actual`: The scenario that actually occurred
+- `counterfactuals`: Alternative "what if" scenarios
+- `interventionPoint`: Where the scenarios diverge
+- `comparison`: Differences, insights, and lessons learned
+- `causalChains`: Intervention → steps → outcome paths
+
+#### Analogical Mode
+- `sourceDomain`: Known domain with entities and relations
+- `targetDomain`: Domain being analyzed
+- `mapping`: Entity-to-entity mappings with justifications
+- `insights`: Knowledge transferred from source to target
+- `inferences`: Predictions based on analogical reasoning
+- `limitations`: Where the analogy breaks down
+- `analogyStrength`: Overall confidence in the analogy (0-1)
 
 ### Actions
 - `add_thought` (default): Add a new thought to session
@@ -189,6 +245,188 @@ Thought 1: "Define the electromagnetic field tensor"
   }
 ```
 
+### Example 4: Abductive Reasoning (Debugging)
+
+```
+Thought 1: "System crashes at 3 AM - need to find root cause"
+- mode: abductive
+- observations: [
+    { id: "obs1", description: "Crash at 3 AM daily", confidence: 0.95 },
+    { id: "obs2", description: "Memory usage spikes before crash", confidence: 0.8 }
+  ]
+- hypotheses: [
+    {
+      id: "h1",
+      explanation: "Memory leak in background job",
+      assumptions: ["Job runs at 3 AM"],
+      predictions: ["Memory should grow until crash"],
+      score: 0.85
+    },
+    {
+      id: "h2",
+      explanation: "External service timeout",
+      assumptions: ["Service maintenance window at 3 AM"],
+      predictions: ["Network errors in logs"],
+      score: 0.6
+    }
+  ]
+- evaluationCriteria: {
+    parsimony: 0.7,
+    explanatoryPower: 0.85,
+    plausibility: 0.8,
+    testability: true
+  }
+- bestExplanation: h1
+```
+
+### Example 5: Causal Analysis (Impact Assessment)
+
+```
+Thought 1: "Analyze impact of increasing marketing budget"
+- mode: causal
+- causalGraph: {
+    nodes: [
+      { id: "marketing", name: "Marketing Budget", type: "cause" },
+      { id: "awareness", name: "Brand Awareness", type: "mediator" },
+      { id: "leads", name: "Lead Generation", type: "mediator" },
+      { id: "revenue", name: "Revenue", type: "effect" }
+    ],
+    edges: [
+      { from: "marketing", to: "awareness", strength: 0.8, confidence: 0.9 },
+      { from: "awareness", to: "leads", strength: 0.7, confidence: 0.85 },
+      { from: "leads", to: "revenue", strength: 0.9, confidence: 0.95 }
+    ]
+  }
+- interventions: [
+    {
+      nodeId: "marketing",
+      action: "Increase budget by 20%",
+      expectedEffects: [
+        { nodeId: "revenue", expectedChange: "+12%", confidence: 0.7 }
+      ]
+    }
+  ]
+```
+
+### Example 6: Bayesian Reasoning (A/B Test Analysis)
+
+```
+Thought 1: "Evaluate if new feature increases engagement"
+- mode: bayesian
+- hypothesis: { id: "h1", statement: "New feature increases engagement" }
+- prior: {
+    probability: 0.5,
+    justification: "No prior information, neutral stance"
+  }
+- evidence: [
+    {
+      id: "e1",
+      description: "Test group showed 15% increase",
+      likelihoodGivenHypothesis: 0.8,
+      likelihoodGivenNotHypothesis: 0.2
+    }
+  ]
+- posterior: {
+    probability: 0.8,
+    calculation: "P(H|E) = P(E|H) * P(H) / P(E) = 0.8 * 0.5 / 0.5 = 0.8"
+  }
+- bayesFactor: 4.0  // Strong evidence for hypothesis
+```
+
+### Example 7: Counterfactual Analysis (Post-Mortem)
+
+```
+Thought 1: "What if we had chosen microservices instead of monolith?"
+- mode: counterfactual
+- actual: {
+    id: "actual",
+    name: "Monolithic Architecture",
+    description: "Built as single application",
+    conditions: [{ factor: "Architecture", value: "Monolith" }],
+    outcomes: [
+      { description: "Deployment bottleneck", impact: "negative", magnitude: 0.7 },
+      { description: "Fast initial development", impact: "positive", magnitude: 0.8 }
+    ]
+  }
+- counterfactuals: [
+    {
+      id: "cf1",
+      name: "Microservices Architecture",
+      description: "Built as independent services",
+      conditions: [{ factor: "Architecture", value: "Microservices" }],
+      outcomes: [
+        { description: "Independent deployment", impact: "positive", magnitude: 0.9 },
+        { description: "Higher operational complexity", impact: "negative", magnitude: 0.6 }
+      ]
+    }
+  ]
+- interventionPoint: {
+    description: "Initial architecture decision",
+    alternatives: ["Monolith", "Microservices", "Modular Monolith"]
+  }
+- comparison: {
+    differences: [
+      {
+        aspect: "Scalability",
+        actual: "Limited",
+        counterfactual: "Highly scalable",
+        significance: "high"
+      }
+    ],
+    insights: ["Microservices would have enabled better scaling"],
+    lessons: ["Consider future scale requirements in architecture decisions"]
+  }
+```
+
+### Example 8: Analogical Reasoning (Design Patterns)
+
+```
+Thought 1: "Apply immune system principles to cybersecurity"
+- mode: analogical
+- sourceDomain: {
+    id: "immune",
+    name: "Biological Immune System",
+    entities: [
+      { id: "antibody", name: "Antibody", type: "defender" },
+      { id: "pathogen", name: "Pathogen", type: "threat" }
+    ],
+    relations: [
+      { id: "r1", type: "neutralizes", from: "antibody", to: "pathogen" }
+    ]
+  }
+- targetDomain: {
+    id: "cyber",
+    name: "Cybersecurity System",
+    entities: [
+      { id: "firewall", name: "Firewall", type: "defender" },
+      { id: "malware", name: "Malware", type: "threat" }
+    ],
+    relations: [
+      { id: "r2", type: "blocks", from: "firewall", to: "malware" }
+    ]
+  }
+- mapping: [
+    {
+      sourceEntityId: "antibody",
+      targetEntityId: "firewall",
+      justification: "Both identify and neutralize threats",
+      confidence: 0.85
+    }
+  ]
+- insights: [
+    {
+      description: "Layered defense strategy",
+      sourceEvidence: "Immune system has innate + adaptive layers",
+      targetApplication: "Implement defense-in-depth security"
+    }
+  ]
+- limitations: [
+    "Biological systems self-heal, digital systems don't",
+    "Pathogens evolve naturally, malware is designed"
+  ]
+- analogyStrength: 0.75
+```
+
 ## Development
 
 ### Building
@@ -230,23 +468,25 @@ deepthinking-mcp/
 
 ## Roadmap
 
-### Phase 1 (Current)
+### Phase 1 (Completed - v1.0)
 - ✅ Core type system
 - ✅ Session management
 - ✅ Unified thinking tool
-- ✅ Multiple mode support
+- ✅ 5 core reasoning modes
 
-### Phase 2 (Next)
-- [ ] Validation engine
-- [ ] Export to LaTeX/Jupyter
-- [ ] Visualization (Mermaid diagrams)
-- [ ] Math-MCP integration
+### Phase 2 (Completed - v2.0)
+- ✅ Validation engine
+- ✅ 5 advanced reasoning modes (Abductive, Causal, Bayesian, Counterfactual, Analogical)
+- ✅ Comprehensive test suite (77 tests)
+- ✅ Enhanced type safety
 
 ### Phase 3 (Future)
+- [ ] Export to LaTeX/Jupyter
+- [ ] Visualization (Mermaid diagrams for causal graphs)
+- [ ] Math-MCP integration
 - [ ] Persistence layer
-- [ ] Collaborative thinking
-- [ ] Pattern learning
-- [ ] Plugin system
+- [ ] Collaborative thinking sessions
+- [ ] Pattern learning from successful reasoning chains
 
 ## Contributing
 
