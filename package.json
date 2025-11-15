@@ -19,11 +19,12 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest",
+    "test:run": "vitest --run",
     "test:coverage": "vitest --coverage",
     "lint": "eslint src/",
     "format": "prettier --write src/",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build && npm test"
+    "prepublishOnly": "npm run build && npm run test:run"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
