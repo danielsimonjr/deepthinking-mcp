@@ -29,6 +29,7 @@ import {
   CounterfactualThought,
   AnalogicalThought,
   TemporalThought,
+  GameTheoryThought,
 } from './types/index.js';
 
 const server = new Server(
@@ -351,6 +352,20 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         constraints: input.constraints || [],
         relations: input.relations || [],
       } as TemporalThought;
+
+    case 'gametheory':
+      return {
+        ...baseThought,
+        mode: ThinkingMode.GAMETHEORY,
+        thoughtType: input.thoughtType as any,
+        game: input.game,
+        players: input.players || [],
+        strategies: input.strategies || [],
+        payoffMatrix: input.payoffMatrix,
+        nashEquilibria: input.nashEquilibria || [],
+        dominantStrategies: input.dominantStrategies || [],
+        gameTree: input.gameTree,
+      } as GameTheoryThought;
 
     case 'hybrid':
     default:

@@ -5,6 +5,121 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2025-11-15
+
+### Added
+
+#### New Reasoning Mode: Game Theory (Phase 3B)
+- **Game-Theoretic Reasoning Mode**: Strategic analysis with Nash equilibria and payoff matrices
+  - Game definitions: normal-form, extensive-form, cooperative, non-cooperative
+  - Player modeling with rational agents and available strategies
+  - Pure and mixed strategies with probability distributions
+  - Payoff matrix representation with strategy profiles
+  - Nash equilibrium detection (pure and mixed)
+  - Dominant strategy analysis (strictly/weakly dominant)
+  - Game tree structures for extensive-form games
+  - Information sets for imperfect information games
+  - Support for zero-sum and general-sum games
+  - Perfect and imperfect information modeling
+
+#### Implementation Components
+- `src/types/modes/gametheory.ts`: Complete type definitions
+  - `GameTheoryThought` interface with 5 thought types
+  - 11 supporting interfaces: Game, Player, Strategy, PayoffMatrix, PayoffEntry, NashEquilibrium, DominantStrategy, GameTree, GameNode, InformationSet, BackwardInduction
+  - Type guard: `isGameTheoryThought()`
+- `src/validation/validator.ts`: Game theory validation
+  - `validateGameTheory()` method (240+ lines)
+  - Validates player counts, strategy references, probability ranges
+  - Payoff matrix dimension checking
+  - Nash equilibria validation
+  - Game tree structure validation with node references
+  - Terminal node payoff verification
+- `src/tools/thinking.ts`: Zod schemas for runtime validation
+- `src/session/manager.ts`: Game theory metrics tracking
+  - numPlayers, totalStrategies, mixedStrategies
+  - nashEquilibria, pureNashEquilibria, dominantStrategies
+  - gameType, isZeroSum tracking
+- `src/index.ts`: createThought() integration for gametheory mode
+
+#### Testing
+- `tests/unit/gametheory.test.ts`: 17 comprehensive tests
+  - Type guard validation (2 tests)
+  - Game definition validation (2 tests)
+  - Player validation (3 tests)
+  - Strategy validation (3 tests)
+  - Payoff matrix validation (2 tests)
+  - Nash equilibria validation (2 tests)
+  - Game tree validation (2 tests)
+  - Complete Prisoner's Dilemma example (1 test)
+- **Total test count: 113 tests (96 → 113)**
+
+#### Documentation
+- Updated README.md to v2.2
+- Added game theory mode to Phase 3 Modes section
+- Complete parameter documentation for all game theory fields
+- Updated mode count from 11 to 12 modes
+
+### Fixed
+- Validation dispatch bug: `validateGameTheory()` was not being called for game theory thoughts
+  - Fixed empty dispatch block in `src/validation/validator.ts:69-71`
+  - All 17 game theory tests now pass
+
+### Changed
+- Extended `ThinkingMode` enum to include 'gametheory'
+- Updated `Thought` union type to include `GameTheoryThought`
+- Mode count: 11 → 12 reasoning modes
+
+## [2.1.4] - 2025-11-15
+
+### Added
+
+#### New Reasoning Mode: Temporal (Phase 3A)
+- **Temporal Reasoning Mode**: Event timelines and temporal constraints using Allen's interval algebra
+  - Temporal events (instant and interval types)
+  - Time intervals with Allen's algebra relationships (before, after, during, overlaps, meets, starts, finishes, equals)
+  - Temporal constraints with confidence levels
+  - Causal and enabling relations between events (causes, enables, prevents, precedes, follows)
+  - Timeline structures with configurable time units
+  - Temporal relation strength (0-1) and time delays
+
+#### Implementation Components
+- `src/types/modes/temporal.ts`: Complete type definitions
+  - `TemporalThought` interface with 5 thought types
+  - Supporting interfaces: TemporalEvent, TemporalInterval, TemporalRelation, TemporalConstraint, Timeline
+  - Type guard: `isTemporalThought()`
+- `src/validation/validator.ts`: Temporal validation
+  - `validateTemporal()` method
+  - Validates event timestamps, interval ordering, constraint references
+  - Relation strength and confidence validation
+  - Timeline structure validation
+- `src/tools/thinking.ts`: Zod schemas for temporal parameters
+- `src/session/manager.ts`: Temporal metrics tracking
+  - totalEvents, instantEvents, intervalEvents
+  - temporalRelations, temporalConstraints, hasTimeline
+- `src/index.ts`: createThought() integration for temporal mode
+
+#### Testing
+- `tests/unit/temporal.test.ts`: 19 comprehensive tests
+  - Type guard validation
+  - Event validation (instant and interval types)
+  - Interval validation (start < end constraint)
+  - Relation validation (strength ranges, event references)
+  - Constraint validation (Allen's algebra types, confidence levels)
+  - Timeline validation (event references, time units)
+  - Complete temporal analysis example
+- **Total test count: 96 tests (77 → 96)**
+
+#### Documentation
+- Updated README.md to v2.1
+- Added temporal mode to Phase 3 Modes section
+- Complete parameter documentation for temporal reasoning
+- Updated mode count from 10 to 11 modes
+
+### Changed
+- Extended `ThinkingMode` enum to include 'temporal'
+- Updated `Thought` union type to include `TemporalThought`
+- Mode count: 10 → 11 reasoning modes
+
 ## [2.0.1] - 2025-11-14
 
 ### Fixed
@@ -135,6 +250,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - npm package publication
 - GitHub repository setup
 
+[2.2.0]: https://github.com/danielsimonjr/deepthinking-mcp/compare/v2.1.4...v2.2.0
+[2.1.4]: https://github.com/danielsimonjr/deepthinking-mcp/compare/v2.0.1...v2.1.4
 [2.0.1]: https://github.com/danielsimonjr/deepthinking-mcp/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/danielsimonjr/deepthinking-mcp/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/danielsimonjr/deepthinking-mcp/releases/tag/v1.0.0

@@ -1,6 +1,6 @@
-# DeepThinking MCP v2.1
+# DeepThinking MCP v2.2
 
-A comprehensive Model Context Protocol (MCP) server featuring **11 advanced reasoning modes** for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **12 advanced reasoning modes** for complex problem-solving, analysis, and decision-making.
 
 ## Overview
 
@@ -19,8 +19,9 @@ DeepThinking MCP v2.1 provides a complete toolkit for structured reasoning with 
 - **Bayesian**: Probabilistic reasoning with evidence updates
 - **Counterfactual**: What-if scenario analysis and alternative histories
 - **Analogical**: Cross-domain pattern matching and knowledge transfer
-n### Phase 3 Modes (v2.1+)
+n### Phase 3 Modes (v2.2+)
 - **Temporal**: Event timelines, temporal constraints, Allen's interval algebra, causal relations over time
+- **Game Theory**: Nash equilibria, strategic analysis, payoff matrices, dominant strategies, game trees
 
 ## Features
 
@@ -41,6 +42,7 @@ n### Phase 3 Modes (v2.1+)
 - **Analogical**: Transfer knowledge across domains by identifying structural similarities. Great for design patterns and innovative problem-solving.
 n#### Phase 3 Reasoning Modes (v2.1+)
 - **Temporal**: Model events, intervals, and temporal relationships using Allen's interval algebra. Track causality over time with timestamps, durations, and temporal constraints. Perfect for timeline analysis, scheduling problems, and understanding event sequences.
+- **Game Theory**: Analyze strategic interactions between rational agents. Define games, players, and strategies. Compute Nash equilibria (pure and mixed), identify dominant strategies, construct payoff matrices, and build extensive-form game trees. Ideal for competitive analysis, mechanism design, and strategic decision-making.
 
 ### Mathematical Enhancements
 - **Symbolic computation** support with LaTeX and symbolic formats
@@ -189,6 +191,15 @@ n#### Temporal Mode
 - `intervals`: Time intervals with start, end, overlaps, contains relationships
 - `constraints`: Allen's interval algebra constraints (before, after, during, overlaps, meets, starts, finishes, equals)
 - `relations`: Temporal causal relations (causes, enables, prevents, precedes, follows) with strength and delay
+
+#### Game Theory Mode
+- `game`: Game definition (id, name, type, numPlayers, isZeroSum, isPerfectInformation)
+- `players`: Player definitions with roles, rationality, available strategies
+- `strategies`: Pure or mixed strategies with probabilities
+- `payoffMatrix`: Normal-form payoff matrix with strategy profiles and payoffs
+- `nashEquilibria`: Nash equilibrium solutions (pure/mixed, strict, stability)
+- `dominantStrategies`: Dominant strategy analysis (strictly/weakly dominant)
+- `gameTree`: Extensive-form game tree with decision, chance, and terminal nodes
 
 ### Actions
 - `add_thought` (default): Add a new thought to session

@@ -14,6 +14,7 @@ import {
   ExportFormat
 } from '../types/index.js';
 import { TemporalThought, isTemporalThought } from '../types/modes/temporal.js';
+import { GameTheoryThought, isGameTheoryThought } from '../types/modes/gametheory.js';
 
 /**
  * Default session configuration
@@ -261,6 +262,30 @@ export class SessionManager {
       if (thought.intervals) {
         metrics.customMetrics.set('timeIntervals', thought.intervals.length);
       }
+
+    // Game theory-specific metrics (Phase 3, v2.2)
+    if (isGameTheoryThought(thought)) {
+      if (thought.players) {
+        metrics.customMetrics.set('numPlayers', thought.players.length);
+      }
+      if (thought.strategies) {
+        metrics.customMetrics.set('totalStrategies', thought.strategies.length);
+        const mixedStrategies = thought.strategies.filter(s => !s.isPure);
+        metrics.customMetrics.set('mixedStrategies', mixedStrategies.length);
+      }
+      if (thought.nashEquilibria) {
+        metrics.customMetrics.set('nashEquilibria', thought.nashEquilibria.length);
+        const pureEquilibria = thought.nashEquilibria.filter(e => e.type === 'pure');
+        metrics.customMetrics.set('pureNashEquilibria', pureEquilibria.length);
+      }
+      if (thought.dominantStrategies) {
+        metrics.customMetrics.set('dominantStrategies', thought.dominantStrategies.length);
+      }
+      if (thought.game) {
+        metrics.customMetrics.set('gameType', thought.game.type);
+        metrics.customMetrics.set('isZeroSum', thought.game.isZeroSum);
+      }
+    }
     }
   }
 }

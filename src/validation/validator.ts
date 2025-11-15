@@ -27,6 +27,7 @@ import {
   isAnalogicalThought,
 } from '../types/core.js';
 import { TemporalThought, isTemporalThought } from '../types/modes/temporal.js';
+import { GameTheoryThought, isGameTheoryThought } from '../types/modes/gametheory.js';
 import { ValidationResult, ValidationIssue } from '../types/session.js';
 
 /**
@@ -65,6 +66,8 @@ export class ThoughtValidator {
       issues.push(...this.validateAnalogical(thought, context));
     } else if (isTemporalThought(thought)) {
       issues.push(...this.validateTemporal(thought, context));
+    } else if (isGameTheoryThought(thought)) {
+      issues.push(...this.validateGameTheory(thought, context));
     }
 
     // Calculate validation result
@@ -1145,6 +1148,258 @@ export class ThoughtValidator {
   /**
    * Generate suggestions from issues
    */
+  /**
+   * Validate game theory thought
+   */
+  private validateGameTheory(thought: GameTheoryThought, context: ValidationContext): ValidationIssue[] {
+    const issues: ValidationIssue[] = [];
+
+    // Validate game definition
+    if (thought.game) {
+      if (thought.game.numPlayers < 2) {
+        issues.push({
+          severity: 'error',
+          thoughtNumber: thought.thoughtNumber,
+          description: 'Game must have at least 2 players',
+          suggestion: 'Set numPlayers to 2 or more',
+          category: 'structural',
+        });
+      }
+    }
+
+    // Validate players match game
+    if (thought.game && thought.players) {
+      if (thought.players.length !== thought.game.numPlayers) {
+        issues.push({
+          severity: 'error',
+          thoughtNumber: thought.thoughtNumber,
+          description: `Number of players (${thought.players.length}) does not match game definition (${thought.game.numPlayers})`,
+          suggestion: 'Ensure player list matches game.numPlayers',
+          category: 'structural',
+        });
+      }
+
+      // Validate each player has strategies
+      for (const player of thought.players) {
+        if (player.availableStrategies.length === 0) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Player ${player.id} has no available strategies`,
+            suggestion: 'Add at least one strategy per player',
+            category: 'structural',
+          });
+        }
+      }
+    }
+
+    // Validate strategies reference valid players
+    if (thought.strategies && thought.players) {
+      const playerIds = new Set(thought.players.map(p => p.id));
+
+      for (const strategy of thought.strategies) {
+        if (!playerIds.has(strategy.playerId)) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Strategy ${strategy.id} references non-existent player ${strategy.playerId}`,
+            suggestion: 'Ensure all strategies reference valid player IDs',
+            category: 'structural',
+          });
+        }
+
+        // Validate mixed strategy probabilities
+        if (!strategy.isPure) {
+          if (strategy.probability === undefined) {
+            issues.push({
+              severity: 'error',
+              thoughtNumber: thought.thoughtNumber,
+              description: `Mixed strategy ${strategy.id} missing probability`,
+              suggestion: 'Add probability (0-1) for mixed strategies',
+              category: 'structural',
+            });
+          } else if (strategy.probability < 0 || strategy.probability > 1) {
+            issues.push({
+              severity: 'error',
+              thoughtNumber: thought.thoughtNumber,
+              description: `Strategy ${strategy.id} probability must be 0-1`,
+              suggestion: 'Set probability between 0 and 1',
+              category: 'structural',
+            });
+          }
+        }
+      }
+    }
+
+    // Validate payoff matrix dimensions
+    if (thought.payoffMatrix && thought.players) {
+      if (thought.payoffMatrix.players.length !== thought.players.length) {
+        issues.push({
+          severity: 'error',
+          thoughtNumber: thought.thoughtNumber,
+          description: 'Payoff matrix player count does not match game',
+          suggestion: 'Ensure payoffMatrix.players matches number of players',
+          category: 'structural',
+        });
+      }
+
+      // Validate payoff entries
+      for (const entry of thought.payoffMatrix.payoffs) {
+        if (entry.payoffs.length !== thought.players.length) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Payoff entry has ${entry.payoffs.length} payoffs but game has ${thought.players.length} players`,
+            suggestion: 'Each payoff entry must have payoff for each player',
+            category: 'structural',
+          });
+        }
+
+        if (entry.strategyProfile.length !== thought.players.length) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Strategy profile has ${entry.strategyProfile.length} strategies but game has ${thought.players.length} players`,
+            suggestion: 'Strategy profile must specify one strategy per player',
+            category: 'structural',
+          });
+        }
+      }
+    }
+
+    // Validate Nash equilibria
+    if (thought.nashEquilibria && thought.players) {
+      for (const equilibrium of thought.nashEquilibria) {
+        if (equilibrium.strategyProfile.length !== thought.players.length) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Nash equilibrium ${equilibrium.id} strategy profile length mismatch`,
+            suggestion: 'Equilibrium must specify one strategy per player',
+            category: 'logical',
+          });
+        }
+
+        if (equilibrium.payoffs.length !== thought.players.length) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Nash equilibrium ${equilibrium.id} payoffs length mismatch`,
+            suggestion: 'Equilibrium must have payoff for each player',
+            category: 'logical',
+          });
+        }
+
+        if (equilibrium.stability < 0 || equilibrium.stability > 1) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Nash equilibrium ${equilibrium.id} stability must be 0-1`,
+            suggestion: 'Set stability value between 0 and 1',
+            category: 'structural',
+          });
+        }
+      }
+    }
+
+    // Validate dominant strategies reference valid players and strategies
+    if (thought.dominantStrategies && thought.players && thought.strategies) {
+      const playerIds = new Set(thought.players.map(p => p.id));
+      const strategyIds = new Set(thought.strategies.map(s => s.id));
+
+      for (const domStrategy of thought.dominantStrategies) {
+        if (!playerIds.has(domStrategy.playerId)) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Dominant strategy references non-existent player ${domStrategy.playerId}`,
+            suggestion: 'Ensure dominant strategies reference valid player IDs',
+            category: 'structural',
+          });
+        }
+
+        if (!strategyIds.has(domStrategy.strategyId)) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Dominant strategy references non-existent strategy ${domStrategy.strategyId}`,
+            suggestion: 'Ensure dominant strategies reference valid strategy IDs',
+            category: 'structural',
+          });
+        }
+      }
+    }
+
+    // Validate game tree structure
+    if (thought.gameTree) {
+      const nodeIds = new Set(thought.gameTree.nodes.map(n => n.id));
+
+      // Validate root node exists
+      if (!nodeIds.has(thought.gameTree.rootNode)) {
+        issues.push({
+          severity: 'error',
+          thoughtNumber: thought.thoughtNumber,
+          description: 'Game tree root node does not exist in node list',
+          suggestion: 'Ensure rootNode ID matches a node in nodes array',
+          category: 'structural',
+        });
+      }
+
+      // Validate node references
+      for (const node of thought.gameTree.nodes) {
+        // Check parent exists
+        if (node.parentNode && !nodeIds.has(node.parentNode)) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Node ${node.id} references non-existent parent ${node.parentNode}`,
+            suggestion: 'Ensure all parent node references are valid',
+            category: 'structural',
+          });
+        }
+
+        // Check children exist
+        for (const childId of node.childNodes) {
+          if (!nodeIds.has(childId)) {
+            issues.push({
+              severity: 'error',
+              thoughtNumber: thought.thoughtNumber,
+              description: `Node ${node.id} references non-existent child ${childId}`,
+              suggestion: 'Ensure all child node references are valid',
+              category: 'structural',
+            });
+          }
+        }
+
+        // Validate chance node probabilities
+        if (node.type === 'chance' && node.probability !== undefined) {
+          if (node.probability < 0 || node.probability > 1) {
+            issues.push({
+              severity: 'error',
+              thoughtNumber: thought.thoughtNumber,
+              description: `Chance node ${node.id} probability must be 0-1`,
+              suggestion: 'Set probability between 0 and 1',
+              category: 'structural',
+            });
+          }
+        }
+
+        // Validate terminal nodes have payoffs
+        if (node.type === 'terminal' && !node.payoffs) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Terminal node ${node.id} missing payoffs`,
+            suggestion: 'Add payoffs array for terminal nodes',
+            category: 'structural',
+          });
+        }
+      }
+    }
+
+    return issues;
+  }
+
   private generateSuggestions(issues: ValidationIssue[]): string[] {
     return issues
       .filter(i => i.severity === 'error' || i.severity === 'warning')
