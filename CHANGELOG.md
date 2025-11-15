@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2025-11-14
+
+### Fixed
+- **Session Manager**: Fixed null reference error when accessing `dependencies.length` in metrics update
+  - Added defensive null checking before accessing array properties
+  - Error occurred when new reasoning modes (abductive, causal, bayesian, counterfactual, analogical) were tested
+  - Location: `src/session/manager.ts:237-241`
+  - Issue: `'in' operator check was insufficient - now includes explicit null validation
+
+### Changed
+- Build size: 18.57 KB (minimal increase from 18.54 KB)
+
 ## [2.0.0] - 2025-11-14
 
 ### Added
@@ -123,5 +135,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - npm package publication
 - GitHub repository setup
 
+[2.0.1]: https://github.com/danielsimonjr/deepthinking-mcp/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/danielsimonjr/deepthinking-mcp/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/danielsimonjr/deepthinking-mcp/releases/tag/v1.0.0
