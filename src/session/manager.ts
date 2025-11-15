@@ -234,9 +234,9 @@ export class SessionManager {
     }
 
     // Update dependency depth
-    if ('dependencies' in thought) {
+    if ('dependencies' in thought && thought.dependencies) {
       const deps = (thought as any).dependencies as string[];
-      if (deps.length > metrics.dependencyDepth) {
+      if (deps && deps.length > metrics.dependencyDepth) {
         metrics.dependencyDepth = deps.length;
       }
     }
