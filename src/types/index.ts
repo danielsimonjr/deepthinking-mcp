@@ -5,3 +5,6 @@
 
 export * from './core.js';
 export * from './session.js';
+
+// Phase 3 modes
+export * from './modes/temporal.js';

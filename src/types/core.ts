@@ -1,7 +1,7 @@
 /**
- * Core type definitions for the DeepThinking MCP server v2.0
- * Supports 10 thinking modes: Sequential, Shannon, Mathematics, Physics, Hybrid,
- * Abductive, Causal, Bayesian, Counterfactual, Analogical
+ * Core type definitions for the DeepThinking MCP server v2.1+
+ * Supports 13 thinking modes: Sequential, Shannon, Mathematics, Physics, Hybrid,
+ * Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory, Evidential
  */
 
 /**
@@ -18,6 +18,9 @@ export enum ThinkingMode {
   BAYESIAN = 'bayesian',
   COUNTERFACTUAL = 'counterfactual',
   ANALOGICAL = 'analogical',
+  TEMPORAL = 'temporal', // Phase 3 (v2.1)
+  GAMETHEORY = 'gametheory', // Phase 3 (v2.2)
+  EVIDENTIAL = 'evidential', // Phase 3 (v2.3)
   CUSTOM = 'custom'
 }
 
