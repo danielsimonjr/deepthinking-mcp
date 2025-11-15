@@ -146,7 +146,16 @@ async function handleExport(input: ThinkingToolInput) {
     throw new Error(`Session ${input.sessionId} not found`);
   }
 
-  const exported = JSON.stringify(session, null, 2);
+  // Convert Map to object for JSON serialization
+  const sessionWithCustomMetrics = {
+    ...session,
+    metrics: {
+      ...session.metrics,
+      customMetrics: Object.fromEntries(session.metrics.customMetrics),
+    },
+  };
+
+  const exported = JSON.stringify(sessionWithCustomMetrics, null, 2);
 
   return {
     content: [
@@ -189,6 +198,12 @@ async function handleGetSession(input: ThinkingToolInput) {
     throw new Error(`Session ${input.sessionId} not found`);
   }
 
+  // Convert Map to object for JSON serialization
+  const metricsWithCustom = {
+    ...session.metrics,
+    customMetrics: Object.fromEntries(session.metrics.customMetrics),
+  };
+
   return {
     content: [
       {
@@ -199,7 +214,7 @@ async function handleGetSession(input: ThinkingToolInput) {
           mode: session.mode,
           thoughtCount: session.thoughts.length,
           isComplete: session.isComplete,
-          metrics: session.metrics,
+          metrics: metricsWithCustom,
         }, null, 2),
       },
     ],
