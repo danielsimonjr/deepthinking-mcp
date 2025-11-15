@@ -220,16 +220,6 @@ export const ThinkingToolSchema = z.object({
     justification: z.string(),
     confidence: z.number().min(0).max(1),
   })).optional(),
-    properties: z.array(z.object({
-      entityId: z.string(),
-      name: z.string(),
-      value: z.string(),
-    })),
-    properties: z.array(z.object({
-      entityId: z.string(),
-      name: z.string(),
-      value: z.string(),
-    })),
   insights: z.array(z.object({
     description: z.string(),
     sourceEvidence: z.string(),
