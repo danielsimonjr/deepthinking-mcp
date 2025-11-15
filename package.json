@@ -1,6 +1,6 @@
 {
   "name": "deepthinking-mcp",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Comprehensive MCP server with 10 advanced reasoning modes: Sequential, Shannon, Mathematics, Physics, Hybrid, Abductive, Causal, Bayesian, Counterfactual, and Analogical reasoning",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
