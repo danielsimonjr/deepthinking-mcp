@@ -4,6 +4,106 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [2.4.0] - 2025-11-16
+
+### Added
+
+#### New Feature: Mode Recommendation System (Phase 3D)
+- **Intelligent Mode Selection**: Automatically recommends the best reasoning modes based on problem characteristics
+  - `ModeRecommender` class with three recommendation methods
+  - `recommendModes()`: Returns ranked mode recommendations with scores, reasoning, strengths, limitations, and examples
+  - `recommendCombinations()`: Suggests synergistic mode combinations (parallel, sequential, or hybrid)
+  - `quickRecommend()`: Simple problem-type based recommendations using keyword mapping
+  
+#### Problem Characteristics Analysis
+- **ProblemCharacteristics** interface with 10 dimensions:
+  - Domain (general, mathematics, physics, engineering, etc.)
+  - Complexity (low, medium, high)
+  - Uncertainty level (low, medium, high)
+  - Time-dependent (boolean)
+  - Multi-agent (boolean)
+  - Requires proof (boolean)
+  - Requires quantification (boolean)
+  - Has incomplete info (boolean)
+  - Requires explanation (boolean)
+  - Has alternatives (boolean)
+
+#### Mode Recommendation Logic
+- **Temporal Mode**: Recommended for time-dependent problems (score: 0.9)
+- **Game Theory Mode**: Recommended for multi-agent strategic interactions (score: 0.85)
+- **Evidential Mode**: Recommended for incomplete information + high uncertainty (score: 0.88)
+- **Abductive Mode**: Recommended when explanation is needed (score: 0.87)
+- **Causal Mode**: Recommended for time-dependent + explanation problems (score: 0.86)
+- **Bayesian Mode**: Recommended for quantification + uncertainty (score: 0.84)
+- **Counterfactual Mode**: Recommended when alternatives exist (score: 0.82)
+- **Analogical Mode**: Recommended for high complexity + explanation (score: 0.80)
+- **Mathematics Mode**: Recommended when proof is required (score: 0.95)
+- **Physics Mode**: Recommended for physics/engineering domains (score: 0.90)
+- **Shannon Mode**: Recommended for high complexity + proof (score: 0.88)
+- **Sequential Mode**: Default fallback mode (score: 0.70)
+
+#### Combination Recommendations
+- **Temporal + Causal**: Sequential combination for timeline → causal analysis
+- **Abductive + Bayesian**: Sequential combination for hypotheses → probabilities
+- **Game Theory + Counterfactual**: Hybrid combination for equilibria → scenarios
+- **Evidential + Causal**: Parallel combination for uncertain evidence + causality
+- **Temporal + Game Theory**: Sequential for events → strategic analysis
+- **Analogical + Abductive**: Parallel for creative + systematic hypothesis generation
+- **Shannon + Mathematics**: Hybrid for structured complex proofs
+
+#### Implementation Components
+- `src/types/modes/recommendations.ts`: Complete type definitions
+  - `ProblemCharacteristics` interface
+  - `ModeRecommendation` interface with score, reasoning, strengths, limitations, examples
+  - `CombinationRecommendation` interface with modes, sequence, rationale, benefits, synergies
+  - `ModeRecommender` class with full recommendation logic
+- Moved from `src/modes/recommendations.ts` to `src/types/modes/` for better organization
+
+#### Code Organization
+- **Type Refactoring**: Created separate type definition files in `src/types/modes/`:
+  - `sequential.ts`: SequentialThought interface with branching and iteration control
+  - `shannon.ts`: ShannonThought interface with 5-stage methodology
+  - `mathematics.ts`: MathematicsThought with proofs and theorems
+  - `physics.ts`: PhysicsThought with tensor properties and field theory
+  - `causal.ts`: CausalThought with causal graphs and interventions
+  - `bayesian.ts`: BayesianThought with priors, likelihoods, and posteriors
+  - `counterfactual.ts`: CounterfactualThought with scenarios and comparisons
+  - `analogical.ts`: AnalogicalThought with domain mapping and insights
+- Core reasoning modes (Inductive, Deductive, Abductive) remain in `core.ts` for backward compatibility
+- All mode files exported from `src/types/index.ts`
+
+#### Testing
+- `tests/unit/recommendations.test.ts`: 15 comprehensive tests
+  - Single mode recommendations: temporal, game theory, evidential, abductive (4 tests)
+  - Mode combinations: temporal+causal, abductive+bayesian (2 tests)
+  - Mode scoring correctness and ranking (1 test)
+  - Quick recommendations with case-insensitivity (2 tests)
+  - Recommendation quality and fallback behavior (2 tests)
+  - Combination synergies and sequence types (2 tests)
+  - Edge cases: domain-specific recommendations (2 tests)
+- All 15 tests passing
+- Total test count: 145 tests (129 before + 15 new + 1 additional)
+
+#### Documentation
+- Updated README.md to v2.4
+- Added "Mode Recommendation System (v2.4)" feature section
+- Added "Mode Recommendations (v2.4)" usage section with examples
+- Documented problem characteristics analysis
+- Provided quick recommendation keyword mapping
+- Updated version references from v2.3 to v2.4
+- Changed mode count from "11" to "13 Specialized Reasoning Modes"
+
+### Changed
+- Enhanced hybrid mode preparation for integration with recommendation engine (planned for future update)
+- Reorganized type definitions for better maintainability
+- Improved code organization with separate mode type files
+
+### Technical Details
+- Lines of code: ~300 new lines for recommendation system
+- Test coverage: 15 new tests, all passing
+- API: Three public methods on ModeRecommender class
+- Type safety: Full TypeScript coverage with strict typing
+
 
 ## [2.3.0] - 2025-11-15
 

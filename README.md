@@ -1,10 +1,10 @@
-# DeepThinking MCP v2.3
+# DeepThinking MCP v2.4
 
-A comprehensive Model Context Protocol (MCP) server featuring **13 advanced reasoning modes** for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **13 advanced reasoning modes** with intelligent mode recommendation for complex problem-solving, analysis, and decision-making.
 
 ## Overview
 
-DeepThinking MCP v2.3 provides a complete toolkit for structured reasoning with 13 specialized modes:
+DeepThinking MCP v2.4 provides a complete toolkit for structured reasoning with 13 specialized modes and an intelligent recommendation system:
 
 ### Core Modes
 - **Sequential**: Iterative refinement with revision capabilities
@@ -26,7 +26,7 @@ n### Phase 3 Modes (v2.3+)
 
 ## Features
 
-### 11 Specialized Reasoning Modes
+### 13 Specialized Reasoning Modes
 
 #### Core Modes
 - **Sequential**: Iterative refinement with revision capabilities and branching
@@ -65,6 +65,13 @@ n#### Phase 3 Reasoning Modes (v2.3+)
 - Automatic metrics tracking
 - Mode switching during problem-solving
 - Export to multiple formats (Markdown, LaTeX, JSON)
+
+### Mode Recommendation System (v2.4)
+- **Intelligent Mode Selection**: Automatically recommends the best reasoning modes based on problem characteristics
+- **Combination Suggestions**: Identifies synergistic mode combinations for complex problems
+- **Quick Recommendations**: Simple problem-type based recommendations
+- **Problem Characteristics Analysis**: Analyzes domain, complexity, uncertainty, time-dependence, and more
+- **Ranked Recommendations**: Returns modes sorted by suitability score with detailed reasoning
 
 ## Installation
 
@@ -116,6 +123,49 @@ Use deepthinking to solve this complex problem...
 ```
 
 The hybrid mode automatically selects the best features from each mode.
+
+### Mode Recommendations (v2.4)
+
+The recommendation system helps you choose the best reasoning mode for your problem:
+
+```
+What mode should I use for debugging this application?
+```
+
+Returns: **Abductive mode** - Perfect for hypothesis generation and root cause analysis.
+
+```
+I need to analyze a competitive business scenario with multiple players. What modes should I use?
+```
+
+Returns: **Game Theory mode** for strategic analysis, potentially combined with **Counterfactual mode** for scenario exploration.
+
+#### Problem Characteristics
+
+The recommender analyzes:
+- **Domain**: General, mathematics, physics, engineering, etc.
+- **Complexity**: Low, medium, or high
+- **Uncertainty**: How much unknown information exists
+- **Time-dependent**: Whether events occur over time
+- **Multi-agent**: Whether multiple actors interact strategically
+- **Requires proof**: Whether formal mathematical proof is needed
+- **Requires quantification**: Whether probabilities or measurements are needed
+- **Incomplete information**: Whether data gaps exist
+- **Requires explanation**: Whether understanding "why" is important
+- **Has alternatives**: Whether alternative scenarios should be explored
+
+#### Quick Recommendations
+
+For simple cases, use problem-type keywords:
+- `debugging` → Abductive mode
+- `proof` → Mathematics mode
+- `timeline` → Temporal mode
+- `strategy` → Game Theory mode
+- `uncertainty` → Evidential mode
+- `causality` → Causal mode
+- `probability` → Bayesian mode
+- `what-if` → Counterfactual mode
+
 
 ## Tool Parameters
 
