@@ -31,6 +31,7 @@ import {
   TemporalThought,
   GameTheoryThought,
   EvidentialThought,
+  ModeRecommender,
 } from './types/index.js';
 
 const server = new Server(
@@ -71,6 +72,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           return await handleSwitchMode(input);
         case 'get_session':
           return await handleGetSession(input);
+        case 'recommend_mode':
+          return await handleRecommendMode(input);
         default:
           throw new Error(`Unknown action: ${input.action}`);
       }
@@ -399,6 +402,89 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         secondaryFeatures: [],
       } as HybridThought;
   }
+}
+
+
+/**
+ * Handle mode recommendation requests
+ */
+async function handleRecommendMode(input: ThinkingToolInput) {
+  const recommender = new ModeRecommender();
+  
+  // Quick recommendation based on problem type
+  if (input.problemType && !input.problemCharacteristics) {
+    const recommendedMode = recommender.quickRecommend(input.problemType);
+    
+    return {
+      content: [{
+        type: 'text' as const,
+        text: `Quick recommendation for "${input.problemType}":\n\n**Recommended Mode**: ${recommendedMode}\n\nFor more detailed recommendations, provide problemCharacteristics.`
+      }],
+      isError: false,
+    };
+  }
+  
+  // Comprehensive recommendations based on problem characteristics
+  if (input.problemCharacteristics) {
+    const modeRecs = recommender.recommendModes(input.problemCharacteristics);
+    const combinationRecs = input.includeCombinations 
+      ? recommender.recommendCombinations(input.problemCharacteristics)
+      : [];
+    
+    let response = '# Mode Recommendations\n\n';
+    
+    // Single mode recommendations
+    response += '## Individual Modes\n\n';
+    for (const rec of modeRecs) {
+      response += `### ${rec.mode} (Score: ${rec.score})\n`;
+      response += `**Reasoning**: ${rec.reasoning}\n\n`;
+      response += `**Strengths**:\n`;
+      for (const strength of rec.strengths) {
+        response += `- ${strength}\n`;
+      }
+      response += `\n**Limitations**:\n`;
+      for (const limitation of rec.limitations) {
+        response += `- ${limitation}\n`;
+      }
+      response += `\n**Examples**: ${rec.examples.join(', ')}\n\n`;
+      response += '---\n\n';
+    }
+    
+    // Mode combinations
+    if (combinationRecs.length > 0) {
+      response += '## Recommended Mode Combinations\n\n';
+      for (const combo of combinationRecs) {
+        response += `### ${combo.modes.join(' + ')} (${combo.sequence})\n`;
+        response += `**Rationale**: ${combo.rationale}\n\n`;
+        response += `**Benefits**:\n`;
+        for (const benefit of combo.benefits) {
+          response += `- ${benefit}\n`;
+        }
+        response += `\n**Synergies**:\n`;
+        for (const synergy of combo.synergies) {
+          response += `- ${synergy}\n`;
+        }
+        response += '\n---\n\n';
+      }
+    }
+    
+    return {
+      content: [{
+        type: 'text' as const,
+        text: response
+      }],
+      isError: false,
+    };
+  }
+  
+  // No valid input provided
+  return {
+    content: [{
+      type: 'text' as const,
+      text: 'Error: Please provide either problemType or problemCharacteristics for mode recommendations.'
+    }],
+    isError: true,
+  };
 }
 
 async function main() {
