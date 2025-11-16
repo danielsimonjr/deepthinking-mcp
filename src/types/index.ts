@@ -9,3 +9,4 @@ export * from './session.js';
 // Phase 3 modes
 export * from './modes/temporal.js';
 export * from './modes/gametheory.js';
+export * from './modes/evidential.js';

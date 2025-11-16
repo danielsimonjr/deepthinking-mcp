@@ -5,6 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2025-11-15
+
+### Added
+
+#### New Reasoning Mode: Evidential (Phase 3C)
+- **Evidential Reasoning Mode**: Dempster-Shafer theory for uncertain and incomplete evidence
+  - Frame of discernment for hypothesis space definition
+  - Hypothesis modeling with mutually exclusive and composite hypotheses
+  - Evidence collection with reliability scores (0-1) and timestamp tracking
+  - Belief functions with basic probability mass assignments
+  - Dempster's rule of combination for evidence fusion
+  - Conflict mass computation and normalization
+  - Belief and plausibility interval calculations
+  - Uncertainty interval representation [belief, plausibility]
+  - Decision analysis under uncertainty with confidence scores
+  - Support for sensor fusion, diagnostic reasoning, intelligence analysis
+
+#### Implementation Components
+- `src/types/modes/evidential.ts`: Complete type definitions
+  - `EvidentialThought` interface with 5 thought types
+  - 9 supporting interfaces: Hypothesis, Evidence, BeliefFunction, MassAssignment, PlausibilityFunction, PlausibilityAssignment, Decision, Alternative
+  - Type guard: `isEvidentialThought()`
+- `src/validation/validator.ts`: Evidential validation
+  - `validateEvidential()` method (200+ lines)
+  - Validates hypothesis subsets, evidence reliability, mass assignments
+  - Belief function mass sum validation (must equal 1.0)
+  - Plausibility consistency checks (belief ≤ plausibility)
+  - Uncertainty interval validation
+  - Decision hypothesis reference validation
+- `src/tools/thinking.ts`: Zod schemas for runtime validation
+- `src/session/manager.ts`: Evidential metrics tracking
+  - totalHypotheses, totalEvidence, avgEvidenceReliability
+  - beliefFunctions, hasCombinedBelief, conflictMass
+  - decisions tracking
+- `src/index.ts`: createThought() integration for evidential mode
+
+#### Testing
+- `tests/unit/evidential.test.ts`: 17 comprehensive tests
+  - Type guard validation (1 test)
+  - Hypothesis validation (2 tests)
+  - Evidence validation (3 tests)
+  - Belief function validation (4 tests)
+  - Plausibility validation (3 tests)
+  - Decision validation (2 tests)
+  - Complete sensor fusion example (2 tests)
+- **Total test count: 130 tests (113 → 130)**
+
+#### Documentation
+- Updated README.md to v2.3
+- Added evidential mode to Phase 3 Modes section
+- Complete parameter documentation for all evidential fields
+- Updated mode count from 12 to 13 modes
+
+### Changed
+- Extended `ThinkingMode` enum to include 'evidential'
+- Updated `Thought` union type to include `EvidentialThought`
+- Mode count: 12 → 13 reasoning modes
+
+
 ## [2.2.0] - 2025-11-15
 
 ### Added
@@ -250,6 +309,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - npm package publication
 - GitHub repository setup
 
+[2.3.0]: https://github.com/danielsimonjr/deepthinking-mcp/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/danielsimonjr/deepthinking-mcp/compare/v2.1.4...v2.2.0
 [2.1.4]: https://github.com/danielsimonjr/deepthinking-mcp/compare/v2.0.1...v2.1.4
 [2.0.1]: https://github.com/danielsimonjr/deepthinking-mcp/compare/v2.0.0...v2.0.1

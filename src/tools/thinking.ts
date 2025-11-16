@@ -55,10 +55,16 @@ export const ThinkingToolSchema = z.object({
   })).optional(),
   hypotheses: z.array(z.object({
     id: z.string(),
-    explanation: z.string(),
-    assumptions: z.array(z.string()),
-    predictions: z.array(z.string()),
-    score: z.number(),
+    // Abductive fields
+    explanation: z.string().optional(),
+    assumptions: z.array(z.string()).optional(),
+    predictions: z.array(z.string()).optional(),
+    score: z.number().optional(),
+    // Evidential fields
+    name: z.string().optional(),
+    description: z.string().optional(),
+    mutuallyExclusive: z.boolean().optional(),
+    subsets: z.array(z.string()).optional(),
   })).optional(),
   evaluationCriteria: z.object({
     parsimony: z.number(),
@@ -68,10 +74,17 @@ export const ThinkingToolSchema = z.object({
   }).optional(),
   evidence: z.array(z.object({
     id: z.string(),
-    hypothesisId: z.string(),
-    type: z.enum(['supporting', 'contradicting', 'neutral']),
     description: z.string(),
-    strength: z.number().min(0).max(1),
+    // Abductive fields
+    hypothesisId: z.string().optional(),
+    type: z.enum(['supporting', 'contradicting', 'neutral']).optional(),
+    strength: z.number().min(0).max(1).optional(),
+    // Evidential fields
+    source: z.string().optional(),
+    reliability: z.number().min(0).max(1).optional(),
+    timestamp: z.number().optional(),
+    supports: z.array(z.string()).optional(),
+    contradicts: z.array(z.string()).optional(),
   })).optional(),
   bestExplanation: z.object({
     id: z.string(),
@@ -341,6 +354,50 @@ export const ThinkingToolSchema = z.object({
       availableActions: z.array(z.string()),
     })).optional(),
   }).optional(),
+
+  // Evidential properties (Phase 3, v2.3)
+  frameOfDiscernment: z.array(z.string()).optional(),
+  beliefFunctions: z.array(z.object({
+    id: z.string(),
+    source: z.string(),
+    massAssignments: z.array(z.object({
+      hypothesisSet: z.array(z.string()),
+      mass: z.number().min(0).max(1),
+      justification: z.string(),
+    })),
+    conflictMass: z.number().optional(),
+  })).optional(),
+  combinedBelief: z.object({
+    id: z.string(),
+    source: z.string(),
+    massAssignments: z.array(z.object({
+      hypothesisSet: z.array(z.string()),
+      mass: z.number().min(0).max(1),
+      justification: z.string(),
+    })),
+    conflictMass: z.number().optional(),
+  }).optional(),
+  plausibility: z.object({
+    id: z.string(),
+    assignments: z.array(z.object({
+      hypothesisSet: z.array(z.string()),
+      plausibility: z.number().min(0).max(1),
+      belief: z.number().min(0).max(1),
+      uncertaintyInterval: z.tuple([z.number(), z.number()]),
+    })),
+  }).optional(),
+  decisions: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    selectedHypothesis: z.array(z.string()),
+    confidence: z.number().min(0).max(1),
+    reasoning: z.string(),
+    alternatives: z.array(z.object({
+      hypothesis: z.array(z.string()),
+      expectedUtility: z.number(),
+      risk: z.number(),
+    })),
+  })).optional(),
   action: z.enum(['add_thought', 'summarize', 'export', 'switch_mode', 'get_session']).default('add_thought'),
   exportFormat: z.enum(['markdown', 'latex', 'json', 'html', 'jupyter']).optional(),
   newMode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential']).optional(),

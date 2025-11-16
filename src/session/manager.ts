@@ -15,6 +15,7 @@ import {
 } from '../types/index.js';
 import { TemporalThought, isTemporalThought } from '../types/modes/temporal.js';
 import { GameTheoryThought, isGameTheoryThought } from '../types/modes/gametheory.js';
+import { EvidentialThought, isEvidentialThought } from '../types/modes/evidential.js';
 
 /**
  * Default session configuration
@@ -285,6 +286,30 @@ export class SessionManager {
         metrics.customMetrics.set('gameType', thought.game.type);
         metrics.customMetrics.set('isZeroSum', thought.game.isZeroSum);
       }
+
+    // Evidential-specific metrics (Phase 3, v2.3)
+    if (isEvidentialThought(thought)) {
+      if (thought.hypotheses) {
+        metrics.customMetrics.set('totalHypotheses', thought.hypotheses.length);
+      }
+      if (thought.evidence) {
+        metrics.customMetrics.set('totalEvidence', thought.evidence.length);
+        const avgReliability = thought.evidence.reduce((sum, e) => sum + e.reliability, 0) / thought.evidence.length;
+        metrics.customMetrics.set('avgEvidenceReliability', avgReliability);
+      }
+      if (thought.beliefFunctions) {
+        metrics.customMetrics.set('beliefFunctions', thought.beliefFunctions.length);
+      }
+      if (thought.combinedBelief) {
+        metrics.customMetrics.set('hasCombinedBelief', true);
+        if (thought.combinedBelief.conflictMass !== undefined) {
+          metrics.customMetrics.set('conflictMass', thought.combinedBelief.conflictMass);
+        }
+      }
+      if (thought.decisions) {
+        metrics.customMetrics.set('decisions', thought.decisions.length);
+      }
+    }
     }
     }
   }

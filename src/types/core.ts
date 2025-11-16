@@ -638,7 +638,8 @@ export type Thought =
   | CounterfactualThought
   | AnalogicalThought
   | TemporalThought
-  | GameTheoryThought;
+  | GameTheoryThought
+  | EvidentialThought;
 
 // ========== TYPE GUARDS ==========
 

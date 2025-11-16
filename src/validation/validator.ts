@@ -28,6 +28,7 @@ import {
 } from '../types/core.js';
 import { TemporalThought, isTemporalThought } from '../types/modes/temporal.js';
 import { GameTheoryThought, isGameTheoryThought } from '../types/modes/gametheory.js';
+import { EvidentialThought, isEvidentialThought } from '../types/modes/evidential.js';
 import { ValidationResult, ValidationIssue } from '../types/session.js';
 
 /**
@@ -68,6 +69,8 @@ export class ThoughtValidator {
       issues.push(...this.validateTemporal(thought, context));
     } else if (isGameTheoryThought(thought)) {
       issues.push(...this.validateGameTheory(thought, context));
+    } else if (isEvidentialThought(thought)) {
+      issues.push(...this.validateEvidential(thought, context));
     }
 
     // Calculate validation result
@@ -1393,6 +1396,203 @@ export class ThoughtValidator {
             suggestion: 'Add payoffs array for terminal nodes',
             category: 'structural',
           });
+        }
+      }
+    }
+
+    return issues;
+  }
+
+  private validateEvidential(thought: EvidentialThought, context: ValidationContext): ValidationIssue[] {
+    const issues: ValidationIssue[] = [];
+
+    // Validate hypotheses
+    if (thought.hypotheses) {
+      const hypothesisIds = new Set(thought.hypotheses.map(h => h.id));
+
+      for (const hypothesis of thought.hypotheses) {
+        if (hypothesis.subsets) {
+          for (const subset of hypothesis.subsets) {
+            if (!hypothesisIds.has(subset)) {
+              issues.push({
+                severity: 'error',
+                thoughtNumber: thought.thoughtNumber,
+                description: `Hypothesis ${hypothesis.id} references unknown subset ${subset}`,
+                suggestion: 'Ensure all hypothesis subsets reference valid hypothesis IDs',
+                category: 'structural',
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // Validate evidence
+    if (thought.evidence) {
+      const hypothesisIds = new Set(thought.hypotheses?.map(h => h.id) || []);
+
+      for (const evidence of thought.evidence) {
+        if (evidence.reliability < 0 || evidence.reliability > 1) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Evidence ${evidence.id} reliability must be 0-1`,
+            suggestion: 'Set reliability between 0 and 1',
+            category: 'structural',
+          });
+        }
+
+        for (const hypId of evidence.supports) {
+          if (!hypothesisIds.has(hypId) && hypId !== 'unknown') {
+            issues.push({
+              severity: 'error',
+              thoughtNumber: thought.thoughtNumber,
+              description: `Evidence ${evidence.id} supports unknown hypothesis ${hypId}`,
+              suggestion: 'Ensure evidence only supports defined hypotheses',
+              category: 'structural',
+            });
+          }
+        }
+
+        if (evidence.contradicts) {
+          for (const hypId of evidence.contradicts) {
+            if (!hypothesisIds.has(hypId)) {
+              issues.push({
+                severity: 'error',
+                thoughtNumber: thought.thoughtNumber,
+                description: `Evidence ${evidence.id} contradicts unknown hypothesis ${hypId}`,
+                suggestion: 'Ensure evidence only contradicts defined hypotheses',
+                category: 'structural',
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // Validate belief functions
+    if (thought.beliefFunctions) {
+      for (const bf of thought.beliefFunctions) {
+        let totalMass = 0;
+
+        for (const ma of bf.massAssignments) {
+          if (ma.mass < 0 || ma.mass > 1) {
+            issues.push({
+              severity: 'error',
+              thoughtNumber: thought.thoughtNumber,
+              description: `Mass assignment in ${bf.id} must be 0-1`,
+              suggestion: 'Set mass values between 0 and 1',
+              category: 'structural',
+            });
+          }
+          totalMass += ma.mass;
+
+          if (ma.hypothesisSet.length === 0) {
+            issues.push({
+              severity: 'error',
+              thoughtNumber: thought.thoughtNumber,
+              description: `Mass assignment in ${bf.id} must assign to at least one hypothesis`,
+              suggestion: 'Assign mass to at least one hypothesis',
+              category: 'structural',
+            });
+          }
+        }
+
+        // Allow small tolerance for floating point
+        if (Math.abs(totalMass - 1.0) > 0.01) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Belief function ${bf.id} mass assignments must sum to 1.0 (got ${totalMass})`,
+            suggestion: 'Ensure mass assignments sum to 1.0',
+            category: 'structural',
+          });
+        }
+      }
+    }
+
+    // Validate plausibility function
+    if (thought.plausibility) {
+      for (const pa of thought.plausibility.assignments) {
+        if (pa.belief < 0 || pa.belief > 1) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Plausibility assignment belief must be 0-1`,
+            suggestion: 'Set belief between 0 and 1',
+            category: 'structural',
+          });
+        }
+        if (pa.plausibility < 0 || pa.plausibility > 1) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Plausibility assignment plausibility must be 0-1`,
+            suggestion: 'Set plausibility between 0 and 1',
+            category: 'structural',
+          });
+        }
+        if (pa.belief > pa.plausibility) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Belief cannot exceed plausibility`,
+            suggestion: 'Ensure belief ≤ plausibility',
+            category: 'structural',
+          });
+        }
+        if (pa.uncertaintyInterval[0] !== pa.belief ||
+            pa.uncertaintyInterval[1] !== pa.plausibility) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Uncertainty interval must match [belief, plausibility]`,
+            suggestion: 'Set uncertaintyInterval to [belief, plausibility]',
+            category: 'structural',
+          });
+        }
+      }
+    }
+
+    // Validate decisions
+    if (thought.decisions) {
+      const hypothesisIds = new Set(thought.hypotheses?.map(h => h.id) || []);
+
+      for (const decision of thought.decisions) {
+        if (decision.confidence < 0 || decision.confidence > 1) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Decision ${decision.id} confidence must be 0-1`,
+            suggestion: 'Set confidence between 0 and 1',
+            category: 'structural',
+          });
+        }
+
+        for (const hypId of decision.selectedHypothesis) {
+          if (!hypothesisIds.has(hypId)) {
+            issues.push({
+              severity: 'error',
+              thoughtNumber: thought.thoughtNumber,
+              description: `Decision ${decision.id} selects unknown hypothesis ${hypId}`,
+              suggestion: 'Ensure decision only selects defined hypotheses',
+              category: 'structural',
+            });
+          }
+        }
+
+        for (const alt of decision.alternatives) {
+          for (const hypId of alt.hypothesis) {
+            if (!hypothesisIds.has(hypId)) {
+              issues.push({
+                severity: 'error',
+                thoughtNumber: thought.thoughtNumber,
+                description: `Alternative in decision ${decision.id} references unknown hypothesis ${hypId}`,
+                suggestion: 'Ensure alternatives only reference defined hypotheses',
+                category: 'structural',
+              });
+            }
+          }
         }
       }
     }

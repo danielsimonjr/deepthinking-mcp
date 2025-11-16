@@ -30,6 +30,7 @@ import {
   AnalogicalThought,
   TemporalThought,
   GameTheoryThought,
+  EvidentialThought,
 } from './types/index.js';
 
 const server = new Server(
@@ -366,6 +367,20 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         dominantStrategies: input.dominantStrategies || [],
         gameTree: input.gameTree,
       } as GameTheoryThought;
+
+    case 'evidential':
+      return {
+        ...baseThought,
+        mode: ThinkingMode.EVIDENTIAL,
+        thoughtType: input.thoughtType as any,
+        frameOfDiscernment: input.frameOfDiscernment,
+        hypotheses: input.hypotheses || [],
+        evidence: input.evidence || [],
+        beliefFunctions: input.beliefFunctions || [],
+        combinedBelief: input.combinedBelief,
+        plausibility: input.plausibility,
+        decisions: input.decisions || [],
+      } as EvidentialThought;
 
     case 'hybrid':
     default:

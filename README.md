@@ -1,10 +1,10 @@
-# DeepThinking MCP v2.2
+# DeepThinking MCP v2.3
 
-A comprehensive Model Context Protocol (MCP) server featuring **12 advanced reasoning modes** for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **13 advanced reasoning modes** for complex problem-solving, analysis, and decision-making.
 
 ## Overview
 
-DeepThinking MCP v2.1 provides a complete toolkit for structured reasoning with 11 specialized modes:
+DeepThinking MCP v2.3 provides a complete toolkit for structured reasoning with 13 specialized modes:
 
 ### Core Modes
 - **Sequential**: Iterative refinement with revision capabilities
@@ -19,9 +19,10 @@ DeepThinking MCP v2.1 provides a complete toolkit for structured reasoning with 
 - **Bayesian**: Probabilistic reasoning with evidence updates
 - **Counterfactual**: What-if scenario analysis and alternative histories
 - **Analogical**: Cross-domain pattern matching and knowledge transfer
-n### Phase 3 Modes (v2.2+)
+n### Phase 3 Modes (v2.3+)
 - **Temporal**: Event timelines, temporal constraints, Allen's interval algebra, causal relations over time
 - **Game Theory**: Nash equilibria, strategic analysis, payoff matrices, dominant strategies, game trees
+- **Evidential**: Dempster-Shafer theory, belief functions, evidence combination, uncertainty intervals
 
 ## Features
 
@@ -40,9 +41,10 @@ n### Phase 3 Modes (v2.2+)
 - **Bayesian**: Update beliefs using probabilistic reasoning with priors, likelihoods, and evidence. Essential for risk assessment and A/B testing.
 - **Counterfactual**: Explore alternative scenarios and compare outcomes. Excellent for post-mortems and strategic planning.
 - **Analogical**: Transfer knowledge across domains by identifying structural similarities. Great for design patterns and innovative problem-solving.
-n#### Phase 3 Reasoning Modes (v2.1+)
+n#### Phase 3 Reasoning Modes (v2.3+)
 - **Temporal**: Model events, intervals, and temporal relationships using Allen's interval algebra. Track causality over time with timestamps, durations, and temporal constraints. Perfect for timeline analysis, scheduling problems, and understanding event sequences.
 - **Game Theory**: Analyze strategic interactions between rational agents. Define games, players, and strategies. Compute Nash equilibria (pure and mixed), identify dominant strategies, construct payoff matrices, and build extensive-form game trees. Ideal for competitive analysis, mechanism design, and strategic decision-making.
+- **Evidential**: Apply Dempster-Shafer theory for reasoning with uncertain and incomplete evidence. Define hypotheses, collect evidence with reliability scores, assign belief functions with mass assignments, combine evidence using Dempster's rule, compute belief and plausibility intervals, and make decisions under uncertainty. Ideal for sensor fusion, diagnostic reasoning, intelligence analysis, and situations with incomplete information.
 
 ### Mathematical Enhancements
 - **Symbolic computation** support with LaTeX and symbolic formats
@@ -200,6 +202,15 @@ n#### Temporal Mode
 - `nashEquilibria`: Nash equilibrium solutions (pure/mixed, strict, stability)
 - `dominantStrategies`: Dominant strategy analysis (strictly/weakly dominant)
 - `gameTree`: Extensive-form game tree with decision, chance, and terminal nodes
+
+#### Evidential Mode
+- `frameOfDiscernment`: Set of all possible hypotheses being considered
+- `hypotheses`: Hypothesis definitions (id, name, description, mutuallyExclusive, subsets)
+- `evidence`: Evidence items with source, reliability (0-1), timestamp, supports, contradicts
+- `beliefFunctions`: Belief function with mass assignments (hypothesisSet, mass, justification)
+- `combinedBelief`: Belief function resulting from Dempster-Shafer combination (includes conflictMass)
+- `plausibility`: Plausibility function with belief/plausibility values and uncertainty intervals
+- `decisions`: Decision analysis (selectedHypothesis, confidence, reasoning, alternatives)
 
 ### Actions
 - `add_thought` (default): Add a new thought to session
