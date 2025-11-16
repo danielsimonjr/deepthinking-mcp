@@ -398,9 +398,24 @@ export const ThinkingToolSchema = z.object({
       risk: z.number(),
     })),
   })).optional(),
-  action: z.enum(['add_thought', 'summarize', 'export', 'switch_mode', 'get_session']).default('add_thought'),
+  action: z.enum(['add_thought', 'summarize', 'export', 'switch_mode', 'get_session', 'recommend_mode']).default('add_thought'),
   exportFormat: z.enum(['markdown', 'latex', 'json', 'html', 'jupyter']).optional(),
   newMode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential']).optional(),
+  // Mode recommendation parameters (v2.4)
+  problemType: z.string().optional(),
+  problemCharacteristics: z.object({
+    domain: z.string(),
+    complexity: z.enum(['low', 'medium', 'high']),
+    uncertainty: z.enum(['low', 'medium', 'high']),
+    timeDependent: z.boolean(),
+    multiAgent: z.boolean(),
+    requiresProof: z.boolean(),
+    requiresQuantification: z.boolean(),
+    hasIncompleteInfo: z.boolean(),
+    requiresExplanation: z.boolean(),
+    hasAlternatives: z.boolean(),
+  }).optional(),
+  includeCombinations: z.boolean().optional(),
 });
 
 export type ThinkingToolInput = z.infer<typeof ThinkingToolSchema>;
@@ -689,7 +704,7 @@ Choose the mode that best fits your problem type.`,
       },
       action: {
         type: "string",
-        enum: ["add_thought", "summarize", "export", "switch_mode", "get_session"],
+        enum: ["add_thought", "summarize", "export", "switch_mode", "get_session", "recommend_mode"],
         description: "Action to perform"
       },
       exportFormat: {
@@ -701,6 +716,32 @@ Choose the mode that best fits your problem type.`,
         type: "string",
         enum: ["sequential", "shannon", "mathematics", "physics", "hybrid", "abductive", "causal", "bayesian", "counterfactual", "analogical", "temporal", "gametheory", "evidential"],
         description: "New mode for switch_mode action"
+      }
+,
+      problemType: {
+        type: "string",
+        description: "Simple problem type for quick recommendations (e.g., 'debugging', 'proof', 'timeline')"
+      },
+      problemCharacteristics: {
+        type: "object",
+        properties: {
+          domain: { type: "string", description: "Problem domain" },
+          complexity: { type: "string", enum: ["low", "medium", "high"], description: "Problem complexity" },
+          uncertainty: { type: "string", enum: ["low", "medium", "high"], description: "Uncertainty level" },
+          timeDependent: { type: "boolean", description: "Whether problem involves time sequences" },
+          multiAgent: { type: "boolean", description: "Whether multiple agents interact" },
+          requiresProof: { type: "boolean", description: "Whether formal proof is needed" },
+          requiresQuantification: { type: "boolean", description: "Whether quantification is needed" },
+          hasIncompleteInfo: { type: "boolean", description: "Whether information is incomplete" },
+          requiresExplanation: { type: "boolean", description: "Whether explanation is needed" },
+          hasAlternatives: { type: "boolean", description: "Whether alternative scenarios exist" }
+        },
+        required: ["domain", "complexity", "uncertainty", "timeDependent", "multiAgent", "requiresProof", "requiresQuantification", "hasIncompleteInfo", "requiresExplanation", "hasAlternatives"],
+        description: "Detailed problem characteristics for comprehensive recommendations"
+      },
+      includeCombinations: {
+        type: "boolean",
+        description: "Whether to include mode combination suggestions"
       }
     },
     required: ["thought", "thoughtNumber", "totalThoughts", "nextThoughtNeeded"]
