@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.3] - 2025-11-16
+
+### Security & Code Quality
+- **Input Sanitization**: Added comprehensive input validation and sanitization utilities
+  - Created `src/utils/sanitization.ts` module with security-focused validation functions
+  - String length validation with configurable limits
+  - UUID v4 validation for session IDs
+  - Null byte injection prevention
+  - Number range validation
+  - Array sanitization with size limits
+  - 26 new tests for sanitization utilities (185 total tests passing)
+
+### New Features
+- `sanitizeString()` - General string sanitization with length and injection checks
+- `validateSessionId()` - UUID v4 format validation
+- `sanitizeNumber()` - Numeric validation with min/max bounds
+- `sanitizeStringArray()` - Array validation with element sanitization
+- Specialized sanitizers for thought content, titles, domains, and authors
+
+### Technical Details
+- Maximum lengths: Thought content (100KB), Title (500), Domain (200), Author (300)
+- All inputs validated before processing
+- Package size: 74.74 KB
+
+---
+
+
 ## [2.5.2] - 2025-11-16
 
 ### Performance
