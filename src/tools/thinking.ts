@@ -446,7 +446,21 @@ Phase 3 Modes (v2.1+):
 - gametheory: Nash equilibria, strategic analysis, payoff matrices
 - evidential: Dempster-Shafer theory, belief functions, evidence combination
 
-Choose the mode that best fits your problem type.`,
+Actions:
+- add_thought: Add a new thought to the session (default)
+- summarize: Generate a summary of the session
+- export: Export session in various formats (markdown, latex, json, html, jupyter)
+- switch_mode: Change reasoning mode mid-session
+- get_session: Retrieve session information
+- recommend_mode: Get intelligent mode recommendations based on problem characteristics
+
+Mode Recommendations (v2.4):
+Use action 'recommend_mode' with either:
+  • problemType: Quick recommendation (e.g., 'debugging', 'proof', 'timeline', 'strategy')
+  • problemCharacteristics: Detailed analysis with 10 dimensions (domain, complexity, uncertainty, etc.)
+  • includeCombinations: Set to true for synergistic mode combination suggestions
+
+Choose the mode that best fits your problem type, or use recommend_mode to get intelligent suggestions.`,
   inputSchema: {
     type: "object",
     properties: {
