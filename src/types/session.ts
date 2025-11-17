@@ -87,6 +87,10 @@ export interface SessionMetrics {
   timeSpent: number;
   dependencyDepth: number;
   customMetrics: Map<string, any>;
+
+  // Running totals for incremental calculation (internal use)
+  _uncertaintySum?: number;
+  _uncertaintyCount?: number;
 }
 
 /**

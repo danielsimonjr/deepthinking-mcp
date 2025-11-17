@@ -226,15 +226,15 @@ export class SessionManager {
     // Update time spent (in milliseconds)
     metrics.timeSpent = session.updatedAt.getTime() - session.createdAt.getTime();
 
-    // Update average uncertainty (for modes that have uncertainty)
-    if ('uncertainty' in thought) {
-      const totalUncertainty = session.thoughts
-        .filter(t => 'uncertainty' in t)
-        .reduce((sum, t) => sum + (t as any).uncertainty, 0);
-      const thoughtsWithUncertainty = session.thoughts.filter(t => 'uncertainty' in t).length;
-      metrics.averageUncertainty = thoughtsWithUncertainty > 0
-        ? totalUncertainty / thoughtsWithUncertainty
-        : 0;
+    // Update average uncertainty incrementally (O(1) instead of O(n))
+    if ('uncertainty' in thought && typeof (thought as any).uncertainty === 'number') {
+      const uncertaintyValue = (thought as any).uncertainty;
+      const currentSum = metrics._uncertaintySum || 0;
+      const currentCount = metrics._uncertaintyCount || 0;
+
+      metrics._uncertaintySum = currentSum + uncertaintyValue;
+      metrics._uncertaintyCount = currentCount + 1;
+      metrics.averageUncertainty = metrics._uncertaintySum / metrics._uncertaintyCount;
     }
 
     // Update dependency depth

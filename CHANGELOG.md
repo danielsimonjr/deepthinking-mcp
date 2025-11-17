@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.2] - 2025-11-16
+
+### Performance
+- **Incremental Metrics Calculation**: Optimized session metrics to use O(1) incremental calculation instead of O(n)
+  - Average uncertainty now calculated using running totals
+  - Significantly faster for large sessions (>500 thoughts)
+  - Benchmark shows 1.19x ratio between 500 and 1000 thoughts (true O(1) behavior)
+
+### Testing
+- Added comprehensive performance benchmark suite
+  - Correctness verification for incremental calculations
+  - Complexity analysis to verify O(1) behavior
+  - 159 tests passing (including 2 new benchmark tests)
+
+### Code Quality
+- Removed legacy core-old.ts file
+- Added internal fields to SessionMetrics interface for performance tracking
+
+### Technical Details
+- Package size: 74.74 KB
+- All tests passing
+
+---
+
+
 ## [2.5.1] - 2025-11-16
 
 ### Fixed
