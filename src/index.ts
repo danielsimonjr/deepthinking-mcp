@@ -44,6 +44,7 @@ import {
   ModeRecommender,
 } from './types/index.js';
 import { VisualExporter, type VisualFormat } from './export/visual.js';
+import { toExtendedThoughtType } from './utils/type-guards.js';
 
 const server = new Server(
   {
@@ -345,7 +346,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
       return {
         ...baseThought,
         mode: ThinkingMode.MATHEMATICS,
-        thoughtType: input.thoughtType as any,
+        thoughtType: toExtendedThoughtType(input.thoughtType, 'model'),
         mathematicalModel: input.mathematicalModel,
         proofStrategy: input.proofStrategy,
         dependencies: input.dependencies || [],
@@ -357,7 +358,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
       return {
         ...baseThought,
         mode: ThinkingMode.PHYSICS,
-        thoughtType: input.thoughtType as any,
+        thoughtType: toExtendedThoughtType(input.thoughtType, 'model'),
         tensorProperties: input.tensorProperties,
         physicalInterpretation: input.physicalInterpretation,
         dependencies: input.dependencies || [],
@@ -369,7 +370,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
       return {
         ...baseThought,
         mode: ThinkingMode.ABDUCTIVE,
-        thoughtType: input.thoughtType as any,
+        thoughtType: toExtendedThoughtType(input.thoughtType, 'problem_definition'),
         observations: input.observations || [],
         hypotheses: input.hypotheses || [],
         evaluationCriteria: input.evaluationCriteria,
@@ -381,7 +382,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
       return {
         ...baseThought,
         mode: ThinkingMode.CAUSAL,
-        thoughtType: input.thoughtType as any,
+        thoughtType: toExtendedThoughtType(input.thoughtType, 'problem_definition'),
         causalGraph: input.causalGraph,
         interventions: input.interventions || [],
         mechanisms: input.mechanisms || [],
@@ -392,7 +393,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
       return {
         ...baseThought,
         mode: ThinkingMode.BAYESIAN,
-        thoughtType: input.thoughtType as any,
+        thoughtType: toExtendedThoughtType(input.thoughtType, 'problem_definition'),
         hypothesis: input.hypothesis,
         prior: input.prior,
         likelihood: input.likelihood,
@@ -405,7 +406,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
       return {
         ...baseThought,
         mode: ThinkingMode.COUNTERFACTUAL,
-        thoughtType: input.thoughtType as any,
+        thoughtType: toExtendedThoughtType(input.thoughtType, 'problem_definition'),
         actual: input.actual,
         counterfactuals: input.counterfactuals || [],
         comparison: input.comparison,
@@ -417,7 +418,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
       return {
         ...baseThought,
         mode: ThinkingMode.ANALOGICAL,
-        thoughtType: input.thoughtType as any,
+        thoughtType: toExtendedThoughtType(input.thoughtType, 'analogy'),
         sourceDomain: input.sourceDomain,
         targetDomain: input.targetDomain,
         mapping: input.mapping || [],
@@ -431,19 +432,19 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
       return {
         ...baseThought,
         mode: ThinkingMode.TEMPORAL,
-        thoughtType: input.thoughtType as any,
+        thoughtType: input.thoughtType || 'event_definition',
         timeline: input.timeline,
         events: input.events || [],
         intervals: input.intervals || [],
         constraints: input.constraints || [],
         relations: input.relations || [],
-      } as TemporalThought;
+      } as unknown as TemporalThought;
 
     case 'gametheory':
       return {
         ...baseThought,
         mode: ThinkingMode.GAMETHEORY,
-        thoughtType: input.thoughtType as any,
+        thoughtType: input.thoughtType || 'game_definition',
         game: input.game,
         players: input.players || [],
         strategies: input.strategies || [],
@@ -451,13 +452,13 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         nashEquilibria: input.nashEquilibria || [],
         dominantStrategies: input.dominantStrategies || [],
         gameTree: input.gameTree,
-      } as GameTheoryThought;
+      } as unknown as GameTheoryThought;
 
     case 'evidential':
       return {
         ...baseThought,
         mode: ThinkingMode.EVIDENTIAL,
-        thoughtType: input.thoughtType as any,
+        thoughtType: input.thoughtType || 'hypothesis_definition',
         frameOfDiscernment: input.frameOfDiscernment,
         hypotheses: input.hypotheses || [],
         evidence: input.evidence || [],
@@ -465,14 +466,14 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         combinedBelief: input.combinedBelief,
         plausibility: input.plausibility,
         decisions: input.decisions || [],
-      } as EvidentialThought;
+      } as unknown as EvidentialThought;
 
     case 'hybrid':
     default:
       return {
         ...baseThought,
         mode: ThinkingMode.HYBRID,
-        thoughtType: input.thoughtType as any,
+        thoughtType: toExtendedThoughtType(input.thoughtType, 'synthesis'),
         stage: input.stage as ShannonStage,
         uncertainty: input.uncertainty,
         dependencies: input.dependencies,
@@ -480,9 +481,9 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         mathematicalModel: input.mathematicalModel,
         tensorProperties: input.tensorProperties,
         physicalInterpretation: input.physicalInterpretation,
-        primaryMode: input.mode as any,
+        primaryMode: (input.mode || ThinkingMode.HYBRID) as any,
         secondaryFeatures: [],
-      } as HybridThought;
+      } as unknown as HybridThought;
   }
 }
 

@@ -456,6 +456,10 @@ export class SessionManager {
     // Update total thoughts
     metrics.totalThoughts = session.thoughts.length;
 
+    // Update thoughtsByType incrementally (O(1) instead of recalculating)
+    const thoughtType = thought.type || 'unknown';
+    metrics.thoughtsByType[thoughtType] = (metrics.thoughtsByType[thoughtType] || 0) + 1;
+
     // Update revision count
     if (thought.isRevision) {
       metrics.revisionCount++;
