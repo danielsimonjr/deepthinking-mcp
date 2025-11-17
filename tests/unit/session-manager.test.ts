@@ -182,9 +182,10 @@ describe('SessionManager', () => {
     });
 
     it('should throw error for non-existent session', async () => {
+      const nonExistentId = '00000000-0000-4000-8000-000000000000';
       const thought = {
         id: 'thought-1',
-        sessionId: 'non-existent',
+        sessionId: nonExistentId,
         mode: ThinkingMode.SEQUENTIAL,
         thoughtNumber: 1,
         totalThoughts: 3,
@@ -193,8 +194,8 @@ describe('SessionManager', () => {
         nextThoughtNeeded: true,
       };
 
-      await expect(manager.addThought('non-existent', thought as any))
-        .rejects.toThrow('Session non-existent not found');
+      await expect(manager.addThought(nonExistentId, thought as any))
+        .rejects.toThrow(`Session not found: ${nonExistentId}`);
     });
   });
 
@@ -213,8 +214,9 @@ describe('SessionManager', () => {
     });
 
     it('should throw error for non-existent session', async () => {
-      await expect(manager.switchMode('non-existent', ThinkingMode.SHANNON))
-        .rejects.toThrow('Session non-existent not found');
+      const nonExistentId = '00000000-0000-4000-8000-000000000000';
+      await expect(manager.switchMode(nonExistentId, ThinkingMode.SHANNON))
+        .rejects.toThrow(`Session not found: ${nonExistentId}`);
     });
   });
 
