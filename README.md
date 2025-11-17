@@ -1,10 +1,10 @@
-# DeepThinking MCP v2.4
+# DeepThinking MCP v2.5
 
-A comprehensive Model Context Protocol (MCP) server featuring **13 advanced reasoning modes** with intelligent mode recommendation for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **13 advanced reasoning modes** with intelligent mode recommendation and visual export capabilities for complex problem-solving, analysis, and decision-making.
 
 ## Overview
 
-DeepThinking MCP v2.4 provides a complete toolkit for structured reasoning with 13 specialized modes and an intelligent recommendation system:
+DeepThinking MCP v2.5 provides a complete toolkit for structured reasoning with 13 specialized modes, an intelligent recommendation system, and powerful visual export capabilities:
 
 ### Core Modes
 - **Sequential**: Iterative refinement with revision capabilities
@@ -165,6 +165,94 @@ For simple cases, use problem-type keywords:
 - `causality` → Causal mode
 - `probability` → Bayesian mode
 - `what-if` → Counterfactual mode
+
+### Visual Exports (v2.5)
+
+Export your reasoning sessions as visual diagrams in multiple formats for presentation, documentation, and analysis:
+
+#### Supported Formats
+- **Mermaid**: Flowcharts, Gantt charts, and graphs (compatible with GitHub, Markdown renderers, and documentation tools)
+- **DOT**: Graphviz format for professional graph visualization and publication-quality diagrams
+- **ASCII**: Plain text diagrams for terminal output, logs, and text-based documentation
+
+#### Supported Modes
+- **Causal Mode**: Export causal graphs showing cause-effect relationships with node types (causes, effects, mediators, confounders) and edge strengths
+- **Temporal Mode**: Export timelines as Gantt charts showing events, intervals, and temporal relationships
+- **Game Theory Mode**: Export game trees with strategies, decision nodes, and payoffs
+- **Bayesian Mode**: Export Bayesian networks showing prior/posterior relationships and evidence flow
+
+#### Visual Export Examples
+
+**Causal Graph to Mermaid:**
+```json
+{
+  "action": "export",
+  "sessionId": "session-id",
+  "exportFormat": "mermaid"
+}
+```
+
+Returns a Mermaid diagram:
+```mermaid
+graph TB
+  marketing([Marketing Budget])
+  awareness[Brand Awareness]
+  revenue[[Revenue]]
+
+  marketing --> |0.80| awareness
+  awareness --> |0.90| revenue
+
+  style marketing fill:#a8d5ff
+  style revenue fill:#ffb3b3
+```
+
+**Temporal Timeline to ASCII:**
+```json
+{
+  "action": "export",
+  "sessionId": "session-id",
+  "exportFormat": "ascii"
+}
+```
+
+Returns a text timeline:
+```
+Timeline: Project Timeline (days)
+
+t=   0 ⦿ Project Start
+       Kickoff meeting
+
+t=   5 ━ Development (duration: 10 days)
+       Code implementation
+
+t=  20 ⦿ Launch
+       Product release
+```
+
+**Game Tree to DOT:**
+```json
+{
+  "action": "export",
+  "sessionId": "session-id",
+  "exportFormat": "dot"
+}
+```
+
+Returns Graphviz DOT format for rendering with `dot` or graph visualization tools.
+
+#### Color Schemes
+Visual exports support multiple color schemes:
+- **default**: Vibrant colors for causes (blue), effects (red), mediators (yellow)
+- **pastel**: Soft, pastel colors for presentations
+- **monochrome**: No colors for print or accessibility
+
+#### Integration
+Visual exports work seamlessly with:
+- GitHub Markdown (Mermaid diagrams render automatically)
+- Documentation generators (MkDocs, Docusaurus, etc.)
+- Graphviz tools (`dot`, `neato`, `fdp` for DOT format)
+- Terminal output (ASCII format)
+- Jupyter notebooks (via Mermaid magic)
 
 
 ## Tool Parameters
@@ -562,9 +650,13 @@ deepthinking-mcp/
 - ✅ Comprehensive test suite (77 tests)
 - ✅ Enhanced type safety
 
-### Phase 3 (Future)
-- [ ] Export to LaTeX/Jupyter
-- [ ] Visualization (Mermaid diagrams for causal graphs)
+### Phase 3 (In Progress)
+- ✅ Temporal reasoning mode (v2.1)
+- ✅ Game theory mode (v2.2)
+- ✅ Evidential reasoning mode (v2.3)
+- ✅ Mode recommendation system (v2.4)
+- ✅ Visual exports - Mermaid, DOT, ASCII (v2.5)
+- ✅ Export to LaTeX/Jupyter/HTML (v2.5)
 - [ ] Math-MCP integration
 - [ ] Persistence layer
 - [ ] Collaborative thinking sessions

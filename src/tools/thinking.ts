@@ -399,7 +399,7 @@ export const ThinkingToolSchema = z.object({
     })),
   })).optional(),
   action: z.enum(['add_thought', 'summarize', 'export', 'switch_mode', 'get_session', 'recommend_mode']).default('add_thought'),
-  exportFormat: z.enum(['markdown', 'latex', 'json', 'html', 'jupyter']).optional(),
+  exportFormat: z.enum(['markdown', 'latex', 'json', 'html', 'jupyter', 'mermaid', 'dot', 'ascii']).optional(),
   newMode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential']).optional(),
   // Mode recommendation parameters (v2.4)
   problemType: z.string().optional(),
@@ -723,7 +723,7 @@ Choose the mode that best fits your problem type, or use recommend_mode to get i
       },
       exportFormat: {
         type: "string",
-        enum: ["markdown", "latex", "json", "html", "jupyter"],
+        enum: ["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"],
         description: "Export format"
       },
       newMode: {

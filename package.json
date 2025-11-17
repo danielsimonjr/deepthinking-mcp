@@ -1,7 +1,7 @@
 {
   "name": "deepthinking-mcp",
-  "version": "2.4.2",
-  "description": "Comprehensive MCP server with 10 advanced reasoning modes: Sequential, Shannon, Mathematics, Physics, Hybrid, Abductive, Causal, Bayesian, Counterfactual, and Analogical reasoning",
+  "version": "2.5.0",
+  "description": "Comprehensive MCP server with 13 advanced reasoning modes and visual export capabilities (Mermaid, DOT, ASCII) for complex problem-solving and analysis",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -61,7 +61,14 @@
     "analogical-reasoning",
     "causal-graphs",
     "hypothesis-generation",
-    "probabilistic-reasoning"
+    "probabilistic-reasoning",
+    "temporal-reasoning",
+    "game-theory",
+    "evidential-reasoning",
+    "visual-exports",
+    "mermaid-diagrams",
+    "graphviz",
+    "ascii-diagrams"
   ],
   "repository": {
     "type": "git",

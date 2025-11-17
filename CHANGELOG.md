@@ -4,6 +4,119 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.5.0] - 2025-11-16
+
+### Added
+
+#### New Feature: Visual Export Formats (Phase 3E)
+- **Visual Diagram Exports**: Export reasoning sessions as visual diagrams in multiple formats
+  - `VisualExporter` class with 4 main export methods
+  - Support for Mermaid, DOT (Graphviz), and ASCII formats
+  - Visual exports for causal graphs, temporal timelines, game trees, and Bayesian networks
+
+#### Export Formats
+- **Mermaid Format**:
+  - Flowcharts for causal graphs with color-coded nodes
+  - Gantt charts for temporal timelines
+  - Decision trees for game theory analysis
+  - Network diagrams for Bayesian reasoning
+  - Compatible with GitHub, documentation generators, and Markdown renderers
+- **DOT Format**:
+  - Graphviz-compatible output for professional graph visualization
+  - Customizable node shapes based on semantic types
+  - Edge labels showing metrics (strength, probabilities)
+  - Suitable for publications and technical documentation
+- **ASCII Format**:
+  - Plain text diagrams for terminal output
+  - Human-readable timeline representations
+  - Compatible with logs and text-based documentation
+  - Accessibility-friendly format
+
+#### Supported Visual Export Modes
+- **Causal Mode**: Export causal graphs with node types (causes, effects, mediators, confounders)
+  - Node shapes vary by type: stadium for causes, double boxes for effects, rectangles for mediators, diamonds for confounders
+  - Edge labels show causal strength (0-1 scale)
+  - Color coding by node type (blue for causes, red for effects, yellow for mediators)
+- **Temporal Mode**: Export timelines as Gantt charts or ASCII timelines
+  - Instant events shown as milestones (⦿)
+  - Interval events shown with duration bars (━)
+  - Time units configurable (milliseconds, seconds, minutes, hours, days, months, years)
+- **Game Theory Mode**: Export game trees with strategies and payoffs
+  - Decision nodes, chance nodes, and terminal nodes
+  - Action labels on edges
+  - Payoff values at terminal nodes
+- **Bayesian Mode**: Export Bayesian networks showing probability flow
+  - Prior, evidence, hypothesis, and posterior nodes
+  - Probability values displayed
+  - Bayes factor shown
+  - Evidence flow visualization
+
+#### Visual Export Options
+- **Color Schemes**:
+  - `default`: Vibrant colors (blue causes, red effects, yellow mediators)
+  - `pastel`: Soft pastel colors for presentations
+  - `monochrome`: No colors for print or accessibility
+- **Configurable Options**:
+  - `includeLabels`: Show/hide node and edge labels
+  - `includeMetrics`: Display strength values, probabilities, and other metrics
+
+#### Implementation Components
+- `src/export/visual.ts`: Complete VisualExporter class (600+ lines)
+  - `exportCausalGraph()`: 3 format implementations
+  - `exportTemporalTimeline()`: 3 format implementations
+  - `exportGameTree()`: 3 format implementations
+  - `exportBayesianNetwork()`: 3 format implementations
+  - 12 private format-specific methods (e.g., `causalGraphToMermaid()`, `gameTreeToDOT()`)
+  - Node sanitization for diagram compatibility
+  - Color scheme management
+  - Shape mapping by node type
+- `src/index.ts`: Export action integration
+  - Extended `handleExport()` to route visual formats
+  - Format detection for mermaid/dot/ascii
+  - Mode-based routing to appropriate visual exporter
+  - Fallback to standard exports (json, markdown, latex, html, jupyter)
+- `src/tools/thinking.ts`: Schema updates
+  - Extended `exportFormat` enum: added 'mermaid', 'dot', 'ascii'
+  - Updated Zod schema and JSON schema
+
+#### Testing
+- `tests/unit/visual.test.ts`: 13 comprehensive tests
+  - Causal Graph Exports (3 tests): Mermaid, DOT, ASCII format validation
+  - Temporal Timeline Exports (3 tests): Gantt chart, ASCII, DOT format validation
+  - Game Theory Exports (2 tests): Mermaid and ASCII game tree rendering
+  - Bayesian Network Exports (2 tests): Mermaid and ASCII network diagrams
+  - Export Options (3 tests): color schemes, metrics inclusion, error handling
+- **Total test count: 157 tests (145 → 157)**
+
+#### Documentation
+- Updated README.md to v2.5
+- Added "Visual Exports (v2.5)" feature section with:
+  - Supported formats and modes documentation
+  - Visual export examples (Mermaid causal graph, ASCII timeline, DOT game tree)
+  - Color scheme options
+  - Integration guidance (GitHub, Graphviz, documentation generators)
+- Updated roadmap to show Phase 3E completion
+- Added visual export capabilities to overview
+
+### Changed
+- Extended export action to support 8 total formats (json, markdown, latex, html, jupyter, mermaid, dot, ascii)
+- Package size: 55.78 KB → 74.50 KB (33% increase due to visual export implementations)
+- Refactored `handleExport()` function to route visual and standard exports separately
+
+### Fixed
+- Game tree action labels: Fixed to use child node's action property instead of parent node's
+  - Applied fix to both `gameTreeToMermaid()` and `gameTreeToDOT()` methods
+  - Ensures action labels appear correctly on game tree edges
+
+### Technical Details
+- Lines of code: ~600 new lines for visual export system
+- Test coverage: 13 new tests, all passing
+- API: 4 public export methods on VisualExporter class
+- Type safety: Full TypeScript coverage with strict typing
+- Format support: 3 visual formats × 4 reasoning modes = 12 export combinations
+
+
 ## [2.4.0] - 2025-11-16
 
 ### Added
@@ -409,6 +522,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - npm package publication
 - GitHub repository setup
 
+[2.5.0]: https://github.com/danielsimonjr/deepthinking-mcp/compare/v2.4.0...v2.5.0
+[2.4.0]: https://github.com/danielsimonjr/deepthinking-mcp/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/danielsimonjr/deepthinking-mcp/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/danielsimonjr/deepthinking-mcp/compare/v2.1.4...v2.2.0
 [2.1.4]: https://github.com/danielsimonjr/deepthinking-mcp/compare/v2.0.1...v2.1.4

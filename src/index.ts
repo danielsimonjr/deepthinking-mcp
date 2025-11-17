@@ -33,6 +33,7 @@ import {
   EvidentialThought,
   ModeRecommender,
 } from './types/index.js';
+import { VisualExporter, type VisualFormat } from './export/visual.js';
 
 const server = new Server(
   {
@@ -151,7 +152,59 @@ async function handleExport(input: ThinkingToolInput) {
     throw new Error(`Session ${input.sessionId} not found`);
   }
 
-  // Convert Map to object for JSON serialization
+  const format = input.exportFormat || 'json';
+
+  // For visual formats, check if applicable and use VisualExporter
+  if (format === 'mermaid' || format === 'dot' || format === 'ascii') {
+    const visualExporter = new VisualExporter();
+    const lastThought = session.thoughts[session.thoughts.length - 1];
+
+    if (!lastThought) {
+      throw new Error('No thoughts in session to export');
+    }
+
+    let exported: string;
+
+    // Determine which visual export method to use based on mode
+    if (lastThought.mode === 'causal' && 'causalGraph' in lastThought) {
+      exported = visualExporter.exportCausalGraph(lastThought as CausalThought, {
+        format: format as VisualFormat,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    } else if (lastThought.mode === 'temporal' && 'timeline' in lastThought) {
+      exported = visualExporter.exportTemporalTimeline(lastThought as TemporalThought, {
+        format: format as VisualFormat,
+        includeLabels: true,
+      });
+    } else if (lastThought.mode === 'gametheory' && 'game' in lastThought) {
+      exported = visualExporter.exportGameTree(lastThought as GameTheoryThought, {
+        format: format as VisualFormat,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    } else if (lastThought.mode === 'bayesian' && 'hypothesis' in lastThought) {
+      exported = visualExporter.exportBayesianNetwork(lastThought as BayesianThought, {
+        format: format as VisualFormat,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    } else {
+      throw new Error(`Visual export not supported for mode: ${lastThought.mode}`);
+    }
+
+    return {
+      content: [{
+        type: 'text' as const,
+        text: exported,
+      }],
+    };
+  }
+
+  // Standard exports (json, markdown, latex, html, jupyter)
   const sessionWithCustomMetrics = {
     ...session,
     metrics: {
@@ -160,17 +213,36 @@ async function handleExport(input: ThinkingToolInput) {
     },
   };
 
-  const exported = JSON.stringify(sessionWithCustomMetrics, null, 2);
+  let exported: string;
+
+  switch (format) {
+    case 'json':
+      exported = JSON.stringify(sessionWithCustomMetrics, null, 2);
+      break;
+    case 'markdown':
+      exported = exportToMarkdown(sessionWithCustomMetrics);
+      break;
+    case 'latex':
+      exported = exportToLatex(sessionWithCustomMetrics);
+      break;
+    case 'html':
+      exported = exportToHTML(sessionWithCustomMetrics);
+      break;
+    case 'jupyter':
+      exported = exportToJupyter(sessionWithCustomMetrics);
+      break;
+    default:
+      exported = JSON.stringify(sessionWithCustomMetrics, null, 2);
+  }
 
   return {
-    content: [
-      {
-        type: 'text',
-        text: exported,
-      },
-    ],
+    content: [{
+      type: 'text' as const,
+      text: exported,
+    }],
   };
 }
+
 
 async function handleSwitchMode(input: ThinkingToolInput) {
   if (!input.sessionId || !input.newMode) {
@@ -485,6 +557,140 @@ async function handleRecommendMode(input: ThinkingToolInput) {
     }],
     isError: true,
   };
+}
+
+
+// Helper export functions
+function exportToMarkdown(session: any): string {
+  let md = `# Thinking Session: ${session.id}
+
+`;
+  md += `**Mode**: ${session.mode}
+`;
+  md += `**Created**: ${session.createdAt}
+`;
+  md += `**Status**: ${session.status}
+
+`;
+  md += `## Thoughts
+
+`;
+
+  for (const thought of session.thoughts) {
+    md += `### Thought ${thought.thoughtNumber}/${session.thoughts.length}
+
+`;
+    md += `${thought.content}
+
+`;
+  }
+
+  return md;
+}
+
+function exportToLatex(session: any): string {
+  let latex = `\documentclass{article}
+`;
+  latex += `\title{Thinking Session: ${session.id}}
+`;
+  latex += `\begin{document}
+`;
+  latex += `\maketitle
+
+`;
+  latex += `\section{Session Details}
+`;
+  latex += `Mode: ${session.mode}\\
+`;
+  latex += `Status: ${session.status}\\
+
+`;
+  latex += `\section{Thoughts}
+`;
+
+  for (const thought of session.thoughts) {
+    latex += `\subsection{Thought ${thought.thoughtNumber}}
+`;
+    latex += `${thought.content}
+
+`;
+  }
+
+  latex += `\end{document}
+`;
+  return latex;
+}
+
+function exportToHTML(session: any): string {
+  let html = `<!DOCTYPE html>
+<html>
+<head>
+`;
+  html += `  <title>Thinking Session: ${session.id}</title>
+`;
+  html += `  <style>body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; }</style>
+`;
+  html += `</head>
+<body>
+`;
+  html += `  <h1>Thinking Session: ${session.id}</h1>
+`;
+  html += `  <p><strong>Mode:</strong> ${session.mode}</p>
+`;
+  html += `  <p><strong>Status:</strong> ${session.status}</p>
+`;
+  html += `  <h2>Thoughts</h2>
+`;
+
+  for (const thought of session.thoughts) {
+    html += `  <div>
+`;
+    html += `    <h3>Thought ${thought.thoughtNumber}/${session.thoughts.length}</h3>
+`;
+    html += `    <p>${thought.content}</p>
+`;
+    html += `  </div>
+`;
+  }
+
+  html += `</body>
+</html>
+`;
+  return html;
+}
+
+function exportToJupyter(session: any): string {
+  const notebook = {
+    cells: [] as any[],
+    metadata: {},
+    nbformat: 4,
+    nbformat_minor: 2,
+  };
+
+  // Add title cell
+  notebook.cells.push({
+    cell_type: 'markdown',
+    metadata: {},
+    source: [`# Thinking Session: ${session.id}
+`, `
+`, `**Mode**: ${session.mode}  
+`, `**Status**: ${session.status}
+`],
+  });
+
+  // Add thought cells
+  for (const thought of session.thoughts) {
+    notebook.cells.push({
+      cell_type: 'markdown',
+      metadata: {},
+      source: [`## Thought ${thought.thoughtNumber}/${session.thoughts.length}
+`, `
+`, `${thought.content}
+`],
+    });
+  }
+
+  return JSON.stringify(notebook, null, 2);
 }
 
 async function main() {
