@@ -1,0 +1,75 @@
+deepthinking (deepthinking-mcp)                                                                                                                           │
+│                                                                                                                                                           │
+│ Tool name: deepthinking                                                                                                                                   │
+│ Full name: mcp__deepthinking-mcp__deepthinking                                                                                                            │
+│                                                                                                                                                           │
+│ Description:                                                                                                                                              │
+│ Advanced deep thinking tool supporting 13 reasoning modes:                                                                                                │
+│                                                                                                                                                           │
+│ Core Modes:                                                                                                                                               │
+│ - sequential: Iterative refinement and exploration                                                                                                        │
+│ - shannon: Systematic 5-stage problem-solving                                                                                                             │
+│ - mathematics: Theorem proving and symbolic reasoning                                                                                                     │
+│ - physics: Tensor mathematics and field theory                                                                                                            │
+│ - hybrid: Intelligently combines multiple approaches                                                                                                      │
+│                                                                                                                                                           │
+│ Advanced Modes (v2.0):                                                                                                                                    │
+│ - abductive: Inference to the best explanation, hypothesis generation                                                                                     │
+│ - causal: Cause-effect analysis with causal graphs                                                                                                        │
+│ - bayesian: Probabilistic reasoning with evidence updates                                                                                                 │
+│ - counterfactual: What-if scenario analysis                                                                                                               │
+│ - analogical: Cross-domain pattern matching and insights                                                                                                  │
+│                                                                                                                                                           │
+│ Phase 3 Modes (v2.1+):                                                                                                                                    │
+│ - temporal: Event timelines, temporal constraints, causal relations over time                                                                             │
+│ - gametheory: Nash equilibria, strategic analysis, payoff matrices                                                                                        │
+│ - evidential: Dempster-Shafer theory, belief functions, evidence combination                                                                              │
+│                                                                                                                                                           │
+│ Actions:                                                                                                                                                  │
+│ - add_thought: Add a new thought to the session (default)                                                                                                 │
+│ - summarize: Generate a summary of the session                                                                                                            │
+│ - export: Export session in various formats (markdown, latex, json, html, jupyter)                                                                        │
+│ - switch_mode: Change reasoning mode mid-session                                                                                                          │
+│ - get_session: Retrieve session information                                                                                                               │
+│ - recommend_mode: Get intelligent mode recommendations based on problem characteristics                                                                   │
+│                                                                                                                                                           │
+│ Mode Recommendations (v2.4):                                                                                                                              │
+│ Use action 'recommend_mode' with either:                                                                                                                  │
+│   • problemType: Quick recommendation (e.g., 'debugging', 'proof', 'timeline', 'strategy')                                                                │
+│   • problemCharacteristics: Detailed analysis with 10 dimensions (domain, complexity, uncertainty, etc.)                                                  │
+│   • includeCombinations: Set to true for synergistic mode combination suggestions                                                                         │
+│                                                                                                                                                           │
+│ Choose the mode that best fits your problem type, or use recommend_mode to get intelligent suggestions.                                                   │
+│                                                                                                                                                           │
+│ Parameters:                                                                                                                                               │
+│   • sessionId: string - Session ID (creates new if omitted)                                                                                               │
+│   • mode: string - Thinking mode to use                                                                                                                   │
+│   • thought (required): string - The thought content                                                                                                      │
+│   • thoughtNumber (required): integer - Position in sequence                                                                                              │
+│   • totalThoughts (required): integer - Estimated total thoughts                                                                                          │
+│   • nextThoughtNeeded (required): boolean - Should thinking continue?                                                                                     │
+│   • isRevision: boolean - Whether this revises previous thinking                                                                                          │
+│   • revisesThought: string - Which thought is being reconsidered                                                                                          │
+│   • revisionReason: string - Reason for revision                                                                                                          │
+│   • branchFrom: string - Branching point thought                                                                                                          │
+│   • branchId: string - Branch identifier                                                                                                                  │
+│   • stage: string - Shannon methodology stage                                                                                                             │
+│   • uncertainty: number - Uncertainty level (0-1)                                                                                                         │
+│   • dependencies: array - Dependencies on other thoughts                                                                                                  │
+│   • assumptions: array - Assumptions made                                                                                                                 │
+│   • thoughtType: string - Type of mathematical thought                                                                                                    │
+│   • mathematicalModel: object                                                                                                                             │
+│   • proofStrategy: object                                                                                                                                 │
+│   • tensorProperties: object                                                                                                                              │
+│   • physicalInterpretation: object                                                                                                                        │
+│   • timeline: object - Timeline structure for temporal reasoning                                                                                          │
+│   • events: array - Temporal events                                                                                                                       │
+│   • intervals: array - Time intervals with Allen's algebra relationships                                                                                  │
+│   • constraints: array - Temporal constraints using Allen's interval algebra                                                                              │
+│   • relations: array - Temporal causal/enabling relations                                                                                                 │
+│   • action: string - Action to perform                                                                                                                    │
+│   • exportFormat: string - Export format                                                                                                                  │
+│   • newMode: string - New mode for switch_mode action                                                                                                     │
+│   • problemType: string - Simple problem type for quick recommendations (e.g., 'debugging', 'proof', 'timeline')                                          │
+│   • problemCharacteristics: object - Detailed problem characteristics for comprehensive recommendations                                                   │
+│   • includeCombinations: boolean - Whether to include mode combination suggestions

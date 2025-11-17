@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] - 2025-11-16
+
+### Fixed
+- **Server Version Sync**: Server metadata now correctly displays version from package.json instead of hardcoded '1.0.0'
+  - Added dynamic import of package.json version
+  - Server name also synced with package.json
+- **SessionManager Syntax Error**: Fixed missing closing braces in updateMetrics() method (lines 267-314)
+  - Added missing closing brace for temporal block (after line 266)
+  - Added missing closing brace for game theory block (after line 289)
+  - Removed two extra closing braces (lines 315-316)
+
+### Technical Details
+- No functional changes to features
+- Critical bug fixes only
+- All 157 tests passing
+- Package size: 74.67 KB
+
+---
+
 ## [2.5.0] - 2025-11-16
 
 ### Added

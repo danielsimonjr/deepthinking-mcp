@@ -263,6 +263,7 @@ export class SessionManager {
       if (thought.intervals) {
         metrics.customMetrics.set('timeIntervals', thought.intervals.length);
       }
+    }
 
     // Game theory-specific metrics (Phase 3, v2.2)
     if (isGameTheoryThought(thought)) {
@@ -286,6 +287,7 @@ export class SessionManager {
         metrics.customMetrics.set('gameType', thought.game.type);
         metrics.customMetrics.set('isZeroSum', thought.game.isZeroSum);
       }
+    }
 
     // Evidential-specific metrics (Phase 3, v2.3)
     if (isEvidentialThought(thought)) {
@@ -309,8 +311,6 @@ export class SessionManager {
       if (thought.decisions) {
         metrics.customMetrics.set('decisions', thought.decisions.length);
       }
-    }
-    }
     }
   }
 }

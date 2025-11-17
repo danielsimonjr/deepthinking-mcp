@@ -12,6 +12,16 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { randomUUID } from 'crypto';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+// Import package.json for version sync
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(
+  readFileSync(join(__dirname, '../package.json'), 'utf-8')
+);
 
 import { thinkingTool, ThinkingToolInput, ThinkingToolSchema } from './tools/thinking.js';
 import { SessionManager } from './session/index.js';
@@ -37,8 +47,8 @@ import { VisualExporter, type VisualFormat } from './export/visual.js';
 
 const server = new Server(
   {
-    name: 'deepthinking-mcp',
-    version: '1.0.0',
+    name: packageJson.name,
+    version: packageJson.version,
   },
   {
     capabilities: {
