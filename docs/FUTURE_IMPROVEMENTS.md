@@ -1,13 +1,411 @@
 # DeepThinking MCP - Performance and Quality Improvements
 
-**Document Version**: 1.0
+**Document Version**: 2.0
 **Author**: Code Review Analysis
-**Date**: 2025-11-16
+**Date**: 2025-11-16 (Updated after v2.4.0 release)
 **Status**: Recommendations for Optimization
 
 ## Executive Summary
 
 This document outlines recommended performance optimizations and quality improvements for the DeepThinking MCP codebase. The codebase is well-architected and production-ready, but several opportunities exist to enhance performance, maintainability, and robustness.
+
+**Latest Update**: Added critical findings from v2.4.0 release review, including bugs and missing integrations in the Mode Recommendation System.
+
+---
+
+## 0. CRITICAL ISSUES - v2.4.0 Release Review
+
+### 0.1 Version Number Mismatch (CRITICAL BUG)
+
+**Issue**: Server metadata shows version '1.0.0' but package.json is at '2.4.0'
+
+**Location**: `src/index.ts:36-46`
+```typescript
+const server = new Server(
+  {
+    name: 'deepthinking-mcp',
+    version: '1.0.0', // ❌ Should be '2.4.0'
+  },
+```
+
+**Impact**:
+- User-visible bug causing confusion about server version
+- MCP clients see incorrect version information
+- Debugging difficulties when users report issues
+
+**Fix**: Import version from package.json or use a constant
+```typescript
+import packageJson from '../package.json' assert { type: 'json' };
+
+const server = new Server(
+  {
+    name: packageJson.name,
+    version: packageJson.version,
+  },
+```
+
+**Priority**: 🔴 CRITICAL
+**Effort**: 5 minutes
+**Affected Since**: v2.0.0 (every release since then shows wrong version)
+
+---
+
+### 0.2 Package Description Mismatch
+
+**Issue**: package.json describes "10 advanced reasoning modes" but codebase has 13 modes
+
+**Location**: `package.json:4`
+```json
+"description": "Comprehensive MCP server with 10 advanced reasoning modes..."
+```
+
+**Actual Modes**: Sequential, Shannon, Mathematics, Physics, Hybrid, Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory, Evidential (13 total)
+
+**Fix**: Update description to reflect accurate count
+
+**Priority**: 🟡 Medium
+**Effort**: 2 minutes
+
+---
+
+### 0.3 Mode Recommendation System Not Exposed via MCP (CRITICAL)
+
+**Issue**: v2.4.0 added `ModeRecommender` class but it's not accessible through MCP tools
+
+**Current State**:
+- Class exists in `src/types/modes/recommendations.ts`
+- Three public methods: `recommendModes()`, `recommendCombinations()`, `quickRecommend()`
+- **NOT** exposed in `src/index.ts` tool handlers
+- **NO** MCP action for mode recommendation
+
+**Impact**:
+- Users cannot use the recommendation system via Claude
+- The entire v2.4.0 feature is unusable in production
+- Tests pass but feature is inaccessible
+
+**Recommendations**:
+1. Add new action 'recommend_mode' to thinking tool
+2. Expose ModeRecommender instance in server
+3. Add tool schema for recommendation request
+4. Update README with usage examples
+
+**Priority**: 🔴 CRITICAL (v2.4.0 feature is non-functional)
+**Effort**: 2-3 hours
+**File**: `src/index.ts`
+
+**Proposed Implementation**:
+```typescript
+// In src/index.ts, add:
+import { ModeRecommender } from './types/modes/recommendations.js';
+
+const recommender = new ModeRecommender();
+
+// Add new action handler:
+case 'recommend_mode':
+  return await handleRecommendMode(input);
+
+async function handleRecommendMode(input: ThinkingToolInput) {
+  const characteristics = input.problemCharacteristics;
+  if (!characteristics) {
+    throw new Error('Problem characteristics required for recommendations');
+  }
+
+  const recommendations = recommender.recommendModes(characteristics);
+  const combinations = recommender.recommendCombinations(characteristics);
+
+  return {
+    content: [{
+      type: 'text',
+      text: JSON.stringify({ recommendations, combinations }, null, 2)
+    }]
+  };
+}
+```
+
+---
+
+### 0.4 Mode Recommendation Algorithm Limitations
+
+**Issues Identified in `ModeRecommender` Implementation**:
+
+#### 0.4.1 Hardcoded Scores
+- All scores are static constants (0.70 - 0.95)
+- No dynamic scoring based on characteristic strength
+- Multiple characteristics don't compound scores
+
+**Example Problem**:
+```typescript
+if (characteristics.timeDependent) {
+  score: 0.9, // Always 0.9, regardless of other factors
+}
+```
+
+**Recommendation**:
+- Implement weighted scoring system
+- Combine multiple factors: `baseScore + (factor1 * weight1) + (factor2 * weight2)`
+- Normalize final scores to [0, 1] range
+
+**Priority**: 🟡 Medium
+**Effort**: 4-6 hours
+
+---
+
+#### 0.4.2 Domain Field Is Free-Form String
+
+**Issue**: `domain` field in `ProblemCharacteristics` is `string` instead of enum
+
+**Current**:
+```typescript
+export interface ProblemCharacteristics {
+  domain: string; // Any string allowed
+  ...
+}
+```
+
+**Problems**:
+- Typos cause missed recommendations (e.g., "physcis" vs "physics")
+- No IDE autocomplete
+- Case-sensitive matching (physics vs Physics)
+- No validation
+
+**Recommendation**:
+```typescript
+export type Domain =
+  | 'general'
+  | 'mathematics'
+  | 'physics'
+  | 'engineering'
+  | 'computer-science'
+  | 'biology'
+  | 'chemistry'
+  | 'economics'
+  | 'social-science'
+  | 'medicine'
+  | 'law'
+  | 'other';
+
+export interface ProblemCharacteristics {
+  domain: Domain;
+  ...
+}
+```
+
+**Priority**: 🟡 Medium
+**Effort**: 1 hour
+**File**: `src/types/modes/recommendations.ts:8-19`
+
+---
+
+#### 0.4.3 Missing Hybrid Mode Recommendations
+
+**Issue**: Hybrid mode exists but is never recommended
+
+**Evidence**:
+- `ThinkingMode.HYBRID` is defined in core types
+- Never appears in `recommendModes()` logic
+- No conditions trigger hybrid mode recommendation
+
+**Recommendation**: Add hybrid mode logic or remove it from the system
+
+**Priority**: 🟢 Low
+**Effort**: 30 minutes
+
+---
+
+#### 0.4.4 quickRecommend() Is Too Simplistic
+
+**Issue**: `quickRecommend()` is just a lookup table, doesn't use problem characteristics
+
+**Current Implementation**:
+```typescript
+quickRecommend(problemType: string): ThinkingMode {
+  const typeMap: Record<string, ThinkingMode> = {
+    'debugging': ThinkingMode.ABDUCTIVE,
+    // ... hardcoded mappings
+  };
+  return typeMap[problemType.toLowerCase()] || ThinkingMode.SEQUENTIAL;
+}
+```
+
+**Problems**:
+- Ignores all problem characteristics
+- Case-sensitive despite toLowerCase() on wrong side
+- Limited to predefined keywords
+- No fuzzy matching or synonyms
+
+**Recommendations**:
+- Use problem characteristics for quick recommend
+- Add keyword synonym mapping
+- Implement fuzzy string matching (Levenshtein distance)
+- Return top 3 modes instead of just one
+
+**Priority**: 🟢 Low
+**Effort**: 2 hours
+
+---
+
+#### 0.4.5 No Score Explanation or Provenance
+
+**Issue**: Users don't know WHY a score was assigned
+
+**Current**: Scores are returned but calculation is opaque
+```typescript
+{ mode: 'temporal', score: 0.9, reasoning: "Problem involves..." }
+```
+
+**Missing**:
+- Which characteristics contributed to the score
+- How much each characteristic weighted
+- Confidence intervals on scores
+- Alternative modes that were close
+
+**Recommendation**: Add detailed score breakdown
+```typescript
+export interface ModeRecommendation {
+  mode: ThinkingMode;
+  score: number;
+  confidence: number; // How confident in this score
+  reasoning: string;
+  scoringFactors: ScoringFactor[]; // NEW
+  strengths: string[];
+  limitations: string[];
+  examples: string[];
+}
+
+interface ScoringFactor {
+  characteristic: keyof ProblemCharacteristics;
+  value: any;
+  contribution: number; // How much this added to score
+  weight: number;
+}
+```
+
+**Priority**: 🟡 Medium
+**Effort**: 3-4 hours
+
+---
+
+#### 0.4.6 Duplicate Recommendations Possible
+
+**Issue**: Same mode can be recommended multiple times with different scores
+
+**Example**: A problem that is both `timeDependent=true` and `requiresExplanation=true` will add CAUSAL mode:
+- Once for temporal + explanation (score: 0.86)
+- Potentially multiple times if other conditions match
+
+**Current Code**:
+```typescript
+// Line 47-56: Adds TEMPORAL if timeDependent
+if (characteristics.timeDependent) {
+  recommendations.push({ mode: ThinkingMode.TEMPORAL, score: 0.9, ... });
+}
+
+// Line 95-104: Adds CAUSAL if timeDependent AND requiresExplanation
+if (characteristics.timeDependent && characteristics.requiresExplanation) {
+  recommendations.push({ mode: ThinkingMode.CAUSAL, score: 0.86, ... });
+}
+```
+
+**No Deduplication**: Array can have duplicate modes
+
+**Recommendation**:
+- Deduplicate by mode before returning
+- If duplicate, keep highest score
+- Or combine scores with max/average strategy
+
+**Priority**: 🟡 Medium
+**Effort**: 1 hour
+
+---
+
+#### 0.4.7 No Recommendation History or Learning
+
+**Issue**: System doesn't learn from past recommendations
+
+**Missing Features**:
+- Track which recommendations users selected
+- Learn which combinations work well
+- Adjust scores based on user feedback
+- Persist recommendation history
+
+**Recommendation**: Add recommendation tracking
+```typescript
+export interface RecommendationHistory {
+  id: string;
+  timestamp: Date;
+  characteristics: ProblemCharacteristics;
+  recommendations: ModeRecommendation[];
+  selectedMode?: ThinkingMode;
+  userFeedback?: {
+    rating: number; // 1-5
+    comments?: string;
+  };
+  sessionOutcome?: {
+    completed: boolean;
+    thoughtCount: number;
+    successMetrics: Record<string, number>;
+  };
+}
+```
+
+**Priority**: 🟢 Low (v3.x feature)
+**Effort**: 6-8 hours
+
+---
+
+### 0.5 Testing Gaps for v2.4.0 Features
+
+**Issue**: Tests exist but don't cover all edge cases
+
+**Missing Test Coverage**:
+- ❌ No tests for MCP tool integration (because it doesn't exist)
+- ❌ No tests for duplicate mode handling
+- ❌ No tests for score normalization
+- ❌ No tests for domain case sensitivity
+- ❌ No tests for empty characteristics
+- ❌ No tests for all characteristics set to false (edge case)
+- ❌ No integration tests with actual MCP client
+
+**Recommendation**: Add comprehensive edge case tests
+
+**Priority**: 🟡 Medium
+**Effort**: 4 hours
+**File**: `tests/unit/recommendations.test.ts`
+
+---
+
+### 0.6 Documentation Gaps
+
+**Issues**:
+- README doesn't explain how to use recommendations (because feature isn't accessible)
+- No API documentation for `ModeRecommender`
+- No examples of `ProblemCharacteristics` usage
+- CHANGELOG mentions feature but doesn't note it's not accessible via MCP
+
+**Recommendations**:
+1. Add README section with MCP usage examples (after fixing 0.3)
+2. Document all 10 characteristics with examples
+3. Add decision tree diagram showing recommendation logic
+4. Update CHANGELOG with known limitations
+
+**Priority**: 🟡 Medium
+**Effort**: 2-3 hours
+
+---
+
+## v2.4.0 Quick Wins Summary
+
+| Fix | Impact | Effort | Priority |
+|-----|--------|--------|----------|
+| Fix version number | High | 5 min | 🔴 Critical |
+| Update package description | Low | 2 min | 🟡 Medium |
+| Expose recommender via MCP | Critical | 2-3 hrs | 🔴 Critical |
+| Add domain enum | Medium | 1 hr | 🟡 Medium |
+| Fix duplicate recommendations | Medium | 1 hr | 🟡 Medium |
+| Add edge case tests | Medium | 4 hrs | 🟡 Medium |
+
+**Total Critical Fixes**: 2 items, ~3 hours
+**Total Medium Fixes**: 4 items, ~8 hours
 
 ---
 
