@@ -5,6 +5,64 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2025-11-18
+
+### Session Persistence (Phase 3.5E)
+- **FileSessionStore**: Production-ready file-based session persistence
+  - JSON file storage with metadata indexing for fast listings
+  - Custom serialization for Date and Map objects (full object tree traversal)
+  - Storage statistics with health monitoring (healthy/warning/critical)
+  - Automatic cleanup of old sessions by age
+  - Concurrent operation support
+  - Comprehensive error handling
+
+- **SessionManager Integration**: Optional persistent storage backend
+  - Backward compatible: Works in memory-only mode without storage
+  - Auto-save on session creation, thought addition, and mode switching
+  - Lazy loading: Sessions loaded from storage on-demand
+  - Unified session listing across memory and storage
+  - Automatic persistence to both memory and storage on deletion
+  - Example usage:
+    ```typescript
+    import { FileSessionStore } from './storage/file-store.js';
+    const storage = new FileSessionStore('./sessions');
+    await storage.initialize();
+    const manager = new SessionManager({}, LogLevel.INFO, storage);
+    ```
+
+### Storage Interface
+- **SessionStorage Interface**: Pluggable persistence architecture
+  - CRUD operations: save, load, delete, list, exists
+  - Storage stats: totalSessions, totalThoughts, storageSize, health
+  - Cleanup operations: age-based session removal
+  - Configuration: autoSave, compression, encryption, maxSessions
+  - Supports multiple backends (file, database, cloud - file implemented)
+
+### Testing
+- **FileSessionStore Unit Tests**: 27 comprehensive tests
+  - Initialization and directory management
+  - Save/load/delete operations
+  - Date and Map object preservation
+  - Metadata indexing
+  - Storage statistics and health monitoring
+  - Age-based cleanup
+  - Concurrent operations (saves and reads)
+  - Error handling (corrupted data, pre-initialization)
+- **All Tests Passing**: 190 total tests (163 existing + 27 new)
+
+### Technical Details
+- Custom serialization handles Date→ISO string and Map→array conversions
+- Deep object tree traversal for nested Date/Map objects
+- Metadata cache for O(1) session existence checks
+- Storage health thresholds: 70% warning, 90% critical
+- Atomic file operations with proper error recovery
+- Package size: 98.94 KB (increased from 96.11 KB)
+
+### Breaking Changes
+None - SessionManager constructor signature extended with optional `storage` parameter
+
+---
+
 ## [2.5.6] - 2025-11-18
 
 ### Testing & Quality Assurance (Phase 3.5D)

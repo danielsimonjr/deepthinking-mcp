@@ -20,6 +20,7 @@ import { SessionNotFoundError, InvalidModeError, InputValidationError, ErrorFact
 import { sanitizeString, sanitizeThoughtContent, validateSessionId, MAX_LENGTHS } from '../utils/sanitization.js';
 import { logger, Logger, createLogger, LogLevel } from '../utils/logger.js';
 import { validationCache } from '../validation/cache.js';
+import { SessionStorage } from './storage/interface.js';
 
 /**
  * Default session configuration
@@ -66,24 +67,38 @@ export class SessionManager {
   private activeSessions: Map<string, ThinkingSession>;
   private config: Partial<SessionConfig>;
   private logger: Logger;
+  private storage?: SessionStorage;
 
   /**
    * Creates a new SessionManager instance
    *
    * @param config - Optional default configuration applied to all new sessions
    * @param logLevel - Optional minimum log level (default: INFO)
+   * @param storage - Optional persistent storage backend for sessions
    *
    * @example
    * ```typescript
+   * // Memory-only mode (default)
    * const manager = new SessionManager({
    *   enableAutoSave: true,
    *   maxThoughtsInMemory: 500
    * }, LogLevel.DEBUG);
+   *
+   * // With file-based persistence
+   * import { FileSessionStore } from './storage/file-store.js';
+   * const storage = new FileSessionStore('./sessions');
+   * await storage.initialize();
+   * const manager = new SessionManager({}, LogLevel.INFO, storage);
    * ```
    */
-  constructor(config?: Partial<SessionConfig>, logLevel?: LogLevel) {
+  constructor(
+    config?: Partial<SessionConfig>,
+    logLevel?: LogLevel,
+    storage?: SessionStorage
+  ) {
     this.activeSessions = new Map();
     this.config = config || {};
+    this.storage = storage;
     this.logger = createLogger({
       minLevel: logLevel || LogLevel.INFO,
       enableConsole: true
@@ -156,6 +171,17 @@ export class SessionManager {
 
     this.activeSessions.set(sessionId, session);
 
+    // Auto-save to storage if enabled
+    if (this.storage && session.config.enableAutoSave) {
+      try {
+        await this.storage.saveSession(session);
+        this.logger.debug('Session persisted to storage', { sessionId });
+      } catch (error) {
+        this.logger.error('Failed to persist session', error as Error, { sessionId });
+        // Don't throw - session is still created in memory
+      }
+    }
+
     this.logger.info('Session created', {
       sessionId,
       title,
@@ -170,7 +196,8 @@ export class SessionManager {
   /**
    * Get a session by ID
    *
-   * Retrieves an active session by its unique identifier.
+   * Retrieves a session by its unique identifier. If the session is not in memory
+   * but storage is available, it will attempt to load from storage.
    *
    * @param sessionId - Unique UUID v4 identifier of the session
    * @returns Promise resolving to the session, or null if not found
@@ -185,7 +212,24 @@ export class SessionManager {
    * ```
    */
   async getSession(sessionId: string): Promise<ThinkingSession | null> {
-    return this.activeSessions.get(sessionId) || null;
+    // Check memory first
+    let session = this.activeSessions.get(sessionId);
+
+    // If not in memory and storage is available, try loading from storage
+    if (!session && this.storage) {
+      try {
+        session = await this.storage.loadSession(sessionId);
+        if (session) {
+          // Add to active sessions cache
+          this.activeSessions.set(sessionId, session);
+          this.logger.debug('Session loaded from storage', { sessionId });
+        }
+      } catch (error) {
+        this.logger.error('Failed to load session from storage', error as Error, { sessionId });
+      }
+    }
+
+    return session || null;
   }
 
   /**
@@ -250,6 +294,17 @@ export class SessionManager {
       });
     }
 
+    // Auto-save to storage if enabled
+    if (this.storage && session.config.enableAutoSave) {
+      try {
+        await this.storage.saveSession(session);
+        this.logger.debug('Session persisted after thought added', { sessionId });
+      } catch (error) {
+        this.logger.error('Failed to persist session', error as Error, { sessionId });
+        // Don't throw - thought is still added in memory
+      }
+    }
+
     this.logger.debug('Thought added', {
       sessionId,
       thoughtNumber: thought.thoughtNumber,
@@ -299,6 +354,16 @@ export class SessionManager {
     session.config.modeConfig.mode = newMode;
     session.updatedAt = new Date();
 
+    // Auto-save to storage if enabled
+    if (this.storage && session.config.enableAutoSave) {
+      try {
+        await this.storage.saveSession(session);
+        this.logger.debug('Session persisted after mode switch', { sessionId });
+      } catch (error) {
+        this.logger.error('Failed to persist session', error as Error, { sessionId });
+      }
+    }
+
     this.logger.info('Session mode switched', {
       sessionId,
       oldMode,
@@ -312,9 +377,10 @@ export class SessionManager {
   /**
    * List all active sessions with metadata
    *
-   * Returns summary information for all sessions currently managed
-   * by this SessionManager instance.
+   * Returns summary information for all sessions. If storage is available,
+   * includes both in-memory sessions and persisted sessions.
    *
+   * @param includeStoredSessions - Whether to include sessions from storage (default: true)
    * @returns Promise resolving to array of session metadata
    *
    * @example
@@ -325,8 +391,8 @@ export class SessionManager {
    * });
    * ```
    */
-  async listSessions(): Promise<SessionMetadata[]> {
-    return Array.from(this.activeSessions.values()).map(session => ({
+  async listSessions(includeStoredSessions: boolean = true): Promise<SessionMetadata[]> {
+    const memoryMetadata = Array.from(this.activeSessions.values()).map(session => ({
       id: session.id,
       title: session.title,
       createdAt: session.createdAt,
@@ -335,12 +401,35 @@ export class SessionManager {
       mode: session.mode,
       isComplete: session.isComplete
     }));
+
+    // If no storage or not including stored sessions, return memory sessions only
+    if (!this.storage || !includeStoredSessions) {
+      return memoryMetadata;
+    }
+
+    // Get stored sessions and merge with memory sessions
+    try {
+      const storedMetadata = await this.storage.listSessions();
+      const memoryIds = new Set(memoryMetadata.map(s => s.id));
+
+      // Combine memory sessions with stored sessions (avoiding duplicates)
+      const combined = [
+        ...memoryMetadata,
+        ...storedMetadata.filter(s => !memoryIds.has(s.id))
+      ];
+
+      return combined;
+    } catch (error) {
+      this.logger.error('Failed to list stored sessions', error as Error);
+      return memoryMetadata; // Return memory sessions if storage fails
+    }
   }
 
   /**
    * Delete a session
    *
-   * Removes a session from memory. This operation cannot be undone.
+   * Removes a session from memory and storage (if available).
+   * This operation cannot be undone.
    *
    * @param sessionId - ID of the session to delete
    * @returns Promise that resolves when deletion is complete
@@ -352,16 +441,26 @@ export class SessionManager {
    */
   async deleteSession(sessionId: string): Promise<void> {
     const session = this.activeSessions.get(sessionId);
-    const deleted = this.activeSessions.delete(sessionId);
+    const deletedFromMemory = this.activeSessions.delete(sessionId);
 
-    if (deleted && session) {
+    // Also delete from storage if available
+    if (this.storage) {
+      try {
+        await this.storage.deleteSession(sessionId);
+        this.logger.debug('Session deleted from storage', { sessionId });
+      } catch (error) {
+        this.logger.error('Failed to delete session from storage', error as Error, { sessionId });
+      }
+    }
+
+    if (deletedFromMemory && session) {
       this.logger.info('Session deleted', {
         sessionId,
         title: session.title,
         thoughtCount: session.thoughts.length
       });
     } else {
-      this.logger.warn('Attempted to delete non-existent session', { sessionId });
+      this.logger.warn('Attempted to delete non-existent session from memory', { sessionId });
     }
   }
 
