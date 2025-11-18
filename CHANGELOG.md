@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.1] - 2025-11-18
+
+### CI/CD Pipeline (Phase 3.5F)
+- **GitHub Actions Workflows**: Complete CI/CD automation
+  - **Continuous Integration** (`.github/workflows/ci.yml`):
+    - Multi-platform testing (Ubuntu, Windows, macOS)
+    - Multi-version Node.js support (18.x, 20.x, 22.x)
+    - Automated type checking, linting, and formatting checks
+    - Test execution with coverage upload to Codecov
+    - Build verification and package size monitoring
+    - Parallel job execution for faster feedback
+  - **Automated Publishing** (`.github/workflows/publish.yml`):
+    - Automatic npm publishing on release/tag creation
+    - Pre-publish validation (type check, tests, build)
+    - Package provenance with npm attestations
+    - GitHub Release summary generation
+  - **Code Quality & Security** (`.github/workflows/codeql.yml`):
+    - Weekly CodeQL security scans
+    - Dependency vulnerability auditing
+    - License compliance checking
+  - **Dependabot Auto-merge** (`.github/workflows/dependabot-auto-merge.yml`):
+    - Automatic approval and merge of patch/minor updates
+    - Manual review notifications for major updates
+
+### Dependency Management
+- **Dependabot Configuration** (`.github/dependabot.yml`):
+  - Weekly npm dependency updates (Monday 9:00 AM)
+  - Monthly GitHub Actions version updates
+  - Automatic labeling and reviewer assignment
+  - Semantic commit messages (deps, deps-dev, ci prefixes)
+  - Maximum 10 concurrent pull requests
+
+### Package Scripts
+- Added `format:check` script for CI formatting verification
+- Existing scripts: `lint`, `format`, `typecheck`, `test`, `build`
+
+### Infrastructure
+- Automated quality gates on all pull requests
+- Multi-environment testing matrix (3 OS × 3 Node versions = 9 combinations)
+- Security scanning with automated alerts
+- Dependency management with auto-merge for non-breaking changes
+
+### Breaking Changes
+None - Infrastructure additions only
+
+---
+
 ## [2.6.0] - 2025-11-18
 
 ### Session Persistence (Phase 3.5E)
