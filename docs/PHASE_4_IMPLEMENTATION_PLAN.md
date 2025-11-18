@@ -674,6 +674,486 @@ export class RecommendationEngine {
 
 ---
 
+## Feature 7: Reasoning Taxonomy Integration
+
+### Purpose
+**NEW - Phase 4 Enhancement**: Integrate the comprehensive 110-type reasoning taxonomy into DeepThinking MCP, enabling automatic classification and tagging of thoughts with reasoning types beyond the 13 core modes.
+
+### Components
+
+#### 7.1 Taxonomy Classification System
+**File**: `src/taxonomy/classifier.ts`
+
+```typescript
+export enum ReasoningCategory {
+  FUNDAMENTAL = 'fundamental',
+  LOGICAL_FORMAL = 'logical_formal',
+  MATHEMATICAL_QUANTITATIVE = 'mathematical_quantitative',
+  TEMPORAL_SPATIAL = 'temporal_spatial',
+  CAUSAL_EXPLANATORY = 'causal_explanatory',
+  ANALOGICAL_COMPARATIVE = 'analogical_comparative',
+  ANALYTICAL_CRITICAL = 'analytical_critical',
+  PROBLEM_SOLVING_STRATEGIC = 'problem_solving_strategic',
+  CREATIVE_DIVERGENT = 'creative_divergent',
+  DIALECTICAL_ARGUMENTATIVE = 'dialectical_argumentative',
+  SOCIAL_PRACTICAL = 'social_practical',
+  SPECIALIZED_ADVANCED = 'specialized_advanced',
+  EPISTEMIC_NORMATIVE = 'epistemic_normative',
+  UNCERTAINTY_ADAPTABILITY = 'uncertainty_adaptability',
+  COMBINED_HYBRID = 'combined_hybrid',
+  CONTEXTUAL_SITUATED = 'contextual_situated',
+  EMERGING_SPECIALIZED = 'emerging_specialized',
+  ADDITIONAL_ADVANCED = 'additional_advanced'
+}
+
+export interface ReasoningType {
+  id: string;
+  name: string; // e.g., "Deductive Reasoning"
+  category: ReasoningCategory;
+  definition: string;
+  relation: string; // How it relates to other forms
+  examples: string[];
+  notes: string;
+}
+
+export interface TaxonomyClassification {
+  primaryType: ReasoningType;
+  secondaryTypes: ReasoningType[];
+  confidence: number;
+  reasoning: string;
+  applicableCategories: ReasoningCategory[];
+}
+
+export class TaxonomyClassifier {
+  private reasoningTypes: Map<string, ReasoningType>;
+
+  constructor() {
+    this.initializeTaxonomy();
+  }
+
+  // Classify a thought into reasoning types
+  async classify(thought: Thought): Promise<TaxonomyClassification>;
+
+  // Get all reasoning types in a category
+  getTypesByCategory(category: ReasoningCategory): ReasoningType[];
+
+  // Find reasoning types by characteristics
+  findTypes(query: ReasoningTypeQuery): ReasoningType[];
+
+  // Analyze which fundamental forms are being used
+  detectFundamentalForms(thought: Thought): {
+    deductive: number;
+    inductive: number;
+    abductive: number;
+  };
+}
+```
+
+#### 7.2 Enhanced Thought Attributes
+**File**: `src/types/taxonomy.ts`
+
+```typescript
+export interface EnhancedThoughtMetadata {
+  // Taxonomy classification
+  taxonomyClassification: TaxonomyClassification;
+
+  // Cognitive metrics (NEW)
+  cognitiveLoad: {
+    workingMemoryDemand: number; // 0-1
+    processingDepth: number; // 0-1, shallow to deep
+    conceptualComplexity: number; // 0-1
+    estimatedEffort: 'low' | 'medium' | 'high';
+  };
+
+  // Dual-process indicators (NEW)
+  dualProcess: {
+    system1Score: number; // 0-1, fast/intuitive
+    system2Score: number; // 0-1, slow/analytical
+    predominantSystem: 'system1' | 'system2' | 'hybrid';
+    automaticity: number; // 0-1, automatic to deliberate
+  };
+
+  // Reasoning quality (NEW)
+  qualityMetrics: {
+    rigor: number; // 0-1, informal to formal
+    completeness: number; // 0-1
+    soundness: number; // 0-1
+    creativity: number; // 0-1
+    practicality: number; // 0-1
+  };
+
+  // Cross-modal transfer (NEW)
+  transferPotential: {
+    applicableModes: ThinkingMode[];
+    generalizability: number; // 0-1
+    domainSpecificity: number; // 0-1
+    transferSuggestions: string[];
+  };
+}
+
+export interface ThoughtWithTaxonomy extends BaseThought {
+  enhancedMetadata: EnhancedThoughtMetadata;
+}
+```
+
+#### 7.3 Multi-Modal Reasoning Analyzer
+**File**: `src/taxonomy/multimodal.ts`
+
+```typescript
+export interface MultiModalAnalysis {
+  sessionId: string;
+
+  // Reasoning forms used
+  formsUsed: {
+    type: ReasoningType;
+    frequency: number;
+    thoughtNumbers: number[];
+  }[];
+
+  // Mode transitions
+  transitions: {
+    from: ThinkingMode;
+    to: ThinkingMode;
+    thoughtNumber: number;
+    rationale?: string;
+  }[];
+
+  // Synergies detected
+  synergies: {
+    modes: ThinkingMode[];
+    benefit: string;
+    strength: number;
+    examples: string[];
+  }[];
+
+  // Reasoning architecture
+  architecture: {
+    layers: ReasoningLayer[];
+    composition: 'sequential' | 'parallel' | 'hierarchical' | 'hybrid';
+    complexity: number;
+  };
+}
+
+export interface ReasoningLayer {
+  level: number;
+  modes: ThinkingMode[];
+  types: ReasoningType[];
+  purpose: string;
+}
+
+export class MultiModalAnalyzer {
+  // Analyze multi-modal reasoning in session
+  async analyze(session: ThinkingSession): Promise<MultiModalAnalysis>;
+
+  // Detect reasoning synergies
+  detectSynergies(
+    thoughts: ThoughtWithTaxonomy[]
+  ): Promise<ReasoningSynergy[]>;
+
+  // Visualize reasoning architecture
+  visualizeArchitecture(analysis: MultiModalAnalysis): string; // Mermaid diagram
+}
+```
+
+#### 7.4 Adaptive Mode Selection
+**File**: `src/taxonomy/adaptive.ts`
+
+```typescript
+export interface AdaptiveRecommendation {
+  suggestedMode: ThinkingMode;
+  reasoning: string;
+  confidence: number;
+  basedOn: {
+    currentProgress: number;
+    problemEvolution: string;
+    previousModeEffectiveness: number;
+    taxonomyInsights: string[];
+  };
+  expectedBenefits: string[];
+  risks: string[];
+}
+
+export class AdaptiveModeSelector {
+  // Recommend mode based on session evolution
+  async recommendNextMode(
+    session: ThinkingSession,
+    currentThought: Thought
+  ): Promise<AdaptiveRecommendation>;
+
+  // Detect when to switch modes
+  shouldSwitchMode(session: ThinkingSession): {
+    shouldSwitch: boolean;
+    reasoning: string;
+    suggestedMode?: ThinkingMode;
+  };
+
+  // Optimize mode sequence
+  async optimizeSequence(
+    session: ThinkingSession
+  ): Promise<ThinkingMode[]>;
+}
+```
+
+### Integration with Existing Features
+
+**Export Enhancements**:
+- LaTeX/Jupyter exports include taxonomy classifications
+- Visualizations show reasoning type overlays
+- Pattern learning leverages taxonomy for better matching
+
+**Validation Enhancements**:
+- Mode-specific validation considers expected reasoning types
+- Quality metrics based on taxonomy standards
+- Suggestions reference reasoning type best practices
+
+**Collaboration Enhancements**:
+- Users can filter sessions by reasoning types
+- Recommendations include taxonomy-based insights
+- Comments can reference specific reasoning patterns
+
+### Implementation Priority
+**High** - Foundational enhancement that enriches all other features
+
+### Estimated Effort
+- Taxonomy initialization: 8 hours
+- Classification system: 16 hours
+- Enhanced metadata: 8 hours
+- Multi-modal analyzer: 12 hours
+- Adaptive selector: 10 hours
+- Integration with exports: 8 hours
+- Testing: 10 hours
+- Documentation: 6 hours
+**Total: 78 hours (~10 days)**
+
+---
+
+## Feature 8: Additional Reasoning Modes
+
+### Purpose
+**NEW - Phase 4 Enhancement**: Add 6 new reasoning modes inspired by the 110-type taxonomy to cover critical reasoning patterns not yet supported.
+
+### New Modes
+
+#### 8.1 Meta-Reasoning Mode
+**File**: `src/types/modes/metareasoning.ts`
+
+Reasoning about reasoning itself - monitoring cognitive processes and strategy selection.
+
+```typescript
+export interface MetaReasoningThought extends BaseThought {
+  mode: ThinkingMode.METAREASONING;
+
+  // What is being reasoned about
+  targetReasoning: {
+    sessionId: string;
+    thoughtNumbers: number[];
+    reasoningType: string;
+  };
+
+  // Metacognitive monitoring
+  monitoring: {
+    comprehensionLevel: number; // 0-1
+    progressAssessment: string;
+    difficultyEstimate: number; // 0-1
+    bottlenecksIdentified: string[];
+  };
+
+  // Strategy evaluation
+  strategyEvaluation: {
+    currentStrategy: string;
+    effectiveness: number; // 0-1
+    alternativeStrategies: Strategy[];
+    recommendation: string;
+  };
+
+  // Cognitive regulation
+  regulation: {
+    adjustments: string[];
+    resourceAllocation: Record<string, number>;
+    priorityChanges: string[];
+  };
+}
+```
+
+#### 8.2 Modal Reasoning Mode
+**File**: `src/types/modes/modal.ts`
+
+Reasoning about necessity, possibility, impossibility using modal logic.
+
+```typescript
+export interface ModalThought extends BaseThought {
+  mode: ThinkingMode.MODAL;
+
+  // Modal operators
+  modalStatements: ModalStatement[];
+
+  // Possible worlds semantics
+  possibleWorlds?: {
+    worlds: World[];
+    accessibility: WorldRelation[];
+    actualWorld: string;
+  };
+
+  // Modal types
+  modalType: 'alethic' | 'deontic' | 'epistemic' | 'temporal';
+}
+
+export interface ModalStatement {
+  proposition: string;
+  operator: 'necessary' | 'possible' | 'impossible' | 'contingent';
+  justification: string;
+  worldsWhereTrue?: string[];
+}
+```
+
+#### 8.3 Constraint-Based Reasoning Mode
+**File**: `src/types/modes/constraint.ts`
+
+Solving problems by identifying and working within constraints.
+
+```typescript
+export interface ConstraintThought extends BaseThought {
+  mode: ThinkingMode.CONSTRAINT;
+
+  // Variables and domains
+  variables: Variable[];
+
+  // Constraints
+  constraints: Constraint[];
+
+  // Solution approach
+  approach: 'backtracking' | 'forward-checking' | 'arc-consistency' | 'local-search';
+
+  // Solutions
+  solutions?: Solution[];
+
+  // Constraint relaxation
+  relaxations?: ConstraintRelaxation[];
+}
+
+export interface Constraint {
+  id: string;
+  type: 'unary' | 'binary' | 'global';
+  variables: string[];
+  relation: string;
+  priority: number; // 0-1, for relaxation
+}
+```
+
+#### 8.4 Optimization Reasoning Mode
+**File**: `src/types/modes/optimization.ts`
+
+Finding best solutions according to objective functions.
+
+```typescript
+export interface OptimizationThought extends BaseThought {
+  mode: ThinkingMode.OPTIMIZATION;
+
+  // Objective function
+  objective: {
+    expression: string;
+    type: 'minimize' | 'maximize';
+    multiObjective?: boolean;
+    objectives?: ObjectiveFunction[];
+  };
+
+  // Decision variables
+  variables: DecisionVariable[];
+
+  // Constraints
+  constraints: OptimizationConstraint[];
+
+  // Solution method
+  method: 'linear-programming' | 'integer-programming' | 'nonlinear' |
+          'dynamic-programming' | 'gradient-descent' | 'evolutionary';
+
+  // Solution
+  solution?: OptimizationSolution;
+}
+```
+
+#### 8.5 Stochastic Reasoning Mode
+**File**: `src/types/modes/stochastic.ts`
+
+Reasoning about random processes and probabilistic systems.
+
+```typescript
+export interface StochasticThought extends BaseThought {
+  mode: ThinkingMode.STOCHASTIC;
+
+  // Stochastic process
+  process: {
+    type: 'random-walk' | 'markov-chain' | 'poisson' | 'brownian-motion' | 'diffusion';
+    states?: string[];
+    transitionMatrix?: number[][];
+    parameters: Record<string, number>;
+  };
+
+  // Simulations
+  simulations?: {
+    numRuns: number;
+    results: SimulationResult[];
+    statistics: {
+      mean: number;
+      variance: number;
+      confidence: [number, number];
+    };
+  };
+
+  // Analysis
+  analysis: {
+    stationaryDistribution?: number[];
+    expectedValue?: number;
+    convergenceTime?: number;
+  };
+}
+```
+
+#### 8.6 Recursive Reasoning Mode
+**File**: `src/types/modes/recursive.ts`
+
+Self-referential reasoning and recursive problem decomposition.
+
+```typescript
+export interface RecursiveThought extends BaseThought {
+  mode: ThinkingMode.RECURSIVE;
+
+  // Recursive structure
+  recursion: {
+    baseCase: BaseCase;
+    recursiveCase: RecursiveCase;
+    depthLimit?: number;
+    currentDepth: number;
+  };
+
+  // Self-reference
+  selfReference?: {
+    referenceType: 'direct' | 'indirect';
+    cycleDetection: boolean;
+    paradoxCheck: boolean;
+  };
+
+  // Decomposition
+  decomposition: {
+    subproblems: Subproblem[];
+    combinationStrategy: string;
+    complexityReduction: number; // 0-1
+  };
+}
+```
+
+### Implementation Priority
+**Medium** - Extends core capabilities significantly
+
+### Estimated Effort
+- Per mode: 12 hours (types + validation + tests)
+- 6 modes × 12 hours = 72 hours
+- Integration: 8 hours
+- Documentation: 8 hours
+**Total: 88 hours (~11 days)**
+
+---
+
 ## Implementation Timeline
 
 **Prerequisites**: Phase 3 must be complete (v2.6, all 145 tests passing, weeks 1-6)
@@ -698,9 +1178,27 @@ export class RecommendationEngine {
 - Collaborative Sessions (6 days)
 - Testing & Documentation (2 days)
 
-### Phase 4D (v4.0.0) - ML & Intelligence
-**Duration**: 3-4 weeks (Weeks 15-18)
-- Pattern Learning across all 13 modes (10 days)
+### Phase 4D (v3.5.0) - Taxonomy Integration
+**Duration**: 2-3 weeks (Weeks 15-17) **NEW**
+- Taxonomy Classification System (10 days)
+- Enhanced Thought Attributes (3 days)
+- Multi-Modal Reasoning Analyzer (3 days)
+- Integration with existing features (2 days)
+- Testing & Documentation (2 days)
+
+### Phase 4E (v3.7.0) - Additional Reasoning Modes
+**Duration**: 3 weeks (Weeks 18-20) **NEW**
+- Meta-Reasoning Mode (2 days)
+- Modal Reasoning Mode (2 days)
+- Constraint-Based Mode (2 days)
+- Optimization Mode (2 days)
+- Stochastic Mode (2 days)
+- Recursive Mode (2 days)
+- Integration & Testing (3 days)
+
+### Phase 4F (v4.0.0) - ML & Intelligence
+**Duration**: 3-4 weeks (Weeks 21-24)
+- Pattern Learning across all 19 modes (13 + 6 new) (12 days)
 - ML Model Training (4 days)
 - Testing & Documentation (2 days)
 
@@ -755,12 +1253,32 @@ export class RecommendationEngine {
 - [ ] Collaboration supports Phase 3 mode recommendations
 - [ ] 205+ passing tests (185 + 20 new)
 
-### v4.0.0 (Phase 4D)
-- [ ] Pattern recognition identifying common patterns across all 13 modes
-- [ ] Recommendations leveraging Phase 3 mode recommender
-- [ ] ML models trained on 1000+ sessions
-- [ ] Pattern learning for temporal, game-theoretic, evidential modes
-- [ ] 225+ passing tests (205 + 20 new)
+### v3.5.0 (Phase 4D) - **NEW**
+- [ ] Taxonomy classification system operational with 110 reasoning types
+- [ ] All 18 reasoning categories implemented
+- [ ] Enhanced metadata (cognitive load, dual-process, quality metrics) working
+- [ ] Multi-modal reasoning analyzer detecting synergies
+- [ ] Adaptive mode selection recommending based on session evolution
+- [ ] Taxonomy integrated into exports, validation, and collaboration
+- [ ] 230+ passing tests (205 + 25 new)
+
+### v3.7.0 (Phase 4E) - **NEW**
+- [ ] 6 new reasoning modes implemented (Meta, Modal, Constraint, Optimization, Stochastic, Recursive)
+- [ ] Total of 19 reasoning modes available (13 + 6)
+- [ ] Each new mode has comprehensive validation
+- [ ] New modes integrated with taxonomy classifier
+- [ ] Exports support all 19 modes
+- [ ] Persistence supports all 19 modes
+- [ ] 280+ passing tests (230 + 50 new for 6 modes)
+
+### v4.0.0 (Phase 4F)
+- [ ] Pattern recognition identifying common patterns across all 19 modes
+- [ ] Recommendations leveraging Phase 3 mode recommender + taxonomy
+- [ ] ML models trained on 1000+ sessions with taxonomy features
+- [ ] Pattern learning for all new modes (temporal through recursive)
+- [ ] Taxonomy-enhanced pattern matching operational
+- [ ] Reasoning architecture visualization complete
+- [ ] 305+ passing tests (280 + 25 new)
 
 ---
 
@@ -789,8 +1307,50 @@ Phase 4 directly depends on the following Phase 3 features:
 
 1. ✅ Complete Phase 3 implementation (v2.1 - v2.6)
 2. ✅ Document Phase 3 and Phase 4 plans
-3. Create detailed task breakdowns for each Phase 4 feature
-4. Await Phase 3 completion and validation (145 tests passing)
-5. Prioritize Phase 4 features based on Phase 3 usage patterns
-6. Begin Phase 4 implementation with v3.0.0 (Export & Enhanced Visualization)
-7. Iterate based on usage metrics and feedback
+3. ✅ Review Types of Thinking taxonomy for enhancements
+4. ✅ Identify 6 new reasoning modes to add
+5. ✅ Design taxonomy integration system
+6. Create detailed task breakdowns for each Phase 4 feature (including new Features 7 & 8)
+7. Await Phase 3 completion and validation (145 tests passing)
+8. Prioritize Phase 4 features based on Phase 3 usage patterns
+9. Begin Phase 4 implementation with v3.0.0 (Export & Enhanced Visualization)
+10. Iterate based on usage metrics and feedback
+11. Implement taxonomy integration in v3.5.0
+12. Add new reasoning modes in v3.7.0
+13. Complete ML/Intelligence features in v4.0.0
+
+## Summary of Enhancements
+
+**Phase 4 Plan Updated Based on "Types of Thinking and Reasonings - Expanded 3.0.md"**:
+
+### New Features Added:
+- **Feature 7**: Reasoning Taxonomy Integration (110 types, 18 categories)
+- **Feature 8**: 6 Additional Reasoning Modes (Meta, Modal, Constraint, Optimization, Stochastic, Recursive)
+
+### Enhanced Attributes:
+- **Cognitive Load Metrics**: Working memory demand, processing depth, complexity
+- **Dual-Process Indicators**: System 1 vs System 2 classification
+- **Quality Metrics**: Rigor, completeness, soundness, creativity, practicality
+- **Transfer Potential**: Cross-modal applicability and generalizability
+
+### Architecture Enhancements:
+- **Multi-Modal Reasoning Analyzer**: Detects synergies and reasoning architectures
+- **Adaptive Mode Selection**: AI-powered recommendations based on session evolution
+- **Taxonomy Classification**: Automatic tagging with 110 reasoning types
+- **Reasoning Architecture Visualization**: Shows how different modes interact
+
+### Timeline Extended:
+- Original: v3.0.0 → v4.0.0 (Phases 4A-4D, Weeks 7-18)
+- **Enhanced**: v3.0.0 → v4.0.0 (Phases 4A-4F, Weeks 7-24)
+- **New Phases**:
+  - Phase 4D (v3.5.0): Taxonomy Integration
+  - Phase 4E (v3.7.0): Additional Reasoning Modes
+  - Phase 4F (v4.0.0): ML & Intelligence (enhanced with taxonomy)
+
+### Test Coverage Extended:
+- Original: 145 → 225 tests
+- **Enhanced**: 145 → 305 tests (60% increase)
+
+### Total Modes:
+- Phase 3 End: 13 modes
+- **Phase 4 End**: 19 modes (13 + 6 new)

@@ -1236,4 +1236,665 @@ Each feature must include:
 - Docs: 10 hours
 **Total: 106 hours (~13 days)**
 
-**Grand Total: ~320 hours (~40 days / 8 weeks)**
+**Grand Total (Original): ~320 hours (~40 days / 8 weeks)**
+
+---
+
+## Phase 4D: Taxonomy Integration (v3.5.0) - **NEW**
+
+### Feature 7: Reasoning Taxonomy Integration
+
+#### Task 7.1: Initialize Taxonomy Database
+**File**: `src/taxonomy/data/taxonomy.json`
+**Estimated Time**: 8 hours
+
+**Description**: Create comprehensive database of 110 reasoning types across 18 categories from "Types of Thinking and Reasonings - Expanded 3.0.md"
+
+**Code Snippet**:
+```json
+{
+  "reasoningTypes": [
+    {
+      "id": "deductive",
+      "name": "Deductive Reasoning",
+      "category": "fundamental",
+      "definition": "Logical process where conclusions necessarily follow from premises",
+      "relation": "Foundation of formal logic, mathematics, and rigorous proof",
+      "examples": [
+        "All mammals are warm-blooded. Whales are mammals. Therefore, whales are warm-blooded."
+      ],
+      "notes": "Truth-preserving but not ampliative. Certainty depends on premise truth and logical validity.",
+      "keywords": ["logic", "proof", "validity", "syllogism", "modus ponens"]
+    },
+    // ... 109 more types
+  ],
+  "categories": [
+    {
+      "id": "fundamental",
+      "name": "Fundamental Forms",
+      "description": "Core reasoning forms that underlie all others",
+      "types": ["deductive", "inductive", "abductive"]
+    },
+    // ... 17 more categories
+  ]
+}
+```
+
+**Acceptance Criteria**:
+- [ ] All 110 reasoning types entered with complete metadata
+- [ ] All 18 categories defined
+- [ ] Keywords for each type for classification
+- [ ] JSON schema validation passes
+- [ ] Type relationships documented
+
+---
+
+#### Task 7.2: Build Taxonomy Classifier
+**File**: `src/taxonomy/classifier.ts`
+**Estimated Time**: 16 hours
+
+**Code Snippet**:
+```typescript
+export class TaxonomyClassifier {
+  private reasoningTypes: Map<string, ReasoningType>;
+  private keywordIndex: Map<string, string[]>; // keyword -> type IDs
+
+  constructor() {
+    this.initializeTaxonomy();
+    this.buildKeywordIndex();
+  }
+
+  private async initializeTaxonomy(): Promise<void> {
+    const taxonomyData = await import('./data/taxonomy.json');
+    this.reasoningTypes = new Map(
+      taxonomyData.reasoningTypes.map(rt => [rt.id, rt])
+    );
+  }
+
+  private buildKeywordIndex(): void {
+    for (const [id, type] of this.reasoningTypes) {
+      for (const keyword of type.keywords) {
+        if (!this.keywordIndex.has(keyword)) {
+          this.keywordIndex.set(keyword, []);
+        }
+        this.keywordIndex.get(keyword)!.push(id);
+      }
+    }
+  }
+
+  async classify(thought: Thought): Promise<TaxonomyClassification> {
+    // 1. Keyword matching
+    const keywordScores = this.scoreByKeywords(thought.content);
+
+    // 2. Mode-based classification
+    const modeTypes = this.getTypesForMode(thought.mode);
+
+    // 3. Structure analysis
+    const structureScores = this.analyzeStructure(thought);
+
+    // 4. Combine scores
+    const combinedScores = this.combineScores(
+      keywordScores,
+      modeTypes,
+      structureScores
+    );
+
+    // 5. Select primary and secondary types
+    const sortedTypes = Array.from(combinedScores.entries())
+      .sort((a, b) => b[1] - a[1]);
+
+    const primaryType = this.reasoningTypes.get(sortedTypes[0][0])!;
+    const secondaryTypes = sortedTypes
+      .slice(1, 4)
+      .map(([id]) => this.reasoningTypes.get(id)!);
+
+    return {
+      primaryType,
+      secondaryTypes,
+      confidence: sortedTypes[0][1],
+      reasoning: this.explainClassification(thought, primaryType),
+      applicableCategories: this.getCategories([primaryType, ...secondaryTypes]),
+    };
+  }
+
+  private scoreByKeywords(content: string): Map<string, number> {
+    const scores = new Map<string, number>();
+    const words = content.toLowerCase().split(/\W+/);
+
+    for (const word of words) {
+      if (this.keywordIndex.has(word)) {
+        for (const typeId of this.keywordIndex.get(word)!) {
+          scores.set(typeId, (scores.get(typeId) || 0) + 1);
+        }
+      }
+    }
+
+    // Normalize
+    const maxScore = Math.max(...scores.values(), 1);
+    for (const [typeId, score] of scores) {
+      scores.set(typeId, score / maxScore);
+    }
+
+    return scores;
+  }
+
+  private getTypesForMode(mode: ThinkingMode): Map<string, number> {
+    const modeTypeMap: Record<ThinkingMode, string[]> = {
+      [ThinkingMode.MATHEMATICS]: ['deductive', 'symbolic', 'mathematical', 'proof'],
+      [ThinkingMode.BAYESIAN]: ['bayesian', 'probabilistic', 'inductive'],
+      [ThinkingMode.CAUSAL]: ['causal', 'mechanistic', 'abductive'],
+      [ThinkingMode.TEMPORAL]: ['temporal', 'sequential'],
+      [ThinkingMode.GAMETHEORY]: ['game-theoretic', 'strategic'],
+      // ... more mappings
+    };
+
+    const types = modeTypeMap[mode] || [];
+    return new Map(types.map(t => [t, 0.8])); // High confidence for mode-based
+  }
+
+  private analyzeStructure(thought: Thought): Map<string, number> {
+    const scores = new Map<string, number>();
+
+    // Check for mathematical structures
+    if (/\$.*\$|\\[a-z]+/.test(thought.content)) {
+      scores.set('mathematical', 0.7);
+      scores.set('symbolic', 0.6);
+    }
+
+    // Check for causal language
+    if (/(because|causes?|leads? to|results? in)/i.test(thought.content)) {
+      scores.set('causal', 0.7);
+    }
+
+    // Check for probabilistic language
+    if (/(probability|likely|chance|odds)/i.test(thought.content)) {
+      scores.set('probabilistic', 0.7);
+      scores.set('bayesian', 0.5);
+    }
+
+    // Check for modal operators
+    if (/(necessary|possible|must|might|could)/i.test(thought.content)) {
+      scores.set('modal', 0.6);
+    }
+
+    return scores;
+  }
+
+  detectFundamentalForms(thought: Thought): {
+    deductive: number;
+    inductive: number;
+    abductive: number;
+  } {
+    let deductive = 0, inductive = 0, abductive = 0;
+
+    // Deductive indicators
+    if (/(therefore|thus|hence|proves|must be)/i.test(thought.content)) {
+      deductive += 0.3;
+    }
+    if (thought.mode === ThinkingMode.MATHEMATICS) {
+      deductive += 0.4;
+    }
+
+    // Inductive indicators
+    if (/(pattern|in general|usually|often|tends to)/i.test(thought.content)) {
+      inductive += 0.3;
+    }
+    if (thought.mode === ThinkingMode.BAYESIAN) {
+      inductive += 0.3;
+    }
+
+    // Abductive indicators
+    if (/(best explanation|hypothesis|likely cause|explains)/i.test(thought.content)) {
+      abductive += 0.3;
+    }
+    if (thought.mode === ThinkingMode.ABDUCTIVE) {
+      abductive += 0.5;
+    }
+
+    // Normalize to 0-1
+    const total = deductive + inductive + abductive;
+    if (total > 0) {
+      deductive /= total;
+      inductive /= total;
+      abductive /= total;
+    }
+
+    return { deductive, inductive, abductive };
+  }
+}
+```
+
+**Acceptance Criteria**:
+- [ ] Taxonomy loaded from JSON
+- [ ] Keyword-based classification working
+- [ ] Mode-based type mapping working
+- [ ] Structure analysis detecting patterns
+- [ ] Fundamental forms detection accurate
+- [ ] Confidence scores calibrated
+
+---
+
+#### Task 7.3: Implement Enhanced Metadata
+**File**: `src/types/taxonomy.ts`
+**Estimated Time**: 8 hours
+
+**Code Snippet**:
+```typescript
+export class MetadataCalculator {
+  /**
+   * Calculate cognitive load metrics
+   */
+  calculateCognitiveLoad(thought: Thought): CognitiveLoad {
+    // Working memory demand based on complexity
+    const workingMemoryDemand = this.estimateWorkingMemory(thought);
+
+    // Processing depth (shallow pattern recognition vs deep analysis)
+    const processingDepth = this.estimateProcessingDepth(thought);
+
+    // Conceptual complexity
+    const conceptualComplexity = this.estimateComplexity(thought);
+
+    const estimatedEffort =
+      (workingMemoryDemand + processingDepth + conceptualComplexity) / 3 > 0.6
+        ? 'high'
+        : (workingMemoryDemand + processingDepth + conceptualComplexity) / 3 > 0.3
+        ? 'medium'
+        : 'low';
+
+    return {
+      workingMemoryDemand,
+      processingDepth,
+      conceptualComplexity,
+      estimatedEffort,
+    };
+  }
+
+  private estimateWorkingMemory(thought: Thought): number {
+    let score = 0;
+
+    // Count of distinct concepts (measured by unique nouns/technical terms)
+    const concepts = this.extractConcepts(thought.content);
+    score += Math.min(concepts.length / 7, 1) * 0.4; // 7 ± 2 working memory capacity
+
+    // Nesting depth (for nested structures like proofs)
+    const nestingDepth = this.measureNesting(thought);
+    score += Math.min(nestingDepth / 4, 1) * 0.3;
+
+    // Mode-specific complexity
+    if (isMathematicsThought(thought)) {
+      score += thought.mathematicalModel ? 0.2 : 0;
+      score += thought.proofStrategy ? 0.1 : 0;
+    }
+
+    return Math.min(score, 1);
+  }
+
+  /**
+   * Calculate dual-process indicators
+   */
+  calculateDualProcess(thought: Thought): DualProcess {
+    // System 1: Fast, intuitive, automatic
+    let system1Score = 0;
+
+    // Indicators of System 1:
+    // - Short response time
+    // - Pattern recognition
+    // - Heuristic use
+    // - Analogical reasoning
+
+    if (thought.mode === ThinkingMode.ANALOGICAL) {
+      system1Score += 0.3;
+    }
+
+    // Quick pattern recognition
+    if (this.hasQuickPatterns(thought.content)) {
+      system1Score += 0.2;
+    }
+
+    // System 2: Slow, analytical, deliberate
+    let system2Score = 0;
+
+    // Indicators of System 2:
+    // - Mathematical reasoning
+    // - Logical deduction
+    // - Multi-step analysis
+    // - Counterfactual thinking
+
+    if (thought.mode === ThinkingMode.MATHEMATICS ||
+        thought.mode === ThinkingMode.BAYESIAN) {
+      system2Score += 0.4;
+    }
+
+    if (this.hasMultiStepReasoning(thought)) {
+      system2Score += 0.3;
+    }
+
+    // Normalize
+    const total = system1Score + system2Score;
+    if (total > 0) {
+      system1Score /= total;
+      system2Score /= total;
+    }
+
+    const predominantSystem =
+      Math.abs(system1Score - system2Score) < 0.2
+        ? 'hybrid'
+        : system1Score > system2Score
+        ? 'system1'
+        : 'system2';
+
+    const automaticity = system1Score; // Higher System 1 = more automatic
+
+    return {
+      system1Score,
+      system2Score,
+      predominantSystem,
+      automaticity,
+    };
+  }
+
+  /**
+   * Calculate reasoning quality metrics
+   */
+  calculateQuality(
+    thought: Thought,
+    validation?: ValidationResult
+  ): QualityMetrics {
+    // Rigor: How formal and structured
+    const rigor = this.assessRigor(thought);
+
+    // Completeness: How thorough
+    const completeness = validation?.strengthMetrics?.completeness ?? this.assessCompleteness(thought);
+
+    // Soundness: Logical validity
+    const soundness = validation?.confidence ?? this.assessSoundness(thought);
+
+    // Creativity: Novelty and insight
+    const creativity = this.assessCreativity(thought);
+
+    // Practicality: Real-world applicability
+    const practicality = this.assessPracticality(thought);
+
+    return {
+      rigor,
+      completeness,
+      soundness,
+      creativity,
+      practicality,
+    };
+  }
+
+  private assessRigor(thought: Thought): number {
+    let score = 0;
+
+    // Formal modes are more rigorous
+    if (thought.mode === ThinkingMode.MATHEMATICS) score += 0.4;
+    if (thought.mode === ThinkingMode.PHYSICS) score += 0.3;
+
+    // Look for formal structures
+    if (/theorem|lemma|proof|axiom/i.test(thought.content)) score += 0.2;
+    if (/\$.*\$/.test(thought.content)) score += 0.1; // LaTeX math
+
+    return Math.min(score, 1);
+  }
+
+  /**
+   * Calculate transfer potential
+   */
+  calculateTransfer(
+    thought: Thought,
+    taxonomy: TaxonomyClassification
+  ): TransferPotential {
+    const applicableModes: ThinkingMode[] = [];
+
+    // Determine which modes could benefit from this insight
+    if (taxonomy.primaryType.category === 'fundamental') {
+      // Fundamental forms apply broadly
+      applicableModes.push(...Object.values(ThinkingMode));
+    } else if (taxonomy.primaryType.category === 'mathematical_quantitative') {
+      applicableModes.push(
+        ThinkingMode.MATHEMATICS,
+        ThinkingMode.PHYSICS,
+        ThinkingMode.BAYESIAN
+      );
+    }
+
+    // Generalizability: How broadly applicable
+    const generalizability = this.assessGeneralizability(thought, taxonomy);
+
+    // Domain specificity: How tied to specific domain
+    const domainSpecificity = 1 - generalizability;
+
+    const transferSuggestions = this.generateTransferSuggestions(
+      thought,
+      applicableModes
+    );
+
+    return {
+      applicableModes,
+      generalizability,
+      domainSpecificity,
+      transferSuggestions,
+    };
+  }
+}
+```
+
+**Acceptance Criteria**:
+- [ ] Cognitive load calculation accurate
+- [ ] Dual-process classification reasonable
+- [ ] Quality metrics comprehensive
+- [ ] Transfer potential useful
+- [ ] All metrics normalized 0-1
+
+---
+
+#### Task 7.4: Build Multi-Modal Analyzer
+**File**: `src/taxonomy/multimodal.ts`
+**Estimated Time**: 12 hours
+
+**Acceptance Criteria**:
+- [ ] Session-level analysis working
+- [ ] Mode transitions detected
+- [ ] Synergies identified
+- [ ] Architecture visualization generated
+- [ ] Mermaid diagrams accurate
+
+---
+
+#### Task 7.5: Implement Adaptive Mode Selector
+**File**: `src/taxonomy/adaptive.ts`
+**Estimated Time**: 10 hours
+
+**Acceptance Criteria**:
+- [ ] Mode recommendations based on progress
+- [ ] Switch detection accurate
+- [ ] Sequence optimization reasonable
+- [ ] Integration with existing recommender
+
+---
+
+#### Task 7.6: Integrate Taxonomy with Exports
+**File**: `src/export/latex.ts`, `src/export/jupyter.ts`
+**Estimated Time**: 8 hours
+
+**Acceptance Criteria**:
+- [ ] LaTeX exports include taxonomy tags
+- [ ] Jupyter notebooks show classifications
+- [ ] Visualizations include taxonomy overlays
+
+---
+
+#### Task 7.7: Testing Taxonomy System
+**File**: `tests/unit/taxonomy/*.test.ts`
+**Estimated Time**: 10 hours
+
+**Acceptance Criteria**:
+- [ ] 25+ tests for taxonomy features
+- [ ] Classification accuracy tested
+- [ ] Metadata calculations validated
+- [ ] Integration tests passing
+
+---
+
+## Phase 4E: Additional Reasoning Modes (v3.7.0) - **NEW**
+
+### Feature 8: 6 New Reasoning Modes
+
+#### Task 8.1: Implement Meta-Reasoning Mode
+**Files**: `src/types/modes/metareasoning.ts`, `src/validation/metareasoning.ts`
+**Estimated Time**: 12 hours
+
+**Acceptance Criteria**:
+- [ ] Type definitions complete
+- [ ] Validation logic working
+- [ ] Integration with existing modes
+- [ ] 8+ tests passing
+- [ ] Documentation complete
+
+---
+
+#### Task 8.2: Implement Modal Reasoning Mode
+**Files**: `src/types/modes/modal.ts`, `src/validation/modal.ts`
+**Estimated Time**: 12 hours
+
+**Acceptance Criteria**:
+- [ ] Modal operators supported
+- [ ] Possible worlds semantics working
+- [ ] Validation checks modal consistency
+- [ ] 8+ tests passing
+
+---
+
+#### Task 8.3: Implement Constraint-Based Mode
+**Files**: `src/types/modes/constraint.ts`, `src/validation/constraint.ts`
+**Estimated Time**: 12 hours
+
+**Acceptance Criteria**:
+- [ ] CSP formulation supported
+- [ ] Constraint types implemented
+- [ ] Solution approaches defined
+- [ ] 8+ tests passing
+
+---
+
+#### Task 8.4: Implement Optimization Mode
+**Files**: `src/types/modes/optimization.ts`, `src/validation/optimization.ts`
+**Estimated Time**: 12 hours
+
+**Acceptance Criteria**:
+- [ ] Objective functions supported
+- [ ] Multiple optimization methods
+- [ ] Constraint handling
+- [ ] 8+ tests passing
+
+---
+
+#### Task 8.5: Implement Stochastic Mode
+**Files**: `src/types/modes/stochastic.ts`, `src/validation/stochastic.ts`
+**Estimated Time**: 12 hours
+
+**Acceptance Criteria**:
+- [ ] Stochastic processes modeled
+- [ ] Simulation support
+- [ ] Statistical analysis
+- [ ] 8+ tests passing
+
+---
+
+#### Task 8.6: Implement Recursive Mode
+**Files**: `src/types/modes/recursive.ts`, `src/validation/recursive.ts`
+**Estimated Time**: 12 hours
+
+**Acceptance Criteria**:
+- [ ] Base/recursive cases supported
+- [ ] Self-reference detection
+- [ ] Cycle prevention
+- [ ] 8+ tests passing
+
+---
+
+#### Task 8.7: Update Core Types for New Modes
+**File**: `src/types/core.ts`
+**Estimated Time**: 4 hours
+
+**Code Snippet**:
+```typescript
+export enum ThinkingMode {
+  // Existing modes
+  SEQUENTIAL = 'sequential',
+  SHANNON = 'shannon',
+  MATHEMATICS = 'mathematics',
+  PHYSICS = 'physics',
+  HYBRID = 'hybrid',
+  ABDUCTIVE = 'abductive',
+  CAUSAL = 'causal',
+  BAYESIAN = 'bayesian',
+  COUNTERFACTUAL = 'counterfactual',
+  ANALOGICAL = 'analogical',
+  TEMPORAL = 'temporal',
+  GAMETHEORY = 'gametheory',
+  EVIDENTIAL = 'evidential',
+
+  // NEW: Phase 4 modes
+  METAREASONING = 'metareasoning',
+  MODAL = 'modal',
+  CONSTRAINT = 'constraint',
+  OPTIMIZATION = 'optimization',
+  STOCHASTIC = 'stochastic',
+  RECURSIVE = 'recursive',
+
+  CUSTOM = 'custom'
+}
+```
+
+**Acceptance Criteria**:
+- [ ] All 19 modes in enum
+- [ ] Type guards for new modes
+- [ ] Union types updated
+- [ ] Exports complete
+
+---
+
+#### Task 8.8: Update Validator for New Modes
+**File**: `src/validation/validator.ts`
+**Estimated Time**: 4 hours
+
+**Acceptance Criteria**:
+- [ ] Validation for all 6 new modes
+- [ ] Mode-specific checks
+- [ ] Integration with taxonomy
+- [ ] Tests updated
+
+---
+
+## Updated Total Effort
+
+### Phase 4D (v3.5.0) - Taxonomy Integration
+- Taxonomy initialization: 8 hours
+- Classification system: 16 hours
+- Enhanced metadata: 8 hours
+- Multi-modal analyzer: 12 hours
+- Adaptive selector: 10 hours
+- Export integration: 8 hours
+- Testing: 10 hours
+- Documentation: 6 hours
+**Subtotal: 78 hours (~10 days)**
+
+### Phase 4E (v3.7.0) - New Modes
+- 6 modes × 12 hours: 72 hours
+- Core types update: 4 hours
+- Validator update: 4 hours
+- Integration testing: 8 hours
+- Documentation: 8 hours
+**Subtotal: 96 hours (~12 days)**
+
+### Original Phases 4A-4C + 4F
+- Phase 4A: 65 hours
+- Phase 4B: 80 hours
+- Phase 4C: 70 hours
+- Phase 4F (ML): 96 hours (updated for 19 modes)
+**Subtotal: 311 hours (~39 days)**
+
+**Grand Total (Enhanced): ~485 hours (~60 days / 12 weeks)**
+**Increase from Original: +165 hours (+51%)**
