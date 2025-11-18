@@ -19,6 +19,7 @@ import { EvidentialThought, isEvidentialThought } from '../types/modes/evidentia
 import { SessionNotFoundError, InvalidModeError, InputValidationError, ErrorFactory } from '../utils/errors.js';
 import { sanitizeString, sanitizeThoughtContent, validateSessionId, MAX_LENGTHS } from '../utils/sanitization.js';
 import { logger, Logger, createLogger, LogLevel } from '../utils/logger.js';
+import { validationCache } from '../validation/cache.js';
 
 /**
  * Default session configuration
@@ -438,6 +439,13 @@ export class SessionManager {
       timeSpent: 0,
       dependencyDepth: 0,
       customMetrics: new Map(),
+      cacheStats: {
+        hits: 0,
+        misses: 0,
+        hitRate: 0,
+        size: 0,
+        maxSize: 0,
+      },
     };
   }
 
@@ -554,5 +562,24 @@ export class SessionManager {
         metrics.customMetrics.set('decisions', thought.decisions.length);
       }
     }
+
+    // Update validation cache statistics
+    this.updateCacheStats(session);
+  }
+
+  /**
+   * Update validation cache statistics in session metrics
+   *
+   * @param session - Session to update
+   */
+  private updateCacheStats(session: ThinkingSession): void {
+    const cacheStats = validationCache.getStats();
+    session.metrics.cacheStats = {
+      hits: cacheStats.hits,
+      misses: cacheStats.misses,
+      hitRate: cacheStats.hitRate,
+      size: cacheStats.size,
+      maxSize: cacheStats.maxSize,
+    };
   }
 }
