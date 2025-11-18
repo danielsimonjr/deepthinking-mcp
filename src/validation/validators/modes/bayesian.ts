@@ -35,7 +35,7 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
         issues.push({
           severity: 'error',
           thoughtNumber: thought.thoughtNumber,
-          description: 'Likelihood must be between 0 and 1',
+          description: 'Likelihood probability must be between 0 and 1',
           suggestion: 'Provide likelihood as decimal',
           category: 'structural',
         });
@@ -59,7 +59,7 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
         issues.push({
           severity: 'warning',
           thoughtNumber: thought.thoughtNumber,
-          description: 'Posterior calculation is missing',
+          description: 'Posterior calculation should be shown',
           suggestion: 'Provide calculation showing how posterior was derived',
           category: 'completeness',
         });
@@ -73,7 +73,7 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
           issues.push({
             severity: 'error',
             thoughtNumber: thought.thoughtNumber,
-            description: `Evidence "${evidence.description}" has invalid likelihoodGivenHypothesis: ${evidence.likelihoodGivenHypothesis}`,
+            description: `Evidence "${evidence.description}" has invalid P(E|H): ${evidence.likelihoodGivenHypothesis}`,
             suggestion: 'Likelihood must be between 0 and 1',
             category: 'structural',
           });
@@ -82,7 +82,7 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
           issues.push({
             severity: 'error',
             thoughtNumber: thought.thoughtNumber,
-            description: `Evidence "${evidence.description}" has invalid likelihoodGivenNotHypothesis: ${evidence.likelihoodGivenNotHypothesis}`,
+            description: `Evidence "${evidence.description}" has invalid P(E|¬H): ${evidence.likelihoodGivenNotHypothesis}`,
             suggestion: 'Likelihood must be between 0 and 1',
             category: 'structural',
           });
@@ -107,7 +107,7 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
         issues.push({
           severity: 'info',
           thoughtNumber: thought.thoughtNumber,
-          description: `Bayes factor ${thought.bayesFactor.toFixed(2)} > 1 supports the hypothesis`,
+          description: `Bayes factor ${thought.bayesFactor.toFixed(2)} > 1, evidence supports hypothesis`,
           suggestion: 'Evidence favors the hypothesis over the alternative',
           category: 'interpretation',
         });
@@ -118,7 +118,7 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
         issues.push({
           severity: 'info',
           thoughtNumber: thought.thoughtNumber,
-          description: `Bayes factor ${thought.bayesFactor.toFixed(2)} < 1 contradicts the hypothesis`,
+          description: `Bayes factor ${thought.bayesFactor.toFixed(2)} < 1, evidence contradicts hypothesis`,
           suggestion: 'Evidence favors the alternative over the hypothesis',
           category: 'interpretation',
         });

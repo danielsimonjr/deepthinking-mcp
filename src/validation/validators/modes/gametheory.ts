@@ -74,7 +74,7 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
           issues.push({
             severity: 'error',
             thoughtNumber: thought.thoughtNumber,
-            description: `Mixed strategy "${strategy.name}" must have probability`,
+            description: `Mixed strategy "${strategy.name}" is missing probability`,
             suggestion: 'Provide probability for mixed strategies',
             category: 'structural',
           });
@@ -86,7 +86,7 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
           issues.push({
             severity: 'error',
             thoughtNumber: thought.thoughtNumber,
-            description: `Strategy "${strategy.name}" probability must be between 0 and 1`,
+            description: `Strategy "${strategy.name}" probability must be 0-1`,
             suggestion: 'Provide probability as decimal',
             category: 'structural',
           });
@@ -113,7 +113,7 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
           issues.push({
             severity: 'error',
             thoughtNumber: thought.thoughtNumber,
-            description: `Payoff entry strategy profile length does not match player count`,
+            description: `Strategy profile length does not match player count`,
             suggestion: 'Each payoff entry must specify strategies for all players',
             category: 'structural',
           });
@@ -138,7 +138,7 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
           issues.push({
             severity: 'error',
             thoughtNumber: thought.thoughtNumber,
-            description: `Nash equilibrium "${equilibrium.id}" strategy profile length does not match player count`,
+            description: `Nash equilibrium "${equilibrium.id}" has strategy profile length mismatch`,
             suggestion: 'Strategy profile must include strategies for all players',
             category: 'structural',
           });
@@ -149,7 +149,7 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
           issues.push({
             severity: 'error',
             thoughtNumber: thought.thoughtNumber,
-            description: `Nash equilibrium "${equilibrium.id}" stability must be between 0 and 1`,
+            description: `Nash equilibrium "${equilibrium.id}" stability must be 0-1`,
             suggestion: 'Provide stability as decimal',
             category: 'structural',
           });
@@ -179,7 +179,7 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
           issues.push({
             severity: 'error',
             thoughtNumber: thought.thoughtNumber,
-            description: `Terminal node ${node.id} must have payoffs`,
+            description: `Terminal node ${node.id} is missing payoffs`,
             suggestion: 'Provide payoffs for terminal nodes',
             category: 'structural',
           });
