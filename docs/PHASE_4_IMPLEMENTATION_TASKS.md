@@ -1868,6 +1868,317 @@ export enum ThinkingMode {
 
 ---
 
+## Phase 4F: Production-Ready Capabilities (v3.9.0) - **NEW**
+
+### Feature 9: Production-Ready Capabilities
+
+#### Task 9.1: Build Session Search & Query System
+**Files**: `src/query/search.ts`, `src/query/indexer.ts`
+**Estimated Time**: 16 hours
+
+**Description**: Implement full-text search engine with faceted filtering, taxonomy-based queries, and relevance ranking.
+
+**Code Snippet**:
+```typescript
+export class SessionSearchEngine {
+  private index: SearchIndex;
+  private taxonomyClassifier: TaxonomyClassifier;
+
+  async search(query: SearchQuery): Promise<SearchResult[]> {
+    // 1. Parse query
+    const parsedQuery = this.parseQuery(query);
+
+    // 2. Execute search
+    const rawResults = await this.executeSearch(parsedQuery);
+
+    // 3. Filter by taxonomy if specified
+    if (query.reasoningTypes || query.reasoningCategories) {
+      rawResults = await this.filterByTaxonomy(rawResults, query);
+    }
+
+    // 4. Rank results
+    const rankedResults = this.rankResults(rawResults, query);
+
+    // 5. Generate highlights
+    return this.generateHighlights(rankedResults, query);
+  }
+
+  private async filterByTaxonomy(
+    results: RawSearchResult[],
+    query: SearchQuery
+  ): Promise<RawSearchResult[]> {
+    const filtered: RawSearchResult[] = [];
+
+    for (const result of results) {
+      const session = await this.getSession(result.sessionId);
+
+      // Classify all thoughts
+      const classifications = await Promise.all(
+        session.thoughts.map(t => this.taxonomyClassifier.classify(t))
+      );
+
+      // Check if session uses required reasoning types
+      const hasRequiredTypes = this.checkReasoningTypes(
+        classifications,
+        query.reasoningTypes
+      );
+
+      if (hasRequiredTypes) {
+        filtered.push(result);
+      }
+    }
+
+    return filtered;
+  }
+}
+```
+
+**Acceptance Criteria**:
+- [ ] Full-text search across session content
+- [ ] Faceted filtering (mode, date, tags, reasoning types)
+- [ ] Taxonomy-based filtering operational
+- [ ] Relevance scoring and ranking
+- [ ] Search result highlighting
+- [ ] Similar session discovery
+- [ ] Index management (create, update, reindex)
+- [ ] 10+ tests for search functionality
+
+---
+
+#### Task 9.2: Build Real-Time Analytics Dashboard
+**Files**: `src/analytics/dashboard.ts`, `src/analytics/aggregator.ts`
+**Estimated Time**: 20 hours
+
+**Code Snippet**:
+```typescript
+export class AnalyticsEngine {
+  async getMetrics(): Promise<SessionAnalytics> {
+    const sessions = await this.repository.listAll();
+
+    // Usage metrics
+    const totalSessions = sessions.length;
+    const activeSessions = sessions.filter(s => !s.isComplete).length;
+    const completedSessions = totalSessions - activeSessions;
+
+    // Mode distribution
+    const modeUsage = this.calculateModeDistribution(sessions);
+    const modeSuccessRates = this.calculateSuccessRates(sessions);
+
+    // Taxonomy metrics
+    const reasoningTypeDistribution = await this.calculateTaxonomyDistribution(sessions);
+    const mostUsedReasoningTypes = this.getMostUsedTypes(reasoningTypeDistribution);
+
+    // Quality metrics
+    const validations = await this.getAllValidations(sessions);
+    const averageCompleteness = this.calculateAverageMetric(validations, 'completeness');
+    const averageSoundness = this.calculateAverageMetric(validations, 'soundness');
+
+    return {
+      totalSessions,
+      activeSessions,
+      completedSessions,
+      modeUsage,
+      modeSuccessRates,
+      reasoningTypeDistribution,
+      mostUsedReasoningTypes,
+      averageCompleteness,
+      averageSoundness,
+      // ... more metrics
+    };
+  }
+}
+```
+
+**Acceptance Criteria**:
+- [ ] Real-time metrics calculation
+- [ ] Mode and taxonomy distribution analytics
+- [ ] Quality metrics tracking
+- [ ] Time-series data generation
+- [ ] Performance profiling per session
+- [ ] Export reports to JSON/CSV/PDF
+- [ ] 8+ tests for analytics
+
+---
+
+#### Task 9.3: Implement Session Templates
+**Files**: `src/templates/index.ts`, `src/templates/builtin.ts`
+**Estimated Time**: 12 hours
+
+**Code Snippet**:
+```typescript
+export class TemplateManager {
+  private templates: Map<string, SessionTemplate>;
+
+  constructor() {
+    this.loadBuiltInTemplates();
+  }
+
+  private loadBuiltInTemplates(): void {
+    // Scientific Hypothesis Testing
+    this.templates.set('scientific-hypothesis', {
+      id: 'scientific-hypothesis',
+      name: 'Scientific Hypothesis Testing',
+      description: 'Systematic hypothesis formation and testing',
+      category: 'science',
+      recommendedMode: ThinkingMode.ABDUCTIVE,
+      alternativeModes: [ThinkingMode.BAYESIAN, ThinkingMode.COUNTERFACTUAL],
+      initialThoughts: [
+        {
+          content: 'Observe phenomenon and identify what needs explanation',
+          position: 1,
+          mode: ThinkingMode.ABDUCTIVE,
+          isPlaceholder: true,
+        },
+        {
+          content: 'Generate possible hypotheses using abductive reasoning',
+          position: 2,
+          mode: ThinkingMode.ABDUCTIVE,
+          isPlaceholder: true,
+        },
+        {
+          content: 'Calculate prior probabilities and likelihoods',
+          position: 3,
+          mode: ThinkingMode.BAYESIAN,
+          isPlaceholder: true,
+        },
+        {
+          content: 'Consider counterfactual scenarios if hypothesis were false',
+          position: 4,
+          mode: ThinkingMode.COUNTERFACTUAL,
+          isPlaceholder: true,
+        },
+      ],
+      expectedReasoningTypes: ['abductive', 'inductive', 'probabilistic'],
+      cognitiveLoadEstimate: 'high',
+    });
+
+    // Add more built-in templates...
+  }
+
+  async applyTemplate(
+    templateId: string,
+    initialData?: Record<string, any>
+  ): Promise<ThinkingSession> {
+    const template = this.templates.get(templateId);
+    if (!template) {
+      throw new Error(`Template not found: ${templateId}`);
+    }
+
+    // Create new session
+    const session = await this.createSessionFromTemplate(template, initialData);
+    return session;
+  }
+}
+```
+
+**Acceptance Criteria**:
+- [ ] Template CRUD operations
+- [ ] 6+ built-in templates implemented
+- [ ] Template application creates valid sessions
+- [ ] Template recommendation based on problem description
+- [ ] 6+ tests for template functionality
+
+---
+
+#### Task 9.4: Implement Batch Processing
+**Files**: `src/batch/processor.ts`, `src/batch/queue.ts`
+**Estimated Time**: 14 hours
+
+**Acceptance Criteria**:
+- [ ] Batch job submission and management
+- [ ] Parallel processing of multiple sessions
+- [ ] Progress tracking and monitoring
+- [ ] Error handling and retry logic
+- [ ] Job cancellation
+- [ ] 8+ tests for batch processing
+
+---
+
+#### Task 9.5: Implement API Management
+**Files**: `src/api/management.ts`, `src/api/rate-limiter.ts`
+**Estimated Time**: 10 hours
+
+**Acceptance Criteria**:
+- [ ] Rate limiting per user/IP/global
+- [ ] Quota management and enforcement
+- [ ] API metrics tracking
+- [ ] 6+ tests for API management
+
+---
+
+#### Task 9.6: Implement Caching Layer
+**Files**: `src/cache/manager.ts`, `src/cache/strategies.ts`
+**Estimated Time**: 8 hours
+
+**Acceptance Criteria**:
+- [ ] Cache operations (get, set, delete, clear)
+- [ ] getOrCompute pattern
+- [ ] LRU/LFU/FIFO strategies
+- [ ] Cache statistics
+- [ ] TTL support
+- [ ] 8+ tests for caching
+
+---
+
+#### Task 9.7: Implement Webhook System
+**Files**: `src/events/webhooks.ts`, `src/events/delivery.ts`
+**Estimated Time**: 12 hours
+
+**Acceptance Criteria**:
+- [ ] Webhook registration and management
+- [ ] Event triggering for 8+ event types
+- [ ] HMAC signature verification
+- [ ] Delivery retry with exponential backoff
+- [ ] Delivery status tracking
+- [ ] 8+ tests for webhooks
+
+---
+
+#### Task 9.8: Implement Backup & Restore System
+**Files**: `src/backup/manager.ts`, `src/backup/storage.ts`
+**Estimated Time**: 16 hours
+
+**Acceptance Criteria**:
+- [ ] Backup creation (full and incremental)
+- [ ] Multiple storage backends (local, S3, GCS, Azure)
+- [ ] Restore functionality
+- [ ] Backup verification and integrity checks
+- [ ] Scheduled backups with cron
+- [ ] Compression and encryption support
+- [ ] 10+ tests for backup/restore
+
+---
+
+#### Task 9.9: Implement Session Comparison Tools
+**Files**: `src/comparison/comparator.ts`, `src/comparison/similarity.ts`
+**Estimated Time**: 10 hours
+
+**Acceptance Criteria**:
+- [ ] Side-by-side session comparison
+- [ ] Structural similarity metrics
+- [ ] Quality comparison
+- [ ] Taxonomy-based comparison
+- [ ] Best practice extraction
+- [ ] 8+ tests for comparison
+
+---
+
+#### Task 9.10: Integration Testing for Production Features
+**File**: `tests/integration/production.test.ts`
+**Estimated Time**: 16 hours
+
+**Acceptance Criteria**:
+- [ ] End-to-end tests for search
+- [ ] Analytics data accuracy tests
+- [ ] Template application tests
+- [ ] Batch processing performance tests
+- [ ] Cache effectiveness tests
+- [ ] Webhook delivery tests
+- [ ] Backup/restore integrity tests
+- [ ] 30+ integration tests
+
+---
+
 ## Updated Total Effort
 
 ### Phase 4D (v3.5.0) - Taxonomy Integration
@@ -1889,12 +2200,26 @@ export enum ThinkingMode {
 - Documentation: 8 hours
 **Subtotal: 96 hours (~12 days)**
 
-### Original Phases 4A-4C + 4F
+### Phase 4F (v3.9.0) - Production Features
+- Search & Query: 16 hours
+- Analytics Dashboard: 20 hours
+- Session Templates: 12 hours
+- Batch Processing: 14 hours
+- API Management: 10 hours
+- Caching Layer: 8 hours
+- Webhook System: 12 hours
+- Backup & Restore: 16 hours
+- Session Comparison: 10 hours
+- Integration Testing: 16 hours
+- Documentation: 10 hours
+**Subtotal: 144 hours (~18 days)**
+
+### Original Phases 4A-4C + 4G
 - Phase 4A: 65 hours
 - Phase 4B: 80 hours
 - Phase 4C: 70 hours
-- Phase 4F (ML): 96 hours (updated for 19 modes)
+- Phase 4G (ML): 96 hours (updated for 19 modes)
 **Subtotal: 311 hours (~39 days)**
 
-**Grand Total (Enhanced): ~485 hours (~60 days / 12 weeks)**
-**Increase from Original: +165 hours (+51%)**
+**Grand Total (Enhanced): ~629 hours (~79 days / 16 weeks)**
+**Increase from Original: +309 hours (+97%)**
