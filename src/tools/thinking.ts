@@ -449,7 +449,7 @@ Phase 3 Modes (v2.1+):
 Actions:
 - add_thought: Add a new thought to the session (default)
 - summarize: Generate a summary of the session
-- export: Export session in various formats (markdown, latex, json, html, jupyter)
+- export: Export session in various formats (markdown, latex, json, html, jupyter, mermaid, dot, ascii)
 - switch_mode: Change reasoning mode mid-session
 - get_session: Retrieve session information
 - recommend_mode: Get intelligent mode recommendations based on problem characteristics
@@ -715,6 +715,99 @@ Choose the mode that best fits your problem type, or use recommend_mode to get i
           required: ["id", "from", "to", "relationType", "strength"]
         },
         description: "Temporal causal/enabling relations"
+      },
+      // Game theory properties (Phase 3, v2.2)
+      players: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            role: { type: "string" },
+            isRational: { type: "boolean" },
+            availableStrategies: {
+              type: "array",
+              items: { type: "string" }
+            }
+          },
+          required: ["id", "name", "isRational", "availableStrategies"]
+        },
+        description: "Players in the game"
+      },
+      strategies: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            playerId: { type: "string" },
+            name: { type: "string" },
+            description: { type: "string" },
+            isPure: { type: "boolean" },
+            probability: { type: "number", minimum: 0, maximum: 1 }
+          },
+          required: ["id", "playerId", "name", "description", "isPure"]
+        },
+        description: "Available strategies"
+      },
+      payoffMatrix: {
+        type: "object",
+        properties: {
+          players: {
+            type: "array",
+            items: { type: "string" }
+          },
+          dimensions: {
+            type: "array",
+            items: { type: "number" }
+          },
+          payoffs: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                strategyProfile: {
+                  type: "array",
+                  items: { type: "string" }
+                },
+                payoffs: {
+                  type: "array",
+                  items: { type: "number" }
+                }
+              },
+              required: ["strategyProfile", "payoffs"]
+            }
+          }
+        },
+        required: ["players", "dimensions", "payoffs"],
+        description: "Payoff matrix for the game"
+      },
+      // Evidential reasoning properties (Phase 3, v2.3)
+      frameOfDiscernment: {
+        type: "array",
+        items: { type: "string" },
+        description: "Frame of discernment (set of all possible hypotheses)"
+      },
+      beliefMasses: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            hypothesisSet: {
+              type: "array",
+              items: { type: "string" }
+            },
+            mass: {
+              type: "number",
+              minimum: 0,
+              maximum: 1
+            },
+            justification: { type: "string" }
+          },
+          required: ["hypothesisSet", "mass", "justification"]
+        },
+        description: "Belief mass assignments (Dempster-Shafer)"
       },
       action: {
         type: "string",

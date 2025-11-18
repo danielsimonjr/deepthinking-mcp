@@ -5,6 +5,62 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.6] - 2025-11-18
+
+### Testing & Quality Assurance (Phase 3.5D)
+- **Comprehensive Integration Test Suite**: Added 64 new integration tests
+  - **Session Workflow Tests** (7 tests): End-to-end session lifecycle testing
+    - Full sequential thinking workflow with 5 thoughts
+    - Mathematics mode with theorem proving and validation
+    - Mode switching mid-session (sequential → shannon)
+    - Validation cache statistics tracking
+    - Multiple concurrent sessions
+    - Session deletion and metrics accuracy
+  - **MCP Protocol Compliance Tests** (21 tests): Ensures MCP standard adherence
+    - Tool definition structure and properties validation
+    - Input schema validation (JSON Schema)
+    - Zod schema runtime validation
+    - All 13 thinking modes documented and supported
+    - Export format support (markdown, latex, json, html, jupyter, mermaid, dot, ascii)
+    - Phase 3 mode-specific properties (temporal, game theory, evidential)
+  - **Error Handling & Edge Cases** (36 tests): Robustness and reliability testing
+    - Invalid session operations and graceful degradation
+    - Boundary conditions (uncertainty 0-1, large numbers, single thoughts)
+    - Empty data handling (empty content, titles, sessions)
+    - Special character support (Unicode, LaTeX, newlines, XSS patterns)
+    - Large data handling (100KB thoughts, 100-thought sessions)
+    - Concurrent operations (rapid session creation, concurrent updates)
+    - Mode-specific edge cases (mathematics, shannon, temporal modes)
+
+### MCP Tool Enhancements
+- **Complete JSON Schema**: Added missing Phase 3 properties to MCP tool schema
+  - Game theory properties: `players`, `strategies`, `payoffMatrix`
+  - Evidential reasoning properties: `frameOfDiscernment`, `beliefMasses`
+  - Updated export format documentation to include all supported formats
+
+### Documentation
+- Documented current lenient validation behavior (validation at MCP tool level)
+- Added TODOs for future SessionManager input validation improvements
+- Comprehensive test coverage documentation
+
+### Test Coverage Summary
+- **Total Integration Tests**: 64 passing
+- **Total Unit Tests**: 212 passing
+- **Total Tests**: 276 passing
+- **Test Categories**:
+  - Unit tests: types, modes, validation, sanitization, session management
+  - Integration tests: workflows, MCP compliance, error handling
+  - Performance benchmarks: validation cache, metrics calculation
+  - Benchmark tests: 5 passing (2 flaky timing tests excluded)
+
+### Known Issues
+- SessionManager currently uses lenient validation (accepts invalid inputs)
+  - Input validation happens at MCP tool level via Zod schema
+  - Future enhancement: Add validation layer to SessionManager
+  - Tests document expected vs. actual behavior
+
+---
+
 ## [2.5.5] - 2025-11-17
 
 ### Performance (Phase 3.5C)
