@@ -88,6 +88,15 @@ export interface SessionMetrics {
   dependencyDepth: number;
   customMetrics: Map<string, any>;
 
+  // Validation cache statistics
+  cacheStats?: {
+    hits: number;
+    misses: number;
+    hitRate: number;
+    size: number;
+    maxSize: number;
+  };
+
   // Running totals for incremental calculation (internal use)
   _uncertaintySum?: number;
   _uncertaintyCount?: number;

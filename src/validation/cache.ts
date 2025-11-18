@@ -6,17 +6,15 @@
  */
 
 import { getConfig } from '../config/index.js';
+import { ValidationResult } from '../types/session.js';
 import { createHash } from 'crypto';
 
 /**
  * Validation result entry
  */
 export interface ValidationCacheEntry {
-  /** Whether validation passed */
-  isValid: boolean;
-
-  /** Validation errors if any */
-  errors?: string[];
+  /** Cached validation result */
+  result: ValidationResult;
 
   /** Timestamp of validation */
   timestamp: number;
@@ -82,10 +80,9 @@ export class ValidationCache {
    * Store validation result in cache
    *
    * @param content - Content that was validated
-   * @param isValid - Whether validation passed
-   * @param errors - Validation errors if any
+   * @param result - Validation result to cache
    */
-  set(content: unknown, isValid: boolean, errors?: string[]): void {
+  set(content: unknown, result: ValidationResult): void {
     const key = this.generateKey(content);
 
     // If cache is full, remove least recently used (first entry)
@@ -97,8 +94,7 @@ export class ValidationCache {
     }
 
     const entry: ValidationCacheEntry = {
-      isValid,
-      errors,
+      result,
       timestamp: Date.now(),
       hitCount: 0,
     };

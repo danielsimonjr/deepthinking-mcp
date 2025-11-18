@@ -30,6 +30,8 @@ import { TemporalThought, isTemporalThought } from '../types/modes/temporal.js';
 import { GameTheoryThought, isGameTheoryThought } from '../types/modes/gametheory.js';
 import { EvidentialThought, isEvidentialThought } from '../types/modes/evidential.js';
 import { ValidationResult, ValidationIssue } from '../types/session.js';
+import { validationCache } from './cache.js';
+import { getConfig } from '../config/index.js';
 
 /**
  * Main validator class
@@ -39,6 +41,32 @@ export class ThoughtValidator {
    * Validate a thought based on its mode
    */
   async validate(thought: Thought, context: ValidationContext = {}): Promise<ValidationResult> {
+    const config = getConfig();
+
+    // Check cache if enabled
+    if (config.enableValidationCache) {
+      const cached = validationCache.get(thought);
+      if (cached) {
+        // Cache hit - return cached result
+        return cached.result;
+      }
+    }
+
+    // Cache miss or caching disabled - perform validation
+    const result = await this.performValidation(thought, context);
+
+    // Cache result if enabled
+    if (config.enableValidationCache) {
+      validationCache.set(thought, result);
+    }
+
+    return result;
+  }
+
+  /**
+   * Perform actual validation (extracted for caching)
+   */
+  private async performValidation(thought: Thought, context: ValidationContext = {}): Promise<ValidationResult> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
