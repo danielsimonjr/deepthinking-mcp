@@ -600,34 +600,34 @@ function exportToMarkdown(session: any): string {
 }
 
 function exportToLatex(session: any): string {
-  let latex = `\documentclass{article}
+  let latex = `\\documentclass{article}
 `;
-  latex += `\title{Thinking Session: ${session.id}}
+  latex += `\\title{Thinking Session: ${session.id}}
 `;
-  latex += `\begin{document}
+  latex += `\\begin{document}
 `;
-  latex += `\maketitle
+  latex += `\\maketitle
 
 `;
-  latex += `\section{Session Details}
+  latex += `\\section{Session Details}
 `;
-  latex += `Mode: ${session.mode}\\
+  latex += `Mode: ${session.mode}\\\\
 `;
-  latex += `Status: ${session.status}\\
+  latex += `Status: ${session.status}\\\\
 
 `;
-  latex += `\section{Thoughts}
+  latex += `\\section{Thoughts}
 `;
 
   for (const thought of session.thoughts) {
-    latex += `\subsection{Thought ${thought.thoughtNumber}}
+    latex += `\\subsection{Thought ${thought.thoughtNumber}}
 `;
     latex += `${thought.content}
 
 `;
   }
 
-  latex += `\end{document}
+  latex += `\\end{document}
 `;
   return latex;
 }

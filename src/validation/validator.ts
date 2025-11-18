@@ -66,7 +66,6 @@ export class ThoughtValidator {
 
     // Calculate validation result
     const errors = issues.filter(i => i.severity === 'error');
-    const warnings = issues.filter(i => i.severity === 'warning');
 
     return {
       isValid: errors.length === 0,

@@ -4,7 +4,7 @@
  * Defines the contract that all mode-specific validators must implement
  */
 
-import { Thought, ValidationResult, ValidationIssue, ValidationContext } from '../../types/index.js';
+import { Thought, ValidationIssue, ValidationContext } from '../../types/index.js';
 
 /**
  * Interface for mode-specific validators

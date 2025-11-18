@@ -9,7 +9,7 @@ import { ThinkingSession } from '../types/session.js';
 import { getConfig } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import { promises as fs } from 'fs';
-import { join, dirname } from 'path';
+import { join } from 'path';
 import { existsSync } from 'fs';
 
 /**

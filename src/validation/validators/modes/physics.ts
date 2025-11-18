@@ -10,7 +10,7 @@ export class PhysicsValidator extends BaseValidator<PhysicsThought> {
     return 'physics';
   }
 
-  validate(thought: PhysicsThought, context: ValidationContext): ValidationIssue[] {
+  validate(thought: PhysicsThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation
