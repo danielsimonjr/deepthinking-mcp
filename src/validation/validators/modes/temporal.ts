@@ -152,8 +152,8 @@ export class TemporalValidator extends BaseValidator<TemporalThought> {
           issues.push({
             severity: 'error',
             thoughtNumber: thought.thoughtNumber,
-            description: `Temporal relation ${relation.id} strength must be between 0 and 1`,
-            suggestion: 'Provide strength as decimal',
+            description: `Relation ${relation.id} strength must be 0-1`,
+            suggestion: 'Use decimal strength values between 0 and 1',
             category: 'structural',
           });
         }

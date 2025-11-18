@@ -29,7 +29,7 @@ export class CausalValidator extends BaseValidator<CausalThought> {
           issues.push({
             severity: 'error',
             thoughtNumber: thought.thoughtNumber,
-            description: `Edge references non-existent node: ${edge.from}`,
+            description: `Edge references non-existent source node: ${edge.from}`,
             suggestion: 'Ensure all edge endpoints reference existing nodes',
             category: 'structural',
           });
@@ -38,7 +38,7 @@ export class CausalValidator extends BaseValidator<CausalThought> {
           issues.push({
             severity: 'error',
             thoughtNumber: thought.thoughtNumber,
-            description: `Edge references non-existent node: ${edge.to}`,
+            description: `Edge references non-existent target node: ${edge.to}`,
             suggestion: 'Ensure all edge endpoints reference existing nodes',
             category: 'structural',
           });
@@ -69,7 +69,9 @@ export class CausalValidator extends BaseValidator<CausalThought> {
 
       // Detect cycles in causal graph
       const hasCycle = this.detectCycle(edges, nodeIds);
-      if (hasCycle) {
+      // Only warn about cycles if no feedback mechanisms are explicitly marked
+      const hasFeedbackMechanism = thought.mechanisms?.some(m => m.type === 'feedback');
+      if (hasCycle && !hasFeedbackMechanism) {
         issues.push({
           severity: 'warning',
           thoughtNumber: thought.thoughtNumber,
@@ -121,7 +123,7 @@ export class CausalValidator extends BaseValidator<CausalThought> {
             issues.push({
               severity: 'error',
               thoughtNumber: thought.thoughtNumber,
-              description: `Intervention expected effect references non-existent node: ${effect.nodeId}`,
+              description: `Intervention effect references non-existent node: ${effect.nodeId}`,
               suggestion: 'Ensure expected effects reference existing nodes',
               category: 'structural',
             });

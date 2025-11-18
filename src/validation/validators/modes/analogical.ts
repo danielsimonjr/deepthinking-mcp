@@ -21,8 +21,8 @@ export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {
       issues.push({
         severity: 'error',
         thoughtNumber: thought.thoughtNumber,
-        description: 'Source domain is required',
-        suggestion: 'Provide the source domain for the analogy',
+        description: 'Analogical reasoning requires a source domain',
+        suggestion: 'Provide the known domain for comparison',
         category: 'structural',
       });
     }
@@ -32,8 +32,8 @@ export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {
       issues.push({
         severity: 'error',
         thoughtNumber: thought.thoughtNumber,
-        description: 'Target domain is required',
-        suggestion: 'Provide the target domain for the analogy',
+        description: 'Analogical reasoning requires a target domain',
+        suggestion: 'Provide the domain being analyzed',
         category: 'structural',
       });
     }
@@ -107,9 +107,9 @@ export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {
       issues.push({
         severity: 'warning',
         thoughtNumber: thought.thoughtNumber,
-        description: 'No limitations of the analogy identified',
-        suggestion: 'Consider identifying potential limitations or weaknesses of the analogy',
-        category: 'completeness',
+        description: 'Good analogies acknowledge their limitations',
+        suggestion: 'Identify where the analogy breaks down or doesn\'t apply',
+        category: 'logical',
       });
     }
 

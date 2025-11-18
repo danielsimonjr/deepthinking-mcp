@@ -21,7 +21,7 @@ export class CounterfactualValidator extends BaseValidator<CounterfactualThought
       issues.push({
         severity: 'error',
         thoughtNumber: thought.thoughtNumber,
-        description: 'Actual scenario is required',
+        description: 'Counterfactual reasoning requires an actual scenario',
         suggestion: 'Provide the actual scenario that occurred',
         category: 'structural',
       });
@@ -32,18 +32,18 @@ export class CounterfactualValidator extends BaseValidator<CounterfactualThought
       issues.push({
         severity: 'error',
         thoughtNumber: thought.thoughtNumber,
-        description: 'At least one counterfactual scenario is required',
+        description: 'at least one counterfactual scenario is required',
         suggestion: 'Provide at least one alternative scenario',
         category: 'structural',
       });
     }
 
     // Require intervention point
-    if (!thought.interventionPoint) {
+    if (!thought.interventionPoint || !thought.interventionPoint.description) {
       issues.push({
         severity: 'error',
         thoughtNumber: thought.thoughtNumber,
-        description: 'Intervention point is required',
+        description: 'Intervention point must be specified',
         suggestion: 'Specify where and how intervention could change the outcome',
         category: 'structural',
       });
@@ -71,27 +71,27 @@ export class CounterfactualValidator extends BaseValidator<CounterfactualThought
       }
     }
 
-    // Validate scenario probability ranges
-    if (thought.actual && thought.actual.probability !== undefined &&
-        (thought.actual.probability < 0 || thought.actual.probability > 1)) {
+    // Validate scenario likelihood ranges
+    if (thought.actual && thought.actual.likelihood !== undefined &&
+        (thought.actual.likelihood < 0 || thought.actual.likelihood > 1)) {
       issues.push({
         severity: 'error',
         thoughtNumber: thought.thoughtNumber,
-        description: 'Actual scenario probability must be between 0 and 1',
-        suggestion: 'Provide probability as decimal',
+        description: 'Actual scenario has invalid likelihood',
+        suggestion: 'Provide likelihood as decimal between 0 and 1',
         category: 'structural',
       });
     }
 
     if (thought.counterfactuals) {
       for (const scenario of thought.counterfactuals) {
-        if (scenario.probability !== undefined &&
-            (scenario.probability < 0 || scenario.probability > 1)) {
+        if (scenario.likelihood !== undefined &&
+            (scenario.likelihood < 0 || scenario.likelihood > 1)) {
           issues.push({
             severity: 'error',
             thoughtNumber: thought.thoughtNumber,
-            description: `Counterfactual scenario "${scenario.name}" probability must be between 0 and 1`,
-            suggestion: 'Provide probability as decimal',
+            description: `Counterfactual scenario "${scenario.name}" has invalid likelihood`,
+            suggestion: 'Provide likelihood as decimal between 0 and 1',
             category: 'structural',
           });
         }
@@ -104,6 +104,21 @@ export class CounterfactualValidator extends BaseValidator<CounterfactualThought
             description: `Counterfactual scenario "${scenario.name}" outcome magnitude must be between 0 and 1`,
             suggestion: 'Provide magnitude as decimal',
             category: 'structural',
+          });
+        }
+      }
+    }
+
+    // Validate comparison differences
+    if (thought.comparison && thought.comparison.differences) {
+      for (const diff of thought.comparison.differences) {
+        if (!diff.actual || !diff.counterfactual) {
+          issues.push({
+            severity: 'warning',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Difference "${diff.aspect}" should reference both actual and counterfactual values`,
+            suggestion: 'Provide both actual and counterfactual values for complete comparison',
+            category: 'completeness',
           });
         }
       }
