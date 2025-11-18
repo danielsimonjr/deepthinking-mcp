@@ -10,30 +10,42 @@ export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {
     return 'analogical';
   }
 
-  validate(thought: AnalogicalThought, context: ValidationContext): ValidationIssue[] {
+  validate(thought: AnalogicalThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation
     issues.push(...this.validateCommon(thought));
 
-    // Source domain should be specified
-    if (thought.sourceDomain && !thought.sourceDomain.description) {
+    // Require source domain
+    if (!thought.sourceDomain) {
       issues.push({
-        severity: 'warning',
+        severity: 'error',
         thoughtNumber: thought.thoughtNumber,
-        description: 'Source domain should have a description',
-        suggestion: 'Provide clear description of the source domain',
+        description: 'Source domain is required',
+        suggestion: 'Provide the source domain for the analogy',
         category: 'structural',
       });
     }
 
-    // Target domain should be specified
-    if (thought.targetDomain && !thought.targetDomain.description) {
+    // Require target domain
+    if (!thought.targetDomain) {
       issues.push({
-        severity: 'warning',
+        severity: 'error',
         thoughtNumber: thought.thoughtNumber,
-        description: 'Target domain should have a description',
-        suggestion: 'Provide clear description of the target domain',
+        description: 'Target domain is required',
+        suggestion: 'Provide the target domain for the analogy',
+        category: 'structural',
+      });
+    }
+
+    // Validate analogy strength range
+    if (thought.analogyStrength !== undefined &&
+        (thought.analogyStrength < 0 || thought.analogyStrength > 1)) {
+      issues.push({
+        severity: 'error',
+        thoughtNumber: thought.thoughtNumber,
+        description: 'Analogy strength must be between 0 and 1',
+        suggestion: 'Provide analogy strength as decimal',
         category: 'structural',
       });
     }
@@ -49,14 +61,82 @@ export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {
       });
     }
 
-    // Validate mapping confidence scores
-    if (thought.mapping) {
+    // Validate mapping references and confidence scores
+    if (thought.mapping && thought.sourceDomain && thought.targetDomain) {
+      const sourceEntityIds = new Set(thought.sourceDomain.entities.map(e => e.id));
+      const targetEntityIds = new Set(thought.targetDomain.entities.map(e => e.id));
+
       for (const map of thought.mapping) {
+        // Validate source entity reference
+        if (!sourceEntityIds.has(map.sourceEntityId)) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Mapping references non-existent source entity: ${map.sourceEntityId}`,
+            suggestion: 'Ensure mappings reference existing source entities',
+            category: 'structural',
+          });
+        }
+
+        // Validate target entity reference
+        if (!targetEntityIds.has(map.targetEntityId)) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Mapping references non-existent target entity: ${map.targetEntityId}`,
+            suggestion: 'Ensure mappings reference existing target entities',
+            category: 'structural',
+          });
+        }
+
+        // Validate confidence range
         if (map.confidence < 0 || map.confidence > 1) {
           issues.push({
             severity: 'error',
             thoughtNumber: thought.thoughtNumber,
-            description: `Mapping confidence must be between 0 and 1: ${map.sourceElement} -> ${map.targetElement}`,
+            description: `Mapping confidence must be between 0 and 1: ${map.sourceEntityId} -> ${map.targetEntityId}`,
+            suggestion: 'Provide confidence as decimal',
+            category: 'structural',
+          });
+        }
+      }
+    }
+
+    // Warn if no limitations identified
+    if (!thought.limitations || thought.limitations.length === 0) {
+      issues.push({
+        severity: 'warning',
+        thoughtNumber: thought.thoughtNumber,
+        description: 'No limitations of the analogy identified',
+        suggestion: 'Consider identifying potential limitations or weaknesses of the analogy',
+        category: 'completeness',
+      });
+    }
+
+    // Validate insight novelty ranges
+    if (thought.insights) {
+      for (const insight of thought.insights) {
+        if (insight.novelty !== undefined &&
+            (insight.novelty < 0 || insight.novelty > 1)) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: 'Insight novelty must be between 0 and 1',
+            suggestion: 'Provide novelty as decimal',
+            category: 'structural',
+          });
+        }
+      }
+    }
+
+    // Validate inference confidence ranges
+    if (thought.inferences) {
+      for (const inference of thought.inferences) {
+        if (inference.confidence < 0 || inference.confidence > 1) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: 'Inference confidence must be between 0 and 1',
             suggestion: 'Provide confidence as decimal',
             category: 'structural',
           });

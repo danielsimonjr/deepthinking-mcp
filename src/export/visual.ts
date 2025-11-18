@@ -40,7 +40,7 @@ export class VisualExporter {
    * Export temporal timeline to visual format
    */
   exportTemporalTimeline(thought: TemporalThought, options: VisualExportOptions): string {
-    const { format, colorScheme = 'default', includeLabels = true } = options;
+    const { format, includeLabels = true } = options;
 
     switch (format) {
       case 'mermaid':

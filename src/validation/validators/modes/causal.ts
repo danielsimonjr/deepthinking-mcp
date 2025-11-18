@@ -10,7 +10,7 @@ export class CausalValidator extends BaseValidator<CausalThought> {
     return 'causal';
   }
 
-  validate(thought: CausalThought, context: ValidationContext): ValidationIssue[] {
+  validate(thought: CausalThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation
@@ -44,16 +44,39 @@ export class CausalValidator extends BaseValidator<CausalThought> {
           });
         }
 
-        // Validate strength is in range
-        if (edge.strength < 0 || edge.strength > 1) {
+        // Validate strength is in range (-1 to 1)
+        if (edge.strength < -1 || edge.strength > 1) {
           issues.push({
             severity: 'error',
             thoughtNumber: thought.thoughtNumber,
-            description: `Edge strength must be between 0 and 1: ${edge.from} -> ${edge.to}`,
-            suggestion: 'Provide edge strength as decimal',
+            description: `Edge strength must be between -1 and 1: ${edge.from} -> ${edge.to}`,
+            suggestion: 'Provide edge strength as decimal (-1 for inhibitory, +1 for excitatory)',
             category: 'structural',
           });
         }
+
+        // Validate confidence is in range (0 to 1)
+        if (edge.confidence < 0 || edge.confidence > 1) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Edge confidence must be between 0 and 1: ${edge.from} -> ${edge.to}`,
+            suggestion: 'Provide confidence as decimal',
+            category: 'structural',
+          });
+        }
+      }
+
+      // Detect cycles in causal graph
+      const hasCycle = this.detectCycle(edges, nodeIds);
+      if (hasCycle) {
+        issues.push({
+          severity: 'warning',
+          thoughtNumber: thought.thoughtNumber,
+          description: 'Causal graph contains cycles (feedback loops)',
+          suggestion: 'Verify that cyclical relationships are intentional',
+          category: 'structural',
+        });
       }
 
       // Check for isolated nodes
@@ -68,7 +91,7 @@ export class CausalValidator extends BaseValidator<CausalThought> {
           issues.push({
             severity: 'info',
             thoughtNumber: thought.thoughtNumber,
-            description: `Node "${node.label}" is isolated (no connections)`,
+            description: `Node "${node.name}" is isolated (no connections)`,
             suggestion: 'Consider adding causal relationships or removing isolated nodes',
             category: 'structural',
           });
@@ -76,6 +99,97 @@ export class CausalValidator extends BaseValidator<CausalThought> {
       }
     }
 
+    // Validate interventions
+    if (thought.interventions) {
+      const nodeIds = new Set(thought.causalGraph?.nodes.map(n => n.id) || []);
+
+      for (const intervention of thought.interventions) {
+        // Validate intervention references existing node
+        if (!nodeIds.has(intervention.nodeId)) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Intervention references non-existent node: ${intervention.nodeId}`,
+            suggestion: 'Ensure intervention references existing nodes',
+            category: 'structural',
+          });
+        }
+
+        // Validate expected effects reference existing nodes
+        for (const effect of intervention.expectedEffects) {
+          if (!nodeIds.has(effect.nodeId)) {
+            issues.push({
+              severity: 'error',
+              thoughtNumber: thought.thoughtNumber,
+              description: `Intervention expected effect references non-existent node: ${effect.nodeId}`,
+              suggestion: 'Ensure expected effects reference existing nodes',
+              category: 'structural',
+            });
+          }
+
+          // Validate confidence range
+          if (effect.confidence < 0 || effect.confidence > 1) {
+            issues.push({
+              severity: 'error',
+              thoughtNumber: thought.thoughtNumber,
+              description: `Intervention effect confidence must be between 0 and 1`,
+              suggestion: 'Provide confidence as decimal',
+              category: 'structural',
+            });
+          }
+        }
+      }
+    }
+
     return issues;
+  }
+
+  /**
+   * Detect cycles in directed graph using DFS
+   */
+  private detectCycle(edges: { from: string; to: string }[], nodeIds: Set<string>): boolean {
+    const graph = new Map<string, string[]>();
+
+    // Build adjacency list
+    for (const nodeId of nodeIds) {
+      graph.set(nodeId, []);
+    }
+    for (const edge of edges) {
+      const neighbors = graph.get(edge.from) || [];
+      neighbors.push(edge.to);
+      graph.set(edge.from, neighbors);
+    }
+
+    const visited = new Set<string>();
+    const recStack = new Set<string>();
+
+    const dfs = (node: string): boolean => {
+      visited.add(node);
+      recStack.add(node);
+
+      const neighbors = graph.get(node) || [];
+      for (const neighbor of neighbors) {
+        if (!visited.has(neighbor)) {
+          if (dfs(neighbor)) {
+            return true;
+          }
+        } else if (recStack.has(neighbor)) {
+          return true; // Cycle detected
+        }
+      }
+
+      recStack.delete(node);
+      return false;
+    };
+
+    for (const node of nodeIds) {
+      if (!visited.has(node)) {
+        if (dfs(node)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }

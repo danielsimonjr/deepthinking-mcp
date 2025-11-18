@@ -10,7 +10,7 @@ export class EvidentialValidator extends BaseValidator<EvidentialThought> {
     return 'evidential';
   }
 
-  validate(thought: EvidentialThought, context: ValidationContext): ValidationIssue[] {
+  validate(thought: EvidentialThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation

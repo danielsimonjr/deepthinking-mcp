@@ -10,7 +10,7 @@ export class MathematicsValidator extends BaseValidator<MathematicsThought> {
     return 'mathematics';
   }
 
-  validate(thought: MathematicsThought, context: ValidationContext): ValidationIssue[] {
+  validate(thought: MathematicsThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation

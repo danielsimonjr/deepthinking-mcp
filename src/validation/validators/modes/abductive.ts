@@ -10,7 +10,7 @@ export class AbductiveValidator extends BaseValidator<AbductiveThought> {
     return 'abductive';
   }
 
-  validate(thought: AbductiveThought, context: ValidationContext): ValidationIssue[] {
+  validate(thought: AbductiveThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation

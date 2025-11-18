@@ -10,7 +10,7 @@ export class ShannonValidator extends BaseValidator<ShannonThought> {
     return 'shannon';
   }
 
-  validate(thought: ShannonThought, context: ValidationContext): ValidationIssue[] {
+  validate(thought: ShannonThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation

@@ -10,7 +10,7 @@ export class SequentialValidator extends BaseValidator<SequentialThought> {
     return 'sequential';
   }
 
-  validate(thought: SequentialThought, context: ValidationContext): ValidationIssue[] {
+  validate(thought: SequentialThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation

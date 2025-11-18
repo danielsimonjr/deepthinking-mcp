@@ -10,7 +10,7 @@ export class TemporalValidator extends BaseValidator<TemporalThought> {
     return 'temporal';
   }
 
-  validate(thought: TemporalThought, context: ValidationContext): ValidationIssue[] {
+  validate(thought: TemporalThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation
@@ -115,6 +115,56 @@ export class TemporalValidator extends BaseValidator<TemporalThought> {
             thoughtNumber: thought.thoughtNumber,
             description: `Constraint ${constraint.id} confidence must be 0-1`,
             suggestion: 'Use decimal confidence values between 0 and 1',
+            category: 'structural',
+          });
+        }
+      }
+    }
+
+    // Validate temporal relations
+    if (thought.relations) {
+      const eventIds = new Set(thought.events?.map((e) => e.id) || []);
+
+      for (const relation of thought.relations) {
+        // Validate relation references existing events
+        if (!eventIds.has(relation.from)) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Temporal relation ${relation.id} 'from' event ${relation.from} not found`,
+            suggestion: 'Ensure relation references existing events',
+            category: 'structural',
+          });
+        }
+
+        if (!eventIds.has(relation.to)) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Temporal relation ${relation.id} 'to' event ${relation.to} not found`,
+            suggestion: 'Ensure relation references existing events',
+            category: 'structural',
+          });
+        }
+
+        // Validate relation strength range
+        if (relation.strength < 0 || relation.strength > 1) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Temporal relation ${relation.id} strength must be between 0 and 1`,
+            suggestion: 'Provide strength as decimal',
+            category: 'structural',
+          });
+        }
+
+        // Validate relation delay is non-negative
+        if (relation.delay !== undefined && relation.delay < 0) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Temporal relation ${relation.id} delay cannot be negative`,
+            suggestion: 'Use non-negative delay values',
             category: 'structural',
           });
         }

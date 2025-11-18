@@ -10,7 +10,7 @@ export class HybridValidator extends BaseValidator<HybridThought> {
     return 'hybrid';
   }
 
-  validate(thought: HybridThought, context: ValidationContext): ValidationIssue[] {
+  validate(thought: HybridThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation
