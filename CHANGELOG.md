@@ -36,10 +36,19 @@ Fixed all TypeScript compilation errors (~80 errors resolved) to ensure clean bu
 - **Null Handling**: Fixed null vs undefined type mismatches in session manager
 - **Property Names**: Fixed GameNode, Strategy, and Bayesian type property mismatches in visual export
 
+#### Test Data Fixes
+- **Visual Export Tests**: Fixed 3 test failures caused by TypeScript property changes
+  - Updated Strategy test data: `type: 'pure'` → `isPure: true`
+  - Updated GameNode test data: `name`, `isTerminal` → `type`, `action` properties
+  - Updated Game interface test data to match actual type definition
+  - Updated BayesianEvidence test data: `observation` → `description`
+  - Updated test expectations for strategy type capitalization: `(pure)` → `(Pure)`
+
 #### Results
 - **TypeScript Errors**: 0 (down from ~80)
 - **Test Suite**: 397/397 passing (100%)
-- **Files Modified**: 35 files
+- **Files Modified**: 36 files (35 source files + 1 test file)
+- **Package Published**: Successfully published to npm as deepthinking-mcp@3.0.2
 
 ### Phase 3.5F - CI/CD Pipeline
 
