@@ -1,10 +1,10 @@
-# DeepThinking MCP v3.0.2
+# DeepThinking MCP v3.1.0
 
-A comprehensive Model Context Protocol (MCP) server featuring **13 advanced reasoning modes** with intelligent mode recommendation, visual export capabilities, high-performance validation caching, comprehensive testing, and automated CI/CD for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **14 advanced reasoning modes** with intelligent mode recommendation, visual export capabilities, high-performance validation caching, comprehensive testing, and automated CI/CD for complex problem-solving, analysis, and decision-making.
 
 ## Overview
 
-DeepThinking MCP v3.0 provides a complete toolkit for structured reasoning with 13 specialized modes, an intelligent recommendation system, powerful visual export capabilities, and optimized performance through validation caching:
+DeepThinking MCP v3.1 provides a complete toolkit for structured reasoning with 14 specialized modes, an intelligent recommendation system, powerful visual export capabilities, and optimized performance through validation caching:
 
 ### Core Modes
 - **Sequential**: Iterative refinement with revision capabilities
@@ -23,6 +23,7 @@ n### Phase 3 Modes (v2.3+)
 - **Temporal**: Event timelines, temporal constraints, Allen's interval algebra, causal relations over time
 - **Game Theory**: Nash equilibria, strategic analysis, payoff matrices, dominant strategies, game trees
 - **Evidential**: Dempster-Shafer theory, belief functions, evidence combination, uncertainty intervals
+- **First-Principles**: Deductive reasoning from foundational axioms and principles
 
 ## Features
 
@@ -45,6 +46,7 @@ n#### Phase 3 Reasoning Modes (v2.3+)
 - **Temporal**: Model events, intervals, and temporal relationships using Allen's interval algebra. Track causality over time with timestamps, durations, and temporal constraints. Perfect for timeline analysis, scheduling problems, and understanding event sequences.
 - **Game Theory**: Analyze strategic interactions between rational agents. Define games, players, and strategies. Compute Nash equilibria (pure and mixed), identify dominant strategies, construct payoff matrices, and build extensive-form game trees. Ideal for competitive analysis, mechanism design, and strategic decision-making.
 - **Evidential**: Apply Dempster-Shafer theory for reasoning with uncertain and incomplete evidence. Define hypotheses, collect evidence with reliability scores, assign belief functions with mass assignments, combine evidence using Dempster's rule, compute belief and plausibility intervals, and make decisions under uncertainty. Ideal for sensor fusion, diagnostic reasoning, intelligence analysis, and situations with incomplete information.
+- **First-Principles**: Derive conclusions from foundational axioms and principles using deductive reasoning. Define principles (axioms, definitions, observations), build derivation chains with logical inferences, track confidence levels, and reach conclusions with certainty analysis. Ideal for fundamental analysis, conceptual understanding, and reasoning from basic truths.
 
 ### Mathematical Enhancements
 - **Symbolic computation** support with LaTeX and symbolic formats
@@ -192,11 +194,7 @@ Export your reasoning sessions as visual diagrams in multiple formats for presen
 - **DOT**: Graphviz format for professional graph visualization and publication-quality diagrams
 - **ASCII**: Plain text diagrams for terminal output, logs, and text-based documentation
 
-#### Supported Modes
-- **Causal Mode**: Export causal graphs showing cause-effect relationships with node types (causes, effects, mediators, confounders) and edge strengths
-- **Temporal Mode**: Export timelines as Gantt charts showing events, intervals, and temporal relationships
-- **Game Theory Mode**: Export game trees with strategies, decision nodes, and payoffs
-- **Bayesian Mode**: Export Bayesian networks showing prior/posterior relationships and evidence flow
+#### Supported Modes**All 14 modes now support visual export (100% coverage):**- **Causal Mode**: Export causal graphs showing cause-effect relationships with node types (causes, effects, mediators, confounders) and edge strengths- **Temporal Mode**: Export timelines as Gantt charts showing events, intervals, and temporal relationships- **Game Theory Mode**: Export game trees with strategies, decision nodes, and payoffs- **Bayesian Mode**: Export Bayesian networks showing prior/posterior relationships and evidence flow- **First-Principles Mode**: Export derivation chains showing question → principles → derivation steps → conclusion flow- **All Other Modes**: Generic thought sequence visualization showing reasoning progression for Sequential, Shannon, Mathematics, Physics, Hybrid, Abductive, Counterfactual, Analogical, and Evidential modes
 
 #### Visual Export Examples
 
@@ -279,7 +277,7 @@ Visual exports work seamlessly with:
 - `thoughtNumber` (number, required): Position in sequence
 - `totalThoughts` (number, required): Estimated total thoughts needed
 - `nextThoughtNeeded` (boolean, required): Whether to continue thinking
-- `mode` (string, optional): `sequential`, `shannon`, `mathematics`, `physics`, `hybrid`, `abductive`, `causal`, `bayesian`, `counterfactual`, `analogical`, or `temporal` (default: `hybrid`)
+- `mode` (string, optional): `sequential`, `shannon`, `mathematics`, `physics`, `hybrid`, `abductive`, `causal`, `bayesian`, `counterfactual`, `analogical`, or `temporal`, `gametheory`, `evidential`, `firstprinciple` (default: `hybrid`)
 
 ### Mode-Specific Parameters
 
@@ -366,6 +364,26 @@ n#### Temporal Mode
 - `combinedBelief`: Belief function resulting from Dempster-Shafer combination (includes conflictMass)
 - `plausibility`: Plausibility function with belief/plausibility values and uncertainty intervals
 - `decisions`: Decision analysis (selectedHypothesis, confidence, reasoning, alternatives)
+n#### First-Principles Mode
+- `question`: The question being answered from first principles
+- `principles`: Array of foundational principles with:
+  - `id`: Unique identifier
+  - `type`: Principle type (axiom, definition, observation, logical_inference, assumption)
+  - `statement`: The principle statement
+  - `justification`: Why this principle is valid
+  - `dependsOn`: Optional array of principle IDs this depends on
+- `derivationSteps`: Chain of reasoning steps with:
+  - `stepNumber`: Step position in derivation
+  - `principle`: The principle being applied
+  - `inference`: What is inferred from this principle
+  - `logicalForm`: Optional formal logic representation
+  - `confidence`: Confidence in this step (0-1)
+- `conclusion`: Final conclusion with:
+  - `statement`: The conclusion statement
+  - `derivationChain`: Array of step numbers leading to conclusion
+  - `certainty`: Overall certainty level (0-1)
+  - `limitations`: Optional array of known limitations or assumptions
+- `alternativeInterpretations`: Optional array of other possible interpretations
 
 ### Actions
 - `add_thought` (default): Add a new thought to session
@@ -748,7 +766,7 @@ deepthinking-mcp/
 - ✅ Comprehensive test suite (77 tests)
 - ✅ Enhanced type safety
 
-### Phase 3 (Completed - v3.0.2)
+### Phase 3 (Completed - v3.1.0)
 - ✅ Temporal reasoning mode (v2.1)
 - ✅ Game theory mode (v2.2)
 - ✅ Evidential reasoning mode (v2.3)
@@ -758,6 +776,8 @@ deepthinking-mcp/
 - ✅ Performance optimization with validation caching (v3.0)
 - ✅ Integration tests & MCP compliance (v3.0.2)
 - ✅ CI/CD pipeline with GitHub Actions (v3.0.2)
+- ✅ First-Principles reasoning mode (v3.1.0)
+- ✅ Universal visual export support for all 14 modes (v3.1.0)
 
 ### Phase 4 (Planned)
 - [ ] Math-MCP integration
