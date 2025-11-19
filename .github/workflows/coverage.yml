@@ -1,0 +1,180 @@
+name: Code Coverage
+
+on:
+  push:
+    branches: [master, main, develop]
+  pull_request:
+    branches: [master, main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  coverage:
+    name: Generate Coverage Report
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+        env:
+          NODE_ENV: test
+
+      - name: Generate coverage summary
+        id: coverage
+        run: |
+          # Extract coverage percentages from coverage summary
+          if [ -f coverage/coverage-summary.json ]; then
+            TOTAL_COV=$(node -pe "JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.lines.pct")
+            echo "total_coverage=$TOTAL_COV" >> $GITHUB_OUTPUT
+          else
+            echo "total_coverage=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage-final.json
+          flags: unittests
+          name: codecov-deepthinking-mcp
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage/
+            coverage/lcov-report/
+          retention-days: 30
+
+      - name: Generate coverage badge
+        uses: schneegans/dynamic-badges-action@v1.6.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: ${{ secrets.GIST_ID }}
+          filename: deepthinking-mcp-coverage.json
+          label: coverage
+          message: ${{ steps.coverage.outputs.total_coverage }}%
+          valColorRange: ${{ steps.coverage.outputs.total_coverage }}
+          maxColorRange: 100
+          minColorRange: 0
+        continue-on-error: true
+
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let coverageComment = '## 📊 Code Coverage Report\n\n';
+
+            try {
+              const coverageData = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
+              const total = coverageData.total;
+
+              coverageComment += '| Metric | Coverage | Status |\n';
+              coverageComment += '|--------|----------|--------|\n';
+
+              const metrics = [
+                { name: 'Lines', data: total.lines },
+                { name: 'Statements', data: total.statements },
+                { name: 'Functions', data: total.functions },
+                { name: 'Branches', data: total.branches }
+              ];
+
+              metrics.forEach(metric => {
+                const pct = metric.data.pct;
+                const status = pct >= 80 ? '✅' : pct >= 60 ? '⚠️' : '❌';
+                coverageComment += `| ${metric.name} | ${pct}% (${metric.data.covered}/${metric.data.total}) | ${status} |\n`;
+              });
+
+              coverageComment += '\n';
+
+              // Coverage threshold check
+              if (total.lines.pct < 60) {
+                coverageComment += '⚠️ **Warning**: Line coverage is below 60%\n';
+              } else if (total.lines.pct >= 80) {
+                coverageComment += '✅ **Great!**: Coverage meets the 80% threshold\n';
+              }
+
+            } catch (error) {
+              coverageComment += '❌ Failed to read coverage data\n';
+            }
+
+            // Find existing coverage comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' && comment.body.includes('Code Coverage Report')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: coverageComment
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: coverageComment
+              });
+            }
+
+      - name: Post coverage summary
+        run: |
+          echo "## Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f coverage/coverage-summary.json ]; then
+            node -pe "
+              const data = JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8'));
+              const t = data.total;
+              \`| Metric | Coverage |
+              |--------|----------|
+              | Lines | \${t.lines.pct}% |
+              | Statements | \${t.statements.pct}% |
+              | Functions | \${t.functions.pct}% |
+              | Branches | \${t.branches.pct}% |
+
+              Total Coverage: **\${t.lines.pct}%**\`
+            " >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ No coverage data generated" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check coverage threshold
+        run: |
+          COVERAGE=$(node -pe "JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.lines.pct")
+          if (( $(echo "$COVERAGE < 60" | bc -l) )); then
+            echo "::warning::Code coverage ($COVERAGE%) is below 60% threshold"
+          fi
