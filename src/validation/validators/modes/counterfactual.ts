@@ -2,7 +2,8 @@
  * Counterfactual Mode Validator
  */
 
-import { CounterfactualThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { CounterfactualThought, ValidationIssue } from '../../../types/index.js';
+import { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
 
 export class CounterfactualValidator extends BaseValidator<CounterfactualThought> {
@@ -96,15 +97,19 @@ export class CounterfactualValidator extends BaseValidator<CounterfactualThought
           });
         }
         // Validate outcome magnitude
-        if (scenario.outcome && scenario.outcome.magnitude !== undefined &&
-            (scenario.outcome.magnitude < 0 || scenario.outcome.magnitude > 1)) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Counterfactual scenario "${scenario.name}" outcome magnitude must be between 0 and 1`,
-            suggestion: 'Provide magnitude as decimal',
-            category: 'structural',
-          });
+        if (scenario.outcomes) {
+          for (const outcome of scenario.outcomes) {
+            if (outcome.magnitude !== undefined &&
+                (outcome.magnitude < 0 || outcome.magnitude > 1)) {
+              issues.push({
+                severity: 'error',
+                thoughtNumber: thought.thoughtNumber,
+                description: `Counterfactual scenario "${scenario.name}" outcome magnitude must be between 0 and 1`,
+                suggestion: 'Provide magnitude as decimal',
+                category: 'structural',
+              });
+            }
+          }
         }
       }
     }
@@ -118,7 +123,7 @@ export class CounterfactualValidator extends BaseValidator<CounterfactualThought
             thoughtNumber: thought.thoughtNumber,
             description: `Difference "${diff.aspect}" should reference both actual and counterfactual values`,
             suggestion: 'Provide both actual and counterfactual values for complete comparison',
-            category: 'completeness',
+            category: 'structural',
           });
         }
       }

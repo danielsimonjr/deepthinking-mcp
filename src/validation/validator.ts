@@ -105,7 +105,7 @@ export class ThoughtValidator {
   /**
    * Calculate strength metrics
    */
-  private calculateStrengthMetrics(thought: Thought, issues: ValidationIssue[]) {
+  private calculateStrengthMetrics(_thought: Thought, issues: ValidationIssue[]) {
     const logicalIssues = issues.filter(i => i.category === 'logical');
     const mathIssues = issues.filter(i => i.category === 'mathematical');
     const physicalIssues = issues.filter(i => i.category === 'physical');

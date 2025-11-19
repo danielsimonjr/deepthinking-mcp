@@ -2,7 +2,8 @@
  * Shannon Mode Validator
  */
 
-import { ShannonThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { ShannonThought, ValidationIssue } from '../../../types/index.js';
+import { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
 
 export class ShannonValidator extends BaseValidator<ShannonThought> {
@@ -20,7 +21,7 @@ export class ShannonValidator extends BaseValidator<ShannonThought> {
     issues.push(...this.validateUncertainty(thought, thought.uncertainty));
 
     // Validate dependencies exist
-    issues.push(...this.validateDependencies(thought, thought.dependencies, context));
+    issues.push(...this.validateDependencies(thought, thought.dependencies, _context));
 
     // Warn if model stage has no assumptions
     if (thought.stage === 'model' && thought.assumptions.length === 0) {

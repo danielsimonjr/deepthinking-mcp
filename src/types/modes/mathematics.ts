@@ -3,7 +3,7 @@
  * Formal mathematical reasoning with proofs, theorems, and symbolic computation
  */
 
-import { BaseThought } from '../core.js';
+import { BaseThought, ThinkingMode } from '../core.js';
 
 /**
  * Mathematical thought types
@@ -80,7 +80,7 @@ export interface LogicalForm {
 }
 
 export interface MathematicsThought extends BaseThought {
-  mode: 'mathematics';
+  mode: ThinkingMode.MATHEMATICS;
   thoughtType: MathematicsThoughtType;
   mathematicalModel?: MathematicalModel;
   proofStrategy?: ProofStrategy;

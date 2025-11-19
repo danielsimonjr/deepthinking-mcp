@@ -2,7 +2,8 @@
  * Sequential Mode Validator
  */
 
-import { SequentialThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { SequentialThought, ValidationIssue } from '../../../types/index.js';
+import { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
 
 export class SequentialValidator extends BaseValidator<SequentialThought> {
@@ -27,8 +28,8 @@ export class SequentialValidator extends BaseValidator<SequentialThought> {
       });
     }
 
-    if (thought.isRevision && context.existingThoughts) {
-      const revisedThought = context.existingThoughts.get(thought.revisesThought || '');
+    if (thought.isRevision && _context.existingThoughts) {
+      const revisedThought = _context.existingThoughts.get(thought.revisesThought || '');
       if (!revisedThought) {
         issues.push({
           severity: 'error',

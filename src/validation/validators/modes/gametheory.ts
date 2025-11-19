@@ -2,7 +2,8 @@
  * Game Theory Mode Validator
  */
 
-import { GameTheoryThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { GameTheoryThought, ValidationIssue } from '../../../types/index.js';
+import { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
 
 export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {

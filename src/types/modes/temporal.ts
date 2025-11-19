@@ -3,13 +3,13 @@
  * Phase 3 (v2.1) - Temporal reasoning with events, intervals, constraints, and causal relations
  */
 
-import { BaseThought } from '../core.js';
+import { BaseThought, ThinkingMode } from '../core.js';
 
 /**
  * Temporal thought extends base thought with time-dependent reasoning
  */
 export interface TemporalThought extends BaseThought {
-  mode: 'temporal';
+  mode: ThinkingMode.TEMPORAL;
   thoughtType:
     | 'event_definition'
     | 'interval_analysis'

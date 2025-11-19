@@ -2,7 +2,8 @@
  * Evidential Mode Validator
  */
 
-import { EvidentialThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { EvidentialThought, ValidationIssue } from '../../../types/index.js';
+import { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
 
 export class EvidentialValidator extends BaseValidator<EvidentialThought> {

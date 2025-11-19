@@ -3,10 +3,10 @@
  * Phase 3B (v2.2) - Strategic analysis, Nash equilibria, payoff matrices
  */
 
-import { BaseThought } from '../core.js';
+import { BaseThought, ThinkingMode } from '../core.js';
 
 export interface GameTheoryThought extends BaseThought {
-  mode: 'gametheory';
+  mode: ThinkingMode.GAMETHEORY;
   thoughtType:
     | 'game_definition'
     | 'strategy_analysis'

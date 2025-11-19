@@ -3,7 +3,7 @@
  * Cross-domain analogies, mapping, and knowledge transfer
  */
 
-import { BaseThought } from '../core.js';
+import { BaseThought, ThinkingMode } from '../core.js';
 
 /**
  * Entity in a domain
@@ -78,7 +78,7 @@ export interface Inference {
 }
 
 export interface AnalogicalThought extends BaseThought {
-  mode: 'analogical';
+  mode: ThinkingMode.ANALOGICAL;
   sourceDomain: Domain;
   targetDomain: Domain;
   mapping: Mapping[];

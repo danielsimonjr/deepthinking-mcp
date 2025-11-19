@@ -2,7 +2,8 @@
  * Bayesian Mode Validator
  */
 
-import { BayesianThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { BayesianThought, ValidationIssue } from '../../../types/index.js';
+import { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
 
 export class BayesianValidator extends BaseValidator<BayesianThought> {
@@ -61,7 +62,7 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
           thoughtNumber: thought.thoughtNumber,
           description: 'Posterior calculation should be shown',
           suggestion: 'Provide calculation showing how posterior was derived',
-          category: 'completeness',
+          category: 'structural',
         });
       }
     }
@@ -109,7 +110,7 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
           thoughtNumber: thought.thoughtNumber,
           description: `Bayes factor ${thought.bayesFactor.toFixed(2)} > 1: evidence supports hypothesis`,
           suggestion: 'Evidence favors the hypothesis over the alternative',
-          category: 'interpretation',
+          category: 'logical',
         });
       }
 
@@ -120,7 +121,7 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
           thoughtNumber: thought.thoughtNumber,
           description: `Bayes factor ${thought.bayesFactor.toFixed(2)} < 1: evidence contradicts hypothesis`,
           suggestion: 'Evidence favors the alternative over the hypothesis',
-          category: 'interpretation',
+          category: 'logical',
         });
       }
     }

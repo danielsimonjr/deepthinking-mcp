@@ -4,6 +4,11 @@
  * Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory, Evidential
  */
 
+// Import Phase 3 mode types
+import type { TemporalThought } from './modes/temporal.js';
+import type { GameTheoryThought } from './modes/gametheory.js';
+import type { EvidentialThought } from './modes/evidential.js';
+
 /**
  * Available thinking modes
  */
@@ -510,6 +515,9 @@ export interface CausalChain {
 export interface InterventionPoint {
   description: string;
   timestamp?: string;
+  timing: string;
+  feasibility: number; // 0-1
+  expectedImpact: number; // 0-1
   alternatives: string[];
 }
 
@@ -595,6 +603,7 @@ export interface Insight {
   description: string;
   sourceEvidence: string;
   targetApplication: string;
+  novelty: number; // 0-1
 }
 
 /**
@@ -688,3 +697,21 @@ export function isCounterfactualThought(thought: Thought): thought is Counterfac
 export function isAnalogicalThought(thought: Thought): thought is AnalogicalThought {
   return thought.mode === ThinkingMode.ANALOGICAL;
 }
+
+/**
+ * Type guards for Phase 3 modes (v2.1+)
+ */
+export function isTemporalThought(thought: Thought): thought is TemporalThought {
+  return thought.mode === ThinkingMode.TEMPORAL;
+}
+
+export function isGameTheoryThought(thought: Thought): thought is GameTheoryThought {
+  return thought.mode === ThinkingMode.GAMETHEORY;
+}
+
+export function isEvidentialThought(thought: Thought): thought is EvidentialThought {
+  return thought.mode === ThinkingMode.EVIDENTIAL;
+}
+
+// Re-export Phase 3 types
+export type { TemporalThought, GameTheoryThought, EvidentialThought };

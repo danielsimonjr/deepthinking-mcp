@@ -2,7 +2,8 @@
  * Temporal Mode Validator
  */
 
-import { TemporalThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { TemporalThought, ValidationIssue } from '../../../types/index.js';
+import { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
 
 export class TemporalValidator extends BaseValidator<TemporalThought> {

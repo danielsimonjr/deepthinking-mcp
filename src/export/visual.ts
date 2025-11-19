@@ -324,7 +324,7 @@ export class VisualExporter {
 
   private gameTreeToMermaid(
     thought: GameTheoryThought,
-    colorScheme: string,
+    _colorScheme: string,
     includeLabels: boolean,
     includeMetrics: boolean
   ): string {
@@ -338,10 +338,10 @@ export class VisualExporter {
     if (thought.gameTree && thought.gameTree.nodes) {
       for (const node of thought.gameTree.nodes) {
         const nodeId = this.sanitizeId(node.id);
-        const label = includeLabels ? node.name : nodeId;
+        const label = includeLabels ? (node.action || node.id) : nodeId;
 
         // Terminal nodes use double boxes
-        const shape = node.isTerminal ? ['[[', ']]'] : ['[', ']'];
+        const shape = node.type === 'terminal' ? ['[[', ']]'] : ['[', ']'];
         mermaid += `  ${nodeId}${shape[0]}${label}${shape[1]}\n`;
       }
 
@@ -395,8 +395,8 @@ export class VisualExporter {
     if (thought.gameTree && thought.gameTree.nodes) {
       for (const node of thought.gameTree.nodes) {
         const nodeId = this.sanitizeId(node.id);
-        const label = includeLabels ? node.name : nodeId;
-        const shape = node.isTerminal ? 'doublecircle' : 'circle';
+        const label = includeLabels ? (node.action || node.id) : nodeId;
+        const shape = node.type === 'terminal' ? 'doublecircle' : 'circle';
 
         dot += `  ${nodeId} [label="${label}", shape=${shape}];\n`;
       }
@@ -433,13 +433,14 @@ export class VisualExporter {
     if (thought.strategies && thought.strategies.length > 0) {
       ascii += 'Strategies:\n';
       for (const strategy of thought.strategies) {
-        ascii += `  • ${strategy.name} (${strategy.type})\n`;
+        const strategyType = strategy.isPure ? 'Pure' : 'Mixed';
+        ascii += `  • ${strategy.name} (${strategyType})\n`;
       }
     }
 
-    if (thought.equilibria && thought.equilibria.length > 0) {
+    if (thought.nashEquilibria && thought.nashEquilibria.length > 0) {
       ascii += '\nEquilibria:\n';
-      for (const eq of thought.equilibria) {
+      for (const eq of thought.nashEquilibria) {
         ascii += `  ⚖ ${eq.type}: ${eq.strategyProfile.join(', ')}\n`;
         ascii += `    Payoffs: [${eq.payoffs.join(', ')}]\n`;
       }
@@ -453,7 +454,7 @@ export class VisualExporter {
   private bayesianToMermaid(
     thought: BayesianThought,
     colorScheme: string,
-    includeLabels: boolean,
+    _includeLabels: boolean,
     includeMetrics: boolean
   ): string {
     let mermaid = 'graph LR\n';
@@ -484,7 +485,7 @@ export class VisualExporter {
 
   private bayesianToDOT(
     thought: BayesianThought,
-    includeLabels: boolean,
+    _includeLabels: boolean,
     includeMetrics: boolean
   ): string {
     let dot = 'digraph BayesianNetwork {\n';
@@ -519,13 +520,13 @@ export class VisualExporter {
     if (thought.evidence && thought.evidence.length > 0) {
       ascii += 'Evidence:\n';
       for (const ev of thought.evidence) {
-        ascii += `  • ${ev.observation}\n`;
+        ascii += `  • ${ev.description}\n`;
       }
       ascii += '\n';
     }
 
     ascii += `Posterior Probability: ${thought.posterior.probability.toFixed(3)}\n`;
-    ascii += `  Justification: ${thought.posterior.justification}\n`;
+    ascii += `  Calculation: ${thought.posterior.calculation}\n`;
 
     if (thought.bayesFactor !== undefined) {
       ascii += `\nBayes Factor: ${thought.bayesFactor.toFixed(2)}\n`;

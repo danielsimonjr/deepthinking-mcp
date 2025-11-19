@@ -2,7 +2,8 @@
  * Causal Mode Validator
  */
 
-import { CausalThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { CausalThought, ValidationIssue } from '../../../types/index.js';
+import { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
 
 export class CausalValidator extends BaseValidator<CausalThought> {

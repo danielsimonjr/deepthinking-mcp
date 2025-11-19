@@ -51,20 +51,18 @@ export class SessionError extends DeepThinkingError {
 /**
  * Session not found error
  */
-export class SessionNotFoundError extends SessionError {
+export class SessionNotFoundError extends DeepThinkingError {
   constructor(sessionId: string) {
-    super(`Session not found: ${sessionId}`, { sessionId });
-    this.code = 'SESSION_NOT_FOUND';
+    super(`Session not found: ${sessionId}`, 'SESSION_NOT_FOUND', { sessionId });
   }
 }
 
 /**
  * Session already exists error
  */
-export class SessionAlreadyExistsError extends SessionError {
+export class SessionAlreadyExistsError extends DeepThinkingError {
   constructor(sessionId: string) {
-    super(`Session already exists: ${sessionId}`, { sessionId });
-    this.code = 'SESSION_ALREADY_EXISTS';
+    super(`Session already exists: ${sessionId}`, 'SESSION_ALREADY_EXISTS', { sessionId });
   }
 }
 
@@ -80,14 +78,13 @@ export class ValidationError extends DeepThinkingError {
 /**
  * Input validation error
  */
-export class InputValidationError extends ValidationError {
+export class InputValidationError extends DeepThinkingError {
   constructor(fieldName: string, reason: string, value?: unknown) {
-    super(`Invalid ${fieldName}: ${reason}`, {
+    super(`Invalid ${fieldName}: ${reason}`, 'INPUT_VALIDATION_ERROR', {
       fieldName,
       reason,
       value: typeof value === 'object' ? '[object]' : value,
     });
-    this.code = 'INPUT_VALIDATION_ERROR';
   }
 }
 
@@ -103,10 +100,9 @@ export class ConfigurationError extends DeepThinkingError {
 /**
  * Invalid mode error
  */
-export class InvalidModeError extends ValidationError {
+export class InvalidModeError extends DeepThinkingError {
   constructor(mode: string, validModes: string[]) {
-    super(`Invalid thinking mode: ${mode}`, { mode, validModes });
-    this.code = 'INVALID_MODE';
+    super(`Invalid thinking mode: ${mode}`, 'INVALID_MODE', { mode, validModes });
   }
 }
 

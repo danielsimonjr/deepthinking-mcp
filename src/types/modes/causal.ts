@@ -3,7 +3,7 @@
  * Causal graph modeling, interventions, and counterfactual analysis
  */
 
-import { BaseThought } from '../core.js';
+import { BaseThought, ThinkingMode } from '../core.js';
 
 /**
  * Node in causal graph
@@ -76,7 +76,7 @@ export interface CounterfactualScenario {
 }
 
 export interface CausalThought extends BaseThought {
-  mode: 'causal';
+  mode: ThinkingMode.CAUSAL;
   causalGraph: CausalGraph;
   interventions?: Intervention[];
   counterfactuals?: CounterfactualScenario[];

@@ -12,9 +12,7 @@ import {
   Thought,
   ThinkingMode
 } from '../types/index.js';
-import { isTemporalThought } from '../types/modes/temporal.js';
-import { isGameTheoryThought } from '../types/modes/gametheory.js';
-import { isEvidentialThought } from '../types/modes/evidential.js';
+import { isTemporalThought, isGameTheoryThought, isEvidentialThought } from '../types/core.js';
 import { SessionNotFoundError } from '../utils/errors.js';
 import { sanitizeString, sanitizeThoughtContent, validateSessionId, MAX_LENGTHS } from '../utils/sanitization.js';
 import { Logger, createLogger, LogLevel } from '../utils/logger.js';
@@ -217,7 +215,7 @@ export class SessionManager {
     // If not in memory and storage is available, try loading from storage
     if (!session && this.storage) {
       try {
-        session = await this.storage.loadSession(sessionId);
+        session = (await this.storage.loadSession(sessionId)) ?? undefined;
         if (session) {
           // Add to active sessions cache
           this.activeSessions.set(sessionId, session);
@@ -563,7 +561,7 @@ export class SessionManager {
     metrics.totalThoughts = session.thoughts.length;
 
     // Update thoughtsByType incrementally (O(1) instead of recalculating)
-    const thoughtType = thought.type || 'unknown';
+    const thoughtType = thought.mode || 'unknown';
     metrics.thoughtsByType[thoughtType] = (metrics.thoughtsByType[thoughtType] || 0) + 1;
 
     // Update revision count
@@ -580,9 +578,12 @@ export class SessionManager {
       const currentSum = metrics._uncertaintySum || 0;
       const currentCount = metrics._uncertaintyCount || 0;
 
-      metrics._uncertaintySum = currentSum + uncertaintyValue;
-      metrics._uncertaintyCount = currentCount + 1;
-      metrics.averageUncertainty = metrics._uncertaintySum / metrics._uncertaintyCount;
+      const newSum = currentSum + uncertaintyValue;
+      const newCount = currentCount + 1;
+
+      metrics._uncertaintySum = newSum;
+      metrics._uncertaintyCount = newCount;
+      metrics.averageUncertainty = newSum / newCount;
     }
 
     // Update dependency depth

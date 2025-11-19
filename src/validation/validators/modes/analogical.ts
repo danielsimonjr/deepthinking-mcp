@@ -2,7 +2,8 @@
  * Analogical Mode Validator
  */
 
-import { AnalogicalThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { AnalogicalThought, ValidationIssue } from '../../../types/index.js';
+import { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
 
 export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {

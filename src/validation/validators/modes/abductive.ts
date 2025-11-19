@@ -2,7 +2,8 @@
  * Abductive Mode Validator
  */
 
-import { AbductiveThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { AbductiveThought, ValidationIssue } from '../../../types/index.js';
+import { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
 
 export class AbductiveValidator extends BaseValidator<AbductiveThought> {

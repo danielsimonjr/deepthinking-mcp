@@ -3,7 +3,7 @@
  * Probabilistic reasoning with evidence updates and Bayes' theorem
  */
 
-import { BaseThought } from '../core.js';
+import { BaseThought, ThinkingMode } from '../core.js';
 
 /**
  * Hypothesis for Bayesian analysis
@@ -59,7 +59,7 @@ export interface SensitivityAnalysis {
 }
 
 export interface BayesianThought extends BaseThought {
-  mode: 'bayesian';
+  mode: ThinkingMode.BAYESIAN;
   hypothesis: BayesianHypothesis;
   prior: PriorProbability;
   likelihood: Likelihood;

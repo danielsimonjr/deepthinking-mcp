@@ -412,7 +412,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         comparison: input.comparison,
         interventionPoint: input.interventionPoint,
         causalChains: input.causalChains || [],
-      } as CounterfactualThought;
+      } as unknown as CounterfactualThought;
 
     case 'analogical':
       return {
