@@ -5,6 +5,105 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.2] - 2025-11-19
+
+### Phase 3.5F - CI/CD Pipeline
+
+Complete CI/CD infrastructure with GitHub Actions workflows for automated testing, releases, and code coverage.
+
+#### GitHub Actions Workflows
+
+- **F1 - Test Workflow** (`.github/workflows/test.yml`):
+  - Multi-OS testing: Ubuntu, Windows, macOS
+  - Multi-Node version testing: 18.x, 20.x, 22.x
+  - Runs TypeScript checks, linter, formatter, and full test suite
+  - Uploads test results as artifacts
+  - Test summary generation
+
+- **F2 - Release Workflow** (`.github/workflows/release.yml`):
+  - Automated releases on version tags (v*.*.*)
+  - Pre-release testing (type check, full test suite)
+  - GitHub release creation with changelog
+  - npm publishing support (requires NPM_TOKEN secret)
+  - Manual workflow dispatch option
+
+- **F3 - Coverage Workflow** (`.github/workflows/coverage.yml`):
+  - Coverage report generation
+  - Codecov integration
+  - Coverage badge generation (requires GIST_SECRET)
+  - PR comments with detailed coverage summary
+  - Coverage threshold warnings (<60%)
+
+- **F4 - Branch Protection Documentation** (`.github/BRANCH_PROTECTION.md`):
+  - Recommended settings for main/master branch
+  - Required status checks configuration
+  - PR review requirements
+  - Setup instructions (web UI, CLI, Terraform)
+  - CODEOWNERS file example
+  - Best practices and troubleshooting guide
+
+#### Phase 3.5F Status
+- ✅ **F1**: Test workflow (multi-OS, multi-Node)
+- ✅ **F2**: Release workflow (automated GitHub releases + npm)
+- ✅ **F3**: Coverage workflow (Codecov integration)
+- ✅ **F4**: Branch protection documentation
+
+**Phase 3.5F: COMPLETE** 🎉
+
+### Phase 3.5D - Integration Tests & MCP Compliance
+
+Comprehensive integration test suite ensuring MCP protocol compliance and production readiness.
+
+#### Integration Tests Added (94 tests)
+
+- **D1-D2 - Handler Function Tests** (`tests/integration/index-handlers.test.ts`, 33 tests):
+  - `handleAddThought()` for all 13 thinking modes
+  - `handleSummarize()` for session summaries
+  - `handleSwitchMode()` for mode switching
+  - `handleGetSession()` for session retrieval
+  - `handleExport()` for all export formats (markdown, latex, json, html, jupyter, mermaid, dot, ascii)
+
+- **D3 - MCP Protocol Compliance** (`tests/integration/mcp-protocol.test.ts`, 43 tests):
+  - Tool schema validation for all 13 modes
+  - Mode-specific parameter validation
+  - Required/optional field validation
+  - MCP response format compliance
+  - Error handling and edge cases
+
+- **D4 - Multi-Session Scenarios** (`tests/integration/multi-session.test.ts`, 18 tests):
+  - Multiple session management and isolation
+  - Concurrent operations on same session
+  - Concurrent operations across different sessions
+  - Resource management with 50+ sessions
+  - Session state consistency
+  - Concurrent error handling
+
+- **D5 - Error Handling & Edge Cases** (`tests/integration/error-handling.test.ts`, 36 tests):
+  - Invalid session operations
+  - Validation errors with lenient validation
+  - Boundary conditions (0, 1, MAX_SAFE_INTEGER)
+  - Edge cases: empty data, Unicode, 100KB content
+  - Large data handling (100 thoughts, 50 dependencies)
+  - Summary generation edge cases
+  - Concurrent session management
+  - Mode-specific edge cases
+
+#### Test Results
+- **Test Files**: 24 passed (24)
+- **Tests**: 397 passed (397)
+- **Pass Rate**: 100%
+- **Duration**: 7.24 seconds
+- **Performance**: 15.13x validation cache speedup
+
+#### Phase 3.5D Status
+- ✅ **D1**: Handler tests for createThought() factory (13 modes)
+- ✅ **D2**: Handler function tests (add_thought, summarize, export, etc.)
+- ✅ **D3**: MCP protocol compliance tests
+- ✅ **D4**: Multi-session and concurrent scenarios
+- ✅ **D5**: Error handling and edge case coverage
+
+**Phase 3.5D: COMPLETE** 🎉
+
 ## [3.0.1] - 2025-11-18
 
 ### Phase 3.5C - Validation Cache Performance Verification

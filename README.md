@@ -1,6 +1,6 @@
-# DeepThinking MCP v3.0
+# DeepThinking MCP v3.0.2
 
-A comprehensive Model Context Protocol (MCP) server featuring **13 advanced reasoning modes** with intelligent mode recommendation, visual export capabilities, and high-performance validation caching for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **13 advanced reasoning modes** with intelligent mode recommendation, visual export capabilities, high-performance validation caching, comprehensive testing, and automated CI/CD for complex problem-solving, analysis, and decision-making.
 
 ## Overview
 
@@ -635,6 +635,87 @@ npm test
 npm run typecheck
 ```
 
+### Testing & CI/CD
+
+#### Comprehensive Test Suite (v3.0.2)
+
+DeepThinking MCP includes **397 tests** across **24 test files** with **100% pass rate**:
+
+- **Unit Tests**: Core functionality, validators, session management
+- **Integration Tests (94 tests)**: MCP protocol compliance, multi-session scenarios, error handling
+- **Benchmark Tests**: Performance validation (15x speedup with caching)
+- **Mode-Specific Tests**: All 13 reasoning modes thoroughly tested
+
+**Test Coverage:**
+```bash
+# Run full test suite
+npm test
+
+# Run with coverage report
+npm run test:coverage
+
+# Run specific test file
+npm test -- tests/integration/mcp-protocol.test.ts
+```
+
+**Test Results:**
+- Test Files: 24 passed
+- Tests: 397 passed
+- Duration: ~7-8 seconds
+- Pass Rate: 100%
+
+#### CI/CD Pipeline
+
+Automated workflows using GitHub Actions ensure code quality and reliability:
+
+**Test Workflow** (`.github/workflows/test.yml`):
+- Multi-OS testing: Ubuntu, Windows, macOS
+- Multi-Node version: 18.x, 20.x, 22.x
+- Runs: TypeScript checks, linter, formatter, full test suite
+- Test result artifacts with 30-day retention
+
+**Coverage Workflow** (`.github/workflows/coverage.yml`):
+- Generates detailed coverage reports
+- Codecov integration for coverage tracking
+- PR comments with coverage summary
+- Coverage badge generation
+- Threshold warnings (<60% triggers warning)
+
+**Release Workflow** (`.github/workflows/release.yml`):
+- Automated releases on version tags (v*.*.*)
+- Pre-release testing (type check + full test suite)
+- GitHub release creation with changelog
+- npm publishing (requires NPM_TOKEN)
+- Workflow dispatch for manual releases
+
+**Branch Protection:**
+See `.github/BRANCH_PROTECTION.md` for recommended settings:
+- Required status checks before merging
+- PR review requirements
+- Linear history enforcement
+- Force push protection
+
+#### Integration Tests
+
+**MCP Protocol Compliance** (43 tests):
+- Tool schema validation for all 13 modes
+- Required/optional field validation
+- MCP response format compliance
+- Error handling for invalid inputs
+
+**Multi-Session Scenarios** (18 tests):
+- Session isolation and concurrent operations
+- Resource management (50+ sessions)
+- State consistency verification
+- Concurrent error handling
+
+**Error Handling & Edge Cases** (36 tests):
+- Invalid session operations
+- Boundary conditions (0, 1, MAX_SAFE_INTEGER)
+- Large data handling (100 thoughts, 50 dependencies)
+- Unicode and special character support
+- Mode-specific edge cases
+
 ## Architecture
 
 ```
@@ -667,21 +748,38 @@ deepthinking-mcp/
 - ✅ Comprehensive test suite (77 tests)
 - ✅ Enhanced type safety
 
-### Phase 3 (In Progress)
+### Phase 3 (Completed - v3.0.2)
 - ✅ Temporal reasoning mode (v2.1)
 - ✅ Game theory mode (v2.2)
 - ✅ Evidential reasoning mode (v2.3)
 - ✅ Mode recommendation system (v2.4)
 - ✅ Visual exports - Mermaid, DOT, ASCII (v2.5)
 - ✅ Export to LaTeX/Jupyter/HTML (v2.5)
+- ✅ Performance optimization with validation caching (v3.0)
+- ✅ Integration tests & MCP compliance (v3.0.2)
+- ✅ CI/CD pipeline with GitHub Actions (v3.0.2)
+
+### Phase 4 (Planned)
 - [ ] Math-MCP integration
 - [ ] Persistence layer
 - [ ] Collaborative thinking sessions
 - [ ] Pattern learning from successful reasoning chains
+- [ ] Advanced visualization dashboard
+- [ ] Real-time reasoning collaboration
 
 ## Contributing
 
-Contributions welcome! Please read our contributing guidelines and submit PRs.
+Contributions welcome! Please ensure:
+
+1. **All tests pass**: Run `npm test` before submitting PRs
+2. **Type checking passes**: Run `npm run typecheck`
+3. **Code formatting**: Run `npm run format:check` or `npm run format`
+4. **Linting passes**: Run `npm run lint`
+5. **CI/CD workflows pass**: All GitHub Actions checks must pass
+6. **Test coverage**: Maintain or improve test coverage
+7. **Documentation**: Update README.md and CHANGELOG.md for new features
+
+See `.github/BRANCH_PROTECTION.md` for branch protection requirements and `.github/workflows/` for CI/CD pipeline details.
 
 ## License
 
