@@ -26,27 +26,27 @@
   },
   {
     "content": "Task 1.4b: Integrate Phase 3 Visual Exporter with LaTeX (Mermaid diagrams)",
-    "status": "pending",
+    "status": "completed",
     "activeForm": "Integrating Phase 3 Visual Exporter with LaTeX"
   },
   {
     "content": "Task 1.5: Add LaTeX export tests (15+ tests)",
-    "status": "pending",
+    "status": "completed",
     "activeForm": "Adding LaTeX export tests"
   },
   {
     "content": "Task 3.1: Create Mermaid generator infrastructure",
-    "status": "pending",
+    "status": "completed",
     "activeForm": "Creating Mermaid generator infrastructure"
   },
   {
     "content": "Task 3.2: Add interactive Mermaid features (zoom, click handlers, animations)",
-    "status": "pending",
+    "status": "completed",
     "activeForm": "Adding interactive Mermaid features"
   },
   {
     "content": "Task 3.3: Add thought flow sequence diagrams",
-    "status": "pending",
+    "status": "completed",
     "activeForm": "Adding thought flow sequence diagrams"
   },
   {
