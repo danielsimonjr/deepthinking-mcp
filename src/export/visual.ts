@@ -3,7 +3,7 @@
  * Exports thinking sessions to visual formats: Mermaid, DOT, ASCII
  */
 
-import type { CausalThought, TemporalThought, GameTheoryThought, BayesianThought } from '../types/index.js';
+import type { CausalThought, TemporalThought, GameTheoryThought, BayesianThought, FirstPrincipleThought, BaseThought } from '../types/index.js';
 
 export type VisualFormat = 'mermaid' | 'dot' | 'ascii';
 
@@ -542,5 +542,231 @@ export class VisualExporter {
    */
   private sanitizeId(id: string): string {
     return id.replace(/[^a-zA-Z0-9_]/g, '_');
+  }
+
+  // ===== Generic Thought Sequence Export =====
+
+  /**
+   * Export any thought sequence as a flow diagram
+   * Works for sequential, shannon, mathematics, physics, hybrid, abductive,
+   * counterfactual, analogical, and evidential modes
+   */
+  exportThoughtSequence(thoughts: BaseThought[], options: VisualExportOptions): string {
+    const { format, colorScheme = 'default' } = options;
+
+    switch (format) {
+      case 'mermaid':
+        return this.thoughtSequenceToMermaid(thoughts, colorScheme);
+      case 'dot':
+        return this.thoughtSequenceToDOT(thoughts);
+      case 'ascii':
+        return this.thoughtSequenceToASCII(thoughts);
+      default:
+        throw new Error(`Unsupported format: ${format}`);
+    }
+  }
+
+  private thoughtSequenceToMermaid(thoughts: BaseThought[], colorScheme: string): string {
+    let mermaid = 'graph TD\n';
+
+    for (let i = 0; i < thoughts.length; i++) {
+      const thought = thoughts[i];
+      const nodeId = `T${i + 1}`;
+      const content = thought.content.substring(0, 60).replace(/\n/g, ' ');
+      const label = `${i + 1}. ${content}${thought.content.length > 60 ? '...' : ''}`;
+
+      mermaid += `  ${nodeId}["${label}"]\n`;
+
+      if (i > 0) {
+        mermaid += `  T${i} --> ${nodeId}\n`;
+      }
+    }
+
+    if (colorScheme !== 'monochrome' && thoughts.length > 0) {
+      mermaid += '\n';
+      const color = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
+      mermaid += `  style T1 fill:${color}\n`;
+      if (thoughts.length > 1) {
+        const endColor = colorScheme === 'pastel' ? '#e8f5e9' : '#c8e6c9';
+        mermaid += `  style T${thoughts.length} fill:${endColor}\n`;
+      }
+    }
+
+    return mermaid;
+  }
+
+  private thoughtSequenceToDOT(thoughts: BaseThought[]): string {
+    let dot = 'digraph ThoughtSequence {\n';
+    dot += '  rankdir=TD;\n';
+    dot += '  node [shape=box, style=rounded];\n\n';
+
+    for (let i = 0; i < thoughts.length; i++) {
+      const thought = thoughts[i];
+      const nodeId = `T${i + 1}`;
+      const content = thought.content.substring(0, 60).replace(/"/g, '\\"').replace(/\n/g, ' ');
+      const label = `${i + 1}. ${content}${thought.content.length > 60 ? '...' : ''}`;
+
+      dot += `  ${nodeId} [label="${label}"];\n`;
+
+      if (i > 0) {
+        dot += `  T${i} -> ${nodeId};\n`;
+      }
+    }
+
+    dot += '}\n';
+    return dot;
+  }
+
+  private thoughtSequenceToASCII(thoughts: BaseThought[]): string {
+    let ascii = 'Thought Sequence:\n';
+    ascii += '=================\n\n';
+
+    for (let i = 0; i < thoughts.length; i++) {
+      const thought = thoughts[i];
+      ascii += `${i + 1}. ${thought.content}\n`;
+
+      if (i < thoughts.length - 1) {
+        ascii += '   ↓\n';
+      }
+      ascii += '\n';
+    }
+
+    return ascii;
+  }
+
+  // ===== First-Principles Export =====
+
+  /**
+   * Export first-principles reasoning to visual format
+   */
+  exportFirstPrinciples(thought: FirstPrincipleThought, options: VisualExportOptions): string {
+    const { format, colorScheme = 'default' } = options;
+
+    switch (format) {
+      case 'mermaid':
+        return this.firstPrinciplesToMermaid(thought, colorScheme);
+      case 'dot':
+        return this.firstPrinciplesToDOT(thought);
+      case 'ascii':
+        return this.firstPrinciplesToASCII(thought);
+      default:
+        throw new Error(`Unsupported format: ${format}`);
+    }
+  }
+
+  private firstPrinciplesToMermaid(thought: FirstPrincipleThought, colorScheme: string): string {
+    let mermaid = 'graph TD\n';
+
+    // Add question
+    mermaid += `  Q["Question: ${thought.question}"]\n`;
+
+    // Add principles
+    for (const principle of thought.principles) {
+      const pid = this.sanitizeId(principle.id);
+      mermaid += `  ${pid}["${principle.type}: ${principle.statement}"]\n`;
+    }
+
+    // Add derivation steps
+    for (const step of thought.derivationSteps) {
+      const sid = `S${step.stepNumber}`;
+      const pid = this.sanitizeId(step.principle.id);
+      mermaid += `  ${sid}["Step ${step.stepNumber}: ${step.inference}"]\n`;
+      mermaid += `  ${pid} --> ${sid}\n`;
+
+      if (step.stepNumber > 1) {
+        mermaid += `  S${step.stepNumber - 1} --> ${sid}\n`;
+      } else {
+        mermaid += `  Q --> ${pid}\n`;
+      }
+    }
+
+    // Add conclusion
+    mermaid += `  C[["Conclusion: ${thought.conclusion.statement}"]]:\n`;
+    if (thought.derivationSteps.length > 0) {
+      mermaid += `  S${thought.derivationSteps.length} --> C\n`;
+    }
+
+    // Styling
+    if (colorScheme !== 'monochrome') {
+      mermaid += '\n';
+      const qColor = colorScheme === 'pastel' ? '#fff3e0' : '#ffeb3b';
+      const cColor = colorScheme === 'pastel' ? '#e8f5e9' : '#4caf50';
+      mermaid += `  style Q fill:${qColor}\n`;
+      mermaid += `  style C fill:${cColor}\n`;
+    }
+
+    return mermaid;
+  }
+
+  private firstPrinciplesToDOT(thought: FirstPrincipleThought): string {
+    let dot = 'digraph FirstPrinciples {\n';
+    dot += '  rankdir=TD;\n';
+    dot += '  node [shape=box, style=rounded];\n\n';
+
+    // Question
+    dot += `  Q [label="Question:\\n${thought.question}", shape=ellipse];\n`;
+
+    // Principles
+    for (const principle of thought.principles) {
+      const pid = this.sanitizeId(principle.id);
+      dot += `  ${pid} [label="${principle.type}:\\n${principle.statement}"];\n`;
+    }
+
+    // Steps
+    for (const step of thought.derivationSteps) {
+      const sid = `S${step.stepNumber}`;
+      const pid = this.sanitizeId(step.principle.id);
+      dot += `  ${sid} [label="Step ${step.stepNumber}:\\n${step.inference}"];\n`;
+      dot += `  ${pid} -> ${sid};\n`;
+
+      if (step.stepNumber > 1) {
+        dot += `  S${step.stepNumber - 1} -> ${sid};\n`;
+      } else {
+        dot += `  Q -> ${pid};\n`;
+      }
+    }
+
+    // Conclusion
+    dot += `  C [label="Conclusion:\\n${thought.conclusion.statement}", shape=doubleoctagon];\n`;
+    if (thought.derivationSteps.length > 0) {
+      dot += `  S${thought.derivationSteps.length} -> C;\n`;
+    }
+
+    dot += '}\n';
+    return dot;
+  }
+
+  private firstPrinciplesToASCII(thought: FirstPrincipleThought): string {
+    let ascii = 'First-Principles Reasoning:\n';
+    ascii += '===========================\n\n';
+
+    ascii += `Question: ${thought.question}\n\n`;
+
+    ascii += 'Foundational Principles:\n';
+    for (const principle of thought.principles) {
+      ascii += `  • [${principle.type}] ${principle.statement}\n`;
+      ascii += `    Justification: ${principle.justification}\n`;
+    }
+    ascii += '\n';
+
+    ascii += 'Derivation Chain:\n';
+    for (const step of thought.derivationSteps) {
+      ascii += `  ${step.stepNumber}. ${step.inference}\n`;
+      ascii += `     (From: ${step.principle.statement})\n`;
+      ascii += `     Confidence: ${(step.confidence * 100).toFixed(0)}%\n`;
+    }
+    ascii += '\n';
+
+    ascii += `Conclusion: ${thought.conclusion.statement}\n`;
+    ascii += `Certainty: ${(thought.conclusion.certainty * 100).toFixed(0)}%\n`;
+
+    if (thought.conclusion.limitations && thought.conclusion.limitations.length > 0) {
+      ascii += '\nLimitations:\n';
+      for (const limitation of thought.conclusion.limitations) {
+        ascii += `  • ${limitation}\n`;
+      }
+    }
+
+    return ascii;
   }
 }
