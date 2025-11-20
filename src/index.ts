@@ -45,6 +45,8 @@ import {
 } from './types/index.js';
 import { VisualExporter, type VisualFormat } from './export/visual.js';
 import { toExtendedThoughtType } from './utils/type-guards.js';
+import { escapeHtml, escapeLatex } from './utils/sanitization.js';
+import type { ThinkingSession } from './types/session.js';
 
 const server = new Server(
   {
@@ -216,34 +218,42 @@ async function handleExport(input: ThinkingToolInput) {
   }
 
   // Standard exports (json, markdown, latex, html, jupyter)
-  const sessionWithCustomMetrics = {
-    ...session,
-    metrics: {
-      ...session.metrics,
-      customMetrics: Object.fromEntries(session.metrics.customMetrics),
-    },
-  };
-
   let exported: string;
 
   switch (format) {
     case 'json':
+      // For JSON, convert Map to Object for serialization
+      const sessionWithCustomMetrics = {
+        ...session,
+        metrics: {
+          ...session.metrics,
+          customMetrics: Object.fromEntries(session.metrics.customMetrics),
+        },
+      };
       exported = JSON.stringify(sessionWithCustomMetrics, null, 2);
       break;
     case 'markdown':
-      exported = exportToMarkdown(sessionWithCustomMetrics);
+      exported = exportToMarkdown(session);
       break;
     case 'latex':
-      exported = exportToLatex(sessionWithCustomMetrics);
+      exported = exportToLatex(session);
       break;
     case 'html':
-      exported = exportToHTML(sessionWithCustomMetrics);
+      exported = exportToHTML(session);
       break;
     case 'jupyter':
-      exported = exportToJupyter(sessionWithCustomMetrics);
+      exported = exportToJupyter(session);
       break;
     default:
-      exported = JSON.stringify(sessionWithCustomMetrics, null, 2);
+      // For unknown formats, fallback to JSON
+      const fallbackSession = {
+        ...session,
+        metrics: {
+          ...session.metrics,
+          customMetrics: Object.fromEntries(session.metrics.customMetrics),
+        },
+      };
+      exported = JSON.stringify(fallbackSession, null, 2);
   }
 
   return {
@@ -572,15 +582,22 @@ async function handleRecommendMode(input: ThinkingToolInput) {
 
 
 // Helper export functions
-function exportToMarkdown(session: any): string {
-  let md = `# Thinking Session: ${session.id}
+
+/**
+ * Export session to Markdown format
+ * @param session - The thinking session to export
+ * @returns Markdown-formatted string
+ */
+function exportToMarkdown(session: ThinkingSession): string {
+  const status = session.isComplete ? 'Complete' : 'In Progress';
+  let md = `# Thinking Session: ${session.title}
 
 `;
   md += `**Mode**: ${session.mode}
 `;
-  md += `**Created**: ${session.createdAt}
+  md += `**Created**: ${session.createdAt.toISOString()}
 `;
-  md += `**Status**: ${session.status}
+  md += `**Status**: ${status}
 
 `;
   md += `## Thoughts
@@ -599,10 +616,22 @@ function exportToMarkdown(session: any): string {
   return md;
 }
 
-function exportToLatex(session: any): string {
+/**
+ * Export session to LaTeX format with proper escaping
+ * @param session - The thinking session to export
+ * @returns LaTeX-formatted string
+ */
+function exportToLatex(session: ThinkingSession): string {
+  const status = session.isComplete ? 'Complete' : 'In Progress';
+  const safeTitle = escapeLatex(session.title);
+  const safeMode = escapeLatex(session.mode);
+  const safeStatus = escapeLatex(status);
+
   let latex = `\\documentclass{article}
 `;
-  latex += `\\title{Thinking Session: ${session.id}}
+  latex += `\\usepackage[utf8]{inputenc}
+`;
+  latex += `\\title{${safeTitle}}
 `;
   latex += `\\begin{document}
 `;
@@ -611,9 +640,9 @@ function exportToLatex(session: any): string {
 `;
   latex += `\\section{Session Details}
 `;
-  latex += `Mode: ${session.mode}\\\\
+  latex += `Mode: ${safeMode}\\\\
 `;
-  latex += `Status: ${session.status}\\\\
+  latex += `Status: ${safeStatus}\\\\
 
 `;
   latex += `\\section{Thoughts}
@@ -622,7 +651,7 @@ function exportToLatex(session: any): string {
   for (const thought of session.thoughts) {
     latex += `\\subsection{Thought ${thought.thoughtNumber}}
 `;
-    latex += `${thought.content}
+    latex += `${escapeLatex(thought.content)}
 
 `;
   }
@@ -632,23 +661,37 @@ function exportToLatex(session: any): string {
   return latex;
 }
 
-function exportToHTML(session: any): string {
+/**
+ * Export session to HTML format with XSS protection
+ * @param session - The thinking session to export
+ * @returns HTML-formatted string with escaped content
+ */
+function exportToHTML(session: ThinkingSession): string {
+  const status = session.isComplete ? 'Complete' : 'In Progress';
+  const safeTitle = escapeHtml(session.title);
+  const safeMode = escapeHtml(session.mode);
+  const safeStatus = escapeHtml(status);
+
   let html = `<!DOCTYPE html>
 <html>
 <head>
 `;
-  html += `  <title>Thinking Session: ${session.id}</title>
+  html += `  <meta charset="UTF-8">
 `;
-  html += `  <style>body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; }</style>
+  html += `  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+`;
+  html += `  <title>${safeTitle}</title>
+`;
+  html += `  <style>body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 0 20px; }</style>
 `;
   html += `</head>
 <body>
 `;
-  html += `  <h1>Thinking Session: ${session.id}</h1>
+  html += `  <h1>${safeTitle}</h1>
 `;
-  html += `  <p><strong>Mode:</strong> ${session.mode}</p>
+  html += `  <p><strong>Mode:</strong> ${safeMode}</p>
 `;
-  html += `  <p><strong>Status:</strong> ${session.status}</p>
+  html += `  <p><strong>Status:</strong> ${safeStatus}</p>
 `;
   html += `  <h2>Thoughts</h2>
 `;
@@ -658,7 +701,7 @@ function exportToHTML(session: any): string {
 `;
     html += `    <h3>Thought ${thought.thoughtNumber}/${session.thoughts.length}</h3>
 `;
-    html += `    <p>${thought.content}</p>
+    html += `    <p>${escapeHtml(thought.content)}</p>
 `;
     html += `  </div>
 `;
@@ -670,9 +713,29 @@ function exportToHTML(session: any): string {
   return html;
 }
 
-function exportToJupyter(session: any): string {
-  const notebook = {
-    cells: [] as any[],
+/**
+ * Export session to Jupyter Notebook format
+ * @param session - The thinking session to export
+ * @returns JSON string representing a Jupyter notebook
+ */
+function exportToJupyter(session: ThinkingSession): string {
+  const status = session.isComplete ? 'Complete' : 'In Progress';
+
+  interface JupyterCell {
+    cell_type: 'markdown' | 'code';
+    metadata: Record<string, unknown>;
+    source: string[];
+  }
+
+  interface JupyterNotebook {
+    cells: JupyterCell[];
+    metadata: Record<string, unknown>;
+    nbformat: number;
+    nbformat_minor: number;
+  }
+
+  const notebook: JupyterNotebook = {
+    cells: [],
     metadata: {},
     nbformat: 4,
     nbformat_minor: 2,
@@ -682,10 +745,10 @@ function exportToJupyter(session: any): string {
   notebook.cells.push({
     cell_type: 'markdown',
     metadata: {},
-    source: [`# Thinking Session: ${session.id}
+    source: [`# Thinking Session: ${session.title}
 `, `
-`, `**Mode**: ${session.mode}  
-`, `**Status**: ${session.status}
+`, `**Mode**: ${session.mode}
+`, `**Status**: ${status}
 `],
   });
 
