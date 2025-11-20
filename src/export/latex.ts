@@ -1022,7 +1022,6 @@ ${content}
         sections.push(`  \\item \\textbf{[${eqType}]} ${eq.strategyProfile.join(', ')}`);
         sections.push(`        \\\\Payoffs: (${eq.payoffs.join(', ')})`);
         sections.push(`        \\\\Stability: ${eq.stability}`);
-        }
       });
       sections.push('\\end{enumerate}');
       sections.push('');
@@ -1072,7 +1071,13 @@ ${content}
     if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
       sections.push('\\paragraph{Belief Functions}');
       sections.push('\\begin{itemize}');
-      thought.beliefFunctions.forEach(bf => {        sections.push(`  \item \textbf{Source:} ${this.escapeLatex(bf.source)}`);        bf.massAssignments.forEach(ma => {          sections.push(`    - $m(\{${ma.hypothesisSet.join(', ')}\}) = ${ma.mass.toFixed(4)}$`);          sections.push(`      \\\textit{${this.escapeLatex(ma.justification)}}`);        });      });
+      thought.beliefFunctions.forEach(bf => {
+        sections.push(`  \\item \\textbf{Source:} ${this.escapeLatex(bf.source)}`);
+        bf.massAssignments.forEach(ma => {
+          sections.push(`    - $m(\\{${ma.hypothesisSet.join(', ')}\\}) = ${ma.mass.toFixed(4)}$`);
+          sections.push(`      \\\\\\textit{${this.escapeLatex(ma.justification)}}`);
+        });
+      });
       sections.push('\\end{itemize}');
       sections.push('');
     }
