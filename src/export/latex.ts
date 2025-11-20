@@ -5,6 +5,7 @@
 
 import type { ThinkingSession } from '../types/session.js';
 import type { Thought, MathematicsThought, PhysicsThought, CausalThought, BayesianThought, AnalogicalThought, TemporalThought, GameTheoryThought, EvidentialThought, FirstPrincipleThought } from '../types/index.js';
+import { VisualExporter } from './visual.js';
 
 /**
  * LaTeX export options
@@ -39,6 +40,7 @@ export interface LaTeXExportOptions {
  */
 export class LaTeXExporter {
   private options: Required<LaTeXExportOptions>;
+  private visualExporter: VisualExporter;
 
   constructor(options: LaTeXExportOptions = {}) {
     // Set defaults
@@ -57,6 +59,7 @@ export class LaTeXExporter {
       renderDiagrams: options.renderDiagrams !== false,
       inlineMath: options.inlineMath !== false,
     };
+    this.visualExporter = new VisualExporter();
   }
 
   /**
@@ -324,6 +327,52 @@ ${content}
         break;
     }
 
+
+    // Embed Mermaid diagrams for visual modes
+    if (this.shouldIncludeDiagram(thought)) {
+      try {
+        let mermaid: string = '';
+        let caption: string = '';
+
+        switch (thought.mode) {
+          case 'causal':
+            mermaid = this.visualExporter.exportCausalGraph(
+              thought as CausalThought,
+              { format: 'mermaid', includeLabels: true, includeMetrics: true }
+            );
+            caption = `Causal Graph for Thought ${number}`;
+            break;
+          case 'temporal':
+            mermaid = this.visualExporter.exportTemporalTimeline(
+              thought as TemporalThought,
+              { format: 'mermaid', includeLabels: true }
+            );
+            caption = `Temporal Timeline for Thought ${number}`;
+            break;
+          case 'gametheory':
+            mermaid = this.visualExporter.exportGameTree(
+              thought as GameTheoryThought,
+              { format: 'mermaid', includeLabels: true, includeMetrics: true }
+            );
+            caption = `Game Tree for Thought ${number}`;
+            break;
+          case 'bayesian':
+            mermaid = this.visualExporter.exportBayesianNetwork(
+              thought as BayesianThought,
+              { format: 'mermaid', includeLabels: true, includeMetrics: true }
+            );
+            caption = `Bayesian Network for Thought ${number}`;
+            break;
+        }
+
+        if (mermaid) {
+          sections.push(this.embedMermaidDiagram(mermaid, caption));
+        }
+      } catch (error) {
+        // Silently skip diagram generation if it fails
+        console.warn(`Failed to generate diagram for thought ${number}:`, error);
+      }
+    }
     return sections.join('\n');
   }
 
@@ -1186,5 +1235,38 @@ ${content}
     if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
 
     return parts.join(' ');
+  }
+
+  /**
+   * Determine if a thought should include a visual diagram
+   */
+  private shouldIncludeDiagram(thought: Thought): boolean {
+    if (!this.options.renderDiagrams) {
+      return false;
+    }
+
+    // Include diagrams for modes with rich visual representations
+    return thought.mode === 'causal' ||
+           thought.mode === 'temporal' ||
+           thought.mode === 'gametheory' ||
+           thought.mode === 'bayesian';
+  }
+
+  /**
+   * Embed a Mermaid diagram in LaTeX document
+   */
+  private embedMermaidDiagram(mermaid: string, caption: string): string {
+    const sections: string[] = [];
+
+    sections.push('\\begin{figure}[h]');
+    sections.push('\\centering');
+    sections.push('\\begin{verbatim}');
+    sections.push(mermaid);
+    sections.push('\\end{verbatim}');
+    sections.push(`\\caption{${this.escapeLatex(caption)}}`);
+    sections.push('\\end{figure}');
+    sections.push('');
+
+    return sections.join('\n');
   }
 }
