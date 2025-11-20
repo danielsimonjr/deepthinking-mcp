@@ -51,12 +51,12 @@
   },
   {
     "content": "Task 3.4: Add reasoning state chart diagrams",
-    "status": "pending",
+    "status": "completed",
     "activeForm": "Adding reasoning state chart diagrams"
   },
   {
     "content": "Task 3.5: Add knowledge mind map generation",
-    "status": "pending",
+    "status": "completed",
     "activeForm": "Adding knowledge mind map generation"
   },
   {
@@ -111,7 +111,7 @@
   },
   {
     "content": "Task 7.7: Testing taxonomy system (25+ tests)",
-    "status": "pending",
+    "status": "completed",
     "activeForm": "Testing taxonomy system"
   },
   {
@@ -146,12 +146,12 @@
   },
   {
     "content": "Task 8.7: Update core types for new modes (ThinkingMode enum)",
-    "status": "pending",
+    "status": "completed",
     "activeForm": "Updating core types for new modes"
   },
   {
     "content": "Task 8.8: Update validator for new modes",
-    "status": "pending",
+    "status": "completed",
     "activeForm": "Updating validator for new modes"
   },
   {
