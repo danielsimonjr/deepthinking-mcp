@@ -69,6 +69,23 @@ Complete production-ready infrastructure for enterprise deployment.
 - **Files Added**: `src/rate-limit/` (4 files: types, limiter, quota, exports)
 - **Lines**: ~600 lines
 
+
+#### Task 9.6 - LRU Caching Layer
+- **3 Eviction Strategies**:
+  - **LRU (Least Recently Used)**: Recency-based eviction - evicts items not accessed recently
+  - **LFU (Least Frequently Used)**: Frequency-based eviction - evicts items with lowest access count
+  - **FIFO (First In First Out)**: Insertion-order eviction - evicts oldest items
+- **Cache Features**:
+  - TTL support with automatic expiration
+  - Statistics tracking (hits, misses, evictions, hit rate, memory usage)
+  - Eviction callbacks for cleanup logic
+  - Manual expired entry cleanup
+  - Memory usage estimation
+- **Cache Manager**: Multi-cache management with named caches and combined statistics
+- **Cache Factory**: Unified interface for creating cache instances by strategy
+- **Files Added**:  (6 files: types, lru, lfu, fifo, factory, exports)
+- **Lines**: ~950 lines
+
 ### Phase 4 Visual & Validation Updates (Tasks 3.4, 3.5, 7.7, 8.7, 8.8)
 
 #### Task 3.4 - Reasoning State Chart Diagrams
