@@ -191,7 +191,7 @@
   },
   {
     "content": "Task 9.8: Implement backup and restore system (local, S3, GCS, Azure)",
-    "status": "pending",
+    "status": "completed",
     "activeForm": "Implementing backup and restore system"
   },
   {
