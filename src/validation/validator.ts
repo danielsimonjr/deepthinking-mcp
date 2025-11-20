@@ -59,7 +59,7 @@ export class ThoughtValidator {
         severity: 'warning',
         thoughtNumber: thought.thoughtNumber,
         description: `Unknown thinking mode: ${thought.mode}`,
-        suggestion: 'Use a supported mode (sequential, shannon, mathematics, physics, hybrid, abductive, causal, bayesian, counterfactual, analogical, temporal, gametheory, evidential)',
+        suggestion: 'Use a supported mode (sequential, shannon, mathematics, physics, hybrid, abductive, causal, bayesian, counterfactual, analogical, temporal, gametheory, evidential, firstprinciple, meta, modal, constraint, optimization, stochastic, recursive)',
         category: 'structural',
       });
     }

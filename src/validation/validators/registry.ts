@@ -18,6 +18,12 @@ import { AnalogicalValidator } from './modes/analogical.js';
 import { TemporalValidator } from './modes/temporal.js';
 import { GameTheoryValidator } from './modes/gametheory.js';
 import { EvidentialValidator } from './modes/evidential.js';
+import { MetaValidator } from './modes/meta.js';
+import { ModalValidator } from './modes/modal.js';
+import { ConstraintValidator } from './modes/constraint.js';
+import { OptimizationValidator } from './modes/optimization.js';
+import { StochasticValidator } from './modes/stochastic.js';
+import { RecursiveValidator } from './modes/recursive.js';
 
 /**
  * Singleton registry of all mode validators
@@ -47,6 +53,12 @@ class ValidatorRegistry {
     this.register(new TemporalValidator());
     this.register(new GameTheoryValidator());
     this.register(new EvidentialValidator());
+    this.register(new MetaValidator());
+    this.register(new ModalValidator());
+    this.register(new ConstraintValidator());
+    this.register(new OptimizationValidator());
+    this.register(new StochasticValidator());
+    this.register(new RecursiveValidator());
   }
 
   /**

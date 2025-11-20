@@ -41,6 +41,7 @@ import {
   TemporalThought,
   GameTheoryThought,
   EvidentialThought,
+  FirstPrincipleThought,
   ModeRecommender,
 } from './types/index.js';
 import { VisualExporter, type VisualFormat } from './export/visual.js';
@@ -203,8 +204,17 @@ async function handleExport(input: ThinkingToolInput) {
         includeLabels: true,
         includeMetrics: true,
       });
+    } else if (lastThought.mode === 'firstprinciple' && 'question' in lastThought) {
+      exported = visualExporter.exportFirstPrinciples(lastThought as FirstPrincipleThought, {
+        format: format as VisualFormat,
+        colorScheme: 'default',
+      });
     } else {
-      throw new Error(`Visual export not supported for mode: ${lastThought.mode}`);
+      // Generic thought sequence export for all other modes
+      exported = visualExporter.exportThoughtSequence(session.thoughts, {
+        format: format as VisualFormat,
+        colorScheme: 'default',
+      });
     }
 
     return {
@@ -468,6 +478,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         decisions: input.decisions || [],
       } as unknown as EvidentialThought;
 
+    case 'firstprinciple':      return {        ...baseThought,        mode: ThinkingMode.FIRSTPRINCIPLE,        question: input.question || '',        principles: input.principles || [],        derivationSteps: input.derivationSteps || [],        conclusion: input.conclusion || { statement: '', derivationChain: [], certainty: 0 },        alternativeInterpretations: input.alternativeInterpretations || [],      } as unknown as FirstPrincipleThought;
     case 'hybrid':
     default:
       return {

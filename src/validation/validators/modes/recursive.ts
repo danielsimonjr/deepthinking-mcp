@@ -1,0 +1,110 @@
+/**
+ * Recursive Reasoning Mode Validator (v3.4.0)
+ * Phase 4E Task 8.8: Validator for recursive reasoning mode
+ *
+ * Recursive reasoning involves breaking problems into smaller self-similar
+ * subproblems and building solutions from base cases
+ */
+
+import { Thought, ValidationIssue } from '../../../types/index.js';
+import { ValidationContext } from '../../validator.js';
+import { BaseValidator } from '../base.js';
+
+export class RecursiveValidator extends BaseValidator<Thought> {
+  getMode(): string {
+    return 'recursive';
+  }
+
+  validate(thought: Thought, _context: ValidationContext): ValidationIssue[] {
+    const issues: ValidationIssue[] = [];
+
+    // Common validation
+    issues.push(...this.validateCommon(thought));
+
+    // Check for base case definition (should appear early)
+    if (thought.thoughtNumber <= 2) {
+      const hasBaseCase = thought.thought.toLowerCase().includes('base case') ||
+                         thought.thought.toLowerCase().includes('base condition') ||
+                         thought.thought.toLowerCase().includes('termination');
+
+      if (!hasBaseCase) {
+        issues.push({
+          severity: 'warning',
+          thoughtNumber: thought.thoughtNumber,
+          description: 'Recursive reasoning should define base cases early',
+          suggestion: 'Define base/termination cases before recursive steps',
+          category: 'structural',
+        });
+      }
+    }
+
+    // Check for recursive structure
+    const recursiveKeywords = [
+      'recursive', 'recursion', 'self-similar', 'subproblem',
+      'divide', 'conquer', 'smaller instance'
+    ];
+
+    const hasRecursiveContent = recursiveKeywords.some(keyword =>
+      thought.thought.toLowerCase().includes(keyword)
+    );
+
+    if (!hasRecursiveContent) {
+      issues.push({
+        severity: 'info',
+        thoughtNumber: thought.thoughtNumber,
+        description: 'Recursive reasoning should make recursive structure explicit',
+        suggestion: 'Describe how the problem breaks down into smaller instances',
+        category: 'structural',
+      });
+    }
+
+    // Check for dependencies (recursive steps should reference previous steps)
+    if ('dependencies' in thought && Array.isArray(thought.dependencies)) {
+      if (thought.thoughtNumber > 2 && thought.dependencies.length === 0) {
+        issues.push({
+          severity: 'warning',
+          thoughtNumber: thought.thoughtNumber,
+          description: 'Recursive steps should depend on previous subproblems or base cases',
+          suggestion: 'Add dependencies to show how subproblems combine',
+          category: 'structural',
+        });
+      }
+    }
+
+    // Check for combination/merging logic (after recursion)
+    if (thought.thoughtNumber > 2) {
+      const hasCombination = thought.thought.toLowerCase().includes('combine') ||
+                            thought.thought.toLowerCase().includes('merge') ||
+                            thought.thought.toLowerCase().includes('build up');
+
+      if (!hasCombination && thought.nextThoughtNeeded) {
+        issues.push({
+          severity: 'info',
+          thoughtNumber: thought.thoughtNumber,
+          description: 'Consider explaining how subproblem solutions combine',
+          suggestion: 'Describe how to build the final solution from recursive calls',
+          category: 'logical',
+        });
+      }
+    }
+
+    // Warn about potential infinite recursion
+    if (thought.thoughtNumber > thought.totalThoughts * 0.8) {
+      const hasTermination = thought.thought.toLowerCase().includes('terminat') ||
+                            thought.thought.toLowerCase().includes('base') ||
+                            thought.thought.toLowerCase().includes('stop');
+
+      if (!hasTermination && thought.nextThoughtNeeded) {
+        issues.push({
+          severity: 'warning',
+          thoughtNumber: thought.thoughtNumber,
+          description: 'Deep recursion detected - ensure termination conditions are met',
+          suggestion: 'Verify that base cases are being reached',
+          category: 'logical',
+        });
+      }
+    }
+
+    return issues;
+  }
+}

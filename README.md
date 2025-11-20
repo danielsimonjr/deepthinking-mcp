@@ -780,7 +780,6 @@ deepthinking-mcp/
 - ✅ Universal visual export support for all 14 modes (v3.1.0)
 
 ### Phase 4 (Planned)
-- [ ] Math-MCP integration
 - [ ] Persistence layer
 - [ ] Collaborative thinking sessions
 - [ ] Pattern learning from successful reasoning chains

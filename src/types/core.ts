@@ -1,13 +1,15 @@
 /**
- * Core type definitions for the DeepThinking MCP server v2.1+
- * Supports 13 thinking modes: Sequential, Shannon, Mathematics, Physics, Hybrid,
- * Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory, Evidential
+ * Core type definitions for the DeepThinking MCP server v3.4.0
+ * Supports 20 thinking modes: Sequential, Shannon, Mathematics, Physics, Hybrid,
+ * Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory, Evidential,
+ * FirstPrinciple, Meta, Modal, Constraint, Optimization, Stochastic, Recursive
  */
 
 // Import Phase 3 mode types
 import type { TemporalThought } from './modes/temporal.js';
 import type { GameTheoryThought } from './modes/gametheory.js';
 import type { EvidentialThought } from './modes/evidential.js';
+import type { FirstPrincipleThought } from './modes/firstprinciple.js';
 
 /**
  * Available thinking modes
@@ -26,6 +28,13 @@ export enum ThinkingMode {
   TEMPORAL = 'temporal', // Phase 3 (v2.1)
   GAMETHEORY = 'gametheory', // Phase 3 (v2.2)
   EVIDENTIAL = 'evidential', // Phase 3 (v2.3)
+  FIRSTPRINCIPLE = 'firstprinciple', // v3.1.0
+  META = 'meta', // Phase 4E (v3.4.0)
+  MODAL = 'modal', // Phase 4E (v3.4.0)
+  CONSTRAINT = 'constraint', // Phase 4E (v3.4.0)
+  OPTIMIZATION = 'optimization', // Phase 4E (v3.4.0)
+  STOCHASTIC = 'stochastic', // Phase 4E (v3.4.0)
+  RECURSIVE = 'recursive', // Phase 4E (v3.4.0)
   CUSTOM = 'custom'
 }
 
@@ -648,7 +657,8 @@ export type Thought =
   | AnalogicalThought
   | TemporalThought
   | GameTheoryThought
-  | EvidentialThought;
+  | EvidentialThought
+  | FirstPrincipleThought;
 
 // ========== TYPE GUARDS ==========
 
@@ -712,6 +722,9 @@ export function isGameTheoryThought(thought: Thought): thought is GameTheoryThou
 export function isEvidentialThought(thought: Thought): thought is EvidentialThought {
   return thought.mode === ThinkingMode.EVIDENTIAL;
 }
+export function isFirstPrincipleThought(thought: Thought): thought is FirstPrincipleThought {
+  return thought.mode === ThinkingMode.FIRSTPRINCIPLE;
+}
 
 // Re-export Phase 3 types
-export type { TemporalThought, GameTheoryThought, EvidentialThought };
+export type { TemporalThought, GameTheoryThought, EvidentialThought, FirstPrincipleThought };

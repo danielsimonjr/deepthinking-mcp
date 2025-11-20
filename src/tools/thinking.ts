@@ -10,7 +10,7 @@ import { z } from 'zod';
  */
 export const ThinkingToolSchema = z.object({
   sessionId: z.string().optional(),
-  mode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential']).default('hybrid'),
+  mode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential', 'firstprinciple']).default('hybrid'),
   thought: z.string(),
   thoughtNumber: z.number().int().positive(),
   totalThoughts: z.number().int().positive(),
@@ -398,9 +398,38 @@ export const ThinkingToolSchema = z.object({
       risk: z.number(),
     })),
   })).optional(),
+  // First-principles reasoning properties (v3.1.0)
+  question: z.string().optional(),
+  principles: z.array(z.object({
+    id: z.string(),
+    type: z.enum(['axiom', 'definition', 'observation', 'logical_inference', 'assumption']),
+    statement: z.string(),
+    justification: z.string(),
+    dependsOn: z.array(z.string()).optional(),
+  })).optional(),
+  derivationSteps: z.array(z.object({
+    stepNumber: z.number(),
+    principle: z.object({
+      id: z.string(),
+      type: z.enum(['axiom', 'definition', 'observation', 'logical_inference', 'assumption']),
+      statement: z.string(),
+      justification: z.string(),
+      dependsOn: z.array(z.string()).optional(),
+    }),
+    inference: z.string(),
+    logicalForm: z.string().optional(),
+    confidence: z.number().min(0).max(1),
+  })).optional(),
+  conclusion: z.object({
+    statement: z.string(),
+    derivationChain: z.array(z.number()),
+    certainty: z.number().min(0).max(1),
+    limitations: z.array(z.string()).optional(),
+  }).optional(),
+  alternativeInterpretations: z.array(z.string()).optional(),
   action: z.enum(['add_thought', 'summarize', 'export', 'switch_mode', 'get_session', 'recommend_mode']).default('add_thought'),
   exportFormat: z.enum(['markdown', 'latex', 'json', 'html', 'jupyter', 'mermaid', 'dot', 'ascii']).optional(),
-  newMode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential']).optional(),
+  newMode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential', 'firstprinciple']).optional(),
   // Mode recommendation parameters (v2.4)
   problemType: z.string().optional(),
   problemCharacteristics: z.object({

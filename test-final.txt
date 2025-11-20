@@ -1,0 +1,2781 @@
+
+> deepthinking-mcp@3.0.2 test:run
+> vitest --run
+
+
+[7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mC:/mcp-servers/deepthinking-mcp[39m
+
+ [32m✓[39m tests/unit/types.test.ts [2m ([22m[2m14 tests[22m[2m)[22m[90m 29[2mms[22m[39m
+ [32m✓[39m tests/unit/recommendations.test.ts [2m ([22m[2m15 tests[22m[2m)[22m[90m 35[2mms[22m[39m
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2minitialization[2m > [22m[2mshould create necessary directories[22m[39m
+[2025-11-19T10:17:44.870Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-dbe84b2b-7595-48c8-bc97-f240d8e0e219",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2minitialization[2m > [22m[2mshould create necessary directories[22m[39m
+[2025-11-19T10:17:44.878Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2minitialization[2m > [22m[2mshould handle multiple initialization calls[22m[39m
+[2025-11-19T10:17:44.889Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-41a5407d-5243-4ca2-b1a1-c9f5ca5e16db",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+[2025-11-19T10:17:44.890Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2msaveSession[2m > [22m[2mshould save a session to disk[22m[39m
+[2025-11-19T10:17:44.913Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-df0bcfda-8519-4307-a840-4ebff4811645",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2msaveSession[2m > [22m[2mshould save a session to disk[22m[39m
+[2025-11-19T10:17:44.933Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2msaveSession[2m > [22m[2mshould save session with correct content[22m[39m
+[2025-11-19T10:17:44.955Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-70c85609-e62f-4818-b688-6c6d993e8473",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2msaveSession[2m > [22m[2mshould save session with correct content[22m[39m
+[2025-11-19T10:17:44.964Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2msaveSession[2m > [22m[2mshould update metadata index[22m[39m
+[2025-11-19T10:17:44.977Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-df2358d7-ce2d-459e-95c8-100c26d10150",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2msaveSession[2m > [22m[2mshould update metadata index[22m[39m
+[2025-11-19T10:17:44.987Z] INFO: FileSessionStore closed
+
+ [32m✓[39m tests/integration/multi-session.test.ts [2m ([22m[2m18 tests[22m[2m)[22m[90m 73[2mms[22m[39m
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mMultiple Session Management[2m > [22m[2mshould create and manage multiple sessions independently[22m[39m
+[2025-11-19T10:17:44.927Z] INFO: Session created
+  Context: {
+  "sessionId": "4b41ee42-64fa-4475-b62d-142d7ac8b6c6",
+  "title": "Session 1",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.930Z] INFO: Session created
+  Context: {
+  "sessionId": "b3845bb5-0d80-4654-ada8-7c07913edeb0",
+  "title": "Session 2",
+  "mode": "shannon"
+}
+[2025-11-19T10:17:44.930Z] INFO: Session created
+  Context: {
+  "sessionId": "416b7bd4-04aa-47ac-bb2d-484128629999",
+  "title": "Session 3",
+  "mode": "mathematics"
+}
+[2025-11-19T10:17:44.930Z] INFO: Session created
+  Context: {
+  "sessionId": "665585c1-dca0-43e0-8b77-cca61f059b86",
+  "title": "Session 4",
+  "mode": "physics"
+}
+[2025-11-19T10:17:44.931Z] INFO: Session created
+  Context: {
+  "sessionId": "d1d597fd-a7bb-420a-aade-f1edd125fe86",
+  "title": "Session 5",
+  "mode": "hybrid"
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mMultiple Session Management[2m > [22m[2mshould maintain session isolation (changes in one do not affect others)[22m[39m
+[2025-11-19T10:17:44.939Z] INFO: Session created
+  Context: {
+  "sessionId": "022476b1-9696-45d3-b114-9a60673cda5b",
+  "title": "Isolated Session 1",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.940Z] INFO: Session created
+  Context: {
+  "sessionId": "d51decdc-9f1c-4e7e-9ae7-7f6e66647e00",
+  "title": "Isolated Session 2",
+  "mode": "sequential"
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mMultiple Session Management[2m > [22m[2mshould handle mode switching independently across sessions[22m[39m
+[2025-11-19T10:17:44.945Z] INFO: Session created
+  Context: {
+  "sessionId": "ff70270c-5f32-4212-80e0-76ffd33c1aec",
+  "title": "S1",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.945Z] INFO: Session created
+  Context: {
+  "sessionId": "d1405ede-989c-4490-a3c1-73b47a009e86",
+  "title": "S2",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.946Z] INFO: Session created
+  Context: {
+  "sessionId": "e4bc365a-f546-4042-abf9-91f5246b6da9",
+  "title": "S3",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.946Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "ff70270c-5f32-4212-80e0-76ffd33c1aec",
+  "oldMode": "sequential",
+  "newMode": "mathematics",
+  "reason": "Switch to math"
+}
+[2025-11-19T10:17:44.946Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "d1405ede-989c-4490-a3c1-73b47a009e86",
+  "oldMode": "sequential",
+  "newMode": "physics",
+  "reason": "Switch to physics"
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mMultiple Session Management[2m > [22m[2mshould handle completion status independently across sessions[22m[39m
+[2025-11-19T10:17:44.948Z] INFO: Session created
+  Context: {
+  "sessionId": "01ed9465-a5c5-4540-aa07-542456450b62",
+  "title": "S1",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.948Z] INFO: Session created
+  Context: {
+  "sessionId": "141e51be-fe68-4c8b-9142-f640a6a2b83d",
+  "title": "S2",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.948Z] INFO: Session completed
+  Context: {
+  "sessionId": "01ed9465-a5c5-4540-aa07-542456450b62",
+  "title": "S1",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mConcurrent Operations on Same Session[2m > [22m[2mshould handle concurrent thought additions to same session[22m[39m
+[2025-11-19T10:17:44.953Z] INFO: Session created
+  Context: {
+  "sessionId": "84a68ca6-4399-4fc7-b2bb-b7c46638900a",
+  "title": "Concurrent Test",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.953Z] INFO: Session completed
+  Context: {
+  "sessionId": "84a68ca6-4399-4fc7-b2bb-b7c46638900a",
+  "title": "Concurrent Test",
+  "totalThoughts": 3
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mConcurrent Operations on Same Session[2m > [22m[2mshould handle concurrent retrieval of same session[22m[39m
+[2025-11-19T10:17:44.955Z] INFO: Session created
+  Context: {
+  "sessionId": "0a3225d1-d0ab-47dd-bf29-8fec26067959",
+  "title": "Concurrent Retrieval",
+  "mode": "sequential"
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mConcurrent Operations on Same Session[2m > [22m[2mshould handle concurrent mode switches on same session[22m[39m
+[2025-11-19T10:17:44.956Z] INFO: Session created
+  Context: {
+  "sessionId": "67ff9010-4083-4dae-b41b-6a93750da238",
+  "title": "Mode Switch Race",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.956Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "67ff9010-4083-4dae-b41b-6a93750da238",
+  "oldMode": "sequential",
+  "newMode": "mathematics",
+  "reason": "Switch 1"
+}
+[2025-11-19T10:17:44.956Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "67ff9010-4083-4dae-b41b-6a93750da238",
+  "oldMode": "mathematics",
+  "newMode": "physics",
+  "reason": "Switch 2"
+}
+[2025-11-19T10:17:44.956Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "67ff9010-4083-4dae-b41b-6a93750da238",
+  "oldMode": "physics",
+  "newMode": "hybrid",
+  "reason": "Switch 3"
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mConcurrent Operations Across Different Sessions[2m > [22m[2mshould handle concurrent operations on different sessions[22m[39m
+[2025-11-19T10:17:44.959Z] INFO: Session created
+  Context: {
+  "sessionId": "3f991789-fdd2-4f7e-bedd-733519b4d175",
+  "title": "S1",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.959Z] INFO: Session created
+  Context: {
+  "sessionId": "e516bbb4-68fe-491b-aa63-ed5895f7ef7e",
+  "title": "S2",
+  "mode": "shannon"
+}
+[2025-11-19T10:17:44.959Z] INFO: Session created
+  Context: {
+  "sessionId": "dea5acb8-7021-40c9-88a2-95da2d5700d8",
+  "title": "S3",
+  "mode": "mathematics"
+}
+[2025-11-19T10:17:44.960Z] INFO: Session completed
+  Context: {
+  "sessionId": "3f991789-fdd2-4f7e-bedd-733519b4d175",
+  "title": "S1",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:44.960Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "e516bbb4-68fe-491b-aa63-ed5895f7ef7e",
+  "oldMode": "shannon",
+  "newMode": "physics",
+  "reason": "Switch mode"
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mConcurrent Operations Across Different Sessions[2m > [22m[2mshould handle concurrent session creation[22m[39m
+[2025-11-19T10:17:44.962Z] INFO: Session created
+  Context: {
+  "sessionId": "3f232dd7-99f8-4aea-961d-776c7abeb496",
+  "title": "Session 1",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.962Z] INFO: Session created
+  Context: {
+  "sessionId": "590c392e-e0c9-4e0b-b093-078d75609012",
+  "title": "Session 2",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.962Z] INFO: Session created
+  Context: {
+  "sessionId": "fe0989a8-89ec-4427-a587-cc0a2bf37c7c",
+  "title": "Session 3",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.962Z] INFO: Session created
+  Context: {
+  "sessionId": "9d3bb500-7367-46a2-bb69-5a8240d2bd34",
+  "title": "Session 4",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.963Z] INFO: Session created
+  Context: {
+  "sessionId": "7405b813-6385-455e-aabb-662fe1b9f7bb",
+  "title": "Session 5",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.963Z] INFO: Session created
+  Context: {
+  "sessionId": "dc22f448-8e6d-4299-a80e-620c735a4c75",
+  "title": "Session 6",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.963Z] INFO: Session created
+  Context: {
+  "sessionId": "d4a4bb3b-74ee-4ebe-90cc-6ecbb108f373",
+  "title": "Session 7",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.963Z] INFO: Session created
+  Context: {
+  "sessionId": "ba9f2fbf-e6cd-463e-8d98-b73dc3861d5a",
+  "title": "Session 8",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.963Z] INFO: Session created
+  Context: {
+  "sessionId": "1050e0ba-018c-43ec-af19-b01a4144348f",
+  "title": "Session 9",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.963Z] INFO: Session created
+  Context: {
+  "sessionId": "41f1f75b-44e7-4cdf-b455-404291bd5a28",
+  "title": "Session 10",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.963Z] INFO: Session created
+  Context: {
+  "sessionId": "df47ffde-cd96-431e-a61c-d49772326607",
+  "title": "Session 11",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.963Z] INFO: Session created
+  Context: {
+  "sessionId": "f1b27e41-d6fd-4eb9-8a6b-21f0b2a96044",
+  "title": "Session 12",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.963Z] INFO: Session created
+  Context: {
+  "sessionId": "cc3313a9-b522-4f5c-ace1-f6746ecbc749",
+  "title": "Session 13",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.963Z] INFO: Session created
+  Context: {
+  "sessionId": "4e501db2-3d2f-4242-98ac-605a9e67e8bc",
+  "title": "Session 14",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.963Z] INFO: Session created
+  Context: {
+  "sessionId": "bd3f928f-ba06-4156-b1ba-510856fbfd20",
+  "title": "Session 15",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.963Z] INFO: Session created
+  Context: {
+  "sessionId": "5e39dc7d-8d71-4f18-be73-46e397fe5b9d",
+  "title": "Session 16",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.963Z] INFO: Session created
+  Context: {
+  "sessionId": "23da4583-5e1e-4a8c-8439-04a56f998ba6",
+  "title": "Session 17",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.964Z] INFO: Session created
+  Context: {
+  "sessionId": "c37693ef-3ed9-4bf5-aecd-78832df9d5f3",
+  "title": "Session 18",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.964Z] INFO: Session created
+  Context: {
+  "sessionId": "a38ee6fd-509a-4bf5-91d0-1b79131d4542",
+  "title": "Session 19",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.964Z] INFO: Session created
+  Context: {
+  "sessionId": "50f8a288-361f-4ce6-8c54-e8df60a27a3c",
+  "title": "Session 20",
+  "mode": "sequential"
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mConcurrent Operations Across Different Sessions[2m > [22m[2mshould handle concurrent summary generation for different sessions[22m[39m
+[2025-11-19T10:17:44.965Z] INFO: Session created
+  Context: {
+  "sessionId": "dc7cf021-8b92-4078-85c4-8cf1679f47c1",
+  "title": "S1",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.966Z] INFO: Session created
+  Context: {
+  "sessionId": "7a504fb7-5679-4046-96e2-0ab34eb81107",
+  "title": "S2",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.966Z] INFO: Session created
+  Context: {
+  "sessionId": "537406a9-d3d9-47c8-a8aa-2414579dc37e",
+  "title": "S3",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.966Z] INFO: Session completed
+  Context: {
+  "sessionId": "dc7cf021-8b92-4078-85c4-8cf1679f47c1",
+  "title": "S1",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:44.966Z] INFO: Session completed
+  Context: {
+  "sessionId": "7a504fb7-5679-4046-96e2-0ab34eb81107",
+  "title": "S2",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:44.966Z] INFO: Session completed
+  Context: {
+  "sessionId": "537406a9-d3d9-47c8-a8aa-2414579dc37e",
+  "title": "S3",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mResource Management with Many Sessions[2m > [22m[2mshould handle creation of many sessions[22m[39m
+[2025-11-19T10:17:44.969Z] INFO: Session created
+  Context: {
+  "sessionId": "6b0c4998-6dac-4eee-a3b7-39cd467d7f85",
+  "title": "Session 1",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.969Z] INFO: Session created
+  Context: {
+  "sessionId": "136a504e-5e62-49ad-83dc-44f7ff662bed",
+  "title": "Session 2",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.970Z] INFO: Session created
+  Context: {
+  "sessionId": "4a0b6aa4-d8c9-4f39-825b-376a4f2918c2",
+  "title": "Session 3",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.970Z] INFO: Session created
+  Context: {
+  "sessionId": "78ae71d1-23e9-4254-a958-65515469a493",
+  "title": "Session 4",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.970Z] INFO: Session created
+  Context: {
+  "sessionId": "2d554baa-c2ed-4b17-be72-056eb9c073e1",
+  "title": "Session 5",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.970Z] INFO: Session created
+  Context: {
+  "sessionId": "de3b0bd8-d52d-4b67-8d05-05da4ef68469",
+  "title": "Session 6",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.970Z] INFO: Session created
+  Context: {
+  "sessionId": "75df1a84-1ec1-4801-bef6-4f9f4b5e753d",
+  "title": "Session 7",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.970Z] INFO: Session created
+  Context: {
+  "sessionId": "5dd7eddb-ba87-4257-8a9d-4f839f67403c",
+  "title": "Session 8",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.970Z] INFO: Session created
+  Context: {
+  "sessionId": "3f6efcf2-c60c-4420-beb7-5f874dbe7ef2",
+  "title": "Session 9",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.970Z] INFO: Session created
+  Context: {
+  "sessionId": "20b3d6dc-d0f1-4b61-8c1a-4af2886a0ad1",
+  "title": "Session 10",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.970Z] INFO: Session created
+  Context: {
+  "sessionId": "eac05b53-dcbd-4413-9f66-b2c5448d7f55",
+  "title": "Session 11",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.970Z] INFO: Session created
+  Context: {
+  "sessionId": "9f1b72a4-39d5-437c-b61f-423b74c00617",
+  "title": "Session 12",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "09084735-b751-4733-96d1-e7640f6b5810",
+  "title": "Session 13",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "e7115060-3bdf-4480-a190-9feb65040b52",
+  "title": "Session 14",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "e6d832dc-d49c-41d1-8bb6-cf2130ef5e30",
+  "title": "Session 15",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "bda0e76f-1866-45df-a01c-ba5797c422a3",
+  "title": "Session 16",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "620c3696-53e4-484e-88b4-4a5db36fd8e5",
+  "title": "Session 17",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "902eef6d-4082-46c4-bc00-6db3a229350a",
+  "title": "Session 18",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "a2960ef7-90a9-4893-8823-243584afa26e",
+  "title": "Session 19",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "83258821-2da5-4d58-b08f-3085ab1d02ac",
+  "title": "Session 20",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "16a925ec-1339-4595-94fc-774accb7a4f1",
+  "title": "Session 21",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "9cb56337-8b37-4011-ba0e-ceb5e6a72ae8",
+  "title": "Session 22",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "0a2177cc-60d4-47d2-9949-bbdd834b6f37",
+  "title": "Session 23",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "22002538-cb40-4640-a946-7f53452163aa",
+  "title": "Session 24",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "b0a71f01-28d9-4c64-9d9e-c8bcb17f4adb",
+  "title": "Session 25",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "1481966b-8f74-45d9-82b2-7a5689ecf92e",
+  "title": "Session 26",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "c87f1cc3-ca58-4db9-aa1f-aeca1cbab2dd",
+  "title": "Session 27",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "0658bb53-6806-4b8d-8c14-0467dcff8446",
+  "title": "Session 28",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "a742d318-5388-41b6-b9b4-93996dab25d4",
+  "title": "Session 29",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "cf61d4ee-9141-4c06-8e12-bdea817f996b",
+  "title": "Session 30",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "060cea29-b1c7-441e-b879-3b7dc398ea03",
+  "title": "Session 31",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "b880b388-d426-47fc-9d7c-a276df72dc9b",
+  "title": "Session 32",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "e84a060c-bddc-4cca-bc75-5a0dfad33f2c",
+  "title": "Session 33",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "3a7751b6-1dd2-4032-b1c4-3f38768c021e",
+  "title": "Session 34",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "1f4f81f5-3d6c-47a1-a55c-c48c90a8d6d3",
+  "title": "Session 35",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "f0e931dd-51b0-4335-a8c9-f6871edc0a21",
+  "title": "Session 36",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "aa5aecf7-fd97-4475-8b71-83217b9b852d",
+  "title": "Session 37",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "301a4e00-5434-4a24-a380-8b91ba540940",
+  "title": "Session 38",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "5225c1a3-c1fd-4b95-9475-62f06f2b0da8",
+  "title": "Session 39",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "f867f667-73e8-4ba3-881b-69b2e8544aaf",
+  "title": "Session 40",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "f7a54aa7-e420-4650-83bd-2d8b8605de08",
+  "title": "Session 41",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "196beb70-fb72-4cca-bc90-c16af2982f51",
+  "title": "Session 42",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "6551825e-14b9-4d93-8e97-87060ebd412a",
+  "title": "Session 43",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.972Z] INFO: Session created
+  Context: {
+  "sessionId": "68005c97-c9e2-4ccb-b2bc-17a2b379308f",
+  "title": "Session 44",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.973Z] INFO: Session created
+  Context: {
+  "sessionId": "850fbe7e-c0d1-4737-8f81-5d99e4f0c20e",
+  "title": "Session 45",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.973Z] INFO: Session created
+  Context: {
+  "sessionId": "24798aef-0020-4af0-a0b9-89a1dfb6afa6",
+  "title": "Session 46",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.973Z] INFO: Session created
+  Context: {
+  "sessionId": "0b1bdf3d-3c70-4880-aeee-e5e79ae79878",
+  "title": "Session 47",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.973Z] INFO: Session created
+  Context: {
+  "sessionId": "c5418073-ac3b-4d0d-af54-171d85d5053f",
+  "title": "Session 48",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.973Z] INFO: Session created
+  Context: {
+  "sessionId": "76934d36-8b23-42e6-a721-8bce0daeaaa7",
+  "title": "Session 49",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.973Z] INFO: Session created
+  Context: {
+  "sessionId": "dbdffc3c-652e-4c2b-806b-ebd0dc05e646",
+  "title": "Session 50",
+  "mode": "sequential"
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mResource Management with Many Sessions[2m > [22m[2mshould retrieve sessions efficiently with many active sessions[22m[39m
+[2025-11-19T10:17:44.974Z] INFO: Session created
+  Context: {
+  "sessionId": "208922ab-07bc-498a-9e3c-c84cfd2b9a3d",
+  "title": "Session 1",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.974Z] INFO: Session created
+  Context: {
+  "sessionId": "819d6d4f-6e31-453a-a990-666bbd9e5fdf",
+  "title": "Session 2",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.974Z] INFO: Session created
+  Context: {
+  "sessionId": "cff6c8c3-0b9e-422d-9576-8a14c2a351a9",
+  "title": "Session 3",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.974Z] INFO: Session created
+  Context: {
+  "sessionId": "80a01b82-ec43-4c95-899f-a966fc1df317",
+  "title": "Session 4",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.975Z] INFO: Session created
+  Context: {
+  "sessionId": "529d72b5-8cb3-4522-aba3-4b429cdc2df7",
+  "title": "Session 5",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.975Z] INFO: Session created
+  Context: {
+  "sessionId": "dde8f3c6-9205-41a1-891a-a57cedb93443",
+  "title": "Session 6",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.975Z] INFO: Session created
+  Context: {
+  "sessionId": "15ac623a-c32b-4817-ac16-858c851c7563",
+  "title": "Session 7",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.975Z] INFO: Session created
+  Context: {
+  "sessionId": "201c9587-b3e1-4162-90a5-bbb75d7cc49b",
+  "title": "Session 8",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.975Z] INFO: Session created
+  Context: {
+  "sessionId": "8f7db655-3525-456e-b5a3-dd29fdbd55fa",
+  "title": "Session 9",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.975Z] INFO: Session created
+  Context: {
+  "sessionId": "10941f7b-1f40-48c4-a412-e0daec5785a5",
+  "title": "Session 10",
+  "mode": "sequential"
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mResource Management with Many Sessions[2m > [22m[2mshould list all sessions when many exist[22m[39m
+[2025-11-19T10:17:44.976Z] INFO: Session created
+  Context: {
+  "sessionId": "ece59d9a-6d17-46fc-8c8c-09f55a12d83a",
+  "title": "Session 1",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.976Z] INFO: Session created
+  Context: {
+  "sessionId": "47cc19ec-e7b8-4a4f-bbcc-9072b1b1ab76",
+  "title": "Session 2",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.976Z] INFO: Session created
+  Context: {
+  "sessionId": "b4d02b4a-a076-482f-af6f-b3f7e82cd30f",
+  "title": "Session 3",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.976Z] INFO: Session created
+  Context: {
+  "sessionId": "ff2bd898-89c7-4f13-b880-41702cf680fb",
+  "title": "Session 4",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.977Z] INFO: Session created
+  Context: {
+  "sessionId": "75259b6e-ff92-4a87-ab4b-4fa279858fe4",
+  "title": "Session 5",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.977Z] INFO: Session created
+  Context: {
+  "sessionId": "dce6158e-22e6-4fe4-bca7-2d75b2e74fa1",
+  "title": "Session 6",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.977Z] INFO: Session created
+  Context: {
+  "sessionId": "dc6a50fa-980d-4a14-bb15-85f331fc4d39",
+  "title": "Session 7",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.977Z] INFO: Session created
+  Context: {
+  "sessionId": "17f024b3-6a52-4c6d-ad6b-7b6e466f3566",
+  "title": "Session 8",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.977Z] INFO: Session created
+  Context: {
+  "sessionId": "bc9e6b65-2e7b-4f0d-b845-abd3c5a85d74",
+  "title": "Session 9",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.977Z] INFO: Session created
+  Context: {
+  "sessionId": "51a9f72b-2843-49a9-b786-b176278ed954",
+  "title": "Session 10",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.977Z] INFO: Session created
+  Context: {
+  "sessionId": "68ddf931-c1d9-4996-8bbf-fd2454e379a8",
+  "title": "Session 11",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.977Z] INFO: Session created
+  Context: {
+  "sessionId": "39911f4c-e5aa-4927-9fd9-d7a4b709dc29",
+  "title": "Session 12",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.977Z] INFO: Session created
+  Context: {
+  "sessionId": "c7897a4a-b92d-4639-bfe5-38efff987095",
+  "title": "Session 13",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.977Z] INFO: Session created
+  Context: {
+  "sessionId": "c5156ee3-8dbe-4b5d-ac2f-1ddd8d9abf84",
+  "title": "Session 14",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.977Z] INFO: Session created
+  Context: {
+  "sessionId": "e74611d4-d70b-42ff-9f1a-ed7468261752",
+  "title": "Session 15",
+  "mode": "sequential"
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mSession State Consistency[2m > [22m[2mshould maintain consistent thought count across concurrent additions[22m[39m
+[2025-11-19T10:17:44.979Z] INFO: Session created
+  Context: {
+  "sessionId": "d68dfc9d-0f35-4e5d-bfee-31e1ba5530a6",
+  "title": "Consistency Test",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.980Z] INFO: Session completed
+  Context: {
+  "sessionId": "d68dfc9d-0f35-4e5d-bfee-31e1ba5530a6",
+  "title": "Consistency Test",
+  "totalThoughts": 10
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mSession State Consistency[2m > [22m[2mshould maintain correct status after concurrent operations[22m[39m
+[2025-11-19T10:17:44.982Z] INFO: Session created
+  Context: {
+  "sessionId": "07a935ee-afe1-4e2b-8483-f1ea70ed4fa8",
+  "title": "Status Test",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:44.982Z] INFO: Session completed
+  Context: {
+  "sessionId": "07a935ee-afe1-4e2b-8483-f1ea70ed4fa8",
+  "title": "Status Test",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mSession State Consistency[2m > [22m[2mshould handle concurrent thought additions with proper sequencing[22m[39m
+[2025-11-19T10:17:44.983Z] INFO: Session created
+  Context: {
+  "sessionId": "3502c43b-4ed6-463d-9511-521a99d14089",
+  "title": "Sequence Test",
+  "mode": "sequential"
+}
+
+[90mstdout[2m | tests/integration/multi-session.test.ts[2m > [22m[2mMulti-Session and Concurrent Scenarios[2m > [22m[2mError Handling in Concurrent Scenarios[2m > [22m[2mshould handle mixed success/failure scenarios gracefully[22m[39m
+[2025-11-19T10:17:44.988Z] INFO: Session created
+  Context: {
+  "sessionId": "b555deb4-ee4d-4505-86b2-e01cfaac2f02",
+  "title": "Mixed Test",
+  "mode": "sequential"
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2msaveSession[2m > [22m[2mshould overwrite existing session[22m[39m
+[2025-11-19T10:17:44.996Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-b652f8cc-170e-45fc-ade8-61c4483ca0f6",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2msaveSession[2m > [22m[2mshould overwrite existing session[22m[39m
+[2025-11-19T10:17:45.007Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mloadSession[2m > [22m[2mshould load an existing session[22m[39m
+[2025-11-19T10:17:45.016Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-061c5fc5-8fe2-45b6-ae60-f94afe0e54d4",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mloadSession[2m > [22m[2mshould load an existing session[22m[39m
+[2025-11-19T10:17:45.022Z] INFO: FileSessionStore closed
+
+ [32m✓[39m tests/integration/error-handling.test.ts [2m ([22m[2m36 tests[22m[2m)[22m[90m 103[2mms[22m[39m
+[90mstderr[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mInvalid Session Operations[2m > [22m[2mshould throw error for non-existent session ID[22m[39m
+[2025-11-19T10:17:44.935Z] ERROR: Session not found
+  Context: {
+  "sessionId": "00000000-0000-4000-8000-000000000000"
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mInvalid Session Operations[2m > [22m[2mshould handle session deletion idempotently[22m[39m
+[2025-11-19T10:17:44.951Z] INFO: Session created
+  Context: {
+  "sessionId": "0cbbc341-4f21-4d8b-a0f2-7592ca620b5c",
+  "title": "Test",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.952Z] INFO: Session deleted
+  Context: {
+  "sessionId": "0cbbc341-4f21-4d8b-a0f2-7592ca620b5c",
+  "title": "Test",
+  "thoughtCount": 0
+}
+
+[90mstderr[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mInvalid Session Operations[2m > [22m[2mshould handle session deletion idempotently[22m[39m
+[2025-11-19T10:17:44.953Z] WARN: Attempted to delete non-existent session from memory
+  Context: {
+  "sessionId": "0cbbc341-4f21-4d8b-a0f2-7592ca620b5c"
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mValidation Errors[2m > [22m[2mshould accept thoughts with missing fields (lenient validation)[22m[39m
+[2025-11-19T10:17:44.956Z] INFO: Session created
+  Context: {
+  "sessionId": "53dc666a-50f1-4e61-b08b-5c078e2f5d4c",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.957Z] INFO: Session completed
+  Context: {
+  "sessionId": "53dc666a-50f1-4e61-b08b-5c078e2f5d4c",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mValidation Errors[2m > [22m[2mshould accept invalid uncertainty values (lenient validation)[22m[39m
+[2025-11-19T10:17:44.959Z] INFO: Session created
+  Context: {
+  "sessionId": "674b5902-fc31-4b94-9a15-30a95b7f72c7",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.959Z] INFO: Session completed
+  Context: {
+  "sessionId": "674b5902-fc31-4b94-9a15-30a95b7f72c7",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mValidation Errors[2m > [22m[2mshould accept negative thought numbers (lenient validation)[22m[39m
+[2025-11-19T10:17:44.961Z] INFO: Session created
+  Context: {
+  "sessionId": "fdbbc384-1b36-4400-9f4e-5ccad29ccca8",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.961Z] INFO: Session completed
+  Context: {
+  "sessionId": "fdbbc384-1b36-4400-9f4e-5ccad29ccca8",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mValidation Errors[2m > [22m[2mshould accept zero thought numbers (lenient validation)[22m[39m
+[2025-11-19T10:17:44.962Z] INFO: Session created
+  Context: {
+  "sessionId": "8584eb28-47d5-4bf5-a39e-d4dc55560938",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.963Z] INFO: Session completed
+  Context: {
+  "sessionId": "8584eb28-47d5-4bf5-a39e-d4dc55560938",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mValidation Errors[2m > [22m[2mshould accept invalid mode values (lenient validation)[22m[39m
+[2025-11-19T10:17:44.964Z] INFO: Session created
+  Context: {
+  "sessionId": "27f0fb9d-676c-4b0f-99fe-428c0efc3a12",
+  "title": "Untitled Session",
+  "mode": "invalid_mode"
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mValidation Errors[2m > [22m[2mshould accept invalid Shannon stage (lenient validation)[22m[39m
+[2025-11-19T10:17:44.966Z] INFO: Session created
+  Context: {
+  "sessionId": "aa24f043-4ec1-4353-bd75-9297f8ca0003",
+  "title": "Untitled Session",
+  "mode": "shannon"
+}
+[2025-11-19T10:17:44.966Z] INFO: Session completed
+  Context: {
+  "sessionId": "aa24f043-4ec1-4353-bd75-9297f8ca0003",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mBoundary Conditions[2m > [22m[2mshould handle uncertainty = 0 (perfect certainty)[22m[39m
+[2025-11-19T10:17:44.968Z] INFO: Session created
+  Context: {
+  "sessionId": "64974696-991d-48a0-ba36-212013faf657",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.969Z] INFO: Session completed
+  Context: {
+  "sessionId": "64974696-991d-48a0-ba36-212013faf657",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mBoundary Conditions[2m > [22m[2mshould handle uncertainty = 1 (complete uncertainty)[22m[39m
+[2025-11-19T10:17:44.971Z] INFO: Session created
+  Context: {
+  "sessionId": "7a3aa696-d866-44c5-83e8-e633ac1d4762",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.971Z] INFO: Session completed
+  Context: {
+  "sessionId": "7a3aa696-d866-44c5-83e8-e633ac1d4762",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mBoundary Conditions[2m > [22m[2mshould handle very large thoughtNumber[22m[39m
+[2025-11-19T10:17:44.973Z] INFO: Session created
+  Context: {
+  "sessionId": "9a6858be-6425-4ba6-96fb-f4d4d6fd8a47",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.973Z] INFO: Session completed
+  Context: {
+  "sessionId": "9a6858be-6425-4ba6-96fb-f4d4d6fd8a47",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mBoundary Conditions[2m > [22m[2mshould handle totalThoughts = thoughtNumber (single thought)[22m[39m
+[2025-11-19T10:17:44.974Z] INFO: Session created
+  Context: {
+  "sessionId": "3673749a-3e63-4c20-a8c2-d154bb082294",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.974Z] INFO: Session completed
+  Context: {
+  "sessionId": "3673749a-3e63-4c20-a8c2-d154bb082294",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mEdge Cases - Empty Data[2m > [22m[2mshould handle empty thought content[22m[39m
+[2025-11-19T10:17:44.978Z] INFO: Session created
+  Context: {
+  "sessionId": "58750aa9-52ee-4ef7-9f2a-c1e4a9a70635",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.978Z] INFO: Session completed
+  Context: {
+  "sessionId": "58750aa9-52ee-4ef7-9f2a-c1e4a9a70635",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mEdge Cases - Empty Data[2m > [22m[2mshould handle empty session title with default[22m[39m
+[2025-11-19T10:17:44.979Z] INFO: Session created
+  Context: {
+  "sessionId": "cc60d13c-75ce-4d1e-aecd-b6c50f2f76f8",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mEdge Cases - Empty Data[2m > [22m[2mshould handle empty arrays for optional fields[22m[39m
+[2025-11-19T10:17:44.980Z] INFO: Session created
+  Context: {
+  "sessionId": "008a3c46-ad29-41e9-89a4-3394036b0130",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.981Z] INFO: Session completed
+  Context: {
+  "sessionId": "008a3c46-ad29-41e9-89a4-3394036b0130",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mEdge Cases - Empty Data[2m > [22m[2mshould handle session with no thoughts[22m[39m
+[2025-11-19T10:17:44.982Z] INFO: Session created
+  Context: {
+  "sessionId": "1931bfe4-119f-4fd9-a50d-5f5ab5387a62",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mEdge Cases - Special Characters[2m > [22m[2mshould handle Unicode characters in thought content[22m[39m
+[2025-11-19T10:17:44.984Z] INFO: Session created
+  Context: {
+  "sessionId": "1024a255-c761-4773-a486-169ace826820",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.984Z] INFO: Session completed
+  Context: {
+  "sessionId": "1024a255-c761-4773-a486-169ace826820",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mEdge Cases - Special Characters[2m > [22m[2mshould handle special characters in session title[22m[39m
+[2025-11-19T10:17:44.986Z] INFO: Session created
+  Context: {
+  "sessionId": "be57f63c-bc54-4a9c-b95a-acb6f77f15c2",
+  "title": "<script>alert(\"xss\")</script>",
+  "mode": "hybrid"
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mEdge Cases - Special Characters[2m > [22m[2mshould handle LaTeX with special characters[22m[39m
+[2025-11-19T10:17:44.991Z] INFO: Session created
+  Context: {
+  "sessionId": "0e702979-ea24-4ef9-b665-f749da4ed957",
+  "title": "Untitled Session",
+  "mode": "mathematics"
+}
+[2025-11-19T10:17:44.991Z] INFO: Session completed
+  Context: {
+  "sessionId": "0e702979-ea24-4ef9-b665-f749da4ed957",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mEdge Cases - Special Characters[2m > [22m[2mshould handle newlines and tabs in thought content[22m[39m
+[2025-11-19T10:17:44.992Z] INFO: Session created
+  Context: {
+  "sessionId": "46aa3a99-1bcd-4660-a0c2-9caacb9a4a04",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.992Z] INFO: Session completed
+  Context: {
+  "sessionId": "46aa3a99-1bcd-4660-a0c2-9caacb9a4a04",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mEdge Cases - Large Data[2m > [22m[2mshould handle very long thought content[22m[39m
+[2025-11-19T10:17:44.994Z] INFO: Session created
+  Context: {
+  "sessionId": "2a4f0526-a0d3-49ab-87b0-04efe0b8f415",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.994Z] INFO: Session completed
+  Context: {
+  "sessionId": "2a4f0526-a0d3-49ab-87b0-04efe0b8f415",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mEdge Cases - Large Data[2m > [22m[2mshould handle sessions with many thoughts[22m[39m
+[2025-11-19T10:17:44.995Z] INFO: Session created
+  Context: {
+  "sessionId": "7f0fa372-55e4-4555-aa35-9b7c2773b819",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.997Z] INFO: Session completed
+  Context: {
+  "sessionId": "7f0fa372-55e4-4555-aa35-9b7c2773b819",
+  "title": "Untitled Session",
+  "totalThoughts": 100
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mEdge Cases - Large Data[2m > [22m[2mshould handle large dependency arrays[22m[39m
+[2025-11-19T10:17:44.998Z] INFO: Session created
+  Context: {
+  "sessionId": "be74522b-58a3-4b63-9bc3-bc9b361f11dc",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:44.998Z] INFO: Session completed
+  Context: {
+  "sessionId": "be74522b-58a3-4b63-9bc3-bc9b361f11dc",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mError Recovery[2m > [22m[2mshould maintain session integrity even with lenient validation[22m[39m
+[2025-11-19T10:17:45.000Z] INFO: Session created
+  Context: {
+  "sessionId": "c94d3ff4-438b-4174-8a6b-d02650b97f83",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.000Z] INFO: Session completed
+  Context: {
+  "sessionId": "c94d3ff4-438b-4174-8a6b-d02650b97f83",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:45.000Z] INFO: Session completed
+  Context: {
+  "sessionId": "c94d3ff4-438b-4174-8a6b-d02650b97f83",
+  "title": "Untitled Session",
+  "totalThoughts": 2
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mError Recovery[2m > [22m[2mshould allow mode switch even after adding invalid data[22m[39m
+[2025-11-19T10:17:45.002Z] INFO: Session created
+  Context: {
+  "sessionId": "3b23665f-8fcf-499d-9ab4-d9435f828586",
+  "title": "Untitled Session",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:45.002Z] INFO: Session completed
+  Context: {
+  "sessionId": "3b23665f-8fcf-499d-9ab4-d9435f828586",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:45.003Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "3b23665f-8fcf-499d-9ab4-d9435f828586",
+  "oldMode": "sequential",
+  "newMode": "shannon"
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mSummary Generation Edge Cases[2m > [22m[2mshould generate summary for empty session[22m[39m
+[2025-11-19T10:17:45.004Z] INFO: Session created
+  Context: {
+  "sessionId": "1f1a9728-5e66-4483-a4fa-f0590674de9e",
+  "title": "Empty Session",
+  "mode": "hybrid"
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mSummary Generation Edge Cases[2m > [22m[2mshould generate summary for single thought session[22m[39m
+[2025-11-19T10:17:45.005Z] INFO: Session created
+  Context: {
+  "sessionId": "ae79b379-0c4d-4100-a878-92b2ce94077a",
+  "title": "Single Thought",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.005Z] INFO: Session completed
+  Context: {
+  "sessionId": "ae79b379-0c4d-4100-a878-92b2ce94077a",
+  "title": "Single Thought",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mSummary Generation Edge Cases[2m > [22m[2mshould handle summary for session with very long thoughts[22m[39m
+[2025-11-19T10:17:45.006Z] INFO: Session created
+  Context: {
+  "sessionId": "fd377958-cf8f-4feb-8e1b-348110224601",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.007Z] INFO: Session completed
+  Context: {
+  "sessionId": "fd377958-cf8f-4feb-8e1b-348110224601",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mConcurrent Session Management[2m > [22m[2mshould handle rapid session creation[22m[39m
+[2025-11-19T10:17:45.008Z] INFO: Session created
+  Context: {
+  "sessionId": "d66ed4a1-a293-4273-ae9d-41a86b2510a4",
+  "title": "Session 0",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.008Z] INFO: Session created
+  Context: {
+  "sessionId": "534f9d95-725a-4f55-b22d-a662af6fd3f4",
+  "title": "Session 1",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.008Z] INFO: Session created
+  Context: {
+  "sessionId": "47a9c742-07d1-4d92-9799-6f775c304882",
+  "title": "Session 2",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.008Z] INFO: Session created
+  Context: {
+  "sessionId": "0d11237b-d94b-4085-b34a-704692163d9b",
+  "title": "Session 3",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.008Z] INFO: Session created
+  Context: {
+  "sessionId": "80c5be81-2afd-4baa-8761-6bc82bb5ed27",
+  "title": "Session 4",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.008Z] INFO: Session created
+  Context: {
+  "sessionId": "2fd79160-9171-4133-b3fe-a03aba149cb7",
+  "title": "Session 5",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.009Z] INFO: Session created
+  Context: {
+  "sessionId": "5acbcb60-a57e-45e3-8cf8-32d4a9686755",
+  "title": "Session 6",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.009Z] INFO: Session created
+  Context: {
+  "sessionId": "66a92d86-cc0e-46e2-8bf8-b9f49ba36313",
+  "title": "Session 7",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.009Z] INFO: Session created
+  Context: {
+  "sessionId": "f05e4c12-323b-4fff-b938-7b22366ede87",
+  "title": "Session 8",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.009Z] INFO: Session created
+  Context: {
+  "sessionId": "8dd5f777-2cfa-4f6e-88af-dd3f938963ac",
+  "title": "Session 9",
+  "mode": "hybrid"
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mConcurrent Session Management[2m > [22m[2mshould handle concurrent thought additions to same session[22m[39m
+[2025-11-19T10:17:45.011Z] INFO: Session created
+  Context: {
+  "sessionId": "75466e4f-b5ed-40ac-a3cd-f2712e393bec",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.012Z] INFO: Session completed
+  Context: {
+  "sessionId": "75466e4f-b5ed-40ac-a3cd-f2712e393bec",
+  "title": "Untitled Session",
+  "totalThoughts": 5
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mConcurrent Session Management[2m > [22m[2mshould maintain independence of multiple sessions[22m[39m
+[2025-11-19T10:17:45.013Z] INFO: Session created
+  Context: {
+  "sessionId": "19d0f9fd-803d-42ba-bb9e-cfe019e0b26e",
+  "title": "Session 1",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.013Z] INFO: Session created
+  Context: {
+  "sessionId": "94250b44-d86a-4cac-9c97-bfa661715dba",
+  "title": "Session 2",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.013Z] INFO: Session completed
+  Context: {
+  "sessionId": "19d0f9fd-803d-42ba-bb9e-cfe019e0b26e",
+  "title": "Session 1",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:45.013Z] INFO: Session completed
+  Context: {
+  "sessionId": "94250b44-d86a-4cac-9c97-bfa661715dba",
+  "title": "Session 2",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mMode-Specific Edge Cases[2m > [22m[2mshould handle mathematics mode with missing optional fields[22m[39m
+[2025-11-19T10:17:45.018Z] INFO: Session created
+  Context: {
+  "sessionId": "4a886c20-87cb-44b0-8559-9fabc2d8aa17",
+  "title": "Untitled Session",
+  "mode": "mathematics"
+}
+[2025-11-19T10:17:45.018Z] INFO: Session completed
+  Context: {
+  "sessionId": "4a886c20-87cb-44b0-8559-9fabc2d8aa17",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mMode-Specific Edge Cases[2m > [22m[2mshould handle Shannon mode without explicit stage[22m[39m
+[2025-11-19T10:17:45.019Z] INFO: Session created
+  Context: {
+  "sessionId": "5ff67952-8b01-4ab2-b729-fa6051df26b2",
+  "title": "Untitled Session",
+  "mode": "shannon"
+}
+[2025-11-19T10:17:45.019Z] INFO: Session completed
+  Context: {
+  "sessionId": "5ff67952-8b01-4ab2-b729-fa6051df26b2",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/error-handling.test.ts[2m > [22m[2mError Handling and Edge Cases[2m > [22m[2mMode-Specific Edge Cases[2m > [22m[2mshould handle temporal mode with minimal event data[22m[39m
+[2025-11-19T10:17:45.020Z] INFO: Session created
+  Context: {
+  "sessionId": "50c33d82-2fcb-42d0-a919-0bbc6312040a",
+  "title": "Untitled Session",
+  "mode": "temporal"
+}
+[2025-11-19T10:17:45.020Z] INFO: Session completed
+  Context: {
+  "sessionId": "50c33d82-2fcb-42d0-a919-0bbc6312040a",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mloadSession[2m > [22m[2mshould return null for non-existent session[22m[39m
+[2025-11-19T10:17:45.040Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-e3e1dab8-9ffc-44ad-9323-534adeedc7b4",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mloadSession[2m > [22m[2mshould return null for non-existent session[22m[39m
+[2025-11-19T10:17:45.042Z] INFO: FileSessionStore closed
+
+ [32m✓[39m tests/integration/index-handlers.test.ts [2m ([22m[2m33 tests[22m[2m)[22m[90m 108[2mms[22m[39m
+[90mstdout[2m | tests/integration/index-handlers.test.ts[2m > [22m[2mIndex.ts Handler Functions[2m > [22m[2mHandler Functions[2m > [22m[2mhandleAddThought()[2m > [22m[2mshould create new session if sessionId not provided[22m[39m
+[2025-11-19T10:17:44.993Z] INFO: Session created
+  Context: {
+  "sessionId": "714fea99-750b-4530-bd7c-8b3093a8dbd1",
+  "title": "Test Session",
+  "mode": "sequential"
+}
+
+[90mstdout[2m | tests/integration/index-handlers.test.ts[2m > [22m[2mIndex.ts Handler Functions[2m > [22m[2mHandler Functions[2m > [22m[2mhandleAddThought()[2m > [22m[2mshould add thought to existing session[22m[39m
+[2025-11-19T10:17:44.996Z] INFO: Session created
+  Context: {
+  "sessionId": "30577031-6458-427d-9c58-0329dd0a3792",
+  "title": "Test Session",
+  "mode": "sequential"
+}
+
+[90mstdout[2m | tests/integration/index-handlers.test.ts[2m > [22m[2mIndex.ts Handler Functions[2m > [22m[2mHandler Functions[2m > [22m[2mhandleAddThought()[2m > [22m[2mshould handle all 13 modes in add_thought[22m[39m
+[2025-11-19T10:17:45.000Z] INFO: Session created
+  Context: {
+  "sessionId": "62d7a73e-62f1-4115-badd-8da1914d601f",
+  "title": "Test sequential",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:45.000Z] INFO: Session completed
+  Context: {
+  "sessionId": "62d7a73e-62f1-4115-badd-8da1914d601f",
+  "title": "Test sequential",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:45.001Z] INFO: Session created
+  Context: {
+  "sessionId": "04f97441-0206-4fd8-b06b-a372effa7ff8",
+  "title": "Test shannon",
+  "mode": "shannon"
+}
+[2025-11-19T10:17:45.001Z] INFO: Session completed
+  Context: {
+  "sessionId": "04f97441-0206-4fd8-b06b-a372effa7ff8",
+  "title": "Test shannon",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:45.002Z] INFO: Session created
+  Context: {
+  "sessionId": "f3046ed6-559a-47f4-aa8d-5bf8064b1928",
+  "title": "Test mathematics",
+  "mode": "mathematics"
+}
+[2025-11-19T10:17:45.002Z] INFO: Session completed
+  Context: {
+  "sessionId": "f3046ed6-559a-47f4-aa8d-5bf8064b1928",
+  "title": "Test mathematics",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:45.003Z] INFO: Session created
+  Context: {
+  "sessionId": "13bbe6f3-274e-45df-85d1-c14ef89e7ef9",
+  "title": "Test physics",
+  "mode": "physics"
+}
+[2025-11-19T10:17:45.003Z] INFO: Session completed
+  Context: {
+  "sessionId": "13bbe6f3-274e-45df-85d1-c14ef89e7ef9",
+  "title": "Test physics",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:45.004Z] INFO: Session created
+  Context: {
+  "sessionId": "86ad1936-ff48-44e1-b577-1982278490a9",
+  "title": "Test hybrid",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.004Z] INFO: Session completed
+  Context: {
+  "sessionId": "86ad1936-ff48-44e1-b577-1982278490a9",
+  "title": "Test hybrid",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:45.005Z] INFO: Session created
+  Context: {
+  "sessionId": "ba36f41d-7442-49dc-94ab-69cb5f01bb88",
+  "title": "Test abductive",
+  "mode": "abductive"
+}
+[2025-11-19T10:17:45.005Z] INFO: Session completed
+  Context: {
+  "sessionId": "ba36f41d-7442-49dc-94ab-69cb5f01bb88",
+  "title": "Test abductive",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:45.005Z] INFO: Session created
+  Context: {
+  "sessionId": "5d9267c3-bf49-4b95-b1dd-8df2fc56206a",
+  "title": "Test causal",
+  "mode": "causal"
+}
+[2025-11-19T10:17:45.006Z] INFO: Session completed
+  Context: {
+  "sessionId": "5d9267c3-bf49-4b95-b1dd-8df2fc56206a",
+  "title": "Test causal",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:45.006Z] INFO: Session created
+  Context: {
+  "sessionId": "06b62454-f691-4a86-9f89-2e5632d70c43",
+  "title": "Test bayesian",
+  "mode": "bayesian"
+}
+[2025-11-19T10:17:45.006Z] INFO: Session completed
+  Context: {
+  "sessionId": "06b62454-f691-4a86-9f89-2e5632d70c43",
+  "title": "Test bayesian",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:45.007Z] INFO: Session created
+  Context: {
+  "sessionId": "fb8bb0a0-11e5-4ef5-9abe-814de01d3081",
+  "title": "Test counterfactual",
+  "mode": "counterfactual"
+}
+[2025-11-19T10:17:45.007Z] INFO: Session completed
+  Context: {
+  "sessionId": "fb8bb0a0-11e5-4ef5-9abe-814de01d3081",
+  "title": "Test counterfactual",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:45.008Z] INFO: Session created
+  Context: {
+  "sessionId": "86725302-b6a0-4768-b8a6-8b493851ae70",
+  "title": "Test analogical",
+  "mode": "analogical"
+}
+[2025-11-19T10:17:45.008Z] INFO: Session completed
+  Context: {
+  "sessionId": "86725302-b6a0-4768-b8a6-8b493851ae70",
+  "title": "Test analogical",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:45.009Z] INFO: Session created
+  Context: {
+  "sessionId": "72267827-967a-48a1-a30a-2f5816c76295",
+  "title": "Test temporal",
+  "mode": "temporal"
+}
+[2025-11-19T10:17:45.009Z] INFO: Session completed
+  Context: {
+  "sessionId": "72267827-967a-48a1-a30a-2f5816c76295",
+  "title": "Test temporal",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:45.009Z] INFO: Session created
+  Context: {
+  "sessionId": "665a9e0a-5eeb-46b3-857e-9945a1a6c258",
+  "title": "Test gametheory",
+  "mode": "gametheory"
+}
+[2025-11-19T10:17:45.010Z] INFO: Session completed
+  Context: {
+  "sessionId": "665a9e0a-5eeb-46b3-857e-9945a1a6c258",
+  "title": "Test gametheory",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:45.011Z] INFO: Session created
+  Context: {
+  "sessionId": "c3985524-4119-4bef-ba5b-a6d2435b6188",
+  "title": "Test evidential",
+  "mode": "evidential"
+}
+[2025-11-19T10:17:45.011Z] INFO: Session completed
+  Context: {
+  "sessionId": "c3985524-4119-4bef-ba5b-a6d2435b6188",
+  "title": "Test evidential",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/index-handlers.test.ts[2m > [22m[2mIndex.ts Handler Functions[2m > [22m[2mHandler Functions[2m > [22m[2mhandleSummarize()[2m > [22m[2mshould generate summary for session with thoughts[22m[39m
+[2025-11-19T10:17:45.021Z] INFO: Session created
+  Context: {
+  "sessionId": "a264a0b8-f1d5-4c1f-af08-40eabe2eb10d",
+  "title": "Test Session",
+  "mode": "sequential"
+}
+
+[90mstdout[2m | tests/integration/index-handlers.test.ts[2m > [22m[2mIndex.ts Handler Functions[2m > [22m[2mHandler Functions[2m > [22m[2mhandleSummarize()[2m > [22m[2mshould generate summary for empty session[22m[39m
+[2025-11-19T10:17:45.024Z] INFO: Session created
+  Context: {
+  "sessionId": "c4903a8e-3bf1-406f-9e92-bc0b1d218312",
+  "title": "Empty Session",
+  "mode": "sequential"
+}
+
+[90mstdout[2m | tests/integration/index-handlers.test.ts[2m > [22m[2mIndex.ts Handler Functions[2m > [22m[2mHandler Functions[2m > [22m[2mhandleSwitchMode()[2m > [22m[2mshould switch mode successfully[22m[39m
+[2025-11-19T10:17:45.027Z] INFO: Session created
+  Context: {
+  "sessionId": "89c2b3a4-b992-4e64-9f2a-7ee907baffad",
+  "title": "Test Session",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:45.028Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "89c2b3a4-b992-4e64-9f2a-7ee907baffad",
+  "oldMode": "sequential",
+  "newMode": "shannon",
+  "reason": "User requested mode switch"
+}
+
+[90mstdout[2m | tests/integration/index-handlers.test.ts[2m > [22m[2mIndex.ts Handler Functions[2m > [22m[2mHandler Functions[2m > [22m[2mhandleSwitchMode()[2m > [22m[2mshould switch between all 13 modes[22m[39m
+[2025-11-19T10:17:45.029Z] INFO: Session created
+  Context: {
+  "sessionId": "418ff3cc-bf8b-47cc-bd36-01a4f69bc627",
+  "title": "Multi-mode Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:45.029Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "418ff3cc-bf8b-47cc-bd36-01a4f69bc627",
+  "oldMode": "hybrid",
+  "newMode": "sequential",
+  "reason": "Switching to sequential"
+}
+[2025-11-19T10:17:45.029Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "418ff3cc-bf8b-47cc-bd36-01a4f69bc627",
+  "oldMode": "sequential",
+  "newMode": "shannon",
+  "reason": "Switching to shannon"
+}
+[2025-11-19T10:17:45.029Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "418ff3cc-bf8b-47cc-bd36-01a4f69bc627",
+  "oldMode": "shannon",
+  "newMode": "mathematics",
+  "reason": "Switching to mathematics"
+}
+[2025-11-19T10:17:45.029Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "418ff3cc-bf8b-47cc-bd36-01a4f69bc627",
+  "oldMode": "mathematics",
+  "newMode": "physics",
+  "reason": "Switching to physics"
+}
+[2025-11-19T10:17:45.029Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "418ff3cc-bf8b-47cc-bd36-01a4f69bc627",
+  "oldMode": "physics",
+  "newMode": "abductive",
+  "reason": "Switching to abductive"
+}
+[2025-11-19T10:17:45.029Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "418ff3cc-bf8b-47cc-bd36-01a4f69bc627",
+  "oldMode": "abductive",
+  "newMode": "causal",
+  "reason": "Switching to causal"
+}
+[2025-11-19T10:17:45.030Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "418ff3cc-bf8b-47cc-bd36-01a4f69bc627",
+  "oldMode": "causal",
+  "newMode": "bayesian",
+  "reason": "Switching to bayesian"
+}
+[2025-11-19T10:17:45.030Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "418ff3cc-bf8b-47cc-bd36-01a4f69bc627",
+  "oldMode": "bayesian",
+  "newMode": "counterfactual",
+  "reason": "Switching to counterfactual"
+}
+[2025-11-19T10:17:45.030Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "418ff3cc-bf8b-47cc-bd36-01a4f69bc627",
+  "oldMode": "counterfactual",
+  "newMode": "analogical",
+  "reason": "Switching to analogical"
+}
+[2025-11-19T10:17:45.030Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "418ff3cc-bf8b-47cc-bd36-01a4f69bc627",
+  "oldMode": "analogical",
+  "newMode": "temporal",
+  "reason": "Switching to temporal"
+}
+[2025-11-19T10:17:45.030Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "418ff3cc-bf8b-47cc-bd36-01a4f69bc627",
+  "oldMode": "temporal",
+  "newMode": "gametheory",
+  "reason": "Switching to gametheory"
+}
+[2025-11-19T10:17:45.030Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "418ff3cc-bf8b-47cc-bd36-01a4f69bc627",
+  "oldMode": "gametheory",
+  "newMode": "evidential",
+  "reason": "Switching to evidential"
+}
+[2025-11-19T10:17:45.030Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "418ff3cc-bf8b-47cc-bd36-01a4f69bc627",
+  "oldMode": "evidential",
+  "newMode": "hybrid",
+  "reason": "Switching to hybrid"
+}
+
+[90mstdout[2m | tests/integration/index-handlers.test.ts[2m > [22m[2mIndex.ts Handler Functions[2m > [22m[2mHandler Functions[2m > [22m[2mhandleGetSession()[2m > [22m[2mshould retrieve session with all properties[22m[39m
+[2025-11-19T10:17:45.033Z] INFO: Session created
+  Context: {
+  "sessionId": "ce7545d2-2d5b-4542-a2ae-8405b9292aaf",
+  "title": "Test Session",
+  "mode": "sequential"
+}
+
+[90mstdout[2m | tests/integration/index-handlers.test.ts[2m > [22m[2mIndex.ts Handler Functions[2m > [22m[2mHandler Functions[2m > [22m[2mhandleGetSession()[2m > [22m[2mshould retrieve session with thoughts[22m[39m
+[2025-11-19T10:17:45.034Z] INFO: Session created
+  Context: {
+  "sessionId": "af1516b9-ed01-4514-83a9-77f90836bed5",
+  "title": "Session with Thoughts",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:45.035Z] INFO: Session completed
+  Context: {
+  "sessionId": "af1516b9-ed01-4514-83a9-77f90836bed5",
+  "title": "Session with Thoughts",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/index-handlers.test.ts[2m > [22m[2mIndex.ts Handler Functions[2m > [22m[2mHandler Functions[2m > [22m[2mhandleExport()[2m > [22m[2mshould export session in JSON format[22m[39m
+[2025-11-19T10:17:45.037Z] INFO: Session created
+  Context: {
+  "sessionId": "2efbd162-34f8-42bd-bdde-c3727774f918",
+  "title": "Export Test",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:45.038Z] INFO: Session completed
+  Context: {
+  "sessionId": "2efbd162-34f8-42bd-bdde-c3727774f918",
+  "title": "Export Test",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mloadSession[2m > [22m[2mshould preserve Date objects[22m[39m
+[2025-11-19T10:17:45.056Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-d6232b61-d538-4280-bbe1-7d92bf49d605",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mloadSession[2m > [22m[2mshould preserve Date objects[22m[39m
+[2025-11-19T10:17:45.071Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mloadSession[2m > [22m[2mshould preserve Map objects[22m[39m
+[2025-11-19T10:17:45.082Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-7eba5cc8-72e4-4a5a-8fde-4b7cf43777d8",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mloadSession[2m > [22m[2mshould preserve Map objects[22m[39m
+[2025-11-19T10:17:45.093Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mdeleteSession[2m > [22m[2mshould delete an existing session[22m[39m
+[2025-11-19T10:17:45.106Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-acb748e2-746b-4ba5-9b20-77d43cd49f8d",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mdeleteSession[2m > [22m[2mshould delete an existing session[22m[39m
+[2025-11-19T10:17:45.113Z] INFO: Session deleted
+  Context: {
+  "sessionId": "a2ee8790-5577-4d9c-afe6-ff342e2c4925"
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mdeleteSession[2m > [22m[2mshould delete an existing session[22m[39m
+[2025-11-19T10:17:45.116Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mdeleteSession[2m > [22m[2mshould return false for non-existent session[22m[39m
+[2025-11-19T10:17:45.129Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-dd7c929f-394e-46bc-98b9-6c0aca662a27",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mdeleteSession[2m > [22m[2mshould return false for non-existent session[22m[39m
+[2025-11-19T10:17:45.130Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mdeleteSession[2m > [22m[2mshould update metadata index after deletion[22m[39m
+[2025-11-19T10:17:45.145Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-6fa9f71e-9de3-4e0a-b49a-92b0c7fc8f07",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mdeleteSession[2m > [22m[2mshould update metadata index after deletion[22m[39m
+[2025-11-19T10:17:45.170Z] INFO: Session deleted
+  Context: {
+  "sessionId": "2126a576-6609-413a-80ae-3f24f24ce697"
+}
+[2025-11-19T10:17:45.171Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/integration/mcp-protocol.test.ts[2m > [22m[2mMCP Protocol Compliance[2m > [22m[2mMCP Response Format Compliance[2m > [22m[2mshould return MCP-compliant response for successful operation[22m[39m
+[2025-11-19T10:17:45.198Z] INFO: Session created
+  Context: {
+  "sessionId": "675ac535-d76b-4a62-958b-51606efc9d71",
+  "title": "Test Session",
+  "mode": "sequential"
+}
+
+ [32m✓[39m tests/integration/mcp-protocol.test.ts [2m ([22m[2m43 tests[22m[2m)[22m[90m 106[2mms[22m[39m
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mlistSessions[2m > [22m[2mshould list all sessions[22m[39m
+[2025-11-19T10:17:45.207Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-0bc87568-00d4-4185-b2df-88400f6b8a01",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mlistSessions[2m > [22m[2mshould list all sessions[22m[39m
+[2025-11-19T10:17:45.251Z] INFO: FileSessionStore closed
+
+ [32m✓[39m tests/unit/analogical.test.ts [2m ([22m[2m9 tests[22m[2m)[22m[90m 28[2mms[22m[39m
+ [32m✓[39m tests/unit/evidential.test.ts [2m ([22m[2m16 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+ [32m✓[39m tests/unit/temporal.test.ts [2m ([22m[2m19 tests[22m[2m)[22m[90m 58[2mms[22m[39m
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mlistSessions[2m > [22m[2mshould return empty array when no sessions exist[22m[39m
+[2025-11-19T10:17:45.365Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-7ba815ea-de58-4613-931b-dd83e3b4402b",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+[2025-11-19T10:17:45.366Z] INFO: FileSessionStore closed
+
+ [32m✓[39m tests/unit/gametheory.test.ts [2m ([22m[2m17 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mlistSessions[2m > [22m[2mshould include correct metadata fields[22m[39m
+[2025-11-19T10:17:45.407Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-66048bff-48f5-4886-8b2f-5499e0c6f7cc",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mlistSessions[2m > [22m[2mshould include correct metadata fields[22m[39m
+[2025-11-19T10:17:45.417Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mexists[2m > [22m[2mshould return true for existing session[22m[39m
+[2025-11-19T10:17:45.426Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-9dce661d-38c8-4c22-8c7a-08feb0fcc5b6",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mexists[2m > [22m[2mshould return true for existing session[22m[39m
+[2025-11-19T10:17:45.429Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mexists[2m > [22m[2mshould return false for non-existent session[22m[39m
+[2025-11-19T10:17:45.436Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-fe496bde-dcca-405e-a7d5-1f4c37340671",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+[2025-11-19T10:17:45.437Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mgetStats[2m > [22m[2mshould return storage statistics[22m[39m
+[2025-11-19T10:17:45.443Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-9e7ac80e-4407-4463-b4f6-3372aeeaaedb",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mgetStats[2m > [22m[2mshould return storage statistics[22m[39m
+[2025-11-19T10:17:45.453Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mgetStats[2m > [22m[2mshould calculate total thoughts correctly[22m[39m
+[2025-11-19T10:17:45.461Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-641114fd-194e-4ffb-96eb-bbaae24dc311",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mgetStats[2m > [22m[2mshould calculate total thoughts correctly[22m[39m
+[2025-11-19T10:17:45.470Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mgetStats[2m > [22m[2mshould identify storage health status[22m[39m
+[2025-11-19T10:17:45.477Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-17430627-95de-490b-8ffa-13f3825bc509",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mgetStats[2m > [22m[2mshould identify storage health status[22m[39m
+[2025-11-19T10:17:45.480Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-17430627-95de-490b-8ffa-13f3825bc509",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 10,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mgetStats[2m > [22m[2mshould identify storage health status[22m[39m
+[2025-11-19T10:17:45.666Z] INFO: FileSessionStore closed
+[2025-11-19T10:17:45.666Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mcleanup[2m > [22m[2mshould clean up old sessions[22m[39m
+[2025-11-19T10:17:45.702Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-d693f3d9-53c6-4b42-bad1-c168d1a59abb",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mcleanup[2m > [22m[2mshould clean up old sessions[22m[39m
+[2025-11-19T10:17:45.875Z] INFO: Session deleted
+  Context: {
+  "sessionId": "50c8bbf8-c645-4650-a188-877ca398ad3d"
+}
+[2025-11-19T10:17:45.875Z] INFO: Cleanup completed
+  Context: {
+  "cleanedCount": 1,
+  "maxAgeMs": 604800000,
+  "remaining": 1
+}
+[2025-11-19T10:17:45.876Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mcleanup[2m > [22m[2mshould return 0 when no sessions need cleanup[22m[39m
+[2025-11-19T10:17:46.069Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-fb5ff158-fa95-47cb-8b3c-c2284bc868f1",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mcleanup[2m > [22m[2mshould return 0 when no sessions need cleanup[22m[39m
+[2025-11-19T10:17:46.093Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mconcurrent operations[2m > [22m[2mshould handle concurrent saves[22m[39m
+[2025-11-19T10:17:46.159Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-7e29b2df-04d7-4674-95c2-4d75033cf05f",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mconcurrent operations[2m > [22m[2mshould handle concurrent saves[22m[39m
+[2025-11-19T10:17:46.180Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mconcurrent operations[2m > [22m[2mshould handle concurrent reads[22m[39m
+[2025-11-19T10:17:46.194Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-850e396e-a788-4b5a-bb66-ff9e546caf02",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2mconcurrent operations[2m > [22m[2mshould handle concurrent reads[22m[39m
+[2025-11-19T10:17:46.204Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2merror handling[2m > [22m[2mshould handle invalid session data gracefully[22m[39m
+[2025-11-19T10:17:46.240Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-6136b93f-8a47-4b9f-8850-9a67b3a05462",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstderr[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2merror handling[2m > [22m[2mshould handle invalid session data gracefully[22m[39m
+[2025-11-19T10:17:46.282Z] ERROR: Failed to load session
+  Context: {
+  "sessionId": "056e136a-6b40-498d-b17b-fca016767001"
+}
+  Error: Unexpected token 'i', "invalid json {{{" is not valid JSON
+  Stack: SyntaxError: Unexpected token 'i', "invalid json {{{" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at FileSessionStore.loadSession (C:\mcp-servers\deepthinking-mcp\src\session\storage\file-store.ts:124:27)
+    at C:\mcp-servers\deepthinking-mcp\tests\unit\file-store.test.ts:455:22
+    at runTest (file:///C:/mcp-servers/deepthinking-mcp/node_modules/@vitest/runner/dist/index.js:781:11)
+    at runSuite (file:///C:/mcp-servers/deepthinking-mcp/node_modules/@vitest/runner/dist/index.js:909:15)
+    at runSuite (file:///C:/mcp-servers/deepthinking-mcp/node_modules/@vitest/runner/dist/index.js:909:15)
+    at runSuite (file:///C:/mcp-servers/deepthinking-mcp/node_modules/@vitest/runner/dist/index.js:909:15)
+    at runFiles (file:///C:/mcp-servers/deepthinking-mcp/node_modules/@vitest/runner/dist/index.js:958:5)
+    at startTests (file:///C:/mcp-servers/deepthinking-mcp/node_modules/@vitest/runner/dist/index.js:967:3)
+    at file:///C:/mcp-servers/deepthinking-mcp/node_modules/vitest/dist/chunks/runtime-runBaseTests.oAvMKtQC.js:116:7
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2merror handling[2m > [22m[2mshould handle invalid session data gracefully[22m[39m
+[2025-11-19T10:17:46.299Z] INFO: FileSessionStore closed
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2merror handling[2m > [22m[2mshould handle operations before initialization[22m[39m
+[2025-11-19T10:17:46.319Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-8bb2b354-2f1a-4a12-85c1-1c30885fcc30",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2merror handling[2m > [22m[2mshould handle operations before initialization[22m[39m
+[2025-11-19T10:17:46.323Z] INFO: FileSessionStore initialized
+  Context: {
+  "baseDir": "C:\\Users\\danie\\AppData\\Local\\Temp\\deepthinking-test-8bb2b354-2f1a-4a12-85c1-1c30885fcc30",
+  "config": {
+    "autoSave": true,
+    "autoSaveDelay": 1000,
+    "enableCompression": false,
+    "maxSessions": 1000,
+    "maxSessionAge": 2592000000,
+    "enableEncryption": false,
+    "serialization": {
+      "prettyPrint": false,
+      "includeMetadata": true
+    }
+  }
+}
+
+[90mstdout[2m | tests/unit/file-store.test.ts[2m > [22m[2mFileSessionStore[2m > [22m[2merror handling[2m > [22m[2mshould handle operations before initialization[22m[39m
+[2025-11-19T10:17:46.328Z] INFO: FileSessionStore closed
+[2025-11-19T10:17:46.330Z] INFO: FileSessionStore closed
+
+ [32m✓[39m tests/unit/file-store.test.ts [2m ([22m[2m27 tests[22m[2m)[22m[33m 1502[2mms[22m[39m
+ [32m✓[39m tests/integration/session-workflow.test.ts [2m ([22m[2m7 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+[90mstdout[2m | tests/integration/session-workflow.test.ts[2m > [22m[2mSession Workflow Integration[2m > [22m[2mshould complete full sequential thinking workflow[22m[39m
+[2025-11-19T10:17:46.467Z] INFO: Session created
+  Context: {
+  "sessionId": "03e49b1c-9172-4428-b222-b89bb24e0e98",
+  "title": "Solve Prime Factorization Problem",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:46.482Z] INFO: Session completed
+  Context: {
+  "sessionId": "03e49b1c-9172-4428-b222-b89bb24e0e98",
+  "title": "Solve Prime Factorization Problem",
+  "totalThoughts": 5
+}
+
+[90mstdout[2m | tests/integration/session-workflow.test.ts[2m > [22m[2mSession Workflow Integration[2m > [22m[2mshould handle mathematics mode with validation[22m[39m
+[2025-11-19T10:17:46.486Z] INFO: Session created
+  Context: {
+  "sessionId": "0e24446f-f75d-4d8b-a8e9-4cc3b6270748",
+  "title": "Prove Fundamental Theorem",
+  "mode": "mathematics"
+}
+[2025-11-19T10:17:46.487Z] INFO: Session completed
+  Context: {
+  "sessionId": "0e24446f-f75d-4d8b-a8e9-4cc3b6270748",
+  "title": "Prove Fundamental Theorem",
+  "totalThoughts": 3
+}
+
+[90mstdout[2m | tests/integration/session-workflow.test.ts[2m > [22m[2mSession Workflow Integration[2m > [22m[2mshould handle mode switching mid-session[22m[39m
+[2025-11-19T10:17:46.488Z] INFO: Session created
+  Context: {
+  "sessionId": "18a5664a-9743-4a23-b4b4-6d3e3db2cf2f",
+  "title": "Problem Solving Session",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:46.489Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "18a5664a-9743-4a23-b4b4-6d3e3db2cf2f",
+  "oldMode": "sequential",
+  "newMode": "shannon",
+  "reason": "Need more structure"
+}
+[2025-11-19T10:17:46.490Z] INFO: Session completed
+  Context: {
+  "sessionId": "18a5664a-9743-4a23-b4b4-6d3e3db2cf2f",
+  "title": "Problem Solving Session",
+  "totalThoughts": 3
+}
+
+[90mstdout[2m | tests/integration/session-workflow.test.ts[2m > [22m[2mSession Workflow Integration[2m > [22m[2mshould track validation cache statistics[22m[39m
+[2025-11-19T10:17:46.491Z] INFO: Session created
+  Context: {
+  "sessionId": "a45dfba1-a691-43b6-bf9f-370bc567189d",
+  "title": "Cache Test Session",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:46.492Z] INFO: Session completed
+  Context: {
+  "sessionId": "a45dfba1-a691-43b6-bf9f-370bc567189d",
+  "title": "Cache Test Session",
+  "totalThoughts": 3
+}
+
+[90mstdout[2m | tests/integration/session-workflow.test.ts[2m > [22m[2mSession Workflow Integration[2m > [22m[2mshould handle multiple concurrent sessions[22m[39m
+[2025-11-19T10:17:46.493Z] INFO: Session created
+  Context: {
+  "sessionId": "4f1ad706-aa6a-4fe3-8377-9a5ca31d3f06",
+  "title": "Session 1",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:46.494Z] INFO: Session created
+  Context: {
+  "sessionId": "807ae261-cc20-40d3-a834-91042c61b78a",
+  "title": "Session 2",
+  "mode": "mathematics"
+}
+[2025-11-19T10:17:46.494Z] INFO: Session created
+  Context: {
+  "sessionId": "9637ddc9-88cb-40c3-9eb9-6fd77dc3c1a6",
+  "title": "Session 3",
+  "mode": "shannon"
+}
+[2025-11-19T10:17:46.494Z] INFO: Session completed
+  Context: {
+  "sessionId": "4f1ad706-aa6a-4fe3-8377-9a5ca31d3f06",
+  "title": "Session 1",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:46.494Z] INFO: Session completed
+  Context: {
+  "sessionId": "807ae261-cc20-40d3-a834-91042c61b78a",
+  "title": "Session 2",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:46.494Z] INFO: Session completed
+  Context: {
+  "sessionId": "9637ddc9-88cb-40c3-9eb9-6fd77dc3c1a6",
+  "title": "Session 3",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/integration/session-workflow.test.ts[2m > [22m[2mSession Workflow Integration[2m > [22m[2mshould handle session deletion[22m[39m
+[2025-11-19T10:17:46.496Z] INFO: Session created
+  Context: {
+  "sessionId": "ed4659d9-1685-4ebb-bf35-64ae704ee5a6",
+  "title": "Temporary Session",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:46.496Z] INFO: Session completed
+  Context: {
+  "sessionId": "ed4659d9-1685-4ebb-bf35-64ae704ee5a6",
+  "title": "Temporary Session",
+  "totalThoughts": 1
+}
+[2025-11-19T10:17:46.497Z] INFO: Session deleted
+  Context: {
+  "sessionId": "ed4659d9-1685-4ebb-bf35-64ae704ee5a6",
+  "title": "Temporary Session",
+  "thoughtCount": 1
+}
+
+[90mstdout[2m | tests/integration/session-workflow.test.ts[2m > [22m[2mSession Workflow Integration[2m > [22m[2mshould maintain metrics accuracy across workflow[22m[39m
+[2025-11-19T10:17:46.498Z] INFO: Session created
+  Context: {
+  "sessionId": "605de874-4bcb-49d0-9560-fee72a4777d5",
+  "title": "Metrics Test",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:46.498Z] INFO: Session completed
+  Context: {
+  "sessionId": "605de874-4bcb-49d0-9560-fee72a4777d5",
+  "title": "Metrics Test",
+  "totalThoughts": 5
+}
+
+ [32m✓[39m tests/integration/mcp-compliance.test.ts [2m ([22m[2m21 tests[22m[2m)[22m[90m 52[2mms[22m[39m
+ [32m✓[39m tests/unit/causal.test.ts [2m ([22m[2m10 tests[22m[2m)[22m[90m 38[2mms[22m[39m
+ [32m✓[39m tests/unit/visual.test.ts [2m ([22m[2m13 tests[22m[2m)[22m[90m 45[2mms[22m[39m
+ [32m✓[39m tests/unit/bayesian.test.ts [2m ([22m[2m10 tests[22m[2m)[22m[90m 33[2mms[22m[39m
+ [32m✓[39m tests/unit/abductive.test.ts [2m ([22m[2m10 tests[22m[2m)[22m[90m 38[2mms[22m[39m
+ [32m✓[39m tests/unit/counterfactual.test.ts [2m ([22m[2m8 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+ [32m✓[39m tests/unit/session-manager.test.ts [2m ([22m[2m16 tests[22m[2m)[22m[90m 70[2mms[22m[39m
+[90mstdout[2m | tests/unit/session-manager.test.ts[2m > [22m[2mSessionManager[2m > [22m[2mcreateSession[2m > [22m[2mshould create a new session with default values[22m[39m
+[2025-11-19T10:17:47.199Z] INFO: Session created
+  Context: {
+  "sessionId": "3d812232-b163-4c45-8ac2-c7b87858ecb5",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+
+[90mstdout[2m | tests/unit/session-manager.test.ts[2m > [22m[2mSessionManager[2m > [22m[2mcreateSession[2m > [22m[2mshould create a session with custom options[22m[39m
+[2025-11-19T10:17:47.209Z] INFO: Session created
+  Context: {
+  "sessionId": "e1edb446-96e2-49cc-93a9-f5173e223959",
+  "title": "My Problem",
+  "mode": "mathematics",
+  "domain": "number_theory",
+  "author": "Test User"
+}
+
+[90mstdout[2m | tests/unit/session-manager.test.ts[2m > [22m[2mSessionManager[2m > [22m[2mcreateSession[2m > [22m[2mshould initialize metrics correctly[22m[39m
+[2025-11-19T10:17:47.213Z] INFO: Session created
+  Context: {
+  "sessionId": "16b4f808-cbca-4bd2-9a33-952ec44d21bc",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+
+[90mstdout[2m | tests/unit/session-manager.test.ts[2m > [22m[2mSessionManager[2m > [22m[2mgetSession[2m > [22m[2mshould retrieve an existing session[22m[39m
+[2025-11-19T10:17:47.216Z] INFO: Session created
+  Context: {
+  "sessionId": "70ec4e50-cad2-4cb0-ac62-641ca069454d",
+  "title": "Test Session",
+  "mode": "hybrid"
+}
+
+[90mstdout[2m | tests/unit/session-manager.test.ts[2m > [22m[2mSessionManager[2m > [22m[2maddThought[2m > [22m[2mshould add a sequential thought to session[22m[39m
+[2025-11-19T10:17:47.219Z] INFO: Session created
+  Context: {
+  "sessionId": "3cc5982a-ba74-48c9-b016-bd8e3e62b6b6",
+  "title": "Untitled Session",
+  "mode": "sequential"
+}
+
+[90mstdout[2m | tests/unit/session-manager.test.ts[2m > [22m[2mSessionManager[2m > [22m[2maddThought[2m > [22m[2mshould mark session as complete when nextThoughtNeeded is false[22m[39m
+[2025-11-19T10:17:47.224Z] INFO: Session created
+  Context: {
+  "sessionId": "a548b9c2-47d9-4a5e-a0b9-5f7474f0e5af",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:47.225Z] INFO: Session completed
+  Context: {
+  "sessionId": "a548b9c2-47d9-4a5e-a0b9-5f7474f0e5af",
+  "title": "Untitled Session",
+  "totalThoughts": 1
+}
+
+[90mstdout[2m | tests/unit/session-manager.test.ts[2m > [22m[2mSessionManager[2m > [22m[2maddThought[2m > [22m[2mshould track revisions in metrics[22m[39m
+[2025-11-19T10:17:47.226Z] INFO: Session created
+  Context: {
+  "sessionId": "105d7a1e-061a-4ae7-bcc8-efabbac2d231",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+
+[90mstdout[2m | tests/unit/session-manager.test.ts[2m > [22m[2mSessionManager[2m > [22m[2maddThought[2m > [22m[2mshould calculate average uncertainty for Shannon thoughts[22m[39m
+[2025-11-19T10:17:47.227Z] INFO: Session created
+  Context: {
+  "sessionId": "c4b91d6f-59ef-4533-8e35-1a5d9372ef39",
+  "title": "Untitled Session",
+  "mode": "shannon"
+}
+
+[90mstderr[2m | tests/unit/session-manager.test.ts[2m > [22m[2mSessionManager[2m > [22m[2maddThought[2m > [22m[2mshould throw error for non-existent session[22m[39m
+[2025-11-19T10:17:47.233Z] ERROR: Session not found
+  Context: {
+  "sessionId": "00000000-0000-4000-8000-000000000000"
+}
+
+[90mstdout[2m | tests/unit/session-manager.test.ts[2m > [22m[2mSessionManager[2m > [22m[2mswitchMode[2m > [22m[2mshould switch session mode[22m[39m
+[2025-11-19T10:17:47.239Z] INFO: Session created
+  Context: {
+  "sessionId": "05034ccb-448c-43b9-b435-635bf6878abe",
+  "title": "Untitled Session",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:47.240Z] INFO: Session mode switched
+  Context: {
+  "sessionId": "05034ccb-448c-43b9-b435-635bf6878abe",
+  "oldMode": "sequential",
+  "newMode": "shannon",
+  "reason": "Need systematic approach"
+}
+
+[90mstderr[2m | tests/unit/session-manager.test.ts[2m > [22m[2mSessionManager[2m > [22m[2mswitchMode[2m > [22m[2mshould throw error for non-existent session[22m[39m
+[2025-11-19T10:17:47.241Z] ERROR: Session not found
+  Context: {
+  "sessionId": "00000000-0000-4000-8000-000000000000"
+}
+
+[90mstdout[2m | tests/unit/session-manager.test.ts[2m > [22m[2mSessionManager[2m > [22m[2mlistSessions[2m > [22m[2mshould list all sessions[22m[39m
+[2025-11-19T10:17:47.243Z] INFO: Session created
+  Context: {
+  "sessionId": "a2b2babe-03ef-43ed-9345-716f2de4b0e6",
+  "title": "Session 1",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:47.244Z] INFO: Session created
+  Context: {
+  "sessionId": "38725108-7c8c-4f68-aa5c-51ae5a499203",
+  "title": "Session 2",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:47.244Z] INFO: Session created
+  Context: {
+  "sessionId": "1bc841af-b2dd-431b-8b0d-6b172d7b1e9e",
+  "title": "Session 3",
+  "mode": "hybrid"
+}
+
+[90mstdout[2m | tests/unit/session-manager.test.ts[2m > [22m[2mSessionManager[2m > [22m[2mdeleteSession[2m > [22m[2mshould delete a session[22m[39m
+[2025-11-19T10:17:47.248Z] INFO: Session created
+  Context: {
+  "sessionId": "5098c081-0373-41a5-b706-864720a71887",
+  "title": "Untitled Session",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:47.248Z] INFO: Session deleted
+  Context: {
+  "sessionId": "5098c081-0373-41a5-b706-864720a71887",
+  "title": "Untitled Session",
+  "thoughtCount": 0
+}
+
+[90mstdout[2m | tests/unit/session-manager.test.ts[2m > [22m[2mSessionManager[2m > [22m[2mgenerateSummary[2m > [22m[2mshould generate a summary of session[22m[39m
+[2025-11-19T10:17:47.249Z] INFO: Session created
+  Context: {
+  "sessionId": "7cd44d72-4a1f-4fc0-a2e3-826842fd2cb7",
+  "title": "Test Problem",
+  "mode": "hybrid"
+}
+[2025-11-19T10:17:47.249Z] INFO: Session completed
+  Context: {
+  "sessionId": "7cd44d72-4a1f-4fc0-a2e3-826842fd2cb7",
+  "title": "Test Problem",
+  "totalThoughts": 1
+}
+
+ [32m✓[39m tests/unit/sanitization.test.ts [2m ([22m[2m26 tests[22m[2m)[22m[90m 52[2mms[22m[39m
+[90mstdout[2m | tests/benchmarks/validation-performance.test.ts[2m > [22m[2mValidation Performance Benchmark[2m > [22m[2mshould show significant performance improvement for cache hits[22m[39m
+
+📊 Validation Cache Benchmark: Testing cache performance
+
+🔴 First validation (cache miss):
+   Time: 3.9138ms
+   Valid: true
+   Confidence: 0.70
+
+🟢 Second validation (cache hit):
+   Time: 0.1777ms
+   Valid: true
+   Confidence: 0.70
+
+📈 Performance Analysis:
+   Cache miss time: 3.9138ms
+   Cache hit time: 0.1777ms
+   Speedup: 22.02x
+   Hit rate: 50.0%
+
+🎯 Result: EXCELLENT (≥10x)
+
+[90mstdout[2m | tests/benchmarks/validation-performance.test.ts[2m > [22m[2mValidation Performance Benchmark[2m > [22m[2mshould maintain O(1) lookup complexity regardless of cache size[22m[39m
+
+📈 Complexity Analysis: Testing O(1) cache lookup
+   Cache size 10: 0.0626ms per lookup
+   Cache size 50: 0.1179ms per lookup
+   Cache size 100: 0.2209ms per lookup
+
+   Min: 0.0626ms, Max: 0.2209ms, Ratio: 3.53x
+   Complexity: O(1) ✅
+
+[90mstdout[2m | tests/benchmarks/validation-performance.test.ts[2m > [22m[2mValidation Performance Benchmark[2m > [22m[2mshould handle high cache hit rates efficiently[22m[39m
+
+📊 High-Volume Test: Simulating realistic usage patterns
+   Running 100 validations (5 unique thoughts, repeated pattern)...
+
+📈 Results:
+   Total validations: 100
+   Cache misses: 5 (avg 0.2300ms)
+   Cache hits: 95 (avg 0.1271ms)
+   Average speedup: 1.81x
+   Hit rate: 95.0%
+   Cache size: 5/1000
+
+🎯 Overall Performance: ACCEPTABLE
+
+ [32m✓[39m tests/benchmarks/validation-performance.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 75[2mms[22m[39m
+ [32m✓[39m tests/benchmarks/metrics-performance.test.ts [2m ([22m[2m2 tests[22m[2m)[22m[90m 63[2mms[22m[39m
+[90mstdout[2m | tests/benchmarks/metrics-performance.test.ts[2m > [22m[2mMetrics Performance Benchmark[2m > [22m[2mshould show performance improvement with incremental calculation[22m[39m
+[2025-11-19T10:17:47.899Z] INFO: Session created
+  Context: {
+  "sessionId": "05bddb8c-d707-4dc2-9214-9dbe795aca90",
+  "title": "Performance Test",
+  "mode": "sequential"
+}
+
+📊 Benchmark: Adding 1000 thoughts with uncertainty tracking
+[2025-11-19T10:17:47.921Z] INFO: Session completed
+  Context: {
+  "sessionId": "05bddb8c-d707-4dc2-9214-9dbe795aca90",
+  "title": "Performance Test",
+  "totalThoughts": 1000
+}
+✅ Total time: 19.64ms
+✅ Average time per thought: 0.0196ms
+✅ Expected average uncertainty: 0.503186
+✅ Actual average uncertainty: 0.503186
+✅ Accuracy verified: PASS
+
+🎯 Performance: EXCELLENT
+
+[90mstdout[2m | tests/benchmarks/metrics-performance.test.ts[2m > [22m[2mMetrics Performance Benchmark[2m > [22m[2mshould maintain O(1) complexity regardless of session size[22m[39m
+
+📈 Complexity Analysis: Testing O(1) behavior
+[2025-11-19T10:17:47.935Z] INFO: Session created
+  Context: {
+  "sessionId": "7b0b91cd-63f3-4ba3-8a9e-388cc19dc04c",
+  "title": "Test Session 100",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:47.936Z] INFO: Session completed
+  Context: {
+  "sessionId": "7b0b91cd-63f3-4ba3-8a9e-388cc19dc04c",
+  "title": "Test Session 100",
+  "totalThoughts": 100
+}
+  Session size 100: 0.0127ms per thought
+[2025-11-19T10:17:47.936Z] INFO: Session created
+  Context: {
+  "sessionId": "eb238edd-9f65-40f8-bfc5-0bfd5ada9af7",
+  "title": "Test Session 500",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:47.939Z] INFO: Session completed
+  Context: {
+  "sessionId": "eb238edd-9f65-40f8-bfc5-0bfd5ada9af7",
+  "title": "Test Session 500",
+  "totalThoughts": 500
+}
+  Session size 500: 0.0081ms per thought
+[2025-11-19T10:17:47.940Z] INFO: Session created
+  Context: {
+  "sessionId": "fa6bb4a8-bd37-475c-b639-121918f5a527",
+  "title": "Test Session 1000",
+  "mode": "sequential"
+}
+[2025-11-19T10:17:47.952Z] INFO: Session completed
+  Context: {
+  "sessionId": "fa6bb4a8-bd37-475c-b639-121918f5a527",
+  "title": "Test Session 1000",
+  "totalThoughts": 1000
+}
+  Session size 1000: 0.0097ms per thought
+
+  Min: 0.0081ms, Max: 0.0127ms, Overall Ratio: 1.56x
+  Ratio (500 vs 1000): 1.19x
+  Complexity: O(1) ✅
+
+ [32m✓[39m tests/unit/logger.test.ts [2m ([22m[2m11 tests[22m[2m)[22m[90m 48[2mms[22m[39m
+ [32m✓[39m tests/unit/errors.test.ts [2m ([22m[2m13 tests[22m[2m)[22m[90m 49[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m24 passed[39m[22m[90m (24)[39m
+[2m      Tests [22m [1m[32m397 passed[39m[22m[90m (397)[39m
+[2m   Start at [22m 05:17:42
+[2m   Duration [22m 5.53s[2m (transform 6.32s, setup 10ms, collect 14.54s, tests 2.74s, environment 33ms, prepare 18.28s)[22m
+

@@ -19,6 +19,12 @@ export { AnalogicalValidator } from './modes/analogical.js';
 export { TemporalValidator } from './modes/temporal.js';
 export { GameTheoryValidator } from './modes/gametheory.js';
 export { EvidentialValidator } from './modes/evidential.js';
+export { MetaValidator } from './modes/meta.js';
+export { ModalValidator } from './modes/modal.js';
+export { ConstraintValidator } from './modes/constraint.js';
+export { OptimizationValidator } from './modes/optimization.js';
+export { StochasticValidator } from './modes/stochastic.js';
+export { RecursiveValidator } from './modes/recursive.js';
 
 // Registry and factory
 export {

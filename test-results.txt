@@ -42637,3 +42637,379 @@
 
 [1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
        [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m src/validation/validators/modes/shannon.ts[22m
+
+[90mstdout[2m | tests/benchmarks/validation-performance.test.ts[2m > [22m[2mValidation Performance Benchmark[2m > [22m[2mshould show significant performance improvement for cache hits[22m[39m
+
+📊 Validation Cache Benchmark: Testing cache performance
+
+🔴 First validation (cache miss):
+   Time: 9.9430ms
+   Valid: true
+   Confidence: 0.70
+
+🟢 Second validation (cache hit):
+   Time: 0.4047ms
+   Valid: true
+   Confidence: 0.70
+
+📈 Performance Analysis:
+   Cache miss time: 9.9430ms
+   Cache hit time: 0.4047ms
+   Speedup: 24.57x
+   Hit rate: 50.0%
+
+🎯 Result: EXCELLENT (≥10x)
+
+[90mstdout[2m | tests/benchmarks/validation-performance.test.ts[2m > [22m[2mValidation Performance Benchmark[2m > [22m[2mshould maintain O(1) lookup complexity regardless of cache size[22m[39m
+
+📈 Complexity Analysis: Testing O(1) cache lookup
+   Cache size 10: 0.0890ms per lookup
+   Cache size 50: 0.0803ms per lookup
+   Cache size 100: 0.0696ms per lookup
+
+   Min: 0.0696ms, Max: 0.0890ms, Ratio: 1.28x
+   Complexity: O(1) ✅
+
+[90mstdout[2m | tests/benchmarks/validation-performance.test.ts[2m > [22m[2mValidation Performance Benchmark[2m > [22m[2mshould handle high cache hit rates efficiently[22m[39m
+
+📊 High-Volume Test: Simulating realistic usage patterns
+   Running 100 validations (5 unique thoughts, repeated pattern)...
+
+📈 Results:
+   Total validations: 100
+   Cache misses: 5 (avg 0.3893ms)
+   Cache hits: 95 (avg 0.1381ms)
+   Average speedup: 2.82x
+   Hit rate: 95.0%
+   Cache size: 5/1000
+
+🎯 Overall Performance: ACCEPTABLE
+
+ [32m✓[39m tests/benchmarks/validation-performance.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 96[2mms[22m[39m
+ [32m✓[39m tests/unit/temporal.test.ts [2m ([22m[2m19 tests[22m[2m)[22m[90m 106[2mms[22m[39m
+ [32m✓[39m tests/unit/abductive.test.ts [2m ([22m[2m10 tests[22m[2m)[22m[90m 85[2mms[22m[39m
+ [32m✓[39m tests/unit/gametheory.test.ts [2m ([22m[2m17 tests[22m[2m)[22m[90m 112[2mms[22m[39m
+ [32m✓[39m tests/unit/evidential.test.ts [2m ([22m[2m16 tests[22m[2m)[22m[90m 104[2mms[22m[39m
+ [32m✓[39m tests/unit/causal.test.ts [2m ([22m[2m10 tests[22m[2m)[22m[90m 76[2mms[22m[39m
+ [32m✓[39m tests/unit/counterfactual.test.ts [2m ([22m[2m8 tests[22m[2m)[22m[90m 37[2mms[22m[39m
+ [32m✓[39m tests/unit/analogical.test.ts [2m ([22m[2m9 tests[22m[2m)[22m[90m 54[2mms[22m[39m
+ [32m✓[39m tests/unit/bayesian.test.ts [2m ([22m[2m10 tests[22m[2m)[22m[90m 61[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m9 passed[39m[22m[90m (9)[39m
+[2m      Tests [22m [1m[32m102 passed[39m[22m[90m (102)[39m
+[2m   Start at [22m 23:50:23
+[2m   Duration [22m 17.10s
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m tests/unit/visual.test.ts[22m [34mx8[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Errors [27m[22m⎯⎯⎯⎯⎯⎯[39m
+[31m[1m
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Error [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+[31m[1mError[22m: ENOENT: no such file or directory, open 'C:\Users\danie\AppData\Local\Temp\Zl-zNaVjhuHsT6tWkPodA\ssr\40b9f1f37d5bd759c353e90078138580f67eb091'[39m
+[90m [2m❯[22m readFileSync node:fs:[2m435:20[22m[39m
+[90m [2m❯[22m Object.fetchModule node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m423:22[22m[39m
+[90m [2m❯[22m VitestExecutor.directRequest node_modules/vite-node/dist/client.mjs:[2m250:46[22m[39m
+[90m [2m❯[22m VitestExecutor.cachedRequest node_modules/vite-node/dist/client.mjs:[2m189:14[22m[39m
+[90m [2m❯[22m VitestExecutor.executeId node_modules/vite-node/dist/client.mjs:[2m165:12[22m[39m
+[90m [2m❯[22m createVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m366:3[22m[39m
+[90m [2m❯[22m startVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m407:10[22m[39m
+[90m [2m❯[22m startViteNode node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m11:15[22m[39m
+[90m [2m❯[22m runBaseTests node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m26:31[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
+
+[2m Test Files [22m [2mno tests[22m
+[2m      Tests [22m [2mno tests[22m
+[2m     Errors [22m [1m[31m1 error[39m[22m
+[2m   Start at [22m 05:12:19
+[2m   Duration [22m 0ms
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x8[39m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m tests/unit/visual.test.ts[22m [34mx9[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Errors [27m[22m⎯⎯⎯⎯⎯⎯[39m
+[31m[1m
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Error [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+[31m[1mError[22m: ENOENT: no such file or directory, open 'C:\Users\danie\AppData\Local\Temp\Zl-zNaVjhuHsT6tWkPodA\ssr\40b9f1f37d5bd759c353e90078138580f67eb091'[39m
+[90m [2m❯[22m readFileSync node:fs:[2m435:20[22m[39m
+[90m [2m❯[22m Object.fetchModule node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m423:22[22m[39m
+[90m [2m❯[22m VitestExecutor.directRequest node_modules/vite-node/dist/client.mjs:[2m250:46[22m[39m
+[90m [2m❯[22m VitestExecutor.cachedRequest node_modules/vite-node/dist/client.mjs:[2m189:14[22m[39m
+[90m [2m❯[22m VitestExecutor.executeId node_modules/vite-node/dist/client.mjs:[2m165:12[22m[39m
+[90m [2m❯[22m createVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m366:3[22m[39m
+[90m [2m❯[22m startVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m407:10[22m[39m
+[90m [2m❯[22m startViteNode node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m11:15[22m[39m
+[90m [2m❯[22m runBaseTests node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m26:31[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
+
+[2m Test Files [22m [2mno tests[22m
+[2m      Tests [22m [2mno tests[22m
+[2m     Errors [22m [1m[31m1 error[39m[22m
+[2m   Start at [22m 05:12:20
+[2m   Duration [22m 0ms
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x9[39m
+[2K[1A[2K[G       [90mrerun x9[39m
+[2K[1A[2K[G       [2m[90mrerun x9[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m tests/unit/visual.test.ts[22m [34mx10[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Errors [27m[22m⎯⎯⎯⎯⎯⎯[39m
+[31m[1m
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Error [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+[31m[1mError[22m: ENOENT: no such file or directory, open 'C:\Users\danie\AppData\Local\Temp\Zl-zNaVjhuHsT6tWkPodA\ssr\40b9f1f37d5bd759c353e90078138580f67eb091'[39m
+[90m [2m❯[22m readFileSync node:fs:[2m435:20[22m[39m
+[90m [2m❯[22m Object.fetchModule node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m423:22[22m[39m
+[90m [2m❯[22m VitestExecutor.directRequest node_modules/vite-node/dist/client.mjs:[2m250:46[22m[39m
+[90m [2m❯[22m VitestExecutor.cachedRequest node_modules/vite-node/dist/client.mjs:[2m189:14[22m[39m
+[90m [2m❯[22m VitestExecutor.executeId node_modules/vite-node/dist/client.mjs:[2m165:12[22m[39m
+[90m [2m❯[22m createVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m366:3[22m[39m
+[90m [2m❯[22m startVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m407:10[22m[39m
+[90m [2m❯[22m startViteNode node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m11:15[22m[39m
+[90m [2m❯[22m runBaseTests node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m26:31[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
+
+[2m Test Files [22m [2mno tests[22m
+[2m      Tests [22m [2mno tests[22m
+[2m     Errors [22m [1m[31m1 error[39m[22m
+[2m   Start at [22m 05:16:14
+[2m   Duration [22m 0ms
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x10[39m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m tests/unit/visual.test.ts[22m [34mx11[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Errors [27m[22m⎯⎯⎯⎯⎯⎯[39m
+[31m[1m
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Error [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+[31m[1mError[22m: ENOENT: no such file or directory, open 'C:\Users\danie\AppData\Local\Temp\Zl-zNaVjhuHsT6tWkPodA\ssr\40b9f1f37d5bd759c353e90078138580f67eb091'[39m
+[90m [2m❯[22m readFileSync node:fs:[2m435:20[22m[39m
+[90m [2m❯[22m Object.fetchModule node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m423:22[22m[39m
+[90m [2m❯[22m VitestExecutor.directRequest node_modules/vite-node/dist/client.mjs:[2m250:46[22m[39m
+[90m [2m❯[22m VitestExecutor.cachedRequest node_modules/vite-node/dist/client.mjs:[2m189:14[22m[39m
+[90m [2m❯[22m VitestExecutor.executeId node_modules/vite-node/dist/client.mjs:[2m165:12[22m[39m
+[90m [2m❯[22m createVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m366:3[22m[39m
+[90m [2m❯[22m startVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m407:10[22m[39m
+[90m [2m❯[22m startViteNode node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m11:15[22m[39m
+[90m [2m❯[22m runBaseTests node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m26:31[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
+
+[2m Test Files [22m [2mno tests[22m
+[2m      Tests [22m [2mno tests[22m
+[2m     Errors [22m [1m[31m1 error[39m[22m
+[2m   Start at [22m 05:16:15
+[2m   Duration [22m 0ms
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x11[39m
+[2K[1A[2K[G       [90mrerun x11[39m
+[2K[1A[2K[G       [2m[90mrerun x11[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m tests/unit/visual.test.ts[22m [34mx12[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Errors [27m[22m⎯⎯⎯⎯⎯⎯[39m
+[31m[1m
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Error [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+[31m[1mError[22m: ENOENT: no such file or directory, open 'C:\Users\danie\AppData\Local\Temp\Zl-zNaVjhuHsT6tWkPodA\ssr\40b9f1f37d5bd759c353e90078138580f67eb091'[39m
+[90m [2m❯[22m readFileSync node:fs:[2m435:20[22m[39m
+[90m [2m❯[22m Object.fetchModule node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m423:22[22m[39m
+[90m [2m❯[22m VitestExecutor.directRequest node_modules/vite-node/dist/client.mjs:[2m250:46[22m[39m
+[90m [2m❯[22m VitestExecutor.cachedRequest node_modules/vite-node/dist/client.mjs:[2m189:14[22m[39m
+[90m [2m❯[22m VitestExecutor.executeId node_modules/vite-node/dist/client.mjs:[2m165:12[22m[39m
+[90m [2m❯[22m createVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m366:3[22m[39m
+[90m [2m❯[22m startVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m407:10[22m[39m
+[90m [2m❯[22m startViteNode node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m11:15[22m[39m
+[90m [2m❯[22m runBaseTests node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m26:31[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
+
+[2m Test Files [22m [2mno tests[22m
+[2m      Tests [22m [2mno tests[22m
+[2m     Errors [22m [1m[31m1 error[39m[22m
+[2m   Start at [22m 05:16:34
+[2m   Duration [22m 0ms
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x12[39m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m tests/unit/visual.test.ts[22m [34mx13[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Errors [27m[22m⎯⎯⎯⎯⎯⎯[39m
+[31m[1m
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Error [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+[31m[1mError[22m: ENOENT: no such file or directory, open 'C:\Users\danie\AppData\Local\Temp\Zl-zNaVjhuHsT6tWkPodA\ssr\40b9f1f37d5bd759c353e90078138580f67eb091'[39m
+[90m [2m❯[22m readFileSync node:fs:[2m435:20[22m[39m
+[90m [2m❯[22m Object.fetchModule node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m423:22[22m[39m
+[90m [2m❯[22m VitestExecutor.directRequest node_modules/vite-node/dist/client.mjs:[2m250:46[22m[39m
+[90m [2m❯[22m VitestExecutor.cachedRequest node_modules/vite-node/dist/client.mjs:[2m189:14[22m[39m
+[90m [2m❯[22m VitestExecutor.executeId node_modules/vite-node/dist/client.mjs:[2m165:12[22m[39m
+[90m [2m❯[22m createVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m366:3[22m[39m
+[90m [2m❯[22m startVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m407:10[22m[39m
+[90m [2m❯[22m startViteNode node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m11:15[22m[39m
+[90m [2m❯[22m runBaseTests node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m26:31[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
+
+[2m Test Files [22m [2mno tests[22m
+[2m      Tests [22m [2mno tests[22m
+[2m     Errors [22m [1m[31m1 error[39m[22m
+[2m   Start at [22m 05:16:35
+[2m   Duration [22m 0ms
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x13[39m
+[2K[1A[2K[G       [90mrerun x13[39m
+[2K[1A[2K[G       [2m[90mrerun x13[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m tests/unit/visual.test.ts[22m [34mx14[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Errors [27m[22m⎯⎯⎯⎯⎯⎯[39m
+[31m[1m
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Error [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+[31m[1mError[22m: ENOENT: no such file or directory, open 'C:\Users\danie\AppData\Local\Temp\Zl-zNaVjhuHsT6tWkPodA\ssr\40b9f1f37d5bd759c353e90078138580f67eb091'[39m
+[90m [2m❯[22m readFileSync node:fs:[2m435:20[22m[39m
+[90m [2m❯[22m Object.fetchModule node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m423:22[22m[39m
+[90m [2m❯[22m VitestExecutor.directRequest node_modules/vite-node/dist/client.mjs:[2m250:46[22m[39m
+[90m [2m❯[22m VitestExecutor.cachedRequest node_modules/vite-node/dist/client.mjs:[2m189:14[22m[39m
+[90m [2m❯[22m VitestExecutor.executeId node_modules/vite-node/dist/client.mjs:[2m165:12[22m[39m
+[90m [2m❯[22m createVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m366:3[22m[39m
+[90m [2m❯[22m startVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m407:10[22m[39m
+[90m [2m❯[22m startViteNode node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m11:15[22m[39m
+[90m [2m❯[22m runBaseTests node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m26:31[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
+
+[2m Test Files [22m [2mno tests[22m
+[2m      Tests [22m [2mno tests[22m
+[2m     Errors [22m [1m[31m1 error[39m[22m
+[2m   Start at [22m 05:16:51
+[2m   Duration [22m 0ms
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x14[39m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m tests/unit/visual.test.ts[22m [34mx15[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Errors [27m[22m⎯⎯⎯⎯⎯⎯[39m
+[31m[1m
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Error [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+[31m[1mError[22m: ENOENT: no such file or directory, open 'C:\Users\danie\AppData\Local\Temp\Zl-zNaVjhuHsT6tWkPodA\ssr\40b9f1f37d5bd759c353e90078138580f67eb091'[39m
+[90m [2m❯[22m readFileSync node:fs:[2m435:20[22m[39m
+[90m [2m❯[22m Object.fetchModule node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m423:22[22m[39m
+[90m [2m❯[22m VitestExecutor.directRequest node_modules/vite-node/dist/client.mjs:[2m250:46[22m[39m
+[90m [2m❯[22m VitestExecutor.cachedRequest node_modules/vite-node/dist/client.mjs:[2m189:14[22m[39m
+[90m [2m❯[22m VitestExecutor.executeId node_modules/vite-node/dist/client.mjs:[2m165:12[22m[39m
+[90m [2m❯[22m createVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m366:3[22m[39m
+[90m [2m❯[22m startVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m407:10[22m[39m
+[90m [2m❯[22m startViteNode node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m11:15[22m[39m
+[90m [2m❯[22m runBaseTests node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m26:31[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
+
+[2m Test Files [22m [2mno tests[22m
+[2m      Tests [22m [2mno tests[22m
+[2m     Errors [22m [1m[31m1 error[39m[22m
+[2m   Start at [22m 05:16:52
+[2m   Duration [22m 0ms
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x15[39m
+[2K[1A[2K[G       [90mrerun x15[39m
+[2K[1A[2K[G       [2m[90mrerun x15[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m tests/unit/visual.test.ts[22m [34mx16[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Errors [27m[22m⎯⎯⎯⎯⎯⎯[39m
+[31m[1m
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Unhandled Error [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+[31m[1mError[22m: ENOENT: no such file or directory, open 'C:\Users\danie\AppData\Local\Temp\Zl-zNaVjhuHsT6tWkPodA\ssr\40b9f1f37d5bd759c353e90078138580f67eb091'[39m
+[90m [2m❯[22m readFileSync node:fs:[2m435:20[22m[39m
+[90m [2m❯[22m Object.fetchModule node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m423:22[22m[39m
+[90m [2m❯[22m VitestExecutor.directRequest node_modules/vite-node/dist/client.mjs:[2m250:46[22m[39m
+[90m [2m❯[22m VitestExecutor.cachedRequest node_modules/vite-node/dist/client.mjs:[2m189:14[22m[39m
+[90m [2m❯[22m VitestExecutor.executeId node_modules/vite-node/dist/client.mjs:[2m165:12[22m[39m
+[90m [2m❯[22m createVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m366:3[22m[39m
+[90m [2m❯[22m startVitestExecutor node_modules/vitest/dist/vendor/execute.fL3szUAI.js:[2m407:10[22m[39m
+[90m [2m❯[22m startViteNode node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m11:15[22m[39m
+[90m [2m❯[22m runBaseTests node_modules/vitest/dist/vendor/base.Ybri3C14.js:[2m26:31[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
+
+[2m Test Files [22m [2mno tests[22m
+[2m      Tests [22m [2mno tests[22m
+[2m     Errors [22m [1m[31m1 error[39m[22m
+[2m   Start at [22m 05:17:30
+[2m   Duration [22m 0ms
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x16[39m
+[2K[1A[2K[G       [90mrerun x16[39m
+[2K[1A[2K[G       [2m[90mrerun x16[39m[22m
+[2K[1A[2K[G
