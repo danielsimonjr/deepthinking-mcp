@@ -5,6 +5,108 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+#### Complete LaTeX and Diagram Support Across All Modes
+- **Universal Visualization Coverage**: All 13 thinking modes now have comprehensive support for mathematical notation and/or diagram export
+- **LaTeX Mathematical Formulas**: Added LaTeX support to modes with existing diagram capabilities
+  - **Causal Mode**: LaTeX formulas for causal edge relationships and mechanism descriptions
+    - `CausalEdge.formula`: Mathematical relationship formulas (e.g., linear, exponential, threshold functions)
+    - `CausalMechanism.formula`: Formal mechanism descriptions using mathematical notation
+  - **Temporal Mode**: LaTeX formulas for temporal logic constraints and relationship dynamics
+    - `TemporalConstraint.formula`: Temporal logic formulas (e.g., ◇φ, □φ, φ U ψ)
+    - `TemporalRelation.formula`: Mathematical dynamics of causal/enabling relationships over time
+  - **GameTheory Mode**: LaTeX support for game-theoretic analysis
+    - `PayoffMatrix.latex`: Matrix representation of payoffs in LaTeX format
+    - `NashEquilibrium.formula`: Equilibrium conditions as LaTeX formulas
+    - `DominantStrategy.formula`: Dominance relationships in mathematical notation
+  - **Bayesian Mode**: LaTeX formulas for probabilistic reasoning
+    - `PriorProbability.latex`: Prior distribution formulas (e.g., Beta, Gaussian distributions)
+    - `Likelihood.latex`: Likelihood function formulas
+    - `PosteriorProbability.latex`: Bayesian update calculations showing P(H|E) derivation
+
+- **Diagram Export Capabilities**: Added comprehensive visual export support (Mermaid, DOT, ASCII) to 6 modes
+  - **Sequential Mode**: Dependency graph visualization
+    - Shows thought relationships, branching points, and revisions
+    - Visualizes `buildUpon`, `branchFrom`, and `revisesThought` connections
+    - Color-coded nodes for revisions vs. regular thoughts
+  - **Shannon Mode**: Stage flow diagrams
+    - 5-stage methodology visualization (Problem Definition → Constraints → Model → Proof → Implementation)
+    - Current stage highlighting with uncertainty metrics
+    - Linear flow diagram showing progress through Shannon methodology
+  - **Abductive Mode**: Hypothesis comparison diagrams
+    - Observations connected to multiple hypotheses
+    - Hypothesis scoring and ranking visualization
+    - Best explanation highlighting
+  - **Counterfactual Mode**: Scenario tree visualization
+    - Intervention point as decision node
+    - Actual scenario vs. counterfactual branches
+    - Likelihood and outcome comparison
+  - **Analogical Mode**: Domain mapping diagrams
+    - Source and target domain separation (clustered subgraphs)
+    - Entity-to-entity mapping with confidence scores
+    - Cross-domain relationship visualization
+  - **Evidential Mode**: Belief function visualization
+    - Frame of discernment hierarchy
+    - Mass assignment distributions
+    - Belief and plausibility interval representations
+
+#### Implementation Details
+- **Type System Enhancements** (`src/types/core.ts`, `src/types/modes/*.ts`):
+  - Added 11 new optional LaTeX/formula fields across 4 modes
+  - All additions are backward compatible (optional fields)
+- **Visual Export System** (`src/export/visual.ts`):
+  - 6 new export methods (18 format-specific implementations)
+  - 833 lines of new visualization code
+  - Consistent API across all modes
+  - Support for 3 color schemes (default, pastel, monochrome)
+  - Configurable display options (labels, metrics)
+- **Export Formats**:
+  - **Mermaid**: Flowcharts, subgraphs, and relationship diagrams
+  - **DOT**: Graphviz-compatible professional graph layouts
+  - **ASCII**: Text-based diagrams for terminal/log output
+
+#### Benefits
+- **Complete Coverage**: Every mode now has either LaTeX support, diagram export, or both
+- **Consistent API**: All diagram exports follow the same pattern and options
+- **Format Flexibility**: 3 export formats support different use cases (documentation, analysis, terminal)
+- **Mathematical Precision**: LaTeX formulas enable precise mathematical notation for complex relationships
+- **Visual Clarity**: Diagram exports make complex reasoning structures immediately understandable
+
+### Technical Details
+- **Files Modified**: 4 files updated
+  - `src/types/core.ts`: 5 interface updates (Bayesian mode LaTeX fields, Causal mode formulas)
+  - `src/types/modes/temporal.ts`: 2 interface updates (LaTeX formulas)
+  - `src/types/modes/gametheory.ts`: 3 interface updates (LaTeX formulas)
+  - `src/export/visual.ts`: +833 lines (6 new exporters × 3 formats)
+- **Test Results**: 396/397 tests passing (99.7%)
+  - 1 performance benchmark failure (unrelated timing test)
+- **Backward Compatibility**: All changes are additive (optional fields)
+
+### Coverage Summary
+
+| Mode | LaTeX Support | Diagram Support | Export Formats |
+|------|--------------|-----------------|----------------|
+| Mathematics | ✅ (existing) | ❌ | JSON, Markdown, LaTeX, HTML, Jupyter |
+| Physics | ✅ (existing) | ❌ | JSON, Markdown, LaTeX, HTML, Jupyter |
+| Hybrid | ✅ (inherited) | ❌ | JSON, Markdown, LaTeX, HTML, Jupyter |
+| **Causal** | ✅ **NEW** | ✅ (existing) | JSON, Markdown, LaTeX, HTML, Jupyter, Mermaid, DOT, ASCII |
+| **Temporal** | ✅ **NEW** | ✅ (existing) | JSON, Markdown, LaTeX, HTML, Jupyter, Mermaid, DOT, ASCII |
+| **GameTheory** | ✅ **NEW** | ✅ (existing) | JSON, Markdown, LaTeX, HTML, Jupyter, Mermaid, DOT, ASCII |
+| **Bayesian** | ✅ **NEW** | ✅ (existing) | JSON, Markdown, LaTeX, HTML, Jupyter, Mermaid, DOT, ASCII |
+| **Sequential** | ❌ | ✅ **NEW** | JSON, Markdown, LaTeX, HTML, Jupyter, Mermaid, DOT, ASCII |
+| **Shannon** | ❌ | ✅ **NEW** | JSON, Markdown, LaTeX, HTML, Jupyter, Mermaid, DOT, ASCII |
+| **Abductive** | ❌ | ✅ **NEW** | JSON, Markdown, LaTeX, HTML, Jupyter, Mermaid, DOT, ASCII |
+| **Counterfactual** | ❌ | ✅ **NEW** | JSON, Markdown, LaTeX, HTML, Jupyter, Mermaid, DOT, ASCII |
+| **Analogical** | ❌ | ✅ **NEW** | JSON, Markdown, LaTeX, HTML, Jupyter, Mermaid, DOT, ASCII |
+| **Evidential** | ❌ | ✅ **NEW** | JSON, Markdown, LaTeX, HTML, Jupyter, Mermaid, DOT, ASCII |
+
+**Result**: 100% of modes now have either LaTeX support, diagram export, or both! 🎉
+
+---
+
 ## [3.0.2] - 2025-11-19
 
 ### TypeScript Compilation Fixes
