@@ -1,10 +1,10 @@
 # DeepThinking MCP v3.1.0
 
-A comprehensive Model Context Protocol (MCP) server featuring **14 advanced reasoning modes** with intelligent mode recommendation, visual export capabilities, high-performance validation caching, comprehensive testing, and automated CI/CD for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **13 specialized reasoning modes** with intelligent mode recommendation, universal LaTeX and diagram support, high-performance validation caching, comprehensive testing, and automated CI/CD for complex problem-solving, analysis, and decision-making.
 
 ## Overview
 
-DeepThinking MCP v3.1 provides a complete toolkit for structured reasoning with 14 specialized modes, an intelligent recommendation system, powerful visual export capabilities, and optimized performance through validation caching:
+DeepThinking MCP v3.1 provides a complete toolkit for structured reasoning with 13 specialized modes, an intelligent recommendation system, powerful visual export capabilities with **100% coverage** (all modes support LaTeX and/or diagrams), and optimized performance through validation caching:
 
 ### Core Modes
 - **Sequential**: Iterative refinement with revision capabilities
@@ -194,7 +194,26 @@ Export your reasoning sessions as visual diagrams in multiple formats for presen
 - **DOT**: Graphviz format for professional graph visualization and publication-quality diagrams
 - **ASCII**: Plain text diagrams for terminal output, logs, and text-based documentation
 
-#### Supported Modes**All 14 modes now support visual export (100% coverage):**- **Causal Mode**: Export causal graphs showing cause-effect relationships with node types (causes, effects, mediators, confounders) and edge strengths- **Temporal Mode**: Export timelines as Gantt charts showing events, intervals, and temporal relationships- **Game Theory Mode**: Export game trees with strategies, decision nodes, and payoffs- **Bayesian Mode**: Export Bayesian networks showing prior/posterior relationships and evidence flow- **First-Principles Mode**: Export derivation chains showing question → principles → derivation steps → conclusion flow- **All Other Modes**: Generic thought sequence visualization showing reasoning progression for Sequential, Shannon, Mathematics, Physics, Hybrid, Abductive, Counterfactual, Analogical, and Evidential modes
+#### Supported Modes
+
+**All 13 modes now support visual export (100% coverage):**
+
+**Advanced Visualization Modes** (Mermaid, DOT, ASCII diagram support):
+- **Causal Mode**: Export causal graphs showing cause-effect relationships with node types (causes, effects, mediators, confounders) and edge strengths. **NEW**: LaTeX formulas for causal relationships and mechanisms.
+- **Temporal Mode**: Export timelines as Gantt charts showing events, intervals, and temporal relationships. **NEW**: LaTeX formulas for temporal logic constraints and dynamics.
+- **Game Theory Mode**: Export game trees with strategies, decision nodes, and payoffs. **NEW**: LaTeX support for payoff matrices, Nash equilibria, and dominant strategies.
+- **Bayesian Mode**: Export Bayesian networks showing prior/posterior relationships and evidence flow. **NEW**: LaTeX formulas for priors, likelihoods, and posterior calculations.
+- **Sequential Mode** (**NEW**): Export dependency graphs showing thought relationships, branches, and revisions
+- **Shannon Mode** (**NEW**): Export stage flow diagrams with 5-stage methodology visualization and uncertainty metrics
+- **Abductive Mode** (**NEW**): Export hypothesis comparison diagrams showing observations → hypotheses → best explanation
+- **Counterfactual Mode** (**NEW**): Export scenario tree diagrams comparing actual vs. counterfactual outcomes
+- **Analogical Mode** (**NEW**): Export domain mapping diagrams showing source/target entity correspondences
+- **Evidential Mode** (**NEW**): Export belief function visualizations with frame of discernment and mass assignments
+
+**Text Export Modes** (JSON, Markdown, LaTeX, HTML, Jupyter):
+- **Mathematics Mode**: Full LaTeX mathematical notation for theorems, proofs, and symbolic computation
+- **Physics Mode**: LaTeX support for tensor mathematics, field equations, and conservation laws
+- **Hybrid Mode**: Inherits LaTeX capabilities from mathematics/physics components
 
 #### Visual Export Examples
 
