@@ -18,6 +18,7 @@ import { AnalogicalValidator } from './modes/analogical.js';
 import { TemporalValidator } from './modes/temporal.js';
 import { GameTheoryValidator } from './modes/gametheory.js';
 import { EvidentialValidator } from './modes/evidential.js';
+import { FirstPrinciplesValidator } from './modes/firstprinciples.js';
 
 /**
  * Singleton registry of all mode validators
@@ -47,6 +48,7 @@ class ValidatorRegistry {
     this.register(new TemporalValidator());
     this.register(new GameTheoryValidator());
     this.register(new EvidentialValidator());
+    this.register(new FirstPrinciplesValidator());
   }
 
   /**

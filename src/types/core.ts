@@ -1,13 +1,14 @@
 /**
- * Core type definitions for the DeepThinking MCP server v2.1+
- * Supports 13 thinking modes: Sequential, Shannon, Mathematics, Physics, Hybrid,
- * Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory, Evidential
+ * Core type definitions for the DeepThinking MCP server v3.1.0
+ * Supports 14 thinking modes: Sequential, Shannon, Mathematics, Physics, Hybrid,
+ * Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory, Evidential, FirstPrinciples
  */
 
 // Import Phase 3 mode types
 import type { TemporalThought } from './modes/temporal.js';
 import type { GameTheoryThought } from './modes/gametheory.js';
 import type { EvidentialThought } from './modes/evidential.js';
+import type { FirstPrinciplesThought } from './modes/firstprinciples.js';
 
 /**
  * Available thinking modes
@@ -26,6 +27,7 @@ export enum ThinkingMode {
   TEMPORAL = 'temporal', // Phase 3 (v2.1)
   GAMETHEORY = 'gametheory', // Phase 3 (v2.2)
   EVIDENTIAL = 'evidential', // Phase 3 (v2.3)
+  FIRSTPRINCIPLES = 'firstprinciples', // Phase 3 (v3.1.0)
   CUSTOM = 'custom'
 }
 
@@ -653,7 +655,8 @@ export type Thought =
   | AnalogicalThought
   | TemporalThought
   | GameTheoryThought
-  | EvidentialThought;
+  | EvidentialThought
+  | FirstPrinciplesThought;
 
 // ========== TYPE GUARDS ==========
 
@@ -718,5 +721,9 @@ export function isEvidentialThought(thought: Thought): thought is EvidentialThou
   return thought.mode === ThinkingMode.EVIDENTIAL;
 }
 
+export function isFirstPrinciplesThought(thought: Thought): thought is FirstPrinciplesThought {
+  return thought.mode === ThinkingMode.FIRSTPRINCIPLES;
+}
+
 // Re-export Phase 3 types
-export type { TemporalThought, GameTheoryThought, EvidentialThought };
+export type { TemporalThought, GameTheoryThought, EvidentialThought, FirstPrinciplesThought };
