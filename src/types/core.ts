@@ -327,6 +327,7 @@ export interface CausalEdge {
   strength: number; // -1 to 1 (negative = inhibitory)
   confidence: number; // 0-1
   mechanism?: string;
+  formula?: string; // LaTeX formula for mathematical relationship
 }
 
 /**
@@ -358,6 +359,7 @@ export interface CausalMechanism {
   to: string;
   description: string;
   type: 'direct' | 'indirect' | 'feedback';
+  formula?: string; // LaTeX formula describing the mechanism
 }
 
 /**
@@ -407,6 +409,7 @@ export interface BayesianHypothesis {
 export interface PriorProbability {
   probability: number; // 0-1
   justification: string;
+  latex?: string; // LaTeX formula for prior distribution
 }
 
 /**
@@ -415,6 +418,7 @@ export interface PriorProbability {
 export interface Likelihood {
   probability: number; // 0-1
   description: string;
+  latex?: string; // LaTeX formula for likelihood function
 }
 
 /**
@@ -434,6 +438,7 @@ export interface BayesianEvidence {
 export interface PosteriorProbability {
   probability: number; // 0-1
   calculation: string; // Show the math
+  latex?: string; // LaTeX formula for Bayesian update calculation
 }
 
 /**

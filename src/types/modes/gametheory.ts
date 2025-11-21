@@ -66,6 +66,7 @@ export interface PayoffMatrix {
   players: string[]; // Player IDs in order
   dimensions: number[]; // Number of strategies per player
   payoffs: PayoffEntry[];
+  latex?: string; // LaTeX representation of the payoff matrix
 }
 
 /**
@@ -86,6 +87,7 @@ export interface NashEquilibrium {
   type: 'pure' | 'mixed';
   isStrict: boolean; // No player wants to deviate
   stability: number; // 0-1, how stable is this equilibrium
+  formula?: string; // LaTeX formula showing equilibrium conditions
 }
 
 /**
@@ -97,6 +99,7 @@ export interface DominantStrategy {
   type: 'strictly_dominant' | 'weakly_dominant';
   dominatesStrategies: string[]; // Other strategy IDs this dominates
   justification: string;
+  formula?: string; // LaTeX formula showing dominance relationship
 }
 
 /**

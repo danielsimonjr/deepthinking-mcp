@@ -3,7 +3,18 @@
  * Exports thinking sessions to visual formats: Mermaid, DOT, ASCII
  */
 
-import type { CausalThought, TemporalThought, GameTheoryThought, BayesianThought } from '../types/index.js';
+import type {
+  CausalThought,
+  TemporalThought,
+  GameTheoryThought,
+  BayesianThought,
+  SequentialThought,
+  ShannonThought,
+  AbductiveThought,
+  CounterfactualThought,
+  AnalogicalThought,
+  EvidentialThought
+} from '../types/index.js';
 
 export type VisualFormat = 'mermaid' | 'dot' | 'ascii';
 
@@ -530,6 +541,817 @@ export class VisualExporter {
 
     if (thought.bayesFactor !== undefined) {
       ascii += `\nBayes Factor: ${thought.bayesFactor.toFixed(2)}\n`;
+    }
+
+    return ascii;
+  }
+
+  // ===== Sequential Dependency Graph Exporters =====
+
+  /**
+   * Export sequential dependency graph to visual format
+   */
+  exportSequentialDependencyGraph(thought: SequentialThought, options: VisualExportOptions): string {
+    const { format, colorScheme = 'default', includeLabels = true } = options;
+
+    switch (format) {
+      case 'mermaid':
+        return this.sequentialToMermaid(thought, colorScheme, includeLabels);
+      case 'dot':
+        return this.sequentialToDOT(thought, includeLabels);
+      case 'ascii':
+        return this.sequentialToASCII(thought);
+      default:
+        throw new Error(`Unsupported format: ${format}`);
+    }
+  }
+
+  private sequentialToMermaid(
+    thought: SequentialThought,
+    colorScheme: string,
+    includeLabels: boolean
+  ): string {
+    let mermaid = 'graph TD\n';
+
+    const nodeId = this.sanitizeId(thought.id);
+    const label = includeLabels ? thought.content.substring(0, 50) + '...' : nodeId;
+
+    mermaid += `  ${nodeId}["${label}"]\n`;
+
+    // Add dependencies
+    if (thought.buildUpon && thought.buildUpon.length > 0) {
+      mermaid += '\n';
+      for (const depId of thought.buildUpon) {
+        const depNodeId = this.sanitizeId(depId);
+        mermaid += `  ${depNodeId} --> ${nodeId}\n`;
+      }
+    }
+
+    // Add branch information
+    if (thought.branchFrom) {
+      const branchId = this.sanitizeId(thought.branchFrom);
+      mermaid += `  ${branchId} -.->|branch| ${nodeId}\n`;
+    }
+
+    // Add revision information
+    if (thought.revisesThought) {
+      const revisedId = this.sanitizeId(thought.revisesThought);
+      mermaid += `  ${revisedId} ==>|revises| ${nodeId}\n`;
+    }
+
+    // Add styling
+    if (colorScheme !== 'monochrome') {
+      mermaid += '\n';
+      const color = thought.isRevision
+        ? (colorScheme === 'pastel' ? '#fff3e0' : '#ffd699')
+        : (colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff');
+      mermaid += `  style ${nodeId} fill:${color}\n`;
+    }
+
+    return mermaid;
+  }
+
+  private sequentialToDOT(thought: SequentialThought, includeLabels: boolean): string {
+    let dot = 'digraph SequentialDependency {\n';
+    dot += '  rankdir=TD;\n';
+    dot += '  node [shape=box, style=rounded];\n\n';
+
+    const nodeId = this.sanitizeId(thought.id);
+    const label = includeLabels ? thought.content.substring(0, 50) + '...' : nodeId;
+
+    dot += `  ${nodeId} [label="${label}"];\n`;
+
+    if (thought.buildUpon && thought.buildUpon.length > 0) {
+      for (const depId of thought.buildUpon) {
+        const depNodeId = this.sanitizeId(depId);
+        dot += `  ${depNodeId} -> ${nodeId};\n`;
+      }
+    }
+
+    if (thought.branchFrom) {
+      const branchId = this.sanitizeId(thought.branchFrom);
+      dot += `  ${branchId} -> ${nodeId} [style=dashed, label="branch"];\n`;
+    }
+
+    if (thought.revisesThought) {
+      const revisedId = this.sanitizeId(thought.revisesThought);
+      dot += `  ${revisedId} -> ${nodeId} [style=bold, label="revises"];\n`;
+    }
+
+    dot += '}\n';
+    return dot;
+  }
+
+  private sequentialToASCII(thought: SequentialThought): string {
+    let ascii = 'Sequential Dependency Graph:\n';
+    ascii += '============================\n\n';
+
+    ascii += `Current Thought: ${thought.id}\n`;
+    ascii += `Content: ${thought.content.substring(0, 100)}...\n\n`;
+
+    if (thought.buildUpon && thought.buildUpon.length > 0) {
+      ascii += 'Builds Upon:\n';
+      for (const depId of thought.buildUpon) {
+        ascii += `  ↓ ${depId}\n`;
+      }
+      ascii += '\n';
+    }
+
+    if (thought.branchFrom) {
+      ascii += `Branches From: ${thought.branchFrom}\n`;
+      if (thought.branchId) {
+        ascii += `Branch ID: ${thought.branchId}\n`;
+      }
+      ascii += '\n';
+    }
+
+    if (thought.revisesThought) {
+      ascii += `Revises: ${thought.revisesThought}\n`;
+      if (thought.revisionReason) {
+        ascii += `Reason: ${thought.revisionReason}\n`;
+      }
+      ascii += '\n';
+    }
+
+    return ascii;
+  }
+
+  // ===== Shannon Stage Flow Exporters =====
+
+  /**
+   * Export Shannon stage flow diagram to visual format
+   */
+  exportShannonStageFlow(thought: ShannonThought, options: VisualExportOptions): string {
+    const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+
+    switch (format) {
+      case 'mermaid':
+        return this.shannonToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      case 'dot':
+        return this.shannonToDOT(thought, includeLabels, includeMetrics);
+      case 'ascii':
+        return this.shannonToASCII(thought);
+      default:
+        throw new Error(`Unsupported format: ${format}`);
+    }
+  }
+
+  private shannonToMermaid(
+    thought: ShannonThought,
+    colorScheme: string,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let mermaid = 'graph LR\n';
+
+    const stages = [
+      'problem_definition',
+      'constraints',
+      'model',
+      'proof',
+      'implementation'
+    ];
+
+    const stageLabels: Record<string, string> = {
+      problem_definition: 'Problem Definition',
+      constraints: 'Constraints',
+      model: 'Model',
+      proof: 'Proof',
+      implementation: 'Implementation'
+    };
+
+    // Add all stages
+    for (let i = 0; i < stages.length; i++) {
+      const stage = stages[i];
+      const stageId = this.sanitizeId(stage);
+      const label = includeLabels ? stageLabels[stage] : stageId;
+
+      mermaid += `  ${stageId}["${label}"]\n`;
+
+      // Connect to next stage
+      if (i < stages.length - 1) {
+        const nextStageId = this.sanitizeId(stages[i + 1]);
+        mermaid += `  ${stageId} --> ${nextStageId}\n`;
+      }
+    }
+
+    // Highlight current stage
+    if (colorScheme !== 'monochrome') {
+      mermaid += '\n';
+      const currentStageId = this.sanitizeId(thought.stage);
+      const color = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
+      mermaid += `  style ${currentStageId} fill:${color},stroke:#333,stroke-width:3px\n`;
+    }
+
+    // Add uncertainty metric
+    if (includeMetrics && thought.uncertainty !== undefined) {
+      mermaid += `\n  uncertainty["Uncertainty: ${thought.uncertainty.toFixed(2)}"]\n`;
+      mermaid += `  uncertainty -.-> ${this.sanitizeId(thought.stage)}\n`;
+    }
+
+    return mermaid;
+  }
+
+  private shannonToDOT(
+    thought: ShannonThought,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let dot = 'digraph ShannonStageFlow {\n';
+    dot += '  rankdir=LR;\n';
+    dot += '  node [shape=box, style=rounded];\n\n';
+
+    const stages = [
+      'problem_definition',
+      'constraints',
+      'model',
+      'proof',
+      'implementation'
+    ];
+
+    const stageLabels: Record<string, string> = {
+      problem_definition: 'Problem Definition',
+      constraints: 'Constraints',
+      model: 'Model',
+      proof: 'Proof',
+      implementation: 'Implementation'
+    };
+
+    for (let i = 0; i < stages.length; i++) {
+      const stage = stages[i];
+      const stageId = this.sanitizeId(stage);
+      const label = includeLabels ? stageLabels[stage] : stageId;
+
+      const isCurrent = stage === thought.stage;
+      const style = isCurrent ? ', style=filled, fillcolor=lightblue' : '';
+
+      dot += `  ${stageId} [label="${label}"${style}];\n`;
+
+      if (i < stages.length - 1) {
+        const nextStageId = this.sanitizeId(stages[i + 1]);
+        dot += `  ${stageId} -> ${nextStageId};\n`;
+      }
+    }
+
+    if (includeMetrics && thought.uncertainty !== undefined) {
+      dot += `\n  uncertainty [label="Uncertainty: ${thought.uncertainty.toFixed(2)}", shape=ellipse];\n`;
+      dot += `  uncertainty -> ${this.sanitizeId(thought.stage)} [style=dashed];\n`;
+    }
+
+    dot += '}\n';
+    return dot;
+  }
+
+  private shannonToASCII(thought: ShannonThought): string {
+    let ascii = 'Shannon Stage Flow:\n';
+    ascii += '===================\n\n';
+
+    const stages = [
+      'problem_definition',
+      'constraints',
+      'model',
+      'proof',
+      'implementation'
+    ];
+
+    const stageLabels: Record<string, string> = {
+      problem_definition: 'Problem Definition',
+      constraints: 'Constraints',
+      model: 'Model',
+      proof: 'Proof',
+      implementation: 'Implementation'
+    };
+
+    ascii += 'Flow: ';
+    for (let i = 0; i < stages.length; i++) {
+      const stage = stages[i];
+      const isCurrent = stage === thought.stage;
+
+      if (isCurrent) {
+        ascii += `[${stageLabels[stage]}]`;
+      } else {
+        ascii += stageLabels[stage];
+      }
+
+      if (i < stages.length - 1) {
+        ascii += ' → ';
+      }
+    }
+
+    ascii += '\n\n';
+    ascii += `Current Stage: ${stageLabels[thought.stage]}\n`;
+    ascii += `Uncertainty: ${thought.uncertainty.toFixed(2)}\n`;
+
+    if (thought.dependencies && thought.dependencies.length > 0) {
+      ascii += '\nDependencies:\n';
+      for (const dep of thought.dependencies) {
+        ascii += `  • ${dep}\n`;
+      }
+    }
+
+    if (thought.assumptions && thought.assumptions.length > 0) {
+      ascii += '\nAssumptions:\n';
+      for (const assumption of thought.assumptions) {
+        ascii += `  • ${assumption}\n`;
+      }
+    }
+
+    return ascii;
+  }
+
+  // ===== Abductive Hypothesis Comparison Exporters =====
+
+  /**
+   * Export abductive hypothesis comparison to visual format
+   */
+  exportAbductiveHypotheses(thought: AbductiveThought, options: VisualExportOptions): string {
+    const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+
+    switch (format) {
+      case 'mermaid':
+        return this.abductiveToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      case 'dot':
+        return this.abductiveToDOT(thought, includeLabels, includeMetrics);
+      case 'ascii':
+        return this.abductiveToASCII(thought);
+      default:
+        throw new Error(`Unsupported format: ${format}`);
+    }
+  }
+
+  private abductiveToMermaid(
+    thought: AbductiveThought,
+    colorScheme: string,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let mermaid = 'graph TD\n';
+
+    // Add observations node
+    mermaid += '  Observations["Observations"]\n';
+
+    // Add hypothesis nodes
+    for (const hypothesis of thought.hypotheses) {
+      const hypId = this.sanitizeId(hypothesis.id);
+      const label = includeLabels ? hypothesis.explanation.substring(0, 50) + '...' : hypId;
+      const scoreLabel = includeMetrics ? ` (${hypothesis.score.toFixed(2)})` : '';
+
+      mermaid += `  ${hypId}["${label}${scoreLabel}"]\n`;
+      mermaid += `  Observations --> ${hypId}\n`;
+    }
+
+    // Highlight best explanation
+    if (thought.bestExplanation && colorScheme !== 'monochrome') {
+      mermaid += '\n';
+      const bestId = this.sanitizeId(thought.bestExplanation.id);
+      const color = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
+      mermaid += `  style ${bestId} fill:${color},stroke:#333,stroke-width:3px\n`;
+    }
+
+    return mermaid;
+  }
+
+  private abductiveToDOT(
+    thought: AbductiveThought,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let dot = 'digraph AbductiveHypotheses {\n';
+    dot += '  rankdir=TD;\n';
+    dot += '  node [shape=box, style=rounded];\n\n';
+
+    dot += '  Observations [label="Observations", shape=ellipse];\n\n';
+
+    for (const hypothesis of thought.hypotheses) {
+      const hypId = this.sanitizeId(hypothesis.id);
+      const label = includeLabels ? hypothesis.explanation.substring(0, 50) + '...' : hypId;
+      const scoreLabel = includeMetrics ? ` (${hypothesis.score.toFixed(2)})` : '';
+
+      const isBest = thought.bestExplanation?.id === hypothesis.id;
+      const style = isBest ? ', style=filled, fillcolor=lightblue' : '';
+
+      dot += `  ${hypId} [label="${label}${scoreLabel}"${style}];\n`;
+      dot += `  Observations -> ${hypId};\n`;
+    }
+
+    dot += '}\n';
+    return dot;
+  }
+
+  private abductiveToASCII(thought: AbductiveThought): string {
+    let ascii = 'Abductive Hypothesis Comparison:\n';
+    ascii += '================================\n\n';
+
+    ascii += 'Observations:\n';
+    for (const obs of thought.observations) {
+      ascii += `  • ${obs.description} (confidence: ${obs.confidence.toFixed(2)})\n`;
+    }
+
+    ascii += '\nHypotheses:\n';
+    for (const hypothesis of thought.hypotheses) {
+      const isBest = thought.bestExplanation?.id === hypothesis.id;
+      const marker = isBest ? '★' : '•';
+
+      ascii += `  ${marker} ${hypothesis.explanation}\n`;
+      ascii += `    Score: ${hypothesis.score.toFixed(2)}\n`;
+      ascii += `    Assumptions: ${hypothesis.assumptions.join(', ')}\n`;
+      ascii += '\n';
+    }
+
+    if (thought.bestExplanation) {
+      ascii += `Best Explanation: ${thought.bestExplanation.explanation}\n`;
+    }
+
+    return ascii;
+  }
+
+  // ===== Counterfactual Scenario Tree Exporters =====
+
+  /**
+   * Export counterfactual scenario tree to visual format
+   */
+  exportCounterfactualScenarios(thought: CounterfactualThought, options: VisualExportOptions): string {
+    const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+
+    switch (format) {
+      case 'mermaid':
+        return this.counterfactualToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      case 'dot':
+        return this.counterfactualToDOT(thought, includeLabels, includeMetrics);
+      case 'ascii':
+        return this.counterfactualToASCII(thought);
+      default:
+        throw new Error(`Unsupported format: ${format}`);
+    }
+  }
+
+  private counterfactualToMermaid(
+    thought: CounterfactualThought,
+    colorScheme: string,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let mermaid = 'graph TD\n';
+
+    // Add intervention point
+    const interventionId = 'intervention';
+    mermaid += `  ${interventionId}["${thought.interventionPoint.description}"]\n`;
+
+    // Add actual scenario
+    const actualId = this.sanitizeId(thought.actual.id);
+    const actualLabel = includeLabels ? thought.actual.name : actualId;
+    mermaid += `  ${actualId}["Actual: ${actualLabel}"]\n`;
+    mermaid += `  ${interventionId} -->|no change| ${actualId}\n`;
+
+    // Add counterfactual scenarios
+    for (const scenario of thought.counterfactuals) {
+      const scenarioId = this.sanitizeId(scenario.id);
+      const label = includeLabels ? scenario.name : scenarioId;
+      const likelihoodLabel = includeMetrics && scenario.likelihood
+        ? ` (${scenario.likelihood.toFixed(2)})`
+        : '';
+
+      mermaid += `  ${scenarioId}["CF: ${label}${likelihoodLabel}"]\n`;
+      mermaid += `  ${interventionId} -->|intervene| ${scenarioId}\n`;
+    }
+
+    // Add styling
+    if (colorScheme !== 'monochrome') {
+      mermaid += '\n';
+      const actualColor = colorScheme === 'pastel' ? '#fff3e0' : '#ffd699';
+      mermaid += `  style ${actualId} fill:${actualColor}\n`;
+
+      const cfColor = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
+      for (const scenario of thought.counterfactuals) {
+        const scenarioId = this.sanitizeId(scenario.id);
+        mermaid += `  style ${scenarioId} fill:${cfColor}\n`;
+      }
+    }
+
+    return mermaid;
+  }
+
+  private counterfactualToDOT(
+    thought: CounterfactualThought,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let dot = 'digraph CounterfactualScenarios {\n';
+    dot += '  rankdir=TD;\n';
+    dot += '  node [shape=box, style=rounded];\n\n';
+
+    const interventionId = 'intervention';
+    dot += `  ${interventionId} [label="${thought.interventionPoint.description}", shape=diamond];\n\n`;
+
+    const actualId = this.sanitizeId(thought.actual.id);
+    const actualLabel = includeLabels ? thought.actual.name : actualId;
+    dot += `  ${actualId} [label="Actual: ${actualLabel}", style=filled, fillcolor=lightyellow];\n`;
+    dot += `  ${interventionId} -> ${actualId} [label="no change"];\n\n`;
+
+    for (const scenario of thought.counterfactuals) {
+      const scenarioId = this.sanitizeId(scenario.id);
+      const label = includeLabels ? scenario.name : scenarioId;
+      const likelihoodLabel = includeMetrics && scenario.likelihood
+        ? ` (${scenario.likelihood.toFixed(2)})`
+        : '';
+
+      dot += `  ${scenarioId} [label="CF: ${label}${likelihoodLabel}", style=filled, fillcolor=lightblue];\n`;
+      dot += `  ${interventionId} -> ${scenarioId} [label="intervene"];\n`;
+    }
+
+    dot += '}\n';
+    return dot;
+  }
+
+  private counterfactualToASCII(thought: CounterfactualThought): string {
+    let ascii = 'Counterfactual Scenario Tree:\n';
+    ascii += '=============================\n\n';
+
+    ascii += `Intervention Point: ${thought.interventionPoint.description}\n`;
+    ascii += `Timing: ${thought.interventionPoint.timing}\n`;
+    ascii += `Feasibility: ${thought.interventionPoint.feasibility.toFixed(2)}\n\n`;
+
+    ascii += '┌─ Actual Scenario:\n';
+    ascii += `│  ${thought.actual.name}\n`;
+    ascii += `│  ${thought.actual.description}\n\n`;
+
+    ascii += '└─ Counterfactual Scenarios:\n';
+    for (const scenario of thought.counterfactuals) {
+      const likelihoodStr = scenario.likelihood ? ` (likelihood: ${scenario.likelihood.toFixed(2)})` : '';
+      ascii += `   ├─ ${scenario.name}${likelihoodStr}\n`;
+      ascii += `   │  ${scenario.description}\n`;
+    }
+
+    return ascii;
+  }
+
+  // ===== Analogical Domain Mapping Exporters =====
+
+  /**
+   * Export analogical domain mapping to visual format
+   */
+  exportAnalogicalMapping(thought: AnalogicalThought, options: VisualExportOptions): string {
+    const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+
+    switch (format) {
+      case 'mermaid':
+        return this.analogicalToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      case 'dot':
+        return this.analogicalToDOT(thought, includeLabels, includeMetrics);
+      case 'ascii':
+        return this.analogicalToASCII(thought);
+      default:
+        throw new Error(`Unsupported format: ${format}`);
+    }
+  }
+
+  private analogicalToMermaid(
+    thought: AnalogicalThought,
+    colorScheme: string,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let mermaid = 'graph LR\n';
+
+    // Add source domain entities
+    mermaid += '  subgraph Source["Source Domain"]\n';
+    for (const entity of thought.sourceDomain.entities) {
+      const entityId = this.sanitizeId('src_' + entity.id);
+      const label = includeLabels ? entity.name : entityId;
+      mermaid += `    ${entityId}["${label}"]\n`;
+    }
+    mermaid += '  end\n\n';
+
+    // Add target domain entities
+    mermaid += '  subgraph Target["Target Domain"]\n';
+    for (const entity of thought.targetDomain.entities) {
+      const entityId = this.sanitizeId('tgt_' + entity.id);
+      const label = includeLabels ? entity.name : entityId;
+      mermaid += `    ${entityId}["${label}"]\n`;
+    }
+    mermaid += '  end\n\n';
+
+    // Add mappings
+    for (const mapping of thought.mapping) {
+      const srcId = this.sanitizeId('src_' + mapping.sourceEntityId);
+      const tgtId = this.sanitizeId('tgt_' + mapping.targetEntityId);
+      const confidenceLabel = includeMetrics ? `|${mapping.confidence.toFixed(2)}|` : '';
+
+      mermaid += `  ${srcId} -.->${confidenceLabel} ${tgtId}\n`;
+    }
+
+    // Add styling
+    if (colorScheme !== 'monochrome') {
+      mermaid += '\n';
+      const srcColor = colorScheme === 'pastel' ? '#fff3e0' : '#ffd699';
+      const tgtColor = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
+
+      for (const entity of thought.sourceDomain.entities) {
+        const entityId = this.sanitizeId('src_' + entity.id);
+        mermaid += `  style ${entityId} fill:${srcColor}\n`;
+      }
+
+      for (const entity of thought.targetDomain.entities) {
+        const entityId = this.sanitizeId('tgt_' + entity.id);
+        mermaid += `  style ${tgtId} fill:${tgtColor}\n`;
+      }
+    }
+
+    return mermaid;
+  }
+
+  private analogicalToDOT(
+    thought: AnalogicalThought,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let dot = 'digraph AnalogicalMapping {\n';
+    dot += '  rankdir=LR;\n';
+    dot += '  node [shape=box, style=rounded];\n\n';
+
+    // Source domain cluster
+    dot += '  subgraph cluster_source {\n';
+    dot += '    label="Source Domain";\n';
+    dot += '    style=filled;\n';
+    dot += '    fillcolor=lightyellow;\n\n';
+
+    for (const entity of thought.sourceDomain.entities) {
+      const entityId = this.sanitizeId('src_' + entity.id);
+      const label = includeLabels ? entity.name : entityId;
+      dot += `    ${entityId} [label="${label}"];\n`;
+    }
+
+    dot += '  }\n\n';
+
+    // Target domain cluster
+    dot += '  subgraph cluster_target {\n';
+    dot += '    label="Target Domain";\n';
+    dot += '    style=filled;\n';
+    dot += '    fillcolor=lightblue;\n\n';
+
+    for (const entity of thought.targetDomain.entities) {
+      const entityId = this.sanitizeId('tgt_' + entity.id);
+      const label = includeLabels ? entity.name : entityId;
+      dot += `    ${entityId} [label="${label}"];\n`;
+    }
+
+    dot += '  }\n\n';
+
+    // Add mappings
+    for (const mapping of thought.mapping) {
+      const srcId = this.sanitizeId('src_' + mapping.sourceEntityId);
+      const tgtId = this.sanitizeId('tgt_' + mapping.targetEntityId);
+      const confidenceLabel = includeMetrics ? `, label="${mapping.confidence.toFixed(2)}"` : '';
+
+      dot += `  ${srcId} -> ${tgtId} [style=dashed${confidenceLabel}];\n`;
+    }
+
+    dot += '}\n';
+    return dot;
+  }
+
+  private analogicalToASCII(thought: AnalogicalThought): string {
+    let ascii = 'Analogical Domain Mapping:\n';
+    ascii += '==========================\n\n';
+
+    ascii += `Source Domain: ${thought.sourceDomain.name}\n`;
+    ascii += `${thought.sourceDomain.description}\n\n`;
+
+    ascii += `Target Domain: ${thought.targetDomain.name}\n`;
+    ascii += `${thought.targetDomain.description}\n\n`;
+
+    ascii += 'Mappings:\n';
+    for (const mapping of thought.mapping) {
+      const srcEntity = thought.sourceDomain.entities.find(e => e.id === mapping.sourceEntityId);
+      const tgtEntity = thought.targetDomain.entities.find(e => e.id === mapping.targetEntityId);
+
+      if (srcEntity && tgtEntity) {
+        ascii += `  ${srcEntity.name} ←→ ${tgtEntity.name} (confidence: ${mapping.confidence.toFixed(2)})\n`;
+        ascii += `    ${mapping.justification}\n`;
+      }
+    }
+
+    ascii += `\nAnalogy Strength: ${thought.analogyStrength.toFixed(2)}\n`;
+
+    return ascii;
+  }
+
+  // ===== Evidential Belief Visualization Exporters =====
+
+  /**
+   * Export evidential belief visualization to visual format
+   */
+  exportEvidentialBeliefs(thought: EvidentialThought, options: VisualExportOptions): string {
+    const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+
+    switch (format) {
+      case 'mermaid':
+        return this.evidentialToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      case 'dot':
+        return this.evidentialToDOT(thought, includeLabels, includeMetrics);
+      case 'ascii':
+        return this.evidentialToASCII(thought);
+      default:
+        throw new Error(`Unsupported format: ${format}`);
+    }
+  }
+
+  private evidentialToMermaid(
+    thought: EvidentialThought,
+    colorScheme: string,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let mermaid = 'graph TD\n';
+
+    // Add frame of discernment
+    mermaid += '  Frame["Frame of Discernment"]\n';
+
+    // Add hypotheses
+    for (const hypothesis of thought.frameOfDiscernment) {
+      const hypId = this.sanitizeId(hypothesis);
+      const label = includeLabels ? hypothesis : hypId;
+
+      mermaid += `  ${hypId}["${label}"]\n`;
+      mermaid += `  Frame --> ${hypId}\n`;
+    }
+
+    // Add mass assignments
+    if (includeMetrics && thought.massAssignments && thought.massAssignments.length > 0) {
+      mermaid += '\n';
+      for (const mass of thought.massAssignments) {
+        const massId = this.sanitizeId(mass.subset.join('_'));
+        const label = `{${mass.subset.join(', ')}}`;
+        mermaid += `  ${massId}["${label}: ${mass.mass.toFixed(3)}"]\n`;
+      }
+    }
+
+    // Add styling
+    if (colorScheme !== 'monochrome') {
+      mermaid += '\n';
+      const color = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
+      for (const hypothesis of thought.frameOfDiscernment) {
+        const hypId = this.sanitizeId(hypothesis);
+        mermaid += `  style ${hypId} fill:${color}\n`;
+      }
+    }
+
+    return mermaid;
+  }
+
+  private evidentialToDOT(
+    thought: EvidentialThought,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let dot = 'digraph EvidentialBeliefs {\n';
+    dot += '  rankdir=TD;\n';
+    dot += '  node [shape=box, style=rounded];\n\n';
+
+    dot += '  Frame [label="Frame of Discernment", shape=ellipse];\n\n';
+
+    for (const hypothesis of thought.frameOfDiscernment) {
+      const hypId = this.sanitizeId(hypothesis);
+      const label = includeLabels ? hypothesis : hypId;
+
+      dot += `  ${hypId} [label="${label}"];\n`;
+      dot += `  Frame -> ${hypId};\n`;
+    }
+
+    if (includeMetrics && thought.massAssignments && thought.massAssignments.length > 0) {
+      dot += '\n';
+      for (const mass of thought.massAssignments) {
+        const massId = this.sanitizeId(mass.subset.join('_'));
+        const label = `{${mass.subset.join(', ')}}: ${mass.mass.toFixed(3)}`;
+        dot += `  ${massId} [label="${label}", shape=note];\n`;
+      }
+    }
+
+    dot += '}\n';
+    return dot;
+  }
+
+  private evidentialToASCII(thought: EvidentialThought): string {
+    let ascii = 'Evidential Belief Visualization:\n';
+    ascii += '================================\n\n';
+
+    ascii += 'Frame of Discernment:\n';
+    ascii += `  {${thought.frameOfDiscernment.join(', ')}}\n\n`;
+
+    if (thought.massAssignments && thought.massAssignments.length > 0) {
+      ascii += 'Mass Assignments:\n';
+      for (const mass of thought.massAssignments) {
+        ascii += `  m({${mass.subset.join(', ')}}) = ${mass.mass.toFixed(3)}\n`;
+      }
+      ascii += '\n';
+    }
+
+    if (thought.beliefFunction) {
+      ascii += `Belief: ${thought.beliefFunction.toFixed(3)}\n`;
+    }
+
+    if (thought.plausibilityFunction) {
+      ascii += `Plausibility: ${thought.plausibilityFunction.toFixed(3)}\n`;
     }
 
     return ascii;
