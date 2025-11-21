@@ -19,6 +19,10 @@ import { TemporalValidator } from './modes/temporal.js';
 import { GameTheoryValidator } from './modes/gametheory.js';
 import { EvidentialValidator } from './modes/evidential.js';
 import { FirstPrinciplesValidator } from './modes/firstprinciples.js';
+import { SystemsThinkingValidator } from './modes/systemsthinking.js';
+import { ScientificMethodValidator } from './modes/scientificmethod.js';
+import { OptimizationValidator } from './modes/optimization.js';
+import { FormalLogicValidator } from './modes/formallogic.js';
 
 /**
  * Singleton registry of all mode validators
@@ -49,6 +53,10 @@ class ValidatorRegistry {
     this.register(new GameTheoryValidator());
     this.register(new EvidentialValidator());
     this.register(new FirstPrinciplesValidator());
+    this.register(new SystemsThinkingValidator());
+    this.register(new ScientificMethodValidator());
+    this.register(new OptimizationValidator());
+    this.register(new FormalLogicValidator());
   }
 
   /**

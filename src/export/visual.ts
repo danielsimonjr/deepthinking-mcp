@@ -1,5 +1,5 @@
 /**
- * Visual Export Module (v2.5)
+ * Visual Export Module (v3.2.0)
  * Exports thinking sessions to visual formats: Mermaid, DOT, ASCII
  */
 
@@ -14,7 +14,11 @@ import type {
   CounterfactualThought,
   AnalogicalThought,
   EvidentialThought,
-  FirstPrinciplesThought
+  FirstPrinciplesThought,
+  SystemsThinkingThought,
+  ScientificMethodThought,
+  OptimizationThought,
+  FormalLogicThought
 } from '../types/index.js';
 
 export type VisualFormat = 'mermaid' | 'dot' | 'ascii';
@@ -1625,6 +1629,889 @@ export class VisualExporter {
       for (const alt of thought.alternativeInterpretations) {
         ascii += `  - ${alt}\n`;
       }
+    }
+
+    return ascii;
+  }
+
+  // ===== Systems Thinking Causal Loop Exporters =====
+
+  /**
+   * Export systems thinking causal loop diagram to visual format
+   */
+  exportSystemsThinkingCausalLoops(thought: SystemsThinkingThought, options: VisualExportOptions): string {
+    const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+
+    switch (format) {
+      case 'mermaid':
+        return this.systemsThinkingToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      case 'dot':
+        return this.systemsThinkingToDOT(thought, includeLabels, includeMetrics);
+      case 'ascii':
+        return this.systemsThinkingToASCII(thought);
+      default:
+        throw new Error(`Unsupported format: ${format}`);
+    }
+  }
+
+  private systemsThinkingToMermaid(
+    thought: SystemsThinkingThought,
+    colorScheme: string,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let mermaid = 'graph TB\n';
+
+    // Add system node
+    if (thought.system) {
+      mermaid += `  System["${thought.system.name}"]\n\n`;
+    }
+
+    // Add component nodes
+    if (thought.components && thought.components.length > 0) {
+      for (const component of thought.components) {
+        const compId = this.sanitizeId(component.id);
+        const label = includeLabels ? component.name : compId;
+
+        // Different shapes for stocks vs flows
+        const shape = component.type === 'stock' ? ['[[', ']]'] : ['[', ']'];
+        mermaid += `  ${compId}${shape[0]}${label}${shape[1]}\n`;
+      }
+      mermaid += '\n';
+    }
+
+    // Add feedback loops
+    if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+      for (const loop of thought.feedbackLoops) {
+        const loopComponents = loop.components;
+
+        for (let i = 0; i < loopComponents.length; i++) {
+          const fromId = this.sanitizeId(loopComponents[i]);
+          const toId = this.sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
+
+          const edgeLabel = includeMetrics
+            ? `|${loop.type} (${loop.strength.toFixed(2)})| `
+            : `|${loop.type}| `;
+
+          const edgeStyle = loop.type === 'reinforcing' ? '-->' : '-..->';
+          mermaid += `  ${fromId} ${edgeStyle}${edgeLabel}${toId}\n`;
+        }
+      }
+      mermaid += '\n';
+    }
+
+    // Add styling based on color scheme
+    if (colorScheme !== 'monochrome' && thought.components) {
+      const stockColor = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
+      const flowColor = colorScheme === 'pastel' ? '#fff3e0' : '#ffd699';
+
+      for (const component of thought.components) {
+        const compId = this.sanitizeId(component.id);
+        const color = component.type === 'stock' ? stockColor : flowColor;
+        mermaid += `  style ${compId} fill:${color}\n`;
+      }
+    }
+
+    return mermaid;
+  }
+
+  private systemsThinkingToDOT(
+    thought: SystemsThinkingThought,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let dot = 'digraph SystemsThinking {\n';
+    dot += '  rankdir=TB;\n';
+    dot += '  node [shape=box, style=rounded];\n\n';
+
+    // Add components
+    if (thought.components && thought.components.length > 0) {
+      for (const component of thought.components) {
+        const compId = this.sanitizeId(component.id);
+        const label = includeLabels ? component.name : compId;
+        const shape = component.type === 'stock' ? 'box' : 'ellipse';
+
+        dot += `  ${compId} [label="${label}", shape=${shape}];\n`;
+      }
+      dot += '\n';
+    }
+
+    // Add feedback loops
+    if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+      for (const loop of thought.feedbackLoops) {
+        const loopComponents = loop.components;
+
+        for (let i = 0; i < loopComponents.length; i++) {
+          const fromId = this.sanitizeId(loopComponents[i]);
+          const toId = this.sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
+
+          const edgeLabel = includeMetrics
+            ? `, label="${loop.type} (${loop.strength.toFixed(2)})"`
+            : `, label="${loop.type}"`;
+
+          const edgeStyle = loop.type === 'reinforcing' ? 'solid' : 'dashed';
+          dot += `  ${fromId} -> ${toId} [style=${edgeStyle}${edgeLabel}];\n`;
+        }
+      }
+    }
+
+    dot += '}\n';
+    return dot;
+  }
+
+  private systemsThinkingToASCII(thought: SystemsThinkingThought): string {
+    let ascii = 'Systems Thinking Model:\n';
+    ascii += '======================\n\n';
+
+    if (thought.system) {
+      ascii += `System: ${thought.system.name}\n`;
+      ascii += `${thought.system.description}\n\n`;
+    }
+
+    if (thought.components && thought.components.length > 0) {
+      ascii += 'Components:\n';
+      for (const component of thought.components) {
+        const typeIcon = component.type === 'stock' ? '[■]' : '(○)';
+        ascii += `  ${typeIcon} ${component.name}: ${component.description}\n`;
+      }
+      ascii += '\n';
+    }
+
+    if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+      ascii += 'Feedback Loops:\n';
+      for (const loop of thought.feedbackLoops) {
+        const loopIcon = loop.type === 'reinforcing' ? '⊕' : '⊖';
+        ascii += `  ${loopIcon} ${loop.name} (${loop.type})\n`;
+        ascii += `    Strength: ${loop.strength.toFixed(2)}\n`;
+        ascii += `    Components: ${loop.components.join(' → ')}\n`;
+      }
+      ascii += '\n';
+    }
+
+    if (thought.leveragePoints && thought.leveragePoints.length > 0) {
+      ascii += 'Leverage Points:\n';
+      for (const point of thought.leveragePoints) {
+        ascii += `  ★ ${point.location} (effectiveness: ${point.effectiveness.toFixed(2)})\n`;
+        ascii += `    ${point.description}\n`;
+      }
+    }
+
+    return ascii;
+  }
+
+  // ===== Scientific Method Experiment Exporters =====
+
+  /**
+   * Export scientific method experiment flow to visual format
+   */
+  exportScientificMethodExperiment(thought: ScientificMethodThought, options: VisualExportOptions): string {
+    const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+
+    switch (format) {
+      case 'mermaid':
+        return this.scientificMethodToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      case 'dot':
+        return this.scientificMethodToDOT(thought, includeLabels, includeMetrics);
+      case 'ascii':
+        return this.scientificMethodToASCII(thought);
+      default:
+        throw new Error(`Unsupported format: ${format}`);
+    }
+  }
+
+  private scientificMethodToMermaid(
+    thought: ScientificMethodThought,
+    colorScheme: string,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let mermaid = 'graph TD\n';
+
+    // Research question
+    if (thought.researchQuestion) {
+      mermaid += `  RQ["Research Question: ${thought.researchQuestion.question.substring(0, 60)}..."]\n`;
+      mermaid += '\n';
+    }
+
+    // Hypotheses
+    if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+      for (const hypothesis of thought.scientificHypotheses) {
+        const hypId = this.sanitizeId(hypothesis.id);
+        const label = includeLabels ? hypothesis.statement.substring(0, 50) + '...' : hypId;
+        mermaid += `  ${hypId}["H: ${label}"]\n`;
+        if (thought.researchQuestion) {
+          mermaid += `  RQ --> ${hypId}\n`;
+        }
+      }
+      mermaid += '\n';
+    }
+
+    // Experiment
+    if (thought.experiment) {
+      mermaid += `  Exp["Experiment: ${thought.experiment.name}"]\n`;
+      if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+        for (const hypothesis of thought.scientificHypotheses) {
+          const hypId = this.sanitizeId(hypothesis.id);
+          mermaid += `  ${hypId} --> Exp\n`;
+        }
+      }
+      mermaid += '\n';
+    }
+
+    // Data collection
+    if (thought.dataCollection) {
+      mermaid += `  Data["Data Collection: ${thought.dataCollection.sampleSize} samples"]\n`;
+      if (thought.experiment) {
+        mermaid += `  Exp --> Data\n`;
+      }
+      mermaid += '\n';
+    }
+
+    // Statistical analysis
+    if (thought.statisticalAnalysis) {
+      mermaid += `  Stats["Statistical Analysis"]\n`;
+      if (thought.dataCollection) {
+        mermaid += `  Data --> Stats\n`;
+      }
+      mermaid += '\n';
+    }
+
+    // Conclusion
+    if (thought.scientificConclusion) {
+      const conclusionId = 'Conclusion';
+      const supportLabel = includeMetrics && thought.scientificConclusion.confidenceLevel
+        ? ` (conf: ${thought.scientificConclusion.confidenceLevel.toFixed(2)})`
+        : '';
+      mermaid += `  ${conclusionId}["Conclusion: ${thought.scientificConclusion.finding.substring(0, 50)}...${supportLabel}"]\n`;
+      if (thought.statisticalAnalysis) {
+        mermaid += `  Stats --> ${conclusionId}\n`;
+      }
+    }
+
+    // Add styling
+    if (colorScheme !== 'monochrome') {
+      mermaid += '\n';
+      const questionColor = colorScheme === 'pastel' ? '#fff3e0' : '#ffd699';
+      const hypothesisColor = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
+      const conclusionColor = colorScheme === 'pastel' ? '#e8f5e9' : '#a5d6a7';
+
+      if (thought.researchQuestion) {
+        mermaid += `  style RQ fill:${questionColor}\n`;
+      }
+      if (thought.scientificHypotheses) {
+        for (const hypothesis of thought.scientificHypotheses) {
+          const hypId = this.sanitizeId(hypothesis.id);
+          mermaid += `  style ${hypId} fill:${hypothesisColor}\n`;
+        }
+      }
+      if (thought.scientificConclusion) {
+        mermaid += `  style Conclusion fill:${conclusionColor}\n`;
+      }
+    }
+
+    return mermaid;
+  }
+
+  private scientificMethodToDOT(
+    thought: ScientificMethodThought,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let dot = 'digraph ScientificMethod {\n';
+    dot += '  rankdir=TD;\n';
+    dot += '  node [shape=box, style=rounded];\n\n';
+
+    // Research question
+    if (thought.researchQuestion) {
+      const label = includeLabels ? thought.researchQuestion.question.substring(0, 60) + '...' : 'RQ';
+      dot += `  RQ [label="Research Question:\\n${label}", shape=ellipse];\n\n`;
+    }
+
+    // Hypotheses
+    if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+      for (const hypothesis of thought.scientificHypotheses) {
+        const hypId = this.sanitizeId(hypothesis.id);
+        const label = includeLabels ? hypothesis.statement.substring(0, 50) + '...' : hypId;
+        dot += `  ${hypId} [label="Hypothesis:\\n${label}"];\n`;
+        if (thought.researchQuestion) {
+          dot += `  RQ -> ${hypId};\n`;
+        }
+      }
+      dot += '\n';
+    }
+
+    // Experiment
+    if (thought.experiment) {
+      const label = includeLabels ? thought.experiment.name : 'Exp';
+      dot += `  Exp [label="Experiment:\\n${label}"];\n`;
+      if (thought.scientificHypotheses) {
+        for (const hypothesis of thought.scientificHypotheses) {
+          const hypId = this.sanitizeId(hypothesis.id);
+          dot += `  ${hypId} -> Exp;\n`;
+        }
+      }
+      dot += '\n';
+    }
+
+    // Data and analysis
+    if (thought.dataCollection) {
+      const sampleLabel = includeMetrics ? `\\nSamples: ${thought.dataCollection.sampleSize}` : '';
+      dot += `  Data [label="Data Collection${sampleLabel}"];\n`;
+      if (thought.experiment) {
+        dot += `  Exp -> Data;\n`;
+      }
+    }
+
+    if (thought.statisticalAnalysis) {
+      dot += `  Stats [label="Statistical Analysis"];\n`;
+      if (thought.dataCollection) {
+        dot += `  Data -> Stats;\n`;
+      }
+    }
+
+    // Conclusion
+    if (thought.scientificConclusion) {
+      const label = includeLabels ? thought.scientificConclusion.finding.substring(0, 50) + '...' : 'Conclusion';
+      const confLabel = includeMetrics && thought.scientificConclusion.confidenceLevel
+        ? `\\nconf: ${thought.scientificConclusion.confidenceLevel.toFixed(2)}`
+        : '';
+      dot += `  Conclusion [label="Conclusion:\\n${label}${confLabel}", shape=doubleoctagon];\n`;
+      if (thought.statisticalAnalysis) {
+        dot += `  Stats -> Conclusion;\n`;
+      }
+    }
+
+    dot += '}\n';
+    return dot;
+  }
+
+  private scientificMethodToASCII(thought: ScientificMethodThought): string {
+    let ascii = 'Scientific Method Process:\n';
+    ascii += '==========================\n\n';
+
+    if (thought.researchQuestion) {
+      ascii += `Research Question: ${thought.researchQuestion.question}\n`;
+      ascii += `Background: ${thought.researchQuestion.background}\n\n`;
+    }
+
+    if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+      ascii += 'Hypotheses:\n';
+      for (const hypothesis of thought.scientificHypotheses) {
+        const typeIcon = hypothesis.type === 'null' ? 'H₀' : 'H₁';
+        ascii += `  ${typeIcon} ${hypothesis.statement}\n`;
+        if (hypothesis.prediction) {
+          ascii += `    Prediction: ${hypothesis.prediction}\n`;
+        }
+      }
+      ascii += '\n';
+    }
+
+    if (thought.experiment) {
+      ascii += `Experiment: ${thought.experiment.name}\n`;
+      ascii += `Type: ${thought.experiment.type}\n`;
+      ascii += `Design: ${thought.experiment.design}\n\n`;
+    }
+
+    if (thought.dataCollection) {
+      ascii += 'Data Collection:\n';
+      ascii += `  Sample Size: ${thought.dataCollection.sampleSize}\n`;
+      ascii += `  Method: ${thought.dataCollection.method}\n`;
+      if (thought.dataCollection.dataQuality) {
+        ascii += `  Quality:\n`;
+        ascii += `    Completeness: ${thought.dataCollection.dataQuality.completeness.toFixed(2)}\n`;
+        ascii += `    Reliability: ${thought.dataCollection.dataQuality.reliability.toFixed(2)}\n`;
+      }
+      ascii += '\n';
+    }
+
+    if (thought.statisticalAnalysis && thought.statisticalAnalysis.tests) {
+      ascii += 'Statistical Tests:\n';
+      for (const test of thought.statisticalAnalysis.tests) {
+        ascii += `  • ${test.name}\n`;
+        ascii += `    p-value: ${test.pValue.toFixed(4)}, α: ${test.alpha}\n`;
+        ascii += `    Result: ${test.result}\n`;
+      }
+      ascii += '\n';
+    }
+
+    if (thought.scientificConclusion) {
+      ascii += 'Conclusion:\n';
+      ascii += `${thought.scientificConclusion.finding}\n`;
+      ascii += `Support for hypothesis: ${thought.scientificConclusion.supportForHypothesis}\n`;
+      if (thought.scientificConclusion.confidenceLevel) {
+        ascii += `Confidence: ${thought.scientificConclusion.confidenceLevel.toFixed(2)}\n`;
+      }
+    }
+
+    return ascii;
+  }
+
+  // ===== Optimization Constraint Graph Exporters =====
+
+  /**
+   * Export optimization problem constraint graph to visual format
+   */
+  exportOptimizationSolution(thought: OptimizationThought, options: VisualExportOptions): string {
+    const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+
+    switch (format) {
+      case 'mermaid':
+        return this.optimizationToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      case 'dot':
+        return this.optimizationToDOT(thought, includeLabels, includeMetrics);
+      case 'ascii':
+        return this.optimizationToASCII(thought);
+      default:
+        throw new Error(`Unsupported format: ${format}`);
+    }
+  }
+
+  private optimizationToMermaid(
+    thought: OptimizationThought,
+    colorScheme: string,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let mermaid = 'graph TD\n';
+
+    // Problem definition
+    if (thought.optimizationProblem) {
+      const problemLabel = includeLabels
+        ? `Problem: ${thought.optimizationProblem.name}`
+        : 'Problem';
+      mermaid += `  Problem["${problemLabel}"]\n\n`;
+    }
+
+    // Decision variables
+    if (thought.decisionVariables && thought.decisionVariables.length > 0) {
+      mermaid += '  subgraph Variables["Decision Variables"]\n';
+      for (const variable of thought.decisionVariables) {
+        const varId = this.sanitizeId(variable.id);
+        const label = includeLabels ? variable.name : varId;
+        const domainLabel = includeMetrics && variable.domain
+          ? ` [${variable.domain.lowerBound},${variable.domain.upperBound}]`
+          : '';
+        mermaid += `    ${varId}["${label}${domainLabel}"]\n`;
+      }
+      mermaid += '  end\n\n';
+    }
+
+    // Constraints
+    if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+      mermaid += '  subgraph Constraints["Constraints"]\n';
+      for (const constraint of thought.optimizationConstraints) {
+        const constId = this.sanitizeId(constraint.id);
+        const label = includeLabels ? constraint.name : constId;
+        mermaid += `    ${constId}["${label}"]\n`;
+      }
+      mermaid += '  end\n\n';
+    }
+
+    // Objectives
+    if (thought.objectives && thought.objectives.length > 0) {
+      for (const objective of thought.objectives) {
+        const objId = this.sanitizeId(objective.id);
+        const label = includeLabels
+          ? `${objective.type}: ${objective.name}`
+          : objId;
+        mermaid += `  ${objId}["${label}"]\n`;
+      }
+      mermaid += '\n';
+    }
+
+    // Solution
+    if (thought.solution) {
+      const qualityLabel = includeMetrics && thought.solution.quality
+        ? ` (quality: ${thought.solution.quality.toFixed(2)})`
+        : '';
+      mermaid += `  Solution["Solution${qualityLabel}"]\n`;
+      if (thought.objectives) {
+        for (const objective of thought.objectives) {
+          const objId = this.sanitizeId(objective.id);
+          mermaid += `  ${objId} --> Solution\n`;
+        }
+      }
+    }
+
+    // Add styling
+    if (colorScheme !== 'monochrome') {
+      mermaid += '\n';
+      const solutionColor = colorScheme === 'pastel' ? '#e8f5e9' : '#a5d6a7';
+      if (thought.solution) {
+        mermaid += `  style Solution fill:${solutionColor}\n`;
+      }
+    }
+
+    return mermaid;
+  }
+
+  private optimizationToDOT(
+    thought: OptimizationThought,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let dot = 'digraph Optimization {\n';
+    dot += '  rankdir=TD;\n';
+    dot += '  node [shape=box, style=rounded];\n\n';
+
+    // Problem
+    if (thought.optimizationProblem) {
+      const label = includeLabels ? thought.optimizationProblem.name : 'Problem';
+      dot += `  Problem [label="Problem:\\n${label}", shape=ellipse];\n\n`;
+    }
+
+    // Variables
+    if (thought.decisionVariables && thought.decisionVariables.length > 0) {
+      dot += '  subgraph cluster_variables {\n';
+      dot += '    label="Decision Variables";\n';
+      for (const variable of thought.decisionVariables) {
+        const varId = this.sanitizeId(variable.id);
+        const label = includeLabels ? variable.name : varId;
+        const domainLabel = includeMetrics && variable.domain
+          ? `\\n[${variable.domain.lowerBound}, ${variable.domain.upperBound}]`
+          : '';
+        dot += `    ${varId} [label="${label}${domainLabel}"];\n`;
+      }
+      dot += '  }\n\n';
+    }
+
+    // Constraints
+    if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+      dot += '  subgraph cluster_constraints {\n';
+      dot += '    label="Constraints";\n';
+      for (const constraint of thought.optimizationConstraints) {
+        const constId = this.sanitizeId(constraint.id);
+        const label = includeLabels ? constraint.name : constId;
+        dot += `    ${constId} [label="${label}", shape=diamond];\n`;
+      }
+      dot += '  }\n\n';
+    }
+
+    // Objectives and solution
+    if (thought.objectives) {
+      for (const objective of thought.objectives) {
+        const objId = this.sanitizeId(objective.id);
+        const label = includeLabels ? `${objective.type}:\\n${objective.name}` : objId;
+        dot += `  ${objId} [label="${label}"];\n`;
+      }
+    }
+
+    if (thought.solution) {
+      const qualityLabel = includeMetrics && thought.solution.quality
+        ? `\\nquality: ${thought.solution.quality.toFixed(2)}`
+        : '';
+      dot += `  Solution [label="Solution${qualityLabel}", shape=doubleoctagon, style=filled, fillcolor=lightgreen];\n`;
+      if (thought.objectives) {
+        for (const objective of thought.objectives) {
+          const objId = this.sanitizeId(objective.id);
+          dot += `  ${objId} -> Solution;\n`;
+        }
+      }
+    }
+
+    dot += '}\n';
+    return dot;
+  }
+
+  private optimizationToASCII(thought: OptimizationThought): string {
+    let ascii = 'Optimization Problem:\n';
+    ascii += '====================\n\n';
+
+    if (thought.optimizationProblem) {
+      ascii += `Problem: ${thought.optimizationProblem.name}\n`;
+      ascii += `Type: ${thought.optimizationProblem.type}\n`;
+      ascii += `${thought.optimizationProblem.description}\n\n`;
+    }
+
+    if (thought.decisionVariables && thought.decisionVariables.length > 0) {
+      ascii += 'Decision Variables:\n';
+      for (const variable of thought.decisionVariables) {
+        ascii += `  ${variable.name} (${variable.variableType})\n`;
+        if (variable.domain) {
+          ascii += `    Domain: [${variable.domain.lowerBound}, ${variable.domain.upperBound}]\n`;
+        }
+      }
+      ascii += '\n';
+    }
+
+    if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+      ascii += 'Constraints:\n';
+      for (const constraint of thought.optimizationConstraints) {
+        ascii += `  ${constraint.name} (${constraint.type})\n`;
+        ascii += `    ${constraint.formula}\n`;
+      }
+      ascii += '\n';
+    }
+
+    if (thought.objectives && thought.objectives.length > 0) {
+      ascii += 'Objectives:\n';
+      for (const objective of thought.objectives) {
+        ascii += `  ${objective.type.toUpperCase()}: ${objective.name}\n`;
+        ascii += `    ${objective.formula}\n`;
+      }
+      ascii += '\n';
+    }
+
+    if (thought.solution) {
+      ascii += 'Solution:\n';
+      ascii += `  Status: ${thought.solution.status}\n`;
+      if (thought.solution.optimalValue !== undefined) {
+        ascii += `  Optimal Value: ${thought.solution.optimalValue}\n`;
+      }
+      if (thought.solution.quality !== undefined) {
+        ascii += `  Quality: ${thought.solution.quality.toFixed(2)}\n`;
+      }
+      if (thought.solution.assignments) {
+        ascii += '  Assignments:\n';
+        for (const [varId, value] of Object.entries(thought.solution.assignments)) {
+          ascii += `    ${varId} = ${value}\n`;
+        }
+      }
+    }
+
+    return ascii;
+  }
+
+  // ===== Formal Logic Proof Tree Exporters =====
+
+  /**
+   * Export formal logic proof tree to visual format
+   */
+  exportFormalLogicProof(thought: FormalLogicThought, options: VisualExportOptions): string {
+    const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+
+    switch (format) {
+      case 'mermaid':
+        return this.formalLogicToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      case 'dot':
+        return this.formalLogicToDOT(thought, includeLabels, includeMetrics);
+      case 'ascii':
+        return this.formalLogicToASCII(thought);
+      default:
+        throw new Error(`Unsupported format: ${format}`);
+    }
+  }
+
+  private formalLogicToMermaid(
+    thought: FormalLogicThought,
+    colorScheme: string,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let mermaid = 'graph TD\n';
+
+    // Add propositions
+    if (thought.propositions && thought.propositions.length > 0) {
+      mermaid += '  subgraph Propositions["Propositions"]\n';
+      for (const proposition of thought.propositions) {
+        const propId = this.sanitizeId(proposition.id);
+        const label = includeLabels
+          ? `${proposition.symbol}: ${proposition.statement.substring(0, 40)}...`
+          : proposition.symbol;
+        const shape = proposition.type === 'atomic' ? ['[', ']'] : ['[[', ']]'];
+        mermaid += `    ${propId}${shape[0]}${label}${shape[1]}\n`;
+      }
+      mermaid += '  end\n\n';
+    }
+
+    // Add proof steps if available
+    if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
+      mermaid += '  Theorem["Theorem"]\n';
+
+      for (const step of thought.proof.steps) {
+        const stepId = `Step${step.stepNumber}`;
+        const label = includeLabels
+          ? `${step.stepNumber}. ${step.statement.substring(0, 40)}...`
+          : `Step ${step.stepNumber}`;
+
+        mermaid += `  ${stepId}["${label}"]\n`;
+
+        // Connect referenced steps
+        if (step.referencesSteps && step.referencesSteps.length > 0) {
+          for (const refStep of step.referencesSteps) {
+            mermaid += `  Step${refStep} --> ${stepId}\n`;
+          }
+        }
+      }
+
+      // Connect last step to theorem
+      const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
+      mermaid += `  Step${lastStep.stepNumber} --> Theorem\n`;
+
+      // Add completeness metric
+      if (includeMetrics) {
+        const completeness = (thought.proof.completeness * 100).toFixed(0);
+        mermaid += `\n  Completeness["Completeness: ${completeness}%"]\n`;
+        mermaid += `  Completeness -.-> Theorem\n`;
+      }
+    }
+
+    // Add inferences
+    if (thought.logicalInferences && thought.logicalInferences.length > 0) {
+      mermaid += '\n';
+      for (const inference of thought.logicalInferences) {
+        const infId = this.sanitizeId(inference.id);
+        const label = includeLabels ? inference.rule : infId;
+
+        mermaid += `  ${infId}{{"${label}"}}\n`;
+
+        // Connect premises to inference
+        if (inference.premises) {
+          for (const premiseId of inference.premises) {
+            const propId = this.sanitizeId(premiseId);
+            mermaid += `  ${propId} --> ${infId}\n`;
+          }
+        }
+
+        // Connect inference to conclusion
+        const conclusionId = this.sanitizeId(inference.conclusion);
+        mermaid += `  ${infId} --> ${conclusionId}\n`;
+      }
+    }
+
+    // Add styling
+    if (colorScheme !== 'monochrome') {
+      mermaid += '\n';
+      const atomicColor = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
+      const compoundColor = colorScheme === 'pastel' ? '#fff3e0' : '#ffd699';
+
+      if (thought.propositions) {
+        for (const proposition of thought.propositions) {
+          const propId = this.sanitizeId(proposition.id);
+          const color = proposition.type === 'atomic' ? atomicColor : compoundColor;
+          mermaid += `  style ${propId} fill:${color}\n`;
+        }
+      }
+    }
+
+    return mermaid;
+  }
+
+  private formalLogicToDOT(
+    thought: FormalLogicThought,
+    includeLabels: boolean,
+    includeMetrics: boolean
+  ): string {
+    let dot = 'digraph FormalLogic {\n';
+    dot += '  rankdir=TD;\n';
+    dot += '  node [shape=box, style=rounded];\n\n';
+
+    // Add propositions
+    if (thought.propositions && thought.propositions.length > 0) {
+      dot += '  subgraph cluster_propositions {\n';
+      dot += '    label="Propositions";\n';
+      for (const proposition of thought.propositions) {
+        const propId = this.sanitizeId(proposition.id);
+        const label = includeLabels
+          ? `${proposition.symbol}:\\n${proposition.statement.substring(0, 40)}...`
+          : proposition.symbol;
+        const shape = proposition.type === 'atomic' ? 'ellipse' : 'box';
+        dot += `    ${propId} [label="${label}", shape=${shape}];\n`;
+      }
+      dot += '  }\n\n';
+    }
+
+    // Add proof steps
+    if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
+      dot += `  Theorem [label="Theorem:\\n${thought.proof.theorem.substring(0, 50)}...", shape=doubleoctagon, style=bold];\n\n`;
+
+      for (const step of thought.proof.steps) {
+        const stepId = `Step${step.stepNumber}`;
+        const label = includeLabels
+          ? `${step.stepNumber}. ${step.statement.substring(0, 40)}...`
+          : `Step ${step.stepNumber}`;
+        const ruleLabel = step.rule ? `\\n(${step.rule})` : '';
+
+        dot += `  ${stepId} [label="${label}${ruleLabel}"];\n`;
+
+        if (step.referencesSteps) {
+          for (const refStep of step.referencesSteps) {
+            dot += `  Step${refStep} -> ${stepId};\n`;
+          }
+        }
+      }
+
+      const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
+      dot += `  Step${lastStep.stepNumber} -> Theorem;\n`;
+
+      if (includeMetrics) {
+        const completeness = (thought.proof.completeness * 100).toFixed(0);
+        dot += `\n  Completeness [label="Completeness: ${completeness}%", shape=note];\n`;
+      }
+    }
+
+    // Add inferences
+    if (thought.logicalInferences && thought.logicalInferences.length > 0) {
+      dot += '\n';
+      for (const inference of thought.logicalInferences) {
+        const infId = this.sanitizeId(inference.id);
+        const label = includeLabels ? inference.rule : infId;
+
+        dot += `  ${infId} [label="${label}", shape=diamond];\n`;
+
+        if (inference.premises) {
+          for (const premiseId of inference.premises) {
+            const propId = this.sanitizeId(premiseId);
+            dot += `  ${propId} -> ${infId};\n`;
+          }
+        }
+
+        const conclusionId = this.sanitizeId(inference.conclusion);
+        dot += `  ${infId} -> ${conclusionId};\n`;
+      }
+    }
+
+    dot += '}\n';
+    return dot;
+  }
+
+  private formalLogicToASCII(thought: FormalLogicThought): string {
+    let ascii = 'Formal Logic Proof:\n';
+    ascii += '==================\n\n';
+
+    if (thought.propositions && thought.propositions.length > 0) {
+      ascii += 'Propositions:\n';
+      for (const proposition of thought.propositions) {
+        const typeMarker = proposition.type === 'atomic' ? '●' : '◆';
+        ascii += `  ${typeMarker} ${proposition.symbol}: ${proposition.statement}\n`;
+      }
+      ascii += '\n';
+    }
+
+    if (thought.logicalInferences && thought.logicalInferences.length > 0) {
+      ascii += 'Inferences:\n';
+      for (const inference of thought.logicalInferences) {
+        ascii += `  [${inference.rule}]\n`;
+        ascii += `    Premises: ${inference.premises.join(', ')}\n`;
+        ascii += `    Conclusion: ${inference.conclusion}\n`;
+        ascii += `    Valid: ${inference.valid ? '✓' : '✗'}\n`;
+      }
+      ascii += '\n';
+    }
+
+    if (thought.proof) {
+      ascii += `Proof: ${thought.proof.theorem}\n`;
+      ascii += `Technique: ${thought.proof.technique}\n`;
+      ascii += `Completeness: ${(thought.proof.completeness * 100).toFixed(0)}%\n\n`;
+
+      if (thought.proof.steps && thought.proof.steps.length > 0) {
+        ascii += 'Proof Steps:\n';
+        for (const step of thought.proof.steps) {
+          ascii += `  ${step.stepNumber}. ${step.statement}\n`;
+          ascii += `     Justification: ${step.justification}\n`;
+        }
+        ascii += '\n';
+      }
+
+      ascii += `Conclusion: ${thought.proof.conclusion}\n`;
+      ascii += `Valid: ${thought.proof.valid ? '✓' : '✗'}\n`;
+    }
+
+    if (thought.truthTable) {
+      ascii += '\nTruth Table:\n';
+      ascii += `  Tautology: ${thought.truthTable.isTautology ? '✓' : '✗'}\n`;
+      ascii += `  Contradiction: ${thought.truthTable.isContradiction ? '✓' : '✗'}\n`;
+      ascii += `  Contingent: ${thought.truthTable.isContingent ? '✓' : '✗'}\n`;
     }
 
     return ascii;

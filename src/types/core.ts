@@ -1,7 +1,8 @@
 /**
- * Core type definitions for the DeepThinking MCP server v3.1.0
- * Supports 14 thinking modes: Sequential, Shannon, Mathematics, Physics, Hybrid,
- * Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory, Evidential, FirstPrinciples
+ * Core type definitions for the DeepThinking MCP server v3.2.0
+ * Supports 18 thinking modes: Sequential, Shannon, Mathematics, Physics, Hybrid,
+ * Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory, Evidential, FirstPrinciples,
+ * SystemsThinking, ScientificMethod, Optimization, FormalLogic
  */
 
 // Import Phase 3 mode types
@@ -9,6 +10,12 @@ import type { TemporalThought } from './modes/temporal.js';
 import type { GameTheoryThought } from './modes/gametheory.js';
 import type { EvidentialThought } from './modes/evidential.js';
 import type { FirstPrinciplesThought } from './modes/firstprinciples.js';
+
+// Import Phase 4 mode types (v3.2.0)
+import type { SystemsThinkingThought } from './modes/systemsthinking.js';
+import type { ScientificMethodThought } from './modes/scientificmethod.js';
+import type { OptimizationThought } from './modes/optimization.js';
+import type { FormalLogicThought } from './modes/formallogic.js';
 
 /**
  * Available thinking modes
@@ -28,6 +35,10 @@ export enum ThinkingMode {
   GAMETHEORY = 'gametheory', // Phase 3 (v2.2)
   EVIDENTIAL = 'evidential', // Phase 3 (v2.3)
   FIRSTPRINCIPLES = 'firstprinciples', // Phase 3 (v3.1.0)
+  SYSTEMSTHINKING = 'systemsthinking', // Phase 4 (v3.2.0)
+  SCIENTIFICMETHOD = 'scientificmethod', // Phase 4 (v3.2.0)
+  OPTIMIZATION = 'optimization', // Phase 4 (v3.2.0)
+  FORMALLOGIC = 'formallogic', // Phase 4 (v3.2.0)
   CUSTOM = 'custom'
 }
 
@@ -656,7 +667,11 @@ export type Thought =
   | TemporalThought
   | GameTheoryThought
   | EvidentialThought
-  | FirstPrinciplesThought;
+  | FirstPrinciplesThought
+  | SystemsThinkingThought
+  | ScientificMethodThought
+  | OptimizationThought
+  | FormalLogicThought;
 
 // ========== TYPE GUARDS ==========
 
@@ -725,5 +740,27 @@ export function isFirstPrinciplesThought(thought: Thought): thought is FirstPrin
   return thought.mode === ThinkingMode.FIRSTPRINCIPLES;
 }
 
+/**
+ * Type guards for Phase 4 modes (v3.2.0)
+ */
+export function isSystemsThinkingThought(thought: Thought): thought is SystemsThinkingThought {
+  return thought.mode === ThinkingMode.SYSTEMSTHINKING;
+}
+
+export function isScientificMethodThought(thought: Thought): thought is ScientificMethodThought {
+  return thought.mode === ThinkingMode.SCIENTIFICMETHOD;
+}
+
+export function isOptimizationThought(thought: Thought): thought is OptimizationThought {
+  return thought.mode === ThinkingMode.OPTIMIZATION;
+}
+
+export function isFormalLogicThought(thought: Thought): thought is FormalLogicThought {
+  return thought.mode === ThinkingMode.FORMALLOGIC;
+}
+
 // Re-export Phase 3 types
 export type { TemporalThought, GameTheoryThought, EvidentialThought, FirstPrinciplesThought };
+
+// Re-export Phase 4 types
+export type { SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought };

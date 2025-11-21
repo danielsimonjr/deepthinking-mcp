@@ -1,10 +1,10 @@
-# DeepThinking MCP v3.1.0
+# DeepThinking MCP v3.2.0
 
-A comprehensive Model Context Protocol (MCP) server featuring **13 specialized reasoning modes** with intelligent mode recommendation, universal LaTeX and diagram support, high-performance validation caching, comprehensive testing, and automated CI/CD for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **17 specialized reasoning modes** with intelligent mode recommendation, universal LaTeX and diagram support, high-performance validation caching, comprehensive testing, and automated CI/CD for complex problem-solving, analysis, and decision-making.
 
 ## Overview
 
-DeepThinking MCP v3.1 provides a complete toolkit for structured reasoning with 13 specialized modes, an intelligent recommendation system, powerful visual export capabilities with **100% coverage** (all modes support LaTeX and/or diagrams), and optimized performance through validation caching:
+DeepThinking MCP v3.2 provides a complete toolkit for structured reasoning with 17 specialized modes, an intelligent recommendation system, powerful visual export capabilities with **100% coverage** (all modes support LaTeX and/or diagrams), and optimized performance through validation caching:
 
 ### Core Modes
 - **Sequential**: Iterative refinement with revision capabilities
@@ -25,9 +25,15 @@ n### Phase 3 Modes (v2.3+)
 - **Evidential**: Dempster-Shafer theory, belief functions, evidence combination, uncertainty intervals
 - **First-Principles**: Deductive reasoning from foundational axioms and principles
 
+### Phase 4 Modes (v3.2.0)
+- **Systems Thinking**: System dynamics, feedback loops (reinforcing/balancing), stocks and flows, leverage points, emergent behavior analysis
+- **Scientific Method**: Hypothesis-driven experimentation, research questions, experiment design, data collection, statistical analysis, p-values and confidence intervals
+- **Optimization**: Constraint satisfaction, decision variables, objective functions (minimize/maximize), linear/nonlinear programming, solution quality analysis
+- **Formal Logic**: Propositional and predicate logic, logical proofs, inference rules, truth tables, satisfiability checking, theorem proving
+
 ## Features
 
-### 13 Specialized Reasoning Modes
+### 17 Specialized Reasoning Modes
 
 #### Core Modes
 - **Sequential**: Iterative refinement with revision capabilities and branching
@@ -47,6 +53,12 @@ n#### Phase 3 Reasoning Modes (v2.3+)
 - **Game Theory**: Analyze strategic interactions between rational agents. Define games, players, and strategies. Compute Nash equilibria (pure and mixed), identify dominant strategies, construct payoff matrices, and build extensive-form game trees. Ideal for competitive analysis, mechanism design, and strategic decision-making.
 - **Evidential**: Apply Dempster-Shafer theory for reasoning with uncertain and incomplete evidence. Define hypotheses, collect evidence with reliability scores, assign belief functions with mass assignments, combine evidence using Dempster's rule, compute belief and plausibility intervals, and make decisions under uncertainty. Ideal for sensor fusion, diagnostic reasoning, intelligence analysis, and situations with incomplete information.
 - **First-Principles**: Derive conclusions from foundational axioms and principles using deductive reasoning. Define principles (axioms, definitions, observations), build derivation chains with logical inferences, track confidence levels, and reach conclusions with certainty analysis. Ideal for fundamental analysis, conceptual understanding, and reasoning from basic truths.
+
+#### Phase 4 Reasoning Modes (v3.2.0)
+- **Systems Thinking**: Analyze complex systems with interacting components and feedback loops. Model stocks (accumulations) and flows (rates of change), identify reinforcing and balancing feedback loops, discover leverage points for system intervention, and understand emergent behaviors. Includes system boundaries, component relationships, delays, and non-linear dynamics. Perfect for organizational design, policy analysis, ecosystem modeling, and understanding complex adaptive systems.
+- **Scientific Method**: Conduct rigorous hypothesis-driven experimentation and analysis. Formulate research questions, develop null and alternative hypotheses, design controlled experiments, define control/treatment groups, collect data with quality metrics, perform statistical tests (t-tests, ANOVA, chi-square), calculate p-values and confidence intervals, and draw evidence-based conclusions. Ideal for A/B testing, research design, experimental validation, and evidence-based decision-making.
+- **Optimization**: Solve constrained optimization problems. Define decision variables with domains and bounds, specify constraints (equality, inequality, bounds), formulate objective functions (minimize or maximize), support linear programming, non-linear programming, and multi-objective optimization. Analyze solution quality, perform sensitivity analysis, and identify binding constraints. Perfect for resource allocation, scheduling, portfolio optimization, and engineering design.
+- **Formal Logic**: Apply rigorous logical reasoning with formal proofs. Define atomic and compound propositions, construct logical formulas with operators (AND, OR, NOT, IMPLIES), apply inference rules (modus ponens, modus tollens, resolution), build proof steps with justifications, generate truth tables to verify tautologies/contradictions, check satisfiability (SAT/UNSAT), and prove theorems using various proof techniques (direct, contradiction, induction). Ideal for mathematical proofs, program verification, logical analysis, and rigorous argumentation.
 
 ### Mathematical Enhancements
 - **Symbolic computation** support with LaTeX and symbolic formats
@@ -196,7 +208,7 @@ Export your reasoning sessions as visual diagrams in multiple formats for presen
 
 #### Supported Modes
 
-**All 13 modes now support visual export (100% coverage):**
+**All 17 modes now support visual export (100% coverage):**
 
 **Advanced Visualization Modes** (Mermaid, DOT, ASCII diagram support):
 - **Causal Mode**: Export causal graphs showing cause-effect relationships with node types (causes, effects, mediators, confounders) and edge strengths. **NEW**: LaTeX formulas for causal relationships and mechanisms.
@@ -209,6 +221,11 @@ Export your reasoning sessions as visual diagrams in multiple formats for presen
 - **Counterfactual Mode** (**NEW**): Export scenario tree diagrams comparing actual vs. counterfactual outcomes
 - **Analogical Mode** (**NEW**): Export domain mapping diagrams showing source/target entity correspondences
 - **Evidential Mode** (**NEW**): Export belief function visualizations with frame of discernment and mass assignments
+- **First-Principles Mode** (**NEW**): Export derivation chain diagrams showing question → principles → steps → conclusion
+- **Systems Thinking Mode** (**NEW in v3.2**): Export causal loop diagrams showing stocks, flows, and feedback loops
+- **Scientific Method Mode** (**NEW in v3.2**): Export experiment flow diagrams from research question through analysis to conclusion
+- **Optimization Mode** (**NEW in v3.2**): Export constraint graphs showing variables, constraints, objectives, and solutions
+- **Formal Logic Mode** (**NEW in v3.2**): Export proof trees showing propositions, inferences, and proof steps
 
 **Text Export Modes** (JSON, Markdown, LaTeX, HTML, Jupyter):
 - **Mathematics Mode**: Full LaTeX mathematical notation for theorems, proofs, and symbolic computation
@@ -296,7 +313,7 @@ Visual exports work seamlessly with:
 - `thoughtNumber` (number, required): Position in sequence
 - `totalThoughts` (number, required): Estimated total thoughts needed
 - `nextThoughtNeeded` (boolean, required): Whether to continue thinking
-- `mode` (string, optional): `sequential`, `shannon`, `mathematics`, `physics`, `hybrid`, `abductive`, `causal`, `bayesian`, `counterfactual`, `analogical`, or `temporal`, `gametheory`, `evidential`, `firstprinciple` (default: `hybrid`)
+- `mode` (string, optional): `sequential`, `shannon`, `mathematics`, `physics`, `hybrid`, `abductive`, `causal`, `bayesian`, `counterfactual`, `analogical`, `temporal`, `gametheory`, `evidential`, `firstprinciples`, `systemsthinking`, `scientificmethod`, `optimization`, `formallogic` (default: `hybrid`)
 
 ### Mode-Specific Parameters
 
@@ -403,6 +420,38 @@ n#### First-Principles Mode
   - `certainty`: Overall certainty level (0-1)
   - `limitations`: Optional array of known limitations or assumptions
 - `alternativeInterpretations`: Optional array of other possible interpretations
+
+#### Systems Thinking Mode
+- `system`: System definition (id, name, description, boundary, timeHorizon)
+- `components`: Array of system components (stocks, flows, parameters, auxiliaries)
+- `feedbackLoops`: Feedback loops with type (reinforcing/balancing), components, strength, delay
+- `leveragePoints`: High-impact intervention points with effectiveness and difficulty ratings
+- `behaviors`: Emergent system behaviors (growth, decline, oscillation, equilibrium, chaos)
+- `interventions`: Proposed system interventions with expected effects
+- `delays`: Information and material delays affecting system dynamics
+
+#### Scientific Method Mode
+- `researchQuestion`: Research question with background and significance
+- `hypotheses`: Null and alternative hypotheses with predictions
+- `experiment`: Experiment design (name, type, design, variables, controls)
+- `dataCollection`: Sample size, method, sampling strategy, data quality metrics
+- `statisticalAnalysis`: Statistical tests (t-test, ANOVA, chi-square) with p-values, effect sizes
+- `scientificConclusion`: Finding, hypothesis support, confidence level, limitations, future work
+
+#### Optimization Mode
+- `optimizationProblem`: Problem definition (name, type, description, domain)
+- `decisionVariables`: Variables to optimize with domains, bounds, types (continuous/integer/binary)
+- `constraints`: Constraints (equality, inequality, bounds) with formulas
+- `objectives`: Objective functions (minimize/maximize) with weights for multi-objective problems
+- `solution`: Solution status, optimal value, quality, assignments, method used
+- `sensitivityAnalysis`: Sensitivity of solution to parameter changes
+
+#### Formal Logic Mode
+- `propositions`: Atomic and compound propositions with symbols and truth values
+- `inferences`: Logical inferences using rules (modus ponens, resolution, etc.)
+- `proof`: Logical proof with theorem, technique, steps, conclusion, validity, completeness
+- `truthTable`: Truth tables for formulas with tautology/contradiction/contingency analysis
+- `satisfiability`: SAT/UNSAT results with satisfying models or unsatisfiability proofs
 
 ### Actions
 - `add_thought` (default): Add a new thought to session
@@ -798,7 +847,12 @@ deepthinking-mcp/
 - ✅ First-Principles reasoning mode (v3.1.0)
 - ✅ Universal visual export support for all 14 modes (v3.1.0)
 
-### Phase 4 (Planned)
+### Phase 4 (In Progress - v3.2.0)
+- ✅ Systems Thinking mode - system dynamics and feedback loops (v3.2.0)
+- ✅ Scientific Method mode - hypothesis-driven experimentation (v3.2.0)
+- ✅ Optimization mode - constraint satisfaction and optimization (v3.2.0)
+- ✅ Formal Logic mode - propositional/predicate logic and proofs (v3.2.0)
+- ✅ Universal visual export support for all 17 modes (v3.2.0)
 - [ ] Math-MCP integration
 - [ ] Persistence layer
 - [ ] Collaborative thinking sessions
