@@ -157,3 +157,43 @@ export function sanitizeDomain(domain: string | undefined): string | undefined {
 export function sanitizeAuthor(author: string | undefined): string | undefined {
   return sanitizeOptionalString(author, MAX_LENGTHS.AUTHOR, 'author');
 }
+
+/**
+ * Escape HTML special characters to prevent XSS
+ * @param text - Text to escape
+ * @returns HTML-safe string
+ */
+export function escapeHtml(text: string): string {
+  const htmlEscapeMap: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+    '/': '&#x2F;',
+  };
+
+  return text.replace(/[&<>"'\/]/g, (char) => htmlEscapeMap[char] || char);
+}
+
+/**
+ * Escape LaTeX special characters to prevent injection
+ * @param text - Text to escape
+ * @returns LaTeX-safe string
+ */
+export function escapeLatex(text: string): string {
+  const latexEscapeMap: Record<string, string> = {
+    '\\': '\\textbackslash{}',
+    '{': '\\{',
+    '}': '\\}',
+    '$': '\\$',
+    '&': '\\&',
+    '%': '\\%',
+    '#': '\\#',
+    '_': '\\_',
+    '~': '\\textasciitilde{}',
+    '^': '\\textasciicircum{}',
+  };
+
+  return text.replace(/[\\{}$&%#_~^]/g, (char) => latexEscapeMap[char] || char);
+}
