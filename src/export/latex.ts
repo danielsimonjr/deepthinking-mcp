@@ -237,7 +237,7 @@ ${content}
       meta.push(`  \\item[Updated] ${this.formatDate(session.updatedAt)}`);
     }
 
-    if (this.options.includeMetrics) {
+    if (this.options.includeMetrics && session.metrics) {
       meta.push(`  \\item[Total Thoughts] ${session.metrics.totalThoughts}`);
       meta.push(`  \\item[Revisions] ${session.metrics.revisionCount}`);
       meta.push(`  \\item[Average Uncertainty] ${session.metrics.averageUncertainty.toFixed(3)}`);

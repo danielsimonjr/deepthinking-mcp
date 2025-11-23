@@ -117,6 +117,10 @@ export class VisualExporter {
     let mermaid = 'graph TB\n';
 
     // Add nodes with appropriate shapes
+    if (!thought.causalGraph || !thought.causalGraph.nodes) {
+      return mermaid + '  NoData["No causal graph data"]\n';
+    }
+
     for (const node of thought.causalGraph.nodes) {
       const nodeId = this.sanitizeId(node.id);
       const label = includeLabels ? node.name : nodeId;
