@@ -413,7 +413,7 @@ export class WebhookManager {
   /**
    * Get event for delivery (stub - should integrate with event storage)
    */
-  private async getEventForDelivery(eventId: string): Promise<WebhookEvent | null> {
+  private async getEventForDelivery(_eventId: string): Promise<WebhookEvent | null> {
     // In real implementation, this would fetch from event storage
     // For now, return null
     return null;

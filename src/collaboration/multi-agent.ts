@@ -515,7 +515,7 @@ export class MultiAgentCollaboration {
     totalMessages: number;
     unreadMessages: number;
     totalThoughts: number;
-    collaboration Duration: number; // in milliseconds
+    collaborationDuration: number; // in milliseconds
     agentDistribution: Map<AgentRole, number>;
     modeDistribution: Map<ThinkingMode, number>;
   } {

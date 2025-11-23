@@ -613,7 +613,6 @@ export class ConstraintReasoningEngine {
       }
 
       if (solution.objectiveValue !== undefined) {
-        report.push(`');
         report.push(`**Objective Value:** ${solution.objectiveValue}`);
       }
     } else {

@@ -355,8 +355,8 @@ export class ThoughtFlowVisualizer {
       const mode = this.formatModeName(thought.mode);
       report.push(`${prefix} **T${thought.thoughtNumber}** [${mode}]: ${this.truncate(thought.content, 60)}`);
 
-      if (thought.dependencies && thought.dependencies.length > 0) {
-        report.push(`  ↳ Depends on: ${thought.dependencies.join(', ')}`);
+      if ((thought as any).dependencies && (thought as any).dependencies.length > 0) {
+        report.push(`  ↳ Depends on: ${(thought as any).dependencies.join(", ")}`);
       }
     }
 
