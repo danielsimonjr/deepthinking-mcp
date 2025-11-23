@@ -109,8 +109,8 @@ export class ThoughtFlowVisualizer {
       }
 
       // Check for dependencies
-      if (thought.dependencies && thought.dependencies.length > 0) {
-        for (const depId of thought.dependencies) {
+      if ((thought as any).dependencies && (thought as any).dependencies.length > 0) {
+        for (const depId of (thought as any).dependencies) {
           interactions.push({
             from: modeName,
             to: 'System',
@@ -257,8 +257,8 @@ export class ThoughtFlowVisualizer {
 
     // Add dependency edges
     for (const thought of session.thoughts) {
-      if (thought.dependencies && thought.dependencies.length > 0) {
-        for (const depId of thought.dependencies) {
+      if ((thought as any).dependencies && (thought as any).dependencies.length > 0) {
+        for (const depId of (thought as any).dependencies) {
           edges.push({
             from: depId,
             to: `thought_${thought.thoughtNumber}`,

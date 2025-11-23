@@ -110,8 +110,8 @@ export class SearchEngine {
       resultIds = this.intersect(resultIds, countResults);
     }
 
-    if (query.isComplete !== undefined) {
-      const completedResults = this.index.filterByCompleted(query.isComplete);
+    if (query.completed !== undefined) {
+      const completedResults = this.index.filterByCompleted(query.completed);
       resultIds = this.intersect(resultIds, completedResults);
     }
 
@@ -357,7 +357,7 @@ export class SearchEngine {
       }
 
       for (let i = 0; i < session.thoughts.length; i++) {
-        const thoughtTokens = this.tokenizer.getUniqueTokens(session.thoughts[i].thought);
+        const thoughtTokens = this.tokenizer.getUniqueTokens(session.contents[i].thought);
         if (tokens.some(t => thoughtTokens.has(t))) {
           fields.push(`thought_${i}`);
           break; // Just indicate thoughts matched

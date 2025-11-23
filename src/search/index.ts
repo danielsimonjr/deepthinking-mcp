@@ -29,7 +29,7 @@ export class SearchIndex {
    */
   indexSession(session: ThinkingSession): void {
     // Extract all thought texts
-    const thoughtTexts = session.thoughts.map(t => t.thought);
+    const thoughtTexts = session.contents.map(t => t.thought);
     const allText = [session.title || '', ...thoughtTexts].join(' ');
 
     // Tokenize
