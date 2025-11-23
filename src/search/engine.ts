@@ -110,8 +110,8 @@ export class SearchEngine {
       resultIds = this.intersect(resultIds, countResults);
     }
 
-    if (query.completed !== undefined) {
-      const completedResults = this.index.filterByCompleted(query.completed);
+    if (query.isComplete !== undefined) {
+      const completedResults = this.index.filterByCompleted(query.isComplete);
       resultIds = this.intersect(resultIds, completedResults);
     }
 

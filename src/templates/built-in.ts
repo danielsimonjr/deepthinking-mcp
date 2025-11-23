@@ -417,7 +417,7 @@ export const BUILT_IN_TEMPLATES: SessionTemplate[] = [
     name: 'First Principles Learning',
     description: 'Deep understanding through first principles thinking',
     category: 'learning',
-    mode: ThinkingMode.FIRSTPRINCIPLE,
+    mode: ThinkingMode.FIRSTPRINCIPLES,
     difficulty: 'intermediate',
     estimatedTime: '20-40 minutes',
     tags: ['learning', 'first-principles', 'understanding'],
@@ -440,7 +440,7 @@ export const BUILT_IN_TEMPLATES: SessionTemplate[] = [
           number: 2,
           title: 'Break Down to Fundamentals',
           description: 'Identify the core principles',
-          mode: ThinkingMode.FIRSTPRINCIPLE,
+          mode: ThinkingMode.FIRSTPRINCIPLES,
           prompts: [
             'What are the most basic truths?',
             'What assumptions can be challenged?',

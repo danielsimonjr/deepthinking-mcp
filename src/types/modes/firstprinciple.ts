@@ -51,7 +51,7 @@ export interface Conclusion {
  * First-principles thought structure
  */
 export interface FirstPrincipleThought extends BaseThought {
-  mode: ThinkingMode.FIRSTPRINCIPLE;
+  mode: ThinkingMode.FIRSTPRINCIPLES
   question: string; // The question being answered
   principles: FirstPrinciple[]; // All principles used
   derivationSteps: DerivationStep[]; // Chain of reasoning

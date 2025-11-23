@@ -488,7 +488,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         decisions: input.decisions || [],
       } as unknown as EvidentialThought;
 
-    case 'firstprinciple':      return {        ...baseThought,        mode: ThinkingMode.FIRSTPRINCIPLE,        question: input.question || '',        principles: input.principles || [],        derivationSteps: input.derivationSteps || [],        conclusion: input.conclusion || { statement: '', derivationChain: [], certainty: 0 },        alternativeInterpretations: input.alternativeInterpretations || [],      } as unknown as FirstPrincipleThought;
+    case 'firstprinciple':      return {        ...baseThought,        mode: ThinkingMode.FIRSTPRINCIPLES,        question: input.question || '',        principles: input.principles || [],        derivationSteps: input.derivationSteps || [],        conclusion: input.conclusion || { statement: '', derivationChain: [], certainty: 0 },        alternativeInterpretations: input.alternativeInterpretations || [],      } as unknown as FirstPrincipleThought;
     case 'hybrid':
     default:
       return {

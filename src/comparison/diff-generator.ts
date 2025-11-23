@@ -186,10 +186,10 @@ export class DiffGenerator {
     }
 
     // Compare completion
-    if (sessionA.completed !== sessionB.completed) {
+    if (sessionA.isComplete !== sessionB.isComplete) {
       lines.push('## Completion Status');
-      lines.push(`- ${sessionA.completed ? 'Completed' : 'Incomplete'}`);
-      lines.push(`+ ${sessionB.completed ? 'Completed' : 'Incomplete'}`);
+      lines.push(`- ${sessionA.isComplete ? 'Completed' : 'Incomplete'}`);
+      lines.push(`+ ${sessionB.isComplete ? 'Completed' : 'Incomplete'}`);
       lines.push('');
     }
 
