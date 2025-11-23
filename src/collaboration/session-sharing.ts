@@ -4,7 +4,7 @@
  */
 
 import type { ThinkingSession, Thought } from '../types/index.js';
-import type { ThinkingMode } from '../modes/index.js';
+import type { ThinkingMode } from '../types/core.js';
 
 /**
  * Merge strategy for combining sessions
@@ -260,8 +260,7 @@ export class SessionSharingManager {
       title: `Merged: ${sessions.map(s => s.title).join(' + ')}`,
       thoughts: deduplicated,
       isComplete: sessions.every(s => s.isComplete),
-      created: new Date(Math.min(...sessions.map(s => s.created.getTime()))),
-      lastModified: new Date(),
+      createdAt: new Date(Math.min(...sessions.map(s => s.createdAt.getTime()))),
       metadata: {
         sources: sessions.map(s => s.id),
         mergeStrategy: strategy,
@@ -315,7 +314,7 @@ export class SessionSharingManager {
     }
 
     // Find duplicates
-    for (const [content, instances] of contentMap) {
+    for (const [_content, instances] of contentMap) {
       if (instances.length > 1) {
         conflicts.push({
           id: this.generateConflictId(),
@@ -486,7 +485,7 @@ export class SessionSharingManager {
   /**
    * Auto-resolve conflicts that can be automatically handled
    */
-  private autoResolveConflicts(conflicts: MergeConflict[], mergedSession: ThinkingSession): number {
+  private autoResolveConflicts(conflicts: MergeConflict[], _mergedSession: ThinkingSession): number {
     let resolved = 0;
 
     for (const conflict of conflicts) {

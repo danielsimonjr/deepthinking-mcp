@@ -22,7 +22,7 @@ export class GCSBackupProvider {
   async save(
     backupId: string,
     data: Buffer,
-    manifest: BackupManifest
+    _manifest: BackupManifest
   ): Promise<string> {
     // Stub implementation
     // In production, would use GCS SDK:
@@ -44,7 +44,7 @@ export class GCSBackupProvider {
   /**
    * Load backup from GCS
    */
-  async load(backupId: string): Promise<{
+  async load(_backupId: string): Promise<{
     data: Buffer;
     manifest: BackupManifest;
   }> {
@@ -73,7 +73,7 @@ export class GCSBackupProvider {
   /**
    * Check if backup exists in GCS
    */
-  async exists(backupId: string): Promise<boolean> {
+  async exists(_backupId: string): Promise<boolean> {
     // Stub implementation
     return false;
   }
@@ -81,7 +81,7 @@ export class GCSBackupProvider {
   /**
    * Get backup size
    */
-  async getSize(backupId: string): Promise<number> {
+  async getSize(_backupId: string): Promise<number> {
     // Stub implementation
     return 0;
   }

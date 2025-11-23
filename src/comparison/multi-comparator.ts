@@ -8,7 +8,7 @@ import type {
   SessionCluster,
   ComparisonResult,
 } from './types.js';
-import type { ThinkingSession } from '../types/core.js';
+import type { ThinkingSession } from '../types/session.js';
 import { SessionComparator } from './comparator.js';
 
 /**

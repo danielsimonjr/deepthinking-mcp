@@ -13,7 +13,7 @@ import type {
   SimilarityMetrics,
   ThoughtComparison,
 } from './types.js';
-import type { ThinkingSession } from '../types/core.js';
+import type { ThinkingSession } from '../types/session.js';
 
 /**
  * Session comparator for comparing two thinking sessions
@@ -69,14 +69,14 @@ export class SessionComparator {
     }
 
     // Compare completion status
-    if (sessionA.completed !== sessionB.completed) {
+    if (sessionA.isComplete !== sessionB.isComplete) {
       differences.push({
         type: 'completion',
         path: 'completed',
-        valueA: sessionA.completed,
-        valueB: sessionB.completed,
+        valueA: sessionA.isComplete,
+        valueB: sessionB.isComplete,
         severity: 'major',
-        description: `Completion status differs: ${sessionA.completed} vs ${sessionB.completed}`,
+        description: `Completion status differs: ${sessionA.isComplete} vs ${sessionB.isComplete}`,
       });
     }
 
@@ -317,7 +317,7 @@ export class SessionComparator {
     return {
       thoughtCountDiff: Math.abs(thoughtCountA - thoughtCountB),
       modesSame: sessionA.mode === sessionB.mode,
-      completionDiff: (sessionA.completed ? 1 : 0) - (sessionB.completed ? 1 : 0),
+      completionDiff: (sessionA.isComplete ? 1 : 0) - (sessionB.isComplete ? 1 : 0),
       averageConfidenceDiff: 0, // Placeholder
       taxonomySimilarity: 0.5, // Placeholder
       qualityScoreDiff: 0, // Placeholder
@@ -383,7 +383,7 @@ export class SessionComparator {
   /**
    * Compare individual thoughts
    */
-  compareThoughts(thoughtA: any, thoughtB: any): ThoughtComparison {
+  compareIndividualThoughts(thoughtA: any, thoughtB: any): ThoughtComparison {
     const contentA = this.extractThoughtContent(thoughtA);
     const contentB = this.extractThoughtContent(thoughtB);
 

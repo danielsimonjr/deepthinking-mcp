@@ -4,7 +4,7 @@
  */
 
 import type { ThinkingSession } from '../types/session.js';
-import type { Thought, MathematicsThought, PhysicsThought, CausalThought, BayesianThought, AnalogicalThought, TemporalThought, GameTheoryThought, EvidentialThought, FirstPrincipleThought } from '../types/index.js';
+import type { Thought, MathematicsThought, PhysicsThought, CausalThought, BayesianThought, AnalogicalThought, TemporalThought, GameTheoryThought, EvidentialThought, FirstPrinciplesThought } from '../types/index.js';
 import { VisualExporter } from './visual.js';
 
 /**
@@ -318,8 +318,8 @@ ${content}
       case 'evidential':
         sections.push(this.formatEvidentialThought(thought as EvidentialThought));
         break;
-      case 'firstprinciple':
-        sections.push(this.formatFirstPrincipleThought(thought as FirstPrincipleThought));
+      case 'firstprinciples':
+        sections.push(this.formatFirstPrinciplesThought(thought as FirstPrincipleThought));
         break;
       default:
         // Generic formatting for other modes

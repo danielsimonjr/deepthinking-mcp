@@ -4,7 +4,7 @@
  */
 
 import type { ThinkingSession, Thought } from '../types/index.js';
-import type { ThinkingMode } from '../modes/index.js';
+import type { ThinkingMode } from '../types/core.js';
 
 /**
  * Agent role in collaborative reasoning

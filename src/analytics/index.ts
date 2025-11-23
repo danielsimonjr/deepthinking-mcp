@@ -3,7 +3,8 @@
  * Phase 4 Task 9.2: Real-time analytics dashboard
  */
 
-export { AnalyticsEngine } from './engine.js';
+// TODO: Restore analytics engine after type fixes
+// export { AnalyticsEngine } from './engine.js';
 
 export type {
   AnalyticsDashboard,

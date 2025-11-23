@@ -10,7 +10,7 @@ import type {
   DivergencePoint,
   ConvergencePoint,
 } from './types.js';
-import type { ThinkingSession } from '../types/core.js';
+import type { ThinkingSession } from '../types/session.js';
 
 /**
  * Diff generator for creating detailed diffs

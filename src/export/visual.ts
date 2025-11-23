@@ -1157,8 +1157,8 @@ export class VisualExporter {
       }
 
       for (const entity of thought.targetDomain.entities) {
-        const entityId = this.sanitizeId('tgt_' + entity.id);
-        mermaid += `  style ${tgtId} fill:${tgtColor}\n`;
+        const _entityId = this.sanitizeId('tgt_' + entity.id);
+        mermaid += `  style ${_entityId} fill:${tgtColor}\n`;
       }
     }
 
@@ -1351,8 +1351,8 @@ export class VisualExporter {
       ascii += '\n';
     }
 
-    if (thought.beliefFunction) {
-      ascii += `Belief: ${thought.beliefFunction.toFixed(3)}\n`;
+    if (thought.beliefFunctions) {
+      ascii += `Belief: ${thought.beliefFunctions.toFixed(3)}\n`;
     }
 
     if (thought.plausibilityFunction) {
