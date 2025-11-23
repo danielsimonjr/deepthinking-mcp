@@ -1282,9 +1282,9 @@ export class VisualExporter {
     }
 
     // Add mass assignments
-    if (includeMetrics && thought.massAssignments && thought.massAssignments.length > 0) {
+    if (includeMetrics && (thought as any).massAssignments && (thought as any).massAssignments.length > 0) {
       mermaid += '\n';
-      for (const mass of thought.massAssignments) {
+      for (const mass of (thought as any).massAssignments) {
         const massId = this.sanitizeId(mass.subset.join('_'));
         const label = `{${mass.subset.join(', ')}}`;
         mermaid += `  ${massId}["${label}: ${mass.mass.toFixed(3)}"]\n`;
@@ -1323,9 +1323,9 @@ export class VisualExporter {
       dot += `  Frame -> ${hypId};\n`;
     }
 
-    if (includeMetrics && thought.massAssignments && thought.massAssignments.length > 0) {
+    if (includeMetrics && (thought as any).massAssignments && (thought as any).massAssignments.length > 0) {
       dot += '\n';
-      for (const mass of thought.massAssignments) {
+      for (const mass of (thought as any).massAssignments) {
         const massId = this.sanitizeId(mass.subset.join('_'));
         const label = `{${mass.subset.join(', ')}}: ${mass.mass.toFixed(3)}`;
         dot += `  ${massId} [label="${label}", shape=note];\n`;
@@ -1343,9 +1343,9 @@ export class VisualExporter {
     ascii += 'Frame of Discernment:\n';
     ascii += `  {${thought.frameOfDiscernment.join(', ')}}\n\n`;
 
-    if (thought.massAssignments && thought.massAssignments.length > 0) {
+    if ((thought as any).massAssignments && (thought as any).massAssignments.length > 0) {
       ascii += 'Mass Assignments:\n';
-      for (const mass of thought.massAssignments) {
+      for (const mass of (thought as any).massAssignments) {
         ascii += `  m({${mass.subset.join(', ')}}) = ${mass.mass.toFixed(3)}\n`;
       }
       ascii += '\n';
@@ -1355,8 +1355,8 @@ export class VisualExporter {
       ascii += `Belief: ${thought.beliefFunctions.toFixed(3)}\n`;
     }
 
-    if (thought.plausibilityFunction) {
-      ascii += `Plausibility: ${thought.plausibilityFunction.toFixed(3)}\n`;
+    if ((thought as any).plausibilityFunction) {
+      ascii += `Plausibility: ${(thought as any).plausibilityFunction.toFixed(3)}\n`;
     }
 
     return ascii;
@@ -1859,8 +1859,8 @@ export class VisualExporter {
     }
 
     // Data collection
-    if (thought.dataCollection) {
-      mermaid += `  Data["Data Collection: ${thought.dataCollection.sampleSize} samples"]\n`;
+    if (thought.data) {
+      mermaid += `  Data["Data Collection: ${thought.data.sampleSize} samples"]\n`;
       if (thought.experiment) {
         mermaid += `  Exp --> Data\n`;
       }
@@ -1868,22 +1868,22 @@ export class VisualExporter {
     }
 
     // Statistical analysis
-    if (thought.statisticalAnalysis) {
+    if (thought.analysis) {
       mermaid += `  Stats["Statistical Analysis"]\n`;
-      if (thought.dataCollection) {
+      if (thought.data) {
         mermaid += `  Data --> Stats\n`;
       }
       mermaid += '\n';
     }
 
     // Conclusion
-    if (thought.scientificConclusion) {
+    if (thought.conclusion) {
       const conclusionId = 'Conclusion';
-      const supportLabel = includeMetrics && thought.scientificConclusion.confidenceLevel
-        ? ` (conf: ${thought.scientificConclusion.confidenceLevel.toFixed(2)})`
+      const supportLabel = includeMetrics && thought.conclusion.confidenceLevel
+        ? ` (conf: ${thought.conclusion.confidenceLevel.toFixed(2)})`
         : '';
-      mermaid += `  ${conclusionId}["Conclusion: ${thought.scientificConclusion.finding.substring(0, 50)}...${supportLabel}"]\n`;
-      if (thought.statisticalAnalysis) {
+      mermaid += `  ${conclusionId}["Conclusion: ${thought.conclusion.finding.substring(0, 50)}...${supportLabel}"]\n`;
+      if (thought.analysis) {
         mermaid += `  Stats --> ${conclusionId}\n`;
       }
     }
@@ -1904,7 +1904,7 @@ export class VisualExporter {
           mermaid += `  style ${hypId} fill:${hypothesisColor}\n`;
         }
       }
-      if (thought.scientificConclusion) {
+      if (thought.conclusion) {
         mermaid += `  style Conclusion fill:${conclusionColor}\n`;
       }
     }
@@ -1954,29 +1954,29 @@ export class VisualExporter {
     }
 
     // Data and analysis
-    if (thought.dataCollection) {
-      const sampleLabel = includeMetrics ? `\\nSamples: ${thought.dataCollection.sampleSize}` : '';
+    if (thought.data) {
+      const sampleLabel = includeMetrics ? `\\nSamples: ${thought.data.sampleSize}` : '';
       dot += `  Data [label="Data Collection${sampleLabel}"];\n`;
       if (thought.experiment) {
         dot += `  Exp -> Data;\n`;
       }
     }
 
-    if (thought.statisticalAnalysis) {
+    if (thought.analysis) {
       dot += `  Stats [label="Statistical Analysis"];\n`;
-      if (thought.dataCollection) {
+      if (thought.data) {
         dot += `  Data -> Stats;\n`;
       }
     }
 
     // Conclusion
-    if (thought.scientificConclusion) {
-      const label = includeLabels ? thought.scientificConclusion.finding.substring(0, 50) + '...' : 'Conclusion';
-      const confLabel = includeMetrics && thought.scientificConclusion.confidenceLevel
-        ? `\\nconf: ${thought.scientificConclusion.confidenceLevel.toFixed(2)}`
+    if (thought.conclusion) {
+      const label = includeLabels ? thought.conclusion.finding.substring(0, 50) + '...' : 'Conclusion';
+      const confLabel = includeMetrics && thought.conclusion.confidenceLevel
+        ? `\\nconf: ${thought.conclusion.confidenceLevel.toFixed(2)}`
         : '';
       dot += `  Conclusion [label="Conclusion:\\n${label}${confLabel}", shape=doubleoctagon];\n`;
-      if (thought.statisticalAnalysis) {
+      if (thought.analysis) {
         dot += `  Stats -> Conclusion;\n`;
       }
     }
@@ -2012,21 +2012,21 @@ export class VisualExporter {
       ascii += `Design: ${thought.experiment.design}\n\n`;
     }
 
-    if (thought.dataCollection) {
+    if (thought.data) {
       ascii += 'Data Collection:\n';
-      ascii += `  Sample Size: ${thought.dataCollection.sampleSize}\n`;
-      ascii += `  Method: ${thought.dataCollection.method}\n`;
-      if (thought.dataCollection.dataQuality) {
+      ascii += `  Sample Size: ${thought.data.sampleSize}\n`;
+      ascii += `  Method: ${thought.data.method}\n`;
+      if (thought.data.dataQuality) {
         ascii += `  Quality:\n`;
-        ascii += `    Completeness: ${thought.dataCollection.dataQuality.completeness.toFixed(2)}\n`;
-        ascii += `    Reliability: ${thought.dataCollection.dataQuality.reliability.toFixed(2)}\n`;
+        ascii += `    Completeness: ${thought.data.dataQuality.completeness.toFixed(2)}\n`;
+        ascii += `    Reliability: ${thought.data.dataQuality.reliability.toFixed(2)}\n`;
       }
       ascii += '\n';
     }
 
-    if (thought.statisticalAnalysis && thought.statisticalAnalysis.tests) {
+    if (thought.analysis && thought.analysis.tests) {
       ascii += 'Statistical Tests:\n';
-      for (const test of thought.statisticalAnalysis.tests) {
+      for (const test of thought.analysis.tests) {
         ascii += `  • ${test.name}\n`;
         ascii += `    p-value: ${test.pValue.toFixed(4)}, α: ${test.alpha}\n`;
         ascii += `    Result: ${test.result}\n`;
@@ -2034,12 +2034,12 @@ export class VisualExporter {
       ascii += '\n';
     }
 
-    if (thought.scientificConclusion) {
+    if (thought.conclusion) {
       ascii += 'Conclusion:\n';
-      ascii += `${thought.scientificConclusion.finding}\n`;
-      ascii += `Support for hypothesis: ${thought.scientificConclusion.supportForHypothesis}\n`;
-      if (thought.scientificConclusion.confidenceLevel) {
-        ascii += `Confidence: ${thought.scientificConclusion.confidenceLevel.toFixed(2)}\n`;
+      ascii += `${thought.conclusion.finding}\n`;
+      ascii += `Support for hypothesis: ${thought.conclusion.supportForHypothesis}\n`;
+      if (thought.conclusion.confidenceLevel) {
+        ascii += `Confidence: ${thought.conclusion.confidenceLevel.toFixed(2)}\n`;
       }
     }
 
@@ -2075,17 +2075,17 @@ export class VisualExporter {
     let mermaid = 'graph TD\n';
 
     // Problem definition
-    if (thought.optimizationProblem) {
+    if (thought.problem) {
       const problemLabel = includeLabels
-        ? `Problem: ${thought.optimizationProblem.name}`
+        ? `Problem: ${thought.problem.name}`
         : 'Problem';
       mermaid += `  Problem["${problemLabel}"]\n\n`;
     }
 
     // Decision variables
-    if (thought.decisionVariables && thought.decisionVariables.length > 0) {
+    if (thought.variables && thought.variables.length > 0) {
       mermaid += '  subgraph Variables["Decision Variables"]\n';
-      for (const variable of thought.decisionVariables) {
+      for (const variable of thought.variables) {
         const varId = this.sanitizeId(variable.id);
         const label = includeLabels ? variable.name : varId;
         const domainLabel = includeMetrics && variable.domain
@@ -2155,16 +2155,16 @@ export class VisualExporter {
     dot += '  node [shape=box, style=rounded];\n\n';
 
     // Problem
-    if (thought.optimizationProblem) {
-      const label = includeLabels ? thought.optimizationProblem.name : 'Problem';
+    if (thought.problem) {
+      const label = includeLabels ? thought.problem.name : 'Problem';
       dot += `  Problem [label="Problem:\\n${label}", shape=ellipse];\n\n`;
     }
 
     // Variables
-    if (thought.decisionVariables && thought.decisionVariables.length > 0) {
+    if (thought.variables && thought.variables.length > 0) {
       dot += '  subgraph cluster_variables {\n';
       dot += '    label="Decision Variables";\n';
-      for (const variable of thought.decisionVariables) {
+      for (const variable of thought.variables) {
         const varId = this.sanitizeId(variable.id);
         const label = includeLabels ? variable.name : varId;
         const domainLabel = includeMetrics && variable.domain
@@ -2217,15 +2217,15 @@ export class VisualExporter {
     let ascii = 'Optimization Problem:\n';
     ascii += '====================\n\n';
 
-    if (thought.optimizationProblem) {
-      ascii += `Problem: ${thought.optimizationProblem.name}\n`;
-      ascii += `Type: ${thought.optimizationProblem.type}\n`;
-      ascii += `${thought.optimizationProblem.description}\n\n`;
+    if (thought.problem) {
+      ascii += `Problem: ${thought.problem.name}\n`;
+      ascii += `Type: ${thought.problem.type}\n`;
+      ascii += `${thought.problem.description}\n\n`;
     }
 
-    if (thought.decisionVariables && thought.decisionVariables.length > 0) {
+    if (thought.variables && thought.variables.length > 0) {
       ascii += 'Decision Variables:\n';
-      for (const variable of thought.decisionVariables) {
+      for (const variable of thought.variables) {
         ascii += `  ${variable.name} (${variable.variableType})\n`;
         if (variable.domain) {
           ascii += `    Domain: [${variable.domain.lowerBound}, ${variable.domain.upperBound}]\n`;
