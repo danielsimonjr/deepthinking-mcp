@@ -6,7 +6,7 @@
 import type { ThinkingSession, ThinkingMode } from '../types/index.js';
 import type { SearchIndexEntry, SearchStats } from './types.js';
 import { Tokenizer } from './tokenizer.js';
-import { TaxonomyClassifier } from '../taxonomy/classifier.js';
+// import { TaxonomyClassifier } from '../taxonomy/classifier.js'; // TODO: Implement taxonomy classifier
 
 /**
  * In-memory search index
@@ -14,13 +14,13 @@ import { TaxonomyClassifier } from '../taxonomy/classifier.js';
 export class SearchIndex {
   private index: Map<string, SearchIndexEntry>;
   private tokenizer: Tokenizer;
-  private classifier: TaxonomyClassifier;
+  // private classifier: TaxonomyClassifier;
   private lastIndexed: Date;
 
   constructor() {
     this.index = new Map();
     this.tokenizer = new Tokenizer();
-    this.classifier = new TaxonomyClassifier();
+    // this.classifier = new TaxonomyClassifier();
     this.lastIndexed = new Date();
   }
 
@@ -29,7 +29,7 @@ export class SearchIndex {
    */
   indexSession(session: ThinkingSession): void {
     // Extract all thought texts
-    const thoughtTexts = session.contents.map(t => t.thought);
+    const thoughtTexts = session.thoughts.map(t => t.content);
     const allText = [session.title || '', ...thoughtTexts].join(' ');
 
     // Tokenize
@@ -39,6 +39,8 @@ export class SearchIndex {
     const taxonomyCategories = new Set<string>();
     const taxonomyTypes = new Set<string>();
 
+    // TODO: Re-enable taxonomy classification when classifier is implemented
+    /*
     for (const thought of session.thoughts) {
       const classification = this.classifier.classifyThought(thought);
       taxonomyCategories.add(classification.primaryCategory);
@@ -48,6 +50,7 @@ export class SearchIndex {
         taxonomyTypes.add(type.id);
       }
     }
+    */
 
     // Create index entry
     const entry: SearchIndexEntry = {
