@@ -1,10 +1,10 @@
-# DeepThinking MCP v3.1.0
+# DeepThinking MCP v3.4.0
 
-A comprehensive Model Context Protocol (MCP) server featuring **14 advanced reasoning modes** with intelligent mode recommendation, visual export capabilities, high-performance validation caching, comprehensive testing, and automated CI/CD for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **18 advanced reasoning modes** with intelligent mode recommendation, visual export capabilities, high-performance validation caching, production-ready features, comprehensive testing, and automated CI/CD for complex problem-solving, analysis, and decision-making.
 
 ## Overview
 
-DeepThinking MCP v3.1 provides a complete toolkit for structured reasoning with 14 specialized modes, an intelligent recommendation system, powerful visual export capabilities, and optimized performance through validation caching:
+DeepThinking MCP v3.4 provides a complete toolkit for structured reasoning with 18 specialized modes, an intelligent recommendation system, powerful visual export capabilities, production-ready features (search, analytics, templates, batch processing, caching, webhooks, backup/restore), and optimized performance through validation caching:
 
 ### Core Modes
 - **Sequential**: Iterative refinement with revision capabilities
@@ -24,6 +24,12 @@ n### Phase 3 Modes (v2.3+)
 - **Game Theory**: Nash equilibria, strategic analysis, payoff matrices, dominant strategies, game trees
 - **Evidential**: Dempster-Shafer theory, belief functions, evidence combination, uncertainty intervals
 - **First-Principles**: Deductive reasoning from foundational axioms and principles
+
+### Phase 4 Modes (v3.2+) - Remote Contributions
+- **Systems Thinking**: Holistic analysis of complex systems, feedback loops, emergence, and interconnections
+- **Scientific Method**: Hypothesis-driven experimentation with research questions, experimental design, data collection, and statistical analysis
+- **Optimization**: Constraint satisfaction and optimization problems with decision variables, objectives, and solution search
+- **Formal Logic**: Rigorous logical reasoning with formal systems, inference rules, and proof verification
 
 ## Features
 
@@ -85,11 +91,28 @@ n#### Phase 3 Reasoning Modes (v2.3+)
 - **Modular Validator Architecture**: Clean separation of concerns with mode-specific validators
 - **Session Metrics**: Comprehensive performance tracking including cache statistics
 
+### Phase 4 Production Features (v3.4+)
+- **Search System**: Full-text search with TF-IDF scoring, faceted search, autocomplete, and advanced filtering
+- **Analytics Dashboard**: Real-time metrics, mode distribution, time series analysis, and quality tracking
+- **Template System**: 7 built-in templates for common workflows (problem-solving, research, design, proof, decision-making, learning, analysis)
+- **Batch Processing**: Parallel job execution for export, validation, analysis, and transformation tasks
+- **Rate Limiting**: 4-tier quota system with burst allowances for API protection
+- **Caching**: LRU/LFU/FIFO strategies for performance optimization
+- **Webhook System**: HTTP event notifications for session lifecycle events
+- **Backup & Restore**: Multi-provider backup with compression and integrity verification
+- **Comparison Tools**: Session diff, similarity analysis, and multi-session comparison
+
 ### Configuration Options
 ```javascript
 // Environment variables for performance tuning
 MCP_ENABLE_VALIDATION_CACHE=true     // Enable/disable caching (default: true)
 MCP_VALIDATION_CACHE_SIZE=1000        // Max cache entries (default: 1000)
+
+// Phase 4 feature configuration
+MCP_SEARCH_INDEX_SIZE=10000           // Max sessions in search index
+MCP_BATCH_CONCURRENCY=3               // Max concurrent batch jobs
+MCP_CACHE_STRATEGY='lru'              // Cache eviction policy (lru/lfu/fifo)
+MCP_BACKUP_PROVIDER='local'           // Backup provider (local/s3/gcs/azure)
 ```
 
 ## Installation
