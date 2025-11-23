@@ -29,7 +29,7 @@ export class StochasticValidator extends BaseValidator<Thought> {
         if (!dist.type) {
           issues.push({
             severity: 'warning',
-            thoughtNumber: thought.thoughtNumber,
+            thoughtNumber: thought.contentNumber,
             description: 'Probability distribution should specify type',
             suggestion: 'Specify distribution type (e.g., normal, uniform, exponential)',
             category: 'structural',
@@ -41,7 +41,7 @@ export class StochasticValidator extends BaseValidator<Thought> {
           if (dist.type === 'normal' && (!dist.parameters.mean || !dist.parameters.stddev)) {
             issues.push({
               severity: 'error',
-              thoughtNumber: thought.thoughtNumber,
+              thoughtNumber: thought.contentNumber,
               description: 'Normal distribution requires mean and stddev parameters',
               suggestion: 'Add mean and stddev to distribution parameters',
               category: 'structural',
@@ -59,16 +59,16 @@ export class StochasticValidator extends BaseValidator<Thought> {
       if (thought.uncertainty === 0) {
         issues.push({
           severity: 'warning',
-          thoughtNumber: thought.thoughtNumber,
+          thoughtNumber: thought.contentNumber,
           description: 'Stochastic reasoning usually involves non-zero uncertainty',
           suggestion: 'Consider quantifying the uncertainty in your stochastic process',
           category: 'logical',
         });
       }
-    } else if (thought.thoughtNumber > 1) {
+    } else if (thought.contentNumber > 1) {
       issues.push({
         severity: 'info',
-        thoughtNumber: thought.thoughtNumber,
+        thoughtNumber: thought.contentNumber,
         description: 'Consider adding uncertainty quantification',
         suggestion: 'Stochastic reasoning benefits from explicit uncertainty measures',
         category: 'structural',
@@ -82,13 +82,13 @@ export class StochasticValidator extends BaseValidator<Thought> {
     ];
 
     const hasStochasticContent = stochasticKeywords.some(keyword =>
-      thought.thought.toLowerCase().includes(keyword)
+      thought.content.toLowerCase().includes(keyword)
     );
 
     if (!hasStochasticContent) {
       issues.push({
         severity: 'info',
-        thoughtNumber: thought.thoughtNumber,
+        thoughtNumber: thought.contentNumber,
         description: 'Stochastic reasoning should discuss random processes or distributions',
         suggestion: 'Make explicit references to probability distributions or random variables',
         category: 'structural',

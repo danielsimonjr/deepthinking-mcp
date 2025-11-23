@@ -99,11 +99,11 @@ export class ThoughtFlowVisualizer {
       }
 
       // Check for branch points
-      if (thought.branchId) {
+      if ((thought as any).branchId) {
         interactions.push({
           from: 'System',
           to: modeName,
-          message: `Branch: ${thought.branchId}`,
+          message: `Branch: ${(thought as any).branchId}`,
           type: 'dotted',
         });
       }
@@ -197,7 +197,7 @@ export class ThoughtFlowVisualizer {
       let shape: string;
       if (thought.isRevision) {
         shape = 'hexagon';
-      } else if (thought.branchId) {
+      } else if ((thought as any).branchId) {
         shape = 'diamond';
       } else {
         shape = 'rectangle';
@@ -245,7 +245,7 @@ export class ThoughtFlowVisualizer {
       const next = session.thoughts[i + 1];
 
       const edgeType = current.nextThoughtNeeded ? 'solid' : 'dotted';
-      const label = next.isRevision ? 'Revise' : next.branchId ? 'Branch' : '';
+      const label = next.isRevision ? 'Revise' : (next as any).branchId ? 'Branch' : '';
 
       edges.push({
         from: `thought_${current.thoughtNumber}`,
@@ -338,7 +338,7 @@ export class ThoughtFlowVisualizer {
 
     // Flow statistics
     const revisions = session.thoughts.filter(t => t.isRevision).length;
-    const branches = session.thoughts.filter(t => t.branchId).length;
+    const branches = session.thoughts.filter(t => (t as any).branchId).length;
     const modesUsed = new Set(session.thoughts.map(t => t.mode)).size;
 
     report.push('## Flow Statistics');
@@ -351,7 +351,7 @@ export class ThoughtFlowVisualizer {
     // Thought progression
     report.push('## Thought Progression');
     for (const thought of session.thoughts) {
-      const prefix = thought.isRevision ? '🔄' : thought.branchId ? '🌿' : '→';
+      const prefix = thought.isRevision ? '🔄' : (thought as any).branchId ? '🌿' : '→';
       const mode = this.formatModeName(thought.mode);
       report.push(`${prefix} **T${thought.thoughtNumber}** [${mode}]: ${this.truncate(thought.content, 60)}`);
 

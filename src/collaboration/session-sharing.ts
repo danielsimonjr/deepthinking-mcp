@@ -417,8 +417,8 @@ export class SessionSharingManager {
       if (processed.has(thought.id)) return;
 
       // Process dependencies first
-      if (thought.dependencies) {
-        for (const depId of thought.dependencies) {
+      if ((thought as any).dependencies) {
+        for (const depId of (thought as any).dependencies) {
           const dep = allThoughts.find(t => t.id === depId);
           if (dep) {
             processThought(dep);

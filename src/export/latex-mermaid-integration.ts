@@ -198,19 +198,19 @@ ${mermaidCode.split('\n').map(line => `% ${line}`).join('\n')}
     if (thought.mode === 'causal' && 'graph' in thought) {
       mermaidCode = this.visualExporter.exportCausalGraph(thought as any, visualOptions);
       caption = 'Causal Graph';
-      label = `fig:causal-${thought.thoughtNumber}`;
+      label = `fig:causal-${thought.contentNumber}`;
     } else if (thought.mode === 'temporal' && 'timeline' in thought) {
       mermaidCode = this.visualExporter.exportTemporalTimeline(thought as any, visualOptions);
       caption = 'Temporal Timeline';
-      label = `fig:temporal-${thought.thoughtNumber}`;
+      label = `fig:temporal-${thought.contentNumber}`;
     } else if (thought.mode === 'gametheory' && 'gameTree' in thought) {
       mermaidCode = this.visualExporter.exportGameTree(thought as any, visualOptions);
       caption = 'Game Theory Tree';
-      label = `fig:gametheory-${thought.thoughtNumber}`;
+      label = `fig:gametheory-${thought.contentNumber}`;
     } else if (thought.mode === 'bayesian' && 'network' in thought) {
       mermaidCode = this.visualExporter.exportBayesianNetwork(thought as any, visualOptions);
       caption = 'Bayesian Network';
-      label = `fig:bayesian-${thought.thoughtNumber}`;
+      label = `fig:bayesian-${thought.contentNumber}`;
     } else {
       return ''; // No diagram for this thought type
     }
@@ -258,16 +258,16 @@ ${mermaidCode.split('\n').map(line => `% ${line}`).join('\n')}
 
       if (thought.mode === 'causal' && 'graph' in thought) {
         mermaidCode = this.visualExporter.exportCausalGraph(thought as any, visualOptions);
-        sections.push(`\\subsection*{Thought ${thought.thoughtNumber}: Causal Graph}`);
+        sections.push(`\\subsection*{Thought ${thought.contentNumber}: Causal Graph}`);
       } else if (thought.mode === 'temporal' && 'timeline' in thought) {
         mermaidCode = this.visualExporter.exportTemporalTimeline(thought as any, visualOptions);
-        sections.push(`\\subsection*{Thought ${thought.thoughtNumber}: Temporal Timeline}`);
+        sections.push(`\\subsection*{Thought ${thought.contentNumber}: Temporal Timeline}`);
       } else if (thought.mode === 'gametheory' && 'gameTree' in thought) {
         mermaidCode = this.visualExporter.exportGameTree(thought as any, visualOptions);
-        sections.push(`\\subsection*{Thought ${thought.thoughtNumber}: Game Theory Tree}`);
+        sections.push(`\\subsection*{Thought ${thought.contentNumber}: Game Theory Tree}`);
       } else if (thought.mode === 'bayesian' && 'network' in thought) {
         mermaidCode = this.visualExporter.exportBayesianNetwork(thought as any, visualOptions);
-        sections.push(`\\subsection*{Thought ${thought.thoughtNumber}: Bayesian Network}`);
+        sections.push(`\\subsection*{Thought ${thought.contentNumber}: Bayesian Network}`);
       }
 
       if (mermaidCode) {
@@ -319,9 +319,9 @@ ${mermaidCode.split('\n').map(line => `% ${line}`).join('\n')}
     doc.push('');
 
     for (const thought of session.thoughts) {
-      doc.push(`\\subsection{Thought ${thought.thoughtNumber}}`);
+      doc.push(`\\subsection{Thought ${thought.contentNumber}}`);
       doc.push('');
-      doc.push(thought.thought);
+      doc.push(thought.content);
       doc.push('');
 
       // Add diagram if applicable

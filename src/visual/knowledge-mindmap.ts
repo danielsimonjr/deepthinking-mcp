@@ -164,7 +164,7 @@ export class KnowledgeMindMapGenerator {
 
     for (const thought of thoughts) {
       // Extract from thought content (simplified)
-      const words = thought.thought.split(/\s+/);
+      const words = thought.content.split(/\s+/);
 
       // Look for capitalized words or important terms
       for (const word of words) {

@@ -25,7 +25,7 @@ export class ConstraintValidator extends BaseValidator<Thought> {
       if (thought.constraints.length === 0) {
         issues.push({
           severity: 'warning',
-          thoughtNumber: thought.thoughtNumber,
+          thoughtNumber: thought.contentNumber,
           description: 'Constraint-based reasoning should define constraints',
           suggestion: 'Add constraints array with problem constraints',
           category: 'structural',
@@ -37,7 +37,7 @@ export class ConstraintValidator extends BaseValidator<Thought> {
         if (!constraint.description && !constraint.type) {
           issues.push({
             severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
+            thoughtNumber: thought.contentNumber,
             description: 'Each constraint should have a description or type',
             suggestion: 'Provide clear constraint specifications',
             category: 'structural',
@@ -49,13 +49,13 @@ export class ConstraintValidator extends BaseValidator<Thought> {
     // Check for constraint-related keywords
     const constraintKeywords = ['constraint', 'satisfy', 'violate', 'requirement', 'condition', 'limit'];
     const hasConstraintContent = constraintKeywords.some(keyword =>
-      thought.thought.toLowerCase().includes(keyword)
+      thought.content.toLowerCase().includes(keyword)
     );
 
     if (!hasConstraintContent) {
       issues.push({
         severity: 'info',
-        thoughtNumber: thought.thoughtNumber,
+        thoughtNumber: thought.contentNumber,
         description: 'Constraint-based reasoning typically discusses constraints explicitly',
         suggestion: 'Consider making explicit references to constraints being satisfied or violated',
         category: 'structural',
@@ -63,15 +63,15 @@ export class ConstraintValidator extends BaseValidator<Thought> {
     }
 
     // Check for solution validation
-    if ('solution' in thought && thought.thoughtNumber > 1) {
-      const hasSatisfaction = thought.thought.toLowerCase().includes('satisf') ||
-                             thought.thought.toLowerCase().includes('meets') ||
-                             thought.thought.toLowerCase().includes('valid');
+    if ('solution' in thought && thought.contentNumber > 1) {
+      const hasSatisfaction = thought.content.toLowerCase().includes('satisf') ||
+                             thought.content.toLowerCase().includes('meets') ||
+                             thought.content.toLowerCase().includes('valid');
 
       if (!hasSatisfaction) {
         issues.push({
           severity: 'info',
-          thoughtNumber: thought.thoughtNumber,
+          thoughtNumber: thought.contentNumber,
           description: 'Solution should be validated against constraints',
           suggestion: 'Verify that the solution satisfies all constraints',
           category: 'logical',

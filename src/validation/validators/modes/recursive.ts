@@ -22,15 +22,15 @@ export class RecursiveValidator extends BaseValidator<Thought> {
     issues.push(...this.validateCommon(thought));
 
     // Check for base case definition (should appear early)
-    if (thought.thoughtNumber <= 2) {
-      const hasBaseCase = thought.thought.toLowerCase().includes('base case') ||
-                         thought.thought.toLowerCase().includes('base condition') ||
-                         thought.thought.toLowerCase().includes('termination');
+    if (thought.contentNumber <= 2) {
+      const hasBaseCase = thought.content.toLowerCase().includes('base case') ||
+                         thought.content.toLowerCase().includes('base condition') ||
+                         thought.content.toLowerCase().includes('termination');
 
       if (!hasBaseCase) {
         issues.push({
           severity: 'warning',
-          thoughtNumber: thought.thoughtNumber,
+          thoughtNumber: thought.contentNumber,
           description: 'Recursive reasoning should define base cases early',
           suggestion: 'Define base/termination cases before recursive steps',
           category: 'structural',
@@ -45,13 +45,13 @@ export class RecursiveValidator extends BaseValidator<Thought> {
     ];
 
     const hasRecursiveContent = recursiveKeywords.some(keyword =>
-      thought.thought.toLowerCase().includes(keyword)
+      thought.content.toLowerCase().includes(keyword)
     );
 
     if (!hasRecursiveContent) {
       issues.push({
         severity: 'info',
-        thoughtNumber: thought.thoughtNumber,
+        thoughtNumber: thought.contentNumber,
         description: 'Recursive reasoning should make recursive structure explicit',
         suggestion: 'Describe how the problem breaks down into smaller instances',
         category: 'structural',
@@ -60,10 +60,10 @@ export class RecursiveValidator extends BaseValidator<Thought> {
 
     // Check for dependencies (recursive steps should reference previous steps)
     if ('dependencies' in thought && Array.isArray(thought.dependencies)) {
-      if (thought.thoughtNumber > 2 && thought.dependencies.length === 0) {
+      if (thought.contentNumber > 2 && thought.dependencies.length === 0) {
         issues.push({
           severity: 'warning',
-          thoughtNumber: thought.thoughtNumber,
+          thoughtNumber: thought.contentNumber,
           description: 'Recursive steps should depend on previous subproblems or base cases',
           suggestion: 'Add dependencies to show how subproblems combine',
           category: 'structural',
@@ -72,15 +72,15 @@ export class RecursiveValidator extends BaseValidator<Thought> {
     }
 
     // Check for combination/merging logic (after recursion)
-    if (thought.thoughtNumber > 2) {
-      const hasCombination = thought.thought.toLowerCase().includes('combine') ||
-                            thought.thought.toLowerCase().includes('merge') ||
-                            thought.thought.toLowerCase().includes('build up');
+    if (thought.contentNumber > 2) {
+      const hasCombination = thought.content.toLowerCase().includes('combine') ||
+                            thought.content.toLowerCase().includes('merge') ||
+                            thought.content.toLowerCase().includes('build up');
 
       if (!hasCombination && thought.nextThoughtNeeded) {
         issues.push({
           severity: 'info',
-          thoughtNumber: thought.thoughtNumber,
+          thoughtNumber: thought.contentNumber,
           description: 'Consider explaining how subproblem solutions combine',
           suggestion: 'Describe how to build the final solution from recursive calls',
           category: 'logical',
@@ -89,15 +89,15 @@ export class RecursiveValidator extends BaseValidator<Thought> {
     }
 
     // Warn about potential infinite recursion
-    if (thought.thoughtNumber > thought.totalThoughts * 0.8) {
-      const hasTermination = thought.thought.toLowerCase().includes('terminat') ||
-                            thought.thought.toLowerCase().includes('base') ||
-                            thought.thought.toLowerCase().includes('stop');
+    if (thought.contentNumber > thought.totalThoughts * 0.8) {
+      const hasTermination = thought.content.toLowerCase().includes('terminat') ||
+                            thought.content.toLowerCase().includes('base') ||
+                            thought.content.toLowerCase().includes('stop');
 
       if (!hasTermination && thought.nextThoughtNeeded) {
         issues.push({
           severity: 'warning',
-          thoughtNumber: thought.thoughtNumber,
+          thoughtNumber: thought.contentNumber,
           description: 'Deep recursion detected - ensure termination conditions are met',
           suggestion: 'Verify that base cases are being reached',
           category: 'logical',

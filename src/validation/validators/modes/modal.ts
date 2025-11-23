@@ -30,13 +30,13 @@ export class ModalValidator extends BaseValidator<Thought> {
     ];
 
     const hasModalOperator = modalOperators.some(operator =>
-      thought.thought.toLowerCase().includes(operator)
+      thought.content.toLowerCase().includes(operator)
     );
 
     if (!hasModalOperator) {
       issues.push({
         severity: 'warning',
-        thoughtNumber: thought.thoughtNumber,
+        thoughtNumber: thought.contentNumber,
         description: 'Modal logic should use modal operators (necessary, possible, impossible)',
         suggestion: 'Express claims using modalities: □ (necessity), ◇ (possibility)',
         category: 'structural',
@@ -46,13 +46,13 @@ export class ModalValidator extends BaseValidator<Thought> {
     // Check for world/scenario references (modal logic works across possible worlds)
     const worldKeywords = ['world', 'scenario', 'case', 'situation', 'circumstance'];
     const hasWorldReference = worldKeywords.some(keyword =>
-      thought.thought.toLowerCase().includes(keyword)
+      thought.content.toLowerCase().includes(keyword)
     );
 
-    if (!hasWorldReference && thought.thoughtNumber > 1) {
+    if (!hasWorldReference && thought.contentNumber > 1) {
       issues.push({
         severity: 'info',
-        thoughtNumber: thought.thoughtNumber,
+        thoughtNumber: thought.contentNumber,
         description: 'Modal reasoning often considers different possible worlds or scenarios',
         suggestion: 'Consider making explicit references to alternative scenarios or states',
         category: 'structural',

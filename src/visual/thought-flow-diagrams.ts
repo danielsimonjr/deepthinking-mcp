@@ -86,8 +86,8 @@ export class ThoughtFlowDiagramGenerator {
     for (const thought of session.thoughts) {
       const nodeType = this.determineNodeType(thought);
       const node: ThoughtFlowNode = {
-        id: `T${thought.thoughtNumber}`,
-        thoughtNumber: thought.thoughtNumber,
+        id: `T${thought.contentNumber}`,
+        thoughtNumber: thought.contentNumber,
         label: this.createNodeLabel(thought),
         type: nodeType,
         mode: thought.mode,
@@ -130,7 +130,7 @@ export class ThoughtFlowDiagramGenerator {
       if ('isRevision' in thought && thought.isRevision && thought.revisesThought) {
         edges.push({
           from: `T${thought.revisesThought}`,
-          to: `T${thought.thoughtNumber}`,
+          to: `T${thought.contentNumber}`,
           type: 'conditional',
           label: 'revision',
         });
@@ -155,7 +155,7 @@ export class ThoughtFlowDiagramGenerator {
     }
 
     // Check for milestone (low thought number or specific modes)
-    if (thought.thoughtNumber === 1 || thought.thoughtNumber === thought.totalThoughts) {
+    if (thought.contentNumber === 1 || thought.contentNumber === thought.totalThoughts) {
       return 'milestone';
     }
 
@@ -190,13 +190,13 @@ export class ThoughtFlowDiagramGenerator {
    */
   private createNodeLabel(thought: Thought): string {
     const maxLength = 30;
-    let text = thought.thought;
+    let text = thought.content;
 
     if (text.length > maxLength) {
       text = text.substring(0, maxLength) + '...';
     }
 
-    return `T${thought.thoughtNumber}: ${thought.mode}`;
+    return `T${thought.contentNumber}: ${thought.mode}`;
   }
 
   /**
@@ -236,7 +236,7 @@ export class ThoughtFlowDiagramGenerator {
       messages.push({
         from: previousMode,
         to: currentMode,
-        text: `T${thought.thoughtNumber}: ${this.createNodeLabel(thought)}`,
+        text: `T${thought.contentNumber}: ${this.createNodeLabel(thought)}`,
         type: 'solid',
       });
 
@@ -327,7 +327,7 @@ export class ThoughtFlowDiagramGenerator {
     for (const [mode, thoughts] of thoughtsByMode) {
       lines.push(`  section ${mode}`);
       for (const thought of thoughts) {
-        lines.push(`    Thought ${thought.thoughtNumber} : ${this.createNodeLabel(thought)}`);
+        lines.push(`    Thought ${thought.contentNumber} : ${this.createNodeLabel(thought)}`);
       }
     }
 
@@ -360,7 +360,7 @@ export class ThoughtFlowDiagramGenerator {
         transitions.push({
           from: previousMode,
           to: thought.mode,
-          label: `T${thought.thoughtNumber}`,
+          label: `T${thought.contentNumber}`,
         });
       }
       previousMode = thought.mode;

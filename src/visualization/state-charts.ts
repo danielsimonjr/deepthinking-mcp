@@ -62,7 +62,7 @@ export class ReasoningStateChart {
       });
     }
 
-    if (session.thoughts.some(t => t.branchId)) {
+    if (session.thoughts.some(t => (t as any).branchId)) {
       states.push({
         id: 'Branching',
         label: 'Branching',
@@ -131,11 +131,11 @@ export class ReasoningStateChart {
         });
       }
       // Handle branches
-      else if (next.branchId) {
+      else if ((next as any).branchId) {
         transitions.push({
           from: fromState,
           to: 'Branching',
-          condition: `Branch: ${next.branchId}`,
+          condition: `Branch: ${(next as any).branchId}`,
         });
 
         transitions.push({
@@ -270,7 +270,7 @@ export class ReasoningStateChart {
     // Add current state annotation
     if (thought.isRevision) {
       lines.push('  note right of Revising: Current thought is revision');
-    } else if (thought.branchId) {
+    } else if ((thought as any).branchId) {
       lines.push('  note right of Branching: Current thought is branch');
     } else {
       lines.push('  note right of Complete: Thought complete');
@@ -460,7 +460,7 @@ ${this.generateThoughtStateDiagram(t)}
       </div>
       <div class="stat-card">
         <div class="stat-label">Branches</div>
-        <div class="stat-value">${session.thoughts.filter(t => t.branchId).length}</div>
+        <div class="stat-value">${session.thoughts.filter(t => (t as any).branchId).length}</div>
       </div>
     </div>
 

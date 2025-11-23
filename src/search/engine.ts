@@ -240,7 +240,7 @@ export class SearchEngine {
 
       // Search in thought text (limit to prevent slowdown)
       for (const thought of session.thoughts.slice(0, 5)) {
-        const tokens = this.tokenizer.tokenize(thought.thought);
+        const tokens = this.tokenizer.tokenize(thought.content);
         for (const token of tokens) {
           if (token.startsWith(prefixLower)) {
             suggestions.add(token);
@@ -316,15 +316,15 @@ export class SearchEngine {
     // Highlight in thoughts (limit to first few)
     for (let i = 0; i < Math.min(session.thoughts.length, 10); i++) {
       const thought = session.thoughts[i];
-      const thoughtLower = thought.thought.toLowerCase();
+      const thoughtLower = thought.content.toLowerCase();
 
       for (const token of queryTokens) {
         const idx = thoughtLower.indexOf(token);
         if (idx >= 0) {
           // Extract context around match
           const contextStart = Math.max(0, idx - 30);
-          const contextEnd = Math.min(thought.thought.length, idx + token.length + 30);
-          const context = thought.thought.substring(contextStart, contextEnd);
+          const contextEnd = Math.min(thought.content.length, idx + token.length + 30);
+          const context = thought.content.substring(contextStart, contextEnd);
 
           highlights.push({
             field: `thought_${i}`,
