@@ -1848,7 +1848,7 @@ export class VisualExporter {
 
     // Experiment
     if (thought.experiment) {
-      mermaid += `  Exp["Experiment: ${thought.experiment.name}"]\n`;
+      mermaid += `  Exp["Experiment: ${thought.experiment.design}"]\n`;
       if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
         for (const hypothesis of thought.scientificHypotheses) {
           const hypId = this.sanitizeId(hypothesis.id);
@@ -1860,7 +1860,7 @@ export class VisualExporter {
 
     // Data collection
     if (thought.data) {
-      mermaid += `  Data["Data Collection: ${thought.data.sampleSize} samples"]\n`;
+      mermaid += `  Data["Data Collection: ${(thought.experiment as any)?.sampleSize || 0} samples"]\n`;
       if (thought.experiment) {
         mermaid += `  Exp --> Data\n`;
       }
@@ -1879,10 +1879,10 @@ export class VisualExporter {
     // Conclusion
     if (thought.conclusion) {
       const conclusionId = 'Conclusion';
-      const supportLabel = includeMetrics && thought.conclusion.confidenceLevel
-        ? ` (conf: ${thought.conclusion.confidenceLevel.toFixed(2)})`
+      const supportLabel = includeMetrics && thought.conclusion.confidence
+        ? ` (conf: ${thought.conclusion.confidence.toFixed(2)})`
         : '';
-      mermaid += `  ${conclusionId}["Conclusion: ${thought.conclusion.finding.substring(0, 50)}...${supportLabel}"]\n`;
+      mermaid += `  ${conclusionId}["Conclusion: ${thought.conclusion.statement.substring(0, 50)}...${supportLabel}"]\n`;
       if (thought.analysis) {
         mermaid += `  Stats --> ${conclusionId}\n`;
       }
@@ -1942,7 +1942,7 @@ export class VisualExporter {
 
     // Experiment
     if (thought.experiment) {
-      const label = includeLabels ? thought.experiment.name : 'Exp';
+      const label = includeLabels ? thought.experiment.design : 'Exp';
       dot += `  Exp [label="Experiment:\\n${label}"];\n`;
       if (thought.scientificHypotheses) {
         for (const hypothesis of thought.scientificHypotheses) {
@@ -1955,7 +1955,7 @@ export class VisualExporter {
 
     // Data and analysis
     if (thought.data) {
-      const sampleLabel = includeMetrics ? `\\nSamples: ${thought.data.sampleSize}` : '';
+      const sampleLabel = includeMetrics ? `\\nSamples: ${(thought.experiment as any)?.sampleSize || 0}` : '';
       dot += `  Data [label="Data Collection${sampleLabel}"];\n`;
       if (thought.experiment) {
         dot += `  Exp -> Data;\n`;
@@ -1971,9 +1971,9 @@ export class VisualExporter {
 
     // Conclusion
     if (thought.conclusion) {
-      const label = includeLabels ? thought.conclusion.finding.substring(0, 50) + '...' : 'Conclusion';
-      const confLabel = includeMetrics && thought.conclusion.confidenceLevel
-        ? `\\nconf: ${thought.conclusion.confidenceLevel.toFixed(2)}`
+      const label = includeLabels ? thought.conclusion.statement.substring(0, 50) + '...' : 'Conclusion';
+      const confLabel = includeMetrics && thought.conclusion.confidence
+        ? `\\nconf: ${thought.conclusion.confidence.toFixed(2)}`
         : '';
       dot += `  Conclusion [label="Conclusion:\\n${label}${confLabel}", shape=doubleoctagon];\n`;
       if (thought.analysis) {
@@ -2007,14 +2007,14 @@ export class VisualExporter {
     }
 
     if (thought.experiment) {
-      ascii += `Experiment: ${thought.experiment.name}\n`;
+      ascii += `Experiment: ${thought.experiment.design}\n`;
       ascii += `Type: ${thought.experiment.type}\n`;
       ascii += `Design: ${thought.experiment.design}\n\n`;
     }
 
     if (thought.data) {
       ascii += 'Data Collection:\n';
-      ascii += `  Sample Size: ${thought.data.sampleSize}\n`;
+      ascii += `  Sample Size: ${(thought.experiment as any)?.sampleSize || 0}\n`;
       ascii += `  Method: ${thought.data.method}\n`;
       if (thought.data.dataQuality) {
         ascii += `  Quality:\n`;
@@ -2036,10 +2036,10 @@ export class VisualExporter {
 
     if (thought.conclusion) {
       ascii += 'Conclusion:\n';
-      ascii += `${thought.conclusion.finding}\n`;
+      ascii += `${thought.conclusion.statement}\n`;
       ascii += `Support for hypothesis: ${thought.conclusion.supportForHypothesis}\n`;
-      if (thought.conclusion.confidenceLevel) {
-        ascii += `Confidence: ${thought.conclusion.confidenceLevel.toFixed(2)}\n`;
+      if (thought.conclusion.confidence) {
+        ascii += `Confidence: ${thought.conclusion.confidence.toFixed(2)}\n`;
       }
     }
 
@@ -2089,7 +2089,7 @@ export class VisualExporter {
         const varId = this.sanitizeId(variable.id);
         const label = includeLabels ? variable.name : varId;
         const domainLabel = includeMetrics && variable.domain
-          ? ` [${variable.domain.lowerBound},${variable.domain.upperBound}]`
+          ? ` [${(variable.domain as any).lowerBound},${(variable.domain as any).upperBound}]`
           : '';
         mermaid += `    ${varId}["${label}${domainLabel}"]\n`;
       }
@@ -2168,7 +2168,7 @@ export class VisualExporter {
         const varId = this.sanitizeId(variable.id);
         const label = includeLabels ? variable.name : varId;
         const domainLabel = includeMetrics && variable.domain
-          ? `\\n[${variable.domain.lowerBound}, ${variable.domain.upperBound}]`
+          ? `\\n[${(variable.domain as any).lowerBound}, ${(variable.domain as any).upperBound}]`
           : '';
         dot += `    ${varId} [label="${label}${domainLabel}"];\n`;
       }
@@ -2228,7 +2228,7 @@ export class VisualExporter {
       for (const variable of thought.variables) {
         ascii += `  ${variable.name} (${variable.variableType})\n`;
         if (variable.domain) {
-          ascii += `    Domain: [${variable.domain.lowerBound}, ${variable.domain.upperBound}]\n`;
+          ascii += `    Domain: [${(variable.domain as any).lowerBound}, ${(variable.domain as any).upperBound}]\n`;
         }
       }
       ascii += '\n';
