@@ -695,20 +695,20 @@ export class ConflictResolutionManager {
    * Generate unique conflict ID
    */
   private generateConflictId(): string {
-    return `conflict_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `conflict_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
    * Generate unique resolution ID
    */
   private generateResolutionId(): string {
-    return `resolution_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `resolution_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
    * Generate unique evidence ID
    */
   private generateEvidenceId(): string {
-    return `evidence_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `evidence_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 }

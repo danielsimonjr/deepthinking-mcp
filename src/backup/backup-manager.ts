@@ -645,13 +645,13 @@ export class BackupManager {
    * Generate backup ID
    */
   private generateBackupId(): string {
-    return `backup_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `backup_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
    * Generate restore ID
    */
   private generateRestoreId(): string {
-    return `restore_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `restore_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 }

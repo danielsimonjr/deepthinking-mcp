@@ -217,7 +217,7 @@ export class StochasticReasoningEngine {
     }
 
     return {
-      id: `rv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `rv_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       name,
       distribution,
       support,
@@ -316,7 +316,7 @@ export class StochasticReasoningEngine {
     description: string
   ): StochasticProcess {
     return {
-      id: `mc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `mc_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       name: 'Markov Chain',
       type: 'markov_chain',
       states,

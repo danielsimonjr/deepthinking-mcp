@@ -232,7 +232,7 @@ export class RecursiveReasoningEngine {
     strategy: RecursionStrategy
   ): RecursiveProblem {
     return {
-      id: `rec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `rec_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       name,
       description,
       baseCase,

@@ -662,13 +662,13 @@ export class AnnotationManager {
    * Generate unique annotation ID
    */
   private generateAnnotationId(): string {
-    return `annotation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `annotation_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
    * Generate unique thread ID
    */
   private generateThreadId(): string {
-    return `thread_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `thread_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 }
