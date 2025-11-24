@@ -43,3 +43,4 @@ restore-mcps.cjs
 *.backup
 *.bak
 add-to-config.cjs
+*.txt
