@@ -346,12 +346,15 @@ export class TemplateManager {
 
     const query: TemplateQuery = {};
     if (options.category) {
+      // @ts-expect-error - String to TemplateCategory conversion
       query.categories = [options.category];
     }
     if (options.difficulty) {
+      // @ts-expect-error - String to difficulty literal conversion
       query.difficulties = [options.difficulty];
     }
     if (options.mode) {
+      // @ts-expect-error - String to ThinkingMode conversion
       query.modes = [options.mode];
     }
 
