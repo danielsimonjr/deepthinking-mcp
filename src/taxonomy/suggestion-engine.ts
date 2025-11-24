@@ -85,6 +85,8 @@ export interface ReasoningSuggestion {
  */
 export interface SessionAnalysis {
   session: ThinkingSession;
+  totalThoughts: number;
+  uniqueModes: number;
   cognitiveLoadProfile: Map<CognitiveLoad, number>;
   dualProcessDistribution: Map<DualProcessType, number>;
   averageQualityMetrics: QualityMetrics;
@@ -773,8 +775,13 @@ export class SuggestionEngine {
       }
     }
 
+    // Calculate unique modes
+    const uniqueModes = new Set(session.thoughts.map(t => t.mode)).size;
+
     return {
       session,
+      totalThoughts: session.thoughts.length,
+      uniqueModes,
       cognitiveLoadProfile,
       dualProcessDistribution,
       averageQualityMetrics,
