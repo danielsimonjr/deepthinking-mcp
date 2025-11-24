@@ -30,6 +30,18 @@ export function createCache<T>(config: Partial<CacheConfig> = {}): Cache<T> {
 }
 
 /**
+ * Cache factory class with static methods
+ */
+export class CacheFactory {
+  /**
+   * Create cache instance (static method)
+   */
+  static create<T>(strategy: string, config?: Partial<CacheConfig>): Cache<T> {
+    return createCache<T>({ ...config, strategy: strategy as 'lru' | 'lfu' | 'fifo' });
+  }
+}
+
+/**
  * Cache manager for multiple named caches
  */
 export class CacheManager {

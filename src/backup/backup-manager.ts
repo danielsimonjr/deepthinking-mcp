@@ -175,6 +175,17 @@ export class BackupManager {
   }
 
   /**
+   * Create a backup (alias for create method)
+   */
+  async backup(
+    data: any[],
+    config: BackupConfig,
+    providerOptions: BackupProviderOptions
+  ): Promise<BackupRecord> {
+    return this.create(data, config, providerOptions);
+  }
+
+  /**
    * Restore from a backup
    */
   async restore(options: RestoreOptions): Promise<RestoreResult> {

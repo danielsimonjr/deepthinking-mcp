@@ -137,7 +137,16 @@ export class TemplateManager {
   /**
    * Instantiate a template into a session
    */
-  instantiateTemplate(options: TemplateInstantiationOptions): Partial<ThinkingSession> {
+  instantiateTemplate(
+    optionsOrTemplateId: TemplateInstantiationOptions | string,
+    additionalOptions?: Partial<TemplateInstantiationOptions>
+  ): Partial<ThinkingSession> {
+    // Handle both signatures: (options) or (templateId, options)
+    const options: TemplateInstantiationOptions =
+      typeof optionsOrTemplateId === 'string'
+        ? { templateId: optionsOrTemplateId, ...additionalOptions }
+        : optionsOrTemplateId;
+
     const template = this.templates.get(options.templateId);
 
     if (!template) {
@@ -321,5 +330,31 @@ export class TemplateManager {
     template.builtIn = false;
     this.addCustomTemplate(template);
     return template;
+  }
+
+  /**
+   * List templates with optional filters (alias for searchTemplates)
+   */
+  listTemplates(options?: {
+    category?: string;
+    difficulty?: string;
+    mode?: string;
+  }): SessionTemplate[] {
+    if (!options) {
+      return this.getAllTemplates();
+    }
+
+    const query: TemplateQuery = {};
+    if (options.category) {
+      query.categories = [options.category];
+    }
+    if (options.difficulty) {
+      query.difficulties = [options.difficulty];
+    }
+    if (options.mode) {
+      query.modes = [options.mode];
+    }
+
+    return this.searchTemplates(query);
   }
 }

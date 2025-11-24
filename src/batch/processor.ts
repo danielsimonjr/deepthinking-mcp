@@ -65,6 +65,14 @@ export class BatchProcessor {
   }
 
   /**
+   * Submit a new batch job (alias for createJob that returns job ID)
+   */
+  async submitJob(params: { type: BatchJobType; params: BatchJobParams }): Promise<string> {
+    const job = this.createJob(params.type, params.params);
+    return job.id;
+  }
+
+  /**
    * Get total items from params
    */
   private getTotalItems(params: BatchJobParams): number {
