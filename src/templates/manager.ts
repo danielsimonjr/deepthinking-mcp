@@ -8,8 +8,9 @@ import type {
   TemplateQuery,
   TemplateStats,
   TemplateInstantiationOptions,
+  TemplateCategory,
 } from './types.js';
-import type { ThinkingSession } from '../types/index.js';
+import type { ThinkingSession, ThinkingMode } from '../types/index.js';
 import { BUILT_IN_TEMPLATES } from './built-in.js';
 
 /**
@@ -173,15 +174,14 @@ export class TemplateManager {
     }
     estimatedThoughts += template.structure.conclusion.estimatedThoughts || 0;
 
-    // Create session metadata
-    const session: Partial<ThinkingSession> = {
+    // Create session metadata with template info (extends ThinkingSession)
+    const session: Partial<ThinkingSession> & { metadata?: any } = {
       title,
       mode: template.mode,
       domain,
       author: options.author,
       thoughts: [],
       tags: [...template.tags, 'template', `template:${template.id}`],
-        // @ts-expect-error - metadata not in type
       metadata: {
         templateId: template.id,
         templateName: template.name,
@@ -356,16 +356,13 @@ export class TemplateManager {
 
     const query: TemplateQuery = {};
     if (options.category) {
-      // @ts-expect-error - String to TemplateCategory conversion
-      query.categories = [options.category];
+      query.categories = [options.category as TemplateCategory];
     }
     if (options.difficulty) {
-      // @ts-expect-error - String to difficulty literal conversion
-      query.difficulties = [options.difficulty];
+      query.difficulties = [options.difficulty as 'beginner' | 'intermediate' | 'advanced'];
     }
     if (options.mode) {
-      // @ts-expect-error - String to ThinkingMode conversion
-      query.modes = [options.mode];
+      query.modes = [options.mode as ThinkingMode];
     }
 
     return this.searchTemplates(query);
