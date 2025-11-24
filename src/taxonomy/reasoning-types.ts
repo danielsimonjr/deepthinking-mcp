@@ -1244,6 +1244,7 @@ export function searchReasoningTypes(query: string): ReasoningType[] {
   const lowerQuery = query.toLowerCase();
   return REASONING_TAXONOMY.filter(
     t =>
+      t.category === lowerQuery ||
       t.name.toLowerCase().includes(lowerQuery) ||
       t.description.toLowerCase().includes(lowerQuery) ||
       t.aliases.some(a => a.toLowerCase().includes(lowerQuery)) ||
