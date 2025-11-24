@@ -100,9 +100,9 @@ describe('Reasoning Taxonomy', () => {
     });
 
     it('should query by difficulty', () => {
-      const results = navigator.query({ difficulties: ['easy'] });
+      const results = navigator.query({ difficulties: ['beginner'] });
       expect(results.length).toBeGreaterThan(0);
-      expect(results.every(r => r.type.difficulty === 'easy')).toBe(true);
+      expect(results.every(r => r.type.difficulty === 'beginner')).toBe(true);
     });
 
     it('should query by keyword', () => {
@@ -113,7 +113,7 @@ describe('Reasoning Taxonomy', () => {
     it('should query with multiple filters', () => {
       const results = navigator.query({
         categories: ['deductive'],
-        difficulties: ['moderate'],
+        difficulties: ['intermediate'],
       });
       expect(results.length).toBeGreaterThanOrEqual(0);
     });
