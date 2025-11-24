@@ -128,7 +128,7 @@ export class MultiAgentCollaboration {
    * Create new collaborative workspace
    */
   createWorkspace(name: string, problem: string): string {
-    const workspaceId = `workspace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const workspaceId = `workspace_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
     const workspace: CollaborativeWorkspace = {
       id: workspaceId,
@@ -163,7 +163,7 @@ export class MultiAgentCollaboration {
       throw new Error(`Workspace ${workspaceId} not found`);
     }
 
-    const agentId = `agent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const agentId = `agent_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
     const agent: CollaborativeAgent = {
       id: agentId,
@@ -608,7 +608,7 @@ export class MultiAgentCollaboration {
    * Generate unique message ID
    */
   private generateMessageId(): string {
-    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `msg_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**

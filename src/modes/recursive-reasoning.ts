@@ -3,7 +3,7 @@
  * Phase 4E Task 8.6 (File Task 29): Reasoning with recursion and self-reference
  */
 
-import type { Thought } from '../types/index.js';
+import type { BaseThought, ThinkingMode } from '../types/index.js';
 
 /**
  * Recursion type
@@ -148,9 +148,8 @@ export interface RecursionAnalysis {
 /**
  * Recursive reasoning thought
  */
-// @ts-expect-error - Phase 4 mode not yet added to ThinkingMode enum
-export interface RecursiveReasoningThought extends Thought {
-  mode: 'recursive';
+export interface RecursiveReasoningThought extends BaseThought {
+  mode: ThinkingMode.RECURSIVE;
   problem: RecursiveProblem;
   solution: RecursiveSolution;
   callTree: CallTreeNode;
@@ -232,7 +231,7 @@ export class RecursiveReasoningEngine {
     strategy: RecursionStrategy
   ): RecursiveProblem {
     return {
-      id: `rec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `rec_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       name,
       description,
       baseCase,

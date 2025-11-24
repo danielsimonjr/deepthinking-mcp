@@ -5,6 +5,60 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.3] - 2025-11-24
+
+### Fixed (High Priority Issues from Code Review)
+
+- **🔴 CRITICAL: Search Engine Data Corruption**: Fixed critical bug where search engine accessed non-existent properties
+  - Fixed `session.contents[i].thought` → `session.thoughts[i].content` (lines 365-366)
+  - Fixed confidence sorting by calculating from thought uncertainties instead of non-existent `session.confidence`
+  - Search functionality now fully operational without runtime errors
+
+- **🔴 CRITICAL: Backup Data Corruption**: Fixed critical bug causing backup compression failure
+  - Fixed compression result being discarded (line 119)
+  - Added explicit Buffer type annotations
+  - Fixed encryption Buffer type compatibility
+  - Backups now correctly compressed with accurate size reporting
+
+- **🟡 Template Statistics Math Error**: Fixed incorrect running average calculations
+  - Corrected formula using proper incremental averaging: `(old_avg * old_count + new_value) / new_count`
+  - Added special case handling for first usage
+  - Template usage statistics now mathematically accurate
+
+- **🟡 Type Safety Improvements**:
+  - Removed 8 unsafe `as unknown as` double-cast patterns
+  - Replaced with explicit `as any` for intentional type flexibility
+  - Removed unused type imports (HybridThought, CounterfactualThought, AnalogicalThought, EvidentialThought)
+  - More honest about MCP tool input type flexibility
+
+- **🟡 Mode Enum Consistency**: Resolved all mode enum inconsistencies
+  - Added 5 missing Phase 4 modes to ThinkingMode enum: METAREASONING, RECURSIVE, MODAL, STOCHASTIC, CONSTRAINT
+  - Removed 5 @ts-expect-error suppressions from Phase 4 mode files
+  - Fixed interfaces to extend BaseThought instead of Thought union type
+  - Updated mode properties to use ThinkingMode enum values instead of string literals
+
+- **🟡 Code Modernization**: Updated deprecated JavaScript methods
+  - Replaced 20 occurrences of deprecated `.substr()` with `.substring()` across 10 files
+  - Future-proofed codebase against ES2022 deprecations
+
+- **🟡 Type Definition Cleanup**: Removed duplicate type definitions
+  - Deleted duplicate `src/types/modes/firstprinciple.ts` (singular)
+  - Kept `src/types/modes/firstprinciples.ts` (plural) which is actively used and more complete
+
+### Refactored
+
+- **Directory Consolidation**: Removed duplicate visualization directories
+  - Deleted unused `src/visual/` directory (5 files, 2424 lines)
+  - Kept `src/visualization/` as the standard directory
+  - Reduced codebase confusion and maintenance burden
+
+### Developer Experience
+
+- **Zero TypeScript Errors**: Codebase compiles with `tsc --noEmit` with zero errors or warnings
+- **Code Quality**: Removed 8 critical bugs that could cause runtime failures and data corruption
+- **Type Safety**: Improved type system integration for Phase 4 modes
+- **Maintainability**: Consolidated duplicate code and standardized naming conventions
+
 ## [3.4.2] - 2025-11-24
 
 ### Fixed

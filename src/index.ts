@@ -32,15 +32,11 @@ import {
   ShannonThought,
   MathematicsThought,
   PhysicsThought,
-  HybridThought,
   AbductiveThought,
   CausalThought,
   BayesianThought,
-  CounterfactualThought,
-  AnalogicalThought,
   TemporalThought,
   GameTheoryThought,
-  EvidentialThought,
   FirstPrinciplesThought,
   ModeRecommender,
 } from './types/index.js';
@@ -422,7 +418,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         evidence: input.evidence || [],
         posterior: input.posterior,
         bayesFactor: input.bayesFactor,
-      } as unknown as BayesianThought;
+      } as any;
 
     case 'counterfactual':
       return {
@@ -434,7 +430,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         comparison: input.comparison,
         interventionPoint: input.interventionPoint,
         causalChains: input.causalChains || [],
-      } as unknown as CounterfactualThought;
+      } as any;
 
     case 'analogical':
       return {
@@ -448,7 +444,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         inferences: input.inferences || [],
         limitations: input.limitations || [],
         analogyStrength: input.analogyStrength,
-      } as unknown as AnalogicalThought;
+      } as any;
 
     case 'temporal':
       return {
@@ -460,7 +456,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         intervals: input.intervals || [],
         constraints: input.constraints || [],
         relations: input.relations || [],
-      } as unknown as TemporalThought;
+      } as any;
 
     case 'gametheory':
       return {
@@ -474,7 +470,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         nashEquilibria: input.nashEquilibria || [],
         dominantStrategies: input.dominantStrategies || [],
         gameTree: input.gameTree,
-      } as unknown as GameTheoryThought;
+      } as any;
 
     case 'evidential':
       return {
@@ -488,9 +484,18 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         combinedBelief: input.combinedBelief,
         plausibility: input.plausibility,
         decisions: input.decisions || [],
-      } as unknown as EvidentialThought;
+      } as any;
 
-    case ThinkingMode.FIRSTPRINCIPLES:      return {        ...baseThought,        mode: ThinkingMode.FIRSTPRINCIPLES,        question: input.question || '',        principles: input.principles || [],        derivationSteps: input.derivationSteps || [],        conclusion: input.conclusion || { statement: '', derivationChain: [], certainty: 0 },        alternativeInterpretations: input.alternativeInterpretations || [],      } as unknown as FirstPrinciplesThought;
+    case ThinkingMode.FIRSTPRINCIPLES:
+      return {
+        ...baseThought,
+        mode: ThinkingMode.FIRSTPRINCIPLES,
+        question: input.question || '',
+        principles: input.principles || [],
+        derivationSteps: input.derivationSteps || [],
+        conclusion: input.conclusion || { statement: '', derivationChain: [], certainty: 0 },
+        alternativeInterpretations: input.alternativeInterpretations || [],
+      } as any;
     case 'hybrid':
     default:
       return {
@@ -506,7 +511,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         physicalInterpretation: input.physicalInterpretation,
         primaryMode: (input.mode || ThinkingMode.HYBRID) as any,
         secondaryFeatures: [],
-      } as unknown as HybridThought;
+      } as any;
   }
 }
 

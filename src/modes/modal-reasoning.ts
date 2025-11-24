@@ -3,7 +3,7 @@
  * Phase 4E Task 8.2 (File Task 25): Reasoning about necessity, possibility, and impossibility
  */
 
-import type { Thought } from '../types/index.js';
+import type { BaseThought, ThinkingMode } from '../types/index.js';
 
 /**
  * Modal operator
@@ -89,9 +89,8 @@ export interface ModalAnalysis {
 /**
  * Modal thought
  */
-// @ts-expect-error - Phase 4 mode not yet added to ThinkingMode enum
-export interface ModalReasoningThought extends Thought {
-  mode: 'modal';
+export interface ModalReasoningThought extends BaseThought {
+  mode: ThinkingMode.MODAL;
   propositions: ModalProposition[];
   worlds: PossibleWorld[];
   inferences: ModalInference[];

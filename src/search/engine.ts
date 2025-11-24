@@ -362,8 +362,9 @@ export class SearchEngine {
       }
 
       for (let i = 0; i < session.thoughts.length; i++) {
-        const thoughtTokens = this.tokenizer.getUniqueTokens(//@ts-expect-error
-session.contents[i].thought);
+        const thoughtTokens = this.tokenizer.getUniqueTokens(
+          session.thoughts[i].content
+        );
         if (tokens.some(t => thoughtTokens.has(t))) {
           fields.push(`thought_${i}`);
           break; // Just indicate thoughts matched
@@ -411,11 +412,16 @@ session.contents[i].thought);
           break;
 
         case 'confidence':
-          const confA = a.//@ts-expect-error
-session.confidence || 0;
-          const confB = b.//@ts-expect-error
-session.confidence || 0;
-          comparison = confA - confB;
+          // Calculate average confidence from thoughts with uncertainty
+          const getAvgConfidence = (session: ThinkingSession): number => {
+            const uncertainties = session.thoughts
+              .filter((t: any) => typeof t.uncertainty === 'number')
+              .map((t: any) => 1 - t.uncertainty);
+            return uncertainties.length > 0
+              ? uncertainties.reduce((sum, c) => sum + c, 0) / uncertainties.length
+              : 0.5;
+          };
+          comparison = getAvgConfidence(a.session) - getAvgConfidence(b.session);
           break;
 
         case 'title':

@@ -243,7 +243,7 @@ export class EventEmitter {
    * Generate unique event ID
    */
   private generateEventId(): string {
-    return `evt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `evt_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**

@@ -236,18 +236,28 @@ export class TemplateManager {
       return;
     }
 
-    // Update averages (simplified - would need proper running average)
+    // Calculate running averages correctly
+    // Note: usageCount has already been incremented when this is called
     const thoughtCount = session.thoughts.length;
     const completed = session.thoughts.length > 0 && session.isComplete;
     const confidence = (session as any).confidence || 0;
 
-    stats.averageThoughts = (stats.averageThoughts * (stats.usageCount - 1) + thoughtCount) / stats.usageCount;
-    stats.averageConfidence = (stats.averageConfidence * (stats.usageCount - 1) + confidence) / stats.usageCount;
+    // Use n-1 as the previous count since usageCount was already incremented
+    const previousCount = stats.usageCount - 1;
+    if (previousCount > 0) {
+      // Running average: new_avg = (old_avg * old_count + new_value) / new_count
+      stats.averageThoughts = (stats.averageThoughts * previousCount + thoughtCount) / stats.usageCount;
+      stats.averageConfidence = (stats.averageConfidence * previousCount + confidence) / stats.usageCount;
 
-    if (completed) {
-      stats.successRate = ((stats.successRate * (stats.usageCount - 1)) + 1) / stats.usageCount;
+      // Success rate: proportion of completed sessions
+      const previousSuccesses = stats.successRate * previousCount;
+      const newSuccesses = previousSuccesses + (completed ? 1 : 0);
+      stats.successRate = newSuccesses / stats.usageCount;
     } else {
-      stats.successRate = (stats.successRate * (stats.usageCount - 1)) / stats.usageCount;
+      // First usage - set initial values
+      stats.averageThoughts = thoughtCount;
+      stats.averageConfidence = confidence;
+      stats.successRate = completed ? 1 : 0;
     }
   }
 

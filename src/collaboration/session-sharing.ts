@@ -103,7 +103,7 @@ export class SessionSharingManager {
     ownerId: string,
     accessLevel: 'read' | 'comment' | 'edit' = 'read'
   ): string {
-    const sharedId = `shared_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const sharedId = `shared_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
     const sharedSession: SharedSession = {
       id: sharedId,
@@ -156,7 +156,7 @@ export class SessionSharingManager {
       throw new Error('Session is read-only');
     }
 
-    const commentId = `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const commentId = `comment_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
     const comment: SessionComment = {
       id: commentId,
@@ -617,13 +617,13 @@ export class SessionSharingManager {
    * Generate unique merge ID
    */
   private generateMergeId(): string {
-    return `merge_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `merge_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
    * Generate unique conflict ID
    */
   private generateConflictId(): string {
-    return `conflict_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `conflict_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 }
