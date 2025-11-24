@@ -162,9 +162,6 @@ export class BackupManager {
       record.duration =
         record.completedAt.getTime() - record.startedAt.getTime();
 
-    // @ts-expect-error - Property name mismatch
-      this._lastBackupId = backupId;
-
       return record;
     } catch (error) {
       record.status = 'failed';

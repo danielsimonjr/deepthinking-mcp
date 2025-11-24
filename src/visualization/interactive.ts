@@ -196,11 +196,6 @@ export class InteractiveMermaid {
       js.push(`  if (element_${elementId}) {`);
 
       for (const handler of handlers) {
-      // @ts-expect-error - Unused variable
-        const callbackName = typeof handler.callback === 'string'
-          ? handler.callback
-          : `callback_${elementId}_${handler.event}`;
-
         js.push(`    element_${elementId}.addEventListener("${handler.event}", function(event) {`);
 
         if (handler.preventDefault) {
