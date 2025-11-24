@@ -26,7 +26,7 @@ export class MetaValidator extends BaseValidator<Thought> {
       if (thought.dependencies.length === 0) {
         issues.push({
           severity: 'warning',
-          thoughtNumber: thought.contentNumber,
+          thoughtNumber: thought.thoughtNumber,
           description: 'Meta-reasoning should reference thoughts being analyzed',
           suggestion: 'Add dependencies to thoughts being reflected upon',
           category: 'structural',
@@ -43,7 +43,7 @@ export class MetaValidator extends BaseValidator<Thought> {
     if (!hasMetaContent) {
       issues.push({
         severity: 'info',
-        thoughtNumber: thought.contentNumber,
+        thoughtNumber: thought.thoughtNumber,
         description: 'Meta-reasoning typically discusses reasoning processes',
         suggestion: 'Consider making explicit references to reasoning strategies or thought processes',
         category: 'structural',

@@ -4,7 +4,7 @@
  */
 
 import type { ThinkingSession } from '../types/session.js';
-import type { Thought, MathematicsThought, CausalThought, FirstPrincipleThought } from '../types/index.js';
+import type { Thought, MathematicsThought, CausalThought, FirstPrinciplesThought } from '../types/index.js';
 import { MermaidGenerator, type MindmapNode } from './mermaid.js';
 
 /**
@@ -120,8 +120,8 @@ export class KnowledgeMindMap {
       case 'causal':
         nodes.push(...this.extractCausalKnowledge(thought as CausalThought));
         break;
-      case 'firstprinciple':
-        nodes.push(...this.extractFirstPrincipleKnowledge(thought as FirstPrincipleThought));
+      case ThinkingMode.FIRSTPRINCIPLES:
+        nodes.push(...this.extractFirstPrincipleKnowledge(thought as FirstPrinciplesThought));
         break;
       default:
         // Generic extraction
@@ -237,7 +237,7 @@ export class KnowledgeMindMap {
   /**
    * Extract knowledge from first-principle thought
    */
-  private extractFirstPrincipleKnowledge(thought: FirstPrincipleThought): KnowledgeNode[] {
+  private extractFirstPrincipleKnowledge(thought: FirstPrinciplesThought): KnowledgeNode[] {
     const nodes: KnowledgeNode[] = [];
 
     // Fundamental principles

@@ -5348,4 +5348,155 @@ Failed to generate diagram for thought 1: TypeError: Cannot read properties of u
        [34mrerun x4[39m
 [2K[1A[2K[G       [90mrerun x4[39m
 [2K[1A[2K[G       [2m[90mrerun x4[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m tests/unit/ml/pattern-recognition.test.ts[22m [34mx1[39m
+
+ [33m❯[39m tests/unit/ml/pattern-recognition.test.ts [2m ([22m[2m20 tests[22m [2m|[22m [31m1 failed[39m[2m)[22m[90m 48[2mms[22m[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mtrain[2m > [22mshould generate insights[39m
+[31m     → expected undefined not to be undefined[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mtrain[2m > [22mshould generate insights
+[31m[1mAssertionError[22m: expected undefined not to be undefined[39m
+[36m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m74:46[22m[39m
+    [90m 72| [39m
+    [90m 73| [39m      [34mexpect[39m(result[33m.[39minsights)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m 74| [39m      [34mexpect[39m(result[33m.[39minsights[33m.[39mmostCommonType)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                                             [31m^[39m
+    [90m 75| [39m      [34mexpect[39m(result[33m.[39minsights[33m.[39mhighestConfidencePattern)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m 76| [39m      [34mexpect[39m(result[33m.[39minsights[33m.[39maverageFrequency)[33m.[39m[34mtoBeGreaterThanOrEqual[39m(…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m19 passed[39m[22m[90m (20)[39m
+[2m   Start at [22m 19:18:24
+[2m   Duration [22m 142ms
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x1[39m
+[2K[1A[2K[G       [90mrerun x1[39m
+[2K[1A[2K[G       [2m[90mrerun x1[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m tests/unit/ml/pattern-recognition.test.ts[22m [34mx2[39m
+
+ [32m✓[39m tests/unit/ml/pattern-recognition.test.ts [2m ([22m[2m20 tests[22m[2m)[22m[90m 47[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m20 passed[39m[22m[90m (20)[39m
+[2m   Start at [22m 19:23:41
+[2m   Duration [22m 122ms
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x2[39m
+[2K[1A[2K[G       [90mrerun x2[39m
+[2K[1A[2K[G       [2m[90mrerun x2[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m tests/unit/ml/success-metrics.test.ts[22m [34mx1[39m
+
+ [33m❯[39m tests/unit/ml/success-metrics.test.ts [2m ([22m[2m32 tests[22m [2m|[22m [31m1 failed[39m[2m)[22m[90m 90[2mms[22m[39m
+[31m   [33m❯[31m tests/unit/ml/success-metrics.test.ts[2m > [22mSuccessMetricsAnalyzer[2m > [22manalyzeSession[2m > [22mshould include comparison to average with enough data[39m
+[31m     → expected NaN to be greater than or equal to 0[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/success-metrics.test.ts[2m > [22mSuccessMetricsAnalyzer[2m > [22manalyzeSession[2m > [22mshould include comparison to average with enough data
+[31m[1mAssertionError[22m: expected NaN to be greater than or equal to 0[39m
+[36m [2m❯[22m tests/unit/ml/success-metrics.test.ts:[2m105:56[22m[39m
+    [90m103| [39m
+    [90m104| [39m      [34mexpect[39m(analysis[33m.[39mcomparisonToAverage)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m105| [39m      [34mexpect[39m(analysis[33m.[39mcomparisonToAverage[33m?.[39mpercentile)[33m.[39m[34mtoBeGreaterThan[39m…
+    [90m   | [39m                                                       [31m^[39m
+    [90m106| [39m      [34mexpect[39m(analysis[33m.[39mcomparisonToAverage[33m?.[39mpercentile)[33m.[39m[34mtoBeLessThanOrE[39m…
+    [90m107| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m31 passed[39m[22m[90m (32)[39m
+[2m   Start at [22m 19:29:24
+[2m   Duration [22m 263ms
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x1[39m
+[2K[1A[2K[G       [90mrerun x1[39m
+[2K[1A[2K[G       [2m[90mrerun x1[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m src/ml/success-metrics.ts[22m [34mx2[39m
+
+ [32m✓[39m tests/unit/ml/success-metrics.test.ts [2m ([22m[2m32 tests[22m[2m)[22m[90m 80[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m32 passed[39m[22m[90m (32)[39m
+[2m   Start at [22m 19:30:22
+[2m   Duration [22m 208ms
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x2[39m
+[2K[1A[2K[G       [90mrerun x2[39m
+[2K[1A[2K[G       [2m[90mrerun x2[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m tests/unit/ml/recommendation-engine.test.ts[22m [34mx1[39m
+
+ [33m❯[39m tests/unit/ml/recommendation-engine.test.ts [2m ([22m[2m27 tests[22m [2m|[22m [31m1 failed[39m[2m)[22m[33m 335[2mms[22m[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate mode recommendations[39m
+[31m     → expected false to be true // Object.is equality[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate mode recommendations
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m126:67[22m[39m
+    [90m124| [39m      })[33m;[39m
+    [90m125| [39m
+    [90m126| [39m      [34mexpect[39m(result[33m.[39mrecommendations[33m.[39m[34msome[39m(r [33m=>[39m r[33m.[39mtype [33m===[39m [32m'mode'[39m))[33m.[39m[34mtoBe[39m…
+    [90m   | [39m                                                                  [31m^[39m
+    [90m127| [39m    })[33m;[39m
+    [90m128| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m26 passed[39m[22m[90m (27)[39m
+[2m   Start at [22m 19:36:00
+[2m   Duration [22m 690ms
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x1[39m
+[2K[1A[2K[G       [90mrerun x1[39m
+[2K[1A[2K[G       [2m[90mrerun x1[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m tests/unit/ml/recommendation-engine.test.ts[22m [34mx2[39m
+
+ [32m✓[39m tests/unit/ml/recommendation-engine.test.ts [2m ([22m[2m27 tests[22m[2m)[22m[90m 139[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m27 passed[39m[22m[90m (27)[39m
+[2m   Start at [22m 19:36:58
+[2m   Duration [22m 312ms
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x2[39m
+[2K[1A[2K[G       [90mrerun x2[39m
+[2K[1A[2K[G       [2m[90mrerun x2[39m[22m
 [2K[1A[2K[G

@@ -22,7 +22,7 @@ export class RecursiveValidator extends BaseValidator<Thought> {
     issues.push(...this.validateCommon(thought));
 
     // Check for base case definition (should appear early)
-    if (thought.contentNumber <= 2) {
+    if (thought.thoughtNumber <= 2) {
       const hasBaseCase = thought.content.toLowerCase().includes('base case') ||
                          thought.content.toLowerCase().includes('base condition') ||
                          thought.content.toLowerCase().includes('termination');
@@ -30,7 +30,7 @@ export class RecursiveValidator extends BaseValidator<Thought> {
       if (!hasBaseCase) {
         issues.push({
           severity: 'warning',
-          thoughtNumber: thought.contentNumber,
+          thoughtNumber: thought.thoughtNumber,
           description: 'Recursive reasoning should define base cases early',
           suggestion: 'Define base/termination cases before recursive steps',
           category: 'structural',
@@ -51,7 +51,7 @@ export class RecursiveValidator extends BaseValidator<Thought> {
     if (!hasRecursiveContent) {
       issues.push({
         severity: 'info',
-        thoughtNumber: thought.contentNumber,
+        thoughtNumber: thought.thoughtNumber,
         description: 'Recursive reasoning should make recursive structure explicit',
         suggestion: 'Describe how the problem breaks down into smaller instances',
         category: 'structural',
@@ -60,10 +60,10 @@ export class RecursiveValidator extends BaseValidator<Thought> {
 
     // Check for dependencies (recursive steps should reference previous steps)
     if ('dependencies' in thought && Array.isArray(thought.dependencies)) {
-      if (thought.contentNumber > 2 && thought.dependencies.length === 0) {
+      if (thought.thoughtNumber > 2 && thought.dependencies.length === 0) {
         issues.push({
           severity: 'warning',
-          thoughtNumber: thought.contentNumber,
+          thoughtNumber: thought.thoughtNumber,
           description: 'Recursive steps should depend on previous subproblems or base cases',
           suggestion: 'Add dependencies to show how subproblems combine',
           category: 'structural',
@@ -72,7 +72,7 @@ export class RecursiveValidator extends BaseValidator<Thought> {
     }
 
     // Check for combination/merging logic (after recursion)
-    if (thought.contentNumber > 2) {
+    if (thought.thoughtNumber > 2) {
       const hasCombination = thought.content.toLowerCase().includes('combine') ||
                             thought.content.toLowerCase().includes('merge') ||
                             thought.content.toLowerCase().includes('build up');
@@ -80,7 +80,7 @@ export class RecursiveValidator extends BaseValidator<Thought> {
       if (!hasCombination && thought.nextThoughtNeeded) {
         issues.push({
           severity: 'info',
-          thoughtNumber: thought.contentNumber,
+          thoughtNumber: thought.thoughtNumber,
           description: 'Consider explaining how subproblem solutions combine',
           suggestion: 'Describe how to build the final solution from recursive calls',
           category: 'logical',
@@ -89,7 +89,7 @@ export class RecursiveValidator extends BaseValidator<Thought> {
     }
 
     // Warn about potential infinite recursion
-    if (thought.contentNumber > thought.totalThoughts * 0.8) {
+    if (thought.thoughtNumber > thought.totalThoughts * 0.8) {
       const hasTermination = thought.content.toLowerCase().includes('terminat') ||
                             thought.content.toLowerCase().includes('base') ||
                             thought.content.toLowerCase().includes('stop');
@@ -97,7 +97,7 @@ export class RecursiveValidator extends BaseValidator<Thought> {
       if (!hasTermination && thought.nextThoughtNeeded) {
         issues.push({
           severity: 'warning',
-          thoughtNumber: thought.contentNumber,
+          thoughtNumber: thought.thoughtNumber,
           description: 'Deep recursion detected - ensure termination conditions are met',
           suggestion: 'Verify that base cases are being reached',
           category: 'logical',
