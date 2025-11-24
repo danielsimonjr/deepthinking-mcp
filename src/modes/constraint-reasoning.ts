@@ -3,7 +3,7 @@
  * Phase 4E Task 8.3 (File Task 26): Reasoning with constraints and CSPs
  */
 
-import type { Thought } from '../types/index.js';
+import type { BaseThought, ThinkingMode } from '../types/index.js';
 
 /**
  * Constraint type
@@ -121,9 +121,8 @@ export type ValueOrdering =
 /**
  * Constraint reasoning thought
  */
-// @ts-expect-error - Phase 4 mode not yet added to ThinkingMode enum
-export interface ConstraintReasoningThought extends Thought {
-  mode: 'constraint';
+export interface ConstraintReasoningThought extends BaseThought {
+  mode: ThinkingMode.CONSTRAINT;
   csp: CSP;
   assignments: Assignment[];
   solutions: Solution[];

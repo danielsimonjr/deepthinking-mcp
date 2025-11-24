@@ -3,7 +3,7 @@
  * Phase 4E Task 8.5 (File Task 28): Reasoning with randomness and uncertainty
  */
 
-import type { Thought } from '../types/index.js';
+import type { BaseThought, ThinkingMode } from '../types/index.js';
 
 /**
  * Stochastic process type
@@ -153,9 +153,8 @@ export interface MarkovChainAnalysis {
 /**
  * Stochastic reasoning thought
  */
-// @ts-expect-error - Phase 4 mode not yet added to ThinkingMode enum
-export interface StochasticReasoningThought extends Thought {
-  mode: 'stochastic';
+export interface StochasticReasoningThought extends BaseThought {
+  mode: ThinkingMode.STOCHASTIC;
   randomVariables: RandomVariable[];
   processes: StochasticProcess[];
   simulations: SimulationResult[];
