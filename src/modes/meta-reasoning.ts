@@ -2,7 +2,6 @@
  * Meta-Reasoning Mode (v3.4.0)
  * Phase 4E Task 8.1 (File Task 24): Reasoning about reasoning itself
  */
-// @ts-nocheck - Type definitions need refactoring
 
 import type { ThinkingSession, Thought } from '../types/index.js';
 import type { ThinkingMode } from '../types/core.js';
@@ -59,6 +58,7 @@ export interface CognitiveBias {
 /**
  * Meta-reasoning thought
  */
+// @ts-expect-error - Phase 4 mode not yet added to ThinkingMode enum
 export interface MetaReasoningThought extends Thought {
   mode: 'metareasoning';
   focus: MetaReasoningFocus;

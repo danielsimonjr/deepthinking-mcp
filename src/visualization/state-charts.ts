@@ -2,9 +2,9 @@
  * Reasoning State Chart Diagrams (v3.3.0)
  * Phase 4B Task 3.4: State machine visualizations for reasoning modes
  */
-// @ts-nocheck - Requires type refactoring
 
 import type { ThinkingSession } from '../types/session.js';
+// @ts-expect-error - Import used in types
 import type { Thought, ThinkingMode } from '../types/index.js';
 import { MermaidGenerator, type StateNode, type StateTransition } from './mermaid.js';
 
@@ -190,6 +190,7 @@ export class ReasoningStateChart {
     for (const mode of allModes) {
       const stateId = this.getModeStateId(mode);
       const label = this.formatModeName(mode);
+      // @ts-expect-error - Mode string/enum conversion
       const used = modesUsed.has(mode);
 
       lines.push(`  state "${label}" as ${stateId} {`);

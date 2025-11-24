@@ -2,7 +2,6 @@
  * Interactive Mermaid Features (v3.3.0)
  * Phase 4B Task 3.2: Animations, event handlers, dynamic updates
  */
-// @ts-nocheck - Requires type refactoring
 
 import type { MermaidGenerator } from './mermaid.js';
 
@@ -45,6 +44,7 @@ export interface EventHandler {
  * Interactive features manager for Mermaid diagrams
  */
 export class InteractiveMermaid {
+// @ts-ignore - Variable used in class instance
   private generator: MermaidGenerator;
   private animations: Map<string, AnimationConfig>;
   private eventHandlers: Map<string, EventHandler[]>;
@@ -196,6 +196,7 @@ export class InteractiveMermaid {
       js.push(`  if (element_${elementId}) {`);
 
       for (const handler of handlers) {
+      // @ts-expect-error - Unused variable
         const callbackName = typeof handler.callback === 'string'
           ? handler.callback
           : `callback_${elementId}_${handler.event}`;

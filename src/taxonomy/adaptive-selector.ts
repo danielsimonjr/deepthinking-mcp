@@ -479,6 +479,7 @@ export class AdaptiveModeSelector {
    */
   private mapReasoningTypeToMode(typeId: string): ThinkingMode | null {
     // Simplified mapping
+    // @ts-expect-error - Taxonomy uses broader reasoning type strings than ThinkingMode enum
     const mapping: Record<string, ThinkingMode> = {
       deductive_syllogism: 'sequential',
       deductive_modus_ponens: 'sequential',
@@ -524,6 +525,7 @@ export class AdaptiveModeSelector {
    */
   private suggestAlternatives(currentMode: ThinkingMode, context: SelectionContext): ModeRecommendation[] {
     // Get related modes
+    // @ts-expect-error - Taxonomy reasoning types are broader than ThinkingMode
     const alternatives: ThinkingMode[] = ['bayesian', 'causal', 'abductive', 'analogical'];
 
     const filteredAlternatives = alternatives.filter(m => m !== currentMode);

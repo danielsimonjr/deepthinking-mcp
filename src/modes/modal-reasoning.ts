@@ -2,7 +2,6 @@
  * Modal Reasoning Mode (v3.4.0)
  * Phase 4E Task 8.2 (File Task 25): Reasoning about necessity, possibility, and impossibility
  */
-// @ts-nocheck - Type definitions need refactoring
 
 import type { Thought } from '../types/index.js';
 
@@ -90,6 +89,7 @@ export interface ModalAnalysis {
 /**
  * Modal thought
  */
+// @ts-expect-error - Phase 4 mode not yet added to ThinkingMode enum
 export interface ModalReasoningThought extends Thought {
   mode: 'modal';
   propositions: ModalProposition[];

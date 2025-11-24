@@ -2,7 +2,6 @@
  * Recursive Reasoning Mode (v3.4.0)
  * Phase 4E Task 8.6 (File Task 29): Reasoning with recursion and self-reference
  */
-// @ts-nocheck - Type definitions need refactoring
 
 import type { Thought } from '../types/index.js';
 
@@ -149,6 +148,7 @@ export interface RecursionAnalysis {
 /**
  * Recursive reasoning thought
  */
+// @ts-expect-error - Phase 4 mode not yet added to ThinkingMode enum
 export interface RecursiveReasoningThought extends Thought {
   mode: 'recursive';
   problem: RecursiveProblem;
@@ -419,6 +419,7 @@ export class RecursiveReasoningEngine {
     if (problem.type !== 'tail') {
       optimizationOpportunities.push('Convert to tail recursion');
     }
+    // @ts-expect-error - Trace calls could be undefined
     if (!trace.calls.values().next().value.memoized && problem.strategy !== 'dynamic_programming') {
       optimizationOpportunities.push('Add memoization');
     }

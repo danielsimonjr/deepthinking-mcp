@@ -2,7 +2,6 @@
  * Template Manager (v3.4.0)
  * Phase 4 Task 9.3: Template management and instantiation
  */
-// @ts-nocheck - Requires type refactoring
 
 import type {
   SessionTemplate,
@@ -173,6 +172,7 @@ export class TemplateManager {
       author: options.author,
       thoughts: [],
       tags: [...template.tags, 'template', `template:${template.id}`],
+        // @ts-expect-error - metadata not in type
       metadata: {
         templateId: template.id,
         templateName: template.name,
@@ -229,9 +229,8 @@ export class TemplateManager {
 
     // Update averages (simplified - would need proper running average)
     const thoughtCount = session.thoughts.length;
-    const completed = session.thoughts.length > 0 &&
-      !session.thoughts[session.thoughts.length - 1].nextThoughtNeeded;
-    const confidence = session.confidence || 0;
+    const completed = session.thoughts.length > 0 && session.isComplete;
+    const confidence = (session as any).confidence || 0;
 
     stats.averageThoughts = (stats.averageThoughts * (stats.usageCount - 1) + thoughtCount) / stats.usageCount;
     stats.averageConfidence = (stats.averageConfidence * (stats.usageCount - 1) + confidence) / stats.usageCount;

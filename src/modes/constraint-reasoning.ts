@@ -2,7 +2,6 @@
  * Constraint-Based Reasoning Mode (v3.4.0)
  * Phase 4E Task 8.3 (File Task 26): Reasoning with constraints and CSPs
  */
-// @ts-nocheck - Type definitions need refactoring
 
 import type { Thought } from '../types/index.js';
 
@@ -122,6 +121,7 @@ export type ValueOrdering =
 /**
  * Constraint reasoning thought
  */
+// @ts-expect-error - Phase 4 mode not yet added to ThinkingMode enum
 export interface ConstraintReasoningThought extends Thought {
   mode: 'constraint';
   csp: CSP;

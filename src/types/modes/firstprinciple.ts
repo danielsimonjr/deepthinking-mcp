@@ -2,7 +2,6 @@
  * First-Principles Reasoning Mode - Type Definitions
  * Deductive reasoning from foundational axioms and principles
  */
-// @ts-nocheck - Requires type refactoring
 
 import { BaseThought, ThinkingMode } from '../core.js';
 
@@ -64,5 +63,6 @@ export interface FirstPrincipleThought extends BaseThought {
  * Type guard for FirstPrincipleThought
  */
 export function isFirstPrincipleThought(thought: BaseThought): thought is FirstPrincipleThought {
+      // @ts-expect-error - String comparison issue
   return thought.mode === 'firstprinciple';
 }

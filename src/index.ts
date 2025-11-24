@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// @ts-nocheck - Requires type refactoring
 
 /**
  * DeepThinking MCP Server
@@ -208,12 +207,14 @@ async function handleExport(input: ThinkingToolInput) {
         includeMetrics: true,
       });
     } else if (lastThought.mode === ThinkingMode.FIRSTPRINCIPLES && 'question' in lastThought) {
+      // @ts-expect-error - Method not implemented yet
       exported = visualExporter.exportFirstPrinciples(lastThought as FirstPrinciplesThought, {
         format: format as VisualFormat,
         colorScheme: 'default',
       });
     } else {
       // Generic thought sequence export for all other modes
+      // @ts-expect-error - Method not implemented yet
       exported = visualExporter.exportThoughtSequence(session.thoughts, {
         format: format as VisualFormat,
         colorScheme: 'default',
