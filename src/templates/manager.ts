@@ -360,4 +360,11 @@ export class TemplateManager {
 
     return this.searchTemplates(query);
   }
+
+  /**
+   * Get usage statistics for a template
+   */
+  getUsageStats(templateId: string) {
+    return this.stats.get(templateId) || { timesUsed: 0, lastUsed: null };
+  }
 }
