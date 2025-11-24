@@ -150,6 +150,7 @@ export interface SearchHighlight {
  */
 export interface SearchResults {
   results: SearchResult[];
+  sessions: ThinkingSession[]; // Convenience property for direct session access
   total: number;
   page: number;
   pageSize: number;
