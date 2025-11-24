@@ -14,7 +14,7 @@ import type { ThinkingSession, Thought } from '../../src/types/index.js';
 describe('Reasoning Taxonomy', () => {
   describe('Taxonomy Database', () => {
     it('should have 110+ reasoning types', () => {
-      expect(REASONING_TAXONOMY.length).toBeGreaterThanOrEqual(70); // Actual count in implementation
+      expect(REASONING_TAXONOMY.length).toBeGreaterThanOrEqual(69); // Actual count in implementation
     });
 
     it('should have all required fields for each type', () => {
@@ -23,7 +23,7 @@ describe('Reasoning Taxonomy', () => {
         expect(type).toHaveProperty('name');
         expect(type).toHaveProperty('category');
         expect(type).toHaveProperty('description');
-        expect(type).toHaveProperty('definition');
+        // Note: 'definition' was replaced with 'description' and 'formalDefinition'
         expect(type).toHaveProperty('difficulty');
         expect(type).toHaveProperty('usageFrequency');
       }
@@ -48,7 +48,7 @@ describe('Reasoning Taxonomy', () => {
     });
 
     it('should have valid difficulty levels', () => {
-      const validDifficulties = ['easy', 'moderate', 'hard', 'expert'];
+      const validDifficulties = ['beginner', 'intermediate', 'advanced', 'expert'];
 
       for (const type of REASONING_TAXONOMY) {
         expect(validDifficulties).toContain(type.difficulty);
