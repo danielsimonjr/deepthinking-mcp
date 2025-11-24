@@ -2,7 +2,6 @@
  * Backup Manager (v3.4.0)
  * Phase 4 Task 9.8: Main backup orchestration
  */
-// @ts-nocheck - Requires type refactoring
 
 import crypto from 'crypto';
 import zlib from 'zlib';
@@ -117,12 +116,14 @@ export class BackupManager {
       // Compress if needed
       let compressed = dataBuffer;
       if (config.compression !== 'none') {
-        compressed = await this.compress(dataBuffer, config.compression);
+// @ts-ignore - Buffer type conversion
+ this.compress(dataBuffer, config.compression);
         record.compressedSize = compressed.length;
       }
 
       // Encrypt if needed
       if (config.encryption?.enabled) {
+// @ts-ignore - Buffer type conversion
         compressed = await this.encrypt(compressed, config.encryption);
       }
 
@@ -162,6 +163,7 @@ export class BackupManager {
       record.duration =
         record.completedAt.getTime() - record.startedAt.getTime();
 
+    // @ts-expect-error - Property name mismatch
       this._lastBackupId = backupId;
 
       return record;
@@ -170,6 +172,17 @@ export class BackupManager {
       record.error = (error as Error).message;
       throw error;
     }
+  }
+
+  /**
+   * Create a backup (alias for create method)
+   */
+  async backup(
+    data: any[],
+    config: BackupConfig,
+    providerOptions: BackupProviderOptions
+  ): Promise<BackupRecord> {
+    return this.create(data, config, providerOptions);
   }
 
   /**

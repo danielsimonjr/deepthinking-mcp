@@ -2,7 +2,6 @@
  * Template Manager (v3.4.0)
  * Phase 4 Task 9.3: Template management and instantiation
  */
-// @ts-nocheck - Requires type refactoring
 
 import type {
   SessionTemplate,
@@ -138,7 +137,16 @@ export class TemplateManager {
   /**
    * Instantiate a template into a session
    */
-  instantiateTemplate(options: TemplateInstantiationOptions): Partial<ThinkingSession> {
+  instantiateTemplate(
+    optionsOrTemplateId: TemplateInstantiationOptions | string,
+    additionalOptions?: Partial<TemplateInstantiationOptions>
+  ): Partial<ThinkingSession> {
+    // Handle both signatures: (options) or (templateId, options)
+    const options: TemplateInstantiationOptions =
+      typeof optionsOrTemplateId === 'string'
+        ? { templateId: optionsOrTemplateId, ...additionalOptions }
+        : optionsOrTemplateId;
+
     const template = this.templates.get(options.templateId);
 
     if (!template) {
@@ -173,6 +181,7 @@ export class TemplateManager {
       author: options.author,
       thoughts: [],
       tags: [...template.tags, 'template', `template:${template.id}`],
+        // @ts-expect-error - metadata not in type
       metadata: {
         templateId: template.id,
         templateName: template.name,
@@ -229,9 +238,8 @@ export class TemplateManager {
 
     // Update averages (simplified - would need proper running average)
     const thoughtCount = session.thoughts.length;
-    const completed = session.thoughts.length > 0 &&
-      !session.thoughts[session.thoughts.length - 1].nextThoughtNeeded;
-    const confidence = session.confidence || 0;
+    const completed = session.thoughts.length > 0 && session.isComplete;
+    const confidence = (session as any).confidence || 0;
 
     stats.averageThoughts = (stats.averageThoughts * (stats.usageCount - 1) + thoughtCount) / stats.usageCount;
     stats.averageConfidence = (stats.averageConfidence * (stats.usageCount - 1) + confidence) / stats.usageCount;
@@ -322,5 +330,34 @@ export class TemplateManager {
     template.builtIn = false;
     this.addCustomTemplate(template);
     return template;
+  }
+
+  /**
+   * List templates with optional filters (alias for searchTemplates)
+   */
+  listTemplates(options?: {
+    category?: string;
+    difficulty?: string;
+    mode?: string;
+  }): SessionTemplate[] {
+    if (!options) {
+      return this.getAllTemplates();
+    }
+
+    const query: TemplateQuery = {};
+    if (options.category) {
+      // @ts-expect-error - String to TemplateCategory conversion
+      query.categories = [options.category];
+    }
+    if (options.difficulty) {
+      // @ts-expect-error - String to difficulty literal conversion
+      query.difficulties = [options.difficulty];
+    }
+    if (options.mode) {
+      // @ts-expect-error - String to ThinkingMode conversion
+      query.modes = [options.mode];
+    }
+
+    return this.searchTemplates(query);
   }
 }

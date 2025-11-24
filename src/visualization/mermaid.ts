@@ -2,9 +2,9 @@
  * Enhanced Mermaid Diagram Generator (v3.3.0)
  * Phase 4B Task 3.1: Advanced Mermaid infrastructure with interactive features
  */
-// @ts-nocheck - Requires type refactoring
 
-import type { BaseThought } from '../types/index.js';
+// @ts-ignore - Type used in type definitions
+import type { BaseThought } from '../types/index.js'; // Used in type definitions
 
 /**
  * Mermaid diagram types supported

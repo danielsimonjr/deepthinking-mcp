@@ -2,7 +2,6 @@
  * Mermaid Generator Infrastructure (v3.4.0)
  * Phase 4B Task 3.1: Enhanced Mermaid diagram generation
  *
-// @ts-nocheck - Requires type refactoring
  * Provides advanced Mermaid diagram generation with styling, themes, and configuration
  */
 

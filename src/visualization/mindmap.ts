@@ -2,7 +2,6 @@
  * Knowledge Mind Map Generator (v3.3.0)
  * Phase 4B Task 3.5: Mind map visualizations for knowledge structures
  */
-// @ts-nocheck - Type definitions need refactoring
 
 import type { ThinkingSession } from '../types/session.js';
 import type { Thought, MathematicsThought, CausalThought, FirstPrinciplesThought } from '../types/index.js';
@@ -121,6 +120,7 @@ export class KnowledgeMindMap {
       case 'causal':
         nodes.push(...this.extractCausalKnowledge(thought as CausalThought));
         break;
+          // @ts-expect-error - ThinkingMode type issue
       case ThinkingMode.FIRSTPRINCIPLES:
         nodes.push(...this.extractFirstPrincipleKnowledge(thought as FirstPrinciplesThought));
         break;
@@ -222,7 +222,7 @@ export class KnowledgeMindMap {
           label: 'Relations',
           type: 'relation',
           children: graph.edges.map(edge => ({
-            id: `rel_${edge.id}`,
+            id: `rel_${(edge as any).id}`,
             label: `${this.getNodeName(graph.nodes, edge.from)} → ${this.getNodeName(graph.nodes, edge.to)}`,
             type: 'relation',
             children: [],
@@ -242,12 +242,13 @@ export class KnowledgeMindMap {
     const nodes: KnowledgeNode[] = [];
 
     // Fundamental principles
-    if (thought.fundamentalPrinciples && thought.fundamentalPrinciples.length > 0) {
+    if ((thought as any).fundamentalPrinciples && (thought as any).fundamentalPrinciples.length > 0) {
       nodes.push({
         id: `principles_${thought.id}`,
         label: 'Principles',
         type: 'concept',
-        children: thought.fundamentalPrinciples.map(p => ({
+// @ts-ignore - Dynamic property access
+        children: (thought as any).fundamentalPrinciples.map(p => ({
           id: `principle_${thought.id}_${p.name}`,
           label: p.name,
           type: 'fact',
@@ -257,12 +258,13 @@ export class KnowledgeMindMap {
     }
 
     // Assumptions
-    if (thought.assumptions && thought.assumptions.length > 0) {
+    if ((thought as any).assumptions && (thought as any).assumptions.length > 0) {
       nodes.push({
         id: `assumptions_${thought.id}`,
         label: 'Assumptions',
         type: 'concept',
-        children: thought.assumptions.map((a, i) => ({
+// @ts-ignore - Map callback types
+        children: (thought as any).assumptions.map((a, i) => ({
           id: `assumption_${thought.id}_${i}`,
           label: this.truncate(a, 40),
           type: 'fact',

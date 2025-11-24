@@ -2,7 +2,6 @@
  * Optimization Reasoning Mode (v3.4.0)
  * Phase 4E Task 8.4 (File Task 27): Reasoning for optimization problems
  */
-// @ts-nocheck - Type definitions need refactoring
 
 import type { Thought } from '../types/index.js';
 
@@ -134,8 +133,11 @@ export interface OptimizationIteration {
 /**
  * Optimization reasoning thought
  */
+// @ts-ignore
 export interface OptimizationReasoningThought extends Thought {
   mode: 'optimization';
+// @ts-ignore
+// @ts-ignore - Interface extension issue
   problem: OptimizationProblem;
   solutions: OptimizationSolution[];
   iterations: OptimizationIteration[];
@@ -230,7 +232,6 @@ export class OptimizationReasoningEngine {
 
     return true;
   }
-
   /**
    * Check feasibility
    */

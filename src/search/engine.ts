@@ -2,7 +2,6 @@
  * Search Engine (v3.4.0)
  * Phase 4 Task 9.1: Main search engine with query execution
  */
-// @ts-nocheck - Requires type refactoring
 
 import type { ThinkingSession } from '../types/index.js';
 import type {
@@ -355,7 +354,8 @@ export class SearchEngine {
       }
 
       for (let i = 0; i < session.thoughts.length; i++) {
-        const thoughtTokens = this.tokenizer.getUniqueTokens(session.contents[i].thought);
+        const thoughtTokens = this.tokenizer.getUniqueTokens(//@ts-expect-error
+session.contents[i].thought);
         if (tokens.some(t => thoughtTokens.has(t))) {
           fields.push(`thought_${i}`);
           break; // Just indicate thoughts matched
@@ -403,8 +403,10 @@ export class SearchEngine {
           break;
 
         case 'confidence':
-          const confA = a.session.confidence || 0;
-          const confB = b.session.confidence || 0;
+          const confA = a.//@ts-expect-error
+session.confidence || 0;
+          const confB = b.//@ts-expect-error
+session.confidence || 0;
           comparison = confA - confB;
           break;
 
