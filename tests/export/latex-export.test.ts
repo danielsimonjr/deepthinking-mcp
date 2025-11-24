@@ -61,11 +61,11 @@ describe('LaTeX Exporter', () => {
 
   describe('Document Structure', () => {
     it('should export complete document', () => {
-      const thought: Thought = {
+      const thought: any = {
         thoughtNumber: 1,
         totalThoughts: 1,
         nextThoughtNeeded: false,
-        thought: 'Test thought',
+        content: 'Test thought',
         mode: 'sequential',
       };
       session.thoughts = [thought];
@@ -102,11 +102,11 @@ describe('LaTeX Exporter', () => {
 
   describe('Mathematics Mode Export', () => {
     it('should export mathematical equations', () => {
-      const mathThought: MathematicsThought = {
+      const mathThought: any = {
         thoughtNumber: 1,
         totalThoughts: 1,
         nextThoughtNeeded: false,
-        thought: 'Mathematical proof',
+        content: 'Mathematical proof',
         mode: 'mathematics',
         equation: 'x^2 + y^2 = z^2',
         proofStrategy: { type: 'direct', steps: [] },
@@ -121,11 +121,11 @@ describe('LaTeX Exporter', () => {
 
     it('should handle inline math mode', () => {
       const exporter = new LaTeXExporter({ inlineMath: true });
-      const mathThought: MathematicsThought = {
+      const mathThought: any = {
         thoughtNumber: 1,
         totalThoughts: 1,
         nextThoughtNeeded: false,
-        thought: 'Inline equation',
+        content: 'Inline equation',
         mode: 'mathematics',
         equation: 'E = mc^2',
         proofStrategy: { type: 'direct', steps: [] },
@@ -138,11 +138,11 @@ describe('LaTeX Exporter', () => {
     });
 
     it('should format theorem environments', () => {
-      const mathThought: MathematicsThought = {
+      const mathThought: any = {
         thoughtNumber: 1,
         totalThoughts: 1,
         nextThoughtNeeded: false,
-        thought: 'Pythagorean theorem',
+        content: 'Pythagorean theorem',
         mode: 'mathematics',
         equation: 'a^2 + b^2 = c^2',
         proofStrategy: { type: 'direct', steps: ['Step 1', 'Step 2'] },
@@ -158,11 +158,11 @@ describe('LaTeX Exporter', () => {
   describe('Diagram Integration', () => {
     it('should include diagrams when enabled', () => {
       const exporter = new LaTeXExporter({ renderDiagrams: true });
-      const causalThought: CausalThought = {
+      const causalThought: any = {
         thoughtNumber: 1,
         totalThoughts: 1,
         nextThoughtNeeded: false,
-        thought: 'Causal analysis',
+        content: 'Causal analysis',
         mode: 'causal',
         graph: {
           nodes: [{ id: 'A', label: 'A' }],
@@ -178,11 +178,11 @@ describe('LaTeX Exporter', () => {
 
     it('should exclude diagrams when disabled', () => {
       const exporter = new LaTeXExporter({ renderDiagrams: false });
-      const causalThought: CausalThought = {
+      const causalThought: any = {
         thoughtNumber: 1,
         totalThoughts: 1,
         nextThoughtNeeded: false,
-        thought: 'Causal analysis',
+        content: 'Causal analysis',
         mode: 'causal',
         graph: {
           nodes: [{ id: 'A', label: 'A' }],
@@ -253,11 +253,11 @@ describe('LaTeX Exporter', () => {
     });
 
     it('should generate thought diagram', () => {
-      const causalThought: CausalThought = {
+      const causalThought: any = {
         thoughtNumber: 1,
         totalThoughts: 1,
         nextThoughtNeeded: false,
-        thought: 'Causal analysis',
+        content: 'Causal analysis',
         mode: 'causal',
         graph: {
           nodes: [{ id: 'A', label: 'A' }],
@@ -271,11 +271,11 @@ describe('LaTeX Exporter', () => {
     });
 
     it('should generate session diagrams', () => {
-      const causalThought: CausalThought = {
+      const causalThought: any = {
         thoughtNumber: 1,
         totalThoughts: 1,
         nextThoughtNeeded: false,
-        thought: 'Causal analysis',
+        content: 'Causal analysis',
         mode: 'causal',
         graph: {
           nodes: [{ id: 'A', label: 'A' }],
@@ -290,11 +290,11 @@ describe('LaTeX Exporter', () => {
     });
 
     it('should generate Mermaid appendix', () => {
-      const causalThought: CausalThought = {
+      const causalThought: any = {
         thoughtNumber: 1,
         totalThoughts: 1,
         nextThoughtNeeded: false,
-        thought: 'Causal analysis',
+        content: 'Causal analysis',
         mode: 'causal',
         graph: {
           nodes: [{ id: 'A', label: 'A' }],
@@ -310,11 +310,11 @@ describe('LaTeX Exporter', () => {
     });
 
     it('should generate complete integrated document', () => {
-      const causalThought: CausalThought = {
+      const causalThought: any = {
         thoughtNumber: 1,
         totalThoughts: 1,
         nextThoughtNeeded: false,
-        thought: 'Causal analysis',
+        content: 'Causal analysis',
         mode: 'causal',
         graph: {
           nodes: [{ id: 'A', label: 'A' }],
@@ -337,11 +337,11 @@ describe('LaTeX Exporter', () => {
 
   describe('Special Characters Escaping', () => {
     it('should escape LaTeX special characters', () => {
-      const thought: Thought = {
+      const thought: any = {
         thoughtNumber: 1,
         totalThoughts: 1,
         nextThoughtNeeded: false,
-        thought: 'Special chars: $ % & # _',
+        content: 'Special chars: $ % & # _',
         mode: 'sequential',
       };
       session.thoughts = [thought];

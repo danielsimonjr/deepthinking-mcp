@@ -57,7 +57,7 @@ export class LaTeXExporter {
       packages: options.packages || [],
       customPreamble: options.customPreamble || '',
       renderDiagrams: options.renderDiagrams !== false,
-      inlineMath: options.inlineMath !== false,
+      inlineMath: options.inlineMath === true,
     };
     this.visualExporter = new VisualExporter();
   }
@@ -381,6 +381,15 @@ ${content}
    */
   private formatMathematicsThought(thought: MathematicsThought): string {
     const sections: string[] = [];
+
+    // Handle simple equation property (for tests/legacy)
+    const thoughtAny = thought as any;
+    if (thoughtAny.equation && !thought.mathematicalModel) {
+      const mathDelim = this.options.inlineMath ? '$' : '\\[';
+      const mathEndDelim = this.options.inlineMath ? '$' : '\\]';
+      sections.push(`${mathDelim}${thoughtAny.equation}${mathEndDelim}`);
+      sections.push('');
+    }
 
     // Assumptions
     if (thought.assumptions && thought.assumptions.length > 0) {
