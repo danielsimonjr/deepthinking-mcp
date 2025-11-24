@@ -10876,4 +10876,1972 @@ C:/mcp-servers/deepthinking-mcp/src/export/visual.ts:1312:10: ERROR: Expected ";
        [34mrerun x6[39m
 [2K[1A[2K[G       [90mrerun x6[39m
 [2K[1A[2K[G       [2m[90mrerun x6[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m src/export/visual.ts[22m
+
+ [32m✓[39m tests/unit/visual.test.ts [2m ([22m[2m13 tests[22m[2m)[22m[90m 44[2mms[22m[39m
+ [33m❯[39m tests/unit/export/latex.test.ts [2m ([22m[2m23 tests[22m [2m|[22m [31m1 failed[39m[2m)[22m[90m 98[2mms[22m[39m
+[31m   [33m❯[31m tests/unit/export/latex.test.ts[2m > [22mLaTeX Export[2m > [22mDiagram Embedding[2m > [22mshould not embed diagrams when renderDiagrams is false[39m
+[31m     → expected '\documentclass[11pt,letterpaper]{arti…' to contain '\begin{tikzpicture}'[39m
+ [33m❯[39m tests/export/latex-export.test.ts [2m ([22m[2m27 tests[22m [2m|[22m [31m5 failed[39m[2m)[22m[90m 103[2mms[22m[39m
+[31m   [33m❯[31m tests/export/latex-export.test.ts[2m > [22mLaTeX Exporter[2m > [22mDocument Structure[2m > [22mshould export complete document[39m
+[31m     → Cannot read properties of undefined (reading 'toISOString')[39m
+[31m   [33m❯[31m tests/export/latex-export.test.ts[2m > [22mLaTeX Exporter[2m > [22mMathematics Mode Export[2m > [22mshould export mathematical equations[39m
+[31m     → expected '\documentclass[11pt,letterpaper]{arti…' to contain 'x^2 + y^2 = z^2'[39m
+[31m   [33m❯[31m tests/export/latex-export.test.ts[2m > [22mLaTeX Exporter[2m > [22mMathematics Mode Export[2m > [22mshould handle inline math mode[39m
+[31m     → expected '\documentclass[11pt,letterpaper]{arti…' to contain '$'[39m
+[31m   [33m❯[31m tests/export/latex-export.test.ts[2m > [22mLaTeX Exporter[2m > [22mLaTeX-Mermaid Integration[2m > [22mshould generate complete integrated document[39m
+[31m     → expected '\documentclass[11pt]{article}\n\n\n% …' to contain 'Causal analysis'[39m
+[31m   [33m❯[31m tests/export/latex-export.test.ts[2m > [22mLaTeX Exporter[2m > [22mSpecial Characters Escaping[2m > [22mshould escape LaTeX special characters[39m
+[31m     → Cannot read properties of undefined (reading 'toISOString')[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 6 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/export/latex.test.ts[2m > [22mLaTeX Export[2m > [22mDiagram Embedding[2m > [22mshould not embed diagrams when renderDiagrams is false
+[31m[1mAssertionError[22m: expected '\documentclass[11pt,letterpaper]{arti…' to contain '\begin{tikzpicture}'[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- \begin{tikzpicture}[39m
+[31m+ \documentclass[11pt,letterpaper]{article}[39m
+[31m+[39m
+[31m+ % Core packages[39m
+[31m+ \usepackage[utf8]{inputenc}[39m
+[31m+ \usepackage[T1]{fontenc}[39m
+[31m+ \usepackage{amsmath}[39m
+[31m+ \usepackage{amssymb}[39m
+[31m+ \usepackage{amsthm}[39m
+[31m+ \usepackage{graphicx}[39m
+[31m+ \usepackage{xcolor}[39m
+[31m+ \usepackage{listings}[39m
+[31m+ \usepackage{geometry}[39m
+[31m+ \usepackage{enumitem}[39m
+[31m+ \usepackage{tikz}[39m
+[31m+ \usepackage{booktabs}[39m
+[31m+ \usepackage{longtable}[39m
+[31m+ \usepackage{multirow}[39m
+[31m+ \usepackage{minted}[39m
+[31m+[39m
+[31m+ % Color scheme setup[39m
+[31m+ % Default color scheme[39m
+[31m+ \definecolor{thoughtcolor}{RGB}{52,73,94}[39m
+[31m+ \definecolor{metacolor}{RGB}{127,140,141}[39m
+[31m+ \definecolor{uncertaintycolor}{RGB}{231,76,60}[39m
+[31m+ \definecolor{mathcolor}{RGB}{46,134,193}[39m
+[31m+ \definecolor{physicscolor}{RGB}{142,68,173}[39m
+[31m+ \definecolor{codebackground}{RGB}{247,247,247}[39m
+[31m+[39m
+[31m+ % Theorem environments[39m
+[31m+ \newtheorem{theorem}{Theorem}[section][39m
+[31m+ \newtheorem{lemma}[theorem]{Lemma}[39m
+[31m+ \newtheorem{corollary}[theorem]{Corollary}[39m
+[31m+ \newtheorem{definition}[theorem]{Definition}[39m
+[31m+ \newtheorem{proposition}[theorem]{Proposition}[39m
+[31m+[39m
+[31m+ % Custom commands[39m
+[31m+ \newcommand{\thoughtsection}[2]{%[39m
+[31m+   \subsection{Thought #1: #2}%[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ \newcommand{\metadata}[2]{%[39m
+[31m+   \textbf{#1:} \textit{#2}\\%[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ \newcommand{\uncertainty}[1]{%[39m
+[31m+   \textcolor{uncertaintycolor}{[Uncertainty: #1]}%[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ % Custom preamble[39m
+[31m+[39m
+[31m+[39m
+[31m+ % Document metadata setup[39m
+[31m+ \usepackage{fancyhdr}[39m
+[31m+ \pagestyle{fancy}[39m
+[31m+ \fancyhead[L]{DeepThinking Session}[39m
+[31m+ \fancyhead[R]{\today}[39m
+[31m+ \fancyfoot[C]{\thepage}[39m
+[31m+[39m
+[31m+ % Hyperref should be last[39m
+[31m+ \usepackage{hyperref}[39m
+[31m+ \hypersetup{[39m
+[31m+   colorlinks=true,[39m
+[31m+   linkcolor=blue,[39m
+[31m+   citecolor=blue,[39m
+[31m+   urlcolor=blue,[39m
+[31m+ }[39m
+[31m+[39m
+[31m+[39m
+[31m+ \begin{document}[39m
+[31m+[39m
+[31m+ \title{Test Session}[39m
+[31m+[39m
+[31m+ \date{2025-01-01}[39m
+[31m+ \maketitle[39m
+[31m+[39m
+[31m+ \section*{Session Metadata}[39m
+[31m+ \begin{description}[leftmargin=3cm,style=nextline][39m
+[31m+   \item[Session ID] \texttt{test-session-1}[39m
+[31m+   \item[Mode] \texttt{sequential}[39m
+[31m+   \item[Created] 2025-01-01[39m
+[31m+   \item[Updated] 2025-01-01[39m
+[31m+   \item[Total Thoughts] 1[39m
+[31m+   \item[Revisions] 0[39m
+[31m+   \item[Average Uncertainty] 0.300[39m
+[31m+   \item[Time Spent] 1h[39m
+[31m+   \item[Tags] test[39m
+[31m+ \end{description}[39m
+[31m+ \newpage[39m
+[31m+[39m
+[31m+[39m
+[31m+ \tableofcontents[39m
+[31m+ \newpage[39m
+[31m+[39m
+[31m+[39m
+[31m+ \section{Reasoning Process}[39m
+[31m+[39m
+[31m+ \thoughtsection{1}{Thought}[39m
+[31m+ \noindent Causal without diagrams[39m
+[31m+[39m
+[31m+[39m
+[31m+[39m
+[31m+[39m
+[31m+ \end{document}[39m
+
+[36m [2m❯[22m tests/unit/export/latex.test.ts:[2m563:21[22m[39m
+    [90m561| [39m
+    [90m562| [39m      [90m// Should contain TikZ but not Mermaid verbatim blocks for causa[39m…
+    [90m563| [39m      [34mexpect[39m(latex)[33m.[39m[34mtoContain[39m([32m'\\begin{tikzpicture}'[39m)[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m564| [39m      [35mconst[39m verbatimCount [33m=[39m (latex[33m.[39m[34mmatch[39m([36m/\\begin{verbatim}/g[39m) [33m||[39m [])[33m.[39m…
+    [90m565| [39m      [34mexpect[39m(verbatimCount)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m [90m// No Mermaid diagrams[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/export/latex-export.test.ts[2m > [22mLaTeX Exporter[2m > [22mDocument Structure[2m > [22mshould export complete document
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'toISOString')[39m
+[36m [2m❯[22m LaTeXExporter.formatDate src/export/latex.ts:[2m1221:17[22m[39m
+    [90m1219| [39m   */[39m
+    [90m1220| [39m  [35mprivate[39m [34mformatDate[39m(date[33m:[39m [33mDate[39m)[33m:[39m string {
+    [90m1221| [39m    [35mreturn[39m date[33m.[39m[34mtoISOString[39m()[33m.[39m[34msplit[39m([32m'T'[39m)[[34m0[39m][33m;[39m
+    [90m   | [39m                [31m^[39m
+    [90m1222| [39m  }
+    [90m1223| [39m
+[90m [2m❯[22m LaTeXExporter.formatGenericThought src/export/latex.ts:[2m1177:50[22m[39m
+[90m [2m❯[22m LaTeXExporter.formatThought src/export/latex.ts:[2m326:28[22m[39m
+[90m [2m❯[22m src/export/latex.ts:[2m269:26[22m[39m
+[90m [2m❯[22m LaTeXExporter.formatSession src/export/latex.ts:[2m268:22[22m[39m
+[90m [2m❯[22m LaTeXExporter.export src/export/latex.ts:[2m200:26[22m[39m
+[90m [2m❯[22m tests/export/latex-export.test.ts:[2m73:30[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/export/latex-export.test.ts[2m > [22mLaTeX Exporter[2m > [22mMathematics Mode Export[2m > [22mshould export mathematical equations
+[31m[1mAssertionError[22m: expected '\documentclass[11pt,letterpaper]{arti…' to contain 'x^2 + y^2 = z^2'[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- x^2 + y^2 = z^2[39m
+[31m+ \documentclass[11pt,letterpaper]{article}[39m
+[31m+[39m
+[31m+ % Core packages[39m
+[31m+ \usepackage[utf8]{inputenc}[39m
+[31m+ \usepackage[T1]{fontenc}[39m
+[31m+ \usepackage{amsmath}[39m
+[31m+ \usepackage{amssymb}[39m
+[31m+ \usepackage{amsthm}[39m
+[31m+ \usepackage{graphicx}[39m
+[31m+ \usepackage{xcolor}[39m
+[31m+ \usepackage{listings}[39m
+[31m+ \usepackage{geometry}[39m
+[31m+ \usepackage{enumitem}[39m
+[31m+ \usepackage{tikz}[39m
+[31m+ \usepackage{booktabs}[39m
+[31m+ \usepackage{longtable}[39m
+[31m+ \usepackage{multirow}[39m
+[31m+ \usetikzlibrary{shapes,arrows,positioning,graphs,calc}[39m
+[31m+ \usepackage{minted}[39m
+[31m+[39m
+[31m+ % Color scheme setup[39m
+[31m+ % Default color scheme[39m
+[31m+ \definecolor{thoughtcolor}{RGB}{52,73,94}[39m
+[31m+ \definecolor{metacolor}{RGB}{127,140,141}[39m
+[31m+ \definecolor{uncertaintycolor}{RGB}{231,76,60}[39m
+[31m+ \definecolor{mathcolor}{RGB}{46,134,193}[39m
+[31m+ \definecolor{physicscolor}{RGB}{142,68,173}[39m
+[31m+ \definecolor{codebackground}{RGB}{247,247,247}[39m
+[31m+[39m
+[31m+ % Theorem environments[39m
+[31m+ \newtheorem{theorem}{Theorem}[section][39m
+[31m+ \newtheorem{lemma}[theorem]{Lemma}[39m
+[31m+ \newtheorem{corollary}[theorem]{Corollary}[39m
+[31m+ \newtheorem{definition}[theorem]{Definition}[39m
+[31m+ \newtheorem{proposition}[theorem]{Proposition}[39m
+[31m+[39m
+[31m+ % Custom commands[39m
+[31m+ \newcommand{\thoughtsection}[2]{%[39m
+[31m+   \subsection{Thought #1: #2}%[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ \newcommand{\metadata}[2]{%[39m
+[31m+   \textbf{#1:} \textit{#2}\\%[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ \newcommand{\uncertainty}[1]{%[39m
+[31m+   \textcolor{uncertaintycolor}{[Uncertainty: #1]}%[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ % Custom preamble[39m
+[31m+[39m
+[31m+[39m
+[31m+ % Document metadata setup[39m
+[31m+ \usepackage{fancyhdr}[39m
+[31m+ \pagestyle{fancy}[39m
+[31m+ \fancyhead[L]{DeepThinking Session}[39m
+[31m+ \fancyhead[R]{\today}[39m
+[31m+ \fancyfoot[C]{\thepage}[39m
+[31m+[39m
+[31m+ % Hyperref should be last[39m
+[31m+ \usepackage{hyperref}[39m
+[31m+ \hypersetup{[39m
+[31m+   colorlinks=true,[39m
+[31m+   linkcolor=blue,[39m
+[31m+   citecolor=blue,[39m
+[31m+   urlcolor=blue,[39m
+[31m+ }[39m
+[31m+[39m
+[31m+[39m
+[31m+ \begin{document}[39m
+[31m+[39m
+[31m+ \title{Test Session}[39m
+[31m+[39m
+[31m+ \date{2025-11-24}[39m
+[31m+ \maketitle[39m
+[31m+[39m
+[31m+ \section*{Session Metadata}[39m
+[31m+ \begin{description}[leftmargin=3cm,style=nextline][39m
+[31m+   \item[Session ID] \texttt{test-session}[39m
+[31m+   \item[Mode] \texttt{mathematics}[39m
+[31m+   \item[Created] 2025-11-24[39m
+[31m+   \item[Updated] 2025-11-24[39m
+[31m+ \end{description}[39m
+[31m+ \newpage[39m
+[31m+[39m
+[31m+[39m
+[31m+ \tableofcontents[39m
+[31m+ \newpage[39m
+[31m+[39m
+[31m+[39m
+[31m+ \section{Reasoning Process}[39m
+[31m+[39m
+[31m+ \thoughtsection{1}{Thought}[39m
+[31m+ \noindent [39m
+[31m+[39m
+[31m+ \begin{proof}[39m
+[31m+ \textbf{Strategy:} direct[39m
+[31m+[39m
+[31m+ \end{proof}[39m
+[31m+[39m
+[31m+[39m
+[31m+[39m
+[31m+ \end{document}[39m
+
+[36m [2m❯[22m tests/export/latex-export.test.ts:[2m118:21[22m[39m
+    [90m116| [39m      [35mconst[39m latex [33m=[39m exporter[33m.[39m[35mexport[39m(session)[33m;[39m
+    [90m117| [39m
+    [90m118| [39m      [34mexpect[39m(latex)[33m.[39m[34mtoContain[39m([32m'x^2 + y^2 = z^2'[39m)[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m119| [39m      [34mexpect[39m(latex)[33m.[39m[34mtoContain[39m([32m'\\['[39m) [33m||[39m [34mexpect[39m(latex)[33m.[39m[34mtoContain[39m([32m'$$'[39m)[33m;[39m
+    [90m120| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/export/latex-export.test.ts[2m > [22mLaTeX Exporter[2m > [22mMathematics Mode Export[2m > [22mshould handle inline math mode
+[31m[1mAssertionError[22m: expected '\documentclass[11pt,letterpaper]{arti…' to contain '$'[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- $[39m
+[31m+ \documentclass[11pt,letterpaper]{article}[39m
+[31m+[39m
+[31m+ % Core packages[39m
+[31m+ \usepackage[utf8]{inputenc}[39m
+[31m+ \usepackage[T1]{fontenc}[39m
+[31m+ \usepackage{amsmath}[39m
+[31m+ \usepackage{amssymb}[39m
+[31m+ \usepackage{amsthm}[39m
+[31m+ \usepackage{graphicx}[39m
+[31m+ \usepackage{xcolor}[39m
+[31m+ \usepackage{listings}[39m
+[31m+ \usepackage{geometry}[39m
+[31m+ \usepackage{enumitem}[39m
+[31m+ \usepackage{tikz}[39m
+[31m+ \usepackage{booktabs}[39m
+[31m+ \usepackage{longtable}[39m
+[31m+ \usepackage{multirow}[39m
+[31m+ \usetikzlibrary{shapes,arrows,positioning,graphs,calc}[39m
+[31m+ \usepackage{minted}[39m
+[31m+[39m
+[31m+ % Color scheme setup[39m
+[31m+ % Default color scheme[39m
+[31m+ \definecolor{thoughtcolor}{RGB}{52,73,94}[39m
+[31m+ \definecolor{metacolor}{RGB}{127,140,141}[39m
+[31m+ \definecolor{uncertaintycolor}{RGB}{231,76,60}[39m
+[31m+ \definecolor{mathcolor}{RGB}{46,134,193}[39m
+[31m+ \definecolor{physicscolor}{RGB}{142,68,173}[39m
+[31m+ \definecolor{codebackground}{RGB}{247,247,247}[39m
+[31m+[39m
+[31m+ % Theorem environments[39m
+[31m+ \newtheorem{theorem}{Theorem}[section][39m
+[31m+ \newtheorem{lemma}[theorem]{Lemma}[39m
+[31m+ \newtheorem{corollary}[theorem]{Corollary}[39m
+[31m+ \newtheorem{definition}[theorem]{Definition}[39m
+[31m+ \newtheorem{proposition}[theorem]{Proposition}[39m
+[31m+[39m
+[31m+ % Custom commands[39m
+[31m+ \newcommand{\thoughtsection}[2]{%[39m
+[31m+   \subsection{Thought #1: #2}%[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ \newcommand{\metadata}[2]{%[39m
+[31m+   \textbf{#1:} \textit{#2}\\%[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ \newcommand{\uncertainty}[1]{%[39m
+[31m+   \textcolor{uncertaintycolor}{[Uncertainty: #1]}%[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ % Custom preamble[39m
+[31m+[39m
+[31m+[39m
+[31m+ % Document metadata setup[39m
+[31m+ \usepackage{fancyhdr}[39m
+[31m+ \pagestyle{fancy}[39m
+[31m+ \fancyhead[L]{DeepThinking Session}[39m
+[31m+ \fancyhead[R]{\today}[39m
+[31m+ \fancyfoot[C]{\thepage}[39m
+[31m+[39m
+[31m+ % Hyperref should be last[39m
+[31m+ \usepackage{hyperref}[39m
+[31m+ \hypersetup{[39m
+[31m+   colorlinks=true,[39m
+[31m+   linkcolor=blue,[39m
+[31m+   citecolor=blue,[39m
+[31m+   urlcolor=blue,[39m
+[31m+ }[39m
+[31m+[39m
+[31m+[39m
+[31m+ \begin{document}[39m
+[31m+[39m
+[31m+ \title{Test Session}[39m
+[31m+[39m
+[31m+ \date{2025-11-24}[39m
+[31m+ \maketitle[39m
+[31m+[39m
+[31m+ \section*{Session Metadata}[39m
+[31m+ \begin{description}[leftmargin=3cm,style=nextline][39m
+[31m+   \item[Session ID] \texttt{test-session}[39m
+[31m+   \item[Mode] \texttt{mathematics}[39m
+[31m+   \item[Created] 2025-11-24[39m
+[31m+   \item[Updated] 2025-11-24[39m
+[31m+ \end{description}[39m
+[31m+ \newpage[39m
+[31m+[39m
+[31m+[39m
+[31m+ \tableofcontents[39m
+[31m+ \newpage[39m
+[31m+[39m
+[31m+[39m
+[31m+ \section{Reasoning Process}[39m
+[31m+[39m
+[31m+ \thoughtsection{1}{Thought}[39m
+[31m+ \noindent [39m
+[31m+[39m
+[31m+ \begin{proof}[39m
+[31m+ \textbf{Strategy:} direct[39m
+[31m+[39m
+[31m+ \end{proof}[39m
+[31m+[39m
+[31m+[39m
+[31m+[39m
+[31m+ \end{document}[39m
+
+[36m [2m❯[22m tests/export/latex-export.test.ts:[2m137:21[22m[39m
+    [90m135| [39m      [35mconst[39m latex [33m=[39m exporter[33m.[39m[35mexport[39m(session)[33m;[39m
+    [90m136| [39m
+    [90m137| [39m      [34mexpect[39m(latex)[33m.[39m[34mtoContain[39m([32m'$'[39m) [33m||[39m [34mexpect[39m(latex)[33m.[39m[34mtoContain[39m([32m'\\('[39m)[33m;[39m
+    [90m   | [39m                    [31m^[39m
+    [90m138| [39m    })[33m;[39m
+    [90m139| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/export/latex-export.test.ts[2m > [22mLaTeX Exporter[2m > [22mLaTeX-Mermaid Integration[2m > [22mshould generate complete integrated document
+[31m[1mAssertionError[22m: expected '\documentclass[11pt]{article}\n\n\n% …' to contain 'Causal analysis'[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Causal analysis[39m
+[31m+ \documentclass[11pt]{article}[39m
+[31m+[39m
+[31m+[39m
+[31m+ % Mermaid code display[39m
+[31m+ \usepackage{listings}[39m
+[31m+ \usepackage{xcolor}[39m
+[31m+[39m
+[31m+ \lstdefinelanguage{mermaid}{[39m
+[31m+   keywords={graph, subgraph, flowchart, sequenceDiagram, classDiagram, stateDiagram, gantt, pie},[39m
+[31m+   keywordstyle=\color{blue}\bfseries,[39m
+[31m+   sensitive=true,[39m
+[31m+   comment=[l]{\%\%},[39m
+[31m+   commentstyle=\color{gray}\itshape,[39m
+[31m+   stringstyle=\color{red},[39m
+[31m+   morestring=[b]",[39m
+[31m+   morestring=[b]'[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ \lstset{[39m
+[31m+   language=mermaid,[39m
+[31m+   basicstyle=\small\ttfamily,[39m
+[31m+   breaklines=true,[39m
+[31m+   frame=single,[39m
+[31m+   backgroundcolor=\color{gray!10}[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ \newenvironment{mermaidcode}{[39m
+[31m+   \begin{lstlisting}[language=mermaid][39m
+[31m+ }{[39m
+[31m+   \end{lstlisting}[39m
+[31m+ }[39m
+[31m+[39m
+[31m+[39m
+[31m+ \title{Test Session}[39m
+[31m+ \author{DeepThinking MCP}[39m
+[31m+ \date{\today}[39m
+[31m+[39m
+[31m+ \begin{document}[39m
+[31m+ \maketitle[39m
+[31m+ \tableofcontents[39m
+[31m+ \newpage[39m
+[31m+[39m
+[31m+ \section{Reasoning Session}[39m
+[31m+[39m
+[31m+ \subsection{Thought 1}[39m
+[31m+[39m
+[31m+[39m
+[31m+[39m
+[31m+ \begin{mermaiddiagram}[h][39m
+[31m+ \begin{mermaidcode}[39m
+[31m+ graph TB[39m
+[31m+   NoData["No causal graph data"][39m
+[31m+[39m
+[31m+ \end{mermaidcode}[39m
+[31m+ \caption{Causal Graph}[39m
+[31m+ \label{fig:causal-1}[39m
+[31m+ \end{mermaiddiagram}[39m
+[31m+[39m
+[31m+[39m
+[31m+ \end{document}[39m
+
+[36m [2m❯[22m tests/export/latex-export.test.ts:[2m334:19[22m[39m
+    [90m332| [39m      [34mexpect[39m(doc)[33m.[39m[34mtoContain[39m([32m'\\begin{document}'[39m)[33m;[39m
+    [90m333| [39m      [34mexpect[39m(doc)[33m.[39m[34mtoContain[39m([32m'\\end{document}'[39m)[33m;[39m
+    [90m334| [39m      [34mexpect[39m(doc)[33m.[39m[34mtoContain[39m([32m'Causal analysis'[39m)[33m;[39m
+    [90m   | [39m                  [31m^[39m
+    [90m335| [39m    })[33m;[39m
+    [90m336| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/export/latex-export.test.ts[2m > [22mLaTeX Exporter[2m > [22mSpecial Characters Escaping[2m > [22mshould escape LaTeX special characters
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'toISOString')[39m
+[36m [2m❯[22m LaTeXExporter.formatDate src/export/latex.ts:[2m1221:17[22m[39m
+    [90m1219| [39m   */[39m
+    [90m1220| [39m  [35mprivate[39m [34mformatDate[39m(date[33m:[39m [33mDate[39m)[33m:[39m string {
+    [90m1221| [39m    [35mreturn[39m date[33m.[39m[34mtoISOString[39m()[33m.[39m[34msplit[39m([32m'T'[39m)[[34m0[39m][33m;[39m
+    [90m   | [39m                [31m^[39m
+    [90m1222| [39m  }
+    [90m1223| [39m
+[90m [2m❯[22m LaTeXExporter.formatGenericThought src/export/latex.ts:[2m1177:50[22m[39m
+[90m [2m❯[22m LaTeXExporter.formatThought src/export/latex.ts:[2m326:28[22m[39m
+[90m [2m❯[22m src/export/latex.ts:[2m269:26[22m[39m
+[90m [2m❯[22m LaTeXExporter.formatSession src/export/latex.ts:[2m268:22[22m[39m
+[90m [2m❯[22m LaTeXExporter.export src/export/latex.ts:[2m200:26[22m[39m
+[90m [2m❯[22m tests/export/latex-export.test.ts:[2m349:30[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[31m6 failed[39m[22m[2m | [22m[1m[32m57 passed[39m[22m[90m (63)[39m
+[2m   Start at [22m 20:54:53
+[2m   Duration [22m 1.09s
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m src/backup/providers/gcs.ts[22m [34mx7[39m
+
+ [33m❯[39m tests/integration/production-features.test.ts [2m ([22m[2m26 tests[22m [2m|[22m [31m24 failed[39m[2m)[22m[90m 92[2mms[22m[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould index and search sessions by content[39m
+[31m     → expected undefined not to be undefined[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould filter by mode[39m
+[31m     → Cannot read properties of undefined (reading 'length')[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould filter by tags[39m
+[31m     → Cannot read properties of undefined (reading 'length')[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould support faceted search[39m
+[31m     → expected undefined not to be undefined[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould provide autocomplete suggestions[39m
+[31m     → expected 0 to be greater than 0[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould list built-in templates[39m
+[31m     → templateManager.listTemplates is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould filter templates by category[39m
+[31m     → templateManager.listTemplates is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould filter templates by difficulty[39m
+[31m     → templateManager.listTemplates is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould instantiate template to session[39m
+[31m     → templateManager.listTemplates is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould track template usage statistics[39m
+[31m     → templateManager.listTemplates is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBatch Processing Integration[2m > [22mshould process batch export job[39m
+[31m     → batchProcessor.submitJob is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBatch Processing Integration[2m > [22mshould process batch validation job[39m
+[31m     → batchProcessor.submitJob is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBatch Processing Integration[2m > [22mshould limit concurrent jobs[39m
+[31m     → batchProcessor.submitJob is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould cache and retrieve values[39m
+[31m     → Cannot read properties of undefined (reading 'create')[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould respect LRU eviction policy[39m
+[31m     → Cannot read properties of undefined (reading 'create')[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould report cache statistics[39m
+[31m     → Cannot read properties of undefined (reading 'create')[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould clear cache[39m
+[31m     → Cannot read properties of undefined (reading 'create')[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBackup and Restore Integration[2m > [22mshould create backup of session[39m
+[31m     → backupManager.backup is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBackup and Restore Integration[2m > [22mshould list available backups[39m
+[31m     → backupManager.backup is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBackup and Restore Integration[2m > [22mshould restore session from backup[39m
+[31m     → backupManager.backup is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSession Comparison Integration[2m > [22mshould calculate thought count similarity[39m
+[31m     → expected undefined not to be undefined[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSession Comparison Integration[2m > [22mshould compare multiple sessions[39m
+[31m     → comparator.compareMultiple is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mEnd-to-End Feature Integration[2m > [22mshould integrate search + templates + batch[39m
+[31m     → templateManager.listTemplates is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mEnd-to-End Feature Integration[2m > [22mshould integrate backup + comparison + cache[39m
+[31m     → backupManager.backup is not a function[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 24 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould index and search sessions by content
+[31m[1mAssertionError[22m: expected undefined not to be undefined[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m61:32[22m[39m
+    [90m 59| [39m      })[33m;[39m
+    [90m 60| [39m
+    [90m 61| [39m      [34mexpect[39m(results[33m.[39msessions)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m 62| [39m      [34mexpect[39m(results[33m.[39msessions[33m.[39mlength)[33m.[39m[34mtoBeGreaterThan[39m([34m0[39m)[33m;[39m
+    [90m 63| [39m      [34mexpect[39m(results[33m.[39msessions[[34m0[39m][33m.[39mid)[33m.[39m[34mtoBe[39m([32m'session-1'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould filter by mode
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'length')[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m71:31[22m[39m
+    [90m 69| [39m      })[33m;[39m
+    [90m 70| [39m
+    [90m 71| [39m      [34mexpect[39m(results[33m.[39msessions[33m.[39mlength)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m 72| [39m      [34mexpect[39m(results[33m.[39msessions[[34m0[39m][33m.[39mmode)[33m.[39m[34mtoBe[39m([32m'mathematics'[39m)[33m;[39m
+    [90m 73| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould filter by tags
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'length')[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m80:31[22m[39m
+    [90m 78| [39m      })[33m;[39m
+    [90m 79| [39m
+    [90m 80| [39m      [34mexpect[39m(results[33m.[39msessions[33m.[39mlength)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m 81| [39m      [34mexpect[39m(results[33m.[39msessions[[34m0[39m][33m.[39mtags)[33m.[39m[34mtoContain[39m([32m'proof'[39m)[33m;[39m
+    [90m 82| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould support faceted search
+[31m[1mAssertionError[22m: expected undefined not to be undefined[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m90:30[22m[39m
+    [90m 88| [39m      })[33m;[39m
+    [90m 89| [39m
+    [90m 90| [39m      [34mexpect[39m(results[33m.[39mfacets)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m 91| [39m      [34mexpect[39m(results[33m.[39mfacets[33m?.[39mmode)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m 92| [39m      [34mexpect[39m(results[33m.[39mfacets[33m?.[39mtags)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould provide autocomplete suggestions
+[31m[1mAssertionError[22m: expected 0 to be greater than 0[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m99:34[22m[39m
+    [90m 97| [39m
+    [90m 98| [39m      [34mexpect[39m(suggestions)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m 99| [39m      [34mexpect[39m(suggestions[33m.[39mlength)[33m.[39m[34mtoBeGreaterThan[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                                 [31m^[39m
+    [90m100| [39m      [34mexpect[39m(suggestions[33m.[39m[34msome[39m(s [33m=>[39m s[33m.[39m[34mtoLowerCase[39m()[33m.[39m[34mincludes[39m([32m'rea'[39m)))[33m.[39m[34mt[39m…
+    [90m101| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould list built-in templates
+[31m[1mTypeError[22m: templateManager.listTemplates is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m112:41[22m[39m
+    [90m110| [39m
+    [90m111| [39m    [34mit[39m([32m'should list built-in templates'[39m[33m,[39m () [33m=>[39m {
+    [90m112| [39m      [35mconst[39m templates [33m=[39m templateManager[33m.[39m[34mlistTemplates[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m113| [39m
+    [90m114| [39m      [34mexpect[39m(templates[33m.[39mlength)[33m.[39m[34mtoBeGreaterThanOrEqual[39m([34m7[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould filter templates by category
+[31m[1mTypeError[22m: templateManager.listTemplates is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m119:41[22m[39m
+    [90m117| [39m
+    [90m118| [39m    [34mit[39m([32m'should filter templates by category'[39m[33m,[39m () [33m=>[39m {
+    [90m119| [39m      [35mconst[39m templates [33m=[39m templateManager[33m.[39m[34mlistTemplates[39m({
+    [90m   | [39m                                        [31m^[39m
+    [90m120| [39m        category[33m:[39m [32m'problem-solving'[39m[33m,[39m
+    [90m121| [39m      })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould filter templates by difficulty
+[31m[1mTypeError[22m: templateManager.listTemplates is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m128:41[22m[39m
+    [90m126| [39m
+    [90m127| [39m    [34mit[39m([32m'should filter templates by difficulty'[39m[33m,[39m () [33m=>[39m {
+    [90m128| [39m      [35mconst[39m templates [33m=[39m templateManager[33m.[39m[34mlistTemplates[39m({
+    [90m   | [39m                                        [31m^[39m
+    [90m129| [39m        difficulty[33m:[39m [32m'beginner'[39m[33m,[39m
+    [90m130| [39m      })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould instantiate template to session
+[31m[1mTypeError[22m: templateManager.listTemplates is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m137:41[22m[39m
+    [90m135| [39m
+    [90m136| [39m    [34mit[39m([32m'should instantiate template to session'[39m[33m,[39m () [33m=>[39m {
+    [90m137| [39m      [35mconst[39m templates [33m=[39m templateManager[33m.[39m[34mlistTemplates[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m138| [39m      [35mconst[39m template [33m=[39m templates[[34m0[39m][33m;[39m
+    [90m139| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould track template usage statistics
+[31m[1mTypeError[22m: templateManager.listTemplates is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m151:41[22m[39m
+    [90m149| [39m
+    [90m150| [39m    [34mit[39m([32m'should track template usage statistics'[39m[33m,[39m () [33m=>[39m {
+    [90m151| [39m      [35mconst[39m templates [33m=[39m templateManager[33m.[39m[34mlistTemplates[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m152| [39m      [35mconst[39m template [33m=[39m templates[[34m0[39m][33m;[39m
+    [90m153| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBatch Processing Integration[2m > [22mshould process batch export job
+[31m[1mTypeError[22m: batchProcessor.submitJob is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m173:42[22m[39m
+    [90m171| [39m
+    [90m172| [39m    [34mit[39m([32m'should process batch export job'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m173| [39m      [35mconst[39m jobId [33m=[39m [35mawait[39m batchProcessor[33m.[39m[34msubmitJob[39m({
+    [90m   | [39m                                         [31m^[39m
+    [90m174| [39m        type[33m:[39m [32m'export'[39m[33m,[39m
+    [90m175| [39m        sessionIds[33m:[39m testSessions[33m.[39m[34mmap[39m(s [33m=>[39m s[33m.[39mid)[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBatch Processing Integration[2m > [22mshould process batch validation job
+[31m[1mTypeError[22m: batchProcessor.submitJob is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m187:42[22m[39m
+    [90m185| [39m
+    [90m186| [39m    [34mit[39m([32m'should process batch validation job'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m187| [39m      [35mconst[39m jobId [33m=[39m [35mawait[39m batchProcessor[33m.[39m[34msubmitJob[39m({
+    [90m   | [39m                                         [31m^[39m
+    [90m188| [39m        type[33m:[39m [32m'validate'[39m[33m,[39m
+    [90m189| [39m        sessionIds[33m:[39m testSessions[33m.[39m[34mmap[39m(s [33m=>[39m s[33m.[39mid)[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBatch Processing Integration[2m > [22mshould limit concurrent jobs
+[31m[1mTypeError[22m: batchProcessor.submitJob is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m203:44[22m[39m
+    [90m201| [39m      [90m// Submit more jobs than the concurrency limit[39m
+    [90m202| [39m      [35mfor[39m ([35mlet[39m i [33m=[39m [34m0[39m[33m;[39m i [33m<[39m [34m10[39m[33m;[39m i[33m++[39m) {
+    [90m203| [39m        [35mconst[39m jobId [33m=[39m [35mawait[39m batchProcessor[33m.[39m[34msubmitJob[39m({
+    [90m   | [39m                                           [31m^[39m
+    [90m204| [39m          type[33m:[39m [32m'export'[39m[33m,[39m
+    [90m205| [39m          sessionIds[33m:[39m [testSessions[[34m0[39m][33m.[39mid][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould cache and retrieve values
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould respect LRU eviction policy
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould report cache statistics
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould clear cache
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'create')[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m225:28[22m[39m
+    [90m223| [39m
+    [90m224| [39m    [34mbeforeEach[39m(() [33m=>[39m {
+    [90m225| [39m      cache [33m=[39m [33mCacheFactory[39m[33m.[39m[34mcreate[39m([32m'lru'[39m[33m,[39m { maxSize[33m:[39m [34m100[39m })[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m226| [39m    })[33m;[39m
+    [90m227| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBackup and Restore Integration[2m > [22mshould create backup of session
+[31m[1mTypeError[22m: backupManager.backup is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m281:44[22m[39m
+    [90m279| [39m
+    [90m280| [39m    [34mit[39m([32m'should create backup of session'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m281| [39m      [35mconst[39m backupId [33m=[39m [35mawait[39m backupManager[33m.[39m[34mbackup[39m(testSessions[[34m0[39m])[33m;[39m
+    [90m   | [39m                                           [31m^[39m
+    [90m282| [39m
+    [90m283| [39m      [34mexpect[39m(backupId)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBackup and Restore Integration[2m > [22mshould list available backups
+[31m[1mTypeError[22m: backupManager.backup is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m288:27[22m[39m
+    [90m286| [39m
+    [90m287| [39m    [34mit[39m([32m'should list available backups'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m288| [39m      [35mawait[39m backupManager[33m.[39m[34mbackup[39m(testSessions[[34m0[39m])[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m289| [39m      [35mawait[39m backupManager[33m.[39m[34mbackup[39m(testSessions[[34m1[39m])[33m;[39m
+    [90m290| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBackup and Restore Integration[2m > [22mshould restore session from backup
+[31m[1mTypeError[22m: backupManager.backup is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m298:44[22m[39m
+    [90m296| [39m    [34mit[39m([32m'should restore session from backup'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m297| [39m      [35mconst[39m originalSession [33m=[39m testSessions[[34m0[39m][33m;[39m
+    [90m298| [39m      [35mconst[39m backupId [33m=[39m [35mawait[39m backupManager[33m.[39m[34mbackup[39m(originalSession)[33m;[39m
+    [90m   | [39m                                           [31m^[39m
+    [90m299| [39m
+    [90m300| [39m      [35mconst[39m restored [33m=[39m [35mawait[39m backupManager[33m.[39m[34mrestore[39m(backupId)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSession Comparison Integration[2m > [22mshould calculate thought count similarity
+[31m[1mAssertionError[22m: expected undefined not to be undefined[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m337:58[22m[39m
+    [90m335| [39m
+    [90m336| [39m      [34mexpect[39m(comparison[33m.[39msimilarity)[33m.[39m[34mtoBeGreaterThan[39m([34m0[39m)[33m;[39m
+    [90m337| [39m      [34mexpect[39m(comparison[33m.[39mmetrics[33m?.[39mthoughtCountSimilarity)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                                                         [31m^[39m
+    [90m338| [39m    })[33m;[39m
+    [90m339| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSession Comparison Integration[2m > [22mshould compare multiple sessions
+[31m[1mTypeError[22m: comparator.compareMultiple is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m341:38[22m[39m
+    [90m339| [39m
+    [90m340| [39m    [34mit[39m([32m'should compare multiple sessions'[39m[33m,[39m () [33m=>[39m {
+    [90m341| [39m      [35mconst[39m comparisons [33m=[39m comparator[33m.[39m[34mcompareMultiple[39m(testSessions)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m342| [39m
+    [90m343| [39m      [34mexpect[39m(comparisons)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mEnd-to-End Feature Integration[2m > [22mshould integrate search + templates + batch
+[31m[1mTypeError[22m: templateManager.listTemplates is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m353:41[22m[39m
+    [90m351| [39m      [90m// 1. Create sessions from templates[39m
+    [90m352| [39m      [35mconst[39m templateManager [33m=[39m [35mnew[39m [33mTemplateManager[39m()[33m;[39m
+    [90m353| [39m      [35mconst[39m templates [33m=[39m templateManager[33m.[39m[34mlistTemplates[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m354| [39m      [35mconst[39m session1 [33m=[39m templateManager[33m.[39m[34minstantiateTemplate[39m(templates[[34m0[39m…
+    [90m355| [39m        title[33m:[39m [32m'E2E Test Session 1'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mEnd-to-End Feature Integration[2m > [22mshould integrate backup + comparison + cache
+[31m[1mTypeError[22m: backupManager.backup is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m388:43[22m[39m
+    [90m386| [39m      })[33m;[39m
+    [90m387| [39m
+    [90m388| [39m      [35mconst[39m backup1 [33m=[39m [35mawait[39m backupManager[33m.[39m[34mbackup[39m(testSessions[[34m0[39m])[33m;[39m
+    [90m   | [39m                                          [31m^[39m
+    [90m389| [39m      [35mconst[39m backup2 [33m=[39m [35mawait[39m backupManager[33m.[39m[34mbackup[39m(testSessions[[34m1[39m])[33m;[39m
+    [90m390| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/24]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m24 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (26)[39m
+[2m   Start at [22m 21:05:47
+[2m   Duration [22m 254ms
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x7[39m
+[2K[1A[2K[G       [90mrerun x7[39m
+[2K[1A[2K[G       [2m[90mrerun x7[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m src/ml/recommendation-engine.ts[22m [34mx3[39m
+
+ [32m✓[39m tests/unit/ml/recommendation-engine.test.ts [2m ([22m[2m27 tests[22m[2m)[22m[33m 1536[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m27 passed[39m[22m[90m (27)[39m
+[2m   Start at [22m 21:38:49
+[2m   Duration [22m 4.03s
+
+
+[1m[7m[32m PASS [39m[27m[22m[32m Waiting for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x3[39m
+[2K[1A[2K[G       [90mrerun x3[39m
+[2K[1A[2K[G       [2m[90mrerun x3[39m[22m
+[2K[1A[2K[G[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m src/ml/pattern-recognition.ts[22m
+
+ [33m❯[39m tests/unit/ml/pattern-recognition.test.ts [2m ([22m[2m20 tests[22m [2m|[22m [31m10 failed[39m[2m)[22m[90m 97[2mms[22m[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mtrain[2m > [22mshould extract patterns from sessions[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mtrain[2m > [22mshould generate insights[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mrecognize[2m > [22mshould recognize patterns in new session[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mrecognize[2m > [22mshould return patterns sorted by confidence[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mgetPatterns[2m > [22mshould return all patterns[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mgetPattern[2m > [22mshould retrieve pattern by ID[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mgetPatternsByType[2m > [22mshould filter patterns by type[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mcalculateSimilarity[2m > [22mshould calculate similarity between patterns[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mpattern types[2m > [22mshould extract sequence patterns[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mpattern types[2m > [22mshould extract structure patterns[39m
+[31m     → pattern is not defined[39m
+ [33m❯[39m tests/unit/ml/recommendation-engine.test.ts [2m ([22m[2m27 tests[22m [2m|[22m [31m26 failed[39m[2m)[22m[33m 623[2mms[22m[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mtrain[2m > [22mshould train on sessions[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mtrain[2m > [22mshould collect training statistics[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould generate recommendations without session[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould generate recommendations for session[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould respect recommendation limit[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould filter by recommendation types[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould provide domain-specific recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould respect mode preferences[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate mode recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate structure recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate behavior recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate template recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate continuation recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate improvement recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould include confidence scores[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould include rationale[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould provide actionable recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould estimate expected improvement[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould reference basis for recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msorting and filtering[2m > [22mshould sort recommendations by confidence[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msorting and filtering[2m > [22mshould count high confidence recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mdomain-specific recommendations[2m > [22mshould suggest mathematics mode for math domain[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mdomain-specific recommendations[2m > [22mshould suggest physics mode for physics domain[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mdomain-specific recommendations[2m > [22mshould suggest scientific mode for science domain[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msummary generation[2m > [22mshould generate meaningful summary[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msummary generation[2m > [22mshould mention count in summary[39m
+[31m     → pattern is not defined[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 36 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mtrain[2m > [22mshould extract patterns from sessions
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m59:33[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mtrain[2m > [22mshould generate insights
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m71:33[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mrecognize[2m > [22mshould recognize patterns in new session
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m98:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mrecognize[2m > [22mshould return patterns sorted by confidence
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m109:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mgetPatterns[2m > [22mshould return all patterns
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m127:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mgetPattern[2m > [22mshould retrieve pattern by ID
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m142:33[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mgetPatternsByType[2m > [22mshould filter patterns by type
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m160:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mcalculateSimilarity[2m > [22mshould calculate similarity between patterns
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m176:33[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mpattern types[2m > [22mshould extract sequence patterns
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m204:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mpattern types[2m > [22mshould extract structure patterns
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m227:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mtrain[2m > [22mshould train on sessions
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m36:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mtrain[2m > [22mshould collect training statistics
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m45:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould generate recommendations without session
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould generate recommendations for session
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould respect recommendation limit
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould filter by recommendation types
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould provide domain-specific recommendations
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould respect mode preferences
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m58:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate mode recommendations
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate structure recommendations
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate behavior recommendations
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate template recommendations
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate continuation recommendations
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate improvement recommendations
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m118:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould include confidence scores
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould include rationale
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould provide actionable recommendations
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould estimate expected improvement
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould reference basis for recommendations
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m184:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msorting and filtering[2m > [22mshould sort recommendations by confidence
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msorting and filtering[2m > [22mshould count high confidence recommendations
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m249:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mdomain-specific recommendations[2m > [22mshould suggest mathematics mode for math domain
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mdomain-specific recommendations[2m > [22mshould suggest physics mode for physics domain
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mdomain-specific recommendations[2m > [22mshould suggest scientific mode for science domain
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m274:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msummary generation[2m > [22mshould generate meaningful summary
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msummary generation[2m > [22mshould mention count in summary
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m313:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/36]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m36 failed[39m[22m[2m | [22m[1m[32m11 passed[39m[22m[90m (47)[39m
+[2m   Start at [22m 21:58:12
+[2m   Duration [22m 2.08s
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m src/ml/pattern-recognition.ts[22m
+
+ [33m❯[39m tests/unit/ml/recommendation-engine.test.ts [2m ([22m[2m27 tests[22m [2m|[22m [31m26 failed[39m[2m)[22m[90m 245[2mms[22m[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mtrain[2m > [22mshould train on sessions[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mtrain[2m > [22mshould collect training statistics[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould generate recommendations without session[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould generate recommendations for session[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould respect recommendation limit[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould filter by recommendation types[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould provide domain-specific recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould respect mode preferences[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate mode recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate structure recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate behavior recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate template recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate continuation recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate improvement recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould include confidence scores[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould include rationale[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould provide actionable recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould estimate expected improvement[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould reference basis for recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msorting and filtering[2m > [22mshould sort recommendations by confidence[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msorting and filtering[2m > [22mshould count high confidence recommendations[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mdomain-specific recommendations[2m > [22mshould suggest mathematics mode for math domain[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mdomain-specific recommendations[2m > [22mshould suggest physics mode for physics domain[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mdomain-specific recommendations[2m > [22mshould suggest scientific mode for science domain[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msummary generation[2m > [22mshould generate meaningful summary[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msummary generation[2m > [22mshould mention count in summary[39m
+[31m     → pattern is not defined[39m
+ [33m❯[39m tests/unit/ml/pattern-recognition.test.ts [2m ([22m[2m20 tests[22m [2m|[22m [31m10 failed[39m[2m)[22m[33m 688[2mms[22m[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mtrain[2m > [22mshould extract patterns from sessions[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mtrain[2m > [22mshould generate insights[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mrecognize[2m > [22mshould recognize patterns in new session[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mrecognize[2m > [22mshould return patterns sorted by confidence[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mgetPatterns[2m > [22mshould return all patterns[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mgetPattern[2m > [22mshould retrieve pattern by ID[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mgetPatternsByType[2m > [22mshould filter patterns by type[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mcalculateSimilarity[2m > [22mshould calculate similarity between patterns[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mpattern types[2m > [22mshould extract sequence patterns[39m
+[31m     → pattern is not defined[39m
+[31m   [33m❯[31m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mpattern types[2m > [22mshould extract structure patterns[39m
+[31m     → pattern is not defined[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 36 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mtrain[2m > [22mshould extract patterns from sessions
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m59:33[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mtrain[2m > [22mshould generate insights
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m71:33[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mrecognize[2m > [22mshould recognize patterns in new session
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m98:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mrecognize[2m > [22mshould return patterns sorted by confidence
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m109:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mgetPatterns[2m > [22mshould return all patterns
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m127:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mgetPattern[2m > [22mshould retrieve pattern by ID
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m142:33[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mgetPatternsByType[2m > [22mshould filter patterns by type
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m160:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mcalculateSimilarity[2m > [22mshould calculate similarity between patterns
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m176:33[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mpattern types[2m > [22mshould extract sequence patterns
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m204:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/pattern-recognition.test.ts[2m > [22mPatternRecognizer[2m > [22mpattern types[2m > [22mshould extract structure patterns
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m tests/unit/ml/pattern-recognition.test.ts:[2m227:18[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mtrain[2m > [22mshould train on sessions
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m36:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mtrain[2m > [22mshould collect training statistics
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m45:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould generate recommendations without session
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould generate recommendations for session
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould respect recommendation limit
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould filter by recommendation types
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould provide domain-specific recommendations
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mgetRecommendations[2m > [22mshould respect mode preferences
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m58:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate mode recommendations
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate structure recommendations
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate behavior recommendations
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate template recommendations
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate continuation recommendations
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation types[2m > [22mshould generate improvement recommendations
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m118:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould include confidence scores
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould include rationale
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould provide actionable recommendations
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould estimate expected improvement
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mrecommendation quality[2m > [22mshould reference basis for recommendations
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m184:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msorting and filtering[2m > [22mshould sort recommendations by confidence
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msorting and filtering[2m > [22mshould count high confidence recommendations
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m249:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mdomain-specific recommendations[2m > [22mshould suggest mathematics mode for math domain
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mdomain-specific recommendations[2m > [22mshould suggest physics mode for physics domain
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22mdomain-specific recommendations[2m > [22mshould suggest scientific mode for science domain
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m274:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/36]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msummary generation[2m > [22mshould generate meaningful summary
+[31m[1m[7m FAIL [27m[22m[39m tests/unit/ml/recommendation-engine.test.ts[2m > [22mRecommendationEngine[2m > [22msummary generation[2m > [22mshould mention count in summary
+[31m[1mReferenceError[22m: pattern is not defined[39m
+[36m [2m❯[22m PatternRecognizer.matchesPattern src/ml/pattern-recognition.ts:[2m552:5[22m[39m
+    [90m550| [39m   */[39m
+    [90m551| [39m  [35mprivate[39m [34mmatchesPattern[39m(session[33m:[39m [33mThinkingSession[39m[33m,[39m _pattern[33m:[39m [33mPattern[39m)[33m:[39m…
+    [90m552| [39m    [35mswitch[39m (pattern[33m.[39mtype) {
+    [90m   | [39m    [31m^[39m
+    [90m553| [39m      [35mcase[39m [32m'sequence'[39m[33m:[39m
+    [90m554| [39m        [35mreturn[39m [35mthis[39m[33m.[39m[34mmatchesSequencePattern[39m(session[33m,[39m pattern)[33m;[39m
+[90m [2m❯[22m PatternRecognizer.recognize src/ml/pattern-recognition.ts:[2m148:16[22m[39m
+[90m [2m❯[22m PatternRecognizer.calculateCoverage src/ml/pattern-recognition.ts:[2m499:36[22m[39m
+[90m [2m❯[22m PatternRecognizer.train src/ml/pattern-recognition.ts:[2m127:27[22m[39m
+[90m [2m❯[22m RecommendationEngine.train src/ml/recommendation-engine.ts:[2m101:28[22m[39m
+[90m [2m❯[22m tests/unit/ml/recommendation-engine.test.ts:[2m313:14[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/36]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m36 failed[39m[22m[2m | [22m[1m[32m11 passed[39m[22m[90m (47)[39m
+[2m   Start at [22m 22:26:30
+[2m   Duration [22m 3.17s
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+[3Jc
+[7m[1m[34m RERUN [39m[22m[27m[2m src/backup/backup-manager.ts[22m [34mx8[39m
+
+ [33m❯[39m tests/integration/production-features.test.ts [2m ([22m[2m26 tests[22m [2m|[22m [31m24 failed[39m[2m)[22m[33m 561[2mms[22m[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould index and search sessions by content[39m
+[31m     → expected undefined not to be undefined[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould filter by mode[39m
+[31m     → Cannot read properties of undefined (reading 'length')[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould filter by tags[39m
+[31m     → Cannot read properties of undefined (reading 'length')[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould support faceted search[39m
+[31m     → expected undefined not to be undefined[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould provide autocomplete suggestions[39m
+[31m     → expected 0 to be greater than 0[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould list built-in templates[39m
+[31m     → templateManager.listTemplates is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould filter templates by category[39m
+[31m     → templateManager.listTemplates is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould filter templates by difficulty[39m
+[31m     → templateManager.listTemplates is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould instantiate template to session[39m
+[31m     → templateManager.listTemplates is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould track template usage statistics[39m
+[31m     → templateManager.listTemplates is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBatch Processing Integration[2m > [22mshould process batch export job[39m
+[31m     → batchProcessor.submitJob is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBatch Processing Integration[2m > [22mshould process batch validation job[39m
+[31m     → batchProcessor.submitJob is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBatch Processing Integration[2m > [22mshould limit concurrent jobs[39m
+[31m     → batchProcessor.submitJob is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould cache and retrieve values[39m
+[31m     → Cannot read properties of undefined (reading 'create')[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould respect LRU eviction policy[39m
+[31m     → Cannot read properties of undefined (reading 'create')[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould report cache statistics[39m
+[31m     → Cannot read properties of undefined (reading 'create')[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould clear cache[39m
+[31m     → Cannot read properties of undefined (reading 'create')[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBackup and Restore Integration[2m > [22mshould create backup of session[39m
+[31m     → backupManager.backup is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBackup and Restore Integration[2m > [22mshould list available backups[39m
+[31m     → backupManager.backup is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBackup and Restore Integration[2m > [22mshould restore session from backup[39m
+[31m     → backupManager.backup is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSession Comparison Integration[2m > [22mshould calculate thought count similarity[39m
+[31m     → expected undefined not to be undefined[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSession Comparison Integration[2m > [22mshould compare multiple sessions[39m
+[31m     → comparator.compareMultiple is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mEnd-to-End Feature Integration[2m > [22mshould integrate search + templates + batch[39m
+[31m     → templateManager.listTemplates is not a function[39m
+[31m   [33m❯[31m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mEnd-to-End Feature Integration[2m > [22mshould integrate backup + comparison + cache[39m
+[31m     → backupManager.backup is not a function[39m
+
+[31m⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 24 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould index and search sessions by content
+[31m[1mAssertionError[22m: expected undefined not to be undefined[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m61:32[22m[39m
+    [90m 59| [39m      })[33m;[39m
+    [90m 60| [39m
+    [90m 61| [39m      [34mexpect[39m(results[33m.[39msessions)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m 62| [39m      [34mexpect[39m(results[33m.[39msessions[33m.[39mlength)[33m.[39m[34mtoBeGreaterThan[39m([34m0[39m)[33m;[39m
+    [90m 63| [39m      [34mexpect[39m(results[33m.[39msessions[[34m0[39m][33m.[39mid)[33m.[39m[34mtoBe[39m([32m'session-1'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould filter by mode
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'length')[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m71:31[22m[39m
+    [90m 69| [39m      })[33m;[39m
+    [90m 70| [39m
+    [90m 71| [39m      [34mexpect[39m(results[33m.[39msessions[33m.[39mlength)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m 72| [39m      [34mexpect[39m(results[33m.[39msessions[[34m0[39m][33m.[39mmode)[33m.[39m[34mtoBe[39m([32m'mathematics'[39m)[33m;[39m
+    [90m 73| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould filter by tags
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'length')[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m80:31[22m[39m
+    [90m 78| [39m      })[33m;[39m
+    [90m 79| [39m
+    [90m 80| [39m      [34mexpect[39m(results[33m.[39msessions[33m.[39mlength)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m 81| [39m      [34mexpect[39m(results[33m.[39msessions[[34m0[39m][33m.[39mtags)[33m.[39m[34mtoContain[39m([32m'proof'[39m)[33m;[39m
+    [90m 82| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould support faceted search
+[31m[1mAssertionError[22m: expected undefined not to be undefined[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m90:30[22m[39m
+    [90m 88| [39m      })[33m;[39m
+    [90m 89| [39m
+    [90m 90| [39m      [34mexpect[39m(results[33m.[39mfacets)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                             [31m^[39m
+    [90m 91| [39m      [34mexpect[39m(results[33m.[39mfacets[33m?.[39mmode)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m 92| [39m      [34mexpect[39m(results[33m.[39mfacets[33m?.[39mtags)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSearch System Integration[2m > [22mshould provide autocomplete suggestions
+[31m[1mAssertionError[22m: expected 0 to be greater than 0[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m99:34[22m[39m
+    [90m 97| [39m
+    [90m 98| [39m      [34mexpect[39m(suggestions)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m 99| [39m      [34mexpect[39m(suggestions[33m.[39mlength)[33m.[39m[34mtoBeGreaterThan[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                                 [31m^[39m
+    [90m100| [39m      [34mexpect[39m(suggestions[33m.[39m[34msome[39m(s [33m=>[39m s[33m.[39m[34mtoLowerCase[39m()[33m.[39m[34mincludes[39m([32m'rea'[39m)))[33m.[39m[34mt[39m…
+    [90m101| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould list built-in templates
+[31m[1mTypeError[22m: templateManager.listTemplates is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m112:41[22m[39m
+    [90m110| [39m
+    [90m111| [39m    [34mit[39m([32m'should list built-in templates'[39m[33m,[39m () [33m=>[39m {
+    [90m112| [39m      [35mconst[39m templates [33m=[39m templateManager[33m.[39m[34mlistTemplates[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m113| [39m
+    [90m114| [39m      [34mexpect[39m(templates[33m.[39mlength)[33m.[39m[34mtoBeGreaterThanOrEqual[39m([34m7[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould filter templates by category
+[31m[1mTypeError[22m: templateManager.listTemplates is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m119:41[22m[39m
+    [90m117| [39m
+    [90m118| [39m    [34mit[39m([32m'should filter templates by category'[39m[33m,[39m () [33m=>[39m {
+    [90m119| [39m      [35mconst[39m templates [33m=[39m templateManager[33m.[39m[34mlistTemplates[39m({
+    [90m   | [39m                                        [31m^[39m
+    [90m120| [39m        category[33m:[39m [32m'problem-solving'[39m[33m,[39m
+    [90m121| [39m      })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould filter templates by difficulty
+[31m[1mTypeError[22m: templateManager.listTemplates is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m128:41[22m[39m
+    [90m126| [39m
+    [90m127| [39m    [34mit[39m([32m'should filter templates by difficulty'[39m[33m,[39m () [33m=>[39m {
+    [90m128| [39m      [35mconst[39m templates [33m=[39m templateManager[33m.[39m[34mlistTemplates[39m({
+    [90m   | [39m                                        [31m^[39m
+    [90m129| [39m        difficulty[33m:[39m [32m'beginner'[39m[33m,[39m
+    [90m130| [39m      })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould instantiate template to session
+[31m[1mTypeError[22m: templateManager.listTemplates is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m137:41[22m[39m
+    [90m135| [39m
+    [90m136| [39m    [34mit[39m([32m'should instantiate template to session'[39m[33m,[39m () [33m=>[39m {
+    [90m137| [39m      [35mconst[39m templates [33m=[39m templateManager[33m.[39m[34mlistTemplates[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m138| [39m      [35mconst[39m template [33m=[39m templates[[34m0[39m][33m;[39m
+    [90m139| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mTemplate System Integration[2m > [22mshould track template usage statistics
+[31m[1mTypeError[22m: templateManager.listTemplates is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m151:41[22m[39m
+    [90m149| [39m
+    [90m150| [39m    [34mit[39m([32m'should track template usage statistics'[39m[33m,[39m () [33m=>[39m {
+    [90m151| [39m      [35mconst[39m templates [33m=[39m templateManager[33m.[39m[34mlistTemplates[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m152| [39m      [35mconst[39m template [33m=[39m templates[[34m0[39m][33m;[39m
+    [90m153| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBatch Processing Integration[2m > [22mshould process batch export job
+[31m[1mTypeError[22m: batchProcessor.submitJob is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m173:42[22m[39m
+    [90m171| [39m
+    [90m172| [39m    [34mit[39m([32m'should process batch export job'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m173| [39m      [35mconst[39m jobId [33m=[39m [35mawait[39m batchProcessor[33m.[39m[34msubmitJob[39m({
+    [90m   | [39m                                         [31m^[39m
+    [90m174| [39m        type[33m:[39m [32m'export'[39m[33m,[39m
+    [90m175| [39m        sessionIds[33m:[39m testSessions[33m.[39m[34mmap[39m(s [33m=>[39m s[33m.[39mid)[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBatch Processing Integration[2m > [22mshould process batch validation job
+[31m[1mTypeError[22m: batchProcessor.submitJob is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m187:42[22m[39m
+    [90m185| [39m
+    [90m186| [39m    [34mit[39m([32m'should process batch validation job'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m187| [39m      [35mconst[39m jobId [33m=[39m [35mawait[39m batchProcessor[33m.[39m[34msubmitJob[39m({
+    [90m   | [39m                                         [31m^[39m
+    [90m188| [39m        type[33m:[39m [32m'validate'[39m[33m,[39m
+    [90m189| [39m        sessionIds[33m:[39m testSessions[33m.[39m[34mmap[39m(s [33m=>[39m s[33m.[39mid)[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBatch Processing Integration[2m > [22mshould limit concurrent jobs
+[31m[1mTypeError[22m: batchProcessor.submitJob is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m203:44[22m[39m
+    [90m201| [39m      [90m// Submit more jobs than the concurrency limit[39m
+    [90m202| [39m      [35mfor[39m ([35mlet[39m i [33m=[39m [34m0[39m[33m;[39m i [33m<[39m [34m10[39m[33m;[39m i[33m++[39m) {
+    [90m203| [39m        [35mconst[39m jobId [33m=[39m [35mawait[39m batchProcessor[33m.[39m[34msubmitJob[39m({
+    [90m   | [39m                                           [31m^[39m
+    [90m204| [39m          type[33m:[39m [32m'export'[39m[33m,[39m
+    [90m205| [39m          sessionIds[33m:[39m [testSessions[[34m0[39m][33m.[39mid][33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould cache and retrieve values
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould respect LRU eviction policy
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould report cache statistics
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mCache System Integration[2m > [22mshould clear cache
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'create')[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m225:28[22m[39m
+    [90m223| [39m
+    [90m224| [39m    [34mbeforeEach[39m(() [33m=>[39m {
+    [90m225| [39m      cache [33m=[39m [33mCacheFactory[39m[33m.[39m[34mcreate[39m([32m'lru'[39m[33m,[39m { maxSize[33m:[39m [34m100[39m })[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m226| [39m    })[33m;[39m
+    [90m227| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBackup and Restore Integration[2m > [22mshould create backup of session
+[31m[1mTypeError[22m: backupManager.backup is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m281:44[22m[39m
+    [90m279| [39m
+    [90m280| [39m    [34mit[39m([32m'should create backup of session'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m281| [39m      [35mconst[39m backupId [33m=[39m [35mawait[39m backupManager[33m.[39m[34mbackup[39m(testSessions[[34m0[39m])[33m;[39m
+    [90m   | [39m                                           [31m^[39m
+    [90m282| [39m
+    [90m283| [39m      [34mexpect[39m(backupId)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBackup and Restore Integration[2m > [22mshould list available backups
+[31m[1mTypeError[22m: backupManager.backup is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m288:27[22m[39m
+    [90m286| [39m
+    [90m287| [39m    [34mit[39m([32m'should list available backups'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m288| [39m      [35mawait[39m backupManager[33m.[39m[34mbackup[39m(testSessions[[34m0[39m])[33m;[39m
+    [90m   | [39m                          [31m^[39m
+    [90m289| [39m      [35mawait[39m backupManager[33m.[39m[34mbackup[39m(testSessions[[34m1[39m])[33m;[39m
+    [90m290| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mBackup and Restore Integration[2m > [22mshould restore session from backup
+[31m[1mTypeError[22m: backupManager.backup is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m298:44[22m[39m
+    [90m296| [39m    [34mit[39m([32m'should restore session from backup'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m297| [39m      [35mconst[39m originalSession [33m=[39m testSessions[[34m0[39m][33m;[39m
+    [90m298| [39m      [35mconst[39m backupId [33m=[39m [35mawait[39m backupManager[33m.[39m[34mbackup[39m(originalSession)[33m;[39m
+    [90m   | [39m                                           [31m^[39m
+    [90m299| [39m
+    [90m300| [39m      [35mconst[39m restored [33m=[39m [35mawait[39m backupManager[33m.[39m[34mrestore[39m(backupId)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSession Comparison Integration[2m > [22mshould calculate thought count similarity
+[31m[1mAssertionError[22m: expected undefined not to be undefined[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m337:58[22m[39m
+    [90m335| [39m
+    [90m336| [39m      [34mexpect[39m(comparison[33m.[39msimilarity)[33m.[39m[34mtoBeGreaterThan[39m([34m0[39m)[33m;[39m
+    [90m337| [39m      [34mexpect[39m(comparison[33m.[39mmetrics[33m?.[39mthoughtCountSimilarity)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m   | [39m                                                         [31m^[39m
+    [90m338| [39m    })[33m;[39m
+    [90m339| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mSession Comparison Integration[2m > [22mshould compare multiple sessions
+[31m[1mTypeError[22m: comparator.compareMultiple is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m341:38[22m[39m
+    [90m339| [39m
+    [90m340| [39m    [34mit[39m([32m'should compare multiple sessions'[39m[33m,[39m () [33m=>[39m {
+    [90m341| [39m      [35mconst[39m comparisons [33m=[39m comparator[33m.[39m[34mcompareMultiple[39m(testSessions)[33m;[39m
+    [90m   | [39m                                     [31m^[39m
+    [90m342| [39m
+    [90m343| [39m      [34mexpect[39m(comparisons)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mEnd-to-End Feature Integration[2m > [22mshould integrate search + templates + batch
+[31m[1mTypeError[22m: templateManager.listTemplates is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m353:41[22m[39m
+    [90m351| [39m      [90m// 1. Create sessions from templates[39m
+    [90m352| [39m      [35mconst[39m templateManager [33m=[39m [35mnew[39m [33mTemplateManager[39m()[33m;[39m
+    [90m353| [39m      [35mconst[39m templates [33m=[39m templateManager[33m.[39m[34mlistTemplates[39m()[33m;[39m
+    [90m   | [39m                                        [31m^[39m
+    [90m354| [39m      [35mconst[39m session1 [33m=[39m templateManager[33m.[39m[34minstantiateTemplate[39m(templates[[34m0[39m…
+    [90m355| [39m        title[33m:[39m [32m'E2E Test Session 1'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/24]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/integration/production-features.test.ts[2m > [22mProduction Features Integration Tests[2m > [22mEnd-to-End Feature Integration[2m > [22mshould integrate backup + comparison + cache
+[31m[1mTypeError[22m: backupManager.backup is not a function[39m
+[36m [2m❯[22m tests/integration/production-features.test.ts:[2m388:43[22m[39m
+    [90m386| [39m      })[33m;[39m
+    [90m387| [39m
+    [90m388| [39m      [35mconst[39m backup1 [33m=[39m [35mawait[39m backupManager[33m.[39m[34mbackup[39m(testSessions[[34m0[39m])[33m;[39m
+    [90m   | [39m                                          [31m^[39m
+    [90m389| [39m      [35mconst[39m backup2 [33m=[39m [35mawait[39m backupManager[33m.[39m[34mbackup[39m(testSessions[[34m1[39m])[33m;[39m
+    [90m390| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/24]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m24 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (26)[39m
+[2m   Start at [22m 22:42:49
+[2m   Duration [22m 2.53s
+
+
+[1m[7m[31m FAIL [39m[27m[22m[31m Tests failed. Watching for file changes...[39m
+       [2mpress [22m[1mh[22m[2m to show help[22m[2m, [22m[2mpress [22m[1mq[22m[2m to quit[22m
+       [34mrerun x8[39m
+[2K[1A[2K[G       [90mrerun x8[39m
+[2K[1A[2K[G       [2m[90mrerun x8[39m[22m
 [2K[1A[2K[G

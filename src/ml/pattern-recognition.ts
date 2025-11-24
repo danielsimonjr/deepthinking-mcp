@@ -548,7 +548,7 @@ export class PatternRecognizer {
   /**
    * Check if session matches a pattern
    */
-  private matchesPattern(session: ThinkingSession, pattern: Pattern): boolean {
+  private matchesPattern(session: ThinkingSession, _pattern: Pattern): boolean {
     switch (pattern.type) {
       case 'sequence':
         return this.matchesSequencePattern(session, pattern);

@@ -20,7 +20,7 @@ export class S3BackupProvider {
    * Save backup to S3
    */
   async save(
-    backupId: string,
+    _backupId: string,
     data: Buffer,
     _manifest: BackupManifest
   ): Promise<string> {
@@ -61,7 +61,7 @@ export class S3BackupProvider {
   /**
    * Delete backup from S3
    */
-  async delete(backupId: string): Promise<boolean> {
+  async delete(_backupId: string): Promise<boolean> {
     // Stub implementation
     console.log(`[S3BackupProvider] Would delete backup ${backupId}`);
     return true;
@@ -95,7 +95,7 @@ export class S3BackupProvider {
   /**
    * Verify backup integrity
    */
-  async verify(backupId: string, expectedChecksum: string): Promise<boolean> {
+  async verify(_backupId: string, _expectedChecksum: string): Promise<boolean> {
     // Stub implementation
     return false;
   }

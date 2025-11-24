@@ -20,7 +20,7 @@ export class GCSBackupProvider {
    * Save backup to GCS
    */
   async save(
-    backupId: string,
+    _backupId: string,
     data: Buffer,
     _manifest: BackupManifest
   ): Promise<string> {
@@ -55,7 +55,7 @@ export class GCSBackupProvider {
   /**
    * Delete backup from GCS
    */
-  async delete(backupId: string): Promise<boolean> {
+  async delete(_backupId: string): Promise<boolean> {
     // Stub implementation
     console.log(`[GCSBackupProvider] Would delete backup ${backupId}`);
     return true;
@@ -89,7 +89,7 @@ export class GCSBackupProvider {
   /**
    * Verify backup integrity
    */
-  async verify(backupId: string, expectedChecksum: string): Promise<boolean> {
+  async verify(_backupId: string, _expectedChecksum: string): Promise<boolean> {
     // Stub implementation
     return false;
   }

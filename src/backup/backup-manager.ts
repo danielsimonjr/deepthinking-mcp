@@ -36,7 +36,6 @@ const brotliDecompress = promisify(zlib.brotliDecompress);
 export class BackupManager {
   private backups: Map<string, BackupRecord>;
   private providers: Map<BackupProvider, any>;
-  private _lastBackupId: string | null = null;
 
   constructor() {
     this.backups = new Map();
