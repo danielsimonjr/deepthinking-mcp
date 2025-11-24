@@ -1217,7 +1217,10 @@ ${content}
   /**
    * Format date for LaTeX
    */
-  private formatDate(date: Date): string {
+  private formatDate(date: Date | undefined): string {
+    if (!date) {
+      return new Date().toISOString().split('T')[0];
+    }
     return date.toISOString().split('T')[0];
   }
 
