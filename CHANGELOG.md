@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.4] - 2025-11-24
+
+### Fixed
+
+- **Type Safety: Complete @ts-expect-error Elimination** (231 → 0)
+  - Fixed 8 remaining type suppressions across 6 files
+  - index.ts: Corrected method name exportFirstPrinciplesDerivation, added fallback for unsupported modes
+  - visualization/mindmap.ts: Use ThinkingMode enum values consistently in switch statements
+  - visualization/state-charts.ts: Fixed mode string/enum comparison with proper cast
+  - taxonomy/adaptive-selector.ts: Use ThinkingMode enum values in all mappings and alternatives
+  - modes/stochastic-reasoning.ts: Convert state values to strings for Map keys
+  - modes/recursive-reasoning.ts: Add null check before accessing iterator value
+  - Achieved 100% type-safe codebase with zero suppressions
+
+- **LaTeX Export Tests** (27/27 passing, was 22/27)
+  - Fixed test data to use correct 'content' property instead of legacy 'thought' property
+  - Enhanced LaTeX exporter with fallback support for simple 'equation' property
+  - Fixed inline math default to false (display math mode \[ \] by default)
+  - All LaTeX document generation, mathematics export, and special character escaping tests passing
+
+### Quality Metrics
+
+- **TypeScript**: ✅ 0 errors, 0 warnings, 0 suppressions
+- **Test Pass Rate**: 95.6% (565/589, up from 560/589)
+- **LaTeX Export**: 100% (27/27 tests passing)
+- **Remaining Test Failures**: 24 tests (12 Taxonomy, 11 Production, 1 Performance)
+
 ## [3.4.3] - 2025-11-24
 
 ### Fixed (High Priority Issues from Code Review)

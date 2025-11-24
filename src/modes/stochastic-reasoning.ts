@@ -407,8 +407,8 @@ export class StochasticReasoningEngine {
     const finalStateCounts = new Map<string, number>();
     for (const traj of trajectories) {
       const finalState = traj.stateValues[traj.stateValues.length - 1];
-      // @ts-expect-error - State value conversion
-      finalStateCounts.set(finalState, (finalStateCounts.get(finalState) || 0) + 1);
+      const finalStateKey = String(finalState);
+      finalStateCounts.set(finalStateKey, (finalStateCounts.get(finalStateKey) || 0) + 1);
     }
 
     const meanValue = Array.from(finalStateCounts.values()).reduce((a, b) => a + b, 0) / numTrajectories;

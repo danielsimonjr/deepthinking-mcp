@@ -203,18 +203,17 @@ async function handleExport(input: ThinkingToolInput) {
         includeMetrics: true,
       });
     } else if (lastThought.mode === ThinkingMode.FIRSTPRINCIPLES && 'question' in lastThought) {
-      // @ts-expect-error - Method not implemented yet
-      exported = visualExporter.exportFirstPrinciples(lastThought as FirstPrinciplesThought, {
+      exported = visualExporter.exportFirstPrinciplesDerivation(lastThought as FirstPrinciplesThought, {
         format: format as VisualFormat,
         colorScheme: 'default',
       });
     } else {
-      // Generic thought sequence export for all other modes
-      // @ts-expect-error - Method not implemented yet
-      exported = visualExporter.exportThoughtSequence(session.thoughts, {
-        format: format as VisualFormat,
-        colorScheme: 'default',
-      });
+      // Generic thought sequence export for modes without specific visual exporters
+      // Provide a simple text-based representation
+      const thoughts = session.thoughts.map((t, i) =>
+        `Thought ${i + 1} (${t.mode}):\n${t.content}\n`
+      ).join('\n');
+      exported = `Session: ${session.title || 'Untitled'}\nMode: ${lastThought.mode}\n\n${thoughts}`;
     }
 
     return {
