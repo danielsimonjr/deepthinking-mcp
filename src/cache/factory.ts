@@ -3,7 +3,7 @@
  * Phase 4 Task 9.6: Factory for creating cache instances
  */
 
-import type { Cache, CacheConfig, CacheStrategy } from './types.js';
+import type { Cache, CacheConfig } from './types.js';
 import { LRUCache } from './lru.js';
 import { LFUCache } from './lfu.js';
 import { FIFOCache } from './fifo.js';

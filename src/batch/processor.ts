@@ -8,10 +8,8 @@ import type {
   BatchJob,
   BatchJobType,
   BatchJobParams,
-  BatchJobStatus,
   BatchJobResult,
   BatchProcessorOptions,
-  BatchError,
 } from './types.js';
 
 /**

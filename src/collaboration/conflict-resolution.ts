@@ -349,7 +349,6 @@ export class ConflictResolutionManager {
 
     const totalWeight = votes.reduce((sum, v) => sum + v.weight, 0);
     const acceptWeight = acceptVotes.reduce((sum, v) => sum + v.weight, 0);
-    const _rejectWeight = rejectVotes.reduce((sum, v) => sum + v.weight, 0);
 
     const acceptanceRatio = acceptWeight / totalWeight;
 

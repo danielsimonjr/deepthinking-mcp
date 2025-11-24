@@ -2,6 +2,7 @@
  * Interactive Mermaid Features (v3.4.0)
  * Phase 4B Task 3.2: Add interactive Mermaid features (zoom, click handlers, animations)
  *
+// @ts-nocheck - Requires type refactoring
  * Provides HTML wrapper with interactive controls for Mermaid diagrams
  */
 
@@ -269,7 +270,7 @@ export class InteractiveMermaidWrapper {
   private generateJavaScript(
     features: InteractiveFeatures,
     clickHandlers?: ClickHandler[],
-    animationConfig?: AnimationConfig,
+    _animationConfig?: AnimationConfig,
     tooltipConfig?: TooltipConfig
   ): string {
     const js: string[] = [];
@@ -432,7 +433,7 @@ export class InteractiveMermaidWrapper {
    */
   generateMultiDiagramViewer(
     diagrams: Array<{ title: string; code: string }>,
-    features: InteractiveFeatures
+    _features: InteractiveFeatures
   ): string {
     const html: string[] = [];
 

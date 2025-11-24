@@ -452,7 +452,7 @@ export const BUILT_IN_TEMPLATES: SessionTemplate[] = [
           number: 3,
           title: 'Build Up Understanding',
           description: 'Reconstruct knowledge from fundamentals',
-          mode: ThinkingMode.RECURSIVE,
+          mode: ThinkingMode.SEQUENTIAL,
           prompts: [
             'How do these principles combine?',
             'What follows logically?',

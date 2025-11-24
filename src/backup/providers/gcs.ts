@@ -28,10 +28,10 @@ export class GCSBackupProvider {
     // In production, would use GCS SDK:
     // const storage = new Storage({ projectId, keyFilename });
     // const bucket = storage.bucket(this.options.bucket);
-    // const file = bucket.file(`${prefix}/${backupId}.backup`);
+    // const file = bucket.file(`${prefix}/${_backupId}.backup`);
     // await file.save(data, { metadata: { storageClass } });
 
-    const key = `${this.options.prefix || 'backups'}/${backupId}.backup`;
+    const key = `${this.options.prefix || 'backups'}/${_backupId}.backup`;
     const location = `gs://${this.options.bucket}/${key}`;
 
     console.log(
@@ -57,7 +57,7 @@ export class GCSBackupProvider {
    */
   async delete(_backupId: string): Promise<boolean> {
     // Stub implementation
-    console.log(`[GCSBackupProvider] Would delete backup ${backupId}`);
+    console.log(`[GCSBackupProvider] Would delete backup ${_backupId}`);
     return true;
   }
 

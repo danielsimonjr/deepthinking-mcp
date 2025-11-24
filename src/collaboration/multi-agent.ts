@@ -3,7 +3,7 @@
  * Phase 4C Task 5.1: Support for multiple reasoning agents working together
  */
 
-import type { ThinkingSession, Thought } from '../types/index.js';
+import type { Thought } from '../types/index.js';
 import type { ThinkingMode } from '../types/core.js';
 
 /**

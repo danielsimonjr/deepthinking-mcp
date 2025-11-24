@@ -73,7 +73,7 @@ export interface PatternRecognitionResult {
 /**
  * Pattern similarity
  */
-interface PatternSimilarity {
+export interface PatternSimilarity {
   pattern1: string;
   pattern2: string;
   similarity: number;
@@ -548,33 +548,33 @@ export class PatternRecognizer {
   /**
    * Check if session matches a pattern
    */
-  private matchesPattern(session: ThinkingSession, _pattern: Pattern): boolean {
+  private matchesPattern(session: ThinkingSession, pattern: Pattern): boolean {
     switch (pattern.type) {
       case 'sequence':
-        return this.matchesSequencePattern(session, pattern);
+        return this.matchesSequencePattern(session);
       case 'transition':
-        return this.matchesTransitionPattern(session, pattern);
+        return this.matchesTransitionPattern(session);
       case 'structure':
-        return this.matchesStructurePattern(session, pattern);
+        return this.matchesStructurePattern(session);
       case 'temporal':
-        return this.matchesTemporalPattern(session, pattern);
+        return this.matchesTemporalPattern(session);
       case 'branching':
-        return this.matchesBranchingPattern(session, pattern);
+        return this.matchesBranchingPattern(session);
       case 'revision':
-        return this.matchesRevisionPattern(session, pattern);
+        return this.matchesRevisionPattern(session);
       case 'convergence':
-        return this.matchesConvergencePattern(session, pattern);
+        return this.matchesConvergencePattern(session);
       default:
         return false;
     }
   }
 
-  private matchesSequencePattern(session: ThinkingSession, pattern: Pattern): boolean {
+  private matchesSequencePattern(session: ThinkingSession): boolean {
     // Simple heuristic: check if session has similar thought count
     return session.thoughts.length >= 2;
   }
 
-  private matchesTransitionPattern(session: ThinkingSession, pattern: Pattern): boolean {
+  private matchesTransitionPattern(session: ThinkingSession): boolean {
     // Check if session has mode transitions matching the pattern
     for (let i = 0; i < session.thoughts.length - 1; i++) {
       if (session.thoughts[i].mode !== session.thoughts[i + 1].mode) {
@@ -584,23 +584,23 @@ export class PatternRecognizer {
     return false;
   }
 
-  private matchesStructurePattern(session: ThinkingSession, pattern: Pattern): boolean {
+  private matchesStructurePattern(session: ThinkingSession): boolean {
     return session.thoughts.length > 0;
   }
 
-  private matchesTemporalPattern(session: ThinkingSession, pattern: Pattern): boolean {
+  private matchesTemporalPattern(session: ThinkingSession): boolean {
     return session.thoughts.length >= 2;
   }
 
-  private matchesBranchingPattern(session: ThinkingSession, pattern: Pattern): boolean {
+  private matchesBranchingPattern(session: ThinkingSession): boolean {
     return session.thoughts.some(t => t.isRevision || (t as any).branchId);
   }
 
-  private matchesRevisionPattern(session: ThinkingSession, pattern: Pattern): boolean {
+  private matchesRevisionPattern(session: ThinkingSession): boolean {
     return session.thoughts.some(t => t.isRevision);
   }
 
-  private matchesConvergencePattern(session: ThinkingSession, pattern: Pattern): boolean {
+  private matchesConvergencePattern(session: ThinkingSession): boolean {
     return session.isComplete;
   }
 
