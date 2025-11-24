@@ -11,3 +11,11 @@ export type {
   PatternMetadata,
   PatternRecognitionResult,
 } from './pattern-recognition.js';
+
+export { SuccessMetricsAnalyzer } from './success-metrics.js';
+export type {
+  SuccessMetric,
+  SuccessAnalysis,
+  SuccessFactor,
+  SuccessInsights,
+} from './success-metrics.js';
