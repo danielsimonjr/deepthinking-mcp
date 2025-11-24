@@ -121,14 +121,14 @@ describe('Reasoning Taxonomy', () => {
     it('should explore reasoning type', () => {
       const exploration = navigator.explore('deductive_modus_ponens');
       expect(exploration).toBeDefined();
-      expect(exploration?.type.id).toBe('deductive_modus_ponens');
-      expect(exploration?.related.length).toBeGreaterThanOrEqual(0);
+      expect(exploration?.startType.id).toBe('deductive_modus_ponens');
+      expect(exploration?.neighborhood.related.length).toBeGreaterThanOrEqual(0);
     });
 
     it('should find path between types', () => {
       const path = navigator.findPath('deductive_modus_ponens', 'inductive_generalization');
       expect(path).toBeDefined();
-      expect(path?.path.length).toBeGreaterThan(0);
+      expect(path?.steps.length).toBeGreaterThan(0);
     });
 
     it('should recommend based on problem', () => {
