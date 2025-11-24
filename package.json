@@ -1,6 +1,6 @@
 {
   "name": "deepthinking-mcp",
-  "version": "3.1.0",
+  "version": "3.4.3",
   "description": "Comprehensive MCP server with 13 advanced reasoning modes and visual export capabilities (Mermaid, DOT, ASCII) for complex problem-solving and analysis",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
