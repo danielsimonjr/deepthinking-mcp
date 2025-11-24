@@ -41,7 +41,7 @@ import {
   TemporalThought,
   GameTheoryThought,
   EvidentialThought,
-  FirstPrincipleThought,
+  FirstPrinciplesThought,
   ModeRecommender,
 } from './types/index.js';
 import { VisualExporter, type VisualFormat } from './export/visual.js';
@@ -206,8 +206,8 @@ async function handleExport(input: ThinkingToolInput) {
         includeLabels: true,
         includeMetrics: true,
       });
-    } else if (lastThought.mode === 'firstprinciple' && 'question' in lastThought) {
-      exported = visualExporter.exportFirstPrinciples(lastThought as FirstPrincipleThought, {
+    } else if (lastThought.mode === ThinkingMode.FIRSTPRINCIPLES && 'question' in lastThought) {
+      exported = visualExporter.exportFirstPrinciples(lastThought as FirstPrinciplesThought, {
         format: format as VisualFormat,
         colorScheme: 'default',
       });
@@ -488,7 +488,7 @@ function createThought(input: ThinkingToolInput, sessionId: string) {
         decisions: input.decisions || [],
       } as unknown as EvidentialThought;
 
-    case 'firstprinciple':      return {        ...baseThought,        mode: ThinkingMode.FIRSTPRINCIPLES,        question: input.question || '',        principles: input.principles || [],        derivationSteps: input.derivationSteps || [],        conclusion: input.conclusion || { statement: '', derivationChain: [], certainty: 0 },        alternativeInterpretations: input.alternativeInterpretations || [],      } as unknown as FirstPrincipleThought;
+    case ThinkingMode.FIRSTPRINCIPLES:      return {        ...baseThought,        mode: ThinkingMode.FIRSTPRINCIPLES,        question: input.question || '',        principles: input.principles || [],        derivationSteps: input.derivationSteps || [],        conclusion: input.conclusion || { statement: '', derivationChain: [], certainty: 0 },        alternativeInterpretations: input.alternativeInterpretations || [],      } as unknown as FirstPrinciplesThought;
     case 'hybrid':
     default:
       return {

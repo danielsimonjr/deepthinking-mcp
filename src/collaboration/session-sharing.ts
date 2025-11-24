@@ -261,12 +261,7 @@ export class SessionSharingManager {
       thoughts: deduplicated,
       isComplete: sessions.every(s => s.isComplete),
       createdAt: new Date(Math.min(...sessions.map(s => s.createdAt.getTime()))),
-      metadata: {
-        sources: sessions.map(s => s.id),
-        mergeStrategy: strategy,
-        conflicts: conflicts.length,
-      },
-    };
+    } as ThinkingSession;
 
     // Resolve auto-resolvable conflicts
     const resolvedConflicts = this.autoResolveConflicts(conflicts, merged);

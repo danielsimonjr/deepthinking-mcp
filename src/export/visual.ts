@@ -1277,12 +1277,14 @@ export class VisualExporter {
     mermaid += '  Frame["Frame of Discernment"]\n';
 
     // Add hypotheses
-    for (const hypothesis of thought.frameOfDiscernment) {
-      const hypId = this.sanitizeId(hypothesis);
-      const label = includeLabels ? hypothesis : hypId;
+    if (thought.frameOfDiscernment) {
+      for (const hypothesis of thought.frameOfDiscernment) {
+        const hypId = this.sanitizeId(hypothesis);
+        const label = includeLabels ? hypothesis : hypId;
 
-      mermaid += `  ${hypId}["${label}"]\n`;
-      mermaid += `  Frame --> ${hypId}\n`;
+        mermaid += `  ${hypId}["${label}"]\n`;
+        mermaid += `  Frame --> ${hypId}\n`;
+      }
     }
 
     // Add mass assignments
@@ -1296,7 +1298,7 @@ export class VisualExporter {
     }
 
     // Add styling
-    if (colorScheme !== 'monochrome') {
+    if (colorScheme !== 'monochrome' && thought.frameOfDiscernment) {
       mermaid += '\n';
       const color = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
       for (const hypothesis of thought.frameOfDiscernment) {
@@ -1319,12 +1321,14 @@ export class VisualExporter {
 
     dot += '  Frame [label="Frame of Discernment", shape=ellipse];\n\n';
 
-    for (const hypothesis of thought.frameOfDiscernment) {
-      const hypId = this.sanitizeId(hypothesis);
-      const label = includeLabels ? hypothesis : hypId;
+    if (thought.frameOfDiscernment) {
+      for (const hypothesis of thought.frameOfDiscernment) {
+        const hypId = this.sanitizeId(hypothesis);
+        const label = includeLabels ? hypothesis : hypId;
 
-      dot += `  ${hypId} [label="${label}"];\n`;
-      dot += `  Frame -> ${hypId};\n`;
+        dot += `  ${hypId} [label="${label}"];\n`;
+        dot += `  Frame -> ${hypId};\n`;
+      }
     }
 
     if (includeMetrics && (thought as any).massAssignments && (thought as any).massAssignments.length > 0) {
@@ -1345,7 +1349,11 @@ export class VisualExporter {
     ascii += '================================\n\n';
 
     ascii += 'Frame of Discernment:\n';
-    ascii += `  {${thought.frameOfDiscernment.join(', ')}}\n\n`;
+    if (thought.frameOfDiscernment) {
+      ascii += `  {${thought.frameOfDiscernment.join(', ')}}\n\n`;
+    } else {
+      ascii += '  (not defined)\n\n';
+    }
 
     if ((thought as any).massAssignments && (thought as any).massAssignments.length > 0) {
       ascii += 'Mass Assignments:\n';
@@ -1355,8 +1363,8 @@ export class VisualExporter {
       ascii += '\n';
     }
 
-    if (thought.beliefFunctions) {
-      ascii += `Belief: ${thought.beliefFunctions.toFixed(3)}\n`;
+    if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
+      ascii += `Belief Functions: ${thought.beliefFunctions.length} defined\n`;
     }
 
     if ((thought as any).plausibilityFunction) {
@@ -2041,7 +2049,9 @@ export class VisualExporter {
     if (thought.conclusion) {
       ascii += 'Conclusion:\n';
       ascii += `${thought.conclusion.statement}\n`;
-      ascii += `Support for hypothesis: ${thought.conclusion.supportForHypothesis}\n`;
+      if ((thought.conclusion as any).supportedHypotheses) {
+        ascii += `Supported hypotheses: ${(thought.conclusion as any).supportedHypotheses.join(', ')}\n`;
+      }
       if (thought.conclusion.confidence) {
         ascii += `Confidence: ${thought.conclusion.confidence.toFixed(2)}\n`;
       }
@@ -2230,7 +2240,8 @@ export class VisualExporter {
     if (thought.variables && thought.variables.length > 0) {
       ascii += 'Decision Variables:\n';
       for (const variable of thought.variables) {
-        ascii += `  ${variable.name} (${variable.variableType})\n`;
+        const varType = (variable as any).type || 'unknown';
+        ascii += `  ${variable.name} (${varType})\n`;
         if (variable.domain) {
           ascii += `    Domain: [${(variable.domain as any).lowerBound}, ${(variable.domain as any).upperBound}]\n`;
         }
@@ -2258,16 +2269,19 @@ export class VisualExporter {
 
     if (thought.solution) {
       ascii += 'Solution:\n';
-      ascii += `  Status: ${thought.solution.status}\n`;
-      if (thought.solution.optimalValue !== undefined) {
-        ascii += `  Optimal Value: ${thought.solution.optimalValue}\n`;
+      const solution = thought.solution as any;
+      if (solution.status) {
+        ascii += `  Status: ${solution.status}\n`;
       }
-      if (thought.solution.quality !== undefined) {
-        ascii += `  Quality: ${thought.solution.quality.toFixed(2)}\n`;
+      if (solution.optimalValue !== undefined) {
+        ascii += `  Optimal Value: ${solution.optimalValue}\n`;
       }
-      if (thought.solution.assignments) {
+      if (solution.quality !== undefined) {
+        ascii += `  Quality: ${solution.quality.toFixed(2)}\n`;
+      }
+      if (solution.assignments) {
         ascii += '  Assignments:\n';
-        for (const [varId, value] of Object.entries(thought.solution.assignments)) {
+        for (const [varId, value] of Object.entries(solution.assignments)) {
           ascii += `    ${varId} = ${value}\n`;
         }
       }

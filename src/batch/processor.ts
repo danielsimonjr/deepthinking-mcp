@@ -70,7 +70,7 @@ export class BatchProcessor {
    * Get total items from params
    */
   private getTotalItems(params: BatchJobParams): number {
-    if ('sessionIds' in params) {
+    if ('sessionIds' in params && params.sessionIds) {
       return params.sessionIds.length;
     }
     if ('inputPaths' in params) {

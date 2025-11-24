@@ -319,7 +319,7 @@ ${content}
         sections.push(this.formatEvidentialThought(thought as EvidentialThought));
         break;
       case 'firstprinciples':
-        sections.push(this.formatFirstPrinciplesThought(thought as FirstPrincipleThought));
+        sections.push(this.formatFirstPrinciplesThought(thought as FirstPrinciplesThought));
         break;
       default:
         // Generic formatting for other modes
@@ -1137,7 +1137,7 @@ ${content}
   /**
    * Format First-Principles mode thought
    */
-  private formatFirstPrincipleThought(thought: FirstPrincipleThought): string {
+  private formatFirstPrinciplesThought(thought: FirstPrinciplesThought): string {
     const sections: string[] = [];
 
     if (thought.question) {
