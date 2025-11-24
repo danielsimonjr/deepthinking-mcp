@@ -519,7 +519,7 @@ export class MultiModalAnalyzer {
     let relevance = pattern.effectiveness * 0.3; // Base from pattern effectiveness
 
     // Check use case match
-    const lowerProblem = problemDescription.toLowerCase();
+    const lowerProblem = (problemDescription || '').toLowerCase();
     for (const useCase of pattern.useCases) {
       if (lowerProblem.includes(useCase.toLowerCase())) {
         relevance += 0.3;
