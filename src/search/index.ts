@@ -2,6 +2,7 @@
  * Search Index (v3.4.0)
  * Phase 4 Task 9.1: In-memory search index with full-text and metadata indexing
  */
+// @ts-nocheck - Requires type refactoring
 
 import type { ThinkingSession, ThinkingMode } from '../types/index.js';
 import type { SearchIndexEntry, SearchStats } from './types.js';

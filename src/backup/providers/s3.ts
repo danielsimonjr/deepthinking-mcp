@@ -35,7 +35,7 @@ export class S3BackupProvider {
     //   ServerSideEncryption: this.options.serverSideEncryption ? 'AES256' : undefined
     // }));
 
-    const key = `${this.options.prefix || 'backups'}/${backupId}.backup`;
+    const key = `${this.options.prefix || 'backups'}/${_backupId}.backup`;
     const location = `s3://${this.options.bucket}/${key}`;
 
     console.log(
@@ -63,7 +63,7 @@ export class S3BackupProvider {
    */
   async delete(_backupId: string): Promise<boolean> {
     // Stub implementation
-    console.log(`[S3BackupProvider] Would delete backup ${backupId}`);
+    console.log(`[S3BackupProvider] Would delete backup ${_backupId}`);
     return true;
   }
 

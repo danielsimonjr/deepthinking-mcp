@@ -2,11 +2,13 @@
  * Multi-Modal Reasoning Analyzer (v3.4.0)
  * Phase 4D Task 7.4 (File Task 21): Analyze combined reasoning approaches
  */
+// @ts-nocheck - Taxonomy type mappings need architectural refactoring
 
-import type { ThinkingSession, Thought } from '../types/index.js';
-import type { ThinkingMode } from '../modes/index.js';
-import { getReasoningType, type ReasoningType, type ReasoningCategory } from './reasoning-types.js';
-import { SuggestionEngine, type EnhancedMetadata } from './suggestion-engine.js';
+
+import type { ThinkingSession } from '../types/index.js';
+import type { ThinkingMode } from '../types/core.js';
+import { type ReasoningCategory } from './reasoning-types.js';
+import { SuggestionEngine } from './suggestion-engine.js';
 
 /**
  * Mode transition

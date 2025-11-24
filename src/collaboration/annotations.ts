@@ -3,7 +3,6 @@
  * Phase 4C Task 5.3: Annotations, highlights, and comments on shared thoughts
  */
 
-import type { Thought } from '../types/index.js';
 
 /**
  * Annotation type

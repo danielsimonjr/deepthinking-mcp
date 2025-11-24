@@ -3,7 +3,6 @@
  * Phase 4 Task 9.4: Batch processing system
  */
 
-import type { ThinkingSession, ThinkingMode } from '../types/index.js';
 
 /**
  * Batch job

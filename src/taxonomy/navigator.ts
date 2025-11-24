@@ -5,10 +5,8 @@
 
 import {
   REASONING_TAXONOMY,
-  getReasoningType,
   getReasoningTypesByCategory,
   searchReasoningTypes,
-  getRelatedTypes,
   getTaxonomyStats,
   type ReasoningType,
   type ReasoningCategory,

@@ -5,7 +5,7 @@
 
 import type { ThinkingSession } from '../types/session.js';
 import type { ThinkingMode } from '../types/core.js';
-import { PatternRecognizer, type Pattern } from './pattern-recognition.js';
+import { PatternRecognizer } from './pattern-recognition.js';
 import { SuccessMetricsAnalyzer, type SuccessAnalysis, type SuccessFactor } from './success-metrics.js';
 
 /**
@@ -171,10 +171,10 @@ export class RecommendationEngine {
     // Sort modes by performance
     const sortedModes = Array.from(allInsights.modePerformance.entries())
       .sort((a, b) => b[1].averageScore - a[1].averageScore)
-      .filter(([mode, perf]) => perf.sessionCount >= 3); // Require minimum data
+      .filter(([, perf]) => perf.sessionCount >= 3); // Require minimum data
 
     // Apply preferences
-    const filtered = sortedModes.filter(([mode, _]) => {
+    const filtered = sortedModes.filter(([mode]) => {
       if (request.context?.preferences?.avoidModes?.includes(mode)) {
         return false;
       }
@@ -217,7 +217,7 @@ export class RecommendationEngine {
   /**
    * Generate structure recommendations
    */
-  private generateStructureRecommendations(request: RecommendationRequest): Recommendation[] {
+  private generateStructureRecommendations(_request: RecommendationRequest): Recommendation[] {
     const recommendations: Recommendation[] = [];
     const factors = this.successAnalyzer.getSuccessFactors();
 
@@ -253,7 +253,7 @@ export class RecommendationEngine {
   /**
    * Generate behavior recommendations
    */
-  private generateBehaviorRecommendations(request: RecommendationRequest): Recommendation[] {
+  private generateBehaviorRecommendations(_request: RecommendationRequest): Recommendation[] {
     const recommendations: Recommendation[] = [];
     const factors = this.successAnalyzer.getSuccessFactors();
 
@@ -289,7 +289,7 @@ export class RecommendationEngine {
   /**
    * Generate template recommendations
    */
-  private generateTemplateRecommendations(request: RecommendationRequest): Recommendation[] {
+  private generateTemplateRecommendations(_request: RecommendationRequest): Recommendation[] {
     const recommendations: Recommendation[] = [];
 
     // Suggest templates based on patterns

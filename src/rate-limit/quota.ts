@@ -173,7 +173,7 @@ export class QuotaManager {
   /**
    * Check and reset usage if needed
    */
-  private checkAndResetUsage(userId: string, usage: QuotaUsage): void {
+  private checkAndResetUsage(_userId: string, usage: QuotaUsage): void {
     const now = new Date();
 
     // Check daily reset

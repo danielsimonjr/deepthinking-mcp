@@ -476,7 +476,7 @@ export class SuccessMetricsAnalyzer {
    * Generate recommendations for a session
    */
   private generateRecommendations(
-    session: ThinkingSession,
+    _session: ThinkingSession,
     metrics: SuccessMetric[]
   ): string[] {
     const recommendations: string[] = [];

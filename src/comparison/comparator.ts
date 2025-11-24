@@ -6,7 +6,6 @@
 import type {
   ComparisonResult,
   Difference,
-  DifferenceType,
   ComparisonSummary,
   ComparisonMetrics,
   DiffOptions,
