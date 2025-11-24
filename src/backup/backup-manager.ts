@@ -114,17 +114,16 @@ export class BackupManager {
       record.size = dataBuffer.length;
 
       // Compress if needed
-      let compressed = dataBuffer;
+      let compressed: Buffer = dataBuffer;
       if (config.compression !== 'none') {
-// @ts-ignore - Buffer type conversion
- this.compress(dataBuffer, config.compression);
+        compressed = await this.compress(dataBuffer, config.compression);
         record.compressedSize = compressed.length;
       }
 
       // Encrypt if needed
       if (config.encryption?.enabled) {
-// @ts-ignore - Buffer type conversion
-        compressed = await this.encrypt(compressed, config.encryption);
+        const encrypted = await this.encrypt(compressed, config.encryption);
+        compressed = Buffer.from(encrypted);
       }
 
       // Calculate checksum
