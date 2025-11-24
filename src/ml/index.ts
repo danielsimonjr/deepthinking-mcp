@@ -19,3 +19,12 @@ export type {
   SuccessFactor,
   SuccessInsights,
 } from './success-metrics.js';
+
+export { RecommendationEngine } from './recommendation-engine.js';
+export type {
+  Recommendation,
+  RecommendationType,
+  RecommendationConfidence,
+  RecommendationRequest,
+  RecommendationResult,
+} from './recommendation-engine.js';
