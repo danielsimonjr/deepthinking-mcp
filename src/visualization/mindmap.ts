@@ -5,6 +5,7 @@
 
 import type { ThinkingSession } from '../types/session.js';
 import type { Thought, MathematicsThought, CausalThought, FirstPrinciplesThought } from '../types/index.js';
+import { ThinkingMode } from '../types/index.js';
 import { MermaidGenerator, type MindmapNode } from './mermaid.js';
 
 /**
@@ -114,13 +115,12 @@ export class KnowledgeMindMap {
 
     // Mode-specific extraction
     switch (thought.mode) {
-      case 'mathematics':
+      case ThinkingMode.MATHEMATICS:
         nodes.push(...this.extractMathKnowledge(thought as MathematicsThought));
         break;
-      case 'causal':
+      case ThinkingMode.CAUSAL:
         nodes.push(...this.extractCausalKnowledge(thought as CausalThought));
         break;
-          // @ts-expect-error - ThinkingMode type issue
       case ThinkingMode.FIRSTPRINCIPLES:
         nodes.push(...this.extractFirstPrincipleKnowledge(thought as FirstPrinciplesThought));
         break;

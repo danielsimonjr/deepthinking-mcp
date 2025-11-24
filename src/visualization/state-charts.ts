@@ -189,8 +189,7 @@ export class ReasoningStateChart {
     for (const mode of allModes) {
       const stateId = this.getModeStateId(mode);
       const label = this.formatModeName(mode);
-      // @ts-expect-error - Mode string/enum conversion
-      const used = modesUsed.has(mode);
+      const used = modesUsed.has(mode as any);
 
       lines.push(`  state "${label}" as ${stateId} {`);
       if (used) {

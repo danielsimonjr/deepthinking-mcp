@@ -418,8 +418,8 @@ export class RecursiveReasoningEngine {
     if (problem.type !== 'tail') {
       optimizationOpportunities.push('Convert to tail recursion');
     }
-    // @ts-expect-error - Trace calls could be undefined
-    if (!trace.calls.values().next().value.memoized && problem.strategy !== 'dynamic_programming') {
+    const firstCall = trace.calls.values().next().value;
+    if (firstCall && !firstCall.memoized && problem.strategy !== 'dynamic_programming') {
       optimizationOpportunities.push('Add memoization');
     }
     if (averageBranchingFactor > 2) {
