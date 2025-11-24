@@ -68,8 +68,7 @@ export class SearchIndex {
       taxonomyTypes,
       tokens,
       thoughtTexts,
-        // @ts-expect-error - confidence property
-      confidence: session.confidence,
+      // confidence is optional and not available on ThinkingSession
     };
 
     this.index.set(session.id, entry);
