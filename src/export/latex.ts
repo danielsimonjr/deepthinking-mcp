@@ -602,8 +602,8 @@ ${content}
   private formatCausalThought(thought: CausalThought): string {
     const sections: string[] = [];
 
-    // Causal graph visualization
-    if (thought.causalGraph && this.options.renderDiagrams) {
+    // Causal graph visualization (TikZ is native LaTeX, always render)
+    if (thought.causalGraph) {
       sections.push(this.formatCausalGraph(thought.causalGraph, thought.thoughtNumber));
     }
 
