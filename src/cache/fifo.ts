@@ -192,7 +192,7 @@ export class FIFOCache<T> implements Cache<T> {
 
   private updateHitRate(): void {
     const total = this.stats.hits + this.stats.misses;
-    this.stats.hitRate = total > 0 ? (this.stats.hits / total) * 100 : 0;
+    this.stats.hitRate = total > 0 ? this.stats.hits / total : 0;
   }
 
   private estimateSize(value: T): number {
