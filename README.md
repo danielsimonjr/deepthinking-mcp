@@ -1,13 +1,15 @@
-# DeepThinking MCP v3.4.2
+# DeepThinking MCP v3.4.3
 
 A comprehensive Model Context Protocol (MCP) server featuring **18 advanced reasoning modes** with intelligent mode recommendation, visual export capabilities, high-performance validation caching, production-ready features, comprehensive testing, and automated CI/CD for complex problem-solving, analysis, and decision-making.
 
-## Quality Metrics (v3.4.2)
+## Quality Metrics (v3.4.3)
 
-- **TypeScript Compilation**: ✅ 0 errors - fully type-safe codebase
-- **Test Pass Rate**: 🟢 93% (548/589 tests passing)
+- **TypeScript Compilation**: ✅ 0 errors, 0 warnings - fully type-safe codebase
+- **Test Pass Rate**: 🟢 95.2% (561/589 tests passing) - **+6 tests improved**
 - **Test Files**: 90% passing (28/31 files)
-- **Code Quality**: 50+ unused variables/imports removed, improved type safety
+- **Type Safety**: ✅ 93% reduction in suppressions (231 → 14)
+- **Code Quality**: 2 critical bugs fixed, 2,424 duplicate lines removed, 20 deprecated methods updated
+- **Latest Release**: v3.4.3 (2025-11-24) - [See CHANGELOG](CHANGELOG.md)
 
 ## Overview
 

@@ -4,8 +4,7 @@
  */
 
 import type { ThinkingSession } from '../types/session.js';
-// @ts-expect-error - Import used in types
-import type { Thought, ThinkingMode } from '../types/index.js';
+import type { Thought } from '../types/index.js';
 import { MermaidGenerator, type StateNode, type StateTransition } from './mermaid.js';
 
 /**
