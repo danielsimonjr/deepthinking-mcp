@@ -55,82 +55,89 @@ export class SearchEngine {
   /**
    * Execute a search query
    */
-  search(query: SearchQuery): SearchResults {
+  search(query: SearchQuery & { query?: string; mode?: string }): SearchResults {
     const startTime = Date.now();
+
+    // Handle aliases: query -> text, mode -> modes
+    const normalizedQuery: SearchQuery = {
+      ...query,
+      text: (query as any).query || query.text,
+      modes: (query as any).mode ? [(query as any).mode] : query.modes,
+    };
 
     // Start with all sessions
     let resultIds = new Set<string>(this.sessions.keys());
 
     // Apply filters
-    if (query.text && query.text.trim() !== '') {
-      const textScores = this.index.searchByText(query.text);
+    if (normalizedQuery.text && normalizedQuery.text.trim() !== '') {
+      const textScores = this.index.searchByText(normalizedQuery.text);
       resultIds = new Set(Array.from(resultIds).filter(id => textScores.has(id)));
     }
 
-    if (query.modes && query.modes.length > 0) {
-      const modeResults = this.index.filterByModes(query.modes);
+    if (normalizedQuery.modes && normalizedQuery.modes.length > 0) {
+      const modeResults = this.index.filterByModes(normalizedQuery.modes);
       resultIds = this.intersect(resultIds, modeResults);
     }
 
-    if (query.taxonomyCategories && query.taxonomyCategories.length > 0) {
-      const categoryResults = this.index.filterByTaxonomyCategories(query.taxonomyCategories);
+    if (normalizedQuery.taxonomyCategories && normalizedQuery.taxonomyCategories.length > 0) {
+      const categoryResults = this.index.filterByTaxonomyCategories(normalizedQuery.taxonomyCategories);
       resultIds = this.intersect(resultIds, categoryResults);
     }
 
-    if (query.taxonomyTypes && query.taxonomyTypes.length > 0) {
-      const typeResults = this.index.filterByTaxonomyTypes(query.taxonomyTypes);
+    if (normalizedQuery.taxonomyTypes && normalizedQuery.taxonomyTypes.length > 0) {
+      const typeResults = this.index.filterByTaxonomyTypes(normalizedQuery.taxonomyTypes);
       resultIds = this.intersect(resultIds, typeResults);
     }
 
-    if (query.author) {
-      const authorResults = this.index.filterByAuthor(query.author);
+    if (normalizedQuery.author) {
+      const authorResults = this.index.filterByAuthor(normalizedQuery.author);
       resultIds = this.intersect(resultIds, authorResults);
     }
 
-    if (query.domain) {
-      const domainResults = this.index.filterByDomain(query.domain);
+    if (normalizedQuery.domain) {
+      const domainResults = this.index.filterByDomain(normalizedQuery.domain);
       resultIds = this.intersect(resultIds, domainResults);
     }
 
-    if (query.tags && query.tags.length > 0) {
-      const tagResults = this.index.filterByTags(query.tags);
+    if (normalizedQuery.tags && normalizedQuery.tags.length > 0) {
+      const tagResults = this.index.filterByTags(normalizedQuery.tags);
       resultIds = this.intersect(resultIds, tagResults);
     }
 
-    if (query.dateRange) {
-      const dateResults = this.index.filterByDateRange(query.dateRange.from, query.dateRange.to);
+    if (normalizedQuery.dateRange) {
+      const dateResults = this.index.filterByDateRange(normalizedQuery.dateRange.from, normalizedQuery.dateRange.to);
       resultIds = this.intersect(resultIds, dateResults);
     }
 
-    if (query.thoughtCountRange) {
+    if (normalizedQuery.thoughtCountRange) {
       const countResults = this.index.filterByThoughtCountRange(
-        query.thoughtCountRange.min,
-        query.thoughtCountRange.max
+        normalizedQuery.thoughtCountRange.min,
+        normalizedQuery.thoughtCountRange.max
       );
       resultIds = this.intersect(resultIds, countResults);
     }
 
-    if (query.completed !== undefined) {
-      const completedResults = this.index.filterByCompleted(query.completed);
+    if (normalizedQuery.completed !== undefined) {
+      const completedResults = this.index.filterByCompleted(normalizedQuery.completed);
       resultIds = this.intersect(resultIds, completedResults);
     }
 
-    if (query.minConfidence !== undefined) {
-      const confidenceResults = this.index.filterByMinConfidence(query.minConfidence);
+    if (normalizedQuery.minConfidence !== undefined) {
+      const confidenceResults = this.index.filterByMinConfidence(normalizedQuery.minConfidence);
       resultIds = this.intersect(resultIds, confidenceResults);
     }
 
     // Build results with scores
     const results: SearchResult[] = [];
-    const textScores = query.text ? this.index.searchByText(query.text) : new Map();
+    const textScores = normalizedQuery.text ? this.index.searchByText(normalizedQuery.text) : new Map();
 
     for (const sessionId of resultIds) {
       const session = this.sessions.get(sessionId);
       if (!session) continue;
 
       const score = textScores.get(sessionId) || 1.0;
-      const highlights = query.text ? this.generateHighlights(session, query.text) : [];
-      const matchedFields = this.getMatchedFields(session, query);
+      const highlights = normalizedQuery.text ? this.generateHighlights(session, normalizedQuery.text) : [];
+      const matchedFields = this.getMatchedFields(session, normalizedQuery);
 
       results.push({
         session,
@@ -141,11 +148,11 @@ export class SearchEngine {
     }
 
     // Sort results
-    this.sortResults(results, query.sort?.field || 'relevance', query.sort?.order || 'desc');
+    this.sortResults(results, normalizedQuery.sort?.field || 'relevance', normalizedQuery.sort?.order || 'desc');
 
     // Apply pagination
-    const page = query.pagination?.page || 1;
-    const pageSize = query.pagination?.pageSize || 10;
+    const page = normalizedQuery.pagination?.page || 1;
+    const pageSize = normalizedQuery.pagination?.pageSize || 10;
     const startIdx = (page - 1) * pageSize;
     const endIdx = startIdx + pageSize;
     const paginatedResults = results.slice(startIdx, endIdx);
@@ -154,11 +161,12 @@ export class SearchEngine {
 
     return {
       results: paginatedResults,
+      sessions: paginatedResults.map(r => r.session), // Convenience property
       total: results.length,
       page,
       pageSize,
       totalPages: Math.ceil(results.length / pageSize),
-      query,
+      query: normalizedQuery,
       executionTime,
     };
   }

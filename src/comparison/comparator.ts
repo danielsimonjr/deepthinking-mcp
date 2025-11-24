@@ -408,4 +408,20 @@ export class SessionComparator {
       contentDiff: [],
     };
   }
+
+  /**
+   * Compare multiple sessions pairwise
+   */
+  compareMultiple(sessions: ThinkingSession[]): ComparisonResult[] {
+    const comparisons: ComparisonResult[] = [];
+
+    // Compare all pairs
+    for (let i = 0; i < sessions.length; i++) {
+      for (let j = i + 1; j < sessions.length; j++) {
+        comparisons.push(this.compare(sessions[i], sessions[j]));
+      }
+    }
+
+    return comparisons;
+  }
 }

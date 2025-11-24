@@ -66,9 +66,12 @@ export class BatchProcessor {
 
   /**
    * Submit a new batch job (alias for createJob that returns job ID)
+   * Supports both nested { type, params } and flat { type, ...params } formats
    */
-  async submitJob(params: { type: BatchJobType; params: BatchJobParams }): Promise<string> {
-    const job = this.createJob(params.type, params.params);
+  async submitJob(params: any): Promise<string> {
+    const type: BatchJobType = params.type;
+    const jobParams: BatchJobParams = params.params || params; // Handle both formats
+    const job = this.createJob(type, jobParams);
     return job.id;
   }
 
@@ -90,6 +93,13 @@ export class BatchProcessor {
    */
   getJob(jobId: string): BatchJob | undefined {
     return this.jobs.get(jobId);
+  }
+
+  /**
+   * Get job status (alias for getJob)
+   */
+  getJobStatus(jobId: string): BatchJob | undefined {
+    return this.getJob(jobId);
   }
 
   /**
