@@ -20,13 +20,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed in 4 locations: Suggestion Engine, Multi-Modal Analyzer, Adaptive Mode Selector, Integration tests
   - 4 additional tests now passing (5 failures remaining)
 
+- **Production Features - Search Engine**
+  - Added faceted search support: facets parameter in SearchQuery, facets property in SearchResults
+  - Implemented computeFacets() for mode and tags dimensions
+  - Autocomplete method already existed with full tokenizer integration
+  - Search engine now returns facet counts when requested
+
+- **Production Features - Template Manager**
+  - Fixed getUsageStats() to map usageCount → timesUsed for test compatibility
+  - Stats tracking properly increments usageCount on template instantiation
+  - Template usage statistics now accessible via standardized property names
+
+- **Production Features - Backup Manager**
+  - Added optional config parameter to constructor
+  - Auto-registers backup provider when config provided
+  - Supports { provider, config } initialization pattern for tests
+
+- **Production Features - Session Comparator**
+  - Added thoughtCountSimilarity metric to ComparisonMetrics interface
+  - Implemented calculation: 1 - (diff / max), normalized 0-1 scale
+  - Provides quantitative similarity measure for thought count comparison
+
 ### Quality Metrics
 
 - **TypeScript**: ✅ 0 errors, 0 warnings, **0 suppressions** - 100% type-safe codebase
-- **Test Pass Rate**: 🟢 **97.5%** (575/589 tests passing, **+5 tests from v3.4.4**)
+- **Test Pass Rate**: 🟢 **98.6%** (581/589 tests passing, **+11 tests from v3.4.4**)
 - **Taxonomy**: 86.5% (32/37 tests passing, +4 tests fixed)
-- **Commits**: 6 commits with frequent pushes to GitHub
-- **Remaining Failures**: 14 tests (5 Taxonomy, 9 Production features)
+- **Production Features**: Significant improvements in search, templates, backup, comparison
+- **Commits**: 11 commits with frequent pushes to GitHub
+- **Remaining Failures**: 8 tests (5 Taxonomy edge cases, 3 Production features)
 
 ## [3.4.4] - 2025-11-24
 
