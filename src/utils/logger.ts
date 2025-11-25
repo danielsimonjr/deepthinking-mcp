@@ -3,6 +3,8 @@
  * Provides structured logging with levels and context
  */
 
+import { ILogger } from '../interfaces/ILogger.js';
+
 /**
  * Log levels
  */
@@ -48,7 +50,7 @@ const DEFAULT_CONFIG: LoggerConfig = {
 /**
  * Simple logger implementation
  */
-export class Logger {
+export class Logger implements ILogger {
   private config: LoggerConfig;
   private logs: LogEntry[] = [];
 
