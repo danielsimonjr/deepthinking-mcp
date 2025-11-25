@@ -3,8 +3,6 @@
  * Phase 4E Task 8.4 (File Task 27): Reasoning for optimization problems
  */
 
-import type { Thought } from '../types/index.js';
-
 /**
  * Optimization type
  */
@@ -132,12 +130,12 @@ export interface OptimizationIteration {
 
 /**
  * Optimization reasoning thought
+ *
+ * Note: This is a standalone thought type for the optimization reasoning engine.
+ * It is not part of the main Thought union type.
  */
-// @ts-ignore
-export interface OptimizationReasoningThought extends Thought {
+export interface OptimizationReasoningThought {
   mode: 'optimization';
-// @ts-ignore
-// @ts-ignore - Interface extension issue
   problem: OptimizationProblem;
   solutions: OptimizationSolution[];
   iterations: OptimizationIteration[];

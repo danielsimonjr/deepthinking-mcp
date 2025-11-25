@@ -3,9 +3,6 @@
  * Phase 4B Task 3.1: Advanced Mermaid infrastructure with interactive features
  */
 
-// @ts-ignore - Type used in type definitions
-import type { BaseThought } from '../types/index.js'; // Used in type definitions
-
 /**
  * Mermaid diagram types supported
  */

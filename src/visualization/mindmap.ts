@@ -247,8 +247,7 @@ export class KnowledgeMindMap {
         id: `principles_${thought.id}`,
         label: 'Principles',
         type: 'concept',
-// @ts-ignore - Dynamic property access
-        children: (thought as any).fundamentalPrinciples.map(p => ({
+        children: (thought as any).fundamentalPrinciples.map((p: any) => ({
           id: `principle_${thought.id}_${p.name}`,
           label: p.name,
           type: 'fact',
@@ -263,8 +262,7 @@ export class KnowledgeMindMap {
         id: `assumptions_${thought.id}`,
         label: 'Assumptions',
         type: 'concept',
-// @ts-ignore - Map callback types
-        children: (thought as any).assumptions.map((a, i) => ({
+        children: (thought as any).assumptions.map((a: any, i: number) => ({
           id: `assumption_${thought.id}_${i}`,
           label: this.truncate(a, 40),
           type: 'fact',

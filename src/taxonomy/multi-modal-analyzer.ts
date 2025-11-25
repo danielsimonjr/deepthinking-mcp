@@ -2,8 +2,7 @@
  * Multi-Modal Reasoning Analyzer (v3.4.0)
  * Phase 4D Task 7.4 (File Task 21): Analyze combined reasoning approaches
  */
-// @ts-nocheck - Taxonomy type mappings need architectural refactoring
-
+// @ts-nocheck - Uses string literals instead of ThinkingMode enum (requires refactoring)
 
 import type { ThinkingSession } from '../types/index.js';
 import type { ThinkingMode } from '../types/core.js';

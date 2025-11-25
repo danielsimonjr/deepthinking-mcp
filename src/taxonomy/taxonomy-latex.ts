@@ -2,7 +2,7 @@
  * Taxonomy LaTeX Integration (v3.4.0)
  * Phase 4D Task 7.6 (File Task 23): Integrate taxonomy with LaTeX exports
  */
-// @ts-nocheck - Requires type refactoring
+// @ts-nocheck - Depends on multi-modal-analyzer types (requires refactoring)
 
 import type { ThinkingSession } from '../types/index.js';
 import { getReasoningType } from './reasoning-types.js';
