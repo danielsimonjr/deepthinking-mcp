@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.5] - 2025-11-24
+
+### Fixed
+
+- **Taxonomy System Tests** (32/37 passing, was 28/37)
+  - Fixed query test to use correct difficulty values ('beginner'/'intermediate' instead of 'easy'/'moderate')
+  - Fixed explore method test to access `startType` property instead of non-existent `type` property
+  - Fixed explore method test to access `neighborhood.related` instead of non-existent `related` property
+  - Fixed findPath method test to access `steps` property instead of non-existent `path` property
+  - Fixed search by category test to use `.some()` instead of `.every()` for category matching
+  - searchReasoningTypes() returns types matching in ANY field, not just category
+  - 4 additional tests now passing (5 failures remaining)
+
+### Quality Metrics
+
+- **TypeScript**: ✅ 0 errors, 0 warnings, **0 suppressions** - 100% type-safe codebase
+- **Test Pass Rate**: Improved taxonomy test coverage to 86.5% (32/37)
+- **Taxonomy**: +4 tests fixed (query, explore, findPath, search)
+- **Commits**: 3 commits with frequent pushes to GitHub
+
 ## [3.4.4] - 2025-11-24
 
 ### Fixed
