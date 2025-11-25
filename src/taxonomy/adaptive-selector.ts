@@ -169,7 +169,7 @@ export class AdaptiveModeSelector {
 
     for (const mode of bestPattern.modeSequence) {
       recommendations.push({
-        mode,
+        mode: mode as ThinkingMode,
         confidence: bestPattern.effectiveness * patterns[0].relevanceScore,
         reasoning: [
           `Part of ${bestPattern.name} pattern`,
