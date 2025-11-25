@@ -15,7 +15,8 @@ import {
 } from '../types/index.js';
 import { SessionNotFoundError } from '../utils/errors.js';
 import { sanitizeString, sanitizeThoughtContent, validateSessionId, MAX_LENGTHS } from '../utils/sanitization.js';
-import { Logger, createLogger, LogLevel } from '../utils/logger.js';
+import { createLogger, LogLevel } from '../utils/logger.js';
+import { ILogger } from '../interfaces/ILogger.js';
 import { SessionStorage } from './storage/interface.js';
 import { LRUCache } from '../cache/lru.js';
 import { SessionMetricsCalculator } from './SessionMetricsCalculator.js';
@@ -64,7 +65,7 @@ const DEFAULT_CONFIG: SessionConfig = {
 export class SessionManager {
   private activeSessions: LRUCache<ThinkingSession>;
   private config: Partial<SessionConfig>;
-  private logger: Logger;
+  private logger: ILogger;
   private storage?: SessionStorage;
   private metricsCalculator: SessionMetricsCalculator;
 
@@ -72,18 +73,23 @@ export class SessionManager {
    * Creates a new SessionManager instance
    *
    * @param config - Optional default configuration applied to all new sessions
-   * @param logLevel - Optional minimum log level (default: INFO)
+   * @param logger - Optional logger instance or log level (default: INFO level logger)
    * @param storage - Optional persistent storage backend for sessions
    *
    * @example
    * ```typescript
-   * // Memory-only mode (default)
+   * // Memory-only mode with default logger
    * const manager = new SessionManager({
    *   enableAutoSave: true,
    *   maxThoughtsInMemory: 500
-   * }, LogLevel.DEBUG);
+   * });
    *
-   * // With file-based persistence
+   * // With custom logger (DI)
+   * import { createLogger, LogLevel } from './utils/logger.js';
+   * const logger = createLogger({ minLevel: LogLevel.DEBUG });
+   * const manager = new SessionManager({}, logger);
+   *
+   * // With file-based persistence (backward compatible)
    * import { FileSessionStore } from './storage/file-store.js';
    * const storage = new FileSessionStore('./sessions');
    * await storage.initialize();
@@ -92,7 +98,7 @@ export class SessionManager {
    */
   constructor(
     config?: Partial<SessionConfig>,
-    logLevel?: LogLevel,
+    logger?: ILogger | LogLevel,
     storage?: SessionStorage
   ) {
     // Initialize LRU cache for sessions (max 1000 sessions, ~10-50MB)
@@ -113,10 +119,16 @@ export class SessionManager {
     });
     this.config = config || {};
     this.storage = storage;
-    this.logger = createLogger({
-      minLevel: logLevel || LogLevel.INFO,
-      enableConsole: true
-    });
+
+    // Support both ILogger injection (DI) and LogLevel (backward compatibility)
+    if (logger && typeof logger === 'object' && 'info' in logger) {
+      this.logger = logger;
+    } else {
+      this.logger = createLogger({
+        minLevel: (logger as LogLevel) || LogLevel.INFO,
+        enableConsole: true
+      });
+    }
     this.metricsCalculator = new SessionMetricsCalculator();
   }
 
