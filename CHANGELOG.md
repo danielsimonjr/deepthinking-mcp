@@ -44,11 +44,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Quality Metrics
 
 - **TypeScript**: ✅ 0 errors, 0 warnings, **0 suppressions** - 100% type-safe codebase
-- **Test Pass Rate**: 🟢 **98.6%** (581/589 tests passing, **+11 tests from v3.4.4**)
+- **Test Pass Rate**: 🟢 **97.6%** (575/589 tests passing, **+5 tests from v3.4.4**)
+- **Test Files**: 29/31 files passing (93.5%)
 - **Taxonomy**: 86.5% (32/37 tests passing, +4 tests fixed)
-- **Production Features**: Significant improvements in search, templates, backup, comparison
-- **Commits**: 11 commits with frequent pushes to GitHub
-- **Remaining Failures**: 8 tests (5 Taxonomy edge cases, 3 Production features)
+- **Production Features**: Core functionality tested and working
+- **Commits**: 13 commits with frequent pushes to GitHub
+
+### Known Issues (14 tests)
+
+The remaining 14 test failures are complex functional issues requiring implementation work:
+
+**Taxonomy System** (6 tests):
+- Navigator query/recommend returning empty for some search terms
+- Adaptive mode selection algorithms need tuning
+- Integration tests expecting fuller feature implementation
+
+**Production Features** (8 tests):
+- Search engine indexing workflow needs session storage
+- Backup/restore requires file system configuration
+- Integration tests need end-to-end setup
+
+These are tracked for future releases and do not affect core reasoning functionality.
 
 ## [3.4.4] - 2025-11-24
 
