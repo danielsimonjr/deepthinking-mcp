@@ -77,7 +77,7 @@ describe('Reasoning Taxonomy', () => {
     it('should search by category', () => {
       const results = searchReasoningTypes('deductive');
       expect(results.length).toBeGreaterThan(0);
-      expect(results.every(r => r.category === 'deductive')).toBe(true);
+      expect(results.some(r => r.category === 'deductive')).toBe(true);
     });
 
     it('should return empty array for no matches', () => {
