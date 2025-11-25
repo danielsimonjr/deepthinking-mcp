@@ -169,7 +169,7 @@ describe('Reasoning Taxonomy', () => {
         title: 'Test',
         mode: 'sequential',
         thoughts: [
-          { thoughtNumber: 1, totalThoughts: 1, nextThoughtNeeded: false, thought: 'Test', mode: 'sequential' }
+          { thoughtNumber: 1, totalThoughts: 1, nextThoughtNeeded: false, content: 'Test', mode: 'sequential' }
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -211,9 +211,9 @@ describe('Reasoning Taxonomy', () => {
         title: 'Test',
         mode: 'sequential',
         thoughts: [
-          { thoughtNumber: 1, totalThoughts: 3, nextThoughtNeeded: true, thought: 'T1', mode: 'sequential' },
-          { thoughtNumber: 2, totalThoughts: 3, nextThoughtNeeded: true, thought: 'T2', mode: 'mathematics' },
-          { thoughtNumber: 3, totalThoughts: 3, nextThoughtNeeded: false, thought: 'T3', mode: 'sequential' },
+          { thoughtNumber: 1, totalThoughts: 3, nextThoughtNeeded: true, content: 'T1', mode: 'sequential' },
+          { thoughtNumber: 2, totalThoughts: 3, nextThoughtNeeded: true, content: 'T2', mode: 'mathematics' },
+          { thoughtNumber: 3, totalThoughts: 3, nextThoughtNeeded: false, content: 'T3', mode: 'sequential' },
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -300,7 +300,7 @@ describe('Reasoning Taxonomy', () => {
         title: 'Test',
         mode: 'sequential',
         thoughts: [
-          { thoughtNumber: 1, totalThoughts: 1, nextThoughtNeeded: false, thought: 'Test', mode: 'sequential' }
+          { thoughtNumber: 1, totalThoughts: 1, nextThoughtNeeded: false, content: 'Test', mode: 'sequential' }
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -385,10 +385,10 @@ describe('Reasoning Taxonomy', () => {
         title: 'Test',
         mode: 'hybrid',
         thoughts: [
-          { thoughtNumber: 1, totalThoughts: 4, nextThoughtNeeded: true, thought: 'T1', mode: 'sequential' },
-          { thoughtNumber: 2, totalThoughts: 4, nextThoughtNeeded: true, thought: 'T2', mode: 'mathematics' },
-          { thoughtNumber: 3, totalThoughts: 4, nextThoughtNeeded: true, thought: 'T3', mode: 'causal' },
-          { thoughtNumber: 4, totalThoughts: 4, nextThoughtNeeded: false, thought: 'T4', mode: 'bayesian' },
+          { thoughtNumber: 1, totalThoughts: 4, nextThoughtNeeded: true, content: 'T1', mode: 'sequential' },
+          { thoughtNumber: 2, totalThoughts: 4, nextThoughtNeeded: true, content: 'T2', mode: 'mathematics' },
+          { thoughtNumber: 3, totalThoughts: 4, nextThoughtNeeded: true, content: 'T3', mode: 'causal' },
+          { thoughtNumber: 4, totalThoughts: 4, nextThoughtNeeded: false, content: 'T4', mode: 'bayesian' },
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
