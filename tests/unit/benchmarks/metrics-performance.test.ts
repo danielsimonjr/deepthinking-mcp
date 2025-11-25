@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { SessionManager } from '../../src/session/manager.js';
-import { ThinkingMode } from '../../src/types/index.js';
+import { SessionManager } from '../../../src/session/manager.js';
+import { ThinkingMode } from '../../../src/types/index.js';
 
 describe('Metrics Performance Benchmark', () => {
   it('should show performance improvement with incremental calculation', async () => {

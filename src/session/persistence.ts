@@ -10,7 +10,6 @@ import { getConfig } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import { existsSync } from 'fs';
 
 /**
  * Session store interface for dependency injection
@@ -95,7 +94,10 @@ export class FileSessionStore implements ISessionStore {
    * Ensure the storage directory exists
    */
   private async ensureDir(): Promise<void> {
-    if (!existsSync(this.baseDir)) {
+    try {
+      await fs.access(this.baseDir);
+    } catch {
+      // Directory doesn't exist, create it
       await fs.mkdir(this.baseDir, { recursive: true });
     }
   }
@@ -179,16 +181,17 @@ export class FileSessionStore implements ISessionStore {
     try {
       const filePath = this.getFilePath(sessionId);
 
-      if (!existsSync(filePath)) {
-        return null;
-      }
-
+      // Try to read the file - if it doesn't exist, readFile will throw
       const json = await fs.readFile(filePath, 'utf-8');
       const session = this.deserializeSession(json);
 
       logger.debug('Session loaded from disk', { sessionId, filePath });
       return session;
     } catch (error) {
+      // File doesn't exist or read failed
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+        return null;
+      }
       logger.error('Failed to load session from disk', error as Error, { sessionId });
       return null;
     }
@@ -198,11 +201,13 @@ export class FileSessionStore implements ISessionStore {
     try {
       const filePath = this.getFilePath(sessionId);
 
-      if (existsSync(filePath)) {
-        await fs.unlink(filePath);
-        logger.debug('Session deleted from disk', { sessionId, filePath });
-      }
+      await fs.unlink(filePath);
+      logger.debug('Session deleted from disk', { sessionId, filePath });
     } catch (error) {
+      // If file doesn't exist, that's fine - deletion succeeded
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+        return;
+      }
       logger.error('Failed to delete session from disk', error as Error, { sessionId });
       throw error;
     }
@@ -223,8 +228,13 @@ export class FileSessionStore implements ISessionStore {
   }
 
   async exists(sessionId: string): Promise<boolean> {
-    const filePath = this.getFilePath(sessionId);
-    return existsSync(filePath);
+    try {
+      const filePath = this.getFilePath(sessionId);
+      await fs.access(filePath);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async clear(): Promise<void> {

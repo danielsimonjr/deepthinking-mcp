@@ -16,6 +16,16 @@ export class LRUCache<T> implements Cache<T> {
   constructor(config: Partial<CacheConfig> = {}) {
     this.cache = new Map();
     this.config = {
+      /**
+       * Default max cache size: 100 entries
+       * Reasoning:
+       * - Validation cache typically stores session/thought validation results
+       * - Average entry size: ~1-2KB (validation result + metadata)
+       * - 100 entries = ~100-200KB memory usage
+       * - Sufficient for most use cases (covers recent validations)
+       * - Prevents unbounded memory growth in long-running processes
+       * - Can be overridden via config parameter for high-traffic scenarios
+       */
       maxSize: config.maxSize || 100,
       strategy: 'lru',
       ttl: config.ttl || 0,

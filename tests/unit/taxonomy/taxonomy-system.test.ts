@@ -4,12 +4,12 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { REASONING_TAXONOMY, getReasoningType, searchReasoningTypes } from '../../src/taxonomy/reasoning-types.js';
-import { TaxonomyNavigator } from '../../src/taxonomy/navigator.js';
-import { SuggestionEngine } from '../../src/taxonomy/suggestion-engine.js';
-import { MultiModalAnalyzer } from '../../src/taxonomy/multi-modal-analyzer.js';
-import { AdaptiveModeSelector } from '../../src/taxonomy/adaptive-selector.js';
-import type { ThinkingSession, Thought } from '../../src/types/index.js';
+import { REASONING_TAXONOMY, getReasoningType, searchReasoningTypes } from '../../../src/taxonomy/reasoning-types.js';
+import { TaxonomyNavigator } from '../../../src/taxonomy/navigator.js';
+import { SuggestionEngine } from '../../../src/taxonomy/suggestion-engine.js';
+import { MultiModalAnalyzer } from '../../../src/taxonomy/multi-modal-analyzer.js';
+import { AdaptiveModeSelector } from '../../../src/taxonomy/adaptive-selector.js';
+import type { ThinkingSession, Thought } from '../../../src/types/index.js';
 
 describe('Reasoning Taxonomy', () => {
   describe('Taxonomy Database', () => {

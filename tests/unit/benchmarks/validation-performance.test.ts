@@ -9,9 +9,9 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ThoughtValidator } from '../../src/validation/validator.js';
-import { validationCache } from '../../src/validation/cache.js';
-import { Thought, ThinkingMode } from '../../src/types/index.js';
+import { ThoughtValidator } from '../../../src/validation/validator.js';
+import { validationCache } from '../../../src/validation/cache.js';
+import { Thought, ThinkingMode } from '../../../src/types/index.js';
 
 describe('Validation Performance Benchmark', () => {
   beforeEach(() => {
