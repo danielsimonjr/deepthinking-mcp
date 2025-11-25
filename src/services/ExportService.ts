@@ -1,6 +1,7 @@
 /**
  * Export Service (v3.4.5)
  * Sprint 3 Task 3.3: Extract export logic from index.ts
+ * Sprint 3 Task 3.2: Added dependency injection support
  *
  * Centralizes session export logic for multiple formats.
  * Handles conversion between internal session format and export formats.
@@ -24,6 +25,8 @@ import {
 } from '../types/index.js';
 import { VisualExporter, type VisualFormat } from '../export/visual.js';
 import { escapeHtml, escapeLatex } from '../utils/sanitization.js';
+import { ILogger } from '../interfaces/ILogger.js';
+import { createLogger, LogLevel } from '../utils/logger.js';
 
 /**
  * Export Service - Handles session exports to multiple formats
@@ -41,9 +44,11 @@ import { escapeHtml, escapeLatex } from '../utils/sanitization.js';
  */
 export class ExportService {
   private visualExporter: VisualExporter;
+  private logger: ILogger;
 
-  constructor() {
+  constructor(logger?: ILogger) {
     this.visualExporter = new VisualExporter();
+    this.logger = logger || createLogger({ minLevel: LogLevel.INFO, enableConsole: true });
   }
 
   /**
@@ -68,27 +73,52 @@ export class ExportService {
     session: ThinkingSession,
     format: 'json' | 'markdown' | 'latex' | 'html' | 'jupyter' | 'mermaid' | 'dot' | 'ascii'
   ): string {
+    const startTime = Date.now();
+    this.logger.debug('Export started', { sessionId: session.id, format, thoughtCount: session.thoughts.length });
+
     // Handle visual formats
     if (format === 'mermaid' || format === 'dot' || format === 'ascii') {
-      return this.exportVisual(session, format);
+      const result = this.exportVisual(session, format);
+      this.logger.debug('Export completed', {
+        sessionId: session.id,
+        format,
+        duration: Date.now() - startTime,
+        outputSize: result.length,
+      });
+      return result;
     }
 
     // Handle standard formats
+    let result: string;
     switch (format) {
       case 'json':
-        return this.exportToJSON(session);
+        result = this.exportToJSON(session);
+        break;
       case 'markdown':
-        return this.exportToMarkdown(session);
+        result = this.exportToMarkdown(session);
+        break;
       case 'latex':
-        return this.exportToLatex(session);
+        result = this.exportToLatex(session);
+        break;
       case 'html':
-        return this.exportToHTML(session);
+        result = this.exportToHTML(session);
+        break;
       case 'jupyter':
-        return this.exportToJupyter(session);
+        result = this.exportToJupyter(session);
+        break;
       default:
         // Fallback to JSON for unknown formats
-        return this.exportToJSON(session);
+        result = this.exportToJSON(session);
     }
+
+    this.logger.debug('Export completed', {
+      sessionId: session.id,
+      format,
+      duration: Date.now() - startTime,
+      outputSize: result.length,
+    });
+
+    return result;
   }
 
   /**
