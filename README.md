@@ -4,11 +4,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
 
-A comprehensive Model Context Protocol (MCP) server featuring **18 advanced reasoning modes** with intelligent mode recommendation, taxonomy-based classification, multi-cloud backup (S3/Azure/GCS), enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **18 advanced reasoning modes** with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
 > 📋 **Latest Release**: v3.4.5 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
 >
-> 🎉 **New in v3.4.5**: Multi-cloud backup providers, taxonomy classifier (110+ types), enterprise security features, zero TypeScript suppressions!
+> 🎉 **New in v3.4.5**: Taxonomy classifier (110+ types), enterprise security features, zero TypeScript suppressions!
 
 ## Table of Contents
 
@@ -27,7 +27,6 @@ A comprehensive Model Context Protocol (MCP) server featuring **18 advanced reas
 - **18 Specialized Reasoning Modes** - From sequential thinking to game theory and formal logic
 - **Intelligent Mode Recommendation** - Automatic mode selection based on problem characteristics
 - **Taxonomy Classifier** - 110+ reasoning types across 12 categories for intelligent task classification
-- **Multi-Cloud Backup** - AWS S3, Azure Blob Storage, and Google Cloud Storage support
 - **Visual Exports** - Generate Mermaid diagrams, DOT graphs, ASCII art, and LaTeX documents
 - **Production-Ready** - Search engine, templates, batch processing, caching, backup/restore
 - **Enterprise Security** - Input validation (Zod), rate limiting, path sanitization, PII redaction
@@ -384,47 +383,12 @@ const status = await server.getJobStatus(jobId);
 
 ### Backup & Restore
 
-Automated backup with compression and multi-cloud storage support (local, S3, Azure, GCS).
+Automated backup with compression and local storage.
 
 ```typescript
-// Local backup
-const localBackup = new BackupManager({
+const backupManager = new BackupManager({
   provider: 'local',
   config: { path: './backups' }
-});
-
-// AWS S3 backup
-const s3Backup = new BackupManager({
-  provider: 's3',
-  config: {
-    bucket: 'my-backups',
-    region: 'us-east-1',
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    storageClass: 'STANDARD_IA' // Options: STANDARD, STANDARD_IA, GLACIER
-  }
-});
-
-// Azure Blob Storage backup
-const azureBackup = new BackupManager({
-  provider: 'azure',
-  config: {
-    containerName: 'backups',
-    accountName: 'myaccount',
-    accountKey: process.env.AZURE_ACCOUNT_KEY,
-    tier: 'Cool' // Options: Hot, Cool, Archive
-  }
-});
-
-// Google Cloud Storage backup
-const gcsBackup = new BackupManager({
-  provider: 'gcs',
-  config: {
-    bucket: 'my-backups',
-    projectId: 'my-project',
-    keyFilename: './gcs-key.json',
-    storageClass: 'NEARLINE' // Options: STANDARD, NEARLINE, COLDLINE, ARCHIVE
-  }
 });
 
 const backupId = await backupManager.backup(session);
@@ -598,7 +562,7 @@ production/
 ├── templates/     # Session templates with usage tracking
 ├── batch/         # Real batch processing (6 operations implemented)
 ├── cache/         # LRU caching with auto-eviction
-├── backup/        # Multi-cloud backup (S3, Azure, GCS, Local)
+├── backup/        # Local backup with compression
 ├── comparison/    # Session comparison & similarity analysis
 ├── validation/    # Zod-based input validation (8 schemas)
 ├── rate-limit/    # Sliding window rate limiter

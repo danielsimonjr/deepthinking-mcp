@@ -5,9 +5,6 @@
 
 export { BackupManager } from './backup-manager.js';
 export { LocalBackupProvider } from './providers/local.js';
-export { S3BackupProvider } from './providers/s3.js';
-export { GCSBackupProvider } from './providers/gcs.js';
-export { AzureBackupProvider } from './providers/azure.js';
 
 export type {
   BackupProvider,
