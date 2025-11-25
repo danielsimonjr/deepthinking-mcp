@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.4.5] - 2025-11-25
 
-### 🚧 Sprint 3 In Progress: Architecture & Testing (1/6 Tasks - 17%)
+### 🚧 Sprint 3 In Progress: Architecture & Testing (1.5/6 Tasks - 25%)
 
 **Objective**: Improve architecture, add dependency injection, increase test coverage
 **Status**: IN PROGRESS ⚙️
@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Tasks Completed** (1/6):
 
-1. ✅ **Implement Repository Pattern** (a5c4f3d) - HIGH PRIORITY
+1. ✅ **Implement Repository Pattern** (a5c4f3d, 5f632de) - HIGH PRIORITY
    - Created ISessionRepository interface with domain-oriented methods
    - Implemented FileSessionRepository wrapping SessionStorage
    - Implemented MemorySessionRepository for testing
@@ -23,8 +23,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - Comprehensive JSDoc documentation with examples
    - Benefits: Testability, flexibility, domain abstraction, query methods
 
-**Remaining Tasks** (5/6):
-- Task 3.2: Add Dependency Injection (HIGH priority, very complex)
+**Tasks In Progress** (0.5/6):
+
+2. 🚧 **Add Dependency Injection** (d2a8ba0) - HIGH PRIORITY ⚙️
+   - Created ILogger interface for logger dependency injection
+   - Updated Logger class to implement ILogger interface
+   - Created interfaces module (src/interfaces/) for DI contracts
+   - Re-exported Cache<T> interface from cache module
+   - **Next Steps**: Refactor major classes (SessionManager, SearchEngine, etc.) to inject dependencies
+   - **Status**: ~10% complete (1 week task - incremental progress)
+
+**Remaining Tasks** (4.5/6):
+- Task 3.2: Complete Dependency Injection refactoring (HIGH priority, very complex)
 - Task 3.3: Split God File (index.ts) (CRITICAL priority, very complex)
 - Task 3.4: Refactor SessionManager God Class (CRITICAL priority, very complex)
 - Task 3.5: Add Critical Path Tests (CRITICAL priority, very complex)
