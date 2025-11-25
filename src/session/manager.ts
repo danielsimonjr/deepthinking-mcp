@@ -18,6 +18,7 @@ import { sanitizeString, sanitizeThoughtContent, validateSessionId, MAX_LENGTHS 
 import { Logger, createLogger, LogLevel } from '../utils/logger.js';
 import { validationCache } from '../validation/cache.js';
 import { SessionStorage } from './storage/interface.js';
+import { LRUCache } from '../cache/lru.js';
 
 /**
  * Default session configuration
@@ -61,7 +62,7 @@ const DEFAULT_CONFIG: SessionConfig = {
  * ```
  */
 export class SessionManager {
-  private activeSessions: Map<string, ThinkingSession>;
+  private activeSessions: LRUCache<ThinkingSession>;
   private config: Partial<SessionConfig>;
   private logger: Logger;
   private storage?: SessionStorage;
@@ -93,7 +94,22 @@ export class SessionManager {
     logLevel?: LogLevel,
     storage?: SessionStorage
   ) {
-    this.activeSessions = new Map();
+    // Initialize LRU cache for sessions (max 1000 sessions, ~10-50MB)
+    this.activeSessions = new LRUCache<ThinkingSession>({
+      maxSize: 1000,
+      enableStats: true,
+      onEvict: async (key: string, session: ThinkingSession) => {
+        // Auto-save evicted sessions to persistent storage if available
+        if (this.storage && session.config.enableAutoSave) {
+          try {
+            await this.storage.saveSession(session);
+            this.logger.debug('Evicted session saved to storage', { sessionId: key });
+          } catch (error) {
+            this.logger.error('Failed to save evicted session', error as Error, { sessionId: key });
+          }
+        }
+      }
+    });
     this.config = config || {};
     this.storage = storage;
     this.logger = createLogger({

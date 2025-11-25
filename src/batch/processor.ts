@@ -71,7 +71,24 @@ export class BatchProcessor {
   }
 
   /**
-   * Create a new batch job
+   * Creates a new batch job and adds it to the processing queue
+   *
+   * Jobs are automatically started if processor has available capacity.
+   * Otherwise, they remain in queue until a slot becomes available.
+   *
+   * @param type - Type of batch operation to perform
+   * @param params - Job-specific parameters (sessionIds, paths, etc.)
+   * @returns Created batch job with generated ID and initial status
+   *
+   * @example
+   * ```typescript
+   * const job = processor.createJob('export', {
+   *   sessionIds: ['session-1', 'session-2'],
+   *   format: 'json',
+   *   outputDir: '/exports'
+   * });
+   * console.log(`Job ${job.id} created with ${job.totalItems} items`);
+   * ```
    */
   createJob(type: BatchJobType, params: BatchJobParams): BatchJob {
     const job: BatchJob = {
@@ -97,8 +114,28 @@ export class BatchProcessor {
   }
 
   /**
-   * Submit a new batch job (alias for createJob that returns job ID)
-   * Supports both nested { type, params } and flat { type, ...params } formats
+   * Submits a new batch job and returns its ID
+   *
+   * Convenience method for MCP tool integration. Supports both nested
+   * `{ type, params }` and flat `{ type, ...params }` parameter formats.
+   *
+   * @param params - Job parameters (type + operation-specific params)
+   * @returns Promise resolving to the created job ID
+   *
+   * @example
+   * ```typescript
+   * // Nested format
+   * const jobId = await processor.submitJob({
+   *   type: 'export',
+   *   params: { sessionIds: ['id-1'], format: 'json' }
+   * });
+   *
+   * // Flat format
+   * const jobId2 = await processor.submitJob({
+   *   type: 'analyze',
+   *   sessionIds: ['id-1', 'id-2']
+   * });
+   * ```
    */
   async submitJob(params: any): Promise<string> {
     const type: BatchJobType = params.type;
@@ -121,28 +158,68 @@ export class BatchProcessor {
   }
 
   /**
-   * Get job by ID
+   * Retrieves a batch job by its ID
+   *
+   * @param jobId - The unique job identifier
+   * @returns The batch job if found, undefined otherwise
+   *
+   * @example
+   * ```typescript
+   * const job = processor.getJob('job-123');
+   * if (job) {
+   *   console.log(`Status: ${job.status}, Progress: ${job.progress}%`);
+   * }
+   * ```
    */
   getJob(jobId: string): BatchJob | undefined {
     return this.jobs.get(jobId);
   }
 
   /**
-   * Get job status (alias for getJob)
+   * Gets the current status of a batch job (alias for getJob)
+   *
+   * @param jobId - The unique job identifier
+   * @returns The batch job if found, undefined otherwise
    */
   getJobStatus(jobId: string): BatchJob | undefined {
     return this.getJob(jobId);
   }
 
   /**
-   * Get all jobs
+   * Retrieves all batch jobs (pending, running, completed, and failed)
+   *
+   * @returns Array of all batch jobs in the processor
+   *
+   * @example
+   * ```typescript
+   * const jobs = processor.getAllJobs();
+   * const running = jobs.filter(j => j.status === 'running');
+   * console.log(`${running.length} jobs currently running`);
+   * ```
    */
   getAllJobs(): BatchJob[] {
     return Array.from(this.jobs.values());
   }
 
   /**
-   * Cancel a job
+   * Cancels a batch job if it's pending or running
+   *
+   * For pending jobs, removes from queue. For running jobs, marks as
+   * cancelled (actual cancellation depends on job implementation).
+   * Completed or failed jobs cannot be cancelled.
+   *
+   * @param jobId - The unique job identifier
+   * @returns true if job was cancelled, false if not found or already completed
+   *
+   * @example
+   * ```typescript
+   * const cancelled = processor.cancelJob('job-123');
+   * if (cancelled) {
+   *   console.log('Job cancelled successfully');
+   * } else {
+   *   console.log('Job not found or already completed');
+   * }
+   * ```
    */
   cancelJob(jobId: string): boolean {
     const job = this.jobs.get(jobId);
