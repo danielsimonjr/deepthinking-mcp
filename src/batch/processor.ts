@@ -1,6 +1,7 @@
 /**
  * Batch Processor (v3.4.0)
  * Phase 4 Task 9.4: Batch job execution and management
+ * Sprint 3 Task 3.2: Added dependency injection support
  */
 
 import { randomUUID } from 'crypto';
@@ -11,6 +12,8 @@ import type {
   BatchJobResult,
   BatchProcessorOptions,
 } from './types.js';
+import { ILogger } from '../interfaces/ILogger.js';
+import { createLogger, LogLevel } from '../utils/logger.js';
 
 /**
  * Default processor options
@@ -62,12 +65,14 @@ export class BatchProcessor {
   private queue: string[];
   private running: Set<string>;
   private options: BatchProcessorOptions;
+  private logger: ILogger;
 
-  constructor(options: Partial<BatchProcessorOptions> = {}) {
+  constructor(options: Partial<BatchProcessorOptions> = {}, logger?: ILogger) {
     this.jobs = new Map();
     this.queue = [];
     this.running = new Set();
     this.options = { ...DEFAULT_OPTIONS, ...options };
+    this.logger = logger || createLogger({ minLevel: LogLevel.INFO, enableConsole: true });
   }
 
   /**
@@ -106,6 +111,13 @@ export class BatchProcessor {
 
     this.jobs.set(job.id, job);
     this.queue.push(job.id);
+
+    this.logger.info('Batch job created', {
+      jobId: job.id,
+      type: job.type,
+      totalItems: job.totalItems,
+      queuePosition: this.queue.length,
+    });
 
     // Try to start job if capacity available
     this.processQueue();

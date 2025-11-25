@@ -1,6 +1,7 @@
 /**
  * Backup Manager (v3.4.0)
  * Phase 4 Task 9.8: Main backup orchestration
+ * Sprint 3 Task 3.2: Added dependency injection support
  */
 
 import crypto from 'crypto';
@@ -24,6 +25,8 @@ import { LocalBackupProvider } from './providers/local.js';
 import { S3BackupProvider } from './providers/s3.js';
 import { GCSBackupProvider } from './providers/gcs.js';
 import { AzureBackupProvider } from './providers/azure.js';
+import { ILogger } from '../interfaces/ILogger.js';
+import { createLogger, LogLevel } from '../utils/logger.js';
 
 const gzip = promisify(zlib.gzip);
 const gunzip = promisify(zlib.gunzip);
@@ -36,10 +39,12 @@ const brotliDecompress = promisify(zlib.brotliDecompress);
 export class BackupManager {
   private backups: Map<string, BackupRecord>;
   private providers: Map<BackupProvider, any>;
+  private logger: ILogger;
 
-  constructor(config?: { provider: BackupProvider; config: BackupProviderOptions }) {
+  constructor(config?: { provider: BackupProvider; config: BackupProviderOptions }, logger?: ILogger) {
     this.backups = new Map();
     this.providers = new Map();
+    this.logger = logger || createLogger({ minLevel: LogLevel.INFO, enableConsole: true });
 
     // Auto-register provider if config provided
     if (config) {
@@ -112,6 +117,14 @@ export class BackupManager {
 
     this.backups.set(backupId, record);
 
+    this.logger.info('Backup started', {
+      backupId,
+      type: config.type,
+      provider: config.provider,
+      compression: config.compression,
+      itemCount: data.length,
+    });
+
     try {
       // Serialize data
       const serialized = JSON.stringify(data);
@@ -167,10 +180,20 @@ export class BackupManager {
       record.duration =
         record.completedAt.getTime() - record.startedAt.getTime();
 
+      this.logger.info('Backup completed', {
+        backupId,
+        duration: record.duration,
+        size: record.size,
+        compressedSize: record.compressedSize,
+        sessionCount: record.sessionCount,
+        thoughtCount: record.thoughtCount,
+      });
+
       return record;
     } catch (error) {
       record.status = 'failed';
       record.error = (error as Error).message;
+      this.logger.error('Backup failed', error as Error, { backupId });
       throw error;
     }
   }

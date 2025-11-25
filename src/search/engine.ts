@@ -1,6 +1,7 @@
 /**
  * Search Engine (v3.4.0)
  * Phase 4 Task 9.1: Main search engine with query execution
+ * Sprint 3 Task 3.2: Added dependency injection support
  */
 
 import type { ThinkingSession } from '../types/index.js';
@@ -14,6 +15,8 @@ import type {
 } from './types.js';
 import { SearchIndex } from './index.js';
 import { Tokenizer } from './tokenizer.js';
+import { ILogger } from '../interfaces/ILogger.js';
+import { createLogger, LogLevel } from '../utils/logger.js';
 
 /**
  * Search engine for session querying
@@ -22,11 +25,13 @@ export class SearchEngine {
   private index: SearchIndex;
   private sessions: Map<string, ThinkingSession>;
   private tokenizer: Tokenizer;
+  private logger: ILogger;
 
-  constructor() {
+  constructor(logger?: ILogger) {
     this.index = new SearchIndex();
     this.sessions = new Map();
     this.tokenizer = new Tokenizer();
+    this.logger = logger || createLogger({ minLevel: LogLevel.INFO, enableConsole: true });
   }
 
   /**
@@ -35,6 +40,7 @@ export class SearchEngine {
   indexSession(session: ThinkingSession): void {
     this.index.indexSession(session);
     this.sessions.set(session.id, session);
+    this.logger.debug('Session indexed', { sessionId: session.id, thoughtCount: session.thoughts.length });
   }
 
   /**
@@ -43,6 +49,7 @@ export class SearchEngine {
   removeSession(sessionId: string): void {
     this.index.removeSession(sessionId);
     this.sessions.delete(sessionId);
+    this.logger.debug('Session removed from index', { sessionId });
   }
 
   /**
@@ -50,6 +57,7 @@ export class SearchEngine {
    */
   updateSession(session: ThinkingSession): void {
     this.indexSession(session);
+    this.logger.debug('Session re-indexed', { sessionId: session.id });
   }
 
   /**
@@ -164,6 +172,14 @@ export class SearchEngine {
     if ((query as any).facets && Array.isArray((query as any).facets)) {
       facets = this.computeFacets(results.map(r => r.session), (query as any).facets);
     }
+
+    this.logger.debug('Search completed', {
+      resultsCount: paginatedResults.length,
+      totalMatches: results.length,
+      executionTime,
+      hasText: !!normalizedQuery.text,
+      hasFacets: !!facets,
+    });
 
     return {
       results: paginatedResults,
