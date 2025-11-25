@@ -159,6 +159,12 @@ export class SearchEngine {
 
     const executionTime = Date.now() - startTime;
 
+    // Compute facets if requested
+    let facets: SearchResults['facets'];
+    if ((query as any).facets && Array.isArray((query as any).facets)) {
+      facets = this.computeFacets(results.map(r => r.session), (query as any).facets);
+    }
+
     return {
       results: paginatedResults,
       sessions: paginatedResults.map(r => r.session), // Convenience property
@@ -168,6 +174,7 @@ export class SearchEngine {
       totalPages: Math.ceil(results.length / pageSize),
       query: normalizedQuery,
       executionTime,
+      facets,
     };
   }
 
@@ -431,5 +438,75 @@ export class SearchEngine {
 
       return order === 'asc' ? comparison : -comparison;
     });
+  }
+
+  /**
+   * Compute facets for search results
+   */
+  private computeFacets(sessions: ThinkingSession[], facetFields: string[]): SearchResults['facets'] {
+    const facets: SearchResults['facets'] = {};
+
+    for (const field of facetFields) {
+      if (field === 'mode') {
+        const modeCounts = new Map<string, number>();
+        for (const session of sessions) {
+          const mode = session.mode;
+          modeCounts.set(mode, (modeCounts.get(mode) || 0) + 1);
+        }
+        facets.mode = modeCounts;
+      } else if (field === 'tags') {
+        const tagCounts = new Map<string, number>();
+        for (const session of sessions) {
+          if (session.tags) {
+            for (const tag of session.tags) {
+              tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+            }
+          }
+        }
+        facets.tags = tagCounts;
+      }
+    }
+
+    return facets;
+  }
+
+  /**
+   * Provide autocomplete suggestions based on indexed content
+   */
+  autocomplete(prefix: string): string[] {
+    const lowerPrefix = prefix.toLowerCase();
+    const suggestions = new Set<string>();
+
+    // Add matching titles
+    for (const session of this.sessions.values()) {
+      if (session.title && session.title.toLowerCase().includes(lowerPrefix)) {
+        suggestions.add(session.title);
+      }
+
+      // Add matching tags
+      if (session.tags) {
+        for (const tag of session.tags) {
+          if (tag.toLowerCase().includes(lowerPrefix)) {
+            suggestions.add(tag);
+          }
+        }
+      }
+
+      // Add matching thought content (limited to avoid performance issues)
+      for (const thought of session.thoughts.slice(0, 5)) {
+        const words = thought.content.toLowerCase().split(/\s+/);
+        for (const word of words) {
+          if (word.startsWith(lowerPrefix) && word.length > 2) {
+            suggestions.add(word);
+            if (suggestions.size >= 20) break;
+          }
+        }
+        if (suggestions.size >= 20) break;
+      }
+
+      if (suggestions.size >= 20) break;
+    }
+
+    return Array.from(suggestions).slice(0, 10);
   }
 }

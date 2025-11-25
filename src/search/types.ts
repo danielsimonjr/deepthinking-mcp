@@ -84,6 +84,11 @@ export interface SearchQuery {
    * Pagination
    */
   pagination?: PaginationOptions;
+
+  /**
+   * Request faceted results for specified dimensions
+   */
+  facets?: string[];
 }
 
 /**
@@ -157,6 +162,11 @@ export interface SearchResults {
   totalPages: number;
   query: SearchQuery;
   executionTime: number; // in milliseconds
+  facets?: {
+    mode?: Map<string, number>;
+    tags?: Map<string, number>;
+    [key: string]: Map<string, number> | undefined;
+  };
 }
 
 /**
