@@ -39,8 +39,17 @@ test-server.js
 test-tool-call.js
 restore-mcps.cjs
 
+# Test output files (auto-generated)
+test-output.txt
+test-results.txt
+test-final.txt
+*-output.txt
+*-results.txt
+
 # Backup files
 *.backup
 *.bak
 add-to-config.cjs
-*.txt
+
+# Archives (don't track zip files)
+*.zip
