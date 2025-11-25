@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.4.5] - 2025-11-25
 
-### 🚧 Sprint 3 In Progress: Architecture & Testing (1.5/6 Tasks - 25%)
+### 🚧 Sprint 3 In Progress: Architecture & Testing (2.5/6 Tasks - 42%)
 
 **Objective**: Improve architecture, add dependency injection, increase test coverage
 **Status**: IN PROGRESS ⚙️
@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Tasks In Progress** (0.5/6):
 
-2. 🚧 **Add Dependency Injection** (d2a8ba0) - HIGH PRIORITY ⚙️
+2. 🚧 **Add Dependency Injection** (d2a8ba0, 1a4f56a) - HIGH PRIORITY ⚙️
    - Created ILogger interface for logger dependency injection
    - Updated Logger class to implement ILogger interface
    - Created interfaces module (src/interfaces/) for DI contracts
@@ -33,9 +33,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - **Next Steps**: Refactor major classes (SessionManager, SearchEngine, etc.) to inject dependencies
    - **Status**: ~10% complete (1 week task - incremental progress)
 
-**Remaining Tasks** (4.5/6):
+**Tasks Completed** (2/6):
+
+3. ✅ **Split God File (index.ts)** (a949dc7) - CRITICAL PRIORITY ✨
+   - **MAJOR REFACTORING**: Reduced index.ts from 796 lines to 311 lines (61% reduction)
+   - Created ThoughtFactory service (243 lines) - Centralized thought creation for 18 modes
+   - Created ExportService (360 lines) - Unified export logic for 6+ formats
+   - Created ModeRouter (195 lines) - Mode switching and intelligent recommendations
+   - **Benefits**: Separation of concerns, improved testability, better maintainability
+   - All TypeScript types validated (0 errors)
+
+**Remaining Tasks** (3.5/6):
 - Task 3.2: Complete Dependency Injection refactoring (HIGH priority, very complex)
-- Task 3.3: Split God File (index.ts) (CRITICAL priority, very complex)
 - Task 3.4: Refactor SessionManager God Class (CRITICAL priority, very complex)
 - Task 3.5: Add Critical Path Tests (CRITICAL priority, very complex)
 - Task 3.6: Add Integration Test Suite (HIGH priority, very complex)
