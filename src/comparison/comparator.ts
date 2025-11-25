@@ -313,8 +313,15 @@ export class SessionComparator {
     const thoughtCountA = sessionA.thoughts?.length || 0;
     const thoughtCountB = sessionB.thoughts?.length || 0;
 
+    // Calculate thought count similarity (0-1 scale, where 1 is identical)
+    const maxCount = Math.max(thoughtCountA, thoughtCountB);
+    const thoughtCountSimilarity = maxCount > 0
+      ? 1 - Math.abs(thoughtCountA - thoughtCountB) / maxCount
+      : 1;
+
     return {
       thoughtCountDiff: Math.abs(thoughtCountA - thoughtCountB),
+      thoughtCountSimilarity,
       modesSame: sessionA.mode === sessionB.mode,
       completionDiff: (sessionA.isComplete ? 1 : 0) - (sessionB.isComplete ? 1 : 0),
       averageConfidenceDiff: 0, // Placeholder

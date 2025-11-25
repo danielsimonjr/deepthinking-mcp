@@ -37,9 +37,14 @@ export class BackupManager {
   private backups: Map<string, BackupRecord>;
   private providers: Map<BackupProvider, any>;
 
-  constructor() {
+  constructor(config?: { provider: BackupProvider; config: BackupProviderOptions }) {
     this.backups = new Map();
     this.providers = new Map();
+
+    // Auto-register provider if config provided
+    if (config) {
+      this.registerProvider(config.provider, config.config);
+    }
   }
 
   /**

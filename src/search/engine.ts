@@ -159,6 +159,12 @@ export class SearchEngine {
 
     const executionTime = Date.now() - startTime;
 
+    // Compute facets if requested
+    let facets: SearchResults['facets'];
+    if ((query as any).facets && Array.isArray((query as any).facets)) {
+      facets = this.computeFacets(results.map(r => r.session), (query as any).facets);
+    }
+
     return {
       results: paginatedResults,
       sessions: paginatedResults.map(r => r.session), // Convenience property
@@ -168,6 +174,7 @@ export class SearchEngine {
       totalPages: Math.ceil(results.length / pageSize),
       query: normalizedQuery,
       executionTime,
+      facets,
     };
   }
 
@@ -431,5 +438,35 @@ export class SearchEngine {
 
       return order === 'asc' ? comparison : -comparison;
     });
+  }
+
+  /**
+   * Compute facets for search results
+   */
+  private computeFacets(sessions: ThinkingSession[], facetFields: string[]): SearchResults['facets'] {
+    const facets: SearchResults['facets'] = {};
+
+    for (const field of facetFields) {
+      if (field === 'mode') {
+        const modeCounts = new Map<string, number>();
+        for (const session of sessions) {
+          const mode = session.mode;
+          modeCounts.set(mode, (modeCounts.get(mode) || 0) + 1);
+        }
+        facets.mode = modeCounts;
+      } else if (field === 'tags') {
+        const tagCounts = new Map<string, number>();
+        for (const session of sessions) {
+          if (session.tags) {
+            for (const tag of session.tags) {
+              tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+            }
+          }
+        }
+        facets.tags = tagCounts;
+      }
+    }
+
+    return facets;
   }
 }

@@ -60,6 +60,7 @@ export interface ComparisonSummary {
  */
 export interface ComparisonMetrics {
   thoughtCountDiff: number;
+  thoughtCountSimilarity?: number;
   modesSame: boolean;
   completionDiff: number;
   averageConfidenceDiff: number;
