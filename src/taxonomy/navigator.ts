@@ -161,11 +161,15 @@ export class TaxonomyNavigator {
       );
     }
 
-    // Text search
+    // Text search - only filter if we find matches, otherwise use for scoring
     if (filters.searchText) {
       const searchResults = searchReasoningTypes(filters.searchText);
-      const searchIds = new Set(searchResults.map(r => r.id));
-      candidates = candidates.filter(t => searchIds.has(t.id));
+      const searchMatchIds = new Set(searchResults.map(r => r.id));
+      // Only filter down if search found matches
+      if (searchMatchIds.size > 0) {
+        candidates = candidates.filter(t => searchMatchIds.has(t.id));
+      }
+      // If search found nothing, still keep all candidates for scoring
     }
 
     // Calculate relevance scores
@@ -476,9 +480,14 @@ export class TaxonomyNavigator {
 
     // Build query
     const query: TaxonomyQuery = {
-      keywords,
+      // Always include searchText for scoring, but don't use as a hard filter
       searchText: problemDescription,
     };
+
+    // Only add keywords if we found any
+    if (keywords.length > 0) {
+      query.keywords = keywords;
+    }
 
     if (context?.difficulty) {
       query.difficulties = [context.difficulty];
