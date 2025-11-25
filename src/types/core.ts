@@ -21,30 +21,80 @@ import type { FormalLogicThought } from './modes/formallogic.js';
  * Available thinking modes
  */
 export enum ThinkingMode {
+  // ===== Fully Implemented Modes =====
   SEQUENTIAL = 'sequential',
   SHANNON = 'shannon',
   MATHEMATICS = 'mathematics',
   PHYSICS = 'physics',
   HYBRID = 'hybrid',
-  ABDUCTIVE = 'abductive',
-  CAUSAL = 'causal',
-  BAYESIAN = 'bayesian',
-  COUNTERFACTUAL = 'counterfactual',
-  ANALOGICAL = 'analogical',
-  TEMPORAL = 'temporal', // Phase 3 (v2.1)
-  GAMETHEORY = 'gametheory', // Phase 3 (v2.2)
-  EVIDENTIAL = 'evidential', // Phase 3 (v2.3)
-  FIRSTPRINCIPLES = 'firstprinciples', // Phase 3 (v3.1.0)
-  METAREASONING = 'metareasoning', // Phase 4 (v3.3.0)
-  RECURSIVE = 'recursive', // Phase 4 (v3.3.0)
-  MODAL = 'modal', // Phase 4 (v3.3.0)
-  STOCHASTIC = 'stochastic', // Phase 4 (v3.3.0)
-  CONSTRAINT = 'constraint', // Phase 4 (v3.3.0)
-  SYSTEMSTHINKING = 'systemsthinking', // Phase 4 (v3.2.0)
-  SCIENTIFICMETHOD = 'scientificmethod', // Phase 4 (v3.2.0)
-  OPTIMIZATION = 'optimization', // Phase 4 (v3.2.0)
-  FORMALLOGIC = 'formallogic', // Phase 4 (v3.2.0)
+
+  // ===== Implemented - Advanced Modes (Phase 4) =====
+  METAREASONING = 'metareasoning', // Phase 4 (v3.3.0) - Self-reflection and strategy selection
+  RECURSIVE = 'recursive', // Phase 4 (v3.3.0) - Recursive problem decomposition
+  MODAL = 'modal', // Phase 4 (v3.3.0) - Possibility and necessity reasoning
+  STOCHASTIC = 'stochastic', // Phase 4 (v3.3.0) - Probabilistic state transitions
+  CONSTRAINT = 'constraint', // Phase 4 (v3.3.0) - Constraint satisfaction
+  OPTIMIZATION = 'optimization', // Phase 4 (v3.2.0) - Optimization strategies
+
+  // ===== Experimental - Limited Implementation =====
+  // These modes have validators and type definitions but limited runtime logic
+  ABDUCTIVE = 'abductive', // ⚠️ Experimental - Inference to best explanation
+  CAUSAL = 'causal', // ⚠️ Experimental - Causal reasoning
+  BAYESIAN = 'bayesian', // ⚠️ Experimental - Bayesian inference
+  COUNTERFACTUAL = 'counterfactual', // ⚠️ Experimental - What-if scenarios
+  ANALOGICAL = 'analogical', // ⚠️ Experimental - Reasoning by analogy
+  TEMPORAL = 'temporal', // ⚠️ Experimental (Phase 3 v2.1) - Temporal logic
+  GAMETHEORY = 'gametheory', // ⚠️ Experimental (Phase 3 v2.2) - Game theory analysis
+  EVIDENTIAL = 'evidential', // ⚠️ Experimental (Phase 3 v2.3) - Evidence-based reasoning
+  FIRSTPRINCIPLES = 'firstprinciples', // ⚠️ Experimental (Phase 3 v3.1.0) - First principles thinking
+  SYSTEMSTHINKING = 'systemsthinking', // ⚠️ Experimental (Phase 4 v3.2.0) - Systems thinking
+  SCIENTIFICMETHOD = 'scientificmethod', // ⚠️ Experimental (Phase 4 v3.2.0) - Scientific method
+  FORMALLOGIC = 'formallogic', // ⚠️ Experimental (Phase 4 v3.2.0) - Formal logic
+
   CUSTOM = 'custom'
+}
+
+/**
+ * Modes with full implementation including specialized thought creation logic
+ */
+export const FULLY_IMPLEMENTED_MODES: ReadonlyArray<ThinkingMode> = [
+  ThinkingMode.SEQUENTIAL,
+  ThinkingMode.SHANNON,
+  ThinkingMode.MATHEMATICS,
+  ThinkingMode.PHYSICS,
+  ThinkingMode.HYBRID,
+  ThinkingMode.METAREASONING,
+  ThinkingMode.RECURSIVE,
+  ThinkingMode.MODAL,
+  ThinkingMode.STOCHASTIC,
+  ThinkingMode.CONSTRAINT,
+  ThinkingMode.OPTIMIZATION,
+];
+
+/**
+ * Experimental modes - have validators but limited runtime implementation
+ * These modes will create base thoughts without specialized logic
+ */
+export const EXPERIMENTAL_MODES: ReadonlyArray<ThinkingMode> = [
+  ThinkingMode.ABDUCTIVE,
+  ThinkingMode.CAUSAL,
+  ThinkingMode.BAYESIAN,
+  ThinkingMode.COUNTERFACTUAL,
+  ThinkingMode.ANALOGICAL,
+  ThinkingMode.TEMPORAL,
+  ThinkingMode.GAMETHEORY,
+  ThinkingMode.EVIDENTIAL,
+  ThinkingMode.FIRSTPRINCIPLES,
+  ThinkingMode.SYSTEMSTHINKING,
+  ThinkingMode.SCIENTIFICMETHOD,
+  ThinkingMode.FORMALLOGIC,
+];
+
+/**
+ * Check if a mode is fully implemented
+ */
+export function isFullyImplemented(mode: ThinkingMode): boolean {
+  return FULLY_IMPLEMENTED_MODES.includes(mode);
 }
 
 /**
