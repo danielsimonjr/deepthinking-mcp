@@ -2,13 +2,10 @@
  * Adaptive Mode Selector with Taxonomy Insights (v3.4.0)
  * Phase 4D Task 7.5 (File Task 22): Intelligent mode selection
  */
-// @ts-nocheck - Taxonomy type mappings need architectural refactoring
 
-
-import { TaxonomyNavigator } from './navigator.js';
 import { SuggestionEngine, type ProblemCharacteristics, type EnhancedMetadata } from './suggestion-engine.js';
 import { MultiModalAnalyzer } from './multi-modal-analyzer.js';
-import type { ThinkingMode } from '../types/core.js';
+import { ThinkingMode } from '../types/core.js';
 import type { ThinkingSession, Thought } from '../types/index.js';
 
 /**
@@ -89,13 +86,11 @@ export interface SessionLearning {
  * Adaptive mode selector
  */
 export class AdaptiveModeSelector {
-  private navigator: TaxonomyNavigator;
   private suggestionEngine: SuggestionEngine;
   private multiModalAnalyzer: MultiModalAnalyzer;
   private sessionHistory: Map<string, SessionLearning>;
 
   constructor() {
-    this.navigator = new TaxonomyNavigator();
     this.suggestionEngine = new SuggestionEngine();
     this.multiModalAnalyzer = new MultiModalAnalyzer();
     this.sessionHistory = new Map();
@@ -522,7 +517,7 @@ export class AdaptiveModeSelector {
   /**
    * Suggest alternatives to current mode
    */
-  private suggestAlternatives(currentMode: ThinkingMode, context: SelectionContext): ModeRecommendation[] {
+  private suggestAlternatives(currentMode: ThinkingMode, _context: SelectionContext): ModeRecommendation[] {
     // Get related modes
     const alternatives: ThinkingMode[] = [ThinkingMode.BAYESIAN, ThinkingMode.CAUSAL, ThinkingMode.ABDUCTIVE, ThinkingMode.ANALOGICAL];
 

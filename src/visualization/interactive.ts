@@ -3,8 +3,6 @@
  * Phase 4B Task 3.2: Animations, event handlers, dynamic updates
  */
 
-import type { MermaidGenerator } from './mermaid.js';
-
 /**
  * Animation types supported
  */
@@ -44,14 +42,11 @@ export interface EventHandler {
  * Interactive features manager for Mermaid diagrams
  */
 export class InteractiveMermaid {
-// @ts-ignore - Variable used in class instance
-  private generator: MermaidGenerator;
   private animations: Map<string, AnimationConfig>;
   private eventHandlers: Map<string, EventHandler[]>;
   private dynamicUpdates: boolean;
 
-  constructor(generator: MermaidGenerator) {
-    this.generator = generator;
+  constructor() {
     this.animations = new Map();
     this.eventHandlers = new Map();
     this.dynamicUpdates = false;
