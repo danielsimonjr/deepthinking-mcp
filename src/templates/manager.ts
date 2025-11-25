@@ -372,6 +372,13 @@ export class TemplateManager {
    * Get usage statistics for a template
    */
   getUsageStats(templateId: string) {
-    return this.stats.get(templateId) || { timesUsed: 0, lastUsed: null };
+    const stats = this.stats.get(templateId);
+    if (stats) {
+      return {
+        timesUsed: stats.usageCount,
+        lastUsed: stats.lastUsed || null,
+      };
+    }
+    return { timesUsed: 0, lastUsed: null };
   }
 }
