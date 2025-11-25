@@ -2,12 +2,10 @@
  * Multi-Modal Reasoning Analyzer (v3.4.0)
  * Phase 4D Task 7.4 (File Task 21): Analyze combined reasoning approaches
  */
-// @ts-nocheck - Uses string literals instead of ThinkingMode enum (requires refactoring)
 
 import type { ThinkingSession } from '../types/index.js';
-import type { ThinkingMode } from '../types/core.js';
+import { ThinkingMode, type Thought } from '../types/core.js';
 import { type ReasoningCategory } from './reasoning-types.js';
-import { SuggestionEngine } from './suggestion-engine.js';
 
 /**
  * Mode transition
@@ -49,12 +47,13 @@ export interface ReasoningFlow {
 
 /**
  * Multi-modal pattern
+ * Note: modeSequence uses conceptual mode names (string) that may not directly map to ThinkingMode enum
  */
 export interface MultiModalPattern {
   id: string;
   name: string;
   description: string;
-  modeSequence: ThinkingMode[];
+  modeSequence: string[]; // Conceptual mode names
   useCases: string[];
   effectiveness: number;
   examples: string[];
@@ -64,10 +63,11 @@ export interface MultiModalPattern {
 
 /**
  * Mode synergy analysis
+ * Note: mode1/mode2 use conceptual mode names (string) for pattern matching
  */
 export interface ModeSynergy {
-  mode1: ThinkingMode;
-  mode2: ThinkingMode;
+  mode1: string; // Conceptual mode name
+  mode2: string; // Conceptual mode name
   synergyScore: number; // 0-1
   complementarity: string[];
   conflicts: string[];
@@ -260,10 +260,8 @@ const MODE_SYNERGIES: ModeSynergy[] = [
  * Multi-modal reasoning analyzer
  */
 export class MultiModalAnalyzer {
-  private suggestionEngine: SuggestionEngine;
-
   constructor() {
-    this.suggestionEngine = new SuggestionEngine();
+    // No initialization needed
   }
 
   /**
@@ -414,8 +412,9 @@ export class MultiModalAnalyzer {
 
   /**
    * Calculate combination synergy
+   * Note: Accepts mode names as strings (ThinkingMode values will work since they're string-based)
    */
-  private calculateCombinationSynergy(modes: ThinkingMode[]): number {
+  private calculateCombinationSynergy(modes: string[]): number {
     let totalSynergy = 0;
     let count = 0;
 
@@ -527,7 +526,7 @@ export class MultiModalAnalyzer {
     }
 
     // Check mode overlap
-    const overlap = pattern.modeSequence.filter(m => currentModes.includes(m)).length;
+    const overlap = pattern.modeSequence.filter(m => currentModes.includes(m as ThinkingMode)).length;
     const overlapRatio = overlap / pattern.modeSequence.length;
     relevance += overlapRatio * 0.4;
 
@@ -543,7 +542,7 @@ export class MultiModalAnalyzer {
     rationale.push(`${pattern.name}: ${pattern.description}`);
     rationale.push(`Effectiveness: ${(pattern.effectiveness * 100).toFixed(0)}%`);
 
-    const overlap = pattern.modeSequence.filter(m => currentModes.includes(m));
+    const overlap = pattern.modeSequence.filter(m => currentModes.includes(m as ThinkingMode));
     if (overlap.length > 0) {
       rationale.push(`Already using: ${overlap.join(', ')}`);
     }
@@ -557,7 +556,7 @@ export class MultiModalAnalyzer {
   private suggestPatternAdaptations(pattern: MultiModalPattern, currentModes: ThinkingMode[]): string[] {
     const adaptations: string[] = [];
 
-    const missing = pattern.modeSequence.filter(m => !currentModes.includes(m));
+    const missing = pattern.modeSequence.filter(m => !currentModes.includes(m as ThinkingMode));
     if (missing.length > 0) {
       adaptations.push(`Add missing modes: ${missing.join(', ')}`);
     }
@@ -583,8 +582,9 @@ export class MultiModalAnalyzer {
 
   /**
    * Find mode synergy
+   * Note: Accepts mode names as strings (can be ThinkingMode values or conceptual names)
    */
-  findSynergy(mode1: ThinkingMode, mode2: ThinkingMode): ModeSynergy | null {
+  findSynergy(mode1: string, mode2: string): ModeSynergy | null {
     return MODE_SYNERGIES.find(s => s.mode1 === mode1 && s.mode2 === mode2) || null;
   }
 

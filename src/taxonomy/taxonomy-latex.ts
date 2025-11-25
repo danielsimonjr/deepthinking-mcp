@@ -2,7 +2,6 @@
  * Taxonomy LaTeX Integration (v3.4.0)
  * Phase 4D Task 7.6 (File Task 23): Integrate taxonomy with LaTeX exports
  */
-// @ts-nocheck - Depends on multi-modal-analyzer types (requires refactoring)
 
 import type { ThinkingSession } from '../types/index.js';
 import { getReasoningType } from './reasoning-types.js';
@@ -122,7 +121,7 @@ This session employed \\textbf{${flow.modeDistribution.size}} distinct reasoning
   /**
    * Generate flow analysis section
    */
-  private generateFlowAnalysisSection(flow: any, options: TaxonomyLatexOptions): string {
+  private generateFlowAnalysisSection(flow: any, _options: TaxonomyLatexOptions): string {
     let latex = `
 \\subsection{Reasoning Flow Analysis}
 
@@ -171,7 +170,7 @@ The session included \\textbf{${flow.transitions.length}} mode transitions:
   /**
    * Generate quality metrics section
    */
-  private generateQualityMetricsSection(session: ThinkingSession, options: TaxonomyLatexOptions): string {
+  private generateQualityMetricsSection(session: ThinkingSession, _options: TaxonomyLatexOptions): string {
     const analysis = this.suggestionEngine.analyzeSession(session);
 
     let latex = `
@@ -222,7 +221,7 @@ The following metrics characterize the quality of reasoning in this session:
   /**
    * Generate metadata section
    */
-  private generateMetadataSection(session: ThinkingSession, options: TaxonomyLatexOptions): string {
+  private generateMetadataSection(session: ThinkingSession, _options: TaxonomyLatexOptions): string {
     const analysis = this.suggestionEngine.analyzeSession(session);
 
     let latex = `
@@ -328,7 +327,7 @@ The following metrics characterize the quality of reasoning in this session:
   /**
    * Generate thought annotation with taxonomy
    */
-  generateThoughtAnnotation(thought: any, typeId?: string): string {
+  generateThoughtAnnotation(_thought: any, typeId?: string): string {
     if (!typeId) return '';
 
     const type = getReasoningType(typeId);

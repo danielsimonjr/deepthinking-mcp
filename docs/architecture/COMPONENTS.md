@@ -1,0 +1,807 @@
+# Component Architecture
+
+## Core Components
+
+### MCP Server Layer
+
+#### `src/index.ts` - MCP Server Entry Point
+**Purpose**: Main server implementation and tool request orchestration
+
+**Key Functions**:
+- `handleAddThought()` - Process thought additions
+- `handleCreateSession()` - Initialize new thinking sessions
+- `handleExport()` - Export sessions in various formats
+- `handleSwitchMode()` - Change reasoning modes
+- `handleGetSummary()` - Generate session summaries
+- `handleGetRecommendations()` - Mode recommendations
+
+**Dependencies**:
+- ThoughtFactory
+- ExportService
+- ModeRouter
+- SessionManager
+
+**Line Count**: 311 (reduced from 796)
+
+**Testing**: Comprehensive integration tests in `tests/integration/index-handlers.test.ts`
+
+---
+
+## Service Layer Components
+
+### `src/services/ThoughtFactory.ts` - Thought Creation Service
+
+**Purpose**: Centralized factory for creating mode-specific thought objects
+
+**Key Method**:
+```typescript
+createThought(input: ThinkingToolInput, sessionId: string): Thought
+```
+
+**Supported Modes** (18 total):
+1. **Sequential** - Step-by-step linear reasoning
+2. **Shannon** - Information theory with uncertainty quantification
+3. **Mathematics** - Formal mathematical reasoning with proofs
+4. **Physics** - Physical reasoning with tensor analysis
+5. **Hybrid** - Combined reasoning approaches
+6. **Abductive** - Inference to best explanation
+7. **Causal** - Causal relationship analysis
+8. **Bayesian** - Probabilistic inference
+9. **Counterfactual** - "What if" analysis
+10. **Analogical** - Reasoning by analogy
+11. **Temporal** - Time-based reasoning
+12. **Game Theory** - Strategic decision making
+13. **Evidential** - Dempster-Shafer theory
+14. **First Principles** - Fundamental reasoning
+15. **Systems Thinking** - Holistic system analysis
+16. **Scientific Method** - Hypothesis testing
+17. **Optimization** - Constraint optimization
+18. **Formal Logic** - Logical inference
+
+**Line Count**: 243 lines
+
+**Testing**: Covered by mode-specific unit tests and integration tests
+
+---
+
+### `src/services/ExportService.ts` - Export Service
+
+**Purpose**: Unified export logic for multiple output formats
+
+**Key Method**:
+```typescript
+exportSession(session: ThinkingSession, format: ExportFormat): string
+```
+
+**Supported Formats**:
+- **JSON**: Structured data export
+- **Markdown**: Human-readable documentation
+- **LaTeX**: Academic paper format
+- **HTML**: Web-ready output with styling
+- **Jupyter**: Interactive notebook (.ipynb)
+- **Mermaid**: Diagram-based visualization
+- **DOT**: GraphViz format
+- **ASCII**: Terminal-friendly tree view
+
+**Key Features**:
+- Format-specific transformations
+- Metadata preservation
+- Thought hierarchy rendering
+- Mode-specific formatting
+
+**Line Count**: 360 lines
+
+**Dependencies**:
+- VisualExporter (for Mermaid, DOT, ASCII)
+
+---
+
+### `src/services/ModeRouter.ts` - Mode Routing Service
+
+**Purpose**: Mode switching and intelligent recommendations
+
+**Key Methods**:
+```typescript
+switchMode(sessionId: string, newMode: ThinkingMode, reason: string): Promise<ThinkingSession>
+quickRecommend(problemType: string): ThinkingMode
+getRecommendations(characteristics: ProblemCharacteristics): string
+```
+
+**Features**:
+- Safe mode transitions
+- Problem-based recommendations
+- Integration with taxonomy system
+- Mode combination suggestions
+
+**Line Count**: 195 lines
+
+**Dependencies**:
+- SessionManager
+- ModeRecommender
+
+---
+
+## Session Management Components
+
+### `src/session/manager.ts` - Session Manager
+
+**Purpose**: Core session lifecycle and state management
+
+**Key Methods**:
+```typescript
+createSession(options): Promise<ThinkingSession>
+getSession(sessionId): Promise<ThinkingSession | null>
+addThought(sessionId, thought): Promise<ThinkingSession>
+switchMode(sessionId, newMode, reason): Promise<ThinkingSession>
+listSessions(includeStoredSessions): Promise<SessionMetadata[]>
+deleteSession(sessionId): Promise<void>
+generateSummary(sessionId): Promise<string>
+```
+
+**Key Features**:
+- LRU cache for active sessions (default: 100 sessions)
+- Automatic persistence with SessionStorage
+- Mode transition management
+- Summary generation
+- Metrics tracking delegation
+
+**Line Count**: 542 lines (reduced from ~700)
+
+**Performance**:
+- O(1) session access (LRU cache)
+- O(1) metrics updates (via SessionMetricsCalculator)
+- Configurable cache size
+
+**Testing**: Unit tests in `tests/unit/session-manager.test.ts`
+
+---
+
+### `src/session/SessionMetricsCalculator.ts` - Metrics Calculator
+
+**Purpose**: Session metrics calculation and tracking
+
+**Key Methods**:
+```typescript
+initializeMetrics(): SessionMetrics
+updateMetrics(session, thought): void
+updateModeSpecificMetrics(metrics, thought): void
+updateCacheStats(session): void
+```
+
+**Tracked Metrics**:
+- Total thoughts count
+- Thoughts by type distribution
+- Average uncertainty (for probabilistic modes)
+- Revision count
+- Time spent
+- Dependency depth
+- Cache statistics (hits, misses, hit rate)
+
+**Performance**:
+- O(1) metric initialization
+- O(1) incremental updates (vs O(n) recalculation)
+- Memory efficient (no historical data storage)
+
+**Line Count**: 241 lines
+
+---
+
+## Search & Discovery Components
+
+### `src/search/engine.ts` - Search Engine
+
+**Purpose**: Full-text search and multi-dimensional filtering
+
+**Key Methods**:
+```typescript
+indexSession(session): void
+removeSession(sessionId): void
+search(query): SearchResults
+```
+
+**Search Capabilities**:
+- **Text Search**: Tokenization, stemming, TF-IDF scoring
+- **Mode Filtering**: Single or multiple modes
+- **Taxonomy Filtering**: Categories and types
+- **Author/Domain**: Exact match filtering
+- **Date Range**: createdAfter/createdBefore
+- **Sorting**: Relevance, date, title
+- **Pagination**: Offset and limit
+- **Facets**: Aggregated counts by mode, author, domain
+
+**Index Structure**:
+- Inverted index for text search
+- Multi-attribute indexes for filters
+- In-memory for fast queries
+
+**Testing**: Comprehensive unit tests in `tests/unit/search-engine.test.ts` (50+ cases)
+
+---
+
+### `src/search/index.ts` - Search Index
+
+**Purpose**: Low-level indexing and retrieval
+
+**Features**:
+- Inverted index construction
+- TF-IDF scoring
+- Multi-field indexing (title, content, tags)
+
+---
+
+### `src/search/tokenizer.ts` - Tokenizer
+
+**Purpose**: Text processing for search
+
+**Features**:
+- Word tokenization
+- Stemming
+- Stop word removal
+- Case normalization
+
+---
+
+## Batch Processing Components
+
+### `src/batch/processor.ts` - Batch Processor
+
+**Purpose**: Asynchronous batch job execution and management
+
+**Job Types**:
+1. **Export**: Batch export multiple sessions
+2. **Import**: Batch import from files
+3. **Analyze**: Batch session analysis
+4. **Validate**: Batch session validation
+
+**Key Methods**:
+```typescript
+createJob(type, params): BatchJob
+submitJob(params): Promise<string>
+getJob(jobId): BatchJob | undefined
+getAllJobs(): BatchJob[]
+cancelJob(jobId): boolean
+```
+
+**Configuration**:
+- `maxConcurrentJobs`: Parallel execution limit (default: 3)
+- `maxBatchSize`: Items per batch (default: 100)
+- `retryFailedItems`: Enable retries (default: true)
+- `maxRetries`: Retry attempts (default: 3)
+
+**Queue Management**:
+- FIFO queue processing
+- Automatic job start when capacity available
+- Job status tracking (pending, running, completed, failed, cancelled)
+
+**Testing**: Comprehensive unit tests in `tests/unit/batch-processor.test.ts` (40+ cases)
+
+---
+
+## Backup & Recovery Components
+
+### `src/backup/backup-manager.ts` - Backup Manager
+
+**Purpose**: Backup creation and restoration orchestration
+
+**Key Methods**:
+```typescript
+registerProvider(provider, options): void
+create(data, config, providerOptions): Promise<BackupRecord>
+restore(options): Promise<RestoreResult>
+validate(backupId, validationType): Promise<BackupValidation>
+```
+
+**Backup Types**:
+- **Full**: Complete snapshot
+- **Incremental**: Changes since last backup
+- **Differential**: Changes since last full backup
+
+**Compression**:
+- **gzip**: Standard compression (good balance)
+- **brotli**: Better compression (slower)
+- **none**: No compression (fastest)
+
+**Providers**:
+1. **Local**: File system storage
+2. **S3**: AWS S3 buckets
+3. **GCS**: Google Cloud Storage
+4. **Azure**: Azure Blob Storage
+
+**Security**:
+- SHA256 checksums for integrity
+- Optional encryption
+- Provider-specific authentication
+
+**Testing**: Comprehensive unit tests in `tests/unit/backup-manager.test.ts` (35+ cases)
+
+---
+
+### `src/backup/providers/` - Storage Providers
+
+Each provider implements the `BackupProvider` interface:
+```typescript
+interface BackupProvider {
+  save(backupId: string, data: Buffer, manifest: BackupManifest): Promise<string>
+  load(backupId: string): Promise<{ data: Buffer; manifest: BackupManifest }>
+  delete(backupId: string): Promise<void>
+  list(): Promise<BackupMetadata[]>
+  exists(backupId: string): Promise<boolean>
+}
+```
+
+---
+
+## Validation & Security Components
+
+### `src/validation/schemas.ts` - Input Validation
+
+**Purpose**: Type-safe input validation using Zod
+
+**Schemas**:
+- AddThoughtSchema
+- CreateSessionSchema
+- SwitchModeSchema
+- ExportSessionSchema
+- GetRecommendationsSchema
+
+**Features**:
+- UUID v4 validation
+- String length limits
+- Enum validation
+- Custom error messages
+
+---
+
+### `src/utils/sanitization.ts` - Data Sanitization
+
+**Purpose**: Security-focused input sanitization
+
+**Functions**:
+- `sanitizeFilename()`: Remove path traversal attempts
+- `validatePath()`: Ensure path is within allowed directory
+- `validateSessionId()`: UUID v4 validation
+- `sanitizeForLogging()`: PII redaction (15 field types)
+
+---
+
+## Taxonomy System Components
+
+### `src/taxonomy/reasoning-types.ts` - Reasoning Type Definitions
+
+**Purpose**: 30+ reasoning type definitions organized hierarchically
+
+**Categories**:
+- Logical Reasoning
+- Scientific Reasoning
+- Creative Reasoning
+- Practical Reasoning
+- Exploratory Reasoning
+
+### `src/taxonomy/navigator.ts` - Taxonomy Navigator
+
+**Purpose**: Navigate reasoning type hierarchy
+
+**Features**:
+- Get reasoning type metadata
+- Find related types
+- Traverse hierarchy
+- Type recommendations
+
+### `src/taxonomy/suggestion-engine.ts` - Suggestion Engine
+
+**Purpose**: Intelligent mode recommendations based on problem characteristics
+
+**Input**: Problem characteristics (uncertainty, complexity, domain, etc.)
+**Output**: Ranked mode recommendations with rationale
+
+**Features**:
+- Quality metrics (rigor, creativity, practicality)
+- Cognitive load estimation
+- Prerequisite knowledge analysis
+- Common pitfalls identification
+
+---
+
+## Visualization Components
+
+### `src/visualization/mermaid.ts` - Mermaid Generator
+
+**Purpose**: Generate Mermaid diagrams from thinking sessions
+
+**Diagram Types**:
+- Flowcharts (thought flow)
+- Sequence diagrams (Shannon stages)
+- Mind maps (knowledge structures)
+- Gantt charts (temporal reasoning)
+
+### `src/visualization/interactive.ts` - Interactive Features
+
+**Purpose**: Add interactivity to visualizations
+
+**Features**:
+- CSS animations (fadeIn, slideIn, zoomIn, etc.)
+- Event handlers
+- Dynamic updates
+
+---
+
+## Utility Components
+
+### `src/utils/errors.ts` - Error Definitions
+
+Custom error types:
+- `SessionNotFoundError`
+- `InvalidThoughtError`
+- `ValidationError`
+
+### `src/utils/logger.ts` - Logger
+
+**Purpose**: Structured logging with levels
+
+**Levels**: error, warn, info, debug
+
+**Features**:
+- Timestamp tracking
+- Level filtering
+- PII sanitization
+
+**Interface**: Implements `ILogger` for dependency injection
+
+---
+
+## Type System Architecture
+
+### Base Types (`src/types/core.ts`)
+
+**BaseThought**: Common fields for all thoughts
+```typescript
+interface BaseThought {
+  id: string;
+  sessionId: string;
+  mode: ThinkingMode;
+  thoughtNumber: number;
+  totalThoughts: number;
+  content: string;
+  timestamp: Date;
+  nextThoughtNeeded: boolean;
+  isRevision?: boolean;
+  revisesThought?: string;
+}
+```
+
+**ThinkingSession**: Session state container
+```typescript
+interface ThinkingSession {
+  id: string;
+  title: string;
+  mode: ThinkingMode;
+  thoughts: Thought[];
+  createdAt: Date;
+  updatedAt: Date;
+  isComplete: boolean;
+  metrics: SessionMetrics;
+  config: SessionConfig;
+  // ... additional fields
+}
+```
+
+### Mode-Specific Types (`src/types/modes/*.ts`)
+
+Each mode extends BaseThought with mode-specific fields:
+
+**Example - ShannonThought**:
+```typescript
+interface ShannonThought extends BaseThought {
+  mode: ThinkingMode.SHANNON;
+  thoughtType: ExtendedThoughtType;
+  stage: ShannonStage;
+  uncertainty?: number;
+  dependencies?: string[];
+  assumptions?: string[];
+}
+```
+
+**Example - MathematicsThought**:
+```typescript
+interface MathematicsThought extends BaseThought {
+  mode: ThinkingMode.MATHEMATICS;
+  thoughtType: ExtendedThoughtType;
+  mathematicalModel?: MathematicalModel;
+  proofStrategy?: ProofStrategy;
+}
+```
+
+### Discriminated Unions
+
+**Thought Union**:
+```typescript
+type Thought =
+  | SequentialThought
+  | ShannonThought
+  | MathematicsThought
+  | PhysicsThought
+  | ... (18 total)
+```
+
+Enables type-safe pattern matching and mode-specific handling.
+
+---
+
+## Component Interactions
+
+### Session Creation Flow
+
+```
+Client Request
+    ↓
+index.ts: handleCreateSession()
+    ↓
+SessionManager.createSession()
+    ↓
+SessionMetricsCalculator.initializeMetrics()
+    ↓
+Repository.save()
+    ↓
+Return ThinkingSession
+```
+
+### Thought Addition Flow
+
+```
+Client Request
+    ↓
+index.ts: handleAddThought()
+    ↓
+ThoughtFactory.createThought()
+    ↓
+SessionManager.addThought()
+    ↓
+SessionMetricsCalculator.updateMetrics()
+    ↓
+Repository.save()
+    ↓
+SearchEngine.updateSession()
+    ↓
+Return updated ThinkingSession
+```
+
+### Export Flow
+
+```
+Client Request
+    ↓
+index.ts: handleExport()
+    ↓
+SessionManager.getSession()
+    ↓
+ExportService.exportSession()
+    ↓
+VisualExporter (if visual format)
+    ↓
+Return formatted output
+```
+
+### Mode Switching Flow
+
+```
+Client Request
+    ↓
+index.ts: handleSwitchMode()
+    ↓
+ModeRouter.switchMode()
+    ↓
+SessionManager.switchMode()
+    ↓
+Update session.mode
+    ↓
+Update config.modeConfig
+    ↓
+Repository.save()
+    ↓
+Return updated session
+```
+
+### Batch Processing Flow
+
+```
+Client Request
+    ↓
+BatchProcessor.submitJob()
+    ↓
+BatchProcessor.createJob()
+    ↓
+Queue.push(job)
+    ↓
+BatchProcessor.processQueue()
+    ↓
+BatchProcessor.executeJob()
+    ↓
+Execute operation (export/import/analyze/validate)
+    ↓
+Update progress
+    ↓
+Call onProgress callback
+    ↓
+Mark job complete
+```
+
+### Backup Flow
+
+```
+Client Request
+    ↓
+BackupManager.create()
+    ↓
+Serialize data → JSON
+    ↓
+Compress (gzip/brotli)
+    ↓
+Encrypt (optional)
+    ↓
+Calculate checksum (SHA256)
+    ↓
+Provider.save()
+    ↓
+Return BackupRecord
+```
+
+---
+
+## Component Dependencies
+
+### Dependency Graph
+
+```
+index.ts
+├── ThoughtFactory
+├── ExportService
+│   └── VisualExporter
+├── ModeRouter
+│   ├── SessionManager
+│   │   ├── SessionMetricsCalculator
+│   │   └── Repository
+│   └── ModeRecommender
+└── SessionManager
+
+BatchProcessor (standalone)
+
+BackupManager
+└── BackupProviders
+    ├── LocalBackupProvider
+    ├── S3BackupProvider
+    ├── GCSBackupProvider
+    └── AzureBackupProvider
+
+SearchEngine
+├── SearchIndex
+└── Tokenizer
+
+TaxonomySystem
+├── TaxonomyNavigator
+├── SuggestionEngine
+├── AdaptiveModeSelector
+└── MultiModalAnalyzer
+```
+
+### Circular Dependencies
+
+**None** - Architecture maintains unidirectional dependencies
+
+**Design Principle**: Services depend on managers, managers depend on storage, no upward dependencies.
+
+---
+
+## Extension Points
+
+### Adding a New Thinking Mode
+
+1. **Define Type** in `src/types/modes/new-mode.ts`:
+   ```typescript
+   export interface NewModeThought extends BaseThought {
+     mode: ThinkingMode.NEW_MODE;
+     // mode-specific fields
+   }
+   ```
+
+2. **Update Enum** in `src/types/core.ts`:
+   ```typescript
+   export enum ThinkingMode {
+     // ...
+     NEW_MODE = 'new_mode',
+   }
+   ```
+
+3. **Add to Union** in `src/types/core.ts`:
+   ```typescript
+   export type Thought = ... | NewModeThought;
+   ```
+
+4. **Implement in Factory** (`src/services/ThoughtFactory.ts`):
+   ```typescript
+   case 'new_mode':
+     return { ...baseThought, mode: ThinkingMode.NEW_MODE, ... };
+   ```
+
+5. **Add Tests** in `tests/unit/new-mode.test.ts`
+
+### Adding a New Export Format
+
+1. **Implement Method** in `src/services/ExportService.ts`:
+   ```typescript
+   private exportToNewFormat(session: ThinkingSession): string {
+     // format implementation
+   }
+   ```
+
+2. **Add to Switch** in `exportSession()`:
+   ```typescript
+   case 'new_format':
+     return this.exportToNewFormat(session);
+   ```
+
+3. **Add Tests**
+
+### Adding a New Backup Provider
+
+1. **Implement Interface** in `src/backup/providers/new-provider.ts`:
+   ```typescript
+   export class NewBackupProvider implements BackupProvider {
+     async save(backupId, data, manifest): Promise<string> { }
+     async load(backupId): Promise<{ data: Buffer; manifest: BackupManifest }> { }
+     // ... other methods
+   }
+   ```
+
+2. **Register in BackupManager** (`src/backup/backup-manager.ts`):
+   ```typescript
+   case 'new_provider':
+     this.providers.set(provider, new NewBackupProvider(options));
+   ```
+
+---
+
+## Performance Optimization
+
+### Session Management
+- **LRU Cache**: Keep hot sessions in memory
+- **Lazy Loading**: Load from storage only when needed
+- **Incremental Metrics**: O(1) updates instead of O(n) recalculation
+
+### Search
+- **Inverted Index**: O(log n) search vs O(n) scan
+- **Pagination**: Limit memory usage for large result sets
+- **Facet Caching**: Pre-compute aggregations
+
+### Batch Processing
+- **Concurrency Control**: Prevent resource exhaustion
+- **Progress Streaming**: Real-time feedback
+- **Retry Logic**: Handle transient failures
+
+---
+
+## Testing Strategy
+
+### Unit Tests
+- **Service Layer**: ThoughtFactory, ExportService, ModeRouter
+- **Session Management**: SessionManager, SessionMetricsCalculator
+- **Search**: SearchEngine, SearchIndex, Tokenizer
+- **Batch**: BatchProcessor
+- **Backup**: BackupManager
+- **Mode-Specific**: One test file per thinking mode
+
+### Integration Tests
+- **MCP Protocol**: Full request/response cycles
+- **Session Workflows**: End-to-end session operations
+- **Multi-Session**: Concurrent session handling
+- **Error Handling**: Error propagation and recovery
+- **Production Features**: Real-world usage scenarios
+
+### Coverage Targets
+- **Critical Paths**: 80%+ coverage ✅
+- **Overall**: 93.5% (608/650 tests passing)
+- **Type Safety**: 100% (0 type errors)
+
+---
+
+*Last Updated*: 2025-11-25
+*Component Version*: 3.4.5
