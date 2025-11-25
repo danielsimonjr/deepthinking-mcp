@@ -396,21 +396,22 @@ export class TaxonomyNavigator {
         return { steps: path, totalDistance };
       }
 
-      const current = this.index.get(id)!;
+      const current = this.index.get(id);
+      if (!current) continue; // Skip if type not found
 
       // Explore neighbors
       const neighbors: Array<{ id: string; relationship: NavigationStep['relationship']; distance: number }> = [];
 
       // Prerequisites
       for (const prereqId of current.prerequisites) {
-        if (!visited.has(prereqId)) {
+        if (!visited.has(prereqId) && this.index.has(prereqId)) {
           neighbors.push({ id: prereqId, relationship: 'prerequisite', distance: 1 });
         }
       }
 
       // Related types
       for (const relatedId of current.relatedTypes) {
-        if (!visited.has(relatedId)) {
+        if (!visited.has(relatedId) && this.index.has(relatedId)) {
           neighbors.push({ id: relatedId, relationship: 'related', distance: 2 });
         }
       }
@@ -426,8 +427,10 @@ export class TaxonomyNavigator {
       for (const neighbor of neighbors) {
         if (visited.has(neighbor.id)) continue;
 
+        const neighborType = this.index.get(neighbor.id);
+        if (!neighborType) continue; // Skip if type not found
+
         visited.add(neighbor.id);
-        const neighborType = this.index.get(neighbor.id)!;
 
         const step: NavigationStep = {
           from: current,

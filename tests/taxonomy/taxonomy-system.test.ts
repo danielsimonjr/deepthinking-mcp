@@ -106,7 +106,7 @@ describe('Reasoning Taxonomy', () => {
     });
 
     it('should query by keyword', () => {
-      const results = navigator.query({ keywords: ['proof'] });
+      const results = navigator.query({ keywords: ['contradiction'] });
       expect(results.length).toBeGreaterThan(0);
     });
 
