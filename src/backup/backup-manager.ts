@@ -22,9 +22,6 @@ import type {
   CompressionFormat,
 } from './types.js';
 import { LocalBackupProvider } from './providers/local.js';
-import { S3BackupProvider } from './providers/s3.js';
-import { GCSBackupProvider } from './providers/gcs.js';
-import { AzureBackupProvider } from './providers/azure.js';
 import { ILogger } from '../interfaces/ILogger.js';
 import { createLogger, LogLevel } from '../utils/logger.js';
 
@@ -60,17 +57,8 @@ export class BackupManager {
       case 'local':
         this.providers.set(provider, new LocalBackupProvider(options as any));
         break;
-      case 's3':
-        this.providers.set(provider, new S3BackupProvider(options as any));
-        break;
-      case 'gcs':
-        this.providers.set(provider, new GCSBackupProvider(options as any));
-        break;
-      case 'azure':
-        this.providers.set(provider, new AzureBackupProvider(options as any));
-        break;
       default:
-        throw new Error(`Unknown provider: ${provider}`);
+        throw new Error(`Unknown provider: ${provider}. Only 'local' provider is supported.`);
     }
   }
 
