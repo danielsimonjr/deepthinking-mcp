@@ -14,11 +14,43 @@ import type {
 
 /**
  * Default processor options
+ *
+ * These defaults are optimized for typical multi-core systems while preventing
+ * resource exhaustion. Adjust based on your system specifications.
  */
 const DEFAULT_OPTIONS: BatchProcessorOptions = {
+  /**
+   * Maximum concurrent jobs to run in parallel
+   * Default: 3 - Based on typical CPU core count (4-8 cores)
+   * - Leaves resources for main thread and other processes
+   * - Prevents thread pool exhaustion
+   * - Adjust higher for dedicated batch processing servers
+   */
   maxConcurrentJobs: 3,
+
+  /**
+   * Maximum items per batch
+   * Default: 100 - Balances memory usage vs. throughput
+   * - Each session ~10-50KB in memory
+   * - 100 items = ~1-5MB per batch
+   * - Prevents excessive memory allocation
+   * - Increase for systems with >16GB RAM
+   */
   maxBatchSize: 100,
+
+  /**
+   * Whether to retry failed items
+   * Default: true - Improves reliability for transient failures
+   */
   retryFailedItems: true,
+
+  /**
+   * Maximum retry attempts per item
+   * Default: 3 - Exponential backoff (1s, 2s, 4s total ~7s)
+   * - Sufficient for network hiccups or temporary locks
+   * - Prevents infinite retry loops
+   * - Total retry time: ~7 seconds per item
+   */
   maxRetries: 3,
 };
 
