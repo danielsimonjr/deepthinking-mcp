@@ -4,9 +4,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
 
-A comprehensive Model Context Protocol (MCP) server featuring **18 advanced reasoning modes** with intelligent mode recommendation, visual export capabilities, high-performance validation caching, and production-ready features for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **18 advanced reasoning modes** with intelligent mode recommendation, taxonomy-based classification, multi-cloud backup (S3/Azure/GCS), enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
 > 📋 **Latest Release**: v3.4.5 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
+>
+> 🎉 **New in v3.4.5**: Multi-cloud backup providers, taxonomy classifier (110+ types), enterprise security features, zero TypeScript suppressions!
 
 ## Table of Contents
 
@@ -24,10 +26,14 @@ A comprehensive Model Context Protocol (MCP) server featuring **18 advanced reas
 
 - **18 Specialized Reasoning Modes** - From sequential thinking to game theory and formal logic
 - **Intelligent Mode Recommendation** - Automatic mode selection based on problem characteristics
+- **Taxonomy Classifier** - 110+ reasoning types across 12 categories for intelligent task classification
+- **Multi-Cloud Backup** - AWS S3, Azure Blob Storage, and Google Cloud Storage support
 - **Visual Exports** - Generate Mermaid diagrams, DOT graphs, ASCII art, and LaTeX documents
 - **Production-Ready** - Search engine, templates, batch processing, caching, backup/restore
-- **High Performance** - LRU validation caching with 4-5x speedups
-- **Type-Safe** - 100% TypeScript with zero suppressions
+- **Enterprise Security** - Input validation (Zod), rate limiting, path sanitization, PII redaction
+- **High Performance** - LRU caching with auto-eviction, async I/O, 4-5x validation speedups
+- **Type-Safe** - 100% TypeScript with zero suppressions (down from 231 baseline)
+- **Repository Pattern** - Clean architecture with dependency injection
 - **Extensible** - Plugin architecture for custom reasoning modes
 - **MCP Compatible** - Full integration with Model Context Protocol
 
@@ -378,12 +384,47 @@ const status = await server.getJobStatus(jobId);
 
 ### Backup & Restore
 
-Automated backup with compression and cloud storage support.
+Automated backup with compression and multi-cloud storage support (local, S3, Azure, GCS).
 
 ```typescript
-const backupManager = new BackupManager({
+// Local backup
+const localBackup = new BackupManager({
   provider: 'local',
   config: { path: './backups' }
+});
+
+// AWS S3 backup
+const s3Backup = new BackupManager({
+  provider: 's3',
+  config: {
+    bucket: 'my-backups',
+    region: 'us-east-1',
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    storageClass: 'STANDARD_IA' // Options: STANDARD, STANDARD_IA, GLACIER
+  }
+});
+
+// Azure Blob Storage backup
+const azureBackup = new BackupManager({
+  provider: 'azure',
+  config: {
+    containerName: 'backups',
+    accountName: 'myaccount',
+    accountKey: process.env.AZURE_ACCOUNT_KEY,
+    tier: 'Cool' // Options: Hot, Cool, Archive
+  }
+});
+
+// Google Cloud Storage backup
+const gcsBackup = new BackupManager({
+  provider: 'gcs',
+  config: {
+    bucket: 'my-backups',
+    projectId: 'my-project',
+    keyFilename: './gcs-key.json',
+    storageClass: 'NEARLINE' // Options: STANDARD, NEARLINE, COLDLINE, ARCHIVE
+  }
 });
 
 const backupId = await backupManager.backup(session);
@@ -400,6 +441,66 @@ const comparison = await server.compareSessions(session1, session2);
 console.log(comparison.similarity); // 0-1 scale
 console.log(comparison.differences); // Detailed diff
 console.log(comparison.metrics); // Quantitative metrics
+```
+
+### Security & Validation
+
+Enterprise-grade security features with input validation, rate limiting, and PII protection.
+
+```typescript
+// Input validation with Zod schemas
+import { validateInput, AddThoughtSchema } from 'deepthinking-mcp/validation';
+
+const validated = validateInput(AddThoughtSchema, userInput);
+// Throws ValidationError if invalid
+
+// Rate limiting for API protection
+import { RateLimiter } from 'deepthinking-mcp/rate-limit';
+
+const limiter = new RateLimiter({
+  windowMs: 60000,        // 1 minute window
+  maxRequests: 100,       // 100 requests per window
+  keyPrefix: 'api:'
+});
+
+await limiter.checkLimit(userId);  // Throws RateLimitError if exceeded
+
+// Path sanitization prevents directory traversal
+import { sanitizeFilename, validatePath } from 'deepthinking-mcp/utils';
+
+const safeFilename = sanitizeFilename(userInput);  // Removes dangerous characters
+validatePath(targetPath, baseDir);  // Prevents path traversal attacks
+
+// Log sanitization for GDPR compliance
+import { sanitizeForLogging } from 'deepthinking-mcp/utils';
+
+logger.info('User action', sanitizeForLogging({
+  userId: user.id,
+  email: user.email,  // Will be redacted as [REDACTED]
+  action: 'create_session'
+}));
+```
+
+### Taxonomy Classifier
+
+Intelligent classification of reasoning tasks using 110+ reasoning types across 12 categories.
+
+```typescript
+import { TaxonomyClassifier } from 'deepthinking-mcp/taxonomy';
+
+const classifier = new TaxonomyClassifier();
+
+const result = classifier.classify(
+  'How can we prove that the sum of two even numbers is always even?'
+);
+
+console.log(result.primaryCategory);  // 'deductive'
+console.log(result.primaryType);      // 'Mathematical Proof'
+console.log(result.confidence);       // 0.95
+console.log(result.secondaryTypes);   // ['Formal Logic', 'Theorem Proving']
+
+// Use for automatic mode selection
+const mode = result.primaryType.mode;  // Suggests best reasoning mode
 ```
 
 ## API Documentation
@@ -493,12 +594,28 @@ Enterprise-ready features for production deployment.
 
 ```
 production/
-├── search/     # Full-text search engine
-├── templates/  # Session templates
-├── batch/      # Batch processing
-├── cache/      # High-performance caching
-├── backup/     # Backup & restore
-└── comparison/ # Session comparison
+├── search/        # Full-text search with facets & autocomplete
+├── templates/     # Session templates with usage tracking
+├── batch/         # Real batch processing (6 operations implemented)
+├── cache/         # LRU caching with auto-eviction
+├── backup/        # Multi-cloud backup (S3, Azure, GCS, Local)
+├── comparison/    # Session comparison & similarity analysis
+├── validation/    # Zod-based input validation (8 schemas)
+├── rate-limit/    # Sliding window rate limiter
+└── repositories/  # Repository pattern with FileSessionRepository
+```
+
+### Security Features
+
+Production-grade security and compliance.
+
+```
+security/
+├── validation/      # Input validation with Zod schemas
+├── sanitization/    # Path sanitization & traversal prevention
+├── rate-limiting/   # Per-key rate limiting with sliding windows
+├── log-redaction/   # PII redaction for GDPR compliance
+└── error-handling/  # Standardized error hierarchy with context
 ```
 
 ## Contributing
