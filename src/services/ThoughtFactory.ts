@@ -1,6 +1,7 @@
 /**
  * Thought Factory Service (v3.4.5)
  * Sprint 3 Task 3.3: Extract thought creation logic from index.ts
+ * Sprint 3 Task 3.2: Added dependency injection support
  *
  * Centralizes thought creation logic for all thinking modes.
  * Provides type-safe thought construction based on mode-specific requirements.
@@ -27,6 +28,8 @@ import {
 } from '../types/index.js';
 import { ThinkingToolInput } from '../tools/thinking.js';
 import { toExtendedThoughtType } from '../utils/type-guards.js';
+import { ILogger } from '../interfaces/ILogger.js';
+import { createLogger, LogLevel } from '../utils/logger.js';
 
 /**
  * Thought Factory - Creates mode-specific thought objects
@@ -42,6 +45,11 @@ import { toExtendedThoughtType } from '../utils/type-guards.js';
  * ```
  */
 export class ThoughtFactory {
+  private logger: ILogger;
+
+  constructor(logger?: ILogger) {
+    this.logger = logger || createLogger({ minLevel: LogLevel.INFO, enableConsole: true });
+  }
   /**
    * Create a thought object based on input and mode
    *
@@ -65,6 +73,14 @@ export class ThoughtFactory {
    * ```
    */
   createThought(input: ThinkingToolInput, sessionId: string): Thought {
+    this.logger.debug('Creating thought', {
+      sessionId,
+      mode: input.mode,
+      thoughtNumber: input.thoughtNumber,
+      totalThoughts: input.totalThoughts,
+      isRevision: input.isRevision,
+    });
+
     const baseThought = {
       id: randomUUID(),
       sessionId,

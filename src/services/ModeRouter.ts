@@ -1,6 +1,7 @@
 /**
  * Mode Router Service (v3.4.5)
  * Sprint 3 Task 3.3: Extract mode management logic from index.ts
+ * Sprint 3 Task 3.2: Added dependency injection support
  *
  * Handles thinking mode operations including mode switching and recommendations.
  * Provides intelligent mode selection based on problem characteristics.
@@ -15,6 +16,8 @@
 
 import { ThinkingMode, ModeRecommender, ProblemCharacteristics } from '../types/index.js';
 import { SessionManager } from '../session/index.js';
+import { ILogger } from '../interfaces/ILogger.js';
+import { createLogger, LogLevel } from '../utils/logger.js';
 
 /**
  * Mode recommendation result for formatting
@@ -60,20 +63,25 @@ export interface ModeCombinationRecommendation {
 export class ModeRouter {
   private sessionManager: SessionManager;
   private recommender: ModeRecommender;
+  private logger: ILogger;
 
   /**
    * Create a new ModeRouter
    *
    * @param sessionManager - Session manager instance for mode switching
+   * @param logger - Optional logger for dependency injection
    *
    * @example
    * ```typescript
    * const router = new ModeRouter(sessionManager);
+   * // Or with DI:
+   * const router = new ModeRouter(sessionManager, customLogger);
    * ```
    */
-  constructor(sessionManager: SessionManager) {
+  constructor(sessionManager: SessionManager, logger?: ILogger) {
     this.sessionManager = sessionManager;
     this.recommender = new ModeRecommender();
+    this.logger = logger || createLogger({ minLevel: LogLevel.INFO, enableConsole: true });
   }
 
   /**
@@ -103,7 +111,18 @@ export class ModeRouter {
     newMode: ThinkingMode,
     reason: string
   ) {
-    return await this.sessionManager.switchMode(sessionId, newMode, reason);
+    this.logger.info('Switching mode', {
+      sessionId,
+      newMode,
+      reason,
+    });
+    const session = await this.sessionManager.switchMode(sessionId, newMode, reason);
+    this.logger.debug('Mode switch completed', {
+      sessionId,
+      newMode,
+      thoughtCount: session.thoughts.length,
+    });
+    return session;
   }
 
   /**
@@ -123,7 +142,10 @@ export class ModeRouter {
    * ```
    */
   quickRecommend(problemType: string): ThinkingMode {
-    return this.recommender.quickRecommend(problemType);
+    this.logger.debug('Quick recommend requested', { problemType });
+    const mode = this.recommender.quickRecommend(problemType);
+    this.logger.debug('Quick recommend result', { problemType, recommendedMode: mode });
+    return mode;
   }
 
   /**
@@ -149,10 +171,22 @@ export class ModeRouter {
     characteristics: ProblemCharacteristics,
     includeCombinations: boolean = false
   ): string {
+    this.logger.debug('Getting mode recommendations', {
+      characteristics,
+      includeCombinations,
+    });
+
     const modeRecs = this.recommender.recommendModes(characteristics);
     const combinationRecs = includeCombinations
       ? this.recommender.recommendCombinations(characteristics)
       : [];
+
+    this.logger.debug('Recommendations generated', {
+      modeCount: modeRecs.length,
+      combinationCount: combinationRecs.length,
+      topMode: modeRecs[0]?.mode,
+      topScore: modeRecs[0]?.score,
+    });
 
     let response = '# Mode Recommendations\n\n';
 
