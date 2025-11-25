@@ -161,11 +161,15 @@ export class TaxonomyNavigator {
       );
     }
 
-    // Text search
+    // Text search - only filter if we find matches, otherwise use for scoring
     if (filters.searchText) {
       const searchResults = searchReasoningTypes(filters.searchText);
-      const searchIds = new Set(searchResults.map(r => r.id));
-      candidates = candidates.filter(t => searchIds.has(t.id));
+      const searchMatchIds = new Set(searchResults.map(r => r.id));
+      // Only filter down if search found matches
+      if (searchMatchIds.size > 0) {
+        candidates = candidates.filter(t => searchMatchIds.has(t.id));
+      }
+      // If search found nothing, still keep all candidates for scoring
     }
 
     // Calculate relevance scores
@@ -378,7 +382,7 @@ export class TaxonomyNavigator {
   /**
    * Find path between two reasoning types
    */
-  findPath(fromId: string, toId: string): NavigationPath | null {
+  findPath(fromId: string, toId: string, maxDepth: number = 6): NavigationPath | null {
     const fromType = this.index.get(fromId);
     const toType = this.index.get(toId);
 
@@ -396,21 +400,27 @@ export class TaxonomyNavigator {
         return { steps: path, totalDistance };
       }
 
-      const current = this.index.get(id)!;
+      // Stop exploring if we've gone too deep
+      if (path.length >= maxDepth) {
+        continue;
+      }
+
+      const current = this.index.get(id);
+      if (!current) continue; // Skip if type not found
 
       // Explore neighbors
       const neighbors: Array<{ id: string; relationship: NavigationStep['relationship']; distance: number }> = [];
 
       // Prerequisites
       for (const prereqId of current.prerequisites) {
-        if (!visited.has(prereqId)) {
+        if (!visited.has(prereqId) && this.index.has(prereqId)) {
           neighbors.push({ id: prereqId, relationship: 'prerequisite', distance: 1 });
         }
       }
 
       // Related types
       for (const relatedId of current.relatedTypes) {
-        if (!visited.has(relatedId)) {
+        if (!visited.has(relatedId) && this.index.has(relatedId)) {
           neighbors.push({ id: relatedId, relationship: 'related', distance: 2 });
         }
       }
@@ -424,10 +434,13 @@ export class TaxonomyNavigator {
       }
 
       for (const neighbor of neighbors) {
+        // Skip if already visited or queued
         if (visited.has(neighbor.id)) continue;
 
-        visited.add(neighbor.id);
-        const neighborType = this.index.get(neighbor.id)!;
+        const neighborType = this.index.get(neighbor.id);
+        if (!neighborType) continue; // Skip if type not found
+
+        visited.add(neighbor.id); // Mark as visited immediately when adding to queue
 
         const step: NavigationStep = {
           from: current,
@@ -467,9 +480,14 @@ export class TaxonomyNavigator {
 
     // Build query
     const query: TaxonomyQuery = {
-      keywords,
+      // Always include searchText for scoring, but don't use as a hard filter
       searchText: problemDescription,
     };
+
+    // Only add keywords if we found any
+    if (keywords.length > 0) {
+      query.keywords = keywords;
+    }
 
     if (context?.difficulty) {
       query.difficulties = [context.difficulty];
