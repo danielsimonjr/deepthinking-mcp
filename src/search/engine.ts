@@ -469,44 +469,4 @@ export class SearchEngine {
 
     return facets;
   }
-
-  /**
-   * Provide autocomplete suggestions based on indexed content
-   */
-  autocomplete(prefix: string): string[] {
-    const lowerPrefix = prefix.toLowerCase();
-    const suggestions = new Set<string>();
-
-    // Add matching titles
-    for (const session of this.sessions.values()) {
-      if (session.title && session.title.toLowerCase().includes(lowerPrefix)) {
-        suggestions.add(session.title);
-      }
-
-      // Add matching tags
-      if (session.tags) {
-        for (const tag of session.tags) {
-          if (tag.toLowerCase().includes(lowerPrefix)) {
-            suggestions.add(tag);
-          }
-        }
-      }
-
-      // Add matching thought content (limited to avoid performance issues)
-      for (const thought of session.thoughts.slice(0, 5)) {
-        const words = thought.content.toLowerCase().split(/\s+/);
-        for (const word of words) {
-          if (word.startsWith(lowerPrefix) && word.length > 2) {
-            suggestions.add(word);
-            if (suggestions.size >= 20) break;
-          }
-        }
-        if (suggestions.size >= 20) break;
-      }
-
-      if (suggestions.size >= 20) break;
-    }
-
-    return Array.from(suggestions).slice(0, 10);
-  }
 }
