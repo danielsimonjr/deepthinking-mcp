@@ -7,13 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.4.5] - 2025-11-25
 
-### 🚧 Sprint 3 In Progress: Architecture & Testing (2.5/6 Tasks - 42%)
+### 🚧 Sprint 3 In Progress: Architecture & Testing (3/6 Tasks - 50%)
 
 **Objective**: Improve architecture, add dependency injection, increase test coverage
 **Status**: IN PROGRESS ⚙️
 **TypeScript**: ✅ 0 errors, 0 warnings, 0 suppressions
 
-**Tasks Completed** (1/6):
+**Tasks Completed** (3/6):
 
 1. ✅ **Implement Repository Pattern** (a5c4f3d, 5f632de) - HIGH PRIORITY
    - Created ISessionRepository interface with domain-oriented methods
@@ -23,7 +23,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - Comprehensive JSDoc documentation with examples
    - Benefits: Testability, flexibility, domain abstraction, query methods
 
-**Tasks In Progress** (0.5/6):
+3. ✅ **Split God File (index.ts)** (a949dc7) - CRITICAL PRIORITY ✨
+   - **MAJOR REFACTORING**: Reduced index.ts from 796 lines to 311 lines (61% reduction)
+   - Created ThoughtFactory service (243 lines) - Centralized thought creation for 18 modes
+   - Created ExportService (360 lines) - Unified export logic for 6+ formats
+   - Created ModeRouter (195 lines) - Mode switching and intelligent recommendations
+   - **Benefits**: Separation of concerns, improved testability, better maintainability
+   - All TypeScript types validated (0 errors)
+
+4. ✅ **Refactor SessionManager God Class** (137066d) - CRITICAL PRIORITY ✨
+   - **MAJOR REFACTORING**: Extracted SessionMetricsCalculator from SessionManager
+   - SessionManager reduced from ~700 to 542 lines (23% reduction)
+   - Created SessionMetricsCalculator (241 lines) for metrics calculation logic
+   - Moved initializeMetrics() with O(1) initialization
+   - Moved updateMetrics() with incremental calculations (O(1) instead of O(n))
+   - Moved updateModeSpecificMetrics() for temporal/game theory/evidential modes
+   - Moved updateCacheStats() for LRU cache tracking
+   - **Benefits**: Separation of concerns, improved testability, focused responsibilities
+
+**Tasks In Progress** (0/6):
 
 2. 🚧 **Add Dependency Injection** (d2a8ba0, 1a4f56a) - HIGH PRIORITY ⚙️
    - Created ILogger interface for logger dependency injection
@@ -33,19 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - **Next Steps**: Refactor major classes (SessionManager, SearchEngine, etc.) to inject dependencies
    - **Status**: ~10% complete (1 week task - incremental progress)
 
-**Tasks Completed** (2/6):
-
-3. ✅ **Split God File (index.ts)** (a949dc7) - CRITICAL PRIORITY ✨
-   - **MAJOR REFACTORING**: Reduced index.ts from 796 lines to 311 lines (61% reduction)
-   - Created ThoughtFactory service (243 lines) - Centralized thought creation for 18 modes
-   - Created ExportService (360 lines) - Unified export logic for 6+ formats
-   - Created ModeRouter (195 lines) - Mode switching and intelligent recommendations
-   - **Benefits**: Separation of concerns, improved testability, better maintainability
-   - All TypeScript types validated (0 errors)
-
-**Remaining Tasks** (3.5/6):
+**Remaining Tasks** (3/6):
 - Task 3.2: Complete Dependency Injection refactoring (HIGH priority, very complex)
-- Task 3.4: Refactor SessionManager God Class (CRITICAL priority, very complex)
 - Task 3.5: Add Critical Path Tests (CRITICAL priority, very complex)
 - Task 3.6: Add Integration Test Suite (HIGH priority, very complex)
 
