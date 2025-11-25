@@ -378,7 +378,7 @@ export class TaxonomyNavigator {
   /**
    * Find path between two reasoning types
    */
-  findPath(fromId: string, toId: string): NavigationPath | null {
+  findPath(fromId: string, toId: string, maxDepth: number = 6): NavigationPath | null {
     const fromType = this.index.get(fromId);
     const toType = this.index.get(toId);
 
@@ -394,6 +394,11 @@ export class TaxonomyNavigator {
       if (id === toId) {
         const totalDistance = path.reduce((sum, step) => sum + step.distance, 0);
         return { steps: path, totalDistance };
+      }
+
+      // Stop exploring if we've gone too deep
+      if (path.length >= maxDepth) {
+        continue;
       }
 
       const current = this.index.get(id);
@@ -425,12 +430,13 @@ export class TaxonomyNavigator {
       }
 
       for (const neighbor of neighbors) {
+        // Skip if already visited or queued
         if (visited.has(neighbor.id)) continue;
 
         const neighborType = this.index.get(neighbor.id);
         if (!neighborType) continue; // Skip if type not found
 
-        visited.add(neighbor.id);
+        visited.add(neighbor.id); // Mark as visited immediately when adding to queue
 
         const step: NavigationStep = {
           from: current,
