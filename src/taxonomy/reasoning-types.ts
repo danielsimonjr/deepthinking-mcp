@@ -1248,7 +1248,8 @@ export function searchReasoningTypes(query: string): ReasoningType[] {
       t.name.toLowerCase().includes(lowerQuery) ||
       t.description.toLowerCase().includes(lowerQuery) ||
       t.aliases.some(a => a.toLowerCase().includes(lowerQuery)) ||
-      t.keywords.some(k => k.toLowerCase().includes(lowerQuery))
+      t.keywords.some(k => k.toLowerCase().includes(lowerQuery)) ||
+      t.applications.some(app => app.toLowerCase().includes(lowerQuery))
   );
 }
 
