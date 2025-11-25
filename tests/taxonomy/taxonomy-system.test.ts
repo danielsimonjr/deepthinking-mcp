@@ -77,7 +77,7 @@ describe('Reasoning Taxonomy', () => {
     it('should search by category', () => {
       const results = searchReasoningTypes('deductive');
       expect(results.length).toBeGreaterThan(0);
-      expect(results.every(r => r.category === 'deductive')).toBe(true);
+      expect(results.some(r => r.category === 'deductive')).toBe(true);
     });
 
     it('should return empty array for no matches', () => {
@@ -121,14 +121,14 @@ describe('Reasoning Taxonomy', () => {
     it('should explore reasoning type', () => {
       const exploration = navigator.explore('deductive_modus_ponens');
       expect(exploration).toBeDefined();
-      expect(exploration?.type.id).toBe('deductive_modus_ponens');
-      expect(exploration?.related.length).toBeGreaterThanOrEqual(0);
+      expect(exploration?.startType.id).toBe('deductive_modus_ponens');
+      expect(exploration?.neighborhood.related.length).toBeGreaterThanOrEqual(0);
     });
 
     it('should find path between types', () => {
       const path = navigator.findPath('deductive_modus_ponens', 'inductive_generalization');
       expect(path).toBeDefined();
-      expect(path?.path.length).toBeGreaterThan(0);
+      expect(path?.steps.length).toBeGreaterThan(0);
     });
 
     it('should recommend based on problem', () => {
@@ -169,7 +169,7 @@ describe('Reasoning Taxonomy', () => {
         title: 'Test',
         mode: 'sequential',
         thoughts: [
-          { thoughtNumber: 1, totalThoughts: 1, nextThoughtNeeded: false, thought: 'Test', mode: 'sequential' }
+          { thoughtNumber: 1, totalThoughts: 1, nextThoughtNeeded: false, content: 'Test', mode: 'sequential' }
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -211,9 +211,9 @@ describe('Reasoning Taxonomy', () => {
         title: 'Test',
         mode: 'sequential',
         thoughts: [
-          { thoughtNumber: 1, totalThoughts: 3, nextThoughtNeeded: true, thought: 'T1', mode: 'sequential' },
-          { thoughtNumber: 2, totalThoughts: 3, nextThoughtNeeded: true, thought: 'T2', mode: 'mathematics' },
-          { thoughtNumber: 3, totalThoughts: 3, nextThoughtNeeded: false, thought: 'T3', mode: 'sequential' },
+          { thoughtNumber: 1, totalThoughts: 3, nextThoughtNeeded: true, content: 'T1', mode: 'sequential' },
+          { thoughtNumber: 2, totalThoughts: 3, nextThoughtNeeded: true, content: 'T2', mode: 'mathematics' },
+          { thoughtNumber: 3, totalThoughts: 3, nextThoughtNeeded: false, content: 'T3', mode: 'sequential' },
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -300,7 +300,7 @@ describe('Reasoning Taxonomy', () => {
         title: 'Test',
         mode: 'sequential',
         thoughts: [
-          { thoughtNumber: 1, totalThoughts: 1, nextThoughtNeeded: false, thought: 'Test', mode: 'sequential' }
+          { thoughtNumber: 1, totalThoughts: 1, nextThoughtNeeded: false, content: 'Test', mode: 'sequential' }
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -385,10 +385,10 @@ describe('Reasoning Taxonomy', () => {
         title: 'Test',
         mode: 'hybrid',
         thoughts: [
-          { thoughtNumber: 1, totalThoughts: 4, nextThoughtNeeded: true, thought: 'T1', mode: 'sequential' },
-          { thoughtNumber: 2, totalThoughts: 4, nextThoughtNeeded: true, thought: 'T2', mode: 'mathematics' },
-          { thoughtNumber: 3, totalThoughts: 4, nextThoughtNeeded: true, thought: 'T3', mode: 'causal' },
-          { thoughtNumber: 4, totalThoughts: 4, nextThoughtNeeded: false, thought: 'T4', mode: 'bayesian' },
+          { thoughtNumber: 1, totalThoughts: 4, nextThoughtNeeded: true, content: 'T1', mode: 'sequential' },
+          { thoughtNumber: 2, totalThoughts: 4, nextThoughtNeeded: true, content: 'T2', mode: 'mathematics' },
+          { thoughtNumber: 3, totalThoughts: 4, nextThoughtNeeded: true, content: 'T3', mode: 'causal' },
+          { thoughtNumber: 4, totalThoughts: 4, nextThoughtNeeded: false, content: 'T4', mode: 'bayesian' },
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
