@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * DeepThinking MCP Server (v4.0.0)
+ * DeepThinking MCP Server (v4.1.0)
  * Sprint 5: 9 focused tools replacing monolithic deepthinking tool
+ * Sprint 9: Lazy service initialization for reduced startup time
  *
  * Tools:
  * - deepthinking_core: sequential, shannon, hybrid modes
@@ -36,9 +37,9 @@ const packageJson = JSON.parse(
 // Import new tool definitions and schemas
 import { toolList, toolSchemas, isValidTool, modeToToolMap } from './tools/definitions.js';
 import { thinkingTool } from './tools/thinking.js'; // Legacy tool for backward compatibility
-import { SessionManager } from './session/index.js';
+import type { SessionManager } from './session/index.js';
 import { ThinkingMode } from './types/index.js';
-import { ThoughtFactory, ExportService, ModeRouter } from './services/index.js';
+import type { ThoughtFactory, ExportService, ModeRouter } from './services/index.js';
 
 // Initialize server
 const server = new Server(
@@ -53,11 +54,47 @@ const server = new Server(
   }
 );
 
-// Initialize services
-const sessionManager = new SessionManager();
-const thoughtFactory = new ThoughtFactory();
-const exportService = new ExportService();
-const modeRouter = new ModeRouter(sessionManager);
+/**
+ * Lazy Service Initialization (Sprint 9.1)
+ * Services are loaded on first use to reduce startup time
+ */
+let _sessionManager: SessionManager | null = null;
+let _thoughtFactory: ThoughtFactory | null = null;
+let _exportService: ExportService | null = null;
+let _modeRouter: ModeRouter | null = null;
+
+async function getSessionManager(): Promise<SessionManager> {
+  if (!_sessionManager) {
+    const { SessionManager } = await import('./session/index.js');
+    _sessionManager = new SessionManager();
+  }
+  return _sessionManager;
+}
+
+async function getThoughtFactory(): Promise<ThoughtFactory> {
+  if (!_thoughtFactory) {
+    const { ThoughtFactory } = await import('./services/index.js');
+    _thoughtFactory = new ThoughtFactory();
+  }
+  return _thoughtFactory;
+}
+
+async function getExportService(): Promise<ExportService> {
+  if (!_exportService) {
+    const { ExportService } = await import('./services/index.js');
+    _exportService = new ExportService();
+  }
+  return _exportService;
+}
+
+async function getModeRouter(): Promise<ModeRouter> {
+  if (!_modeRouter) {
+    const { ModeRouter } = await import('./services/index.js');
+    const sessionManager = await getSessionManager();
+    _modeRouter = new ModeRouter(sessionManager);
+  }
+  return _modeRouter;
+}
 
 // Register tool list handler - now returns all 9 focused tools + legacy
 server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -146,6 +183,9 @@ function prependWarning(result: any, warning: string) {
  * Handle add_thought action for any thinking mode
  */
 async function handleAddThought(input: any, _toolName: string) {
+  const sessionManager = await getSessionManager();
+  const thoughtFactory = await getThoughtFactory();
+
   let sessionId = input.sessionId;
 
   // Determine mode from tool name or input
@@ -212,6 +252,7 @@ async function handleSummarize(input: any) {
     throw new Error('sessionId required for summarize action');
   }
 
+  const sessionManager = await getSessionManager();
   const summary = await sessionManager.generateSummary(input.sessionId);
 
   return {
@@ -231,6 +272,9 @@ async function handleExport(input: any) {
   if (!input.sessionId) {
     throw new Error('sessionId required for export action');
   }
+
+  const sessionManager = await getSessionManager();
+  const exportService = await getExportService();
 
   const session = await sessionManager.getSession(input.sessionId);
   if (!session) {
@@ -256,6 +300,7 @@ async function handleSwitchMode(input: any) {
     throw new Error('sessionId and newMode required for switch_mode action');
   }
 
+  const modeRouter = await getModeRouter();
   const session = await modeRouter.switchMode(
     input.sessionId,
     input.newMode as ThinkingMode,
@@ -280,6 +325,7 @@ async function handleGetSession(input: any) {
     throw new Error('sessionId required for get_session action');
   }
 
+  const sessionManager = await getSessionManager();
   const session = await sessionManager.getSession(input.sessionId);
   if (!session) {
     throw new Error(`Session ${input.sessionId} not found`);
@@ -312,6 +358,8 @@ async function handleGetSession(input: any) {
  * Handle recommend_mode action
  */
 async function handleRecommendMode(input: any) {
+  const modeRouter = await getModeRouter();
+
   // Quick recommendation based on problem type
   if (input.problemType && !input.problemCharacteristics) {
     const recommendedMode = modeRouter.quickRecommend(input.problemType);

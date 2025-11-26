@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.1.0] - 2025-11-26
 
-### 🚀 Token Optimization Enhancements (Sprints 5.5, 5.7, 7.5)
+### 🚀 Token Optimization Enhancements (Sprints 5.5, 5.7, 7.5, 9.1)
 
 #### Sprint 5.7: Remove Duplicate JSON Schema
 - **414 lines removed** from `thinking.ts` (1136 → 722 lines, 36% reduction)
@@ -28,12 +28,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `LevelEnum`, `ImpactEnum`, `ExportFormatEnum`
   - `TimeUnitEnum`, `TemporalConstraintEnum`, `TemporalRelationEnum`
   - `ProofTypeEnum`, `TransformationEnum`, `EventTypeEnum`
-- Updated base.ts and temporal.ts to use shared enums
+- Updated base.ts, temporal.ts, strategic.ts, probabilistic.ts to use shared enums
 - Type exports for TypeScript consumers
+
+#### Sprint 9.1: Lazy Service Initialization
+- Converted all services to lazy loading in `index.ts`:
+  - `SessionManager`, `ThoughtFactory`, `ExportService`, `ModeRouter`
+- Services instantiated on first use instead of startup
+- Dynamic imports for true lazy loading
+- Benefits: Reduced startup time, lower initial memory footprint
 
 ### 📊 Test Results
 - **763 tests passing** (747 original + 16 new lazy loader tests)
-- Build size: 188.60 KB (stable)
+- Build size: 207.35 KB
 
 ### 📖 Documentation
 - Added comprehensive REFACTORING_PLAN.md with Sprints 5-10

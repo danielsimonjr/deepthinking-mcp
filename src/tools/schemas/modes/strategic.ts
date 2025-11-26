@@ -1,14 +1,13 @@
 /**
- * Strategic Mode Schemas (v4.0.0)
+ * Strategic Mode Schemas (v4.1.0)
  * Sprint 5 Task 5.3: Game Theory, Optimization modes
+ * Sprint 7 Task 7.5: Use shared schemas
  */
 
 import { z } from 'zod';
 import { BaseThoughtSchema } from '../base.js';
+import { ConfidenceSchema } from '../shared.js';
 
-/**
- * Game theory player
- */
 const PlayerSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -17,16 +16,13 @@ const PlayerSchema = z.object({
   role: z.string().optional(),
 });
 
-/**
- * Strategy definition
- */
 const StrategySchema = z.object({
   id: z.string(),
   playerId: z.string(),
   name: z.string(),
   description: z.string(),
   isPure: z.boolean(),
-  probability: z.number().min(0).max(1).optional(),
+  probability: ConfidenceSchema.optional(),
 });
 
 /**
