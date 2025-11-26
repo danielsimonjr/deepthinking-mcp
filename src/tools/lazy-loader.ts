@@ -1,6 +1,11 @@
 /**
- * Lazy Schema Loader (v4.0.0)
+ * Lazy Schema Loader (v4.1.0)
  * Sprint 5 Task 5.5: Load schemas on-demand for reduced memory footprint
+ *
+ * Benefits:
+ * - Reduced startup time (schemas loaded only when needed)
+ * - Lower memory footprint (unused schemas never loaded)
+ * - Validation schemas cached after first use
  */
 
 import { z } from 'zod';
@@ -204,4 +209,43 @@ export function getSchemaStats(): {
     available: Object.keys(schemaLoaders).length,
     loadedNames: getLoadedTools(),
   };
+}
+
+/**
+ * Get all tool definitions (for MCP ListTools)
+ * Note: This loads all schemas - use sparingly
+ */
+export async function getAllToolDefinitions(): Promise<object[]> {
+  const toolNames = getAvailableTools();
+  const definitions = await Promise.all(
+    toolNames.map(async (name) => {
+      const { tool } = await getSchema(name);
+      return tool;
+    })
+  );
+  return definitions;
+}
+
+/**
+ * Validate input against a tool's schema
+ * Lazy loads the schema if not already loaded
+ */
+export async function validateInput(
+  toolName: string,
+  input: unknown
+): Promise<{ success: boolean; data?: unknown; error?: z.ZodError }> {
+  const { schema } = await getSchema(toolName);
+  const result = schema.safeParse(input);
+
+  if (result.success) {
+    return { success: true, data: result.data };
+  }
+  return { success: false, error: result.error };
+}
+
+/**
+ * Check if a tool exists
+ */
+export function isValidTool(toolName: string): boolean {
+  return toolName in schemaLoaders;
 }
