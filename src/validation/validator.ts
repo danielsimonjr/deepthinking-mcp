@@ -1,8 +1,9 @@
 /**
- * Validation engine for DeepThinking MCP
+ * Validation engine for DeepThinking MCP (v4.3.0)
  * Validates thoughts based on mode and provides feedback
  *
  * Refactored in v3.0.0 to use modular validator architecture
+ * Sprint 9.3: Updated for async lazy-loaded validators
  */
 
 import { Thought } from '../types/core.js';
@@ -64,8 +65,8 @@ export class ThoughtValidator {
   private async performValidation(thought: Thought, context: ValidationContext = {}): Promise<ValidationResult> {
     const issues: ValidationIssue[] = [];
 
-    // Get validator for this mode
-    const validator = getValidatorForMode(thought.mode);
+    // Get validator for this mode (async lazy loading)
+    const validator = await getValidatorForMode(thought.mode);
 
     if (validator) {
       // Use mode-specific validator

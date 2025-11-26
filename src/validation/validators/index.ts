@@ -26,10 +26,12 @@ export { OptimizationValidator } from './modes/optimization.js';
 export { StochasticValidator } from './modes/stochastic.js';
 export { RecursiveValidator } from './modes/recursive.js';
 
-// Registry and factory
+// Registry and factory (Sprint 9.3: lazy loading)
 export {
   validatorRegistry,
   getValidatorForMode,
+  getValidatorForModeSync,
   hasValidatorForMode,
   getSupportedModes,
+  preloadValidators,
 } from './registry.js';
