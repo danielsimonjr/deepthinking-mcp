@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.0] - 2025-11-26
+
+### 🚀 Visual Export Modularization (Sprint 8.1)
+
+#### Sprint 8.1: Split visual.ts into Mode-Specific Exporters
+- **2546-line monolithic file split into 17 modular files**
+- Created `src/export/visual/` directory with:
+  - `types.ts` - Shared types (VisualFormat, VisualExportOptions)
+  - `utils.ts` - Shared utilities (sanitizeId)
+  - 15 mode-specific exporters (~100-150 lines each):
+    - `causal.ts`, `temporal.ts`, `game-theory.ts`, `bayesian.ts`
+    - `sequential.ts`, `shannon.ts`, `abductive.ts`, `counterfactual.ts`
+    - `analogical.ts`, `evidential.ts`, `first-principles.ts`
+    - `systems-thinking.ts`, `scientific-method.ts`, `optimization.ts`, `formal-logic.ts`
+  - `index.ts` - Barrel export with unified VisualExporter class
+
+#### Benefits
+- **Lazy loading**: Only load exporters when specific mode is needed
+- **Maintainability**: Smaller, focused files easier to modify
+- **Tree-shaking**: Unused exporters eliminated during bundling
+- **Backward compatibility**: Unified VisualExporter class preserved
+
+### 📊 Test Results
+- **763 tests passing**
+- All existing imports continue to work
+
+---
+
 ## [4.2.0] - 2025-11-26
 
 ### 🚀 Schema Consolidation & Tree-Shaking (Sprints 7, 9.4)
