@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] - 2025-11-26
+
+### 🚀 Schema Consolidation & Tree-Shaking (Sprints 7, 9.4)
+
+#### Sprint 7: Complete Schema Consolidation
+- Updated all 8 mode schemas to use shared enums from `shared.ts`:
+  - `core.ts`: Uses `ShannonStageEnum` (33→17 lines)
+  - `mathematics.ts`: Uses `ProofTypeEnum`, `TransformationEnum` (63→46 lines)
+  - `causal.ts`, `analytical.ts`, `scientific.ts`: Cleaned up (removed redundant comments)
+- Added `ShannonStageEnum` to shared.ts
+- Total: ~50 lines removed from mode schemas
+
+#### Sprint 9.4: Tree-Shaking Configuration
+- Added `"sideEffects": false` to package.json
+- Enables bundler tree-shaking for consumers
+- Allows unused exports to be eliminated during bundling
+
+### 📊 Test Results
+- **763 tests passing**
+- Build size: 206.90 KB (reduced from 207.35 KB)
+
+---
+
 ## [4.1.0] - 2025-11-26
 
 ### 🚀 Token Optimization Enhancements (Sprints 5.5, 5.7, 7.5, 9.1)

@@ -1,61 +1,44 @@
 /**
- * Mathematics Mode Schemas (v4.0.0)
+ * Mathematics Mode Schemas (v4.1.0)
  * Sprint 5 Task 5.3: Mathematics, Physics modes
+ * Sprint 7 Task 7.5: Use shared enums
  */
 
 import { z } from 'zod';
 import { BaseThoughtSchema } from '../base.js';
+import { ProofTypeEnum, TransformationEnum } from '../shared.js';
 
-/**
- * Proof strategy types
- */
 const ProofStrategySchema = z.object({
-  type: z.enum(['direct', 'contradiction', 'induction', 'construction', 'contrapositive']),
+  type: ProofTypeEnum,
   steps: z.array(z.string()),
 });
 
-/**
- * Mathematical model representation
- */
 const MathematicalModelSchema = z.object({
   latex: z.string(),
   symbolic: z.string(),
   ascii: z.string().optional(),
 });
 
-/**
- * Tensor properties for physics mode
- */
 const TensorPropertiesSchema = z.object({
   rank: z.tuple([z.number(), z.number()]),
   components: z.string(),
   latex: z.string(),
   symmetries: z.array(z.string()),
   invariants: z.array(z.string()),
-  transformation: z.enum(['covariant', 'contravariant', 'mixed']),
+  transformation: TransformationEnum,
 });
 
-/**
- * Physical interpretation
- */
 const PhysicalInterpretationSchema = z.object({
   quantity: z.string(),
   units: z.string(),
   conservationLaws: z.array(z.string()),
 });
 
-/**
- * Mathematics and Physics modes schema
- */
 export const MathSchema = BaseThoughtSchema.extend({
   mode: z.enum(['mathematics', 'physics']),
-
-  // Mathematics-specific
   thoughtType: z.string().optional(),
   proofStrategy: ProofStrategySchema.optional(),
   mathematicalModel: MathematicalModelSchema.optional(),
-
-  // Physics-specific
   tensorProperties: TensorPropertiesSchema.optional(),
   physicalInterpretation: PhysicalInterpretationSchema.optional(),
 });

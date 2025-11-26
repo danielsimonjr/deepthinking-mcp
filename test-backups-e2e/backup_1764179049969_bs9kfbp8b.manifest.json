@@ -1,0 +1,24 @@
+{
+  "version": "3.4.0",
+  "backupId": "backup_1764179049969_bs9kfbp8b",
+  "createdAt": "2025-11-26T17:44:09.969Z",
+  "type": "full",
+  "compression": "none",
+  "encrypted": false,
+  "checksum": "84dfe735939f9047805928d00f6aa6bf4630ac3b310c3190996a267fed0f45ea",
+  "sessions": [
+    {
+      "id": "session-2",
+      "mode": "mathematics",
+      "thoughtCount": 5,
+      "createdAt": "2025-11-26T17:44:09.963Z",
+      "size": 1877
+    }
+  ],
+  "statistics": {
+    "totalSessions": 1,
+    "totalThoughts": 5,
+    "totalSize": 1879,
+    "compressedSize": 1879
+  }
+}
