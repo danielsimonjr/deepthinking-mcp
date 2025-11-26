@@ -477,9 +477,10 @@ describe('SearchEngine', () => {
 
     it('should sort by title', () => {
       const results = searchEngine.search({ sort: 'title' });
-      expect(results.sessions[0].title.charAt(0)).toBeLessThanOrEqual(
-        results.sessions[1].title.charAt(0)
-      );
+      // Compare strings lexicographically
+      const title0 = results.sessions[0].title || '';
+      const title1 = results.sessions[1].title || '';
+      expect(title0.localeCompare(title1)).toBeLessThanOrEqual(0);
     });
 
     it('should default to relevance sorting with text query', () => {

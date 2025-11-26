@@ -1,10 +1,11 @@
 /**
- * Search Engine (v3.4.0)
+ * Search Engine (v3.5.0)
  * Phase 4 Task 9.1: Main search engine with query execution
  * Sprint 3 Task 3.2: Added dependency injection support
+ * Sprint 5: Added convenience aliases for createdAfter/createdBefore, limit/offset, sort, includeFacets
  */
 
-import type { ThinkingSession } from '../types/index.js';
+import type { ThinkingSession, ThinkingMode } from '../types/index.js';
 import type {
   SearchQuery,
   SearchResults,
@@ -17,6 +18,20 @@ import { SearchIndex } from './index.js';
 import { Tokenizer } from './tokenizer.js';
 import { ILogger } from '../interfaces/ILogger.js';
 import { createLogger, LogLevel } from '../utils/logger.js';
+
+/**
+ * Extended search query with convenience aliases
+ */
+interface ExtendedSearchQuery extends SearchQuery {
+  // Aliases for easier use
+  query?: string;           // Alias for text
+  mode?: ThinkingMode;      // Alias for single mode
+  createdAfter?: Date;      // Alias for dateRange.from
+  createdBefore?: Date;     // Alias for dateRange.to
+  limit?: number;           // Alias for pagination.pageSize
+  offset?: number;          // Alias for pagination offset
+  includeFacets?: boolean;  // Whether to include facets
+}
 
 /**
  * Search engine for session querying
@@ -63,15 +78,33 @@ export class SearchEngine {
   /**
    * Execute a search query
    */
-  search(query: SearchQuery & { query?: string; mode?: string }): SearchResults {
+  search(query: ExtendedSearchQuery): SearchResults & { hasMore?: boolean; offset?: number } {
     const startTime = Date.now();
 
-    // Handle aliases: query -> text, mode -> modes
+    // Handle aliases: query -> text, mode -> modes, createdAfter/createdBefore -> dateRange
+    const extQuery = query as ExtendedSearchQuery;
     const normalizedQuery: SearchQuery = {
       ...query,
-      text: (query as any).query || query.text,
-      modes: (query as any).mode ? [(query as any).mode] : query.modes,
+      text: extQuery.query || query.text,
+      modes: extQuery.mode ? [extQuery.mode] : query.modes,
     };
+
+    // Handle date range aliases
+    if (extQuery.createdAfter || extQuery.createdBefore) {
+      normalizedQuery.dateRange = {
+        from: extQuery.createdAfter,
+        to: extQuery.createdBefore,
+      };
+    }
+
+    // Handle sort alias (string -> SortOptions)
+    if (typeof (query as any).sort === 'string') {
+      const sortStr = (query as any).sort as string;
+      const field = sortStr === 'date' ? 'createdAt' : (sortStr as SortField);
+      // Use ascending order for title, descending for date/relevance
+      const order = field === 'title' ? 'asc' : 'desc';
+      normalizedQuery.sort = { field, order };
+    }
 
     // Start with all sessions
     let resultIds = new Set<string>(this.sessions.keys());
@@ -158,19 +191,20 @@ export class SearchEngine {
     // Sort results
     this.sortResults(results, normalizedQuery.sort?.field || 'relevance', normalizedQuery.sort?.order || 'desc');
 
-    // Apply pagination
-    const page = normalizedQuery.pagination?.page || 1;
-    const pageSize = normalizedQuery.pagination?.pageSize || 10;
-    const startIdx = (page - 1) * pageSize;
-    const endIdx = startIdx + pageSize;
-    const paginatedResults = results.slice(startIdx, endIdx);
+    // Handle pagination - support both old (limit/offset) and new (pagination) styles
+    const hasLimitOffset = extQuery.limit !== undefined || extQuery.offset !== undefined;
+    const limit = extQuery.limit ?? normalizedQuery.pagination?.pageSize ?? 100;
+    const offset = extQuery.offset ?? ((normalizedQuery.pagination?.page ?? 1) - 1) * limit;
+    const paginatedResults = results.slice(offset, offset + limit);
 
     const executionTime = Date.now() - startTime;
 
-    // Compute facets if requested
+    // Compute facets if requested (includeFacets or facets array)
     let facets: SearchResults['facets'];
-    if ((query as any).facets && Array.isArray((query as any).facets)) {
-      facets = this.computeFacets(results.map(r => r.session), (query as any).facets);
+    if (extQuery.includeFacets) {
+      facets = this.computeAllFacets(results.map(r => r.session));
+    } else if (query.facets && Array.isArray(query.facets)) {
+      facets = this.computeFacets(results.map(r => r.session), query.facets);
     }
 
     this.logger.debug('Search completed', {
@@ -180,6 +214,10 @@ export class SearchEngine {
       hasText: !!normalizedQuery.text,
       hasFacets: !!facets,
     });
+
+    // Calculate page/pageSize from limit/offset for compatibility
+    const pageSize = limit;
+    const page = Math.floor(offset / pageSize) + 1;
 
     return {
       results: paginatedResults,
@@ -191,7 +229,42 @@ export class SearchEngine {
       query: normalizedQuery,
       executionTime,
       facets,
+      // Additional convenience properties for limit/offset style pagination
+      hasMore: offset + paginatedResults.length < results.length,
+      offset: hasLimitOffset ? offset : undefined,
     };
+  }
+
+  /**
+   * Compute all facets for search results
+   */
+  private computeAllFacets(sessions: ThinkingSession[]): SearchResults['facets'] {
+    const facets: SearchResults['facets'] = {
+      modes: {} as Record<string, number>,
+      authors: {} as Record<string, number>,
+      domains: {} as Record<string, number>,
+    };
+
+    for (const session of sessions) {
+      // Mode facet
+      const modeKey = session.mode;
+      (facets.modes as Record<string, number>)[modeKey] =
+        ((facets.modes as Record<string, number>)[modeKey] || 0) + 1;
+
+      // Author facet
+      if (session.author) {
+        (facets.authors as Record<string, number>)[session.author] =
+          ((facets.authors as Record<string, number>)[session.author] || 0) + 1;
+      }
+
+      // Domain facet
+      if (session.domain) {
+        (facets.domains as Record<string, number>)[session.domain] =
+          ((facets.domains as Record<string, number>)[session.domain] || 0) + 1;
+      }
+    }
+
+    return facets;
   }
 
   /**
@@ -264,6 +337,18 @@ export class SearchEngine {
     for (const session of this.sessions.values()) {
       if (session.title && session.title.toLowerCase().includes(prefixLower)) {
         suggestions.add(session.title);
+      }
+
+      // Search in tags
+      if (session.tags) {
+        for (const tag of session.tags) {
+          if (tag.toLowerCase().startsWith(prefixLower)) {
+            suggestions.add(tag);
+            if (suggestions.size >= limit) {
+              break;
+            }
+          }
+        }
       }
 
       // Search in thought text (limit to prevent slowdown)

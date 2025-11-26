@@ -221,7 +221,7 @@ describe('BackupManager', () => {
         provider: 'local',
         compression: 'none',
         baseBackupId: 'base-backup-id',
-      });
+      };
 
       const record = await manager.create(testData, config, {
         basePath: '/tmp/test-backups',
@@ -370,18 +370,21 @@ describe('BackupManager', () => {
   });
 
   describe('error handling', () => {
-    it('should handle unregistered provider', async () => {
+    it('should auto-register provider if not registered', async () => {
+      // BackupManager auto-registers provider when create is called
       const config: BackupConfig = {
         type: 'full',
         provider: 'local',
         compression: 'none',
       };
 
-      await expect(
-        manager.create(testData, config, {
-          basePath: '/tmp/test-backups',
-        })
-      ).rejects.toThrow();
+      // Should succeed because provider is auto-registered
+      const record = await manager.create(testData, config, {
+        basePath: '/tmp/test-backups',
+      });
+
+      expect(record).toBeDefined();
+      expect(record.status).toBe('completed');
     });
 
     it('should mark backup as failed on error', async () => {

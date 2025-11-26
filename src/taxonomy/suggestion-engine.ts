@@ -573,11 +573,27 @@ export class SuggestionEngine {
   /**
    * Suggest reasoning types for problem
    */
-  suggestForProblem(characteristics: ProblemCharacteristics): ReasoningSuggestion[] {
-    const results = this.navigator.recommend(characteristics.domain, {
-      difficulty: this.mapComplexityToDifficulty(characteristics.complexity),
-      domain: characteristics.domain,
+  suggestForProblem(characteristics: Partial<ProblemCharacteristics>): ReasoningSuggestion[] {
+    const domain = characteristics.domain || 'general';
+    const complexity = characteristics.complexity || 'moderate';
+
+    // Try to get recommendations from navigator
+    let results = this.navigator.recommend(domain, {
+      difficulty: this.mapComplexityToDifficulty(complexity),
+      domain: domain,
     });
+
+    // If no results, fall back to querying by difficulty
+    if (results.length === 0) {
+      results = this.navigator.query({
+        difficulties: [this.mapComplexityToDifficulty(complexity)],
+      });
+    }
+
+    // If still no results, get all types sorted by relevance
+    if (results.length === 0) {
+      results = this.navigator.query({});
+    }
 
     const suggestions: ReasoningSuggestion[] = [];
 
@@ -585,11 +601,23 @@ export class SuggestionEngine {
       const metadata = this.getMetadata(result.type.id);
       if (!metadata) continue;
 
-      const rationale = this.buildRationale(result.type, characteristics, metadata);
-      const warnings = this.buildWarnings(result.type, characteristics, metadata);
+      const fullCharacteristics: ProblemCharacteristics = {
+        domain: domain,
+        complexity: complexity,
+        uncertainty: characteristics.uncertainty || 'medium',
+        timeConstraints: characteristics.timeConstraints || 'moderate',
+        stakeholders: characteristics.stakeholders || 1,
+        novelty: characteristics.novelty || 'familiar',
+        dataAvailability: characteristics.dataAvailability || 'adequate',
+        reversibility: characteristics.reversibility || 'reversible',
+        ethicalImplications: characteristics.ethicalImplications || 'none',
+      };
+
+      const rationale = this.buildRationale(result.type, fullCharacteristics, metadata);
+      const warnings = this.buildWarnings(result.type, fullCharacteristics, metadata);
       const alternatives = result.type.relatedTypes.slice(0, 3);
-      const effort = this.estimateEffort(metadata, characteristics);
-      const successProb = this.estimateSuccessProbability(result.type, characteristics, metadata);
+      const effort = this.estimateEffort(metadata, fullCharacteristics);
+      const successProb = this.estimateSuccessProbability(result.type, fullCharacteristics, metadata);
 
       suggestions.push({
         reasoningType: result.type,

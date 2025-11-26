@@ -1,6 +1,6 @@
 {
   "name": "deepthinking-mcp",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "description": "Comprehensive MCP server with 18 advanced reasoning modes, taxonomy classifier, enterprise security, and visual export capabilities for complex problem-solving and analysis",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -25,7 +25,7 @@
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build && npm run test:run"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",

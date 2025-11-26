@@ -181,6 +181,9 @@ export class BatchProcessor {
    * Get total items from params
    */
   private getTotalItems(params: BatchJobParams): number {
+    if (!params) {
+      return 0;
+    }
     if ('sessionIds' in params && params.sessionIds) {
       return params.sessionIds.length;
     }

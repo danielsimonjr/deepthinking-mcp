@@ -272,9 +272,11 @@ describe('Reasoning Taxonomy', () => {
     it('should select mode with best_match strategy', () => {
       const recommendations = selector.selectMode(
         {
-          problemDescription: 'prove a theorem',
-          currentMode: 'sequential',
-          sessionHistory: [],
+          problem: 'prove a theorem',
+          characteristics: {
+            domain: 'mathematical',
+            complexity: 'complex',
+          },
         },
         'best_match'
       );
@@ -285,9 +287,11 @@ describe('Reasoning Taxonomy', () => {
     it('should select mode with multi_modal strategy', () => {
       const recommendations = selector.selectMode(
         {
-          problemDescription: 'analyze a complex system',
-          currentMode: 'sequential',
-          sessionHistory: [],
+          problem: 'analyze a complex system',
+          characteristics: {
+            domain: 'general',
+            complexity: 'complex',
+          },
         },
         'multi_modal'
       );
@@ -315,9 +319,7 @@ describe('Reasoning Taxonomy', () => {
     it('should respect constraints', () => {
       const recommendations = selector.selectMode(
         {
-          problemDescription: 'quick analysis',
-          currentMode: 'sequential',
-          sessionHistory: [],
+          problem: 'quick analysis',
           constraints: {
             maxCognitiveLoad: 'moderate',
           },
@@ -332,11 +334,9 @@ describe('Reasoning Taxonomy', () => {
     it('should consider user preferences', () => {
       const recommendations = selector.selectMode(
         {
-          problemDescription: 'general problem',
-          currentMode: 'sequential',
-          sessionHistory: [],
+          problem: 'general problem',
           userPreferences: {
-            preferredModes: ['mathematics'],
+            preferredModes: ['mathematics' as any],
           },
         },
         'best_match'
@@ -368,9 +368,11 @@ describe('Reasoning Taxonomy', () => {
       // Step 3: Select mode adaptively
       const selection = selector.selectMode(
         {
-          problemDescription: 'proving mathematical theorem',
-          currentMode: 'sequential',
-          sessionHistory: [],
+          problem: 'proving mathematical theorem',
+          characteristics: {
+            domain: 'mathematical',
+            complexity: 'complex',
+          },
         },
         'best_match'
       );

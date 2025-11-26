@@ -174,14 +174,21 @@ export class TemplateManager {
     }
     estimatedThoughts += template.structure.conclusion.estimatedThoughts || 0;
 
+    // Generate a unique session ID
+    const sessionId = `session-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const now = new Date();
+
     // Create session metadata with template info (extends ThinkingSession)
     const session: Partial<ThinkingSession> & { metadata?: any } = {
+      id: sessionId,
       title,
       mode: template.mode,
       domain,
       author: options.author,
       thoughts: [],
       tags: [...template.tags, 'template', `template:${template.id}`],
+      createdAt: now,
+      updatedAt: now,
       metadata: {
         templateId: template.id,
         templateName: template.name,

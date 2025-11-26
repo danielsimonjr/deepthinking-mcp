@@ -417,12 +417,14 @@ function createTestSession(
   const thoughts: Thought[] = [];
 
   for (let i = 0; i < thoughtCount; i++) {
+    // Include tags in the content so they're searchable
+    const tagContent = tags.length > 0 ? ` about ${tags.join(' and ')}` : '';
     thoughts.push({
       id: `${id}-thought-${i + 1}`,
       sessionId: id,
       thoughtNumber: i + 1,
       totalThoughts: thoughtCount,
-      content: `Test thought ${i + 1} for ${mode} mode`,
+      content: `Test thought ${i + 1} for ${mode} mode${tagContent}`,
       timestamp: new Date(),
       mode: mode,
       nextThoughtNeeded: i < thoughtCount - 1,

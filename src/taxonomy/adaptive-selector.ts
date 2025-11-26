@@ -473,19 +473,95 @@ export class AdaptiveModeSelector {
    * Map reasoning type ID to thinking mode
    */
   private mapReasoningTypeToMode(typeId: string): ThinkingMode | null {
-    // Simplified mapping
+    // Explicit mapping for known types
     const mapping: Record<string, ThinkingMode> = {
+      // Deductive reasoning types
       deductive_syllogism: ThinkingMode.SEQUENTIAL,
       deductive_modus_ponens: ThinkingMode.SEQUENTIAL,
+      deductive_modus_tollens: ThinkingMode.SEQUENTIAL,
+      deductive_disjunctive_syllogism: ThinkingMode.SEQUENTIAL,
+      deductive_hypothetical_syllogism: ThinkingMode.SEQUENTIAL,
+      deductive_categorical_syllogism: ThinkingMode.SEQUENTIAL,
+      deductive_conditional_proof: ThinkingMode.SEQUENTIAL,
+      deductive_proof_by_cases: ThinkingMode.SEQUENTIAL,
+      deductive_reductio_ad_absurdum: ThinkingMode.MATHEMATICS,
+
+      // Mathematical reasoning types
       mathematical_proof_induction: ThinkingMode.MATHEMATICS,
+      mathematical_axiom_system: ThinkingMode.MATHEMATICS,
+      mathematical_formal_verification: ThinkingMode.MATHEMATICS,
+      mathematical_constructive_proof: ThinkingMode.MATHEMATICS,
+      mathematical_nonconstructive_proof: ThinkingMode.MATHEMATICS,
+
+      // Probabilistic reasoning types
       probabilistic_bayesian: ThinkingMode.BAYESIAN,
-      abductive_inference: ThinkingMode.ABDUCTIVE,
-      analogical_structural: ThinkingMode.ANALOGICAL,
+      probabilistic_frequentist: ThinkingMode.BAYESIAN,
+      probabilistic_maximum_likelihood: ThinkingMode.BAYESIAN,
+      probabilistic_monte_carlo: ThinkingMode.BAYESIAN,
+
+      // Causal reasoning types
       causal_counterfactual: ThinkingMode.COUNTERFACTUAL,
+      causal_intervention: ThinkingMode.CAUSAL,
+      causal_mechanism: ThinkingMode.CAUSAL,
+      causal_graph: ThinkingMode.CAUSAL,
+
+      // Abductive reasoning types
+      abductive_inference: ThinkingMode.ABDUCTIVE,
+      abductive_hypothesis: ThinkingMode.ABDUCTIVE,
+      abductive_explanation: ThinkingMode.ABDUCTIVE,
+
+      // Analogical reasoning types
+      analogical_structural: ThinkingMode.ANALOGICAL,
+      analogical_case_based: ThinkingMode.ANALOGICAL,
+      analogical_metaphorical: ThinkingMode.ANALOGICAL,
+
+      // Inductive reasoning types
       inductive_generalization: ThinkingMode.SEQUENTIAL,
+      inductive_statistical: ThinkingMode.BAYESIAN,
+      inductive_enumerative: ThinkingMode.SEQUENTIAL,
+
+      // Scientific and practical reasoning
+      scientific_hypothesis_testing: ThinkingMode.BAYESIAN,
+      scientific_experimental: ThinkingMode.SEQUENTIAL,
+      practical_means_ends: ThinkingMode.SEQUENTIAL,
+      practical_cost_benefit: ThinkingMode.SEQUENTIAL,
+
+      // Temporal reasoning
+      temporal_planning: ThinkingMode.TEMPORAL,
+      temporal_scheduling: ThinkingMode.TEMPORAL,
+      temporal_sequence_analysis: ThinkingMode.TEMPORAL,
     };
 
-    return mapping[typeId] || null;
+    // Direct mapping first
+    if (mapping[typeId]) {
+      return mapping[typeId];
+    }
+
+    // Pattern-based fallback - map based on ID prefix
+    const prefixMappings: Record<string, ThinkingMode> = {
+      deductive: ThinkingMode.SEQUENTIAL,
+      mathematical: ThinkingMode.MATHEMATICS,
+      probabilistic: ThinkingMode.BAYESIAN,
+      causal: ThinkingMode.CAUSAL,
+      abductive: ThinkingMode.ABDUCTIVE,
+      analogical: ThinkingMode.ANALOGICAL,
+      inductive: ThinkingMode.SEQUENTIAL,
+      temporal: ThinkingMode.TEMPORAL,
+      scientific: ThinkingMode.SHANNON,
+      practical: ThinkingMode.SEQUENTIAL,
+      dialectical: ThinkingMode.SEQUENTIAL,
+      creative: ThinkingMode.HYBRID,
+      critical: ThinkingMode.SEQUENTIAL,
+    };
+
+    for (const [prefix, mode] of Object.entries(prefixMappings)) {
+      if (typeId.startsWith(prefix)) {
+        return mode;
+      }
+    }
+
+    // Last resort: return a reasonable default
+    return ThinkingMode.SEQUENTIAL;
   }
 
   /**

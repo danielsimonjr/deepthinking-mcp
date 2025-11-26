@@ -39,14 +39,31 @@ export class SearchIndex {
     const taxonomyCategories = new Set<string>();
     const taxonomyTypes = new Set<string>();
 
-    // Classify thoughts using taxonomy classifier
-    for (const thought of session.thoughts) {
-      const classification = this.classifier.classifyThought(thought);
-      taxonomyCategories.add(classification.primaryCategory);
-      taxonomyTypes.add(classification.primaryType.id);
+    // First, use session's existing taxonomy classification if available
+    const sessionTaxonomy = (session as any).taxonomyClassification;
+    if (sessionTaxonomy) {
+      if (sessionTaxonomy.categories) {
+        for (const cat of sessionTaxonomy.categories) {
+          taxonomyCategories.add(cat);
+        }
+      }
+      if (sessionTaxonomy.types) {
+        for (const type of sessionTaxonomy.types) {
+          taxonomyTypes.add(type);
+        }
+      }
+    }
 
-      for (const type of classification.secondaryTypes.slice(0, 3)) {
-        taxonomyTypes.add(type.id);
+    // If no pre-existing taxonomy, classify thoughts using taxonomy classifier
+    if (taxonomyCategories.size === 0 && session.thoughts.length > 0) {
+      for (const thought of session.thoughts) {
+        const classification = this.classifier.classifyThought(thought);
+        taxonomyCategories.add(classification.primaryCategory);
+        taxonomyTypes.add(classification.primaryType.id);
+
+        for (const type of classification.secondaryTypes.slice(0, 3)) {
+          taxonomyTypes.add(type.id);
+        }
       }
     }
 
@@ -114,11 +131,14 @@ export class SearchIndex {
 
     for (const [sessionId, entry] of this.index) {
       let score = 0;
+      let matchCount = 0;
 
-      // TF-IDF scoring (simplified)
+      // TF-IDF scoring (simplified, with minimum score for matches)
       for (const queryToken of queryTokens) {
         const tokenFreq = entry.tokens.get(queryToken) || 0;
         if (tokenFreq > 0) {
+          matchCount++;
+
           // Calculate document frequency
           let docFreq = 0;
           for (const otherEntry of this.index.values()) {
@@ -127,9 +147,10 @@ export class SearchIndex {
             }
           }
 
-          // TF-IDF score
-          const tf = tokenFreq / entry.tokens.size;
-          const idf = Math.log(this.index.size / (docFreq + 1));
+          // TF-IDF score (modified to handle small document sets)
+          const tf = Math.log(1 + tokenFreq) / Math.log(1 + entry.tokens.size);
+          // Use smoothed IDF that doesn't go negative
+          const idf = Math.log(1 + (this.index.size + 1) / (docFreq + 1));
           score += tf * idf;
         }
       }
@@ -142,7 +163,9 @@ export class SearchIndex {
         }
       }
 
-      if (score > 0) {
+      // If we have any matches, ensure a minimum score
+      if (matchCount > 0) {
+        score = Math.max(score, 0.1 * matchCount);
         scores.set(sessionId, score);
       }
     }
