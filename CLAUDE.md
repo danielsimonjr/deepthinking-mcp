@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring 18 advanced reasoning modes with taxonomy-based classification (110+ reasoning types across 12 categories), enterprise security, and visual export capabilities.
 
-**Version**: 3.5.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
+**Version**: 3.5.2 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
 
 ## Build & Development Commands
 
@@ -134,3 +134,13 @@ Configured in `tsconfig.json`:
 - `src/services/ThoughtFactory.ts` - Thought creation and validation
 - `src/taxonomy/reasoning-types.ts` - All 110+ reasoning type definitions
 - `src/search/engine.ts` - Full-text search implementation
+
+## Memory Usage Reminder
+
+**IMPORTANT**: Use the `memory-mcp` tools periodically during sessions to:
+
+1. **At session start**: Search for existing context with `mcp__memory-mcp__search_nodes` using query "deepthinking-mcp"
+2. **During work**: Add observations for significant changes with `mcp__memory-mcp__add_observations`
+3. **At session end**: Update memory with session summary and any new findings
+
+This ensures continuity across sessions and prevents loss of important project context.
