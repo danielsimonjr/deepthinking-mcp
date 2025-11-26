@@ -1,0 +1,50 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git config:*)",
+      "Bash(claude mcp:*)",
+      "Bash(cat:*)",
+      "mcp__memory-mcp__read_graph",
+      "mcp__memory-mcp__search_nodes",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "mcp__memory-mcp__create_entities",
+      "mcp__memory-mcp__create_relations",
+      "mcp__memory-mcp__add_tags",
+      "mcp__memory-mcp__set_importance",
+      "mcp__memory-mcp__get_graph_stats",
+      "mcp__memory-mcp__export_graph",
+      "mcp__memory-mcp__search_by_date_range",
+      "Bash(npm run build:*)",
+      "Bash(node -e:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npm test:*)",
+      "Bash(npm publish:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "mcp__memory-mcp__delete_entities",
+      "mcp__memory-mcp__add_observations",
+      "Bash(npm run test:run:*)",
+      "Bash(xargs -I {} sh -c 'echo \"\"\"\"=== {} ===\"\"\"\" && head -20 {}')",
+      "Bash(npm ls:*)",
+      "mcp__memory-mcp__delete_observations",
+      "mcp__deepthinking-mcp__deepthinking"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "sequential-thinking-mcp",
+    "everything-mcp",
+    "fermat-mcp",
+    "math-mcp",
+    "playwright",
+    "substack-mcp",
+    "time",
+    "memory-mcp",
+    "fzf-mcp",
+    "deepthinking-mcp"
+  ]
+}
