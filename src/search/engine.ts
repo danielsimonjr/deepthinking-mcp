@@ -239,32 +239,31 @@ export class SearchEngine {
    * Compute all facets for search results
    */
   private computeAllFacets(sessions: ThinkingSession[]): SearchResults['facets'] {
-    const facets: SearchResults['facets'] = {
-      modes: {} as Record<string, number>,
-      authors: {} as Record<string, number>,
-      domains: {} as Record<string, number>,
-    };
+    const modes = new Map<string, number>();
+    const authors = new Map<string, number>();
+    const domains = new Map<string, number>();
 
     for (const session of sessions) {
       // Mode facet
       const modeKey = session.mode;
-      (facets.modes as Record<string, number>)[modeKey] =
-        ((facets.modes as Record<string, number>)[modeKey] || 0) + 1;
+      modes.set(modeKey, (modes.get(modeKey) || 0) + 1);
 
       // Author facet
       if (session.author) {
-        (facets.authors as Record<string, number>)[session.author] =
-          ((facets.authors as Record<string, number>)[session.author] || 0) + 1;
+        authors.set(session.author, (authors.get(session.author) || 0) + 1);
       }
 
       // Domain facet
       if (session.domain) {
-        (facets.domains as Record<string, number>)[session.domain] =
-          ((facets.domains as Record<string, number>)[session.domain] || 0) + 1;
+        domains.set(session.domain, (domains.get(session.domain) || 0) + 1);
       }
     }
 
-    return facets;
+    return {
+      modes,
+      authors,
+      domains,
+    };
   }
 
   /**

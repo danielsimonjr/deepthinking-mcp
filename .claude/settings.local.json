@@ -29,7 +29,11 @@
       "Bash(xargs -I {} sh -c 'echo \"\"\"\"=== {} ===\"\"\"\" && head -20 {}')",
       "Bash(npm ls:*)",
       "mcp__memory-mcp__delete_observations",
-      "mcp__deepthinking-mcp__deepthinking"
+      "mcp__deepthinking-mcp__deepthinking",
+      "Bash(npm whoami:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run typecheck:*)"
     ],
     "deny": [],
     "ask": []

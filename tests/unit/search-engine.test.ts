@@ -540,15 +540,15 @@ describe('SearchEngine', () => {
 
     it('should calculate correct mode facets', () => {
       const results = searchEngine.search({ includeFacets: true });
-      expect(results.facets?.modes[ThinkingMode.MATHEMATICS]).toBe(1);
-      expect(results.facets?.modes[ThinkingMode.PHYSICS]).toBe(1);
-      expect(results.facets?.modes[ThinkingMode.CAUSAL]).toBe(1);
+      expect(results.facets?.modes?.get(ThinkingMode.MATHEMATICS)).toBe(1);
+      expect(results.facets?.modes?.get(ThinkingMode.PHYSICS)).toBe(1);
+      expect(results.facets?.modes?.get(ThinkingMode.CAUSAL)).toBe(1);
     });
 
     it('should calculate correct author facets', () => {
       const results = searchEngine.search({ includeFacets: true });
-      expect(results.facets?.authors['alice@example.com']).toBe(2);
-      expect(results.facets?.authors['bob@example.com']).toBe(1);
+      expect(results.facets?.authors?.get('alice@example.com')).toBe(2);
+      expect(results.facets?.authors?.get('bob@example.com')).toBe(1);
     });
 
     it('should not include facets when not requested', () => {

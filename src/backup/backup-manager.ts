@@ -229,9 +229,16 @@ export class BackupManager {
         type: 'full',
         provider: 'local',
         compression: 'none',
+        metadata: {
+          includeStats: true,
+          includeHistory: false,
+          includeLogs: false,
+        },
       };
-      const defaultOptions = {
-        basePath: process.env.TEMP || '/tmp',
+      const defaultOptions: BackupProviderOptions = {
+        provider: 'local',
+        path: process.env.TEMP || '/tmp',
+        createDirectories: true,
       };
       const record = await this.create(sessions, defaultConfig, defaultOptions);
       return record.id;

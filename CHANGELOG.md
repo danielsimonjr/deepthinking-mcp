@@ -5,6 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2025-11-26
+
+### ⚠️ Breaking Changes
+
+- **Tool Architecture Overhaul**: Split monolithic `deepthinking` tool into 9 focused tools
+  - Old `deepthinking` tool is **deprecated** (still works, routes to new tools)
+  - Will be removed in v5.0.0
+
+### ✨ New Tools
+
+| Tool | Modes |
+|------|-------|
+| `deepthinking_core` | sequential, shannon, hybrid |
+| `deepthinking_math` | mathematics, physics |
+| `deepthinking_temporal` | temporal |
+| `deepthinking_probabilistic` | bayesian, evidential |
+| `deepthinking_causal` | causal, counterfactual, abductive |
+| `deepthinking_strategic` | gametheory, optimization |
+| `deepthinking_analytical` | analogical, firstprinciples |
+| `deepthinking_scientific` | scientificmethod, systemsthinking, formallogic |
+| `deepthinking_session` | summarize, export, get_session, switch_mode, recommend_mode |
+
+### 🚀 Token Optimization (Sprints 5-7)
+
+- **~60-70% token reduction**: From ~8-10K to ~3K tokens
+- **Single source of truth**: Zod schemas with auto-generated JSON Schema via zod-to-json-schema
+- **Lazy schema loading**: Schemas loaded on-demand for reduced memory footprint
+- **Optimized descriptions**: Concise, single-line tool descriptions
+
+### 🏗️ New Architecture
+
+- `src/tools/schemas/` - Modular Zod schemas by mode category
+- `src/tools/definitions.ts` - 9 focused tool definitions
+- `src/tools/lazy-loader.ts` - On-demand schema loading
+- `src/tools/legacy.ts` - Backward compatibility layer
+- `src/tools/schema-generator.ts` - Zod to JSON Schema conversion
+- `src/tools/schemas/version.ts` - Schema versioning
+
+### 📖 Documentation
+
+- Added migration guide: `docs/migration/v4.0-tool-splitting.md`
+- Schema version: 4.0.0
+
+### 📊 Test Results
+
+- **746 tests passing** (710 original + 36 new schema tests)
+- All schema validation tests included
+
+---
+
 ## [3.5.2] - 2025-11-26
 
 ### 🐛 Bug Fixes

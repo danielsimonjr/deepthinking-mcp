@@ -163,7 +163,9 @@ export interface SearchResults {
   query: SearchQuery;
   executionTime: number; // in milliseconds
   facets?: {
-    mode?: Map<string, number>;
+    modes?: Map<string, number>;
+    authors?: Map<string, number>;
+    domains?: Map<string, number>;
     tags?: Map<string, number>;
     [key: string]: Map<string, number> | undefined;
   };

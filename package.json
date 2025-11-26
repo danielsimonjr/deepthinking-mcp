@@ -1,6 +1,6 @@
 {
   "name": "deepthinking-mcp",
-  "version": "3.5.2",
+  "version": "4.0.0",
   "description": "Comprehensive MCP server with 18 advanced reasoning modes, taxonomy classifier, enterprise security, and visual export capabilities for complex problem-solving and analysis",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -30,7 +30,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
     "zod": "^3.22.4",
-    "zod-to-json-schema": "^3.24.6"
+    "zod-to-json-schema": "^3.25.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
