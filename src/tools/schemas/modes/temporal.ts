@@ -1,28 +1,19 @@
 /**
- * Temporal Mode Schema (v4.0.0)
+ * Temporal Mode Schema (v4.1.0)
  * Sprint 5 Task 5.3: Temporal reasoning with Allen's interval algebra
+ * Sprint 7 Task 7.5: Use shared enums
  */
 
 import { z } from 'zod';
 import { BaseThoughtSchema } from '../base.js';
+import {
+  ConfidenceSchema,
+  TimeUnitEnum,
+  TemporalConstraintEnum,
+  TemporalRelationEnum,
+  EventTypeEnum,
+} from '../shared.js';
 
-/**
- * Time units
- */
-const TimeUnitEnum = z.enum([
-  'milliseconds', 'seconds', 'minutes', 'hours', 'days', 'months', 'years'
-]);
-
-/**
- * Allen's interval algebra constraints
- */
-const TemporalConstraintTypeEnum = z.enum([
-  'before', 'after', 'during', 'overlaps', 'meets', 'starts', 'finishes', 'equals'
-]);
-
-/**
- * Timeline structure
- */
 const TimelineSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -32,33 +23,24 @@ const TimelineSchema = z.object({
   endTime: z.number().optional(),
 });
 
-/**
- * Temporal event
- */
 const TemporalEventSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string(),
   timestamp: z.number(),
-  type: z.enum(['instant', 'interval']),
+  type: EventTypeEnum,
   duration: z.number().optional(),
   properties: z.record(z.unknown()).optional(),
 });
 
-/**
- * Temporal constraint
- */
 const TemporalConstraintSchema = z.object({
   id: z.string(),
-  type: TemporalConstraintTypeEnum,
+  type: TemporalConstraintEnum,
   subject: z.string(),
   object: z.string(),
-  confidence: z.number().min(0).max(1),
+  confidence: ConfidenceSchema,
 });
 
-/**
- * Temporal interval
- */
 const TemporalIntervalSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -68,15 +50,12 @@ const TemporalIntervalSchema = z.object({
   overlaps: z.array(z.string()).optional(),
 });
 
-/**
- * Temporal relation
- */
 const TemporalRelationSchema = z.object({
   id: z.string(),
   from: z.string(),
   to: z.string(),
-  relationType: z.enum(['causes', 'enables', 'prevents', 'precedes', 'follows']),
-  strength: z.number().min(0).max(1),
+  relationType: TemporalRelationEnum,
+  strength: ConfidenceSchema,
   delay: z.number().optional(),
 });
 
