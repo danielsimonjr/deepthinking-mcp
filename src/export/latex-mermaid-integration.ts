@@ -6,7 +6,7 @@
  */
 
 import type { ThinkingSession, Thought } from '../types/index.js';
-import { VisualExporter, type VisualExportOptions } from './visual.js';
+import { VisualExporter, type VisualExportOptions } from './visual/index.js';
 
 /**
  * Mermaid-LaTeX integration options

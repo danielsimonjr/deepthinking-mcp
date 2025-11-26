@@ -23,7 +23,7 @@ import {
   BayesianThought,
   FirstPrinciplesThought,
 } from '../types/index.js';
-import { VisualExporter, type VisualFormat } from '../export/visual.js';
+import { VisualExporter, type VisualFormat } from '../export/visual/index.js';
 import { escapeHtml, escapeLatex } from '../utils/sanitization.js';
 import { ILogger } from '../interfaces/ILogger.js';
 import { createLogger, LogLevel } from '../utils/logger.js';

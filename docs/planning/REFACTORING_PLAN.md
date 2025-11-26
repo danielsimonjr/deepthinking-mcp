@@ -15,15 +15,17 @@ This plan consolidates all refactoring efforts to reduce context/token usage in 
 
 ### Key Metrics
 
-| Metric | Before (v3.x) | v4.0.0 | v4.1.0 | v4.2.0 | Target | Status |
-|--------|---------------|--------|--------|--------|--------|--------|
-| Tool Count | 1 monolithic | 9 focused | 9 | 9 | 9 | ✅ Complete |
-| Schema Sources | 2 (Zod + JSON) | 2 (partial) | 1 (Zod) | 1 (Zod) | 1 | ✅ Complete |
-| Token Usage | ~8-10K | ~4-5K | ~3-4K | ~3K | ~2-3K | 🔄 75% |
-| Largest File | 2546 lines | 2546 | 2546 | 2546 | <500 | ❌ Pending |
-| Eager Imports | All | All | Lazy Svc | Lazy Svc | Lazy | 🔄 Partial |
-| Tree-Shaking | No | No | No | Yes | Yes | ✅ Complete |
-| Total Lines | 38,655 | 38,655 | ~38,200 | ~38,100 | ~30,000 | 🔄 In Progress |
+| Metric | Before (v3.x) | v4.0.0 | v4.1.0 | v4.2.0 | v4.3.0 | Target | Status |
+|--------|---------------|--------|--------|--------|--------|--------|--------|
+| Tool Count | 1 monolithic | 9 focused | 9 | 9 | 9 | 9 | ✅ Complete |
+| Schema Sources | 2 (Zod + JSON) | 2 (partial) | 1 (Zod) | 1 (Zod) | 1 (Zod) | 1 | ✅ Complete |
+| Token Usage | ~8-10K | ~4-5K | ~3-4K | ~3K | ~2.5K | ~2-3K | ✅ 85% |
+| Largest File | 2546 lines | 2546 | 2546 | 2546 | ~150 | <500 | ✅ Complete |
+| Eager Imports | All | All | Lazy Svc | Lazy Svc | Lazy Visual | Lazy | 🔄 Partial |
+| Tree-Shaking | No | No | No | Yes | Yes | Yes | ✅ Complete |
+| Total Lines | 38,655 | 38,655 | ~38,200 | ~38,100 | ~40,700* | ~30,000 | 🔄 In Progress |
+
+*Note: v4.3.0 total lines increased temporarily due to modular split (adds re-exports), but tree-shaking eliminates unused code in bundled builds.
 
 ---
 
@@ -282,16 +284,17 @@ One description per nested hierarchy level, not multiple.
 
 ---
 
-## Sprint 8: Large File Refactoring 🆕 NEW
+## Sprint 8: Large File Refactoring 🔄 IN PROGRESS
 
-**Status**: NOT STARTED
+**Status**: 17% Complete (Task 8.1 done)
 **Goal**: Split monolithic files for maintainability and lazy loading
 **Priority**: HIGH
 
-### Task 8.1: Split visual.ts (2546 lines) into Mode-Specific Exporters
+### Task 8.1: Split visual.ts (2546 lines) into Mode-Specific Exporters ✅
+**Status**: COMPLETE (v4.3.0)
 **Priority**: CRITICAL
-**Current File**: `src/export/visual.ts`
-**Target Structure**:
+**Current File**: `src/export/visual.ts` → `src/export/visual/`
+**Achieved Structure**:
 ```
 src/export/visual/
 ├── index.ts              # Re-exports, ~50 lines

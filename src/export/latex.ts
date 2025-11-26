@@ -5,7 +5,7 @@
 
 import type { ThinkingSession } from '../types/session.js';
 import type { Thought, MathematicsThought, PhysicsThought, CausalThought, BayesianThought, AnalogicalThought, TemporalThought, GameTheoryThought, EvidentialThought, FirstPrinciplesThought } from '../types/index.js';
-import { VisualExporter } from './visual.js';
+import { VisualExporter } from './visual/index.js';
 
 /**
  * LaTeX export options
