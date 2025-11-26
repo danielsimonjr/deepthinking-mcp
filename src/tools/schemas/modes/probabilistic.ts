@@ -1,17 +1,16 @@
 /**
- * Probabilistic Mode Schemas (v4.0.0)
+ * Probabilistic Mode Schemas (v4.1.0)
  * Sprint 5 Task 5.3: Bayesian, Evidential modes
+ * Sprint 7 Task 7.5: Use shared schemas
  */
 
 import { z } from 'zod';
 import { BaseThoughtSchema } from '../base.js';
+import { ConfidenceSchema } from '../shared.js';
 
-/**
- * Belief mass assignment for Dempster-Shafer
- */
 const BeliefMassSchema = z.object({
   hypothesisSet: z.array(z.string()),
-  mass: z.number().min(0).max(1),
+  mass: ConfidenceSchema,
   justification: z.string(),
 });
 
