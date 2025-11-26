@@ -33,7 +33,8 @@
       "Bash(npm whoami:*)",
       "Bash(npx tsc:*)",
       "Bash(npm install:*)",
-      "Bash(npm run typecheck:*)"
+      "Bash(npm run typecheck:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []
