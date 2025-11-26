@@ -1,0 +1,24 @@
+{
+  "version": "3.4.0",
+  "backupId": "backup_1764176534994_llhstnl7k",
+  "createdAt": "2025-11-26T17:02:14.994Z",
+  "type": "full",
+  "compression": "none",
+  "encrypted": false,
+  "checksum": "751f5208cd928a834faec45ba920cf999fd5fbb338bec80ef5a28cbf714d7a80",
+  "sessions": [
+    {
+      "id": "session-1",
+      "mode": "sequential",
+      "thoughtCount": 3,
+      "createdAt": "2025-11-26T17:02:14.994Z",
+      "size": 1373
+    }
+  ],
+  "statistics": {
+    "totalSessions": 1,
+    "totalThoughts": 3,
+    "totalSize": 1375,
+    "compressedSize": 1375
+  }
+}

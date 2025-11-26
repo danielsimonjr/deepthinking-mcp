@@ -1,0 +1,24 @@
+{
+  "version": "3.4.0",
+  "backupId": "backup_1764176895017_vmbvhbdat",
+  "createdAt": "2025-11-26T17:08:15.017Z",
+  "type": "full",
+  "compression": "none",
+  "encrypted": false,
+  "checksum": "7152b8d390f9329bfdf20c78795aab4f954d2fb08568a0f62742aec9b9545b5d",
+  "sessions": [
+    {
+      "id": "session-1",
+      "mode": "sequential",
+      "thoughtCount": 3,
+      "createdAt": "2025-11-26T17:08:15.016Z",
+      "size": 1373
+    }
+  ],
+  "statistics": {
+    "totalSessions": 1,
+    "totalThoughts": 3,
+    "totalSize": 1375,
+    "compressedSize": 1375
+  }
+}

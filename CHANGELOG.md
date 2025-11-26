@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2025-11-26
+
+### 🚀 Token Optimization Enhancements (Sprints 5.5, 5.7, 7.5)
+
+#### Sprint 5.7: Remove Duplicate JSON Schema
+- **414 lines removed** from `thinking.ts` (1136 → 722 lines, 36% reduction)
+- Replaced manually maintained JSON Schema with auto-generated from Zod
+- Single source of truth: Zod schemas only
+- Legacy tool description updated to indicate deprecation
+
+#### Sprint 5.5: Enhanced Lazy Schema Loading
+- Added `getAllToolDefinitions()` for MCP ListTools
+- Added `validateInput()` for lazy schema validation
+- Added `isValidTool()` check function
+- Added `getSchemaStats()` for cache monitoring
+- **16 new unit tests** for lazy loader
+
+#### Sprint 7.5: Shared Schema Components
+- Created `src/tools/schemas/shared.ts` with common patterns:
+  - `ConfidenceSchema` (0-1 range), `PositiveIntSchema`
+  - `LevelEnum`, `ImpactEnum`, `ExportFormatEnum`
+  - `TimeUnitEnum`, `TemporalConstraintEnum`, `TemporalRelationEnum`
+  - `ProofTypeEnum`, `TransformationEnum`, `EventTypeEnum`
+- Updated base.ts and temporal.ts to use shared enums
+- Type exports for TypeScript consumers
+
+### 📊 Test Results
+- **763 tests passing** (747 original + 16 new lazy loader tests)
+- Build size: 188.60 KB (stable)
+
+### 📖 Documentation
+- Added comprehensive REFACTORING_PLAN.md with Sprints 5-10
+
+---
+
 ## [4.0.0] - 2025-11-26
 
 ### ⚠️ Breaking Changes
