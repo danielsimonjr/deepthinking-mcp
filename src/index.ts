@@ -1,11 +1,19 @@
 #!/usr/bin/env node
 
 /**
- * DeepThinking MCP Server (v3.4.5)
- * Sprint 3 Task 3.3: Refactored to use service layer
+ * DeepThinking MCP Server (v4.0.0)
+ * Sprint 5: 9 focused tools replacing monolithic deepthinking tool
  *
- * Main server entry point - delegates to service layer for business logic.
- * Reduced from 796 lines to ~180 lines by extracting services.
+ * Tools:
+ * - deepthinking_core: sequential, shannon, hybrid modes
+ * - deepthinking_math: mathematics, physics modes
+ * - deepthinking_temporal: temporal reasoning
+ * - deepthinking_probabilistic: bayesian, evidential modes
+ * - deepthinking_causal: causal, counterfactual, abductive modes
+ * - deepthinking_strategic: gametheory, optimization modes
+ * - deepthinking_analytical: analogical, firstprinciples modes
+ * - deepthinking_scientific: scientificmethod, systemsthinking, formallogic modes
+ * - deepthinking_session: summarize, export, get_session, switch_mode, recommend_mode
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -25,7 +33,9 @@ const packageJson = JSON.parse(
   readFileSync(join(__dirname, '../package.json'), 'utf-8')
 );
 
-import { thinkingTool, ThinkingToolInput, ThinkingToolSchema } from './tools/thinking.js';
+// Import new tool definitions and schemas
+import { toolList, toolSchemas, isValidTool, modeToToolMap } from './tools/definitions.js';
+import { thinkingTool } from './tools/thinking.js'; // Legacy tool for backward compatibility
 import { SessionManager } from './session/index.js';
 import { ThinkingMode } from './types/index.js';
 import { ThoughtFactory, ExportService, ModeRouter } from './services/index.js';
@@ -49,10 +59,13 @@ const thoughtFactory = new ThoughtFactory();
 const exportService = new ExportService();
 const modeRouter = new ModeRouter(sessionManager);
 
-// Register tool list handler
+// Register tool list handler - now returns all 9 focused tools + legacy
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
-    tools: [thinkingTool],
+    tools: [
+      ...toolList,      // 9 new focused tools
+      thinkingTool,     // Legacy tool for backward compatibility
+    ],
   };
 });
 
@@ -60,62 +73,95 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
-  if (name === 'deepthinking') {
-    try {
-      const input = ThinkingToolSchema.parse(args) as ThinkingToolInput;
+  try {
+    // Handle new focused tools
+    if (isValidTool(name)) {
+      const schema = toolSchemas[name as keyof typeof toolSchemas];
+      const input = schema.parse(args);
+
+      // Session action tool
+      if (name === 'deepthinking_session') {
+        return await handleSessionAction(input);
+      }
+
+      // All other tools are for adding thoughts
+      return await handleAddThought(input, name);
+    }
+
+    // Handle legacy tool (backward compatibility)
+    if (name === 'deepthinking') {
+      const { ThinkingToolSchema } = await import('./tools/thinking.js');
+      const input = ThinkingToolSchema.parse(args);
+
+      // Add deprecation warning
+      const deprecationWarning = '⚠️ DEPRECATED: The "deepthinking" tool is deprecated. ' +
+        'Use the focused tools instead: deepthinking_core, deepthinking_math, ' +
+        'deepthinking_temporal, deepthinking_probabilistic, deepthinking_causal, ' +
+        'deepthinking_strategic, deepthinking_analytical, deepthinking_scientific, ' +
+        'deepthinking_session. See docs/migration/v4.0-tool-splitting.md for details.\n\n';
 
       switch (input.action) {
-        case 'add_thought':
-          return await handleAddThought(input);
+        case 'add_thought': {
+          const result = await handleAddThought(input, modeToToolMap[input.mode || 'hybrid'] || 'deepthinking_core');
+          return prependWarning(result, deprecationWarning);
+        }
         case 'summarize':
-          return await handleSummarize(input);
         case 'export':
-          return await handleExport(input);
         case 'switch_mode':
-          return await handleSwitchMode(input);
         case 'get_session':
-          return await handleGetSession(input);
-        case 'recommend_mode':
-          return await handleRecommendMode(input);
+        case 'recommend_mode': {
+          const result = await handleSessionAction(input);
+          return prependWarning(result, deprecationWarning);
+        }
         default:
           throw new Error(`Unknown action: ${input.action}`);
       }
-    } catch (error) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-          },
-        ],
-        isError: true,
-      };
     }
-  }
 
-  throw new Error(`Unknown tool: ${name}`);
+    throw new Error(`Unknown tool: ${name}`);
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
+      isError: true,
+    };
+  }
 });
 
 /**
- * Handle add_thought action
- *
- * Creates a new thought and adds it to the session.
- * Uses ThoughtFactory to create properly typed thought objects.
+ * Prepend a warning message to a tool result
  */
-async function handleAddThought(input: ThinkingToolInput) {
+function prependWarning(result: any, warning: string) {
+  if (result.content && result.content[0] && result.content[0].type === 'text') {
+    result.content[0].text = warning + result.content[0].text;
+  }
+  return result;
+}
+
+/**
+ * Handle add_thought action for any thinking mode
+ */
+async function handleAddThought(input: any, _toolName: string) {
   let sessionId = input.sessionId;
+
+  // Determine mode from tool name or input
+  let mode: ThinkingMode = input.mode || ThinkingMode.HYBRID;
 
   // Create session if none provided
   if (!sessionId) {
     const session = await sessionManager.createSession({
-      mode: input.mode as ThinkingMode,
+      mode: mode,
       title: `Thinking Session ${new Date().toISOString()}`,
     });
     sessionId = session.id;
   }
 
   // Use ThoughtFactory to create thought
-  const thought = thoughtFactory.createThought(input, sessionId);
+  const thought = thoughtFactory.createThought({ ...input, mode }, sessionId);
   const session = await sessionManager.addThought(sessionId, thought);
 
   return {
@@ -137,11 +183,31 @@ async function handleAddThought(input: ThinkingToolInput) {
 }
 
 /**
- * Handle summarize action
- *
- * Generates a summary of the session's thoughts.
+ * Handle session actions (summarize, export, switch_mode, get_session, recommend_mode)
  */
-async function handleSummarize(input: ThinkingToolInput) {
+async function handleSessionAction(input: any) {
+  const action = input.action;
+
+  switch (action) {
+    case 'summarize':
+      return await handleSummarize(input);
+    case 'export':
+      return await handleExport(input);
+    case 'switch_mode':
+      return await handleSwitchMode(input);
+    case 'get_session':
+      return await handleGetSession(input);
+    case 'recommend_mode':
+      return await handleRecommendMode(input);
+    default:
+      throw new Error(`Unknown session action: ${action}`);
+  }
+}
+
+/**
+ * Handle summarize action
+ */
+async function handleSummarize(input: any) {
   if (!input.sessionId) {
     throw new Error('sessionId required for summarize action');
   }
@@ -160,10 +226,8 @@ async function handleSummarize(input: ThinkingToolInput) {
 
 /**
  * Handle export action
- *
- * Exports session to requested format using ExportService.
  */
-async function handleExport(input: ThinkingToolInput) {
+async function handleExport(input: any) {
   if (!input.sessionId) {
     throw new Error('sessionId required for export action');
   }
@@ -174,8 +238,6 @@ async function handleExport(input: ThinkingToolInput) {
   }
 
   const format = input.exportFormat || 'json';
-
-  // Use ExportService for all exports
   const exported = exportService.exportSession(session, format as any);
 
   return {
@@ -188,10 +250,8 @@ async function handleExport(input: ThinkingToolInput) {
 
 /**
  * Handle switch_mode action
- *
- * Switches session to a new thinking mode using ModeRouter.
  */
-async function handleSwitchMode(input: ThinkingToolInput) {
+async function handleSwitchMode(input: any) {
   if (!input.sessionId || !input.newMode) {
     throw new Error('sessionId and newMode required for switch_mode action');
   }
@@ -214,10 +274,8 @@ async function handleSwitchMode(input: ThinkingToolInput) {
 
 /**
  * Handle get_session action
- *
- * Retrieves session details and metrics.
  */
-async function handleGetSession(input: ThinkingToolInput) {
+async function handleGetSession(input: any) {
   if (!input.sessionId) {
     throw new Error('sessionId required for get_session action');
   }
@@ -252,10 +310,8 @@ async function handleGetSession(input: ThinkingToolInput) {
 
 /**
  * Handle recommend_mode action
- *
- * Provides mode recommendations using ModeRouter.
  */
-async function handleRecommendMode(input: ThinkingToolInput) {
+async function handleRecommendMode(input: any) {
   // Quick recommendation based on problem type
   if (input.problemType && !input.problemCharacteristics) {
     const recommendedMode = modeRouter.quickRecommend(input.problemType);
