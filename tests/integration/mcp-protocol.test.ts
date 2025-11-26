@@ -47,11 +47,11 @@ describe('MCP Protocol Compliance', () => {
       expect(properties.action.enum).toContain('recommend_mode');
     });
 
-    it('should define all 13 thinking modes in mode enum', () => {
+    it('should define all 18 thinking modes in mode enum', () => {
       const properties = thinkingTool.inputSchema.properties || {};
       expect(properties.mode).toBeDefined();
       expect(properties.mode.enum).toBeDefined();
-      expect(properties.mode.enum).toHaveLength(13);
+      expect(properties.mode.enum).toHaveLength(18);
       expect(properties.mode.enum).toContain('sequential');
       expect(properties.mode.enum).toContain('shannon');
       expect(properties.mode.enum).toContain('mathematics');
@@ -65,6 +65,11 @@ describe('MCP Protocol Compliance', () => {
       expect(properties.mode.enum).toContain('temporal');
       expect(properties.mode.enum).toContain('gametheory');
       expect(properties.mode.enum).toContain('evidential');
+      expect(properties.mode.enum).toContain('firstprinciples');
+      expect(properties.mode.enum).toContain('systemsthinking');
+      expect(properties.mode.enum).toContain('scientificmethod');
+      expect(properties.mode.enum).toContain('optimization');
+      expect(properties.mode.enum).toContain('formallogic');
     });
 
     it('should define all 8 export formats correctly', () => {
