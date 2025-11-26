@@ -1,7 +1,8 @@
 # Refactoring Plan: Context/Token Optimization
 
-**Version**: 1.0.0
+**Version**: 1.1.0
 **Created**: 2025-11-26
+**Updated**: 2025-11-26
 **Status**: Active
 **Total Sprints**: 6 (Sprints 5-10)
 **Total Tasks**: 48 tasks organized into sprints of 5-10 items
@@ -14,20 +15,20 @@ This plan consolidates all refactoring efforts to reduce context/token usage in 
 
 ### Key Metrics
 
-| Metric | Before (v3.x) | Current (v4.0.0) | Target | Status |
-|--------|---------------|------------------|--------|--------|
-| Tool Count | 1 monolithic | 9 focused | 9 | ✅ Complete |
-| Schema Sources | 2 (Zod + JSON) | 2 (partial) | 1 (Zod only) | 🔄 In Progress |
-| Token Usage | ~8-10K | ~4-5K | ~2-3K | 🔄 50% → 70% |
-| Largest File | 2546 lines | 2546 lines | <500 lines | ❌ Pending |
-| Eager Imports | All | All | Lazy | ❌ Pending |
-| Total Source Lines | 38,655 | 38,655 | ~30,000 | ❌ Pending |
+| Metric | Before (v3.x) | v4.0.0 | v4.1.0 | Target | Status |
+|--------|---------------|--------|--------|--------|--------|
+| Tool Count | 1 monolithic | 9 focused | 9 focused | 9 | ✅ Complete |
+| Schema Sources | 2 (Zod + JSON) | 2 (partial) | 1 (Zod only) | 1 | ✅ Complete |
+| Token Usage | ~8-10K | ~4-5K | ~3-4K | ~2-3K | 🔄 70% |
+| Largest File | 2546 lines | 2546 lines | 2546 lines | <500 lines | ❌ Pending |
+| Eager Imports | All | All | Lazy Services | Lazy | 🔄 Partial |
+| Total Source Lines | 38,655 | 38,655 | ~38,200 | ~30,000 | 🔄 In Progress |
 
 ---
 
 ## Sprint 5: Tool Splitting & Schema Refactor ✅ COMPLETE
 
-**Status**: 90% Complete (v4.0.0 Released)
+**Status**: 100% Complete (v4.1.0)
 **Duration**: Completed
 
 ### Task 5.1: Install and Configure zod-to-json-schema ✅
@@ -76,8 +77,8 @@ Shared properties extracted into `BaseThoughtSchema`:
 - `deepthinking_scientific` - "Scientific: hypothesis testing, systems thinking, formal logic"
 - `deepthinking_session` - "Session: summarize, export, get, switch_mode, recommend"
 
-### Task 5.5: Implement Lazy Schema Loading ❌
-**Status**: NOT IMPLEMENTED
+### Task 5.5: Implement Lazy Schema Loading ✅
+**Status**: COMPLETE (v4.1.0)
 **Priority**: HIGH
 **File**: `src/tools/lazy-loader.ts` (to create)
 
@@ -114,29 +115,15 @@ export async function getSchema(toolName: string) {
 
 Server now registers all 9 focused tools plus legacy tool for backward compatibility.
 
-### Task 5.7: Remove Duplicate JSON Schema from thinking.ts ❌
-**Status**: NOT IMPLEMENTED
-**Priority**: CRITICAL
+### Task 5.7: Remove Duplicate JSON Schema from thinking.ts ✅
+**Status**: COMPLETE (v4.1.0)
 **File**: `src/tools/thinking.ts`
 
-**Problem**: The legacy tool still contains 1,136 lines including ~400 lines of manually maintained JSON Schema that duplicates the Zod schema.
-
-**Current Structure** (lines 11-698 = Zod, lines 705-1135 = duplicate JSON):
-- Lines 11-698: `ThinkingToolSchema` (Zod) - 687 lines
-- Lines 705-1135: `thinkingTool.inputSchema` (JSON) - 430 lines of duplication
-
-**Solution**: Replace manual JSON schema with auto-generated:
-```typescript
-import { zodToJsonSchema } from 'zod-to-json-schema';
-
-export const thinkingTool = {
-  name: 'deepthinking',
-  description: '[DEPRECATED] Use deepthinking_* tools instead.',
-  inputSchema: zodToJsonSchema(ThinkingToolSchema, { target: 'openApi3' })
-};
-```
-
-**Expected Reduction**: ~430 lines → ~5 lines (99% reduction in this file)
+**Achieved**:
+- Removed 414 lines of manually maintained JSON Schema
+- File reduced from 1,136 → 722 lines (36% reduction)
+- Now uses `zodToJsonSchema()` for auto-generation
+- Single source of truth: Zod schemas only
 
 ### Task 5.8: Optimize Schema Descriptions ✅
 **Status**: COMPLETE
@@ -395,34 +382,21 @@ src/batch/
 
 ---
 
-## Sprint 9: Import Optimization & Lazy Loading 🆕 NEW
+## Sprint 9: Import Optimization & Lazy Loading 🔄 IN PROGRESS
 
-**Status**: NOT STARTED
+**Status**: 20% Complete (Task 9.1 done)
 **Goal**: Implement comprehensive lazy loading throughout codebase
 **Priority**: HIGH
 
-### Task 9.1: Implement Service Lazy Loading in index.ts
-**Priority**: CRITICAL
+### Task 9.1: Implement Service Lazy Loading in index.ts ✅
+**Status**: COMPLETE (v4.1.0)
 **File**: `src/index.ts`
 
-**Current** (lines 57-60):
-```typescript
-const sessionManager = new SessionManager();
-const thoughtFactory = new ThoughtFactory();
-const exportService = new ExportService();
-const modeRouter = new ModeRouter(sessionManager);
-```
-
-**Solution**: Lazy initialize on first use
-```typescript
-let _sessionManager: SessionManager | null = null;
-function getSessionManager() {
-  if (!_sessionManager) {
-    _sessionManager = new SessionManager();
-  }
-  return _sessionManager;
-}
-```
+**Achieved**:
+- Converted all services to lazy loading with async getters
+- Dynamic imports for SessionManager, ThoughtFactory, ExportService, ModeRouter
+- Services instantiated on first use instead of startup
+- Benefits: Reduced startup time, lower initial memory footprint
 
 ### Task 9.2: Create Barrel Export Optimization
 **Priority**: HIGH
