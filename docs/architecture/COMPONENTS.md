@@ -1,5 +1,7 @@
 # Component Architecture
 
+**Version**: 4.3.0 | **Last Updated**: 2025-11-26
+
 ## Core Components
 
 ### MCP Server Layer
@@ -333,6 +335,79 @@ interface BackupProvider {
 
 ## Validation & Security Components
 
+### `src/validation/constants.ts` - Validation Constants (v4.3.0)
+
+**Purpose**: Centralized validation enums and helper functions
+
+**Constants**:
+```typescript
+// Severity levels
+export const IssueSeverity = { ERROR: 'error', WARNING: 'warning', INFO: 'info' };
+
+// Issue categories
+export const IssueCategory = { STRUCTURAL: 'structural', LOGICAL: 'logical', MATHEMATICAL: 'mathematical', PHYSICAL: 'physical' };
+
+// Validation thresholds
+export const ValidationThresholds = {
+  MIN_PROBABILITY: 0, MAX_PROBABILITY: 1,
+  MIN_CONFIDENCE: 0, MAX_CONFIDENCE: 1,
+  MIN_PROGRESS: 0, MAX_PROGRESS: 100,
+  MIN_WEIGHT: 0, MAX_WEIGHT: 1
+};
+```
+
+**Helper Functions**:
+- `isInRange(value, min, max)` - Generic range check
+- `isValidProbability(value)` - Probability validation (0-1)
+- `isValidConfidence(value)` - Confidence validation (0-1)
+- `ValidationMessages` - Factory functions for consistent error messages
+
+---
+
+### `src/validation/validators/registry.ts` - Validator Registry (v4.3.0)
+
+**Purpose**: Lazy-loading validator management
+
+**Key Features**:
+- **Lazy Loading**: Validators loaded on-demand via dynamic imports
+- **Caching**: Loaded validators cached for reuse
+- **Preloading**: Optional preload for known high-use modes
+
+**Key Methods**:
+```typescript
+getAsync(mode: string): Promise<ModeValidator | undefined>  // Lazy load
+get(mode: string): ModeValidator | undefined                 // Sync (cached only)
+preload(modes: string[]): Promise<void>                      // Preload specific modes
+has(mode: string): boolean                                   // Check if mode supported
+```
+
+**Registry Structure** (consolidated in v4.3.0):
+```typescript
+const VALIDATOR_REGISTRY: Record<string, ValidatorConfig> = {
+  sequential: { module: './modes/sequential.js', className: 'SequentialValidator' },
+  // ... 17 more modes
+};
+```
+
+---
+
+### `src/validation/validators/base.ts` - Base Validator (v4.3.0)
+
+**Purpose**: Abstract base class with reusable validation methods
+
+**Reusable Methods** (added in v4.3.0):
+```typescript
+validateNumberRange(thought, value, fieldName, min, max, severity, category)
+validateProbability(thought, value, fieldName)
+validateConfidence(thought, value, fieldName)
+validateRequired(thought, value, fieldName, category)
+validateNonEmptyArray(thought, arr, fieldName, category)
+```
+
+**Benefits**: Consolidates 56+ range check patterns across validators
+
+---
+
 ### `src/validation/schemas.ts` - Input Validation
 
 **Purpose**: Type-safe input validation using Zod
@@ -399,6 +474,53 @@ interface BackupProvider {
 - Cognitive load estimation
 - Prerequisite knowledge analysis
 - Common pitfalls identification
+
+---
+
+## Visual Export Components (v4.3.0)
+
+### `src/export/visual/` - Modular Visual Exporters
+
+**Purpose**: Mode-specific visual export generation
+
+**Structure** (17 modular files):
+```
+src/export/visual/
+├── index.ts              # Unified VisualExporter class
+├── types.ts              # VisualFormat, VisualExportOptions
+├── utils.ts              # sanitizeId utility
+└── [15 mode-specific exporters]
+    causal.ts, temporal.ts, game-theory.ts, bayesian.ts,
+    sequential.ts, shannon.ts, abductive.ts, counterfactual.ts,
+    analogical.ts, evidential.ts, first-principles.ts,
+    systems-thinking.ts, scientific-method.ts, optimization.ts, formal-logic.ts
+```
+
+**Key Types**:
+```typescript
+type VisualFormat = 'mermaid' | 'dot' | 'ascii';
+
+interface VisualExportOptions {
+  format: VisualFormat;
+  includeMetadata?: boolean;
+  maxDepth?: number;
+}
+```
+
+**Unified Exporter Class**:
+```typescript
+class VisualExporter {
+  exportCausalGraph(thought: CausalThought, options: VisualExportOptions): string
+  exportTemporalTimeline(thought: TemporalThought, options: VisualExportOptions): string
+  // ... 15 mode-specific methods
+}
+```
+
+**Benefits**:
+- **Lazy loading**: Only load exporters when specific mode needed
+- **Tree-shaking**: Unused exporters eliminated during bundling
+- **Maintainability**: ~100-150 lines per file vs 2,546 line monolith
+- **Backward compatibility**: Unified class preserved for existing consumers
 
 ---
 
@@ -798,10 +920,11 @@ TaxonomySystem
 
 ### Coverage Targets
 - **Critical Paths**: 80%+ coverage ✅
-- **Overall**: 93.5% (608/650 tests passing)
-- **Type Safety**: 100% (0 type errors)
+- **Tests**: 763 passing
+- **Test Files**: 36
+- **Type Safety**: 100% (0 type suppressions)
 
 ---
 
-*Last Updated*: 2025-11-25
-*Component Version*: 3.4.5
+*Last Updated*: 2025-11-26
+*Component Version*: 4.3.0

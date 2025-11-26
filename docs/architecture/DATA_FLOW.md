@@ -1,5 +1,7 @@
 # Data Flow Architecture
 
+**Version**: 4.3.0 | **Last Updated**: 2025-11-26
+
 ## Overview
 
 This document describes how data flows through the DeepThinking MCP system, from client requests to persistence and back.
@@ -867,5 +869,5 @@ Storage
 
 ---
 
-*Last Updated*: 2025-11-25
-*Data Flow Version*: 3.4.5
+*Last Updated*: 2025-11-26
+*Data Flow Version*: 4.3.0
