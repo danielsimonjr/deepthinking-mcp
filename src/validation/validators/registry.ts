@@ -1,6 +1,7 @@
 /**
  * Validator Registry and Factory (v4.3.0)
  * Sprint 9.3: Lazy loading - validators loaded on-demand
+ * Sprint 10: Consolidated registry mapping
  *
  * Manages mode-specific validators with lazy instantiation
  */
@@ -8,51 +9,36 @@
 import type { ModeValidator } from './base.js';
 
 /**
- * Mode to validator module path mapping
+ * Validator configuration entry
  */
-const VALIDATOR_MODULES: Record<string, string> = {
-  sequential: './modes/sequential.js',
-  shannon: './modes/shannon.js',
-  mathematics: './modes/mathematics.js',
-  physics: './modes/physics.js',
-  hybrid: './modes/hybrid.js',
-  abductive: './modes/abductive.js',
-  causal: './modes/causal.js',
-  bayesian: './modes/bayesian.js',
-  counterfactual: './modes/counterfactual.js',
-  analogical: './modes/analogical.js',
-  temporal: './modes/temporal.js',
-  gametheory: './modes/gametheory.js',
-  evidential: './modes/evidential.js',
-  firstprinciples: './modes/firstprinciples.js',
-  systemsthinking: './modes/systemsthinking.js',
-  scientificmethod: './modes/scientificmethod.js',
-  optimization: './modes/optimization.js',
-  formallogic: './modes/formallogic.js',
-};
+interface ValidatorConfig {
+  module: string;
+  className: string;
+}
 
 /**
- * Validator class name mapping (for dynamic import extraction)
+ * Consolidated validator registry (Sprint 10: merged dual mappings)
+ * Format: mode -> { module path, class name }
  */
-const VALIDATOR_CLASSES: Record<string, string> = {
-  sequential: 'SequentialValidator',
-  shannon: 'ShannonValidator',
-  mathematics: 'MathematicsValidator',
-  physics: 'PhysicsValidator',
-  hybrid: 'HybridValidator',
-  abductive: 'AbductiveValidator',
-  causal: 'CausalValidator',
-  bayesian: 'BayesianValidator',
-  counterfactual: 'CounterfactualValidator',
-  analogical: 'AnalogicalValidator',
-  temporal: 'TemporalValidator',
-  gametheory: 'GameTheoryValidator',
-  evidential: 'EvidentialValidator',
-  firstprinciples: 'FirstPrinciplesValidator',
-  systemsthinking: 'SystemsThinkingValidator',
-  scientificmethod: 'ScientificMethodValidator',
-  optimization: 'OptimizationValidator',
-  formallogic: 'FormalLogicValidator',
+const VALIDATOR_REGISTRY: Record<string, ValidatorConfig> = {
+  sequential: { module: './modes/sequential.js', className: 'SequentialValidator' },
+  shannon: { module: './modes/shannon.js', className: 'ShannonValidator' },
+  mathematics: { module: './modes/mathematics.js', className: 'MathematicsValidator' },
+  physics: { module: './modes/physics.js', className: 'PhysicsValidator' },
+  hybrid: { module: './modes/hybrid.js', className: 'HybridValidator' },
+  abductive: { module: './modes/abductive.js', className: 'AbductiveValidator' },
+  causal: { module: './modes/causal.js', className: 'CausalValidator' },
+  bayesian: { module: './modes/bayesian.js', className: 'BayesianValidator' },
+  counterfactual: { module: './modes/counterfactual.js', className: 'CounterfactualValidator' },
+  analogical: { module: './modes/analogical.js', className: 'AnalogicalValidator' },
+  temporal: { module: './modes/temporal.js', className: 'TemporalValidator' },
+  gametheory: { module: './modes/gametheory.js', className: 'GameTheoryValidator' },
+  evidential: { module: './modes/evidential.js', className: 'EvidentialValidator' },
+  firstprinciples: { module: './modes/firstprinciples.js', className: 'FirstPrinciplesValidator' },
+  systemsthinking: { module: './modes/systemsthinking.js', className: 'SystemsThinkingValidator' },
+  scientificmethod: { module: './modes/scientificmethod.js', className: 'ScientificMethodValidator' },
+  optimization: { module: './modes/optimization.js', className: 'OptimizationValidator' },
+  formallogic: { module: './modes/formallogic.js', className: 'FormalLogicValidator' },
 };
 
 /**
@@ -80,7 +66,7 @@ class ValidatorRegistry {
     }
 
     // Check if mode is supported
-    if (!VALIDATOR_MODULES[mode]) {
+    if (!VALIDATOR_REGISTRY[mode]) {
       return undefined;
     }
 
@@ -109,15 +95,14 @@ class ValidatorRegistry {
    */
   private async loadValidator(mode: string): Promise<ModeValidator | undefined> {
     try {
-      const modulePath = VALIDATOR_MODULES[mode];
-      const className = VALIDATOR_CLASSES[mode];
+      const config = VALIDATOR_REGISTRY[mode];
 
-      if (!modulePath || !className) {
+      if (!config) {
         return undefined;
       }
 
-      const module = await import(modulePath);
-      const ValidatorClass = module[className];
+      const mod = await import(config.module);
+      const ValidatorClass = mod[config.className];
 
       if (!ValidatorClass) {
         return undefined;
@@ -145,7 +130,7 @@ class ValidatorRegistry {
    * Check if a validator exists for a mode (sync check for supported modes)
    */
   has(mode: string): boolean {
-    return mode in VALIDATOR_MODULES;
+    return mode in VALIDATOR_REGISTRY;
   }
 
   /**
@@ -159,7 +144,7 @@ class ValidatorRegistry {
    * Get all supported modes
    */
   getModes(): string[] {
-    return Object.keys(VALIDATOR_MODULES);
+    return Object.keys(VALIDATOR_REGISTRY);
   }
 
   /**

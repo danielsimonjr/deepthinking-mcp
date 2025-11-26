@@ -21,11 +21,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `systems-thinking.ts`, `scientific-method.ts`, `optimization.ts`, `formal-logic.ts`
   - `index.ts` - Barrel export with unified VisualExporter class
 
-#### Benefits
-- **Lazy loading**: Only load exporters when specific mode is needed
-- **Maintainability**: Smaller, focused files easier to modify
-- **Tree-shaking**: Unused exporters eliminated during bundling
-- **Backward compatibility**: Unified VisualExporter class preserved
+### 🔄 Sprint 9.2: Barrel Export Optimization
+- Replaced `export * from` patterns with explicit exports
+- Updated files:
+  - `src/session/index.ts` - Explicit SessionManager export
+  - `src/validation/index.ts` - Explicit schema/validator exports
+  - `src/tools/schemas/index.ts` - Explicit mode schema exports
+  - `src/export/index.ts` - Explicit visual/LaTeX exports
+- **Benefit**: Better tree-shaking, clearer API surface
+
+### ⚡ Sprint 9.3: Lazy Validator Loading
+- Converted eager imports in `ValidatorRegistry` to dynamic imports
+- Validators only instantiated when first requested
+- Added async `getAsync()` method for lazy loading
+- Added `preload()` method for selective preloading
+- Updated `ThoughtValidator` for async validation
+- **Benefit**: Reduces initial bundle execution time
+
+### 🧹 Sprint 10: Code Redundancy Elimination
+- Created `src/validation/constants.ts` with centralized:
+  - `IssueSeverity` constants (error, warning, info)
+  - `IssueCategory` constants (structural, logical, mathematical, physical)
+  - `ValidationThresholds` (probability, confidence, weight ranges)
+  - `ValidationMessages` factory functions
+  - `isInRange()`, `isValidProbability()`, `isValidConfidence()` helpers
+- Enhanced `BaseValidator` with reusable validation methods:
+  - `validateNumberRange()` - Consolidates 56+ range checks
+  - `validateProbability()` - Probability range validation
+  - `validateConfidence()` - Confidence range validation
+  - `validateRequired()` - Required field validation
+  - `validateNonEmptyArray()` - Array validation
+- Consolidated dual registry mappings in `registry.ts` into single `VALIDATOR_REGISTRY`
+- **Benefit**: Eliminates ~300 hardcoded string literals, reduces code duplication
 
 ### 📊 Test Results
 - **763 tests passing**

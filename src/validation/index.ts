@@ -1,7 +1,19 @@
 /**
  * Validation module exports (v4.3.0)
  * Sprint 9.2: Explicit exports for tree-shaking
+ * Sprint 10: Added validation constants
  */
+
+// Constants (Sprint 10)
+export {
+  IssueSeverity,
+  IssueCategory,
+  ValidationThresholds,
+  ValidationMessages,
+  isInRange,
+  isValidProbability,
+  isValidConfidence,
+} from './constants.js';
 
 // Validator exports
 export { ThoughtValidator, type ValidationContext } from './validator.js';

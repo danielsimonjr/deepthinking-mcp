@@ -1,11 +1,19 @@
 /**
- * Base Validator Interface and Abstract Class
+ * Base Validator Interface and Abstract Class (v4.3.0)
+ * Sprint 10: Added reusable validation methods
  *
  * Defines the contract that all mode-specific validators must implement
  */
 
 import { Thought, ValidationIssue } from '../../types/index.js';
 import { ValidationContext } from '../validator.js';
+import {
+  IssueSeverity,
+  IssueCategory,
+  ValidationThresholds,
+  ValidationMessages,
+  isInRange,
+} from '../constants.js';
 
 /**
  * Interface for mode-specific validators
@@ -119,6 +127,120 @@ export abstract class BaseValidator<T extends Thought = Thought> implements Mode
         description: 'Uncertainty must be between 0 and 1',
         suggestion: 'Provide uncertainty as a decimal (e.g., 0.2 for 20%)',
         category: 'structural',
+      });
+    }
+
+    return issues;
+  }
+
+  /**
+   * Validate a number is within a range (consolidates 56+ range checks)
+   * Sprint 10: Reusable range validation
+   */
+  protected validateNumberRange(
+    thought: Thought,
+    value: number | undefined,
+    fieldName: string,
+    min: number = 0,
+    max: number = 1,
+    severity: IssueSeverity = IssueSeverity.ERROR,
+    category: IssueCategory = IssueCategory.STRUCTURAL
+  ): ValidationIssue[] {
+    const issues: ValidationIssue[] = [];
+
+    if (value !== undefined && !isInRange(value, min, max)) {
+      issues.push({
+        severity,
+        thoughtNumber: thought.thoughtNumber,
+        description: ValidationMessages.INVALID_RANGE(fieldName, min, max),
+        suggestion: `Provide ${fieldName} as a value between ${min} and ${max}`,
+        category,
+      });
+    }
+
+    return issues;
+  }
+
+  /**
+   * Validate probability (0-1 range)
+   */
+  protected validateProbability(
+    thought: Thought,
+    value: number | undefined,
+    fieldName: string = 'Probability'
+  ): ValidationIssue[] {
+    return this.validateNumberRange(
+      thought,
+      value,
+      fieldName,
+      ValidationThresholds.MIN_PROBABILITY,
+      ValidationThresholds.MAX_PROBABILITY,
+      IssueSeverity.ERROR,
+      IssueCategory.MATHEMATICAL
+    );
+  }
+
+  /**
+   * Validate confidence (0-1 range)
+   */
+  protected validateConfidence(
+    thought: Thought,
+    value: number | undefined,
+    fieldName: string = 'Confidence'
+  ): ValidationIssue[] {
+    return this.validateNumberRange(
+      thought,
+      value,
+      fieldName,
+      ValidationThresholds.MIN_CONFIDENCE,
+      ValidationThresholds.MAX_CONFIDENCE,
+      IssueSeverity.ERROR,
+      IssueCategory.STRUCTURAL
+    );
+  }
+
+  /**
+   * Validate required field exists
+   */
+  protected validateRequired(
+    thought: Thought,
+    value: unknown,
+    fieldName: string,
+    category: IssueCategory = IssueCategory.STRUCTURAL
+  ): ValidationIssue[] {
+    const issues: ValidationIssue[] = [];
+
+    if (value === undefined || value === null) {
+      issues.push({
+        severity: IssueSeverity.ERROR,
+        thoughtNumber: thought.thoughtNumber,
+        description: ValidationMessages.REQUIRED_FIELD(fieldName),
+        suggestion: `Provide a value for ${fieldName}`,
+        category,
+      });
+    }
+
+    return issues;
+  }
+
+  /**
+   * Validate array is not empty
+   */
+  protected validateNonEmptyArray(
+    thought: Thought,
+    arr: unknown[] | undefined,
+    fieldName: string,
+    category: IssueCategory = IssueCategory.STRUCTURAL
+  ): ValidationIssue[] {
+    const issues: ValidationIssue[] = [];
+
+    if (!arr || arr.length === 0) {
+      issues.push({
+        severity: IssueSeverity.WARNING,
+        thoughtNumber: thought.thoughtNumber,
+        description: ValidationMessages.EMPTY_ARRAY(fieldName),
+        suggestion: `Add at least one item to ${fieldName}`,
+        category,
       });
     }
 
