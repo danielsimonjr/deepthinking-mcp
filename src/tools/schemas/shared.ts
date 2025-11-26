@@ -122,6 +122,17 @@ export const EventTypeEnum = z.enum(['instant', 'interval']);
  */
 export const TransformationEnum = z.enum(['covariant', 'contravariant', 'mixed']);
 
+/**
+ * Shannon methodology stages
+ */
+export const ShannonStageEnum = z.enum([
+  'problem_definition',
+  'constraints',
+  'model',
+  'proof',
+  'implementation',
+]);
+
 // ============================================================
 // REUSABLE OBJECT SCHEMAS
 // ============================================================
@@ -156,3 +167,4 @@ export type TemporalConstraint = z.infer<typeof TemporalConstraintEnum>;
 export type TemporalRelation = z.infer<typeof TemporalRelationEnum>;
 export type EventType = z.infer<typeof EventTypeEnum>;
 export type Transformation = z.infer<typeof TransformationEnum>;
+export type ShannonStage = z.infer<typeof ShannonStageEnum>;
