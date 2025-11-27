@@ -1,33 +1,309 @@
-# DeepThinking MCP - User Guide
+# DeepThinking MCP - Codebase Overview
 
-## What is DeepThinking MCP?
+## Project Summary
 
-DeepThinking MCP is a **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities for AI assistants like Claude. It offers **18 specialized thinking modes** to help solve complex problems through structured reasoning.
+DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 18 specialized thinking modes. The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, enterprise security features, and comprehensive export capabilities.
 
-**Version**: 4.3.0 | **Node**: >=18.0.0
+**Version**: 4.3.0 | **Node**: >=18.0.0 | **License**: MIT
 
 ---
 
-## Quick Start
+## Key Metrics
 
-### Installation
+| Metric | Value |
+|--------|-------|
+| Total Lines of Code | ~48,800 |
+| TypeScript Files | 182 |
+| Test Files | 36 |
+| Passing Tests | 763 |
+| Type Suppressions | 0 |
+| Thinking Modes | 18 |
+| Export Formats | 8 |
+| Reasoning Types | 110+ |
+| Visual Exporters | 15 |
 
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/deepthinking-mcp.git
-cd deepthinking-mcp
+---
 
-# Install dependencies
-npm install
+## Project Structure
 
-# Build
-npm run build
+```
+deepthinking-mcp/
+├── src/                    # Source code (~48,800 lines)
+│   ├── index.ts            # MCP server entry point
+│   ├── types/              # Type definitions (18 modes)
+│   ├── services/           # Business logic layer
+│   ├── session/            # Session management
+│   ├── validation/         # Zod schemas & validators
+│   ├── export/             # Export system (8 formats)
+│   ├── taxonomy/           # 110+ reasoning types
+│   ├── search/             # Full-text search engine
+│   ├── batch/              # Batch processing
+│   ├── backup/             # Backup & recovery
+│   ├── cache/              # Caching strategies
+│   ├── rate-limit/         # Rate limiting
+│   ├── repositories/       # Storage abstraction
+│   ├── modes/              # Mode implementations
+│   └── tools/              # MCP tool definitions
+├── tests/                  # Test suite (36 files, 763 tests)
+│   ├── unit/               # Unit tests
+│   └── integration/        # Integration tests
+├── docs/                   # Documentation
+│   └── architecture/       # Architecture docs
+├── dist/                   # Compiled output
+└── package.json            # Project configuration
 ```
 
+---
+
+## Core Source Directories
+
+### `src/types/` - Type System
+
+Comprehensive TypeScript definitions for the 18 reasoning modes:
+
+```
+src/types/
+├── core.ts                 # ThinkingMode enum, Thought union type
+├── config.ts               # Configuration types
+├── session.ts              # Session & validation types
+├── events.ts               # Event system types
+└── modes/                  # Mode-specific types
+    ├── sequential.ts       # Sequential thinking
+    ├── shannon.ts          # Information theory
+    ├── mathematics.ts      # Mathematical reasoning
+    ├── physics.ts          # Physical modeling
+    ├── causal.ts           # Causal inference
+    ├── bayesian.ts         # Bayesian reasoning
+    ├── game-theory.ts      # Game theoretic analysis
+    └── [11 more modes]
+```
+
+### `src/services/` - Business Logic Layer
+
+Core services extracted from the entry point:
+
+| Service | File | Responsibility |
+|---------|------|----------------|
+| **ThoughtFactory** | `ThoughtFactory.ts` | Mode-specific thought creation and validation |
+| **ExportService** | `ExportService.ts` | Multi-format export (8 formats) |
+| **ModeRouter** | `ModeRouter.ts` | Mode switching and recommendations |
+
+### `src/session/` - Session Management
+
+```
+src/session/
+├── manager.ts                    # SessionManager - lifecycle management
+├── SessionMetricsCalculator.ts   # O(1) incremental metrics
+├── storage.ts                    # Storage abstraction
+└── persistence.ts                # Persistence layer
+```
+
+### `src/validation/` - Validation System (v4.3.0)
+
+```
+src/validation/
+├── index.ts              # Public exports
+├── constants.ts          # IssueSeverity, IssueCategory, ValidationThresholds
+├── validator.ts          # Main validation orchestrator
+├── schemas.ts            # Zod schemas
+└── validators/
+    ├── base.ts           # BaseValidator with reusable methods
+    ├── registry.ts       # Lazy-loading ValidatorRegistry
+    └── modes/            # 18 mode-specific validators
+```
+
+### `src/export/` - Export System
+
+```
+src/export/
+├── index.ts              # Unified ExportService
+├── visual/               # Visual exporters (17 modular files)
+│   ├── index.ts          # VisualExporter class
+│   ├── types.ts          # VisualFormat, VisualExportOptions
+│   ├── utils.ts          # sanitizeId utility
+│   └── [15 mode-specific exporters]
+└── formats/              # Document format exporters
+    ├── markdown.ts
+    ├── latex.ts
+    ├── html.ts
+    ├── jupyter.ts
+    └── json.ts
+```
+
+### `src/taxonomy/` - Taxonomy System
+
+```
+src/taxonomy/
+├── reasoning-types.ts       # 110+ reasoning type definitions
+├── taxonomy-navigator.ts    # Hierarchy navigation
+├── suggestion-engine.ts     # Mode recommendations
+├── adaptive-mode.ts         # Intelligent mode selection
+└── multi-modal.ts           # Combined reasoning analysis
+```
+
+---
+
+## The 18 Thinking Modes
+
+### Core Modes (Full Runtime)
+| Mode | Purpose |
+|------|---------|
+| **Sequential** | Step-by-step linear reasoning |
+| **Shannon** | Information theory, entropy analysis |
+| **Mathematics** | Formal proofs, theorems |
+| **Physics** | Physical models, conservation laws |
+| **Hybrid** | Multi-approach combination |
+
+### Advanced Modes (Full Runtime)
+| Mode | Purpose |
+|------|---------|
+| **Metareasoning** | Reasoning about reasoning |
+| **Recursive** | Self-referential analysis |
+| **Modal** | Possibility/necessity logic |
+| **Stochastic** | Probabilistic reasoning |
+| **Constraint** | Constraint satisfaction |
+| **Optimization** | Objective function optimization |
+
+### Analytical Modes
+| Mode | Purpose |
+|------|---------|
+| **Causal** | Cause-effect relationships |
+| **Bayesian** | Probability updates |
+| **Counterfactual** | "What-if" scenarios |
+| **Temporal** | Time-based reasoning |
+
+### Additional Modes
+| Mode | Purpose |
+|------|---------|
+| **Abductive** | Hypothesis generation |
+| **Analogical** | Reasoning by analogy |
+| **Game Theory** | Strategic decision-making |
+| **Evidential** | Dempster-Shafer theory |
+| **First Principles** | Fundamental decomposition |
+| **Systems Thinking** | Holistic system analysis |
+| **Scientific Method** | Hypothesis → experiment → conclusion |
+| **Formal Logic** | Formal logical proofs |
+
+---
+
+## Key Files Reference
+
+### Entry Points
+| File | Purpose |
+|------|---------|
+| `src/index.ts` | MCP server entry, tool handlers |
+| `dist/index.js` | Compiled output (runtime entry) |
+
+### Core Types
+| File | Purpose |
+|------|---------|
+| `src/types/core.ts` | ThinkingMode enum, Thought union type, type guards |
+| `src/types/session.ts` | Session, ValidationIssue types |
+
+### Services
+| File | Purpose |
+|------|---------|
+| `src/services/ThoughtFactory.ts` | Thought creation for all 18 modes |
+| `src/services/ExportService.ts` | Export orchestration |
+| `src/services/ModeRouter.ts` | Mode switching logic |
+
+### Session
+| File | Purpose |
+|------|---------|
+| `src/session/manager.ts` | SessionManager class |
+| `src/session/SessionMetricsCalculator.ts` | Metrics calculation |
+
+### Validation
+| File | Purpose |
+|------|---------|
+| `src/validation/constants.ts` | Centralized validation constants |
+| `src/validation/validators/base.ts` | Reusable validation methods |
+| `src/validation/validators/registry.ts` | Lazy-loading validator registry |
+
+### Search & Batch
+| File | Purpose |
+|------|---------|
+| `src/search/engine.ts` | Full-text search with TF-IDF |
+| `src/batch/processor.ts` | Batch job execution |
+
+### Storage
+| File | Purpose |
+|------|---------|
+| `src/repositories/session.ts` | ISessionRepository interface |
+| `src/repositories/file-session.ts` | File-based implementation |
+| `src/repositories/memory-session.ts` | In-memory implementation |
+
+---
+
+## Architecture Patterns
+
+### 1. Service-Oriented Architecture
+Business logic extracted into focused service classes with single responsibilities.
+
+### 2. Repository Pattern
+Storage abstraction through `ISessionRepository` interface enables swappable backends.
+
+### 3. Factory Pattern
+`ThoughtFactory` centralizes mode-specific thought creation.
+
+### 4. Strategy Pattern
+Different thinking modes implemented as interchangeable strategies.
+
+### 5. Lazy Loading Pattern (v4.3.0)
+- Validators loaded on-demand via dynamic imports
+- Schemas loaded when first accessed
+- Visual exporters loaded per-mode
+
+### 6. Observer Pattern
+Progress callbacks and event handlers for async operations.
+
+---
+
+## Build & Development
+
+### Commands
+```bash
+npm run build        # Compile with tsup → dist/
+npm run dev          # Watch mode compilation
+npm run typecheck    # Type check without emitting
+npm run lint         # ESLint checks
+npm run format       # Prettier auto-format
+npm test             # Run tests (watch mode)
+npm run test:run     # Run tests once (CI)
+npm run test:coverage # Coverage reports
+```
+
+### Configuration Files
+| File | Purpose |
+|------|---------|
+| `tsconfig.json` | TypeScript configuration with path aliases |
+| `tsup.config.ts` | Build configuration (tree-shaking enabled) |
+| `vitest.config.ts` | Test configuration |
+| `.eslintrc.json` | Linting rules |
+| `.prettierrc` | Formatting rules |
+
+### Path Aliases
+Configured in `tsconfig.json`:
+- `@/*` → `src/*`
+- `@types/*` → `src/types/*`
+- `@validation/*` → `src/validation/*`
+- `@session/*`, `@search/*`, `@batch/*`, `@export/*`, `@taxonomy/*`
+
+---
+
+## MCP Integration
+
+### Tool Categories
+
+**Session Management**: `create_session`, `add_thought`, `get_session`, `list_sessions`, `delete_session`
+
+**Analysis & Export**: `get_summary`, `export_session`, `get_recommendations`, `switch_mode`
+
+**Search & Discovery**: `search_sessions`
+
+**Batch Operations**: `batch_submit`, `batch_status`
+
 ### Configuration
-
-Add to your MCP client configuration (e.g., Claude Desktop):
-
 ```json
 {
   "mcpServers": {
@@ -41,270 +317,55 @@ Add to your MCP client configuration (e.g., Claude Desktop):
 
 ---
 
-## Core Concepts
+## Export Capabilities
 
-### Thinking Sessions
+### Document Formats
+| Format | Extension | Use Case |
+|--------|-----------|----------|
+| JSON | `.json` | API integration, backup |
+| Markdown | `.md` | Documentation |
+| LaTeX | `.tex` | Academic papers |
+| HTML | `.html` | Web display |
+| Jupyter | `.ipynb` | Interactive analysis |
 
-A **session** represents a problem-solving context. Each session has:
-- A **title** describing the problem
-- A **thinking mode** (e.g., sequential, mathematics, causal)
-- A collection of **thoughts** that build the solution
-- **Metrics** tracking progress and quality
-
-### Thoughts
-
-A **thought** is a single reasoning step within a session. Thoughts include:
-- **Content**: The actual reasoning text
-- **Thought number**: Position in the sequence
-- **Mode-specific fields**: Depending on the thinking mode
-
-### Thinking Modes
-
-DeepThinking offers **18 specialized modes** for different problem types:
-
-| Category | Modes | Best For |
-|----------|-------|----------|
-| **Core** | Sequential, Shannon, Mathematics, Physics, Hybrid | General problem-solving, information theory, formal proofs |
-| **Advanced** | Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization | Complex multi-step problems, probability, constraints |
-| **Analytical** | Causal, Bayesian, Counterfactual, Temporal | Cause-effect analysis, probability updates, "what-if" scenarios |
-| **Creative** | Abductive, Analogical, First Principles | Hypothesis generation, reasoning by analogy |
-| **Systematic** | Systems Thinking, Scientific Method, Formal Logic, Game Theory, Evidential | Holistic analysis, hypothesis testing, strategic decisions |
-
----
-
-## Basic Usage
-
-### 1. Create a Session
-
-```
-Tool: create_session
-Arguments:
-  - title: "Optimize database query performance"
-  - mode: "sequential"
-```
-
-### 2. Add Thoughts
-
-```
-Tool: add_thought
-Arguments:
-  - sessionId: "<session-id>"
-  - thought: "First, let's identify the slow queries..."
-  - thoughtNumber: 1
-  - totalThoughts: 5
-  - nextThoughtNeeded: true
-```
-
-### 3. Continue Reasoning
-
-Add more thoughts, building on previous ones. The session tracks dependencies and metrics automatically.
-
-### 4. Complete the Session
-
-```
-Tool: add_thought
-Arguments:
-  - sessionId: "<session-id>"
-  - thought: "In conclusion, implementing an index on the user_id column..."
-  - thoughtNumber: 5
-  - totalThoughts: 5
-  - nextThoughtNeeded: false  # Marks session complete
-```
-
-### 5. Export Results
-
-```
-Tool: export_session
-Arguments:
-  - sessionId: "<session-id>"
-  - format: "markdown"  # or json, latex, html, mermaid, dot, ascii
-```
-
----
-
-## Available Tools
-
-### Session Management
-| Tool | Description |
-|------|-------------|
-| `create_session` | Start a new thinking session |
-| `add_thought` | Add a reasoning step to a session |
-| `get_session` | Retrieve session details |
-| `list_sessions` | List all sessions |
-| `delete_session` | Remove a session |
-
-### Analysis & Export
-| Tool | Description |
-|------|-------------|
-| `get_summary` | Generate session summary |
-| `export_session` | Export in various formats |
-| `get_recommendations` | Get mode recommendations |
-| `switch_mode` | Change thinking mode mid-session |
-
-### Search & Discovery
-| Tool | Description |
-|------|-------------|
-| `search_sessions` | Full-text search across sessions |
-
-### Batch Operations
-| Tool | Description |
-|------|-------------|
-| `batch_submit` | Submit batch jobs |
-| `batch_status` | Check job progress |
-
----
-
-## Choosing the Right Mode
-
-### For Mathematical Problems
-- **Mathematics**: Formal proofs, theorems, mathematical models
-- **Optimization**: Constraint satisfaction, objective functions
-- **Bayesian**: Probability calculations, updates
-
-### For Scientific Analysis
-- **Scientific Method**: Hypothesis → experiment → conclusion
-- **Physics**: Physical models, tensor analysis, conservation laws
-- **Causal**: Cause-effect relationships, intervention analysis
-
-### For Business/Strategic Decisions
-- **Game Theory**: Multi-agent decisions, Nash equilibrium
-- **Systems Thinking**: Holistic analysis, feedback loops
-- **First Principles**: Break down to fundamentals
-
-### For Uncertainty & Risk
-- **Shannon**: Information theory, uncertainty quantification
-- **Stochastic**: Probabilistic reasoning, Monte Carlo
-- **Evidential**: Dempster-Shafer theory, belief functions
-
-### For General Problem-Solving
-- **Sequential**: Step-by-step linear reasoning (default)
-- **Hybrid**: Combine multiple approaches
-- **Analogical**: Learn from similar problems
-
----
-
-## Export Formats
-
+### Visual Formats
 | Format | Output | Use Case |
 |--------|--------|----------|
-| `json` | Structured data | API integration, backup |
-| `markdown` | Human-readable text | Documentation, sharing |
-| `latex` | Academic format | Papers, reports |
-| `html` | Web-ready | Browser display |
-| `jupyter` | Notebook (.ipynb) | Interactive analysis |
-| `mermaid` | Diagrams | Visual flowcharts |
-| `dot` | GraphViz | Graph visualization |
-| `ascii` | Terminal-friendly | CLI display |
+| Mermaid | Flowcharts | Documentation |
+| DOT | GraphViz graphs | Visualization tools |
+| ASCII | Text diagrams | Terminal display |
 
 ---
 
-## Advanced Features
+## Testing
 
-### Mode Recommendations
-
-Not sure which mode to use? Ask for recommendations:
-
+### Test Structure
 ```
-Tool: get_recommendations
-Arguments:
-  - problemDescription: "I need to analyze customer churn factors"
-  - complexity: "high"
-  - domain: "business"
-```
-
-### Visual Exports
-
-Generate diagrams from your reasoning:
-
-```
-Tool: export_session
-Arguments:
-  - sessionId: "<session-id>"
-  - format: "mermaid"
+tests/
+├── unit/                   # 36 unit test files
+│   ├── session/            # Session management tests
+│   ├── validation/         # Validator tests
+│   ├── services/           # Service layer tests
+│   └── modes/              # Mode-specific tests
+└── integration/            # 7 integration tests
 ```
 
-This creates flowcharts, decision trees, or causal graphs depending on your session's mode.
-
-### Batch Processing
-
-Process multiple sessions at once:
-
-```
-Tool: batch_submit
-Arguments:
-  - type: "export"
-  - sessionIds: ["session-1", "session-2", "session-3"]
-  - format: "markdown"
-```
-
-### Search
-
-Find sessions by content, mode, or metadata:
-
-```
-Tool: search_sessions
-Arguments:
-  - query: "database optimization"
-  - modes: ["sequential", "optimization"]
-  - limit: 10
-```
+### Coverage
+- **Unit Tests**: 36 files
+- **Integration Tests**: 7 files
+- **Total Tests**: 763 passing
+- **Critical Paths**: 80%+ coverage
 
 ---
 
-## Best Practices
+## Further Documentation
 
-### 1. Choose Modes Intentionally
-Match the mode to your problem type. Use `get_recommendations` if unsure.
-
-### 2. Structure Your Thoughts
-- Start with problem definition
-- Build reasoning step by step
-- Reference previous thoughts when building on them
-
-### 3. Use Revisions
-If a thought needs updating:
-```
-Arguments:
-  - isRevision: true
-  - revisesThought: "<thought-id>"
-```
-
-### 4. Track Uncertainty
-For probabilistic modes, include uncertainty estimates:
-```
-Arguments:
-  - uncertainty: 0.2  # 20% uncertainty
-```
-
-### 5. Export for Documentation
-Export completed sessions for future reference and sharing.
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed system architecture
+- **[COMPONENTS.md](COMPONENTS.md)** - Component deep-dive
+- **[DATA_FLOW.md](DATA_FLOW.md)** - Data flow diagrams
+- **[CHANGELOG.md](../../CHANGELOG.md)** - Version history
 
 ---
 
-## Troubleshooting
-
-### Session Not Found
-- Verify the session ID is correct
-- Check if the session was deleted or expired
-
-### Invalid Mode
-- Use one of the 18 supported modes
-- Mode names are lowercase (e.g., `sequential`, not `Sequential`)
-
-### Export Fails
-- Ensure the session has at least one thought
-- Check the format name is valid
-
----
-
-## Further Reading
-
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture and design
-- **[COMPONENTS.md](COMPONENTS.md)** - Detailed component documentation
-- **[DATA_FLOW.md](DATA_FLOW.md)** - How data moves through the system
-- **[CHANGELOG.md](../../CHANGELOG.md)** - Version history and updates
-
----
-
-*Last Updated*: 2025-11-26
+*Last Updated*: 2025-11-27
 *Version*: 4.3.0
