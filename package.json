@@ -30,7 +30,7 @@
     "prepublishOnly": "npm run build && npm run test:publish"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@modelcontextprotocol/sdk": "^1.23.0",
     "zod": "^4.1.13",
     "zod-to-json-schema": "^3.25.0"
   },
