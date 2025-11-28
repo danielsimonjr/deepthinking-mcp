@@ -34,7 +34,13 @@
       "Bash(npx tsc:*)",
       "Bash(npm install:*)",
       "Bash(npm run typecheck:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(node dist/index.js:*)",
+      "Bash(node test-schema-output.js:*)",
+      "Bash(node test-schema-simple.mjs:*)",
+      "Bash(node test-list-tools.mjs:*)",
+      "Bash(node test-schema-2020.mjs:*)",
+      "Bash(npm run test:publish:*)"
     ],
     "deny": [],
     "ask": []
