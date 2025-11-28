@@ -712,11 +712,24 @@ export type ThinkingToolInput = z.infer<typeof ThinkingToolSchema>;
  * - deepthinking_probabilistic, deepthinking_causal, deepthinking_strategic
  * - deepthinking_analytical, deepthinking_scientific, deepthinking_session
  */
+// Generate JSON Schema and remove $schema property for MCP compatibility
+const generateMcpSchema = () => {
+  const jsonSchema = zodToJsonSchema(ThinkingToolSchema, {
+    target: 'jsonSchema2019-09',
+    $refStrategy: 'none',
+  });
+
+  // Remove $schema property as MCP doesn't support it
+  if (jsonSchema && typeof jsonSchema === 'object') {
+    const { $schema, ...rest } = jsonSchema as any;
+    return rest;
+  }
+
+  return jsonSchema;
+};
+
 export const thinkingTool = {
   name: 'deepthinking',
   description: '[DEPRECATED] Use deepthinking_* tools instead. Legacy tool supporting 18 reasoning modes with auto-routing to focused tools.',
-  inputSchema: zodToJsonSchema(ThinkingToolSchema, {
-    target: 'openApi3',
-    $refStrategy: 'none',
-  }),
+  inputSchema: generateMcpSchema(),
 };

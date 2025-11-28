@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.1] - 2025-11-28
+
+### 🐛 Bug Fixes
+
+#### Fixed MCP JSON Schema Compatibility Issue
+- **Root Cause**: MCP/Claude API requires JSON Schema draft 2020-12, but we were generating draft-07 schemas
+- **Error**: `"tools.125.custom.input_schema: JSON schema is invalid. It must match JSON Schema draft 2020-12"`
+- **Fixed**: Changed `zodToJsonSchema` target from `'jsonSchema7'` to `'jsonSchema2019-09'`
+  - Note: `jsonSchema2019-09` is the closest available target in zod-to-json-schema and is compatible with 2020-12
+- **Updated files**:
+  - `src/tools/schema-generator.ts` - Both `generateToolSchema()` and `generateJsonSchema()` functions (lines 18, 44)
+  - `src/tools/thinking.ts` - Legacy tool schema generation (line 718)
+- **Technical changes**:
+  - Uses JSON Schema 2019-09 format (compatible with 2020-12 requirements)
+  - Continued removal of `$schema` property for MCP compatibility
+- **Impact**: All 9 focused tools + legacy tool now generate MCP-compatible JSON schemas
+- **Benefit**: Resolves Claude API 400 errors when MCP server connects
+
+---
+
 ## [4.3.0] - 2025-11-26
 
 ### 🚀 Visual Export Modularization (Sprint 8.1)

@@ -14,13 +14,25 @@ export function generateToolSchema(
   name: string,
   description: string
 ) {
+  const jsonSchema = zodToJsonSchema(zodSchema, {
+    target: 'jsonSchema2019-09',
+    $refStrategy: 'none',
+  });
+
+  // Remove $schema property as MCP doesn't support it
+  if (jsonSchema && typeof jsonSchema === 'object') {
+    const { $schema, ...rest } = jsonSchema as any;
+    return {
+      name,
+      description,
+      inputSchema: rest,
+    };
+  }
+
   return {
     name,
     description,
-    inputSchema: zodToJsonSchema(zodSchema, {
-      target: 'openApi3',
-      $refStrategy: 'none',
-    }),
+    inputSchema: jsonSchema,
   };
 }
 
@@ -28,8 +40,16 @@ export function generateToolSchema(
  * Generate just the JSON schema without tool wrapper
  */
 export function generateJsonSchema(zodSchema: z.ZodType) {
-  return zodToJsonSchema(zodSchema, {
-    target: 'openApi3',
+  const jsonSchema = zodToJsonSchema(zodSchema, {
+    target: 'jsonSchema2019-09',
     $refStrategy: 'none',
   });
+
+  // Remove $schema property as MCP doesn't support it
+  if (jsonSchema && typeof jsonSchema === 'object') {
+    const { $schema, ...rest } = jsonSchema as any;
+    return rest;
+  }
+
+  return jsonSchema;
 }
