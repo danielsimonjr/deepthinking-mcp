@@ -27,6 +27,9 @@ test-backups-e2e/
 *.swo
 *~
 
+# Claude Code settings (local only)
+.claude/
+
 # OS
 .DS_Store
 Thumbs.db
@@ -49,9 +52,9 @@ debug-*.mjs
 temp-*.js
 temp-*.mjs
 
-# Note files for user/Claude communication (keep these)
-# .error.txt
-# .note.txt
+# Note files for user/Claude communication (local only, never commit)
+.error.txt
+.note.txt
 
 # Test output files (auto-generated)
 test-output.txt
