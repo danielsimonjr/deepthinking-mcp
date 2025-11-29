@@ -3,7 +3,7 @@
  * Sprint 5 Task 5.3: Causal, Counterfactual, Abductive modes
  */
 
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { BaseThoughtSchema } from '../base.js';
 
 export const CausalSchema = BaseThoughtSchema.extend({

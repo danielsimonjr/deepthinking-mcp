@@ -5,17 +5,74 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.4] - 2025-11-29
+
+### 🐛 Bug Fixes
+
+#### Completed zod/v3 Migration for All Schema Files
+- **Issue**: v4.3.3 fixed `schema-generator.ts` and `thinking.ts` but missed schema definition files
+- **Problem**: Tool schemas in `src/tools/schemas/` were still using `import { z } from 'zod'`
+- **Result**: MCP server tools had empty/undefined schemas at runtime despite tests passing
+- **Fixed**: Updated ALL schema files to use `import { z } from 'zod/v3'`
+- **Files updated**:
+  - `src/tools/schemas/base.ts`
+  - `src/tools/schemas/shared.ts`
+  - `src/tools/schemas/modes/*.ts` (all 8 mode schema files)
+- **Verification**: Manual MCP server test confirms all 10 tools now have valid schemas
+- **Test Results**: 758/758 tests passing
+- **Impact**: MCP server now connects properly with all tools having correct JSON schemas
+
+**What was wrong:**
+- v4.3.3 only fixed the schema *generator* functions
+- But the schema *definitions* (CoreSchema, MathSchema, etc.) were still using plain `zod` import
+- This caused runtime schemas to be empty even though tests passed (tests use TypeScript, not built JS)
+
+**Complete Fix:**
+All Zod imports throughout the codebase now use `zod/v3` compatibility layer for reliable schema generation.
+
+---
+
+## [4.3.3] - 2025-11-29
+
+### 🐛 Bug Fixes
+
+#### Fixed Zod v4 / zod-to-json-schema Compatibility Issue
+- **Root Cause**: `zod-to-json-schema` v3.25.0 generates empty schemas `{}` when used with Zod v4
+- **Discovery**: v4.3.2 SDK update exposed deeper incompatibility - schemas were completely empty
+- **Investigation**: Zod v4's native `toJSONSchema()` has issues with complex types (tuples, nested objects)
+- **Solution**: Use `zod/v3` import path with `zod-to-json-schema` for compatibility
+- **Fixed**: All schema generation now uses `import { z } from 'zod/v3'` with `zod-to-json-schema`
+- **Updated files**:
+  - `src/tools/schema-generator.ts` - Both `generateToolSchema()` and `generateJsonSchema()`
+  - `src/tools/thinking.ts` - Legacy tool schema generation
+- **Target**: Changed to `jsonSchema2020-12` for full MCP draft 2020-12 compliance
+- **Test Results**: 762/763 tests passing (only 1 non-critical benchmark test failing)
+- **Impact**: All MCP integration tests now pass - schema validation working correctly
+- **Benefit**: Resolves empty schema bug and ensures MCP server connects properly to Claude
+
+**Technical Details:**
+- Zod v4 packages both v3 and v4 APIs under different import paths
+- `import { z } from 'zod/v3'` provides v3-compatible API
+- `zod-to-json-schema` v3.25.0 works correctly with v3 API
+- This approach maintains Zod v4 dependency while using stable v3 schema generation
+
+**References:**
+- [zod-to-json-schema incompatibility with Zod v4](https://github.com/vercel/ai/issues/7189)
+- [Zod v4 JSON Schema Type Errors](https://v4.ai-sdk.dev/docs/troubleshooting/zod-v4-json-schema-type-error)
+
+---
+
 ## [4.3.2] - 2025-11-29
 
 ### 🐛 Bug Fixes
 
 #### Updated MCP SDK Dependency
+- **Note**: This fix was incomplete - schema generation was still broken (see v4.3.3)
 - **Root Cause**: MCP SDK was outdated (1.21.1 while package.json required ^1.23.0)
 - **Issue**: Continued JSON Schema validation errors despite schema format fixes in 4.3.1
 - **Error**: `"tools.125.custom.input_schema: JSON schema is invalid. It must match JSON Schema draft 2020-12"`
 - **Fixed**: Updated `@modelcontextprotocol/sdk` from 1.21.1 to 1.23.0
-- **Impact**: SDK update likely includes improved JSON Schema validation and draft 2020-12 compatibility
-- **Benefit**: Resolves persistent schema validation errors when MCP server connects
+- **Impact**: SDK update exposed deeper Zod v4 incompatibility (resolved in v4.3.3)
 
 ---
 

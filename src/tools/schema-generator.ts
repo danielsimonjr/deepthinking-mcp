@@ -1,13 +1,17 @@
 /**
  * Schema Generator (v4.0.0)
  * Sprint 5 Task 5.1: Auto-generate JSON Schema from Zod schemas
+ *
+ * Updated in v4.3.3 to use zod/v3 with zod-to-json-schema (draft 2020-12)
+ * Note: Zod v4's native toJSONSchema has compatibility issues with complex types
  */
 
+import { z } from 'zod/v3';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { z } from 'zod';
 
 /**
  * Generate MCP tool definition from Zod schema
+ * Uses zod-to-json-schema with draft 2020-12 target
  */
 export function generateToolSchema(
   zodSchema: z.ZodType,
@@ -15,7 +19,7 @@ export function generateToolSchema(
   description: string
 ) {
   const jsonSchema = zodToJsonSchema(zodSchema, {
-    target: 'jsonSchema2019-09',
+    target: 'jsonSchema2020-12',
     $refStrategy: 'none',
   });
 
@@ -38,10 +42,11 @@ export function generateToolSchema(
 
 /**
  * Generate just the JSON schema without tool wrapper
+ * Uses zod-to-json-schema with draft 2020-12 target
  */
 export function generateJsonSchema(zodSchema: z.ZodType) {
   const jsonSchema = zodToJsonSchema(zodSchema, {
-    target: 'jsonSchema2019-09',
+    target: 'jsonSchema2020-12',
     $refStrategy: 'none',
   });
 

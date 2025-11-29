@@ -6,7 +6,9 @@
  * The Zod schema is the single source of truth - JSON Schema is auto-generated.
  */
 
-import { z } from 'zod';
+// Use zod/v3 for compatibility with zod-to-json-schema
+// Zod v4's native toJSONSchema has issues with complex types like tuples
+import { z } from 'zod/v3';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 /**
@@ -712,10 +714,11 @@ export type ThinkingToolInput = z.infer<typeof ThinkingToolSchema>;
  * - deepthinking_probabilistic, deepthinking_causal, deepthinking_strategic
  * - deepthinking_analytical, deepthinking_scientific, deepthinking_session
  */
-// Generate JSON Schema and remove $schema property for MCP compatibility
+// Generate JSON Schema using zod-to-json-schema with zod/v3 import
+// Draft 2020-12 compatible (MCP requirement)
 const generateMcpSchema = () => {
   const jsonSchema = zodToJsonSchema(ThinkingToolSchema, {
-    target: 'jsonSchema2019-09',
+    target: 'jsonSchema2020-12',
     $refStrategy: 'none',
   });
 

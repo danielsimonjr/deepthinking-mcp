@@ -4,7 +4,7 @@
  * Sprint 7 Task 7.5: Use shared enums
  */
 
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { BaseThoughtSchema } from '../base.js';
 import {
   ConfidenceSchema,

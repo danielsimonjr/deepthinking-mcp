@@ -41,7 +41,13 @@
       "Bash(node test-list-tools.mjs:*)",
       "Bash(node test-schema-2020.mjs:*)",
       "Bash(npm run test:publish:*)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(tee:*)",
+      "Bash(node test-thinking-tool.mjs:*)",
+      "Bash(npx tsx:*)",
+      "WebSearch",
+      "Bash(npm uninstall:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

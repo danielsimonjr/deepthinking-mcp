@@ -6,7 +6,7 @@
  * Import these shared components instead of redefining.
  */
 
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 // ============================================================
 // NUMERIC SCHEMAS
