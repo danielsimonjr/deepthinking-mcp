@@ -41,6 +41,18 @@ test-server.js
 test-tool-call.js
 restore-mcps.cjs
 
+# Temporary debug/test scripts (Claude-created)
+test-*.js
+test-*.mjs
+debug-*.js
+debug-*.mjs
+temp-*.js
+temp-*.mjs
+
+# Note files for user/Claude communication (keep these)
+# .error.txt
+# .note.txt
+
 # Test output files (auto-generated)
 test-output.txt
 test-results.txt
