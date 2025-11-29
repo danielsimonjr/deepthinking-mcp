@@ -135,6 +135,56 @@ Configured in `tsconfig.json`:
 - `src/taxonomy/reasoning-types.ts` - All 110+ reasoning type definitions
 - `src/search/engine.ts` - Full-text search implementation
 
+## Development Best Practices
+
+### Cleanup Before Committing/Publishing
+
+**CRITICAL**: Always remove temporary debug/test artifacts before committing or publishing:
+
+```bash
+# Before git commit - check for junk files
+git status
+
+# Common temporary files to remove:
+rm test-*.mjs test-*.js debug-*.js temp-*.js .error.txt
+
+# Verify only intended files are staged
+git diff --cached
+```
+
+**Cleanup Checklist:**
+- ✅ Remove temporary test scripts (e.g., `test-mcp-server.mjs`, `test-schema-output.js`)
+- ✅ Delete debug files created during troubleshooting
+- ✅ Check for `.error.txt` or other runtime artifacts
+- ✅ Review `git status` output before committing
+- ✅ Verify `dist/` doesn't contain test artifacts before publishing
+- ✅ Run tests to ensure nothing broke after cleanup
+
+**Workflow:**
+1. Create temp files for debugging → Test/Debug → **Delete temp files** → Commit clean code
+2. Before `git commit`: Ask yourself "Did I create any temp/debug files?"
+3. Before `npm publish`: Verify package contents are clean
+
+### Build & Publish Workflow
+
+**IMPORTANT**: Always rebuild `dist/` AFTER source changes before publishing:
+
+```bash
+# Correct workflow
+1. Make source changes in src/
+2. npm run build              # ← CRITICAL: Build AFTER changes
+3. npm run test:publish       # Run tests (excludes benchmarks)
+4. git add -A && git commit   # Commit source + dist
+5. npm publish                # Publish to npm
+6. git push origin master     # Push to GitHub
+```
+
+**Common Mistakes:**
+- ❌ Building before source changes (v4.3.4 bug)
+- ❌ Committing source without rebuilding dist/
+- ❌ Publishing with outdated dist/ files
+- ✅ Build → Test → Commit → Publish (correct order)
+
 ## Memory Usage Reminder
 
 **IMPORTANT**: Use the `memory-mcp` tools periodically during sessions to:
