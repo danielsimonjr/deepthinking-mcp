@@ -220,16 +220,22 @@ export const deepthinking_temporal_schema = {
       timeline: {
         type: "object",
         properties: {
-          start: { type: "string", description: "Timeline start point" },
-          end: { type: "string", description: "Timeline end point" },
-          unit: {
+          id: { type: "string", description: "Timeline ID" },
+          name: { type: "string", description: "Timeline name" },
+          timeUnit: {
             type: "string",
             enum: ["milliseconds", "seconds", "minutes", "hours", "days", "months", "years"],
             description: "Time unit"
           },
-          resolution: { type: "string", description: "Timeline resolution" }
+          events: {
+            type: "array",
+            items: { type: "string" },
+            description: "Event IDs in this timeline"
+          },
+          startTime: { type: "number", description: "Timeline start time (optional)" },
+          endTime: { type: "number", description: "Timeline end time (optional)" }
         },
-        required: ["start", "end", "unit"],
+        required: ["id", "name", "timeUnit", "events"],
         additionalProperties: false,
         description: "Timeline definition"
       },
@@ -240,52 +246,90 @@ export const deepthinking_temporal_schema = {
           properties: {
             id: { type: "string" },
             name: { type: "string" },
+            description: { type: "string" },
+            timestamp: { type: "number", description: "Event timestamp as number" },
             type: {
               type: "string",
-              enum: ["instant", "interval"]
+              enum: ["instant", "interval"],
+              description: "Event type"
             },
-            timestamp: { type: "string" },
-            duration: { type: "number" },
-            description: { type: "string" }
-          },
-          required: ["id", "name", "type"],
-          additionalProperties: false
-        },
-        description: "Events on the timeline"
-      },
-      temporalConstraints: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            event1: { type: "string" },
-            relation: {
-              type: "string",
-              enum: ["before", "after", "during", "overlaps", "meets", "starts", "finishes", "equals"]
-            },
-            event2: { type: "string" }
-          },
-          required: ["event1", "relation", "event2"],
-          additionalProperties: false
-        },
-        description: "Allen interval algebra constraints"
-      },
-      causalRelations: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            from: { type: "string" },
-            to: { type: "string" },
-            type: {
-              type: "string",
-              enum: ["causes", "enables", "prevents", "precedes", "follows"]
+            duration: { type: "number", description: "Event duration (optional)" },
+            properties: {
+              type: "object",
+              additionalProperties: true,
+              description: "Additional event properties"
             }
           },
-          required: ["from", "to", "type"],
+          required: ["id", "name", "description", "timestamp", "type"],
           additionalProperties: false
         },
-        description: "Causal relationships between events"
+        description: "Temporal events"
+      },
+      constraints: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            type: {
+              type: "string",
+              enum: ["before", "after", "during", "simultaneous"],
+              description: "Constraint type"
+            },
+            subject: { type: "string", description: "Subject event ID" },
+            object: { type: "string", description: "Object event ID" },
+            confidence: { type: "number", minimum: 0, maximum: 1, description: "Confidence in constraint" }
+          },
+          required: ["id", "type", "subject", "object", "confidence"],
+          additionalProperties: false
+        },
+        description: "Temporal constraints"
+      },
+      intervals: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            start: { type: "number", description: "Interval start" },
+            end: { type: "number", description: "Interval end" },
+            contains: {
+              type: "array",
+              items: { type: "string" },
+              description: "Event IDs contained in this interval"
+            },
+            overlaps: {
+              type: "array",
+              items: { type: "string" },
+              description: "Interval IDs that overlap"
+            }
+          },
+          required: ["id", "name", "start", "end"],
+          additionalProperties: false
+        },
+        description: "Temporal intervals"
+      },
+      relations: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            from: { type: "string", description: "Source event ID" },
+            to: { type: "string", description: "Target event ID" },
+            relationType: {
+              type: "string",
+              enum: ["before", "after", "during", "overlaps", "meets", "starts", "finishes", "equals", "causes"],
+              description: "Relation type (Allen's interval algebra)"
+            },
+            strength: { type: "number", minimum: 0, maximum: 1, description: "Relation strength" },
+            delay: { type: "number", description: "Temporal delay (optional)" }
+          },
+          required: ["id", "from", "to", "relationType", "strength"],
+          additionalProperties: false
+        },
+        description: "Temporal relations between events"
       }
     },
     required: [...baseThoughtRequired],

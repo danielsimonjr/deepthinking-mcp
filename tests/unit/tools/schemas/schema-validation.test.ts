@@ -119,10 +119,11 @@ describe('JSON Schema 2020-12 Compliance', () => {
       expect(schema.type).toBe('object');
       expect(schema.properties).toHaveProperty('timeline');
       expect(schema.properties).toHaveProperty('events');
-      expect(schema.properties).toHaveProperty('temporalConstraints'); // Updated: was 'constraints'
-      expect(schema.properties).toHaveProperty('causalRelations'); // Temporal also has causal relations
+      expect(schema.properties).toHaveProperty('constraints'); // Matches Zod schema
+      expect(schema.properties).toHaveProperty('intervals'); // Temporal intervals
+      expect(schema.properties).toHaveProperty('relations'); // Temporal relations
 
-      // Should have 15+ properties (base + temporal-specific)
+      // Should have 15+ properties (base + temporal-specific: timeline, events, constraints, intervals, relations)
       expect(Object.keys(schema.properties).length).toBeGreaterThanOrEqual(15);
     });
 
