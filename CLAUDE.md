@@ -167,23 +167,31 @@ git diff --cached
 
 ### Build & Publish Workflow
 
-**IMPORTANT**: Always rebuild `dist/` AFTER source changes before publishing:
+**CRITICAL**: Always follow this exact order - typecheck and test BEFORE building:
 
 ```bash
-# Correct workflow
+# Correct workflow (v4.4.0+)
 1. Make source changes in src/
-2. npm run build              # ← CRITICAL: Build AFTER changes
-3. npm run test:publish       # Run tests (excludes benchmarks)
-4. git add -A && git commit   # Commit source + dist
-5. npm publish                # Publish to npm
-6. git push origin master     # Push to GitHub
+2. npm run typecheck          # ← CRITICAL: Type check FIRST
+3. npm run test:publish       # ← CRITICAL: Test BEFORE building
+4. npm run build              # ← Build AFTER typecheck and tests pass
+5. git add -A && git commit   # Commit source + dist
+6. npm publish                # Publish to npm
+7. git push origin master     # Push to GitHub
 ```
 
+**Why This Order Matters:**
+- Typecheck catches errors before wasting time on builds
+- Tests verify correctness before building
+- Building only when code is verified saves time
+- Never commit broken code
+
 **Common Mistakes:**
-- ❌ Building before source changes (v4.3.4 bug)
+- ❌ Building before typechecking (wastes time if types are wrong)
+- ❌ Building before testing (wastes time if tests fail)
 - ❌ Committing source without rebuilding dist/
 - ❌ Publishing with outdated dist/ files
-- ✅ Build → Test → Commit → Publish (correct order)
+- ✅ Typecheck → Test → Build → Commit → Publish (correct order)
 
 ## Memory Usage Reminder
 

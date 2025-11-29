@@ -4,7 +4,7 @@
  * Sprint 7 Task 7.5: Use shared enums
  */
 
-import { z } from 'zod/v3';
+import { z } from 'zod';
 import { BaseThoughtSchema } from '../base.js';
 import {
   ConfidenceSchema,
@@ -30,7 +30,7 @@ const TemporalEventSchema = z.object({
   timestamp: z.number(),
   type: EventTypeEnum,
   duration: z.number().optional(),
-  properties: z.record(z.unknown()).optional(),
+  properties: z.record(z.string(), z.unknown()).optional(),
 });
 
 const TemporalConstraintSchema = z.object({

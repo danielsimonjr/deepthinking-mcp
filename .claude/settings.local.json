@@ -47,7 +47,9 @@
       "Bash(npx tsx:*)",
       "WebSearch",
       "Bash(npm uninstall:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "mcp__sequential-thinking-mcp__sequentialthinking",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

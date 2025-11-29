@@ -3,7 +3,7 @@
  * Sprint 5 Task 5.3: Analogical, First Principles modes
  */
 
-import { z } from 'zod/v3';
+import { z } from 'zod';
 import { BaseThoughtSchema } from '../base.js';
 
 export const AnalyticalSchema = BaseThoughtSchema.extend({

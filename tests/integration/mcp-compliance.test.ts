@@ -91,16 +91,18 @@ describe('MCP Protocol Compliance', () => {
     it('should define properties with correct types', () => {
       const props = thinkingTool.inputSchema.properties;
 
-      // Core fields
+      // Core required fields
       expect(props.thought.type).toBe('string');
       expect(props.thoughtNumber.type).toBe('integer');
       expect(props.totalThoughts.type).toBe('integer');
       expect(props.nextThoughtNeeded.type).toBe('boolean');
 
-      // Optional fields
+      // Optional fields for backward compatibility
       expect(props.sessionId).toBeDefined();
       expect(props.mode).toBeDefined();
-      expect(props.action).toBeDefined();
+
+      // Note: Legacy tool is simplified - action and detailed mode properties removed
+      // Users should migrate to deepthinking_* focused tools
     });
 
     it('should define mode enum with all 18 modes', () => {
@@ -135,68 +137,12 @@ describe('MCP Protocol Compliance', () => {
       }
     });
 
-    it('should define action enum with all actions', () => {
-      const actionEnum = thinkingTool.inputSchema.properties.action.enum;
+    // Note: Legacy tool simplified - action and mode-specific properties removed
+    // Tests removed as they're no longer relevant for the deprecated legacy tool
+    // Users should use deepthinking_* focused tools which have proper mode-specific schemas
 
-      expect(Array.isArray(actionEnum)).toBe(true);
-
-      const expectedActions = [
-        'add_thought',
-        'summarize',
-        'export',
-        'switch_mode',
-        'get_session',
-        'recommend_mode',
-      ];
-
-      for (const action of expectedActions) {
-        expect(actionEnum).toContain(action);
-      }
-    });
-
-    it('should define mode-specific properties', () => {
-      const props = thinkingTool.inputSchema.properties;
-
-      // Shannon mode
-      expect(props.stage).toBeDefined();
-      expect(props.stage.enum).toContain('problem_definition');
-      expect(props.stage.enum).toContain('constraints');
-      expect(props.stage.enum).toContain('model');
-      expect(props.stage.enum).toContain('proof');
-      expect(props.stage.enum).toContain('implementation');
-
-      // Mathematics mode
-      expect(props.mathematicalModel).toBeDefined();
-      expect(props.proofStrategy).toBeDefined();
-      expect(props.thoughtType).toBeDefined();
-
-      // Physics mode
-      expect(props.tensorProperties).toBeDefined();
-      expect(props.physicalInterpretation).toBeDefined();
-
-      // Uncertainty (Shannon, Bayesian, etc.)
-      expect(props.uncertainty).toBeDefined();
-      expect(props.uncertainty.type).toBe('number');
-    });
-
-    it('should define complex nested structures', () => {
-      const props = thinkingTool.inputSchema.properties;
-
-      // Mathematical model structure
-      expect(props.mathematicalModel.type).toBe('object');
-      expect(props.mathematicalModel.properties.latex).toBeDefined();
-      expect(props.mathematicalModel.properties.symbolic).toBeDefined();
-
-      // Proof strategy structure
-      expect(props.proofStrategy.type).toBe('object');
-      expect(props.proofStrategy.properties.type).toBeDefined();
-      expect(props.proofStrategy.properties.steps).toBeDefined();
-
-      // Tensor properties structure
-      expect(props.tensorProperties.type).toBe('object');
-      expect(props.tensorProperties.properties.rank).toBeDefined();
-      expect(props.tensorProperties.properties.components).toBeDefined();
-    });
+    // Note: Detailed nested structure tests removed - legacy tool is simplified
+    // Use deepthinking_* focused tools for mode-specific schemas
   });
 
   describe('Zod Schema Validation', () => {
@@ -319,31 +265,12 @@ describe('MCP Protocol Compliance', () => {
       expect(description).toContain('export');
     });
 
-    it('should define exportFormat property', () => {
-      const props = thinkingTool.inputSchema.properties;
-      expect(props.exportFormat).toBeDefined();
-      expect(props.exportFormat.enum).toBeDefined();
-    });
+    // Note: exportFormat removed from legacy tool - use deepthinking_session instead
   });
 
   describe('Schema Completeness', () => {
-    it('should define all Phase 3 mode-specific properties', () => {
-      const props = thinkingTool.inputSchema.properties;
-
-      // Temporal reasoning
-      expect(props.events).toBeDefined();
-      expect(props.timeline).toBeDefined();
-      expect(props.constraints).toBeDefined();
-
-      // Game theory
-      expect(props.players).toBeDefined();
-      expect(props.strategies).toBeDefined();
-      expect(props.payoffMatrix).toBeDefined();
-
-      // Evidential reasoning (may be beliefFunctions in auto-generated schema)
-      expect(props.beliefFunctions || props.beliefMasses).toBeDefined();
-      expect(props.frameOfDiscernment).toBeDefined();
-    });
+    // Note: Phase 3 mode-specific properties removed from legacy tool
+    // Use deepthinking_* focused tools which have proper mode-specific schemas
 
     it('should maintain backward compatibility', () => {
       // All v1.0 fields should still be supported

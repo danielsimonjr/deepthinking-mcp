@@ -35,17 +35,8 @@ describe('MCP Protocol Compliance', () => {
       expect(required).toContain('nextThoughtNeeded');
     });
 
-    it('should define all action enum values correctly', () => {
-      const properties = thinkingTool.inputSchema.properties || {};
-      expect(properties.action).toBeDefined();
-      expect(properties.action.enum).toBeDefined();
-      expect(properties.action.enum).toContain('add_thought');
-      expect(properties.action.enum).toContain('summarize');
-      expect(properties.action.enum).toContain('export');
-      expect(properties.action.enum).toContain('switch_mode');
-      expect(properties.action.enum).toContain('get_session');
-      expect(properties.action.enum).toContain('recommend_mode');
-    });
+    // Note: action enum removed from simplified legacy tool
+    // Use deepthinking_session tool for session management actions
 
     it('should define all 18 thinking modes in mode enum', () => {
       const properties = thinkingTool.inputSchema.properties || {};
@@ -72,20 +63,8 @@ describe('MCP Protocol Compliance', () => {
       expect(properties.mode.enum).toContain('formallogic');
     });
 
-    it('should define all 8 export formats correctly', () => {
-      const properties = thinkingTool.inputSchema.properties || {};
-      expect(properties.exportFormat).toBeDefined();
-      expect(properties.exportFormat.enum).toBeDefined();
-      expect(properties.exportFormat.enum).toHaveLength(8);
-      expect(properties.exportFormat.enum).toContain('json');
-      expect(properties.exportFormat.enum).toContain('markdown');
-      expect(properties.exportFormat.enum).toContain('latex');
-      expect(properties.exportFormat.enum).toContain('html');
-      expect(properties.exportFormat.enum).toContain('jupyter');
-      expect(properties.exportFormat.enum).toContain('mermaid');
-      expect(properties.exportFormat.enum).toContain('dot');
-      expect(properties.exportFormat.enum).toContain('ascii');
-    });
+    // Note: exportFormat removed from simplified legacy tool
+    // Use deepthinking_session tool with action='export' for exporting sessions
   });
 
   describe('Parameter Validation', () => {

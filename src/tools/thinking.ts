@@ -1,15 +1,12 @@
 /**
- * Legacy thinking tool for DeepThinking MCP v4.0.0
+ * Legacy thinking tool for DeepThinking MCP v4.4.0
  * DEPRECATED: Use focused tools (deepthinking_*) instead
  *
  * This file provides backward compatibility only.
- * The Zod schema is the single source of truth - JSON Schema is auto-generated.
+ * Zod schema kept for runtime validation. JSON schema is hand-written.
  */
 
-// Use zod/v3 for compatibility with zod-to-json-schema
-// Zod v4's native toJSONSchema has issues with complex types like tuples
-import { z } from 'zod/v3';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { z } from 'zod';
 
 /**
  * Zod schema for runtime validation (internal use)
@@ -268,7 +265,7 @@ export const ThinkingToolSchema = z.object({
     timestamp: z.number(),
     duration: z.number().optional(),
     type: z.enum(['instant', 'interval']),
-    properties: z.record(z.any()),
+    properties: z.record(z.string(), z.any()),
   })).optional(),
   intervals: z.array(z.object({
     id: z.string(),
@@ -608,8 +605,8 @@ export const ThinkingToolSchema = z.object({
   solution: z.object({
     id: z.string(),
     type: z.enum(['optimal', 'feasible', 'infeasible', 'unbounded', 'approximate']),
-    variableValues: z.record(z.union([z.number(), z.string()])),
-    objectiveValues: z.record(z.number()),
+    variableValues: z.record(z.string(), z.union([z.number(), z.string()])),
+    objectiveValues: z.record(z.string(), z.number()),
     quality: z.number().min(0).max(1),
     computationTime: z.number().optional(),
     iterations: z.number().optional(),
@@ -620,7 +617,7 @@ export const ThinkingToolSchema = z.object({
     id: z.string(),
     robustness: z.number().min(0).max(1),
     criticalConstraints: z.array(z.string()),
-    shadowPrices: z.record(z.number()).optional(),
+    shadowPrices: z.record(z.string(), z.number()).optional(),
     recommendations: z.array(z.string()),
   }).optional(),
 
@@ -666,7 +663,7 @@ export const ThinkingToolSchema = z.object({
     formula: z.string().optional(),
     rows: z.array(z.object({
       rowNumber: z.number().int().positive(),
-      assignments: z.record(z.boolean()),
+      assignments: z.record(z.string(), z.boolean()),
       result: z.boolean(),
     })),
     isTautology: z.boolean(),
@@ -677,7 +674,7 @@ export const ThinkingToolSchema = z.object({
     id: z.string(),
     formula: z.string(),
     satisfiable: z.boolean(),
-    model: z.record(z.boolean()).optional(),
+    model: z.record(z.string(), z.boolean()).optional(),
     method: z.enum(['dpll', 'cdcl', 'resolution', 'truth_table', 'other']),
     complexity: z.string().optional(),
     explanation: z.string(),
@@ -707,32 +704,78 @@ export type ThinkingToolInput = z.infer<typeof ThinkingToolSchema>;
 
 /**
  * Legacy tool definition - DEPRECATED
- * JSON Schema is auto-generated from Zod schema (single source of truth)
  *
  * Use the focused tools instead:
  * - deepthinking_core, deepthinking_math, deepthinking_temporal
  * - deepthinking_probabilistic, deepthinking_causal, deepthinking_strategic
  * - deepthinking_analytical, deepthinking_scientific, deepthinking_session
+ *
+ * NOTE: This tool accepts a superset of all focused tool properties for backward compatibility.
+ * The schema lists all possible properties but most are optional.
  */
-// Generate JSON Schema using zod-to-json-schema with zod/v3 import
-// Draft 2020-12 compatible (MCP requirement)
-const generateMcpSchema = () => {
-  const jsonSchema = zodToJsonSchema(ThinkingToolSchema, {
-    target: 'jsonSchema2020-12',
-    $refStrategy: 'none',
-  });
-
-  // Remove $schema property as MCP doesn't support it
-  if (jsonSchema && typeof jsonSchema === 'object') {
-    const { $schema, ...rest } = jsonSchema as any;
-    return rest;
-  }
-
-  return jsonSchema;
-};
-
 export const thinkingTool = {
   name: 'deepthinking',
   description: '[DEPRECATED] Use deepthinking_* tools instead. Legacy tool supporting 18 reasoning modes with auto-routing to focused tools.',
-  inputSchema: generateMcpSchema(),
+  inputSchema: {
+    type: "object" as const,
+    properties: {
+      sessionId: { type: "string" },
+      mode: {
+        type: "string",
+        enum: ['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential', 'firstprinciples', 'systemsthinking', 'scientificmethod', 'optimization', 'formallogic'],
+        default: 'hybrid'
+      },
+      thought: { type: "string", minLength: 1 },
+      thoughtNumber: { type: "integer", minimum: 1 },
+      totalThoughts: { type: "integer", minimum: 1 },
+      nextThoughtNeeded: { type: "boolean" },
+      isRevision: { type: "boolean" },
+      revisesThought: { type: "string" },
+      revisionReason: { type: "string" },
+      branchFrom: { type: "string" },
+      branchId: { type: "string" },
+      stage: {
+        type: "string",
+        enum: ['problem_definition', 'constraints', 'model', 'proof', 'implementation']
+      },
+      uncertainty: { type: "number", minimum: 0, maximum: 1 },
+      dependencies: { type: "array", items: { type: "string" } },
+      assumptions: { type: "array", items: { type: "string" } },
+      thoughtType: { type: "string" },
+      // Math/Physics properties
+      mathematicalModel: {
+        type: "object",
+        properties: {
+          latex: { type: "string" },
+          symbolic: { type: "string" },
+          ascii: { type: "string" }
+        },
+        additionalProperties: false
+      },
+      proofStrategy: {
+        type: "object",
+        properties: {
+          type: { type: "string", enum: ['direct', 'contradiction', 'induction', 'construction', 'contrapositive'] },
+          steps: { type: "array", items: { type: "string" } }
+        },
+        additionalProperties: false
+      },
+      tensorProperties: {
+        type: "object",
+        properties: {
+          rank: { type: "array", items: { type: "number" }, minItems: 2, maxItems: 2 },
+          components: { type: "string" },
+          latex: { type: "string" },
+          symmetries: { type: "array", items: { type: "string" } },
+          invariants: { type: "array", items: { type: "string" } },
+          transformation: { type: "string", enum: ['covariant', 'contravariant', 'mixed'] }
+        },
+        additionalProperties: false
+      },
+      // All other optional properties from various modes (simplified for legacy compatibility)
+      // Most users should migrate to focused tools for full schema validation
+    },
+    required: ["thought", "thoughtNumber", "totalThoughts", "nextThoughtNeeded"],
+    additionalProperties: true  // Allow extra properties for backward compatibility
+  }
 };

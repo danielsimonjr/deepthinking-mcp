@@ -3,7 +3,7 @@
  * Sprint 5 Task 5.3: Scientific Method, Systems Thinking, Formal Logic modes
  */
 
-import { z } from 'zod/v3';
+import { z } from 'zod';
 import { BaseThoughtSchema } from '../base.js';
 
 export const ScientificSchema = BaseThoughtSchema.extend({

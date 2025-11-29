@@ -1,9 +1,9 @@
 /**
- * Tool Definitions Tests (v4.0.0)
- * Sprint 6: Testing for new tool split architecture
+ * Tool Definitions Tests (v4.4.0)
+ * Testing for hand-written schema architecture
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   tools,
   toolList,
@@ -13,15 +13,6 @@ import {
   isValidTool,
   getSchemaForTool,
 } from '../../../../src/tools/definitions.js';
-import {
-  getSchema,
-  getToolDefinition,
-  getLoadedTools,
-  getAvailableTools,
-  preloadSchemas,
-  clearSchemaCache,
-  getSchemaStats,
-} from '../../../../src/tools/lazy-loader.js';
 import { SCHEMA_VERSION, schemaMetadata, getDeprecationWarning } from '../../../../src/tools/schemas/version.js';
 
 describe('Tool Definitions', () => {
@@ -150,79 +141,6 @@ describe('Tool Definitions', () => {
   });
 });
 
-describe('Lazy Schema Loader', () => {
-  beforeEach(() => {
-    clearSchemaCache();
-  });
-
-  describe('getAvailableTools', () => {
-    it('should return all 9 tools', () => {
-      const available = getAvailableTools();
-      expect(available).toHaveLength(9);
-    });
-  });
-
-  describe('getLoadedTools', () => {
-    it('should start empty', () => {
-      expect(getLoadedTools()).toHaveLength(0);
-    });
-
-    it('should track loaded tools', async () => {
-      await getSchema('deepthinking_core');
-      expect(getLoadedTools()).toContain('deepthinking_core');
-    });
-  });
-
-  describe('getSchema', () => {
-    it('should load schema on demand', async () => {
-      const { schema, tool } = await getSchema('deepthinking_temporal');
-      expect(schema).toBeDefined();
-      expect(tool).toBeDefined();
-      expect(typeof schema.parse).toBe('function');
-    });
-
-    it('should throw for unknown tool', async () => {
-      await expect(getSchema('unknown')).rejects.toThrow('Unknown tool: unknown');
-    });
-
-    it('should cache loaded schemas', async () => {
-      await getSchema('deepthinking_core');
-      await getSchema('deepthinking_core');
-      expect(getLoadedTools().filter(t => t === 'deepthinking_core')).toHaveLength(1);
-    });
-  });
-
-  describe('getToolDefinition', () => {
-    it('should return tool definition', async () => {
-      const tool = await getToolDefinition('deepthinking_math');
-      expect(tool).toHaveProperty('name');
-      expect(tool).toHaveProperty('description');
-      expect(tool).toHaveProperty('inputSchema');
-    });
-  });
-
-  describe('preloadSchemas', () => {
-    it('should preload specified schemas', async () => {
-      await preloadSchemas(['deepthinking_core', 'deepthinking_math']);
-      expect(getLoadedTools()).toContain('deepthinking_core');
-      expect(getLoadedTools()).toContain('deepthinking_math');
-    });
-  });
-
-  describe('getSchemaStats', () => {
-    it('should return correct stats', async () => {
-      await getSchema('deepthinking_core');
-      await getSchema('deepthinking_temporal');
-
-      const stats = getSchemaStats();
-      expect(stats.loaded).toBe(2);
-      expect(stats.available).toBe(9);
-      expect(stats.loadedNames).toContain('deepthinking_core');
-      expect(stats.loadedNames).toContain('deepthinking_temporal');
-    });
-  });
-});
-
 describe('Schema Versioning', () => {
   describe('SCHEMA_VERSION', () => {
     it('should be version 4.0.0', () => {
@@ -265,8 +183,8 @@ describe('Schema Versioning', () => {
 
 describe('Schema Validation', () => {
   describe('CoreSchema', () => {
-    it('should validate valid core input', async () => {
-      const { schema } = await getSchema('deepthinking_core');
+    it('should validate valid core input', () => {
+      const schema = getSchemaForTool('deepthinking_core');
       const input = {
         thought: 'Test thought',
         thoughtNumber: 1,
@@ -277,8 +195,8 @@ describe('Schema Validation', () => {
       expect(() => schema.parse(input)).not.toThrow();
     });
 
-    it('should reject invalid mode', async () => {
-      const { schema } = await getSchema('deepthinking_core');
+    it('should reject invalid mode', () => {
+      const schema = getSchemaForTool('deepthinking_core');
       const input = {
         thought: 'Test',
         thoughtNumber: 1,
@@ -291,8 +209,8 @@ describe('Schema Validation', () => {
   });
 
   describe('TemporalSchema', () => {
-    it('should validate temporal input with timeline', async () => {
-      const { schema } = await getSchema('deepthinking_temporal');
+    it('should validate temporal input with timeline', () => {
+      const schema = getSchemaForTool('deepthinking_temporal');
       const input = {
         thought: 'Analyzing timeline',
         thoughtNumber: 1,
@@ -311,8 +229,8 @@ describe('Schema Validation', () => {
   });
 
   describe('SessionActionSchema', () => {
-    it('should validate session action', async () => {
-      const { schema } = await getSchema('deepthinking_session');
+    it('should validate session action', () => {
+      const schema = getSchemaForTool('deepthinking_session');
       const input = {
         action: 'summarize',
         sessionId: 'test-session',
@@ -320,8 +238,8 @@ describe('Schema Validation', () => {
       expect(() => schema.parse(input)).not.toThrow();
     });
 
-    it('should validate export action with format', async () => {
-      const { schema } = await getSchema('deepthinking_session');
+    it('should validate export action with format', () => {
+      const schema = getSchemaForTool('deepthinking_session');
       const input = {
         action: 'export',
         sessionId: 'test-session',

@@ -1,11 +1,13 @@
 /**
- * Focused Tool Definitions (v4.0.0)
+ * Focused Tool Definitions (v4.4.0)
  * Sprint 5 Task 5.4: Split monolithic tool into 9 focused tools
  *
- * Token optimization: ~8-10K tokens → ~3-4K tokens (60% reduction)
+ * REFACTORED: Now using hand-written JSON schemas like working MCP servers
+ * - Follows pattern from sequential-thinking-mcp and memory-mcp
+ * - Zod schemas kept for runtime validation only
  */
 
-import { generateToolSchema } from './schema-generator.js';
+import { jsonSchemas } from './json-schemas.js';
 import { SessionActionSchema } from './schemas/base.js';
 import { CoreSchema } from './schemas/modes/core.js';
 import { MathSchema } from './schemas/modes/mathematics.js';
@@ -17,69 +19,25 @@ import { AnalyticalSchema } from './schemas/modes/analytical.js';
 import { ScientificSchema } from './schemas/modes/scientific.js';
 
 /**
- * 9 focused tools replacing the monolithic deepthinking tool
- * Token-optimized descriptions (Sprint 7)
+ * 9 focused tools with hand-written JSON schemas
+ * Zod schemas used only for runtime validation
  */
 export const tools = {
-  deepthinking_core: generateToolSchema(
-    CoreSchema,
-    'deepthinking_core',
-    'Core modes: sequential, shannon (5-stage), hybrid'
-  ),
-
-  deepthinking_math: generateToolSchema(
-    MathSchema,
-    'deepthinking_math',
-    'Math/physics: proofs, tensors, LaTeX, conservation laws'
-  ),
-
-  deepthinking_temporal: generateToolSchema(
-    TemporalSchema,
-    'deepthinking_temporal',
-    'Temporal: timelines, Allen intervals, event sequencing'
-  ),
-
-  deepthinking_probabilistic: generateToolSchema(
-    ProbabilisticSchema,
-    'deepthinking_probabilistic',
-    'Probabilistic: Bayesian updates, Dempster-Shafer belief'
-  ),
-
-  deepthinking_causal: generateToolSchema(
-    CausalSchema,
-    'deepthinking_causal',
-    'Causal: graphs, counterfactuals, abductive inference'
-  ),
-
-  deepthinking_strategic: generateToolSchema(
-    StrategicSchema,
-    'deepthinking_strategic',
-    'Strategic: game theory, Nash equilibria, optimization'
-  ),
-
-  deepthinking_analytical: generateToolSchema(
-    AnalyticalSchema,
-    'deepthinking_analytical',
-    'Analytical: analogical mapping, first principles'
-  ),
-
-  deepthinking_scientific: generateToolSchema(
-    ScientificSchema,
-    'deepthinking_scientific',
-    'Scientific: hypothesis testing, systems thinking, formal logic'
-  ),
-
-  deepthinking_session: generateToolSchema(
-    SessionActionSchema,
-    'deepthinking_session',
-    'Session: summarize, export, get, switch_mode, recommend'
-  ),
+  deepthinking_core: jsonSchemas[0],
+  deepthinking_math: jsonSchemas[1],
+  deepthinking_temporal: jsonSchemas[2],
+  deepthinking_probabilistic: jsonSchemas[3],
+  deepthinking_causal: jsonSchemas[4],
+  deepthinking_strategic: jsonSchemas[5],
+  deepthinking_analytical: jsonSchemas[6],
+  deepthinking_scientific: jsonSchemas[7],
+  deepthinking_session: jsonSchemas[8],
 };
 
 /**
  * All tools as array for MCP ListTools
  */
-export const toolList = Object.values(tools);
+export const toolList = jsonSchemas;
 
 /**
  * Tool name to schema mapping for validation

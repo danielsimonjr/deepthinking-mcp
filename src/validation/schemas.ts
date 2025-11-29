@@ -148,7 +148,7 @@ export const ExportSessionSchema = z.object({
   sessionId: SessionIdSchema,
   format: z
     .enum(['json', 'markdown', 'latex'], {
-      errorMap: () => ({ message: 'Format must be json, markdown, or latex' }),
+      message: 'Format must be json, markdown, or latex',
     })
     .describe('Export format'),
 });
@@ -183,7 +183,7 @@ export type SearchSessionsInput = z.infer<typeof SearchSessionsSchema>;
  */
 export const BatchOperationSchema = z.object({
   type: z.enum(['export', 'import', 'analyze', 'validate', 'transform', 'index', 'backup', 'cleanup']),
-  params: z.record(z.unknown()).describe('Operation-specific parameters'),
+  params: z.record(z.string(), z.unknown()).describe('Operation-specific parameters'),
 });
 
 export type BatchOperationInput = z.infer<typeof BatchOperationSchema>;

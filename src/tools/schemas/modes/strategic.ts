@@ -4,7 +4,7 @@
  * Sprint 7 Task 7.5: Use shared schemas
  */
 
-import { z } from 'zod/v3';
+import { z } from 'zod';
 import { BaseThoughtSchema } from '../base.js';
 import { ConfidenceSchema } from '../shared.js';
 
