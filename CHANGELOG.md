@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.6] - 2025-11-29
+
+### 🧪 Testing
+
+#### Added Comprehensive Schema Validation Test Suite
+- **New Test File**: `tests/unit/tools/schemas/schema-validation.test.ts` (32 tests)
+- **Purpose**: Prevent regression of zod/v3 schema generation issues
+- **Coverage**:
+  1. JSON Schema 2020-12 Compliance (11 tests)
+     - All 9 tools have valid schemas with proper structure
+     - Property definitions validated across all tools
+     - Property counts match v4.3.5 verification (14-19 properties per tool)
+  2. zod/v3 Compatibility Layer (9 tests)
+     - Tuple types (regression test for v4.3.4 bug)
+     - Union types, optional fields, arrays, nested objects
+     - `$schema` property removal verification
+  3. Lazy Loader Schema Tests (3 tests)
+     - Runtime schema loading and consistency
+  4. Regression Tests (4 tests)
+     - Empty schemas prevention (v4.3.4 bug)
+     - Undefined schema.type prevention
+     - Build/runtime consistency checks
+  5. MCP Protocol Compliance (5 tests)
+     - Valid tool names, descriptions, inputSchema structure
+
+#### Fixed Flaky Checksum Test
+- **Issue**: `backup-manager.test.ts` checksum test randomly failed
+- **Root Cause**: Called `createMockSessions(3)` twice, each creating new `Date()` timestamps
+- **Fix**: Use same data reference for both backup operations to ensure identical checksums
+- **Result**: 790/790 tests passing (100% pass rate)
+
+### 📦 Release Summary
+- **Test Suite**: 790 tests passing (up from 789, +1 test file with 32 tests)
+- **Fixed**: Eliminated last flaky test
+- **Added**: Comprehensive schema validation to prevent future regressions
+- **Quality**: 100% test pass rate, robust schema validation coverage
+
+---
+
 ## [4.3.5] - 2025-11-29
 
 ### 🐛 Bug Fixes
