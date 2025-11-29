@@ -517,14 +517,14 @@ describe('BackupManager', () => {
         compression: 'none',
       };
 
-      const data1 = createMockSessions(3);
-      const data2 = createMockSessions(3);
+      // Use same data twice (same reference = identical data)
+      const data = createMockSessions(3);
 
-      const record1 = await manager.create(data1, config, {
+      const record1 = await manager.create(data, config, {
         basePath: '/tmp/test-backups',
       });
 
-      const record2 = await manager.create(data2, config, {
+      const record2 = await manager.create(data, config, {
         basePath: '/tmp/test-backups',
       });
 
