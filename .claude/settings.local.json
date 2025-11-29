@@ -49,7 +49,16 @@
       "Bash(npm uninstall:*)",
       "Bash(node:*)",
       "mcp__sequential-thinking-mcp__sequentialthinking",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "mcp__deepthinking-mcp__deepthinking_core",
+      "mcp__deepthinking-mcp__deepthinking_math",
+      "mcp__deepthinking-mcp__deepthinking_temporal",
+      "mcp__deepthinking-mcp__deepthinking_session",
+      "mcp__deepthinking-mcp__deepthinking_probabilistic",
+      "mcp__deepthinking-mcp__deepthinking_causal",
+      "mcp__deepthinking-mcp__deepthinking_strategic",
+      "mcp__deepthinking-mcp__deepthinking_analytical",
+      "mcp__deepthinking-mcp__deepthinking_scientific"
     ],
     "deny": [],
     "ask": []

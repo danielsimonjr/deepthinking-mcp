@@ -181,15 +181,20 @@ export const deepthinking_math_schema = {
         additionalProperties: false,
         description: "Tensor properties for physics calculations"
       },
-      conservationLaws: {
-        type: "array",
-        items: { type: "string" },
-        description: "Conservation laws applicable to this problem"
-      },
-      physicalPrinciples: {
-        type: "array",
-        items: { type: "string" },
-        description: "Physical principles being applied"
+      physicalInterpretation: {
+        type: "object",
+        properties: {
+          quantity: { type: "string", description: "Physical quantity being described" },
+          units: { type: "string", description: "Units of the quantity" },
+          conservationLaws: {
+            type: "array",
+            items: { type: "string" },
+            description: "Conservation laws applicable"
+          }
+        },
+        required: ["quantity", "units", "conservationLaws"],
+        additionalProperties: false,
+        description: "Physical interpretation of the model"
       }
     },
     required: [...baseThoughtRequired],
@@ -480,12 +485,15 @@ export const deepthinking_strategic_schema = {
           properties: {
             id: { type: "string" },
             name: { type: "string" },
-            objectives: {
+            isRational: { type: "boolean", description: "Whether player is rational" },
+            availableStrategies: {
               type: "array",
-              items: { type: "string" }
-            }
+              items: { type: "string" },
+              description: "Strategy IDs available to this player"
+            },
+            role: { type: "string", description: "Player's role in the game" }
           },
-          required: ["id", "name"],
+          required: ["id", "name", "isRational", "availableStrategies"],
           additionalProperties: false
         },
         description: "Players in the game"
@@ -495,30 +503,56 @@ export const deepthinking_strategic_schema = {
         items: {
           type: "object",
           properties: {
-            player: { type: "string" },
-            action: { type: "string" },
-            payoff: { type: "number" }
+            id: { type: "string" },
+            playerId: { type: "string", description: "ID of the player using this strategy" },
+            name: { type: "string", description: "Strategy name" },
+            description: { type: "string", description: "Strategy description" },
+            isPure: { type: "boolean", description: "Whether this is a pure strategy" },
+            probability: { type: "number", minimum: 0, maximum: 1, description: "Probability for mixed strategies" }
           },
-          required: ["player", "action"],
+          required: ["id", "playerId", "name", "description", "isPure"],
           additionalProperties: false
         },
         description: "Available strategies"
       },
-      equilibria: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            type: { type: "string" },
-            strategies: {
-              type: "array",
-              items: { type: "string" }
-            },
-            stability: { type: "string" }
+      payoffMatrix: {
+        type: "object",
+        properties: {
+          players: {
+            type: "array",
+            items: { type: "string" },
+            description: "Player IDs in the matrix"
           },
-          additionalProperties: false
+          dimensions: {
+            type: "array",
+            items: { type: "number" },
+            description: "Dimensions of the payoff matrix"
+          },
+          payoffs: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                strategyProfile: {
+                  type: "array",
+                  items: { type: "string" },
+                  description: "Strategy IDs for this profile"
+                },
+                payoffs: {
+                  type: "array",
+                  items: { type: "number" },
+                  description: "Payoff values for each player"
+                }
+              },
+              required: ["strategyProfile", "payoffs"],
+              additionalProperties: false
+            },
+            description: "Payoff entries"
+          }
         },
-        description: "Identified equilibria"
+        required: ["players", "dimensions", "payoffs"],
+        additionalProperties: false,
+        description: "Payoff matrix for the game"
       },
       objectiveFunction: {
         type: "string",
