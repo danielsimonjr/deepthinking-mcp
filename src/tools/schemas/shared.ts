@@ -105,11 +105,15 @@ export const TemporalConstraintEnum = z.enum([
  * Temporal relation types
  */
 export const TemporalRelationEnum = z.enum([
+  'before',
+  'after',
+  'during',
+  'overlaps',
+  'meets',
+  'starts',
+  'finishes',
+  'equals',
   'causes',
-  'enables',
-  'prevents',
-  'precedes',
-  'follows',
 ]);
 
 /**
