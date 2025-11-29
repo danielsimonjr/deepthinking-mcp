@@ -16,6 +16,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zod v4's built-in `toJSONSchema()` doesn't exist
 - `zod-to-json-schema` package had compatibility issues with Zod v4
 
+### 🐛 Bug Fixes (Post-Release)
+
+#### Schema Validation Bugs Fixed
+1. **Strategic Tool Schema** - Complete structure mismatch
+   - Players: Missing `isRational`, `availableStrategies` fields
+   - Strategies: Wrong field names (`player` → `playerId`, `action` → `name`)
+   - Missing entire `payoffMatrix` structure
+   - Fixed to match Zod schema exactly
+
+2. **Math Tool Schema** - Wrong structure for physics
+   - Had flat `conservationLaws` and `physicalPrinciples`
+   - Zod expects nested `physicalInterpretation` object
+   - Fixed: `physicalInterpretation.{quantity, units, conservationLaws}`
+
+3. **Temporal Tool Schema** - Completely incorrect structure
+   - timeline: Missing `id`, `name`, wrong field names (`unit` → `timeUnit`)
+   - events: `timestamp` was string, should be number
+   - Wrong field names: `temporalConstraints` → `constraints`
+   - Missing: `intervals` and `relations` arrays entirely
+   - Removed: `causalRelations` (not in Zod schema)
+   - Fixed to match Zod schema exactly
+
+#### Test Stability
+- **metrics-performance test**: Fixed flakiness
+  - Simplified from 3 test sizes to 2 (500/1000)
+  - Relaxed threshold from 3.0x to 5.0x for system variance
+  - More stable across different system loads
+
 ### ✨ Added
 
 #### Hand-Written JSON Schemas (`src/tools/json-schemas.ts`)
