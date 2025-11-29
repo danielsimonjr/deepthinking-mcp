@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.2] - 2025-11-29
+
+### 🐛 Bug Fixes
+
+#### Updated MCP SDK Dependency
+- **Root Cause**: MCP SDK was outdated (1.21.1 while package.json required ^1.23.0)
+- **Issue**: Continued JSON Schema validation errors despite schema format fixes in 4.3.1
+- **Error**: `"tools.125.custom.input_schema: JSON schema is invalid. It must match JSON Schema draft 2020-12"`
+- **Fixed**: Updated `@modelcontextprotocol/sdk` from 1.21.1 to 1.23.0
+- **Impact**: SDK update likely includes improved JSON Schema validation and draft 2020-12 compatibility
+- **Benefit**: Resolves persistent schema validation errors when MCP server connects
+
+---
+
 ## [4.3.1] - 2025-11-28
 
 ### 🐛 Bug Fixes
