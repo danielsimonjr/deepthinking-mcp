@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.5] - 2025-11-29
+
+### 🐛 Bug Fixes
+
+#### Rebuilt dist/ with correct zod/v3 schemas
+- **Issue**: v4.3.4 npm package had outdated dist files built BEFORE src schema fixes
+- **Problem**: dist/index.js was built at 12:20, but src files were committed at 12:34
+- **Result**: Published v4.3.4 package still had empty/undefined schemas at runtime
+- **Fixed**: Rebuilt dist/ after src changes, verified with manual MCP server test
+- **Verification**: test-mcp-server.mjs confirms all 10 tools have valid schemas (14-19 properties each)
+- **Impact**: MCP server now actually works when installed from npm
+
+**Timeline:**
+- v4.3.4 commit: Updated src files with zod/v3 imports
+- v4.3.4 publish: Used OLD dist files (built before src changes)
+- v4.3.5: Rebuilt dist + republished with correct schemas
+
+---
+
 ## [4.3.4] - 2025-11-29
 
 ### 🐛 Bug Fixes
