@@ -22,6 +22,8 @@ import {
   ShannonThought,
   MathematicsThought,
   PhysicsThought,
+  InductiveThought,
+  DeductiveThought,
   AbductiveThought,
   CausalThought,
   Thought,
@@ -136,6 +138,29 @@ export class ThoughtFactory {
           assumptions: input.assumptions || [],
           uncertainty: input.uncertainty || 0.5,
         } as PhysicsThought;
+
+      case 'inductive':
+        return {
+          ...baseThought,
+          mode: ThinkingMode.INDUCTIVE,
+          observations: input.observations || [],
+          pattern: input.pattern,
+          generalization: input.generalization || '',
+          confidence: input.confidence ?? 0.5,
+          counterexamples: input.counterexamples || [],
+          sampleSize: input.sampleSize,
+        } as InductiveThought;
+
+      case 'deductive':
+        return {
+          ...baseThought,
+          mode: ThinkingMode.DEDUCTIVE,
+          premises: input.premises || [],
+          conclusion: input.conclusion || '',
+          logicForm: input.logicForm,
+          validityCheck: input.validityCheck ?? false,
+          soundnessCheck: input.soundnessCheck,
+        } as DeductiveThought;
 
       case 'abductive':
         return {

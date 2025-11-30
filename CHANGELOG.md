@@ -5,6 +5,136 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.0] - 2025-11-30
+
+### 🚀 NEW FEATURE: Fundamental Reasoning Modes
+
+**Phase 5 Sprint 2 - New Core Reasoning Tool**
+
+This release introduces a new `deepthinking_core` tool with three fundamental reasoning modes: inductive, deductive, and abductive.
+
+#### New Features
+
+##### New Tool: `deepthinking_core`
+- **Inductive Reasoning**: Reason from specific observations to general principles
+  - Properties: `observations[]`, `pattern`, `generalization`, `confidence`, `counterexamples[]`, `sampleSize`
+  - Use case: Pattern recognition, hypothesis generation from data
+  - Example: "All observed swans are white" → "All swans are white" (with confidence score)
+
+- **Deductive Reasoning**: Reason from general principles to specific conclusions
+  - Properties: `premises[]`, `conclusion`, `logicForm`, `validityCheck`, `soundnessCheck`
+  - Use case: Logical proofs, formal reasoning, validity checking
+  - Example: "All humans are mortal, Socrates is human" → "Socrates is mortal"
+
+- **Abductive Reasoning**: Infer best explanation from observations (moved from causal)
+  - Properties: `observations[]`, `hypotheses[]`, `bestExplanation`, `evaluationCriteria`
+  - Use case: Diagnostic reasoning, root cause analysis
+  - Example: "The grass is wet" → "It probably rained"
+
+#### Breaking Changes
+
+##### Mode Migration
+- **Abductive mode** moved from `deepthinking_causal` to `deepthinking_core`
+- `deepthinking_causal` now only supports: `causal`, `counterfactual`
+- `deepthinking_core` supports: `inductive`, `deductive`, `abductive`
+
+##### Tool Count
+- Total tools: **10** (was 9)
+- New tool: `deepthinking_core` (index 0 in toolList)
+- All other tools shifted +1 in array indices
+
+##### Mode Count
+- Total modes: **20** (was 18)
+- New modes: `inductive`, `deductive`
+- All modes alphabetically: analogical, bayesian, causal, counterfactual, deductive, evidential, firstprinciples, formallogic, gametheory, hybrid, inductive, mathematics, optimization, physics, scientificmethod, sequential, shannon, systemsthinking, temporal
+
+#### Migration Guide
+
+**Abductive Mode Users:**
+```javascript
+// Before (v4.8.0)
+{ tool: "deepthinking_causal", mode: "abductive" }
+
+// After (v5.0.0)
+{ tool: "deepthinking_core", mode: "abductive" }
+```
+
+**Inductive Reasoning (NEW):**
+```javascript
+{
+  tool: "deepthinking_core",
+  mode: "inductive",
+  thought: "Analyzing pattern in observations...",
+  thoughtNumber: 1,
+  totalThoughts: 3,
+  nextThoughtNeeded: true,
+  observations: [
+    "Sample 1 showed property X",
+    "Sample 2 showed property X",
+    "Sample 3 showed property X"
+  ],
+  pattern: "All samples exhibit property X",
+  generalization: "All instances of this type have property X",
+  confidence: 0.85,
+  sampleSize: 3
+}
+```
+
+**Deductive Reasoning (NEW):**
+```javascript
+{
+  tool: "deepthinking_core",
+  mode: "deductive",
+  thought: "Applying logical deduction...",
+  thoughtNumber: 1,
+  totalThoughts: 2,
+  nextThoughtNeeded: true,
+  premises: [
+    "All humans are mortal",
+    "Socrates is a human"
+  ],
+  conclusion: "Socrates is mortal",
+  logicForm: "modus ponens",
+  validityCheck: true,
+  soundnessCheck: true
+}
+```
+
+#### Implementation Details
+
+##### Files Modified
+- `src/types/core.ts` - Added InductiveThought and DeductiveThought interfaces
+- `src/validation/validators/modes/inductive.ts` - New validator (NEW FILE)
+- `src/validation/validators/modes/deductive.ts` - New validator (NEW FILE)
+- `src/validation/validators/registry.ts` - Registered new validators
+- `src/tools/json-schemas.ts` - Added deepthinking_core_schema at index 0
+- `src/tools/schemas/modes/core.ts` - Added CoreModeSchema, renamed CoreSchema→StandardSchema
+- `src/tools/definitions.ts` - Updated routing, added deepthinking_core
+- `src/services/ThoughtFactory.ts` - Added inductive/deductive thought creation
+- `src/tools/thinking.ts` - Updated legacy tool with union types for property conflicts
+- 4 test files updated to reflect 10 tools and 20 modes
+
+##### Type System
+- `ThinkingMode` enum: Added `INDUCTIVE` and `DEDUCTIVE`
+- `FULLY_IMPLEMENTED_MODES`: 13 modes (added inductive, deductive)
+- `EXPERIMENTAL_MODES`: 7 modes (removed inductive, deductive)
+- `Thought` union type: Added `InductiveThought` and `DeductiveThought`
+- Type guards: `isInductiveThought()`, `isDeductiveThought()`
+
+#### Validation
+✅ All 745 tests passing (6 new tests)
+✅ Typecheck passed with zero errors
+✅ Build successful
+✅ Zero regressions
+✅ 36 test files passing
+
+#### Technical Notes
+- Legacy schema uses union types for `observations` (string[] for inductive, object[] for abductive)
+- Legacy schema uses union types for `conclusion` (string for deductive, object for first-principles)
+- Tool schemas properly segregated: core (3 modes), standard (3 modes), others unchanged
+
+---
+
 ## [4.8.0] - 2025-11-30
 
 ### 🔧 BREAKING CHANGE: Core Mode Renamed to Standard

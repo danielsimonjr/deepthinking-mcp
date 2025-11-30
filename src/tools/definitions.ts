@@ -9,7 +9,7 @@
 
 import { jsonSchemas } from './json-schemas.js';
 import { SessionActionSchema } from './schemas/base.js';
-import { CoreSchema } from './schemas/modes/core.js';
+import { CoreModeSchema, StandardSchema } from './schemas/modes/core.js';
 import { MathSchema } from './schemas/modes/mathematics.js';
 import { TemporalSchema } from './schemas/modes/temporal.js';
 import { ProbabilisticSchema } from './schemas/modes/probabilistic.js';
@@ -19,19 +19,21 @@ import { AnalyticalSchema } from './schemas/modes/analytical.js';
 import { ScientificSchema } from './schemas/modes/scientific.js';
 
 /**
- * 9 focused tools with hand-written JSON schemas
+ * 10 focused tools with hand-written JSON schemas (v5.0.0)
  * Zod schemas used only for runtime validation
+ * Phase 5: Added deepthinking_core for fundamental reasoning
  */
 export const tools = {
-  deepthinking_standard: jsonSchemas[0],
-  deepthinking_math: jsonSchemas[1],
-  deepthinking_temporal: jsonSchemas[2],
-  deepthinking_probabilistic: jsonSchemas[3],
-  deepthinking_causal: jsonSchemas[4],
-  deepthinking_strategic: jsonSchemas[5],
-  deepthinking_analytical: jsonSchemas[6],
-  deepthinking_scientific: jsonSchemas[7],
-  deepthinking_session: jsonSchemas[8],
+  deepthinking_core: jsonSchemas[0],
+  deepthinking_standard: jsonSchemas[1],
+  deepthinking_math: jsonSchemas[2],
+  deepthinking_temporal: jsonSchemas[3],
+  deepthinking_probabilistic: jsonSchemas[4],
+  deepthinking_causal: jsonSchemas[5],
+  deepthinking_strategic: jsonSchemas[6],
+  deepthinking_analytical: jsonSchemas[7],
+  deepthinking_scientific: jsonSchemas[8],
+  deepthinking_session: jsonSchemas[9],
 };
 
 /**
@@ -43,7 +45,8 @@ export const toolList = jsonSchemas;
  * Tool name to schema mapping for validation
  */
 export const toolSchemas = {
-  deepthinking_standard: CoreSchema,
+  deepthinking_core: CoreModeSchema,
+  deepthinking_standard: StandardSchema,
   deepthinking_math: MathSchema,
   deepthinking_temporal: TemporalSchema,
   deepthinking_probabilistic: ProbabilisticSchema,
@@ -58,6 +61,11 @@ export const toolSchemas = {
  * Mode to tool name mapping for routing
  */
 export const modeToToolMap: Record<string, string> = {
+  // Core reasoning modes (fundamental)
+  inductive: 'deepthinking_core',
+  deductive: 'deepthinking_core',
+  abductive: 'deepthinking_core',
+
   // Standard workflow modes
   sequential: 'deepthinking_standard',
   shannon: 'deepthinking_standard',
@@ -74,10 +82,9 @@ export const modeToToolMap: Record<string, string> = {
   bayesian: 'deepthinking_probabilistic',
   evidential: 'deepthinking_probabilistic',
 
-  // Causal modes
+  // Causal modes (abductive moved to core)
   causal: 'deepthinking_causal',
   counterfactual: 'deepthinking_causal',
-  abductive: 'deepthinking_causal',
 
   // Strategic modes
   gametheory: 'deepthinking_strategic',

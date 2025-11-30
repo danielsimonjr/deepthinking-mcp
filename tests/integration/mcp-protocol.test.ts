@@ -38,16 +38,18 @@ describe('MCP Protocol Compliance', () => {
     // Note: action enum removed from simplified legacy tool
     // Use deepthinking_session tool for session management actions
 
-    it('should define all 18 thinking modes in mode enum', () => {
+    it('should define all 20 thinking modes in mode enum', () => {
       const properties = thinkingTool.inputSchema.properties || {};
       expect(properties.mode).toBeDefined();
       expect(properties.mode.enum).toBeDefined();
-      expect(properties.mode.enum).toHaveLength(18);
+      expect(properties.mode.enum).toHaveLength(20);
       expect(properties.mode.enum).toContain('sequential');
       expect(properties.mode.enum).toContain('shannon');
       expect(properties.mode.enum).toContain('mathematics');
       expect(properties.mode.enum).toContain('physics');
       expect(properties.mode.enum).toContain('hybrid');
+      expect(properties.mode.enum).toContain('inductive');
+      expect(properties.mode.enum).toContain('deductive');
       expect(properties.mode.enum).toContain('abductive');
       expect(properties.mode.enum).toContain('causal');
       expect(properties.mode.enum).toContain('bayesian');

@@ -11,6 +11,8 @@ export { ShannonValidator } from './modes/shannon.js';
 export { MathematicsValidator } from './modes/mathematics.js';
 export { PhysicsValidator } from './modes/physics.js';
 export { HybridValidator } from './modes/hybrid.js';
+export { InductiveValidator } from './modes/inductive.js';
+export { DeductiveValidator } from './modes/deductive.js';
 export { AbductiveValidator } from './modes/abductive.js';
 export { CausalValidator } from './modes/causal.js';
 export { BayesianValidator } from './modes/bayesian.js';

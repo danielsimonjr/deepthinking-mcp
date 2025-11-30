@@ -75,6 +75,105 @@ const baseThoughtProperties = {
 const baseThoughtRequired = ["thought", "thoughtNumber", "totalThoughts", "nextThoughtNeeded"] as const;
 
 /**
+ * deepthinking_core - Fundamental reasoning modes
+ */
+export const deepthinking_core_schema = {
+  name: "deepthinking_core",
+  description: "Core reasoning: inductive, deductive, abductive",
+  inputSchema: {
+    type: "object",
+    properties: {
+      ...baseThoughtProperties,
+      mode: {
+        type: "string",
+        enum: ["inductive", "deductive", "abductive"],
+        description: "Core reasoning mode"
+      },
+      // Inductive properties
+      observations: {
+        type: "array",
+        items: { type: "string" },
+        description: "Specific cases observed (inductive/abductive)"
+      },
+      pattern: {
+        type: "string",
+        description: "Identified pattern (inductive)"
+      },
+      generalization: {
+        type: "string",
+        description: "General principle formed (inductive)"
+      },
+      confidence: {
+        type: "number",
+        minimum: 0,
+        maximum: 1,
+        description: "Strength of inference (inductive)"
+      },
+      counterexamples: {
+        type: "array",
+        items: { type: "string" },
+        description: "Known exceptions (inductive)"
+      },
+      sampleSize: {
+        type: "integer",
+        minimum: 1,
+        description: "Number of observations (inductive)"
+      },
+      // Deductive properties
+      premises: {
+        type: "array",
+        items: { type: "string" },
+        description: "General principles (deductive)"
+      },
+      conclusion: {
+        type: "string",
+        description: "Specific conclusion (deductive)"
+      },
+      logicForm: {
+        type: "string",
+        description: "Logic form: modus ponens, modus tollens, etc. (deductive)"
+      },
+      validityCheck: {
+        type: "boolean",
+        description: "Is the deduction logically valid? (deductive)"
+      },
+      soundnessCheck: {
+        type: "boolean",
+        description: "Are the premises true? (deductive)"
+      },
+      // Abductive properties
+      hypotheses: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            explanation: { type: "string" },
+            score: { type: "number" }
+          },
+          required: ["id", "explanation"],
+          additionalProperties: false
+        },
+        description: "Candidate explanations (abductive)"
+      },
+      bestExplanation: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+          explanation: { type: "string" },
+          score: { type: "number" }
+        },
+        required: ["id", "explanation"],
+        additionalProperties: false,
+        description: "Best explanation chosen (abductive)"
+      }
+    },
+    required: [...baseThoughtRequired],
+    additionalProperties: false
+  }
+} as const;
+
+/**
  * deepthinking_standard - Sequential, Shannon, Hybrid modes
  */
 export const deepthinking_standard_schema = {
@@ -416,18 +515,18 @@ export const deepthinking_probabilistic_schema = {
 } as const;
 
 /**
- * deepthinking_causal - Causal, Counterfactual, Abductive reasoning
+ * deepthinking_causal - Causal and Counterfactual reasoning
  */
 export const deepthinking_causal_schema = {
   name: "deepthinking_causal",
-  description: "Causal: graphs, counterfactuals, abductive inference",
+  description: "Causal: graphs, counterfactuals (abductive moved to core)",
   inputSchema: {
     type: "object",
     properties: {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["causal", "counterfactual", "abductive"],
+        enum: ["causal", "counterfactual"],
         description: "Causal reasoning mode"
       },
       nodes: {
@@ -880,6 +979,7 @@ export const deepthinking_session_schema = {
  * All tool schemas as array
  */
 export const jsonSchemas = [
+  deepthinking_core_schema,
   deepthinking_standard_schema,
   deepthinking_math_schema,
   deepthinking_temporal_schema,

@@ -1,7 +1,7 @@
 {
   "name": "deepthinking-mcp",
-  "version": "4.8.0",
-  "description": "Comprehensive MCP server with 18 advanced reasoning modes, taxonomy classifier, enterprise security, and visual export capabilities for complex problem-solving and analysis",
+  "version": "5.0.0",
+  "description": "Comprehensive MCP server with 20 advanced reasoning modes, taxonomy classifier, enterprise security, and visual export capabilities for complex problem-solving and analysis",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",

@@ -13,7 +13,7 @@ import { z } from 'zod';
  */
 export const ThinkingToolSchema = z.object({
   sessionId: z.string().optional(),
-  mode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential', 'firstprinciples', 'systemsthinking', 'scientificmethod', 'optimization', 'formallogic']).default('hybrid'),
+  mode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'inductive', 'deductive', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential', 'firstprinciples', 'systemsthinking', 'scientificmethod', 'optimization', 'formallogic']).default('hybrid'),
   thought: z.string(),
   thoughtNumber: z.number().int().positive(),
   totalThoughts: z.number().int().positive(),
@@ -50,12 +50,26 @@ export const ThinkingToolSchema = z.object({
     units: z.string(),
     conservationLaws: z.array(z.string()),
   }).optional(),
+  // Inductive reasoning properties (Phase 5, v5.0.0)
+  pattern: z.string().optional(),
+  generalization: z.string().optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  counterexamples: z.array(z.string()).optional(),
+  sampleSize: z.number().int().min(1).optional(),
+  // Deductive reasoning properties (Phase 5, v5.0.0)
+  premises: z.array(z.string()).optional(),
+  logicForm: z.string().optional(),
+  validityCheck: z.boolean().optional(),
+  soundnessCheck: z.boolean().optional(),
   // Abductive reasoning properties (v2.0)
-  observations: z.array(z.object({
-    id: z.string(),
-    description: z.string(),
-    confidence: z.number().min(0).max(1),
-  })).optional(),
+  observations: z.union([
+    z.array(z.string()), // For inductive reasoning - simple strings
+    z.array(z.object({   // For abductive reasoning - structured objects
+      id: z.string(),
+      description: z.string(),
+      confidence: z.number().min(0).max(1),
+    })),
+  ]).optional(),
   hypotheses: z.array(z.object({
     id: z.string(),
     // Abductive fields
@@ -418,12 +432,15 @@ export const ThinkingToolSchema = z.object({
     logicalForm: z.string().optional(),
     confidence: z.number().min(0).max(1),
   })).optional(),
-  conclusion: z.object({
-    statement: z.string(),
-    derivationChain: z.array(z.number()),
-    certainty: z.number().min(0).max(1),
-    limitations: z.array(z.string()).optional(),
-  }).optional(),
+  conclusion: z.union([
+    z.string(), // For deductive reasoning - simple conclusion
+    z.object({  // For first-principles reasoning - structured conclusion
+      statement: z.string(),
+      derivationChain: z.array(z.number()),
+      certainty: z.number().min(0).max(1),
+      limitations: z.array(z.string()).optional(),
+    }),
+  ]).optional(),
   alternativeInterpretations: z.array(z.string()).optional(),
 
   // Systems Thinking properties (Phase 4, v3.2.0)
@@ -682,7 +699,7 @@ export const ThinkingToolSchema = z.object({
 
   action: z.enum(['add_thought', 'summarize', 'export', 'switch_mode', 'get_session', 'recommend_mode']).default('add_thought'),
   exportFormat: z.enum(['markdown', 'latex', 'json', 'html', 'jupyter', 'mermaid', 'dot', 'ascii']).optional(),
-  newMode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential', 'firstprinciples', 'systemsthinking', 'scientificmethod', 'optimization', 'formallogic']).optional(),
+  newMode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'inductive', 'deductive', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential', 'firstprinciples', 'systemsthinking', 'scientificmethod', 'optimization', 'formallogic']).optional(),
   // Mode recommendation parameters (v2.4)
   problemType: z.string().optional(),
   problemCharacteristics: z.object({
@@ -722,7 +739,7 @@ export const thinkingTool = {
       sessionId: { type: "string" },
       mode: {
         type: "string",
-        enum: ['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential', 'firstprinciples', 'systemsthinking', 'scientificmethod', 'optimization', 'formallogic'],
+        enum: ['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'inductive', 'deductive', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential', 'firstprinciples', 'systemsthinking', 'scientificmethod', 'optimization', 'formallogic'],
         default: 'hybrid'
       },
       thought: { type: "string", minLength: 1 },

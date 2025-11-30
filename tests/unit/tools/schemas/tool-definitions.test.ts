@@ -1,5 +1,5 @@
 /**
- * Tool Definitions Tests (v4.4.0)
+ * Tool Definitions Tests (v5.0.0)
  * Testing for hand-written schema architecture
  */
 
@@ -17,12 +17,13 @@ import { SCHEMA_VERSION, schemaMetadata, getDeprecationWarning } from '../../../
 
 describe('Tool Definitions', () => {
   describe('tools object', () => {
-    it('should have all 9 tools defined', () => {
-      expect(Object.keys(tools)).toHaveLength(9);
+    it('should have all 10 tools defined', () => {
+      expect(Object.keys(tools)).toHaveLength(10);
     });
 
     it('should have correct tool names', () => {
       const expectedTools = [
+        'deepthinking_core',
         'deepthinking_standard',
         'deepthinking_math',
         'deepthinking_temporal',
@@ -48,7 +49,7 @@ describe('Tool Definitions', () => {
 
   describe('toolList', () => {
     it('should contain all tools as array', () => {
-      expect(toolList).toHaveLength(9);
+      expect(toolList).toHaveLength(10);
     });
 
     it('should have valid MCP tool format', () => {
@@ -64,7 +65,7 @@ describe('Tool Definitions', () => {
 
   describe('toolSchemas', () => {
     it('should have schemas for all tools', () => {
-      expect(Object.keys(toolSchemas)).toHaveLength(9);
+      expect(Object.keys(toolSchemas)).toHaveLength(10);
     });
 
     it('should have parse method on each schema', () => {
@@ -75,13 +76,14 @@ describe('Tool Definitions', () => {
   });
 
   describe('modeToToolMap', () => {
-    it('should map all 18 modes', () => {
+    it('should map all 20 modes', () => {
       const modes = [
         'sequential', 'shannon', 'hybrid',
         'mathematics', 'physics',
+        'inductive', 'deductive', 'abductive',
         'temporal',
         'bayesian', 'evidential',
-        'causal', 'counterfactual', 'abductive',
+        'causal', 'counterfactual',
         'gametheory', 'optimization',
         'analogical', 'firstprinciples',
         'scientificmethod', 'systemsthinking', 'formallogic',
@@ -92,10 +94,16 @@ describe('Tool Definitions', () => {
       }
     });
 
-    it('should map core modes correctly', () => {
+    it('should map standard workflow modes correctly', () => {
       expect(modeToToolMap.sequential).toBe('deepthinking_standard');
       expect(modeToToolMap.shannon).toBe('deepthinking_standard');
       expect(modeToToolMap.hybrid).toBe('deepthinking_standard');
+    });
+
+    it('should map core reasoning modes correctly', () => {
+      expect(modeToToolMap.inductive).toBe('deepthinking_core');
+      expect(modeToToolMap.deductive).toBe('deepthinking_core');
+      expect(modeToToolMap.abductive).toBe('deepthinking_core');
     });
 
     it('should map math modes correctly', () => {

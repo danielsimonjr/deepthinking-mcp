@@ -38,6 +38,8 @@ export enum ThinkingMode {
 
   // ===== Experimental - Limited Implementation =====
   // These modes have validators and type definitions but limited runtime logic
+  INDUCTIVE = 'inductive', // ⚠️ Experimental (Phase 5 v5.0.0) - Inductive reasoning
+  DEDUCTIVE = 'deductive', // ⚠️ Experimental (Phase 5 v5.0.0) - Deductive reasoning
   ABDUCTIVE = 'abductive', // ⚠️ Experimental - Inference to best explanation
   CAUSAL = 'causal', // ⚠️ Experimental - Causal reasoning
   BAYESIAN = 'bayesian', // ⚠️ Experimental - Bayesian inference
@@ -69,6 +71,8 @@ export const FULLY_IMPLEMENTED_MODES: ReadonlyArray<ThinkingMode> = [
   ThinkingMode.STOCHASTIC,
   ThinkingMode.CONSTRAINT,
   ThinkingMode.OPTIMIZATION,
+  ThinkingMode.INDUCTIVE, // Phase 5 v5.0.0
+  ThinkingMode.DEDUCTIVE, // Phase 5 v5.0.0
 ];
 
 /**
@@ -372,6 +376,37 @@ export interface AbductiveThought extends BaseThought {
   evaluationCriteria: EvaluationCriteria;
   evidence: Evidence[];
   bestExplanation?: Hypothesis;
+}
+
+// ===== INDUCTIVE REASONING =====
+
+/**
+ * Inductive reasoning thought
+ * Reasoning from specific observations to general principles
+ */
+export interface InductiveThought extends BaseThought {
+  mode: ThinkingMode.INDUCTIVE;
+  observations: string[];        // Specific cases observed
+  pattern?: string;              // Identified pattern
+  generalization: string;        // General principle formed
+  confidence: number;            // 0-1: Strength of inference
+  counterexamples?: string[];    // Known exceptions
+  sampleSize?: number;           // Number of observations
+}
+
+// ===== DEDUCTIVE REASONING =====
+
+/**
+ * Deductive reasoning thought
+ * Reasoning from general principles to specific conclusions
+ */
+export interface DeductiveThought extends BaseThought {
+  mode: ThinkingMode.DEDUCTIVE;
+  premises: string[];            // General principles
+  conclusion: string;            // Specific conclusion
+  logicForm?: string;            // e.g., "modus ponens", "modus tollens"
+  validityCheck: boolean;        // Is the deduction logically valid?
+  soundnessCheck?: boolean;      // Are the premises true?
 }
 
 // ===== CAUSAL REASONING =====
@@ -714,6 +749,8 @@ export type Thought =
   | MathematicsThought
   | PhysicsThought
   | HybridThought
+  | InductiveThought
+  | DeductiveThought
   | AbductiveThought
   | CausalThought
   | BayesianThought
@@ -756,6 +793,14 @@ export function isHybridThought(thought: Thought): thought is HybridThought {
 /**
  * Type guards for new modes (v2.0)
  */
+export function isInductiveThought(thought: Thought): thought is InductiveThought {
+  return thought.mode === ThinkingMode.INDUCTIVE;
+}
+
+export function isDeductiveThought(thought: Thought): thought is DeductiveThought {
+  return thought.mode === ThinkingMode.DEDUCTIVE;
+}
+
 export function isAbductiveThought(thought: Thought): thought is AbductiveThought {
   return thought.mode === ThinkingMode.ABDUCTIVE;
 }

@@ -2,12 +2,13 @@
  * MCP Protocol Compliance Tests
  *
  * Tests that the deepthinking MCP tools properly implement the MCP protocol:
- * - Tool definition structure (9 focused tools + 1 legacy)
+ * - Tool definition structure (10 focused tools + 1 legacy)
  * - Schema validation
- * - Mode coverage (18 modes)
+ * - Mode coverage (20 modes)
  * - Input/output contracts
  *
  * Note: v4.0.0 split the monolithic tool into 9 focused tools.
+ * v5.0.0 added deepthinking_core (inductive, deductive, abductive).
  * The legacy 'deepthinking' tool is deprecated but maintained for backward compatibility.
  */
 
@@ -34,10 +35,11 @@ describe('MCP Protocol Compliance', () => {
       expect(thinkingTool.description).toContain('DEPRECATED');
     });
 
-    it('should have 9 focused tools in v4.0.0', () => {
-      expect(toolList).toHaveLength(9);
+    it('should have 10 focused tools in v5.0.0', () => {
+      expect(toolList).toHaveLength(10);
 
       const toolNames = toolList.map((t: any) => t.name);
+      expect(toolNames).toContain('deepthinking_core');
       expect(toolNames).toContain('deepthinking_standard');
       expect(toolNames).toContain('deepthinking_math');
       expect(toolNames).toContain('deepthinking_temporal');
@@ -105,11 +107,11 @@ describe('MCP Protocol Compliance', () => {
       // Users should migrate to deepthinking_* focused tools
     });
 
-    it('should define mode enum with all 18 modes', () => {
+    it('should define mode enum with all 20 modes', () => {
       const modeEnum = thinkingTool.inputSchema.properties.mode.enum;
 
       expect(Array.isArray(modeEnum)).toBe(true);
-      expect(modeEnum).toHaveLength(18);
+      expect(modeEnum).toHaveLength(20);
 
       const expectedModes = [
         'sequential',
@@ -117,6 +119,8 @@ describe('MCP Protocol Compliance', () => {
         'mathematics',
         'physics',
         'hybrid',
+        'inductive',
+        'deductive',
         'abductive',
         'causal',
         'bayesian',

@@ -1,5 +1,5 @@
 /**
- * JSON Schema Validation Tests (v4.4.0)
+ * JSON Schema Validation Tests (v5.0.0)
  * Comprehensive tests for hand-written JSON Schema draft 2020-12 compatibility
  *
  * Purpose: Verify hand-written schemas are valid and complete
@@ -19,8 +19,8 @@ import {
  */
 describe('JSON Schema 2020-12 Compliance', () => {
   describe('All Tools Schema Generation', () => {
-    it('should generate valid JSON schemas for all 9 tools', () => {
-      expect(toolList).toHaveLength(9);
+    it('should generate valid JSON schemas for all 10 tools', () => {
+      expect(toolList).toHaveLength(10);
 
       for (const tool of toolList) {
         const schema = (tool as any).inputSchema;
@@ -154,11 +154,10 @@ describe('JSON Schema 2020-12 Compliance', () => {
       expect(schema.properties).toHaveProperty('thought');
       expect(schema.properties).toHaveProperty('thoughtNumber');
 
-      // Causal schema extends base with mode enum
+      // Causal schema extends base with mode enum (abductive moved to core in v5.0.0)
       const modeProp = schema.properties.mode as any;
       expect(modeProp.enum).toContain('causal');
       expect(modeProp.enum).toContain('counterfactual');
-      expect(modeProp.enum).toContain('abductive');
 
       // Should have 10+ properties
       expect(Object.keys(schema.properties).length).toBeGreaterThanOrEqual(10);
