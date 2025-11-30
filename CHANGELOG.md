@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.8.0] - 2025-11-30
+
+### 🔧 BREAKING CHANGE: Core Mode Renamed to Standard
+
+**Phase 5 Sprint 1 - Tool Name Restructuring**
+
+This release renames the `deepthinking_core` tool to `deepthinking_standard` to prepare for a new fundamental reasoning modes tool in v5.0.0.
+
+#### Breaking Changes
+- **Tool Name**: `deepthinking_core` → `deepthinking_standard`
+- **Description**: "Core modes" → "Standard workflows"
+- **Mode Routing**: Sequential, Shannon, and Hybrid modes now route to `deepthinking_standard`
+
+#### Migration Guide
+Users must update their tool references:
+
+**Before (v4.3.7)**:
+```javascript
+{ tool: "deepthinking_core", mode: "sequential" }
+```
+
+**After (v4.8.0)**:
+```javascript
+{ tool: "deepthinking_standard", mode: "sequential" }
+```
+
+#### Files Modified
+- `src/tools/json-schemas.ts` - Renamed schema and updated exports
+- `src/tools/definitions.ts` - Updated tool name, routing map, and default fallback
+- Test files updated to use new tool name
+
+#### Validation
+✅ All 744 tests passing
+✅ Typecheck passed
+✅ Build successful
+✅ Zero regressions
+
+**Next Release**: v5.0.0 will introduce new `deepthinking_core` with fundamental reasoning modes (inductive, deductive, abductive)
+
+---
+
 ## [4.4.0] - 2025-11-29
 
 ### 🔧 BREAKING CHANGE: Hand-Written JSON Schemas
