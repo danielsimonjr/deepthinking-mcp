@@ -586,6 +586,29 @@ security/
 
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
+### Adding New Reasoning Modes
+
+Want to add a new reasoning mode? We've made it easy:
+
+📖 **[Complete Guide: Adding a New Mode](docs/ADDING_NEW_MODE.md)**
+
+This guide includes:
+- Step-by-step instructions for all 8 required files
+- Template files in `templates/mode-scaffolding/`
+- Code examples and common patterns
+- Complete checklist to ensure nothing is missed
+- Testing guidelines
+
+**Quick Start**:
+```bash
+# Copy template files
+cp templates/mode-scaffolding/example-mode.type.ts src/types/modes/yourmode.ts
+cp templates/mode-scaffolding/example-mode.validator.ts src/validation/validators/modes/yourmode.ts
+
+# Follow the guide
+cat docs/ADDING_NEW_MODE.md
+```
+
 ### Development Setup
 
 ```bash
