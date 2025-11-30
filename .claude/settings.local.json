@@ -58,7 +58,14 @@
       "mcp__deepthinking-mcp__deepthinking_causal",
       "mcp__deepthinking-mcp__deepthinking_strategic",
       "mcp__deepthinking-mcp__deepthinking_analytical",
-      "mcp__deepthinking-mcp__deepthinking_scientific"
+      "mcp__deepthinking-mcp__deepthinking_scientific",
+      "mcp__memory-mcp__compress_graph",
+      "mcp__everything-mcp__search",
+      "Bash(where:*)",
+      "Bash(python:*)",
+      "Bash(mcp-server-sequential-thinking:*)",
+      "Bash(timeout 2 mcp-server-sequential-thinking:*)",
+      "Bash(tasklist /FI \"IMAGENAME eq node.exe\" /FO CSV)"
     ],
     "deny": [],
     "ask": []

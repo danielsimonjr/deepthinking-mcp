@@ -23,7 +23,7 @@ describe('Tool Definitions', () => {
 
     it('should have correct tool names', () => {
       const expectedTools = [
-        'deepthinking_core',
+        'deepthinking_standard',
         'deepthinking_math',
         'deepthinking_temporal',
         'deepthinking_probabilistic',
@@ -93,9 +93,9 @@ describe('Tool Definitions', () => {
     });
 
     it('should map core modes correctly', () => {
-      expect(modeToToolMap.sequential).toBe('deepthinking_core');
-      expect(modeToToolMap.shannon).toBe('deepthinking_core');
-      expect(modeToToolMap.hybrid).toBe('deepthinking_core');
+      expect(modeToToolMap.sequential).toBe('deepthinking_standard');
+      expect(modeToToolMap.shannon).toBe('deepthinking_standard');
+      expect(modeToToolMap.hybrid).toBe('deepthinking_standard');
     });
 
     it('should map math modes correctly', () => {
@@ -106,19 +106,19 @@ describe('Tool Definitions', () => {
 
   describe('getToolForMode', () => {
     it('should return correct tool for each mode', () => {
-      expect(getToolForMode('sequential')).toBe('deepthinking_core');
+      expect(getToolForMode('sequential')).toBe('deepthinking_standard');
       expect(getToolForMode('temporal')).toBe('deepthinking_temporal');
       expect(getToolForMode('bayesian')).toBe('deepthinking_probabilistic');
     });
 
     it('should default to core for unknown modes', () => {
-      expect(getToolForMode('unknown')).toBe('deepthinking_core');
+      expect(getToolForMode('unknown')).toBe('deepthinking_standard');
     });
   });
 
   describe('isValidTool', () => {
     it('should return true for valid tools', () => {
-      expect(isValidTool('deepthinking_core')).toBe(true);
+      expect(isValidTool('deepthinking_standard')).toBe(true);
       expect(isValidTool('deepthinking_temporal')).toBe(true);
     });
 
@@ -130,7 +130,7 @@ describe('Tool Definitions', () => {
 
   describe('getSchemaForTool', () => {
     it('should return schema for valid tool', () => {
-      const schema = getSchemaForTool('deepthinking_core');
+      const schema = getSchemaForTool('deepthinking_standard');
       expect(schema).toBeDefined();
       expect(typeof schema.parse).toBe('function');
     });
@@ -175,7 +175,7 @@ describe('Schema Versioning', () => {
     });
 
     it('should return null for non-deprecated tool', () => {
-      const warning = getDeprecationWarning('deepthinking_core');
+      const warning = getDeprecationWarning('deepthinking_standard');
       expect(warning).toBeNull();
     });
   });
@@ -184,7 +184,7 @@ describe('Schema Versioning', () => {
 describe('Schema Validation', () => {
   describe('CoreSchema', () => {
     it('should validate valid core input', () => {
-      const schema = getSchemaForTool('deepthinking_core');
+      const schema = getSchemaForTool('deepthinking_standard');
       const input = {
         thought: 'Test thought',
         thoughtNumber: 1,
@@ -196,7 +196,7 @@ describe('Schema Validation', () => {
     });
 
     it('should reject invalid mode', () => {
-      const schema = getSchemaForTool('deepthinking_core');
+      const schema = getSchemaForTool('deepthinking_standard');
       const input = {
         thought: 'Test',
         thoughtNumber: 1,

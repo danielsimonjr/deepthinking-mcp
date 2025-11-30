@@ -38,7 +38,7 @@ describe('MCP Protocol Compliance', () => {
       expect(toolList).toHaveLength(9);
 
       const toolNames = toolList.map((t: any) => t.name);
-      expect(toolNames).toContain('deepthinking_core');
+      expect(toolNames).toContain('deepthinking_standard');
       expect(toolNames).toContain('deepthinking_math');
       expect(toolNames).toContain('deepthinking_temporal');
       expect(toolNames).toContain('deepthinking_probabilistic');
@@ -50,10 +50,10 @@ describe('MCP Protocol Compliance', () => {
     });
 
     it('should document modes across focused tools', () => {
-      // Core modes documented in deepthinking_core
-      expect(tools.deepthinking_core.description).toContain('sequential');
-      expect(tools.deepthinking_core.description).toContain('shannon');
-      expect(tools.deepthinking_core.description).toContain('hybrid');
+      // Standard workflow modes documented in deepthinking_standard
+      expect(tools.deepthinking_standard.description).toContain('sequential');
+      expect(tools.deepthinking_standard.description).toContain('shannon');
+      expect(tools.deepthinking_standard.description).toContain('hybrid');
 
       // Math modes documented in deepthinking_math
       expect(tools.deepthinking_math.description.toLowerCase()).toContain('math');

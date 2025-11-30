@@ -23,7 +23,7 @@ import { ScientificSchema } from './schemas/modes/scientific.js';
  * Zod schemas used only for runtime validation
  */
 export const tools = {
-  deepthinking_core: jsonSchemas[0],
+  deepthinking_standard: jsonSchemas[0],
   deepthinking_math: jsonSchemas[1],
   deepthinking_temporal: jsonSchemas[2],
   deepthinking_probabilistic: jsonSchemas[3],
@@ -43,7 +43,7 @@ export const toolList = jsonSchemas;
  * Tool name to schema mapping for validation
  */
 export const toolSchemas = {
-  deepthinking_core: CoreSchema,
+  deepthinking_standard: CoreSchema,
   deepthinking_math: MathSchema,
   deepthinking_temporal: TemporalSchema,
   deepthinking_probabilistic: ProbabilisticSchema,
@@ -58,10 +58,10 @@ export const toolSchemas = {
  * Mode to tool name mapping for routing
  */
 export const modeToToolMap: Record<string, string> = {
-  // Core modes
-  sequential: 'deepthinking_core',
-  shannon: 'deepthinking_core',
-  hybrid: 'deepthinking_core',
+  // Standard workflow modes
+  sequential: 'deepthinking_standard',
+  shannon: 'deepthinking_standard',
+  hybrid: 'deepthinking_standard',
 
   // Math/Physics modes
   mathematics: 'deepthinking_math',
@@ -99,8 +99,8 @@ export const modeToToolMap: Record<string, string> = {
 export function getToolForMode(mode: string): string {
   const tool = modeToToolMap[mode];
   if (!tool) {
-    // Default to core for unknown modes
-    return 'deepthinking_core';
+    // Default to standard for unknown modes
+    return 'deepthinking_standard';
   }
   return tool;
 }

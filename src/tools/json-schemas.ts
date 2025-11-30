@@ -75,11 +75,11 @@ const baseThoughtProperties = {
 const baseThoughtRequired = ["thought", "thoughtNumber", "totalThoughts", "nextThoughtNeeded"] as const;
 
 /**
- * deepthinking_core - Sequential, Shannon, Hybrid modes
+ * deepthinking_standard - Sequential, Shannon, Hybrid modes
  */
-export const deepthinking_core_schema = {
-  name: "deepthinking_core",
-  description: "Core modes: sequential, shannon (5-stage), hybrid",
+export const deepthinking_standard_schema = {
+  name: "deepthinking_standard",
+  description: "Standard workflows: sequential, shannon (5-stage), hybrid",
   inputSchema: {
     type: "object",
     properties: {
@@ -880,7 +880,7 @@ export const deepthinking_session_schema = {
  * All tool schemas as array
  */
 export const jsonSchemas = [
-  deepthinking_core_schema,
+  deepthinking_standard_schema,
   deepthinking_math_schema,
   deepthinking_temporal_schema,
   deepthinking_probabilistic_schema,

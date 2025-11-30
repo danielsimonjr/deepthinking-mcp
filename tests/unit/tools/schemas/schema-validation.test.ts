@@ -80,8 +80,8 @@ describe('JSON Schema 2020-12 Compliance', () => {
   });
 
   describe('Individual Tool Schema Structure', () => {
-    it('deepthinking_core should have complete schema', () => {
-      const tool = tools.deepthinking_core;
+    it('deepthinking_standard should have complete schema', () => {
+      const tool = tools.deepthinking_standard;
       const schema = (tool as any).inputSchema;
 
       expect(schema.type).toBe('object');
