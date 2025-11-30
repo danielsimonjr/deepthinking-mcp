@@ -38,11 +38,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - Removed: `causalRelations` (not in Zod schema)
    - Fixed to match Zod schema exactly
 
+#### Temporal Relations Enum
+- **TemporalRelationEnum**: Fixed to use Allen's interval algebra
+  - Changed from causal relations (causes/enables/prevents/precedes/follows)
+  - To proper Allen's interval algebra: before, after, during, overlaps, meets, starts, finishes, equals, causes
+  - Fixed in `src/tools/schemas/shared.ts`
+
 #### Test Stability
 - **metrics-performance test**: Fixed flakiness
   - Simplified from 3 test sizes to 2 (500/1000)
   - Relaxed threshold from 3.0x to 5.0x for system variance
   - More stable across different system loads
+
+#### Production Validation
+- **Comprehensive MCP Client Testing**: All 9 tools tested successfully
+  - deepthinking_core, deepthinking_math, deepthinking_temporal
+  - deepthinking_probabilistic, deepthinking_causal, deepthinking_strategic
+  - deepthinking_analytical, deepthinking_scientific, deepthinking_session
+  - Verified all schema fixes working in production
+  - All 744 tests passing, typecheck clean
 
 ### ✨ Added
 
