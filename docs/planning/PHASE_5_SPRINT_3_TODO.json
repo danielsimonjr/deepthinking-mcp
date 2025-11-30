@@ -1,56 +1,88 @@
 {
   "sprint": 3,
-  "title": "Deprecation & Feature Flags",
-  "week": "Week 2",
-  "effort": "14-18 hours",
+  "title": "Testing, Documentation & Release v5.0.0",
+  "week": "Week 2-3",
+  "effort": "12-20 hours",
   "status": "pending",
   "tasks": [
     {
       "id": 1,
-      "description": "Create src/deprecation/warnings.ts with deprecation warning system",
+      "description": "Create unit tests for inductive mode - tests/unit/validation/validators/inductive.test.ts",
       "status": "pending",
-      "files": ["src/deprecation/warnings.ts"]
+      "files": ["tests/unit/validation/validators/inductive.test.ts"]
     },
     {
       "id": 2,
-      "description": "Create src/config/feature-flags.ts with DEEPTHINKING_BETA_CORE flag support",
+      "description": "Create unit tests for deductive mode - tests/unit/validation/validators/deductive.test.ts",
       "status": "pending",
-      "files": ["src/config/feature-flags.ts"]
+      "files": ["tests/unit/validation/validators/deductive.test.ts"]
     },
     {
       "id": 3,
-      "description": "Update src/index.ts to emit deprecation warnings when deepthinking_core is used",
+      "description": "Create integration test for standard mode - verify sequential/shannon/hybrid work",
       "status": "pending",
-      "files": ["src/index.ts"]
+      "files": ["tests/integration/standard-mode.test.ts"]
     },
     {
       "id": 4,
-      "description": "Implement feature flag check in tool listing handler",
+      "description": "Create integration test for new core mode - verify inductive/deductive/abductive work",
       "status": "pending",
-      "files": ["src/index.ts"]
+      "files": ["tests/integration/new-core-mode.test.ts"]
     },
     {
       "id": 5,
-      "description": "Create tests for deprecation warnings",
+      "description": "Update src/export/markdown.ts - Add formatting for inductive/deductive modes",
       "status": "pending",
-      "files": ["tests/unit/deprecation/warnings.test.ts"]
+      "files": ["src/export/markdown.ts"]
     },
     {
       "id": 6,
-      "description": "Create tests for feature flag functionality",
+      "description": "Create docs/migration/v5.0-core-restructure.md - Migration guide (~500 lines)",
       "status": "pending",
-      "files": ["tests/unit/config/feature-flags.test.ts"]
+      "files": ["docs/migration/v5.0-core-restructure.md"]
     },
     {
       "id": 7,
-      "description": "Document feature flag usage in README",
+      "description": "Update README.md - Update modes section with new structure",
       "status": "pending",
       "files": ["README.md"]
+    },
+    {
+      "id": 8,
+      "description": "Update CHANGELOG.md - Add v5.0.0 entry with breaking changes",
+      "status": "pending",
+      "files": ["CHANGELOG.md"]
+    },
+    {
+      "id": 9,
+      "description": "Update CLAUDE.md - Update architecture notes",
+      "status": "pending",
+      "files": ["CLAUDE.md"]
+    },
+    {
+      "id": 10,
+      "description": "Run full test suite 5 times - all must pass",
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": 11,
+      "description": "Build and verify dist/ output",
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": 12,
+      "description": "Commit and tag v5.0.0 release",
+      "status": "pending",
+      "files": []
     }
   ],
   "successCriteria": [
-    "Deprecation warnings display correctly",
-    "Feature flags toggle beta features",
-    "No impact when flag is disabled"
+    "Comprehensive test coverage for new modes",
+    "Migration guide complete and clear",
+    "All documentation updated",
+    "All 744+ tests passing consistently",
+    "Ready for npm publish"
   ]
 }

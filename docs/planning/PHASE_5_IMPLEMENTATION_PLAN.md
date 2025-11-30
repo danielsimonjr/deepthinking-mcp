@@ -9,301 +9,250 @@
 2. Create NEW `deepthinking_core` (inductive, deductive, abductive)
 3. Move abductive mode from `deepthinking_causal` to new `deepthinking_core`
 
-**Approach**: Phased migration with 3 major releases over 10-12 weeks
-- **Sprint 1-3**: v4.5.0 - Deprecation warnings + beta preview (Weeks 1-3)
-- **Sprint 4-6**: v4.6.0 - Beta tools + feedback collection (Weeks 4-6)
-- **Sprint 7-10**: v5.0.0 - Hard cutover + comprehensive migration (Weeks 7-10+)
+**Approach**: Direct implementation with proper testing - no beta versions needed
+- **Sprint 1**: Rename core → standard (all files, validators, tests, scaffolding)
+- **Sprint 2**: Create new core mode (clone existing mode, adapt for inductive/deductive/abductive)
+- **Sprint 3**: Final testing, documentation, and v5.0.0 release
 
-**Total Effort**: 250-330 developer hours across 10 sprints
+**Total Effort**: 40-60 developer hours across 3 sprints
 
 ---
 
 ## Sprint Structure
 
-### Sprint 1: Type System Foundation (Week 1)
-**Effort**: 12-16 hours | **Files**: 3 new, 1 modified
+### Sprint 1: Rename Core to Standard Mode (Week 1)
+**Effort**: 12-16 hours | **Result**: All "core" references become "standard"
 
 **Tasks**:
-1. Create `src/types/modes/inductive.ts` with InductiveThought interface (~150 lines)
-2. Create `src/types/modes/deductive.ts` with DeductiveThought interface (~150 lines)
-3. Update `src/types/core.ts` - Add INDUCTIVE and DEDUCTIVE to ThinkingMode enum
-4. Update `src/types/core.ts` - Add InductiveThought and DeductiveThought to Thought union type
-5. Add type guard functions `isInductiveThought()` and `isDeductiveThought()` to core.ts
-6. Run typecheck to verify no regressions
-7. Update memory with completion status
+1. Update `src/tools/json-schemas.ts` - Rename `deepthinking_core_schema` to `deepthinking_standard_schema`
+2. Update `src/tools/definitions.ts` - Change tool name from `deepthinking_core` to `deepthinking_standard`
+3. Update `src/tools/definitions.ts` - Update `modeToToolMap` routing: sequential/shannon/hybrid → `deepthinking_standard`
+4. Verify no validators need renaming (sequential, shannon, hybrid validators stay as-is)
+5. Update all tests that reference `deepthinking_core` tool to use `deepthinking_standard`
+6. Update export services if they reference core tool name
+7. Run typecheck - verify no errors
+8. Run full test suite - all tests must pass
+9. Update memory with Sprint 1 completion
 
 **Success Criteria**:
-- ✅ TypeScript compiles without errors
-- ✅ Zero breaking changes to existing types
-- ✅ Type guards work correctly
-
----
-
-### Sprint 2: Validation Layer (Week 1-2)
-**Effort**: 12-16 hours | **Files**: 2 new
-
-**Tasks**:
-1. Create `src/validation/validators/modes/inductive.ts` with InductiveValidator class (~150 lines)
-2. Create `src/validation/validators/modes/deductive.ts` with DeductiveValidator class (~150 lines)
-3. Implement validation rules for inductive mode (observations, generalization, confidence 0-1)
-4. Implement validation rules for deductive mode (premises, conclusion, logic form)
-5. Register validators in `src/validation/validator.ts`
-6. Create unit tests for validators
-7. Run tests to verify validators work correctly
-
-**Success Criteria**:
-- ✅ Validators catch invalid input
-- ✅ Validators pass valid input
-- ✅ All existing tests still pass
-
----
-
-### Sprint 3: Deprecation & Feature Flags (Week 2)
-**Effort**: 14-18 hours | **Files**: 2 new, 2 modified
-
-**Tasks**:
-1. Create `src/deprecation/warnings.ts` with deprecation warning system
-2. Create `src/config/feature-flags.ts` with DEEPTHINKING_BETA_CORE flag support
-3. Update `src/index.ts` to emit deprecation warnings when deepthinking_core is used
-4. Implement feature flag check in tool listing handler
-5. Create tests for deprecation warnings
-6. Create tests for feature flag functionality
-7. Document feature flag usage in README
-
-**Success Criteria**:
-- ✅ Deprecation warnings display correctly
-- ✅ Feature flags toggle beta features
-- ✅ No impact when flag is disabled
-
----
-
-### Sprint 4: Documentation & Release v4.5.0 (Week 3)
-**Effort**: 16-22 hours | **Files**: 3 new, 2 modified
-
-**Tasks**:
-1. Create `docs/migration/v5.0-core-restructure.md` - comprehensive migration guide (~500 lines)
-2. Create `docs/migration/v4.5-deprecation-guide.md` - deprecation notice guide (~200 lines)
-3. Update `CHANGELOG.md` with v4.5.0 release notes
-4. Update `README.md` with deprecation notice and timeline
-5. Run full test suite 3 times - all must pass
-6. Build and verify dist/ output
-7. Tag v4.5.0 release (DO NOT publish yet - commit only)
-
-**Success Criteria**:
+- ✅ All references to old `deepthinking_core` tool are now `deepthinking_standard`
+- ✅ Sequential, shannon, hybrid modes route to `deepthinking_standard`
 - ✅ All 744+ tests passing
-- ✅ Zero breaking changes
-- ✅ Documentation complete and clear
-- ✅ Build output verified
+- ✅ Zero breaking changes for existing modes
+
+**Files Modified**:
+- `src/tools/json-schemas.ts`
+- `src/tools/definitions.ts`
+- `tests/**/*.test.ts` (update tool name references)
+- Possibly `src/export/*.ts` (if tool names referenced)
 
 ---
 
-### Sprint 5: Beta Tool Schemas (Week 4)
-**Effort**: 18-24 hours | **Files**: 1 modified
+### Sprint 2: Create New Core Mode (Week 1-2)
+**Effort**: 16-24 hours | **Result**: New deepthinking_core with inductive/deductive/abductive
 
 **Tasks**:
-1. Create `deepthinking_core_beta` schema in `src/tools/json-schemas.ts`
-2. Create `deepthinking_standard_beta` schema in `src/tools/json-schemas.ts`
-3. Add inductive mode properties to core_beta schema (observations, pattern, generalization, confidence)
-4. Add deductive mode properties to core_beta schema (premises, conclusion, logicForm, validityCheck)
-5. Add abductive mode properties to core_beta schema (moved from causal)
-6. Copy sequential/shannon/hybrid properties to standard_beta schema
-7. Create Zod schemas for validation in `src/validation/schemas.ts`
-8. Run typecheck and tests
+1. Create `src/types/modes/inductive.ts` - Clone from causal.ts structure, adapt for inductive reasoning
+2. Create `src/types/modes/deductive.ts` - Clone from causal.ts structure, adapt for deductive reasoning
+3. Update `src/types/core.ts` - Add INDUCTIVE, DEDUCTIVE to ThinkingMode enum
+4. Update `src/types/core.ts` - Add InductiveThought, DeductiveThought to Thought union type
+5. Update `src/types/core.ts` - Add type guards `isInductiveThought()`, `isDeductiveThought()`
+6. Create `src/validation/validators/modes/inductive.ts` - Clone existing validator, adapt rules
+7. Create `src/validation/validators/modes/deductive.ts` - Clone existing validator, adapt rules
+8. Update `src/validation/validator.ts` - Register new validators
+9. Create `src/tools/json-schemas.ts` - Add NEW `deepthinking_core_schema` (inductive/deductive/abductive)
+10. Update `src/tools/json-schemas.ts` - Remove abductive from `deepthinking_causal_schema`
+11. Update `src/tools/definitions.ts` - Add `deepthinking_core` tool, route inductive/deductive/abductive to it
+12. Update `src/services/ThoughtFactory.ts` - Add cases for inductive and deductive modes
+13. Create `src/validation/schemas.ts` - Add InductiveSchema and DeductiveSchema (Zod)
+14. Update `src/types/core.ts` - Move INDUCTIVE, DEDUCTIVE to FULLY_IMPLEMENTED_MODES
+15. Run typecheck - verify no errors
+16. Run full test suite - all tests must pass
 
 **Success Criteria**:
-- ✅ Beta schemas validate correctly
-- ✅ All mode properties included
-- ✅ No impact on existing schemas
-
----
-
-### Sprint 6: Beta Tool Implementation (Week 4-5)
-**Effort**: 14-18 hours | **Files**: 3 modified
-
-**Tasks**:
-1. Update `src/index.ts` to conditionally expose beta tools when flag enabled
-2. Update `src/services/ThoughtFactory.ts` - Add case for 'inductive' mode
-3. Update `src/services/ThoughtFactory.ts` - Add case for 'deductive' mode
-4. Update `src/tools/json-schemas.ts` - Remove 'abductive' from causal schema (add deprecation note)
-5. Test beta tools with feature flag enabled
-6. Test existing tools still work with flag disabled
-7. Create integration tests for beta tools
-
-**Success Criteria**:
-- ✅ Beta tools appear when flag enabled
-- ✅ Beta tools hidden when flag disabled
+- ✅ New `deepthinking_core` tool exists with 3 modes: inductive, deductive, abductive
+- ✅ Abductive moved from causal tool to core tool
+- ✅ Type system, validators, schemas all in place
 - ✅ ThoughtFactory creates correct thought types
+- ✅ All tests passing
+
+**Files Created**:
+- `src/types/modes/inductive.ts`
+- `src/types/modes/deductive.ts`
+- `src/validation/validators/modes/inductive.ts`
+- `src/validation/validators/modes/deductive.ts`
+
+**Files Modified**:
+- `src/types/core.ts`
+- `src/tools/json-schemas.ts`
+- `src/tools/definitions.ts`
+- `src/services/ThoughtFactory.ts`
+- `src/validation/validator.ts`
+- `src/validation/schemas.ts`
 
 ---
 
-### Sprint 7: Beta Testing & Feedback (Week 5-6)
-**Effort**: 20-26 hours | **Files**: 2 new, 1 modified
+### Sprint 3: Testing, Documentation & Release v5.0.0 (Week 2-3)
+**Effort**: 12-20 hours | **Result**: Production-ready v5.0.0 release
 
 **Tasks**:
-1. Create `docs/beta/v4.6-beta-guide.md` with beta testing instructions (~300 lines)
-2. Update `docs/migration/v5.0-core-restructure.md` with beta testing section
-3. Create GitHub Discussion for beta feedback
-4. Recruit 5-10 beta testers
-5. Monitor feedback daily for 2 weeks
-6. Address critical issues found during beta
-7. Document feedback and adjustments in CHANGELOG
-
-**Success Criteria**:
-- ✅ ≥10 users testing beta
-- ✅ >70% positive feedback
-- ✅ Critical issues resolved
-
----
-
-### Sprint 8: Release v4.6.0 & Final Prep (Week 6)
-**Effort**: 16-20 hours | **Files**: 2 modified, tests
-
-**Tasks**:
-1. Update `README.md` with beta announcement
-2. Update `CHANGELOG.md` with v4.6.0 release notes
-3. Create `tests/integration/beta-tools.test.ts` - beta tool integration tests
-4. Create `tests/integration/migration-scenarios.test.ts` - migration path tests
-5. Run full test suite 5 times - all must pass
-6. Build and verify dist/ output
-7. Tag v4.6.0 release (DO NOT publish yet - commit only)
-
-**Success Criteria**:
-- ✅ Beta tools fully functional
-- ✅ Zero regressions in non-beta mode
-- ✅ Migration paths validated
-
----
-
-### Sprint 9: v5.0.0 Implementation (Week 7-8)
-**Effort**: 36-48 hours | **Files**: 5 modified
-
-**Tasks**:
-1. Update `src/tools/json-schemas.ts` - Finalize deepthinking_core_schema (inductive/deductive/abductive)
-2. Update `src/tools/json-schemas.ts` - Rename old core → deepthinking_standard_schema
-3. Update `src/tools/definitions.ts` - Complete modeToToolMap routing changes
-4. Update `src/types/core.ts` - Move INDUCTIVE and DEDUCTIVE from EXPERIMENTAL to FULLY_IMPLEMENTED
+1. Create unit tests for inductive mode - `tests/unit/validation/validators/inductive.test.ts`
+2. Create unit tests for deductive mode - `tests/unit/validation/validators/deductive.test.ts`
+3. Create integration test for standard mode - verify sequential/shannon/hybrid work
+4. Create integration test for new core mode - verify inductive/deductive/abductive work
 5. Update `src/export/markdown.ts` - Add formatting for inductive/deductive modes
-6. Remove `src/config/feature-flags.ts` and `src/deprecation/warnings.ts`
-7. Remove all feature flag checks from codebase
-8. Run full test suite 5 times - all must pass
+6. Create `docs/migration/v5.0-core-restructure.md` - Migration guide (~500 lines)
+7. Update `README.md` - Update modes section with new structure
+8. Update `CHANGELOG.md` - Add v5.0.0 entry with breaking changes
+9. Update `CLAUDE.md` - Update architecture notes
+10. Run full test suite 5 times - all must pass
+11. Build and verify dist/ output
+12. Commit and tag v5.0.0 release
 
 **Success Criteria**:
-- ✅ All routing updated correctly
-- ✅ Beta code removed cleanly
-- ✅ All 744+ tests passing
+- ✅ Comprehensive test coverage for new modes
+- ✅ Migration guide complete and clear
+- ✅ All documentation updated
+- ✅ All 744+ tests passing consistently
+- ✅ Ready for npm publish
 
----
+**Files Created**:
+- `tests/unit/validation/validators/inductive.test.ts`
+- `tests/unit/validation/validators/deductive.test.ts`
+- `tests/integration/standard-mode.test.ts`
+- `tests/integration/new-core-mode.test.ts`
+- `docs/migration/v5.0-core-restructure.md`
 
-### Sprint 10: Documentation & Release v5.0.0 (Week 9-10)
-**Effort**: 40-52 hours | **Files**: 4 modified, migration tests
-
-**Tasks**:
-1. Expand `docs/migration/v5.0-core-restructure.md` to ~1000 lines (comprehensive guide)
-2. Update `README.md` - Complete rewrite of modes section
-3. Update `CHANGELOG.md` - Comprehensive v5.0.0 entry with all breaking changes
-4. Update `CLAUDE.md` - Update architecture notes with new structure
-5. Create migration tests for v4.3.7→v5.0.0, v4.5.0→v5.0.0, v4.6.0→v5.0.0
-6. Run full test suite 10 times - all must pass
-7. Build, verify, commit dist/ output
-8. Tag v5.0.0 release and prepare for npm publish
-
-**Success Criteria**:
-- ✅ Migration guide comprehensive
-- ✅ All migration paths tested
-- ✅ Zero critical bugs
-- ✅ Ready for production release
+**Files Modified**:
+- `src/export/markdown.ts`
+- `README.md`
+- `CHANGELOG.md`
+- `CLAUDE.md`
 
 ---
 
 ## Critical Files Reference
 
-### Must Read Before Starting
-1. `src/tools/json-schemas.ts` (945 lines) - Tool schema structure
-2. `src/types/core.ts` (822 lines) - Type system architecture
-3. `src/tools/definitions.ts` (123 lines) - Mode routing
-4. `src/index.ts` (245 lines) - MCP server handlers
-5. `src/services/ThoughtFactory.ts` - Thought creation logic
+### Sprint 1 Must-Read:
+1. `src/tools/json-schemas.ts` - Tool schema definitions
+2. `src/tools/definitions.ts` - Tool routing map
+3. `tests/**/*.test.ts` - Find tests referencing deepthinking_core
 
-### Reference During Implementation
-6. `src/validation/validators/modes/*.ts` - Validator patterns
-7. `src/services/ModeRouter.ts` - Mode recommendation
-8. `CHANGELOG.md` - Version history format
-9. Previous phase docs in `docs/planning/`
+### Sprint 2 Must-Read:
+4. `src/types/modes/causal.ts` - Template for new mode types
+5. `src/validation/validators/modes/*.ts` - Validator patterns
+6. `src/services/ThoughtFactory.ts` - Thought creation logic
+7. `src/types/core.ts` - Type system architecture
+
+### Sprint 3 Must-Read:
+8. `tests/unit/validation/validators/*.test.ts` - Test patterns
+9. `docs/migration/*.md` - Previous migration examples
+10. `CHANGELOG.md` - Version history format
 
 ---
 
 ## Timeline Summary
 
-| Sprint | Week | Effort | Key Deliverable |
-|--------|------|--------|----------------|
-| 1 | 1 | 12-16h | Type definitions |
-| 2 | 1-2 | 12-16h | Validators |
-| 3 | 2 | 14-18h | Deprecation & flags |
-| 4 | 3 | 16-22h | v4.5.0 release |
-| 5 | 4 | 18-24h | Beta schemas |
-| 6 | 4-5 | 14-18h | Beta implementation |
-| 7 | 5-6 | 20-26h | Beta testing |
-| 8 | 6 | 16-20h | v4.6.0 release |
-| 9 | 7-8 | 36-48h | v5.0.0 implementation |
-| 10 | 9-10 | 40-52h | v5.0.0 release |
-| **Total** | **10-12 weeks** | **250-330h** | **v5.0.0 production** |
+| Sprint | Week | Effort | Key Deliverable | Breaking Changes |
+|--------|------|--------|----------------|------------------|
+| 1 | 1 | 12-16h | Rename core → standard | Tool name change |
+| 2 | 1-2 | 16-24h | New core mode | Abductive moved, new modes added |
+| 3 | 2-3 | 12-20h | v5.0.0 release | Documentation complete |
+| **Total** | **2-3 weeks** | **40-60h** | **v5.0.0 production** | **Major version** |
+
+---
+
+## Breaking Changes (v5.0.0)
+
+### Tool Name Changes:
+- `deepthinking_core` → `deepthinking_standard`
+- NEW `deepthinking_core` created
+
+### Mode Routing Changes:
+- `abductive` mode: moved from `deepthinking_causal` to `deepthinking_core`
+- `sequential`, `shannon`, `hybrid`: now route to `deepthinking_standard` (was `deepthinking_core`)
+
+### New Modes Added:
+- `inductive` (NEW) - routes to `deepthinking_core`
+- `deductive` (NEW) - routes to `deepthinking_core`
+
+---
+
+## Migration Guide Summary
+
+### For Users Using Sequential/Shannon/Hybrid:
+**Before (v4.x)**:
+```javascript
+{ tool: "deepthinking_core", mode: "sequential" }
+```
+
+**After (v5.0)**:
+```javascript
+{ tool: "deepthinking_standard", mode: "sequential" }
+```
+
+### For Users Using Abductive:
+**Before (v4.x)**:
+```javascript
+{ tool: "deepthinking_causal", mode: "abductive" }
+```
+
+**After (v5.0)**:
+```javascript
+{ tool: "deepthinking_core", mode: "abductive" }
+```
+
+### For Users Using New Modes:
+**New in v5.0**:
+```javascript
+{ tool: "deepthinking_core", mode: "inductive" }
+{ tool: "deepthinking_core", mode: "deductive" }
+```
 
 ---
 
 ## Risk Mitigation
 
-### High Risk: User Adoption
-- 6 weeks advance warning (v4.5.0 + v4.6.0)
-- Comprehensive migration guide
-- Beta testing period with real users
-- Responsive support post-launch
+### High Risk: Breaking Changes
+**Impact**: All users must update tool names
+**Mitigation**:
+- Clear migration guide with search-and-replace examples
+- CHANGELOG documents every breaking change
+- Comprehensive testing before release
 
-### High Risk: Unexpected Breaking Changes
-- Extensive testing at each sprint
-- Beta validation before final release
-- Migration path testing for all versions
-- Fast hotfix capability ready
+### Medium Risk: Abductive Mode Move
+**Impact**: Users using abductive must change from causal to core tool
+**Mitigation**:
+- Document in migration guide prominently
+- Test abductive thoroughly in new location
 
-### Medium Risk: Tool Name Confusion
-- Clear naming convention (core = fundamental)
-- Side-by-side comparison tables in docs
-- Deprecation warnings for 6+ weeks
-- Search-and-replace examples provided
+### Low Risk: New Mode Stability
+**Impact**: Inductive/deductive are new, may have edge cases
+**Mitigation**:
+- Comprehensive validation
+- Unit and integration tests
+- Clone proven patterns from existing modes
 
 ---
 
 ## Success Metrics
 
-### Quantitative
+### Quantitative:
 - All 744+ tests passing in every sprint
-- <5 critical issues in Week 1 post-v5.0.0
-- >70% user adoption within 4 weeks
-- <10 support issues requiring hotfixes
+- Zero regressions in existing modes
+- Successful build on all platforms
 
-### Qualitative
-- >80% user satisfaction (survey)
-- Positive community feedback
-- Clear, helpful documentation
-- Smooth migration experience
-
----
-
-## Communication Strategy
-
-| Version | Message | Channels |
-|---------|---------|----------|
-| v4.5.0 | "Heads up! Changes coming in 8 weeks. Preview with feature flag." | GitHub Release, CHANGELOG |
-| v4.6.0 | "Beta test the new structure! Provide feedback before v5.0.0." | GitHub Discussion, README |
-| v5.0.0 | "Major restructure complete. Comprehensive migration guide available." | All channels + announcement |
-
-**Primary Channels**: GitHub Releases, CHANGELOG.md, GitHub Discussions, README.md
+### Qualitative:
+- Migration guide is clear and complete
+- Breaking changes well-documented
+- Code follows existing patterns
 
 ---
 
 ## Next Steps
 
-1. ✅ Plan approved and documented
+1. ✅ Plan approved and simplified
 2. ⏳ Await operator approval to start Sprint 1
-3. ⏳ Execute sprints sequentially (do not skip ahead)
+3. ⏳ Execute sprints sequentially (Sprint 1 → 2 → 3)
 4. ⏳ Update sprint JSON todos as tasks complete
 5. ⏳ Commit changes after each sprint completion
