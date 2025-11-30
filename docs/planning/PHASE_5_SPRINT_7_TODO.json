@@ -1,0 +1,56 @@
+{
+  "sprint": 7,
+  "title": "Beta Testing & Feedback",
+  "week": "Week 5-6",
+  "effort": "20-26 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": 1,
+      "description": "Create docs/beta/v4.6-beta-guide.md with beta testing instructions (~300 lines)",
+      "status": "pending",
+      "files": ["docs/beta/v4.6-beta-guide.md"]
+    },
+    {
+      "id": 2,
+      "description": "Update docs/migration/v5.0-core-restructure.md with beta testing section",
+      "status": "pending",
+      "files": ["docs/migration/v5.0-core-restructure.md"]
+    },
+    {
+      "id": 3,
+      "description": "Create GitHub Discussion for beta feedback",
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": 4,
+      "description": "Recruit 5-10 beta testers",
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": 5,
+      "description": "Monitor feedback daily for 2 weeks",
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": 6,
+      "description": "Address critical issues found during beta",
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": 7,
+      "description": "Document feedback and adjustments in CHANGELOG",
+      "status": "pending",
+      "files": ["CHANGELOG.md"]
+    }
+  ],
+  "successCriteria": [
+    "≥10 users testing beta",
+    ">70% positive feedback",
+    "Critical issues resolved"
+  ]
+}

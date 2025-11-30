@@ -1,0 +1,57 @@
+{
+  "sprint": 4,
+  "title": "Documentation & Release v4.5.0",
+  "week": "Week 3",
+  "effort": "16-22 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": 1,
+      "description": "Create docs/migration/v5.0-core-restructure.md - comprehensive migration guide (~500 lines)",
+      "status": "pending",
+      "files": ["docs/migration/v5.0-core-restructure.md"]
+    },
+    {
+      "id": 2,
+      "description": "Create docs/migration/v4.5-deprecation-guide.md - deprecation notice guide (~200 lines)",
+      "status": "pending",
+      "files": ["docs/migration/v4.5-deprecation-guide.md"]
+    },
+    {
+      "id": 3,
+      "description": "Update CHANGELOG.md with v4.5.0 release notes",
+      "status": "pending",
+      "files": ["CHANGELOG.md"]
+    },
+    {
+      "id": 4,
+      "description": "Update README.md with deprecation notice and timeline",
+      "status": "pending",
+      "files": ["README.md"]
+    },
+    {
+      "id": 5,
+      "description": "Run full test suite 3 times - all must pass",
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": 6,
+      "description": "Build and verify dist/ output",
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": 7,
+      "description": "Tag v4.5.0 release (DO NOT publish yet - commit only)",
+      "status": "pending",
+      "files": []
+    }
+  ],
+  "successCriteria": [
+    "All 744+ tests passing",
+    "Zero breaking changes",
+    "Documentation complete and clear",
+    "Build output verified"
+  ]
+}

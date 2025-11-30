@@ -1,0 +1,56 @@
+{
+  "sprint": 6,
+  "title": "Beta Tool Implementation",
+  "week": "Week 4-5",
+  "effort": "14-18 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": 1,
+      "description": "Update src/index.ts to conditionally expose beta tools when flag enabled",
+      "status": "pending",
+      "files": ["src/index.ts"]
+    },
+    {
+      "id": 2,
+      "description": "Update src/services/ThoughtFactory.ts - Add case for 'inductive' mode",
+      "status": "pending",
+      "files": ["src/services/ThoughtFactory.ts"]
+    },
+    {
+      "id": 3,
+      "description": "Update src/services/ThoughtFactory.ts - Add case for 'deductive' mode",
+      "status": "pending",
+      "files": ["src/services/ThoughtFactory.ts"]
+    },
+    {
+      "id": 4,
+      "description": "Update src/tools/json-schemas.ts - Remove 'abductive' from causal schema (add deprecation note)",
+      "status": "pending",
+      "files": ["src/tools/json-schemas.ts"]
+    },
+    {
+      "id": 5,
+      "description": "Test beta tools with feature flag enabled",
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": 6,
+      "description": "Test existing tools still work with flag disabled",
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": 7,
+      "description": "Create integration tests for beta tools",
+      "status": "pending",
+      "files": ["tests/integration/beta-tools.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "Beta tools appear when flag enabled",
+    "Beta tools hidden when flag disabled",
+    "ThoughtFactory creates correct thought types"
+  ]
+}

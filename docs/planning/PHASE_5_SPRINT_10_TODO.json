@@ -1,0 +1,63 @@
+{
+  "sprint": 10,
+  "title": "Documentation & Release v5.0.0",
+  "week": "Week 9-10",
+  "effort": "40-52 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": 1,
+      "description": "Expand docs/migration/v5.0-core-restructure.md to ~1000 lines (comprehensive guide)",
+      "status": "pending",
+      "files": ["docs/migration/v5.0-core-restructure.md"]
+    },
+    {
+      "id": 2,
+      "description": "Update README.md - Complete rewrite of modes section",
+      "status": "pending",
+      "files": ["README.md"]
+    },
+    {
+      "id": 3,
+      "description": "Update CHANGELOG.md - Comprehensive v5.0.0 entry with all breaking changes",
+      "status": "pending",
+      "files": ["CHANGELOG.md"]
+    },
+    {
+      "id": 4,
+      "description": "Update CLAUDE.md - Update architecture notes with new structure",
+      "status": "pending",
+      "files": ["CLAUDE.md"]
+    },
+    {
+      "id": 5,
+      "description": "Create migration tests for v4.3.7→v5.0.0, v4.5.0→v5.0.0, v4.6.0→v5.0.0",
+      "status": "pending",
+      "files": ["tests/integration/migration-v4.3.7-to-v5.0.0.test.ts", "tests/integration/migration-v4.5.0-to-v5.0.0.test.ts", "tests/integration/migration-v4.6.0-to-v5.0.0.test.ts"]
+    },
+    {
+      "id": 6,
+      "description": "Run full test suite 10 times - all must pass",
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": 7,
+      "description": "Build, verify, commit dist/ output",
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": 8,
+      "description": "Tag v5.0.0 release and prepare for npm publish",
+      "status": "pending",
+      "files": []
+    }
+  ],
+  "successCriteria": [
+    "Migration guide comprehensive",
+    "All migration paths tested",
+    "Zero critical bugs",
+    "Ready for production release"
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "sprint": 9,
+  "title": "v5.0.0 Implementation",
+  "week": "Week 7-8",
+  "effort": "36-48 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": 1,
+      "description": "Update src/tools/json-schemas.ts - Finalize deepthinking_core_schema (inductive/deductive/abductive)",
+      "status": "pending",
+      "files": ["src/tools/json-schemas.ts"]
+    },
+    {
+      "id": 2,
+      "description": "Update src/tools/json-schemas.ts - Rename old core → deepthinking_standard_schema",
+      "status": "pending",
+      "files": ["src/tools/json-schemas.ts"]
+    },
+    {
+      "id": 3,
+      "description": "Update src/tools/definitions.ts - Complete modeToToolMap routing changes",
+      "status": "pending",
+      "files": ["src/tools/definitions.ts"]
+    },
+    {
+      "id": 4,
+      "description": "Update src/types/core.ts - Move INDUCTIVE and DEDUCTIVE from EXPERIMENTAL to FULLY_IMPLEMENTED",
+      "status": "pending",
+      "files": ["src/types/core.ts"]
+    },
+    {
+      "id": 5,
+      "description": "Update src/export/markdown.ts - Add formatting for inductive/deductive modes",
+      "status": "pending",
+      "files": ["src/export/markdown.ts"]
+    },
+    {
+      "id": 6,
+      "description": "Remove src/config/feature-flags.ts and src/deprecation/warnings.ts",
+      "status": "pending",
+      "files": ["src/config/feature-flags.ts", "src/deprecation/warnings.ts"]
+    },
+    {
+      "id": 7,
+      "description": "Remove all feature flag checks from codebase",
+      "status": "pending",
+      "files": ["src/index.ts", "src/tools/definitions.ts"]
+    },
+    {
+      "id": 8,
+      "description": "Run full test suite 5 times - all must pass",
+      "status": "pending",
+      "files": []
+    }
+  ],
+  "successCriteria": [
+    "All routing updated correctly",
+    "Beta code removed cleanly",
+    "All 744+ tests passing"
+  ]
+}

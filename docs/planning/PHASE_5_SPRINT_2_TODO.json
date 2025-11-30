@@ -1,0 +1,56 @@
+{
+  "sprint": 2,
+  "title": "Validation Layer",
+  "week": "Week 1-2",
+  "effort": "12-16 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": 1,
+      "description": "Create src/validation/validators/modes/inductive.ts with InductiveValidator class (~150 lines)",
+      "status": "pending",
+      "files": ["src/validation/validators/modes/inductive.ts"]
+    },
+    {
+      "id": 2,
+      "description": "Create src/validation/validators/modes/deductive.ts with DeductiveValidator class (~150 lines)",
+      "status": "pending",
+      "files": ["src/validation/validators/modes/deductive.ts"]
+    },
+    {
+      "id": 3,
+      "description": "Implement validation rules for inductive mode (observations, generalization, confidence 0-1)",
+      "status": "pending",
+      "files": ["src/validation/validators/modes/inductive.ts"]
+    },
+    {
+      "id": 4,
+      "description": "Implement validation rules for deductive mode (premises, conclusion, logic form)",
+      "status": "pending",
+      "files": ["src/validation/validators/modes/deductive.ts"]
+    },
+    {
+      "id": 5,
+      "description": "Register validators in src/validation/validator.ts",
+      "status": "pending",
+      "files": ["src/validation/validator.ts"]
+    },
+    {
+      "id": 6,
+      "description": "Create unit tests for validators",
+      "status": "pending",
+      "files": ["tests/unit/validation/validators/inductive.test.ts", "tests/unit/validation/validators/deductive.test.ts"]
+    },
+    {
+      "id": 7,
+      "description": "Run tests to verify validators work correctly",
+      "status": "pending",
+      "files": []
+    }
+  ],
+  "successCriteria": [
+    "Validators catch invalid input",
+    "Validators pass valid input",
+    "All existing tests still pass"
+  ]
+}

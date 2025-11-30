@@ -1,0 +1,56 @@
+{
+  "sprint": 1,
+  "title": "Type System Foundation",
+  "week": "Week 1",
+  "effort": "12-16 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": 1,
+      "description": "Create src/types/modes/inductive.ts with InductiveThought interface (~150 lines)",
+      "status": "pending",
+      "files": ["src/types/modes/inductive.ts"]
+    },
+    {
+      "id": 2,
+      "description": "Create src/types/modes/deductive.ts with DeductiveThought interface (~150 lines)",
+      "status": "pending",
+      "files": ["src/types/modes/deductive.ts"]
+    },
+    {
+      "id": 3,
+      "description": "Update src/types/core.ts - Add INDUCTIVE and DEDUCTIVE to ThinkingMode enum",
+      "status": "pending",
+      "files": ["src/types/core.ts"]
+    },
+    {
+      "id": 4,
+      "description": "Update src/types/core.ts - Add InductiveThought and DeductiveThought to Thought union type",
+      "status": "pending",
+      "files": ["src/types/core.ts"]
+    },
+    {
+      "id": 5,
+      "description": "Add type guard functions isInductiveThought() and isDeductiveThought() to core.ts",
+      "status": "pending",
+      "files": ["src/types/core.ts"]
+    },
+    {
+      "id": 6,
+      "description": "Run typecheck to verify no regressions",
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": 7,
+      "description": "Update memory with completion status",
+      "status": "pending",
+      "files": []
+    }
+  ],
+  "successCriteria": [
+    "TypeScript compiles without errors",
+    "Zero breaking changes to existing types",
+    "Type guards work correctly"
+  ]
+}

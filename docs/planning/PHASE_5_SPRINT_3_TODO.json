@@ -1,0 +1,56 @@
+{
+  "sprint": 3,
+  "title": "Deprecation & Feature Flags",
+  "week": "Week 2",
+  "effort": "14-18 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": 1,
+      "description": "Create src/deprecation/warnings.ts with deprecation warning system",
+      "status": "pending",
+      "files": ["src/deprecation/warnings.ts"]
+    },
+    {
+      "id": 2,
+      "description": "Create src/config/feature-flags.ts with DEEPTHINKING_BETA_CORE flag support",
+      "status": "pending",
+      "files": ["src/config/feature-flags.ts"]
+    },
+    {
+      "id": 3,
+      "description": "Update src/index.ts to emit deprecation warnings when deepthinking_core is used",
+      "status": "pending",
+      "files": ["src/index.ts"]
+    },
+    {
+      "id": 4,
+      "description": "Implement feature flag check in tool listing handler",
+      "status": "pending",
+      "files": ["src/index.ts"]
+    },
+    {
+      "id": 5,
+      "description": "Create tests for deprecation warnings",
+      "status": "pending",
+      "files": ["tests/unit/deprecation/warnings.test.ts"]
+    },
+    {
+      "id": 6,
+      "description": "Create tests for feature flag functionality",
+      "status": "pending",
+      "files": ["tests/unit/config/feature-flags.test.ts"]
+    },
+    {
+      "id": 7,
+      "description": "Document feature flag usage in README",
+      "status": "pending",
+      "files": ["README.md"]
+    }
+  ],
+  "successCriteria": [
+    "Deprecation warnings display correctly",
+    "Feature flags toggle beta features",
+    "No impact when flag is disabled"
+  ]
+}
