@@ -27,7 +27,8 @@
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build && npm run test:publish"
+    "prepublishOnly": "npm run build && npm run test:publish",
+    "docs:deps": "node tools/create-dependency-graph.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.23.0",
