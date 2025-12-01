@@ -4,18 +4,18 @@ This directory contains utility scripts for maintaining the DeepThinking MCP cod
 
 ## Available Tools
 
-### create-dependency-graph.mjs
+### create-dependency-graph.ts
 
 Scans the codebase and generates comprehensive dependency documentation.
 
 **Usage:**
 
 ```bash
-# Run directly
-node tools/create-dependency-graph.mjs
-
-# Or via npm script
+# Run via npm script (recommended)
 npm run docs:deps
+
+# Or run directly with tsx
+npx tsx tools/create-dependency-graph.ts
 ```
 
 **Output:**
@@ -31,6 +31,7 @@ npm run docs:deps
 - Detects circular dependencies
 - Generates statistics (file count, export count, etc.)
 - Produces both human-readable Markdown and machine-readable JSON
+- Fully typed TypeScript for type safety
 
 **Generated Documentation Includes:**
 
@@ -44,6 +45,7 @@ npm run docs:deps
 
 ## Adding New Tools
 
-1. Create a new `.mjs` file in this directory
+1. Create a new `.ts` file in this directory
 2. Add a corresponding npm script in `package.json`
 3. Document the tool in this README
+4. Run typecheck before committing: `npm run typecheck`
