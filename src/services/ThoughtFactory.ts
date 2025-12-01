@@ -95,7 +95,7 @@ export class ThoughtFactory {
       revisesThought: input.revisesThought,
     };
 
-    switch (input.mode) {
+    switch (input.mode as string) {
       case 'sequential':
         return {
           ...baseThought,
@@ -274,6 +274,60 @@ export class ThoughtFactory {
           conclusion: input.conclusion || { statement: '', derivationChain: [], certainty: 0 },
           alternativeInterpretations: input.alternativeInterpretations || [],
         } as any;
+
+      case 'metareasoning':
+        {
+          const metaInput = input as any;
+          return {
+            ...baseThought,
+            mode: ThinkingMode.METAREASONING,
+            currentStrategy: metaInput.currentStrategy || {
+              mode: ThinkingMode.SEQUENTIAL,
+              approach: 'Default sequential approach',
+              startedAt: new Date(),
+              thoughtsSpent: 0,
+              progressIndicators: [],
+            },
+            strategyEvaluation: metaInput.strategyEvaluation || {
+              effectiveness: 0.5,
+              efficiency: 0.5,
+              confidence: 0.5,
+              progressRate: 0,
+              qualityScore: 0.5,
+              issues: [],
+              strengths: [],
+            },
+            alternativeStrategies: metaInput.alternativeStrategies || [],
+            recommendation: metaInput.recommendation || {
+              action: 'CONTINUE',
+              justification: 'No specific recommendation yet',
+              confidence: 0.5,
+              expectedImprovement: 'Monitor progress',
+            },
+            resourceAllocation: metaInput.resourceAllocation || {
+              timeSpent: 0,
+              thoughtsRemaining: input.totalThoughts - input.thoughtNumber,
+              complexityLevel: 'medium',
+              urgency: 'medium',
+              recommendation: 'Continue with current approach',
+            },
+            qualityMetrics: metaInput.qualityMetrics || {
+              logicalConsistency: 0.5,
+              evidenceQuality: 0.5,
+              completeness: 0.5,
+              originality: 0.5,
+              clarity: 0.5,
+              overallQuality: 0.5,
+            },
+            sessionContext: metaInput.sessionContext || {
+              sessionId,
+              totalThoughts: input.thoughtNumber,
+              modesUsed: [input.mode as ThinkingMode],
+              modeSwitches: 0,
+              problemType: 'general',
+            },
+          } as any;
+        }
 
       case 'hybrid':
       default:

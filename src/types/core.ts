@@ -17,6 +17,9 @@ import type { ScientificMethodThought } from './modes/scientificmethod.js';
 import type { OptimizationThought } from './modes/optimization.js';
 import type { FormalLogicThought } from './modes/formallogic.js';
 
+// Import Phase 6 mode types (v6.0.0)
+import type { MetaReasoningThought } from './modes/metareasoning.js';
+
 /**
  * Available thinking modes
  */
@@ -763,7 +766,8 @@ export type Thought =
   | SystemsThinkingThought
   | ScientificMethodThought
   | OptimizationThought
-  | FormalLogicThought;
+  | FormalLogicThought
+  | MetaReasoningThought;
 
 // ========== TYPE GUARDS ==========
 
@@ -859,8 +863,18 @@ export function isFormalLogicThought(thought: Thought): thought is FormalLogicTh
   return thought.mode === ThinkingMode.FORMALLOGIC;
 }
 
+/**
+ * Type guards for Phase 6 modes (v6.0.0)
+ */
+export function isMetaReasoningThought(thought: Thought): thought is MetaReasoningThought {
+  return thought.mode === ThinkingMode.METAREASONING;
+}
+
 // Re-export Phase 3 types
 export type { TemporalThought, GameTheoryThought, EvidentialThought, FirstPrinciplesThought };
 
 // Re-export Phase 4 types
 export type { SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought };
+
+// Re-export Phase 6 types
+export type { MetaReasoningThought };

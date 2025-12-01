@@ -41,6 +41,7 @@ const VALIDATOR_REGISTRY: Record<string, ValidatorConfig> = {
   scientificmethod: { module: './modes/scientificmethod.js', className: 'ScientificMethodValidator' },
   optimization: { module: './modes/optimization.js', className: 'OptimizationValidator' },
   formallogic: { module: './modes/formallogic.js', className: 'FormalLogicValidator' },
+  metareasoning: { module: './modes/metareasoning.js', className: 'MetaReasoningValidator' },
 };
 
 /**

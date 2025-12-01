@@ -27,6 +27,7 @@ export { ConstraintValidator } from './modes/constraint.js';
 export { OptimizationValidator } from './modes/optimization.js';
 export { StochasticValidator } from './modes/stochastic.js';
 export { RecursiveValidator } from './modes/recursive.js';
+export { MetaReasoningValidator } from './modes/metareasoning.js';
 
 // Registry and factory (Sprint 9.3: lazy loading)
 export {
