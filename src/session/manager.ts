@@ -1,8 +1,10 @@
 /**
- * Session Manager for DeepThinking MCP (v3.4.5)
+ * Session Manager for DeepThinking MCP (v6.0.0)
  * Sprint 3 Task 3.4: Refactored to use SessionMetricsCalculator
+ * Phase 6 Sprint 2: Integrated with MetaMonitor for meta-reasoning tracking
  *
  * Manages thinking sessions, persistence, and coordinates with metrics calculator.
+ * Tracks session thoughts for meta-reasoning insights and adaptive mode switching.
  */
 
 import { randomUUID } from 'crypto';
@@ -20,6 +22,7 @@ import { ILogger } from '../interfaces/ILogger.js';
 import { SessionStorage } from './storage/interface.js';
 import { LRUCache } from '../cache/lru.js';
 import { SessionMetricsCalculator } from './SessionMetricsCalculator.js';
+import { metaMonitor, MetaMonitor } from '../services/MetaMonitor.js';
 
 /**
  * Default session configuration
@@ -68,6 +71,7 @@ export class SessionManager {
   private logger: ILogger;
   private storage?: SessionStorage;
   private metricsCalculator: SessionMetricsCalculator;
+  private monitor: MetaMonitor;
 
   /**
    * Creates a new SessionManager instance
@@ -75,6 +79,7 @@ export class SessionManager {
    * @param config - Optional default configuration applied to all new sessions
    * @param logger - Optional logger instance or log level (default: INFO level logger)
    * @param storage - Optional persistent storage backend for sessions
+   * @param monitor - Optional MetaMonitor instance for dependency injection
    *
    * @example
    * ```typescript
@@ -99,7 +104,8 @@ export class SessionManager {
   constructor(
     config?: Partial<SessionConfig>,
     logger?: ILogger | LogLevel,
-    storage?: SessionStorage
+    storage?: SessionStorage,
+    monitor?: MetaMonitor
   ) {
     // Initialize LRU cache for sessions (max 1000 sessions, ~10-50MB)
     this.activeSessions = new LRUCache<ThinkingSession>({
@@ -115,10 +121,15 @@ export class SessionManager {
             this.logger.error('Failed to save evicted session', error as Error, { sessionId: key });
           }
         }
+        // Clear meta-monitoring data for evicted session
+        if (this.monitor) {
+          this.monitor.clearSession(key);
+        }
       }
     });
     this.config = config || {};
     this.storage = storage;
+    this.monitor = monitor || metaMonitor;
 
     // Support both ILogger injection (DI) and LogLevel (backward compatibility)
     if (logger && typeof logger === 'object' && 'info' in logger) {
@@ -208,6 +219,9 @@ export class SessionManager {
         // Don't throw - session is still created in memory
       }
     }
+
+    // Start meta-monitoring strategy tracking
+    this.monitor.startStrategy(sessionId, session.mode);
 
     this.logger.info('Session created', {
       sessionId,
@@ -310,6 +324,9 @@ export class SessionManager {
 
     // Update metrics
     this.metricsCalculator.updateMetrics(session, thought);
+
+    // Record thought for meta-reasoning insights
+    this.monitor.recordThought(sessionId, thought);
 
     // Check if session is complete
     if (!thought.nextThoughtNeeded) {
