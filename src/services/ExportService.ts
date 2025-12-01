@@ -23,6 +23,17 @@ import {
   BayesianThought,
   FirstPrinciplesThought,
   isMetaReasoningThought,
+  // Sprint 1: Visual export integration types
+  SequentialThought,
+  ShannonThought,
+  AbductiveThought,
+  CounterfactualThought,
+  AnalogicalThought,
+  EvidentialThought,
+  SystemsThinkingThought,
+  ScientificMethodThought,
+  OptimizationThought,
+  FormalLogicThought,
 } from '../types/index.js';
 import { VisualExporter, type VisualFormat } from '../export/visual/index.js';
 import { escapeHtml, escapeLatex } from '../utils/sanitization.js';
@@ -179,6 +190,98 @@ export class ExportService {
       return this.visualExporter.exportFirstPrinciplesDerivation(lastThought as FirstPrinciplesThought, {
         format,
         colorScheme: 'default',
+      });
+    }
+
+    // Sprint 1: Integration of 10 existing visual exporters
+
+    if (lastThought.mode === ThinkingMode.SEQUENTIAL && 'buildUpon' in lastThought) {
+      return this.visualExporter.exportSequentialDependencyGraph(lastThought as SequentialThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    }
+
+    if (lastThought.mode === ThinkingMode.SHANNON && 'stage' in lastThought) {
+      return this.visualExporter.exportShannonStageFlow(lastThought as ShannonThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    }
+
+    if (lastThought.mode === ThinkingMode.ABDUCTIVE && 'hypotheses' in lastThought) {
+      return this.visualExporter.exportAbductiveHypotheses(lastThought as AbductiveThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    }
+
+    if (lastThought.mode === ThinkingMode.COUNTERFACTUAL && 'scenarios' in lastThought) {
+      return this.visualExporter.exportCounterfactualScenarios(lastThought as CounterfactualThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    }
+
+    if (lastThought.mode === ThinkingMode.ANALOGICAL && 'sourceAnalogy' in lastThought) {
+      return this.visualExporter.exportAnalogicalMapping(lastThought as AnalogicalThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    }
+
+    if (lastThought.mode === ThinkingMode.EVIDENTIAL && 'frameOfDiscernment' in lastThought) {
+      return this.visualExporter.exportEvidentialBeliefs(lastThought as EvidentialThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    }
+
+    if (lastThought.mode === ThinkingMode.SYSTEMSTHINKING && 'systemComponents' in lastThought) {
+      return this.visualExporter.exportSystemsThinkingCausalLoops(lastThought as SystemsThinkingThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    }
+
+    if (lastThought.mode === ThinkingMode.SCIENTIFICMETHOD && 'hypothesis' in lastThought) {
+      return this.visualExporter.exportScientificMethodExperiment(lastThought as ScientificMethodThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    }
+
+    if (lastThought.mode === ThinkingMode.OPTIMIZATION && 'objectiveFunction' in lastThought) {
+      return this.visualExporter.exportOptimizationSolution(lastThought as OptimizationThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    }
+
+    if (lastThought.mode === ThinkingMode.FORMALLOGIC && 'premises' in lastThought) {
+      return this.visualExporter.exportFormalLogicProof(lastThought as FormalLogicThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
       });
     }
 
