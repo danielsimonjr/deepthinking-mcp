@@ -22,6 +22,7 @@ import {
   GameTheoryThought,
   BayesianThought,
   FirstPrinciplesThought,
+  isMetaReasoningThought,
 } from '../types/index.js';
 import { VisualExporter, type VisualFormat } from '../export/visual/index.js';
 import { escapeHtml, escapeLatex } from '../utils/sanitization.js';
@@ -230,6 +231,59 @@ export class ExportService {
     for (const thought of session.thoughts) {
       md += `### Thought ${thought.thoughtNumber}/${session.thoughts.length}\n\n`;
       md += `${thought.content}\n\n`;
+
+      // Display meta-reasoning insights if this is a meta-reasoning thought
+      if (isMetaReasoningThought(thought)) {
+        md += `#### 📊 Meta-Reasoning Analysis\n\n`;
+
+        // Current Strategy
+        md += `**Current Strategy:**\n`;
+        md += `- Mode: ${thought.currentStrategy.mode}\n`;
+        md += `- Approach: ${thought.currentStrategy.approach}\n`;
+        md += `- Thoughts Spent: ${thought.currentStrategy.thoughtsSpent}\n`;
+        if (thought.currentStrategy.progressIndicators.length > 0) {
+          md += `- Progress: ${thought.currentStrategy.progressIndicators.join(', ')}\n`;
+        }
+        md += `\n`;
+
+        // Strategy Evaluation
+        md += `**Strategy Evaluation:**\n`;
+        md += `- Effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%\n`;
+        md += `- Efficiency: ${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%\n`;
+        md += `- Confidence: ${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%\n`;
+        md += `- Quality Score: ${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%\n`;
+        if (thought.strategyEvaluation.issues.length > 0) {
+          md += `- Issues: ${thought.strategyEvaluation.issues.join('; ')}\n`;
+        }
+        if (thought.strategyEvaluation.strengths.length > 0) {
+          md += `- Strengths: ${thought.strategyEvaluation.strengths.join('; ')}\n`;
+        }
+        md += `\n`;
+
+        // Recommendation
+        md += `**Recommendation:** ${thought.recommendation.action}\n`;
+        md += `- ${thought.recommendation.justification}\n`;
+        md += `- Confidence: ${(thought.recommendation.confidence * 100).toFixed(1)}%\n`;
+        md += `- Expected Improvement: ${thought.recommendation.expectedImprovement}\n`;
+
+        // Alternative Strategies
+        if (thought.alternativeStrategies.length > 0) {
+          md += `\n**Alternative Strategies:**\n`;
+          for (const alt of thought.alternativeStrategies) {
+            md += `- **${alt.mode}** (score: ${(alt.recommendationScore * 100).toFixed(0)}%): ${alt.reasoning}\n`;
+          }
+        }
+
+        // Quality Metrics
+        md += `\n**Quality Metrics:**\n`;
+        md += `- Logical Consistency: ${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%\n`;
+        md += `- Evidence Quality: ${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%\n`;
+        md += `- Completeness: ${(thought.qualityMetrics.completeness * 100).toFixed(1)}%\n`;
+        md += `- Originality: ${(thought.qualityMetrics.originality * 100).toFixed(1)}%\n`;
+        md += `- Clarity: ${(thought.qualityMetrics.clarity * 100).toFixed(1)}%\n`;
+        md += `- Overall Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%\n`;
+        md += `\n`;
+      }
     }
 
     return md;
