@@ -729,18 +729,18 @@ export const deepthinking_strategic_schema = {
 } as const;
 
 /**
- * deepthinking_analytical - Analogical and First Principles reasoning
+ * deepthinking_analytical - Analogical, First Principles, and Meta-Reasoning
  */
 export const deepthinking_analytical_schema = {
   name: "deepthinking_analytical",
-  description: "Analytical: analogical mapping, first principles",
+  description: "Analytical: analogical mapping, first principles, meta-reasoning",
   inputSchema: {
     type: "object",
     properties: {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["analogical", "firstprinciples"],
+        enum: ["analogical", "firstprinciples", "metareasoning"],
         description: "Analytical reasoning mode"
       },
       sourceAnalogy: {

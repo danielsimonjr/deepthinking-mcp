@@ -93,6 +93,7 @@ export const modeToToolMap: Record<string, string> = {
   // Analytical modes
   analogical: 'deepthinking_analytical',
   firstprinciples: 'deepthinking_analytical',
+  metareasoning: 'deepthinking_analytical',
 
   // Scientific modes
   scientificmethod: 'deepthinking_scientific',
