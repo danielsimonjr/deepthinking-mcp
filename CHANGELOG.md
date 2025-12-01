@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **create-dependency-graph tool**: New utility script in `tools/` for automated documentation
+  - Scans TypeScript codebase and generates comprehensive dependency graphs
+  - Outputs both Markdown (`DEPENDENCY_GRAPH.md`) and JSON (`dependency-graph.json`)
+  - Dynamically discovers modules from directory structure
+  - Detects circular dependencies
+  - Generates visual Mermaid diagrams from actual dependencies
+  - Computes statistics (file count, exports, classes, interfaces, functions, etc.)
+  - Fully generic - no hardcoded codebase-specific values
+  - Run with `npm run docs:deps`
+
 ## [6.0.0] - 2025-12-01
 
 ### 🎉 MAJOR RELEASE: Meta-Reasoning Mode
