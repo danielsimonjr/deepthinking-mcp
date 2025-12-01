@@ -1,0 +1,607 @@
+{
+  "metadata": {
+    "version": "6.0.0",
+    "lastUpdated": "2025-12-01",
+    "totalFiles": 185,
+    "totalModules": 25,
+    "totalExports": 150
+  },
+  "entryPoints": [
+    {
+      "file": "src/index.ts",
+      "type": "main",
+      "description": "MCP Server Entry Point"
+    }
+  ],
+  "modules": {
+    "entry": {
+      "src/index.ts": {
+        "description": "MCP Server Entry Point",
+        "externalDependencies": [
+          {
+            "package": "@modelcontextprotocol/sdk/server/index.js",
+            "imports": ["Server"]
+          },
+          {
+            "package": "@modelcontextprotocol/sdk/server/stdio.js",
+            "imports": ["StdioServerTransport"]
+          },
+          {
+            "package": "@modelcontextprotocol/sdk/types.js",
+            "imports": ["CallToolRequestSchema", "ListToolsRequestSchema"]
+          }
+        ],
+        "nodeDependencies": [
+          { "module": "fs", "imports": ["readFileSync"] },
+          { "module": "url", "imports": ["fileURLToPath"] },
+          { "module": "path", "imports": ["dirname", "join"] }
+        ],
+        "internalDependencies": [
+          { "file": "./tools/definitions.js", "imports": ["toolList", "toolSchemas", "isValidTool", "modeToToolMap"] },
+          { "file": "./tools/thinking.js", "imports": ["thinkingTool", "ThinkingToolSchema"] },
+          { "file": "./session/index.js", "imports": ["SessionManager"] },
+          { "file": "./types/index.js", "imports": ["ThinkingMode"] },
+          { "file": "./services/index.js", "imports": ["ThoughtFactory", "ExportService", "ModeRouter"] }
+        ],
+        "exports": [],
+        "functions": [
+          { "name": "getSessionManager", "type": "factory", "lazy": true },
+          { "name": "getThoughtFactory", "type": "factory", "lazy": true },
+          { "name": "getExportService", "type": "factory", "lazy": true },
+          { "name": "getModeRouter", "type": "factory", "lazy": true },
+          { "name": "handleAddThought", "type": "handler" },
+          { "name": "handleSessionAction", "type": "handler" },
+          { "name": "handleSummarize", "type": "handler" },
+          { "name": "handleExport", "type": "handler" },
+          { "name": "handleSwitchMode", "type": "handler" },
+          { "name": "handleGetSession", "type": "handler" },
+          { "name": "handleRecommendMode", "type": "handler" }
+        ]
+      }
+    },
+    "services": {
+      "src/services/index.ts": {
+        "description": "Service Barrel Export",
+        "internalDependencies": [
+          { "file": "./ThoughtFactory.js", "imports": ["ThoughtFactory"] },
+          { "file": "./ExportService.js", "imports": ["ExportService"] },
+          { "file": "./ModeRouter.js", "imports": ["ModeRouter"] }
+        ],
+        "exports": ["ThoughtFactory", "ExportService", "ModeRouter"]
+      },
+      "src/services/ThoughtFactory.ts": {
+        "description": "Thought Creation Service",
+        "nodeDependencies": [
+          { "module": "crypto", "imports": ["randomUUID"] }
+        ],
+        "internalDependencies": [
+          { "file": "../types/index.js", "imports": ["ThinkingMode", "ShannonStage", "SequentialThought", "ShannonThought", "MathematicsThought", "PhysicsThought", "HybridThought", "InductiveThought", "DeductiveThought", "AbductiveThought", "MetaReasoningThought"] },
+          { "file": "../tools/thinking.js", "imports": ["ThinkingToolInput"] },
+          { "file": "../utils/type-guards.js", "imports": ["toExtendedThoughtType"] },
+          { "file": "../interfaces/ILogger.js", "imports": ["ILogger"] },
+          { "file": "../utils/logger.js", "imports": ["createLogger", "LogLevel"] }
+        ],
+        "exports": ["ThoughtFactory"],
+        "classes": [
+          {
+            "name": "ThoughtFactory",
+            "methods": ["createThought"]
+          }
+        ]
+      },
+      "src/services/ExportService.ts": {
+        "description": "Export Service",
+        "internalDependencies": [
+          { "file": "../types/index.js", "imports": ["ThinkingSession", "ThinkingMode", "Thought", "isMetaReasoningThought"] },
+          { "file": "../export/visual/index.js", "imports": ["VisualExporter", "VisualFormat"] },
+          { "file": "../utils/sanitization.js", "imports": ["escapeHtml", "escapeLatex"] },
+          { "file": "../interfaces/ILogger.js", "imports": ["ILogger"] },
+          { "file": "../utils/logger.js", "imports": ["createLogger", "LogLevel"] }
+        ],
+        "exports": ["ExportService"],
+        "classes": [
+          {
+            "name": "ExportService",
+            "methods": ["exportSession", "exportVisual", "exportToJSON", "exportToMarkdown", "exportToLatex", "exportToHTML", "exportToJupyter"]
+          }
+        ]
+      },
+      "src/services/ModeRouter.ts": {
+        "description": "Mode Routing Service",
+        "internalDependencies": [
+          { "file": "../types/index.js", "imports": ["ThinkingMode", "ModeRecommender", "ProblemCharacteristics"] },
+          { "file": "../session/index.js", "imports": ["SessionManager"] },
+          { "file": "../interfaces/ILogger.js", "imports": ["ILogger"] },
+          { "file": "../utils/logger.js", "imports": ["createLogger", "LogLevel"] },
+          { "file": "./MetaMonitor.js", "imports": ["metaMonitor", "MetaMonitor"] }
+        ],
+        "exports": ["ModeRouter", "ModeRecommendation", "ModeCombinationRecommendation"],
+        "classes": [
+          {
+            "name": "ModeRouter",
+            "methods": ["switchMode", "quickRecommend", "getRecommendations", "formatQuickRecommendation", "evaluateAndSuggestSwitch", "autoSwitchIfNeeded"]
+          }
+        ],
+        "interfaces": ["ModeRecommendation", "ModeCombinationRecommendation"]
+      },
+      "src/services/MetaMonitor.ts": {
+        "description": "Meta-Reasoning Monitor (v6.0.0)",
+        "internalDependencies": [
+          { "file": "../types/core.js", "imports": ["Thought", "ThinkingMode"] },
+          { "file": "../types/modes/metareasoning.js", "imports": ["StrategyEvaluation", "AlternativeStrategy", "QualityMetrics", "SessionContext"] }
+        ],
+        "exports": ["MetaMonitor", "metaMonitor"],
+        "classes": [
+          {
+            "name": "MetaMonitor",
+            "methods": ["recordThought", "startStrategy", "updateStrategyProgress", "recordStrategyIssue", "evaluateStrategy", "suggestAlternatives", "calculateQualityMetrics", "getSessionContext", "clearSession", "getActiveSessions"]
+          }
+        ],
+        "instances": [
+          { "name": "metaMonitor", "type": "MetaMonitor", "singleton": true }
+        ]
+      }
+    },
+    "session": {
+      "src/session/index.ts": {
+        "description": "Session Module Barrel",
+        "internalDependencies": [
+          { "file": "./manager.js", "imports": ["SessionManager"] }
+        ],
+        "exports": ["SessionManager"]
+      },
+      "src/session/manager.ts": {
+        "description": "Session Manager",
+        "nodeDependencies": [
+          { "module": "crypto", "imports": ["randomUUID"] }
+        ],
+        "internalDependencies": [
+          { "file": "../types/index.js", "imports": ["ThinkingSession", "SessionConfig", "SessionMetadata", "Thought", "ThinkingMode"] },
+          { "file": "../utils/errors.js", "imports": ["SessionNotFoundError"] },
+          { "file": "../utils/sanitization.js", "imports": ["sanitizeString", "sanitizeThoughtContent", "validateSessionId", "MAX_LENGTHS"] },
+          { "file": "../utils/logger.js", "imports": ["createLogger", "LogLevel"] },
+          { "file": "../interfaces/ILogger.js", "imports": ["ILogger"] },
+          { "file": "./storage/interface.js", "imports": ["SessionStorage"] },
+          { "file": "../cache/lru.js", "imports": ["LRUCache"] },
+          { "file": "./SessionMetricsCalculator.js", "imports": ["SessionMetricsCalculator"] },
+          { "file": "../services/MetaMonitor.js", "imports": ["metaMonitor", "MetaMonitor"] }
+        ],
+        "exports": ["SessionManager"],
+        "classes": [
+          {
+            "name": "SessionManager",
+            "methods": ["createSession", "getSession", "addThought", "switchMode", "listSessions", "deleteSession", "generateSummary"]
+          }
+        ]
+      },
+      "src/session/SessionMetricsCalculator.ts": {
+        "description": "Metrics Calculator",
+        "internalDependencies": [
+          { "file": "../types/index.js", "imports": ["SessionMetrics", "Thought"] }
+        ],
+        "exports": ["SessionMetricsCalculator"],
+        "classes": [
+          {
+            "name": "SessionMetricsCalculator",
+            "methods": ["initializeMetrics", "updateMetrics", "calculateAverageUncertainty"]
+          }
+        ]
+      },
+      "src/session/storage/interface.ts": {
+        "description": "Storage Interface",
+        "internalDependencies": [
+          { "file": "../../types/index.js", "imports": ["ThinkingSession", "SessionMetadata"] }
+        ],
+        "exports": ["SessionStorage", "StorageStats", "StorageConfig", "DEFAULT_STORAGE_CONFIG"],
+        "interfaces": ["SessionStorage", "StorageStats", "StorageConfig"],
+        "constants": ["DEFAULT_STORAGE_CONFIG"]
+      }
+    },
+    "types": {
+      "src/types/index.ts": {
+        "description": "Types Barrel Export",
+        "internalDependencies": [
+          { "file": "./core.js", "imports": ["*"] },
+          { "file": "./session.js", "imports": ["*"] },
+          { "file": "./modes/recommendations.js", "imports": ["*"] }
+        ],
+        "exports": ["all re-exported types"]
+      },
+      "src/types/core.ts": {
+        "description": "Core Type Definitions",
+        "internalDependencies": [
+          { "file": "./modes/temporal.js", "imports": ["TemporalThought"] },
+          { "file": "./modes/gametheory.js", "imports": ["GameTheoryThought"] },
+          { "file": "./modes/evidential.js", "imports": ["EvidentialThought"] },
+          { "file": "./modes/firstprinciples.js", "imports": ["FirstPrinciplesThought"] },
+          { "file": "./modes/systemsthinking.js", "imports": ["SystemsThinkingThought"] },
+          { "file": "./modes/scientificmethod.js", "imports": ["ScientificMethodThought"] },
+          { "file": "./modes/optimization.js", "imports": ["OptimizationThought"] },
+          { "file": "./modes/formallogic.js", "imports": ["FormalLogicThought"] },
+          { "file": "./modes/metareasoning.js", "imports": ["MetaReasoningThought"] }
+        ],
+        "exports": {
+          "enums": ["ThinkingMode", "ShannonStage"],
+          "constants": ["FULLY_IMPLEMENTED_MODES", "EXPERIMENTAL_MODES"],
+          "interfaces": [
+            "BaseThought", "SequentialThought", "ShannonThought", "MathematicsThought",
+            "PhysicsThought", "HybridThought", "InductiveThought", "DeductiveThought",
+            "AbductiveThought", "CausalThought", "BayesianThought", "CounterfactualThought",
+            "AnalogicalThought", "MathematicalModel", "TensorProperties", "PhysicalInterpretation",
+            "ProofStrategy", "Theorem", "Reference", "Observation", "Hypothesis", "Evidence",
+            "EvaluationCriteria", "CausalNode", "CausalEdge", "CausalGraph", "Intervention",
+            "CausalMechanism", "Confounder", "CounterfactualScenario", "BayesianHypothesis",
+            "PriorProbability", "Likelihood", "BayesianEvidence", "PosteriorProbability",
+            "SensitivityAnalysis", "Condition", "Outcome", "Scenario", "Difference",
+            "CausalChain", "InterventionPoint", "CounterfactualComparison", "Entity",
+            "Relation", "Property", "Domain", "Mapping", "Insight", "Inference"
+          ],
+          "types": ["ExtendedThoughtType", "Thought"],
+          "functions": [
+            "isSequentialThought", "isShannonThought", "isMathematicsThought", "isPhysicsThought",
+            "isHybridThought", "isInductiveThought", "isDeductiveThought", "isAbductiveThought",
+            "isCausalThought", "isBayesianThought", "isCounterfactualThought", "isAnalogicalThought",
+            "isTemporalThought", "isGameTheoryThought", "isEvidentialThought", "isFirstPrinciplesThought",
+            "isSystemsThinkingThought", "isScientificMethodThought", "isOptimizationThought",
+            "isFormalLogicThought", "isMetaReasoningThought", "isFullyImplemented"
+          ]
+        }
+      },
+      "src/types/session.ts": {
+        "description": "Session Types",
+        "internalDependencies": [
+          { "file": "./core.js", "imports": ["Thought", "ThinkingMode"] }
+        ],
+        "exports": {
+          "interfaces": [
+            "ThinkingSession", "SessionConfig", "ModeConfig", "SessionMetrics",
+            "SessionMetadata", "Attachment", "ValidationResult", "ValidationIssue"
+          ],
+          "types": ["ExportFormat"]
+        }
+      }
+    },
+    "tools": {
+      "src/tools/definitions.ts": {
+        "description": "Tool Definitions",
+        "internalDependencies": [
+          { "file": "./json-schemas.js", "imports": ["jsonSchemas"] },
+          { "file": "./schemas/base.js", "imports": ["SessionActionSchema"] },
+          { "file": "./schemas/modes/core.js", "imports": ["CoreModeSchema", "StandardSchema"] },
+          { "file": "./schemas/modes/mathematics.js", "imports": ["MathSchema"] },
+          { "file": "./schemas/modes/temporal.js", "imports": ["TemporalSchema"] },
+          { "file": "./schemas/modes/probabilistic.js", "imports": ["ProbabilisticSchema"] },
+          { "file": "./schemas/modes/causal.js", "imports": ["CausalSchema"] },
+          { "file": "./schemas/modes/strategic.js", "imports": ["StrategicSchema"] },
+          { "file": "./schemas/modes/analytical.js", "imports": ["AnalyticalSchema"] },
+          { "file": "./schemas/modes/scientific.js", "imports": ["ScientificSchema"] }
+        ],
+        "exports": ["tools", "toolList", "toolSchemas", "modeToToolMap", "getToolForMode", "isValidTool", "getSchemaForTool"],
+        "constants": {
+          "tools": {
+            "type": "Record<string, Schema>",
+            "keys": ["deepthinking_core", "deepthinking_standard", "deepthinking_math", "deepthinking_temporal", "deepthinking_probabilistic", "deepthinking_causal", "deepthinking_strategic", "deepthinking_analytical", "deepthinking_scientific", "deepthinking_session"]
+          },
+          "modeToToolMap": {
+            "type": "Record<string, string>",
+            "mappings": 21
+          }
+        }
+      },
+      "src/tools/thinking.ts": {
+        "description": "Legacy Thinking Tool",
+        "externalDependencies": [
+          { "package": "zod", "imports": ["z"] }
+        ],
+        "exports": ["ThinkingToolSchema", "ThinkingToolInput", "thinkingTool"],
+        "schemas": ["ThinkingToolSchema"],
+        "types": ["ThinkingToolInput"]
+      }
+    },
+    "export": {
+      "src/export/visual/index.ts": {
+        "description": "Visual Export Module",
+        "internalDependencies": [
+          { "file": "./types.js", "imports": ["VisualFormat", "VisualExportOptions"] },
+          { "file": "./utils.js", "imports": ["sanitizeId"] },
+          { "file": "../../types/index.js", "imports": ["CausalThought", "TemporalThought", "GameTheoryThought", "BayesianThought", "SequentialThought", "ShannonThought", "AbductiveThought", "CounterfactualThought", "AnalogicalThought", "EvidentialThought", "FirstPrinciplesThought", "SystemsThinkingThought", "ScientificMethodThought", "OptimizationThought", "FormalLogicThought"] },
+          { "file": "./causal.js", "imports": ["exportCausalGraph"] },
+          { "file": "./temporal.js", "imports": ["exportTemporalTimeline"] },
+          { "file": "./game-theory.js", "imports": ["exportGameTree"] },
+          { "file": "./bayesian.js", "imports": ["exportBayesianNetwork"] },
+          { "file": "./sequential.js", "imports": ["exportSequentialDependencyGraph"] },
+          { "file": "./shannon.js", "imports": ["exportShannonStageFlow"] },
+          { "file": "./abductive.js", "imports": ["exportAbductiveHypotheses"] },
+          { "file": "./counterfactual.js", "imports": ["exportCounterfactualScenarios"] },
+          { "file": "./analogical.js", "imports": ["exportAnalogicalMapping"] },
+          { "file": "./evidential.js", "imports": ["exportEvidentialBeliefs"] },
+          { "file": "./first-principles.js", "imports": ["exportFirstPrinciplesDerivation"] },
+          { "file": "./systems-thinking.js", "imports": ["exportSystemsThinkingCausalLoops"] },
+          { "file": "./scientific-method.js", "imports": ["exportScientificMethodExperiment"] },
+          { "file": "./optimization.js", "imports": ["exportOptimizationSolution"] },
+          { "file": "./formal-logic.js", "imports": ["exportFormalLogicProof"] }
+        ],
+        "exports": ["VisualExporter", "VisualFormat", "VisualExportOptions", "sanitizeId", "exportCausalGraph", "exportTemporalTimeline", "exportGameTree", "exportBayesianNetwork", "exportSequentialDependencyGraph", "exportShannonStageFlow", "exportAbductiveHypotheses", "exportCounterfactualScenarios", "exportAnalogicalMapping", "exportEvidentialBeliefs", "exportFirstPrinciplesDerivation", "exportSystemsThinkingCausalLoops", "exportScientificMethodExperiment", "exportOptimizationSolution", "exportFormalLogicProof"],
+        "classes": [
+          {
+            "name": "VisualExporter",
+            "methods": ["exportCausalGraph", "exportTemporalTimeline", "exportGameTree", "exportBayesianNetwork", "exportSequentialDependencyGraph", "exportShannonStageFlow", "exportAbductiveHypotheses", "exportCounterfactualScenarios", "exportAnalogicalMapping", "exportEvidentialBeliefs", "exportFirstPrinciplesDerivation", "exportSystemsThinkingCausalLoops", "exportScientificMethodExperiment", "exportOptimizationSolution", "exportFormalLogicProof"]
+          }
+        ]
+      }
+    },
+    "utils": {
+      "src/utils/logger.ts": {
+        "description": "Logging Utility",
+        "internalDependencies": [
+          { "file": "../interfaces/ILogger.js", "imports": ["ILogger"] }
+        ],
+        "exports": ["LogLevel", "LogEntry", "LoggerConfig", "Logger", "logger", "createLogger"],
+        "enums": ["LogLevel"],
+        "interfaces": ["LogEntry", "LoggerConfig"],
+        "classes": [
+          {
+            "name": "Logger",
+            "implements": ["ILogger"],
+            "methods": ["debug", "info", "warn", "error", "getLogs", "clearLogs", "setLevel", "exportLogs"]
+          }
+        ],
+        "instances": [
+          { "name": "logger", "type": "Logger", "singleton": true }
+        ],
+        "functions": ["createLogger"]
+      },
+      "src/utils/sanitization.ts": {
+        "description": "Input Sanitization",
+        "internalDependencies": [],
+        "exports": ["MAX_LENGTHS", "sanitizeString", "sanitizeOptionalString", "validateSessionId", "sanitizeNumber", "sanitizeStringArray", "sanitizeThoughtContent", "sanitizeTitle", "sanitizeDomain", "sanitizeAuthor", "escapeHtml", "escapeLatex"],
+        "constants": {
+          "MAX_LENGTHS": {
+            "THOUGHT_CONTENT": 100000,
+            "TITLE": 500,
+            "DOMAIN": 200,
+            "AUTHOR": 300,
+            "SESSION_ID": 100,
+            "HYPOTHESIS": 5000,
+            "DESCRIPTION": 10000,
+            "STRING_FIELD": 1000
+          }
+        },
+        "functions": ["sanitizeString", "sanitizeOptionalString", "validateSessionId", "sanitizeNumber", "sanitizeStringArray", "sanitizeThoughtContent", "sanitizeTitle", "sanitizeDomain", "sanitizeAuthor", "escapeHtml", "escapeLatex"]
+      },
+      "src/utils/errors.ts": {
+        "description": "Error Utilities",
+        "internalDependencies": [],
+        "exports": ["DeepThinkingError", "SessionError", "SessionNotFoundError", "SessionAlreadyExistsError", "ValidationError", "InputValidationError", "ConfigurationError", "InvalidModeError", "ThoughtProcessingError", "ExportError", "ResourceLimitError", "RateLimitError", "SecurityError", "PathTraversalError", "StorageError", "BackupError", "ErrorFactory"],
+        "classes": [
+          { "name": "DeepThinkingError", "extends": "Error", "base": true },
+          { "name": "SessionError", "extends": "DeepThinkingError", "code": "SESSION_ERROR" },
+          { "name": "SessionNotFoundError", "extends": "DeepThinkingError", "code": "SESSION_NOT_FOUND" },
+          { "name": "SessionAlreadyExistsError", "extends": "DeepThinkingError", "code": "SESSION_ALREADY_EXISTS" },
+          { "name": "ValidationError", "extends": "DeepThinkingError", "code": "VALIDATION_ERROR" },
+          { "name": "InputValidationError", "extends": "DeepThinkingError", "code": "INPUT_VALIDATION_ERROR" },
+          { "name": "ConfigurationError", "extends": "DeepThinkingError", "code": "CONFIGURATION_ERROR" },
+          { "name": "InvalidModeError", "extends": "DeepThinkingError", "code": "INVALID_MODE" },
+          { "name": "ThoughtProcessingError", "extends": "DeepThinkingError", "code": "THOUGHT_PROCESSING_ERROR" },
+          { "name": "ExportError", "extends": "DeepThinkingError", "code": "EXPORT_ERROR" },
+          { "name": "ResourceLimitError", "extends": "DeepThinkingError", "code": "RESOURCE_LIMIT_EXCEEDED" },
+          { "name": "RateLimitError", "extends": "DeepThinkingError", "code": "RATE_LIMIT_EXCEEDED" },
+          { "name": "SecurityError", "extends": "DeepThinkingError", "code": "SECURITY_ERROR" },
+          { "name": "PathTraversalError", "extends": "DeepThinkingError", "code": "PATH_TRAVERSAL_DETECTED" },
+          { "name": "StorageError", "extends": "DeepThinkingError", "code": "STORAGE_ERROR" },
+          { "name": "BackupError", "extends": "DeepThinkingError", "code": "BACKUP_ERROR" },
+          { "name": "ErrorFactory", "type": "factory" }
+        ]
+      }
+    },
+    "interfaces": {
+      "src/interfaces/ILogger.ts": {
+        "description": "Logger Interface",
+        "internalDependencies": [
+          { "file": "../utils/logger.js", "imports": ["LogLevel", "LogEntry"] }
+        ],
+        "exports": ["ILogger"],
+        "interfaces": [
+          {
+            "name": "ILogger",
+            "methods": ["debug", "info", "warn", "error", "getLogs", "clearLogs", "setLevel", "exportLogs"]
+          }
+        ]
+      }
+    },
+    "cache": {
+      "src/cache/lru.ts": {
+        "description": "LRU Cache",
+        "internalDependencies": [
+          { "file": "./types.js", "imports": ["Cache", "CacheConfig", "CacheEntry", "CacheStats"] }
+        ],
+        "exports": ["LRUCache"],
+        "classes": [
+          {
+            "name": "LRUCache",
+            "implements": ["Cache<T>"],
+            "generic": "T",
+            "methods": ["get", "set", "delete", "has", "clear", "keys", "values", "entries", "getStats", "resize"]
+          }
+        ]
+      },
+      "src/cache/types.ts": {
+        "description": "Cache Types",
+        "internalDependencies": [],
+        "exports": ["Cache", "CacheConfig", "CacheEntry", "CacheStats"],
+        "interfaces": ["Cache", "CacheConfig", "CacheEntry", "CacheStats"]
+      }
+    }
+  },
+  "thinkingModes": {
+    "total": 21,
+    "fullyImplemented": [
+      "sequential", "shannon", "mathematics", "physics", "hybrid",
+      "metareasoning", "recursive", "modal", "stochastic", "constraint",
+      "optimization", "inductive", "deductive"
+    ],
+    "experimental": [
+      "abductive", "causal", "bayesian", "counterfactual", "analogical",
+      "temporal", "gametheory", "evidential", "firstprinciples",
+      "systemsthinking", "scientificmethod", "formallogic"
+    ],
+    "modeToToolMapping": {
+      "inductive": "deepthinking_core",
+      "deductive": "deepthinking_core",
+      "abductive": "deepthinking_core",
+      "sequential": "deepthinking_standard",
+      "shannon": "deepthinking_standard",
+      "hybrid": "deepthinking_standard",
+      "mathematics": "deepthinking_math",
+      "physics": "deepthinking_math",
+      "temporal": "deepthinking_temporal",
+      "bayesian": "deepthinking_probabilistic",
+      "evidential": "deepthinking_probabilistic",
+      "causal": "deepthinking_causal",
+      "counterfactual": "deepthinking_causal",
+      "gametheory": "deepthinking_strategic",
+      "optimization": "deepthinking_strategic",
+      "analogical": "deepthinking_analytical",
+      "firstprinciples": "deepthinking_analytical",
+      "metareasoning": "deepthinking_analytical",
+      "scientificmethod": "deepthinking_scientific",
+      "systemsthinking": "deepthinking_scientific",
+      "formallogic": "deepthinking_scientific"
+    }
+  },
+  "tools": {
+    "total": 10,
+    "list": [
+      {
+        "name": "deepthinking_core",
+        "description": "Fundamental reasoning",
+        "modes": ["inductive", "deductive", "abductive"]
+      },
+      {
+        "name": "deepthinking_standard",
+        "description": "Standard workflows",
+        "modes": ["sequential", "shannon", "hybrid"]
+      },
+      {
+        "name": "deepthinking_math",
+        "description": "Mathematical/physical reasoning",
+        "modes": ["mathematics", "physics"]
+      },
+      {
+        "name": "deepthinking_temporal",
+        "description": "Time-based reasoning",
+        "modes": ["temporal"]
+      },
+      {
+        "name": "deepthinking_probabilistic",
+        "description": "Probability reasoning",
+        "modes": ["bayesian", "evidential"]
+      },
+      {
+        "name": "deepthinking_causal",
+        "description": "Causal analysis",
+        "modes": ["causal", "counterfactual"]
+      },
+      {
+        "name": "deepthinking_strategic",
+        "description": "Strategic decision-making",
+        "modes": ["gametheory", "optimization"]
+      },
+      {
+        "name": "deepthinking_analytical",
+        "description": "Analytical reasoning",
+        "modes": ["analogical", "firstprinciples", "metareasoning"]
+      },
+      {
+        "name": "deepthinking_scientific",
+        "description": "Scientific methods",
+        "modes": ["scientificmethod", "systemsthinking", "formallogic"]
+      },
+      {
+        "name": "deepthinking_session",
+        "description": "Session management",
+        "modes": ["all"]
+      }
+    ]
+  },
+  "visualExporters": {
+    "total": 15,
+    "list": [
+      "causal", "temporal", "game-theory", "bayesian", "sequential",
+      "shannon", "abductive", "counterfactual", "analogical", "evidential",
+      "first-principles", "systems-thinking", "scientific-method",
+      "optimization", "formal-logic"
+    ]
+  },
+  "errorClasses": {
+    "total": 17,
+    "hierarchy": {
+      "Error": {
+        "DeepThinkingError": {
+          "SessionError": {},
+          "SessionNotFoundError": {},
+          "SessionAlreadyExistsError": {},
+          "ValidationError": {},
+          "InputValidationError": {},
+          "ConfigurationError": {},
+          "InvalidModeError": {},
+          "ThoughtProcessingError": {},
+          "ExportError": {},
+          "ResourceLimitError": {},
+          "RateLimitError": {},
+          "SecurityError": {},
+          "PathTraversalError": {},
+          "StorageError": {},
+          "BackupError": {}
+        }
+      }
+    }
+  },
+  "dependencyGraph": {
+    "circularDependencies": [],
+    "layers": [
+      {
+        "name": "Entry",
+        "files": ["src/index.ts"]
+      },
+      {
+        "name": "Tools",
+        "files": ["src/tools/definitions.ts", "src/tools/thinking.ts", "src/tools/schemas/*"]
+      },
+      {
+        "name": "Services",
+        "files": ["src/services/ThoughtFactory.ts", "src/services/ExportService.ts", "src/services/ModeRouter.ts", "src/services/MetaMonitor.ts"]
+      },
+      {
+        "name": "Session",
+        "files": ["src/session/manager.ts", "src/session/SessionMetricsCalculator.ts"]
+      },
+      {
+        "name": "Export",
+        "files": ["src/export/visual/*"]
+      },
+      {
+        "name": "Types",
+        "files": ["src/types/core.ts", "src/types/session.ts", "src/types/modes/*"]
+      },
+      {
+        "name": "Infrastructure",
+        "files": ["src/cache/lru.ts", "src/session/storage/*", "src/interfaces/*"]
+      },
+      {
+        "name": "Utils",
+        "files": ["src/utils/logger.ts", "src/utils/sanitization.ts", "src/utils/errors.ts"]
+      }
+    ]
+  },
+  "statistics": {
+    "totalTypeScriptFiles": 185,
+    "totalTestFiles": 36,
+    "totalLinesOfCode": 50900,
+    "totalExports": 150,
+    "totalClasses": 25,
+    "totalInterfaces": 80,
+    "totalFunctions": 100,
+    "totalTypeGuards": 22
+  }
+}
