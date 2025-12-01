@@ -1,17 +1,20 @@
 #!/usr/bin/env node
 
 /**
- * Dependency Graph Generator for DeepThinking MCP
+ * Generic Dependency Graph Generator
  *
- * Scans the codebase and generates:
+ * Scans a TypeScript codebase and generates:
  * - docs/architecture/DEPENDENCY_GRAPH.md
  * - docs/architecture/dependency-graph.json
  *
  * Usage: node tools/create-dependency-graph.mjs
+ *
+ * This tool is generic and does not depend on any codebase-specific functions.
+ * It dynamically discovers the project structure from the filesystem.
  */
 
-import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'fs';
-import { join, dirname, relative, basename, extname } from 'path';
+import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync } from 'fs';
+import { join, dirname, relative, basename } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -20,13 +23,22 @@ const ROOT_DIR = join(__dirname, '..');
 const SRC_DIR = join(ROOT_DIR, 'src');
 const OUTPUT_DIR = join(ROOT_DIR, 'docs', 'architecture');
 
-// Read package.json for version
-const packageJson = JSON.parse(readFileSync(join(ROOT_DIR, 'package.json'), 'utf-8'));
+// Read package.json for version and name
+let packageJson = { name: 'unknown', version: '0.0.0' };
+try {
+  packageJson = JSON.parse(readFileSync(join(ROOT_DIR, 'package.json'), 'utf-8'));
+} catch (e) {
+  console.warn('Warning: Could not read package.json, using defaults');
+}
 
 /**
  * Recursively get all TypeScript files in a directory
  */
 function getAllTsFiles(dir, files = []) {
+  if (!existsSync(dir)) {
+    return files;
+  }
+
   const entries = readdirSync(dir);
 
   for (const entry of entries) {
@@ -48,7 +60,7 @@ function getAllTsFiles(dir, files = []) {
  */
 function parseFile(filePath) {
   const content = readFileSync(filePath, 'utf-8');
-  const relativePath = relative(ROOT_DIR, filePath);
+  const relativePath = relative(ROOT_DIR, filePath).replace(/\\/g, '/');
 
   const result = {
     path: relativePath,
@@ -86,12 +98,14 @@ function parseFile(filePath) {
     if (defaultImport) imports.push(defaultImport);
     if (namespaceImport) imports.push(`* as ${namespaceImport}`);
 
+    const nodeBuiltins = ['fs', 'path', 'url', 'crypto', 'util', 'stream', 'events', 'buffer', 'os', 'child_process', 'http', 'https', 'net', 'dns', 'tls', 'zlib', 'readline', 'assert', 'cluster', 'dgram', 'domain', 'inspector', 'module', 'perf_hooks', 'process', 'punycode', 'querystring', 'repl', 'string_decoder', 'timers', 'tty', 'v8', 'vm', 'worker_threads'];
+
     if (source.startsWith('.')) {
       result.internalDependencies.push({
         file: source,
         imports: imports
       });
-    } else if (source.startsWith('node:') || ['fs', 'path', 'url', 'crypto', 'util', 'stream', 'events', 'buffer', 'os', 'child_process'].includes(source)) {
+    } else if (source.startsWith('node:') || nodeBuiltins.includes(source.split('/')[0])) {
       result.nodeDependencies.push({
         module: source.replace('node:', ''),
         imports: imports
@@ -215,81 +229,35 @@ function extractDescription(content) {
 }
 
 /**
- * Categorize files into modules
+ * Dynamically discover and categorize files into modules based on directory structure
  */
 function categorizeFiles(files) {
-  const modules = {
-    entry: {},
-    services: {},
-    session: {},
-    types: {},
-    tools: {},
-    export: {},
-    utils: {},
-    interfaces: {},
-    cache: {},
-    search: {},
-    taxonomy: {},
-    backup: {},
-    batch: {},
-    'rate-limit': {},
-    comparison: {},
-    collaboration: {},
-    repositories: {},
-    config: {},
-    templates: {},
-    analytics: {},
-    modes: {},
-    validation: {}
-  };
+  const modules = {};
 
   for (const file of files) {
     const relativePath = file.path;
 
+    // Handle entry point (src/index.ts)
     if (relativePath === 'src/index.ts') {
+      if (!modules.entry) modules.entry = {};
       modules.entry[relativePath] = file;
-    } else if (relativePath.startsWith('src/services/')) {
-      modules.services[relativePath] = file;
-    } else if (relativePath.startsWith('src/session/')) {
-      modules.session[relativePath] = file;
-    } else if (relativePath.startsWith('src/types/')) {
-      modules.types[relativePath] = file;
-    } else if (relativePath.startsWith('src/tools/')) {
-      modules.tools[relativePath] = file;
-    } else if (relativePath.startsWith('src/export/')) {
-      modules.export[relativePath] = file;
-    } else if (relativePath.startsWith('src/utils/')) {
-      modules.utils[relativePath] = file;
-    } else if (relativePath.startsWith('src/interfaces/')) {
-      modules.interfaces[relativePath] = file;
-    } else if (relativePath.startsWith('src/cache/')) {
-      modules.cache[relativePath] = file;
-    } else if (relativePath.startsWith('src/search/')) {
-      modules.search[relativePath] = file;
-    } else if (relativePath.startsWith('src/taxonomy/')) {
-      modules.taxonomy[relativePath] = file;
-    } else if (relativePath.startsWith('src/backup/')) {
-      modules.backup[relativePath] = file;
-    } else if (relativePath.startsWith('src/batch/')) {
-      modules.batch[relativePath] = file;
-    } else if (relativePath.startsWith('src/rate-limit/')) {
-      modules['rate-limit'][relativePath] = file;
-    } else if (relativePath.startsWith('src/comparison/')) {
-      modules.comparison[relativePath] = file;
-    } else if (relativePath.startsWith('src/collaboration/')) {
-      modules.collaboration[relativePath] = file;
-    } else if (relativePath.startsWith('src/repositories/')) {
-      modules.repositories[relativePath] = file;
-    } else if (relativePath.startsWith('src/config/')) {
-      modules.config[relativePath] = file;
-    } else if (relativePath.startsWith('src/templates/')) {
-      modules.templates[relativePath] = file;
-    } else if (relativePath.startsWith('src/analytics/')) {
-      modules.analytics[relativePath] = file;
-    } else if (relativePath.startsWith('src/modes/')) {
-      modules.modes[relativePath] = file;
-    } else if (relativePath.startsWith('src/validation/')) {
-      modules.validation[relativePath] = file;
+      continue;
+    }
+
+    // Extract the module name from path (first directory after src/)
+    const parts = relativePath.split('/');
+    if (parts.length >= 2 && parts[0] === 'src') {
+      const moduleName = parts[1].replace('.ts', '');
+
+      // If it's a file directly in src/, categorize by filename
+      if (parts.length === 2) {
+        if (!modules.root) modules.root = {};
+        modules.root[relativePath] = file;
+      } else {
+        // It's in a subdirectory
+        if (!modules[moduleName]) modules[moduleName] = {};
+        modules[moduleName][relativePath] = file;
+      }
     }
   }
 
@@ -322,7 +290,6 @@ function buildDependencyMatrix(files) {
     for (const other of files) {
       if (other.path === file.path) continue;
       for (const dep of other.internalDependencies) {
-        // Normalize paths for comparison
         const resolvedPath = resolvePath(other.path, dep.file);
         if (resolvedPath === file.path || resolvedPath === file.path.replace('.ts', '')) {
           exportsTo.add(other.path);
@@ -361,19 +328,16 @@ function resolvePath(fromPath, relativePath) {
 }
 
 /**
- * Detect circular dependencies using Tarjan's algorithm for SCCs
+ * Detect circular dependencies
  */
 function detectCircularDependencies(files) {
-  // Build a map of file paths for quick lookup
   const filePaths = new Set(files.map(f => f.path));
 
-  // Build adjacency list with resolved paths
   const graph = new Map();
   for (const file of files) {
     const deps = [];
     for (const d of file.internalDependencies) {
       const resolved = resolvePath(file.path, d.file);
-      // Only include if the resolved path exists in our file set
       if (filePaths.has(resolved)) {
         deps.push(resolved);
       }
@@ -387,12 +351,10 @@ function detectCircularDependencies(files) {
 
   function dfs(node, path) {
     if (inStack.has(node)) {
-      // Found a cycle - extract just the cycle portion
       const cycleStart = path.indexOf(node);
       if (cycleStart !== -1) {
         const cycle = path.slice(cycleStart);
         cycle.push(node);
-        // Only add unique cycles (check by sorted string representation)
         const cycleKey = [...cycle].sort().join('->');
         if (!cycles.some(c => [...c].sort().join('->') === cycleKey)) {
           cycles.push(cycle);
@@ -416,7 +378,6 @@ function detectCircularDependencies(files) {
     inStack.delete(node);
   }
 
-  // Start DFS from each node
   for (const node of graph.keys()) {
     if (!visited.has(node)) {
       dfs(node, []);
@@ -427,7 +388,7 @@ function detectCircularDependencies(files) {
 }
 
 /**
- * Generate statistics
+ * Generate statistics from parsed files
  */
 function generateStatistics(files, modules) {
   let totalExports = 0;
@@ -447,7 +408,7 @@ function generateStatistics(files, modules) {
     totalEnums += file.exports.enums.length;
     totalConstants += file.exports.constants.length;
 
-    // Count type guards
+    // Count type guards (functions starting with 'is')
     totalTypeGuards += file.exports.functions.filter(f => f.startsWith('is')).length;
 
     // Count lines
@@ -470,89 +431,6 @@ function generateStatistics(files, modules) {
     totalTypeGuards,
     totalEnums,
     totalConstants
-  };
-}
-
-/**
- * Get thinking modes information
- */
-function getThinkingModes() {
-  return {
-    total: 21,
-    fullyImplemented: [
-      'sequential', 'shannon', 'mathematics', 'physics', 'hybrid',
-      'metareasoning', 'recursive', 'modal', 'stochastic', 'constraint',
-      'optimization', 'inductive', 'deductive'
-    ],
-    experimental: [
-      'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical',
-      'temporal', 'gametheory', 'evidential', 'firstprinciples',
-      'systemsthinking', 'scientificmethod', 'formallogic'
-    ],
-    modeToToolMapping: {
-      inductive: 'deepthinking_core',
-      deductive: 'deepthinking_core',
-      abductive: 'deepthinking_core',
-      sequential: 'deepthinking_standard',
-      shannon: 'deepthinking_standard',
-      hybrid: 'deepthinking_standard',
-      mathematics: 'deepthinking_math',
-      physics: 'deepthinking_math',
-      temporal: 'deepthinking_temporal',
-      bayesian: 'deepthinking_probabilistic',
-      evidential: 'deepthinking_probabilistic',
-      causal: 'deepthinking_causal',
-      counterfactual: 'deepthinking_causal',
-      gametheory: 'deepthinking_strategic',
-      optimization: 'deepthinking_strategic',
-      analogical: 'deepthinking_analytical',
-      firstprinciples: 'deepthinking_analytical',
-      metareasoning: 'deepthinking_analytical',
-      scientificmethod: 'deepthinking_scientific',
-      systemsthinking: 'deepthinking_scientific',
-      formallogic: 'deepthinking_scientific'
-    }
-  };
-}
-
-/**
- * Get tools information
- */
-function getToolsInfo() {
-  return {
-    total: 10,
-    list: [
-      { name: 'deepthinking_core', description: 'Fundamental reasoning', modes: ['inductive', 'deductive', 'abductive'] },
-      { name: 'deepthinking_standard', description: 'Standard workflows', modes: ['sequential', 'shannon', 'hybrid'] },
-      { name: 'deepthinking_math', description: 'Mathematical/physical reasoning', modes: ['mathematics', 'physics'] },
-      { name: 'deepthinking_temporal', description: 'Time-based reasoning', modes: ['temporal'] },
-      { name: 'deepthinking_probabilistic', description: 'Probability reasoning', modes: ['bayesian', 'evidential'] },
-      { name: 'deepthinking_causal', description: 'Causal analysis', modes: ['causal', 'counterfactual'] },
-      { name: 'deepthinking_strategic', description: 'Strategic decision-making', modes: ['gametheory', 'optimization'] },
-      { name: 'deepthinking_analytical', description: 'Analytical reasoning', modes: ['analogical', 'firstprinciples', 'metareasoning'] },
-      { name: 'deepthinking_scientific', description: 'Scientific methods', modes: ['scientificmethod', 'systemsthinking', 'formallogic'] },
-      { name: 'deepthinking_session', description: 'Session management', modes: ['all'] }
-    ]
-  };
-}
-
-/**
- * Get visual exporters information
- */
-function getVisualExporters(files) {
-  const exporters = [];
-  const visualFiles = files.filter(f => f.path.startsWith('src/export/visual/') && f.path !== 'src/export/visual/index.ts');
-
-  for (const file of visualFiles) {
-    const name = basename(file.path, '.ts');
-    if (name !== 'types' && name !== 'utils') {
-      exporters.push(name);
-    }
-  }
-
-  return {
-    total: exporters.length,
-    list: exporters.sort()
   };
 }
 
@@ -593,44 +471,99 @@ function generateJSON(files, modules, stats, circularDeps) {
     }
   }
 
+  // Build layers from modules
+  const layers = Object.keys(modules).map(name => ({
+    name: name.charAt(0).toUpperCase() + name.slice(1),
+    files: Object.keys(modules[name])
+  })).filter(l => l.files.length > 0);
+
   return {
     metadata: {
+      name: packageJson.name,
       version: packageJson.version,
       lastUpdated: today,
       totalFiles: stats.totalTypeScriptFiles,
       totalModules: stats.totalModules,
       totalExports: stats.totalExports
     },
-    entryPoints: [
-      {
-        file: 'src/index.ts',
+    entryPoints: files
+      .filter(f => f.path === 'src/index.ts')
+      .map(f => ({
+        file: f.path,
         type: 'main',
-        description: 'MCP Server Entry Point'
-      }
-    ],
+        description: f.description || 'Entry Point'
+      })),
     modules: modulesJson,
-    thinkingModes: getThinkingModes(),
-    tools: getToolsInfo(),
-    visualExporters: getVisualExporters(files),
     dependencyGraph: {
       circularDependencies: circularDeps,
-      layers: [
-        { name: 'Entry', files: ['src/index.ts'] },
-        { name: 'Tools', files: Object.keys(modules.tools || {}) },
-        { name: 'Services', files: Object.keys(modules.services || {}) },
-        { name: 'Session', files: Object.keys(modules.session || {}) },
-        { name: 'Export', files: Object.keys(modules.export || {}) },
-        { name: 'Types', files: Object.keys(modules.types || {}) },
-        { name: 'Infrastructure', files: [
-          ...Object.keys(modules.cache || {}),
-          ...Object.keys(modules.interfaces || {}),
-          ...Object.keys(modules.repositories || {})
-        ] },
-        { name: 'Utils', files: Object.keys(modules.utils || {}) }
-      ].filter(l => l.files.length > 0)
+      layers
     },
     statistics: stats
   };
+}
+
+/**
+ * Generate a dynamic Mermaid diagram from actual dependencies
+ */
+function generateMermaidDiagram(modules, files) {
+  const lines = [];
+  lines.push('```mermaid');
+  lines.push('graph TD');
+
+  // Create subgraphs for each module
+  const moduleNames = Object.keys(modules);
+  const nodeIds = new Map();
+  let nodeCounter = 0;
+
+  for (const moduleName of moduleNames) {
+    const title = moduleName.charAt(0).toUpperCase() + moduleName.slice(1);
+    lines.push(`    subgraph ${title}`);
+
+    const moduleFiles = Object.keys(modules[moduleName]);
+    for (const filePath of moduleFiles.slice(0, 5)) { // Limit to 5 files per module for readability
+      const name = basename(filePath, '.ts');
+      const nodeId = `N${nodeCounter++}`;
+      nodeIds.set(filePath, nodeId);
+      lines.push(`        ${nodeId}[${name}]`);
+    }
+
+    if (moduleFiles.length > 5) {
+      const nodeId = `N${nodeCounter++}`;
+      lines.push(`        ${nodeId}[...${moduleFiles.length - 5} more]`);
+    }
+
+    lines.push('    end');
+    lines.push('');
+  }
+
+  // Add edges for dependencies (limited for readability)
+  const addedEdges = new Set();
+  let edgeCount = 0;
+  const maxEdges = 30;
+
+  for (const file of files) {
+    const sourceId = nodeIds.get(file.path);
+    if (!sourceId) continue;
+
+    for (const dep of file.internalDependencies) {
+      if (edgeCount >= maxEdges) break;
+
+      const resolved = resolvePath(file.path, dep.file);
+      const targetId = nodeIds.get(resolved);
+
+      if (targetId && sourceId !== targetId) {
+        const edgeKey = `${sourceId}-${targetId}`;
+        if (!addedEdges.has(edgeKey)) {
+          lines.push(`    ${sourceId} --> ${targetId}`);
+          addedEdges.add(edgeKey);
+          edgeCount++;
+        }
+      }
+    }
+  }
+
+  lines.push('```');
+  return lines.join('\n');
 }
 
 /**
@@ -639,12 +572,13 @@ function generateJSON(files, modules, stats, circularDeps) {
 function generateMarkdown(files, modules, stats, circularDeps, matrix) {
   const today = new Date().toISOString().split('T')[0];
   const lines = [];
+  const projectName = packageJson.name || 'Project';
 
-  lines.push('# DeepThinking MCP - Dependency Graph');
+  lines.push(`# ${projectName} - Dependency Graph`);
   lines.push('');
   lines.push(`**Version**: ${packageJson.version} | **Last Updated**: ${today}`);
   lines.push('');
-  lines.push('This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the DeepThinking MCP codebase.');
+  lines.push('This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.');
   lines.push('');
   lines.push('---');
   lines.push('');
@@ -670,31 +604,12 @@ function generateMarkdown(files, modules, stats, circularDeps, matrix) {
   // Overview
   lines.push('## Overview');
   lines.push('');
-  lines.push('The DeepThinking MCP codebase follows a layered architecture with clear dependency directions:');
+  lines.push('The codebase is organized into the following modules:');
   lines.push('');
-  lines.push('```');
-  lines.push('┌─────────────────────────────────────────────────────────────┐');
-  lines.push('│                    Entry Point (index.ts)                   │');
-  lines.push('├─────────────────────────────────────────────────────────────┤');
-  lines.push('│                     Tools Layer                             │');
-  lines.push('│        (definitions.ts, thinking.ts, schemas/*)             │');
-  lines.push('├─────────────────────────────────────────────────────────────┤');
-  lines.push('│                    Services Layer                           │');
-  lines.push('│  (ThoughtFactory, ExportService, ModeRouter, MetaMonitor)   │');
-  lines.push('├─────────────────────────────────────────────────────────────┤');
-  lines.push('│                   Session Layer                             │');
-  lines.push('│      (SessionManager, SessionMetricsCalculator)             │');
-  lines.push('├─────────────────────────────────────────────────────────────┤');
-  lines.push('│                    Export Layer                             │');
-  lines.push('│           (visual/*, document exporters)                    │');
-  lines.push('├─────────────────────────────────────────────────────────────┤');
-  lines.push('│              Types / Interfaces / Utils                     │');
-  lines.push('│      (core.ts, session.ts, modes/*, utils/*)                │');
-  lines.push('├─────────────────────────────────────────────────────────────┤');
-  lines.push('│              Infrastructure Layer                           │');
-  lines.push('│         (cache/, storage/, interfaces/)                     │');
-  lines.push('└─────────────────────────────────────────────────────────────┘');
-  lines.push('```');
+  for (const [moduleName, moduleFiles] of Object.entries(modules)) {
+    const fileCount = Object.keys(moduleFiles).length;
+    lines.push(`- **${moduleName}**: ${fileCount} file${fileCount !== 1 ? 's' : ''}`);
+  }
   lines.push('');
   lines.push('---');
   lines.push('');
@@ -713,10 +628,10 @@ function generateMarkdown(files, modules, stats, circularDeps, matrix) {
       // External dependencies
       if (file.externalDependencies.length > 0) {
         lines.push('**External Dependencies:**');
-        lines.push('| Package | Import | Usage |');
-        lines.push('|---------|--------|-------|');
+        lines.push('| Package | Import |');
+        lines.push('|---------|--------|');
         for (const dep of file.externalDependencies) {
-          lines.push(`| \`${dep.package}\` | \`${dep.imports.join(', ')}\` | External package |`);
+          lines.push(`| \`${dep.package}\` | \`${dep.imports.join(', ')}\` |`);
         }
         lines.push('');
       }
@@ -724,10 +639,10 @@ function generateMarkdown(files, modules, stats, circularDeps, matrix) {
       // Node dependencies
       if (file.nodeDependencies.length > 0) {
         lines.push('**Node.js Built-in Dependencies:**');
-        lines.push('| Module | Import | Usage |');
-        lines.push('|--------|--------|-------|');
+        lines.push('| Module | Import |');
+        lines.push('|--------|--------|');
         for (const dep of file.nodeDependencies) {
-          lines.push(`| \`${dep.module}\` | \`${dep.imports.join(', ')}\` | Node.js built-in |`);
+          lines.push(`| \`${dep.module}\` | \`${dep.imports.join(', ')}\` |`);
         }
         lines.push('');
       }
@@ -735,8 +650,8 @@ function generateMarkdown(files, modules, stats, circularDeps, matrix) {
       // Internal dependencies
       if (file.internalDependencies.length > 0) {
         lines.push('**Internal Dependencies:**');
-        lines.push('| File | Imports | Usage |');
-        lines.push('|------|---------|-------|');
+        lines.push('| File | Imports | Type |');
+        lines.push('|------|---------|------|');
         for (const dep of file.internalDependencies) {
           const usage = dep.reExport ? 'Re-export' : 'Import';
           lines.push(`| \`${dep.file}\` | \`${dep.imports.join(', ')}\` | ${usage} |`);
@@ -781,7 +696,7 @@ function generateMarkdown(files, modules, stats, circularDeps, matrix) {
   lines.push('| File | Imports From | Exports To |');
   lines.push('|------|--------------|------------|');
 
-  const matrixEntries = Object.entries(matrix).slice(0, 20); // Limit to top 20 for readability
+  const matrixEntries = Object.entries(matrix).slice(0, 30); // Limit for readability
   for (const [path, deps] of matrixEntries) {
     const shortPath = basename(path, '.ts');
     const importsCount = deps.importsFrom.length;
@@ -800,17 +715,13 @@ function generateMarkdown(files, modules, stats, circularDeps, matrix) {
   } else {
     lines.push(`**${circularDeps.length} circular dependencies detected:**`);
     lines.push('');
-    for (const cycle of circularDeps) {
+    for (const cycle of circularDeps.slice(0, 20)) { // Limit display
       lines.push(`- ${cycle.join(' -> ')}`);
     }
+    if (circularDeps.length > 20) {
+      lines.push(`- ... and ${circularDeps.length - 20} more`);
+    }
   }
-  lines.push('');
-  lines.push('The dependency graph follows a strict top-down hierarchy:');
-  lines.push('1. Entry point (`index.ts`) depends on services and tools');
-  lines.push('2. Services depend on types, utilities, and session layer');
-  lines.push('3. Session layer depends on types, utilities, storage, and cache');
-  lines.push('4. Types are leaf nodes (only import from other types)');
-  lines.push('5. Utilities are leaf nodes (no internal dependencies)');
   lines.push('');
   lines.push('---');
   lines.push('');
@@ -818,114 +729,7 @@ function generateMarkdown(files, modules, stats, circularDeps, matrix) {
   // Visual Dependency Graph
   lines.push('## Visual Dependency Graph');
   lines.push('');
-  lines.push('### Mermaid Diagram');
-  lines.push('');
-  lines.push('```mermaid');
-  lines.push('graph TD');
-  lines.push('    subgraph Entry');
-  lines.push('        INDEX[index.ts]');
-  lines.push('    end');
-  lines.push('');
-  lines.push('    subgraph Tools');
-  lines.push('        TOOL_DEF[tools/definitions.ts]');
-  lines.push('        TOOL_THINK[tools/thinking.ts]');
-  lines.push('        TOOL_SCHEMAS[tools/schemas/*]');
-  lines.push('    end');
-  lines.push('');
-  lines.push('    subgraph Services');
-  lines.push('        SVC_IDX[services/index.ts]');
-  lines.push('        TF[ThoughtFactory]');
-  lines.push('        ES[ExportService]');
-  lines.push('        MR[ModeRouter]');
-  lines.push('        MM[MetaMonitor]');
-  lines.push('    end');
-  lines.push('');
-  lines.push('    subgraph Session');
-  lines.push('        SESS_IDX[session/index.ts]');
-  lines.push('        SM[SessionManager]');
-  lines.push('        SMC[SessionMetricsCalculator]');
-  lines.push('        STORAGE[storage/interface]');
-  lines.push('    end');
-  lines.push('');
-  lines.push('    subgraph Types');
-  lines.push('        TYPE_IDX[types/index.ts]');
-  lines.push('        CORE[types/core.ts]');
-  lines.push('        SESS_TYPE[types/session.ts]');
-  lines.push('        MODES[types/modes/*]');
-  lines.push('    end');
-  lines.push('');
-  lines.push('    subgraph Export');
-  lines.push('        VIS_IDX[export/visual/index.ts]');
-  lines.push('        EXPORTERS[export/visual/*]');
-  lines.push('    end');
-  lines.push('');
-  lines.push('    subgraph Utils');
-  lines.push('        LOGGER[utils/logger.ts]');
-  lines.push('        SANITIZE[utils/sanitization.ts]');
-  lines.push('        ERRORS[utils/errors.ts]');
-  lines.push('    end');
-  lines.push('');
-  lines.push('    subgraph Infra');
-  lines.push('        LRU[cache/lru.ts]');
-  lines.push('        ILOGGER[interfaces/ILogger.ts]');
-  lines.push('    end');
-  lines.push('');
-  lines.push('    INDEX --> TOOL_DEF');
-  lines.push('    INDEX --> TOOL_THINK');
-  lines.push('    INDEX --> SVC_IDX');
-  lines.push('    INDEX --> SESS_IDX');
-  lines.push('    INDEX --> TYPE_IDX');
-  lines.push('');
-  lines.push('    TOOL_DEF --> TOOL_SCHEMAS');
-  lines.push('');
-  lines.push('    SVC_IDX --> TF');
-  lines.push('    SVC_IDX --> ES');
-  lines.push('    SVC_IDX --> MR');
-  lines.push('');
-  lines.push('    TF --> TYPE_IDX');
-  lines.push('    TF --> TOOL_THINK');
-  lines.push('    TF --> LOGGER');
-  lines.push('    TF --> ILOGGER');
-  lines.push('');
-  lines.push('    ES --> TYPE_IDX');
-  lines.push('    ES --> VIS_IDX');
-  lines.push('    ES --> SANITIZE');
-  lines.push('    ES --> LOGGER');
-  lines.push('');
-  lines.push('    MR --> TYPE_IDX');
-  lines.push('    MR --> SESS_IDX');
-  lines.push('    MR --> MM');
-  lines.push('    MR --> LOGGER');
-  lines.push('');
-  lines.push('    MM --> CORE');
-  lines.push('    MM --> MODES');
-  lines.push('');
-  lines.push('    SESS_IDX --> SM');
-  lines.push('    SM --> TYPE_IDX');
-  lines.push('    SM --> ERRORS');
-  lines.push('    SM --> SANITIZE');
-  lines.push('    SM --> LOGGER');
-  lines.push('    SM --> STORAGE');
-  lines.push('    SM --> LRU');
-  lines.push('    SM --> SMC');
-  lines.push('    SM --> MM');
-  lines.push('');
-  lines.push('    TYPE_IDX --> CORE');
-  lines.push('    TYPE_IDX --> SESS_TYPE');
-  lines.push('    CORE --> MODES');
-  lines.push('    SESS_TYPE --> CORE');
-  lines.push('');
-  lines.push('    VIS_IDX --> EXPORTERS');
-  lines.push('    VIS_IDX --> TYPE_IDX');
-  lines.push('');
-  lines.push('    LOGGER --> ILOGGER');
-  lines.push('    LRU --> cache/types');
-  lines.push('');
-  lines.push('    style INDEX fill:#f96');
-  lines.push('    style SVC_IDX fill:#9f6');
-  lines.push('    style TYPE_IDX fill:#69f');
-  lines.push('    style SESS_IDX fill:#f69');
-  lines.push('```');
+  lines.push(generateMermaidDiagram(modules, files));
   lines.push('');
   lines.push('---');
   lines.push('');
@@ -944,8 +748,6 @@ function generateMarkdown(files, modules, stats, circularDeps, matrix) {
   lines.push(`| Total Functions | ${stats.totalFunctions} |`);
   lines.push(`| Total Type Guards | ${stats.totalTypeGuards} |`);
   lines.push(`| Total Enums | ${stats.totalEnums} |`);
-  lines.push(`| Thinking Modes | 21 |`);
-  lines.push(`| Visual Exporters | ${getVisualExporters(files).total} |`);
   lines.push('');
   lines.push('---');
   lines.push('');
@@ -962,9 +764,20 @@ function generateMarkdown(files, modules, stats, circularDeps, matrix) {
 async function main() {
   console.log('Scanning codebase for dependencies...');
 
+  // Ensure output directory exists
+  if (!existsSync(OUTPUT_DIR)) {
+    mkdirSync(OUTPUT_DIR, { recursive: true });
+    console.log(`Created output directory: ${OUTPUT_DIR}`);
+  }
+
   // Get all TypeScript files
   const tsFiles = getAllTsFiles(SRC_DIR);
   console.log(`Found ${tsFiles.length} TypeScript files`);
+
+  if (tsFiles.length === 0) {
+    console.error('No TypeScript files found in src/');
+    process.exit(1);
+  }
 
   // Parse all files
   const parsedFiles = tsFiles.map(parseFile);
