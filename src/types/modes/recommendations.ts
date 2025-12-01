@@ -100,6 +100,19 @@ export class ModeRecommender {
       });
     }
 
+    // Meta-reasoning - reasoning about reasoning itself
+    if (characteristics.complexity === 'high' ||
+        (characteristics.hasAlternatives && characteristics.uncertainty === 'high')) {
+      recommendations.push({
+        mode: ThinkingMode.METAREASONING,
+        score: characteristics.complexity === 'high' ? 0.88 : 0.82,
+        reasoning: 'Complex or uncertain problems benefit from strategic monitoring and adaptive reasoning',
+        strengths: ['Strategy evaluation', 'Mode switching recommendations', 'Quality monitoring', 'Resource allocation', 'Self-reflection'],
+        limitations: ['Meta-level overhead', 'Requires understanding of other modes', 'May not directly solve the problem'],
+        examples: ['Strategy selection', 'Debugging stuck reasoning', 'Quality assessment', 'Adaptive problem-solving'],
+      });
+    }
+
     // Temporal reasoning
     if (characteristics.timeDependent) {
       recommendations.push({
@@ -349,6 +362,11 @@ export class ModeRecommender {
       'synthesis': ThinkingMode.HYBRID,
       'philosophical': ThinkingMode.HYBRID,
       'metaphysical': ThinkingMode.HYBRID,
+      // Meta-reasoning
+      'meta': ThinkingMode.METAREASONING,
+      'strategy-selection': ThinkingMode.METAREASONING,
+      'quality-assessment': ThinkingMode.METAREASONING,
+      'reflection': ThinkingMode.METAREASONING,
       // Specialized modes
       'debugging': ThinkingMode.ABDUCTIVE,
       'mathematical': ThinkingMode.MATHEMATICS,
