@@ -4,11 +4,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
 
-A comprehensive Model Context Protocol (MCP) server featuring **18 advanced reasoning modes** with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **21 advanced reasoning modes** including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
-> 📋 **Latest Release**: v4.3.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
+> 📋 **Latest Release**: v6.0.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
 >
-> 🎉 **New in v4.3.0**: Visual export modularization, lazy validator loading, code redundancy elimination, tree-shaking optimizations!
+> 🎉 **New in v6.0.0**: Meta-Reasoning mode for strategic oversight! Monitor reasoning effectiveness, get adaptive mode-switching recommendations, and assess quality metrics across 6 dimensions.
 
 ## Table of Contents
 
@@ -24,10 +24,12 @@ A comprehensive Model Context Protocol (MCP) server featuring **18 advanced reas
 
 ## Features
 
-- **18 Specialized Reasoning Modes** - From sequential thinking to game theory and formal logic
+- **21 Specialized Reasoning Modes** - From sequential thinking to game theory, formal logic, and meta-reasoning
+- **Meta-Reasoning (NEW!)** - Strategic oversight that monitors effectiveness, recommends mode switches, and assesses quality
+- **Adaptive Mode Switching** - Automatic evaluation-based mode switching when effectiveness drops below thresholds
 - **Intelligent Mode Recommendation** - Automatic mode selection based on problem characteristics
 - **Taxonomy Classifier** - 110+ reasoning types across 12 categories for intelligent task classification
-- **Visual Exports** - Generate Mermaid diagrams, DOT graphs, ASCII art, and LaTeX documents
+- **Visual Exports** - Generate Mermaid diagrams, DOT graphs, ASCII art, and LaTeX documents with meta-insights
 - **Production-Ready** - Search engine, templates, batch processing, caching, backup/restore
 - **Enterprise Security** - Input validation (Zod), rate limiting, path sanitization, PII redaction
 - **High Performance** - LRU caching with auto-eviction, async I/O, 4-5x validation speedups
@@ -224,6 +226,18 @@ Derive conclusions from foundational axioms using deductive reasoning.
 mode: 'first-principles'
 // Use for: Fundamental analysis, conceptual understanding, basic truths
 ```
+
+#### Meta-Reasoning ⭐ NEW
+Strategic oversight of reasoning process - monitors effectiveness, recommends mode switches, assesses quality.
+
+```typescript
+mode: 'metareasoning'
+// Use for: Strategy evaluation, adaptive mode switching, quality assessment
+// Metrics: Effectiveness, Efficiency, Confidence, Quality (6 dimensions)
+// Auto-switches at effectiveness < 0.3
+```
+
+See [full documentation](docs/modes/METAREASONING.md) for detailed usage.
 
 #### Systems Thinking
 Holistic analysis of complex systems, feedback loops, and emergence.

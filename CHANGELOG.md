@@ -5,6 +5,119 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.0] - 2025-12-01
+
+### 🎉 MAJOR RELEASE: Meta-Reasoning Mode
+
+**Added Meta-Reasoning mode for strategic oversight of reasoning processes!**
+
+Meta-reasoning provides executive function for your thinking - it doesn't solve problems directly, but monitors **how** you're thinking and recommends when to switch strategies, assess quality, and allocate resources.
+
+#### New Features
+
+##### Meta-Reasoning Mode (21st Mode)
+- **Strategic oversight**: Monitors reasoning effectiveness, efficiency, and quality
+- **Adaptive mode switching**: Recommends alternatives when current strategy is failing
+- **Quality assessment**: Evaluates 6 dimensions (logical consistency, evidence quality, completeness, originality, clarity, overall)
+- **Resource allocation**: Tracks time spent, thoughts remaining, complexity, urgency
+- **Auto-switching**: Automatically switches modes at effectiveness < 0.3 to prevent thrashing
+
+##### Architecture Enhancements
+- **MetaReasoningThought** type with 7 interfaces:
+  - `CurrentStrategy`: Tracks mode, approach, thoughts spent, progress
+  - `StrategyEvaluation`: 4 metrics (effectiveness, efficiency, confidence, quality)
+  - `AlternativeStrategy`: Ranked alternative modes
+  - `StrategyRecommendation`: Actionable next steps (CONTINUE/SWITCH/REFINE/COMBINE)
+  - `ResourceAllocation`: Budget management
+  - `QualityMetrics`: 6-dimensional quality assessment
+  - `SessionContext`: Historical effectiveness tracking
+- **MetaReasoningValidator**: 401-line comprehensive validation
+- **MetaMonitor** service: Session tracking, strategy evaluation, alternative suggestions
+- **ModeRouter** enhancements:
+  - `evaluateAndSuggestSwitch()`: Suggests mode changes at effectiveness < 0.4
+  - `autoSwitchIfNeeded()`: Automatic switching at effectiveness < 0.3
+- **SessionManager** integration: Records all thoughts for meta-reasoning insights
+
+##### Export Enhancements
+- **Markdown exporter**: Rich meta-reasoning insights display
+  - Current strategy visualization
+  - Strategy evaluation metrics
+  - Recommendations and alternatives
+  - Quality metrics breakdown
+
+#### Technical Details
+
+**Files Added**:
+- `src/types/modes/metareasoning.ts` (113 lines) - Type system
+- `src/validation/validators/modes/metareasoning.ts` (401 lines) - Validation
+- `src/services/MetaMonitor.ts` (330 lines) - Session monitoring
+- `docs/modes/METAREASONING.md` - Comprehensive documentation
+
+**Files Modified**:
+- `src/types/core.ts` - Added MetaReasoningThought to union type
+- `src/validation/validators/registry.ts` - Registered metareasoning validator
+- `src/tools/definitions.ts` - Routed to deepthinking_analytical tool
+- `src/tools/json-schemas.ts` - Added metareasoning to analytical schema
+- `src/services/ThoughtFactory.ts` - Creates MetaReasoningThought instances
+- `src/services/ModeRouter.ts` - Adaptive mode switching methods
+- `src/session/manager.ts` - MetaMonitor integration
+- `src/services/ExportService.ts` - Meta-reasoning display in exports
+- `src/types/modes/recommendations.ts` - Meta-reasoning recommendations
+
+**Test Status**: All 745 tests passing (zero regressions)
+
+#### Usage Example
+
+```typescript
+// Meta-reasoning thought
+{
+  mode: 'metareasoning',
+  thought: 'Evaluating deductive approach effectiveness',
+  currentStrategy: {
+    mode: ThinkingMode.DEDUCTIVE,
+    approach: 'Logical derivation from axioms',
+    thoughtsSpent: 3,
+    progressIndicators: []
+  },
+  strategyEvaluation: {
+    effectiveness: 0.25,  // Very low!
+    efficiency: 0.40,
+    confidence: 0.60,
+    qualityScore: 0.35
+  },
+  recommendation: {
+    action: 'SWITCH',
+    justification: 'Deductive approach not yielding results - try empirical investigation',
+    confidence: 0.80,
+    expectedImprovement: 'Inductive pattern recognition could reveal insights'
+  },
+  alternativeStrategies: [
+    {
+      mode: ThinkingMode.INDUCTIVE,
+      reasoning: 'Gather empirical observations and build patterns',
+      recommendationScore: 0.85
+    }
+  ]
+}
+```
+
+#### Breaking Changes
+
+**None!** This is a purely additive release. All existing functionality remains unchanged.
+
+#### Migration Guide
+
+No migration needed. Meta-reasoning is an opt-in feature accessed via:
+
+```typescript
+// Route to deepthinking_analytical tool
+mode: 'metareasoning'
+```
+
+See [docs/modes/METAREASONING.md](docs/modes/METAREASONING.md) for full usage guide.
+
+---
+
 ## [5.0.1] - 2025-11-30
 
 ### 🔧 BUGFIX: Mode Recommendation System
