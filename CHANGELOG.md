@@ -5,6 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.1] - 2025-11-30
+
+### 🔧 BUGFIX: Mode Recommendation System
+
+**Fixed mode recommendation algorithm to properly suggest core reasoning modes for philosophical and metaphysical problems.**
+
+#### What Was Fixed
+
+The mode recommendation system (`ModeRecommender` in `src/types/modes/recommendations.ts`) was not recommending the core reasoning modes (Hybrid, Inductive, Deductive, Abductive) for philosophical/metaphysical problems. It over-weighted uncertainty and incomplete information toward Evidential mode, missing the fundamental reasoning approaches that actually perform best for these domains.
+
+#### Changes
+
+##### Mode Recommendation Algorithm
+- **Added philosophical domain detection**: Detects metaphysics, theology, philosophy, epistemology, ethics domains
+- **Added Hybrid mode recommendation** (score: 0.92): For complex problems requiring multi-modal synthesis
+  - Strengths: Comprehensive analysis, combines empirical and logical approaches, maximum evidential strength
+  - Examples: Philosophical arguments, scientific theories, complex decision-making, metaphysical questions
+- **Added Inductive mode recommendation** (score: 0.85 philosophical, 0.80 general): Pattern recognition and generalization
+  - Strengths: Empirical grounding, pattern detection, probabilistic reasoning, scientific discovery
+  - Examples: Scientific hypotheses, trend analysis, empirical arguments, data-driven insights
+- **Added Deductive mode recommendation** (score: 0.90 proofs, 0.75 philosophical): Logical derivation from principles
+  - Strengths: Logical validity, rigorous inference, exposes contradictions, formal reasoning
+  - Examples: Logical proofs, mathematical theorems, philosophical arguments, formal verification
+- **Enhanced Abductive mode**: Boosted score to 0.90 for philosophical domains (was generic 0.87)
+- **Lowered Evidential mode**: Reduced score to 0.82 (was 0.88) and excluded for philosophical domains
+
+##### Quick Recommendations
+- **Updated `quickRecommend()` mappings**:
+  - `'pattern'` → `INDUCTIVE` (was unmapped)
+  - `'logic'` → `DEDUCTIVE` (was unmapped)
+  - `'proof'` → `DEDUCTIVE` (was `MATHEMATICS`)
+  - `'mathematical'` → `MATHEMATICS` (new mapping)
+  - `'philosophical'` → `HYBRID` (new mapping)
+  - `'metaphysical'` → `HYBRID` (new mapping)
+
+##### Mode Combinations
+- **Added Inductive + Deductive + Abductive hybrid combination**: For philosophical/complex problems requiring maximum evidential strength through multi-modal synthesis
+
+#### Test Updates
+
+Updated `tests/unit/recommendations.test.ts`:
+- Fixed evidential score expectation: 0.88 → 0.82
+- Fixed 'proof' mapping: `MATHEMATICS` → `DEDUCTIVE`
+- Added test coverage for new core mode mappings
+
+All 745 tests passing.
+
+#### Impact
+
+This fix ensures the recommendation system now properly suggests:
+- **Hybrid mode** for complex philosophical problems (91.5% confidence achievable)
+- **Inductive reasoning** for empirical pattern detection (85% confidence)
+- **Deductive reasoning** for logical validity checking (40-90% confidence depending on premises)
+- **Abductive reasoning** for inference to best explanation (90% confidence)
+
+The system now correctly identifies that philosophical/metaphysical problems benefit most from core reasoning modes rather than specialized uncertainty-handling modes.
+
 ## [5.0.0] - 2025-11-30
 
 ### 🚀 NEW FEATURE: Fundamental Reasoning Modes

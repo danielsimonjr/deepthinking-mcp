@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "deepthinking-test": {
-      "command": "node",
-      "args": ["C:/mcp-servers/deepthinking-mcp/dist/index.js"]
-    }
-  }
-}

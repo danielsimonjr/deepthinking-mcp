@@ -65,7 +65,13 @@
       "Bash(python:*)",
       "Bash(mcp-server-sequential-thinking:*)",
       "Bash(timeout 2 mcp-server-sequential-thinking:*)",
-      "Bash(tasklist /FI \"IMAGENAME eq node.exe\" /FO CSV)"
+      "Bash(tasklist /FI \"IMAGENAME eq node.exe\" /FO CSV)",
+      "Bash(git restore:*)",
+      "Bash(mcp__memory-mcp__add_observations)",
+      "mcp__memory-mcp__open_nodes",
+      "mcp__memory-mcp__merge_entities",
+      "mcp__memory-mcp__delete_relations",
+      "mcp__deepthinking-mcp__deepthinking_standard"
     ],
     "deny": [],
     "ask": []

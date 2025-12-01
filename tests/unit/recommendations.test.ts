@@ -83,7 +83,7 @@ describe('Mode Recommendation System', () => {
       expect(recommendations.length).toBeGreaterThan(0);
       const evidentialRec = recommendations.find(r => r.mode === ThinkingMode.EVIDENTIAL);
       expect(evidentialRec).toBeDefined();
-      expect(evidentialRec?.score).toBe(0.88);
+      expect(evidentialRec?.score).toBe(0.82);
       expect(evidentialRec?.reasoning).toContain('incomplete information');
       expect(evidentialRec?.strengths).toContain('Handles ignorance');
       expect(evidentialRec?.examples).toContain('Sensor fusion');
@@ -216,7 +216,8 @@ describe('Mode Recommendation System', () => {
   describe('Quick Recommendation', () => {
     it('should provide quick recommendations based on problem type strings', () => {
       expect(recommender.quickRecommend('debugging')).toBe(ThinkingMode.ABDUCTIVE);
-      expect(recommender.quickRecommend('proof')).toBe(ThinkingMode.MATHEMATICS);
+      expect(recommender.quickRecommend('proof')).toBe(ThinkingMode.DEDUCTIVE);
+      expect(recommender.quickRecommend('mathematical')).toBe(ThinkingMode.MATHEMATICS);
       expect(recommender.quickRecommend('timeline')).toBe(ThinkingMode.TEMPORAL);
       expect(recommender.quickRecommend('strategy')).toBe(ThinkingMode.GAMETHEORY);
       expect(recommender.quickRecommend('uncertainty')).toBe(ThinkingMode.EVIDENTIAL);
@@ -226,6 +227,9 @@ describe('Mode Recommendation System', () => {
       expect(recommender.quickRecommend('analogy')).toBe(ThinkingMode.ANALOGICAL);
       expect(recommender.quickRecommend('physics')).toBe(ThinkingMode.PHYSICS);
       expect(recommender.quickRecommend('systematic')).toBe(ThinkingMode.SHANNON);
+      expect(recommender.quickRecommend('philosophical')).toBe(ThinkingMode.HYBRID);
+      expect(recommender.quickRecommend('pattern')).toBe(ThinkingMode.INDUCTIVE);
+      expect(recommender.quickRecommend('logic')).toBe(ThinkingMode.DEDUCTIVE);
 
       // Should fallback to SEQUENTIAL for unknown types
       expect(recommender.quickRecommend('unknown-type')).toBe(ThinkingMode.SEQUENTIAL);
@@ -233,7 +237,8 @@ describe('Mode Recommendation System', () => {
 
     it('should be case-insensitive for problem types', () => {
       expect(recommender.quickRecommend('DEBUGGING')).toBe(ThinkingMode.ABDUCTIVE);
-      expect(recommender.quickRecommend('Proof')).toBe(ThinkingMode.MATHEMATICS);
+      expect(recommender.quickRecommend('Proof')).toBe(ThinkingMode.DEDUCTIVE);
+      expect(recommender.quickRecommend('Mathematical')).toBe(ThinkingMode.MATHEMATICS);
       expect(recommender.quickRecommend('TimeLine')).toBe(ThinkingMode.TEMPORAL);
     });
   });

@@ -43,6 +43,63 @@ export class ModeRecommender {
   recommendModes(characteristics: ProblemCharacteristics): ModeRecommendation[] {
     const recommendations: ModeRecommendation[] = [];
 
+    // Core reasoning modes - prioritize for philosophical/metaphysical domains
+    const isPhilosophical = characteristics.domain.toLowerCase().includes('metaphysics') ||
+                           characteristics.domain.toLowerCase().includes('theology') ||
+                           characteristics.domain.toLowerCase().includes('philosophy') ||
+                           characteristics.domain.toLowerCase().includes('epistemology') ||
+                           characteristics.domain.toLowerCase().includes('ethics');
+
+    // Hybrid mode - for complex multi-faceted problems
+    if (characteristics.complexity === 'high' &&
+        (characteristics.requiresExplanation || characteristics.hasAlternatives || isPhilosophical)) {
+      recommendations.push({
+        mode: ThinkingMode.HYBRID,
+        score: 0.92,
+        reasoning: 'Complex problem benefits from multi-modal synthesis combining inductive, deductive, and abductive reasoning',
+        strengths: ['Comprehensive analysis', 'Combines empirical and logical approaches', 'Maximum evidential strength', 'Convergent validation'],
+        limitations: ['Time-intensive', 'Requires understanding of multiple reasoning types'],
+        examples: ['Philosophical arguments', 'Scientific theories', 'Complex decision-making', 'Metaphysical questions'],
+      });
+    }
+
+    // Inductive reasoning - pattern recognition and generalization
+    if (!characteristics.requiresProof &&
+        (characteristics.requiresQuantification || characteristics.hasIncompleteInfo || isPhilosophical)) {
+      recommendations.push({
+        mode: ThinkingMode.INDUCTIVE,
+        score: isPhilosophical ? 0.85 : 0.80,
+        reasoning: 'Problem requires pattern recognition and generalization from observations',
+        strengths: ['Empirical grounding', 'Pattern detection', 'Probabilistic reasoning', 'Scientific discovery'],
+        limitations: ['Cannot prove with certainty', 'Vulnerable to black swans', 'Sample size dependent'],
+        examples: ['Scientific hypotheses', 'Trend analysis', 'Empirical arguments', 'Data-driven insights'],
+      });
+    }
+
+    // Deductive reasoning - logical derivation from principles
+    if (characteristics.requiresProof || isPhilosophical) {
+      recommendations.push({
+        mode: ThinkingMode.DEDUCTIVE,
+        score: characteristics.requiresProof ? 0.90 : 0.75,
+        reasoning: 'Problem requires logical derivation from general principles to specific conclusions',
+        strengths: ['Logical validity', 'Rigorous inference', 'Exposes contradictions', 'Formal reasoning'],
+        limitations: ['Soundness depends on premise truth', 'Vulnerable to definitional disputes', 'May not handle uncertainty well'],
+        examples: ['Logical proofs', 'Mathematical theorems', 'Philosophical arguments', 'Formal verification'],
+      });
+    }
+
+    // Abductive reasoning - inference to best explanation
+    if (characteristics.requiresExplanation || isPhilosophical) {
+      recommendations.push({
+        mode: ThinkingMode.ABDUCTIVE,
+        score: isPhilosophical ? 0.90 : 0.87,
+        reasoning: 'Problem requires finding best explanations through comparative hypothesis evaluation',
+        strengths: ['Hypothesis generation', 'Comparative evaluation', 'Explanatory power assessment', 'Handles competing theories'],
+        limitations: ['May miss non-obvious explanations', 'Explanatory power is subjective'],
+        examples: ['Scientific explanation', 'Debugging', 'Diagnosis', 'Theory selection', 'Metaphysical arguments'],
+      });
+    }
+
     // Temporal reasoning
     if (characteristics.timeDependent) {
       recommendations.push({
@@ -68,26 +125,14 @@ export class ModeRecommender {
     }
 
     // Evidential reasoning
-    if (characteristics.hasIncompleteInfo && characteristics.uncertainty === 'high') {
+    if (characteristics.hasIncompleteInfo && characteristics.uncertainty === 'high' && !isPhilosophical) {
       recommendations.push({
         mode: ThinkingMode.EVIDENTIAL,
-        score: 0.88,
-        reasoning: 'Problem has incomplete information and high uncertainty',
+        score: 0.82,
+        reasoning: 'Problem has incomplete information and high uncertainty requiring Dempster-Shafer belief functions',
         strengths: ['Handles ignorance', 'Evidence combination', 'Uncertainty intervals'],
-        limitations: ['Computational complexity', 'Requires careful mass assignment'],
+        limitations: ['Computational complexity', 'Requires careful mass assignment', 'Better for sensor fusion than philosophical reasoning'],
         examples: ['Sensor fusion', 'Diagnostic reasoning', 'Intelligence analysis'],
-      });
-    }
-
-    // Abductive reasoning
-    if (characteristics.requiresExplanation) {
-      recommendations.push({
-        mode: ThinkingMode.ABDUCTIVE,
-        score: 0.87,
-        reasoning: 'Problem requires finding best explanations',
-        strengths: ['Hypothesis generation', 'Root cause analysis', 'Explanation quality'],
-        limitations: ['May miss non-obvious explanations'],
-        examples: ['Debugging', 'Diagnosis', 'Scientific discovery'],
       });
     }
 
@@ -197,6 +242,23 @@ export class ModeRecommender {
   recommendCombinations(characteristics: ProblemCharacteristics): CombinationRecommendation[] {
     const combinations: CombinationRecommendation[] = [];
 
+    const isPhilosophical = characteristics.domain.toLowerCase().includes('metaphysics') ||
+                           characteristics.domain.toLowerCase().includes('theology') ||
+                           characteristics.domain.toLowerCase().includes('philosophy') ||
+                           characteristics.domain.toLowerCase().includes('epistemology') ||
+                           characteristics.domain.toLowerCase().includes('ethics');
+
+    // Inductive + Deductive + Abductive (Hybrid) - for philosophical/complex problems
+    if (isPhilosophical || (characteristics.complexity === 'high' && characteristics.requiresExplanation && characteristics.hasAlternatives)) {
+      combinations.push({
+        modes: [ThinkingMode.INDUCTIVE, ThinkingMode.DEDUCTIVE, ThinkingMode.ABDUCTIVE],
+        sequence: 'hybrid',
+        rationale: 'Synthesize empirical patterns, logical derivations, and explanatory hypotheses for maximum evidential strength',
+        benefits: ['Convergent validation from three independent methods', 'Empirical grounding + logical rigor + explanatory power', 'Highest achievable confidence through multi-modal synthesis', 'Exposes both empirical patterns and logical contradictions'],
+        synergies: ['Inductive patterns inform abductive hypotheses', 'Deductive logic tests hypothesis validity', 'Abductive explanations guide inductive search', 'All three methods converge on same conclusion'],
+      });
+    }
+
     // Temporal + Causal
     if (characteristics.timeDependent && characteristics.requiresExplanation) {
       combinations.push({
@@ -252,16 +314,6 @@ export class ModeRecommender {
       });
     }
 
-    // Analogical + Abductive
-    if (characteristics.requiresExplanation && characteristics.complexity === 'high') {
-      combinations.push({
-        modes: [ThinkingMode.ANALOGICAL, ThinkingMode.ABDUCTIVE],
-        sequence: 'parallel',
-        rationale: 'Use analogies to inspire hypotheses while systematically generating explanations',
-        benefits: ['Creative hypothesis generation', 'Cross-domain insights'],
-        synergies: ['Analogies suggest hypotheses', 'Hypotheses validated by analogical reasoning'],
-      });
-    }
 
     // Mathematics + Shannon (for complex proofs)
     if (characteristics.requiresProof && characteristics.complexity === 'high') {
@@ -283,8 +335,23 @@ export class ModeRecommender {
    */
   quickRecommend(problemType: string): ThinkingMode {
     const typeMap: Record<string, ThinkingMode> = {
+      // Core reasoning modes
+      'explanation': ThinkingMode.ABDUCTIVE,
+      'hypothesis': ThinkingMode.ABDUCTIVE,
+      'inference': ThinkingMode.ABDUCTIVE,
+      'pattern': ThinkingMode.INDUCTIVE,
+      'generalization': ThinkingMode.INDUCTIVE,
+      'empirical': ThinkingMode.INDUCTIVE,
+      'logic': ThinkingMode.DEDUCTIVE,
+      'proof': ThinkingMode.DEDUCTIVE,
+      'derivation': ThinkingMode.DEDUCTIVE,
+      'complex': ThinkingMode.HYBRID,
+      'synthesis': ThinkingMode.HYBRID,
+      'philosophical': ThinkingMode.HYBRID,
+      'metaphysical': ThinkingMode.HYBRID,
+      // Specialized modes
       'debugging': ThinkingMode.ABDUCTIVE,
-      'proof': ThinkingMode.MATHEMATICS,
+      'mathematical': ThinkingMode.MATHEMATICS,
       'timeline': ThinkingMode.TEMPORAL,
       'strategy': ThinkingMode.GAMETHEORY,
       'uncertainty': ThinkingMode.EVIDENTIAL,
