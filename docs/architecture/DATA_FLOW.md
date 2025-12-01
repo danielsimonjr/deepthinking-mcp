@@ -1,6 +1,6 @@
 # Data Flow Architecture
 
-**Version**: 4.3.0 | **Last Updated**: 2025-11-26
+**Version**: 6.0.0 | **Last Updated**: 2025-12-01
 
 ## Overview
 
@@ -168,21 +168,24 @@ Client                    Server                    Storage
 2. Server validates with AddThoughtSchema
 3. ThoughtFactory creates mode-specific thought object
 4. SessionManager adds thought to session
-5. SessionMetricsCalculator updates metrics incrementally (O(1))
-6. Repository persists updated session
-7. SearchEngine reindexes session for search
-8. Response contains updated session
+5. **MetaMonitor records thought for meta-reasoning analysis (v6.0.0)**
+6. SessionMetricsCalculator updates metrics incrementally (O(1))
+7. Repository persists updated session
+8. SearchEngine reindexes session for search
+9. Response contains updated session
 
 **Data Transformations**:
 - Input: Flat thought parameters
 - ThoughtFactory: Rich Thought object with mode-specific fields
 - SessionManager: Updated session state
+- MetaMonitor: Session history and mode transitions (v6.0.0)
 - Metrics: Incremental calculations (avg uncertainty, etc.)
 - Output: Complete updated session
 
 **Performance**:
 - O(1) thought addition
 - O(1) metrics update (incremental)
+- O(1) MetaMonitor recording (v6.0.0)
 - O(n) search reindexing (n = thoughts in session)
 
 ---
@@ -237,8 +240,74 @@ Client                    Server                    Storage
 
 **Data Transformations**:
 - session.mode: old → new mode
-- session.config.modeConfig: updated for new mode
-- Metadata: mode switch event recorded
+
+---
+
+### 3.1 Adaptive Mode Switching (v6.0.0)
+
+```
+Client/System                ModeRouter                MetaMonitor
+  │                             │                          │
+  ├─ evaluateAndSuggestSwitch ──►                         │
+  │   {                         │                          │
+  │     sessionId: "uuid",      │                          │
+  │     problemType: "complex"  │                          │
+  │   }                         │                          │
+  │                             │                          │
+  │                             ├─────────────────────────►│
+  │                             │   evaluateStrategy()     │
+  │                             │                          │
+  │                             │◄─────────────────────────┤
+  │                             │   {                      │
+  │                             │     effectiveness: 0.25, │
+  │                             │     efficiency: 0.40,    │
+  │                             │     confidence: 0.60,    │
+  │                             │     qualityScore: 0.35   │
+  │                             │   }                      │
+  │                             │                          │
+  │                             ├─────────────────────────►│
+  │                             │   suggestAlternatives()  │
+  │                             │                          │
+  │                             │◄─────────────────────────┤
+  │                             │   [                      │
+  │                             │     { mode: HYBRID,      │
+  │                             │       score: 0.85 },     │
+  │                             │     { mode: INDUCTIVE,   │
+  │                             │       score: 0.70 }      │
+  │                             │   ]                      │
+  │                             │                          │
+  │                             ├─ determine shouldSwitch  │
+  │                             │   (effectiveness < 0.4)  │
+  │                             │                          │
+  │◄────────────────────────────┤                          │
+  │  {                          │                          │
+  │    shouldSwitch: true,      │                          │
+  │    suggestedMode: HYBRID,   │                          │
+  │    reasoning: "Current      │                          │
+  │      effectiveness: 25%...",│                          │
+  │    alternatives: [...]      │                          │
+  │  }                          │                          │
+```
+
+**Auto-Switch Flow** (effectiveness < 0.3):
+```
+ModeRouter.autoSwitchIfNeeded()
+    ↓
+evaluateAndSuggestSwitch()
+    ↓
+if effectiveness < 0.3 AND suggestedMode exists
+    ↓
+ModeRouter.switchMode(sessionId, suggestedMode)
+    ↓
+Log: "Auto-switched mode due to low effectiveness"
+    ↓
+Return { switched: true, oldMode, newMode, reasoning }
+```
+
+**Decision Thresholds**:
+- `effectiveness < 0.4`: Suggest mode switch
+- `effectiveness < 0.3`: Auto-switch to prevent thrashing
+- `alternatives[0].score > 0.75`: Strong recommendation
 
 ---
 
@@ -869,5 +938,5 @@ Storage
 
 ---
 
-*Last Updated*: 2025-11-26
-*Data Flow Version*: 4.3.0
+*Last Updated*: 2025-12-01
+*Data Flow Version*: 6.0.0

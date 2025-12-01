@@ -1,6 +1,6 @@
 # Component Architecture
 
-**Version**: 4.3.0 | **Last Updated**: 2025-11-26
+**Version**: 6.0.0 | **Last Updated**: 2025-12-01
 
 ## Core Components
 
@@ -9,21 +9,26 @@
 #### `src/index.ts` - MCP Server Entry Point
 **Purpose**: Main server implementation and tool request orchestration
 
-**Key Functions**:
-- `handleAddThought()` - Process thought additions
-- `handleCreateSession()` - Initialize new thinking sessions
-- `handleExport()` - Export sessions in various formats
-- `handleSwitchMode()` - Change reasoning modes
-- `handleGetSummary()` - Generate session summaries
-- `handleGetRecommendations()` - Mode recommendations
+**10 Focused Tools** (v5.0.0+):
+- `deepthinking_core` - Fundamental reasoning (inductive, deductive, abductive)
+- `deepthinking_standard` - Standard workflows (sequential, shannon, hybrid)
+- `deepthinking_math` - Mathematical/physical reasoning
+- `deepthinking_temporal` - Time-based reasoning
+- `deepthinking_probabilistic` - Probability reasoning (bayesian, evidential)
+- `deepthinking_causal` - Causal analysis (causal, counterfactual)
+- `deepthinking_strategic` - Strategic decision-making (gametheory, optimization)
+- `deepthinking_analytical` - Analytical reasoning (analogical, firstprinciples, metareasoning)
+- `deepthinking_scientific` - Scientific methods (scientificmethod, systemsthinking, formallogic)
+- `deepthinking_session` - Session management
 
 **Dependencies**:
 - ThoughtFactory
 - ExportService
 - ModeRouter
 - SessionManager
+- MetaMonitor (v6.0.0)
 
-**Line Count**: 311 (reduced from 796)
+**Line Count**: ~350
 
 **Testing**: Comprehensive integration tests in `tests/integration/index-handlers.test.ts`
 
@@ -40,25 +45,42 @@
 createThought(input: ThinkingToolInput, sessionId: string): Thought
 ```
 
-**Supported Modes** (18 total):
-1. **Sequential** - Step-by-step linear reasoning
-2. **Shannon** - Information theory with uncertainty quantification
-3. **Mathematics** - Formal mathematical reasoning with proofs
-4. **Physics** - Physical reasoning with tensor analysis
-5. **Hybrid** - Combined reasoning approaches
-6. **Abductive** - Inference to best explanation
-7. **Causal** - Causal relationship analysis
-8. **Bayesian** - Probabilistic inference
-9. **Counterfactual** - "What if" analysis
-10. **Analogical** - Reasoning by analogy
-11. **Temporal** - Time-based reasoning
-12. **Game Theory** - Strategic decision making
-13. **Evidential** - Dempster-Shafer theory
-14. **First Principles** - Fundamental reasoning
-15. **Systems Thinking** - Holistic system analysis
-16. **Scientific Method** - Hypothesis testing
-17. **Optimization** - Constraint optimization
-18. **Formal Logic** - Logical inference
+**Supported Modes** (21 total):
+
+**Core Reasoning** (v5.0.0+):
+1. **Inductive** - Observations → general principles
+2. **Deductive** - General principles → specific conclusions
+3. **Abductive** - Inference to best explanation
+
+**Standard Workflow**:
+4. **Sequential** - Step-by-step linear reasoning
+5. **Shannon** - Information theory with uncertainty quantification
+6. **Hybrid** - Combined reasoning approaches
+
+**Math/Physics**:
+7. **Mathematics** - Formal mathematical reasoning with proofs
+8. **Physics** - Physical reasoning with tensor analysis
+
+**Advanced** (Full Runtime):
+9. **Metareasoning** - Strategic oversight of reasoning (v6.0.0)
+10. **Recursive** - Self-referential analysis
+11. **Modal** - Possibility/necessity logic
+12. **Stochastic** - Probabilistic state transitions
+13. **Constraint** - Constraint satisfaction
+14. **Optimization** - Constraint optimization
+
+**Analytical/Scientific**:
+15. **Causal** - Causal relationship analysis
+16. **Bayesian** - Probabilistic inference
+17. **Counterfactual** - "What if" analysis
+18. **Analogical** - Reasoning by analogy
+19. **Temporal** - Time-based reasoning
+20. **Game Theory** - Strategic decision making
+21. **Evidential** - Dempster-Shafer theory
+22. **First Principles** - Fundamental reasoning
+23. **Systems Thinking** - Holistic system analysis
+24. **Scientific Method** - Hypothesis testing
+25. **Formal Logic** - Logical inference
 
 **Line Count**: 243 lines
 
@@ -100,13 +122,15 @@ exportSession(session: ThinkingSession, format: ExportFormat): string
 
 ### `src/services/ModeRouter.ts` - Mode Routing Service
 
-**Purpose**: Mode switching and intelligent recommendations
+**Purpose**: Mode switching, intelligent recommendations, and adaptive switching (v6.0.0)
 
 **Key Methods**:
 ```typescript
 switchMode(sessionId: string, newMode: ThinkingMode, reason: string): Promise<ThinkingSession>
 quickRecommend(problemType: string): ThinkingMode
 getRecommendations(characteristics: ProblemCharacteristics): string
+evaluateAndSuggestSwitch(sessionId: string, problemType?: string): Promise<EvaluationResult>  // v6.0.0
+autoSwitchIfNeeded(sessionId: string, problemType?: string): Promise<SwitchResult>  // v6.0.0
 ```
 
 **Features**:
@@ -114,12 +138,52 @@ getRecommendations(characteristics: ProblemCharacteristics): string
 - Problem-based recommendations
 - Integration with taxonomy system
 - Mode combination suggestions
+- **Adaptive mode switching** based on MetaMonitor evaluation (v6.0.0)
+- **Auto-switching** when effectiveness < 0.3 to prevent thrashing (v6.0.0)
 
-**Line Count**: 195 lines
+**Line Count**: ~380 lines
 
 **Dependencies**:
 - SessionManager
 - ModeRecommender
+- MetaMonitor (v6.0.0)
+
+---
+
+### `src/services/MetaMonitor.ts` - Meta-Reasoning Monitor (v6.0.0)
+
+**Purpose**: Session tracking and strategy evaluation for meta-reasoning insights
+
+**Key Methods**:
+```typescript
+recordThought(sessionId: string, thought: Thought): void
+startStrategy(sessionId: string, mode: ThinkingMode): void
+updateStrategyProgress(sessionId: string, indicator: string): void
+evaluateStrategy(sessionId: string): StrategyEvaluation
+suggestAlternatives(sessionId: string, currentMode: ThinkingMode): AlternativeStrategy[]
+calculateQualityMetrics(sessionId: string): QualityMetrics
+getSessionContext(sessionId: string, problemType: string): SessionContext
+```
+
+**Strategy Evaluation Metrics**:
+- **effectiveness**: Progress relative to effort (0-1)
+- **efficiency**: Progress per unit time (0-1)
+- **confidence**: Based on issues encountered (0-1)
+- **progressRate**: Insights per thought
+- **qualityScore**: Weighted combination
+
+**Quality Metrics** (6 dimensions):
+- logicalConsistency, evidenceQuality, completeness
+- originality, clarity, overallQuality
+
+**Line Count**: 310 lines
+
+**Features**:
+- Session history tracking for meta-level analysis
+- Mode transition tracking across sessions
+- Strategy performance evaluation
+- Alternative strategy suggestions (HYBRID, INDUCTIVE when failing)
+- Global singleton instance (`metaMonitor`)
 
 ---
 
@@ -127,7 +191,7 @@ getRecommendations(characteristics: ProblemCharacteristics): string
 
 ### `src/session/manager.ts` - Session Manager
 
-**Purpose**: Core session lifecycle and state management
+**Purpose**: Core session lifecycle and state management with meta-reasoning integration (v6.0.0)
 
 **Key Methods**:
 ```typescript
@@ -146,13 +210,19 @@ generateSummary(sessionId): Promise<string>
 - Mode transition management
 - Summary generation
 - Metrics tracking delegation
+- **MetaMonitor integration** for thought recording (v6.0.0)
 
-**Line Count**: 542 lines (reduced from ~700)
+**Line Count**: ~550 lines
 
 **Performance**:
 - O(1) session access (LRU cache)
 - O(1) metrics updates (via SessionMetricsCalculator)
 - Configurable cache size
+
+**Dependencies**:
+- SessionMetricsCalculator
+- SessionStorage
+- MetaMonitor (v6.0.0)
 
 **Testing**: Unit tests in `tests/unit/session-manager.test.ts`
 
@@ -642,7 +712,10 @@ type Thought =
   | ShannonThought
   | MathematicsThought
   | PhysicsThought
-  | ... (18 total)
+  | InductiveThought      // v5.0.0
+  | DeductiveThought      // v5.0.0
+  | MetaReasoningThought  // v6.0.0
+  | ... (21 total)
 ```
 
 Enables type-safe pattern matching and mode-specific handling.
@@ -920,11 +993,11 @@ TaxonomySystem
 
 ### Coverage Targets
 - **Critical Paths**: 80%+ coverage ✅
-- **Tests**: 763 passing
+- **Tests**: 745 passing
 - **Test Files**: 36
 - **Type Safety**: 100% (0 type suppressions)
 
 ---
 
-*Last Updated*: 2025-11-26
-*Component Version*: 4.3.0
+*Last Updated*: 2025-12-01
+*Component Version*: 6.0.0

@@ -2,9 +2,9 @@
 
 ## Project Summary
 
-DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 18 specialized thinking modes. The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, enterprise security features, and comprehensive export capabilities.
+DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 21 specialized thinking modes. The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, meta-reasoning for strategic oversight, enterprise security features, and comprehensive export capabilities.
 
-**Version**: 4.3.0 | **Node**: >=18.0.0 | **License**: MIT
+**Version**: 6.0.0 | **Node**: >=18.0.0 | **License**: MIT
 
 ---
 
@@ -12,12 +12,13 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~48,800 |
-| TypeScript Files | 182 |
+| Total Lines of Code | ~50,900 |
+| TypeScript Files | 185 |
 | Test Files | 36 |
-| Passing Tests | 763 |
+| Passing Tests | 745 |
 | Type Suppressions | 0 |
-| Thinking Modes | 18 |
+| Thinking Modes | 21 |
+| MCP Tools | 10 |
 | Export Formats | 8 |
 | Reasoning Types | 110+ |
 | Visual Exporters | 15 |
@@ -86,7 +87,8 @@ Core services extracted from the entry point:
 |---------|------|----------------|
 | **ThoughtFactory** | `ThoughtFactory.ts` | Mode-specific thought creation and validation |
 | **ExportService** | `ExportService.ts` | Multi-format export (8 formats) |
-| **ModeRouter** | `ModeRouter.ts` | Mode switching and recommendations |
+| **ModeRouter** | `ModeRouter.ts` | Mode switching, recommendations, and adaptive switching |
+| **MetaMonitor** | `MetaMonitor.ts` | Session tracking, strategy evaluation, meta-reasoning insights (v6.0.0) |
 
 ### `src/session/` - Session Management
 
@@ -143,46 +145,56 @@ src/taxonomy/
 
 ---
 
-## The 18 Thinking Modes
+## The 21 Thinking Modes
 
-### Core Modes (Full Runtime)
-| Mode | Purpose |
-|------|---------|
-| **Sequential** | Step-by-step linear reasoning |
-| **Shannon** | Information theory, entropy analysis |
-| **Mathematics** | Formal proofs, theorems |
-| **Physics** | Physical models, conservation laws |
-| **Hybrid** | Multi-approach combination |
+### Core Reasoning Modes (Fundamental) - v5.0.0+
+| Mode | Purpose | Tool |
+|------|---------|------|
+| **Inductive** | Specific observations → general principles | `deepthinking_core` |
+| **Deductive** | General principles → specific conclusions | `deepthinking_core` |
+| **Abductive** | Inference to best explanation | `deepthinking_core` |
+
+### Standard Workflow Modes (Full Runtime)
+| Mode | Purpose | Tool |
+|------|---------|------|
+| **Sequential** | Step-by-step linear reasoning | `deepthinking_standard` |
+| **Shannon** | Information theory, entropy analysis | `deepthinking_standard` |
+| **Hybrid** | Multi-approach combination | `deepthinking_standard` |
+
+### Math/Physics Modes
+| Mode | Purpose | Tool |
+|------|---------|------|
+| **Mathematics** | Formal proofs, theorems | `deepthinking_math` |
+| **Physics** | Physical models, conservation laws | `deepthinking_math` |
 
 ### Advanced Modes (Full Runtime)
-| Mode | Purpose |
-|------|---------|
-| **Metareasoning** | Reasoning about reasoning |
-| **Recursive** | Self-referential analysis |
-| **Modal** | Possibility/necessity logic |
-| **Stochastic** | Probabilistic reasoning |
-| **Constraint** | Constraint satisfaction |
-| **Optimization** | Objective function optimization |
+| Mode | Purpose | Tool |
+|------|---------|------|
+| **Metareasoning** | Strategic oversight of reasoning (v6.0.0) | `deepthinking_analytical` |
+| **Recursive** | Self-referential analysis | N/A |
+| **Modal** | Possibility/necessity logic | N/A |
+| **Stochastic** | Probabilistic reasoning | N/A |
+| **Constraint** | Constraint satisfaction | N/A |
+| **Optimization** | Objective function optimization | `deepthinking_strategic` |
 
-### Analytical Modes
-| Mode | Purpose |
-|------|---------|
-| **Causal** | Cause-effect relationships |
-| **Bayesian** | Probability updates |
-| **Counterfactual** | "What-if" scenarios |
-| **Temporal** | Time-based reasoning |
+### Analytical & Causal Modes
+| Mode | Purpose | Tool |
+|------|---------|------|
+| **Causal** | Cause-effect relationships | `deepthinking_causal` |
+| **Counterfactual** | "What-if" scenarios | `deepthinking_causal` |
+| **Bayesian** | Probability updates | `deepthinking_probabilistic` |
+| **Evidential** | Dempster-Shafer theory | `deepthinking_probabilistic` |
+| **Temporal** | Time-based reasoning | `deepthinking_temporal` |
 
-### Additional Modes
-| Mode | Purpose |
-|------|---------|
-| **Abductive** | Hypothesis generation |
-| **Analogical** | Reasoning by analogy |
-| **Game Theory** | Strategic decision-making |
-| **Evidential** | Dempster-Shafer theory |
-| **First Principles** | Fundamental decomposition |
-| **Systems Thinking** | Holistic system analysis |
-| **Scientific Method** | Hypothesis → experiment → conclusion |
-| **Formal Logic** | Formal logical proofs |
+### Scientific & Systematic Modes
+| Mode | Purpose | Tool |
+|------|---------|------|
+| **Analogical** | Reasoning by analogy | `deepthinking_analytical` |
+| **First Principles** | Fundamental decomposition | `deepthinking_analytical` |
+| **Game Theory** | Strategic decision-making | `deepthinking_strategic` |
+| **Systems Thinking** | Holistic system analysis | `deepthinking_scientific` |
+| **Scientific Method** | Hypothesis → experiment → conclusion | `deepthinking_scientific` |
+| **Formal Logic** | Formal logical proofs | `deepthinking_scientific` |
 
 ---
 
@@ -293,15 +305,20 @@ Configured in `tsconfig.json`:
 
 ## MCP Integration
 
-### Tool Categories
+### The 10 Focused Tools (v5.0.0+)
 
-**Session Management**: `create_session`, `add_thought`, `get_session`, `list_sessions`, `delete_session`
-
-**Analysis & Export**: `get_summary`, `export_session`, `get_recommendations`, `switch_mode`
-
-**Search & Discovery**: `search_sessions`
-
-**Batch Operations**: `batch_submit`, `batch_status`
+| Tool | Description | Modes Supported |
+|------|-------------|-----------------|
+| `deepthinking_core` | Fundamental reasoning | inductive, deductive, abductive |
+| `deepthinking_standard` | Standard workflows | sequential, shannon, hybrid |
+| `deepthinking_math` | Mathematical/physical | mathematics, physics |
+| `deepthinking_temporal` | Time-based reasoning | temporal |
+| `deepthinking_probabilistic` | Probability reasoning | bayesian, evidential |
+| `deepthinking_causal` | Causal analysis | causal, counterfactual |
+| `deepthinking_strategic` | Strategic decision-making | gametheory, optimization |
+| `deepthinking_analytical` | Analytical reasoning | analogical, firstprinciples, metareasoning |
+| `deepthinking_scientific` | Scientific methods | scientificmethod, systemsthinking, formallogic |
+| `deepthinking_session` | Session management | All (create, list, delete, export) |
 
 ### Configuration
 ```json
@@ -353,7 +370,7 @@ tests/
 ### Coverage
 - **Unit Tests**: 36 files
 - **Integration Tests**: 7 files
-- **Total Tests**: 763 passing
+- **Total Tests**: 745 passing
 - **Critical Paths**: 80%+ coverage
 
 ---
@@ -363,9 +380,10 @@ tests/
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed system architecture
 - **[COMPONENTS.md](COMPONENTS.md)** - Component deep-dive
 - **[DATA_FLOW.md](DATA_FLOW.md)** - Data flow diagrams
+- **[docs/modes/METAREASONING.md](../modes/METAREASONING.md)** - Meta-reasoning mode guide (v6.0.0)
 - **[CHANGELOG.md](../../CHANGELOG.md)** - Version history
 
 ---
 
-*Last Updated*: 2025-11-27
-*Version*: 4.3.0
+*Last Updated*: 2025-12-01
+*Version*: 6.0.0

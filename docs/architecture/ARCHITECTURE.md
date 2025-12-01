@@ -2,9 +2,9 @@
 
 ## System Architecture
 
-DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced reasoning capabilities through multiple thinking modes. The architecture follows a modular, service-oriented design with clear separation of concerns.
+DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced reasoning capabilities through 21 thinking modes with meta-reasoning for strategic oversight. The architecture follows a modular, service-oriented design with clear separation of concerns.
 
-**Version**: 4.3.0 | **Node**: >=18.0.0
+**Version**: 6.0.0 | **Node**: >=18.0.0
 
 ## High-Level Architecture
 
@@ -16,29 +16,36 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
 ┌───────────────────┴─────────────────────────────────────────┐
 │                   MCP Server (index.ts)                     │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │              Tool Request Handlers                     │ │
-│  │  • add_thought  • create_session  • export_session     │ │
-│  │  • get_summary  • switch_mode     • get_recommendations│ │
+│  │              10 Focused Tool Handlers (v5.0.0+)        │ │
+│  │  • deepthinking_core     • deepthinking_standard       │ │
+│  │  • deepthinking_math     • deepthinking_temporal       │ │
+│  │  • deepthinking_causal   • deepthinking_strategic      │ │
+│  │  • deepthinking_analytical • deepthinking_session      │ │
 │  └────────────────────────────────────────────────────────┘ │
-└───────┬──────────┬──────────-┬───────--─┬───────────--──────┘
-        │          │           │          │
-   ┌────▼────┐ ┌───▼──────┐ ┌──▼─────┐ ┌──▼─────────┐
+└───────┬──────────┬──────────┬───────────┬───────────────────┘
+        │          │          │           │
+   ┌────▼────┐ ┌───▼──────┐ ┌─▼──────┐ ┌──▼─────────┐
    │ Thought │ │  Export  │ │  Mode  │ │   Session  │
    │ Factory │ │ Service  │ │ Router │ │   Manager  │
    └────┬────┘ └────┬─────┘ └───┬────┘ └─────┬──────┘
         │           │           │            │
         │      ┌────▼───────────▼────┐       │
-        │      │ Visual Exporters    │		 │
+        │      │ Visual Exporters    │       │
         │      │ (17 modular files)  │       │
         │      └─────────────────────┘       │
+        │                  │                 │
+        │           ┌──────▼──────┐          │
+        │           │ MetaMonitor │◄─────────┤
+        │           │  (v6.0.0)   │          │
+        │           └─────────────┘          │
         │                                    │
         └──────────────┬─────────────────────┘
                        │
         ┌──────────────┼───────────────┐
         │              │               │
-   ┌────▼──────┐  ┌────▼──────-┐  ┌────▼─────────┐
+   ┌────▼──────┐  ┌────▼──────┐  ┌────▼─────────┐
    │  Storage  │  │ Validation │  │  Type System │
-   │   Layer   │  │   Layer    │  │  (18 Modes)  │
+   │   Layer   │  │   Layer    │  │  (21 Modes)  │
    └───────────┘  │ (Lazy Load)│  └──────────────┘
                   └────────────┘
 ```
@@ -72,11 +79,23 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
 - **Formats**: JSON, Markdown, LaTeX, HTML, Jupyter, Mermaid, DOT, ASCII
 
 #### ModeRouter (`src/services/ModeRouter.ts`)
-- **Role**: Mode switching and intelligent recommendations
+- **Role**: Mode switching, recommendations, and adaptive switching (v6.0.0)
 - **Responsibilities**:
   - Switches thinking modes mid-session
   - Provides mode recommendations based on problem characteristics
   - Integrates with taxonomy system
+  - **Adaptive mode switching** via `evaluateAndSuggestSwitch()` (v6.0.0)
+  - **Auto-switching** at low effectiveness via `autoSwitchIfNeeded()` (v6.0.0)
+
+#### MetaMonitor (`src/services/MetaMonitor.ts`) - v6.0.0
+- **Role**: Session tracking and strategy evaluation for meta-reasoning
+- **Responsibilities**:
+  - Records thoughts in session history for meta-level analysis
+  - Tracks mode transitions across sessions
+  - Evaluates strategy effectiveness (effectiveness, efficiency, confidence, quality)
+  - Suggests alternative strategies when current approach is failing
+  - Calculates quality metrics (logical consistency, evidence quality, completeness)
+  - Provides session context for meta-reasoning insights
 
 ### 3. Visual Export System (`src/export/visual/`) - v4.3.0
 
@@ -231,11 +250,15 @@ Provides 110+ reasoning types organized across 12 categories.
 ### 12. Type System (`src/types/`)
 
 #### Organized by Domain:
-- **core.ts**: Base types, ThinkingMode enum, Thought union type
-- **modes/*.ts**: Mode-specific thought types (18 modes)
+- **core.ts**: Base types, ThinkingMode enum, Thought union type (21 modes)
+- **modes/*.ts**: Mode-specific thought types (21 modes including metareasoning.ts)
 - **config.ts**: Configuration types
 - **session.ts**: Session and validation types
 - **events.ts**: Event system types
+
+#### Mode Categories (v6.0.0):
+- **Fully Implemented** (13): Sequential, Shannon, Mathematics, Physics, Hybrid, Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization, Inductive, Deductive
+- **Experimental** (8): Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory, Evidential, FirstPrinciples, SystemsThinking, ScientificMethod, FormalLogic
 
 ## Architectural Patterns
 
@@ -269,6 +292,12 @@ Provides 110+ reasoning types organized across 12 categories.
 - Progress callbacks for long-running operations
 - Event handlers for visualization
 - Metrics updates on state changes
+
+### 7. Meta-Reasoning Pattern (v6.0.0)
+- **MetaMonitor** tracks session-level strategy performance
+- **ModeRouter** uses meta-reasoning insights for adaptive switching
+- **SessionManager** integrates with MetaMonitor for thought recording
+- Automatic mode switching when effectiveness < 0.3 to prevent thrashing
 
 ## Data Flow
 
@@ -377,12 +406,13 @@ Response with updated session
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~48,800 |
-| TypeScript Files | 182 |
+| Total Lines of Code | ~50,900 |
+| TypeScript Files | 185 |
 | Type Suppressions | 0 |
 | Test Files | 36 |
-| Tests | 763 |
-| Thinking Modes | 18 |
+| Tests | 745 |
+| Thinking Modes | 21 |
+| MCP Tools | 10 |
 | Export Formats | 8 |
 | Backup Providers | 4 |
 | Visual Exporters | 15 mode-specific |
@@ -390,7 +420,11 @@ Response with updated session
 
 ## Version History
 
-- **v4.3.0** (Current): Visual export modularization, lazy validator loading, validation constants, tree-shaking optimizations
+- **v6.0.0** (Current): Meta-reasoning mode, MetaMonitor service, adaptive mode switching, quality metrics
+- **v5.0.1**: Mode recommendation bugfixes for philosophical domains
+- **v5.0.0**: Fundamental reasoning modes (Inductive, Deductive), deepthinking_core tool
+- **v4.4.0**: 10 focused tools with hand-written JSON schemas
+- **v4.3.0**: Visual export modularization, lazy validator loading, validation constants, tree-shaking optimizations
 - **v4.2.0**: Schema consolidation, tree-shaking configuration
 - **v4.1.0**: Token optimization, lazy schema loading
 - **v4.0.0**: Tool splitting, major refactoring
@@ -403,5 +437,5 @@ Response with updated session
 
 ---
 
-*Last Updated*: 2025-11-26
-*Architecture Version*: 4.3.0
+*Last Updated*: 2025-12-01
+*Architecture Version*: 6.0.0
