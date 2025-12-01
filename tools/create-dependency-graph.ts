@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env npx tsx
 
 /**
  * Generic Dependency Graph Generator
@@ -7,7 +7,7 @@
  * - docs/architecture/DEPENDENCY_GRAPH.md
  * - docs/architecture/dependency-graph.json
  *
- * Usage: node tools/create-dependency-graph.mjs
+ * Usage: npx tsx tools/create-dependency-graph.ts
  *
  * This tool is generic and does not depend on any codebase-specific functions.
  * It dynamically discovers the project structure from the filesystem.
@@ -17,6 +17,76 @@ import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSy
 import { join, dirname, relative, basename } from 'path';
 import { fileURLToPath } from 'url';
 
+// Types
+interface Dependency {
+  file: string;
+  imports: string[];
+  reExport?: boolean;
+}
+
+interface ExternalDependency {
+  package: string;
+  imports: string[];
+}
+
+interface NodeDependency {
+  module: string;
+  imports: string[];
+}
+
+interface FileExports {
+  named: string[];
+  default: string | null;
+  types: string[];
+  interfaces: string[];
+  enums: string[];
+  classes: string[];
+  functions: string[];
+  constants: string[];
+}
+
+interface ParsedFile {
+  path: string;
+  name: string;
+  externalDependencies: ExternalDependency[];
+  nodeDependencies: NodeDependency[];
+  internalDependencies: Dependency[];
+  exports: FileExports;
+  description: string | null;
+}
+
+interface DependencyMatrix {
+  [path: string]: {
+    importsFrom: string[];
+    exportsTo: string[];
+  };
+}
+
+interface Statistics {
+  totalTypeScriptFiles: number;
+  totalModules: number;
+  totalLinesOfCode: number;
+  totalExports: number;
+  totalClasses: number;
+  totalInterfaces: number;
+  totalFunctions: number;
+  totalTypeGuards: number;
+  totalEnums: number;
+  totalConstants: number;
+}
+
+interface ModuleMap {
+  [moduleName: string]: {
+    [filePath: string]: ParsedFile;
+  };
+}
+
+interface PackageJson {
+  name: string;
+  version: string;
+}
+
+// Constants
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT_DIR = join(__dirname, '..');
@@ -24,17 +94,17 @@ const SRC_DIR = join(ROOT_DIR, 'src');
 const OUTPUT_DIR = join(ROOT_DIR, 'docs', 'architecture');
 
 // Read package.json for version and name
-let packageJson = { name: 'unknown', version: '0.0.0' };
+let packageJson: PackageJson = { name: 'unknown', version: '0.0.0' };
 try {
-  packageJson = JSON.parse(readFileSync(join(ROOT_DIR, 'package.json'), 'utf-8'));
-} catch (e) {
+  packageJson = JSON.parse(readFileSync(join(ROOT_DIR, 'package.json'), 'utf-8')) as PackageJson;
+} catch {
   console.warn('Warning: Could not read package.json, using defaults');
 }
 
 /**
  * Recursively get all TypeScript files in a directory
  */
-function getAllTsFiles(dir, files = []) {
+function getAllTsFiles(dir: string, files: string[] = []): string[] {
   if (!existsSync(dir)) {
     return files;
   }
@@ -58,11 +128,11 @@ function getAllTsFiles(dir, files = []) {
 /**
  * Parse a TypeScript file for imports and exports
  */
-function parseFile(filePath) {
+function parseFile(filePath: string): ParsedFile {
   const content = readFileSync(filePath, 'utf-8');
   const relativePath = relative(ROOT_DIR, filePath).replace(/\\/g, '/');
 
-  const result = {
+  const result: ParsedFile = {
     path: relativePath,
     name: basename(filePath, '.ts'),
     externalDependencies: [],
@@ -83,7 +153,7 @@ function parseFile(filePath) {
 
   // Parse imports
   const importRegex = /import\s+(?:(?:type\s+)?(?:{([^}]+)}|(\w+)|\*\s+as\s+(\w+))(?:\s*,\s*(?:{([^}]+)}|(\w+)))?)\s+from\s+['"]([^'"]+)['"]/g;
-  let match;
+  let match: RegExpExecArray | null;
 
   while ((match = importRegex.exec(content)) !== null) {
     const namedImports = match[1] || match[4] || '';
@@ -91,7 +161,7 @@ function parseFile(filePath) {
     const namespaceImport = match[3] || '';
     const source = match[6];
 
-    const imports = [];
+    const imports: string[] = [];
     if (namedImports) {
       imports.push(...namedImports.split(',').map(s => s.trim().split(' as ')[0].replace(/^type\s+/, '')).filter(Boolean));
     }
@@ -207,7 +277,7 @@ function parseFile(filePath) {
 /**
  * Extract file description from comments
  */
-function extractDescription(content) {
+function extractDescription(content: string): string | null {
   // Try to find JSDoc comment at the top
   const jsdocMatch = content.match(/\/\*\*\s*\n([^*]*(?:\*(?!\/)[^*]*)*)\*\//);
   if (jsdocMatch) {
@@ -231,8 +301,8 @@ function extractDescription(content) {
 /**
  * Dynamically discover and categorize files into modules based on directory structure
  */
-function categorizeFiles(files) {
-  const modules = {};
+function categorizeFiles(files: ParsedFile[]): ModuleMap {
+  const modules: ModuleMap = {};
 
   for (const file of files) {
     const relativePath = file.path;
@@ -274,12 +344,12 @@ function categorizeFiles(files) {
 /**
  * Build dependency matrix
  */
-function buildDependencyMatrix(files) {
-  const matrix = {};
+function buildDependencyMatrix(files: ParsedFile[]): DependencyMatrix {
+  const matrix: DependencyMatrix = {};
 
   for (const file of files) {
-    const importedFrom = new Set();
-    const exportsTo = new Set();
+    const importedFrom = new Set<string>();
+    const exportsTo = new Set<string>();
 
     // Find what this file imports from
     for (const dep of file.internalDependencies) {
@@ -309,7 +379,7 @@ function buildDependencyMatrix(files) {
 /**
  * Resolve relative path
  */
-function resolvePath(fromPath, relativePath) {
+function resolvePath(fromPath: string, relativePath: string): string {
   const dir = dirname(fromPath);
   let resolved = join(dir, relativePath);
 
@@ -330,12 +400,12 @@ function resolvePath(fromPath, relativePath) {
 /**
  * Detect circular dependencies
  */
-function detectCircularDependencies(files) {
+function detectCircularDependencies(files: ParsedFile[]): string[][] {
   const filePaths = new Set(files.map(f => f.path));
 
-  const graph = new Map();
+  const graph = new Map<string, string[]>();
   for (const file of files) {
-    const deps = [];
+    const deps: string[] = [];
     for (const d of file.internalDependencies) {
       const resolved = resolvePath(file.path, d.file);
       if (filePaths.has(resolved)) {
@@ -345,11 +415,11 @@ function detectCircularDependencies(files) {
     graph.set(file.path, deps);
   }
 
-  const cycles = [];
-  const visited = new Set();
-  const inStack = new Set();
+  const cycles: string[][] = [];
+  const visited = new Set<string>();
+  const inStack = new Set<string>();
 
-  function dfs(node, path) {
+  function dfs(node: string, path: string[]): void {
     if (inStack.has(node)) {
       const cycleStart = path.indexOf(node);
       if (cycleStart !== -1) {
@@ -390,7 +460,7 @@ function detectCircularDependencies(files) {
 /**
  * Generate statistics from parsed files
  */
-function generateStatistics(files, modules) {
+function generateStatistics(files: ParsedFile[], modules: ModuleMap): Statistics {
   let totalExports = 0;
   let totalClasses = 0;
   let totalInterfaces = 0;
@@ -415,7 +485,7 @@ function generateStatistics(files, modules) {
     try {
       const content = readFileSync(join(ROOT_DIR, file.path), 'utf-8');
       totalLines += content.split('\n').length;
-    } catch (e) {
+    } catch {
       // Ignore
     }
   }
@@ -437,15 +507,15 @@ function generateStatistics(files, modules) {
 /**
  * Generate JSON output
  */
-function generateJSON(files, modules, stats, circularDeps) {
+function generateJSON(files: ParsedFile[], modules: ModuleMap, stats: Statistics, circularDeps: string[][]): object {
   const today = new Date().toISOString().split('T')[0];
 
   // Convert modules to JSON-friendly format
-  const modulesJson = {};
+  const modulesJson: Record<string, Record<string, object>> = {};
   for (const [category, categoryFiles] of Object.entries(modules)) {
     modulesJson[category] = {};
     for (const [path, file] of Object.entries(categoryFiles)) {
-      modulesJson[category][path] = {
+      const fileData: Record<string, unknown> = {
         description: file.description || `${file.name} module`,
         externalDependencies: file.externalDependencies,
         nodeDependencies: file.nodeDependencies,
@@ -463,11 +533,13 @@ function generateJSON(files, modules, stats, circularDeps) {
       };
 
       // Clean up undefined values
-      Object.keys(modulesJson[category][path]).forEach(key => {
-        if (modulesJson[category][path][key] === undefined) {
-          delete modulesJson[category][path][key];
+      Object.keys(fileData).forEach(key => {
+        if (fileData[key] === undefined) {
+          delete fileData[key];
         }
       });
+
+      modulesJson[category][path] = fileData;
     }
   }
 
@@ -505,14 +577,14 @@ function generateJSON(files, modules, stats, circularDeps) {
 /**
  * Generate a dynamic Mermaid diagram from actual dependencies
  */
-function generateMermaidDiagram(modules, files) {
-  const lines = [];
+function generateMermaidDiagram(modules: ModuleMap, files: ParsedFile[]): string {
+  const lines: string[] = [];
   lines.push('```mermaid');
   lines.push('graph TD');
 
   // Create subgraphs for each module
   const moduleNames = Object.keys(modules);
-  const nodeIds = new Map();
+  const nodeIds = new Map<string, string>();
   let nodeCounter = 0;
 
   for (const moduleName of moduleNames) {
@@ -537,7 +609,7 @@ function generateMermaidDiagram(modules, files) {
   }
 
   // Add edges for dependencies (limited for readability)
-  const addedEdges = new Set();
+  const addedEdges = new Set<string>();
   let edgeCount = 0;
   const maxEdges = 30;
 
@@ -569,9 +641,9 @@ function generateMermaidDiagram(modules, files) {
 /**
  * Generate Markdown output
  */
-function generateMarkdown(files, modules, stats, circularDeps, matrix) {
+function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statistics, circularDeps: string[][], matrix: DependencyMatrix): string {
   const today = new Date().toISOString().split('T')[0];
-  const lines = [];
+  const lines: string[] = [];
   const projectName = packageJson.name || 'Project';
 
   lines.push(`# ${projectName} - Dependency Graph`);
@@ -761,7 +833,7 @@ function generateMarkdown(files, modules, stats, circularDeps, matrix) {
 /**
  * Main function
  */
-async function main() {
+async function main(): Promise<void> {
   console.log('Scanning codebase for dependencies...');
 
   // Ensure output directory exists
