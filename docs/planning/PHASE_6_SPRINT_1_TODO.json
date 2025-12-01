@@ -1,0 +1,173 @@
+{
+  "sprint": 1,
+  "title": "Core Meta-Reasoning Infrastructure",
+  "week": "Week 1",
+  "effort": "14-20 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Type System",
+      "description": "Create src/types/modes/metareasoning.ts - Define MetaReasoningThought type with strategy monitoring, evaluation, recommendations, quality metrics, and session context",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["src/types/modes/metareasoning.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Type System",
+      "description": "Update src/types/core.ts - Add METAREASONING to ThinkingMode enum",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": ["src/types/core.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Type System",
+      "description": "Update src/types/core.ts - Add MetaReasoningThought to Thought union type",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": ["src/types/core.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Type System",
+      "description": "Update src/types/core.ts - Add type guard isMetaReasoningThought()",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": ["src/types/core.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Type System",
+      "description": "Update src/types/core.ts - Add METAREASONING to FULLY_IMPLEMENTED_MODES list",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": ["src/types/core.ts"]
+    },
+    {
+      "id": 6,
+      "category": "Validation & Schemas",
+      "description": "Create src/validation/validators/modes/metareasoning.ts - Validator for meta-reasoning with strategy evaluation, recommendation validation, quality metrics checks",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["src/validation/validators/modes/metareasoning.ts"]
+    },
+    {
+      "id": 7,
+      "category": "Validation & Schemas",
+      "description": "Update src/validation/schemas.ts - Add MetaReasoningSchema using Zod",
+      "status": "pending",
+      "estimatedHours": 1,
+      "files": ["src/validation/schemas.ts"]
+    },
+    {
+      "id": 8,
+      "category": "Validation & Schemas",
+      "description": "Update src/validation/validator.ts - Register metareasoning validator",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": ["src/validation/validator.ts"]
+    },
+    {
+      "id": 9,
+      "category": "Tool Schema & Routing",
+      "description": "Update src/tools/json-schemas.ts - Add metareasoning to deepthinking_analytical_schema (or create deepthinking_meta_schema)",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": ["src/tools/json-schemas.ts"]
+    },
+    {
+      "id": 10,
+      "category": "Tool Schema & Routing",
+      "description": "Update src/tools/definitions.ts - Route metareasoning mode appropriately",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": ["src/tools/definitions.ts"]
+    },
+    {
+      "id": 11,
+      "category": "Tool Schema & Routing",
+      "description": "Update src/services/ModeRouter.ts - Add metareasoning routing logic",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": ["src/services/ModeRouter.ts"]
+    },
+    {
+      "id": 12,
+      "category": "Core Implementation",
+      "description": "Create src/modes/metareasoning.ts - Meta-reasoning logic with strategy evaluation algorithms, mode switching recommendations, quality assessment heuristics",
+      "status": "pending",
+      "estimatedHours": 4,
+      "files": ["src/modes/metareasoning.ts"]
+    },
+    {
+      "id": 13,
+      "category": "Core Implementation",
+      "description": "Update src/services/ThoughtFactory.ts - Add metareasoning case to create MetaReasoningThought instances",
+      "status": "pending",
+      "estimatedHours": 1,
+      "files": ["src/services/ThoughtFactory.ts"]
+    },
+    {
+      "id": 14,
+      "category": "Core Implementation",
+      "description": "Create src/services/MetaMonitor.ts - Session monitoring service to track mode usage patterns, evaluate reasoning effectiveness, suggest improvements",
+      "status": "pending",
+      "estimatedHours": 3,
+      "files": ["src/services/MetaMonitor.ts"]
+    },
+    {
+      "id": 15,
+      "category": "Testing Infrastructure",
+      "description": "Run typecheck - verify no TypeScript errors",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": []
+    },
+    {
+      "id": 16,
+      "category": "Testing Infrastructure",
+      "description": "Create tests/unit/metareasoning.test.ts - Basic unit tests for meta-reasoning thought creation and validation",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["tests/unit/metareasoning.test.ts"]
+    },
+    {
+      "id": 17,
+      "category": "Testing Infrastructure",
+      "description": "Run full test suite - verify all 740+ tests pass with new meta-reasoning mode",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": []
+    }
+  ],
+  "successCriteria": [
+    "Meta-reasoning type system complete with all required fields",
+    "Validation and schemas properly configured",
+    "Tool routing configured for meta-reasoning mode",
+    "Basic meta-reasoning logic functional",
+    "MetaMonitor service can track and evaluate sessions",
+    "All 740+ tests passing",
+    "Can monitor and evaluate reasoning strategies",
+    "No TypeScript errors"
+  ],
+  "filesCreated": [
+    "src/types/modes/metareasoning.ts",
+    "src/validation/validators/modes/metareasoning.ts",
+    "src/modes/metareasoning.ts",
+    "src/services/MetaMonitor.ts",
+    "tests/unit/metareasoning.test.ts"
+  ],
+  "filesModified": [
+    "src/types/core.ts",
+    "src/validation/schemas.ts",
+    "src/validation/validator.ts",
+    "src/tools/json-schemas.ts",
+    "src/tools/definitions.ts",
+    "src/services/ModeRouter.ts",
+    "src/services/ThoughtFactory.ts"
+  ],
+  "totalEstimatedHours": 20.5,
+  "notes": "This sprint establishes the foundational infrastructure for meta-reasoning. Focus on creating a robust type system and core monitoring capabilities. The MetaMonitor service is key - it should be able to track session history and evaluate strategy effectiveness."
+}
