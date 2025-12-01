@@ -1,841 +1,414 @@
-# DeepThinking MCP - Dependency Graph
+# deepthinking-mcp - Dependency Graph
 
 **Version**: 6.0.0 | **Last Updated**: 2025-12-01
 
-This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the DeepThinking MCP codebase.
+This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
 ---
 
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Entry Dependencies](#entry-dependencies)
-3. [Services Dependencies](#services-dependencies)
-4. [Session Dependencies](#session-dependencies)
-5. [Types Dependencies](#types-dependencies)
-6. [Tools Dependencies](#tools-dependencies)
-7. [Export Dependencies](#export-dependencies)
-8. [Utils Dependencies](#utils-dependencies)
-9. [Interfaces Dependencies](#interfaces-dependencies)
-10. [Cache Dependencies](#cache-dependencies)
-11. [Search Dependencies](#search-dependencies)
-12. [Taxonomy Dependencies](#taxonomy-dependencies)
-13. [Backup Dependencies](#backup-dependencies)
-14. [Batch Dependencies](#batch-dependencies)
-15. [Rate limit Dependencies](#rate-limit-dependencies)
-16. [Comparison Dependencies](#comparison-dependencies)
-17. [Collaboration Dependencies](#collaboration-dependencies)
-18. [Repositories Dependencies](#repositories-dependencies)
-19. [Config Dependencies](#config-dependencies)
+2. [Analytics Dependencies](#analytics-dependencies)
+3. [Backup Dependencies](#backup-dependencies)
+4. [Batch Dependencies](#batch-dependencies)
+5. [Cache Dependencies](#cache-dependencies)
+6. [Collaboration Dependencies](#collaboration-dependencies)
+7. [Comparison Dependencies](#comparison-dependencies)
+8. [Config Dependencies](#config-dependencies)
+9. [Export Dependencies](#export-dependencies)
+10. [Entry Dependencies](#entry-dependencies)
+11. [Interfaces Dependencies](#interfaces-dependencies)
+12. [Ml Dependencies](#ml-dependencies)
+13. [Modes Dependencies](#modes-dependencies)
+14. [Rate limit Dependencies](#rate-limit-dependencies)
+15. [Repositories Dependencies](#repositories-dependencies)
+16. [Search Dependencies](#search-dependencies)
+17. [Services Dependencies](#services-dependencies)
+18. [Session Dependencies](#session-dependencies)
+19. [Taxonomy Dependencies](#taxonomy-dependencies)
 20. [Templates Dependencies](#templates-dependencies)
-21. [Analytics Dependencies](#analytics-dependencies)
-22. [Modes Dependencies](#modes-dependencies)
-23. [Validation Dependencies](#validation-dependencies)
-24. [Dependency Matrix](#dependency-matrix)
-25. [Circular Dependency Analysis](#circular-dependency-analysis)
-26. [Visual Dependency Graph](#visual-dependency-graph)
-27. [Summary Statistics](#summary-statistics)
+21. [Tools Dependencies](#tools-dependencies)
+22. [Types Dependencies](#types-dependencies)
+23. [Utils Dependencies](#utils-dependencies)
+24. [Validation Dependencies](#validation-dependencies)
+25. [Visualization Dependencies](#visualization-dependencies)
+26. [Webhooks Dependencies](#webhooks-dependencies)
+27. [Dependency Matrix](#dependency-matrix)
+28. [Circular Dependency Analysis](#circular-dependency-analysis)
+29. [Visual Dependency Graph](#visual-dependency-graph)
+30. [Summary Statistics](#summary-statistics)
 
 ---
 
 ## Overview
 
-The DeepThinking MCP codebase follows a layered architecture with clear dependency directions:
+The codebase is organized into the following modules:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Entry Point (index.ts)                   │
-├─────────────────────────────────────────────────────────────┤
-│                     Tools Layer                             │
-│        (definitions.ts, thinking.ts, schemas/*)             │
-├─────────────────────────────────────────────────────────────┤
-│                    Services Layer                           │
-│  (ThoughtFactory, ExportService, ModeRouter, MetaMonitor)   │
-├─────────────────────────────────────────────────────────────┤
-│                   Session Layer                             │
-│      (SessionManager, SessionMetricsCalculator)             │
-├─────────────────────────────────────────────────────────────┤
-│                    Export Layer                             │
-│           (visual/*, document exporters)                    │
-├─────────────────────────────────────────────────────────────┤
-│              Types / Interfaces / Utils                     │
-│      (core.ts, session.ts, modes/*, utils/*)                │
-├─────────────────────────────────────────────────────────────┤
-│              Infrastructure Layer                           │
-│         (cache/, storage/, interfaces/)                     │
-└─────────────────────────────────────────────────────────────┘
-```
+- **analytics**: 2 files
+- **backup**: 4 files
+- **batch**: 3 files
+- **cache**: 6 files
+- **collaboration**: 5 files
+- **comparison**: 5 files
+- **config**: 1 file
+- **export**: 22 files
+- **entry**: 1 file
+- **interfaces**: 2 files
+- **ml**: 4 files
+- **modes**: 6 files
+- **rate-limit**: 4 files
+- **repositories**: 4 files
+- **search**: 5 files
+- **services**: 5 files
+- **session**: 7 files
+- **taxonomy**: 7 files
+- **templates**: 4 files
+- **tools**: 16 files
+- **types**: 21 files
+- **utils**: 7 files
+- **validation**: 34 files
+- **visualization**: 5 files
+- **webhooks**: 5 files
 
 ---
 
-## Entry Dependencies
+## Analytics Dependencies
 
-### `src/index.ts` - DeepThinking MCP Server (v4.1.0)
+### `src/analytics/index.ts` - Analytics Module Exports (v3.4.0)
 
-**External Dependencies:**
-| Package | Import | Usage |
-|---------|--------|-------|
-| `@modelcontextprotocol/sdk/server/index.js` | `Server` | External package |
-| `@modelcontextprotocol/sdk/server/stdio.js` | `StdioServerTransport` | External package |
-| `@modelcontextprotocol/sdk/types.js` | `CallToolRequestSchema, ListToolsRequestSchema` | External package |
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./engine.js` | `AnalyticsEngine` | Re-export |
+| `./dashboard.js` | `AnalyticsDashboard` | Re-export |
+| `./time-series.js` | `TimeSeriesAnalyzer` | Re-export |
+| `./quality-metrics.js` | `QualityMetrics` | Re-export |
+| `./distribution.js` | `DistributionAnalyzer` | Re-export |
+
+**Exports:**
+
+---
+
+### `src/analytics/types.ts` - Analytics Types (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `ThinkingMode` | Import |
+
+---
+
+## Backup Dependencies
+
+### `src/backup/backup-manager.ts` - Backup Manager (v3.4.0)
 
 **Node.js Built-in Dependencies:**
-| Module | Import | Usage |
-|--------|--------|-------|
-| `fs` | `readFileSync` | Node.js built-in |
-| `url` | `fileURLToPath` | Node.js built-in |
-| `path` | `dirname, join` | Node.js built-in |
+| Module | Import |
+|--------|--------|
+| `crypto` | `crypto` |
+| `zlib` | `zlib` |
+| `util` | `promisify` |
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./tools/definitions.js` | `toolList, toolSchemas, isValidTool, modeToToolMap` | Import |
-| `./tools/thinking.js` | `thinkingTool` | Import |
-| `./session/index.js` | `SessionManager` | Import |
-| `./types/index.js` | `ThinkingMode` | Import |
-| `./services/index.js` | `ThoughtFactory, ExportService, ModeRouter` | Import |
-
----
-
-## Services Dependencies
-
-### `src/services/ExportService.ts` - Export Service (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/index.js` | `ThinkingSession, ThinkingMode, CausalThought, TemporalThought, GameTheoryThought, BayesianThought, FirstPrinciplesThought, isMetaReasoningThought` | Import |
-| `../export/visual/index.js` | `VisualExporter, VisualFormat` | Import |
-| `../utils/sanitization.js` | `escapeHtml, escapeLatex` | Import |
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `BackupConfig, BackupRecord, BackupProviderOptions, BackupManifest, BackupValidation, BackupStats, BackupType, BackupProvider, RestoreOptions, RestoreResult, RestoreProgress, CompressionFormat` | Import |
+| `./providers/local.js` | `LocalBackupProvider` | Import |
 | `../interfaces/ILogger.js` | `ILogger` | Import |
 | `../utils/logger.js` | `createLogger, LogLevel` | Import |
 
 **Exports:**
-- Classes: `ExportService`
+- Classes: `BackupManager`
 
 ---
 
-### `src/services/MetaMonitor.ts` - Meta-Reasoning Monitor Service (v6.0.0)
+### `src/backup/index.ts` - Backup and Restore System Exports (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/core.js` | `Thought, ThinkingMode` | Import |
-| `../types/modes/metareasoning.js` | `StrategyEvaluation, AlternativeStrategy, QualityMetrics, SessionContext` | Import |
+| File | Imports | Type |
+|------|---------|------|
+| `./backup-manager.js` | `BackupManager` | Re-export |
+| `./providers/local.js` | `LocalBackupProvider` | Re-export |
 
 **Exports:**
-- Classes: `MetaMonitor`
-- Constants: `metaMonitor`
 
 ---
 
-### `src/services/ModeRouter.ts` - Mode Router Service (v6.0.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/index.js` | `ThinkingMode, ModeRecommender, ProblemCharacteristics` | Import |
-| `../session/index.js` | `SessionManager` | Import |
-| `../interfaces/ILogger.js` | `ILogger` | Import |
-| `../utils/logger.js` | `createLogger, LogLevel` | Import |
-| `./MetaMonitor.js` | `metaMonitor, MetaMonitor` | Import |
-
-**Exports:**
-- Classes: `ModeRouter`
-- Interfaces: `ModeRecommendation`, `ModeCombinationRecommendation`
-
----
-
-### `src/services/ThoughtFactory.ts` - Thought Factory Service (v3.4.5)
+### `src/backup/providers/local.ts` - Local File System Backup Provider (v3.4.0)
 
 **Node.js Built-in Dependencies:**
-| Module | Import | Usage |
-|--------|--------|-------|
-| `crypto` | `randomUUID` | Node.js built-in |
+| Module | Import |
+|--------|--------|
+| `fs/promises` | `fs` |
+| `path` | `path` |
+| `crypto` | `crypto` |
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/index.js` | `ThinkingMode, ShannonStage, SequentialThought, ShannonThought, MathematicsThought, PhysicsThought, InductiveThought, DeductiveThought, AbductiveThought, CausalThought, Thought` | Import |
-| `../tools/thinking.js` | `ThinkingToolInput` | Import |
-| `../utils/type-guards.js` | `toExtendedThoughtType` | Import |
-| `../interfaces/ILogger.js` | `ILogger` | Import |
-| `../utils/logger.js` | `createLogger, LogLevel` | Import |
+| File | Imports | Type |
+|------|---------|------|
+| `../types.js` | `LocalBackupOptions, BackupManifest` | Import |
 
 **Exports:**
-- Classes: `ThoughtFactory`
+- Classes: `LocalBackupProvider`
 
 ---
 
-### `src/services/index.ts` - Services module exports (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./ThoughtFactory.js` | `ThoughtFactory` | Re-export |
-| `./ExportService.js` | `ExportService` | Re-export |
-| `./ModeRouter.js` | `ModeRouter` | Re-export |
-
-**Exports:**
+### `src/backup/types.ts` - Backup and Restore System Types (v3.4.0)
 
 ---
 
-## Session Dependencies
+## Batch Dependencies
 
-### `src/session/SessionMetricsCalculator.ts` - Session Metrics Calculator (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/index.js` | `ThinkingSession, SessionMetrics, Thought` | Import |
-| `../types/core.js` | `isTemporalThought, isGameTheoryThought, isEvidentialThought` | Import |
-| `../validation/cache.js` | `validationCache` | Import |
-
-**Exports:**
-- Classes: `SessionMetricsCalculator`
-
----
-
-### `src/session/index.ts` - Session module exports (v4.3.0)
+### `src/batch/index.ts` - Batch Processing Module Exports (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./manager.js` | `SessionManager` | Re-export |
+| File | Imports | Type |
+|------|---------|------|
+| `./processor.js` | `BatchProcessor` | Re-export |
 
 **Exports:**
 
 ---
 
-### `src/session/manager.ts` - Session Manager for DeepThinking MCP (v6.0.0)
+### `src/batch/processor.ts` - Batch Processor (v3.4.0)
 
 **Node.js Built-in Dependencies:**
-| Module | Import | Usage |
-|--------|--------|-------|
-| `crypto` | `randomUUID` | Node.js built-in |
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/index.js` | `ThinkingSession, SessionConfig, SessionMetadata, Thought, ThinkingMode` | Import |
-| `../utils/errors.js` | `SessionNotFoundError` | Import |
-| `../utils/sanitization.js` | `sanitizeString, sanitizeThoughtContent, validateSessionId, MAX_LENGTHS` | Import |
-| `../utils/logger.js` | `createLogger, LogLevel` | Import |
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `BatchJob, BatchJobType, BatchJobParams, BatchJobResult, BatchProcessorOptions` | Import |
 | `../interfaces/ILogger.js` | `ILogger` | Import |
-| `./storage/interface.js` | `SessionStorage` | Import |
-| `../cache/lru.js` | `LRUCache` | Import |
-| `./SessionMetricsCalculator.js` | `SessionMetricsCalculator` | Import |
-| `../services/MetaMonitor.js` | `metaMonitor, MetaMonitor` | Import |
-| `./utils/logger.js` | `createLogger, LogLevel` | Import |
-| `./storage/file-store.js` | `FileSessionStore` | Import |
+| `../utils/logger.js` | `createLogger, LogLevel` | Import |
+| `../session/manager.js` | `SessionManager` | Import |
+| `../services/ExportService.js` | `ExportService` | Import |
+| `../backup/backup-manager.js` | `BackupManager` | Import |
+| `../search/engine.js` | `SearchEngine` | Import |
 
 **Exports:**
-- Classes: `SessionManager`
+- Classes: `BatchProcessor`
+- Interfaces: `BatchProcessorDependencies`
 
 ---
 
-### `src/session/persistence.ts` - Session persistence layer
+### `src/batch/types.ts` - Batch Processing Types (v3.4.0)
 
-**Node.js Built-in Dependencies:**
-| Module | Import | Usage |
-|--------|--------|-------|
-| `fs` | `promises` | Node.js built-in |
-| `path` | `join` | Node.js built-in |
+---
+
+## Cache Dependencies
+
+### `src/cache/factory.ts` - Cache Factory (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `Cache, CacheConfig` | Import |
+| `./lru.js` | `LRUCache` | Import |
+| `./lfu.js` | `LFUCache` | Import |
+| `./fifo.js` | `FIFOCache` | Import |
+
+**Exports:**
+- Classes: `CacheFactory`, `CacheManager`
+- Functions: `createCache`
+
+---
+
+### `src/cache/fifo.ts` - FIFO Cache (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `Cache, CacheConfig, CacheEntry, CacheStats` | Import |
+
+**Exports:**
+- Classes: `FIFOCache`
+
+---
+
+### `src/cache/index.ts` - Cache Module Exports (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./lru.js` | `LRUCache` | Re-export |
+| `./lfu.js` | `LFUCache` | Re-export |
+| `./fifo.js` | `FIFOCache` | Re-export |
+| `./factory.js` | `createCache, CacheManager` | Re-export |
+
+**Exports:**
+
+---
+
+### `src/cache/lfu.ts` - LFU Cache (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `Cache, CacheConfig, CacheEntry, CacheStats` | Import |
+
+**Exports:**
+- Classes: `LFUCache`
+
+---
+
+### `src/cache/lru.ts` - LRU Cache (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `Cache, CacheConfig, CacheEntry, CacheStats` | Import |
+
+**Exports:**
+- Classes: `LRUCache`
+
+---
+
+### `src/cache/types.ts` - Cache Types (v3.4.0)
+
+---
+
+## Collaboration Dependencies
+
+### `src/collaboration/annotations.ts` - Collaborative Annotations (v3.4.0)
+
+**Exports:**
+- Classes: `AnnotationManager`
+- Interfaces: `TextRange`, `Annotation`, `AnnotationVote`, `AnnotationFilter`, `AnnotationThread`, `AnnotationStats`
+
+---
+
+### `src/collaboration/conflict-resolution.ts` - Conflict Resolution for Divergent Thoughts (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `Thought` | Import |
+| `../types/core.js` | `ThinkingMode` | Import |
+
+**Exports:**
+- Classes: `ConflictResolutionManager`
+- Interfaces: `DivergentThought`, `ThoughtConflict`, `ConflictResolution`, `ResolutionVote`, `ConsensusRequirement`, `Evidence`
+
+---
+
+### `src/collaboration/index.ts` - Collaboration Module - Index
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./multi-agent.js` | `MultiAgentCollaboration, type CollaborativeAgent, type CollaborativeWorkspace, type AgentMessage, type AgentAssignment, type CoordinationRule, type AgentRole, type AgentStatus, type MessageType` | Re-export |
+| `./session-sharing.js` | `SessionSharingManager, type SharedSession, type SessionComment, type MergeStrategy, type MergeMetadata, type MergeConflict, type ConflictType` | Re-export |
+| `./annotations.js` | `AnnotationManager, type Annotation, type AnnotationType, type HighlightColor, type AnnotationVisibility, type TextRange, type AnnotationVote, type AnnotationFilter, type AnnotationThread, type AnnotationStats` | Re-export |
+| `./conflict-resolution.js` | `ConflictResolutionManager, type ThoughtConflict, type ConflictResolution, type DivergentThought, type ResolutionVote, type ResolutionStrategy, type ResolutionStatus, type ConflictSeverity, type ConflictCategory, type ConsensusRequirement, type Evidence` | Re-export |
+
+**Exports:**
+
+---
+
+### `src/collaboration/multi-agent.ts` - Multi-Agent Collaboration Infrastructure (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `Thought` | Import |
+| `../types/core.js` | `ThinkingMode` | Import |
+
+**Exports:**
+- Classes: `MultiAgentCollaboration`
+- Interfaces: `CollaborativeAgent`, `AgentMessage`, `CollaborativeWorkspace`, `CoordinationRule`, `AgentAssignment`
+
+---
+
+### `src/collaboration/session-sharing.ts` - Session Sharing and Merging (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `ThinkingSession, Thought` | Import |
+| `../types/core.js` | `ThinkingMode` | Import |
+
+**Exports:**
+- Classes: `SessionSharingManager`
+- Interfaces: `MergeConflict`, `MergeMetadata`, `SharedSession`, `SessionComment`
+
+---
+
+## Comparison Dependencies
+
+### `src/comparison/comparator.ts` - Session Comparator (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `ComparisonResult, Difference, ComparisonSummary, ComparisonMetrics, DiffOptions, SimilarityMetrics, ThoughtComparison` | Import |
 | `../types/session.js` | `ThinkingSession` | Import |
-| `../config/index.js` | `getConfig` | Import |
-| `../utils/logger.js` | `logger` | Import |
 
 **Exports:**
-- Classes: `InMemorySessionStore`, `FileSessionStore`
-- Interfaces: `ISessionStore`
-- Functions: `createSessionStore`
+- Classes: `SessionComparator`
 
 ---
 
-### `src/session/storage/file-store.ts` - File-based Session Storage Implementation
-
-**Node.js Built-in Dependencies:**
-| Module | Import | Usage |
-|--------|--------|-------|
-| `fs` | `promises` | Node.js built-in |
-| `path` | `* as path` | Node.js built-in |
+### `src/comparison/diff-generator.ts` - Diff Generator (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../../types/index.js` | `ThinkingSession, SessionMetadata` | Import |
-| `./interface.js` | `SessionStorage, StorageStats, StorageConfig, DEFAULT_STORAGE_CONFIG` | Import |
-| `../../utils/logger.js` | `logger` | Import |
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `TextDiff, ComparisonTimeline, TimelineEvent, DivergencePoint, ConvergencePoint` | Import |
+| `../types/session.js` | `ThinkingSession` | Import |
 
 **Exports:**
-- Classes: `FileSessionStore`
+- Classes: `DiffGenerator`
 
 ---
 
-### `src/session/storage/index.ts` - Session Storage Module
+### `src/comparison/index.ts` - Session Comparison Exports (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./interface.js` | `SessionStorage, StorageStats, StorageConfig, DEFAULT_STORAGE_CONFIG` | Re-export |
-| `./file-store.js` | `FileSessionStore` | Re-export |
+| File | Imports | Type |
+|------|---------|------|
+| `./comparator.js` | `SessionComparator` | Re-export |
+| `./multi-comparator.js` | `MultiSessionComparator` | Re-export |
+| `./diff-generator.js` | `DiffGenerator` | Re-export |
 
 **Exports:**
 
 ---
 
-### `src/session/storage/interface.ts` - Storage Interface for Session Persistence
+### `src/comparison/multi-comparator.ts` - Multi-Session Comparator (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../../types/index.js` | `ThinkingSession, SessionMetadata` | Import |
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `MultiSessionComparison, SessionCluster, ComparisonResult` | Import |
+| `../types/session.js` | `ThinkingSession` | Import |
+| `./comparator.js` | `SessionComparator` | Import |
 
 **Exports:**
-- Interfaces: `SessionStorage`, `StorageStats`, `StorageConfig`
-- Constants: `DEFAULT_STORAGE_CONFIG`
+- Classes: `MultiSessionComparator`
 
 ---
 
-## Types Dependencies
-
-### `src/types/core.ts` - Core type definitions for the DeepThinking MCP server v3.2.0
+### `src/comparison/types.ts` - Session Comparison Types (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./modes/temporal.js` | `TemporalThought` | Import |
-| `./modes/gametheory.js` | `GameTheoryThought` | Import |
-| `./modes/evidential.js` | `EvidentialThought` | Import |
-| `./modes/firstprinciples.js` | `FirstPrinciplesThought` | Import |
-| `./modes/systemsthinking.js` | `SystemsThinkingThought` | Import |
-| `./modes/scientificmethod.js` | `ScientificMethodThought` | Import |
-| `./modes/optimization.js` | `OptimizationThought` | Import |
-| `./modes/formallogic.js` | `FormalLogicThought` | Import |
-| `./modes/metareasoning.js` | `MetaReasoningThought` | Import |
+| File | Imports | Type |
+|------|---------|------|
+| `../types/core.js` | `ThinkingMode` | Import |
+
+---
+
+## Config Dependencies
+
+### `src/config/index.ts` - Centralized configuration for DeepThinking MCP Server
 
 **Exports:**
-- Interfaces: `BaseThought`, `MathematicalModel`, `TensorProperties`, `PhysicalInterpretation`, `ProofStrategy`, `Theorem`, `Reference`, `SequentialThought`, `ShannonThought`, `MathematicsThought`, `PhysicsThought`, `HybridThought`, `Observation`, `Hypothesis`, `Evidence`, `EvaluationCriteria`, `AbductiveThought`, `InductiveThought`, `DeductiveThought`, `CausalNode`, `CausalEdge`, `CausalGraph`, `Intervention`, `CausalMechanism`, `Confounder`, `CounterfactualScenario`, `CausalThought`, `BayesianHypothesis`, `PriorProbability`, `Likelihood`, `BayesianEvidence`, `PosteriorProbability`, `SensitivityAnalysis`, `BayesianThought`, `Condition`, `Outcome`, `Scenario`, `Difference`, `CausalChain`, `InterventionPoint`, `CounterfactualComparison`, `CounterfactualThought`, `Entity`, `Relation`, `Property`, `Domain`, `Mapping`, `Insight`, `Inference`, `AnalogicalThought`
-- Enums: `ThinkingMode`, `ShannonStage`
-- Functions: `isFullyImplemented`, `isSequentialThought`, `isShannonThought`, `isMathematicsThought`, `isPhysicsThought`, `isHybridThought`, `isInductiveThought`, `isDeductiveThought`, `isAbductiveThought`, `isCausalThought`, `isBayesianThought`, `isCounterfactualThought`, `isAnalogicalThought`, `isTemporalThought`, `isGameTheoryThought`, `isEvidentialThought`, `isFirstPrinciplesThought`, `isSystemsThinkingThought`, `isScientificMethodThought`, `isOptimizationThought`, `isFormalLogicThought`, `isMetaReasoningThought`
-- Constants: `FULLY_IMPLEMENTED_MODES`, `EXPERIMENTAL_MODES`
-
----
-
-### `src/types/index.ts` - Type definitions index
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./core.js` | `*` | Re-export |
-| `./session.js` | `*` | Re-export |
-| `./modes/recommendations.js` | `*` | Re-export |
-
----
-
-### `src/types/modes/analogical.ts` - Analogical Reasoning Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `Entity`, `Relation`, `Property`, `Domain`, `Mapping`, `Insight`, `Inference`, `AnalogicalThought`
-- Functions: `isAnalogicalThought`
-
----
-
-### `src/types/modes/bayesian.ts` - Bayesian Reasoning Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `BayesianHypothesis`, `PriorProbability`, `Likelihood`, `BayesianEvidence`, `PosteriorProbability`, `SensitivityAnalysis`, `BayesianThought`
-- Functions: `isBayesianThought`
-
----
-
-### `src/types/modes/causal.ts` - Causal Reasoning Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `CausalNode`, `CausalEdge`, `CausalGraph`, `Intervention`, `CausalMechanism`, `Confounder`, `CounterfactualScenario`, `CausalThought`
-- Functions: `isCausalThought`
-
----
-
-### `src/types/modes/counterfactual.ts` - Counterfactual Reasoning Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `Condition`, `Outcome`, `Scenario`, `CounterfactualComparison`, `InterventionPoint`, `CausalChain`, `CounterfactualThought`
-- Functions: `isCounterfactualThought`
-
----
-
-### `src/types/modes/evidential.ts` - Evidential Reasoning Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `EvidentialThought`, `Hypothesis`, `Evidence`, `BeliefFunction`, `MassAssignment`, `PlausibilityFunction`, `PlausibilityAssignment`, `Decision`, `Alternative`
-- Functions: `isEvidentialThought`
-
----
-
-### `src/types/modes/firstprinciples.ts` - First-Principles Reasoning Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `FirstPrinciplesThought`, `FoundationalPrinciple`, `DerivationStep`, `Conclusion`
-- Functions: `isFirstPrinciplesThought`
-
----
-
-### `src/types/modes/formallogic.ts` - Formal Logic Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `FormalLogicThought`, `Proposition`, `LogicalFormula`, `Inference`, `LogicalProof`, `ProofStep`, `TruthTable`, `TruthTableRow`, `SatisfiabilityResult`, `ValidityResult`, `LogicalArgument`, `Contradiction`, `LogicalEquivalence`, `NormalForm`
-- Functions: `isFormalLogicThought`
-
----
-
-### `src/types/modes/gametheory.ts` - Game-Theoretic Reasoning Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `GameTheoryThought`, `Game`, `Player`, `Strategy`, `PayoffMatrix`, `PayoffEntry`, `NashEquilibrium`, `DominantStrategy`, `GameTree`, `GameNode`, `InformationSet`, `BackwardInduction`
-- Functions: `isGameTheoryThought`
-
----
-
-### `src/types/modes/mathematics.ts` - Mathematics Reasoning Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `MathematicalModel`, `ProofStrategy`, `Theorem`, `Reference`, `LogicalForm`, `MathematicsThought`
-- Functions: `isMathematicsThought`
-
----
-
-### `src/types/modes/metareasoning.ts` - Meta-Reasoning Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `CurrentStrategy`, `StrategyEvaluation`, `AlternativeStrategy`, `StrategyRecommendation`, `ResourceAllocation`, `QualityMetrics`, `SessionContext`, `MetaReasoningThought`
-- Functions: `isMetaReasoningThought`
-
----
-
-### `src/types/modes/optimization.ts` - Constraint Optimization Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `OptimizationThought`, `OptimizationProblem`, `DecisionVariable`, `Constraint`, `Objective`, `Solution`, `ParetoSolution`, `FeasibleRegion`, `SensitivityAnalysis`, `ParameterSensitivity`, `ConstraintRelaxation`, `TradeoffAnalysis`
-- Functions: `isOptimizationThought`
-
----
-
-### `src/types/modes/physics.ts` - Physics Reasoning Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `TensorProperties`, `PhysicalInterpretation`, `FieldTheoryContext`, `PhysicsThought`
-- Functions: `isPhysicsThought`
-
----
-
-### `src/types/modes/recommendations.ts` - Mode Recommendation System (v2.4)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `ThinkingMode` | Import |
-
-**Exports:**
-- Classes: `ModeRecommender`
-- Interfaces: `ProblemCharacteristics`, `ModeRecommendation`, `CombinationRecommendation`
-
----
-
-### `src/types/modes/scientificmethod.ts` - Scientific Method Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `ScientificMethodThought`, `ResearchQuestion`, `Hypothesis`, `ExperimentDesign`, `Variable`, `DataCollection`, `Observation`, `Measurement`, `StatisticalAnalysis`, `StatisticalTest`, `ScientificConclusion`
-- Functions: `isScientificMethodThought`
-
----
-
-### `src/types/modes/sequential.ts` - Sequential Reasoning Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `SequentialThought`
-- Functions: `isSequentialThought`
-
----
-
-### `src/types/modes/shannon.ts` - Shannon Methodology Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode, ShannonStage` | Import |
-
-**Exports:**
-- Interfaces: `ShannonThought`
-- Functions: `isShannonThought`
-
----
-
-### `src/types/modes/systemsthinking.ts` - Systems Thinking Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `SystemsThinkingThought`, `SystemDefinition`, `SystemComponent`, `FeedbackLoop`, `CausalLink`, `LeveragePoint`, `EmergentBehavior`, `StockFlow`, `SystemDelay`
-- Functions: `isSystemsThinkingThought`
-
----
-
-### `src/types/modes/temporal.ts` - Temporal Reasoning Mode - Type Definitions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../core.js` | `BaseThought, ThinkingMode` | Import |
-
-**Exports:**
-- Interfaces: `TemporalThought`, `Timeline`, `TemporalEvent`, `TimeInterval`, `TemporalConstraint`, `TemporalRelation`
-- Functions: `isTemporalThought`
-
----
-
-### `src/types/session.ts` - Session types for managing thinking sessions
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./core.js` | `Thought, ThinkingMode` | Import |
-
----
-
-## Tools Dependencies
-
-### `src/tools/definitions.ts` - Focused Tool Definitions (v4.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./json-schemas.js` | `jsonSchemas` | Import |
-| `./schemas/base.js` | `SessionActionSchema` | Import |
-| `./schemas/modes/core.js` | `CoreModeSchema, StandardSchema` | Import |
-| `./schemas/modes/mathematics.js` | `MathSchema` | Import |
-| `./schemas/modes/temporal.js` | `TemporalSchema` | Import |
-| `./schemas/modes/probabilistic.js` | `ProbabilisticSchema` | Import |
-| `./schemas/modes/causal.js` | `CausalSchema` | Import |
-| `./schemas/modes/strategic.js` | `StrategicSchema` | Import |
-| `./schemas/modes/analytical.js` | `AnalyticalSchema` | Import |
-| `./schemas/modes/scientific.js` | `ScientificSchema` | Import |
-
-**Exports:**
-- Functions: `getToolForMode`, `isValidTool`, `getSchemaForTool`
-- Constants: `tools`, `toolList`, `toolSchemas`, `modeToToolMap`
-
----
-
-### `src/tools/json-schemas.ts` - Hand-Written JSON Schemas for MCP Tools (v4.4.0)
-
-**Exports:**
-- Constants: `deepthinking_core_schema`, `deepthinking_standard_schema`, `deepthinking_math_schema`, `deepthinking_temporal_schema`, `deepthinking_probabilistic_schema`, `deepthinking_causal_schema`, `deepthinking_strategic_schema`, `deepthinking_analytical_schema`, `deepthinking_scientific_schema`, `deepthinking_session_schema`, `jsonSchemas`
-
----
-
-### `src/tools/schemas/base.ts` - Base Thought Schema (v4.1.0)
-
-**External Dependencies:**
-| Package | Import | Usage |
-|---------|--------|-------|
-| `zod` | `z` | External package |
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./shared.js` | `ConfidenceSchema, PositiveIntSchema, SessionActionEnum, ExportFormatEnum, LevelEnum` | Import |
-
-**Exports:**
-- Constants: `BaseThoughtSchema`, `SessionActionSchema`
-
----
-
-### `src/tools/schemas/index.ts` - Schema Index (v4.3.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./base.js` | `BaseThoughtSchema, SessionActionSchema, type BaseThoughtInput, type SessionActionInput` | Re-export |
-| `./modes/core.js` | `CoreSchema, type CoreInput` | Re-export |
-| `./modes/mathematics.js` | `MathSchema, type MathInput` | Re-export |
-| `./modes/temporal.js` | `TemporalSchema, type TemporalInput` | Re-export |
-| `./modes/probabilistic.js` | `ProbabilisticSchema, type ProbabilisticInput` | Re-export |
-| `./modes/causal.js` | `CausalSchema, type CausalInput` | Re-export |
-| `./modes/strategic.js` | `StrategicSchema, type StrategicInput` | Re-export |
-| `./modes/analytical.js` | `AnalyticalSchema, type AnalyticalInput` | Re-export |
-| `./modes/scientific.js` | `ScientificSchema, type ScientificInput` | Re-export |
-
-**Exports:**
-
----
-
-### `src/tools/schemas/modes/analytical.ts` - Analytical Mode Schemas (v6.0.0)
-
-**External Dependencies:**
-| Package | Import | Usage |
-|---------|--------|-------|
-| `zod` | `z` | External package |
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../base.js` | `BaseThoughtSchema` | Import |
-
-**Exports:**
-- Constants: `AnalyticalSchema`
-
----
-
-### `src/tools/schemas/modes/causal.ts` - Causal Mode Schemas (v4.1.0)
-
-**External Dependencies:**
-| Package | Import | Usage |
-|---------|--------|-------|
-| `zod` | `z` | External package |
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../base.js` | `BaseThoughtSchema` | Import |
-
-**Exports:**
-- Constants: `CausalSchema`
-
----
-
-### `src/tools/schemas/modes/core.ts` - Core Mode Schemas (v5.0.0)
-
-**External Dependencies:**
-| Package | Import | Usage |
-|---------|--------|-------|
-| `zod` | `z` | External package |
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `ShannonStageEnum` | Import |
-
-**Exports:**
-- Constants: `StandardSchema`, `CoreModeSchema`, `CoreSchema`
-
----
-
-### `src/tools/schemas/modes/index.ts` - Mode Schemas Index (v4.0.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./core.js` | `CoreSchema, type CoreInput` | Re-export |
-| `./mathematics.js` | `MathSchema, type MathInput` | Re-export |
-| `./temporal.js` | `TemporalSchema, type TemporalInput` | Re-export |
-| `./probabilistic.js` | `ProbabilisticSchema, type ProbabilisticInput` | Re-export |
-| `./causal.js` | `CausalSchema, type CausalInput` | Re-export |
-| `./strategic.js` | `StrategicSchema, type StrategicInput` | Re-export |
-| `./analytical.js` | `AnalyticalSchema, type AnalyticalInput` | Re-export |
-| `./scientific.js` | `ScientificSchema, type ScientificInput` | Re-export |
-
-**Exports:**
-
----
-
-### `src/tools/schemas/modes/mathematics.ts` - Mathematics Mode Schemas (v4.1.0)
-
-**External Dependencies:**
-| Package | Import | Usage |
-|---------|--------|-------|
-| `zod` | `z` | External package |
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `ProofTypeEnum, TransformationEnum` | Import |
-
-**Exports:**
-- Constants: `MathSchema`
-
----
-
-### `src/tools/schemas/modes/probabilistic.ts` - Probabilistic Mode Schemas (v4.1.0)
-
-**External Dependencies:**
-| Package | Import | Usage |
-|---------|--------|-------|
-| `zod` | `z` | External package |
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `ConfidenceSchema` | Import |
-
-**Exports:**
-- Constants: `ProbabilisticSchema`
-
----
-
-### `src/tools/schemas/modes/scientific.ts` - Scientific Mode Schemas (v4.1.0)
-
-**External Dependencies:**
-| Package | Import | Usage |
-|---------|--------|-------|
-| `zod` | `z` | External package |
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../base.js` | `BaseThoughtSchema` | Import |
-
-**Exports:**
-- Constants: `ScientificSchema`
-
----
-
-### `src/tools/schemas/modes/strategic.ts` - Strategic Mode Schemas (v4.1.0)
-
-**External Dependencies:**
-| Package | Import | Usage |
-|---------|--------|-------|
-| `zod` | `z` | External package |
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `ConfidenceSchema` | Import |
-
-**Exports:**
-- Constants: `StrategicSchema`
-
----
-
-### `src/tools/schemas/modes/temporal.ts` - Temporal Mode Schema (v4.1.0)
-
-**External Dependencies:**
-| Package | Import | Usage |
-|---------|--------|-------|
-| `zod` | `z` | External package |
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `ConfidenceSchema, TimeUnitEnum, TemporalConstraintEnum, TemporalRelationEnum, EventTypeEnum` | Import |
-
-**Exports:**
-- Constants: `TemporalSchema`
-
----
-
-### `src/tools/schemas/shared.ts` - Shared Schema Components (v4.1.0)
-
-**External Dependencies:**
-| Package | Import | Usage |
-|---------|--------|-------|
-| `zod` | `z` | External package |
-
-**Exports:**
-- Constants: `ConfidenceSchema`, `PositiveIntSchema`, `LevelEnum`, `ImpactEnum`, `ExportFormatEnum`, `SessionActionEnum`, `ProofTypeEnum`, `TimeUnitEnum`, `TemporalConstraintEnum`, `TemporalRelationEnum`, `EventTypeEnum`, `TransformationEnum`, `ShannonStageEnum`, `EntitySchema`, `DescribedEntitySchema`
-
----
-
-### `src/tools/schemas/version.ts` - Schema Versioning (v4.0.0)
-
-**Exports:**
-- Interfaces: `BreakingChange`, `Deprecation`
-- Functions: `isCompatibleVersion`, `getDeprecationWarning`
-- Constants: `SCHEMA_VERSION`, `schemaMetadata`
-
----
-
-### `src/tools/thinking.ts` - Legacy thinking tool for DeepThinking MCP v4.4.0
-
-**External Dependencies:**
-| Package | Import | Usage |
-|---------|--------|-------|
-| `zod` | `z` | External package |
-
-**Exports:**
-- Constants: `ThinkingToolSchema`, `thinkingTool`
+- Interfaces: `ServerConfig`
+- Functions: `getConfig`, `updateConfig`, `resetConfig`, `validateConfig`
+- Constants: `CONFIG`
 
 ---
 
@@ -844,8 +417,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/index.ts` - Export module index (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `./visual/index.js` | `type VisualFormat, type VisualExportOptions, sanitizeId, VisualExporter, exportCausalGraph, exportTemporalTimeline, exportGameTree, exportBayesianNetwork, exportSequentialDependencyGraph, exportShannonStageFlow, exportAbductiveHypotheses, exportCounterfactualScenarios, exportAnalogicalMapping, exportEvidentialBeliefs, exportFirstPrinciplesDerivation, exportSystemsThinkingCausalLoops, exportScientificMethodExperiment, exportOptimizationSolution, exportFormalLogicProof` | Re-export |
 | `./latex.js` | `LaTeXExporter, type LaTeXExportOptions` | Re-export |
 
@@ -856,8 +429,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/latex-mermaid-integration.ts` - LaTeX-Mermaid Integration (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../types/index.js` | `ThinkingSession, Thought` | Import |
 | `./visual/index.js` | `VisualExporter, VisualExportOptions` | Import |
 
@@ -870,8 +443,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/latex.ts` - LaTeX Export Module (v3.2.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../types/session.js` | `ThinkingSession` | Import |
 | `../types/index.js` | `Thought, MathematicsThought, PhysicsThought, CausalThought, BayesianThought, AnalogicalThought, TemporalThought, GameTheoryThought, EvidentialThought, FirstPrinciplesThought` | Import |
 | `./visual/index.js` | `VisualExporter` | Import |
@@ -885,8 +458,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/abductive.ts` - Abductive Visual Exporter (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `AbductiveThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 | `./utils.js` | `sanitizeId` | Import |
@@ -899,8 +472,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/analogical.ts` - Analogical Visual Exporter (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `AnalogicalThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 | `./utils.js` | `sanitizeId` | Import |
@@ -913,8 +486,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/bayesian.ts` - Bayesian Visual Exporter (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `BayesianThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 
@@ -926,8 +499,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/causal.ts` - Causal Visual Exporter (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `CausalThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 | `./utils.js` | `sanitizeId` | Import |
@@ -940,8 +513,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/counterfactual.ts` - Counterfactual Visual Exporter (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `CounterfactualThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 | `./utils.js` | `sanitizeId` | Import |
@@ -954,8 +527,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/evidential.ts` - Evidential Visual Exporter (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `EvidentialThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 | `./utils.js` | `sanitizeId` | Import |
@@ -968,8 +541,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/first-principles.ts` - First Principles Visual Exporter (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `FirstPrinciplesThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 | `./utils.js` | `sanitizeId` | Import |
@@ -982,8 +555,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/formal-logic.ts` - Formal Logic Visual Exporter (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `FormalLogicThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 | `./utils.js` | `sanitizeId` | Import |
@@ -996,8 +569,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/game-theory.ts` - Game Theory Visual Exporter (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `GameTheoryThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 | `./utils.js` | `sanitizeId` | Import |
@@ -1010,8 +583,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/index.ts` - Visual Export Module (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `CausalThought, TemporalThought, GameTheoryThought, BayesianThought, SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, FirstPrinciplesThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 | `./causal.js` | `exportCausalGraph` | Import |
@@ -1055,8 +628,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/optimization.ts` - Optimization Visual Exporter (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `OptimizationThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 | `./utils.js` | `sanitizeId` | Import |
@@ -1069,8 +642,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/scientific-method.ts` - Scientific Method Visual Exporter (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `ScientificMethodThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 | `./utils.js` | `sanitizeId` | Import |
@@ -1083,8 +656,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/sequential.ts` - Sequential Visual Exporter (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `SequentialThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 | `./utils.js` | `sanitizeId` | Import |
@@ -1097,8 +670,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/shannon.ts` - Shannon Visual Exporter (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `ShannonThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 | `./utils.js` | `sanitizeId` | Import |
@@ -1111,8 +684,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/systems-thinking.ts` - Systems Thinking Visual Exporter (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `SystemsThinkingThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 | `./utils.js` | `sanitizeId` | Import |
@@ -1125,8 +698,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual/temporal.ts` - Temporal Visual Exporter (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `TemporalThought` | Import |
 | `./types.js` | `VisualExportOptions` | Import |
 | `./utils.js` | `sanitizeId` | Import |
@@ -1150,8 +723,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/export/visual.ts` - Visual Export Module (v3.2.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../types/index.js` | `CausalThought, TemporalThought, GameTheoryThought, BayesianThought, SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, FirstPrinciplesThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought` | Import |
 
 **Exports:**
@@ -1160,86 +733,32 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 
 ---
 
-## Utils Dependencies
+## Entry Dependencies
 
-### `src/utils/errors.ts` - Custom error classes for DeepThinking MCP
+### `src/index.ts` - DeepThinking MCP Server (v4.1.0)
 
-**Exports:**
-- Classes: `DeepThinkingError`, `SessionError`, `SessionNotFoundError`, `SessionAlreadyExistsError`, `ValidationError`, `InputValidationError`, `ConfigurationError`, `InvalidModeError`, `ThoughtProcessingError`, `ExportError`, `ResourceLimitError`, `ErrorFactory`, `RateLimitError`, `SecurityError`, `PathTraversalError`, `StorageError`, `BackupError`
-
----
-
-### `src/utils/log-sanitizer.ts` - Log Sanitization Utilities (v3.4.5)
-
-**Exports:**
-- Functions: `sanitizeForLogging`, `sanitizeSession`, `sanitizeError`, `sanitizeBatch`, `sanitizeSummary`
-
----
-
-### `src/utils/logger.ts` - Logging utility for DeepThinking MCP
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../interfaces/ILogger.js` | `ILogger` | Import |
-
-**Exports:**
-- Classes: `Logger`
-- Interfaces: `LogEntry`, `LoggerConfig`
-- Enums: `LogLevel`
-- Functions: `createLogger`
-- Constants: `logger`
-
----
-
-### `src/utils/rate-limiter.ts` - Rate Limiter (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./errors.js` | `RateLimitError` | Import |
-
-**Exports:**
-- Classes: `RateLimiter`
-- Interfaces: `RateLimiterConfig`, `RateLimitStatus`
-- Constants: `sessionRateLimiter`, `thoughtRateLimiter`
-
----
-
-### `src/utils/sanitization.ts` - Input sanitization utilities for DeepThinking MCP
-
-**Exports:**
-- Functions: `sanitizeString`, `sanitizeOptionalString`, `validateSessionId`, `sanitizeNumber`, `sanitizeStringArray`, `sanitizeThoughtContent`, `sanitizeTitle`, `sanitizeDomain`, `sanitizeAuthor`, `escapeHtml`, `escapeLatex`
-- Constants: `MAX_LENGTHS`
-
----
-
-### `src/utils/sanitize.ts` - File and Input Sanitization Utilities (v3.4.5)
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `@modelcontextprotocol/sdk/server/index.js` | `Server` |
+| `@modelcontextprotocol/sdk/server/stdio.js` | `StdioServerTransport` |
+| `@modelcontextprotocol/sdk/types.js` | `CallToolRequestSchema, ListToolsRequestSchema` |
 
 **Node.js Built-in Dependencies:**
-| Module | Import | Usage |
-|--------|--------|-------|
-| `path` | `* as path` | Node.js built-in |
+| Module | Import |
+|--------|--------|
+| `fs` | `readFileSync` |
+| `url` | `fileURLToPath` |
+| `path` | `dirname, join` |
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./errors.js` | `PathTraversalError, InputValidationError` | Import |
-
-**Exports:**
-- Functions: `sanitizeFilename`, `validatePath`, `isValidSessionId`, `validateSessionId`, `safePathJoin`, `safeSessionPath`
-
----
-
-### `src/utils/type-guards.ts` - Type guards for runtime type checking
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/core.js` | `ExtendedThoughtType` | Import |
-
-**Exports:**
-- Functions: `isExtendedThoughtType`, `toExtendedThoughtType`, `isNumber`, `isNonEmptyString`, `isArray`, `isPlainObject`, `safeCast`
+| File | Imports | Type |
+|------|---------|------|
+| `./tools/definitions.js` | `toolList, toolSchemas, isValidTool, modeToToolMap` | Import |
+| `./tools/thinking.js` | `thinkingTool` | Import |
+| `./session/index.js` | `SessionManager` | Import |
+| `./types/index.js` | `ThinkingMode` | Import |
+| `./services/index.js` | `ThoughtFactory, ExportService, ModeRouter` | Import |
 
 ---
 
@@ -1248,8 +767,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/interfaces/ILogger.ts` - Logger Interface (v3.4.5)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../utils/logger.js` | `LogLevel, LogEntry` | Import |
 
 ---
@@ -1257,8 +776,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/interfaces/index.ts` - Dependency Injection Interfaces (v3.4.5)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `./interfaces/index.js` | `ILogger` | Import |
 | `./cache/types.js` | `Cache` | Import |
 | `./ILogger.js` | `ILogger` | Re-export |
@@ -1268,75 +787,239 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 
 ---
 
-## Cache Dependencies
+## Ml Dependencies
 
-### `src/cache/factory.ts` - Cache Factory (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./types.js` | `Cache, CacheConfig` | Import |
-| `./lru.js` | `LRUCache` | Import |
-| `./lfu.js` | `LFUCache` | Import |
-| `./fifo.js` | `FIFOCache` | Import |
-
-**Exports:**
-- Classes: `CacheFactory`, `CacheManager`
-- Functions: `createCache`
-
----
-
-### `src/cache/fifo.ts` - FIFO Cache (v3.4.0)
+### `src/ml/index.ts` - Machine Learning Module (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./types.js` | `Cache, CacheConfig, CacheEntry, CacheStats` | Import |
-
-**Exports:**
-- Classes: `FIFOCache`
-
----
-
-### `src/cache/index.ts` - Cache Module Exports (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./lru.js` | `LRUCache` | Re-export |
-| `./lfu.js` | `LFUCache` | Re-export |
-| `./fifo.js` | `FIFOCache` | Re-export |
-| `./factory.js` | `createCache, CacheManager` | Re-export |
+| File | Imports | Type |
+|------|---------|------|
+| `./pattern-recognition.js` | `PatternRecognizer` | Re-export |
+| `./success-metrics.js` | `SuccessMetricsAnalyzer` | Re-export |
+| `./recommendation-engine.js` | `RecommendationEngine` | Re-export |
 
 **Exports:**
 
 ---
 
-### `src/cache/lfu.ts` - LFU Cache (v3.4.0)
+### `src/ml/pattern-recognition.ts` - Pattern Recognition System (v3.4.1)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./types.js` | `Cache, CacheConfig, CacheEntry, CacheStats` | Import |
+| File | Imports | Type |
+|------|---------|------|
+| `../types/session.js` | `ThinkingSession` | Import |
+| `../types/core.js` | `Thought` | Import |
 
 **Exports:**
-- Classes: `LFUCache`
+- Classes: `PatternRecognizer`
+- Interfaces: `Pattern`, `PatternExample`, `PatternMetadata`, `PatternRecognitionResult`, `PatternSimilarity`
 
 ---
 
-### `src/cache/lru.ts` - LRU Cache (v3.4.0)
+### `src/ml/recommendation-engine.ts` - Recommendation Engine (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./types.js` | `Cache, CacheConfig, CacheEntry, CacheStats` | Import |
+| File | Imports | Type |
+|------|---------|------|
+| `../types/session.js` | `ThinkingSession` | Import |
+| `../types/core.js` | `ThinkingMode` | Import |
+| `./pattern-recognition.js` | `PatternRecognizer` | Import |
+| `./success-metrics.js` | `SuccessMetricsAnalyzer, SuccessAnalysis, SuccessFactor` | Import |
 
 **Exports:**
-- Classes: `LRUCache`
+- Classes: `RecommendationEngine`
+- Interfaces: `Recommendation`, `RecommendationRequest`, `RecommendationResult`
 
 ---
 
-### `src/cache/types.ts` - Cache Types (v3.4.0)
+### `src/ml/success-metrics.ts` - Success Metrics Analyzer (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/session.js` | `ThinkingSession` | Import |
+| `../types/core.js` | `ThinkingMode` | Import |
+
+**Exports:**
+- Classes: `SuccessMetricsAnalyzer`
+- Interfaces: `SuccessMetric`, `SuccessAnalysis`, `SuccessFactor`, `SuccessInsights`
+
+---
+
+## Modes Dependencies
+
+### `src/modes/constraint-reasoning.ts` - Constraint-Based Reasoning Mode (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Classes: `ConstraintReasoningEngine`
+- Interfaces: `Variable`, `Constraint`, `CSP`, `ObjectiveFunction`, `Assignment`, `Solution`, `ConstraintReasoningThought`, `ConstraintPropagation`, `ConstraintAnalysis`
+
+---
+
+### `src/modes/meta-reasoning.ts` - Meta-Reasoning Mode (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `ThinkingSession, BaseThought` | Import |
+| `../types/core.js` | `ThinkingMode` | Import |
+
+**Exports:**
+- Classes: `MetaReasoningEngine`
+- Interfaces: `MetacognitiveJudgment`, `ReasoningStrategy`, `CognitiveBias`, `MetaReasoningThought`
+
+---
+
+### `src/modes/modal-reasoning.ts` - Modal Reasoning Mode (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Classes: `ModalReasoningEngine`
+- Interfaces: `ModalProposition`, `PossibleWorld`, `ModalInference`, `ModalAnalysis`, `ModalReasoningThought`
+
+---
+
+### `src/modes/optimization-reasoning.ts` - Optimization Reasoning Mode (v3.4.0)
+
+**Exports:**
+- Classes: `OptimizationReasoningEngine`
+- Interfaces: `OptimizationVariable`, `ObjectiveFunction`, `OptimizationConstraint`, `OptimizationProblem`, `OptimizationSolution`, `ParetoFront`, `OptimizationIteration`, `OptimizationReasoningThought`, `OptimizationAnalysis`, `SensitivityAnalysis`
+
+---
+
+### `src/modes/recursive-reasoning.ts` - Recursive Reasoning Mode (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Classes: `RecursiveReasoningEngine`
+- Interfaces: `RecursiveProblem`, `BaseCase`, `RecursiveCase`, `RecursiveCall`, `CallTreeNode`, `RecursionTrace`, `RecurrenceRelation`, `RecursiveSolution`, `RecursionAnalysis`, `RecursiveReasoningThought`
+
+---
+
+### `src/modes/stochastic-reasoning.ts` - Stochastic Reasoning Mode (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Classes: `StochasticReasoningEngine`
+- Interfaces: `RandomVariable`, `ProbabilityDistribution`, `StochasticProcess`, `SimulationResult`, `Trajectory`, `StochasticEvent`, `SimulationStatistics`, `ConvergenceInfo`, `MarkovChainAnalysis`, `StochasticReasoningThought`, `StochasticAnalysis`
+
+---
+
+## Rate limit Dependencies
+
+### `src/rate-limit/index.ts` - Rate Limiting Module Exports (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./limiter.js` | `RateLimiter` | Re-export |
+| `./quota.js` | `QuotaManager` | Re-export |
+| `./types.js` | `TIER_LIMITS` | Re-export |
+
+**Exports:**
+
+---
+
+### `src/rate-limit/limiter.ts` - Rate Limiter (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `RateLimitConfig, RateLimitInfo` | Import |
+
+**Exports:**
+- Classes: `RateLimiter`
+
+---
+
+### `src/rate-limit/quota.ts` - Quota Manager (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `QuotaConfig, QuotaUsage, QuotaStatus, UserTier` | Import |
+| `./types.js` | `TIER_LIMITS` | Import |
+
+**Exports:**
+- Classes: `QuotaManager`
+
+---
+
+### `src/rate-limit/types.ts` - Rate Limiting Types (v3.4.0)
+
+**Exports:**
+- Interfaces: `RateLimitConfig`, `RateLimitInfo`, `QuotaConfig`, `QuotaFeatures`, `QuotaUsage`, `QuotaStatus`
+- Constants: `TIER_LIMITS`
+
+---
+
+## Repositories Dependencies
+
+### `src/repositories/FileSessionRepository.ts` - File-based Session Repository Implementation (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./ISessionRepository.js` | `ISessionRepository` | Import |
+| `../session/storage/interface.js` | `SessionStorage` | Import |
+| `../types/index.js` | `ThinkingSession, SessionMetadata, ThinkingMode` | Import |
+| `../utils/logger.js` | `logger` | Import |
+| `../utils/errors.js` | `StorageError` | Import |
+
+**Exports:**
+- Classes: `FileSessionRepository`
+
+---
+
+### `src/repositories/ISessionRepository.ts` - Session Repository Interface (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `ThinkingSession, SessionMetadata, ThinkingMode` | Import |
+
+---
+
+### `src/repositories/MemorySessionRepository.ts` - In-Memory Session Repository Implementation (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./ISessionRepository.js` | `ISessionRepository` | Import |
+| `../types/index.js` | `ThinkingSession, SessionMetadata, ThinkingMode` | Import |
+
+**Exports:**
+- Classes: `MemorySessionRepository`
+
+---
+
+### `src/repositories/index.ts` - Repository module exports (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./ISessionRepository.js` | `ISessionRepository` | Re-export |
+| `./FileSessionRepository.js` | `FileSessionRepository` | Re-export |
+| `./MemorySessionRepository.js` | `MemorySessionRepository` | Re-export |
+
+**Exports:**
 
 ---
 
@@ -1345,8 +1028,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/search/engine.ts` - Search Engine (v3.5.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../types/index.js` | `ThinkingSession, ThinkingMode` | Import |
 | `./types.js` | `SearchQuery, SearchResults, SearchResult, SearchHighlight, FacetedResults, SortField` | Import |
 | `./index.js` | `SearchIndex` | Import |
@@ -1362,8 +1045,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/search/index.export.ts` - Search Module Exports (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `./engine.js` | `SearchEngine` | Re-export |
 | `./index.js` | `SearchIndex` | Re-export |
 | `./tokenizer.js` | `Tokenizer, DEFAULT_TOKENIZER_OPTIONS` | Re-export |
@@ -1375,8 +1058,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/search/index.ts` - Search Index (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../types/index.js` | `ThinkingSession, ThinkingMode` | Import |
 | `./types.js` | `SearchIndexEntry, SearchStats` | Import |
 | `./tokenizer.js` | `Tokenizer` | Import |
@@ -1399,9 +1082,213 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/search/types.ts` - Search and Query Types (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../types/index.js` | `ThinkingSession, ThinkingMode` | Import |
+
+---
+
+## Services Dependencies
+
+### `src/services/ExportService.ts` - Export Service (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `ThinkingSession, ThinkingMode, CausalThought, TemporalThought, GameTheoryThought, BayesianThought, FirstPrinciplesThought, isMetaReasoningThought` | Import |
+| `../export/visual/index.js` | `VisualExporter, VisualFormat` | Import |
+| `../utils/sanitization.js` | `escapeHtml, escapeLatex` | Import |
+| `../interfaces/ILogger.js` | `ILogger` | Import |
+| `../utils/logger.js` | `createLogger, LogLevel` | Import |
+
+**Exports:**
+- Classes: `ExportService`
+
+---
+
+### `src/services/MetaMonitor.ts` - Meta-Reasoning Monitor Service (v6.0.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/core.js` | `Thought, ThinkingMode` | Import |
+| `../types/modes/metareasoning.js` | `StrategyEvaluation, AlternativeStrategy, QualityMetrics, SessionContext` | Import |
+
+**Exports:**
+- Classes: `MetaMonitor`
+- Constants: `metaMonitor`
+
+---
+
+### `src/services/ModeRouter.ts` - Mode Router Service (v6.0.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `ThinkingMode, ModeRecommender, ProblemCharacteristics` | Import |
+| `../session/index.js` | `SessionManager` | Import |
+| `../interfaces/ILogger.js` | `ILogger` | Import |
+| `../utils/logger.js` | `createLogger, LogLevel` | Import |
+| `./MetaMonitor.js` | `metaMonitor, MetaMonitor` | Import |
+
+**Exports:**
+- Classes: `ModeRouter`
+- Interfaces: `ModeRecommendation`, `ModeCombinationRecommendation`
+
+---
+
+### `src/services/ThoughtFactory.ts` - Thought Factory Service (v3.4.5)
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `ThinkingMode, ShannonStage, SequentialThought, ShannonThought, MathematicsThought, PhysicsThought, InductiveThought, DeductiveThought, AbductiveThought, CausalThought, Thought` | Import |
+| `../tools/thinking.js` | `ThinkingToolInput` | Import |
+| `../utils/type-guards.js` | `toExtendedThoughtType` | Import |
+| `../interfaces/ILogger.js` | `ILogger` | Import |
+| `../utils/logger.js` | `createLogger, LogLevel` | Import |
+
+**Exports:**
+- Classes: `ThoughtFactory`
+
+---
+
+### `src/services/index.ts` - Services module exports (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./ThoughtFactory.js` | `ThoughtFactory` | Re-export |
+| `./ExportService.js` | `ExportService` | Re-export |
+| `./ModeRouter.js` | `ModeRouter` | Re-export |
+
+**Exports:**
+
+---
+
+## Session Dependencies
+
+### `src/session/SessionMetricsCalculator.ts` - Session Metrics Calculator (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `ThinkingSession, SessionMetrics, Thought` | Import |
+| `../types/core.js` | `isTemporalThought, isGameTheoryThought, isEvidentialThought` | Import |
+| `../validation/cache.js` | `validationCache` | Import |
+
+**Exports:**
+- Classes: `SessionMetricsCalculator`
+
+---
+
+### `src/session/index.ts` - Session module exports (v4.3.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./manager.js` | `SessionManager` | Re-export |
+
+**Exports:**
+
+---
+
+### `src/session/manager.ts` - Session Manager for DeepThinking MCP (v6.0.0)
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `ThinkingSession, SessionConfig, SessionMetadata, Thought, ThinkingMode` | Import |
+| `../utils/errors.js` | `SessionNotFoundError` | Import |
+| `../utils/sanitization.js` | `sanitizeString, sanitizeThoughtContent, validateSessionId, MAX_LENGTHS` | Import |
+| `../utils/logger.js` | `createLogger, LogLevel` | Import |
+| `../interfaces/ILogger.js` | `ILogger` | Import |
+| `./storage/interface.js` | `SessionStorage` | Import |
+| `../cache/lru.js` | `LRUCache` | Import |
+| `./SessionMetricsCalculator.js` | `SessionMetricsCalculator` | Import |
+| `../services/MetaMonitor.js` | `metaMonitor, MetaMonitor` | Import |
+| `./utils/logger.js` | `createLogger, LogLevel` | Import |
+| `./storage/file-store.js` | `FileSessionStore` | Import |
+
+**Exports:**
+- Classes: `SessionManager`
+
+---
+
+### `src/session/persistence.ts` - Session persistence layer
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `fs` | `promises` |
+| `path` | `join` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/session.js` | `ThinkingSession` | Import |
+| `../config/index.js` | `getConfig` | Import |
+| `../utils/logger.js` | `logger` | Import |
+
+**Exports:**
+- Classes: `InMemorySessionStore`, `FileSessionStore`
+- Interfaces: `ISessionStore`
+- Functions: `createSessionStore`
+
+---
+
+### `src/session/storage/file-store.ts` - File-based Session Storage Implementation
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `fs` | `promises` |
+| `path` | `* as path` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/index.js` | `ThinkingSession, SessionMetadata` | Import |
+| `./interface.js` | `SessionStorage, StorageStats, StorageConfig, DEFAULT_STORAGE_CONFIG` | Import |
+| `../../utils/logger.js` | `logger` | Import |
+
+**Exports:**
+- Classes: `FileSessionStore`
+
+---
+
+### `src/session/storage/index.ts` - Session Storage Module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./interface.js` | `SessionStorage, StorageStats, StorageConfig, DEFAULT_STORAGE_CONFIG` | Re-export |
+| `./file-store.js` | `FileSessionStore` | Re-export |
+
+**Exports:**
+
+---
+
+### `src/session/storage/interface.ts` - Storage Interface for Session Persistence
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/index.js` | `ThinkingSession, SessionMetadata` | Import |
+
+**Exports:**
+- Interfaces: `SessionStorage`, `StorageStats`, `StorageConfig`
+- Constants: `DEFAULT_STORAGE_CONFIG`
 
 ---
 
@@ -1410,8 +1297,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/taxonomy/adaptive-selector.ts` - Adaptive Mode Selector with Taxonomy Insights (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `./suggestion-engine.js` | `SuggestionEngine, ProblemCharacteristics, EnhancedMetadata` | Import |
 | `./multi-modal-analyzer.js` | `MultiModalAnalyzer` | Import |
 | `../types/core.js` | `ThinkingMode` | Import |
@@ -1426,8 +1313,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/taxonomy/classifier.ts` - Taxonomy Classifier (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../types/index.js` | `Thought` | Import |
 | `./reasoning-types.js` | `REASONING_TAXONOMY, ReasoningType, ReasoningCategory` | Import |
 
@@ -1440,8 +1327,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/taxonomy/multi-modal-analyzer.ts` - Multi-Modal Reasoning Analyzer (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../types/index.js` | `ThinkingSession` | Import |
 | `../types/core.js` | `ThinkingMode, Thought` | Import |
 | `./reasoning-types.js` | `ReasoningCategory` | Import |
@@ -1455,8 +1342,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/taxonomy/navigator.ts` - Taxonomy Navigator and Query System (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `./reasoning-types.js` | `REASONING_TAXONOMY, getReasoningTypesByCategory, searchReasoningTypes, getTaxonomyStats, ReasoningType, ReasoningCategory` | Import |
 
 **Exports:**
@@ -1477,8 +1364,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/taxonomy/suggestion-engine.ts` - Reasoning Type Suggestion Engine with Enhanced Metadata (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `./navigator.js` | `TaxonomyNavigator` | Import |
 | `./reasoning-types.js` | `getReasoningType, ReasoningType, ReasoningCategory` | Import |
 | `../types/index.js` | `ThinkingSession` | Import |
@@ -1492,8 +1379,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/taxonomy/taxonomy-latex.ts` - Taxonomy LaTeX Integration (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../types/index.js` | `ThinkingSession` | Import |
 | `./reasoning-types.js` | `getReasoningType` | Import |
 | `./suggestion-engine.js` | `SuggestionEngine` | Import |
@@ -1505,363 +1392,13 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 
 ---
 
-## Backup Dependencies
-
-### `src/backup/backup-manager.ts` - Backup Manager (v3.4.0)
-
-**External Dependencies:**
-| Package | Import | Usage |
-|---------|--------|-------|
-| `zlib` | `zlib` | External package |
-
-**Node.js Built-in Dependencies:**
-| Module | Import | Usage |
-|--------|--------|-------|
-| `crypto` | `crypto` | Node.js built-in |
-| `util` | `promisify` | Node.js built-in |
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./types.js` | `BackupConfig, BackupRecord, BackupProviderOptions, BackupManifest, BackupValidation, BackupStats, BackupType, BackupProvider, RestoreOptions, RestoreResult, RestoreProgress, CompressionFormat` | Import |
-| `./providers/local.js` | `LocalBackupProvider` | Import |
-| `../interfaces/ILogger.js` | `ILogger` | Import |
-| `../utils/logger.js` | `createLogger, LogLevel` | Import |
-
-**Exports:**
-- Classes: `BackupManager`
-
----
-
-### `src/backup/index.ts` - Backup and Restore System Exports (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./backup-manager.js` | `BackupManager` | Re-export |
-| `./providers/local.js` | `LocalBackupProvider` | Re-export |
-
-**Exports:**
-
----
-
-### `src/backup/providers/local.ts` - Local File System Backup Provider (v3.4.0)
-
-**External Dependencies:**
-| Package | Import | Usage |
-|---------|--------|-------|
-| `fs/promises` | `fs` | External package |
-
-**Node.js Built-in Dependencies:**
-| Module | Import | Usage |
-|--------|--------|-------|
-| `path` | `path` | Node.js built-in |
-| `crypto` | `crypto` | Node.js built-in |
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types.js` | `LocalBackupOptions, BackupManifest` | Import |
-
-**Exports:**
-- Classes: `LocalBackupProvider`
-
----
-
-### `src/backup/types.ts` - Backup and Restore System Types (v3.4.0)
-
----
-
-## Batch Dependencies
-
-### `src/batch/index.ts` - Batch Processing Module Exports (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./processor.js` | `BatchProcessor` | Re-export |
-
-**Exports:**
-
----
-
-### `src/batch/processor.ts` - Batch Processor (v3.4.0)
-
-**Node.js Built-in Dependencies:**
-| Module | Import | Usage |
-|--------|--------|-------|
-| `crypto` | `randomUUID` | Node.js built-in |
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./types.js` | `BatchJob, BatchJobType, BatchJobParams, BatchJobResult, BatchProcessorOptions` | Import |
-| `../interfaces/ILogger.js` | `ILogger` | Import |
-| `../utils/logger.js` | `createLogger, LogLevel` | Import |
-| `../session/manager.js` | `SessionManager` | Import |
-| `../services/ExportService.js` | `ExportService` | Import |
-| `../backup/backup-manager.js` | `BackupManager` | Import |
-| `../search/engine.js` | `SearchEngine` | Import |
-
-**Exports:**
-- Classes: `BatchProcessor`
-- Interfaces: `BatchProcessorDependencies`
-
----
-
-### `src/batch/types.ts` - Batch Processing Types (v3.4.0)
-
----
-
-## Rate limit Dependencies
-
-### `src/rate-limit/index.ts` - Rate Limiting Module Exports (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./limiter.js` | `RateLimiter` | Re-export |
-| `./quota.js` | `QuotaManager` | Re-export |
-| `./types.js` | `TIER_LIMITS` | Re-export |
-
-**Exports:**
-
----
-
-### `src/rate-limit/limiter.ts` - Rate Limiter (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./types.js` | `RateLimitConfig, RateLimitInfo` | Import |
-
-**Exports:**
-- Classes: `RateLimiter`
-
----
-
-### `src/rate-limit/quota.ts` - Quota Manager (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./types.js` | `QuotaConfig, QuotaUsage, QuotaStatus, UserTier` | Import |
-| `./types.js` | `TIER_LIMITS` | Import |
-
-**Exports:**
-- Classes: `QuotaManager`
-
----
-
-### `src/rate-limit/types.ts` - Rate Limiting Types (v3.4.0)
-
-**Exports:**
-- Interfaces: `RateLimitConfig`, `RateLimitInfo`, `QuotaConfig`, `QuotaFeatures`, `QuotaUsage`, `QuotaStatus`
-- Constants: `TIER_LIMITS`
-
----
-
-## Comparison Dependencies
-
-### `src/comparison/comparator.ts` - Session Comparator (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./types.js` | `ComparisonResult, Difference, ComparisonSummary, ComparisonMetrics, DiffOptions, SimilarityMetrics, ThoughtComparison` | Import |
-| `../types/session.js` | `ThinkingSession` | Import |
-
-**Exports:**
-- Classes: `SessionComparator`
-
----
-
-### `src/comparison/diff-generator.ts` - Diff Generator (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./types.js` | `TextDiff, ComparisonTimeline, TimelineEvent, DivergencePoint, ConvergencePoint` | Import |
-| `../types/session.js` | `ThinkingSession` | Import |
-
-**Exports:**
-- Classes: `DiffGenerator`
-
----
-
-### `src/comparison/index.ts` - Session Comparison Exports (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./comparator.js` | `SessionComparator` | Re-export |
-| `./multi-comparator.js` | `MultiSessionComparator` | Re-export |
-| `./diff-generator.js` | `DiffGenerator` | Re-export |
-
-**Exports:**
-
----
-
-### `src/comparison/multi-comparator.ts` - Multi-Session Comparator (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./types.js` | `MultiSessionComparison, SessionCluster, ComparisonResult` | Import |
-| `../types/session.js` | `ThinkingSession` | Import |
-| `./comparator.js` | `SessionComparator` | Import |
-
-**Exports:**
-- Classes: `MultiSessionComparator`
-
----
-
-### `src/comparison/types.ts` - Session Comparison Types (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/core.js` | `ThinkingMode` | Import |
-
----
-
-## Collaboration Dependencies
-
-### `src/collaboration/annotations.ts` - Collaborative Annotations (v3.4.0)
-
-**Exports:**
-- Classes: `AnnotationManager`
-- Interfaces: `TextRange`, `Annotation`, `AnnotationVote`, `AnnotationFilter`, `AnnotationThread`, `AnnotationStats`
-
----
-
-### `src/collaboration/conflict-resolution.ts` - Conflict Resolution for Divergent Thoughts (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/index.js` | `Thought` | Import |
-| `../types/core.js` | `ThinkingMode` | Import |
-
-**Exports:**
-- Classes: `ConflictResolutionManager`
-- Interfaces: `DivergentThought`, `ThoughtConflict`, `ConflictResolution`, `ResolutionVote`, `ConsensusRequirement`, `Evidence`
-
----
-
-### `src/collaboration/index.ts` - Collaboration Module - Index
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./multi-agent.js` | `MultiAgentCollaboration, type CollaborativeAgent, type CollaborativeWorkspace, type AgentMessage, type AgentAssignment, type CoordinationRule, type AgentRole, type AgentStatus, type MessageType` | Re-export |
-| `./session-sharing.js` | `SessionSharingManager, type SharedSession, type SessionComment, type MergeStrategy, type MergeMetadata, type MergeConflict, type ConflictType` | Re-export |
-| `./annotations.js` | `AnnotationManager, type Annotation, type AnnotationType, type HighlightColor, type AnnotationVisibility, type TextRange, type AnnotationVote, type AnnotationFilter, type AnnotationThread, type AnnotationStats` | Re-export |
-| `./conflict-resolution.js` | `ConflictResolutionManager, type ThoughtConflict, type ConflictResolution, type DivergentThought, type ResolutionVote, type ResolutionStrategy, type ResolutionStatus, type ConflictSeverity, type ConflictCategory, type ConsensusRequirement, type Evidence` | Re-export |
-
-**Exports:**
-
----
-
-### `src/collaboration/multi-agent.ts` - Multi-Agent Collaboration Infrastructure (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/index.js` | `Thought` | Import |
-| `../types/core.js` | `ThinkingMode` | Import |
-
-**Exports:**
-- Classes: `MultiAgentCollaboration`
-- Interfaces: `CollaborativeAgent`, `AgentMessage`, `CollaborativeWorkspace`, `CoordinationRule`, `AgentAssignment`
-
----
-
-### `src/collaboration/session-sharing.ts` - Session Sharing and Merging (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/index.js` | `ThinkingSession, Thought` | Import |
-| `../types/core.js` | `ThinkingMode` | Import |
-
-**Exports:**
-- Classes: `SessionSharingManager`
-- Interfaces: `MergeConflict`, `MergeMetadata`, `SharedSession`, `SessionComment`
-
----
-
-## Repositories Dependencies
-
-### `src/repositories/FileSessionRepository.ts` - File-based Session Repository Implementation (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./ISessionRepository.js` | `ISessionRepository` | Import |
-| `../session/storage/interface.js` | `SessionStorage` | Import |
-| `../types/index.js` | `ThinkingSession, SessionMetadata, ThinkingMode` | Import |
-| `../utils/logger.js` | `logger` | Import |
-| `../utils/errors.js` | `StorageError` | Import |
-
-**Exports:**
-- Classes: `FileSessionRepository`
-
----
-
-### `src/repositories/ISessionRepository.ts` - Session Repository Interface (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/index.js` | `ThinkingSession, SessionMetadata, ThinkingMode` | Import |
-
----
-
-### `src/repositories/MemorySessionRepository.ts` - In-Memory Session Repository Implementation (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./ISessionRepository.js` | `ISessionRepository` | Import |
-| `../types/index.js` | `ThinkingSession, SessionMetadata, ThinkingMode` | Import |
-
-**Exports:**
-- Classes: `MemorySessionRepository`
-
----
-
-### `src/repositories/index.ts` - Repository module exports (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./ISessionRepository.js` | `ISessionRepository` | Re-export |
-| `./FileSessionRepository.js` | `FileSessionRepository` | Re-export |
-| `./MemorySessionRepository.js` | `MemorySessionRepository` | Re-export |
-
-**Exports:**
-
----
-
-## Config Dependencies
-
-### `src/config/index.ts` - Centralized configuration for DeepThinking MCP Server
-
-**Exports:**
-- Interfaces: `ServerConfig`
-- Functions: `getConfig`, `updateConfig`, `resetConfig`, `validateConfig`
-- Constants: `CONFIG`
-
----
-
 ## Templates Dependencies
 
 ### `src/templates/built-in.ts` - Built-in Templates (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `./types.js` | `SessionTemplate` | Import |
 | `../types/index.js` | `ThinkingMode` | Import |
 
@@ -1874,8 +1411,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/templates/index.ts` - Templates Module Exports (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `./manager.js` | `TemplateManager` | Re-export |
 | `./built-in.js` | `BUILT_IN_TEMPLATES, getTemplateById, getTemplateIds, getTemplatesByCategory, getTemplatesByMode` | Re-export |
 
@@ -1886,8 +1423,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/templates/manager.ts` - Template Manager (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `./types.js` | `SessionTemplate, TemplateQuery, TemplateStats, TemplateInstantiationOptions, TemplateCategory` | Import |
 | `../types/index.js` | `ThinkingSession, ThinkingMode` | Import |
 | `./built-in.js` | `BUILT_IN_TEMPLATES` | Import |
@@ -1900,111 +1437,630 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/templates/types.ts` - Template System Types (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../types/index.js` | `ThinkingMode, SessionConfig` | Import |
 
 ---
 
-## Analytics Dependencies
+## Tools Dependencies
 
-### `src/analytics/index.ts` - Analytics Module Exports (v3.4.0)
+### `src/tools/definitions.ts` - Focused Tool Definitions (v4.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `./engine.js` | `AnalyticsEngine` | Re-export |
-| `./dashboard.js` | `AnalyticsDashboard` | Re-export |
-| `./time-series.js` | `TimeSeriesAnalyzer` | Re-export |
-| `./quality-metrics.js` | `QualityMetrics` | Re-export |
-| `./distribution.js` | `DistributionAnalyzer` | Re-export |
+| File | Imports | Type |
+|------|---------|------|
+| `./json-schemas.js` | `jsonSchemas` | Import |
+| `./schemas/base.js` | `SessionActionSchema` | Import |
+| `./schemas/modes/core.js` | `CoreModeSchema, StandardSchema` | Import |
+| `./schemas/modes/mathematics.js` | `MathSchema` | Import |
+| `./schemas/modes/temporal.js` | `TemporalSchema` | Import |
+| `./schemas/modes/probabilistic.js` | `ProbabilisticSchema` | Import |
+| `./schemas/modes/causal.js` | `CausalSchema` | Import |
+| `./schemas/modes/strategic.js` | `StrategicSchema` | Import |
+| `./schemas/modes/analytical.js` | `AnalyticalSchema` | Import |
+| `./schemas/modes/scientific.js` | `ScientificSchema` | Import |
+
+**Exports:**
+- Functions: `getToolForMode`, `isValidTool`, `getSchemaForTool`
+- Constants: `tools`, `toolList`, `toolSchemas`, `modeToToolMap`
+
+---
+
+### `src/tools/json-schemas.ts` - Hand-Written JSON Schemas for MCP Tools (v4.4.0)
+
+**Exports:**
+- Constants: `deepthinking_core_schema`, `deepthinking_standard_schema`, `deepthinking_math_schema`, `deepthinking_temporal_schema`, `deepthinking_probabilistic_schema`, `deepthinking_causal_schema`, `deepthinking_strategic_schema`, `deepthinking_analytical_schema`, `deepthinking_scientific_schema`, `deepthinking_session_schema`, `jsonSchemas`
+
+---
+
+### `src/tools/schemas/base.ts` - Base Thought Schema (v4.1.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./shared.js` | `ConfidenceSchema, PositiveIntSchema, SessionActionEnum, ExportFormatEnum, LevelEnum` | Import |
+
+**Exports:**
+- Constants: `BaseThoughtSchema`, `SessionActionSchema`
+
+---
+
+### `src/tools/schemas/index.ts` - Schema Index (v4.3.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./base.js` | `BaseThoughtSchema, SessionActionSchema, type BaseThoughtInput, type SessionActionInput` | Re-export |
+| `./modes/core.js` | `CoreSchema, type CoreInput` | Re-export |
+| `./modes/mathematics.js` | `MathSchema, type MathInput` | Re-export |
+| `./modes/temporal.js` | `TemporalSchema, type TemporalInput` | Re-export |
+| `./modes/probabilistic.js` | `ProbabilisticSchema, type ProbabilisticInput` | Re-export |
+| `./modes/causal.js` | `CausalSchema, type CausalInput` | Re-export |
+| `./modes/strategic.js` | `StrategicSchema, type StrategicInput` | Re-export |
+| `./modes/analytical.js` | `AnalyticalSchema, type AnalyticalInput` | Re-export |
+| `./modes/scientific.js` | `ScientificSchema, type ScientificInput` | Re-export |
 
 **Exports:**
 
 ---
 
-### `src/analytics/types.ts` - Analytics Types (v3.4.0)
+### `src/tools/schemas/modes/analytical.ts` - Analytical Mode Schemas (v6.0.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/index.js` | `ThinkingMode` | Import |
+| File | Imports | Type |
+|------|---------|------|
+| `../base.js` | `BaseThoughtSchema` | Import |
+
+**Exports:**
+- Constants: `AnalyticalSchema`
 
 ---
 
-## Modes Dependencies
+### `src/tools/schemas/modes/causal.ts` - Causal Mode Schemas (v4.1.0)
 
-### `src/modes/constraint-reasoning.ts` - Constraint-Based Reasoning Mode (v3.4.0)
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/index.js` | `BaseThought, ThinkingMode` | Import |
+| File | Imports | Type |
+|------|---------|------|
+| `../base.js` | `BaseThoughtSchema` | Import |
 
 **Exports:**
-- Classes: `ConstraintReasoningEngine`
-- Interfaces: `Variable`, `Constraint`, `CSP`, `ObjectiveFunction`, `Assignment`, `Solution`, `ConstraintReasoningThought`, `ConstraintPropagation`, `ConstraintAnalysis`
+- Constants: `CausalSchema`
 
 ---
 
-### `src/modes/meta-reasoning.ts` - Meta-Reasoning Mode (v3.4.0)
+### `src/tools/schemas/modes/core.ts` - Core Mode Schemas (v5.0.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/index.js` | `ThinkingSession, BaseThought` | Import |
-| `../types/core.js` | `ThinkingMode` | Import |
+| File | Imports | Type |
+|------|---------|------|
+| `../base.js` | `BaseThoughtSchema` | Import |
+| `../shared.js` | `ShannonStageEnum` | Import |
 
 **Exports:**
-- Classes: `MetaReasoningEngine`
-- Interfaces: `MetacognitiveJudgment`, `ReasoningStrategy`, `CognitiveBias`, `MetaReasoningThought`
+- Constants: `StandardSchema`, `CoreModeSchema`, `CoreSchema`
 
 ---
 
-### `src/modes/modal-reasoning.ts` - Modal Reasoning Mode (v3.4.0)
+### `src/tools/schemas/modes/index.ts` - Mode Schemas Index (v4.0.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/index.js` | `BaseThought, ThinkingMode` | Import |
+| File | Imports | Type |
+|------|---------|------|
+| `./core.js` | `CoreSchema, type CoreInput` | Re-export |
+| `./mathematics.js` | `MathSchema, type MathInput` | Re-export |
+| `./temporal.js` | `TemporalSchema, type TemporalInput` | Re-export |
+| `./probabilistic.js` | `ProbabilisticSchema, type ProbabilisticInput` | Re-export |
+| `./causal.js` | `CausalSchema, type CausalInput` | Re-export |
+| `./strategic.js` | `StrategicSchema, type StrategicInput` | Re-export |
+| `./analytical.js` | `AnalyticalSchema, type AnalyticalInput` | Re-export |
+| `./scientific.js` | `ScientificSchema, type ScientificInput` | Re-export |
 
 **Exports:**
-- Classes: `ModalReasoningEngine`
-- Interfaces: `ModalProposition`, `PossibleWorld`, `ModalInference`, `ModalAnalysis`, `ModalReasoningThought`
 
 ---
 
-### `src/modes/optimization-reasoning.ts` - Optimization Reasoning Mode (v3.4.0)
+### `src/tools/schemas/modes/mathematics.ts` - Mathematics Mode Schemas (v4.1.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../base.js` | `BaseThoughtSchema` | Import |
+| `../shared.js` | `ProofTypeEnum, TransformationEnum` | Import |
 
 **Exports:**
-- Classes: `OptimizationReasoningEngine`
-- Interfaces: `OptimizationVariable`, `ObjectiveFunction`, `OptimizationConstraint`, `OptimizationProblem`, `OptimizationSolution`, `ParetoFront`, `OptimizationIteration`, `OptimizationReasoningThought`, `OptimizationAnalysis`, `SensitivityAnalysis`
+- Constants: `MathSchema`
 
 ---
 
-### `src/modes/recursive-reasoning.ts` - Recursive Reasoning Mode (v3.4.0)
+### `src/tools/schemas/modes/probabilistic.ts` - Probabilistic Mode Schemas (v4.1.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/index.js` | `BaseThought, ThinkingMode` | Import |
+| File | Imports | Type |
+|------|---------|------|
+| `../base.js` | `BaseThoughtSchema` | Import |
+| `../shared.js` | `ConfidenceSchema` | Import |
 
 **Exports:**
-- Classes: `RecursiveReasoningEngine`
-- Interfaces: `RecursiveProblem`, `BaseCase`, `RecursiveCase`, `RecursiveCall`, `CallTreeNode`, `RecursionTrace`, `RecurrenceRelation`, `RecursiveSolution`, `RecursionAnalysis`, `RecursiveReasoningThought`
+- Constants: `ProbabilisticSchema`
 
 ---
 
-### `src/modes/stochastic-reasoning.ts` - Stochastic Reasoning Mode (v3.4.0)
+### `src/tools/schemas/modes/scientific.ts` - Scientific Mode Schemas (v4.1.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
-| `../types/index.js` | `BaseThought, ThinkingMode` | Import |
+| File | Imports | Type |
+|------|---------|------|
+| `../base.js` | `BaseThoughtSchema` | Import |
 
 **Exports:**
-- Classes: `StochasticReasoningEngine`
-- Interfaces: `RandomVariable`, `ProbabilityDistribution`, `StochasticProcess`, `SimulationResult`, `Trajectory`, `StochasticEvent`, `SimulationStatistics`, `ConvergenceInfo`, `MarkovChainAnalysis`, `StochasticReasoningThought`, `StochasticAnalysis`
+- Constants: `ScientificSchema`
+
+---
+
+### `src/tools/schemas/modes/strategic.ts` - Strategic Mode Schemas (v4.1.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../base.js` | `BaseThoughtSchema` | Import |
+| `../shared.js` | `ConfidenceSchema` | Import |
+
+**Exports:**
+- Constants: `StrategicSchema`
+
+---
+
+### `src/tools/schemas/modes/temporal.ts` - Temporal Mode Schema (v4.1.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../base.js` | `BaseThoughtSchema` | Import |
+| `../shared.js` | `ConfidenceSchema, TimeUnitEnum, TemporalConstraintEnum, TemporalRelationEnum, EventTypeEnum` | Import |
+
+**Exports:**
+- Constants: `TemporalSchema`
+
+---
+
+### `src/tools/schemas/shared.ts` - Shared Schema Components (v4.1.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
+
+**Exports:**
+- Constants: `ConfidenceSchema`, `PositiveIntSchema`, `LevelEnum`, `ImpactEnum`, `ExportFormatEnum`, `SessionActionEnum`, `ProofTypeEnum`, `TimeUnitEnum`, `TemporalConstraintEnum`, `TemporalRelationEnum`, `EventTypeEnum`, `TransformationEnum`, `ShannonStageEnum`, `EntitySchema`, `DescribedEntitySchema`
+
+---
+
+### `src/tools/schemas/version.ts` - Schema Versioning (v4.0.0)
+
+**Exports:**
+- Interfaces: `BreakingChange`, `Deprecation`
+- Functions: `isCompatibleVersion`, `getDeprecationWarning`
+- Constants: `SCHEMA_VERSION`, `schemaMetadata`
+
+---
+
+### `src/tools/thinking.ts` - Legacy thinking tool for DeepThinking MCP v4.4.0
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
+
+**Exports:**
+- Constants: `ThinkingToolSchema`, `thinkingTool`
+
+---
+
+## Types Dependencies
+
+### `src/types/core.ts` - Core type definitions for the DeepThinking MCP server v3.2.0
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./modes/temporal.js` | `TemporalThought` | Import |
+| `./modes/gametheory.js` | `GameTheoryThought` | Import |
+| `./modes/evidential.js` | `EvidentialThought` | Import |
+| `./modes/firstprinciples.js` | `FirstPrinciplesThought` | Import |
+| `./modes/systemsthinking.js` | `SystemsThinkingThought` | Import |
+| `./modes/scientificmethod.js` | `ScientificMethodThought` | Import |
+| `./modes/optimization.js` | `OptimizationThought` | Import |
+| `./modes/formallogic.js` | `FormalLogicThought` | Import |
+| `./modes/metareasoning.js` | `MetaReasoningThought` | Import |
+
+**Exports:**
+- Interfaces: `BaseThought`, `MathematicalModel`, `TensorProperties`, `PhysicalInterpretation`, `ProofStrategy`, `Theorem`, `Reference`, `SequentialThought`, `ShannonThought`, `MathematicsThought`, `PhysicsThought`, `HybridThought`, `Observation`, `Hypothesis`, `Evidence`, `EvaluationCriteria`, `AbductiveThought`, `InductiveThought`, `DeductiveThought`, `CausalNode`, `CausalEdge`, `CausalGraph`, `Intervention`, `CausalMechanism`, `Confounder`, `CounterfactualScenario`, `CausalThought`, `BayesianHypothesis`, `PriorProbability`, `Likelihood`, `BayesianEvidence`, `PosteriorProbability`, `SensitivityAnalysis`, `BayesianThought`, `Condition`, `Outcome`, `Scenario`, `Difference`, `CausalChain`, `InterventionPoint`, `CounterfactualComparison`, `CounterfactualThought`, `Entity`, `Relation`, `Property`, `Domain`, `Mapping`, `Insight`, `Inference`, `AnalogicalThought`
+- Enums: `ThinkingMode`, `ShannonStage`
+- Functions: `isFullyImplemented`, `isSequentialThought`, `isShannonThought`, `isMathematicsThought`, `isPhysicsThought`, `isHybridThought`, `isInductiveThought`, `isDeductiveThought`, `isAbductiveThought`, `isCausalThought`, `isBayesianThought`, `isCounterfactualThought`, `isAnalogicalThought`, `isTemporalThought`, `isGameTheoryThought`, `isEvidentialThought`, `isFirstPrinciplesThought`, `isSystemsThinkingThought`, `isScientificMethodThought`, `isOptimizationThought`, `isFormalLogicThought`, `isMetaReasoningThought`
+- Constants: `FULLY_IMPLEMENTED_MODES`, `EXPERIMENTAL_MODES`
+
+---
+
+### `src/types/index.ts` - Type definitions index
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./core.js` | `*` | Re-export |
+| `./session.js` | `*` | Re-export |
+| `./modes/recommendations.js` | `*` | Re-export |
+
+---
+
+### `src/types/modes/analogical.ts` - Analogical Reasoning Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `Entity`, `Relation`, `Property`, `Domain`, `Mapping`, `Insight`, `Inference`, `AnalogicalThought`
+- Functions: `isAnalogicalThought`
+
+---
+
+### `src/types/modes/bayesian.ts` - Bayesian Reasoning Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `BayesianHypothesis`, `PriorProbability`, `Likelihood`, `BayesianEvidence`, `PosteriorProbability`, `SensitivityAnalysis`, `BayesianThought`
+- Functions: `isBayesianThought`
+
+---
+
+### `src/types/modes/causal.ts` - Causal Reasoning Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `CausalNode`, `CausalEdge`, `CausalGraph`, `Intervention`, `CausalMechanism`, `Confounder`, `CounterfactualScenario`, `CausalThought`
+- Functions: `isCausalThought`
+
+---
+
+### `src/types/modes/counterfactual.ts` - Counterfactual Reasoning Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `Condition`, `Outcome`, `Scenario`, `CounterfactualComparison`, `InterventionPoint`, `CausalChain`, `CounterfactualThought`
+- Functions: `isCounterfactualThought`
+
+---
+
+### `src/types/modes/evidential.ts` - Evidential Reasoning Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `EvidentialThought`, `Hypothesis`, `Evidence`, `BeliefFunction`, `MassAssignment`, `PlausibilityFunction`, `PlausibilityAssignment`, `Decision`, `Alternative`
+- Functions: `isEvidentialThought`
+
+---
+
+### `src/types/modes/firstprinciples.ts` - First-Principles Reasoning Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `FirstPrinciplesThought`, `FoundationalPrinciple`, `DerivationStep`, `Conclusion`
+- Functions: `isFirstPrinciplesThought`
+
+---
+
+### `src/types/modes/formallogic.ts` - Formal Logic Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `FormalLogicThought`, `Proposition`, `LogicalFormula`, `Inference`, `LogicalProof`, `ProofStep`, `TruthTable`, `TruthTableRow`, `SatisfiabilityResult`, `ValidityResult`, `LogicalArgument`, `Contradiction`, `LogicalEquivalence`, `NormalForm`
+- Functions: `isFormalLogicThought`
+
+---
+
+### `src/types/modes/gametheory.ts` - Game-Theoretic Reasoning Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `GameTheoryThought`, `Game`, `Player`, `Strategy`, `PayoffMatrix`, `PayoffEntry`, `NashEquilibrium`, `DominantStrategy`, `GameTree`, `GameNode`, `InformationSet`, `BackwardInduction`
+- Functions: `isGameTheoryThought`
+
+---
+
+### `src/types/modes/mathematics.ts` - Mathematics Reasoning Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `MathematicalModel`, `ProofStrategy`, `Theorem`, `Reference`, `LogicalForm`, `MathematicsThought`
+- Functions: `isMathematicsThought`
+
+---
+
+### `src/types/modes/metareasoning.ts` - Meta-Reasoning Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `CurrentStrategy`, `StrategyEvaluation`, `AlternativeStrategy`, `StrategyRecommendation`, `ResourceAllocation`, `QualityMetrics`, `SessionContext`, `MetaReasoningThought`
+- Functions: `isMetaReasoningThought`
+
+---
+
+### `src/types/modes/optimization.ts` - Constraint Optimization Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `OptimizationThought`, `OptimizationProblem`, `DecisionVariable`, `Constraint`, `Objective`, `Solution`, `ParetoSolution`, `FeasibleRegion`, `SensitivityAnalysis`, `ParameterSensitivity`, `ConstraintRelaxation`, `TradeoffAnalysis`
+- Functions: `isOptimizationThought`
+
+---
+
+### `src/types/modes/physics.ts` - Physics Reasoning Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `TensorProperties`, `PhysicalInterpretation`, `FieldTheoryContext`, `PhysicsThought`
+- Functions: `isPhysicsThought`
+
+---
+
+### `src/types/modes/recommendations.ts` - Mode Recommendation System (v2.4)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `ThinkingMode` | Import |
+
+**Exports:**
+- Classes: `ModeRecommender`
+- Interfaces: `ProblemCharacteristics`, `ModeRecommendation`, `CombinationRecommendation`
+
+---
+
+### `src/types/modes/scientificmethod.ts` - Scientific Method Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `ScientificMethodThought`, `ResearchQuestion`, `Hypothesis`, `ExperimentDesign`, `Variable`, `DataCollection`, `Observation`, `Measurement`, `StatisticalAnalysis`, `StatisticalTest`, `ScientificConclusion`
+- Functions: `isScientificMethodThought`
+
+---
+
+### `src/types/modes/sequential.ts` - Sequential Reasoning Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `SequentialThought`
+- Functions: `isSequentialThought`
+
+---
+
+### `src/types/modes/shannon.ts` - Shannon Methodology Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode, ShannonStage` | Import |
+
+**Exports:**
+- Interfaces: `ShannonThought`
+- Functions: `isShannonThought`
+
+---
+
+### `src/types/modes/systemsthinking.ts` - Systems Thinking Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `SystemsThinkingThought`, `SystemDefinition`, `SystemComponent`, `FeedbackLoop`, `CausalLink`, `LeveragePoint`, `EmergentBehavior`, `StockFlow`, `SystemDelay`
+- Functions: `isSystemsThinkingThought`
+
+---
+
+### `src/types/modes/temporal.ts` - Temporal Reasoning Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `TemporalThought`, `Timeline`, `TemporalEvent`, `TimeInterval`, `TemporalConstraint`, `TemporalRelation`
+- Functions: `isTemporalThought`
+
+---
+
+### `src/types/session.ts` - Session types for managing thinking sessions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./core.js` | `Thought, ThinkingMode` | Import |
+
+---
+
+## Utils Dependencies
+
+### `src/utils/errors.ts` - Custom error classes for DeepThinking MCP
+
+**Exports:**
+- Classes: `DeepThinkingError`, `SessionError`, `SessionNotFoundError`, `SessionAlreadyExistsError`, `ValidationError`, `InputValidationError`, `ConfigurationError`, `InvalidModeError`, `ThoughtProcessingError`, `ExportError`, `ResourceLimitError`, `ErrorFactory`, `RateLimitError`, `SecurityError`, `PathTraversalError`, `StorageError`, `BackupError`
+
+---
+
+### `src/utils/log-sanitizer.ts` - Log Sanitization Utilities (v3.4.5)
+
+**Exports:**
+- Functions: `sanitizeForLogging`, `sanitizeSession`, `sanitizeError`, `sanitizeBatch`, `sanitizeSummary`
+
+---
+
+### `src/utils/logger.ts` - Logging utility for DeepThinking MCP
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../interfaces/ILogger.js` | `ILogger` | Import |
+
+**Exports:**
+- Classes: `Logger`
+- Interfaces: `LogEntry`, `LoggerConfig`
+- Enums: `LogLevel`
+- Functions: `createLogger`
+- Constants: `logger`
+
+---
+
+### `src/utils/rate-limiter.ts` - Rate Limiter (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./errors.js` | `RateLimitError` | Import |
+
+**Exports:**
+- Classes: `RateLimiter`
+- Interfaces: `RateLimiterConfig`, `RateLimitStatus`
+- Constants: `sessionRateLimiter`, `thoughtRateLimiter`
+
+---
+
+### `src/utils/sanitization.ts` - Input sanitization utilities for DeepThinking MCP
+
+**Exports:**
+- Functions: `sanitizeString`, `sanitizeOptionalString`, `validateSessionId`, `sanitizeNumber`, `sanitizeStringArray`, `sanitizeThoughtContent`, `sanitizeTitle`, `sanitizeDomain`, `sanitizeAuthor`, `escapeHtml`, `escapeLatex`
+- Constants: `MAX_LENGTHS`
+
+---
+
+### `src/utils/sanitize.ts` - File and Input Sanitization Utilities (v3.4.5)
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `path` | `* as path` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./errors.js` | `PathTraversalError, InputValidationError` | Import |
+
+**Exports:**
+- Functions: `sanitizeFilename`, `validatePath`, `isValidSessionId`, `validateSessionId`, `safePathJoin`, `safeSessionPath`
+
+---
+
+### `src/utils/type-guards.ts` - Type guards for runtime type checking
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/core.js` | `ExtendedThoughtType` | Import |
+
+**Exports:**
+- Functions: `isExtendedThoughtType`, `toExtendedThoughtType`, `isNumber`, `isNonEmptyString`, `isArray`, `isPlainObject`, `safeCast`
 
 ---
 
@@ -2013,13 +2069,13 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/cache.ts` - Validation result caching for performance optimization
 
 **Node.js Built-in Dependencies:**
-| Module | Import | Usage |
-|--------|--------|-------|
-| `crypto` | `createHash` | Node.js built-in |
+| Module | Import |
+|--------|--------|
+| `crypto` | `createHash` |
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../config/index.js` | `getConfig` | Import |
 | `../types/session.js` | `ValidationResult` | Import |
 
@@ -2041,8 +2097,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/index.ts` - Validation module exports (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `./constants.js` | `IssueSeverity, IssueCategory, ValidationThresholds, ValidationMessages, isInRange, isValidProbability, isValidConfidence` | Re-export |
 | `./validator.js` | `ThoughtValidator, type ValidationContext` | Re-export |
 | `./schemas.js` | `SessionIdSchema, ThinkingModeSchema, CreateSessionSchema, type CreateSessionInput, AddThoughtSchema, type AddThoughtInput, CompleteSessionSchema, type CompleteSessionInput, GetSessionSchema, type GetSessionInput, ListSessionsSchema, type ListSessionsInput, ExportSessionSchema, type ExportSessionInput, SearchSessionsSchema, type SearchSessionsInput, BatchOperationSchema, type BatchOperationInput, validateInput, safeValidateInput` | Re-export |
@@ -2054,13 +2110,13 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/schemas.ts` - Input Validation Schemas (v3.4.5)
 
 **External Dependencies:**
-| Package | Import | Usage |
-|---------|--------|-------|
-| `zod` | `z` | External package |
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../types/index.js` | `ThinkingMode` | Import |
 
 **Exports:**
@@ -2072,8 +2128,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validator.ts` - Validation engine for DeepThinking MCP (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../types/core.js` | `Thought` | Import |
 | `../types/session.js` | `ValidationResult, ValidationIssue` | Import |
 | `./cache.js` | `validationCache` | Import |
@@ -2089,8 +2145,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/base.ts` - Base Validator Interface and Abstract Class (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../types/index.js` | `Thought, ValidationIssue` | Import |
 | `../validator.js` | `ValidationContext` | Import |
 | `../constants.js` | `IssueSeverity, IssueCategory, ValidationThresholds, ValidationMessages, isInRange` | Import |
@@ -2100,8 +2156,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/index.ts` - Validator Module Exports
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `./base.js` | `ModeValidator, BaseValidator` | Re-export |
 | `./modes/sequential.js` | `SequentialValidator` | Re-export |
 | `./modes/shannon.js` | `ShannonValidator` | Re-export |
@@ -2134,8 +2190,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/abductive.ts` - Abductive Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `AbductiveThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2148,8 +2204,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/analogical.ts` - Analogical Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `AnalogicalThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2162,8 +2218,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/bayesian.ts` - Bayesian Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `BayesianThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2176,8 +2232,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/causal.ts` - Causal Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `CausalThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2190,8 +2246,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/constraint.ts` - Constraint-Based Reasoning Mode Validator (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `Thought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2204,8 +2260,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/counterfactual.ts` - Counterfactual Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `CounterfactualThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2218,8 +2274,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/deductive.ts` - Deductive Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `DeductiveThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2232,8 +2288,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/evidential.ts` - Evidential Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `EvidentialThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2246,8 +2302,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/firstprinciples.ts` - First-Principles Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `FirstPrinciplesThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2260,8 +2316,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/formallogic.ts` - Formal Logic Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `FormalLogicThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2274,8 +2330,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/gametheory.ts` - Game Theory Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `GameTheoryThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2288,8 +2344,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/hybrid.ts` - Hybrid Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `HybridThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2302,8 +2358,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/inductive.ts` - Inductive Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `InductiveThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2316,8 +2372,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/mathematics.ts` - Mathematics Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `MathematicsThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2330,8 +2386,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/meta.ts` - Meta-Reasoning Mode Validator (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `Thought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2344,8 +2400,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/metareasoning.ts` - Meta-Reasoning Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `MetaReasoningThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2358,8 +2414,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/modal.ts` - Modal Logic Mode Validator (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `Thought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2372,8 +2428,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/optimization.ts` - Optimization Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `OptimizationThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2386,8 +2442,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/physics.ts` - Physics Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `PhysicsThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2400,8 +2456,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/recursive.ts` - Recursive Reasoning Mode Validator (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `Thought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2414,8 +2470,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/scientificmethod.ts` - Scientific Method Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `ScientificMethodThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2428,8 +2484,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/sequential.ts` - Sequential Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `SequentialThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2442,8 +2498,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/shannon.ts` - Shannon Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `ShannonThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2456,8 +2512,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/stochastic.ts` - Stochastic Reasoning Mode Validator (v3.4.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `Thought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2470,8 +2526,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/systemsthinking.ts` - Systems Thinking Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `SystemsThinkingThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2484,8 +2540,8 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/modes/temporal.ts` - Temporal Mode Validator
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `../../../types/index.js` | `TemporalThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import |
 | `../base.js` | `BaseValidator` | Import |
@@ -2498,13 +2554,163 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 ### `src/validation/validators/registry.ts` - Validator Registry and Factory (v4.3.0)
 
 **Internal Dependencies:**
-| File | Imports | Usage |
-|------|---------|-------|
+| File | Imports | Type |
+|------|---------|------|
 | `./base.js` | `ModeValidator` | Import |
 
 **Exports:**
 - Functions: `getValidatorForMode`, `getValidatorForModeSync`, `hasValidatorForMode`, `getSupportedModes`, `preloadValidators`
 - Constants: `validatorRegistry`
+
+---
+
+## Visualization Dependencies
+
+### `src/visualization/interactive.ts` - Interactive Mermaid Features (v3.3.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs` | `mermaid` |
+
+**Exports:**
+- Classes: `InteractiveMermaid`
+- Interfaces: `AnimationConfig`, `EventHandler`
+
+---
+
+### `src/visualization/mermaid.ts` - Enhanced Mermaid Diagram Generator (v3.3.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs` | `mermaid` |
+
+**Exports:**
+- Classes: `MermaidGenerator`
+- Interfaces: `MermaidConfig`, `InteractiveElement`, `FlowchartNode`, `FlowchartEdge`, `SequenceInteraction`, `StateNode`, `StateTransition`, `MindmapNode`, `GanttTask`
+
+---
+
+### `src/visualization/mindmap.ts` - Knowledge Mind Map Generator (v3.3.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs` | `mermaid` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/session.js` | `ThinkingSession` | Import |
+| `../types/index.js` | `Thought, MathematicsThought, CausalThought, FirstPrinciplesThought` | Import |
+| `../types/index.js` | `ThinkingMode` | Import |
+| `./mermaid.js` | `MermaidGenerator, MindmapNode` | Import |
+
+**Exports:**
+- Classes: `KnowledgeMindMap`
+- Interfaces: `KnowledgeNode`
+
+---
+
+### `src/visualization/state-charts.ts` - Reasoning State Chart Diagrams (v3.3.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs` | `mermaid` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/session.js` | `ThinkingSession` | Import |
+| `../types/index.js` | `Thought` | Import |
+| `./mermaid.js` | `MermaidGenerator, StateNode, StateTransition` | Import |
+
+**Exports:**
+- Classes: `ReasoningStateChart`
+
+---
+
+### `src/visualization/thought-flow.ts` - Thought Flow Visualization (v3.3.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs` | `mermaid` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/session.js` | `ThinkingSession` | Import |
+| `../types/index.js` | `Thought` | Import |
+| `./mermaid.js` | `MermaidGenerator, SequenceInteraction` | Import |
+
+**Exports:**
+- Classes: `ThoughtFlowVisualizer`
+- Functions: `createThoughtFlowPage`
+
+---
+
+## Webhooks Dependencies
+
+### `src/webhooks/event-bus.ts` - Event Bus (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `EventBusConfig, EventListener, EventHandler, WebhookEvent, WebhookEventType` | Import |
+
+**Exports:**
+- Classes: `EventBus`
+
+---
+
+### `src/webhooks/event-emitter.ts` - Event Emitter (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./event-bus.js` | `EventBus` | Import |
+| `./webhook-manager.js` | `WebhookManager` | Import |
+| `./types.js` | `WebhookEvent, SessionEventData, ThoughtEventData, ValidationEventData, ExportEventData, SearchEventData, AnalyticsEventData` | Import |
+
+**Exports:**
+- Classes: `EventEmitter`
+
+---
+
+### `src/webhooks/index.ts` - Webhook and Event System Exports (v3.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./event-bus.js` | `EventBus` | Re-export |
+| `./webhook-manager.js` | `WebhookManager` | Re-export |
+| `./event-emitter.js` | `EventEmitter` | Re-export |
+
+**Exports:**
+
+---
+
+### `src/webhooks/types.ts` - Webhook and Event System Types (v3.4.0)
+
+---
+
+### `src/webhooks/webhook-manager.ts` - Webhook Manager (v3.4.0)
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `crypto` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `WebhookConfig, WebhookEvent, WebhookDelivery, WebhookStats, WebhookStatus, WebhookValidation, WebhookEventType` | Import |
+
+**Exports:**
+- Classes: `WebhookManager`
 
 ---
 
@@ -2534,6 +2740,16 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 | `index` | 4 files | 0 files |
 | `multi-agent` | 2 files | 1 files |
 | `session-sharing` | 2 files | 1 files |
+| `comparator` | 2 files | 2 files |
+| `diff-generator` | 2 files | 1 files |
+| `index` | 3 files | 0 files |
+| `multi-comparator` | 3 files | 1 files |
+| `types` | 1 files | 3 files |
+| `index` | 0 files | 3 files |
+| `index` | 2 files | 0 files |
+| `latex-mermaid-integration` | 2 files | 0 files |
+| `latex` | 3 files | 1 files |
+| `abductive` | 3 files | 1 files |
 
 ---
 
@@ -2561,138 +2777,232 @@ The DeepThinking MCP codebase follows a layered architecture with clear dependen
 - src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/deductive.ts -> src/validation/validator.ts
 - src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/abductive.ts -> src/validation/validator.ts
 - src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/causal.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/bayesian.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/counterfactual.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/analogical.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/temporal.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/gametheory.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/evidential.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/meta.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/modal.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/constraint.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/optimization.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/stochastic.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/recursive.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/metareasoning.ts -> src/validation/validator.ts
-
-The dependency graph follows a strict top-down hierarchy:
-1. Entry point (`index.ts`) depends on services and tools
-2. Services depend on types, utilities, and session layer
-3. Session layer depends on types, utilities, storage, and cache
-4. Types are leaf nodes (only import from other types)
-5. Utilities are leaf nodes (no internal dependencies)
+- ... and 13 more
 
 ---
 
 ## Visual Dependency Graph
 
-### Mermaid Diagram
-
 ```mermaid
 graph TD
-    subgraph Entry
-        INDEX[index.ts]
+    subgraph Analytics
+        N0[index]
+        N1[types]
     end
 
-    subgraph Tools
-        TOOL_DEF[tools/definitions.ts]
-        TOOL_THINK[tools/thinking.ts]
-        TOOL_SCHEMAS[tools/schemas/*]
+    subgraph Backup
+        N2[backup-manager]
+        N3[index]
+        N4[local]
+        N5[types]
     end
 
-    subgraph Services
-        SVC_IDX[services/index.ts]
-        TF[ThoughtFactory]
-        ES[ExportService]
-        MR[ModeRouter]
-        MM[MetaMonitor]
+    subgraph Batch
+        N6[index]
+        N7[processor]
+        N8[types]
     end
 
-    subgraph Session
-        SESS_IDX[session/index.ts]
-        SM[SessionManager]
-        SMC[SessionMetricsCalculator]
-        STORAGE[storage/interface]
+    subgraph Cache
+        N9[factory]
+        N10[fifo]
+        N11[index]
+        N12[lfu]
+        N13[lru]
+        N14[...1 more]
     end
 
-    subgraph Types
-        TYPE_IDX[types/index.ts]
-        CORE[types/core.ts]
-        SESS_TYPE[types/session.ts]
-        MODES[types/modes/*]
+    subgraph Collaboration
+        N15[annotations]
+        N16[conflict-resolution]
+        N17[index]
+        N18[multi-agent]
+        N19[session-sharing]
+    end
+
+    subgraph Comparison
+        N20[comparator]
+        N21[diff-generator]
+        N22[index]
+        N23[multi-comparator]
+        N24[types]
+    end
+
+    subgraph Config
+        N25[index]
     end
 
     subgraph Export
-        VIS_IDX[export/visual/index.ts]
-        EXPORTERS[export/visual/*]
+        N26[index]
+        N27[latex-mermaid-integration]
+        N28[latex]
+        N29[abductive]
+        N30[analogical]
+        N31[...17 more]
+    end
+
+    subgraph Entry
+        N32[index]
+    end
+
+    subgraph Interfaces
+        N33[ILogger]
+        N34[index]
+    end
+
+    subgraph Ml
+        N35[index]
+        N36[pattern-recognition]
+        N37[recommendation-engine]
+        N38[success-metrics]
+    end
+
+    subgraph Modes
+        N39[constraint-reasoning]
+        N40[meta-reasoning]
+        N41[modal-reasoning]
+        N42[optimization-reasoning]
+        N43[recursive-reasoning]
+        N44[...1 more]
+    end
+
+    subgraph Rate-limit
+        N45[index]
+        N46[limiter]
+        N47[quota]
+        N48[types]
+    end
+
+    subgraph Repositories
+        N49[FileSessionRepository]
+        N50[ISessionRepository]
+        N51[MemorySessionRepository]
+        N52[index]
+    end
+
+    subgraph Search
+        N53[engine]
+        N54[index.export]
+        N55[index]
+        N56[tokenizer]
+        N57[types]
+    end
+
+    subgraph Services
+        N58[ExportService]
+        N59[MetaMonitor]
+        N60[ModeRouter]
+        N61[ThoughtFactory]
+        N62[index]
+    end
+
+    subgraph Session
+        N63[SessionMetricsCalculator]
+        N64[index]
+        N65[manager]
+        N66[persistence]
+        N67[file-store]
+        N68[...2 more]
+    end
+
+    subgraph Taxonomy
+        N69[adaptive-selector]
+        N70[classifier]
+        N71[multi-modal-analyzer]
+        N72[navigator]
+        N73[reasoning-types]
+        N74[...2 more]
+    end
+
+    subgraph Templates
+        N75[built-in]
+        N76[index]
+        N77[manager]
+        N78[types]
+    end
+
+    subgraph Tools
+        N79[definitions]
+        N80[json-schemas]
+        N81[base]
+        N82[index]
+        N83[analytical]
+        N84[...11 more]
+    end
+
+    subgraph Types
+        N85[core]
+        N86[index]
+        N87[analogical]
+        N88[bayesian]
+        N89[causal]
+        N90[...16 more]
     end
 
     subgraph Utils
-        LOGGER[utils/logger.ts]
-        SANITIZE[utils/sanitization.ts]
-        ERRORS[utils/errors.ts]
+        N91[errors]
+        N92[log-sanitizer]
+        N93[logger]
+        N94[rate-limiter]
+        N95[sanitization]
+        N96[...2 more]
     end
 
-    subgraph Infra
-        LRU[cache/lru.ts]
-        ILOGGER[interfaces/ILogger.ts]
+    subgraph Validation
+        N97[cache]
+        N98[constants]
+        N99[index]
+        N100[schemas]
+        N101[validator]
+        N102[...29 more]
     end
 
-    INDEX --> TOOL_DEF
-    INDEX --> TOOL_THINK
-    INDEX --> SVC_IDX
-    INDEX --> SESS_IDX
-    INDEX --> TYPE_IDX
+    subgraph Visualization
+        N103[interactive]
+        N104[mermaid]
+        N105[mindmap]
+        N106[state-charts]
+        N107[thought-flow]
+    end
 
-    TOOL_DEF --> TOOL_SCHEMAS
+    subgraph Webhooks
+        N108[event-bus]
+        N109[event-emitter]
+        N110[index]
+        N111[types]
+        N112[webhook-manager]
+    end
 
-    SVC_IDX --> TF
-    SVC_IDX --> ES
-    SVC_IDX --> MR
-
-    TF --> TYPE_IDX
-    TF --> TOOL_THINK
-    TF --> LOGGER
-    TF --> ILOGGER
-
-    ES --> TYPE_IDX
-    ES --> VIS_IDX
-    ES --> SANITIZE
-    ES --> LOGGER
-
-    MR --> TYPE_IDX
-    MR --> SESS_IDX
-    MR --> MM
-    MR --> LOGGER
-
-    MM --> CORE
-    MM --> MODES
-
-    SESS_IDX --> SM
-    SM --> TYPE_IDX
-    SM --> ERRORS
-    SM --> SANITIZE
-    SM --> LOGGER
-    SM --> STORAGE
-    SM --> LRU
-    SM --> SMC
-    SM --> MM
-
-    TYPE_IDX --> CORE
-    TYPE_IDX --> SESS_TYPE
-    CORE --> MODES
-    SESS_TYPE --> CORE
-
-    VIS_IDX --> EXPORTERS
-    VIS_IDX --> TYPE_IDX
-
-    LOGGER --> ILOGGER
-    LRU --> cache/types
-
-    style INDEX fill:#f96
-    style SVC_IDX fill:#9f6
-    style TYPE_IDX fill:#69f
-    style SESS_IDX fill:#f69
+    N1 --> N86
+    N2 --> N5
+    N2 --> N4
+    N2 --> N33
+    N2 --> N93
+    N3 --> N2
+    N3 --> N4
+    N4 --> N5
+    N6 --> N7
+    N7 --> N8
+    N7 --> N33
+    N7 --> N93
+    N7 --> N65
+    N7 --> N58
+    N7 --> N2
+    N7 --> N53
+    N9 --> N13
+    N9 --> N12
+    N9 --> N10
+    N11 --> N13
+    N11 --> N12
+    N11 --> N10
+    N11 --> N9
+    N16 --> N86
+    N16 --> N85
+    N17 --> N18
+    N17 --> N19
+    N17 --> N15
+    N17 --> N16
+    N18 --> N86
 ```
 
 ---
@@ -2702,7 +3012,7 @@ graph TD
 | Category | Count |
 |----------|-------|
 | Total TypeScript Files | 185 |
-| Total Modules | 22 |
+| Total Modules | 25 |
 | Total Lines of Code | 51132 |
 | Total Exports | 524 |
 | Total Classes | 107 |
@@ -2710,8 +3020,6 @@ graph TD
 | Total Functions | 116 |
 | Total Type Guards | 50 |
 | Total Enums | 3 |
-| Thinking Modes | 21 |
-| Visual Exporters | 15 |
 
 ---
 
