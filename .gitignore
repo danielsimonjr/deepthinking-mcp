@@ -70,3 +70,5 @@ add-to-config.cjs
 
 # Archives (don't track zip files)
 *.zip
+/.claude
+/.claude
