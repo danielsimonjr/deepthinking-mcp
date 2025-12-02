@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 21 specialized thinking modes. The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, meta-reasoning for strategic oversight, enterprise security features, and comprehensive export capabilities.
+DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 25 specialized thinking modes. The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, meta-reasoning for strategic oversight, enterprise security features, and comprehensive export capabilities.
 
 **Version**: 6.1.2 | **Node**: >=18.0.0 | **License**: MIT
 
@@ -17,11 +17,11 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 | Test Files | 36 |
 | Passing Tests | 745 |
 | Type Suppressions | 0 |
-| Thinking Modes | 21 |
-| MCP Tools | 10 |
+| Thinking Modes | 25 (21 with thought types) |
+| MCP Tools | 10 focused + 1 legacy |
 | Export Formats | 8 |
-| Reasoning Types | 110+ |
-| Visual Exporters | 15 |
+| Reasoning Types | 69 (110 planned) |
+| Visual Exporters | 19 mode-specific |
 
 ---
 
@@ -60,23 +60,24 @@ deepthinking-mcp/
 
 ### `src/types/` - Type System
 
-Comprehensive TypeScript definitions for the 18 reasoning modes:
+Comprehensive TypeScript definitions for 25 reasoning modes (21 with dedicated thought types):
 
 ```
 src/types/
-├── core.ts                 # ThinkingMode enum, Thought union type
+├── core.ts                 # ThinkingMode enum (25 modes), Thought union type (21 types)
 ├── config.ts               # Configuration types
 ├── session.ts              # Session & validation types
 ├── events.ts               # Event system types
-└── modes/                  # Mode-specific types
+└── modes/                  # Mode-specific types (17 files)
     ├── sequential.ts       # Sequential thinking
     ├── shannon.ts          # Information theory
     ├── mathematics.ts      # Mathematical reasoning
     ├── physics.ts          # Physical modeling
     ├── causal.ts           # Causal inference
     ├── bayesian.ts         # Bayesian reasoning
-    ├── game-theory.ts      # Game theoretic analysis
-    └── [11 more modes]
+    ├── gametheory.ts       # Game theoretic analysis
+    ├── metareasoning.ts    # Meta-reasoning (v6.0.0)
+    └── [9 more modes]
 ```
 
 ### `src/services/` - Business Logic Layer
@@ -111,7 +112,7 @@ src/validation/
 └── validators/
     ├── base.ts           # BaseValidator with reusable methods
     ├── registry.ts       # Lazy-loading ValidatorRegistry
-    └── modes/            # 18 mode-specific validators
+    └── modes/            # 25+ mode-specific validators
 ```
 
 ### `src/export/` - Export System
@@ -119,11 +120,11 @@ src/validation/
 ```
 src/export/
 ├── index.ts              # Unified ExportService
-├── visual/               # Visual exporters (17 modular files)
+├── visual/               # Visual exporters (22 files)
 │   ├── index.ts          # VisualExporter class
 │   ├── types.ts          # VisualFormat, VisualExportOptions
 │   ├── utils.ts          # sanitizeId utility
-│   └── [15 mode-specific exporters]
+│   └── [19 mode-specific exporters]
 └── formats/              # Document format exporters
     ├── markdown.ts
     ├── latex.ts
@@ -136,8 +137,8 @@ src/export/
 
 ```
 src/taxonomy/
-├── reasoning-types.ts       # 110+ reasoning type definitions
-├── taxonomy-navigator.ts    # Hierarchy navigation
+├── reasoning-types.ts       # 69 reasoning type definitions (110 planned)
+├── navigator.ts             # Hierarchy navigation (TaxonomyNavigator)
 ├── suggestion-engine.ts     # Mode recommendations
 ├── adaptive-mode.ts         # Intelligent mode selection
 └── multi-modal.ts           # Combined reasoning analysis
@@ -145,7 +146,13 @@ src/taxonomy/
 
 ---
 
-## The 21 Thinking Modes
+## The 25 Thinking Modes
+
+The server supports 25 reasoning modes organized into categories:
+- **Core Modes (5)**: Sequential, Shannon, Mathematics, Physics, Hybrid
+- **Advanced Runtime Modes (6)**: Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
+- **Fundamental Modes (2)**: Inductive, Deductive
+- **Experimental Modes (12)**: Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory, Evidential, First Principles, Systems Thinking, Scientific Method, Formal Logic
 
 ### Core Reasoning Modes (Fundamental) - v5.0.0+
 | Mode | Purpose | Tool |
@@ -167,14 +174,14 @@ src/taxonomy/
 | **Mathematics** | Formal proofs, theorems | `deepthinking_math` |
 | **Physics** | Physical models, conservation laws | `deepthinking_math` |
 
-### Advanced Modes (Full Runtime)
+### Advanced Runtime Modes (Full Runtime)
 | Mode | Purpose | Tool |
 |------|---------|------|
 | **Metareasoning** | Strategic oversight of reasoning (v6.0.0) | `deepthinking_analytical` |
-| **Recursive** | Self-referential analysis | N/A |
-| **Modal** | Possibility/necessity logic | N/A |
-| **Stochastic** | Probabilistic reasoning | N/A |
-| **Constraint** | Constraint satisfaction | N/A |
+| **Recursive** | Divide-and-conquer, subproblem decomposition | (runtime only) |
+| **Modal** | Possibility/necessity logic | (runtime only) |
+| **Stochastic** | Probabilistic state transitions | (runtime only) |
+| **Constraint** | Constraint satisfaction problems | (runtime only) |
 | **Optimization** | Objective function optimization | `deepthinking_strategic` |
 
 ### Analytical & Causal Modes
@@ -215,7 +222,7 @@ src/taxonomy/
 ### Services
 | File | Purpose |
 |------|---------|
-| `src/services/ThoughtFactory.ts` | Thought creation for all 18 modes |
+| `src/services/ThoughtFactory.ts` | Thought creation for all 25 modes |
 | `src/services/ExportService.ts` | Export orchestration |
 | `src/services/ModeRouter.ts` | Mode switching logic |
 
