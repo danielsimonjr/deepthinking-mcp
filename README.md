@@ -6,9 +6,11 @@
 
 A comprehensive Model Context Protocol (MCP) server featuring **21 advanced reasoning modes** including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
-> 📋 **Latest Release**: v6.0.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
+> 📋 **Latest Release**: v6.1.2 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
 >
-> 🎉 **New in v6.0.0**: Meta-Reasoning mode for strategic oversight! Monitor reasoning effectiveness, get adaptive mode-switching recommendations, and assess quality metrics across 6 dimensions.
+> 🎉 **New in v6.1.x**: Fixed causal graph exports, eliminated all runtime circular dependencies, updated architecture docs.
+>
+> ✨ **v6.0.0**: Meta-Reasoning mode for strategic oversight! Monitor reasoning effectiveness, get adaptive mode-switching recommendations, and assess quality metrics across 6 dimensions.
 
 ## Table of Contents
 
@@ -49,7 +51,7 @@ npm install deepthinking-mcp
 ### From Source
 
 ```bash
-git clone https://github.com/yourusername/deepthinking-mcp.git
+git clone https://github.com/danielsimonjr/deepthinking-mcp.git
 cd deepthinking-mcp
 npm install
 npm run build
@@ -539,6 +541,19 @@ Validate session structure and content.
 
 For complete API documentation, see [API.md](docs/API.md).
 
+## Project Stats
+
+| Metric | Value |
+|--------|-------|
+| TypeScript Files | 190 |
+| Lines of Code | ~52,000 |
+| Test Files | 36 |
+| Passing Tests | 745 |
+| Thinking Modes | 21 |
+| MCP Tools | 10 |
+| Export Formats | 8 |
+| Reasoning Types | 110+ |
+
 ## Architecture
 
 ### Taxonomy System
@@ -627,7 +642,7 @@ cat docs/ADDING_NEW_MODE.md
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/deepthinking-mcp.git
+git clone https://github.com/danielsimonjr/deepthinking-mcp.git
 cd deepthinking-mcp
 
 # Install dependencies
@@ -669,8 +684,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Support
 
 - 📚 [Documentation](docs/)
-- 🐛 [Issue Tracker](https://github.com/yourusername/deepthinking-mcp/issues)
-- 💬 [Discussions](https://github.com/yourusername/deepthinking-mcp/discussions)
+- 🐛 [Issue Tracker](https://github.com/danielsimonjr/deepthinking-mcp/issues)
+- 💬 [Discussions](https://github.com/danielsimonjr/deepthinking-mcp/discussions)
 - 📧 Email: support@example.com
 
 ---
