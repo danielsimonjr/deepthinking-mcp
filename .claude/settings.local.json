@@ -75,7 +75,9 @@
       "Bash(dir C:mcp-serversdeepthinking-mcpsrctypesmodes)",
       "Bash(git merge:*)",
       "Bash(npm run typecheck:tools:*)",
-      "Bash(npm run docs:deps:*)"
+      "Bash(npm run docs:deps:*)",
+      "Bash(mkdir:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
