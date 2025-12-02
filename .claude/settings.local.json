@@ -72,7 +72,10 @@
       "mcp__memory-mcp__merge_entities",
       "mcp__memory-mcp__delete_relations",
       "mcp__deepthinking-mcp__deepthinking_standard",
-      "Bash(dir C:mcp-serversdeepthinking-mcpsrctypesmodes)"
+      "Bash(dir C:mcp-serversdeepthinking-mcpsrctypesmodes)",
+      "Bash(git merge:*)",
+      "Bash(npm run typecheck:tools:*)",
+      "Bash(npm run docs:deps:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * DeepThinking MCP Server (v4.1.0)
- * Sprint 5: 9 focused tools replacing monolithic deepthinking tool
- * Sprint 9: Lazy service initialization for reduced startup time
+ * DeepThinking MCP Server (v6.1.0)
+ *
+ * 21 advanced reasoning modes with meta-reasoning, taxonomy classifier,
+ * enterprise security, and visual export capabilities.
  *
  * Tools:
  * - deepthinking_core: sequential, shannon, hybrid modes
@@ -12,7 +13,7 @@
  * - deepthinking_probabilistic: bayesian, evidential modes
  * - deepthinking_causal: causal, counterfactual, abductive modes
  * - deepthinking_strategic: gametheory, optimization modes
- * - deepthinking_analytical: analogical, firstprinciples modes
+ * - deepthinking_analytical: analogical, firstprinciples, metareasoning modes
  * - deepthinking_scientific: scientificmethod, systemsthinking, formallogic modes
  * - deepthinking_session: summarize, export, get_session, switch_mode, recommend_mode
  */

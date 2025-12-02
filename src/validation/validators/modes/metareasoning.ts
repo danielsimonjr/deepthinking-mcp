@@ -4,7 +4,7 @@
  */
 
 import { MetaReasoningThought, ValidationIssue } from '../../../types/index.js';
-import { ValidationContext } from '../../validator.js';
+import type { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
 
 export class MetaReasoningValidator extends BaseValidator<MetaReasoningThought> {

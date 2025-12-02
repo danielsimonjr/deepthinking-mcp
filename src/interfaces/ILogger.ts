@@ -21,7 +21,7 @@
  * ```
  */
 
-import { LogLevel, LogEntry } from '../utils/logger.js';
+import type { LogLevel, LogEntry } from '../utils/logger-types.js';
 
 /**
  * Logger interface for dependency injection

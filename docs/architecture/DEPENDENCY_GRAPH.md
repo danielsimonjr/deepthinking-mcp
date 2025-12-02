@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 6.0.0 | **Last Updated**: 2025-12-01
+**Version**: 6.1.0 | **Last Updated**: 2025-12-02
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -52,7 +52,7 @@ The codebase is organized into the following modules:
 - **collaboration**: 5 files
 - **comparison**: 5 files
 - **config**: 1 file
-- **export**: 22 files
+- **export**: 26 files
 - **entry**: 1 file
 - **interfaces**: 2 files
 - **ml**: 4 files
@@ -66,7 +66,7 @@ The codebase is organized into the following modules:
 - **templates**: 4 files
 - **tools**: 16 files
 - **types**: 21 files
-- **utils**: 7 files
+- **utils**: 8 files
 - **validation**: 34 files
 - **visualization**: 5 files
 - **webhooks**: 5 files
@@ -87,6 +87,7 @@ The codebase is organized into the following modules:
 | `./distribution.js` | `DistributionAnalyzer` | Re-export |
 
 **Exports:**
+- Re-exports: `AnalyticsEngine`, `AnalyticsDashboard`, `TimeSeriesAnalyzer`, `QualityMetrics`, `DistributionAnalyzer`
 
 ---
 
@@ -95,7 +96,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingMode` | Import |
+| `../types/index.js` | `ThinkingMode` | Import (type-only) |
 
 ---
 
@@ -113,7 +114,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types.js` | `BackupConfig, BackupRecord, BackupProviderOptions, BackupManifest, BackupValidation, BackupStats, BackupType, BackupProvider, RestoreOptions, RestoreResult, RestoreProgress, CompressionFormat` | Import |
+| `./types.js` | `BackupConfig, BackupRecord, BackupProviderOptions, BackupManifest, BackupValidation, BackupStats, BackupType, BackupProvider, RestoreOptions, RestoreResult, RestoreProgress, CompressionFormat` | Import (type-only) |
 | `./providers/local.js` | `LocalBackupProvider` | Import |
 | `../interfaces/ILogger.js` | `ILogger` | Import |
 | `../utils/logger.js` | `createLogger, LogLevel` | Import |
@@ -132,6 +133,7 @@ The codebase is organized into the following modules:
 | `./providers/local.js` | `LocalBackupProvider` | Re-export |
 
 **Exports:**
+- Re-exports: `BackupManager`, `LocalBackupProvider`
 
 ---
 
@@ -147,7 +149,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types.js` | `LocalBackupOptions, BackupManifest` | Import |
+| `../types.js` | `LocalBackupOptions, BackupManifest` | Import (type-only) |
 
 **Exports:**
 - Classes: `LocalBackupProvider`
@@ -168,6 +170,7 @@ The codebase is organized into the following modules:
 | `./processor.js` | `BatchProcessor` | Re-export |
 
 **Exports:**
+- Re-exports: `BatchProcessor`
 
 ---
 
@@ -181,13 +184,13 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types.js` | `BatchJob, BatchJobType, BatchJobParams, BatchJobResult, BatchProcessorOptions` | Import |
+| `./types.js` | `BatchJob, BatchJobType, BatchJobParams, BatchJobResult, BatchProcessorOptions` | Import (type-only) |
 | `../interfaces/ILogger.js` | `ILogger` | Import |
 | `../utils/logger.js` | `createLogger, LogLevel` | Import |
-| `../session/manager.js` | `SessionManager` | Import |
-| `../services/ExportService.js` | `ExportService` | Import |
-| `../backup/backup-manager.js` | `BackupManager` | Import |
-| `../search/engine.js` | `SearchEngine` | Import |
+| `../session/manager.js` | `SessionManager` | Import (type-only) |
+| `../services/ExportService.js` | `ExportService` | Import (type-only) |
+| `../backup/backup-manager.js` | `BackupManager` | Import (type-only) |
+| `../search/engine.js` | `SearchEngine` | Import (type-only) |
 
 **Exports:**
 - Classes: `BatchProcessor`
@@ -206,7 +209,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types.js` | `Cache, CacheConfig` | Import |
+| `./types.js` | `Cache, CacheConfig` | Import (type-only) |
 | `./lru.js` | `LRUCache` | Import |
 | `./lfu.js` | `LFUCache` | Import |
 | `./fifo.js` | `FIFOCache` | Import |
@@ -222,7 +225,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types.js` | `Cache, CacheConfig, CacheEntry, CacheStats` | Import |
+| `./types.js` | `Cache, CacheConfig, CacheEntry, CacheStats` | Import (type-only) |
 
 **Exports:**
 - Classes: `FIFOCache`
@@ -240,6 +243,7 @@ The codebase is organized into the following modules:
 | `./factory.js` | `createCache, CacheManager` | Re-export |
 
 **Exports:**
+- Re-exports: `LRUCache`, `LFUCache`, `FIFOCache`, `createCache`, `CacheManager`
 
 ---
 
@@ -248,7 +252,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types.js` | `Cache, CacheConfig, CacheEntry, CacheStats` | Import |
+| `./types.js` | `Cache, CacheConfig, CacheEntry, CacheStats` | Import (type-only) |
 
 **Exports:**
 - Classes: `LFUCache`
@@ -260,7 +264,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types.js` | `Cache, CacheConfig, CacheEntry, CacheStats` | Import |
+| `./types.js` | `Cache, CacheConfig, CacheEntry, CacheStats` | Import (type-only) |
 
 **Exports:**
 - Classes: `LRUCache`
@@ -286,8 +290,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `Thought` | Import |
-| `../types/core.js` | `ThinkingMode` | Import |
+| `../types/index.js` | `Thought` | Import (type-only) |
+| `../types/core.js` | `ThinkingMode` | Import (type-only) |
 
 **Exports:**
 - Classes: `ConflictResolutionManager`
@@ -306,6 +310,7 @@ The codebase is organized into the following modules:
 | `./conflict-resolution.js` | `ConflictResolutionManager, type ThoughtConflict, type ConflictResolution, type DivergentThought, type ResolutionVote, type ResolutionStrategy, type ResolutionStatus, type ConflictSeverity, type ConflictCategory, type ConsensusRequirement, type Evidence` | Re-export |
 
 **Exports:**
+- Re-exports: `MultiAgentCollaboration`, `type CollaborativeAgent`, `type CollaborativeWorkspace`, `type AgentMessage`, `type AgentAssignment`, `type CoordinationRule`, `type AgentRole`, `type AgentStatus`, `type MessageType`, `SessionSharingManager`, `type SharedSession`, `type SessionComment`, `type MergeStrategy`, `type MergeMetadata`, `type MergeConflict`, `type ConflictType`, `AnnotationManager`, `type Annotation`, `type AnnotationType`, `type HighlightColor`, `type AnnotationVisibility`, `type TextRange`, `type AnnotationVote`, `type AnnotationFilter`, `type AnnotationThread`, `type AnnotationStats`, `ConflictResolutionManager`, `type ThoughtConflict`, `type ConflictResolution`, `type DivergentThought`, `type ResolutionVote`, `type ResolutionStrategy`, `type ResolutionStatus`, `type ConflictSeverity`, `type ConflictCategory`, `type ConsensusRequirement`, `type Evidence`
 
 ---
 
@@ -314,8 +319,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `Thought` | Import |
-| `../types/core.js` | `ThinkingMode` | Import |
+| `../types/index.js` | `Thought` | Import (type-only) |
+| `../types/core.js` | `ThinkingMode` | Import (type-only) |
 
 **Exports:**
 - Classes: `MultiAgentCollaboration`
@@ -328,8 +333,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingSession, Thought` | Import |
-| `../types/core.js` | `ThinkingMode` | Import |
+| `../types/index.js` | `ThinkingSession, Thought` | Import (type-only) |
+| `../types/core.js` | `ThinkingMode` | Import (type-only) |
 
 **Exports:**
 - Classes: `SessionSharingManager`
@@ -344,8 +349,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types.js` | `ComparisonResult, Difference, ComparisonSummary, ComparisonMetrics, DiffOptions, SimilarityMetrics, ThoughtComparison` | Import |
-| `../types/session.js` | `ThinkingSession` | Import |
+| `./types.js` | `ComparisonResult, Difference, ComparisonSummary, ComparisonMetrics, DiffOptions, SimilarityMetrics, ThoughtComparison` | Import (type-only) |
+| `../types/session.js` | `ThinkingSession` | Import (type-only) |
 
 **Exports:**
 - Classes: `SessionComparator`
@@ -357,8 +362,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types.js` | `TextDiff, ComparisonTimeline, TimelineEvent, DivergencePoint, ConvergencePoint` | Import |
-| `../types/session.js` | `ThinkingSession` | Import |
+| `./types.js` | `TextDiff, ComparisonTimeline, TimelineEvent, DivergencePoint, ConvergencePoint` | Import (type-only) |
+| `../types/session.js` | `ThinkingSession` | Import (type-only) |
 
 **Exports:**
 - Classes: `DiffGenerator`
@@ -375,6 +380,7 @@ The codebase is organized into the following modules:
 | `./diff-generator.js` | `DiffGenerator` | Re-export |
 
 **Exports:**
+- Re-exports: `SessionComparator`, `MultiSessionComparator`, `DiffGenerator`
 
 ---
 
@@ -383,8 +389,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types.js` | `MultiSessionComparison, SessionCluster, ComparisonResult` | Import |
-| `../types/session.js` | `ThinkingSession` | Import |
+| `./types.js` | `MultiSessionComparison, SessionCluster, ComparisonResult` | Import (type-only) |
+| `../types/session.js` | `ThinkingSession` | Import (type-only) |
 | `./comparator.js` | `SessionComparator` | Import |
 
 **Exports:**
@@ -397,7 +403,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/core.js` | `ThinkingMode` | Import |
+| `../types/core.js` | `ThinkingMode` | Import (type-only) |
 
 ---
 
@@ -423,6 +429,7 @@ The codebase is organized into the following modules:
 | `./latex.js` | `LaTeXExporter, type LaTeXExportOptions` | Re-export |
 
 **Exports:**
+- Re-exports: `type VisualFormat`, `type VisualExportOptions`, `sanitizeId`, `VisualExporter`, `exportCausalGraph`, `exportTemporalTimeline`, `exportGameTree`, `exportBayesianNetwork`, `exportSequentialDependencyGraph`, `exportShannonStageFlow`, `exportAbductiveHypotheses`, `exportCounterfactualScenarios`, `exportAnalogicalMapping`, `exportEvidentialBeliefs`, `exportFirstPrinciplesDerivation`, `exportSystemsThinkingCausalLoops`, `exportScientificMethodExperiment`, `exportOptimizationSolution`, `exportFormalLogicProof`, `LaTeXExporter`, `type LaTeXExportOptions`
 
 ---
 
@@ -431,7 +438,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingSession, Thought` | Import |
+| `../types/index.js` | `ThinkingSession, Thought` | Import (type-only) |
 | `./visual/index.js` | `VisualExporter, VisualExportOptions` | Import |
 
 **Exports:**
@@ -445,8 +452,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/session.js` | `ThinkingSession` | Import |
-| `../types/index.js` | `Thought, MathematicsThought, PhysicsThought, CausalThought, BayesianThought, AnalogicalThought, TemporalThought, GameTheoryThought, EvidentialThought, FirstPrinciplesThought` | Import |
+| `../types/session.js` | `ThinkingSession` | Import (type-only) |
+| `../types/index.js` | `Thought, MathematicsThought, PhysicsThought, CausalThought, BayesianThought, AnalogicalThought, TemporalThought, GameTheoryThought, EvidentialThought, FirstPrinciplesThought` | Import (type-only) |
 | `./visual/index.js` | `VisualExporter` | Import |
 
 **Exports:**
@@ -460,8 +467,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `AbductiveThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `AbductiveThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
 
 **Exports:**
@@ -474,8 +481,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `AnalogicalThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `AnalogicalThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
 
 **Exports:**
@@ -488,8 +495,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `BayesianThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `BayesianThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 
 **Exports:**
 - Functions: `exportBayesianNetwork`
@@ -501,8 +508,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `CausalThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `CausalThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
 
 **Exports:**
@@ -515,8 +522,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `CounterfactualThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `CounterfactualThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
 
 **Exports:**
@@ -529,8 +536,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `EvidentialThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `EvidentialThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
 
 **Exports:**
@@ -543,8 +550,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `FirstPrinciplesThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `FirstPrinciplesThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
 
 **Exports:**
@@ -557,8 +564,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `FormalLogicThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `FormalLogicThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
 
 **Exports:**
@@ -571,12 +578,26 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `GameTheoryThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `GameTheoryThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
 
 **Exports:**
 - Functions: `exportGameTree`
+
+---
+
+### `src/export/visual/hybrid.ts` - Hybrid Visual Exporter (v6.1.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `HybridThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
+| `./utils.js` | `sanitizeId` | Import |
+
+**Exports:**
+- Functions: `exportHybridOrchestration`
 
 ---
 
@@ -585,8 +606,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `CausalThought, TemporalThought, GameTheoryThought, BayesianThought, SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, FirstPrinciplesThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `CausalThought, TemporalThought, GameTheoryThought, BayesianThought, SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, FirstPrinciplesThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought, HybridThought` | Import (type-only) |
+| `../../types/modes/mathematics.js` | `MathematicsThought` | Import (type-only) |
+| `../../types/modes/physics.js` | `PhysicsThought` | Import (type-only) |
+| `../../types/modes/metareasoning.js` | `MetaReasoningThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./causal.js` | `exportCausalGraph` | Import |
 | `./temporal.js` | `exportTemporalTimeline` | Import |
 | `./game-theory.js` | `exportGameTree` | Import |
@@ -602,6 +626,10 @@ The codebase is organized into the following modules:
 | `./scientific-method.js` | `exportScientificMethodExperiment` | Import |
 | `./optimization.js` | `exportOptimizationSolution` | Import |
 | `./formal-logic.js` | `exportFormalLogicProof` | Import |
+| `./mathematics.js` | `exportMathematicsDerivation` | Import |
+| `./physics.js` | `exportPhysicsVisualization` | Import |
+| `./hybrid.js` | `exportHybridOrchestration` | Import |
+| `./metareasoning.js` | `exportMetaReasoningVisualization` | Import |
 | `./types.js` | `type VisualFormat, type VisualExportOptions` | Re-export |
 | `./utils.js` | `sanitizeId` | Re-export |
 | `./causal.js` | `exportCausalGraph` | Re-export |
@@ -619,9 +647,42 @@ The codebase is organized into the following modules:
 | `./scientific-method.js` | `exportScientificMethodExperiment` | Re-export |
 | `./optimization.js` | `exportOptimizationSolution` | Re-export |
 | `./formal-logic.js` | `exportFormalLogicProof` | Re-export |
+| `./mathematics.js` | `exportMathematicsDerivation` | Re-export |
+| `./physics.js` | `exportPhysicsVisualization` | Re-export |
+| `./hybrid.js` | `exportHybridOrchestration` | Re-export |
+| `./metareasoning.js` | `exportMetaReasoningVisualization` | Re-export |
 
 **Exports:**
 - Classes: `VisualExporter`
+- Re-exports: `type VisualFormat`, `type VisualExportOptions`, `sanitizeId`, `exportCausalGraph`, `exportTemporalTimeline`, `exportGameTree`, `exportBayesianNetwork`, `exportSequentialDependencyGraph`, `exportShannonStageFlow`, `exportAbductiveHypotheses`, `exportCounterfactualScenarios`, `exportAnalogicalMapping`, `exportEvidentialBeliefs`, `exportFirstPrinciplesDerivation`, `exportSystemsThinkingCausalLoops`, `exportScientificMethodExperiment`, `exportOptimizationSolution`, `exportFormalLogicProof`, `exportMathematicsDerivation`, `exportPhysicsVisualization`, `exportHybridOrchestration`, `exportMetaReasoningVisualization`
+
+---
+
+### `src/export/visual/mathematics.ts` - Mathematics Visual Exporter (v6.1.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/modes/mathematics.js` | `MathematicsThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
+| `./utils.js` | `sanitizeId` | Import |
+
+**Exports:**
+- Functions: `exportMathematicsDerivation`
+
+---
+
+### `src/export/visual/metareasoning.ts` - MetaReasoning Visual Exporter (v6.1.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/modes/metareasoning.js` | `MetaReasoningThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
+| `./utils.js` | `sanitizeId` | Import |
+
+**Exports:**
+- Functions: `exportMetaReasoningVisualization`
 
 ---
 
@@ -630,12 +691,26 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `OptimizationThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `OptimizationThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
 
 **Exports:**
 - Functions: `exportOptimizationSolution`
+
+---
+
+### `src/export/visual/physics.ts` - Physics Visual Exporter (v6.1.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/modes/physics.js` | `PhysicsThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
+| `./utils.js` | `sanitizeId` | Import |
+
+**Exports:**
+- Functions: `exportPhysicsVisualization`
 
 ---
 
@@ -644,8 +719,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `ScientificMethodThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `ScientificMethodThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
 
 **Exports:**
@@ -658,8 +733,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `SequentialThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `SequentialThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
 
 **Exports:**
@@ -672,8 +747,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `ShannonThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `ShannonThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
 
 **Exports:**
@@ -686,8 +761,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `SystemsThinkingThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `SystemsThinkingThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
 
 **Exports:**
@@ -700,8 +775,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `TemporalThought` | Import |
-| `./types.js` | `VisualExportOptions` | Import |
+| `../../types/index.js` | `TemporalThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
 
 **Exports:**
@@ -725,7 +800,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `CausalThought, TemporalThought, GameTheoryThought, BayesianThought, SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, FirstPrinciplesThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought` | Import |
+| `../types/index.js` | `CausalThought, TemporalThought, GameTheoryThought, BayesianThought, SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, FirstPrinciplesThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought` | Import (type-only) |
 
 **Exports:**
 - Classes: `VisualExporter`
@@ -735,7 +810,7 @@ The codebase is organized into the following modules:
 
 ## Entry Dependencies
 
-### `src/index.ts` - DeepThinking MCP Server (v4.1.0)
+### `src/index.ts` - DeepThinking MCP Server (v6.1.0)
 
 **External Dependencies:**
 | Package | Import |
@@ -756,9 +831,9 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `./tools/definitions.js` | `toolList, toolSchemas, isValidTool, modeToToolMap` | Import |
 | `./tools/thinking.js` | `thinkingTool` | Import |
-| `./session/index.js` | `SessionManager` | Import |
+| `./session/index.js` | `SessionManager` | Import (type-only) |
 | `./types/index.js` | `ThinkingMode` | Import |
-| `./services/index.js` | `ThoughtFactory, ExportService, ModeRouter` | Import |
+| `./services/index.js` | `ThoughtFactory, ExportService, ModeRouter` | Import (type-only) |
 
 ---
 
@@ -769,7 +844,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../utils/logger.js` | `LogLevel, LogEntry` | Import |
+| `../utils/logger-types.js` | `LogLevel, LogEntry` | Import (type-only) |
 
 ---
 
@@ -784,6 +859,7 @@ The codebase is organized into the following modules:
 | `../cache/types.js` | `Cache, CacheConfig, CacheStats` | Re-export |
 
 **Exports:**
+- Re-exports: `ILogger`, `Cache`, `CacheConfig`, `CacheStats`
 
 ---
 
@@ -799,6 +875,7 @@ The codebase is organized into the following modules:
 | `./recommendation-engine.js` | `RecommendationEngine` | Re-export |
 
 **Exports:**
+- Re-exports: `PatternRecognizer`, `SuccessMetricsAnalyzer`, `RecommendationEngine`
 
 ---
 
@@ -807,8 +884,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/session.js` | `ThinkingSession` | Import |
-| `../types/core.js` | `Thought` | Import |
+| `../types/session.js` | `ThinkingSession` | Import (type-only) |
+| `../types/core.js` | `Thought` | Import (type-only) |
 
 **Exports:**
 - Classes: `PatternRecognizer`
@@ -821,8 +898,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/session.js` | `ThinkingSession` | Import |
-| `../types/core.js` | `ThinkingMode` | Import |
+| `../types/session.js` | `ThinkingSession` | Import (type-only) |
+| `../types/core.js` | `ThinkingMode` | Import (type-only) |
 | `./pattern-recognition.js` | `PatternRecognizer` | Import |
 | `./success-metrics.js` | `SuccessMetricsAnalyzer, SuccessAnalysis, SuccessFactor` | Import |
 
@@ -837,8 +914,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/session.js` | `ThinkingSession` | Import |
-| `../types/core.js` | `ThinkingMode` | Import |
+| `../types/session.js` | `ThinkingSession` | Import (type-only) |
+| `../types/core.js` | `ThinkingMode` | Import (type-only) |
 
 **Exports:**
 - Classes: `SuccessMetricsAnalyzer`
@@ -853,7 +930,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `BaseThought, ThinkingMode` | Import |
+| `../types/index.js` | `BaseThought, ThinkingMode` | Import (type-only) |
 
 **Exports:**
 - Classes: `ConstraintReasoningEngine`
@@ -866,8 +943,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingSession, BaseThought` | Import |
-| `../types/core.js` | `ThinkingMode` | Import |
+| `../types/index.js` | `ThinkingSession, BaseThought` | Import (type-only) |
+| `../types/core.js` | `ThinkingMode` | Import (type-only) |
 
 **Exports:**
 - Classes: `MetaReasoningEngine`
@@ -880,7 +957,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `BaseThought, ThinkingMode` | Import |
+| `../types/index.js` | `BaseThought, ThinkingMode` | Import (type-only) |
 
 **Exports:**
 - Classes: `ModalReasoningEngine`
@@ -901,7 +978,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `BaseThought, ThinkingMode` | Import |
+| `../types/index.js` | `BaseThought, ThinkingMode` | Import (type-only) |
 
 **Exports:**
 - Classes: `RecursiveReasoningEngine`
@@ -914,7 +991,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `BaseThought, ThinkingMode` | Import |
+| `../types/index.js` | `BaseThought, ThinkingMode` | Import (type-only) |
 
 **Exports:**
 - Classes: `StochasticReasoningEngine`
@@ -934,6 +1011,7 @@ The codebase is organized into the following modules:
 | `./types.js` | `TIER_LIMITS` | Re-export |
 
 **Exports:**
+- Re-exports: `RateLimiter`, `QuotaManager`, `TIER_LIMITS`
 
 ---
 
@@ -942,7 +1020,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types.js` | `RateLimitConfig, RateLimitInfo` | Import |
+| `./types.js` | `RateLimitConfig, RateLimitInfo` | Import (type-only) |
 
 **Exports:**
 - Classes: `RateLimiter`
@@ -954,7 +1032,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types.js` | `QuotaConfig, QuotaUsage, QuotaStatus, UserTier` | Import |
+| `./types.js` | `QuotaConfig, QuotaUsage, QuotaStatus, UserTier` | Import (type-only) |
 | `./types.js` | `TIER_LIMITS` | Import |
 
 **Exports:**
@@ -988,6 +1066,20 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/repositories/index.ts` - Repository module exports (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./ISessionRepository.js` | `ISessionRepository` | Re-export |
+| `./FileSessionRepository.js` | `FileSessionRepository` | Re-export |
+| `./MemorySessionRepository.js` | `MemorySessionRepository` | Re-export |
+
+**Exports:**
+- Re-exports: `ISessionRepository`, `FileSessionRepository`, `MemorySessionRepository`
+
+---
+
 ### `src/repositories/ISessionRepository.ts` - Session Repository Interface (v3.4.5)
 
 **Internal Dependencies:**
@@ -1010,19 +1102,6 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/repositories/index.ts` - Repository module exports (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./ISessionRepository.js` | `ISessionRepository` | Re-export |
-| `./FileSessionRepository.js` | `FileSessionRepository` | Re-export |
-| `./MemorySessionRepository.js` | `MemorySessionRepository` | Re-export |
-
-**Exports:**
-
----
-
 ## Search Dependencies
 
 ### `src/search/engine.ts` - Search Engine (v3.5.0)
@@ -1030,8 +1109,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingSession, ThinkingMode` | Import |
-| `./types.js` | `SearchQuery, SearchResults, SearchResult, SearchHighlight, FacetedResults, SortField` | Import |
+| `../types/index.js` | `ThinkingSession, ThinkingMode` | Import (type-only) |
+| `./types.js` | `SearchQuery, SearchResults, SearchResult, SearchHighlight, FacetedResults, SortField` | Import (type-only) |
 | `./index.js` | `SearchIndex` | Import |
 | `./tokenizer.js` | `Tokenizer` | Import |
 | `../interfaces/ILogger.js` | `ILogger` | Import |
@@ -1052,6 +1131,7 @@ The codebase is organized into the following modules:
 | `./tokenizer.js` | `Tokenizer, DEFAULT_TOKENIZER_OPTIONS` | Re-export |
 
 **Exports:**
+- Re-exports: `SearchEngine`, `SearchIndex`, `Tokenizer`, `DEFAULT_TOKENIZER_OPTIONS`
 
 ---
 
@@ -1060,8 +1140,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingSession, ThinkingMode` | Import |
-| `./types.js` | `SearchIndexEntry, SearchStats` | Import |
+| `../types/index.js` | `ThinkingSession, ThinkingMode` | Import (type-only) |
+| `./types.js` | `SearchIndexEntry, SearchStats` | Import (type-only) |
 | `./tokenizer.js` | `Tokenizer` | Import |
 | `../taxonomy/classifier.js` | `TaxonomyClassifier` | Import |
 
@@ -1084,7 +1164,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingSession, ThinkingMode` | Import |
+| `../types/index.js` | `ThinkingSession, ThinkingMode` | Import (type-only) |
 
 ---
 
@@ -1095,7 +1175,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingSession, ThinkingMode, CausalThought, TemporalThought, GameTheoryThought, BayesianThought, FirstPrinciplesThought, isMetaReasoningThought` | Import |
+| `../types/index.js` | `ThinkingSession, ThinkingMode, CausalThought, TemporalThought, GameTheoryThought, BayesianThought, FirstPrinciplesThought, isMetaReasoningThought, HybridThought, // Sprint 1: Visual export integration types
+  SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought` | Import |
+| `../types/modes/mathematics.js` | `MathematicsThought` | Import (type-only) |
+| `../types/modes/physics.js` | `PhysicsThought` | Import (type-only) |
+| `../types/modes/metareasoning.js` | `MetaReasoningThought` | Import (type-only) |
 | `../export/visual/index.js` | `VisualExporter, VisualFormat` | Import |
 | `../utils/sanitization.js` | `escapeHtml, escapeLatex` | Import |
 | `../interfaces/ILogger.js` | `ILogger` | Import |
@@ -1103,6 +1187,20 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Classes: `ExportService`
+
+---
+
+### `src/services/index.ts` - Services module exports (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./ThoughtFactory.js` | `ThoughtFactory` | Re-export |
+| `./ExportService.js` | `ExportService` | Re-export |
+| `./ModeRouter.js` | `ModeRouter` | Re-export |
+
+**Exports:**
+- Re-exports: `ThoughtFactory`, `ExportService`, `ModeRouter`
 
 ---
 
@@ -1158,34 +1256,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/services/index.ts` - Services module exports (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./ThoughtFactory.js` | `ThoughtFactory` | Re-export |
-| `./ExportService.js` | `ExportService` | Re-export |
-| `./ModeRouter.js` | `ModeRouter` | Re-export |
-
-**Exports:**
-
----
-
 ## Session Dependencies
-
-### `src/session/SessionMetricsCalculator.ts` - Session Metrics Calculator (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `ThinkingSession, SessionMetrics, Thought` | Import |
-| `../types/core.js` | `isTemporalThought, isGameTheoryThought, isEvidentialThought` | Import |
-| `../validation/cache.js` | `validationCache` | Import |
-
-**Exports:**
-- Classes: `SessionMetricsCalculator`
-
----
 
 ### `src/session/index.ts` - Session module exports (v4.3.0)
 
@@ -1195,6 +1266,7 @@ The codebase is organized into the following modules:
 | `./manager.js` | `SessionManager` | Re-export |
 
 **Exports:**
+- Re-exports: `SessionManager`
 
 ---
 
@@ -1247,6 +1319,20 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/session/SessionMetricsCalculator.ts` - Session Metrics Calculator (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `ThinkingSession, SessionMetrics, Thought` | Import |
+| `../types/core.js` | `isTemporalThought, isGameTheoryThought, isEvidentialThought` | Import |
+| `../validation/cache.js` | `validationCache` | Import |
+
+**Exports:**
+- Classes: `SessionMetricsCalculator`
+
+---
+
 ### `src/session/storage/file-store.ts` - File-based Session Storage Implementation
 
 **Node.js Built-in Dependencies:**
@@ -1276,6 +1362,7 @@ The codebase is organized into the following modules:
 | `./file-store.js` | `FileSessionStore` | Re-export |
 
 **Exports:**
+- Re-exports: `SessionStorage`, `StorageStats`, `StorageConfig`, `DEFAULT_STORAGE_CONFIG`, `FileSessionStore`
 
 ---
 
@@ -1302,7 +1389,7 @@ The codebase is organized into the following modules:
 | `./suggestion-engine.js` | `SuggestionEngine, ProblemCharacteristics, EnhancedMetadata` | Import |
 | `./multi-modal-analyzer.js` | `MultiModalAnalyzer` | Import |
 | `../types/core.js` | `ThinkingMode` | Import |
-| `../types/index.js` | `ThinkingSession, Thought` | Import |
+| `../types/index.js` | `ThinkingSession, Thought` | Import (type-only) |
 
 **Exports:**
 - Classes: `AdaptiveModeSelector`
@@ -1315,7 +1402,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `Thought` | Import |
+| `../types/index.js` | `Thought` | Import (type-only) |
 | `./reasoning-types.js` | `REASONING_TAXONOMY, ReasoningType, ReasoningCategory` | Import |
 
 **Exports:**
@@ -1329,7 +1416,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingSession` | Import |
+| `../types/index.js` | `ThinkingSession` | Import (type-only) |
 | `../types/core.js` | `ThinkingMode, Thought` | Import |
 | `./reasoning-types.js` | `ReasoningCategory` | Import |
 
@@ -1368,7 +1455,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `./navigator.js` | `TaxonomyNavigator` | Import |
 | `./reasoning-types.js` | `getReasoningType, ReasoningType, ReasoningCategory` | Import |
-| `../types/index.js` | `ThinkingSession` | Import |
+| `../types/index.js` | `ThinkingSession` | Import (type-only) |
 
 **Exports:**
 - Classes: `SuggestionEngine`
@@ -1381,7 +1468,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingSession` | Import |
+| `../types/index.js` | `ThinkingSession` | Import (type-only) |
 | `./reasoning-types.js` | `getReasoningType` | Import |
 | `./suggestion-engine.js` | `SuggestionEngine` | Import |
 | `./multi-modal-analyzer.js` | `MultiModalAnalyzer` | Import |
@@ -1399,7 +1486,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types.js` | `SessionTemplate` | Import |
+| `./types.js` | `SessionTemplate` | Import (type-only) |
 | `../types/index.js` | `ThinkingMode` | Import |
 
 **Exports:**
@@ -1417,6 +1504,7 @@ The codebase is organized into the following modules:
 | `./built-in.js` | `BUILT_IN_TEMPLATES, getTemplateById, getTemplateIds, getTemplatesByCategory, getTemplatesByMode` | Re-export |
 
 **Exports:**
+- Re-exports: `TemplateManager`, `BUILT_IN_TEMPLATES`, `getTemplateById`, `getTemplateIds`, `getTemplatesByCategory`, `getTemplatesByMode`
 
 ---
 
@@ -1425,8 +1513,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types.js` | `SessionTemplate, TemplateQuery, TemplateStats, TemplateInstantiationOptions, TemplateCategory` | Import |
-| `../types/index.js` | `ThinkingSession, ThinkingMode` | Import |
+| `./types.js` | `SessionTemplate, TemplateQuery, TemplateStats, TemplateInstantiationOptions, TemplateCategory` | Import (type-only) |
+| `../types/index.js` | `ThinkingSession, ThinkingMode` | Import (type-only) |
 | `./built-in.js` | `BUILT_IN_TEMPLATES` | Import |
 
 **Exports:**
@@ -1439,7 +1527,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingMode, SessionConfig` | Import |
+| `../types/index.js` | `ThinkingMode, SessionConfig` | Import (type-only) |
 
 ---
 
@@ -1507,6 +1595,7 @@ The codebase is organized into the following modules:
 | `./modes/scientific.js` | `ScientificSchema, type ScientificInput` | Re-export |
 
 **Exports:**
+- Re-exports: `BaseThoughtSchema`, `SessionActionSchema`, `type BaseThoughtInput`, `type SessionActionInput`, `CoreSchema`, `type CoreInput`, `MathSchema`, `type MathInput`, `TemporalSchema`, `type TemporalInput`, `ProbabilisticSchema`, `type ProbabilisticInput`, `CausalSchema`, `type CausalInput`, `StrategicSchema`, `type StrategicInput`, `AnalyticalSchema`, `type AnalyticalInput`, `ScientificSchema`, `type ScientificInput`
 
 ---
 
@@ -1577,6 +1666,7 @@ The codebase is organized into the following modules:
 | `./scientific.js` | `ScientificSchema, type ScientificInput` | Re-export |
 
 **Exports:**
+- Re-exports: `CoreSchema`, `type CoreInput`, `MathSchema`, `type MathInput`, `TemporalSchema`, `type TemporalInput`, `ProbabilisticSchema`, `type ProbabilisticInput`, `CausalSchema`, `type CausalInput`, `StrategicSchema`, `type StrategicInput`, `AnalyticalSchema`, `type AnalyticalInput`, `ScientificSchema`, `type ScientificInput`
 
 ---
 
@@ -1709,15 +1799,15 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./modes/temporal.js` | `TemporalThought` | Import |
-| `./modes/gametheory.js` | `GameTheoryThought` | Import |
-| `./modes/evidential.js` | `EvidentialThought` | Import |
-| `./modes/firstprinciples.js` | `FirstPrinciplesThought` | Import |
-| `./modes/systemsthinking.js` | `SystemsThinkingThought` | Import |
-| `./modes/scientificmethod.js` | `ScientificMethodThought` | Import |
-| `./modes/optimization.js` | `OptimizationThought` | Import |
-| `./modes/formallogic.js` | `FormalLogicThought` | Import |
-| `./modes/metareasoning.js` | `MetaReasoningThought` | Import |
+| `./modes/temporal.js` | `TemporalThought` | Import (type-only) |
+| `./modes/gametheory.js` | `GameTheoryThought` | Import (type-only) |
+| `./modes/evidential.js` | `EvidentialThought` | Import (type-only) |
+| `./modes/firstprinciples.js` | `FirstPrinciplesThought` | Import (type-only) |
+| `./modes/systemsthinking.js` | `SystemsThinkingThought` | Import (type-only) |
+| `./modes/scientificmethod.js` | `ScientificMethodThought` | Import (type-only) |
+| `./modes/optimization.js` | `OptimizationThought` | Import (type-only) |
+| `./modes/formallogic.js` | `FormalLogicThought` | Import (type-only) |
+| `./modes/metareasoning.js` | `MetaReasoningThought` | Import (type-only) |
 
 **Exports:**
 - Interfaces: `BaseThought`, `MathematicalModel`, `TensorProperties`, `PhysicalInterpretation`, `ProofStrategy`, `Theorem`, `Reference`, `SequentialThought`, `ShannonThought`, `MathematicsThought`, `PhysicsThought`, `HybridThought`, `Observation`, `Hypothesis`, `Evidence`, `EvaluationCriteria`, `AbductiveThought`, `InductiveThought`, `DeductiveThought`, `CausalNode`, `CausalEdge`, `CausalGraph`, `Intervention`, `CausalMechanism`, `Confounder`, `CounterfactualScenario`, `CausalThought`, `BayesianHypothesis`, `PriorProbability`, `Likelihood`, `BayesianEvidence`, `PosteriorProbability`, `SensitivityAnalysis`, `BayesianThought`, `Condition`, `Outcome`, `Scenario`, `Difference`, `CausalChain`, `InterventionPoint`, `CounterfactualComparison`, `CounterfactualThought`, `Entity`, `Relation`, `Property`, `Domain`, `Mapping`, `Insight`, `Inference`, `AnalogicalThought`
@@ -1735,6 +1825,9 @@ The codebase is organized into the following modules:
 | `./core.js` | `*` | Re-export |
 | `./session.js` | `*` | Re-export |
 | `./modes/recommendations.js` | `*` | Re-export |
+
+**Exports:**
+- Re-exports: `* from ./core.js`, `* from ./session.js`, `* from ./modes/recommendations.js`
 
 ---
 
@@ -1997,19 +2090,28 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/utils/logger-types.ts` - Logger Types (v6.1.0)
+
+**Exports:**
+- Interfaces: `LogEntry`, `LoggerConfig`
+- Enums: `LogLevel`
+
+---
+
 ### `src/utils/logger.ts` - Logging utility for DeepThinking MCP
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../interfaces/ILogger.js` | `ILogger` | Import |
+| `../interfaces/ILogger.js` | `ILogger` | Import (type-only) |
+| `./logger-types.js` | `LogLevel, LogEntry, LoggerConfig` | Import |
+| `./logger-types.js` | `LogLevel, type LogEntry, type LoggerConfig` | Re-export |
 
 **Exports:**
 - Classes: `Logger`
-- Interfaces: `LogEntry`, `LoggerConfig`
-- Enums: `LogLevel`
 - Functions: `createLogger`
 - Constants: `logger`
+- Re-exports: `LogLevel`, `type LogEntry`, `type LoggerConfig`
 
 ---
 
@@ -2086,9 +2188,15 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/validation/constants.ts` - Validation Constants (v4.3.0)
+### `src/validation/constants.ts` - Validation Constants and Types (v6.1.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/core.js` | `Thought` | Import (type-only) |
 
 **Exports:**
+- Interfaces: `ValidationContext`
 - Functions: `isInRange`, `isValidProbability`, `isValidConfidence`
 - Constants: `IssueSeverity`, `IssueCategory`, `ValidationThresholds`, `ValidationMessages`
 
@@ -2104,6 +2212,7 @@ The codebase is organized into the following modules:
 | `./schemas.js` | `SessionIdSchema, ThinkingModeSchema, CreateSessionSchema, type CreateSessionInput, AddThoughtSchema, type AddThoughtInput, CompleteSessionSchema, type CompleteSessionInput, GetSessionSchema, type GetSessionInput, ListSessionsSchema, type ListSessionsInput, ExportSessionSchema, type ExportSessionInput, SearchSessionsSchema, type SearchSessionsInput, BatchOperationSchema, type BatchOperationInput, validateInput, safeValidateInput` | Re-export |
 
 **Exports:**
+- Re-exports: `IssueSeverity`, `IssueCategory`, `ValidationThresholds`, `ValidationMessages`, `isInRange`, `isValidProbability`, `isValidConfidence`, `ThoughtValidator`, `type ValidationContext`, `SessionIdSchema`, `ThinkingModeSchema`, `CreateSessionSchema`, `type CreateSessionInput`, `AddThoughtSchema`, `type AddThoughtInput`, `CompleteSessionSchema`, `type CompleteSessionInput`, `GetSessionSchema`, `type GetSessionInput`, `ListSessionsSchema`, `type ListSessionsInput`, `ExportSessionSchema`, `type ExportSessionInput`, `SearchSessionsSchema`, `type SearchSessionsInput`, `BatchOperationSchema`, `type BatchOperationInput`, `validateInput`, `safeValidateInput`
 
 ---
 
@@ -2135,10 +2244,10 @@ The codebase is organized into the following modules:
 | `./cache.js` | `validationCache` | Import |
 | `../config/index.js` | `getConfig` | Import |
 | `./validators/index.js` | `getValidatorForMode` | Import |
+| `./constants.js` | `ValidationContext` | Import (type-only) |
 
 **Exports:**
 - Classes: `ThoughtValidator`
-- Interfaces: `ValidationContext`
 
 ---
 
@@ -2148,8 +2257,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../types/index.js` | `Thought, ValidationIssue` | Import |
-| `../validator.js` | `ValidationContext` | Import |
-| `../constants.js` | `IssueSeverity, IssueCategory, ValidationThresholds, ValidationMessages, isInRange` | Import |
+| `../constants.js` | `IssueSeverity, IssueCategory, ValidationThresholds, ValidationMessages, isInRange, ValidationContext` | Import |
 
 ---
 
@@ -2184,6 +2292,7 @@ The codebase is organized into the following modules:
 | `./registry.js` | `validatorRegistry, getValidatorForMode, getValidatorForModeSync, hasValidatorForMode, getSupportedModes, preloadValidators` | Re-export |
 
 **Exports:**
+- Re-exports: `ModeValidator`, `BaseValidator`, `SequentialValidator`, `ShannonValidator`, `MathematicsValidator`, `PhysicsValidator`, `HybridValidator`, `InductiveValidator`, `DeductiveValidator`, `AbductiveValidator`, `CausalValidator`, `BayesianValidator`, `CounterfactualValidator`, `AnalogicalValidator`, `TemporalValidator`, `GameTheoryValidator`, `EvidentialValidator`, `MetaValidator`, `ModalValidator`, `ConstraintValidator`, `OptimizationValidator`, `StochasticValidator`, `RecursiveValidator`, `MetaReasoningValidator`, `validatorRegistry`, `getValidatorForMode`, `getValidatorForModeSync`, `hasValidatorForMode`, `getSupportedModes`, `preloadValidators`
 
 ---
 
@@ -2193,7 +2302,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `AbductiveThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2207,7 +2316,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `AnalogicalThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2221,7 +2330,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `BayesianThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2235,7 +2344,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `CausalThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2249,7 +2358,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `Thought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2263,7 +2372,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `CounterfactualThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2277,7 +2386,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `DeductiveThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2291,7 +2400,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `EvidentialThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2305,7 +2414,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `FirstPrinciplesThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2319,7 +2428,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `FormalLogicThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2333,7 +2442,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `GameTheoryThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2347,7 +2456,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `HybridThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2361,7 +2470,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `InductiveThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2375,7 +2484,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `MathematicsThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2389,7 +2498,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `Thought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2403,7 +2512,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `MetaReasoningThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2417,7 +2526,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `Thought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2431,7 +2540,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `OptimizationThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2445,7 +2554,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `PhysicsThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2459,7 +2568,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `Thought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2473,7 +2582,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `ScientificMethodThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2487,7 +2596,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `SequentialThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2501,7 +2610,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `ShannonThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2515,7 +2624,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `Thought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2529,7 +2638,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `SystemsThinkingThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2543,7 +2652,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `TemporalThought, ValidationIssue` | Import |
-| `../../validator.js` | `ValidationContext` | Import |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
 
 **Exports:**
@@ -2556,7 +2665,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./base.js` | `ModeValidator` | Import |
+| `./base.js` | `ModeValidator` | Import (type-only) |
 
 **Exports:**
 - Functions: `getValidatorForMode`, `getValidatorForModeSync`, `hasValidatorForMode`, `getSupportedModes`, `preloadValidators`
@@ -2602,8 +2711,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/session.js` | `ThinkingSession` | Import |
-| `../types/index.js` | `Thought, MathematicsThought, CausalThought, FirstPrinciplesThought` | Import |
+| `../types/session.js` | `ThinkingSession` | Import (type-only) |
+| `../types/index.js` | `Thought, MathematicsThought, CausalThought, FirstPrinciplesThought` | Import (type-only) |
 | `../types/index.js` | `ThinkingMode` | Import |
 | `./mermaid.js` | `MermaidGenerator, MindmapNode` | Import |
 
@@ -2623,8 +2732,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/session.js` | `ThinkingSession` | Import |
-| `../types/index.js` | `Thought` | Import |
+| `../types/session.js` | `ThinkingSession` | Import (type-only) |
+| `../types/index.js` | `Thought` | Import (type-only) |
 | `./mermaid.js` | `MermaidGenerator, StateNode, StateTransition` | Import |
 
 **Exports:**
@@ -2642,8 +2751,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/session.js` | `ThinkingSession` | Import |
-| `../types/index.js` | `Thought` | Import |
+| `../types/session.js` | `ThinkingSession` | Import (type-only) |
+| `../types/index.js` | `Thought` | Import (type-only) |
 | `./mermaid.js` | `MermaidGenerator, SequenceInteraction` | Import |
 
 **Exports:**
@@ -2659,7 +2768,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types.js` | `EventBusConfig, EventListener, EventHandler, WebhookEvent, WebhookEventType` | Import |
+| `./types.js` | `EventBusConfig, EventListener, EventHandler, WebhookEvent, WebhookEventType` | Import (type-only) |
 
 **Exports:**
 - Classes: `EventBus`
@@ -2671,9 +2780,9 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./event-bus.js` | `EventBus` | Import |
-| `./webhook-manager.js` | `WebhookManager` | Import |
-| `./types.js` | `WebhookEvent, SessionEventData, ThoughtEventData, ValidationEventData, ExportEventData, SearchEventData, AnalyticsEventData` | Import |
+| `./event-bus.js` | `EventBus` | Import (type-only) |
+| `./webhook-manager.js` | `WebhookManager` | Import (type-only) |
+| `./types.js` | `WebhookEvent, SessionEventData, ThoughtEventData, ValidationEventData, ExportEventData, SearchEventData, AnalyticsEventData` | Import (type-only) |
 
 **Exports:**
 - Classes: `EventEmitter`
@@ -2690,6 +2799,7 @@ The codebase is organized into the following modules:
 | `./event-emitter.js` | `EventEmitter` | Re-export |
 
 **Exports:**
+- Re-exports: `EventBus`, `WebhookManager`, `EventEmitter`
 
 ---
 
@@ -2707,7 +2817,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./types.js` | `WebhookConfig, WebhookEvent, WebhookDelivery, WebhookStats, WebhookStatus, WebhookValidation, WebhookEventType` | Import |
+| `./types.js` | `WebhookConfig, WebhookEvent, WebhookDelivery, WebhookStats, WebhookStatus, WebhookValidation, WebhookEventType` | Import (type-only) |
 
 **Exports:**
 - Classes: `WebhookManager`
@@ -2755,7 +2865,14 @@ The codebase is organized into the following modules:
 
 ## Circular Dependency Analysis
 
-**33 circular dependencies detected:**
+**31 circular dependencies detected:**
+
+- **Runtime cycles**: 0 (require attention)
+- **Type-only cycles**: 31 (safe, no runtime impact)
+
+### Type-Only Circular Dependencies
+
+These cycles only involve type imports and are safe (erased at runtime):
 
 - src/types/core.ts -> src/types/modes/temporal.ts -> src/types/core.ts
 - src/types/core.ts -> src/types/modes/gametheory.ts -> src/types/core.ts
@@ -2766,18 +2883,8 @@ The codebase is organized into the following modules:
 - src/types/core.ts -> src/types/modes/optimization.ts -> src/types/core.ts
 - src/types/core.ts -> src/types/modes/formallogic.ts -> src/types/core.ts
 - src/types/core.ts -> src/types/modes/metareasoning.ts -> src/types/core.ts
-- src/interfaces/ILogger.ts -> src/utils/logger.ts -> src/interfaces/ILogger.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/base.ts -> src/validation/validator.ts
 - src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/sequential.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/shannon.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/mathematics.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/physics.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/hybrid.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/inductive.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/deductive.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/abductive.ts -> src/validation/validator.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/causal.ts -> src/validation/validator.ts
-- ... and 13 more
+- ... and 21 more
 
 ---
 
@@ -2838,7 +2945,7 @@ graph TD
         N28[latex]
         N29[abductive]
         N30[analogical]
-        N31[...17 more]
+        N31[...21 more]
     end
 
     subgraph Entry
@@ -2875,9 +2982,9 @@ graph TD
 
     subgraph Repositories
         N49[FileSessionRepository]
-        N50[ISessionRepository]
-        N51[MemorySessionRepository]
-        N52[index]
+        N50[index]
+        N51[ISessionRepository]
+        N52[MemorySessionRepository]
     end
 
     subgraph Search
@@ -2890,17 +2997,17 @@ graph TD
 
     subgraph Services
         N58[ExportService]
-        N59[MetaMonitor]
-        N60[ModeRouter]
-        N61[ThoughtFactory]
-        N62[index]
+        N59[index]
+        N60[MetaMonitor]
+        N61[ModeRouter]
+        N62[ThoughtFactory]
     end
 
     subgraph Session
-        N63[SessionMetricsCalculator]
-        N64[index]
-        N65[manager]
-        N66[persistence]
+        N63[index]
+        N64[manager]
+        N65[persistence]
+        N66[SessionMetricsCalculator]
         N67[file-store]
         N68[...2 more]
     end
@@ -2942,10 +3049,10 @@ graph TD
     subgraph Utils
         N91[errors]
         N92[log-sanitizer]
-        N93[logger]
-        N94[rate-limiter]
-        N95[sanitization]
-        N96[...2 more]
+        N93[logger-types]
+        N94[logger]
+        N95[rate-limiter]
+        N96[...3 more]
     end
 
     subgraph Validation
@@ -2977,15 +3084,15 @@ graph TD
     N2 --> N5
     N2 --> N4
     N2 --> N33
-    N2 --> N93
+    N2 --> N94
     N3 --> N2
     N3 --> N4
     N4 --> N5
     N6 --> N7
     N7 --> N8
     N7 --> N33
-    N7 --> N93
-    N7 --> N65
+    N7 --> N94
+    N7 --> N64
     N7 --> N58
     N7 --> N2
     N7 --> N53
@@ -3011,17 +3118,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 185 |
+| Total TypeScript Files | 190 |
 | Total Modules | 25 |
-| Total Lines of Code | 51132 |
-| Total Exports | 524 |
+| Total Lines of Code | 52521 |
+| Total Exports | 535 |
+| Total Re-exports | 232 |
 | Total Classes | 107 |
 | Total Interfaces | 427 |
-| Total Functions | 116 |
+| Total Functions | 120 |
 | Total Type Guards | 50 |
 | Total Enums | 3 |
+| Type-only Imports | 156 |
+| Runtime Circular Deps | 0 |
+| Type-only Circular Deps | 31 |
 
 ---
 
-*Last Updated*: 2025-12-01
-*Version*: 6.0.0
+*Last Updated*: 2025-12-02
+*Version*: 6.1.0

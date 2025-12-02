@@ -1,8 +1,11 @@
 /**
- * Validation Constants (v4.3.0)
+ * Validation Constants and Types (v6.1.0)
  * Sprint 10: Centralized validation enums and constants
+ * v6.1.0: Added ValidationContext to break circular dependency
  * Eliminates ~300 hardcoded string literals across validators
  */
+
+import type { Thought } from '../types/core.js';
 
 /**
  * Issue severity levels (matches ValidationIssue type)
@@ -71,4 +74,14 @@ export function isValidProbability(value: number): boolean {
  */
 export function isValidConfidence(value: number): boolean {
   return isInRange(value, ValidationThresholds.MIN_CONFIDENCE, ValidationThresholds.MAX_CONFIDENCE);
+}
+
+/**
+ * Validation context - shared by validator and base validators
+ * Moved here in v6.1.0 to break circular dependency:
+ * validator.ts -> validators/index.ts -> base.ts -> validator.ts
+ */
+export interface ValidationContext {
+  existingThoughts?: Map<string, Thought>;
+  strictMode?: boolean;
 }

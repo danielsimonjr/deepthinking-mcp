@@ -11,6 +11,7 @@ import { ValidationResult, ValidationIssue } from '../types/session.js';
 import { validationCache } from './cache.js';
 import { getConfig } from '../config/index.js';
 import { getValidatorForMode } from './validators/index.js';
+import type { ValidationContext } from './constants.js';
 
 /**
  * Validation confidence penalty constants
@@ -157,9 +158,7 @@ export class ThoughtValidator {
 }
 
 /**
- * Validation context
+ * Re-export ValidationContext from constants for backwards compatibility
+ * Moved to constants.ts in v6.1.0 to break circular dependency
  */
-export interface ValidationContext {
-  existingThoughts?: Map<string, Thought>;
-  strictMode?: boolean;
-}
+export type { ValidationContext } from './constants.js';

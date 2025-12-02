@@ -6,13 +6,13 @@
  */
 
 import { Thought, ValidationIssue } from '../../types/index.js';
-import { ValidationContext } from '../validator.js';
 import {
   IssueSeverity,
   IssueCategory,
   ValidationThresholds,
   ValidationMessages,
   isInRange,
+  type ValidationContext,
 } from '../constants.js';
 
 /**

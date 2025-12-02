@@ -22,6 +22,7 @@ interface Dependency {
   file: string;
   imports: string[];
   reExport?: boolean;
+  typeOnly?: boolean;  // Track type-only imports
 }
 
 interface ExternalDependency {
@@ -43,6 +44,7 @@ interface FileExports {
   classes: string[];
   functions: string[];
   constants: string[];
+  reExported: string[];  // Track re-exported symbols
 }
 
 interface ParsedFile {
@@ -73,6 +75,10 @@ interface Statistics {
   totalTypeGuards: number;
   totalEnums: number;
   totalConstants: number;
+  totalReExports: number;
+  totalTypeOnlyImports: number;
+  runtimeCircularDeps: number;  // Excludes type-only cycles
+  typeOnlyCircularDeps: number; // Type-only cycles (not runtime issues)
 }
 
 interface ModuleMap {
@@ -146,34 +152,54 @@ function parseFile(filePath: string): ParsedFile {
       enums: [],
       classes: [],
       functions: [],
-      constants: []
+      constants: [],
+      reExported: []
     },
     description: extractDescription(content)
   };
 
-  // Parse imports
-  const importRegex = /import\s+(?:(?:type\s+)?(?:{([^}]+)}|(\w+)|\*\s+as\s+(\w+))(?:\s*,\s*(?:{([^}]+)}|(\w+)))?)\s+from\s+['"]([^'"]+)['"]/g;
+  // Parse imports - enhanced to detect type-only imports
+  // Matches: import type { ... }, import { type X, Y }, import X from, import * as X from
+  const importRegex = /import\s+(type\s+)?(?:(?:{([^}]+)}|(\w+)|\*\s+as\s+(\w+))(?:\s*,\s*(?:{([^}]+)}|(\w+)))?)\s+from\s+['"]([^'"]+)['"]/g;
   let match: RegExpExecArray | null;
 
+  const nodeBuiltins = ['fs', 'path', 'url', 'crypto', 'util', 'stream', 'events', 'buffer', 'os', 'child_process', 'http', 'https', 'net', 'dns', 'tls', 'zlib', 'readline', 'assert', 'cluster', 'dgram', 'domain', 'inspector', 'module', 'perf_hooks', 'process', 'punycode', 'querystring', 'repl', 'string_decoder', 'timers', 'tty', 'v8', 'vm', 'worker_threads'];
+
   while ((match = importRegex.exec(content)) !== null) {
-    const namedImports = match[1] || match[4] || '';
-    const defaultImport = match[2] || match[5] || '';
-    const namespaceImport = match[3] || '';
-    const source = match[6];
+    const isTypeOnlyImport = !!match[1]; // "import type" prefix
+    const namedImports = match[2] || match[5] || '';
+    const defaultImport = match[3] || match[6] || '';
+    const namespaceImport = match[4] || '';
+    const source = match[7];
 
     const imports: string[] = [];
+    let hasRuntimeImport = !isTypeOnlyImport;
+
     if (namedImports) {
-      imports.push(...namedImports.split(',').map(s => s.trim().split(' as ')[0].replace(/^type\s+/, '')).filter(Boolean));
+      const importItems = namedImports.split(',').map(s => s.trim());
+      for (const item of importItems) {
+        // Check for inline type imports: import { type Foo, Bar }
+        const isInlineType = item.startsWith('type ');
+        const name = item.replace(/^type\s+/, '').split(' as ')[0].trim();
+        if (name) {
+          imports.push(name);
+          // If any import is NOT a type, it's a runtime import
+          if (!isInlineType && !isTypeOnlyImport) {
+            hasRuntimeImport = true;
+          }
+        }
+      }
     }
     if (defaultImport) imports.push(defaultImport);
     if (namespaceImport) imports.push(`* as ${namespaceImport}`);
 
-    const nodeBuiltins = ['fs', 'path', 'url', 'crypto', 'util', 'stream', 'events', 'buffer', 'os', 'child_process', 'http', 'https', 'net', 'dns', 'tls', 'zlib', 'readline', 'assert', 'cluster', 'dgram', 'domain', 'inspector', 'module', 'perf_hooks', 'process', 'punycode', 'querystring', 'repl', 'string_decoder', 'timers', 'tty', 'v8', 'vm', 'worker_threads'];
+    const typeOnly = isTypeOnlyImport || !hasRuntimeImport;
 
     if (source.startsWith('.')) {
       result.internalDependencies.push({
         file: source,
-        imports: imports
+        imports: imports,
+        typeOnly: typeOnly
       });
     } else if (source.startsWith('node:') || nodeBuiltins.includes(source.split('/')[0])) {
       result.nodeDependencies.push({
@@ -253,6 +279,7 @@ function parseFile(filePath: string): ParsedFile {
       imports: ['*'],
       reExport: true
     });
+    result.exports.reExported.push(`* from ${match[1]}`);
   }
 
   // Re-exports: export { foo } from
@@ -265,11 +292,25 @@ function parseFile(filePath: string): ParsedFile {
       reExport: true
     });
     result.exports.named.push(...exports);
+    result.exports.reExported.push(...exports);
+  }
+
+  // Re-exports: export type * from (type-only re-exports)
+  const reExportTypeAllRegex = /export\s+type\s+\*\s+from\s+['"]([^'"]+)['"]/g;
+  while ((match = reExportTypeAllRegex.exec(content)) !== null) {
+    result.internalDependencies.push({
+      file: match[1],
+      imports: ['*'],
+      reExport: true,
+      typeOnly: true
+    });
+    result.exports.reExported.push(`type * from ${match[1]}`);
   }
 
   // Dedupe exports
   result.exports.named = [...new Set(result.exports.named)];
   result.exports.types = [...new Set(result.exports.types)];
+  result.exports.reExported = [...new Set(result.exports.reExported)];
 
   return result;
 }
@@ -397,70 +438,101 @@ function resolvePath(fromPath: string, relativePath: string): string {
   return resolved;
 }
 
+interface CircularDependencyResult {
+  all: string[][];
+  runtime: string[][];   // Non-type-only cycles (real runtime issues)
+  typeOnly: string[][];  // Type-only cycles (safe, no runtime impact)
+}
+
 /**
- * Detect circular dependencies
+ * Detect circular dependencies, distinguishing runtime from type-only cycles
  */
-function detectCircularDependencies(files: ParsedFile[]): string[][] {
+function detectCircularDependencies(files: ParsedFile[]): CircularDependencyResult {
   const filePaths = new Set(files.map(f => f.path));
 
-  const graph = new Map<string, string[]>();
+  // Build both runtime-only and all-dependencies graphs
+  const runtimeGraph = new Map<string, string[]>();
+  const allGraph = new Map<string, string[]>();
+
   for (const file of files) {
-    const deps: string[] = [];
+    const runtimeDeps: string[] = [];
+    const allDeps: string[] = [];
+
     for (const d of file.internalDependencies) {
       const resolved = resolvePath(file.path, d.file);
       if (filePaths.has(resolved)) {
-        deps.push(resolved);
-      }
-    }
-    graph.set(file.path, deps);
-  }
-
-  const cycles: string[][] = [];
-  const visited = new Set<string>();
-  const inStack = new Set<string>();
-
-  function dfs(node: string, path: string[]): void {
-    if (inStack.has(node)) {
-      const cycleStart = path.indexOf(node);
-      if (cycleStart !== -1) {
-        const cycle = path.slice(cycleStart);
-        cycle.push(node);
-        const cycleKey = [...cycle].sort().join('->');
-        if (!cycles.some(c => [...c].sort().join('->') === cycleKey)) {
-          cycles.push(cycle);
+        allDeps.push(resolved);
+        // Only add to runtime graph if NOT type-only
+        if (!d.typeOnly) {
+          runtimeDeps.push(resolved);
         }
       }
-      return;
     }
-
-    if (visited.has(node)) return;
-
-    visited.add(node);
-    inStack.add(node);
-    path.push(node);
-
-    const neighbors = graph.get(node) || [];
-    for (const neighbor of neighbors) {
-      dfs(neighbor, path);
-    }
-
-    path.pop();
-    inStack.delete(node);
+    runtimeGraph.set(file.path, runtimeDeps);
+    allGraph.set(file.path, allDeps);
   }
 
-  for (const node of graph.keys()) {
-    if (!visited.has(node)) {
-      dfs(node, []);
+  function findCycles(graph: Map<string, string[]>): string[][] {
+    const cycles: string[][] = [];
+    const visited = new Set<string>();
+    const inStack = new Set<string>();
+
+    function dfs(node: string, path: string[]): void {
+      if (inStack.has(node)) {
+        const cycleStart = path.indexOf(node);
+        if (cycleStart !== -1) {
+          const cycle = path.slice(cycleStart);
+          cycle.push(node);
+          const cycleKey = [...cycle].sort().join('->');
+          if (!cycles.some(c => [...c].sort().join('->') === cycleKey)) {
+            cycles.push(cycle);
+          }
+        }
+        return;
+      }
+
+      if (visited.has(node)) return;
+
+      visited.add(node);
+      inStack.add(node);
+      path.push(node);
+
+      const neighbors = graph.get(node) || [];
+      for (const neighbor of neighbors) {
+        dfs(neighbor, path);
+      }
+
+      path.pop();
+      inStack.delete(node);
     }
+
+    for (const node of graph.keys()) {
+      if (!visited.has(node)) {
+        dfs(node, []);
+      }
+    }
+
+    return cycles;
   }
 
-  return cycles;
+  const allCycles = findCycles(allGraph);
+  const runtimeCycles = findCycles(runtimeGraph);
+
+  // Type-only cycles = cycles in all but not in runtime
+  const runtimeCycleKeys = new Set(runtimeCycles.map(c => [...c].sort().join('->')));
+  const typeOnlyCycles = allCycles.filter(c => !runtimeCycleKeys.has([...c].sort().join('->')));
+
+  return {
+    all: allCycles,
+    runtime: runtimeCycles,
+    typeOnly: typeOnlyCycles
+  };
 }
 
 /**
  * Generate statistics from parsed files
  */
-function generateStatistics(files: ParsedFile[], modules: ModuleMap): Statistics {
+function generateStatistics(files: ParsedFile[], modules: ModuleMap, circularDeps: CircularDependencyResult): Statistics {
   let totalExports = 0;
   let totalClasses = 0;
   let totalInterfaces = 0;
@@ -469,6 +541,8 @@ function generateStatistics(files: ParsedFile[], modules: ModuleMap): Statistics
   let totalEnums = 0;
   let totalConstants = 0;
   let totalLines = 0;
+  let totalReExports = 0;
+  let totalTypeOnlyImports = 0;
 
   for (const file of files) {
     totalExports += file.exports.named.length;
@@ -477,6 +551,10 @@ function generateStatistics(files: ParsedFile[], modules: ModuleMap): Statistics
     totalFunctions += file.exports.functions.length;
     totalEnums += file.exports.enums.length;
     totalConstants += file.exports.constants.length;
+    totalReExports += file.exports.reExported.length;
+
+    // Count type-only imports
+    totalTypeOnlyImports += file.internalDependencies.filter(d => d.typeOnly).length;
 
     // Count type guards (functions starting with 'is')
     totalTypeGuards += file.exports.functions.filter(f => f.startsWith('is')).length;
@@ -500,14 +578,18 @@ function generateStatistics(files: ParsedFile[], modules: ModuleMap): Statistics
     totalFunctions,
     totalTypeGuards,
     totalEnums,
-    totalConstants
+    totalConstants,
+    totalReExports,
+    totalTypeOnlyImports,
+    runtimeCircularDeps: circularDeps.runtime.length,
+    typeOnlyCircularDeps: circularDeps.typeOnly.length
   };
 }
 
 /**
  * Generate JSON output
  */
-function generateJSON(files: ParsedFile[], modules: ModuleMap, stats: Statistics, circularDeps: string[][]): object {
+function generateJSON(files: ParsedFile[], modules: ModuleMap, stats: Statistics, circularDeps: CircularDependencyResult): object {
   const today = new Date().toISOString().split('T')[0];
 
   // Convert modules to JSON-friendly format
@@ -522,9 +604,11 @@ function generateJSON(files: ParsedFile[], modules: ModuleMap, stats: Statistics
         internalDependencies: file.internalDependencies.map(d => ({
           file: d.file,
           imports: d.imports,
-          ...(d.reExport ? { reExport: true } : {})
+          ...(d.reExport ? { reExport: true } : {}),
+          ...(d.typeOnly ? { typeOnly: true } : {})
         })),
         exports: file.exports.named,
+        reExported: file.exports.reExported.length > 0 ? file.exports.reExported : undefined,
         classes: file.exports.classes.length > 0 ? file.exports.classes : undefined,
         interfaces: file.exports.interfaces.length > 0 ? file.exports.interfaces : undefined,
         functions: file.exports.functions.length > 0 ? file.exports.functions : undefined,
@@ -567,7 +651,13 @@ function generateJSON(files: ParsedFile[], modules: ModuleMap, stats: Statistics
       })),
     modules: modulesJson,
     dependencyGraph: {
-      circularDependencies: circularDeps,
+      circularDependencies: {
+        runtime: circularDeps.runtime,
+        typeOnly: circularDeps.typeOnly,
+        total: circularDeps.all.length,
+        runtimeCount: circularDeps.runtime.length,
+        typeOnlyCount: circularDeps.typeOnly.length
+      },
       layers
     },
     statistics: stats
@@ -641,7 +731,7 @@ function generateMermaidDiagram(modules: ModuleMap, files: ParsedFile[]): string
 /**
  * Generate Markdown output
  */
-function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statistics, circularDeps: string[][], matrix: DependencyMatrix): string {
+function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statistics, circularDeps: CircularDependencyResult, matrix: DependencyMatrix): string {
   const today = new Date().toISOString().split('T')[0];
   const lines: string[] = [];
   const projectName = packageJson.name || 'Project';
@@ -725,14 +815,15 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
         lines.push('| File | Imports | Type |');
         lines.push('|------|---------|------|');
         for (const dep of file.internalDependencies) {
-          const usage = dep.reExport ? 'Re-export' : 'Import';
+          let usage = dep.reExport ? 'Re-export' : 'Import';
+          if (dep.typeOnly) usage += ' (type-only)';
           lines.push(`| \`${dep.file}\` | \`${dep.imports.join(', ')}\` | ${usage} |`);
         }
         lines.push('');
       }
 
       // Exports
-      if (file.exports.named.length > 0 || file.exports.default) {
+      if (file.exports.named.length > 0 || file.exports.default || file.exports.reExported.length > 0) {
         lines.push('**Exports:**');
         if (file.exports.classes.length > 0) {
           lines.push(`- Classes: \`${file.exports.classes.join('`, `')}\``);
@@ -748,6 +839,9 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
         }
         if (file.exports.constants.length > 0) {
           lines.push(`- Constants: \`${file.exports.constants.join('`, `')}\``);
+        }
+        if (file.exports.reExported.length > 0) {
+          lines.push(`- Re-exports: \`${file.exports.reExported.join('`, `')}\``);
         }
         if (file.exports.default) {
           lines.push(`- Default: \`${file.exports.default}\``);
@@ -782,19 +876,43 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
   // Circular Dependencies
   lines.push('## Circular Dependency Analysis');
   lines.push('');
-  if (circularDeps.length === 0) {
+  if (circularDeps.all.length === 0) {
     lines.push('**No circular dependencies detected.**');
   } else {
-    lines.push(`**${circularDeps.length} circular dependencies detected:**`);
+    lines.push(`**${circularDeps.all.length} circular dependencies detected:**`);
     lines.push('');
-    for (const cycle of circularDeps.slice(0, 20)) { // Limit display
-      lines.push(`- ${cycle.join(' -> ')}`);
+    lines.push(`- **Runtime cycles**: ${circularDeps.runtime.length} (require attention)`);
+    lines.push(`- **Type-only cycles**: ${circularDeps.typeOnly.length} (safe, no runtime impact)`);
+    lines.push('');
+
+    if (circularDeps.runtime.length > 0) {
+      lines.push('### Runtime Circular Dependencies');
+      lines.push('');
+      lines.push('These cycles involve runtime imports and may cause issues:');
+      lines.push('');
+      for (const cycle of circularDeps.runtime.slice(0, 10)) {
+        lines.push(`- ${cycle.join(' -> ')}`);
+      }
+      if (circularDeps.runtime.length > 10) {
+        lines.push(`- ... and ${circularDeps.runtime.length - 10} more`);
+      }
+      lines.push('');
     }
-    if (circularDeps.length > 20) {
-      lines.push(`- ... and ${circularDeps.length - 20} more`);
+
+    if (circularDeps.typeOnly.length > 0) {
+      lines.push('### Type-Only Circular Dependencies');
+      lines.push('');
+      lines.push('These cycles only involve type imports and are safe (erased at runtime):');
+      lines.push('');
+      for (const cycle of circularDeps.typeOnly.slice(0, 10)) {
+        lines.push(`- ${cycle.join(' -> ')}`);
+      }
+      if (circularDeps.typeOnly.length > 10) {
+        lines.push(`- ... and ${circularDeps.typeOnly.length - 10} more`);
+      }
+      lines.push('');
     }
   }
-  lines.push('');
   lines.push('---');
   lines.push('');
 
@@ -815,11 +933,15 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
   lines.push(`| Total Modules | ${stats.totalModules} |`);
   lines.push(`| Total Lines of Code | ${stats.totalLinesOfCode} |`);
   lines.push(`| Total Exports | ${stats.totalExports} |`);
+  lines.push(`| Total Re-exports | ${stats.totalReExports} |`);
   lines.push(`| Total Classes | ${stats.totalClasses} |`);
   lines.push(`| Total Interfaces | ${stats.totalInterfaces} |`);
   lines.push(`| Total Functions | ${stats.totalFunctions} |`);
   lines.push(`| Total Type Guards | ${stats.totalTypeGuards} |`);
   lines.push(`| Total Enums | ${stats.totalEnums} |`);
+  lines.push(`| Type-only Imports | ${stats.totalTypeOnlyImports} |`);
+  lines.push(`| Runtime Circular Deps | ${stats.runtimeCircularDeps} |`);
+  lines.push(`| Type-only Circular Deps | ${stats.typeOnlyCircularDeps} |`);
   lines.push('');
   lines.push('---');
   lines.push('');
@@ -859,13 +981,13 @@ async function main(): Promise<void> {
   const modules = categorizeFiles(parsedFiles);
   console.log(`Categorized into ${Object.keys(modules).length} modules`);
 
-  // Generate statistics
-  const stats = generateStatistics(parsedFiles, modules);
-  console.log('Generated statistics');
-
   // Detect circular dependencies
   const circularDeps = detectCircularDependencies(parsedFiles);
-  console.log(`Found ${circularDeps.length} circular dependencies`);
+  console.log(`Found ${circularDeps.all.length} circular dependencies (${circularDeps.runtime.length} runtime, ${circularDeps.typeOnly.length} type-only)`);
+
+  // Generate statistics (now needs circularDeps)
+  const stats = generateStatistics(parsedFiles, modules, circularDeps);
+  console.log('Generated statistics');
 
   // Build dependency matrix
   const matrix = buildDependencyMatrix(parsedFiles);
@@ -884,8 +1006,11 @@ async function main(): Promise<void> {
 
   console.log('\nDependency graph generation complete!');
   console.log(`  - ${stats.totalTypeScriptFiles} files analyzed`);
-  console.log(`  - ${stats.totalExports} exports found`);
-  console.log(`  - ${circularDeps.length} circular dependencies`);
+  console.log(`  - ${stats.totalExports} exports found (${stats.totalReExports} re-exports)`);
+  console.log(`  - ${stats.totalTypeOnlyImports} type-only imports detected`);
+  console.log(`  - ${circularDeps.all.length} circular dependencies:`);
+  console.log(`      ${circularDeps.runtime.length} runtime (require attention)`);
+  console.log(`      ${circularDeps.typeOnly.length} type-only (safe)`);
 }
 
 main().catch(console.error);
