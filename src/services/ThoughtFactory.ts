@@ -175,11 +175,18 @@ export class ThoughtFactory {
         } as AbductiveThought;
 
       case 'causal':
+        // Build causalGraph from either input.causalGraph or top-level nodes/edges
+        // (JSON schema sends nodes/edges at top level, Zod schema nests them in causalGraph)
+        const inputAny = input as any;
+        const causalGraph = input.causalGraph || {
+          nodes: inputAny.nodes || [],
+          edges: inputAny.edges || [],
+        };
         return {
           ...baseThought,
           mode: ThinkingMode.CAUSAL,
           thoughtType: toExtendedThoughtType(input.thoughtType, 'problem_definition'),
-          causalGraph: input.causalGraph,
+          causalGraph,
           interventions: input.interventions || [],
           mechanisms: input.mechanisms || [],
           confounders: input.confounders || [],

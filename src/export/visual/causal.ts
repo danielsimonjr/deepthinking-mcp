@@ -103,6 +103,11 @@ function causalGraphToDOT(
   dot += '  rankdir=TB;\n';
   dot += '  node [shape=box, style=rounded];\n\n';
 
+  if (!thought.causalGraph || !thought.causalGraph.nodes) {
+    dot += '  NoData [label="No causal graph data"];\n}\n';
+    return dot;
+  }
+
   for (const node of thought.causalGraph.nodes) {
     const nodeId = sanitizeId(node.id);
     const label = includeLabels ? node.name : nodeId;
@@ -138,6 +143,10 @@ function causalGraphToDOT(
 function causalGraphToASCII(thought: CausalThought): string {
   let ascii = 'Causal Graph:\n';
   ascii += '=============\n\n';
+
+  if (!thought.causalGraph || !thought.causalGraph.nodes) {
+    return ascii + 'No causal graph data\n';
+  }
 
   ascii += 'Nodes:\n';
   for (const node of thought.causalGraph.nodes) {
