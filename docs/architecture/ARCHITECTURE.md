@@ -4,7 +4,7 @@
 
 DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced reasoning capabilities through 21 thinking modes with meta-reasoning for strategic oversight. The architecture follows a modular, service-oriented design with clear separation of concerns.
 
-**Version**: 6.0.0 | **Node**: >=18.0.0
+**Version**: 6.1.2 | **Node**: >=18.0.0
 
 ## High-Level Architecture
 
@@ -420,7 +420,10 @@ Response with updated session
 
 ## Version History
 
-- **v6.0.0** (Current): Meta-reasoning mode, MetaMonitor service, adaptive mode switching, quality metrics
+- **v6.1.2** (Current): Fixed causal graph exports (nodes/edges preserved in Zod validation)
+- **v6.1.1**: Eliminated 24 runtime circular dependencies
+- **v6.1.0**: Circular dependency fixes, logger-types.ts extraction
+- **v6.0.0**: Meta-reasoning mode, MetaMonitor service, adaptive mode switching, quality metrics
 - **v5.0.1**: Mode recommendation bugfixes for philosophical domains
 - **v5.0.0**: Fundamental reasoning modes (Inductive, Deductive), deepthinking_core tool
 - **v4.4.0**: 10 focused tools with hand-written JSON schemas
@@ -437,5 +440,5 @@ Response with updated session
 
 ---
 
-*Last Updated*: 2025-12-01
-*Architecture Version*: 6.0.0
+*Last Updated*: 2025-12-02
+*Architecture Version*: 6.1.2

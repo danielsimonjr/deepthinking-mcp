@@ -1,6 +1,6 @@
 # Data Flow Architecture
 
-**Version**: 6.0.0 | **Last Updated**: 2025-12-01
+**Version**: 6.1.2 | **Last Updated**: 2025-12-02
 
 ## Overview
 
@@ -938,5 +938,5 @@ Storage
 
 ---
 
-*Last Updated*: 2025-12-01
-*Data Flow Version*: 6.0.0
+*Last Updated*: 2025-12-02
+*Data Flow Version*: 6.1.2

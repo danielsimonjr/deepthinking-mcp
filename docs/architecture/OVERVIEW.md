@@ -4,7 +4,7 @@
 
 DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 21 specialized thinking modes. The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, meta-reasoning for strategic oversight, enterprise security features, and comprehensive export capabilities.
 
-**Version**: 6.0.0 | **Node**: >=18.0.0 | **License**: MIT
+**Version**: 6.1.2 | **Node**: >=18.0.0 | **License**: MIT
 
 ---
 
@@ -12,8 +12,8 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~50,900 |
-| TypeScript Files | 185 |
+| Total Lines of Code | ~52,000 |
+| TypeScript Files | 190 |
 | Test Files | 36 |
 | Passing Tests | 745 |
 | Type Suppressions | 0 |
@@ -385,5 +385,5 @@ tests/
 
 ---
 
-*Last Updated*: 2025-12-01
-*Version*: 6.0.0
+*Last Updated*: 2025-12-02
+*Version*: 6.1.2

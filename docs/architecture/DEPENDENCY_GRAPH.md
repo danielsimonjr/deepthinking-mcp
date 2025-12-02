@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 6.1.0 | **Last Updated**: 2025-12-02
+**Version**: 6.1.2 | **Last Updated**: 2025-12-02
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -3120,7 +3120,7 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 190 |
 | Total Modules | 25 |
-| Total Lines of Code | 52521 |
+| Total Lines of Code | 52594 |
 | Total Exports | 535 |
 | Total Re-exports | 232 |
 | Total Classes | 107 |
@@ -3135,4 +3135,4 @@ graph TD
 ---
 
 *Last Updated*: 2025-12-02
-*Version*: 6.1.0
+*Version*: 6.1.2
