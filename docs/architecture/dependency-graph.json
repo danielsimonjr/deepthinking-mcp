@@ -2902,44 +2902,6 @@
           "FileSessionRepository"
         ]
       },
-      "src/repositories/index.ts": {
-        "description": "Repository module exports (v3.4.5)",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./ISessionRepository.js",
-            "imports": [
-              "ISessionRepository"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./FileSessionRepository.js",
-            "imports": [
-              "FileSessionRepository"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./MemorySessionRepository.js",
-            "imports": [
-              "MemorySessionRepository"
-            ],
-            "reExport": true
-          }
-        ],
-        "exports": [
-          "ISessionRepository",
-          "FileSessionRepository",
-          "MemorySessionRepository"
-        ],
-        "reExported": [
-          "ISessionRepository",
-          "FileSessionRepository",
-          "MemorySessionRepository"
-        ]
-      },
       "src/repositories/ISessionRepository.ts": {
         "description": "Session Repository Interface (v3.4.5)",
         "externalDependencies": [],
@@ -2983,6 +2945,44 @@
           "MemorySessionRepository"
         ],
         "classes": [
+          "MemorySessionRepository"
+        ]
+      },
+      "src/repositories/index.ts": {
+        "description": "Repository module exports (v3.4.5)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./ISessionRepository.js",
+            "imports": [
+              "ISessionRepository"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./FileSessionRepository.js",
+            "imports": [
+              "FileSessionRepository"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./MemorySessionRepository.js",
+            "imports": [
+              "MemorySessionRepository"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [
+          "ISessionRepository",
+          "FileSessionRepository",
+          "MemorySessionRepository"
+        ],
+        "reExported": [
+          "ISessionRepository",
+          "FileSessionRepository",
           "MemorySessionRepository"
         ]
       }
@@ -3262,44 +3262,6 @@
           "ExportService"
         ]
       },
-      "src/services/index.ts": {
-        "description": "Services module exports (v3.4.5)",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./ThoughtFactory.js",
-            "imports": [
-              "ThoughtFactory"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./ExportService.js",
-            "imports": [
-              "ExportService"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./ModeRouter.js",
-            "imports": [
-              "ModeRouter"
-            ],
-            "reExport": true
-          }
-        ],
-        "exports": [
-          "ThoughtFactory",
-          "ExportService",
-          "ModeRouter"
-        ],
-        "reExported": [
-          "ThoughtFactory",
-          "ExportService",
-          "ModeRouter"
-        ]
-      },
       "src/services/MetaMonitor.ts": {
         "description": "Meta-Reasoning Monitor Service (v6.0.0)",
         "externalDependencies": [],
@@ -3444,9 +3406,82 @@
         "classes": [
           "ThoughtFactory"
         ]
+      },
+      "src/services/index.ts": {
+        "description": "Services module exports (v3.4.5)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./ThoughtFactory.js",
+            "imports": [
+              "ThoughtFactory"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ExportService.js",
+            "imports": [
+              "ExportService"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ModeRouter.js",
+            "imports": [
+              "ModeRouter"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [
+          "ThoughtFactory",
+          "ExportService",
+          "ModeRouter"
+        ],
+        "reExported": [
+          "ThoughtFactory",
+          "ExportService",
+          "ModeRouter"
+        ]
       }
     },
     "session": {
+      "src/session/SessionMetricsCalculator.ts": {
+        "description": "Session Metrics Calculator (v3.4.5)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/index.js",
+            "imports": [
+              "ThinkingSession",
+              "SessionMetrics",
+              "Thought"
+            ]
+          },
+          {
+            "file": "../types/core.js",
+            "imports": [
+              "isTemporalThought",
+              "isGameTheoryThought",
+              "isEvidentialThought"
+            ]
+          },
+          {
+            "file": "../validation/cache.js",
+            "imports": [
+              "validationCache"
+            ]
+          }
+        ],
+        "exports": [
+          "SessionMetricsCalculator"
+        ],
+        "classes": [
+          "SessionMetricsCalculator"
+        ]
+      },
       "src/session/index.ts": {
         "description": "Session module exports (v4.3.0)",
         "externalDependencies": [],
@@ -3614,41 +3649,6 @@
         ],
         "functions": [
           "createSessionStore"
-        ]
-      },
-      "src/session/SessionMetricsCalculator.ts": {
-        "description": "Session Metrics Calculator (v3.4.5)",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../types/index.js",
-            "imports": [
-              "ThinkingSession",
-              "SessionMetrics",
-              "Thought"
-            ]
-          },
-          {
-            "file": "../types/core.js",
-            "imports": [
-              "isTemporalThought",
-              "isGameTheoryThought",
-              "isEvidentialThought"
-            ]
-          },
-          {
-            "file": "../validation/cache.js",
-            "imports": [
-              "validationCache"
-            ]
-          }
-        ],
-        "exports": [
-          "SessionMetricsCalculator"
-        ],
-        "classes": [
-          "SessionMetricsCalculator"
         ]
       },
       "src/session/storage/file-store.ts": {
@@ -8068,9 +8068,9 @@
         "name": "Repositories",
         "files": [
           "src/repositories/FileSessionRepository.ts",
-          "src/repositories/index.ts",
           "src/repositories/ISessionRepository.ts",
-          "src/repositories/MemorySessionRepository.ts"
+          "src/repositories/MemorySessionRepository.ts",
+          "src/repositories/index.ts"
         ]
       },
       {
@@ -8087,19 +8087,19 @@
         "name": "Services",
         "files": [
           "src/services/ExportService.ts",
-          "src/services/index.ts",
           "src/services/MetaMonitor.ts",
           "src/services/ModeRouter.ts",
-          "src/services/ThoughtFactory.ts"
+          "src/services/ThoughtFactory.ts",
+          "src/services/index.ts"
         ]
       },
       {
         "name": "Session",
         "files": [
+          "src/session/SessionMetricsCalculator.ts",
           "src/session/index.ts",
           "src/session/manager.ts",
           "src/session/persistence.ts",
-          "src/session/SessionMetricsCalculator.ts",
           "src/session/storage/file-store.ts",
           "src/session/storage/index.ts",
           "src/session/storage/interface.ts"
