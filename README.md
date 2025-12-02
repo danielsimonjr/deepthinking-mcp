@@ -465,37 +465,15 @@ mode: 'deductive'
 
 ## Production Features
 
+> **Note**: DeepThinking MCP is an MCP server, not a library. These features are accessed through MCP tools and internal architecture. The examples below describe the internal capabilities.
+
 ### Search Engine
 
-Full-text search with faceted filtering, autocomplete, and relevance ranking. The search engine is available programmatically:
-
-```typescript
-import { SearchEngine } from 'deepthinking-mcp/search';
-
-const searchEngine = new SearchEngine();
-const results = await searchEngine.search({
-  query: 'machine learning optimization',
-  facets: ['mode', 'tags'],
-  filters: {
-    modes: ['optimization', 'mathematics'],
-    dateRange: { from: new Date('2024-01-01') }
-  }
-});
-```
+Full-text search with faceted filtering and relevance ranking. Used internally to search across reasoning sessions by mode, tags, date ranges, and content.
 
 ### Template System
 
-Pre-built templates for common reasoning patterns:
-
-```typescript
-import { TemplateManager } from 'deepthinking-mcp/templates';
-
-const templateManager = new TemplateManager();
-const templates = await templateManager.listTemplates({
-  category: 'problem-solving',
-  difficulty: 'beginner'
-});
-```
+Pre-built templates for common reasoning patterns, accessible through session creation.
 
 ### Batch Processing
 
@@ -510,114 +488,26 @@ Process multiple sessions concurrently with 8 operation types:
 - **backup** - Batch backup with compression
 - **cleanup** - Batch cleanup of old/incomplete sessions
 
-```typescript
-import { BatchProcessor } from 'deepthinking-mcp/batch';
-
-const processor = new BatchProcessor({
-  maxConcurrentJobs: 4,
-  maxBatchSize: 100
-});
-
-const job = await processor.submitJob({
-  type: 'export',
-  params: {
-    sessionIds: ['session-1', 'session-2'],
-    format: 'latex',
-    outputPath: './exports'
-  }
-});
-```
-
 ### Backup & Restore
 
-Automated backup with compression and local storage:
-
-```typescript
-import { BackupManager } from 'deepthinking-mcp/backup';
-
-const backupManager = new BackupManager({
-  provider: 'local',
-  config: { path: './backups' }
-});
-
-const backupId = await backupManager.backup(session);
-const restored = await backupManager.restore(backupId);
-```
+Automated backup with compression and local storage, with support for multiple providers (Local, S3, GCS, Azure).
 
 ### Session Comparison
 
-Compare reasoning sessions to analyze differences and similarities:
-
-```typescript
-import { SessionComparator } from 'deepthinking-mcp/comparison';
-
-const comparator = new SessionComparator();
-const comparison = await comparator.compare(session1, session2);
-
-console.log(comparison.similarity); // 0-1 scale
-console.log(comparison.differences); // Detailed diff
-console.log(comparison.metrics); // Quantitative metrics
-```
+Compare reasoning sessions to analyze differences and similarities with quantitative metrics.
 
 ### Security & Validation
 
-Enterprise-grade security features with input validation, rate limiting, and PII protection.
+Enterprise-grade security features built into the MCP server:
 
-```typescript
-// Input validation with Zod schemas
-import { validateInput, AddThoughtSchema } from 'deepthinking-mcp/validation';
-
-const validated = validateInput(AddThoughtSchema, userInput);
-// Throws ValidationError if invalid
-
-// Rate limiting for API protection
-import { RateLimiter } from 'deepthinking-mcp/rate-limit';
-
-const limiter = new RateLimiter({
-  windowMs: 60000,        // 1 minute window
-  maxRequests: 100,       // 100 requests per window
-  keyPrefix: 'api:'
-});
-
-await limiter.checkLimit(userId);  // Throws RateLimitError if exceeded
-
-// Path sanitization prevents directory traversal
-import { sanitizeFilename, validatePath } from 'deepthinking-mcp/utils';
-
-const safeFilename = sanitizeFilename(userInput);  // Removes dangerous characters
-validatePath(targetPath, baseDir);  // Prevents path traversal attacks
-
-// Log sanitization for GDPR compliance
-import { sanitizeForLogging } from 'deepthinking-mcp/utils';
-
-logger.info('User action', sanitizeForLogging({
-  userId: user.id,
-  email: user.email,  // Will be redacted as [REDACTED]
-  action: 'create_session'
-}));
-```
+- **Input Validation** - Zod schemas validate all 25+ mode inputs
+- **Rate Limiting** - Sliding window rate limiter for API protection
+- **Path Sanitization** - Prevents directory traversal attacks
+- **PII Redaction** - GDPR-compliant log sanitization
 
 ### Taxonomy Classifier
 
-Intelligent classification of reasoning tasks using 69 reasoning types across 12 categories.
-
-```typescript
-import { TaxonomyClassifier } from 'deepthinking-mcp/taxonomy';
-
-const classifier = new TaxonomyClassifier();
-
-const result = classifier.classify(
-  'How can we prove that the sum of two even numbers is always even?'
-);
-
-console.log(result.primaryCategory);  // 'deductive'
-console.log(result.primaryType);      // 'Mathematical Proof'
-console.log(result.confidence);       // 0.95
-console.log(result.secondaryTypes);   // ['Formal Logic', 'Theorem Proving']
-
-// Use for automatic mode selection
-const mode = result.primaryType.mode;  // Suggests best reasoning mode
-```
+Intelligent classification of reasoning tasks using 69 reasoning types across 12 categories. Use the `recommend_mode` action in `deepthinking_session` to get mode recommendations based on problem characteristics.
 
 ## API Documentation
 
@@ -660,37 +550,7 @@ All reasoning is done through MCP tools. Each tool accepts arguments and returns
 }
 ```
 
-### Programmatic Usage
-
-For direct TypeScript/JavaScript usage:
-
-```typescript
-import { SessionManager, ThoughtFactory, ExportService } from 'deepthinking-mcp';
-
-// Create session
-const sessionManager = new SessionManager();
-const session = await sessionManager.createSession({
-  mode: 'sequential',
-  title: 'My Analysis'
-});
-
-// Add thought
-const thoughtFactory = new ThoughtFactory();
-const thought = thoughtFactory.createThought({
-  thought: 'Step 1: Analyze the problem',
-  thoughtNumber: 1,
-  totalThoughts: 3,
-  nextThoughtNeeded: true,
-  mode: 'sequential'
-}, session.id);
-await sessionManager.addThought(session.id, thought);
-
-// Export
-const exportService = new ExportService();
-const markdown = exportService.exportSession(session, 'markdown');
-```
-
-For complete API documentation, see [API.md](docs/API.md).
+For architecture details, see [docs/architecture/](docs/architecture/).
 
 ## Project Stats
 
@@ -737,7 +597,7 @@ src/
 │   ├── classifier.ts        # Task classification
 │   └── suggestion-engine.ts # Mode recommendations
 ├── export/            # Visual and document exporters
-│   ├── visual/        # 18 mode-specific visual exporters
+│   ├── visual/        # 19 mode-specific visual exporters
 │   └── latex.ts       # LaTeX document generation
 ├── search/            # Full-text search with faceted filtering
 ├── batch/             # Batch processing (8 operations)
@@ -765,7 +625,7 @@ Security is built into multiple modules:
 
 ## Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions! Please open an issue or pull request on [GitHub](https://github.com/danielsimonjr/deepthinking-mcp).
 
 ### Adding New Reasoning Modes
 
@@ -838,7 +698,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - 📚 [Documentation](docs/)
 - 🐛 [Issue Tracker](https://github.com/danielsimonjr/deepthinking-mcp/issues)
 - 💬 [Discussions](https://github.com/danielsimonjr/deepthinking-mcp/discussions)
-- 📧 Email: support@example.com
 
 ---
 
