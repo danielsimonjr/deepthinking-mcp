@@ -27,7 +27,9 @@
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build && npm run test:publish"
+    "typecheck:tools": "tsc -p tools/tsconfig.json",
+    "prepublishOnly": "npm run build && npm run test:publish",
+    "docs:deps": "npx tsx tools/create-dependency-graph.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.23.0",
@@ -42,6 +44,7 @@
     "eslint": "^9.39.1",
     "prettier": "^3.2.4",
     "tsup": "^8.5.1",
+    "tsx": "^4.19.0",
     "typescript": "^5.3.3",
     "vitest": "^4.0.14"
   },
