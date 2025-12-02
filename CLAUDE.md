@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring 18 advanced reasoning modes with taxonomy-based classification (110+ reasoning types across 12 categories), enterprise security, and visual export capabilities.
+DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring 25 reasoning modes (21 with dedicated thought types) with taxonomy-based classification (69 reasoning types across 12 categories, 110 planned), enterprise security, and visual export capabilities.
 
-**Version**: 4.3.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
+**Version**: 6.1.2 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
 
 ## Build & Development Commands
 
@@ -50,15 +50,15 @@ Business logic extracted from `src/index.ts` into three main services:
 ```
 src/
 ├── index.ts           # MCP server entry point (tool handlers)
-├── types/             # Type definitions including 18 mode types
+├── types/             # Type definitions including 25 mode types
 │   ├── core.ts        # ThinkingMode enum, Thought union type
 │   └── modes/         # One file per reasoning mode
 ├── services/          # Business logic layer
 ├── session/           # SessionManager, persistence, storage abstraction
-├── taxonomy/          # 110+ reasoning types, classifier, suggestion engine
+├── taxonomy/          # 69 reasoning types (110 planned), classifier, suggestion engine
 ├── export/            # Visual and document exporters
 ├── search/            # Full-text search engine with faceted filtering
-├── batch/             # Batch processing (6 operations)
+├── batch/             # Batch processing (8 operations)
 ├── backup/            # Backup manager with provider abstraction
 ├── cache/             # LRU/LFU/FIFO caching strategies
 ├── rate-limit/        # Sliding window rate limiter
@@ -69,7 +69,7 @@ src/
 
 ### Type System
 
-All 18 reasoning modes defined in `src/types/core.ts`:
+All 25 reasoning modes defined in `src/types/core.ts`:
 - `ThinkingMode` enum - Mode identifiers
 - `Thought` union type - Discriminated union of all thought types
 - Type guards: `isSequentialThought()`, `isMathematicsThought()`, etc.
@@ -85,13 +85,17 @@ Configured in `tsconfig.json`:
 - `@validation/*` → `src/validation/*`
 - `@modes/*`, `@session/*`, `@search/*`, `@batch/*`, `@backup/*`, `@cache/*`, `@export/*`, `@taxonomy/*`
 
-## The 18 Reasoning Modes
+## The 25 Reasoning Modes
 
-**Core (full runtime)**: Sequential, Shannon, Mathematics, Physics, Hybrid
+**Core (5)**: Sequential, Shannon, Mathematics, Physics, Hybrid
 
-**Advanced (full runtime)**: Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
+**Advanced Runtime (6)**: Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
 
-**Experimental (validators + types)**: Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory, Evidential, First Principles, Systems Thinking, Scientific Method, Formal Logic
+**Fundamental (2)**: Inductive, Deductive
+
+**Experimental (12)**: Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory, Evidential, First Principles, Systems Thinking, Scientific Method, Formal Logic
+
+Note: 21 modes have dedicated thought types. 4 modes (Recursive, Modal, Stochastic, Constraint) are runtime-only.
 
 ## Adding New Features
 
@@ -132,7 +136,7 @@ Configured in `tsconfig.json`:
 - `src/types/core.ts` - Core types, mode enums, thought union
 - `src/session/manager.ts` - SessionManager lifecycle management
 - `src/services/ThoughtFactory.ts` - Thought creation and validation
-- `src/taxonomy/reasoning-types.ts` - All 110+ reasoning type definitions
+- `src/taxonomy/reasoning-types.ts` - All 69 reasoning type definitions (110 planned)
 - `src/search/engine.ts` - Full-text search implementation
 
 ## Development Best Practices
