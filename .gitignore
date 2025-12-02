@@ -72,3 +72,4 @@ add-to-config.cjs
 *.zip
 /.claude
 /.claude
+.claude/settings.local.json
