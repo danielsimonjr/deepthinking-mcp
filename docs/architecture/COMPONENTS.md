@@ -45,31 +45,29 @@
 createThought(input: ThinkingToolInput, sessionId: string): Thought
 ```
 
-**Supported Modes** (21 total):
+**Supported Modes** (25 total, 21 with dedicated thought types):
 
-**Core Reasoning** (v5.0.0+):
-1. **Inductive** - Observations → general principles
-2. **Deductive** - General principles → specific conclusions
-3. **Abductive** - Inference to best explanation
+**Core Modes** (5):
+1. **Sequential** - Step-by-step linear reasoning
+2. **Shannon** - Information theory with uncertainty quantification
+3. **Mathematics** - Formal mathematical reasoning with proofs
+4. **Physics** - Physical reasoning with tensor analysis
+5. **Hybrid** - Combined reasoning approaches
 
-**Standard Workflow**:
-4. **Sequential** - Step-by-step linear reasoning
-5. **Shannon** - Information theory with uncertainty quantification
-6. **Hybrid** - Combined reasoning approaches
+**Fundamental** (2) - v5.0.0+:
+6. **Inductive** - Observations → general principles
+7. **Deductive** - General principles → specific conclusions
 
-**Math/Physics**:
-7. **Mathematics** - Formal mathematical reasoning with proofs
-8. **Physics** - Physical reasoning with tensor analysis
+**Advanced Runtime** (6):
+8. **Metareasoning** - Strategic oversight of reasoning (v6.0.0)
+9. **Recursive** - Self-referential analysis
+10. **Modal** - Possibility/necessity logic
+11. **Stochastic** - Probabilistic state transitions
+12. **Constraint** - Constraint satisfaction
+13. **Optimization** - Constraint optimization
 
-**Advanced** (Full Runtime):
-9. **Metareasoning** - Strategic oversight of reasoning (v6.0.0)
-10. **Recursive** - Self-referential analysis
-11. **Modal** - Possibility/necessity logic
-12. **Stochastic** - Probabilistic state transitions
-13. **Constraint** - Constraint satisfaction
-14. **Optimization** - Constraint optimization
-
-**Analytical/Scientific**:
+**Experimental** (12):
+14. **Abductive** - Inference to best explanation
 15. **Causal** - Causal relationship analysis
 16. **Bayesian** - Probabilistic inference
 17. **Counterfactual** - "What if" analysis
@@ -455,7 +453,7 @@ has(mode: string): boolean                                   // Check if mode su
 ```typescript
 const VALIDATOR_REGISTRY: Record<string, ValidatorConfig> = {
   sequential: { module: './modes/sequential.js', className: 'SequentialValidator' },
-  // ... 17 more modes
+  // ... 24 more modes (25 total)
 };
 ```
 
@@ -513,7 +511,7 @@ validateNonEmptyArray(thought, arr, fieldName, category)
 
 ### `src/taxonomy/reasoning-types.ts` - Reasoning Type Definitions
 
-**Purpose**: 30+ reasoning type definitions organized hierarchically
+**Purpose**: 69 reasoning type definitions (110 planned) organized hierarchically across 12 categories
 
 **Categories**:
 - Logical Reasoning
@@ -553,17 +551,18 @@ validateNonEmptyArray(thought, arr, fieldName, category)
 
 **Purpose**: Mode-specific visual export generation
 
-**Structure** (17 modular files):
+**Structure** (22 files total, 19 mode-specific exporters):
 ```
 src/export/visual/
 ├── index.ts              # Unified VisualExporter class
 ├── types.ts              # VisualFormat, VisualExportOptions
 ├── utils.ts              # sanitizeId utility
-└── [15 mode-specific exporters]
+└── [19 mode-specific exporters]
     causal.ts, temporal.ts, game-theory.ts, bayesian.ts,
     sequential.ts, shannon.ts, abductive.ts, counterfactual.ts,
     analogical.ts, evidential.ts, first-principles.ts,
-    systems-thinking.ts, scientific-method.ts, optimization.ts, formal-logic.ts
+    systems-thinking.ts, scientific-method.ts, optimization.ts, formal-logic.ts,
+    mathematics.ts, physics.ts, hybrid.ts, metareasoning.ts (v6.1.0)
 ```
 
 **Key Types**:
@@ -712,11 +711,26 @@ type Thought =
   | ShannonThought
   | MathematicsThought
   | PhysicsThought
+  | HybridThought
   | InductiveThought      // v5.0.0
   | DeductiveThought      // v5.0.0
   | MetaReasoningThought  // v6.0.0
-  | ... (21 total)
+  | AbductiveThought
+  | CausalThought
+  | BayesianThought
+  | CounterfactualThought
+  | AnalogicalThought
+  | TemporalThought
+  | GameTheoryThought
+  | EvidentialThought
+  | FirstPrinciplesThought
+  | SystemsThinkingThought
+  | ScientificMethodThought
+  | OptimizationThought
+  | FormalLogicThought    // 21 total thought types
 ```
+
+Note: The 4 advanced runtime modes (Recursive, Modal, Stochastic, Constraint) have mode entries but share generic thought handling.
 
 Enables type-safe pattern matching and mode-specific handling.
 
@@ -996,6 +1010,7 @@ TaxonomySystem
 - **Tests**: 745 passing
 - **Test Files**: 36
 - **Type Safety**: 100% (0 type suppressions)
+- **Mode Coverage**: All 25 modes have validators
 
 ---
 

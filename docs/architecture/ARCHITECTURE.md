@@ -2,7 +2,7 @@
 
 ## System Architecture
 
-DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced reasoning capabilities through 21 thinking modes with meta-reasoning for strategic oversight. The architecture follows a modular, service-oriented design with clear separation of concerns.
+DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced reasoning capabilities through 25 thinking modes (21 with dedicated thought types) with meta-reasoning for strategic oversight. The architecture follows a modular, service-oriented design with clear separation of concerns.
 
 **Version**: 6.1.2 | **Node**: >=18.0.0
 
@@ -17,10 +17,11 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
 │                   MCP Server (index.ts)                     │
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │              10 Focused Tool Handlers (v5.0.0+)        │ │
-│  │  • deepthinking_core     • deepthinking_standard       │ │
-│  │  • deepthinking_math     • deepthinking_temporal       │ │
-│  │  • deepthinking_causal   • deepthinking_strategic      │ │
-│  │  • deepthinking_analytical • deepthinking_session      │ │
+│  │  • deepthinking_core         • deepthinking_standard   │ │
+│  │  • deepthinking_math         • deepthinking_temporal   │ │
+│  │  • deepthinking_probabilistic • deepthinking_causal    │ │
+│  │  • deepthinking_strategic    • deepthinking_analytical │ │
+│  │  • deepthinking_scientific   • deepthinking_session    │ │
 │  └────────────────────────────────────────────────────────┘ │
 └───────┬──────────┬──────────┬───────────┬───────────────────┘
         │          │          │           │
@@ -31,7 +32,7 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
         │           │           │            │
         │      ┌────▼───────────▼────┐       │
         │      │ Visual Exporters    │       │
-        │      │ (17 modular files)  │       │
+        │      │ (19 mode-specific)  │       │
         │      └─────────────────────┘       │
         │                  │                 │
         │           ┌──────▼──────┐          │
@@ -45,7 +46,7 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
         │              │               │
    ┌────▼──────┐  ┌────▼──────┐  ┌────▼─────────┐
    │  Storage  │  │ Validation │  │  Type System │
-   │   Layer   │  │   Layer    │  │  (21 Modes)  │
+   │   Layer   │  │   Layer    │  │  (25 Modes)  │
    └───────────┘  │ (Lazy Load)│  └──────────────┘
                   └────────────┘
 ```
@@ -63,12 +64,12 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
 ### 2. Service Layer
 
 #### ThoughtFactory (`src/services/ThoughtFactory.ts`)
-- **Role**: Centralized thought creation for all 18 thinking modes
+- **Role**: Centralized thought creation for all 25 thinking modes
 - **Responsibilities**:
   - Creates mode-specific thought objects
   - Applies mode-specific validation
   - Handles thought revisions and dependencies
-- **Modes Supported**: Sequential, Shannon, Mathematics, Physics, Hybrid, Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory, Evidential, First Principles, Systems Thinking, Scientific Method, Optimization, Formal Logic
+- **Modes Supported**: Sequential, Shannon, Mathematics, Physics, Hybrid, Inductive, Deductive, Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory, Evidential, First Principles, Systems Thinking, Scientific Method, Optimization, Formal Logic, Metareasoning, Recursive, Modal, Stochastic, Constraint
 
 #### ExportService (`src/services/ExportService.ts`)
 - **Role**: Unified export logic for multiple formats
@@ -99,14 +100,14 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
 
 ### 3. Visual Export System (`src/export/visual/`) - v4.3.0
 
-**Modularized from monolithic visual.ts (2,546 lines) into 17 focused files:**
+**Modularized from monolithic visual.ts (2,546 lines) into 22 focused files:**
 
 ```
 src/export/visual/
 ├── index.ts              # Unified VisualExporter class
 ├── types.ts              # VisualFormat, VisualExportOptions
 ├── utils.ts              # sanitizeId utility
-└── [15 mode-specific exporters]
+└── [19 mode-specific exporters]
     ├── causal.ts         # Causal graph export
     ├── temporal.ts       # Timeline export
     ├── game-theory.ts    # Game tree export
@@ -121,7 +122,11 @@ src/export/visual/
     ├── systems-thinking.ts   # System diagram export
     ├── scientific-method.ts  # Experiment flow export
     ├── optimization.ts       # Optimization space export
-    └── formal-logic.ts       # Proof tree export
+    ├── formal-logic.ts       # Proof tree export
+    ├── mathematics.ts        # Math derivation export (v6.1.0)
+    ├── physics.ts            # Physics diagram export (v6.1.0)
+    ├── hybrid.ts             # Hybrid mode export (v6.1.0)
+    └── metareasoning.ts      # Meta-reasoning export (v6.1.0)
 ```
 
 **Benefits**:
@@ -245,20 +250,22 @@ src/tools/schemas/
 - **AdaptiveModeSelector**: Intelligent mode selection
 - **MultiModalAnalyzer**: Combined reasoning analysis
 
-Provides 110+ reasoning types organized across 12 categories.
+Provides 69 reasoning types (110 planned) organized across 12 categories.
 
 ### 12. Type System (`src/types/`)
 
 #### Organized by Domain:
-- **core.ts**: Base types, ThinkingMode enum, Thought union type (21 modes)
-- **modes/*.ts**: Mode-specific thought types (21 modes including metareasoning.ts)
+- **core.ts**: Base types, ThinkingMode enum (25 modes), Thought union type (21 types)
+- **modes/*.ts**: Mode-specific thought types (17 files)
 - **config.ts**: Configuration types
 - **session.ts**: Session and validation types
 - **events.ts**: Event system types
 
 #### Mode Categories (v6.0.0):
-- **Fully Implemented** (13): Sequential, Shannon, Mathematics, Physics, Hybrid, Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization, Inductive, Deductive
-- **Experimental** (8): Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory, Evidential, FirstPrinciples, SystemsThinking, ScientificMethod, FormalLogic
+- **Core Modes** (5): Sequential, Shannon, Mathematics, Physics, Hybrid
+- **Advanced Runtime** (6): Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
+- **Fundamental** (2): Inductive, Deductive
+- **Experimental** (12): Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory, Evidential, FirstPrinciples, SystemsThinking, ScientificMethod, FormalLogic
 
 ## Architectural Patterns
 
@@ -381,7 +388,7 @@ Response with updated session
 ### Type Safety
 - TypeScript strict mode enabled
 - **0 type suppressions** (down from 231)
-- Comprehensive type definitions for all 18 modes
+- Comprehensive type definitions for all 25 modes
 
 ## Testing Architecture
 
@@ -406,17 +413,17 @@ Response with updated session
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~50,900 |
-| TypeScript Files | 185 |
+| Total Lines of Code | ~52,000 |
+| TypeScript Files | 190 |
 | Type Suppressions | 0 |
 | Test Files | 36 |
 | Tests | 745 |
-| Thinking Modes | 21 |
-| MCP Tools | 10 |
+| Thinking Modes | 25 (21 with thought types) |
+| MCP Tools | 10 focused + 1 legacy |
 | Export Formats | 8 |
 | Backup Providers | 4 |
-| Visual Exporters | 15 mode-specific |
-| Reasoning Types | 110+ |
+| Visual Exporters | 19 mode-specific |
+| Reasoning Types | 69 (110 planned) |
 
 ## Version History
 
