@@ -1066,20 +1066,6 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/repositories/index.ts` - Repository module exports (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./ISessionRepository.js` | `ISessionRepository` | Re-export |
-| `./FileSessionRepository.js` | `FileSessionRepository` | Re-export |
-| `./MemorySessionRepository.js` | `MemorySessionRepository` | Re-export |
-
-**Exports:**
-- Re-exports: `ISessionRepository`, `FileSessionRepository`, `MemorySessionRepository`
-
----
-
 ### `src/repositories/ISessionRepository.ts` - Session Repository Interface (v3.4.5)
 
 **Internal Dependencies:**
@@ -1099,6 +1085,20 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Classes: `MemorySessionRepository`
+
+---
+
+### `src/repositories/index.ts` - Repository module exports (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./ISessionRepository.js` | `ISessionRepository` | Re-export |
+| `./FileSessionRepository.js` | `FileSessionRepository` | Re-export |
+| `./MemorySessionRepository.js` | `MemorySessionRepository` | Re-export |
+
+**Exports:**
+- Re-exports: `ISessionRepository`, `FileSessionRepository`, `MemorySessionRepository`
 
 ---
 
@@ -1190,20 +1190,6 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/services/index.ts` - Services module exports (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./ThoughtFactory.js` | `ThoughtFactory` | Re-export |
-| `./ExportService.js` | `ExportService` | Re-export |
-| `./ModeRouter.js` | `ModeRouter` | Re-export |
-
-**Exports:**
-- Re-exports: `ThoughtFactory`, `ExportService`, `ModeRouter`
-
----
-
 ### `src/services/MetaMonitor.ts` - Meta-Reasoning Monitor Service (v6.0.0)
 
 **Internal Dependencies:**
@@ -1256,7 +1242,35 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/services/index.ts` - Services module exports (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./ThoughtFactory.js` | `ThoughtFactory` | Re-export |
+| `./ExportService.js` | `ExportService` | Re-export |
+| `./ModeRouter.js` | `ModeRouter` | Re-export |
+
+**Exports:**
+- Re-exports: `ThoughtFactory`, `ExportService`, `ModeRouter`
+
+---
+
 ## Session Dependencies
+
+### `src/session/SessionMetricsCalculator.ts` - Session Metrics Calculator (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `ThinkingSession, SessionMetrics, Thought` | Import |
+| `../types/core.js` | `isTemporalThought, isGameTheoryThought, isEvidentialThought` | Import |
+| `../validation/cache.js` | `validationCache` | Import |
+
+**Exports:**
+- Classes: `SessionMetricsCalculator`
+
+---
 
 ### `src/session/index.ts` - Session module exports (v4.3.0)
 
@@ -1316,20 +1330,6 @@ The codebase is organized into the following modules:
 - Classes: `InMemorySessionStore`, `FileSessionStore`
 - Interfaces: `ISessionStore`
 - Functions: `createSessionStore`
-
----
-
-### `src/session/SessionMetricsCalculator.ts` - Session Metrics Calculator (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `ThinkingSession, SessionMetrics, Thought` | Import |
-| `../types/core.js` | `isTemporalThought, isGameTheoryThought, isEvidentialThought` | Import |
-| `../validation/cache.js` | `validationCache` | Import |
-
-**Exports:**
-- Classes: `SessionMetricsCalculator`
 
 ---
 
@@ -2982,9 +2982,9 @@ graph TD
 
     subgraph Repositories
         N49[FileSessionRepository]
-        N50[index]
-        N51[ISessionRepository]
-        N52[MemorySessionRepository]
+        N50[ISessionRepository]
+        N51[MemorySessionRepository]
+        N52[index]
     end
 
     subgraph Search
@@ -2997,17 +2997,17 @@ graph TD
 
     subgraph Services
         N58[ExportService]
-        N59[index]
-        N60[MetaMonitor]
-        N61[ModeRouter]
-        N62[ThoughtFactory]
+        N59[MetaMonitor]
+        N60[ModeRouter]
+        N61[ThoughtFactory]
+        N62[index]
     end
 
     subgraph Session
-        N63[index]
-        N64[manager]
-        N65[persistence]
-        N66[SessionMetricsCalculator]
+        N63[SessionMetricsCalculator]
+        N64[index]
+        N65[manager]
+        N66[persistence]
         N67[file-store]
         N68[...2 more]
     end
@@ -3092,7 +3092,7 @@ graph TD
     N7 --> N8
     N7 --> N33
     N7 --> N94
-    N7 --> N64
+    N7 --> N65
     N7 --> N58
     N7 --> N2
     N7 --> N53

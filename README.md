@@ -4,13 +4,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
 
-A comprehensive Model Context Protocol (MCP) server featuring **21 advanced reasoning modes** including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **25 reasoning modes** (21 with dedicated thought types, 4 advanced runtime modes) including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
 > 📋 **Latest Release**: v6.1.2 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
 >
 > 🎉 **New in v6.1.x**: Fixed causal graph exports, eliminated all runtime circular dependencies, updated architecture docs.
 >
-> ✨ **v6.0.0**: Meta-Reasoning mode for strategic oversight! Monitor reasoning effectiveness, get adaptive mode-switching recommendations, and assess quality metrics across 6 dimensions.
+> ✨ **v6.0.0+**: Meta-Reasoning mode for strategic oversight! Monitor reasoning effectiveness, get adaptive mode-switching recommendations, and assess quality metrics across 6 dimensions. v5.0.0 added Inductive and Deductive reasoning modes.
 
 ## Table of Contents
 
@@ -26,11 +26,11 @@ A comprehensive Model Context Protocol (MCP) server featuring **21 advanced reas
 
 ## Features
 
-- **21 Specialized Reasoning Modes** - From sequential thinking to game theory, formal logic, and meta-reasoning
+- **25 Specialized Reasoning Modes** - From sequential thinking to game theory, formal logic, and meta-reasoning (21 with full thought types, 4 advanced runtime modes)
 - **Meta-Reasoning (NEW!)** - Strategic oversight that monitors effectiveness, recommends mode switches, and assesses quality
 - **Adaptive Mode Switching** - Automatic evaluation-based mode switching when effectiveness drops below thresholds
 - **Intelligent Mode Recommendation** - Automatic mode selection based on problem characteristics
-- **Taxonomy Classifier** - 110+ reasoning types across 12 categories for intelligent task classification
+- **Taxonomy Classifier** - 69 reasoning types across 12 categories for intelligent task classification (110 planned)
 - **Visual Exports** - Generate Mermaid diagrams, DOT graphs, ASCII art, and LaTeX documents with meta-insights
 - **Production-Ready** - Search engine, templates, batch processing, caching, backup/restore
 - **Enterprise Security** - Input validation (Zod), rate limiting, path sanitization, PII redaction
@@ -74,42 +74,85 @@ Add to your MCP settings file:
 
 ## Quick Start
 
-### Basic Usage
-
-```typescript
-import { DeepThinkingServer } from 'deepthinking-mcp';
-
-const server = new DeepThinkingServer();
-
-// Start a sequential reasoning session
-const session = await server.startThinking({
-  mode: 'sequential',
-  problem: 'Analyze the scalability challenges of a distributed system'
-});
-
-// Add thoughts iteratively
-await server.addThought(session.id, {
-  content: 'First, identify the main bottlenecks...'
-});
-
-// Export results
-const markdown = await server.exportSession(session.id, 'markdown');
-```
-
 ### MCP Tool Usage
 
-```typescript
-// Use via MCP protocol
+DeepThinking MCP provides 10 focused tools for different reasoning domains:
+
+| Tool | Modes | Description |
+|------|-------|-------------|
+| `deepthinking_core` | inductive, deductive, abductive | Fundamental reasoning |
+| `deepthinking_standard` | sequential, shannon, hybrid | Standard workflow modes |
+| `deepthinking_math` | mathematics, physics | Mathematical/scientific reasoning |
+| `deepthinking_temporal` | temporal | Time-based reasoning |
+| `deepthinking_probabilistic` | bayesian, evidential | Probabilistic reasoning |
+| `deepthinking_causal` | causal, counterfactual | Cause-effect analysis |
+| `deepthinking_strategic` | gametheory, optimization | Strategic reasoning |
+| `deepthinking_analytical` | analogical, firstprinciples, metareasoning | Analytical reasoning |
+| `deepthinking_scientific` | scientificmethod, systemsthinking, formallogic | Scientific reasoning |
+| `deepthinking_session` | - | Session management (summarize, export, switch_mode) |
+
+### Example: Sequential Reasoning
+
+```json
 {
-  "tool": "start_thinking",
+  "tool": "deepthinking_standard",
+  "arguments": {
+    "mode": "sequential",
+    "thought": "First, identify the main bottlenecks in the distributed system",
+    "thoughtNumber": 1,
+    "totalThoughts": 5,
+    "nextThoughtNeeded": true
+  }
+}
+```
+
+### Example: Causal Analysis
+
+```json
+{
+  "tool": "deepthinking_causal",
   "arguments": {
     "mode": "causal",
-    "problem": "What caused the service outage?"
+    "thought": "Analyzing the root cause of the service outage",
+    "thoughtNumber": 1,
+    "totalThoughts": 3,
+    "nextThoughtNeeded": true,
+    "causalGraph": {
+      "nodes": [
+        {"id": "n1", "name": "High Load", "type": "cause"},
+        {"id": "n2", "name": "Memory Exhaustion", "type": "mediator"},
+        {"id": "n3", "name": "Service Crash", "type": "effect"}
+      ],
+      "edges": [
+        {"from": "n1", "to": "n2", "strength": 0.9},
+        {"from": "n2", "to": "n3", "strength": 0.95}
+      ]
+    }
+  }
+}
+```
+
+### Example: Session Export
+
+```json
+{
+  "tool": "deepthinking_session",
+  "arguments": {
+    "action": "export",
+    "sessionId": "session-123",
+    "exportFormat": "markdown"
   }
 }
 ```
 
 ## Reasoning Modes
+
+The server supports 25 reasoning modes organized into categories:
+
+- **Core Modes (5)**: Sequential, Shannon, Mathematics, Physics, Hybrid
+- **Advanced Runtime Modes (6)**: Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
+- **Fundamental Modes (2)**: Inductive, Deductive
+- **Experimental Modes (12)**: Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory, Evidential, First Principles, Systems Thinking, Scientific Method, Formal Logic
 
 ### Core Modes
 
@@ -273,91 +316,164 @@ mode: 'formal-logic'
 // Use for: Proof verification, logical analysis, formal methods
 ```
 
+### Advanced Runtime Modes
+
+#### Recursive
+Recursive problem decomposition - break complex problems into smaller subproblems.
+
+```typescript
+mode: 'recursive'
+// Use for: Divide-and-conquer, tree-structured problems, recursive algorithms
+```
+
+#### Modal
+Possibility and necessity reasoning using modal logic.
+
+```typescript
+mode: 'modal'
+// Use for: What's possible vs necessary, requirement analysis, constraint exploration
+```
+
+#### Stochastic
+Probabilistic state transitions and Markov chain reasoning.
+
+```typescript
+mode: 'stochastic'
+// Use for: Process modeling, state machines, probabilistic sequences
+```
+
+#### Constraint
+Constraint satisfaction problem solving.
+
+```typescript
+mode: 'constraint'
+// Use for: Scheduling, resource allocation, constraint propagation
+```
+
+### Fundamental Modes
+
+#### Inductive
+Reasoning from specific observations to general principles.
+
+```typescript
+mode: 'inductive'
+// Use for: Pattern recognition, generalization, empirical reasoning
+```
+
+#### Deductive
+Reasoning from general principles to specific conclusions.
+
+```typescript
+mode: 'deductive'
+// Use for: Logical proofs, applying rules, deriving conclusions
+```
+
 ## Usage Examples
 
 ### Example 1: Debugging with Abductive Reasoning
 
-```typescript
-const session = await server.startThinking({
-  mode: 'abductive',
-  problem: 'Users report intermittent 500 errors on checkout'
-});
+```json
+// Step 1: Start with observation
+{
+  "tool": "deepthinking_core",
+  "arguments": {
+    "mode": "abductive",
+    "thought": "Observed: Users report intermittent 500 errors on checkout during high traffic periods",
+    "thoughtNumber": 1,
+    "totalThoughts": 4,
+    "nextThoughtNeeded": true,
+    "observations": ["Errors occur during high traffic", "Checkout page affected", "Intermittent pattern"]
+  }
+}
 
-await server.addThought(session.id, {
-  content: 'Observed: Errors occur during high traffic periods',
-  type: 'observation'
-});
-
-await server.addThought(session.id, {
-  content: 'Hypothesis 1: Database connection pool exhaustion',
-  type: 'hypothesis',
-  likelihood: 0.8
-});
-
-const analysis = await server.analyzeSession(session.id);
-// Returns ranked hypotheses with supporting evidence
+// Step 2: Generate hypothesis
+{
+  "tool": "deepthinking_core",
+  "arguments": {
+    "sessionId": "session-from-step-1",
+    "mode": "abductive",
+    "thought": "Hypothesis: Database connection pool exhaustion under load",
+    "thoughtNumber": 2,
+    "totalThoughts": 4,
+    "nextThoughtNeeded": true,
+    "hypotheses": [{
+      "id": "h1",
+      "explanation": "Connection pool exhausted",
+      "assumptions": ["Fixed pool size", "No connection recycling"],
+      "predictions": ["Errors correlate with traffic spikes"],
+      "score": 0.8
+    }]
+  }
+}
 ```
 
 ### Example 2: Impact Analysis with Causal Reasoning
 
-```typescript
-const session = await server.startThinking({
-  mode: 'causal',
-  problem: 'Impact of increasing API rate limits'
-});
-
-await server.addThought(session.id, {
-  content: 'Build causal graph',
-  causalGraph: {
-    nodes: ['rate_limit', 'server_load', 'response_time', 'user_satisfaction'],
-    edges: [
-      { from: 'rate_limit', to: 'server_load', strength: 0.9 },
-      { from: 'server_load', to: 'response_time', strength: 0.85 }
-    ]
+```json
+{
+  "tool": "deepthinking_causal",
+  "arguments": {
+    "mode": "causal",
+    "thought": "Analyzing impact of increasing API rate limits on system behavior",
+    "thoughtNumber": 1,
+    "totalThoughts": 3,
+    "nextThoughtNeeded": true,
+    "causalGraph": {
+      "nodes": [
+        {"id": "rate_limit", "name": "Rate Limit", "type": "cause", "description": "API rate limit setting"},
+        {"id": "server_load", "name": "Server Load", "type": "mediator", "description": "CPU/Memory usage"},
+        {"id": "response_time", "name": "Response Time", "type": "effect", "description": "API latency"},
+        {"id": "satisfaction", "name": "User Satisfaction", "type": "effect", "description": "User experience"}
+      ],
+      "edges": [
+        {"from": "rate_limit", "to": "server_load", "strength": 0.9, "confidence": 0.85},
+        {"from": "server_load", "to": "response_time", "strength": 0.85, "confidence": 0.9},
+        {"from": "response_time", "to": "satisfaction", "strength": -0.7, "confidence": 0.8}
+      ]
+    }
   }
-});
-
-const intervention = await server.analyzeIntervention(session.id, {
-  variable: 'rate_limit',
-  change: '+50%'
-});
-// Returns predicted effects on downstream variables
+}
 ```
 
 ### Example 3: Strategic Analysis with Game Theory
 
-```typescript
-const session = await server.startThinking({
-  mode: 'game-theory',
-  problem: 'Pricing strategy in competitive market'
-});
-
-await server.addThought(session.id, {
-  content: 'Define game structure',
-  game: {
-    players: ['us', 'competitor'],
-    strategies: {
-      us: ['premium', 'competitive', 'discount'],
-      competitor: ['premium', 'competitive', 'discount']
-    },
-    payoffs: {
-      // Payoff matrix for each strategy combination
+```json
+{
+  "tool": "deepthinking_strategic",
+  "arguments": {
+    "mode": "gametheory",
+    "thought": "Analyzing pricing strategy in competitive market using game theory",
+    "thoughtNumber": 1,
+    "totalThoughts": 3,
+    "nextThoughtNeeded": true,
+    "game": {
+      "type": "strategic",
+      "players": ["Company A", "Company B"],
+      "strategies": {
+        "Company A": ["premium", "competitive", "discount"],
+        "Company B": ["premium", "competitive", "discount"]
+      },
+      "payoffMatrix": [
+        [{"A": 10, "B": 10}, {"A": 5, "B": 15}, {"A": 2, "B": 12}],
+        [{"A": 15, "B": 5}, {"A": 8, "B": 8}, {"A": 4, "B": 10}],
+        [{"A": 12, "B": 2}, {"A": 10, "B": 4}, {"A": 6, "B": 6}]
+      ]
     }
   }
-});
-
-const equilibria = await server.findNashEquilibria(session.id);
-// Returns Nash equilibria and dominant strategies
+}
 ```
 
 ## Production Features
 
 ### Search Engine
 
-Full-text search with faceted filtering, autocomplete, and relevance ranking.
+Full-text search with faceted filtering, autocomplete, and relevance ranking. The search engine is available programmatically:
 
 ```typescript
-const results = await server.search({
+import { SearchEngine } from 'deepthinking-mcp/search';
+
+const searchEngine = new SearchEngine();
+const results = await searchEngine.search({
   query: 'machine learning optimization',
   facets: ['mode', 'tags'],
   filters: {
@@ -369,39 +485,56 @@ const results = await server.search({
 
 ### Template System
 
-Pre-built templates for common reasoning patterns.
+Pre-built templates for common reasoning patterns:
 
 ```typescript
-const templates = await server.listTemplates({
+import { TemplateManager } from 'deepthinking-mcp/templates';
+
+const templateManager = new TemplateManager();
+const templates = await templateManager.listTemplates({
   category: 'problem-solving',
   difficulty: 'beginner'
-});
-
-const session = await server.instantiateTemplate(templates[0].id, {
-  title: 'My Analysis',
-  context: 'Specific problem details...'
 });
 ```
 
 ### Batch Processing
 
-Process multiple sessions concurrently with job tracking.
+Process multiple sessions concurrently with 8 operation types:
+
+- **export** - Batch export sessions to various formats
+- **import** - Batch import sessions from files
+- **analyze** - Batch taxonomy/quality/pattern analysis
+- **validate** - Batch session validation
+- **transform** - Batch mode switching, merging, splitting
+- **index** - Batch search/analytics indexing
+- **backup** - Batch backup with compression
+- **cleanup** - Batch cleanup of old/incomplete sessions
 
 ```typescript
-const jobId = await server.submitBatchJob({
-  type: 'export',
-  sessionIds: ['session-1', 'session-2', 'session-3'],
-  format: 'latex'
+import { BatchProcessor } from 'deepthinking-mcp/batch';
+
+const processor = new BatchProcessor({
+  maxConcurrentJobs: 4,
+  maxBatchSize: 100
 });
 
-const status = await server.getJobStatus(jobId);
+const job = await processor.submitJob({
+  type: 'export',
+  params: {
+    sessionIds: ['session-1', 'session-2'],
+    format: 'latex',
+    outputPath: './exports'
+  }
+});
 ```
 
 ### Backup & Restore
 
-Automated backup with compression and local storage.
+Automated backup with compression and local storage:
 
 ```typescript
+import { BackupManager } from 'deepthinking-mcp/backup';
+
 const backupManager = new BackupManager({
   provider: 'local',
   config: { path: './backups' }
@@ -413,10 +546,13 @@ const restored = await backupManager.restore(backupId);
 
 ### Session Comparison
 
-Compare reasoning sessions to analyze differences and similarities.
+Compare reasoning sessions to analyze differences and similarities:
 
 ```typescript
-const comparison = await server.compareSessions(session1, session2);
+import { SessionComparator } from 'deepthinking-mcp/comparison';
+
+const comparator = new SessionComparator();
+const comparison = await comparator.compare(session1, session2);
 
 console.log(comparison.similarity); // 0-1 scale
 console.log(comparison.differences); // Detailed diff
@@ -463,7 +599,7 @@ logger.info('User action', sanitizeForLogging({
 
 ### Taxonomy Classifier
 
-Intelligent classification of reasoning tasks using 110+ reasoning types across 12 categories.
+Intelligent classification of reasoning tasks using 69 reasoning types across 12 categories.
 
 ```typescript
 import { TaxonomyClassifier } from 'deepthinking-mcp/taxonomy';
@@ -485,59 +621,74 @@ const mode = result.primaryType.mode;  // Suggests best reasoning mode
 
 ## API Documentation
 
-### Core Methods
+### MCP Tool Interface
 
-#### `startThinking(options)`
+All reasoning is done through MCP tools. Each tool accepts arguments and returns JSON responses.
 
-Start a new thinking session.
+#### Common Parameters (all thinking tools)
 
-**Parameters:**
-- `mode` (string): Reasoning mode to use
-- `problem` (string): Problem description
-- `context?` (object): Additional context
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `sessionId` | string | No | Session ID (auto-created if omitted) |
+| `thought` | string | Yes | The reasoning content |
+| `thoughtNumber` | integer | Yes | Current thought number (1-based) |
+| `totalThoughts` | integer | Yes | Estimated total thoughts |
+| `nextThoughtNeeded` | boolean | Yes | Whether more reasoning needed |
+| `mode` | string | Yes | The reasoning mode |
 
-**Returns:** `Promise<ThinkingSession>`
+#### Session Actions (`deepthinking_session`)
 
-#### `addThought(sessionId, thought)`
+| Action | Parameters | Description |
+|--------|------------|-------------|
+| `summarize` | `sessionId` | Generate session summary |
+| `export` | `sessionId`, `exportFormat` | Export to format (json, markdown, latex, html, jupyter, mermaid, dot, ascii) |
+| `get_session` | `sessionId` | Get session details |
+| `switch_mode` | `sessionId`, `newMode` | Switch reasoning mode |
+| `recommend_mode` | `problemType` or `problemCharacteristics` | Get mode recommendations |
 
-Add a thought to an existing session.
+#### Example Response
 
-**Parameters:**
-- `sessionId` (string): Session identifier
-- `thought` (object): Thought content and metadata
+```json
+{
+  "sessionId": "session-abc123",
+  "thoughtId": "thought-xyz789",
+  "thoughtNumber": 1,
+  "mode": "sequential",
+  "nextThoughtNeeded": true,
+  "sessionComplete": false,
+  "totalThoughts": 3
+}
+```
 
-**Returns:** `Promise<Thought>`
+### Programmatic Usage
 
-#### `exportSession(sessionId, format)`
+For direct TypeScript/JavaScript usage:
 
-Export session to specified format.
+```typescript
+import { SessionManager, ThoughtFactory, ExportService } from 'deepthinking-mcp';
 
-**Parameters:**
-- `sessionId` (string): Session identifier
-- `format` ('markdown' | 'latex' | 'json' | 'mermaid' | 'dot' | 'ascii'): Export format
+// Create session
+const sessionManager = new SessionManager();
+const session = await sessionManager.createSession({
+  mode: 'sequential',
+  title: 'My Analysis'
+});
 
-**Returns:** `Promise<string>`
+// Add thought
+const thoughtFactory = new ThoughtFactory();
+const thought = thoughtFactory.createThought({
+  thought: 'Step 1: Analyze the problem',
+  thoughtNumber: 1,
+  totalThoughts: 3,
+  nextThoughtNeeded: true,
+  mode: 'sequential'
+}, session.id);
+await sessionManager.addThought(session.id, thought);
 
-### Advanced Methods
-
-#### `recommendMode(problem, characteristics)`
-
-Get intelligent mode recommendations.
-
-**Parameters:**
-- `problem` (string): Problem description
-- `characteristics?` (object): Problem characteristics
-
-**Returns:** `Promise<ModeRecommendation[]>`
-
-#### `validateSession(sessionId)`
-
-Validate session structure and content.
-
-**Parameters:**
-- `sessionId` (string): Session identifier
-
-**Returns:** `Promise<ValidationResult>`
+// Export
+const exportService = new ExportService();
+const markdown = exportService.exportSession(session, 'markdown');
+```
 
 For complete API documentation, see [API.md](docs/API.md).
 
@@ -549,67 +700,68 @@ For complete API documentation, see [API.md](docs/API.md).
 | Lines of Code | ~52,000 |
 | Test Files | 36 |
 | Passing Tests | 745 |
-| Thinking Modes | 21 |
-| MCP Tools | 10 |
+| Thinking Modes | 25 (21 with thought types) |
+| MCP Tools | 10 focused + 1 legacy |
 | Export Formats | 8 |
-| Reasoning Types | 110+ |
+| Reasoning Types | 69 (110 planned) |
+| Modules | 25 |
+| Total Exports | 535 |
 
 ## Architecture
 
-### Taxonomy System
+The codebase is organized into 25 modules with clean separation of concerns. See [docs/architecture/DEPENDENCY_GRAPH.md](docs/architecture/DEPENDENCY_GRAPH.md) for the complete dependency graph.
 
-Intelligent reasoning type classification and navigation.
-
-```
-taxonomy/
-├── reasoning-types.ts  # 100+ reasoning type definitions
-├── navigator.ts        # Query and exploration
-├── suggestion-engine.ts # Mode recommendations
-└── adaptive-selector.ts # Dynamic mode selection
-```
-
-### Export Formats
-
-Multiple visualization and document formats.
+### Core Structure
 
 ```
-exports/
-├── latex/      # LaTeX document generation
-├── markdown/   # Markdown formatting
-├── mermaid/    # Mermaid diagrams
-├── dot/        # Graphviz DOT graphs
-└── ascii/      # ASCII art visualizations
+src/
+├── index.ts           # MCP server entry point (tool handlers)
+├── types/             # Type definitions including 25 mode types
+│   ├── core.ts        # ThinkingMode enum, Thought union type
+│   └── modes/         # One file per reasoning mode (17 files)
+├── services/          # Business logic layer
+│   ├── ThoughtFactory.ts    # Thought creation and validation
+│   ├── ExportService.ts     # Multi-format export handling
+│   └── ModeRouter.ts        # Mode switching and recommendations
+├── session/           # SessionManager, persistence, storage
+├── modes/             # Advanced reasoning implementations (6 files)
+└── tools/             # MCP tool definitions and schemas
 ```
 
-### Production Systems
-
-Enterprise-ready features for production deployment.
+### Feature Modules
 
 ```
-production/
-├── search/        # Full-text search with facets & autocomplete
-├── templates/     # Session templates with usage tracking
-├── batch/         # Real batch processing (6 operations implemented)
-├── cache/         # LRU caching with auto-eviction
-├── backup/        # Local backup with compression
-├── comparison/    # Session comparison & similarity analysis
-├── validation/    # Zod-based input validation (8 schemas)
-├── rate-limit/    # Sliding window rate limiter
-└── repositories/  # Repository pattern with FileSessionRepository
+src/
+├── taxonomy/          # 69 reasoning types, classifier, suggestion engine
+│   ├── reasoning-types.ts   # Full taxonomy definitions
+│   ├── classifier.ts        # Task classification
+│   └── suggestion-engine.ts # Mode recommendations
+├── export/            # Visual and document exporters
+│   ├── visual/        # 18 mode-specific visual exporters
+│   └── latex.ts       # LaTeX document generation
+├── search/            # Full-text search with faceted filtering
+├── batch/             # Batch processing (8 operations)
+├── backup/            # Backup manager with provider abstraction
+├── cache/             # LRU/LFU/FIFO caching strategies
+├── rate-limit/        # Sliding window rate limiter
+├── validation/        # Zod schemas (25+ mode validators)
+├── comparison/        # Session comparison & diff generation
+├── templates/         # Session templates with usage tracking
+├── analytics/         # Analytics engine and dashboard
+├── webhooks/          # Event-driven webhook system
+├── collaboration/     # Annotations and conflict resolution
+└── ml/                # Pattern recognition & recommendations
 ```
 
 ### Security Features
 
-Production-grade security and compliance.
+Security is built into multiple modules:
 
-```
-security/
-├── validation/      # Input validation with Zod schemas
-├── sanitization/    # Path sanitization & traversal prevention
-├── rate-limiting/   # Per-key rate limiting with sliding windows
-├── log-redaction/   # PII redaction for GDPR compliance
-└── error-handling/  # Standardized error hierarchy with context
-```
+- **validation/** - Input validation with Zod schemas for all 25 modes
+- **utils/sanitization.ts** - Path sanitization & traversal prevention
+- **utils/log-sanitizer.ts** - PII redaction for GDPR compliance
+- **rate-limit/** - Per-key rate limiting with sliding windows
+- **utils/errors.ts** - Standardized error hierarchy with context
 
 ## Contributing
 
