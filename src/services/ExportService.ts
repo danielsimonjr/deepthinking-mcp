@@ -23,6 +23,7 @@ import {
   BayesianThought,
   FirstPrinciplesThought,
   isMetaReasoningThought,
+  HybridThought,
   // Sprint 1: Visual export integration types
   SequentialThought,
   ShannonThought,
@@ -35,6 +36,9 @@ import {
   OptimizationThought,
   FormalLogicThought,
 } from '../types/index.js';
+import type { MathematicsThought } from '../types/modes/mathematics.js';
+import type { PhysicsThought } from '../types/modes/physics.js';
+import type { MetaReasoningThought } from '../types/modes/metareasoning.js';
 import { VisualExporter, type VisualFormat } from '../export/visual/index.js';
 import { escapeHtml, escapeLatex } from '../utils/sanitization.js';
 import { ILogger } from '../interfaces/ILogger.js';
@@ -278,6 +282,44 @@ export class ExportService {
 
     if (lastThought.mode === ThinkingMode.FORMALLOGIC && 'premises' in lastThought) {
       return this.visualExporter.exportFormalLogicProof(lastThought as FormalLogicThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    }
+
+    // Sprint 2: Integration of 4 new visual exporters
+
+    if (lastThought.mode === ThinkingMode.MATHEMATICS && 'proofStrategy' in lastThought) {
+      return this.visualExporter.exportMathematicsDerivation(lastThought as MathematicsThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    }
+
+    if (lastThought.mode === ThinkingMode.PHYSICS && 'tensorProperties' in lastThought) {
+      return this.visualExporter.exportPhysicsVisualization(lastThought as PhysicsThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    }
+
+    if (lastThought.mode === ThinkingMode.HYBRID && 'primaryMode' in lastThought) {
+      return this.visualExporter.exportHybridOrchestration(lastThought as HybridThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    }
+
+    if (lastThought.mode === ThinkingMode.METAREASONING && 'currentStrategy' in lastThought) {
+      return this.visualExporter.exportMetaReasoningVisualization(lastThought as MetaReasoningThought, {
         format,
         colorScheme: 'default',
         includeLabels: true,

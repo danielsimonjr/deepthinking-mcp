@@ -27,6 +27,12 @@ export { exportScientificMethodExperiment } from './scientific-method.js';
 export { exportOptimizationSolution } from './optimization.js';
 export { exportFormalLogicProof } from './formal-logic.js';
 
+// Sprint 2: New visual exporters
+export { exportMathematicsDerivation } from './mathematics.js';
+export { exportPhysicsVisualization } from './physics.js';
+export { exportHybridOrchestration } from './hybrid.js';
+export { exportMetaReasoningVisualization } from './metareasoning.js';
+
 // Import types for unified class
 import type {
   CausalThought,
@@ -43,8 +49,12 @@ import type {
   SystemsThinkingThought,
   ScientificMethodThought,
   OptimizationThought,
-  FormalLogicThought
+  FormalLogicThought,
+  HybridThought,
 } from '../../types/index.js';
+import type { MathematicsThought } from '../../types/modes/mathematics.js';
+import type { PhysicsThought } from '../../types/modes/physics.js';
+import type { MetaReasoningThought } from '../../types/modes/metareasoning.js';
 
 import type { VisualExportOptions } from './types.js';
 
@@ -64,6 +74,12 @@ import { exportSystemsThinkingCausalLoops } from './systems-thinking.js';
 import { exportScientificMethodExperiment } from './scientific-method.js';
 import { exportOptimizationSolution } from './optimization.js';
 import { exportFormalLogicProof } from './formal-logic.js';
+
+// Sprint 2: Import new exporters
+import { exportMathematicsDerivation } from './mathematics.js';
+import { exportPhysicsVisualization } from './physics.js';
+import { exportHybridOrchestration } from './hybrid.js';
+import { exportMetaReasoningVisualization } from './metareasoning.js';
 
 /**
  * Unified Visual Exporter for backward compatibility
@@ -128,5 +144,23 @@ export class VisualExporter {
 
   exportFormalLogicProof(thought: FormalLogicThought, options: VisualExportOptions): string {
     return exportFormalLogicProof(thought, options);
+  }
+
+  // Sprint 2: New visual export wrapper methods
+
+  exportMathematicsDerivation(thought: MathematicsThought, options: VisualExportOptions): string {
+    return exportMathematicsDerivation(thought, options);
+  }
+
+  exportPhysicsVisualization(thought: PhysicsThought, options: VisualExportOptions): string {
+    return exportPhysicsVisualization(thought, options);
+  }
+
+  exportHybridOrchestration(thought: HybridThought, options: VisualExportOptions): string {
+    return exportHybridOrchestration(thought, options);
+  }
+
+  exportMetaReasoningVisualization(thought: MetaReasoningThought, options: VisualExportOptions): string {
+    return exportMetaReasoningVisualization(thought, options);
   }
 }

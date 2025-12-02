@@ -71,7 +71,8 @@
       "mcp__memory-mcp__open_nodes",
       "mcp__memory-mcp__merge_entities",
       "mcp__memory-mcp__delete_relations",
-      "mcp__deepthinking-mcp__deepthinking_standard"
+      "mcp__deepthinking-mcp__deepthinking_standard",
+      "Bash(dir C:mcp-serversdeepthinking-mcpsrctypesmodes)"
     ],
     "deny": [],
     "ask": []
