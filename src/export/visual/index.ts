@@ -33,6 +33,9 @@ export { exportPhysicsVisualization } from './physics.js';
 export { exportHybridOrchestration } from './hybrid.js';
 export { exportMetaReasoningVisualization } from './metareasoning.js';
 
+// Phase 8: Proof decomposition visual export
+export { exportProofDecomposition } from './proof-decomposition.js';
+
 // Import types for unified class
 import type {
   CausalThought,
@@ -52,7 +55,7 @@ import type {
   FormalLogicThought,
   HybridThought,
 } from '../../types/index.js';
-import type { MathematicsThought } from '../../types/modes/mathematics.js';
+import type { MathematicsThought, ProofDecomposition } from '../../types/modes/mathematics.js';
 import type { PhysicsThought } from '../../types/modes/physics.js';
 import type { MetaReasoningThought } from '../../types/modes/metareasoning.js';
 
@@ -80,6 +83,9 @@ import { exportMathematicsDerivation } from './mathematics.js';
 import { exportPhysicsVisualization } from './physics.js';
 import { exportHybridOrchestration } from './hybrid.js';
 import { exportMetaReasoningVisualization } from './metareasoning.js';
+
+// Phase 8: Import proof decomposition exporter
+import { exportProofDecomposition } from './proof-decomposition.js';
 
 /**
  * Unified Visual Exporter for backward compatibility
@@ -162,5 +168,11 @@ export class VisualExporter {
 
   exportMetaReasoningVisualization(thought: MetaReasoningThought, options: VisualExportOptions): string {
     return exportMetaReasoningVisualization(thought, options);
+  }
+
+  // Phase 8: Proof decomposition visual export
+
+  exportProofDecomposition(decomposition: ProofDecomposition, options: VisualExportOptions): string {
+    return exportProofDecomposition(decomposition, options);
   }
 }

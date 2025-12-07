@@ -181,6 +181,31 @@ function prependWarning(result: any, warning: string) {
 }
 
 /**
+ * Check if a thought type is a proof decomposition type (Phase 8)
+ */
+function isDecompositionThoughtType(thoughtType: string | undefined): boolean {
+  return [
+    'proof_decomposition',
+    'dependency_analysis',
+    'consistency_check',
+    'gap_identification',
+    'assumption_trace',
+  ].includes(thoughtType || '');
+}
+
+/**
+ * Lazy load MathematicsReasoningEngine (Phase 8)
+ */
+let _mathEngine: any = null;
+async function getMathematicsReasoningEngine() {
+  if (!_mathEngine) {
+    const { MathematicsReasoningEngine } = await import('./modes/mathematics-reasoning.js');
+    _mathEngine = new MathematicsReasoningEngine();
+  }
+  return _mathEngine;
+}
+
+/**
  * Handle add_thought action for any thinking mode
  */
 async function handleAddThought(input: any, _toolName: string) {
@@ -203,21 +228,62 @@ async function handleAddThought(input: any, _toolName: string) {
 
   // Use ThoughtFactory to create thought
   const thought = thoughtFactory.createThought({ ...input, mode }, sessionId);
+
+  // Phase 8: Enrich mathematics thoughts with proof decomposition analysis
+  if (mode === ThinkingMode.MATHEMATICS && isDecompositionThoughtType(input.thoughtType)) {
+    try {
+      const mathEngine = await getMathematicsReasoningEngine();
+
+      // Build proof input from tool input
+      const proofInput = input.proofSteps || input.thought;
+
+      // Run analysis based on thought type
+      const analysisResult = mathEngine.analyzeForThoughtType(
+        proofInput,
+        input.thoughtType,
+        input.theorem
+      );
+
+      // Enrich the thought with analysis results
+      (thought as any).decomposition = analysisResult.decomposition;
+      (thought as any).consistencyReport = analysisResult.consistencyReport;
+      (thought as any).gapAnalysis = analysisResult.gapAnalysis;
+      (thought as any).assumptionAnalysis = analysisResult.assumptionAnalysis;
+    } catch (error) {
+      // Log but don't fail - analysis is optional enhancement
+      console.error('Proof analysis failed:', error);
+    }
+  }
+
   const session = await sessionManager.addThought(sessionId, thought);
+
+  // Build response with analysis results if present
+  const response: any = {
+    sessionId: session.id,
+    thoughtId: thought.id,
+    thoughtNumber: thought.thoughtNumber,
+    mode: thought.mode,
+    nextThoughtNeeded: thought.nextThoughtNeeded,
+    sessionComplete: session.isComplete,
+    totalThoughts: session.thoughts.length,
+  };
+
+  // Include analysis results in response if available
+  if ((thought as any).decomposition) {
+    response.decomposition = (thought as any).decomposition;
+  }
+  if ((thought as any).consistencyReport) {
+    response.consistencyReport = (thought as any).consistencyReport;
+  }
+  if ((thought as any).gapAnalysis) {
+    response.gapAnalysis = (thought as any).gapAnalysis;
+  }
 
   return {
     content: [
       {
         type: 'text',
-        text: JSON.stringify({
-          sessionId: session.id,
-          thoughtId: thought.id,
-          thoughtNumber: thought.thoughtNumber,
-          mode: thought.mode,
-          nextThoughtNeeded: thought.nextThoughtNeeded,
-          sessionComplete: session.isComplete,
-          totalThoughts: session.thoughts.length,
-        }, null, 2),
+        text: JSON.stringify(response, null, 2),
       },
     ],
   };

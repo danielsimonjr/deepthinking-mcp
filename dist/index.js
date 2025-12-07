@@ -2714,7 +2714,13 @@ var init_type_guards = __esm({
       "synthesis",
       "abstraction",
       "analogy",
-      "metacognition"
+      "metacognition",
+      // Phase 8: Proof Decomposition Types
+      "proof_decomposition",
+      "dependency_analysis",
+      "consistency_check",
+      "gap_identification",
+      "assumption_trace"
     ];
   }
 });
@@ -6317,6 +6323,422 @@ var init_metareasoning = __esm({
   }
 });
 
+// src/export/visual/proof-decomposition.ts
+function exportProofDecomposition(decomposition, options) {
+  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  switch (format) {
+    case "mermaid":
+      return proofDecompositionToMermaid(decomposition, colorScheme, includeLabels, includeMetrics);
+    case "dot":
+      return proofDecompositionToDOT(decomposition, includeLabels, includeMetrics);
+    case "ascii":
+      return proofDecompositionToASCII(decomposition);
+    default:
+      throw new Error(`Unsupported format: ${format}`);
+  }
+}
+function getMermaidShape(type) {
+  switch (type) {
+    case "axiom":
+      return ["([", "])"];
+    // Stadium/rounded
+    case "definition":
+      return ["[[", "]]"];
+    // Subroutine
+    case "hypothesis":
+      return ["[", "]"];
+    // Rectangle
+    case "lemma":
+      return ["{{", "}}"];
+    // Hexagon
+    case "derived":
+      return ["(", ")"];
+    // Default rounded
+    case "conclusion":
+      return ["{", "}"];
+    // Diamond shape via styling
+    default:
+      return ["(", ")"];
+  }
+}
+function getNodeColor(type, colorScheme) {
+  if (colorScheme === "monochrome") return "#ffffff";
+  const colors = colorScheme === "pastel" ? {
+    axiom: "#c8e6c9",
+    // Light green
+    definition: "#e1bee7",
+    // Light purple
+    hypothesis: "#bbdefb",
+    // Light blue
+    lemma: "#fff9c4",
+    // Light yellow
+    derived: "#e0e0e0",
+    // Light gray
+    conclusion: "#d1c4e9"
+    // Light purple
+  } : {
+    axiom: "#81c784",
+    // Green
+    definition: "#ba68c8",
+    // Purple
+    hypothesis: "#64b5f6",
+    // Blue
+    lemma: "#ffd54f",
+    // Yellow
+    derived: "#bdbdbd",
+    // Gray
+    conclusion: "#9575cd"
+    // Purple
+  };
+  return colors[type] || colors.derived;
+}
+function proofDecompositionToMermaid(decomposition, colorScheme, includeLabels, includeMetrics) {
+  let mermaid = "graph TD\n";
+  if (decomposition.theorem) {
+    mermaid += `  title["Proof: ${decomposition.theorem.substring(0, 50)}..."]
+`;
+    mermaid += "  style title fill:#f5f5f5,stroke:#333\n\n";
+  }
+  const axioms = decomposition.atoms.filter((a) => a.type === "axiom");
+  const hypotheses = decomposition.atoms.filter((a) => a.type === "hypothesis");
+  const derived = decomposition.atoms.filter((a) => a.type === "derived" || a.type === "lemma");
+  const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
+  if (axioms.length > 0) {
+    mermaid += '  subgraph Axioms["Axioms"]\n';
+    for (const atom of axioms) {
+      const nodeId = sanitizeId(atom.id);
+      const label = includeLabels ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? "..." : "") : atom.id;
+      const [open, close] = getMermaidShape(atom.type);
+      mermaid += `    ${nodeId}${open}"${label}"${close}
+`;
+    }
+    mermaid += "  end\n\n";
+  }
+  if (hypotheses.length > 0) {
+    mermaid += '  subgraph Hypotheses["Hypotheses"]\n';
+    for (const atom of hypotheses) {
+      const nodeId = sanitizeId(atom.id);
+      const label = includeLabels ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? "..." : "") : atom.id;
+      const [open, close] = getMermaidShape(atom.type);
+      mermaid += `    ${nodeId}${open}"${label}"${close}
+`;
+    }
+    mermaid += "  end\n\n";
+  }
+  for (const atom of derived) {
+    const nodeId = sanitizeId(atom.id);
+    const label = includeLabels ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? "..." : "") : atom.id;
+    const [open, close] = getMermaidShape(atom.type);
+    mermaid += `  ${nodeId}${open}"${label}"${close}
+`;
+  }
+  if (conclusions.length > 0) {
+    mermaid += '\n  subgraph Conclusions["Conclusions"]\n';
+    for (const atom of conclusions) {
+      const nodeId = sanitizeId(atom.id);
+      const label = includeLabels ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? "..." : "") : atom.id;
+      mermaid += `    ${nodeId}{"${label}"}
+`;
+    }
+    mermaid += "  end\n\n";
+  }
+  if (decomposition.dependencies && decomposition.dependencies.edges) {
+    for (const edge of decomposition.dependencies.edges) {
+      const fromId = sanitizeId(edge.from);
+      const toId = sanitizeId(edge.to);
+      const edgeLabel = edge.inferenceRule ? ` -->|${edge.inferenceRule}| ` : " --> ";
+      mermaid += `  ${fromId}${edgeLabel}${toId}
+`;
+    }
+  }
+  if (decomposition.gaps && decomposition.gaps.length > 0) {
+    mermaid += '\n  subgraph Gaps["Identified Gaps"]\n';
+    for (const gap of decomposition.gaps) {
+      const gapId = sanitizeId(gap.id);
+      const label = gap.description.substring(0, 30) + "...";
+      mermaid += `    ${gapId}["${label}"]
+`;
+      mermaid += `    ${sanitizeId(gap.location.from)} -.->|gap| ${gapId}
+`;
+      mermaid += `    ${gapId} -.-> ${sanitizeId(gap.location.to)}
+`;
+    }
+    mermaid += "  end\n";
+  }
+  if (includeMetrics) {
+    mermaid += '\n  subgraph Metrics["Metrics"]\n';
+    mermaid += `    m1["Completeness: ${(decomposition.completeness * 100).toFixed(0)}%"]
+`;
+    mermaid += `    m2["Rigor: ${decomposition.rigorLevel}"]
+`;
+    mermaid += `    m3["Atoms: ${decomposition.atomCount}"]
+`;
+    mermaid += `    m4["Depth: ${decomposition.maxDependencyDepth}"]
+`;
+    mermaid += "  end\n";
+  }
+  if (colorScheme !== "monochrome") {
+    mermaid += "\n";
+    for (const atom of decomposition.atoms) {
+      const nodeId = sanitizeId(atom.id);
+      const color = getNodeColor(atom.type, colorScheme);
+      mermaid += `  style ${nodeId} fill:${color}
+`;
+    }
+    if (decomposition.gaps) {
+      for (const gap of decomposition.gaps) {
+        const gapId = sanitizeId(gap.id);
+        mermaid += `  style ${gapId} fill:#ffcdd2,stroke:#e53935,stroke-dasharray: 5 5
+`;
+      }
+    }
+  }
+  return mermaid;
+}
+function getDOTShape(type) {
+  switch (type) {
+    case "axiom":
+      return "ellipse";
+    case "definition":
+      return "box3d";
+    case "hypothesis":
+      return "box";
+    case "lemma":
+      return "hexagon";
+    case "derived":
+      return "box";
+    case "conclusion":
+      return "diamond";
+    default:
+      return "box";
+  }
+}
+function proofDecompositionToDOT(decomposition, includeLabels, includeMetrics) {
+  let dot = "digraph ProofDecomposition {\n";
+  dot += "  rankdir=TB;\n";
+  dot += "  compound=true;\n";
+  dot += '  node [style="rounded,filled", fontname="Arial"];\n';
+  dot += '  edge [fontname="Arial", fontsize=10];\n\n';
+  if (decomposition.theorem) {
+    dot += `  label="Proof: ${decomposition.theorem.substring(0, 60)}...";
+`;
+    dot += "  labelloc=t;\n";
+    dot += "  fontsize=14;\n\n";
+  }
+  const axioms = decomposition.atoms.filter((a) => a.type === "axiom");
+  const hypotheses = decomposition.atoms.filter((a) => a.type === "hypothesis");
+  const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
+  if (axioms.length > 0) {
+    dot += "  subgraph cluster_axioms {\n";
+    dot += '    label="Axioms";\n';
+    dot += "    style=filled;\n";
+    dot += '    color="#e8f5e9";\n';
+    for (const atom of axioms) {
+      const nodeId = sanitizeId(atom.id);
+      const label = includeLabels ? atom.statement.substring(0, 40).replace(/"/g, '\\"') : atom.id;
+      dot += `    ${nodeId} [label="${label}", shape=${getDOTShape(atom.type)}, fillcolor="#81c784"];
+`;
+    }
+    dot += "  }\n\n";
+  }
+  if (hypotheses.length > 0) {
+    dot += "  subgraph cluster_hypotheses {\n";
+    dot += '    label="Hypotheses";\n';
+    dot += "    style=filled;\n";
+    dot += '    color="#e3f2fd";\n';
+    for (const atom of hypotheses) {
+      const nodeId = sanitizeId(atom.id);
+      const label = includeLabels ? atom.statement.substring(0, 40).replace(/"/g, '\\"') : atom.id;
+      dot += `    ${nodeId} [label="${label}", shape=${getDOTShape(atom.type)}, fillcolor="#64b5f6"];
+`;
+    }
+    dot += "  }\n\n";
+  }
+  const derived = decomposition.atoms.filter((a) => a.type === "derived" || a.type === "lemma");
+  for (const atom of derived) {
+    const nodeId = sanitizeId(atom.id);
+    const label = includeLabels ? atom.statement.substring(0, 40).replace(/"/g, '\\"') : atom.id;
+    const color = atom.type === "lemma" ? "#ffd54f" : "#bdbdbd";
+    dot += `  ${nodeId} [label="${label}", shape=${getDOTShape(atom.type)}, fillcolor="${color}"];
+`;
+  }
+  dot += "\n";
+  if (conclusions.length > 0) {
+    dot += "  subgraph cluster_conclusions {\n";
+    dot += '    label="Conclusions";\n';
+    dot += "    style=filled;\n";
+    dot += '    color="#ede7f6";\n';
+    for (const atom of conclusions) {
+      const nodeId = sanitizeId(atom.id);
+      const label = includeLabels ? atom.statement.substring(0, 40).replace(/"/g, '\\"') : atom.id;
+      dot += `    ${nodeId} [label="${label}", shape=${getDOTShape(atom.type)}, fillcolor="#9575cd"];
+`;
+    }
+    dot += "  }\n\n";
+  }
+  if (decomposition.dependencies && decomposition.dependencies.edges) {
+    for (const edge of decomposition.dependencies.edges) {
+      const fromId = sanitizeId(edge.from);
+      const toId = sanitizeId(edge.to);
+      const edgeLabel = edge.inferenceRule ? ` [label="${edge.inferenceRule}"]` : "";
+      dot += `  ${fromId} -> ${toId}${edgeLabel};
+`;
+    }
+  }
+  if (decomposition.gaps && decomposition.gaps.length > 0) {
+    dot += "\n  // Gaps (dashed red)\n";
+    for (const gap of decomposition.gaps) {
+      const gapId = sanitizeId(gap.id);
+      const label = gap.description.substring(0, 30).replace(/"/g, '\\"');
+      dot += `  ${gapId} [label="${label}", shape=note, fillcolor="#ffcdd2", style="dashed,filled"];
+`;
+      dot += `  ${sanitizeId(gap.location.from)} -> ${gapId} [style=dashed, color=red];
+`;
+      dot += `  ${gapId} -> ${sanitizeId(gap.location.to)} [style=dashed, color=red];
+`;
+    }
+  }
+  if (includeMetrics) {
+    dot += "\n  // Metrics\n";
+    dot += "  subgraph cluster_metrics {\n";
+    dot += '    label="Metrics";\n';
+    dot += "    style=filled;\n";
+    dot += '    color="#f5f5f5";\n';
+    dot += `    metrics [label="Completeness: ${(decomposition.completeness * 100).toFixed(0)}%\\nRigor: ${decomposition.rigorLevel}\\nAtoms: ${decomposition.atomCount}\\nDepth: ${decomposition.maxDependencyDepth}", shape=note];
+`;
+    dot += "  }\n";
+  }
+  dot += "}\n";
+  return dot;
+}
+function proofDecompositionToASCII(decomposition) {
+  let ascii = "";
+  ascii += "\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557\n";
+  ascii += "\u2551                    PROOF DECOMPOSITION                         \u2551\n";
+  ascii += "\u255A\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255D\n\n";
+  if (decomposition.theorem) {
+    ascii += `Theorem: ${decomposition.theorem}
+
+`;
+  }
+  ascii += "\u250C\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
+  ascii += "\u2502 METRICS                                                         \u2502\n";
+  ascii += "\u251C\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n";
+  ascii += `\u2502 Completeness: ${(decomposition.completeness * 100).toFixed(0)}%`.padEnd(66) + "\u2502\n";
+  ascii += `\u2502 Rigor Level:  ${decomposition.rigorLevel}`.padEnd(66) + "\u2502\n";
+  ascii += `\u2502 Atom Count:   ${decomposition.atomCount}`.padEnd(66) + "\u2502\n";
+  ascii += `\u2502 Max Depth:    ${decomposition.maxDependencyDepth}`.padEnd(66) + "\u2502\n";
+  ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n";
+  const axioms = decomposition.atoms.filter((a) => a.type === "axiom");
+  if (axioms.length > 0) {
+    ascii += "\u250C\u2500 AXIOMS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
+    for (const atom of axioms) {
+      const marker = "\u25C9";
+      const line = `\u2502 ${marker} [${atom.id}] ${atom.statement}`;
+      ascii += line.substring(0, 65).padEnd(66) + "\u2502\n";
+    }
+    ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n";
+  }
+  const hypotheses = decomposition.atoms.filter((a) => a.type === "hypothesis");
+  if (hypotheses.length > 0) {
+    ascii += "\u250C\u2500 HYPOTHESES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
+    for (const atom of hypotheses) {
+      const marker = "\u25C6";
+      const line = `\u2502 ${marker} [${atom.id}] ${atom.statement}`;
+      ascii += line.substring(0, 65).padEnd(66) + "\u2502\n";
+    }
+    ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n";
+  }
+  const derived = decomposition.atoms.filter((a) => a.type === "derived" || a.type === "lemma");
+  if (derived.length > 0) {
+    ascii += "\u250C\u2500 DERIVATION CHAIN \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
+    for (const atom of derived) {
+      const marker = atom.type === "lemma" ? "\u25C7" : "\u25CB";
+      const deps = atom.derivedFrom && atom.derivedFrom.length > 0 ? ` \u2190 [${atom.derivedFrom.join(", ")}]` : "";
+      const line = `\u2502 ${marker} [${atom.id}] ${atom.statement}${deps}`;
+      ascii += line.substring(0, 65).padEnd(66) + "\u2502\n";
+      if (atom.usedInferenceRule) {
+        ascii += `\u2502   \u2514\u2500 Rule: ${atom.usedInferenceRule}`.padEnd(66) + "\u2502\n";
+      }
+    }
+    ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n";
+  }
+  const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
+  if (conclusions.length > 0) {
+    ascii += "\u250C\u2500 CONCLUSIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
+    for (const atom of conclusions) {
+      const marker = "\u2605";
+      const deps = atom.derivedFrom && atom.derivedFrom.length > 0 ? ` \u2190 [${atom.derivedFrom.join(", ")}]` : "";
+      const line = `\u2502 ${marker} [${atom.id}] ${atom.statement}${deps}`;
+      ascii += line.substring(0, 65).padEnd(66) + "\u2502\n";
+    }
+    ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n";
+  }
+  if (decomposition.gaps && decomposition.gaps.length > 0) {
+    ascii += "\u250C\u2500 GAPS (Missing Steps) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
+    for (const gap of decomposition.gaps) {
+      const severityIcon = gap.severity === "critical" ? "\u26A0" : gap.severity === "significant" ? "!" : "?";
+      ascii += `\u2502 ${severityIcon} [${gap.type}] ${gap.description}`.substring(0, 65).padEnd(66) + "\u2502\n";
+      ascii += `\u2502   Between: ${gap.location.from} \u2192 ${gap.location.to}`.padEnd(66) + "\u2502\n";
+      if (gap.suggestedFix) {
+        ascii += `\u2502   Fix: ${gap.suggestedFix}`.substring(0, 65).padEnd(66) + "\u2502\n";
+      }
+    }
+    ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n";
+  }
+  if (decomposition.implicitAssumptions && decomposition.implicitAssumptions.length > 0) {
+    ascii += "\u250C\u2500 IMPLICIT ASSUMPTIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
+    for (const assumption of decomposition.implicitAssumptions) {
+      ascii += `\u2502 \u2022 [${assumption.type}]`.padEnd(66) + "\u2502\n";
+      ascii += `\u2502   ${assumption.statement}`.substring(0, 65).padEnd(66) + "\u2502\n";
+      if (assumption.shouldBeExplicit) {
+        ascii += `\u2502   \u26A0 Should be explicit`.padEnd(66) + "\u2502\n";
+      }
+    }
+    ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n";
+  }
+  if (decomposition.dependencies && decomposition.dependencies.edges.length > 0) {
+    ascii += "\u250C\u2500 DEPENDENCY TREE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
+    ascii += "\u2502                                                                    \u2502\n";
+    const roots = decomposition.dependencies.roots || [];
+    for (const rootId of roots) {
+      ascii += buildASCIITree(rootId, decomposition, 0, /* @__PURE__ */ new Set());
+    }
+    ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n";
+  }
+  return ascii;
+}
+function buildASCIITree(nodeId, decomposition, depth, visited) {
+  if (visited.has(nodeId) || depth > 10) {
+    return "";
+  }
+  visited.add(nodeId);
+  const indent = "\u2502   ".repeat(depth);
+  const atom = decomposition.atoms.find((a) => a.id === nodeId);
+  if (!atom) return "";
+  const typeMarker = {
+    axiom: "\u25C9",
+    hypothesis: "\u25C6",
+    definition: "\u25A3",
+    lemma: "\u25C7",
+    derived: "\u25CB",
+    conclusion: "\u2605"
+  }[atom.type] || "?";
+  let result = `\u2502 ${indent}${typeMarker} ${atom.id}
+`;
+  const children = decomposition.dependencies.edges.filter((e) => e.from === nodeId).map((e) => e.to);
+  for (const childId of children) {
+    result += buildASCIITree(childId, decomposition, depth + 1, visited);
+  }
+  return result;
+}
+var init_proof_decomposition = __esm({
+  "src/export/visual/proof-decomposition.ts"() {
+    init_esm_shims();
+    init_utils();
+  }
+});
+
 // src/export/visual/index.ts
 var VisualExporter;
 var init_visual = __esm({
@@ -6341,6 +6763,7 @@ var init_visual = __esm({
     init_physics();
     init_hybrid();
     init_metareasoning();
+    init_proof_decomposition();
     VisualExporter = class {
       exportCausalGraph(thought, options) {
         return exportCausalGraph(thought, options);
@@ -6399,6 +6822,10 @@ var init_visual = __esm({
       }
       exportMetaReasoningVisualization(thought, options) {
         return exportMetaReasoningVisualization(thought, options);
+      }
+      // Phase 8: Proof decomposition visual export
+      exportProofDecomposition(decomposition, options) {
+        return exportProofDecomposition(decomposition, options);
       }
     };
   }
@@ -7227,6 +7654,2975 @@ var init_services = __esm({
     init_ModeRouter();
   }
 });
+var DependencyGraphBuilder;
+var init_dependency_graph = __esm({
+  "src/proof/dependency-graph.ts"() {
+    init_esm_shims();
+    DependencyGraphBuilder = class {
+      nodes;
+      edges;
+      adjacencyList;
+      // node -> nodes it points to
+      reverseAdjacencyList;
+      // node -> nodes pointing to it
+      constructor() {
+        this.nodes = /* @__PURE__ */ new Map();
+        this.edges = [];
+        this.adjacencyList = /* @__PURE__ */ new Map();
+        this.reverseAdjacencyList = /* @__PURE__ */ new Map();
+      }
+      /**
+       * Add a statement to the graph
+       */
+      addStatement(statement) {
+        this.nodes.set(statement.id, statement);
+        if (!this.adjacencyList.has(statement.id)) {
+          this.adjacencyList.set(statement.id, []);
+        }
+        if (!this.reverseAdjacencyList.has(statement.id)) {
+          this.reverseAdjacencyList.set(statement.id, []);
+        }
+      }
+      /**
+       * Create and add a new statement
+       */
+      createStatement(statement, type, options) {
+        const newStatement = {
+          id: randomUUID(),
+          statement,
+          type,
+          confidence: options?.confidence ?? 1,
+          isExplicit: options?.isExplicit ?? true,
+          ...options
+        };
+        this.addStatement(newStatement);
+        return newStatement;
+      }
+      /**
+       * Add a dependency edge between two statements
+       *
+       * @param from - ID of the source statement (prerequisite)
+       * @param to - ID of the target statement (depends on source)
+       * @param type - Type of dependency
+       * @param options - Additional edge options
+       */
+      addDependency(from, to, type = "logical", options) {
+        if (!this.nodes.has(from)) {
+          throw new Error(`Source node '${from}' not found in graph`);
+        }
+        if (!this.nodes.has(to)) {
+          throw new Error(`Target node '${to}' not found in graph`);
+        }
+        const edge = {
+          from,
+          to,
+          type,
+          strength: options?.strength ?? 1,
+          inferenceRule: options?.inferenceRule
+        };
+        this.edges.push(edge);
+        const adj = this.adjacencyList.get(from) || [];
+        adj.push(to);
+        this.adjacencyList.set(from, adj);
+        const revAdj = this.reverseAdjacencyList.get(to) || [];
+        revAdj.push(from);
+        this.reverseAdjacencyList.set(to, revAdj);
+      }
+      /**
+       * Find root nodes (axioms/hypotheses with no incoming edges)
+       */
+      findRoots() {
+        const roots = [];
+        for (const [nodeId] of this.nodes) {
+          const incoming = this.reverseAdjacencyList.get(nodeId) || [];
+          if (incoming.length === 0) {
+            roots.push(nodeId);
+          }
+        }
+        return roots;
+      }
+      /**
+       * Find leaf nodes (conclusions with no outgoing edges)
+       */
+      findLeaves() {
+        const leaves = [];
+        for (const [nodeId] of this.nodes) {
+          const outgoing = this.adjacencyList.get(nodeId) || [];
+          if (outgoing.length === 0) {
+            leaves.push(nodeId);
+          }
+        }
+        return leaves;
+      }
+      /**
+       * Get all ancestors of a node (all nodes that lead to this node)
+       */
+      getAncestors(nodeId) {
+        const ancestors = /* @__PURE__ */ new Set();
+        const visited = /* @__PURE__ */ new Set();
+        const stack = [nodeId];
+        while (stack.length > 0) {
+          const current = stack.pop();
+          if (visited.has(current)) continue;
+          visited.add(current);
+          const parents = this.reverseAdjacencyList.get(current) || [];
+          for (const parent of parents) {
+            ancestors.add(parent);
+            stack.push(parent);
+          }
+        }
+        return Array.from(ancestors);
+      }
+      /**
+       * Get all descendants of a node (all nodes that depend on this node)
+       */
+      getDescendants(nodeId) {
+        const descendants = /* @__PURE__ */ new Set();
+        const visited = /* @__PURE__ */ new Set();
+        const stack = [nodeId];
+        while (stack.length > 0) {
+          const current = stack.pop();
+          if (visited.has(current)) continue;
+          visited.add(current);
+          const children = this.adjacencyList.get(current) || [];
+          for (const child of children) {
+            descendants.add(child);
+            stack.push(child);
+          }
+        }
+        return Array.from(descendants);
+      }
+      /**
+       * Compute the depth of the graph (longest path from any root to any leaf)
+       */
+      computeDepth() {
+        const roots = this.findRoots();
+        if (roots.length === 0) return 0;
+        let maxDepth = 0;
+        const memo = /* @__PURE__ */ new Map();
+        const dfs = (nodeId, visited) => {
+          if (memo.has(nodeId)) return memo.get(nodeId);
+          if (visited.has(nodeId)) return 0;
+          visited.add(nodeId);
+          const children = this.adjacencyList.get(nodeId) || [];
+          if (children.length === 0) {
+            memo.set(nodeId, 1);
+            return 1;
+          }
+          let maxChildDepth = 0;
+          for (const child of children) {
+            maxChildDepth = Math.max(maxChildDepth, dfs(child, new Set(visited)));
+          }
+          const depth = 1 + maxChildDepth;
+          memo.set(nodeId, depth);
+          return depth;
+        };
+        for (const root of roots) {
+          maxDepth = Math.max(maxDepth, dfs(root, /* @__PURE__ */ new Set()));
+        }
+        return maxDepth;
+      }
+      /**
+       * Compute the width of the graph (maximum nodes at any level)
+       */
+      computeWidth() {
+        const roots = this.findRoots();
+        if (roots.length === 0) return 0;
+        const levels = /* @__PURE__ */ new Map();
+        const queue = roots.map((r) => ({
+          nodeId: r,
+          level: 0
+        }));
+        const visited = /* @__PURE__ */ new Set();
+        while (queue.length > 0) {
+          const { nodeId, level } = queue.shift();
+          if (visited.has(nodeId)) continue;
+          visited.add(nodeId);
+          levels.set(nodeId, level);
+          const children = this.adjacencyList.get(nodeId) || [];
+          for (const child of children) {
+            if (!visited.has(child)) {
+              queue.push({ nodeId: child, level: level + 1 });
+            }
+          }
+        }
+        const levelCounts = /* @__PURE__ */ new Map();
+        for (const [, level] of levels) {
+          levelCounts.set(level, (levelCounts.get(level) || 0) + 1);
+        }
+        return Math.max(...levelCounts.values(), 0);
+      }
+      /**
+       * Detect cycles using Tarjan's algorithm for strongly connected components
+       * Returns arrays of node IDs that form cycles
+       */
+      detectCycles() {
+        const index = /* @__PURE__ */ new Map();
+        const lowlink = /* @__PURE__ */ new Map();
+        const onStack = /* @__PURE__ */ new Set();
+        const stack = [];
+        const sccs = [];
+        let currentIndex = 0;
+        const strongConnect = (nodeId) => {
+          index.set(nodeId, currentIndex);
+          lowlink.set(nodeId, currentIndex);
+          currentIndex++;
+          stack.push(nodeId);
+          onStack.add(nodeId);
+          const neighbors = this.adjacencyList.get(nodeId) || [];
+          for (const neighbor of neighbors) {
+            if (!index.has(neighbor)) {
+              strongConnect(neighbor);
+              lowlink.set(nodeId, Math.min(lowlink.get(nodeId), lowlink.get(neighbor)));
+            } else if (onStack.has(neighbor)) {
+              lowlink.set(nodeId, Math.min(lowlink.get(nodeId), index.get(neighbor)));
+            }
+          }
+          if (lowlink.get(nodeId) === index.get(nodeId)) {
+            const scc = [];
+            let w;
+            do {
+              w = stack.pop();
+              onStack.delete(w);
+              scc.push(w);
+            } while (w !== nodeId);
+            if (scc.length > 1) {
+              sccs.push(scc);
+            } else if (scc.length === 1) {
+              const selfLoops = this.adjacencyList.get(scc[0]) || [];
+              if (selfLoops.includes(scc[0])) {
+                sccs.push(scc);
+              }
+            }
+          }
+        };
+        for (const [nodeId] of this.nodes) {
+          if (!index.has(nodeId)) {
+            strongConnect(nodeId);
+          }
+        }
+        return sccs;
+      }
+      /**
+       * Check if the graph has any cycles
+       */
+      hasCycles() {
+        return this.detectCycles().length > 0;
+      }
+      /**
+       * Get topological order of nodes (only valid if no cycles)
+       * Returns null if cycles exist
+       */
+      getTopologicalOrder() {
+        if (this.hasCycles()) {
+          return null;
+        }
+        const inDegree = /* @__PURE__ */ new Map();
+        for (const [nodeId] of this.nodes) {
+          inDegree.set(nodeId, 0);
+        }
+        for (const edge of this.edges) {
+          inDegree.set(edge.to, (inDegree.get(edge.to) || 0) + 1);
+        }
+        const queue = [];
+        for (const [nodeId, degree] of inDegree) {
+          if (degree === 0) {
+            queue.push(nodeId);
+          }
+        }
+        const result = [];
+        while (queue.length > 0) {
+          const current = queue.shift();
+          result.push(current);
+          const neighbors = this.adjacencyList.get(current) || [];
+          for (const neighbor of neighbors) {
+            const newDegree = (inDegree.get(neighbor) || 0) - 1;
+            inDegree.set(neighbor, newDegree);
+            if (newDegree === 0) {
+              queue.push(neighbor);
+            }
+          }
+        }
+        return result.length === this.nodes.size ? result : null;
+      }
+      /**
+       * Find a path between two nodes
+       * Returns null if no path exists
+       */
+      findPath(from, to) {
+        if (!this.nodes.has(from) || !this.nodes.has(to)) {
+          return null;
+        }
+        const visited = /* @__PURE__ */ new Set();
+        const parent = /* @__PURE__ */ new Map();
+        const queue = [from];
+        visited.add(from);
+        while (queue.length > 0) {
+          const current = queue.shift();
+          if (current === to) {
+            const path2 = [];
+            let node = to;
+            while (node !== void 0) {
+              path2.unshift(node);
+              node = parent.get(node);
+            }
+            return path2;
+          }
+          const neighbors = this.adjacencyList.get(current) || [];
+          for (const neighbor of neighbors) {
+            if (!visited.has(neighbor)) {
+              visited.add(neighbor);
+              parent.set(neighbor, current);
+              queue.push(neighbor);
+            }
+          }
+        }
+        return null;
+      }
+      /**
+       * Find all paths between two nodes
+       */
+      findAllPaths(from, to, maxPaths = 100) {
+        if (!this.nodes.has(from) || !this.nodes.has(to)) {
+          return [];
+        }
+        const paths = [];
+        const dfs = (current, path2, visited2) => {
+          if (paths.length >= maxPaths) return;
+          if (current === to) {
+            paths.push([...path2]);
+            return;
+          }
+          const neighbors = this.adjacencyList.get(current) || [];
+          for (const neighbor of neighbors) {
+            if (!visited2.has(neighbor)) {
+              visited2.add(neighbor);
+              path2.push(neighbor);
+              dfs(neighbor, path2, visited2);
+              path2.pop();
+              visited2.delete(neighbor);
+            }
+          }
+        };
+        const visited = /* @__PURE__ */ new Set([from]);
+        dfs(from, [from], visited);
+        return paths;
+      }
+      /**
+       * Build the complete dependency graph
+       */
+      build() {
+        const cycles = this.detectCycles();
+        const hasCycles = cycles.length > 0;
+        const topologicalOrder = hasCycles ? void 0 : this.getTopologicalOrder() ?? void 0;
+        return {
+          nodes: new Map(this.nodes),
+          edges: [...this.edges],
+          roots: this.findRoots(),
+          leaves: this.findLeaves(),
+          depth: this.computeDepth(),
+          width: this.computeWidth(),
+          hasCycles,
+          stronglyConnectedComponents: hasCycles ? cycles : void 0,
+          topologicalOrder
+        };
+      }
+      /**
+       * Get the number of nodes in the graph
+       */
+      get nodeCount() {
+        return this.nodes.size;
+      }
+      /**
+       * Get the number of edges in the graph
+       */
+      get edgeCount() {
+        return this.edges.length;
+      }
+      /**
+       * Check if a node exists
+       */
+      hasNode(nodeId) {
+        return this.nodes.has(nodeId);
+      }
+      /**
+       * Get a node by ID
+       */
+      getNode(nodeId) {
+        return this.nodes.get(nodeId);
+      }
+      /**
+       * Get all nodes
+       */
+      getAllNodes() {
+        return Array.from(this.nodes.values());
+      }
+      /**
+       * Get all edges
+       */
+      getAllEdges() {
+        return [...this.edges];
+      }
+      /**
+       * Clear the graph
+       */
+      clear() {
+        this.nodes.clear();
+        this.edges = [];
+        this.adjacencyList.clear();
+        this.reverseAdjacencyList.clear();
+      }
+    };
+  }
+});
+var ProofDecomposer;
+var init_decomposer = __esm({
+  "src/proof/decomposer.ts"() {
+    init_esm_shims();
+    init_dependency_graph();
+    ProofDecomposer = class {
+      statementPatterns;
+      dependencyPatterns;
+      constructor() {
+        this.statementPatterns = this.initializeStatementPatterns();
+        this.dependencyPatterns = this.initializeDependencyPatterns();
+      }
+      /**
+       * Initialize patterns for extracting statements from proof text
+       */
+      initializeStatementPatterns() {
+        return [
+          // Axiom patterns
+          {
+            pattern: /^(?:Axiom|Postulate)\s*(?:\d+)?[:\.]?\s*(.+)$/i,
+            type: "axiom",
+            extractStatement: (m) => m[1].trim()
+          },
+          // Definition patterns
+          {
+            pattern: /^(?:Definition|Def\.?)\s*(?:\d+)?[:\.]?\s*(.+)$/i,
+            type: "definition",
+            extractStatement: (m) => m[1].trim()
+          },
+          {
+            pattern: /^(?:Let|Define)\s+(.+?)(?:\s+be\s+|\s*:=\s*|\s*=\s*)(.+)$/i,
+            type: "definition",
+            extractStatement: (m) => `${m[1]} be ${m[2]}`.trim()
+          },
+          // Hypothesis/Assumption patterns
+          {
+            pattern: /^(?:Assume|Suppose|Given|Hypothesis|Let)\s+(?:that\s+)?(.+)$/i,
+            type: "hypothesis",
+            extractStatement: (m) => m[1].trim()
+          },
+          // Lemma patterns
+          {
+            pattern: /^(?:Lemma|Claim)\s*(?:\d+)?[:\.]?\s*(.+)$/i,
+            type: "lemma",
+            extractStatement: (m) => m[1].trim()
+          },
+          // Conclusion patterns
+          {
+            pattern: /^(?:Therefore|Thus|Hence|So|Consequently|It follows that|We conclude|QED|∴)\s*[,:]?\s*(.+)$/i,
+            type: "conclusion",
+            extractStatement: (m) => m[1].trim()
+          },
+          // Derived statement patterns
+          {
+            pattern: /^(?:By|From|Using|Since)\s+(.+?)[,\s]+(?:we have|we get|we obtain|it follows|this gives)\s+(.+)$/i,
+            type: "derived",
+            extractStatement: (m) => m[2].trim(),
+            extractJustification: (m) => m[1].trim()
+          },
+          {
+            pattern: /^(?:This|Which)\s+(?:implies|gives|yields|means|shows)\s+(?:that\s+)?(.+)$/i,
+            type: "derived",
+            extractStatement: (m) => m[1].trim()
+          },
+          // General derived (fallback)
+          {
+            pattern: /^(.+)$/,
+            type: "derived",
+            extractStatement: (m) => m[1].trim()
+          }
+        ];
+      }
+      /**
+       * Initialize patterns for inferring dependencies
+       */
+      initializeDependencyPatterns() {
+        return [
+          // Modus ponens: "By X, we have Y" or "From X, Y"
+          {
+            pattern: /(?:by|from|using)\s+(.+?)(?:,\s*(?:we have|we get|it follows|we obtain)|$)/i,
+            inferenceRule: "modus_ponens",
+            extractDependencies: (match, statementIds) => {
+              const referenced = match[1];
+              return this.findMatchingStatements(referenced, statementIds);
+            }
+          },
+          // Substitution: "Substituting X into Y"
+          {
+            pattern: /substitut(?:e|ing)\s+(.+?)\s+(?:into|in)\s+(.+)/i,
+            inferenceRule: "substitution",
+            extractDependencies: (match, statementIds) => {
+              const deps = [
+                ...this.findMatchingStatements(match[1], statementIds),
+                ...this.findMatchingStatements(match[2], statementIds)
+              ];
+              return [...new Set(deps)];
+            }
+          },
+          // Definition expansion: "By definition of X"
+          {
+            pattern: /(?:by\s+)?(?:the\s+)?definition\s+(?:of\s+)?(.+)/i,
+            inferenceRule: "definition_expansion",
+            extractDependencies: (match, statementIds) => {
+              return this.findMatchingStatements(match[1], statementIds);
+            }
+          },
+          // Contradiction: "contradicts" or "contradiction"
+          {
+            pattern: /(?:this\s+)?contradicts?\s+(.+)/i,
+            inferenceRule: "contradiction",
+            extractDependencies: (match, statementIds) => {
+              return this.findMatchingStatements(match[1], statementIds);
+            }
+          },
+          // Mathematical induction
+          {
+            pattern: /by\s+(?:mathematical\s+)?induction/i,
+            inferenceRule: "mathematical_induction",
+            extractDependencies: () => []
+          },
+          // Hypothetical syllogism: "Since X implies Y, and Y implies Z"
+          {
+            pattern: /since\s+(.+?)\s+implies\s+(.+?),\s+and\s+(.+?)\s+implies\s+(.+)/i,
+            inferenceRule: "hypothetical_syllogism",
+            extractDependencies: (match, statementIds) => {
+              const deps = [
+                ...this.findMatchingStatements(match[1], statementIds),
+                ...this.findMatchingStatements(match[2], statementIds)
+              ];
+              return [...new Set(deps)];
+            }
+          }
+        ];
+      }
+      /**
+       * Find statements that match a reference
+       */
+      findMatchingStatements(reference, statementIds) {
+        const matches = [];
+        const refLower = reference.toLowerCase().trim();
+        for (const [statement, id] of statementIds) {
+          const stmtLower = statement.toLowerCase();
+          if (stmtLower.includes(refLower) || refLower.includes(stmtLower) || this.hasSignificantOverlap(refLower, stmtLower)) {
+            matches.push(id);
+          }
+        }
+        return matches;
+      }
+      /**
+       * Check if two strings have significant word overlap
+       */
+      hasSignificantOverlap(a, b) {
+        const wordsA = new Set(a.split(/\s+/).filter((w) => w.length > 2));
+        const wordsB = new Set(b.split(/\s+/).filter((w) => w.length > 2));
+        if (wordsA.size === 0 || wordsB.size === 0) return false;
+        let overlap = 0;
+        for (const word of wordsA) {
+          if (wordsB.has(word)) overlap++;
+        }
+        return overlap / Math.min(wordsA.size, wordsB.size) > 0.5;
+      }
+      /**
+       * Decompose a proof into atomic statements
+       *
+       * @param proof - The proof text or structured steps
+       * @param theorem - Optional theorem being proven
+       * @returns ProofDecomposition with atoms and dependencies
+       */
+      decompose(proof, theorem) {
+        const id = randomUUID();
+        const steps = typeof proof === "string" ? this.parseProofText(proof) : proof;
+        const originalProof = typeof proof === "string" ? proof : steps.map((s) => s.content).join("\n");
+        const atoms = this.extractStatements(steps);
+        const statementIds = /* @__PURE__ */ new Map();
+        for (const atom of atoms) {
+          statementIds.set(atom.statement, atom.id);
+        }
+        this.inferDependencies(atoms, steps, statementIds);
+        const dependencies = this.buildDependencyGraph(atoms);
+        const assumptionChains = this.traceAssumptionChains(atoms, dependencies);
+        const gaps = this.detectBasicGaps(atoms, dependencies);
+        const implicitAssumptions = this.findImplicitAssumptions(atoms, steps);
+        const completeness = this.computeCompleteness(atoms, gaps);
+        const rigorLevel = this.assessRigorLevel(atoms, gaps, implicitAssumptions);
+        return {
+          id,
+          originalProof,
+          theorem,
+          atoms,
+          dependencies,
+          assumptionChains,
+          gaps,
+          implicitAssumptions,
+          completeness,
+          rigorLevel,
+          atomCount: atoms.length,
+          maxDependencyDepth: dependencies.depth
+        };
+      }
+      /**
+       * Parse proof text into structured steps
+       */
+      parseProofText(text) {
+        const sentences = text.split(/(?<=[.!?])\s+|\n+/).map((s) => s.trim()).filter((s) => s.length > 0);
+        return sentences.map((content) => ({ content }));
+      }
+      /**
+       * Extract atomic statements from proof steps
+       */
+      extractStatements(steps) {
+        const atoms = [];
+        for (let i = 0; i < steps.length; i++) {
+          const step = steps[i];
+          const atom = this.classifyStatement(step, i);
+          if (atom) {
+            atoms.push(atom);
+          }
+        }
+        return atoms;
+      }
+      /**
+       * Classify a proof step into an atomic statement
+       */
+      classifyStatement(step, stepNumber) {
+        const content = step.content.trim();
+        if (!content) return null;
+        for (const pattern of this.statementPatterns) {
+          const match = content.match(pattern.pattern);
+          if (match) {
+            const statement = pattern.extractStatement(match);
+            const justification = pattern.extractJustification?.(match) || step.justification;
+            return {
+              id: `stmt-${stepNumber + 1}`,
+              statement,
+              latex: step.latex,
+              type: pattern.type,
+              justification,
+              confidence: this.computeConfidence(pattern.type, justification),
+              isExplicit: true,
+              sourceLocation: { stepNumber: stepNumber + 1 }
+            };
+          }
+        }
+        return {
+          id: `stmt-${stepNumber + 1}`,
+          statement: content,
+          latex: step.latex,
+          type: "derived",
+          justification: step.justification,
+          confidence: 0.7,
+          isExplicit: true,
+          sourceLocation: { stepNumber: stepNumber + 1 }
+        };
+      }
+      /**
+       * Compute confidence based on statement type and justification
+       */
+      computeConfidence(type, justification) {
+        const baseConfidence = {
+          axiom: 1,
+          definition: 1,
+          hypothesis: 1,
+          lemma: 0.9,
+          derived: 0.8,
+          conclusion: 0.85
+        };
+        let confidence = baseConfidence[type];
+        if (justification) {
+          confidence = Math.min(1, confidence + 0.1);
+        }
+        return confidence;
+      }
+      /**
+       * Infer dependencies between statements
+       */
+      inferDependencies(atoms, steps, statementIds) {
+        for (let i = 0; i < atoms.length; i++) {
+          const atom = atoms[i];
+          const step = steps[i];
+          if (atom.type === "axiom" || atom.type === "definition" || atom.type === "hypothesis") {
+            continue;
+          }
+          const fullText = `${step.content} ${step.justification || ""}`;
+          const dependencies = [];
+          let inferenceRule;
+          for (const depPattern of this.dependencyPatterns) {
+            const match = fullText.match(depPattern.pattern);
+            if (match) {
+              const deps = depPattern.extractDependencies(match, statementIds);
+              dependencies.push(...deps);
+              if (!inferenceRule) {
+                inferenceRule = depPattern.inferenceRule;
+              }
+            }
+          }
+          if (dependencies.length === 0 && i > 0) {
+            for (let j = i - 1; j >= 0; j--) {
+              if (atoms[j].type !== "conclusion") {
+                dependencies.push(atoms[j].id);
+                break;
+              }
+            }
+          }
+          if (dependencies.length > 0) {
+            atom.derivedFrom = [...new Set(dependencies)];
+            atom.usedInferenceRule = inferenceRule || "direct_implication";
+          }
+        }
+      }
+      /**
+       * Build dependency graph from atoms
+       */
+      buildDependencyGraph(atoms) {
+        const builder = new DependencyGraphBuilder();
+        for (const atom of atoms) {
+          builder.addStatement(atom);
+        }
+        for (const atom of atoms) {
+          if (atom.derivedFrom) {
+            for (const depId of atom.derivedFrom) {
+              builder.addDependency(depId, atom.id, "logical", {
+                inferenceRule: atom.usedInferenceRule
+              });
+            }
+          }
+        }
+        return builder.build();
+      }
+      /**
+       * Trace assumption chains from conclusions to axioms
+       */
+      traceAssumptionChains(atoms, graph) {
+        const chains = [];
+        const conclusions = atoms.filter((a) => a.type === "conclusion");
+        for (const conclusion of conclusions) {
+          const assumptions = [];
+          const path2 = [];
+          const visited = /* @__PURE__ */ new Set();
+          const trace = (id) => {
+            if (visited.has(id)) return;
+            visited.add(id);
+            const atom = graph.nodes.get(id);
+            if (!atom) return;
+            path2.push(id);
+            if (atom.type === "axiom" || atom.type === "definition" || atom.type === "hypothesis") {
+              assumptions.push(id);
+              return;
+            }
+            if (atom.derivedFrom) {
+              for (const depId of atom.derivedFrom) {
+                trace(depId);
+              }
+            }
+          };
+          trace(conclusion.id);
+          chains.push({
+            conclusion: conclusion.id,
+            assumptions,
+            path: path2.reverse(),
+            allAssumptionsExplicit: true,
+            // Will be updated by AssumptionTracker
+            implicitAssumptions: []
+          });
+        }
+        return chains;
+      }
+      /**
+       * Detect basic gaps in the proof
+       */
+      detectBasicGaps(atoms, graph) {
+        const gaps = [];
+        let gapCount = 0;
+        for (const atom of atoms) {
+          if ((atom.type === "derived" || atom.type === "conclusion") && (!atom.derivedFrom || atom.derivedFrom.length === 0)) {
+            gaps.push({
+              id: `gap-${++gapCount}`,
+              type: "unjustified_leap",
+              location: {
+                from: "unknown",
+                to: atom.id
+              },
+              description: `Statement "${atom.statement.substring(0, 50)}..." lacks explicit justification`,
+              severity: atom.type === "conclusion" ? "significant" : "minor",
+              suggestedFix: "Add explicit derivation steps or reference to supporting statements"
+            });
+          }
+        }
+        const reachable = /* @__PURE__ */ new Set();
+        const stack = [...graph.roots];
+        while (stack.length > 0) {
+          const id = stack.pop();
+          if (reachable.has(id)) continue;
+          reachable.add(id);
+          for (const edge of graph.edges) {
+            if (edge.from === id && !reachable.has(edge.to)) {
+              stack.push(edge.to);
+            }
+          }
+        }
+        for (const atom of atoms) {
+          if (!reachable.has(atom.id) && atom.type !== "axiom" && atom.type !== "definition" && atom.type !== "hypothesis") {
+            gaps.push({
+              id: `gap-${++gapCount}`,
+              type: "missing_step",
+              location: {
+                from: "root",
+                to: atom.id
+              },
+              description: `Statement "${atom.statement.substring(0, 50)}..." is disconnected from the proof structure`,
+              severity: "significant",
+              suggestedFix: "Connect this statement to the main proof chain"
+            });
+          }
+        }
+        return gaps;
+      }
+      /**
+       * Find implicit assumptions in the proof
+       */
+      findImplicitAssumptions(atoms, steps) {
+        const implicitAssumptions = [];
+        let count = 0;
+        const implicitPatterns = [
+          {
+            pattern: /(?:clearly|obviously|trivially|it is clear that)/i,
+            type: "existence_assumption",
+            suggestedFormulation: (text) => `Explicitly state and justify: "${text.substring(0, 50)}..."`
+          },
+          {
+            pattern: /(?:for\s+(?:all|any|every)|∀)\s+([a-zA-Z_]\w*)/i,
+            type: "domain_assumption",
+            suggestedFormulation: (_text, match) => `Specify the domain of ${match[1]}`
+          },
+          {
+            pattern: /(?:there\s+exists?|∃)\s+([a-zA-Z_]\w*)/i,
+            type: "existence_assumption",
+            suggestedFormulation: (_text, match) => `Prove existence of ${match[1]} or cite a theorem`
+          },
+          {
+            pattern: /(?:unique|the\s+only)/i,
+            type: "uniqueness_assumption",
+            suggestedFormulation: () => "Prove uniqueness or cite a uniqueness theorem"
+          },
+          {
+            pattern: /(?:continuous|differentiable|integrable)/i,
+            type: "continuity_assumption",
+            suggestedFormulation: () => "State continuity/differentiability assumptions explicitly"
+          },
+          {
+            pattern: /(?:finite|bounded)/i,
+            type: "finiteness_assumption",
+            suggestedFormulation: () => "State finiteness/boundedness assumptions explicitly"
+          }
+        ];
+        for (let i = 0; i < steps.length; i++) {
+          const step = steps[i];
+          const atom = atoms[i];
+          if (!atom) continue;
+          for (const { pattern, type, suggestedFormulation } of implicitPatterns) {
+            const match = step.content.match(pattern);
+            if (match) {
+              implicitAssumptions.push({
+                id: `impl-${++count}`,
+                statement: step.content.substring(0, 100),
+                type,
+                usedInStep: atom.id,
+                shouldBeExplicit: true,
+                suggestedFormulation: suggestedFormulation(step.content, match)
+              });
+              break;
+            }
+          }
+        }
+        return implicitAssumptions;
+      }
+      /**
+       * Compute proof completeness score
+       */
+      computeCompleteness(atoms, gaps) {
+        if (atoms.length === 0) return 0;
+        let score = 1;
+        for (const gap of gaps) {
+          switch (gap.severity) {
+            case "critical":
+              score -= 0.25;
+              break;
+            case "significant":
+              score -= 0.1;
+              break;
+            case "minor":
+              score -= 0.03;
+              break;
+          }
+        }
+        const justifiedCount = atoms.filter(
+          (a) => a.type === "axiom" || a.type === "definition" || a.type === "hypothesis" || a.derivedFrom && a.derivedFrom.length > 0
+        ).length;
+        const justificationScore = justifiedCount / atoms.length;
+        score = score * 0.7 + justificationScore * 0.3;
+        return Math.max(0, Math.min(1, score));
+      }
+      /**
+       * Assess the rigor level of the proof
+       */
+      assessRigorLevel(atoms, gaps, implicitAssumptions) {
+        const criticalGaps = gaps.filter((g) => g.severity === "critical").length;
+        const significantGaps = gaps.filter((g) => g.severity === "significant").length;
+        const implicitCount = implicitAssumptions.filter((a) => a.shouldBeExplicit).length;
+        const allJustified = atoms.every(
+          (a) => a.type === "axiom" || a.type === "definition" || a.type === "hypothesis" || a.derivedFrom && a.derivedFrom.length > 0 && a.usedInferenceRule
+        );
+        if (criticalGaps > 0) return "informal";
+        if (significantGaps > 2 || implicitCount > 3) return "informal";
+        if (significantGaps > 0 || implicitCount > 1) return "textbook";
+        if (!allJustified || implicitCount > 0) return "textbook";
+        if (allJustified && implicitCount === 0 && gaps.length === 0) return "rigorous";
+        const hasFormalNotation = atoms.some(
+          (a) => a.latex && (a.latex.includes("\\forall") || a.latex.includes("\\exists") || a.latex.includes("\\vdash") || a.latex.includes("\\Rightarrow"))
+        );
+        return hasFormalNotation ? "formal" : "rigorous";
+      }
+      /**
+       * Get decomposition metrics
+       */
+      computeMetrics(decomposition) {
+        const { atoms, dependencies, gaps, implicitAssumptions, completeness } = decomposition;
+        const totalDeps = atoms.reduce((sum, a) => sum + (a.derivedFrom?.length || 0), 0);
+        const avgDependencies = atoms.length > 0 ? totalDeps / atoms.length : 0;
+        return {
+          atomCount: atoms.length,
+          rootCount: dependencies.roots.length,
+          leafCount: dependencies.leaves.length,
+          avgDependencies,
+          maxDependencyDepth: dependencies.depth,
+          completeness,
+          gapCount: gaps.length,
+          implicitAssumptionCount: implicitAssumptions.length
+        };
+      }
+    };
+  }
+});
+
+// src/proof/gap-analyzer.ts
+var DEFAULT_CONFIG3, GapAnalyzer;
+var init_gap_analyzer = __esm({
+  "src/proof/gap-analyzer.ts"() {
+    init_esm_shims();
+    DEFAULT_CONFIG3 = {
+      strictness: "standard",
+      checkDomainAssumptions: true,
+      verifyInferenceRules: true,
+      maxLeapDistance: 2
+    };
+    GapAnalyzer = class {
+      config;
+      constructor(config = {}) {
+        this.config = { ...DEFAULT_CONFIG3, ...config };
+      }
+      /**
+       * Analyze a proof decomposition for gaps
+       */
+      analyzeGaps(decomposition) {
+        const { atoms, dependencies } = decomposition;
+        const unjustifiedLeaps = this.findUnjustifiedLeaps(atoms, dependencies);
+        const missingSteps = this.findMissingSteps(atoms, dependencies);
+        const scopeErrors = this.findScopeErrors(atoms);
+        const undefinedTerms = this.findUndefinedTerms(atoms);
+        const gaps = [...unjustifiedLeaps, ...missingSteps, ...scopeErrors, ...undefinedTerms];
+        const implicitAssumptions = this.findImplicitAssumptions(atoms, gaps);
+        const unjustifiedSteps = this.findUnjustifiedSteps(atoms);
+        const suggestions = this.generateSuggestions(gaps, implicitAssumptions, unjustifiedSteps);
+        const completeness = this.computeCompleteness(atoms, gaps, implicitAssumptions);
+        return {
+          completeness,
+          gaps,
+          implicitAssumptions,
+          unjustifiedSteps,
+          suggestions
+        };
+      }
+      /**
+       * Check if a transition between two statements is valid
+       */
+      isValidTransition(from, to) {
+        if (to.type === "axiom" || to.type === "definition" || to.type === "hypothesis") {
+          return { isValid: true };
+        }
+        if (to.derivedFrom && to.derivedFrom.includes(from.id)) {
+          if (to.usedInferenceRule && this.config.verifyInferenceRules) {
+            const ruleCheck = this.verifyInferenceRule(from, to);
+            if (!ruleCheck.isValid) {
+              return ruleCheck;
+            }
+          }
+          return { isValid: true };
+        }
+        const impliedConnection = this.checkImpliedConnection(from, to);
+        if (impliedConnection.isValid) {
+          return impliedConnection;
+        }
+        return {
+          isValid: false,
+          reason: `No clear logical connection from "${from.statement.substring(0, 30)}..." to "${to.statement.substring(0, 30)}..."`,
+          suggestedFix: "Add explicit derivation step or justification"
+        };
+      }
+      /**
+       * Verify that an inference rule is correctly applied
+       */
+      verifyInferenceRule(from, to) {
+        const rule = to.usedInferenceRule;
+        if (!rule) return { isValid: true };
+        const fromText = from.statement.toLowerCase();
+        const toText = to.statement.toLowerCase();
+        switch (rule) {
+          case "modus_ponens":
+            if (fromText.includes("if") && fromText.includes("then")) {
+              return { isValid: true };
+            }
+            if (fromText.includes("implies") || fromText.includes("\u21D2")) {
+              return { isValid: true };
+            }
+            break;
+          case "modus_tollens":
+            if (toText.includes("not") || toText.includes("\xAC") || toText.includes("false")) {
+              return { isValid: true };
+            }
+            break;
+          case "contradiction":
+            if (toText.includes("contradiction") || toText.includes("impossible") || toText.includes("false")) {
+              return { isValid: true };
+            }
+            break;
+          case "substitution":
+            if (fromText.includes("=") || fromText.includes("equals")) {
+              return { isValid: true };
+            }
+            break;
+          case "universal_instantiation":
+            if (fromText.includes("for all") || fromText.includes("\u2200") || fromText.includes("every")) {
+              return { isValid: true };
+            }
+            break;
+          case "existential_generalization":
+            if (toText.includes("exists") || toText.includes("\u2203") || toText.includes("there is")) {
+              return { isValid: true };
+            }
+            break;
+          case "mathematical_induction":
+            return { isValid: true };
+          default:
+            return { isValid: true };
+        }
+        return {
+          isValid: true,
+          // Don't be too strict
+          reason: `Inference rule ${rule} application may need review`
+        };
+      }
+      /**
+       * Check for implied logical connection between statements
+       */
+      checkImpliedConnection(from, to) {
+        const fromWords = new Set(from.statement.toLowerCase().split(/\s+/));
+        const toWords = new Set(to.statement.toLowerCase().split(/\s+/));
+        const meaningfulWords = [...fromWords].filter(
+          (w) => w.length > 3 && toWords.has(w)
+        );
+        if (meaningfulWords.length >= 2) {
+          return {
+            isValid: true,
+            reason: "Implied connection through shared concepts"
+          };
+        }
+        if (to.justification && to.justification.toLowerCase().includes(from.id.toLowerCase())) {
+          return { isValid: true };
+        }
+        return { isValid: false };
+      }
+      /**
+       * Find unjustified leaps in reasoning
+       */
+      findUnjustifiedLeaps(atoms, graph) {
+        const gaps = [];
+        let gapId = 0;
+        for (const atom of atoms) {
+          if (atom.type === "axiom" || atom.type === "definition" || atom.type === "hypothesis") {
+            continue;
+          }
+          if (atom.type === "derived" || atom.type === "conclusion" || atom.type === "lemma") {
+            if (!atom.derivedFrom || atom.derivedFrom.length === 0) {
+              gaps.push({
+                id: `gap-leap-${++gapId}`,
+                type: "unjustified_leap",
+                location: { from: "unknown", to: atom.id },
+                description: `Statement "${atom.statement.substring(0, 50)}..." appears without justification`,
+                severity: this.assessGapSeverity(atom),
+                suggestedFix: this.suggestJustification(atom, atoms)
+              });
+              continue;
+            }
+            if (this.config.strictness !== "lenient") {
+              const leapDistance = this.computeLeapDistance(atom, graph);
+              if (leapDistance > this.config.maxLeapDistance) {
+                gaps.push({
+                  id: `gap-leap-${++gapId}`,
+                  type: "unjustified_leap",
+                  location: {
+                    from: atom.derivedFrom[0],
+                    to: atom.id
+                  },
+                  description: `Large logical leap (distance ${leapDistance}) to reach this statement`,
+                  severity: "significant",
+                  suggestedFix: "Add intermediate steps to bridge the logical gap"
+                });
+              }
+            }
+          }
+        }
+        return gaps;
+      }
+      /**
+       * Compute the "leap distance" - how many implicit steps are skipped
+       */
+      computeLeapDistance(atom, graph) {
+        if (!atom.derivedFrom || atom.derivedFrom.length === 0) return 0;
+        const deps = atom.derivedFrom.map((id) => graph.nodes.get(id)).filter(Boolean);
+        if (deps.length === 0) return 0;
+        const atomComplexity = this.estimateStatementComplexity(atom.statement);
+        const avgDepComplexity = deps.reduce((sum, d) => sum + this.estimateStatementComplexity(d.statement), 0) / deps.length;
+        return Math.max(0, Math.floor((atomComplexity - avgDepComplexity) / 10));
+      }
+      /**
+       * Estimate statement complexity based on length and symbols
+       */
+      estimateStatementComplexity(statement) {
+        let complexity = statement.length;
+        const mathSymbols = /[∀∃∈∉⊆⊇∩∪∧∨¬⇒⇔∫∑∏√≤≥≠±∞]/g;
+        const matches = statement.match(mathSymbols);
+        if (matches) complexity += matches.length * 5;
+        const nestingLevel = (statement.match(/[\(\[\{]/g) || []).length;
+        complexity += nestingLevel * 3;
+        return complexity;
+      }
+      /**
+       * Find missing intermediate steps
+       */
+      findMissingSteps(atoms, graph) {
+        const gaps = [];
+        let gapId = 0;
+        for (const atom of atoms) {
+          if (!atom.derivedFrom) continue;
+          for (const depId of atom.derivedFrom) {
+            const dep = graph.nodes.get(depId);
+            if (!dep) continue;
+            const validation = this.isValidTransition(dep, atom);
+            if (!validation.isValid) {
+              gaps.push({
+                id: `gap-step-${++gapId}`,
+                type: "missing_step",
+                location: { from: depId, to: atom.id },
+                description: validation.reason || "Missing intermediate step",
+                severity: "minor",
+                suggestedFix: validation.suggestedFix
+              });
+            }
+          }
+        }
+        if (graph.topologicalOrder) {
+          for (let i = 1; i < graph.topologicalOrder.length; i++) {
+            const prev = graph.nodes.get(graph.topologicalOrder[i - 1]);
+            const curr = graph.nodes.get(graph.topologicalOrder[i]);
+            if (prev && curr && curr.derivedFrom?.includes(prev.id)) {
+              if (this.needsIntermediateStep(prev, curr)) {
+                gaps.push({
+                  id: `gap-step-${++gapId}`,
+                  type: "missing_step",
+                  location: { from: prev.id, to: curr.id },
+                  description: `Step from "${prev.statement.substring(0, 30)}..." to "${curr.statement.substring(0, 30)}..." may need clarification`,
+                  severity: "minor",
+                  suggestedFix: "Consider adding an intermediate derivation step"
+                });
+              }
+            }
+          }
+        }
+        return gaps;
+      }
+      /**
+       * Check if an intermediate step is needed between two statements
+       */
+      needsIntermediateStep(from, to) {
+        if (this.config.strictness === "lenient") return false;
+        const fromSymbols = this.extractMathSymbols(from.statement);
+        const toSymbols = this.extractMathSymbols(to.statement);
+        const commonSymbols = fromSymbols.filter((s) => toSymbols.includes(s));
+        if (commonSymbols.length === 0 && fromSymbols.length > 0 && toSymbols.length > 0) {
+          return true;
+        }
+        if (this.config.strictness === "strict") {
+          const lengthRatio = to.statement.length / Math.max(1, from.statement.length);
+          if (lengthRatio > 2 || lengthRatio < 0.5) {
+            return true;
+          }
+        }
+        return false;
+      }
+      /**
+       * Extract mathematical symbols from a statement
+       */
+      extractMathSymbols(statement) {
+        const symbols = [];
+        const vars = statement.match(/\b[a-zA-Z](?:_\d+)?\b/g);
+        if (vars) symbols.push(...vars);
+        const ops = statement.match(/[+\-*/=<>≤≥≠∈∉⊆⊇]/g);
+        if (ops) symbols.push(...ops);
+        return symbols;
+      }
+      /**
+       * Find scope errors (variables used out of scope)
+       */
+      findScopeErrors(atoms) {
+        const gaps = [];
+        let gapId = 0;
+        const variableScope = /* @__PURE__ */ new Map();
+        for (const atom of atoms) {
+          const introMatch = atom.statement.match(
+            /(?:let|for\s+(?:all|any|every)|∀)\s+([a-zA-Z](?:_\d+)?)/i
+          );
+          if (introMatch) {
+            variableScope.set(introMatch[1], atom.id);
+          }
+          const varMatches = atom.statement.match(/\b([a-zA-Z](?:_\d+)?)\b/g);
+          if (varMatches) {
+            for (const v of varMatches) {
+              if (["a", "an", "the", "if", "is", "or", "be", "to", "in", "of"].includes(v.toLowerCase())) {
+                continue;
+              }
+              if (v.length === 1 && !variableScope.has(v) && atom.type === "derived") {
+                const previouslyUsed = atoms.some(
+                  (a) => a.id !== atom.id && atoms.indexOf(a) < atoms.indexOf(atom) && a.statement.includes(v)
+                );
+                if (!previouslyUsed) {
+                  gaps.push({
+                    id: `gap-scope-${++gapId}`,
+                    type: "scope_error",
+                    location: { from: "introduction", to: atom.id },
+                    description: `Variable "${v}" appears without explicit introduction`,
+                    severity: "minor",
+                    suggestedFix: `Introduce ${v} with "Let ${v}..." or specify its domain`
+                  });
+                }
+              }
+            }
+          }
+        }
+        return gaps;
+      }
+      /**
+       * Find undefined terms
+       */
+      findUndefinedTerms(atoms) {
+        const gaps = [];
+        let gapId = 0;
+        const definedTerms = /* @__PURE__ */ new Set();
+        for (const atom of atoms) {
+          if (atom.type === "definition") {
+            const defMatch = atom.statement.match(
+              /(?:define|let)\s+(\w+)|(\w+)\s+(?:is|are|be)\s+defined/i
+            );
+            if (defMatch) {
+              definedTerms.add((defMatch[1] || defMatch[2]).toLowerCase());
+            }
+          }
+        }
+        for (const atom of atoms) {
+          const byDefMatch = atom.statement.match(/by\s+(?:the\s+)?definition\s+of\s+(\w+)/i);
+          if (byDefMatch) {
+            const term = byDefMatch[1].toLowerCase();
+            if (!definedTerms.has(term) && !this.isStandardMathTerm(term)) {
+              gaps.push({
+                id: `gap-undef-${++gapId}`,
+                type: "undefined_term",
+                location: { from: "definition", to: atom.id },
+                description: `Term "${byDefMatch[1]}" is used but not defined`,
+                severity: "significant",
+                suggestedFix: `Add a definition for "${byDefMatch[1]}"`
+              });
+            }
+          }
+        }
+        return gaps;
+      }
+      /**
+       * Check if a term is a standard mathematical term
+       */
+      isStandardMathTerm(term) {
+        const standardTerms = /* @__PURE__ */ new Set([
+          "integer",
+          "integers",
+          "real",
+          "reals",
+          "natural",
+          "naturals",
+          "rational",
+          "rationals",
+          "complex",
+          "prime",
+          "even",
+          "odd",
+          "positive",
+          "negative",
+          "zero",
+          "function",
+          "continuous",
+          "differentiable",
+          "derivative",
+          "integral",
+          "limit",
+          "sequence",
+          "series",
+          "set",
+          "subset",
+          "superset",
+          "union",
+          "intersection",
+          "element",
+          "member",
+          "domain",
+          "range",
+          "codomain",
+          "bijection",
+          "injection",
+          "surjection",
+          "isomorphism",
+          "homomorphism"
+        ]);
+        return standardTerms.has(term);
+      }
+      /**
+       * Find implicit assumptions
+       */
+      findImplicitAssumptions(atoms, gaps) {
+        const implicitAssumptions = [];
+        let count = 0;
+        for (const gap of gaps) {
+          if (gap.type === "implicit_assumption") {
+            implicitAssumptions.push({
+              id: `impl-${++count}`,
+              statement: gap.description,
+              type: "existence_assumption",
+              usedInStep: gap.location.to,
+              shouldBeExplicit: gap.severity !== "minor",
+              suggestedFormulation: gap.suggestedFix || "Make assumption explicit"
+            });
+          }
+        }
+        for (const atom of atoms) {
+          if (/\/\s*([a-zA-Z_]\w*|\([^)]+\))/.test(atom.statement)) {
+            implicitAssumptions.push({
+              id: `impl-${++count}`,
+              statement: "Division operation implies non-zero divisor",
+              type: "domain_assumption",
+              usedInStep: atom.id,
+              shouldBeExplicit: true,
+              suggestedFormulation: "State that the divisor is non-zero"
+            });
+          }
+          if (/√|\\sqrt/.test(atom.statement)) {
+            implicitAssumptions.push({
+              id: `impl-${++count}`,
+              statement: "Square root implies non-negative argument",
+              type: "domain_assumption",
+              usedInStep: atom.id,
+              shouldBeExplicit: true,
+              suggestedFormulation: "State that the argument is non-negative"
+            });
+          }
+          if (/log|ln|\\log/.test(atom.statement)) {
+            implicitAssumptions.push({
+              id: `impl-${++count}`,
+              statement: "Logarithm implies positive argument",
+              type: "domain_assumption",
+              usedInStep: atom.id,
+              shouldBeExplicit: true,
+              suggestedFormulation: "State that the argument is positive"
+            });
+          }
+        }
+        return implicitAssumptions;
+      }
+      /**
+       * Find unjustified steps (steps with low confidence)
+       */
+      findUnjustifiedSteps(atoms) {
+        return atoms.filter(
+          (a) => (a.type === "derived" || a.type === "conclusion") && (!a.derivedFrom || a.derivedFrom.length === 0) && !a.justification
+        ).map((a) => a.id);
+      }
+      /**
+       * Assess severity of a gap
+       */
+      assessGapSeverity(atom) {
+        if (atom.type === "conclusion") return "critical";
+        if (atom.type === "lemma") return "significant";
+        return "minor";
+      }
+      /**
+       * Suggest justification for an unjustified statement
+       */
+      suggestJustification(atom, allAtoms) {
+        const related = allAtoms.filter((a) => {
+          if (a.id === atom.id) return false;
+          const overlap = this.computeWordOverlap(a.statement, atom.statement);
+          return overlap > 0.3;
+        });
+        if (related.length > 0) {
+          const relatedIds = related.map((r) => r.id).join(", ");
+          return `Consider deriving from: ${relatedIds}`;
+        }
+        return "Add explicit justification or reference to supporting statements";
+      }
+      /**
+       * Compute word overlap between two statements
+       */
+      computeWordOverlap(a, b) {
+        const wordsA = new Set(
+          a.toLowerCase().split(/\s+/).filter((w) => w.length > 2)
+        );
+        const wordsB = new Set(
+          b.toLowerCase().split(/\s+/).filter((w) => w.length > 2)
+        );
+        if (wordsA.size === 0 || wordsB.size === 0) return 0;
+        let overlap = 0;
+        for (const w of wordsA) {
+          if (wordsB.has(w)) overlap++;
+        }
+        return overlap / Math.max(wordsA.size, wordsB.size);
+      }
+      /**
+       * Generate improvement suggestions
+       */
+      generateSuggestions(gaps, implicitAssumptions, unjustifiedSteps) {
+        const suggestions = [];
+        const criticalGaps = gaps.filter((g) => g.severity === "critical");
+        const significantGaps = gaps.filter((g) => g.severity === "significant");
+        const minorGaps = gaps.filter((g) => g.severity === "minor");
+        if (criticalGaps.length > 0) {
+          suggestions.push(
+            `CRITICAL: Address ${criticalGaps.length} critical gap(s) in the proof - conclusions lack proper justification`
+          );
+        }
+        if (significantGaps.length > 0) {
+          suggestions.push(
+            `Add intermediate steps to bridge ${significantGaps.length} significant logical gap(s)`
+          );
+        }
+        if (implicitAssumptions.filter((a) => a.shouldBeExplicit).length > 0) {
+          suggestions.push(
+            `Make ${implicitAssumptions.filter((a) => a.shouldBeExplicit).length} implicit assumption(s) explicit`
+          );
+        }
+        if (unjustifiedSteps.length > 0) {
+          suggestions.push(`Provide justification for ${unjustifiedSteps.length} unjustified step(s)`);
+        }
+        if (minorGaps.length > 0 && this.config.strictness !== "lenient") {
+          suggestions.push(
+            `Consider clarifying ${minorGaps.length} minor gap(s) for improved rigor`
+          );
+        }
+        if (suggestions.length === 0) {
+          suggestions.push("The proof appears complete with no significant gaps identified");
+        }
+        return suggestions;
+      }
+      /**
+       * Compute overall completeness score
+       */
+      computeCompleteness(atoms, gaps, implicitAssumptions) {
+        if (atoms.length === 0) return 0;
+        let score = 1;
+        for (const gap of gaps) {
+          switch (gap.severity) {
+            case "critical":
+              score -= 0.25;
+              break;
+            case "significant":
+              score -= 0.1;
+              break;
+            case "minor":
+              score -= 0.02;
+              break;
+          }
+        }
+        const criticalImplicit = implicitAssumptions.filter((a) => a.shouldBeExplicit).length;
+        score -= criticalImplicit * 0.05;
+        return Math.max(0, Math.min(1, score));
+      }
+    };
+  }
+});
+
+// src/proof/assumption-tracker.ts
+var AssumptionTracker;
+var init_assumption_tracker = __esm({
+  "src/proof/assumption-tracker.ts"() {
+    init_esm_shims();
+    AssumptionTracker = class {
+      /**
+       * Trace a conclusion back to its foundational assumptions
+       *
+       * @param conclusionId - The statement ID to trace
+       * @param graph - The dependency graph
+       * @returns AssumptionChain with full derivation path
+       */
+      traceToAssumptions(conclusionId, graph) {
+        const assumptions = [];
+        const path2 = [];
+        const implicitAssumptions = [];
+        const visited = /* @__PURE__ */ new Set();
+        const trace = (id) => {
+          if (visited.has(id)) return;
+          visited.add(id);
+          const node = graph.nodes.get(id);
+          if (!node) return;
+          path2.push(id);
+          if (node.type === "axiom" || node.type === "definition" || node.type === "hypothesis") {
+            assumptions.push(id);
+            return;
+          }
+          if (node.derivedFrom && node.derivedFrom.length > 0) {
+            for (const depId of node.derivedFrom) {
+              trace(depId);
+            }
+          } else {
+            implicitAssumptions.push({
+              id: `impl-trace-${id}`,
+              statement: node.statement,
+              type: "existence_assumption",
+              usedInStep: id,
+              shouldBeExplicit: true,
+              suggestedFormulation: `Make explicit: "${node.statement.substring(0, 50)}..."`
+            });
+          }
+        };
+        trace(conclusionId);
+        const allAssumptionsExplicit = implicitAssumptions.length === 0;
+        return {
+          conclusion: conclusionId,
+          assumptions: [...new Set(assumptions)],
+          path: path2.reverse(),
+          // Start from assumptions, end at conclusion
+          allAssumptionsExplicit,
+          implicitAssumptions
+        };
+      }
+      /**
+       * Perform comprehensive assumption analysis
+       *
+       * @param decomposition - The proof decomposition to analyze
+       * @returns AssumptionAnalysis with detailed findings
+       */
+      analyzeAssumptions(decomposition) {
+        const { atoms, dependencies } = decomposition;
+        const explicitAssumptions = atoms.filter(
+          (a) => a.type === "axiom" || a.type === "definition" || a.type === "hypothesis"
+        );
+        const allImplicitAssumptions = [];
+        const conclusionDependencies = /* @__PURE__ */ new Map();
+        const conclusions = atoms.filter((a) => a.type === "conclusion");
+        for (const conclusion of conclusions) {
+          const chain = this.traceToAssumptions(conclusion.id, dependencies);
+          conclusionDependencies.set(conclusion.id, chain.assumptions);
+          allImplicitAssumptions.push(...chain.implicitAssumptions);
+        }
+        if (conclusions.length === 0) {
+          for (const leafId of dependencies.leaves) {
+            const chain = this.traceToAssumptions(leafId, dependencies);
+            conclusionDependencies.set(leafId, chain.assumptions);
+            allImplicitAssumptions.push(...chain.implicitAssumptions);
+          }
+        }
+        const usedAssumptions = /* @__PURE__ */ new Set();
+        for (const deps of conclusionDependencies.values()) {
+          for (const dep of deps) {
+            usedAssumptions.add(dep);
+          }
+        }
+        const unusedAssumptions = explicitAssumptions.filter((a) => !usedAssumptions.has(a.id)).map((a) => a.id);
+        const minimalSets = this.findMinimalAssumptions(conclusionDependencies, dependencies);
+        const uniqueImplicit = this.deduplicateImplicit(allImplicitAssumptions);
+        return {
+          explicitAssumptions,
+          implicitAssumptions: uniqueImplicit,
+          unusedAssumptions,
+          conclusionDependencies,
+          minimalSets
+        };
+      }
+      /**
+       * Find minimal sets of assumptions needed for each conclusion
+       *
+       * Uses a greedy approach to find approximately minimal sets.
+       * For exact minimal sets, a SAT solver would be needed.
+       */
+      findMinimalAssumptions(conclusionDependencies, graph) {
+        const minimalSets = /* @__PURE__ */ new Map();
+        for (const [conclusion, assumptions] of conclusionDependencies) {
+          const minimal = this.computeMinimalSet(conclusion, assumptions, graph);
+          minimalSets.set(conclusion, minimal);
+        }
+        return minimalSets;
+      }
+      /**
+       * Compute a minimal assumption set for a conclusion
+       *
+       * Uses backward elimination: try removing each assumption and
+       * check if the conclusion is still reachable.
+       */
+      computeMinimalSet(conclusion, assumptions, graph) {
+        if (assumptions.length <= 1) return [...assumptions];
+        let current = [...assumptions];
+        for (let i = 0; i < current.length; i++) {
+          const testSet = [...current.slice(0, i), ...current.slice(i + 1)];
+          if (this.isReachable(testSet, conclusion, graph)) {
+            current = testSet;
+            i--;
+          }
+        }
+        return current;
+      }
+      /**
+       * Check if a conclusion is reachable from a set of assumptions
+       */
+      isReachable(assumptions, conclusion, graph) {
+        const reachable = new Set(assumptions);
+        let changed = true;
+        while (changed) {
+          changed = false;
+          for (const [id, node] of graph.nodes) {
+            if (reachable.has(id)) continue;
+            if (node.derivedFrom && node.derivedFrom.length > 0) {
+              const allDepsReachable = node.derivedFrom.every((d) => reachable.has(d));
+              if (allDepsReachable) {
+                reachable.add(id);
+                changed = true;
+                if (id === conclusion) return true;
+              }
+            }
+          }
+        }
+        return reachable.has(conclusion);
+      }
+      /**
+       * Find assumptions that are not used in any derivation
+       */
+      findUnusedAssumptions(decomposition) {
+        const { atoms, dependencies } = decomposition;
+        const assumptionIds = new Set(
+          atoms.filter((a) => a.type === "axiom" || a.type === "definition" || a.type === "hypothesis").map((a) => a.id)
+        );
+        const referenced = /* @__PURE__ */ new Set();
+        for (const atom of atoms) {
+          if (atom.derivedFrom) {
+            for (const depId of atom.derivedFrom) {
+              referenced.add(depId);
+            }
+          }
+        }
+        for (const edge of dependencies.edges) {
+          referenced.add(edge.from);
+        }
+        return [...assumptionIds].filter((id) => !referenced.has(id));
+      }
+      /**
+       * Check if assumptions are properly discharged in proof by contradiction
+       *
+       * In proof by contradiction, we assume ¬P to derive a contradiction,
+       * then discharge ¬P to conclude P.
+       */
+      checkAssumptionDischarge(decomposition) {
+        const { atoms } = decomposition;
+        const statuses = [];
+        const hypotheticals = atoms.filter((a) => a.type === "hypothesis");
+        const contradictions = atoms.filter(
+          (a) => a.statement.toLowerCase().includes("contradiction") || a.statement.includes("\u22A5") || a.usedInferenceRule === "contradiction"
+        );
+        for (const hyp of hypotheticals) {
+          const isDischargedByContradiction = contradictions.some(
+            (c) => c.derivedFrom?.some((d) => this.dependsOn(d, hyp.id, decomposition.dependencies))
+          );
+          if (isDischargedByContradiction) {
+            statuses.push({
+              assumptionId: hyp.id,
+              isDischarged: true,
+              dischargedAt: contradictions[0]?.id,
+              dischargeReason: "Used in proof by contradiction"
+            });
+          } else {
+            const conclusions = atoms.filter((a) => a.type === "conclusion");
+            const impliesDischarged = conclusions.some(
+              (c) => c.statement.toLowerCase().includes("implies") || c.statement.includes("\u21D2") || c.statement.includes("\u2192")
+            );
+            if (impliesDischarged) {
+              statuses.push({
+                assumptionId: hyp.id,
+                isDischarged: true,
+                dischargedAt: conclusions[0]?.id,
+                dischargeReason: "Used in implication introduction"
+              });
+            } else {
+              statuses.push({
+                assumptionId: hyp.id,
+                isDischarged: false,
+                dischargeReason: "Hypothesis not discharged - may need attention"
+              });
+            }
+          }
+        }
+        return statuses;
+      }
+      /**
+       * Check if statement A depends on statement B (transitively)
+       */
+      dependsOn(aId, bId, graph) {
+        const visited = /* @__PURE__ */ new Set();
+        const check = (id) => {
+          if (id === bId) return true;
+          if (visited.has(id)) return false;
+          visited.add(id);
+          const node = graph.nodes.get(id);
+          if (!node || !node.derivedFrom) return false;
+          return node.derivedFrom.some((depId) => check(depId));
+        };
+        return check(aId);
+      }
+      /**
+       * Get the dependency chain for a specific assumption
+       *
+       * Shows which statements depend on this assumption.
+       */
+      getAssumptionImpact(assumptionId, graph) {
+        const dependents = [];
+        const visited = /* @__PURE__ */ new Set();
+        const queue = [assumptionId];
+        while (queue.length > 0) {
+          const current = queue.shift();
+          if (visited.has(current)) continue;
+          visited.add(current);
+          for (const [id, node] of graph.nodes) {
+            if (node.derivedFrom?.includes(current) && !visited.has(id)) {
+              dependents.push(id);
+              queue.push(id);
+            }
+          }
+        }
+        return dependents;
+      }
+      /**
+       * Deduplicate implicit assumptions based on content similarity
+       */
+      deduplicateImplicit(assumptions) {
+        const seen = /* @__PURE__ */ new Map();
+        for (const assumption of assumptions) {
+          const key = `${assumption.type}:${assumption.statement.toLowerCase().trim()}`;
+          if (!seen.has(key)) {
+            seen.set(key, assumption);
+          }
+        }
+        return [...seen.values()];
+      }
+      /**
+       * Suggest how to strengthen a proof by making assumptions explicit
+       */
+      getSuggestions(analysis) {
+        const suggestions = [];
+        if (analysis.unusedAssumptions.length > 0) {
+          suggestions.push(
+            `Consider removing ${analysis.unusedAssumptions.length} unused assumption(s): ${analysis.unusedAssumptions.join(", ")}`
+          );
+        }
+        const criticalImplicit = analysis.implicitAssumptions.filter((a) => a.shouldBeExplicit);
+        if (criticalImplicit.length > 0) {
+          suggestions.push(
+            `Make ${criticalImplicit.length} implicit assumption(s) explicit for improved rigor`
+          );
+          for (const imp of criticalImplicit.slice(0, 3)) {
+            suggestions.push(`  - ${imp.suggestedFormulation}`);
+          }
+        }
+        for (const [conclusion, minimal] of analysis.minimalSets) {
+          const full = analysis.conclusionDependencies.get(conclusion) || [];
+          if (minimal.length < full.length) {
+            const redundant = full.filter((a) => !minimal.includes(a));
+            if (redundant.length > 0) {
+              suggestions.push(
+                `For conclusion ${conclusion}: ${redundant.length} assumption(s) may be redundant`
+              );
+            }
+          }
+        }
+        if (suggestions.length === 0) {
+          suggestions.push("Assumption structure appears sound");
+        }
+        return suggestions;
+      }
+      /**
+       * Validate the assumption structure of a proof
+       *
+       * Returns true if the proof has a valid assumption structure:
+       * - At least one foundational assumption
+       * - All conclusions traceable to assumptions
+       * - No circular dependencies involving assumptions
+       */
+      validateStructure(decomposition) {
+        const issues = [];
+        const { atoms, dependencies } = decomposition;
+        const foundations = atoms.filter(
+          (a) => a.type === "axiom" || a.type === "definition" || a.type === "hypothesis"
+        );
+        if (foundations.length === 0) {
+          issues.push("No foundational assumptions (axioms, definitions, or hypotheses) found");
+        }
+        for (const rootId of dependencies.roots) {
+          const root = dependencies.nodes.get(rootId);
+          if (root && root.type !== "axiom" && root.type !== "definition" && root.type !== "hypothesis") {
+            issues.push(
+              `Root statement "${root.statement.substring(0, 30)}..." is not a foundational type`
+            );
+          }
+        }
+        if (dependencies.hasCycles) {
+          const cycleNodes = new Set(
+            (dependencies.stronglyConnectedComponents || []).filter((scc) => scc.length > 1).flat()
+          );
+          for (const foundation of foundations) {
+            if (cycleNodes.has(foundation.id)) {
+              issues.push(
+                `Assumption "${foundation.statement.substring(0, 30)}..." is involved in circular reasoning`
+              );
+            }
+          }
+        }
+        const conclusions = atoms.filter((a) => a.type === "conclusion");
+        for (const conclusion of conclusions) {
+          const chain = this.traceToAssumptions(conclusion.id, dependencies);
+          if (chain.assumptions.length === 0 && !chain.allAssumptionsExplicit) {
+            issues.push(
+              `Conclusion "${conclusion.statement.substring(0, 30)}..." cannot be traced to any assumption`
+            );
+          }
+        }
+        return {
+          isValid: issues.length === 0,
+          issues
+        };
+      }
+    };
+  }
+});
+
+// src/proof/inconsistency-detector.ts
+var DEFAULT_CONFIG4, InconsistencyDetector;
+var init_inconsistency_detector = __esm({
+  "src/proof/inconsistency-detector.ts"() {
+    init_esm_shims();
+    DEFAULT_CONFIG4 = {
+      strictTyping: true,
+      checkDomains: true,
+      checkQuantifiers: true,
+      maxPairwiseComparisons: 1e3
+    };
+    InconsistencyDetector = class {
+      config;
+      contradictionPatterns;
+      constructor(config = {}) {
+        this.config = { ...DEFAULT_CONFIG4, ...config };
+        this.contradictionPatterns = this.initializePatterns();
+      }
+      /**
+       * Initialize contradiction patterns for syntactic matching
+       */
+      initializePatterns() {
+        return [
+          // Inequality contradictions
+          {
+            positive: /(\w+)\s*>\s*0/,
+            negative: /(\w+)\s*(?:<=|≤)\s*0/,
+            description: "Positive and non-positive contradiction"
+          },
+          {
+            positive: /(\w+)\s*<\s*0/,
+            negative: /(\w+)\s*(?:>=|≥)\s*0/,
+            description: "Negative and non-negative contradiction"
+          },
+          {
+            positive: /(\w+)\s*=\s*0/,
+            negative: /(\w+)\s*(?:!=|≠|<>)\s*0/,
+            description: "Zero and non-zero contradiction"
+          },
+          // Boolean contradictions
+          {
+            positive: /(\w+)\s+is\s+true/i,
+            negative: /(\w+)\s+is\s+false/i,
+            description: "True and false contradiction"
+          },
+          // Property contradictions
+          {
+            positive: /(\w+)\s+is\s+even/i,
+            negative: /(\w+)\s+is\s+odd/i,
+            description: "Even and odd contradiction"
+          },
+          {
+            positive: /(\w+)\s+is\s+positive/i,
+            negative: /(\w+)\s+is\s+(?:negative|non-positive)/i,
+            description: "Positive property contradiction"
+          },
+          {
+            positive: /(\w+)\s+is\s+rational/i,
+            negative: /(\w+)\s+is\s+irrational/i,
+            description: "Rational and irrational contradiction"
+          },
+          {
+            positive: /(\w+)\s+is\s+finite/i,
+            negative: /(\w+)\s+is\s+infinite/i,
+            description: "Finite and infinite contradiction"
+          },
+          // Existence contradictions
+          {
+            positive: /(?:there\s+)?exists?\s+(\w+)/i,
+            negative: /(?:no|does\s+not\s+exist|cannot\s+exist)\s+(\w+)/i,
+            description: "Existence contradiction"
+          }
+        ];
+      }
+      /**
+       * Analyze a proof decomposition for inconsistencies
+       */
+      analyze(decomposition) {
+        const { atoms, dependencies } = decomposition;
+        const inconsistencies = [];
+        let inconsistencyCount = 0;
+        const contradictions = this.detectContradictions(atoms);
+        inconsistencies.push(
+          ...contradictions.map((c) => ({
+            ...c,
+            id: `inc-${++inconsistencyCount}`
+          }))
+        );
+        if (this.config.strictTyping) {
+          const typeMismatches = this.detectTypeMismatches(atoms);
+          inconsistencies.push(
+            ...typeMismatches.map((t) => ({
+              ...t,
+              id: `inc-${++inconsistencyCount}`
+            }))
+          );
+        }
+        if (this.config.checkDomains) {
+          const domainViolations = this.detectDomainViolations(atoms);
+          inconsistencies.push(
+            ...domainViolations.map((d) => ({
+              ...d,
+              id: `inc-${++inconsistencyCount}`
+            }))
+          );
+        }
+        const undefinedOps = this.detectUndefinedOperations(atoms);
+        inconsistencies.push(
+          ...undefinedOps.map((u) => ({
+            ...u,
+            id: `inc-${++inconsistencyCount}`
+          }))
+        );
+        const axiomConflicts = this.detectAxiomConflicts(atoms);
+        inconsistencies.push(
+          ...axiomConflicts.map((a) => ({
+            ...a,
+            id: `inc-${++inconsistencyCount}`
+          }))
+        );
+        if (this.config.checkQuantifiers) {
+          const quantifierErrors = this.detectQuantifierErrors(atoms, dependencies);
+          inconsistencies.push(
+            ...quantifierErrors.map((q) => ({
+              ...q,
+              id: `inc-${++inconsistencyCount}`
+            }))
+          );
+        }
+        return inconsistencies;
+      }
+      /**
+       * Detect direct contradictions (P and ¬P)
+       */
+      detectContradictions(atoms) {
+        const contradictions = [];
+        const limit = Math.min(atoms.length, Math.sqrt(this.config.maxPairwiseComparisons));
+        for (let i = 0; i < Math.min(atoms.length, limit); i++) {
+          for (let j = i + 1; j < Math.min(atoms.length, limit); j++) {
+            const stmtA = atoms[i];
+            const stmtB = atoms[j];
+            if (this.isSyntacticNegation(stmtA.statement, stmtB.statement)) {
+              contradictions.push({
+                type: "direct_contradiction",
+                involvedStatements: [stmtA.id, stmtB.id],
+                explanation: `Statement "${stmtA.statement.substring(0, 40)}..." directly contradicts "${stmtB.statement.substring(0, 40)}..."`,
+                severity: "critical",
+                suggestedResolution: "Review the derivation of both statements to find the error"
+              });
+            }
+            for (const pattern of this.contradictionPatterns) {
+              const matchA = stmtA.statement.match(pattern.positive);
+              const matchB = stmtB.statement.match(pattern.negative);
+              if (matchA && matchB && matchA[1] === matchB[1]) {
+                contradictions.push({
+                  type: "direct_contradiction",
+                  involvedStatements: [stmtA.id, stmtB.id],
+                  explanation: `${pattern.description}: "${matchA[1]}" has conflicting properties`,
+                  severity: "critical",
+                  suggestedResolution: "Check the assumptions about the variable"
+                });
+              }
+              const matchA2 = stmtA.statement.match(pattern.negative);
+              const matchB2 = stmtB.statement.match(pattern.positive);
+              if (matchA2 && matchB2 && matchA2[1] === matchB2[1]) {
+                contradictions.push({
+                  type: "direct_contradiction",
+                  involvedStatements: [stmtA.id, stmtB.id],
+                  explanation: `${pattern.description}: "${matchA2[1]}" has conflicting properties`,
+                  severity: "critical",
+                  suggestedResolution: "Check the assumptions about the variable"
+                });
+              }
+            }
+          }
+        }
+        return contradictions;
+      }
+      /**
+       * Check if two statements are syntactic negations
+       */
+      isSyntacticNegation(a, b) {
+        const normalA = a.toLowerCase().trim();
+        const normalB = b.toLowerCase().trim();
+        if (normalB === `not ${normalA}` || normalA === `not ${normalB}`) {
+          return true;
+        }
+        if (normalB === `\xAC ${normalA}` || normalB === `\xAC${normalA}`) {
+          return true;
+        }
+        if (normalA === `\xAC ${normalB}` || normalA === `\xAC${normalB}`) {
+          return true;
+        }
+        const trueMatch = normalA.match(/^(.+) is true$/);
+        const falseMatch = normalB.match(/^(.+) is false$/);
+        if (trueMatch && falseMatch && trueMatch[1] === falseMatch[1]) {
+          return true;
+        }
+        const trueMatch2 = normalB.match(/^(.+) is true$/);
+        const falseMatch2 = normalA.match(/^(.+) is false$/);
+        if (trueMatch2 && falseMatch2 && trueMatch2[1] === falseMatch2[1]) {
+          return true;
+        }
+        const holdsMatch = normalA.match(/^(.+) holds$/);
+        const notHoldsMatch = normalB.match(/^(.+) does not hold$/);
+        if (holdsMatch && notHoldsMatch && holdsMatch[1] === notHoldsMatch[1]) {
+          return true;
+        }
+        const itTrueMatch = normalA.match(/^it is true that (.+)$/);
+        const itFalseMatch = normalB.match(/^it is false that (.+)$/);
+        if (itTrueMatch && itFalseMatch && itTrueMatch[1] === itFalseMatch[1]) {
+          return true;
+        }
+        return false;
+      }
+      /**
+       * Detect type mismatches
+       */
+      detectTypeMismatches(atoms) {
+        const mismatches = [];
+        const variableTypes = /* @__PURE__ */ new Map();
+        for (const atom of atoms) {
+          const typePatterns = [
+            { pattern: /let\s+(\w+)\s+be\s+an?\s+(\w+)/i, extractor: (m) => ({ var: m[1], type: m[2] }) },
+            { pattern: /(\w+)\s+is\s+an?\s+(\w+)/i, extractor: (m) => ({ var: m[1], type: m[2] }) },
+            { pattern: /for\s+(?:all|any|every)\s+(\w+)\s+in\s+(\w+)/i, extractor: (m) => ({ var: m[1], type: m[2] }) },
+            { pattern: /(\w+)\s*∈\s*(\w+)/i, extractor: (m) => ({ var: m[1], type: m[2] }) }
+          ];
+          for (const { pattern, extractor } of typePatterns) {
+            const match = atom.statement.match(pattern);
+            if (match) {
+              const { var: varName, type: varType } = extractor(match);
+              const existing = variableTypes.get(varName);
+              if (existing && !this.areTypesCompatible(existing.type, varType)) {
+                mismatches.push({
+                  type: "type_mismatch",
+                  involvedStatements: [existing.sourceId, atom.id],
+                  explanation: `Variable "${varName}" is declared as both "${existing.type}" and "${varType}"`,
+                  severity: "error",
+                  suggestedResolution: `Clarify the type of "${varName}"`
+                });
+              } else {
+                variableTypes.set(varName, { type: varType, sourceId: atom.id });
+              }
+            }
+          }
+        }
+        return mismatches;
+      }
+      /**
+       * Check if two types are compatible
+       */
+      areTypesCompatible(type1, type2) {
+        const t1 = type1.toLowerCase();
+        const t2 = type2.toLowerCase();
+        if (t1 === t2) return true;
+        const subtypes = {
+          natural: ["integer", "real", "complex"],
+          integer: ["real", "complex"],
+          rational: ["real", "complex"],
+          real: ["complex"],
+          positive: ["real", "integer"],
+          negative: ["real", "integer"]
+        };
+        return subtypes[t1]?.includes(t2) || subtypes[t2]?.includes(t1);
+      }
+      /**
+       * Detect domain violations
+       */
+      detectDomainViolations(atoms) {
+        const violations = [];
+        const domainPatterns = [
+          {
+            pattern: /sqrt\s*\(\s*(-[\d.]+|negative)/i,
+            violation: "Square root of negative number",
+            domain: "real numbers"
+          },
+          {
+            pattern: /log\s*\(\s*(-[\d.]+|0|zero|non-?positive)/i,
+            violation: "Logarithm of non-positive number",
+            domain: "positive real numbers"
+          },
+          {
+            pattern: /arcsin\s*\(\s*([\d.]+)/,
+            violation: "Arcsin of value outside [-1, 1]",
+            domain: "[-1, 1]",
+            validator: (match) => {
+              const val = parseFloat(match[1]);
+              return Math.abs(val) > 1;
+            }
+          },
+          {
+            pattern: /(\w+)\s*\/\s*0(?![.\d])/,
+            violation: "Division by zero",
+            domain: "non-zero divisor"
+          }
+        ];
+        for (const atom of atoms) {
+          for (const { pattern, violation, domain, validator } of domainPatterns) {
+            const match = atom.statement.match(pattern);
+            if (match && (!validator || validator(match))) {
+              violations.push({
+                type: "domain_violation",
+                involvedStatements: [atom.id],
+                explanation: `${violation} in "${atom.statement.substring(0, 50)}..."`,
+                severity: "error",
+                suggestedResolution: `Ensure the argument is in the valid domain: ${domain}`
+              });
+            }
+          }
+        }
+        return violations;
+      }
+      /**
+       * Detect undefined operations
+       */
+      detectUndefinedOperations(atoms) {
+        const undefined2 = [];
+        const undefinedPatterns = [
+          {
+            pattern: /0\s*\/\s*0/,
+            operation: "0/0 - indeterminate form"
+          },
+          {
+            pattern: /∞\s*[-/]\s*∞/,
+            operation: "\u221E - \u221E or \u221E/\u221E - indeterminate form"
+          },
+          {
+            pattern: /0\s*\*\s*∞|∞\s*\*\s*0/,
+            operation: "0 \xD7 \u221E - indeterminate form"
+          },
+          {
+            pattern: /0\s*\^\s*0/,
+            operation: "0^0 - undefined/context-dependent"
+          },
+          {
+            pattern: /(\w+)\s*\^\s*\(?\s*-\d+\s*\)?.*\1\s*=\s*0/i,
+            operation: "Negative power of zero"
+          }
+        ];
+        for (const atom of atoms) {
+          for (const { pattern, operation } of undefinedPatterns) {
+            if (pattern.test(atom.statement)) {
+              undefined2.push({
+                type: "undefined_operation",
+                involvedStatements: [atom.id],
+                explanation: `Undefined operation: ${operation}`,
+                severity: "critical",
+                suggestedResolution: "This operation is mathematically undefined or indeterminate"
+              });
+            }
+          }
+        }
+        return undefined2;
+      }
+      /**
+       * Detect axiom conflicts
+       */
+      detectAxiomConflicts(atoms) {
+        const conflicts = [];
+        const axioms = atoms.filter((a) => a.type === "axiom");
+        for (let i = 0; i < axioms.length; i++) {
+          for (let j = i + 1; j < axioms.length; j++) {
+            if (this.axiomsMayConflict(axioms[i], axioms[j])) {
+              conflicts.push({
+                type: "axiom_conflict",
+                involvedStatements: [axioms[i].id, axioms[j].id],
+                explanation: `Axioms may be in conflict: "${axioms[i].statement.substring(0, 30)}..." and "${axioms[j].statement.substring(0, 30)}..."`,
+                severity: "warning",
+                suggestedResolution: "Verify that these axioms are consistent in the intended model"
+              });
+            }
+          }
+        }
+        return conflicts;
+      }
+      /**
+       * Check if two axioms may conflict
+       */
+      axiomsMayConflict(a, b) {
+        if (this.isSyntacticNegation(a.statement, b.statement)) {
+          return true;
+        }
+        const universalA = /(?:for\s+all|∀)\s+(\w+).*?(\w+)\s+is\s+(\w+)/i.exec(a.statement);
+        const universalB = /(?:for\s+all|∀)\s+(\w+).*?(\w+)\s+is\s+not\s+(\w+)/i.exec(b.statement);
+        if (universalA && universalB && universalA[2] === universalB[2] && universalA[3] === universalB[3]) {
+          return true;
+        }
+        return false;
+      }
+      /**
+       * Detect quantifier errors
+       */
+      detectQuantifierErrors(atoms, graph) {
+        const errors = [];
+        const scopedVariables = /* @__PURE__ */ new Map();
+        for (const atom of atoms) {
+          const universalMatch = atom.statement.match(/(?:for\s+all|∀)\s+(\w+)/i);
+          if (universalMatch) {
+            scopedVariables.set(universalMatch[1], { quantifier: "universal", scope: atom.id });
+          }
+          const existentialMatch = atom.statement.match(/(?:there\s+exists?|∃)\s+(\w+)/i);
+          if (existentialMatch) {
+            scopedVariables.set(existentialMatch[1], { quantifier: "existential", scope: atom.id });
+          }
+          const variableUses = atom.statement.match(/\b([a-zA-Z])\b/g);
+          if (variableUses) {
+            for (const varName of variableUses) {
+              const scopeInfo = scopedVariables.get(varName);
+              if (scopeInfo) {
+                const inScope = this.isInScope(atom.id, scopeInfo.scope, graph);
+                if (!inScope) {
+                  errors.push({
+                    type: "quantifier_error",
+                    involvedStatements: [scopeInfo.scope, atom.id],
+                    explanation: `Variable "${varName}" used outside its quantifier scope`,
+                    severity: "error",
+                    suggestedResolution: `Ensure "${varName}" is properly bound in the current context`
+                  });
+                }
+              }
+            }
+          }
+          const uniExiPattern = /∀\s*(\w+).*∃\s*(\w+).*\1.*\2/;
+          const exiUniPattern = /∃\s*(\w+).*∀\s*(\w+).*\1.*\2/;
+          const uniExiMatch = atom.statement.match(uniExiPattern);
+          const exiUniMatch = atom.statement.match(exiUniPattern);
+          if (uniExiMatch && exiUniMatch) {
+            errors.push({
+              type: "quantifier_error",
+              involvedStatements: [atom.id],
+              explanation: "Ambiguous quantifier order may lead to different meanings",
+              severity: "warning",
+              suggestedResolution: "Clarify the intended quantifier order (\u2200\u2203 vs \u2203\u2200 has different meaning)"
+            });
+          }
+        }
+        return errors;
+      }
+      /**
+       * Check if a statement is in the scope of another
+       */
+      isInScope(stmtId, scopeId, graph) {
+        const visited = /* @__PURE__ */ new Set();
+        const queue = [scopeId];
+        while (queue.length > 0) {
+          const current = queue.shift();
+          if (current === stmtId) return true;
+          if (visited.has(current)) continue;
+          visited.add(current);
+          for (const edge of graph.edges) {
+            if (edge.from === current && !visited.has(edge.to)) {
+              queue.push(edge.to);
+            }
+          }
+        }
+        return false;
+      }
+      /**
+       * Get a summary of all inconsistencies
+       */
+      getSummary(inconsistencies) {
+        const criticalCount = inconsistencies.filter((i) => i.severity === "critical").length;
+        const errorCount = inconsistencies.filter((i) => i.severity === "error").length;
+        const warningCount = inconsistencies.filter((i) => i.severity === "warning").length;
+        let summary;
+        if (criticalCount > 0) {
+          summary = `CRITICAL: ${criticalCount} critical inconsistencies found. The proof is invalid.`;
+        } else if (errorCount > 0) {
+          summary = `ERROR: ${errorCount} errors found that need to be addressed.`;
+        } else if (warningCount > 0) {
+          summary = `WARNING: ${warningCount} potential issues found. Review recommended.`;
+        } else {
+          summary = "No inconsistencies detected. The proof appears to be consistent.";
+        }
+        return {
+          isConsistent: criticalCount === 0 && errorCount === 0,
+          criticalCount,
+          errorCount,
+          warningCount,
+          summary
+        };
+      }
+    };
+  }
+});
+
+// src/proof/circular-detector.ts
+var CircularReasoningDetector;
+var init_circular_detector = __esm({
+  "src/proof/circular-detector.ts"() {
+    init_esm_shims();
+    CircularReasoningDetector = class {
+      /**
+       * Detect all forms of circular reasoning in a proof
+       */
+      detectCircularReasoning(decomposition) {
+        const { atoms, dependencies } = decomposition;
+        const cycles = this.findReasoningCycles(dependencies);
+        const selfReferential = this.findSelfReferential(atoms);
+        const begging = this.findBeggingTheQuestion(atoms, dependencies);
+        const tautologies = this.findTautologies(atoms);
+        const hasCircularReasoning = cycles.length > 0 || selfReferential.length > 0 || begging.length > 0;
+        return {
+          hasCircularReasoning,
+          cycles,
+          selfReferentialStatements: selfReferential,
+          beggingTheQuestion: begging,
+          tautologies,
+          summary: this.generateSummary(cycles, selfReferential, begging, tautologies)
+        };
+      }
+      /**
+       * Check if a single statement is self-referential
+       */
+      isSelfReferential(statement) {
+        if (statement.derivedFrom?.includes(statement.id)) {
+          return true;
+        }
+        const selfRefPatterns = [
+          /this\s+(?:statement|proposition|claim)\s+(?:is|implies)/i,
+          /(?:the\s+)?above\s+(?:statement|claim)\s+proves\s+itself/i,
+          /by\s+definition\s+of\s+itself/i
+        ];
+        return selfRefPatterns.some((p) => p.test(statement.statement));
+      }
+      /**
+       * Find all reasoning cycles using Tarjan's algorithm results
+       */
+      findReasoningCycles(graph) {
+        const cycles = [];
+        if (!graph.hasCycles) {
+          return cycles;
+        }
+        if (graph.stronglyConnectedComponents) {
+          for (const scc of graph.stronglyConnectedComponents) {
+            if (scc.length > 1) {
+              cycles.push(this.createCircularPath(scc, graph));
+            }
+          }
+        } else {
+          const visited = /* @__PURE__ */ new Set();
+          const recStack = /* @__PURE__ */ new Set();
+          const parent = /* @__PURE__ */ new Map();
+          for (const [nodeId] of graph.nodes) {
+            if (!visited.has(nodeId)) {
+              this.findCyclesDFS(nodeId, graph, visited, recStack, parent, cycles);
+            }
+          }
+        }
+        return cycles;
+      }
+      /**
+       * DFS helper for finding cycles
+       */
+      findCyclesDFS(nodeId, graph, visited, recStack, parent, cycles) {
+        visited.add(nodeId);
+        recStack.add(nodeId);
+        for (const edge of graph.edges) {
+          if (edge.from === nodeId) {
+            const childId = edge.to;
+            if (!visited.has(childId)) {
+              parent.set(childId, nodeId);
+              this.findCyclesDFS(childId, graph, visited, recStack, parent, cycles);
+            } else if (recStack.has(childId)) {
+              const cyclePath = this.extractCyclePath(childId, nodeId, parent);
+              cycles.push(this.createCircularPath(cyclePath, graph));
+            }
+          }
+        }
+        recStack.delete(nodeId);
+      }
+      /**
+       * Extract the cycle path from parent map
+       */
+      extractCyclePath(cycleStart, cycleEnd, parent) {
+        const path2 = [cycleEnd];
+        let current = cycleEnd;
+        while (current !== cycleStart && parent.has(current)) {
+          current = parent.get(current);
+          path2.push(current);
+        }
+        path2.push(cycleStart);
+        return path2.reverse();
+      }
+      /**
+       * Create a CircularPath object from a list of statement IDs
+       */
+      createCircularPath(statementIds, graph) {
+        const statements = statementIds.map((id) => graph.nodes.get(id)?.statement || id);
+        const visualPath = statementIds.join(" \u2192 ") + " \u2192 " + statementIds[0];
+        let severity = "minor";
+        const conclusionInCycle = statementIds.some((id) => {
+          const node = graph.nodes.get(id);
+          return node?.type === "conclusion";
+        });
+        const hypothesisInCycle = statementIds.some((id) => {
+          const node = graph.nodes.get(id);
+          return node?.type === "hypothesis";
+        });
+        if (conclusionInCycle) {
+          severity = "critical";
+        } else if (hypothesisInCycle || statementIds.length > 3) {
+          severity = "significant";
+        }
+        return {
+          statements: statementIds,
+          cycleLength: statementIds.length,
+          explanation: `Circular reasoning detected: ${statements.map((s) => s.substring(0, 20) + "...").join(" depends on ")} which depends on the first statement`,
+          visualPath,
+          severity
+        };
+      }
+      /**
+       * Find self-referential statements
+       */
+      findSelfReferential(atoms) {
+        return atoms.filter((a) => this.isSelfReferential(a)).map((a) => a.id);
+      }
+      /**
+       * Find instances of begging the question
+       * (assuming what needs to be proved)
+       */
+      findBeggingTheQuestion(atoms, graph) {
+        const begging = [];
+        const conclusions = atoms.filter((a) => a.type === "conclusion");
+        const hypotheses = atoms.filter((a) => a.type === "hypothesis");
+        for (const conclusion of conclusions) {
+          for (const hypothesis of hypotheses) {
+            if (this.statementsEquivalent(conclusion.statement, hypothesis.statement)) {
+              begging.push(conclusion.id);
+              break;
+            }
+          }
+          if (conclusion.derivedFrom) {
+            for (const depId of conclusion.derivedFrom) {
+              const dep = graph.nodes.get(depId);
+              if (dep && this.statementsEquivalent(conclusion.statement, dep.statement)) {
+                begging.push(conclusion.id);
+                break;
+              }
+            }
+          }
+        }
+        return [...new Set(begging)];
+      }
+      /**
+       * Check if two statements are semantically equivalent
+       */
+      statementsEquivalent(a, b) {
+        const normalizeStatement = (s) => {
+          return s.toLowerCase().replace(/\s+/g, " ").replace(/[.,;:!?]/g, "").trim();
+        };
+        const normA = normalizeStatement(a);
+        const normB = normalizeStatement(b);
+        if (normA === normB) return true;
+        const checkEquivalence = (a2, b2) => {
+          const thereforeMatch = a2.match(/therefore\s+(.+)/);
+          const thusMatch = b2.match(/thus\s+(.+)/);
+          if (thereforeMatch && thusMatch && thereforeMatch[1] === thusMatch[1]) return true;
+          const isTrueMatch = a2.match(/(.+)\s+is\s+true/);
+          if (isTrueMatch && isTrueMatch[1] === b2) return true;
+          const followsMatch = a2.match(/it follows that\s+(.+)/);
+          if (followsMatch && followsMatch[1] === b2) return true;
+          return false;
+        };
+        if (checkEquivalence(normA, normB) || checkEquivalence(normB, normA)) return true;
+        const wordsA = new Set(normA.split(/\s+/).filter((w) => w.length > 3));
+        const wordsB = new Set(normB.split(/\s+/).filter((w) => w.length > 3));
+        if (wordsA.size === 0 || wordsB.size === 0) return false;
+        let overlap = 0;
+        for (const word of wordsA) {
+          if (wordsB.has(word)) overlap++;
+        }
+        return overlap / Math.max(wordsA.size, wordsB.size) > 0.8;
+      }
+      /**
+       * Find tautological statements
+       * (statements that are trivially true)
+       */
+      findTautologies(atoms) {
+        const tautologies = [];
+        const tautologyPatterns = [
+          /(.+)\s+is\s+\1/i,
+          // "X is X"
+          /if\s+(.+)\s+then\s+\1/i,
+          // "if P then P"
+          /(.+)\s+or\s+not\s+\1/i,
+          // "P or not P"
+          /(.+)\s+implies\s+\1/i,
+          // "P implies P"
+          /(?:it is |)true\s+that\s+(.+)\s+is\s+(?:true|the case)/i,
+          // "it is true that X is true"
+          /either\s+(.+)\s+or\s+\1/i,
+          // "either P or P"
+          /all\s+(\w+)\s+are\s+\1/i
+          // "all X are X"
+        ];
+        for (const atom of atoms) {
+          for (const pattern of tautologyPatterns) {
+            if (pattern.test(atom.statement)) {
+              tautologies.push(atom.id);
+              break;
+            }
+          }
+          if (this.isLogicalTautology(atom.statement)) {
+            tautologies.push(atom.id);
+          }
+        }
+        return [...new Set(tautologies)];
+      }
+      /**
+       * Check if a statement is a logical tautology
+       */
+      isLogicalTautology(statement) {
+        const normalized = statement.toLowerCase();
+        const orNotPattern = /(\b\w+\b)\s+or\s+not\s+\1/;
+        if (orNotPattern.test(normalized)) return true;
+        const orSamePattern = /(\b\w+\b)\s+or\s+\1\b/;
+        if (orSamePattern.test(normalized)) return true;
+        const impliesSelf = /if\s+(\b\w+\b).*then\s+\1/;
+        if (impliesSelf.test(normalized)) return true;
+        return false;
+      }
+      /**
+       * Generate a summary of circular reasoning findings
+       */
+      generateSummary(cycles, selfReferential, begging, tautologies) {
+        const parts = [];
+        if (cycles.length > 0) {
+          const criticalCycles = cycles.filter((c) => c.severity === "critical").length;
+          if (criticalCycles > 0) {
+            parts.push(`CRITICAL: ${criticalCycles} circular reasoning cycle(s) involving conclusions`);
+          } else {
+            parts.push(`${cycles.length} circular reasoning cycle(s) detected`);
+          }
+        }
+        if (selfReferential.length > 0) {
+          parts.push(`${selfReferential.length} self-referential statement(s)`);
+        }
+        if (begging.length > 0) {
+          parts.push(`${begging.length} instance(s) of begging the question`);
+        }
+        if (tautologies.length > 0) {
+          parts.push(`${tautologies.length} tautological statement(s) (may be intentional)`);
+        }
+        if (parts.length === 0) {
+          return "No circular reasoning detected. The proof structure appears sound.";
+        }
+        return parts.join(". ") + ".";
+      }
+      /**
+       * Get detailed analysis of a specific cycle
+       */
+      analyzeCycle(cycle, graph) {
+        const involvedStatements = [];
+        const breakPoints = [];
+        for (const id of cycle.statements) {
+          const node = graph.nodes.get(id);
+          if (node) {
+            involvedStatements.push(node);
+            if (node.type === "derived" && node.derivedFrom && node.derivedFrom.length > 1) {
+              breakPoints.push(id);
+            }
+          }
+        }
+        let suggestedFix;
+        if (breakPoints.length > 0) {
+          suggestedFix = `Consider independently justifying statement(s) ${breakPoints.join(", ")} to break the cycle`;
+        } else if (involvedStatements.some((s) => s.type === "hypothesis")) {
+          suggestedFix = "Review the hypothesis - it may be assuming what needs to be proved";
+        } else {
+          suggestedFix = "Add independent justification for one of the statements in the cycle";
+        }
+        return {
+          involvedStatements,
+          breakPoints,
+          suggestedFix
+        };
+      }
+      /**
+       * Check if proof uses circular argument to establish a conclusion
+       */
+      conclusionDependsOnItself(conclusionId, graph) {
+        const conclusion = graph.nodes.get(conclusionId);
+        if (!conclusion) return false;
+        const visited = /* @__PURE__ */ new Set();
+        const queue = conclusion.derivedFrom ? [...conclusion.derivedFrom] : [];
+        while (queue.length > 0) {
+          const current = queue.shift();
+          if (current === conclusionId) return true;
+          if (visited.has(current)) continue;
+          visited.add(current);
+          const node = graph.nodes.get(current);
+          if (node?.derivedFrom) {
+            queue.push(...node.derivedFrom.filter((d) => !visited.has(d)));
+          }
+        }
+        return false;
+      }
+    };
+  }
+});
+
+// src/modes/mathematics-reasoning.ts
+var mathematics_reasoning_exports = {};
+__export(mathematics_reasoning_exports, {
+  MathematicsReasoningEngine: () => MathematicsReasoningEngine
+});
+var DEFAULT_CONFIG5, MathematicsReasoningEngine;
+var init_mathematics_reasoning = __esm({
+  "src/modes/mathematics-reasoning.ts"() {
+    init_esm_shims();
+    init_decomposer();
+    init_gap_analyzer();
+    init_assumption_tracker();
+    init_inconsistency_detector();
+    init_circular_detector();
+    DEFAULT_CONFIG5 = {
+      enableDecomposition: true,
+      enableGapAnalysis: true,
+      enableAssumptionTracking: true,
+      enableInconsistencyDetection: true,
+      enableCircularDetection: true
+    };
+    MathematicsReasoningEngine = class {
+      config;
+      decomposer;
+      gapAnalyzer;
+      assumptionTracker;
+      inconsistencyDetector;
+      circularDetector;
+      constructor(config = {}) {
+        this.config = { ...DEFAULT_CONFIG5, ...config };
+        this.decomposer = new ProofDecomposer();
+        this.gapAnalyzer = new GapAnalyzer(this.config.gapAnalyzerConfig);
+        this.assumptionTracker = new AssumptionTracker();
+        this.inconsistencyDetector = new InconsistencyDetector(this.config.inconsistencyConfig);
+        this.circularDetector = new CircularReasoningDetector();
+      }
+      /**
+       * Analyze a proof completely
+       *
+       * @param proof - Proof text or structured steps
+       * @param theorem - Optional theorem being proven
+       * @returns Complete analysis result
+       */
+      analyzeProof(proof, theorem) {
+        const recommendations = [];
+        let overallScore = 1;
+        let decomposition;
+        if (this.config.enableDecomposition) {
+          decomposition = this.decomposer.decompose(proof, theorem);
+          overallScore *= decomposition.completeness;
+        }
+        if (!decomposition) {
+          return {
+            overallScore: 0,
+            recommendations: ["Unable to decompose proof. Please provide proof content."],
+            isValid: false
+          };
+        }
+        let gapAnalysis;
+        if (this.config.enableGapAnalysis) {
+          gapAnalysis = this.gapAnalyzer.analyzeGaps(decomposition);
+          overallScore *= gapAnalysis.completeness;
+          recommendations.push(...gapAnalysis.suggestions);
+        }
+        let assumptionAnalysis;
+        if (this.config.enableAssumptionTracking) {
+          assumptionAnalysis = this.assumptionTracker.analyzeAssumptions(decomposition);
+          const assumptionSuggestions = this.assumptionTracker.getSuggestions(assumptionAnalysis);
+          recommendations.push(...assumptionSuggestions);
+          if (assumptionAnalysis.unusedAssumptions.length > 0) {
+            overallScore *= 0.95;
+          }
+        }
+        let consistencyReport;
+        if (this.config.enableInconsistencyDetection) {
+          const inconsistencies = this.inconsistencyDetector.analyze(decomposition);
+          const summary = this.inconsistencyDetector.getSummary(inconsistencies);
+          let circularReasoning;
+          if (this.config.enableCircularDetection) {
+            circularReasoning = this.circularDetector.detectCircularReasoning(decomposition);
+          }
+          consistencyReport = {
+            isConsistent: summary.isConsistent && !circularReasoning?.hasCircularReasoning,
+            overallScore: summary.isConsistent ? overallScore : overallScore * 0.5,
+            inconsistencies,
+            warnings: inconsistencies.filter((i) => i.severity === "warning").map((i) => i.explanation),
+            circularReasoning: circularReasoning?.cycles || [],
+            summary: this.generateConsistencySummary(summary, circularReasoning)
+          };
+          if (!consistencyReport.isConsistent) {
+            overallScore *= 0.3;
+            recommendations.unshift(consistencyReport.summary);
+          }
+        }
+        const isValid = (consistencyReport?.isConsistent ?? true) && overallScore > 0.5;
+        return {
+          decomposition,
+          consistencyReport,
+          gapAnalysis,
+          assumptionAnalysis,
+          overallScore: Math.max(0, Math.min(1, overallScore)),
+          recommendations: this.deduplicateRecommendations(recommendations),
+          isValid
+        };
+      }
+      /**
+       * Analyze a specific thought type
+       */
+      analyzeForThoughtType(proof, thoughtType, theorem) {
+        switch (thoughtType) {
+          case "proof_decomposition":
+            return {
+              decomposition: this.decomposer.decompose(proof, theorem)
+            };
+          case "dependency_analysis":
+            const decomp = this.decomposer.decompose(proof, theorem);
+            return {
+              decomposition: decomp,
+              recommendations: [
+                `Proof depth: ${decomp.maxDependencyDepth}`,
+                `Atomic statements: ${decomp.atomCount}`,
+                `Has cycles: ${decomp.dependencies.hasCycles}`
+              ]
+            };
+          case "consistency_check":
+            return this.checkConsistency(proof, theorem);
+          case "gap_identification":
+            const gapDecomp = this.decomposer.decompose(proof, theorem);
+            return {
+              gapAnalysis: this.gapAnalyzer.analyzeGaps(gapDecomp)
+            };
+          case "assumption_trace":
+            const assumptionDecomp = this.decomposer.decompose(proof, theorem);
+            return {
+              assumptionAnalysis: this.assumptionTracker.analyzeAssumptions(assumptionDecomp)
+            };
+          default:
+            return this.analyzeProof(proof, theorem);
+        }
+      }
+      /**
+       * Perform only consistency check
+       */
+      checkConsistency(proof, theorem) {
+        const decomposition = this.decomposer.decompose(proof, theorem);
+        const inconsistencies = this.inconsistencyDetector.analyze(decomposition);
+        const summary = this.inconsistencyDetector.getSummary(inconsistencies);
+        const circularReasoning = this.circularDetector.detectCircularReasoning(decomposition);
+        const consistencyReport = {
+          isConsistent: summary.isConsistent && !circularReasoning.hasCircularReasoning,
+          overallScore: summary.isConsistent ? 1 - summary.warningCount * 0.05 : 0.3,
+          inconsistencies,
+          warnings: inconsistencies.filter((i) => i.severity === "warning").map((i) => i.explanation),
+          circularReasoning: circularReasoning.cycles,
+          summary: this.generateConsistencySummary(summary, circularReasoning)
+        };
+        return {
+          decomposition,
+          consistencyReport,
+          isValid: consistencyReport.isConsistent,
+          overallScore: consistencyReport.overallScore
+        };
+      }
+      /**
+       * Generate a comprehensive report
+       */
+      generateReport(analysisResult) {
+        const lines = [];
+        lines.push("# Proof Analysis Report");
+        lines.push("");
+        lines.push("## Overall Assessment");
+        lines.push(`- **Valid**: ${analysisResult.isValid ? "Yes" : "No"}`);
+        lines.push(`- **Score**: ${(analysisResult.overallScore * 100).toFixed(1)}%`);
+        lines.push("");
+        if (analysisResult.decomposition) {
+          const d = analysisResult.decomposition;
+          lines.push("## Proof Structure");
+          lines.push(`- **Atomic Statements**: ${d.atomCount}`);
+          lines.push(`- **Maximum Depth**: ${d.maxDependencyDepth}`);
+          lines.push(`- **Rigor Level**: ${d.rigorLevel}`);
+          lines.push(`- **Completeness**: ${(d.completeness * 100).toFixed(1)}%`);
+          lines.push("");
+        }
+        if (analysisResult.consistencyReport) {
+          const c = analysisResult.consistencyReport;
+          lines.push("## Consistency Analysis");
+          lines.push(`- **Consistent**: ${c.isConsistent ? "Yes" : "No"}`);
+          lines.push(`- **Inconsistencies Found**: ${c.inconsistencies.length}`);
+          lines.push(`- **Circular Reasoning**: ${c.circularReasoning.length > 0 ? "Detected" : "None"}`);
+          if (c.inconsistencies.length > 0) {
+            lines.push("");
+            lines.push("### Inconsistencies");
+            for (const inc of c.inconsistencies.slice(0, 5)) {
+              lines.push(`- [${inc.severity.toUpperCase()}] ${inc.explanation}`);
+            }
+          }
+          lines.push("");
+        }
+        if (analysisResult.gapAnalysis) {
+          const g = analysisResult.gapAnalysis;
+          lines.push("## Gap Analysis");
+          lines.push(`- **Gaps Found**: ${g.gaps.length}`);
+          lines.push(`- **Implicit Assumptions**: ${g.implicitAssumptions.length}`);
+          lines.push(`- **Unjustified Steps**: ${g.unjustifiedSteps.length}`);
+          lines.push("");
+        }
+        if (analysisResult.recommendations.length > 0) {
+          lines.push("## Recommendations");
+          for (const rec of analysisResult.recommendations.slice(0, 10)) {
+            lines.push(`- ${rec}`);
+          }
+          lines.push("");
+        }
+        return lines.join("\n");
+      }
+      /**
+       * Generate consistency summary from analysis results
+       */
+      generateConsistencySummary(inconsistencySummary, circularResult) {
+        const parts = [];
+        if (!inconsistencySummary.isConsistent) {
+          parts.push(inconsistencySummary.summary);
+        }
+        if (circularResult?.hasCircularReasoning) {
+          parts.push(circularResult.summary);
+        }
+        if (parts.length === 0) {
+          return "The proof is logically consistent with no circular reasoning detected.";
+        }
+        return parts.join(" ");
+      }
+      /**
+       * Deduplicate recommendations
+       */
+      deduplicateRecommendations(recommendations) {
+        const seen = /* @__PURE__ */ new Set();
+        const result = [];
+        for (const rec of recommendations) {
+          const normalized = rec.toLowerCase().trim();
+          if (!seen.has(normalized)) {
+            seen.add(normalized);
+            result.push(rec);
+          }
+        }
+        return result;
+      }
+      /**
+       * Enhance a MathematicsThought with analysis results
+       */
+      enhanceThought(thought, proof) {
+        const analysisResult = this.analyzeForThoughtType(
+          proof,
+          thought.thoughtType,
+          thought.content
+        );
+        return {
+          ...thought,
+          decomposition: analysisResult.decomposition,
+          consistencyReport: analysisResult.consistencyReport,
+          gapAnalysis: analysisResult.gapAnalysis,
+          assumptionAnalysis: analysisResult.assumptionAnalysis
+        };
+      }
+      /**
+       * Get engine statistics
+       */
+      getStats() {
+        return {
+          features: {
+            decomposition: this.config.enableDecomposition,
+            gapAnalysis: this.config.enableGapAnalysis,
+            assumptionTracking: this.config.enableAssumptionTracking,
+            inconsistencyDetection: this.config.enableInconsistencyDetection,
+            circularDetection: this.config.enableCircularDetection
+          },
+          version: "7.0.0"
+          // Phase 8
+        };
+      }
+    };
+  }
+});
 
 // src/index.ts
 init_esm_shims();
@@ -7422,7 +10818,7 @@ var deepthinking_standard_schema = {
 };
 var deepthinking_math_schema = {
   name: "deepthinking_math",
-  description: "Math/physics: proofs, tensors, LaTeX, conservation laws",
+  description: "Math/physics: proofs, proof decomposition, consistency checking, tensors, LaTeX, conservation laws",
   inputSchema: {
     type: "object",
     properties: {
@@ -7431,6 +10827,10 @@ var deepthinking_math_schema = {
         type: "string",
         enum: ["mathematics", "physics"],
         description: "Mathematical reasoning mode"
+      },
+      thoughtType: {
+        type: "string",
+        description: "Specific thought type for mathematics mode. Use 'proof_decomposition', 'dependency_analysis', 'consistency_check', 'gap_identification', or 'assumption_trace' for proof analysis."
       },
       mathematicalModel: {
         type: "object",
@@ -7507,6 +10907,49 @@ var deepthinking_math_schema = {
         required: ["quantity", "units", "conservationLaws"],
         additionalProperties: false,
         description: "Physical interpretation of the model"
+      },
+      // Phase 8: Proof decomposition fields
+      proofSteps: {
+        type: "array",
+        description: "Structured proof steps for decomposition analysis",
+        items: {
+          type: "object",
+          properties: {
+            stepNumber: { type: "integer", minimum: 1, description: "Step number in the proof" },
+            statement: { type: "string", description: "The statement being made" },
+            justification: { type: "string", description: "Justification for this step" },
+            latex: { type: "string", description: "LaTeX representation of the statement" },
+            referencesSteps: {
+              type: "array",
+              items: { type: "integer" },
+              description: "Step numbers this step references"
+            }
+          },
+          required: ["stepNumber", "statement"],
+          additionalProperties: false
+        }
+      },
+      theorem: {
+        type: "string",
+        description: "The theorem being proved (for proof decomposition)"
+      },
+      hypotheses: {
+        type: "array",
+        items: { type: "string" },
+        description: "Starting hypotheses for the proof"
+      },
+      analysisDepth: {
+        type: "string",
+        enum: ["shallow", "standard", "deep"],
+        description: "Depth of proof analysis"
+      },
+      includeConsistencyCheck: {
+        type: "boolean",
+        description: "Whether to run inconsistency detection"
+      },
+      traceAssumptions: {
+        type: "boolean",
+        description: "Whether to include assumption chain analysis"
       }
     },
     required: [...baseThoughtRequired],
@@ -8348,13 +11791,27 @@ var PhysicalInterpretationSchema = z.object({
   units: z.string(),
   conservationLaws: z.array(z.string())
 });
+var ProofStepInputSchema = z.object({
+  stepNumber: z.number().int().positive(),
+  statement: z.string(),
+  justification: z.string().optional(),
+  latex: z.string().optional(),
+  referencesSteps: z.array(z.number()).optional()
+});
 var MathSchema = BaseThoughtSchema.extend({
   mode: z.enum(["mathematics", "physics"]),
   thoughtType: z.string().optional(),
   proofStrategy: ProofStrategySchema.optional(),
   mathematicalModel: MathematicalModelSchema.optional(),
   tensorProperties: TensorPropertiesSchema.optional(),
-  physicalInterpretation: PhysicalInterpretationSchema.optional()
+  physicalInterpretation: PhysicalInterpretationSchema.optional(),
+  // Phase 8: Proof decomposition fields
+  proofSteps: z.array(ProofStepInputSchema).optional(),
+  theorem: z.string().optional(),
+  hypotheses: z.array(z.string()).optional(),
+  analysisDepth: z.enum(["shallow", "standard", "deep"]).optional(),
+  includeConsistencyCheck: z.boolean().optional(),
+  traceAssumptions: z.boolean().optional()
 });
 
 // src/tools/schemas/modes/temporal.ts
@@ -8674,6 +12131,23 @@ function prependWarning(result, warning) {
   }
   return result;
 }
+function isDecompositionThoughtType(thoughtType) {
+  return [
+    "proof_decomposition",
+    "dependency_analysis",
+    "consistency_check",
+    "gap_identification",
+    "assumption_trace"
+  ].includes(thoughtType || "");
+}
+var _mathEngine = null;
+async function getMathematicsReasoningEngine() {
+  if (!_mathEngine) {
+    const { MathematicsReasoningEngine: MathematicsReasoningEngine2 } = await Promise.resolve().then(() => (init_mathematics_reasoning(), mathematics_reasoning_exports));
+    _mathEngine = new MathematicsReasoningEngine2();
+  }
+  return _mathEngine;
+}
 async function handleAddThought(input, _toolName) {
   const sessionManager = await getSessionManager();
   const thoughtFactory = await getThoughtFactory();
@@ -8687,20 +12161,47 @@ async function handleAddThought(input, _toolName) {
     sessionId = session2.id;
   }
   const thought = thoughtFactory.createThought({ ...input, mode }, sessionId);
+  if (mode === "mathematics" /* MATHEMATICS */ && isDecompositionThoughtType(input.thoughtType)) {
+    try {
+      const mathEngine = await getMathematicsReasoningEngine();
+      const proofInput = input.proofSteps || input.thought;
+      const analysisResult = mathEngine.analyzeForThoughtType(
+        proofInput,
+        input.thoughtType,
+        input.theorem
+      );
+      thought.decomposition = analysisResult.decomposition;
+      thought.consistencyReport = analysisResult.consistencyReport;
+      thought.gapAnalysis = analysisResult.gapAnalysis;
+      thought.assumptionAnalysis = analysisResult.assumptionAnalysis;
+    } catch (error) {
+      console.error("Proof analysis failed:", error);
+    }
+  }
   const session = await sessionManager.addThought(sessionId, thought);
+  const response = {
+    sessionId: session.id,
+    thoughtId: thought.id,
+    thoughtNumber: thought.thoughtNumber,
+    mode: thought.mode,
+    nextThoughtNeeded: thought.nextThoughtNeeded,
+    sessionComplete: session.isComplete,
+    totalThoughts: session.thoughts.length
+  };
+  if (thought.decomposition) {
+    response.decomposition = thought.decomposition;
+  }
+  if (thought.consistencyReport) {
+    response.consistencyReport = thought.consistencyReport;
+  }
+  if (thought.gapAnalysis) {
+    response.gapAnalysis = thought.gapAnalysis;
+  }
   return {
     content: [
       {
         type: "text",
-        text: JSON.stringify({
-          sessionId: session.id,
-          thoughtId: thought.id,
-          thoughtNumber: thought.thoughtNumber,
-          mode: thought.mode,
-          nextThoughtNeeded: thought.nextThoughtNeeded,
-          sessionComplete: session.isComplete,
-          totalThoughts: session.thoughts.length
-        }, null, 2)
+        text: JSON.stringify(response, null, 2)
       }
     ]
   };

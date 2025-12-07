@@ -26,6 +26,8 @@ export {
   exportScientificMethodExperiment,
   exportOptimizationSolution,
   exportFormalLogicProof,
+  // Phase 8: Proof decomposition
+  exportProofDecomposition,
 } from './visual/index.js';
 
 // LaTeX exports
