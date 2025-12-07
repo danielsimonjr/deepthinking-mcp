@@ -1,11 +1,25 @@
 /**
- * Optimization Visual Exporter (v4.3.0)
+ * Optimization Visual Exporter (v7.0.2)
  * Sprint 8 Task 8.1: Optimization constraint graph export to Mermaid, DOT, ASCII
+ * Phase 9: Added native SVG export support
  */
 
 import type { OptimizationThought } from '../../types/index.js';
 import type { VisualExportOptions } from './types.js';
 import { sanitizeId } from './utils.js';
+import {
+  generateSVGHeader,
+  generateSVGFooter,
+  renderRectNode,
+  renderEllipseNode,
+  renderStadiumNode,
+  renderEdge,
+  renderMetricsPanel,
+  renderLegend,
+  getNodeColor,
+  DEFAULT_SVG_OPTIONS,
+  type SVGNodePosition,
+} from './svg-utils.js';
 
 /**
  * Export optimization problem constraint graph to visual format
@@ -20,6 +34,8 @@ export function exportOptimizationSolution(thought: OptimizationThought, options
       return optimizationToDOT(thought, includeLabels, includeMetrics);
     case 'ascii':
       return optimizationToASCII(thought);
+    case 'svg':
+      return optimizationToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -223,4 +239,138 @@ function optimizationToASCII(thought: OptimizationThought): string {
   }
 
   return ascii;
+}
+
+/**
+ * Export optimization problem constraint graph to native SVG format
+ */
+function optimizationToSVG(thought: OptimizationThought, options: VisualExportOptions): string {
+  const {
+    colorScheme = 'default',
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = DEFAULT_SVG_OPTIONS.height,
+  } = options;
+
+  const positions = new Map<string, SVGNodePosition>();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+
+  // Problem at the top
+  if (thought.problem) {
+    positions.set('Problem', {
+      id: 'Problem',
+      label: includeLabels ? thought.problem.name : 'Problem',
+      x: svgWidth / 2,
+      y: 80,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: 'problem',
+    });
+  }
+
+  // Variables on the left
+  if (thought.variables) {
+    thought.variables.forEach((variable, index) => {
+      positions.set(variable.id, {
+        id: variable.id,
+        label: includeLabels ? variable.name : variable.id,
+        x: 150,
+        y: 200 + index * 80,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: 'variable',
+      });
+    });
+  }
+
+  // Objectives on the right
+  if (thought.objectives) {
+    thought.objectives.forEach((objective, index) => {
+      positions.set(objective.id, {
+        id: objective.id,
+        label: includeLabels ? `${objective.type}: ${objective.name}` : objective.id,
+        x: svgWidth - 150,
+        y: 200 + index * 80,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: 'objective',
+      });
+    });
+  }
+
+  // Solution at the bottom
+  if (thought.solution) {
+    positions.set('Solution', {
+      id: 'Solution',
+      label: 'Solution',
+      x: svgWidth / 2,
+      y: svgHeight - 100,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: 'solution',
+    });
+  }
+
+  let svg = generateSVGHeader(svgWidth, svgHeight, 'Optimization Problem');
+
+  // Render edges
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+
+  // Edges from objectives to solution
+  if (thought.objectives && thought.solution) {
+    for (const objective of thought.objectives) {
+      const objPos = positions.get(objective.id);
+      const solPos = positions.get('Solution');
+      if (objPos && solPos) {
+        svg += renderEdge(objPos, solPos);
+      }
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render nodes
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+
+  const problemColors = getNodeColor('warning', colorScheme);
+  const variableColors = getNodeColor('neutral', colorScheme);
+  const objectiveColors = getNodeColor('primary', colorScheme);
+  const solutionColors = getNodeColor('success', colorScheme);
+
+  for (const [, pos] of positions) {
+    if (pos.type === 'problem') {
+      svg += renderEllipseNode(pos, problemColors);
+    } else if (pos.type === 'variable') {
+      svg += renderRectNode(pos, variableColors);
+    } else if (pos.type === 'objective') {
+      svg += renderRectNode(pos, objectiveColors);
+    } else if (pos.type === 'solution') {
+      svg += renderStadiumNode(pos, solutionColors);
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render metrics panel
+  if (includeMetrics) {
+    const metrics = [
+      { label: 'Variables', value: thought.variables?.length || 0 },
+      { label: 'Constraints', value: thought.optimizationConstraints?.length || 0 },
+      { label: 'Objectives', value: thought.objectives?.length || 0 },
+      { label: 'Quality', value: thought.solution?.quality?.toFixed(2) || 'N/A' },
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, svgHeight - 150, metrics);
+  }
+
+  // Render legend
+  const legendItems = [
+    { label: 'Problem', color: problemColors, shape: 'ellipse' as const },
+    { label: 'Variable', color: variableColors },
+    { label: 'Objective', color: objectiveColors },
+    { label: 'Solution', color: solutionColors, shape: 'stadium' as const },
+  ];
+  svg += renderLegend(20, svgHeight - 140, legendItems);
+
+  svg += '\n' + generateSVGFooter();
+  return svg;
 }

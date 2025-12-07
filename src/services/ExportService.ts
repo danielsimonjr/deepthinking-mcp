@@ -1,14 +1,15 @@
 /**
- * Export Service (v3.4.5)
+ * Export Service (v7.0.2)
  * Sprint 3 Task 3.3: Extract export logic from index.ts
  * Sprint 3 Task 3.2: Added dependency injection support
+ * Phase 9: Added native SVG export support
  *
  * Centralizes session export logic for multiple formats.
  * Handles conversion between internal session format and export formats.
  *
  * RESPONSIBILITY:
  * - Export sessions to various formats (JSON, Markdown, LaTeX, HTML, Jupyter)
- * - Handle visual exports (Mermaid, DOT, ASCII)
+ * - Handle visual exports (Mermaid, DOT, ASCII, SVG)
  * - Apply proper escaping and formatting for each format
  *
  * EXTRACTED FROM: src/index.ts (handleExport, exportTo* functions)
@@ -87,13 +88,13 @@ export class ExportService {
    */
   exportSession(
     session: ThinkingSession,
-    format: 'json' | 'markdown' | 'latex' | 'html' | 'jupyter' | 'mermaid' | 'dot' | 'ascii'
+    format: 'json' | 'markdown' | 'latex' | 'html' | 'jupyter' | 'mermaid' | 'dot' | 'ascii' | 'svg'
   ): string {
     const startTime = Date.now();
     this.logger.debug('Export started', { sessionId: session.id, format, thoughtCount: session.thoughts.length });
 
-    // Handle visual formats
-    if (format === 'mermaid' || format === 'dot' || format === 'ascii') {
+    // Handle visual formats (including SVG)
+    if (format === 'mermaid' || format === 'dot' || format === 'ascii' || format === 'svg') {
       const result = this.exportVisual(session, format);
       this.logger.debug('Export completed', {
         sessionId: session.id,

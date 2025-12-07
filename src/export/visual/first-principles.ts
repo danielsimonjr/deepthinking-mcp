@@ -1,11 +1,26 @@
 /**
- * First Principles Visual Exporter (v4.3.0)
+ * First Principles Visual Exporter (v7.0.2)
  * Sprint 8 Task 8.1: First principles derivation export to Mermaid, DOT, ASCII
+ * Phase 9: Added native SVG export support
  */
 
 import type { FirstPrinciplesThought } from '../../types/index.js';
 import type { VisualExportOptions } from './types.js';
 import { sanitizeId } from './utils.js';
+import {
+  generateSVGHeader,
+  generateSVGFooter,
+  renderRectNode,
+  renderEllipseNode,
+  renderStadiumNode,
+  renderEdge,
+  renderMetricsPanel,
+  renderLegend,
+  getNodeColor,
+  calculateSVGHeight,
+  DEFAULT_SVG_OPTIONS,
+  type SVGNodePosition,
+} from './svg-utils.js';
 
 /**
  * Export first-principles derivation chain to visual format
@@ -20,6 +35,8 @@ export function exportFirstPrinciplesDerivation(thought: FirstPrinciplesThought,
       return firstPrinciplesToDOT(thought, includeLabels, includeMetrics);
     case 'ascii':
       return firstPrinciplesToASCII(thought);
+    case 'svg':
+      return firstPrinciplesToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -261,4 +278,128 @@ function firstPrinciplesToASCII(thought: FirstPrinciplesThought): string {
   }
 
   return ascii;
+}
+
+/**
+ * Export first-principles derivation chain to native SVG format
+ */
+function firstPrinciplesToSVG(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
+  const {
+    colorScheme = 'default',
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+  } = options;
+
+  const positions = new Map<string, SVGNodePosition>();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+
+  // Position principles at the top
+  const principleY = 100;
+  const principleSpacing = Math.min(180, svgWidth / (thought.principles.length + 1));
+  const principleStartX = (svgWidth - (thought.principles.length - 1) * principleSpacing) / 2;
+  thought.principles.forEach((p, index) => {
+    positions.set(p.id, {
+      id: p.id,
+      label: includeLabels ? `${p.type}: ${p.statement.substring(0, 30)}...` : p.id,
+      x: principleStartX + index * principleSpacing,
+      y: principleY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: p.type,
+    });
+  });
+
+  // Add derivation steps
+  const stepY = 250;
+  thought.derivationSteps.forEach((step, index) => {
+    const stepId = `Step${step.stepNumber}`;
+    positions.set(stepId, {
+      id: stepId,
+      label: includeLabels ? `Step ${step.stepNumber}` : stepId,
+      x: 150 + index * 200,
+      y: stepY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: 'step',
+    });
+  });
+
+  // Add conclusion
+  positions.set('conclusion', {
+    id: 'conclusion',
+    label: includeLabels ? `Conclusion: ${thought.conclusion.statement.substring(0, 30)}...` : 'Conclusion',
+    x: svgWidth / 2,
+    y: stepY + 150,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: 'conclusion',
+  });
+
+  const actualHeight = calculateSVGHeight(positions);
+
+  let svg = generateSVGHeader(svgWidth, actualHeight, 'First Principles Derivation');
+
+  // Render edges
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+
+  // Edges from principles to steps
+  for (const step of thought.derivationSteps) {
+    const principlePos = positions.get(step.principle);
+    const stepPos = positions.get(`Step${step.stepNumber}`);
+    if (principlePos && stepPos) {
+      svg += renderEdge(principlePos, stepPos, { style: 'dashed', label: 'applies' });
+    }
+  }
+
+  // Edges from steps to conclusion
+  const conclusionPos = positions.get('conclusion')!;
+  for (const stepNum of thought.conclusion.derivationChain) {
+    const stepPos = positions.get(`Step${stepNum}`);
+    if (stepPos) {
+      svg += renderEdge(stepPos, conclusionPos);
+    }
+  }
+
+  svg += '\n  </g>';
+
+  // Render nodes
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+
+  const axiomColors = getNodeColor('primary', colorScheme);
+  const stepColors = getNodeColor('neutral', colorScheme);
+  const conclusionColors = getNodeColor('success', colorScheme);
+
+  for (const [id, pos] of positions) {
+    if (id === 'conclusion') {
+      svg += renderStadiumNode(pos, conclusionColors);
+    } else if (id.startsWith('Step')) {
+      svg += renderRectNode(pos, stepColors);
+    } else {
+      svg += renderEllipseNode(pos, axiomColors);
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render metrics panel
+  if (includeMetrics) {
+    const metrics = [
+      { label: 'Principles', value: thought.principles.length },
+      { label: 'Steps', value: thought.derivationSteps.length },
+      { label: 'Certainty', value: thought.conclusion.certainty.toFixed(2) },
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
+  }
+
+  // Render legend
+  const legendItems = [
+    { label: 'Principle', color: axiomColors, shape: 'ellipse' as const },
+    { label: 'Derivation Step', color: stepColors },
+    { label: 'Conclusion', color: conclusionColors, shape: 'stadium' as const },
+  ];
+  svg += renderLegend(20, actualHeight - 100, legendItems);
+
+  svg += '\n' + generateSVGFooter();
+  return svg;
 }

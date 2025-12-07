@@ -1,11 +1,25 @@
 /**
- * Hybrid Visual Exporter (v6.1.0)
+ * Hybrid Visual Exporter (v7.0.2)
  * Phase 7 Sprint 2: Hybrid mode reasoning export to Mermaid, DOT, ASCII
+ * Phase 9: Added native SVG export support
  */
 
 import type { HybridThought } from '../../types/core.js';
 import type { VisualExportOptions } from './types.js';
 import { sanitizeId } from './utils.js';
+import {
+  generateSVGHeader,
+  generateSVGFooter,
+  renderRectNode,
+  renderEllipseNode,
+  renderStadiumNode,
+  renderEdge,
+  renderMetricsPanel,
+  renderLegend,
+  getNodeColor,
+  DEFAULT_SVG_OPTIONS,
+  type SVGNodePosition,
+} from './svg-utils.js';
 
 /**
  * Export hybrid reasoning to visual format
@@ -20,6 +34,8 @@ export function exportHybridOrchestration(thought: HybridThought, options: Visua
       return hybridToDOT(thought, includeLabels, includeMetrics);
     case 'ascii':
       return hybridToASCII(thought);
+    case 'svg':
+      return hybridToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -314,4 +330,121 @@ function hybridToASCII(thought: HybridThought): string {
   }
 
   return ascii;
+}
+
+/**
+ * Export hybrid reasoning to native SVG format
+ */
+function hybridToSVG(thought: HybridThought, options: VisualExportOptions): string {
+  const {
+    colorScheme = 'default',
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = DEFAULT_SVG_OPTIONS.height,
+  } = options;
+
+  const positions = new Map<string, SVGNodePosition>();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+
+  // Hybrid mode at the center
+  positions.set('hybrid', {
+    id: 'hybrid',
+    label: 'Hybrid Mode',
+    x: svgWidth / 2,
+    y: 100,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: 'hybrid',
+  });
+
+  // Primary mode
+  positions.set('primary', {
+    id: 'primary',
+    label: thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1),
+    x: svgWidth / 2,
+    y: 240,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: 'primary',
+  });
+
+  // Secondary features
+  if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
+    thought.secondaryFeatures.forEach((feature, index) => {
+      positions.set(`feature_${index}`, {
+        id: `feature_${index}`,
+        label: includeLabels ? feature.substring(0, 30) + (feature.length > 30 ? '...' : '') : `Feature ${index + 1}`,
+        x: 150 + index * 180,
+        y: 380,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: 'feature',
+      });
+    });
+  }
+
+  let svg = generateSVGHeader(svgWidth, svgHeight, 'Hybrid Mode Orchestration');
+
+  // Render edges
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+
+  const hybridPos = positions.get('hybrid');
+  const primaryPos = positions.get('primary');
+
+  if (hybridPos && primaryPos) {
+    svg += renderEdge(hybridPos, primaryPos, { style: 'solid' });
+  }
+
+  // Edges from hybrid to features
+  if (thought.secondaryFeatures) {
+    thought.secondaryFeatures.forEach((_, index) => {
+      const featurePos = positions.get(`feature_${index}`);
+      if (hybridPos && featurePos) {
+        svg += renderEdge(hybridPos, featurePos);
+      }
+    });
+  }
+
+  svg += '\n  </g>';
+
+  // Render nodes
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+
+  const hybridColors = getNodeColor('success', colorScheme);
+  const primaryColors = getNodeColor('primary', colorScheme);
+  const featureColors = getNodeColor('secondary', colorScheme);
+
+  for (const [, pos] of positions) {
+    if (pos.type === 'hybrid') {
+      svg += renderEllipseNode(pos, hybridColors);
+    } else if (pos.type === 'primary') {
+      svg += renderStadiumNode(pos, primaryColors);
+    } else if (pos.type === 'feature') {
+      svg += renderRectNode(pos, featureColors);
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render metrics panel
+  if (includeMetrics) {
+    const metrics = [
+      { label: 'Primary Mode', value: thought.primaryMode },
+      { label: 'Secondary Features', value: thought.secondaryFeatures?.length || 0 },
+      { label: 'Uncertainty', value: thought.uncertainty !== undefined ? `${(thought.uncertainty * 100).toFixed(1)}%` : 'N/A' },
+    ];
+    svg += renderMetricsPanel(svgWidth - 200, svgHeight - 120, metrics);
+  }
+
+  // Render legend
+  const legendItems = [
+    { label: 'Hybrid Mode', color: hybridColors, shape: 'ellipse' as const },
+    { label: 'Primary Mode', color: primaryColors, shape: 'stadium' as const },
+    { label: 'Secondary Feature', color: featureColors },
+  ];
+  svg += renderLegend(20, svgHeight - 110, legendItems);
+
+  svg += '\n' + generateSVGFooter();
+  return svg;
 }

@@ -1,11 +1,25 @@
 /**
- * Mathematics Visual Exporter (v6.1.0)
+ * Mathematics Visual Exporter (v7.0.2)
  * Phase 7 Sprint 2: Mathematics reasoning export to Mermaid, DOT, ASCII
+ * Phase 9: Added native SVG export support
  */
 
 import type { MathematicsThought } from '../../types/modes/mathematics.js';
 import type { VisualExportOptions } from './types.js';
 import { sanitizeId } from './utils.js';
+import {
+  generateSVGHeader,
+  generateSVGFooter,
+  renderRectNode,
+  renderEllipseNode,
+  renderStadiumNode,
+  renderEdge,
+  renderMetricsPanel,
+  renderLegend,
+  getNodeColor,
+  DEFAULT_SVG_OPTIONS,
+  type SVGNodePosition,
+} from './svg-utils.js';
 
 /**
  * Export mathematics reasoning to visual format
@@ -20,6 +34,8 @@ export function exportMathematicsDerivation(thought: MathematicsThought, options
       return mathematicsToDOT(thought, includeLabels, includeMetrics);
     case 'ascii':
       return mathematicsToASCII(thought);
+    case 'svg':
+      return mathematicsToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -220,4 +236,160 @@ function mathematicsToASCII(thought: MathematicsThought): string {
   }
 
   return ascii;
+}
+
+/**
+ * Export mathematics reasoning to native SVG format
+ */
+function mathematicsToSVG(thought: MathematicsThought, options: VisualExportOptions): string {
+  const {
+    colorScheme = 'default',
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+  } = options;
+
+  const positions = new Map<string, SVGNodePosition>();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+  let currentY = 80;
+
+  // Thought type at the top
+  const typeId = 'type';
+  positions.set(typeId, {
+    id: typeId,
+    label: includeLabels ? (thought.thoughtType || 'Proof').replace(/_/g, ' ') : typeId,
+    x: svgWidth / 2,
+    y: currentY,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: 'type',
+  });
+  currentY += 120;
+
+  // Proof strategy if present
+  if (thought.proofStrategy) {
+    positions.set('strategy', {
+      id: 'strategy',
+      label: thought.proofStrategy.type,
+      x: svgWidth / 2,
+      y: currentY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: 'strategy',
+    });
+    currentY += 100;
+
+    // Proof steps
+    thought.proofStrategy.steps.forEach((step, index) => {
+      const stepId = `step_${index}`;
+      positions.set(stepId, {
+        id: stepId,
+        label: includeLabels ? `${index + 1}. ${step.substring(0, 25)}...` : `Step ${index + 1}`,
+        x: 150 + (index % 3) * 200,
+        y: currentY + Math.floor(index / 3) * 80,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: 'step',
+      });
+    });
+    currentY += Math.ceil(thought.proofStrategy.steps.length / 3) * 80 + 40;
+  }
+
+  // Theorems if present
+  if (thought.theorems && thought.theorems.length > 0) {
+    thought.theorems.forEach((theorem, index) => {
+      const theoremId = `theorem_${index}`;
+      positions.set(theoremId, {
+        id: theoremId,
+        label: theorem.name || `Theorem ${index + 1}`,
+        x: svgWidth / 2,
+        y: currentY,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: 'theorem',
+      });
+      currentY += 80;
+    });
+  }
+
+  const actualHeight = Math.max(DEFAULT_SVG_OPTIONS.height, currentY + 100);
+
+  let svg = generateSVGHeader(svgWidth, actualHeight, 'Mathematics Derivation');
+
+  // Render edges
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+
+  // Edge from type to strategy
+  if (thought.proofStrategy) {
+    const typePos = positions.get('type');
+    const strategyPos = positions.get('strategy');
+    if (typePos && strategyPos) {
+      svg += renderEdge(typePos, strategyPos);
+    }
+
+    // Edges from strategy to steps
+    const stratPos = positions.get('strategy');
+    thought.proofStrategy.steps.forEach((_, index) => {
+      const stepPos = positions.get(`step_${index}`);
+      if (stratPos && stepPos) {
+        svg += renderEdge(stratPos, stepPos);
+      }
+    });
+  }
+
+  // Edges from type to theorems
+  if (thought.theorems) {
+    const typePos = positions.get('type');
+    thought.theorems.forEach((_, index) => {
+      const theoremPos = positions.get(`theorem_${index}`);
+      if (typePos && theoremPos) {
+        svg += renderEdge(typePos, theoremPos);
+      }
+    });
+  }
+  svg += '\n  </g>';
+
+  // Render nodes
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+
+  const typeColors = getNodeColor('primary', colorScheme);
+  const strategyColors = getNodeColor('secondary', colorScheme);
+  const stepColors = getNodeColor('neutral', colorScheme);
+  const theoremColors = getNodeColor('tertiary', colorScheme);
+
+  for (const [, pos] of positions) {
+    if (pos.type === 'type') {
+      svg += renderStadiumNode(pos, typeColors);
+    } else if (pos.type === 'strategy') {
+      svg += renderEllipseNode(pos, strategyColors);
+    } else if (pos.type === 'step') {
+      svg += renderRectNode(pos, stepColors);
+    } else if (pos.type === 'theorem') {
+      svg += renderRectNode(pos, theoremColors);
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render metrics panel
+  if (includeMetrics) {
+    const metrics = [
+      { label: 'Uncertainty', value: `${(thought.uncertainty * 100).toFixed(1)}%` },
+      { label: 'Theorems', value: thought.theorems?.length || 0 },
+      { label: 'Assumptions', value: thought.assumptions?.length || 0 },
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
+  }
+
+  // Render legend
+  const legendItems = [
+    { label: 'Type', color: typeColors, shape: 'stadium' as const },
+    { label: 'Strategy', color: strategyColors, shape: 'ellipse' as const },
+    { label: 'Step', color: stepColors },
+    { label: 'Theorem', color: theoremColors },
+  ];
+  svg += renderLegend(20, actualHeight - 130, legendItems);
+
+  svg += '\n' + generateSVGFooter();
+  return svg;
 }

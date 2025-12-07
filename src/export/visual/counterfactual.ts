@@ -1,11 +1,24 @@
 /**
- * Counterfactual Visual Exporter (v4.3.0)
+ * Counterfactual Visual Exporter (v7.0.2)
  * Sprint 8 Task 8.1: Counterfactual scenario export to Mermaid, DOT, ASCII
+ * Phase 9: Added native SVG export support
  */
 
 import type { CounterfactualThought } from '../../types/index.js';
 import type { VisualExportOptions } from './types.js';
 import { sanitizeId } from './utils.js';
+import {
+  generateSVGHeader,
+  generateSVGFooter,
+  renderRectNode,
+  renderStadiumNode,
+  renderEdge,
+  renderMetricsPanel,
+  renderLegend,
+  getNodeColor,
+  DEFAULT_SVG_OPTIONS,
+  type SVGNodePosition,
+} from './svg-utils.js';
 
 /**
  * Export counterfactual scenario tree to visual format
@@ -20,6 +33,8 @@ export function exportCounterfactualScenarios(thought: CounterfactualThought, op
       return counterfactualToDOT(thought, includeLabels, includeMetrics);
     case 'ascii':
       return counterfactualToASCII(thought);
+    case 'svg':
+      return counterfactualToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -119,4 +134,127 @@ function counterfactualToASCII(thought: CounterfactualThought): string {
   }
 
   return ascii;
+}
+
+/**
+ * Export counterfactual scenario tree to native SVG format
+ */
+function counterfactualToSVG(thought: CounterfactualThought, options: VisualExportOptions): string {
+  const {
+    colorScheme = 'default',
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+  } = options;
+
+  const positions = new Map<string, SVGNodePosition>();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+
+  // Intervention point at the top
+  const interventionId = 'intervention';
+  positions.set(interventionId, {
+    id: interventionId,
+    label: includeLabels ? thought.interventionPoint.description : interventionId,
+    x: svgWidth / 2,
+    y: 80,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: 'intervention',
+  });
+
+  // Actual scenario on the left
+  const actualId = thought.actual.id;
+  const actualLabel = includeLabels ? `Actual: ${thought.actual.name}` : actualId;
+  positions.set(actualId, {
+    id: actualId,
+    label: actualLabel,
+    x: svgWidth / 4,
+    y: 200,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: 'actual',
+  });
+
+  // Counterfactual scenarios on the right
+  const cfCount = thought.counterfactuals.length;
+  const cfStartY = 200;
+  const cfSpacing = 120;
+  thought.counterfactuals.forEach((scenario, index) => {
+    const cfLabel = includeLabels ? `CF: ${scenario.name}` : scenario.id;
+    positions.set(scenario.id, {
+      id: scenario.id,
+      label: cfLabel,
+      x: (svgWidth * 3) / 4,
+      y: cfStartY + index * cfSpacing,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: 'counterfactual',
+    });
+  });
+
+  const actualHeight = Math.max(DEFAULT_SVG_OPTIONS.height, cfStartY + (cfCount - 1) * cfSpacing + 150);
+
+  let svg = generateSVGHeader(svgWidth, actualHeight, 'Counterfactual Scenarios');
+
+  // Render edges first (behind nodes)
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+
+  // Edge from intervention to actual
+  const interventionPos = positions.get(interventionId)!;
+  const actualPos = positions.get(actualId)!;
+  svg += renderEdge(interventionPos, actualPos, { label: 'no change' });
+
+  // Edges from intervention to counterfactuals
+  for (const scenario of thought.counterfactuals) {
+    const cfPos = positions.get(scenario.id);
+    if (cfPos) {
+      const label = includeMetrics && scenario.likelihood
+        ? `${scenario.likelihood.toFixed(2)}`
+        : 'intervene';
+      svg += renderEdge(interventionPos, cfPos, { label });
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render nodes
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+
+  // Render intervention point (diamond)
+  const interventionColors = getNodeColor('warning', colorScheme);
+  svg += `\n    <polygon points="${interventionPos.x},${interventionPos.y - 30} ${interventionPos.x + 40},${interventionPos.y} ${interventionPos.x},${interventionPos.y + 30} ${interventionPos.x - 40},${interventionPos.y}" fill="${interventionColors.fill}" stroke="${interventionColors.stroke}" stroke-width="2"/>`;
+  svg += `\n    <text x="${interventionPos.x}" y="${interventionPos.y + 5}" text-anchor="middle" class="node-label">${interventionPos.label}</text>`;
+
+  // Render actual scenario
+  const actualColors = getNodeColor('tertiary', colorScheme);
+  svg += renderRectNode(actualPos, actualColors);
+
+  // Render counterfactual scenarios
+  const cfColors = getNodeColor('primary', colorScheme);
+  for (const [id, pos] of positions) {
+    if (id !== interventionId && id !== actualId) {
+      svg += renderStadiumNode(pos, cfColors);
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render metrics panel
+  if (includeMetrics) {
+    const metrics = [
+      { label: 'Counterfactuals', value: thought.counterfactuals.length },
+      { label: 'Feasibility', value: thought.interventionPoint.feasibility.toFixed(2) },
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
+  }
+
+  // Render legend
+  const legendItems = [
+    { label: 'Intervention', color: interventionColors, shape: 'diamond' as const },
+    { label: 'Actual', color: actualColors },
+    { label: 'Counterfactual', color: cfColors, shape: 'stadium' as const },
+  ];
+  svg += renderLegend(20, actualHeight - 110, legendItems);
+
+  svg += '\n' + generateSVGFooter();
+  return svg;
 }
