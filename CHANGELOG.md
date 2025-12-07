@@ -9,6 +9,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [7.0.1] - 2025-12-07
+
+### 🧹 Codebase Consolidation (Phase 9)
+
+**Removed 43 dead code files across 10 directories, reducing codebase from 201 to 158 files.**
+
+This release focuses on internal cleanup with zero breaking API changes. Dead code was identified using the dependency graph analysis tool (`tools/create-dependency-graph.ts`) and verified to have no external imports.
+
+#### Removed Directories (Dead Code)
+
+| Directory | Files | Reason |
+|-----------|-------|--------|
+| `src/visualization/` | 5 | Superseded by `src/export/visual/` |
+| `src/rate-limit/` | 4 | Never integrated with main application |
+| `src/analytics/` | 2 | Placeholder for future feature |
+| `src/ml/` | 4 | Machine learning patterns never used |
+| `src/webhooks/` | 5 | Event system never integrated |
+| `src/collaboration/` | 5 | Multi-agent features never used |
+| `src/templates/` | 4 | Template system never integrated |
+| `src/comparison/` | 5 | Session comparison never used |
+| `src/batch/` | 3 | Batch processing never integrated |
+| `src/backup/` | 4 | Only used by dead batch code |
+
+#### Removed Utility Files
+- `src/utils/sanitize.ts` - Path security utilities (never imported)
+- `src/utils/rate-limiter.ts` - Rate limiter (never imported)
+
+#### Removed Test Files
+- Tests for deleted modules (backup, batch, ml, production-features)
+
+#### Updated Configuration
+- Removed `@batch/*` and `@backup/*` path aliases from `tsconfig.json`
+
+#### New Documentation
+- Added `docs/architecture/DIRECTORY_STRUCTURE.md` - Comprehensive guide to codebase organization
+
+#### Metrics
+- **Before**: 201 files, 28 directories, ~58,700 LOC
+- **After**: 158 files, 16 modules, ~45,000 LOC
+- **Reduction**: 43 files removed (~21%), ~13,700 LOC removed (~23%)
+- **Runtime circular deps**: 0 (unchanged)
+- **Type-only circular deps**: 31 (safe, unchanged)
+
+---
+
 ## [7.0.0] - 2025-12-07
 
 ### 🎉 MAJOR RELEASE: Phase 8 - Proof Decomposition & Native SVG Export

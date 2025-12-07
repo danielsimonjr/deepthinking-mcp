@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring 25 reasoning modes (21 with dedicated thought types) with taxonomy-based classification (69 reasoning types across 12 categories, 110 planned), enterprise security, and visual export capabilities.
 
-**Version**: 6.1.2 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
+**Version**: 7.0.1 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
 
 ## Build & Development Commands
 
@@ -53,17 +53,18 @@ src/
 ├── types/             # Type definitions including 25 mode types
 │   ├── core.ts        # ThinkingMode enum, Thought union type
 │   └── modes/         # One file per reasoning mode
-├── services/          # Business logic layer
+├── services/          # Business logic layer (ThoughtFactory, ExportService, ModeRouter)
 ├── session/           # SessionManager, persistence, storage abstraction
 ├── taxonomy/          # 69 reasoning types (110 planned), classifier, suggestion engine
 ├── export/            # Visual and document exporters
+│   └── visual/        # Per-mode visual exporters (Mermaid, DOT, ASCII)
 ├── search/            # Full-text search engine with faceted filtering
-├── batch/             # Batch processing (8 operations)
-├── backup/            # Backup manager with provider abstraction
 ├── cache/             # LRU/LFU/FIFO caching strategies
-├── rate-limit/        # Sliding window rate limiter
+├── proof/             # Proof decomposition and analysis
 ├── repositories/      # Repository pattern (ISessionRepository interface)
 ├── modes/             # Advanced reasoning mode implementations
+├── tools/             # MCP tool definitions and schemas
+├── utils/             # Utility functions (errors, logger, sanitization)
 └── validation/        # Zod schemas for input validation
 ```
 
@@ -83,7 +84,7 @@ Configured in `tsconfig.json`:
 - `@types/*` → `src/types/*`
 - `@utils/*` → `src/utils/*`
 - `@validation/*` → `src/validation/*`
-- `@modes/*`, `@session/*`, `@search/*`, `@batch/*`, `@backup/*`, `@cache/*`, `@export/*`, `@taxonomy/*`
+- `@modes/*`, `@session/*`, `@search/*`, `@cache/*`, `@export/*`, `@taxonomy/*`
 
 ## The 25 Reasoning Modes
 
