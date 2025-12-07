@@ -39,6 +39,14 @@ import {
   addMetric,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+  progressBar,
+} from './markdown-utils.js';
 
 /**
  * Export proof decomposition to visual format
@@ -74,6 +82,8 @@ export function exportProofDecomposition(
       return proofDecompositionToUML(decomposition, options);
     case 'json':
       return proofDecompositionToJSON(decomposition, options);
+    case 'markdown':
+      return proofDecompositionToMarkdown(decomposition, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -1452,4 +1462,163 @@ function proofDecompositionToJSON(
   }
 
   return serializeGraph(graph, { prettyPrint: true });
+}
+
+/**
+ * Export proof decomposition to Markdown format
+ */
+function proofDecompositionToMarkdown(
+  decomposition: ProofDecomposition,
+  options: VisualExportOptions
+): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Theorem section
+  if (decomposition.theorem) {
+    parts.push(section('Theorem', decomposition.theorem));
+  }
+
+  // Metrics section
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      'Completeness': `${(decomposition.completeness * 100).toFixed(0)}%`,
+      'Rigor Level': decomposition.rigorLevel,
+      'Atom Count': decomposition.atomCount,
+      'Max Dependency Depth': decomposition.maxDependencyDepth,
+    });
+
+    let metricsFull = metricsContent;
+    metricsFull += '\n\n**Completeness:**\n\n' + progressBar(decomposition.completeness * 100);
+
+    parts.push(section('Metrics', metricsFull));
+  }
+
+  // Axioms section
+  const axioms = decomposition.atoms.filter((a) => a.type === 'axiom');
+  if (axioms.length > 0) {
+    const axiomRows = axioms.map(atom => [
+      atom.id,
+      atom.statement.substring(0, 100) + (atom.statement.length > 100 ? '...' : ''),
+    ]);
+    parts.push(section('Axioms', table(['ID', 'Statement'], axiomRows)));
+  }
+
+  // Hypotheses section
+  const hypotheses = decomposition.atoms.filter((a) => a.type === 'hypothesis');
+  if (hypotheses.length > 0) {
+    const hypothesesRows = hypotheses.map(atom => [
+      atom.id,
+      atom.statement.substring(0, 100) + (atom.statement.length > 100 ? '...' : ''),
+    ]);
+    parts.push(section('Hypotheses', table(['ID', 'Statement'], hypothesesRows)));
+  }
+
+  // Definitions section
+  const definitions = decomposition.atoms.filter((a) => a.type === 'definition');
+  if (definitions.length > 0) {
+    const definitionsRows = definitions.map(atom => [
+      atom.id,
+      atom.statement.substring(0, 100) + (atom.statement.length > 100 ? '...' : ''),
+    ]);
+    parts.push(section('Definitions', table(['ID', 'Statement'], definitionsRows)));
+  }
+
+  // Lemmas section
+  const lemmas = decomposition.atoms.filter((a) => a.type === 'lemma');
+  if (lemmas.length > 0) {
+    const lemmasRows = lemmas.map(atom => [
+      atom.id,
+      atom.statement.substring(0, 80) + (atom.statement.length > 80 ? '...' : ''),
+      atom.derivedFrom ? atom.derivedFrom.join(', ') : '-',
+      atom.usedInferenceRule || '-',
+    ]);
+    parts.push(section('Lemmas', table(['ID', 'Statement', 'Derived From', 'Rule'], lemmasRows)));
+  }
+
+  // Derived statements section
+  const derived = decomposition.atoms.filter((a) => a.type === 'derived');
+  if (derived.length > 0) {
+    const derivedRows = derived.map(atom => [
+      atom.id,
+      atom.statement.substring(0, 80) + (atom.statement.length > 80 ? '...' : ''),
+      atom.derivedFrom ? atom.derivedFrom.join(', ') : '-',
+      atom.usedInferenceRule || '-',
+    ]);
+    parts.push(section('Derived Statements', table(['ID', 'Statement', 'Derived From', 'Rule'], derivedRows)));
+  }
+
+  // Conclusions section
+  const conclusions = decomposition.atoms.filter((a) => a.type === 'conclusion');
+  if (conclusions.length > 0) {
+    const conclusionsRows = conclusions.map(atom => [
+      atom.id,
+      atom.statement.substring(0, 100) + (atom.statement.length > 100 ? '...' : ''),
+      atom.derivedFrom ? atom.derivedFrom.join(', ') : '-',
+    ]);
+    parts.push(section('Conclusions', table(['ID', 'Statement', 'Derived From'], conclusionsRows)));
+  }
+
+  // Dependencies section
+  if (decomposition.dependencies && decomposition.dependencies.edges && decomposition.dependencies.edges.length > 0) {
+    const depsRows = decomposition.dependencies.edges.map(edge => [
+      edge.from,
+      edge.to,
+      edge.inferenceRule || 'Direct',
+    ]);
+    parts.push(section('Dependencies', table(['From', 'To', 'Inference Rule'], depsRows)));
+  }
+
+  // Gaps section
+  if (decomposition.gaps && decomposition.gaps.length > 0) {
+    const gapsRows = decomposition.gaps.map(gap => [
+      gap.id,
+      gap.type,
+      gap.severity,
+      gap.description.substring(0, 60) + (gap.description.length > 60 ? '...' : ''),
+      `${gap.location.from} → ${gap.location.to}`,
+      gap.suggestedFix ? gap.suggestedFix.substring(0, 40) : '-',
+    ]);
+    parts.push(section('Identified Gaps', table(
+      ['ID', 'Type', 'Severity', 'Description', 'Location', 'Suggested Fix'],
+      gapsRows
+    )));
+  }
+
+  // Implicit assumptions section
+  if (decomposition.implicitAssumptions && decomposition.implicitAssumptions.length > 0) {
+    const assumptionsRows = decomposition.implicitAssumptions.map(assumption => [
+      assumption.type,
+      assumption.statement.substring(0, 80) + (assumption.statement.length > 80 ? '...' : ''),
+      assumption.shouldBeExplicit ? 'Yes' : 'No',
+      assumption.suggestedFormulation ? assumption.suggestedFormulation.substring(0, 50) : '-',
+    ]);
+    parts.push(section('Implicit Assumptions', table(
+      ['Type', 'Statement', 'Should Be Explicit', 'Suggested Formulation'],
+      assumptionsRows
+    )));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = proofDecompositionToMermaid(decomposition, 'default', true, true);
+    parts.push(section('Proof Structure Diagram', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument('Proof Decomposition Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: 'proof-decomposition',
+      completeness: decomposition.completeness,
+      rigorLevel: decomposition.rigorLevel,
+      atomCount: decomposition.atomCount,
+    },
+  });
 }

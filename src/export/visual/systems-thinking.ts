@@ -56,6 +56,14 @@ import {
   addLegendItem,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  list,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export systems thinking causal loop diagram to visual format
@@ -84,6 +92,8 @@ export function exportSystemsThinkingCausalLoops(thought: SystemsThinkingThought
       return systemsThinkingToUML(thought, options);
     case 'json':
       return systemsThinkingToJSON(thought, options);
+    case 'markdown':
+      return systemsThinkingToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -813,4 +823,87 @@ function systemsThinkingToJSON(thought: SystemsThinkingThought, options: VisualE
   }
 
   return serializeGraph(graph);
+}
+
+/**
+ * Export systems thinking causal loop diagram to Markdown format
+ */
+function systemsThinkingToMarkdown(thought: SystemsThinkingThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // System Overview
+  if (thought.system) {
+    const systemContent = keyValueSection({
+      'Name': thought.system.name,
+      'Description': thought.system.description,
+    });
+    parts.push(section('System Overview', systemContent));
+  }
+
+  // Metrics
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      'Components': thought.components?.length || 0,
+      'Feedback Loops': thought.feedbackLoops?.length || 0,
+      'Leverage Points': thought.leveragePoints?.length || 0,
+    });
+    parts.push(section('Metrics', metricsContent));
+  }
+
+  // Components
+  if (thought.components && thought.components.length > 0) {
+    const componentRows = thought.components.map(c => [
+      c.name,
+      c.type,
+      c.description,
+      c.unit || 'N/A',
+      c.initialValue !== undefined ? String(c.initialValue) : 'N/A',
+    ]);
+    const componentsTable = table(
+      ['Name', 'Type', 'Description', 'Unit', 'Initial Value'],
+      componentRows
+    );
+    parts.push(section('Components', componentsTable));
+  }
+
+  // Feedback Loops
+  if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+    const loopItems = thought.feedbackLoops.map(loop =>
+      `**${loop.name}** (${loop.type})\n  - Strength: ${loop.strength.toFixed(2)}\n  - Polarity: ${loop.polarity}\n  - Components: ${loop.components.join(' → ')}`
+    );
+    parts.push(section('Feedback Loops', list(loopItems)));
+  }
+
+  // Leverage Points
+  if (thought.leveragePoints && thought.leveragePoints.length > 0) {
+    const leverageRows = thought.leveragePoints.map(lp => [
+      lp.location,
+      lp.effectiveness.toFixed(2),
+      lp.description,
+    ]);
+    const leverageTable = table(
+      ['Location', 'Effectiveness', 'Description'],
+      leverageRows
+    );
+    parts.push(section('Leverage Points', leverageTable));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = systemsThinkingToMermaid(thought, 'default', true, true);
+    parts.push(section('Causal Loop Diagram', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument('Systems Thinking Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: { mode: 'systems-thinking' },
+  });
 }

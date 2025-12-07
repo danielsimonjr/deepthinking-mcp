@@ -56,6 +56,14 @@ import {
 import {
   generateCausalJson,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  list,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export causal graph to visual format
@@ -84,6 +92,8 @@ export function exportCausalGraph(thought: CausalThought, options: VisualExportO
       return causalToUML(thought, options);
     case 'json':
       return causalToJSON(thought, options);
+    case 'markdown':
+      return causalToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -767,4 +777,88 @@ function causalToJSON(thought: CausalThought, options: VisualExportOptions): str
       includeMetrics,
     }
   );
+}
+
+/**
+ * Export causal graph to Markdown format
+ */
+function causalToMarkdown(thought: CausalThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  if (!thought.causalGraph || !thought.causalGraph.nodes) {
+    parts.push(section('Status', 'No causal graph data available.'));
+    return mdDocument('Causal Graph Analysis', parts.join('\n'), {
+      includeFrontmatter: markdownIncludeFrontmatter,
+      includeTableOfContents: markdownIncludeToc,
+    });
+  }
+
+  const causes = thought.causalGraph.nodes.filter(n => n.type === 'cause');
+  const effects = thought.causalGraph.nodes.filter(n => n.type === 'effect');
+  const mediators = thought.causalGraph.nodes.filter(n => n.type === 'mediator');
+  const confounders = thought.causalGraph.nodes.filter(n => n.type === 'confounder');
+
+  // Metrics section
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      'Total Nodes': thought.causalGraph.nodes.length,
+      'Edges': thought.causalGraph.edges.length,
+      'Causes': causes.length,
+      'Effects': effects.length,
+      'Mediators': mediators.length,
+      'Confounders': confounders.length,
+    });
+    parts.push(section('Metrics', metricsContent));
+  }
+
+  // Nodes table
+  const nodeRows = thought.causalGraph.nodes.map(node => [
+    node.id,
+    node.name,
+    node.type.toUpperCase(),
+    node.description || '-',
+  ]);
+  parts.push(section('Nodes', table(['ID', 'Name', 'Type', 'Description'], nodeRows)));
+
+  // Edges table
+  const edgeRows = thought.causalGraph.edges.map(edge => {
+    const fromNode = thought.causalGraph!.nodes.find(n => n.id === edge.from);
+    const toNode = thought.causalGraph!.nodes.find(n => n.id === edge.to);
+    return [
+      fromNode?.name || edge.from,
+      toNode?.name || edge.to,
+      edge.strength !== undefined ? edge.strength.toFixed(2) : '-',
+      edge.mechanism || '-',
+    ];
+  });
+  parts.push(section('Causal Relationships', table(['From', 'To', 'Strength', 'Mechanism'], edgeRows)));
+
+  // Confounders warning
+  if (confounders.length > 0) {
+    const confounderList = confounders.map(c => `**${c.name}**: ${c.description}`);
+    parts.push(section('⚠️ Confounding Variables', list(confounderList)));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = causalGraphToMermaid(thought, 'default', true, true);
+    parts.push(section('Causal Graph Diagram', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument('Causal Graph Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: 'causal',
+      nodeCount: thought.causalGraph.nodes.length,
+      edgeCount: thought.causalGraph.edges.length,
+    },
+  });
 }

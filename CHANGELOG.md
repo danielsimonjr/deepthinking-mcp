@@ -9,6 +9,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ Features
 
+**Markdown Visual Export Support (Phase 12)**
+
+Added Markdown export format to all 21 visual exporters, completing the visual export format suite with 11 total output formats.
+
+#### New Module
+- `src/export/visual/markdown-utils.ts` - Shared Markdown utilities with:
+  - Headings (h1-h6), bold, italic, strikethrough, inline code
+  - Code blocks with language syntax highlighting
+  - Tables with column alignment (left, center, right)
+  - Lists (bullet, numbered, checkbox, nested)
+  - Blockquotes and horizontal rules
+  - Links and images with optional titles
+  - Collapsible sections (details/summary)
+  - Progress bars and metric displays
+  - Key-value sections for structured data
+  - Graph node and edge representations
+  - Mermaid diagram embedding
+  - Document generation with optional frontmatter and TOC
+
+#### Updated Visual Exporters
+All 21 mode-specific visual exporters now support `format: 'markdown'`:
+- sequential, causal, temporal, bayesian, game-theory, shannon
+- abductive, counterfactual, analogical, evidential, first-principles
+- systems-thinking, scientific-method, optimization, formal-logic
+- mathematics, physics, hybrid, metareasoning, proof-decomposition, engineering
+
+#### ExportService Updates
+- Added `visual-markdown` format option to ExportService.exportSession()
+- Updated documentation to reflect Markdown visual export support
+
+#### Complete Visual Export Format Set
+All 11 visual export formats now available:
+1. `mermaid` - Mermaid flowcharts and diagrams
+2. `dot` - GraphViz DOT graphs
+3. `ascii` - ASCII art diagrams
+4. `svg` - Native SVG graphics
+5. `graphml` - GraphML XML format
+6. `tikz` - LaTeX TikZ graphics
+7. `html` - Standalone HTML documents
+8. `modelica` - Modelica system modeling
+9. `uml` - PlantUML diagrams
+10. `json` - JSON visual graphs
+11. `markdown` - Markdown documents with Mermaid diagrams
+
+---
+
 **Schema Utilities and Validator Refactoring (Phase 11)**
 
 Added shared schema utilities for input validation across all mode validators, completing the consistent utility pattern on the input/prompting side.

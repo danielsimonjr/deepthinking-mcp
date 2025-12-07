@@ -51,6 +51,14 @@ import {
 import {
   generateBayesianJson,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  keyValueSection,
+  progressBar,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export Bayesian network to visual format
@@ -79,6 +87,8 @@ export function exportBayesianNetwork(thought: BayesianThought, options: VisualE
       return bayesianToUML(thought, options);
     case 'json':
       return bayesianToJSON(thought, options);
+    case 'markdown':
+      return bayesianToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -544,4 +554,78 @@ function bayesianToJSON(thought: BayesianThought, options: VisualExportOptions):
       indent: jsonIndent,
     }
   );
+}
+
+/**
+ * Export Bayesian network to Markdown format
+ */
+function bayesianToMarkdown(thought: BayesianThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Hypothesis section
+  const hypothesisContent = `**${thought.hypothesis.statement}**\n\n` +
+    (thought.hypothesis.alternatives && thought.hypothesis.alternatives.length > 0
+      ? `Alternatives: ${thought.hypothesis.alternatives.join(', ')}`
+      : '');
+  parts.push(section('Hypothesis', hypothesisContent));
+
+  // Probabilities section
+  if (includeMetrics) {
+    const priorPct = (thought.prior.probability * 100).toFixed(1);
+    const posteriorPct = (thought.posterior.probability * 100).toFixed(1);
+
+    const metricsContent = keyValueSection({
+      'Prior Probability': `${priorPct}%`,
+      'Posterior Probability': `${posteriorPct}%`,
+      ...(thought.bayesFactor !== undefined ? { 'Bayes Factor': thought.bayesFactor.toFixed(2) } : {}),
+    });
+    parts.push(section('Probabilities', metricsContent));
+
+    // Progress bars
+    parts.push(section('Prior', `${progressBar(thought.prior.probability * 100)}\n\n${thought.prior.justification}`));
+    parts.push(section('Posterior', `${progressBar(thought.posterior.probability * 100)}\n\n${thought.posterior.calculation}`));
+  }
+
+  // Evidence section
+  if (thought.evidence && thought.evidence.length > 0) {
+    const evidenceRows = thought.evidence.map((ev, i) => [
+      (i + 1).toString(),
+      ev.description,
+      ev.likelihoodGivenHypothesis?.toFixed(3) || '-',
+      ev.likelihoodGivenNotHypothesis?.toFixed(3) || '-',
+    ]);
+    parts.push(section('Evidence', table(['#', 'Description', 'P(E|H)', 'P(E|¬H)'], evidenceRows)));
+  }
+
+  // Interpretation
+  const change = thought.posterior.probability - thought.prior.probability;
+  const changeDirection = change > 0 ? 'increased' : change < 0 ? 'decreased' : 'unchanged';
+  const interpretation = `The posterior probability has **${changeDirection}** by ${Math.abs(change * 100).toFixed(1)} percentage points from the prior.` +
+    (thought.bayesFactor !== undefined
+      ? `\n\nBayes Factor of ${thought.bayesFactor.toFixed(2)} indicates ${thought.bayesFactor > 3 ? 'substantial' : thought.bayesFactor > 1 ? 'weak' : 'evidence against'} support for the hypothesis.`
+      : '');
+  parts.push(section('Interpretation', interpretation));
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = bayesianToMermaid(thought, 'default', true, true);
+    parts.push(section('Bayesian Network Diagram', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument('Bayesian Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: 'bayesian',
+      prior: thought.prior.probability,
+      posterior: thought.posterior.probability,
+    },
+  });
 }

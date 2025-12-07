@@ -47,6 +47,14 @@ import {
 import {
   generateLinearFlowJson,
 } from './json-utils.js';
+import {
+  section,
+  list,
+  keyValueSection,
+  progressBar,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export Shannon stage flow diagram to visual format
@@ -75,6 +83,8 @@ export function exportShannonStageFlow(thought: ShannonThought, options: VisualE
       return shannonToUML(thought, options);
     case 'json':
       return shannonToJSON(thought, options);
+    case 'markdown':
+      return shannonToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -473,4 +483,76 @@ function shannonToJSON(thought: ShannonThought, options: VisualExportOptions): s
   }
 
   return json;
+}
+
+/**
+ * Export Shannon stage flow to Markdown format
+ */
+function shannonToMarkdown(thought: ShannonThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Metrics
+  if (includeMetrics) {
+    const stageIndex = stages.indexOf(thought.stage);
+    const progress = ((stageIndex + 1) / stages.length) * 100;
+
+    const metricsContent = keyValueSection({
+      'Current Stage': stageLabels[thought.stage],
+      'Uncertainty': thought.uncertainty.toFixed(2),
+      'Progress': `${progress.toFixed(0)}%`,
+    });
+    parts.push(section('Metrics', metricsContent));
+  }
+
+  // Stage flow
+  const stageFlow = stages.map(stage => {
+    const isCurrent = stage === thought.stage;
+    return isCurrent ? `**[${stageLabels[stage]}]**` : stageLabels[stage];
+  }).join(' → ');
+
+  const stageIndex = stages.indexOf(thought.stage);
+  const progressPct = ((stageIndex + 1) / stages.length) * 100;
+
+  parts.push(section('Stage Flow', `${stageFlow}\n\n${progressBar(progressPct)}`));
+
+  // Current stage details
+  parts.push(section('Current Stage', `**${stageLabels[thought.stage]}**\n\nUncertainty: ${(thought.uncertainty * 100).toFixed(0)}%`));
+
+  // Dependencies
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    parts.push(section('Dependencies', list(thought.dependencies)));
+  }
+
+  // Assumptions
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    parts.push(section('Assumptions', list(thought.assumptions)));
+  }
+
+  // Known limitations
+  if (thought.knownLimitations && thought.knownLimitations.length > 0) {
+    parts.push(section('Known Limitations', list(thought.knownLimitations)));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = shannonToMermaid(thought, 'default', true, true);
+    parts.push(section('Stage Flow Diagram', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument('Shannon Problem-Solving Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: 'shannon',
+      stage: thought.stage,
+      uncertainty: thought.uncertainty,
+    },
+  });
 }

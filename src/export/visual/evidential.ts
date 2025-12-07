@@ -53,6 +53,14 @@ import {
   addMetric,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  list,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export evidential belief visualization to visual format
@@ -81,6 +89,8 @@ export function exportEvidentialBeliefs(thought: EvidentialThought, options: Vis
       return evidentialToUML(thought, options);
     case 'json':
       return evidentialToJSON(thought, options);
+    case 'markdown':
+      return evidentialToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -912,4 +922,102 @@ function evidentialToJSON(thought: EvidentialThought, options: VisualExportOptio
   }
 
   return serializeGraph(graph);
+}
+
+/**
+ * Export evidential beliefs to Markdown format
+ */
+function evidentialToMarkdown(thought: EvidentialThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Metrics
+  if (includeMetrics) {
+    parts.push(section('Metrics', keyValueSection({
+      'Hypotheses': thought.frameOfDiscernment?.length || 0,
+      'Evidence Items': thought.evidence?.length || 0,
+      'Belief Functions': thought.beliefFunctions?.length || 0,
+    })));
+  }
+
+  // Frame of discernment
+  if (thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
+    parts.push(section('Frame of Discernment',
+      list(thought.frameOfDiscernment)
+    ));
+  }
+
+  // Evidence
+  if (thought.evidence && thought.evidence.length > 0) {
+    const evRows = thought.evidence.map(ev => [
+      ev.id,
+      ev.description,
+      ev.reliability.toFixed(2),
+      ev.source || '-',
+    ]);
+    parts.push(section('Evidence', table(
+      ['ID', 'Description', 'Reliability', 'Source'],
+      evRows
+    )));
+  }
+
+  // Belief functions
+  if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
+    const beliefContent: string[] = [];
+    for (const bf of thought.beliefFunctions) {
+      beliefContent.push(`**Source:** ${bf.source}\n`);
+      if (bf.conflictMass !== undefined) {
+        beliefContent.push(`**Conflict Mass:** ${bf.conflictMass.toFixed(3)}\n`);
+      }
+      const massRows = bf.massAssignments.map(ma => [
+        `{${ma.hypothesisSet.join(', ')}}`,
+        ma.mass.toFixed(3),
+        ma.justification,
+      ]);
+      beliefContent.push(table(
+        ['Hypothesis Set', 'Mass', 'Justification'],
+        massRows
+      ));
+      beliefContent.push('\n');
+    }
+    parts.push(section('Belief Functions', beliefContent.join('')));
+  }
+
+  // Combined belief
+  if (thought.combinedBelief) {
+    const massRows = thought.combinedBelief.massAssignments.map(ma => [
+      `{${ma.hypothesisSet.join(', ')}}`,
+      ma.mass.toFixed(3),
+      ma.justification,
+    ]);
+    let combinedContent = table(
+      ['Hypothesis Set', 'Mass', 'Justification'],
+      massRows
+    );
+    if (thought.combinedBelief.conflictMass !== undefined) {
+      combinedContent += `\n**Conflict Mass:** ${thought.combinedBelief.conflictMass.toFixed(3)}\n`;
+    }
+    parts.push(section('Combined Belief', combinedContent));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaid = evidentialToMermaid(thought, 'default', true, includeMetrics);
+    parts.push(section('Visualization', mermaidBlock(mermaid)));
+  }
+
+  return mdDocument('Evidential Reasoning Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: 'evidential',
+      hypotheses: thought.frameOfDiscernment?.length || 0,
+    },
+  });
 }

@@ -66,6 +66,14 @@ import {
   addLegendItem,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  list,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export first-principles derivation chain to visual format
@@ -94,6 +102,8 @@ export function exportFirstPrinciplesDerivation(thought: FirstPrinciplesThought,
       return firstPrinciplesToUML(thought, options);
     case 'json':
       return firstPrinciplesToJSON(thought, options);
+    case 'markdown':
+      return firstPrinciplesToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -1125,4 +1135,90 @@ function firstPrinciplesToJSON(thought: FirstPrinciplesThought, options: VisualE
   }
 
   return serializeGraph(graph, { prettyPrint: true, indent: 2 });
+}
+
+/**
+ * Export first-principles derivation to Markdown format
+ */
+function firstPrinciplesToMarkdown(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Question
+  parts.push(section('Question', thought.question));
+
+  // Metrics
+  if (includeMetrics) {
+    parts.push(section('Metrics', keyValueSection({
+      'Principles': thought.principles.length,
+      'Derivation Steps': thought.derivationSteps.length,
+      'Certainty': (thought.conclusion.certainty * 100).toFixed(0) + '%',
+      'Axioms': thought.principles.filter(p => p.type === 'axiom').length,
+      'Definitions': thought.principles.filter(p => p.type === 'definition').length,
+      'Observations': thought.principles.filter(p => p.type === 'observation').length,
+    })));
+  }
+
+  // Foundational principles
+  const principleRows = thought.principles.map(p => [
+    p.id,
+    p.type,
+    p.statement.substring(0, 60) + (p.statement.length > 60 ? '...' : ''),
+    p.dependsOn?.join(', ') || '-',
+    p.confidence !== undefined ? (p.confidence * 100).toFixed(0) + '%' : 'N/A',
+  ]);
+  parts.push(section('Foundational Principles', table(
+    ['ID', 'Type', 'Statement', 'Depends On', 'Confidence'],
+    principleRows
+  )));
+
+  // Derivation steps
+  const stepRows = thought.derivationSteps.map(s => [
+    s.stepNumber.toString(),
+    s.principle,
+    s.inference.substring(0, 60) + (s.inference.length > 60 ? '...' : ''),
+    s.logicalForm || '-',
+    (s.confidence * 100).toFixed(0) + '%',
+  ]);
+  parts.push(section('Derivation Chain', table(
+    ['Step', 'Principle', 'Inference', 'Logical Form', 'Confidence'],
+    stepRows
+  )));
+
+  // Conclusion
+  let conclusionContent = `**Statement:** ${thought.conclusion.statement}\n\n`;
+  conclusionContent += `**Certainty:** ${(thought.conclusion.certainty * 100).toFixed(0)}%\n\n`;
+  conclusionContent += `**Derivation Chain:** Steps ${thought.conclusion.derivationChain.join(' → ')}\n`;
+
+  if (thought.conclusion.limitations && thought.conclusion.limitations.length > 0) {
+    conclusionContent += `\n**Limitations:**\n${list(thought.conclusion.limitations)}`;
+  }
+  parts.push(section('Conclusion', conclusionContent));
+
+  // Alternative interpretations
+  if (thought.alternativeInterpretations && thought.alternativeInterpretations.length > 0) {
+    parts.push(section('Alternative Interpretations', list(thought.alternativeInterpretations)));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaid = firstPrinciplesToMermaid(thought, 'default', true, includeMetrics);
+    parts.push(section('Visualization', mermaidBlock(mermaid)));
+  }
+
+  return mdDocument('First Principles Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: 'first-principles',
+      principles: thought.principles.length,
+      certainty: thought.conclusion.certainty.toFixed(2),
+    },
+  });
 }

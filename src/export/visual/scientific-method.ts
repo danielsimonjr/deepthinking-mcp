@@ -52,6 +52,14 @@ import {
   addMetric,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  list,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export scientific method experiment flow to visual format
@@ -80,6 +88,8 @@ export function exportScientificMethodExperiment(thought: ScientificMethodThough
       return scientificMethodToUML(thought, options);
     case 'json':
       return scientificMethodToJSON(thought, options);
+    case 'markdown':
+      return scientificMethodToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -1145,4 +1155,103 @@ function scientificMethodToJSON(thought: ScientificMethodThought, options: Visua
   }
 
   return serializeGraph(graph, options);
+}
+
+/**
+ * Export scientific method experiment flow to Markdown format
+ */
+function scientificMethodToMarkdown(thought: ScientificMethodThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Research Question
+  if (thought.researchQuestion) {
+    const questionContent = keyValueSection({
+      'Question': thought.researchQuestion.question,
+      'Background': thought.researchQuestion.background,
+      'Significance': thought.researchQuestion.significance || 'N/A',
+    });
+    parts.push(section('Research Question', questionContent));
+  }
+
+  // Metrics
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      'Hypotheses': thought.scientificHypotheses?.length || 0,
+      'Tests': thought.analysis?.tests?.length || 0,
+      'Confidence': thought.conclusion?.confidence?.toFixed(2) || 'N/A',
+    });
+    parts.push(section('Metrics', metricsContent));
+  }
+
+  // Hypotheses
+  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+    const hypothesisItems = thought.scientificHypotheses.map(h =>
+      `**${h.type === 'null' ? 'H₀' : 'H₁'}**: ${h.statement}${h.prediction ? `\n  - Prediction: ${h.prediction}` : ''}`
+    );
+    parts.push(section('Hypotheses', list(hypothesisItems)));
+  }
+
+  // Experiment
+  if (thought.experiment) {
+    const experimentContent = keyValueSection({
+      'Type': thought.experiment.type,
+      'Design': thought.experiment.design,
+      'Sample Size': (thought.experiment as any)?.sampleSize || 'N/A',
+    });
+    parts.push(section('Experiment', experimentContent));
+  }
+
+  // Data Collection
+  if (thought.data) {
+    const dataContent = keyValueSection({
+      'Method': thought.data.method.join(', '),
+      'Completeness': thought.data.dataQuality ? `${(thought.data.dataQuality.completeness * 100).toFixed(0)}%` : 'N/A',
+      'Reliability': thought.data.dataQuality ? `${(thought.data.dataQuality.reliability * 100).toFixed(0)}%` : 'N/A',
+    });
+    parts.push(section('Data Collection', dataContent));
+  }
+
+  // Statistical Analysis
+  if (thought.analysis && thought.analysis.tests) {
+    const testRows = thought.analysis.tests.map(test => [
+      test.name,
+      test.pValue.toFixed(4),
+      test.alpha.toString(),
+      test.result,
+    ]);
+    const testsTable = table(
+      ['Test', 'p-value', 'α', 'Result'],
+      testRows
+    );
+    parts.push(section('Statistical Analysis', testsTable));
+  }
+
+  // Conclusion
+  if (thought.conclusion) {
+    const conclusionContent = `${thought.conclusion.statement}\n\n` +
+      keyValueSection({
+        'Confidence': thought.conclusion.confidence ? `${(thought.conclusion.confidence * 100).toFixed(0)}%` : 'N/A',
+        'Supported Hypotheses': (thought.conclusion as any).supportedHypotheses?.join(', ') || 'N/A',
+      });
+    parts.push(section('Conclusion', conclusionContent));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = scientificMethodToMermaid(thought, 'default', true, true);
+    parts.push(section('Experiment Flow Diagram', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument('Scientific Method Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: { mode: 'scientific-method' },
+  });
 }

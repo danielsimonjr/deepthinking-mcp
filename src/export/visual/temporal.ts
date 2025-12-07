@@ -47,6 +47,13 @@ import {
   addMetric,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export temporal timeline to visual format
@@ -75,6 +82,8 @@ export function exportTemporalTimeline(thought: TemporalThought, options: Visual
       return temporalToUML(thought, options);
     case 'json':
       return temporalToJSON(thought, options);
+    case 'markdown':
+      return temporalToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -534,4 +543,81 @@ function temporalToJSON(thought: TemporalThought, _options: VisualExportOptions)
   addMetric(graph, 'timeSpan', sortedEvents[sortedEvents.length - 1].timestamp - sortedEvents[0].timestamp);
 
   return serializeGraph(graph, _options);
+}
+
+/**
+ * Export temporal timeline to Markdown format
+ */
+function temporalToMarkdown(thought: TemporalThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+  const title = thought.timeline?.name || 'Timeline';
+
+  if (!thought.events || thought.events.length === 0) {
+    parts.push(section('Status', 'No events in timeline.'));
+    return mdDocument(`Temporal Analysis: ${title}`, parts.join('\n'), {
+      includeFrontmatter: markdownIncludeFrontmatter,
+      includeTableOfContents: markdownIncludeToc,
+    });
+  }
+
+  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const instants = sortedEvents.filter(e => e.type === 'instant');
+  const intervals = sortedEvents.filter(e => e.type === 'interval');
+
+  // Metrics section
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      'Total Events': sortedEvents.length,
+      'Instant Events': instants.length,
+      'Interval Events': intervals.length,
+      'Time Span': `${sortedEvents[0].timestamp} - ${sortedEvents[sortedEvents.length - 1].timestamp}`,
+    });
+    parts.push(section('Metrics', metricsContent));
+  }
+
+  // Events table
+  const eventRows = sortedEvents.map(event => [
+    event.timestamp.toString(),
+    event.name,
+    event.type.toUpperCase(),
+    event.duration ? `${event.duration}` : '-',
+    event.description || '-',
+  ]);
+  parts.push(section('Events', table(['Timestamp', 'Name', 'Type', 'Duration', 'Description'], eventRows)));
+
+  // Relations section
+  if (thought.relations && thought.relations.length > 0) {
+    const relationRows = thought.relations.map(rel => {
+      const fromEvent = thought.events?.find(e => e.id === rel.from);
+      const toEvent = thought.events?.find(e => e.id === rel.to);
+      return [
+        fromEvent?.name || rel.from,
+        rel.relationType,
+        toEvent?.name || rel.to,
+      ];
+    });
+    parts.push(section('Temporal Relations', table(['From', 'Relation', 'To'], relationRows)));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = timelineToMermaidGantt(thought, true);
+    parts.push(section('Timeline Diagram', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument(`Temporal Analysis: ${title}`, parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: 'temporal',
+      eventCount: sortedEvents.length,
+    },
+  });
 }

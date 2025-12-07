@@ -56,6 +56,14 @@ import {
   addMetric,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  list,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export formal logic proof tree to visual format
@@ -84,6 +92,8 @@ export function exportFormalLogicProof(thought: FormalLogicThought, options: Vis
       return formalLogicToUML(thought, options);
     case 'json':
       return formalLogicToJSON(thought, options);
+    case 'markdown':
+      return formalLogicToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -1179,4 +1189,99 @@ function formalLogicToJSON(thought: FormalLogicThought, options: VisualExportOpt
   }
 
   return serializeGraph(graph);
+}
+
+/**
+ * Export formal logic proof tree to Markdown format
+ */
+function formalLogicToMarkdown(thought: FormalLogicThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Proof Overview
+  if (thought.proof) {
+    const proofContent = keyValueSection({
+      'Theorem': thought.proof.theorem,
+      'Technique': thought.proof.technique,
+      'Valid': thought.proof.valid ? 'Yes' : 'No',
+      'Completeness': `${(thought.proof.completeness * 100).toFixed(0)}%`,
+    });
+    parts.push(section('Proof', proofContent));
+  }
+
+  // Metrics
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      'Propositions': thought.propositions?.length || 0,
+      'Inferences': thought.logicalInferences?.length || 0,
+      'Proof Steps': thought.proof?.steps?.length || 0,
+      'Completeness': thought.proof ? `${(thought.proof.completeness * 100).toFixed(0)}%` : 'N/A',
+    });
+    parts.push(section('Metrics', metricsContent));
+  }
+
+  // Propositions
+  if (thought.propositions && thought.propositions.length > 0) {
+    const propositionRows = thought.propositions.map(p => [
+      p.symbol,
+      p.type,
+      p.statement,
+      p.truthValue !== undefined ? String(p.truthValue) : 'N/A',
+    ]);
+    const propositionsTable = table(
+      ['Symbol', 'Type', 'Statement', 'Truth Value'],
+      propositionRows
+    );
+    parts.push(section('Propositions', propositionsTable));
+  }
+
+  // Logical Inferences
+  if (thought.logicalInferences && thought.logicalInferences.length > 0) {
+    const inferenceItems = thought.logicalInferences.map(inf =>
+      `**${inf.rule}** (${inf.valid ? 'Valid' : 'Invalid'})\n  - Premises: ${inf.premises.join(', ')}\n  - Conclusion: ${inf.conclusion}`
+    );
+    parts.push(section('Logical Inferences', list(inferenceItems)));
+  }
+
+  // Proof Steps
+  if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
+    const stepItems = thought.proof.steps.map(step =>
+      `**${step.stepNumber}. ${step.statement}**\n  - Justification: ${step.justification}${step.rule ? `\n  - Rule: ${step.rule}` : ''}${step.referencesSteps && step.referencesSteps.length > 0 ? `\n  - References steps: ${step.referencesSteps.join(', ')}` : ''}`
+    );
+    parts.push(section('Proof Steps', list(stepItems)));
+  }
+
+  // Conclusion
+  if (thought.proof) {
+    const conclusionContent = `${thought.proof.conclusion}\n\n**Status:** ${thought.proof.valid ? 'PROVEN' : 'NOT PROVEN'}`;
+    parts.push(section('Conclusion', conclusionContent));
+  }
+
+  // Truth Table
+  if (thought.truthTable) {
+    const truthTableContent = keyValueSection({
+      'Tautology': thought.truthTable.isTautology ? 'Yes' : 'No',
+      'Contradiction': thought.truthTable.isContradiction ? 'Yes' : 'No',
+      'Contingent': thought.truthTable.isContingent ? 'Yes' : 'No',
+    });
+    parts.push(section('Truth Table', truthTableContent));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = formalLogicToMermaid(thought, 'default', true, true);
+    parts.push(section('Proof Tree Diagram', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument('Formal Logic Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: { mode: 'formal-logic' },
+  });
 }

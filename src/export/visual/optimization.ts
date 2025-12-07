@@ -56,6 +56,14 @@ import {
   addMetric,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  list,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export optimization problem constraint graph to visual format
@@ -84,6 +92,8 @@ export function exportOptimizationSolution(thought: OptimizationThought, options
       return optimizationToUML(thought, options);
     case 'json':
       return optimizationToJSON(thought, options);
+    case 'markdown':
+      return optimizationToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -1113,4 +1123,112 @@ function optimizationToJSON(thought: OptimizationThought, options: VisualExportO
   }
 
   return serializeGraph(graph);
+}
+
+/**
+ * Export optimization problem constraint graph to Markdown format
+ */
+function optimizationToMarkdown(thought: OptimizationThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Problem Overview
+  if (thought.problem) {
+    const problemContent = keyValueSection({
+      'Name': thought.problem.name,
+      'Type': thought.problem.type,
+      'Description': thought.problem.description,
+    });
+    parts.push(section('Problem', problemContent));
+  }
+
+  // Metrics
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      'Variables': thought.variables?.length || 0,
+      'Constraints': thought.optimizationConstraints?.length || 0,
+      'Objectives': thought.objectives?.length || 0,
+      'Quality': thought.solution?.quality?.toFixed(2) || 'N/A',
+    });
+    parts.push(section('Metrics', metricsContent));
+  }
+
+  // Decision Variables
+  if (thought.variables && thought.variables.length > 0) {
+    const variableRows = thought.variables.map(v => {
+      const varType = (v as any).type || 'unknown';
+      const domain = v.domain
+        ? `[${(v.domain as any).lowerBound}, ${(v.domain as any).upperBound}]`
+        : 'N/A';
+      return [v.name, varType, domain, v.description];
+    });
+    const variablesTable = table(
+      ['Name', 'Type', 'Domain', 'Description'],
+      variableRows
+    );
+    parts.push(section('Decision Variables', variablesTable));
+  }
+
+  // Constraints
+  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+    const constraintItems = thought.optimizationConstraints.map(c =>
+      `**${c.name}** (${c.type})\n  - Formula: \`${c.formula}\``
+    );
+    parts.push(section('Constraints', list(constraintItems)));
+  }
+
+  // Objectives
+  if (thought.objectives && thought.objectives.length > 0) {
+    const objectiveItems = thought.objectives.map(o =>
+      `**${o.type.toUpperCase()}: ${o.name}**\n  - Formula: \`${o.formula}\``
+    );
+    parts.push(section('Objectives', list(objectiveItems)));
+  }
+
+  // Solution
+  if (thought.solution) {
+    const solution = thought.solution as any;
+    let solutionContent = '';
+
+    if (solution.status) {
+      solutionContent += `**Status:** ${solution.status}\n\n`;
+    }
+
+    const solutionMetrics: Record<string, string | number> = {};
+    if (solution.optimalValue !== undefined) {
+      solutionMetrics['Optimal Value'] = solution.optimalValue;
+    }
+    if (solution.quality !== undefined) {
+      solutionMetrics['Quality'] = `${(solution.quality * 100).toFixed(0)}%`;
+    }
+
+    if (Object.keys(solutionMetrics).length > 0) {
+      solutionContent += keyValueSection(solutionMetrics);
+    }
+
+    if (solution.assignments) {
+      solutionContent += '\n**Variable Assignments:**\n\n';
+      solutionContent += keyValueSection(solution.assignments);
+    }
+
+    parts.push(section('Solution', solutionContent));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = optimizationToMermaid(thought, 'default', true, true);
+    parts.push(section('Optimization Diagram', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument('Optimization Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: { mode: 'optimization' },
+  });
 }
