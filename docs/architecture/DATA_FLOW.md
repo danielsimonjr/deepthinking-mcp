@@ -1,6 +1,6 @@
 # Data Flow Architecture
 
-**Version**: 6.1.2 | **Last Updated**: 2025-12-02
+**Version**: 7.0.0 | **Last Updated**: 2025-12-07
 
 ## Overview
 
@@ -907,6 +907,72 @@ Return error response to client
 
 ---
 
+## Proof Decomposition Flow (v7.0.0)
+
+### Proof Analysis Pipeline
+
+```
+Proof Input (text or steps)
+    ↓
+ProofDecomposer.decompose()
+    ├─ Parse proof into steps
+    ├─ Identify statement types (axiom, hypothesis, derived, conclusion)
+    ├─ Detect inference rules
+    ├─ Build dependency graph
+    └─ Calculate metrics (completeness, rigor)
+    ↓
+ProofDecomposition
+    ↓
+┌────────────┬──────────────┬────────────────┐
+│            │              │                │
+▼            ▼              ▼                ▼
+GapAnalyzer  AssumptionTracker  InconsistencyDetector  VisualExport
+    │              │                    │                   │
+    ▼              ▼                    ▼                   ▼
+GapAnalysis  AssumptionAnalysis  Inconsistency[]    Mermaid/DOT/ASCII/SVG
+```
+
+### ProofDecomposition Data Structure
+
+```typescript
+interface ProofDecomposition {
+  id: string;
+  originalProof: string;
+  theorem?: string;
+  atoms: AtomicStatement[];           // Atomic statements
+  dependencies: DependencyGraph;       // Node → edges
+  assumptionChains: AssumptionChain[]; // Conclusion → assumptions
+  gaps: ProofGap[];                    // Detected gaps
+  implicitAssumptions: ImplicitAssumption[];
+  completeness: number;                // 0-1 score
+  rigorLevel: 'informal' | 'textbook' | 'rigorous' | 'formal';
+  atomCount: number;
+  maxDependencyDepth: number;
+}
+```
+
+### Visual Export Flow (SVG)
+
+```
+ProofDecomposition
+    ↓
+exportProofDecomposition(decomposition, { format: 'svg' })
+    ↓
+proofDecompositionToSVG()
+    ├─ Group atoms by type (axiom, hypothesis, derived, conclusion)
+    ├─ Calculate layered positions
+    ├─ Apply color scheme (default/pastel/monochrome)
+    ├─ Render nodes (rect/polygon/diamond shapes)
+    ├─ Render edges (Bezier curves with arrowheads)
+    ├─ Add gap indicators (dashed red lines)
+    ├─ Include metrics panel (if requested)
+    └─ Include legend
+    ↓
+SVG String (XML)
+```
+
+---
+
 ## Security & Privacy
 
 ### Data Sanitization Pipeline
@@ -938,5 +1004,5 @@ Storage
 
 ---
 
-*Last Updated*: 2025-12-02
-*Data Flow Version*: 6.1.2
+*Last Updated*: 2025-12-07
+*Data Flow Version*: 7.0.0
