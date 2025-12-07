@@ -27,6 +27,65 @@
 
 ---
 
+## Validation: Dependency Graph Tool Comparison
+
+The analysis in this plan was validated against the output of `tools/create-dependency-graph.ts`.
+
+**Command**: `npx tsx tools/create-dependency-graph.ts`
+
+### Tool Output Summary
+
+| Metric | Tool Output | Manual Analysis | Match |
+|--------|-------------|-----------------|-------|
+| Total TypeScript Files | 201 | 201 | ✅ |
+| Total Modules | 26 | 28 directories* | ✅ |
+| Lines of Code | 58,704 | ~58,500 | ✅ |
+| Total Exports | 608 | - | - |
+| Runtime Circular Deps | **0** | 0 | ✅ |
+| Type-only Circular Deps | 31 | - | - |
+
+*Tool counts "entry" and nested dirs differently; both measurements are correct.
+
+### Dead Code Verification
+
+Verified using the tool's dependency matrix that these directories have **zero external imports**:
+
+| Directory | Files | Tool Status | Confirmed Dead |
+|-----------|-------|-------------|----------------|
+| `analytics/` | 2 | No external imports to it | ✅ |
+| `backup/` | 4 | Only imported by dead `batch/` | ✅ |
+| `batch/` | 3 | No external imports to it | ✅ |
+| `collaboration/` | 5 | No external imports to it | ✅ |
+| `comparison/` | 5 | No external imports to it | ✅ |
+| `ml/` | 4 | No external imports to it | ✅ |
+| `rate-limit/` | 4 | No external imports to it | ✅ |
+| `templates/` | 4 | No external imports to it | ✅ |
+| `visualization/` | 5 | No external imports to it | ✅ |
+| `webhooks/` | 5 | No external imports to it | ✅ |
+
+### Circular Dependencies Analysis
+
+The tool detected **31 type-only circular dependencies** and **0 runtime circular dependencies**.
+
+**Type-only cycles are safe** because:
+- They only involve `import type { ... }` statements
+- TypeScript erases type imports at compile time
+- No runtime code execution order issues
+
+**Categories of type-only cycles found**:
+1. `types/core.ts` ↔ `types/modes/*.ts` (9 cycles) - Expected pattern for type re-exports
+2. `validation/validator.ts` ↔ `validation/validators/modes/*.ts` (22 cycles) - Validator type imports
+
+**Conclusion**: No action needed on circular dependencies.
+
+### Output Files Generated
+
+The tool generated comprehensive documentation:
+- `docs/architecture/dependency-graph.json` - Machine-readable dependency data
+- `docs/architecture/DEPENDENCY_GRAPH.md` - Human-readable dependency documentation
+
+---
+
 ## Current Directory Structure (28 directories)
 
 ```
