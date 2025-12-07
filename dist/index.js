@@ -3045,13 +3045,327 @@ var init_utils = __esm({
 });
 
 // src/export/visual/mermaid-utils.ts
+function sanitizeMermaidId(id) {
+  return id.replace(/[^a-zA-Z0-9_]/g, "_").replace(/^(\d)/, "_$1").replace(/__+/g, "_").replace(/^_+|_+$/g, "") || "node";
+}
+function escapeMermaidLabel(label) {
+  return label.replace(/"/g, "#quot;").replace(/</g, "#lt;").replace(/>/g, "#gt;").replace(/\[/g, "#91;").replace(/\]/g, "#93;").replace(/\{/g, "#123;").replace(/\}/g, "#125;").replace(/\(/g, "#40;").replace(/\)/g, "#41;").replace(/\|/g, "#124;").replace(/\n/g, "<br/>");
+}
+function truncateLabel(label, maxLength = 40) {
+  if (label.length <= maxLength) return label;
+  return label.substring(0, maxLength - 3) + "...";
+}
+function getNodeShapeBrackets(shape) {
+  switch (shape) {
+    case "rectangle":
+      return ["[", "]"];
+    case "rounded":
+      return ["(", ")"];
+    case "stadium":
+      return ["([", "])"];
+    case "subroutine":
+      return ["[[", "]]"];
+    case "cylinder":
+      return ["[(", ")]"];
+    case "circle":
+      return ["((", "))"];
+    case "asymmetric":
+      return [">", "]"];
+    case "rhombus":
+      return ["{", "}"];
+    case "hexagon":
+      return ["{{", "}}"];
+    case "parallelogram":
+      return ["[/", "/]"];
+    case "parallelogram-alt":
+      return ["[\\", "\\]"];
+    case "trapezoid":
+      return ["[/", "\\]"];
+    case "trapezoid-alt":
+      return ["[\\", "/]"];
+    case "double-circle":
+      return ["(((", ")))"];
+    default:
+      return ["[", "]"];
+  }
+}
+function renderMermaidNode(node) {
+  const id = sanitizeMermaidId(node.id);
+  const label = escapeMermaidLabel(node.label);
+  const [open, close] = getNodeShapeBrackets(node.shape || "rectangle");
+  let nodeStr = `  ${id}${open}"${label}"${close}`;
+  if (node.className) {
+    nodeStr += `:::${node.className}`;
+  }
+  return nodeStr;
+}
+function renderMermaidNodeStyle(nodeId, style) {
+  if (!style) return "";
+  const id = sanitizeMermaidId(nodeId);
+  const styles = [];
+  if (style.fill) styles.push(`fill:${style.fill}`);
+  if (style.stroke) styles.push(`stroke:${style.stroke}`);
+  if (style.strokeWidth) styles.push(`stroke-width:${style.strokeWidth}`);
+  if (style.color) styles.push(`color:${style.color}`);
+  if (styles.length === 0) return "";
+  return `  style ${id} ${styles.join(",")}`;
+}
+function getEdgeArrow(style) {
+  switch (style) {
+    case "arrow":
+      return "-->";
+    case "open":
+      return "---";
+    case "dotted":
+      return "-.->";
+    case "thick":
+      return "==>";
+    case "invisible":
+      return "~~~";
+    default:
+      return "-->";
+  }
+}
+function renderMermaidEdge(edge) {
+  const source = sanitizeMermaidId(edge.source);
+  const target = sanitizeMermaidId(edge.target);
+  const arrow = getEdgeArrow(edge.style || "arrow");
+  if (edge.label) {
+    const label = escapeMermaidLabel(edge.label);
+    return `  ${source} ${arrow}|${label}| ${target}`;
+  }
+  return `  ${source} ${arrow} ${target}`;
+}
+function getMermaidColor(type, scheme = "default") {
+  return MERMAID_COLORS[scheme][type];
+}
+function generateMermaidFlowchart(nodes, edges, options = {}) {
+  const { direction = "TD", colorScheme = "default" } = options;
+  const lines = [];
+  lines.push(`graph ${direction}`);
+  if (nodes.length > 0) {
+    lines.push("");
+    for (const node of nodes) {
+      lines.push(renderMermaidNode(node));
+    }
+  }
+  if (edges.length > 0) {
+    lines.push("");
+    for (const edge of edges) {
+      lines.push(renderMermaidEdge(edge));
+    }
+  }
+  if (colorScheme !== "monochrome") {
+    const styledNodes = nodes.filter((n) => n.style);
+    if (styledNodes.length > 0) {
+      lines.push("");
+      for (const node of styledNodes) {
+        const styleStr = renderMermaidNodeStyle(node.id, node.style);
+        if (styleStr) lines.push(styleStr);
+      }
+    }
+  }
+  return lines.join("\n");
+}
+var MERMAID_COLORS;
 var init_mermaid_utils = __esm({
   "src/export/visual/mermaid-utils.ts"() {
     init_esm_shims();
+    MERMAID_COLORS = {
+      default: {
+        primary: "#a8d5ff",
+        secondary: "#ffd699",
+        success: "#81c784",
+        warning: "#ffb74d",
+        danger: "#e57373",
+        info: "#4fc3f7",
+        neutral: "#e0e0e0"
+      },
+      pastel: {
+        primary: "#e1f5ff",
+        secondary: "#fff3e0",
+        success: "#c8e6c9",
+        warning: "#ffecb3",
+        danger: "#ffcdd2",
+        info: "#b3e5fc",
+        neutral: "#f5f5f5"
+      },
+      monochrome: {
+        primary: "#e0e0e0",
+        secondary: "#bdbdbd",
+        success: "#9e9e9e",
+        warning: "#757575",
+        danger: "#616161",
+        info: "#424242",
+        neutral: "#f5f5f5"
+      }
+    };
   }
 });
 
 // src/export/visual/dot-utils.ts
+function sanitizeDotId(id) {
+  if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(id)) {
+    return id;
+  }
+  return `"${escapeDotString(id)}"`;
+}
+function escapeDotString(str) {
+  return str.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t");
+}
+function truncateDotLabel(label, maxLength = 50) {
+  if (label.length <= maxLength) return label;
+  return label.substring(0, maxLength - 3) + "...";
+}
+function renderDotNodeAttrs(node) {
+  const attrs = [];
+  if (node.label !== void 0) {
+    attrs.push(`label="${escapeDotString(node.label)}"`);
+  }
+  if (node.shape) {
+    attrs.push(`shape=${node.shape}`);
+  }
+  if (node.style) {
+    const styleStr = Array.isArray(node.style) ? node.style.join(",") : node.style;
+    attrs.push(`style="${styleStr}"`);
+  }
+  if (node.fillColor) {
+    attrs.push(`fillcolor="${node.fillColor}"`);
+  }
+  if (node.color) {
+    attrs.push(`color="${node.color}"`);
+  }
+  if (node.fontColor) {
+    attrs.push(`fontcolor="${node.fontColor}"`);
+  }
+  if (node.fontName) {
+    attrs.push(`fontname="${node.fontName}"`);
+  }
+  if (node.fontSize) {
+    attrs.push(`fontsize=${node.fontSize}`);
+  }
+  if (node.width) {
+    attrs.push(`width=${node.width}`);
+  }
+  if (node.height) {
+    attrs.push(`height=${node.height}`);
+  }
+  if (node.tooltip) {
+    attrs.push(`tooltip="${escapeDotString(node.tooltip)}"`);
+  }
+  if (node.url) {
+    attrs.push(`URL="${escapeDotString(node.url)}"`);
+  }
+  return attrs.length > 0 ? ` [${attrs.join(", ")}]` : "";
+}
+function renderDotEdgeAttrs(edge) {
+  const attrs = [];
+  if (edge.label) {
+    attrs.push(`label="${escapeDotString(edge.label)}"`);
+  }
+  if (edge.style) {
+    attrs.push(`style=${edge.style}`);
+  }
+  if (edge.color) {
+    attrs.push(`color="${edge.color}"`);
+  }
+  if (edge.fontColor) {
+    attrs.push(`fontcolor="${edge.fontColor}"`);
+  }
+  if (edge.arrowHead) {
+    attrs.push(`arrowhead=${edge.arrowHead}`);
+  }
+  if (edge.arrowTail) {
+    attrs.push(`arrowtail=${edge.arrowTail}`);
+  }
+  if (edge.constraint === false) {
+    attrs.push("constraint=false");
+  }
+  if (edge.weight !== void 0) {
+    attrs.push(`weight=${edge.weight}`);
+  }
+  if (edge.penWidth !== void 0) {
+    attrs.push(`penwidth=${edge.penWidth}`);
+  }
+  if (edge.tooltip) {
+    attrs.push(`tooltip="${escapeDotString(edge.tooltip)}"`);
+  }
+  return attrs.length > 0 ? ` [${attrs.join(", ")}]` : "";
+}
+function renderDotNode(node) {
+  const id = sanitizeDotId(node.id);
+  const attrs = renderDotNodeAttrs(node);
+  return `  ${id}${attrs};`;
+}
+function renderDotEdge(edge, directed = true) {
+  const source = sanitizeDotId(edge.source);
+  const target = sanitizeDotId(edge.target);
+  const arrow = directed ? "->" : "--";
+  const attrs = renderDotEdgeAttrs(edge);
+  return `  ${source} ${arrow} ${target}${attrs};`;
+}
+function generateDotGraph(nodes, edges, options = {}) {
+  const {
+    graphType = "digraph",
+    graphName = "G",
+    rankDir = "TB",
+    splines,
+    overlap,
+    concentrate,
+    compound,
+    bgcolor,
+    fontName,
+    fontSize,
+    nodeDefaults,
+    edgeDefaults
+  } = options;
+  const lines = [];
+  const directed = graphType === "digraph";
+  lines.push(`${graphType} ${sanitizeDotId(graphName)} {`);
+  lines.push(`  rankdir=${rankDir};`);
+  if (splines) lines.push(`  splines=${splines};`);
+  if (overlap !== void 0) lines.push(`  overlap=${overlap};`);
+  if (concentrate) lines.push("  concentrate=true;");
+  if (compound) lines.push("  compound=true;");
+  if (bgcolor) lines.push(`  bgcolor="${bgcolor}";`);
+  if (fontName) lines.push(`  fontname="${fontName}";`);
+  if (fontSize) lines.push(`  fontsize=${fontSize};`);
+  if (nodeDefaults) {
+    const defaultAttrs = [];
+    if (nodeDefaults.shape) defaultAttrs.push(`shape=${nodeDefaults.shape}`);
+    if (nodeDefaults.style) {
+      const styleStr = Array.isArray(nodeDefaults.style) ? nodeDefaults.style.join(",") : nodeDefaults.style;
+      defaultAttrs.push(`style="${styleStr}"`);
+    }
+    if (nodeDefaults.fillColor) defaultAttrs.push(`fillcolor="${nodeDefaults.fillColor}"`);
+    if (nodeDefaults.fontName) defaultAttrs.push(`fontname="${nodeDefaults.fontName}"`);
+    if (nodeDefaults.fontSize) defaultAttrs.push(`fontsize=${nodeDefaults.fontSize}`);
+    if (defaultAttrs.length > 0) {
+      lines.push(`  node [${defaultAttrs.join(", ")}];`);
+    }
+  }
+  if (edgeDefaults) {
+    const defaultAttrs = [];
+    if (edgeDefaults.style) defaultAttrs.push(`style=${edgeDefaults.style}`);
+    if (edgeDefaults.color) defaultAttrs.push(`color="${edgeDefaults.color}"`);
+    if (edgeDefaults.arrowHead) defaultAttrs.push(`arrowhead=${edgeDefaults.arrowHead}`);
+    if (defaultAttrs.length > 0) {
+      lines.push(`  edge [${defaultAttrs.join(", ")}];`);
+    }
+  }
+  lines.push("");
+  for (const node of nodes) {
+    lines.push(renderDotNode(node));
+  }
+  if (edges.length > 0) {
+    lines.push("");
+    for (const edge of edges) {
+      lines.push(renderDotEdge(edge, directed));
+    }
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
 var init_dot_utils = __esm({
   "src/export/visual/dot-utils.ts"() {
     init_esm_shims();
@@ -3059,9 +3373,44 @@ var init_dot_utils = __esm({
 });
 
 // src/export/visual/ascii-utils.ts
+function generateAsciiHeader(title, style = "equals") {
+  const underlineChar = style === "double" ? "\u2550" : style === "equals" ? "=" : style === "single" ? "\u2500" : "-";
+  const underline = underlineChar.repeat(title.length);
+  return `${title}
+${underline}`;
+}
+function generateAsciiSectionHeader(title, icon) {
+  const prefix = "";
+  return `${prefix}${title}:
+${"-".repeat((prefix + title + ":").length)}`;
+}
+function generateAsciiBulletList(items, bullet = "bullet", indent = 2) {
+  const bulletChar = BULLETS[bullet];
+  const indentStr = " ".repeat(indent);
+  return items.map((item) => `${indentStr}${bulletChar} ${item}`).join("\n");
+}
+var BULLETS;
 var init_ascii_utils = __esm({
   "src/export/visual/ascii-utils.ts"() {
     init_esm_shims();
+    BULLETS = {
+      circle: "\u25CB",
+      filledCircle: "\u25CF",
+      square: "\u25A1",
+      filledSquare: "\u25A0",
+      diamond: "\u25C7",
+      filledDiamond: "\u25C6",
+      triangle: "\u25B3",
+      filledTriangle: "\u25B2",
+      star: "\u2606",
+      filledStar: "\u2605",
+      check: "\u2713",
+      cross: "\u2717",
+      dash: "\u2500",
+      bullet: "\u2022",
+      asciiBullet: "*",
+      asciiDash: "-"
+    };
   }
 });
 
@@ -6762,100 +7111,138 @@ function exportSequentialDependencyGraph(thought, options) {
   }
 }
 function sequentialToMermaid(thought, colorScheme, includeLabels) {
-  let mermaid = "graph TD\n";
+  const scheme = colorScheme;
+  const nodes = [];
+  const edges = [];
   const nodeId = sanitizeId(thought.id);
-  const label = includeLabels ? thought.content.substring(0, 50) + "..." : nodeId;
-  mermaid += `  ${nodeId}["${label}"]
-`;
+  const label = includeLabels ? truncateLabel(thought.content, 50) : nodeId;
+  nodes.push({
+    id: nodeId,
+    label,
+    shape: thought.isRevision ? "hexagon" : "stadium",
+    style: colorScheme !== "monochrome" ? {
+      fill: thought.isRevision ? getMermaidColor("warning", scheme) : getMermaidColor("primary", scheme)
+    } : void 0
+  });
   if (thought.buildUpon && thought.buildUpon.length > 0) {
-    mermaid += "\n";
     for (const depId of thought.buildUpon) {
       const depNodeId = sanitizeId(depId);
-      mermaid += `  ${depNodeId} --> ${nodeId}
-`;
+      nodes.push({
+        id: depNodeId,
+        label: depNodeId,
+        shape: "rectangle"
+      });
+      edges.push({
+        source: depNodeId,
+        target: nodeId,
+        style: "arrow"
+      });
     }
   }
   if (thought.branchFrom) {
     const branchId = sanitizeId(thought.branchFrom);
-    mermaid += `  ${branchId} -.->|branch| ${nodeId}
-`;
+    edges.push({
+      source: branchId,
+      target: nodeId,
+      style: "dotted",
+      label: "branch"
+    });
   }
   if (thought.revisesThought) {
     const revisedId = sanitizeId(thought.revisesThought);
-    mermaid += `  ${revisedId} ==>|revises| ${nodeId}
-`;
+    edges.push({
+      source: revisedId,
+      target: nodeId,
+      style: "thick",
+      label: "revises"
+    });
   }
-  if (colorScheme !== "monochrome") {
-    mermaid += "\n";
-    const color = thought.isRevision ? colorScheme === "pastel" ? "#fff3e0" : "#ffd699" : colorScheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
-    mermaid += `  style ${nodeId} fill:${color}
-`;
-  }
-  return mermaid;
+  return generateMermaidFlowchart(nodes, edges, { direction: "TD", colorScheme: scheme });
 }
 function sequentialToDOT(thought, includeLabels) {
-  let dot = "digraph SequentialDependency {\n";
-  dot += "  rankdir=TD;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
+  const nodes = [];
+  const edges = [];
   const nodeId = sanitizeId(thought.id);
-  const label = includeLabels ? thought.content.substring(0, 50) + "..." : nodeId;
-  dot += `  ${nodeId} [label="${label}"];
-`;
+  const label = includeLabels ? truncateDotLabel(thought.content, 50) : nodeId;
+  nodes.push({
+    id: nodeId,
+    label,
+    shape: thought.isRevision ? "hexagon" : "box",
+    style: ["rounded", "filled"],
+    fillColor: thought.isRevision ? "#ffd699" : "#a8d5ff"
+  });
   if (thought.buildUpon && thought.buildUpon.length > 0) {
     for (const depId of thought.buildUpon) {
       const depNodeId = sanitizeId(depId);
-      dot += `  ${depNodeId} -> ${nodeId};
-`;
+      nodes.push({
+        id: depNodeId,
+        label: depNodeId,
+        shape: "box",
+        style: "rounded"
+      });
+      edges.push({
+        source: depNodeId,
+        target: nodeId
+      });
     }
   }
   if (thought.branchFrom) {
     const branchId = sanitizeId(thought.branchFrom);
-    dot += `  ${branchId} -> ${nodeId} [style=dashed, label="branch"];
-`;
+    edges.push({
+      source: branchId,
+      target: nodeId,
+      style: "dashed",
+      label: "branch"
+    });
   }
   if (thought.revisesThought) {
     const revisedId = sanitizeId(thought.revisesThought);
-    dot += `  ${revisedId} -> ${nodeId} [style=bold, label="revises"];
-`;
+    edges.push({
+      source: revisedId,
+      target: nodeId,
+      style: "bold",
+      label: "revises"
+    });
   }
-  dot += "}\n";
-  return dot;
+  return generateDotGraph(nodes, edges, {
+    graphName: "SequentialDependency",
+    rankDir: "TB",
+    nodeDefaults: { shape: "box", style: "rounded" }
+  });
 }
 function sequentialToASCII(thought) {
-  let ascii = "Sequential Dependency Graph:\n";
-  ascii += "============================\n\n";
-  ascii += `Current Thought: ${thought.id}
-`;
-  ascii += `Content: ${thought.content.substring(0, 100)}...
-
-`;
+  const lines = [];
+  lines.push(generateAsciiHeader("Sequential Dependency Graph", "equals"));
+  lines.push("");
+  lines.push(`Current Thought: ${thought.id}`);
+  lines.push(`Content: ${thought.content.substring(0, 100)}...`);
+  lines.push("");
   if (thought.buildUpon && thought.buildUpon.length > 0) {
-    ascii += "Builds Upon:\n";
-    for (const depId of thought.buildUpon) {
-      ascii += `  \u2193 ${depId}
-`;
-    }
-    ascii += "\n";
+    lines.push(generateAsciiSectionHeader("Builds Upon"));
+    lines.push(generateAsciiBulletList(
+      thought.buildUpon.map((depId) => `\u2193 ${depId}`),
+      "asciiBullet",
+      0
+    ));
+    lines.push("");
   }
   if (thought.branchFrom) {
-    ascii += `Branches From: ${thought.branchFrom}
-`;
+    lines.push(generateAsciiSectionHeader("Branch Information"));
+    lines.push(`  Branches From: ${thought.branchFrom}`);
     if (thought.branchId) {
-      ascii += `Branch ID: ${thought.branchId}
-`;
+      lines.push(`  Branch ID: ${thought.branchId}`);
     }
-    ascii += "\n";
+    lines.push("");
   }
   if (thought.revisesThought) {
-    ascii += `Revises: ${thought.revisesThought}
-`;
+    lines.push(generateAsciiSectionHeader("Revision Information"));
+    lines.push(`  Revises: ${thought.revisesThought}`);
     if (thought.revisionReason) {
-      ascii += `Reason: ${thought.revisionReason}
-`;
+      lines.push(`  Reason: ${thought.revisionReason}`);
     }
-    ascii += "\n";
+    lines.push("");
   }
-  return ascii;
+  return lines.join("\n");
 }
 function sequentialToSVG(thought, options) {
   const {
@@ -7196,6 +7583,9 @@ var init_sequential = __esm({
   "src/export/visual/sequential.ts"() {
     init_esm_shims();
     init_utils();
+    init_mermaid_utils();
+    init_dot_utils();
+    init_ascii_utils();
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
