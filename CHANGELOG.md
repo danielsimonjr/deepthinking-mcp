@@ -55,6 +55,10 @@ All 10 visual export formats now have dedicated shared utility modules:
 9. `uml-utils.ts` - PlantUML diagrams
 10. `json-utils.ts` - JSON visual graphs
 
+#### Refactored Exporters
+Updated visual exporters to use the shared utility modules:
+- `sequential.ts` - Refactored to use mermaid-utils, dot-utils, ascii-utils
+
 ---
 
 **Modelica, UML, and JSON Export Support for All Visual Exporters**
