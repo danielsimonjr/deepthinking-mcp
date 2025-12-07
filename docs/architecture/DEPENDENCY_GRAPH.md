@@ -9,36 +9,26 @@ This document provides a comprehensive dependency graph of all files, components
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Analytics Dependencies](#analytics-dependencies)
-3. [Backup Dependencies](#backup-dependencies)
-4. [Batch Dependencies](#batch-dependencies)
-5. [Cache Dependencies](#cache-dependencies)
-6. [Collaboration Dependencies](#collaboration-dependencies)
-7. [Comparison Dependencies](#comparison-dependencies)
-8. [Config Dependencies](#config-dependencies)
-9. [Export Dependencies](#export-dependencies)
-10. [Entry Dependencies](#entry-dependencies)
-11. [Interfaces Dependencies](#interfaces-dependencies)
-12. [Ml Dependencies](#ml-dependencies)
-13. [Modes Dependencies](#modes-dependencies)
-14. [Proof Dependencies](#proof-dependencies)
-15. [Rate limit Dependencies](#rate-limit-dependencies)
-16. [Repositories Dependencies](#repositories-dependencies)
-17. [Search Dependencies](#search-dependencies)
-18. [Services Dependencies](#services-dependencies)
-19. [Session Dependencies](#session-dependencies)
-20. [Taxonomy Dependencies](#taxonomy-dependencies)
-21. [Templates Dependencies](#templates-dependencies)
-22. [Tools Dependencies](#tools-dependencies)
-23. [Types Dependencies](#types-dependencies)
-24. [Utils Dependencies](#utils-dependencies)
-25. [Validation Dependencies](#validation-dependencies)
-26. [Visualization Dependencies](#visualization-dependencies)
-27. [Webhooks Dependencies](#webhooks-dependencies)
-28. [Dependency Matrix](#dependency-matrix)
-29. [Circular Dependency Analysis](#circular-dependency-analysis)
-30. [Visual Dependency Graph](#visual-dependency-graph)
-31. [Summary Statistics](#summary-statistics)
+2. [Cache Dependencies](#cache-dependencies)
+3. [Config Dependencies](#config-dependencies)
+4. [Export Dependencies](#export-dependencies)
+5. [Entry Dependencies](#entry-dependencies)
+6. [Interfaces Dependencies](#interfaces-dependencies)
+7. [Modes Dependencies](#modes-dependencies)
+8. [Proof Dependencies](#proof-dependencies)
+9. [Repositories Dependencies](#repositories-dependencies)
+10. [Search Dependencies](#search-dependencies)
+11. [Services Dependencies](#services-dependencies)
+12. [Session Dependencies](#session-dependencies)
+13. [Taxonomy Dependencies](#taxonomy-dependencies)
+14. [Tools Dependencies](#tools-dependencies)
+15. [Types Dependencies](#types-dependencies)
+16. [Utils Dependencies](#utils-dependencies)
+17. [Validation Dependencies](#validation-dependencies)
+18. [Dependency Matrix](#dependency-matrix)
+19. [Circular Dependency Analysis](#circular-dependency-analysis)
+20. [Visual Dependency Graph](#visual-dependency-graph)
+21. [Summary Statistics](#summary-statistics)
 
 ---
 
@@ -46,161 +36,22 @@ This document provides a comprehensive dependency graph of all files, components
 
 The codebase is organized into the following modules:
 
-- **analytics**: 2 files
-- **backup**: 4 files
-- **batch**: 3 files
 - **cache**: 6 files
-- **collaboration**: 5 files
-- **comparison**: 5 files
 - **config**: 1 file
 - **export**: 27 files
 - **entry**: 1 file
 - **interfaces**: 2 files
-- **ml**: 4 files
 - **modes**: 7 files
 - **proof**: 8 files
-- **rate-limit**: 4 files
 - **repositories**: 4 files
 - **search**: 5 files
 - **services**: 5 files
 - **session**: 7 files
 - **taxonomy**: 7 files
-- **templates**: 4 files
 - **tools**: 16 files
 - **types**: 21 files
-- **utils**: 8 files
+- **utils**: 6 files
 - **validation**: 35 files
-- **visualization**: 5 files
-- **webhooks**: 5 files
-
----
-
-## Analytics Dependencies
-
-### `src/analytics/index.ts` - Analytics Module Exports (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./engine.js` | `AnalyticsEngine` | Re-export |
-| `./dashboard.js` | `AnalyticsDashboard` | Re-export |
-| `./time-series.js` | `TimeSeriesAnalyzer` | Re-export |
-| `./quality-metrics.js` | `QualityMetrics` | Re-export |
-| `./distribution.js` | `DistributionAnalyzer` | Re-export |
-
-**Exports:**
-- Re-exports: `AnalyticsEngine`, `AnalyticsDashboard`, `TimeSeriesAnalyzer`, `QualityMetrics`, `DistributionAnalyzer`
-
----
-
-### `src/analytics/types.ts` - Analytics Types (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `ThinkingMode` | Import (type-only) |
-
----
-
-## Backup Dependencies
-
-### `src/backup/backup-manager.ts` - Backup Manager (v3.4.0)
-
-**Node.js Built-in Dependencies:**
-| Module | Import |
-|--------|--------|
-| `crypto` | `crypto` |
-| `zlib` | `zlib` |
-| `util` | `promisify` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `BackupConfig, BackupRecord, BackupProviderOptions, BackupManifest, BackupValidation, BackupStats, BackupType, BackupProvider, RestoreOptions, RestoreResult, RestoreProgress, CompressionFormat` | Import (type-only) |
-| `./providers/local.js` | `LocalBackupProvider` | Import |
-| `../interfaces/ILogger.js` | `ILogger` | Import |
-| `../utils/logger.js` | `createLogger, LogLevel` | Import |
-
-**Exports:**
-- Classes: `BackupManager`
-
----
-
-### `src/backup/index.ts` - Backup and Restore System Exports (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./backup-manager.js` | `BackupManager` | Re-export |
-| `./providers/local.js` | `LocalBackupProvider` | Re-export |
-
-**Exports:**
-- Re-exports: `BackupManager`, `LocalBackupProvider`
-
----
-
-### `src/backup/providers/local.ts` - Local File System Backup Provider (v3.4.0)
-
-**Node.js Built-in Dependencies:**
-| Module | Import |
-|--------|--------|
-| `fs/promises` | `fs` |
-| `path` | `path` |
-| `crypto` | `crypto` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types.js` | `LocalBackupOptions, BackupManifest` | Import (type-only) |
-
-**Exports:**
-- Classes: `LocalBackupProvider`
-
----
-
-### `src/backup/types.ts` - Backup and Restore System Types (v3.4.0)
-
----
-
-## Batch Dependencies
-
-### `src/batch/index.ts` - Batch Processing Module Exports (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./processor.js` | `BatchProcessor` | Re-export |
-
-**Exports:**
-- Re-exports: `BatchProcessor`
-
----
-
-### `src/batch/processor.ts` - Batch Processor (v3.4.0)
-
-**Node.js Built-in Dependencies:**
-| Module | Import |
-|--------|--------|
-| `crypto` | `randomUUID` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `BatchJob, BatchJobType, BatchJobParams, BatchJobResult, BatchProcessorOptions` | Import (type-only) |
-| `../interfaces/ILogger.js` | `ILogger` | Import |
-| `../utils/logger.js` | `createLogger, LogLevel` | Import |
-| `../session/manager.js` | `SessionManager` | Import (type-only) |
-| `../services/ExportService.js` | `ExportService` | Import (type-only) |
-| `../backup/backup-manager.js` | `BackupManager` | Import (type-only) |
-| `../search/engine.js` | `SearchEngine` | Import (type-only) |
-
-**Exports:**
-- Classes: `BatchProcessor`
-- Interfaces: `BatchProcessorDependencies`
-
----
-
-### `src/batch/types.ts` - Batch Processing Types (v3.4.0)
 
 ---
 
@@ -274,138 +125,6 @@ The codebase is organized into the following modules:
 ---
 
 ### `src/cache/types.ts` - Cache Types (v3.4.0)
-
----
-
-## Collaboration Dependencies
-
-### `src/collaboration/annotations.ts` - Collaborative Annotations (v3.4.0)
-
-**Exports:**
-- Classes: `AnnotationManager`
-- Interfaces: `TextRange`, `Annotation`, `AnnotationVote`, `AnnotationFilter`, `AnnotationThread`, `AnnotationStats`
-
----
-
-### `src/collaboration/conflict-resolution.ts` - Conflict Resolution for Divergent Thoughts (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `Thought` | Import (type-only) |
-| `../types/core.js` | `ThinkingMode` | Import (type-only) |
-
-**Exports:**
-- Classes: `ConflictResolutionManager`
-- Interfaces: `DivergentThought`, `ThoughtConflict`, `ConflictResolution`, `ResolutionVote`, `ConsensusRequirement`, `Evidence`
-
----
-
-### `src/collaboration/index.ts` - Collaboration Module - Index
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./multi-agent.js` | `MultiAgentCollaboration, type CollaborativeAgent, type CollaborativeWorkspace, type AgentMessage, type AgentAssignment, type CoordinationRule, type AgentRole, type AgentStatus, type MessageType` | Re-export |
-| `./session-sharing.js` | `SessionSharingManager, type SharedSession, type SessionComment, type MergeStrategy, type MergeMetadata, type MergeConflict, type ConflictType` | Re-export |
-| `./annotations.js` | `AnnotationManager, type Annotation, type AnnotationType, type HighlightColor, type AnnotationVisibility, type TextRange, type AnnotationVote, type AnnotationFilter, type AnnotationThread, type AnnotationStats` | Re-export |
-| `./conflict-resolution.js` | `ConflictResolutionManager, type ThoughtConflict, type ConflictResolution, type DivergentThought, type ResolutionVote, type ResolutionStrategy, type ResolutionStatus, type ConflictSeverity, type ConflictCategory, type ConsensusRequirement, type Evidence` | Re-export |
-
-**Exports:**
-- Re-exports: `MultiAgentCollaboration`, `type CollaborativeAgent`, `type CollaborativeWorkspace`, `type AgentMessage`, `type AgentAssignment`, `type CoordinationRule`, `type AgentRole`, `type AgentStatus`, `type MessageType`, `SessionSharingManager`, `type SharedSession`, `type SessionComment`, `type MergeStrategy`, `type MergeMetadata`, `type MergeConflict`, `type ConflictType`, `AnnotationManager`, `type Annotation`, `type AnnotationType`, `type HighlightColor`, `type AnnotationVisibility`, `type TextRange`, `type AnnotationVote`, `type AnnotationFilter`, `type AnnotationThread`, `type AnnotationStats`, `ConflictResolutionManager`, `type ThoughtConflict`, `type ConflictResolution`, `type DivergentThought`, `type ResolutionVote`, `type ResolutionStrategy`, `type ResolutionStatus`, `type ConflictSeverity`, `type ConflictCategory`, `type ConsensusRequirement`, `type Evidence`
-
----
-
-### `src/collaboration/multi-agent.ts` - Multi-Agent Collaboration Infrastructure (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `Thought` | Import (type-only) |
-| `../types/core.js` | `ThinkingMode` | Import (type-only) |
-
-**Exports:**
-- Classes: `MultiAgentCollaboration`
-- Interfaces: `CollaborativeAgent`, `AgentMessage`, `CollaborativeWorkspace`, `CoordinationRule`, `AgentAssignment`
-
----
-
-### `src/collaboration/session-sharing.ts` - Session Sharing and Merging (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `ThinkingSession, Thought` | Import (type-only) |
-| `../types/core.js` | `ThinkingMode` | Import (type-only) |
-
-**Exports:**
-- Classes: `SessionSharingManager`
-- Interfaces: `MergeConflict`, `MergeMetadata`, `SharedSession`, `SessionComment`
-
----
-
-## Comparison Dependencies
-
-### `src/comparison/comparator.ts` - Session Comparator (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `ComparisonResult, Difference, ComparisonSummary, ComparisonMetrics, DiffOptions, SimilarityMetrics, ThoughtComparison` | Import (type-only) |
-| `../types/session.js` | `ThinkingSession` | Import (type-only) |
-
-**Exports:**
-- Classes: `SessionComparator`
-
----
-
-### `src/comparison/diff-generator.ts` - Diff Generator (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `TextDiff, ComparisonTimeline, TimelineEvent, DivergencePoint, ConvergencePoint` | Import (type-only) |
-| `../types/session.js` | `ThinkingSession` | Import (type-only) |
-
-**Exports:**
-- Classes: `DiffGenerator`
-
----
-
-### `src/comparison/index.ts` - Session Comparison Exports (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./comparator.js` | `SessionComparator` | Re-export |
-| `./multi-comparator.js` | `MultiSessionComparator` | Re-export |
-| `./diff-generator.js` | `DiffGenerator` | Re-export |
-
-**Exports:**
-- Re-exports: `SessionComparator`, `MultiSessionComparator`, `DiffGenerator`
-
----
-
-### `src/comparison/multi-comparator.ts` - Multi-Session Comparator (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `MultiSessionComparison, SessionCluster, ComparisonResult` | Import (type-only) |
-| `../types/session.js` | `ThinkingSession` | Import (type-only) |
-| `./comparator.js` | `SessionComparator` | Import |
-
-**Exports:**
-- Classes: `MultiSessionComparator`
-
----
-
-### `src/comparison/types.ts` - Session Comparison Types (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/core.js` | `ThinkingMode` | Import (type-only) |
 
 ---
 
@@ -883,66 +602,6 @@ The codebase is organized into the following modules:
 
 ---
 
-## Ml Dependencies
-
-### `src/ml/index.ts` - Machine Learning Module (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./pattern-recognition.js` | `PatternRecognizer` | Re-export |
-| `./success-metrics.js` | `SuccessMetricsAnalyzer` | Re-export |
-| `./recommendation-engine.js` | `RecommendationEngine` | Re-export |
-
-**Exports:**
-- Re-exports: `PatternRecognizer`, `SuccessMetricsAnalyzer`, `RecommendationEngine`
-
----
-
-### `src/ml/pattern-recognition.ts` - Pattern Recognition System (v3.4.1)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/session.js` | `ThinkingSession` | Import (type-only) |
-| `../types/core.js` | `Thought` | Import (type-only) |
-
-**Exports:**
-- Classes: `PatternRecognizer`
-- Interfaces: `Pattern`, `PatternExample`, `PatternMetadata`, `PatternRecognitionResult`, `PatternSimilarity`
-
----
-
-### `src/ml/recommendation-engine.ts` - Recommendation Engine (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/session.js` | `ThinkingSession` | Import (type-only) |
-| `../types/core.js` | `ThinkingMode` | Import (type-only) |
-| `./pattern-recognition.js` | `PatternRecognizer` | Import |
-| `./success-metrics.js` | `SuccessMetricsAnalyzer, SuccessAnalysis, SuccessFactor` | Import |
-
-**Exports:**
-- Classes: `RecommendationEngine`
-- Interfaces: `Recommendation`, `RecommendationRequest`, `RecommendationResult`
-
----
-
-### `src/ml/success-metrics.ts` - Success Metrics Analyzer (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/session.js` | `ThinkingSession` | Import (type-only) |
-| `../types/core.js` | `ThinkingMode` | Import (type-only) |
-
-**Exports:**
-- Classes: `SuccessMetricsAnalyzer`
-- Interfaces: `SuccessMetric`, `SuccessAnalysis`, `SuccessFactor`, `SuccessInsights`
-
----
-
 ## Modes Dependencies
 
 ### `src/modes/constraint-reasoning.ts` - Constraint-Based Reasoning Mode (v3.4.0)
@@ -1150,55 +809,6 @@ The codebase is organized into the following modules:
 - Interfaces: `WarningPattern`
 - Functions: `getPatternsByCategory`, `getPatternsBySeverity`, `checkStatement`, `checkProof`
 - Constants: `DIVISION_BY_HIDDEN_ZERO`, `ASSUMING_CONCLUSION`, `AFFIRMING_CONSEQUENT`, `DENYING_ANTECEDENT`, `HASTY_GENERALIZATION`, `AMBIGUOUS_MIDDLE`, `ILLEGAL_CANCELLATION`, `INFINITY_ARITHMETIC`, `NECESSARY_SUFFICIENT_CONFUSION`, `EXISTENTIAL_INSTANTIATION_ERROR`, `SQRT_SIGN_ERROR`, `LIMIT_EXCHANGE_ERROR`, `ALL_WARNING_PATTERNS`
-
----
-
-## Rate limit Dependencies
-
-### `src/rate-limit/index.ts` - Rate Limiting Module Exports (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./limiter.js` | `RateLimiter` | Re-export |
-| `./quota.js` | `QuotaManager` | Re-export |
-| `./types.js` | `TIER_LIMITS` | Re-export |
-
-**Exports:**
-- Re-exports: `RateLimiter`, `QuotaManager`, `TIER_LIMITS`
-
----
-
-### `src/rate-limit/limiter.ts` - Rate Limiter (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `RateLimitConfig, RateLimitInfo` | Import (type-only) |
-
-**Exports:**
-- Classes: `RateLimiter`
-
----
-
-### `src/rate-limit/quota.ts` - Quota Manager (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `QuotaConfig, QuotaUsage, QuotaStatus, UserTier` | Import (type-only) |
-| `./types.js` | `TIER_LIMITS` | Import |
-
-**Exports:**
-- Classes: `QuotaManager`
-
----
-
-### `src/rate-limit/types.ts` - Rate Limiting Types (v3.4.0)
-
-**Exports:**
-- Interfaces: `RateLimitConfig`, `RateLimitInfo`, `QuotaConfig`, `QuotaFeatures`, `QuotaUsage`, `QuotaStatus`
-- Constants: `TIER_LIMITS`
 
 ---
 
@@ -1630,58 +1240,6 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `TaxonomyLatexExporter`
 - Interfaces: `TaxonomyLatexOptions`
-
----
-
-## Templates Dependencies
-
-### `src/templates/built-in.ts` - Built-in Templates (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `SessionTemplate` | Import (type-only) |
-| `../types/index.js` | `ThinkingMode` | Import |
-
-**Exports:**
-- Functions: `getTemplateById`, `getTemplateIds`, `getTemplatesByCategory`, `getTemplatesByMode`
-- Constants: `BUILT_IN_TEMPLATES`
-
----
-
-### `src/templates/index.ts` - Templates Module Exports (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./manager.js` | `TemplateManager` | Re-export |
-| `./built-in.js` | `BUILT_IN_TEMPLATES, getTemplateById, getTemplateIds, getTemplatesByCategory, getTemplatesByMode` | Re-export |
-
-**Exports:**
-- Re-exports: `TemplateManager`, `BUILT_IN_TEMPLATES`, `getTemplateById`, `getTemplateIds`, `getTemplatesByCategory`, `getTemplatesByMode`
-
----
-
-### `src/templates/manager.ts` - Template Manager (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `SessionTemplate, TemplateQuery, TemplateStats, TemplateInstantiationOptions, TemplateCategory` | Import (type-only) |
-| `../types/index.js` | `ThinkingSession, ThinkingMode` | Import (type-only) |
-| `./built-in.js` | `BUILT_IN_TEMPLATES` | Import |
-
-**Exports:**
-- Classes: `TemplateManager`
-
----
-
-### `src/templates/types.ts` - Template System Types (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `ThinkingMode, SessionConfig` | Import (type-only) |
 
 ---
 
@@ -2269,42 +1827,11 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/utils/rate-limiter.ts` - Rate Limiter (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./errors.js` | `RateLimitError` | Import |
-
-**Exports:**
-- Classes: `RateLimiter`
-- Interfaces: `RateLimiterConfig`, `RateLimitStatus`
-- Constants: `sessionRateLimiter`, `thoughtRateLimiter`
-
----
-
 ### `src/utils/sanitization.ts` - Input sanitization utilities for DeepThinking MCP
 
 **Exports:**
 - Functions: `sanitizeString`, `sanitizeOptionalString`, `validateSessionId`, `sanitizeNumber`, `sanitizeStringArray`, `sanitizeThoughtContent`, `sanitizeTitle`, `sanitizeDomain`, `sanitizeAuthor`, `escapeHtml`, `escapeLatex`
 - Constants: `MAX_LENGTHS`
-
----
-
-### `src/utils/sanitize.ts` - File and Input Sanitization Utilities (v3.4.5)
-
-**Node.js Built-in Dependencies:**
-| Module | Import |
-|--------|--------|
-| `path` | `* as path` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./errors.js` | `PathTraversalError, InputValidationError` | Import |
-
-**Exports:**
-- Functions: `sanitizeFilename`, `validatePath`, `isValidSessionId`, `validateSessionId`, `safePathJoin`, `safeSessionPath`
 
 ---
 
@@ -2840,193 +2367,42 @@ The codebase is organized into the following modules:
 
 ---
 
-## Visualization Dependencies
-
-### `src/visualization/interactive.ts` - Interactive Mermaid Features (v3.3.0)
-
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs` | `mermaid` |
-
-**Exports:**
-- Classes: `InteractiveMermaid`
-- Interfaces: `AnimationConfig`, `EventHandler`
-
----
-
-### `src/visualization/mermaid.ts` - Enhanced Mermaid Diagram Generator (v3.3.0)
-
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs` | `mermaid` |
-
-**Exports:**
-- Classes: `MermaidGenerator`
-- Interfaces: `MermaidConfig`, `InteractiveElement`, `FlowchartNode`, `FlowchartEdge`, `SequenceInteraction`, `StateNode`, `StateTransition`, `MindmapNode`, `GanttTask`
-
----
-
-### `src/visualization/mindmap.ts` - Knowledge Mind Map Generator (v3.3.0)
-
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs` | `mermaid` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/session.js` | `ThinkingSession` | Import (type-only) |
-| `../types/index.js` | `Thought, MathematicsThought, CausalThought, FirstPrinciplesThought` | Import (type-only) |
-| `../types/index.js` | `ThinkingMode` | Import |
-| `./mermaid.js` | `MermaidGenerator, MindmapNode` | Import |
-
-**Exports:**
-- Classes: `KnowledgeMindMap`
-- Interfaces: `KnowledgeNode`
-
----
-
-### `src/visualization/state-charts.ts` - Reasoning State Chart Diagrams (v3.3.0)
-
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs` | `mermaid` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/session.js` | `ThinkingSession` | Import (type-only) |
-| `../types/index.js` | `Thought` | Import (type-only) |
-| `./mermaid.js` | `MermaidGenerator, StateNode, StateTransition` | Import |
-
-**Exports:**
-- Classes: `ReasoningStateChart`
-
----
-
-### `src/visualization/thought-flow.ts` - Thought Flow Visualization (v3.3.0)
-
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs` | `mermaid` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/session.js` | `ThinkingSession` | Import (type-only) |
-| `../types/index.js` | `Thought` | Import (type-only) |
-| `./mermaid.js` | `MermaidGenerator, SequenceInteraction` | Import |
-
-**Exports:**
-- Classes: `ThoughtFlowVisualizer`
-- Functions: `createThoughtFlowPage`
-
----
-
-## Webhooks Dependencies
-
-### `src/webhooks/event-bus.ts` - Event Bus (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `EventBusConfig, EventListener, EventHandler, WebhookEvent, WebhookEventType` | Import (type-only) |
-
-**Exports:**
-- Classes: `EventBus`
-
----
-
-### `src/webhooks/event-emitter.ts` - Event Emitter (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./event-bus.js` | `EventBus` | Import (type-only) |
-| `./webhook-manager.js` | `WebhookManager` | Import (type-only) |
-| `./types.js` | `WebhookEvent, SessionEventData, ThoughtEventData, ValidationEventData, ExportEventData, SearchEventData, AnalyticsEventData` | Import (type-only) |
-
-**Exports:**
-- Classes: `EventEmitter`
-
----
-
-### `src/webhooks/index.ts` - Webhook and Event System Exports (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./event-bus.js` | `EventBus` | Re-export |
-| `./webhook-manager.js` | `WebhookManager` | Re-export |
-| `./event-emitter.js` | `EventEmitter` | Re-export |
-
-**Exports:**
-- Re-exports: `EventBus`, `WebhookManager`, `EventEmitter`
-
----
-
-### `src/webhooks/types.ts` - Webhook and Event System Types (v3.4.0)
-
----
-
-### `src/webhooks/webhook-manager.ts` - Webhook Manager (v3.4.0)
-
-**Node.js Built-in Dependencies:**
-| Module | Import |
-|--------|--------|
-| `crypto` | `crypto` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `WebhookConfig, WebhookEvent, WebhookDelivery, WebhookStats, WebhookStatus, WebhookValidation, WebhookEventType` | Import (type-only) |
-
-**Exports:**
-- Classes: `WebhookManager`
-
----
-
 ## Dependency Matrix
 
 ### File Import/Export Matrix
 
 | File | Imports From | Exports To |
 |------|--------------|------------|
-| `index` | 5 files | 0 files |
-| `types` | 1 files | 0 files |
-| `backup-manager` | 4 files | 2 files |
-| `index` | 2 files | 0 files |
-| `local` | 1 files | 2 files |
-| `types` | 0 files | 2 files |
-| `index` | 1 files | 0 files |
-| `processor` | 7 files | 1 files |
-| `types` | 0 files | 1 files |
 | `factory` | 4 files | 1 files |
 | `fifo` | 1 files | 2 files |
 | `index` | 4 files | 0 files |
 | `lfu` | 1 files | 2 files |
 | `lru` | 1 files | 3 files |
 | `types` | 0 files | 5 files |
-| `annotations` | 0 files | 1 files |
-| `conflict-resolution` | 2 files | 1 files |
-| `index` | 4 files | 0 files |
-| `multi-agent` | 2 files | 1 files |
-| `session-sharing` | 2 files | 1 files |
-| `comparator` | 2 files | 2 files |
-| `diff-generator` | 2 files | 1 files |
-| `index` | 3 files | 0 files |
-| `multi-comparator` | 3 files | 1 files |
-| `types` | 1 files | 3 files |
 | `index` | 0 files | 3 files |
 | `index` | 2 files | 0 files |
 | `latex-mermaid-integration` | 2 files | 0 files |
 | `latex` | 3 files | 1 files |
 | `abductive` | 3 files | 1 files |
+| `analogical` | 3 files | 1 files |
+| `bayesian` | 2 files | 1 files |
+| `causal` | 3 files | 1 files |
+| `counterfactual` | 3 files | 1 files |
+| `evidential` | 3 files | 1 files |
+| `first-principles` | 3 files | 1 files |
+| `formal-logic` | 3 files | 1 files |
+| `game-theory` | 3 files | 1 files |
+| `hybrid` | 3 files | 1 files |
+| `index` | 26 files | 4 files |
+| `mathematics` | 3 files | 1 files |
+| `metareasoning` | 3 files | 1 files |
+| `optimization` | 3 files | 1 files |
+| `physics` | 3 files | 1 files |
+| `proof-decomposition` | 3 files | 1 files |
+| `scientific-method` | 3 files | 1 files |
+| `sequential` | 3 files | 1 files |
+| `shannon` | 3 files | 1 files |
+| `systems-thinking` | 3 files | 1 files |
 
 ---
 
@@ -3059,233 +2435,162 @@ These cycles only involve type imports and are safe (erased at runtime):
 
 ```mermaid
 graph TD
-    subgraph Analytics
-        N0[index]
-        N1[types]
-    end
-
-    subgraph Backup
-        N2[backup-manager]
-        N3[index]
-        N4[local]
-        N5[types]
-    end
-
-    subgraph Batch
-        N6[index]
-        N7[processor]
-        N8[types]
-    end
-
     subgraph Cache
-        N9[factory]
-        N10[fifo]
-        N11[index]
-        N12[lfu]
-        N13[lru]
-        N14[...1 more]
-    end
-
-    subgraph Collaboration
-        N15[annotations]
-        N16[conflict-resolution]
-        N17[index]
-        N18[multi-agent]
-        N19[session-sharing]
-    end
-
-    subgraph Comparison
-        N20[comparator]
-        N21[diff-generator]
-        N22[index]
-        N23[multi-comparator]
-        N24[types]
+        N0[factory]
+        N1[fifo]
+        N2[index]
+        N3[lfu]
+        N4[lru]
+        N5[...1 more]
     end
 
     subgraph Config
-        N25[index]
+        N6[index]
     end
 
     subgraph Export
-        N26[index]
-        N27[latex-mermaid-integration]
-        N28[latex]
-        N29[abductive]
-        N30[analogical]
-        N31[...22 more]
+        N7[index]
+        N8[latex-mermaid-integration]
+        N9[latex]
+        N10[abductive]
+        N11[analogical]
+        N12[...22 more]
     end
 
     subgraph Entry
-        N32[index]
+        N13[index]
     end
 
     subgraph Interfaces
-        N33[ILogger]
-        N34[index]
-    end
-
-    subgraph Ml
-        N35[index]
-        N36[pattern-recognition]
-        N37[recommendation-engine]
-        N38[success-metrics]
+        N14[ILogger]
+        N15[index]
     end
 
     subgraph Modes
-        N39[constraint-reasoning]
-        N40[mathematics-reasoning]
-        N41[meta-reasoning]
-        N42[modal-reasoning]
-        N43[optimization-reasoning]
-        N44[...2 more]
+        N16[constraint-reasoning]
+        N17[mathematics-reasoning]
+        N18[meta-reasoning]
+        N19[modal-reasoning]
+        N20[optimization-reasoning]
+        N21[...2 more]
     end
 
     subgraph Proof
-        N45[assumption-tracker]
-        N46[circular-detector]
-        N47[decomposer]
-        N48[dependency-graph]
-        N49[gap-analyzer]
-        N50[...3 more]
-    end
-
-    subgraph Rate-limit
-        N51[index]
-        N52[limiter]
-        N53[quota]
-        N54[types]
+        N22[assumption-tracker]
+        N23[circular-detector]
+        N24[decomposer]
+        N25[dependency-graph]
+        N26[gap-analyzer]
+        N27[...3 more]
     end
 
     subgraph Repositories
-        N55[FileSessionRepository]
-        N56[ISessionRepository]
-        N57[MemorySessionRepository]
-        N58[index]
+        N28[FileSessionRepository]
+        N29[ISessionRepository]
+        N30[MemorySessionRepository]
+        N31[index]
     end
 
     subgraph Search
-        N59[engine]
-        N60[index.export]
-        N61[index]
-        N62[tokenizer]
-        N63[types]
+        N32[engine]
+        N33[index.export]
+        N34[index]
+        N35[tokenizer]
+        N36[types]
     end
 
     subgraph Services
-        N64[ExportService]
-        N65[MetaMonitor]
-        N66[ModeRouter]
-        N67[ThoughtFactory]
-        N68[index]
+        N37[ExportService]
+        N38[MetaMonitor]
+        N39[ModeRouter]
+        N40[ThoughtFactory]
+        N41[index]
     end
 
     subgraph Session
-        N69[SessionMetricsCalculator]
-        N70[index]
-        N71[manager]
-        N72[persistence]
-        N73[file-store]
-        N74[...2 more]
+        N42[SessionMetricsCalculator]
+        N43[index]
+        N44[manager]
+        N45[persistence]
+        N46[file-store]
+        N47[...2 more]
     end
 
     subgraph Taxonomy
-        N75[adaptive-selector]
-        N76[classifier]
-        N77[multi-modal-analyzer]
-        N78[navigator]
-        N79[reasoning-types]
-        N80[...2 more]
-    end
-
-    subgraph Templates
-        N81[built-in]
-        N82[index]
-        N83[manager]
-        N84[types]
+        N48[adaptive-selector]
+        N49[classifier]
+        N50[multi-modal-analyzer]
+        N51[navigator]
+        N52[reasoning-types]
+        N53[...2 more]
     end
 
     subgraph Tools
-        N85[definitions]
-        N86[json-schemas]
-        N87[base]
-        N88[index]
-        N89[analytical]
-        N90[...11 more]
+        N54[definitions]
+        N55[json-schemas]
+        N56[base]
+        N57[index]
+        N58[analytical]
+        N59[...11 more]
     end
 
     subgraph Types
-        N91[core]
-        N92[index]
-        N93[analogical]
-        N94[bayesian]
-        N95[causal]
-        N96[...16 more]
+        N60[core]
+        N61[index]
+        N62[analogical]
+        N63[bayesian]
+        N64[causal]
+        N65[...16 more]
     end
 
     subgraph Utils
-        N97[errors]
-        N98[log-sanitizer]
-        N99[logger-types]
-        N100[logger]
-        N101[rate-limiter]
-        N102[...3 more]
+        N66[errors]
+        N67[log-sanitizer]
+        N68[logger-types]
+        N69[logger]
+        N70[sanitization]
+        N71[...1 more]
     end
 
     subgraph Validation
-        N103[cache]
-        N104[constants]
-        N105[index]
-        N106[schemas]
-        N107[validator]
-        N108[...30 more]
+        N72[cache]
+        N73[constants]
+        N74[index]
+        N75[schemas]
+        N76[validator]
+        N77[...30 more]
     end
 
-    subgraph Visualization
-        N109[interactive]
-        N110[mermaid]
-        N111[mindmap]
-        N112[state-charts]
-        N113[thought-flow]
-    end
-
-    subgraph Webhooks
-        N114[event-bus]
-        N115[event-emitter]
-        N116[index]
-        N117[types]
-        N118[webhook-manager]
-    end
-
-    N1 --> N92
-    N2 --> N5
+    N0 --> N4
+    N0 --> N3
+    N0 --> N1
     N2 --> N4
-    N2 --> N33
-    N2 --> N100
-    N3 --> N2
-    N3 --> N4
-    N4 --> N5
-    N6 --> N7
-    N7 --> N8
-    N7 --> N33
-    N7 --> N100
-    N7 --> N71
-    N7 --> N64
-    N7 --> N2
-    N7 --> N59
-    N9 --> N13
-    N9 --> N12
-    N9 --> N10
-    N11 --> N13
-    N11 --> N12
-    N11 --> N10
-    N11 --> N9
-    N16 --> N92
-    N16 --> N91
-    N17 --> N18
-    N17 --> N19
-    N17 --> N15
-    N17 --> N16
-    N18 --> N92
+    N2 --> N3
+    N2 --> N1
+    N2 --> N0
+    N7 --> N9
+    N8 --> N61
+    N9 --> N61
+    N10 --> N61
+    N11 --> N61
+    N13 --> N54
+    N13 --> N43
+    N13 --> N61
+    N13 --> N41
+    N14 --> N68
+    N15 --> N14
+    N16 --> N61
+    N17 --> N24
+    N17 --> N26
+    N17 --> N22
+    N17 --> N23
+    N18 --> N61
+    N18 --> N60
+    N19 --> N61
+    N24 --> N25
+    N28 --> N29
+    N28 --> N61
+    N28 --> N69
 ```
 
 ---
@@ -3294,17 +2599,17 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 201 |
-| Total Modules | 26 |
-| Total Lines of Code | 58704 |
-| Total Exports | 608 |
-| Total Re-exports | 251 |
-| Total Classes | 114 |
-| Total Interfaces | 446 |
-| Total Functions | 132 |
-| Total Type Guards | 50 |
+| Total TypeScript Files | 158 |
+| Total Modules | 16 |
+| Total Lines of Code | 42551 |
+| Total Exports | 505 |
+| Total Re-exports | 188 |
+| Total Classes | 89 |
+| Total Interfaces | 314 |
+| Total Functions | 121 |
+| Total Type Guards | 49 |
 | Total Enums | 3 |
-| Type-only Imports | 165 |
+| Type-only Imports | 121 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 31 |
 

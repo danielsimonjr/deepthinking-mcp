@@ -15,8 +15,6 @@
       "@modes/*": ["src/modes/*"],
       "@session/*": ["src/session/*"],
       "@search/*": ["src/search/*"],
-      "@batch/*": ["src/batch/*"],
-      "@backup/*": ["src/backup/*"],
       "@cache/*": ["src/cache/*"],
       "@export/*": ["src/export/*"],
       "@taxonomy/*": ["src/taxonomy/*"]
