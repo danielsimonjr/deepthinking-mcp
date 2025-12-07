@@ -9,6 +9,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ Features
 
+**Algorithmic Reasoning Mode (Phase 12 - CLRS Comprehensive Coverage)**
+
+Added new ALGORITHMIC reasoning mode with comprehensive coverage of algorithms from "Introduction to Algorithms" (CLRS) and beyond, bringing the total to 29 thinking modes.
+
+#### New Algorithmic Mode
+- `src/types/modes/algorithmic.ts` - Complete type definitions for:
+  - **Algorithm Design Patterns**: divide-and-conquer, dynamic programming, greedy, backtracking, branch-and-bound, randomized, approximation
+  - **Complexity Analysis**: time complexity (best/average/worst case), space complexity, amortized analysis
+  - **Correctness Proofs**: loop invariants, induction, termination arguments
+  - **Recurrence Relations**: Master theorem, substitution method, recursion tree analysis
+  - **Dynamic Programming Formulations**: state space, recurrence, computation order, reconstruction
+  - **Greedy Proofs**: greedy choice property, optimal substructure, exchange arguments
+  - **Graph Algorithm Context**: directed/undirected, weighted, representation types
+  - **Data Structure Specifications**: operations, complexities, invariants, augmentation
+  - **Amortized Analysis**: aggregate, accounting, and potential methods
+  - **CLRS Algorithm Categories**: All 7 parts covering foundations, sorting, data structures, design techniques, graph algorithms, and selected topics
+  - **100+ Named Algorithms**: From insertion sort to FFT, Dijkstra to KMP, RSA to convex hull
+
+- Helper functions:
+  - `suggestDesignPattern()` - Recommend design pattern based on problem characteristics
+  - `applyMasterTheorem()` - Apply Master Theorem for recurrence solving
+  - `COMMON_RECURRENCES` - Reference for common recurrence patterns
+
+#### Recommendation Engine Updates
+- Added ALGORITHMIC mode to `recommendModes()` with domain-aware scoring
+- Added 5 new mode combinations:
+  - ALGORITHMIC + COMPUTABILITY - Theoretical algorithm analysis
+  - ALGORITHMIC + OPTIMIZATION - Algorithm performance optimization
+  - ALGORITHMIC + MATHEMATICS - Algorithm correctness proofs
+  - ALGORITHMIC + RECURSIVE - Divide-and-conquer paradigm
+  - ALGORITHMIC + STOCHASTIC - Randomized algorithms
+- Added 100+ `quickRecommend()` mappings covering:
+  - Sorting algorithms (merge-sort, quicksort, heapsort, etc.)
+  - Graph algorithms (BFS, DFS, Dijkstra, Floyd-Warshall, etc.)
+  - Data structures (heap, hash-table, red-black-tree, etc.)
+  - DP problems (LCS, knapsack, edit-distance, etc.)
+  - String algorithms (KMP, Rabin-Karp, suffix-tree)
+  - Computational geometry (convex-hull, closest-pair)
+  - Number theory (GCD, Miller-Rabin, RSA)
+
+#### New Thought Types Added
+- `algorithm_definition` - Formal algorithm specification
+- `complexity_analysis` - Time/space complexity analysis
+- `recurrence_solving` - Recurrence relation solving
+- `correctness_proof` - Algorithm correctness proof
+- `invariant_identification` - Loop/recursion invariant identification
+- `divide_and_conquer` - Divide-and-conquer design
+- `dynamic_programming` - DP formulation
+- `greedy_choice` - Greedy algorithm design
+- `backtracking` - Backtracking exploration
+- `branch_and_bound` - Branch-and-bound optimization
+- `randomized_analysis` - Randomized algorithm analysis
+- `amortized_analysis` - Amortized cost analysis
+- `data_structure_design` - Custom data structure design
+- `graph_traversal` - Graph traversal analysis
+- `shortest_path` - Shortest path algorithms
+- `minimum_spanning_tree` - MST algorithms
+- `network_flow` - Max flow/min cut
+- `string_matching` - Pattern matching
+- `computational_geometry` - Geometric algorithms
+- `approximation` - Approximation algorithms
+
 **Historical Computing Pioneers Extensions (Phase 11 - Turing & von Neumann)**
 
 Added new reasoning modes inspired by the foundational work of Alan Turing and John von Neumann, bringing the total to 27 thinking modes.

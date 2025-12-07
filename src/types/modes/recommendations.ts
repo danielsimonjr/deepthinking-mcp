@@ -390,6 +390,34 @@ export class ModeRecommender {
       });
     }
 
+    // Algorithmic reasoning - for algorithm design, analysis, and optimization
+    if (characteristics.domain === 'computer science' ||
+        characteristics.domain === 'algorithms' ||
+        characteristics.domain === 'data structures' ||
+        characteristics.domain === 'software' ||
+        (characteristics.requiresProof && characteristics.requiresQuantification)) {
+      recommendations.push({
+        mode: ThinkingMode.ALGORITHMIC,
+        score: characteristics.domain === 'algorithms' ? 0.95 : 0.88,
+        reasoning: 'Problem involves algorithm design, complexity analysis, or data structure optimization',
+        strengths: [
+          'Algorithm design patterns (divide-and-conquer, DP, greedy)',
+          'Complexity analysis (time, space, amortized)',
+          'Correctness proofs (loop invariants, induction)',
+          'Data structure selection and analysis',
+          'Graph algorithms and optimization',
+        ],
+        limitations: ['Focused on computational problems', 'Requires algorithmic thinking'],
+        examples: [
+          'Sorting and searching',
+          'Graph traversal (BFS, DFS)',
+          'Dynamic programming formulation',
+          'Shortest path algorithms',
+          'NP-completeness proofs',
+        ],
+      });
+    }
+
     // Sequential reasoning (default fallback)
     if (recommendations.length === 0) {
       recommendations.push({
@@ -655,6 +683,63 @@ export class ModeRecommender {
       });
     }
 
+    // ===== ALGORITHMIC MODE COMBINATIONS (v7.3.0) =====
+
+    // Algorithmic + Computability (for theoretical algorithm analysis)
+    if (characteristics.domain === 'computer science' && characteristics.requiresProof) {
+      combinations.push({
+        modes: [ThinkingMode.ALGORITHMIC, ThinkingMode.COMPUTABILITY],
+        sequence: 'hybrid',
+        rationale: 'Combine algorithm design with computability analysis for theoretical completeness',
+        benefits: ['Algorithm correctness proofs', 'Complexity class analysis', 'Decidability bounds'],
+        synergies: ['Algorithmic design informs complexity', 'Computability proves fundamental limits'],
+      });
+    }
+
+    // Algorithmic + Optimization (for algorithm optimization)
+    if (characteristics.hasAlternatives && characteristics.requiresQuantification) {
+      combinations.push({
+        modes: [ThinkingMode.ALGORITHMIC, ThinkingMode.OPTIMIZATION],
+        sequence: 'sequential',
+        rationale: 'Design algorithm first, then optimize for performance',
+        benefits: ['Correct-by-construction', 'Performance optimization', 'Trade-off analysis'],
+        synergies: ['Algorithm provides baseline', 'Optimization improves constants and bounds'],
+      });
+    }
+
+    // Algorithmic + Mathematics (for algorithm correctness proofs)
+    if (characteristics.requiresProof && characteristics.domain !== 'philosophy') {
+      combinations.push({
+        modes: [ThinkingMode.ALGORITHMIC, ThinkingMode.MATHEMATICS],
+        sequence: 'hybrid',
+        rationale: 'Combine algorithm design with mathematical proof techniques',
+        benefits: ['Rigorous correctness proofs', 'Loop invariant verification', 'Inductive reasoning'],
+        synergies: ['Algorithmic structures guide proof strategy', 'Mathematical rigor ensures correctness'],
+      });
+    }
+
+    // Algorithmic + Recursive (for divide-and-conquer problems)
+    if (characteristics.complexity === 'high' && characteristics.hasAlternatives) {
+      combinations.push({
+        modes: [ThinkingMode.ALGORITHMIC, ThinkingMode.RECURSIVE],
+        sequence: 'parallel',
+        rationale: 'Apply divide-and-conquer paradigm with recursive decomposition',
+        benefits: ['Natural problem decomposition', 'Recurrence solving', 'Subproblem identification'],
+        synergies: ['Algorithmic patterns guide recursion', 'Recursive structure enables Master Theorem'],
+      });
+    }
+
+    // Algorithmic + Stochastic (for randomized algorithms)
+    if (characteristics.uncertainty !== 'low' && characteristics.requiresQuantification) {
+      combinations.push({
+        modes: [ThinkingMode.ALGORITHMIC, ThinkingMode.STOCHASTIC],
+        sequence: 'parallel',
+        rationale: 'Design randomized algorithms with probabilistic analysis',
+        benefits: ['Expected-case analysis', 'Monte Carlo methods', 'Las Vegas algorithms'],
+        synergies: ['Algorithmic framework structures randomization', 'Stochastic analysis proves bounds'],
+      });
+    }
+
     return combinations;
   }
 
@@ -717,9 +802,6 @@ export class ModeRecommender {
       'turing': ThinkingMode.COMPUTABILITY,
       'halting': ThinkingMode.COMPUTABILITY,
       'complexity-class': ThinkingMode.COMPUTABILITY,
-      'algorithm-analysis': ThinkingMode.COMPUTABILITY,
-      'reduction': ThinkingMode.COMPUTABILITY,
-      'np-complete': ThinkingMode.COMPUTABILITY,
       'undecidable': ThinkingMode.COMPUTABILITY,
 
       // Cryptanalytic reasoning
@@ -838,6 +920,153 @@ export class ModeRecommender {
       'disinformation': ThinkingMode.EVIDENTIAL,
       'reasoning-flaw': ThinkingMode.METAREASONING,
       'argument-analysis': ThinkingMode.FORMALLOGIC,
+
+      // ===== ALGORITHMIC REASONING (v7.3.0) - CLRS Coverage =====
+
+      // General algorithm terms
+      'algorithm': ThinkingMode.ALGORITHMIC,
+      'algorithms': ThinkingMode.ALGORITHMIC,
+      'algorithmic': ThinkingMode.ALGORITHMIC,
+      'data-structure': ThinkingMode.ALGORITHMIC,
+      'data-structures': ThinkingMode.ALGORITHMIC,
+      'complexity': ThinkingMode.ALGORITHMIC,
+      'time-complexity': ThinkingMode.ALGORITHMIC,
+      'space-complexity': ThinkingMode.ALGORITHMIC,
+      'big-o': ThinkingMode.ALGORITHMIC,
+      'asymptotic': ThinkingMode.ALGORITHMIC,
+      'correctness-proof': ThinkingMode.ALGORITHMIC,
+      'loop-invariant': ThinkingMode.ALGORITHMIC,
+      'invariant': ThinkingMode.ALGORITHMIC,
+
+      // Design patterns
+      'divide-and-conquer': ThinkingMode.ALGORITHMIC,
+      'dynamic-programming': ThinkingMode.ALGORITHMIC,
+      'dp': ThinkingMode.ALGORITHMIC,
+      'memoization': ThinkingMode.ALGORITHMIC,
+      'greedy-algorithm': ThinkingMode.ALGORITHMIC,
+      'backtracking': ThinkingMode.ALGORITHMIC,
+      'branch-and-bound': ThinkingMode.ALGORITHMIC,
+      'amortized': ThinkingMode.ALGORITHMIC,
+      'amortized-analysis': ThinkingMode.ALGORITHMIC,
+
+      // Sorting algorithms
+      'sorting': ThinkingMode.ALGORITHMIC,
+      'sort': ThinkingMode.ALGORITHMIC,
+      'insertion-sort': ThinkingMode.ALGORITHMIC,
+      'merge-sort': ThinkingMode.ALGORITHMIC,
+      'mergesort': ThinkingMode.ALGORITHMIC,
+      'quicksort': ThinkingMode.ALGORITHMIC,
+      'quick-sort': ThinkingMode.ALGORITHMIC,
+      'heapsort': ThinkingMode.ALGORITHMIC,
+      'heap-sort': ThinkingMode.ALGORITHMIC,
+      'counting-sort': ThinkingMode.ALGORITHMIC,
+      'radix-sort': ThinkingMode.ALGORITHMIC,
+      'bucket-sort': ThinkingMode.ALGORITHMIC,
+      'comparison-sort': ThinkingMode.ALGORITHMIC,
+
+      // Searching and selection
+      'binary-search': ThinkingMode.ALGORITHMIC,
+      'linear-search': ThinkingMode.ALGORITHMIC,
+      'selection-algorithm': ThinkingMode.ALGORITHMIC,
+      'median-of-medians': ThinkingMode.ALGORITHMIC,
+      'order-statistics': ThinkingMode.ALGORITHMIC,
+
+      // Data structures
+      'heap': ThinkingMode.ALGORITHMIC,
+      'binary-heap': ThinkingMode.ALGORITHMIC,
+      'priority-queue': ThinkingMode.ALGORITHMIC,
+      'hash-table': ThinkingMode.ALGORITHMIC,
+      'hashing': ThinkingMode.ALGORITHMIC,
+      'binary-search-tree': ThinkingMode.ALGORITHMIC,
+      'bst': ThinkingMode.ALGORITHMIC,
+      'red-black-tree': ThinkingMode.ALGORITHMIC,
+      'avl-tree': ThinkingMode.ALGORITHMIC,
+      'b-tree': ThinkingMode.ALGORITHMIC,
+      'fibonacci-heap': ThinkingMode.ALGORITHMIC,
+      'union-find': ThinkingMode.ALGORITHMIC,
+      'disjoint-set': ThinkingMode.ALGORITHMIC,
+      'trie': ThinkingMode.ALGORITHMIC,
+      'segment-tree': ThinkingMode.ALGORITHMIC,
+      'fenwick-tree': ThinkingMode.ALGORITHMIC,
+
+      // Graph algorithms
+      'graph-algorithm': ThinkingMode.ALGORITHMIC,
+      'bfs': ThinkingMode.ALGORITHMIC,
+      'breadth-first': ThinkingMode.ALGORITHMIC,
+      'dfs': ThinkingMode.ALGORITHMIC,
+      'depth-first': ThinkingMode.ALGORITHMIC,
+      'topological-sort': ThinkingMode.ALGORITHMIC,
+      'strongly-connected': ThinkingMode.ALGORITHMIC,
+      'scc': ThinkingMode.ALGORITHMIC,
+      'minimum-spanning-tree': ThinkingMode.ALGORITHMIC,
+      'mst': ThinkingMode.ALGORITHMIC,
+      'kruskal': ThinkingMode.ALGORITHMIC,
+      'prim': ThinkingMode.ALGORITHMIC,
+      'dijkstra': ThinkingMode.ALGORITHMIC,
+      'bellman-ford': ThinkingMode.ALGORITHMIC,
+      'floyd-warshall': ThinkingMode.ALGORITHMIC,
+      'shortest-path': ThinkingMode.ALGORITHMIC,
+      'max-flow': ThinkingMode.ALGORITHMIC,
+      'ford-fulkerson': ThinkingMode.ALGORITHMIC,
+      'edmonds-karp': ThinkingMode.ALGORITHMIC,
+      'bipartite-matching': ThinkingMode.ALGORITHMIC,
+
+      // Dynamic programming problems
+      'lcs': ThinkingMode.ALGORITHMIC,
+      'longest-common-subsequence': ThinkingMode.ALGORITHMIC,
+      'edit-distance': ThinkingMode.ALGORITHMIC,
+      'levenshtein': ThinkingMode.ALGORITHMIC,
+      'knapsack': ThinkingMode.ALGORITHMIC,
+      'matrix-chain': ThinkingMode.ALGORITHMIC,
+      'optimal-bst': ThinkingMode.ALGORITHMIC,
+      'rod-cutting': ThinkingMode.ALGORITHMIC,
+      'coin-change': ThinkingMode.ALGORITHMIC,
+
+      // String algorithms
+      'string-matching': ThinkingMode.ALGORITHMIC,
+      'pattern-matching': ThinkingMode.ALGORITHMIC,
+      'kmp': ThinkingMode.ALGORITHMIC,
+      'knuth-morris-pratt': ThinkingMode.ALGORITHMIC,
+      'rabin-karp': ThinkingMode.ALGORITHMIC,
+      'boyer-moore': ThinkingMode.ALGORITHMIC,
+      'suffix-array': ThinkingMode.ALGORITHMIC,
+      'suffix-tree': ThinkingMode.ALGORITHMIC,
+
+      // Computational geometry
+      'convex-hull': ThinkingMode.ALGORITHMIC,
+      'graham-scan': ThinkingMode.ALGORITHMIC,
+      'jarvis-march': ThinkingMode.ALGORITHMIC,
+      'closest-pair': ThinkingMode.ALGORITHMIC,
+      'line-intersection': ThinkingMode.ALGORITHMIC,
+
+      // Number theory algorithms
+      'gcd': ThinkingMode.ALGORITHMIC,
+      'euclidean': ThinkingMode.ALGORITHMIC,
+      'modular-arithmetic': ThinkingMode.ALGORITHMIC,
+      'primality': ThinkingMode.ALGORITHMIC,
+      'miller-rabin': ThinkingMode.ALGORITHMIC,
+      'rsa': ThinkingMode.ALGORITHMIC,
+
+      // Matrix algorithms
+      'strassen': ThinkingMode.ALGORITHMIC,
+      'matrix-multiplication': ThinkingMode.ALGORITHMIC,
+      'matrix-exponentiation': ThinkingMode.ALGORITHMIC,
+
+      // Advanced topics
+      'fft': ThinkingMode.ALGORITHMIC,
+      'fast-fourier': ThinkingMode.ALGORITHMIC,
+      'polynomial-multiplication': ThinkingMode.ALGORITHMIC,
+      'linear-programming': ThinkingMode.ALGORITHMIC,
+      'simplex': ThinkingMode.ALGORITHMIC,
+      'approximation-algorithm': ThinkingMode.ALGORITHMIC,
+      'np-hard': ThinkingMode.ALGORITHMIC,
+      'np-complete': ThinkingMode.ALGORITHMIC,
+
+      // Recurrences and analysis
+      'recurrence': ThinkingMode.ALGORITHMIC,
+      'master-theorem': ThinkingMode.ALGORITHMIC,
+      'recursion-tree': ThinkingMode.ALGORITHMIC,
+      'substitution-method': ThinkingMode.ALGORITHMIC,
     };
 
     return typeMap[problemType.toLowerCase()] || ThinkingMode.SEQUENTIAL;

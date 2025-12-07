@@ -821,7 +821,7 @@ export class SuggestionEngine {
 
   /**
    * Map thinking mode to reasoning type
-   * Supports all 28 reasoning modes (v7.2.0)
+   * Supports all 29 reasoning modes (v7.3.0)
    */
   private mapModeToType(mode: string): string | null {
     const mapping: Record<string, string> = {
@@ -832,10 +832,11 @@ export class SuggestionEngine {
       physics: 'mathematical_constructive_proof',
       hybrid: 'creative_synthesis',
 
-      // Phase 10-11 modes
+      // Phase 10-12 modes
       engineering: 'practical_means_ends',
       computability: 'mathematical_proof_induction',
       cryptanalytic: 'probabilistic_bayesian',
+      algorithmic: 'mathematical_proof_induction', // Phase 12 v7.3.0 - Algorithm analysis
 
       // Advanced runtime modes
       metareasoning: 'critical_evaluation',
