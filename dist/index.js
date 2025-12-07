@@ -6325,7 +6325,15 @@ var init_metareasoning = __esm({
 
 // src/export/visual/proof-decomposition.ts
 function exportProofDecomposition(decomposition, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = 800,
+    svgHeight = 600,
+    nodeSpacing = 120
+  } = options;
   switch (format) {
     case "mermaid":
       return proofDecompositionToMermaid(decomposition, colorScheme, includeLabels, includeMetrics);
@@ -6333,6 +6341,8 @@ function exportProofDecomposition(decomposition, options) {
       return proofDecompositionToDOT(decomposition, includeLabels, includeMetrics);
     case "ascii":
       return proofDecompositionToASCII(decomposition);
+    case "svg":
+      return proofDecompositionToSVG(decomposition, colorScheme, includeLabels, includeMetrics, svgWidth, svgHeight, nodeSpacing);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -6731,6 +6741,259 @@ function buildASCIITree(nodeId, decomposition, depth, visited) {
     result += buildASCIITree(childId, decomposition, depth + 1, visited);
   }
   return result;
+}
+function getSVGColors(type, colorScheme) {
+  if (colorScheme === "monochrome") {
+    return { fill: "#ffffff", stroke: "#333333" };
+  }
+  const colors = colorScheme === "pastel" ? {
+    axiom: { fill: "#c8e6c9", stroke: "#4caf50" },
+    definition: { fill: "#e1bee7", stroke: "#9c27b0" },
+    hypothesis: { fill: "#bbdefb", stroke: "#2196f3" },
+    lemma: { fill: "#fff9c4", stroke: "#ffc107" },
+    derived: { fill: "#e0e0e0", stroke: "#757575" },
+    conclusion: { fill: "#d1c4e9", stroke: "#673ab7" }
+  } : {
+    axiom: { fill: "#81c784", stroke: "#388e3c" },
+    definition: { fill: "#ba68c8", stroke: "#7b1fa2" },
+    hypothesis: { fill: "#64b5f6", stroke: "#1976d2" },
+    lemma: { fill: "#ffd54f", stroke: "#ffa000" },
+    derived: { fill: "#bdbdbd", stroke: "#616161" },
+    conclusion: { fill: "#9575cd", stroke: "#512da8" }
+  };
+  return colors[type] || colors.derived;
+}
+function escapeSVGText(text) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function truncateText(text, maxChars) {
+  if (text.length <= maxChars) return text;
+  return text.substring(0, maxChars - 3) + "...";
+}
+function renderSVGNode(pos, colorScheme) {
+  const colors = getSVGColors(pos.type, colorScheme);
+  const escapedLabel = escapeSVGText(truncateText(pos.label, 30));
+  switch (pos.type) {
+    case "axiom":
+      return `
+    <g class="node node-axiom" data-id="${sanitizeId(pos.id)}">
+      <rect x="${pos.x}" y="${pos.y}" width="${pos.width}" height="${pos.height}"
+            rx="20" ry="20" fill="${colors.fill}" stroke="${colors.stroke}" stroke-width="2"/>
+      <text x="${pos.x + pos.width / 2}" y="${pos.y + pos.height / 2 + 5}"
+            text-anchor="middle" font-family="Arial, sans-serif" font-size="12">${escapedLabel}</text>
+    </g>`;
+    case "hypothesis":
+      return `
+    <g class="node node-hypothesis" data-id="${sanitizeId(pos.id)}">
+      <rect x="${pos.x}" y="${pos.y}" width="${pos.width}" height="${pos.height}"
+            rx="4" ry="4" fill="${colors.fill}" stroke="${colors.stroke}" stroke-width="2"/>
+      <text x="${pos.x + pos.width / 2}" y="${pos.y + pos.height / 2 + 5}"
+            text-anchor="middle" font-family="Arial, sans-serif" font-size="12">${escapedLabel}</text>
+    </g>`;
+    case "conclusion": {
+      const cx = pos.x + pos.width / 2;
+      const cy = pos.y + pos.height / 2;
+      return `
+    <g class="node node-conclusion" data-id="${sanitizeId(pos.id)}">
+      <polygon points="${cx},${pos.y} ${pos.x + pos.width},${cy} ${cx},${pos.y + pos.height} ${pos.x},${cy}"
+               fill="${colors.fill}" stroke="${colors.stroke}" stroke-width="2"/>
+      <text x="${cx}" y="${cy + 5}"
+            text-anchor="middle" font-family="Arial, sans-serif" font-size="12">${escapedLabel}</text>
+    </g>`;
+    }
+    case "lemma": {
+      const hx = pos.x + pos.width / 2;
+      const hy = pos.y + pos.height / 2;
+      const w = pos.width;
+      const h = pos.height;
+      return `
+    <g class="node node-lemma" data-id="${sanitizeId(pos.id)}">
+      <polygon points="${pos.x + w * 0.25},${pos.y} ${pos.x + w * 0.75},${pos.y} ${pos.x + w},${hy} ${pos.x + w * 0.75},${pos.y + h} ${pos.x + w * 0.25},${pos.y + h} ${pos.x},${hy}"
+               fill="${colors.fill}" stroke="${colors.stroke}" stroke-width="2"/>
+      <text x="${hx}" y="${hy + 5}"
+            text-anchor="middle" font-family="Arial, sans-serif" font-size="12">${escapedLabel}</text>
+    </g>`;
+    }
+    case "definition":
+      return `
+    <g class="node node-definition" data-id="${sanitizeId(pos.id)}">
+      <rect x="${pos.x}" y="${pos.y}" width="${pos.width}" height="${pos.height}"
+            rx="4" ry="4" fill="${colors.fill}" stroke="${colors.stroke}" stroke-width="2"/>
+      <rect x="${pos.x + 4}" y="${pos.y + 4}" width="${pos.width - 8}" height="${pos.height - 8}"
+            rx="2" ry="2" fill="none" stroke="${colors.stroke}" stroke-width="1"/>
+      <text x="${pos.x + pos.width / 2}" y="${pos.y + pos.height / 2 + 5}"
+            text-anchor="middle" font-family="Arial, sans-serif" font-size="12">${escapedLabel}</text>
+    </g>`;
+    default:
+      return `
+    <g class="node node-derived" data-id="${sanitizeId(pos.id)}">
+      <rect x="${pos.x}" y="${pos.y}" width="${pos.width}" height="${pos.height}"
+            rx="8" ry="8" fill="${colors.fill}" stroke="${colors.stroke}" stroke-width="2"/>
+      <text x="${pos.x + pos.width / 2}" y="${pos.y + pos.height / 2 + 5}"
+            text-anchor="middle" font-family="Arial, sans-serif" font-size="12">${escapedLabel}</text>
+    </g>`;
+  }
+}
+function renderSVGEdge(fromPos, toPos, label, isDashed = false, color = "#333333") {
+  const fromX = fromPos.x + fromPos.width / 2;
+  const fromY = fromPos.y + fromPos.height;
+  const toX = toPos.x + toPos.width / 2;
+  const toY = toPos.y;
+  const midY = (fromY + toY) / 2;
+  const path2 = `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY - 8}`;
+  const dashStyle = isDashed ? 'stroke-dasharray="5,5"' : "";
+  const labelElement = label ? `<text x="${(fromX + toX) / 2}" y="${midY - 5}" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">${escapeSVGText(label)}</text>` : "";
+  return `
+    <g class="edge">
+      <path d="${path2}" fill="none" stroke="${color}" stroke-width="2" ${dashStyle} marker-end="url(#arrowhead)"/>
+      ${labelElement}
+    </g>`;
+}
+function proofDecompositionToSVG(decomposition, colorScheme, includeLabels, includeMetrics, width, height, nodeSpacing) {
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+  const padding = 40;
+  const layerSpacing = nodeSpacing;
+  const axioms = decomposition.atoms.filter((a) => a.type === "axiom");
+  const hypotheses = decomposition.atoms.filter((a) => a.type === "hypothesis");
+  const derived = decomposition.atoms.filter((a) => a.type === "derived" || a.type === "lemma");
+  const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
+  const nodePositions = /* @__PURE__ */ new Map();
+  let currentY = padding;
+  const layer1 = [...axioms, ...hypotheses];
+  const layer1Width = layer1.length * (nodeWidth + 20) - 20;
+  let startX = (width - layer1Width) / 2;
+  for (const atom of layer1) {
+    const label = includeLabels ? atom.statement : atom.id;
+    nodePositions.set(atom.id, {
+      id: atom.id,
+      x: startX,
+      y: currentY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: atom.type,
+      label
+    });
+    startX += nodeWidth + 20;
+  }
+  currentY += nodeHeight + layerSpacing;
+  const derivedWidth = derived.length * (nodeWidth + 20) - 20;
+  startX = (width - derivedWidth) / 2;
+  for (const atom of derived) {
+    const label = includeLabels ? atom.statement : atom.id;
+    nodePositions.set(atom.id, {
+      id: atom.id,
+      x: startX,
+      y: currentY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: atom.type,
+      label
+    });
+    startX += nodeWidth + 20;
+  }
+  currentY += nodeHeight + layerSpacing;
+  const conclusionsWidth = conclusions.length * (nodeWidth + 20) - 20;
+  startX = (width - conclusionsWidth) / 2;
+  for (const atom of conclusions) {
+    const label = includeLabels ? atom.statement : atom.id;
+    nodePositions.set(atom.id, {
+      id: atom.id,
+      x: startX,
+      y: currentY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: atom.type,
+      label
+    });
+    startX += nodeWidth + 20;
+  }
+  currentY += nodeHeight + padding;
+  const actualHeight = Math.max(height, currentY);
+  let svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${actualHeight}" width="${width}" height="${actualHeight}">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e53935"/>
+    </marker>
+  </defs>
+
+  <style>
+    .title { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; }
+    .section-label { font-family: Arial, sans-serif; font-size: 12px; fill: #666; font-style: italic; }
+    .metrics { font-family: Arial, sans-serif; font-size: 11px; fill: #444; }
+  </style>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#fafafa"/>
+`;
+  if (decomposition.theorem) {
+    svg += `
+  <!-- Title -->
+  <text x="${width / 2}" y="25" text-anchor="middle" class="title">Proof: ${escapeSVGText(truncateText(decomposition.theorem, 60))}</text>
+`;
+  }
+  if (decomposition.dependencies && decomposition.dependencies.edges) {
+    svg += '\n  <!-- Edges -->\n  <g class="edges">';
+    for (const edge of decomposition.dependencies.edges) {
+      const fromPos = nodePositions.get(edge.from);
+      const toPos = nodePositions.get(edge.to);
+      if (fromPos && toPos) {
+        svg += renderSVGEdge(fromPos, toPos, edge.inferenceRule);
+      }
+    }
+    svg += "\n  </g>\n";
+  }
+  if (decomposition.gaps && decomposition.gaps.length > 0) {
+    svg += '\n  <!-- Gap Edges -->\n  <g class="gap-edges">';
+    for (const gap of decomposition.gaps) {
+      const fromPos = nodePositions.get(gap.location.from);
+      const toPos = nodePositions.get(gap.location.to);
+      if (fromPos && toPos) {
+        svg += renderSVGEdge(fromPos, toPos, "GAP: " + truncateText(gap.description, 20), true, "#e53935");
+      }
+    }
+    svg += "\n  </g>\n";
+  }
+  svg += '\n  <!-- Nodes -->\n  <g class="nodes">';
+  for (const [, pos] of nodePositions) {
+    svg += renderSVGNode(pos, colorScheme);
+  }
+  svg += "\n  </g>\n";
+  if (includeMetrics) {
+    const metricsX = width - 180;
+    const metricsY = actualHeight - 100;
+    svg += `
+  <!-- Metrics -->
+  <g class="metrics-panel">
+    <rect x="${metricsX}" y="${metricsY}" width="160" height="90" rx="8" fill="#f5f5f5" stroke="#ddd" stroke-width="1"/>
+    <text x="${metricsX + 10}" y="${metricsY + 20}" class="metrics" font-weight="bold">Metrics</text>
+    <text x="${metricsX + 10}" y="${metricsY + 38}" class="metrics">Completeness: ${(decomposition.completeness * 100).toFixed(0)}%</text>
+    <text x="${metricsX + 10}" y="${metricsY + 54}" class="metrics">Rigor: ${decomposition.rigorLevel}</text>
+    <text x="${metricsX + 10}" y="${metricsY + 70}" class="metrics">Atoms: ${decomposition.atomCount}</text>
+    <text x="${metricsX + 10}" y="${metricsY + 86}" class="metrics">Depth: ${decomposition.maxDependencyDepth}</text>
+  </g>
+`;
+  }
+  svg += `
+  <!-- Legend -->
+  <g class="legend" transform="translate(20, ${actualHeight - 100})">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="11" font-weight="bold">Legend</text>
+    <rect x="0" y="10" width="20" height="12" rx="6" fill="${getSVGColors("axiom", colorScheme).fill}" stroke="${getSVGColors("axiom", colorScheme).stroke}"/>
+    <text x="25" y="20" font-family="Arial, sans-serif" font-size="10">Axiom</text>
+    <rect x="0" y="28" width="20" height="12" rx="2" fill="${getSVGColors("hypothesis", colorScheme).fill}" stroke="${getSVGColors("hypothesis", colorScheme).stroke}"/>
+    <text x="25" y="38" font-family="Arial, sans-serif" font-size="10">Hypothesis</text>
+    <rect x="0" y="46" width="20" height="12" rx="4" fill="${getSVGColors("derived", colorScheme).fill}" stroke="${getSVGColors("derived", colorScheme).stroke}"/>
+    <text x="25" y="56" font-family="Arial, sans-serif" font-size="10">Derived</text>
+    <polygon points="10,64 20,70 10,76 0,70" fill="${getSVGColors("conclusion", colorScheme).fill}" stroke="${getSVGColors("conclusion", colorScheme).stroke}"/>
+    <text x="25" y="74" font-family="Arial, sans-serif" font-size="10">Conclusion</text>
+  </g>
+`;
+  svg += "</svg>";
+  return svg;
 }
 var init_proof_decomposition = __esm({
   "src/export/visual/proof-decomposition.ts"() {
