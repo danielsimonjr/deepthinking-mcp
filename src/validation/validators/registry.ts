@@ -26,6 +26,7 @@ const VALIDATOR_REGISTRY: Record<string, ValidatorConfig> = {
   mathematics: { module: './modes/mathematics.js', className: 'MathematicsValidator' },
   physics: { module: './modes/physics.js', className: 'PhysicsValidator' },
   hybrid: { module: './modes/hybrid.js', className: 'HybridValidator' },
+  engineering: { module: './modes/engineering.js', className: 'EngineeringValidator' }, // Phase 10 v7.1.0
   inductive: { module: './modes/inductive.js', className: 'InductiveValidator' },
   deductive: { module: './modes/deductive.js', className: 'DeductiveValidator' },
   abductive: { module: './modes/abductive.js', className: 'AbductiveValidator' },

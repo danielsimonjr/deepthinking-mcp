@@ -1,6 +1,6 @@
 /**
- * Core type definitions for the DeepThinking MCP server v3.2.0
- * Supports 18 thinking modes: Sequential, Shannon, Mathematics, Physics, Hybrid,
+ * Core type definitions for the DeepThinking MCP server v7.1.0
+ * Supports 19 thinking modes: Sequential, Shannon, Mathematics, Physics, Hybrid, Engineering,
  * Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory, Evidential, FirstPrinciples,
  * SystemsThinking, ScientificMethod, Optimization, FormalLogic
  */
@@ -20,6 +20,9 @@ import type { FormalLogicThought } from './modes/formallogic.js';
 // Import Phase 6 mode types (v6.0.0)
 import type { MetaReasoningThought } from './modes/metareasoning.js';
 
+// Import Phase 10 mode types (v7.1.0)
+import type { EngineeringThought } from './modes/engineering.js';
+
 /**
  * Available thinking modes
  */
@@ -30,6 +33,7 @@ export enum ThinkingMode {
   MATHEMATICS = 'mathematics',
   PHYSICS = 'physics',
   HYBRID = 'hybrid',
+  ENGINEERING = 'engineering', // Phase 10 (v7.1.0) - Engineering analysis
 
   // ===== Implemented - Advanced Modes (Phase 4) =====
   METAREASONING = 'metareasoning', // Phase 4 (v3.3.0) - Self-reflection and strategy selection
@@ -68,6 +72,7 @@ export const FULLY_IMPLEMENTED_MODES: ReadonlyArray<ThinkingMode> = [
   ThinkingMode.MATHEMATICS,
   ThinkingMode.PHYSICS,
   ThinkingMode.HYBRID,
+  ThinkingMode.ENGINEERING, // Phase 10 v7.1.0
   ThinkingMode.METAREASONING,
   ThinkingMode.RECURSIVE,
   ThinkingMode.MODAL,
@@ -755,6 +760,7 @@ export type Thought =
   | MathematicsThought
   | PhysicsThought
   | HybridThought
+  | EngineeringThought
   | InductiveThought
   | DeductiveThought
   | AbductiveThought
@@ -873,6 +879,13 @@ export function isMetaReasoningThought(thought: Thought): thought is MetaReasoni
   return thought.mode === ThinkingMode.METAREASONING;
 }
 
+/**
+ * Type guards for Phase 10 modes (v7.1.0)
+ */
+export function isEngineeringThought(thought: Thought): thought is EngineeringThought {
+  return thought.mode === ThinkingMode.ENGINEERING;
+}
+
 // Re-export Phase 3 types
 export type { TemporalThought, GameTheoryThought, EvidentialThought, FirstPrinciplesThought };
 
@@ -881,3 +894,6 @@ export type { SystemsThinkingThought, ScientificMethodThought, OptimizationThoug
 
 // Re-export Phase 6 types
 export type { MetaReasoningThought };
+
+// Re-export Phase 10 types
+export type { EngineeringThought };

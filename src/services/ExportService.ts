@@ -40,6 +40,7 @@ import {
 import type { MathematicsThought } from '../types/modes/mathematics.js';
 import type { PhysicsThought } from '../types/modes/physics.js';
 import type { MetaReasoningThought } from '../types/modes/metareasoning.js';
+import type { EngineeringThought } from '../types/modes/engineering.js';
 import { VisualExporter, type VisualFormat } from '../export/visual/index.js';
 import { escapeHtml, escapeLatex } from '../utils/sanitization.js';
 import { ILogger } from '../interfaces/ILogger.js';
@@ -321,6 +322,16 @@ export class ExportService {
 
     if (lastThought.mode === ThinkingMode.METAREASONING && 'currentStrategy' in lastThought) {
       return this.visualExporter.exportMetaReasoningVisualization(lastThought as MetaReasoningThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
+      });
+    }
+
+    // Phase 10: Engineering analysis visual export
+    if (lastThought.mode === ThinkingMode.ENGINEERING && 'analysisType' in lastThought) {
+      return this.visualExporter.exportEngineeringAnalysis(lastThought as EngineeringThought, {
         format,
         colorScheme: 'default',
         includeLabels: true,

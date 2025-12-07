@@ -45,6 +45,9 @@ export { exportMetaReasoningVisualization } from './metareasoning.js';
 // Phase 8: Proof decomposition visual export
 export { exportProofDecomposition } from './proof-decomposition.js';
 
+// Phase 10: Engineering visual export
+export { exportEngineeringAnalysis } from './engineering.js';
+
 // Import types for unified class
 import type {
   CausalThought,
@@ -67,6 +70,7 @@ import type {
 import type { MathematicsThought, ProofDecomposition } from '../../types/modes/mathematics.js';
 import type { PhysicsThought } from '../../types/modes/physics.js';
 import type { MetaReasoningThought } from '../../types/modes/metareasoning.js';
+import type { EngineeringThought } from '../../types/modes/engineering.js';
 
 import type { VisualExportOptions } from './types.js';
 
@@ -95,6 +99,9 @@ import { exportMetaReasoningVisualization } from './metareasoning.js';
 
 // Phase 8: Import proof decomposition exporter
 import { exportProofDecomposition } from './proof-decomposition.js';
+
+// Phase 10: Import engineering exporter
+import { exportEngineeringAnalysis } from './engineering.js';
 
 /**
  * Unified Visual Exporter for backward compatibility
@@ -183,5 +190,11 @@ export class VisualExporter {
 
   exportProofDecomposition(decomposition: ProofDecomposition, options: VisualExportOptions): string {
     return exportProofDecomposition(decomposition, options);
+  }
+
+  // Phase 10: Engineering visual export
+
+  exportEngineeringAnalysis(thought: EngineeringThought, options: VisualExportOptions): string {
+    return exportEngineeringAnalysis(thought, options);
   }
 }

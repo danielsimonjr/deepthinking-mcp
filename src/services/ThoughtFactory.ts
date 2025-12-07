@@ -27,6 +27,7 @@ import {
   AbductiveThought,
   CausalThought,
   Thought,
+  EngineeringThought,
 } from '../types/index.js';
 import { ThinkingToolInput } from '../tools/thinking.js';
 import { toExtendedThoughtType } from '../utils/type-guards.js';
@@ -334,6 +335,22 @@ export class ThoughtFactory {
               problemType: 'general',
             },
           } as any;
+        }
+
+      case 'engineering':
+        {
+          const engInput = input as any;
+          return {
+            ...baseThought,
+            mode: ThinkingMode.ENGINEERING,
+            analysisType: engInput.analysisType || 'comprehensive',
+            designChallenge: engInput.designChallenge || input.thought,
+            requirements: engInput.requirements,
+            tradeStudy: engInput.tradeStudy,
+            fmea: engInput.fmea,
+            designDecisions: engInput.designDecisions,
+            assessment: engInput.assessment,
+          } as EngineeringThought;
         }
 
       case 'hybrid':
