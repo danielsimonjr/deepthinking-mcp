@@ -821,15 +821,47 @@ export class SuggestionEngine {
 
   /**
    * Map thinking mode to reasoning type
+   * Supports all 28 reasoning modes (v7.2.0)
    */
   private mapModeToType(mode: string): string | null {
     const mapping: Record<string, string> = {
+      // Core modes
       sequential: 'deductive_modus_ponens',
+      shannon: 'scientific_hypothesis_testing',
       mathematics: 'mathematical_proof_induction',
+      physics: 'mathematical_constructive_proof',
+      hybrid: 'creative_synthesis',
+
+      // Phase 10-11 modes
+      engineering: 'practical_means_ends',
+      computability: 'mathematical_proof_induction',
+      cryptanalytic: 'probabilistic_bayesian',
+
+      // Advanced runtime modes
+      metareasoning: 'critical_evaluation',
+      recursive: 'deductive_reductio_ad_absurdum',
+      modal: 'deductive_hypothetical_syllogism',
+      stochastic: 'probabilistic_bayesian',
+      constraint: 'practical_means_ends',
+      optimization: 'practical_cost_benefit',
+
+      // Fundamental modes
+      inductive: 'inductive_generalization',
+      deductive: 'deductive_modus_ponens',
+
+      // Experimental modes
+      abductive: 'abductive_inference',
       causal: 'causal_counterfactual',
       bayesian: 'probabilistic_bayesian',
-      abductive: 'abductive_inference',
+      counterfactual: 'causal_counterfactual',
       analogical: 'analogical_structural',
+      temporal: 'temporal_sequence_analysis',
+      gametheory: 'practical_strategic',
+      evidential: 'probabilistic_bayesian',
+      firstprinciples: 'deductive_reductio_ad_absurdum',
+      systemsthinking: 'creative_synthesis',
+      scientificmethod: 'scientific_hypothesis_testing',
+      formallogic: 'deductive_modus_ponens',
     };
     return mapping[mode] || null;
   }

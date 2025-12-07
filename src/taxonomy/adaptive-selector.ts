@@ -471,65 +471,99 @@ export class AdaptiveModeSelector {
 
   /**
    * Map reasoning type ID to thinking mode
+   * Supports all 28 reasoning modes (v7.2.0)
    */
   private mapReasoningTypeToMode(typeId: string): ThinkingMode | null {
     // Explicit mapping for known types
     const mapping: Record<string, ThinkingMode> = {
       // Deductive reasoning types
-      deductive_syllogism: ThinkingMode.SEQUENTIAL,
-      deductive_modus_ponens: ThinkingMode.SEQUENTIAL,
-      deductive_modus_tollens: ThinkingMode.SEQUENTIAL,
-      deductive_disjunctive_syllogism: ThinkingMode.SEQUENTIAL,
-      deductive_hypothetical_syllogism: ThinkingMode.SEQUENTIAL,
-      deductive_categorical_syllogism: ThinkingMode.SEQUENTIAL,
-      deductive_conditional_proof: ThinkingMode.SEQUENTIAL,
-      deductive_proof_by_cases: ThinkingMode.SEQUENTIAL,
+      deductive_syllogism: ThinkingMode.DEDUCTIVE,
+      deductive_modus_ponens: ThinkingMode.DEDUCTIVE,
+      deductive_modus_tollens: ThinkingMode.DEDUCTIVE,
+      deductive_disjunctive_syllogism: ThinkingMode.DEDUCTIVE,
+      deductive_hypothetical_syllogism: ThinkingMode.MODAL,
+      deductive_categorical_syllogism: ThinkingMode.DEDUCTIVE,
+      deductive_conditional_proof: ThinkingMode.FORMALLOGIC,
+      deductive_proof_by_cases: ThinkingMode.FORMALLOGIC,
       deductive_reductio_ad_absurdum: ThinkingMode.MATHEMATICS,
 
       // Mathematical reasoning types
       mathematical_proof_induction: ThinkingMode.MATHEMATICS,
-      mathematical_axiom_system: ThinkingMode.MATHEMATICS,
-      mathematical_formal_verification: ThinkingMode.MATHEMATICS,
+      mathematical_axiom_system: ThinkingMode.FORMALLOGIC,
+      mathematical_formal_verification: ThinkingMode.FORMALLOGIC,
       mathematical_constructive_proof: ThinkingMode.MATHEMATICS,
       mathematical_nonconstructive_proof: ThinkingMode.MATHEMATICS,
+      mathematical_recursive: ThinkingMode.RECURSIVE,
+      mathematical_symbolic: ThinkingMode.MATHEMATICS,
 
       // Probabilistic reasoning types
       probabilistic_bayesian: ThinkingMode.BAYESIAN,
       probabilistic_frequentist: ThinkingMode.BAYESIAN,
       probabilistic_maximum_likelihood: ThinkingMode.BAYESIAN,
-      probabilistic_monte_carlo: ThinkingMode.BAYESIAN,
+      probabilistic_monte_carlo: ThinkingMode.STOCHASTIC,
+      probabilistic_markov: ThinkingMode.STOCHASTIC,
+      probabilistic_independence: ThinkingMode.BAYESIAN,
+      probabilistic_sampling: ThinkingMode.STOCHASTIC,
 
       // Causal reasoning types
       causal_counterfactual: ThinkingMode.COUNTERFACTUAL,
       causal_intervention: ThinkingMode.CAUSAL,
       causal_mechanism: ThinkingMode.CAUSAL,
       causal_graph: ThinkingMode.CAUSAL,
+      causal_discovery: ThinkingMode.CAUSAL,
+      causal_inference: ThinkingMode.CAUSAL,
 
       // Abductive reasoning types
       abductive_inference: ThinkingMode.ABDUCTIVE,
       abductive_hypothesis: ThinkingMode.ABDUCTIVE,
       abductive_explanation: ThinkingMode.ABDUCTIVE,
+      abductive_diagnostic: ThinkingMode.ABDUCTIVE,
+      abductive_multiple_hypotheses: ThinkingMode.ABDUCTIVE,
 
       // Analogical reasoning types
       analogical_structural: ThinkingMode.ANALOGICAL,
       analogical_case_based: ThinkingMode.ANALOGICAL,
       analogical_metaphorical: ThinkingMode.ANALOGICAL,
+      analogical_cross_domain: ThinkingMode.ANALOGICAL,
+      analogical_functional: ThinkingMode.ANALOGICAL,
 
       // Inductive reasoning types
-      inductive_generalization: ThinkingMode.SEQUENTIAL,
-      inductive_statistical: ThinkingMode.BAYESIAN,
-      inductive_enumerative: ThinkingMode.SEQUENTIAL,
+      inductive_generalization: ThinkingMode.INDUCTIVE,
+      inductive_statistical: ThinkingMode.INDUCTIVE,
+      inductive_enumerative: ThinkingMode.INDUCTIVE,
+      inductive_prediction: ThinkingMode.INDUCTIVE,
+      inductive_confirmation: ThinkingMode.INDUCTIVE,
 
-      // Scientific and practical reasoning
-      scientific_hypothesis_testing: ThinkingMode.BAYESIAN,
-      scientific_experimental: ThinkingMode.SEQUENTIAL,
-      practical_means_ends: ThinkingMode.SEQUENTIAL,
-      practical_cost_benefit: ThinkingMode.SEQUENTIAL,
+      // Scientific reasoning
+      scientific_hypothesis_testing: ThinkingMode.SCIENTIFICMETHOD,
+      scientific_experimental: ThinkingMode.SCIENTIFICMETHOD,
+      scientific_falsification: ThinkingMode.SCIENTIFICMETHOD,
+      scientific_reproducibility: ThinkingMode.SCIENTIFICMETHOD,
+      scientific_research_design: ThinkingMode.SCIENTIFICMETHOD,
+
+      // Practical reasoning
+      practical_means_ends: ThinkingMode.ENGINEERING,
+      practical_cost_benefit: ThinkingMode.OPTIMIZATION,
+      practical_strategic: ThinkingMode.GAMETHEORY,
+      practical_decision_theory: ThinkingMode.OPTIMIZATION,
+      practical_constraint_satisfaction: ThinkingMode.CONSTRAINT,
 
       // Temporal reasoning
       temporal_planning: ThinkingMode.TEMPORAL,
       temporal_scheduling: ThinkingMode.TEMPORAL,
       temporal_sequence_analysis: ThinkingMode.TEMPORAL,
+
+      // Critical reasoning
+      critical_evaluation: ThinkingMode.METAREASONING,
+      critical_fallacy_detection: ThinkingMode.FORMALLOGIC,
+      critical_source_criticism: ThinkingMode.EVIDENTIAL,
+      critical_logical_analysis: ThinkingMode.FORMALLOGIC,
+
+      // Creative reasoning
+      creative_divergent: ThinkingMode.HYBRID,
+      creative_convergent: ThinkingMode.HYBRID,
+      creative_synthesis: ThinkingMode.SYSTEMSTHINKING,
+      creative_lateral: ThinkingMode.FIRSTPRINCIPLES,
     };
 
     // Direct mapping first
@@ -539,19 +573,32 @@ export class AdaptiveModeSelector {
 
     // Pattern-based fallback - map based on ID prefix
     const prefixMappings: Record<string, ThinkingMode> = {
-      deductive: ThinkingMode.SEQUENTIAL,
+      deductive: ThinkingMode.DEDUCTIVE,
       mathematical: ThinkingMode.MATHEMATICS,
       probabilistic: ThinkingMode.BAYESIAN,
       causal: ThinkingMode.CAUSAL,
       abductive: ThinkingMode.ABDUCTIVE,
       analogical: ThinkingMode.ANALOGICAL,
-      inductive: ThinkingMode.SEQUENTIAL,
+      inductive: ThinkingMode.INDUCTIVE,
       temporal: ThinkingMode.TEMPORAL,
-      scientific: ThinkingMode.SHANNON,
-      practical: ThinkingMode.SEQUENTIAL,
-      dialectical: ThinkingMode.SEQUENTIAL,
+      scientific: ThinkingMode.SCIENTIFICMETHOD,
+      practical: ThinkingMode.ENGINEERING,
+      dialectical: ThinkingMode.HYBRID,
       creative: ThinkingMode.HYBRID,
-      critical: ThinkingMode.SEQUENTIAL,
+      critical: ThinkingMode.METAREASONING,
+      optimization: ThinkingMode.OPTIMIZATION,
+      constraint: ThinkingMode.CONSTRAINT,
+      stochastic: ThinkingMode.STOCHASTIC,
+      modal: ThinkingMode.MODAL,
+      recursive: ThinkingMode.RECURSIVE,
+      game: ThinkingMode.GAMETHEORY,
+      evidential: ThinkingMode.EVIDENTIAL,
+      formal: ThinkingMode.FORMALLOGIC,
+      systems: ThinkingMode.SYSTEMSTHINKING,
+      first_principles: ThinkingMode.FIRSTPRINCIPLES,
+      engineering: ThinkingMode.ENGINEERING,
+      computability: ThinkingMode.COMPUTABILITY,
+      cryptanalytic: ThinkingMode.CRYPTANALYTIC,
     };
 
     for (const [prefix, mode] of Object.entries(prefixMappings)) {
@@ -592,16 +639,83 @@ export class AdaptiveModeSelector {
 
   /**
    * Suggest alternatives to current mode
+   * Now considers all 28 reasoning modes with intelligent pairing (v7.2.0)
    */
-  private suggestAlternatives(currentMode: ThinkingMode, _context: SelectionContext): ModeRecommendation[] {
-    // Get related modes
-    const alternatives: ThinkingMode[] = [ThinkingMode.BAYESIAN, ThinkingMode.CAUSAL, ThinkingMode.ABDUCTIVE, ThinkingMode.ANALOGICAL];
+  private suggestAlternatives(currentMode: ThinkingMode, context: SelectionContext): ModeRecommendation[] {
+    // Mode affinity groups - modes that work well as alternatives to each other
+    const modeAffinities: Record<ThinkingMode, ThinkingMode[]> = {
+      // Logical/deductive modes suggest other analytical modes
+      [ThinkingMode.SEQUENTIAL]: [ThinkingMode.DEDUCTIVE, ThinkingMode.INDUCTIVE, ThinkingMode.HYBRID],
+      [ThinkingMode.DEDUCTIVE]: [ThinkingMode.FORMALLOGIC, ThinkingMode.MATHEMATICS, ThinkingMode.INDUCTIVE],
+      [ThinkingMode.INDUCTIVE]: [ThinkingMode.BAYESIAN, ThinkingMode.DEDUCTIVE, ThinkingMode.SCIENTIFICMETHOD],
+      [ThinkingMode.FORMALLOGIC]: [ThinkingMode.DEDUCTIVE, ThinkingMode.MATHEMATICS, ThinkingMode.MODAL],
+
+      // Mathematical/computational modes
+      [ThinkingMode.MATHEMATICS]: [ThinkingMode.FORMALLOGIC, ThinkingMode.PHYSICS, ThinkingMode.COMPUTABILITY],
+      [ThinkingMode.PHYSICS]: [ThinkingMode.MATHEMATICS, ThinkingMode.ENGINEERING, ThinkingMode.SYSTEMSTHINKING],
+      [ThinkingMode.COMPUTABILITY]: [ThinkingMode.MATHEMATICS, ThinkingMode.FORMALLOGIC, ThinkingMode.RECURSIVE],
+      [ThinkingMode.SHANNON]: [ThinkingMode.ENGINEERING, ThinkingMode.FIRSTPRINCIPLES, ThinkingMode.SYSTEMSTHINKING],
+
+      // Probabilistic modes
+      [ThinkingMode.BAYESIAN]: [ThinkingMode.STOCHASTIC, ThinkingMode.EVIDENTIAL, ThinkingMode.SCIENTIFICMETHOD],
+      [ThinkingMode.STOCHASTIC]: [ThinkingMode.BAYESIAN, ThinkingMode.OPTIMIZATION, ThinkingMode.GAMETHEORY],
+      [ThinkingMode.EVIDENTIAL]: [ThinkingMode.BAYESIAN, ThinkingMode.ABDUCTIVE, ThinkingMode.SCIENTIFICMETHOD],
+
+      // Causal/explanatory modes
+      [ThinkingMode.CAUSAL]: [ThinkingMode.COUNTERFACTUAL, ThinkingMode.ABDUCTIVE, ThinkingMode.TEMPORAL],
+      [ThinkingMode.COUNTERFACTUAL]: [ThinkingMode.CAUSAL, ThinkingMode.MODAL, ThinkingMode.GAMETHEORY],
+      [ThinkingMode.ABDUCTIVE]: [ThinkingMode.CAUSAL, ThinkingMode.INDUCTIVE, ThinkingMode.FIRSTPRINCIPLES],
+
+      // Creative/synthesis modes
+      [ThinkingMode.HYBRID]: [ThinkingMode.SYSTEMSTHINKING, ThinkingMode.ANALOGICAL, ThinkingMode.FIRSTPRINCIPLES],
+      [ThinkingMode.ANALOGICAL]: [ThinkingMode.HYBRID, ThinkingMode.ABDUCTIVE, ThinkingMode.FIRSTPRINCIPLES],
+      [ThinkingMode.FIRSTPRINCIPLES]: [ThinkingMode.SYSTEMSTHINKING, ThinkingMode.ABDUCTIVE, ThinkingMode.ENGINEERING],
+      [ThinkingMode.SYSTEMSTHINKING]: [ThinkingMode.FIRSTPRINCIPLES, ThinkingMode.ENGINEERING, ThinkingMode.HYBRID],
+
+      // Engineering/practical modes
+      [ThinkingMode.ENGINEERING]: [ThinkingMode.OPTIMIZATION, ThinkingMode.CONSTRAINT, ThinkingMode.SYSTEMSTHINKING],
+      [ThinkingMode.OPTIMIZATION]: [ThinkingMode.CONSTRAINT, ThinkingMode.ENGINEERING, ThinkingMode.STOCHASTIC],
+      [ThinkingMode.CONSTRAINT]: [ThinkingMode.OPTIMIZATION, ThinkingMode.ENGINEERING, ThinkingMode.FORMALLOGIC],
+
+      // Advanced modes
+      [ThinkingMode.RECURSIVE]: [ThinkingMode.MATHEMATICS, ThinkingMode.COMPUTABILITY, ThinkingMode.OPTIMIZATION],
+      [ThinkingMode.MODAL]: [ThinkingMode.COUNTERFACTUAL, ThinkingMode.FORMALLOGIC, ThinkingMode.DEDUCTIVE],
+      [ThinkingMode.METAREASONING]: [ThinkingMode.HYBRID, ThinkingMode.SYSTEMSTHINKING, ThinkingMode.FIRSTPRINCIPLES],
+
+      // Specialized modes
+      [ThinkingMode.TEMPORAL]: [ThinkingMode.CAUSAL, ThinkingMode.GAMETHEORY, ThinkingMode.SEQUENTIAL],
+      [ThinkingMode.GAMETHEORY]: [ThinkingMode.OPTIMIZATION, ThinkingMode.COUNTERFACTUAL, ThinkingMode.STOCHASTIC],
+      [ThinkingMode.SCIENTIFICMETHOD]: [ThinkingMode.BAYESIAN, ThinkingMode.INDUCTIVE, ThinkingMode.EVIDENTIAL],
+      [ThinkingMode.CRYPTANALYTIC]: [ThinkingMode.STOCHASTIC, ThinkingMode.BAYESIAN, ThinkingMode.COMPUTABILITY],
+
+      // Default fallback
+      [ThinkingMode.CUSTOM]: [ThinkingMode.HYBRID, ThinkingMode.SEQUENTIAL, ThinkingMode.METAREASONING],
+    };
+
+    // Get mode-specific alternatives or fall back to general alternatives
+    const alternatives = modeAffinities[currentMode] ||
+      [ThinkingMode.BAYESIAN, ThinkingMode.CAUSAL, ThinkingMode.ABDUCTIVE, ThinkingMode.ANALOGICAL];
 
     const filteredAlternatives = alternatives.filter(m => m !== currentMode);
 
-    return filteredAlternatives.slice(0, 3).map(mode => ({
+    // If context provides characteristics, prioritize modes that match
+    const domain = context.characteristics?.domain || 'general';
+    const scored = filteredAlternatives.map(mode => {
+      let score = 0.6;
+      // Boost score for domain-relevant modes
+      if (domain.includes('math') && [ThinkingMode.MATHEMATICS, ThinkingMode.FORMALLOGIC].includes(mode)) score += 0.15;
+      if (domain.includes('engineer') && [ThinkingMode.ENGINEERING, ThinkingMode.OPTIMIZATION].includes(mode)) score += 0.15;
+      if (domain.includes('science') && [ThinkingMode.SCIENTIFICMETHOD, ThinkingMode.BAYESIAN].includes(mode)) score += 0.15;
+      if (domain.includes('security') && [ThinkingMode.CRYPTANALYTIC, ThinkingMode.STOCHASTIC].includes(mode)) score += 0.15;
+      return { mode, score };
+    });
+
+    // Sort by score and take top 3
+    scored.sort((a, b) => b.score - a.score);
+
+    return scored.slice(0, 3).map(({ mode, score }) => ({
       mode,
-      confidence: 0.6,
+      confidence: score,
       reasoning: ['Alternative approach to break stagnation', `Switch from ${currentMode} to ${mode}`],
       expectedBenefits: ['Fresh perspective', 'Different reasoning style'],
       potentialRisks: ['Learning curve', 'Context switch cost'],
