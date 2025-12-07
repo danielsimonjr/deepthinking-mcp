@@ -4,11 +4,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
 
-A comprehensive Model Context Protocol (MCP) server featuring **25 reasoning modes** (21 with dedicated thought types, 4 advanced runtime modes) including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **27 reasoning modes** (23 with dedicated thought types, 4 advanced runtime modes) including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
-> 📋 **Latest Release**: v7.0.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
+> 📋 **Latest Release**: v7.2.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
 >
-> 🎉 **New in v7.0.0**: Phase 8 Proof Decomposition System with native SVG export! Break proofs into atomic statements, detect gaps and implicit assumptions, track assumption chains, and export visualizations directly to SVG without external tools.
+> 🎉 **New in v7.2.0**: Phase 11 Historical Computing Extensions! Computability mode (Turing machines, decidability, reductions), Cryptanalytic mode (deciban evidence system, Banburismus), and extended Game Theory (von Neumann's minimax theorem, cooperative games, Shapley values).
+>
+> ✨ **v7.0.0**: Phase 8 Proof Decomposition System with native SVG export! Break proofs into atomic statements, detect gaps and implicit assumptions, track assumption chains.
 >
 > ✨ **v6.0.0+**: Meta-Reasoning mode for strategic oversight! Monitor reasoning effectiveness, get adaptive mode-switching recommendations, and assess quality metrics across 6 dimensions.
 
@@ -27,9 +29,10 @@ A comprehensive Model Context Protocol (MCP) server featuring **25 reasoning mod
 
 ## Features
 
-- **25 Specialized Reasoning Modes** - From sequential thinking to game theory, formal logic, and meta-reasoning (21 with full thought types, 4 advanced runtime modes)
-- **Proof Decomposition (NEW!)** - Break proofs into atomic statements, detect gaps, track assumption chains
-- **Native SVG Export (NEW!)** - Direct SVG generation without external tools for proof visualizations
+- **27 Specialized Reasoning Modes** - From sequential thinking to game theory, formal logic, and meta-reasoning (23 with full thought types, 4 advanced runtime modes)
+- **Historical Computing Extensions (NEW!)** - Computability (Turing machines), Cryptanalytic (decibans), extended Game Theory (von Neumann)
+- **Proof Decomposition** - Break proofs into atomic statements, detect gaps, track assumption chains
+- **Native SVG Export** - Direct SVG generation without external tools for proof visualizations
 - **Meta-Reasoning** - Strategic oversight that monitors effectiveness, recommends mode switches, and assesses quality
 - **Adaptive Mode Switching** - Automatic evaluation-based mode switching when effectiveness drops below thresholds
 - **Intelligent Mode Recommendation** - Automatic mode selection based on problem characteristics
@@ -150,12 +153,13 @@ DeepThinking MCP provides 10 focused tools for different reasoning domains:
 
 ## Reasoning Modes
 
-The server supports 25 reasoning modes organized into categories:
+The server supports 27 reasoning modes organized into categories:
 
 - **Core Modes (5)**: Sequential, Shannon, Mathematics, Physics, Hybrid
+- **Historical Computing (2)**: Computability (Turing), Cryptanalytic (Turing) - *v7.2.0*
 - **Advanced Runtime Modes (6)**: Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
 - **Fundamental Modes (2)**: Inductive, Deductive
-- **Experimental Modes (12)**: Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory, Evidential, First Principles, Systems Thinking, Scientific Method, Formal Logic
+- **Experimental Modes (12)**: Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory (+ von Neumann extensions), Evidential, First Principles, Systems Thinking, Scientific Method, Formal Logic
 
 ### Core Modes
 
@@ -369,6 +373,37 @@ Reasoning from general principles to specific conclusions.
 ```typescript
 mode: 'deductive'
 // Use for: Logical proofs, applying rules, deriving conclusions
+```
+
+### Historical Computing Modes (v7.2.0)
+
+Tributes to Alan Turing and John von Neumann's foundational work.
+
+#### Computability
+Turing machines, decidability proofs, reductions, and diagonalization arguments.
+
+```typescript
+mode: 'computability'
+// Use for: Decidability analysis, algorithm limits, computational complexity
+// Features: Turing machine simulation, reduction chains, halting problem analysis
+```
+
+#### Cryptanalytic
+Turing's deciban evidence system from Bletchley Park.
+
+```typescript
+mode: 'cryptanalytic'
+// Use for: Evidence quantification, hypothesis testing, code-breaking analysis
+// Features: Deciban accumulation (10 db ≈ 10:1 odds), frequency analysis, Banburismus
+```
+
+#### Extended Game Theory (v7.2.0)
+Von Neumann's minimax theorem, cooperative games, and Shapley values.
+
+```typescript
+mode: 'gametheory'
+// Enhanced with: Minimax analysis, cooperative game theory, coalition analysis
+// Use for: Zero-sum games, fair value distribution, strategic decision-making
 ```
 
 ## Proof Decomposition
@@ -591,7 +626,7 @@ Compare reasoning sessions to analyze differences and similarities with quantita
 
 Enterprise-grade security features built into the MCP server:
 
-- **Input Validation** - Zod schemas validate all 25+ mode inputs
+- **Input Validation** - Zod schemas validate all 27 mode inputs
 - **Rate Limiting** - Sliding window rate limiter for API protection
 - **Path Sanitization** - Prevents directory traversal attacks
 - **PII Redaction** - GDPR-compliant log sanitization
@@ -647,30 +682,30 @@ For architecture details, see [docs/architecture/](docs/architecture/).
 
 | Metric | Value |
 |--------|-------|
-| TypeScript Files | 201 |
-| Lines of Code | ~55,000 |
+| TypeScript Files | 178 |
+| Lines of Code | ~58,000 |
 | Test Files | 40 |
-| Passing Tests | 972 |
-| Thinking Modes | 25 (21 with thought types) |
+| Passing Tests | 792+ |
+| Thinking Modes | 27 (23 with thought types) |
 | MCP Tools | 10 focused + 1 legacy |
 | Export Formats | 8 (+ native SVG) |
 | Visual Formats | 4 (mermaid, dot, ascii, svg) |
 | Reasoning Types | 69 (110 planned) |
-| Modules | 26 |
-| Total Exports | 608 |
+| Modules | 16 |
+| Total Exports | 888 |
 
 ## Architecture
 
-The codebase is organized into 26 modules with clean separation of concerns. See [docs/architecture/DEPENDENCY_GRAPH.md](docs/architecture/DEPENDENCY_GRAPH.md) for the complete dependency graph.
+The codebase is organized into 16 modules with clean separation of concerns. See [docs/architecture/DEPENDENCY_GRAPH.md](docs/architecture/DEPENDENCY_GRAPH.md) for the complete dependency graph.
 
 ### Core Structure
 
 ```
 src/
 ├── index.ts           # MCP server entry point (tool handlers)
-├── types/             # Type definitions including 25 mode types
+├── types/             # Type definitions including 27 mode types
 │   ├── core.ts        # ThinkingMode enum, Thought union type
-│   └── modes/         # One file per reasoning mode (17 files)
+│   └── modes/         # One file per reasoning mode (19 files)
 ├── services/          # Business logic layer
 │   ├── ThoughtFactory.ts    # Thought creation and validation
 │   ├── ExportService.ts     # Multi-format export handling
@@ -695,7 +730,7 @@ src/
 │   ├── classifier.ts        # Task classification
 │   └── suggestion-engine.ts # Mode recommendations
 ├── export/            # Visual and document exporters
-│   ├── visual/        # 20 mode-specific visual exporters + native SVG
+│   ├── visual/        # 21 mode-specific visual exporters + native SVG
 │   │   ├── proof-decomposition.ts  # Proof visualization (v7.0.0)
 │   │   └── [19 mode exporters]     # Mermaid, DOT, ASCII, SVG
 │   └── latex.ts       # LaTeX document generation
@@ -717,7 +752,7 @@ src/
 
 Security is built into multiple modules:
 
-- **validation/** - Input validation with Zod schemas for all 25 modes
+- **validation/** - Input validation with Zod schemas for all 27 modes
 - **utils/sanitization.ts** - Path sanitization & traversal prevention
 - **utils/log-sanitizer.ts** - PII redaction for GDPR compliance
 - **rate-limit/** - Per-key rate limiting with sliding windows

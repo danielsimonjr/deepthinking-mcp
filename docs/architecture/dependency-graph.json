@@ -1,11 +1,11 @@
 {
   "metadata": {
     "name": "deepthinking-mcp",
-    "version": "7.0.1",
+    "version": "7.1.0",
     "lastUpdated": "2025-12-07",
-    "totalFiles": 158,
+    "totalFiles": 178,
     "totalModules": 16,
-    "totalExports": 505
+    "totalExports": 888
   },
   "entryPoints": [
     {
@@ -388,7 +388,7 @@
         ]
       },
       "src/export/visual/abductive.ts": {
-        "description": "Abductive Visual Exporter (v4.3.0)",
+        "description": "Abductive Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -411,6 +411,81 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEllipseNode",
+              "renderStadiumNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderBadge"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "generateHierarchyModelica"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "generateHierarchyJson"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -421,7 +496,7 @@
         ]
       },
       "src/export/visual/analogical.ts": {
-        "description": "Analogical Visual Exporter (v4.3.0)",
+        "description": "Analogical Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -444,6 +519,89 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge",
+              "GraphMLOptions"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "getTikZColor",
+              "renderTikZMetrics",
+              "renderTikZLegend",
+              "TikZNode",
+              "TikZEdge",
+              "TikZOptions"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderProgressBar"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -453,8 +611,78 @@
           "exportAnalogicalMapping"
         ]
       },
+      "src/export/visual/ascii-utils.ts": {
+        "description": "ASCII Art Utilities (v7.1.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "BOX_CHARS",
+          "ARROWS",
+          "BULLETS",
+          "truncateAscii",
+          "padAscii",
+          "wrapText",
+          "indentText",
+          "generateAsciiHeader",
+          "generateAsciiSectionHeader",
+          "generateAsciiBoxedTitle",
+          "generateAsciiBox",
+          "generateAsciiBulletList",
+          "generateAsciiNumberedList",
+          "generateAsciiTreeList",
+          "generateAsciiTable",
+          "getAsciiArrow",
+          "generateAsciiFlowDiagram",
+          "generateAsciiSection",
+          "generateAsciiDocument",
+          "generateAsciiProgressBar",
+          "generateAsciiMetric",
+          "generateAsciiMetricsPanel",
+          "generateAsciiGraph",
+          "generateLinearFlowAscii",
+          "generateHierarchyAscii"
+        ],
+        "interfaces": [
+          "AsciiNode",
+          "AsciiEdge",
+          "AsciiSection",
+          "AsciiTableColumn",
+          "AsciiOptions",
+          "AsciiTreeNode"
+        ],
+        "functions": [
+          "truncateAscii",
+          "padAscii",
+          "wrapText",
+          "indentText",
+          "generateAsciiHeader",
+          "generateAsciiSectionHeader",
+          "generateAsciiBoxedTitle",
+          "generateAsciiBox",
+          "generateAsciiBulletList",
+          "generateAsciiNumberedList",
+          "generateAsciiTreeList",
+          "generateAsciiTable",
+          "getAsciiArrow",
+          "generateAsciiFlowDiagram",
+          "generateAsciiSection",
+          "generateAsciiDocument",
+          "generateAsciiProgressBar",
+          "generateAsciiMetric",
+          "generateAsciiMetricsPanel",
+          "generateAsciiGraph",
+          "generateLinearFlowAscii",
+          "generateHierarchyAscii"
+        ],
+        "constants": [
+          "BOX_CHARS",
+          "ARROWS",
+          "BULLETS"
+        ]
+      },
       "src/export/visual/bayesian.ts": {
-        "description": "Bayesian Visual Exporter (v4.3.0)",
+        "description": "Bayesian Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -471,6 +699,82 @@
               "VisualExportOptions"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEllipseNode",
+              "renderStadiumNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderProgressBar"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "generateBayesianJson"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "keyValueSection",
+              "progressBar",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -481,7 +785,7 @@
         ]
       },
       "src/export/visual/causal.ts": {
-        "description": "Causal Visual Exporter (v4.3.0)",
+        "description": "Causal Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -504,6 +808,86 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderStadiumNode",
+              "renderRectNode",
+              "renderDiamondNode",
+              "renderEllipseNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "layoutNodesInLayers",
+              "calculateSVGHeight",
+              "DEFAULT_SVG_OPTIONS"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge",
+              "GraphMLOptions"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge",
+              "TikZOptions"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderBadge"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "generateCausalJson"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -513,8 +897,109 @@
           "exportCausalGraph"
         ]
       },
+      "src/export/visual/computability.ts": {
+        "description": "Computability Visual Exporter (v7.2.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../types/index.js",
+            "imports": [
+              "ComputabilityThought",
+              "TuringMachine",
+              "Reduction"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./types.js",
+            "imports": [
+              "VisualExportOptions"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./utils.js",
+            "imports": [
+              "sanitizeId"
+            ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEllipseNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderList",
+              "renderBadge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "addLegendItem",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
+          }
+        ],
+        "exports": [
+          "exportComputability"
+        ],
+        "functions": [
+          "exportComputability"
+        ]
+      },
       "src/export/visual/counterfactual.ts": {
-        "description": "Counterfactual Visual Exporter (v4.3.0)",
+        "description": "Counterfactual Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -537,6 +1022,85 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderStadiumNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge",
+              "GraphMLOptions"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge",
+              "TikZOptions"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -546,8 +1110,162 @@
           "exportCounterfactualScenarios"
         ]
       },
+      "src/export/visual/dot-utils.ts": {
+        "description": "DOT/GraphViz Utilities (v7.1.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "DOT_COLORS",
+          "sanitizeDotId",
+          "escapeDotString",
+          "truncateDotLabel",
+          "renderDotNodeAttrs",
+          "renderDotEdgeAttrs",
+          "renderDotNode",
+          "renderDotEdge",
+          "renderDotSubgraph",
+          "getDotColor",
+          "generateDotGraph",
+          "generateLinearFlowDot",
+          "generateHierarchyDot",
+          "generateNetworkDot"
+        ],
+        "interfaces": [
+          "DotNode",
+          "DotEdge",
+          "DotSubgraph",
+          "DotOptions"
+        ],
+        "functions": [
+          "sanitizeDotId",
+          "escapeDotString",
+          "truncateDotLabel",
+          "renderDotNodeAttrs",
+          "renderDotEdgeAttrs",
+          "renderDotNode",
+          "renderDotEdge",
+          "renderDotSubgraph",
+          "getDotColor",
+          "generateDotGraph",
+          "generateLinearFlowDot",
+          "generateHierarchyDot",
+          "generateNetworkDot"
+        ],
+        "constants": [
+          "DOT_COLORS"
+        ]
+      },
+      "src/export/visual/engineering.ts": {
+        "description": "Engineering Visual Exporter (v7.1.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../types/modes/engineering.js",
+            "imports": [
+              "EngineeringThought"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./types.js",
+            "imports": [
+              "VisualExportOptions"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./utils.js",
+            "imports": [
+              "sanitizeId"
+            ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderStadiumNode",
+              "renderEdge",
+              "getNodeColor",
+              "renderMetricsPanel",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderBadge",
+              "renderProgressBar"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document",
+              "progressBar"
+            ]
+          }
+        ],
+        "exports": [
+          "for",
+          "exportEngineeringAnalysis"
+        ],
+        "functions": [
+          "for",
+          "exportEngineeringAnalysis"
+        ]
+      },
       "src/export/visual/evidential.ts": {
-        "description": "Evidential Visual Exporter (v4.3.0)",
+        "description": "Evidential Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -570,6 +1288,83 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEllipseNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderSection",
+              "renderTable"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -580,7 +1375,7 @@
         ]
       },
       "src/export/visual/first-principles.ts": {
-        "description": "First Principles Visual Exporter (v4.3.0)",
+        "description": "First Principles Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -603,6 +1398,97 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEllipseNode",
+              "renderStadiumNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "calculateSVGHeight",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderBadge",
+              "renderList"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString",
+              "generateModelicaPackageHeader",
+              "generateModelicaPackageFooter",
+              "generateModelicaRecord"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlHeader",
+              "generateUmlFooter",
+              "renderUmlNode",
+              "renderUmlEdge",
+              "sanitizeUmlId",
+              "escapeUml",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "addLegendItem",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -613,7 +1499,7 @@
         ]
       },
       "src/export/visual/formal-logic.ts": {
-        "description": "Formal Logic Visual Exporter (v4.3.0)",
+        "description": "Formal Logic Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -636,6 +1522,87 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEllipseNode",
+              "renderStadiumNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderBadge",
+              "renderProgressBar"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -646,7 +1613,7 @@
         ]
       },
       "src/export/visual/game-theory.ts": {
-        "description": "Game Theory Visual Exporter (v4.3.0)",
+        "description": "Game Theory Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -669,6 +1636,87 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEllipseNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "createTreeGraphML",
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "createTreeTikZ",
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderBadge"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "addLegendItem",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -678,8 +1726,76 @@
           "exportGameTree"
         ]
       },
+      "src/export/visual/graphml-utils.ts": {
+        "description": "GraphML Export Utilities (v7.0.3)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "DEFAULT_GRAPHML_OPTIONS",
+          "generateGraphMLHeader",
+          "generateGraphMLFooter",
+          "renderGraphMLNode",
+          "renderGraphMLEdge",
+          "generateGraphML",
+          "createLinearGraphML",
+          "createTreeGraphML",
+          "createLayeredGraphML"
+        ],
+        "interfaces": [
+          "GraphMLNode",
+          "GraphMLEdge",
+          "GraphMLOptions"
+        ],
+        "functions": [
+          "generateGraphMLHeader",
+          "generateGraphMLFooter",
+          "renderGraphMLNode",
+          "renderGraphMLEdge",
+          "generateGraphML",
+          "createLinearGraphML",
+          "createTreeGraphML",
+          "createLayeredGraphML"
+        ],
+        "constants": [
+          "DEFAULT_GRAPHML_OPTIONS"
+        ]
+      },
+      "src/export/visual/html-utils.ts": {
+        "description": "HTML Export Utilities (v7.1.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "getHTMLThemeColors",
+          "generateHTMLHeader",
+          "generateHTMLFooter",
+          "escapeHTML",
+          "renderMetricCard",
+          "renderProgressBar",
+          "renderBadge",
+          "renderTable",
+          "renderSection",
+          "renderList"
+        ],
+        "interfaces": [
+          "HTMLThemeColors"
+        ],
+        "functions": [
+          "getHTMLThemeColors",
+          "generateHTMLHeader",
+          "generateHTMLFooter",
+          "escapeHTML",
+          "renderMetricCard",
+          "renderProgressBar",
+          "renderBadge",
+          "renderTable",
+          "renderSection",
+          "renderList"
+        ]
+      },
       "src/export/visual/hybrid.ts": {
-        "description": "Hybrid Visual Exporter (v6.1.0)",
+        "description": "Hybrid Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -702,6 +1818,87 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEllipseNode",
+              "renderStadiumNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderBadge"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "addLegendItem",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -712,7 +1909,7 @@
         ]
       },
       "src/export/visual/index.ts": {
-        "description": "Visual Export Module (v4.3.0)",
+        "description": "Visual Export Module (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -757,6 +1954,20 @@
             "file": "../../types/modes/metareasoning.js",
             "imports": [
               "MetaReasoningThought"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../../types/modes/engineering.js",
+            "imports": [
+              "EngineeringThought"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../../types/modes/computability.js",
+            "imports": [
+              "ComputabilityThought"
             ],
             "typeOnly": true
           },
@@ -886,6 +2097,95 @@
             "imports": [
               "exportProofDecomposition"
             ]
+          },
+          {
+            "file": "./engineering.js",
+            "imports": [
+              "exportEngineeringAnalysis"
+            ]
+          },
+          {
+            "file": "./computability.js",
+            "imports": [
+              "exportComputability"
+            ]
+          },
+          {
+            "file": "./mermaid-utils.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./dot-utils.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ascii-utils.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "*"
+            ],
+            "reExport": true
           },
           {
             "file": "./types.js",
@@ -1041,6 +2341,20 @@
               "exportProofDecomposition"
             ],
             "reExport": true
+          },
+          {
+            "file": "./engineering.js",
+            "imports": [
+              "exportEngineeringAnalysis"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./computability.js",
+            "imports": [
+              "exportComputability"
+            ],
+            "reExport": true
           }
         ],
         "exports": [
@@ -1067,9 +2381,22 @@
           "exportHybridOrchestration",
           "exportMetaReasoningVisualization",
           "exportProofDecomposition",
+          "exportEngineeringAnalysis",
+          "exportComputability",
           "VisualExporter"
         ],
         "reExported": [
+          "* from ./mermaid-utils.js",
+          "* from ./dot-utils.js",
+          "* from ./ascii-utils.js",
+          "* from ./svg-utils.js",
+          "* from ./graphml-utils.js",
+          "* from ./tikz-utils.js",
+          "* from ./html-utils.js",
+          "* from ./modelica-utils.js",
+          "* from ./uml-utils.js",
+          "* from ./json-utils.js",
+          "* from ./markdown-utils.js",
           "type VisualFormat",
           "type VisualExportOptions",
           "sanitizeId",
@@ -1092,14 +2419,124 @@
           "exportPhysicsVisualization",
           "exportHybridOrchestration",
           "exportMetaReasoningVisualization",
-          "exportProofDecomposition"
+          "exportProofDecomposition",
+          "exportEngineeringAnalysis",
+          "exportComputability"
         ],
         "classes": [
           "VisualExporter"
         ]
       },
+      "src/export/visual/json-utils.ts": {
+        "description": "JSON Visual Export Utilities (v7.1.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "createJsonGraph",
+          "addNode",
+          "addEdge",
+          "addMetric",
+          "addLegendItem",
+          "serializeGraph",
+          "generateLinearFlowJson",
+          "generateHierarchyJson",
+          "generateNetworkJson",
+          "generateBayesianJson",
+          "generateCausalJson"
+        ],
+        "interfaces": [
+          "JsonVisualNode",
+          "JsonVisualEdge",
+          "JsonVisualGraph",
+          "JsonVisualOptions"
+        ],
+        "functions": [
+          "createJsonGraph",
+          "addNode",
+          "addEdge",
+          "addMetric",
+          "addLegendItem",
+          "serializeGraph",
+          "generateLinearFlowJson",
+          "generateHierarchyJson",
+          "generateNetworkJson",
+          "generateBayesianJson",
+          "generateCausalJson"
+        ]
+      },
+      "src/export/visual/markdown-utils.ts": {
+        "description": "Markdown Export Utilities (v7.1.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "heading",
+          "bold",
+          "italic",
+          "strikethrough",
+          "inlineCode",
+          "codeBlock",
+          "blockquote",
+          "horizontalRule",
+          "link",
+          "image",
+          "listItem",
+          "list",
+          "nestedList",
+          "table",
+          "definitionList",
+          "taskList",
+          "collapsible",
+          "badge",
+          "progressBar",
+          "metric",
+          "keyValueSection",
+          "mermaidBlock",
+          "section",
+          "frontmatter",
+          "document",
+          "graphNode",
+          "graphEdge",
+          "graph",
+          "escapeMarkdown",
+          "truncate"
+        ],
+        "functions": [
+          "heading",
+          "bold",
+          "italic",
+          "strikethrough",
+          "inlineCode",
+          "codeBlock",
+          "blockquote",
+          "horizontalRule",
+          "link",
+          "image",
+          "listItem",
+          "list",
+          "nestedList",
+          "table",
+          "definitionList",
+          "taskList",
+          "collapsible",
+          "badge",
+          "progressBar",
+          "metric",
+          "keyValueSection",
+          "mermaidBlock",
+          "section",
+          "frontmatter",
+          "document",
+          "graphNode",
+          "graphEdge",
+          "graph",
+          "escapeMarkdown",
+          "truncate"
+        ]
+      },
       "src/export/visual/mathematics.ts": {
-        "description": "Mathematics Visual Exporter (v6.1.0)",
+        "description": "Mathematics Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1122,6 +2559,85 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEllipseNode",
+              "renderStadiumNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderBadge",
+              "renderProgressBar"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -1131,8 +2647,58 @@
           "exportMathematicsDerivation"
         ]
       },
+      "src/export/visual/mermaid-utils.ts": {
+        "description": "Mermaid Utilities (v7.1.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "MERMAID_COLORS",
+          "sanitizeMermaidId",
+          "escapeMermaidLabel",
+          "truncateLabel",
+          "getNodeShapeBrackets",
+          "renderMermaidNode",
+          "renderMermaidNodeStyle",
+          "getEdgeArrow",
+          "renderMermaidEdge",
+          "renderMermaidSubgraph",
+          "getMermaidColor",
+          "generateMermaidFlowchart",
+          "generateLinearFlowMermaid",
+          "generateHierarchyMermaid",
+          "generateMermaidStateDiagram",
+          "generateMermaidClassDiagram"
+        ],
+        "interfaces": [
+          "MermaidNode",
+          "MermaidEdge",
+          "MermaidSubgraph",
+          "MermaidOptions"
+        ],
+        "functions": [
+          "sanitizeMermaidId",
+          "escapeMermaidLabel",
+          "truncateLabel",
+          "getNodeShapeBrackets",
+          "renderMermaidNode",
+          "renderMermaidNodeStyle",
+          "getEdgeArrow",
+          "renderMermaidEdge",
+          "renderMermaidSubgraph",
+          "getMermaidColor",
+          "generateMermaidFlowchart",
+          "generateLinearFlowMermaid",
+          "generateHierarchyMermaid",
+          "generateMermaidStateDiagram",
+          "generateMermaidClassDiagram"
+        ],
+        "constants": [
+          "MERMAID_COLORS"
+        ]
+      },
       "src/export/visual/metareasoning.ts": {
-        "description": "MetaReasoning Visual Exporter (v6.1.0)",
+        "description": "MetaReasoning Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1155,6 +2721,90 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEllipseNode",
+              "renderStadiumNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge",
+              "GraphMLOptions"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge",
+              "TikZOptions"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderBadge",
+              "renderProgressBar"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document",
+              "progressBar"
+            ]
           }
         ],
         "exports": [
@@ -1164,8 +2814,39 @@
           "exportMetaReasoningVisualization"
         ]
       },
+      "src/export/visual/modelica-utils.ts": {
+        "description": "Modelica Export Utilities (v7.1.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "sanitizeModelicaId",
+          "escapeModelicaString",
+          "generateModelicaPackageHeader",
+          "generateModelicaPackageFooter",
+          "generateModelicaRecord",
+          "generateModelicaModel",
+          "generateLinearFlowModelica",
+          "generateHierarchyModelica"
+        ],
+        "interfaces": [
+          "ModelicaNode",
+          "ModelicaEdge",
+          "ModelicaOptions"
+        ],
+        "functions": [
+          "sanitizeModelicaId",
+          "escapeModelicaString",
+          "generateModelicaPackageHeader",
+          "generateModelicaPackageFooter",
+          "generateModelicaRecord",
+          "generateModelicaModel",
+          "generateLinearFlowModelica",
+          "generateHierarchyModelica"
+        ]
+      },
       "src/export/visual/optimization.ts": {
-        "description": "Optimization Visual Exporter (v4.3.0)",
+        "description": "Optimization Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1188,6 +2869,86 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEllipseNode",
+              "renderStadiumNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderBadge"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -1198,7 +2959,7 @@
         ]
       },
       "src/export/visual/physics.ts": {
-        "description": "Physics Visual Exporter (v6.1.0)",
+        "description": "Physics Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1220,6 +2981,89 @@
             "file": "./utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEllipseNode",
+              "renderStadiumNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge",
+              "GraphMLOptions"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "renderTikZMetrics",
+              "TikZNode",
+              "TikZEdge",
+              "TikZOptions"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderBadge"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document",
+              "progressBar"
             ]
           }
         ],
@@ -1255,6 +3099,54 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderProgressBar"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "keyValueSection",
+              "mermaidBlock",
+              "document",
+              "progressBar"
+            ]
           }
         ],
         "exports": [
@@ -1265,7 +3157,7 @@
         ]
       },
       "src/export/visual/scientific-method.ts": {
-        "description": "Scientific Method Visual Exporter (v4.3.0)",
+        "description": "Scientific Method Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1288,6 +3180,83 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEllipseNode",
+              "renderStadiumNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderBadge"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateActivityDiagram"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -1298,7 +3267,7 @@
         ]
       },
       "src/export/visual/sequential.ts": {
-        "description": "Sequential Visual Exporter (v4.3.0)",
+        "description": "Sequential Visual Exporter (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1321,6 +3290,108 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./mermaid-utils.js",
+            "imports": [
+              "generateMermaidFlowchart",
+              "truncateLabel",
+              "getMermaidColor",
+              "MermaidNode",
+              "MermaidEdge"
+            ]
+          },
+          {
+            "file": "./dot-utils.js",
+            "imports": [
+              "generateDotGraph",
+              "truncateDotLabel",
+              "DotNode",
+              "DotEdge"
+            ]
+          },
+          {
+            "file": "./ascii-utils.js",
+            "imports": [
+              "generateAsciiHeader",
+              "generateAsciiSectionHeader",
+              "generateAsciiBulletList"
+            ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderStadiumNode",
+              "renderEdge",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderBadge",
+              "renderList"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateActivityDiagram"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -1331,7 +3402,7 @@
         ]
       },
       "src/export/visual/shannon.ts": {
-        "description": "Shannon Visual Exporter (v4.3.0)",
+        "description": "Shannon Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1354,6 +3425,77 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderStadiumNode",
+              "renderHorizontalEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "layoutNodesHorizontally",
+              "DEFAULT_SVG_OPTIONS"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "createLinearGraphML"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "TikZNode",
+              "TikZEdge",
+              "generateTikZ"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderList",
+              "renderProgressBar",
+              "renderBadge"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "generateLinearFlowModelica"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateActivityDiagram"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "generateLinearFlowJson"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "list",
+              "keyValueSection",
+              "progressBar",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -1363,8 +3505,68 @@
           "exportShannonStageFlow"
         ]
       },
+      "src/export/visual/svg-utils.ts": {
+        "description": "SVG Export Utilities (v7.0.2)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "DEFAULT_SVG_OPTIONS",
+          "COLOR_PALETTES",
+          "getNodeColor",
+          "escapeSVGText",
+          "truncateText",
+          "generateSVGHeader",
+          "generateSVGFooter",
+          "renderRectNode",
+          "renderStadiumNode",
+          "renderDiamondNode",
+          "renderHexagonNode",
+          "renderEllipseNode",
+          "renderParallelogramNode",
+          "renderSubroutineNode",
+          "renderEdge",
+          "renderHorizontalEdge",
+          "renderMetricsPanel",
+          "renderLegend",
+          "layoutNodesInLayers",
+          "layoutNodesHorizontally",
+          "calculateSVGHeight"
+        ],
+        "interfaces": [
+          "SVGExportOptions",
+          "SVGNodePosition",
+          "SVGEdge",
+          "ColorPalette"
+        ],
+        "functions": [
+          "getNodeColor",
+          "escapeSVGText",
+          "truncateText",
+          "generateSVGHeader",
+          "generateSVGFooter",
+          "renderRectNode",
+          "renderStadiumNode",
+          "renderDiamondNode",
+          "renderHexagonNode",
+          "renderEllipseNode",
+          "renderParallelogramNode",
+          "renderSubroutineNode",
+          "renderEdge",
+          "renderHorizontalEdge",
+          "renderMetricsPanel",
+          "renderLegend",
+          "layoutNodesInLayers",
+          "layoutNodesHorizontally",
+          "calculateSVGHeight"
+        ],
+        "constants": [
+          "DEFAULT_SVG_OPTIONS",
+          "COLOR_PALETTES"
+        ]
+      },
       "src/export/visual/systems-thinking.ts": {
-        "description": "Systems Thinking Visual Exporter (v4.3.0)",
+        "description": "Systems Thinking Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1387,6 +3589,86 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEllipseNode",
+              "renderEdge",
+              "renderMetricsPanel",
+              "renderLegend",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderBadge"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "addLegendItem",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "list",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -1397,7 +3679,7 @@
         ]
       },
       "src/export/visual/temporal.ts": {
-        "description": "Temporal Visual Exporter (v4.3.0)",
+        "description": "Temporal Visual Exporter (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1420,6 +3702,77 @@
             "imports": [
               "sanitizeId"
             ]
+          },
+          {
+            "file": "./svg-utils.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderEllipseNode",
+              "renderHorizontalEdge",
+              "renderLegend",
+              "getNodeColor",
+              "layoutNodesHorizontally",
+              "DEFAULT_SVG_OPTIONS"
+            ]
+          },
+          {
+            "file": "./graphml-utils.js",
+            "imports": [
+              "createLinearGraphML"
+            ]
+          },
+          {
+            "file": "./tikz-utils.js",
+            "imports": [
+              "createLinearTikZ"
+            ]
+          },
+          {
+            "file": "./html-utils.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection",
+              "renderTable",
+              "renderBadge"
+            ]
+          },
+          {
+            "file": "./modelica-utils.js",
+            "imports": [
+              "sanitizeModelicaId",
+              "escapeModelicaString"
+            ]
+          },
+          {
+            "file": "./uml-utils.js",
+            "imports": [
+              "generateStateDiagram"
+            ]
+          },
+          {
+            "file": "./json-utils.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./markdown-utils.js",
+            "imports": [
+              "section",
+              "table",
+              "keyValueSection",
+              "mermaidBlock",
+              "document"
+            ]
           }
         ],
         "exports": [
@@ -1429,14 +3782,96 @@
           "exportTemporalTimeline"
         ]
       },
+      "src/export/visual/tikz-utils.ts": {
+        "description": "TikZ Export Utilities (v7.0.3)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "DEFAULT_TIKZ_OPTIONS",
+          "getTikZColor",
+          "generateTikZHeader",
+          "generateTikZFooter",
+          "renderTikZNode",
+          "renderTikZNodeRelative",
+          "renderTikZEdge",
+          "renderTikZMetrics",
+          "renderTikZLegend",
+          "generateTikZ",
+          "createLinearTikZ",
+          "createTreeTikZ",
+          "createLayeredTikZ"
+        ],
+        "interfaces": [
+          "TikZNode",
+          "TikZEdge",
+          "TikZOptions"
+        ],
+        "functions": [
+          "getTikZColor",
+          "generateTikZHeader",
+          "generateTikZFooter",
+          "renderTikZNode",
+          "renderTikZNodeRelative",
+          "renderTikZEdge",
+          "renderTikZMetrics",
+          "renderTikZLegend",
+          "generateTikZ",
+          "createLinearTikZ",
+          "createTreeTikZ",
+          "createLayeredTikZ"
+        ],
+        "constants": [
+          "DEFAULT_TIKZ_OPTIONS"
+        ]
+      },
       "src/export/visual/types.ts": {
-        "description": "Visual Export Types (v7.0.0)",
+        "description": "Visual Export Types (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
         "exports": [],
         "interfaces": [
           "VisualExportOptions"
+        ]
+      },
+      "src/export/visual/uml-utils.ts": {
+        "description": "UML/PlantUML Export Utilities (v7.1.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "sanitizeUmlId",
+          "escapeUml",
+          "generateUmlHeader",
+          "generateUmlFooter",
+          "renderUmlNode",
+          "renderUmlEdge",
+          "generateUmlDiagram",
+          "generateClassDiagram",
+          "generateComponentDiagram",
+          "generateActivityDiagram",
+          "generateStateDiagram",
+          "generateUseCaseDiagram"
+        ],
+        "interfaces": [
+          "UmlNode",
+          "UmlEdge",
+          "UmlOptions"
+        ],
+        "functions": [
+          "sanitizeUmlId",
+          "escapeUml",
+          "generateUmlHeader",
+          "generateUmlFooter",
+          "renderUmlNode",
+          "renderUmlEdge",
+          "generateUmlDiagram",
+          "generateClassDiagram",
+          "generateComponentDiagram",
+          "generateActivityDiagram",
+          "generateStateDiagram",
+          "generateUseCaseDiagram"
         ]
       },
       "src/export/visual/utils.ts": {
@@ -2546,7 +4981,7 @@
     },
     "services": {
       "src/services/ExportService.ts": {
-        "description": "Export Service (v3.4.5)",
+        "description": "Export Service (v7.0.3)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -2592,6 +5027,13 @@
             "file": "../types/modes/metareasoning.js",
             "imports": [
               "MetaReasoningThought"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../types/modes/engineering.js",
+            "imports": [
+              "EngineeringThought"
             ],
             "typeOnly": true
           },
@@ -2739,7 +5181,8 @@
               "DeductiveThought",
               "AbductiveThought",
               "CausalThought",
-              "Thought"
+              "Thought",
+              "EngineeringThought"
             ]
           },
           {
@@ -4119,7 +6562,7 @@
     },
     "types": {
       "src/types/core.ts": {
-        "description": "Core type definitions for the DeepThinking MCP server v3.2.0",
+        "description": "Core type definitions for the DeepThinking MCP server v7.1.0",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -4185,6 +6628,27 @@
               "MetaReasoningThought"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "./modes/engineering.js",
+            "imports": [
+              "EngineeringThought"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./modes/computability.js",
+            "imports": [
+              "ComputabilityThought"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./modes/cryptanalytic.js",
+            "imports": [
+              "CryptanalyticThought"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -4212,6 +6676,9 @@
           "isOptimizationThought",
           "isFormalLogicThought",
           "isMetaReasoningThought",
+          "isEngineeringThought",
+          "isComputabilityThought",
+          "isCryptanalyticThought",
           "ThinkingMode",
           "ShannonStage"
         ],
@@ -4289,7 +6756,10 @@
           "isScientificMethodThought",
           "isOptimizationThought",
           "isFormalLogicThought",
-          "isMetaReasoningThought"
+          "isMetaReasoningThought",
+          "isEngineeringThought",
+          "isComputabilityThought",
+          "isCryptanalyticThought"
         ],
         "enums": [
           "ThinkingMode",
@@ -4301,7 +6771,7 @@
         ]
       },
       "src/types/index.ts": {
-        "description": "Type definitions index",
+        "description": "Type definitions index (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -4325,13 +6795,230 @@
               "*"
             ],
             "reExport": true
+          },
+          {
+            "file": "./modes/engineering.js",
+            "imports": [
+              "type Requirement",
+              "type RequirementPriority",
+              "type RequirementSource",
+              "type RequirementStatus",
+              "type RequirementsTraceability",
+              "type TradeAlternative",
+              "type TradeCriterion",
+              "type TradeScore",
+              "type TradeStudy",
+              "type FailureMode",
+              "type FailureModeAnalysis",
+              "type SeverityRating",
+              "type OccurrenceRating",
+              "type DetectionRating",
+              "type DesignDecision",
+              "type DecisionStatus",
+              "type DecisionAlternative",
+              "type DesignDecisionLog",
+              "type EngineeringAnalysisType",
+              "isEngineeringThought"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./modes/computability.js",
+            "imports": [
+              "type ComputabilityThoughtType",
+              "type TuringTransition",
+              "type TuringMachine",
+              "type ComputationStep",
+              "type ComputationTrace",
+              "type DecisionProblem",
+              "type Reduction",
+              "type DiagonalizationArgument",
+              "type DecidabilityProof",
+              "type ComplexityAnalysis",
+              "type OracleAnalysis",
+              "type ClassicUndecidableProblem",
+              "isComputabilityThought",
+              "createSimpleMachine",
+              "reductionPreservesDecidability",
+              "isPolynomialReduction"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./modes/gametheory.js",
+            "imports": [
+              "type MinimaxAnalysis",
+              "type CooperativeGame",
+              "type CoalitionValue",
+              "type CoreAllocation",
+              "type CoalitionAnalysis",
+              "type ShapleyValueDetails",
+              "createCharacteristicFunction",
+              "checkSuperadditivity",
+              "calculateShapleyValue"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./modes/cryptanalytic.js",
+            "imports": [
+              "type CryptanalyticThoughtType",
+              "type DecibanEvidence",
+              "type EvidenceChain",
+              "type KeySpaceAnalysis",
+              "type FrequencyAnalysis",
+              "type BanburismusAnalysis",
+              "type CribAnalysis",
+              "type CipherType",
+              "type CryptographicHypothesis",
+              "type IsomorphismPattern",
+              "isCryptanalyticThought",
+              "toDecibans",
+              "fromDecibans",
+              "decibansToOdds",
+              "decibansToProbability",
+              "accumulateEvidence",
+              "calculateIndexOfCoincidence",
+              "LANGUAGE_IC",
+              "ENGLISH_FREQUENCIES"
+            ],
+            "reExport": true
           }
         ],
-        "exports": [],
+        "exports": [
+          "type Requirement",
+          "type RequirementPriority",
+          "type RequirementSource",
+          "type RequirementStatus",
+          "type RequirementsTraceability",
+          "type TradeAlternative",
+          "type TradeCriterion",
+          "type TradeScore",
+          "type TradeStudy",
+          "type FailureMode",
+          "type FailureModeAnalysis",
+          "type SeverityRating",
+          "type OccurrenceRating",
+          "type DetectionRating",
+          "type DesignDecision",
+          "type DecisionStatus",
+          "type DecisionAlternative",
+          "type DesignDecisionLog",
+          "type EngineeringAnalysisType",
+          "isEngineeringThought",
+          "type ComputabilityThoughtType",
+          "type TuringTransition",
+          "type TuringMachine",
+          "type ComputationStep",
+          "type ComputationTrace",
+          "type DecisionProblem",
+          "type Reduction",
+          "type DiagonalizationArgument",
+          "type DecidabilityProof",
+          "type ComplexityAnalysis",
+          "type OracleAnalysis",
+          "type ClassicUndecidableProblem",
+          "isComputabilityThought",
+          "createSimpleMachine",
+          "reductionPreservesDecidability",
+          "isPolynomialReduction",
+          "type MinimaxAnalysis",
+          "type CooperativeGame",
+          "type CoalitionValue",
+          "type CoreAllocation",
+          "type CoalitionAnalysis",
+          "type ShapleyValueDetails",
+          "createCharacteristicFunction",
+          "checkSuperadditivity",
+          "calculateShapleyValue",
+          "type CryptanalyticThoughtType",
+          "type DecibanEvidence",
+          "type EvidenceChain",
+          "type KeySpaceAnalysis",
+          "type FrequencyAnalysis",
+          "type BanburismusAnalysis",
+          "type CribAnalysis",
+          "type CipherType",
+          "type CryptographicHypothesis",
+          "type IsomorphismPattern",
+          "isCryptanalyticThought",
+          "toDecibans",
+          "fromDecibans",
+          "decibansToOdds",
+          "decibansToProbability",
+          "accumulateEvidence",
+          "calculateIndexOfCoincidence",
+          "LANGUAGE_IC",
+          "ENGLISH_FREQUENCIES"
+        ],
         "reExported": [
           "* from ./core.js",
           "* from ./session.js",
-          "* from ./modes/recommendations.js"
+          "* from ./modes/recommendations.js",
+          "type Requirement",
+          "type RequirementPriority",
+          "type RequirementSource",
+          "type RequirementStatus",
+          "type RequirementsTraceability",
+          "type TradeAlternative",
+          "type TradeCriterion",
+          "type TradeScore",
+          "type TradeStudy",
+          "type FailureMode",
+          "type FailureModeAnalysis",
+          "type SeverityRating",
+          "type OccurrenceRating",
+          "type DetectionRating",
+          "type DesignDecision",
+          "type DecisionStatus",
+          "type DecisionAlternative",
+          "type DesignDecisionLog",
+          "type EngineeringAnalysisType",
+          "isEngineeringThought",
+          "type ComputabilityThoughtType",
+          "type TuringTransition",
+          "type TuringMachine",
+          "type ComputationStep",
+          "type ComputationTrace",
+          "type DecisionProblem",
+          "type Reduction",
+          "type DiagonalizationArgument",
+          "type DecidabilityProof",
+          "type ComplexityAnalysis",
+          "type OracleAnalysis",
+          "type ClassicUndecidableProblem",
+          "isComputabilityThought",
+          "createSimpleMachine",
+          "reductionPreservesDecidability",
+          "isPolynomialReduction",
+          "type MinimaxAnalysis",
+          "type CooperativeGame",
+          "type CoalitionValue",
+          "type CoreAllocation",
+          "type CoalitionAnalysis",
+          "type ShapleyValueDetails",
+          "createCharacteristicFunction",
+          "checkSuperadditivity",
+          "calculateShapleyValue",
+          "type CryptanalyticThoughtType",
+          "type DecibanEvidence",
+          "type EvidenceChain",
+          "type KeySpaceAnalysis",
+          "type FrequencyAnalysis",
+          "type BanburismusAnalysis",
+          "type CribAnalysis",
+          "type CipherType",
+          "type CryptographicHypothesis",
+          "type IsomorphismPattern",
+          "isCryptanalyticThought",
+          "toDecibans",
+          "fromDecibans",
+          "decibansToOdds",
+          "decibansToProbability",
+          "accumulateEvidence",
+          "calculateIndexOfCoincidence",
+          "LANGUAGE_IC",
+          "ENGLISH_FREQUENCIES"
         ]
       },
       "src/types/modes/analogical.ts": {
@@ -4423,6 +7110,45 @@
           "isCausalThought"
         ]
       },
+      "src/types/modes/computability.ts": {
+        "description": "Computability Theory Mode - Type Definitions",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../core.js",
+            "imports": [
+              "BaseThought",
+              "ThinkingMode"
+            ]
+          }
+        ],
+        "exports": [
+          "isComputabilityThought",
+          "createSimpleMachine",
+          "reductionPreservesDecidability",
+          "isPolynomialReduction"
+        ],
+        "interfaces": [
+          "TuringTransition",
+          "TuringMachine",
+          "ComputationStep",
+          "ComputationTrace",
+          "DecisionProblem",
+          "Reduction",
+          "DiagonalizationArgument",
+          "DecidabilityProof",
+          "ComplexityAnalysis",
+          "OracleAnalysis",
+          "ComputabilityThought"
+        ],
+        "functions": [
+          "isComputabilityThought",
+          "createSimpleMachine",
+          "reductionPreservesDecidability",
+          "isPolynomialReduction"
+        ]
+      },
       "src/types/modes/counterfactual.ts": {
         "description": "Counterfactual Reasoning Mode - Type Definitions",
         "externalDependencies": [],
@@ -4443,6 +7169,7 @@
           "Condition",
           "Outcome",
           "Scenario",
+          "ScenarioDifference",
           "CounterfactualComparison",
           "InterventionPoint",
           "CausalChain",
@@ -4450,6 +7177,89 @@
         ],
         "functions": [
           "isCounterfactualThought"
+        ]
+      },
+      "src/types/modes/cryptanalytic.ts": {
+        "description": "Cryptanalytic Reasoning Mode - Type Definitions",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../core.js",
+            "imports": [
+              "BaseThought",
+              "ThinkingMode"
+            ]
+          }
+        ],
+        "exports": [
+          "LANGUAGE_IC",
+          "ENGLISH_FREQUENCIES",
+          "isCryptanalyticThought",
+          "toDecibans",
+          "fromDecibans",
+          "decibansToOdds",
+          "decibansToProbability",
+          "accumulateEvidence",
+          "calculateIndexOfCoincidence"
+        ],
+        "interfaces": [
+          "DecibanEvidence",
+          "EvidenceChain",
+          "KeySpaceAnalysis",
+          "FrequencyAnalysis",
+          "BanburismusAnalysis",
+          "CribAnalysis",
+          "CryptographicHypothesis",
+          "IsomorphismPattern",
+          "CryptanalyticThought"
+        ],
+        "functions": [
+          "isCryptanalyticThought",
+          "toDecibans",
+          "fromDecibans",
+          "decibansToOdds",
+          "decibansToProbability",
+          "accumulateEvidence",
+          "calculateIndexOfCoincidence"
+        ],
+        "constants": [
+          "LANGUAGE_IC",
+          "ENGLISH_FREQUENCIES"
+        ]
+      },
+      "src/types/modes/engineering.ts": {
+        "description": "Engineering Thought Type (v7.1.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../core.js",
+            "imports": [
+              "ThinkingMode",
+              "BaseThought"
+            ]
+          }
+        ],
+        "exports": [
+          "isEngineeringThought"
+        ],
+        "interfaces": [
+          "Requirement",
+          "RequirementsTraceability",
+          "TradeAlternative",
+          "TradeCriterion",
+          "TradeScore",
+          "TradeStudy",
+          "FailureMode",
+          "FailureModeAnalysis",
+          "DecisionAlternative",
+          "DesignDecision",
+          "DesignDecisionLog",
+          "EngineeringThought"
+        ],
+        "functions": [
+          "isEngineeringThought"
         ]
       },
       "src/types/modes/evidential.ts": {
@@ -4559,7 +7369,10 @@
           }
         ],
         "exports": [
-          "isGameTheoryThought"
+          "isGameTheoryThought",
+          "createCharacteristicFunction",
+          "checkSuperadditivity",
+          "calculateShapleyValue"
         ],
         "interfaces": [
           "GameTheoryThought",
@@ -4573,10 +7386,19 @@
           "GameTree",
           "GameNode",
           "InformationSet",
-          "BackwardInduction"
+          "BackwardInduction",
+          "MinimaxAnalysis",
+          "CooperativeGame",
+          "CoalitionValue",
+          "CoreAllocation",
+          "CoalitionAnalysis",
+          "ShapleyValueDetails"
         ],
         "functions": [
-          "isGameTheoryThought"
+          "isGameTheoryThought",
+          "createCharacteristicFunction",
+          "checkSuperadditivity",
+          "calculateShapleyValue"
         ]
       },
       "src/types/modes/mathematics.ts": {
@@ -5179,7 +8001,7 @@
         ]
       },
       "src/validation/index.ts": {
-        "description": "Validation module exports (v4.3.0)",
+        "description": "Validation module exports (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -5229,6 +8051,85 @@
               "safeValidateInput"
             ],
             "reExport": true
+          },
+          {
+            "file": "./schema-utils.js",
+            "imports": [
+              "// Primitive schemas\n  probabilitySchema",
+              "confidenceSchema",
+              "progressSchema",
+              "weightSchema",
+              "nonNegativeSchema",
+              "positiveSchema",
+              "nonEmptyStringSchema",
+              "uuidSchema",
+              "timestampSchema",
+              "// Composite schemas - Hypothesis & Evidence\n  hypothesisSchema",
+              "probabilityWithJustificationSchema",
+              "probabilityWithCalculationSchema",
+              "evidenceSchema",
+              "evidenceWithSupportSchema",
+              "type HypothesisInput",
+              "type ProbabilityWithJustification",
+              "type ProbabilityWithCalculation",
+              "type EvidenceInput",
+              "type EvidenceWithSupport",
+              "// Graph schemas\n  createNodeSchema",
+              "createEdgeSchema",
+              "nodeSchema",
+              "weightedNodeSchema",
+              "edgeSchema",
+              "weightedEdgeSchema",
+              "causalEdgeSchema",
+              "type NodeInput",
+              "type WeightedNodeInput",
+              "type EdgeInput",
+              "type WeightedEdgeInput",
+              "type CausalEdgeInput",
+              "// Temporal schemas\n  timePointSchema",
+              "timeIntervalSchema",
+              "temporalEventSchema",
+              "type TimePointInput",
+              "type TimeIntervalInput",
+              "type TemporalEventInput",
+              "// Mathematical schemas\n  mathExpressionSchema",
+              "valueWithUnitSchema",
+              "measurementSchema",
+              "type MathExpressionInput",
+              "type ValueWithUnitInput",
+              "type MeasurementInput",
+              "// Game Theory schemas\n  playerSchema",
+              "strategySchema",
+              "payoffSchema",
+              "type PlayerInput",
+              "type StrategyInput",
+              "type PayoffInput",
+              "// Reasoning schemas\n  reasoningStepSchema",
+              "propositionSchema",
+              "inferenceRuleSchema",
+              "type ReasoningStepInput",
+              "type PropositionInput",
+              "type InferenceRuleInput",
+              "// Optimization schemas\n  constraintSchema",
+              "objectiveSchema",
+              "solutionSchema",
+              "type ConstraintInput",
+              "type ObjectiveInput",
+              "type SolutionInput",
+              "// Base schemas\n  baseThoughtSchema",
+              "sequentialThoughtExtensionSchema",
+              "bayesianThoughtExtensionSchema",
+              "type BaseThoughtInput",
+              "// Helpers\n  createRangeSchema",
+              "createEnumSchema",
+              "createOptionalStringWithDefault",
+              "createOptionalNumberWithDefault",
+              "createOptionalBooleanWithDefault",
+              "uniqueIdArraySchema",
+              "createGraphSchema",
+              "// Namespace export\n  SchemaUtils"
+            ],
+            "reExport": true
           }
         ],
         "exports": [
@@ -5260,7 +8161,80 @@
           "BatchOperationSchema",
           "type BatchOperationInput",
           "validateInput",
-          "safeValidateInput"
+          "safeValidateInput",
+          "// Primitive schemas\n  probabilitySchema",
+          "confidenceSchema",
+          "progressSchema",
+          "weightSchema",
+          "nonNegativeSchema",
+          "positiveSchema",
+          "nonEmptyStringSchema",
+          "uuidSchema",
+          "timestampSchema",
+          "// Composite schemas - Hypothesis & Evidence\n  hypothesisSchema",
+          "probabilityWithJustificationSchema",
+          "probabilityWithCalculationSchema",
+          "evidenceSchema",
+          "evidenceWithSupportSchema",
+          "type HypothesisInput",
+          "type ProbabilityWithJustification",
+          "type ProbabilityWithCalculation",
+          "type EvidenceInput",
+          "type EvidenceWithSupport",
+          "// Graph schemas\n  createNodeSchema",
+          "createEdgeSchema",
+          "nodeSchema",
+          "weightedNodeSchema",
+          "edgeSchema",
+          "weightedEdgeSchema",
+          "causalEdgeSchema",
+          "type NodeInput",
+          "type WeightedNodeInput",
+          "type EdgeInput",
+          "type WeightedEdgeInput",
+          "type CausalEdgeInput",
+          "// Temporal schemas\n  timePointSchema",
+          "timeIntervalSchema",
+          "temporalEventSchema",
+          "type TimePointInput",
+          "type TimeIntervalInput",
+          "type TemporalEventInput",
+          "// Mathematical schemas\n  mathExpressionSchema",
+          "valueWithUnitSchema",
+          "measurementSchema",
+          "type MathExpressionInput",
+          "type ValueWithUnitInput",
+          "type MeasurementInput",
+          "// Game Theory schemas\n  playerSchema",
+          "strategySchema",
+          "payoffSchema",
+          "type PlayerInput",
+          "type StrategyInput",
+          "type PayoffInput",
+          "// Reasoning schemas\n  reasoningStepSchema",
+          "propositionSchema",
+          "inferenceRuleSchema",
+          "type ReasoningStepInput",
+          "type PropositionInput",
+          "type InferenceRuleInput",
+          "// Optimization schemas\n  constraintSchema",
+          "objectiveSchema",
+          "solutionSchema",
+          "type ConstraintInput",
+          "type ObjectiveInput",
+          "type SolutionInput",
+          "// Base schemas\n  baseThoughtSchema",
+          "sequentialThoughtExtensionSchema",
+          "bayesianThoughtExtensionSchema",
+          "type BaseThoughtInput",
+          "// Helpers\n  createRangeSchema",
+          "createEnumSchema",
+          "createOptionalStringWithDefault",
+          "createOptionalNumberWithDefault",
+          "createOptionalBooleanWithDefault",
+          "uniqueIdArraySchema",
+          "createGraphSchema",
+          "// Namespace export\n  SchemaUtils"
         ],
         "reExported": [
           "IssueSeverity",
@@ -5291,7 +8265,201 @@
           "BatchOperationSchema",
           "type BatchOperationInput",
           "validateInput",
-          "safeValidateInput"
+          "safeValidateInput",
+          "// Primitive schemas\n  probabilitySchema",
+          "confidenceSchema",
+          "progressSchema",
+          "weightSchema",
+          "nonNegativeSchema",
+          "positiveSchema",
+          "nonEmptyStringSchema",
+          "uuidSchema",
+          "timestampSchema",
+          "// Composite schemas - Hypothesis & Evidence\n  hypothesisSchema",
+          "probabilityWithJustificationSchema",
+          "probabilityWithCalculationSchema",
+          "evidenceSchema",
+          "evidenceWithSupportSchema",
+          "type HypothesisInput",
+          "type ProbabilityWithJustification",
+          "type ProbabilityWithCalculation",
+          "type EvidenceInput",
+          "type EvidenceWithSupport",
+          "// Graph schemas\n  createNodeSchema",
+          "createEdgeSchema",
+          "nodeSchema",
+          "weightedNodeSchema",
+          "edgeSchema",
+          "weightedEdgeSchema",
+          "causalEdgeSchema",
+          "type NodeInput",
+          "type WeightedNodeInput",
+          "type EdgeInput",
+          "type WeightedEdgeInput",
+          "type CausalEdgeInput",
+          "// Temporal schemas\n  timePointSchema",
+          "timeIntervalSchema",
+          "temporalEventSchema",
+          "type TimePointInput",
+          "type TimeIntervalInput",
+          "type TemporalEventInput",
+          "// Mathematical schemas\n  mathExpressionSchema",
+          "valueWithUnitSchema",
+          "measurementSchema",
+          "type MathExpressionInput",
+          "type ValueWithUnitInput",
+          "type MeasurementInput",
+          "// Game Theory schemas\n  playerSchema",
+          "strategySchema",
+          "payoffSchema",
+          "type PlayerInput",
+          "type StrategyInput",
+          "type PayoffInput",
+          "// Reasoning schemas\n  reasoningStepSchema",
+          "propositionSchema",
+          "inferenceRuleSchema",
+          "type ReasoningStepInput",
+          "type PropositionInput",
+          "type InferenceRuleInput",
+          "// Optimization schemas\n  constraintSchema",
+          "objectiveSchema",
+          "solutionSchema",
+          "type ConstraintInput",
+          "type ObjectiveInput",
+          "type SolutionInput",
+          "// Base schemas\n  baseThoughtSchema",
+          "sequentialThoughtExtensionSchema",
+          "bayesianThoughtExtensionSchema",
+          "type BaseThoughtInput",
+          "// Helpers\n  createRangeSchema",
+          "createEnumSchema",
+          "createOptionalStringWithDefault",
+          "createOptionalNumberWithDefault",
+          "createOptionalBooleanWithDefault",
+          "uniqueIdArraySchema",
+          "createGraphSchema",
+          "// Namespace export\n  SchemaUtils"
+        ]
+      },
+      "src/validation/schema-utils.ts": {
+        "description": "Schema Utilities (v7.1.0)",
+        "externalDependencies": [
+          {
+            "package": "zod",
+            "imports": [
+              "z"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./constants.js",
+            "imports": [
+              "ValidationThresholds",
+              "ValidationMessages"
+            ]
+          }
+        ],
+        "exports": [
+          "probabilitySchema",
+          "confidenceSchema",
+          "progressSchema",
+          "weightSchema",
+          "nonNegativeSchema",
+          "positiveSchema",
+          "nonEmptyStringSchema",
+          "uuidSchema",
+          "timestampSchema",
+          "hypothesisSchema",
+          "probabilityWithJustificationSchema",
+          "probabilityWithCalculationSchema",
+          "evidenceSchema",
+          "evidenceWithSupportSchema",
+          "nodeSchema",
+          "weightedNodeSchema",
+          "edgeSchema",
+          "weightedEdgeSchema",
+          "causalEdgeSchema",
+          "timePointSchema",
+          "timeIntervalSchema",
+          "temporalEventSchema",
+          "mathExpressionSchema",
+          "valueWithUnitSchema",
+          "measurementSchema",
+          "playerSchema",
+          "strategySchema",
+          "payoffSchema",
+          "reasoningStepSchema",
+          "propositionSchema",
+          "inferenceRuleSchema",
+          "constraintSchema",
+          "objectiveSchema",
+          "solutionSchema",
+          "baseThoughtSchema",
+          "sequentialThoughtExtensionSchema",
+          "bayesianThoughtExtensionSchema",
+          "SchemaUtils",
+          "createNodeSchema",
+          "createEdgeSchema",
+          "createRangeSchema",
+          "createEnumSchema",
+          "createOptionalStringWithDefault",
+          "createOptionalNumberWithDefault",
+          "createOptionalBooleanWithDefault",
+          "uniqueIdArraySchema",
+          "createGraphSchema"
+        ],
+        "functions": [
+          "createNodeSchema",
+          "createEdgeSchema",
+          "createRangeSchema",
+          "createEnumSchema",
+          "createOptionalStringWithDefault",
+          "createOptionalNumberWithDefault",
+          "createOptionalBooleanWithDefault",
+          "uniqueIdArraySchema",
+          "createGraphSchema"
+        ],
+        "constants": [
+          "probabilitySchema",
+          "confidenceSchema",
+          "progressSchema",
+          "weightSchema",
+          "nonNegativeSchema",
+          "positiveSchema",
+          "nonEmptyStringSchema",
+          "uuidSchema",
+          "timestampSchema",
+          "hypothesisSchema",
+          "probabilityWithJustificationSchema",
+          "probabilityWithCalculationSchema",
+          "evidenceSchema",
+          "evidenceWithSupportSchema",
+          "nodeSchema",
+          "weightedNodeSchema",
+          "edgeSchema",
+          "weightedEdgeSchema",
+          "causalEdgeSchema",
+          "timePointSchema",
+          "timeIntervalSchema",
+          "temporalEventSchema",
+          "mathExpressionSchema",
+          "valueWithUnitSchema",
+          "measurementSchema",
+          "playerSchema",
+          "strategySchema",
+          "payoffSchema",
+          "reasoningStepSchema",
+          "propositionSchema",
+          "inferenceRuleSchema",
+          "constraintSchema",
+          "objectiveSchema",
+          "solutionSchema",
+          "baseThoughtSchema",
+          "sequentialThoughtExtensionSchema",
+          "bayesianThoughtExtensionSchema",
+          "SchemaUtils"
         ]
       },
       "src/validation/schemas.ts": {
@@ -5592,6 +8760,20 @@
             "reExport": true
           },
           {
+            "file": "./modes/computability.js",
+            "imports": [
+              "ComputabilityValidator"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./modes/cryptanalytic.js",
+            "imports": [
+              "CryptanalyticValidator"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./registry.js",
             "imports": [
               "validatorRegistry",
@@ -5629,6 +8811,8 @@
           "StochasticValidator",
           "RecursiveValidator",
           "MetaReasoningValidator",
+          "ComputabilityValidator",
+          "CryptanalyticValidator",
           "validatorRegistry",
           "getValidatorForMode",
           "getValidatorForModeSync",
@@ -5661,6 +8845,8 @@
           "StochasticValidator",
           "RecursiveValidator",
           "MetaReasoningValidator",
+          "ComputabilityValidator",
+          "CryptanalyticValidator",
           "validatorRegistry",
           "getValidatorForMode",
           "getValidatorForModeSync",
@@ -5670,7 +8856,7 @@
         ]
       },
       "src/validation/validators/modes/abductive.ts": {
-        "description": "Abductive Mode Validator",
+        "description": "Abductive Mode Validator (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -5693,6 +8879,13 @@
             "imports": [
               "BaseValidator"
             ]
+          },
+          {
+            "file": "../../constants.js",
+            "imports": [
+              "IssueCategory",
+              "IssueSeverity"
+            ]
           }
         ],
         "exports": [
@@ -5703,7 +8896,7 @@
         ]
       },
       "src/validation/validators/modes/analogical.ts": {
-        "description": "Analogical Mode Validator",
+        "description": "Analogical Mode Validator (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -5726,6 +8919,13 @@
             "imports": [
               "BaseValidator"
             ]
+          },
+          {
+            "file": "../../constants.js",
+            "imports": [
+              "IssueCategory",
+              "IssueSeverity"
+            ]
           }
         ],
         "exports": [
@@ -5736,7 +8936,7 @@
         ]
       },
       "src/validation/validators/modes/bayesian.ts": {
-        "description": "Bayesian Mode Validator",
+        "description": "Bayesian Mode Validator (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -5759,6 +8959,13 @@
             "imports": [
               "BaseValidator"
             ]
+          },
+          {
+            "file": "../../constants.js",
+            "imports": [
+              "IssueCategory",
+              "IssueSeverity"
+            ]
           }
         ],
         "exports": [
@@ -5769,7 +8976,7 @@
         ]
       },
       "src/validation/validators/modes/causal.ts": {
-        "description": "Causal Mode Validator",
+        "description": "Causal Mode Validator (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -5792,6 +8999,13 @@
             "imports": [
               "BaseValidator"
             ]
+          },
+          {
+            "file": "../../constants.js",
+            "imports": [
+              "IssueCategory",
+              "IssueSeverity"
+            ]
           }
         ],
         "exports": [
@@ -5799,6 +9013,49 @@
         ],
         "classes": [
           "CausalValidator"
+        ]
+      },
+      "src/validation/validators/modes/computability.ts": {
+        "description": "Computability Mode Validator (v7.2.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../../types/index.js",
+            "imports": [
+              "ValidationIssue"
+            ]
+          },
+          {
+            "file": "../../../types/modes/computability.js",
+            "imports": [
+              "ComputabilityThought",
+              "TuringMachine",
+              "Reduction",
+              "DecidabilityProof",
+              "DiagonalizationArgument"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../../validator.js",
+            "imports": [
+              "ValidationContext"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../base.js",
+            "imports": [
+              "BaseValidator"
+            ]
+          }
+        ],
+        "exports": [
+          "ComputabilityValidator"
+        ],
+        "classes": [
+          "ComputabilityValidator"
         ]
       },
       "src/validation/validators/modes/constraint.ts": {
@@ -5835,7 +9092,7 @@
         ]
       },
       "src/validation/validators/modes/counterfactual.ts": {
-        "description": "Counterfactual Mode Validator",
+        "description": "Counterfactual Mode Validator (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -5858,6 +9115,13 @@
             "imports": [
               "BaseValidator"
             ]
+          },
+          {
+            "file": "../../constants.js",
+            "imports": [
+              "IssueCategory",
+              "IssueSeverity"
+            ]
           }
         ],
         "exports": [
@@ -5865,6 +9129,47 @@
         ],
         "classes": [
           "CounterfactualValidator"
+        ]
+      },
+      "src/validation/validators/modes/cryptanalytic.ts": {
+        "description": "Cryptanalytic Mode Validator (v7.2.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../../types/index.js",
+            "imports": [
+              "ValidationIssue"
+            ]
+          },
+          {
+            "file": "../../../types/modes/cryptanalytic.js",
+            "imports": [
+              "CryptanalyticThought",
+              "EvidenceChain",
+              "DecibanEvidence"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../../validator.js",
+            "imports": [
+              "ValidationContext"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../base.js",
+            "imports": [
+              "BaseValidator"
+            ]
+          }
+        ],
+        "exports": [
+          "CryptanalyticValidator"
+        ],
+        "classes": [
+          "CryptanalyticValidator"
         ]
       },
       "src/validation/validators/modes/deductive.ts": {
@@ -5900,8 +9205,47 @@
           "DeductiveValidator"
         ]
       },
+      "src/validation/validators/modes/engineering.ts": {
+        "description": "Engineering Mode Validator (v7.1.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../../types/index.js",
+            "imports": [
+              "ValidationIssue"
+            ]
+          },
+          {
+            "file": "../../../types/modes/engineering.js",
+            "imports": [
+              "EngineeringThought"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../../validator.js",
+            "imports": [
+              "ValidationContext"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../base.js",
+            "imports": [
+              "BaseValidator"
+            ]
+          }
+        ],
+        "exports": [
+          "EngineeringValidator"
+        ],
+        "classes": [
+          "EngineeringValidator"
+        ]
+      },
       "src/validation/validators/modes/evidential.ts": {
-        "description": "Evidential Mode Validator",
+        "description": "Evidential Mode Validator (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -5924,6 +9268,13 @@
             "imports": [
               "BaseValidator"
             ]
+          },
+          {
+            "file": "../../constants.js",
+            "imports": [
+              "IssueCategory",
+              "IssueSeverity"
+            ]
           }
         ],
         "exports": [
@@ -5934,7 +9285,7 @@
         ]
       },
       "src/validation/validators/modes/firstprinciples.ts": {
-        "description": "First-Principles Mode Validator",
+        "description": "First-Principles Mode Validator (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -5956,6 +9307,13 @@
             "file": "../base.js",
             "imports": [
               "BaseValidator"
+            ]
+          },
+          {
+            "file": "../../constants.js",
+            "imports": [
+              "IssueCategory",
+              "IssueSeverity"
             ]
           }
         ],
@@ -6000,7 +9358,7 @@
         ]
       },
       "src/validation/validators/modes/gametheory.ts": {
-        "description": "Game Theory Mode Validator",
+        "description": "Game Theory Mode Validator (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -6022,6 +9380,13 @@
             "file": "../base.js",
             "imports": [
               "BaseValidator"
+            ]
+          },
+          {
+            "file": "../../constants.js",
+            "imports": [
+              "IssueCategory",
+              "IssueSeverity"
             ]
           }
         ],
@@ -6473,7 +9838,7 @@
         ]
       },
       "src/validation/validators/modes/shannon.ts": {
-        "description": "Shannon Mode Validator",
+        "description": "Shannon Mode Validator (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -6495,6 +9860,13 @@
             "file": "../base.js",
             "imports": [
               "BaseValidator"
+            ]
+          },
+          {
+            "file": "../../constants.js",
+            "imports": [
+              "IssueCategory",
+              "IssueSeverity"
             ]
           }
         ],
@@ -6539,7 +9911,7 @@
         ]
       },
       "src/validation/validators/modes/systemsthinking.ts": {
-        "description": "Systems Thinking Mode Validator",
+        "description": "Systems Thinking Mode Validator (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -6562,6 +9934,13 @@
             "imports": [
               "BaseValidator"
             ]
+          },
+          {
+            "file": "../../constants.js",
+            "imports": [
+              "IssueCategory",
+              "IssueSeverity"
+            ]
           }
         ],
         "exports": [
@@ -6572,7 +9951,7 @@
         ]
       },
       "src/validation/validators/modes/temporal.ts": {
-        "description": "Temporal Mode Validator",
+        "description": "Temporal Mode Validator (v7.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -6594,6 +9973,13 @@
             "file": "../base.js",
             "imports": [
               "BaseValidator"
+            ]
+          },
+          {
+            "file": "../../constants.js",
+            "imports": [
+              "IssueCategory",
+              "IssueSeverity"
             ]
           }
         ],
@@ -6685,6 +10071,21 @@
         [
           "src/types/core.ts",
           "src/types/modes/metareasoning.ts",
+          "src/types/core.ts"
+        ],
+        [
+          "src/types/core.ts",
+          "src/types/modes/engineering.ts",
+          "src/types/core.ts"
+        ],
+        [
+          "src/types/core.ts",
+          "src/types/modes/computability.ts",
+          "src/types/core.ts"
+        ],
+        [
+          "src/types/core.ts",
+          "src/types/modes/cryptanalytic.ts",
           "src/types/core.ts"
         ],
         [
@@ -6818,11 +10219,23 @@
           "src/validation/validators/index.ts",
           "src/validation/validators/modes/metareasoning.ts",
           "src/validation/validator.ts"
+        ],
+        [
+          "src/validation/validator.ts",
+          "src/validation/validators/index.ts",
+          "src/validation/validators/modes/computability.ts",
+          "src/validation/validator.ts"
+        ],
+        [
+          "src/validation/validator.ts",
+          "src/validation/validators/index.ts",
+          "src/validation/validators/modes/cryptanalytic.ts",
+          "src/validation/validator.ts"
         ]
       ],
-      "total": 31,
+      "total": 36,
       "runtimeCount": 0,
-      "typeOnlyCount": 31
+      "typeOnlyCount": 36
     },
     "layers": [
       {
@@ -6850,26 +10263,39 @@
           "src/export/latex.ts",
           "src/export/visual/abductive.ts",
           "src/export/visual/analogical.ts",
+          "src/export/visual/ascii-utils.ts",
           "src/export/visual/bayesian.ts",
           "src/export/visual/causal.ts",
+          "src/export/visual/computability.ts",
           "src/export/visual/counterfactual.ts",
+          "src/export/visual/dot-utils.ts",
+          "src/export/visual/engineering.ts",
           "src/export/visual/evidential.ts",
           "src/export/visual/first-principles.ts",
           "src/export/visual/formal-logic.ts",
           "src/export/visual/game-theory.ts",
+          "src/export/visual/graphml-utils.ts",
+          "src/export/visual/html-utils.ts",
           "src/export/visual/hybrid.ts",
           "src/export/visual/index.ts",
+          "src/export/visual/json-utils.ts",
+          "src/export/visual/markdown-utils.ts",
           "src/export/visual/mathematics.ts",
+          "src/export/visual/mermaid-utils.ts",
           "src/export/visual/metareasoning.ts",
+          "src/export/visual/modelica-utils.ts",
           "src/export/visual/optimization.ts",
           "src/export/visual/physics.ts",
           "src/export/visual/proof-decomposition.ts",
           "src/export/visual/scientific-method.ts",
           "src/export/visual/sequential.ts",
           "src/export/visual/shannon.ts",
+          "src/export/visual/svg-utils.ts",
           "src/export/visual/systems-thinking.ts",
           "src/export/visual/temporal.ts",
+          "src/export/visual/tikz-utils.ts",
           "src/export/visual/types.ts",
+          "src/export/visual/uml-utils.ts",
           "src/export/visual/utils.ts",
           "src/export/visual.ts"
         ]
@@ -6994,7 +10420,10 @@
           "src/types/modes/analogical.ts",
           "src/types/modes/bayesian.ts",
           "src/types/modes/causal.ts",
+          "src/types/modes/computability.ts",
           "src/types/modes/counterfactual.ts",
+          "src/types/modes/cryptanalytic.ts",
+          "src/types/modes/engineering.ts",
           "src/types/modes/evidential.ts",
           "src/types/modes/firstprinciples.ts",
           "src/types/modes/formallogic.ts",
@@ -7029,6 +10458,7 @@
           "src/validation/cache.ts",
           "src/validation/constants.ts",
           "src/validation/index.ts",
+          "src/validation/schema-utils.ts",
           "src/validation/schemas.ts",
           "src/validation/validator.ts",
           "src/validation/validators/base.ts",
@@ -7037,9 +10467,12 @@
           "src/validation/validators/modes/analogical.ts",
           "src/validation/validators/modes/bayesian.ts",
           "src/validation/validators/modes/causal.ts",
+          "src/validation/validators/modes/computability.ts",
           "src/validation/validators/modes/constraint.ts",
           "src/validation/validators/modes/counterfactual.ts",
+          "src/validation/validators/modes/cryptanalytic.ts",
           "src/validation/validators/modes/deductive.ts",
+          "src/validation/validators/modes/engineering.ts",
           "src/validation/validators/modes/evidential.ts",
           "src/validation/validators/modes/firstprinciples.ts",
           "src/validation/validators/modes/formallogic.ts",
@@ -7066,19 +10499,19 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 158,
+    "totalTypeScriptFiles": 178,
     "totalModules": 16,
-    "totalLinesOfCode": 42551,
-    "totalExports": 505,
-    "totalClasses": 89,
-    "totalInterfaces": 314,
-    "totalFunctions": 121,
-    "totalTypeGuards": 49,
+    "totalLinesOfCode": 70593,
+    "totalExports": 888,
+    "totalClasses": 92,
+    "totalInterfaces": 388,
+    "totalFunctions": 311,
+    "totalTypeGuards": 56,
     "totalEnums": 3,
-    "totalConstants": 106,
-    "totalReExports": 188,
-    "totalTypeOnlyImports": 121,
+    "totalConstants": 155,
+    "totalReExports": 340,
+    "totalTypeOnlyImports": 137,
     "runtimeCircularDeps": 0,
-    "typeOnlyCircularDeps": 31
+    "typeOnlyCircularDeps": 36
   }
 }
