@@ -38,6 +38,12 @@ const VALID_THOUGHT_TYPES: readonly ExtendedThoughtType[] = [
   'abstraction',
   'analogy',
   'metacognition',
+  // Phase 8: Proof Decomposition Types
+  'proof_decomposition',
+  'dependency_analysis',
+  'consistency_check',
+  'gap_identification',
+  'assumption_trace',
 ] as const;
 
 /**

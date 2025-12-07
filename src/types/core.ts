@@ -144,7 +144,10 @@ export type ExtendedThoughtType =
   | 'symmetry_analysis' | 'gauge_theory' | 'field_equations'
   | 'lagrangian' | 'hamiltonian' | 'conservation_law'
   | 'dimensional_analysis' | 'tensor_formulation' | 'differential_geometry'
-  | 'decomposition' | 'synthesis' | 'abstraction' | 'analogy' | 'metacognition';
+  | 'decomposition' | 'synthesis' | 'abstraction' | 'analogy' | 'metacognition'
+  // Phase 8: Proof Decomposition Types
+  | 'proof_decomposition' | 'dependency_analysis' | 'consistency_check'
+  | 'gap_identification' | 'assumption_trace';
 
 /**
  * Mathematical model representation

@@ -206,10 +206,11 @@ export const deepthinking_standard_schema = {
 
 /**
  * deepthinking_math - Mathematics and Physics modes
+ * Phase 8: Added proof decomposition fields
  */
 export const deepthinking_math_schema = {
   name: "deepthinking_math",
-  description: "Math/physics: proofs, tensors, LaTeX, conservation laws",
+  description: "Math/physics: proofs, proof decomposition, consistency checking, tensors, LaTeX, conservation laws",
   inputSchema: {
     type: "object",
     properties: {
@@ -218,6 +219,10 @@ export const deepthinking_math_schema = {
         type: "string",
         enum: ["mathematics", "physics"],
         description: "Mathematical reasoning mode"
+      },
+      thoughtType: {
+        type: "string",
+        description: "Specific thought type for mathematics mode. Use 'proof_decomposition', 'dependency_analysis', 'consistency_check', 'gap_identification', or 'assumption_trace' for proof analysis."
       },
       mathematicalModel: {
         type: "object",
@@ -294,6 +299,49 @@ export const deepthinking_math_schema = {
         required: ["quantity", "units", "conservationLaws"],
         additionalProperties: false,
         description: "Physical interpretation of the model"
+      },
+      // Phase 8: Proof decomposition fields
+      proofSteps: {
+        type: "array",
+        description: "Structured proof steps for decomposition analysis",
+        items: {
+          type: "object",
+          properties: {
+            stepNumber: { type: "integer", minimum: 1, description: "Step number in the proof" },
+            statement: { type: "string", description: "The statement being made" },
+            justification: { type: "string", description: "Justification for this step" },
+            latex: { type: "string", description: "LaTeX representation of the statement" },
+            referencesSteps: {
+              type: "array",
+              items: { type: "integer" },
+              description: "Step numbers this step references"
+            }
+          },
+          required: ["stepNumber", "statement"],
+          additionalProperties: false
+        }
+      },
+      theorem: {
+        type: "string",
+        description: "The theorem being proved (for proof decomposition)"
+      },
+      hypotheses: {
+        type: "array",
+        items: { type: "string" },
+        description: "Starting hypotheses for the proof"
+      },
+      analysisDepth: {
+        type: "string",
+        enum: ["shallow", "standard", "deep"],
+        description: "Depth of proof analysis"
+      },
+      includeConsistencyCheck: {
+        type: "boolean",
+        description: "Whether to run inconsistency detection"
+      },
+      traceAssumptions: {
+        type: "boolean",
+        description: "Whether to include assumption chain analysis"
       }
     },
     required: [...baseThoughtRequired],
