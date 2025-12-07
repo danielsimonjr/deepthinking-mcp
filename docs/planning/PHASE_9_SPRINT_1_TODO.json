@@ -1,0 +1,209 @@
+{
+  "phase": 9,
+  "sprint": 1,
+  "title": "Delete Dead Code Directories",
+  "week": "Week 1",
+  "effort": "2-3 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Dead Code Removal",
+      "description": "Delete src/visualization/ directory - 5 files of unused visualization code completely shadowed by src/export/visual/",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": [
+        "src/visualization/interactive.ts",
+        "src/visualization/mermaid.ts",
+        "src/visualization/mindmap.ts",
+        "src/visualization/state-charts.ts",
+        "src/visualization/thought-flow.ts"
+      ]
+    },
+    {
+      "id": 2,
+      "category": "Dead Code Removal",
+      "description": "Delete src/rate-limit/ directory - 4 files of unused rate limiting functionality",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": [
+        "src/rate-limit/index.ts",
+        "src/rate-limit/limiter.ts",
+        "src/rate-limit/quota.ts",
+        "src/rate-limit/types.ts"
+      ]
+    },
+    {
+      "id": 3,
+      "category": "Dead Code Removal",
+      "description": "Delete src/analytics/ directory - 2 files of placeholder analytics code",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": [
+        "src/analytics/index.ts",
+        "src/analytics/types.ts"
+      ]
+    },
+    {
+      "id": 4,
+      "category": "Dead Code Removal",
+      "description": "Delete src/ml/ directory - 4 files of unused machine learning pattern recognition",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": [
+        "src/ml/index.ts",
+        "src/ml/pattern-recognition.ts",
+        "src/ml/recommendation-engine.ts",
+        "src/ml/success-metrics.ts"
+      ]
+    },
+    {
+      "id": 5,
+      "category": "Dead Code Removal",
+      "description": "Delete src/webhooks/ directory - 5 files of unused webhook/event system",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": [
+        "src/webhooks/event-bus.ts",
+        "src/webhooks/event-emitter.ts",
+        "src/webhooks/index.ts",
+        "src/webhooks/types.ts",
+        "src/webhooks/webhook-manager.ts"
+      ]
+    },
+    {
+      "id": 6,
+      "category": "Dead Code Removal",
+      "description": "Delete src/collaboration/ directory - 5 files of unused multi-agent collaboration code",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": [
+        "src/collaboration/annotations.ts",
+        "src/collaboration/conflict-resolution.ts",
+        "src/collaboration/index.ts",
+        "src/collaboration/multi-agent.ts",
+        "src/collaboration/session-sharing.ts"
+      ]
+    },
+    {
+      "id": 7,
+      "category": "Dead Code Removal",
+      "description": "Delete src/templates/ directory - 4 files of unused built-in template system",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": [
+        "src/templates/built-in.ts",
+        "src/templates/factory.ts",
+        "src/templates/index.ts",
+        "src/templates/registry.ts"
+      ]
+    },
+    {
+      "id": 8,
+      "category": "Dead Code Removal",
+      "description": "Delete src/comparison/ directory - 5 files of unused session comparison tools",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": [
+        "src/comparison/comparator.ts",
+        "src/comparison/diff-generator.ts",
+        "src/comparison/index.ts",
+        "src/comparison/multi-comparator.ts",
+        "src/comparison/types.ts"
+      ]
+    },
+    {
+      "id": 9,
+      "category": "Dead Code Removal",
+      "description": "Delete src/batch/ directory - 3 files of unused batch processing (only consumer of backup/)",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": [
+        "src/batch/index.ts",
+        "src/batch/processor.ts",
+        "src/batch/types.ts"
+      ]
+    },
+    {
+      "id": 10,
+      "category": "Dead Code Removal",
+      "description": "Delete src/backup/ directory - 4 files only used by dead batch/ code",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": [
+        "src/backup/backup-manager.ts",
+        "src/backup/index.ts",
+        "src/backup/types.ts",
+        "src/backup/providers/local.ts"
+      ]
+    },
+    {
+      "id": 11,
+      "category": "Configuration",
+      "description": "Update tsconfig.json - Remove path aliases for deleted directories (@analytics/*, @backup/*, @batch/*, @collaboration/*, @comparison/*, @ml/*, @rate-limit/*, @templates/*, @visualization/*, @webhooks/*)",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": ["tsconfig.json"]
+    },
+    {
+      "id": 12,
+      "category": "Verification",
+      "description": "Run npm run typecheck - Verify no TypeScript errors after deletions",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": []
+    },
+    {
+      "id": 13,
+      "category": "Verification",
+      "description": "Run npm run test:run - Verify all tests pass after deletions",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": []
+    },
+    {
+      "id": 14,
+      "category": "Verification",
+      "description": "Run npm run build - Verify clean build output",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": []
+    },
+    {
+      "id": 15,
+      "category": "Verification",
+      "description": "Run tools/create-dependency-graph.ts - Regenerate dependency graph with reduced file count",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": [
+        "docs/architecture/dependency-graph.json",
+        "docs/architecture/DEPENDENCY_GRAPH.md"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "All 41 dead code files deleted from 10 directories",
+    "Zero TypeScript compilation errors",
+    "All existing tests pass (790+ tests)",
+    "Build completes successfully",
+    "Dependency graph shows reduced file count (201 → 160 files)",
+    "No runtime errors when starting MCP server"
+  ],
+  "filesDeleted": [
+    "src/visualization/* (5 files)",
+    "src/rate-limit/* (4 files)",
+    "src/analytics/* (2 files)",
+    "src/ml/* (4 files)",
+    "src/webhooks/* (5 files)",
+    "src/collaboration/* (5 files)",
+    "src/templates/* (4 files)",
+    "src/comparison/* (5 files)",
+    "src/batch/* (3 files)",
+    "src/backup/* (4 files)"
+  ],
+  "filesModified": [
+    "tsconfig.json"
+  ],
+  "totalEstimatedHours": 2.25,
+  "notes": "This sprint focuses on removing confirmed dead code. All directories were verified to have zero external imports using the dependency graph tool. The backup/ directory is only imported by batch/, which is itself dead code. Deleting these directories will reduce bundle size by ~243 KB and simplify the codebase structure."
+}

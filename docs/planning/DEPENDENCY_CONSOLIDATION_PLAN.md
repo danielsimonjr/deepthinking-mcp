@@ -164,31 +164,38 @@ grep -r "from ['\"].*analytics" src/       # Returns 0 matches
 
 ## Duplicate/Overlapping Modules
 
-### 1. Sanitization Modules (Confusing Names)
+### 1. Sanitization Modules (Both Dead Code)
 
 **Problem**: Two files with similar names but different purposes:
-- `src/utils/sanitization.ts` - Input validation + HTML/LaTeX escaping
-- `src/utils/sanitize.ts` - Path security + UUID validation
+- `src/utils/sanitization.ts` - Input validation + HTML/LaTeX escaping (ACTIVE)
+- `src/utils/sanitize.ts` - Path security + UUID validation (DEAD CODE)
 
-**Solution**: Rename for clarity:
-- Keep `src/utils/sanitization.ts` (input sanitization)
-- Rename `src/utils/sanitize.ts` → `src/utils/path-security.ts`
+**Analysis Update**: Further investigation revealed `src/utils/sanitize.ts` is NOT imported anywhere. The batch/types.ts reference to "sanitize" is just a string enum value, not an import.
 
-### 2. Rate Limiter Modules (Duplicate Feature)
+**Solution**: DELETE `src/utils/sanitize.ts` - it's completely unused dead code.
+
+### 2. Rate Limiter Modules (All Dead Code)
 
 **Problem**: Two rate limiting implementations:
-- `src/utils/rate-limiter.ts` - Simple rate limiter
-- `src/rate-limit/` - Full rate limiting system with quotas
+- `src/utils/rate-limiter.ts` - Simple rate limiter (DEAD CODE - not imported)
+- `src/rate-limit/` - Full rate limiting system with quotas (DEAD CODE - not imported)
 
-**Solution**: Both are dead code - DELETE both. If rate limiting is needed later, implement fresh with clear requirements.
+**Solution**: DELETE both. Neither is imported anywhere in the codebase.
 
 ### 3. Visualization vs Export/Visual
 
 **Problem**: Two visualization directories:
-- `src/visualization/` - Original visualization (mermaid, mindmap, etc.)
-- `src/export/visual/` - Current visualization system (per-mode exporters)
+- `src/visualization/` - Original visualization (mermaid, mindmap, etc.) - DEAD CODE
+- `src/export/visual/` - Current visualization system (per-mode exporters) - ACTIVE
 
 **Solution**: DELETE `src/visualization/` - it's completely superseded.
+
+### Updated Dead Code Summary
+
+Including utils dead files, the total dead code count is:
+- **10 directories**: 41 files
+- **2 utils files**: `sanitize.ts`, `rate-limiter.ts`
+- **Total**: 43 files (~250 KB)
 
 ---
 
