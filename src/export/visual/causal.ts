@@ -1,7 +1,8 @@
 /**
- * Causal Visual Exporter (v7.0.2)
+ * Causal Visual Exporter (v7.0.3)
  * Sprint 8 Task 8.1: Causal graph export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
+ * Phase 9: Added GraphML and TikZ export support
  */
 
 import type { CausalThought } from '../../types/index.js';
@@ -22,6 +23,18 @@ import {
   calculateSVGHeight,
   DEFAULT_SVG_OPTIONS,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+  type GraphMLOptions,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  type TikZNode,
+  type TikZEdge,
+  type TikZOptions,
+} from './tikz-utils.js';
 
 /**
  * Export causal graph to visual format
@@ -38,6 +51,10 @@ export function exportCausalGraph(thought: CausalThought, options: VisualExportO
       return causalGraphToASCII(thought);
     case 'svg':
       return causalGraphToSVG(thought, options);
+    case 'graphml':
+      return causalGraphToGraphML(thought, options);
+    case 'tikz':
+      return causalGraphToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -271,4 +288,132 @@ function causalGraphToSVG(thought: CausalThought, options: VisualExportOptions):
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export causal graph to GraphML format
+ */
+function causalGraphToGraphML(thought: CausalThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+
+  if (!thought.causalGraph || !thought.causalGraph.nodes) {
+    const emptyNodes: GraphMLNode[] = [
+      { id: 'no_data', label: 'No causal graph data', type: 'message' }
+    ];
+    return generateGraphML(emptyNodes, [], { graphName: 'Causal Graph' });
+  }
+
+  // Convert nodes to GraphML format
+  const nodes: GraphMLNode[] = thought.causalGraph.nodes.map(node => ({
+    id: node.id,
+    label: node.name,
+    type: node.type,
+  }));
+
+  // Convert edges to GraphML format
+  const edges: GraphMLEdge[] = thought.causalGraph.edges.map((edge, index) => {
+    const edgeData: GraphMLEdge = {
+      id: `e${index}`,
+      source: edge.from,
+      target: edge.to,
+    };
+
+    if (includeMetrics && edge.strength !== undefined) {
+      edgeData.metadata = { weight: edge.strength };
+    }
+
+    return edgeData;
+  });
+
+  const graphmlOptions: GraphMLOptions = {
+    graphName: 'Causal Graph',
+  };
+
+  return generateGraphML(nodes, edges, graphmlOptions);
+}
+
+/**
+ * Export causal graph to TikZ format
+ */
+function causalGraphToTikZ(thought: CausalThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  if (!thought.causalGraph || !thought.causalGraph.nodes) {
+    const emptyNodes: TikZNode[] = [
+      { id: 'no_data', x: 0, y: 0, label: 'No causal graph data', shape: 'rectangle' }
+    ];
+    return generateTikZ(emptyNodes, [], { title: 'Causal Graph' });
+  }
+
+  // Group nodes by type for layered layout
+  const causes = thought.causalGraph.nodes.filter(n => n.type === 'cause');
+  const mediators = thought.causalGraph.nodes.filter(n => n.type === 'mediator');
+  const confounders = thought.causalGraph.nodes.filter(n => n.type === 'confounder');
+  const effects = thought.causalGraph.nodes.filter(n => n.type === 'effect');
+
+  // Create TikZ nodes with layered positions
+  const nodes: TikZNode[] = [];
+
+  // Layer 0: Causes (y = 0)
+  causes.forEach((node, index) => {
+    const spacing = 3;
+    const offset = (causes.length - 1) * spacing / 2;
+    nodes.push({
+      id: node.id,
+      x: index * spacing - offset,
+      y: 0,
+      label: includeLabels ? node.name : node.id,
+      shape: 'stadium',
+      type: node.type,
+    });
+  });
+
+  // Layer 1: Mediators and Confounders (y = -2)
+  const middleNodes = [...mediators, ...confounders];
+  middleNodes.forEach((node, index) => {
+    const spacing = 3;
+    const offset = (middleNodes.length - 1) * spacing / 2;
+    nodes.push({
+      id: node.id,
+      x: index * spacing - offset,
+      y: -2,
+      label: includeLabels ? node.name : node.id,
+      shape: node.type === 'confounder' ? 'diamond' : 'rectangle',
+      type: node.type,
+    });
+  });
+
+  // Layer 2: Effects (y = -4)
+  effects.forEach((node, index) => {
+    const spacing = 3;
+    const offset = (effects.length - 1) * spacing / 2;
+    nodes.push({
+      id: node.id,
+      x: index * spacing - offset,
+      y: -4,
+      label: includeLabels ? node.name : node.id,
+      shape: 'ellipse',
+      type: node.type,
+    });
+  });
+
+  // Create TikZ edges
+  const edges: TikZEdge[] = thought.causalGraph.edges.map(edge => {
+    const edgeData: TikZEdge = {
+      source: edge.from,
+      target: edge.to,
+    };
+
+    if (includeMetrics && edge.strength !== undefined) {
+      edgeData.label = edge.strength.toFixed(2);
+    }
+
+    return edgeData;
+  });
+
+  const tikzOptions: TikZOptions = {
+    title: 'Causal Graph',
+  };
+
+  return generateTikZ(nodes, edges, tikzOptions);
 }

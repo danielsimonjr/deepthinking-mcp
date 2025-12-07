@@ -1,7 +1,7 @@
 /**
- * Mathematics Visual Exporter (v7.0.2)
+ * Mathematics Visual Exporter (v7.0.3)
  * Phase 7 Sprint 2: Mathematics reasoning export to Mermaid, DOT, ASCII
- * Phase 9: Added native SVG export support
+ * Phase 9: Added native SVG export support, GraphML, TikZ
  */
 
 import type { MathematicsThought } from '../../types/modes/mathematics.js';
@@ -20,6 +20,16 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  type TikZNode,
+  type TikZEdge,
+} from './tikz-utils.js';
 
 /**
  * Export mathematics reasoning to visual format
@@ -36,6 +46,10 @@ export function exportMathematicsDerivation(thought: MathematicsThought, options
       return mathematicsToASCII(thought);
     case 'svg':
       return mathematicsToSVG(thought, options);
+    case 'graphml':
+      return mathematicsToGraphML(thought, options);
+    case 'tikz':
+      return mathematicsToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -392,4 +406,210 @@ function mathematicsToSVG(thought: MathematicsThought, options: VisualExportOpti
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export mathematics reasoning to GraphML format
+ */
+function mathematicsToGraphML(thought: MathematicsThought, options: VisualExportOptions): string {
+  const { includeLabels = true } = options;
+
+  const nodes: GraphMLNode[] = [];
+  const edges: GraphMLEdge[] = [];
+  let edgeCount = 0;
+
+  // Add thought type as root node
+  const typeId = sanitizeId(`type_${thought.thoughtType || 'proof'}`);
+  nodes.push({
+    id: typeId,
+    label: includeLabels ? (thought.thoughtType || 'Proof').replace(/_/g, ' ') : typeId,
+    type: 'type',
+  });
+
+  // Add theorems/axioms if present
+  if (thought.theorems && thought.theorems.length > 0) {
+    thought.theorems.forEach((theorem, index) => {
+      const theoremId = sanitizeId(`theorem_${index}`);
+      nodes.push({
+        id: theoremId,
+        label: theorem.name || `Theorem ${index + 1}`,
+        type: 'axiom',
+        metadata: {
+          description: theorem.statement,
+        },
+      });
+
+      // Connect type to theorems
+      edges.push({
+        id: `e${edgeCount++}`,
+        source: typeId,
+        target: theoremId,
+        directed: true,
+      });
+    });
+  }
+
+  // Add proof strategy with derivation steps
+  if (thought.proofStrategy) {
+    const strategyId = sanitizeId('strategy');
+    nodes.push({
+      id: strategyId,
+      label: thought.proofStrategy.type,
+      type: 'strategy',
+    });
+
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: typeId,
+      target: strategyId,
+      directed: true,
+    });
+
+    // Add proof steps as derivation nodes
+    let prevStepId = strategyId;
+    thought.proofStrategy.steps.forEach((step, index) => {
+      const stepId = sanitizeId(`step_${index}`);
+      nodes.push({
+        id: stepId,
+        label: includeLabels ? step.slice(0, 40) + (step.length > 40 ? '...' : '') : `Step ${index + 1}`,
+        type: 'step',
+        metadata: {
+          description: step,
+        },
+      });
+
+      edges.push({
+        id: `e${edgeCount++}`,
+        source: prevStepId,
+        target: stepId,
+        directed: true,
+      });
+
+      prevStepId = stepId;
+    });
+  }
+
+  // Add mathematical model if present
+  if (thought.mathematicalModel) {
+    const modelId = sanitizeId('model');
+    nodes.push({
+      id: modelId,
+      label: thought.mathematicalModel.symbolic || 'Mathematical Model',
+      type: 'model',
+      metadata: {
+        description: thought.mathematicalModel.latex,
+      },
+    });
+
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: typeId,
+      target: modelId,
+      directed: true,
+    });
+  }
+
+  return generateGraphML(nodes, edges, {
+    graphName: 'Mathematics Derivation',
+    directed: true,
+    includeLabels,
+  });
+}
+
+/**
+ * Export mathematics reasoning to TikZ format
+ */
+function mathematicsToTikZ(thought: MathematicsThought, options: VisualExportOptions): string {
+  const { includeLabels = true, colorScheme = 'default' } = options;
+
+  const nodes: TikZNode[] = [];
+  const edges: TikZEdge[] = [];
+  let yPos = 0;
+
+  // Add thought type as root node (stadium shape for axioms/theorems)
+  const typeId = sanitizeId(`type_${thought.thoughtType || 'proof'}`);
+  nodes.push({
+    id: typeId,
+    label: includeLabels ? (thought.thoughtType || 'Proof').replace(/_/g, ' ') : typeId,
+    x: 4,
+    y: yPos,
+    type: 'primary',
+    shape: 'stadium',
+  });
+  yPos -= 2;
+
+  // Add theorems/axioms if present (stadium shapes)
+  if (thought.theorems && thought.theorems.length > 0) {
+    thought.theorems.forEach((theorem, index) => {
+      const theoremId = sanitizeId(`theorem_${index}`);
+      const xPos = 1 + index * 3;
+      nodes.push({
+        id: theoremId,
+        label: theorem.name || `Theorem ${index + 1}`,
+        x: xPos,
+        y: yPos,
+        type: 'secondary',
+        shape: 'stadium',
+      });
+
+      edges.push({
+        source: typeId,
+        target: theoremId,
+        directed: true,
+      });
+    });
+    yPos -= 2;
+  }
+
+  // Add proof strategy with derivation steps (rectangles for steps)
+  if (thought.proofStrategy) {
+    const strategyId = sanitizeId('strategy');
+    nodes.push({
+      id: strategyId,
+      label: thought.proofStrategy.type,
+      x: 4,
+      y: yPos,
+      type: 'secondary',
+      shape: 'ellipse',
+    });
+
+    edges.push({
+      source: typeId,
+      target: strategyId,
+      directed: true,
+    });
+
+    yPos -= 2;
+
+    // Add proof steps as derivation nodes (rectangles)
+    let prevStepId = strategyId;
+    thought.proofStrategy.steps.forEach((step, index) => {
+      const stepId = sanitizeId(`step_${index}`);
+      const xPos = 1 + (index % 3) * 2.5;
+      const stepYPos = yPos - Math.floor(index / 3) * 1.5;
+
+      nodes.push({
+        id: stepId,
+        label: includeLabels ? `${index + 1}. ${step.substring(0, 20)}...` : `Step ${index + 1}`,
+        x: xPos,
+        y: stepYPos,
+        type: 'neutral',
+        shape: 'rectangle',
+      });
+
+      edges.push({
+        source: prevStepId,
+        target: stepId,
+        directed: true,
+      });
+
+      prevStepId = stepId;
+    });
+  }
+
+  return generateTikZ(nodes, edges, {
+    title: 'Mathematics Derivation',
+    colorScheme,
+    includeLabels,
+  });
 }

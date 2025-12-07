@@ -1,7 +1,8 @@
 /**
- * Shannon Visual Exporter (v7.0.2)
+ * Shannon Visual Exporter (v7.0.3)
  * Sprint 8 Task 8.1: Shannon stage flow export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
+ * Phase 9: Added GraphML and TikZ export support
  */
 
 import type { ShannonThought } from '../../types/index.js';
@@ -19,6 +20,14 @@ import {
   layoutNodesHorizontally,
   DEFAULT_SVG_OPTIONS,
 } from './svg-utils.js';
+import {
+  createLinearGraphML,
+} from './graphml-utils.js';
+import {
+  type TikZNode,
+  type TikZEdge,
+  generateTikZ,
+} from './tikz-utils.js';
 
 /**
  * Export Shannon stage flow diagram to visual format
@@ -35,6 +44,10 @@ export function exportShannonStageFlow(thought: ShannonThought, options: VisualE
       return shannonToASCII(thought);
     case 'svg':
       return shannonToSVG(thought, options);
+    case 'graphml':
+      return shannonToGraphML(thought, options);
+    case 'tikz':
+      return shannonToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -245,4 +258,54 @@ function shannonToSVG(thought: ShannonThought, options: VisualExportOptions): st
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export Shannon stage flow to GraphML format
+ */
+function shannonToGraphML(_thought: ShannonThought, options: VisualExportOptions): string {
+  const { includeLabels = true } = options;
+
+  // Create labels from stageLabels
+  const labels = stages.map(stage =>
+    includeLabels ? stageLabels[stage] : sanitizeId(stage)
+  );
+
+  return createLinearGraphML(labels, {
+    graphName: 'Shannon Stage Flow',
+    directed: true
+  });
+}
+
+/**
+ * Export Shannon stage flow to TikZ format
+ */
+function shannonToTikZ(thought: ShannonThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  // Create TikZ nodes with horizontal spacing
+  const nodes: TikZNode[] = stages.map((stage, i) => ({
+    id: sanitizeId(stage),
+    label: includeLabels ? stageLabels[stage] : sanitizeId(stage),
+    x: i * 3,
+    y: 0,
+    shape: stage === thought.stage ? 'stadium' : 'rectangle',
+    type: stage === thought.stage ? 'primary' : 'neutral',
+  }));
+
+  // Create edges between consecutive stages
+  const edges: TikZEdge[] = [];
+  for (let i = 0; i < stages.length - 1; i++) {
+    edges.push({
+      source: sanitizeId(stages[i]),
+      target: sanitizeId(stages[i + 1]),
+      label: '',
+    });
+  }
+
+  return generateTikZ(nodes, edges, {
+    title: 'Shannon Stage Flow',
+    includeLabels,
+    includeMetrics,
+  });
 }

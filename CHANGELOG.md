@@ -9,6 +9,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [7.0.3] - 2025-12-07
+
+### ✨ Features
+
+**GraphML and TikZ Export Support for All Visual Exporters**
+
+Added GraphML (XML-based) and TikZ (LaTeX-based) export modules accessible by all 19 thought modes with dedicated visual exporters.
+
+#### New Modules
+- `src/export/visual/graphml-utils.ts` - Shared GraphML utilities with:
+  - XML-based graph representation for tools like yEd, Gephi, Cytoscape, NetworkX
+  - Node and edge rendering with metadata support
+  - Linear, tree, and layered graph generation helpers
+  - XML escaping and schema compliance
+
+- `src/export/visual/tikz-utils.ts` - Shared TikZ utilities with:
+  - LaTeX/TikZ graphics for academic papers and publications
+  - Node shapes (rectangle, circle, ellipse, diamond, stadium)
+  - Edge rendering with solid, dashed, dotted styles and bend options
+  - Color palettes (default, pastel, monochrome)
+  - Metrics panel and legend generation
+  - Standalone document support for direct compilation
+
+#### Updated Exporters
+All 19 mode-specific visual exporters now support GraphML and TikZ formats:
+- Causal, Sequential, Temporal, Bayesian, Game Theory
+- Shannon, Abductive, Counterfactual, Analogical, Evidential
+- First Principles, Systems Thinking, Scientific Method, Optimization
+- Formal Logic, Mathematics, Physics, Hybrid, Meta-Reasoning
+
+#### Updated Services
+- `ExportService.exportSession()` now accepts `'graphml'` and `'tikz'` as valid formats
+- Visual format type extended: `'mermaid' | 'dot' | 'ascii' | 'svg' | 'graphml' | 'tikz'`
+- `VisualExportOptions` extended with `tikzStandalone`, `tikzScale`, `graphmlDirected` options
+
+#### API
+```typescript
+// Export to GraphML (for graph analysis tools)
+const graphmlOutput = exportService.exportSession(session, 'graphml');
+
+// Export to TikZ (for LaTeX documents)
+const tikzOutput = exportService.exportSession(session, 'tikz');
+
+// Direct exporter usage
+import { exportCausalGraph } from './export/visual/causal.js';
+const graphml = exportCausalGraph(thought, { format: 'graphml' });
+const tikz = exportCausalGraph(thought, { format: 'tikz', colorScheme: 'pastel' });
+```
+
+---
+
 ## [7.0.2] - 2025-12-07
 
 ### ✨ Features

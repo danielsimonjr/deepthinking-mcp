@@ -1,7 +1,8 @@
 /**
- * MetaReasoning Visual Exporter (v7.0.2)
+ * MetaReasoning Visual Exporter (v7.0.3)
  * Phase 7 Sprint 2: Meta-reasoning export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
+ * Phase 9: Added GraphML and TikZ export support
  */
 
 import type { MetaReasoningThought } from '../../types/modes/metareasoning.js';
@@ -20,6 +21,18 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+  type GraphMLOptions,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  type TikZNode,
+  type TikZEdge,
+  type TikZOptions,
+} from './tikz-utils.js';
 
 /**
  * Export meta-reasoning to visual format
@@ -36,6 +49,10 @@ export function exportMetaReasoningVisualization(thought: MetaReasoningThought, 
       return metaReasoningToASCII(thought);
     case 'svg':
       return metaReasoningToSVG(thought, options);
+    case 'graphml':
+      return metaReasoningToGraphML(thought, options);
+    case 'tikz':
+      return metaReasoningToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -461,4 +478,313 @@ function metaReasoningToSVG(thought: MetaReasoningThought, options: VisualExport
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export meta-reasoning to GraphML format
+ */
+function metaReasoningToGraphML(thought: MetaReasoningThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  const nodes: GraphMLNode[] = [];
+  const edges: GraphMLEdge[] = [];
+
+  // Meta-reasoning central node
+  nodes.push({
+    id: 'meta',
+    label: 'Meta-Reasoning',
+    type: 'meta',
+  });
+
+  // Current strategy node
+  const currentLabel = includeLabels ? thought.currentStrategy.approach : 'Current Strategy';
+  nodes.push({
+    id: 'current_strategy',
+    label: currentLabel,
+    type: 'current',
+    metadata: {
+      mode: thought.currentStrategy.mode,
+      thoughtsSpent: thought.currentStrategy.thoughtsSpent,
+    },
+  });
+
+  edges.push({
+    id: 'e_meta_current',
+    source: 'meta',
+    target: 'current_strategy',
+    directed: true,
+  });
+
+  // Strategy evaluation node
+  if (includeMetrics) {
+    nodes.push({
+      id: 'evaluation',
+      label: `Effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`,
+      type: 'evaluation',
+      metadata: {
+        effectiveness: thought.strategyEvaluation.effectiveness,
+        efficiency: thought.strategyEvaluation.efficiency,
+        confidence: thought.strategyEvaluation.confidence,
+        progressRate: thought.strategyEvaluation.progressRate,
+        qualityScore: thought.strategyEvaluation.qualityScore,
+      },
+    });
+
+    edges.push({
+      id: 'e_current_eval',
+      source: 'current_strategy',
+      target: 'evaluation',
+      directed: true,
+    });
+
+    // Issues node
+    if (thought.strategyEvaluation.issues.length > 0) {
+      nodes.push({
+        id: 'issues',
+        label: `Issues: ${thought.strategyEvaluation.issues.length}`,
+        type: 'issue',
+        metadata: {
+          issues: thought.strategyEvaluation.issues,
+        },
+      });
+
+      edges.push({
+        id: 'e_eval_issues',
+        source: 'evaluation',
+        target: 'issues',
+        directed: true,
+      });
+    }
+
+    // Strengths node
+    if (thought.strategyEvaluation.strengths.length > 0) {
+      nodes.push({
+        id: 'strengths',
+        label: `Strengths: ${thought.strategyEvaluation.strengths.length}`,
+        type: 'strength',
+        metadata: {
+          strengths: thought.strategyEvaluation.strengths,
+        },
+      });
+
+      edges.push({
+        id: 'e_eval_strengths',
+        source: 'evaluation',
+        target: 'strengths',
+        directed: true,
+      });
+    }
+  }
+
+  // Alternative strategies
+  if (thought.alternativeStrategies.length > 0) {
+    thought.alternativeStrategies.forEach((alt, index) => {
+      const altLabel = includeLabels
+        ? `${alt.mode}: ${(alt.recommendationScore * 100).toFixed(0)}%`
+        : `Alternative ${index + 1}`;
+
+      nodes.push({
+        id: `alt_${index}`,
+        label: altLabel,
+        type: 'alternative',
+        metadata: {
+          mode: alt.mode,
+          reasoning: alt.reasoning,
+          expectedBenefit: alt.expectedBenefit,
+          switchingCost: alt.switchingCost,
+          recommendationScore: alt.recommendationScore,
+        },
+      });
+
+      edges.push({
+        id: `e_meta_alt_${index}`,
+        source: 'meta',
+        target: `alt_${index}`,
+        directed: true,
+      });
+    });
+  }
+
+  // Recommendation node
+  const recLabel = `${thought.recommendation.action}${thought.recommendation.targetMode ? ` → ${thought.recommendation.targetMode}` : ''}`;
+  nodes.push({
+    id: 'recommendation',
+    label: recLabel,
+    type: 'recommendation',
+    metadata: {
+      action: thought.recommendation.action,
+      targetMode: thought.recommendation.targetMode,
+      justification: thought.recommendation.justification,
+      confidence: thought.recommendation.confidence,
+      expectedImprovement: thought.recommendation.expectedImprovement,
+    },
+  });
+
+  edges.push({
+    id: 'e_meta_rec',
+    source: 'meta',
+    target: 'recommendation',
+    directed: true,
+  });
+
+  // Quality metrics node
+  if (includeMetrics) {
+    nodes.push({
+      id: 'quality',
+      label: `Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`,
+      type: 'quality',
+      metadata: {
+        logicalConsistency: thought.qualityMetrics.logicalConsistency,
+        evidenceQuality: thought.qualityMetrics.evidenceQuality,
+        completeness: thought.qualityMetrics.completeness,
+        originality: thought.qualityMetrics.originality,
+        clarity: thought.qualityMetrics.clarity,
+        overallQuality: thought.qualityMetrics.overallQuality,
+      },
+    });
+
+    edges.push({
+      id: 'e_meta_quality',
+      source: 'meta',
+      target: 'quality',
+      directed: true,
+    });
+  }
+
+  const graphmlOptions: GraphMLOptions = {
+    graphName: 'MetaReasoning Visualization',
+    directed: true,
+    includeLabels,
+  };
+
+  return generateGraphML(nodes, edges, graphmlOptions);
+}
+
+/**
+ * Export meta-reasoning to TikZ format
+ */
+function metaReasoningToTikZ(thought: MetaReasoningThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true, colorScheme = 'default' } = options;
+
+  const nodes: TikZNode[] = [];
+  const edges: TikZEdge[] = [];
+
+  // Meta-reasoning central node at top
+  nodes.push({
+    id: 'meta',
+    label: 'Meta-Reasoning',
+    x: 0,
+    y: 0,
+    shape: 'ellipse',
+    type: 'meta',
+  });
+
+  // Current strategy on the left
+  const currentLabel = includeLabels ? thought.currentStrategy.approach : 'Current Strategy';
+  nodes.push({
+    id: 'current_strategy',
+    label: currentLabel.substring(0, 30), // Truncate for readability
+    x: -4,
+    y: -2,
+    shape: 'stadium',
+    type: 'current',
+  });
+
+  edges.push({
+    source: 'meta',
+    target: 'current_strategy',
+    directed: true,
+  });
+
+  // Recommendation on the right
+  const recLabel = `${thought.recommendation.action}${thought.recommendation.targetMode ? ` → ${thought.recommendation.targetMode}` : ''}`;
+  nodes.push({
+    id: 'recommendation',
+    label: recLabel.substring(0, 30),
+    x: 4,
+    y: -2,
+    shape: 'stadium',
+    type: 'recommendation',
+  });
+
+  edges.push({
+    source: 'meta',
+    target: 'recommendation',
+    directed: true,
+  });
+
+  // Strategy evaluation
+  if (includeMetrics) {
+    nodes.push({
+      id: 'evaluation',
+      label: `Eff: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`,
+      x: -4,
+      y: -4,
+      shape: 'diamond',
+      type: 'evaluation',
+    });
+
+    edges.push({
+      source: 'current_strategy',
+      target: 'evaluation',
+      directed: true,
+    });
+  }
+
+  // Alternative strategies at the bottom
+  if (thought.alternativeStrategies.length > 0) {
+    const altCount = thought.alternativeStrategies.length;
+    const spacing = 2.5;
+    const totalWidth = (altCount - 1) * spacing;
+    const offset = totalWidth / 2;
+
+    thought.alternativeStrategies.forEach((alt, index) => {
+      const altLabel = includeLabels
+        ? `${alt.mode}: ${(alt.recommendationScore * 100).toFixed(0)}%`
+        : `Alt ${index + 1}`;
+
+      nodes.push({
+        id: `alt_${index}`,
+        label: altLabel,
+        x: index * spacing - offset,
+        y: -5,
+        shape: 'rectangle',
+        type: 'alternative',
+      });
+
+      edges.push({
+        source: 'meta',
+        target: `alt_${index}`,
+        directed: true,
+        style: 'dashed',
+      });
+    });
+  }
+
+  // Quality metrics
+  if (includeMetrics) {
+    nodes.push({
+      id: 'quality',
+      label: `Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`,
+      x: 4,
+      y: -4,
+      shape: 'diamond',
+      type: 'quality',
+    });
+
+    edges.push({
+      source: 'meta',
+      target: 'quality',
+      directed: true,
+      style: 'dashed',
+    });
+  }
+
+  const tikzOptions: TikZOptions = {
+    title: 'MetaReasoning Visualization',
+    colorScheme,
+    includeLabels,
+  };
+
+  return generateTikZ(nodes, edges, tikzOptions);
 }

@@ -1,7 +1,8 @@
 /**
- * Analogical Visual Exporter (v7.0.2)
+ * Analogical Visual Exporter (v7.0.3)
  * Sprint 8 Task 8.1: Analogical domain mapping export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
+ * Phase 9: Added GraphML and TikZ export support
  */
 
 import type { AnalogicalThought } from '../../types/index.js';
@@ -18,6 +19,21 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+  type GraphMLOptions,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  getTikZColor,
+  renderTikZMetrics,
+  renderTikZLegend,
+  type TikZNode,
+  type TikZEdge,
+  type TikZOptions,
+} from './tikz-utils.js';
 
 /**
  * Export analogical domain mapping to visual format
@@ -34,6 +50,10 @@ export function exportAnalogicalMapping(thought: AnalogicalThought, options: Vis
       return analogicalToASCII(thought);
     case 'svg':
       return analogicalToSVG(thought, options);
+    case 'graphml':
+      return analogicalToGraphML(thought, options);
+    case 'tikz':
+      return analogicalToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -263,4 +283,148 @@ function analogicalToSVG(thought: AnalogicalThought, options: VisualExportOption
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export analogical domain mapping to GraphML format
+ */
+function analogicalToGraphML(thought: AnalogicalThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+
+  // Create nodes for source domain entities
+  const nodes: GraphMLNode[] = [];
+  for (const entity of thought.sourceDomain.entities) {
+    nodes.push({
+      id: 'src_' + entity.id,
+      label: entity.name,
+      type: 'source',
+      metadata: {
+        description: entity.description,
+        domain: thought.sourceDomain.name,
+      },
+    });
+  }
+
+  // Create nodes for target domain entities
+  for (const entity of thought.targetDomain.entities) {
+    nodes.push({
+      id: 'tgt_' + entity.id,
+      label: entity.name,
+      type: 'target',
+      metadata: {
+        description: entity.description,
+        domain: thought.targetDomain.name,
+      },
+    });
+  }
+
+  // Create edges for mappings
+  const edges: GraphMLEdge[] = thought.mapping.map((mapping, index) => {
+    const edge: GraphMLEdge = {
+      id: `mapping_${index}`,
+      source: 'src_' + mapping.sourceEntityId,
+      target: 'tgt_' + mapping.targetEntityId,
+    };
+
+    if (includeMetrics) {
+      edge.metadata = {
+        weight: mapping.confidence,
+        type: 'mapping',
+      };
+      edge.label = mapping.confidence.toFixed(2);
+    }
+
+    return edge;
+  });
+
+  const graphmlOptions: GraphMLOptions = {
+    graphName: 'Analogical Mapping',
+  };
+
+  return generateGraphML(nodes, edges, graphmlOptions);
+}
+
+/**
+ * Export analogical domain mapping to TikZ format
+ */
+function analogicalToTikZ(thought: AnalogicalThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true, colorScheme = 'default' } = options;
+
+  const nodes: TikZNode[] = [];
+
+  // Source domain entities on the left (x = -3)
+  thought.sourceDomain.entities.forEach((entity, index) => {
+    nodes.push({
+      id: 'src_' + entity.id,
+      x: -3,
+      y: -index * 1.5,
+      label: includeLabels ? entity.name : entity.id,
+      shape: 'rectangle',
+      type: 'tertiary',
+    });
+  });
+
+  // Target domain entities on the right (x = 3)
+  thought.targetDomain.entities.forEach((entity, index) => {
+    nodes.push({
+      id: 'tgt_' + entity.id,
+      x: 3,
+      y: -index * 1.5,
+      label: includeLabels ? entity.name : entity.id,
+      shape: 'rectangle',
+      type: 'primary',
+    });
+  });
+
+  // Create dashed edges for mappings
+  const edges: TikZEdge[] = thought.mapping.map(mapping => {
+    const edge: TikZEdge = {
+      source: 'src_' + mapping.sourceEntityId,
+      target: 'tgt_' + mapping.targetEntityId,
+      style: 'dashed',
+    };
+
+    if (includeMetrics) {
+      edge.label = mapping.confidence.toFixed(2);
+    }
+
+    return edge;
+  });
+
+  const tikzOptions: TikZOptions = {
+    title: 'Analogical Mapping',
+    colorScheme,
+    includeLabels,
+    includeMetrics,
+  };
+
+  let tikz = generateTikZ(nodes, edges, tikzOptions);
+
+  // Add metrics panel if requested
+  if (includeMetrics) {
+    const metrics = [
+      { label: 'Analogy Strength', value: thought.analogyStrength.toFixed(2) },
+      { label: 'Mappings', value: thought.mapping.length.toString() },
+      { label: 'Source Entities', value: thought.sourceDomain.entities.length.toString() },
+      { label: 'Target Entities', value: thought.targetDomain.entities.length.toString() },
+    ];
+    tikz = tikz.replace(
+      /\\end\{tikzpicture\}/,
+      renderTikZMetrics(6, -6, metrics) + '\n\\end{tikzpicture}'
+    );
+  }
+
+  // Add legend
+  const sourceColors = getTikZColor('tertiary', colorScheme);
+  const targetColors = getTikZColor('primary', colorScheme);
+  const legendItems = [
+    { label: 'Source Domain', color: sourceColors },
+    { label: 'Target Domain', color: targetColors },
+  ];
+  tikz = tikz.replace(
+    /\\end\{tikzpicture\}/,
+    renderTikZLegend(-3, -6, legendItems) + '\n\\end{tikzpicture}'
+  );
+
+  return tikz;
 }
