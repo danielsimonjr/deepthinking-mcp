@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 7.0.1 | **Last Updated**: 2025-12-07
+**Version**: 7.1.0 | **Last Updated**: 2025-12-07
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -38,7 +38,7 @@ The codebase is organized into the following modules:
 
 - **cache**: 6 files
 - **config**: 1 file
-- **export**: 27 files
+- **export**: 40 files
 - **entry**: 1 file
 - **interfaces**: 2 files
 - **modes**: 7 files
@@ -49,9 +49,9 @@ The codebase is organized into the following modules:
 - **session**: 7 files
 - **taxonomy**: 7 files
 - **tools**: 16 files
-- **types**: 21 files
+- **types**: 24 files
 - **utils**: 6 files
-- **validation**: 35 files
+- **validation**: 39 files
 
 ---
 
@@ -185,7 +185,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/abductive.ts` - Abductive Visual Exporter (v4.3.0)
+### `src/export/visual/abductive.ts` - Abductive Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -193,13 +193,21 @@ The codebase is organized into the following modules:
 | `../../types/index.js` | `AbductiveThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderBadge` | Import |
+| `./modelica-utils.js` | `generateHierarchyModelica` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `generateHierarchyJson` | Import |
+| `./markdown-utils.js` | `section, table, list, keyValueSection, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportAbductiveHypotheses`
 
 ---
 
-### `src/export/visual/analogical.ts` - Analogical Visual Exporter (v4.3.0)
+### `src/export/visual/analogical.ts` - Analogical Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -207,26 +215,51 @@ The codebase is organized into the following modules:
 | `../../types/index.js` | `AnalogicalThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge, GraphMLOptions` | Import |
+| `./tikz-utils.js` | `generateTikZ, getTikZColor, renderTikZMetrics, renderTikZLegend, TikZNode, TikZEdge, TikZOptions` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderProgressBar` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, table, list, keyValueSection, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportAnalogicalMapping`
 
 ---
 
-### `src/export/visual/bayesian.ts` - Bayesian Visual Exporter (v4.3.0)
+### `src/export/visual/ascii-utils.ts` - ASCII Art Utilities (v7.1.0)
+
+**Exports:**
+- Interfaces: `AsciiNode`, `AsciiEdge`, `AsciiSection`, `AsciiTableColumn`, `AsciiOptions`, `AsciiTreeNode`
+- Functions: `truncateAscii`, `padAscii`, `wrapText`, `indentText`, `generateAsciiHeader`, `generateAsciiSectionHeader`, `generateAsciiBoxedTitle`, `generateAsciiBox`, `generateAsciiBulletList`, `generateAsciiNumberedList`, `generateAsciiTreeList`, `generateAsciiTable`, `getAsciiArrow`, `generateAsciiFlowDiagram`, `generateAsciiSection`, `generateAsciiDocument`, `generateAsciiProgressBar`, `generateAsciiMetric`, `generateAsciiMetricsPanel`, `generateAsciiGraph`, `generateLinearFlowAscii`, `generateHierarchyAscii`
+- Constants: `BOX_CHARS`, `ARROWS`, `BULLETS`
+
+---
+
+### `src/export/visual/bayesian.ts` - Bayesian Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
 | `../../types/index.js` | `BayesianThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderProgressBar` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `generateBayesianJson` | Import |
+| `./markdown-utils.js` | `section, table, keyValueSection, progressBar, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportBayesianNetwork`
 
 ---
 
-### `src/export/visual/causal.ts` - Causal Visual Exporter (v4.3.0)
+### `src/export/visual/causal.ts` - Causal Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -234,13 +267,41 @@ The codebase is organized into the following modules:
 | `../../types/index.js` | `CausalThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderStadiumNode, renderRectNode, renderDiamondNode, renderEllipseNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, layoutNodesInLayers, calculateSVGHeight, DEFAULT_SVG_OPTIONS` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge, GraphMLOptions` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge, TikZOptions` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderBadge` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `generateCausalJson` | Import |
+| `./markdown-utils.js` | `section, table, list, keyValueSection, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportCausalGraph`
 
 ---
 
-### `src/export/visual/counterfactual.ts` - Counterfactual Visual Exporter (v4.3.0)
+### `src/export/visual/computability.ts` - Computability Visual Exporter (v7.2.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/index.js` | `ComputabilityThought, TuringMachine, Reduction` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
+| `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderList, renderBadge` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, addLegendItem, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, table, list, keyValueSection, mermaidBlock, document` | Import |
+
+**Exports:**
+- Functions: `exportComputability`
+
+---
+
+### `src/export/visual/counterfactual.ts` - Counterfactual Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -248,13 +309,51 @@ The codebase is organized into the following modules:
 | `../../types/index.js` | `CounterfactualThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge, GraphMLOptions` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge, TikZOptions` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, table, keyValueSection, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportCounterfactualScenarios`
 
 ---
 
-### `src/export/visual/evidential.ts` - Evidential Visual Exporter (v4.3.0)
+### `src/export/visual/dot-utils.ts` - DOT/GraphViz Utilities (v7.1.0)
+
+**Exports:**
+- Interfaces: `DotNode`, `DotEdge`, `DotSubgraph`, `DotOptions`
+- Functions: `sanitizeDotId`, `escapeDotString`, `truncateDotLabel`, `renderDotNodeAttrs`, `renderDotEdgeAttrs`, `renderDotNode`, `renderDotEdge`, `renderDotSubgraph`, `getDotColor`, `generateDotGraph`, `generateLinearFlowDot`, `generateHierarchyDot`, `generateNetworkDot`
+- Constants: `DOT_COLORS`
+
+---
+
+### `src/export/visual/engineering.ts` - Engineering Visual Exporter (v7.1.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/modes/engineering.js` | `EngineeringThought` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
+| `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderStadiumNode, renderEdge, getNodeColor, renderMetricsPanel, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderBadge, renderProgressBar` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, table, list, keyValueSection, mermaidBlock, document, progressBar` | Import |
+
+**Exports:**
+- Functions: `for`, `exportEngineeringAnalysis`
+
+---
+
+### `src/export/visual/evidential.ts` - Evidential Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -262,13 +361,21 @@ The codebase is organized into the following modules:
 | `../../types/index.js` | `EvidentialThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderSection, renderTable` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, table, list, keyValueSection, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportEvidentialBeliefs`
 
 ---
 
-### `src/export/visual/first-principles.ts` - First Principles Visual Exporter (v4.3.0)
+### `src/export/visual/first-principles.ts` - First Principles Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -276,13 +383,21 @@ The codebase is organized into the following modules:
 | `../../types/index.js` | `FirstPrinciplesThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, calculateSVGHeight, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderBadge, renderList` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString, generateModelicaPackageHeader, generateModelicaPackageFooter, generateModelicaRecord` | Import |
+| `./uml-utils.js` | `generateUmlHeader, generateUmlFooter, renderUmlNode, renderUmlEdge, sanitizeUmlId, escapeUml, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, addLegendItem, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, table, list, keyValueSection, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportFirstPrinciplesDerivation`
 
 ---
 
-### `src/export/visual/formal-logic.ts` - Formal Logic Visual Exporter (v4.3.0)
+### `src/export/visual/formal-logic.ts` - Formal Logic Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -290,13 +405,21 @@ The codebase is organized into the following modules:
 | `../../types/index.js` | `FormalLogicThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderBadge, renderProgressBar` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, table, list, keyValueSection, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportFormalLogicProof`
 
 ---
 
-### `src/export/visual/game-theory.ts` - Game Theory Visual Exporter (v4.3.0)
+### `src/export/visual/game-theory.ts` - Game Theory Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -304,13 +427,38 @@ The codebase is organized into the following modules:
 | `../../types/index.js` | `GameTheoryThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `createTreeGraphML, generateGraphML, GraphMLNode, GraphMLEdge` | Import |
+| `./tikz-utils.js` | `createTreeTikZ, generateTikZ, TikZNode, TikZEdge` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderBadge` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, addLegendItem, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, table, keyValueSection, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportGameTree`
 
 ---
 
-### `src/export/visual/hybrid.ts` - Hybrid Visual Exporter (v6.1.0)
+### `src/export/visual/graphml-utils.ts` - GraphML Export Utilities (v7.0.3)
+
+**Exports:**
+- Interfaces: `GraphMLNode`, `GraphMLEdge`, `GraphMLOptions`
+- Functions: `generateGraphMLHeader`, `generateGraphMLFooter`, `renderGraphMLNode`, `renderGraphMLEdge`, `generateGraphML`, `createLinearGraphML`, `createTreeGraphML`, `createLayeredGraphML`
+- Constants: `DEFAULT_GRAPHML_OPTIONS`
+
+---
+
+### `src/export/visual/html-utils.ts` - HTML Export Utilities (v7.1.0)
+
+**Exports:**
+- Interfaces: `HTMLThemeColors`
+- Functions: `getHTMLThemeColors`, `generateHTMLHeader`, `generateHTMLFooter`, `escapeHTML`, `renderMetricCard`, `renderProgressBar`, `renderBadge`, `renderTable`, `renderSection`, `renderList`
+
+---
+
+### `src/export/visual/hybrid.ts` - Hybrid Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -318,13 +466,21 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `HybridThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderBadge` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, addLegendItem, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, table, list, keyValueSection, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportHybridOrchestration`
 
 ---
 
-### `src/export/visual/index.ts` - Visual Export Module (v4.3.0)
+### `src/export/visual/index.ts` - Visual Export Module (v7.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -333,6 +489,8 @@ The codebase is organized into the following modules:
 | `../../types/modes/mathematics.js` | `MathematicsThought, ProofDecomposition` | Import (type-only) |
 | `../../types/modes/physics.js` | `PhysicsThought` | Import (type-only) |
 | `../../types/modes/metareasoning.js` | `MetaReasoningThought` | Import (type-only) |
+| `../../types/modes/engineering.js` | `EngineeringThought` | Import (type-only) |
+| `../../types/modes/computability.js` | `ComputabilityThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./causal.js` | `exportCausalGraph` | Import |
 | `./temporal.js` | `exportTemporalTimeline` | Import |
@@ -354,6 +512,19 @@ The codebase is organized into the following modules:
 | `./hybrid.js` | `exportHybridOrchestration` | Import |
 | `./metareasoning.js` | `exportMetaReasoningVisualization` | Import |
 | `./proof-decomposition.js` | `exportProofDecomposition` | Import |
+| `./engineering.js` | `exportEngineeringAnalysis` | Import |
+| `./computability.js` | `exportComputability` | Import |
+| `./mermaid-utils.js` | `*` | Re-export |
+| `./dot-utils.js` | `*` | Re-export |
+| `./ascii-utils.js` | `*` | Re-export |
+| `./svg-utils.js` | `*` | Re-export |
+| `./graphml-utils.js` | `*` | Re-export |
+| `./tikz-utils.js` | `*` | Re-export |
+| `./html-utils.js` | `*` | Re-export |
+| `./modelica-utils.js` | `*` | Re-export |
+| `./uml-utils.js` | `*` | Re-export |
+| `./json-utils.js` | `*` | Re-export |
+| `./markdown-utils.js` | `*` | Re-export |
 | `./types.js` | `type VisualFormat, type VisualExportOptions` | Re-export |
 | `./utils.js` | `sanitizeId` | Re-export |
 | `./causal.js` | `exportCausalGraph` | Re-export |
@@ -376,14 +547,31 @@ The codebase is organized into the following modules:
 | `./hybrid.js` | `exportHybridOrchestration` | Re-export |
 | `./metareasoning.js` | `exportMetaReasoningVisualization` | Re-export |
 | `./proof-decomposition.js` | `exportProofDecomposition` | Re-export |
+| `./engineering.js` | `exportEngineeringAnalysis` | Re-export |
+| `./computability.js` | `exportComputability` | Re-export |
 
 **Exports:**
 - Classes: `VisualExporter`
-- Re-exports: `type VisualFormat`, `type VisualExportOptions`, `sanitizeId`, `exportCausalGraph`, `exportTemporalTimeline`, `exportGameTree`, `exportBayesianNetwork`, `exportSequentialDependencyGraph`, `exportShannonStageFlow`, `exportAbductiveHypotheses`, `exportCounterfactualScenarios`, `exportAnalogicalMapping`, `exportEvidentialBeliefs`, `exportFirstPrinciplesDerivation`, `exportSystemsThinkingCausalLoops`, `exportScientificMethodExperiment`, `exportOptimizationSolution`, `exportFormalLogicProof`, `exportMathematicsDerivation`, `exportPhysicsVisualization`, `exportHybridOrchestration`, `exportMetaReasoningVisualization`, `exportProofDecomposition`
+- Re-exports: `* from ./mermaid-utils.js`, `* from ./dot-utils.js`, `* from ./ascii-utils.js`, `* from ./svg-utils.js`, `* from ./graphml-utils.js`, `* from ./tikz-utils.js`, `* from ./html-utils.js`, `* from ./modelica-utils.js`, `* from ./uml-utils.js`, `* from ./json-utils.js`, `* from ./markdown-utils.js`, `type VisualFormat`, `type VisualExportOptions`, `sanitizeId`, `exportCausalGraph`, `exportTemporalTimeline`, `exportGameTree`, `exportBayesianNetwork`, `exportSequentialDependencyGraph`, `exportShannonStageFlow`, `exportAbductiveHypotheses`, `exportCounterfactualScenarios`, `exportAnalogicalMapping`, `exportEvidentialBeliefs`, `exportFirstPrinciplesDerivation`, `exportSystemsThinkingCausalLoops`, `exportScientificMethodExperiment`, `exportOptimizationSolution`, `exportFormalLogicProof`, `exportMathematicsDerivation`, `exportPhysicsVisualization`, `exportHybridOrchestration`, `exportMetaReasoningVisualization`, `exportProofDecomposition`, `exportEngineeringAnalysis`, `exportComputability`
 
 ---
 
-### `src/export/visual/mathematics.ts` - Mathematics Visual Exporter (v6.1.0)
+### `src/export/visual/json-utils.ts` - JSON Visual Export Utilities (v7.1.0)
+
+**Exports:**
+- Interfaces: `JsonVisualNode`, `JsonVisualEdge`, `JsonVisualGraph`, `JsonVisualOptions`
+- Functions: `createJsonGraph`, `addNode`, `addEdge`, `addMetric`, `addLegendItem`, `serializeGraph`, `generateLinearFlowJson`, `generateHierarchyJson`, `generateNetworkJson`, `generateBayesianJson`, `generateCausalJson`
+
+---
+
+### `src/export/visual/markdown-utils.ts` - Markdown Export Utilities (v7.1.0)
+
+**Exports:**
+- Functions: `heading`, `bold`, `italic`, `strikethrough`, `inlineCode`, `codeBlock`, `blockquote`, `horizontalRule`, `link`, `image`, `listItem`, `list`, `nestedList`, `table`, `definitionList`, `taskList`, `collapsible`, `badge`, `progressBar`, `metric`, `keyValueSection`, `mermaidBlock`, `section`, `frontmatter`, `document`, `graphNode`, `graphEdge`, `graph`, `escapeMarkdown`, `truncate`
+
+---
+
+### `src/export/visual/mathematics.ts` - Mathematics Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -391,13 +579,30 @@ The codebase is organized into the following modules:
 | `../../types/modes/mathematics.js` | `MathematicsThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderBadge, renderProgressBar` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, list, keyValueSection, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportMathematicsDerivation`
 
 ---
 
-### `src/export/visual/metareasoning.ts` - MetaReasoning Visual Exporter (v6.1.0)
+### `src/export/visual/mermaid-utils.ts` - Mermaid Utilities (v7.1.0)
+
+**Exports:**
+- Interfaces: `MermaidNode`, `MermaidEdge`, `MermaidSubgraph`, `MermaidOptions`
+- Functions: `sanitizeMermaidId`, `escapeMermaidLabel`, `truncateLabel`, `getNodeShapeBrackets`, `renderMermaidNode`, `renderMermaidNodeStyle`, `getEdgeArrow`, `renderMermaidEdge`, `renderMermaidSubgraph`, `getMermaidColor`, `generateMermaidFlowchart`, `generateLinearFlowMermaid`, `generateHierarchyMermaid`, `generateMermaidStateDiagram`, `generateMermaidClassDiagram`
+- Constants: `MERMAID_COLORS`
+
+---
+
+### `src/export/visual/metareasoning.ts` - MetaReasoning Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -405,13 +610,29 @@ The codebase is organized into the following modules:
 | `../../types/modes/metareasoning.js` | `MetaReasoningThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge, GraphMLOptions` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge, TikZOptions` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderBadge, renderProgressBar` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, table, list, keyValueSection, mermaidBlock, document, progressBar` | Import |
 
 **Exports:**
 - Functions: `exportMetaReasoningVisualization`
 
 ---
 
-### `src/export/visual/optimization.ts` - Optimization Visual Exporter (v4.3.0)
+### `src/export/visual/modelica-utils.ts` - Modelica Export Utilities (v7.1.0)
+
+**Exports:**
+- Interfaces: `ModelicaNode`, `ModelicaEdge`, `ModelicaOptions`
+- Functions: `sanitizeModelicaId`, `escapeModelicaString`, `generateModelicaPackageHeader`, `generateModelicaPackageFooter`, `generateModelicaRecord`, `generateModelicaModel`, `generateLinearFlowModelica`, `generateHierarchyModelica`
+
+---
+
+### `src/export/visual/optimization.ts` - Optimization Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -419,13 +640,21 @@ The codebase is organized into the following modules:
 | `../../types/index.js` | `OptimizationThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderBadge` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, table, list, keyValueSection, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportOptimizationSolution`
 
 ---
 
-### `src/export/visual/physics.ts` - Physics Visual Exporter (v6.1.0)
+### `src/export/visual/physics.ts` - Physics Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -433,6 +662,14 @@ The codebase is organized into the following modules:
 | `../../types/modes/physics.js` | `PhysicsThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge, GraphMLOptions` | Import |
+| `./tikz-utils.js` | `generateTikZ, renderTikZMetrics, TikZNode, TikZEdge, TikZOptions` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderBadge` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, list, keyValueSection, mermaidBlock, document, progressBar` | Import |
 
 **Exports:**
 - Functions: `exportPhysicsVisualization`
@@ -447,13 +684,18 @@ The codebase is organized into the following modules:
 | `../../types/modes/mathematics.js` | `ProofDecomposition, AtomicStatement` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderProgressBar` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, table, keyValueSection, mermaidBlock, document, progressBar` | Import |
 
 **Exports:**
 - Functions: `exportProofDecomposition`
 
 ---
 
-### `src/export/visual/scientific-method.ts` - Scientific Method Visual Exporter (v4.3.0)
+### `src/export/visual/scientific-method.ts` - Scientific Method Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -461,13 +703,21 @@ The codebase is organized into the following modules:
 | `../../types/index.js` | `ScientificMethodThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderBadge` | Import |
+| `./modelica-utils.js` | `escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateActivityDiagram` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, table, list, keyValueSection, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportScientificMethodExperiment`
 
 ---
 
-### `src/export/visual/sequential.ts` - Sequential Visual Exporter (v4.3.0)
+### `src/export/visual/sequential.ts` - Sequential Visual Exporter (v7.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -475,13 +725,24 @@ The codebase is organized into the following modules:
 | `../../types/index.js` | `SequentialThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./mermaid-utils.js` | `generateMermaidFlowchart, truncateLabel, getMermaidColor, MermaidNode, MermaidEdge` | Import |
+| `./dot-utils.js` | `generateDotGraph, truncateDotLabel, DotNode, DotEdge` | Import |
+| `./ascii-utils.js` | `generateAsciiHeader, generateAsciiSectionHeader, generateAsciiBulletList` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderStadiumNode, renderEdge, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderBadge, renderList` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateActivityDiagram` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, list, keyValueSection, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportSequentialDependencyGraph`
 
 ---
 
-### `src/export/visual/shannon.ts` - Shannon Visual Exporter (v4.3.0)
+### `src/export/visual/shannon.ts` - Shannon Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -489,13 +750,30 @@ The codebase is organized into the following modules:
 | `../../types/index.js` | `ShannonThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderStadiumNode, renderHorizontalEdge, renderMetricsPanel, renderLegend, getNodeColor, layoutNodesHorizontally, DEFAULT_SVG_OPTIONS` | Import |
+| `./graphml-utils.js` | `createLinearGraphML` | Import |
+| `./tikz-utils.js` | `TikZNode, TikZEdge, generateTikZ` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderList, renderProgressBar, renderBadge` | Import |
+| `./modelica-utils.js` | `generateLinearFlowModelica` | Import |
+| `./uml-utils.js` | `generateActivityDiagram` | Import |
+| `./json-utils.js` | `generateLinearFlowJson` | Import |
+| `./markdown-utils.js` | `section, list, keyValueSection, progressBar, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportShannonStageFlow`
 
 ---
 
-### `src/export/visual/systems-thinking.ts` - Systems Thinking Visual Exporter (v4.3.0)
+### `src/export/visual/svg-utils.ts` - SVG Export Utilities (v7.0.2)
+
+**Exports:**
+- Interfaces: `SVGExportOptions`, `SVGNodePosition`, `SVGEdge`, `ColorPalette`
+- Functions: `getNodeColor`, `escapeSVGText`, `truncateText`, `generateSVGHeader`, `generateSVGFooter`, `renderRectNode`, `renderStadiumNode`, `renderDiamondNode`, `renderHexagonNode`, `renderEllipseNode`, `renderParallelogramNode`, `renderSubroutineNode`, `renderEdge`, `renderHorizontalEdge`, `renderMetricsPanel`, `renderLegend`, `layoutNodesInLayers`, `layoutNodesHorizontally`, `calculateSVGHeight`
+- Constants: `DEFAULT_SVG_OPTIONS`, `COLOR_PALETTES`
+
+---
+
+### `src/export/visual/systems-thinking.ts` - Systems Thinking Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -503,13 +781,21 @@ The codebase is organized into the following modules:
 | `../../types/index.js` | `SystemsThinkingThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./graphml-utils.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
+| `./tikz-utils.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderBadge` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, addLegendItem, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, table, list, keyValueSection, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportSystemsThinkingCausalLoops`
 
 ---
 
-### `src/export/visual/temporal.ts` - Temporal Visual Exporter (v4.3.0)
+### `src/export/visual/temporal.ts` - Temporal Visual Exporter (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -517,13 +803,38 @@ The codebase is organized into the following modules:
 | `../../types/index.js` | `TemporalThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
 | `./utils.js` | `sanitizeId` | Import |
+| `./svg-utils.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderHorizontalEdge, renderLegend, getNodeColor, layoutNodesHorizontally, DEFAULT_SVG_OPTIONS` | Import |
+| `./graphml-utils.js` | `createLinearGraphML` | Import |
+| `./tikz-utils.js` | `createLinearTikZ` | Import |
+| `./html-utils.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderBadge` | Import |
+| `./modelica-utils.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
+| `./uml-utils.js` | `generateStateDiagram` | Import |
+| `./json-utils.js` | `createJsonGraph, addNode, addEdge, addMetric, serializeGraph` | Import |
+| `./markdown-utils.js` | `section, table, keyValueSection, mermaidBlock, document` | Import |
 
 **Exports:**
 - Functions: `exportTemporalTimeline`
 
 ---
 
-### `src/export/visual/types.ts` - Visual Export Types (v7.0.0)
+### `src/export/visual/tikz-utils.ts` - TikZ Export Utilities (v7.0.3)
+
+**Exports:**
+- Interfaces: `TikZNode`, `TikZEdge`, `TikZOptions`
+- Functions: `getTikZColor`, `generateTikZHeader`, `generateTikZFooter`, `renderTikZNode`, `renderTikZNodeRelative`, `renderTikZEdge`, `renderTikZMetrics`, `renderTikZLegend`, `generateTikZ`, `createLinearTikZ`, `createTreeTikZ`, `createLayeredTikZ`
+- Constants: `DEFAULT_TIKZ_OPTIONS`
+
+---
+
+### `src/export/visual/types.ts` - Visual Export Types (v7.1.0)
+
+---
+
+### `src/export/visual/uml-utils.ts` - UML/PlantUML Export Utilities (v7.1.0)
+
+**Exports:**
+- Interfaces: `UmlNode`, `UmlEdge`, `UmlOptions`
+- Functions: `sanitizeUmlId`, `escapeUml`, `generateUmlHeader`, `generateUmlFooter`, `renderUmlNode`, `renderUmlEdge`, `generateUmlDiagram`, `generateClassDiagram`, `generateComponentDiagram`, `generateActivityDiagram`, `generateStateDiagram`, `generateUseCaseDiagram`
 
 ---
 
@@ -934,7 +1245,7 @@ The codebase is organized into the following modules:
 
 ## Services Dependencies
 
-### `src/services/ExportService.ts` - Export Service (v3.4.5)
+### `src/services/ExportService.ts` - Export Service (v7.0.3)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -944,6 +1255,7 @@ The codebase is organized into the following modules:
 | `../types/modes/mathematics.js` | `MathematicsThought` | Import (type-only) |
 | `../types/modes/physics.js` | `PhysicsThought` | Import (type-only) |
 | `../types/modes/metareasoning.js` | `MetaReasoningThought` | Import (type-only) |
+| `../types/modes/engineering.js` | `EngineeringThought` | Import (type-only) |
 | `../export/visual/index.js` | `VisualExporter, VisualFormat` | Import |
 | `../utils/sanitization.js` | `escapeHtml, escapeLatex` | Import |
 | `../interfaces/ILogger.js` | `ILogger` | Import |
@@ -995,7 +1307,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingMode, ShannonStage, SequentialThought, ShannonThought, MathematicsThought, PhysicsThought, InductiveThought, DeductiveThought, AbductiveThought, CausalThought, Thought` | Import |
+| `../types/index.js` | `ThinkingMode, ShannonStage, SequentialThought, ShannonThought, MathematicsThought, PhysicsThought, InductiveThought, DeductiveThought, AbductiveThought, CausalThought, Thought, EngineeringThought` | Import |
 | `../tools/thinking.js` | `ThinkingToolInput` | Import |
 | `../utils/type-guards.js` | `toExtendedThoughtType` | Import |
 | `../interfaces/ILogger.js` | `ILogger` | Import |
@@ -1506,7 +1818,7 @@ The codebase is organized into the following modules:
 
 ## Types Dependencies
 
-### `src/types/core.ts` - Core type definitions for the DeepThinking MCP server v3.2.0
+### `src/types/core.ts` - Core type definitions for the DeepThinking MCP server v7.1.0
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1520,16 +1832,19 @@ The codebase is organized into the following modules:
 | `./modes/optimization.js` | `OptimizationThought` | Import (type-only) |
 | `./modes/formallogic.js` | `FormalLogicThought` | Import (type-only) |
 | `./modes/metareasoning.js` | `MetaReasoningThought` | Import (type-only) |
+| `./modes/engineering.js` | `EngineeringThought` | Import (type-only) |
+| `./modes/computability.js` | `ComputabilityThought` | Import (type-only) |
+| `./modes/cryptanalytic.js` | `CryptanalyticThought` | Import (type-only) |
 
 **Exports:**
 - Interfaces: `BaseThought`, `MathematicalModel`, `TensorProperties`, `PhysicalInterpretation`, `ProofStrategy`, `Theorem`, `Reference`, `SequentialThought`, `ShannonThought`, `MathematicsThought`, `PhysicsThought`, `HybridThought`, `Observation`, `Hypothesis`, `Evidence`, `EvaluationCriteria`, `AbductiveThought`, `InductiveThought`, `DeductiveThought`, `CausalNode`, `CausalEdge`, `CausalGraph`, `Intervention`, `CausalMechanism`, `Confounder`, `CounterfactualScenario`, `CausalThought`, `BayesianHypothesis`, `PriorProbability`, `Likelihood`, `BayesianEvidence`, `PosteriorProbability`, `SensitivityAnalysis`, `BayesianThought`, `Condition`, `Outcome`, `Scenario`, `Difference`, `CausalChain`, `InterventionPoint`, `CounterfactualComparison`, `CounterfactualThought`, `Entity`, `Relation`, `Property`, `Domain`, `Mapping`, `Insight`, `Inference`, `AnalogicalThought`
 - Enums: `ThinkingMode`, `ShannonStage`
-- Functions: `isFullyImplemented`, `isSequentialThought`, `isShannonThought`, `isMathematicsThought`, `isPhysicsThought`, `isHybridThought`, `isInductiveThought`, `isDeductiveThought`, `isAbductiveThought`, `isCausalThought`, `isBayesianThought`, `isCounterfactualThought`, `isAnalogicalThought`, `isTemporalThought`, `isGameTheoryThought`, `isEvidentialThought`, `isFirstPrinciplesThought`, `isSystemsThinkingThought`, `isScientificMethodThought`, `isOptimizationThought`, `isFormalLogicThought`, `isMetaReasoningThought`
+- Functions: `isFullyImplemented`, `isSequentialThought`, `isShannonThought`, `isMathematicsThought`, `isPhysicsThought`, `isHybridThought`, `isInductiveThought`, `isDeductiveThought`, `isAbductiveThought`, `isCausalThought`, `isBayesianThought`, `isCounterfactualThought`, `isAnalogicalThought`, `isTemporalThought`, `isGameTheoryThought`, `isEvidentialThought`, `isFirstPrinciplesThought`, `isSystemsThinkingThought`, `isScientificMethodThought`, `isOptimizationThought`, `isFormalLogicThought`, `isMetaReasoningThought`, `isEngineeringThought`, `isComputabilityThought`, `isCryptanalyticThought`
 - Constants: `FULLY_IMPLEMENTED_MODES`, `EXPERIMENTAL_MODES`
 
 ---
 
-### `src/types/index.ts` - Type definitions index
+### `src/types/index.ts` - Type definitions index (v7.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1537,9 +1852,13 @@ The codebase is organized into the following modules:
 | `./core.js` | `*` | Re-export |
 | `./session.js` | `*` | Re-export |
 | `./modes/recommendations.js` | `*` | Re-export |
+| `./modes/engineering.js` | `type Requirement, type RequirementPriority, type RequirementSource, type RequirementStatus, type RequirementsTraceability, type TradeAlternative, type TradeCriterion, type TradeScore, type TradeStudy, type FailureMode, type FailureModeAnalysis, type SeverityRating, type OccurrenceRating, type DetectionRating, type DesignDecision, type DecisionStatus, type DecisionAlternative, type DesignDecisionLog, type EngineeringAnalysisType, isEngineeringThought` | Re-export |
+| `./modes/computability.js` | `type ComputabilityThoughtType, type TuringTransition, type TuringMachine, type ComputationStep, type ComputationTrace, type DecisionProblem, type Reduction, type DiagonalizationArgument, type DecidabilityProof, type ComplexityAnalysis, type OracleAnalysis, type ClassicUndecidableProblem, isComputabilityThought, createSimpleMachine, reductionPreservesDecidability, isPolynomialReduction` | Re-export |
+| `./modes/gametheory.js` | `type MinimaxAnalysis, type CooperativeGame, type CoalitionValue, type CoreAllocation, type CoalitionAnalysis, type ShapleyValueDetails, createCharacteristicFunction, checkSuperadditivity, calculateShapleyValue` | Re-export |
+| `./modes/cryptanalytic.js` | `type CryptanalyticThoughtType, type DecibanEvidence, type EvidenceChain, type KeySpaceAnalysis, type FrequencyAnalysis, type BanburismusAnalysis, type CribAnalysis, type CipherType, type CryptographicHypothesis, type IsomorphismPattern, isCryptanalyticThought, toDecibans, fromDecibans, decibansToOdds, decibansToProbability, accumulateEvidence, calculateIndexOfCoincidence, LANGUAGE_IC, ENGLISH_FREQUENCIES` | Re-export |
 
 **Exports:**
-- Re-exports: `* from ./core.js`, `* from ./session.js`, `* from ./modes/recommendations.js`
+- Re-exports: `* from ./core.js`, `* from ./session.js`, `* from ./modes/recommendations.js`, `type Requirement`, `type RequirementPriority`, `type RequirementSource`, `type RequirementStatus`, `type RequirementsTraceability`, `type TradeAlternative`, `type TradeCriterion`, `type TradeScore`, `type TradeStudy`, `type FailureMode`, `type FailureModeAnalysis`, `type SeverityRating`, `type OccurrenceRating`, `type DetectionRating`, `type DesignDecision`, `type DecisionStatus`, `type DecisionAlternative`, `type DesignDecisionLog`, `type EngineeringAnalysisType`, `isEngineeringThought`, `type ComputabilityThoughtType`, `type TuringTransition`, `type TuringMachine`, `type ComputationStep`, `type ComputationTrace`, `type DecisionProblem`, `type Reduction`, `type DiagonalizationArgument`, `type DecidabilityProof`, `type ComplexityAnalysis`, `type OracleAnalysis`, `type ClassicUndecidableProblem`, `isComputabilityThought`, `createSimpleMachine`, `reductionPreservesDecidability`, `isPolynomialReduction`, `type MinimaxAnalysis`, `type CooperativeGame`, `type CoalitionValue`, `type CoreAllocation`, `type CoalitionAnalysis`, `type ShapleyValueDetails`, `createCharacteristicFunction`, `checkSuperadditivity`, `calculateShapleyValue`, `type CryptanalyticThoughtType`, `type DecibanEvidence`, `type EvidenceChain`, `type KeySpaceAnalysis`, `type FrequencyAnalysis`, `type BanburismusAnalysis`, `type CribAnalysis`, `type CipherType`, `type CryptographicHypothesis`, `type IsomorphismPattern`, `isCryptanalyticThought`, `toDecibans`, `fromDecibans`, `decibansToOdds`, `decibansToProbability`, `accumulateEvidence`, `calculateIndexOfCoincidence`, `LANGUAGE_IC`, `ENGLISH_FREQUENCIES`
 
 ---
 
@@ -1582,6 +1901,19 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/types/modes/computability.ts` - Computability Theory Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `TuringTransition`, `TuringMachine`, `ComputationStep`, `ComputationTrace`, `DecisionProblem`, `Reduction`, `DiagonalizationArgument`, `DecidabilityProof`, `ComplexityAnalysis`, `OracleAnalysis`, `ComputabilityThought`
+- Functions: `isComputabilityThought`, `createSimpleMachine`, `reductionPreservesDecidability`, `isPolynomialReduction`
+
+---
+
 ### `src/types/modes/counterfactual.ts` - Counterfactual Reasoning Mode - Type Definitions
 
 **Internal Dependencies:**
@@ -1590,8 +1922,35 @@ The codebase is organized into the following modules:
 | `../core.js` | `BaseThought, ThinkingMode` | Import |
 
 **Exports:**
-- Interfaces: `Condition`, `Outcome`, `Scenario`, `CounterfactualComparison`, `InterventionPoint`, `CausalChain`, `CounterfactualThought`
+- Interfaces: `Condition`, `Outcome`, `Scenario`, `ScenarioDifference`, `CounterfactualComparison`, `InterventionPoint`, `CausalChain`, `CounterfactualThought`
 - Functions: `isCounterfactualThought`
+
+---
+
+### `src/types/modes/cryptanalytic.ts` - Cryptanalytic Reasoning Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `DecibanEvidence`, `EvidenceChain`, `KeySpaceAnalysis`, `FrequencyAnalysis`, `BanburismusAnalysis`, `CribAnalysis`, `CryptographicHypothesis`, `IsomorphismPattern`, `CryptanalyticThought`
+- Functions: `isCryptanalyticThought`, `toDecibans`, `fromDecibans`, `decibansToOdds`, `decibansToProbability`, `accumulateEvidence`, `calculateIndexOfCoincidence`
+- Constants: `LANGUAGE_IC`, `ENGLISH_FREQUENCIES`
+
+---
+
+### `src/types/modes/engineering.ts` - Engineering Thought Type (v7.1.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `ThinkingMode, BaseThought` | Import |
+
+**Exports:**
+- Interfaces: `Requirement`, `RequirementsTraceability`, `TradeAlternative`, `TradeCriterion`, `TradeScore`, `TradeStudy`, `FailureMode`, `FailureModeAnalysis`, `DecisionAlternative`, `DesignDecision`, `DesignDecisionLog`, `EngineeringThought`
+- Functions: `isEngineeringThought`
 
 ---
 
@@ -1642,8 +2001,8 @@ The codebase is organized into the following modules:
 | `../core.js` | `BaseThought, ThinkingMode` | Import |
 
 **Exports:**
-- Interfaces: `GameTheoryThought`, `Game`, `Player`, `Strategy`, `PayoffMatrix`, `PayoffEntry`, `NashEquilibrium`, `DominantStrategy`, `GameTree`, `GameNode`, `InformationSet`, `BackwardInduction`
-- Functions: `isGameTheoryThought`
+- Interfaces: `GameTheoryThought`, `Game`, `Player`, `Strategy`, `PayoffMatrix`, `PayoffEntry`, `NashEquilibrium`, `DominantStrategy`, `GameTree`, `GameNode`, `InformationSet`, `BackwardInduction`, `MinimaxAnalysis`, `CooperativeGame`, `CoalitionValue`, `CoreAllocation`, `CoalitionAnalysis`, `ShapleyValueDetails`
+- Functions: `isGameTheoryThought`, `createCharacteristicFunction`, `checkSuperadditivity`, `calculateShapleyValue`
 
 ---
 
@@ -1883,7 +2242,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/validation/index.ts` - Validation module exports (v4.3.0)
+### `src/validation/index.ts` - Validation module exports (v7.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1891,9 +2250,50 @@ The codebase is organized into the following modules:
 | `./constants.js` | `IssueSeverity, IssueCategory, ValidationThresholds, ValidationMessages, isInRange, isValidProbability, isValidConfidence` | Re-export |
 | `./validator.js` | `ThoughtValidator, type ValidationContext` | Re-export |
 | `./schemas.js` | `SessionIdSchema, ThinkingModeSchema, CreateSessionSchema, type CreateSessionInput, AddThoughtSchema, type AddThoughtInput, CompleteSessionSchema, type CompleteSessionInput, GetSessionSchema, type GetSessionInput, ListSessionsSchema, type ListSessionsInput, ExportSessionSchema, type ExportSessionInput, SearchSessionsSchema, type SearchSessionsInput, BatchOperationSchema, type BatchOperationInput, validateInput, safeValidateInput` | Re-export |
+| `./schema-utils.js` | `// Primitive schemas
+  probabilitySchema, confidenceSchema, progressSchema, weightSchema, nonNegativeSchema, positiveSchema, nonEmptyStringSchema, uuidSchema, timestampSchema, // Composite schemas - Hypothesis & Evidence
+  hypothesisSchema, probabilityWithJustificationSchema, probabilityWithCalculationSchema, evidenceSchema, evidenceWithSupportSchema, type HypothesisInput, type ProbabilityWithJustification, type ProbabilityWithCalculation, type EvidenceInput, type EvidenceWithSupport, // Graph schemas
+  createNodeSchema, createEdgeSchema, nodeSchema, weightedNodeSchema, edgeSchema, weightedEdgeSchema, causalEdgeSchema, type NodeInput, type WeightedNodeInput, type EdgeInput, type WeightedEdgeInput, type CausalEdgeInput, // Temporal schemas
+  timePointSchema, timeIntervalSchema, temporalEventSchema, type TimePointInput, type TimeIntervalInput, type TemporalEventInput, // Mathematical schemas
+  mathExpressionSchema, valueWithUnitSchema, measurementSchema, type MathExpressionInput, type ValueWithUnitInput, type MeasurementInput, // Game Theory schemas
+  playerSchema, strategySchema, payoffSchema, type PlayerInput, type StrategyInput, type PayoffInput, // Reasoning schemas
+  reasoningStepSchema, propositionSchema, inferenceRuleSchema, type ReasoningStepInput, type PropositionInput, type InferenceRuleInput, // Optimization schemas
+  constraintSchema, objectiveSchema, solutionSchema, type ConstraintInput, type ObjectiveInput, type SolutionInput, // Base schemas
+  baseThoughtSchema, sequentialThoughtExtensionSchema, bayesianThoughtExtensionSchema, type BaseThoughtInput, // Helpers
+  createRangeSchema, createEnumSchema, createOptionalStringWithDefault, createOptionalNumberWithDefault, createOptionalBooleanWithDefault, uniqueIdArraySchema, createGraphSchema, // Namespace export
+  SchemaUtils` | Re-export |
 
 **Exports:**
-- Re-exports: `IssueSeverity`, `IssueCategory`, `ValidationThresholds`, `ValidationMessages`, `isInRange`, `isValidProbability`, `isValidConfidence`, `ThoughtValidator`, `type ValidationContext`, `SessionIdSchema`, `ThinkingModeSchema`, `CreateSessionSchema`, `type CreateSessionInput`, `AddThoughtSchema`, `type AddThoughtInput`, `CompleteSessionSchema`, `type CompleteSessionInput`, `GetSessionSchema`, `type GetSessionInput`, `ListSessionsSchema`, `type ListSessionsInput`, `ExportSessionSchema`, `type ExportSessionInput`, `SearchSessionsSchema`, `type SearchSessionsInput`, `BatchOperationSchema`, `type BatchOperationInput`, `validateInput`, `safeValidateInput`
+- Re-exports: `IssueSeverity`, `IssueCategory`, `ValidationThresholds`, `ValidationMessages`, `isInRange`, `isValidProbability`, `isValidConfidence`, `ThoughtValidator`, `type ValidationContext`, `SessionIdSchema`, `ThinkingModeSchema`, `CreateSessionSchema`, `type CreateSessionInput`, `AddThoughtSchema`, `type AddThoughtInput`, `CompleteSessionSchema`, `type CompleteSessionInput`, `GetSessionSchema`, `type GetSessionInput`, `ListSessionsSchema`, `type ListSessionsInput`, `ExportSessionSchema`, `type ExportSessionInput`, `SearchSessionsSchema`, `type SearchSessionsInput`, `BatchOperationSchema`, `type BatchOperationInput`, `validateInput`, `safeValidateInput`, `// Primitive schemas
+  probabilitySchema`, `confidenceSchema`, `progressSchema`, `weightSchema`, `nonNegativeSchema`, `positiveSchema`, `nonEmptyStringSchema`, `uuidSchema`, `timestampSchema`, `// Composite schemas - Hypothesis & Evidence
+  hypothesisSchema`, `probabilityWithJustificationSchema`, `probabilityWithCalculationSchema`, `evidenceSchema`, `evidenceWithSupportSchema`, `type HypothesisInput`, `type ProbabilityWithJustification`, `type ProbabilityWithCalculation`, `type EvidenceInput`, `type EvidenceWithSupport`, `// Graph schemas
+  createNodeSchema`, `createEdgeSchema`, `nodeSchema`, `weightedNodeSchema`, `edgeSchema`, `weightedEdgeSchema`, `causalEdgeSchema`, `type NodeInput`, `type WeightedNodeInput`, `type EdgeInput`, `type WeightedEdgeInput`, `type CausalEdgeInput`, `// Temporal schemas
+  timePointSchema`, `timeIntervalSchema`, `temporalEventSchema`, `type TimePointInput`, `type TimeIntervalInput`, `type TemporalEventInput`, `// Mathematical schemas
+  mathExpressionSchema`, `valueWithUnitSchema`, `measurementSchema`, `type MathExpressionInput`, `type ValueWithUnitInput`, `type MeasurementInput`, `// Game Theory schemas
+  playerSchema`, `strategySchema`, `payoffSchema`, `type PlayerInput`, `type StrategyInput`, `type PayoffInput`, `// Reasoning schemas
+  reasoningStepSchema`, `propositionSchema`, `inferenceRuleSchema`, `type ReasoningStepInput`, `type PropositionInput`, `type InferenceRuleInput`, `// Optimization schemas
+  constraintSchema`, `objectiveSchema`, `solutionSchema`, `type ConstraintInput`, `type ObjectiveInput`, `type SolutionInput`, `// Base schemas
+  baseThoughtSchema`, `sequentialThoughtExtensionSchema`, `bayesianThoughtExtensionSchema`, `type BaseThoughtInput`, `// Helpers
+  createRangeSchema`, `createEnumSchema`, `createOptionalStringWithDefault`, `createOptionalNumberWithDefault`, `createOptionalBooleanWithDefault`, `uniqueIdArraySchema`, `createGraphSchema`, `// Namespace export
+  SchemaUtils`
+
+---
+
+### `src/validation/schema-utils.ts` - Schema Utilities (v7.1.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./constants.js` | `ValidationThresholds, ValidationMessages` | Import |
+
+**Exports:**
+- Functions: `createNodeSchema`, `createEdgeSchema`, `createRangeSchema`, `createEnumSchema`, `createOptionalStringWithDefault`, `createOptionalNumberWithDefault`, `createOptionalBooleanWithDefault`, `uniqueIdArraySchema`, `createGraphSchema`
+- Constants: `probabilitySchema`, `confidenceSchema`, `progressSchema`, `weightSchema`, `nonNegativeSchema`, `positiveSchema`, `nonEmptyStringSchema`, `uuidSchema`, `timestampSchema`, `hypothesisSchema`, `probabilityWithJustificationSchema`, `probabilityWithCalculationSchema`, `evidenceSchema`, `evidenceWithSupportSchema`, `nodeSchema`, `weightedNodeSchema`, `edgeSchema`, `weightedEdgeSchema`, `causalEdgeSchema`, `timePointSchema`, `timeIntervalSchema`, `temporalEventSchema`, `mathExpressionSchema`, `valueWithUnitSchema`, `measurementSchema`, `playerSchema`, `strategySchema`, `payoffSchema`, `reasoningStepSchema`, `propositionSchema`, `inferenceRuleSchema`, `constraintSchema`, `objectiveSchema`, `solutionSchema`, `baseThoughtSchema`, `sequentialThoughtExtensionSchema`, `bayesianThoughtExtensionSchema`, `SchemaUtils`
 
 ---
 
@@ -1970,14 +2370,16 @@ The codebase is organized into the following modules:
 | `./modes/stochastic.js` | `StochasticValidator` | Re-export |
 | `./modes/recursive.js` | `RecursiveValidator` | Re-export |
 | `./modes/metareasoning.js` | `MetaReasoningValidator` | Re-export |
+| `./modes/computability.js` | `ComputabilityValidator` | Re-export |
+| `./modes/cryptanalytic.js` | `CryptanalyticValidator` | Re-export |
 | `./registry.js` | `validatorRegistry, getValidatorForMode, getValidatorForModeSync, hasValidatorForMode, getSupportedModes, preloadValidators` | Re-export |
 
 **Exports:**
-- Re-exports: `ModeValidator`, `BaseValidator`, `SequentialValidator`, `ShannonValidator`, `MathematicsValidator`, `PhysicsValidator`, `HybridValidator`, `InductiveValidator`, `DeductiveValidator`, `AbductiveValidator`, `CausalValidator`, `BayesianValidator`, `CounterfactualValidator`, `AnalogicalValidator`, `TemporalValidator`, `GameTheoryValidator`, `EvidentialValidator`, `MetaValidator`, `ModalValidator`, `ConstraintValidator`, `OptimizationValidator`, `StochasticValidator`, `RecursiveValidator`, `MetaReasoningValidator`, `validatorRegistry`, `getValidatorForMode`, `getValidatorForModeSync`, `hasValidatorForMode`, `getSupportedModes`, `preloadValidators`
+- Re-exports: `ModeValidator`, `BaseValidator`, `SequentialValidator`, `ShannonValidator`, `MathematicsValidator`, `PhysicsValidator`, `HybridValidator`, `InductiveValidator`, `DeductiveValidator`, `AbductiveValidator`, `CausalValidator`, `BayesianValidator`, `CounterfactualValidator`, `AnalogicalValidator`, `TemporalValidator`, `GameTheoryValidator`, `EvidentialValidator`, `MetaValidator`, `ModalValidator`, `ConstraintValidator`, `OptimizationValidator`, `StochasticValidator`, `RecursiveValidator`, `MetaReasoningValidator`, `ComputabilityValidator`, `CryptanalyticValidator`, `validatorRegistry`, `getValidatorForMode`, `getValidatorForModeSync`, `hasValidatorForMode`, `getSupportedModes`, `preloadValidators`
 
 ---
 
-### `src/validation/validators/modes/abductive.ts` - Abductive Mode Validator
+### `src/validation/validators/modes/abductive.ts` - Abductive Mode Validator (v7.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1985,13 +2387,14 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `AbductiveThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
+| `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
 
 **Exports:**
 - Classes: `AbductiveValidator`
 
 ---
 
-### `src/validation/validators/modes/analogical.ts` - Analogical Mode Validator
+### `src/validation/validators/modes/analogical.ts` - Analogical Mode Validator (v7.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1999,13 +2402,14 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `AnalogicalThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
+| `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
 
 **Exports:**
 - Classes: `AnalogicalValidator`
 
 ---
 
-### `src/validation/validators/modes/bayesian.ts` - Bayesian Mode Validator
+### `src/validation/validators/modes/bayesian.ts` - Bayesian Mode Validator (v7.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -2013,13 +2417,14 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `BayesianThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
+| `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
 
 **Exports:**
 - Classes: `BayesianValidator`
 
 ---
 
-### `src/validation/validators/modes/causal.ts` - Causal Mode Validator
+### `src/validation/validators/modes/causal.ts` - Causal Mode Validator (v7.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -2027,9 +2432,25 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `CausalThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
+| `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
 
 **Exports:**
 - Classes: `CausalValidator`
+
+---
+
+### `src/validation/validators/modes/computability.ts` - Computability Mode Validator (v7.2.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/modes/computability.js` | `ComputabilityThought, TuringMachine, Reduction, DecidabilityProof, DiagonalizationArgument` | Import (type-only) |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
+| `../base.js` | `BaseValidator` | Import |
+
+**Exports:**
+- Classes: `ComputabilityValidator`
 
 ---
 
@@ -2047,7 +2468,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/validation/validators/modes/counterfactual.ts` - Counterfactual Mode Validator
+### `src/validation/validators/modes/counterfactual.ts` - Counterfactual Mode Validator (v7.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -2055,9 +2476,25 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `CounterfactualThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
+| `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
 
 **Exports:**
 - Classes: `CounterfactualValidator`
+
+---
+
+### `src/validation/validators/modes/cryptanalytic.ts` - Cryptanalytic Mode Validator (v7.2.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/modes/cryptanalytic.js` | `CryptanalyticThought, EvidenceChain, DecibanEvidence` | Import (type-only) |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
+| `../base.js` | `BaseValidator` | Import |
+
+**Exports:**
+- Classes: `CryptanalyticValidator`
 
 ---
 
@@ -2075,7 +2512,22 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/validation/validators/modes/evidential.ts` - Evidential Mode Validator
+### `src/validation/validators/modes/engineering.ts` - Engineering Mode Validator (v7.1.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/modes/engineering.js` | `EngineeringThought` | Import (type-only) |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
+| `../base.js` | `BaseValidator` | Import |
+
+**Exports:**
+- Classes: `EngineeringValidator`
+
+---
+
+### `src/validation/validators/modes/evidential.ts` - Evidential Mode Validator (v7.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -2083,13 +2535,14 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `EvidentialThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
+| `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
 
 **Exports:**
 - Classes: `EvidentialValidator`
 
 ---
 
-### `src/validation/validators/modes/firstprinciples.ts` - First-Principles Mode Validator
+### `src/validation/validators/modes/firstprinciples.ts` - First-Principles Mode Validator (v7.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -2097,6 +2550,7 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `FirstPrinciplesThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
+| `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
 
 **Exports:**
 - Classes: `FirstPrinciplesValidator`
@@ -2117,7 +2571,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/validation/validators/modes/gametheory.ts` - Game Theory Mode Validator
+### `src/validation/validators/modes/gametheory.ts` - Game Theory Mode Validator (v7.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -2125,6 +2579,7 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `GameTheoryThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
+| `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
 
 **Exports:**
 - Classes: `GameTheoryValidator`
@@ -2298,7 +2753,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/validation/validators/modes/shannon.ts` - Shannon Mode Validator
+### `src/validation/validators/modes/shannon.ts` - Shannon Mode Validator (v7.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -2306,6 +2761,7 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `ShannonThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
+| `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
 
 **Exports:**
 - Classes: `ShannonValidator`
@@ -2326,7 +2782,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/validation/validators/modes/systemsthinking.ts` - Systems Thinking Mode Validator
+### `src/validation/validators/modes/systemsthinking.ts` - Systems Thinking Mode Validator (v7.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -2334,13 +2790,14 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `SystemsThinkingThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
+| `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
 
 **Exports:**
 - Classes: `SystemsThinkingValidator`
 
 ---
 
-### `src/validation/validators/modes/temporal.ts` - Temporal Mode Validator
+### `src/validation/validators/modes/temporal.ts` - Temporal Mode Validator (v7.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -2348,6 +2805,7 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `TemporalThought, ValidationIssue` | Import |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
 | `../base.js` | `BaseValidator` | Import |
+| `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
 
 **Exports:**
 - Classes: `TemporalValidator`
@@ -2383,35 +2841,35 @@ The codebase is organized into the following modules:
 | `index` | 2 files | 0 files |
 | `latex-mermaid-integration` | 2 files | 0 files |
 | `latex` | 3 files | 1 files |
-| `abductive` | 3 files | 1 files |
-| `analogical` | 3 files | 1 files |
-| `bayesian` | 2 files | 1 files |
-| `causal` | 3 files | 1 files |
-| `counterfactual` | 3 files | 1 files |
-| `evidential` | 3 files | 1 files |
-| `first-principles` | 3 files | 1 files |
-| `formal-logic` | 3 files | 1 files |
-| `game-theory` | 3 files | 1 files |
-| `hybrid` | 3 files | 1 files |
-| `index` | 26 files | 4 files |
-| `mathematics` | 3 files | 1 files |
-| `metareasoning` | 3 files | 1 files |
-| `optimization` | 3 files | 1 files |
-| `physics` | 3 files | 1 files |
-| `proof-decomposition` | 3 files | 1 files |
-| `scientific-method` | 3 files | 1 files |
-| `sequential` | 3 files | 1 files |
-| `shannon` | 3 files | 1 files |
-| `systems-thinking` | 3 files | 1 files |
+| `abductive` | 11 files | 1 files |
+| `analogical` | 11 files | 1 files |
+| `ascii-utils` | 0 files | 2 files |
+| `bayesian` | 10 files | 1 files |
+| `causal` | 11 files | 1 files |
+| `computability` | 9 files | 1 files |
+| `counterfactual` | 11 files | 1 files |
+| `dot-utils` | 0 files | 2 files |
+| `engineering` | 10 files | 1 files |
+| `evidential` | 11 files | 1 files |
+| `first-principles` | 11 files | 1 files |
+| `formal-logic` | 11 files | 1 files |
+| `game-theory` | 11 files | 1 files |
+| `graphml-utils` | 0 files | 22 files |
+| `html-utils` | 0 files | 23 files |
+| `hybrid` | 11 files | 1 files |
+| `index` | 41 files | 4 files |
+| `json-utils` | 0 files | 23 files |
+| `markdown-utils` | 0 files | 23 files |
+| `mathematics` | 11 files | 1 files |
 
 ---
 
 ## Circular Dependency Analysis
 
-**31 circular dependencies detected:**
+**36 circular dependencies detected:**
 
 - **Runtime cycles**: 0 (require attention)
-- **Type-only cycles**: 31 (safe, no runtime impact)
+- **Type-only cycles**: 36 (safe, no runtime impact)
 
 ### Type-Only Circular Dependencies
 
@@ -2426,8 +2884,8 @@ These cycles only involve type imports and are safe (erased at runtime):
 - src/types/core.ts -> src/types/modes/optimization.ts -> src/types/core.ts
 - src/types/core.ts -> src/types/modes/formallogic.ts -> src/types/core.ts
 - src/types/core.ts -> src/types/modes/metareasoning.ts -> src/types/core.ts
-- src/validation/validator.ts -> src/validation/validators/index.ts -> src/validation/validators/modes/sequential.ts -> src/validation/validator.ts
-- ... and 21 more
+- src/types/core.ts -> src/types/modes/engineering.ts -> src/types/core.ts
+- ... and 26 more
 
 ---
 
@@ -2454,7 +2912,7 @@ graph TD
         N9[latex]
         N10[abductive]
         N11[analogical]
-        N12[...22 more]
+        N12[...35 more]
     end
 
     subgraph Entry
@@ -2540,7 +2998,7 @@ graph TD
         N62[analogical]
         N63[bayesian]
         N64[causal]
-        N65[...16 more]
+        N65[...19 more]
     end
 
     subgraph Utils
@@ -2556,9 +3014,9 @@ graph TD
         N72[cache]
         N73[constants]
         N74[index]
-        N75[schemas]
-        N76[validator]
-        N77[...30 more]
+        N75[schema-utils]
+        N76[schemas]
+        N77[...34 more]
     end
 
     N0 --> N4
@@ -2599,21 +3057,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 158 |
+| Total TypeScript Files | 178 |
 | Total Modules | 16 |
-| Total Lines of Code | 42551 |
-| Total Exports | 505 |
-| Total Re-exports | 188 |
-| Total Classes | 89 |
-| Total Interfaces | 314 |
-| Total Functions | 121 |
-| Total Type Guards | 49 |
+| Total Lines of Code | 70593 |
+| Total Exports | 888 |
+| Total Re-exports | 340 |
+| Total Classes | 92 |
+| Total Interfaces | 388 |
+| Total Functions | 311 |
+| Total Type Guards | 56 |
 | Total Enums | 3 |
-| Type-only Imports | 121 |
+| Type-only Imports | 137 |
 | Runtime Circular Deps | 0 |
-| Type-only Circular Deps | 31 |
+| Type-only Circular Deps | 36 |
 
 ---
 
 *Last Updated*: 2025-12-07
-*Version*: 7.0.1
+*Version*: 7.1.0

@@ -2,9 +2,33 @@
 
 ## System Architecture
 
-DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced reasoning capabilities through 25 thinking modes (21 with dedicated thought types) with meta-reasoning for strategic oversight. The architecture follows a modular, service-oriented design with clear separation of concerns.
+DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced reasoning capabilities through 27 thinking modes (23 with dedicated thought types) with meta-reasoning for strategic oversight. The architecture follows a modular, service-oriented design with clear separation of concerns.
 
-**Version**: 7.0.0 | **Node**: >=18.0.0
+**Version**: 7.2.0 | **Node**: >=18.0.0
+
+## What's New in v7.2.0
+
+### Phase 11: Historical Computing Extensions - Turing & von Neumann Tributes
+
+This release introduces modes inspired by the foundational work of Alan Turing and John von Neumann:
+
+- **ComputabilityMode** (`src/types/modes/computability.ts`): Turing machines, decidability proofs, reductions, diagonalization
+- **CryptanalyticMode** (`src/types/modes/cryptanalytic.ts`): Turing's deciban system, Banburismus, frequency analysis
+- **Extended GameTheory** (`src/types/modes/gametheory.ts`): von Neumann's minimax theorem, cooperative games, Shapley values
+- **ComputabilityValidator** (`src/validation/validators/modes/computability.ts`): Turing machine well-formedness validation
+- **CryptanalyticValidator** (`src/validation/validators/modes/cryptanalytic.ts`): Deciban calculation validation
+- **ComputabilityExporter** (`src/export/visual/computability.ts`): State diagram and reduction chain visualizations
+
+### Key Features (v7.2.0)
+- Turing machine simulation with tape, head, and state transitions
+- Decidability proofs with reduction chains
+- Diagonalization arguments for undecidability
+- Evidence chains with deciban accumulation (10 decibans ≈ 10:1 odds)
+- Key space analysis with elimination methods
+- Frequency analysis with index of coincidence
+- Minimax analysis for zero-sum games
+- Cooperative game theory with coalition analysis
+- Shapley value calculations for fair value distribution
 
 ## What's New in v7.0.0
 
@@ -52,7 +76,7 @@ This release introduces a comprehensive proof decomposition system for mathemati
         │           │           │            │
         │      ┌────▼───────────▼────┐       │
         │      │ Visual Exporters    │       │
-        │      │ (19 mode-specific)  │       │
+        │      │ (21 mode-specific)  │       │
         │      └─────────────────────┘       │
         │                  │                 │
         │           ┌──────▼──────┐          │
@@ -66,7 +90,7 @@ This release introduces a comprehensive proof decomposition system for mathemati
         │              │               │
    ┌────▼──────┐  ┌────▼──────┐  ┌────▼─────────┐
    │  Storage  │  │ Validation │  │  Type System │
-   │   Layer   │  │   Layer    │  │  (25 Modes)  │
+   │   Layer   │  │   Layer    │  │  (27 Modes)  │
    └───────────┘  │ (Lazy Load)│  └──────────────┘
                   └────────────┘
 ```
@@ -84,12 +108,12 @@ This release introduces a comprehensive proof decomposition system for mathemati
 ### 2. Service Layer
 
 #### ThoughtFactory (`src/services/ThoughtFactory.ts`)
-- **Role**: Centralized thought creation for all 25 thinking modes
+- **Role**: Centralized thought creation for all 27 thinking modes
 - **Responsibilities**:
   - Creates mode-specific thought objects
   - Applies mode-specific validation
   - Handles thought revisions and dependencies
-- **Modes Supported**: Sequential, Shannon, Mathematics, Physics, Hybrid, Inductive, Deductive, Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory, Evidential, First Principles, Systems Thinking, Scientific Method, Optimization, Formal Logic, Metareasoning, Recursive, Modal, Stochastic, Constraint
+- **Modes Supported**: Sequential, Shannon, Mathematics, Physics, Hybrid, Inductive, Deductive, Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory, Evidential, First Principles, Systems Thinking, Scientific Method, Optimization, Formal Logic, Metareasoning, Recursive, Modal, Stochastic, Constraint, **Computability** (v7.2.0), **Cryptanalytic** (v7.2.0)
 
 #### ExportService (`src/services/ExportService.ts`)
 - **Role**: Unified export logic for multiple formats
@@ -120,7 +144,7 @@ This release introduces a comprehensive proof decomposition system for mathemati
 
 ### 3. Visual Export System (`src/export/visual/`) - v7.0.0
 
-**Modularized from monolithic visual.ts (2,546 lines) into 23 focused files:**
+**Modularized from monolithic visual.ts (2,546 lines) into 25 focused files:**
 
 ```
 src/export/visual/
@@ -128,7 +152,7 @@ src/export/visual/
 ├── types.ts              # VisualFormat ('mermaid' | 'dot' | 'ascii' | 'svg'), VisualExportOptions
 ├── utils.ts              # sanitizeId utility
 ├── proof-decomposition.ts # Proof decomposition export (v7.0.0) - Mermaid, DOT, ASCII, SVG
-└── [19 mode-specific exporters]
+└── [21 mode-specific exporters]
     ├── causal.ts         # Causal graph export
     ├── temporal.ts       # Timeline export
     ├── game-theory.ts    # Game tree export
@@ -147,7 +171,8 @@ src/export/visual/
     ├── mathematics.ts        # Math derivation export (v6.1.0)
     ├── physics.ts            # Physics diagram export (v6.1.0)
     ├── hybrid.ts             # Hybrid mode export (v6.1.0)
-    └── metareasoning.ts      # Meta-reasoning export (v6.1.0)
+    ├── metareasoning.ts      # Meta-reasoning export (v6.1.0)
+    └── computability.ts      # Turing machine diagrams (v7.2.0)
 ```
 
 **Native SVG Export (v7.0.0)**:
@@ -284,17 +309,18 @@ Provides 69 reasoning types (110 planned) organized across 12 categories.
 ### 12. Type System (`src/types/`)
 
 #### Organized by Domain:
-- **core.ts**: Base types, ThinkingMode enum (25 modes), Thought union type (21 types)
-- **modes/*.ts**: Mode-specific thought types (17 files)
+- **core.ts**: Base types, ThinkingMode enum (27 modes), Thought union type (23 types)
+- **modes/*.ts**: Mode-specific thought types (19 files)
 - **config.ts**: Configuration types
 - **session.ts**: Session and validation types
 - **events.ts**: Event system types
 
-#### Mode Categories (v6.0.0):
+#### Mode Categories (v7.2.0):
 - **Core Modes** (5): Sequential, Shannon, Mathematics, Physics, Hybrid
+- **Historical Computing** (2): Computability (Turing), Cryptanalytic (Turing) - *v7.2.0*
 - **Advanced Runtime** (6): Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
 - **Fundamental** (2): Inductive, Deductive
-- **Experimental** (12): Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory, Evidential, FirstPrinciples, SystemsThinking, ScientificMethod, FormalLogic
+- **Experimental** (12): Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory (+ von Neumann extensions), Evidential, FirstPrinciples, SystemsThinking, ScientificMethod, FormalLogic
 
 ## Architectural Patterns
 
@@ -417,7 +443,7 @@ Response with updated session
 ### Type Safety
 - TypeScript strict mode enabled
 - **0 type suppressions** (down from 231)
-- Comprehensive type definitions for all 25 modes
+- Comprehensive type definitions for all 27 modes
 
 ## Testing Architecture
 
@@ -442,22 +468,26 @@ Response with updated session
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~55,000 |
-| TypeScript Files | 201 |
+| Total Lines of Code | ~58,000 |
+| TypeScript Files | 178 |
 | Type Suppressions | 0 |
 | Test Files | 40 |
-| Tests | 972 |
-| Thinking Modes | 25 (21 with thought types) |
+| Tests | 792+ |
+| Thinking Modes | 27 (23 with thought types) |
 | MCP Tools | 10 focused + 1 legacy |
 | Export Formats | 8 (+ native SVG) |
 | Visual Formats | 4 (mermaid, dot, ascii, svg) |
 | Backup Providers | 4 |
-| Visual Exporters | 20 mode-specific |
+| Visual Exporters | 21 mode-specific |
 | Reasoning Types | 69 (110 planned) |
+| Modules | 16 |
+| Total Exports | 888 |
 
 ## Version History
 
-- **v7.0.0** (Current): Phase 8 proof decomposition system, native SVG export, MathematicsReasoningEngine
+- **v7.2.0** (Current): Phase 11 historical computing extensions, Computability mode (Turing machines), Cryptanalytic mode (decibans), extended Game Theory (von Neumann)
+- **v7.1.0**: Markdown visual export format for all 21 exporters
+- **v7.0.0**: Phase 8 proof decomposition system, native SVG export, MathematicsReasoningEngine
 - **v6.1.2**: Fixed causal graph exports (nodes/edges preserved in Zod validation)
 - **v6.1.1**: Eliminated 24 runtime circular dependencies
 - **v6.1.0**: Circular dependency fixes, logger-types.ts extraction
@@ -479,4 +509,4 @@ Response with updated session
 ---
 
 *Last Updated*: 2025-12-07
-*Architecture Version*: 7.0.0
+*Architecture Version*: 7.2.0
