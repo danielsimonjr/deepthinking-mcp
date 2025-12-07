@@ -2998,6 +2998,20 @@ var init_ThoughtFactory = __esm({
               }
             };
           }
+          case "engineering": {
+            const engInput = input;
+            return {
+              ...baseThought,
+              mode: "engineering" /* ENGINEERING */,
+              analysisType: engInput.analysisType || "comprehensive",
+              designChallenge: engInput.designChallenge || input.thought,
+              requirements: engInput.requirements,
+              tradeStudy: engInput.tradeStudy,
+              fmea: engInput.fmea,
+              designDecisions: engInput.designDecisions,
+              assessment: engInput.assessment
+            };
+          }
           case "hybrid":
           default:
             return {
@@ -12096,6 +12110,522 @@ var init_proof_decomposition = __esm({
   }
 });
 
+// src/export/visual/engineering.ts
+function exportEngineeringAnalysis(thought, options) {
+  const { format } = options;
+  switch (format) {
+    case "mermaid":
+      return engineeringToMermaid(thought, options);
+    case "dot":
+      return engineeringToDOT(thought, options);
+    case "ascii":
+      return engineeringToASCII(thought);
+    case "svg":
+      return engineeringToSVG(thought, options);
+    case "graphml":
+      return engineeringToGraphML(thought, options);
+    case "tikz":
+      return engineeringToTikZ(thought, options);
+    default:
+      throw new Error(`Unsupported format: ${format}`);
+  }
+}
+function engineeringToMermaid(thought, options) {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const lines = ["flowchart TB"];
+  lines.push(`  title["\u{1F527} ${thought.analysisType.toUpperCase()} Analysis"]`);
+  lines.push(`  title --> challenge["${thought.designChallenge.slice(0, 50)}${thought.designChallenge.length > 50 ? "..." : ""}"]`);
+  if (thought.requirements && thought.requirements.requirements.length > 0) {
+    lines.push("");
+    lines.push('  subgraph Requirements ["\u{1F4CB} Requirements"]');
+    for (const req of thought.requirements.requirements.slice(0, 5)) {
+      const label = includeLabels ? req.title.slice(0, 30) : req.id;
+      const status = req.status === "verified" ? "\u2713" : req.status === "implemented" ? "\u2699" : "\u25CB";
+      lines.push(`    ${sanitizeId(req.id)}["${status} ${label}"]`);
+    }
+    if (thought.requirements.requirements.length > 5) {
+      lines.push(`    reqMore["... +${thought.requirements.requirements.length - 5} more"]`);
+    }
+    lines.push("  end");
+    lines.push("  challenge --> Requirements");
+  }
+  if (thought.tradeStudy) {
+    lines.push("");
+    lines.push('  subgraph TradeStudy ["\u2696\uFE0F Trade Study"]');
+    for (const alt of thought.tradeStudy.alternatives.slice(0, 4)) {
+      const isRecommended = alt.id === thought.tradeStudy.recommendation;
+      const icon = isRecommended ? "\u2605" : "\u25CB";
+      const label = includeLabels ? alt.name.slice(0, 25) : alt.id;
+      lines.push(`    ${sanitizeId(alt.id)}["${icon} ${label}"]`);
+    }
+    if (thought.tradeStudy.alternatives.length > 4) {
+      lines.push(`    altMore["... +${thought.tradeStudy.alternatives.length - 4} more"]`);
+    }
+    lines.push("  end");
+    lines.push("  challenge --> TradeStudy");
+  }
+  if (thought.fmea && thought.fmea.failureModes.length > 0) {
+    lines.push("");
+    lines.push('  subgraph FMEA ["\u26A0\uFE0F Failure Modes"]');
+    const sortedModes = [...thought.fmea.failureModes].sort((a, b) => b.rpn - a.rpn);
+    for (const fm of sortedModes.slice(0, 4)) {
+      const risk = fm.rpn >= thought.fmea.rpnThreshold ? "\u{1F534}" : fm.rpn >= 100 ? "\u{1F7E1}" : "\u{1F7E2}";
+      const label = includeMetrics ? `${fm.failureMode.slice(0, 20)} (RPN:${fm.rpn})` : fm.failureMode.slice(0, 25);
+      lines.push(`    ${sanitizeId(fm.id)}{{"${risk} ${label}"}}`);
+    }
+    if (thought.fmea.failureModes.length > 4) {
+      lines.push(`    fmMore["... +${thought.fmea.failureModes.length - 4} more"]`);
+    }
+    lines.push("  end");
+    lines.push("  challenge --> FMEA");
+  }
+  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
+    lines.push("");
+    lines.push('  subgraph Decisions ["\u{1F4DD} Design Decisions"]');
+    for (const dec of thought.designDecisions.decisions.slice(0, 4)) {
+      const status = dec.status === "accepted" ? "\u2713" : dec.status === "proposed" ? "?" : "\u2717";
+      const label = includeLabels ? dec.title.slice(0, 25) : dec.id;
+      lines.push(`    ${sanitizeId(dec.id)}(["${status} ${label}"])`);
+    }
+    if (thought.designDecisions.decisions.length > 4) {
+      lines.push(`    decMore["... +${thought.designDecisions.decisions.length - 4} more"]`);
+    }
+    lines.push("  end");
+    lines.push("  challenge --> Decisions");
+  }
+  if (includeMetrics && thought.assessment) {
+    lines.push("");
+    lines.push(`  metrics["\u{1F4CA} Confidence: ${(thought.assessment.confidence * 100).toFixed(0)}%"]`);
+    lines.push("  challenge --> metrics");
+  }
+  return lines.join("\n");
+}
+function engineeringToDOT(thought, options) {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const lines = [
+    "digraph EngineeringAnalysis {",
+    "  rankdir=TB;",
+    '  node [fontname="Arial", fontsize=10];',
+    '  edge [fontname="Arial", fontsize=9];',
+    ""
+  ];
+  lines.push(`  challenge [label="${thought.designChallenge.slice(0, 40)}", shape=box, style=filled, fillcolor=lightblue];`);
+  if (thought.requirements && thought.requirements.requirements.length > 0) {
+    lines.push("");
+    lines.push("  subgraph cluster_requirements {");
+    lines.push('    label="Requirements";');
+    lines.push("    style=filled;");
+    lines.push("    fillcolor=lightyellow;");
+    for (const req of thought.requirements.requirements) {
+      const label = includeLabels ? `${req.id}\\n${req.title.slice(0, 20)}` : req.id;
+      const color = req.status === "verified" ? "green" : req.status === "implemented" ? "blue" : "gray";
+      lines.push(`    ${sanitizeId(req.id)} [label="${label}", color=${color}];`);
+    }
+    lines.push("  }");
+    lines.push("  challenge -> " + sanitizeId(thought.requirements.requirements[0]?.id || "req") + ";");
+  }
+  if (thought.tradeStudy) {
+    lines.push("");
+    lines.push("  subgraph cluster_trade {");
+    lines.push('    label="Trade Study";');
+    lines.push("    style=filled;");
+    lines.push("    fillcolor=lightgreen;");
+    for (const alt of thought.tradeStudy.alternatives) {
+      const label = includeLabels ? `${alt.id}\\n${alt.name.slice(0, 20)}` : alt.id;
+      const style = alt.id === thought.tradeStudy.recommendation ? "bold" : "solid";
+      const color = alt.id === thought.tradeStudy.recommendation ? "gold" : "white";
+      lines.push(`    ${sanitizeId(alt.id)} [label="${label}", style="${style},filled", fillcolor=${color}];`);
+    }
+    lines.push("  }");
+    lines.push("  challenge -> " + sanitizeId(thought.tradeStudy.alternatives[0]?.id || "alt") + ";");
+  }
+  if (thought.fmea && thought.fmea.failureModes.length > 0) {
+    lines.push("");
+    lines.push("  subgraph cluster_fmea {");
+    lines.push('    label="FMEA";');
+    lines.push("    style=filled;");
+    lines.push("    fillcolor=mistyrose;");
+    for (const fm of thought.fmea.failureModes) {
+      const label = includeMetrics ? `${fm.id}\\n${fm.failureMode.slice(0, 15)}\\nRPN:${fm.rpn}` : `${fm.id}\\n${fm.failureMode.slice(0, 20)}`;
+      const color = fm.rpn >= thought.fmea.rpnThreshold ? "red" : fm.rpn >= 100 ? "orange" : "green";
+      lines.push(`    ${sanitizeId(fm.id)} [label="${label}", shape=diamond, color=${color}];`);
+    }
+    lines.push("  }");
+    lines.push("  challenge -> " + sanitizeId(thought.fmea.failureModes[0]?.id || "fm") + ";");
+  }
+  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
+    lines.push("");
+    lines.push("  subgraph cluster_decisions {");
+    lines.push('    label="Design Decisions";');
+    lines.push("    style=filled;");
+    lines.push("    fillcolor=lavender;");
+    for (const dec of thought.designDecisions.decisions) {
+      const label = includeLabels ? `${dec.id}\\n${dec.title.slice(0, 20)}` : dec.id;
+      const shape = dec.status === "accepted" ? "box" : "ellipse";
+      lines.push(`    ${sanitizeId(dec.id)} [label="${label}", shape=${shape}];`);
+    }
+    lines.push("  }");
+    lines.push("  challenge -> " + sanitizeId(thought.designDecisions.decisions[0]?.id || "dec") + ";");
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+function engineeringToASCII(thought) {
+  const lines = [];
+  const width = 60;
+  lines.push("\u2554" + "\u2550".repeat(width - 2) + "\u2557");
+  lines.push("\u2551" + ` \u{1F527} ENGINEERING: ${thought.analysisType.toUpperCase()} `.padEnd(width - 2) + "\u2551");
+  lines.push("\u2560" + "\u2550".repeat(width - 2) + "\u2563");
+  lines.push("\u2551" + ` Challenge: ${thought.designChallenge.slice(0, width - 14)}`.padEnd(width - 2) + "\u2551");
+  lines.push("\u2560" + "\u2500".repeat(width - 2) + "\u2563");
+  if (thought.requirements && thought.requirements.requirements.length > 0) {
+    lines.push("\u2551" + " \u{1F4CB} REQUIREMENTS".padEnd(width - 2) + "\u2551");
+    lines.push("\u2551" + "\u2500".repeat(width - 2) + "\u2551");
+    for (const req of thought.requirements.requirements.slice(0, 5)) {
+      const status = req.status === "verified" ? "[\u2713]" : req.status === "implemented" ? "[\u2699]" : "[ ]";
+      const line = ` ${status} ${req.id}: ${req.title.slice(0, width - 20)}`;
+      lines.push("\u2551" + line.padEnd(width - 2) + "\u2551");
+    }
+    if (thought.requirements.requirements.length > 5) {
+      lines.push("\u2551" + `   ... +${thought.requirements.requirements.length - 5} more`.padEnd(width - 2) + "\u2551");
+    }
+    lines.push("\u2551" + `   Coverage: ${thought.requirements.coverage.verified}/${thought.requirements.coverage.total} verified`.padEnd(width - 2) + "\u2551");
+    lines.push("\u2560" + "\u2500".repeat(width - 2) + "\u2563");
+  }
+  if (thought.tradeStudy) {
+    lines.push("\u2551" + " \u2696\uFE0F TRADE STUDY".padEnd(width - 2) + "\u2551");
+    lines.push("\u2551" + "\u2500".repeat(width - 2) + "\u2551");
+    for (const alt of thought.tradeStudy.alternatives) {
+      const isRec = alt.id === thought.tradeStudy.recommendation;
+      const marker = isRec ? "\u2605" : "\u25CB";
+      const line = ` ${marker} ${alt.name.slice(0, width - 8)}`;
+      lines.push("\u2551" + line.padEnd(width - 2) + "\u2551");
+    }
+    lines.push("\u2551" + `   Recommended: ${thought.tradeStudy.recommendation}`.padEnd(width - 2) + "\u2551");
+    lines.push("\u2560" + "\u2500".repeat(width - 2) + "\u2563");
+  }
+  if (thought.fmea && thought.fmea.failureModes.length > 0) {
+    lines.push("\u2551" + " \u26A0\uFE0F FAILURE MODES (FMEA)".padEnd(width - 2) + "\u2551");
+    lines.push("\u2551" + "\u2500".repeat(width - 2) + "\u2551");
+    const sortedModes = [...thought.fmea.failureModes].sort((a, b) => b.rpn - a.rpn);
+    for (const fm of sortedModes.slice(0, 5)) {
+      const risk = fm.rpn >= thought.fmea.rpnThreshold ? "\u{1F534}" : fm.rpn >= 100 ? "\u{1F7E1}" : "\u{1F7E2}";
+      const line = ` ${risk} ${fm.failureMode.slice(0, width - 25)} RPN:${fm.rpn}`;
+      lines.push("\u2551" + line.padEnd(width - 2) + "\u2551");
+    }
+    if (thought.fmea.failureModes.length > 5) {
+      lines.push("\u2551" + `   ... +${thought.fmea.failureModes.length - 5} more`.padEnd(width - 2) + "\u2551");
+    }
+    lines.push("\u2551" + `   Critical: ${thought.fmea.summary.criticalModes} modes above threshold`.padEnd(width - 2) + "\u2551");
+    lines.push("\u2560" + "\u2500".repeat(width - 2) + "\u2563");
+  }
+  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
+    lines.push("\u2551" + " \u{1F4DD} DESIGN DECISIONS".padEnd(width - 2) + "\u2551");
+    lines.push("\u2551" + "\u2500".repeat(width - 2) + "\u2551");
+    for (const dec of thought.designDecisions.decisions.slice(0, 5)) {
+      const status = dec.status === "accepted" ? "[\u2713]" : dec.status === "proposed" ? "[?]" : "[\u2717]";
+      const line = ` ${status} ${dec.id}: ${dec.title.slice(0, width - 20)}`;
+      lines.push("\u2551" + line.padEnd(width - 2) + "\u2551");
+    }
+    if (thought.designDecisions.decisions.length > 5) {
+      lines.push("\u2551" + `   ... +${thought.designDecisions.decisions.length - 5} more`.padEnd(width - 2) + "\u2551");
+    }
+    lines.push("\u2560" + "\u2500".repeat(width - 2) + "\u2563");
+  }
+  if (thought.assessment) {
+    lines.push("\u2551" + " \u{1F4CA} ASSESSMENT".padEnd(width - 2) + "\u2551");
+    lines.push("\u2551" + `   Confidence: ${(thought.assessment.confidence * 100).toFixed(0)}%`.padEnd(width - 2) + "\u2551");
+    if (thought.assessment.keyRisks.length > 0) {
+      lines.push("\u2551" + `   Key Risks: ${thought.assessment.keyRisks.length}`.padEnd(width - 2) + "\u2551");
+    }
+    if (thought.assessment.openIssues.length > 0) {
+      lines.push("\u2551" + `   Open Issues: ${thought.assessment.openIssues.length}`.padEnd(width - 2) + "\u2551");
+    }
+  }
+  lines.push("\u255A" + "\u2550".repeat(width - 2) + "\u255D");
+  return lines.join("\n");
+}
+function engineeringToSVG(thought, options) {
+  const { colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const svgOptions = { ...DEFAULT_SVG_OPTIONS, ...options };
+  const nodePositions = /* @__PURE__ */ new Map();
+  let currentY = 60;
+  const centerX = (svgOptions.svgWidth || 800) / 2;
+  const challengePos = {
+    id: "challenge",
+    label: thought.designChallenge.slice(0, 40),
+    x: centerX - 100,
+    y: currentY,
+    width: 200,
+    height: 40,
+    type: "primary"
+  };
+  nodePositions.set("challenge", challengePos);
+  currentY += 80;
+  const sections = [];
+  if (thought.requirements && thought.requirements.requirements.length > 0) {
+    const label = includeLabels ? `Requirements (${thought.requirements.requirements.length})` : "Reqs";
+    sections.push({ id: "requirements", label, type: "info" });
+  }
+  if (thought.tradeStudy) {
+    const label = includeLabels ? `Trade Study (${thought.tradeStudy.alternatives.length} alts)` : "Trade";
+    sections.push({ id: "tradeStudy", label, type: "secondary" });
+  }
+  if (thought.fmea && thought.fmea.failureModes.length > 0) {
+    const label = includeLabels ? `FMEA (${thought.fmea.failureModes.length} modes)` : "FMEA";
+    sections.push({ id: "fmea", label, type: "danger" });
+  }
+  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
+    const label = includeLabels ? `Decisions (${thought.designDecisions.decisions.length})` : "Decisions";
+    sections.push({ id: "decisions", label, type: "tertiary" });
+  }
+  const sectionWidth = 150;
+  const totalWidth = sections.length * (sectionWidth + 20);
+  let startX = centerX - totalWidth / 2;
+  for (const section of sections) {
+    const pos = {
+      id: section.id,
+      label: section.label,
+      x: startX,
+      y: currentY,
+      width: sectionWidth,
+      height: 40,
+      type: section.type
+    };
+    nodePositions.set(section.id, pos);
+    startX += sectionWidth + 20;
+  }
+  const svgHeight = currentY + 120;
+  let svg = generateSVGHeader(svgOptions.svgWidth || 800, svgHeight, `Engineering: ${thought.analysisType}`);
+  const challengeColors = getNodeColor("primary", colorScheme);
+  svg += renderStadiumNode(challengePos, challengeColors);
+  for (const section of sections) {
+    const pos = nodePositions.get(section.id);
+    const colors = getNodeColor(section.type, colorScheme);
+    svg += renderRectNode(pos, colors, 5);
+    svg += renderEdge(challengePos, pos, { color: "#666666" });
+  }
+  if (includeMetrics && thought.assessment) {
+    const metrics = [
+      { label: "Confidence", value: `${(thought.assessment.confidence * 100).toFixed(0)}%` },
+      { label: "Key Risks", value: thought.assessment.keyRisks.length },
+      { label: "Open Issues", value: thought.assessment.openIssues.length }
+    ];
+    svg += renderMetricsPanel((svgOptions.svgWidth || 800) - 150, 20, metrics);
+  }
+  svg += generateSVGFooter();
+  return svg;
+}
+function engineeringToGraphML(thought, options) {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const nodes = [];
+  const edges = [];
+  let edgeId = 0;
+  nodes.push({
+    id: "challenge",
+    label: includeLabels ? thought.designChallenge : "Challenge",
+    type: "challenge",
+    metadata: { analysisType: thought.analysisType }
+  });
+  if (thought.requirements) {
+    for (const req of thought.requirements.requirements) {
+      nodes.push({
+        id: sanitizeId(req.id),
+        label: includeLabels ? req.title : req.id,
+        type: "requirement",
+        metadata: {
+          priority: req.priority,
+          status: req.status,
+          source: req.source
+        }
+      });
+      edges.push({
+        id: `e${edgeId++}`,
+        source: "challenge",
+        target: sanitizeId(req.id),
+        label: "requires"
+      });
+      if (req.tracesTo) {
+        for (const parentId of req.tracesTo) {
+          edges.push({
+            id: `e${edgeId++}`,
+            source: sanitizeId(req.id),
+            target: sanitizeId(parentId),
+            label: "traces to"
+          });
+        }
+      }
+    }
+  }
+  if (thought.tradeStudy) {
+    nodes.push({
+      id: "tradeStudy",
+      label: thought.tradeStudy.title,
+      type: "trade-study"
+    });
+    edges.push({
+      id: `e${edgeId++}`,
+      source: "challenge",
+      target: "tradeStudy"
+    });
+    for (const alt of thought.tradeStudy.alternatives) {
+      const isRecommended = alt.id === thought.tradeStudy.recommendation;
+      nodes.push({
+        id: sanitizeId(alt.id),
+        label: includeLabels ? alt.name : alt.id,
+        type: isRecommended ? "recommended" : "alternative",
+        metadata: {
+          riskLevel: alt.riskLevel,
+          estimatedCost: alt.estimatedCost
+        }
+      });
+      edges.push({
+        id: `e${edgeId++}`,
+        source: "tradeStudy",
+        target: sanitizeId(alt.id),
+        label: isRecommended ? "recommended" : "alternative"
+      });
+    }
+  }
+  if (thought.fmea) {
+    for (const fm of thought.fmea.failureModes) {
+      nodes.push({
+        id: sanitizeId(fm.id),
+        label: includeLabels ? fm.failureMode : fm.id,
+        type: fm.rpn >= thought.fmea.rpnThreshold ? "critical-failure" : "failure-mode",
+        metadata: includeMetrics ? {
+          severity: fm.severity,
+          occurrence: fm.occurrence,
+          detection: fm.detection,
+          rpn: fm.rpn,
+          component: fm.component
+        } : void 0
+      });
+      edges.push({
+        id: `e${edgeId++}`,
+        source: "challenge",
+        target: sanitizeId(fm.id),
+        label: "failure mode",
+        metadata: includeMetrics ? { weight: fm.rpn } : void 0
+      });
+    }
+  }
+  if (thought.designDecisions) {
+    for (const dec of thought.designDecisions.decisions) {
+      nodes.push({
+        id: sanitizeId(dec.id),
+        label: includeLabels ? dec.title : dec.id,
+        type: `decision-${dec.status}`,
+        metadata: {
+          status: dec.status,
+          context: dec.context
+        }
+      });
+      edges.push({
+        id: `e${edgeId++}`,
+        source: "challenge",
+        target: sanitizeId(dec.id),
+        label: "decision"
+      });
+      if (dec.relatedDecisions) {
+        for (const relId of dec.relatedDecisions) {
+          edges.push({
+            id: `e${edgeId++}`,
+            source: sanitizeId(dec.id),
+            target: sanitizeId(relId),
+            label: "related to"
+          });
+        }
+      }
+    }
+  }
+  return generateGraphML(nodes, edges, { graphName: "Engineering Analysis", directed: true });
+}
+function engineeringToTikZ(thought, options) {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const nodes = [];
+  const edges = [];
+  nodes.push({
+    id: "challenge",
+    label: thought.designChallenge.slice(0, 30),
+    x: 4,
+    y: 0,
+    type: "primary",
+    shape: "stadium"
+  });
+  let sectionX = 0;
+  const sectionY = -2;
+  if (thought.requirements && thought.requirements.requirements.length > 0) {
+    nodes.push({
+      id: "reqs",
+      label: includeLabels ? `Reqs (${thought.requirements.requirements.length})` : "Requirements",
+      x: sectionX,
+      y: sectionY,
+      type: "info",
+      shape: "rectangle"
+    });
+    edges.push({ source: "challenge", target: "reqs", directed: true });
+    sectionX += 2.5;
+  }
+  if (thought.tradeStudy) {
+    nodes.push({
+      id: "trade",
+      label: includeLabels ? `Trade (${thought.tradeStudy.alternatives.length})` : "Trade Study",
+      x: sectionX,
+      y: sectionY,
+      type: "secondary",
+      shape: "rectangle"
+    });
+    edges.push({ source: "challenge", target: "trade", directed: true });
+    sectionX += 2.5;
+  }
+  if (thought.fmea && thought.fmea.failureModes.length > 0) {
+    const criticalCount = thought.fmea.summary.criticalModes;
+    nodes.push({
+      id: "fmea",
+      label: includeMetrics ? `FMEA (${criticalCount} crit)` : "FMEA",
+      x: sectionX,
+      y: sectionY,
+      type: "danger",
+      shape: "diamond"
+    });
+    edges.push({ source: "challenge", target: "fmea", directed: true });
+    sectionX += 2.5;
+  }
+  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
+    nodes.push({
+      id: "decisions",
+      label: includeLabels ? `Decisions (${thought.designDecisions.decisions.length})` : "Decisions",
+      x: sectionX,
+      y: sectionY,
+      type: "tertiary",
+      shape: "ellipse"
+    });
+    edges.push({ source: "challenge", target: "decisions", directed: true });
+  }
+  if (thought.assessment && includeMetrics) {
+    nodes.push({
+      id: "assessment",
+      label: `${(thought.assessment.confidence * 100).toFixed(0)}% conf`,
+      x: 4,
+      y: -4,
+      type: "success",
+      shape: "ellipse"
+    });
+    edges.push({ source: "challenge", target: "assessment", style: "dashed", directed: true });
+  }
+  return generateTikZ(nodes, edges, { title: `Engineering: ${thought.analysisType}` });
+}
+var init_engineering = __esm({
+  "src/export/visual/engineering.ts"() {
+    init_esm_shims();
+    init_utils();
+    init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
+  }
+});
+
 // src/export/visual/index.ts
 var VisualExporter;
 var init_visual = __esm({
@@ -12124,6 +12654,7 @@ var init_visual = __esm({
     init_hybrid();
     init_metareasoning();
     init_proof_decomposition();
+    init_engineering();
     VisualExporter = class {
       exportCausalGraph(thought, options) {
         return exportCausalGraph(thought, options);
@@ -12186,6 +12717,10 @@ var init_visual = __esm({
       // Phase 8: Proof decomposition visual export
       exportProofDecomposition(decomposition, options) {
         return exportProofDecomposition(decomposition, options);
+      }
+      // Phase 10: Engineering visual export
+      exportEngineeringAnalysis(thought, options) {
+        return exportEngineeringAnalysis(thought, options);
       }
     };
   }
@@ -12424,6 +12959,14 @@ var init_ExportService = __esm({
         }
         if (lastThought.mode === "metareasoning" /* METAREASONING */ && "currentStrategy" in lastThought) {
           return this.visualExporter.exportMetaReasoningVisualization(lastThought, {
+            format,
+            colorScheme: "default",
+            includeLabels: true,
+            includeMetrics: true
+          });
+        }
+        if (lastThought.mode === "engineering" /* ENGINEERING */ && "analysisType" in lastThought) {
+          return this.visualExporter.exportEngineeringAnalysis(lastThought, {
             format,
             colorScheme: "default",
             includeLabels: true,
