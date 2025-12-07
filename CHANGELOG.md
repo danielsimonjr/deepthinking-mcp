@@ -7,6 +7,100 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ✨ Features
+
+**Modelica, UML, and JSON Export Support for All Visual Exporters**
+
+Added Modelica (system modeling), UML/PlantUML (activity diagrams), and JSON (visual graph) export formats to all 21 reasoning mode visual exporters.
+
+#### New Modules
+- `src/export/visual/modelica-utils.ts` - Shared Modelica utilities with:
+  - System modeling language format for engineering simulations
+  - Package, record, and model generation
+  - Linear flow and hierarchy graph helpers
+  - Identifier sanitization and string escaping
+
+- `src/export/visual/uml-utils.ts` - Shared PlantUML utilities with:
+  - Activity, class, component, state, and use case diagram support
+  - Node shapes (rectangle, circle, diamond, cloud, actor, usecase, component)
+  - Edge types (arrow, dashed, dotted, association, dependency, composition, aggregation, inheritance, implementation)
+  - Theme support (default, sketchy, blueprint, plain)
+  - Direction control (left to right, top to bottom)
+
+- `src/export/visual/json-utils.ts` - Shared JSON visual graph utilities with:
+  - Structured JSON graph representation for visualization libraries
+  - Node and edge metadata support
+  - Metrics and legend item generation
+  - Linear flow, hierarchy, network, Bayesian, and causal graph helpers
+  - Pretty print and indent options
+
+#### Updated Exporters
+All 21 mode-specific visual exporters now support Modelica, UML, and JSON formats:
+- Sequential, Shannon, Mathematics, Physics, Hybrid
+- Bayesian, Abductive, Causal, Temporal, Game Theory
+- Counterfactual, Analogical, Evidential, First Principles
+- Systems Thinking, Scientific Method, Optimization, Formal Logic
+- Metareasoning, Proof Decomposition, Engineering
+
+#### Updated Services
+- `ExportService.exportSession()` now accepts `'uml'` and `'visual-json'` as valid formats
+- Visual format type extended: `'mermaid' | 'dot' | 'ascii' | 'svg' | 'graphml' | 'tikz' | 'modelica' | 'html' | 'uml' | 'json'`
+- `VisualExportOptions` extended with `umlDiagramType`, `umlTheme`, `umlDirection`, `jsonPrettyPrint`, `jsonIndent` options
+
+#### API
+```typescript
+// Export to Modelica (for system modeling tools)
+const modelicaOutput = exportService.exportSession(session, 'modelica');
+
+// Export to UML/PlantUML (for UML diagrams)
+const umlOutput = exportService.exportSession(session, 'uml');
+
+// Export to JSON visual graph (for visualization libraries)
+const jsonOutput = exportService.exportSession(session, 'visual-json');
+
+// Direct exporter usage
+import { exportSequentialGraph } from './export/visual/sequential.js';
+const modelica = exportSequentialGraph(thought, { format: 'modelica' });
+const uml = exportSequentialGraph(thought, { format: 'uml', umlDiagramType: 'activity' });
+const json = exportSequentialGraph(thought, { format: 'json', jsonPrettyPrint: true });
+```
+
+---
+
+**HTML Visual Export Support for All Visual Exporters**
+
+Added standalone HTML export format to all 21 reasoning mode visual exporters for browser-based viewing.
+
+#### New Module
+- `src/export/visual/html-utils.ts` - Shared HTML utilities with:
+  - Responsive, standalone HTML document generation
+  - Metric cards, sections, badges, and list rendering
+  - CSS styling with hover effects and smooth transitions
+  - Theme support (light theme built-in)
+  - Legend and progress visualization
+
+#### Updated Exporters
+All 21 mode-specific visual exporters now support HTML format:
+- Sequential, Shannon, Mathematics, Physics, Hybrid
+- Bayesian, Abductive, Causal, Temporal, Game Theory
+- Counterfactual, Analogical, Evidential, First Principles
+- Systems Thinking, Scientific Method, Optimization, Formal Logic
+- Metareasoning, Proof Decomposition, Engineering
+
+#### Updated Services
+- `ExportService.exportSession()` now accepts `'html'` as a valid format
+- Visual format type extended to include `'html'`
+
+#### API
+```typescript
+// Export to HTML
+const htmlOutput = exportService.exportSession(session, 'html');
+
+// Direct exporter usage
+import { exportSequentialGraph } from './export/visual/sequential.js';
+const html = exportSequentialGraph(thought, { format: 'html' });
+```
+
 ---
 
 ## [7.0.3] - 2025-12-07
