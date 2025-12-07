@@ -288,4 +288,162 @@ describe('Proof Decomposition Visual Export', () => {
       }).toThrow('Unsupported format');
     });
   });
+
+  describe('SVG Export', () => {
+    it('should export to SVG format', () => {
+      const decomposition = createMockDecomposition();
+      const result = exportProofDecomposition(decomposition, { format: 'svg' });
+
+      expect(result).toContain('<?xml version="1.0"');
+      expect(result).toContain('<svg xmlns="http://www.w3.org/2000/svg"');
+      expect(result).toContain('</svg>');
+    });
+
+    it('should include theorem in title', () => {
+      const decomposition = createMockDecomposition();
+      const result = exportProofDecomposition(decomposition, { format: 'svg' });
+
+      expect(result).toContain('Proof:');
+    });
+
+    it('should include nodes with correct shapes', () => {
+      const decomposition = createMockDecomposition();
+      const result = exportProofDecomposition(decomposition, { format: 'svg' });
+
+      expect(result).toContain('class="node node-hypothesis"');
+      expect(result).toContain('class="node node-derived"');
+      expect(result).toContain('class="node node-conclusion"');
+    });
+
+    it('should include edges', () => {
+      const decomposition = createMockDecomposition();
+      const result = exportProofDecomposition(decomposition, { format: 'svg' });
+
+      expect(result).toContain('class="edges"');
+      expect(result).toContain('<path');
+      expect(result).toContain('marker-end="url(#arrowhead)"');
+    });
+
+    it('should include metrics when requested', () => {
+      const decomposition = createMockDecomposition();
+      const result = exportProofDecomposition(decomposition, { format: 'svg', includeMetrics: true });
+
+      expect(result).toContain('class="metrics-panel"');
+      expect(result).toContain('Completeness');
+      expect(result).toContain('Rigor');
+    });
+
+    it('should include legend', () => {
+      const decomposition = createMockDecomposition();
+      const result = exportProofDecomposition(decomposition, { format: 'svg' });
+
+      expect(result).toContain('class="legend"');
+      expect(result).toContain('Axiom');
+      expect(result).toContain('Hypothesis');
+      expect(result).toContain('Conclusion');
+    });
+
+    it('should apply default color scheme', () => {
+      const decomposition = createMockDecomposition();
+      const result = exportProofDecomposition(decomposition, { format: 'svg', colorScheme: 'default' });
+
+      expect(result).toContain('#64b5f6'); // Hypothesis blue
+      expect(result).toContain('#9575cd'); // Conclusion purple
+    });
+
+    it('should apply pastel color scheme', () => {
+      const decomposition = createMockDecomposition();
+      const result = exportProofDecomposition(decomposition, { format: 'svg', colorScheme: 'pastel' });
+
+      expect(result).toContain('#bbdefb'); // Pastel blue
+      expect(result).toContain('#d1c4e9'); // Pastel purple
+    });
+
+    it('should apply monochrome color scheme', () => {
+      const decomposition = createMockDecomposition();
+      const result = exportProofDecomposition(decomposition, { format: 'svg', colorScheme: 'monochrome' });
+
+      expect(result).toContain('#ffffff');
+      expect(result).toContain('#333333');
+    });
+
+    it('should respect svgWidth and svgHeight options', () => {
+      const decomposition = createMockDecomposition();
+      const result = exportProofDecomposition(decomposition, {
+        format: 'svg',
+        svgWidth: 1200,
+        svgHeight: 800,
+      });
+
+      expect(result).toContain('width="1200"');
+    });
+
+    it('should include defs for arrow markers', () => {
+      const decomposition = createMockDecomposition();
+      const result = exportProofDecomposition(decomposition, { format: 'svg' });
+
+      expect(result).toContain('<defs>');
+      expect(result).toContain('id="arrowhead"');
+      expect(result).toContain('</defs>');
+    });
+
+    it('should escape special characters in text', () => {
+      const decomposition = createMockDecomposition();
+      decomposition.atoms[0].statement = 'n < m & m > k';
+      const result = exportProofDecomposition(decomposition, { format: 'svg' });
+
+      expect(result).toContain('&lt;');
+      expect(result).toContain('&amp;');
+      expect(result).toContain('&gt;');
+    });
+
+    it('should show gaps with dashed red lines', () => {
+      const decomposition = createMockDecomposition();
+      decomposition.gaps = [
+        {
+          id: 'gap1',
+          type: 'missing_step',
+          location: { from: 'a2', to: 'a3' },
+          description: 'Missing step',
+          severity: 'minor',
+        },
+      ];
+
+      const result = exportProofDecomposition(decomposition, { format: 'svg' });
+
+      expect(result).toContain('class="gap-edges"');
+      expect(result).toContain('stroke-dasharray="5,5"');
+      expect(result).toContain('#e53935'); // Red color
+    });
+
+    it('should handle empty atoms array in SVG', () => {
+      const decomposition = createMockDecomposition();
+      decomposition.atoms = [];
+      decomposition.dependencies.nodes = new Map();
+      decomposition.dependencies.edges = [];
+
+      const result = exportProofDecomposition(decomposition, { format: 'svg' });
+
+      expect(result).toContain('<svg');
+      expect(result).toContain('</svg>');
+    });
+
+    it('should include background rect', () => {
+      const decomposition = createMockDecomposition();
+      const result = exportProofDecomposition(decomposition, { format: 'svg' });
+
+      expect(result).toContain('<!-- Background -->');
+      expect(result).toContain('fill="#fafafa"');
+    });
+
+    it('should include CSS styles in SVG', () => {
+      const decomposition = createMockDecomposition();
+      const result = exportProofDecomposition(decomposition, { format: 'svg' });
+
+      expect(result).toContain('<style>');
+      expect(result).toContain('.title');
+      expect(result).toContain('.metrics');
+      expect(result).toContain('</style>');
+    });
+  });
 });
