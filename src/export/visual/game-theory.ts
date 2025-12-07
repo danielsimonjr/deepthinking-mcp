@@ -57,6 +57,13 @@ import {
   addLegendItem,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export game tree to visual format
@@ -85,6 +92,8 @@ export function exportGameTree(thought: GameTheoryThought, options: VisualExport
       return gameTheoryToUML(thought, options);
     case 'json':
       return gameTheoryToJSON(thought, options);
+    case 'markdown':
+      return gameTheoryToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -937,4 +946,82 @@ function gameTheoryToJSON(thought: GameTheoryThought, options: VisualExportOptio
   addLegendItem(graph, 'Nash Equilibrium', '#9370DB');
 
   return serializeGraph(graph);
+}
+
+/**
+ * Export game theory to Markdown format
+ */
+function gameTheoryToMarkdown(thought: GameTheoryThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  if (!thought.game) {
+    parts.push(section('Status', 'No game defined.'));
+    return mdDocument('Game Theory Analysis', parts.join('\n'), {
+      includeFrontmatter: markdownIncludeFrontmatter,
+      includeTableOfContents: markdownIncludeToc,
+    });
+  }
+
+  // Game information
+  const gameInfo = keyValueSection({
+    'Game Name': thought.game.name || 'Untitled',
+    'Type': thought.game.type,
+    'Players': thought.players ? thought.players.map(p => p.name).join(', ') : String(thought.game.numPlayers),
+    ...(thought.game.description ? { 'Description': thought.game.description } : {}),
+  });
+  parts.push(section('Game Information', gameInfo));
+
+  // Metrics
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      'Players': thought.players?.length || thought.game.numPlayers,
+      'Strategies': thought.strategies?.length || 0,
+      'Nash Equilibria': thought.nashEquilibria?.length || 0,
+    });
+    parts.push(section('Metrics', metricsContent));
+  }
+
+  // Strategies table
+  if (thought.strategies && thought.strategies.length > 0) {
+    const strategyRows = thought.strategies.map(strategy => [
+      strategy.name,
+      strategy.isPure ? 'Pure' : 'Mixed',
+      strategy.description || '-',
+    ]);
+    parts.push(section('Strategies', table(['Name', 'Type', 'Description'], strategyRows)));
+  }
+
+  // Nash Equilibria
+  if (thought.nashEquilibria && thought.nashEquilibria.length > 0) {
+    const eqRows = thought.nashEquilibria.map(eq => [
+      eq.type,
+      eq.strategyProfile.join(', '),
+      `[${eq.payoffs.join(', ')}]`,
+      eq.isStrict ? 'Yes' : 'No',
+    ]);
+    parts.push(section('Nash Equilibria', table(['Type', 'Strategy Profile', 'Payoffs', 'Strict'], eqRows)));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = gameTreeToMermaid(thought, 'default', true, true);
+    parts.push(section('Game Tree Diagram', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument(`Game Theory Analysis: ${thought.game.name || 'Untitled'}`, parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: 'game-theory',
+      gameType: thought.game.type,
+      playerCount: thought.players?.length || thought.game.numPlayers,
+    },
+  });
 }

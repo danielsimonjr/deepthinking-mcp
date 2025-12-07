@@ -51,6 +51,14 @@ import {
 import {
   generateHierarchyJson,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  list,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export abductive hypothesis comparison to visual format
@@ -79,6 +87,8 @@ export function exportAbductiveHypotheses(thought: AbductiveThought, options: Vi
       return abductiveToUML(thought, options);
     case 'json':
       return abductiveToJSON(thought, options);
+    case 'markdown':
+      return abductiveToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -584,4 +594,73 @@ function abductiveToJSON(thought: AbductiveThought, options: VisualExportOptions
   }
 
   return json;
+}
+
+/**
+ * Export abductive hypotheses to Markdown format
+ */
+function abductiveToMarkdown(thought: AbductiveThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Metrics
+  if (includeMetrics) {
+    parts.push(section('Metrics', keyValueSection({
+      'Total Hypotheses': thought.hypotheses.length,
+      'Total Observations': thought.observations.length,
+      'Best Hypothesis Score': thought.bestExplanation?.score.toFixed(2) || 'N/A',
+    })));
+  }
+
+  // Observations
+  const obsRows = thought.observations.map(obs => [
+    obs.id,
+    obs.description,
+    obs.confidence.toFixed(2),
+    obs.timestamp || '-',
+  ]);
+  parts.push(section('Observations', table(
+    ['ID', 'Description', 'Confidence', 'Timestamp'],
+    obsRows
+  )));
+
+  // Hypotheses
+  const hypRows = thought.hypotheses.map(hyp => [
+    hyp.id,
+    hyp.explanation.substring(0, 60) + (hyp.explanation.length > 60 ? '...' : ''),
+    hyp.score.toFixed(2),
+    thought.bestExplanation?.id === hyp.id ? '★ Best' : '',
+  ]);
+  parts.push(section('Hypotheses', table(
+    ['ID', 'Explanation', 'Score', 'Status'],
+    hypRows
+  )));
+
+  // Best explanation details
+  if (thought.bestExplanation) {
+    const assumptions = list(thought.bestExplanation.assumptions);
+    parts.push(section('Best Explanation',
+      `**Score:** ${thought.bestExplanation.score.toFixed(2)}\n\n` +
+      `**Explanation:** ${thought.bestExplanation.explanation}\n\n` +
+      `**Assumptions:**\n${assumptions}`
+    ));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaid = abductiveToMermaid(thought, 'default', true, includeMetrics);
+    parts.push(section('Visualization', mermaidBlock(mermaid)));
+  }
+
+  return mdDocument('Abductive Reasoning Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: { mode: 'abductive', hypotheses: thought.hypotheses.length },
+  });
 }

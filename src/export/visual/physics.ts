@@ -59,6 +59,14 @@ import {
   addMetric,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  list,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+  progressBar,
+} from './markdown-utils.js';
 
 /**
  * Export physics reasoning to visual format
@@ -87,6 +95,8 @@ export function exportPhysicsVisualization(thought: PhysicsThought, options: Vis
       return physicsToUML(thought, options);
     case 'json':
       return physicsToJSON(thought, options);
+    case 'markdown':
+      return physicsToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -1643,4 +1653,129 @@ function physicsToJSON(thought: PhysicsThought, options: VisualExportOptions): s
   }
 
   return serializeGraph(graph);
+}
+
+/**
+ * Export physics reasoning to Markdown format
+ */
+function physicsToMarkdown(thought: PhysicsThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Thought type section
+  const typeContent = `**Type:** ${(thought.thoughtType || 'physics').replace(/_/g, ' ')}`;
+  parts.push(section('Overview', typeContent));
+
+  // Tensor properties section
+  if (thought.tensorProperties) {
+    const tensorContent = keyValueSection({
+      'Rank': `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`,
+      'Components': thought.tensorProperties.components,
+      'LaTeX': thought.tensorProperties.latex,
+      'Transformation': thought.tensorProperties.transformation,
+      ...(thought.tensorProperties.indexStructure ? { 'Index Structure': thought.tensorProperties.indexStructure } : {}),
+      ...(thought.tensorProperties.coordinateSystem ? { 'Coordinate System': thought.tensorProperties.coordinateSystem } : {}),
+    });
+
+    let tensorFull = tensorContent;
+
+    if (thought.tensorProperties.symmetries.length > 0) {
+      tensorFull += '\n\n**Symmetries:**\n\n' + list(thought.tensorProperties.symmetries);
+    }
+
+    if (thought.tensorProperties.invariants.length > 0) {
+      tensorFull += '\n\n**Invariants:**\n\n' + list(thought.tensorProperties.invariants);
+    }
+
+    parts.push(section('Tensor Properties', tensorFull));
+  }
+
+  // Physical interpretation section
+  if (thought.physicalInterpretation) {
+    const interpContent = keyValueSection({
+      'Quantity': thought.physicalInterpretation.quantity,
+      'Units': thought.physicalInterpretation.units,
+    });
+
+    let interpFull = interpContent;
+
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      interpFull += '\n\n**Conservation Laws:**\n\n' + list(thought.physicalInterpretation.conservationLaws);
+    }
+
+    if (thought.physicalInterpretation.constraints && thought.physicalInterpretation.constraints.length > 0) {
+      interpFull += '\n\n**Constraints:**\n\n' + list(thought.physicalInterpretation.constraints);
+    }
+
+    if (thought.physicalInterpretation.observables && thought.physicalInterpretation.observables.length > 0) {
+      interpFull += '\n\n**Observables:**\n\n' + list(thought.physicalInterpretation.observables);
+    }
+
+    parts.push(section('Physical Interpretation', interpFull));
+  }
+
+  // Field theory context section
+  if (thought.fieldTheoryContext) {
+    const fieldContent = keyValueSection({
+      'Symmetry Group': thought.fieldTheoryContext.symmetryGroup,
+    });
+
+    let fieldFull = fieldContent;
+
+    if (thought.fieldTheoryContext.fields.length > 0) {
+      fieldFull += '\n\n**Fields:**\n\n' + list(thought.fieldTheoryContext.fields);
+    }
+
+    if (thought.fieldTheoryContext.interactions.length > 0) {
+      fieldFull += '\n\n**Interactions:**\n\n' + list(thought.fieldTheoryContext.interactions);
+    }
+
+    if (thought.fieldTheoryContext.gaugeSymmetries && thought.fieldTheoryContext.gaugeSymmetries.length > 0) {
+      fieldFull += '\n\n**Gauge Symmetries:**\n\n' + list(thought.fieldTheoryContext.gaugeSymmetries);
+    }
+
+    parts.push(section('Field Theory Context', fieldFull));
+  }
+
+  // Metrics section
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      'Uncertainty': `${(thought.uncertainty * 100).toFixed(1)}%`,
+      ...(thought.assumptions ? { 'Assumptions': thought.assumptions.length } : {}),
+      ...(thought.dependencies ? { 'Dependencies': thought.dependencies.length } : {}),
+    });
+    parts.push(section('Metrics', metricsContent + '\n\n' + progressBar(thought.uncertainty * 100)));
+  }
+
+  // Assumptions section
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    parts.push(section('Assumptions', list(thought.assumptions)));
+  }
+
+  // Dependencies section
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    parts.push(section('Dependencies', list(thought.dependencies)));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = physicsToMermaid(thought, 'default', true, true);
+    parts.push(section('Visualization', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument('Physics Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: 'physics',
+      thoughtType: thought.thoughtType || 'physics',
+      uncertainty: thought.uncertainty,
+    },
+  });
 }

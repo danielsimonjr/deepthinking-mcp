@@ -56,6 +56,13 @@ import {
   addMetric,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export counterfactual scenario tree to visual format
@@ -84,6 +91,8 @@ export function exportCounterfactualScenarios(thought: CounterfactualThought, op
       return counterfactualToUML(thought, options);
     case 'json':
       return counterfactualToJSON(thought, options);
+    case 'markdown':
+      return counterfactualToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -731,4 +740,68 @@ function counterfactualToJSON(thought: CounterfactualThought, options: VisualExp
   }
 
   return serializeGraph(graph);
+}
+
+/**
+ * Export counterfactual scenarios to Markdown format
+ */
+function counterfactualToMarkdown(thought: CounterfactualThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Metrics
+  if (includeMetrics) {
+    parts.push(section('Metrics', keyValueSection({
+      'Counterfactual Scenarios': thought.counterfactuals.length,
+      'Intervention Feasibility': (thought.interventionPoint.feasibility * 100).toFixed(0) + '%',
+      'Expected Impact': (thought.interventionPoint.expectedImpact * 100).toFixed(0) + '%',
+    })));
+  }
+
+  // Intervention point
+  parts.push(section('Intervention Point', keyValueSection({
+    'Description': thought.interventionPoint.description,
+    'Timing': thought.interventionPoint.timing,
+    'Feasibility': (thought.interventionPoint.feasibility * 100).toFixed(0) + '%',
+    'Expected Impact': (thought.interventionPoint.expectedImpact * 100).toFixed(0) + '%',
+  })));
+
+  // Actual scenario
+  parts.push(section('Actual Scenario',
+    `**Name:** ${thought.actual.name}\n\n` +
+    `**Description:** ${thought.actual.description}`
+  ));
+
+  // Counterfactual scenarios
+  const cfRows = thought.counterfactuals.map(cf => {
+    const primaryOutcome = cf.outcomes[0];
+    return [
+      cf.name,
+      cf.description.substring(0, 50) + (cf.description.length > 50 ? '...' : ''),
+      cf.likelihood !== undefined ? cf.likelihood.toFixed(2) : 'N/A',
+      primaryOutcome?.impact || '-',
+    ];
+  });
+  parts.push(section('Counterfactual Scenarios', table(
+    ['Name', 'Description', 'Likelihood', 'Impact'],
+    cfRows
+  )));
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaid = counterfactualToMermaid(thought, 'default', true, includeMetrics);
+    parts.push(section('Visualization', mermaidBlock(mermaid)));
+  }
+
+  return mdDocument('Counterfactual Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: { mode: 'counterfactual', scenarios: thought.counterfactuals.length },
+  });
 }

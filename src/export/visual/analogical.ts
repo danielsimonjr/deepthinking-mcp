@@ -59,6 +59,14 @@ import {
   addMetric,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  list,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export analogical domain mapping to visual format
@@ -87,6 +95,8 @@ export function exportAnalogicalMapping(thought: AnalogicalThought, options: Vis
       return analogicalToUML(thought, options);
     case 'json':
       return analogicalToJSON(thought, options);
+    case 'markdown':
+      return analogicalToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -780,4 +790,84 @@ function analogicalToJSON(thought: AnalogicalThought, options: VisualExportOptio
   }
 
   return serializeGraph(graph);
+}
+
+/**
+ * Export analogical mapping to Markdown format
+ */
+function analogicalToMarkdown(thought: AnalogicalThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Metrics
+  if (includeMetrics) {
+    parts.push(section('Metrics', keyValueSection({
+      'Analogy Strength': (thought.analogyStrength * 100).toFixed(0) + '%',
+      'Mappings': thought.mapping.length,
+      'Source Entities': thought.sourceDomain.entities.length,
+      'Target Entities': thought.targetDomain.entities.length,
+    })));
+  }
+
+  // Source domain
+  parts.push(section('Source Domain',
+    `**Name:** ${thought.sourceDomain.name}\n\n` +
+    `**Description:** ${thought.sourceDomain.description || 'N/A'}\n\n` +
+    `**Entities:**\n${list(thought.sourceDomain.entities.map(e => `${e.name}: ${e.description || 'N/A'}`))}`
+  ));
+
+  // Target domain
+  parts.push(section('Target Domain',
+    `**Name:** ${thought.targetDomain.name}\n\n` +
+    `**Description:** ${thought.targetDomain.description || 'N/A'}\n\n` +
+    `**Entities:**\n${list(thought.targetDomain.entities.map(e => `${e.name}: ${e.description || 'N/A'}`))}`
+  ));
+
+  // Mappings
+  const mapRows = thought.mapping.map(m => [
+    m.sourceEntityId,
+    '→',
+    m.targetEntityId,
+    (m.confidence * 100).toFixed(0) + '%',
+    m.justification || '-',
+  ]);
+  parts.push(section('Entity Mappings', table(
+    ['Source', '', 'Target', 'Confidence', 'Justification'],
+    mapRows
+  )));
+
+  // Inferences
+  if (thought.inferences && thought.inferences.length > 0) {
+    const infRows = thought.inferences.map(inf => [
+      inf.sourcePattern,
+      inf.targetPrediction,
+      (inf.confidence * 100).toFixed(0) + '%',
+    ]);
+    parts.push(section('Inferences', table(
+      ['Source Pattern', 'Target Prediction', 'Confidence'],
+      infRows
+    )));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaid = analogicalToMermaid(thought, 'default', true, includeMetrics);
+    parts.push(section('Visualization', mermaidBlock(mermaid)));
+  }
+
+  return mdDocument('Analogical Reasoning Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: 'analogical',
+      mappings: thought.mapping.length,
+      analogyStrength: thought.analogyStrength.toFixed(2),
+    },
+  });
 }

@@ -55,6 +55,13 @@ import {
   addMetric,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  list,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export mathematics reasoning to visual format
@@ -83,6 +90,8 @@ export function exportMathematicsDerivation(thought: MathematicsThought, options
       return mathematicsToUML(thought, options);
     case 'json':
       return mathematicsToJSON(thought, options);
+    case 'markdown':
+      return mathematicsToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -1106,4 +1115,97 @@ function mathematicsToJSON(thought: MathematicsThought, options: VisualExportOpt
   }
 
   return serializeGraph(graph);
+}
+
+/**
+ * Export mathematics reasoning to Markdown format
+ */
+function mathematicsToMarkdown(thought: MathematicsThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Type and Uncertainty
+  const typeContent = keyValueSection({
+    'Type': (thought.thoughtType || 'proof').replace(/_/g, ' '),
+    'Uncertainty': `${(thought.uncertainty * 100).toFixed(1)}%`,
+  });
+  parts.push(section('Overview', typeContent));
+
+  // Mathematical Model
+  if (thought.mathematicalModel) {
+    const modelContent = keyValueSection({
+      'LaTeX': `\`${thought.mathematicalModel.latex}\``,
+      'Symbolic': `\`${thought.mathematicalModel.symbolic}\``,
+      'ASCII': thought.mathematicalModel.ascii ? `\`${thought.mathematicalModel.ascii}\`` : 'N/A',
+    });
+    parts.push(section('Mathematical Model', modelContent));
+  }
+
+  // Metrics
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      'Uncertainty': `${(thought.uncertainty * 100).toFixed(1)}%`,
+      'Theorems': thought.theorems?.length || 0,
+      'Assumptions': thought.assumptions?.length || 0,
+      'Proof Completeness': thought.proofStrategy ? `${(thought.proofStrategy.completeness * 100).toFixed(0)}%` : 'N/A',
+    });
+    parts.push(section('Metrics', metricsContent));
+  }
+
+  // Proof Strategy
+  if (thought.proofStrategy) {
+    let proofContent = `**Type:** ${thought.proofStrategy.type}\n\n`;
+    proofContent += `**Completeness:** ${(thought.proofStrategy.completeness * 100).toFixed(0)}%\n\n`;
+    proofContent += '**Steps:**\n\n';
+
+    const stepItems = thought.proofStrategy.steps.map((step, index) =>
+      `${index + 1}. ${step}`
+    );
+    proofContent += list(stepItems, 'numbered');
+
+    if (thought.proofStrategy.baseCase) {
+      proofContent += `\n**Base Case:** ${thought.proofStrategy.baseCase}\n`;
+    }
+    if (thought.proofStrategy.inductiveStep) {
+      proofContent += `\n**Inductive Step:** ${thought.proofStrategy.inductiveStep}\n`;
+    }
+
+    parts.push(section('Proof Strategy', proofContent));
+  }
+
+  // Theorems
+  if (thought.theorems && thought.theorems.length > 0) {
+    const theoremItems = thought.theorems.map(theorem =>
+      `**${theorem.name}**: ${theorem.statement}\n  - Hypotheses: ${theorem.hypotheses.join(', ')}\n  - Conclusion: ${theorem.conclusion}`
+    );
+    parts.push(section('Theorems', list(theoremItems)));
+  }
+
+  // Assumptions
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    parts.push(section('Assumptions', list(thought.assumptions)));
+  }
+
+  // Dependencies
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    parts.push(section('Dependencies', list(thought.dependencies)));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = mathematicsToMermaid(thought, 'default', true, true);
+    parts.push(section('Derivation Diagram', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument('Mathematics Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: { mode: 'mathematics' },
+  });
 }

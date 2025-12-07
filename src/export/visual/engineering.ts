@@ -58,6 +58,15 @@ import {
   addMetric,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  list,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+  progressBar,
+} from './markdown-utils.js';
 
 /**
  * Main export function for engineering analysis
@@ -89,6 +98,8 @@ export function exportEngineeringAnalysis(
       return engineeringToUML(thought, options);
     case 'json':
       return engineeringToJSON(thought, options);
+    case 'markdown':
+      return engineeringToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -1498,4 +1509,183 @@ function engineeringToJSON(thought: EngineeringThought, options: VisualExportOpt
   }
 
   return serializeGraph(graph, { prettyPrint: jsonPrettyPrint, indent: jsonIndent });
+}
+
+/**
+ * Export engineering analysis to Markdown format
+ */
+function engineeringToMarkdown(thought: EngineeringThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Overview section
+  const overviewContent = keyValueSection({
+    'Analysis Type': thought.analysisType.toUpperCase(),
+    'Design Challenge': thought.designChallenge.substring(0, 100) + (thought.designChallenge.length > 100 ? '...' : ''),
+  });
+  parts.push(section('Overview', overviewContent));
+
+  // Requirements Traceability section
+  if (thought.requirements && thought.requirements.requirements.length > 0) {
+    const reqRows = thought.requirements.requirements.map(req => [
+      req.id,
+      req.title.substring(0, 40) + (req.title.length > 40 ? '...' : ''),
+      req.priority,
+      req.status,
+      req.source,
+    ]);
+
+    let reqContent = table(['ID', 'Title', 'Priority', 'Status', 'Source'], reqRows);
+
+    if (includeMetrics) {
+      const cov = thought.requirements.coverage;
+      const coveragePercent = (cov.verified / Math.max(cov.total, 1)) * 100;
+      reqContent += '\n\n' + keyValueSection({
+        'Total Requirements': cov.total,
+        'Verified': cov.verified,
+        'Traced to Source': cov.tracedToSource,
+        'Allocated to Design': cov.allocatedToDesign,
+        'Coverage': `${coveragePercent.toFixed(1)}%`,
+      });
+      reqContent += '\n\n**Verification Progress:**\n\n' + progressBar(coveragePercent);
+    }
+
+    parts.push(section('Requirements Traceability', reqContent));
+  }
+
+  // Trade Study section
+  if (thought.tradeStudy) {
+    const criteriaRows = thought.tradeStudy.criteria.map(c => [
+      c.name,
+      `${(c.weight * 100).toFixed(0)}%`,
+      c.description || '-',
+    ]);
+
+    const altRows = thought.tradeStudy.alternatives.map(alt => [
+      alt.id === thought.tradeStudy!.recommendation ? `⭐ ${alt.name}` : alt.name,
+      alt.description.substring(0, 60) + (alt.description.length > 60 ? '...' : ''),
+      alt.riskLevel || '-',
+      alt.estimatedCost?.toString() || '-',
+    ]);
+
+    let tradeContent = `**Objective:** ${thought.tradeStudy.objective}\n\n`;
+    tradeContent += '### Criteria\n\n';
+    tradeContent += table(['Criterion', 'Weight', 'Description'], criteriaRows);
+    tradeContent += '\n\n### Alternatives\n\n';
+    tradeContent += table(['Alternative', 'Description', 'Risk Level', 'Cost'], altRows);
+    tradeContent += '\n\n**Recommendation:** ' + thought.tradeStudy.recommendation;
+    tradeContent += '\n\n**Justification:**\n\n' + thought.tradeStudy.justification;
+
+    parts.push(section('Trade Study: ' + thought.tradeStudy.title, tradeContent));
+  }
+
+  // FMEA section
+  if (thought.fmea && thought.fmea.failureModes.length > 0) {
+    const fmeaRows = thought.fmea.failureModes.map(fm => {
+      const isCritical = fm.rpn >= thought.fmea!.rpnThreshold;
+      return [
+        fm.component,
+        fm.failureMode.substring(0, 40) + (fm.failureMode.length > 40 ? '...' : ''),
+        fm.severity.toString(),
+        fm.occurrence.toString(),
+        fm.detection.toString(),
+        `${fm.rpn}${isCritical ? ' ⚠️' : ''}`,
+        fm.mitigation ? '✓' : '-',
+      ];
+    });
+
+    let fmeaContent = `**System:** ${thought.fmea.system}\n\n`;
+    fmeaContent += table(
+      ['Component', 'Failure Mode', 'S', 'O', 'D', 'RPN', 'Mitigation'],
+      fmeaRows
+    );
+
+    if (includeMetrics) {
+      const sum = thought.fmea.summary;
+      fmeaContent += '\n\n' + keyValueSection({
+        'Total Modes': sum.totalModes,
+        'Critical Modes': sum.criticalModes,
+        'Average RPN': sum.averageRpn.toFixed(1),
+        'Max RPN': sum.maxRpn,
+        'RPN Threshold': thought.fmea.rpnThreshold,
+      });
+    }
+
+    parts.push(section('Failure Mode and Effects Analysis (FMEA)', fmeaContent));
+  }
+
+  // Design Decisions section
+  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
+    let decisionsContent = '';
+
+    for (const dec of thought.designDecisions.decisions) {
+      decisionsContent += `### ${dec.id}: ${dec.title} (${dec.status})\n\n`;
+      decisionsContent += keyValueSection({
+        'Status': dec.status,
+        'Date': dec.date || '-',
+      });
+      decisionsContent += '\n\n**Context:**\n\n' + dec.context;
+      decisionsContent += '\n\n**Decision:**\n\n' + dec.decision;
+      decisionsContent += '\n\n**Rationale:**\n\n' + dec.rationale;
+
+      if (dec.consequences.length > 0) {
+        decisionsContent += '\n\n**Consequences:**\n\n' + list(dec.consequences);
+      }
+
+      if (dec.supersededBy) {
+        decisionsContent += `\n\n*Superseded by: ${dec.supersededBy}*`;
+      }
+
+      decisionsContent += '\n\n---\n\n';
+    }
+
+    parts.push(section('Design Decisions', decisionsContent));
+  }
+
+  // Assessment section
+  if (thought.assessment) {
+    let assessmentContent = keyValueSection({
+      'Confidence': `${(thought.assessment.confidence * 100).toFixed(1)}%`,
+      'Key Risks': thought.assessment.keyRisks.length,
+      'Open Issues': thought.assessment.openIssues.length,
+    });
+
+    assessmentContent += '\n\n**Confidence Level:**\n\n' + progressBar(thought.assessment.confidence * 100);
+
+    if (thought.assessment.keyRisks.length > 0) {
+      assessmentContent += '\n\n**Key Risks:**\n\n' + list(thought.assessment.keyRisks.map(r => `⚠️ ${r}`));
+    }
+
+    if (thought.assessment.openIssues.length > 0) {
+      assessmentContent += '\n\n**Open Issues:**\n\n' + list(thought.assessment.openIssues);
+    }
+
+    if (thought.assessment.nextSteps.length > 0) {
+      assessmentContent += '\n\n**Next Steps:**\n\n' + list(thought.assessment.nextSteps);
+    }
+
+    parts.push(section('Assessment', assessmentContent));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = engineeringToMermaid(thought, options);
+    parts.push(section('Visualization', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument(`Engineering Analysis: ${thought.analysisType}`, parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: 'engineering',
+      analysisType: thought.analysisType,
+      ...(thought.assessment?.confidence !== undefined ? { confidence: thought.assessment.confidence } : {}),
+    },
+  });
 }

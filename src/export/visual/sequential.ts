@@ -74,6 +74,13 @@ import {
   addMetric,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  list,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export sequential dependency graph to visual format
@@ -102,6 +109,8 @@ export function exportSequentialDependencyGraph(thought: SequentialThought, opti
       return sequentialToUML(thought, options);
     case 'json':
       return sequentialToJSON(thought, options);
+    case 'markdown':
+      return sequentialToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -730,4 +739,67 @@ function sequentialToJSON(thought: SequentialThought, options: VisualExportOptio
   }
 
   return serializeGraph(graph, { prettyPrint: jsonPrettyPrint, indent: jsonIndent });
+}
+
+/**
+ * Export sequential dependency graph to Markdown format
+ */
+function sequentialToMarkdown(thought: SequentialThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Overview section
+  const overviewContent = keyValueSection({
+    'Thought Number': `${thought.thoughtNumber} of ${thought.totalThoughts}`,
+    'Status': thought.nextThoughtNeeded ? 'In Progress' : 'Complete',
+    'Revision': thought.isRevision ? 'Yes' : 'No',
+  });
+  parts.push(section('Overview', overviewContent));
+
+  // Current thought content
+  parts.push(section('Current Thought', thought.content));
+
+  // Dependencies
+  if (thought.buildUpon && thought.buildUpon.length > 0) {
+    parts.push(section('Dependencies (Builds Upon)', list(thought.buildUpon)));
+  }
+
+  // Branch information
+  if (thought.branchFrom) {
+    const branchContent = keyValueSection({
+      'Branched From': thought.branchFrom,
+      ...(thought.branchId ? { 'Branch ID': thought.branchId } : {}),
+    });
+    parts.push(section('Branch Information', branchContent));
+  }
+
+  // Revision information
+  if (thought.isRevision && thought.revisesThought) {
+    const revisionContent = keyValueSection({
+      'Revises': thought.revisesThought,
+      ...(thought.revisionReason ? { 'Reason': thought.revisionReason } : {}),
+    });
+    parts.push(section('Revision Information', revisionContent));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = sequentialToMermaid(thought, 'default', true);
+    parts.push(section('Dependency Graph', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument('Sequential Dependency Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: 'sequential',
+      thoughtNumber: thought.thoughtNumber,
+      totalThoughts: thought.totalThoughts,
+    },
+  });
 }

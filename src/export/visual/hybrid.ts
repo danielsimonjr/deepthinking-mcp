@@ -56,6 +56,14 @@ import {
   addLegendItem,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  list,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+} from './markdown-utils.js';
 
 /**
  * Export hybrid reasoning to visual format
@@ -85,6 +93,8 @@ export function exportHybridOrchestration(thought: HybridThought, options: Visua
       return hybridToUML(thought, options);
     case 'json':
       return hybridToJSON(thought, options);
+    case 'markdown':
+      return hybridToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -1309,4 +1319,132 @@ function hybridToJSON(thought: HybridThought, options: VisualExportOptions): str
   }
 
   return serializeGraph(graph);
+}
+
+/**
+ * Export hybrid orchestration to Markdown format
+ */
+function hybridToMarkdown(thought: HybridThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Overview section
+  const overviewContent = keyValueSection({
+    'Primary Mode': thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1),
+    ...(thought.stage ? { 'Stage': thought.stage.replace(/_/g, ' ') } : {}),
+    ...(thought.uncertainty !== undefined ? { 'Uncertainty': `${(thought.uncertainty * 100).toFixed(1)}%` } : {}),
+  });
+  parts.push(section('Overview', overviewContent));
+
+  // Switch reason section
+  if (thought.switchReason) {
+    parts.push(section('Mode Switch Reason', thought.switchReason));
+  }
+
+  // Secondary features section
+  if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
+    parts.push(section('Secondary Features', list(thought.secondaryFeatures)));
+  }
+
+  // Mathematical model section
+  if (thought.mathematicalModel) {
+    const mathContent = keyValueSection({
+      'LaTeX': thought.mathematicalModel.latex,
+      'Symbolic': thought.mathematicalModel.symbolic,
+      ...(thought.mathematicalModel.ascii ? { 'ASCII': thought.mathematicalModel.ascii } : {}),
+    });
+    parts.push(section('Mathematical Model', mathContent));
+  }
+
+  // Tensor properties section
+  if (thought.tensorProperties) {
+    const tensorRows = [
+      ['Rank', `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`],
+      ['Components', thought.tensorProperties.components],
+      ['Transformation', thought.tensorProperties.transformation],
+    ];
+
+    let tensorContent = table(['Property', 'Value'], tensorRows);
+
+    if (thought.tensorProperties.symmetries.length > 0) {
+      tensorContent += '\n\n**Symmetries:**\n\n' + list(thought.tensorProperties.symmetries);
+    }
+
+    parts.push(section('Tensor Properties', tensorContent));
+  }
+
+  // Physical interpretation section
+  if (thought.physicalInterpretation) {
+    const interpContent = keyValueSection({
+      'Quantity': thought.physicalInterpretation.quantity,
+      'Units': thought.physicalInterpretation.units,
+    });
+
+    let interpFull = interpContent;
+
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      interpFull += '\n\n**Conservation Laws:**\n\n' + list(thought.physicalInterpretation.conservationLaws);
+    }
+
+    parts.push(section('Physical Interpretation', interpFull));
+  }
+
+  // Metrics section
+  if (includeMetrics) {
+    const metricsItems: Record<string, string | number> = {
+      'Primary Mode': thought.primaryMode,
+      'Secondary Features': thought.secondaryFeatures?.length || 0,
+    };
+
+    if (thought.uncertainty !== undefined) {
+      metricsItems['Uncertainty'] = `${(thought.uncertainty * 100).toFixed(1)}%`;
+    }
+
+    if (thought.assumptions) {
+      metricsItems['Assumptions'] = thought.assumptions.length;
+    }
+
+    if (thought.dependencies) {
+      metricsItems['Dependencies'] = thought.dependencies.length;
+    }
+
+    parts.push(section('Metrics', keyValueSection(metricsItems)));
+  }
+
+  // Assumptions section
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    parts.push(section('Assumptions', list(thought.assumptions)));
+  }
+
+  // Dependencies section
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    parts.push(section('Dependencies', list(thought.dependencies)));
+  }
+
+  // Revision reason section
+  if (thought.revisionReason) {
+    parts.push(section('Revision Reason', thought.revisionReason));
+  }
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = hybridToMermaid(thought, 'default', true, true);
+    parts.push(section('Visualization', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument('Hybrid Mode Orchestration', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: 'hybrid',
+      primaryMode: thought.primaryMode,
+      secondaryFeatures: thought.secondaryFeatures?.length || 0,
+    },
+  });
 }

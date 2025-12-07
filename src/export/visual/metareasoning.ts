@@ -59,6 +59,15 @@ import {
   addMetric,
   serializeGraph,
 } from './json-utils.js';
+import {
+  section,
+  table,
+  list,
+  keyValueSection,
+  mermaidBlock,
+  document as mdDocument,
+  progressBar,
+} from './markdown-utils.js';
 
 /**
  * Export meta-reasoning to visual format
@@ -87,6 +96,8 @@ export function exportMetaReasoningVisualization(thought: MetaReasoningThought, 
       return metaReasoningToUML(thought, options);
     case 'json':
       return metaReasoningToJSON(thought, options);
+    case 'markdown':
+      return metaReasoningToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -1471,4 +1482,147 @@ function metaReasoningToJSON(thought: MetaReasoningThought, options: VisualExpor
   };
 
   return serializeGraph(graph);
+}
+
+/**
+ * Export meta-reasoning to Markdown format
+ */
+function metaReasoningToMarkdown(thought: MetaReasoningThought, options: VisualExportOptions): string {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true,
+  } = options;
+
+  const parts: string[] = [];
+
+  // Current Strategy section
+  const strategyContent = keyValueSection({
+    'Mode': thought.currentStrategy.mode,
+    'Approach': thought.currentStrategy.approach,
+    'Thoughts Spent': thought.currentStrategy.thoughtsSpent,
+  });
+
+  let strategyFull = strategyContent;
+
+  if (thought.currentStrategy.progressIndicators.length > 0) {
+    strategyFull += '\n\n**Progress Indicators:**\n\n' + list(thought.currentStrategy.progressIndicators);
+  }
+
+  parts.push(section('Current Strategy', strategyFull));
+
+  // Strategy Evaluation section
+  if (includeMetrics) {
+    const evalRows = [
+      ['Effectiveness', `${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%`],
+      ['Efficiency', `${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%`],
+      ['Confidence', `${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%`],
+      ['Progress Rate', `${thought.strategyEvaluation.progressRate.toFixed(2)} insights/thought`],
+      ['Quality Score', `${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%`],
+    ];
+
+    let evalContent = table(['Metric', 'Value'], evalRows);
+
+    evalContent += '\n\n**Effectiveness:**\n\n' + progressBar(thought.strategyEvaluation.effectiveness * 100);
+
+    if (thought.strategyEvaluation.strengths.length > 0) {
+      evalContent += '\n\n**Strengths:**\n\n' + list(thought.strategyEvaluation.strengths.map(s => `✓ ${s}`));
+    }
+
+    if (thought.strategyEvaluation.issues.length > 0) {
+      evalContent += '\n\n**Issues:**\n\n' + list(thought.strategyEvaluation.issues.map(i => `✗ ${i}`));
+    }
+
+    parts.push(section('Strategy Evaluation', evalContent));
+  }
+
+  // Alternative Strategies section
+  if (thought.alternativeStrategies.length > 0) {
+    const altRows = thought.alternativeStrategies.map(alt => [
+      alt.mode,
+      alt.reasoning.substring(0, 50) + (alt.reasoning.length > 50 ? '...' : ''),
+      alt.expectedBenefit.substring(0, 40) + (alt.expectedBenefit.length > 40 ? '...' : ''),
+      `${(alt.switchingCost * 100).toFixed(0)}%`,
+      `${(alt.recommendationScore * 100).toFixed(0)}%`,
+    ]);
+
+    parts.push(section('Alternative Strategies', table(
+      ['Mode', 'Reasoning', 'Expected Benefit', 'Switching Cost', 'Score'],
+      altRows
+    )));
+  }
+
+  // Recommendation section
+  const recContent = keyValueSection({
+    'Action': thought.recommendation.action,
+    ...(thought.recommendation.targetMode ? { 'Target Mode': thought.recommendation.targetMode } : {}),
+    'Confidence': `${(thought.recommendation.confidence * 100).toFixed(1)}%`,
+    'Expected Improvement': thought.recommendation.expectedImprovement,
+  });
+
+  let recFull = recContent;
+  recFull += '\n\n**Justification:**\n\n' + thought.recommendation.justification;
+  recFull += '\n\n**Confidence Level:**\n\n' + progressBar(thought.recommendation.confidence * 100);
+
+  parts.push(section('Recommendation', recFull));
+
+  // Resource Allocation section
+  const resourceContent = keyValueSection({
+    'Time Spent': `${thought.resourceAllocation.timeSpent}ms`,
+    'Thoughts Remaining': thought.resourceAllocation.thoughtsRemaining,
+    'Complexity Level': thought.resourceAllocation.complexityLevel,
+    'Urgency': thought.resourceAllocation.urgency,
+    'Recommendation': thought.resourceAllocation.recommendation,
+  });
+
+  parts.push(section('Resource Allocation', resourceContent));
+
+  // Quality Metrics section
+  if (includeMetrics) {
+    const qualityRows = [
+      ['Logical Consistency', `${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%`],
+      ['Evidence Quality', `${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%`],
+      ['Completeness', `${(thought.qualityMetrics.completeness * 100).toFixed(1)}%`],
+      ['Originality', `${(thought.qualityMetrics.originality * 100).toFixed(1)}%`],
+      ['Clarity', `${(thought.qualityMetrics.clarity * 100).toFixed(1)}%`],
+      ['Overall Quality', `${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%`],
+    ];
+
+    let qualityContent = table(['Metric', 'Value'], qualityRows);
+    qualityContent += '\n\n**Overall Quality:**\n\n' + progressBar(thought.qualityMetrics.overallQuality * 100);
+
+    parts.push(section('Quality Metrics', qualityContent));
+  }
+
+  // Session Context section
+  const sessionContent = keyValueSection({
+    'Session ID': thought.sessionContext.sessionId,
+    'Total Thoughts': thought.sessionContext.totalThoughts,
+    'Mode Switches': thought.sessionContext.modeSwitches,
+    'Problem Type': thought.sessionContext.problemType,
+    'Modes Used': thought.sessionContext.modesUsed.join(', '),
+    ...(thought.sessionContext.historicalEffectiveness !== undefined
+      ? { 'Historical Effectiveness': `${(thought.sessionContext.historicalEffectiveness * 100).toFixed(1)}%` }
+      : {}),
+  });
+
+  parts.push(section('Session Context', sessionContent));
+
+  // Mermaid diagram
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = metaReasoningToMermaid(thought, 'default', true, true);
+    parts.push(section('Visualization', mermaidBlock(mermaidDiagram)));
+  }
+
+  return mdDocument('Meta-Reasoning Analysis', parts.join('\n'), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: 'metareasoning',
+      currentMode: thought.currentStrategy.mode,
+      recommendedAction: thought.recommendation.action,
+      overallQuality: thought.qualityMetrics.overallQuality,
+    },
+  });
 }

@@ -4,9 +4,10 @@
  * Phase 8: Added native SVG format support
  * Phase 9: Added GraphML and TikZ format support
  * Phase 10: Added Modelica, HTML, UML, and JSON format support
+ * Phase 12: Added Markdown format support
  */
 
-export type VisualFormat = 'mermaid' | 'dot' | 'ascii' | 'svg' | 'graphml' | 'tikz' | 'modelica' | 'html' | 'uml' | 'json';
+export type VisualFormat = 'mermaid' | 'dot' | 'ascii' | 'svg' | 'graphml' | 'tikz' | 'modelica' | 'html' | 'uml' | 'json' | 'markdown';
 
 export interface VisualExportOptions {
   format: VisualFormat;
@@ -36,4 +37,8 @@ export interface VisualExportOptions {
   // JSON-specific options
   jsonPrettyPrint?: boolean;
   jsonIndent?: number;
+  // Markdown-specific options
+  markdownIncludeFrontmatter?: boolean;
+  markdownIncludeToc?: boolean;
+  markdownIncludeMermaid?: boolean;
 }

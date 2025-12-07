@@ -40,6 +40,9 @@ export * from './uml-utils.js';
 // Re-export JSON visual utilities for all exporters
 export * from './json-utils.js';
 
+// Re-export Markdown utilities for all exporters
+export * from './markdown-utils.js';
+
 // Re-export mode-specific functions
 export { exportCausalGraph } from './causal.js';
 export { exportTemporalTimeline } from './temporal.js';
