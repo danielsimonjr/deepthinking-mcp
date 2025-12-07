@@ -40,6 +40,17 @@ import {
   renderTable,
   renderBadge,
 } from './html-utils.js';
+import {
+  generateHierarchyModelica,
+} from './modelica-utils.js';
+import {
+  generateUmlDiagram,
+  type UmlNode,
+  type UmlEdge,
+} from './uml-utils.js';
+import {
+  generateHierarchyJson,
+} from './json-utils.js';
 
 /**
  * Export abductive hypothesis comparison to visual format
@@ -62,6 +73,12 @@ export function exportAbductiveHypotheses(thought: AbductiveThought, options: Vi
       return abductiveToTikZ(thought, options);
     case 'html':
       return abductiveToHTML(thought, options);
+    case 'modelica':
+      return abductiveToModelica(thought, options);
+    case 'uml':
+      return abductiveToUML(thought, options);
+    case 'json':
+      return abductiveToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -454,4 +471,117 @@ function abductiveToHTML(thought: AbductiveThought, options: VisualExportOptions
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export abductive hypotheses to Modelica format
+ */
+function abductiveToModelica(thought: AbductiveThought, options: VisualExportOptions): string {
+  const { modelicaPackageName, includeMetrics = true } = options;
+
+  // Map hypotheses to the format expected by generateHierarchyModelica
+  const children = thought.hypotheses.map(h => ({
+    name: sanitizeId(h.id),
+    description: h.explanation.substring(0, 100),
+    score: includeMetrics ? h.score : undefined,
+  }));
+
+  return generateHierarchyModelica(
+    'Observations',
+    `Abductive reasoning with ${thought.observations.length} observations`,
+    children,
+    {
+      packageName: modelicaPackageName || 'AbductiveHypotheses',
+      includeMetrics,
+    }
+  );
+}
+
+/**
+ * Export abductive hypotheses to UML/PlantUML format
+ */
+function abductiveToUML(thought: AbductiveThought, options: VisualExportOptions): string {
+  const { umlTheme, umlDirection, includeLabels = true, includeMetrics = true } = options;
+
+  const nodes: UmlNode[] = [
+    {
+      id: 'observations',
+      label: 'Observations',
+      shape: 'database',
+    },
+  ];
+
+  const edges: UmlEdge[] = [];
+
+  // Add hypothesis nodes
+  for (const hyp of thought.hypotheses) {
+    const isBest = thought.bestExplanation?.id === hyp.id;
+    const label = includeLabels
+      ? hyp.explanation.substring(0, 40) + (hyp.explanation.length > 40 ? '...' : '')
+      : hyp.id;
+    const scoreLabel = includeMetrics ? ` (${hyp.score.toFixed(2)})` : '';
+
+    nodes.push({
+      id: sanitizeId(hyp.id),
+      label: label + scoreLabel,
+      shape: 'class',
+      color: isBest ? '90EE90' : undefined,
+      stereotype: isBest ? 'best' : undefined,
+    });
+
+    edges.push({
+      source: 'observations',
+      target: sanitizeId(hyp.id),
+      type: 'arrow',
+    });
+  }
+
+  return generateUmlDiagram(nodes, edges, {
+    title: 'Abductive Hypotheses',
+    theme: umlTheme,
+    direction: umlDirection,
+  });
+}
+
+/**
+ * Export abductive hypotheses to JSON format
+ */
+function abductiveToJSON(thought: AbductiveThought, options: VisualExportOptions): string {
+  const { jsonPrettyPrint = true, jsonIndent = 2, includeMetrics = true } = options;
+
+  const children = thought.hypotheses.map(h => ({
+    id: sanitizeId(h.id),
+    label: h.explanation.substring(0, 60),
+    score: h.score,
+    metadata: {
+      assumptions: h.assumptions,
+      isBest: thought.bestExplanation?.id === h.id,
+    },
+  }));
+
+  let json = generateHierarchyJson(
+    'Abductive Hypotheses',
+    'abductive',
+    { label: 'Observations', metadata: { count: thought.observations.length } },
+    children,
+    {
+      prettyPrint: jsonPrettyPrint,
+      indent: jsonIndent,
+      includeMetrics,
+    }
+  );
+
+  // Add observation details
+  if (includeMetrics) {
+    const graph = JSON.parse(json);
+    graph.metadata.observationCount = thought.observations.length;
+    graph.metadata.hypothesisCount = thought.hypotheses.length;
+    if (thought.bestExplanation) {
+      graph.metadata.bestHypothesisId = thought.bestExplanation.id;
+      graph.metadata.bestScore = thought.bestExplanation.score;
+    }
+    json = JSON.stringify(graph, null, jsonPrettyPrint !== false ? jsonIndent : 0);
+  }
+
+  return json;
 }

@@ -43,18 +43,34 @@ import {
   renderTable,
   renderBadge,
 } from './html-utils.js';
+import {
+  sanitizeModelicaId,
+  escapeModelicaString,
+} from './modelica-utils.js';
+import {
+  generateUmlDiagram,
+  type UmlNode,
+  type UmlEdge,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Export physics reasoning to visual format
  */
 export function exportPhysicsVisualization(thought: PhysicsThought, options: VisualExportOptions): string {
-  const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+  const { format, colorScheme = 'default' } = options;
 
   switch (format) {
     case 'mermaid':
-      return physicsToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return physicsToMermaid(thought, colorScheme, options.includeLabels ?? true, options.includeMetrics ?? true);
     case 'dot':
-      return physicsToDOT(thought, includeLabels, includeMetrics);
+      return physicsToDOT(thought, options.includeLabels ?? true, options.includeMetrics ?? true);
     case 'ascii':
       return physicsToASCII(thought);
     case 'svg':
@@ -65,6 +81,12 @@ export function exportPhysicsVisualization(thought: PhysicsThought, options: Vis
       return physicsToTikZ(thought, options);
     case 'html':
       return physicsToHTML(thought, options);
+    case 'modelica':
+      return physicsToModelica(thought, options);
+    case 'uml':
+      return physicsToUML(thought, options);
+    case 'json':
+      return physicsToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -1101,4 +1123,524 @@ function physicsToHTML(thought: PhysicsThought, options: VisualExportOptions): s
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export physics reasoning to Modelica format
+ */
+function physicsToModelica(thought: PhysicsThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+
+  const packageName = sanitizeModelicaId(thought.thoughtType || 'PhysicsModel');
+  let modelica = `package ${packageName}\n`;
+  modelica += `  "${escapeModelicaString('Physics model for ' + (thought.thoughtType || 'physical system'))}"\n\n`;
+
+  // Create main model
+  modelica += `  model PhysicalSystem\n`;
+  modelica += `    "${escapeModelicaString('Physical system representation')}"\n\n`;
+
+  // Add tensor properties as parameters and variables
+  if (thought.tensorProperties) {
+    modelica += `    // Tensor Properties\n`;
+    modelica += `    parameter Integer tensorRank[2] = {${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]}};\n`;
+    modelica += `    parameter String tensorComponents = "${escapeModelicaString(thought.tensorProperties.components)}";\n`;
+    modelica += `    parameter String tensorTransformation = "${escapeModelicaString(thought.tensorProperties.transformation)}";\n`;
+
+    if (thought.tensorProperties.indexStructure) {
+      modelica += `    parameter String indexStructure = "${escapeModelicaString(thought.tensorProperties.indexStructure)}";\n`;
+    }
+
+    if (thought.tensorProperties.coordinateSystem) {
+      modelica += `    parameter String coordinateSystem = "${escapeModelicaString(thought.tensorProperties.coordinateSystem)}";\n`;
+    }
+
+    modelica += '\n';
+  }
+
+  // Add physical interpretation as physical quantities
+  if (thought.physicalInterpretation) {
+    modelica += `    // Physical Interpretation\n`;
+    const quantity = sanitizeModelicaId(thought.physicalInterpretation.quantity);
+    const units = thought.physicalInterpretation.units;
+
+    modelica += `    Real ${quantity}(unit="${escapeModelicaString(units)}");\n`;
+    modelica += `    parameter String physicalQuantity = "${escapeModelicaString(thought.physicalInterpretation.quantity)}";\n`;
+
+    // Add conservation laws as constraints
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      modelica += `\n    // Conservation Laws\n`;
+      thought.physicalInterpretation.conservationLaws.forEach((law, index) => {
+        const lawVar = sanitizeModelicaId(`conservationLaw_${index + 1}`);
+        modelica += `    parameter String ${lawVar} = "${escapeModelicaString(law)}";\n`;
+      });
+    }
+
+    // Add constraints as parameters
+    if (thought.physicalInterpretation.constraints && thought.physicalInterpretation.constraints.length > 0) {
+      modelica += `\n    // Constraints\n`;
+      thought.physicalInterpretation.constraints.forEach((constraint, index) => {
+        const constraintVar = sanitizeModelicaId(`constraint_${index + 1}`);
+        modelica += `    parameter String ${constraintVar} = "${escapeModelicaString(constraint)}";\n`;
+      });
+    }
+
+    // Add observables
+    if (thought.physicalInterpretation.observables && thought.physicalInterpretation.observables.length > 0) {
+      modelica += `\n    // Observables\n`;
+      thought.physicalInterpretation.observables.forEach((obs, index) => {
+        const obsVar = sanitizeModelicaId(`observable_${index + 1}`);
+        modelica += `    Real ${obsVar} "${escapeModelicaString(obs)}";\n`;
+      });
+    }
+
+    modelica += '\n';
+  }
+
+  // Add field theory context
+  if (thought.fieldTheoryContext) {
+    modelica += `    // Field Theory Context\n`;
+    modelica += `    parameter String symmetryGroup = "${escapeModelicaString(thought.fieldTheoryContext.symmetryGroup)}";\n`;
+
+    if (thought.fieldTheoryContext.fields.length > 0) {
+      modelica += `\n    // Fields\n`;
+      thought.fieldTheoryContext.fields.forEach((field, index) => {
+        const fieldVar = sanitizeModelicaId(`field_${index + 1}`);
+        modelica += `    Real ${fieldVar} "${escapeModelicaString(field)}";\n`;
+      });
+    }
+
+    if (thought.fieldTheoryContext.interactions.length > 0) {
+      modelica += `\n    // Interactions\n`;
+      thought.fieldTheoryContext.interactions.forEach((interaction, index) => {
+        const intVar = sanitizeModelicaId(`interaction_${index + 1}`);
+        modelica += `    parameter String ${intVar} = "${escapeModelicaString(interaction)}";\n`;
+      });
+    }
+
+    if (thought.fieldTheoryContext.gaugeSymmetries && thought.fieldTheoryContext.gaugeSymmetries.length > 0) {
+      modelica += `\n    // Gauge Symmetries\n`;
+      thought.fieldTheoryContext.gaugeSymmetries.forEach((gauge, index) => {
+        const gaugeVar = sanitizeModelicaId(`gaugeSymmetry_${index + 1}`);
+        modelica += `    parameter String ${gaugeVar} = "${escapeModelicaString(gauge)}";\n`;
+      });
+    }
+
+    modelica += '\n';
+  }
+
+  // Add metrics
+  if (includeMetrics) {
+    modelica += `    // Metrics\n`;
+    modelica += `    parameter Real uncertainty = ${thought.uncertainty};\n`;
+    if (thought.assumptions && thought.assumptions.length > 0) {
+      modelica += `    parameter Integer assumptionCount = ${thought.assumptions.length};\n`;
+    }
+    modelica += '\n';
+  }
+
+  // Add equations section
+  modelica += `  equation\n`;
+
+  // Add simple time derivative equation for demonstration
+  if (thought.physicalInterpretation) {
+    const quantity = sanitizeModelicaId(thought.physicalInterpretation.quantity);
+    modelica += `    // Physical evolution (placeholder)\n`;
+    modelica += `    der(${quantity}) = 0; // Steady state or define custom dynamics\n`;
+  }
+
+  modelica += `  end PhysicalSystem;\n\n`;
+
+  // Add annotations
+  modelica += `  annotation(\n`;
+  modelica += `    Documentation(info="<html>\n`;
+  modelica += `      <p>Physics model generated from reasoning thought</p>\n`;
+  modelica += `      <p>Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%</p>\n`;
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    modelica += `      <p>Assumptions: ${thought.assumptions.length}</p>\n`;
+  }
+  modelica += `    </html>")\n`;
+  modelica += `  );\n`;
+
+  modelica += `end ${packageName};\n`;
+
+  return modelica;
+}
+
+/**
+ * Export physics reasoning to UML format
+ */
+function physicsToUML(thought: PhysicsThought, options: VisualExportOptions): string {
+  const { includeLabels = true } = options;
+
+  const nodes: UmlNode[] = [];
+  const edges: UmlEdge[] = [];
+
+  // Main physics class
+  const mainId = 'PhysicsSystem';
+  nodes.push({
+    id: mainId,
+    label: includeLabels ? (thought.thoughtType || 'Physics').replace(/_/g, ' ') : 'PhysicsSystem',
+    shape: 'class',
+    attributes: [
+      `uncertainty: Real = ${thought.uncertainty.toFixed(3)}`,
+      ...(thought.assumptions ? [`assumptions: Integer = ${thought.assumptions.length}`] : []),
+    ],
+    methods: [],
+  });
+
+  // Tensor properties as a class
+  if (thought.tensorProperties) {
+    const tensorId = 'TensorProperties';
+    nodes.push({
+      id: tensorId,
+      label: 'TensorProperties',
+      shape: 'class',
+      attributes: [
+        `rank: Integer[2] = [${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]}]`,
+        `components: String = "${thought.tensorProperties.components.substring(0, 30)}..."`,
+        `transformation: String = "${thought.tensorProperties.transformation}"`,
+        ...(thought.tensorProperties.symmetries.length > 0 ? [`symmetries: Integer = ${thought.tensorProperties.symmetries.length}`] : []),
+        ...(thought.tensorProperties.invariants.length > 0 ? [`invariants: Integer = ${thought.tensorProperties.invariants.length}`] : []),
+      ],
+      methods: [],
+    });
+    edges.push({
+      source: mainId,
+      target: tensorId,
+      type: 'composition',
+      label: 'has',
+    });
+  }
+
+  // Physical interpretation as a class
+  if (thought.physicalInterpretation) {
+    const interpId = 'PhysicalInterpretation';
+    nodes.push({
+      id: interpId,
+      label: 'PhysicalInterpretation',
+      shape: 'class',
+      attributes: [
+        `quantity: String = "${thought.physicalInterpretation.quantity}"`,
+        `units: String = "${thought.physicalInterpretation.units}"`,
+        `conservationLaws: Integer = ${thought.physicalInterpretation.conservationLaws.length}`,
+        ...(thought.physicalInterpretation.constraints ? [`constraints: Integer = ${thought.physicalInterpretation.constraints.length}`] : []),
+        ...(thought.physicalInterpretation.observables ? [`observables: Integer = ${thought.physicalInterpretation.observables.length}`] : []),
+      ],
+      methods: [
+        'measure(): Real',
+        'validate(): Boolean',
+      ],
+    });
+    edges.push({
+      source: mainId,
+      target: interpId,
+      type: 'composition',
+      label: 'interprets as',
+    });
+
+    // Conservation laws as a separate class
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      const lawsId = 'ConservationLaws';
+      nodes.push({
+        id: lawsId,
+        label: 'ConservationLaws',
+        shape: 'class',
+        attributes: thought.physicalInterpretation.conservationLaws.map((law, i) =>
+          `law${i + 1}: String = "${law.substring(0, 30)}..."`
+        ),
+        methods: ['verify(): Boolean'],
+      });
+      edges.push({
+        source: interpId,
+        target: lawsId,
+        type: 'association',
+        label: 'enforces',
+      });
+    }
+  }
+
+  // Field theory context as a class
+  if (thought.fieldTheoryContext) {
+    const fieldId = 'FieldTheory';
+    nodes.push({
+      id: fieldId,
+      label: 'FieldTheory',
+      shape: 'class',
+      attributes: [
+        `symmetryGroup: String = "${thought.fieldTheoryContext.symmetryGroup}"`,
+        `fields: Integer = ${thought.fieldTheoryContext.fields.length}`,
+        `interactions: Integer = ${thought.fieldTheoryContext.interactions.length}`,
+        ...(thought.fieldTheoryContext.gaugeSymmetries ? [`gaugeSymmetries: Integer = ${thought.fieldTheoryContext.gaugeSymmetries.length}`] : []),
+      ],
+      methods: [
+        'computeField(x: Real): Real',
+        'applySymmetry(g: Group): Field',
+      ],
+    });
+    edges.push({
+      source: mainId,
+      target: fieldId,
+      type: 'composition',
+      label: 'described by',
+    });
+
+    // Fields as individual components
+    if (thought.fieldTheoryContext.fields.length > 0 && thought.fieldTheoryContext.fields.length <= 3) {
+      thought.fieldTheoryContext.fields.forEach((field, index) => {
+        const fId = `Field${index + 1}`;
+        nodes.push({
+          id: fId,
+          label: field,
+          shape: 'class',
+          attributes: ['value: Real', 'gradient: Real'],
+          methods: ['evaluate(x: Real): Real'],
+        });
+        edges.push({
+          source: fieldId,
+          target: fId,
+          type: 'aggregation',
+          label: 'contains',
+        });
+      });
+    }
+  }
+
+  return generateUmlDiagram(nodes, edges, {
+    title: 'Physics System UML',
+    includeLabels,
+  });
+}
+
+/**
+ * Export physics reasoning to JSON format
+ */
+function physicsToJSON(thought: PhysicsThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  const graph = createJsonGraph('physics_system', 'Physics System Model');
+
+  // Add main type node
+  const typeId = 'type';
+  addNode(graph, {
+    id: typeId,
+    label: includeLabels ? (thought.thoughtType || 'Physics').replace(/_/g, ' ') : 'Physics',
+    type: 'thought_type',
+    metadata: {
+      thoughtType: thought.thoughtType || 'physics',
+    },
+  });
+
+  // Add tensor properties
+  if (thought.tensorProperties) {
+    const tensorId = 'tensor';
+    addNode(graph, {
+      id: tensorId,
+      label: `Tensor (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`,
+      type: 'tensor',
+      metadata: {
+        rank: thought.tensorProperties.rank,
+        components: thought.tensorProperties.components,
+        transformation: thought.tensorProperties.transformation,
+        indexStructure: thought.tensorProperties.indexStructure,
+        coordinateSystem: thought.tensorProperties.coordinateSystem,
+      },
+    });
+    addEdge(graph, {
+      id: 'edge_type_tensor',
+      source: typeId,
+      target: tensorId,
+      label: 'has_tensor',
+      directed: true,
+    });
+
+    // Add symmetries as nodes
+    if (thought.tensorProperties.symmetries.length > 0) {
+      thought.tensorProperties.symmetries.forEach((sym, index) => {
+        const symId = `symmetry_${index}`;
+        addNode(graph, {
+          id: symId,
+          label: sym,
+          type: 'symmetry',
+          metadata: { description: sym },
+        });
+        addEdge(graph, {
+          id: `edge_tensor_sym_${index}`,
+          source: tensorId,
+          target: symId,
+          label: 'has_symmetry',
+          directed: true,
+        });
+      });
+    }
+
+    // Add invariants as nodes
+    if (thought.tensorProperties.invariants.length > 0) {
+      thought.tensorProperties.invariants.forEach((inv, index) => {
+        const invId = `invariant_${index}`;
+        addNode(graph, {
+          id: invId,
+          label: inv,
+          type: 'invariant',
+          metadata: { description: inv },
+        });
+        addEdge(graph, {
+          id: `edge_tensor_inv_${index}`,
+          source: tensorId,
+          target: invId,
+          label: 'has_invariant',
+          directed: true,
+        });
+      });
+    }
+  }
+
+  // Add physical interpretation
+  if (thought.physicalInterpretation) {
+    const interpId = 'interpretation';
+    addNode(graph, {
+      id: interpId,
+      label: thought.physicalInterpretation.quantity,
+      type: 'physical_interpretation',
+      metadata: {
+        quantity: thought.physicalInterpretation.quantity,
+        units: thought.physicalInterpretation.units,
+        conservationLaws: thought.physicalInterpretation.conservationLaws,
+        constraints: thought.physicalInterpretation.constraints,
+        observables: thought.physicalInterpretation.observables,
+      },
+    });
+    addEdge(graph, {
+      id: 'edge_type_interp',
+      source: typeId,
+      target: interpId,
+      label: 'interprets_as',
+      directed: true,
+    });
+
+    // Add units node
+    const unitsId = 'units';
+    addNode(graph, {
+      id: unitsId,
+      label: thought.physicalInterpretation.units,
+      type: 'units',
+      metadata: { units: thought.physicalInterpretation.units },
+    });
+    addEdge(graph, {
+      id: 'edge_interp_units',
+      source: interpId,
+      target: unitsId,
+      label: 'measured_in',
+      directed: true,
+    });
+
+    // Add conservation laws
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      thought.physicalInterpretation.conservationLaws.forEach((law, index) => {
+        const lawId = `conservation_${index}`;
+        addNode(graph, {
+          id: lawId,
+          label: includeLabels ? law : `Law ${index + 1}`,
+          type: 'conservation_law',
+          metadata: { law },
+        });
+        addEdge(graph, {
+          id: `edge_interp_law_${index}`,
+          source: interpId,
+          target: lawId,
+          label: 'conserves',
+          directed: true,
+        });
+      });
+    }
+
+    // Add observables
+    if (thought.physicalInterpretation.observables && thought.physicalInterpretation.observables.length > 0) {
+      thought.physicalInterpretation.observables.forEach((obs, index) => {
+        const obsId = `observable_${index}`;
+        addNode(graph, {
+          id: obsId,
+          label: obs,
+          type: 'observable',
+          metadata: { observable: obs },
+        });
+        addEdge(graph, {
+          id: `edge_interp_obs_${index}`,
+          source: interpId,
+          target: obsId,
+          label: 'has_observable',
+          directed: true,
+        });
+      });
+    }
+  }
+
+  // Add field theory context
+  if (thought.fieldTheoryContext) {
+    const fieldId = 'field_theory';
+    addNode(graph, {
+      id: fieldId,
+      label: 'Field Theory',
+      type: 'field_theory',
+      metadata: {
+        symmetryGroup: thought.fieldTheoryContext.symmetryGroup,
+        fields: thought.fieldTheoryContext.fields,
+        interactions: thought.fieldTheoryContext.interactions,
+        gaugeSymmetries: thought.fieldTheoryContext.gaugeSymmetries,
+      },
+    });
+    addEdge(graph, {
+      id: 'edge_type_field',
+      source: typeId,
+      target: fieldId,
+      label: 'has_context',
+      directed: true,
+    });
+
+    // Add fields
+    thought.fieldTheoryContext.fields.forEach((field, index) => {
+      const fId = `field_${index}`;
+      addNode(graph, {
+        id: fId,
+        label: field,
+        type: 'field',
+        metadata: { field },
+      });
+      addEdge(graph, {
+        id: `edge_field_f_${index}`,
+        source: fieldId,
+        target: fId,
+        label: 'includes_field',
+        directed: true,
+      });
+    });
+
+    // Add symmetry group
+    const symGroupId = 'symmetry_group';
+    addNode(graph, {
+      id: symGroupId,
+      label: thought.fieldTheoryContext.symmetryGroup,
+      type: 'symmetry_group',
+      metadata: { group: thought.fieldTheoryContext.symmetryGroup },
+    });
+    addEdge(graph, {
+      id: 'edge_field_symgroup',
+      source: fieldId,
+      target: symGroupId,
+      label: 'has_symmetry_group',
+      directed: true,
+    });
+  }
+
+  // Add metrics
+  if (includeMetrics) {
+    addMetric(graph, 'uncertainty', thought.uncertainty);
+    if (thought.assumptions) {
+      addMetric(graph, 'assumption_count', thought.assumptions.length);
+    }
+    if (thought.dependencies) {
+      addMetric(graph, 'dependency_count', thought.dependencies.length);
+    }
+  }
+
+  return serializeGraph(graph);
 }

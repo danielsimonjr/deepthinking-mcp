@@ -40,6 +40,22 @@ import {
   renderTable,
   renderBadge,
 } from './html-utils.js';
+import {
+  sanitizeModelicaId,
+  escapeModelicaString,
+} from './modelica-utils.js';
+import {
+  generateUmlDiagram,
+  type UmlNode,
+  type UmlEdge,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Export optimization problem constraint graph to visual format
@@ -62,6 +78,12 @@ export function exportOptimizationSolution(thought: OptimizationThought, options
       return optimizationToTikZ(thought, options);
     case 'html':
       return optimizationToHTML(thought, options);
+    case 'modelica':
+      return optimizationToModelica(thought, options);
+    case 'uml':
+      return optimizationToUML(thought, options);
+    case 'json':
+      return optimizationToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -700,4 +722,395 @@ function optimizationToHTML(thought: OptimizationThought, options: VisualExportO
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export optimization problem to Modelica format
+ */
+function optimizationToModelica(thought: OptimizationThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+  let modelica = '// Optimization Problem Model\n';
+
+  const packageName = thought.problem
+    ? sanitizeModelicaId(thought.problem.name)
+    : 'OptimizationProblem';
+
+  modelica += `package ${packageName}\n`;
+
+  if (thought.problem) {
+    modelica += `  annotation(Documentation(info="${escapeModelicaString(thought.problem.description)}"));\n\n`;
+  }
+
+  // Decision Variables
+  if (thought.variables && thought.variables.length > 0) {
+    modelica += '  // Decision Variables\n';
+    for (const variable of thought.variables) {
+      const varId = sanitizeModelicaId(variable.id);
+      const varType = (variable as any).type || 'Real';
+      const domain = variable.domain
+        ? `(min=${(variable.domain as any).lowerBound}, max=${(variable.domain as any).upperBound})`
+        : '';
+      const comment = includeLabels && variable.description
+        ? ` "${escapeModelicaString(variable.description)}"`
+        : '';
+      modelica += `  ${varType} ${varId}${domain}${comment};\n`;
+    }
+    modelica += '\n';
+  }
+
+  // Objectives as optimization parameters
+  if (thought.objectives && thought.objectives.length > 0) {
+    modelica += '  // Objective Functions\n';
+    for (const objective of thought.objectives) {
+      const objId = sanitizeModelicaId(objective.id);
+      const comment = includeLabels
+        ? ` "${objective.type}: ${escapeModelicaString(objective.name)}"`
+        : '';
+      modelica += `  Real ${objId}${comment};\n`;
+      modelica += `  equation\n`;
+      modelica += `    ${objId} = ${escapeModelicaString(objective.formula)};\n`;
+    }
+    modelica += '\n';
+  }
+
+  // Constraints
+  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+    modelica += '  // Constraints\n';
+    modelica += '  equation\n';
+    for (const constraint of thought.optimizationConstraints) {
+      const comment = includeLabels
+        ? ` // ${constraint.name} (${constraint.type})`
+        : '';
+      modelica += `    ${escapeModelicaString(constraint.formula)};${comment}\n`;
+    }
+    modelica += '\n';
+  }
+
+  // Solution record
+  if (thought.solution) {
+    modelica += '  // Solution\n';
+    modelica += '  record Solution\n';
+
+    const solution = thought.solution as any;
+    if (solution.status) {
+      modelica += `    String status = "${escapeModelicaString(solution.status)}";\n`;
+    }
+    if (solution.optimalValue !== undefined) {
+      modelica += `    Real optimalValue = ${solution.optimalValue};\n`;
+    }
+    if (includeMetrics && solution.quality !== undefined) {
+      modelica += `    Real quality = ${solution.quality.toFixed(4)};\n`;
+    }
+
+    if (solution.assignments) {
+      modelica += '    // Variable Assignments\n';
+      for (const [varId, value] of Object.entries(solution.assignments)) {
+        const safeVarId = sanitizeModelicaId(varId);
+        modelica += `    Real ${safeVarId}_value = ${value};\n`;
+      }
+    }
+
+    modelica += '  end Solution;\n';
+  }
+
+  modelica += `end ${packageName};\n`;
+  return modelica;
+}
+
+/**
+ * Export optimization problem to UML format
+ */
+function optimizationToUML(thought: OptimizationThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const nodes: UmlNode[] = [];
+  const edges: UmlEdge[] = [];
+
+  // Problem as main package
+  if (thought.problem) {
+    nodes.push({
+      id: 'Problem',
+      label: includeLabels ? thought.problem.name : 'Problem',
+      shape: 'package',
+      attributes: [
+        `type: ${thought.problem.type}`,
+        `description: ${thought.problem.description}`,
+      ],
+    });
+  }
+
+  // Variables as a class with attributes
+  if (thought.variables && thought.variables.length > 0) {
+    const attributes = thought.variables.map(v => {
+      const varType = (v as any).type || 'Real';
+      const domain = v.domain
+        ? ` [${(v.domain as any).lowerBound}..${(v.domain as any).upperBound}]`
+        : '';
+      return `${v.name}: ${varType}${domain}`;
+    });
+
+    nodes.push({
+      id: 'Variables',
+      label: 'Decision Variables',
+      shape: 'class',
+      attributes,
+    });
+
+    if (thought.problem) {
+      edges.push({
+        source: 'Problem',
+        target: 'Variables',
+        type: 'composition',
+        label: 'contains',
+      });
+    }
+  }
+
+  // Constraints as a class
+  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+    const methods = thought.optimizationConstraints.map(c =>
+      `${c.name}(): ${c.type} = ${c.formula}`
+    );
+
+    nodes.push({
+      id: 'Constraints',
+      label: 'Constraints',
+      shape: 'class',
+      stereotype: 'constraint',
+      methods,
+    });
+
+    if (thought.problem) {
+      edges.push({
+        source: 'Problem',
+        target: 'Constraints',
+        type: 'composition',
+        label: 'enforces',
+      });
+    }
+
+    // Constraints constrain variables
+    if (thought.variables) {
+      edges.push({
+        source: 'Constraints',
+        target: 'Variables',
+        type: 'dependency',
+        label: 'constrains',
+      });
+    }
+  }
+
+  // Objectives as a class
+  if (thought.objectives && thought.objectives.length > 0) {
+    const methods = thought.objectives.map(o =>
+      `${o.name}(): ${o.type} = ${o.formula}`
+    );
+
+    nodes.push({
+      id: 'Objectives',
+      label: 'Objective Functions',
+      shape: 'interface',
+      stereotype: 'interface',
+      methods,
+    });
+
+    if (thought.problem) {
+      edges.push({
+        source: 'Problem',
+        target: 'Objectives',
+        type: 'composition',
+        label: 'optimizes',
+      });
+    }
+
+    // Objectives use variables
+    if (thought.variables) {
+      edges.push({
+        source: 'Objectives',
+        target: 'Variables',
+        type: 'dependency',
+        label: 'uses',
+      });
+    }
+  }
+
+  // Solution as a result class
+  if (thought.solution) {
+    const solution = thought.solution as any;
+    const attributes: string[] = [];
+
+    if (solution.status) {
+      attributes.push(`status: ${solution.status}`);
+    }
+    if (solution.optimalValue !== undefined) {
+      attributes.push(`optimalValue: ${solution.optimalValue}`);
+    }
+    if (includeMetrics && solution.quality !== undefined) {
+      attributes.push(`quality: ${solution.quality.toFixed(2)}`);
+    }
+
+    if (solution.assignments) {
+      for (const [varId, value] of Object.entries(solution.assignments)) {
+        attributes.push(`${varId} = ${value}`);
+      }
+    }
+
+    nodes.push({
+      id: 'Solution',
+      label: 'Solution',
+      shape: 'class',
+      stereotype: 'result',
+      attributes,
+    });
+
+    // Solution realizes objectives
+    if (thought.objectives) {
+      edges.push({
+        source: 'Solution',
+        target: 'Objectives',
+        type: 'implementation',
+        label: 'satisfies',
+      });
+    }
+  }
+
+  return generateUmlDiagram(nodes, edges, {
+    title: 'Optimization Problem Structure',
+    includeLabels,
+  });
+}
+
+/**
+ * Export optimization problem to JSON format
+ */
+function optimizationToJSON(thought: OptimizationThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const graph = createJsonGraph('Optimization Problem Graph', 'optimization');
+  let edgeIdCounter = 0;
+
+  // Add problem node
+  if (thought.problem) {
+    addNode(graph, {
+      id: 'problem',
+      label: includeLabels ? thought.problem.name : 'Problem',
+      type: 'problem',
+      metadata: {
+        problemType: thought.problem.type,
+        description: thought.problem.description,
+      },
+    });
+  }
+
+  // Add variable nodes
+  if (thought.variables && thought.variables.length > 0) {
+    for (const variable of thought.variables) {
+      addNode(graph, {
+        id: variable.id,
+        label: includeLabels ? variable.name : variable.id,
+        type: 'variable',
+        metadata: {
+          variableType: (variable as any).type || 'Real',
+          domain: variable.domain,
+          description: variable.description,
+        },
+      });
+
+      // Connect variables to problem
+      if (thought.problem) {
+        addEdge(graph, {
+          id: `e${edgeIdCounter++}`,
+          source: 'problem',
+          target: variable.id,
+          label: 'has_variable',
+        });
+      }
+    }
+  }
+
+  // Add constraint nodes
+  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+    for (const constraint of thought.optimizationConstraints) {
+      addNode(graph, {
+        id: constraint.id,
+        label: includeLabels ? constraint.name : constraint.id,
+        type: 'constraint',
+        metadata: {
+          constraintType: constraint.type,
+          formula: constraint.formula,
+        },
+      });
+
+      // Connect constraints to problem
+      if (thought.problem) {
+        addEdge(graph, {
+          id: `e${edgeIdCounter++}`,
+          source: 'problem',
+          target: constraint.id,
+          label: 'enforces',
+        });
+      }
+    }
+  }
+
+  // Add objective nodes
+  if (thought.objectives && thought.objectives.length > 0) {
+    for (const objective of thought.objectives) {
+      addNode(graph, {
+        id: objective.id,
+        label: includeLabels ? objective.name : objective.id,
+        type: 'objective',
+        metadata: {
+          objectiveType: objective.type,
+          formula: objective.formula,
+        },
+      });
+
+      // Connect objectives to problem
+      if (thought.problem) {
+        addEdge(graph, {
+          id: `e${edgeIdCounter++}`,
+          source: 'problem',
+          target: objective.id,
+          label: 'optimizes',
+        });
+      }
+
+      // Connect objectives to solution
+      if (thought.solution) {
+        addEdge(graph, {
+          id: `e${edgeIdCounter++}`,
+          source: objective.id,
+          target: 'solution',
+          label: 'achieved_by',
+        });
+      }
+    }
+  }
+
+  // Add solution node
+  if (thought.solution) {
+    const solution = thought.solution as any;
+    addNode(graph, {
+      id: 'solution',
+      label: 'Solution',
+      type: 'solution',
+      metadata: {
+        status: solution.status,
+        optimalValue: solution.optimalValue,
+        quality: solution.quality,
+        assignments: solution.assignments,
+      },
+    });
+  }
+
+  // Add metrics
+  if (includeMetrics) {
+    addMetric(graph, 'variable_count', thought.variables?.length || 0);
+    addMetric(graph, 'constraint_count', thought.optimizationConstraints?.length || 0);
+    addMetric(graph, 'objective_count', thought.objectives?.length || 0);
+    if (thought.solution?.quality !== undefined) {
+      addMetric(graph, 'solution_quality', thought.solution.quality);
+    }
+  }
+
+  return serializeGraph(graph);
 }

@@ -41,6 +41,31 @@ import {
   renderBadge,
   renderList,
 } from './html-utils.js';
+import {
+  sanitizeModelicaId,
+  escapeModelicaString,
+  generateModelicaPackageHeader,
+  generateModelicaPackageFooter,
+  generateModelicaRecord,
+} from './modelica-utils.js';
+import {
+  generateUmlHeader,
+  generateUmlFooter,
+  renderUmlNode,
+  renderUmlEdge,
+  sanitizeUmlId,
+  escapeUml,
+  type UmlNode,
+  type UmlEdge,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  addLegendItem,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Export first-principles derivation chain to visual format
@@ -63,6 +88,12 @@ export function exportFirstPrinciplesDerivation(thought: FirstPrinciplesThought,
       return firstPrinciplesToTikZ(thought, options);
     case 'html':
       return firstPrinciplesToHTML(thought, options);
+    case 'modelica':
+      return firstPrinciplesToModelica(thought, options);
+    case 'uml':
+      return firstPrinciplesToUML(thought, options);
+    case 'json':
+      return firstPrinciplesToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -691,4 +722,407 @@ function firstPrinciplesToHTML(thought: FirstPrinciplesThought, options: VisualE
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export first-principles derivation to Modelica format
+ */
+function firstPrinciplesToModelica(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+  const packageName = 'FirstPrinciplesDerivation';
+
+  let modelica = generateModelicaPackageHeader(
+    packageName,
+    `First principles derivation: ${thought.question}`
+  );
+
+  // Create records for each fundamental principle
+  modelica += '  // Fundamental Principles\n';
+  for (const principle of thought.principles) {
+    const fields: Array<{ name: string; type: string; value: string; description?: string }> = [
+      { name: 'id', type: 'String', value: `"${escapeModelicaString(principle.id)}"` },
+      { name: 'principleType', type: 'String', value: `"${escapeModelicaString(principle.type)}"` },
+      { name: 'statement', type: 'String', value: `"${escapeModelicaString(principle.statement)}"` },
+      { name: 'justification', type: 'String', value: `"${escapeModelicaString(principle.justification)}"` },
+    ];
+
+    if (includeMetrics && principle.confidence !== undefined) {
+      fields.push({
+        name: 'confidence',
+        type: 'Real',
+        value: principle.confidence.toFixed(3),
+        description: 'Confidence level in this principle',
+      });
+    }
+
+    modelica += generateModelicaRecord(
+      sanitizeModelicaId(principle.id),
+      `${principle.type}: ${principle.statement.substring(0, 60)}`,
+      fields
+    );
+  }
+
+  // Create model for derivation process
+  modelica += '  // Derivation Process\n';
+  modelica += '  model Derivation\n';
+  modelica += `    "Derivation chain from principles to conclusion"\n`;
+  modelica += '\n';
+
+  // Principle instantiations
+  modelica += '    // Principle instances\n';
+  for (const principle of thought.principles) {
+    const safeId = sanitizeModelicaId(principle.id);
+    modelica += `    ${safeId} ${safeId}_instance;\n`;
+  }
+  modelica += '\n';
+
+  // Derivation steps as parameters
+  modelica += '    // Derivation steps\n';
+  for (const step of thought.derivationSteps) {
+    const stepId = `step_${step.stepNumber}`;
+    modelica += `    parameter String ${stepId}_principle = "${escapeModelicaString(step.principle)}";\n`;
+    modelica += `    parameter String ${stepId}_inference = "${escapeModelicaString(step.inference)}";\n`;
+    if (step.logicalForm) {
+      modelica += `    parameter String ${stepId}_logicalForm = "${escapeModelicaString(step.logicalForm)}";\n`;
+    }
+    if (includeMetrics) {
+      modelica += `    parameter Real ${stepId}_confidence = ${step.confidence.toFixed(3)};\n`;
+    }
+  }
+  modelica += '\n';
+
+  // Conclusion
+  modelica += '    // Conclusion\n';
+  modelica += `    parameter String conclusion = "${escapeModelicaString(thought.conclusion.statement)}";\n`;
+  if (includeMetrics) {
+    modelica += `    parameter Real certainty = ${thought.conclusion.certainty.toFixed(3)};\n`;
+  }
+  modelica += `    parameter Integer derivationChainLength = ${thought.conclusion.derivationChain.length};\n`;
+  modelica += '\n';
+
+  modelica += '    annotation(\n';
+  modelica += '      Documentation(info="<html>\n';
+  modelica += `        <h3>Question</h3>\n`;
+  modelica += `        <p>${escapeModelicaString(thought.question)}</p>\n`;
+  modelica += `        <h3>Principles</h3>\n`;
+  modelica += `        <p>Count: ${thought.principles.length}</p>\n`;
+  modelica += `        <h3>Derivation Steps</h3>\n`;
+  modelica += `        <p>Count: ${thought.derivationSteps.length}</p>\n`;
+  modelica += `        <h3>Conclusion</h3>\n`;
+  modelica += `        <p>${escapeModelicaString(thought.conclusion.statement)}</p>\n`;
+  if (includeMetrics) {
+    modelica += `        <p>Certainty: ${(thought.conclusion.certainty * 100).toFixed(1)}%</p>\n`;
+  }
+  modelica += '      </html>")\n';
+  modelica += '    );\n';
+  modelica += '  end Derivation;\n';
+  modelica += '\n';
+
+  modelica += generateModelicaPackageFooter(packageName, { includeAnnotations: true, version: '7.1.0' });
+
+  return modelica;
+}
+
+/**
+ * Export first-principles derivation to UML format
+ */
+function firstPrinciplesToUML(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  const nodes: UmlNode[] = [];
+  const edges: UmlEdge[] = [];
+
+  // Add principles as classes or rectangles
+  for (const principle of thought.principles) {
+    const attributes: string[] = [
+      `type: ${principle.type}`,
+      `statement: "${principle.statement.substring(0, 40)}..."`,
+      `justification: "${principle.justification.substring(0, 40)}..."`,
+    ];
+
+    if (includeMetrics && principle.confidence !== undefined) {
+      attributes.push(`confidence: ${principle.confidence.toFixed(2)}`);
+    }
+
+    nodes.push({
+      id: sanitizeUmlId(principle.id),
+      label: includeLabels ? principle.id : sanitizeUmlId(principle.id),
+      shape: principle.type === 'axiom' ? 'class' : 'rectangle',
+      stereotype: principle.type,
+      attributes: attributes,
+    });
+
+    // Add dependency edges between principles
+    if (principle.dependsOn && principle.dependsOn.length > 0) {
+      for (const depId of principle.dependsOn) {
+        edges.push({
+          source: sanitizeUmlId(depId),
+          target: sanitizeUmlId(principle.id),
+          type: 'dependency',
+          label: 'depends on',
+        });
+      }
+    }
+  }
+
+  // Add derivation steps as components
+  for (const step of thought.derivationSteps) {
+    const stepId = `Step${step.stepNumber}`;
+    const attributes: string[] = [
+      `inference: "${step.inference.substring(0, 40)}..."`,
+    ];
+
+    if (step.logicalForm) {
+      attributes.push(`logicalForm: "${step.logicalForm.substring(0, 30)}..."`);
+    }
+
+    if (includeMetrics) {
+      attributes.push(`confidence: ${step.confidence.toFixed(2)}`);
+    }
+
+    nodes.push({
+      id: stepId,
+      label: includeLabels ? `Step ${step.stepNumber}` : stepId,
+      shape: 'component',
+      attributes: attributes,
+    });
+
+    // Edge from principle to step
+    edges.push({
+      source: sanitizeUmlId(step.principle),
+      target: stepId,
+      type: 'dashed',
+      label: 'applies',
+    });
+  }
+
+  // Add conclusion as a class
+  const conclusionAttributes: string[] = [
+    `statement: "${thought.conclusion.statement.substring(0, 40)}..."`,
+    `derivationChain: [${thought.conclusion.derivationChain.join(', ')}]`,
+  ];
+
+  if (includeMetrics) {
+    conclusionAttributes.push(`certainty: ${thought.conclusion.certainty.toFixed(2)}`);
+  }
+
+  if (thought.conclusion.limitations && thought.conclusion.limitations.length > 0) {
+    conclusionAttributes.push(`limitations: ${thought.conclusion.limitations.length} items`);
+  }
+
+  nodes.push({
+    id: 'Conclusion',
+    label: 'Conclusion',
+    shape: 'class',
+    stereotype: 'conclusion',
+    attributes: conclusionAttributes,
+  });
+
+  // Edges from derivation steps to conclusion
+  for (const stepNum of thought.conclusion.derivationChain) {
+    edges.push({
+      source: `Step${stepNum}`,
+      target: 'Conclusion',
+      type: 'arrow',
+    });
+  }
+
+  // Generate the UML diagram
+  let uml = generateUmlHeader({
+    title: 'First Principles Derivation',
+    direction: 'top to bottom',
+  });
+
+  uml += `' Question: ${escapeUml(thought.question)}\n\n`;
+
+  // Render nodes
+  uml += "' Principles\n";
+  for (const node of nodes.filter(n => !n.id.startsWith('Step') && n.id !== 'Conclusion')) {
+    uml += renderUmlNode(node) + '\n';
+  }
+
+  uml += "\n' Derivation Steps\n";
+  for (const node of nodes.filter(n => n.id.startsWith('Step'))) {
+    uml += renderUmlNode(node) + '\n';
+  }
+
+  uml += "\n' Conclusion\n";
+  const conclusionNode = nodes.find(n => n.id === 'Conclusion');
+  if (conclusionNode) {
+    uml += renderUmlNode(conclusionNode) + '\n';
+  }
+
+  // Render edges
+  uml += "\n' Relationships\n";
+  for (const edge of edges) {
+    uml += renderUmlEdge(edge) + '\n';
+  }
+
+  uml += '\n' + generateUmlFooter();
+
+  return uml;
+}
+
+/**
+ * Export first-principles derivation to JSON format
+ */
+function firstPrinciplesToJSON(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
+  const { includeMetrics = true, includeLabels = true } = options;
+
+  const graph = createJsonGraph(
+    'First Principles Derivation',
+    'first-principles',
+    { includeMetrics, includeLayout: true, includeLegend: true }
+  );
+
+  // Set hierarchical layout
+  if (graph.layout) {
+    graph.layout.type = 'hierarchical';
+    graph.layout.direction = 'TB';
+  }
+
+  // Add question metadata
+  graph.metadata.question = thought.question;
+
+  // Add principle nodes at the top level
+  const principleSpacing = 150;
+  const principleStartX = -((thought.principles.length - 1) * principleSpacing) / 2;
+
+  for (let i = 0; i < thought.principles.length; i++) {
+    const principle = thought.principles[i];
+    const principleId = sanitizeId(principle.id);
+
+    // Determine color based on type
+    let color = '#e0e0e0';
+    switch (principle.type) {
+      case 'axiom': color = '#a8d5ff'; break;
+      case 'definition': color = '#ce93d8'; break;
+      case 'observation': color = '#ffd699'; break;
+      case 'logical_inference': color = '#a5d6a7'; break;
+      case 'assumption': color = '#ef9a9a'; break;
+    }
+
+    addNode(graph, {
+      id: principleId,
+      label: includeLabels ? `${principle.type}: ${principle.statement.substring(0, 30)}...` : principleId,
+      type: principle.type,
+      x: principleStartX + i * principleSpacing,
+      y: 0,
+      width: 140,
+      height: 60,
+      color: color,
+      shape: principle.type === 'axiom' ? 'ellipse' : 'rectangle',
+      metadata: {
+        statement: principle.statement,
+        justification: principle.justification,
+        confidence: principle.confidence,
+        dependsOn: principle.dependsOn,
+      },
+    });
+
+    // Add dependency edges between principles
+    if (principle.dependsOn && principle.dependsOn.length > 0) {
+      for (const depId of principle.dependsOn) {
+        addEdge(graph, {
+          id: `edge_${sanitizeId(depId)}_${principleId}`,
+          source: sanitizeId(depId),
+          target: principleId,
+          label: 'depends on',
+          directed: true,
+          style: 'dashed',
+        });
+      }
+    }
+  }
+
+  // Add derivation step nodes in the middle
+  const stepY = 150;
+  const stepSpacing = 200;
+  const stepStartX = -((thought.derivationSteps.length - 1) * stepSpacing) / 2;
+
+  for (let i = 0; i < thought.derivationSteps.length; i++) {
+    const step = thought.derivationSteps[i];
+    const stepId = `step_${step.stepNumber}`;
+
+    addNode(graph, {
+      id: stepId,
+      label: includeLabels ? `Step ${step.stepNumber}: ${step.inference.substring(0, 30)}...` : `Step ${step.stepNumber}`,
+      type: 'derivation_step',
+      x: stepStartX + i * stepSpacing,
+      y: stepY,
+      width: 180,
+      height: 50,
+      color: '#81c784',
+      shape: 'rectangle',
+      metadata: {
+        inference: step.inference,
+        logicalForm: step.logicalForm,
+        confidence: step.confidence,
+        principle: step.principle,
+      },
+    });
+
+    // Edge from principle to step
+    addEdge(graph, {
+      id: `edge_${sanitizeId(step.principle)}_${stepId}`,
+      source: sanitizeId(step.principle),
+      target: stepId,
+      label: 'applies',
+      directed: true,
+      style: 'dashed',
+    });
+  }
+
+  // Add conclusion node at the bottom
+  addNode(graph, {
+    id: 'conclusion',
+    label: includeLabels ? `Conclusion: ${thought.conclusion.statement.substring(0, 40)}...` : 'Conclusion',
+    type: 'conclusion',
+    x: 0,
+    y: stepY + 150,
+    width: 200,
+    height: 60,
+    color: '#66bb6a',
+    shape: 'stadium',
+    metadata: {
+      statement: thought.conclusion.statement,
+      certainty: thought.conclusion.certainty,
+      derivationChain: thought.conclusion.derivationChain,
+      limitations: thought.conclusion.limitations,
+    },
+  });
+
+  // Edges from derivation steps to conclusion
+  for (const stepNum of thought.conclusion.derivationChain) {
+    addEdge(graph, {
+      id: `edge_step${stepNum}_conclusion`,
+      source: `step_${stepNum}`,
+      target: 'conclusion',
+      directed: true,
+      style: 'solid',
+    });
+  }
+
+  // Add metrics
+  if (includeMetrics && graph.metrics) {
+    addMetric(graph, 'principleCount', thought.principles.length);
+    addMetric(graph, 'derivationStepCount', thought.derivationSteps.length);
+    addMetric(graph, 'certainty', thought.conclusion.certainty);
+    addMetric(graph, 'axiomCount', thought.principles.filter(p => p.type === 'axiom').length);
+    addMetric(graph, 'definitionCount', thought.principles.filter(p => p.type === 'definition').length);
+    addMetric(graph, 'observationCount', thought.principles.filter(p => p.type === 'observation').length);
+  }
+
+  // Add legend
+  if (graph.legend) {
+    addLegendItem(graph, 'Axiom', '#a8d5ff', 'ellipse');
+    addLegendItem(graph, 'Definition', '#ce93d8', 'rectangle');
+    addLegendItem(graph, 'Observation', '#ffd699', 'rectangle');
+    addLegendItem(graph, 'Logical Inference', '#a5d6a7', 'rectangle');
+    addLegendItem(graph, 'Assumption', '#ef9a9a', 'rectangle');
+    addLegendItem(graph, 'Derivation Step', '#81c784', 'rectangle');
+    addLegendItem(graph, 'Conclusion', '#66bb6a', 'stadium');
+  }
+
+  return serializeGraph(graph, { prettyPrint: true, indent: 2 });
 }

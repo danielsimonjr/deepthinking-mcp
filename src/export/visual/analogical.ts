@@ -43,6 +43,22 @@ import {
   renderTable,
   renderProgressBar,
 } from './html-utils.js';
+import {
+  sanitizeModelicaId,
+  escapeModelicaString,
+} from './modelica-utils.js';
+import {
+  generateUmlDiagram,
+  type UmlNode,
+  type UmlEdge,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Export analogical domain mapping to visual format
@@ -65,6 +81,12 @@ export function exportAnalogicalMapping(thought: AnalogicalThought, options: Vis
       return analogicalToTikZ(thought, options);
     case 'html':
       return analogicalToHTML(thought, options);
+    case 'modelica':
+      return analogicalToModelica(thought, options);
+    case 'uml':
+      return analogicalToUML(thought, options);
+    case 'json':
+      return analogicalToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -508,4 +530,254 @@ function analogicalToHTML(thought: AnalogicalThought, options: VisualExportOptio
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export analogical mapping to Modelica format
+ */
+function analogicalToModelica(thought: AnalogicalThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+
+  const pkgName = sanitizeModelicaId('AnalogicalMapping');
+  let modelica = `package ${pkgName}\n`;
+  modelica += `  "${escapeModelicaString('Analogical domain mapping: ' + thought.sourceDomain.name + ' → ' + thought.targetDomain.name)}"\n\n`;
+
+  // Source domain record
+  modelica += `  record SourceDomain "${escapeModelicaString(thought.sourceDomain.name)}"\n`;
+  modelica += `    String name = "${escapeModelicaString(thought.sourceDomain.name)}";\n`;
+  modelica += `    String description = "${escapeModelicaString(thought.sourceDomain.description || '')}";\n`;
+
+  // Add source entities as parameters
+  thought.sourceDomain.entities.forEach(entity => {
+    const entityId = sanitizeModelicaId(entity.id);
+    modelica += `    parameter String entity_${entityId} = "${escapeModelicaString(entity.name)}";\n`;
+    if (entity.description) {
+      modelica += `    parameter String entity_${entityId}_desc = "${escapeModelicaString(entity.description)}";\n`;
+    }
+  });
+  modelica += `  end SourceDomain;\n\n`;
+
+  // Target domain record
+  modelica += `  record TargetDomain "${escapeModelicaString(thought.targetDomain.name)}"\n`;
+  modelica += `    String name = "${escapeModelicaString(thought.targetDomain.name)}";\n`;
+  modelica += `    String description = "${escapeModelicaString(thought.targetDomain.description || '')}";\n`;
+
+  // Add target entities as parameters
+  thought.targetDomain.entities.forEach(entity => {
+    const entityId = sanitizeModelicaId(entity.id);
+    modelica += `    parameter String entity_${entityId} = "${escapeModelicaString(entity.name)}";\n`;
+    if (entity.description) {
+      modelica += `    parameter String entity_${entityId}_desc = "${escapeModelicaString(entity.description)}";\n`;
+    }
+  });
+  modelica += `  end TargetDomain;\n\n`;
+
+  // Mapping record
+  modelica += `  record Mapping "Entity mapping with confidence"\n`;
+  thought.mapping.forEach((mapping, index) => {
+    const srcId = sanitizeModelicaId(mapping.sourceEntityId);
+    const tgtId = sanitizeModelicaId(mapping.targetEntityId);
+    modelica += `    parameter String map_${index}_source = "${escapeModelicaString(srcId)}";\n`;
+    modelica += `    parameter String map_${index}_target = "${escapeModelicaString(tgtId)}";\n`;
+    modelica += `    parameter Real map_${index}_confidence = ${mapping.confidence.toFixed(3)};\n`;
+    if (mapping.justification) {
+      modelica += `    parameter String map_${index}_justification = "${escapeModelicaString(mapping.justification)}";\n`;
+    }
+  });
+  modelica += `  end Mapping;\n\n`;
+
+  // Metrics if requested
+  if (includeMetrics) {
+    modelica += `  record Metrics "Analogy metrics"\n`;
+    modelica += `    parameter Real analogyStrength = ${thought.analogyStrength.toFixed(3)};\n`;
+    modelica += `    parameter Integer mappingCount = ${thought.mapping.length};\n`;
+    modelica += `    parameter Integer sourceEntityCount = ${thought.sourceDomain.entities.length};\n`;
+    modelica += `    parameter Integer targetEntityCount = ${thought.targetDomain.entities.length};\n`;
+    modelica += `  end Metrics;\n\n`;
+  }
+
+  // Main model connecting domains
+  modelica += `  model AnalogicalSystem "Complete analogical mapping system"\n`;
+  modelica += `    SourceDomain source;\n`;
+  modelica += `    TargetDomain target;\n`;
+  modelica += `    Mapping mappings;\n`;
+  if (includeMetrics) {
+    modelica += `    Metrics metrics;\n`;
+  }
+  modelica += `  end AnalogicalSystem;\n\n`;
+
+  modelica += `  annotation(Documentation(info="<html>\n`;
+  modelica += `    <p>Analogical mapping between ${escapeModelicaString(thought.sourceDomain.name)} and ${escapeModelicaString(thought.targetDomain.name)}</p>\n`;
+  modelica += `    <p>Analogy strength: ${(thought.analogyStrength * 100).toFixed(1)}%</p>\n`;
+  modelica += `  </html>"));\n`;
+  modelica += `end ${pkgName};\n`;
+
+  return modelica;
+}
+
+/**
+ * Export analogical mapping to UML format
+ */
+function analogicalToUML(thought: AnalogicalThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  const nodes: UmlNode[] = [];
+  const edges: UmlEdge[] = [];
+
+  // Create package for source domain
+  nodes.push({
+    id: 'source_domain',
+    label: thought.sourceDomain.name,
+    shape: 'package',
+    stereotype: 'source',
+  });
+
+  // Create entities for source domain
+  thought.sourceDomain.entities.forEach(entity => {
+    const nodeId = 'src_' + entity.id;
+    nodes.push({
+      id: nodeId,
+      label: includeLabels ? entity.name : entity.id,
+      shape: 'rectangle',
+      color: 'FFE0B2',
+      attributes: entity.description ? [entity.description] : [],
+    });
+  });
+
+  // Create package for target domain
+  nodes.push({
+    id: 'target_domain',
+    label: thought.targetDomain.name,
+    shape: 'package',
+    stereotype: 'target',
+  });
+
+  // Create entities for target domain
+  thought.targetDomain.entities.forEach(entity => {
+    const nodeId = 'tgt_' + entity.id;
+    nodes.push({
+      id: nodeId,
+      label: includeLabels ? entity.name : entity.id,
+      shape: 'rectangle',
+      color: 'B3E5FC',
+      attributes: entity.description ? [entity.description] : [],
+    });
+  });
+
+  // Create dependency relationships for mappings
+  thought.mapping.forEach(mapping => {
+    const srcId = 'src_' + mapping.sourceEntityId;
+    const tgtId = 'tgt_' + mapping.targetEntityId;
+
+    edges.push({
+      source: srcId,
+      target: tgtId,
+      type: 'dependency',
+      label: includeMetrics ? `${mapping.confidence.toFixed(2)}` : undefined,
+    });
+  });
+
+  // Add metrics info if requested
+  if (includeMetrics) {
+    nodes.push({
+      id: 'metrics_info',
+      label: `Metrics\nAnalogy Strength: ${(thought.analogyStrength * 100).toFixed(1)}%\nMappings: ${thought.mapping.length}`,
+      shape: 'rectangle',
+      color: 'E8EAF6',
+    });
+  }
+
+  return generateUmlDiagram(nodes, edges, {
+    title: 'Analogical Domain Mapping',
+    diagramType: 'component',
+  });
+}
+
+/**
+ * Export analogical mapping to JSON format
+ */
+function analogicalToJSON(thought: AnalogicalThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+
+  // Create graph
+  const graph = createJsonGraph('Analogical Domain Mapping', 'analogical');
+
+  // Add additional metadata
+  graph.metadata.sourceDomainName = thought.sourceDomain.name;
+  graph.metadata.sourceDomainDescription = thought.sourceDomain.description;
+  graph.metadata.targetDomainName = thought.targetDomain.name;
+  graph.metadata.targetDomainDescription = thought.targetDomain.description;
+
+  // Add source domain entities as nodes
+  thought.sourceDomain.entities.forEach(entity => {
+    addNode(graph, {
+      id: 'src_' + entity.id,
+      label: entity.name,
+      type: 'source_entity',
+      metadata: {
+        originalId: entity.id,
+        description: entity.description,
+        entityType: entity.type,
+        domain: 'source',
+      },
+    });
+  });
+
+  // Add target domain entities as nodes
+  thought.targetDomain.entities.forEach(entity => {
+    addNode(graph, {
+      id: 'tgt_' + entity.id,
+      label: entity.name,
+      type: 'target_entity',
+      metadata: {
+        originalId: entity.id,
+        description: entity.description,
+        entityType: entity.type,
+        domain: 'target',
+      },
+    });
+  });
+
+  // Add mappings as edges
+  thought.mapping.forEach((mapping, index) => {
+    addEdge(graph, {
+      id: `mapping_${index}`,
+      source: 'src_' + mapping.sourceEntityId,
+      target: 'tgt_' + mapping.targetEntityId,
+      label: `confidence: ${mapping.confidence.toFixed(2)}`,
+      type: 'mapping',
+      metadata: {
+        confidence: mapping.confidence,
+        justification: mapping.justification,
+      },
+    });
+  });
+
+  // Add metrics
+  if (includeMetrics) {
+    addMetric(graph, 'analogyStrength', thought.analogyStrength);
+    addMetric(graph, 'mappingCount', thought.mapping.length);
+    addMetric(graph, 'sourceEntityCount', thought.sourceDomain.entities.length);
+    addMetric(graph, 'targetEntityCount', thought.targetDomain.entities.length);
+
+    // Add average mapping confidence
+    if (thought.mapping.length > 0) {
+      const avgConfidence = thought.mapping.reduce((sum, m) => sum + m.confidence, 0) / thought.mapping.length;
+      addMetric(graph, 'averageMappingConfidence', avgConfidence);
+    }
+  }
+
+  // Add inferences if present
+  if (thought.inferences && thought.inferences.length > 0) {
+    graph.metadata.inferences = thought.inferences.map(inf => ({
+      sourcePattern: inf.sourcePattern,
+      targetPrediction: inf.targetPrediction,
+      confidence: inf.confidence,
+    }));
+    if (includeMetrics) {
+      addMetric(graph, 'inferenceCount', thought.inferences.length);
+    }
+  }
+
+  return serializeGraph(graph);
 }

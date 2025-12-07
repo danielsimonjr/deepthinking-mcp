@@ -46,6 +46,18 @@ import {
   renderBadge,
   renderProgressBar,
 } from './html-utils.js';
+import {
+  generateUmlDiagram,
+  type UmlNode,
+  type UmlEdge,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Main export function for engineering analysis
@@ -73,6 +85,10 @@ export function exportEngineeringAnalysis(
       return engineeringToModelica(thought, options);
     case 'html':
       return engineeringToHTML(thought, options);
+    case 'uml':
+      return engineeringToUML(thought, options);
+    case 'json':
+      return engineeringToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -1143,4 +1159,343 @@ function engineeringToHTML(thought: EngineeringThought, options: VisualExportOpt
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+// =============================================================================
+// UML Export
+// =============================================================================
+
+/**
+ * Export engineering analysis to UML/PlantUML format
+ */
+function engineeringToUML(thought: EngineeringThought, options: VisualExportOptions): string {
+  const { umlTheme, umlDirection, includeLabels = true, includeMetrics = true } = options;
+
+  const nodes: UmlNode[] = [];
+  const edges: UmlEdge[] = [];
+
+  // Central challenge node
+  nodes.push({
+    id: 'challenge',
+    label: thought.designChallenge.substring(0, 50),
+    shape: 'component',
+    stereotype: thought.analysisType,
+  });
+
+  // Requirements section
+  if (thought.requirements && thought.requirements.requirements.length > 0) {
+    nodes.push({
+      id: 'requirements',
+      label: includeLabels ? `Requirements (${thought.requirements.requirements.length})` : 'Requirements',
+      shape: 'folder',
+      color: 'lightyellow',
+    });
+    edges.push({
+      source: 'challenge',
+      target: 'requirements',
+      type: 'composition',
+    });
+
+    // Add individual requirements
+    for (const req of thought.requirements.requirements.slice(0, 5)) {
+      const reqId = sanitizeId(req.id);
+      nodes.push({
+        id: `req_${reqId}`,
+        label: includeLabels ? req.title.substring(0, 30) : req.id,
+        shape: 'class',
+        stereotype: req.priority,
+      });
+      edges.push({
+        source: 'requirements',
+        target: `req_${reqId}`,
+        type: 'aggregation',
+      });
+    }
+  }
+
+  // Trade Study section
+  if (thought.tradeStudy) {
+    nodes.push({
+      id: 'tradeStudy',
+      label: includeLabels ? thought.tradeStudy.title.substring(0, 30) : 'Trade Study',
+      shape: 'package',
+      color: 'lightgreen',
+    });
+    edges.push({
+      source: 'challenge',
+      target: 'tradeStudy',
+      type: 'dependency',
+    });
+
+    // Add alternatives
+    for (const alt of thought.tradeStudy.alternatives.slice(0, 4)) {
+      const isRec = alt.id === thought.tradeStudy.recommendation;
+      nodes.push({
+        id: `alt_${sanitizeId(alt.id)}`,
+        label: alt.name.substring(0, 25),
+        shape: isRec ? 'entity' : 'rectangle',
+        stereotype: isRec ? 'recommended' : undefined,
+        color: isRec ? '90EE90' : undefined,
+      });
+      edges.push({
+        source: 'tradeStudy',
+        target: `alt_${sanitizeId(alt.id)}`,
+        type: 'association',
+      });
+    }
+  }
+
+  // FMEA section
+  if (thought.fmea && thought.fmea.failureModes.length > 0) {
+    nodes.push({
+      id: 'fmea',
+      label: includeMetrics ? `FMEA (${thought.fmea.summary.criticalModes} critical)` : 'FMEA',
+      shape: 'database',
+      color: 'mistyrose',
+    });
+    edges.push({
+      source: 'challenge',
+      target: 'fmea',
+      type: 'dependency',
+    });
+  }
+
+  // Design Decisions section
+  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
+    nodes.push({
+      id: 'decisions',
+      label: includeLabels ? `Decisions (${thought.designDecisions.decisions.length})` : 'Decisions',
+      shape: 'folder',
+      color: 'lavender',
+    });
+    edges.push({
+      source: 'challenge',
+      target: 'decisions',
+      type: 'dependency',
+    });
+  }
+
+  // Assessment
+  if (thought.assessment && includeMetrics) {
+    nodes.push({
+      id: 'assessment',
+      label: `Confidence: ${(thought.assessment.confidence * 100).toFixed(0)}%`,
+      shape: 'usecase',
+      color: thought.assessment.confidence > 0.7 ? '90EE90' : 'FFD700',
+    });
+    edges.push({
+      source: 'challenge',
+      target: 'assessment',
+      type: 'dashed',
+    });
+  }
+
+  return generateUmlDiagram(nodes, edges, {
+    title: `Engineering: ${thought.analysisType}`,
+    theme: umlTheme,
+    direction: umlDirection,
+  });
+}
+
+// =============================================================================
+// JSON Export
+// =============================================================================
+
+/**
+ * Export engineering analysis to JSON format
+ */
+function engineeringToJSON(thought: EngineeringThought, options: VisualExportOptions): string {
+  const { jsonPrettyPrint = true, jsonIndent = 2, includeMetrics = true } = options;
+
+  const graph = createJsonGraph(`Engineering: ${thought.analysisType}`, 'engineering', {
+    prettyPrint: jsonPrettyPrint,
+    indent: jsonIndent,
+    includeMetrics,
+  });
+
+  // Add metadata
+  graph.metadata.analysisType = thought.analysisType;
+  graph.metadata.designChallenge = thought.designChallenge;
+
+  // Challenge node
+  addNode(graph, {
+    id: 'challenge',
+    label: thought.designChallenge,
+    type: 'challenge',
+    color: '#a8d5ff',
+    shape: 'stadium',
+    metadata: { analysisType: thought.analysisType },
+  });
+
+  // Requirements
+  if (thought.requirements) {
+    addNode(graph, {
+      id: 'requirements',
+      label: `Requirements (${thought.requirements.requirements.length})`,
+      type: 'requirements',
+      color: '#fff9c4',
+      shape: 'rectangle',
+      metadata: {
+        total: thought.requirements.coverage.total,
+        verified: thought.requirements.coverage.verified,
+        requirements: thought.requirements.requirements.map(r => ({
+          id: r.id,
+          title: r.title,
+          priority: r.priority,
+          status: r.status,
+        })),
+      },
+    });
+    addEdge(graph, {
+      id: 'edge_challenge_requirements',
+      source: 'challenge',
+      target: 'requirements',
+      type: 'has_requirements',
+      directed: true,
+    });
+  }
+
+  // Trade Study
+  if (thought.tradeStudy) {
+    addNode(graph, {
+      id: 'tradeStudy',
+      label: thought.tradeStudy.title,
+      type: 'trade_study',
+      color: '#c8e6c9',
+      shape: 'rectangle',
+      metadata: {
+        objective: thought.tradeStudy.objective,
+        recommendation: thought.tradeStudy.recommendation,
+        justification: thought.tradeStudy.justification,
+        alternatives: thought.tradeStudy.alternatives.map(a => ({
+          id: a.id,
+          name: a.name,
+          riskLevel: a.riskLevel,
+        })),
+        criteria: thought.tradeStudy.criteria.map(c => ({
+          id: c.id,
+          name: c.name,
+          weight: c.weight,
+        })),
+      },
+    });
+    addEdge(graph, {
+      id: 'edge_challenge_tradeStudy',
+      source: 'challenge',
+      target: 'tradeStudy',
+      type: 'has_trade_study',
+      directed: true,
+    });
+  }
+
+  // FMEA
+  if (thought.fmea && thought.fmea.failureModes.length > 0) {
+    addNode(graph, {
+      id: 'fmea',
+      label: `FMEA: ${thought.fmea.system}`,
+      type: 'fmea',
+      color: '#ffcdd2',
+      shape: 'diamond',
+      metadata: {
+        system: thought.fmea.system,
+        rpnThreshold: thought.fmea.rpnThreshold,
+        summary: thought.fmea.summary,
+        failureModes: thought.fmea.failureModes.map(fm => ({
+          id: fm.id,
+          component: fm.component,
+          failureMode: fm.failureMode,
+          rpn: fm.rpn,
+          severity: fm.severity,
+          occurrence: fm.occurrence,
+          detection: fm.detection,
+        })),
+      },
+    });
+    addEdge(graph, {
+      id: 'edge_challenge_fmea',
+      source: 'challenge',
+      target: 'fmea',
+      type: 'has_fmea',
+      directed: true,
+    });
+  }
+
+  // Design Decisions
+  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
+    addNode(graph, {
+      id: 'decisions',
+      label: `Decisions (${thought.designDecisions.decisions.length})`,
+      type: 'design_decisions',
+      color: '#e1bee7',
+      shape: 'rectangle',
+      metadata: {
+        projectName: thought.designDecisions.projectName,
+        decisions: thought.designDecisions.decisions.map(d => ({
+          id: d.id,
+          title: d.title,
+          status: d.status,
+          decision: d.decision,
+        })),
+      },
+    });
+    addEdge(graph, {
+      id: 'edge_challenge_decisions',
+      source: 'challenge',
+      target: 'decisions',
+      type: 'has_decisions',
+      directed: true,
+    });
+  }
+
+  // Assessment
+  if (thought.assessment) {
+    addNode(graph, {
+      id: 'assessment',
+      label: `Assessment: ${(thought.assessment.confidence * 100).toFixed(0)}%`,
+      type: 'assessment',
+      color: thought.assessment.confidence > 0.7 ? '#a5d6a7' : '#ffe082',
+      shape: 'ellipse',
+      metadata: {
+        confidence: thought.assessment.confidence,
+        keyRisks: thought.assessment.keyRisks,
+        openIssues: thought.assessment.openIssues,
+        nextSteps: thought.assessment.nextSteps,
+      },
+    });
+    addEdge(graph, {
+      id: 'edge_challenge_assessment',
+      source: 'challenge',
+      target: 'assessment',
+      type: 'has_assessment',
+      directed: true,
+      style: 'dashed',
+    });
+  }
+
+  // Add metrics
+  if (includeMetrics && graph.metrics) {
+    addMetric(graph, 'analysisType', thought.analysisType);
+    if (thought.requirements) {
+      addMetric(graph, 'requirementCount', thought.requirements.requirements.length);
+      addMetric(graph, 'verifiedRequirements', thought.requirements.coverage.verified);
+    }
+    if (thought.tradeStudy) {
+      addMetric(graph, 'alternativeCount', thought.tradeStudy.alternatives.length);
+      addMetric(graph, 'recommendation', thought.tradeStudy.recommendation);
+    }
+    if (thought.fmea) {
+      addMetric(graph, 'failureModeCount', thought.fmea.failureModes.length);
+      addMetric(graph, 'criticalModes', thought.fmea.summary.criticalModes);
+      addMetric(graph, 'maxRpn', thought.fmea.summary.maxRpn);
+    }
+    if (thought.designDecisions) {
+      addMetric(graph, 'decisionCount', thought.designDecisions.decisions.length);
+    }
+    if (thought.assessment) {
+      addMetric(graph, 'confidence', thought.assessment.confidence);
+      addMetric(graph, 'riskCount', thought.assessment.keyRisks.length);
+    }
+  }
+
+  return serializeGraph(graph, { prettyPrint: jsonPrettyPrint, indent: jsonIndent });
 }

@@ -43,6 +43,22 @@ import {
   renderBadge,
   renderProgressBar,
 } from './html-utils.js';
+import {
+  sanitizeModelicaId,
+  escapeModelicaString,
+} from './modelica-utils.js';
+import {
+  generateUmlDiagram,
+  type UmlNode,
+  type UmlEdge,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Export meta-reasoning to visual format
@@ -65,6 +81,12 @@ export function exportMetaReasoningVisualization(thought: MetaReasoningThought, 
       return metaReasoningToTikZ(thought, options);
     case 'html':
       return metaReasoningToHTML(thought, options);
+    case 'modelica':
+      return metaReasoningToModelica(thought, options);
+    case 'uml':
+      return metaReasoningToUML(thought, options);
+    case 'json':
+      return metaReasoningToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -958,4 +980,495 @@ function metaReasoningToHTML(thought: MetaReasoningThought, options: VisualExpor
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export meta-reasoning to Modelica format
+ */
+function metaReasoningToModelica(thought: MetaReasoningThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+
+  let modelica = 'package MetaReasoning\n';
+  modelica += '  "Meta-reasoning analysis model for strategy evaluation and recommendation"\n\n';
+
+  // Current strategy record
+  modelica += '  record CurrentStrategy\n';
+  modelica += '    "Current reasoning strategy being employed"\n';
+  const modeId = sanitizeModelicaId(thought.currentStrategy.mode);
+  modelica += `    parameter String mode = "${escapeModelicaString(modeId)}";\n`;
+  modelica += `    parameter String approach = "${escapeModelicaString(thought.currentStrategy.approach)}";\n`;
+  modelica += `    parameter Integer thoughtsSpent = ${thought.currentStrategy.thoughtsSpent};\n`;
+  if (thought.currentStrategy.progressIndicators.length > 0) {
+    modelica += `    parameter Integer progressIndicatorCount = ${thought.currentStrategy.progressIndicators.length};\n`;
+  }
+  modelica += '  end CurrentStrategy;\n\n';
+
+  // Strategy evaluation record
+  modelica += '  record StrategyEvaluation\n';
+  modelica += '    "Evaluation metrics for current strategy"\n';
+  modelica += `    parameter Real effectiveness(min=0.0, max=1.0) = ${thought.strategyEvaluation.effectiveness.toFixed(4)};\n`;
+  modelica += `    parameter Real efficiency(min=0.0, max=1.0) = ${thought.strategyEvaluation.efficiency.toFixed(4)};\n`;
+  modelica += `    parameter Real confidence(min=0.0, max=1.0) = ${thought.strategyEvaluation.confidence.toFixed(4)};\n`;
+  modelica += `    parameter Real progressRate = ${thought.strategyEvaluation.progressRate.toFixed(4)};\n`;
+  modelica += `    parameter Real qualityScore(min=0.0, max=1.0) = ${thought.strategyEvaluation.qualityScore.toFixed(4)};\n`;
+  modelica += `    parameter Integer issueCount = ${thought.strategyEvaluation.issues.length};\n`;
+  modelica += `    parameter Integer strengthCount = ${thought.strategyEvaluation.strengths.length};\n`;
+  modelica += '  end StrategyEvaluation;\n\n';
+
+  // Alternative strategies
+  if (thought.alternativeStrategies.length > 0) {
+    thought.alternativeStrategies.forEach((alt, index) => {
+      modelica += `  record AlternativeStrategy${index + 1}\n`;
+      modelica += `    "Alternative reasoning strategy option ${index + 1}"\n`;
+      const altModeId = sanitizeModelicaId(alt.mode);
+      modelica += `    parameter String mode = "${escapeModelicaString(altModeId)}";\n`;
+      modelica += `    parameter String reasoning = "${escapeModelicaString(alt.reasoning)}";\n`;
+      modelica += `    parameter String expectedBenefit = "${escapeModelicaString(alt.expectedBenefit)}";\n`;
+      modelica += `    parameter Real switchingCost(min=0.0, max=1.0) = ${alt.switchingCost.toFixed(4)};\n`;
+      modelica += `    parameter Real recommendationScore(min=0.0, max=1.0) = ${alt.recommendationScore.toFixed(4)};\n`;
+      modelica += `  end AlternativeStrategy${index + 1};\n\n`;
+    });
+  }
+
+  // Recommendation record
+  modelica += '  record Recommendation\n';
+  modelica += '    "Strategic recommendation from meta-reasoning"\n';
+  modelica += `    parameter String action = "${escapeModelicaString(thought.recommendation.action)}";\n`;
+  if (thought.recommendation.targetMode) {
+    const targetModeId = sanitizeModelicaId(thought.recommendation.targetMode);
+    modelica += `    parameter String targetMode = "${escapeModelicaString(targetModeId)}";\n`;
+  }
+  modelica += `    parameter String justification = "${escapeModelicaString(thought.recommendation.justification)}";\n`;
+  modelica += `    parameter Real confidence(min=0.0, max=1.0) = ${thought.recommendation.confidence.toFixed(4)};\n`;
+  modelica += `    parameter String expectedImprovement = "${escapeModelicaString(thought.recommendation.expectedImprovement)}";\n`;
+  modelica += '  end Recommendation;\n\n';
+
+  // Quality metrics
+  if (includeMetrics) {
+    modelica += '  record QualityMetrics\n';
+    modelica += '    "Quality assessment metrics for reasoning session"\n';
+    modelica += `    parameter Real logicalConsistency(min=0.0, max=1.0) = ${thought.qualityMetrics.logicalConsistency.toFixed(4)};\n`;
+    modelica += `    parameter Real evidenceQuality(min=0.0, max=1.0) = ${thought.qualityMetrics.evidenceQuality.toFixed(4)};\n`;
+    modelica += `    parameter Real completeness(min=0.0, max=1.0) = ${thought.qualityMetrics.completeness.toFixed(4)};\n`;
+    modelica += `    parameter Real originality(min=0.0, max=1.0) = ${thought.qualityMetrics.originality.toFixed(4)};\n`;
+    modelica += `    parameter Real clarity(min=0.0, max=1.0) = ${thought.qualityMetrics.clarity.toFixed(4)};\n`;
+    modelica += `    parameter Real overallQuality(min=0.0, max=1.0) = ${thought.qualityMetrics.overallQuality.toFixed(4)};\n`;
+    modelica += '  end QualityMetrics;\n\n';
+  }
+
+  // Resource allocation
+  modelica += '  record ResourceAllocation\n';
+  modelica += '    "Resource allocation and complexity assessment"\n';
+  modelica += `    parameter Real timeSpent = ${thought.resourceAllocation.timeSpent};\n`;
+  modelica += `    parameter Integer thoughtsRemaining = ${thought.resourceAllocation.thoughtsRemaining};\n`;
+  modelica += `    parameter String complexityLevel = "${escapeModelicaString(thought.resourceAllocation.complexityLevel)}";\n`;
+  modelica += `    parameter String urgency = "${escapeModelicaString(thought.resourceAllocation.urgency)}";\n`;
+  modelica += `    parameter String recommendation = "${escapeModelicaString(thought.resourceAllocation.recommendation)}";\n`;
+  modelica += '  end ResourceAllocation;\n\n';
+
+  // Session context
+  modelica += '  record SessionContext\n';
+  modelica += '    "Session context and historical information"\n';
+  modelica += `    parameter String sessionId = "${escapeModelicaString(thought.sessionContext.sessionId)}";\n`;
+  modelica += `    parameter Integer totalThoughts = ${thought.sessionContext.totalThoughts};\n`;
+  modelica += `    parameter Integer modeSwitches = ${thought.sessionContext.modeSwitches};\n`;
+  modelica += `    parameter String problemType = "${escapeModelicaString(thought.sessionContext.problemType)}";\n`;
+  modelica += `    parameter Integer modesUsedCount = ${thought.sessionContext.modesUsed.length};\n`;
+  if (thought.sessionContext.historicalEffectiveness !== undefined) {
+    modelica += `    parameter Real historicalEffectiveness(min=0.0, max=1.0) = ${thought.sessionContext.historicalEffectiveness.toFixed(4)};\n`;
+  }
+  modelica += '  end SessionContext;\n\n';
+
+  // Main meta-reasoning model
+  modelica += '  model MetaReasoningAnalysis\n';
+  modelica += '    "Complete meta-reasoning analysis model"\n';
+  modelica += '    CurrentStrategy currentStrategy;\n';
+  modelica += '    StrategyEvaluation strategyEvaluation;\n';
+  modelica += '    Recommendation recommendation;\n';
+  if (includeMetrics) {
+    modelica += '    QualityMetrics qualityMetrics;\n';
+  }
+  modelica += '    ResourceAllocation resourceAllocation;\n';
+  modelica += '    SessionContext sessionContext;\n';
+
+  if (thought.alternativeStrategies.length > 0) {
+    thought.alternativeStrategies.forEach((_, index) => {
+      modelica += `    AlternativeStrategy${index + 1} alternativeStrategy${index + 1};\n`;
+    });
+  }
+
+  modelica += '  end MetaReasoningAnalysis;\n\n';
+  modelica += 'end MetaReasoning;\n';
+
+  return modelica;
+}
+
+/**
+ * Export meta-reasoning to UML format
+ */
+function metaReasoningToUML(thought: MetaReasoningThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+
+  const nodes: UmlNode[] = [];
+  const edges: UmlEdge[] = [];
+
+  // Main meta-reasoning class
+  nodes.push({
+    id: 'MetaReasoning',
+    label: 'MetaReasoning',
+    shape: 'class',
+    attributes: [
+      `mode: ${thought.currentStrategy.mode}`,
+      `sessionId: ${thought.sessionContext.sessionId}`,
+      `totalThoughts: ${thought.sessionContext.totalThoughts}`,
+    ],
+    methods: [
+      'evaluateStrategy()',
+      'generateRecommendation()',
+      'allocateResources()',
+    ],
+  });
+
+  // Current strategy class
+  nodes.push({
+    id: 'CurrentStrategy',
+    label: 'CurrentStrategy',
+    shape: 'class',
+    attributes: [
+      `mode: ${thought.currentStrategy.mode}`,
+      `approach: ${thought.currentStrategy.approach.substring(0, 30)}...`,
+      `thoughtsSpent: ${thought.currentStrategy.thoughtsSpent}`,
+      `progressIndicators: ${thought.currentStrategy.progressIndicators.length}`,
+    ],
+  });
+
+  edges.push({
+    source: 'MetaReasoning',
+    target: 'CurrentStrategy',
+    label: 'employs',
+    type: 'composition',
+  });
+
+  // Strategy evaluation class
+  nodes.push({
+    id: 'StrategyEvaluation',
+    label: 'StrategyEvaluation',
+    shape: 'class',
+    attributes: [
+      `effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%`,
+      `efficiency: ${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%`,
+      `confidence: ${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%`,
+      `progressRate: ${thought.strategyEvaluation.progressRate.toFixed(2)}`,
+      `qualityScore: ${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%`,
+      `issues: ${thought.strategyEvaluation.issues.length}`,
+      `strengths: ${thought.strategyEvaluation.strengths.length}`,
+    ],
+  });
+
+  edges.push({
+    source: 'MetaReasoning',
+    target: 'StrategyEvaluation',
+    label: 'evaluates',
+    type: 'association',
+  });
+
+  // Recommendation class
+  nodes.push({
+    id: 'Recommendation',
+    label: 'Recommendation',
+    shape: 'class',
+    attributes: [
+      `action: ${thought.recommendation.action}`,
+      thought.recommendation.targetMode ? `targetMode: ${thought.recommendation.targetMode}` : undefined,
+      `confidence: ${(thought.recommendation.confidence * 100).toFixed(1)}%`,
+      `justification: ${thought.recommendation.justification.substring(0, 40)}...`,
+    ].filter(Boolean) as string[],
+  });
+
+  edges.push({
+    source: 'MetaReasoning',
+    target: 'Recommendation',
+    label: 'produces',
+    type: 'association',
+  });
+
+  // Alternative strategies
+  if (thought.alternativeStrategies.length > 0) {
+    // Create an interface for alternative strategies
+    nodes.push({
+      id: 'AlternativeStrategy',
+      label: '<<interface>>\\nAlternativeStrategy',
+      shape: 'interface',
+      attributes: [
+        'mode: ThinkingMode',
+        'reasoning: string',
+        'expectedBenefit: string',
+        'switchingCost: number',
+        'recommendationScore: number',
+      ],
+    });
+
+    edges.push({
+      source: 'MetaReasoning',
+      target: 'AlternativeStrategy',
+      label: `considers (${thought.alternativeStrategies.length})`,
+      type: 'association',
+    });
+
+    // Add concrete alternative strategies
+    thought.alternativeStrategies.slice(0, 3).forEach((alt, index) => {
+      nodes.push({
+        id: `Alt${index + 1}`,
+        label: `${alt.mode}Strategy`,
+        shape: 'class',
+        attributes: [
+          `score: ${(alt.recommendationScore * 100).toFixed(0)}%`,
+          `cost: ${(alt.switchingCost * 100).toFixed(0)}%`,
+        ],
+      });
+
+      edges.push({
+        source: `Alt${index + 1}`,
+        target: 'AlternativeStrategy',
+        type: 'implementation',
+      });
+    });
+  }
+
+  // Quality metrics (if included)
+  if (includeMetrics) {
+    nodes.push({
+      id: 'QualityMetrics',
+      label: 'QualityMetrics',
+      shape: 'class',
+      attributes: [
+        `logicalConsistency: ${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%`,
+        `evidenceQuality: ${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%`,
+        `completeness: ${(thought.qualityMetrics.completeness * 100).toFixed(1)}%`,
+        `originality: ${(thought.qualityMetrics.originality * 100).toFixed(1)}%`,
+        `clarity: ${(thought.qualityMetrics.clarity * 100).toFixed(1)}%`,
+        `overallQuality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%`,
+      ],
+    });
+
+    edges.push({
+      source: 'MetaReasoning',
+      target: 'QualityMetrics',
+      label: 'monitors',
+      type: 'association',
+    });
+  }
+
+  // Resource allocation
+  nodes.push({
+    id: 'ResourceAllocation',
+    label: 'ResourceAllocation',
+    shape: 'class',
+    attributes: [
+      `timeSpent: ${thought.resourceAllocation.timeSpent}ms`,
+      `thoughtsRemaining: ${thought.resourceAllocation.thoughtsRemaining}`,
+      `complexity: ${thought.resourceAllocation.complexityLevel}`,
+      `urgency: ${thought.resourceAllocation.urgency}`,
+    ],
+  });
+
+  edges.push({
+    source: 'MetaReasoning',
+    target: 'ResourceAllocation',
+    label: 'manages',
+    type: 'composition',
+  });
+
+  return generateUmlDiagram(nodes, edges, {
+    title: 'MetaReasoning Structure',
+    direction: 'top to bottom',
+  });
+}
+
+/**
+ * Export meta-reasoning to JSON format
+ */
+function metaReasoningToJSON(thought: MetaReasoningThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+
+  const graph = createJsonGraph(
+    'MetaReasoning',
+    'Meta-reasoning analysis graph showing strategy evaluation and recommendations',
+    { includeMetrics, includeLayout: true }
+  );
+
+  // Add central meta-reasoning node
+  addNode(graph, {
+    id: 'meta',
+    label: 'Meta-Reasoning',
+    type: 'meta',
+    metadata: {
+      mode: thought.currentStrategy.mode,
+      sessionId: thought.sessionContext.sessionId,
+    },
+  });
+
+  // Add current strategy node
+  addNode(graph, {
+    id: 'current_strategy',
+    label: 'Current Strategy',
+    type: 'strategy',
+    metadata: {
+      mode: thought.currentStrategy.mode,
+      approach: thought.currentStrategy.approach,
+      thoughtsSpent: thought.currentStrategy.thoughtsSpent,
+      progressIndicatorCount: thought.currentStrategy.progressIndicators.length,
+      progressIndicators: thought.currentStrategy.progressIndicators,
+    },
+  });
+
+  addEdge(graph, {
+    id: 'e_meta_current',
+    source: 'meta',
+    target: 'current_strategy',
+    label: 'employs',
+    metadata: {
+      relationship: 'current',
+    },
+  });
+
+  // Add strategy evaluation node
+  addNode(graph, {
+    id: 'evaluation',
+    label: 'Strategy Evaluation',
+    type: 'evaluation',
+    metadata: {
+      effectiveness: thought.strategyEvaluation.effectiveness,
+      efficiency: thought.strategyEvaluation.efficiency,
+      confidence: thought.strategyEvaluation.confidence,
+      progressRate: thought.strategyEvaluation.progressRate,
+      qualityScore: thought.strategyEvaluation.qualityScore,
+      issueCount: thought.strategyEvaluation.issues.length,
+      strengthCount: thought.strategyEvaluation.strengths.length,
+      issues: thought.strategyEvaluation.issues,
+      strengths: thought.strategyEvaluation.strengths,
+    },
+  });
+
+  addEdge(graph, {
+    id: 'e_current_eval',
+    source: 'current_strategy',
+    target: 'evaluation',
+    label: 'evaluated_by',
+  });
+
+  // Add alternative strategies
+  thought.alternativeStrategies.forEach((alt, index) => {
+    addNode(graph, {
+      id: `alt_${index}`,
+      label: `Alternative: ${alt.mode}`,
+      type: 'alternative',
+      metadata: {
+        mode: alt.mode,
+        reasoning: alt.reasoning,
+        expectedBenefit: alt.expectedBenefit,
+        switchingCost: alt.switchingCost,
+        recommendationScore: alt.recommendationScore,
+      },
+    });
+
+    addEdge(graph, {
+      id: `e_meta_alt_${index}`,
+      source: 'meta',
+      target: `alt_${index}`,
+      label: 'considers',
+      metadata: {
+        score: alt.recommendationScore,
+      },
+    });
+  });
+
+  // Add recommendation node
+  addNode(graph, {
+    id: 'recommendation',
+    label: 'Recommendation',
+    type: 'recommendation',
+    metadata: {
+      action: thought.recommendation.action,
+      targetMode: thought.recommendation.targetMode,
+      justification: thought.recommendation.justification,
+      confidence: thought.recommendation.confidence,
+      expectedImprovement: thought.recommendation.expectedImprovement,
+    },
+  });
+
+  addEdge(graph, {
+    id: 'e_eval_rec',
+    source: 'evaluation',
+    target: 'recommendation',
+    label: 'produces',
+    metadata: {
+      confidence: thought.recommendation.confidence,
+    },
+  });
+
+  // Add quality metrics (if included)
+  if (includeMetrics) {
+    addNode(graph, {
+      id: 'quality',
+      label: 'Quality Metrics',
+      type: 'metrics',
+      metadata: {
+        logicalConsistency: thought.qualityMetrics.logicalConsistency,
+        evidenceQuality: thought.qualityMetrics.evidenceQuality,
+        completeness: thought.qualityMetrics.completeness,
+        originality: thought.qualityMetrics.originality,
+        clarity: thought.qualityMetrics.clarity,
+        overallQuality: thought.qualityMetrics.overallQuality,
+      },
+    });
+
+    addEdge(graph, {
+      id: 'e_meta_quality',
+      source: 'meta',
+      target: 'quality',
+      label: 'monitors',
+    });
+
+    // Add overall metrics
+    addMetric(graph, 'effectiveness', thought.strategyEvaluation.effectiveness);
+    addMetric(graph, 'overallQuality', thought.qualityMetrics.overallQuality);
+    addMetric(graph, 'recommendationConfidence', thought.recommendation.confidence);
+  }
+
+  // Add resource allocation node
+  addNode(graph, {
+    id: 'resources',
+    label: 'Resource Allocation',
+    type: 'resources',
+    metadata: {
+      timeSpent: thought.resourceAllocation.timeSpent,
+      thoughtsRemaining: thought.resourceAllocation.thoughtsRemaining,
+      complexityLevel: thought.resourceAllocation.complexityLevel,
+      urgency: thought.resourceAllocation.urgency,
+      recommendation: thought.resourceAllocation.recommendation,
+    },
+  });
+
+  addEdge(graph, {
+    id: 'e_meta_resources',
+    source: 'meta',
+    target: 'resources',
+    label: 'manages',
+  });
+
+  // Add session context metadata
+  graph.metadata = {
+    ...graph.metadata,
+    sessionContext: {
+      sessionId: thought.sessionContext.sessionId,
+      totalThoughts: thought.sessionContext.totalThoughts,
+      modeSwitches: thought.sessionContext.modeSwitches,
+      problemType: thought.sessionContext.problemType,
+      modesUsed: thought.sessionContext.modesUsed,
+      historicalEffectiveness: thought.sessionContext.historicalEffectiveness,
+    },
+  };
+
+  return serializeGraph(graph);
 }

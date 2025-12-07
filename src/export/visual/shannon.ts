@@ -38,6 +38,15 @@ import {
   renderProgressBar,
   renderBadge,
 } from './html-utils.js';
+import {
+  generateLinearFlowModelica,
+} from './modelica-utils.js';
+import {
+  generateActivityDiagram,
+} from './uml-utils.js';
+import {
+  generateLinearFlowJson,
+} from './json-utils.js';
 
 /**
  * Export Shannon stage flow diagram to visual format
@@ -60,6 +69,12 @@ export function exportShannonStageFlow(thought: ShannonThought, options: VisualE
       return shannonToTikZ(thought, options);
     case 'html':
       return shannonToHTML(thought, options);
+    case 'modelica':
+      return shannonToModelica(thought, options);
+    case 'uml':
+      return shannonToUML(thought, options);
+    case 'json':
+      return shannonToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -383,4 +398,79 @@ function shannonToHTML(thought: ShannonThought, options: VisualExportOptions): s
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export Shannon stage flow to Modelica format
+ */
+function shannonToModelica(thought: ShannonThought, options: VisualExportOptions): string {
+  const { modelicaPackageName, modelicaIncludeAnnotations = true, includeMetrics = true } = options;
+  const stageLabelsArray = stages.map(s => stageLabels[s]);
+
+  // Use the shared linear flow generator
+  let modelica = generateLinearFlowModelica(stageLabelsArray, stageLabels[thought.stage], {
+    packageName: modelicaPackageName || 'ShannonStageFlow',
+    includeAnnotations: modelicaIncludeAnnotations,
+    includeMetrics,
+  });
+
+  // Add uncertainty metric if available
+  if (includeMetrics && thought.uncertainty !== undefined) {
+    // Insert before package footer
+    const insertPoint = modelica.lastIndexOf('end ');
+    const metricsSection = `
+  // Shannon-specific metrics
+  parameter Real uncertainty = ${thought.uncertainty.toFixed(3)} "Current uncertainty level";
+
+`;
+    modelica = modelica.slice(0, insertPoint) + metricsSection + modelica.slice(insertPoint);
+  }
+
+  return modelica;
+}
+
+/**
+ * Export Shannon stage flow to UML/PlantUML format
+ */
+function shannonToUML(thought: ShannonThought, options: VisualExportOptions): string {
+  const { umlTheme, umlDirection } = options;
+  const stageLabelsArray = stages.map(s => stageLabels[s]);
+
+  return generateActivityDiagram(stageLabelsArray, stageLabels[thought.stage], {
+    title: 'Shannon Stage Flow',
+    theme: umlTheme,
+    direction: umlDirection,
+  });
+}
+
+/**
+ * Export Shannon stage flow to JSON format
+ */
+function shannonToJSON(thought: ShannonThought, options: VisualExportOptions): string {
+  const { jsonPrettyPrint = true, jsonIndent = 2, includeMetrics = true } = options;
+  const stageLabelsArray = stages.map(s => stageLabels[s]);
+
+  let json = generateLinearFlowJson('Shannon Stage Flow', 'shannon', stageLabelsArray, stageLabels[thought.stage], {
+    prettyPrint: jsonPrettyPrint,
+    indent: jsonIndent,
+    includeMetrics,
+  });
+
+  // Parse, add custom fields, and re-serialize
+  if (includeMetrics) {
+    const graph = JSON.parse(json);
+    graph.metadata.mode = 'shannon';
+    graph.metrics = graph.metrics || {};
+    graph.metrics.uncertainty = thought.uncertainty;
+    graph.metrics.stage = thought.stage;
+    if (thought.dependencies) {
+      graph.metrics.dependencyCount = thought.dependencies.length;
+    }
+    if (thought.assumptions) {
+      graph.metrics.assumptionCount = thought.assumptions.length;
+    }
+    json = JSON.stringify(graph, null, jsonPrettyPrint !== false ? jsonIndent : 0);
+  }
+
+  return json;
 }

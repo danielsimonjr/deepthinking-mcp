@@ -23,6 +23,22 @@ import {
   renderTable,
   renderProgressBar,
 } from './html-utils.js';
+import {
+  sanitizeModelicaId,
+  escapeModelicaString,
+} from './modelica-utils.js';
+import {
+  generateUmlDiagram,
+  type UmlNode,
+  type UmlEdge,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Export proof decomposition to visual format
@@ -52,6 +68,12 @@ export function exportProofDecomposition(
       return proofDecompositionToSVG(decomposition, colorScheme, includeLabels, includeMetrics, svgWidth, svgHeight, nodeSpacing);
     case 'html':
       return proofDecompositionToHTML(decomposition, options);
+    case 'modelica':
+      return proofDecompositionToModelica(decomposition, options);
+    case 'uml':
+      return proofDecompositionToUML(decomposition, options);
+    case 'json':
+      return proofDecompositionToJSON(decomposition, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -1047,4 +1069,387 @@ function proofDecompositionToHTML(
 
   html += generateHTMLFooter(true);
   return html;
+}
+
+// ============================================================================
+// Modelica Export Functions
+// ============================================================================
+
+/**
+ * Convert proof decomposition to Modelica format
+ */
+function proofDecompositionToModelica(
+  decomposition: ProofDecomposition,
+  options: VisualExportOptions
+): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const packageName = 'ProofDecomposition';
+
+  let modelica = `package ${packageName}\n`;
+  modelica += `  "Proof decomposition structure for: ${escapeModelicaString(decomposition.theorem || 'theorem')}"\n\n`;
+
+  // Add theorem record
+  if (decomposition.theorem) {
+    modelica += `  record Theorem "Main theorem being proved"\n`;
+    modelica += `    String statement = "${escapeModelicaString(decomposition.theorem)}";\n`;
+    modelica += `    Real completeness = ${decomposition.completeness};\n`;
+    modelica += `    String rigorLevel = "${escapeModelicaString(decomposition.rigorLevel)}";\n`;
+    modelica += `    Integer atomCount = ${decomposition.atomCount};\n`;
+    modelica += `    Integer maxDepth = ${decomposition.maxDependencyDepth};\n`;
+    modelica += `  end Theorem;\n\n`;
+  }
+
+  // Add atomic statement record
+  modelica += `  record AtomicStatement "Individual statement in the proof"\n`;
+  modelica += `    String id "Unique identifier";\n`;
+  modelica += `    String statementType "Type: axiom, hypothesis, derived, lemma, conclusion, definition";\n`;
+  modelica += `    String statement "The mathematical statement";\n`;
+  modelica += `  end AtomicStatement;\n\n`;
+
+  // Group atoms by type
+  const axioms = decomposition.atoms.filter((a) => a.type === 'axiom');
+  const hypotheses = decomposition.atoms.filter((a) => a.type === 'hypothesis');
+  const lemmas = decomposition.atoms.filter((a) => a.type === 'lemma');
+  const derived = decomposition.atoms.filter((a) => a.type === 'derived');
+  const conclusions = decomposition.atoms.filter((a) => a.type === 'conclusion');
+
+  // Axioms
+  if (axioms.length > 0) {
+    modelica += `  // Axioms (${axioms.length})\n`;
+    for (const atom of axioms) {
+      const atomId = sanitizeModelicaId(atom.id);
+      const statement = includeLabels ? escapeModelicaString(atom.statement) : atom.id;
+      modelica += `  AtomicStatement ${atomId}(\n`;
+      modelica += `    id="${escapeModelicaString(atom.id)}",\n`;
+      modelica += `    statementType="${atom.type}",\n`;
+      modelica += `    statement="${statement}"\n`;
+      modelica += `  );\n`;
+    }
+    modelica += '\n';
+  }
+
+  // Hypotheses
+  if (hypotheses.length > 0) {
+    modelica += `  // Hypotheses (${hypotheses.length})\n`;
+    for (const atom of hypotheses) {
+      const atomId = sanitizeModelicaId(atom.id);
+      const statement = includeLabels ? escapeModelicaString(atom.statement) : atom.id;
+      modelica += `  AtomicStatement ${atomId}(\n`;
+      modelica += `    id="${escapeModelicaString(atom.id)}",\n`;
+      modelica += `    statementType="${atom.type}",\n`;
+      modelica += `    statement="${statement}"\n`;
+      modelica += `  );\n`;
+    }
+    modelica += '\n';
+  }
+
+  // Lemmas
+  if (lemmas.length > 0) {
+    modelica += `  // Lemmas (${lemmas.length})\n`;
+    for (const atom of lemmas) {
+      const atomId = sanitizeModelicaId(atom.id);
+      const statement = includeLabels ? escapeModelicaString(atom.statement) : atom.id;
+      modelica += `  AtomicStatement ${atomId}(\n`;
+      modelica += `    id="${escapeModelicaString(atom.id)}",\n`;
+      modelica += `    statementType="${atom.type}",\n`;
+      modelica += `    statement="${statement}"\n`;
+      modelica += `  );\n`;
+    }
+    modelica += '\n';
+  }
+
+  // Derived statements
+  if (derived.length > 0) {
+    modelica += `  // Derived Statements (${derived.length})\n`;
+    for (const atom of derived) {
+      const atomId = sanitizeModelicaId(atom.id);
+      const statement = includeLabels ? escapeModelicaString(atom.statement) : atom.id;
+      modelica += `  AtomicStatement ${atomId}(\n`;
+      modelica += `    id="${escapeModelicaString(atom.id)}",\n`;
+      modelica += `    statementType="${atom.type}",\n`;
+      modelica += `    statement="${statement}"\n`;
+      modelica += `  );\n`;
+    }
+    modelica += '\n';
+  }
+
+  // Conclusions
+  if (conclusions.length > 0) {
+    modelica += `  // Conclusions (${conclusions.length})\n`;
+    for (const atom of conclusions) {
+      const atomId = sanitizeModelicaId(atom.id);
+      const statement = includeLabels ? escapeModelicaString(atom.statement) : atom.id;
+      modelica += `  AtomicStatement ${atomId}(\n`;
+      modelica += `    id="${escapeModelicaString(atom.id)}",\n`;
+      modelica += `    statementType="${atom.type}",\n`;
+      modelica += `    statement="${statement}"\n`;
+      modelica += `  );\n`;
+    }
+    modelica += '\n';
+  }
+
+  // Add dependency information as comments
+  if (decomposition.dependencies && decomposition.dependencies.edges && decomposition.dependencies.edges.length > 0) {
+    modelica += `  // Dependencies (${decomposition.dependencies.edges.length} edges)\n`;
+    modelica += `  /* Proof structure:\n`;
+    for (const edge of decomposition.dependencies.edges) {
+      const rule = edge.inferenceRule ? ` [${edge.inferenceRule}]` : '';
+      modelica += `   * ${edge.from} -> ${edge.to}${rule}\n`;
+    }
+    modelica += `   */\n\n`;
+  }
+
+  // Add gaps as comments if present
+  if (decomposition.gaps && decomposition.gaps.length > 0) {
+    modelica += `  // Identified Gaps (${decomposition.gaps.length})\n`;
+    modelica += `  /* Gaps in proof:\n`;
+    for (const gap of decomposition.gaps) {
+      modelica += `   * [${gap.severity}] ${gap.type}: ${gap.description}\n`;
+      modelica += `   *   Location: ${gap.location.from} -> ${gap.location.to}\n`;
+      if (gap.suggestedFix) {
+        modelica += `   *   Fix: ${gap.suggestedFix}\n`;
+      }
+    }
+    modelica += `   */\n\n`;
+  }
+
+  // Add metrics as annotation
+  if (includeMetrics) {
+    modelica += `  annotation(\n`;
+    modelica += `    Documentation(info="<html>\n`;
+    modelica += `      <h3>Proof Metrics</h3>\n`;
+    modelica += `      <ul>\n`;
+    modelica += `        <li>Completeness: ${(decomposition.completeness * 100).toFixed(0)}%</li>\n`;
+    modelica += `        <li>Rigor Level: ${decomposition.rigorLevel}</li>\n`;
+    modelica += `        <li>Atom Count: ${decomposition.atomCount}</li>\n`;
+    modelica += `        <li>Max Dependency Depth: ${decomposition.maxDependencyDepth}</li>\n`;
+    modelica += `      </ul>\n`;
+    modelica += `    </html>")\n`;
+    modelica += `  );\n`;
+  }
+
+  modelica += `end ${packageName};\n`;
+  return modelica;
+}
+
+// ============================================================================
+// UML Export Functions
+// ============================================================================
+
+/**
+ * Convert proof decomposition to UML format
+ */
+function proofDecompositionToUML(
+  decomposition: ProofDecomposition,
+  options: VisualExportOptions
+): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  const nodes: UmlNode[] = [];
+  const edges: UmlEdge[] = [];
+
+  // Create nodes for all atoms
+  for (const atom of decomposition.atoms) {
+    const label = includeLabels
+      ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? '...' : '')
+      : atom.id;
+
+    // Determine stereotype based on type
+    let stereotype = '';
+    switch (atom.type) {
+      case 'axiom':
+        stereotype = '«axiom»';
+        break;
+      case 'hypothesis':
+        stereotype = '«hypothesis»';
+        break;
+      case 'lemma':
+        stereotype = '«lemma»';
+        break;
+      case 'conclusion':
+        stereotype = '«conclusion»';
+        break;
+      case 'definition':
+        stereotype = '«definition»';
+        break;
+      default:
+        stereotype = '«derived»';
+    }
+
+    nodes.push({
+      id: atom.id,
+      label: `${stereotype}\\n${label}`,
+      shape: 'class', // Use class notation
+      stereotype: atom.type,
+    });
+  }
+
+  // Create edges from dependencies
+  if (decomposition.dependencies && decomposition.dependencies.edges) {
+    for (const edge of decomposition.dependencies.edges) {
+      edges.push({
+        source: edge.from,
+        target: edge.to,
+        label: edge.inferenceRule || 'derives',
+        type: 'dependency', // UML dependency arrow
+      });
+    }
+  }
+
+  // Add gap edges
+  if (decomposition.gaps && decomposition.gaps.length > 0) {
+    for (const gap of decomposition.gaps) {
+      edges.push({
+        source: gap.location.from,
+        target: gap.location.to,
+        label: `GAP: ${gap.description.substring(0, 20)}`,
+        type: 'dashed',
+      });
+    }
+  }
+
+  // Generate UML diagram
+  let uml = generateUmlDiagram(nodes, edges, {
+    title: `Proof Structure: ${decomposition.theorem?.substring(0, 50) || 'Proof Decomposition'}`,
+    direction: 'top to bottom',
+  });
+
+  // Add notes for metrics
+  if (includeMetrics) {
+    uml += '\n\nnote right of diagram\n';
+    uml += '  **Proof Metrics**\n';
+    uml += `  Completeness: ${(decomposition.completeness * 100).toFixed(0)}%\n`;
+    uml += `  Rigor: ${decomposition.rigorLevel}\n`;
+    uml += `  Atoms: ${decomposition.atomCount}\n`;
+    uml += `  Depth: ${decomposition.maxDependencyDepth}\n`;
+    uml += 'end note\n';
+  }
+
+  // Add legend for statement types
+  uml += '\nlegend right\n';
+  uml += '  |= Type |= Symbol |\n';
+  uml += '  | Axiom | «axiom» |\n';
+  uml += '  | Hypothesis | «hypothesis» |\n';
+  uml += '  | Lemma | «lemma» |\n';
+  uml += '  | Derived | «derived» |\n';
+  uml += '  | Conclusion | «conclusion» |\n';
+  uml += 'endlegend\n';
+
+  return uml;
+}
+
+// ============================================================================
+// JSON Export Functions
+// ============================================================================
+
+/**
+ * Convert proof decomposition to JSON format
+ */
+function proofDecompositionToJSON(
+  decomposition: ProofDecomposition,
+  options: VisualExportOptions
+): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  // Create graph structure
+  const graph = createJsonGraph(
+    decomposition.theorem?.substring(0, 50) || 'Proof Decomposition',
+    'mathematics',
+    { includeMetrics, includeLayout: true }
+  );
+
+  // Add metadata to graph.metadata
+  if (decomposition.theorem) {
+    graph.metadata.theorem = decomposition.theorem;
+    graph.metadata.completeness = decomposition.completeness;
+    graph.metadata.rigorLevel = decomposition.rigorLevel;
+    graph.metadata.atomCount = decomposition.atomCount;
+    graph.metadata.maxDependencyDepth = decomposition.maxDependencyDepth;
+  }
+
+  // Add nodes for all atoms
+  for (const atom of decomposition.atoms) {
+    const label = includeLabels ? atom.statement : atom.id;
+    addNode(graph, {
+      id: atom.id,
+      label,
+      type: atom.type,
+      shape: atom.type === 'conclusion' ? 'diamond' : atom.type === 'axiom' ? 'stadium' : 'rectangle',
+      metadata: {
+        statement: atom.statement,
+        derivedFrom: atom.derivedFrom || [],
+        usedInferenceRule: atom.usedInferenceRule || null,
+      },
+    });
+  }
+
+  // Add edges from dependencies
+  if (decomposition.dependencies && decomposition.dependencies.edges) {
+    let edgeId = 0;
+    for (const edge of decomposition.dependencies.edges) {
+      addEdge(graph, {
+        id: `edge_${edgeId++}`,
+        source: edge.from,
+        target: edge.to,
+        label: edge.inferenceRule,
+        type: 'inference',
+        directed: true,
+        style: 'solid',
+      });
+    }
+  }
+
+  // Add gap edges
+  if (decomposition.gaps && decomposition.gaps.length > 0) {
+    let gapId = 0;
+    for (const gap of decomposition.gaps) {
+      addEdge(graph, {
+        id: `gap_${gapId++}`,
+        source: gap.location.from,
+        target: gap.location.to,
+        label: `GAP: ${gap.description.substring(0, 30)}`,
+        type: 'gap',
+        directed: true,
+        style: 'dashed',
+        metadata: {
+          gapType: gap.type,
+          severity: gap.severity,
+          description: gap.description,
+          suggestedFix: gap.suggestedFix || null,
+        },
+      });
+    }
+  }
+
+  // Add metrics
+  if (includeMetrics) {
+    addMetric(graph, 'completeness', decomposition.completeness);
+    addMetric(graph, 'rigorLevel', decomposition.rigorLevel);
+    addMetric(graph, 'atomCount', decomposition.atomCount);
+    addMetric(graph, 'maxDependencyDepth', decomposition.maxDependencyDepth);
+  }
+
+  // Add implicit assumptions to metadata
+  if (decomposition.implicitAssumptions && decomposition.implicitAssumptions.length > 0) {
+    graph.metadata.implicitAssumptions = decomposition.implicitAssumptions.map((assumption) => ({
+      type: assumption.type,
+      statement: assumption.statement,
+      shouldBeExplicit: assumption.shouldBeExplicit || false,
+      suggestedFormulation: assumption.suggestedFormulation || null,
+    }));
+  }
+
+  // Add gaps summary to metadata
+  if (decomposition.gaps && decomposition.gaps.length > 0) {
+    graph.metadata.gaps = decomposition.gaps.map((gap) => ({
+      id: gap.id,
+      type: gap.type,
+      severity: gap.severity,
+      description: gap.description,
+      location: gap.location,
+      suggestedFix: gap.suggestedFix || null,
+    }));
+  }
+
+  return serializeGraph(graph, { prettyPrint: true });
 }
