@@ -18,7 +18,7 @@ Proof decomposition is the systematic breakdown of mathematical proofs into atom
 - **Sprint 1**: Core type system and dependency graph infrastructure
 - **Sprint 2**: Proof decomposition engine and new thought types
 - **Sprint 3**: Inconsistency detection and analysis services
-- **Sprint 4**: MCP tools, visual exports, and integration
+- **Sprint 4**: Existing tool enhancement, visual exports, and integration
 
 **Total Effort**: 60-80 developer hours across 4 sprints
 
@@ -958,102 +958,148 @@ Test full consistency analysis workflows:
 
 ---
 
-### Sprint 4: MCP Tools, Visual Exports & Release (Week 4)
+### Sprint 4: Existing Tool Enhancement, Visual Exports & Release (Week 4)
 **Effort**: 14-18 hours | **Result**: Production-ready v7.0.0 with full integration
 
-**Overview**: Create MCP tools for proof analysis, visual exports for proof decomposition, documentation, and v7.0.0 release.
+**Overview**: Enhance the existing `deepthinking` tool to support proof decomposition thought types, add visual exports, and release v7.0.0.
 
 **Key Deliverables**:
-1. Three new MCP tools for proof analysis
-2. Visual export for proof decomposition (Mermaid, DOT, ASCII)
-3. Zod validators for new types
-4. Comprehensive documentation
-5. v7.0.0 release
+1. Extended `deepthinking` tool schema with proof decomposition fields
+2. Updated handler to invoke `MathematicsReasoningEngine` for decomposition thought types
+3. Visual export for proof decomposition (Mermaid, DOT, ASCII)
+4. Zod validators for new types
+5. Comprehensive documentation
+6. v7.0.0 release
+
+**Design Principle**: All proof decomposition functionality works through the **existing `deepthinking` tool** using the new `MathematicsThoughtType` values. No new MCP tools are created.
 
 **Tasks**:
 
-#### Task 4.1: Create MCP Tool: decompose_proof (2 hours)
-**File**: `src/tools/proof-tools.ts`
+#### Task 4.1: Extend deepthinking Tool Schema (2 hours)
+**File**: `src/tools/thinking.ts`
+
+Add new optional input fields for proof decomposition:
 
 ```typescript
-export const decomposeProofSchema = {
-  name: "decompose_proof",
-  description: "Decompose a mathematical proof into atomic components and analyze its structure",
-  inputSchema: {
-    type: "object",
-    properties: {
-      sessionId: { type: "string", description: "Session ID" },
-      proof: { type: "string", description: "The proof text or LaTeX" },
-      theorem: { type: "string", description: "The theorem being proved" },
-      hypotheses: { type: "array", items: { type: "string" } },
-      analysisDepth: {
-        type: "string",
-        enum: ["shallow", "standard", "deep"],
-        default: "standard"
-      },
-      includeVisualization: { type: "boolean", default: true }
-    },
-    required: ["sessionId", "proof"]
-  }
-};
+// Add to ThinkingToolInput interface
+export interface ThinkingToolInput {
+  // ... existing fields ...
+
+  // NEW: Proof Decomposition Fields (for mathematics mode)
+  proofSteps?: ProofStepInput[];      // Structured proof steps
+  theorem?: string;                    // Theorem being proved
+  hypotheses?: string[];               // Starting hypotheses
+  analysisDepth?: 'shallow' | 'standard' | 'deep';
+  includeConsistencyCheck?: boolean;   // Run inconsistency detection
+  traceAssumptions?: boolean;          // Include assumption chains
+}
+
+// Proof step input structure
+export interface ProofStepInput {
+  stepNumber: number;
+  statement: string;
+  justification?: string;
+  latex?: string;
+  referencesSteps?: number[];
+}
 ```
 
-#### Task 4.2: Create MCP Tool: check_consistency (2 hours)
-**File**: `src/tools/proof-tools.ts`
-
+Update JSON schema for `deepthinking` tool:
 ```typescript
-export const checkConsistencySchema = {
-  name: "check_consistency",
-  description: "Check a set of mathematical statements for logical consistency and contradictions",
-  inputSchema: {
+// Add to inputSchema.properties
+proofSteps: {
+  type: "array",
+  description: "Structured proof steps for decomposition analysis",
+  items: {
     type: "object",
     properties: {
-      sessionId: { type: "string" },
-      statements: { type: "array", items: { type: "string" } },
-      checkTypes: {
-        type: "array",
-        items: {
-          type: "string",
-          enum: ["contradiction", "circular", "gaps", "assumptions", "all"]
-        },
-        default: ["all"]
-      },
-      generateReport: { type: "boolean", default: true }
+      stepNumber: { type: "number" },
+      statement: { type: "string" },
+      justification: { type: "string" },
+      latex: { type: "string" },
+      referencesSteps: { type: "array", items: { type: "number" } }
     },
-    required: ["sessionId", "statements"]
+    required: ["stepNumber", "statement"]
   }
-};
+},
+theorem: {
+  type: "string",
+  description: "The theorem being proved (for proof decomposition)"
+},
+hypotheses: {
+  type: "array",
+  items: { type: "string" },
+  description: "Starting hypotheses for the proof"
+},
+analysisDepth: {
+  type: "string",
+  enum: ["shallow", "standard", "deep"],
+  description: "Depth of proof analysis"
+},
+includeConsistencyCheck: {
+  type: "boolean",
+  description: "Whether to run inconsistency detection"
+},
+traceAssumptions: {
+  type: "boolean",
+  description: "Whether to include assumption chain analysis"
+}
 ```
 
-#### Task 4.3: Create MCP Tool: trace_assumptions (1.5 hours)
-**File**: `src/tools/proof-tools.ts`
-
-```typescript
-export const traceAssumptionsSchema = {
-  name: "trace_assumptions",
-  description: "Trace a mathematical conclusion back to its foundational assumptions",
-  inputSchema: {
-    type: "object",
-    properties: {
-      sessionId: { type: "string" },
-      conclusion: { type: "string" },
-      showFullChain: { type: "boolean", default: true },
-      findMinimal: { type: "boolean", default: false }
-    },
-    required: ["sessionId", "conclusion"]
-  }
-};
-```
-
-#### Task 4.4: Register Tools in index.ts (1.5 hours)
+#### Task 4.2: Update deepthinking Handler for Mathematics Mode (2.5 hours)
 **File**: `src/index.ts`
 
-Add handlers for new proof analysis tools:
-- `decompose_proof` handler
-- `check_consistency` handler
-- `trace_assumptions` handler
+Modify the `deepthinking` tool handler to invoke `MathematicsReasoningEngine` when:
+- `mode === 'mathematics'` AND
+- `thoughtType` is one of: `proof_decomposition`, `dependency_analysis`, `consistency_check`, `gap_identification`, `assumption_trace`
 
-#### Task 4.5: Create Visual Export for Proof Decomposition (3 hours)
+```typescript
+// In deepthinking handler, after creating the thought:
+
+if (input.mode === 'mathematics' && isDecompositionThoughtType(input.thoughtType)) {
+  const mathEngine = new MathematicsReasoningEngine();
+
+  // Build analysis input from tool input
+  const analysisInput: ProofAnalysisInput = {
+    proof: input.proofSteps || input.thought,
+    theorem: input.theorem,
+    hypotheses: input.hypotheses,
+    analysisDepth: input.analysisDepth || 'standard',
+  };
+
+  // Run analysis based on thought type
+  const analysisResult = mathEngine.analyzeForThoughtType(
+    input.thoughtType,
+    analysisInput
+  );
+
+  // Enrich the thought with analysis results
+  thought.decomposition = analysisResult.decomposition;
+  thought.consistencyReport = analysisResult.consistencyReport;
+  thought.gapAnalysis = analysisResult.gapAnalysis;
+  thought.assumptionAnalysis = analysisResult.assumptionAnalysis;
+}
+
+function isDecompositionThoughtType(thoughtType: string): boolean {
+  return [
+    'proof_decomposition',
+    'dependency_analysis',
+    'consistency_check',
+    'gap_identification',
+    'assumption_trace'
+  ].includes(thoughtType);
+}
+```
+
+#### Task 4.3: Update ThoughtFactory for Enriched Mathematics Thoughts (1.5 hours)
+**File**: `src/services/ThoughtFactory.ts`
+
+Ensure ThoughtFactory properly handles the new fields:
+- Accept `proofSteps`, `theorem`, `hypotheses` from input
+- Pass analysis results to thought structure
+- Validate decomposition fields
+
+#### Task 4.4: Create Visual Export for Proof Decomposition (3 hours)
 **File**: `src/export/visual/proof-decomposition.ts`
 
 ```typescript
@@ -1087,7 +1133,7 @@ Visual elements:
 - Gaps: Dashed edges (red)
 - Circular paths: Red highlighted cycles
 
-#### Task 4.6: Create Zod Validators for Proof Types (2 hours)
+#### Task 4.5: Create Zod Validators for Proof Types (2 hours)
 **File**: `src/validation/validators/modes/mathematics-extended.ts`
 
 Validators for:
@@ -1095,25 +1141,49 @@ Validators for:
 - `DependencyGraph`
 - `ProofDecomposition`
 - `ConsistencyReport`
-- `ProofAnalysisInput`
+- `ProofStepInput`
 
-#### Task 4.7: Update Documentation (2 hours)
+#### Task 4.6: Update Documentation (2 hours)
 
 **Files**:
-- `docs/modes/MATHEMATICS.md` - Update with decomposition features
-- `docs/tools/PROOF_ANALYSIS.md` - New tools documentation
-- `README.md` - Update feature list
+- `docs/modes/MATHEMATICS.md` - Update with decomposition features and new thought types
+- `README.md` - Update feature list with proof decomposition capabilities
 - `CHANGELOG.md` - Add v7.0.0 entry
 
-#### Task 4.8: Integration Tests for MCP Tools (1.5 hours)
-**File**: `tests/integration/tools/proof-tools.test.ts`
+#### Task 4.7: Integration Tests for Mathematics Mode Decomposition (2 hours)
+**File**: `tests/integration/mathematics/proof-decomposition.test.ts`
 
-Test complete tool workflows:
-- decompose_proof with valid input
-- check_consistency finding issues
-- trace_assumptions producing chains
+Test complete workflows using the existing `deepthinking` tool:
+- `deepthinking` with `mode: "mathematics"`, `thoughtType: "proof_decomposition"`
+- `deepthinking` with `mode: "mathematics"`, `thoughtType: "consistency_check"`
+- `deepthinking` with `mode: "mathematics"`, `thoughtType: "assumption_trace"`
+- Verify decomposition, consistencyReport, and gapAnalysis fields populated
 
-#### Task 4.9: Release Preparation (1.5 hours)
+Example test case:
+```typescript
+it('should decompose a proof when using proof_decomposition thought type', async () => {
+  const result = await callDeepthinking({
+    mode: 'mathematics',
+    thoughtType: 'proof_decomposition',
+    thought: 'Analyzing proof structure',
+    proofSteps: [
+      { stepNumber: 1, statement: 'Assume √2 is rational' },
+      { stepNumber: 2, statement: '√2 = p/q for coprime p, q' },
+      // ...
+    ],
+    theorem: '√2 is irrational',
+    thoughtNumber: 1,
+    totalThoughts: 3,
+    nextThoughtNeeded: true
+  });
+
+  expect(result.decomposition).toBeDefined();
+  expect(result.decomposition.atoms.length).toBeGreaterThan(0);
+  expect(result.consistencyReport).toBeDefined();
+});
+```
+
+#### Task 4.8: Release Preparation (1.5 hours)
 
 - Run full test suite
 - Run typecheck
@@ -1122,7 +1192,9 @@ Test complete tool workflows:
 - Create release notes
 
 **Sprint 4 Success Criteria**:
-- All 3 MCP tools working correctly
+- `deepthinking` tool accepts new proof decomposition fields
+- Mathematics mode with decomposition thought types triggers analysis
+- Thoughts are enriched with decomposition, consistencyReport, gapAnalysis
 - Visual exports generating valid Mermaid/DOT/ASCII
 - Zod validators passing all test cases
 - Documentation complete and accurate
@@ -1130,14 +1202,14 @@ Test complete tool workflows:
 - 50+ new tests passing
 
 **Files Created**:
-- `src/tools/proof-tools.ts`
 - `src/export/visual/proof-decomposition.ts`
 - `src/validation/validators/modes/mathematics-extended.ts`
-- `docs/tools/PROOF_ANALYSIS.md`
-- `tests/integration/tools/proof-tools.test.ts`
+- `tests/integration/mathematics/proof-decomposition.test.ts`
 
 **Files Modified**:
-- `src/index.ts`
+- `src/tools/thinking.ts` (extended schema)
+- `src/index.ts` (handler logic)
+- `src/services/ThoughtFactory.ts`
 - `src/services/ExportService.ts`
 - `src/export/visual/index.ts`
 - `docs/modes/MATHEMATICS.md`
@@ -1154,7 +1226,7 @@ Test complete tool workflows:
 | 1 | 1 | 14-18h | Type system + DependencyGraphBuilder | 12 test files |
 | 2 | 2 | 16-20h | ProofDecomposer + GapAnalyzer | 10 test files |
 | 3 | 3 | 16-20h | InconsistencyDetector + MathematicsReasoningEngine | 12 test files |
-| 4 | 4 | 14-18h | MCP Tools + Visual Exports + v7.0.0 | 8 test files |
+| 4 | 4 | 14-18h | Tool Enhancement + Visual Exports + v7.0.0 | 8 test files |
 | **Total** | **4 weeks** | **60-76h** | **v7.0.0 production** | **42 test files** |
 
 ---
@@ -1165,17 +1237,34 @@ Test complete tool workflows:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    MCP Tools Layer                               │
-│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐    │
-│  │ decompose_proof │ │check_consistency│ │trace_assumptions│    │
-│  └────────┬────────┘ └────────┬────────┘ └────────┬────────┘    │
-└───────────┼────────────────────┼────────────────────┼────────────┘
-            │                    │                    │
-            ▼                    ▼                    ▼
+│                    Existing MCP Tool                             │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │                   deepthinking                           │    │
+│  │                                                          │    │
+│  │  mode: "mathematics"                                     │    │
+│  │  thoughtType: "proof_decomposition" | "consistency_check"│    │
+│  │               "dependency_analysis" | "gap_identification"│    │
+│  │               "assumption_trace"                         │    │
+│  │                                                          │    │
+│  │  + proofSteps, theorem, hypotheses, analysisDepth        │    │
+│  └────────────────────────────┬─────────────────────────────┘    │
+└───────────────────────────────┼──────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     index.ts Handler                             │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │  if (mode === 'mathematics' &&                           │    │
+│  │      isDecompositionThoughtType(thoughtType))            │    │
+│  │    → invoke MathematicsReasoningEngine                   │    │
+│  └────────────────────────────┬─────────────────────────────┘    │
+└───────────────────────────────┼──────────────────────────────────┘
+                                │
+                                ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │              MathematicsReasoningEngine                          │
 │  ┌─────────────────────────────────────────────────────────┐    │
-│  │                   analyzeProof()                         │    │
+│  │            analyzeForThoughtType(thoughtType, input)     │    │
 │  └─────────────────────────────────────────────────────────┘    │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
@@ -1200,9 +1289,31 @@ Test complete tool workflows:
 ### Data Flow
 
 ```
-Input: Proof Text / ProofStep[]
+User calls deepthinking tool:
+{
+  mode: "mathematics",
+  thoughtType: "proof_decomposition",
+  thought: "Analyzing proof...",
+  proofSteps: [...],
+  theorem: "√2 is irrational"
+}
           │
           ▼
+    ┌───────────────┐
+    │  index.ts     │
+    │  Handler      │
+    │               │
+    │ Detects math  │
+    │ + decomp type │
+    └───────┬───────┘
+            │
+            ▼
+    ┌───────────────┐
+    │Mathematics    │
+    │ReasoningEngine│
+    └───────┬───────┘
+            │
+            ▼
     ┌───────────────┐
     │ ProofDecomposer│
     │               │
@@ -1243,32 +1354,114 @@ Input: Proof Text / ProofStep[]
     │ • Gaps        │
     │ • Assumptions │
     │ • Suggestions │
+    └───────┬───────┘
+            │
+            ▼
+    ┌───────────────┐
+    │ Enriched      │
+    │ Mathematics   │
+    │ Thought       │
+    │               │
+    │ thought.      │
+    │  decomposition│
+    │  consistency  │
+    │  Report       │
+    │  gapAnalysis  │
+    └───────┬───────┘
+            │
+            ▼
+    ┌───────────────┐
+    │ Returned to   │
+    │ Session &     │
+    │ User          │
     └───────────────┘
 ```
 
 ---
 
-## Example Output
+## Example Usage
 
-### Input
+### Input: Calling deepthinking Tool
 
+```json
+{
+  "mode": "mathematics",
+  "thoughtType": "proof_decomposition",
+  "thought": "Analyzing the classic irrationality proof for √2",
+  "thoughtNumber": 1,
+  "totalThoughts": 3,
+  "nextThoughtNeeded": true,
+  "theorem": "√2 is irrational",
+  "hypotheses": ["√2 is rational"],
+  "proofSteps": [
+    { "stepNumber": 1, "statement": "Assume √2 is rational" },
+    { "stepNumber": 2, "statement": "√2 = p/q for coprime integers p, q", "referencesSteps": [1] },
+    { "stepNumber": 3, "statement": "Squaring: 2 = p²/q²", "referencesSteps": [2] },
+    { "stepNumber": 4, "statement": "Therefore: 2q² = p²", "referencesSteps": [3] },
+    { "stepNumber": 5, "statement": "So p² is even, thus p is even", "referencesSteps": [4] },
+    { "stepNumber": 6, "statement": "Let p = 2k for some integer k", "referencesSteps": [5] },
+    { "stepNumber": 7, "statement": "Then 2q² = 4k², so q² = 2k²", "referencesSteps": [4, 6] },
+    { "stepNumber": 8, "statement": "So q² is even, thus q is even", "referencesSteps": [7] },
+    { "stepNumber": 9, "statement": "But p and q both even contradicts coprimality", "referencesSteps": [5, 8, 2] },
+    { "stepNumber": 10, "statement": "Therefore √2 is irrational", "referencesSteps": [1, 9] }
+  ],
+  "analysisDepth": "standard",
+  "includeConsistencyCheck": true,
+  "traceAssumptions": true
+}
 ```
-Theorem: √2 is irrational
 
-Proof:
-1. Assume √2 is rational
-2. Then √2 = p/q for coprime integers p, q
-3. Squaring: 2 = p²/q²
-4. Therefore: 2q² = p²
-5. So p² is even, thus p is even
-6. Let p = 2k for some integer k
-7. Then 2q² = 4k², so q² = 2k²
-8. So q² is even, thus q is even
-9. But p and q both even contradicts coprimality
-10. Therefore √2 is irrational
+### Output: Enriched MathematicsThought
+
+The `deepthinking` tool returns the thought with analysis fields populated:
+
+```typescript
+{
+  id: "uuid-here",
+  sessionId: "session-uuid",
+  mode: "mathematics",
+  thoughtType: "proof_decomposition",
+  content: "Analyzing the classic irrationality proof for √2",
+  thoughtNumber: 1,
+  totalThoughts: 3,
+  nextThoughtNeeded: true,
+
+  // ENRICHED FIELDS from MathematicsReasoningEngine:
+  decomposition: {
+    id: "decomp-uuid",
+    theorem: "√2 is irrational",
+    atoms: [ /* 10 AtomicStatements */ ],
+    dependencies: { /* DependencyGraph */ },
+    completeness: 0.95,
+    // ...
+  },
+  consistencyReport: {
+    isConsistent: true,
+    overallScore: 1.0,
+    inconsistencies: [],
+    circularReasoning: [],
+    summary: "No contradictions in reasoning (contradiction is intentional for proof technique)"
+  },
+  gapAnalysis: {
+    completeness: 0.95,
+    gaps: [
+      {
+        type: "implicit_assumption",
+        location: { from: "step-4", to: "step-5" },
+        description: "Missing: Explicit lemma that square of odd is odd",
+        severity: "minor"
+      }
+    ]
+  },
+  assumptionAnalysis: {
+    explicitAssumptions: ["√2 is rational"],
+    implicitAssumptions: ["Properties of even/odd integers"],
+    // ...
+  }
+}
 ```
 
-### Output: Proof Decomposition Report
+### Visual Representation (Mermaid)
 
 ```markdown
 # Proof Decomposition Report
