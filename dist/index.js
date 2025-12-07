@@ -4938,6 +4938,123 @@ var init_json_utils = __esm({
   }
 });
 
+// src/export/visual/markdown-utils.ts
+function heading(text, level = 1) {
+  const prefix = "#".repeat(level);
+  return `${prefix} ${text}
+`;
+}
+function bold(text) {
+  return `**${text}**`;
+}
+function codeBlock(code, language = "") {
+  return `\`\`\`${language}
+${code}
+\`\`\`
+`;
+}
+function listItem(text, style = "bullet", indent = 0) {
+  const indentStr = "  ".repeat(indent);
+  switch (style) {
+    case "numbered":
+      return `${indentStr}1. ${text}`;
+    case "checkbox":
+      return `${indentStr}- [ ] ${text}`;
+    case "checkbox-checked":
+      return `${indentStr}- [x] ${text}`;
+    case "bullet":
+    default:
+      return `${indentStr}- ${text}`;
+  }
+}
+function list(items, style = "bullet") {
+  return items.map((item, index) => {
+    if (style === "numbered") {
+      return `${index + 1}. ${item}`;
+    }
+    return listItem(item, style);
+  }).join("\n") + "\n";
+}
+function getAlignmentSeparator(alignment) {
+  switch (alignment) {
+    case "center":
+      return ":---:";
+    case "right":
+      return "---:";
+    case "left":
+    default:
+      return ":---";
+  }
+}
+function escapeTableCell(text) {
+  return text.replace(/\|/g, "\\|");
+}
+function table(headers, rows, alignments) {
+  const aligns = headers.map(() => "left");
+  const headerRow = "| " + headers.map(escapeTableCell).join(" | ") + " |";
+  const separatorRow = "| " + aligns.map(getAlignmentSeparator).join(" | ") + " |";
+  const dataRows = rows.map((row) => {
+    const cells = row.map(escapeTableCell);
+    while (cells.length < headers.length) {
+      cells.push("");
+    }
+    return "| " + cells.join(" | ") + " |";
+  });
+  return [headerRow, separatorRow, ...dataRows].join("\n") + "\n";
+}
+function progressBar(value, max = 100, width = 20) {
+  const percentage = Math.min(100, Math.max(0, value / max * 100));
+  const filled = Math.round(percentage / 100 * width);
+  const empty = width - filled;
+  const bar = "\u2588".repeat(filled) + "\u2591".repeat(empty);
+  return `${bar} ${percentage.toFixed(0)}%`;
+}
+function keyValueSection(items) {
+  return Object.entries(items).map(([key, value]) => `- ${bold(key)}: ${value}`).join("\n") + "\n";
+}
+function mermaidBlock(diagram) {
+  return codeBlock(diagram, "mermaid");
+}
+function section(title, content, level = 2) {
+  return heading(title, level) + "\n" + content + "\n";
+}
+function frontmatter(metadata) {
+  const lines = ["---"];
+  for (const [key, value] of Object.entries(metadata)) {
+    if (Array.isArray(value)) {
+      lines.push(`${key}:`);
+      value.forEach((v) => lines.push(`  - ${v}`));
+    } else {
+      lines.push(`${key}: ${typeof value === "string" ? `"${value}"` : value}`);
+    }
+  }
+  lines.push("---", "");
+  return lines.join("\n");
+}
+function document(title, content, options = {}) {
+  const { includeFrontmatter = false, metadata = {}, includeTableOfContents = false } = options;
+  const parts = [];
+  if (includeFrontmatter) {
+    const fm = {
+      title,
+      date: (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
+      ...metadata
+    };
+    parts.push(frontmatter(fm));
+  }
+  parts.push(heading(title, 1));
+  if (includeTableOfContents) {
+    parts.push("\n## Table of Contents\n\n[TOC]\n");
+  }
+  parts.push(content);
+  return parts.join("\n");
+}
+var init_markdown_utils = __esm({
+  "src/export/visual/markdown-utils.ts"() {
+    init_esm_shims();
+  }
+});
+
 // src/export/visual/causal.ts
 function exportCausalGraph(thought, options) {
   const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
@@ -4962,6 +5079,8 @@ function exportCausalGraph(thought, options) {
       return causalToUML(thought, options);
     case "json":
       return causalToJSON(thought, options);
+    case "markdown":
+      return causalToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -5508,6 +5627,72 @@ function causalToJSON(thought, options) {
     }
   );
 }
+function causalToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  if (!thought.causalGraph || !thought.causalGraph.nodes) {
+    parts.push(section("Status", "No causal graph data available."));
+    return document("Causal Graph Analysis", parts.join("\n"), {
+      includeFrontmatter: markdownIncludeFrontmatter,
+      includeTableOfContents: markdownIncludeToc
+    });
+  }
+  const causes = thought.causalGraph.nodes.filter((n) => n.type === "cause");
+  const effects = thought.causalGraph.nodes.filter((n) => n.type === "effect");
+  const mediators = thought.causalGraph.nodes.filter((n) => n.type === "mediator");
+  const confounders = thought.causalGraph.nodes.filter((n) => n.type === "confounder");
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      "Total Nodes": thought.causalGraph.nodes.length,
+      "Edges": thought.causalGraph.edges.length,
+      "Causes": causes.length,
+      "Effects": effects.length,
+      "Mediators": mediators.length,
+      "Confounders": confounders.length
+    });
+    parts.push(section("Metrics", metricsContent));
+  }
+  const nodeRows = thought.causalGraph.nodes.map((node) => [
+    node.id,
+    node.name,
+    node.type.toUpperCase(),
+    node.description || "-"
+  ]);
+  parts.push(section("Nodes", table(["ID", "Name", "Type", "Description"], nodeRows)));
+  const edgeRows = thought.causalGraph.edges.map((edge) => {
+    const fromNode = thought.causalGraph.nodes.find((n) => n.id === edge.from);
+    const toNode = thought.causalGraph.nodes.find((n) => n.id === edge.to);
+    return [
+      fromNode?.name || edge.from,
+      toNode?.name || edge.to,
+      edge.strength !== void 0 ? edge.strength.toFixed(2) : "-",
+      edge.mechanism || "-"
+    ];
+  });
+  parts.push(section("Causal Relationships", table(["From", "To", "Strength", "Mechanism"], edgeRows)));
+  if (confounders.length > 0) {
+    const confounderList = confounders.map((c) => `**${c.name}**: ${c.description}`);
+    parts.push(section("\u26A0\uFE0F Confounding Variables", list(confounderList)));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = causalGraphToMermaid(thought, "default", true, true);
+    parts.push(section("Causal Graph Diagram", mermaidBlock(mermaidDiagram)));
+  }
+  return document("Causal Graph Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: "causal",
+      nodeCount: thought.causalGraph.nodes.length,
+      edgeCount: thought.causalGraph.edges.length
+    }
+  });
+}
 var init_causal = __esm({
   "src/export/visual/causal.ts"() {
     init_esm_shims();
@@ -5519,6 +5704,7 @@ var init_causal = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -5546,6 +5732,8 @@ function exportTemporalTimeline(thought, options) {
       return temporalToUML(thought);
     case "json":
       return temporalToJSON(thought, options);
+    case "markdown":
+      return temporalToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -5916,6 +6104,67 @@ function temporalToJSON(thought, _options) {
   addMetric(graph, "timeSpan", sortedEvents[sortedEvents.length - 1].timestamp - sortedEvents[0].timestamp);
   return serializeGraph(graph, _options);
 }
+function temporalToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  const title = thought.timeline?.name || "Timeline";
+  if (!thought.events || thought.events.length === 0) {
+    parts.push(section("Status", "No events in timeline."));
+    return document(`Temporal Analysis: ${title}`, parts.join("\n"), {
+      includeFrontmatter: markdownIncludeFrontmatter,
+      includeTableOfContents: markdownIncludeToc
+    });
+  }
+  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const instants = sortedEvents.filter((e) => e.type === "instant");
+  const intervals = sortedEvents.filter((e) => e.type === "interval");
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      "Total Events": sortedEvents.length,
+      "Instant Events": instants.length,
+      "Interval Events": intervals.length,
+      "Time Span": `${sortedEvents[0].timestamp} - ${sortedEvents[sortedEvents.length - 1].timestamp}`
+    });
+    parts.push(section("Metrics", metricsContent));
+  }
+  const eventRows = sortedEvents.map((event) => [
+    event.timestamp.toString(),
+    event.name,
+    event.type.toUpperCase(),
+    event.duration ? `${event.duration}` : "-",
+    event.description || "-"
+  ]);
+  parts.push(section("Events", table(["Timestamp", "Name", "Type", "Duration", "Description"], eventRows)));
+  if (thought.relations && thought.relations.length > 0) {
+    const relationRows = thought.relations.map((rel) => {
+      const fromEvent = thought.events?.find((e) => e.id === rel.from);
+      const toEvent = thought.events?.find((e) => e.id === rel.to);
+      return [
+        fromEvent?.name || rel.from,
+        rel.relationType,
+        toEvent?.name || rel.to
+      ];
+    });
+    parts.push(section("Temporal Relations", table(["From", "Relation", "To"], relationRows)));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = timelineToMermaidGantt(thought, true);
+    parts.push(section("Timeline Diagram", mermaidBlock(mermaidDiagram)));
+  }
+  return document(`Temporal Analysis: ${title}`, parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: "temporal",
+      eventCount: sortedEvents.length
+    }
+  });
+}
 var init_temporal = __esm({
   "src/export/visual/temporal.ts"() {
     init_esm_shims();
@@ -5927,6 +6176,7 @@ var init_temporal = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -5954,6 +6204,8 @@ function exportGameTree(thought, options) {
       return gameTheoryToUML(thought, options);
     case "json":
       return gameTheoryToJSON(thought, options);
+    case "markdown":
+      return gameTheoryToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -6668,6 +6920,67 @@ function gameTheoryToJSON(thought, options) {
   addLegendItem(graph, "Nash Equilibrium", "#9370DB");
   return serializeGraph(graph);
 }
+function gameTheoryToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  if (!thought.game) {
+    parts.push(section("Status", "No game defined."));
+    return document("Game Theory Analysis", parts.join("\n"), {
+      includeFrontmatter: markdownIncludeFrontmatter,
+      includeTableOfContents: markdownIncludeToc
+    });
+  }
+  const gameInfo = keyValueSection({
+    "Game Name": thought.game.name || "Untitled",
+    "Type": thought.game.type,
+    "Players": thought.players ? thought.players.map((p) => p.name).join(", ") : String(thought.game.numPlayers),
+    ...thought.game.description ? { "Description": thought.game.description } : {}
+  });
+  parts.push(section("Game Information", gameInfo));
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      "Players": thought.players?.length || thought.game.numPlayers,
+      "Strategies": thought.strategies?.length || 0,
+      "Nash Equilibria": thought.nashEquilibria?.length || 0
+    });
+    parts.push(section("Metrics", metricsContent));
+  }
+  if (thought.strategies && thought.strategies.length > 0) {
+    const strategyRows = thought.strategies.map((strategy) => [
+      strategy.name,
+      strategy.isPure ? "Pure" : "Mixed",
+      strategy.description || "-"
+    ]);
+    parts.push(section("Strategies", table(["Name", "Type", "Description"], strategyRows)));
+  }
+  if (thought.nashEquilibria && thought.nashEquilibria.length > 0) {
+    const eqRows = thought.nashEquilibria.map((eq) => [
+      eq.type,
+      eq.strategyProfile.join(", "),
+      `[${eq.payoffs.join(", ")}]`,
+      eq.isStrict ? "Yes" : "No"
+    ]);
+    parts.push(section("Nash Equilibria", table(["Type", "Strategy Profile", "Payoffs", "Strict"], eqRows)));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = gameTreeToMermaid(thought, "default", true, true);
+    parts.push(section("Game Tree Diagram", mermaidBlock(mermaidDiagram)));
+  }
+  return document(`Game Theory Analysis: ${thought.game.name || "Untitled"}`, parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: "game-theory",
+      gameType: thought.game.type,
+      playerCount: thought.players?.length || thought.game.numPlayers
+    }
+  });
+}
 var init_game_theory = __esm({
   "src/export/visual/game-theory.ts"() {
     init_esm_shims();
@@ -6679,6 +6992,7 @@ var init_game_theory = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -6706,6 +7020,8 @@ function exportBayesianNetwork(thought, options) {
       return bayesianToUML(thought, options);
     case "json":
       return bayesianToJSON(thought, options);
+    case "markdown":
+      return bayesianToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -7069,6 +7385,63 @@ function bayesianToJSON(thought, options) {
     }
   );
 }
+function bayesianToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  const hypothesisContent = `**${thought.hypothesis.statement}**
+
+` + (thought.hypothesis.alternatives && thought.hypothesis.alternatives.length > 0 ? `Alternatives: ${thought.hypothesis.alternatives.join(", ")}` : "");
+  parts.push(section("Hypothesis", hypothesisContent));
+  if (includeMetrics) {
+    const priorPct = (thought.prior.probability * 100).toFixed(1);
+    const posteriorPct = (thought.posterior.probability * 100).toFixed(1);
+    const metricsContent = keyValueSection({
+      "Prior Probability": `${priorPct}%`,
+      "Posterior Probability": `${posteriorPct}%`,
+      ...thought.bayesFactor !== void 0 ? { "Bayes Factor": thought.bayesFactor.toFixed(2) } : {}
+    });
+    parts.push(section("Probabilities", metricsContent));
+    parts.push(section("Prior", `${progressBar(thought.prior.probability * 100)}
+
+${thought.prior.justification}`));
+    parts.push(section("Posterior", `${progressBar(thought.posterior.probability * 100)}
+
+${thought.posterior.calculation}`));
+  }
+  if (thought.evidence && thought.evidence.length > 0) {
+    const evidenceRows = thought.evidence.map((ev, i) => [
+      (i + 1).toString(),
+      ev.description,
+      ev.likelihoodGivenHypothesis?.toFixed(3) || "-",
+      ev.likelihoodGivenNotHypothesis?.toFixed(3) || "-"
+    ]);
+    parts.push(section("Evidence", table(["#", "Description", "P(E|H)", "P(E|\xACH)"], evidenceRows)));
+  }
+  const change = thought.posterior.probability - thought.prior.probability;
+  const changeDirection = change > 0 ? "increased" : change < 0 ? "decreased" : "unchanged";
+  const interpretation = `The posterior probability has **${changeDirection}** by ${Math.abs(change * 100).toFixed(1)} percentage points from the prior.` + (thought.bayesFactor !== void 0 ? `
+
+Bayes Factor of ${thought.bayesFactor.toFixed(2)} indicates ${thought.bayesFactor > 3 ? "substantial" : thought.bayesFactor > 1 ? "weak" : "evidence against"} support for the hypothesis.` : "");
+  parts.push(section("Interpretation", interpretation));
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = bayesianToMermaid(thought, "default", true, true);
+    parts.push(section("Bayesian Network Diagram", mermaidBlock(mermaidDiagram)));
+  }
+  return document("Bayesian Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: "bayesian",
+      prior: thought.prior.probability,
+      posterior: thought.posterior.probability
+    }
+  });
+}
 var init_bayesian = __esm({
   "src/export/visual/bayesian.ts"() {
     init_esm_shims();
@@ -7079,6 +7452,7 @@ var init_bayesian = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -7106,6 +7480,8 @@ function exportSequentialDependencyGraph(thought, options) {
       return sequentialToUML(thought, options);
     case "json":
       return sequentialToJSON(thought, options);
+    case "markdown":
+      return sequentialToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -7579,6 +7955,51 @@ function sequentialToJSON(thought, options) {
   }
   return serializeGraph(graph, { prettyPrint: jsonPrettyPrint, indent: jsonIndent });
 }
+function sequentialToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true
+  } = options;
+  const parts = [];
+  const overviewContent = keyValueSection({
+    "Thought Number": `${thought.thoughtNumber} of ${thought.totalThoughts}`,
+    "Status": thought.nextThoughtNeeded ? "In Progress" : "Complete",
+    "Revision": thought.isRevision ? "Yes" : "No"
+  });
+  parts.push(section("Overview", overviewContent));
+  parts.push(section("Current Thought", thought.content));
+  if (thought.buildUpon && thought.buildUpon.length > 0) {
+    parts.push(section("Dependencies (Builds Upon)", list(thought.buildUpon)));
+  }
+  if (thought.branchFrom) {
+    const branchContent = keyValueSection({
+      "Branched From": thought.branchFrom,
+      ...thought.branchId ? { "Branch ID": thought.branchId } : {}
+    });
+    parts.push(section("Branch Information", branchContent));
+  }
+  if (thought.isRevision && thought.revisesThought) {
+    const revisionContent = keyValueSection({
+      "Revises": thought.revisesThought,
+      ...thought.revisionReason ? { "Reason": thought.revisionReason } : {}
+    });
+    parts.push(section("Revision Information", revisionContent));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = sequentialToMermaid(thought, "default", true);
+    parts.push(section("Dependency Graph", mermaidBlock(mermaidDiagram)));
+  }
+  return document("Sequential Dependency Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: "sequential",
+      thoughtNumber: thought.thoughtNumber,
+      totalThoughts: thought.totalThoughts
+    }
+  });
+}
 var init_sequential = __esm({
   "src/export/visual/sequential.ts"() {
     init_esm_shims();
@@ -7593,6 +8014,7 @@ var init_sequential = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -7620,6 +8042,8 @@ function exportShannonStageFlow(thought, options) {
       return shannonToUML(thought, options);
     case "json":
       return shannonToJSON(thought, options);
+    case "markdown":
+      return shannonToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -7908,6 +8332,59 @@ function shannonToJSON(thought, options) {
   }
   return json;
 }
+function shannonToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  if (includeMetrics) {
+    const stageIndex2 = stages.indexOf(thought.stage);
+    const progress = (stageIndex2 + 1) / stages.length * 100;
+    const metricsContent = keyValueSection({
+      "Current Stage": stageLabels[thought.stage],
+      "Uncertainty": thought.uncertainty.toFixed(2),
+      "Progress": `${progress.toFixed(0)}%`
+    });
+    parts.push(section("Metrics", metricsContent));
+  }
+  const stageFlow = stages.map((stage) => {
+    const isCurrent = stage === thought.stage;
+    return isCurrent ? `**[${stageLabels[stage]}]**` : stageLabels[stage];
+  }).join(" \u2192 ");
+  const stageIndex = stages.indexOf(thought.stage);
+  const progressPct = (stageIndex + 1) / stages.length * 100;
+  parts.push(section("Stage Flow", `${stageFlow}
+
+${progressBar(progressPct)}`));
+  parts.push(section("Current Stage", `**${stageLabels[thought.stage]}**
+
+Uncertainty: ${(thought.uncertainty * 100).toFixed(0)}%`));
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    parts.push(section("Dependencies", list(thought.dependencies)));
+  }
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    parts.push(section("Assumptions", list(thought.assumptions)));
+  }
+  if (thought.knownLimitations && thought.knownLimitations.length > 0) {
+    parts.push(section("Known Limitations", list(thought.knownLimitations)));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = shannonToMermaid(thought, "default", true, true);
+    parts.push(section("Stage Flow Diagram", mermaidBlock(mermaidDiagram)));
+  }
+  return document("Shannon Problem-Solving Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: "shannon",
+      stage: thought.stage,
+      uncertainty: thought.uncertainty
+    }
+  });
+}
 var stages, stageLabels;
 var init_shannon = __esm({
   "src/export/visual/shannon.ts"() {
@@ -7920,6 +8397,7 @@ var init_shannon = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
     stages = [
       "problem_definition",
       "constraints",
@@ -7961,6 +8439,8 @@ function exportAbductiveHypotheses(thought, options) {
       return abductiveToUML(thought, options);
     case "json":
       return abductiveToJSON(thought, options);
+    case "markdown":
+      return abductiveToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -8349,6 +8829,63 @@ function abductiveToJSON(thought, options) {
   }
   return json;
 }
+function abductiveToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  if (includeMetrics) {
+    parts.push(section("Metrics", keyValueSection({
+      "Total Hypotheses": thought.hypotheses.length,
+      "Total Observations": thought.observations.length,
+      "Best Hypothesis Score": thought.bestExplanation?.score.toFixed(2) || "N/A"
+    })));
+  }
+  const obsRows = thought.observations.map((obs) => [
+    obs.id,
+    obs.description,
+    obs.confidence.toFixed(2),
+    obs.timestamp || "-"
+  ]);
+  parts.push(section("Observations", table(
+    ["ID", "Description", "Confidence", "Timestamp"],
+    obsRows
+  )));
+  const hypRows = thought.hypotheses.map((hyp) => [
+    hyp.id,
+    hyp.explanation.substring(0, 60) + (hyp.explanation.length > 60 ? "..." : ""),
+    hyp.score.toFixed(2),
+    thought.bestExplanation?.id === hyp.id ? "\u2605 Best" : ""
+  ]);
+  parts.push(section("Hypotheses", table(
+    ["ID", "Explanation", "Score", "Status"],
+    hypRows
+  )));
+  if (thought.bestExplanation) {
+    const assumptions = list(thought.bestExplanation.assumptions);
+    parts.push(section(
+      "Best Explanation",
+      `**Score:** ${thought.bestExplanation.score.toFixed(2)}
+
+**Explanation:** ${thought.bestExplanation.explanation}
+
+**Assumptions:**
+${assumptions}`
+    ));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaid = abductiveToMermaid(thought, "default", true, includeMetrics);
+    parts.push(section("Visualization", mermaidBlock(mermaid)));
+  }
+  return document("Abductive Reasoning Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: { mode: "abductive", hypotheses: thought.hypotheses.length }
+  });
+}
 var init_abductive = __esm({
   "src/export/visual/abductive.ts"() {
     init_esm_shims();
@@ -8360,6 +8897,7 @@ var init_abductive = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -8387,6 +8925,8 @@ function exportCounterfactualScenarios(thought, options) {
       return counterfactualToUML(thought, options);
     case "json":
       return counterfactualToJSON(thought, options);
+    case "markdown":
+      return counterfactualToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -8893,6 +9433,56 @@ function counterfactualToJSON(thought, options) {
   }
   return serializeGraph(graph);
 }
+function counterfactualToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  if (includeMetrics) {
+    parts.push(section("Metrics", keyValueSection({
+      "Counterfactual Scenarios": thought.counterfactuals.length,
+      "Intervention Feasibility": (thought.interventionPoint.feasibility * 100).toFixed(0) + "%",
+      "Expected Impact": (thought.interventionPoint.expectedImpact * 100).toFixed(0) + "%"
+    })));
+  }
+  parts.push(section("Intervention Point", keyValueSection({
+    "Description": thought.interventionPoint.description,
+    "Timing": thought.interventionPoint.timing,
+    "Feasibility": (thought.interventionPoint.feasibility * 100).toFixed(0) + "%",
+    "Expected Impact": (thought.interventionPoint.expectedImpact * 100).toFixed(0) + "%"
+  })));
+  parts.push(section(
+    "Actual Scenario",
+    `**Name:** ${thought.actual.name}
+
+**Description:** ${thought.actual.description}`
+  ));
+  const cfRows = thought.counterfactuals.map((cf) => {
+    const primaryOutcome = cf.outcomes[0];
+    return [
+      cf.name,
+      cf.description.substring(0, 50) + (cf.description.length > 50 ? "..." : ""),
+      cf.likelihood !== void 0 ? cf.likelihood.toFixed(2) : "N/A",
+      primaryOutcome?.impact || "-"
+    ];
+  });
+  parts.push(section("Counterfactual Scenarios", table(
+    ["Name", "Description", "Likelihood", "Impact"],
+    cfRows
+  )));
+  if (markdownIncludeMermaid) {
+    const mermaid = counterfactualToMermaid(thought, "default", true, includeMetrics);
+    parts.push(section("Visualization", mermaidBlock(mermaid)));
+  }
+  return document("Counterfactual Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: { mode: "counterfactual", scenarios: thought.counterfactuals.length }
+  });
+}
 var init_counterfactual = __esm({
   "src/export/visual/counterfactual.ts"() {
     init_esm_shims();
@@ -8904,6 +9494,7 @@ var init_counterfactual = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -8931,6 +9522,8 @@ function exportAnalogicalMapping(thought, options) {
       return analogicalToUML(thought, options);
     case "json":
       return analogicalToJSON(thought, options);
+    case "markdown":
+      return analogicalToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -9519,6 +10112,76 @@ function analogicalToJSON(thought, options) {
   }
   return serializeGraph(graph);
 }
+function analogicalToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  if (includeMetrics) {
+    parts.push(section("Metrics", keyValueSection({
+      "Analogy Strength": (thought.analogyStrength * 100).toFixed(0) + "%",
+      "Mappings": thought.mapping.length,
+      "Source Entities": thought.sourceDomain.entities.length,
+      "Target Entities": thought.targetDomain.entities.length
+    })));
+  }
+  parts.push(section(
+    "Source Domain",
+    `**Name:** ${thought.sourceDomain.name}
+
+**Description:** ${thought.sourceDomain.description || "N/A"}
+
+**Entities:**
+${list(thought.sourceDomain.entities.map((e) => `${e.name}: ${e.description || "N/A"}`))}`
+  ));
+  parts.push(section(
+    "Target Domain",
+    `**Name:** ${thought.targetDomain.name}
+
+**Description:** ${thought.targetDomain.description || "N/A"}
+
+**Entities:**
+${list(thought.targetDomain.entities.map((e) => `${e.name}: ${e.description || "N/A"}`))}`
+  ));
+  const mapRows = thought.mapping.map((m) => [
+    m.sourceEntityId,
+    "\u2192",
+    m.targetEntityId,
+    (m.confidence * 100).toFixed(0) + "%",
+    m.justification || "-"
+  ]);
+  parts.push(section("Entity Mappings", table(
+    ["Source", "", "Target", "Confidence", "Justification"],
+    mapRows
+  )));
+  if (thought.inferences && thought.inferences.length > 0) {
+    const infRows = thought.inferences.map((inf) => [
+      inf.sourcePattern,
+      inf.targetPrediction,
+      (inf.confidence * 100).toFixed(0) + "%"
+    ]);
+    parts.push(section("Inferences", table(
+      ["Source Pattern", "Target Prediction", "Confidence"],
+      infRows
+    )));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaid = analogicalToMermaid(thought, "default", true, includeMetrics);
+    parts.push(section("Visualization", mermaidBlock(mermaid)));
+  }
+  return document("Analogical Reasoning Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: "analogical",
+      mappings: thought.mapping.length,
+      analogyStrength: thought.analogyStrength.toFixed(2)
+    }
+  });
+}
 var init_analogical = __esm({
   "src/export/visual/analogical.ts"() {
     init_esm_shims();
@@ -9530,6 +10193,7 @@ var init_analogical = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -9557,6 +10221,8 @@ function exportEvidentialBeliefs(thought, options) {
       return evidentialToUML(thought, options);
     case "json":
       return evidentialToJSON(thought, options);
+    case "markdown":
+      return evidentialToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -10223,6 +10889,91 @@ function evidentialToJSON(thought, options) {
   }
   return serializeGraph(graph);
 }
+function evidentialToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  if (includeMetrics) {
+    parts.push(section("Metrics", keyValueSection({
+      "Hypotheses": thought.frameOfDiscernment?.length || 0,
+      "Evidence Items": thought.evidence?.length || 0,
+      "Belief Functions": thought.beliefFunctions?.length || 0
+    })));
+  }
+  if (thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
+    parts.push(section(
+      "Frame of Discernment",
+      list(thought.frameOfDiscernment)
+    ));
+  }
+  if (thought.evidence && thought.evidence.length > 0) {
+    const evRows = thought.evidence.map((ev) => [
+      ev.id,
+      ev.description,
+      ev.reliability.toFixed(2),
+      ev.source || "-"
+    ]);
+    parts.push(section("Evidence", table(
+      ["ID", "Description", "Reliability", "Source"],
+      evRows
+    )));
+  }
+  if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
+    const beliefContent = [];
+    for (const bf of thought.beliefFunctions) {
+      beliefContent.push(`**Source:** ${bf.source}
+`);
+      if (bf.conflictMass !== void 0) {
+        beliefContent.push(`**Conflict Mass:** ${bf.conflictMass.toFixed(3)}
+`);
+      }
+      const massRows = bf.massAssignments.map((ma) => [
+        `{${ma.hypothesisSet.join(", ")}}`,
+        ma.mass.toFixed(3),
+        ma.justification
+      ]);
+      beliefContent.push(table(
+        ["Hypothesis Set", "Mass", "Justification"],
+        massRows
+      ));
+      beliefContent.push("\n");
+    }
+    parts.push(section("Belief Functions", beliefContent.join("")));
+  }
+  if (thought.combinedBelief) {
+    const massRows = thought.combinedBelief.massAssignments.map((ma) => [
+      `{${ma.hypothesisSet.join(", ")}}`,
+      ma.mass.toFixed(3),
+      ma.justification
+    ]);
+    let combinedContent = table(
+      ["Hypothesis Set", "Mass", "Justification"],
+      massRows
+    );
+    if (thought.combinedBelief.conflictMass !== void 0) {
+      combinedContent += `
+**Conflict Mass:** ${thought.combinedBelief.conflictMass.toFixed(3)}
+`;
+    }
+    parts.push(section("Combined Belief", combinedContent));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaid = evidentialToMermaid(thought, "default", true, includeMetrics);
+    parts.push(section("Visualization", mermaidBlock(mermaid)));
+  }
+  return document("Evidential Reasoning Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: "evidential",
+      hypotheses: thought.frameOfDiscernment?.length || 0
+    }
+  });
+}
 var init_evidential = __esm({
   "src/export/visual/evidential.ts"() {
     init_esm_shims();
@@ -10234,6 +10985,7 @@ var init_evidential = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -10261,6 +11013,8 @@ function exportFirstPrinciplesDerivation(thought, options) {
       return firstPrinciplesToUML(thought, options);
     case "json":
       return firstPrinciplesToJSON(thought, options);
+    case "markdown":
+      return firstPrinciplesToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -11132,6 +11886,78 @@ function firstPrinciplesToJSON(thought, options) {
   }
   return serializeGraph(graph, { prettyPrint: true, indent: 2 });
 }
+function firstPrinciplesToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  parts.push(section("Question", thought.question));
+  if (includeMetrics) {
+    parts.push(section("Metrics", keyValueSection({
+      "Principles": thought.principles.length,
+      "Derivation Steps": thought.derivationSteps.length,
+      "Certainty": (thought.conclusion.certainty * 100).toFixed(0) + "%",
+      "Axioms": thought.principles.filter((p) => p.type === "axiom").length,
+      "Definitions": thought.principles.filter((p) => p.type === "definition").length,
+      "Observations": thought.principles.filter((p) => p.type === "observation").length
+    })));
+  }
+  const principleRows = thought.principles.map((p) => [
+    p.id,
+    p.type,
+    p.statement.substring(0, 60) + (p.statement.length > 60 ? "..." : ""),
+    p.dependsOn?.join(", ") || "-",
+    p.confidence !== void 0 ? (p.confidence * 100).toFixed(0) + "%" : "N/A"
+  ]);
+  parts.push(section("Foundational Principles", table(
+    ["ID", "Type", "Statement", "Depends On", "Confidence"],
+    principleRows
+  )));
+  const stepRows = thought.derivationSteps.map((s) => [
+    s.stepNumber.toString(),
+    s.principle,
+    s.inference.substring(0, 60) + (s.inference.length > 60 ? "..." : ""),
+    s.logicalForm || "-",
+    (s.confidence * 100).toFixed(0) + "%"
+  ]);
+  parts.push(section("Derivation Chain", table(
+    ["Step", "Principle", "Inference", "Logical Form", "Confidence"],
+    stepRows
+  )));
+  let conclusionContent = `**Statement:** ${thought.conclusion.statement}
+
+`;
+  conclusionContent += `**Certainty:** ${(thought.conclusion.certainty * 100).toFixed(0)}%
+
+`;
+  conclusionContent += `**Derivation Chain:** Steps ${thought.conclusion.derivationChain.join(" \u2192 ")}
+`;
+  if (thought.conclusion.limitations && thought.conclusion.limitations.length > 0) {
+    conclusionContent += `
+**Limitations:**
+${list(thought.conclusion.limitations)}`;
+  }
+  parts.push(section("Conclusion", conclusionContent));
+  if (thought.alternativeInterpretations && thought.alternativeInterpretations.length > 0) {
+    parts.push(section("Alternative Interpretations", list(thought.alternativeInterpretations)));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaid = firstPrinciplesToMermaid(thought, "default", true, includeMetrics);
+    parts.push(section("Visualization", mermaidBlock(mermaid)));
+  }
+  return document("First Principles Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: "first-principles",
+      principles: thought.principles.length,
+      certainty: thought.conclusion.certainty.toFixed(2)
+    }
+  });
+}
 var init_first_principles = __esm({
   "src/export/visual/first-principles.ts"() {
     init_esm_shims();
@@ -11143,6 +11969,7 @@ var init_first_principles = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -11170,6 +11997,8 @@ function exportSystemsThinkingCausalLoops(thought, options) {
       return systemsThinkingToUML(thought, options);
     case "json":
       return systemsThinkingToJSON(thought, options);
+    case "markdown":
+      return systemsThinkingToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -11753,6 +12582,74 @@ function systemsThinkingToJSON(thought, options) {
   }
   return serializeGraph(graph);
 }
+function systemsThinkingToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  if (thought.system) {
+    const systemContent = keyValueSection({
+      "Name": thought.system.name,
+      "Description": thought.system.description
+    });
+    parts.push(section("System Overview", systemContent));
+  }
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      "Components": thought.components?.length || 0,
+      "Feedback Loops": thought.feedbackLoops?.length || 0,
+      "Leverage Points": thought.leveragePoints?.length || 0
+    });
+    parts.push(section("Metrics", metricsContent));
+  }
+  if (thought.components && thought.components.length > 0) {
+    const componentRows = thought.components.map((c) => [
+      c.name,
+      c.type,
+      c.description,
+      c.unit || "N/A",
+      c.initialValue !== void 0 ? String(c.initialValue) : "N/A"
+    ]);
+    const componentsTable = table(
+      ["Name", "Type", "Description", "Unit", "Initial Value"],
+      componentRows
+    );
+    parts.push(section("Components", componentsTable));
+  }
+  if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+    const loopItems = thought.feedbackLoops.map(
+      (loop) => `**${loop.name}** (${loop.type})
+  - Strength: ${loop.strength.toFixed(2)}
+  - Polarity: ${loop.polarity}
+  - Components: ${loop.components.join(" \u2192 ")}`
+    );
+    parts.push(section("Feedback Loops", list(loopItems)));
+  }
+  if (thought.leveragePoints && thought.leveragePoints.length > 0) {
+    const leverageRows = thought.leveragePoints.map((lp) => [
+      lp.location,
+      lp.effectiveness.toFixed(2),
+      lp.description
+    ]);
+    const leverageTable = table(
+      ["Location", "Effectiveness", "Description"],
+      leverageRows
+    );
+    parts.push(section("Leverage Points", leverageTable));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = systemsThinkingToMermaid(thought, "default", true, true);
+    parts.push(section("Causal Loop Diagram", mermaidBlock(mermaidDiagram)));
+  }
+  return document("Systems Thinking Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: { mode: "systems-thinking" }
+  });
+}
 var init_systems_thinking = __esm({
   "src/export/visual/systems-thinking.ts"() {
     init_esm_shims();
@@ -11764,6 +12661,7 @@ var init_systems_thinking = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -11791,6 +12689,8 @@ function exportScientificMethodExperiment(thought, options) {
       return scientificMethodToUML(thought, options);
     case "json":
       return scientificMethodToJSON(thought, options);
+    case "markdown":
+      return scientificMethodToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -12683,6 +13583,85 @@ function scientificMethodToJSON(thought, options) {
   }
   return serializeGraph(graph, options);
 }
+function scientificMethodToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  if (thought.researchQuestion) {
+    const questionContent = keyValueSection({
+      "Question": thought.researchQuestion.question,
+      "Background": thought.researchQuestion.background,
+      "Significance": thought.researchQuestion.significance || "N/A"
+    });
+    parts.push(section("Research Question", questionContent));
+  }
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      "Hypotheses": thought.scientificHypotheses?.length || 0,
+      "Tests": thought.analysis?.tests?.length || 0,
+      "Confidence": thought.conclusion?.confidence?.toFixed(2) || "N/A"
+    });
+    parts.push(section("Metrics", metricsContent));
+  }
+  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+    const hypothesisItems = thought.scientificHypotheses.map(
+      (h) => `**${h.type === "null" ? "H\u2080" : "H\u2081"}**: ${h.statement}${h.prediction ? `
+  - Prediction: ${h.prediction}` : ""}`
+    );
+    parts.push(section("Hypotheses", list(hypothesisItems)));
+  }
+  if (thought.experiment) {
+    const experimentContent = keyValueSection({
+      "Type": thought.experiment.type,
+      "Design": thought.experiment.design,
+      "Sample Size": thought.experiment?.sampleSize || "N/A"
+    });
+    parts.push(section("Experiment", experimentContent));
+  }
+  if (thought.data) {
+    const dataContent = keyValueSection({
+      "Method": thought.data.method.join(", "),
+      "Completeness": thought.data.dataQuality ? `${(thought.data.dataQuality.completeness * 100).toFixed(0)}%` : "N/A",
+      "Reliability": thought.data.dataQuality ? `${(thought.data.dataQuality.reliability * 100).toFixed(0)}%` : "N/A"
+    });
+    parts.push(section("Data Collection", dataContent));
+  }
+  if (thought.analysis && thought.analysis.tests) {
+    const testRows = thought.analysis.tests.map((test) => [
+      test.name,
+      test.pValue.toFixed(4),
+      test.alpha.toString(),
+      test.result
+    ]);
+    const testsTable = table(
+      ["Test", "p-value", "\u03B1", "Result"],
+      testRows
+    );
+    parts.push(section("Statistical Analysis", testsTable));
+  }
+  if (thought.conclusion) {
+    const conclusionContent = `${thought.conclusion.statement}
+
+` + keyValueSection({
+      "Confidence": thought.conclusion.confidence ? `${(thought.conclusion.confidence * 100).toFixed(0)}%` : "N/A",
+      "Supported Hypotheses": thought.conclusion.supportedHypotheses?.join(", ") || "N/A"
+    });
+    parts.push(section("Conclusion", conclusionContent));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = scientificMethodToMermaid(thought, "default", true, true);
+    parts.push(section("Experiment Flow Diagram", mermaidBlock(mermaidDiagram)));
+  }
+  return document("Scientific Method Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: { mode: "scientific-method" }
+  });
+}
 var init_scientific_method = __esm({
   "src/export/visual/scientific-method.ts"() {
     init_esm_shims();
@@ -12694,6 +13673,7 @@ var init_scientific_method = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -12721,6 +13701,8 @@ function exportOptimizationSolution(thought, options) {
       return optimizationToUML(thought, options);
     case "json":
       return optimizationToJSON(thought, options);
+    case "markdown":
+      return optimizationToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -13570,6 +14552,91 @@ function optimizationToJSON(thought, options) {
   }
   return serializeGraph(graph);
 }
+function optimizationToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  if (thought.problem) {
+    const problemContent = keyValueSection({
+      "Name": thought.problem.name,
+      "Type": thought.problem.type,
+      "Description": thought.problem.description
+    });
+    parts.push(section("Problem", problemContent));
+  }
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      "Variables": thought.variables?.length || 0,
+      "Constraints": thought.optimizationConstraints?.length || 0,
+      "Objectives": thought.objectives?.length || 0,
+      "Quality": thought.solution?.quality?.toFixed(2) || "N/A"
+    });
+    parts.push(section("Metrics", metricsContent));
+  }
+  if (thought.variables && thought.variables.length > 0) {
+    const variableRows = thought.variables.map((v) => {
+      const varType = v.type || "unknown";
+      const domain = v.domain ? `[${v.domain.lowerBound}, ${v.domain.upperBound}]` : "N/A";
+      return [v.name, varType, domain, v.description];
+    });
+    const variablesTable = table(
+      ["Name", "Type", "Domain", "Description"],
+      variableRows
+    );
+    parts.push(section("Decision Variables", variablesTable));
+  }
+  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+    const constraintItems = thought.optimizationConstraints.map(
+      (c) => `**${c.name}** (${c.type})
+  - Formula: \`${c.formula}\``
+    );
+    parts.push(section("Constraints", list(constraintItems)));
+  }
+  if (thought.objectives && thought.objectives.length > 0) {
+    const objectiveItems = thought.objectives.map(
+      (o) => `**${o.type.toUpperCase()}: ${o.name}**
+  - Formula: \`${o.formula}\``
+    );
+    parts.push(section("Objectives", list(objectiveItems)));
+  }
+  if (thought.solution) {
+    const solution = thought.solution;
+    let solutionContent = "";
+    if (solution.status) {
+      solutionContent += `**Status:** ${solution.status}
+
+`;
+    }
+    const solutionMetrics = {};
+    if (solution.optimalValue !== void 0) {
+      solutionMetrics["Optimal Value"] = solution.optimalValue;
+    }
+    if (solution.quality !== void 0) {
+      solutionMetrics["Quality"] = `${(solution.quality * 100).toFixed(0)}%`;
+    }
+    if (Object.keys(solutionMetrics).length > 0) {
+      solutionContent += keyValueSection(solutionMetrics);
+    }
+    if (solution.assignments) {
+      solutionContent += "\n**Variable Assignments:**\n\n";
+      solutionContent += keyValueSection(solution.assignments);
+    }
+    parts.push(section("Solution", solutionContent));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = optimizationToMermaid(thought, "default", true, true);
+    parts.push(section("Optimization Diagram", mermaidBlock(mermaidDiagram)));
+  }
+  return document("Optimization Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: { mode: "optimization" }
+  });
+}
 var init_optimization = __esm({
   "src/export/visual/optimization.ts"() {
     init_esm_shims();
@@ -13581,6 +14648,7 @@ var init_optimization = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -13608,6 +14676,8 @@ function exportFormalLogicProof(thought, options) {
       return formalLogicToUML(thought, options);
     case "json":
       return formalLogicToJSON(thought, options);
+    case "markdown":
+      return formalLogicToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -14523,6 +15593,86 @@ function formalLogicToJSON(thought, options) {
   }
   return serializeGraph(graph);
 }
+function formalLogicToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  if (thought.proof) {
+    const proofContent = keyValueSection({
+      "Theorem": thought.proof.theorem,
+      "Technique": thought.proof.technique,
+      "Valid": thought.proof.valid ? "Yes" : "No",
+      "Completeness": `${(thought.proof.completeness * 100).toFixed(0)}%`
+    });
+    parts.push(section("Proof", proofContent));
+  }
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      "Propositions": thought.propositions?.length || 0,
+      "Inferences": thought.logicalInferences?.length || 0,
+      "Proof Steps": thought.proof?.steps?.length || 0,
+      "Completeness": thought.proof ? `${(thought.proof.completeness * 100).toFixed(0)}%` : "N/A"
+    });
+    parts.push(section("Metrics", metricsContent));
+  }
+  if (thought.propositions && thought.propositions.length > 0) {
+    const propositionRows = thought.propositions.map((p) => [
+      p.symbol,
+      p.type,
+      p.statement,
+      p.truthValue !== void 0 ? String(p.truthValue) : "N/A"
+    ]);
+    const propositionsTable = table(
+      ["Symbol", "Type", "Statement", "Truth Value"],
+      propositionRows
+    );
+    parts.push(section("Propositions", propositionsTable));
+  }
+  if (thought.logicalInferences && thought.logicalInferences.length > 0) {
+    const inferenceItems = thought.logicalInferences.map(
+      (inf) => `**${inf.rule}** (${inf.valid ? "Valid" : "Invalid"})
+  - Premises: ${inf.premises.join(", ")}
+  - Conclusion: ${inf.conclusion}`
+    );
+    parts.push(section("Logical Inferences", list(inferenceItems)));
+  }
+  if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
+    const stepItems = thought.proof.steps.map(
+      (step) => `**${step.stepNumber}. ${step.statement}**
+  - Justification: ${step.justification}${step.rule ? `
+  - Rule: ${step.rule}` : ""}${step.referencesSteps && step.referencesSteps.length > 0 ? `
+  - References steps: ${step.referencesSteps.join(", ")}` : ""}`
+    );
+    parts.push(section("Proof Steps", list(stepItems)));
+  }
+  if (thought.proof) {
+    const conclusionContent = `${thought.proof.conclusion}
+
+**Status:** ${thought.proof.valid ? "PROVEN" : "NOT PROVEN"}`;
+    parts.push(section("Conclusion", conclusionContent));
+  }
+  if (thought.truthTable) {
+    const truthTableContent = keyValueSection({
+      "Tautology": thought.truthTable.isTautology ? "Yes" : "No",
+      "Contradiction": thought.truthTable.isContradiction ? "Yes" : "No",
+      "Contingent": thought.truthTable.isContingent ? "Yes" : "No"
+    });
+    parts.push(section("Truth Table", truthTableContent));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = formalLogicToMermaid(thought, "default", true, true);
+    parts.push(section("Proof Tree Diagram", mermaidBlock(mermaidDiagram)));
+  }
+  return document("Formal Logic Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: { mode: "formal-logic" }
+  });
+}
 var init_formal_logic = __esm({
   "src/export/visual/formal-logic.ts"() {
     init_esm_shims();
@@ -14534,6 +15684,7 @@ var init_formal_logic = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -14561,6 +15712,8 @@ function exportMathematicsDerivation(thought, options) {
       return mathematicsToUML(thought, options);
     case "json":
       return mathematicsToJSON(thought, options);
+    case "markdown":
+      return mathematicsToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -15433,6 +16586,84 @@ function mathematicsToJSON(thought, options) {
   }
   return serializeGraph(graph);
 }
+function mathematicsToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  const typeContent = keyValueSection({
+    "Type": (thought.thoughtType || "proof").replace(/_/g, " "),
+    "Uncertainty": `${(thought.uncertainty * 100).toFixed(1)}%`
+  });
+  parts.push(section("Overview", typeContent));
+  if (thought.mathematicalModel) {
+    const modelContent = keyValueSection({
+      "LaTeX": `\`${thought.mathematicalModel.latex}\``,
+      "Symbolic": `\`${thought.mathematicalModel.symbolic}\``,
+      "ASCII": thought.mathematicalModel.ascii ? `\`${thought.mathematicalModel.ascii}\`` : "N/A"
+    });
+    parts.push(section("Mathematical Model", modelContent));
+  }
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      "Uncertainty": `${(thought.uncertainty * 100).toFixed(1)}%`,
+      "Theorems": thought.theorems?.length || 0,
+      "Assumptions": thought.assumptions?.length || 0,
+      "Proof Completeness": thought.proofStrategy ? `${(thought.proofStrategy.completeness * 100).toFixed(0)}%` : "N/A"
+    });
+    parts.push(section("Metrics", metricsContent));
+  }
+  if (thought.proofStrategy) {
+    let proofContent = `**Type:** ${thought.proofStrategy.type}
+
+`;
+    proofContent += `**Completeness:** ${(thought.proofStrategy.completeness * 100).toFixed(0)}%
+
+`;
+    proofContent += "**Steps:**\n\n";
+    const stepItems = thought.proofStrategy.steps.map(
+      (step, index) => `${index + 1}. ${step}`
+    );
+    proofContent += list(stepItems, "numbered");
+    if (thought.proofStrategy.baseCase) {
+      proofContent += `
+**Base Case:** ${thought.proofStrategy.baseCase}
+`;
+    }
+    if (thought.proofStrategy.inductiveStep) {
+      proofContent += `
+**Inductive Step:** ${thought.proofStrategy.inductiveStep}
+`;
+    }
+    parts.push(section("Proof Strategy", proofContent));
+  }
+  if (thought.theorems && thought.theorems.length > 0) {
+    const theoremItems = thought.theorems.map(
+      (theorem) => `**${theorem.name}**: ${theorem.statement}
+  - Hypotheses: ${theorem.hypotheses.join(", ")}
+  - Conclusion: ${theorem.conclusion}`
+    );
+    parts.push(section("Theorems", list(theoremItems)));
+  }
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    parts.push(section("Assumptions", list(thought.assumptions)));
+  }
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    parts.push(section("Dependencies", list(thought.dependencies)));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = mathematicsToMermaid(thought, "default", true, true);
+    parts.push(section("Derivation Diagram", mermaidBlock(mermaidDiagram)));
+  }
+  return document("Mathematics Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: { mode: "mathematics" }
+  });
+}
 var init_mathematics = __esm({
   "src/export/visual/mathematics.ts"() {
     init_esm_shims();
@@ -15444,6 +16675,7 @@ var init_mathematics = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -15471,6 +16703,8 @@ function exportPhysicsVisualization(thought, options) {
       return physicsToUML(thought, options);
     case "json":
       return physicsToJSON(thought, options);
+    case "markdown":
+      return physicsToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -16851,6 +18085,95 @@ function physicsToJSON(thought, options) {
   }
   return serializeGraph(graph);
 }
+function physicsToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  const typeContent = `**Type:** ${(thought.thoughtType || "physics").replace(/_/g, " ")}`;
+  parts.push(section("Overview", typeContent));
+  if (thought.tensorProperties) {
+    const tensorContent = keyValueSection({
+      "Rank": `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`,
+      "Components": thought.tensorProperties.components,
+      "LaTeX": thought.tensorProperties.latex,
+      "Transformation": thought.tensorProperties.transformation,
+      ...thought.tensorProperties.indexStructure ? { "Index Structure": thought.tensorProperties.indexStructure } : {},
+      ...thought.tensorProperties.coordinateSystem ? { "Coordinate System": thought.tensorProperties.coordinateSystem } : {}
+    });
+    let tensorFull = tensorContent;
+    if (thought.tensorProperties.symmetries.length > 0) {
+      tensorFull += "\n\n**Symmetries:**\n\n" + list(thought.tensorProperties.symmetries);
+    }
+    if (thought.tensorProperties.invariants.length > 0) {
+      tensorFull += "\n\n**Invariants:**\n\n" + list(thought.tensorProperties.invariants);
+    }
+    parts.push(section("Tensor Properties", tensorFull));
+  }
+  if (thought.physicalInterpretation) {
+    const interpContent = keyValueSection({
+      "Quantity": thought.physicalInterpretation.quantity,
+      "Units": thought.physicalInterpretation.units
+    });
+    let interpFull = interpContent;
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      interpFull += "\n\n**Conservation Laws:**\n\n" + list(thought.physicalInterpretation.conservationLaws);
+    }
+    if (thought.physicalInterpretation.constraints && thought.physicalInterpretation.constraints.length > 0) {
+      interpFull += "\n\n**Constraints:**\n\n" + list(thought.physicalInterpretation.constraints);
+    }
+    if (thought.physicalInterpretation.observables && thought.physicalInterpretation.observables.length > 0) {
+      interpFull += "\n\n**Observables:**\n\n" + list(thought.physicalInterpretation.observables);
+    }
+    parts.push(section("Physical Interpretation", interpFull));
+  }
+  if (thought.fieldTheoryContext) {
+    const fieldContent = keyValueSection({
+      "Symmetry Group": thought.fieldTheoryContext.symmetryGroup
+    });
+    let fieldFull = fieldContent;
+    if (thought.fieldTheoryContext.fields.length > 0) {
+      fieldFull += "\n\n**Fields:**\n\n" + list(thought.fieldTheoryContext.fields);
+    }
+    if (thought.fieldTheoryContext.interactions.length > 0) {
+      fieldFull += "\n\n**Interactions:**\n\n" + list(thought.fieldTheoryContext.interactions);
+    }
+    if (thought.fieldTheoryContext.gaugeSymmetries && thought.fieldTheoryContext.gaugeSymmetries.length > 0) {
+      fieldFull += "\n\n**Gauge Symmetries:**\n\n" + list(thought.fieldTheoryContext.gaugeSymmetries);
+    }
+    parts.push(section("Field Theory Context", fieldFull));
+  }
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      "Uncertainty": `${(thought.uncertainty * 100).toFixed(1)}%`,
+      ...thought.assumptions ? { "Assumptions": thought.assumptions.length } : {},
+      ...thought.dependencies ? { "Dependencies": thought.dependencies.length } : {}
+    });
+    parts.push(section("Metrics", metricsContent + "\n\n" + progressBar(thought.uncertainty * 100)));
+  }
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    parts.push(section("Assumptions", list(thought.assumptions)));
+  }
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    parts.push(section("Dependencies", list(thought.dependencies)));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = physicsToMermaid(thought, "default", true, true);
+    parts.push(section("Visualization", mermaidBlock(mermaidDiagram)));
+  }
+  return document("Physics Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: "physics",
+      thoughtType: thought.thoughtType || "physics",
+      uncertainty: thought.uncertainty
+    }
+  });
+}
 var init_physics = __esm({
   "src/export/visual/physics.ts"() {
     init_esm_shims();
@@ -16862,6 +18185,7 @@ var init_physics = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -16890,6 +18214,8 @@ function exportHybridOrchestration(thought, options) {
       return hybridToUML(thought, options);
     case "json":
       return hybridToJSON(thought, options);
+    case "markdown":
+      return hybridToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -17899,6 +19225,96 @@ function hybridToJSON(thought, options) {
   }
   return serializeGraph(graph);
 }
+function hybridToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  const overviewContent = keyValueSection({
+    "Primary Mode": thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1),
+    ...thought.stage ? { "Stage": thought.stage.replace(/_/g, " ") } : {},
+    ...thought.uncertainty !== void 0 ? { "Uncertainty": `${(thought.uncertainty * 100).toFixed(1)}%` } : {}
+  });
+  parts.push(section("Overview", overviewContent));
+  if (thought.switchReason) {
+    parts.push(section("Mode Switch Reason", thought.switchReason));
+  }
+  if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
+    parts.push(section("Secondary Features", list(thought.secondaryFeatures)));
+  }
+  if (thought.mathematicalModel) {
+    const mathContent = keyValueSection({
+      "LaTeX": thought.mathematicalModel.latex,
+      "Symbolic": thought.mathematicalModel.symbolic,
+      ...thought.mathematicalModel.ascii ? { "ASCII": thought.mathematicalModel.ascii } : {}
+    });
+    parts.push(section("Mathematical Model", mathContent));
+  }
+  if (thought.tensorProperties) {
+    const tensorRows = [
+      ["Rank", `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`],
+      ["Components", thought.tensorProperties.components],
+      ["Transformation", thought.tensorProperties.transformation]
+    ];
+    let tensorContent = table(["Property", "Value"], tensorRows);
+    if (thought.tensorProperties.symmetries.length > 0) {
+      tensorContent += "\n\n**Symmetries:**\n\n" + list(thought.tensorProperties.symmetries);
+    }
+    parts.push(section("Tensor Properties", tensorContent));
+  }
+  if (thought.physicalInterpretation) {
+    const interpContent = keyValueSection({
+      "Quantity": thought.physicalInterpretation.quantity,
+      "Units": thought.physicalInterpretation.units
+    });
+    let interpFull = interpContent;
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      interpFull += "\n\n**Conservation Laws:**\n\n" + list(thought.physicalInterpretation.conservationLaws);
+    }
+    parts.push(section("Physical Interpretation", interpFull));
+  }
+  if (includeMetrics) {
+    const metricsItems = {
+      "Primary Mode": thought.primaryMode,
+      "Secondary Features": thought.secondaryFeatures?.length || 0
+    };
+    if (thought.uncertainty !== void 0) {
+      metricsItems["Uncertainty"] = `${(thought.uncertainty * 100).toFixed(1)}%`;
+    }
+    if (thought.assumptions) {
+      metricsItems["Assumptions"] = thought.assumptions.length;
+    }
+    if (thought.dependencies) {
+      metricsItems["Dependencies"] = thought.dependencies.length;
+    }
+    parts.push(section("Metrics", keyValueSection(metricsItems)));
+  }
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    parts.push(section("Assumptions", list(thought.assumptions)));
+  }
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    parts.push(section("Dependencies", list(thought.dependencies)));
+  }
+  if (thought.revisionReason) {
+    parts.push(section("Revision Reason", thought.revisionReason));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = hybridToMermaid(thought, "default", true, true);
+    parts.push(section("Visualization", mermaidBlock(mermaidDiagram)));
+  }
+  return document("Hybrid Mode Orchestration", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: "hybrid",
+      primaryMode: thought.primaryMode,
+      secondaryFeatures: thought.secondaryFeatures?.length || 0
+    }
+  });
+}
 var init_hybrid = __esm({
   "src/export/visual/hybrid.ts"() {
     init_esm_shims();
@@ -17910,6 +19326,7 @@ var init_hybrid = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -17937,6 +19354,8 @@ function exportMetaReasoningVisualization(thought, options) {
       return metaReasoningToUML(thought, options);
     case "json":
       return metaReasoningToJSON(thought, options);
+    case "markdown":
+      return metaReasoningToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -19150,6 +20569,110 @@ function metaReasoningToJSON(thought, options) {
   };
   return serializeGraph(graph);
 }
+function metaReasoningToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  const strategyContent = keyValueSection({
+    "Mode": thought.currentStrategy.mode,
+    "Approach": thought.currentStrategy.approach,
+    "Thoughts Spent": thought.currentStrategy.thoughtsSpent
+  });
+  let strategyFull = strategyContent;
+  if (thought.currentStrategy.progressIndicators.length > 0) {
+    strategyFull += "\n\n**Progress Indicators:**\n\n" + list(thought.currentStrategy.progressIndicators);
+  }
+  parts.push(section("Current Strategy", strategyFull));
+  if (includeMetrics) {
+    const evalRows = [
+      ["Effectiveness", `${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%`],
+      ["Efficiency", `${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%`],
+      ["Confidence", `${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%`],
+      ["Progress Rate", `${thought.strategyEvaluation.progressRate.toFixed(2)} insights/thought`],
+      ["Quality Score", `${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%`]
+    ];
+    let evalContent = table(["Metric", "Value"], evalRows);
+    evalContent += "\n\n**Effectiveness:**\n\n" + progressBar(thought.strategyEvaluation.effectiveness * 100);
+    if (thought.strategyEvaluation.strengths.length > 0) {
+      evalContent += "\n\n**Strengths:**\n\n" + list(thought.strategyEvaluation.strengths.map((s) => `\u2713 ${s}`));
+    }
+    if (thought.strategyEvaluation.issues.length > 0) {
+      evalContent += "\n\n**Issues:**\n\n" + list(thought.strategyEvaluation.issues.map((i) => `\u2717 ${i}`));
+    }
+    parts.push(section("Strategy Evaluation", evalContent));
+  }
+  if (thought.alternativeStrategies.length > 0) {
+    const altRows = thought.alternativeStrategies.map((alt) => [
+      alt.mode,
+      alt.reasoning.substring(0, 50) + (alt.reasoning.length > 50 ? "..." : ""),
+      alt.expectedBenefit.substring(0, 40) + (alt.expectedBenefit.length > 40 ? "..." : ""),
+      `${(alt.switchingCost * 100).toFixed(0)}%`,
+      `${(alt.recommendationScore * 100).toFixed(0)}%`
+    ]);
+    parts.push(section("Alternative Strategies", table(
+      ["Mode", "Reasoning", "Expected Benefit", "Switching Cost", "Score"],
+      altRows
+    )));
+  }
+  const recContent = keyValueSection({
+    "Action": thought.recommendation.action,
+    ...thought.recommendation.targetMode ? { "Target Mode": thought.recommendation.targetMode } : {},
+    "Confidence": `${(thought.recommendation.confidence * 100).toFixed(1)}%`,
+    "Expected Improvement": thought.recommendation.expectedImprovement
+  });
+  let recFull = recContent;
+  recFull += "\n\n**Justification:**\n\n" + thought.recommendation.justification;
+  recFull += "\n\n**Confidence Level:**\n\n" + progressBar(thought.recommendation.confidence * 100);
+  parts.push(section("Recommendation", recFull));
+  const resourceContent = keyValueSection({
+    "Time Spent": `${thought.resourceAllocation.timeSpent}ms`,
+    "Thoughts Remaining": thought.resourceAllocation.thoughtsRemaining,
+    "Complexity Level": thought.resourceAllocation.complexityLevel,
+    "Urgency": thought.resourceAllocation.urgency,
+    "Recommendation": thought.resourceAllocation.recommendation
+  });
+  parts.push(section("Resource Allocation", resourceContent));
+  if (includeMetrics) {
+    const qualityRows = [
+      ["Logical Consistency", `${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%`],
+      ["Evidence Quality", `${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%`],
+      ["Completeness", `${(thought.qualityMetrics.completeness * 100).toFixed(1)}%`],
+      ["Originality", `${(thought.qualityMetrics.originality * 100).toFixed(1)}%`],
+      ["Clarity", `${(thought.qualityMetrics.clarity * 100).toFixed(1)}%`],
+      ["Overall Quality", `${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%`]
+    ];
+    let qualityContent = table(["Metric", "Value"], qualityRows);
+    qualityContent += "\n\n**Overall Quality:**\n\n" + progressBar(thought.qualityMetrics.overallQuality * 100);
+    parts.push(section("Quality Metrics", qualityContent));
+  }
+  const sessionContent = keyValueSection({
+    "Session ID": thought.sessionContext.sessionId,
+    "Total Thoughts": thought.sessionContext.totalThoughts,
+    "Mode Switches": thought.sessionContext.modeSwitches,
+    "Problem Type": thought.sessionContext.problemType,
+    "Modes Used": thought.sessionContext.modesUsed.join(", "),
+    ...thought.sessionContext.historicalEffectiveness !== void 0 ? { "Historical Effectiveness": `${(thought.sessionContext.historicalEffectiveness * 100).toFixed(1)}%` } : {}
+  });
+  parts.push(section("Session Context", sessionContent));
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = metaReasoningToMermaid(thought, "default", true, true);
+    parts.push(section("Visualization", mermaidBlock(mermaidDiagram)));
+  }
+  return document("Meta-Reasoning Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: "metareasoning",
+      currentMode: thought.currentStrategy.mode,
+      recommendedAction: thought.recommendation.action,
+      overallQuality: thought.qualityMetrics.overallQuality
+    }
+  });
+}
 var init_metareasoning = __esm({
   "src/export/visual/metareasoning.ts"() {
     init_esm_shims();
@@ -19161,6 +20684,7 @@ var init_metareasoning = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -19192,6 +20716,8 @@ function exportProofDecomposition(decomposition, options) {
       return proofDecompositionToUML(decomposition, options);
     case "json":
       return proofDecompositionToJSON(decomposition, options);
+    case "markdown":
+      return proofDecompositionToMarkdown(decomposition, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -20313,6 +21839,130 @@ function proofDecompositionToJSON(decomposition, options) {
   }
   return serializeGraph(graph, { prettyPrint: true });
 }
+function proofDecompositionToMarkdown(decomposition, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  if (decomposition.theorem) {
+    parts.push(section("Theorem", decomposition.theorem));
+  }
+  if (includeMetrics) {
+    const metricsContent = keyValueSection({
+      "Completeness": `${(decomposition.completeness * 100).toFixed(0)}%`,
+      "Rigor Level": decomposition.rigorLevel,
+      "Atom Count": decomposition.atomCount,
+      "Max Dependency Depth": decomposition.maxDependencyDepth
+    });
+    let metricsFull = metricsContent;
+    metricsFull += "\n\n**Completeness:**\n\n" + progressBar(decomposition.completeness * 100);
+    parts.push(section("Metrics", metricsFull));
+  }
+  const axioms = decomposition.atoms.filter((a) => a.type === "axiom");
+  if (axioms.length > 0) {
+    const axiomRows = axioms.map((atom) => [
+      atom.id,
+      atom.statement.substring(0, 100) + (atom.statement.length > 100 ? "..." : "")
+    ]);
+    parts.push(section("Axioms", table(["ID", "Statement"], axiomRows)));
+  }
+  const hypotheses = decomposition.atoms.filter((a) => a.type === "hypothesis");
+  if (hypotheses.length > 0) {
+    const hypothesesRows = hypotheses.map((atom) => [
+      atom.id,
+      atom.statement.substring(0, 100) + (atom.statement.length > 100 ? "..." : "")
+    ]);
+    parts.push(section("Hypotheses", table(["ID", "Statement"], hypothesesRows)));
+  }
+  const definitions = decomposition.atoms.filter((a) => a.type === "definition");
+  if (definitions.length > 0) {
+    const definitionsRows = definitions.map((atom) => [
+      atom.id,
+      atom.statement.substring(0, 100) + (atom.statement.length > 100 ? "..." : "")
+    ]);
+    parts.push(section("Definitions", table(["ID", "Statement"], definitionsRows)));
+  }
+  const lemmas = decomposition.atoms.filter((a) => a.type === "lemma");
+  if (lemmas.length > 0) {
+    const lemmasRows = lemmas.map((atom) => [
+      atom.id,
+      atom.statement.substring(0, 80) + (atom.statement.length > 80 ? "..." : ""),
+      atom.derivedFrom ? atom.derivedFrom.join(", ") : "-",
+      atom.usedInferenceRule || "-"
+    ]);
+    parts.push(section("Lemmas", table(["ID", "Statement", "Derived From", "Rule"], lemmasRows)));
+  }
+  const derived = decomposition.atoms.filter((a) => a.type === "derived");
+  if (derived.length > 0) {
+    const derivedRows = derived.map((atom) => [
+      atom.id,
+      atom.statement.substring(0, 80) + (atom.statement.length > 80 ? "..." : ""),
+      atom.derivedFrom ? atom.derivedFrom.join(", ") : "-",
+      atom.usedInferenceRule || "-"
+    ]);
+    parts.push(section("Derived Statements", table(["ID", "Statement", "Derived From", "Rule"], derivedRows)));
+  }
+  const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
+  if (conclusions.length > 0) {
+    const conclusionsRows = conclusions.map((atom) => [
+      atom.id,
+      atom.statement.substring(0, 100) + (atom.statement.length > 100 ? "..." : ""),
+      atom.derivedFrom ? atom.derivedFrom.join(", ") : "-"
+    ]);
+    parts.push(section("Conclusions", table(["ID", "Statement", "Derived From"], conclusionsRows)));
+  }
+  if (decomposition.dependencies && decomposition.dependencies.edges && decomposition.dependencies.edges.length > 0) {
+    const depsRows = decomposition.dependencies.edges.map((edge) => [
+      edge.from,
+      edge.to,
+      edge.inferenceRule || "Direct"
+    ]);
+    parts.push(section("Dependencies", table(["From", "To", "Inference Rule"], depsRows)));
+  }
+  if (decomposition.gaps && decomposition.gaps.length > 0) {
+    const gapsRows = decomposition.gaps.map((gap) => [
+      gap.id,
+      gap.type,
+      gap.severity,
+      gap.description.substring(0, 60) + (gap.description.length > 60 ? "..." : ""),
+      `${gap.location.from} \u2192 ${gap.location.to}`,
+      gap.suggestedFix ? gap.suggestedFix.substring(0, 40) : "-"
+    ]);
+    parts.push(section("Identified Gaps", table(
+      ["ID", "Type", "Severity", "Description", "Location", "Suggested Fix"],
+      gapsRows
+    )));
+  }
+  if (decomposition.implicitAssumptions && decomposition.implicitAssumptions.length > 0) {
+    const assumptionsRows = decomposition.implicitAssumptions.map((assumption) => [
+      assumption.type,
+      assumption.statement.substring(0, 80) + (assumption.statement.length > 80 ? "..." : ""),
+      assumption.shouldBeExplicit ? "Yes" : "No",
+      assumption.suggestedFormulation ? assumption.suggestedFormulation.substring(0, 50) : "-"
+    ]);
+    parts.push(section("Implicit Assumptions", table(
+      ["Type", "Statement", "Should Be Explicit", "Suggested Formulation"],
+      assumptionsRows
+    )));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = proofDecompositionToMermaid(decomposition, "default", true, true);
+    parts.push(section("Proof Structure Diagram", mermaidBlock(mermaidDiagram)));
+  }
+  return document("Proof Decomposition Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: "proof-decomposition",
+      completeness: decomposition.completeness,
+      rigorLevel: decomposition.rigorLevel,
+      atomCount: decomposition.atomCount
+    }
+  });
+}
 var init_proof_decomposition = __esm({
   "src/export/visual/proof-decomposition.ts"() {
     init_esm_shims();
@@ -20321,6 +21971,7 @@ var init_proof_decomposition = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -20348,6 +21999,8 @@ function exportEngineeringAnalysis(thought, options) {
       return engineeringToUML(thought, options);
     case "json":
       return engineeringToJSON(thought, options);
+    case "markdown":
+      return engineeringToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -20604,26 +22257,26 @@ function engineeringToSVG(thought, options) {
   const sectionWidth = 150;
   const totalWidth = sections.length * (sectionWidth + 20);
   let startX = centerX - totalWidth / 2;
-  for (const section of sections) {
+  for (const section2 of sections) {
     const pos = {
-      id: section.id,
-      label: section.label,
+      id: section2.id,
+      label: section2.label,
       x: startX,
       y: currentY,
       width: sectionWidth,
       height: 40,
-      type: section.type
+      type: section2.type
     };
-    nodePositions.set(section.id, pos);
+    nodePositions.set(section2.id, pos);
     startX += sectionWidth + 20;
   }
   const svgHeight = currentY + 120;
   let svg = generateSVGHeader(svgOptions.svgWidth || 800, svgHeight, `Engineering: ${thought.analysisType}`);
   const challengeColors = getNodeColor("primary", colorScheme);
   svg += renderStadiumNode(challengePos, challengeColors);
-  for (const section of sections) {
-    const pos = nodePositions.get(section.id);
-    const colors = getNodeColor(section.type, colorScheme);
+  for (const section2 of sections) {
+    const pos = nodePositions.get(section2.id);
+    const colors = getNodeColor(section2.type, colorScheme);
     svg += renderRectNode(pos, colors, 5);
     svg += renderEdge(challengePos, pos, { color: "#666666" });
   }
@@ -21491,6 +23144,154 @@ function engineeringToJSON(thought, options) {
   }
   return serializeGraph(graph, { prettyPrint: jsonPrettyPrint, indent: jsonIndent });
 }
+function engineeringToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  const overviewContent = keyValueSection({
+    "Analysis Type": thought.analysisType.toUpperCase(),
+    "Design Challenge": thought.designChallenge.substring(0, 100) + (thought.designChallenge.length > 100 ? "..." : "")
+  });
+  parts.push(section("Overview", overviewContent));
+  if (thought.requirements && thought.requirements.requirements.length > 0) {
+    const reqRows = thought.requirements.requirements.map((req) => [
+      req.id,
+      req.title.substring(0, 40) + (req.title.length > 40 ? "..." : ""),
+      req.priority,
+      req.status,
+      req.source
+    ]);
+    let reqContent = table(["ID", "Title", "Priority", "Status", "Source"], reqRows);
+    if (includeMetrics) {
+      const cov = thought.requirements.coverage;
+      const coveragePercent = cov.verified / Math.max(cov.total, 1) * 100;
+      reqContent += "\n\n" + keyValueSection({
+        "Total Requirements": cov.total,
+        "Verified": cov.verified,
+        "Traced to Source": cov.tracedToSource,
+        "Allocated to Design": cov.allocatedToDesign,
+        "Coverage": `${coveragePercent.toFixed(1)}%`
+      });
+      reqContent += "\n\n**Verification Progress:**\n\n" + progressBar(coveragePercent);
+    }
+    parts.push(section("Requirements Traceability", reqContent));
+  }
+  if (thought.tradeStudy) {
+    const criteriaRows = thought.tradeStudy.criteria.map((c) => [
+      c.name,
+      `${(c.weight * 100).toFixed(0)}%`,
+      c.description || "-"
+    ]);
+    const altRows = thought.tradeStudy.alternatives.map((alt) => [
+      alt.id === thought.tradeStudy.recommendation ? `\u2B50 ${alt.name}` : alt.name,
+      alt.description.substring(0, 60) + (alt.description.length > 60 ? "..." : ""),
+      alt.riskLevel || "-",
+      alt.estimatedCost?.toString() || "-"
+    ]);
+    let tradeContent = `**Objective:** ${thought.tradeStudy.objective}
+
+`;
+    tradeContent += "### Criteria\n\n";
+    tradeContent += table(["Criterion", "Weight", "Description"], criteriaRows);
+    tradeContent += "\n\n### Alternatives\n\n";
+    tradeContent += table(["Alternative", "Description", "Risk Level", "Cost"], altRows);
+    tradeContent += "\n\n**Recommendation:** " + thought.tradeStudy.recommendation;
+    tradeContent += "\n\n**Justification:**\n\n" + thought.tradeStudy.justification;
+    parts.push(section("Trade Study: " + thought.tradeStudy.title, tradeContent));
+  }
+  if (thought.fmea && thought.fmea.failureModes.length > 0) {
+    const fmeaRows = thought.fmea.failureModes.map((fm) => {
+      const isCritical = fm.rpn >= thought.fmea.rpnThreshold;
+      return [
+        fm.component,
+        fm.failureMode.substring(0, 40) + (fm.failureMode.length > 40 ? "..." : ""),
+        fm.severity.toString(),
+        fm.occurrence.toString(),
+        fm.detection.toString(),
+        `${fm.rpn}${isCritical ? " \u26A0\uFE0F" : ""}`,
+        fm.mitigation ? "\u2713" : "-"
+      ];
+    });
+    let fmeaContent = `**System:** ${thought.fmea.system}
+
+`;
+    fmeaContent += table(
+      ["Component", "Failure Mode", "S", "O", "D", "RPN", "Mitigation"],
+      fmeaRows
+    );
+    if (includeMetrics) {
+      const sum = thought.fmea.summary;
+      fmeaContent += "\n\n" + keyValueSection({
+        "Total Modes": sum.totalModes,
+        "Critical Modes": sum.criticalModes,
+        "Average RPN": sum.averageRpn.toFixed(1),
+        "Max RPN": sum.maxRpn,
+        "RPN Threshold": thought.fmea.rpnThreshold
+      });
+    }
+    parts.push(section("Failure Mode and Effects Analysis (FMEA)", fmeaContent));
+  }
+  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
+    let decisionsContent = "";
+    for (const dec of thought.designDecisions.decisions) {
+      decisionsContent += `### ${dec.id}: ${dec.title} (${dec.status})
+
+`;
+      decisionsContent += keyValueSection({
+        "Status": dec.status,
+        "Date": dec.date || "-"
+      });
+      decisionsContent += "\n\n**Context:**\n\n" + dec.context;
+      decisionsContent += "\n\n**Decision:**\n\n" + dec.decision;
+      decisionsContent += "\n\n**Rationale:**\n\n" + dec.rationale;
+      if (dec.consequences.length > 0) {
+        decisionsContent += "\n\n**Consequences:**\n\n" + list(dec.consequences);
+      }
+      if (dec.supersededBy) {
+        decisionsContent += `
+
+*Superseded by: ${dec.supersededBy}*`;
+      }
+      decisionsContent += "\n\n---\n\n";
+    }
+    parts.push(section("Design Decisions", decisionsContent));
+  }
+  if (thought.assessment) {
+    let assessmentContent = keyValueSection({
+      "Confidence": `${(thought.assessment.confidence * 100).toFixed(1)}%`,
+      "Key Risks": thought.assessment.keyRisks.length,
+      "Open Issues": thought.assessment.openIssues.length
+    });
+    assessmentContent += "\n\n**Confidence Level:**\n\n" + progressBar(thought.assessment.confidence * 100);
+    if (thought.assessment.keyRisks.length > 0) {
+      assessmentContent += "\n\n**Key Risks:**\n\n" + list(thought.assessment.keyRisks.map((r) => `\u26A0\uFE0F ${r}`));
+    }
+    if (thought.assessment.openIssues.length > 0) {
+      assessmentContent += "\n\n**Open Issues:**\n\n" + list(thought.assessment.openIssues);
+    }
+    if (thought.assessment.nextSteps.length > 0) {
+      assessmentContent += "\n\n**Next Steps:**\n\n" + list(thought.assessment.nextSteps);
+    }
+    parts.push(section("Assessment", assessmentContent));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = engineeringToMermaid(thought, options);
+    parts.push(section("Visualization", mermaidBlock(mermaidDiagram)));
+  }
+  return document(`Engineering Analysis: ${thought.analysisType}`, parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: "engineering",
+      analysisType: thought.analysisType,
+      ...thought.assessment?.confidence !== void 0 ? { confidence: thought.assessment.confidence } : {}
+    }
+  });
+}
 var init_engineering = __esm({
   "src/export/visual/engineering.ts"() {
     init_esm_shims();
@@ -21501,6 +23302,639 @@ var init_engineering = __esm({
     init_html_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
+  }
+});
+
+// src/export/visual/computability.ts
+function exportComputability(thought, options) {
+  const { format } = options;
+  switch (format) {
+    case "mermaid":
+      return computabilityToMermaid(thought, options);
+    case "dot":
+      return computabilityToDOT(thought, options);
+    case "ascii":
+      return computabilityToASCII(thought);
+    case "svg":
+      return computabilityToSVG(thought, options);
+    case "graphml":
+      return computabilityToGraphML(thought, options);
+    case "tikz":
+      return computabilityToTikZ(thought, options);
+    case "html":
+      return computabilityToHTML(thought, options);
+    case "json":
+      return computabilityToJSON(thought, options);
+    case "markdown":
+      return computabilityToMarkdown(thought, options);
+    default:
+      throw new Error(`Unsupported format: ${format}`);
+  }
+}
+function computabilityToMermaid(thought, options) {
+  const { includeLabels = true } = options;
+  if (thought.currentMachine || thought.machines && thought.machines.length > 0) {
+    return turingMachineToMermaid(thought.currentMachine || thought.machines[0], includeLabels);
+  }
+  if (thought.reductions && thought.reductions.length > 0) {
+    return reductionChainToMermaid(thought.reductions, thought.reductionChain, includeLabels);
+  }
+  if (thought.decidabilityProof) {
+    return decidabilityProofToMermaid(thought);
+  }
+  let mermaid = "graph TD\n";
+  mermaid += `  type["${thought.thoughtType}"]
+`;
+  if (thought.keyInsight) {
+    mermaid += `  insight["${thought.keyInsight.substring(0, 50)}..."]
+`;
+    mermaid += "  type --> insight\n";
+  }
+  return mermaid;
+}
+function turingMachineToMermaid(machine, includeLabels) {
+  let mermaid = "stateDiagram-v2\n";
+  mermaid += `  [*] --> ${sanitizeId(machine.initialState)}
+`;
+  for (const t of machine.transitions) {
+    const label = includeLabels ? `${t.readSymbol}/${t.writeSymbol},${t.direction}` : "";
+    mermaid += `  ${sanitizeId(t.fromState)} --> ${sanitizeId(t.toState)}`;
+    if (label) {
+      mermaid += `: ${label}`;
+    }
+    mermaid += "\n";
+  }
+  for (const acceptState of machine.acceptStates) {
+    mermaid += `  ${sanitizeId(acceptState)} --> [*]
+`;
+  }
+  return mermaid;
+}
+function reductionChainToMermaid(reductions, chain, includeLabels) {
+  let mermaid = "graph LR\n";
+  if (chain && chain.length > 0) {
+    for (let i = 0; i < chain.length - 1; i++) {
+      const from = sanitizeId(chain[i]);
+      const to = sanitizeId(chain[i + 1]);
+      const reduction = reductions.find((r) => r.fromProblem === chain[i] && r.toProblem === chain[i + 1]);
+      const label = includeLabels && reduction ? `\u2264${reduction.type === "polynomial_time" ? "p" : "m"}` : "";
+      mermaid += `  ${from}["${chain[i]}"] -->|${label}| ${to}["${chain[i + 1]}"]
+`;
+    }
+  } else {
+    for (const r of reductions) {
+      const from = sanitizeId(r.fromProblem);
+      const to = sanitizeId(r.toProblem);
+      const label = includeLabels ? `\u2264${r.type === "polynomial_time" ? "p" : "m"}` : "";
+      mermaid += `  ${from}["${r.fromProblem}"] -->|${label}| ${to}["${r.toProblem}"]
+`;
+    }
+  }
+  return mermaid;
+}
+function decidabilityProofToMermaid(thought, _includeLabels) {
+  const proof = thought.decidabilityProof;
+  let mermaid = "graph TD\n";
+  mermaid += `  problem["Problem: ${proof.problem}"]
+`;
+  mermaid += `  method["Method: ${proof.method}"]
+`;
+  mermaid += `  conclusion["${proof.conclusion.toUpperCase()}"]
+`;
+  mermaid += "  problem --> method\n";
+  mermaid += "  method --> conclusion\n";
+  if (proof.conclusion === "undecidable") {
+    mermaid += "  style conclusion fill:#ffcccc,stroke:#ff0000\n";
+  } else if (proof.conclusion === "decidable") {
+    mermaid += "  style conclusion fill:#ccffcc,stroke:#00ff00\n";
+  }
+  return mermaid;
+}
+function computabilityToDOT(thought, options) {
+  const { includeLabels = true } = options;
+  if (thought.currentMachine || thought.machines && thought.machines.length > 0) {
+    return turingMachineToDOT(thought.currentMachine || thought.machines[0], includeLabels);
+  }
+  if (thought.reductions && thought.reductions.length > 0) {
+    return reductionChainToDOT(thought.reductions, thought.reductionChain, includeLabels);
+  }
+  let dot = "digraph Computability {\n";
+  dot += "  rankdir=TD;\n";
+  dot += `  type [label="${thought.thoughtType}"];
+`;
+  dot += "}\n";
+  return dot;
+}
+function turingMachineToDOT(machine, includeLabels) {
+  let dot = `digraph TuringMachine {
+`;
+  dot += "  rankdir=LR;\n";
+  dot += "  node [shape=circle];\n\n";
+  dot += "  start [shape=point];\n";
+  dot += `  start -> ${sanitizeId(machine.initialState)};
+
+`;
+  for (const state of machine.states) {
+    const isAccept = machine.acceptStates.includes(state);
+    const isReject = machine.rejectStates.includes(state);
+    const shape = isAccept ? "doublecircle" : isReject ? "circle, style=filled, fillcolor=lightgray" : "circle";
+    dot += `  ${sanitizeId(state)} [label="${state}", shape=${shape}];
+`;
+  }
+  dot += "\n";
+  for (const t of machine.transitions) {
+    const label = includeLabels ? `${t.readSymbol}/${t.writeSymbol},${t.direction}` : "";
+    dot += `  ${sanitizeId(t.fromState)} -> ${sanitizeId(t.toState)}`;
+    if (label) {
+      dot += ` [label="${label}"]`;
+    }
+    dot += ";\n";
+  }
+  dot += "}\n";
+  return dot;
+}
+function reductionChainToDOT(reductions, _chain, includeLabels) {
+  let dot = "digraph ReductionChain {\n";
+  dot += "  rankdir=LR;\n";
+  dot += "  node [shape=box, style=rounded];\n\n";
+  const problems = /* @__PURE__ */ new Set();
+  for (const r of reductions) {
+    problems.add(r.fromProblem);
+    problems.add(r.toProblem);
+  }
+  for (const p of problems) {
+    dot += `  ${sanitizeId(p)} [label="${p}"];
+`;
+  }
+  dot += "\n";
+  for (const r of reductions) {
+    const label = includeLabels ? `\u2264${r.type === "polynomial_time" ? "p" : "m"}` : "";
+    dot += `  ${sanitizeId(r.fromProblem)} -> ${sanitizeId(r.toProblem)}`;
+    if (label) {
+      dot += ` [label="${label}"]`;
+    }
+    dot += ";\n";
+  }
+  dot += "}\n";
+  return dot;
+}
+function computabilityToASCII(thought) {
+  let ascii = "COMPUTABILITY ANALYSIS\n";
+  ascii += "=".repeat(50) + "\n\n";
+  ascii += `Type: ${thought.thoughtType}
+`;
+  if (thought.keyInsight) {
+    ascii += `
+Key Insight: ${thought.keyInsight}
+`;
+  }
+  if (thought.currentMachine) {
+    const m = thought.currentMachine;
+    ascii += `
+Turing Machine: ${m.name}
+`;
+    ascii += "-".repeat(30) + "\n";
+    ascii += `States: {${m.states.join(", ")}}
+`;
+    ascii += `Initial: ${m.initialState}
+`;
+    ascii += `Accept: {${m.acceptStates.join(", ")}}
+`;
+    ascii += `Transitions: ${m.transitions.length}
+`;
+  }
+  if (thought.computationTrace) {
+    const trace = thought.computationTrace;
+    ascii += `
+Computation Trace:
+`;
+    ascii += "-".repeat(30) + "\n";
+    ascii += `Input: ${trace.input}
+`;
+    ascii += `Steps: ${trace.totalSteps}
+`;
+    ascii += `Result: ${trace.result.toUpperCase()}
+`;
+    for (const step of trace.steps.slice(0, 5)) {
+      const head = " ".repeat(step.headPosition) + "v";
+      ascii += `  [${step.stepNumber}] ${step.state}: ${step.tapeContents}
+`;
+      ascii += `       ${head}
+`;
+    }
+    if (trace.steps.length > 5) {
+      ascii += `  ... (${trace.steps.length - 5} more steps)
+`;
+    }
+  }
+  if (thought.decidabilityProof) {
+    const proof = thought.decidabilityProof;
+    ascii += `
+Decidability Analysis:
+`;
+    ascii += "-".repeat(30) + "\n";
+    ascii += `Problem: ${proof.problem}
+`;
+    ascii += `Method: ${proof.method}
+`;
+    ascii += `Conclusion: ${proof.conclusion.toUpperCase()}
+`;
+    if (proof.proofSteps.length > 0) {
+      ascii += "\nProof Steps:\n";
+      for (let i = 0; i < Math.min(proof.proofSteps.length, 5); i++) {
+        ascii += `  ${i + 1}. ${proof.proofSteps[i]}
+`;
+      }
+    }
+  }
+  if (thought.reductions && thought.reductions.length > 0) {
+    ascii += `
+Reductions:
+`;
+    ascii += "-".repeat(30) + "\n";
+    for (const r of thought.reductions) {
+      ascii += `  ${r.fromProblem} \u2264${r.type === "polynomial_time" ? "p" : "m"} ${r.toProblem}
+`;
+    }
+  }
+  if (thought.diagonalization) {
+    const diag = thought.diagonalization;
+    ascii += `
+Diagonalization Argument:
+`;
+    ascii += "-".repeat(30) + "\n";
+    ascii += `Pattern: ${diag.pattern}
+`;
+    ascii += `Enumeration: ${diag.enumeration.description}
+`;
+    ascii += `Diagonal: ${diag.diagonalConstruction.description}
+`;
+    ascii += `Contradiction: ${diag.contradiction.impossibility}
+`;
+  }
+  return ascii;
+}
+function computabilityToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = 400
+  } = options;
+  const title = thought.currentMachine?.name || "Computability Analysis";
+  if (thought.currentMachine) {
+    return turingMachineToSVG(thought.currentMachine, { ...options, colorScheme, svgWidth, svgHeight });
+  }
+  const positions = /* @__PURE__ */ new Map();
+  positions.set("type", {
+    id: "type",
+    x: svgWidth / 2 - 60,
+    y: 80,
+    width: 120,
+    height: 40,
+    label: thought.thoughtType,
+    type: "type"
+  });
+  let svg = generateSVGHeader(svgWidth, svgHeight, title);
+  svg += '\n  <!-- Nodes -->\n  <g class="nodes">';
+  for (const [, pos] of positions) {
+    svg += renderRectNode(pos, getNodeColor("primary", colorScheme));
+  }
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Type", value: thought.thoughtType },
+      { label: "Uncertainty", value: thought.uncertainty.toFixed(2) }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, svgHeight - 80, metrics);
+  }
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
+function turingMachineToSVG(machine, options) {
+  const {
+    colorScheme = "default",
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = 400
+  } = options;
+  const positions = /* @__PURE__ */ new Map();
+  const nodeRadius = 30;
+  const spacing = 120;
+  const cols = Math.ceil(Math.sqrt(machine.states.length));
+  machine.states.forEach((state, i) => {
+    const row = Math.floor(i / cols);
+    const col = i % cols;
+    positions.set(state, {
+      id: state,
+      x: 100 + col * spacing,
+      y: 100 + row * spacing,
+      width: nodeRadius * 2,
+      height: nodeRadius * 2,
+      label: state,
+      type: machine.acceptStates.includes(state) ? "accept" : machine.rejectStates.includes(state) ? "reject" : "state"
+    });
+  });
+  let svg = generateSVGHeader(svgWidth, svgHeight, machine.name);
+  svg += '\n  <!-- Transitions -->\n  <g class="edges">';
+  for (const t of machine.transitions) {
+    const fromPos = positions.get(t.fromState);
+    const toPos = positions.get(t.toState);
+    if (fromPos && toPos) {
+      svg += renderEdge(fromPos, toPos, { label: `${t.readSymbol}/${t.writeSymbol}` });
+    }
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- States -->\n  <g class="nodes">';
+  for (const [, pos] of positions) {
+    const colors = pos.type === "accept" ? getNodeColor("success", colorScheme) : pos.type === "reject" ? getNodeColor("danger", colorScheme) : getNodeColor("neutral", colorScheme);
+    svg += renderEllipseNode(pos, colors);
+  }
+  svg += "\n  </g>";
+  const legendItems = [
+    { label: "State", color: getNodeColor("neutral", colorScheme) },
+    { label: "Accept", color: getNodeColor("success", colorScheme) },
+    { label: "Reject", color: getNodeColor("danger", colorScheme) }
+  ];
+  svg += renderLegend(20, svgHeight - 80, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
+function computabilityToGraphML(thought, options) {
+  const nodes = [];
+  const edges = [];
+  let edgeId = 0;
+  if (thought.currentMachine) {
+    const m = thought.currentMachine;
+    for (const state of m.states) {
+      nodes.push({
+        id: sanitizeId(state),
+        label: state,
+        type: m.acceptStates.includes(state) ? "accept" : m.rejectStates.includes(state) ? "reject" : "state"
+      });
+    }
+    for (const t of m.transitions) {
+      edges.push({
+        id: `e${edgeId++}`,
+        source: sanitizeId(t.fromState),
+        target: sanitizeId(t.toState),
+        label: options.includeLabels ? `${t.readSymbol}/${t.writeSymbol},${t.direction}` : void 0,
+        directed: true
+      });
+    }
+    return generateGraphML(nodes, edges, { graphName: m.name });
+  }
+  nodes.push({ id: "root", label: thought.thoughtType, type: "root" });
+  return generateGraphML(nodes, edges, { graphName: "Computability Analysis" });
+}
+function computabilityToTikZ(thought, options) {
+  const nodes = [];
+  const edges = [];
+  if (thought.currentMachine) {
+    const m = thought.currentMachine;
+    const cols = Math.ceil(Math.sqrt(m.states.length));
+    m.states.forEach((state, i) => {
+      const row = Math.floor(i / cols);
+      const col = i % cols;
+      nodes.push({
+        id: sanitizeId(state),
+        label: state,
+        x: col * 3,
+        y: -row * 2,
+        shape: "ellipse",
+        type: m.acceptStates.includes(state) ? "success" : m.rejectStates.includes(state) ? "danger" : "neutral"
+      });
+    });
+    for (const t of m.transitions) {
+      edges.push({
+        source: sanitizeId(t.fromState),
+        target: sanitizeId(t.toState),
+        label: options.includeLabels ? `${t.readSymbol}/${t.writeSymbol}` : void 0,
+        directed: true
+      });
+    }
+    return generateTikZ(nodes, edges, { title: m.name, colorScheme: options.colorScheme });
+  }
+  nodes.push({ id: "root", label: thought.thoughtType, x: 0, y: 0, shape: "rectangle", type: "primary" });
+  return generateTikZ(nodes, edges, { title: "Computability Analysis" });
+}
+function computabilityToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Computability Analysis",
+    htmlTheme = "light",
+    includeMetrics = true
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  const typeBadge = renderBadge(thought.thoughtType, "primary");
+  html += `<p>Analysis Type: ${typeBadge}</p>
+`;
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard("Thought Type", thought.thoughtType, "primary");
+    html += renderMetricCard("Uncertainty", thought.uncertainty.toFixed(2), "info");
+    if (thought.machines) {
+      html += renderMetricCard("Machines", thought.machines.length, "info");
+    }
+    if (thought.reductions) {
+      html += renderMetricCard("Reductions", thought.reductions.length, "info");
+    }
+    html += "</div>\n";
+  }
+  if (thought.currentMachine) {
+    const m = thought.currentMachine;
+    html += renderSection("Turing Machine", `
+      <p><strong>Name:</strong> ${escapeHTML(m.name)}</p>
+      <p><strong>Type:</strong> ${escapeHTML(m.type)}</p>
+      <p><strong>States:</strong> {${m.states.map((s) => escapeHTML(s)).join(", ")}}</p>
+      <p><strong>Initial State:</strong> ${escapeHTML(m.initialState)}</p>
+      <p><strong>Accept States:</strong> {${m.acceptStates.map((s) => escapeHTML(s)).join(", ")}}</p>
+      <p><strong>Transitions:</strong> ${m.transitions.length}</p>
+    `, "\u{1F916}");
+  }
+  if (thought.decidabilityProof) {
+    const proof = thought.decidabilityProof;
+    const conclusionBadge = renderBadge(
+      proof.conclusion.toUpperCase(),
+      proof.conclusion === "decidable" ? "success" : proof.conclusion === "undecidable" ? "danger" : "warning"
+    );
+    html += renderSection("Decidability Analysis", `
+      <p><strong>Problem:</strong> ${escapeHTML(proof.problem)}</p>
+      <p><strong>Method:</strong> ${escapeHTML(proof.method)}</p>
+      <p><strong>Conclusion:</strong> ${conclusionBadge}</p>
+      ${proof.proofSteps.length > 0 ? renderList(proof.proofSteps) : ""}
+    `, "\u{1F4CA}");
+  }
+  if (thought.reductions && thought.reductions.length > 0) {
+    const rows = thought.reductions.map((r) => [
+      escapeHTML(r.fromProblem),
+      `\u2264${r.type === "polynomial_time" ? "p" : "m"}`,
+      escapeHTML(r.toProblem)
+    ]);
+    html += renderSection("Reductions", renderTable(["From", "Type", "To"], rows), "\u{1F517}");
+  }
+  if (thought.keyInsight) {
+    html += renderSection("Key Insight", `<p>${escapeHTML(thought.keyInsight)}</p>`, "\u{1F4A1}");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
+function computabilityToJSON(thought, options) {
+  const { includeMetrics = true } = options;
+  const graph = createJsonGraph("Computability Analysis", "computability");
+  addNode(graph, {
+    id: "root",
+    label: thought.thoughtType,
+    type: "thought-type",
+    metadata: {
+      uncertainty: thought.uncertainty,
+      keyInsight: thought.keyInsight
+    }
+  });
+  let edgeId = 0;
+  if (thought.machines) {
+    for (const m of thought.machines) {
+      addNode(graph, {
+        id: sanitizeId(m.id),
+        label: m.name,
+        type: "turing-machine",
+        metadata: {
+          states: m.states.length,
+          transitions: m.transitions.length,
+          type: m.type
+        }
+      });
+      addEdge(graph, {
+        id: `e${edgeId++}`,
+        source: "root",
+        target: sanitizeId(m.id),
+        type: "contains"
+      });
+    }
+  }
+  if (thought.reductions) {
+    for (const r of thought.reductions) {
+      addNode(graph, {
+        id: sanitizeId(r.id),
+        label: `${r.fromProblem} \u2192 ${r.toProblem}`,
+        type: "reduction",
+        metadata: {
+          reductionType: r.type,
+          fromProblem: r.fromProblem,
+          toProblem: r.toProblem
+        }
+      });
+    }
+  }
+  if (includeMetrics) {
+    addMetric(graph, "Thought Type", thought.thoughtType);
+    addMetric(graph, "Uncertainty", thought.uncertainty);
+    if (thought.machines) {
+      addMetric(graph, "Machines", thought.machines.length);
+    }
+    if (thought.decidabilityProof) {
+      addMetric(graph, "Conclusion", thought.decidabilityProof.conclusion);
+    }
+  }
+  addLegendItem(graph, "Turing Machine", "#4A90E2");
+  addLegendItem(graph, "Reduction", "#50C878");
+  addLegendItem(graph, "Decidable", "#28A745");
+  addLegendItem(graph, "Undecidable", "#DC3545");
+  return serializeGraph(graph);
+}
+function computabilityToMarkdown(thought, options) {
+  const {
+    markdownIncludeFrontmatter = false,
+    markdownIncludeToc = false,
+    markdownIncludeMermaid = true,
+    includeMetrics = true
+  } = options;
+  const parts = [];
+  if (includeMetrics) {
+    parts.push(section("Analysis", keyValueSection({
+      "Type": thought.thoughtType,
+      "Uncertainty": thought.uncertainty.toFixed(2),
+      ...thought.keyInsight ? { "Key Insight": thought.keyInsight } : {}
+    })));
+  }
+  if (thought.currentMachine) {
+    const m = thought.currentMachine;
+    parts.push(section("Turing Machine", keyValueSection({
+      "Name": m.name,
+      "Type": m.type,
+      "States": `{${m.states.join(", ")}}`,
+      "Initial State": m.initialState,
+      "Accept States": `{${m.acceptStates.join(", ")}}`,
+      "Transitions": m.transitions.length.toString()
+    })));
+    if (m.transitions.length > 0) {
+      const transitionRows = m.transitions.map((t) => [
+        t.fromState,
+        t.readSymbol,
+        t.toState,
+        t.writeSymbol,
+        t.direction
+      ]);
+      parts.push(section("Transition Function", table(
+        ["From State", "Read", "To State", "Write", "Move"],
+        transitionRows
+      )));
+    }
+  }
+  if (thought.decidabilityProof) {
+    const proof = thought.decidabilityProof;
+    parts.push(section("Decidability Analysis", keyValueSection({
+      "Problem": proof.problem,
+      "Method": proof.method,
+      "Conclusion": `**${proof.conclusion.toUpperCase()}**`
+    })));
+    if (proof.proofSteps.length > 0) {
+      parts.push(section("Proof Steps", list(proof.proofSteps.map((s, i) => `${i + 1}. ${s}`))));
+    }
+  }
+  if (thought.reductions && thought.reductions.length > 0) {
+    const reductionRows = thought.reductions.map((r) => [
+      r.fromProblem,
+      `\u2264${r.type === "polynomial_time" ? "p" : "m"}`,
+      r.toProblem
+    ]);
+    parts.push(section("Reductions", table(["From Problem", "Reduction", "To Problem"], reductionRows)));
+  }
+  if (thought.diagonalization) {
+    const d = thought.diagonalization;
+    parts.push(section("Diagonalization Argument", keyValueSection({
+      "Pattern": d.pattern,
+      "Enumeration": d.enumeration.description,
+      "Diagonal Construction": d.diagonalConstruction.description,
+      "Contradiction": d.contradiction.impossibility
+    })));
+  }
+  if (markdownIncludeMermaid) {
+    const mermaidDiagram = computabilityToMermaid(thought, { ...options});
+    parts.push(section("Diagram", mermaidBlock(mermaidDiagram)));
+  }
+  return document("Computability Analysis", parts.join("\n"), {
+    includeFrontmatter: markdownIncludeFrontmatter,
+    includeTableOfContents: markdownIncludeToc,
+    metadata: {
+      mode: "computability",
+      thoughtType: thought.thoughtType,
+      uncertainty: thought.uncertainty
+    }
+  });
+}
+var init_computability = __esm({
+  "src/export/visual/computability.ts"() {
+    init_esm_shims();
+    init_utils();
+    init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
+    init_html_utils();
+    init_json_utils();
+    init_markdown_utils();
   }
 });
 
@@ -21519,6 +23953,7 @@ var init_visual = __esm({
     init_modelica_utils();
     init_uml_utils();
     init_json_utils();
+    init_markdown_utils();
     init_causal();
     init_temporal();
     init_game_theory();
@@ -21540,6 +23975,7 @@ var init_visual = __esm({
     init_metareasoning();
     init_proof_decomposition();
     init_engineering();
+    init_computability();
     VisualExporter = class {
       exportCausalGraph(thought, options) {
         return exportCausalGraph(thought, options);
@@ -21607,6 +24043,10 @@ var init_visual = __esm({
       exportEngineeringAnalysis(thought, options) {
         return exportEngineeringAnalysis(thought, options);
       }
+      // Phase 11: Computability visual export (Turing's legacy)
+      exportComputability(thought, options) {
+        return exportComputability(thought, options);
+      }
     };
   }
 });
@@ -21648,8 +24088,8 @@ var init_ExportService = __esm({
       exportSession(session, format) {
         const startTime = Date.now();
         this.logger.debug("Export started", { sessionId: session.id, format, thoughtCount: session.thoughts.length });
-        if (format === "mermaid" || format === "dot" || format === "ascii" || format === "svg" || format === "graphml" || format === "tikz" || format === "modelica" || format === "html" || format === "uml" || format === "visual-json") {
-          const visualFormat = format === "visual-json" ? "json" : format;
+        if (format === "mermaid" || format === "dot" || format === "ascii" || format === "svg" || format === "graphml" || format === "tikz" || format === "modelica" || format === "html" || format === "uml" || format === "visual-json" || format === "visual-markdown") {
+          const visualFormat = format === "visual-json" ? "json" : format === "visual-markdown" ? "markdown" : format;
           const result2 = this.exportVisual(session, visualFormat);
           this.logger.debug("Export completed", {
             sessionId: session.id,

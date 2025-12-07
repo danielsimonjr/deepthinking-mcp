@@ -23,6 +23,10 @@ import type { MetaReasoningThought } from './modes/metareasoning.js';
 // Import Phase 10 mode types (v7.1.0)
 import type { EngineeringThought } from './modes/engineering.js';
 
+// Import Phase 11 mode types (v7.2.0) - Turing/von Neumann extensions
+import type { ComputabilityThought } from './modes/computability.js';
+import type { CryptanalyticThought } from './modes/cryptanalytic.js';
+
 /**
  * Available thinking modes
  */
@@ -34,6 +38,8 @@ export enum ThinkingMode {
   PHYSICS = 'physics',
   HYBRID = 'hybrid',
   ENGINEERING = 'engineering', // Phase 10 (v7.1.0) - Engineering analysis
+  COMPUTABILITY = 'computability', // Phase 11 (v7.2.0) - Computability theory, Turing machines
+  CRYPTANALYTIC = 'cryptanalytic', // Phase 11 (v7.2.0) - Cryptanalysis, Turing's deciban system
 
   // ===== Implemented - Advanced Modes (Phase 4) =====
   METAREASONING = 'metareasoning', // Phase 4 (v3.3.0) - Self-reflection and strategy selection
@@ -73,6 +79,8 @@ export const FULLY_IMPLEMENTED_MODES: ReadonlyArray<ThinkingMode> = [
   ThinkingMode.PHYSICS,
   ThinkingMode.HYBRID,
   ThinkingMode.ENGINEERING, // Phase 10 v7.1.0
+  ThinkingMode.COMPUTABILITY, // Phase 11 v7.2.0 - Turing's legacy
+  ThinkingMode.CRYPTANALYTIC, // Phase 11 v7.2.0 - Turing's Bletchley Park work
   ThinkingMode.METAREASONING,
   ThinkingMode.RECURSIVE,
   ThinkingMode.MODAL,
@@ -761,6 +769,8 @@ export type Thought =
   | PhysicsThought
   | HybridThought
   | EngineeringThought
+  | ComputabilityThought
+  | CryptanalyticThought
   | InductiveThought
   | DeductiveThought
   | AbductiveThought
@@ -886,6 +896,17 @@ export function isEngineeringThought(thought: Thought): thought is EngineeringTh
   return thought.mode === ThinkingMode.ENGINEERING;
 }
 
+/**
+ * Type guards for Phase 11 modes (v7.2.0) - Turing/von Neumann extensions
+ */
+export function isComputabilityThought(thought: Thought): thought is ComputabilityThought {
+  return thought.mode === ThinkingMode.COMPUTABILITY;
+}
+
+export function isCryptanalyticThought(thought: Thought): thought is CryptanalyticThought {
+  return thought.mode === ThinkingMode.CRYPTANALYTIC;
+}
+
 // Re-export Phase 3 types
 export type { TemporalThought, GameTheoryThought, EvidentialThought, FirstPrinciplesThought };
 
@@ -897,3 +918,6 @@ export type { MetaReasoningThought };
 
 // Re-export Phase 10 types
 export type { EngineeringThought };
+
+// Re-export Phase 11 types (v7.2.0) - Turing/von Neumann extensions
+export type { ComputabilityThought, CryptanalyticThought };
