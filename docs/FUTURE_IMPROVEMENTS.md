@@ -229,7 +229,7 @@ quickRecommend(problemType: string): ThinkingMode {
 
 **Problems**:
 - Ignores all problem characteristics
-- Case-sensitive despite toLowerCase() on wrong side
+- Not truly case-insensitive if typeMap keys contain uppercase characters
 - Limited to predefined keywords
 - No fuzzy matching or synonyms
 
