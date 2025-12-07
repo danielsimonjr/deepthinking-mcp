@@ -994,6 +994,126 @@ var init_recommendations = __esm({
             examples: ["Complex system design", "Research problems", "Novel algorithms"]
           });
         }
+        if (characteristics.domain === "engineering" || characteristics.domain === "software" || characteristics.domain === "systems" || characteristics.requiresQuantification && !characteristics.requiresProof) {
+          recommendations.push({
+            mode: "engineering" /* ENGINEERING */,
+            score: characteristics.domain === "engineering" ? 0.92 : 0.85,
+            reasoning: "Problem requires systematic engineering analysis with trade-offs and constraints",
+            strengths: ["Requirements analysis", "Trade-off evaluation", "System design", "Failure mode analysis", "Implementation planning"],
+            limitations: ["May over-engineer simple problems", "Requires domain expertise"],
+            examples: ["System architecture", "Design decisions", "Performance optimization", "Reliability analysis", "Technical debt assessment"]
+          });
+        }
+        if (characteristics.domain === "computer science" || characteristics.domain === "computation" || characteristics.requiresProof && characteristics.domain.includes("algorithm")) {
+          recommendations.push({
+            mode: "computability" /* COMPUTABILITY */,
+            score: 0.88,
+            reasoning: "Problem involves computational complexity, decidability, or algorithmic analysis",
+            strengths: ["Turing machine analysis", "Decidability proofs", "Complexity classification", "Halting problem variants"],
+            limitations: ["Highly theoretical", "Requires formal CS background"],
+            examples: ["Algorithm decidability", "Complexity bounds", "Reduction proofs", "Computational limits"]
+          });
+        }
+        if (characteristics.domain === "security" || characteristics.domain === "cryptography" || characteristics.domain.includes("crypto")) {
+          recommendations.push({
+            mode: "cryptanalytic" /* CRYPTANALYTIC */,
+            score: 0.9,
+            reasoning: "Problem involves cryptographic analysis, security assessment, or information-theoretic reasoning",
+            strengths: ["Statistical analysis", "Pattern detection", "Deciban calculations", "Key space analysis", "Attack surface evaluation"],
+            limitations: ["Specialized domain", "Requires mathematical background"],
+            examples: ["Cipher analysis", "Protocol security", "Key management", "Attack vectors", "Information leakage"]
+          });
+        }
+        if (characteristics.complexity === "high" && (characteristics.hasAlternatives || characteristics.requiresExplanation)) {
+          recommendations.push({
+            mode: "recursive" /* RECURSIVE */,
+            score: 0.82,
+            reasoning: "Problem has recursive structure or can be decomposed into smaller similar subproblems",
+            strengths: ["Problem decomposition", "Self-similar analysis", "Base case identification", "Recursive patterns"],
+            limitations: ["Stack overflow risk in deep recursion", "May miss non-recursive solutions"],
+            examples: ["Divide and conquer", "Tree traversal", "Fractal analysis", "Self-referential problems"]
+          });
+        }
+        if (characteristics.hasAlternatives && characteristics.uncertainty === "high") {
+          recommendations.push({
+            mode: "modal" /* MODAL */,
+            score: 0.8,
+            reasoning: "Problem involves possibility, necessity, or reasoning about alternative scenarios",
+            strengths: ["Possible worlds analysis", "Necessity vs possibility", "Epistemic reasoning", "Deontic analysis"],
+            limitations: ["Abstract and theoretical", "May overcomplicate simple choices"],
+            examples: ["Modal logic proofs", "Necessity analysis", "Epistemic uncertainty", "Deontic obligations"]
+          });
+        }
+        if (characteristics.uncertainty === "high" && characteristics.requiresQuantification) {
+          recommendations.push({
+            mode: "stochastic" /* STOCHASTIC */,
+            score: 0.84,
+            reasoning: "Problem involves random processes, probabilistic transitions, or stochastic modeling",
+            strengths: ["Markov chains", "Random process modeling", "Probabilistic state transitions", "Monte Carlo methods"],
+            limitations: ["Requires probability theory", "Computationally intensive"],
+            examples: ["Queueing systems", "Random walks", "Stochastic optimization", "Process simulation"]
+          });
+        }
+        if (characteristics.hasAlternatives && characteristics.requiresQuantification) {
+          recommendations.push({
+            mode: "constraint" /* CONSTRAINT */,
+            score: 0.83,
+            reasoning: "Problem involves multiple constraints that must be satisfied simultaneously",
+            strengths: ["Constraint propagation", "Feasibility analysis", "SAT solving", "CSP formulation"],
+            limitations: ["NP-hard in general", "May have no solution"],
+            examples: ["Scheduling", "Resource allocation", "Configuration", "Puzzle solving"]
+          });
+        }
+        if (characteristics.requiresQuantification && characteristics.hasAlternatives) {
+          recommendations.push({
+            mode: "optimization" /* OPTIMIZATION */,
+            score: 0.86,
+            reasoning: "Problem requires finding optimal or near-optimal solutions from alternatives",
+            strengths: ["Objective function formulation", "Gradient methods", "Convex optimization", "Meta-heuristics"],
+            limitations: ["Local optima", "Computational complexity", "May require relaxation"],
+            examples: ["Resource optimization", "Parameter tuning", "Portfolio optimization", "Route planning"]
+          });
+        }
+        if (isPhilosophical || characteristics.complexity === "high" && characteristics.requiresExplanation) {
+          recommendations.push({
+            mode: "firstprinciples" /* FIRSTPRINCIPLES */,
+            score: isPhilosophical ? 0.88 : 0.82,
+            reasoning: "Problem benefits from breaking down to fundamental truths and building up from there",
+            strengths: ["Assumption identification", "Foundational analysis", "Novel solutions", "Deep understanding"],
+            limitations: ["Time-intensive", "May rediscover known solutions", "Requires broad knowledge"],
+            examples: ["Innovation challenges", "Paradigm shifts", "Root cause analysis", "Foundational questions"]
+          });
+        }
+        if (characteristics.complexity === "high" && (characteristics.timeDependent || characteristics.multiAgent)) {
+          recommendations.push({
+            mode: "systemsthinking" /* SYSTEMSTHINKING */,
+            score: 0.85,
+            reasoning: "Problem involves complex systems with interconnected components and feedback loops",
+            strengths: ["Holistic view", "Feedback loop analysis", "Emergence detection", "Leverage point identification"],
+            limitations: ["Can be overwhelming", "Requires system boundaries definition"],
+            examples: ["Organizational change", "Ecosystem analysis", "Market dynamics", "Social systems"]
+          });
+        }
+        if (characteristics.hasIncompleteInfo && (characteristics.requiresExplanation || characteristics.requiresQuantification)) {
+          recommendations.push({
+            mode: "scientificmethod" /* SCIENTIFICMETHOD */,
+            score: 0.84,
+            reasoning: "Problem requires systematic empirical investigation and hypothesis testing",
+            strengths: ["Hypothesis formulation", "Experimental design", "Falsification", "Reproducibility"],
+            limitations: ["Requires data collection", "Time for experiments", "May not apply to all domains"],
+            examples: ["Research questions", "A/B testing", "Empirical studies", "Data-driven decisions"]
+          });
+        }
+        if (characteristics.requiresProof && !characteristics.requiresQuantification) {
+          recommendations.push({
+            mode: "formallogic" /* FORMALLOGIC */,
+            score: 0.87,
+            reasoning: "Problem requires rigorous formal logical analysis and proof construction",
+            strengths: ["Propositional logic", "Predicate logic", "Proof systems", "Logical completeness"],
+            limitations: ["May be overly formal", "Limited expressiveness for some domains"],
+            examples: ["Formal verification", "Logical puzzles", "Argument validity", "Theorem proving"]
+          });
+        }
         if (recommendations.length === 0) {
           recommendations.push({
             mode: "sequential" /* SEQUENTIAL */,
@@ -1075,11 +1195,120 @@ var init_recommendations = __esm({
             synergies: ["Shannon stages guide proof strategy", "Mathematical rigor validates each stage"]
           });
         }
+        if ((characteristics.domain === "engineering" || characteristics.domain === "software") && characteristics.hasAlternatives) {
+          combinations.push({
+            modes: ["engineering" /* ENGINEERING */, "optimization" /* OPTIMIZATION */],
+            sequence: "sequential",
+            rationale: "Design system architecture, then optimize for performance/cost",
+            benefits: ["Structured design", "Optimal trade-offs", "Measurable improvements"],
+            synergies: ["Engineering constraints feed optimization", "Optimization validates design choices"]
+          });
+        }
+        if (characteristics.requiresQuantification && characteristics.hasAlternatives && (characteristics.domain === "engineering" || characteristics.domain === "software")) {
+          combinations.push({
+            modes: ["constraint" /* CONSTRAINT */, "engineering" /* ENGINEERING */],
+            sequence: "sequential",
+            rationale: "Identify constraints first, then design within those boundaries",
+            benefits: ["Feasibility guaranteed", "Requirements satisfaction", "Clear boundaries"],
+            synergies: ["Constraints define engineering solution space", "Engineering validates constraint satisfaction"]
+          });
+        }
+        if (characteristics.complexity === "high" && characteristics.requiresExplanation) {
+          combinations.push({
+            modes: ["firstprinciples" /* FIRSTPRINCIPLES */, "systemsthinking" /* SYSTEMSTHINKING */],
+            sequence: "sequential",
+            rationale: "Build from fundamental truths, then analyze systemic interactions",
+            benefits: ["Deep understanding", "Holistic view", "Novel insights"],
+            synergies: ["First principles reveal core elements", "Systems thinking shows interconnections"]
+          });
+        }
+        if (characteristics.hasIncompleteInfo && characteristics.requiresQuantification) {
+          combinations.push({
+            modes: ["scientificmethod" /* SCIENTIFICMETHOD */, "bayesian" /* BAYESIAN */],
+            sequence: "hybrid",
+            rationale: "Design experiments and update beliefs with Bayesian inference",
+            benefits: ["Rigorous methodology", "Quantified uncertainty", "Evidence integration"],
+            synergies: ["Experiments generate evidence", "Bayesian updates refine hypotheses"]
+          });
+        }
+        if (characteristics.requiresProof && !characteristics.hasIncompleteInfo) {
+          combinations.push({
+            modes: ["formallogic" /* FORMALLOGIC */, "deductive" /* DEDUCTIVE */],
+            sequence: "hybrid",
+            rationale: "Use formal logic systems with deductive derivation",
+            benefits: ["Maximum rigor", "Logically valid conclusions", "Formal verification"],
+            synergies: ["Formal logic provides structure", "Deduction ensures valid inference"]
+          });
+        }
+        if (characteristics.complexity === "high" && characteristics.hasAlternatives) {
+          combinations.push({
+            modes: ["recursive" /* RECURSIVE */, "optimization" /* OPTIMIZATION */],
+            sequence: "hybrid",
+            rationale: "Decompose problem recursively, optimize at each level",
+            benefits: ["Scalable solutions", "Local and global optimization", "Manageable complexity"],
+            synergies: ["Recursion breaks down problem", "Optimization solves subproblems optimally"]
+          });
+        }
+        if (characteristics.uncertainty === "high" && characteristics.requiresQuantification) {
+          combinations.push({
+            modes: ["stochastic" /* STOCHASTIC */, "bayesian" /* BAYESIAN */],
+            sequence: "parallel",
+            rationale: "Model random processes while updating beliefs probabilistically",
+            benefits: ["Complete uncertainty model", "Dynamic belief updates", "Probabilistic predictions"],
+            synergies: ["Stochastic models generate distributions", "Bayesian reasoning integrates evidence"]
+          });
+        }
+        if (characteristics.domain === "computer science" && characteristics.requiresProof) {
+          combinations.push({
+            modes: ["computability" /* COMPUTABILITY */, "formallogic" /* FORMALLOGIC */],
+            sequence: "hybrid",
+            rationale: "Analyze computational limits with formal logical proofs",
+            benefits: ["Decidability analysis", "Rigorous complexity proofs", "Theoretical foundations"],
+            synergies: ["Computability defines limits", "Formal logic proves properties"]
+          });
+        }
+        if (characteristics.domain === "security" && characteristics.uncertainty === "high") {
+          combinations.push({
+            modes: ["cryptanalytic" /* CRYPTANALYTIC */, "stochastic" /* STOCHASTIC */],
+            sequence: "parallel",
+            rationale: "Analyze cryptographic systems with probabilistic attack modeling",
+            benefits: ["Security assessment", "Attack probability estimation", "Key space analysis"],
+            synergies: ["Cryptanalysis identifies vulnerabilities", "Stochastic models attack success rates"]
+          });
+        }
+        if (characteristics.complexity === "high" && (characteristics.multiAgent || characteristics.timeDependent)) {
+          combinations.push({
+            modes: ["systemsthinking" /* SYSTEMSTHINKING */, "engineering" /* ENGINEERING */],
+            sequence: "sequential",
+            rationale: "Understand system dynamics holistically, then engineer solutions",
+            benefits: ["Holistic design", "Feedback-aware engineering", "Emergent behavior consideration"],
+            synergies: ["Systems view informs design", "Engineering implements systemic solutions"]
+          });
+        }
+        if (characteristics.hasAlternatives && characteristics.uncertainty === "high") {
+          combinations.push({
+            modes: ["modal" /* MODAL */, "counterfactual" /* COUNTERFACTUAL */],
+            sequence: "parallel",
+            rationale: "Analyze possible worlds and counterfactual scenarios together",
+            benefits: ["Complete possibility space", "What-if analysis", "Robust decision making"],
+            synergies: ["Modal logic structures possibilities", "Counterfactuals explore specific alternatives"]
+          });
+        }
+        if (characteristics.complexity === "high" && characteristics.hasAlternatives) {
+          combinations.push({
+            modes: ["metareasoning" /* METAREASONING */, "optimization" /* OPTIMIZATION */],
+            sequence: "hybrid",
+            rationale: "Monitor reasoning strategies and optimize approach selection",
+            benefits: ["Adaptive reasoning", "Resource optimization", "Strategy refinement"],
+            synergies: ["Metareasoning evaluates strategies", "Optimization selects best approach"]
+          });
+        }
         return combinations;
       }
       /**
        * Get a simple mode recommendation based on a few key characteristics
        * Simplified version for quick recommendations
+       * Supports all 28 reasoning modes (v7.2.0)
        */
       quickRecommend(problemType) {
         const typeMap = {
@@ -1102,6 +1331,7 @@ var init_recommendations = __esm({
           "strategy-selection": "metareasoning" /* METAREASONING */,
           "quality-assessment": "metareasoning" /* METAREASONING */,
           "reflection": "metareasoning" /* METAREASONING */,
+          "self-evaluation": "metareasoning" /* METAREASONING */,
           // Specialized modes
           "debugging": "abductive" /* ABDUCTIVE */,
           "mathematical": "mathematics" /* MATHEMATICS */,
@@ -1113,7 +1343,118 @@ var init_recommendations = __esm({
           "what-if": "counterfactual" /* COUNTERFACTUAL */,
           "analogy": "analogical" /* ANALOGICAL */,
           "physics": "physics" /* PHYSICS */,
-          "systematic": "shannon" /* SHANNON */
+          "systematic": "shannon" /* SHANNON */,
+          // ===== NEW MODES (v7.2.0) =====
+          // Engineering reasoning
+          "engineering": "engineering" /* ENGINEERING */,
+          "design": "engineering" /* ENGINEERING */,
+          "architecture": "engineering" /* ENGINEERING */,
+          "trade-off": "engineering" /* ENGINEERING */,
+          "tradeoff": "engineering" /* ENGINEERING */,
+          "system-design": "engineering" /* ENGINEERING */,
+          "implementation": "engineering" /* ENGINEERING */,
+          "reliability": "engineering" /* ENGINEERING */,
+          "scalability": "engineering" /* ENGINEERING */,
+          "performance": "engineering" /* ENGINEERING */,
+          // Computability reasoning
+          "computability": "computability" /* COMPUTABILITY */,
+          "decidability": "computability" /* COMPUTABILITY */,
+          "turing": "computability" /* COMPUTABILITY */,
+          "halting": "computability" /* COMPUTABILITY */,
+          "complexity-class": "computability" /* COMPUTABILITY */,
+          "algorithm-analysis": "computability" /* COMPUTABILITY */,
+          "reduction": "computability" /* COMPUTABILITY */,
+          "np-complete": "computability" /* COMPUTABILITY */,
+          "undecidable": "computability" /* COMPUTABILITY */,
+          // Cryptanalytic reasoning
+          "cryptanalysis": "cryptanalytic" /* CRYPTANALYTIC */,
+          "cryptography": "cryptanalytic" /* CRYPTANALYTIC */,
+          "security": "cryptanalytic" /* CRYPTANALYTIC */,
+          "cipher": "cryptanalytic" /* CRYPTANALYTIC */,
+          "encryption": "cryptanalytic" /* CRYPTANALYTIC */,
+          "decryption": "cryptanalytic" /* CRYPTANALYTIC */,
+          "attack-vector": "cryptanalytic" /* CRYPTANALYTIC */,
+          "key-analysis": "cryptanalytic" /* CRYPTANALYTIC */,
+          "protocol-security": "cryptanalytic" /* CRYPTANALYTIC */,
+          // Recursive reasoning
+          "recursive": "recursive" /* RECURSIVE */,
+          "recursion": "recursive" /* RECURSIVE */,
+          "divide-conquer": "recursive" /* RECURSIVE */,
+          "self-similar": "recursive" /* RECURSIVE */,
+          "decomposition": "recursive" /* RECURSIVE */,
+          "fractal": "recursive" /* RECURSIVE */,
+          "tree-traversal": "recursive" /* RECURSIVE */,
+          // Modal reasoning
+          "modal": "modal" /* MODAL */,
+          "possibility": "modal" /* MODAL */,
+          "necessity": "modal" /* MODAL */,
+          "possible-worlds": "modal" /* MODAL */,
+          "epistemic": "modal" /* MODAL */,
+          "deontic": "modal" /* MODAL */,
+          "alethic": "modal" /* MODAL */,
+          // Stochastic reasoning
+          "stochastic": "stochastic" /* STOCHASTIC */,
+          "random-process": "stochastic" /* STOCHASTIC */,
+          "markov": "stochastic" /* STOCHASTIC */,
+          "monte-carlo": "stochastic" /* STOCHASTIC */,
+          "probabilistic-process": "stochastic" /* STOCHASTIC */,
+          "queueing": "stochastic" /* STOCHASTIC */,
+          "random-walk": "stochastic" /* STOCHASTIC */,
+          // Constraint reasoning
+          "constraint": "constraint" /* CONSTRAINT */,
+          "constraints": "constraint" /* CONSTRAINT */,
+          "csp": "constraint" /* CONSTRAINT */,
+          "sat": "constraint" /* CONSTRAINT */,
+          "scheduling": "constraint" /* CONSTRAINT */,
+          "allocation": "constraint" /* CONSTRAINT */,
+          "feasibility": "constraint" /* CONSTRAINT */,
+          "satisfiability": "constraint" /* CONSTRAINT */,
+          // Optimization reasoning
+          "optimization": "optimization" /* OPTIMIZATION */,
+          "optimize": "optimization" /* OPTIMIZATION */,
+          "optimal": "optimization" /* OPTIMIZATION */,
+          "minimize": "optimization" /* OPTIMIZATION */,
+          "maximize": "optimization" /* OPTIMIZATION */,
+          "gradient": "optimization" /* OPTIMIZATION */,
+          "convex": "optimization" /* OPTIMIZATION */,
+          "heuristic": "optimization" /* OPTIMIZATION */,
+          "search": "optimization" /* OPTIMIZATION */,
+          // First Principles reasoning
+          "first-principles": "firstprinciples" /* FIRSTPRINCIPLES */,
+          "fundamental": "firstprinciples" /* FIRSTPRINCIPLES */,
+          "foundational": "firstprinciples" /* FIRSTPRINCIPLES */,
+          "axiom": "firstprinciples" /* FIRSTPRINCIPLES */,
+          "ground-truth": "firstprinciples" /* FIRSTPRINCIPLES */,
+          "from-scratch": "firstprinciples" /* FIRSTPRINCIPLES */,
+          "basic-principles": "firstprinciples" /* FIRSTPRINCIPLES */,
+          "root-cause": "firstprinciples" /* FIRSTPRINCIPLES */,
+          // Systems Thinking reasoning
+          "systems-thinking": "systemsthinking" /* SYSTEMSTHINKING */,
+          "systems": "systemsthinking" /* SYSTEMSTHINKING */,
+          "holistic": "systemsthinking" /* SYSTEMSTHINKING */,
+          "feedback-loop": "systemsthinking" /* SYSTEMSTHINKING */,
+          "emergence": "systemsthinking" /* SYSTEMSTHINKING */,
+          "interconnected": "systemsthinking" /* SYSTEMSTHINKING */,
+          "ecosystem": "systemsthinking" /* SYSTEMSTHINKING */,
+          "leverage-point": "systemsthinking" /* SYSTEMSTHINKING */,
+          // Scientific Method reasoning
+          "scientific": "scientificmethod" /* SCIENTIFICMETHOD */,
+          "experiment": "scientificmethod" /* SCIENTIFICMETHOD */,
+          "research": "scientificmethod" /* SCIENTIFICMETHOD */,
+          "falsification": "scientificmethod" /* SCIENTIFICMETHOD */,
+          "hypothesis-testing": "scientificmethod" /* SCIENTIFICMETHOD */,
+          "a/b-testing": "scientificmethod" /* SCIENTIFICMETHOD */,
+          "reproducibility": "scientificmethod" /* SCIENTIFICMETHOD */,
+          "control-group": "scientificmethod" /* SCIENTIFICMETHOD */,
+          // Formal Logic reasoning
+          "formal-logic": "formallogic" /* FORMALLOGIC */,
+          "propositional": "formallogic" /* FORMALLOGIC */,
+          "predicate": "formallogic" /* FORMALLOGIC */,
+          "theorem-proving": "formallogic" /* FORMALLOGIC */,
+          "formal-proof": "formallogic" /* FORMALLOGIC */,
+          "validity": "formallogic" /* FORMALLOGIC */,
+          "soundness": "formallogic" /* FORMALLOGIC */,
+          "completeness": "formallogic" /* FORMALLOGIC */
         };
         return typeMap[problemType.toLowerCase()] || "sequential" /* SEQUENTIAL */;
       }
