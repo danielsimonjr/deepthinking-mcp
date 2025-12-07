@@ -1,11 +1,11 @@
 {
   "metadata": {
     "name": "deepthinking-mcp",
-    "version": "6.1.2",
-    "lastUpdated": "2025-12-02",
-    "totalFiles": 190,
-    "totalModules": 25,
-    "totalExports": 535
+    "version": "7.0.0",
+    "lastUpdated": "2025-12-07",
+    "totalFiles": 201,
+    "totalModules": 26,
+    "totalExports": 608
   },
   "entryPoints": [
     {
@@ -1063,7 +1063,8 @@
               "exportSystemsThinkingCausalLoops",
               "exportScientificMethodExperiment",
               "exportOptimizationSolution",
-              "exportFormalLogicProof"
+              "exportFormalLogicProof",
+              "// Phase 8: Proof decomposition\n  exportProofDecomposition"
             ],
             "reExport": true
           },
@@ -1096,6 +1097,7 @@
           "exportScientificMethodExperiment",
           "exportOptimizationSolution",
           "exportFormalLogicProof",
+          "// Phase 8: Proof decomposition\n  exportProofDecomposition",
           "LaTeXExporter",
           "type LaTeXExportOptions"
         ],
@@ -1119,6 +1121,7 @@
           "exportScientificMethodExperiment",
           "exportOptimizationSolution",
           "exportFormalLogicProof",
+          "// Phase 8: Proof decomposition\n  exportProofDecomposition",
           "LaTeXExporter",
           "type LaTeXExportOptions"
         ]
@@ -1553,7 +1556,8 @@
           {
             "file": "../../types/modes/mathematics.js",
             "imports": [
-              "MathematicsThought"
+              "MathematicsThought",
+              "ProofDecomposition"
             ],
             "typeOnly": true
           },
@@ -1690,6 +1694,12 @@
             "file": "./metareasoning.js",
             "imports": [
               "exportMetaReasoningVisualization"
+            ]
+          },
+          {
+            "file": "./proof-decomposition.js",
+            "imports": [
+              "exportProofDecomposition"
             ]
           },
           {
@@ -1839,6 +1849,13 @@
               "exportMetaReasoningVisualization"
             ],
             "reExport": true
+          },
+          {
+            "file": "./proof-decomposition.js",
+            "imports": [
+              "exportProofDecomposition"
+            ],
+            "reExport": true
           }
         ],
         "exports": [
@@ -1864,6 +1881,7 @@
           "exportPhysicsVisualization",
           "exportHybridOrchestration",
           "exportMetaReasoningVisualization",
+          "exportProofDecomposition",
           "VisualExporter"
         ],
         "reExported": [
@@ -1888,7 +1906,8 @@
           "exportMathematicsDerivation",
           "exportPhysicsVisualization",
           "exportHybridOrchestration",
-          "exportMetaReasoningVisualization"
+          "exportMetaReasoningVisualization",
+          "exportProofDecomposition"
         ],
         "classes": [
           "VisualExporter"
@@ -2024,6 +2043,40 @@
         ],
         "functions": [
           "exportPhysicsVisualization"
+        ]
+      },
+      "src/export/visual/proof-decomposition.ts": {
+        "description": "Proof Decomposition Visual Exporter (v7.0.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../types/modes/mathematics.js",
+            "imports": [
+              "ProofDecomposition",
+              "AtomicStatement"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./types.js",
+            "imports": [
+              "VisualExportOptions"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./utils.js",
+            "imports": [
+              "sanitizeId"
+            ]
+          }
+        ],
+        "exports": [
+          "exportProofDecomposition"
+        ],
+        "functions": [
+          "exportProofDecomposition"
         ]
       },
       "src/export/visual/scientific-method.ts": {
@@ -2192,7 +2245,7 @@
         ]
       },
       "src/export/visual/types.ts": {
-        "description": "Visual Export Types (v4.3.0)",
+        "description": "Visual Export Types (v7.0.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -2592,6 +2645,68 @@
           "ConstraintAnalysis"
         ]
       },
+      "src/modes/mathematics-reasoning.ts": {
+        "description": "Mathematics Reasoning Engine - Phase 8 Sprint 3",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/modes/mathematics.js",
+            "imports": [
+              "MathematicsThought",
+              "MathematicsThoughtType",
+              "ProofDecomposition",
+              "ConsistencyReport",
+              "GapAnalysis",
+              "AssumptionAnalysis"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../proof/decomposer.js",
+            "imports": [
+              "ProofDecomposer",
+              "ProofStep"
+            ]
+          },
+          {
+            "file": "../proof/gap-analyzer.js",
+            "imports": [
+              "GapAnalyzer",
+              "GapAnalyzerConfig"
+            ]
+          },
+          {
+            "file": "../proof/assumption-tracker.js",
+            "imports": [
+              "AssumptionTracker"
+            ]
+          },
+          {
+            "file": "../proof/inconsistency-detector.js",
+            "imports": [
+              "InconsistencyDetector",
+              "InconsistencyDetectorConfig"
+            ]
+          },
+          {
+            "file": "../proof/circular-detector.js",
+            "imports": [
+              "CircularReasoningDetector"
+            ]
+          }
+        ],
+        "exports": [
+          "MathematicsReasoningEngine"
+        ],
+        "classes": [
+          "MathematicsReasoningEngine"
+        ],
+        "interfaces": [
+          "MathematicsReasoningEngineConfig",
+          "ProofAnalysisResult"
+        ]
+      },
       "src/modes/meta-reasoning.ts": {
         "description": "Meta-Reasoning Mode (v3.4.0)",
         "externalDependencies": [],
@@ -2743,6 +2858,337 @@
           "MarkovChainAnalysis",
           "StochasticReasoningThought",
           "StochasticAnalysis"
+        ]
+      }
+    },
+    "proof": {
+      "src/proof/assumption-tracker.ts": {
+        "description": "Assumption Tracker - Phase 8 Sprint 2",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/modes/mathematics.js",
+            "imports": [
+              "DependencyGraph",
+              "AssumptionChain",
+              "AssumptionAnalysis",
+              "ImplicitAssumption",
+              "ProofDecomposition"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "exports": [
+          "AssumptionTracker"
+        ],
+        "classes": [
+          "AssumptionTracker"
+        ]
+      },
+      "src/proof/circular-detector.ts": {
+        "description": "Circular Reasoning Detector - Phase 8 Sprint 3",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/modes/mathematics.js",
+            "imports": [
+              "AtomicStatement",
+              "DependencyGraph",
+              "CircularPath",
+              "ProofDecomposition"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "exports": [
+          "CircularReasoningDetector"
+        ],
+        "classes": [
+          "CircularReasoningDetector"
+        ],
+        "interfaces": [
+          "CircularReasoningResult"
+        ]
+      },
+      "src/proof/decomposer.ts": {
+        "description": "Proof Decomposer - Phase 8 Sprint 2",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "crypto",
+            "imports": [
+              "randomUUID"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../types/modes/mathematics.js",
+            "imports": [
+              "AtomicStatement",
+              "InferenceRule",
+              "ProofDecomposition",
+              "DependencyGraph",
+              "ProofGap",
+              "ImplicitAssumption",
+              "AssumptionChain"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./dependency-graph.js",
+            "imports": [
+              "DependencyGraphBuilder"
+            ]
+          }
+        ],
+        "exports": [
+          "ProofDecomposer"
+        ],
+        "classes": [
+          "ProofDecomposer"
+        ],
+        "interfaces": [
+          "ProofStep"
+        ]
+      },
+      "src/proof/dependency-graph.ts": {
+        "description": "Dependency Graph Builder (Phase 8 - v7.0.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "crypto",
+            "imports": [
+              "randomUUID"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../types/modes/mathematics.js",
+            "imports": [
+              "AtomicStatement",
+              "DependencyEdge",
+              "DependencyGraph",
+              "InferenceRule"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "exports": [
+          "DependencyGraphBuilder"
+        ],
+        "classes": [
+          "DependencyGraphBuilder"
+        ]
+      },
+      "src/proof/gap-analyzer.ts": {
+        "description": "Gap Analyzer - Phase 8 Sprint 2",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/modes/mathematics.js",
+            "imports": [
+              "AtomicStatement",
+              "DependencyGraph",
+              "ProofGap",
+              "ImplicitAssumption",
+              "GapAnalysis",
+              "ProofDecomposition"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "exports": [
+          "GapAnalyzer"
+        ],
+        "classes": [
+          "GapAnalyzer"
+        ],
+        "interfaces": [
+          "GapAnalyzerConfig"
+        ]
+      },
+      "src/proof/inconsistency-detector.ts": {
+        "description": "Inconsistency Detector - Phase 8 Sprint 3",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/modes/mathematics.js",
+            "imports": [
+              "AtomicStatement",
+              "DependencyGraph",
+              "Inconsistency",
+              "ProofDecomposition"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "exports": [
+          "InconsistencyDetector"
+        ],
+        "classes": [
+          "InconsistencyDetector"
+        ],
+        "interfaces": [
+          "InconsistencyDetectorConfig"
+        ]
+      },
+      "src/proof/index.ts": {
+        "description": "Proof Analysis Module (Phase 8 - v7.0.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./dependency-graph.js",
+            "imports": [
+              "DependencyGraphBuilder"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./decomposer.js",
+            "imports": [
+              "ProofDecomposer",
+              "type ProofStep"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./gap-analyzer.js",
+            "imports": [
+              "GapAnalyzer",
+              "type GapAnalyzerConfig"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./assumption-tracker.js",
+            "imports": [
+              "AssumptionTracker"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./inconsistency-detector.js",
+            "imports": [
+              "InconsistencyDetector",
+              "type InconsistencyDetectorConfig"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./circular-detector.js",
+            "imports": [
+              "CircularReasoningDetector",
+              "type CircularReasoningResult"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./patterns/warnings.js",
+            "imports": [
+              "type WarningPattern",
+              "type WarningCategory",
+              "ALL_WARNING_PATTERNS",
+              "getPatternsByCategory",
+              "getPatternsBySeverity",
+              "checkStatement",
+              "checkProof"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [
+          "DependencyGraphBuilder",
+          "ProofDecomposer",
+          "type ProofStep",
+          "GapAnalyzer",
+          "type GapAnalyzerConfig",
+          "AssumptionTracker",
+          "InconsistencyDetector",
+          "type InconsistencyDetectorConfig",
+          "CircularReasoningDetector",
+          "type CircularReasoningResult",
+          "type WarningPattern",
+          "type WarningCategory",
+          "ALL_WARNING_PATTERNS",
+          "getPatternsByCategory",
+          "getPatternsBySeverity",
+          "checkStatement",
+          "checkProof"
+        ],
+        "reExported": [
+          "DependencyGraphBuilder",
+          "ProofDecomposer",
+          "type ProofStep",
+          "GapAnalyzer",
+          "type GapAnalyzerConfig",
+          "AssumptionTracker",
+          "InconsistencyDetector",
+          "type InconsistencyDetectorConfig",
+          "CircularReasoningDetector",
+          "type CircularReasoningResult",
+          "type WarningPattern",
+          "type WarningCategory",
+          "ALL_WARNING_PATTERNS",
+          "getPatternsByCategory",
+          "getPatternsBySeverity",
+          "checkStatement",
+          "checkProof"
+        ]
+      },
+      "src/proof/patterns/warnings.ts": {
+        "description": "Mathematical Fallacy and Warning Patterns - Phase 8 Sprint 3",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "DIVISION_BY_HIDDEN_ZERO",
+          "ASSUMING_CONCLUSION",
+          "AFFIRMING_CONSEQUENT",
+          "DENYING_ANTECEDENT",
+          "HASTY_GENERALIZATION",
+          "AMBIGUOUS_MIDDLE",
+          "ILLEGAL_CANCELLATION",
+          "INFINITY_ARITHMETIC",
+          "NECESSARY_SUFFICIENT_CONFUSION",
+          "EXISTENTIAL_INSTANTIATION_ERROR",
+          "SQRT_SIGN_ERROR",
+          "LIMIT_EXCHANGE_ERROR",
+          "ALL_WARNING_PATTERNS",
+          "getPatternsByCategory",
+          "getPatternsBySeverity",
+          "checkStatement",
+          "checkProof"
+        ],
+        "interfaces": [
+          "WarningPattern"
+        ],
+        "functions": [
+          "getPatternsByCategory",
+          "getPatternsBySeverity",
+          "checkStatement",
+          "checkProof"
+        ],
+        "constants": [
+          "DIVISION_BY_HIDDEN_ZERO",
+          "ASSUMING_CONCLUSION",
+          "AFFIRMING_CONSEQUENT",
+          "DENYING_ANTECEDENT",
+          "HASTY_GENERALIZATION",
+          "AMBIGUOUS_MIDDLE",
+          "ILLEGAL_CANCELLATION",
+          "INFINITY_ARITHMETIC",
+          "NECESSARY_SUFFICIENT_CONFUSION",
+          "EXISTENTIAL_INSTANTIATION_ERROR",
+          "SQRT_SIGN_ERROR",
+          "LIMIT_EXCHANGE_ERROR",
+          "ALL_WARNING_PATTERNS"
         ]
       }
     },
@@ -4639,7 +5085,7 @@
         ]
       },
       "src/tools/schemas/modes/mathematics.ts": {
-        "description": "Mathematics Mode Schemas (v4.1.0)",
+        "description": "Mathematics Mode Schemas (v7.0.0)",
         "externalDependencies": [
           {
             "package": "zod",
@@ -5369,6 +5815,18 @@
           "isMathematicsThought"
         ],
         "interfaces": [
+          "AtomicStatement",
+          "DependencyEdge",
+          "DependencyGraph",
+          "ProofGap",
+          "ImplicitAssumption",
+          "AssumptionChain",
+          "ProofDecomposition",
+          "Inconsistency",
+          "CircularPath",
+          "ConsistencyReport",
+          "GapAnalysis",
+          "AssumptionAnalysis",
           "MathematicalModel",
           "ProofStrategy",
           "Theorem",
@@ -6925,6 +7383,83 @@
           "InductiveValidator"
         ]
       },
+      "src/validation/validators/modes/mathematics-extended.ts": {
+        "description": "Mathematics Extended Validators (v7.0.0)",
+        "externalDependencies": [
+          {
+            "package": "zod",
+            "imports": [
+              "z"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "InferenceRuleSchema",
+          "AtomicStatementTypeSchema",
+          "SourceLocationSchema",
+          "AtomicStatementSchema",
+          "DependencyEdgeTypeSchema",
+          "DependencyEdgeSchema",
+          "DependencyGraphSchema",
+          "ProofGapTypeSchema",
+          "GapSeveritySchema",
+          "ProofGapSchema",
+          "ImplicitAssumptionTypeSchema",
+          "ImplicitAssumptionSchema",
+          "AssumptionChainSchema",
+          "RigorLevelSchema",
+          "ProofDecompositionSchema",
+          "InconsistencyTypeSchema",
+          "InconsistencySeveritySchema",
+          "InconsistencySchema",
+          "CircularPathSchema",
+          "ConsistencyReportSchema",
+          "GapAnalysisSchema",
+          "AssumptionAnalysisSchema",
+          "validateAtomicStatement",
+          "validateProofDecomposition",
+          "validateConsistencyReport",
+          "validateGapAnalysis",
+          "validateAssumptionAnalysis",
+          "safeValidateProofDecomposition",
+          "safeValidateConsistencyReport"
+        ],
+        "functions": [
+          "validateAtomicStatement",
+          "validateProofDecomposition",
+          "validateConsistencyReport",
+          "validateGapAnalysis",
+          "validateAssumptionAnalysis",
+          "safeValidateProofDecomposition",
+          "safeValidateConsistencyReport"
+        ],
+        "constants": [
+          "InferenceRuleSchema",
+          "AtomicStatementTypeSchema",
+          "SourceLocationSchema",
+          "AtomicStatementSchema",
+          "DependencyEdgeTypeSchema",
+          "DependencyEdgeSchema",
+          "DependencyGraphSchema",
+          "ProofGapTypeSchema",
+          "GapSeveritySchema",
+          "ProofGapSchema",
+          "ImplicitAssumptionTypeSchema",
+          "ImplicitAssumptionSchema",
+          "AssumptionChainSchema",
+          "RigorLevelSchema",
+          "ProofDecompositionSchema",
+          "InconsistencyTypeSchema",
+          "InconsistencySeveritySchema",
+          "InconsistencySchema",
+          "CircularPathSchema",
+          "ConsistencyReportSchema",
+          "GapAnalysisSchema",
+          "AssumptionAnalysisSchema"
+        ]
+      },
       "src/validation/validators/modes/mathematics.ts": {
         "description": "Mathematics Mode Validator",
         "externalDependencies": [],
@@ -8012,6 +8547,7 @@
           "src/export/visual/metareasoning.ts",
           "src/export/visual/optimization.ts",
           "src/export/visual/physics.ts",
+          "src/export/visual/proof-decomposition.ts",
           "src/export/visual/scientific-method.ts",
           "src/export/visual/sequential.ts",
           "src/export/visual/shannon.ts",
@@ -8048,11 +8584,25 @@
         "name": "Modes",
         "files": [
           "src/modes/constraint-reasoning.ts",
+          "src/modes/mathematics-reasoning.ts",
           "src/modes/meta-reasoning.ts",
           "src/modes/modal-reasoning.ts",
           "src/modes/optimization-reasoning.ts",
           "src/modes/recursive-reasoning.ts",
           "src/modes/stochastic-reasoning.ts"
+        ]
+      },
+      {
+        "name": "Proof",
+        "files": [
+          "src/proof/assumption-tracker.ts",
+          "src/proof/circular-detector.ts",
+          "src/proof/decomposer.ts",
+          "src/proof/dependency-graph.ts",
+          "src/proof/gap-analyzer.ts",
+          "src/proof/inconsistency-detector.ts",
+          "src/proof/index.ts",
+          "src/proof/patterns/warnings.ts"
         ]
       },
       {
@@ -8209,6 +8759,7 @@
           "src/validation/validators/modes/gametheory.ts",
           "src/validation/validators/modes/hybrid.ts",
           "src/validation/validators/modes/inductive.ts",
+          "src/validation/validators/modes/mathematics-extended.ts",
           "src/validation/validators/modes/mathematics.ts",
           "src/validation/validators/modes/meta.ts",
           "src/validation/validators/modes/metareasoning.ts",
@@ -8248,18 +8799,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 190,
-    "totalModules": 25,
-    "totalLinesOfCode": 52594,
-    "totalExports": 535,
-    "totalClasses": 107,
-    "totalInterfaces": 427,
-    "totalFunctions": 120,
+    "totalTypeScriptFiles": 201,
+    "totalModules": 26,
+    "totalLinesOfCode": 58704,
+    "totalExports": 608,
+    "totalClasses": 114,
+    "totalInterfaces": 446,
+    "totalFunctions": 132,
     "totalTypeGuards": 50,
     "totalEnums": 3,
-    "totalConstants": 75,
-    "totalReExports": 232,
-    "totalTypeOnlyImports": 156,
+    "totalConstants": 110,
+    "totalReExports": 251,
+    "totalTypeOnlyImports": 165,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 31
   }

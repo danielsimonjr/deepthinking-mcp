@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 6.1.2 | **Last Updated**: 2025-12-02
+**Version**: 7.0.0 | **Last Updated**: 2025-12-07
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -21,23 +21,24 @@ This document provides a comprehensive dependency graph of all files, components
 11. [Interfaces Dependencies](#interfaces-dependencies)
 12. [Ml Dependencies](#ml-dependencies)
 13. [Modes Dependencies](#modes-dependencies)
-14. [Rate limit Dependencies](#rate-limit-dependencies)
-15. [Repositories Dependencies](#repositories-dependencies)
-16. [Search Dependencies](#search-dependencies)
-17. [Services Dependencies](#services-dependencies)
-18. [Session Dependencies](#session-dependencies)
-19. [Taxonomy Dependencies](#taxonomy-dependencies)
-20. [Templates Dependencies](#templates-dependencies)
-21. [Tools Dependencies](#tools-dependencies)
-22. [Types Dependencies](#types-dependencies)
-23. [Utils Dependencies](#utils-dependencies)
-24. [Validation Dependencies](#validation-dependencies)
-25. [Visualization Dependencies](#visualization-dependencies)
-26. [Webhooks Dependencies](#webhooks-dependencies)
-27. [Dependency Matrix](#dependency-matrix)
-28. [Circular Dependency Analysis](#circular-dependency-analysis)
-29. [Visual Dependency Graph](#visual-dependency-graph)
-30. [Summary Statistics](#summary-statistics)
+14. [Proof Dependencies](#proof-dependencies)
+15. [Rate limit Dependencies](#rate-limit-dependencies)
+16. [Repositories Dependencies](#repositories-dependencies)
+17. [Search Dependencies](#search-dependencies)
+18. [Services Dependencies](#services-dependencies)
+19. [Session Dependencies](#session-dependencies)
+20. [Taxonomy Dependencies](#taxonomy-dependencies)
+21. [Templates Dependencies](#templates-dependencies)
+22. [Tools Dependencies](#tools-dependencies)
+23. [Types Dependencies](#types-dependencies)
+24. [Utils Dependencies](#utils-dependencies)
+25. [Validation Dependencies](#validation-dependencies)
+26. [Visualization Dependencies](#visualization-dependencies)
+27. [Webhooks Dependencies](#webhooks-dependencies)
+28. [Dependency Matrix](#dependency-matrix)
+29. [Circular Dependency Analysis](#circular-dependency-analysis)
+30. [Visual Dependency Graph](#visual-dependency-graph)
+31. [Summary Statistics](#summary-statistics)
 
 ---
 
@@ -52,11 +53,12 @@ The codebase is organized into the following modules:
 - **collaboration**: 5 files
 - **comparison**: 5 files
 - **config**: 1 file
-- **export**: 26 files
+- **export**: 27 files
 - **entry**: 1 file
 - **interfaces**: 2 files
 - **ml**: 4 files
-- **modes**: 6 files
+- **modes**: 7 files
+- **proof**: 8 files
 - **rate-limit**: 4 files
 - **repositories**: 4 files
 - **search**: 5 files
@@ -67,7 +69,7 @@ The codebase is organized into the following modules:
 - **tools**: 16 files
 - **types**: 21 files
 - **utils**: 8 files
-- **validation**: 34 files
+- **validation**: 35 files
 - **visualization**: 5 files
 - **webhooks**: 5 files
 
@@ -425,11 +427,13 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./visual/index.js` | `type VisualFormat, type VisualExportOptions, sanitizeId, VisualExporter, exportCausalGraph, exportTemporalTimeline, exportGameTree, exportBayesianNetwork, exportSequentialDependencyGraph, exportShannonStageFlow, exportAbductiveHypotheses, exportCounterfactualScenarios, exportAnalogicalMapping, exportEvidentialBeliefs, exportFirstPrinciplesDerivation, exportSystemsThinkingCausalLoops, exportScientificMethodExperiment, exportOptimizationSolution, exportFormalLogicProof` | Re-export |
+| `./visual/index.js` | `type VisualFormat, type VisualExportOptions, sanitizeId, VisualExporter, exportCausalGraph, exportTemporalTimeline, exportGameTree, exportBayesianNetwork, exportSequentialDependencyGraph, exportShannonStageFlow, exportAbductiveHypotheses, exportCounterfactualScenarios, exportAnalogicalMapping, exportEvidentialBeliefs, exportFirstPrinciplesDerivation, exportSystemsThinkingCausalLoops, exportScientificMethodExperiment, exportOptimizationSolution, exportFormalLogicProof, // Phase 8: Proof decomposition
+  exportProofDecomposition` | Re-export |
 | `./latex.js` | `LaTeXExporter, type LaTeXExportOptions` | Re-export |
 
 **Exports:**
-- Re-exports: `type VisualFormat`, `type VisualExportOptions`, `sanitizeId`, `VisualExporter`, `exportCausalGraph`, `exportTemporalTimeline`, `exportGameTree`, `exportBayesianNetwork`, `exportSequentialDependencyGraph`, `exportShannonStageFlow`, `exportAbductiveHypotheses`, `exportCounterfactualScenarios`, `exportAnalogicalMapping`, `exportEvidentialBeliefs`, `exportFirstPrinciplesDerivation`, `exportSystemsThinkingCausalLoops`, `exportScientificMethodExperiment`, `exportOptimizationSolution`, `exportFormalLogicProof`, `LaTeXExporter`, `type LaTeXExportOptions`
+- Re-exports: `type VisualFormat`, `type VisualExportOptions`, `sanitizeId`, `VisualExporter`, `exportCausalGraph`, `exportTemporalTimeline`, `exportGameTree`, `exportBayesianNetwork`, `exportSequentialDependencyGraph`, `exportShannonStageFlow`, `exportAbductiveHypotheses`, `exportCounterfactualScenarios`, `exportAnalogicalMapping`, `exportEvidentialBeliefs`, `exportFirstPrinciplesDerivation`, `exportSystemsThinkingCausalLoops`, `exportScientificMethodExperiment`, `exportOptimizationSolution`, `exportFormalLogicProof`, `// Phase 8: Proof decomposition
+  exportProofDecomposition`, `LaTeXExporter`, `type LaTeXExportOptions`
 
 ---
 
@@ -607,7 +611,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../types/index.js` | `CausalThought, TemporalThought, GameTheoryThought, BayesianThought, SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, FirstPrinciplesThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought, HybridThought` | Import (type-only) |
-| `../../types/modes/mathematics.js` | `MathematicsThought` | Import (type-only) |
+| `../../types/modes/mathematics.js` | `MathematicsThought, ProofDecomposition` | Import (type-only) |
 | `../../types/modes/physics.js` | `PhysicsThought` | Import (type-only) |
 | `../../types/modes/metareasoning.js` | `MetaReasoningThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
@@ -630,6 +634,7 @@ The codebase is organized into the following modules:
 | `./physics.js` | `exportPhysicsVisualization` | Import |
 | `./hybrid.js` | `exportHybridOrchestration` | Import |
 | `./metareasoning.js` | `exportMetaReasoningVisualization` | Import |
+| `./proof-decomposition.js` | `exportProofDecomposition` | Import |
 | `./types.js` | `type VisualFormat, type VisualExportOptions` | Re-export |
 | `./utils.js` | `sanitizeId` | Re-export |
 | `./causal.js` | `exportCausalGraph` | Re-export |
@@ -651,10 +656,11 @@ The codebase is organized into the following modules:
 | `./physics.js` | `exportPhysicsVisualization` | Re-export |
 | `./hybrid.js` | `exportHybridOrchestration` | Re-export |
 | `./metareasoning.js` | `exportMetaReasoningVisualization` | Re-export |
+| `./proof-decomposition.js` | `exportProofDecomposition` | Re-export |
 
 **Exports:**
 - Classes: `VisualExporter`
-- Re-exports: `type VisualFormat`, `type VisualExportOptions`, `sanitizeId`, `exportCausalGraph`, `exportTemporalTimeline`, `exportGameTree`, `exportBayesianNetwork`, `exportSequentialDependencyGraph`, `exportShannonStageFlow`, `exportAbductiveHypotheses`, `exportCounterfactualScenarios`, `exportAnalogicalMapping`, `exportEvidentialBeliefs`, `exportFirstPrinciplesDerivation`, `exportSystemsThinkingCausalLoops`, `exportScientificMethodExperiment`, `exportOptimizationSolution`, `exportFormalLogicProof`, `exportMathematicsDerivation`, `exportPhysicsVisualization`, `exportHybridOrchestration`, `exportMetaReasoningVisualization`
+- Re-exports: `type VisualFormat`, `type VisualExportOptions`, `sanitizeId`, `exportCausalGraph`, `exportTemporalTimeline`, `exportGameTree`, `exportBayesianNetwork`, `exportSequentialDependencyGraph`, `exportShannonStageFlow`, `exportAbductiveHypotheses`, `exportCounterfactualScenarios`, `exportAnalogicalMapping`, `exportEvidentialBeliefs`, `exportFirstPrinciplesDerivation`, `exportSystemsThinkingCausalLoops`, `exportScientificMethodExperiment`, `exportOptimizationSolution`, `exportFormalLogicProof`, `exportMathematicsDerivation`, `exportPhysicsVisualization`, `exportHybridOrchestration`, `exportMetaReasoningVisualization`, `exportProofDecomposition`
 
 ---
 
@@ -711,6 +717,20 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Functions: `exportPhysicsVisualization`
+
+---
+
+### `src/export/visual/proof-decomposition.ts` - Proof Decomposition Visual Exporter (v7.0.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/modes/mathematics.js` | `ProofDecomposition, AtomicStatement` | Import (type-only) |
+| `./types.js` | `VisualExportOptions` | Import (type-only) |
+| `./utils.js` | `sanitizeId` | Import |
+
+**Exports:**
+- Functions: `exportProofDecomposition`
 
 ---
 
@@ -784,7 +804,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/types.ts` - Visual Export Types (v4.3.0)
+### `src/export/visual/types.ts` - Visual Export Types (v7.0.0)
 
 ---
 
@@ -938,6 +958,24 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/modes/mathematics-reasoning.ts` - Mathematics Reasoning Engine - Phase 8 Sprint 3
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/modes/mathematics.js` | `MathematicsThought, MathematicsThoughtType, ProofDecomposition, ConsistencyReport, GapAnalysis, AssumptionAnalysis` | Import (type-only) |
+| `../proof/decomposer.js` | `ProofDecomposer, ProofStep` | Import |
+| `../proof/gap-analyzer.js` | `GapAnalyzer, GapAnalyzerConfig` | Import |
+| `../proof/assumption-tracker.js` | `AssumptionTracker` | Import |
+| `../proof/inconsistency-detector.js` | `InconsistencyDetector, InconsistencyDetectorConfig` | Import |
+| `../proof/circular-detector.js` | `CircularReasoningDetector` | Import |
+
+**Exports:**
+- Classes: `MathematicsReasoningEngine`
+- Interfaces: `MathematicsReasoningEngineConfig`, `ProofAnalysisResult`
+
+---
+
 ### `src/modes/meta-reasoning.ts` - Meta-Reasoning Mode (v3.4.0)
 
 **Internal Dependencies:**
@@ -996,6 +1034,122 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `StochasticReasoningEngine`
 - Interfaces: `RandomVariable`, `ProbabilityDistribution`, `StochasticProcess`, `SimulationResult`, `Trajectory`, `StochasticEvent`, `SimulationStatistics`, `ConvergenceInfo`, `MarkovChainAnalysis`, `StochasticReasoningThought`, `StochasticAnalysis`
+
+---
+
+## Proof Dependencies
+
+### `src/proof/assumption-tracker.ts` - Assumption Tracker - Phase 8 Sprint 2
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/modes/mathematics.js` | `DependencyGraph, AssumptionChain, AssumptionAnalysis, ImplicitAssumption, ProofDecomposition` | Import (type-only) |
+
+**Exports:**
+- Classes: `AssumptionTracker`
+
+---
+
+### `src/proof/circular-detector.ts` - Circular Reasoning Detector - Phase 8 Sprint 3
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/modes/mathematics.js` | `AtomicStatement, DependencyGraph, CircularPath, ProofDecomposition` | Import (type-only) |
+
+**Exports:**
+- Classes: `CircularReasoningDetector`
+- Interfaces: `CircularReasoningResult`
+
+---
+
+### `src/proof/decomposer.ts` - Proof Decomposer - Phase 8 Sprint 2
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/modes/mathematics.js` | `AtomicStatement, InferenceRule, ProofDecomposition, DependencyGraph, ProofGap, ImplicitAssumption, AssumptionChain` | Import (type-only) |
+| `./dependency-graph.js` | `DependencyGraphBuilder` | Import |
+
+**Exports:**
+- Classes: `ProofDecomposer`
+- Interfaces: `ProofStep`
+
+---
+
+### `src/proof/dependency-graph.ts` - Dependency Graph Builder (Phase 8 - v7.0.0)
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/modes/mathematics.js` | `AtomicStatement, DependencyEdge, DependencyGraph, InferenceRule` | Import (type-only) |
+
+**Exports:**
+- Classes: `DependencyGraphBuilder`
+
+---
+
+### `src/proof/gap-analyzer.ts` - Gap Analyzer - Phase 8 Sprint 2
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/modes/mathematics.js` | `AtomicStatement, DependencyGraph, ProofGap, ImplicitAssumption, GapAnalysis, ProofDecomposition` | Import (type-only) |
+
+**Exports:**
+- Classes: `GapAnalyzer`
+- Interfaces: `GapAnalyzerConfig`
+
+---
+
+### `src/proof/inconsistency-detector.ts` - Inconsistency Detector - Phase 8 Sprint 3
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/modes/mathematics.js` | `AtomicStatement, DependencyGraph, Inconsistency, ProofDecomposition` | Import (type-only) |
+
+**Exports:**
+- Classes: `InconsistencyDetector`
+- Interfaces: `InconsistencyDetectorConfig`
+
+---
+
+### `src/proof/index.ts` - Proof Analysis Module (Phase 8 - v7.0.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./dependency-graph.js` | `DependencyGraphBuilder` | Re-export |
+| `./decomposer.js` | `ProofDecomposer, type ProofStep` | Re-export |
+| `./gap-analyzer.js` | `GapAnalyzer, type GapAnalyzerConfig` | Re-export |
+| `./assumption-tracker.js` | `AssumptionTracker` | Re-export |
+| `./inconsistency-detector.js` | `InconsistencyDetector, type InconsistencyDetectorConfig` | Re-export |
+| `./circular-detector.js` | `CircularReasoningDetector, type CircularReasoningResult` | Re-export |
+| `./patterns/warnings.js` | `type WarningPattern, type WarningCategory, ALL_WARNING_PATTERNS, getPatternsByCategory, getPatternsBySeverity, checkStatement, checkProof` | Re-export |
+
+**Exports:**
+- Re-exports: `DependencyGraphBuilder`, `ProofDecomposer`, `type ProofStep`, `GapAnalyzer`, `type GapAnalyzerConfig`, `AssumptionTracker`, `InconsistencyDetector`, `type InconsistencyDetectorConfig`, `CircularReasoningDetector`, `type CircularReasoningResult`, `type WarningPattern`, `type WarningCategory`, `ALL_WARNING_PATTERNS`, `getPatternsByCategory`, `getPatternsBySeverity`, `checkStatement`, `checkProof`
+
+---
+
+### `src/proof/patterns/warnings.ts` - Mathematical Fallacy and Warning Patterns - Phase 8 Sprint 3
+
+**Exports:**
+- Interfaces: `WarningPattern`
+- Functions: `getPatternsByCategory`, `getPatternsBySeverity`, `checkStatement`, `checkProof`
+- Constants: `DIVISION_BY_HIDDEN_ZERO`, `ASSUMING_CONCLUSION`, `AFFIRMING_CONSEQUENT`, `DENYING_ANTECEDENT`, `HASTY_GENERALIZATION`, `AMBIGUOUS_MIDDLE`, `ILLEGAL_CANCELLATION`, `INFINITY_ARITHMETIC`, `NECESSARY_SUFFICIENT_CONFUSION`, `EXISTENTIAL_INSTANTIATION_ERROR`, `SQRT_SIGN_ERROR`, `LIMIT_EXCHANGE_ERROR`, `ALL_WARNING_PATTERNS`
 
 ---
 
@@ -1670,7 +1824,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/tools/schemas/modes/mathematics.ts` - Mathematics Mode Schemas (v4.1.0)
+### `src/tools/schemas/modes/mathematics.ts` - Mathematics Mode Schemas (v7.0.0)
 
 **External Dependencies:**
 | Package | Import |
@@ -1943,7 +2097,7 @@ The codebase is organized into the following modules:
 | `../core.js` | `BaseThought, ThinkingMode` | Import |
 
 **Exports:**
-- Interfaces: `MathematicalModel`, `ProofStrategy`, `Theorem`, `Reference`, `LogicalForm`, `MathematicsThought`
+- Interfaces: `AtomicStatement`, `DependencyEdge`, `DependencyGraph`, `ProofGap`, `ImplicitAssumption`, `AssumptionChain`, `ProofDecomposition`, `Inconsistency`, `CircularPath`, `ConsistencyReport`, `GapAnalysis`, `AssumptionAnalysis`, `MathematicalModel`, `ProofStrategy`, `Theorem`, `Reference`, `LogicalForm`, `MathematicsThought`
 - Functions: `isMathematicsThought`
 
 ---
@@ -2478,6 +2632,19 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/validation/validators/modes/mathematics-extended.ts` - Mathematics Extended Validators (v7.0.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
+
+**Exports:**
+- Functions: `validateAtomicStatement`, `validateProofDecomposition`, `validateConsistencyReport`, `validateGapAnalysis`, `validateAssumptionAnalysis`, `safeValidateProofDecomposition`, `safeValidateConsistencyReport`
+- Constants: `InferenceRuleSchema`, `AtomicStatementTypeSchema`, `SourceLocationSchema`, `AtomicStatementSchema`, `DependencyEdgeTypeSchema`, `DependencyEdgeSchema`, `DependencyGraphSchema`, `ProofGapTypeSchema`, `GapSeveritySchema`, `ProofGapSchema`, `ImplicitAssumptionTypeSchema`, `ImplicitAssumptionSchema`, `AssumptionChainSchema`, `RigorLevelSchema`, `ProofDecompositionSchema`, `InconsistencyTypeSchema`, `InconsistencySeveritySchema`, `InconsistencySchema`, `CircularPathSchema`, `ConsistencyReportSchema`, `GapAnalysisSchema`, `AssumptionAnalysisSchema`
+
+---
+
 ### `src/validation/validators/modes/mathematics.ts` - Mathematics Mode Validator
 
 **Internal Dependencies:**
@@ -2945,7 +3112,7 @@ graph TD
         N28[latex]
         N29[abductive]
         N30[analogical]
-        N31[...21 more]
+        N31[...22 more]
     end
 
     subgraph Entry
@@ -2966,136 +3133,145 @@ graph TD
 
     subgraph Modes
         N39[constraint-reasoning]
-        N40[meta-reasoning]
-        N41[modal-reasoning]
-        N42[optimization-reasoning]
-        N43[recursive-reasoning]
-        N44[...1 more]
+        N40[mathematics-reasoning]
+        N41[meta-reasoning]
+        N42[modal-reasoning]
+        N43[optimization-reasoning]
+        N44[...2 more]
+    end
+
+    subgraph Proof
+        N45[assumption-tracker]
+        N46[circular-detector]
+        N47[decomposer]
+        N48[dependency-graph]
+        N49[gap-analyzer]
+        N50[...3 more]
     end
 
     subgraph Rate-limit
-        N45[index]
-        N46[limiter]
-        N47[quota]
-        N48[types]
+        N51[index]
+        N52[limiter]
+        N53[quota]
+        N54[types]
     end
 
     subgraph Repositories
-        N49[FileSessionRepository]
-        N50[ISessionRepository]
-        N51[MemorySessionRepository]
-        N52[index]
+        N55[FileSessionRepository]
+        N56[ISessionRepository]
+        N57[MemorySessionRepository]
+        N58[index]
     end
 
     subgraph Search
-        N53[engine]
-        N54[index.export]
-        N55[index]
-        N56[tokenizer]
-        N57[types]
+        N59[engine]
+        N60[index.export]
+        N61[index]
+        N62[tokenizer]
+        N63[types]
     end
 
     subgraph Services
-        N58[ExportService]
-        N59[MetaMonitor]
-        N60[ModeRouter]
-        N61[ThoughtFactory]
-        N62[index]
+        N64[ExportService]
+        N65[MetaMonitor]
+        N66[ModeRouter]
+        N67[ThoughtFactory]
+        N68[index]
     end
 
     subgraph Session
-        N63[SessionMetricsCalculator]
-        N64[index]
-        N65[manager]
-        N66[persistence]
-        N67[file-store]
-        N68[...2 more]
-    end
-
-    subgraph Taxonomy
-        N69[adaptive-selector]
-        N70[classifier]
-        N71[multi-modal-analyzer]
-        N72[navigator]
-        N73[reasoning-types]
+        N69[SessionMetricsCalculator]
+        N70[index]
+        N71[manager]
+        N72[persistence]
+        N73[file-store]
         N74[...2 more]
     end
 
+    subgraph Taxonomy
+        N75[adaptive-selector]
+        N76[classifier]
+        N77[multi-modal-analyzer]
+        N78[navigator]
+        N79[reasoning-types]
+        N80[...2 more]
+    end
+
     subgraph Templates
-        N75[built-in]
-        N76[index]
-        N77[manager]
-        N78[types]
+        N81[built-in]
+        N82[index]
+        N83[manager]
+        N84[types]
     end
 
     subgraph Tools
-        N79[definitions]
-        N80[json-schemas]
-        N81[base]
-        N82[index]
-        N83[analytical]
-        N84[...11 more]
+        N85[definitions]
+        N86[json-schemas]
+        N87[base]
+        N88[index]
+        N89[analytical]
+        N90[...11 more]
     end
 
     subgraph Types
-        N85[core]
-        N86[index]
-        N87[analogical]
-        N88[bayesian]
-        N89[causal]
-        N90[...16 more]
+        N91[core]
+        N92[index]
+        N93[analogical]
+        N94[bayesian]
+        N95[causal]
+        N96[...16 more]
     end
 
     subgraph Utils
-        N91[errors]
-        N92[log-sanitizer]
-        N93[logger-types]
-        N94[logger]
-        N95[rate-limiter]
-        N96[...3 more]
+        N97[errors]
+        N98[log-sanitizer]
+        N99[logger-types]
+        N100[logger]
+        N101[rate-limiter]
+        N102[...3 more]
     end
 
     subgraph Validation
-        N97[cache]
-        N98[constants]
-        N99[index]
-        N100[schemas]
-        N101[validator]
-        N102[...29 more]
+        N103[cache]
+        N104[constants]
+        N105[index]
+        N106[schemas]
+        N107[validator]
+        N108[...30 more]
     end
 
     subgraph Visualization
-        N103[interactive]
-        N104[mermaid]
-        N105[mindmap]
-        N106[state-charts]
-        N107[thought-flow]
+        N109[interactive]
+        N110[mermaid]
+        N111[mindmap]
+        N112[state-charts]
+        N113[thought-flow]
     end
 
     subgraph Webhooks
-        N108[event-bus]
-        N109[event-emitter]
-        N110[index]
-        N111[types]
-        N112[webhook-manager]
+        N114[event-bus]
+        N115[event-emitter]
+        N116[index]
+        N117[types]
+        N118[webhook-manager]
     end
 
-    N1 --> N86
+    N1 --> N92
     N2 --> N5
     N2 --> N4
     N2 --> N33
-    N2 --> N94
+    N2 --> N100
     N3 --> N2
     N3 --> N4
     N4 --> N5
     N6 --> N7
     N7 --> N8
     N7 --> N33
-    N7 --> N94
-    N7 --> N65
-    N7 --> N58
+    N7 --> N100
+    N7 --> N71
+    N7 --> N64
     N7 --> N2
-    N7 --> N53
+    N7 --> N59
     N9 --> N13
     N9 --> N12
     N9 --> N10
@@ -3103,13 +3279,13 @@ graph TD
     N11 --> N12
     N11 --> N10
     N11 --> N9
-    N16 --> N86
-    N16 --> N85
+    N16 --> N92
+    N16 --> N91
     N17 --> N18
     N17 --> N19
     N17 --> N15
     N17 --> N16
-    N18 --> N86
+    N18 --> N92
 ```
 
 ---
@@ -3118,21 +3294,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 190 |
-| Total Modules | 25 |
-| Total Lines of Code | 52594 |
-| Total Exports | 535 |
-| Total Re-exports | 232 |
-| Total Classes | 107 |
-| Total Interfaces | 427 |
-| Total Functions | 120 |
+| Total TypeScript Files | 201 |
+| Total Modules | 26 |
+| Total Lines of Code | 58704 |
+| Total Exports | 608 |
+| Total Re-exports | 251 |
+| Total Classes | 114 |
+| Total Interfaces | 446 |
+| Total Functions | 132 |
 | Total Type Guards | 50 |
 | Total Enums | 3 |
-| Type-only Imports | 156 |
+| Type-only Imports | 165 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 31 |
 
 ---
 
-*Last Updated*: 2025-12-02
-*Version*: 6.1.2
+*Last Updated*: 2025-12-07
+*Version*: 7.0.0

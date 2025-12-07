@@ -1,6 +1,6 @@
 # Component Architecture
 
-**Version**: 6.1.2 | **Last Updated**: 2025-12-02
+**Version**: 7.0.0 | **Last Updated**: 2025-12-07
 
 ## Core Components
 
@@ -545,18 +545,100 @@ validateNonEmptyArray(thought, arr, fieldName, category)
 
 ---
 
-## Visual Export Components (v4.3.0)
+## Proof Decomposition Components (v7.0.0)
+
+### `src/proof/decomposer.ts` - Proof Decomposer
+
+**Purpose**: Breaks proofs into atomic statements with dependency tracking
+
+**Key Methods**:
+```typescript
+decompose(proof: ProofStep[] | string, theorem?: string): ProofDecomposition
+computeMetrics(decomposition: ProofDecomposition): DecompositionMetrics
+```
+
+**Features**:
+- Pattern-based statement type detection (axiom, hypothesis, derived, conclusion)
+- Inference rule identification (algebraic_manipulation, substitution, etc.)
+- Dependency chain construction
+- Support for text and structured proof input
+
+---
+
+### `src/proof/gap-analyzer.ts` - Gap Analyzer
+
+**Purpose**: Detects gaps and implicit assumptions in proofs
+
+**Key Methods**:
+```typescript
+analyzeGaps(decomposition: ProofDecomposition): GapAnalysisResult
+```
+
+**Gap Types Detected**:
+- `missing_step`: Steps skipped in derivation
+- `unjustified_leap`: Conclusions without proper justification
+- `implicit_assumption`: Unstated assumptions relied upon
+
+**Severity Levels**: minor, significant, critical
+
+---
+
+### `src/proof/assumption-tracker.ts` - Assumption Tracker
+
+**Purpose**: Traces conclusions back to their supporting assumptions
+
+**Key Methods**:
+```typescript
+traceToAssumptions(conclusionId: string, graph: DependencyGraph): AssumptionChain
+analyzeAssumptions(decomposition: ProofDecomposition): AssumptionAnalysis
+checkAssumptionDischarge(decomposition: ProofDecomposition): DischargeStatus[]
+findUnusedAssumptions(decomposition: ProofDecomposition): string[]
+validateStructure(decomposition: ProofDecomposition): StructureValidation
+```
+
+---
+
+### `src/modes/mathematics-reasoning.ts` - Mathematics Reasoning Engine
+
+**Purpose**: Advanced mathematical analysis with integrated proof decomposition
+
+**Key Methods**:
+```typescript
+analyzeProof(proof: string | ProofStep[], theorem?: string): ProofAnalysisResult
+suggestImprovements(decomposition: ProofDecomposition): Suggestion[]
+```
+
+---
+
+### `src/reasoning/inconsistency-detector.ts` - Inconsistency Detector
+
+**Purpose**: Detects logical inconsistencies in reasoning chains
+
+**Key Methods**:
+```typescript
+detectInconsistencies(decomposition: ProofDecomposition): Inconsistency[]
+```
+
+**Inconsistency Types**:
+- Circular dependencies
+- Contradictory statements
+- Invalid inference chains
+
+---
+
+## Visual Export Components (v7.0.0)
 
 ### `src/export/visual/` - Modular Visual Exporters
 
 **Purpose**: Mode-specific visual export generation
 
-**Structure** (22 files total, 19 mode-specific exporters):
+**Structure** (23 files total, 20 mode-specific exporters):
 ```
 src/export/visual/
 ├── index.ts              # Unified VisualExporter class
 ├── types.ts              # VisualFormat, VisualExportOptions
 ├── utils.ts              # sanitizeId utility
+├── proof-decomposition.ts # Proof decomposition export (v7.0.0)
 └── [19 mode-specific exporters]
     causal.ts, temporal.ts, game-theory.ts, bayesian.ts,
     sequential.ts, shannon.ts, abductive.ts, counterfactual.ts,
@@ -565,14 +647,19 @@ src/export/visual/
     mathematics.ts, physics.ts, hybrid.ts, metareasoning.ts (v6.1.0)
 ```
 
-**Key Types**:
+**Key Types** (v7.0.0):
 ```typescript
-type VisualFormat = 'mermaid' | 'dot' | 'ascii';
+type VisualFormat = 'mermaid' | 'dot' | 'ascii' | 'svg';
 
 interface VisualExportOptions {
   format: VisualFormat;
-  includeMetadata?: boolean;
-  maxDepth?: number;
+  colorScheme?: 'default' | 'monochrome' | 'pastel';
+  includeLabels?: boolean;
+  includeMetrics?: boolean;
+  // SVG-specific options
+  svgWidth?: number;
+  svgHeight?: number;
+  nodeSpacing?: number;
 }
 ```
 
@@ -1007,12 +1094,13 @@ TaxonomySystem
 
 ### Coverage Targets
 - **Critical Paths**: 80%+ coverage ✅
-- **Tests**: 745 passing
-- **Test Files**: 36
+- **Tests**: 972 passing
+- **Test Files**: 40
 - **Type Safety**: 100% (0 type suppressions)
 - **Mode Coverage**: All 25 modes have validators
+- **Proof Decomposition**: Full coverage for Phase 8 components
 
 ---
 
-*Last Updated*: 2025-12-02
-*Component Version*: 6.1.2
+*Last Updated*: 2025-12-07
+*Component Version*: 7.0.0

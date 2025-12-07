@@ -2,9 +2,19 @@
 
 ## Project Summary
 
-DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 25 specialized thinking modes. The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, meta-reasoning for strategic oversight, enterprise security features, and comprehensive export capabilities.
+DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 25 specialized thinking modes. The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, meta-reasoning for strategic oversight, enterprise security features, proof decomposition for mathematical reasoning, and comprehensive export capabilities including native SVG generation.
 
-**Version**: 6.1.2 | **Node**: >=18.0.0 | **License**: MIT
+**Version**: 7.0.0 | **Node**: >=18.0.0 | **License**: MIT
+
+---
+
+## What's New in v7.0.0
+
+- **Phase 8: Proof Decomposition System** - Break proofs into atomic statements, detect gaps, track assumptions
+- **Native SVG Export** - Direct SVG generation without external tools
+- **MathematicsReasoningEngine** - Advanced mathematical analysis
+- **InconsistencyDetector** - Logical inconsistency detection
+- **972 Tests** - Comprehensive test coverage
 
 ---
 
@@ -12,16 +22,17 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~52,000 |
-| TypeScript Files | 190 |
-| Test Files | 36 |
-| Passing Tests | 745 |
+| Total Lines of Code | ~55,000 |
+| TypeScript Files | 201 |
+| Test Files | 40 |
+| Passing Tests | 972 |
 | Type Suppressions | 0 |
 | Thinking Modes | 25 (21 with thought types) |
 | MCP Tools | 10 focused + 1 legacy |
-| Export Formats | 8 |
+| Export Formats | 8 (+ native SVG) |
+| Visual Formats | 4 (mermaid, dot, ascii, svg) |
 | Reasoning Types | 69 (110 planned) |
-| Visual Exporters | 19 mode-specific |
+| Visual Exporters | 20 mode-specific |
 
 ---
 
@@ -352,12 +363,25 @@ Configured in `tsconfig.json`:
 | HTML | `.html` | Web display |
 | Jupyter | `.ipynb` | Interactive analysis |
 
-### Visual Formats
+### Visual Formats (v7.0.0)
 | Format | Output | Use Case |
 |--------|--------|----------|
 | Mermaid | Flowcharts | Documentation |
 | DOT | GraphViz graphs | Visualization tools |
 | ASCII | Text diagrams | Terminal display |
+| **SVG** | Native vector graphics | Direct rendering without external tools |
+
+---
+
+## Proof Decomposition (v7.0.0)
+
+| Component | Purpose |
+|-----------|---------|
+| **ProofDecomposer** | Breaks proofs into atomic statements |
+| **GapAnalyzer** | Detects gaps and implicit assumptions |
+| **AssumptionTracker** | Traces conclusions to assumptions |
+| **MathematicsReasoningEngine** | Advanced mathematical analysis |
+| **InconsistencyDetector** | Detects logical inconsistencies |
 
 ---
 
@@ -375,10 +399,11 @@ tests/
 ```
 
 ### Coverage
-- **Unit Tests**: 36 files
-- **Integration Tests**: 7 files
-- **Total Tests**: 745 passing
+- **Unit Tests**: 40 files
+- **Integration Tests**: 8 files (including proof decomposition)
+- **Total Tests**: 972 passing
 - **Critical Paths**: 80%+ coverage
+- **Phase 8**: Full coverage for proof decomposition components
 
 ---
 
@@ -387,10 +412,11 @@ tests/
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed system architecture
 - **[COMPONENTS.md](COMPONENTS.md)** - Component deep-dive
 - **[DATA_FLOW.md](DATA_FLOW.md)** - Data flow diagrams
+- **[DEPENDENCY_GRAPH.md](DEPENDENCY_GRAPH.md)** - Module dependency analysis
 - **[docs/modes/METAREASONING.md](../modes/METAREASONING.md)** - Meta-reasoning mode guide (v6.0.0)
 - **[CHANGELOG.md](../../CHANGELOG.md)** - Version history
 
 ---
 
-*Last Updated*: 2025-12-02
-*Version*: 6.1.2
+*Last Updated*: 2025-12-07
+*Version*: 7.0.0

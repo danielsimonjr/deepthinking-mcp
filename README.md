@@ -6,11 +6,11 @@
 
 A comprehensive Model Context Protocol (MCP) server featuring **25 reasoning modes** (21 with dedicated thought types, 4 advanced runtime modes) including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
-> 📋 **Latest Release**: v6.1.2 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
+> 📋 **Latest Release**: v7.0.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
 >
-> 🎉 **New in v6.1.x**: Fixed causal graph exports, eliminated all runtime circular dependencies, updated architecture docs.
+> 🎉 **New in v7.0.0**: Phase 8 Proof Decomposition System with native SVG export! Break proofs into atomic statements, detect gaps and implicit assumptions, track assumption chains, and export visualizations directly to SVG without external tools.
 >
-> ✨ **v6.0.0+**: Meta-Reasoning mode for strategic oversight! Monitor reasoning effectiveness, get adaptive mode-switching recommendations, and assess quality metrics across 6 dimensions. v5.0.0 added Inductive and Deductive reasoning modes.
+> ✨ **v6.0.0+**: Meta-Reasoning mode for strategic oversight! Monitor reasoning effectiveness, get adaptive mode-switching recommendations, and assess quality metrics across 6 dimensions.
 
 ## Table of Contents
 
@@ -27,11 +27,13 @@ A comprehensive Model Context Protocol (MCP) server featuring **25 reasoning mod
 ## Features
 
 - **25 Specialized Reasoning Modes** - From sequential thinking to game theory, formal logic, and meta-reasoning (21 with full thought types, 4 advanced runtime modes)
-- **Meta-Reasoning (NEW!)** - Strategic oversight that monitors effectiveness, recommends mode switches, and assesses quality
+- **Proof Decomposition (NEW!)** - Break proofs into atomic statements, detect gaps, track assumption chains
+- **Native SVG Export (NEW!)** - Direct SVG generation without external tools for proof visualizations
+- **Meta-Reasoning** - Strategic oversight that monitors effectiveness, recommends mode switches, and assesses quality
 - **Adaptive Mode Switching** - Automatic evaluation-based mode switching when effectiveness drops below thresholds
 - **Intelligent Mode Recommendation** - Automatic mode selection based on problem characteristics
 - **Taxonomy Classifier** - 69 reasoning types across 12 categories for intelligent task classification (110 planned)
-- **Visual Exports** - Generate Mermaid diagrams, DOT graphs, ASCII art, and LaTeX documents with meta-insights
+- **Visual Exports** - Generate Mermaid diagrams, DOT graphs, ASCII art, SVG graphics, and LaTeX documents
 - **Production-Ready** - Search engine, templates, batch processing, caching, backup/restore
 - **Enterprise Security** - Input validation (Zod), rate limiting, path sanitization, PII redaction
 - **High Performance** - LRU caching with auto-eviction, async I/O, 4-5x validation speedups
@@ -556,16 +558,17 @@ For architecture details, see [docs/architecture/](docs/architecture/).
 
 | Metric | Value |
 |--------|-------|
-| TypeScript Files | 190 |
-| Lines of Code | ~52,000 |
-| Test Files | 36 |
-| Passing Tests | 745 |
+| TypeScript Files | 201 |
+| Lines of Code | ~55,000 |
+| Test Files | 40 |
+| Passing Tests | 972 |
 | Thinking Modes | 25 (21 with thought types) |
 | MCP Tools | 10 focused + 1 legacy |
-| Export Formats | 8 |
+| Export Formats | 8 (+ native SVG) |
+| Visual Formats | 4 (mermaid, dot, ascii, svg) |
 | Reasoning Types | 69 (110 planned) |
-| Modules | 25 |
-| Total Exports | 535 |
+| Modules | 26 |
+| Total Exports | 608 |
 
 ## Architecture
 

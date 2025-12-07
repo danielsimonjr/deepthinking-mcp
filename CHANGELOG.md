@@ -7,6 +7,142 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [7.0.0] - 2025-12-07
+
+### 🎉 MAJOR RELEASE: Phase 8 - Proof Decomposition & Native SVG Export
+
+**Added comprehensive proof decomposition system for mathematical reasoning with native SVG export!**
+
+This release introduces a powerful proof analysis system that breaks proofs into atomic statements, detects gaps and implicit assumptions, tracks assumption chains, and provides visualization in multiple formats including native SVG.
+
+#### Phase 8 Sprints
+
+##### Sprint 1: Type System & Dependency Graph
+- **ProofDecomposition types** (`src/types/modes/mathematics.ts`)
+  - `AtomicStatement`: Individual proof statements with type, confidence, derivation tracking
+  - `DependencyGraph`: Graph structure with nodes, edges, roots, leaves, cycle detection
+  - `ProofGap`: Gap representation with type, location, severity, suggested fix
+  - `ImplicitAssumption`: Unstated assumptions with usage tracking
+  - `AssumptionChain`: Full derivation paths from conclusions to assumptions
+
+##### Sprint 2: Proof Decomposition Engine
+- **ProofDecomposer** (`src/proof/decomposer.ts`)
+  - Parse proofs from text or structured steps
+  - Identify statement types (axiom, hypothesis, definition, derived, lemma, conclusion)
+  - Detect inference rules (algebraic_manipulation, substitution, modus_ponens, etc.)
+  - Build dependency graphs with transitive closure
+  - Calculate completeness and rigor metrics
+
+- **GapAnalyzer** (`src/proof/gap-analyzer.ts`)
+  - Detect missing steps, unjustified leaps, implicit assumptions
+  - Severity classification (minor, significant, critical)
+  - Generate improvement suggestions
+
+- **AssumptionTracker** (`src/proof/assumption-tracker.ts`)
+  - Trace conclusions to their supporting assumptions
+  - Compute minimal assumption sets
+  - Detect unused assumptions
+  - Validate proof structure
+
+##### Sprint 3: Inconsistency Detection & Reasoning Engine
+- **InconsistencyDetector** (`src/reasoning/inconsistency-detector.ts`)
+  - Detect circular dependencies
+  - Find contradictory statements
+  - Validate inference chains
+
+- **MathematicsReasoningEngine** (`src/modes/mathematics-reasoning.ts`)
+  - Integrated proof analysis pipeline
+  - Improvement suggestions based on gaps and inconsistencies
+
+##### Sprint 4: Visual Export & Tool Integration
+- **Proof Decomposition Visual Export** (`src/export/visual/proof-decomposition.ts`)
+  - Mermaid format with subgraphs and styled nodes
+  - DOT format with clusters and node shapes
+  - ASCII format with derivation chains
+  - **Native SVG format** (NEW!)
+    - Direct SVG generation without external tools
+    - Layered graph layout (axioms → derived → conclusions)
+    - Color schemes: default, pastel, monochrome
+    - Gap visualization with dashed red lines
+    - Metrics panel and legend support
+    - Configurable dimensions (svgWidth, svgHeight, nodeSpacing)
+
+- **Extended Mathematics Validators** (`src/validation/validators/modes/mathematics-extended.ts`)
+  - Full Zod validation for ProofDecomposition structures
+  - AtomicStatement, DependencyGraph, ProofGap validation
+
+- **JSON Schema Extensions** (`src/tools/json-schemas.ts`)
+  - proofDecomposition schema for MCP tool input
+
+#### New Files Added
+```
+src/proof/
+├── decomposer.ts           # ProofDecomposer class
+├── gap-analyzer.ts         # GapAnalyzer class
+└── assumption-tracker.ts   # AssumptionTracker class
+
+src/reasoning/
+└── inconsistency-detector.ts  # InconsistencyDetector class
+
+src/modes/
+└── mathematics-reasoning.ts   # MathematicsReasoningEngine
+
+src/export/visual/
+└── proof-decomposition.ts     # Visual export (Mermaid, DOT, ASCII, SVG)
+
+src/validation/validators/modes/
+└── mathematics-extended.ts    # Extended Zod validators
+
+tests/unit/export/
+└── proof-decomposition-visual.test.ts  # 52 visual export tests
+
+tests/integration/proof/
+└── decomposition.test.ts      # Integration tests
+```
+
+#### Technical Details
+
+**Test Coverage**:
+- 972 tests passing (up from 745 in v6.1.x)
+- 40 test files (up from 36)
+- Full coverage for Phase 8 components
+
+**Files Modified**:
+- `src/types/modes/mathematics.ts` - Added proof decomposition types
+- `src/tools/json-schemas.ts` - Added proofDecomposition schema
+- `src/export/visual/types.ts` - Added 'svg' to VisualFormat, SVG options
+- `src/index.ts` - Handler integration for proof tools
+
+**Breaking Changes**: None! This is a purely additive release.
+
+#### Usage Example
+
+```typescript
+import { ProofDecomposer } from './proof/decomposer';
+import { exportProofDecomposition } from './export/visual/proof-decomposition';
+
+const decomposer = new ProofDecomposer();
+const proof = [
+  { content: 'Assume n is an even integer.' },
+  { content: 'By definition, n = 2k for some integer k.' },
+  { content: 'Then n² = 4k² = 2(2k²).' },
+  { content: 'Therefore n² is even.' },
+];
+
+const result = decomposer.decompose(proof, 'If n is even, then n² is even');
+
+// Export to SVG
+const svg = exportProofDecomposition(result, {
+  format: 'svg',
+  colorScheme: 'default',
+  includeMetrics: true
+});
+```
+
+---
+
 ### Added
 - **create-dependency-graph tool**: New utility script in `tools/` for automated documentation
   - Scans TypeScript codebase and generates comprehensive dependency graphs

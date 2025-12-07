@@ -4,7 +4,27 @@
 
 DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced reasoning capabilities through 25 thinking modes (21 with dedicated thought types) with meta-reasoning for strategic oversight. The architecture follows a modular, service-oriented design with clear separation of concerns.
 
-**Version**: 6.1.2 | **Node**: >=18.0.0
+**Version**: 7.0.0 | **Node**: >=18.0.0
+
+## What's New in v7.0.0
+
+### Phase 8: Proof Decomposition & Mathematical Reasoning Engine
+
+This release introduces a comprehensive proof decomposition system for mathematical reasoning:
+
+- **ProofDecomposer** (`src/proof/decomposer.ts`): Breaks proofs into atomic statements
+- **GapAnalyzer** (`src/proof/gap-analyzer.ts`): Detects gaps and implicit assumptions
+- **AssumptionTracker** (`src/proof/assumption-tracker.ts`): Traces conclusions to assumptions
+- **MathematicsReasoningEngine** (`src/modes/mathematics-reasoning.ts`): Advanced mathematical analysis
+- **InconsistencyDetector** (`src/reasoning/inconsistency-detector.ts`): Logical inconsistency detection
+- **Native SVG Export**: Direct SVG generation for proof decomposition visualizations
+
+### Key Features
+- Decompose proofs into atomic statements with dependency graphs
+- Detect gaps: missing steps, unjustified leaps, implicit assumptions
+- Track assumption chains and discharge status
+- Compute completeness and rigor metrics
+- Visual exports in Mermaid, DOT, ASCII, and native SVG formats
 
 ## High-Level Architecture
 
@@ -98,15 +118,16 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
   - Calculates quality metrics (logical consistency, evidence quality, completeness)
   - Provides session context for meta-reasoning insights
 
-### 3. Visual Export System (`src/export/visual/`) - v4.3.0
+### 3. Visual Export System (`src/export/visual/`) - v7.0.0
 
-**Modularized from monolithic visual.ts (2,546 lines) into 22 focused files:**
+**Modularized from monolithic visual.ts (2,546 lines) into 23 focused files:**
 
 ```
 src/export/visual/
 ├── index.ts              # Unified VisualExporter class
-├── types.ts              # VisualFormat, VisualExportOptions
+├── types.ts              # VisualFormat ('mermaid' | 'dot' | 'ascii' | 'svg'), VisualExportOptions
 ├── utils.ts              # sanitizeId utility
+├── proof-decomposition.ts # Proof decomposition export (v7.0.0) - Mermaid, DOT, ASCII, SVG
 └── [19 mode-specific exporters]
     ├── causal.ts         # Causal graph export
     ├── temporal.ts       # Timeline export
@@ -128,6 +149,14 @@ src/export/visual/
     ├── hybrid.ts             # Hybrid mode export (v6.1.0)
     └── metareasoning.ts      # Meta-reasoning export (v6.1.0)
 ```
+
+**Native SVG Export (v7.0.0)**:
+- Direct SVG generation without external tools (mermaid-cli, Graphviz)
+- Layered graph layout (axioms/hypotheses → derived → conclusions)
+- Color schemes: default, pastel, monochrome
+- Gap visualization with dashed red lines
+- Metrics panel and legend support
+- Configurable dimensions (svgWidth, svgHeight, nodeSpacing)
 
 **Benefits**:
 - Lazy loading: Only load exporters when specific mode is needed
@@ -413,21 +442,23 @@ Response with updated session
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~52,000 |
-| TypeScript Files | 190 |
+| Total Lines of Code | ~55,000 |
+| TypeScript Files | 201 |
 | Type Suppressions | 0 |
-| Test Files | 36 |
-| Tests | 745 |
+| Test Files | 40 |
+| Tests | 972 |
 | Thinking Modes | 25 (21 with thought types) |
 | MCP Tools | 10 focused + 1 legacy |
-| Export Formats | 8 |
+| Export Formats | 8 (+ native SVG) |
+| Visual Formats | 4 (mermaid, dot, ascii, svg) |
 | Backup Providers | 4 |
-| Visual Exporters | 19 mode-specific |
+| Visual Exporters | 20 mode-specific |
 | Reasoning Types | 69 (110 planned) |
 
 ## Version History
 
-- **v6.1.2** (Current): Fixed causal graph exports (nodes/edges preserved in Zod validation)
+- **v7.0.0** (Current): Phase 8 proof decomposition system, native SVG export, MathematicsReasoningEngine
+- **v6.1.2**: Fixed causal graph exports (nodes/edges preserved in Zod validation)
 - **v6.1.1**: Eliminated 24 runtime circular dependencies
 - **v6.1.0**: Circular dependency fixes, logger-types.ts extraction
 - **v6.0.0**: Meta-reasoning mode, MetaMonitor service, adaptive mode switching, quality metrics
@@ -447,5 +478,5 @@ Response with updated session
 
 ---
 
-*Last Updated*: 2025-12-02
-*Architecture Version*: 6.1.2
+*Last Updated*: 2025-12-07
+*Architecture Version*: 7.0.0
