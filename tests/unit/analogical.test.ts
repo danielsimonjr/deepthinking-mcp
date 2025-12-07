@@ -86,7 +86,9 @@ describe('Analogical Reasoning', () => {
 
       const result = await validator.validate(thought);
       expect(result.isValid).toBe(false);
-      expect(result.issues.some(i => i.description.includes('requires a source domain'))).toBe(true);
+      // Check for source domain validation error - matches both old and new message formats
+      expect(result.issues.some(i => i.description.toLowerCase().includes('source') &&
+        (i.description.includes('domain') || i.description.includes('required')))).toBe(true);
     });
 
     it('should require target domain', async () => {
@@ -117,7 +119,9 @@ describe('Analogical Reasoning', () => {
 
       const result = await validator.validate(thought);
       expect(result.isValid).toBe(false);
-      expect(result.issues.some(i => i.description.includes('requires a target domain'))).toBe(true);
+      // Check for target domain validation error - matches both old and new message formats
+      expect(result.issues.some(i => i.description.toLowerCase().includes('target') &&
+        (i.description.includes('domain') || i.description.includes('required')))).toBe(true);
     });
   });
 

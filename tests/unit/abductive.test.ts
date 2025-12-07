@@ -81,7 +81,9 @@ describe('Abductive Reasoning', () => {
 
       const result = await validator.validate(thought);
       expect(result.isValid).toBe(false);
-      expect(result.issues.some(i => i.description.includes('at least one observation'))).toBe(true);
+      // Check for observations validation error - matches both old and new message formats
+      expect(result.issues.some(i => i.description.toLowerCase().includes('observation') &&
+        (i.description.includes('at least') || i.description.includes('empty')))).toBe(true);
     });
 
     it('should validate observation confidence range', async () => {
@@ -113,7 +115,9 @@ describe('Abductive Reasoning', () => {
 
       const result = await validator.validate(thought);
       expect(result.isValid).toBe(false);
-      expect(result.issues.some(i => i.description.includes('invalid confidence'))).toBe(true);
+      // Check for confidence validation error - matches both old and new message formats
+      expect(result.issues.some(i => i.description.toLowerCase().includes('confidence') &&
+        (i.description.includes('0') || i.description.includes('1') || i.description.includes('invalid')))).toBe(true);
     });
   });
 

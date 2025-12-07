@@ -225,18 +225,20 @@ export abstract class BaseValidator<T extends Thought = Thought> implements Mode
 
   /**
    * Validate array is not empty
+   * Use ERROR severity for required arrays, WARNING for optional arrays
    */
   protected validateNonEmptyArray(
     thought: Thought,
     arr: unknown[] | undefined,
     fieldName: string,
-    category: IssueCategory = IssueCategory.STRUCTURAL
+    category: IssueCategory = IssueCategory.STRUCTURAL,
+    severity: IssueSeverity = IssueSeverity.WARNING
   ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     if (!arr || arr.length === 0) {
       issues.push({
-        severity: IssueSeverity.WARNING,
+        severity,
         thoughtNumber: thought.thoughtNumber,
         description: ValidationMessages.EMPTY_ARRAY(fieldName),
         suggestion: `Add at least one item to ${fieldName}`,

@@ -1,10 +1,12 @@
 /**
- * Game Theory Mode Validator
+ * Game Theory Mode Validator (v7.1.0)
+ * Refactored to use BaseValidator shared methods
  */
 
 import { GameTheoryThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
+import { IssueCategory, IssueSeverity } from '../../constants.js';
 
 export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
   getMode(): string {
@@ -20,11 +22,11 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
     // Validate game definition requires at least 2 players
     if (thought.game && thought.game.numPlayers < 2) {
       issues.push({
-        severity: 'error',
+        severity: IssueSeverity.ERROR,
         thoughtNumber: thought.thoughtNumber,
         description: 'Game must have at least 2 players',
         suggestion: 'Game theory requires at least 2 players',
-        category: 'structural',
+        category: IssueCategory.STRUCTURAL,
       });
     }
 
@@ -32,25 +34,25 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
     if (thought.game && thought.players) {
       if (thought.players.length !== thought.game.numPlayers) {
         issues.push({
-          severity: 'error',
+          severity: IssueSeverity.ERROR,
           thoughtNumber: thought.thoughtNumber,
           description: `Player count (${thought.players.length}) does not match game definition (${thought.game.numPlayers})`,
           suggestion: 'Ensure number of players matches game definition',
-          category: 'structural',
+          category: IssueCategory.STRUCTURAL,
         });
       }
 
-      // Validate players have strategies
+      // Validate players have strategies using shared method (ERROR severity)
       for (const player of thought.players) {
-        if (!player.availableStrategies || player.availableStrategies.length === 0) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Player "${player.name}" has no available strategies`,
-            suggestion: 'Each player must have at least one available strategy',
-            category: 'structural',
-          });
-        }
+        issues.push(
+          ...this.validateNonEmptyArray(
+            thought,
+            player.availableStrategies,
+            `Player "${player.name}" available strategies`,
+            IssueCategory.STRUCTURAL,
+            IssueSeverity.ERROR
+          )
+        );
       }
     }
 
@@ -62,36 +64,29 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
         // Validate strategy references existing player
         if (!playerIds.has(strategy.playerId)) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Strategy "${strategy.name}" references non-existent player: ${strategy.playerId}`,
             suggestion: 'Ensure strategies reference existing players',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
 
         // Validate mixed strategies have probability
         if (!strategy.isPure && strategy.probability === undefined) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Mixed strategy "${strategy.name}" is missing probability`,
             suggestion: 'Provide probability for mixed strategies',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
 
-        // Validate probability range
-        if (strategy.probability !== undefined &&
-            (strategy.probability < 0 || strategy.probability > 1)) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Strategy "${strategy.name}" probability must be 0-1`,
-            suggestion: 'Provide probability as decimal',
-            category: 'structural',
-          });
-        }
+        // Validate probability range using shared method
+        issues.push(
+          ...this.validateProbability(thought, strategy.probability, `Strategy "${strategy.name}" probability`)
+        );
       }
     }
 
@@ -137,24 +132,18 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
         // Validate strategy profile length
         if (thought.players && equilibrium.strategyProfile.length !== thought.players.length) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Nash equilibrium "${equilibrium.id}" has strategy profile length mismatch`,
             suggestion: 'Strategy profile must include strategies for all players',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
 
-        // Validate stability range
-        if (equilibrium.stability < 0 || equilibrium.stability > 1) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Nash equilibrium "${equilibrium.id}" stability must be 0-1`,
-            suggestion: 'Provide stability as decimal',
-            category: 'structural',
-          });
-        }
+        // Validate stability range using shared method
+        issues.push(
+          ...this.validateProbability(thought, equilibrium.stability, `Nash equilibrium "${equilibrium.id}" stability`)
+        );
       }
     }
 
@@ -165,11 +154,11 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
       // Validate root node exists
       if (!nodeIds.has(thought.gameTree.rootNode)) {
         issues.push({
-          severity: 'error',
+          severity: IssueSeverity.ERROR,
           thoughtNumber: thought.thoughtNumber,
           description: 'Game tree root node does not exist in nodes',
           suggestion: 'Ensure rootNode references an existing node',
-          category: 'structural',
+          category: IssueCategory.STRUCTURAL,
         });
       }
 
@@ -178,36 +167,27 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
         // Validate terminal nodes have payoffs
         if (node.type === 'terminal' && !node.payoffs) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Terminal node ${node.id} missing payoffs`,
             suggestion: 'Provide payoffs for terminal nodes',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
 
         // Validate chance nodes have probability
         if (node.type === 'chance' && node.probability === undefined) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Chance node ${node.id} must have probability`,
             suggestion: 'Provide probability for chance nodes',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
 
-        // Validate probability range
-        if (node.probability !== undefined &&
-            (node.probability < 0 || node.probability > 1)) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Node ${node.id} probability must be between 0 and 1`,
-            suggestion: 'Provide probability as decimal',
-            category: 'structural',
-          });
-        }
+        // Validate probability range using shared method
+        issues.push(...this.validateProbability(thought, node.probability, `Node ${node.id} probability`));
       }
     }
 
