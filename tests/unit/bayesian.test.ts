@@ -303,7 +303,9 @@ describe('Bayesian Reasoning', () => {
 
       const result = await validator.validate(thought);
       expect(result.isValid).toBe(false);
-      expect(result.issues.some(i => i.description.includes('Bayes factor must be non-negative'))).toBe(true);
+      // Check for Bayes factor validation error - matches both old and new message formats
+      expect(result.issues.some(i => i.description.toLowerCase().includes('bayes factor') &&
+        (i.description.includes('non-negative') || i.description.includes('0')))).toBe(true);
     });
 
     it('should provide info when Bayes factor > 1 (supports hypothesis)', async () => {

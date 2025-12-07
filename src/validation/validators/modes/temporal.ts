@@ -1,10 +1,12 @@
 /**
- * Temporal Mode Validator
+ * Temporal Mode Validator (v7.1.0)
+ * Refactored to use BaseValidator shared methods
  */
 
 import { TemporalThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
+import { IssueCategory, IssueSeverity } from '../../constants.js';
 
 export class TemporalValidator extends BaseValidator<TemporalThought> {
   getMode(): string {
@@ -21,11 +23,11 @@ export class TemporalValidator extends BaseValidator<TemporalThought> {
     if (thought.timeline) {
       if (!thought.timeline.timeUnit) {
         issues.push({
-          severity: 'error',
+          severity: IssueSeverity.ERROR,
           thoughtNumber: thought.thoughtNumber,
           description: 'Timeline must specify timeUnit',
           suggestion: 'Add timeUnit property (milliseconds, seconds, minutes, hours, days, months, years)',
-          category: 'structural',
+          category: IssueCategory.STRUCTURAL,
         });
       }
 
@@ -35,11 +37,11 @@ export class TemporalValidator extends BaseValidator<TemporalThought> {
         thought.timeline.startTime >= thought.timeline.endTime
       ) {
         issues.push({
-          severity: 'error',
+          severity: IssueSeverity.ERROR,
           thoughtNumber: thought.thoughtNumber,
           description: 'Timeline startTime must be before endTime',
           suggestion: 'Ensure chronological order: startTime < endTime',
-          category: 'logical',
+          category: IssueCategory.LOGICAL,
         });
       }
     }
@@ -49,23 +51,26 @@ export class TemporalValidator extends BaseValidator<TemporalThought> {
       for (const event of thought.events) {
         if (event.type === 'interval' && !event.duration) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Interval event ${event.id} must have duration`,
             suggestion: 'Add duration property for interval events',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
 
-        if (event.timestamp < 0) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Event ${event.id} has negative timestamp`,
-            suggestion: 'Use non-negative timestamps',
-            category: 'structural',
-          });
-        }
+        // Validate timestamp is non-negative using shared method
+        issues.push(
+          ...this.validateNumberRange(
+            thought,
+            event.timestamp,
+            `Event ${event.id} timestamp`,
+            0,
+            Infinity,
+            IssueSeverity.ERROR,
+            IssueCategory.STRUCTURAL
+          )
+        );
       }
     }
 
@@ -74,11 +79,11 @@ export class TemporalValidator extends BaseValidator<TemporalThought> {
       for (const interval of thought.intervals) {
         if (interval.start >= interval.end) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Interval ${interval.id} start must be before end`,
             suggestion: 'Ensure start < end for all intervals',
-            category: 'logical',
+            category: IssueCategory.LOGICAL,
           });
         }
       }
@@ -92,33 +97,26 @@ export class TemporalValidator extends BaseValidator<TemporalThought> {
       for (const constraint of thought.constraints) {
         if (!eventIds.has(constraint.subject) && !intervalIds.has(constraint.subject)) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Constraint subject ${constraint.subject} not found in events or intervals`,
             suggestion: 'Ensure constraint references exist',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
 
         if (!eventIds.has(constraint.object) && !intervalIds.has(constraint.object)) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Constraint object ${constraint.object} not found in events or intervals`,
             suggestion: 'Ensure constraint references exist',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
 
-        if (constraint.confidence < 0 || constraint.confidence > 1) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Constraint ${constraint.id} confidence must be 0-1`,
-            suggestion: 'Use decimal confidence values between 0 and 1',
-            category: 'structural',
-          });
-        }
+        // Validate confidence using shared method
+        issues.push(...this.validateConfidence(thought, constraint.confidence, `Constraint ${constraint.id} confidence`));
       }
     }
 
@@ -130,45 +128,39 @@ export class TemporalValidator extends BaseValidator<TemporalThought> {
         // Validate relation references existing events
         if (!eventIds.has(relation.from)) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Temporal relation ${relation.id} 'from' event ${relation.from} not found`,
             suggestion: 'Ensure relation references existing events',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
 
         if (!eventIds.has(relation.to)) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Temporal relation ${relation.id} 'to' event ${relation.to} not found`,
             suggestion: 'Ensure relation references existing events',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
 
-        // Validate relation strength range
-        if (relation.strength < 0 || relation.strength > 1) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Relation ${relation.id} strength must be 0-1`,
-            suggestion: 'Use decimal strength values between 0 and 1',
-            category: 'structural',
-          });
-        }
+        // Validate relation strength range using shared method
+        issues.push(...this.validateProbability(thought, relation.strength, `Relation ${relation.id} strength`));
 
-        // Validate relation delay is non-negative
-        if (relation.delay !== undefined && relation.delay < 0) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Temporal relation ${relation.id} delay cannot be negative`,
-            suggestion: 'Use non-negative delay values',
-            category: 'structural',
-          });
-        }
+        // Validate relation delay is non-negative using shared method
+        issues.push(
+          ...this.validateNumberRange(
+            thought,
+            relation.delay,
+            `Temporal relation ${relation.id} delay`,
+            0,
+            Infinity,
+            IssueSeverity.ERROR,
+            IssueCategory.STRUCTURAL
+          )
+        );
       }
     }
 

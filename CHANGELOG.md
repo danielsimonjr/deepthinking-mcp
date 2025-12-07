@@ -9,6 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ Features
 
+**Schema Utilities and Validator Refactoring (Phase 11)**
+
+Added shared schema utilities for input validation across all mode validators, completing the consistent utility pattern on the input/prompting side.
+
+#### New Schema Utilities (`src/validation/schema-utils.ts`)
+- **Primitive Schemas**: probabilitySchema, confidenceSchema, nonEmptyStringSchema, nonNegativeNumberSchema, positiveNumberSchema
+- **Composite Schemas**: hypothesisSchema, evidenceSchema, nodeSchema, edgeSchema, graphSchema, dependencySchema, timestampSchema, metadataSchema
+- **Factory Functions**: createEnumSchema, createNodeSchema, createEdgeSchema, createGraphSchema
+- **Type-specific Defaults**: createOptionalStringWithDefault, createOptionalNumberWithDefault, createOptionalBooleanWithDefault, createOptionalArrayWithDefault
+
+#### Refactored Mode Validators
+All mode validators updated to use BaseValidator shared methods instead of inline checks:
+- `validateProbability()` - Validates 0-1 range for probabilities
+- `validateConfidence()` - Validates 0-1 range for confidence values
+- `validateNumberRange()` - Validates custom ranges with configurable severity
+- `validateRequired()` - Validates required fields
+- `validateNonEmptyArray()` - Validates non-empty arrays with configurable severity
+
+Refactored validators:
+- bayesian.ts, causal.ts, evidential.ts, abductive.ts, counterfactual.ts
+- analogical.ts, temporal.ts, shannon.ts, gametheory.ts, firstprinciples.ts, systemsthinking.ts
+
+#### Benefits
+- Consistent validation patterns across all modes
+- Centralized error message generation via `ValidationMessages`
+- Proper use of `IssueSeverity` and `IssueCategory` constants
+- Easier addition of new modes with reusable validation logic
+
 **Shared Utility Modules for Mermaid, DOT, and ASCII Formats**
 
 Added shared utility modules for the three original visual export formats, completing the consistent utility pattern across all 10 export formats.

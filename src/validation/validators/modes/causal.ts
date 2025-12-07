@@ -1,10 +1,12 @@
 /**
- * Causal Mode Validator
+ * Causal Mode Validator (v7.1.0)
+ * Refactored to use BaseValidator shared methods
  */
 
 import { CausalThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
+import { IssueCategory, IssueSeverity } from '../../constants.js';
 
 export class CausalValidator extends BaseValidator<CausalThought> {
   getMode(): string {
@@ -28,44 +30,40 @@ export class CausalValidator extends BaseValidator<CausalThought> {
       for (const edge of edges) {
         if (!nodeIds.has(edge.from)) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Edge references non-existent source node: ${edge.from}`,
             suggestion: 'Ensure all edge endpoints reference existing nodes',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
         if (!nodeIds.has(edge.to)) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Edge references non-existent target node: ${edge.to}`,
             suggestion: 'Ensure all edge endpoints reference existing nodes',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
 
-        // Validate strength is in range (-1 to 1)
-        if (edge.strength < -1 || edge.strength > 1) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Edge strength must be between -1 and 1: ${edge.from} -> ${edge.to}`,
-            suggestion: 'Provide edge strength as decimal (-1 for inhibitory, +1 for excitatory)',
-            category: 'structural',
-          });
-        }
+        // Validate strength is in range (-1 to 1) using shared method
+        issues.push(
+          ...this.validateNumberRange(
+            thought,
+            edge.strength,
+            `Edge strength (${edge.from} -> ${edge.to})`,
+            -1,
+            1,
+            IssueSeverity.ERROR,
+            IssueCategory.STRUCTURAL
+          )
+        );
 
-        // Validate confidence is in range (0 to 1)
-        if (edge.confidence < 0 || edge.confidence > 1) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Edge confidence must be between 0 and 1: ${edge.from} -> ${edge.to}`,
-            suggestion: 'Provide confidence as decimal',
-            category: 'structural',
-          });
-        }
+        // Validate confidence is in range (0 to 1) using shared method
+        issues.push(
+          ...this.validateConfidence(thought, edge.confidence, `Edge confidence (${edge.from} -> ${edge.to})`)
+        );
       }
 
       // Detect cycles in causal graph
@@ -130,16 +128,10 @@ export class CausalValidator extends BaseValidator<CausalThought> {
             });
           }
 
-          // Validate confidence range
-          if (effect.confidence < 0 || effect.confidence > 1) {
-            issues.push({
-              severity: 'error',
-              thoughtNumber: thought.thoughtNumber,
-              description: `Intervention effect confidence must be between 0 and 1`,
-              suggestion: 'Provide confidence as decimal',
-              category: 'structural',
-            });
-          }
+          // Validate confidence range using shared method
+          issues.push(
+            ...this.validateConfidence(thought, effect.confidence, 'Intervention effect confidence')
+          );
         }
       }
     }

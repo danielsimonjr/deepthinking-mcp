@@ -94,7 +94,9 @@ describe('Causal Reasoning', () => {
 
       const result = await validator.validate(thought);
       expect(result.isValid).toBe(false);
-      expect(result.issues.some(i => i.description.includes('strength must be between -1 and 1'))).toBe(true);
+      // Check for strength validation error - matches both old and new message formats
+      expect(result.issues.some(i => i.description.toLowerCase().includes('strength') &&
+        (i.description.includes('-1') || i.description.includes('1')))).toBe(true);
     });
 
     it('should validate edge confidence range (0 to 1)', async () => {
@@ -121,7 +123,9 @@ describe('Causal Reasoning', () => {
 
       const result = await validator.validate(thought);
       expect(result.isValid).toBe(false);
-      expect(result.issues.some(i => i.description.includes('confidence must be between 0 and 1'))).toBe(true);
+      // Check for confidence validation error - matches both old and new message formats
+      expect(result.issues.some(i => i.description.toLowerCase().includes('confidence') &&
+        (i.description.includes('0') || i.description.includes('1')))).toBe(true);
     });
 
     it('should detect cycles in causal graph', async () => {

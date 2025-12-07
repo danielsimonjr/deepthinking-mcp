@@ -1,10 +1,12 @@
 /**
- * First-Principles Mode Validator
+ * First-Principles Mode Validator (v7.1.0)
+ * Refactored to use BaseValidator shared methods
  */
 
 import { FirstPrinciplesThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
+import { IssueCategory, IssueSeverity } from '../../constants.js';
 
 export class FirstPrinciplesValidator extends BaseValidator<FirstPrinciplesThought> {
   getMode(): string {
@@ -17,87 +19,53 @@ export class FirstPrinciplesValidator extends BaseValidator<FirstPrinciplesThoug
     // Common validation
     issues.push(...this.validateCommon(thought));
 
-    // Validate question
-    if (!thought.question || thought.question.trim() === '') {
-      issues.push({
-        severity: 'error',
-        thoughtNumber: thought.thoughtNumber,
-        description: 'First-Principles thought must have a question',
-        suggestion: 'Provide the question being answered from first principles',
-        category: 'structural',
-      });
-    }
+    // Validate question using shared method
+    issues.push(...this.validateRequired(thought, thought.question?.trim(), 'Question', IssueCategory.STRUCTURAL));
 
-    // Validate principles
-    if (!thought.principles || thought.principles.length === 0) {
-      issues.push({
-        severity: 'error',
-        thoughtNumber: thought.thoughtNumber,
-        description: 'First-Principles thought must have at least one foundational principle',
-        suggestion: 'Add foundational principles (axioms, definitions, observations)',
-        category: 'structural',
-      });
-    } else {
+    // Validate principles using shared method (ERROR severity)
+    issues.push(
+      ...this.validateNonEmptyArray(thought, thought.principles, 'Foundational principles', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
+    );
+
+    if (thought.principles && thought.principles.length > 0) {
       const principleIds = new Set<string>();
 
       for (const principle of thought.principles) {
         // Validate unique IDs
         if (principleIds.has(principle.id)) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Duplicate principle ID: ${principle.id}`,
             suggestion: 'Ensure all principle IDs are unique',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
         principleIds.add(principle.id);
 
         // Validate required fields
-        if (!principle.statement || principle.statement.trim() === '') {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Principle ${principle.id} must have a statement`,
-            suggestion: 'Provide a clear statement of the principle',
-            category: 'structural',
-          });
-        }
+        issues.push(
+          ...this.validateRequired(thought, principle.statement?.trim(), `Principle ${principle.id} statement`, IssueCategory.STRUCTURAL)
+        );
+        issues.push(
+          ...this.validateRequired(thought, principle.justification?.trim(), `Principle ${principle.id} justification`, IssueCategory.STRUCTURAL)
+        );
 
-        if (!principle.justification || principle.justification.trim() === '') {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Principle ${principle.id} must have a justification`,
-            suggestion: 'Explain why this principle is valid',
-            category: 'structural',
-          });
-        }
-
-        // Validate confidence range for observations and assumptions
-        if (
-          principle.confidence !== undefined &&
-          (principle.confidence < 0 || principle.confidence > 1)
-        ) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Principle ${principle.id} confidence must be 0-1`,
-            suggestion: 'Use decimal confidence values between 0 and 1',
-            category: 'structural',
-          });
-        }
+        // Validate confidence range using shared method
+        issues.push(
+          ...this.validateConfidence(thought, principle.confidence, `Principle ${principle.id} confidence`)
+        );
 
         // Validate dependencies exist
         if (principle.dependsOn) {
           for (const depId of principle.dependsOn) {
             if (!principleIds.has(depId) && !thought.principles.some((p) => p.id === depId)) {
               issues.push({
-                severity: 'error',
+                severity: IssueSeverity.ERROR,
                 thoughtNumber: thought.thoughtNumber,
                 description: `Principle ${principle.id} depends on non-existent principle ${depId}`,
                 suggestion: 'Ensure dependency references exist',
-                category: 'logical',
+                category: IssueCategory.LOGICAL,
               });
             }
           }
@@ -105,16 +73,12 @@ export class FirstPrinciplesValidator extends BaseValidator<FirstPrinciplesThoug
       }
     }
 
-    // Validate derivation steps
-    if (!thought.derivationSteps || thought.derivationSteps.length === 0) {
-      issues.push({
-        severity: 'error',
-        thoughtNumber: thought.thoughtNumber,
-        description: 'First-Principles thought must have derivation steps',
-        suggestion: 'Add derivation steps showing the reasoning chain',
-        category: 'structural',
-      });
-    } else {
+    // Validate derivation steps using shared method (ERROR severity)
+    issues.push(
+      ...this.validateNonEmptyArray(thought, thought.derivationSteps, 'Derivation steps', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
+    );
+
+    if (thought.derivationSteps && thought.derivationSteps.length > 0) {
       const principleIds = new Set(thought.principles?.map((p) => p.id) || []);
       const stepNumbers = new Set<number>();
 
@@ -122,117 +86,85 @@ export class FirstPrinciplesValidator extends BaseValidator<FirstPrinciplesThoug
         // Validate unique step numbers
         if (stepNumbers.has(step.stepNumber)) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Duplicate step number: ${step.stepNumber}`,
             suggestion: 'Ensure all step numbers are unique',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
         stepNumbers.add(step.stepNumber);
 
-        // Validate step number is positive
-        if (step.stepNumber <= 0) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Step ${step.stepNumber} must have a positive step number`,
-            suggestion: 'Use positive integers for step numbers',
-            category: 'structural',
-          });
-        }
+        // Validate step number is positive using shared method
+        issues.push(
+          ...this.validateNumberRange(
+            thought,
+            step.stepNumber,
+            `Step number`,
+            1,
+            Infinity,
+            IssueSeverity.ERROR,
+            IssueCategory.STRUCTURAL
+          )
+        );
 
         // Validate principle reference
         if (!principleIds.has(step.principle)) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Step ${step.stepNumber} references non-existent principle ${step.principle}`,
             suggestion: 'Ensure step references existing principles',
-            category: 'logical',
+            category: IssueCategory.LOGICAL,
           });
         }
 
         // Validate inference
-        if (!step.inference || step.inference.trim() === '') {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Step ${step.stepNumber} must have an inference`,
-            suggestion: 'Describe what is inferred from the principle',
-            category: 'structural',
-          });
-        }
+        issues.push(
+          ...this.validateRequired(thought, step.inference?.trim(), `Step ${step.stepNumber} inference`, IssueCategory.STRUCTURAL)
+        );
 
-        // Validate confidence range
-        if (step.confidence < 0 || step.confidence > 1) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Step ${step.stepNumber} confidence must be 0-1`,
-            suggestion: 'Use decimal confidence values between 0 and 1',
-            category: 'structural',
-          });
-        }
+        // Validate confidence range using shared method
+        issues.push(
+          ...this.validateConfidence(thought, step.confidence, `Step ${step.stepNumber} confidence`)
+        );
       }
     }
 
-    // Validate conclusion
-    if (!thought.conclusion) {
-      issues.push({
-        severity: 'error',
-        thoughtNumber: thought.thoughtNumber,
-        description: 'First-Principles thought must have a conclusion',
-        suggestion: 'Provide a conclusion derived from the principles',
-        category: 'structural',
-      });
-    } else {
-      // Validate conclusion statement
-      if (!thought.conclusion.statement || thought.conclusion.statement.trim() === '') {
-        issues.push({
-          severity: 'error',
-          thoughtNumber: thought.thoughtNumber,
-          description: 'Conclusion must have a statement',
-          suggestion: 'Provide a clear conclusion statement',
-          category: 'structural',
-        });
-      }
+    // Validate conclusion using shared method
+    issues.push(...this.validateRequired(thought, thought.conclusion, 'Conclusion', IssueCategory.STRUCTURAL));
 
-      // Validate derivation chain
-      if (!thought.conclusion.derivationChain || thought.conclusion.derivationChain.length === 0) {
-        issues.push({
-          severity: 'error',
-          thoughtNumber: thought.thoughtNumber,
-          description: 'Conclusion must have a derivation chain',
-          suggestion: 'Specify which steps lead to the conclusion',
-          category: 'structural',
-        });
-      } else {
+    if (thought.conclusion) {
+      // Validate conclusion statement
+      issues.push(
+        ...this.validateRequired(thought, thought.conclusion.statement?.trim(), 'Conclusion statement', IssueCategory.STRUCTURAL)
+      );
+
+      // Validate derivation chain (ERROR severity)
+      issues.push(
+        ...this.validateNonEmptyArray(thought, thought.conclusion.derivationChain, 'Derivation chain', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
+      );
+
+      if (thought.conclusion.derivationChain && thought.conclusion.derivationChain.length > 0) {
         const stepNumbers = new Set(thought.derivationSteps?.map((s) => s.stepNumber) || []);
 
         for (const stepNum of thought.conclusion.derivationChain) {
           if (!stepNumbers.has(stepNum)) {
             issues.push({
-              severity: 'error',
+              severity: IssueSeverity.ERROR,
               thoughtNumber: thought.thoughtNumber,
               description: `Conclusion references non-existent step ${stepNum}`,
               suggestion: 'Ensure derivation chain references existing steps',
-              category: 'logical',
+              category: IssueCategory.LOGICAL,
             });
           }
         }
       }
 
-      // Validate certainty range
-      if (thought.conclusion.certainty < 0 || thought.conclusion.certainty > 1) {
-        issues.push({
-          severity: 'error',
-          thoughtNumber: thought.thoughtNumber,
-          description: 'Conclusion certainty must be 0-1',
-          suggestion: 'Use decimal certainty values between 0 and 1',
-          category: 'structural',
-        });
-      }
+      // Validate certainty range using shared method
+      issues.push(
+        ...this.validateProbability(thought, thought.conclusion.certainty, 'Conclusion certainty')
+      );
     }
 
     return issues;

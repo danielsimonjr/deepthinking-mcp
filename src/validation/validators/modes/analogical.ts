@@ -1,10 +1,12 @@
 /**
- * Analogical Mode Validator
+ * Analogical Mode Validator (v7.1.0)
+ * Refactored to use BaseValidator shared methods
  */
 
 import { AnalogicalThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
+import { IssueCategory, IssueSeverity } from '../../constants.js';
 
 export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {
   getMode(): string {
@@ -17,48 +19,23 @@ export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {
     // Common validation
     issues.push(...this.validateCommon(thought));
 
-    // Require source domain
-    if (!thought.sourceDomain) {
-      issues.push({
-        severity: 'error',
-        thoughtNumber: thought.thoughtNumber,
-        description: 'Analogical reasoning requires a source domain',
-        suggestion: 'Provide the known domain for comparison',
-        category: 'structural',
-      });
-    }
+    // Require source domain using shared method
+    issues.push(...this.validateRequired(thought, thought.sourceDomain, 'Source domain', IssueCategory.STRUCTURAL));
 
-    // Require target domain
-    if (!thought.targetDomain) {
-      issues.push({
-        severity: 'error',
-        thoughtNumber: thought.thoughtNumber,
-        description: 'Analogical reasoning requires a target domain',
-        suggestion: 'Provide the domain being analyzed',
-        category: 'structural',
-      });
-    }
+    // Require target domain using shared method
+    issues.push(...this.validateRequired(thought, thought.targetDomain, 'Target domain', IssueCategory.STRUCTURAL));
 
-    // Validate analogy strength range
-    if (thought.analogyStrength !== undefined &&
-        (thought.analogyStrength < 0 || thought.analogyStrength > 1)) {
-      issues.push({
-        severity: 'error',
-        thoughtNumber: thought.thoughtNumber,
-        description: 'Analogy strength must be between 0 and 1',
-        suggestion: 'Provide analogy strength as decimal',
-        category: 'structural',
-      });
-    }
+    // Validate analogy strength range using shared method
+    issues.push(...this.validateProbability(thought, thought.analogyStrength, 'Analogy strength'));
 
     // Validate mapping completeness
     if (thought.mapping && thought.mapping.length === 0) {
       issues.push({
-        severity: 'info',
+        severity: IssueSeverity.INFO,
         thoughtNumber: thought.thoughtNumber,
         description: 'No mappings specified between domains',
         suggestion: 'Provide at least one mapping between source and target',
-        category: 'structural',
+        category: IssueCategory.STRUCTURAL,
       });
     }
 
@@ -71,77 +48,58 @@ export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {
         // Validate source entity reference
         if (!sourceEntityIds.has(map.sourceEntityId)) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Mapping references non-existent source entity: ${map.sourceEntityId}`,
             suggestion: 'Ensure mappings reference existing source entities',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
 
         // Validate target entity reference
         if (!targetEntityIds.has(map.targetEntityId)) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Mapping references non-existent target entity: ${map.targetEntityId}`,
             suggestion: 'Ensure mappings reference existing target entities',
-            category: 'structural',
+            category: IssueCategory.STRUCTURAL,
           });
         }
 
-        // Validate confidence range
-        if (map.confidence < 0 || map.confidence > 1) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Mapping confidence must be between 0 and 1: ${map.sourceEntityId} -> ${map.targetEntityId}`,
-            suggestion: 'Provide confidence as decimal',
-            category: 'structural',
-          });
-        }
+        // Validate confidence range using shared method
+        issues.push(
+          ...this.validateConfidence(
+            thought,
+            map.confidence,
+            `Mapping confidence (${map.sourceEntityId} -> ${map.targetEntityId})`
+          )
+        );
       }
     }
 
     // Warn if no limitations identified
     if (!thought.limitations || thought.limitations.length === 0) {
       issues.push({
-        severity: 'warning',
+        severity: IssueSeverity.WARNING,
         thoughtNumber: thought.thoughtNumber,
         description: 'Good analogies acknowledge their limitations',
         suggestion: 'Identify where the analogy breaks down or doesn\'t apply',
-        category: 'logical',
+        category: IssueCategory.LOGICAL,
       });
     }
 
-    // Validate insight novelty ranges
+    // Validate insight novelty ranges using shared method
     if (thought.insights) {
       for (const insight of thought.insights) {
-        if (insight.novelty !== undefined &&
-            (insight.novelty < 0 || insight.novelty > 1)) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: 'Insight novelty must be between 0 and 1',
-            suggestion: 'Provide novelty as decimal',
-            category: 'structural',
-          });
-        }
+        issues.push(...this.validateProbability(thought, insight.novelty, 'Insight novelty'));
       }
     }
 
-    // Validate inference confidence ranges
+    // Validate inference confidence ranges using shared method
     if (thought.inferences) {
       for (const inference of thought.inferences) {
-        if (inference.confidence < 0 || inference.confidence > 1) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: 'Inference confidence must be between 0 and 1',
-            suggestion: 'Provide confidence as decimal',
-            category: 'structural',
-          });
-        }
+        issues.push(...this.validateConfidence(thought, inference.confidence, 'Inference confidence'));
       }
     }
 
