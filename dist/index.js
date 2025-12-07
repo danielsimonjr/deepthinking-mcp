@@ -1303,6 +1303,24 @@ var init_recommendations = __esm({
             synergies: ["Metareasoning evaluates strategies", "Optimization selects best approach"]
           });
         }
+        if (characteristics.requiresExplanation && characteristics.hasAlternatives) {
+          combinations.push({
+            modes: ["metareasoning" /* METAREASONING */, "formallogic" /* FORMALLOGIC */, "abductive" /* ABDUCTIVE */],
+            sequence: "sequential",
+            rationale: "Detect cognitive biases through meta-analysis, identify logical fallacies, and generate alternative explanations as counter-arguments",
+            benefits: ["Comprehensive bias detection", "Fallacy identification", "Counter-argument generation", "Critical analysis"],
+            synergies: ["Metareasoning identifies reasoning flaws", "Formal logic validates argument structure", "Abductive generates alternative explanations"]
+          });
+        }
+        if (characteristics.hasAlternatives && characteristics.uncertainty !== "low") {
+          combinations.push({
+            modes: ["metareasoning" /* METAREASONING */, "counterfactual" /* COUNTERFACTUAL */],
+            sequence: "parallel",
+            rationale: "Self-reflect on reasoning while exploring alternative scenarios to counter biases",
+            benefits: ["Bias awareness", "Alternative perspective generation", "Decision robustness"],
+            synergies: ["Metareasoning detects bias patterns", "Counterfactual explores what-if scenarios"]
+          });
+        }
         return combinations;
       }
       /**
@@ -1454,7 +1472,24 @@ var init_recommendations = __esm({
           "formal-proof": "formallogic" /* FORMALLOGIC */,
           "validity": "formallogic" /* FORMALLOGIC */,
           "soundness": "formallogic" /* FORMALLOGIC */,
-          "completeness": "formallogic" /* FORMALLOGIC */
+          "completeness": "formallogic" /* FORMALLOGIC */,
+          // Bias detection and critical analysis
+          "bias": "metareasoning" /* METAREASONING */,
+          "bias-detection": "metareasoning" /* METAREASONING */,
+          "cognitive-bias": "metareasoning" /* METAREASONING */,
+          "fallacy": "formallogic" /* FORMALLOGIC */,
+          "fallacies": "formallogic" /* FORMALLOGIC */,
+          "logical-fallacy": "formallogic" /* FORMALLOGIC */,
+          "counter-argument": "counterfactual" /* COUNTERFACTUAL */,
+          "counterargument": "counterfactual" /* COUNTERFACTUAL */,
+          "rebuttal": "counterfactual" /* COUNTERFACTUAL */,
+          "critique": "metareasoning" /* METAREASONING */,
+          "critical-analysis": "metareasoning" /* METAREASONING */,
+          "fact-check": "evidential" /* EVIDENTIAL */,
+          "misinformation": "evidential" /* EVIDENTIAL */,
+          "disinformation": "evidential" /* EVIDENTIAL */,
+          "reasoning-flaw": "metareasoning" /* METAREASONING */,
+          "argument-analysis": "formallogic" /* FORMALLOGIC */
         };
         return typeMap[problemType.toLowerCase()] || "sequential" /* SEQUENTIAL */;
       }

@@ -633,6 +633,28 @@ export class ModeRecommender {
       });
     }
 
+    // Metareasoning + Formal Logic + Abductive (for cognitive bias detection and counter-arguments)
+    if (characteristics.requiresExplanation && characteristics.hasAlternatives) {
+      combinations.push({
+        modes: [ThinkingMode.METAREASONING, ThinkingMode.FORMALLOGIC, ThinkingMode.ABDUCTIVE],
+        sequence: 'sequential',
+        rationale: 'Detect cognitive biases through meta-analysis, identify logical fallacies, and generate alternative explanations as counter-arguments',
+        benefits: ['Comprehensive bias detection', 'Fallacy identification', 'Counter-argument generation', 'Critical analysis'],
+        synergies: ['Metareasoning identifies reasoning flaws', 'Formal logic validates argument structure', 'Abductive generates alternative explanations'],
+      });
+    }
+
+    // Metareasoning + Counterfactual (for bias mitigation and alternative perspectives)
+    if (characteristics.hasAlternatives && characteristics.uncertainty !== 'low') {
+      combinations.push({
+        modes: [ThinkingMode.METAREASONING, ThinkingMode.COUNTERFACTUAL],
+        sequence: 'parallel',
+        rationale: 'Self-reflect on reasoning while exploring alternative scenarios to counter biases',
+        benefits: ['Bias awareness', 'Alternative perspective generation', 'Decision robustness'],
+        synergies: ['Metareasoning detects bias patterns', 'Counterfactual explores what-if scenarios'],
+      });
+    }
+
     return combinations;
   }
 
@@ -798,6 +820,24 @@ export class ModeRecommender {
       'validity': ThinkingMode.FORMALLOGIC,
       'soundness': ThinkingMode.FORMALLOGIC,
       'completeness': ThinkingMode.FORMALLOGIC,
+
+      // Bias detection and critical analysis
+      'bias': ThinkingMode.METAREASONING,
+      'bias-detection': ThinkingMode.METAREASONING,
+      'cognitive-bias': ThinkingMode.METAREASONING,
+      'fallacy': ThinkingMode.FORMALLOGIC,
+      'fallacies': ThinkingMode.FORMALLOGIC,
+      'logical-fallacy': ThinkingMode.FORMALLOGIC,
+      'counter-argument': ThinkingMode.COUNTERFACTUAL,
+      'counterargument': ThinkingMode.COUNTERFACTUAL,
+      'rebuttal': ThinkingMode.COUNTERFACTUAL,
+      'critique': ThinkingMode.METAREASONING,
+      'critical-analysis': ThinkingMode.METAREASONING,
+      'fact-check': ThinkingMode.EVIDENTIAL,
+      'misinformation': ThinkingMode.EVIDENTIAL,
+      'disinformation': ThinkingMode.EVIDENTIAL,
+      'reasoning-flaw': ThinkingMode.METAREASONING,
+      'argument-analysis': ThinkingMode.FORMALLOGIC,
     };
 
     return typeMap[problemType.toLowerCase()] || ThinkingMode.SEQUENTIAL;
