@@ -35,7 +35,7 @@ const server = new Server(
 
 **Fix**: Import version from package.json or use a constant
 ```typescript
-import packageJson from '../package.json' assert { type: 'json' };
+import packageJson from '../package.json' with { type: 'json' };
 
 const server = new Server(
   {
