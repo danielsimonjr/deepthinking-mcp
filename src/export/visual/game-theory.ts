@@ -40,6 +40,23 @@ import {
   renderTable,
   renderBadge,
 } from './html-utils.js';
+import {
+  sanitizeModelicaId,
+  escapeModelicaString,
+} from './modelica-utils.js';
+import {
+  generateUmlDiagram,
+  type UmlNode,
+  type UmlEdge,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  addLegendItem,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Export game tree to visual format
@@ -62,6 +79,12 @@ export function exportGameTree(thought: GameTheoryThought, options: VisualExport
       return gameTreeToTikZ(thought, options);
     case 'html':
       return gameTreeToHTML(thought, options);
+    case 'modelica':
+      return gameTheoryToModelica(thought, options);
+    case 'uml':
+      return gameTheoryToUML(thought, options);
+    case 'json':
+      return gameTheoryToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -597,4 +620,321 @@ function gameTreeToHTML(thought: GameTheoryThought, options: VisualExportOptions
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export game theory to Modelica format
+ */
+function gameTheoryToModelica(thought: GameTheoryThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+  const gameName = sanitizeModelicaId(thought.game?.name || 'Game');
+
+  let modelica = `package ${gameName}\n`;
+  modelica += `  "Game Theory Analysis: ${escapeModelicaString(thought.game?.name || 'Untitled')}"\n\n`;
+
+  // Player record type
+  if (thought.players && thought.players.length > 0) {
+    modelica += '  record Player\n';
+    modelica += '    "Player in the game"\n';
+    modelica += '    String id "Player identifier";\n';
+    modelica += '    String name "Player name";\n';
+    modelica += '  end Player;\n\n';
+
+    // Player instances
+    for (const player of thought.players) {
+      const playerId = sanitizeModelicaId(player.id || player.name);
+      modelica += `  constant Player ${playerId} = Player(\n`;
+      modelica += `    id="${escapeModelicaString(player.id || player.name)}",\n`;
+      modelica += `    name="${escapeModelicaString(player.name)}"\n`;
+      modelica += '  );\n';
+    }
+    modelica += '\n';
+  }
+
+  // Strategy enumeration
+  if (thought.strategies && thought.strategies.length > 0) {
+    modelica += '  type StrategyType = enumeration(\n';
+    const strategyNames = thought.strategies.map(s => sanitizeModelicaId(s.name));
+    modelica += strategyNames.map(name => `    ${name}`).join(',\n');
+    modelica += '\n  ) "Available strategies";\n\n';
+
+    // Strategy records
+    modelica += '  record Strategy\n';
+    modelica += '    "Strategy definition"\n';
+    modelica += '    String id "Strategy identifier";\n';
+    modelica += '    String name "Strategy name";\n';
+    modelica += '    Boolean isPure "Whether strategy is pure or mixed";\n';
+    modelica += '  end Strategy;\n\n';
+
+    for (const strategy of thought.strategies) {
+      const stratId = sanitizeModelicaId(strategy.id);
+      modelica += `  constant Strategy ${stratId} = Strategy(\n`;
+      modelica += `    id="${escapeModelicaString(strategy.id)}",\n`;
+      modelica += `    name="${escapeModelicaString(strategy.name)}",\n`;
+      modelica += `    isPure=${strategy.isPure ? 'true' : 'false'}\n`;
+      modelica += '  );\n';
+    }
+    modelica += '\n';
+  }
+
+  // Nash Equilibria
+  if (thought.nashEquilibria && thought.nashEquilibria.length > 0) {
+    modelica += '  record NashEquilibrium\n';
+    modelica += '    "Nash equilibrium definition"\n';
+    modelica += '    String equilibriumType "Type: pure or mixed";\n';
+    modelica += '    String strategyProfile[:] "Strategy profile";\n';
+    modelica += '    Real payoffs[:] "Payoffs for each player";\n';
+    modelica += '    Boolean isStrict "Whether equilibrium is strict";\n';
+    modelica += '  end NashEquilibrium;\n\n';
+
+    for (let i = 0; i < thought.nashEquilibria.length; i++) {
+      const eq = thought.nashEquilibria[i];
+      modelica += `  constant NashEquilibrium equilibrium${i + 1} = NashEquilibrium(\n`;
+      modelica += `    equilibriumType="${escapeModelicaString(eq.type)}",\n`;
+      modelica += `    strategyProfile={${eq.strategyProfile.map(s => `"${escapeModelicaString(s)}"`).join(', ')}},\n`;
+      modelica += `    payoffs={${eq.payoffs.join(', ')}},\n`;
+      modelica += `    isStrict=${eq.isStrict ? 'true' : 'false'}\n`;
+      modelica += '  );\n';
+    }
+    modelica += '\n';
+  }
+
+  // Game metadata
+  if (includeMetrics) {
+    modelica += '  // Game Metrics\n';
+    modelica += `  constant Integer numPlayers = ${thought.players?.length || thought.game?.numPlayers || 0};\n`;
+    modelica += `  constant Integer numStrategies = ${thought.strategies?.length || 0};\n`;
+    modelica += `  constant Integer numEquilibria = ${thought.nashEquilibria?.length || 0};\n`;
+    modelica += `  constant String gameType = "${escapeModelicaString(thought.game?.type || 'unknown')}";\n`;
+  }
+
+  modelica += `end ${gameName};\n`;
+  return modelica;
+}
+
+/**
+ * Export game theory to UML format
+ */
+function gameTheoryToUML(thought: GameTheoryThought, options: VisualExportOptions): string {
+  const { includeLabels = true } = options;
+
+  const nodes: UmlNode[] = [];
+  const edges: UmlEdge[] = [];
+
+  if (!thought.game) {
+    nodes.push({
+      id: 'nogame',
+      label: 'No Game Defined',
+      shape: 'class',
+      stereotype: 'error',
+    });
+    return generateUmlDiagram(nodes, edges, { title: 'Game Theory Analysis' });
+  }
+
+  // Game class (central node)
+  const gameNode: UmlNode = {
+    id: 'game',
+    label: thought.game.name || 'Game',
+    shape: 'class',
+    attributes: [
+      `type: ${thought.game.type}`,
+      `players: ${thought.players?.length || thought.game.numPlayers}`,
+    ],
+  };
+  nodes.push(gameNode);
+
+  // Player classes
+  if (thought.players && thought.players.length > 0) {
+    for (const player of thought.players) {
+      const playerId = sanitizeId(player.id || player.name);
+      nodes.push({
+        id: playerId,
+        label: player.name,
+        shape: 'class',
+        stereotype: 'player',
+        attributes: [`id: ${player.id || player.name}`],
+      });
+      edges.push({
+        source: 'game',
+        target: playerId,
+        type: 'association',
+        label: includeLabels ? 'has player' : undefined,
+      });
+    }
+  }
+
+  // Strategy classes
+  if (thought.strategies && thought.strategies.length > 0) {
+    for (const strategy of thought.strategies.slice(0, 10)) {
+      const stratId = sanitizeId(strategy.id);
+      nodes.push({
+        id: stratId,
+        label: strategy.name,
+        shape: 'class',
+        stereotype: strategy.isPure ? 'pure strategy' : 'mixed strategy',
+        attributes: [
+          `id: ${strategy.id}`,
+          ...(strategy.description ? [`description: ${strategy.description}`] : []),
+        ],
+      });
+      edges.push({
+        source: 'game',
+        target: stratId,
+        type: 'association',
+        label: includeLabels ? 'uses' : undefined,
+      });
+    }
+  }
+
+  // Nash Equilibria as separate nodes
+  if (thought.nashEquilibria && thought.nashEquilibria.length > 0) {
+    for (let i = 0; i < thought.nashEquilibria.length; i++) {
+      const eq = thought.nashEquilibria[i];
+      const eqId = `equilibrium_${i}`;
+      nodes.push({
+        id: eqId,
+        label: `Nash Equilibrium ${i + 1}`,
+        shape: 'class',
+        stereotype: eq.type,
+        attributes: [
+          `profile: [${eq.strategyProfile.join(', ')}]`,
+          `payoffs: [${eq.payoffs.join(', ')}]`,
+          `strict: ${eq.isStrict}`,
+        ],
+      });
+      edges.push({
+        source: 'game',
+        target: eqId,
+        type: 'dependency',
+        label: includeLabels ? 'achieves' : undefined,
+      });
+    }
+  }
+
+  return generateUmlDiagram(nodes, edges, {
+    title: thought.game.name || 'Game Theory Analysis',
+    direction: 'top to bottom',
+  });
+}
+
+/**
+ * Export game theory to JSON format
+ */
+function gameTheoryToJSON(thought: GameTheoryThought, options: VisualExportOptions): string {
+  const { includeMetrics = true, includeLabels = true } = options;
+
+  const graph = createJsonGraph(
+    thought.game?.name || 'Game Theory Analysis',
+    'game-theory'
+  );
+
+  if (!thought.game) {
+    addNode(graph, {
+      id: 'nogame',
+      label: 'No Game Defined',
+      type: 'error',
+    });
+    return serializeGraph(graph);
+  }
+
+  // Add game node
+  addNode(graph, {
+    id: 'game',
+    label: thought.game.name || 'Game',
+    type: 'game',
+    metadata: {
+      gameType: thought.game.type,
+      numPlayers: thought.players?.length || thought.game.numPlayers,
+      description: thought.game.description,
+    },
+  });
+
+  // Add player nodes
+  let edgeId = 0;
+  if (thought.players && thought.players.length > 0) {
+    for (const player of thought.players) {
+      const playerId = sanitizeId(player.id || player.name);
+      addNode(graph, {
+        id: playerId,
+        label: player.name,
+        type: 'player',
+        metadata: {
+          originalId: player.id,
+        },
+      });
+      addEdge(graph, {
+        id: `edge_${edgeId++}`,
+        source: 'game',
+        target: playerId,
+        label: includeLabels ? 'has player' : undefined,
+        type: 'participates',
+      });
+    }
+  }
+
+  // Add strategy nodes
+  if (thought.strategies && thought.strategies.length > 0) {
+    for (const strategy of thought.strategies) {
+      const stratId = sanitizeId(strategy.id);
+      addNode(graph, {
+        id: stratId,
+        label: strategy.name,
+        type: strategy.isPure ? 'pure-strategy' : 'mixed-strategy',
+        metadata: {
+          originalId: strategy.id,
+          description: strategy.description,
+          isPure: strategy.isPure,
+        },
+      });
+      addEdge(graph, {
+        id: `edge_${edgeId++}`,
+        source: 'game',
+        target: stratId,
+        label: includeLabels ? 'uses strategy' : undefined,
+        type: 'strategy',
+      });
+    }
+  }
+
+  // Add Nash equilibria nodes
+  if (thought.nashEquilibria && thought.nashEquilibria.length > 0) {
+    for (let i = 0; i < thought.nashEquilibria.length; i++) {
+      const eq = thought.nashEquilibria[i];
+      const eqId = `equilibrium_${i}`;
+      addNode(graph, {
+        id: eqId,
+        label: `Nash Equilibrium ${i + 1}`,
+        type: 'equilibrium',
+        metadata: {
+          equilibriumType: eq.type,
+          strategyProfile: eq.strategyProfile,
+          payoffs: eq.payoffs,
+          isStrict: eq.isStrict,
+        },
+      });
+      addEdge(graph, {
+        id: `edge_${edgeId++}`,
+        source: 'game',
+        target: eqId,
+        label: includeLabels ? 'achieves' : undefined,
+        type: 'outcome',
+      });
+    }
+  }
+
+  // Add metrics
+  if (includeMetrics) {
+    addMetric(graph, 'Players', thought.players?.length || thought.game?.numPlayers || 0);
+    addMetric(graph, 'Strategies', thought.strategies?.length || 0);
+    addMetric(graph, 'Nash Equilibria', thought.nashEquilibria?.length || 0);
+  }
+
+  // Add legend
+  addLegendItem(graph, 'Game', '#4A90E2');
+  addLegendItem(graph, 'Player', '#50C878');
+  addLegendItem(graph, 'Pure Strategy', '#FFD700');
+  addLegendItem(graph, 'Mixed Strategy', '#FFA500');
+  addLegendItem(graph, 'Nash Equilibrium', '#9370DB');
+
+  return serializeGraph(graph);
 }

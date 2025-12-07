@@ -33,6 +33,20 @@ import {
   renderTable,
   renderBadge,
 } from './html-utils.js';
+import {
+  sanitizeModelicaId,
+  escapeModelicaString,
+} from './modelica-utils.js';
+import {
+  generateStateDiagram,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Export temporal timeline to visual format
@@ -55,6 +69,12 @@ export function exportTemporalTimeline(thought: TemporalThought, options: Visual
       return timelineToTikZ(thought, options);
     case 'html':
       return timelineToHTML(thought, options);
+    case 'modelica':
+      return temporalToModelica(thought, options);
+    case 'uml':
+      return temporalToUML(thought, options);
+    case 'json':
+      return temporalToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -342,4 +362,176 @@ function timelineToHTML(thought: TemporalThought, options: VisualExportOptions):
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export temporal timeline to Modelica format
+ */
+function temporalToModelica(thought: TemporalThought, _options: VisualExportOptions): string {
+  const pkgName = sanitizeModelicaId(thought.timeline?.name || 'Timeline');
+  let modelica = `package ${pkgName}\n`;
+  modelica += `  "${escapeModelicaString(thought.timeline?.name || 'Timeline')} - Temporal Event System"\n\n`;
+
+  if (!thought.events || thought.events.length === 0) {
+    modelica += '  // No events\n';
+    modelica += `end ${pkgName};\n`;
+    return modelica;
+  }
+
+  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+
+  // Define event records
+  modelica += '  // Event Records\n';
+  for (const event of sortedEvents) {
+    const eventId = sanitizeModelicaId(event.id);
+    modelica += `  record ${eventId}\n`;
+    modelica += `    "${escapeModelicaString(event.name)}"\n`;
+    modelica += `    parameter Real timestamp = ${event.timestamp} "Event timestamp";\n`;
+    if (event.duration !== undefined) {
+      modelica += `    parameter Real duration = ${event.duration} "Event duration";\n`;
+    }
+    modelica += `    parameter String eventType = "${event.type}" "Event type (instant/interval)";\n`;
+    if (event.description) {
+      modelica += `    parameter String description = "${escapeModelicaString(event.description)}";\n`;
+    }
+    modelica += `  end ${eventId};\n\n`;
+  }
+
+  // Define timeline model
+  modelica += '  model TimelineModel\n';
+  modelica += '    "Temporal event sequence model"\n\n';
+
+  // Timeline parameters
+  modelica += '    parameter Real timeStart = ' + sortedEvents[0].timestamp + ' "Timeline start";\n';
+  modelica += '    parameter Real timeEnd = ' + sortedEvents[sortedEvents.length - 1].timestamp + ' "Timeline end";\n';
+  modelica += `    parameter Integer eventCount = ${sortedEvents.length} "Total number of events";\n\n`;
+
+  // Event instances
+  modelica += '    // Event instances\n';
+  for (const event of sortedEvents) {
+    const eventId = sanitizeModelicaId(event.id);
+    modelica += `    ${eventId} ${eventId.toLowerCase()}_inst;\n`;
+  }
+
+  // Discrete time logic
+  modelica += '\n    // Timeline progression\n';
+  modelica += '    discrete Real currentTime(start=timeStart);\n';
+  modelica += '  equation\n';
+  modelica += '    when time >= timeEnd then\n';
+  modelica += '      currentTime = timeEnd;\n';
+  modelica += '    end when;\n';
+
+  modelica += '  end TimelineModel;\n\n';
+
+  modelica += `end ${pkgName};\n`;
+  return modelica;
+}
+
+/**
+ * Export temporal timeline to UML format
+ */
+function temporalToUML(thought: TemporalThought, _options: VisualExportOptions): string {
+  if (!thought.events || thought.events.length === 0) {
+    return generateStateDiagram([], [], undefined, { title: thought.timeline?.name || 'Timeline' });
+  }
+
+  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+
+  // Create states from events (map to just the names)
+  const states = sortedEvents.map(event => event.name);
+
+  // Create transitions between consecutive events
+  const transitions: Array<{ from: string; to: string; event?: string }> = [];
+  for (let i = 0; i < sortedEvents.length - 1; i++) {
+    transitions.push({
+      from: sortedEvents[i].id,
+      to: sortedEvents[i + 1].id,
+      event: `Δt=${sortedEvents[i + 1].timestamp - sortedEvents[i].timestamp}`,
+    });
+  }
+
+  // Add causal relations as additional transitions
+  if (thought.relations) {
+    for (const rel of thought.relations) {
+      transitions.push({
+        from: rel.from,
+        to: rel.to,
+        event: rel.relationType,
+      });
+    }
+  }
+
+  return generateStateDiagram(states, transitions, undefined, { title: thought.timeline?.name || 'Timeline' });
+}
+
+/**
+ * Export temporal timeline to JSON format
+ */
+function temporalToJSON(thought: TemporalThought, _options: VisualExportOptions): string {
+  const graph = createJsonGraph(
+    thought.timeline?.name || 'Timeline',
+    'temporal',
+    _options
+  );
+
+  if (!thought.events || thought.events.length === 0) {
+    return serializeGraph(graph, _options);
+  }
+
+  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+
+  // Add event nodes
+  for (const event of sortedEvents) {
+    addNode(graph, {
+      id: event.id,
+      label: event.name,
+      type: event.type,
+      metadata: {
+        timestamp: event.timestamp,
+        duration: event.duration,
+        description: event.description,
+      },
+    });
+  }
+
+  // Add edges between consecutive events
+  for (let i = 0; i < sortedEvents.length - 1; i++) {
+    addEdge(graph, {
+      id: `edge_${i}`,
+      source: sortedEvents[i].id,
+      target: sortedEvents[i + 1].id,
+      label: 'temporal_next',
+      metadata: {
+        timeDelta: sortedEvents[i + 1].timestamp - sortedEvents[i].timestamp,
+      },
+    });
+  }
+
+  // Add causal relation edges
+  if (thought.relations) {
+    let relIdx = sortedEvents.length - 1;
+    for (const rel of thought.relations) {
+      addEdge(graph, {
+        id: `edge_rel_${relIdx++}`,
+        source: rel.from,
+        target: rel.to,
+        label: rel.relationType,
+        metadata: {
+          edgeType: 'causal',
+        },
+      });
+    }
+  }
+
+  // Add metrics
+  const instants = sortedEvents.filter(e => e.type === 'instant');
+  const intervals = sortedEvents.filter(e => e.type === 'interval');
+  addMetric(graph, 'totalEvents', sortedEvents.length);
+  addMetric(graph, 'instantEvents', instants.length);
+  addMetric(graph, 'intervalEvents', intervals.length);
+  addMetric(graph, 'timeStart', sortedEvents[0].timestamp);
+  addMetric(graph, 'timeEnd', sortedEvents[sortedEvents.length - 1].timestamp);
+  addMetric(graph, 'timeSpan', sortedEvents[sortedEvents.length - 1].timestamp - sortedEvents[0].timestamp);
+
+  return serializeGraph(graph, _options);
 }

@@ -89,14 +89,16 @@ export class ExportService {
    */
   exportSession(
     session: ThinkingSession,
-    format: 'json' | 'markdown' | 'latex' | 'html' | 'jupyter' | 'mermaid' | 'dot' | 'ascii' | 'svg' | 'graphml' | 'tikz' | 'modelica'
+    format: 'json' | 'markdown' | 'latex' | 'html' | 'jupyter' | 'mermaid' | 'dot' | 'ascii' | 'svg' | 'graphml' | 'tikz' | 'modelica' | 'uml' | 'visual-json'
   ): string {
     const startTime = Date.now();
     this.logger.debug('Export started', { sessionId: session.id, format, thoughtCount: session.thoughts.length });
 
-    // Handle visual formats (including SVG, GraphML, TikZ, Modelica, HTML)
-    if (format === 'mermaid' || format === 'dot' || format === 'ascii' || format === 'svg' || format === 'graphml' || format === 'tikz' || format === 'modelica' || format === 'html') {
-      const result = this.exportVisual(session, format);
+    // Handle visual formats (including SVG, GraphML, TikZ, Modelica, HTML, UML, JSON graph)
+    if (format === 'mermaid' || format === 'dot' || format === 'ascii' || format === 'svg' || format === 'graphml' || format === 'tikz' || format === 'modelica' || format === 'html' || format === 'uml' || format === 'visual-json') {
+      // Map 'visual-json' to 'json' for VisualFormat compatibility
+      const visualFormat = format === 'visual-json' ? 'json' : format;
+      const result = this.exportVisual(session, visualFormat as VisualFormat);
       this.logger.debug('Export completed', {
         sessionId: session.id,
         format,

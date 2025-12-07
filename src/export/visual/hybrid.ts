@@ -39,12 +39,30 @@ import {
   renderTable,
   renderBadge,
 } from './html-utils.js';
+import {
+  sanitizeModelicaId,
+  escapeModelicaString,
+} from './modelica-utils.js';
+import {
+  generateUmlDiagram,
+  type UmlNode,
+  type UmlEdge,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  addLegendItem,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Export hybrid reasoning to visual format
  */
 export function exportHybridOrchestration(thought: HybridThought, options: VisualExportOptions): string {
-  const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+  const { format, colorScheme = 'default', includeMetrics = true } = options;
+  const includeLabels = options.includeLabels !== false;
 
   switch (format) {
     case 'mermaid':
@@ -61,6 +79,12 @@ export function exportHybridOrchestration(thought: HybridThought, options: Visua
       return hybridToTikZ(thought, options);
     case 'html':
       return hybridToHTML(thought, options);
+    case 'modelica':
+      return hybridToModelica(thought, options);
+    case 'uml':
+      return hybridToUML(thought, options);
+    case 'json':
+      return hybridToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -778,4 +802,511 @@ function hybridToHTML(thought: HybridThought, options: VisualExportOptions): str
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export hybrid orchestration to Modelica format
+ */
+function hybridToModelica(thought: HybridThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+
+  let modelica = '// Hybrid Mode Orchestration\n';
+  modelica += '// Multi-mode reasoning orchestration package\n\n';
+
+  const packageName = sanitizeModelicaId('HybridOrchestration');
+  modelica += `package ${packageName}\n`;
+  modelica += '  "Hybrid mode reasoning orchestration with primary and secondary features"\n\n';
+
+  // Mode configuration record
+  modelica += '  record ModeConfiguration\n';
+  modelica += '    "Configuration for a reasoning mode"\n';
+  modelica += '    String modeName "Name of the reasoning mode";\n';
+  modelica += '    Real weight "Weight/importance in orchestration (0-1)";\n';
+  modelica += '    Boolean isPrimary "Whether this is the primary mode";\n';
+  modelica += '  end ModeConfiguration;\n\n';
+
+  // Orchestrator model
+  modelica += '  model Orchestrator\n';
+  modelica += '    "Hybrid mode orchestration controller"\n\n';
+
+  // Parameters
+  modelica += '    // Mode configuration\n';
+  const primaryMode = escapeModelicaString(thought.primaryMode);
+  modelica += `    parameter String primaryMode = "${primaryMode}" "Primary reasoning mode";\n`;
+
+  if (thought.stage) {
+    const stage = escapeModelicaString(thought.stage.replace(/_/g, ' '));
+    modelica += `    parameter String currentStage = "${stage}" "Current orchestration stage";\n`;
+  }
+
+  if (includeMetrics && thought.uncertainty !== undefined) {
+    modelica += `    parameter Real uncertainty = ${thought.uncertainty.toFixed(4)} "Orchestration uncertainty (0-1)";\n`;
+  }
+
+  // Secondary features count
+  const featureCount = thought.secondaryFeatures?.length || 0;
+  modelica += `    parameter Integer secondaryCount = ${featureCount} "Number of secondary features";\n`;
+
+  modelica += '\n    // Mode weights\n';
+  modelica += '    parameter Real primaryWeight = 0.7 "Primary mode weight";\n';
+  modelica += '    parameter Real secondaryWeight = 0.3 "Secondary features weight";\n\n';
+
+  // Variables
+  modelica += '    // State variables\n';
+  modelica += '    Real orchestrationEfficiency(start=1.0) "Overall orchestration efficiency";\n';
+  modelica += '    Real modeBalance "Balance between primary and secondary modes";\n';
+  modelica += '    Boolean isActive(start=true) "Whether orchestration is active";\n\n';
+
+  // Equations
+  modelica += '  equation\n';
+  modelica += '    // Orchestration efficiency decreases with uncertainty\n';
+  if (thought.uncertainty !== undefined) {
+    modelica += `    orchestrationEfficiency = 1.0 - ${thought.uncertainty.toFixed(4)};\n`;
+  } else {
+    modelica += '    orchestrationEfficiency = 1.0;\n';
+  }
+  modelica += '    \n';
+  modelica += '    // Mode balance based on weights\n';
+  modelica += '    modeBalance = primaryWeight / (primaryWeight + secondaryWeight);\n';
+  modelica += '    \n';
+  modelica += '    // Orchestration is active when efficiency is above threshold\n';
+  modelica += '    isActive = orchestrationEfficiency > 0.5;\n\n';
+
+  // Annotations
+  modelica += '  annotation(\n';
+  modelica += '    Documentation(info="<html>\n';
+  modelica += `      <p>Hybrid mode orchestration combining ${primaryMode}`;
+  if (featureCount > 0) {
+    modelica += ` with ${featureCount} secondary features`;
+  }
+  modelica += '.</p>\n';
+
+  if (thought.switchReason) {
+    const switchReason = escapeModelicaString(thought.switchReason);
+    modelica += `      <p><b>Switch Reason:</b> ${switchReason}</p>\n`;
+  }
+
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    modelica += '      <p><b>Assumptions:</b></p>\n';
+    modelica += '      <ul>\n';
+    thought.assumptions.forEach(assumption => {
+      const escapedAssumption = escapeModelicaString(assumption);
+      modelica += `        <li>${escapedAssumption}</li>\n`;
+    });
+    modelica += '      </ul>\n';
+  }
+
+  modelica += '    </html>")\n';
+  modelica += '  );\n';
+  modelica += '  end Orchestrator;\n\n';
+
+  // Secondary features as separate components
+  if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
+    modelica += '  // Secondary feature models\n';
+    thought.secondaryFeatures.forEach((feature, index) => {
+      const featureId = sanitizeModelicaId(`Feature${index + 1}`);
+      const featureDesc = escapeModelicaString(feature.substring(0, 60));
+
+      modelica += `  model ${featureId}\n`;
+      modelica += `    "Secondary feature: ${featureDesc}"\n`;
+      modelica += '    parameter Real contribution = 0.1 "Contribution to orchestration";\n';
+      modelica += '    Real effectiveness "Feature effectiveness";\n';
+      modelica += '  equation\n';
+      modelica += '    effectiveness = contribution;\n';
+      modelica += `  end ${featureId};\n\n`;
+    });
+  }
+
+  // Mathematical model component if present
+  if (thought.mathematicalModel) {
+    modelica += '  model MathematicalModel\n';
+    modelica += '    "Mathematical model integration"\n';
+    const symbolicModel = escapeModelicaString(thought.mathematicalModel.symbolic || 'Unknown');
+    modelica += `    parameter String symbolic = "${symbolicModel}" "Symbolic representation";\n`;
+    if (thought.mathematicalModel.ascii) {
+      const asciiModel = escapeModelicaString(thought.mathematicalModel.ascii);
+      modelica += `    parameter String ascii = "${asciiModel}" "ASCII representation";\n`;
+    }
+    modelica += '  end MathematicalModel;\n\n';
+  }
+
+  // Tensor properties component if present
+  if (thought.tensorProperties) {
+    modelica += '  model TensorProperties\n';
+    modelica += '    "Tensor analysis integration"\n';
+    modelica += `    parameter Integer rank[2] = {${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]}} "Tensor rank";\n`;
+    const components = escapeModelicaString(thought.tensorProperties.components);
+    modelica += `    parameter String components = "${components}" "Tensor components";\n`;
+    const transformation = escapeModelicaString(thought.tensorProperties.transformation);
+    modelica += `    parameter String transformation = "${transformation}" "Transformation rule";\n`;
+    modelica += '  end TensorProperties;\n\n';
+  }
+
+  // Physical interpretation component if present
+  if (thought.physicalInterpretation) {
+    modelica += '  model PhysicalInterpretation\n';
+    modelica += '    "Physical meaning of reasoning"\n';
+    const quantity = escapeModelicaString(thought.physicalInterpretation.quantity);
+    modelica += `    parameter String quantity = "${quantity}" "Physical quantity";\n`;
+    const units = escapeModelicaString(thought.physicalInterpretation.units);
+    modelica += `    parameter String units = "${units}" "Measurement units";\n`;
+    modelica += '  end PhysicalInterpretation;\n\n';
+  }
+
+  modelica += `end ${packageName};\n`;
+
+  return modelica;
+}
+
+/**
+ * Export hybrid orchestration to UML format
+ */
+function hybridToUML(thought: HybridThought, options: VisualExportOptions): string {
+  const { includeLabels = true } = options;
+
+  const nodes: UmlNode[] = [];
+  const edges: UmlEdge[] = [];
+
+  // Central hybrid orchestrator as a component
+  nodes.push({
+    id: 'hybrid',
+    label: includeLabels ? 'Hybrid Orchestrator' : 'Hybrid',
+    shape: 'component',
+    stereotype: '<<orchestrator>>',
+    attributes: [
+      `primaryMode: ${thought.primaryMode}`,
+      thought.stage ? `stage: ${thought.stage.replace(/_/g, ' ')}` : null,
+      thought.uncertainty !== undefined ? `uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%` : null,
+    ].filter(Boolean) as string[],
+  });
+
+  // Primary mode as a class
+  const primaryId = sanitizeId(`primary_${thought.primaryMode}`);
+  nodes.push({
+    id: primaryId,
+    label: includeLabels ? thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1) : thought.primaryMode,
+    shape: 'class',
+    stereotype: '<<primary>>',
+    attributes: ['weight: 0.7'],
+  });
+
+  // Composition relationship from orchestrator to primary mode
+  edges.push({
+    source: 'hybrid',
+    target: primaryId,
+    type: 'composition',
+    label: 'orchestrates',
+  });
+
+  // Secondary features as separate classes
+  if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
+    thought.secondaryFeatures.forEach((feature, index) => {
+      const featureId = sanitizeId(`feature_${index}`);
+      nodes.push({
+        id: featureId,
+        label: includeLabels ? (feature.length > 30 ? feature.substring(0, 30) + '...' : feature) : `Feature${index + 1}`,
+        shape: 'class',
+        stereotype: '<<secondary>>',
+        attributes: ['weight: 0.3'],
+      });
+
+      // Association from orchestrator to feature
+      edges.push({
+        source: 'hybrid',
+        target: featureId,
+        type: 'association',
+        label: 'uses',
+      });
+    });
+  }
+
+  // Mathematical model as a package
+  if (thought.mathematicalModel) {
+    nodes.push({
+      id: 'math_model',
+      label: 'Mathematical Model',
+      shape: 'package',
+      attributes: [
+        `symbolic: ${thought.mathematicalModel.symbolic}`,
+        thought.mathematicalModel.ascii ? `ascii: ${thought.mathematicalModel.ascii.substring(0, 30)}` : null,
+      ].filter(Boolean) as string[],
+    });
+
+    edges.push({
+      source: primaryId,
+      target: 'math_model',
+      type: 'dependency',
+      label: 'applies',
+    });
+  }
+
+  // Tensor properties as an interface
+  if (thought.tensorProperties) {
+    nodes.push({
+      id: 'tensor',
+      label: 'Tensor Properties',
+      shape: 'interface',
+      attributes: [
+        `rank: (${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`,
+        `components: ${thought.tensorProperties.components}`,
+      ],
+    });
+
+    edges.push({
+      source: primaryId,
+      target: 'tensor',
+      type: 'implementation',
+      label: 'implements',
+    });
+  }
+
+  // Physical interpretation as a component
+  if (thought.physicalInterpretation) {
+    nodes.push({
+      id: 'physical',
+      label: 'Physical Interpretation',
+      shape: 'component',
+      attributes: [
+        `quantity: ${thought.physicalInterpretation.quantity}`,
+        `units: ${thought.physicalInterpretation.units}`,
+      ],
+    });
+
+    edges.push({
+      source: primaryId,
+      target: 'physical',
+      type: 'dependency',
+      label: 'interprets',
+    });
+  }
+
+  // Switch reason as a note
+  if (thought.switchReason && includeLabels) {
+    nodes.push({
+      id: 'switch_note',
+      label: 'Switch Reason',
+      shape: 'rectangle',
+      stereotype: '<<note>>',
+      attributes: [thought.switchReason.substring(0, 50) + (thought.switchReason.length > 50 ? '...' : '')],
+    });
+
+    edges.push({
+      source: 'hybrid',
+      target: 'switch_note',
+      type: 'dependency',
+    });
+  }
+
+  return generateUmlDiagram(nodes, edges, {
+    title: 'Hybrid Mode Orchestration',
+    diagramType: 'component',
+  });
+}
+
+/**
+ * Export hybrid orchestration to JSON format
+ */
+function hybridToJSON(thought: HybridThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+
+  // Create graph structure
+  const graph = createJsonGraph('Hybrid Mode Orchestration', 'hybrid_orchestration', {
+    includeMetrics,
+    includeLegend: true,
+    includeLayout: true,
+  });
+
+  // Add central hybrid mode node
+  addNode(graph, {
+    id: 'hybrid',
+    label: 'Hybrid Mode',
+    type: 'orchestrator',
+    metadata: {
+      primaryMode: thought.primaryMode,
+      stage: thought.stage || null,
+      uncertainty: thought.uncertainty,
+      secondaryFeaturesCount: thought.secondaryFeatures?.length || 0,
+    },
+  });
+
+  // Add primary mode node
+  const primaryId = sanitizeId(`primary_${thought.primaryMode}`);
+  addNode(graph, {
+    id: primaryId,
+    label: thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1),
+    type: 'primary_mode',
+    metadata: {
+      name: thought.primaryMode,
+      weight: 0.7,
+    },
+  });
+
+  // Edge from hybrid to primary
+  addEdge(graph, {
+    id: 'e_hybrid_primary',
+    source: 'hybrid',
+    target: primaryId,
+    label: 'orchestrates',
+    type: 'primary',
+    metadata: {
+      strength: 1.0,
+    },
+  });
+
+  // Add secondary features
+  if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
+    thought.secondaryFeatures.forEach((feature, index) => {
+      const featureId = sanitizeId(`feature_${index}`);
+      addNode(graph, {
+        id: featureId,
+        label: `Feature ${index + 1}`,
+        type: 'secondary_feature',
+        metadata: {
+          description: feature,
+          index: index,
+          weight: 0.3 / thought.secondaryFeatures!.length,
+        },
+      });
+
+      addEdge(graph, {
+        id: `e_hybrid_feature_${index}`,
+        source: 'hybrid',
+        target: featureId,
+        label: 'uses',
+        type: 'secondary',
+        metadata: {
+          strength: 0.5,
+        },
+      });
+    });
+  }
+
+  // Add stage node if present
+  if (thought.stage) {
+    const stageId = sanitizeId(`stage_${thought.stage}`);
+    addNode(graph, {
+      id: stageId,
+      label: thought.stage.replace(/_/g, ' '),
+      type: 'stage',
+      metadata: {
+        name: thought.stage,
+      },
+    });
+
+    addEdge(graph, {
+      id: 'e_primary_stage',
+      source: primaryId,
+      target: stageId,
+      label: 'in_stage',
+      type: 'stage_flow',
+    });
+  }
+
+  // Add mathematical model if present
+  if (thought.mathematicalModel) {
+    addNode(graph, {
+      id: 'math_model',
+      label: 'Mathematical Model',
+      type: 'mathematical',
+      metadata: {
+        latex: thought.mathematicalModel.latex,
+        symbolic: thought.mathematicalModel.symbolic,
+        ascii: thought.mathematicalModel.ascii || null,
+      },
+    });
+
+    addEdge(graph, {
+      id: 'e_primary_math',
+      source: primaryId,
+      target: 'math_model',
+      label: 'applies',
+      type: 'transformation',
+    });
+  }
+
+  // Add tensor properties if present
+  if (thought.tensorProperties) {
+    addNode(graph, {
+      id: 'tensor',
+      label: 'Tensor Properties',
+      type: 'tensor',
+      metadata: {
+        rank: thought.tensorProperties.rank,
+        components: thought.tensorProperties.components,
+        transformation: thought.tensorProperties.transformation,
+        symmetries: thought.tensorProperties.symmetries,
+      },
+    });
+
+    addEdge(graph, {
+      id: 'e_primary_tensor',
+      source: primaryId,
+      target: 'tensor',
+      label: 'analyzes',
+      type: 'analysis',
+    });
+  }
+
+  // Add physical interpretation if present
+  if (thought.physicalInterpretation) {
+    addNode(graph, {
+      id: 'physical',
+      label: 'Physical Interpretation',
+      type: 'physical',
+      metadata: {
+        quantity: thought.physicalInterpretation.quantity,
+        units: thought.physicalInterpretation.units,
+        conservationLaws: thought.physicalInterpretation.conservationLaws,
+      },
+    });
+
+    addEdge(graph, {
+      id: 'e_primary_physical',
+      source: primaryId,
+      target: 'physical',
+      label: 'interprets',
+      type: 'interpretation',
+    });
+  }
+
+  // Add metrics if requested
+  if (includeMetrics) {
+    addMetric(graph, 'primary_mode', thought.primaryMode);
+    addMetric(graph, 'secondary_features_count', thought.secondaryFeatures?.length || 0);
+
+    if (thought.uncertainty !== undefined) {
+      addMetric(graph, 'uncertainty', thought.uncertainty);
+    }
+
+    if (thought.stage) {
+      addMetric(graph, 'stage', thought.stage);
+    }
+
+    if (thought.assumptions) {
+      addMetric(graph, 'assumptions_count', thought.assumptions.length);
+    }
+
+    if (thought.dependencies) {
+      addMetric(graph, 'dependencies_count', thought.dependencies.length);
+    }
+  }
+
+  // Add legend items
+  addLegendItem(graph, 'Hybrid Orchestrator', '#90EE90');
+  addLegendItem(graph, 'Primary Mode', '#87CEEB');
+  addLegendItem(graph, 'Secondary Feature', '#FFD700');
+
+  if (thought.mathematicalModel) {
+    addLegendItem(graph, 'Mathematical Model', '#DDA0DD');
+  }
+
+  if (thought.tensorProperties) {
+    addLegendItem(graph, 'Tensor Properties', '#F0E68C');
+  }
+
+  if (thought.physicalInterpretation) {
+    addLegendItem(graph, 'Physical Interpretation', '#98FB98');
+  }
+
+  return serializeGraph(graph);
 }

@@ -1,8 +1,8 @@
 /**
- * Visual Export Module (v7.0.3)
+ * Visual Export Module (v7.1.0)
  * Sprint 8 Task 8.1: Modular visual exporter with lazy loading
  *
- * Exports thinking sessions to visual formats: Mermaid, DOT, ASCII, SVG, GraphML, TikZ
+ * Exports thinking sessions to visual formats: Mermaid, DOT, ASCII, SVG, GraphML, TikZ, Modelica, HTML, UML, JSON
  * Split from monolithic 2546-line file into mode-specific modules
  */
 
@@ -21,6 +21,15 @@ export * from './tikz-utils.js';
 
 // Re-export HTML utilities for all exporters
 export * from './html-utils.js';
+
+// Re-export Modelica utilities for all exporters
+export * from './modelica-utils.js';
+
+// Re-export UML utilities for all exporters
+export * from './uml-utils.js';
+
+// Re-export JSON visual utilities for all exporters
+export * from './json-utils.js';
 
 // Re-export mode-specific functions
 export { exportCausalGraph } from './causal.js';

@@ -40,6 +40,22 @@ import {
   renderSection,
   renderTable,
 } from './html-utils.js';
+import {
+  sanitizeModelicaId,
+  escapeModelicaString,
+} from './modelica-utils.js';
+import {
+  generateUmlDiagram,
+  type UmlNode,
+  type UmlEdge,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Export counterfactual scenario tree to visual format
@@ -62,6 +78,12 @@ export function exportCounterfactualScenarios(thought: CounterfactualThought, op
       return counterfactualToTikZ(thought, options);
     case 'html':
       return counterfactualToHTML(thought, options);
+    case 'modelica':
+      return counterfactualToModelica(thought, options);
+    case 'uml':
+      return counterfactualToUML(thought, options);
+    case 'json':
+      return counterfactualToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -492,4 +514,221 @@ function counterfactualToHTML(thought: CounterfactualThought, options: VisualExp
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export counterfactual scenarios to Modelica format
+ */
+function counterfactualToModelica(thought: CounterfactualThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+
+  let modelica = 'package CounterfactualScenarios\n';
+  modelica += '  "Counterfactual scenario analysis with original vs. alternative outcomes"\n\n';
+
+  // Intervention point record
+  modelica += '  record InterventionPoint\n';
+  modelica += '    "The point at which the counterfactual diverges from the actual"\n';
+  modelica += `    String description = "${escapeModelicaString(thought.interventionPoint.description)}";\n`;
+  modelica += `    String timing = "${escapeModelicaString(thought.interventionPoint.timing)}";\n`;
+  modelica += `    Real feasibility = ${thought.interventionPoint.feasibility};\n`;
+  modelica += `    Real expectedImpact = ${thought.interventionPoint.expectedImpact};\n`;
+  modelica += '  end InterventionPoint;\n\n';
+
+  // Actual scenario record
+  modelica += '  record ActualScenario\n';
+  modelica += '    "The actual outcome that occurred"\n';
+  modelica += `    String id = "${sanitizeModelicaId(thought.actual.id)}";\n`;
+  modelica += `    String name = "${escapeModelicaString(thought.actual.name)}";\n`;
+  modelica += `    String description = "${escapeModelicaString(thought.actual.description)}";\n`;
+  modelica += '  end ActualScenario;\n\n';
+
+  // Counterfactual scenario records
+  for (let i = 0; i < thought.counterfactuals.length; i++) {
+    const scenario = thought.counterfactuals[i];
+    const recordName = sanitizeModelicaId(`CF_${scenario.id}`);
+
+    modelica += `  record ${recordName}\n`;
+    modelica += `    "Counterfactual: ${escapeModelicaString(scenario.name)}"\n`;
+    modelica += `    String id = "${sanitizeModelicaId(scenario.id)}";\n`;
+    modelica += `    String name = "${escapeModelicaString(scenario.name)}";\n`;
+    modelica += `    String description = "${escapeModelicaString(scenario.description)}";\n`;
+
+    if (includeMetrics && scenario.likelihood !== undefined) {
+      modelica += `    Real likelihood = ${scenario.likelihood};\n`;
+    }
+
+    // Add outcomes if present
+    if (scenario.outcomes && scenario.outcomes.length > 0) {
+      modelica += `    String outcomes[${scenario.outcomes.length}] = {`;
+      modelica += scenario.outcomes.map(o => `"${escapeModelicaString(o.description)}"`).join(', ');
+      modelica += '};\n';
+    }
+
+    modelica += `  end ${recordName};\n\n`;
+  }
+
+  // Model showing the divergence
+  modelica += '  model ScenarioDivergence\n';
+  modelica += '    "Model showing the branching from intervention point to outcomes"\n';
+  modelica += '    InterventionPoint intervention;\n';
+  modelica += '    ActualScenario actual;\n';
+
+  for (let i = 0; i < thought.counterfactuals.length; i++) {
+    const scenario = thought.counterfactuals[i];
+    const recordName = sanitizeModelicaId(`CF_${scenario.id}`);
+    modelica += `    ${recordName} counterfactual${i + 1};\n`;
+  }
+
+  if (includeMetrics) {
+    modelica += '\n    annotation(Documentation(info="<html>\n';
+    modelica += `      <p>Counterfactuals: ${thought.counterfactuals.length}</p>\n`;
+    modelica += `      <p>Feasibility: ${(thought.interventionPoint.feasibility * 100).toFixed(1)}%</p>\n`;
+    modelica += `      <p>Expected Impact: ${(thought.interventionPoint.expectedImpact * 100).toFixed(1)}%</p>\n`;
+    modelica += '    </html>"));\n';
+  }
+
+  modelica += '  end ScenarioDivergence;\n';
+  modelica += 'end CounterfactualScenarios;\n';
+
+  return modelica;
+}
+
+/**
+ * Export counterfactual scenarios to UML format
+ */
+function counterfactualToUML(thought: CounterfactualThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  const nodes: UmlNode[] = [];
+  const edges: UmlEdge[] = [];
+
+  // Intervention point node (decision node)
+  nodes.push({
+    id: 'intervention',
+    label: includeLabels ? thought.interventionPoint.description : 'Intervention',
+    shape: 'state',
+    stereotype: 'decision',
+  });
+
+  // Actual scenario node
+  nodes.push({
+    id: thought.actual.id,
+    label: includeLabels ? `Actual: ${thought.actual.name}` : 'Actual',
+    shape: 'state',
+  });
+
+  // Edge from intervention to actual (no intervention taken)
+  edges.push({
+    source: 'intervention',
+    target: thought.actual.id,
+    label: 'no change',
+    type: 'arrow',
+  });
+
+  // Counterfactual scenario nodes and edges
+  for (const scenario of thought.counterfactuals) {
+    nodes.push({
+      id: scenario.id,
+      label: includeLabels ? `CF: ${scenario.name}` : scenario.id,
+      shape: 'state',
+    });
+
+    const edgeLabel = includeMetrics && scenario.likelihood !== undefined
+      ? `intervene (${scenario.likelihood.toFixed(2)})`
+      : 'intervene';
+
+    edges.push({
+      source: 'intervention',
+      target: scenario.id,
+      label: edgeLabel,
+      type: 'arrow',
+    });
+  }
+
+  return generateUmlDiagram(nodes, edges, {
+    diagramType: 'state',
+    title: 'Counterfactual Scenarios',
+    includeMetrics,
+  });
+}
+
+/**
+ * Export counterfactual scenarios to JSON format
+ */
+function counterfactualToJSON(thought: CounterfactualThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  const graph = createJsonGraph('counterfactual', 'Counterfactual Scenarios');
+
+  // Add intervention point node
+  addNode(graph, {
+    id: 'intervention',
+    label: includeLabels ? thought.interventionPoint.description : 'Intervention',
+    type: 'intervention',
+    metadata: {
+      timing: thought.interventionPoint.timing,
+      feasibility: thought.interventionPoint.feasibility,
+      expectedImpact: thought.interventionPoint.expectedImpact,
+    },
+  });
+
+  // Add actual scenario node
+  addNode(graph, {
+    id: thought.actual.id,
+    label: includeLabels ? `Actual: ${thought.actual.name}` : thought.actual.id,
+    type: 'actual',
+    metadata: {
+      name: thought.actual.name,
+      description: thought.actual.description,
+    },
+  });
+
+  // Add edge from intervention to actual
+  addEdge(graph, {
+    id: 'e_intervention_actual',
+    source: 'intervention',
+    target: thought.actual.id,
+    label: 'no change',
+    type: 'no_intervention',
+  });
+
+  // Add counterfactual scenario nodes and edges
+  for (let i = 0; i < thought.counterfactuals.length; i++) {
+    const scenario = thought.counterfactuals[i];
+
+    addNode(graph, {
+      id: scenario.id,
+      label: includeLabels ? `CF: ${scenario.name}` : scenario.id,
+      type: 'counterfactual',
+      metadata: {
+        name: scenario.name,
+        description: scenario.description,
+        likelihood: scenario.likelihood,
+        outcomes: scenario.outcomes?.map(o => ({
+          description: o.description,
+          impact: o.impact,
+        })),
+      },
+    });
+
+    addEdge(graph, {
+      id: `e_intervention_cf${i}`,
+      source: 'intervention',
+      target: scenario.id,
+      label: 'intervene',
+      type: 'intervention',
+      metadata: includeMetrics && scenario.likelihood !== undefined
+        ? { likelihood: scenario.likelihood }
+        : undefined,
+    });
+  }
+
+  // Add metrics
+  if (includeMetrics) {
+    addMetric(graph, 'counterfactualCount', thought.counterfactuals.length);
+    addMetric(graph, 'feasibility', thought.interventionPoint.feasibility);
+    addMetric(graph, 'expectedImpact', thought.interventionPoint.expectedImpact);
+  }
+
+  return serializeGraph(graph);
 }

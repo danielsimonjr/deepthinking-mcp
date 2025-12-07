@@ -39,6 +39,19 @@ import {
   renderTable,
   renderBadge,
 } from './html-utils.js';
+import {
+  escapeModelicaString,
+} from './modelica-utils.js';
+import {
+  generateActivityDiagram,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Export scientific method experiment flow to visual format
@@ -61,6 +74,12 @@ export function exportScientificMethodExperiment(thought: ScientificMethodThough
       return scientificMethodToTikZ(thought, options);
     case 'html':
       return scientificMethodToHTML(thought, options);
+    case 'modelica':
+      return scientificMethodToModelica(thought, options);
+    case 'uml':
+      return scientificMethodToUML(thought, options);
+    case 'json':
+      return scientificMethodToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -762,4 +781,368 @@ function scientificMethodToHTML(thought: ScientificMethodThought, options: Visua
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export scientific method experiment flow to Modelica format
+ */
+function scientificMethodToModelica(thought: ScientificMethodThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+  const lines: string[] = [];
+
+  // Package header
+  lines.push('package ScientificMethodExperiment');
+  lines.push('  "Scientific method experiment modeling package"');
+  lines.push('');
+
+  // Stage enumeration
+  const stages: string[] = [];
+  if (thought.researchQuestion) stages.push('ResearchQuestion');
+  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) stages.push('Hypothesis');
+  if (thought.experiment) stages.push('Experiment');
+  if (thought.data) stages.push('DataCollection');
+  if (thought.analysis) stages.push('Analysis');
+  if (thought.conclusion) stages.push('Conclusion');
+
+  if (stages.length > 0) {
+    lines.push('  type Stage = enumeration(');
+    for (let i = 0; i < stages.length; i++) {
+      const comma = i < stages.length - 1 ? ',' : '';
+      lines.push(`    ${stages[i]} "${stages[i]}"${comma}`);
+    }
+    lines.push('  );');
+    lines.push('');
+  }
+
+  // Research Question record
+  if (thought.researchQuestion) {
+    lines.push('  record ResearchQuestionData');
+    lines.push('    "Research question information"');
+    lines.push(`    parameter String question = "${escapeModelicaString(thought.researchQuestion.question)}";`);
+    lines.push(`    parameter String background = "${escapeModelicaString(thought.researchQuestion.background)}";`);
+    if (thought.researchQuestion.significance) {
+      lines.push(`    parameter String significance = "${escapeModelicaString(thought.researchQuestion.significance)}";`);
+    }
+    lines.push('  end ResearchQuestionData;');
+    lines.push('');
+  }
+
+  // Hypothesis record
+  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+    lines.push('  record HypothesisData');
+    lines.push('    "Hypothesis information"');
+    lines.push(`    parameter Integer count = ${thought.scientificHypotheses.length};`);
+    lines.push(`    parameter String primaryHypothesis = "${escapeModelicaString(thought.scientificHypotheses[0].statement)}";`);
+    lines.push(`    parameter String hypothesisType = "${thought.scientificHypotheses[0].type}";`);
+    lines.push('  end HypothesisData;');
+    lines.push('');
+  }
+
+  // Experiment record
+  if (thought.experiment) {
+    lines.push('  record ExperimentData');
+    lines.push('    "Experiment design information"');
+    lines.push(`    parameter String experimentType = "${escapeModelicaString(thought.experiment.type)}";`);
+    lines.push(`    parameter String design = "${escapeModelicaString(thought.experiment.design)}";`);
+    const sampleSize = (thought.experiment as any)?.sampleSize || 0;
+    if (sampleSize > 0) {
+      lines.push(`    parameter Integer sampleSize = ${sampleSize};`);
+    }
+    lines.push('  end ExperimentData;');
+    lines.push('');
+  }
+
+  // Data Collection record
+  if (thought.data) {
+    lines.push('  record DataCollectionInfo');
+    lines.push('    "Data collection and quality metrics"');
+    lines.push(`    parameter String method = "${escapeModelicaString(thought.data.method.join(', '))}";`);
+    if (thought.data.dataQuality) {
+      lines.push(`    parameter Real completeness = ${thought.data.dataQuality.completeness.toFixed(3)};`);
+      lines.push(`    parameter Real reliability = ${thought.data.dataQuality.reliability.toFixed(3)};`);
+    }
+    lines.push('  end DataCollectionInfo;');
+    lines.push('');
+  }
+
+  // Analysis record
+  if (thought.analysis && thought.analysis.tests) {
+    lines.push('  record AnalysisData');
+    lines.push('    "Statistical analysis results"');
+    lines.push(`    parameter Integer testCount = ${thought.analysis.tests.length};`);
+    if (thought.analysis.tests.length > 0) {
+      lines.push(`    parameter String primaryTest = "${escapeModelicaString(thought.analysis.tests[0].name)}";`);
+      lines.push(`    parameter Real primaryPValue = ${thought.analysis.tests[0].pValue.toFixed(4)};`);
+    }
+    lines.push('  end AnalysisData;');
+    lines.push('');
+  }
+
+  // Conclusion record
+  if (thought.conclusion) {
+    lines.push('  record ConclusionData');
+    lines.push('    "Final conclusion and confidence"');
+    lines.push(`    parameter String statement = "${escapeModelicaString(thought.conclusion.statement)}";`);
+    if (thought.conclusion.confidence) {
+      lines.push(`    parameter Real confidence = ${thought.conclusion.confidence.toFixed(3)};`);
+    }
+    lines.push('  end ConclusionData;');
+    lines.push('');
+  }
+
+  // Progress metrics
+  if (includeMetrics && stages.length > 0) {
+    const currentStageIndex = stages.length; // All stages completed if we have conclusion
+    lines.push('  // Progress metrics');
+    lines.push(`  parameter Integer totalStages = ${stages.length};`);
+    lines.push(`  parameter Integer completedStages = ${currentStageIndex};`);
+    lines.push(`  parameter Real progress = ${(currentStageIndex / stages.length).toFixed(3)};`);
+    lines.push('');
+  }
+
+  // Package footer with annotations
+  lines.push('  annotation(');
+  lines.push('    Documentation(info="<html>');
+  lines.push('      <p>Scientific Method Experiment Flow</p>');
+  if (includeMetrics) {
+    lines.push(`      <p>Stages: ${stages.length}</p>`);
+    if (thought.scientificHypotheses) {
+      lines.push(`      <p>Hypotheses: ${thought.scientificHypotheses.length}</p>`);
+    }
+    if (thought.conclusion?.confidence) {
+      lines.push(`      <p>Confidence: ${(thought.conclusion.confidence * 100).toFixed(0)}%</p>`);
+    }
+  }
+  lines.push('      <p>Generated by DeepThinking MCP v7.1.0</p>');
+  lines.push('    </html>"),');
+  lines.push('    version="1.0.0"');
+  lines.push('  );');
+  lines.push('end ScientificMethodExperiment;');
+
+  return lines.join('\n');
+}
+
+/**
+ * Export scientific method experiment flow to UML format (PlantUML activity diagram)
+ */
+function scientificMethodToUML(thought: ScientificMethodThought, options: VisualExportOptions): string {
+  const { includeLabels = true } = options;
+
+  // Build the list of activities (stages in the scientific method)
+  const activities: string[] = [];
+
+  if (thought.researchQuestion) {
+    const label = includeLabels
+      ? `Research Question: ${thought.researchQuestion.question.substring(0, 40)}...`
+      : 'Research Question';
+    activities.push(label);
+  }
+
+  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+    const label = includeLabels
+      ? `Hypotheses (${thought.scientificHypotheses.length})`
+      : 'Hypotheses';
+    activities.push(label);
+  }
+
+  if (thought.experiment) {
+    const label = includeLabels
+      ? `Experiment: ${thought.experiment.design.substring(0, 40)}`
+      : 'Experiment';
+    activities.push(label);
+  }
+
+  if (thought.data) {
+    activities.push('Data Collection');
+  }
+
+  if (thought.analysis) {
+    const label = includeLabels && thought.analysis.tests
+      ? `Statistical Analysis (${thought.analysis.tests.length} tests)`
+      : 'Statistical Analysis';
+    activities.push(label);
+  }
+
+  if (thought.conclusion) {
+    const label = includeLabels
+      ? `Conclusion: ${thought.conclusion.statement.substring(0, 40)}...`
+      : 'Conclusion';
+    activities.push(label);
+  }
+
+  // The current activity is the last one (conclusion if it exists)
+  const currentActivity = thought.conclusion ? activities[activities.length - 1] : undefined;
+
+  return generateActivityDiagram(activities, currentActivity, {
+    title: 'Scientific Method Experiment Flow',
+    includeLabels,
+  });
+}
+
+/**
+ * Export scientific method experiment flow to JSON format
+ */
+function scientificMethodToJSON(thought: ScientificMethodThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+
+  const graph = createJsonGraph('Scientific Method Experiment', 'scientific-method', options);
+
+  // Set layout for linear flow
+  if (graph.layout) {
+    graph.layout.type = 'linear';
+    graph.layout.direction = 'TB';
+  }
+
+  let yPosition = 0;
+  const ySpacing = 100;
+  let edgeId = 0;
+  const nodeIds: string[] = [];
+
+  // Research Question node
+  if (thought.researchQuestion) {
+    addNode(graph, {
+      id: 'research_question',
+      label: thought.researchQuestion.question.substring(0, 60) + '...',
+      type: 'question',
+      y: yPosition,
+      x: 200,
+      color: '#ffd699',
+      shape: 'ellipse',
+      metadata: {
+        question: thought.researchQuestion.question,
+        background: thought.researchQuestion.background,
+        significance: thought.researchQuestion.significance,
+      },
+    });
+    nodeIds.push('research_question');
+    yPosition += ySpacing;
+  }
+
+  // Hypotheses node
+  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+    addNode(graph, {
+      id: 'hypotheses',
+      label: `Hypotheses (${thought.scientificHypotheses.length})`,
+      type: 'hypothesis',
+      y: yPosition,
+      x: 200,
+      color: '#a8d5ff',
+      shape: 'rectangle',
+      metadata: {
+        count: thought.scientificHypotheses.length,
+        hypotheses: thought.scientificHypotheses.map(h => ({
+          id: h.id,
+          statement: h.statement,
+          type: h.type,
+        })),
+      },
+    });
+    nodeIds.push('hypotheses');
+    yPosition += ySpacing;
+  }
+
+  // Experiment node
+  if (thought.experiment) {
+    addNode(graph, {
+      id: 'experiment',
+      label: `Experiment: ${thought.experiment.design.substring(0, 30)}...`,
+      type: 'experiment',
+      y: yPosition,
+      x: 200,
+      color: '#e0e0e0',
+      shape: 'rectangle',
+      metadata: {
+        type: thought.experiment.type,
+        design: thought.experiment.design,
+        sampleSize: (thought.experiment as any)?.sampleSize,
+      },
+    });
+    nodeIds.push('experiment');
+    yPosition += ySpacing;
+  }
+
+  // Data Collection node
+  if (thought.data) {
+    addNode(graph, {
+      id: 'data_collection',
+      label: 'Data Collection',
+      type: 'data',
+      y: yPosition,
+      x: 200,
+      color: '#e0e0e0',
+      shape: 'rectangle',
+      metadata: {
+        method: thought.data.method,
+        dataQuality: thought.data.dataQuality,
+      },
+    });
+    nodeIds.push('data_collection');
+    yPosition += ySpacing;
+  }
+
+  // Analysis node
+  if (thought.analysis) {
+    const testCount = thought.analysis.tests?.length || 0;
+    addNode(graph, {
+      id: 'analysis',
+      label: `Statistical Analysis (${testCount} tests)`,
+      type: 'analysis',
+      y: yPosition,
+      x: 200,
+      color: '#e0e0e0',
+      shape: 'rectangle',
+      metadata: {
+        testCount,
+        tests: thought.analysis.tests,
+      },
+    });
+    nodeIds.push('analysis');
+    yPosition += ySpacing;
+  }
+
+  // Conclusion node
+  if (thought.conclusion) {
+    addNode(graph, {
+      id: 'conclusion',
+      label: `Conclusion: ${thought.conclusion.statement.substring(0, 40)}...`,
+      type: 'conclusion',
+      y: yPosition,
+      x: 200,
+      color: '#a5d6a7',
+      shape: 'stadium',
+      metadata: {
+        statement: thought.conclusion.statement,
+        confidence: thought.conclusion.confidence,
+        supportedHypotheses: (thought.conclusion as any).supportedHypotheses,
+      },
+    });
+    nodeIds.push('conclusion');
+  }
+
+  // Create edges between consecutive stages
+  for (let i = 0; i < nodeIds.length - 1; i++) {
+    addEdge(graph, {
+      id: `edge_${edgeId++}`,
+      source: nodeIds[i],
+      target: nodeIds[i + 1],
+      directed: true,
+      style: 'solid',
+    });
+  }
+
+  // Add metrics
+  if (includeMetrics && graph.metrics) {
+    addMetric(graph, 'totalStages', nodeIds.length);
+    addMetric(graph, 'completedStages', nodeIds.length);
+    addMetric(graph, 'progress', 1.0);
+    addMetric(graph, 'hypothesisCount', thought.scientificHypotheses?.length || 0);
+    if (thought.conclusion?.confidence) {
+      addMetric(graph, 'confidence', thought.conclusion.confidence);
+    }
+    if (thought.analysis?.tests) {
+      addMetric(graph, 'testCount', thought.analysis.tests.length);
+    }
+  }
+
+  return serializeGraph(graph, options);
 }

@@ -37,6 +37,22 @@ import {
   renderSection,
   renderTable,
 } from './html-utils.js';
+import {
+  sanitizeModelicaId,
+  escapeModelicaString,
+} from './modelica-utils.js';
+import {
+  generateUmlDiagram,
+  type UmlNode,
+  type UmlEdge,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Export evidential belief visualization to visual format
@@ -59,6 +75,12 @@ export function exportEvidentialBeliefs(thought: EvidentialThought, options: Vis
       return evidentialToTikZ(thought, options);
     case 'html':
       return evidentialToHTML(thought, options);
+    case 'modelica':
+      return evidentialToModelica(thought, options);
+    case 'uml':
+      return evidentialToUML(thought, options);
+    case 'json':
+      return evidentialToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -541,4 +563,353 @@ function evidentialToHTML(thought: EvidentialThought, options: VisualExportOptio
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export evidential beliefs to Modelica format
+ */
+function evidentialToModelica(thought: EvidentialThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  let modelica = 'package EvidentialBeliefs\n';
+  modelica += '  "Evidential reasoning with belief degrees and evidence"\n\n';
+
+  // Define evidence records
+  if (thought.evidence && thought.evidence.length > 0) {
+    modelica += '  // Evidence Items\n';
+    for (const evidence of thought.evidence) {
+      const evId = sanitizeModelicaId(evidence.id);
+      const desc = includeLabels ? escapeModelicaString(evidence.description) : '';
+
+      modelica += `  record ${evId}\n`;
+      modelica += `    "Evidence: ${desc}"\n`;
+      modelica += `    parameter Real reliability = ${evidence.reliability};\n`;
+      if (evidence.source) {
+        modelica += `    parameter String source = "${escapeModelicaString(evidence.source)}";\n`;
+      }
+      modelica += `    parameter String description = "${desc}";\n`;
+      modelica += `  end ${evId};\n\n`;
+    }
+  }
+
+  // Define belief function records
+  if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
+    modelica += '  // Belief Functions\n';
+    for (const belief of thought.beliefFunctions) {
+      const bfId = sanitizeModelicaId(belief.id);
+
+      modelica += `  record ${bfId}\n`;
+      modelica += `    "Belief function from ${escapeModelicaString(belief.source)}"\n`;
+
+      // Mass assignments as parameters
+      if (belief.massAssignments && belief.massAssignments.length > 0) {
+        for (let i = 0; i < belief.massAssignments.length; i++) {
+          const ma = belief.massAssignments[i];
+          const hypSet = ma.hypothesisSet.map(h => sanitizeModelicaId(h)).join('_');
+          modelica += `    parameter Real mass_${hypSet} = ${ma.mass};\n`;
+        }
+      }
+
+      if (belief.conflictMass !== undefined && includeMetrics) {
+        modelica += `    parameter Real conflictMass = ${belief.conflictMass};\n`;
+      }
+
+      modelica += `  end ${bfId};\n\n`;
+    }
+  }
+
+  // Combined belief if available
+  if (thought.combinedBelief && includeMetrics) {
+    modelica += '  // Combined Belief\n';
+    modelica += '  record CombinedBelief\n';
+    modelica += '    "Result of combining all evidence"\n';
+
+    if (thought.combinedBelief.massAssignments) {
+      for (let i = 0; i < thought.combinedBelief.massAssignments.length; i++) {
+        const ma = thought.combinedBelief.massAssignments[i];
+        const hypSet = ma.hypothesisSet.map(h => sanitizeModelicaId(h)).join('_');
+        modelica += `    parameter Real mass_${hypSet} = ${ma.mass};\n`;
+      }
+    }
+
+    if (thought.combinedBelief.conflictMass !== undefined) {
+      modelica += `    parameter Real conflictMass = ${thought.combinedBelief.conflictMass};\n`;
+    }
+
+    modelica += '  end CombinedBelief;\n\n';
+  }
+
+  // Frame of discernment as enumeration
+  if (thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
+    modelica += '  // Frame of Discernment\n';
+    modelica += '  type Hypothesis = enumeration(\n';
+    const hypEnums = thought.frameOfDiscernment.map(h => `    ${sanitizeModelicaId(h)}`);
+    modelica += hypEnums.join(',\n');
+    modelica += '\n  );\n\n';
+  }
+
+  modelica += 'end EvidentialBeliefs;\n';
+  return modelica;
+}
+
+/**
+ * Export evidential beliefs to UML format
+ */
+function evidentialToUML(thought: EvidentialThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  const nodes: UmlNode[] = [];
+  const edges: UmlEdge[] = [];
+
+  // Create evidence nodes (classes with attributes)
+  if (thought.evidence && thought.evidence.length > 0) {
+    for (const evidence of thought.evidence) {
+      const attributes = [
+        `reliability: Real = ${evidence.reliability}`,
+      ];
+
+      if (includeLabels) {
+        attributes.unshift(`description: String = "${evidence.description.substring(0, 30)}${evidence.description.length > 30 ? '...' : ''}"`);
+      }
+
+      if (evidence.source) {
+        attributes.push(`source: String = "${evidence.source}"`);
+      }
+
+      nodes.push({
+        id: evidence.id,
+        label: evidence.id,
+        shape: 'class',
+        stereotype: '<<evidence>>',
+        attributes,
+      });
+    }
+  }
+
+  // Create belief function nodes
+  if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
+    for (const belief of thought.beliefFunctions) {
+      const attributes: string[] = [];
+
+      // Add mass assignments as attributes
+      if (includeMetrics && belief.massAssignments && belief.massAssignments.length > 0) {
+        for (const ma of belief.massAssignments) {
+          const hypSet = ma.hypothesisSet.join(', ');
+          attributes.push(`m({${hypSet}}): Real = ${ma.mass.toFixed(3)}`);
+        }
+      }
+
+      if (belief.conflictMass !== undefined && includeMetrics) {
+        attributes.push(`conflictMass: Real = ${belief.conflictMass.toFixed(3)}`);
+      }
+
+      nodes.push({
+        id: belief.id,
+        label: includeLabels ? `Belief from ${belief.source}` : belief.id,
+        shape: 'class',
+        stereotype: '<<belief>>',
+        attributes,
+      });
+
+      // Create edges from evidence to beliefs
+      if (thought.evidence && thought.evidence.length > 0) {
+        const sourceEvidence = thought.evidence.find(e => e.id === belief.source);
+        if (sourceEvidence) {
+          edges.push({
+            source: sourceEvidence.id,
+            target: belief.id,
+            type: 'association',
+            label: includeMetrics ? `[${sourceEvidence.reliability.toFixed(3)}]` : 'supports',
+          });
+        }
+      }
+    }
+  }
+
+  // Create combined belief node if available
+  if (thought.combinedBelief && includeMetrics) {
+    const attributes: string[] = [];
+
+    if (thought.combinedBelief.massAssignments) {
+      for (const ma of thought.combinedBelief.massAssignments) {
+        const hypSet = ma.hypothesisSet.join(', ');
+        attributes.push(`m({${hypSet}}): Real = ${ma.mass.toFixed(3)}`);
+      }
+    }
+
+    if (thought.combinedBelief.conflictMass !== undefined) {
+      attributes.push(`conflictMass: Real = ${thought.combinedBelief.conflictMass.toFixed(3)}`);
+    }
+
+    nodes.push({
+      id: 'combined_belief',
+      label: 'Combined Belief',
+      shape: 'class',
+      stereotype: '<<conclusion>>',
+      attributes,
+    });
+
+    // Connect all beliefs to combined belief
+    if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
+      for (const belief of thought.beliefFunctions) {
+        edges.push({
+          source: belief.id,
+          target: 'combined_belief',
+          type: 'dependency',
+          label: 'combines',
+        });
+      }
+    }
+  }
+
+  // If no evidence or beliefs, show frame of discernment
+  if (nodes.length === 0 && thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
+    nodes.push({
+      id: 'frame',
+      label: 'Frame of Discernment',
+      shape: 'class',
+      stereotype: '<<enumeration>>',
+      attributes: thought.frameOfDiscernment.map(h => `${sanitizeId(h)}`),
+    });
+  }
+
+  return generateUmlDiagram(nodes, edges, {
+    title: 'Evidential Reasoning',
+    includeLabels,
+  });
+}
+
+/**
+ * Export evidential beliefs to JSON format
+ */
+function evidentialToJSON(thought: EvidentialThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+
+  const graph = createJsonGraph('evidential', 'Evidential Beliefs');
+
+  // Add evidence nodes
+  if (thought.evidence && thought.evidence.length > 0) {
+    for (const evidence of thought.evidence) {
+      addNode(graph, {
+        id: evidence.id,
+        label: evidence.description,
+        type: 'evidence',
+        metadata: {
+          reliability: evidence.reliability,
+          source: evidence.source,
+        },
+      });
+    }
+  }
+
+  // Add belief function nodes
+  if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
+    for (const belief of thought.beliefFunctions) {
+      const metadata: Record<string, any> = {
+        source: belief.source,
+      };
+
+      if (includeMetrics && belief.massAssignments) {
+        metadata.massAssignments = belief.massAssignments.map(ma => ({
+          hypothesisSet: ma.hypothesisSet,
+          mass: ma.mass,
+          justification: ma.justification,
+        }));
+      }
+
+      if (belief.conflictMass !== undefined) {
+        metadata.conflictMass = belief.conflictMass;
+      }
+
+      addNode(graph, {
+        id: belief.id,
+        label: `Belief: ${belief.source}`,
+        type: 'belief',
+        metadata,
+      });
+
+      // Create edges from evidence to beliefs
+      if (thought.evidence && thought.evidence.length > 0) {
+        const sourceEvidence = thought.evidence.find(e => e.id === belief.source);
+        if (sourceEvidence) {
+          addEdge(graph, {
+            id: `edge_${sourceEvidence.id}_${belief.id}`,
+            source: sourceEvidence.id,
+            target: belief.id,
+            label: 'supports',
+            weight: sourceEvidence.reliability,
+            metadata: includeMetrics ? {
+              reliability: sourceEvidence.reliability,
+            } : undefined,
+          });
+        }
+      }
+    }
+  }
+
+  // Add combined belief node if available
+  if (thought.combinedBelief) {
+    const metadata: Record<string, any> = {};
+
+    if (includeMetrics && thought.combinedBelief.massAssignments) {
+      metadata.massAssignments = thought.combinedBelief.massAssignments.map(ma => ({
+        hypothesisSet: ma.hypothesisSet,
+        mass: ma.mass,
+        justification: ma.justification,
+      }));
+    }
+
+    if (thought.combinedBelief.conflictMass !== undefined) {
+      metadata.conflictMass = thought.combinedBelief.conflictMass;
+    }
+
+    addNode(graph, {
+      id: 'combined_belief',
+      label: 'Combined Belief',
+      type: 'conclusion',
+      metadata,
+    });
+
+    // Connect all beliefs to combined belief
+    if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
+      for (const belief of thought.beliefFunctions) {
+        addEdge(graph, {
+          id: `edge_${belief.id}_combined`,
+          source: belief.id,
+          target: 'combined_belief',
+          label: 'combines',
+        });
+      }
+    }
+  }
+
+  // Add frame of discernment as metadata if no evidence/beliefs
+  if (graph.nodes.length === 0 && thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
+    addNode(graph, {
+      id: 'frame',
+      label: 'Frame of Discernment',
+      type: 'frame',
+      metadata: {
+        hypotheses: thought.frameOfDiscernment,
+      },
+    });
+  }
+
+  // Add metrics
+  if (includeMetrics) {
+    if (thought.frameOfDiscernment) {
+      addMetric(graph, 'hypotheses', thought.frameOfDiscernment.length);
+    }
+    if (thought.evidence) {
+      addMetric(graph, 'evidenceCount', thought.evidence.length);
+    }
+    if (thought.beliefFunctions) {
+      addMetric(graph, 'beliefFunctions', thought.beliefFunctions.length);
+    }
+    if (thought.combinedBelief) {
+      addMetric(graph, 'hasCombinedBelief', true);
+    }
+  }
+
+  return serializeGraph(graph);
 }

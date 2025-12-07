@@ -39,6 +39,22 @@ import {
   renderBadge,
   renderProgressBar,
 } from './html-utils.js';
+import {
+  sanitizeModelicaId,
+  escapeModelicaString,
+} from './modelica-utils.js';
+import {
+  generateUmlDiagram,
+  type UmlNode,
+  type UmlEdge,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Export mathematics reasoning to visual format
@@ -61,6 +77,12 @@ export function exportMathematicsDerivation(thought: MathematicsThought, options
       return mathematicsToTikZ(thought, options);
     case 'html':
       return mathematicsToHTML(thought, options);
+    case 'modelica':
+      return mathematicsToModelica(thought, options);
+    case 'uml':
+      return mathematicsToUML(thought, options);
+    case 'json':
+      return mathematicsToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -723,4 +745,365 @@ function mathematicsToHTML(thought: MathematicsThought, options: VisualExportOpt
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export mathematics reasoning to Modelica format
+ */
+function mathematicsToModelica(thought: MathematicsThought, options: VisualExportOptions): string {
+  const { includeLabels = true } = options;
+
+  let modelica = '// Mathematics Derivation Model\n';
+  modelica += `package MathematicsDerivation "${thought.thoughtType || 'Proof'}"\n`;
+  modelica += '  "Mathematical derivation and proof structure"\n\n';
+
+  // Add mathematical constants and parameters
+  modelica += '  // Mathematical Model\n';
+  if (thought.mathematicalModel) {
+    const modelName = sanitizeModelicaId('MathModel');
+    modelica += `  model ${modelName} "Mathematical Expression"\n`;
+    modelica += `    parameter String latex = "${escapeModelicaString(thought.mathematicalModel.latex)}";\n`;
+    modelica += `    parameter String symbolic = "${escapeModelicaString(thought.mathematicalModel.symbolic)}";\n`;
+    if (thought.mathematicalModel.ascii) {
+      modelica += `    parameter String ascii = "${escapeModelicaString(thought.mathematicalModel.ascii)}";\n`;
+    }
+    modelica += `  end ${modelName};\n\n`;
+  }
+
+  // Add theorems as models
+  if (thought.theorems && thought.theorems.length > 0) {
+    modelica += '  // Theorems\n';
+    thought.theorems.forEach((theorem, index) => {
+      const theoremName = sanitizeModelicaId(theorem.name || `Theorem${index + 1}`);
+      modelica += `  model ${theoremName} "Theorem ${index + 1}"\n`;
+      modelica += `    parameter String statement = "${escapeModelicaString(theorem.statement)}";\n`;
+      if (theorem.hypotheses.length > 0) {
+        theorem.hypotheses.forEach((hyp, hypIndex) => {
+          modelica += `    parameter String hypothesis${hypIndex + 1} = "${escapeModelicaString(hyp)}";\n`;
+        });
+      }
+      modelica += `    parameter String conclusion = "${escapeModelicaString(theorem.conclusion)}";\n`;
+      modelica += `  end ${theoremName};\n\n`;
+    });
+  }
+
+  // Add proof strategy as a model with derivation steps
+  if (thought.proofStrategy) {
+    const strategyName = sanitizeModelicaId(thought.proofStrategy.type.replace(/\s+/g, '_'));
+    modelica += '  // Proof Strategy\n';
+    modelica += `  model ${strategyName} "Proof Strategy"\n`;
+    modelica += `    parameter String proofType = "${escapeModelicaString(thought.proofStrategy.type)}";\n`;
+    modelica += `    parameter Real completeness = ${thought.proofStrategy.completeness};\n`;
+
+    // Add proof steps as parameters
+    thought.proofStrategy.steps.forEach((step, index) => {
+      if (includeLabels) {
+        modelica += `    parameter String step${index + 1} = "${escapeModelicaString(step)}";\n`;
+      }
+    });
+
+    if (thought.proofStrategy.baseCase) {
+      modelica += `    parameter String baseCase = "${escapeModelicaString(thought.proofStrategy.baseCase)}";\n`;
+    }
+    if (thought.proofStrategy.inductiveStep) {
+      modelica += `    parameter String inductiveStep = "${escapeModelicaString(thought.proofStrategy.inductiveStep)}";\n`;
+    }
+    modelica += `  end ${strategyName};\n\n`;
+  }
+
+  // Add assumptions
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    modelica += '  // Assumptions\n';
+    modelica += '  model Assumptions "Proof Assumptions"\n';
+    thought.assumptions.forEach((assumption, index) => {
+      modelica += `    parameter String assumption${index + 1} = "${escapeModelicaString(assumption)}";\n`;
+    });
+    modelica += '  end Assumptions;\n\n';
+  }
+
+  // Add metadata
+  modelica += '  // Metadata\n';
+  modelica += '  model Metadata "Derivation Metadata"\n';
+  modelica += `    parameter Real uncertainty = ${thought.uncertainty};\n`;
+  modelica += `    parameter Integer theoremCount = ${thought.theorems?.length || 0};\n`;
+  modelica += `    parameter Integer assumptionCount = ${thought.assumptions?.length || 0};\n`;
+  modelica += '  end Metadata;\n\n';
+
+  modelica += 'end MathematicsDerivation;\n';
+  return modelica;
+}
+
+/**
+ * Export mathematics reasoning to UML format
+ */
+function mathematicsToUML(thought: MathematicsThought, options: VisualExportOptions): string {
+  const { includeLabels = true } = options;
+
+  const nodes: UmlNode[] = [];
+  const edges: UmlEdge[] = [];
+
+  // Add thought type as root class
+  const typeId = sanitizeId(`type_${thought.thoughtType || 'proof'}`);
+  nodes.push({
+    id: typeId,
+    label: includeLabels ? (thought.thoughtType || 'Proof').replace(/_/g, ' ') : typeId,
+    shape: 'class',
+    stereotype: 'mathematical',
+    attributes: [
+      `uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`,
+    ],
+  });
+
+  // Add mathematical model as class
+  if (thought.mathematicalModel) {
+    const modelId = sanitizeId('model');
+    nodes.push({
+      id: modelId,
+      label: 'Mathematical Model',
+      shape: 'class',
+      stereotype: 'model',
+      attributes: [
+        `latex: ${thought.mathematicalModel.latex.substring(0, 40)}...`,
+        `symbolic: ${thought.mathematicalModel.symbolic}`,
+      ],
+    });
+
+    edges.push({
+      source: typeId,
+      target: modelId,
+      type: 'composition',
+      label: 'contains',
+    });
+  }
+
+  // Add theorems as classes
+  if (thought.theorems && thought.theorems.length > 0) {
+    thought.theorems.forEach((theorem, index) => {
+      const theoremId = sanitizeId(`theorem_${index}`);
+      const attributes = [
+        `statement: ${theorem.statement.substring(0, 40)}...`,
+        `hypotheses: ${theorem.hypotheses.length}`,
+        `conclusion: ${theorem.conclusion.substring(0, 40)}...`,
+      ];
+
+      nodes.push({
+        id: theoremId,
+        label: theorem.name || `Theorem ${index + 1}`,
+        shape: 'class',
+        stereotype: 'theorem',
+        attributes,
+      });
+
+      edges.push({
+        source: typeId,
+        target: theoremId,
+        type: 'association',
+        label: 'uses',
+      });
+    });
+  }
+
+  // Add proof strategy as class with methods
+  if (thought.proofStrategy) {
+    const strategyId = sanitizeId('strategy');
+    const methods = thought.proofStrategy.steps.map((step, index) => {
+      return includeLabels ? `step${index + 1}(): ${step.substring(0, 30)}...` : `step${index + 1}()`;
+    });
+
+    nodes.push({
+      id: strategyId,
+      label: thought.proofStrategy.type,
+      shape: 'class',
+      stereotype: 'strategy',
+      attributes: [
+        `completeness: ${(thought.proofStrategy.completeness * 100).toFixed(0)}%`,
+      ],
+      methods,
+    });
+
+    edges.push({
+      source: typeId,
+      target: strategyId,
+      type: 'dependency',
+      label: 'applies',
+    });
+  }
+
+  // Add assumptions as interface
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    const assumptionsId = sanitizeId('assumptions');
+    nodes.push({
+      id: assumptionsId,
+      label: 'Assumptions',
+      shape: 'interface',
+      attributes: thought.assumptions.slice(0, 5).map((a, i) => `${i + 1}. ${a.substring(0, 30)}...`),
+    });
+
+    edges.push({
+      source: typeId,
+      target: assumptionsId,
+      type: 'implementation',
+      label: 'assumes',
+    });
+  }
+
+  return generateUmlDiagram(nodes, edges, {
+    title: 'Mathematics Derivation Structure',
+    includeLabels,
+  });
+}
+
+/**
+ * Export mathematics reasoning to JSON format
+ */
+function mathematicsToJSON(thought: MathematicsThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  const graph = createJsonGraph('Mathematics Derivation', 'mathematics');
+
+  // Add thought type as root node
+  const typeId = sanitizeId(`type_${thought.thoughtType || 'proof'}`);
+  addNode(graph, {
+    id: typeId,
+    label: includeLabels ? (thought.thoughtType || 'Proof').replace(/_/g, ' ') : typeId,
+    type: 'type',
+    metadata: {
+      thoughtType: thought.thoughtType || 'proof',
+      uncertainty: thought.uncertainty,
+    },
+  });
+
+  // Add mathematical model
+  if (thought.mathematicalModel) {
+    const modelId = sanitizeId('model');
+    addNode(graph, {
+      id: modelId,
+      label: thought.mathematicalModel.symbolic || 'Mathematical Model',
+      type: 'model',
+      metadata: {
+        latex: thought.mathematicalModel.latex,
+        symbolic: thought.mathematicalModel.symbolic,
+        ascii: thought.mathematicalModel.ascii,
+      },
+    });
+
+    addEdge(graph, {
+      id: `edge_${typeId}_${modelId}`,
+      source: typeId,
+      target: modelId,
+      label: 'contains',
+      type: 'composition',
+    });
+  }
+
+  // Add theorems
+  if (thought.theorems && thought.theorems.length > 0) {
+    thought.theorems.forEach((theorem, index) => {
+      const theoremId = sanitizeId(`theorem_${index}`);
+      addNode(graph, {
+        id: theoremId,
+        label: theorem.name || `Theorem ${index + 1}`,
+        type: 'theorem',
+        metadata: {
+          statement: theorem.statement,
+          hypotheses: theorem.hypotheses,
+          conclusion: theorem.conclusion,
+        },
+      });
+
+      addEdge(graph, {
+        id: `edge_${typeId}_${theoremId}`,
+        source: typeId,
+        target: theoremId,
+        label: 'uses',
+        type: 'association',
+      });
+    });
+  }
+
+  // Add proof strategy with derivation steps
+  if (thought.proofStrategy) {
+    const strategyId = sanitizeId('strategy');
+    addNode(graph, {
+      id: strategyId,
+      label: thought.proofStrategy.type,
+      type: 'strategy',
+      metadata: {
+        proofType: thought.proofStrategy.type,
+        completeness: thought.proofStrategy.completeness,
+        baseCase: thought.proofStrategy.baseCase,
+        inductiveStep: thought.proofStrategy.inductiveStep,
+      },
+    });
+
+    addEdge(graph, {
+      id: `edge_${typeId}_${strategyId}`,
+      source: typeId,
+      target: strategyId,
+      label: 'applies',
+      type: 'dependency',
+    });
+
+    // Add proof steps as nodes
+    let prevStepId = strategyId;
+    thought.proofStrategy.steps.forEach((step, index) => {
+      const stepId = sanitizeId(`step_${index}`);
+      addNode(graph, {
+        id: stepId,
+        label: includeLabels ? `Step ${index + 1}` : stepId,
+        type: 'step',
+        metadata: {
+          stepNumber: index + 1,
+          description: step,
+        },
+      });
+
+      addEdge(graph, {
+        id: `edge_${prevStepId}_${stepId}`,
+        source: prevStepId,
+        target: stepId,
+        label: 'leads_to',
+        type: 'sequence',
+      });
+
+      prevStepId = stepId;
+    });
+  }
+
+  // Add assumptions as nodes
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    thought.assumptions.forEach((assumption, index) => {
+      const assumptionId = sanitizeId(`assumption_${index}`);
+      addNode(graph, {
+        id: assumptionId,
+        label: includeLabels ? `Assumption ${index + 1}` : assumptionId,
+        type: 'assumption',
+        metadata: {
+          description: assumption,
+        },
+      });
+
+      addEdge(graph, {
+        id: `edge_${typeId}_${assumptionId}`,
+        source: typeId,
+        target: assumptionId,
+        label: 'assumes',
+        type: 'dependency',
+      });
+    });
+  }
+
+  // Add metrics
+  if (includeMetrics) {
+    addMetric(graph, 'uncertainty', thought.uncertainty);
+    addMetric(graph, 'theorem_count', thought.theorems?.length || 0);
+    addMetric(graph, 'assumption_count', thought.assumptions?.length || 0);
+    addMetric(graph, 'dependency_count', thought.dependencies?.length || 0);
+    if (thought.proofStrategy) {
+      addMetric(graph, 'proof_completeness', thought.proofStrategy.completeness);
+      addMetric(graph, 'proof_step_count', thought.proofStrategy.steps.length);
+    }
+  }
+
+  return serializeGraph(graph);
 }

@@ -39,6 +39,23 @@ import {
   renderTable,
   renderBadge,
 } from './html-utils.js';
+import {
+  sanitizeModelicaId,
+  escapeModelicaString,
+} from './modelica-utils.js';
+import {
+  generateUmlDiagram,
+  type UmlNode,
+  type UmlEdge,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  addLegendItem,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Export systems thinking causal loop diagram to visual format
@@ -61,6 +78,12 @@ export function exportSystemsThinkingCausalLoops(thought: SystemsThinkingThought
       return systemsThinkingToTikZ(thought, options);
     case 'html':
       return systemsThinkingToHTML(thought, options);
+    case 'modelica':
+      return systemsThinkingToModelica(thought, options);
+    case 'uml':
+      return systemsThinkingToUML(thought, options);
+    case 'json':
+      return systemsThinkingToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -524,4 +547,270 @@ function systemsThinkingToHTML(thought: SystemsThinkingThought, options: VisualE
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export systems thinking causal loop diagram to Modelica format
+ */
+function systemsThinkingToModelica(thought: SystemsThinkingThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+  const systemName = thought.system ? sanitizeModelicaId(thought.system.name) : 'SystemsThinking';
+
+  let modelica = `package ${systemName}\n`;
+  modelica += `  "${thought.system?.description || 'Systems thinking model with feedback loops'}"\n\n`;
+
+  // Create individual component models (stocks and flows)
+  if (thought.components && thought.components.length > 0) {
+    modelica += '  // System Components\n';
+
+    for (const component of thought.components) {
+      const compName = sanitizeModelicaId(component.name);
+      const unit = component.unit ? escapeModelicaString(component.unit) : '';
+      const initialValue = component.initialValue !== undefined ? component.initialValue : 0;
+
+      if (component.type === 'stock') {
+        // Stocks are state variables that accumulate
+        modelica += `  model ${compName}\n`;
+        modelica += `    "${escapeModelicaString(component.description)}"\n`;
+        modelica += `    parameter Real initial_value = ${initialValue}${unit ? ` "${unit}"` : ''};\n`;
+        modelica += `    Real value(start=initial_value)${unit ? `(unit="${unit}")` : ''};\n`;
+        modelica += `    input Real inflow${unit ? `(unit="${unit}/s")` : ''};\n`;
+        modelica += `    input Real outflow${unit ? `(unit="${unit}/s")` : ''};\n`;
+        modelica += '  equation\n';
+        modelica += '    der(value) = inflow - outflow;\n';
+        modelica += '  end ' + compName + ';\n\n';
+      } else {
+        // Flows are rate variables
+        modelica += `  model ${compName}\n`;
+        modelica += `    "${escapeModelicaString(component.description)}"\n`;
+        modelica += `    output Real flow_rate${unit ? `(unit="${unit}/s")` : ''};\n`;
+        modelica += `    input Real source_value${unit ? `(unit="${unit}")` : ''};\n`;
+        modelica += `    input Real sink_value${unit ? `(unit="${unit}")` : ''};\n`;
+        modelica += `    parameter Real coefficient = 1.0;\n`;
+        modelica += '  equation\n';
+        modelica += '    flow_rate = coefficient * (source_value - sink_value);\n';
+        modelica += '  end ' + compName + ';\n\n';
+      }
+    }
+  }
+
+  // Create feedback loop models
+  if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+    modelica += '  // Feedback Loop Models\n';
+
+    for (const loop of thought.feedbackLoops) {
+      const loopName = sanitizeModelicaId(loop.name);
+      const loopType = loop.type === 'reinforcing' ? 'Reinforcing' : 'Balancing';
+
+      modelica += `  model ${loopName}\n`;
+      modelica += `    "${loopType} feedback loop: ${escapeModelicaString(loop.description || loop.name)}"\n`;
+      if (includeMetrics) {
+        modelica += `    // Strength: ${loop.strength.toFixed(3)}\n`;
+        modelica += `    // Polarity: ${loop.polarity}\n`;
+      }
+      modelica += `    parameter Real strength = ${loop.strength.toFixed(3)};\n`;
+      modelica += `    parameter String loop_type = "${loop.type}";\n`;
+
+      // Add component instances for this loop
+      const loopComponents = loop.components.map(c => sanitizeModelicaId(c));
+      modelica += `    // Components in loop: ${loopComponents.join(' → ')}\n`;
+
+      // Create connections for the feedback loop
+      modelica += '  equation\n';
+      modelica += `    // ${loopType} feedback loop dynamics\n`;
+      modelica += '    // Loop components interact with strength factor\n';
+
+      modelica += '  end ' + loopName + ';\n\n';
+    }
+  }
+
+  // Create main system model that integrates components and feedback loops
+  modelica += `  model ${systemName}_Complete\n`;
+  modelica += `    "${thought.system?.description || 'Complete systems thinking model'}"\n`;
+
+  if (includeMetrics && thought.leveragePoints && thought.leveragePoints.length > 0) {
+    modelica += '\n    // Leverage Points:\n';
+    for (const lp of thought.leveragePoints) {
+      modelica += `    // - ${lp.location} (effectiveness: ${lp.effectiveness.toFixed(2)})\n`;
+      modelica += `    //   ${lp.description}\n`;
+    }
+  }
+
+  modelica += '\n    // Integrate component models and feedback loops here\n';
+  modelica += '  end ' + systemName + '_Complete;\n\n';
+
+  modelica += 'end ' + systemName + ';\n';
+
+  return modelica;
+}
+
+/**
+ * Export systems thinking causal loop diagram to UML format
+ */
+function systemsThinkingToUML(thought: SystemsThinkingThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  const nodes: UmlNode[] = [];
+  const edges: UmlEdge[] = [];
+
+  // Create UML nodes for system components
+  if (thought.components && thought.components.length > 0) {
+    for (const component of thought.components) {
+      const attributes: string[] = [];
+
+      if (component.unit) {
+        attributes.push(`unit: ${component.unit}`);
+      }
+      if (component.initialValue !== undefined) {
+        attributes.push(`initialValue: ${component.initialValue}`);
+      }
+      if (includeMetrics) {
+        attributes.push(`type: ${component.type}`);
+      }
+
+      nodes.push({
+        id: sanitizeId(component.id),
+        label: component.name,
+        shape: component.type === 'stock' ? 'class' : 'component',
+        stereotype: component.type,
+        attributes,
+      });
+    }
+  }
+
+  // Create UML edges for feedback loops
+  if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+    for (const loop of thought.feedbackLoops) {
+      const loopComponents = loop.components;
+
+      for (let i = 0; i < loopComponents.length; i++) {
+        const fromId = sanitizeId(loopComponents[i]);
+        const toId = sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
+
+        const label = includeLabels && includeMetrics
+          ? `${loop.type} (${loop.strength.toFixed(2)})`
+          : includeLabels
+            ? loop.type
+            : undefined;
+
+        // Reinforcing loops are associations, balancing loops are dependencies
+        const edgeType = loop.type === 'reinforcing' ? 'association' : 'dependency';
+
+        edges.push({
+          source: fromId,
+          target: toId,
+          type: edgeType,
+          label,
+        });
+      }
+    }
+  }
+
+  return generateUmlDiagram(nodes, edges, {
+    title: 'Systems Thinking Causal Loop Diagram',
+    diagramType: 'component',
+    includeLabels,
+    includeMetrics,
+  });
+}
+
+/**
+ * Export systems thinking causal loop diagram to JSON format
+ */
+function systemsThinkingToJSON(thought: SystemsThinkingThought, options: VisualExportOptions): string {
+  const { includeMetrics = true } = options;
+
+  const graph = createJsonGraph('Systems Thinking Causal Loop Diagram', 'systems-thinking', {
+    includeMetrics,
+  });
+
+  // Add metadata about the system
+  if (thought.system) {
+    graph.metadata.systemName = thought.system.name;
+    graph.metadata.systemDescription = thought.system.description;
+  }
+
+  // Add nodes for system components
+  if (thought.components && thought.components.length > 0) {
+    for (const component of thought.components) {
+      addNode(graph, {
+        id: component.id,
+        label: component.name,
+        type: component.type,
+        shape: component.type === 'stock' ? 'rectangle' : 'ellipse',
+        metadata: {
+          description: component.description,
+          unit: component.unit,
+          initialValue: component.initialValue,
+        },
+      });
+    }
+  }
+
+  // Add edges for feedback loops
+  if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+    let edgeCount = 0;
+    for (const loop of thought.feedbackLoops) {
+      const loopComponents = loop.components;
+
+      for (let i = 0; i < loopComponents.length; i++) {
+        const fromId = loopComponents[i];
+        const toId = loopComponents[(i + 1) % loopComponents.length];
+
+        addEdge(graph, {
+          id: `edge_${edgeCount++}`,
+          source: fromId,
+          target: toId,
+          label: `${loop.type} (${loop.strength.toFixed(2)})`,
+          type: loop.type,
+          weight: loop.strength,
+          style: loop.type === 'reinforcing' ? 'solid' : 'dashed',
+          directed: true,
+          metadata: {
+            loopName: loop.name,
+            polarity: loop.polarity,
+            description: loop.description,
+          },
+        });
+      }
+    }
+  }
+
+  // Add metrics
+  if (includeMetrics) {
+    addMetric(graph, 'components', thought.components?.length || 0);
+    addMetric(graph, 'feedbackLoops', thought.feedbackLoops?.length || 0);
+    addMetric(graph, 'leveragePoints', thought.leveragePoints?.length || 0);
+
+    // Calculate average loop strength
+    if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+      const avgStrength = thought.feedbackLoops.reduce((sum, loop) => sum + loop.strength, 0) / thought.feedbackLoops.length;
+      addMetric(graph, 'averageLoopStrength', parseFloat(avgStrength.toFixed(3)));
+    }
+
+    // Count reinforcing vs balancing loops
+    if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+      const reinforcingCount = thought.feedbackLoops.filter(l => l.type === 'reinforcing').length;
+      const balancingCount = thought.feedbackLoops.filter(l => l.type === 'balancing').length;
+      addMetric(graph, 'reinforcingLoops', reinforcingCount);
+      addMetric(graph, 'balancingLoops', balancingCount);
+    }
+  }
+
+  // Add legend items
+  addLegendItem(graph, 'stock', '#a8d5ff');
+  addLegendItem(graph, 'flow', '#ffd699');
+  addLegendItem(graph, 'reinforcing', '#90ee90', 'solid');
+  addLegendItem(graph, 'balancing', '#ffb3ba', 'dashed');
+
+  // Add leverage points to metadata
+  if (thought.leveragePoints && thought.leveragePoints.length > 0) {
+    graph.metadata.leveragePoints = thought.leveragePoints.map(lp => ({
+      location: lp.location,
+      effectiveness: lp.effectiveness,
+      description: lp.description,
+    }));
+  }
+
+  return serializeGraph(graph);
 }

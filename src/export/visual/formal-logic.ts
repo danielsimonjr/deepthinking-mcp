@@ -40,6 +40,22 @@ import {
   renderBadge,
   renderProgressBar,
 } from './html-utils.js';
+import {
+  sanitizeModelicaId,
+  escapeModelicaString,
+} from './modelica-utils.js';
+import {
+  generateUmlDiagram,
+  type UmlNode,
+  type UmlEdge,
+} from './uml-utils.js';
+import {
+  createJsonGraph,
+  addNode,
+  addEdge,
+  addMetric,
+  serializeGraph,
+} from './json-utils.js';
 
 /**
  * Export formal logic proof tree to visual format
@@ -62,6 +78,12 @@ export function exportFormalLogicProof(thought: FormalLogicThought, options: Vis
       return formalLogicToTikZ(thought, options);
     case 'html':
       return formalLogicToHTML(thought, options);
+    case 'modelica':
+      return formalLogicToModelica(thought, options);
+    case 'uml':
+      return formalLogicToUML(thought, options);
+    case 'json':
+      return formalLogicToJSON(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -763,4 +785,398 @@ function formalLogicToHTML(thought: FormalLogicThought, options: VisualExportOpt
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
+}
+
+/**
+ * Export formal logic proof tree to Modelica format
+ */
+function formalLogicToModelica(thought: FormalLogicThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  let modelica = 'package FormalLogicProof\n';
+  modelica += '  "Formal logic proof representation"\n\n';
+
+  // Add propositions as Boolean parameters
+  if (thought.propositions && thought.propositions.length > 0) {
+    modelica += '  // Logical Propositions\n';
+    for (const proposition of thought.propositions) {
+      const propId = sanitizeModelicaId(proposition.id);
+      const comment = includeLabels
+        ? ` "${escapeModelicaString(proposition.symbol)}: ${escapeModelicaString(proposition.statement)}"`
+        : '';
+      const truthValue = proposition.truthValue !== undefined ? String(proposition.truthValue) : 'false';
+      modelica += `  parameter Boolean ${propId} = ${truthValue}${comment};\n`;
+    }
+    modelica += '\n';
+  }
+
+  // Add inference rules as functions
+  if (thought.logicalInferences && thought.logicalInferences.length > 0) {
+    modelica += '  // Inference Rules\n';
+    for (const inference of thought.logicalInferences) {
+      const ruleName = sanitizeModelicaId(inference.rule.replace(/[^a-zA-Z0-9]/g, '_'));
+
+      modelica += `  function ${ruleName}\n`;
+      modelica += `    "${escapeModelicaString(inference.rule)}"\n`;
+
+      // Input parameters for premises
+      if (inference.premises && inference.premises.length > 0) {
+        for (let i = 0; i < inference.premises.length; i++) {
+          const premiseId = sanitizeModelicaId(inference.premises[i]);
+          modelica += `    input Boolean premise${i + 1} "${escapeModelicaString(premiseId)}";\n`;
+        }
+      }
+
+      // Output parameter for conclusion
+      modelica += `    output Boolean conclusion "${escapeModelicaString(inference.conclusion)}";\n`;
+      modelica += `  algorithm\n`;
+
+      // Simple logical operation (all premises must be true)
+      if (inference.premises && inference.premises.length > 0) {
+        const conditions = inference.premises.map((_, i) => `premise${i + 1}`).join(' and ');
+        modelica += `    conclusion := ${conditions};\n`;
+      } else {
+        modelica += `    conclusion := false;\n`;
+      }
+
+      modelica += `  end ${ruleName};\n\n`;
+    }
+  }
+
+  // Add proof steps as model components
+  if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
+    modelica += '  // Proof Steps\n';
+    modelica += `  model ProofSequence\n`;
+    modelica += `    "${escapeModelicaString(thought.proof.theorem)}"\n\n`;
+
+    for (const step of thought.proof.steps) {
+      const stepId = sanitizeModelicaId(`Step${step.stepNumber}`);
+      const comment = includeLabels
+        ? ` "${escapeModelicaString(step.statement)}"`
+        : '';
+      modelica += `    parameter Boolean ${stepId} = true${comment};\n`;
+
+      if (step.rule) {
+        modelica += `    // Rule: ${escapeModelicaString(step.rule)}\n`;
+      }
+      if (step.justification) {
+        modelica += `    // Justification: ${escapeModelicaString(step.justification)}\n`;
+      }
+    }
+
+    modelica += '\n';
+
+    // Add theorem conclusion
+    const validStr = thought.proof.valid ? 'true' : 'false';
+    modelica += `    parameter Boolean theoremProven = ${validStr} "Theorem is proven";\n`;
+
+    if (includeMetrics) {
+      const completeness = thought.proof.completeness.toFixed(4);
+      modelica += `    parameter Real completeness = ${completeness} "Proof completeness (0-1)";\n`;
+    }
+
+    modelica += `  end ProofSequence;\n\n`;
+  }
+
+  // Add metrics
+  if (includeMetrics) {
+    modelica += '  // Proof Metrics\n';
+    modelica += `  constant Integer propositionCount = ${thought.propositions?.length || 0};\n`;
+    modelica += `  constant Integer inferenceCount = ${thought.logicalInferences?.length || 0};\n`;
+    modelica += `  constant Integer proofStepCount = ${thought.proof?.steps?.length || 0};\n`;
+
+    if (thought.truthTable) {
+      modelica += `  constant Boolean isTautology = ${thought.truthTable.isTautology};\n`;
+      modelica += `  constant Boolean isContradiction = ${thought.truthTable.isContradiction};\n`;
+      modelica += `  constant Boolean isContingent = ${thought.truthTable.isContingent};\n`;
+    }
+  }
+
+  modelica += 'end FormalLogicProof;\n';
+  return modelica;
+}
+
+/**
+ * Export formal logic proof tree to UML format
+ */
+function formalLogicToUML(thought: FormalLogicThought, options: VisualExportOptions): string {
+  const { includeLabels = true } = options;
+
+  const nodes: UmlNode[] = [];
+  const edges: UmlEdge[] = [];
+
+  // Add propositions as class nodes
+  if (thought.propositions && thought.propositions.length > 0) {
+    for (const proposition of thought.propositions) {
+      const propId = sanitizeId(proposition.id);
+      const attributes: string[] = [];
+
+      if (includeLabels) {
+        attributes.push(`symbol: ${proposition.symbol}`);
+        attributes.push(`type: ${proposition.type}`);
+        if (proposition.truthValue !== undefined) {
+          attributes.push(`truth: ${proposition.truthValue}`);
+        }
+      }
+
+      nodes.push({
+        id: propId,
+        label: includeLabels ? proposition.symbol : propId,
+        shape: 'class',
+        stereotype: 'premise',
+        attributes,
+      });
+    }
+  }
+
+  // Add logical inferences as class nodes with methods
+  if (thought.logicalInferences && thought.logicalInferences.length > 0) {
+    for (const inference of thought.logicalInferences) {
+      const infId = sanitizeId(inference.id);
+      const operations: string[] = [];
+
+      if (includeLabels) {
+        operations.push(`apply(): Boolean`);
+      }
+
+      nodes.push({
+        id: infId,
+        label: includeLabels ? inference.rule : infId,
+        shape: 'class',
+        stereotype: 'inference',
+        attributes: [`valid: ${inference.valid}`],
+        methods: operations,
+      });
+
+      // Create dependency edges from premises to inference
+      if (inference.premises) {
+        for (const premiseId of inference.premises) {
+          const propId = sanitizeId(premiseId);
+          edges.push({
+            source: propId,
+            target: infId,
+            type: 'dependency',
+            label: 'premise',
+          });
+        }
+      }
+
+      // Create derivation edge from inference to conclusion
+      const conclusionId = sanitizeId(inference.conclusion);
+      edges.push({
+        source: infId,
+        target: conclusionId,
+        type: 'implementation',
+        label: 'derives',
+      });
+    }
+  }
+
+  // Add proof steps as class nodes
+  if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
+    for (const step of thought.proof.steps) {
+      const stepId = `Step${step.stepNumber}`;
+      const attributes: string[] = [];
+
+      if (includeLabels) {
+        attributes.push(`number: ${step.stepNumber}`);
+        if (step.rule) {
+          attributes.push(`rule: ${step.rule}`);
+        }
+      }
+
+      nodes.push({
+        id: stepId,
+        label: includeLabels ? `Step ${step.stepNumber}` : stepId,
+        shape: 'class',
+        stereotype: 'proof-step',
+        attributes,
+      });
+
+      // Create edges between referenced steps
+      if (step.referencesSteps && step.referencesSteps.length > 0) {
+        for (const refStep of step.referencesSteps) {
+          edges.push({
+            source: `Step${refStep}`,
+            target: stepId,
+            type: 'dependency',
+            label: 'uses',
+          });
+        }
+      }
+    }
+
+    // Add theorem node
+    nodes.push({
+      id: 'Theorem',
+      label: includeLabels ? 'Theorem' : 'T',
+      shape: 'class',
+      stereotype: 'conclusion',
+      attributes: [
+        `valid: ${thought.proof.valid}`,
+        `completeness: ${(thought.proof.completeness * 100).toFixed(0)}%`,
+      ],
+    });
+
+    // Connect last step to theorem
+    const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
+    edges.push({
+      source: `Step${lastStep.stepNumber}`,
+      target: 'Theorem',
+      type: 'implementation',
+      label: 'proves',
+    });
+  }
+
+  return generateUmlDiagram(nodes, edges, {
+    title: 'Formal Logic Proof',
+    diagramType: 'class',
+  });
+}
+
+/**
+ * Export formal logic proof tree to JSON format
+ */
+function formalLogicToJSON(thought: FormalLogicThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  const graph = createJsonGraph('Formal Logic Proof', 'formal-logic', { includeMetrics });
+
+  // Add propositions as nodes
+  if (thought.propositions && thought.propositions.length > 0) {
+    for (const proposition of thought.propositions) {
+      addNode(graph, {
+        id: proposition.id,
+        label: includeLabels ? `${proposition.symbol}: ${proposition.statement}` : proposition.symbol,
+        type: 'premise',
+        metadata: {
+          symbol: proposition.symbol,
+          propositionType: proposition.type,
+          statement: proposition.statement,
+          truthValue: proposition.truthValue,
+        },
+      });
+    }
+  }
+
+  // Edge counter for unique IDs
+  let edgeId = 0;
+
+  // Add logical inferences as nodes and edges
+  if (thought.logicalInferences && thought.logicalInferences.length > 0) {
+    for (const inference of thought.logicalInferences) {
+      const infId = inference.id;
+
+      addNode(graph, {
+        id: infId,
+        label: includeLabels ? inference.rule : infId,
+        type: 'inference',
+        metadata: {
+          rule: inference.rule,
+          valid: inference.valid,
+          premises: inference.premises,
+          conclusion: inference.conclusion,
+        },
+      });
+
+      // Create edges from premises to inference
+      if (inference.premises) {
+        for (const premiseId of inference.premises) {
+          addEdge(graph, {
+            id: `edge_${edgeId++}`,
+            source: premiseId,
+            target: infId,
+            label: 'premise',
+            metadata: { type: 'premise-to-inference' },
+          });
+        }
+      }
+
+      // Create edge from inference to conclusion
+      addEdge(graph, {
+        id: `edge_${edgeId++}`,
+        source: infId,
+        target: inference.conclusion,
+        label: 'derives',
+        metadata: { type: 'inference-to-conclusion' },
+      });
+    }
+  }
+
+  // Add proof steps as nodes
+  if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
+    for (const step of thought.proof.steps) {
+      const stepId = `Step${step.stepNumber}`;
+
+      addNode(graph, {
+        id: stepId,
+        label: includeLabels ? `${step.stepNumber}. ${step.statement}` : `Step ${step.stepNumber}`,
+        type: 'proof-step',
+        metadata: {
+          stepNumber: step.stepNumber,
+          statement: step.statement,
+          justification: step.justification,
+          rule: step.rule,
+          referencesSteps: step.referencesSteps,
+        },
+      });
+
+      // Create edges between referenced steps
+      if (step.referencesSteps && step.referencesSteps.length > 0) {
+        for (const refStep of step.referencesSteps) {
+          addEdge(graph, {
+            id: `edge_${edgeId++}`,
+            source: `Step${refStep}`,
+            target: stepId,
+            label: 'uses',
+            metadata: { type: 'step-reference' },
+          });
+        }
+      }
+    }
+
+    // Add theorem node
+    addNode(graph, {
+      id: 'Theorem',
+      label: includeLabels ? thought.proof.theorem : 'Theorem',
+      type: 'conclusion',
+      metadata: {
+        theorem: thought.proof.theorem,
+        technique: thought.proof.technique,
+        valid: thought.proof.valid,
+        completeness: thought.proof.completeness,
+        conclusion: thought.proof.conclusion,
+      },
+    });
+
+    // Connect last step to theorem
+    const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
+    addEdge(graph, {
+      id: `edge_${edgeId++}`,
+      source: `Step${lastStep.stepNumber}`,
+      target: 'Theorem',
+      label: 'proves',
+      metadata: { type: 'step-to-theorem' },
+    });
+  }
+
+  // Add metrics
+  if (includeMetrics) {
+    addMetric(graph, 'propositionCount', thought.propositions?.length || 0);
+    addMetric(graph, 'inferenceCount', thought.logicalInferences?.length || 0);
+    addMetric(graph, 'proofStepCount', thought.proof?.steps?.length || 0);
+
+    if (thought.proof) {
+      addMetric(graph, 'proofValid', thought.proof.valid);
+      addMetric(graph, 'proofCompleteness', thought.proof.completeness);
+    }
+
+    if (thought.truthTable) {
+      addMetric(graph, 'isTautology', thought.truthTable.isTautology);
+      addMetric(graph, 'isContradiction', thought.truthTable.isContradiction);
+      addMetric(graph, 'isContingent', thought.truthTable.isContingent);
+    }
+  }
+
+  return serializeGraph(graph);
 }
