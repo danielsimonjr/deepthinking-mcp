@@ -89,13 +89,13 @@ export class ExportService {
    */
   exportSession(
     session: ThinkingSession,
-    format: 'json' | 'markdown' | 'latex' | 'html' | 'jupyter' | 'mermaid' | 'dot' | 'ascii' | 'svg' | 'graphml' | 'tikz'
+    format: 'json' | 'markdown' | 'latex' | 'html' | 'jupyter' | 'mermaid' | 'dot' | 'ascii' | 'svg' | 'graphml' | 'tikz' | 'modelica'
   ): string {
     const startTime = Date.now();
     this.logger.debug('Export started', { sessionId: session.id, format, thoughtCount: session.thoughts.length });
 
-    // Handle visual formats (including SVG, GraphML, TikZ)
-    if (format === 'mermaid' || format === 'dot' || format === 'ascii' || format === 'svg' || format === 'graphml' || format === 'tikz') {
+    // Handle visual formats (including SVG, GraphML, TikZ, Modelica)
+    if (format === 'mermaid' || format === 'dot' || format === 'ascii' || format === 'svg' || format === 'graphml' || format === 'tikz' || format === 'modelica') {
       const result = this.exportVisual(session, format);
       this.logger.debug('Export completed', {
         sessionId: session.id,
