@@ -31,6 +31,16 @@ import {
   type TikZNode,
   type TikZEdge,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderBadge,
+  renderList,
+} from './html-utils.js';
 
 /**
  * Export first-principles derivation chain to visual format
@@ -51,6 +61,8 @@ export function exportFirstPrinciplesDerivation(thought: FirstPrinciplesThought,
       return firstPrinciplesToGraphML(thought, options);
     case 'tikz':
       return firstPrinciplesToTikZ(thought, options);
+    case 'html':
+      return firstPrinciplesToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -609,4 +621,74 @@ function firstPrinciplesToTikZ(thought: FirstPrinciplesThought, options: VisualE
     colorScheme,
     includeLabels,
   });
+}
+
+/**
+ * Export first-principles derivation to HTML format
+ */
+function firstPrinciplesToHTML(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'First Principles Analysis',
+    htmlTheme = 'light',
+    includeMetrics = true,
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Question
+  html += renderSection('Question', `<p class="text-primary"><strong>${escapeHTML(thought.question)}</strong></p>`, '❓');
+
+  // Metrics
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard('Principles', thought.principles.length, 'primary');
+    html += renderMetricCard('Derivation Steps', thought.derivationSteps.length, 'info');
+    html += renderMetricCard('Certainty', (thought.conclusion.certainty * 100).toFixed(0) + '%', 'success');
+    html += '</div>\n';
+  }
+
+  // Principles table
+  const principleRows = thought.principles.map(p => {
+    const typeBadge = renderBadge(p.type, p.type === 'axiom' ? 'primary' : p.type === 'observation' ? 'info' : 'secondary');
+    return [
+      p.id,
+      typeBadge,
+      p.statement,
+      p.confidence !== undefined ? (p.confidence * 100).toFixed(0) + '%' : 'N/A',
+    ];
+  });
+  html += renderSection('First Principles', renderTable(
+    ['ID', 'Type', 'Statement', 'Confidence'],
+    principleRows.map(row => row.map(cell => typeof cell === 'string' && cell.startsWith('<') ? cell : escapeHTML(String(cell))))
+  ), '🏛️');
+
+  // Derivation steps
+  const stepRows = thought.derivationSteps.map(s => [
+    s.stepNumber.toString(),
+    s.principle,
+    s.inference,
+    s.logicalForm || '-',
+  ]);
+  html += renderSection('Derivation Chain', renderTable(
+    ['Step', 'Principle', 'Inference', 'Logical Form'],
+    stepRows
+  ), '🔗');
+
+  // Conclusion
+  html += renderSection('Conclusion', `
+    <div class="card">
+      <div class="card-header">${escapeHTML(thought.conclusion.statement)}</div>
+      <p><strong>Certainty:</strong> ${(thought.conclusion.certainty * 100).toFixed(0)}%</p>
+      <p><strong>Derivation Chain:</strong> Steps ${thought.conclusion.derivationChain.join(' → ')}</p>
+      ${thought.conclusion.limitations && thought.conclusion.limitations.length > 0 ? `
+        <p><strong>Limitations:</strong></p>
+        ${renderList(thought.conclusion.limitations)}
+      ` : ''}
+    </div>
+  `, '✓');
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

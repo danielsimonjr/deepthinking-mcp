@@ -24,6 +24,15 @@ import {
 import {
   createLinearTikZ,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderBadge,
+} from './html-utils.js';
 
 /**
  * Export temporal timeline to visual format
@@ -44,6 +53,8 @@ export function exportTemporalTimeline(thought: TemporalThought, options: Visual
       return timelineToGraphML(thought, options);
     case 'tikz':
       return timelineToTikZ(thought, options);
+    case 'html':
+      return timelineToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -257,4 +268,78 @@ function timelineToSVG(thought: TemporalThought, options: VisualExportOptions): 
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export temporal timeline to HTML format
+ */
+function timelineToHTML(thought: TemporalThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = thought.timeline?.name || 'Timeline Analysis',
+    htmlTheme = 'light',
+    includeMetrics = true,
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  if (!thought.events || thought.events.length === 0) {
+    html += '<p class="text-secondary">No events in timeline.</p>\n';
+    html += generateHTMLFooter(htmlStandalone);
+    return html;
+  }
+
+  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+
+  // Metrics section
+  if (includeMetrics) {
+    const instants = sortedEvents.filter(e => e.type === 'instant');
+    const intervals = sortedEvents.filter(e => e.type === 'interval');
+    const minTime = sortedEvents[0].timestamp;
+    const maxTime = sortedEvents[sortedEvents.length - 1].timestamp;
+
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard('Total Events', sortedEvents.length, 'primary');
+    html += renderMetricCard('Instants', instants.length, 'info');
+    html += renderMetricCard('Intervals', intervals.length, 'success');
+    html += renderMetricCard('Time Span', `${minTime} - ${maxTime}`);
+    html += '</div>\n';
+  }
+
+  // Events table
+  const eventRows = sortedEvents.map(event => {
+    const typeBadge = renderBadge(event.type, event.type === 'instant' ? 'info' : 'success');
+    return [
+      event.timestamp.toString(),
+      event.name,
+      typeBadge,
+      event.duration ? `${event.duration}` : '-',
+      event.description || '-',
+    ];
+  });
+  html += renderSection('Events', renderTable(
+    ['Timestamp', 'Name', 'Type', 'Duration', 'Description'],
+    eventRows.map(row => row.map(cell => typeof cell === 'string' && cell.startsWith('<') ? cell : escapeHTML(String(cell))))
+  ), '📅');
+
+  // Relations section
+  if (thought.relations && thought.relations.length > 0) {
+    const relationRows = thought.relations.map(rel => {
+      const fromEvent = thought.events?.find(e => e.id === rel.from);
+      const toEvent = thought.events?.find(e => e.id === rel.to);
+      return [
+        fromEvent?.name || rel.from,
+        rel.relationType,
+        toEvent?.name || rel.to,
+      ];
+    });
+    html += renderSection('Temporal Relations', renderTable(
+      ['From', 'Relation', 'To'],
+      relationRows
+    ), '🔗');
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

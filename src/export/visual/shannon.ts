@@ -28,6 +28,16 @@ import {
   type TikZEdge,
   generateTikZ,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderList,
+  renderProgressBar,
+  renderBadge,
+} from './html-utils.js';
 
 /**
  * Export Shannon stage flow diagram to visual format
@@ -48,6 +58,8 @@ export function exportShannonStageFlow(thought: ShannonThought, options: VisualE
       return shannonToGraphML(thought, options);
     case 'tikz':
       return shannonToTikZ(thought, options);
+    case 'html':
+      return shannonToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -308,4 +320,67 @@ function shannonToTikZ(thought: ShannonThought, options: VisualExportOptions): s
     includeLabels,
     includeMetrics,
   });
+}
+
+/**
+ * Export Shannon stage flow to HTML format
+ */
+function shannonToHTML(thought: ShannonThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Shannon Problem-Solving Analysis',
+    htmlTheme = 'light',
+    includeMetrics = true,
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Metrics
+  if (includeMetrics) {
+    const stageIndex = stages.indexOf(thought.stage);
+    const progress = ((stageIndex + 1) / stages.length) * 100;
+
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard('Current Stage', stageLabels[thought.stage], 'primary');
+    html += renderMetricCard('Uncertainty', thought.uncertainty.toFixed(2), 'info');
+    html += renderMetricCard('Progress', `${progress.toFixed(0)}%`, 'success');
+    html += '</div>\n';
+  }
+
+  // Stage flow visualization
+  html += renderSection('Stage Flow', `
+    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0;">
+      ${stages.map(stage => {
+        const isCurrent = stage === thought.stage;
+        const badge = renderBadge(stageLabels[stage], isCurrent ? 'primary' : 'secondary');
+        return badge;
+      }).join(' → ')}
+    </div>
+    ${renderProgressBar((stages.indexOf(thought.stage) + 1) / stages.length * 100, 'primary')}
+  `, '🔄');
+
+  // Current stage
+  html += renderSection('Current Stage', `
+    <p><strong>${stageLabels[thought.stage]}</strong></p>
+    <p class="text-secondary">Uncertainty: ${(thought.uncertainty * 100).toFixed(0)}%</p>
+  `, '📍');
+
+  // Dependencies
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    html += renderSection('Dependencies', renderList(thought.dependencies), '🔗');
+  }
+
+  // Assumptions
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    html += renderSection('Assumptions', renderList(thought.assumptions), '💡');
+  }
+
+  // Known limitations
+  if (thought.knownLimitations && thought.knownLimitations.length > 0) {
+    html += renderSection('Known Limitations', renderList(thought.knownLimitations), '⚠️');
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

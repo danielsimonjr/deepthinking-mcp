@@ -31,6 +31,15 @@ import {
   type TikZNode,
   type TikZEdge,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderBadge,
+} from './html-utils.js';
 
 /**
  * Export game tree to visual format
@@ -51,6 +60,8 @@ export function exportGameTree(thought: GameTheoryThought, options: VisualExport
       return gameTreeToGraphML(thought, options);
     case 'tikz':
       return gameTreeToTikZ(thought, options);
+    case 'html':
+      return gameTreeToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -506,4 +517,84 @@ function gameTreeToTikZ(thought: GameTheoryThought, options: VisualExportOptions
   // Empty case: no tree or strategies
   const nodes: TikZNode[] = [{ id: 'root', label: 'No game tree', x: 4, y: 0, type: 'root', shape: 'rectangle' }];
   return generateTikZ(nodes, [], { title: thought.game?.name || 'Game Tree', colorScheme });
+}
+
+/**
+ * Export game tree to HTML format
+ */
+function gameTreeToHTML(thought: GameTheoryThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = thought.game?.name || 'Game Theory Analysis',
+    htmlTheme = 'light',
+    includeMetrics = true,
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  if (!thought.game) {
+    html += '<p class="text-secondary">No game defined.</p>\n';
+    html += generateHTMLFooter(htmlStandalone);
+    return html;
+  }
+
+  // Game info
+  html += renderSection('Game Information', `
+    <p><strong>Type:</strong> ${escapeHTML(thought.game.type)}</p>
+    <p><strong>Players:</strong> ${thought.players ? thought.players.map((p: any) => escapeHTML(p.name)).join(', ') : thought.game.numPlayers}</p>
+    ${thought.game.description ? `<p>${escapeHTML(thought.game.description)}</p>` : ''}
+  `, '🎮');
+
+  // Metrics
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard('Players', thought.players ? thought.players.length : thought.game.numPlayers, 'primary');
+    html += renderMetricCard('Strategies', thought.strategies?.length || 0, 'info');
+    html += renderMetricCard('Equilibria', thought.nashEquilibria?.length || 0, 'success');
+    html += '</div>\n';
+  }
+
+  // Strategies table
+  if (thought.strategies && thought.strategies.length > 0) {
+    const strategyRows = thought.strategies.map(strategy => {
+      const typeBadge = renderBadge(strategy.isPure ? 'Pure' : 'Mixed', strategy.isPure ? 'success' : 'info');
+      return [
+        strategy.name,
+        typeBadge,
+        strategy.description || '-',
+      ];
+    });
+    html += renderSection('Strategies', renderTable(
+      ['Name', 'Type', 'Description'],
+      strategyRows.map(row => row.map(cell => typeof cell === 'string' && cell.startsWith('<') ? cell : escapeHTML(String(cell))))
+    ), '📋');
+  }
+
+  // Nash Equilibria
+  if (thought.nashEquilibria && thought.nashEquilibria.length > 0) {
+    const eqRows = thought.nashEquilibria.map(eq => {
+      const typeBadge = renderBadge(eq.type, eq.type === 'pure' ? 'success' : 'info');
+      return [
+        typeBadge,
+        eq.strategyProfile.join(', '),
+        `[${eq.payoffs.join(', ')}]`,
+        eq.isStrict ? 'Yes' : 'No',
+      ];
+    });
+    html += renderSection('Nash Equilibria', renderTable(
+      ['Type', 'Strategy Profile', 'Payoffs', 'Strict'],
+      eqRows.map(row => row.map(cell => typeof cell === 'string' && cell.startsWith('<') ? cell : escapeHTML(String(cell))))
+    ), '⚖️');
+  }
+
+  // Payoff Matrix (if available)
+  if (thought.payoffMatrix) {
+    html += renderSection('Payoff Matrix', `
+      <p class="text-secondary">Payoff matrix visualization available in other formats.</p>
+    `, '📊');
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

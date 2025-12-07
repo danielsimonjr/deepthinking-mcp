@@ -28,6 +28,15 @@ import {
   type TikZNode,
   type TikZEdge,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderBadge,
+  renderList,
+} from './html-utils.js';
 
 /**
  * Export sequential dependency graph to visual format
@@ -48,6 +57,8 @@ export function exportSequentialDependencyGraph(thought: SequentialThought, opti
       return sequentialToGraphML(thought, options);
     case 'tikz':
       return sequentialToTikZ(thought, options);
+    case 'html':
+      return sequentialToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -387,4 +398,62 @@ function sequentialToTikZ(thought: SequentialThought, options: VisualExportOptio
     colorScheme,
     includeLabels,
   });
+}
+
+/**
+ * Export sequential dependency graph to HTML format
+ */
+function sequentialToHTML(thought: SequentialThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Sequential Thinking Analysis',
+    htmlTheme = 'light',
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Metrics
+  html += '<div class="metrics-grid">';
+  html += renderMetricCard('Thought #', thought.thoughtNumber, 'primary');
+  html += renderMetricCard('Total', thought.totalThoughts, 'info');
+  if (thought.buildUpon && thought.buildUpon.length > 0) {
+    html += renderMetricCard('Dependencies', thought.buildUpon.length, 'secondary');
+  }
+  html += '</div>\n';
+
+  // Current thought
+  const badges = [];
+  if (thought.isRevision) badges.push(renderBadge('Revision', 'warning'));
+  if (thought.branchFrom) badges.push(renderBadge('Branched', 'info'));
+
+  html += renderSection('Current Thought', `
+    <div class="flex gap-1" style="margin-bottom: 0.5rem">${badges.join(' ')}</div>
+    <p>${escapeHTML(thought.content)}</p>
+    ${thought.nextThoughtNeeded ? '<p class="text-info">More thoughts needed...</p>' : '<p class="text-success">Reasoning complete.</p>'}
+  `, '💭');
+
+  // Dependencies
+  if (thought.buildUpon && thought.buildUpon.length > 0) {
+    html += renderSection('Builds Upon', renderList(thought.buildUpon), '🔗');
+  }
+
+  // Branch info
+  if (thought.branchFrom) {
+    html += renderSection('Branch Information', `
+      <p><strong>Branched from:</strong> ${escapeHTML(thought.branchFrom)}</p>
+      ${thought.branchId ? `<p><strong>Branch ID:</strong> ${escapeHTML(thought.branchId)}</p>` : ''}
+    `, '🌿');
+  }
+
+  // Revision info
+  if (thought.isRevision && thought.revisesThought) {
+    html += renderSection('Revision Information', `
+      <p><strong>Revises:</strong> ${escapeHTML(thought.revisesThought)}</p>
+      ${thought.revisionReason ? `<p><strong>Reason:</strong> ${escapeHTML(thought.revisionReason)}</p>` : ''}
+    `, '✏️');
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

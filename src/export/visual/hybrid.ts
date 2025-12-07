@@ -30,6 +30,15 @@ import {
   type TikZNode,
   type TikZEdge,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderBadge,
+} from './html-utils.js';
 
 /**
  * Export hybrid reasoning to visual format
@@ -50,6 +59,8 @@ export function exportHybridOrchestration(thought: HybridThought, options: Visua
       return hybridToGraphML(thought, options);
     case 'tikz':
       return hybridToTikZ(thought, options);
+    case 'html':
+      return hybridToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -630,4 +641,141 @@ function hybridToTikZ(thought: HybridThought, options: VisualExportOptions): str
     colorScheme,
     includeLabels,
   });
+}
+
+/**
+ * Export hybrid orchestration to HTML format
+ */
+function hybridToHTML(thought: HybridThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Hybrid Mode Orchestration',
+    htmlTheme = 'light',
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Metrics
+  html += '<div class="metrics-grid">';
+  html += renderMetricCard('Primary Mode', thought.primaryMode, 'primary');
+  if (thought.secondaryFeatures) {
+    html += renderMetricCard('Secondary Features', thought.secondaryFeatures.length, 'info');
+  }
+  if (thought.uncertainty !== undefined) {
+    html += renderMetricCard('Uncertainty', `${(thought.uncertainty * 100).toFixed(1)}%`, 'warning');
+  }
+  if (thought.stage) {
+    html += renderMetricCard('Stage', thought.stage.replace(/_/g, ' '), 'secondary');
+  }
+  html += '</div>\n';
+
+  // Badges
+  const badges = [];
+  badges.push(renderBadge(`Primary: ${thought.primaryMode}`, 'primary'));
+  if (thought.stage) {
+    badges.push(renderBadge(thought.stage.replace(/_/g, ' '), 'info'));
+  }
+
+  html += `<div class="flex gap-1 flex-wrap" style="margin: 1rem 0">${badges.join(' ')}</div>\n`;
+
+  // Switch reason
+  if (thought.switchReason) {
+    html += renderSection('Mode Switch Reason', `
+      <p>${escapeHTML(thought.switchReason)}</p>
+    `, '🔄');
+  }
+
+  // Secondary features
+  if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
+    const featuresContent = `
+      <ul class="list-styled">
+        ${thought.secondaryFeatures.map(f => `<li>${escapeHTML(f)}</li>`).join('')}
+      </ul>
+    `;
+    html += renderSection('Secondary Features', featuresContent, '⚙️');
+  }
+
+  // Mathematical model
+  if (thought.mathematicalModel) {
+    const modelContent = `
+      <p><strong>LaTeX:</strong> <code>${escapeHTML(thought.mathematicalModel.latex)}</code></p>
+      <p><strong>Symbolic:</strong> <code>${escapeHTML(thought.mathematicalModel.symbolic)}</code></p>
+      ${thought.mathematicalModel.ascii ? `<p><strong>ASCII:</strong> <code>${escapeHTML(thought.mathematicalModel.ascii)}</code></p>` : ''}
+    `;
+    html += renderSection('Mathematical Model', modelContent, '📐');
+  }
+
+  // Tensor properties
+  if (thought.tensorProperties) {
+    const tensorRows = [
+      ['Rank', `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`],
+      ['Components', thought.tensorProperties.components],
+      ['Transformation', thought.tensorProperties.transformation],
+    ];
+
+    let tensorContent = renderTable(['Property', 'Value'], tensorRows);
+
+    if (thought.tensorProperties.symmetries.length > 0) {
+      tensorContent += '<p style="margin-top: 1rem"><strong>Symmetries:</strong></p>';
+      tensorContent += '<ul class="list-styled">';
+      thought.tensorProperties.symmetries.forEach(sym => {
+        tensorContent += `<li>${escapeHTML(sym)}</li>`;
+      });
+      tensorContent += '</ul>';
+    }
+
+    html += renderSection('Tensor Properties', tensorContent, '🔢');
+  }
+
+  // Physical interpretation
+  if (thought.physicalInterpretation) {
+    const interpRows = [
+      ['Quantity', thought.physicalInterpretation.quantity],
+      ['Units', thought.physicalInterpretation.units],
+    ];
+
+    let interpContent = renderTable(['Property', 'Value'], interpRows);
+
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      interpContent += '<p style="margin-top: 1rem"><strong>Conservation Laws:</strong></p>';
+      interpContent += '<ul class="list-styled">';
+      thought.physicalInterpretation.conservationLaws.forEach(law => {
+        interpContent += `<li>${escapeHTML(law)}</li>`;
+      });
+      interpContent += '</ul>';
+    }
+
+    html += renderSection('Physical Interpretation', interpContent, '⚛️');
+  }
+
+  // Assumptions
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    const assumptionsList = thought.assumptions.map(a => escapeHTML(a));
+    html += renderSection('Assumptions', `
+      <ul class="list-styled">
+        ${assumptionsList.map(a => `<li>${a}</li>`).join('')}
+      </ul>
+    `, '⚠️');
+  }
+
+  // Dependencies
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    const depsList = thought.dependencies.map(d => escapeHTML(d));
+    html += renderSection('Dependencies', `
+      <ul class="list-styled">
+        ${depsList.map(d => `<li>${d}</li>`).join('')}
+      </ul>
+    `, '🔗');
+  }
+
+  // Revision reason
+  if (thought.revisionReason) {
+    html += renderSection('Revision Reason', `
+      <p>${escapeHTML(thought.revisionReason)}</p>
+    `, '✏️');
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

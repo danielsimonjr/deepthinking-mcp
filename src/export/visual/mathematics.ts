@@ -30,6 +30,15 @@ import {
   type TikZNode,
   type TikZEdge,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderBadge,
+  renderProgressBar,
+} from './html-utils.js';
 
 /**
  * Export mathematics reasoning to visual format
@@ -50,6 +59,8 @@ export function exportMathematicsDerivation(thought: MathematicsThought, options
       return mathematicsToGraphML(thought, options);
     case 'tikz':
       return mathematicsToTikZ(thought, options);
+    case 'html':
+      return mathematicsToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -612,4 +623,104 @@ function mathematicsToTikZ(thought: MathematicsThought, options: VisualExportOpt
     colorScheme,
     includeLabels,
   });
+}
+
+/**
+ * Export mathematics reasoning to HTML format
+ */
+function mathematicsToHTML(thought: MathematicsThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Mathematics Derivation Analysis',
+    htmlTheme = 'light',
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Metrics
+  html += '<div class="metrics-grid">';
+  html += renderMetricCard('Uncertainty', `${(thought.uncertainty * 100).toFixed(1)}%`, 'warning');
+  if (thought.theorems) {
+    html += renderMetricCard('Theorems', thought.theorems.length, 'primary');
+  }
+  if (thought.assumptions) {
+    html += renderMetricCard('Assumptions', thought.assumptions.length, 'info');
+  }
+  if (thought.proofStrategy) {
+    html += renderMetricCard('Completeness', `${(thought.proofStrategy.completeness * 100).toFixed(0)}%`, 'success');
+  }
+  html += '</div>\n';
+
+  // Thought type badge
+  const badges = [];
+  if (thought.thoughtType) {
+    badges.push(renderBadge(thought.thoughtType.replace(/_/g, ' '), 'primary'));
+  }
+
+  if (badges.length > 0) {
+    html += `<div class="flex gap-1" style="margin: 1rem 0">${badges.join(' ')}</div>\n`;
+  }
+
+  // Mathematical model
+  if (thought.mathematicalModel) {
+    const modelContent = `
+      <p><strong>LaTeX:</strong> <code>${escapeHTML(thought.mathematicalModel.latex)}</code></p>
+      <p><strong>Symbolic:</strong> <code>${escapeHTML(thought.mathematicalModel.symbolic)}</code></p>
+      ${thought.mathematicalModel.ascii ? `<p><strong>ASCII:</strong> <code>${escapeHTML(thought.mathematicalModel.ascii)}</code></p>` : ''}
+    `;
+    html += renderSection('Mathematical Model', modelContent, '📐');
+  }
+
+  // Proof strategy
+  if (thought.proofStrategy) {
+    const proofContent = `
+      <p><strong>Type:</strong> ${renderBadge(thought.proofStrategy.type, 'info')}</p>
+      <p><strong>Completeness:</strong></p>
+      ${renderProgressBar(thought.proofStrategy.completeness * 100, 'success')}
+      <p style="margin-top: 1rem"><strong>Steps:</strong></p>
+      <ol class="list-styled">
+        ${thought.proofStrategy.steps.map(step => `<li>${escapeHTML(step)}</li>`).join('')}
+      </ol>
+      ${thought.proofStrategy.baseCase ? `<p><strong>Base Case:</strong> ${escapeHTML(thought.proofStrategy.baseCase)}</p>` : ''}
+      ${thought.proofStrategy.inductiveStep ? `<p><strong>Inductive Step:</strong> ${escapeHTML(thought.proofStrategy.inductiveStep)}</p>` : ''}
+    `;
+    html += renderSection('Proof Strategy', proofContent, '🔍');
+  }
+
+  // Theorems
+  if (thought.theorems && thought.theorems.length > 0) {
+    const theoremsContent = thought.theorems.map((theorem, index) => `
+      <div class="card">
+        <div class="card-header">${escapeHTML(theorem.name || `Theorem ${index + 1}`)}</div>
+        <p><strong>Statement:</strong> ${escapeHTML(theorem.statement)}</p>
+        ${theorem.hypotheses.length > 0 ? `<p><strong>Hypotheses:</strong> ${escapeHTML(theorem.hypotheses.join(', '))}</p>` : ''}
+        <p><strong>Conclusion:</strong> ${escapeHTML(theorem.conclusion)}</p>
+      </div>
+    `).join('');
+    html += renderSection('Theorems', theoremsContent, '📜');
+  }
+
+  // Assumptions
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    const assumptionsList = thought.assumptions.map(a => escapeHTML(a));
+    html += renderSection('Assumptions', `
+      <ul class="list-styled">
+        ${assumptionsList.map(a => `<li>${a}</li>`).join('')}
+      </ul>
+    `, '⚠️');
+  }
+
+  // Dependencies
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    const depsList = thought.dependencies.map(d => escapeHTML(d));
+    html += renderSection('Dependencies', `
+      <ul class="list-styled">
+        ${depsList.map(d => `<li>${d}</li>`).join('')}
+      </ul>
+    `, '🔗');
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

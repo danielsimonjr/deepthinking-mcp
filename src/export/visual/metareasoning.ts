@@ -33,6 +33,16 @@ import {
   type TikZEdge,
   type TikZOptions,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderBadge,
+  renderProgressBar,
+} from './html-utils.js';
 
 /**
  * Export meta-reasoning to visual format
@@ -53,6 +63,8 @@ export function exportMetaReasoningVisualization(thought: MetaReasoningThought, 
       return metaReasoningToGraphML(thought, options);
     case 'tikz':
       return metaReasoningToTikZ(thought, options);
+    case 'html':
+      return metaReasoningToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -787,4 +799,163 @@ function metaReasoningToTikZ(thought: MetaReasoningThought, options: VisualExpor
   };
 
   return generateTikZ(nodes, edges, tikzOptions);
+}
+
+/**
+ * Export meta-reasoning to HTML format
+ */
+function metaReasoningToHTML(thought: MetaReasoningThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Meta-Reasoning Analysis',
+    htmlTheme = 'light',
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Metrics
+  html += '<div class="metrics-grid">';
+  html += renderMetricCard('Effectiveness', `${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`, 'primary');
+  html += renderMetricCard('Quality', `${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`, 'success');
+  html += renderMetricCard('Alternatives', thought.alternativeStrategies.length, 'info');
+  html += renderMetricCard('Confidence', `${(thought.recommendation.confidence * 100).toFixed(0)}%`, 'warning');
+  html += '</div>\n';
+
+  // Current strategy section
+  const strategyContent = `
+    <p><strong>Mode:</strong> ${renderBadge(thought.currentStrategy.mode, 'primary')}</p>
+    <p><strong>Approach:</strong> ${escapeHTML(thought.currentStrategy.approach)}</p>
+    <p><strong>Thoughts Spent:</strong> ${thought.currentStrategy.thoughtsSpent}</p>
+    ${thought.currentStrategy.progressIndicators.length > 0 ? `
+      <p style="margin-top: 1rem"><strong>Progress Indicators:</strong></p>
+      <ul class="list-styled">
+        ${thought.currentStrategy.progressIndicators.map(ind => `<li>${escapeHTML(ind)}</li>`).join('')}
+      </ul>
+    ` : ''}
+  `;
+  html += renderSection('Current Strategy', strategyContent, '🎯');
+
+  // Strategy evaluation section
+  const evalRows = [
+    ['Effectiveness', `${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%`],
+    ['Efficiency', `${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%`],
+    ['Confidence', `${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%`],
+    ['Progress Rate', `${thought.strategyEvaluation.progressRate.toFixed(2)} insights/thought`],
+    ['Quality Score', `${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%`],
+  ];
+
+  let evalContent = renderTable(['Metric', 'Value'], evalRows);
+
+  // Add effectiveness progress bar
+  evalContent += '<p style="margin-top: 1rem"><strong>Effectiveness:</strong></p>';
+  evalContent += renderProgressBar(thought.strategyEvaluation.effectiveness * 100, 'primary');
+
+  if (thought.strategyEvaluation.strengths.length > 0) {
+    evalContent += '<p style="margin-top: 1rem"><strong>Strengths:</strong></p>';
+    evalContent += '<ul class="list-styled">';
+    thought.strategyEvaluation.strengths.forEach(s => {
+      evalContent += `<li class="text-success">✓ ${escapeHTML(s)}</li>`;
+    });
+    evalContent += '</ul>';
+  }
+
+  if (thought.strategyEvaluation.issues.length > 0) {
+    evalContent += '<p style="margin-top: 1rem"><strong>Issues:</strong></p>';
+    evalContent += '<ul class="list-styled">';
+    thought.strategyEvaluation.issues.forEach(issue => {
+      evalContent += `<li class="text-danger">✗ ${escapeHTML(issue)}</li>`;
+    });
+    evalContent += '</ul>';
+  }
+
+  html += renderSection('Strategy Evaluation', evalContent, '📊');
+
+  // Alternative strategies
+  if (thought.alternativeStrategies.length > 0) {
+    const altsContent = thought.alternativeStrategies.map(alt => `
+      <div class="card">
+        <div class="card-header">
+          ${renderBadge(alt.mode, 'info')}
+          ${renderBadge(`Score: ${(alt.recommendationScore * 100).toFixed(0)}%`, 'secondary')}
+        </div>
+        <p><strong>Reasoning:</strong> ${escapeHTML(alt.reasoning)}</p>
+        <p><strong>Expected Benefit:</strong> ${escapeHTML(alt.expectedBenefit)}</p>
+        <p><strong>Switching Cost:</strong></p>
+        ${renderProgressBar(alt.switchingCost * 100, 'warning')}
+        <p style="margin-top: 0.5rem"><strong>Recommendation Score:</strong></p>
+        ${renderProgressBar(alt.recommendationScore * 100, 'success')}
+      </div>
+    `).join('');
+    html += renderSection('Alternative Strategies', altsContent, '🔀');
+  }
+
+  // Recommendation section
+  const recContent = `
+    <p><strong>Action:</strong> ${renderBadge(thought.recommendation.action, 'warning')}</p>
+    ${thought.recommendation.targetMode ? `<p><strong>Target Mode:</strong> ${renderBadge(thought.recommendation.targetMode, 'primary')}</p>` : ''}
+    <p><strong>Justification:</strong> ${escapeHTML(thought.recommendation.justification)}</p>
+    <p><strong>Expected Improvement:</strong> ${escapeHTML(thought.recommendation.expectedImprovement)}</p>
+    <p style="margin-top: 1rem"><strong>Confidence:</strong></p>
+    ${renderProgressBar(thought.recommendation.confidence * 100, 'success')}
+  `;
+  html += renderSection('Recommendation', recContent, '💡');
+
+  // Resource allocation section
+  const resourceRows = [
+    ['Time Spent', `${thought.resourceAllocation.timeSpent}ms`],
+    ['Thoughts Remaining', thought.resourceAllocation.thoughtsRemaining],
+    ['Complexity Level', thought.resourceAllocation.complexityLevel],
+    ['Urgency', thought.resourceAllocation.urgency],
+  ];
+
+  let resourceContent = renderTable(['Resource', 'Value'], resourceRows);
+  resourceContent += `<p style="margin-top: 1rem"><strong>Recommendation:</strong> ${escapeHTML(thought.resourceAllocation.recommendation)}</p>`;
+
+  html += renderSection('Resource Allocation', resourceContent, '⚡');
+
+  // Quality metrics section
+  const qualityRows = [
+    ['Logical Consistency', `${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%`],
+    ['Evidence Quality', `${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%`],
+    ['Completeness', `${(thought.qualityMetrics.completeness * 100).toFixed(1)}%`],
+    ['Originality', `${(thought.qualityMetrics.originality * 100).toFixed(1)}%`],
+    ['Clarity', `${(thought.qualityMetrics.clarity * 100).toFixed(1)}%`],
+    ['Overall Quality', `${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%`],
+  ];
+
+  let qualityContent = renderTable(['Metric', 'Value'], qualityRows);
+  qualityContent += '<p style="margin-top: 1rem"><strong>Overall Quality:</strong></p>';
+  qualityContent += renderProgressBar(thought.qualityMetrics.overallQuality * 100, 'success');
+
+  html += renderSection('Quality Metrics', qualityContent, '⭐');
+
+  // Session context section
+  const sessionRows = [
+    ['Session ID', thought.sessionContext.sessionId],
+    ['Total Thoughts', thought.sessionContext.totalThoughts],
+    ['Mode Switches', thought.sessionContext.modeSwitches],
+    ['Problem Type', thought.sessionContext.problemType],
+  ];
+
+  if (thought.sessionContext.historicalEffectiveness !== undefined) {
+    sessionRows.push(['Historical Effectiveness', `${(thought.sessionContext.historicalEffectiveness * 100).toFixed(1)}%`]);
+  }
+
+  let sessionContent = renderTable(['Property', 'Value'], sessionRows);
+
+  if (thought.sessionContext.modesUsed.length > 0) {
+    sessionContent += '<p style="margin-top: 1rem"><strong>Modes Used:</strong></p>';
+    sessionContent += '<div class="flex gap-1 flex-wrap">';
+    thought.sessionContext.modesUsed.forEach(mode => {
+      sessionContent += renderBadge(mode, 'info');
+      sessionContent += ' ';
+    });
+    sessionContent += '</div>';
+  }
+
+  html += renderSection('Session Context', sessionContent, '📋');
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

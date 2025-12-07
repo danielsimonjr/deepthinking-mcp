@@ -19,6 +19,9 @@ export * from './graphml-utils.js';
 // Re-export TikZ utilities for all exporters
 export * from './tikz-utils.js';
 
+// Re-export HTML utilities for all exporters
+export * from './html-utils.js';
+
 // Re-export mode-specific functions
 export { exportCausalGraph } from './causal.js';
 export { exportTemporalTimeline } from './temporal.js';

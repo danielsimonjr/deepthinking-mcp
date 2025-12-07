@@ -94,8 +94,8 @@ export class ExportService {
     const startTime = Date.now();
     this.logger.debug('Export started', { sessionId: session.id, format, thoughtCount: session.thoughts.length });
 
-    // Handle visual formats (including SVG, GraphML, TikZ, Modelica)
-    if (format === 'mermaid' || format === 'dot' || format === 'ascii' || format === 'svg' || format === 'graphml' || format === 'tikz' || format === 'modelica') {
+    // Handle visual formats (including SVG, GraphML, TikZ, Modelica, HTML)
+    if (format === 'mermaid' || format === 'dot' || format === 'ascii' || format === 'svg' || format === 'graphml' || format === 'tikz' || format === 'modelica' || format === 'html') {
       const result = this.exportVisual(session, format);
       this.logger.debug('Export completed', {
         sessionId: session.id,
@@ -117,9 +117,6 @@ export class ExportService {
         break;
       case 'latex':
         result = this.exportToLatex(session);
-        break;
-      case 'html':
-        result = this.exportToHTML(session);
         break;
       case 'jupyter':
         result = this.exportToJupyter(session);
@@ -486,9 +483,13 @@ export class ExportService {
    * Generates a standalone HTML page with XSS protection via escaping.
    * Includes basic styling for readability.
    *
+   * Note: Currently unused as HTML export is handled by visual exporters.
+   * Kept for potential future use as a session-level HTML export.
+   *
    * @param session - The session to export
    * @returns HTML document as string
    */
+  // @ts-expect-error - Unused method kept for future use
   private exportToHTML(session: ThinkingSession): string {
     const status = session.isComplete ? 'Complete' : 'In Progress';
     const safeTitle = escapeHtml(session.title);

@@ -14,6 +14,15 @@
 import type { ProofDecomposition, AtomicStatement } from '../../types/modes/mathematics.js';
 import type { VisualExportOptions } from './types.js';
 import { sanitizeId } from './utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderProgressBar,
+} from './html-utils.js';
 
 /**
  * Export proof decomposition to visual format
@@ -41,6 +50,8 @@ export function exportProofDecomposition(
       return proofDecompositionToASCII(decomposition);
     case 'svg':
       return proofDecompositionToSVG(decomposition, colorScheme, includeLabels, includeMetrics, svgWidth, svgHeight, nodeSpacing);
+    case 'html':
+      return proofDecompositionToHTML(decomposition, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -899,4 +910,141 @@ function proofDecompositionToSVG(
   svg += '</svg>';
 
   return svg;
+}
+
+// ============================================================================
+// HTML Export Functions
+// ============================================================================
+
+/**
+ * Convert proof decomposition to HTML format
+ */
+function proofDecompositionToHTML(
+  decomposition: ProofDecomposition,
+  options: VisualExportOptions
+): string {
+  const { colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+  const theme = colorScheme === 'monochrome' ? 'light' : 'light';
+
+  let html = generateHTMLHeader('Proof Decomposition', { standalone: true, theme });
+
+  // Title section
+  if (decomposition.theorem) {
+    html += renderSection(
+      'Theorem',
+      `<p class="theorem-statement">${escapeHTML(decomposition.theorem)}</p>`,
+      'info'
+    );
+  }
+
+  // Metrics section
+  if (includeMetrics) {
+    const metricsHTML = `
+      <div class="metrics-grid">
+        ${renderMetricCard('Completeness', `${(decomposition.completeness * 100).toFixed(0)}%`, renderProgressBar(decomposition.completeness * 100))}
+        ${renderMetricCard('Rigor Level', decomposition.rigorLevel)}
+        ${renderMetricCard('Atom Count', decomposition.atomCount.toString())}
+        ${renderMetricCard('Max Depth', decomposition.maxDependencyDepth.toString())}
+      </div>
+    `;
+    html += renderSection('Metrics', metricsHTML);
+  }
+
+  // Axioms section
+  const axioms = decomposition.atoms.filter((a) => a.type === 'axiom');
+  if (axioms.length > 0) {
+    const axiomsRows = axioms.map((atom) => [
+      atom.id,
+      includeLabels ? atom.statement : atom.id,
+      atom.type,
+    ]);
+    html += renderSection('Axioms', renderTable(['ID', 'Statement', 'Type'], axiomsRows), 'success');
+  }
+
+  // Hypotheses section
+  const hypotheses = decomposition.atoms.filter((a) => a.type === 'hypothesis');
+  if (hypotheses.length > 0) {
+    const hypothesesRows = hypotheses.map((atom) => [
+      atom.id,
+      includeLabels ? atom.statement : atom.id,
+      atom.type,
+    ]);
+    html += renderSection('Hypotheses', renderTable(['ID', 'Statement', 'Type'], hypothesesRows), 'info');
+  }
+
+  // Derivation chain section
+  const derived = decomposition.atoms.filter((a) => a.type === 'derived' || a.type === 'lemma');
+  if (derived.length > 0) {
+    const derivedRows = derived.map((atom) => {
+      const deps = atom.derivedFrom && atom.derivedFrom.length > 0
+        ? atom.derivedFrom.join(', ')
+        : 'None';
+      const rule = atom.usedInferenceRule ? atom.usedInferenceRule : 'N/A';
+      return [
+        atom.id,
+        includeLabels ? atom.statement : atom.id,
+        atom.type,
+        deps,
+        rule,
+      ];
+    });
+    html += renderSection(
+      'Derivation Chain',
+      renderTable(['ID', 'Statement', 'Type', 'Derived From', 'Inference Rule'], derivedRows)
+    );
+  }
+
+  // Conclusions section
+  const conclusions = decomposition.atoms.filter((a) => a.type === 'conclusion');
+  if (conclusions.length > 0) {
+    const conclusionsRows = conclusions.map((atom) => {
+      const deps = atom.derivedFrom && atom.derivedFrom.length > 0
+        ? atom.derivedFrom.join(', ')
+        : 'None';
+      return [
+        atom.id,
+        includeLabels ? atom.statement : atom.id,
+        atom.type,
+        deps,
+      ];
+    });
+    html += renderSection('Conclusions', renderTable(['ID', 'Statement', 'Type', 'Derived From'], conclusionsRows), 'primary');
+  }
+
+  // Dependencies section
+  if (decomposition.dependencies && decomposition.dependencies.edges && decomposition.dependencies.edges.length > 0) {
+    const depsRows = decomposition.dependencies.edges.map((edge) => [
+      edge.from,
+      edge.to,
+      edge.inferenceRule ? edge.inferenceRule : 'Direct',
+    ]);
+    html += renderSection('Dependencies', renderTable(['From', 'To', 'Inference Rule'], depsRows));
+  }
+
+  // Gaps section
+  if (decomposition.gaps && decomposition.gaps.length > 0) {
+    const gapsRows = decomposition.gaps.map((gap) => [
+      gap.id,
+      gap.type,
+      gap.severity,
+      gap.description,
+      `${gap.location.from} → ${gap.location.to}`,
+      gap.suggestedFix ? gap.suggestedFix : 'N/A',
+    ]);
+    html += renderSection('Gaps (Missing Steps)', renderTable(['ID', 'Type', 'Severity', 'Description', 'Location', 'Suggested Fix'], gapsRows), 'danger');
+  }
+
+  // Implicit assumptions section
+  if (decomposition.implicitAssumptions && decomposition.implicitAssumptions.length > 0) {
+    const assumptionsRows = decomposition.implicitAssumptions.map((assumption) => [
+      assumption.type,
+      assumption.statement,
+      assumption.shouldBeExplicit ? 'Yes' : 'No',
+      assumption.suggestedFormulation,
+    ]);
+    html += renderSection('Implicit Assumptions', renderTable(['Type', 'Statement', 'Should Be Explicit', 'Suggested Formulation'], assumptionsRows), 'warning');
+  }
+
+  html += generateHTMLFooter(true);
+  return html;
 }

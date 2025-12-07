@@ -3,10 +3,10 @@
  * Sprint 8 Task 8.1: Modular visual export system
  * Phase 8: Added native SVG format support
  * Phase 9: Added GraphML and TikZ format support
- * Phase 10: Added Modelica format support for engineering analysis
+ * Phase 10: Added Modelica and HTML format support
  */
 
-export type VisualFormat = 'mermaid' | 'dot' | 'ascii' | 'svg' | 'graphml' | 'tikz' | 'modelica';
+export type VisualFormat = 'mermaid' | 'dot' | 'ascii' | 'svg' | 'graphml' | 'tikz' | 'modelica' | 'html';
 
 export interface VisualExportOptions {
   format: VisualFormat;
@@ -25,4 +25,8 @@ export interface VisualExportOptions {
   // Modelica-specific options
   modelicaPackageName?: string;
   modelicaIncludeAnnotations?: boolean;
+  // HTML-specific options
+  htmlStandalone?: boolean;
+  htmlTitle?: string;
+  htmlTheme?: 'light' | 'dark' | 'auto';
 }
