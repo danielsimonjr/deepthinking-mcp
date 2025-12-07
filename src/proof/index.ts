@@ -5,8 +5,13 @@
  * for the Mathematics reasoning mode.
  */
 
-// Core graph builder
+// Core infrastructure
 export { DependencyGraphBuilder } from './dependency-graph.js';
+
+// Sprint 2: Decomposition engine and gap analysis
+export { ProofDecomposer, type ProofStep } from './decomposer.js';
+export { GapAnalyzer, type GapAnalyzerConfig } from './gap-analyzer.js';
+export { AssumptionTracker } from './assumption-tracker.js';
 
 // Re-export types from mathematics mode
 export type {
