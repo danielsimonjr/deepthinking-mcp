@@ -3044,6 +3044,27 @@ var init_utils = __esm({
   }
 });
 
+// src/export/visual/mermaid-utils.ts
+var init_mermaid_utils = __esm({
+  "src/export/visual/mermaid-utils.ts"() {
+    init_esm_shims();
+  }
+});
+
+// src/export/visual/dot-utils.ts
+var init_dot_utils = __esm({
+  "src/export/visual/dot-utils.ts"() {
+    init_esm_shims();
+  }
+});
+
+// src/export/visual/ascii-utils.ts
+var init_ascii_utils = __esm({
+  "src/export/visual/ascii-utils.ts"() {
+    init_esm_shims();
+  }
+});
+
 // src/export/visual/svg-utils.ts
 function getNodeColor(type, colorScheme = "default") {
   const palette = COLOR_PALETTES[colorScheme] || COLOR_PALETTES.default;
@@ -21098,6 +21119,9 @@ var VisualExporter;
 var init_visual = __esm({
   "src/export/visual/index.ts"() {
     init_esm_shims();
+    init_mermaid_utils();
+    init_dot_utils();
+    init_ascii_utils();
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
