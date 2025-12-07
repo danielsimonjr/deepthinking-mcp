@@ -3030,6 +3030,279 @@ var init_utils = __esm({
   }
 });
 
+// src/export/visual/svg-utils.ts
+function getNodeColor(type, colorScheme = "default") {
+  const palette = COLOR_PALETTES[colorScheme] || COLOR_PALETTES.default;
+  return palette[type] || palette.neutral;
+}
+function escapeSVGText(text) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function truncateText(text, maxChars = 30) {
+  if (text.length <= maxChars) return text;
+  return text.substring(0, maxChars - 3) + "...";
+}
+function generateSVGHeader(width, height, title) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e53935"/>
+    </marker>
+    <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#388e3c"/>
+    </marker>
+    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1976d2"/>
+    </marker>
+  </defs>
+
+  <style>
+    .title { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; }
+    .subtitle { font-family: Arial, sans-serif; font-size: 12px; fill: #666; font-style: italic; }
+    .node-label { font-family: Arial, sans-serif; font-size: 12px; }
+    .edge-label { font-family: Arial, sans-serif; font-size: 10px; fill: #666; }
+    .metrics { font-family: Arial, sans-serif; font-size: 11px; fill: #444; }
+    .legend-text { font-family: Arial, sans-serif; font-size: 10px; }
+  </style>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#fafafa"/>
+${title ? `
+  <!-- Title -->
+  <text x="${width / 2}" y="25" text-anchor="middle" class="title">${escapeSVGText(truncateText(title, 60))}</text>
+` : ""}`;
+}
+function generateSVGFooter() {
+  return "</svg>";
+}
+function renderRectNode(pos, colors, rx = 8) {
+  const escapedLabel = escapeSVGText(truncateText(pos.label, 25));
+  return `
+    <g class="node" data-id="${pos.id}">
+      <rect x="${pos.x}" y="${pos.y}" width="${pos.width}" height="${pos.height}"
+            rx="${rx}" ry="${rx}" fill="${colors.fill}" stroke="${colors.stroke}" stroke-width="2"/>
+      <text x="${pos.x + pos.width / 2}" y="${pos.y + pos.height / 2 + 5}"
+            text-anchor="middle" class="node-label">${escapedLabel}</text>
+    </g>`;
+}
+function renderStadiumNode(pos, colors) {
+  const escapedLabel = escapeSVGText(truncateText(pos.label, 25));
+  return `
+    <g class="node" data-id="${pos.id}">
+      <rect x="${pos.x}" y="${pos.y}" width="${pos.width}" height="${pos.height}"
+            rx="20" ry="20" fill="${colors.fill}" stroke="${colors.stroke}" stroke-width="2"/>
+      <text x="${pos.x + pos.width / 2}" y="${pos.y + pos.height / 2 + 5}"
+            text-anchor="middle" class="node-label">${escapedLabel}</text>
+    </g>`;
+}
+function renderDiamondNode(pos, colors) {
+  const cx = pos.x + pos.width / 2;
+  const cy = pos.y + pos.height / 2;
+  const escapedLabel = escapeSVGText(truncateText(pos.label, 20));
+  return `
+    <g class="node" data-id="${pos.id}">
+      <polygon points="${cx},${pos.y} ${pos.x + pos.width},${cy} ${cx},${pos.y + pos.height} ${pos.x},${cy}"
+               fill="${colors.fill}" stroke="${colors.stroke}" stroke-width="2"/>
+      <text x="${cx}" y="${cy + 5}"
+            text-anchor="middle" class="node-label">${escapedLabel}</text>
+    </g>`;
+}
+function renderEllipseNode(pos, colors) {
+  const cx = pos.x + pos.width / 2;
+  const cy = pos.y + pos.height / 2;
+  const escapedLabel = escapeSVGText(truncateText(pos.label, 20));
+  return `
+    <g class="node" data-id="${pos.id}">
+      <ellipse cx="${cx}" cy="${cy}" rx="${pos.width / 2}" ry="${pos.height / 2}"
+               fill="${colors.fill}" stroke="${colors.stroke}" stroke-width="2"/>
+      <text x="${cx}" y="${cy + 5}"
+            text-anchor="middle" class="node-label">${escapedLabel}</text>
+    </g>`;
+}
+function renderEdge(fromPos, toPos, options = {}) {
+  const { label, style = "solid", color = "#333333", markerEnd = "arrowhead" } = options;
+  const fromX = fromPos.x + fromPos.width / 2;
+  const fromY = fromPos.y + fromPos.height;
+  const toX = toPos.x + toPos.width / 2;
+  const toY = toPos.y;
+  const midY = (fromY + toY) / 2;
+  const path2 = `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY - 8}`;
+  const dashStyle = style === "dashed" ? 'stroke-dasharray="8,4"' : style === "dotted" ? 'stroke-dasharray="2,2"' : "";
+  const labelElement = label ? `<text x="${(fromX + toX) / 2}" y="${midY - 5}" text-anchor="middle" class="edge-label">${escapeSVGText(label)}</text>` : "";
+  return `
+    <g class="edge">
+      <path d="${path2}" fill="none" stroke="${color}" stroke-width="2" ${dashStyle} marker-end="url(#${markerEnd})"/>
+      ${labelElement}
+    </g>`;
+}
+function renderHorizontalEdge(fromPos, toPos, options = {}) {
+  const { label, style = "solid", color = "#333333" } = options;
+  const fromX = fromPos.x + fromPos.width;
+  const fromY = fromPos.y + fromPos.height / 2;
+  const toX = toPos.x;
+  const toY = toPos.y + toPos.height / 2;
+  const dashStyle = style === "dashed" ? 'stroke-dasharray="8,4"' : style === "dotted" ? 'stroke-dasharray="2,2"' : "";
+  const labelElement = label ? `<text x="${(fromX + toX) / 2}" y="${(fromY + toY) / 2 - 8}" text-anchor="middle" class="edge-label">${escapeSVGText(label)}</text>` : "";
+  return `
+    <g class="edge">
+      <line x1="${fromX}" y1="${fromY}" x2="${toX - 8}" y2="${toY}"
+            stroke="${color}" stroke-width="2" ${dashStyle} marker-end="url(#arrowhead)"/>
+      ${labelElement}
+    </g>`;
+}
+function renderMetricsPanel(x, y, metrics) {
+  const panelHeight = 30 + metrics.length * 16;
+  let svg = `
+  <g class="metrics-panel">
+    <rect x="${x}" y="${y}" width="160" height="${panelHeight}" rx="8" fill="#f5f5f5" stroke="#ddd" stroke-width="1"/>
+    <text x="${x + 10}" y="${y + 20}" class="metrics" font-weight="bold">Metrics</text>`;
+  metrics.forEach((metric, i) => {
+    svg += `
+    <text x="${x + 10}" y="${y + 38 + i * 16}" class="metrics">${escapeSVGText(metric.label)}: ${escapeSVGText(String(metric.value))}</text>`;
+  });
+  svg += "\n  </g>";
+  return svg;
+}
+function renderLegend(x, y, items) {
+  let svg = `
+  <g class="legend" transform="translate(${x}, ${y})">
+    <text x="0" y="0" font-weight="bold" class="legend-text">Legend</text>`;
+  items.forEach((item, i) => {
+    const itemY = 12 + i * 18;
+    let shapeEl;
+    switch (item.shape) {
+      case "diamond":
+        shapeEl = `<polygon points="10,${itemY} 20,${itemY + 6} 10,${itemY + 12} 0,${itemY + 6}" fill="${item.color.fill}" stroke="${item.color.stroke}"/>`;
+        break;
+      case "ellipse":
+        shapeEl = `<ellipse cx="10" cy="${itemY + 6}" rx="10" ry="6" fill="${item.color.fill}" stroke="${item.color.stroke}"/>`;
+        break;
+      case "stadium":
+        shapeEl = `<rect x="0" y="${itemY}" width="20" height="12" rx="6" ry="6" fill="${item.color.fill}" stroke="${item.color.stroke}"/>`;
+        break;
+      default:
+        shapeEl = `<rect x="0" y="${itemY}" width="20" height="12" rx="4" fill="${item.color.fill}" stroke="${item.color.stroke}"/>`;
+    }
+    svg += `
+    ${shapeEl}
+    <text x="25" y="${itemY + 10}" class="legend-text">${escapeSVGText(item.label)}</text>`;
+  });
+  svg += "\n  </g>";
+  return svg;
+}
+function layoutNodesInLayers(layers, options = {}) {
+  const opts = { ...DEFAULT_SVG_OPTIONS, ...options };
+  const positions = /* @__PURE__ */ new Map();
+  let currentY = opts.padding + (opts.title ? 40 : 0);
+  for (const layer of layers) {
+    if (layer.length === 0) continue;
+    const layerWidth = layer.length * (opts.nodeWidth + opts.nodeSpacing) - opts.nodeSpacing;
+    let startX = (opts.width - layerWidth) / 2;
+    for (const node of layer) {
+      positions.set(node.id, {
+        id: node.id,
+        x: startX,
+        y: currentY,
+        width: opts.nodeWidth,
+        height: opts.nodeHeight,
+        label: node.label,
+        type: node.type
+      });
+      startX += opts.nodeWidth + opts.nodeSpacing;
+    }
+    currentY += opts.nodeHeight + opts.layerSpacing;
+  }
+  return positions;
+}
+function layoutNodesHorizontally(nodes, options = {}) {
+  const opts = { ...DEFAULT_SVG_OPTIONS, ...options };
+  const positions = /* @__PURE__ */ new Map();
+  const totalWidth = nodes.length * (opts.nodeWidth + opts.nodeSpacing) - opts.nodeSpacing;
+  let startX = Math.max(opts.padding, (opts.width - totalWidth) / 2);
+  const y = opts.height / 2 - opts.nodeHeight / 2;
+  for (const node of nodes) {
+    positions.set(node.id, {
+      id: node.id,
+      x: startX,
+      y,
+      width: opts.nodeWidth,
+      height: opts.nodeHeight,
+      label: node.label,
+      type: node.type
+    });
+    startX += opts.nodeWidth + opts.nodeSpacing;
+  }
+  return positions;
+}
+function calculateSVGHeight(positions, padding = 40, extraSpace = 120) {
+  let maxY = 0;
+  for (const pos of positions.values()) {
+    maxY = Math.max(maxY, pos.y + pos.height);
+  }
+  return maxY + padding + extraSpace;
+}
+var DEFAULT_SVG_OPTIONS, COLOR_PALETTES;
+var init_svg_utils = __esm({
+  "src/export/visual/svg-utils.ts"() {
+    init_esm_shims();
+    DEFAULT_SVG_OPTIONS = {
+      width: 800,
+      height: 600,
+      nodeWidth: 150,
+      nodeHeight: 40,
+      nodeSpacing: 20,
+      layerSpacing: 100,
+      padding: 40,
+      colorScheme: "default",
+      includeLabels: true,
+      includeMetrics: true,
+      title: ""
+    };
+    COLOR_PALETTES = {
+      default: {
+        primary: { fill: "#64b5f6", stroke: "#1976d2" },
+        secondary: { fill: "#81c784", stroke: "#388e3c" },
+        tertiary: { fill: "#ffb74d", stroke: "#f57c00" },
+        quaternary: { fill: "#ba68c8", stroke: "#7b1fa2" },
+        neutral: { fill: "#bdbdbd", stroke: "#616161" },
+        success: { fill: "#81c784", stroke: "#388e3c" },
+        warning: { fill: "#ffb74d", stroke: "#f57c00" },
+        error: { fill: "#e57373", stroke: "#d32f2f" },
+        info: { fill: "#64b5f6", stroke: "#1976d2" },
+        highlight: { fill: "#fff176", stroke: "#fbc02d" }
+      },
+      pastel: {
+        primary: { fill: "#bbdefb", stroke: "#2196f3" },
+        secondary: { fill: "#c8e6c9", stroke: "#4caf50" },
+        tertiary: { fill: "#ffe0b2", stroke: "#ff9800" },
+        quaternary: { fill: "#e1bee7", stroke: "#9c27b0" },
+        neutral: { fill: "#e0e0e0", stroke: "#757575" },
+        success: { fill: "#c8e6c9", stroke: "#4caf50" },
+        warning: { fill: "#fff9c4", stroke: "#ffc107" },
+        error: { fill: "#ffcdd2", stroke: "#e53935" },
+        info: { fill: "#bbdefb", stroke: "#2196f3" },
+        highlight: { fill: "#fff9c4", stroke: "#fbc02d" }
+      },
+      monochrome: {
+        primary: { fill: "#ffffff", stroke: "#333333" },
+        secondary: { fill: "#f5f5f5", stroke: "#333333" },
+        tertiary: { fill: "#eeeeee", stroke: "#333333" },
+        quaternary: { fill: "#e0e0e0", stroke: "#333333" },
+        neutral: { fill: "#fafafa", stroke: "#333333" },
+        success: { fill: "#ffffff", stroke: "#333333" },
+        warning: { fill: "#f5f5f5", stroke: "#333333" },
+        error: { fill: "#eeeeee", stroke: "#333333" },
+        info: { fill: "#ffffff", stroke: "#333333" },
+        highlight: { fill: "#e0e0e0", stroke: "#333333" }
+      }
+    };
+  }
+});
+
 // src/export/visual/causal.ts
 function exportCausalGraph(thought, options) {
   const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
@@ -3040,6 +3313,8 @@ function exportCausalGraph(thought, options) {
       return causalGraphToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return causalGraphToASCII(thought);
+    case "svg":
+      return causalGraphToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -3166,10 +3441,80 @@ function causalGraphToASCII(thought) {
   }
   return ascii;
 }
+function causalGraphToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width
+  } = options;
+  if (!thought.causalGraph || !thought.causalGraph.nodes) {
+    return generateSVGHeader(svgWidth, 200, "Causal Graph") + '\n  <text x="400" y="100" text-anchor="middle" class="subtitle">No causal graph data</text>\n' + generateSVGFooter();
+  }
+  const causes = thought.causalGraph.nodes.filter((n) => n.type === "cause");
+  const mediators = thought.causalGraph.nodes.filter((n) => n.type === "mediator");
+  const confounders = thought.causalGraph.nodes.filter((n) => n.type === "confounder");
+  const effects = thought.causalGraph.nodes.filter((n) => n.type === "effect");
+  const layers = [
+    causes.map((n) => ({ id: n.id, label: includeLabels ? n.name : n.id, type: "cause" })),
+    [...mediators, ...confounders].map((n) => ({ id: n.id, label: includeLabels ? n.name : n.id, type: n.type })),
+    effects.map((n) => ({ id: n.id, label: includeLabels ? n.name : n.id, type: "effect" }))
+  ].filter((layer) => layer.length > 0);
+  const positions = layoutNodesInLayers(layers, { width: svgWidth, title: "Causal Graph" });
+  const actualHeight = calculateSVGHeight(positions);
+  let svg = generateSVGHeader(svgWidth, actualHeight, "Causal Graph");
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  for (const edge of thought.causalGraph.edges) {
+    const fromPos = positions.get(edge.from);
+    const toPos = positions.get(edge.to);
+    if (fromPos && toPos) {
+      const label = includeMetrics && edge.strength !== void 0 ? edge.strength.toFixed(2) : void 0;
+      svg += renderEdge(fromPos, toPos, { label });
+    }
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  for (const [, pos] of positions) {
+    const colors = getNodeColor(pos.type === "cause" ? "primary" : pos.type === "effect" ? "tertiary" : "neutral", colorScheme);
+    switch (pos.type) {
+      case "cause":
+        svg += renderStadiumNode(pos, colors);
+        break;
+      case "effect":
+        svg += renderEllipseNode(pos, colors);
+        break;
+      case "confounder":
+        svg += renderDiamondNode(pos, colors);
+        break;
+      default:
+        svg += renderRectNode(pos, colors);
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Nodes", value: thought.causalGraph.nodes.length },
+      { label: "Edges", value: thought.causalGraph.edges.length },
+      { label: "Causes", value: causes.length },
+      { label: "Effects", value: effects.length }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
+  }
+  const legendItems = [
+    { label: "Cause", color: getNodeColor("primary", colorScheme) },
+    { label: "Mediator", color: getNodeColor("neutral", colorScheme) },
+    { label: "Confounder", color: getNodeColor("neutral", colorScheme), shape: "diamond" },
+    { label: "Effect", color: getNodeColor("tertiary", colorScheme), shape: "ellipse" }
+  ];
+  svg += renderLegend(20, actualHeight - 100, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_causal = __esm({
   "src/export/visual/causal.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -3183,6 +3528,8 @@ function exportTemporalTimeline(thought, options) {
       return timelineToDOT(thought, includeLabels);
     case "ascii":
       return timelineToASCII(thought);
+    case "svg":
+      return timelineToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -3263,10 +3610,72 @@ function timelineToASCII(thought) {
   }
   return ascii;
 }
+function timelineToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = 300
+  } = options;
+  const title = thought.timeline?.name || "Timeline";
+  if (!thought.events || thought.events.length === 0) {
+    return generateSVGHeader(svgWidth, 200, title) + '\n  <text x="400" y="100" text-anchor="middle" class="subtitle">No events</text>\n' + generateSVGFooter();
+  }
+  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const nodes = sortedEvents.map((event) => ({
+    id: event.id,
+    label: includeLabels ? event.name : event.id,
+    type: event.type
+  }));
+  const positions = layoutNodesHorizontally(nodes, {
+    width: svgWidth,
+    height: svgHeight,
+    nodeWidth: 120,
+    nodeHeight: 40,
+    nodeSpacing: 30
+  });
+  let svg = generateSVGHeader(svgWidth, svgHeight, title);
+  const axisY = svgHeight / 2 + 40;
+  svg += `
+  <!-- Timeline Axis -->
+  <line x1="40" y1="${axisY}" x2="${svgWidth - 40}" y2="${axisY}" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>`;
+  svg += '\n\n  <!-- Edges -->\n  <g class="edges">';
+  for (let i = 0; i < sortedEvents.length - 1; i++) {
+    const fromPos = positions.get(sortedEvents[i].id);
+    const toPos = positions.get(sortedEvents[i + 1].id);
+    if (fromPos && toPos) {
+      svg += renderHorizontalEdge(fromPos, toPos, {});
+    }
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  for (const event of sortedEvents) {
+    const pos = positions.get(event.id);
+    if (pos) {
+      const colors = event.type === "instant" ? getNodeColor("primary", colorScheme) : getNodeColor("secondary", colorScheme);
+      if (event.type === "instant") {
+        svg += renderEllipseNode(pos, colors);
+      } else {
+        svg += renderRectNode(pos, colors);
+      }
+      svg += `
+    <text x="${pos.x}" y="${pos.y + pos.height + 15}" text-anchor="middle" class="edge-label">t=${event.timestamp}</text>`;
+    }
+  }
+  svg += "\n  </g>";
+  const legendItems = [
+    { label: "Instant", color: getNodeColor("primary", colorScheme), shape: "ellipse" },
+    { label: "Interval", color: getNodeColor("secondary", colorScheme) }
+  ];
+  svg += renderLegend(20, svgHeight - 60, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_temporal = __esm({
   "src/export/visual/temporal.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -3280,6 +3689,8 @@ function exportGameTree(thought, options) {
       return gameTreeToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return gameTreeToASCII(thought);
+    case "svg":
+      return gameTreeToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -3386,10 +3797,148 @@ function gameTreeToASCII(thought) {
   }
   return ascii;
 }
+function gameTreeToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = 500
+  } = options;
+  const title = thought.game?.name || "Game Tree";
+  if (!thought.game) {
+    return generateSVGHeader(svgWidth, 200, title) + '\n  <text x="400" y="100" text-anchor="middle" class="subtitle">No game defined</text>\n' + generateSVGFooter();
+  }
+  const positions = /* @__PURE__ */ new Map();
+  const nodeWidth = 120;
+  const nodeHeight = 40;
+  if (thought.gameTree && thought.gameTree.nodes) {
+    const nodeDepths = /* @__PURE__ */ new Map();
+    const rootNodes = thought.gameTree.nodes.filter((n) => !n.parentNode);
+    const queue = rootNodes.map((n) => ({ nodeId: n.id, depth: 0 }));
+    while (queue.length > 0) {
+      const { nodeId, depth } = queue.shift();
+      nodeDepths.set(nodeId, depth);
+      const node = thought.gameTree.nodes.find((n) => n.id === nodeId);
+      if (node) {
+        for (const childId of node.childNodes) {
+          queue.push({ nodeId: childId, depth: depth + 1 });
+        }
+      }
+    }
+    const nodesByDepth = /* @__PURE__ */ new Map();
+    for (const node of thought.gameTree.nodes) {
+      const depth = nodeDepths.get(node.id) || 0;
+      if (!nodesByDepth.has(depth)) {
+        nodesByDepth.set(depth, []);
+      }
+      nodesByDepth.get(depth).push(node);
+    }
+    const depths = Array.from(nodesByDepth.keys()).sort((a, b) => a - b);
+    const verticalSpacing = 100;
+    let currentY = 60;
+    for (const depth of depths) {
+      const nodesAtDepth = nodesByDepth.get(depth);
+      const layerWidth = nodesAtDepth.length * (nodeWidth + 20) - 20;
+      let startX = (svgWidth - layerWidth) / 2;
+      for (const node of nodesAtDepth) {
+        const label = includeLabels ? node.action || node.id : sanitizeId(node.id);
+        positions.set(node.id, {
+          id: node.id,
+          x: startX,
+          y: currentY,
+          width: nodeWidth,
+          height: nodeHeight,
+          label,
+          type: node.type
+        });
+        startX += nodeWidth + 20;
+      }
+      currentY += verticalSpacing;
+    }
+  } else if (thought.strategies) {
+    positions.set("root", {
+      id: "root",
+      x: svgWidth / 2 - nodeWidth / 2,
+      y: 60,
+      width: nodeWidth,
+      height: nodeHeight,
+      label: "Game",
+      type: "root"
+    });
+    const stratCount = Math.min(thought.strategies.length, 5);
+    const layerWidth = stratCount * (nodeWidth + 20) - 20;
+    let startX = (svgWidth - layerWidth) / 2;
+    for (let i = 0; i < stratCount; i++) {
+      const strategy = thought.strategies[i];
+      positions.set(strategy.id, {
+        id: strategy.id,
+        x: startX,
+        y: 180,
+        width: nodeWidth,
+        height: nodeHeight,
+        label: strategy.name,
+        type: "strategy"
+      });
+      startX += nodeWidth + 20;
+    }
+  }
+  let svg = generateSVGHeader(svgWidth, svgHeight, title);
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  if (thought.gameTree && thought.gameTree.nodes) {
+    for (const node of thought.gameTree.nodes) {
+      if (node.childNodes) {
+        for (const childId of node.childNodes) {
+          const fromPos = positions.get(node.id);
+          const toPos = positions.get(childId);
+          if (fromPos && toPos) {
+            svg += renderEdge(fromPos, toPos, {});
+          }
+        }
+      }
+    }
+  } else if (thought.strategies) {
+    const rootPos = positions.get("root");
+    if (rootPos) {
+      for (const strategy of thought.strategies.slice(0, 5)) {
+        const stratPos = positions.get(strategy.id);
+        if (stratPos) {
+          svg += renderEdge(rootPos, stratPos, {});
+        }
+      }
+    }
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  for (const [, pos] of positions) {
+    const colors = pos.type === "terminal" ? getNodeColor("success", colorScheme) : pos.type === "root" ? getNodeColor("primary", colorScheme) : getNodeColor("neutral", colorScheme);
+    if (pos.type === "terminal") {
+      svg += renderEllipseNode(pos, colors);
+    } else {
+      svg += renderRectNode(pos, colors);
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics && thought.nashEquilibria) {
+    const metrics = [
+      { label: "Equilibria", value: thought.nashEquilibria.length },
+      { label: "Strategies", value: thought.strategies?.length || 0 }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, svgHeight - 80, metrics);
+  }
+  const legendItems = [
+    { label: "Decision", color: getNodeColor("neutral", colorScheme) },
+    { label: "Terminal", color: getNodeColor("success", colorScheme), shape: "ellipse" }
+  ];
+  svg += renderLegend(20, svgHeight - 60, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_game_theory = __esm({
   "src/export/visual/game-theory.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -3403,6 +3952,8 @@ function exportBayesianNetwork(thought, options) {
       return bayesianToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return bayesianToASCII(thought);
+    case "svg":
+      return bayesianToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -3483,9 +4034,87 @@ Bayes Factor: ${thought.bayesFactor.toFixed(2)}
   }
   return ascii;
 }
+function bayesianToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = 400
+  } = options;
+  const nodeWidth = 140;
+  const nodeHeight = 50;
+  const centerX = svgWidth / 2;
+  const positions = /* @__PURE__ */ new Map();
+  positions.set("prior", {
+    id: "prior",
+    x: centerX - 200,
+    y: 80,
+    width: nodeWidth,
+    height: nodeHeight,
+    label: `Prior: ${includeMetrics ? thought.prior.probability.toFixed(3) : "?"}`,
+    type: "prior"
+  });
+  positions.set("evidence", {
+    id: "evidence",
+    x: centerX + 60,
+    y: 80,
+    width: nodeWidth,
+    height: nodeHeight,
+    label: "Evidence",
+    type: "evidence"
+  });
+  positions.set("hypothesis", {
+    id: "hypothesis",
+    x: centerX - nodeWidth / 2,
+    y: 180,
+    width: nodeWidth,
+    height: nodeHeight,
+    label: "Hypothesis",
+    type: "hypothesis"
+  });
+  positions.set("posterior", {
+    id: "posterior",
+    x: centerX - nodeWidth / 2,
+    y: 280,
+    width: nodeWidth,
+    height: nodeHeight,
+    label: `Posterior: ${includeMetrics ? thought.posterior.probability.toFixed(3) : "?"}`,
+    type: "posterior"
+  });
+  let svg = generateSVGHeader(svgWidth, svgHeight, "Bayesian Network");
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  svg += renderEdge(positions.get("prior"), positions.get("hypothesis"), {});
+  svg += renderEdge(positions.get("evidence"), positions.get("hypothesis"), {});
+  svg += renderEdge(positions.get("hypothesis"), positions.get("posterior"), {});
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  svg += renderStadiumNode(positions.get("prior"), getNodeColor("primary", colorScheme));
+  svg += renderRectNode(positions.get("evidence"), getNodeColor("info", colorScheme));
+  svg += renderEllipseNode(positions.get("hypothesis"), getNodeColor("neutral", colorScheme));
+  svg += renderStadiumNode(positions.get("posterior"), getNodeColor("success", colorScheme));
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Prior", value: thought.prior.probability.toFixed(3) },
+      { label: "Posterior", value: thought.posterior.probability.toFixed(3) },
+      { label: "Bayes Factor", value: thought.bayesFactor?.toFixed(2) || "N/A" }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, svgHeight - 100, metrics);
+  }
+  const legendItems = [
+    { label: "Prior", color: getNodeColor("primary", colorScheme) },
+    { label: "Evidence", color: getNodeColor("info", colorScheme) },
+    { label: "Hypothesis", color: getNodeColor("neutral", colorScheme), shape: "ellipse" },
+    { label: "Posterior", color: getNodeColor("success", colorScheme) }
+  ];
+  svg += renderLegend(20, svgHeight - 100, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_bayesian = __esm({
   "src/export/visual/bayesian.ts"() {
     init_esm_shims();
+    init_svg_utils();
   }
 });
 
@@ -3499,6 +4128,8 @@ function exportSequentialDependencyGraph(thought, options) {
       return sequentialToDOT(thought, includeLabels);
     case "ascii":
       return sequentialToASCII(thought);
+    case "svg":
+      return sequentialToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -3599,10 +4230,90 @@ function sequentialToASCII(thought) {
   }
   return ascii;
 }
+function sequentialToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width
+  } = options;
+  const nodeWidth = 160;
+  const nodeHeight = 50;
+  const padding = 40;
+  const verticalSpacing = 80;
+  const positions = /* @__PURE__ */ new Map();
+  let currentY = padding + 40;
+  const mainNodeId = sanitizeId(thought.id);
+  const mainLabel = includeLabels ? thought.content.substring(0, 40) + "..." : mainNodeId;
+  if (thought.buildUpon && thought.buildUpon.length > 0) {
+    const depWidth = thought.buildUpon.length * (nodeWidth + 20) - 20;
+    let startX = (svgWidth - depWidth) / 2;
+    for (const depId of thought.buildUpon) {
+      const depNodeId = sanitizeId(depId);
+      positions.set(depId, {
+        id: depId,
+        x: startX,
+        y: currentY,
+        width: nodeWidth,
+        height: nodeHeight,
+        label: depNodeId,
+        type: "dependency"
+      });
+      startX += nodeWidth + 20;
+    }
+    currentY += nodeHeight + verticalSpacing;
+  }
+  positions.set(thought.id, {
+    id: thought.id,
+    x: (svgWidth - nodeWidth) / 2,
+    y: currentY,
+    width: nodeWidth,
+    height: nodeHeight,
+    label: mainLabel,
+    type: thought.isRevision ? "revision" : "main"
+  });
+  currentY += nodeHeight + padding;
+  const actualHeight = currentY + 80;
+  let svg = generateSVGHeader(svgWidth, actualHeight, "Sequential Dependency Graph");
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  if (thought.buildUpon) {
+    for (const depId of thought.buildUpon) {
+      const fromPos = positions.get(depId);
+      const toPos = positions.get(thought.id);
+      if (fromPos && toPos) {
+        svg += renderEdge(fromPos, toPos, {});
+      }
+    }
+  }
+  if (thought.branchFrom) {
+    const branchLabel = "branch";
+    svg += `
+    <text x="${svgWidth / 2 - 100}" y="${padding + 20}" class="edge-label">${branchLabel} from: ${thought.branchFrom}</text>`;
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  for (const [, pos] of positions) {
+    const colors = pos.type === "revision" ? getNodeColor("warning", colorScheme) : pos.type === "main" ? getNodeColor("primary", colorScheme) : getNodeColor("neutral", colorScheme);
+    if (pos.type === "main" || pos.type === "revision") {
+      svg += renderStadiumNode(pos, colors);
+    } else {
+      svg += renderRectNode(pos, colors);
+    }
+  }
+  svg += "\n  </g>";
+  const legendItems = [
+    { label: "Current", color: getNodeColor("primary", colorScheme) },
+    { label: "Revision", color: getNodeColor("warning", colorScheme) },
+    { label: "Dependency", color: getNodeColor("neutral", colorScheme) }
+  ];
+  svg += renderLegend(20, actualHeight - 80, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_sequential = __esm({
   "src/export/visual/sequential.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -3616,6 +4327,8 @@ function exportShannonStageFlow(thought, options) {
       return shannonToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return shannonToASCII(thought);
+    case "svg":
+      return shannonToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -3715,11 +4428,72 @@ function shannonToASCII(thought) {
   }
   return ascii;
 }
+function shannonToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = 300
+  } = options;
+  const nodes = stages.map((stage) => ({
+    id: sanitizeId(stage),
+    label: includeLabels ? stageLabels[stage] : sanitizeId(stage),
+    type: stage === thought.stage ? "current" : "stage"
+  }));
+  const positions = layoutNodesHorizontally(nodes, {
+    width: svgWidth,
+    height: svgHeight,
+    nodeWidth: 130,
+    nodeHeight: 45,
+    nodeSpacing: 25
+  });
+  let svg = generateSVGHeader(svgWidth, svgHeight, "Shannon Stage Flow");
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  for (let i = 0; i < stages.length - 1; i++) {
+    const fromPos = positions.get(sanitizeId(stages[i]));
+    const toPos = positions.get(sanitizeId(stages[i + 1]));
+    if (fromPos && toPos) {
+      svg += renderHorizontalEdge(fromPos, toPos, {});
+    }
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  for (let i = 0; i < stages.length; i++) {
+    const stage = stages[i];
+    const pos = positions.get(sanitizeId(stage));
+    if (pos) {
+      const isCurrent = stage === thought.stage;
+      const colors = isCurrent ? getNodeColor("primary", colorScheme) : getNodeColor("neutral", colorScheme);
+      if (isCurrent) {
+        svg += renderStadiumNode(pos, colors);
+      } else {
+        svg += renderRectNode(pos, colors);
+      }
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics && thought.uncertainty !== void 0) {
+    const metrics = [
+      { label: "Stage", value: stageLabels[thought.stage] },
+      { label: "Uncertainty", value: thought.uncertainty.toFixed(2) }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, svgHeight - 80, metrics);
+  }
+  const legendItems = [
+    { label: "Current", color: getNodeColor("primary", colorScheme) },
+    { label: "Stage", color: getNodeColor("neutral", colorScheme) }
+  ];
+  svg += renderLegend(20, svgHeight - 60, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var stages, stageLabels;
 var init_shannon = __esm({
   "src/export/visual/shannon.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
     stages = [
       "problem_definition",
       "constraints",
@@ -3747,6 +4521,8 @@ function exportAbductiveHypotheses(thought, options) {
       return abductiveToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return abductiveToASCII(thought);
+    case "svg":
+      return abductiveToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -3817,10 +4593,90 @@ function abductiveToASCII(thought) {
   }
   return ascii;
 }
+function abductiveToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = 450
+  } = options;
+  const positions = /* @__PURE__ */ new Map();
+  const nodeWidth = 180;
+  const nodeHeight = 50;
+  const centerX = svgWidth / 2;
+  positions.set("observations", {
+    id: "observations",
+    x: centerX - nodeWidth / 2,
+    y: 60,
+    width: nodeWidth,
+    height: nodeHeight,
+    label: "Observations",
+    type: "observations"
+  });
+  const hypCount = thought.hypotheses.length;
+  const layerWidth = hypCount * (nodeWidth + 20) - 20;
+  let startX = (svgWidth - layerWidth) / 2;
+  for (const hypothesis of thought.hypotheses) {
+    const hypId = sanitizeId(hypothesis.id);
+    const label = includeLabels ? hypothesis.explanation.substring(0, 30) + "..." : hypId;
+    const scoreLabel = includeMetrics ? ` (${hypothesis.score.toFixed(2)})` : "";
+    positions.set(hypothesis.id, {
+      id: hypothesis.id,
+      x: startX,
+      y: 180,
+      width: nodeWidth,
+      height: nodeHeight,
+      label: label + scoreLabel,
+      type: thought.bestExplanation?.id === hypothesis.id ? "best" : "hypothesis"
+    });
+    startX += nodeWidth + 20;
+  }
+  let svg = generateSVGHeader(svgWidth, svgHeight, "Abductive Hypotheses");
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  const obsPos = positions.get("observations");
+  for (const hypothesis of thought.hypotheses) {
+    const hypPos = positions.get(hypothesis.id);
+    if (obsPos && hypPos) {
+      svg += renderEdge(obsPos, hypPos, {});
+    }
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  svg += renderEllipseNode(positions.get("observations"), getNodeColor("info", colorScheme));
+  for (const hypothesis of thought.hypotheses) {
+    const pos = positions.get(hypothesis.id);
+    const isBest = thought.bestExplanation?.id === hypothesis.id;
+    const colors = isBest ? getNodeColor("success", colorScheme) : getNodeColor("neutral", colorScheme);
+    if (isBest) {
+      svg += renderStadiumNode(pos, colors);
+    } else {
+      svg += renderRectNode(pos, colors);
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Hypotheses", value: thought.hypotheses.length },
+      { label: "Observations", value: thought.observations.length },
+      { label: "Best Score", value: thought.bestExplanation?.score.toFixed(2) || "N/A" }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, svgHeight - 100, metrics);
+  }
+  const legendItems = [
+    { label: "Observations", color: getNodeColor("info", colorScheme), shape: "ellipse" },
+    { label: "Hypothesis", color: getNodeColor("neutral", colorScheme) },
+    { label: "Best", color: getNodeColor("success", colorScheme) }
+  ];
+  svg += renderLegend(20, svgHeight - 80, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_abductive = __esm({
   "src/export/visual/abductive.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -3834,6 +4690,8 @@ function exportCounterfactualScenarios(thought, options) {
       return counterfactualToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return counterfactualToASCII(thought);
+    case "svg":
+      return counterfactualToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -3925,10 +4783,102 @@ function counterfactualToASCII(thought) {
   }
   return ascii;
 }
+function counterfactualToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width
+  } = options;
+  const positions = /* @__PURE__ */ new Map();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+  const interventionId = "intervention";
+  positions.set(interventionId, {
+    id: interventionId,
+    label: includeLabels ? thought.interventionPoint.description : interventionId,
+    x: svgWidth / 2,
+    y: 80,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: "intervention"
+  });
+  const actualId = thought.actual.id;
+  const actualLabel = includeLabels ? `Actual: ${thought.actual.name}` : actualId;
+  positions.set(actualId, {
+    id: actualId,
+    label: actualLabel,
+    x: svgWidth / 4,
+    y: 200,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: "actual"
+  });
+  const cfCount = thought.counterfactuals.length;
+  const cfStartY = 200;
+  const cfSpacing = 120;
+  thought.counterfactuals.forEach((scenario, index) => {
+    const cfLabel = includeLabels ? `CF: ${scenario.name}` : scenario.id;
+    positions.set(scenario.id, {
+      id: scenario.id,
+      label: cfLabel,
+      x: svgWidth * 3 / 4,
+      y: cfStartY + index * cfSpacing,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "counterfactual"
+    });
+  });
+  const actualHeight = Math.max(DEFAULT_SVG_OPTIONS.height, cfStartY + (cfCount - 1) * cfSpacing + 150);
+  let svg = generateSVGHeader(svgWidth, actualHeight, "Counterfactual Scenarios");
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  const interventionPos = positions.get(interventionId);
+  const actualPos = positions.get(actualId);
+  svg += renderEdge(interventionPos, actualPos, { label: "no change" });
+  for (const scenario of thought.counterfactuals) {
+    const cfPos = positions.get(scenario.id);
+    if (cfPos) {
+      const label = includeMetrics && scenario.likelihood ? `${scenario.likelihood.toFixed(2)}` : "intervene";
+      svg += renderEdge(interventionPos, cfPos, { label });
+    }
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  const interventionColors = getNodeColor("warning", colorScheme);
+  svg += `
+    <polygon points="${interventionPos.x},${interventionPos.y - 30} ${interventionPos.x + 40},${interventionPos.y} ${interventionPos.x},${interventionPos.y + 30} ${interventionPos.x - 40},${interventionPos.y}" fill="${interventionColors.fill}" stroke="${interventionColors.stroke}" stroke-width="2"/>`;
+  svg += `
+    <text x="${interventionPos.x}" y="${interventionPos.y + 5}" text-anchor="middle" class="node-label">${interventionPos.label}</text>`;
+  const actualColors = getNodeColor("tertiary", colorScheme);
+  svg += renderRectNode(actualPos, actualColors);
+  const cfColors = getNodeColor("primary", colorScheme);
+  for (const [id, pos] of positions) {
+    if (id !== interventionId && id !== actualId) {
+      svg += renderStadiumNode(pos, cfColors);
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Counterfactuals", value: thought.counterfactuals.length },
+      { label: "Feasibility", value: thought.interventionPoint.feasibility.toFixed(2) }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
+  }
+  const legendItems = [
+    { label: "Intervention", color: interventionColors, shape: "diamond" },
+    { label: "Actual", color: actualColors },
+    { label: "Counterfactual", color: cfColors, shape: "stadium" }
+  ];
+  svg += renderLegend(20, actualHeight - 110, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_counterfactual = __esm({
   "src/export/visual/counterfactual.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -3942,6 +4892,8 @@ function exportAnalogicalMapping(thought, options) {
       return analogicalToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return analogicalToASCII(thought);
+    case "svg":
+      return analogicalToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -4053,10 +5005,91 @@ Analogy Strength: ${thought.analogyStrength.toFixed(2)}
 `;
   return ascii;
 }
+function analogicalToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width
+  } = options;
+  const positions = /* @__PURE__ */ new Map();
+  const sourceY = 100;
+  const entitySpacing = 100;
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+  thought.sourceDomain.entities.forEach((entity, index) => {
+    const srcId = "src_" + entity.id;
+    positions.set(srcId, {
+      id: srcId,
+      label: includeLabels ? entity.name : srcId,
+      x: 150,
+      y: sourceY + index * entitySpacing,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "source"
+    });
+  });
+  const targetY = 100;
+  thought.targetDomain.entities.forEach((entity, index) => {
+    const tgtId = "tgt_" + entity.id;
+    positions.set(tgtId, {
+      id: tgtId,
+      label: includeLabels ? entity.name : tgtId,
+      x: svgWidth - 150,
+      y: targetY + index * entitySpacing,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "target"
+    });
+  });
+  const actualHeight = Math.max(
+    DEFAULT_SVG_OPTIONS.height,
+    Math.max(thought.sourceDomain.entities.length, thought.targetDomain.entities.length) * entitySpacing + 150
+  );
+  let svg = generateSVGHeader(svgWidth, actualHeight, "Analogical Domain Mapping");
+  svg += '\n  <!-- Mappings -->\n  <g class="edges">';
+  for (const mapping of thought.mapping) {
+    const srcPos = positions.get("src_" + mapping.sourceEntityId);
+    const tgtPos = positions.get("tgt_" + mapping.targetEntityId);
+    if (srcPos && tgtPos) {
+      const label = includeMetrics ? mapping.confidence.toFixed(2) : void 0;
+      svg += renderEdge(srcPos, tgtPos, { label, style: "dashed" });
+    }
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  const sourceColors = getNodeColor("tertiary", colorScheme);
+  const targetColors = getNodeColor("primary", colorScheme);
+  for (const [, pos] of positions) {
+    if (pos.type === "source") {
+      svg += renderRectNode(pos, sourceColors);
+    } else {
+      svg += renderRectNode(pos, targetColors);
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Analogy Strength", value: thought.analogyStrength.toFixed(2) },
+      { label: "Mappings", value: thought.mapping.length },
+      { label: "Source Entities", value: thought.sourceDomain.entities.length },
+      { label: "Target Entities", value: thought.targetDomain.entities.length }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, actualHeight - 140, metrics);
+  }
+  const legendItems = [
+    { label: "Source Domain", color: sourceColors },
+    { label: "Target Domain", color: targetColors }
+  ];
+  svg += renderLegend(20, actualHeight - 80, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_analogical = __esm({
   "src/export/visual/analogical.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -4070,6 +5103,8 @@ function exportEvidentialBeliefs(thought, options) {
       return evidentialToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return evidentialToASCII(thought);
+    case "svg":
+      return evidentialToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -4163,10 +5198,83 @@ function evidentialToASCII(thought) {
   }
   return ascii;
 }
+function evidentialToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width
+  } = options;
+  if (!thought.frameOfDiscernment || thought.frameOfDiscernment.length === 0) {
+    return generateSVGHeader(svgWidth, 200, "Evidential Beliefs") + '\n  <text x="400" y="100" text-anchor="middle" class="subtitle">No frame of discernment defined</text>\n' + generateSVGFooter();
+  }
+  const positions = /* @__PURE__ */ new Map();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+  positions.set("frame", {
+    id: "frame",
+    label: "Frame of Discernment",
+    x: svgWidth / 2,
+    y: 80,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: "frame"
+  });
+  const hypSpacing = Math.min(200, svgWidth / (thought.frameOfDiscernment.length + 1));
+  const hypStartX = (svgWidth - (thought.frameOfDiscernment.length - 1) * hypSpacing) / 2;
+  thought.frameOfDiscernment.forEach((hypothesis, index) => {
+    const hypId = sanitizeId(hypothesis);
+    positions.set(hypId, {
+      id: hypId,
+      label: includeLabels ? hypothesis : hypId,
+      x: hypStartX + index * hypSpacing,
+      y: 200,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "hypothesis"
+    });
+  });
+  const actualHeight = 400;
+  let svg = generateSVGHeader(svgWidth, actualHeight, "Evidential Beliefs");
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  const framePos = positions.get("frame");
+  for (const hypothesis of thought.frameOfDiscernment) {
+    const hypPos = positions.get(sanitizeId(hypothesis));
+    if (hypPos) {
+      svg += renderEdge(framePos, hypPos);
+    }
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  const frameColors = getNodeColor("warning", colorScheme);
+  const hypColors = getNodeColor("primary", colorScheme);
+  svg += renderEllipseNode(framePos, frameColors);
+  for (const [id, pos] of positions) {
+    if (id !== "frame") {
+      svg += renderRectNode(pos, hypColors);
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Hypotheses", value: thought.frameOfDiscernment.length },
+      { label: "Belief Functions", value: thought.beliefFunctions?.length || 0 }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
+  }
+  const legendItems = [
+    { label: "Frame", color: frameColors, shape: "ellipse" },
+    { label: "Hypothesis", color: hypColors }
+  ];
+  svg += renderLegend(20, actualHeight - 80, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_evidential = __esm({
   "src/export/visual/evidential.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -4180,6 +5288,8 @@ function exportFirstPrinciplesDerivation(thought, options) {
       return firstPrinciplesToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return firstPrinciplesToASCII(thought);
+    case "svg":
+      return firstPrinciplesToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -4410,10 +5520,106 @@ function firstPrinciplesToASCII(thought) {
   }
   return ascii;
 }
+function firstPrinciplesToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width
+  } = options;
+  const positions = /* @__PURE__ */ new Map();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+  const principleY = 100;
+  const principleSpacing = Math.min(180, svgWidth / (thought.principles.length + 1));
+  const principleStartX = (svgWidth - (thought.principles.length - 1) * principleSpacing) / 2;
+  thought.principles.forEach((p, index) => {
+    positions.set(p.id, {
+      id: p.id,
+      label: includeLabels ? `${p.type}: ${p.statement.substring(0, 30)}...` : p.id,
+      x: principleStartX + index * principleSpacing,
+      y: principleY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: p.type
+    });
+  });
+  const stepY = 250;
+  thought.derivationSteps.forEach((step, index) => {
+    const stepId = `Step${step.stepNumber}`;
+    positions.set(stepId, {
+      id: stepId,
+      label: includeLabels ? `Step ${step.stepNumber}` : stepId,
+      x: 150 + index * 200,
+      y: stepY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "step"
+    });
+  });
+  positions.set("conclusion", {
+    id: "conclusion",
+    label: includeLabels ? `Conclusion: ${thought.conclusion.statement.substring(0, 30)}...` : "Conclusion",
+    x: svgWidth / 2,
+    y: stepY + 150,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: "conclusion"
+  });
+  const actualHeight = calculateSVGHeight(positions);
+  let svg = generateSVGHeader(svgWidth, actualHeight, "First Principles Derivation");
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  for (const step of thought.derivationSteps) {
+    const principlePos = positions.get(step.principle);
+    const stepPos = positions.get(`Step${step.stepNumber}`);
+    if (principlePos && stepPos) {
+      svg += renderEdge(principlePos, stepPos, { style: "dashed", label: "applies" });
+    }
+  }
+  const conclusionPos = positions.get("conclusion");
+  for (const stepNum of thought.conclusion.derivationChain) {
+    const stepPos = positions.get(`Step${stepNum}`);
+    if (stepPos) {
+      svg += renderEdge(stepPos, conclusionPos);
+    }
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  const axiomColors = getNodeColor("primary", colorScheme);
+  const stepColors = getNodeColor("neutral", colorScheme);
+  const conclusionColors = getNodeColor("success", colorScheme);
+  for (const [id, pos] of positions) {
+    if (id === "conclusion") {
+      svg += renderStadiumNode(pos, conclusionColors);
+    } else if (id.startsWith("Step")) {
+      svg += renderRectNode(pos, stepColors);
+    } else {
+      svg += renderEllipseNode(pos, axiomColors);
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Principles", value: thought.principles.length },
+      { label: "Steps", value: thought.derivationSteps.length },
+      { label: "Certainty", value: thought.conclusion.certainty.toFixed(2) }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
+  }
+  const legendItems = [
+    { label: "Principle", color: axiomColors, shape: "ellipse" },
+    { label: "Derivation Step", color: stepColors },
+    { label: "Conclusion", color: conclusionColors, shape: "stadium" }
+  ];
+  svg += renderLegend(20, actualHeight - 100, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_first_principles = __esm({
   "src/export/visual/first-principles.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -4427,6 +5633,8 @@ function exportSystemsThinkingCausalLoops(thought, options) {
       return systemsThinkingToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return systemsThinkingToASCII(thought);
+    case "svg":
+      return systemsThinkingToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -4547,10 +5755,87 @@ function systemsThinkingToASCII(thought) {
   }
   return ascii;
 }
+function systemsThinkingToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = DEFAULT_SVG_OPTIONS.height
+  } = options;
+  if (!thought.components || thought.components.length === 0) {
+    return generateSVGHeader(svgWidth, 200, "Systems Thinking") + '\n  <text x="400" y="100" text-anchor="middle" class="subtitle">No system components defined</text>\n' + generateSVGFooter();
+  }
+  const positions = /* @__PURE__ */ new Map();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+  const centerX = svgWidth / 2;
+  const centerY = svgHeight / 2;
+  const radius = Math.min(centerX, centerY) - 100;
+  thought.components.forEach((component, index) => {
+    const angle = 2 * Math.PI * index / (thought.components?.length || 1);
+    const x = centerX + radius * Math.cos(angle - Math.PI / 2);
+    const y = centerY + radius * Math.sin(angle - Math.PI / 2);
+    positions.set(component.id, {
+      id: component.id,
+      label: includeLabels ? component.name : component.id,
+      x,
+      y,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: component.type
+    });
+  });
+  let svg = generateSVGHeader(svgWidth, svgHeight, "Systems Thinking Model");
+  svg += '\n  <!-- Feedback Loops -->\n  <g class="edges">';
+  if (thought.feedbackLoops) {
+    for (const loop of thought.feedbackLoops) {
+      for (let i = 0; i < loop.components.length; i++) {
+        const fromId = loop.components[i];
+        const toId = loop.components[(i + 1) % loop.components.length];
+        const fromPos = positions.get(fromId);
+        const toPos = positions.get(toId);
+        if (fromPos && toPos) {
+          const label = includeMetrics ? `${loop.type[0].toUpperCase()} (${loop.strength.toFixed(1)})` : void 0;
+          const style = loop.type === "reinforcing" ? "solid" : "dashed";
+          svg += renderEdge(fromPos, toPos, { label, style });
+        }
+      }
+    }
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Components -->\n  <g class="nodes">';
+  const stockColors = getNodeColor("primary", colorScheme);
+  const flowColors = getNodeColor("secondary", colorScheme);
+  for (const [, pos] of positions) {
+    if (pos.type === "stock") {
+      svg += renderRectNode(pos, stockColors);
+    } else {
+      svg += renderEllipseNode(pos, flowColors);
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Components", value: thought.components.length },
+      { label: "Feedback Loops", value: thought.feedbackLoops?.length || 0 },
+      { label: "Leverage Points", value: thought.leveragePoints?.length || 0 }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, svgHeight - 110, metrics);
+  }
+  const legendItems = [
+    { label: "Stock", color: stockColors },
+    { label: "Flow", color: flowColors, shape: "ellipse" }
+  ];
+  svg += renderLegend(20, svgHeight - 80, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_systems_thinking = __esm({
   "src/export/visual/systems-thinking.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -4564,6 +5849,8 @@ function exportScientificMethodExperiment(thought, options) {
       return scientificMethodToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return scientificMethodToASCII(thought);
+    case "svg":
+      return scientificMethodToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -4792,10 +6079,141 @@ function scientificMethodToASCII(thought) {
   }
   return ascii;
 }
+function scientificMethodToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width
+  } = options;
+  const positions = /* @__PURE__ */ new Map();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+  const nodeSpacing = 120;
+  let currentY = 80;
+  if (thought.researchQuestion) {
+    positions.set("RQ", {
+      id: "RQ",
+      label: includeLabels ? `RQ: ${thought.researchQuestion.question.substring(0, 40)}...` : "Research Question",
+      x: svgWidth / 2,
+      y: currentY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "question"
+    });
+    currentY += nodeSpacing;
+  }
+  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+    thought.scientificHypotheses.forEach((hypothesis) => {
+      positions.set(hypothesis.id, {
+        id: hypothesis.id,
+        label: includeLabels ? `H: ${hypothesis.statement.substring(0, 30)}...` : hypothesis.id,
+        x: svgWidth / 2,
+        y: currentY,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: "hypothesis"
+      });
+      currentY += nodeSpacing;
+    });
+  }
+  if (thought.experiment) {
+    positions.set("Exp", {
+      id: "Exp",
+      label: "Experiment",
+      x: svgWidth / 2,
+      y: currentY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "experiment"
+    });
+    currentY += nodeSpacing;
+  }
+  if (thought.data) {
+    positions.set("Data", {
+      id: "Data",
+      label: "Data Collection",
+      x: svgWidth / 2,
+      y: currentY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "data"
+    });
+    currentY += nodeSpacing;
+  }
+  if (thought.analysis) {
+    positions.set("Stats", {
+      id: "Stats",
+      label: "Statistical Analysis",
+      x: svgWidth / 2,
+      y: currentY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "analysis"
+    });
+    currentY += nodeSpacing;
+  }
+  if (thought.conclusion) {
+    positions.set("Conclusion", {
+      id: "Conclusion",
+      label: includeLabels ? `Conclusion: ${thought.conclusion.statement.substring(0, 30)}...` : "Conclusion",
+      x: svgWidth / 2,
+      y: currentY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "conclusion"
+    });
+  }
+  const actualHeight = Math.max(DEFAULT_SVG_OPTIONS.height, currentY + 100);
+  let svg = generateSVGHeader(svgWidth, actualHeight, "Scientific Method Process");
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  const nodeIds = ["RQ", ...thought.scientificHypotheses?.map((h) => h.id) || [], "Exp", "Data", "Stats", "Conclusion"];
+  for (let i = 0; i < nodeIds.length - 1; i++) {
+    const fromPos = positions.get(nodeIds[i]);
+    const toPos = positions.get(nodeIds[i + 1]);
+    if (fromPos && toPos) {
+      svg += renderEdge(fromPos, toPos);
+    }
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  const questionColors = getNodeColor("tertiary", colorScheme);
+  const hypothesisColors = getNodeColor("primary", colorScheme);
+  const conclusionColors = getNodeColor("success", colorScheme);
+  const neutralColors = getNodeColor("neutral", colorScheme);
+  for (const [, pos] of positions) {
+    if (pos.type === "question") {
+      svg += renderEllipseNode(pos, questionColors);
+    } else if (pos.type === "hypothesis") {
+      svg += renderRectNode(pos, hypothesisColors);
+    } else if (pos.type === "conclusion") {
+      svg += renderStadiumNode(pos, conclusionColors);
+    } else {
+      svg += renderRectNode(pos, neutralColors);
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Hypotheses", value: thought.scientificHypotheses?.length || 0 },
+      { label: "Confidence", value: thought.conclusion?.confidence?.toFixed(2) || "N/A" }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
+  }
+  const legendItems = [
+    { label: "Research Question", color: questionColors, shape: "ellipse" },
+    { label: "Hypothesis", color: hypothesisColors },
+    { label: "Conclusion", color: conclusionColors, shape: "stadium" }
+  ];
+  svg += renderLegend(20, actualHeight - 110, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_scientific_method = __esm({
   "src/export/visual/scientific-method.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -4809,6 +6227,8 @@ function exportOptimizationSolution(thought, options) {
       return optimizationToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return optimizationToASCII(thought);
+    case "svg":
+      return optimizationToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -4999,10 +6419,118 @@ function optimizationToASCII(thought) {
   }
   return ascii;
 }
+function optimizationToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = DEFAULT_SVG_OPTIONS.height
+  } = options;
+  const positions = /* @__PURE__ */ new Map();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+  if (thought.problem) {
+    positions.set("Problem", {
+      id: "Problem",
+      label: includeLabels ? thought.problem.name : "Problem",
+      x: svgWidth / 2,
+      y: 80,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "problem"
+    });
+  }
+  if (thought.variables) {
+    thought.variables.forEach((variable, index) => {
+      positions.set(variable.id, {
+        id: variable.id,
+        label: includeLabels ? variable.name : variable.id,
+        x: 150,
+        y: 200 + index * 80,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: "variable"
+      });
+    });
+  }
+  if (thought.objectives) {
+    thought.objectives.forEach((objective, index) => {
+      positions.set(objective.id, {
+        id: objective.id,
+        label: includeLabels ? `${objective.type}: ${objective.name}` : objective.id,
+        x: svgWidth - 150,
+        y: 200 + index * 80,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: "objective"
+      });
+    });
+  }
+  if (thought.solution) {
+    positions.set("Solution", {
+      id: "Solution",
+      label: "Solution",
+      x: svgWidth / 2,
+      y: svgHeight - 100,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "solution"
+    });
+  }
+  let svg = generateSVGHeader(svgWidth, svgHeight, "Optimization Problem");
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  if (thought.objectives && thought.solution) {
+    for (const objective of thought.objectives) {
+      const objPos = positions.get(objective.id);
+      const solPos = positions.get("Solution");
+      if (objPos && solPos) {
+        svg += renderEdge(objPos, solPos);
+      }
+    }
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  const problemColors = getNodeColor("warning", colorScheme);
+  const variableColors = getNodeColor("neutral", colorScheme);
+  const objectiveColors = getNodeColor("primary", colorScheme);
+  const solutionColors = getNodeColor("success", colorScheme);
+  for (const [, pos] of positions) {
+    if (pos.type === "problem") {
+      svg += renderEllipseNode(pos, problemColors);
+    } else if (pos.type === "variable") {
+      svg += renderRectNode(pos, variableColors);
+    } else if (pos.type === "objective") {
+      svg += renderRectNode(pos, objectiveColors);
+    } else if (pos.type === "solution") {
+      svg += renderStadiumNode(pos, solutionColors);
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Variables", value: thought.variables?.length || 0 },
+      { label: "Constraints", value: thought.optimizationConstraints?.length || 0 },
+      { label: "Objectives", value: thought.objectives?.length || 0 },
+      { label: "Quality", value: thought.solution?.quality?.toFixed(2) || "N/A" }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, svgHeight - 150, metrics);
+  }
+  const legendItems = [
+    { label: "Problem", color: problemColors, shape: "ellipse" },
+    { label: "Variable", color: variableColors },
+    { label: "Objective", color: objectiveColors },
+    { label: "Solution", color: solutionColors, shape: "stadium" }
+  ];
+  svg += renderLegend(20, svgHeight - 140, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_optimization = __esm({
   "src/export/visual/optimization.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -5016,6 +6544,8 @@ function exportFormalLogicProof(thought, options) {
       return formalLogicToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return formalLogicToASCII(thought);
+    case "svg":
+      return formalLogicToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -5218,10 +6748,117 @@ function formalLogicToASCII(thought) {
   }
   return ascii;
 }
+function formalLogicToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = DEFAULT_SVG_OPTIONS.height
+  } = options;
+  const positions = /* @__PURE__ */ new Map();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+  if (thought.propositions) {
+    const propSpacing = Math.min(180, svgWidth / (thought.propositions.length + 1));
+    const propStartX = (svgWidth - (thought.propositions.length - 1) * propSpacing) / 2;
+    thought.propositions.forEach((prop, index) => {
+      positions.set(prop.id, {
+        id: prop.id,
+        label: includeLabels ? `${prop.symbol}: ${prop.statement.substring(0, 20)}...` : prop.symbol,
+        x: propStartX + index * propSpacing,
+        y: 80,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: prop.type
+      });
+    });
+  }
+  if (thought.proof && thought.proof.steps) {
+    thought.proof.steps.forEach((step, index) => {
+      const stepId = `Step${step.stepNumber}`;
+      positions.set(stepId, {
+        id: stepId,
+        label: includeLabels ? `${step.stepNumber}. ${step.statement.substring(0, 25)}...` : `Step ${step.stepNumber}`,
+        x: 150 + index * 180,
+        y: 250,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: "step"
+      });
+    });
+  }
+  if (thought.proof) {
+    positions.set("Theorem", {
+      id: "Theorem",
+      label: "Theorem",
+      x: svgWidth / 2,
+      y: 420,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "theorem"
+    });
+  }
+  let svg = generateSVGHeader(svgWidth, svgHeight, "Formal Logic Proof");
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  if (thought.proof && thought.proof.steps) {
+    const theoremPos = positions.get("Theorem");
+    for (const step of thought.proof.steps) {
+      const stepPos = positions.get(`Step${step.stepNumber}`);
+      if (stepPos && theoremPos) {
+        svg += renderEdge(stepPos, theoremPos);
+      }
+      if (step.referencesSteps) {
+        for (const refStepNum of step.referencesSteps) {
+          const refStepPos = positions.get(`Step${refStepNum}`);
+          if (refStepPos && stepPos) {
+            svg += renderEdge(refStepPos, stepPos, { style: "dashed" });
+          }
+        }
+      }
+    }
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  const atomicColors = getNodeColor("primary", colorScheme);
+  const compoundColors = getNodeColor("secondary", colorScheme);
+  const stepColors = getNodeColor("neutral", colorScheme);
+  const theoremColors = getNodeColor("success", colorScheme);
+  for (const [, pos] of positions) {
+    if (pos.type === "theorem") {
+      svg += renderStadiumNode(pos, theoremColors);
+    } else if (pos.type === "step") {
+      svg += renderRectNode(pos, stepColors);
+    } else if (pos.type === "atomic") {
+      svg += renderEllipseNode(pos, atomicColors);
+    } else {
+      svg += renderRectNode(pos, compoundColors);
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Propositions", value: thought.propositions?.length || 0 },
+      { label: "Proof Steps", value: thought.proof?.steps?.length || 0 },
+      { label: "Completeness", value: thought.proof ? `${(thought.proof.completeness * 100).toFixed(0)}%` : "N/A" }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, svgHeight - 110, metrics);
+  }
+  const legendItems = [
+    { label: "Atomic", color: atomicColors, shape: "ellipse" },
+    { label: "Compound", color: compoundColors },
+    { label: "Proof Step", color: stepColors },
+    { label: "Theorem", color: theoremColors, shape: "stadium" }
+  ];
+  svg += renderLegend(20, svgHeight - 130, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_formal_logic = __esm({
   "src/export/visual/formal-logic.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -5235,6 +6872,8 @@ function exportMathematicsDerivation(thought, options) {
       return mathematicsToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return mathematicsToASCII(thought);
+    case "svg":
+      return mathematicsToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -5421,10 +7060,135 @@ function mathematicsToASCII(thought) {
   }
   return ascii;
 }
+function mathematicsToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width
+  } = options;
+  const positions = /* @__PURE__ */ new Map();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+  let currentY = 80;
+  const typeId = "type";
+  positions.set(typeId, {
+    id: typeId,
+    label: includeLabels ? (thought.thoughtType || "Proof").replace(/_/g, " ") : typeId,
+    x: svgWidth / 2,
+    y: currentY,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: "type"
+  });
+  currentY += 120;
+  if (thought.proofStrategy) {
+    positions.set("strategy", {
+      id: "strategy",
+      label: thought.proofStrategy.type,
+      x: svgWidth / 2,
+      y: currentY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "strategy"
+    });
+    currentY += 100;
+    thought.proofStrategy.steps.forEach((step, index) => {
+      const stepId = `step_${index}`;
+      positions.set(stepId, {
+        id: stepId,
+        label: includeLabels ? `${index + 1}. ${step.substring(0, 25)}...` : `Step ${index + 1}`,
+        x: 150 + index % 3 * 200,
+        y: currentY + Math.floor(index / 3) * 80,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: "step"
+      });
+    });
+    currentY += Math.ceil(thought.proofStrategy.steps.length / 3) * 80 + 40;
+  }
+  if (thought.theorems && thought.theorems.length > 0) {
+    thought.theorems.forEach((theorem, index) => {
+      const theoremId = `theorem_${index}`;
+      positions.set(theoremId, {
+        id: theoremId,
+        label: theorem.name || `Theorem ${index + 1}`,
+        x: svgWidth / 2,
+        y: currentY,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: "theorem"
+      });
+      currentY += 80;
+    });
+  }
+  const actualHeight = Math.max(DEFAULT_SVG_OPTIONS.height, currentY + 100);
+  let svg = generateSVGHeader(svgWidth, actualHeight, "Mathematics Derivation");
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  if (thought.proofStrategy) {
+    const typePos = positions.get("type");
+    const strategyPos = positions.get("strategy");
+    if (typePos && strategyPos) {
+      svg += renderEdge(typePos, strategyPos);
+    }
+    const stratPos = positions.get("strategy");
+    thought.proofStrategy.steps.forEach((_, index) => {
+      const stepPos = positions.get(`step_${index}`);
+      if (stratPos && stepPos) {
+        svg += renderEdge(stratPos, stepPos);
+      }
+    });
+  }
+  if (thought.theorems) {
+    const typePos = positions.get("type");
+    thought.theorems.forEach((_, index) => {
+      const theoremPos = positions.get(`theorem_${index}`);
+      if (typePos && theoremPos) {
+        svg += renderEdge(typePos, theoremPos);
+      }
+    });
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  const typeColors = getNodeColor("primary", colorScheme);
+  const strategyColors = getNodeColor("secondary", colorScheme);
+  const stepColors = getNodeColor("neutral", colorScheme);
+  const theoremColors = getNodeColor("tertiary", colorScheme);
+  for (const [, pos] of positions) {
+    if (pos.type === "type") {
+      svg += renderStadiumNode(pos, typeColors);
+    } else if (pos.type === "strategy") {
+      svg += renderEllipseNode(pos, strategyColors);
+    } else if (pos.type === "step") {
+      svg += renderRectNode(pos, stepColors);
+    } else if (pos.type === "theorem") {
+      svg += renderRectNode(pos, theoremColors);
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Uncertainty", value: `${(thought.uncertainty * 100).toFixed(1)}%` },
+      { label: "Theorems", value: thought.theorems?.length || 0 },
+      { label: "Assumptions", value: thought.assumptions?.length || 0 }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
+  }
+  const legendItems = [
+    { label: "Type", color: typeColors, shape: "stadium" },
+    { label: "Strategy", color: strategyColors, shape: "ellipse" },
+    { label: "Step", color: stepColors },
+    { label: "Theorem", color: theoremColors }
+  ];
+  svg += renderLegend(20, actualHeight - 130, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_mathematics = __esm({
   "src/export/visual/mathematics.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -5438,6 +7202,8 @@ function exportPhysicsVisualization(thought, options) {
       return physicsToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return physicsToASCII(thought);
+    case "svg":
+      return physicsToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -5734,10 +7500,114 @@ function physicsToASCII(thought) {
   }
   return ascii;
 }
+function physicsToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = DEFAULT_SVG_OPTIONS.height
+  } = options;
+  const positions = /* @__PURE__ */ new Map();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+  positions.set("type", {
+    id: "type",
+    label: includeLabels ? (thought.thoughtType || "Physics").replace(/_/g, " ") : "Physics",
+    x: svgWidth / 2,
+    y: 80,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: "type"
+  });
+  if (thought.tensorProperties) {
+    positions.set("tensor", {
+      id: "tensor",
+      label: `Tensor (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`,
+      x: 150,
+      y: 220,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "tensor"
+    });
+  }
+  if (thought.physicalInterpretation) {
+    positions.set("interpretation", {
+      id: "interpretation",
+      label: thought.physicalInterpretation.quantity,
+      x: svgWidth - 150,
+      y: 220,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "interpretation"
+    });
+  }
+  if (thought.fieldTheoryContext) {
+    positions.set("field", {
+      id: "field",
+      label: "Field Theory",
+      x: svgWidth / 2,
+      y: 360,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: "field"
+    });
+  }
+  let svg = generateSVGHeader(svgWidth, svgHeight, "Physics Analysis");
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  const typePos = positions.get("type");
+  const tensorPos = positions.get("tensor");
+  const interpPos = positions.get("interpretation");
+  const fieldPos = positions.get("field");
+  if (typePos && tensorPos) {
+    svg += renderEdge(typePos, tensorPos);
+  }
+  if (typePos && interpPos) {
+    svg += renderEdge(typePos, interpPos);
+  }
+  if (typePos && fieldPos) {
+    svg += renderEdge(typePos, fieldPos);
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  const typeColors = getNodeColor("primary", colorScheme);
+  const tensorColors = getNodeColor("secondary", colorScheme);
+  const interpColors = getNodeColor("tertiary", colorScheme);
+  const fieldColors = getNodeColor("neutral", colorScheme);
+  for (const [, pos] of positions) {
+    if (pos.type === "type") {
+      svg += renderStadiumNode(pos, typeColors);
+    } else if (pos.type === "tensor") {
+      svg += renderEllipseNode(pos, tensorColors);
+    } else if (pos.type === "interpretation") {
+      svg += renderRectNode(pos, interpColors);
+    } else if (pos.type === "field") {
+      svg += renderRectNode(pos, fieldColors);
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Uncertainty", value: `${(thought.uncertainty * 100).toFixed(1)}%` },
+      { label: "Assumptions", value: thought.assumptions?.length || 0 }
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, svgHeight - 110, metrics);
+  }
+  const legendItems = [
+    { label: "Type", color: typeColors, shape: "stadium" },
+    { label: "Tensor", color: tensorColors, shape: "ellipse" },
+    { label: "Interpretation", color: interpColors },
+    { label: "Field Theory", color: fieldColors }
+  ];
+  svg += renderLegend(20, svgHeight - 130, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_physics = __esm({
   "src/export/visual/physics.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -5751,6 +7621,8 @@ function exportHybridOrchestration(thought, options) {
       return hybridToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return hybridToASCII(thought);
+    case "svg":
+      return hybridToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -6016,10 +7888,100 @@ function hybridToASCII(thought) {
   }
   return ascii;
 }
+function hybridToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = DEFAULT_SVG_OPTIONS.height
+  } = options;
+  const positions = /* @__PURE__ */ new Map();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+  positions.set("hybrid", {
+    id: "hybrid",
+    label: "Hybrid Mode",
+    x: svgWidth / 2,
+    y: 100,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: "hybrid"
+  });
+  positions.set("primary", {
+    id: "primary",
+    label: thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1),
+    x: svgWidth / 2,
+    y: 240,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: "primary"
+  });
+  if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
+    thought.secondaryFeatures.forEach((feature, index) => {
+      positions.set(`feature_${index}`, {
+        id: `feature_${index}`,
+        label: includeLabels ? feature.substring(0, 30) + (feature.length > 30 ? "..." : "") : `Feature ${index + 1}`,
+        x: 150 + index * 180,
+        y: 380,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: "feature"
+      });
+    });
+  }
+  let svg = generateSVGHeader(svgWidth, svgHeight, "Hybrid Mode Orchestration");
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  const hybridPos = positions.get("hybrid");
+  const primaryPos = positions.get("primary");
+  if (hybridPos && primaryPos) {
+    svg += renderEdge(hybridPos, primaryPos, { style: "solid" });
+  }
+  if (thought.secondaryFeatures) {
+    thought.secondaryFeatures.forEach((_, index) => {
+      const featurePos = positions.get(`feature_${index}`);
+      if (hybridPos && featurePos) {
+        svg += renderEdge(hybridPos, featurePos);
+      }
+    });
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  const hybridColors = getNodeColor("success", colorScheme);
+  const primaryColors = getNodeColor("primary", colorScheme);
+  const featureColors = getNodeColor("secondary", colorScheme);
+  for (const [, pos] of positions) {
+    if (pos.type === "hybrid") {
+      svg += renderEllipseNode(pos, hybridColors);
+    } else if (pos.type === "primary") {
+      svg += renderStadiumNode(pos, primaryColors);
+    } else if (pos.type === "feature") {
+      svg += renderRectNode(pos, featureColors);
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Primary Mode", value: thought.primaryMode },
+      { label: "Secondary Features", value: thought.secondaryFeatures?.length || 0 },
+      { label: "Uncertainty", value: thought.uncertainty !== void 0 ? `${(thought.uncertainty * 100).toFixed(1)}%` : "N/A" }
+    ];
+    svg += renderMetricsPanel(svgWidth - 200, svgHeight - 120, metrics);
+  }
+  const legendItems = [
+    { label: "Hybrid Mode", color: hybridColors, shape: "ellipse" },
+    { label: "Primary Mode", color: primaryColors, shape: "stadium" },
+    { label: "Secondary Feature", color: featureColors }
+  ];
+  svg += renderLegend(20, svgHeight - 110, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_hybrid = __esm({
   "src/export/visual/hybrid.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -6033,6 +7995,8 @@ function exportMetaReasoningVisualization(thought, options) {
       return metaReasoningToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
       return metaReasoningToASCII(thought);
+    case "svg":
+      return metaReasoningToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -6316,10 +8280,118 @@ function metaReasoningToASCII(thought) {
   }
   return ascii;
 }
+function metaReasoningToSVG(thought, options) {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = DEFAULT_SVG_OPTIONS.height
+  } = options;
+  const positions = /* @__PURE__ */ new Map();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+  positions.set("meta", {
+    id: "meta",
+    label: "Meta-Reasoning",
+    x: svgWidth / 2,
+    y: 80,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: "meta"
+  });
+  positions.set("current", {
+    id: "current",
+    label: includeLabels ? thought.currentStrategy.approach : "Current Strategy",
+    x: 200,
+    y: 220,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: "current"
+  });
+  positions.set("recommendation", {
+    id: "recommendation",
+    label: thought.recommendation.action,
+    x: svgWidth - 200,
+    y: 220,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: "recommendation"
+  });
+  if (thought.alternativeStrategies && thought.alternativeStrategies.length > 0) {
+    thought.alternativeStrategies.forEach((alt, index) => {
+      positions.set(`alt_${index}`, {
+        id: `alt_${index}`,
+        label: includeLabels ? `${alt.mode}: ${(alt.recommendationScore * 100).toFixed(0)}%` : `Alt ${index + 1}`,
+        x: 150 + index * 180,
+        y: 380,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: "alternative"
+      });
+    });
+  }
+  let svg = generateSVGHeader(svgWidth, svgHeight, "Meta-Reasoning Analysis");
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  const metaPos = positions.get("meta");
+  const currentPos = positions.get("current");
+  const recPos = positions.get("recommendation");
+  if (metaPos && currentPos) {
+    svg += renderEdge(metaPos, currentPos, { style: "solid" });
+  }
+  if (metaPos && recPos) {
+    svg += renderEdge(metaPos, recPos, { style: "solid" });
+  }
+  if (thought.alternativeStrategies) {
+    thought.alternativeStrategies.forEach((_, index) => {
+      const altPos = positions.get(`alt_${index}`);
+      if (metaPos && altPos) {
+        svg += renderEdge(metaPos, altPos, { style: "dashed" });
+      }
+    });
+  }
+  svg += "\n  </g>";
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  const metaColors = getNodeColor("warning", colorScheme);
+  const currentColors = getNodeColor("primary", colorScheme);
+  const recColors = getNodeColor("success", colorScheme);
+  const altColors = getNodeColor("secondary", colorScheme);
+  for (const [, pos] of positions) {
+    if (pos.type === "meta") {
+      svg += renderEllipseNode(pos, metaColors);
+    } else if (pos.type === "current") {
+      svg += renderStadiumNode(pos, currentColors);
+    } else if (pos.type === "recommendation") {
+      svg += renderStadiumNode(pos, recColors);
+    } else if (pos.type === "alternative") {
+      svg += renderRectNode(pos, altColors);
+    }
+  }
+  svg += "\n  </g>";
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Effectiveness", value: `${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%` },
+      { label: "Quality", value: `${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%` },
+      { label: "Alternatives", value: thought.alternativeStrategies.length },
+      { label: "Rec Confidence", value: `${(thought.recommendation.confidence * 100).toFixed(0)}%` }
+    ];
+    svg += renderMetricsPanel(svgWidth - 190, svgHeight - 140, metrics);
+  }
+  const legendItems = [
+    { label: "Meta-Reasoning", color: metaColors, shape: "ellipse" },
+    { label: "Current Strategy", color: currentColors, shape: "stadium" },
+    { label: "Recommendation", color: recColors, shape: "stadium" },
+    { label: "Alternative", color: altColors }
+  ];
+  svg += renderLegend(20, svgHeight - 140, legendItems);
+  svg += "\n" + generateSVGFooter();
+  return svg;
+}
 var init_metareasoning = __esm({
   "src/export/visual/metareasoning.ts"() {
     init_esm_shims();
     init_utils();
+    init_svg_utils();
   }
 });
 
@@ -6371,7 +8443,7 @@ function getMermaidShape(type) {
       return ["(", ")"];
   }
 }
-function getNodeColor(type, colorScheme) {
+function getNodeColor2(type, colorScheme) {
   if (colorScheme === "monochrome") return "#ffffff";
   const colors = colorScheme === "pastel" ? {
     axiom: "#c8e6c9",
@@ -6491,7 +8563,7 @@ function proofDecompositionToMermaid(decomposition, colorScheme, includeLabels, 
     mermaid += "\n";
     for (const atom of decomposition.atoms) {
       const nodeId = sanitizeId(atom.id);
-      const color = getNodeColor(atom.type, colorScheme);
+      const color = getNodeColor2(atom.type, colorScheme);
       mermaid += `  style ${nodeId} fill:${color}
 `;
     }
@@ -6763,16 +8835,16 @@ function getSVGColors(type, colorScheme) {
   };
   return colors[type] || colors.derived;
 }
-function escapeSVGText(text) {
+function escapeSVGText2(text) {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
-function truncateText(text, maxChars) {
+function truncateText2(text, maxChars) {
   if (text.length <= maxChars) return text;
   return text.substring(0, maxChars - 3) + "...";
 }
 function renderSVGNode(pos, colorScheme) {
   const colors = getSVGColors(pos.type, colorScheme);
-  const escapedLabel = escapeSVGText(truncateText(pos.label, 30));
+  const escapedLabel = escapeSVGText2(truncateText2(pos.label, 30));
   switch (pos.type) {
     case "axiom":
       return `
@@ -6842,7 +8914,7 @@ function renderSVGEdge(fromPos, toPos, label, isDashed = false, color = "#333333
   const midY = (fromY + toY) / 2;
   const path2 = `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY - 8}`;
   const dashStyle = isDashed ? 'stroke-dasharray="5,5"' : "";
-  const labelElement = label ? `<text x="${(fromX + toX) / 2}" y="${midY - 5}" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">${escapeSVGText(label)}</text>` : "";
+  const labelElement = label ? `<text x="${(fromX + toX) / 2}" y="${midY - 5}" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">${escapeSVGText2(label)}</text>` : "";
   return `
     <g class="edge">
       <path d="${path2}" fill="none" stroke="${color}" stroke-width="2" ${dashStyle} marker-end="url(#arrowhead)"/>
@@ -6933,7 +9005,7 @@ function proofDecompositionToSVG(decomposition, colorScheme, includeLabels, incl
   if (decomposition.theorem) {
     svg += `
   <!-- Title -->
-  <text x="${width / 2}" y="25" text-anchor="middle" class="title">Proof: ${escapeSVGText(truncateText(decomposition.theorem, 60))}</text>
+  <text x="${width / 2}" y="25" text-anchor="middle" class="title">Proof: ${escapeSVGText2(truncateText2(decomposition.theorem, 60))}</text>
 `;
   }
   if (decomposition.dependencies && decomposition.dependencies.edges) {
@@ -6953,7 +9025,7 @@ function proofDecompositionToSVG(decomposition, colorScheme, includeLabels, incl
       const fromPos = nodePositions.get(gap.location.from);
       const toPos = nodePositions.get(gap.location.to);
       if (fromPos && toPos) {
-        svg += renderSVGEdge(fromPos, toPos, "GAP: " + truncateText(gap.description, 20), true, "#e53935");
+        svg += renderSVGEdge(fromPos, toPos, "GAP: " + truncateText2(gap.description, 20), true, "#e53935");
       }
     }
     svg += "\n  </g>\n";
@@ -7007,6 +9079,7 @@ var VisualExporter;
 var init_visual = __esm({
   "src/export/visual/index.ts"() {
     init_esm_shims();
+    init_svg_utils();
     init_causal();
     init_temporal();
     init_game_theory();
@@ -7131,7 +9204,7 @@ var init_ExportService = __esm({
       exportSession(session, format) {
         const startTime = Date.now();
         this.logger.debug("Export started", { sessionId: session.id, format, thoughtCount: session.thoughts.length });
-        if (format === "mermaid" || format === "dot" || format === "ascii") {
+        if (format === "mermaid" || format === "dot" || format === "ascii" || format === "svg") {
           const result2 = this.exportVisual(session, format);
           this.logger.debug("Export completed", {
             sessionId: session.id,

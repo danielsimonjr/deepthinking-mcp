@@ -1,11 +1,24 @@
 /**
- * Shannon Visual Exporter (v4.3.0)
+ * Shannon Visual Exporter (v7.0.2)
  * Sprint 8 Task 8.1: Shannon stage flow export to Mermaid, DOT, ASCII
+ * Phase 9: Added native SVG export support
  */
 
 import type { ShannonThought } from '../../types/index.js';
 import type { VisualExportOptions } from './types.js';
 import { sanitizeId } from './utils.js';
+import {
+  generateSVGHeader,
+  generateSVGFooter,
+  renderRectNode,
+  renderStadiumNode,
+  renderHorizontalEdge,
+  renderMetricsPanel,
+  renderLegend,
+  getNodeColor,
+  layoutNodesHorizontally,
+  DEFAULT_SVG_OPTIONS,
+} from './svg-utils.js';
 
 /**
  * Export Shannon stage flow diagram to visual format
@@ -20,6 +33,8 @@ export function exportShannonStageFlow(thought: ShannonThought, options: VisualE
       return shannonToDOT(thought, includeLabels, includeMetrics);
     case 'ascii':
       return shannonToASCII(thought);
+    case 'svg':
+      return shannonToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -150,4 +165,84 @@ function shannonToASCII(thought: ShannonThought): string {
   }
 
   return ascii;
+}
+
+/**
+ * Export Shannon stage flow to native SVG format
+ */
+function shannonToSVG(thought: ShannonThought, options: VisualExportOptions): string {
+  const {
+    colorScheme = 'default',
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = 300,
+  } = options;
+
+  // Create nodes from stages
+  const nodes = stages.map(stage => ({
+    id: sanitizeId(stage),
+    label: includeLabels ? stageLabels[stage] : sanitizeId(stage),
+    type: stage === thought.stage ? 'current' : 'stage',
+  }));
+
+  const positions = layoutNodesHorizontally(nodes, {
+    width: svgWidth,
+    height: svgHeight,
+    nodeWidth: 130,
+    nodeHeight: 45,
+    nodeSpacing: 25,
+  });
+
+  let svg = generateSVGHeader(svgWidth, svgHeight, 'Shannon Stage Flow');
+
+  // Render edges between consecutive stages
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  for (let i = 0; i < stages.length - 1; i++) {
+    const fromPos = positions.get(sanitizeId(stages[i]));
+    const toPos = positions.get(sanitizeId(stages[i + 1]));
+    if (fromPos && toPos) {
+      svg += renderHorizontalEdge(fromPos, toPos, {});
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render nodes
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  for (let i = 0; i < stages.length; i++) {
+    const stage = stages[i];
+    const pos = positions.get(sanitizeId(stage));
+    if (pos) {
+      const isCurrent = stage === thought.stage;
+      const colors = isCurrent
+        ? getNodeColor('primary', colorScheme)
+        : getNodeColor('neutral', colorScheme);
+
+      if (isCurrent) {
+        svg += renderStadiumNode(pos, colors);
+      } else {
+        svg += renderRectNode(pos, colors);
+      }
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render metrics
+  if (includeMetrics && thought.uncertainty !== undefined) {
+    const metrics = [
+      { label: 'Stage', value: stageLabels[thought.stage] },
+      { label: 'Uncertainty', value: thought.uncertainty.toFixed(2) },
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, svgHeight - 80, metrics);
+  }
+
+  // Render legend
+  const legendItems = [
+    { label: 'Current', color: getNodeColor('primary', colorScheme) },
+    { label: 'Stage', color: getNodeColor('neutral', colorScheme) },
+  ];
+  svg += renderLegend(20, svgHeight - 60, legendItems);
+
+  svg += '\n' + generateSVGFooter();
+  return svg;
 }

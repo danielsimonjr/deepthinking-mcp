@@ -1,11 +1,25 @@
 /**
- * Scientific Method Visual Exporter (v4.3.0)
+ * Scientific Method Visual Exporter (v7.0.2)
  * Sprint 8 Task 8.1: Scientific method experiment export to Mermaid, DOT, ASCII
+ * Phase 9: Added native SVG export support
  */
 
 import type { ScientificMethodThought } from '../../types/index.js';
 import type { VisualExportOptions } from './types.js';
 import { sanitizeId } from './utils.js';
+import {
+  generateSVGHeader,
+  generateSVGFooter,
+  renderRectNode,
+  renderEllipseNode,
+  renderStadiumNode,
+  renderEdge,
+  renderMetricsPanel,
+  renderLegend,
+  getNodeColor,
+  DEFAULT_SVG_OPTIONS,
+  type SVGNodePosition,
+} from './svg-utils.js';
 
 /**
  * Export scientific method experiment flow to visual format
@@ -20,6 +34,8 @@ export function exportScientificMethodExperiment(thought: ScientificMethodThough
       return scientificMethodToDOT(thought, includeLabels, includeMetrics);
     case 'ascii':
       return scientificMethodToASCII(thought);
+    case 'svg':
+      return scientificMethodToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -240,4 +256,164 @@ function scientificMethodToASCII(thought: ScientificMethodThought): string {
   }
 
   return ascii;
+}
+
+/**
+ * Export scientific method experiment flow to native SVG format
+ */
+function scientificMethodToSVG(thought: ScientificMethodThought, options: VisualExportOptions): string {
+  const {
+    colorScheme = 'default',
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+  } = options;
+
+  const positions = new Map<string, SVGNodePosition>();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+  const nodeSpacing = 120;
+  let currentY = 80;
+
+  // Research Question
+  if (thought.researchQuestion) {
+    positions.set('RQ', {
+      id: 'RQ',
+      label: includeLabels ? `RQ: ${thought.researchQuestion.question.substring(0, 40)}...` : 'Research Question',
+      x: svgWidth / 2,
+      y: currentY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: 'question',
+    });
+    currentY += nodeSpacing;
+  }
+
+  // Hypotheses
+  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+    thought.scientificHypotheses.forEach((hypothesis) => {
+      positions.set(hypothesis.id, {
+        id: hypothesis.id,
+        label: includeLabels ? `H: ${hypothesis.statement.substring(0, 30)}...` : hypothesis.id,
+        x: svgWidth / 2,
+        y: currentY,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: 'hypothesis',
+      });
+      currentY += nodeSpacing;
+    });
+  }
+
+  // Experiment
+  if (thought.experiment) {
+    positions.set('Exp', {
+      id: 'Exp',
+      label: 'Experiment',
+      x: svgWidth / 2,
+      y: currentY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: 'experiment',
+    });
+    currentY += nodeSpacing;
+  }
+
+  // Data
+  if (thought.data) {
+    positions.set('Data', {
+      id: 'Data',
+      label: 'Data Collection',
+      x: svgWidth / 2,
+      y: currentY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: 'data',
+    });
+    currentY += nodeSpacing;
+  }
+
+  // Analysis
+  if (thought.analysis) {
+    positions.set('Stats', {
+      id: 'Stats',
+      label: 'Statistical Analysis',
+      x: svgWidth / 2,
+      y: currentY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: 'analysis',
+    });
+    currentY += nodeSpacing;
+  }
+
+  // Conclusion
+  if (thought.conclusion) {
+    positions.set('Conclusion', {
+      id: 'Conclusion',
+      label: includeLabels ? `Conclusion: ${thought.conclusion.statement.substring(0, 30)}...` : 'Conclusion',
+      x: svgWidth / 2,
+      y: currentY,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: 'conclusion',
+    });
+  }
+
+  const actualHeight = Math.max(DEFAULT_SVG_OPTIONS.height, currentY + 100);
+
+  let svg = generateSVGHeader(svgWidth, actualHeight, 'Scientific Method Process');
+
+  // Render edges (linear flow)
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  const nodeIds = ['RQ', ...thought.scientificHypotheses?.map(h => h.id) || [], 'Exp', 'Data', 'Stats', 'Conclusion'];
+  for (let i = 0; i < nodeIds.length - 1; i++) {
+    const fromPos = positions.get(nodeIds[i]);
+    const toPos = positions.get(nodeIds[i + 1]);
+    if (fromPos && toPos) {
+      svg += renderEdge(fromPos, toPos);
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render nodes
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+
+  const questionColors = getNodeColor('tertiary', colorScheme);
+  const hypothesisColors = getNodeColor('primary', colorScheme);
+  const conclusionColors = getNodeColor('success', colorScheme);
+  const neutralColors = getNodeColor('neutral', colorScheme);
+
+  for (const [, pos] of positions) {
+    if (pos.type === 'question') {
+      svg += renderEllipseNode(pos, questionColors);
+    } else if (pos.type === 'hypothesis') {
+      svg += renderRectNode(pos, hypothesisColors);
+    } else if (pos.type === 'conclusion') {
+      svg += renderStadiumNode(pos, conclusionColors);
+    } else {
+      svg += renderRectNode(pos, neutralColors);
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render metrics panel
+  if (includeMetrics) {
+    const metrics = [
+      { label: 'Hypotheses', value: thought.scientificHypotheses?.length || 0 },
+      { label: 'Confidence', value: thought.conclusion?.confidence?.toFixed(2) || 'N/A' },
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
+  }
+
+  // Render legend
+  const legendItems = [
+    { label: 'Research Question', color: questionColors, shape: 'ellipse' as const },
+    { label: 'Hypothesis', color: hypothesisColors },
+    { label: 'Conclusion', color: conclusionColors, shape: 'stadium' as const },
+  ];
+  svg += renderLegend(20, actualHeight - 110, legendItems);
+
+  svg += '\n' + generateSVGFooter();
+  return svg;
 }

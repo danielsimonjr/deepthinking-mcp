@@ -1,11 +1,24 @@
 /**
- * Evidential Visual Exporter (v4.3.0)
+ * Evidential Visual Exporter (v7.0.2)
  * Sprint 8 Task 8.1: Evidential belief export to Mermaid, DOT, ASCII
+ * Phase 9: Added native SVG export support
  */
 
 import type { EvidentialThought } from '../../types/index.js';
 import type { VisualExportOptions } from './types.js';
 import { sanitizeId } from './utils.js';
+import {
+  generateSVGHeader,
+  generateSVGFooter,
+  renderRectNode,
+  renderEllipseNode,
+  renderEdge,
+  renderMetricsPanel,
+  renderLegend,
+  getNodeColor,
+  DEFAULT_SVG_OPTIONS,
+  type SVGNodePosition,
+} from './svg-utils.js';
 
 /**
  * Export evidential belief visualization to visual format
@@ -20,6 +33,8 @@ export function exportEvidentialBeliefs(thought: EvidentialThought, options: Vis
       return evidentialToDOT(thought, includeLabels, includeMetrics);
     case 'ascii':
       return evidentialToASCII(thought);
+    case 'svg':
+      return evidentialToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -128,4 +143,102 @@ function evidentialToASCII(thought: EvidentialThought): string {
   }
 
   return ascii;
+}
+
+/**
+ * Export evidential belief visualization to native SVG format
+ */
+function evidentialToSVG(thought: EvidentialThought, options: VisualExportOptions): string {
+  const {
+    colorScheme = 'default',
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+  } = options;
+
+  if (!thought.frameOfDiscernment || thought.frameOfDiscernment.length === 0) {
+    return generateSVGHeader(svgWidth, 200, 'Evidential Beliefs') +
+      '\n  <text x="400" y="100" text-anchor="middle" class="subtitle">No frame of discernment defined</text>\n' +
+      generateSVGFooter();
+  }
+
+  const positions = new Map<string, SVGNodePosition>();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+
+  // Frame of discernment at the top center
+  positions.set('frame', {
+    id: 'frame',
+    label: 'Frame of Discernment',
+    x: svgWidth / 2,
+    y: 80,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: 'frame',
+  });
+
+  // Hypotheses below the frame
+  const hypSpacing = Math.min(200, svgWidth / (thought.frameOfDiscernment.length + 1));
+  const hypStartX = (svgWidth - (thought.frameOfDiscernment.length - 1) * hypSpacing) / 2;
+  thought.frameOfDiscernment.forEach((hypothesis, index) => {
+    const hypId = sanitizeId(hypothesis);
+    positions.set(hypId, {
+      id: hypId,
+      label: includeLabels ? hypothesis : hypId,
+      x: hypStartX + index * hypSpacing,
+      y: 200,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: 'hypothesis',
+    });
+  });
+
+  const actualHeight = 400;
+
+  let svg = generateSVGHeader(svgWidth, actualHeight, 'Evidential Beliefs');
+
+  // Render edges from frame to hypotheses
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  const framePos = positions.get('frame')!;
+  for (const hypothesis of thought.frameOfDiscernment) {
+    const hypPos = positions.get(sanitizeId(hypothesis));
+    if (hypPos) {
+      svg += renderEdge(framePos, hypPos);
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render nodes
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+
+  const frameColors = getNodeColor('warning', colorScheme);
+  const hypColors = getNodeColor('primary', colorScheme);
+
+  svg += renderEllipseNode(framePos, frameColors);
+
+  for (const [id, pos] of positions) {
+    if (id !== 'frame') {
+      svg += renderRectNode(pos, hypColors);
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render metrics panel
+  if (includeMetrics) {
+    const metrics = [
+      { label: 'Hypotheses', value: thought.frameOfDiscernment.length },
+      { label: 'Belief Functions', value: thought.beliefFunctions?.length || 0 },
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
+  }
+
+  // Render legend
+  const legendItems = [
+    { label: 'Frame', color: frameColors, shape: 'ellipse' as const },
+    { label: 'Hypothesis', color: hypColors },
+  ];
+  svg += renderLegend(20, actualHeight - 80, legendItems);
+
+  svg += '\n' + generateSVGFooter();
+  return svg;
 }

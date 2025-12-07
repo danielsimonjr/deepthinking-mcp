@@ -10,6 +10,9 @@
 export { type VisualFormat, type VisualExportOptions } from './types.js';
 export { sanitizeId } from './utils.js';
 
+// Re-export SVG utilities for all exporters
+export * from './svg-utils.js';
+
 // Re-export mode-specific functions
 export { exportCausalGraph } from './causal.js';
 export { exportTemporalTimeline } from './temporal.js';

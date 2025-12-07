@@ -9,6 +9,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [7.0.2] - 2025-12-07
+
+### ✨ Features
+
+**Native SVG Export Support for All Visual Exporters**
+
+Added a comprehensive SVG export module accessible by all 19 thought modes with dedicated visual exporters.
+
+#### New Module
+- `src/export/visual/svg-utils.ts` - Shared SVG utilities with:
+  - Node rendering functions (rect, ellipse, stadium, diamond, hexagon, parallelogram)
+  - Edge rendering with curved paths and arrow markers
+  - Color palettes (default, pastel, monochrome)
+  - Layout utilities (layered, horizontal)
+  - Metrics panel and legend generation
+
+#### Updated Exporters
+All 19 mode-specific visual exporters now support native SVG format:
+- Causal, Sequential, Temporal, Bayesian, Game Theory
+- Shannon, Abductive, Counterfactual, Analogical, Evidential
+- First Principles, Systems Thinking, Scientific Method, Optimization
+- Formal Logic, Mathematics, Physics, Hybrid, Meta-Reasoning
+
+#### Updated Services
+- `ExportService.exportSession()` now accepts `'svg'` as a valid format
+- Visual format type extended: `'mermaid' | 'dot' | 'ascii' | 'svg'`
+
+#### API
+```typescript
+// Export to SVG
+const svgOutput = exportService.exportSession(session, 'svg');
+
+// Direct exporter usage
+import { exportCausalGraph } from './export/visual/causal.js';
+const svg = exportCausalGraph(thought, { format: 'svg', colorScheme: 'pastel' });
+```
+
+---
+
 ## [7.0.1] - 2025-12-07
 
 ### 🧹 Codebase Consolidation (Phase 9)

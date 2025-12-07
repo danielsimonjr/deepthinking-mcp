@@ -1,11 +1,27 @@
 /**
- * Causal Visual Exporter (v4.3.0)
+ * Causal Visual Exporter (v7.0.2)
  * Sprint 8 Task 8.1: Causal graph export to Mermaid, DOT, ASCII
+ * Phase 9: Added native SVG export support
  */
 
 import type { CausalThought } from '../../types/index.js';
 import type { VisualExportOptions } from './types.js';
 import { sanitizeId } from './utils.js';
+import {
+  generateSVGHeader,
+  generateSVGFooter,
+  renderStadiumNode,
+  renderRectNode,
+  renderDiamondNode,
+  renderEllipseNode,
+  renderEdge,
+  renderMetricsPanel,
+  renderLegend,
+  getNodeColor,
+  layoutNodesInLayers,
+  calculateSVGHeight,
+  DEFAULT_SVG_OPTIONS,
+} from './svg-utils.js';
 
 /**
  * Export causal graph to visual format
@@ -20,6 +36,8 @@ export function exportCausalGraph(thought: CausalThought, options: VisualExportO
       return causalGraphToDOT(thought, includeLabels, includeMetrics);
     case 'ascii':
       return causalGraphToASCII(thought);
+    case 'svg':
+      return causalGraphToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -162,4 +180,95 @@ function causalGraphToASCII(thought: CausalThought): string {
   }
 
   return ascii;
+}
+
+/**
+ * Export causal graph to native SVG format
+ */
+function causalGraphToSVG(thought: CausalThought, options: VisualExportOptions): string {
+  const {
+    colorScheme = 'default',
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+  } = options;
+
+  if (!thought.causalGraph || !thought.causalGraph.nodes) {
+    return generateSVGHeader(svgWidth, 200, 'Causal Graph') +
+      '\n  <text x="400" y="100" text-anchor="middle" class="subtitle">No causal graph data</text>\n' +
+      generateSVGFooter();
+  }
+
+  // Group nodes by type for layered layout
+  const causes = thought.causalGraph.nodes.filter(n => n.type === 'cause');
+  const mediators = thought.causalGraph.nodes.filter(n => n.type === 'mediator');
+  const confounders = thought.causalGraph.nodes.filter(n => n.type === 'confounder');
+  const effects = thought.causalGraph.nodes.filter(n => n.type === 'effect');
+
+  // Build layers for layout
+  const layers = [
+    causes.map(n => ({ id: n.id, label: includeLabels ? n.name : n.id, type: 'cause' })),
+    [...mediators, ...confounders].map(n => ({ id: n.id, label: includeLabels ? n.name : n.id, type: n.type })),
+    effects.map(n => ({ id: n.id, label: includeLabels ? n.name : n.id, type: 'effect' })),
+  ].filter(layer => layer.length > 0);
+
+  const positions = layoutNodesInLayers(layers, { width: svgWidth, title: 'Causal Graph' });
+  const actualHeight = calculateSVGHeight(positions);
+
+  let svg = generateSVGHeader(svgWidth, actualHeight, 'Causal Graph');
+
+  // Render edges first (behind nodes)
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+  for (const edge of thought.causalGraph.edges) {
+    const fromPos = positions.get(edge.from);
+    const toPos = positions.get(edge.to);
+    if (fromPos && toPos) {
+      const label = includeMetrics && edge.strength !== undefined ? edge.strength.toFixed(2) : undefined;
+      svg += renderEdge(fromPos, toPos, { label });
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render nodes
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+  for (const [, pos] of positions) {
+    const colors = getNodeColor(pos.type === 'cause' ? 'primary' : pos.type === 'effect' ? 'tertiary' : 'neutral', colorScheme);
+    switch (pos.type) {
+      case 'cause':
+        svg += renderStadiumNode(pos, colors);
+        break;
+      case 'effect':
+        svg += renderEllipseNode(pos, colors);
+        break;
+      case 'confounder':
+        svg += renderDiamondNode(pos, colors);
+        break;
+      default:
+        svg += renderRectNode(pos, colors);
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render metrics panel
+  if (includeMetrics) {
+    const metrics = [
+      { label: 'Nodes', value: thought.causalGraph.nodes.length },
+      { label: 'Edges', value: thought.causalGraph.edges.length },
+      { label: 'Causes', value: causes.length },
+      { label: 'Effects', value: effects.length },
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
+  }
+
+  // Render legend
+  const legendItems = [
+    { label: 'Cause', color: getNodeColor('primary', colorScheme) },
+    { label: 'Mediator', color: getNodeColor('neutral', colorScheme) },
+    { label: 'Confounder', color: getNodeColor('neutral', colorScheme), shape: 'diamond' as const },
+    { label: 'Effect', color: getNodeColor('tertiary', colorScheme), shape: 'ellipse' as const },
+  ];
+  svg += renderLegend(20, actualHeight - 100, legendItems);
+
+  svg += '\n' + generateSVGFooter();
+  return svg;
 }

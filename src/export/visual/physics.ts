@@ -1,11 +1,25 @@
 /**
- * Physics Visual Exporter (v6.1.0)
+ * Physics Visual Exporter (v7.0.2)
  * Phase 7 Sprint 2: Physics reasoning export to Mermaid, DOT, ASCII
+ * Phase 9: Added native SVG export support
  */
 
 import type { PhysicsThought } from '../../types/modes/physics.js';
 import type { VisualExportOptions } from './types.js';
 import { sanitizeId } from './utils.js';
+import {
+  generateSVGHeader,
+  generateSVGFooter,
+  renderRectNode,
+  renderEllipseNode,
+  renderStadiumNode,
+  renderEdge,
+  renderMetricsPanel,
+  renderLegend,
+  getNodeColor,
+  DEFAULT_SVG_OPTIONS,
+  type SVGNodePosition,
+} from './svg-utils.js';
 
 /**
  * Export physics reasoning to visual format
@@ -20,6 +34,8 @@ export function exportPhysicsVisualization(thought: PhysicsThought, options: Vis
       return physicsToDOT(thought, includeLabels, includeMetrics);
     case 'ascii':
       return physicsToASCII(thought);
+    case 'svg':
+      return physicsToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -330,4 +346,135 @@ function physicsToASCII(thought: PhysicsThought): string {
   }
 
   return ascii;
+}
+
+/**
+ * Export physics reasoning to native SVG format
+ */
+function physicsToSVG(thought: PhysicsThought, options: VisualExportOptions): string {
+  const {
+    colorScheme = 'default',
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = DEFAULT_SVG_OPTIONS.height,
+  } = options;
+
+  const positions = new Map<string, SVGNodePosition>();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+
+  // Thought type at the top
+  positions.set('type', {
+    id: 'type',
+    label: includeLabels ? (thought.thoughtType || 'Physics').replace(/_/g, ' ') : 'Physics',
+    x: svgWidth / 2,
+    y: 80,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: 'type',
+  });
+
+  // Tensor properties on the left
+  if (thought.tensorProperties) {
+    positions.set('tensor', {
+      id: 'tensor',
+      label: `Tensor (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`,
+      x: 150,
+      y: 220,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: 'tensor',
+    });
+  }
+
+  // Physical interpretation on the right
+  if (thought.physicalInterpretation) {
+    positions.set('interpretation', {
+      id: 'interpretation',
+      label: thought.physicalInterpretation.quantity,
+      x: svgWidth - 150,
+      y: 220,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: 'interpretation',
+    });
+  }
+
+  // Field theory context at the bottom
+  if (thought.fieldTheoryContext) {
+    positions.set('field', {
+      id: 'field',
+      label: 'Field Theory',
+      x: svgWidth / 2,
+      y: 360,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: 'field',
+    });
+  }
+
+  let svg = generateSVGHeader(svgWidth, svgHeight, 'Physics Analysis');
+
+  // Render edges
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+
+  const typePos = positions.get('type');
+  const tensorPos = positions.get('tensor');
+  const interpPos = positions.get('interpretation');
+  const fieldPos = positions.get('field');
+
+  if (typePos && tensorPos) {
+    svg += renderEdge(typePos, tensorPos);
+  }
+  if (typePos && interpPos) {
+    svg += renderEdge(typePos, interpPos);
+  }
+  if (typePos && fieldPos) {
+    svg += renderEdge(typePos, fieldPos);
+  }
+
+  svg += '\n  </g>';
+
+  // Render nodes
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+
+  const typeColors = getNodeColor('primary', colorScheme);
+  const tensorColors = getNodeColor('secondary', colorScheme);
+  const interpColors = getNodeColor('tertiary', colorScheme);
+  const fieldColors = getNodeColor('neutral', colorScheme);
+
+  for (const [, pos] of positions) {
+    if (pos.type === 'type') {
+      svg += renderStadiumNode(pos, typeColors);
+    } else if (pos.type === 'tensor') {
+      svg += renderEllipseNode(pos, tensorColors);
+    } else if (pos.type === 'interpretation') {
+      svg += renderRectNode(pos, interpColors);
+    } else if (pos.type === 'field') {
+      svg += renderRectNode(pos, fieldColors);
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render metrics panel
+  if (includeMetrics) {
+    const metrics = [
+      { label: 'Uncertainty', value: `${(thought.uncertainty * 100).toFixed(1)}%` },
+      { label: 'Assumptions', value: thought.assumptions?.length || 0 },
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, svgHeight - 110, metrics);
+  }
+
+  // Render legend
+  const legendItems = [
+    { label: 'Type', color: typeColors, shape: 'stadium' as const },
+    { label: 'Tensor', color: tensorColors, shape: 'ellipse' as const },
+    { label: 'Interpretation', color: interpColors },
+    { label: 'Field Theory', color: fieldColors },
+  ];
+  svg += renderLegend(20, svgHeight - 130, legendItems);
+
+  svg += '\n' + generateSVGFooter();
+  return svg;
 }

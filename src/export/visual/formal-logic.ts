@@ -1,11 +1,25 @@
 /**
- * Formal Logic Visual Exporter (v4.3.0)
+ * Formal Logic Visual Exporter (v7.0.2)
  * Sprint 8 Task 8.1: Formal logic proof tree export to Mermaid, DOT, ASCII
+ * Phase 9: Added native SVG export support
  */
 
 import type { FormalLogicThought } from '../../types/index.js';
 import type { VisualExportOptions } from './types.js';
 import { sanitizeId } from './utils.js';
+import {
+  generateSVGHeader,
+  generateSVGFooter,
+  renderRectNode,
+  renderEllipseNode,
+  renderStadiumNode,
+  renderEdge,
+  renderMetricsPanel,
+  renderLegend,
+  getNodeColor,
+  DEFAULT_SVG_OPTIONS,
+  type SVGNodePosition,
+} from './svg-utils.js';
 
 /**
  * Export formal logic proof tree to visual format
@@ -20,6 +34,8 @@ export function exportFormalLogicProof(thought: FormalLogicThought, options: Vis
       return formalLogicToDOT(thought, includeLabels, includeMetrics);
     case 'ascii':
       return formalLogicToASCII(thought);
+    case 'svg':
+      return formalLogicToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -236,4 +252,137 @@ function formalLogicToASCII(thought: FormalLogicThought): string {
   }
 
   return ascii;
+}
+
+/**
+ * Export formal logic proof tree to native SVG format
+ */
+function formalLogicToSVG(thought: FormalLogicThought, options: VisualExportOptions): string {
+  const {
+    colorScheme = 'default',
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = DEFAULT_SVG_OPTIONS.height,
+  } = options;
+
+  const positions = new Map<string, SVGNodePosition>();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+
+  // Propositions at the top
+  if (thought.propositions) {
+    const propSpacing = Math.min(180, svgWidth / (thought.propositions.length + 1));
+    const propStartX = (svgWidth - (thought.propositions.length - 1) * propSpacing) / 2;
+    thought.propositions.forEach((prop, index) => {
+      positions.set(prop.id, {
+        id: prop.id,
+        label: includeLabels ? `${prop.symbol}: ${prop.statement.substring(0, 20)}...` : prop.symbol,
+        x: propStartX + index * propSpacing,
+        y: 80,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: prop.type,
+      });
+    });
+  }
+
+  // Proof steps in the middle
+  if (thought.proof && thought.proof.steps) {
+    thought.proof.steps.forEach((step, index) => {
+      const stepId = `Step${step.stepNumber}`;
+      positions.set(stepId, {
+        id: stepId,
+        label: includeLabels ? `${step.stepNumber}. ${step.statement.substring(0, 25)}...` : `Step ${step.stepNumber}`,
+        x: 150 + index * 180,
+        y: 250,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: 'step',
+      });
+    });
+  }
+
+  // Theorem at the bottom
+  if (thought.proof) {
+    positions.set('Theorem', {
+      id: 'Theorem',
+      label: 'Theorem',
+      x: svgWidth / 2,
+      y: 420,
+      width: nodeWidth,
+      height: nodeHeight,
+      type: 'theorem',
+    });
+  }
+
+  let svg = generateSVGHeader(svgWidth, svgHeight, 'Formal Logic Proof');
+
+  // Render edges
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+
+  // Edges from steps to theorem
+  if (thought.proof && thought.proof.steps) {
+    const theoremPos = positions.get('Theorem');
+    for (const step of thought.proof.steps) {
+      const stepPos = positions.get(`Step${step.stepNumber}`);
+      if (stepPos && theoremPos) {
+        svg += renderEdge(stepPos, theoremPos);
+      }
+
+      // Edges between steps (references)
+      if (step.referencesSteps) {
+        for (const refStepNum of step.referencesSteps) {
+          const refStepPos = positions.get(`Step${refStepNum}`);
+          if (refStepPos && stepPos) {
+            svg += renderEdge(refStepPos, stepPos, { style: 'dashed' });
+          }
+        }
+      }
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render nodes
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+
+  const atomicColors = getNodeColor('primary', colorScheme);
+  const compoundColors = getNodeColor('secondary', colorScheme);
+  const stepColors = getNodeColor('neutral', colorScheme);
+  const theoremColors = getNodeColor('success', colorScheme);
+
+  for (const [, pos] of positions) {
+    if (pos.type === 'theorem') {
+      svg += renderStadiumNode(pos, theoremColors);
+    } else if (pos.type === 'step') {
+      svg += renderRectNode(pos, stepColors);
+    } else if (pos.type === 'atomic') {
+      svg += renderEllipseNode(pos, atomicColors);
+    } else {
+      svg += renderRectNode(pos, compoundColors);
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render metrics panel
+  if (includeMetrics) {
+    const metrics = [
+      { label: 'Propositions', value: thought.propositions?.length || 0 },
+      { label: 'Proof Steps', value: thought.proof?.steps?.length || 0 },
+      { label: 'Completeness', value: thought.proof ? `${(thought.proof.completeness * 100).toFixed(0)}%` : 'N/A' },
+    ];
+    svg += renderMetricsPanel(svgWidth - 180, svgHeight - 110, metrics);
+  }
+
+  // Render legend
+  const legendItems = [
+    { label: 'Atomic', color: atomicColors, shape: 'ellipse' as const },
+    { label: 'Compound', color: compoundColors },
+    { label: 'Proof Step', color: stepColors },
+    { label: 'Theorem', color: theoremColors, shape: 'stadium' as const },
+  ];
+  svg += renderLegend(20, svgHeight - 130, legendItems);
+
+  svg += '\n' + generateSVGFooter();
+  return svg;
 }

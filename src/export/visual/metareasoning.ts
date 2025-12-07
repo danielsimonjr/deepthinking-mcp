@@ -1,11 +1,25 @@
 /**
- * MetaReasoning Visual Exporter (v6.1.0)
+ * MetaReasoning Visual Exporter (v7.0.2)
  * Phase 7 Sprint 2: Meta-reasoning export to Mermaid, DOT, ASCII
+ * Phase 9: Added native SVG export support
  */
 
 import type { MetaReasoningThought } from '../../types/modes/metareasoning.js';
 import type { VisualExportOptions } from './types.js';
 import { sanitizeId } from './utils.js';
+import {
+  generateSVGHeader,
+  generateSVGFooter,
+  renderRectNode,
+  renderEllipseNode,
+  renderStadiumNode,
+  renderEdge,
+  renderMetricsPanel,
+  renderLegend,
+  getNodeColor,
+  DEFAULT_SVG_OPTIONS,
+  type SVGNodePosition,
+} from './svg-utils.js';
 
 /**
  * Export meta-reasoning to visual format
@@ -20,6 +34,8 @@ export function exportMetaReasoningVisualization(thought: MetaReasoningThought, 
       return metaReasoningToDOT(thought, includeLabels, includeMetrics);
     case 'ascii':
       return metaReasoningToASCII(thought);
+    case 'svg':
+      return metaReasoningToSVG(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -308,4 +324,141 @@ function metaReasoningToASCII(thought: MetaReasoningThought): string {
   }
 
   return ascii;
+}
+
+/**
+ * Export meta-reasoning to native SVG format
+ */
+function metaReasoningToSVG(thought: MetaReasoningThought, options: VisualExportOptions): string {
+  const {
+    colorScheme = 'default',
+    includeLabels = true,
+    includeMetrics = true,
+    svgWidth = DEFAULT_SVG_OPTIONS.width,
+    svgHeight = DEFAULT_SVG_OPTIONS.height,
+  } = options;
+
+  const positions = new Map<string, SVGNodePosition>();
+  const nodeWidth = 150;
+  const nodeHeight = 40;
+
+  // Meta-reasoning at the top center
+  positions.set('meta', {
+    id: 'meta',
+    label: 'Meta-Reasoning',
+    x: svgWidth / 2,
+    y: 80,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: 'meta',
+  });
+
+  // Current strategy on the left
+  positions.set('current', {
+    id: 'current',
+    label: includeLabels ? thought.currentStrategy.approach : 'Current Strategy',
+    x: 200,
+    y: 220,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: 'current',
+  });
+
+  // Recommendation on the right
+  positions.set('recommendation', {
+    id: 'recommendation',
+    label: thought.recommendation.action,
+    x: svgWidth - 200,
+    y: 220,
+    width: nodeWidth,
+    height: nodeHeight,
+    type: 'recommendation',
+  });
+
+  // Alternative strategies at the bottom
+  if (thought.alternativeStrategies && thought.alternativeStrategies.length > 0) {
+    thought.alternativeStrategies.forEach((alt, index) => {
+      positions.set(`alt_${index}`, {
+        id: `alt_${index}`,
+        label: includeLabels ? `${alt.mode}: ${(alt.recommendationScore * 100).toFixed(0)}%` : `Alt ${index + 1}`,
+        x: 150 + index * 180,
+        y: 380,
+        width: nodeWidth,
+        height: nodeHeight,
+        type: 'alternative',
+      });
+    });
+  }
+
+  let svg = generateSVGHeader(svgWidth, svgHeight, 'Meta-Reasoning Analysis');
+
+  // Render edges
+  svg += '\n  <!-- Edges -->\n  <g class="edges">';
+
+  const metaPos = positions.get('meta');
+  const currentPos = positions.get('current');
+  const recPos = positions.get('recommendation');
+
+  if (metaPos && currentPos) {
+    svg += renderEdge(metaPos, currentPos, { style: 'solid' });
+  }
+  if (metaPos && recPos) {
+    svg += renderEdge(metaPos, recPos, { style: 'solid' });
+  }
+
+  // Edges from meta to alternatives
+  if (thought.alternativeStrategies) {
+    thought.alternativeStrategies.forEach((_, index) => {
+      const altPos = positions.get(`alt_${index}`);
+      if (metaPos && altPos) {
+        svg += renderEdge(metaPos, altPos, { style: 'dashed' });
+      }
+    });
+  }
+
+  svg += '\n  </g>';
+
+  // Render nodes
+  svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
+
+  const metaColors = getNodeColor('warning', colorScheme);
+  const currentColors = getNodeColor('primary', colorScheme);
+  const recColors = getNodeColor('success', colorScheme);
+  const altColors = getNodeColor('secondary', colorScheme);
+
+  for (const [, pos] of positions) {
+    if (pos.type === 'meta') {
+      svg += renderEllipseNode(pos, metaColors);
+    } else if (pos.type === 'current') {
+      svg += renderStadiumNode(pos, currentColors);
+    } else if (pos.type === 'recommendation') {
+      svg += renderStadiumNode(pos, recColors);
+    } else if (pos.type === 'alternative') {
+      svg += renderRectNode(pos, altColors);
+    }
+  }
+  svg += '\n  </g>';
+
+  // Render metrics panel
+  if (includeMetrics) {
+    const metrics = [
+      { label: 'Effectiveness', value: `${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%` },
+      { label: 'Quality', value: `${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%` },
+      { label: 'Alternatives', value: thought.alternativeStrategies.length },
+      { label: 'Rec Confidence', value: `${(thought.recommendation.confidence * 100).toFixed(0)}%` },
+    ];
+    svg += renderMetricsPanel(svgWidth - 190, svgHeight - 140, metrics);
+  }
+
+  // Render legend
+  const legendItems = [
+    { label: 'Meta-Reasoning', color: metaColors, shape: 'ellipse' as const },
+    { label: 'Current Strategy', color: currentColors, shape: 'stadium' as const },
+    { label: 'Recommendation', color: recColors, shape: 'stadium' as const },
+    { label: 'Alternative', color: altColors },
+  ];
+  svg += renderLegend(20, svgHeight - 140, legendItems);
+
+  svg += '\n' + generateSVGFooter();
+  return svg;
 }
