@@ -471,7 +471,7 @@ export class AdaptiveModeSelector {
 
   /**
    * Map reasoning type ID to thinking mode
-   * Supports all 28 reasoning modes (v7.2.0)
+   * Supports all 29 reasoning modes (v7.3.0)
    */
   private mapReasoningTypeToMode(typeId: string): ThinkingMode | null {
     // Explicit mapping for known types
@@ -599,6 +599,8 @@ export class AdaptiveModeSelector {
       engineering: ThinkingMode.ENGINEERING,
       computability: ThinkingMode.COMPUTABILITY,
       cryptanalytic: ThinkingMode.CRYPTANALYTIC,
+      algorithmic: ThinkingMode.ALGORITHMIC, // Phase 12 v7.3.0
+      algorithm: ThinkingMode.ALGORITHMIC,
     };
 
     for (const [prefix, mode] of Object.entries(prefixMappings)) {
@@ -639,7 +641,7 @@ export class AdaptiveModeSelector {
 
   /**
    * Suggest alternatives to current mode
-   * Now considers all 28 reasoning modes with intelligent pairing (v7.2.0)
+   * Now considers all 29 reasoning modes with intelligent pairing (v7.3.0)
    */
   private suggestAlternatives(currentMode: ThinkingMode, context: SelectionContext): ModeRecommendation[] {
     // Mode affinity groups - modes that work well as alternatives to each other
@@ -688,6 +690,9 @@ export class AdaptiveModeSelector {
       [ThinkingMode.SCIENTIFICMETHOD]: [ThinkingMode.BAYESIAN, ThinkingMode.INDUCTIVE, ThinkingMode.EVIDENTIAL],
       [ThinkingMode.CRYPTANALYTIC]: [ThinkingMode.STOCHASTIC, ThinkingMode.BAYESIAN, ThinkingMode.COMPUTABILITY],
 
+      // Algorithmic mode (Phase 12 v7.3.0)
+      [ThinkingMode.ALGORITHMIC]: [ThinkingMode.COMPUTABILITY, ThinkingMode.RECURSIVE, ThinkingMode.OPTIMIZATION],
+
       // Default fallback
       [ThinkingMode.CUSTOM]: [ThinkingMode.HYBRID, ThinkingMode.SEQUENTIAL, ThinkingMode.METAREASONING],
     };
@@ -707,6 +712,7 @@ export class AdaptiveModeSelector {
       if (domain.includes('engineer') && [ThinkingMode.ENGINEERING, ThinkingMode.OPTIMIZATION].includes(mode)) score += 0.15;
       if (domain.includes('science') && [ThinkingMode.SCIENTIFICMETHOD, ThinkingMode.BAYESIAN].includes(mode)) score += 0.15;
       if (domain.includes('security') && [ThinkingMode.CRYPTANALYTIC, ThinkingMode.STOCHASTIC].includes(mode)) score += 0.15;
+      if (domain.includes('algorithm') && [ThinkingMode.ALGORITHMIC, ThinkingMode.COMPUTABILITY].includes(mode)) score += 0.15;
       return { mode, score };
     });
 

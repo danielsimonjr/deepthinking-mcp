@@ -27,6 +27,9 @@ import type { EngineeringThought } from './modes/engineering.js';
 import type { ComputabilityThought } from './modes/computability.js';
 import type { CryptanalyticThought } from './modes/cryptanalytic.js';
 
+// Import Phase 12 mode types (v7.3.0) - Algorithmic reasoning
+import type { AlgorithmicThought } from './modes/algorithmic.js';
+
 /**
  * Available thinking modes
  */
@@ -40,6 +43,7 @@ export enum ThinkingMode {
   ENGINEERING = 'engineering', // Phase 10 (v7.1.0) - Engineering analysis
   COMPUTABILITY = 'computability', // Phase 11 (v7.2.0) - Computability theory, Turing machines
   CRYPTANALYTIC = 'cryptanalytic', // Phase 11 (v7.2.0) - Cryptanalysis, Turing's deciban system
+  ALGORITHMIC = 'algorithmic', // Phase 12 (v7.3.0) - Algorithm design and analysis (CLRS)
 
   // ===== Implemented - Advanced Modes (Phase 4) =====
   METAREASONING = 'metareasoning', // Phase 4 (v3.3.0) - Self-reflection and strategy selection
@@ -81,6 +85,7 @@ export const FULLY_IMPLEMENTED_MODES: ReadonlyArray<ThinkingMode> = [
   ThinkingMode.ENGINEERING, // Phase 10 v7.1.0
   ThinkingMode.COMPUTABILITY, // Phase 11 v7.2.0 - Turing's legacy
   ThinkingMode.CRYPTANALYTIC, // Phase 11 v7.2.0 - Turing's Bletchley Park work
+  ThinkingMode.ALGORITHMIC, // Phase 12 v7.3.0 - CLRS algorithms
   ThinkingMode.METAREASONING,
   ThinkingMode.RECURSIVE,
   ThinkingMode.MODAL,
@@ -771,6 +776,7 @@ export type Thought =
   | EngineeringThought
   | ComputabilityThought
   | CryptanalyticThought
+  | AlgorithmicThought
   | InductiveThought
   | DeductiveThought
   | AbductiveThought
@@ -907,6 +913,13 @@ export function isCryptanalyticThought(thought: Thought): thought is Cryptanalyt
   return thought.mode === ThinkingMode.CRYPTANALYTIC;
 }
 
+/**
+ * Type guards for Phase 12 modes (v7.3.0) - Algorithmic reasoning
+ */
+export function isAlgorithmicThought(thought: Thought): thought is AlgorithmicThought {
+  return thought.mode === ThinkingMode.ALGORITHMIC;
+}
+
 // Re-export Phase 3 types
 export type { TemporalThought, GameTheoryThought, EvidentialThought, FirstPrinciplesThought };
 
@@ -921,3 +934,6 @@ export type { EngineeringThought };
 
 // Re-export Phase 11 types (v7.2.0) - Turing/von Neumann extensions
 export type { ComputabilityThought, CryptanalyticThought };
+
+// Re-export Phase 12 types (v7.3.0) - Algorithmic reasoning
+export type { AlgorithmicThought };

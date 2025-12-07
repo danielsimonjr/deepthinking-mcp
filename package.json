@@ -1,7 +1,7 @@
 {
   "name": "deepthinking-mcp",
-  "version": "7.1.0",
-  "description": "Comprehensive MCP server with 25 reasoning modes (21 with thought types) including meta-reasoning for strategic oversight, taxonomy classifier, enterprise security, and visual export capabilities for complex problem-solving and analysis",
+  "version": "7.3.0",
+  "description": "Comprehensive MCP server with 29 reasoning modes including algorithmic (CLRS), meta-reasoning for strategic oversight, taxonomy classifier, enterprise security, and visual export capabilities for complex problem-solving and analysis",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",

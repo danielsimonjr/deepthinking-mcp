@@ -1114,6 +1114,28 @@ var init_recommendations = __esm({
             examples: ["Formal verification", "Logical puzzles", "Argument validity", "Theorem proving"]
           });
         }
+        if (characteristics.domain === "computer science" || characteristics.domain === "algorithms" || characteristics.domain === "data structures" || characteristics.domain === "software" || characteristics.requiresProof && characteristics.requiresQuantification) {
+          recommendations.push({
+            mode: "algorithmic" /* ALGORITHMIC */,
+            score: characteristics.domain === "algorithms" ? 0.95 : 0.88,
+            reasoning: "Problem involves algorithm design, complexity analysis, or data structure optimization",
+            strengths: [
+              "Algorithm design patterns (divide-and-conquer, DP, greedy)",
+              "Complexity analysis (time, space, amortized)",
+              "Correctness proofs (loop invariants, induction)",
+              "Data structure selection and analysis",
+              "Graph algorithms and optimization"
+            ],
+            limitations: ["Focused on computational problems", "Requires algorithmic thinking"],
+            examples: [
+              "Sorting and searching",
+              "Graph traversal (BFS, DFS)",
+              "Dynamic programming formulation",
+              "Shortest path algorithms",
+              "NP-completeness proofs"
+            ]
+          });
+        }
         if (recommendations.length === 0) {
           recommendations.push({
             mode: "sequential" /* SEQUENTIAL */,
@@ -1321,6 +1343,51 @@ var init_recommendations = __esm({
             synergies: ["Metareasoning detects bias patterns", "Counterfactual explores what-if scenarios"]
           });
         }
+        if (characteristics.domain === "computer science" && characteristics.requiresProof) {
+          combinations.push({
+            modes: ["algorithmic" /* ALGORITHMIC */, "computability" /* COMPUTABILITY */],
+            sequence: "hybrid",
+            rationale: "Combine algorithm design with computability analysis for theoretical completeness",
+            benefits: ["Algorithm correctness proofs", "Complexity class analysis", "Decidability bounds"],
+            synergies: ["Algorithmic design informs complexity", "Computability proves fundamental limits"]
+          });
+        }
+        if (characteristics.hasAlternatives && characteristics.requiresQuantification) {
+          combinations.push({
+            modes: ["algorithmic" /* ALGORITHMIC */, "optimization" /* OPTIMIZATION */],
+            sequence: "sequential",
+            rationale: "Design algorithm first, then optimize for performance",
+            benefits: ["Correct-by-construction", "Performance optimization", "Trade-off analysis"],
+            synergies: ["Algorithm provides baseline", "Optimization improves constants and bounds"]
+          });
+        }
+        if (characteristics.requiresProof && characteristics.domain !== "philosophy") {
+          combinations.push({
+            modes: ["algorithmic" /* ALGORITHMIC */, "mathematics" /* MATHEMATICS */],
+            sequence: "hybrid",
+            rationale: "Combine algorithm design with mathematical proof techniques",
+            benefits: ["Rigorous correctness proofs", "Loop invariant verification", "Inductive reasoning"],
+            synergies: ["Algorithmic structures guide proof strategy", "Mathematical rigor ensures correctness"]
+          });
+        }
+        if (characteristics.complexity === "high" && characteristics.hasAlternatives) {
+          combinations.push({
+            modes: ["algorithmic" /* ALGORITHMIC */, "recursive" /* RECURSIVE */],
+            sequence: "parallel",
+            rationale: "Apply divide-and-conquer paradigm with recursive decomposition",
+            benefits: ["Natural problem decomposition", "Recurrence solving", "Subproblem identification"],
+            synergies: ["Algorithmic patterns guide recursion", "Recursive structure enables Master Theorem"]
+          });
+        }
+        if (characteristics.uncertainty !== "low" && characteristics.requiresQuantification) {
+          combinations.push({
+            modes: ["algorithmic" /* ALGORITHMIC */, "stochastic" /* STOCHASTIC */],
+            sequence: "parallel",
+            rationale: "Design randomized algorithms with probabilistic analysis",
+            benefits: ["Expected-case analysis", "Monte Carlo methods", "Las Vegas algorithms"],
+            synergies: ["Algorithmic framework structures randomization", "Stochastic analysis proves bounds"]
+          });
+        }
         return combinations;
       }
       /**
@@ -1380,9 +1447,6 @@ var init_recommendations = __esm({
           "turing": "computability" /* COMPUTABILITY */,
           "halting": "computability" /* COMPUTABILITY */,
           "complexity-class": "computability" /* COMPUTABILITY */,
-          "algorithm-analysis": "computability" /* COMPUTABILITY */,
-          "reduction": "computability" /* COMPUTABILITY */,
-          "np-complete": "computability" /* COMPUTABILITY */,
           "undecidable": "computability" /* COMPUTABILITY */,
           // Cryptanalytic reasoning
           "cryptanalysis": "cryptanalytic" /* CRYPTANALYTIC */,
@@ -1489,7 +1553,140 @@ var init_recommendations = __esm({
           "misinformation": "evidential" /* EVIDENTIAL */,
           "disinformation": "evidential" /* EVIDENTIAL */,
           "reasoning-flaw": "metareasoning" /* METAREASONING */,
-          "argument-analysis": "formallogic" /* FORMALLOGIC */
+          "argument-analysis": "formallogic" /* FORMALLOGIC */,
+          // ===== ALGORITHMIC REASONING (v7.3.0) - CLRS Coverage =====
+          // General algorithm terms
+          "algorithm": "algorithmic" /* ALGORITHMIC */,
+          "algorithms": "algorithmic" /* ALGORITHMIC */,
+          "algorithmic": "algorithmic" /* ALGORITHMIC */,
+          "data-structure": "algorithmic" /* ALGORITHMIC */,
+          "data-structures": "algorithmic" /* ALGORITHMIC */,
+          "complexity": "algorithmic" /* ALGORITHMIC */,
+          "time-complexity": "algorithmic" /* ALGORITHMIC */,
+          "space-complexity": "algorithmic" /* ALGORITHMIC */,
+          "big-o": "algorithmic" /* ALGORITHMIC */,
+          "asymptotic": "algorithmic" /* ALGORITHMIC */,
+          "correctness-proof": "algorithmic" /* ALGORITHMIC */,
+          "loop-invariant": "algorithmic" /* ALGORITHMIC */,
+          "invariant": "algorithmic" /* ALGORITHMIC */,
+          // Design patterns
+          "divide-and-conquer": "algorithmic" /* ALGORITHMIC */,
+          "dynamic-programming": "algorithmic" /* ALGORITHMIC */,
+          "dp": "algorithmic" /* ALGORITHMIC */,
+          "memoization": "algorithmic" /* ALGORITHMIC */,
+          "greedy-algorithm": "algorithmic" /* ALGORITHMIC */,
+          "backtracking": "algorithmic" /* ALGORITHMIC */,
+          "branch-and-bound": "algorithmic" /* ALGORITHMIC */,
+          "amortized": "algorithmic" /* ALGORITHMIC */,
+          "amortized-analysis": "algorithmic" /* ALGORITHMIC */,
+          // Sorting algorithms
+          "sorting": "algorithmic" /* ALGORITHMIC */,
+          "sort": "algorithmic" /* ALGORITHMIC */,
+          "insertion-sort": "algorithmic" /* ALGORITHMIC */,
+          "merge-sort": "algorithmic" /* ALGORITHMIC */,
+          "mergesort": "algorithmic" /* ALGORITHMIC */,
+          "quicksort": "algorithmic" /* ALGORITHMIC */,
+          "quick-sort": "algorithmic" /* ALGORITHMIC */,
+          "heapsort": "algorithmic" /* ALGORITHMIC */,
+          "heap-sort": "algorithmic" /* ALGORITHMIC */,
+          "counting-sort": "algorithmic" /* ALGORITHMIC */,
+          "radix-sort": "algorithmic" /* ALGORITHMIC */,
+          "bucket-sort": "algorithmic" /* ALGORITHMIC */,
+          "comparison-sort": "algorithmic" /* ALGORITHMIC */,
+          // Searching and selection
+          "binary-search": "algorithmic" /* ALGORITHMIC */,
+          "linear-search": "algorithmic" /* ALGORITHMIC */,
+          "selection-algorithm": "algorithmic" /* ALGORITHMIC */,
+          "median-of-medians": "algorithmic" /* ALGORITHMIC */,
+          "order-statistics": "algorithmic" /* ALGORITHMIC */,
+          // Data structures
+          "heap": "algorithmic" /* ALGORITHMIC */,
+          "binary-heap": "algorithmic" /* ALGORITHMIC */,
+          "priority-queue": "algorithmic" /* ALGORITHMIC */,
+          "hash-table": "algorithmic" /* ALGORITHMIC */,
+          "hashing": "algorithmic" /* ALGORITHMIC */,
+          "binary-search-tree": "algorithmic" /* ALGORITHMIC */,
+          "bst": "algorithmic" /* ALGORITHMIC */,
+          "red-black-tree": "algorithmic" /* ALGORITHMIC */,
+          "avl-tree": "algorithmic" /* ALGORITHMIC */,
+          "b-tree": "algorithmic" /* ALGORITHMIC */,
+          "fibonacci-heap": "algorithmic" /* ALGORITHMIC */,
+          "union-find": "algorithmic" /* ALGORITHMIC */,
+          "disjoint-set": "algorithmic" /* ALGORITHMIC */,
+          "trie": "algorithmic" /* ALGORITHMIC */,
+          "segment-tree": "algorithmic" /* ALGORITHMIC */,
+          "fenwick-tree": "algorithmic" /* ALGORITHMIC */,
+          // Graph algorithms
+          "graph-algorithm": "algorithmic" /* ALGORITHMIC */,
+          "bfs": "algorithmic" /* ALGORITHMIC */,
+          "breadth-first": "algorithmic" /* ALGORITHMIC */,
+          "dfs": "algorithmic" /* ALGORITHMIC */,
+          "depth-first": "algorithmic" /* ALGORITHMIC */,
+          "topological-sort": "algorithmic" /* ALGORITHMIC */,
+          "strongly-connected": "algorithmic" /* ALGORITHMIC */,
+          "scc": "algorithmic" /* ALGORITHMIC */,
+          "minimum-spanning-tree": "algorithmic" /* ALGORITHMIC */,
+          "mst": "algorithmic" /* ALGORITHMIC */,
+          "kruskal": "algorithmic" /* ALGORITHMIC */,
+          "prim": "algorithmic" /* ALGORITHMIC */,
+          "dijkstra": "algorithmic" /* ALGORITHMIC */,
+          "bellman-ford": "algorithmic" /* ALGORITHMIC */,
+          "floyd-warshall": "algorithmic" /* ALGORITHMIC */,
+          "shortest-path": "algorithmic" /* ALGORITHMIC */,
+          "max-flow": "algorithmic" /* ALGORITHMIC */,
+          "ford-fulkerson": "algorithmic" /* ALGORITHMIC */,
+          "edmonds-karp": "algorithmic" /* ALGORITHMIC */,
+          "bipartite-matching": "algorithmic" /* ALGORITHMIC */,
+          // Dynamic programming problems
+          "lcs": "algorithmic" /* ALGORITHMIC */,
+          "longest-common-subsequence": "algorithmic" /* ALGORITHMIC */,
+          "edit-distance": "algorithmic" /* ALGORITHMIC */,
+          "levenshtein": "algorithmic" /* ALGORITHMIC */,
+          "knapsack": "algorithmic" /* ALGORITHMIC */,
+          "matrix-chain": "algorithmic" /* ALGORITHMIC */,
+          "optimal-bst": "algorithmic" /* ALGORITHMIC */,
+          "rod-cutting": "algorithmic" /* ALGORITHMIC */,
+          "coin-change": "algorithmic" /* ALGORITHMIC */,
+          // String algorithms
+          "string-matching": "algorithmic" /* ALGORITHMIC */,
+          "pattern-matching": "algorithmic" /* ALGORITHMIC */,
+          "kmp": "algorithmic" /* ALGORITHMIC */,
+          "knuth-morris-pratt": "algorithmic" /* ALGORITHMIC */,
+          "rabin-karp": "algorithmic" /* ALGORITHMIC */,
+          "boyer-moore": "algorithmic" /* ALGORITHMIC */,
+          "suffix-array": "algorithmic" /* ALGORITHMIC */,
+          "suffix-tree": "algorithmic" /* ALGORITHMIC */,
+          // Computational geometry
+          "convex-hull": "algorithmic" /* ALGORITHMIC */,
+          "graham-scan": "algorithmic" /* ALGORITHMIC */,
+          "jarvis-march": "algorithmic" /* ALGORITHMIC */,
+          "closest-pair": "algorithmic" /* ALGORITHMIC */,
+          "line-intersection": "algorithmic" /* ALGORITHMIC */,
+          // Number theory algorithms
+          "gcd": "algorithmic" /* ALGORITHMIC */,
+          "euclidean": "algorithmic" /* ALGORITHMIC */,
+          "modular-arithmetic": "algorithmic" /* ALGORITHMIC */,
+          "primality": "algorithmic" /* ALGORITHMIC */,
+          "miller-rabin": "algorithmic" /* ALGORITHMIC */,
+          "rsa": "algorithmic" /* ALGORITHMIC */,
+          // Matrix algorithms
+          "strassen": "algorithmic" /* ALGORITHMIC */,
+          "matrix-multiplication": "algorithmic" /* ALGORITHMIC */,
+          "matrix-exponentiation": "algorithmic" /* ALGORITHMIC */,
+          // Advanced topics
+          "fft": "algorithmic" /* ALGORITHMIC */,
+          "fast-fourier": "algorithmic" /* ALGORITHMIC */,
+          "polynomial-multiplication": "algorithmic" /* ALGORITHMIC */,
+          "linear-programming": "algorithmic" /* ALGORITHMIC */,
+          "simplex": "algorithmic" /* ALGORITHMIC */,
+          "approximation-algorithm": "algorithmic" /* ALGORITHMIC */,
+          "np-hard": "algorithmic" /* ALGORITHMIC */,
+          "np-complete": "algorithmic" /* ALGORITHMIC */,
+          // Recurrences and analysis
+          "recurrence": "algorithmic" /* ALGORITHMIC */,
+          "master-theorem": "algorithmic" /* ALGORITHMIC */,
+          "recursion-tree": "algorithmic" /* ALGORITHMIC */,
+          "substitution-method": "algorithmic" /* ALGORITHMIC */
         };
         return typeMap[problemType.toLowerCase()] || "sequential" /* SEQUENTIAL */;
       }
