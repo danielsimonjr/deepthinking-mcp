@@ -9,6 +9,7 @@
  * - SVG: Native scalable vector graphics
  * - GraphML: XML-based graph format
  * - TikZ: LaTeX graphics
+ * - Modelica: System modeling language for simulation
  */
 
 import type { EngineeringThought } from '../../types/modes/engineering.js';
@@ -58,6 +59,8 @@ export function exportEngineeringAnalysis(
       return engineeringToGraphML(thought, options);
     case 'tikz':
       return engineeringToTikZ(thought, options);
+    case 'modelica':
+      return engineeringToModelica(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -670,4 +673,286 @@ function engineeringToTikZ(thought: EngineeringThought, options: VisualExportOpt
   }
 
   return generateTikZ(nodes, edges, { title: `Engineering: ${thought.analysisType}` });
+}
+
+// =============================================================================
+// Modelica Export
+// =============================================================================
+
+/**
+ * Sanitize identifier for Modelica (must start with letter, alphanumeric + underscore only)
+ */
+function sanitizeModelicaId(id: string): string {
+  // Replace hyphens and spaces with underscores
+  let sanitized = id.replace(/[-\s]/g, '_');
+  // Remove any non-alphanumeric characters except underscore
+  sanitized = sanitized.replace(/[^a-zA-Z0-9_]/g, '');
+  // Ensure it starts with a letter
+  if (!/^[a-zA-Z]/.test(sanitized)) {
+    sanitized = 'id_' + sanitized;
+  }
+  return sanitized;
+}
+
+/**
+ * Escape string for Modelica string literals
+ */
+function escapeModelicaString(str: string): string {
+  return str
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t');
+}
+
+function engineeringToModelica(thought: EngineeringThought, options: VisualExportOptions): string {
+  const { includeMetrics = true, modelicaPackageName, modelicaIncludeAnnotations = true } = options;
+  const packageName = modelicaPackageName || sanitizeModelicaId(thought.designChallenge.slice(0, 30)) || 'EngineeringAnalysis';
+  const lines: string[] = [];
+
+  // Package header
+  lines.push(`package ${packageName}`);
+  lines.push(`  "Engineering Analysis: ${escapeModelicaString(thought.designChallenge)}"`);
+  lines.push('');
+
+  // Requirements as a record type with constraints
+  if (thought.requirements && thought.requirements.requirements.length > 0) {
+    lines.push('  // ==========================================================================');
+    lines.push('  // Requirements Traceability');
+    lines.push('  // ==========================================================================');
+    lines.push('');
+    lines.push('  record Requirements');
+    lines.push(`    "Requirements traceability for ${escapeModelicaString(thought.designChallenge)}"`);
+    lines.push('');
+
+    for (const req of thought.requirements.requirements) {
+      const reqId = sanitizeModelicaId(req.id);
+      const priority = req.priority.toUpperCase();
+      const status = req.status;
+      lines.push(`    // ${req.id}: ${escapeModelicaString(req.title)}`);
+      lines.push(`    parameter Boolean ${reqId}_satisfied = ${status === 'verified' || status === 'implemented' ? 'true' : 'false'}`);
+      if (modelicaIncludeAnnotations) {
+        lines.push(`      annotation(Dialog(group="${priority}", tab="Requirements"),`);
+        lines.push(`               Documentation(info="<html><p>${escapeModelicaString(req.description)}</p></html>"));`);
+      } else {
+        lines.push('      ;');
+      }
+      lines.push('');
+    }
+
+    // Coverage metrics
+    if (includeMetrics) {
+      const cov = thought.requirements.coverage;
+      lines.push(`    // Coverage Metrics`);
+      lines.push(`    final parameter Integer totalRequirements = ${cov.total};`);
+      lines.push(`    final parameter Integer verifiedRequirements = ${cov.verified};`);
+      lines.push(`    final parameter Real coverageRatio = ${(cov.verified / Math.max(cov.total, 1)).toFixed(3)};`);
+      lines.push('');
+    }
+
+    lines.push('  end Requirements;');
+    lines.push('');
+  }
+
+  // Trade Study as parameterized model
+  if (thought.tradeStudy) {
+    lines.push('  // ==========================================================================');
+    lines.push('  // Trade Study');
+    lines.push('  // ==========================================================================');
+    lines.push('');
+    lines.push('  model TradeStudy');
+    lines.push(`    "${escapeModelicaString(thought.tradeStudy.title)}"`);
+    lines.push('');
+
+    // Define alternatives as an enumeration
+    const altIds = thought.tradeStudy.alternatives.map(a => sanitizeModelicaId(a.id));
+    lines.push(`    type Alternative = enumeration(`);
+    for (let i = 0; i < altIds.length; i++) {
+      const alt = thought.tradeStudy.alternatives[i];
+      const comma = i < altIds.length - 1 ? ',' : '';
+      lines.push(`      ${altIds[i]} "${escapeModelicaString(alt.name)}"${comma}`);
+    }
+    lines.push('    );');
+    lines.push('');
+
+    // Recommended alternative
+    const recId = sanitizeModelicaId(thought.tradeStudy.recommendation);
+    lines.push(`    parameter Alternative selectedAlternative = Alternative.${recId}`);
+    lines.push(`      "Selected alternative based on trade study";`);
+    lines.push('');
+
+    // Criteria weights
+    lines.push('    // Criteria Weights (sum to 1.0)');
+    for (const crit of thought.tradeStudy.criteria) {
+      const critId = sanitizeModelicaId(crit.id);
+      lines.push(`    parameter Real weight_${critId} = ${crit.weight.toFixed(3)} "${escapeModelicaString(crit.name)}";`);
+    }
+    lines.push('');
+
+    // Scores for recommended alternative
+    lines.push('    // Scores for selected alternative');
+    const recScores = thought.tradeStudy.scores.filter(s => s.alternativeId === thought.tradeStudy!.recommendation);
+    for (const score of recScores) {
+      const critId = sanitizeModelicaId(score.criteriaId);
+      lines.push(`    final parameter Real score_${critId} = ${score.score};`);
+    }
+    lines.push('');
+
+    if (modelicaIncludeAnnotations) {
+      lines.push('    annotation(Documentation(info="<html>');
+      lines.push(`      <h3>Objective</h3><p>${escapeModelicaString(thought.tradeStudy.objective)}</p>`);
+      lines.push(`      <h3>Justification</h3><p>${escapeModelicaString(thought.tradeStudy.justification)}</p>`);
+      lines.push('    </html>"));');
+    }
+
+    lines.push('  end TradeStudy;');
+    lines.push('');
+  }
+
+  // FMEA as failure mode records
+  if (thought.fmea && thought.fmea.failureModes.length > 0) {
+    lines.push('  // ==========================================================================');
+    lines.push('  // Failure Mode and Effects Analysis (FMEA)');
+    lines.push('  // ==========================================================================');
+    lines.push('');
+    lines.push('  model FMEA');
+    lines.push(`    "FMEA for ${escapeModelicaString(thought.fmea.system)}"`);
+    lines.push('');
+
+    // RPN threshold
+    lines.push(`    parameter Integer rpnThreshold = ${thought.fmea.rpnThreshold} "Action required above this RPN";`);
+    lines.push('');
+
+    // Failure modes as nested records
+    for (const fm of thought.fmea.failureModes) {
+      const fmId = sanitizeModelicaId(fm.id);
+      const isCritical = fm.rpn >= thought.fmea.rpnThreshold;
+      lines.push(`    // Failure Mode: ${fm.id}`);
+      lines.push(`    record ${fmId}`);
+      lines.push(`      "${escapeModelicaString(fm.failureMode)}"`);
+      lines.push(`      constant String component = "${escapeModelicaString(fm.component)}";`);
+      lines.push(`      constant String cause = "${escapeModelicaString(fm.cause)}";`);
+      lines.push(`      constant String effect = "${escapeModelicaString(fm.effect)}";`);
+      lines.push(`      constant Integer severity = ${fm.severity} "1-10 scale";`);
+      lines.push(`      constant Integer occurrence = ${fm.occurrence} "1-10 scale";`);
+      lines.push(`      constant Integer detection = ${fm.detection} "1-10 scale";`);
+      lines.push(`      constant Integer rpn = ${fm.rpn} "Risk Priority Number";`);
+      lines.push(`      constant Boolean isCritical = ${isCritical};`);
+      if (fm.mitigation) {
+        lines.push(`      constant String mitigation = "${escapeModelicaString(fm.mitigation)}";`);
+      }
+      lines.push(`    end ${fmId};`);
+      lines.push('');
+    }
+
+    // Summary metrics
+    if (includeMetrics) {
+      const sum = thought.fmea.summary;
+      lines.push('    // Summary Statistics');
+      lines.push(`    final parameter Integer totalModes = ${sum.totalModes};`);
+      lines.push(`    final parameter Integer criticalModes = ${sum.criticalModes};`);
+      lines.push(`    final parameter Real averageRpn = ${sum.averageRpn.toFixed(1)};`);
+      lines.push(`    final parameter Integer maxRpn = ${sum.maxRpn};`);
+      lines.push('');
+    }
+
+    lines.push('  end FMEA;');
+    lines.push('');
+  }
+
+  // Design Decisions as documentation records
+  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
+    lines.push('  // ==========================================================================');
+    lines.push('  // Design Decision Records');
+    lines.push('  // ==========================================================================');
+    lines.push('');
+    lines.push('  package DesignDecisions');
+    if (thought.designDecisions.projectName) {
+      lines.push(`    "Design decisions for ${escapeModelicaString(thought.designDecisions.projectName)}"`);
+    }
+    lines.push('');
+
+    for (const dec of thought.designDecisions.decisions) {
+      const decId = sanitizeModelicaId(dec.id);
+      lines.push(`    record ${decId}`);
+      lines.push(`      "${escapeModelicaString(dec.title)}"`);
+      lines.push(`      constant String status = "${dec.status}";`);
+      lines.push(`      constant String context = "${escapeModelicaString(dec.context.slice(0, 200))}";`);
+      lines.push(`      constant String decision = "${escapeModelicaString(dec.decision.slice(0, 200))}";`);
+      lines.push(`      constant String rationale = "${escapeModelicaString(dec.rationale.slice(0, 200))}";`);
+      if (dec.date) {
+        lines.push(`      constant String date = "${dec.date}";`);
+      }
+      if (dec.supersededBy) {
+        lines.push(`      constant String supersededBy = "${sanitizeModelicaId(dec.supersededBy)}";`);
+      }
+
+      if (modelicaIncludeAnnotations && dec.consequences.length > 0) {
+        lines.push('      annotation(Documentation(info="<html>');
+        lines.push('        <h4>Consequences</h4><ul>');
+        for (const cons of dec.consequences) {
+          lines.push(`          <li>${escapeModelicaString(cons)}</li>`);
+        }
+        lines.push('        </ul></html>"));');
+      }
+
+      lines.push(`    end ${decId};`);
+      lines.push('');
+    }
+
+    lines.push('  end DesignDecisions;');
+    lines.push('');
+  }
+
+  // Assessment summary
+  if (thought.assessment && includeMetrics) {
+    lines.push('  // ==========================================================================');
+    lines.push('  // Assessment');
+    lines.push('  // ==========================================================================');
+    lines.push('');
+    lines.push('  record Assessment');
+    lines.push('    "Overall engineering assessment"');
+    lines.push(`    constant Real confidence = ${thought.assessment.confidence.toFixed(3)};`);
+    lines.push(`    constant Integer keyRisksCount = ${thought.assessment.keyRisks.length};`);
+    lines.push(`    constant Integer openIssuesCount = ${thought.assessment.openIssues.length};`);
+
+    if (modelicaIncludeAnnotations) {
+      lines.push('    annotation(Documentation(info="<html>');
+      if (thought.assessment.keyRisks.length > 0) {
+        lines.push('      <h4>Key Risks</h4><ul>');
+        for (const risk of thought.assessment.keyRisks) {
+          lines.push(`        <li>${escapeModelicaString(risk)}</li>`);
+        }
+        lines.push('      </ul>');
+      }
+      if (thought.assessment.nextSteps.length > 0) {
+        lines.push('      <h4>Next Steps</h4><ul>');
+        for (const step of thought.assessment.nextSteps) {
+          lines.push(`        <li>${escapeModelicaString(step)}</li>`);
+        }
+        lines.push('      </ul>');
+      }
+      lines.push('    </html>"));');
+    }
+
+    lines.push('  end Assessment;');
+    lines.push('');
+  }
+
+  // Package footer with annotation
+  if (modelicaIncludeAnnotations) {
+    lines.push(`  annotation(`);
+    lines.push(`    Documentation(info="<html>`);
+    lines.push(`      <h2>Engineering Analysis: ${escapeModelicaString(thought.analysisType)}</h2>`);
+    lines.push(`      <p><b>Design Challenge:</b> ${escapeModelicaString(thought.designChallenge)}</p>`);
+    lines.push(`      <p>Generated by DeepThinking MCP v7.1.0</p>`);
+    lines.push(`    </html>"),`);
+    lines.push(`    version="1.0.0"`);
+    lines.push(`  );`);
+  }
+
+  lines.push(`end ${packageName};`);
+
+  return lines.join('\n');
 }
