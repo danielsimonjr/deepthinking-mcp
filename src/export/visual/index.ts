@@ -10,6 +10,15 @@
 export { type VisualFormat, type VisualExportOptions } from './types.js';
 export { sanitizeId } from './utils.js';
 
+// Re-export Mermaid utilities for all exporters
+export * from './mermaid-utils.js';
+
+// Re-export DOT/GraphViz utilities for all exporters
+export * from './dot-utils.js';
+
+// Re-export ASCII utilities for all exporters
+export * from './ascii-utils.js';
+
 // Re-export SVG utilities for all exporters
 export * from './svg-utils.js';
 

@@ -9,6 +9,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ Features
 
+**Shared Utility Modules for Mermaid, DOT, and ASCII Formats**
+
+Added shared utility modules for the three original visual export formats, completing the consistent utility pattern across all 10 export formats.
+
+#### New Modules
+- `src/export/visual/mermaid-utils.ts` - Shared Mermaid utilities with:
+  - Flowchart generation with configurable direction (TD, LR, TB, RL, BT)
+  - Node shapes (rectangle, rounded, stadium, subroutine, circle, rhombus, hexagon, etc.)
+  - Edge styles (arrow, open, dotted, thick, invisible)
+  - Subgraph/cluster support
+  - State diagrams and class diagrams
+  - Color schemes (default, pastel, monochrome)
+  - Linear flow and hierarchy diagram helpers
+
+- `src/export/visual/dot-utils.ts` - Shared GraphViz DOT utilities with:
+  - Directed and undirected graph generation
+  - 25+ node shapes (box, ellipse, diamond, hexagon, cylinder, etc.)
+  - Edge styling (solid, dashed, dotted, bold)
+  - Arrow head types (normal, inv, dot, diamond, crow, etc.)
+  - Subgraph/cluster support with styling
+  - Layout options (rankDir, splines, overlap, concentrate)
+  - Linear flow, hierarchy, and network graph helpers
+
+- `src/export/visual/ascii-utils.ts` - Shared ASCII art utilities with:
+  - Box drawing with 5 styles (single, double, rounded, bold, ascii)
+  - Tree/hierarchy list generation with proper connectors
+  - Table rendering with column alignment
+  - Bullet and numbered lists
+  - Progress bars and metric displays
+  - Section and document formatting
+  - Flow diagram generation (horizontal/vertical)
+  - Arrow characters (→, ←, ↑, ↓, ↔)
+
+#### Complete Utility Module Set
+All 10 visual export formats now have dedicated shared utility modules:
+1. `mermaid-utils.ts` - Mermaid flowcharts and diagrams
+2. `dot-utils.ts` - GraphViz DOT graphs
+3. `ascii-utils.ts` - ASCII art diagrams
+4. `svg-utils.ts` - Native SVG graphics
+5. `graphml-utils.ts` - GraphML XML format
+6. `tikz-utils.ts` - LaTeX TikZ graphics
+7. `html-utils.ts` - Standalone HTML documents
+8. `modelica-utils.ts` - Modelica system modeling
+9. `uml-utils.ts` - PlantUML diagrams
+10. `json-utils.ts` - JSON visual graphs
+
+#### Refactored Exporters
+Updated visual exporters to use the shared utility modules:
+- `sequential.ts` - Refactored to use mermaid-utils, dot-utils, ascii-utils
+
+---
+
 **Modelica, UML, and JSON Export Support for All Visual Exporters**
 
 Added Modelica (system modeling), UML/PlantUML (activity diagrams), and JSON (visual graph) export formats to all 21 reasoning mode visual exporters.
