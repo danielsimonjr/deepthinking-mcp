@@ -31,6 +31,15 @@ import {
   type TikZNode,
   type TikZEdge,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderBadge,
+} from './html-utils.js';
 
 /**
  * Export optimization problem constraint graph to visual format
@@ -51,6 +60,8 @@ export function exportOptimizationSolution(thought: OptimizationThought, options
       return optimizationToGraphML(thought, options);
     case 'tikz':
       return optimizationToTikZ(thought, options);
+    case 'html':
+      return optimizationToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -572,4 +583,121 @@ function optimizationToTikZ(thought: OptimizationThought, options: VisualExportO
     includeLabels,
     includeMetrics,
   });
+}
+
+/**
+ * Export optimization problem to HTML format
+ */
+function optimizationToHTML(thought: OptimizationThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Optimization Analysis',
+    htmlTheme = 'light',
+    includeMetrics = true,
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Problem Overview
+  if (thought.problem) {
+    const problemContent = `
+      <p><strong>Name:</strong> ${escapeHTML(thought.problem.name)}</p>
+      <p><strong>Type:</strong> ${renderBadge(thought.problem.type.toUpperCase(), 'info')}</p>
+      <p>${escapeHTML(thought.problem.description)}</p>
+    `;
+    html += renderSection('Problem', problemContent, '🎯');
+  }
+
+  // Metrics
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">\n';
+    html += renderMetricCard('Variables', thought.variables?.length || 0, 'primary');
+    html += renderMetricCard('Constraints', thought.optimizationConstraints?.length || 0, 'warning');
+    html += renderMetricCard('Objectives', thought.objectives?.length || 0, 'info');
+    html += renderMetricCard('Quality', thought.solution?.quality?.toFixed(2) || 'N/A', 'success');
+    html += '</div>\n';
+  }
+
+  // Decision Variables
+  if (thought.variables && thought.variables.length > 0) {
+    const variableRows = thought.variables.map(v => {
+      const varType = (v as any).type || 'unknown';
+      const domain = v.domain
+        ? `[${(v.domain as any).lowerBound}, ${(v.domain as any).upperBound}]`
+        : 'N/A';
+      return [v.name, varType, domain, v.description];
+    });
+    const variablesTable = renderTable(
+      ['Name', 'Type', 'Domain', 'Description'],
+      variableRows,
+      { caption: 'Decision Variables' }
+    );
+    html += renderSection('Decision Variables', variablesTable, '🔢');
+  }
+
+  // Constraints
+  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+    let constraintsContent = '';
+    for (const constraint of thought.optimizationConstraints) {
+      const badge = renderBadge(constraint.type.toUpperCase(), 'warning');
+      constraintsContent += `
+        <div class="card">
+          <div class="card-header">${escapeHTML(constraint.name)} ${badge}</div>
+          <p><strong>Formula:</strong> <code>${escapeHTML(constraint.formula)}</code></p>
+        </div>
+      `;
+    }
+    html += renderSection('Constraints', constraintsContent, '⚠️');
+  }
+
+  // Objectives
+  if (thought.objectives && thought.objectives.length > 0) {
+    let objectivesContent = '';
+    for (const objective of thought.objectives) {
+      const typeColor = objective.type === 'maximize' ? 'success' : 'info';
+      const badge = renderBadge(objective.type.toUpperCase(), typeColor as any);
+      objectivesContent += `
+        <div class="card">
+          <div class="card-header">${badge} ${escapeHTML(objective.name)}</div>
+          <p><strong>Formula:</strong> <code>${escapeHTML(objective.formula)}</code></p>
+        </div>
+      `;
+    }
+    html += renderSection('Objectives', objectivesContent, '🎯');
+  }
+
+  // Solution
+  if (thought.solution) {
+    const solution = thought.solution as any;
+    let solutionContent = '';
+
+    if (solution.status) {
+      const statusBadge = solution.status === 'optimal' ? renderBadge('OPTIMAL', 'success')
+        : solution.status === 'feasible' ? renderBadge('FEASIBLE', 'info')
+          : renderBadge('INFEASIBLE', 'danger');
+      solutionContent += `<p><strong>Status:</strong> ${statusBadge}</p>`;
+    }
+
+    if (solution.optimalValue !== undefined) {
+      solutionContent += `<p><strong>Optimal Value:</strong> ${solution.optimalValue}</p>`;
+    }
+
+    if (solution.quality !== undefined) {
+      solutionContent += `<p><strong>Quality:</strong> ${(solution.quality * 100).toFixed(0)}%</p>`;
+    }
+
+    if (solution.assignments) {
+      solutionContent += '<h4>Variable Assignments</h4><ul>';
+      for (const [varId, value] of Object.entries(solution.assignments)) {
+        solutionContent += `<li><strong>${escapeHTML(varId)}:</strong> ${value}</li>`;
+      }
+      solutionContent += '</ul>';
+    }
+
+    html += renderSection('Solution', solutionContent, '✅');
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

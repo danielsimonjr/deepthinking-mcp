@@ -35,6 +35,15 @@ import {
   type TikZEdge,
   type TikZOptions,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderBadge,
+} from './html-utils.js';
 
 /**
  * Export causal graph to visual format
@@ -55,6 +64,8 @@ export function exportCausalGraph(thought: CausalThought, options: VisualExportO
       return causalGraphToGraphML(thought, options);
     case 'tikz':
       return causalGraphToTikZ(thought, options);
+    case 'html':
+      return causalGraphToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -416,4 +427,91 @@ function causalGraphToTikZ(thought: CausalThought, options: VisualExportOptions)
   };
 
   return generateTikZ(nodes, edges, tikzOptions);
+}
+
+/**
+ * Export causal graph to HTML format
+ */
+function causalGraphToHTML(thought: CausalThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Causal Graph Analysis',
+    htmlTheme = 'light',
+    includeMetrics = true,
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  if (!thought.causalGraph || !thought.causalGraph.nodes) {
+    html += '<p class="text-secondary">No causal graph data available.</p>\n';
+    html += generateHTMLFooter(htmlStandalone);
+    return html;
+  }
+
+  // Metrics section
+  if (includeMetrics) {
+    const causes = thought.causalGraph.nodes.filter(n => n.type === 'cause');
+    const effects = thought.causalGraph.nodes.filter(n => n.type === 'effect');
+    const mediators = thought.causalGraph.nodes.filter(n => n.type === 'mediator');
+    const confounders = thought.causalGraph.nodes.filter(n => n.type === 'confounder');
+
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard('Total Nodes', thought.causalGraph.nodes.length, 'primary');
+    html += renderMetricCard('Edges', thought.causalGraph.edges.length, 'info');
+    html += renderMetricCard('Causes', causes.length, 'success');
+    html += renderMetricCard('Effects', effects.length, 'warning');
+    if (mediators.length > 0) {
+      html += renderMetricCard('Mediators', mediators.length);
+    }
+    if (confounders.length > 0) {
+      html += renderMetricCard('Confounders', confounders.length, 'danger');
+    }
+    html += '</div>\n';
+  }
+
+  // Nodes table
+  const nodeRows = thought.causalGraph.nodes.map(node => {
+    const typeBadge = renderBadge(node.type,
+      node.type === 'cause' ? 'success' :
+      node.type === 'effect' ? 'warning' :
+      node.type === 'confounder' ? 'danger' : 'secondary'
+    );
+    return [node.id, node.name, typeBadge, node.description || '-'];
+  });
+  html += renderSection('Nodes', renderTable(
+    ['ID', 'Name', 'Type', 'Description'],
+    nodeRows.map(row => row.map(cell => typeof cell === 'string' && cell.startsWith('<') ? cell : escapeHTML(String(cell))))
+  ), '📊');
+
+  // Edges table
+  const edgeRows = thought.causalGraph.edges.map(edge => {
+    const fromNode = thought.causalGraph!.nodes.find(n => n.id === edge.from);
+    const toNode = thought.causalGraph!.nodes.find(n => n.id === edge.to);
+    return [
+      fromNode?.name || edge.from,
+      '→',
+      toNode?.name || edge.to,
+      edge.strength !== undefined ? edge.strength.toFixed(2) : '-',
+      edge.mechanism || '-',
+    ];
+  });
+  html += renderSection('Causal Relationships', renderTable(
+    ['From', '', 'To', 'Strength', 'Mechanism'],
+    edgeRows
+  ), '🔗');
+
+  // Confounding warning
+  const confounders = thought.causalGraph.nodes.filter(n => n.type === 'confounder');
+  if (confounders.length > 0) {
+    html += renderSection('⚠️ Confounding Variables', `
+      <p class="text-warning">The following variables may confound causal inference:</p>
+      <ul class="list-styled">
+        ${confounders.map(c => `<li><strong>${escapeHTML(c.name)}</strong>: ${escapeHTML(c.description)}</li>`).join('\n')}
+      </ul>
+    `);
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

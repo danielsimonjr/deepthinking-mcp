@@ -31,6 +31,15 @@ import {
   type TikZNode,
   type TikZEdge,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderBadge,
+} from './html-utils.js';
 
 /**
  * Export abductive hypothesis comparison to visual format
@@ -51,6 +60,8 @@ export function exportAbductiveHypotheses(thought: AbductiveThought, options: Vi
       return abductiveToGraphML(thought, options);
     case 'tikz':
       return abductiveToTikZ(thought, options);
+    case 'html':
+      return abductiveToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -372,4 +383,75 @@ function abductiveToTikZ(thought: AbductiveThought, options: VisualExportOptions
     includeMetrics,
     colorScheme,
   });
+}
+
+/**
+ * Export abductive hypotheses to HTML format
+ */
+function abductiveToHTML(thought: AbductiveThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Abductive Reasoning Analysis',
+    htmlTheme = 'light',
+    includeMetrics = true,
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Metrics
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard('Observations', thought.observations.length, 'info');
+    html += renderMetricCard('Hypotheses', thought.hypotheses.length, 'primary');
+    if (thought.bestExplanation) {
+      html += renderMetricCard('Best Score', thought.bestExplanation.score.toFixed(2), 'success');
+    }
+    html += '</div>\n';
+  }
+
+  // Observations table
+  const obsRows = thought.observations.map((obs, i) => [
+    (i + 1).toString(),
+    obs.description,
+    obs.confidence.toFixed(2),
+    obs.timestamp || '-',
+  ]);
+  html += renderSection('Observations', renderTable(
+    ['#', 'Description', 'Confidence', 'Time'],
+    obsRows
+  ), '👁️');
+
+  // Hypotheses table
+  const hypRows = thought.hypotheses.map(hyp => {
+    const isBest = thought.bestExplanation?.id === hyp.id;
+    const badge = isBest ? renderBadge('Best', 'success') : '';
+    return [
+      hyp.explanation.substring(0, 60) + (hyp.explanation.length > 60 ? '...' : ''),
+      hyp.score.toFixed(2),
+      badge,
+      hyp.assumptions.slice(0, 3).join(', ') + (hyp.assumptions.length > 3 ? '...' : ''),
+    ];
+  });
+  html += renderSection('Hypotheses', renderTable(
+    ['Explanation', 'Score', 'Status', 'Key Assumptions'],
+    hypRows.map(row => row.map(cell => typeof cell === 'string' && cell.startsWith('<') ? cell : escapeHTML(String(cell))))
+  ), '💡');
+
+  // Best explanation highlight
+  if (thought.bestExplanation) {
+    html += renderSection('Best Explanation', `
+      <div class="card">
+        <div class="card-header">${escapeHTML(thought.bestExplanation.explanation)}</div>
+        <p><strong>Score:</strong> ${thought.bestExplanation.score.toFixed(2)}</p>
+        <p><strong>Assumptions:</strong></p>
+        <ul class="list-styled">
+          ${thought.bestExplanation.assumptions.map(a => `<li>${escapeHTML(a)}</li>`).join('\n')}
+        </ul>
+      </div>
+    `, '⭐');
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

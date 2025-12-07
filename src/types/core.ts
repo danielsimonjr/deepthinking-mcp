@@ -606,7 +606,7 @@ export interface Scenario {
   description: string;
   conditions: Condition[];
   outcomes: Outcome[];
-  likelihood?: number; // How plausible is this scenario?
+  likelihood?: number; // 0-1
 }
 
 /**

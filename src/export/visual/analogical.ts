@@ -34,6 +34,15 @@ import {
   type TikZEdge,
   type TikZOptions,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderProgressBar,
+} from './html-utils.js';
 
 /**
  * Export analogical domain mapping to visual format
@@ -54,6 +63,8 @@ export function exportAnalogicalMapping(thought: AnalogicalThought, options: Vis
       return analogicalToGraphML(thought, options);
     case 'tikz':
       return analogicalToTikZ(thought, options);
+    case 'html':
+      return analogicalToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -427,4 +438,74 @@ function analogicalToTikZ(thought: AnalogicalThought, options: VisualExportOptio
   );
 
   return tikz;
+}
+
+/**
+ * Export analogical mapping to HTML format
+ */
+function analogicalToHTML(thought: AnalogicalThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Analogical Reasoning Analysis',
+    htmlTheme = 'light',
+    includeMetrics = true,
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Metrics
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard('Analogy Strength', (thought.analogyStrength * 100).toFixed(0) + '%', 'primary');
+    html += renderMetricCard('Mappings', thought.mapping.length, 'info');
+    html += renderMetricCard('Source Entities', thought.sourceDomain.entities.length, 'success');
+    html += renderMetricCard('Target Entities', thought.targetDomain.entities.length, 'warning');
+    html += '</div>\n';
+    html += renderProgressBar(thought.analogyStrength * 100, 'primary');
+  }
+
+  // Source domain
+  const srcRows = thought.sourceDomain.entities.map(e => [e.id, e.name, e.type || '-', e.description || '-']);
+  html += renderSection('Source Domain: ' + thought.sourceDomain.name, renderTable(
+    ['ID', 'Name', 'Type', 'Description'],
+    srcRows
+  ), '📘');
+
+  // Target domain
+  const tgtRows = thought.targetDomain.entities.map(e => [e.id, e.name, e.type || '-', e.description || '-']);
+  html += renderSection('Target Domain: ' + thought.targetDomain.name, renderTable(
+    ['ID', 'Name', 'Type', 'Description'],
+    tgtRows
+  ), '📗');
+
+  // Mappings
+  const mapRows = thought.mapping.map(m => [
+    m.sourceEntityId,
+    '→',
+    m.targetEntityId,
+    (m.confidence * 100).toFixed(0) + '%',
+    m.justification || '-',
+  ]);
+  html += renderSection('Entity Mappings', renderTable(
+    ['Source', '', 'Target', 'Confidence', 'Justification'],
+    mapRows
+  ), '🔗');
+
+  // Inferences
+  if (thought.inferences && thought.inferences.length > 0) {
+    const infRows = thought.inferences.map((inf, i) => [
+      (i + 1).toString(),
+      inf.sourcePattern,
+      inf.targetPrediction,
+      (inf.confidence * 100).toFixed(0) + '%',
+    ]);
+    html += renderSection('Inferences', renderTable(
+      ['#', 'Source Pattern', 'Target Prediction', 'Confidence'],
+      infRows
+    ), '💡');
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

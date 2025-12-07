@@ -3715,6 +3715,295 @@ var init_tikz_utils = __esm({
   }
 });
 
+// src/export/visual/html-utils.ts
+function getHTMLThemeColors(theme = "light") {
+  if (theme === "dark") {
+    return {
+      background: "#1a1a2e",
+      text: "#eaeaea",
+      primary: "#4a90d9",
+      secondary: "#6c757d",
+      success: "#28a745",
+      warning: "#ffc107",
+      danger: "#dc3545",
+      info: "#17a2b8",
+      border: "#444",
+      tableHeader: "#2d2d44",
+      tableRow: "#1a1a2e",
+      tableRowAlt: "#252538"
+    };
+  }
+  return {
+    background: "#ffffff",
+    text: "#333333",
+    primary: "#2563eb",
+    secondary: "#6b7280",
+    success: "#16a34a",
+    warning: "#ca8a04",
+    danger: "#dc2626",
+    info: "#0891b2",
+    border: "#e5e7eb",
+    tableHeader: "#f3f4f6",
+    tableRow: "#ffffff",
+    tableRowAlt: "#f9fafb"
+  };
+}
+function generateHTMLHeader(title, options = {}) {
+  const { standalone = true, theme = "light", customStyles = "" } = options;
+  const colors = getHTMLThemeColors(theme);
+  if (!standalone) {
+    return `<div class="visual-export" data-theme="${theme}">
+`;
+  }
+  return `<!DOCTYPE html>
+<html lang="en" data-theme="${theme}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeHTML(title)}</title>
+  <style>
+    :root {
+      --bg-color: ${colors.background};
+      --text-color: ${colors.text};
+      --primary-color: ${colors.primary};
+      --secondary-color: ${colors.secondary};
+      --success-color: ${colors.success};
+      --warning-color: ${colors.warning};
+      --danger-color: ${colors.danger};
+      --info-color: ${colors.info};
+      --border-color: ${colors.border};
+      --table-header-bg: ${colors.tableHeader};
+      --table-row-bg: ${colors.tableRow};
+      --table-row-alt-bg: ${colors.tableRowAlt};
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--text-color);
+      background-color: var(--bg-color);
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    h1, h2, h3, h4 { margin-top: 1.5rem; margin-bottom: 0.5rem; }
+    h1 { font-size: 2rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; color: var(--primary-color); }
+    h3 { font-size: 1.25rem; }
+
+    .section {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-primary { background: var(--primary-color); color: white; }
+    .badge-success { background: var(--success-color); color: white; }
+    .badge-warning { background: var(--warning-color); color: black; }
+    .badge-danger { background: var(--danger-color); color: white; }
+    .badge-info { background: var(--info-color); color: white; }
+    .badge-secondary { background: var(--secondary-color); color: white; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border-color);
+    }
+
+    th {
+      background: var(--table-header-bg);
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) { background: var(--table-row-alt-bg); }
+    tr:nth-child(odd) { background: var(--table-row-bg); }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .metric-card {
+      padding: 1rem;
+      background: var(--table-header-bg);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+
+    .metric-label {
+      font-size: 0.85rem;
+      color: var(--secondary-color);
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary-color);
+      transition: width 0.3s ease;
+    }
+
+    .list-styled {
+      list-style: none;
+      padding: 0;
+    }
+
+    .list-styled li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .list-styled li:last-child { border-bottom: none; }
+
+    .icon { margin-right: 0.5rem; }
+
+    .text-success { color: var(--success-color); }
+    .text-warning { color: var(--warning-color); }
+    .text-danger { color: var(--danger-color); }
+    .text-info { color: var(--info-color); }
+    .text-secondary { color: var(--secondary-color); }
+
+    .card {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 0.5rem 0;
+    }
+
+    .card-header {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .flex { display: flex; }
+    .flex-wrap { flex-wrap: wrap; }
+    .gap-1 { gap: 0.5rem; }
+    .gap-2 { gap: 1rem; }
+
+    .footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: var(--secondary-color);
+      text-align: center;
+    }
+
+    ${customStyles}
+  </style>
+</head>
+<body>
+`;
+}
+function generateHTMLFooter(standalone = true) {
+  if (!standalone) {
+    return "</div>\n";
+  }
+  return `
+  <div class="footer">
+    Generated by DeepThinking MCP v7.1.0
+  </div>
+</body>
+</html>`;
+}
+function escapeHTML(str) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+function renderMetricCard(label, value, color) {
+  const colorClass = color ? ` style="color: var(--${color}-color)"` : "";
+  return `
+    <div class="metric-card">
+      <div class="metric-value"${colorClass}>${escapeHTML(String(value))}</div>
+      <div class="metric-label">${escapeHTML(label)}</div>
+    </div>`;
+}
+function renderProgressBar(percent, color = "primary") {
+  const clampedPercent = Math.max(0, Math.min(100, percent));
+  return `
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: ${clampedPercent}%; background: var(--${color}-color)"></div>
+    </div>`;
+}
+function renderBadge(text, type = "primary") {
+  return `<span class="badge badge-${type}">${escapeHTML(text)}</span>`;
+}
+function renderTable(headers, rows, options = {}) {
+  const headerCells = headers.map((h) => `<th>${escapeHTML(h)}</th>`).join("");
+  const bodyRows = rows.map((row) => {
+    const cells = row.map((cell) => `<td>${escapeHTML(String(cell))}</td>`).join("");
+    return `<tr>${cells}</tr>`;
+  }).join("\n");
+  let html = "<table>";
+  if (options.caption) {
+    html += `<caption>${escapeHTML(options.caption)}</caption>`;
+  }
+  html += `<thead><tr>${headerCells}</tr></thead>`;
+  html += `<tbody>${bodyRows}</tbody>`;
+  html += "</table>";
+  return html;
+}
+function renderSection(title, content, icon) {
+  const iconHtml = icon ? `<span class="icon">${icon}</span>` : "";
+  return `
+    <div class="section">
+      <div class="section-header">
+        ${iconHtml}<h3>${escapeHTML(title)}</h3>
+      </div>
+      ${content}
+    </div>`;
+}
+function renderList(items, ordered = false) {
+  const tag = ordered ? "ol" : "ul";
+  const listItems = items.map((item) => `<li>${escapeHTML(item)}</li>`).join("\n");
+  return `<${tag} class="list-styled">${listItems}</${tag}>`;
+}
+var init_html_utils = __esm({
+  "src/export/visual/html-utils.ts"() {
+    init_esm_shims();
+  }
+});
+
 // src/export/visual/causal.ts
 function exportCausalGraph(thought, options) {
   const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
@@ -3731,6 +4020,8 @@ function exportCausalGraph(thought, options) {
       return causalGraphToGraphML(thought, options);
     case "tikz":
       return causalGraphToTikZ(thought, options);
+    case "html":
+      return causalGraphToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -4020,6 +4311,77 @@ function causalGraphToTikZ(thought, options) {
   };
   return generateTikZ(nodes, edges, tikzOptions);
 }
+function causalGraphToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Causal Graph Analysis",
+    htmlTheme = "light",
+    includeMetrics = true
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  if (!thought.causalGraph || !thought.causalGraph.nodes) {
+    html += '<p class="text-secondary">No causal graph data available.</p>\n';
+    html += generateHTMLFooter(htmlStandalone);
+    return html;
+  }
+  if (includeMetrics) {
+    const causes = thought.causalGraph.nodes.filter((n) => n.type === "cause");
+    const effects = thought.causalGraph.nodes.filter((n) => n.type === "effect");
+    const mediators = thought.causalGraph.nodes.filter((n) => n.type === "mediator");
+    const confounders2 = thought.causalGraph.nodes.filter((n) => n.type === "confounder");
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard("Total Nodes", thought.causalGraph.nodes.length, "primary");
+    html += renderMetricCard("Edges", thought.causalGraph.edges.length, "info");
+    html += renderMetricCard("Causes", causes.length, "success");
+    html += renderMetricCard("Effects", effects.length, "warning");
+    if (mediators.length > 0) {
+      html += renderMetricCard("Mediators", mediators.length);
+    }
+    if (confounders2.length > 0) {
+      html += renderMetricCard("Confounders", confounders2.length, "danger");
+    }
+    html += "</div>\n";
+  }
+  const nodeRows = thought.causalGraph.nodes.map((node) => {
+    const typeBadge = renderBadge(
+      node.type,
+      node.type === "cause" ? "success" : node.type === "effect" ? "warning" : node.type === "confounder" ? "danger" : "secondary"
+    );
+    return [node.id, node.name, typeBadge, node.description || "-"];
+  });
+  html += renderSection("Nodes", renderTable(
+    ["ID", "Name", "Type", "Description"],
+    nodeRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
+  ), "\u{1F4CA}");
+  const edgeRows = thought.causalGraph.edges.map((edge) => {
+    const fromNode = thought.causalGraph.nodes.find((n) => n.id === edge.from);
+    const toNode = thought.causalGraph.nodes.find((n) => n.id === edge.to);
+    return [
+      fromNode?.name || edge.from,
+      "\u2192",
+      toNode?.name || edge.to,
+      edge.strength !== void 0 ? edge.strength.toFixed(2) : "-",
+      edge.mechanism || "-"
+    ];
+  });
+  html += renderSection("Causal Relationships", renderTable(
+    ["From", "", "To", "Strength", "Mechanism"],
+    edgeRows
+  ), "\u{1F517}");
+  const confounders = thought.causalGraph.nodes.filter((n) => n.type === "confounder");
+  if (confounders.length > 0) {
+    html += renderSection("\u26A0\uFE0F Confounding Variables", `
+      <p class="text-warning">The following variables may confound causal inference:</p>
+      <ul class="list-styled">
+        ${confounders.map((c) => `<li><strong>${escapeHTML(c.name)}</strong>: ${escapeHTML(c.description)}</li>`).join("\n")}
+      </ul>
+    `);
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_causal = __esm({
   "src/export/visual/causal.ts"() {
     init_esm_shims();
@@ -4027,6 +4389,7 @@ var init_causal = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -4046,6 +4409,8 @@ function exportTemporalTimeline(thought, options) {
       return timelineToGraphML(thought);
     case "tikz":
       return timelineToTikZ(thought);
+    case "html":
+      return timelineToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -4213,6 +4578,66 @@ function timelineToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function timelineToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = thought.timeline?.name || "Timeline Analysis",
+    htmlTheme = "light",
+    includeMetrics = true
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  if (!thought.events || thought.events.length === 0) {
+    html += '<p class="text-secondary">No events in timeline.</p>\n';
+    html += generateHTMLFooter(htmlStandalone);
+    return html;
+  }
+  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  if (includeMetrics) {
+    const instants = sortedEvents.filter((e) => e.type === "instant");
+    const intervals = sortedEvents.filter((e) => e.type === "interval");
+    const minTime = sortedEvents[0].timestamp;
+    const maxTime = sortedEvents[sortedEvents.length - 1].timestamp;
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard("Total Events", sortedEvents.length, "primary");
+    html += renderMetricCard("Instants", instants.length, "info");
+    html += renderMetricCard("Intervals", intervals.length, "success");
+    html += renderMetricCard("Time Span", `${minTime} - ${maxTime}`);
+    html += "</div>\n";
+  }
+  const eventRows = sortedEvents.map((event) => {
+    const typeBadge = renderBadge(event.type, event.type === "instant" ? "info" : "success");
+    return [
+      event.timestamp.toString(),
+      event.name,
+      typeBadge,
+      event.duration ? `${event.duration}` : "-",
+      event.description || "-"
+    ];
+  });
+  html += renderSection("Events", renderTable(
+    ["Timestamp", "Name", "Type", "Duration", "Description"],
+    eventRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
+  ), "\u{1F4C5}");
+  if (thought.relations && thought.relations.length > 0) {
+    const relationRows = thought.relations.map((rel) => {
+      const fromEvent = thought.events?.find((e) => e.id === rel.from);
+      const toEvent = thought.events?.find((e) => e.id === rel.to);
+      return [
+        fromEvent?.name || rel.from,
+        rel.relationType,
+        toEvent?.name || rel.to
+      ];
+    });
+    html += renderSection("Temporal Relations", renderTable(
+      ["From", "Relation", "To"],
+      relationRows
+    ), "\u{1F517}");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_temporal = __esm({
   "src/export/visual/temporal.ts"() {
     init_esm_shims();
@@ -4220,6 +4645,7 @@ var init_temporal = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -4239,6 +4665,8 @@ function exportGameTree(thought, options) {
       return gameTreeToGraphML(thought, options);
     case "tikz":
       return gameTreeToTikZ(thought, options);
+    case "html":
+      return gameTreeToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -4606,6 +5034,70 @@ function gameTreeToTikZ(thought, options) {
   const nodes = [{ id: "root", label: "No game tree", x: 4, y: 0, type: "root", shape: "rectangle" }];
   return generateTikZ(nodes, [], { title: thought.game?.name || "Game Tree", colorScheme });
 }
+function gameTreeToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = thought.game?.name || "Game Theory Analysis",
+    htmlTheme = "light",
+    includeMetrics = true
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  if (!thought.game) {
+    html += '<p class="text-secondary">No game defined.</p>\n';
+    html += generateHTMLFooter(htmlStandalone);
+    return html;
+  }
+  html += renderSection("Game Information", `
+    <p><strong>Type:</strong> ${escapeHTML(thought.game.type)}</p>
+    <p><strong>Players:</strong> ${thought.players ? thought.players.map((p) => escapeHTML(p.name)).join(", ") : thought.game.numPlayers}</p>
+    ${thought.game.description ? `<p>${escapeHTML(thought.game.description)}</p>` : ""}
+  `, "\u{1F3AE}");
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard("Players", thought.players ? thought.players.length : thought.game.numPlayers, "primary");
+    html += renderMetricCard("Strategies", thought.strategies?.length || 0, "info");
+    html += renderMetricCard("Equilibria", thought.nashEquilibria?.length || 0, "success");
+    html += "</div>\n";
+  }
+  if (thought.strategies && thought.strategies.length > 0) {
+    const strategyRows = thought.strategies.map((strategy) => {
+      const typeBadge = renderBadge(strategy.isPure ? "Pure" : "Mixed", strategy.isPure ? "success" : "info");
+      return [
+        strategy.name,
+        typeBadge,
+        strategy.description || "-"
+      ];
+    });
+    html += renderSection("Strategies", renderTable(
+      ["Name", "Type", "Description"],
+      strategyRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
+    ), "\u{1F4CB}");
+  }
+  if (thought.nashEquilibria && thought.nashEquilibria.length > 0) {
+    const eqRows = thought.nashEquilibria.map((eq) => {
+      const typeBadge = renderBadge(eq.type, eq.type === "pure" ? "success" : "info");
+      return [
+        typeBadge,
+        eq.strategyProfile.join(", "),
+        `[${eq.payoffs.join(", ")}]`,
+        eq.isStrict ? "Yes" : "No"
+      ];
+    });
+    html += renderSection("Nash Equilibria", renderTable(
+      ["Type", "Strategy Profile", "Payoffs", "Strict"],
+      eqRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
+    ), "\u2696\uFE0F");
+  }
+  if (thought.payoffMatrix) {
+    html += renderSection("Payoff Matrix", `
+      <p class="text-secondary">Payoff matrix visualization available in other formats.</p>
+    `, "\u{1F4CA}");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_game_theory = __esm({
   "src/export/visual/game-theory.ts"() {
     init_esm_shims();
@@ -4613,6 +5105,7 @@ var init_game_theory = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -4632,6 +5125,8 @@ function exportBayesianNetwork(thought, options) {
       return bayesianToGraphML(thought, options);
     case "tikz":
       return bayesianToTikZ(thought, options);
+    case "html":
+      return bayesianToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -4828,12 +5323,73 @@ function bayesianToTikZ(thought, options) {
     colorScheme
   });
 }
+function bayesianToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Bayesian Analysis",
+    htmlTheme = "light",
+    includeMetrics = true
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  html += renderSection("Hypothesis", `
+    <p><strong>${escapeHTML(thought.hypothesis.statement)}</strong></p>
+    ${thought.hypothesis.alternatives && thought.hypothesis.alternatives.length > 0 ? `<p class="text-secondary">Alternatives: ${thought.hypothesis.alternatives.join(", ")}</p>` : ""}
+  `, "\u{1F3AF}");
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard("Prior", (thought.prior.probability * 100).toFixed(1) + "%", "primary");
+    html += renderMetricCard("Posterior", (thought.posterior.probability * 100).toFixed(1) + "%", "success");
+    if (thought.bayesFactor !== void 0) {
+      html += renderMetricCard("Bayes Factor", thought.bayesFactor.toFixed(2), "info");
+    }
+    html += "</div>\n";
+    html += '<div class="card">';
+    html += '<div class="card-header">Prior Probability</div>';
+    html += renderProgressBar(thought.prior.probability * 100, "primary");
+    html += `<p class="text-secondary" style="margin-top: 0.5rem">${escapeHTML(thought.prior.justification)}</p>`;
+    html += "</div>\n";
+    html += '<div class="card">';
+    html += '<div class="card-header">Posterior Probability</div>';
+    html += renderProgressBar(thought.posterior.probability * 100, "success");
+    html += `<p class="text-secondary" style="margin-top: 0.5rem">${escapeHTML(thought.posterior.calculation)}</p>`;
+    html += "</div>\n";
+  }
+  if (thought.evidence && thought.evidence.length > 0) {
+    const evidenceRows = thought.evidence.map((ev, i) => [
+      (i + 1).toString(),
+      ev.description,
+      ev.likelihoodGivenHypothesis?.toFixed(3) || "-",
+      ev.likelihoodGivenNotHypothesis?.toFixed(3) || "-"
+    ]);
+    html += renderSection("Evidence", renderTable(
+      ["#", "Description", "P(E|H)", "P(E|\xACH)"],
+      evidenceRows
+    ), "\u{1F4CA}");
+  }
+  const change = thought.posterior.probability - thought.prior.probability;
+  const changeDirection = change > 0 ? "increased" : change < 0 ? "decreased" : "unchanged";
+  const changeClass = change > 0 ? "text-success" : change < 0 ? "text-danger" : "text-secondary";
+  html += renderSection("Interpretation", `
+    <p>The posterior probability has <span class="${changeClass}"><strong>${changeDirection}</strong></span>
+    by ${Math.abs(change * 100).toFixed(1)} percentage points from the prior.</p>
+    ${thought.bayesFactor !== void 0 ? `
+      <p>Bayes Factor of ${thought.bayesFactor.toFixed(2)} indicates
+      ${thought.bayesFactor > 3 ? "substantial" : thought.bayesFactor > 1 ? "weak" : "evidence against"}
+      support for the hypothesis.</p>
+    ` : ""}
+  `, "\u{1F4A1}");
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_bayesian = __esm({
   "src/export/visual/bayesian.ts"() {
     init_esm_shims();
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -4853,6 +5409,8 @@ function exportSequentialDependencyGraph(thought, options) {
       return sequentialToGraphML(thought, options);
     case "tikz":
       return sequentialToTikZ(thought, options);
+    case "html":
+      return sequentialToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -5122,6 +5680,48 @@ function sequentialToTikZ(thought, options) {
     includeLabels
   });
 }
+function sequentialToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Sequential Thinking Analysis",
+    htmlTheme = "light"
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  html += '<div class="metrics-grid">';
+  html += renderMetricCard("Thought #", thought.thoughtNumber, "primary");
+  html += renderMetricCard("Total", thought.totalThoughts, "info");
+  if (thought.buildUpon && thought.buildUpon.length > 0) {
+    html += renderMetricCard("Dependencies", thought.buildUpon.length, "secondary");
+  }
+  html += "</div>\n";
+  const badges = [];
+  if (thought.isRevision) badges.push(renderBadge("Revision", "warning"));
+  if (thought.branchFrom) badges.push(renderBadge("Branched", "info"));
+  html += renderSection("Current Thought", `
+    <div class="flex gap-1" style="margin-bottom: 0.5rem">${badges.join(" ")}</div>
+    <p>${escapeHTML(thought.content)}</p>
+    ${thought.nextThoughtNeeded ? '<p class="text-info">More thoughts needed...</p>' : '<p class="text-success">Reasoning complete.</p>'}
+  `, "\u{1F4AD}");
+  if (thought.buildUpon && thought.buildUpon.length > 0) {
+    html += renderSection("Builds Upon", renderList(thought.buildUpon), "\u{1F517}");
+  }
+  if (thought.branchFrom) {
+    html += renderSection("Branch Information", `
+      <p><strong>Branched from:</strong> ${escapeHTML(thought.branchFrom)}</p>
+      ${thought.branchId ? `<p><strong>Branch ID:</strong> ${escapeHTML(thought.branchId)}</p>` : ""}
+    `, "\u{1F33F}");
+  }
+  if (thought.isRevision && thought.revisesThought) {
+    html += renderSection("Revision Information", `
+      <p><strong>Revises:</strong> ${escapeHTML(thought.revisesThought)}</p>
+      ${thought.revisionReason ? `<p><strong>Reason:</strong> ${escapeHTML(thought.revisionReason)}</p>` : ""}
+    `, "\u270F\uFE0F");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_sequential = __esm({
   "src/export/visual/sequential.ts"() {
     init_esm_shims();
@@ -5129,6 +5729,7 @@ var init_sequential = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -5148,6 +5749,8 @@ function exportShannonStageFlow(thought, options) {
       return shannonToGraphML(thought, options);
     case "tikz":
       return shannonToTikZ(thought, options);
+    case "html":
+      return shannonToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -5341,6 +5944,51 @@ function shannonToTikZ(thought, options) {
     includeMetrics
   });
 }
+function shannonToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Shannon Problem-Solving Analysis",
+    htmlTheme = "light",
+    includeMetrics = true
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  if (includeMetrics) {
+    const stageIndex = stages.indexOf(thought.stage);
+    const progress = (stageIndex + 1) / stages.length * 100;
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard("Current Stage", stageLabels[thought.stage], "primary");
+    html += renderMetricCard("Uncertainty", thought.uncertainty.toFixed(2), "info");
+    html += renderMetricCard("Progress", `${progress.toFixed(0)}%`, "success");
+    html += "</div>\n";
+  }
+  html += renderSection("Stage Flow", `
+    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0;">
+      ${stages.map((stage) => {
+    const isCurrent = stage === thought.stage;
+    const badge = renderBadge(stageLabels[stage], isCurrent ? "primary" : "secondary");
+    return badge;
+  }).join(" \u2192 ")}
+    </div>
+    ${renderProgressBar((stages.indexOf(thought.stage) + 1) / stages.length * 100, "primary")}
+  `, "\u{1F504}");
+  html += renderSection("Current Stage", `
+    <p><strong>${stageLabels[thought.stage]}</strong></p>
+    <p class="text-secondary">Uncertainty: ${(thought.uncertainty * 100).toFixed(0)}%</p>
+  `, "\u{1F4CD}");
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    html += renderSection("Dependencies", renderList(thought.dependencies), "\u{1F517}");
+  }
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    html += renderSection("Assumptions", renderList(thought.assumptions), "\u{1F4A1}");
+  }
+  if (thought.knownLimitations && thought.knownLimitations.length > 0) {
+    html += renderSection("Known Limitations", renderList(thought.knownLimitations), "\u26A0\uFE0F");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var stages, stageLabels;
 var init_shannon = __esm({
   "src/export/visual/shannon.ts"() {
@@ -5349,6 +5997,7 @@ var init_shannon = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
     stages = [
       "problem_definition",
       "constraints",
@@ -5382,6 +6031,8 @@ function exportAbductiveHypotheses(thought, options) {
       return abductiveToGraphML(thought, options);
     case "tikz":
       return abductiveToTikZ(thought, options);
+    case "html":
+      return abductiveToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -5628,6 +6279,64 @@ function abductiveToTikZ(thought, options) {
     colorScheme
   });
 }
+function abductiveToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Abductive Reasoning Analysis",
+    htmlTheme = "light",
+    includeMetrics = true
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard("Observations", thought.observations.length, "info");
+    html += renderMetricCard("Hypotheses", thought.hypotheses.length, "primary");
+    if (thought.bestExplanation) {
+      html += renderMetricCard("Best Score", thought.bestExplanation.score.toFixed(2), "success");
+    }
+    html += "</div>\n";
+  }
+  const obsRows = thought.observations.map((obs, i) => [
+    (i + 1).toString(),
+    obs.description,
+    obs.confidence.toFixed(2),
+    obs.timestamp || "-"
+  ]);
+  html += renderSection("Observations", renderTable(
+    ["#", "Description", "Confidence", "Time"],
+    obsRows
+  ), "\u{1F441}\uFE0F");
+  const hypRows = thought.hypotheses.map((hyp) => {
+    const isBest = thought.bestExplanation?.id === hyp.id;
+    const badge = isBest ? renderBadge("Best", "success") : "";
+    return [
+      hyp.explanation.substring(0, 60) + (hyp.explanation.length > 60 ? "..." : ""),
+      hyp.score.toFixed(2),
+      badge,
+      hyp.assumptions.slice(0, 3).join(", ") + (hyp.assumptions.length > 3 ? "..." : "")
+    ];
+  });
+  html += renderSection("Hypotheses", renderTable(
+    ["Explanation", "Score", "Status", "Key Assumptions"],
+    hypRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
+  ), "\u{1F4A1}");
+  if (thought.bestExplanation) {
+    html += renderSection("Best Explanation", `
+      <div class="card">
+        <div class="card-header">${escapeHTML(thought.bestExplanation.explanation)}</div>
+        <p><strong>Score:</strong> ${thought.bestExplanation.score.toFixed(2)}</p>
+        <p><strong>Assumptions:</strong></p>
+        <ul class="list-styled">
+          ${thought.bestExplanation.assumptions.map((a) => `<li>${escapeHTML(a)}</li>`).join("\n")}
+        </ul>
+      </div>
+    `, "\u2B50");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_abductive = __esm({
   "src/export/visual/abductive.ts"() {
     init_esm_shims();
@@ -5635,6 +6344,7 @@ var init_abductive = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -5654,6 +6364,8 @@ function exportCounterfactualScenarios(thought, options) {
       return counterfactualToGraphML(thought, options);
     case "tikz":
       return counterfactualToTikZ(thought, options);
+    case "html":
+      return counterfactualToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -5942,6 +6654,51 @@ function counterfactualToTikZ(thought, options) {
   };
   return generateTikZ(nodes, edges, tikzOptions);
 }
+function counterfactualToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Counterfactual Analysis",
+    htmlTheme = "light",
+    includeMetrics = true
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard("Counterfactuals", thought.counterfactuals.length, "primary");
+    html += renderMetricCard("Feasibility", (thought.interventionPoint.feasibility * 100).toFixed(0) + "%", "info");
+    html += renderMetricCard("Expected Impact", (thought.interventionPoint.expectedImpact * 100).toFixed(0) + "%", "success");
+    html += "</div>\n";
+  }
+  html += renderSection("Intervention Point", `
+    <p><strong>Description:</strong> ${escapeHTML(thought.interventionPoint.description)}</p>
+    <p><strong>Timing:</strong> ${escapeHTML(thought.interventionPoint.timing)}</p>
+    <p><strong>Feasibility:</strong> ${(thought.interventionPoint.feasibility * 100).toFixed(0)}%</p>
+    <p><strong>Expected Impact:</strong> ${(thought.interventionPoint.expectedImpact * 100).toFixed(0)}%</p>
+  `, "\u{1F500}");
+  html += renderSection("Actual Outcome", `
+    <div class="card">
+      <div class="card-header">${escapeHTML(thought.actual.name)}</div>
+      <p>${escapeHTML(thought.actual.description)}</p>
+    </div>
+  `, "\u2713");
+  const cfRows = thought.counterfactuals.map((cf) => {
+    const primaryOutcome = cf.outcomes[0];
+    return [
+      cf.name,
+      primaryOutcome ? primaryOutcome.description.substring(0, 60) + (primaryOutcome.description.length > 60 ? "..." : "") : "-",
+      cf.likelihood !== void 0 ? cf.likelihood.toFixed(2) : "-",
+      primaryOutcome?.impact || "-"
+    ];
+  });
+  html += renderSection("Counterfactual Scenarios", renderTable(
+    ["Scenario", "Outcome", "Likelihood", "Impact"],
+    cfRows
+  ), "\u{1F52E}");
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_counterfactual = __esm({
   "src/export/visual/counterfactual.ts"() {
     init_esm_shims();
@@ -5949,6 +6706,7 @@ var init_counterfactual = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -5968,6 +6726,8 @@ function exportAnalogicalMapping(thought, options) {
       return analogicalToGraphML(thought, options);
     case "tikz":
       return analogicalToTikZ(thought, options);
+    case "html":
+      return analogicalToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -6269,6 +7029,61 @@ function analogicalToTikZ(thought, options) {
   );
   return tikz;
 }
+function analogicalToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Analogical Reasoning Analysis",
+    htmlTheme = "light",
+    includeMetrics = true
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard("Analogy Strength", (thought.analogyStrength * 100).toFixed(0) + "%", "primary");
+    html += renderMetricCard("Mappings", thought.mapping.length, "info");
+    html += renderMetricCard("Source Entities", thought.sourceDomain.entities.length, "success");
+    html += renderMetricCard("Target Entities", thought.targetDomain.entities.length, "warning");
+    html += "</div>\n";
+    html += renderProgressBar(thought.analogyStrength * 100, "primary");
+  }
+  const srcRows = thought.sourceDomain.entities.map((e) => [e.id, e.name, e.type || "-", e.description || "-"]);
+  html += renderSection("Source Domain: " + thought.sourceDomain.name, renderTable(
+    ["ID", "Name", "Type", "Description"],
+    srcRows
+  ), "\u{1F4D8}");
+  const tgtRows = thought.targetDomain.entities.map((e) => [e.id, e.name, e.type || "-", e.description || "-"]);
+  html += renderSection("Target Domain: " + thought.targetDomain.name, renderTable(
+    ["ID", "Name", "Type", "Description"],
+    tgtRows
+  ), "\u{1F4D7}");
+  const mapRows = thought.mapping.map((m) => [
+    m.sourceEntityId,
+    "\u2192",
+    m.targetEntityId,
+    (m.confidence * 100).toFixed(0) + "%",
+    m.justification || "-"
+  ]);
+  html += renderSection("Entity Mappings", renderTable(
+    ["Source", "", "Target", "Confidence", "Justification"],
+    mapRows
+  ), "\u{1F517}");
+  if (thought.inferences && thought.inferences.length > 0) {
+    const infRows = thought.inferences.map((inf, i) => [
+      (i + 1).toString(),
+      inf.sourcePattern,
+      inf.targetPrediction,
+      (inf.confidence * 100).toFixed(0) + "%"
+    ]);
+    html += renderSection("Inferences", renderTable(
+      ["#", "Source Pattern", "Target Prediction", "Confidence"],
+      infRows
+    ), "\u{1F4A1}");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_analogical = __esm({
   "src/export/visual/analogical.ts"() {
     init_esm_shims();
@@ -6276,6 +7091,7 @@ var init_analogical = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -6295,6 +7111,8 @@ function exportEvidentialBeliefs(thought, options) {
       return evidentialToGraphML(thought, options);
     case "tikz":
       return evidentialToTikZ(thought, options);
+    case "html":
+      return evidentialToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -6614,6 +7432,68 @@ function evidentialToTikZ(thought, options) {
     colorScheme
   });
 }
+function evidentialToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Evidential Reasoning Analysis",
+    htmlTheme = "light"
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  if (thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
+    html += renderSection("Frame of Discernment", `
+      <p>Hypotheses under consideration:</p>
+      <ul class="list-styled">
+        ${thought.frameOfDiscernment.map((h) => `<li>${escapeHTML(h)}</li>`).join("\n")}
+      </ul>
+    `, "\u{1F3AF}");
+  }
+  if (thought.evidence && thought.evidence.length > 0) {
+    const evRows = thought.evidence.map((ev) => [
+      ev.id,
+      ev.description,
+      ev.reliability.toFixed(2),
+      ev.source || "-"
+    ]);
+    html += renderSection("Evidence", renderTable(
+      ["ID", "Description", "Reliability", "Source"],
+      evRows
+    ), "\u{1F4CA}");
+  }
+  if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
+    const bfContent = thought.beliefFunctions.map((bf) => {
+      const massRows = bf.massAssignments.map(
+        (ma) => `<tr><td>{${ma.hypothesisSet.join(", ")}}</td><td>${ma.mass.toFixed(3)}</td><td>${escapeHTML(ma.justification)}</td></tr>`
+      ).join("\n");
+      return `
+        <div class="card">
+          <div class="card-header">Belief from: ${escapeHTML(bf.source)}</div>
+          ${bf.conflictMass ? `<p><strong>Conflict Mass:</strong> ${bf.conflictMass.toFixed(3)}</p>` : ""}
+          <table class="table">
+            <thead><tr><th>Hypothesis Set</th><th>Mass</th><th>Justification</th></tr></thead>
+            <tbody>${massRows}</tbody>
+          </table>
+        </div>
+      `;
+    }).join("\n");
+    html += renderSection("Belief Functions", bfContent, "\u{1F4C8}");
+  }
+  if (thought.combinedBelief) {
+    const massRows = thought.combinedBelief.massAssignments.map(
+      (ma) => `<tr><td>{${ma.hypothesisSet.join(", ")}}</td><td>${ma.mass.toFixed(3)}</td><td>${escapeHTML(ma.justification)}</td></tr>`
+    ).join("\n");
+    html += renderSection("Combined Belief", `
+      <table class="table">
+        <thead><tr><th>Hypothesis Set</th><th>Mass</th><th>Justification</th></tr></thead>
+        <tbody>${massRows}</tbody>
+      </table>
+      ${thought.combinedBelief.conflictMass ? `<p><strong>Conflict Mass:</strong> ${thought.combinedBelief.conflictMass.toFixed(3)}</p>` : ""}
+    `, "\u{1F52E}");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_evidential = __esm({
   "src/export/visual/evidential.ts"() {
     init_esm_shims();
@@ -6621,6 +7501,7 @@ var init_evidential = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -6640,6 +7521,8 @@ function exportFirstPrinciplesDerivation(thought, options) {
       return firstPrinciplesToGraphML(thought, options);
     case "tikz":
       return firstPrinciplesToTikZ(thought, options);
+    case "html":
+      return firstPrinciplesToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -7111,6 +7994,61 @@ function firstPrinciplesToTikZ(thought, options) {
     includeLabels
   });
 }
+function firstPrinciplesToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "First Principles Analysis",
+    htmlTheme = "light",
+    includeMetrics = true
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  html += renderSection("Question", `<p class="text-primary"><strong>${escapeHTML(thought.question)}</strong></p>`, "\u2753");
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard("Principles", thought.principles.length, "primary");
+    html += renderMetricCard("Derivation Steps", thought.derivationSteps.length, "info");
+    html += renderMetricCard("Certainty", (thought.conclusion.certainty * 100).toFixed(0) + "%", "success");
+    html += "</div>\n";
+  }
+  const principleRows = thought.principles.map((p) => {
+    const typeBadge = renderBadge(p.type, p.type === "axiom" ? "primary" : p.type === "observation" ? "info" : "secondary");
+    return [
+      p.id,
+      typeBadge,
+      p.statement,
+      p.confidence !== void 0 ? (p.confidence * 100).toFixed(0) + "%" : "N/A"
+    ];
+  });
+  html += renderSection("First Principles", renderTable(
+    ["ID", "Type", "Statement", "Confidence"],
+    principleRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
+  ), "\u{1F3DB}\uFE0F");
+  const stepRows = thought.derivationSteps.map((s) => [
+    s.stepNumber.toString(),
+    s.principle,
+    s.inference,
+    s.logicalForm || "-"
+  ]);
+  html += renderSection("Derivation Chain", renderTable(
+    ["Step", "Principle", "Inference", "Logical Form"],
+    stepRows
+  ), "\u{1F517}");
+  html += renderSection("Conclusion", `
+    <div class="card">
+      <div class="card-header">${escapeHTML(thought.conclusion.statement)}</div>
+      <p><strong>Certainty:</strong> ${(thought.conclusion.certainty * 100).toFixed(0)}%</p>
+      <p><strong>Derivation Chain:</strong> Steps ${thought.conclusion.derivationChain.join(" \u2192 ")}</p>
+      ${thought.conclusion.limitations && thought.conclusion.limitations.length > 0 ? `
+        <p><strong>Limitations:</strong></p>
+        ${renderList(thought.conclusion.limitations)}
+      ` : ""}
+    </div>
+  `, "\u2713");
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_first_principles = __esm({
   "src/export/visual/first-principles.ts"() {
     init_esm_shims();
@@ -7118,6 +8056,7 @@ var init_first_principles = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -7137,6 +8076,8 @@ function exportSystemsThinkingCausalLoops(thought, options) {
       return systemsThinkingToGraphML(thought, options);
     case "tikz":
       return systemsThinkingToTikZ(thought, options);
+    case "html":
+      return systemsThinkingToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -7430,6 +8371,78 @@ function systemsThinkingToTikZ(thought, options) {
     includeMetrics
   });
 }
+function systemsThinkingToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Systems Thinking Analysis",
+    htmlTheme = "light",
+    includeMetrics = true
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  if (thought.system) {
+    const systemContent = `
+      <p><strong>Name:</strong> ${escapeHTML(thought.system.name)}</p>
+      <p>${escapeHTML(thought.system.description)}</p>
+    `;
+    html += renderSection("System Overview", systemContent, "\u{1F50D}");
+  }
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">\n';
+    html += renderMetricCard("Components", thought.components?.length || 0, "primary");
+    html += renderMetricCard("Feedback Loops", thought.feedbackLoops?.length || 0, "info");
+    html += renderMetricCard("Leverage Points", thought.leveragePoints?.length || 0, "success");
+    html += "</div>\n";
+  }
+  if (thought.components && thought.components.length > 0) {
+    const componentRows = thought.components.map((c) => [
+      c.name,
+      c.type,
+      c.description,
+      c.unit || "N/A",
+      c.initialValue !== void 0 ? String(c.initialValue) : "N/A"
+    ]);
+    const componentsTable = renderTable(
+      ["Name", "Type", "Description", "Unit", "Initial Value"],
+      componentRows,
+      { caption: "System Components" }
+    );
+    html += renderSection("Components", componentsTable, "\u{1F527}");
+  }
+  if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+    let loopsContent = "";
+    for (const loop of thought.feedbackLoops) {
+      const loopType = loop.type === "reinforcing" ? "success" : "warning";
+      const badge = renderBadge(loop.type.toUpperCase(), loopType);
+      loopsContent += `
+        <div class="card">
+          <div class="card-header">${escapeHTML(loop.name)} ${badge}</div>
+          <p><strong>Polarity:</strong> ${escapeHTML(loop.polarity)}</p>
+          <p><strong>Strength:</strong> ${loop.strength.toFixed(2)}</p>
+          <p><strong>Components:</strong> ${loop.components.map((c) => escapeHTML(c)).join(" \u2192 ")}</p>
+          ${loop.description ? `<p>${escapeHTML(loop.description)}</p>` : ""}
+        </div>
+      `;
+    }
+    html += renderSection("Feedback Loops", loopsContent, "\u{1F504}");
+  }
+  if (thought.leveragePoints && thought.leveragePoints.length > 0) {
+    const leverageRows = thought.leveragePoints.map((lp) => [
+      lp.location,
+      lp.effectiveness.toFixed(2),
+      lp.description
+    ]);
+    const leverageTable = renderTable(
+      ["Location", "Effectiveness", "Description"],
+      leverageRows,
+      { caption: "Leverage Points" }
+    );
+    html += renderSection("Leverage Points", leverageTable, "\u2B50");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_systems_thinking = __esm({
   "src/export/visual/systems-thinking.ts"() {
     init_esm_shims();
@@ -7437,6 +8450,7 @@ var init_systems_thinking = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -7456,6 +8470,8 @@ function exportScientificMethodExperiment(thought, options) {
       return scientificMethodToGraphML(thought, options);
     case "tikz":
       return scientificMethodToTikZ(thought, options);
+    case "html":
+      return scientificMethodToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -7972,6 +8988,94 @@ function scientificMethodToTikZ(thought, options) {
     includeLabels
   });
 }
+function scientificMethodToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Scientific Method Analysis",
+    htmlTheme = "light",
+    includeMetrics = true
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  if (thought.researchQuestion) {
+    const questionContent = `
+      <p><strong>Question:</strong> ${escapeHTML(thought.researchQuestion.question)}</p>
+      <p><strong>Background:</strong> ${escapeHTML(thought.researchQuestion.background)}</p>
+      ${thought.researchQuestion.significance ? `<p><strong>Significance:</strong> ${escapeHTML(thought.researchQuestion.significance)}</p>` : ""}
+    `;
+    html += renderSection("Research Question", questionContent, "\u2753");
+  }
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">\n';
+    html += renderMetricCard("Hypotheses", thought.scientificHypotheses?.length || 0, "primary");
+    html += renderMetricCard("Tests", thought.analysis?.tests?.length || 0, "info");
+    html += renderMetricCard("Confidence", thought.conclusion?.confidence?.toFixed(2) || "N/A", "success");
+    html += "</div>\n";
+  }
+  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+    let hypothesesContent = "";
+    for (const hypothesis of thought.scientificHypotheses) {
+      const typeColor = hypothesis.type === "null" ? "secondary" : "primary";
+      const badge = renderBadge(hypothesis.type.toUpperCase(), typeColor);
+      hypothesesContent += `
+        <div class="card">
+          <div class="card-header">${badge} ${escapeHTML(hypothesis.statement)}</div>
+          ${hypothesis.prediction ? `<p><strong>Prediction:</strong> ${escapeHTML(hypothesis.prediction)}</p>` : ""}
+          ${hypothesis.rationale ? `<p><strong>Rationale:</strong> ${escapeHTML(hypothesis.rationale)}</p>` : ""}
+        </div>
+      `;
+    }
+    html += renderSection("Hypotheses", hypothesesContent, "\u{1F4A1}");
+  }
+  if (thought.experiment) {
+    const experimentContent = `
+      <p><strong>Type:</strong> ${escapeHTML(thought.experiment.type)}</p>
+      <p><strong>Design:</strong> ${escapeHTML(thought.experiment.design)}</p>
+      ${thought.experiment.sampleSize ? `<p><strong>Sample Size:</strong> ${thought.experiment.sampleSize}</p>` : ""}
+    `;
+    html += renderSection("Experiment", experimentContent, "\u{1F52C}");
+  }
+  if (thought.data) {
+    const dataContent = `
+      <p><strong>Method:</strong> ${escapeHTML(thought.data.method.join(", "))}</p>
+      ${thought.data.dataQuality ? `
+        <p><strong>Quality Metrics:</strong></p>
+        <ul>
+          <li>Completeness: ${(thought.data.dataQuality.completeness * 100).toFixed(0)}%</li>
+          <li>Reliability: ${(thought.data.dataQuality.reliability * 100).toFixed(0)}%</li>
+        </ul>
+      ` : ""}
+    `;
+    html += renderSection("Data Collection", dataContent, "\u{1F4CA}");
+  }
+  if (thought.analysis && thought.analysis.tests) {
+    const testRows = thought.analysis.tests.map((test) => [
+      test.name,
+      test.pValue.toFixed(4),
+      test.alpha.toString(),
+      test.result
+    ]);
+    const testsTable = renderTable(
+      ["Test", "p-value", "\u03B1", "Result"],
+      testRows,
+      { caption: "Statistical Tests" }
+    );
+    html += renderSection("Statistical Analysis", testsTable, "\u{1F4C8}");
+  }
+  if (thought.conclusion) {
+    const conclusionBadge = thought.conclusion.confidence && thought.conclusion.confidence > 0.8 ? renderBadge("HIGH CONFIDENCE", "success") : thought.conclusion.confidence && thought.conclusion.confidence > 0.5 ? renderBadge("MODERATE CONFIDENCE", "warning") : renderBadge("LOW CONFIDENCE", "danger");
+    const conclusionContent = `
+      <p>${conclusionBadge}</p>
+      <p>${escapeHTML(thought.conclusion.statement)}</p>
+      ${thought.conclusion.confidence ? `<p><strong>Confidence:</strong> ${(thought.conclusion.confidence * 100).toFixed(0)}%</p>` : ""}
+      ${thought.conclusion.supportedHypotheses ? `<p><strong>Supported Hypotheses:</strong> ${thought.conclusion.supportedHypotheses.join(", ")}</p>` : ""}
+    `;
+    html += renderSection("Conclusion", conclusionContent, "\u2705");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_scientific_method = __esm({
   "src/export/visual/scientific-method.ts"() {
     init_esm_shims();
@@ -7979,6 +9083,7 @@ var init_scientific_method = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -7998,6 +9103,8 @@ function exportOptimizationSolution(thought, options) {
       return optimizationToGraphML(thought, options);
     case "tikz":
       return optimizationToTikZ(thought, options);
+    case "html":
+      return optimizationToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -8440,6 +9547,97 @@ function optimizationToTikZ(thought, options) {
     includeMetrics
   });
 }
+function optimizationToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Optimization Analysis",
+    htmlTheme = "light",
+    includeMetrics = true
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  if (thought.problem) {
+    const problemContent = `
+      <p><strong>Name:</strong> ${escapeHTML(thought.problem.name)}</p>
+      <p><strong>Type:</strong> ${renderBadge(thought.problem.type.toUpperCase(), "info")}</p>
+      <p>${escapeHTML(thought.problem.description)}</p>
+    `;
+    html += renderSection("Problem", problemContent, "\u{1F3AF}");
+  }
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">\n';
+    html += renderMetricCard("Variables", thought.variables?.length || 0, "primary");
+    html += renderMetricCard("Constraints", thought.optimizationConstraints?.length || 0, "warning");
+    html += renderMetricCard("Objectives", thought.objectives?.length || 0, "info");
+    html += renderMetricCard("Quality", thought.solution?.quality?.toFixed(2) || "N/A", "success");
+    html += "</div>\n";
+  }
+  if (thought.variables && thought.variables.length > 0) {
+    const variableRows = thought.variables.map((v) => {
+      const varType = v.type || "unknown";
+      const domain = v.domain ? `[${v.domain.lowerBound}, ${v.domain.upperBound}]` : "N/A";
+      return [v.name, varType, domain, v.description];
+    });
+    const variablesTable = renderTable(
+      ["Name", "Type", "Domain", "Description"],
+      variableRows,
+      { caption: "Decision Variables" }
+    );
+    html += renderSection("Decision Variables", variablesTable, "\u{1F522}");
+  }
+  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+    let constraintsContent = "";
+    for (const constraint of thought.optimizationConstraints) {
+      const badge = renderBadge(constraint.type.toUpperCase(), "warning");
+      constraintsContent += `
+        <div class="card">
+          <div class="card-header">${escapeHTML(constraint.name)} ${badge}</div>
+          <p><strong>Formula:</strong> <code>${escapeHTML(constraint.formula)}</code></p>
+        </div>
+      `;
+    }
+    html += renderSection("Constraints", constraintsContent, "\u26A0\uFE0F");
+  }
+  if (thought.objectives && thought.objectives.length > 0) {
+    let objectivesContent = "";
+    for (const objective of thought.objectives) {
+      const typeColor = objective.type === "maximize" ? "success" : "info";
+      const badge = renderBadge(objective.type.toUpperCase(), typeColor);
+      objectivesContent += `
+        <div class="card">
+          <div class="card-header">${badge} ${escapeHTML(objective.name)}</div>
+          <p><strong>Formula:</strong> <code>${escapeHTML(objective.formula)}</code></p>
+        </div>
+      `;
+    }
+    html += renderSection("Objectives", objectivesContent, "\u{1F3AF}");
+  }
+  if (thought.solution) {
+    const solution = thought.solution;
+    let solutionContent = "";
+    if (solution.status) {
+      const statusBadge = solution.status === "optimal" ? renderBadge("OPTIMAL", "success") : solution.status === "feasible" ? renderBadge("FEASIBLE", "info") : renderBadge("INFEASIBLE", "danger");
+      solutionContent += `<p><strong>Status:</strong> ${statusBadge}</p>`;
+    }
+    if (solution.optimalValue !== void 0) {
+      solutionContent += `<p><strong>Optimal Value:</strong> ${solution.optimalValue}</p>`;
+    }
+    if (solution.quality !== void 0) {
+      solutionContent += `<p><strong>Quality:</strong> ${(solution.quality * 100).toFixed(0)}%</p>`;
+    }
+    if (solution.assignments) {
+      solutionContent += "<h4>Variable Assignments</h4><ul>";
+      for (const [varId, value] of Object.entries(solution.assignments)) {
+        solutionContent += `<li><strong>${escapeHTML(varId)}:</strong> ${value}</li>`;
+      }
+      solutionContent += "</ul>";
+    }
+    html += renderSection("Solution", solutionContent, "\u2705");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_optimization = __esm({
   "src/export/visual/optimization.ts"() {
     init_esm_shims();
@@ -8447,6 +9645,7 @@ var init_optimization = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -8466,6 +9665,8 @@ function exportFormalLogicProof(thought, options) {
       return formalLogicToGraphML(thought, options);
     case "tikz":
       return formalLogicToTikZ(thought, options);
+    case "html":
+      return formalLogicToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -8964,6 +10165,97 @@ function formalLogicToTikZ(thought, options) {
     includeLabels
   });
 }
+function formalLogicToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Formal Logic Analysis",
+    htmlTheme = "light",
+    includeMetrics = true
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  if (thought.proof) {
+    const validBadge = thought.proof.valid ? renderBadge("VALID", "success") : renderBadge("INVALID", "danger");
+    const proofContent = `
+      <p><strong>Theorem:</strong> ${escapeHTML(thought.proof.theorem)}</p>
+      <p><strong>Technique:</strong> ${escapeHTML(thought.proof.technique)}</p>
+      <p><strong>Validity:</strong> ${validBadge}</p>
+      <p><strong>Completeness:</strong> ${(thought.proof.completeness * 100).toFixed(0)}%</p>
+      ${renderProgressBar(thought.proof.completeness * 100, "primary")}
+    `;
+    html += renderSection("Proof", proofContent, "\u{1F4CB}");
+  }
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">\n';
+    html += renderMetricCard("Propositions", thought.propositions?.length || 0, "primary");
+    html += renderMetricCard("Inferences", thought.logicalInferences?.length || 0, "info");
+    html += renderMetricCard("Proof Steps", thought.proof?.steps?.length || 0, "secondary");
+    html += renderMetricCard("Completeness", thought.proof ? `${(thought.proof.completeness * 100).toFixed(0)}%` : "N/A", "success");
+    html += "</div>\n";
+  }
+  if (thought.propositions && thought.propositions.length > 0) {
+    const propositionRows = thought.propositions.map((p) => [
+      p.symbol,
+      p.type,
+      p.statement,
+      p.truthValue !== void 0 ? String(p.truthValue) : "N/A"
+    ]);
+    const propositionsTable = renderTable(
+      ["Symbol", "Type", "Statement", "Truth Value"],
+      propositionRows,
+      { caption: "Propositions" }
+    );
+    html += renderSection("Propositions", propositionsTable, "\u{1F4AD}");
+  }
+  if (thought.logicalInferences && thought.logicalInferences.length > 0) {
+    let inferencesContent = "";
+    for (const inference of thought.logicalInferences) {
+      const validBadge = inference.valid ? renderBadge("VALID", "success") : renderBadge("INVALID", "danger");
+      inferencesContent += `
+        <div class="card">
+          <div class="card-header">${escapeHTML(inference.rule)} ${validBadge}</div>
+          <p><strong>Premises:</strong> ${inference.premises.map((p) => escapeHTML(p)).join(", ")}</p>
+          <p><strong>Conclusion:</strong> ${escapeHTML(inference.conclusion)}</p>
+        </div>
+      `;
+    }
+    html += renderSection("Logical Inferences", inferencesContent, "\u{1F517}");
+  }
+  if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
+    let stepsContent = "<ol>";
+    for (const step of thought.proof.steps) {
+      stepsContent += `
+        <li>
+          <strong>${escapeHTML(step.statement)}</strong>
+          <p><em>Justification:</em> ${escapeHTML(step.justification)}</p>
+          ${step.rule ? `<p><em>Rule:</em> ${renderBadge(step.rule, "info")}</p>` : ""}
+          ${step.referencesSteps && step.referencesSteps.length > 0 ? `<p><em>References steps:</em> ${step.referencesSteps.join(", ")}</p>` : ""}
+        </li>
+      `;
+    }
+    stepsContent += "</ol>";
+    html += renderSection("Proof Steps", stepsContent, "\u{1F4DD}");
+  }
+  if (thought.proof) {
+    const conclusionBadge = thought.proof.valid ? renderBadge("PROVEN", "success") : renderBadge("NOT PROVEN", "danger");
+    const conclusionContent = `
+      <p>${conclusionBadge}</p>
+      <p>${escapeHTML(thought.proof.conclusion)}</p>
+    `;
+    html += renderSection("Conclusion", conclusionContent, "\u2705");
+  }
+  if (thought.truthTable) {
+    const truthTableContent = `
+      <p><strong>Tautology:</strong> ${thought.truthTable.isTautology ? "\u2713" : "\u2717"}</p>
+      <p><strong>Contradiction:</strong> ${thought.truthTable.isContradiction ? "\u2713" : "\u2717"}</p>
+      <p><strong>Contingent:</strong> ${thought.truthTable.isContingent ? "\u2713" : "\u2717"}</p>
+    `;
+    html += renderSection("Truth Table", truthTableContent, "\u{1F4CA}");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_formal_logic = __esm({
   "src/export/visual/formal-logic.ts"() {
     init_esm_shims();
@@ -8971,6 +10263,7 @@ var init_formal_logic = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -8990,6 +10283,8 @@ function exportMathematicsDerivation(thought, options) {
       return mathematicsToGraphML(thought, options);
     case "tikz":
       return mathematicsToTikZ(thought, options);
+    case "html":
+      return mathematicsToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -9464,6 +10759,87 @@ function mathematicsToTikZ(thought, options) {
     includeLabels
   });
 }
+function mathematicsToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Mathematics Derivation Analysis",
+    htmlTheme = "light"
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  html += '<div class="metrics-grid">';
+  html += renderMetricCard("Uncertainty", `${(thought.uncertainty * 100).toFixed(1)}%`, "warning");
+  if (thought.theorems) {
+    html += renderMetricCard("Theorems", thought.theorems.length, "primary");
+  }
+  if (thought.assumptions) {
+    html += renderMetricCard("Assumptions", thought.assumptions.length, "info");
+  }
+  if (thought.proofStrategy) {
+    html += renderMetricCard("Completeness", `${(thought.proofStrategy.completeness * 100).toFixed(0)}%`, "success");
+  }
+  html += "</div>\n";
+  const badges = [];
+  if (thought.thoughtType) {
+    badges.push(renderBadge(thought.thoughtType.replace(/_/g, " "), "primary"));
+  }
+  if (badges.length > 0) {
+    html += `<div class="flex gap-1" style="margin: 1rem 0">${badges.join(" ")}</div>
+`;
+  }
+  if (thought.mathematicalModel) {
+    const modelContent = `
+      <p><strong>LaTeX:</strong> <code>${escapeHTML(thought.mathematicalModel.latex)}</code></p>
+      <p><strong>Symbolic:</strong> <code>${escapeHTML(thought.mathematicalModel.symbolic)}</code></p>
+      ${thought.mathematicalModel.ascii ? `<p><strong>ASCII:</strong> <code>${escapeHTML(thought.mathematicalModel.ascii)}</code></p>` : ""}
+    `;
+    html += renderSection("Mathematical Model", modelContent, "\u{1F4D0}");
+  }
+  if (thought.proofStrategy) {
+    const proofContent = `
+      <p><strong>Type:</strong> ${renderBadge(thought.proofStrategy.type, "info")}</p>
+      <p><strong>Completeness:</strong></p>
+      ${renderProgressBar(thought.proofStrategy.completeness * 100, "success")}
+      <p style="margin-top: 1rem"><strong>Steps:</strong></p>
+      <ol class="list-styled">
+        ${thought.proofStrategy.steps.map((step) => `<li>${escapeHTML(step)}</li>`).join("")}
+      </ol>
+      ${thought.proofStrategy.baseCase ? `<p><strong>Base Case:</strong> ${escapeHTML(thought.proofStrategy.baseCase)}</p>` : ""}
+      ${thought.proofStrategy.inductiveStep ? `<p><strong>Inductive Step:</strong> ${escapeHTML(thought.proofStrategy.inductiveStep)}</p>` : ""}
+    `;
+    html += renderSection("Proof Strategy", proofContent, "\u{1F50D}");
+  }
+  if (thought.theorems && thought.theorems.length > 0) {
+    const theoremsContent = thought.theorems.map((theorem, index) => `
+      <div class="card">
+        <div class="card-header">${escapeHTML(theorem.name || `Theorem ${index + 1}`)}</div>
+        <p><strong>Statement:</strong> ${escapeHTML(theorem.statement)}</p>
+        ${theorem.hypotheses.length > 0 ? `<p><strong>Hypotheses:</strong> ${escapeHTML(theorem.hypotheses.join(", "))}</p>` : ""}
+        <p><strong>Conclusion:</strong> ${escapeHTML(theorem.conclusion)}</p>
+      </div>
+    `).join("");
+    html += renderSection("Theorems", theoremsContent, "\u{1F4DC}");
+  }
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    const assumptionsList = thought.assumptions.map((a) => escapeHTML(a));
+    html += renderSection("Assumptions", `
+      <ul class="list-styled">
+        ${assumptionsList.map((a) => `<li>${a}</li>`).join("")}
+      </ul>
+    `, "\u26A0\uFE0F");
+  }
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    const depsList = thought.dependencies.map((d) => escapeHTML(d));
+    html += renderSection("Dependencies", `
+      <ul class="list-styled">
+        ${depsList.map((d) => `<li>${d}</li>`).join("")}
+      </ul>
+    `, "\u{1F517}");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_mathematics = __esm({
   "src/export/visual/mathematics.ts"() {
     init_esm_shims();
@@ -9471,6 +10847,7 @@ var init_mathematics = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -9490,6 +10867,8 @@ function exportPhysicsVisualization(thought, options) {
       return physicsToGraphML(thought, options);
     case "tikz":
       return physicsToTikZ(thought, options);
+    case "html":
+      return physicsToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -10248,6 +11627,146 @@ function physicsToTikZ(thought, options) {
   }
   return tikz;
 }
+function physicsToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Physics Analysis",
+    htmlTheme = "light"
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  html += '<div class="metrics-grid">';
+  html += renderMetricCard("Uncertainty", `${(thought.uncertainty * 100).toFixed(1)}%`, "warning");
+  if (thought.assumptions) {
+    html += renderMetricCard("Assumptions", thought.assumptions.length, "info");
+  }
+  if (thought.tensorProperties) {
+    html += renderMetricCard("Tensor Rank", `(${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`, "primary");
+  }
+  if (thought.physicalInterpretation?.conservationLaws) {
+    html += renderMetricCard("Conservation Laws", thought.physicalInterpretation.conservationLaws.length, "success");
+  }
+  html += "</div>\n";
+  const badges = [];
+  if (thought.thoughtType) {
+    badges.push(renderBadge(thought.thoughtType.replace(/_/g, " "), "primary"));
+  }
+  if (badges.length > 0) {
+    html += `<div class="flex gap-1" style="margin: 1rem 0">${badges.join(" ")}</div>
+`;
+  }
+  if (thought.tensorProperties) {
+    const tensorRows = [
+      ["Rank", `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`],
+      ["Components", thought.tensorProperties.components],
+      ["LaTeX", thought.tensorProperties.latex],
+      ["Transformation", thought.tensorProperties.transformation]
+    ];
+    if (thought.tensorProperties.indexStructure) {
+      tensorRows.push(["Index Structure", thought.tensorProperties.indexStructure]);
+    }
+    if (thought.tensorProperties.coordinateSystem) {
+      tensorRows.push(["Coordinate System", thought.tensorProperties.coordinateSystem]);
+    }
+    let tensorContent = renderTable(["Property", "Value"], tensorRows);
+    if (thought.tensorProperties.symmetries.length > 0) {
+      tensorContent += '<p style="margin-top: 1rem"><strong>Symmetries:</strong></p>';
+      tensorContent += '<ul class="list-styled">';
+      thought.tensorProperties.symmetries.forEach((sym) => {
+        tensorContent += `<li>${escapeHTML(sym)}</li>`;
+      });
+      tensorContent += "</ul>";
+    }
+    if (thought.tensorProperties.invariants.length > 0) {
+      tensorContent += '<p style="margin-top: 1rem"><strong>Invariants:</strong></p>';
+      tensorContent += '<ul class="list-styled">';
+      thought.tensorProperties.invariants.forEach((inv) => {
+        tensorContent += `<li>${escapeHTML(inv)}</li>`;
+      });
+      tensorContent += "</ul>";
+    }
+    html += renderSection("Tensor Properties", tensorContent, "\u{1F522}");
+  }
+  if (thought.physicalInterpretation) {
+    const interpRows = [
+      ["Quantity", thought.physicalInterpretation.quantity],
+      ["Units", thought.physicalInterpretation.units]
+    ];
+    let interpContent = renderTable(["Property", "Value"], interpRows);
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      interpContent += '<p style="margin-top: 1rem"><strong>Conservation Laws:</strong></p>';
+      interpContent += '<ul class="list-styled">';
+      thought.physicalInterpretation.conservationLaws.forEach((law) => {
+        interpContent += `<li>${escapeHTML(law)}</li>`;
+      });
+      interpContent += "</ul>";
+    }
+    if (thought.physicalInterpretation.constraints && thought.physicalInterpretation.constraints.length > 0) {
+      interpContent += '<p style="margin-top: 1rem"><strong>Constraints:</strong></p>';
+      interpContent += '<ul class="list-styled">';
+      thought.physicalInterpretation.constraints.forEach((constraint) => {
+        interpContent += `<li>${escapeHTML(constraint)}</li>`;
+      });
+      interpContent += "</ul>";
+    }
+    if (thought.physicalInterpretation.observables && thought.physicalInterpretation.observables.length > 0) {
+      interpContent += '<p style="margin-top: 1rem"><strong>Observables:</strong></p>';
+      interpContent += '<ul class="list-styled">';
+      thought.physicalInterpretation.observables.forEach((obs) => {
+        interpContent += `<li>${escapeHTML(obs)}</li>`;
+      });
+      interpContent += "</ul>";
+    }
+    html += renderSection("Physical Interpretation", interpContent, "\u269B\uFE0F");
+  }
+  if (thought.fieldTheoryContext) {
+    let fieldContent = `<p><strong>Symmetry Group:</strong> ${renderBadge(thought.fieldTheoryContext.symmetryGroup, "info")}</p>`;
+    if (thought.fieldTheoryContext.fields.length > 0) {
+      fieldContent += '<p style="margin-top: 1rem"><strong>Fields:</strong></p>';
+      fieldContent += '<ul class="list-styled">';
+      thought.fieldTheoryContext.fields.forEach((field) => {
+        fieldContent += `<li>${escapeHTML(field)}</li>`;
+      });
+      fieldContent += "</ul>";
+    }
+    if (thought.fieldTheoryContext.interactions.length > 0) {
+      fieldContent += '<p style="margin-top: 1rem"><strong>Interactions:</strong></p>';
+      fieldContent += '<ul class="list-styled">';
+      thought.fieldTheoryContext.interactions.forEach((interaction) => {
+        fieldContent += `<li>${escapeHTML(interaction)}</li>`;
+      });
+      fieldContent += "</ul>";
+    }
+    if (thought.fieldTheoryContext.gaugeSymmetries && thought.fieldTheoryContext.gaugeSymmetries.length > 0) {
+      fieldContent += '<p style="margin-top: 1rem"><strong>Gauge Symmetries:</strong></p>';
+      fieldContent += '<ul class="list-styled">';
+      thought.fieldTheoryContext.gaugeSymmetries.forEach((gauge) => {
+        fieldContent += `<li>${escapeHTML(gauge)}</li>`;
+      });
+      fieldContent += "</ul>";
+    }
+    html += renderSection("Field Theory Context", fieldContent, "\u{1F30C}");
+  }
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    const assumptionsList = thought.assumptions.map((a) => escapeHTML(a));
+    html += renderSection("Assumptions", `
+      <ul class="list-styled">
+        ${assumptionsList.map((a) => `<li>${a}</li>`).join("")}
+      </ul>
+    `, "\u26A0\uFE0F");
+  }
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    const depsList = thought.dependencies.map((d) => escapeHTML(d));
+    html += renderSection("Dependencies", `
+      <ul class="list-styled">
+        ${depsList.map((d) => `<li>${d}</li>`).join("")}
+      </ul>
+    `, "\u{1F517}");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_physics = __esm({
   "src/export/visual/physics.ts"() {
     init_esm_shims();
@@ -10255,6 +11774,7 @@ var init_physics = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -10274,6 +11794,8 @@ function exportHybridOrchestration(thought, options) {
       return hybridToGraphML(thought, options);
     case "tikz":
       return hybridToTikZ(thought, options);
+    case "html":
+      return hybridToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -10756,6 +12278,112 @@ function hybridToTikZ(thought, options) {
     includeLabels
   });
 }
+function hybridToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Hybrid Mode Orchestration",
+    htmlTheme = "light"
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  html += '<div class="metrics-grid">';
+  html += renderMetricCard("Primary Mode", thought.primaryMode, "primary");
+  if (thought.secondaryFeatures) {
+    html += renderMetricCard("Secondary Features", thought.secondaryFeatures.length, "info");
+  }
+  if (thought.uncertainty !== void 0) {
+    html += renderMetricCard("Uncertainty", `${(thought.uncertainty * 100).toFixed(1)}%`, "warning");
+  }
+  if (thought.stage) {
+    html += renderMetricCard("Stage", thought.stage.replace(/_/g, " "), "secondary");
+  }
+  html += "</div>\n";
+  const badges = [];
+  badges.push(renderBadge(`Primary: ${thought.primaryMode}`, "primary"));
+  if (thought.stage) {
+    badges.push(renderBadge(thought.stage.replace(/_/g, " "), "info"));
+  }
+  html += `<div class="flex gap-1 flex-wrap" style="margin: 1rem 0">${badges.join(" ")}</div>
+`;
+  if (thought.switchReason) {
+    html += renderSection("Mode Switch Reason", `
+      <p>${escapeHTML(thought.switchReason)}</p>
+    `, "\u{1F504}");
+  }
+  if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
+    const featuresContent = `
+      <ul class="list-styled">
+        ${thought.secondaryFeatures.map((f) => `<li>${escapeHTML(f)}</li>`).join("")}
+      </ul>
+    `;
+    html += renderSection("Secondary Features", featuresContent, "\u2699\uFE0F");
+  }
+  if (thought.mathematicalModel) {
+    const modelContent = `
+      <p><strong>LaTeX:</strong> <code>${escapeHTML(thought.mathematicalModel.latex)}</code></p>
+      <p><strong>Symbolic:</strong> <code>${escapeHTML(thought.mathematicalModel.symbolic)}</code></p>
+      ${thought.mathematicalModel.ascii ? `<p><strong>ASCII:</strong> <code>${escapeHTML(thought.mathematicalModel.ascii)}</code></p>` : ""}
+    `;
+    html += renderSection("Mathematical Model", modelContent, "\u{1F4D0}");
+  }
+  if (thought.tensorProperties) {
+    const tensorRows = [
+      ["Rank", `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`],
+      ["Components", thought.tensorProperties.components],
+      ["Transformation", thought.tensorProperties.transformation]
+    ];
+    let tensorContent = renderTable(["Property", "Value"], tensorRows);
+    if (thought.tensorProperties.symmetries.length > 0) {
+      tensorContent += '<p style="margin-top: 1rem"><strong>Symmetries:</strong></p>';
+      tensorContent += '<ul class="list-styled">';
+      thought.tensorProperties.symmetries.forEach((sym) => {
+        tensorContent += `<li>${escapeHTML(sym)}</li>`;
+      });
+      tensorContent += "</ul>";
+    }
+    html += renderSection("Tensor Properties", tensorContent, "\u{1F522}");
+  }
+  if (thought.physicalInterpretation) {
+    const interpRows = [
+      ["Quantity", thought.physicalInterpretation.quantity],
+      ["Units", thought.physicalInterpretation.units]
+    ];
+    let interpContent = renderTable(["Property", "Value"], interpRows);
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      interpContent += '<p style="margin-top: 1rem"><strong>Conservation Laws:</strong></p>';
+      interpContent += '<ul class="list-styled">';
+      thought.physicalInterpretation.conservationLaws.forEach((law) => {
+        interpContent += `<li>${escapeHTML(law)}</li>`;
+      });
+      interpContent += "</ul>";
+    }
+    html += renderSection("Physical Interpretation", interpContent, "\u269B\uFE0F");
+  }
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    const assumptionsList = thought.assumptions.map((a) => escapeHTML(a));
+    html += renderSection("Assumptions", `
+      <ul class="list-styled">
+        ${assumptionsList.map((a) => `<li>${a}</li>`).join("")}
+      </ul>
+    `, "\u26A0\uFE0F");
+  }
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    const depsList = thought.dependencies.map((d) => escapeHTML(d));
+    html += renderSection("Dependencies", `
+      <ul class="list-styled">
+        ${depsList.map((d) => `<li>${d}</li>`).join("")}
+      </ul>
+    `, "\u{1F517}");
+  }
+  if (thought.revisionReason) {
+    html += renderSection("Revision Reason", `
+      <p>${escapeHTML(thought.revisionReason)}</p>
+    `, "\u270F\uFE0F");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_hybrid = __esm({
   "src/export/visual/hybrid.ts"() {
     init_esm_shims();
@@ -10763,6 +12391,7 @@ var init_hybrid = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -10782,6 +12411,8 @@ function exportMetaReasoningVisualization(thought, options) {
       return metaReasoningToGraphML(thought, options);
     case "tikz":
       return metaReasoningToTikZ(thought, options);
+    case "html":
+      return metaReasoningToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -11421,6 +13052,130 @@ function metaReasoningToTikZ(thought, options) {
   };
   return generateTikZ(nodes, edges, tikzOptions);
 }
+function metaReasoningToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Meta-Reasoning Analysis",
+    htmlTheme = "light"
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  html += '<div class="metrics-grid">';
+  html += renderMetricCard("Effectiveness", `${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`, "primary");
+  html += renderMetricCard("Quality", `${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`, "success");
+  html += renderMetricCard("Alternatives", thought.alternativeStrategies.length, "info");
+  html += renderMetricCard("Confidence", `${(thought.recommendation.confidence * 100).toFixed(0)}%`, "warning");
+  html += "</div>\n";
+  const strategyContent = `
+    <p><strong>Mode:</strong> ${renderBadge(thought.currentStrategy.mode, "primary")}</p>
+    <p><strong>Approach:</strong> ${escapeHTML(thought.currentStrategy.approach)}</p>
+    <p><strong>Thoughts Spent:</strong> ${thought.currentStrategy.thoughtsSpent}</p>
+    ${thought.currentStrategy.progressIndicators.length > 0 ? `
+      <p style="margin-top: 1rem"><strong>Progress Indicators:</strong></p>
+      <ul class="list-styled">
+        ${thought.currentStrategy.progressIndicators.map((ind) => `<li>${escapeHTML(ind)}</li>`).join("")}
+      </ul>
+    ` : ""}
+  `;
+  html += renderSection("Current Strategy", strategyContent, "\u{1F3AF}");
+  const evalRows = [
+    ["Effectiveness", `${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%`],
+    ["Efficiency", `${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%`],
+    ["Confidence", `${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%`],
+    ["Progress Rate", `${thought.strategyEvaluation.progressRate.toFixed(2)} insights/thought`],
+    ["Quality Score", `${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%`]
+  ];
+  let evalContent = renderTable(["Metric", "Value"], evalRows);
+  evalContent += '<p style="margin-top: 1rem"><strong>Effectiveness:</strong></p>';
+  evalContent += renderProgressBar(thought.strategyEvaluation.effectiveness * 100, "primary");
+  if (thought.strategyEvaluation.strengths.length > 0) {
+    evalContent += '<p style="margin-top: 1rem"><strong>Strengths:</strong></p>';
+    evalContent += '<ul class="list-styled">';
+    thought.strategyEvaluation.strengths.forEach((s) => {
+      evalContent += `<li class="text-success">\u2713 ${escapeHTML(s)}</li>`;
+    });
+    evalContent += "</ul>";
+  }
+  if (thought.strategyEvaluation.issues.length > 0) {
+    evalContent += '<p style="margin-top: 1rem"><strong>Issues:</strong></p>';
+    evalContent += '<ul class="list-styled">';
+    thought.strategyEvaluation.issues.forEach((issue) => {
+      evalContent += `<li class="text-danger">\u2717 ${escapeHTML(issue)}</li>`;
+    });
+    evalContent += "</ul>";
+  }
+  html += renderSection("Strategy Evaluation", evalContent, "\u{1F4CA}");
+  if (thought.alternativeStrategies.length > 0) {
+    const altsContent = thought.alternativeStrategies.map((alt) => `
+      <div class="card">
+        <div class="card-header">
+          ${renderBadge(alt.mode, "info")}
+          ${renderBadge(`Score: ${(alt.recommendationScore * 100).toFixed(0)}%`, "secondary")}
+        </div>
+        <p><strong>Reasoning:</strong> ${escapeHTML(alt.reasoning)}</p>
+        <p><strong>Expected Benefit:</strong> ${escapeHTML(alt.expectedBenefit)}</p>
+        <p><strong>Switching Cost:</strong></p>
+        ${renderProgressBar(alt.switchingCost * 100, "warning")}
+        <p style="margin-top: 0.5rem"><strong>Recommendation Score:</strong></p>
+        ${renderProgressBar(alt.recommendationScore * 100, "success")}
+      </div>
+    `).join("");
+    html += renderSection("Alternative Strategies", altsContent, "\u{1F500}");
+  }
+  const recContent = `
+    <p><strong>Action:</strong> ${renderBadge(thought.recommendation.action, "warning")}</p>
+    ${thought.recommendation.targetMode ? `<p><strong>Target Mode:</strong> ${renderBadge(thought.recommendation.targetMode, "primary")}</p>` : ""}
+    <p><strong>Justification:</strong> ${escapeHTML(thought.recommendation.justification)}</p>
+    <p><strong>Expected Improvement:</strong> ${escapeHTML(thought.recommendation.expectedImprovement)}</p>
+    <p style="margin-top: 1rem"><strong>Confidence:</strong></p>
+    ${renderProgressBar(thought.recommendation.confidence * 100, "success")}
+  `;
+  html += renderSection("Recommendation", recContent, "\u{1F4A1}");
+  const resourceRows = [
+    ["Time Spent", `${thought.resourceAllocation.timeSpent}ms`],
+    ["Thoughts Remaining", thought.resourceAllocation.thoughtsRemaining],
+    ["Complexity Level", thought.resourceAllocation.complexityLevel],
+    ["Urgency", thought.resourceAllocation.urgency]
+  ];
+  let resourceContent = renderTable(["Resource", "Value"], resourceRows);
+  resourceContent += `<p style="margin-top: 1rem"><strong>Recommendation:</strong> ${escapeHTML(thought.resourceAllocation.recommendation)}</p>`;
+  html += renderSection("Resource Allocation", resourceContent, "\u26A1");
+  const qualityRows = [
+    ["Logical Consistency", `${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%`],
+    ["Evidence Quality", `${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%`],
+    ["Completeness", `${(thought.qualityMetrics.completeness * 100).toFixed(1)}%`],
+    ["Originality", `${(thought.qualityMetrics.originality * 100).toFixed(1)}%`],
+    ["Clarity", `${(thought.qualityMetrics.clarity * 100).toFixed(1)}%`],
+    ["Overall Quality", `${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%`]
+  ];
+  let qualityContent = renderTable(["Metric", "Value"], qualityRows);
+  qualityContent += '<p style="margin-top: 1rem"><strong>Overall Quality:</strong></p>';
+  qualityContent += renderProgressBar(thought.qualityMetrics.overallQuality * 100, "success");
+  html += renderSection("Quality Metrics", qualityContent, "\u2B50");
+  const sessionRows = [
+    ["Session ID", thought.sessionContext.sessionId],
+    ["Total Thoughts", thought.sessionContext.totalThoughts],
+    ["Mode Switches", thought.sessionContext.modeSwitches],
+    ["Problem Type", thought.sessionContext.problemType]
+  ];
+  if (thought.sessionContext.historicalEffectiveness !== void 0) {
+    sessionRows.push(["Historical Effectiveness", `${(thought.sessionContext.historicalEffectiveness * 100).toFixed(1)}%`]);
+  }
+  let sessionContent = renderTable(["Property", "Value"], sessionRows);
+  if (thought.sessionContext.modesUsed.length > 0) {
+    sessionContent += '<p style="margin-top: 1rem"><strong>Modes Used:</strong></p>';
+    sessionContent += '<div class="flex gap-1 flex-wrap">';
+    thought.sessionContext.modesUsed.forEach((mode) => {
+      sessionContent += renderBadge(mode, "info");
+      sessionContent += " ";
+    });
+    sessionContent += "</div>";
+  }
+  html += renderSection("Session Context", sessionContent, "\u{1F4CB}");
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_metareasoning = __esm({
   "src/export/visual/metareasoning.ts"() {
     init_esm_shims();
@@ -11428,6 +13183,7 @@ var init_metareasoning = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -11451,6 +13207,8 @@ function exportProofDecomposition(decomposition, options) {
       return proofDecompositionToASCII(decomposition);
     case "svg":
       return proofDecompositionToSVG(decomposition, colorScheme, includeLabels, includeMetrics, svgWidth, svgHeight, nodeSpacing);
+    case "html":
+      return proofDecompositionToHTML(decomposition, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -12103,10 +13861,113 @@ function proofDecompositionToSVG(decomposition, colorScheme, includeLabels, incl
   svg += "</svg>";
   return svg;
 }
+function proofDecompositionToHTML(decomposition, options) {
+  const { colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const theme = colorScheme === "monochrome" ? "light" : "light";
+  let html = generateHTMLHeader("Proof Decomposition", { standalone: true, theme });
+  if (decomposition.theorem) {
+    html += renderSection(
+      "Theorem",
+      `<p class="theorem-statement">${escapeHTML(decomposition.theorem)}</p>`,
+      "info"
+    );
+  }
+  if (includeMetrics) {
+    const metricsHTML = `
+      <div class="metrics-grid">
+        ${renderMetricCard("Completeness", `${(decomposition.completeness * 100).toFixed(0)}%`, renderProgressBar(decomposition.completeness * 100))}
+        ${renderMetricCard("Rigor Level", decomposition.rigorLevel)}
+        ${renderMetricCard("Atom Count", decomposition.atomCount.toString())}
+        ${renderMetricCard("Max Depth", decomposition.maxDependencyDepth.toString())}
+      </div>
+    `;
+    html += renderSection("Metrics", metricsHTML);
+  }
+  const axioms = decomposition.atoms.filter((a) => a.type === "axiom");
+  if (axioms.length > 0) {
+    const axiomsRows = axioms.map((atom) => [
+      atom.id,
+      includeLabels ? atom.statement : atom.id,
+      atom.type
+    ]);
+    html += renderSection("Axioms", renderTable(["ID", "Statement", "Type"], axiomsRows), "success");
+  }
+  const hypotheses = decomposition.atoms.filter((a) => a.type === "hypothesis");
+  if (hypotheses.length > 0) {
+    const hypothesesRows = hypotheses.map((atom) => [
+      atom.id,
+      includeLabels ? atom.statement : atom.id,
+      atom.type
+    ]);
+    html += renderSection("Hypotheses", renderTable(["ID", "Statement", "Type"], hypothesesRows), "info");
+  }
+  const derived = decomposition.atoms.filter((a) => a.type === "derived" || a.type === "lemma");
+  if (derived.length > 0) {
+    const derivedRows = derived.map((atom) => {
+      const deps = atom.derivedFrom && atom.derivedFrom.length > 0 ? atom.derivedFrom.join(", ") : "None";
+      const rule = atom.usedInferenceRule ? atom.usedInferenceRule : "N/A";
+      return [
+        atom.id,
+        includeLabels ? atom.statement : atom.id,
+        atom.type,
+        deps,
+        rule
+      ];
+    });
+    html += renderSection(
+      "Derivation Chain",
+      renderTable(["ID", "Statement", "Type", "Derived From", "Inference Rule"], derivedRows)
+    );
+  }
+  const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
+  if (conclusions.length > 0) {
+    const conclusionsRows = conclusions.map((atom) => {
+      const deps = atom.derivedFrom && atom.derivedFrom.length > 0 ? atom.derivedFrom.join(", ") : "None";
+      return [
+        atom.id,
+        includeLabels ? atom.statement : atom.id,
+        atom.type,
+        deps
+      ];
+    });
+    html += renderSection("Conclusions", renderTable(["ID", "Statement", "Type", "Derived From"], conclusionsRows), "primary");
+  }
+  if (decomposition.dependencies && decomposition.dependencies.edges && decomposition.dependencies.edges.length > 0) {
+    const depsRows = decomposition.dependencies.edges.map((edge) => [
+      edge.from,
+      edge.to,
+      edge.inferenceRule ? edge.inferenceRule : "Direct"
+    ]);
+    html += renderSection("Dependencies", renderTable(["From", "To", "Inference Rule"], depsRows));
+  }
+  if (decomposition.gaps && decomposition.gaps.length > 0) {
+    const gapsRows = decomposition.gaps.map((gap) => [
+      gap.id,
+      gap.type,
+      gap.severity,
+      gap.description,
+      `${gap.location.from} \u2192 ${gap.location.to}`,
+      gap.suggestedFix ? gap.suggestedFix : "N/A"
+    ]);
+    html += renderSection("Gaps (Missing Steps)", renderTable(["ID", "Type", "Severity", "Description", "Location", "Suggested Fix"], gapsRows), "danger");
+  }
+  if (decomposition.implicitAssumptions && decomposition.implicitAssumptions.length > 0) {
+    const assumptionsRows = decomposition.implicitAssumptions.map((assumption) => [
+      assumption.type,
+      assumption.statement,
+      assumption.shouldBeExplicit ? "Yes" : "No",
+      assumption.suggestedFormulation
+    ]);
+    html += renderSection("Implicit Assumptions", renderTable(["Type", "Statement", "Should Be Explicit", "Suggested Formulation"], assumptionsRows), "warning");
+  }
+  html += generateHTMLFooter(true);
+  return html;
+}
 var init_proof_decomposition = __esm({
   "src/export/visual/proof-decomposition.ts"() {
     init_esm_shims();
     init_utils();
+    init_html_utils();
   }
 });
 
@@ -12128,6 +13989,8 @@ function exportEngineeringAnalysis(thought, options) {
       return engineeringToTikZ(thought, options);
     case "modelica":
       return engineeringToModelica(thought, options);
+    case "html":
+      return engineeringToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -12836,6 +14699,156 @@ function engineeringToModelica(thought, options) {
   lines.push(`end ${packageName};`);
   return lines.join("\n");
 }
+function engineeringToHTML(thought, options) {
+  const {
+    htmlStandalone = true,
+    htmlTitle = "Engineering Analysis",
+    htmlTheme = "light",
+    includeMetrics = true
+  } = options;
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>
+`;
+  const typeBadge = renderBadge(thought.analysisType, "primary");
+  html += `<p>Analysis Type: ${typeBadge}</p>
+`;
+  html += renderSection("Design Challenge", `
+    <p class="text-primary"><strong>${escapeHTML(thought.designChallenge)}</strong></p>
+  `, "\u{1F527}");
+  if (thought.requirements && thought.requirements.requirements.length > 0) {
+    if (includeMetrics) {
+      const cov = thought.requirements.coverage;
+      const coveragePercent = cov.verified / Math.max(cov.total, 1) * 100;
+      html += '<div class="metrics-grid">';
+      html += renderMetricCard("Total Requirements", cov.total, "primary");
+      html += renderMetricCard("Verified", cov.verified, "success");
+      html += renderMetricCard("Traced to Source", cov.tracedToSource, "info");
+      html += renderMetricCard("Allocated", cov.allocatedToDesign, "warning");
+      html += "</div>\n";
+      html += renderProgressBar(coveragePercent, "success");
+    }
+    const reqRows = thought.requirements.requirements.map((req) => {
+      const statusBadge = renderBadge(
+        req.status,
+        req.status === "verified" ? "success" : req.status === "implemented" ? "info" : req.status === "approved" ? "primary" : "secondary"
+      );
+      const priorityBadge = renderBadge(
+        req.priority,
+        req.priority === "must" ? "danger" : req.priority === "should" ? "warning" : "secondary"
+      );
+      return [
+        req.id,
+        req.title,
+        priorityBadge,
+        statusBadge,
+        req.source
+      ];
+    });
+    html += renderSection("Requirements Traceability", renderTable(
+      ["ID", "Title", "Priority", "Status", "Source"],
+      reqRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
+    ), "\u{1F4CB}");
+  }
+  if (thought.tradeStudy) {
+    html += renderSection("Trade Study: " + thought.tradeStudy.title, `
+      <p><strong>Objective:</strong> ${escapeHTML(thought.tradeStudy.objective)}</p>
+      <h4>Criteria</h4>
+    ` + renderTable(
+      ["Criterion", "Weight", "Description"],
+      thought.tradeStudy.criteria.map((c) => [c.name, (c.weight * 100).toFixed(0) + "%", c.description || "-"])
+    ) + `
+      <h4>Alternatives</h4>
+    ` + renderTable(
+      ["Alternative", "Description", "Risk Level"],
+      thought.tradeStudy.alternatives.map((a) => [
+        a.id === thought.tradeStudy.recommendation ? "\u2B50 " + a.name : a.name,
+        a.description,
+        a.riskLevel || "-"
+      ])
+    ) + `
+      <div class="card" style="margin-top: 1rem; border-color: var(--success-color);">
+        <div class="card-header text-success">Recommendation: ${escapeHTML(thought.tradeStudy.recommendation)}</div>
+        <p>${escapeHTML(thought.tradeStudy.justification)}</p>
+      </div>
+    `, "\u2696\uFE0F");
+  }
+  if (thought.fmea && thought.fmea.failureModes.length > 0) {
+    if (includeMetrics) {
+      html += '<div class="metrics-grid">';
+      html += renderMetricCard("Failure Modes", thought.fmea.summary.totalModes, "primary");
+      html += renderMetricCard("Critical Modes", thought.fmea.summary.criticalModes, "danger");
+      html += renderMetricCard("Average RPN", thought.fmea.summary.averageRpn.toFixed(1), "warning");
+      html += renderMetricCard("Max RPN", thought.fmea.summary.maxRpn, "danger");
+      html += "</div>\n";
+    }
+    const fmeaRows = thought.fmea.failureModes.map((fm) => {
+      const isCritical = fm.rpn >= thought.fmea.rpnThreshold;
+      const rpnBadge = renderBadge(fm.rpn.toString(), isCritical ? "danger" : "warning");
+      return [
+        fm.component,
+        fm.failureMode.substring(0, 40) + (fm.failureMode.length > 40 ? "..." : ""),
+        fm.severity.toString(),
+        fm.occurrence.toString(),
+        fm.detection.toString(),
+        rpnBadge,
+        fm.mitigation ? "\u2713" : "-"
+      ];
+    });
+    html += renderSection("Failure Mode Analysis (FMEA)", `
+      <p><strong>System:</strong> ${escapeHTML(thought.fmea.system)} | <strong>RPN Threshold:</strong> ${thought.fmea.rpnThreshold}</p>
+    ` + renderTable(
+      ["Component", "Failure Mode", "S", "O", "D", "RPN", "Mitigation"],
+      fmeaRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
+    ), "\u26A0\uFE0F");
+  }
+  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
+    const decisionsContent = thought.designDecisions.decisions.map((dec) => {
+      const statusBadge = renderBadge(
+        dec.status,
+        dec.status === "accepted" ? "success" : dec.status === "rejected" ? "danger" : dec.status === "deprecated" ? "warning" : "secondary"
+      );
+      return `
+        <div class="card">
+          <div class="card-header">${escapeHTML(dec.id)}: ${escapeHTML(dec.title)} ${statusBadge}</div>
+          <p><strong>Context:</strong> ${escapeHTML(dec.context)}</p>
+          <p><strong>Decision:</strong> ${escapeHTML(dec.decision)}</p>
+          <p><strong>Rationale:</strong> ${escapeHTML(dec.rationale)}</p>
+          ${dec.consequences.length > 0 ? `
+            <p><strong>Consequences:</strong></p>
+            <ul class="list-styled">
+              ${dec.consequences.map((c) => `<li>${escapeHTML(c)}</li>`).join("")}
+            </ul>
+          ` : ""}
+        </div>
+      `;
+    }).join("\n");
+    html += renderSection("Design Decisions", decisionsContent, "\u{1F4DD}");
+  }
+  if (thought.assessment && includeMetrics) {
+    html += renderSection("Assessment", `
+      <div class="metrics-grid">
+        ${renderMetricCard("Confidence", (thought.assessment.confidence * 100).toFixed(0) + "%", "primary")}
+        ${renderMetricCard("Key Risks", thought.assessment.keyRisks.length, "danger")}
+        ${renderMetricCard("Open Issues", thought.assessment.openIssues.length, "warning")}
+      </div>
+      ${renderProgressBar(thought.assessment.confidence * 100, "primary")}
+      ${thought.assessment.keyRisks.length > 0 ? `
+        <h4>Key Risks</h4>
+        <ul class="list-styled">
+          ${thought.assessment.keyRisks.map((r) => `<li class="text-danger">${escapeHTML(r)}</li>`).join("")}
+        </ul>
+      ` : ""}
+      ${thought.assessment.nextSteps.length > 0 ? `
+        <h4>Next Steps</h4>
+        <ul class="list-styled">
+          ${thought.assessment.nextSteps.map((s) => `<li>${escapeHTML(s)}</li>`).join("")}
+        </ul>
+      ` : ""}
+    `, "\u{1F4CA}");
+  }
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
+}
 var init_engineering = __esm({
   "src/export/visual/engineering.ts"() {
     init_esm_shims();
@@ -12843,6 +14856,7 @@ var init_engineering = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
   }
 });
 
@@ -12854,6 +14868,7 @@ var init_visual = __esm({
     init_svg_utils();
     init_graphml_utils();
     init_tikz_utils();
+    init_html_utils();
     init_causal();
     init_temporal();
     init_game_theory();
@@ -12983,7 +14998,7 @@ var init_ExportService = __esm({
       exportSession(session, format) {
         const startTime = Date.now();
         this.logger.debug("Export started", { sessionId: session.id, format, thoughtCount: session.thoughts.length });
-        if (format === "mermaid" || format === "dot" || format === "ascii" || format === "svg" || format === "graphml" || format === "tikz" || format === "modelica") {
+        if (format === "mermaid" || format === "dot" || format === "ascii" || format === "svg" || format === "graphml" || format === "tikz" || format === "modelica" || format === "html") {
           const result2 = this.exportVisual(session, format);
           this.logger.debug("Export completed", {
             sessionId: session.id,
@@ -13003,9 +15018,6 @@ var init_ExportService = __esm({
             break;
           case "latex":
             result = this.exportToLatex(session);
-            break;
-          case "html":
-            result = this.exportToHTML(session);
             break;
           case "jupyter":
             result = this.exportToJupyter(session);
@@ -13379,9 +15391,13 @@ ${thoughts}`;
        * Generates a standalone HTML page with XSS protection via escaping.
        * Includes basic styling for readability.
        *
+       * Note: Currently unused as HTML export is handled by visual exporters.
+       * Kept for potential future use as a session-level HTML export.
+       *
        * @param session - The session to export
        * @returns HTML document as string
        */
+      // @ts-expect-error - Unused method kept for future use
       exportToHTML(session) {
         const status = session.isComplete ? "Complete" : "In Progress";
         const safeTitle = escapeHtml(session.title);

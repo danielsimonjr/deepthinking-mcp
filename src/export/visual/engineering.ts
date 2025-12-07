@@ -36,6 +36,16 @@ import {
   type TikZNode,
   type TikZEdge,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderBadge,
+  renderProgressBar,
+} from './html-utils.js';
 
 /**
  * Main export function for engineering analysis
@@ -61,6 +71,8 @@ export function exportEngineeringAnalysis(
       return engineeringToTikZ(thought, options);
     case 'modelica':
       return engineeringToModelica(thought, options);
+    case 'html':
+      return engineeringToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -955,4 +967,180 @@ function engineeringToModelica(thought: EngineeringThought, options: VisualExpor
   lines.push(`end ${packageName};`);
 
   return lines.join('\n');
+}
+
+// =============================================================================
+// HTML Export
+// =============================================================================
+
+/**
+ * Export engineering analysis to HTML format
+ */
+function engineeringToHTML(thought: EngineeringThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Engineering Analysis',
+    htmlTheme = 'light',
+    includeMetrics = true,
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Analysis type badge
+  const typeBadge = renderBadge(thought.analysisType, 'primary');
+  html += `<p>Analysis Type: ${typeBadge}</p>\n`;
+
+  // Design challenge
+  html += renderSection('Design Challenge', `
+    <p class="text-primary"><strong>${escapeHTML(thought.designChallenge)}</strong></p>
+  `, '🔧');
+
+  // Requirements Traceability
+  if (thought.requirements && thought.requirements.requirements.length > 0) {
+    if (includeMetrics) {
+      const cov = thought.requirements.coverage;
+      const coveragePercent = (cov.verified / Math.max(cov.total, 1)) * 100;
+      html += '<div class="metrics-grid">';
+      html += renderMetricCard('Total Requirements', cov.total, 'primary');
+      html += renderMetricCard('Verified', cov.verified, 'success');
+      html += renderMetricCard('Traced to Source', cov.tracedToSource, 'info');
+      html += renderMetricCard('Allocated', cov.allocatedToDesign, 'warning');
+      html += '</div>\n';
+      html += renderProgressBar(coveragePercent, 'success');
+    }
+
+    const reqRows = thought.requirements.requirements.map(req => {
+      const statusBadge = renderBadge(req.status,
+        req.status === 'verified' ? 'success' :
+        req.status === 'implemented' ? 'info' :
+        req.status === 'approved' ? 'primary' : 'secondary'
+      );
+      const priorityBadge = renderBadge(req.priority,
+        req.priority === 'must' ? 'danger' :
+        req.priority === 'should' ? 'warning' : 'secondary'
+      );
+      return [
+        req.id,
+        req.title,
+        priorityBadge,
+        statusBadge,
+        req.source,
+      ];
+    });
+    html += renderSection('Requirements Traceability', renderTable(
+      ['ID', 'Title', 'Priority', 'Status', 'Source'],
+      reqRows.map(row => row.map(cell => typeof cell === 'string' && cell.startsWith('<') ? cell : escapeHTML(String(cell))))
+    ), '📋');
+  }
+
+  // Trade Study
+  if (thought.tradeStudy) {
+    html += renderSection('Trade Study: ' + thought.tradeStudy.title, `
+      <p><strong>Objective:</strong> ${escapeHTML(thought.tradeStudy.objective)}</p>
+      <h4>Criteria</h4>
+    ` + renderTable(
+      ['Criterion', 'Weight', 'Description'],
+      thought.tradeStudy.criteria.map(c => [c.name, (c.weight * 100).toFixed(0) + '%', c.description || '-'])
+    ) + `
+      <h4>Alternatives</h4>
+    ` + renderTable(
+      ['Alternative', 'Description', 'Risk Level'],
+      thought.tradeStudy.alternatives.map(a => [
+        a.id === thought.tradeStudy!.recommendation ? '⭐ ' + a.name : a.name,
+        a.description,
+        a.riskLevel || '-',
+      ])
+    ) + `
+      <div class="card" style="margin-top: 1rem; border-color: var(--success-color);">
+        <div class="card-header text-success">Recommendation: ${escapeHTML(thought.tradeStudy.recommendation)}</div>
+        <p>${escapeHTML(thought.tradeStudy.justification)}</p>
+      </div>
+    `, '⚖️');
+  }
+
+  // FMEA
+  if (thought.fmea && thought.fmea.failureModes.length > 0) {
+    if (includeMetrics) {
+      html += '<div class="metrics-grid">';
+      html += renderMetricCard('Failure Modes', thought.fmea.summary.totalModes, 'primary');
+      html += renderMetricCard('Critical Modes', thought.fmea.summary.criticalModes, 'danger');
+      html += renderMetricCard('Average RPN', thought.fmea.summary.averageRpn.toFixed(1), 'warning');
+      html += renderMetricCard('Max RPN', thought.fmea.summary.maxRpn, 'danger');
+      html += '</div>\n';
+    }
+
+    const fmeaRows = thought.fmea.failureModes.map(fm => {
+      const isCritical = fm.rpn >= thought.fmea!.rpnThreshold;
+      const rpnBadge = renderBadge(fm.rpn.toString(), isCritical ? 'danger' : 'warning');
+      return [
+        fm.component,
+        fm.failureMode.substring(0, 40) + (fm.failureMode.length > 40 ? '...' : ''),
+        fm.severity.toString(),
+        fm.occurrence.toString(),
+        fm.detection.toString(),
+        rpnBadge,
+        fm.mitigation ? '✓' : '-',
+      ];
+    });
+    html += renderSection('Failure Mode Analysis (FMEA)', `
+      <p><strong>System:</strong> ${escapeHTML(thought.fmea.system)} | <strong>RPN Threshold:</strong> ${thought.fmea.rpnThreshold}</p>
+    ` + renderTable(
+      ['Component', 'Failure Mode', 'S', 'O', 'D', 'RPN', 'Mitigation'],
+      fmeaRows.map(row => row.map(cell => typeof cell === 'string' && cell.startsWith('<') ? cell : escapeHTML(String(cell))))
+    ), '⚠️');
+  }
+
+  // Design Decisions
+  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
+    const decisionsContent = thought.designDecisions.decisions.map(dec => {
+      const statusBadge = renderBadge(dec.status,
+        dec.status === 'accepted' ? 'success' :
+        dec.status === 'rejected' ? 'danger' :
+        dec.status === 'deprecated' ? 'warning' : 'secondary'
+      );
+      return `
+        <div class="card">
+          <div class="card-header">${escapeHTML(dec.id)}: ${escapeHTML(dec.title)} ${statusBadge}</div>
+          <p><strong>Context:</strong> ${escapeHTML(dec.context)}</p>
+          <p><strong>Decision:</strong> ${escapeHTML(dec.decision)}</p>
+          <p><strong>Rationale:</strong> ${escapeHTML(dec.rationale)}</p>
+          ${dec.consequences.length > 0 ? `
+            <p><strong>Consequences:</strong></p>
+            <ul class="list-styled">
+              ${dec.consequences.map(c => `<li>${escapeHTML(c)}</li>`).join('')}
+            </ul>
+          ` : ''}
+        </div>
+      `;
+    }).join('\n');
+    html += renderSection('Design Decisions', decisionsContent, '📝');
+  }
+
+  // Assessment
+  if (thought.assessment && includeMetrics) {
+    html += renderSection('Assessment', `
+      <div class="metrics-grid">
+        ${renderMetricCard('Confidence', (thought.assessment.confidence * 100).toFixed(0) + '%', 'primary')}
+        ${renderMetricCard('Key Risks', thought.assessment.keyRisks.length, 'danger')}
+        ${renderMetricCard('Open Issues', thought.assessment.openIssues.length, 'warning')}
+      </div>
+      ${renderProgressBar(thought.assessment.confidence * 100, 'primary')}
+      ${thought.assessment.keyRisks.length > 0 ? `
+        <h4>Key Risks</h4>
+        <ul class="list-styled">
+          ${thought.assessment.keyRisks.map(r => `<li class="text-danger">${escapeHTML(r)}</li>`).join('')}
+        </ul>
+      ` : ''}
+      ${thought.assessment.nextSteps.length > 0 ? `
+        <h4>Next Steps</h4>
+        <ul class="list-styled">
+          ${thought.assessment.nextSteps.map(s => `<li>${escapeHTML(s)}</li>`).join('')}
+        </ul>
+      ` : ''}
+    `, '📊');
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

@@ -34,6 +34,15 @@ import {
   type TikZEdge,
   type TikZOptions,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderBadge,
+} from './html-utils.js';
 
 /**
  * Export physics reasoning to visual format
@@ -54,6 +63,8 @@ export function exportPhysicsVisualization(thought: PhysicsThought, options: Vis
       return physicsToGraphML(thought, options);
     case 'tikz':
       return physicsToTikZ(thought, options);
+    case 'html':
+      return physicsToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -918,4 +929,176 @@ function physicsToTikZ(thought: PhysicsThought, options: VisualExportOptions): s
   }
 
   return tikz;
+}
+
+/**
+ * Export physics reasoning to HTML format
+ */
+function physicsToHTML(thought: PhysicsThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Physics Analysis',
+    htmlTheme = 'light',
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Metrics
+  html += '<div class="metrics-grid">';
+  html += renderMetricCard('Uncertainty', `${(thought.uncertainty * 100).toFixed(1)}%`, 'warning');
+  if (thought.assumptions) {
+    html += renderMetricCard('Assumptions', thought.assumptions.length, 'info');
+  }
+  if (thought.tensorProperties) {
+    html += renderMetricCard('Tensor Rank', `(${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`, 'primary');
+  }
+  if (thought.physicalInterpretation?.conservationLaws) {
+    html += renderMetricCard('Conservation Laws', thought.physicalInterpretation.conservationLaws.length, 'success');
+  }
+  html += '</div>\n';
+
+  // Thought type badge
+  const badges = [];
+  if (thought.thoughtType) {
+    badges.push(renderBadge(thought.thoughtType.replace(/_/g, ' '), 'primary'));
+  }
+
+  if (badges.length > 0) {
+    html += `<div class="flex gap-1" style="margin: 1rem 0">${badges.join(' ')}</div>\n`;
+  }
+
+  // Tensor properties
+  if (thought.tensorProperties) {
+    const tensorRows = [
+      ['Rank', `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`],
+      ['Components', thought.tensorProperties.components],
+      ['LaTeX', thought.tensorProperties.latex],
+      ['Transformation', thought.tensorProperties.transformation],
+    ];
+    if (thought.tensorProperties.indexStructure) {
+      tensorRows.push(['Index Structure', thought.tensorProperties.indexStructure]);
+    }
+    if (thought.tensorProperties.coordinateSystem) {
+      tensorRows.push(['Coordinate System', thought.tensorProperties.coordinateSystem]);
+    }
+
+    let tensorContent = renderTable(['Property', 'Value'], tensorRows);
+
+    if (thought.tensorProperties.symmetries.length > 0) {
+      tensorContent += '<p style="margin-top: 1rem"><strong>Symmetries:</strong></p>';
+      tensorContent += '<ul class="list-styled">';
+      thought.tensorProperties.symmetries.forEach(sym => {
+        tensorContent += `<li>${escapeHTML(sym)}</li>`;
+      });
+      tensorContent += '</ul>';
+    }
+
+    if (thought.tensorProperties.invariants.length > 0) {
+      tensorContent += '<p style="margin-top: 1rem"><strong>Invariants:</strong></p>';
+      tensorContent += '<ul class="list-styled">';
+      thought.tensorProperties.invariants.forEach(inv => {
+        tensorContent += `<li>${escapeHTML(inv)}</li>`;
+      });
+      tensorContent += '</ul>';
+    }
+
+    html += renderSection('Tensor Properties', tensorContent, '🔢');
+  }
+
+  // Physical interpretation
+  if (thought.physicalInterpretation) {
+    const interpRows = [
+      ['Quantity', thought.physicalInterpretation.quantity],
+      ['Units', thought.physicalInterpretation.units],
+    ];
+
+    let interpContent = renderTable(['Property', 'Value'], interpRows);
+
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      interpContent += '<p style="margin-top: 1rem"><strong>Conservation Laws:</strong></p>';
+      interpContent += '<ul class="list-styled">';
+      thought.physicalInterpretation.conservationLaws.forEach(law => {
+        interpContent += `<li>${escapeHTML(law)}</li>`;
+      });
+      interpContent += '</ul>';
+    }
+
+    if (thought.physicalInterpretation.constraints && thought.physicalInterpretation.constraints.length > 0) {
+      interpContent += '<p style="margin-top: 1rem"><strong>Constraints:</strong></p>';
+      interpContent += '<ul class="list-styled">';
+      thought.physicalInterpretation.constraints.forEach(constraint => {
+        interpContent += `<li>${escapeHTML(constraint)}</li>`;
+      });
+      interpContent += '</ul>';
+    }
+
+    if (thought.physicalInterpretation.observables && thought.physicalInterpretation.observables.length > 0) {
+      interpContent += '<p style="margin-top: 1rem"><strong>Observables:</strong></p>';
+      interpContent += '<ul class="list-styled">';
+      thought.physicalInterpretation.observables.forEach(obs => {
+        interpContent += `<li>${escapeHTML(obs)}</li>`;
+      });
+      interpContent += '</ul>';
+    }
+
+    html += renderSection('Physical Interpretation', interpContent, '⚛️');
+  }
+
+  // Field theory context
+  if (thought.fieldTheoryContext) {
+    let fieldContent = `<p><strong>Symmetry Group:</strong> ${renderBadge(thought.fieldTheoryContext.symmetryGroup, 'info')}</p>`;
+
+    if (thought.fieldTheoryContext.fields.length > 0) {
+      fieldContent += '<p style="margin-top: 1rem"><strong>Fields:</strong></p>';
+      fieldContent += '<ul class="list-styled">';
+      thought.fieldTheoryContext.fields.forEach(field => {
+        fieldContent += `<li>${escapeHTML(field)}</li>`;
+      });
+      fieldContent += '</ul>';
+    }
+
+    if (thought.fieldTheoryContext.interactions.length > 0) {
+      fieldContent += '<p style="margin-top: 1rem"><strong>Interactions:</strong></p>';
+      fieldContent += '<ul class="list-styled">';
+      thought.fieldTheoryContext.interactions.forEach(interaction => {
+        fieldContent += `<li>${escapeHTML(interaction)}</li>`;
+      });
+      fieldContent += '</ul>';
+    }
+
+    if (thought.fieldTheoryContext.gaugeSymmetries && thought.fieldTheoryContext.gaugeSymmetries.length > 0) {
+      fieldContent += '<p style="margin-top: 1rem"><strong>Gauge Symmetries:</strong></p>';
+      fieldContent += '<ul class="list-styled">';
+      thought.fieldTheoryContext.gaugeSymmetries.forEach(gauge => {
+        fieldContent += `<li>${escapeHTML(gauge)}</li>`;
+      });
+      fieldContent += '</ul>';
+    }
+
+    html += renderSection('Field Theory Context', fieldContent, '🌌');
+  }
+
+  // Assumptions
+  if (thought.assumptions && thought.assumptions.length > 0) {
+    const assumptionsList = thought.assumptions.map(a => escapeHTML(a));
+    html += renderSection('Assumptions', `
+      <ul class="list-styled">
+        ${assumptionsList.map(a => `<li>${a}</li>`).join('')}
+      </ul>
+    `, '⚠️');
+  }
+
+  // Dependencies
+  if (thought.dependencies && thought.dependencies.length > 0) {
+    const depsList = thought.dependencies.map(d => escapeHTML(d));
+    html += renderSection('Dependencies', `
+      <ul class="list-styled">
+        ${depsList.map(d => `<li>${d}</li>`).join('')}
+      </ul>
+    `, '🔗');
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

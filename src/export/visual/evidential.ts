@@ -30,6 +30,13 @@ import {
   type TikZNode,
   type TikZEdge,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderSection,
+  renderTable,
+} from './html-utils.js';
 
 /**
  * Export evidential belief visualization to visual format
@@ -50,6 +57,8 @@ export function exportEvidentialBeliefs(thought: EvidentialThought, options: Vis
       return evidentialToGraphML(thought, options);
     case 'tikz':
       return evidentialToTikZ(thought, options);
+    case 'html':
+      return evidentialToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -457,4 +466,79 @@ function evidentialToTikZ(thought: EvidentialThought, options: VisualExportOptio
     includeMetrics,
     colorScheme,
   });
+}
+
+/**
+ * Export evidential beliefs to HTML format
+ */
+function evidentialToHTML(thought: EvidentialThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Evidential Reasoning Analysis',
+    htmlTheme = 'light',
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Frame of discernment
+  if (thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
+    html += renderSection('Frame of Discernment', `
+      <p>Hypotheses under consideration:</p>
+      <ul class="list-styled">
+        ${thought.frameOfDiscernment.map(h => `<li>${escapeHTML(h)}</li>`).join('\n')}
+      </ul>
+    `, '🎯');
+  }
+
+  // Evidence table
+  if (thought.evidence && thought.evidence.length > 0) {
+    const evRows = thought.evidence.map(ev => [
+      ev.id,
+      ev.description,
+      ev.reliability.toFixed(2),
+      ev.source || '-',
+    ]);
+    html += renderSection('Evidence', renderTable(
+      ['ID', 'Description', 'Reliability', 'Source'],
+      evRows
+    ), '📊');
+  }
+
+  // Belief functions
+  if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
+    const bfContent = thought.beliefFunctions.map(bf => {
+      const massRows = bf.massAssignments.map(ma =>
+        `<tr><td>{${ma.hypothesisSet.join(', ')}}</td><td>${ma.mass.toFixed(3)}</td><td>${escapeHTML(ma.justification)}</td></tr>`
+      ).join('\n');
+      return `
+        <div class="card">
+          <div class="card-header">Belief from: ${escapeHTML(bf.source)}</div>
+          ${bf.conflictMass ? `<p><strong>Conflict Mass:</strong> ${bf.conflictMass.toFixed(3)}</p>` : ''}
+          <table class="table">
+            <thead><tr><th>Hypothesis Set</th><th>Mass</th><th>Justification</th></tr></thead>
+            <tbody>${massRows}</tbody>
+          </table>
+        </div>
+      `;
+    }).join('\n');
+    html += renderSection('Belief Functions', bfContent, '📈');
+  }
+
+  // Combined belief if available
+  if (thought.combinedBelief) {
+    const massRows = thought.combinedBelief.massAssignments.map(ma =>
+      `<tr><td>{${ma.hypothesisSet.join(', ')}}</td><td>${ma.mass.toFixed(3)}</td><td>${escapeHTML(ma.justification)}</td></tr>`
+    ).join('\n');
+    html += renderSection('Combined Belief', `
+      <table class="table">
+        <thead><tr><th>Hypothesis Set</th><th>Mass</th><th>Justification</th></tr></thead>
+        <tbody>${massRows}</tbody>
+      </table>
+      ${thought.combinedBelief.conflictMass ? `<p><strong>Conflict Mass:</strong> ${thought.combinedBelief.conflictMass.toFixed(3)}</p>` : ''}
+    `, '🔮');
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

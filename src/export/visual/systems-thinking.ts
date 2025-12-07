@@ -30,6 +30,15 @@ import {
   type TikZNode,
   type TikZEdge,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderBadge,
+} from './html-utils.js';
 
 /**
  * Export systems thinking causal loop diagram to visual format
@@ -50,6 +59,8 @@ export function exportSystemsThinkingCausalLoops(thought: SystemsThinkingThought
       return systemsThinkingToGraphML(thought, options);
     case 'tikz':
       return systemsThinkingToTikZ(thought, options);
+    case 'html':
+      return systemsThinkingToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -426,4 +437,91 @@ function systemsThinkingToTikZ(thought: SystemsThinkingThought, options: VisualE
     includeLabels,
     includeMetrics,
   });
+}
+
+/**
+ * Export systems thinking causal loop diagram to HTML format
+ */
+function systemsThinkingToHTML(thought: SystemsThinkingThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Systems Thinking Analysis',
+    htmlTheme = 'light',
+    includeMetrics = true,
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // System Overview
+  if (thought.system) {
+    const systemContent = `
+      <p><strong>Name:</strong> ${escapeHTML(thought.system.name)}</p>
+      <p>${escapeHTML(thought.system.description)}</p>
+    `;
+    html += renderSection('System Overview', systemContent, '🔍');
+  }
+
+  // Metrics
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">\n';
+    html += renderMetricCard('Components', thought.components?.length || 0, 'primary');
+    html += renderMetricCard('Feedback Loops', thought.feedbackLoops?.length || 0, 'info');
+    html += renderMetricCard('Leverage Points', thought.leveragePoints?.length || 0, 'success');
+    html += '</div>\n';
+  }
+
+  // Components Table
+  if (thought.components && thought.components.length > 0) {
+    const componentRows = thought.components.map(c => [
+      c.name,
+      c.type,
+      c.description,
+      c.unit || 'N/A',
+      c.initialValue !== undefined ? String(c.initialValue) : 'N/A',
+    ]);
+    const componentsTable = renderTable(
+      ['Name', 'Type', 'Description', 'Unit', 'Initial Value'],
+      componentRows,
+      { caption: 'System Components' }
+    );
+    html += renderSection('Components', componentsTable, '🔧');
+  }
+
+  // Feedback Loops
+  if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+    let loopsContent = '';
+    for (const loop of thought.feedbackLoops) {
+      const loopType = loop.type === 'reinforcing' ? 'success' : 'warning';
+      const badge = renderBadge(loop.type.toUpperCase(), loopType as any);
+      loopsContent += `
+        <div class="card">
+          <div class="card-header">${escapeHTML(loop.name)} ${badge}</div>
+          <p><strong>Polarity:</strong> ${escapeHTML(loop.polarity)}</p>
+          <p><strong>Strength:</strong> ${loop.strength.toFixed(2)}</p>
+          <p><strong>Components:</strong> ${loop.components.map(c => escapeHTML(c)).join(' → ')}</p>
+          ${loop.description ? `<p>${escapeHTML(loop.description)}</p>` : ''}
+        </div>
+      `;
+    }
+    html += renderSection('Feedback Loops', loopsContent, '🔄');
+  }
+
+  // Leverage Points
+  if (thought.leveragePoints && thought.leveragePoints.length > 0) {
+    const leverageRows = thought.leveragePoints.map(lp => [
+      lp.location,
+      lp.effectiveness.toFixed(2),
+      lp.description,
+    ]);
+    const leverageTable = renderTable(
+      ['Location', 'Effectiveness', 'Description'],
+      leverageRows,
+      { caption: 'Leverage Points' }
+    );
+    html += renderSection('Leverage Points', leverageTable, '⭐');
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

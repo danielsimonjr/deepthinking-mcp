@@ -30,6 +30,15 @@ import {
   type TikZNode,
   type TikZEdge,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderBadge,
+} from './html-utils.js';
 
 /**
  * Export scientific method experiment flow to visual format
@@ -50,6 +59,8 @@ export function exportScientificMethodExperiment(thought: ScientificMethodThough
       return scientificMethodToGraphML(thought, options);
     case 'tikz':
       return scientificMethodToTikZ(thought, options);
+    case 'html':
+      return scientificMethodToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -639,4 +650,116 @@ function scientificMethodToTikZ(thought: ScientificMethodThought, options: Visua
     colorScheme,
     includeLabels,
   });
+}
+
+/**
+ * Export scientific method experiment flow to HTML format
+ */
+function scientificMethodToHTML(thought: ScientificMethodThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Scientific Method Analysis',
+    htmlTheme = 'light',
+    includeMetrics = true,
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Research Question
+  if (thought.researchQuestion) {
+    const questionContent = `
+      <p><strong>Question:</strong> ${escapeHTML(thought.researchQuestion.question)}</p>
+      <p><strong>Background:</strong> ${escapeHTML(thought.researchQuestion.background)}</p>
+      ${thought.researchQuestion.significance ? `<p><strong>Significance:</strong> ${escapeHTML(thought.researchQuestion.significance)}</p>` : ''}
+    `;
+    html += renderSection('Research Question', questionContent, '❓');
+  }
+
+  // Metrics
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">\n';
+    html += renderMetricCard('Hypotheses', thought.scientificHypotheses?.length || 0, 'primary');
+    html += renderMetricCard('Tests', thought.analysis?.tests?.length || 0, 'info');
+    html += renderMetricCard('Confidence', thought.conclusion?.confidence?.toFixed(2) || 'N/A', 'success');
+    html += '</div>\n';
+  }
+
+  // Hypotheses
+  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+    let hypothesesContent = '';
+    for (const hypothesis of thought.scientificHypotheses) {
+      const typeColor = hypothesis.type === 'null' ? 'secondary' : 'primary';
+      const badge = renderBadge(hypothesis.type.toUpperCase(), typeColor as any);
+      hypothesesContent += `
+        <div class="card">
+          <div class="card-header">${badge} ${escapeHTML(hypothesis.statement)}</div>
+          ${hypothesis.prediction ? `<p><strong>Prediction:</strong> ${escapeHTML(hypothesis.prediction)}</p>` : ''}
+          ${hypothesis.rationale ? `<p><strong>Rationale:</strong> ${escapeHTML(hypothesis.rationale)}</p>` : ''}
+        </div>
+      `;
+    }
+    html += renderSection('Hypotheses', hypothesesContent, '💡');
+  }
+
+  // Experiment
+  if (thought.experiment) {
+    const experimentContent = `
+      <p><strong>Type:</strong> ${escapeHTML(thought.experiment.type)}</p>
+      <p><strong>Design:</strong> ${escapeHTML(thought.experiment.design)}</p>
+      ${(thought.experiment as any).sampleSize ? `<p><strong>Sample Size:</strong> ${(thought.experiment as any).sampleSize}</p>` : ''}
+    `;
+    html += renderSection('Experiment', experimentContent, '🔬');
+  }
+
+  // Data Collection
+  if (thought.data) {
+    const dataContent = `
+      <p><strong>Method:</strong> ${escapeHTML(thought.data.method.join(', '))}</p>
+      ${thought.data.dataQuality ? `
+        <p><strong>Quality Metrics:</strong></p>
+        <ul>
+          <li>Completeness: ${(thought.data.dataQuality.completeness * 100).toFixed(0)}%</li>
+          <li>Reliability: ${(thought.data.dataQuality.reliability * 100).toFixed(0)}%</li>
+        </ul>
+      ` : ''}
+    `;
+    html += renderSection('Data Collection', dataContent, '📊');
+  }
+
+  // Statistical Analysis
+  if (thought.analysis && thought.analysis.tests) {
+    const testRows = thought.analysis.tests.map(test => [
+      test.name,
+      test.pValue.toFixed(4),
+      test.alpha.toString(),
+      test.result,
+    ]);
+    const testsTable = renderTable(
+      ['Test', 'p-value', 'α', 'Result'],
+      testRows,
+      { caption: 'Statistical Tests' }
+    );
+    html += renderSection('Statistical Analysis', testsTable, '📈');
+  }
+
+  // Conclusion
+  if (thought.conclusion) {
+    const conclusionBadge = thought.conclusion.confidence && thought.conclusion.confidence > 0.8
+      ? renderBadge('HIGH CONFIDENCE', 'success')
+      : thought.conclusion.confidence && thought.conclusion.confidence > 0.5
+        ? renderBadge('MODERATE CONFIDENCE', 'warning')
+        : renderBadge('LOW CONFIDENCE', 'danger');
+
+    const conclusionContent = `
+      <p>${conclusionBadge}</p>
+      <p>${escapeHTML(thought.conclusion.statement)}</p>
+      ${thought.conclusion.confidence ? `<p><strong>Confidence:</strong> ${(thought.conclusion.confidence * 100).toFixed(0)}%</p>` : ''}
+      ${(thought.conclusion as any).supportedHypotheses ? `<p><strong>Supported Hypotheses:</strong> ${(thought.conclusion as any).supportedHypotheses.join(', ')}</p>` : ''}
+    `;
+    html += renderSection('Conclusion', conclusionContent, '✅');
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

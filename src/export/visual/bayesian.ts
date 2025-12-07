@@ -30,6 +30,15 @@ import {
   type TikZNode,
   type TikZEdge,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderProgressBar,
+} from './html-utils.js';
 
 /**
  * Export Bayesian network to visual format
@@ -50,6 +59,8 @@ export function exportBayesianNetwork(thought: BayesianThought, options: VisualE
       return bayesianToGraphML(thought, options);
     case 'tikz':
       return bayesianToTikZ(thought, options);
+    case 'html':
+      return bayesianToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -301,4 +312,82 @@ function bayesianToTikZ(thought: BayesianThought, options: VisualExportOptions):
     includeMetrics,
     colorScheme,
   });
+}
+
+/**
+ * Export Bayesian network to HTML format
+ */
+function bayesianToHTML(thought: BayesianThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Bayesian Analysis',
+    htmlTheme = 'light',
+    includeMetrics = true,
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Hypothesis section
+  html += renderSection('Hypothesis', `
+    <p><strong>${escapeHTML(thought.hypothesis.statement)}</strong></p>
+    ${thought.hypothesis.alternatives && thought.hypothesis.alternatives.length > 0 ? `<p class="text-secondary">Alternatives: ${thought.hypothesis.alternatives.join(', ')}</p>` : ''}
+  `, '🎯');
+
+  // Probabilities section
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard('Prior', (thought.prior.probability * 100).toFixed(1) + '%', 'primary');
+    html += renderMetricCard('Posterior', (thought.posterior.probability * 100).toFixed(1) + '%', 'success');
+    if (thought.bayesFactor !== undefined) {
+      html += renderMetricCard('Bayes Factor', thought.bayesFactor.toFixed(2), 'info');
+    }
+    html += '</div>\n';
+
+    // Prior probability bar
+    html += '<div class="card">';
+    html += '<div class="card-header">Prior Probability</div>';
+    html += renderProgressBar(thought.prior.probability * 100, 'primary');
+    html += `<p class="text-secondary" style="margin-top: 0.5rem">${escapeHTML(thought.prior.justification)}</p>`;
+    html += '</div>\n';
+
+    // Posterior probability bar
+    html += '<div class="card">';
+    html += '<div class="card-header">Posterior Probability</div>';
+    html += renderProgressBar(thought.posterior.probability * 100, 'success');
+    html += `<p class="text-secondary" style="margin-top: 0.5rem">${escapeHTML(thought.posterior.calculation)}</p>`;
+    html += '</div>\n';
+  }
+
+  // Evidence section
+  if (thought.evidence && thought.evidence.length > 0) {
+    const evidenceRows = thought.evidence.map((ev, i) => [
+      (i + 1).toString(),
+      ev.description,
+      ev.likelihoodGivenHypothesis?.toFixed(3) || '-',
+      ev.likelihoodGivenNotHypothesis?.toFixed(3) || '-',
+    ]);
+    html += renderSection('Evidence', renderTable(
+      ['#', 'Description', 'P(E|H)', 'P(E|¬H)'],
+      evidenceRows
+    ), '📊');
+  }
+
+  // Interpretation
+  const change = thought.posterior.probability - thought.prior.probability;
+  const changeDirection = change > 0 ? 'increased' : change < 0 ? 'decreased' : 'unchanged';
+  const changeClass = change > 0 ? 'text-success' : change < 0 ? 'text-danger' : 'text-secondary';
+
+  html += renderSection('Interpretation', `
+    <p>The posterior probability has <span class="${changeClass}"><strong>${changeDirection}</strong></span>
+    by ${Math.abs(change * 100).toFixed(1)} percentage points from the prior.</p>
+    ${thought.bayesFactor !== undefined ? `
+      <p>Bayes Factor of ${thought.bayesFactor.toFixed(2)} indicates
+      ${thought.bayesFactor > 3 ? 'substantial' : thought.bayesFactor > 1 ? 'weak' : 'evidence against'}
+      support for the hypothesis.</p>
+    ` : ''}
+  `, '💡');
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

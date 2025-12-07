@@ -30,6 +30,16 @@ import {
   type TikZNode,
   type TikZEdge,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+  renderBadge,
+  renderProgressBar,
+} from './html-utils.js';
 
 /**
  * Export formal logic proof tree to visual format
@@ -50,6 +60,8 @@ export function exportFormalLogicProof(thought: FormalLogicThought, options: Vis
       return formalLogicToGraphML(thought, options);
     case 'tikz':
       return formalLogicToTikZ(thought, options);
+    case 'html':
+      return formalLogicToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -641,4 +653,114 @@ function formalLogicToTikZ(thought: FormalLogicThought, options: VisualExportOpt
     colorScheme,
     includeLabels,
   });
+}
+
+/**
+ * Export formal logic proof tree to HTML format
+ */
+function formalLogicToHTML(thought: FormalLogicThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Formal Logic Analysis',
+    htmlTheme = 'light',
+    includeMetrics = true,
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Proof Overview
+  if (thought.proof) {
+    const validBadge = thought.proof.valid ? renderBadge('VALID', 'success') : renderBadge('INVALID', 'danger');
+    const proofContent = `
+      <p><strong>Theorem:</strong> ${escapeHTML(thought.proof.theorem)}</p>
+      <p><strong>Technique:</strong> ${escapeHTML(thought.proof.technique)}</p>
+      <p><strong>Validity:</strong> ${validBadge}</p>
+      <p><strong>Completeness:</strong> ${(thought.proof.completeness * 100).toFixed(0)}%</p>
+      ${renderProgressBar(thought.proof.completeness * 100, 'primary')}
+    `;
+    html += renderSection('Proof', proofContent, '📋');
+  }
+
+  // Metrics
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">\n';
+    html += renderMetricCard('Propositions', thought.propositions?.length || 0, 'primary');
+    html += renderMetricCard('Inferences', thought.logicalInferences?.length || 0, 'info');
+    html += renderMetricCard('Proof Steps', thought.proof?.steps?.length || 0, 'secondary');
+    html += renderMetricCard('Completeness', thought.proof ? `${(thought.proof.completeness * 100).toFixed(0)}%` : 'N/A', 'success');
+    html += '</div>\n';
+  }
+
+  // Propositions
+  if (thought.propositions && thought.propositions.length > 0) {
+    const propositionRows = thought.propositions.map(p => [
+      p.symbol,
+      p.type,
+      p.statement,
+      p.truthValue !== undefined ? String(p.truthValue) : 'N/A',
+    ]);
+    const propositionsTable = renderTable(
+      ['Symbol', 'Type', 'Statement', 'Truth Value'],
+      propositionRows,
+      { caption: 'Propositions' }
+    );
+    html += renderSection('Propositions', propositionsTable, '💭');
+  }
+
+  // Logical Inferences
+  if (thought.logicalInferences && thought.logicalInferences.length > 0) {
+    let inferencesContent = '';
+    for (const inference of thought.logicalInferences) {
+      const validBadge = inference.valid ? renderBadge('VALID', 'success') : renderBadge('INVALID', 'danger');
+      inferencesContent += `
+        <div class="card">
+          <div class="card-header">${escapeHTML(inference.rule)} ${validBadge}</div>
+          <p><strong>Premises:</strong> ${inference.premises.map(p => escapeHTML(p)).join(', ')}</p>
+          <p><strong>Conclusion:</strong> ${escapeHTML(inference.conclusion)}</p>
+        </div>
+      `;
+    }
+    html += renderSection('Logical Inferences', inferencesContent, '🔗');
+  }
+
+  // Proof Steps
+  if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
+    let stepsContent = '<ol>';
+    for (const step of thought.proof.steps) {
+      stepsContent += `
+        <li>
+          <strong>${escapeHTML(step.statement)}</strong>
+          <p><em>Justification:</em> ${escapeHTML(step.justification)}</p>
+          ${step.rule ? `<p><em>Rule:</em> ${renderBadge(step.rule, 'info')}</p>` : ''}
+          ${step.referencesSteps && step.referencesSteps.length > 0 ? `<p><em>References steps:</em> ${step.referencesSteps.join(', ')}</p>` : ''}
+        </li>
+      `;
+    }
+    stepsContent += '</ol>';
+    html += renderSection('Proof Steps', stepsContent, '📝');
+  }
+
+  // Conclusion
+  if (thought.proof) {
+    const conclusionBadge = thought.proof.valid ? renderBadge('PROVEN', 'success') : renderBadge('NOT PROVEN', 'danger');
+    const conclusionContent = `
+      <p>${conclusionBadge}</p>
+      <p>${escapeHTML(thought.proof.conclusion)}</p>
+    `;
+    html += renderSection('Conclusion', conclusionContent, '✅');
+  }
+
+  // Truth Table (if present)
+  if (thought.truthTable) {
+    const truthTableContent = `
+      <p><strong>Tautology:</strong> ${thought.truthTable.isTautology ? '✓' : '✗'}</p>
+      <p><strong>Contradiction:</strong> ${thought.truthTable.isContradiction ? '✓' : '✗'}</p>
+      <p><strong>Contingent:</strong> ${thought.truthTable.isContingent ? '✓' : '✗'}</p>
+    `;
+    html += renderSection('Truth Table', truthTableContent, '📊');
+  }
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }

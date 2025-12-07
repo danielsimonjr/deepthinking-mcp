@@ -32,6 +32,14 @@ import {
   type TikZEdge,
   type TikZOptions,
 } from './tikz-utils.js';
+import {
+  generateHTMLHeader,
+  generateHTMLFooter,
+  escapeHTML,
+  renderMetricCard,
+  renderSection,
+  renderTable,
+} from './html-utils.js';
 
 /**
  * Export counterfactual scenario tree to visual format
@@ -52,6 +60,8 @@ export function exportCounterfactualScenarios(thought: CounterfactualThought, op
       return counterfactualToGraphML(thought, options);
     case 'tikz':
       return counterfactualToTikZ(thought, options);
+    case 'html':
+      return counterfactualToHTML(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -424,4 +434,62 @@ function counterfactualToTikZ(thought: CounterfactualThought, options: VisualExp
   };
 
   return generateTikZ(nodes, edges, tikzOptions);
+}
+
+/**
+ * Export counterfactual scenarios to HTML format
+ */
+function counterfactualToHTML(thought: CounterfactualThought, options: VisualExportOptions): string {
+  const {
+    htmlStandalone = true,
+    htmlTitle = 'Counterfactual Analysis',
+    htmlTheme = 'light',
+    includeMetrics = true,
+  } = options;
+
+  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
+
+  // Metrics
+  if (includeMetrics) {
+    html += '<div class="metrics-grid">';
+    html += renderMetricCard('Counterfactuals', thought.counterfactuals.length, 'primary');
+    html += renderMetricCard('Feasibility', (thought.interventionPoint.feasibility * 100).toFixed(0) + '%', 'info');
+    html += renderMetricCard('Expected Impact', (thought.interventionPoint.expectedImpact * 100).toFixed(0) + '%', 'success');
+    html += '</div>\n';
+  }
+
+  // Intervention point
+  html += renderSection('Intervention Point', `
+    <p><strong>Description:</strong> ${escapeHTML(thought.interventionPoint.description)}</p>
+    <p><strong>Timing:</strong> ${escapeHTML(thought.interventionPoint.timing)}</p>
+    <p><strong>Feasibility:</strong> ${(thought.interventionPoint.feasibility * 100).toFixed(0)}%</p>
+    <p><strong>Expected Impact:</strong> ${(thought.interventionPoint.expectedImpact * 100).toFixed(0)}%</p>
+  `, '🔀');
+
+  // Actual outcome
+  html += renderSection('Actual Outcome', `
+    <div class="card">
+      <div class="card-header">${escapeHTML(thought.actual.name)}</div>
+      <p>${escapeHTML(thought.actual.description)}</p>
+    </div>
+  `, '✓');
+
+  // Counterfactual scenarios
+  const cfRows = thought.counterfactuals.map(cf => {
+    const primaryOutcome = cf.outcomes[0];
+    return [
+      cf.name,
+      primaryOutcome ? primaryOutcome.description.substring(0, 60) + (primaryOutcome.description.length > 60 ? '...' : '') : '-',
+      cf.likelihood !== undefined ? cf.likelihood.toFixed(2) : '-',
+      primaryOutcome?.impact || '-',
+    ];
+  });
+  html += renderSection('Counterfactual Scenarios', renderTable(
+    ['Scenario', 'Outcome', 'Likelihood', 'Impact'],
+    cfRows
+  ), '🔮');
+
+  html += generateHTMLFooter(htmlStandalone);
+  return html;
 }
