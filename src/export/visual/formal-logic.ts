@@ -1,7 +1,7 @@
 /**
- * Formal Logic Visual Exporter (v7.0.2)
+ * Formal Logic Visual Exporter (v7.0.3)
  * Sprint 8 Task 8.1: Formal logic proof tree export to Mermaid, DOT, ASCII
- * Phase 9: Added native SVG export support
+ * Phase 9: Added native SVG export support, GraphML, TikZ
  */
 
 import type { FormalLogicThought } from '../../types/index.js';
@@ -20,6 +20,16 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  type TikZNode,
+  type TikZEdge,
+} from './tikz-utils.js';
 
 /**
  * Export formal logic proof tree to visual format
@@ -36,6 +46,10 @@ export function exportFormalLogicProof(thought: FormalLogicThought, options: Vis
       return formalLogicToASCII(thought);
     case 'svg':
       return formalLogicToSVG(thought, options);
+    case 'graphml':
+      return formalLogicToGraphML(thought, options);
+    case 'tikz':
+      return formalLogicToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -385,4 +399,246 @@ function formalLogicToSVG(thought: FormalLogicThought, options: VisualExportOpti
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export formal logic proof tree to GraphML format
+ */
+function formalLogicToGraphML(thought: FormalLogicThought, options: VisualExportOptions): string {
+  const { includeLabels = true } = options;
+
+  const nodes: GraphMLNode[] = [];
+  const edges: GraphMLEdge[] = [];
+  let edgeCount = 0;
+
+  // Add propositions (premises)
+  if (thought.propositions && thought.propositions.length > 0) {
+    for (const proposition of thought.propositions) {
+      nodes.push({
+        id: sanitizeId(proposition.id),
+        label: includeLabels
+          ? `${proposition.symbol}: ${proposition.statement}`
+          : proposition.symbol,
+        type: 'premise',
+        metadata: {
+          propositionType: proposition.type,
+          description: proposition.statement,
+        },
+      });
+    }
+  }
+
+  // Add logical inferences (inference rules)
+  if (thought.logicalInferences && thought.logicalInferences.length > 0) {
+    for (const inference of thought.logicalInferences) {
+      const infId = sanitizeId(inference.id);
+      nodes.push({
+        id: infId,
+        label: includeLabels ? inference.rule : infId,
+        type: 'inference',
+        metadata: {
+          rule: inference.rule,
+          valid: inference.valid,
+        },
+      });
+
+      // Create edges from premises to inference
+      if (inference.premises) {
+        for (const premiseId of inference.premises) {
+          edges.push({
+            id: `e${edgeCount++}`,
+            source: sanitizeId(premiseId),
+            target: infId,
+            directed: true,
+            metadata: { type: 'premise-to-inference' },
+          });
+        }
+      }
+
+      // Create edge from inference to conclusion
+      edges.push({
+        id: `e${edgeCount++}`,
+        source: infId,
+        target: sanitizeId(inference.conclusion),
+        directed: true,
+        metadata: { type: 'inference-to-conclusion' },
+      });
+    }
+  }
+
+  // Add proof steps
+  if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
+    for (const step of thought.proof.steps) {
+      const stepId = `Step${step.stepNumber}`;
+      nodes.push({
+        id: stepId,
+        label: includeLabels
+          ? `${step.stepNumber}. ${step.statement}`
+          : `Step ${step.stepNumber}`,
+        type: 'proof-step',
+        metadata: {
+          stepNumber: step.stepNumber,
+          justification: step.justification,
+          rule: step.rule,
+        },
+      });
+
+      // Create edges between referenced steps
+      if (step.referencesSteps && step.referencesSteps.length > 0) {
+        for (const refStep of step.referencesSteps) {
+          edges.push({
+            id: `e${edgeCount++}`,
+            source: `Step${refStep}`,
+            target: stepId,
+            directed: true,
+            metadata: { type: 'step-reference' },
+          });
+        }
+      }
+    }
+
+    // Add theorem/conclusion node
+    nodes.push({
+      id: 'Theorem',
+      label: includeLabels ? thought.proof.theorem : 'Theorem',
+      type: 'conclusion',
+      metadata: {
+        theorem: thought.proof.theorem,
+        valid: thought.proof.valid,
+        completeness: thought.proof.completeness,
+      },
+    });
+
+    // Connect last step to theorem
+    const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: `Step${lastStep.stepNumber}`,
+      target: 'Theorem',
+      directed: true,
+      metadata: { type: 'step-to-theorem' },
+    });
+  }
+
+  return generateGraphML(nodes, edges, {
+    graphName: 'Formal Logic Proof',
+    directed: true,
+    includeLabels,
+  });
+}
+
+/**
+ * Export formal logic proof tree to TikZ format
+ */
+function formalLogicToTikZ(thought: FormalLogicThought, options: VisualExportOptions): string {
+  const { includeLabels = true, colorScheme = 'default' } = options;
+
+  const nodes: TikZNode[] = [];
+  const edges: TikZEdge[] = [];
+  let currentY = 0;
+
+  // Add propositions (premises) at the top with stadium shape
+  if (thought.propositions && thought.propositions.length > 0) {
+    thought.propositions.forEach((proposition, index) => {
+      nodes.push({
+        id: sanitizeId(proposition.id),
+        label: includeLabels
+          ? `${proposition.symbol}: ${proposition.statement.substring(0, 30)}...`
+          : proposition.symbol,
+        x: index * 3,
+        y: currentY,
+        type: 'premise',
+        shape: 'stadium',
+      });
+    });
+    currentY -= 2.5;
+  }
+
+  // Add logical inferences (inference rules) in the middle with rectangle shape
+  if (thought.logicalInferences && thought.logicalInferences.length > 0) {
+    thought.logicalInferences.forEach((inference, index) => {
+      const infId = sanitizeId(inference.id);
+      nodes.push({
+        id: infId,
+        label: includeLabels ? inference.rule : infId,
+        x: index * 3,
+        y: currentY,
+        type: 'inference',
+        shape: 'rectangle',
+      });
+
+      // Create edges from premises to inference
+      if (inference.premises) {
+        for (const premiseId of inference.premises) {
+          edges.push({
+            source: sanitizeId(premiseId),
+            target: infId,
+            directed: true,
+          });
+        }
+      }
+
+      // Create edge from inference to conclusion
+      edges.push({
+        source: infId,
+        target: sanitizeId(inference.conclusion),
+        directed: true,
+      });
+    });
+    currentY -= 2.5;
+  }
+
+  // Add proof steps in the middle with rectangle shape
+  if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
+    thought.proof.steps.forEach((step, index) => {
+      const stepId = `Step${step.stepNumber}`;
+      nodes.push({
+        id: stepId,
+        label: includeLabels
+          ? `${step.stepNumber}. ${step.statement.substring(0, 20)}...`
+          : `Step ${step.stepNumber}`,
+        x: index * 3,
+        y: currentY,
+        type: 'neutral',
+        shape: 'rectangle',
+      });
+
+      // Create edges between referenced steps
+      if (step.referencesSteps && step.referencesSteps.length > 0) {
+        for (const refStep of step.referencesSteps) {
+          edges.push({
+            source: `Step${refStep}`,
+            target: stepId,
+            directed: true,
+            style: 'dashed',
+          });
+        }
+      }
+    });
+    currentY -= 2.5;
+
+    // Add theorem/conclusion at the bottom with ellipse shape
+    nodes.push({
+      id: 'Theorem',
+      label: includeLabels ? 'Theorem' : 'T',
+      x: (thought.proof.steps.length - 1) * 1.5,
+      y: currentY,
+      type: 'conclusion',
+      shape: 'ellipse',
+    });
+
+    // Connect last step to theorem
+    const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
+    edges.push({
+      source: `Step${lastStep.stepNumber}`,
+      target: 'Theorem',
+      directed: true,
+    });
+  }
+
+  return generateTikZ(nodes, edges, {
+    title: 'Formal Logic Proof',
+    colorScheme,
+    includeLabels,
+  });
 }

@@ -1,5 +1,5 @@
 /**
- * Temporal Visual Exporter (v7.0.2)
+ * Temporal Visual Exporter (v7.0.3)
  * Sprint 8 Task 8.1: Timeline export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
  */
@@ -18,6 +18,12 @@ import {
   layoutNodesHorizontally,
   DEFAULT_SVG_OPTIONS,
 } from './svg-utils.js';
+import {
+  createLinearGraphML,
+} from './graphml-utils.js';
+import {
+  createLinearTikZ,
+} from './tikz-utils.js';
 
 /**
  * Export temporal timeline to visual format
@@ -34,6 +40,10 @@ export function exportTemporalTimeline(thought: TemporalThought, options: Visual
       return timelineToASCII(thought);
     case 'svg':
       return timelineToSVG(thought, options);
+    case 'graphml':
+      return timelineToGraphML(thought, options);
+    case 'tikz':
+      return timelineToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -124,6 +134,44 @@ function timelineToASCII(thought: TemporalThought): string {
   }
 
   return ascii;
+}
+
+/**
+ * Export temporal timeline to GraphML format
+ */
+function timelineToGraphML(thought: TemporalThought, _options: VisualExportOptions): string {
+  if (!thought.events || thought.events.length === 0) {
+    return createLinearGraphML([], {
+      graphName: thought.timeline?.name || 'Timeline',
+      directed: true,
+    });
+  }
+
+  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const labels = sortedEvents.map(event => event.name);
+
+  return createLinearGraphML(labels, {
+    graphName: thought.timeline?.name || 'Timeline',
+    directed: true,
+  });
+}
+
+/**
+ * Export temporal timeline to TikZ format
+ */
+function timelineToTikZ(thought: TemporalThought, _options: VisualExportOptions): string {
+  if (!thought.events || thought.events.length === 0) {
+    return createLinearTikZ([], {
+      title: thought.timeline?.name || 'Timeline',
+    });
+  }
+
+  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const labels = sortedEvents.map(event => event.name);
+
+  return createLinearTikZ(labels, {
+    title: thought.timeline?.name || 'Timeline',
+  });
 }
 
 /**

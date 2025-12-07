@@ -1,7 +1,7 @@
 /**
- * Scientific Method Visual Exporter (v7.0.2)
+ * Scientific Method Visual Exporter (v7.0.3)
  * Sprint 8 Task 8.1: Scientific method experiment export to Mermaid, DOT, ASCII
- * Phase 9: Added native SVG export support
+ * Phase 9: Added native SVG export support, GraphML, TikZ
  */
 
 import type { ScientificMethodThought } from '../../types/index.js';
@@ -20,6 +20,16 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  type TikZNode,
+  type TikZEdge,
+} from './tikz-utils.js';
 
 /**
  * Export scientific method experiment flow to visual format
@@ -36,6 +46,10 @@ export function exportScientificMethodExperiment(thought: ScientificMethodThough
       return scientificMethodToASCII(thought);
     case 'svg':
       return scientificMethodToSVG(thought, options);
+    case 'graphml':
+      return scientificMethodToGraphML(thought, options);
+    case 'tikz':
+      return scientificMethodToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -416,4 +430,213 @@ function scientificMethodToSVG(thought: ScientificMethodThought, options: Visual
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export scientific method experiment flow to GraphML format
+ */
+function scientificMethodToGraphML(thought: ScientificMethodThought, options: VisualExportOptions): string {
+  const { includeLabels = true } = options;
+
+  const nodes: GraphMLNode[] = [];
+  const edges: GraphMLEdge[] = [];
+  let edgeIndex = 0;
+
+  const stages: Array<{ id: string; label: string; type: string; exists: boolean }> = [];
+
+  // Research Question
+  if (thought.researchQuestion) {
+    stages.push({
+      id: 'RQ',
+      label: includeLabels ? `Research Question: ${thought.researchQuestion.question.substring(0, 60)}...` : 'Research Question',
+      type: 'question',
+      exists: true,
+    });
+  }
+
+  // Hypothesis (simplified - take first one or summarize)
+  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+    const hypLabel = includeLabels
+      ? `Hypothesis: ${thought.scientificHypotheses[0].statement.substring(0, 60)}...`
+      : 'Hypothesis';
+    stages.push({
+      id: 'Hypothesis',
+      label: hypLabel,
+      type: 'hypothesis',
+      exists: true,
+    });
+  }
+
+  // Experiment
+  if (thought.experiment) {
+    stages.push({
+      id: 'Experiment',
+      label: includeLabels ? `Experiment: ${thought.experiment.design}` : 'Experiment',
+      type: 'experiment',
+      exists: true,
+    });
+  }
+
+  // Data Collection
+  if (thought.data) {
+    const sampleSize = (thought.experiment as any)?.sampleSize || 0;
+    stages.push({
+      id: 'Data',
+      label: includeLabels ? `Data Collection: ${sampleSize} samples` : 'Data Collection',
+      type: 'data',
+      exists: true,
+    });
+  }
+
+  // Statistical Analysis
+  if (thought.analysis) {
+    stages.push({
+      id: 'Analysis',
+      label: 'Statistical Analysis',
+      type: 'analysis',
+      exists: true,
+    });
+  }
+
+  // Conclusion
+  if (thought.conclusion) {
+    const confLabel = thought.conclusion.confidence
+      ? ` (confidence: ${thought.conclusion.confidence.toFixed(2)})`
+      : '';
+    stages.push({
+      id: 'Conclusion',
+      label: includeLabels
+        ? `Conclusion: ${thought.conclusion.statement.substring(0, 60)}...${confLabel}`
+        : 'Conclusion',
+      type: 'conclusion',
+      exists: true,
+    });
+  }
+
+  // Create nodes
+  for (const stage of stages) {
+    nodes.push({
+      id: stage.id,
+      label: stage.label,
+      type: stage.type,
+    });
+  }
+
+  // Create linear flow edges
+  for (let i = 0; i < stages.length - 1; i++) {
+    edges.push({
+      id: `e${edgeIndex++}`,
+      source: stages[i].id,
+      target: stages[i + 1].id,
+      directed: true,
+    });
+  }
+
+  return generateGraphML(nodes, edges, {
+    graphName: 'Scientific Method Experiment',
+    directed: true,
+    includeLabels,
+  });
+}
+
+/**
+ * Export scientific method experiment flow to TikZ format
+ */
+function scientificMethodToTikZ(thought: ScientificMethodThought, options: VisualExportOptions): string {
+  const { includeLabels = true, colorScheme = 'default' } = options;
+
+  const nodes: TikZNode[] = [];
+  const edges: TikZEdge[] = [];
+  let xPosition = 0;
+  const xSpacing = 3;
+
+  const stages: Array<{ id: string; label: string; type: string; shape?: TikZNode['shape'] }> = [];
+
+  // Research Question
+  if (thought.researchQuestion) {
+    stages.push({
+      id: 'RQ',
+      label: includeLabels ? 'Research\nQuestion' : 'RQ',
+      type: 'tertiary',
+      shape: 'ellipse',
+    });
+  }
+
+  // Hypothesis (simplified - just note we have hypotheses)
+  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+    stages.push({
+      id: 'Hypothesis',
+      label: includeLabels ? `Hypothesis\n(${thought.scientificHypotheses.length})` : 'H',
+      type: 'info',
+      shape: 'rectangle',
+    });
+  }
+
+  // Experiment
+  if (thought.experiment) {
+    stages.push({
+      id: 'Experiment',
+      label: 'Experiment',
+      type: 'neutral',
+      shape: 'rectangle',
+    });
+  }
+
+  // Data Collection
+  if (thought.data) {
+    stages.push({
+      id: 'Data',
+      label: 'Data\nCollection',
+      type: 'neutral',
+      shape: 'rectangle',
+    });
+  }
+
+  // Statistical Analysis
+  if (thought.analysis) {
+    stages.push({
+      id: 'Analysis',
+      label: 'Statistical\nAnalysis',
+      type: 'primary',
+      shape: 'rectangle',
+    });
+  }
+
+  // Conclusion
+  if (thought.conclusion) {
+    stages.push({
+      id: 'Conclusion',
+      label: 'Conclusion',
+      type: 'success',
+      shape: 'stadium',
+    });
+  }
+
+  // Create nodes with horizontal positioning
+  for (const stage of stages) {
+    nodes.push({
+      id: stage.id,
+      label: stage.label,
+      x: xPosition,
+      y: 0,
+      type: stage.type,
+      shape: stage.shape || 'rectangle',
+    });
+    xPosition += xSpacing;
+  }
+
+  // Create edges between consecutive stages
+  for (let i = 0; i < stages.length - 1; i++) {
+    edges.push({
+      source: stages[i].id,
+      target: stages[i + 1].id,
+      directed: true,
+    });
+  }
+
+  return generateTikZ(nodes, edges, {
+    title: 'Scientific Method Experiment',
+    colorScheme,
+    includeLabels,
+  });
 }

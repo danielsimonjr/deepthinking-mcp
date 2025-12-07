@@ -1,7 +1,8 @@
 /**
- * Bayesian Visual Exporter (v7.0.2)
+ * Bayesian Visual Exporter (v7.0.3)
  * Sprint 8 Task 8.1: Bayesian network export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
+ * Phase 9: Added GraphML and TikZ export support
  */
 
 import type { BayesianThought } from '../../types/index.js';
@@ -19,6 +20,16 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  type TikZNode,
+  type TikZEdge,
+} from './tikz-utils.js';
 
 /**
  * Export Bayesian network to visual format
@@ -35,6 +46,10 @@ export function exportBayesianNetwork(thought: BayesianThought, options: VisualE
       return bayesianToASCII(thought);
     case 'svg':
       return bayesianToSVG(thought, options);
+    case 'graphml':
+      return bayesianToGraphML(thought, options);
+    case 'tikz':
+      return bayesianToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -231,4 +246,59 @@ function bayesianToSVG(thought: BayesianThought, options: VisualExportOptions): 
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export Bayesian network to GraphML format
+ */
+function bayesianToGraphML(thought: BayesianThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  // Simple structure with Prior, Hypothesis, Evidence, Posterior
+  const nodes: GraphMLNode[] = [
+    { id: 'prior', label: includeLabels ? `Prior: ${thought.prior.probability.toFixed(3)}` : 'Prior', type: 'prior' },
+    { id: 'hypothesis', label: 'Hypothesis', type: 'hypothesis' },
+    { id: 'evidence', label: 'Evidence', type: 'evidence' },
+    { id: 'posterior', label: includeLabels ? `Posterior: ${thought.posterior.probability.toFixed(3)}` : 'Posterior', type: 'posterior' },
+  ];
+
+  const edges: GraphMLEdge[] = [
+    { id: 'e1', source: 'prior', target: 'hypothesis' },
+    { id: 'e2', source: 'evidence', target: 'hypothesis' },
+    { id: 'e3', source: 'hypothesis', target: 'posterior' },
+  ];
+
+  return generateGraphML(nodes, edges, {
+    graphName: 'Bayesian Network',
+    includeLabels,
+    includeMetadata: includeMetrics,
+  });
+}
+
+/**
+ * Export Bayesian network to TikZ/LaTeX format
+ */
+function bayesianToTikZ(thought: BayesianThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true, colorScheme = 'default' } = options;
+
+  // Simple structure with Prior, Hypothesis, Evidence, Posterior
+  const nodes: TikZNode[] = [
+    { id: 'prior', label: includeLabels ? `Prior: ${thought.prior.probability.toFixed(3)}` : 'Prior', x: 0, y: 0, type: 'primary', shape: 'stadium' },
+    { id: 'evidence', label: 'Evidence', x: 4, y: 0, type: 'info', shape: 'rectangle' },
+    { id: 'hypothesis', label: 'Hypothesis', x: 2, y: -2, type: 'neutral', shape: 'ellipse' },
+    { id: 'posterior', label: includeLabels ? `Posterior: ${thought.posterior.probability.toFixed(3)}` : 'Posterior', x: 2, y: -4, type: 'success', shape: 'stadium' },
+  ];
+
+  const edges: TikZEdge[] = [
+    { source: 'prior', target: 'hypothesis', directed: true },
+    { source: 'evidence', target: 'hypothesis', directed: true },
+    { source: 'hypothesis', target: 'posterior', directed: true },
+  ];
+
+  return generateTikZ(nodes, edges, {
+    title: 'Bayesian Network',
+    includeLabels,
+    includeMetrics,
+    colorScheme,
+  });
 }

@@ -1,7 +1,8 @@
 /**
- * Evidential Visual Exporter (v7.0.2)
+ * Evidential Visual Exporter (v7.0.3)
  * Sprint 8 Task 8.1: Evidential belief export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
+ * Phase 9: Added GraphML and TikZ export support
  */
 
 import type { EvidentialThought } from '../../types/index.js';
@@ -19,6 +20,16 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  type TikZNode,
+  type TikZEdge,
+} from './tikz-utils.js';
 
 /**
  * Export evidential belief visualization to visual format
@@ -35,6 +46,10 @@ export function exportEvidentialBeliefs(thought: EvidentialThought, options: Vis
       return evidentialToASCII(thought);
     case 'svg':
       return evidentialToSVG(thought, options);
+    case 'graphml':
+      return evidentialToGraphML(thought, options);
+    case 'tikz':
+      return evidentialToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -241,4 +256,205 @@ function evidentialToSVG(thought: EvidentialThought, options: VisualExportOption
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export evidential belief visualization to GraphML format
+ */
+function evidentialToGraphML(thought: EvidentialThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  const nodes: GraphMLNode[] = [];
+  const edges: GraphMLEdge[] = [];
+  let edgeId = 0;
+
+  // Create nodes for evidence items
+  if (thought.evidence && thought.evidence.length > 0) {
+    for (const evidence of thought.evidence) {
+      nodes.push({
+        id: evidence.id,
+        label: includeLabels ? evidence.description : evidence.id,
+        type: 'evidence',
+        metadata: {
+          source: evidence.source,
+          reliability: evidence.reliability,
+          description: evidence.description,
+        },
+      });
+    }
+  }
+
+  // Create nodes for belief functions
+  if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
+    for (const belief of thought.beliefFunctions) {
+      const label = includeLabels
+        ? `Belief: ${belief.source}`
+        : belief.id;
+
+      nodes.push({
+        id: belief.id,
+        label,
+        type: 'belief',
+        metadata: belief.conflictMass !== undefined
+          ? { conflictMass: belief.conflictMass }
+          : undefined,
+      });
+
+      // Create edges from evidence to beliefs
+      if (thought.evidence && thought.evidence.length > 0) {
+        const sourceEvidence = thought.evidence.find(e => e.id === belief.source);
+        if (sourceEvidence) {
+          edges.push({
+            id: `e${edgeId++}`,
+            source: sourceEvidence.id,
+            target: belief.id,
+            label: includeMetrics ? `strength: ${sourceEvidence.reliability.toFixed(3)}` : undefined,
+            metadata: includeMetrics ? { weight: sourceEvidence.reliability } : undefined,
+          });
+        }
+      }
+    }
+  }
+
+  // If no evidence or beliefs, create frame of discernment nodes
+  if (nodes.length === 0 && thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
+    nodes.push({
+      id: 'frame',
+      label: 'Frame of Discernment',
+      type: 'frame',
+    });
+
+    for (const hypothesis of thought.frameOfDiscernment) {
+      const hypId = sanitizeId(hypothesis);
+      nodes.push({
+        id: hypId,
+        label: includeLabels ? hypothesis : hypId,
+        type: 'hypothesis',
+      });
+
+      edges.push({
+        id: `e${edgeId++}`,
+        source: 'frame',
+        target: hypId,
+      });
+    }
+  }
+
+  return generateGraphML(nodes, edges, {
+    graphName: 'Evidential Beliefs',
+    includeLabels,
+    includeMetadata: includeMetrics,
+  });
+}
+
+/**
+ * Export evidential belief visualization to TikZ/LaTeX format
+ */
+function evidentialToTikZ(thought: EvidentialThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true, colorScheme = 'default' } = options;
+
+  const nodes: TikZNode[] = [];
+  const edges: TikZEdge[] = [];
+
+  // Create nodes for evidence items (top layer)
+  if (thought.evidence && thought.evidence.length > 0) {
+    const evidenceCount = thought.evidence.length;
+    const evidenceSpacing = Math.min(3, 8 / evidenceCount);
+    const startX = (8 - (evidenceCount - 1) * evidenceSpacing) / 2;
+
+    for (let i = 0; i < thought.evidence.length; i++) {
+      const evidence = thought.evidence[i];
+      const label = includeLabels
+        ? `${evidence.description.substring(0, 20)}${evidence.description.length > 20 ? '...' : ''}`
+        : evidence.id;
+
+      nodes.push({
+        id: evidence.id,
+        label,
+        x: startX + i * evidenceSpacing,
+        y: 0,
+        type: 'evidence',
+        shape: 'rectangle',
+      });
+    }
+  }
+
+  // Create nodes for belief functions (bottom layer)
+  if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
+    const beliefCount = thought.beliefFunctions.length;
+    const beliefSpacing = Math.min(3, 8 / beliefCount);
+    const startX = (8 - (beliefCount - 1) * beliefSpacing) / 2;
+
+    for (let i = 0; i < thought.beliefFunctions.length; i++) {
+      const belief = thought.beliefFunctions[i];
+      const label = includeLabels
+        ? `Belief: ${belief.source}`
+        : belief.id;
+
+      nodes.push({
+        id: belief.id,
+        label,
+        x: startX + i * beliefSpacing,
+        y: -3,
+        type: 'primary',
+        shape: 'ellipse',
+      });
+
+      // Create edges from evidence to beliefs with strength labels
+      if (thought.evidence && thought.evidence.length > 0) {
+        const sourceEvidence = thought.evidence.find(e => e.id === belief.source);
+        if (sourceEvidence) {
+          edges.push({
+            source: sourceEvidence.id,
+            target: belief.id,
+            label: includeMetrics ? sourceEvidence.reliability.toFixed(3) : undefined,
+            directed: true,
+          });
+        }
+      }
+    }
+  }
+
+  // If no evidence or beliefs, create frame of discernment structure
+  if (nodes.length === 0 && thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
+    nodes.push({
+      id: 'frame',
+      label: 'Frame of Discernment',
+      x: 4,
+      y: 0,
+      type: 'warning',
+      shape: 'ellipse',
+    });
+
+    const hypCount = thought.frameOfDiscernment.length;
+    const hypSpacing = Math.min(2.5, 8 / hypCount);
+    const startX = (8 - (hypCount - 1) * hypSpacing) / 2;
+
+    for (let i = 0; i < thought.frameOfDiscernment.length; i++) {
+      const hypothesis = thought.frameOfDiscernment[i];
+      const hypId = sanitizeId(hypothesis);
+
+      nodes.push({
+        id: hypId,
+        label: includeLabels ? hypothesis : hypId,
+        x: startX + i * hypSpacing,
+        y: -2.5,
+        type: 'info',
+        shape: 'rectangle',
+      });
+
+      edges.push({
+        source: 'frame',
+        target: hypId,
+        directed: true,
+      });
+    }
+  }
+
+  return generateTikZ(nodes, edges, {
+    title: 'Evidential Beliefs',
+    includeLabels,
+    includeMetrics,
+    colorScheme,
+  });
 }

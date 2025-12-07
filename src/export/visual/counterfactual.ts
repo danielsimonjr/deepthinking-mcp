@@ -1,7 +1,8 @@
 /**
- * Counterfactual Visual Exporter (v7.0.2)
+ * Counterfactual Visual Exporter (v7.0.3)
  * Sprint 8 Task 8.1: Counterfactual scenario export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
+ * Phase 9: Added GraphML and TikZ export support
  */
 
 import type { CounterfactualThought } from '../../types/index.js';
@@ -19,6 +20,18 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+  type GraphMLOptions,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  type TikZNode,
+  type TikZEdge,
+  type TikZOptions,
+} from './tikz-utils.js';
 
 /**
  * Export counterfactual scenario tree to visual format
@@ -35,6 +48,10 @@ export function exportCounterfactualScenarios(thought: CounterfactualThought, op
       return counterfactualToASCII(thought);
     case 'svg':
       return counterfactualToSVG(thought, options);
+    case 'graphml':
+      return counterfactualToGraphML(thought, options);
+    case 'tikz':
+      return counterfactualToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -257,4 +274,154 @@ function counterfactualToSVG(thought: CounterfactualThought, options: VisualExpo
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export counterfactual scenario tree to GraphML format
+ */
+function counterfactualToGraphML(thought: CounterfactualThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  // Create nodes: intervention point, actual scenario, and counterfactual scenarios
+  const nodes: GraphMLNode[] = [];
+
+  // Intervention point node
+  nodes.push({
+    id: 'intervention',
+    label: includeLabels ? thought.interventionPoint.description : 'intervention',
+    type: 'intervention',
+    metadata: {
+      timing: thought.interventionPoint.timing,
+      feasibility: thought.interventionPoint.feasibility,
+    },
+  });
+
+  // Actual scenario node
+  nodes.push({
+    id: thought.actual.id,
+    label: includeLabels ? `Actual: ${thought.actual.name}` : thought.actual.id,
+    type: 'actual',
+    metadata: {
+      description: thought.actual.description,
+    },
+  });
+
+  // Counterfactual scenario nodes
+  for (const scenario of thought.counterfactuals) {
+    nodes.push({
+      id: scenario.id,
+      label: includeLabels ? `CF: ${scenario.name}` : scenario.id,
+      type: 'counterfactual',
+      metadata: {
+        description: scenario.description,
+        likelihood: scenario.likelihood,
+      },
+    });
+  }
+
+  // Create edges showing transitions/comparisons
+  const edges: GraphMLEdge[] = [];
+
+  // Edge from intervention to actual
+  edges.push({
+    id: 'e_intervention_actual',
+    source: 'intervention',
+    target: thought.actual.id,
+    label: 'no change',
+  });
+
+  // Edges from intervention to counterfactuals
+  for (let i = 0; i < thought.counterfactuals.length; i++) {
+    const scenario = thought.counterfactuals[i];
+    edges.push({
+      id: `e_intervention_cf${i}`,
+      source: 'intervention',
+      target: scenario.id,
+      label: 'intervene',
+      metadata: includeMetrics && scenario.likelihood !== undefined
+        ? { weight: scenario.likelihood }
+        : undefined,
+    });
+  }
+
+  const graphmlOptions: GraphMLOptions = {
+    graphName: 'Counterfactual Scenarios',
+  };
+
+  return generateGraphML(nodes, edges, graphmlOptions);
+}
+
+/**
+ * Export counterfactual scenario tree to TikZ format
+ */
+function counterfactualToTikZ(thought: CounterfactualThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  const nodes: TikZNode[] = [];
+
+  // Intervention point at the top center
+  nodes.push({
+    id: 'intervention',
+    label: includeLabels ? thought.interventionPoint.description : 'intervention',
+    x: 4,
+    y: 0,
+    type: 'intervention',
+    shape: 'diamond',
+  });
+
+  // Actual scenario on the left
+  nodes.push({
+    id: thought.actual.id,
+    label: includeLabels ? `Actual: ${thought.actual.name}` : thought.actual.id,
+    x: 2,
+    y: -2,
+    type: 'actual',
+    shape: 'rectangle',
+  });
+
+  // Counterfactual scenarios on the right
+  const cfCount = thought.counterfactuals.length;
+  const cfSpacing = 1.5;
+  const cfStartY = -2;
+
+  thought.counterfactuals.forEach((scenario, index) => {
+    const yOffset = (cfCount - 1) * cfSpacing / 2;
+    nodes.push({
+      id: scenario.id,
+      label: includeLabels ? `CF: ${scenario.name}` : scenario.id,
+      x: 6,
+      y: cfStartY - index * cfSpacing + yOffset,
+      type: 'counterfactual',
+      shape: 'ellipse',
+    });
+  });
+
+  // Create edges
+  const edges: TikZEdge[] = [];
+
+  // Edge from intervention to actual
+  edges.push({
+    source: 'intervention',
+    target: thought.actual.id,
+    label: 'no change',
+    directed: true,
+  });
+
+  // Edges from intervention to counterfactuals
+  for (const scenario of thought.counterfactuals) {
+    edges.push({
+      source: 'intervention',
+      target: scenario.id,
+      label: includeMetrics && scenario.likelihood !== undefined
+        ? scenario.likelihood.toFixed(2)
+        : 'intervene',
+      directed: true,
+    });
+  }
+
+  const tikzOptions: TikZOptions = {
+    title: 'Counterfactual Scenarios',
+  };
+
+  return generateTikZ(nodes, edges, tikzOptions);
 }

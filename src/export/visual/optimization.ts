@@ -1,7 +1,8 @@
 /**
- * Optimization Visual Exporter (v7.0.2)
+ * Optimization Visual Exporter (v7.0.3)
  * Sprint 8 Task 8.1: Optimization constraint graph export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
+ * Phase 9: Added GraphML and TikZ export support
  */
 
 import type { OptimizationThought } from '../../types/index.js';
@@ -20,6 +21,16 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  type TikZNode,
+  type TikZEdge,
+} from './tikz-utils.js';
 
 /**
  * Export optimization problem constraint graph to visual format
@@ -36,6 +47,10 @@ export function exportOptimizationSolution(thought: OptimizationThought, options
       return optimizationToASCII(thought);
     case 'svg':
       return optimizationToSVG(thought, options);
+    case 'graphml':
+      return optimizationToGraphML(thought, options);
+    case 'tikz':
+      return optimizationToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -373,4 +388,188 @@ function optimizationToSVG(thought: OptimizationThought, options: VisualExportOp
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export optimization problem to GraphML format
+ */
+function optimizationToGraphML(thought: OptimizationThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const nodes: GraphMLNode[] = [];
+  const edges: GraphMLEdge[] = [];
+  let edgeCount = 0;
+
+  // Add objective function nodes
+  if (thought.objectives && thought.objectives.length > 0) {
+    for (const objective of thought.objectives) {
+      nodes.push({
+        id: sanitizeId(objective.id),
+        label: includeLabels ? `${objective.type}: ${objective.name}` : objective.id,
+        type: 'objective',
+        metadata: {
+          description: objective.formula,
+          objectiveType: objective.type,
+        },
+      });
+    }
+  }
+
+  // Add constraint nodes
+  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+    for (const constraint of thought.optimizationConstraints) {
+      nodes.push({
+        id: sanitizeId(constraint.id),
+        label: includeLabels ? constraint.name : constraint.id,
+        type: 'constraint',
+        metadata: {
+          description: constraint.formula,
+          constraintType: constraint.type,
+        },
+      });
+
+      // Create edges from constraints to objectives
+      if (thought.objectives) {
+        for (const objective of thought.objectives) {
+          edges.push({
+            id: `e${edgeCount++}`,
+            source: sanitizeId(constraint.id),
+            target: sanitizeId(objective.id),
+            label: 'constrains',
+          });
+        }
+      }
+    }
+  }
+
+  // Add solution/optimum node
+  if (thought.solution) {
+    nodes.push({
+      id: 'solution',
+      label: includeMetrics && thought.solution.quality
+        ? `Solution (quality: ${thought.solution.quality.toFixed(2)})`
+        : 'Solution',
+      type: 'solution',
+      metadata: {
+        status: (thought.solution as any).status,
+        optimalValue: (thought.solution as any).optimalValue,
+        quality: thought.solution.quality,
+      },
+    });
+
+    // Create edges from objectives to solution
+    if (thought.objectives) {
+      for (const objective of thought.objectives) {
+        edges.push({
+          id: `e${edgeCount++}`,
+          source: sanitizeId(objective.id),
+          target: 'solution',
+          label: 'optimizes',
+        });
+      }
+    }
+  }
+
+  return generateGraphML(nodes, edges, {
+    graphName: 'Optimization Solution',
+    includeLabels,
+    includeMetadata: includeMetrics,
+  });
+}
+
+/**
+ * Export optimization problem to TikZ format
+ */
+function optimizationToTikZ(thought: OptimizationThought, options: VisualExportOptions): string {
+  const { colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+  const nodes: TikZNode[] = [];
+  const edges: TikZEdge[] = [];
+  let yOffset = 0;
+
+  // Objective functions at the top
+  if (thought.objectives && thought.objectives.length > 0) {
+    const startX = thought.objectives.length > 1 ? 0 : 4;
+    const spacing = thought.objectives.length > 1 ? 8 / thought.objectives.length : 0;
+
+    for (let i = 0; i < thought.objectives.length; i++) {
+      const objective = thought.objectives[i];
+      const x = thought.objectives.length === 1 ? startX : startX + i * spacing + spacing / 2;
+
+      nodes.push({
+        id: sanitizeId(objective.id),
+        label: includeLabels ? `${objective.type}: ${objective.name}` : objective.id,
+        x,
+        y: yOffset,
+        type: 'primary',
+        shape: 'rectangle',
+      });
+    }
+    yOffset -= 2;
+  }
+
+  // Constraints in the middle
+  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+    const startX = thought.optimizationConstraints.length > 1 ? 0 : 4;
+    const spacing = thought.optimizationConstraints.length > 1 ? 8 / thought.optimizationConstraints.length : 0;
+
+    for (let i = 0; i < thought.optimizationConstraints.length; i++) {
+      const constraint = thought.optimizationConstraints[i];
+      const x = thought.optimizationConstraints.length === 1 ? startX : startX + i * spacing + spacing / 2;
+      const constraintId = sanitizeId(constraint.id);
+
+      nodes.push({
+        id: constraintId,
+        label: includeLabels ? constraint.name : constraint.id,
+        x,
+        y: yOffset,
+        type: 'warning',
+        shape: 'diamond',
+      });
+
+      // Create edges from constraints to objectives
+      if (thought.objectives) {
+        for (const objective of thought.objectives) {
+          edges.push({
+            source: constraintId,
+            target: sanitizeId(objective.id),
+            directed: true,
+          });
+        }
+      }
+    }
+    yOffset -= 2;
+  }
+
+  // Solution at the bottom
+  if (thought.solution) {
+    const solutionLabel = includeMetrics && thought.solution.quality
+      ? `Solution (${thought.solution.quality.toFixed(2)})`
+      : 'Solution';
+
+    nodes.push({
+      id: 'solution',
+      label: solutionLabel,
+      x: 4,
+      y: yOffset,
+      type: 'success',
+      shape: 'ellipse',
+    });
+
+    // Create edges from objectives to solution
+    if (thought.objectives) {
+      for (const objective of thought.objectives) {
+        edges.push({
+          source: sanitizeId(objective.id),
+          target: 'solution',
+          directed: true,
+        });
+      }
+    }
+  }
+
+  return generateTikZ(nodes, edges, {
+    title: 'Optimization Solution',
+    colorScheme,
+    includeLabels,
+    includeMetrics,
+  });
 }

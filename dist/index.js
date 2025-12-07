@@ -3303,6 +3303,404 @@ var init_svg_utils = __esm({
   }
 });
 
+// src/export/visual/graphml-utils.ts
+function escapeXML(str) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+}
+function generateGraphMLHeader(options = {}) {
+  const { graphId = "G", directed = true, graphName } = options;
+  let header = `<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
+         http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+
+  <!-- Node attributes -->
+  <key id="label" for="node" attr.name="label" attr.type="string"/>
+  <key id="type" for="node" attr.name="type" attr.type="string"/>
+  <key id="description" for="node" attr.name="description" attr.type="string"/>
+
+  <!-- Edge attributes -->
+  <key id="edgeLabel" for="edge" attr.name="label" attr.type="string"/>
+  <key id="weight" for="edge" attr.name="weight" attr.type="double"/>
+  <key id="edgeType" for="edge" attr.name="type" attr.type="string"/>
+
+  <!-- Graph attributes -->
+  <key id="graphName" for="graph" attr.name="name" attr.type="string"/>
+
+  <graph id="${escapeXML(graphId)}" edgedefault="${directed ? "directed" : "undirected"}">`;
+  if (graphName) {
+    header += `
+    <data key="graphName">${escapeXML(graphName)}</data>`;
+  }
+  return header;
+}
+function generateGraphMLFooter() {
+  return `
+  </graph>
+</graphml>`;
+}
+function renderGraphMLNode(node, options = {}) {
+  const { includeLabels = true, includeMetadata = true } = options;
+  let nodeXML = `
+    <node id="${escapeXML(node.id)}">`;
+  if (includeLabels && node.label) {
+    nodeXML += `
+      <data key="label">${escapeXML(node.label)}</data>`;
+  }
+  if (node.type) {
+    nodeXML += `
+      <data key="type">${escapeXML(node.type)}</data>`;
+  }
+  if (includeMetadata && node.metadata) {
+    if (node.metadata.description) {
+      nodeXML += `
+      <data key="description">${escapeXML(String(node.metadata.description))}</data>`;
+    }
+  }
+  nodeXML += `
+    </node>`;
+  return nodeXML;
+}
+function renderGraphMLEdge(edge, options = {}) {
+  const { includeLabels = true, includeMetadata = true } = options;
+  let edgeXML = `
+    <edge id="${escapeXML(edge.id)}" source="${escapeXML(edge.source)}" target="${escapeXML(edge.target)}">`;
+  if (includeLabels && edge.label) {
+    edgeXML += `
+      <data key="edgeLabel">${escapeXML(edge.label)}</data>`;
+  }
+  if (includeMetadata && edge.metadata) {
+    if (edge.metadata.weight !== void 0) {
+      edgeXML += `
+      <data key="weight">${edge.metadata.weight}</data>`;
+    }
+    if (edge.metadata.type) {
+      edgeXML += `
+      <data key="edgeType">${escapeXML(String(edge.metadata.type))}</data>`;
+    }
+  }
+  edgeXML += `
+    </edge>`;
+  return edgeXML;
+}
+function generateGraphML(nodes, edges, options = {}) {
+  const mergedOptions = { ...DEFAULT_GRAPHML_OPTIONS, ...options };
+  let graphml = generateGraphMLHeader(mergedOptions);
+  graphml += "\n\n    <!-- Nodes -->";
+  for (const node of nodes) {
+    graphml += renderGraphMLNode(node, mergedOptions);
+  }
+  graphml += "\n\n    <!-- Edges -->";
+  for (const edge of edges) {
+    graphml += renderGraphMLEdge(edge, mergedOptions);
+  }
+  graphml += generateGraphMLFooter();
+  return graphml;
+}
+function createLinearGraphML(nodeLabels, options = {}) {
+  const nodes = nodeLabels.map((label, i) => ({
+    id: `n${i}`,
+    label,
+    type: "step"
+  }));
+  const edges = [];
+  for (let i = 0; i < nodeLabels.length - 1; i++) {
+    edges.push({
+      id: `e${i}`,
+      source: `n${i}`,
+      target: `n${i + 1}`
+    });
+  }
+  return generateGraphML(nodes, edges, options);
+}
+function createTreeGraphML(root, options = {}) {
+  const nodes = [];
+  const edges = [];
+  let edgeCount = 0;
+  function traverse(node, depth = 0) {
+    nodes.push({
+      id: node.id,
+      label: node.label,
+      type: depth === 0 ? "root" : "node",
+      metadata: { depth }
+    });
+    if (node.children && Array.isArray(node.children)) {
+      for (const child of node.children) {
+        edges.push({
+          id: `e${edgeCount++}`,
+          source: node.id,
+          target: child.id
+        });
+        traverse(child, depth + 1);
+      }
+    }
+  }
+  traverse(root);
+  return generateGraphML(nodes, edges, options);
+}
+var DEFAULT_GRAPHML_OPTIONS;
+var init_graphml_utils = __esm({
+  "src/export/visual/graphml-utils.ts"() {
+    init_esm_shims();
+    DEFAULT_GRAPHML_OPTIONS = {
+      directed: true,
+      includeMetadata: true,
+      includeLabels: true,
+      graphId: "G",
+      graphName: "Graph"
+    };
+  }
+});
+
+// src/export/visual/tikz-utils.ts
+function getTikZColor(nodeType, colorScheme = "default") {
+  const palette = COLOR_PALETTES2[colorScheme] || COLOR_PALETTES2.default;
+  const colorMap = {
+    primary: "primary",
+    secondary: "secondary",
+    tertiary: "tertiary",
+    neutral: "neutral",
+    success: "success",
+    warning: "warning",
+    danger: "danger",
+    info: "info",
+    cause: "primary",
+    effect: "tertiary",
+    mediator: "secondary",
+    confounder: "warning",
+    root: "primary",
+    current: "primary",
+    terminal: "success",
+    hypothesis: "info",
+    evidence: "secondary",
+    conclusion: "success"
+  };
+  const key = colorMap[nodeType] || "neutral";
+  return palette[key];
+}
+function escapeLatex2(str) {
+  return str.replace(/\\/g, "\\textbackslash{}").replace(/%/g, "\\%").replace(/\$/g, "\\$").replace(/&/g, "\\&").replace(/#/g, "\\#").replace(/_/g, "\\_").replace(/{/g, "\\{").replace(/}/g, "\\}").replace(/\^/g, "\\textasciicircum{}").replace(/~/g, "\\textasciitilde{}");
+}
+function generateTikZHeader(options = {}) {
+  const { standalone = false, title, scale = 1 } = options;
+  let header = "";
+  if (standalone) {
+    header += `\\documentclass[tikz,border=10pt]{standalone}
+\\usepackage{tikz}
+\\usetikzlibrary{shapes,arrows,positioning,calc,backgrounds,fit}
+\\begin{document}
+`;
+  }
+  header += `\\begin{tikzpicture}[
+  scale=${scale},
+  every node/.style={font=\\small},
+  box/.style={rectangle, draw, rounded corners=3pt, minimum width=2cm, minimum height=0.8cm, text centered},
+  circle node/.style={circle, draw, minimum size=0.8cm, text centered},
+  ellipse node/.style={ellipse, draw, minimum width=2cm, minimum height=0.8cm, text centered},
+  diamond node/.style={diamond, draw, aspect=2, minimum width=1.5cm, text centered},
+  stadium node/.style={rectangle, draw, rounded corners=0.4cm, minimum width=2cm, minimum height=0.8cm, text centered},
+  arrow/.style={->, >=stealth, thick},
+  dashed arrow/.style={->, >=stealth, thick, dashed},
+  dotted arrow/.style={->, >=stealth, thick, dotted},
+  edge label/.style={font=\\footnotesize, fill=white, inner sep=1pt}
+]`;
+  if (title) {
+    header += `
+
+% Title
+\\node[font=\\large\\bfseries] at (4, 0.5) {${escapeLatex2(title)}};`;
+  }
+  return header;
+}
+function generateTikZFooter(options = {}) {
+  const { standalone = false } = options;
+  let footer = "\n\\end{tikzpicture}";
+  if (standalone) {
+    footer += "\n\\end{document}";
+  }
+  return footer;
+}
+function getShapeStyle(shape) {
+  switch (shape) {
+    case "circle":
+      return "circle node";
+    case "ellipse":
+      return "ellipse node";
+    case "diamond":
+      return "diamond node";
+    case "stadium":
+    case "rounded":
+      return "stadium node";
+    case "rectangle":
+    default:
+      return "box";
+  }
+}
+function renderTikZNode(node, options = {}) {
+  const { colorScheme = "default", includeLabels = true } = options;
+  const colors = getTikZColor(node.type || "neutral", colorScheme);
+  const shapeStyle = getShapeStyle(node.shape);
+  const label = includeLabels ? escapeLatex2(node.label) : escapeLatex2(node.id);
+  const position = node.x !== void 0 && node.y !== void 0 ? `at (${node.x}, ${node.y})` : "";
+  return `
+  \\node[${shapeStyle}, fill=${colors.fill}, draw=${colors.stroke}] (${node.id}) ${position} {${label}};`;
+}
+function renderTikZEdge(edge, options = {}) {
+  const { includeLabels = true } = options;
+  let style = "arrow";
+  if (edge.style === "dashed") style = "dashed arrow";
+  if (edge.style === "dotted") style = "dotted arrow";
+  if (edge.directed === false) style = style.replace("->", "-");
+  let bendOption = "";
+  if (edge.bend) {
+    if (typeof edge.bend === "number") {
+      bendOption = `, bend ${edge.bend > 0 ? "left" : "right"}=${Math.abs(edge.bend)}`;
+    } else {
+      bendOption = `, bend ${edge.bend}`;
+    }
+  }
+  let labelOption = "";
+  if (includeLabels && edge.label) {
+    labelOption = ` node[edge label, midway] {${escapeLatex2(edge.label)}}`;
+  }
+  return `
+  \\draw[${style}${bendOption}] (${edge.source}) --${labelOption} (${edge.target});`;
+}
+function renderTikZMetrics(x, y, metrics) {
+  let tikz = `
+
+  % Metrics Panel
+  \\node[draw, fill=white, rounded corners, align=left, font=\\footnotesize] at (${x}, ${y}) {`;
+  const lines = metrics.map((m) => `${escapeLatex2(m.label)}: ${escapeLatex2(String(m.value))}`);
+  tikz += lines.join(" \\\\ ");
+  tikz += "};";
+  return tikz;
+}
+function renderTikZLegend(x, y, items) {
+  let tikz = "\n\n  % Legend";
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    const itemY = y - i * 0.5;
+    const shapeStyle = getShapeStyle(item.shape);
+    tikz += `
+  \\node[${shapeStyle}, fill=${item.color.fill}, draw=${item.color.stroke}, minimum width=0.5cm, minimum height=0.3cm] at (${x}, ${itemY}) {};`;
+    tikz += `
+  \\node[right, font=\\footnotesize] at (${x + 0.4}, ${itemY}) {${escapeLatex2(item.label)}};`;
+  }
+  return tikz;
+}
+function generateTikZ(nodes, edges, options = {}) {
+  const mergedOptions = { ...DEFAULT_TIKZ_OPTIONS, ...options };
+  let tikz = generateTikZHeader(mergedOptions);
+  tikz += "\n\n  % Nodes";
+  for (const node of nodes) {
+    tikz += renderTikZNode(node, mergedOptions);
+  }
+  tikz += "\n\n  % Edges";
+  for (const edge of edges) {
+    tikz += renderTikZEdge(edge, mergedOptions);
+  }
+  tikz += generateTikZFooter(mergedOptions);
+  return tikz;
+}
+function createLinearTikZ(nodeLabels, options = {}) {
+  const nodes = nodeLabels.map((label, i) => ({
+    id: `n${i}`,
+    label,
+    x: i * 3,
+    y: 0,
+    type: i === 0 ? "primary" : i === nodeLabels.length - 1 ? "success" : "neutral",
+    shape: "rectangle"
+  }));
+  const edges = [];
+  for (let i = 0; i < nodeLabels.length - 1; i++) {
+    edges.push({
+      source: `n${i}`,
+      target: `n${i + 1}`,
+      directed: true
+    });
+  }
+  return generateTikZ(nodes, edges, options);
+}
+function createTreeTikZ(root, options = {}) {
+  const nodes = [];
+  const edges = [];
+  function traverse(node, x, y, width) {
+    nodes.push({
+      id: node.id,
+      label: node.label,
+      x,
+      y,
+      type: y === 0 ? "primary" : "neutral",
+      shape: "rectangle"
+    });
+    if (node.children && Array.isArray(node.children)) {
+      const children = node.children;
+      const childWidth = width / children.length;
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        const childX = x - width / 2 + childWidth / 2 + i * childWidth;
+        edges.push({
+          source: node.id,
+          target: child.id,
+          directed: true
+        });
+        traverse(child, childX, y - 2, childWidth);
+      }
+    }
+  }
+  traverse(root, 4, 0, 8);
+  return generateTikZ(nodes, edges, options);
+}
+var DEFAULT_TIKZ_OPTIONS, COLOR_PALETTES2;
+var init_tikz_utils = __esm({
+  "src/export/visual/tikz-utils.ts"() {
+    init_esm_shims();
+    DEFAULT_TIKZ_OPTIONS = {
+      standalone: false,
+      includeLabels: true,
+      includeMetrics: true,
+      colorScheme: "default",
+      scale: 1,
+      nodeDistance: "2cm",
+      levelDistance: "1.5cm"
+    };
+    COLOR_PALETTES2 = {
+      default: {
+        primary: { fill: "blue!20", stroke: "blue!60" },
+        secondary: { fill: "green!20", stroke: "green!60" },
+        tertiary: { fill: "orange!20", stroke: "orange!60" },
+        neutral: { fill: "gray!20", stroke: "gray!60" },
+        success: { fill: "green!30", stroke: "green!70" },
+        warning: { fill: "yellow!30", stroke: "yellow!70" },
+        danger: { fill: "red!20", stroke: "red!60" },
+        info: { fill: "cyan!20", stroke: "cyan!60" }
+      },
+      pastel: {
+        primary: { fill: "blue!10", stroke: "blue!40" },
+        secondary: { fill: "green!10", stroke: "green!40" },
+        tertiary: { fill: "orange!10", stroke: "orange!40" },
+        neutral: { fill: "gray!10", stroke: "gray!40" },
+        success: { fill: "green!15", stroke: "green!50" },
+        warning: { fill: "yellow!15", stroke: "yellow!50" },
+        danger: { fill: "red!10", stroke: "red!40" },
+        info: { fill: "cyan!10", stroke: "cyan!40" }
+      },
+      monochrome: {
+        primary: { fill: "black!10", stroke: "black!60" },
+        secondary: { fill: "black!15", stroke: "black!70" },
+        tertiary: { fill: "black!20", stroke: "black!80" },
+        neutral: { fill: "black!5", stroke: "black!50" },
+        success: { fill: "black!10", stroke: "black!60" },
+        warning: { fill: "black!15", stroke: "black!70" },
+        danger: { fill: "black!20", stroke: "black!80" },
+        info: { fill: "black!10", stroke: "black!60" }
+      }
+    };
+  }
+});
+
 // src/export/visual/causal.ts
 function exportCausalGraph(thought, options) {
   const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
@@ -3315,6 +3713,10 @@ function exportCausalGraph(thought, options) {
       return causalGraphToASCII(thought);
     case "svg":
       return causalGraphToSVG(thought, options);
+    case "graphml":
+      return causalGraphToGraphML(thought, options);
+    case "tikz":
+      return causalGraphToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -3510,11 +3912,107 @@ function causalGraphToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function causalGraphToGraphML(thought, options) {
+  const { includeMetrics = true } = options;
+  if (!thought.causalGraph || !thought.causalGraph.nodes) {
+    const emptyNodes = [
+      { id: "no_data", label: "No causal graph data", type: "message" }
+    ];
+    return generateGraphML(emptyNodes, [], { graphName: "Causal Graph" });
+  }
+  const nodes = thought.causalGraph.nodes.map((node) => ({
+    id: node.id,
+    label: node.name,
+    type: node.type
+  }));
+  const edges = thought.causalGraph.edges.map((edge, index) => {
+    const edgeData = {
+      id: `e${index}`,
+      source: edge.from,
+      target: edge.to
+    };
+    if (includeMetrics && edge.strength !== void 0) {
+      edgeData.metadata = { weight: edge.strength };
+    }
+    return edgeData;
+  });
+  const graphmlOptions = {
+    graphName: "Causal Graph"
+  };
+  return generateGraphML(nodes, edges, graphmlOptions);
+}
+function causalGraphToTikZ(thought, options) {
+  const { includeLabels = true, includeMetrics = true } = options;
+  if (!thought.causalGraph || !thought.causalGraph.nodes) {
+    const emptyNodes = [
+      { id: "no_data", x: 0, y: 0, label: "No causal graph data", shape: "rectangle" }
+    ];
+    return generateTikZ(emptyNodes, [], { title: "Causal Graph" });
+  }
+  const causes = thought.causalGraph.nodes.filter((n) => n.type === "cause");
+  const mediators = thought.causalGraph.nodes.filter((n) => n.type === "mediator");
+  const confounders = thought.causalGraph.nodes.filter((n) => n.type === "confounder");
+  const effects = thought.causalGraph.nodes.filter((n) => n.type === "effect");
+  const nodes = [];
+  causes.forEach((node, index) => {
+    const spacing = 3;
+    const offset = (causes.length - 1) * spacing / 2;
+    nodes.push({
+      id: node.id,
+      x: index * spacing - offset,
+      y: 0,
+      label: includeLabels ? node.name : node.id,
+      shape: "stadium",
+      type: node.type
+    });
+  });
+  const middleNodes = [...mediators, ...confounders];
+  middleNodes.forEach((node, index) => {
+    const spacing = 3;
+    const offset = (middleNodes.length - 1) * spacing / 2;
+    nodes.push({
+      id: node.id,
+      x: index * spacing - offset,
+      y: -2,
+      label: includeLabels ? node.name : node.id,
+      shape: node.type === "confounder" ? "diamond" : "rectangle",
+      type: node.type
+    });
+  });
+  effects.forEach((node, index) => {
+    const spacing = 3;
+    const offset = (effects.length - 1) * spacing / 2;
+    nodes.push({
+      id: node.id,
+      x: index * spacing - offset,
+      y: -4,
+      label: includeLabels ? node.name : node.id,
+      shape: "ellipse",
+      type: node.type
+    });
+  });
+  const edges = thought.causalGraph.edges.map((edge) => {
+    const edgeData = {
+      source: edge.from,
+      target: edge.to
+    };
+    if (includeMetrics && edge.strength !== void 0) {
+      edgeData.label = edge.strength.toFixed(2);
+    }
+    return edgeData;
+  });
+  const tikzOptions = {
+    title: "Causal Graph"
+  };
+  return generateTikZ(nodes, edges, tikzOptions);
+}
 var init_causal = __esm({
   "src/export/visual/causal.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -3530,6 +4028,10 @@ function exportTemporalTimeline(thought, options) {
       return timelineToASCII(thought);
     case "svg":
       return timelineToSVG(thought, options);
+    case "graphml":
+      return timelineToGraphML(thought);
+    case "tikz":
+      return timelineToTikZ(thought);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -3610,6 +4112,32 @@ function timelineToASCII(thought) {
   }
   return ascii;
 }
+function timelineToGraphML(thought, _options) {
+  if (!thought.events || thought.events.length === 0) {
+    return createLinearGraphML([], {
+      graphName: thought.timeline?.name || "Timeline",
+      directed: true
+    });
+  }
+  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const labels = sortedEvents.map((event) => event.name);
+  return createLinearGraphML(labels, {
+    graphName: thought.timeline?.name || "Timeline",
+    directed: true
+  });
+}
+function timelineToTikZ(thought, _options) {
+  if (!thought.events || thought.events.length === 0) {
+    return createLinearTikZ([], {
+      title: thought.timeline?.name || "Timeline"
+    });
+  }
+  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const labels = sortedEvents.map((event) => event.name);
+  return createLinearTikZ(labels, {
+    title: thought.timeline?.name || "Timeline"
+  });
+}
 function timelineToSVG(thought, options) {
   const {
     colorScheme = "default",
@@ -3676,6 +4204,8 @@ var init_temporal = __esm({
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -3691,6 +4221,10 @@ function exportGameTree(thought, options) {
       return gameTreeToASCII(thought);
     case "svg":
       return gameTreeToSVG(thought, options);
+    case "graphml":
+      return gameTreeToGraphML(thought, options);
+    case "tikz":
+      return gameTreeToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -3934,11 +4468,137 @@ function gameTreeToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function gameTreeToGraphML(thought, options) {
+  const { includeLabels = true } = options;
+  if (!thought.game) {
+    const nodes2 = [{ id: "root", label: "No game defined", type: "root" }];
+    return generateGraphML(nodes2, [], { graphName: "Empty Game Tree" });
+  }
+  if (thought.gameTree && thought.gameTree.nodes && thought.gameTree.nodes.length > 0) {
+    const nodes2 = thought.gameTree.nodes.map((node) => ({
+      id: sanitizeId(node.id),
+      label: includeLabels ? node.action || node.id : node.id,
+      type: node.type || "node",
+      metadata: {
+        action: node.action,
+        player: node.playerId
+      }
+    }));
+    const edges = [];
+    let edgeCount = 0;
+    for (const node of thought.gameTree.nodes) {
+      if (node.childNodes && node.childNodes.length > 0) {
+        for (const childId of node.childNodes) {
+          const childNode = thought.gameTree.nodes.find((n) => n.id === childId);
+          edges.push({
+            id: `e${edgeCount++}`,
+            source: sanitizeId(node.id),
+            target: sanitizeId(childId),
+            label: includeLabels && childNode?.action ? childNode.action : void 0,
+            directed: true
+          });
+        }
+      }
+    }
+    return generateGraphML(nodes2, edges, { graphName: thought.game?.name || "Game Tree" });
+  } else if (thought.strategies && thought.strategies.length > 0) {
+    const root = {
+      id: "root",
+      label: "Game",
+      children: thought.strategies.slice(0, 5).map((strategy) => ({
+        id: sanitizeId(strategy.id),
+        label: strategy.name
+      }))
+    };
+    return createTreeGraphML(root, { graphName: thought.game?.name || "Game Tree" });
+  }
+  const nodes = [{ id: "root", label: "No game tree", type: "root" }];
+  return generateGraphML(nodes, [], { graphName: thought.game?.name || "Game Tree" });
+}
+function gameTreeToTikZ(thought, options) {
+  const { includeLabels = true, colorScheme = "default" } = options;
+  if (!thought.game) {
+    const nodes2 = [{ id: "root", label: "No game defined", x: 4, y: 0, type: "root", shape: "rectangle" }];
+    return generateTikZ(nodes2, [], { title: "Empty Game Tree", colorScheme });
+  }
+  if (thought.gameTree && thought.gameTree.nodes && thought.gameTree.nodes.length > 0) {
+    const nodeDepths = /* @__PURE__ */ new Map();
+    const rootNodes = thought.gameTree.nodes.filter((n) => !n.parentNode);
+    const queue = rootNodes.map((n) => ({ nodeId: n.id, depth: 0 }));
+    while (queue.length > 0) {
+      const { nodeId, depth } = queue.shift();
+      nodeDepths.set(nodeId, depth);
+      const node = thought.gameTree.nodes.find((n) => n.id === nodeId);
+      if (node && node.childNodes) {
+        for (const childId of node.childNodes) {
+          queue.push({ nodeId: childId, depth: depth + 1 });
+        }
+      }
+    }
+    const nodesByDepth = /* @__PURE__ */ new Map();
+    for (const node of thought.gameTree.nodes) {
+      const depth = nodeDepths.get(node.id) || 0;
+      if (!nodesByDepth.has(depth)) {
+        nodesByDepth.set(depth, []);
+      }
+      nodesByDepth.get(depth).push(node);
+    }
+    const nodes2 = [];
+    const depths = Array.from(nodesByDepth.keys()).sort((a, b) => a - b);
+    for (const depth of depths) {
+      const nodesAtDepth = nodesByDepth.get(depth);
+      const layerWidth = nodesAtDepth.length * 3;
+      const startX = (8 - layerWidth) / 2 + 1.5;
+      for (let i = 0; i < nodesAtDepth.length; i++) {
+        const node = nodesAtDepth[i];
+        nodes2.push({
+          id: sanitizeId(node.id),
+          label: includeLabels ? node.action || node.id : node.id,
+          x: startX + i * 3,
+          y: -depth * 2,
+          // y decreases by 2 per level
+          type: node.type || "neutral",
+          shape: node.type === "terminal" ? "ellipse" : "rectangle"
+          // Use 'ellipse' for terminal nodes
+        });
+      }
+    }
+    const edges = [];
+    for (const node of thought.gameTree.nodes) {
+      if (node.childNodes && node.childNodes.length > 0) {
+        for (const childId of node.childNodes) {
+          const childNode = thought.gameTree.nodes.find((n) => n.id === childId);
+          edges.push({
+            source: sanitizeId(node.id),
+            target: sanitizeId(childId),
+            label: includeLabels && childNode?.action ? childNode.action : void 0,
+            directed: true
+          });
+        }
+      }
+    }
+    return generateTikZ(nodes2, edges, { title: thought.game?.name || "Game Tree", colorScheme });
+  } else if (thought.strategies && thought.strategies.length > 0) {
+    const root = {
+      id: "root",
+      label: "Game",
+      children: thought.strategies.slice(0, 5).map((strategy) => ({
+        id: sanitizeId(strategy.id),
+        label: strategy.name
+      }))
+    };
+    return createTreeTikZ(root, { title: thought.game?.name || "Game Tree", colorScheme });
+  }
+  const nodes = [{ id: "root", label: "No game tree", x: 4, y: 0, type: "root", shape: "rectangle" }];
+  return generateTikZ(nodes, [], { title: thought.game?.name || "Game Tree", colorScheme });
+}
 var init_game_theory = __esm({
   "src/export/visual/game-theory.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -3954,6 +4614,10 @@ function exportBayesianNetwork(thought, options) {
       return bayesianToASCII(thought);
     case "svg":
       return bayesianToSVG(thought, options);
+    case "graphml":
+      return bayesianToGraphML(thought, options);
+    case "tikz":
+      return bayesianToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -4111,10 +4775,51 @@ function bayesianToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function bayesianToGraphML(thought, options) {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const nodes = [
+    { id: "prior", label: includeLabels ? `Prior: ${thought.prior.probability.toFixed(3)}` : "Prior", type: "prior" },
+    { id: "hypothesis", label: "Hypothesis", type: "hypothesis" },
+    { id: "evidence", label: "Evidence", type: "evidence" },
+    { id: "posterior", label: includeLabels ? `Posterior: ${thought.posterior.probability.toFixed(3)}` : "Posterior", type: "posterior" }
+  ];
+  const edges = [
+    { id: "e1", source: "prior", target: "hypothesis" },
+    { id: "e2", source: "evidence", target: "hypothesis" },
+    { id: "e3", source: "hypothesis", target: "posterior" }
+  ];
+  return generateGraphML(nodes, edges, {
+    graphName: "Bayesian Network",
+    includeLabels,
+    includeMetadata: includeMetrics
+  });
+}
+function bayesianToTikZ(thought, options) {
+  const { includeLabels = true, includeMetrics = true, colorScheme = "default" } = options;
+  const nodes = [
+    { id: "prior", label: includeLabels ? `Prior: ${thought.prior.probability.toFixed(3)}` : "Prior", x: 0, y: 0, type: "primary", shape: "stadium" },
+    { id: "evidence", label: "Evidence", x: 4, y: 0, type: "info", shape: "rectangle" },
+    { id: "hypothesis", label: "Hypothesis", x: 2, y: -2, type: "neutral", shape: "ellipse" },
+    { id: "posterior", label: includeLabels ? `Posterior: ${thought.posterior.probability.toFixed(3)}` : "Posterior", x: 2, y: -4, type: "success", shape: "stadium" }
+  ];
+  const edges = [
+    { source: "prior", target: "hypothesis", directed: true },
+    { source: "evidence", target: "hypothesis", directed: true },
+    { source: "hypothesis", target: "posterior", directed: true }
+  ];
+  return generateTikZ(nodes, edges, {
+    title: "Bayesian Network",
+    includeLabels,
+    includeMetrics,
+    colorScheme
+  });
+}
 var init_bayesian = __esm({
   "src/export/visual/bayesian.ts"() {
     init_esm_shims();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -4130,6 +4835,10 @@ function exportSequentialDependencyGraph(thought, options) {
       return sequentialToASCII(thought);
     case "svg":
       return sequentialToSVG(thought, options);
+    case "graphml":
+      return sequentialToGraphML(thought, options);
+    case "tikz":
+      return sequentialToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -4309,11 +5018,103 @@ function sequentialToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function sequentialToGraphML(thought, options) {
+  const { includeLabels = true } = options;
+  const nodes = [];
+  const edges = [];
+  if (thought.buildUpon && thought.buildUpon.length > 0) {
+    thought.buildUpon.forEach((depId, index) => {
+      nodes.push({
+        id: sanitizeId(depId),
+        label: includeLabels ? `Step ${index + 1}: ${depId}` : sanitizeId(depId),
+        type: "dependency"
+      });
+    });
+    nodes.push({
+      id: sanitizeId(thought.id),
+      label: includeLabels ? `Step ${nodes.length + 1}: ${thought.content.substring(0, 50)}...` : sanitizeId(thought.id),
+      type: "current"
+    });
+    thought.buildUpon.forEach((depId, index) => {
+      const sourceId = sanitizeId(depId);
+      const targetId = index < thought.buildUpon.length - 1 ? sanitizeId(thought.buildUpon[index + 1]) : sanitizeId(thought.id);
+      edges.push({
+        id: `e${index}`,
+        source: sourceId,
+        target: targetId,
+        directed: true
+      });
+    });
+  } else {
+    nodes.push({
+      id: sanitizeId(thought.id),
+      label: includeLabels ? thought.content.substring(0, 100) : sanitizeId(thought.id),
+      type: "current"
+    });
+  }
+  return generateGraphML(nodes, edges, {
+    graphName: "Sequential Dependency Graph",
+    directed: true,
+    includeLabels
+  });
+}
+function sequentialToTikZ(thought, options) {
+  const { includeLabels = true, colorScheme = "default" } = options;
+  const nodes = [];
+  const edges = [];
+  if (thought.buildUpon && thought.buildUpon.length > 0) {
+    thought.buildUpon.forEach((depId, index) => {
+      nodes.push({
+        id: sanitizeId(depId),
+        label: includeLabels ? `Step ${index + 1}` : sanitizeId(depId),
+        x: index * 3,
+        y: 0,
+        type: "success",
+        // Completed steps
+        shape: "rectangle"
+      });
+    });
+    nodes.push({
+      id: sanitizeId(thought.id),
+      label: includeLabels ? `Step ${nodes.length + 1}` : sanitizeId(thought.id),
+      x: nodes.length * 3,
+      y: 0,
+      type: "primary",
+      // Current step
+      shape: "rectangle"
+    });
+    thought.buildUpon.forEach((depId, index) => {
+      const sourceId = sanitizeId(depId);
+      const targetId = index < thought.buildUpon.length - 1 ? sanitizeId(thought.buildUpon[index + 1]) : sanitizeId(thought.id);
+      edges.push({
+        source: sourceId,
+        target: targetId,
+        directed: true
+      });
+    });
+  } else {
+    nodes.push({
+      id: sanitizeId(thought.id),
+      label: includeLabels ? "Current" : sanitizeId(thought.id),
+      x: 0,
+      y: 0,
+      type: "primary",
+      shape: "rectangle"
+    });
+  }
+  return generateTikZ(nodes, edges, {
+    title: "Sequential Dependency Graph",
+    colorScheme,
+    includeLabels
+  });
+}
 var init_sequential = __esm({
   "src/export/visual/sequential.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -4329,6 +5130,10 @@ function exportShannonStageFlow(thought, options) {
       return shannonToASCII(thought);
     case "svg":
       return shannonToSVG(thought, options);
+    case "graphml":
+      return shannonToGraphML(thought, options);
+    case "tikz":
+      return shannonToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -4488,12 +5293,48 @@ function shannonToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function shannonToGraphML(_thought, options) {
+  const { includeLabels = true } = options;
+  const labels = stages.map(
+    (stage) => includeLabels ? stageLabels[stage] : sanitizeId(stage)
+  );
+  return createLinearGraphML(labels, {
+    graphName: "Shannon Stage Flow",
+    directed: true
+  });
+}
+function shannonToTikZ(thought, options) {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const nodes = stages.map((stage, i) => ({
+    id: sanitizeId(stage),
+    label: includeLabels ? stageLabels[stage] : sanitizeId(stage),
+    x: i * 3,
+    y: 0,
+    shape: stage === thought.stage ? "stadium" : "rectangle",
+    type: stage === thought.stage ? "primary" : "neutral"
+  }));
+  const edges = [];
+  for (let i = 0; i < stages.length - 1; i++) {
+    edges.push({
+      source: sanitizeId(stages[i]),
+      target: sanitizeId(stages[i + 1]),
+      label: ""
+    });
+  }
+  return generateTikZ(nodes, edges, {
+    title: "Shannon Stage Flow",
+    includeLabels,
+    includeMetrics
+  });
+}
 var stages, stageLabels;
 var init_shannon = __esm({
   "src/export/visual/shannon.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
     stages = [
       "problem_definition",
       "constraints",
@@ -4523,6 +5364,10 @@ function exportAbductiveHypotheses(thought, options) {
       return abductiveToASCII(thought);
     case "svg":
       return abductiveToSVG(thought, options);
+    case "graphml":
+      return abductiveToGraphML(thought, options);
+    case "tikz":
+      return abductiveToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -4672,11 +5517,110 @@ function abductiveToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function abductiveToGraphML(thought, options) {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const nodes = thought.hypotheses.map((hypothesis) => ({
+    id: sanitizeId(hypothesis.id),
+    label: includeLabels ? hypothesis.explanation.substring(0, 50) + "..." : hypothesis.id,
+    type: "hypothesis",
+    metadata: includeMetrics ? {
+      description: hypothesis.explanation,
+      score: hypothesis.score,
+      assumptions: hypothesis.assumptions.join(", ")
+    } : void 0
+  }));
+  if (thought.observations && thought.observations.length > 0) {
+    for (const obs of thought.observations) {
+      nodes.push({
+        id: sanitizeId(`obs_${obs.id}`),
+        label: includeLabels ? obs.description : `obs_${obs.id}`,
+        type: "observation",
+        metadata: includeMetrics ? {
+          description: obs.description,
+          confidence: obs.confidence
+        } : void 0
+      });
+    }
+  }
+  const edges = [];
+  let edgeId = 0;
+  if (thought.observations && thought.observations.length > 0) {
+    for (const obs of thought.observations) {
+      for (const hypothesis of thought.hypotheses) {
+        edges.push({
+          id: `e${edgeId++}`,
+          source: sanitizeId(`obs_${obs.id}`),
+          target: sanitizeId(hypothesis.id),
+          metadata: includeMetrics ? { weight: obs.confidence } : void 0
+        });
+      }
+    }
+  }
+  return generateGraphML(nodes, edges, {
+    graphName: "Abductive Hypotheses",
+    includeLabels,
+    includeMetadata: includeMetrics
+  });
+}
+function abductiveToTikZ(thought, options) {
+  const { includeLabels = true, includeMetrics = true, colorScheme = "default" } = options;
+  const nodes = [];
+  const edges = [];
+  const hypCount = thought.hypotheses.length;
+  const spacing = 3;
+  const totalWidth = (hypCount - 1) * spacing;
+  const startX = 4 - totalWidth / 2;
+  for (let i = 0; i < thought.hypotheses.length; i++) {
+    const hypothesis = thought.hypotheses[i];
+    const isBest = thought.bestExplanation?.id === hypothesis.id;
+    const label = includeLabels ? hypothesis.explanation.substring(0, 30) + "..." : hypothesis.id;
+    const scoreLabel = includeMetrics ? ` (${hypothesis.score.toFixed(2)})` : "";
+    nodes.push({
+      id: sanitizeId(hypothesis.id),
+      label: label + scoreLabel,
+      x: startX + i * spacing,
+      y: -2,
+      type: isBest ? "success" : "hypothesis",
+      shape: "ellipse"
+    });
+  }
+  if (thought.observations && thought.observations.length > 0) {
+    const obsCount = thought.observations.length;
+    const obsSpacing = Math.min(spacing, totalWidth / Math.max(1, obsCount - 1));
+    const obsStartX = 4 - (obsCount - 1) * obsSpacing / 2;
+    for (let i = 0; i < thought.observations.length; i++) {
+      const obs = thought.observations[i];
+      nodes.push({
+        id: sanitizeId(`obs_${obs.id}`),
+        label: includeLabels ? obs.description.substring(0, 30) + "..." : `obs_${obs.id}`,
+        x: obsStartX + i * obsSpacing,
+        y: 0,
+        type: "info",
+        shape: "rectangle"
+      });
+      for (const hypothesis of thought.hypotheses) {
+        edges.push({
+          source: sanitizeId(`obs_${obs.id}`),
+          target: sanitizeId(hypothesis.id),
+          directed: true
+        });
+      }
+    }
+  }
+  return generateTikZ(nodes, edges, {
+    title: "Abductive Hypotheses",
+    includeLabels,
+    includeMetrics,
+    colorScheme
+  });
+}
 var init_abductive = __esm({
   "src/export/visual/abductive.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -4692,6 +5636,10 @@ function exportCounterfactualScenarios(thought, options) {
       return counterfactualToASCII(thought);
     case "svg":
       return counterfactualToSVG(thought, options);
+    case "graphml":
+      return counterfactualToGraphML(thought, options);
+    case "tikz":
+      return counterfactualToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -4874,11 +5822,119 @@ function counterfactualToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function counterfactualToGraphML(thought, options) {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const nodes = [];
+  nodes.push({
+    id: "intervention",
+    label: includeLabels ? thought.interventionPoint.description : "intervention",
+    type: "intervention",
+    metadata: {
+      timing: thought.interventionPoint.timing,
+      feasibility: thought.interventionPoint.feasibility
+    }
+  });
+  nodes.push({
+    id: thought.actual.id,
+    label: includeLabels ? `Actual: ${thought.actual.name}` : thought.actual.id,
+    type: "actual",
+    metadata: {
+      description: thought.actual.description
+    }
+  });
+  for (const scenario of thought.counterfactuals) {
+    nodes.push({
+      id: scenario.id,
+      label: includeLabels ? `CF: ${scenario.name}` : scenario.id,
+      type: "counterfactual",
+      metadata: {
+        description: scenario.description,
+        likelihood: scenario.likelihood
+      }
+    });
+  }
+  const edges = [];
+  edges.push({
+    id: "e_intervention_actual",
+    source: "intervention",
+    target: thought.actual.id,
+    label: "no change"
+  });
+  for (let i = 0; i < thought.counterfactuals.length; i++) {
+    const scenario = thought.counterfactuals[i];
+    edges.push({
+      id: `e_intervention_cf${i}`,
+      source: "intervention",
+      target: scenario.id,
+      label: "intervene",
+      metadata: includeMetrics && scenario.likelihood !== void 0 ? { weight: scenario.likelihood } : void 0
+    });
+  }
+  const graphmlOptions = {
+    graphName: "Counterfactual Scenarios"
+  };
+  return generateGraphML(nodes, edges, graphmlOptions);
+}
+function counterfactualToTikZ(thought, options) {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const nodes = [];
+  nodes.push({
+    id: "intervention",
+    label: includeLabels ? thought.interventionPoint.description : "intervention",
+    x: 4,
+    y: 0,
+    type: "intervention",
+    shape: "diamond"
+  });
+  nodes.push({
+    id: thought.actual.id,
+    label: includeLabels ? `Actual: ${thought.actual.name}` : thought.actual.id,
+    x: 2,
+    y: -2,
+    type: "actual",
+    shape: "rectangle"
+  });
+  const cfCount = thought.counterfactuals.length;
+  const cfSpacing = 1.5;
+  const cfStartY = -2;
+  thought.counterfactuals.forEach((scenario, index) => {
+    const yOffset = (cfCount - 1) * cfSpacing / 2;
+    nodes.push({
+      id: scenario.id,
+      label: includeLabels ? `CF: ${scenario.name}` : scenario.id,
+      x: 6,
+      y: cfStartY - index * cfSpacing + yOffset,
+      type: "counterfactual",
+      shape: "ellipse"
+    });
+  });
+  const edges = [];
+  edges.push({
+    source: "intervention",
+    target: thought.actual.id,
+    label: "no change",
+    directed: true
+  });
+  for (const scenario of thought.counterfactuals) {
+    edges.push({
+      source: "intervention",
+      target: scenario.id,
+      label: includeMetrics && scenario.likelihood !== void 0 ? scenario.likelihood.toFixed(2) : "intervene",
+      directed: true
+    });
+  }
+  const tikzOptions = {
+    title: "Counterfactual Scenarios"
+  };
+  return generateTikZ(nodes, edges, tikzOptions);
+}
 var init_counterfactual = __esm({
   "src/export/visual/counterfactual.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -4894,6 +5950,10 @@ function exportAnalogicalMapping(thought, options) {
       return analogicalToASCII(thought);
     case "svg":
       return analogicalToSVG(thought, options);
+    case "graphml":
+      return analogicalToGraphML(thought, options);
+    case "tikz":
+      return analogicalToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -5085,11 +6145,123 @@ function analogicalToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function analogicalToGraphML(thought, options) {
+  const { includeMetrics = true } = options;
+  const nodes = [];
+  for (const entity of thought.sourceDomain.entities) {
+    nodes.push({
+      id: "src_" + entity.id,
+      label: entity.name,
+      type: "source",
+      metadata: {
+        description: entity.description,
+        domain: thought.sourceDomain.name
+      }
+    });
+  }
+  for (const entity of thought.targetDomain.entities) {
+    nodes.push({
+      id: "tgt_" + entity.id,
+      label: entity.name,
+      type: "target",
+      metadata: {
+        description: entity.description,
+        domain: thought.targetDomain.name
+      }
+    });
+  }
+  const edges = thought.mapping.map((mapping, index) => {
+    const edge = {
+      id: `mapping_${index}`,
+      source: "src_" + mapping.sourceEntityId,
+      target: "tgt_" + mapping.targetEntityId
+    };
+    if (includeMetrics) {
+      edge.metadata = {
+        weight: mapping.confidence,
+        type: "mapping"
+      };
+      edge.label = mapping.confidence.toFixed(2);
+    }
+    return edge;
+  });
+  const graphmlOptions = {
+    graphName: "Analogical Mapping"
+  };
+  return generateGraphML(nodes, edges, graphmlOptions);
+}
+function analogicalToTikZ(thought, options) {
+  const { includeLabels = true, includeMetrics = true, colorScheme = "default" } = options;
+  const nodes = [];
+  thought.sourceDomain.entities.forEach((entity, index) => {
+    nodes.push({
+      id: "src_" + entity.id,
+      x: -3,
+      y: -index * 1.5,
+      label: includeLabels ? entity.name : entity.id,
+      shape: "rectangle",
+      type: "tertiary"
+    });
+  });
+  thought.targetDomain.entities.forEach((entity, index) => {
+    nodes.push({
+      id: "tgt_" + entity.id,
+      x: 3,
+      y: -index * 1.5,
+      label: includeLabels ? entity.name : entity.id,
+      shape: "rectangle",
+      type: "primary"
+    });
+  });
+  const edges = thought.mapping.map((mapping) => {
+    const edge = {
+      source: "src_" + mapping.sourceEntityId,
+      target: "tgt_" + mapping.targetEntityId,
+      style: "dashed"
+    };
+    if (includeMetrics) {
+      edge.label = mapping.confidence.toFixed(2);
+    }
+    return edge;
+  });
+  const tikzOptions = {
+    title: "Analogical Mapping",
+    colorScheme,
+    includeLabels,
+    includeMetrics
+  };
+  let tikz = generateTikZ(nodes, edges, tikzOptions);
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Analogy Strength", value: thought.analogyStrength.toFixed(2) },
+      { label: "Mappings", value: thought.mapping.length.toString() },
+      { label: "Source Entities", value: thought.sourceDomain.entities.length.toString() },
+      { label: "Target Entities", value: thought.targetDomain.entities.length.toString() }
+    ];
+    tikz = tikz.replace(
+      /\\end\{tikzpicture\}/,
+      renderTikZMetrics(6, -6, metrics) + "\n\\end{tikzpicture}"
+    );
+  }
+  const sourceColors = getTikZColor("tertiary", colorScheme);
+  const targetColors = getTikZColor("primary", colorScheme);
+  const legendItems = [
+    { label: "Source Domain", color: sourceColors },
+    { label: "Target Domain", color: targetColors }
+  ];
+  tikz = tikz.replace(
+    /\\end\{tikzpicture\}/,
+    renderTikZLegend(-3, -6, legendItems) + "\n\\end{tikzpicture}"
+  );
+  return tikz;
+}
 var init_analogical = __esm({
   "src/export/visual/analogical.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -5105,6 +6277,10 @@ function exportEvidentialBeliefs(thought, options) {
       return evidentialToASCII(thought);
     case "svg":
       return evidentialToSVG(thought, options);
+    case "graphml":
+      return evidentialToGraphML(thought, options);
+    case "tikz":
+      return evidentialToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -5270,11 +6446,167 @@ function evidentialToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function evidentialToGraphML(thought, options) {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const nodes = [];
+  const edges = [];
+  let edgeId = 0;
+  if (thought.evidence && thought.evidence.length > 0) {
+    for (const evidence of thought.evidence) {
+      nodes.push({
+        id: evidence.id,
+        label: includeLabels ? evidence.description : evidence.id,
+        type: "evidence",
+        metadata: {
+          source: evidence.source,
+          reliability: evidence.reliability,
+          description: evidence.description
+        }
+      });
+    }
+  }
+  if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
+    for (const belief of thought.beliefFunctions) {
+      const label = includeLabels ? `Belief: ${belief.source}` : belief.id;
+      nodes.push({
+        id: belief.id,
+        label,
+        type: "belief",
+        metadata: belief.conflictMass !== void 0 ? { conflictMass: belief.conflictMass } : void 0
+      });
+      if (thought.evidence && thought.evidence.length > 0) {
+        const sourceEvidence = thought.evidence.find((e) => e.id === belief.source);
+        if (sourceEvidence) {
+          edges.push({
+            id: `e${edgeId++}`,
+            source: sourceEvidence.id,
+            target: belief.id,
+            label: includeMetrics ? `strength: ${sourceEvidence.reliability.toFixed(3)}` : void 0,
+            metadata: includeMetrics ? { weight: sourceEvidence.reliability } : void 0
+          });
+        }
+      }
+    }
+  }
+  if (nodes.length === 0 && thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
+    nodes.push({
+      id: "frame",
+      label: "Frame of Discernment",
+      type: "frame"
+    });
+    for (const hypothesis of thought.frameOfDiscernment) {
+      const hypId = sanitizeId(hypothesis);
+      nodes.push({
+        id: hypId,
+        label: includeLabels ? hypothesis : hypId,
+        type: "hypothesis"
+      });
+      edges.push({
+        id: `e${edgeId++}`,
+        source: "frame",
+        target: hypId
+      });
+    }
+  }
+  return generateGraphML(nodes, edges, {
+    graphName: "Evidential Beliefs",
+    includeLabels,
+    includeMetadata: includeMetrics
+  });
+}
+function evidentialToTikZ(thought, options) {
+  const { includeLabels = true, includeMetrics = true, colorScheme = "default" } = options;
+  const nodes = [];
+  const edges = [];
+  if (thought.evidence && thought.evidence.length > 0) {
+    const evidenceCount = thought.evidence.length;
+    const evidenceSpacing = Math.min(3, 8 / evidenceCount);
+    const startX = (8 - (evidenceCount - 1) * evidenceSpacing) / 2;
+    for (let i = 0; i < thought.evidence.length; i++) {
+      const evidence = thought.evidence[i];
+      const label = includeLabels ? `${evidence.description.substring(0, 20)}${evidence.description.length > 20 ? "..." : ""}` : evidence.id;
+      nodes.push({
+        id: evidence.id,
+        label,
+        x: startX + i * evidenceSpacing,
+        y: 0,
+        type: "evidence",
+        shape: "rectangle"
+      });
+    }
+  }
+  if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
+    const beliefCount = thought.beliefFunctions.length;
+    const beliefSpacing = Math.min(3, 8 / beliefCount);
+    const startX = (8 - (beliefCount - 1) * beliefSpacing) / 2;
+    for (let i = 0; i < thought.beliefFunctions.length; i++) {
+      const belief = thought.beliefFunctions[i];
+      const label = includeLabels ? `Belief: ${belief.source}` : belief.id;
+      nodes.push({
+        id: belief.id,
+        label,
+        x: startX + i * beliefSpacing,
+        y: -3,
+        type: "primary",
+        shape: "ellipse"
+      });
+      if (thought.evidence && thought.evidence.length > 0) {
+        const sourceEvidence = thought.evidence.find((e) => e.id === belief.source);
+        if (sourceEvidence) {
+          edges.push({
+            source: sourceEvidence.id,
+            target: belief.id,
+            label: includeMetrics ? sourceEvidence.reliability.toFixed(3) : void 0,
+            directed: true
+          });
+        }
+      }
+    }
+  }
+  if (nodes.length === 0 && thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
+    nodes.push({
+      id: "frame",
+      label: "Frame of Discernment",
+      x: 4,
+      y: 0,
+      type: "warning",
+      shape: "ellipse"
+    });
+    const hypCount = thought.frameOfDiscernment.length;
+    const hypSpacing = Math.min(2.5, 8 / hypCount);
+    const startX = (8 - (hypCount - 1) * hypSpacing) / 2;
+    for (let i = 0; i < thought.frameOfDiscernment.length; i++) {
+      const hypothesis = thought.frameOfDiscernment[i];
+      const hypId = sanitizeId(hypothesis);
+      nodes.push({
+        id: hypId,
+        label: includeLabels ? hypothesis : hypId,
+        x: startX + i * hypSpacing,
+        y: -2.5,
+        type: "info",
+        shape: "rectangle"
+      });
+      edges.push({
+        source: "frame",
+        target: hypId,
+        directed: true
+      });
+    }
+  }
+  return generateTikZ(nodes, edges, {
+    title: "Evidential Beliefs",
+    includeLabels,
+    includeMetrics,
+    colorScheme
+  });
+}
 var init_evidential = __esm({
   "src/export/visual/evidential.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -5290,6 +6622,10 @@ function exportFirstPrinciplesDerivation(thought, options) {
       return firstPrinciplesToASCII(thought);
     case "svg":
       return firstPrinciplesToSVG(thought, options);
+    case "graphml":
+      return firstPrinciplesToGraphML(thought, options);
+    case "tikz":
+      return firstPrinciplesToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -5615,11 +6951,159 @@ function firstPrinciplesToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function firstPrinciplesToGraphML(thought, options) {
+  const { includeLabels = true } = options;
+  const nodes = [];
+  const edges = [];
+  let edgeCount = 0;
+  nodes.push({
+    id: "question",
+    label: includeLabels ? `Question: ${thought.question}` : "Question",
+    type: "question"
+  });
+  for (const principle of thought.principles) {
+    const principleId = sanitizeId(principle.id);
+    nodes.push({
+      id: principleId,
+      label: includeLabels ? `${principle.type.toUpperCase()}: ${principle.statement.substring(0, 60)}...` : principleId,
+      type: principle.type,
+      metadata: {
+        justification: principle.justification,
+        confidence: principle.confidence
+      }
+    });
+    if (principle.dependsOn) {
+      for (const depId of principle.dependsOn) {
+        const sanitizedDepId = sanitizeId(depId);
+        edges.push({
+          id: `e${edgeCount++}`,
+          source: sanitizedDepId,
+          target: principleId,
+          label: "depends on",
+          directed: true
+        });
+      }
+    }
+  }
+  for (const step of thought.derivationSteps) {
+    const stepId = `Step${step.stepNumber}`;
+    nodes.push({
+      id: stepId,
+      label: includeLabels ? `Step ${step.stepNumber}: ${step.inference.substring(0, 60)}...` : stepId,
+      type: "derivation_step",
+      metadata: {
+        logicalForm: step.logicalForm,
+        confidence: step.confidence
+      }
+    });
+    const principleId = sanitizeId(step.principle);
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: principleId,
+      target: stepId,
+      label: "applies",
+      directed: true
+    });
+  }
+  nodes.push({
+    id: "conclusion",
+    label: includeLabels ? `Conclusion: ${thought.conclusion.statement.substring(0, 60)}...` : "Conclusion",
+    type: "conclusion",
+    metadata: {
+      certainty: thought.conclusion.certainty,
+      limitations: thought.conclusion.limitations
+    }
+  });
+  for (const stepNum of thought.conclusion.derivationChain) {
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: `Step${stepNum}`,
+      target: "conclusion",
+      directed: true
+    });
+  }
+  return generateGraphML(nodes, edges, {
+    graphName: "First Principles Derivation",
+    directed: true,
+    includeLabels
+  });
+}
+function firstPrinciplesToTikZ(thought, options) {
+  const { includeLabels = true, colorScheme = "default" } = options;
+  const nodes = [];
+  const edges = [];
+  const principleCount = thought.principles.length;
+  thought.principles.forEach((principle, index) => {
+    const principleId = sanitizeId(principle.id);
+    nodes.push({
+      id: principleId,
+      label: includeLabels ? `${principle.type}: ${principle.statement.substring(0, 25)}...` : principleId,
+      x: index * 3,
+      y: 0,
+      type: principle.type === "axiom" ? "primary" : "secondary",
+      shape: "stadium"
+    });
+    if (principle.dependsOn) {
+      for (const depId of principle.dependsOn) {
+        const sanitizedDepId = sanitizeId(depId);
+        edges.push({
+          source: sanitizedDepId,
+          target: principleId,
+          directed: true,
+          style: "dashed"
+        });
+      }
+    }
+  });
+  const stepY = -2;
+  thought.derivationSteps.forEach((step, index) => {
+    const stepId = `Step${step.stepNumber}`;
+    const principleId = sanitizeId(step.principle);
+    nodes.push({
+      id: stepId,
+      label: includeLabels ? `Step ${step.stepNumber}` : stepId,
+      x: index * 3,
+      y: stepY,
+      type: "neutral",
+      shape: "rectangle"
+    });
+    edges.push({
+      source: principleId,
+      target: stepId,
+      label: "applies",
+      directed: true,
+      style: "dashed"
+    });
+  });
+  const conclusionX = (principleCount - 1) * 3 / 2;
+  nodes.push({
+    id: "conclusion",
+    label: includeLabels ? "Conclusion" : "C",
+    x: conclusionX,
+    y: -4,
+    type: "success",
+    shape: "stadium"
+  });
+  for (const stepNum of thought.conclusion.derivationChain) {
+    edges.push({
+      source: `Step${stepNum}`,
+      target: "conclusion",
+      directed: true
+    });
+  }
+  return generateTikZ(nodes, edges, {
+    title: "First Principles Derivation",
+    colorScheme,
+    includeLabels
+  });
+}
 var init_first_principles = __esm({
   "src/export/visual/first-principles.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -5635,6 +7119,10 @@ function exportSystemsThinkingCausalLoops(thought, options) {
       return systemsThinkingToASCII(thought);
     case "svg":
       return systemsThinkingToSVG(thought, options);
+    case "graphml":
+      return systemsThinkingToGraphML(thought, options);
+    case "tikz":
+      return systemsThinkingToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -5831,11 +7319,110 @@ function systemsThinkingToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function systemsThinkingToGraphML(thought, options) {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const nodes = [];
+  const edges = [];
+  if (thought.components && thought.components.length > 0) {
+    for (const component of thought.components) {
+      nodes.push({
+        id: sanitizeId(component.id),
+        label: component.name,
+        type: component.type,
+        metadata: {
+          description: component.description,
+          unit: component.unit,
+          initialValue: component.initialValue
+        }
+      });
+    }
+  }
+  if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+    let edgeCount = 0;
+    for (const loop of thought.feedbackLoops) {
+      const loopComponents = loop.components;
+      for (let i = 0; i < loopComponents.length; i++) {
+        const fromId = sanitizeId(loopComponents[i]);
+        const toId = sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
+        const label = includeLabels && includeMetrics ? `${loop.type} (${loop.strength.toFixed(2)})` : includeLabels ? loop.type : void 0;
+        edges.push({
+          id: `e${edgeCount++}`,
+          source: fromId,
+          target: toId,
+          label,
+          directed: true,
+          metadata: {
+            type: loop.type,
+            weight: loop.strength,
+            polarity: loop.polarity,
+            loopName: loop.name
+          }
+        });
+      }
+    }
+  }
+  return generateGraphML(nodes, edges, {
+    graphName: "Systems Thinking Causal Loops",
+    directed: true,
+    includeLabels,
+    includeMetadata: includeMetrics
+  });
+}
+function systemsThinkingToTikZ(thought, options) {
+  const { colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const nodes = [];
+  const edges = [];
+  if (thought.components && thought.components.length > 0) {
+    const numComponents = thought.components.length;
+    const radius = 4;
+    thought.components.forEach((component, index) => {
+      const angle = 2 * Math.PI * index / numComponents;
+      const x = 4 + radius * Math.cos(angle - Math.PI / 2);
+      const y = -2 + radius * Math.sin(angle - Math.PI / 2);
+      nodes.push({
+        id: sanitizeId(component.id),
+        label: component.name,
+        x,
+        y,
+        type: component.type === "stock" ? "primary" : "secondary",
+        shape: component.type === "stock" ? "rectangle" : "ellipse"
+      });
+    });
+  }
+  if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+    for (const loop of thought.feedbackLoops) {
+      const loopComponents = loop.components;
+      for (let i = 0; i < loopComponents.length; i++) {
+        const fromId = sanitizeId(loopComponents[i]);
+        const toId = sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
+        const label = includeLabels && includeMetrics ? `${loop.type[0].toUpperCase()} (${loop.strength.toFixed(2)})` : includeLabels ? loop.type[0].toUpperCase() : void 0;
+        const style = loop.type === "reinforcing" ? "solid" : "dashed";
+        const bend = loop.type === "reinforcing" ? "left" : "right";
+        edges.push({
+          source: fromId,
+          target: toId,
+          label,
+          style,
+          directed: true,
+          bend
+        });
+      }
+    }
+  }
+  return generateTikZ(nodes, edges, {
+    title: "Systems Thinking Causal Loops",
+    colorScheme,
+    includeLabels,
+    includeMetrics
+  });
+}
 var init_systems_thinking = __esm({
   "src/export/visual/systems-thinking.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -5851,6 +7438,10 @@ function exportScientificMethodExperiment(thought, options) {
       return scientificMethodToASCII(thought);
     case "svg":
       return scientificMethodToSVG(thought, options);
+    case "graphml":
+      return scientificMethodToGraphML(thought, options);
+    case "tikz":
+      return scientificMethodToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -6209,11 +7800,171 @@ function scientificMethodToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function scientificMethodToGraphML(thought, options) {
+  const { includeLabels = true } = options;
+  const nodes = [];
+  const edges = [];
+  let edgeIndex = 0;
+  const stages2 = [];
+  if (thought.researchQuestion) {
+    stages2.push({
+      id: "RQ",
+      label: includeLabels ? `Research Question: ${thought.researchQuestion.question.substring(0, 60)}...` : "Research Question",
+      type: "question",
+      exists: true
+    });
+  }
+  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+    const hypLabel = includeLabels ? `Hypothesis: ${thought.scientificHypotheses[0].statement.substring(0, 60)}...` : "Hypothesis";
+    stages2.push({
+      id: "Hypothesis",
+      label: hypLabel,
+      type: "hypothesis",
+      exists: true
+    });
+  }
+  if (thought.experiment) {
+    stages2.push({
+      id: "Experiment",
+      label: includeLabels ? `Experiment: ${thought.experiment.design}` : "Experiment",
+      type: "experiment",
+      exists: true
+    });
+  }
+  if (thought.data) {
+    const sampleSize = thought.experiment?.sampleSize || 0;
+    stages2.push({
+      id: "Data",
+      label: includeLabels ? `Data Collection: ${sampleSize} samples` : "Data Collection",
+      type: "data",
+      exists: true
+    });
+  }
+  if (thought.analysis) {
+    stages2.push({
+      id: "Analysis",
+      label: "Statistical Analysis",
+      type: "analysis",
+      exists: true
+    });
+  }
+  if (thought.conclusion) {
+    const confLabel = thought.conclusion.confidence ? ` (confidence: ${thought.conclusion.confidence.toFixed(2)})` : "";
+    stages2.push({
+      id: "Conclusion",
+      label: includeLabels ? `Conclusion: ${thought.conclusion.statement.substring(0, 60)}...${confLabel}` : "Conclusion",
+      type: "conclusion",
+      exists: true
+    });
+  }
+  for (const stage of stages2) {
+    nodes.push({
+      id: stage.id,
+      label: stage.label,
+      type: stage.type
+    });
+  }
+  for (let i = 0; i < stages2.length - 1; i++) {
+    edges.push({
+      id: `e${edgeIndex++}`,
+      source: stages2[i].id,
+      target: stages2[i + 1].id,
+      directed: true
+    });
+  }
+  return generateGraphML(nodes, edges, {
+    graphName: "Scientific Method Experiment",
+    directed: true,
+    includeLabels
+  });
+}
+function scientificMethodToTikZ(thought, options) {
+  const { includeLabels = true, colorScheme = "default" } = options;
+  const nodes = [];
+  const edges = [];
+  let xPosition = 0;
+  const xSpacing = 3;
+  const stages2 = [];
+  if (thought.researchQuestion) {
+    stages2.push({
+      id: "RQ",
+      label: includeLabels ? "Research\nQuestion" : "RQ",
+      type: "tertiary",
+      shape: "ellipse"
+    });
+  }
+  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+    stages2.push({
+      id: "Hypothesis",
+      label: includeLabels ? `Hypothesis
+(${thought.scientificHypotheses.length})` : "H",
+      type: "info",
+      shape: "rectangle"
+    });
+  }
+  if (thought.experiment) {
+    stages2.push({
+      id: "Experiment",
+      label: "Experiment",
+      type: "neutral",
+      shape: "rectangle"
+    });
+  }
+  if (thought.data) {
+    stages2.push({
+      id: "Data",
+      label: "Data\nCollection",
+      type: "neutral",
+      shape: "rectangle"
+    });
+  }
+  if (thought.analysis) {
+    stages2.push({
+      id: "Analysis",
+      label: "Statistical\nAnalysis",
+      type: "primary",
+      shape: "rectangle"
+    });
+  }
+  if (thought.conclusion) {
+    stages2.push({
+      id: "Conclusion",
+      label: "Conclusion",
+      type: "success",
+      shape: "stadium"
+    });
+  }
+  for (const stage of stages2) {
+    nodes.push({
+      id: stage.id,
+      label: stage.label,
+      x: xPosition,
+      y: 0,
+      type: stage.type,
+      shape: stage.shape || "rectangle"
+    });
+    xPosition += xSpacing;
+  }
+  for (let i = 0; i < stages2.length - 1; i++) {
+    edges.push({
+      source: stages2[i].id,
+      target: stages2[i + 1].id,
+      directed: true
+    });
+  }
+  return generateTikZ(nodes, edges, {
+    title: "Scientific Method Experiment",
+    colorScheme,
+    includeLabels
+  });
+}
 var init_scientific_method = __esm({
   "src/export/visual/scientific-method.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -6229,6 +7980,10 @@ function exportOptimizationSolution(thought, options) {
       return optimizationToASCII(thought);
     case "svg":
       return optimizationToSVG(thought, options);
+    case "graphml":
+      return optimizationToGraphML(thought, options);
+    case "tikz":
+      return optimizationToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -6526,11 +8281,158 @@ function optimizationToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function optimizationToGraphML(thought, options) {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const nodes = [];
+  const edges = [];
+  let edgeCount = 0;
+  if (thought.objectives && thought.objectives.length > 0) {
+    for (const objective of thought.objectives) {
+      nodes.push({
+        id: sanitizeId(objective.id),
+        label: includeLabels ? `${objective.type}: ${objective.name}` : objective.id,
+        type: "objective",
+        metadata: {
+          description: objective.formula,
+          objectiveType: objective.type
+        }
+      });
+    }
+  }
+  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+    for (const constraint of thought.optimizationConstraints) {
+      nodes.push({
+        id: sanitizeId(constraint.id),
+        label: includeLabels ? constraint.name : constraint.id,
+        type: "constraint",
+        metadata: {
+          description: constraint.formula,
+          constraintType: constraint.type
+        }
+      });
+      if (thought.objectives) {
+        for (const objective of thought.objectives) {
+          edges.push({
+            id: `e${edgeCount++}`,
+            source: sanitizeId(constraint.id),
+            target: sanitizeId(objective.id),
+            label: "constrains"
+          });
+        }
+      }
+    }
+  }
+  if (thought.solution) {
+    nodes.push({
+      id: "solution",
+      label: includeMetrics && thought.solution.quality ? `Solution (quality: ${thought.solution.quality.toFixed(2)})` : "Solution",
+      type: "solution",
+      metadata: {
+        status: thought.solution.status,
+        optimalValue: thought.solution.optimalValue,
+        quality: thought.solution.quality
+      }
+    });
+    if (thought.objectives) {
+      for (const objective of thought.objectives) {
+        edges.push({
+          id: `e${edgeCount++}`,
+          source: sanitizeId(objective.id),
+          target: "solution",
+          label: "optimizes"
+        });
+      }
+    }
+  }
+  return generateGraphML(nodes, edges, {
+    graphName: "Optimization Solution",
+    includeLabels,
+    includeMetadata: includeMetrics
+  });
+}
+function optimizationToTikZ(thought, options) {
+  const { colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const nodes = [];
+  const edges = [];
+  let yOffset = 0;
+  if (thought.objectives && thought.objectives.length > 0) {
+    const startX = thought.objectives.length > 1 ? 0 : 4;
+    const spacing = thought.objectives.length > 1 ? 8 / thought.objectives.length : 0;
+    for (let i = 0; i < thought.objectives.length; i++) {
+      const objective = thought.objectives[i];
+      const x = thought.objectives.length === 1 ? startX : startX + i * spacing + spacing / 2;
+      nodes.push({
+        id: sanitizeId(objective.id),
+        label: includeLabels ? `${objective.type}: ${objective.name}` : objective.id,
+        x,
+        y: yOffset,
+        type: "primary",
+        shape: "rectangle"
+      });
+    }
+    yOffset -= 2;
+  }
+  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+    const startX = thought.optimizationConstraints.length > 1 ? 0 : 4;
+    const spacing = thought.optimizationConstraints.length > 1 ? 8 / thought.optimizationConstraints.length : 0;
+    for (let i = 0; i < thought.optimizationConstraints.length; i++) {
+      const constraint = thought.optimizationConstraints[i];
+      const x = thought.optimizationConstraints.length === 1 ? startX : startX + i * spacing + spacing / 2;
+      const constraintId = sanitizeId(constraint.id);
+      nodes.push({
+        id: constraintId,
+        label: includeLabels ? constraint.name : constraint.id,
+        x,
+        y: yOffset,
+        type: "warning",
+        shape: "diamond"
+      });
+      if (thought.objectives) {
+        for (const objective of thought.objectives) {
+          edges.push({
+            source: constraintId,
+            target: sanitizeId(objective.id),
+            directed: true
+          });
+        }
+      }
+    }
+    yOffset -= 2;
+  }
+  if (thought.solution) {
+    const solutionLabel = includeMetrics && thought.solution.quality ? `Solution (${thought.solution.quality.toFixed(2)})` : "Solution";
+    nodes.push({
+      id: "solution",
+      label: solutionLabel,
+      x: 4,
+      y: yOffset,
+      type: "success",
+      shape: "ellipse"
+    });
+    if (thought.objectives) {
+      for (const objective of thought.objectives) {
+        edges.push({
+          source: sanitizeId(objective.id),
+          target: "solution",
+          directed: true
+        });
+      }
+    }
+  }
+  return generateTikZ(nodes, edges, {
+    title: "Optimization Solution",
+    colorScheme,
+    includeLabels,
+    includeMetrics
+  });
+}
 var init_optimization = __esm({
   "src/export/visual/optimization.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -6546,6 +8448,10 @@ function exportFormalLogicProof(thought, options) {
       return formalLogicToASCII(thought);
     case "svg":
       return formalLogicToSVG(thought, options);
+    case "graphml":
+      return formalLogicToGraphML(thought, options);
+    case "tikz":
+      return formalLogicToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -6854,11 +8760,203 @@ function formalLogicToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function formalLogicToGraphML(thought, options) {
+  const { includeLabels = true } = options;
+  const nodes = [];
+  const edges = [];
+  let edgeCount = 0;
+  if (thought.propositions && thought.propositions.length > 0) {
+    for (const proposition of thought.propositions) {
+      nodes.push({
+        id: sanitizeId(proposition.id),
+        label: includeLabels ? `${proposition.symbol}: ${proposition.statement}` : proposition.symbol,
+        type: "premise",
+        metadata: {
+          propositionType: proposition.type,
+          description: proposition.statement
+        }
+      });
+    }
+  }
+  if (thought.logicalInferences && thought.logicalInferences.length > 0) {
+    for (const inference of thought.logicalInferences) {
+      const infId = sanitizeId(inference.id);
+      nodes.push({
+        id: infId,
+        label: includeLabels ? inference.rule : infId,
+        type: "inference",
+        metadata: {
+          rule: inference.rule,
+          valid: inference.valid
+        }
+      });
+      if (inference.premises) {
+        for (const premiseId of inference.premises) {
+          edges.push({
+            id: `e${edgeCount++}`,
+            source: sanitizeId(premiseId),
+            target: infId,
+            directed: true,
+            metadata: { type: "premise-to-inference" }
+          });
+        }
+      }
+      edges.push({
+        id: `e${edgeCount++}`,
+        source: infId,
+        target: sanitizeId(inference.conclusion),
+        directed: true,
+        metadata: { type: "inference-to-conclusion" }
+      });
+    }
+  }
+  if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
+    for (const step of thought.proof.steps) {
+      const stepId = `Step${step.stepNumber}`;
+      nodes.push({
+        id: stepId,
+        label: includeLabels ? `${step.stepNumber}. ${step.statement}` : `Step ${step.stepNumber}`,
+        type: "proof-step",
+        metadata: {
+          stepNumber: step.stepNumber,
+          justification: step.justification,
+          rule: step.rule
+        }
+      });
+      if (step.referencesSteps && step.referencesSteps.length > 0) {
+        for (const refStep of step.referencesSteps) {
+          edges.push({
+            id: `e${edgeCount++}`,
+            source: `Step${refStep}`,
+            target: stepId,
+            directed: true,
+            metadata: { type: "step-reference" }
+          });
+        }
+      }
+    }
+    nodes.push({
+      id: "Theorem",
+      label: includeLabels ? thought.proof.theorem : "Theorem",
+      type: "conclusion",
+      metadata: {
+        theorem: thought.proof.theorem,
+        valid: thought.proof.valid,
+        completeness: thought.proof.completeness
+      }
+    });
+    const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: `Step${lastStep.stepNumber}`,
+      target: "Theorem",
+      directed: true,
+      metadata: { type: "step-to-theorem" }
+    });
+  }
+  return generateGraphML(nodes, edges, {
+    graphName: "Formal Logic Proof",
+    directed: true,
+    includeLabels
+  });
+}
+function formalLogicToTikZ(thought, options) {
+  const { includeLabels = true, colorScheme = "default" } = options;
+  const nodes = [];
+  const edges = [];
+  let currentY = 0;
+  if (thought.propositions && thought.propositions.length > 0) {
+    thought.propositions.forEach((proposition, index) => {
+      nodes.push({
+        id: sanitizeId(proposition.id),
+        label: includeLabels ? `${proposition.symbol}: ${proposition.statement.substring(0, 30)}...` : proposition.symbol,
+        x: index * 3,
+        y: currentY,
+        type: "premise",
+        shape: "stadium"
+      });
+    });
+    currentY -= 2.5;
+  }
+  if (thought.logicalInferences && thought.logicalInferences.length > 0) {
+    thought.logicalInferences.forEach((inference, index) => {
+      const infId = sanitizeId(inference.id);
+      nodes.push({
+        id: infId,
+        label: includeLabels ? inference.rule : infId,
+        x: index * 3,
+        y: currentY,
+        type: "inference",
+        shape: "rectangle"
+      });
+      if (inference.premises) {
+        for (const premiseId of inference.premises) {
+          edges.push({
+            source: sanitizeId(premiseId),
+            target: infId,
+            directed: true
+          });
+        }
+      }
+      edges.push({
+        source: infId,
+        target: sanitizeId(inference.conclusion),
+        directed: true
+      });
+    });
+    currentY -= 2.5;
+  }
+  if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
+    thought.proof.steps.forEach((step, index) => {
+      const stepId = `Step${step.stepNumber}`;
+      nodes.push({
+        id: stepId,
+        label: includeLabels ? `${step.stepNumber}. ${step.statement.substring(0, 20)}...` : `Step ${step.stepNumber}`,
+        x: index * 3,
+        y: currentY,
+        type: "neutral",
+        shape: "rectangle"
+      });
+      if (step.referencesSteps && step.referencesSteps.length > 0) {
+        for (const refStep of step.referencesSteps) {
+          edges.push({
+            source: `Step${refStep}`,
+            target: stepId,
+            directed: true,
+            style: "dashed"
+          });
+        }
+      }
+    });
+    currentY -= 2.5;
+    nodes.push({
+      id: "Theorem",
+      label: includeLabels ? "Theorem" : "T",
+      x: (thought.proof.steps.length - 1) * 1.5,
+      y: currentY,
+      type: "conclusion",
+      shape: "ellipse"
+    });
+    const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
+    edges.push({
+      source: `Step${lastStep.stepNumber}`,
+      target: "Theorem",
+      directed: true
+    });
+  }
+  return generateTikZ(nodes, edges, {
+    title: "Formal Logic Proof",
+    colorScheme,
+    includeLabels
+  });
+}
 var init_formal_logic = __esm({
   "src/export/visual/formal-logic.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -6874,6 +8972,10 @@ function exportMathematicsDerivation(thought, options) {
       return mathematicsToASCII(thought);
     case "svg":
       return mathematicsToSVG(thought, options);
+    case "graphml":
+      return mathematicsToGraphML(thought, options);
+    case "tikz":
+      return mathematicsToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -7184,11 +9286,177 @@ function mathematicsToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function mathematicsToGraphML(thought, options) {
+  const { includeLabels = true } = options;
+  const nodes = [];
+  const edges = [];
+  let edgeCount = 0;
+  const typeId = sanitizeId(`type_${thought.thoughtType || "proof"}`);
+  nodes.push({
+    id: typeId,
+    label: includeLabels ? (thought.thoughtType || "Proof").replace(/_/g, " ") : typeId,
+    type: "type"
+  });
+  if (thought.theorems && thought.theorems.length > 0) {
+    thought.theorems.forEach((theorem, index) => {
+      const theoremId = sanitizeId(`theorem_${index}`);
+      nodes.push({
+        id: theoremId,
+        label: theorem.name || `Theorem ${index + 1}`,
+        type: "axiom",
+        metadata: {
+          description: theorem.statement
+        }
+      });
+      edges.push({
+        id: `e${edgeCount++}`,
+        source: typeId,
+        target: theoremId,
+        directed: true
+      });
+    });
+  }
+  if (thought.proofStrategy) {
+    const strategyId = sanitizeId("strategy");
+    nodes.push({
+      id: strategyId,
+      label: thought.proofStrategy.type,
+      type: "strategy"
+    });
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: typeId,
+      target: strategyId,
+      directed: true
+    });
+    let prevStepId = strategyId;
+    thought.proofStrategy.steps.forEach((step, index) => {
+      const stepId = sanitizeId(`step_${index}`);
+      nodes.push({
+        id: stepId,
+        label: includeLabels ? step.slice(0, 40) + (step.length > 40 ? "..." : "") : `Step ${index + 1}`,
+        type: "step",
+        metadata: {
+          description: step
+        }
+      });
+      edges.push({
+        id: `e${edgeCount++}`,
+        source: prevStepId,
+        target: stepId,
+        directed: true
+      });
+      prevStepId = stepId;
+    });
+  }
+  if (thought.mathematicalModel) {
+    const modelId = sanitizeId("model");
+    nodes.push({
+      id: modelId,
+      label: thought.mathematicalModel.symbolic || "Mathematical Model",
+      type: "model",
+      metadata: {
+        description: thought.mathematicalModel.latex
+      }
+    });
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: typeId,
+      target: modelId,
+      directed: true
+    });
+  }
+  return generateGraphML(nodes, edges, {
+    graphName: "Mathematics Derivation",
+    directed: true,
+    includeLabels
+  });
+}
+function mathematicsToTikZ(thought, options) {
+  const { includeLabels = true, colorScheme = "default" } = options;
+  const nodes = [];
+  const edges = [];
+  let yPos = 0;
+  const typeId = sanitizeId(`type_${thought.thoughtType || "proof"}`);
+  nodes.push({
+    id: typeId,
+    label: includeLabels ? (thought.thoughtType || "Proof").replace(/_/g, " ") : typeId,
+    x: 4,
+    y: yPos,
+    type: "primary",
+    shape: "stadium"
+  });
+  yPos -= 2;
+  if (thought.theorems && thought.theorems.length > 0) {
+    thought.theorems.forEach((theorem, index) => {
+      const theoremId = sanitizeId(`theorem_${index}`);
+      const xPos = 1 + index * 3;
+      nodes.push({
+        id: theoremId,
+        label: theorem.name || `Theorem ${index + 1}`,
+        x: xPos,
+        y: yPos,
+        type: "secondary",
+        shape: "stadium"
+      });
+      edges.push({
+        source: typeId,
+        target: theoremId,
+        directed: true
+      });
+    });
+    yPos -= 2;
+  }
+  if (thought.proofStrategy) {
+    const strategyId = sanitizeId("strategy");
+    nodes.push({
+      id: strategyId,
+      label: thought.proofStrategy.type,
+      x: 4,
+      y: yPos,
+      type: "secondary",
+      shape: "ellipse"
+    });
+    edges.push({
+      source: typeId,
+      target: strategyId,
+      directed: true
+    });
+    yPos -= 2;
+    let prevStepId = strategyId;
+    thought.proofStrategy.steps.forEach((step, index) => {
+      const stepId = sanitizeId(`step_${index}`);
+      const xPos = 1 + index % 3 * 2.5;
+      const stepYPos = yPos - Math.floor(index / 3) * 1.5;
+      nodes.push({
+        id: stepId,
+        label: includeLabels ? `${index + 1}. ${step.substring(0, 20)}...` : `Step ${index + 1}`,
+        x: xPos,
+        y: stepYPos,
+        type: "neutral",
+        shape: "rectangle"
+      });
+      edges.push({
+        source: prevStepId,
+        target: stepId,
+        directed: true
+      });
+      prevStepId = stepId;
+    });
+  }
+  return generateTikZ(nodes, edges, {
+    title: "Mathematics Derivation",
+    colorScheme,
+    includeLabels
+  });
+}
 var init_mathematics = __esm({
   "src/export/visual/mathematics.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -7204,6 +9472,10 @@ function exportPhysicsVisualization(thought, options) {
       return physicsToASCII(thought);
     case "svg":
       return physicsToSVG(thought, options);
+    case "graphml":
+      return physicsToGraphML(thought, options);
+    case "tikz":
+      return physicsToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -7603,11 +9875,372 @@ function physicsToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function physicsToGraphML(thought, options) {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const nodes = [];
+  const edges = [];
+  let edgeCount = 0;
+  const typeId = "type";
+  nodes.push({
+    id: typeId,
+    label: includeLabels ? (thought.thoughtType || "Physics").replace(/_/g, " ") : "Physics",
+    type: "primary"
+  });
+  if (thought.tensorProperties) {
+    const tensorId = "tensor";
+    nodes.push({
+      id: tensorId,
+      label: `Tensor Rank (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`,
+      type: "tensor",
+      metadata: {
+        description: `Components: ${thought.tensorProperties.components}`
+      }
+    });
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: typeId,
+      target: tensorId,
+      label: "has tensor"
+    });
+    const componentsId = "components";
+    nodes.push({
+      id: componentsId,
+      label: "Components",
+      type: "property",
+      metadata: {
+        description: thought.tensorProperties.components
+      }
+    });
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: tensorId,
+      target: componentsId
+    });
+    if (thought.tensorProperties.symmetries.length > 0) {
+      thought.tensorProperties.symmetries.forEach((sym, index) => {
+        const symId = `symmetry_${index}`;
+        nodes.push({
+          id: symId,
+          label: includeLabels ? sym : `Symmetry ${index + 1}`,
+          type: "symmetry"
+        });
+        edges.push({
+          id: `e${edgeCount++}`,
+          source: tensorId,
+          target: symId,
+          label: "symmetry"
+        });
+      });
+    }
+    if (thought.tensorProperties.invariants.length > 0) {
+      thought.tensorProperties.invariants.forEach((inv, index) => {
+        const invId = `invariant_${index}`;
+        nodes.push({
+          id: invId,
+          label: includeLabels ? inv : `Invariant ${index + 1}`,
+          type: "invariant"
+        });
+        edges.push({
+          id: `e${edgeCount++}`,
+          source: tensorId,
+          target: invId,
+          label: "invariant"
+        });
+      });
+    }
+  }
+  if (thought.physicalInterpretation) {
+    const interpId = "interpretation";
+    nodes.push({
+      id: interpId,
+      label: thought.physicalInterpretation.quantity,
+      type: "interpretation",
+      metadata: {
+        description: `Units: ${thought.physicalInterpretation.units}`
+      }
+    });
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: typeId,
+      target: interpId,
+      label: "physical meaning"
+    });
+    const unitsId = "units";
+    nodes.push({
+      id: unitsId,
+      label: thought.physicalInterpretation.units,
+      type: "units"
+    });
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: interpId,
+      target: unitsId,
+      label: "measured in"
+    });
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      thought.physicalInterpretation.conservationLaws.forEach((law, index) => {
+        const lawId = `conservation_${index}`;
+        nodes.push({
+          id: lawId,
+          label: includeLabels ? law : `Law ${index + 1}`,
+          type: "conservation_law"
+        });
+        edges.push({
+          id: `e${edgeCount++}`,
+          source: interpId,
+          target: lawId,
+          label: "conserves"
+        });
+      });
+    }
+  }
+  if (thought.fieldTheoryContext) {
+    const fieldId = "field_theory";
+    nodes.push({
+      id: fieldId,
+      label: "Field Theory",
+      type: "field_theory",
+      metadata: {
+        description: `Symmetry Group: ${thought.fieldTheoryContext.symmetryGroup}`
+      }
+    });
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: typeId,
+      target: fieldId,
+      label: "context"
+    });
+    thought.fieldTheoryContext.fields.forEach((field, index) => {
+      const fId = `field_${index}`;
+      nodes.push({
+        id: fId,
+        label: field,
+        type: "field"
+      });
+      edges.push({
+        id: `e${edgeCount++}`,
+        source: fieldId,
+        target: fId,
+        label: "includes field"
+      });
+    });
+    const symGroupId = "symmetry_group";
+    nodes.push({
+      id: symGroupId,
+      label: thought.fieldTheoryContext.symmetryGroup,
+      type: "symmetry_group"
+    });
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: fieldId,
+      target: symGroupId,
+      label: "has symmetry"
+    });
+  }
+  if (includeMetrics) {
+    const metricsId = "metrics";
+    nodes.push({
+      id: metricsId,
+      label: `Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`,
+      type: "metric",
+      metadata: {
+        description: `Assumptions: ${thought.assumptions?.length || 0}`
+      }
+    });
+  }
+  const graphmlOptions = {
+    graphName: "Physics Visualization"
+  };
+  return generateGraphML(nodes, edges, graphmlOptions);
+}
+function physicsToTikZ(thought, options) {
+  const { includeLabels = true, includeMetrics = true, colorScheme = "default" } = options;
+  const nodes = [];
+  const edges = [];
+  const typeId = "type";
+  nodes.push({
+    id: typeId,
+    x: 0,
+    y: 0,
+    label: includeLabels ? (thought.thoughtType || "Physics").replace(/_/g, " ") : "Physics",
+    shape: "stadium",
+    type: "primary"
+  });
+  let leftColumn = -4;
+  let rightColumn = 4;
+  let currentRow = -2;
+  if (thought.tensorProperties) {
+    const tensorId = "tensor";
+    nodes.push({
+      id: tensorId,
+      x: leftColumn,
+      y: currentRow,
+      label: `Tensor (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`,
+      shape: "ellipse",
+      type: "tensor"
+    });
+    edges.push({
+      source: typeId,
+      target: tensorId
+    });
+    const componentsId = "components";
+    nodes.push({
+      id: componentsId,
+      x: leftColumn,
+      y: currentRow - 1.5,
+      label: "Components",
+      shape: "rectangle",
+      type: "property"
+    });
+    edges.push({
+      source: tensorId,
+      target: componentsId,
+      style: "dashed"
+    });
+    if (thought.tensorProperties.symmetries.length > 0) {
+      const symId = "symmetries";
+      nodes.push({
+        id: symId,
+        x: leftColumn - 2,
+        y: currentRow - 3,
+        label: `Symmetries (${thought.tensorProperties.symmetries.length})`,
+        shape: "diamond",
+        type: "symmetry"
+      });
+      edges.push({
+        source: tensorId,
+        target: symId
+      });
+    }
+    if (thought.tensorProperties.invariants.length > 0) {
+      const invId = "invariants";
+      nodes.push({
+        id: invId,
+        x: leftColumn + 2,
+        y: currentRow - 3,
+        label: `Invariants (${thought.tensorProperties.invariants.length})`,
+        shape: "diamond",
+        type: "invariant"
+      });
+      edges.push({
+        source: tensorId,
+        target: invId
+      });
+    }
+  }
+  if (thought.physicalInterpretation) {
+    const interpId = "interpretation";
+    nodes.push({
+      id: interpId,
+      x: rightColumn,
+      y: currentRow,
+      label: thought.physicalInterpretation.quantity,
+      shape: "rounded",
+      type: "interpretation"
+    });
+    edges.push({
+      source: typeId,
+      target: interpId
+    });
+    const unitsId = "units";
+    nodes.push({
+      id: unitsId,
+      x: rightColumn,
+      y: currentRow - 1.5,
+      label: thought.physicalInterpretation.units,
+      shape: "ellipse",
+      type: "units"
+    });
+    edges.push({
+      source: interpId,
+      target: unitsId,
+      style: "dashed"
+    });
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      thought.physicalInterpretation.conservationLaws.forEach((law, index) => {
+        const lawId = `conservation_${index}`;
+        const offset = (index - (thought.physicalInterpretation.conservationLaws.length - 1) / 2) * 2;
+        nodes.push({
+          id: lawId,
+          x: rightColumn + offset,
+          y: currentRow - 3,
+          label: includeLabels ? law.substring(0, 20) : `Law ${index + 1}`,
+          shape: "rectangle",
+          type: "conservation_law"
+        });
+        edges.push({
+          source: interpId,
+          target: lawId
+        });
+      });
+    }
+  }
+  if (thought.fieldTheoryContext) {
+    const fieldId = "field_theory";
+    nodes.push({
+      id: fieldId,
+      x: 0,
+      y: currentRow - 5,
+      label: "Field Theory",
+      shape: "stadium",
+      type: "field_theory"
+    });
+    edges.push({
+      source: typeId,
+      target: fieldId
+    });
+    thought.fieldTheoryContext.fields.forEach((field, index) => {
+      const fId = `field_${index}`;
+      const offset = (index - (thought.fieldTheoryContext.fields.length - 1) / 2) * 2.5;
+      nodes.push({
+        id: fId,
+        x: offset,
+        y: currentRow - 6.5,
+        label: field,
+        shape: "rectangle",
+        type: "field"
+      });
+      edges.push({
+        source: fieldId,
+        target: fId
+      });
+    });
+    const symGroupId = "symmetry_group";
+    nodes.push({
+      id: symGroupId,
+      x: 0,
+      y: currentRow - 8,
+      label: thought.fieldTheoryContext.symmetryGroup,
+      shape: "diamond",
+      type: "symmetry_group"
+    });
+    edges.push({
+      source: fieldId,
+      target: symGroupId,
+      style: "dashed"
+    });
+  }
+  const tikzOptions = {
+    title: "Physics Visualization",
+    colorScheme
+  };
+  let tikz = generateTikZ(nodes, edges, tikzOptions);
+  if (includeMetrics) {
+    const metrics = [
+      { label: "Uncertainty", value: `${(thought.uncertainty * 100).toFixed(1)}%` },
+      { label: "Assumptions", value: thought.assumptions?.length || 0 }
+    ];
+    tikz = tikz.replace("\\end{tikzpicture}", renderTikZMetrics(8, -8, metrics) + "\n\\end{tikzpicture}");
+  }
+  return tikz;
+}
 var init_physics = __esm({
   "src/export/visual/physics.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -7623,6 +10256,10 @@ function exportHybridOrchestration(thought, options) {
       return hybridToASCII(thought);
     case "svg":
       return hybridToSVG(thought, options);
+    case "graphml":
+      return hybridToGraphML(thought, options);
+    case "tikz":
+      return hybridToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -7977,11 +10614,141 @@ function hybridToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function hybridToGraphML(thought, options) {
+  const { includeLabels = true } = options;
+  const nodes = [];
+  const edges = [];
+  nodes.push({
+    id: sanitizeId("hybrid_mode"),
+    label: includeLabels ? "Hybrid Mode" : "hybrid",
+    type: "hybrid"
+  });
+  const primaryId = sanitizeId(`primary_${thought.primaryMode}`);
+  nodes.push({
+    id: primaryId,
+    label: includeLabels ? thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1) : thought.primaryMode,
+    type: "primary"
+  });
+  edges.push({
+    id: "e_hybrid_primary",
+    source: sanitizeId("hybrid_mode"),
+    target: primaryId,
+    directed: true
+  });
+  if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
+    thought.secondaryFeatures.forEach((feature, index) => {
+      const featureId = sanitizeId(`feature_${index}`);
+      nodes.push({
+        id: featureId,
+        label: includeLabels ? feature.substring(0, 50) + (feature.length > 50 ? "..." : "") : `Feature ${index + 1}`,
+        type: "secondary"
+      });
+      edges.push({
+        id: `e_hybrid_feature_${index}`,
+        source: sanitizeId("hybrid_mode"),
+        target: featureId,
+        directed: true
+      });
+    });
+  }
+  if (thought.stage) {
+    const stageId = sanitizeId(`stage_${thought.stage}`);
+    nodes.push({
+      id: stageId,
+      label: includeLabels ? thought.stage.replace(/_/g, " ") : "stage",
+      type: "stage"
+    });
+    edges.push({
+      id: "e_primary_stage",
+      source: primaryId,
+      target: stageId,
+      directed: true
+    });
+  }
+  return generateGraphML(nodes, edges, {
+    graphName: "Hybrid Orchestration",
+    directed: true,
+    includeLabels
+  });
+}
+function hybridToTikZ(thought, options) {
+  const { includeLabels = true, colorScheme = "default" } = options;
+  const nodes = [];
+  const edges = [];
+  nodes.push({
+    id: sanitizeId("hybrid_mode"),
+    label: includeLabels ? "Hybrid Mode" : "hybrid",
+    x: 4,
+    y: 0,
+    type: "success",
+    shape: "ellipse"
+  });
+  const primaryId = sanitizeId(`primary_${thought.primaryMode}`);
+  nodes.push({
+    id: primaryId,
+    label: includeLabels ? thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1) : thought.primaryMode,
+    x: 4,
+    y: -2,
+    type: "primary",
+    shape: "stadium"
+  });
+  edges.push({
+    source: sanitizeId("hybrid_mode"),
+    target: primaryId,
+    directed: true
+  });
+  if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
+    const featureCount = thought.secondaryFeatures.length;
+    const spacing = 3;
+    const totalWidth = (featureCount - 1) * spacing;
+    const startX = 4 - totalWidth / 2;
+    thought.secondaryFeatures.forEach((feature, index) => {
+      const featureId = sanitizeId(`feature_${index}`);
+      nodes.push({
+        id: featureId,
+        label: includeLabels ? feature.length > 20 ? feature.substring(0, 20) + "..." : feature : `F${index + 1}`,
+        x: startX + index * spacing,
+        y: -4,
+        type: "secondary",
+        shape: "rectangle"
+      });
+      edges.push({
+        source: primaryId,
+        target: featureId,
+        directed: true
+      });
+    });
+  }
+  if (thought.stage) {
+    const stageId = sanitizeId(`stage_${thought.stage}`);
+    nodes.push({
+      id: stageId,
+      label: includeLabels ? thought.stage.replace(/_/g, " ") : "stage",
+      x: 7,
+      y: -2,
+      type: "info",
+      shape: "diamond"
+    });
+    edges.push({
+      source: primaryId,
+      target: stageId,
+      directed: true,
+      style: "dashed"
+    });
+  }
+  return generateTikZ(nodes, edges, {
+    title: "Hybrid Orchestration",
+    colorScheme,
+    includeLabels
+  });
+}
 var init_hybrid = __esm({
   "src/export/visual/hybrid.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -7997,6 +10764,10 @@ function exportMetaReasoningVisualization(thought, options) {
       return metaReasoningToASCII(thought);
     case "svg":
       return metaReasoningToSVG(thought, options);
+    case "graphml":
+      return metaReasoningToGraphML(thought, options);
+    case "tikz":
+      return metaReasoningToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -8387,11 +11158,262 @@ function metaReasoningToSVG(thought, options) {
   svg += "\n" + generateSVGFooter();
   return svg;
 }
+function metaReasoningToGraphML(thought, options) {
+  const { includeLabels = true, includeMetrics = true } = options;
+  const nodes = [];
+  const edges = [];
+  nodes.push({
+    id: "meta",
+    label: "Meta-Reasoning",
+    type: "meta"
+  });
+  const currentLabel = includeLabels ? thought.currentStrategy.approach : "Current Strategy";
+  nodes.push({
+    id: "current_strategy",
+    label: currentLabel,
+    type: "current",
+    metadata: {
+      mode: thought.currentStrategy.mode,
+      thoughtsSpent: thought.currentStrategy.thoughtsSpent
+    }
+  });
+  edges.push({
+    id: "e_meta_current",
+    source: "meta",
+    target: "current_strategy",
+    directed: true
+  });
+  if (includeMetrics) {
+    nodes.push({
+      id: "evaluation",
+      label: `Effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`,
+      type: "evaluation",
+      metadata: {
+        effectiveness: thought.strategyEvaluation.effectiveness,
+        efficiency: thought.strategyEvaluation.efficiency,
+        confidence: thought.strategyEvaluation.confidence,
+        progressRate: thought.strategyEvaluation.progressRate,
+        qualityScore: thought.strategyEvaluation.qualityScore
+      }
+    });
+    edges.push({
+      id: "e_current_eval",
+      source: "current_strategy",
+      target: "evaluation",
+      directed: true
+    });
+    if (thought.strategyEvaluation.issues.length > 0) {
+      nodes.push({
+        id: "issues",
+        label: `Issues: ${thought.strategyEvaluation.issues.length}`,
+        type: "issue",
+        metadata: {
+          issues: thought.strategyEvaluation.issues
+        }
+      });
+      edges.push({
+        id: "e_eval_issues",
+        source: "evaluation",
+        target: "issues",
+        directed: true
+      });
+    }
+    if (thought.strategyEvaluation.strengths.length > 0) {
+      nodes.push({
+        id: "strengths",
+        label: `Strengths: ${thought.strategyEvaluation.strengths.length}`,
+        type: "strength",
+        metadata: {
+          strengths: thought.strategyEvaluation.strengths
+        }
+      });
+      edges.push({
+        id: "e_eval_strengths",
+        source: "evaluation",
+        target: "strengths",
+        directed: true
+      });
+    }
+  }
+  if (thought.alternativeStrategies.length > 0) {
+    thought.alternativeStrategies.forEach((alt, index) => {
+      const altLabel = includeLabels ? `${alt.mode}: ${(alt.recommendationScore * 100).toFixed(0)}%` : `Alternative ${index + 1}`;
+      nodes.push({
+        id: `alt_${index}`,
+        label: altLabel,
+        type: "alternative",
+        metadata: {
+          mode: alt.mode,
+          reasoning: alt.reasoning,
+          expectedBenefit: alt.expectedBenefit,
+          switchingCost: alt.switchingCost,
+          recommendationScore: alt.recommendationScore
+        }
+      });
+      edges.push({
+        id: `e_meta_alt_${index}`,
+        source: "meta",
+        target: `alt_${index}`,
+        directed: true
+      });
+    });
+  }
+  const recLabel = `${thought.recommendation.action}${thought.recommendation.targetMode ? ` \u2192 ${thought.recommendation.targetMode}` : ""}`;
+  nodes.push({
+    id: "recommendation",
+    label: recLabel,
+    type: "recommendation",
+    metadata: {
+      action: thought.recommendation.action,
+      targetMode: thought.recommendation.targetMode,
+      justification: thought.recommendation.justification,
+      confidence: thought.recommendation.confidence,
+      expectedImprovement: thought.recommendation.expectedImprovement
+    }
+  });
+  edges.push({
+    id: "e_meta_rec",
+    source: "meta",
+    target: "recommendation",
+    directed: true
+  });
+  if (includeMetrics) {
+    nodes.push({
+      id: "quality",
+      label: `Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`,
+      type: "quality",
+      metadata: {
+        logicalConsistency: thought.qualityMetrics.logicalConsistency,
+        evidenceQuality: thought.qualityMetrics.evidenceQuality,
+        completeness: thought.qualityMetrics.completeness,
+        originality: thought.qualityMetrics.originality,
+        clarity: thought.qualityMetrics.clarity,
+        overallQuality: thought.qualityMetrics.overallQuality
+      }
+    });
+    edges.push({
+      id: "e_meta_quality",
+      source: "meta",
+      target: "quality",
+      directed: true
+    });
+  }
+  const graphmlOptions = {
+    graphName: "MetaReasoning Visualization",
+    directed: true,
+    includeLabels
+  };
+  return generateGraphML(nodes, edges, graphmlOptions);
+}
+function metaReasoningToTikZ(thought, options) {
+  const { includeLabels = true, includeMetrics = true, colorScheme = "default" } = options;
+  const nodes = [];
+  const edges = [];
+  nodes.push({
+    id: "meta",
+    label: "Meta-Reasoning",
+    x: 0,
+    y: 0,
+    shape: "ellipse",
+    type: "meta"
+  });
+  const currentLabel = includeLabels ? thought.currentStrategy.approach : "Current Strategy";
+  nodes.push({
+    id: "current_strategy",
+    label: currentLabel.substring(0, 30),
+    // Truncate for readability
+    x: -4,
+    y: -2,
+    shape: "stadium",
+    type: "current"
+  });
+  edges.push({
+    source: "meta",
+    target: "current_strategy",
+    directed: true
+  });
+  const recLabel = `${thought.recommendation.action}${thought.recommendation.targetMode ? ` \u2192 ${thought.recommendation.targetMode}` : ""}`;
+  nodes.push({
+    id: "recommendation",
+    label: recLabel.substring(0, 30),
+    x: 4,
+    y: -2,
+    shape: "stadium",
+    type: "recommendation"
+  });
+  edges.push({
+    source: "meta",
+    target: "recommendation",
+    directed: true
+  });
+  if (includeMetrics) {
+    nodes.push({
+      id: "evaluation",
+      label: `Eff: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`,
+      x: -4,
+      y: -4,
+      shape: "diamond",
+      type: "evaluation"
+    });
+    edges.push({
+      source: "current_strategy",
+      target: "evaluation",
+      directed: true
+    });
+  }
+  if (thought.alternativeStrategies.length > 0) {
+    const altCount = thought.alternativeStrategies.length;
+    const spacing = 2.5;
+    const totalWidth = (altCount - 1) * spacing;
+    const offset = totalWidth / 2;
+    thought.alternativeStrategies.forEach((alt, index) => {
+      const altLabel = includeLabels ? `${alt.mode}: ${(alt.recommendationScore * 100).toFixed(0)}%` : `Alt ${index + 1}`;
+      nodes.push({
+        id: `alt_${index}`,
+        label: altLabel,
+        x: index * spacing - offset,
+        y: -5,
+        shape: "rectangle",
+        type: "alternative"
+      });
+      edges.push({
+        source: "meta",
+        target: `alt_${index}`,
+        directed: true,
+        style: "dashed"
+      });
+    });
+  }
+  if (includeMetrics) {
+    nodes.push({
+      id: "quality",
+      label: `Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`,
+      x: 4,
+      y: -4,
+      shape: "diamond",
+      type: "quality"
+    });
+    edges.push({
+      source: "meta",
+      target: "quality",
+      directed: true,
+      style: "dashed"
+    });
+  }
+  const tikzOptions = {
+    title: "MetaReasoning Visualization",
+    colorScheme,
+    includeLabels
+  };
+  return generateTikZ(nodes, edges, tikzOptions);
+}
 var init_metareasoning = __esm({
   "src/export/visual/metareasoning.ts"() {
     init_esm_shims();
     init_utils();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
   }
 });
 
@@ -9080,6 +12102,8 @@ var init_visual = __esm({
   "src/export/visual/index.ts"() {
     init_esm_shims();
     init_svg_utils();
+    init_graphml_utils();
+    init_tikz_utils();
     init_causal();
     init_temporal();
     init_game_theory();
@@ -9204,7 +12228,7 @@ var init_ExportService = __esm({
       exportSession(session, format) {
         const startTime = Date.now();
         this.logger.debug("Export started", { sessionId: session.id, format, thoughtCount: session.thoughts.length });
-        if (format === "mermaid" || format === "dot" || format === "ascii" || format === "svg") {
+        if (format === "mermaid" || format === "dot" || format === "ascii" || format === "svg" || format === "graphml" || format === "tikz") {
           const result2 = this.exportVisual(session, format);
           this.logger.debug("Export completed", {
             sessionId: session.id,

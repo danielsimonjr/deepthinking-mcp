@@ -1,7 +1,8 @@
 /**
- * Physics Visual Exporter (v7.0.2)
+ * Physics Visual Exporter (v7.0.3)
  * Phase 7 Sprint 2: Physics reasoning export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
+ * Phase 9: Added GraphML and TikZ export support
  */
 
 import type { PhysicsThought } from '../../types/modes/physics.js';
@@ -20,6 +21,19 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+  type GraphMLOptions,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  renderTikZMetrics,
+  type TikZNode,
+  type TikZEdge,
+  type TikZOptions,
+} from './tikz-utils.js';
 
 /**
  * Export physics reasoning to visual format
@@ -36,6 +50,10 @@ export function exportPhysicsVisualization(thought: PhysicsThought, options: Vis
       return physicsToASCII(thought);
     case 'svg':
       return physicsToSVG(thought, options);
+    case 'graphml':
+      return physicsToGraphML(thought, options);
+    case 'tikz':
+      return physicsToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -477,4 +495,427 @@ function physicsToSVG(thought: PhysicsThought, options: VisualExportOptions): st
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export physics reasoning to GraphML format
+ */
+function physicsToGraphML(thought: PhysicsThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  const nodes: GraphMLNode[] = [];
+  const edges: GraphMLEdge[] = [];
+  let edgeCount = 0;
+
+  // Root node for the thought type
+  const typeId = 'type';
+  nodes.push({
+    id: typeId,
+    label: includeLabels ? (thought.thoughtType || 'Physics').replace(/_/g, ' ') : 'Physics',
+    type: 'primary',
+  });
+
+  // Add tensor properties if present
+  if (thought.tensorProperties) {
+    const tensorId = 'tensor';
+    nodes.push({
+      id: tensorId,
+      label: `Tensor Rank (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`,
+      type: 'tensor',
+      metadata: {
+        description: `Components: ${thought.tensorProperties.components}`,
+      },
+    });
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: typeId,
+      target: tensorId,
+      label: 'has tensor',
+    });
+
+    // Add tensor components
+    const componentsId = 'components';
+    nodes.push({
+      id: componentsId,
+      label: 'Components',
+      type: 'property',
+      metadata: {
+        description: thought.tensorProperties.components,
+      },
+    });
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: tensorId,
+      target: componentsId,
+    });
+
+    // Add symmetries
+    if (thought.tensorProperties.symmetries.length > 0) {
+      thought.tensorProperties.symmetries.forEach((sym, index) => {
+        const symId = `symmetry_${index}`;
+        nodes.push({
+          id: symId,
+          label: includeLabels ? sym : `Symmetry ${index + 1}`,
+          type: 'symmetry',
+        });
+        edges.push({
+          id: `e${edgeCount++}`,
+          source: tensorId,
+          target: symId,
+          label: 'symmetry',
+        });
+      });
+    }
+
+    // Add invariants
+    if (thought.tensorProperties.invariants.length > 0) {
+      thought.tensorProperties.invariants.forEach((inv, index) => {
+        const invId = `invariant_${index}`;
+        nodes.push({
+          id: invId,
+          label: includeLabels ? inv : `Invariant ${index + 1}`,
+          type: 'invariant',
+        });
+        edges.push({
+          id: `e${edgeCount++}`,
+          source: tensorId,
+          target: invId,
+          label: 'invariant',
+        });
+      });
+    }
+  }
+
+  // Add physical interpretation if present
+  if (thought.physicalInterpretation) {
+    const interpId = 'interpretation';
+    nodes.push({
+      id: interpId,
+      label: thought.physicalInterpretation.quantity,
+      type: 'interpretation',
+      metadata: {
+        description: `Units: ${thought.physicalInterpretation.units}`,
+      },
+    });
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: typeId,
+      target: interpId,
+      label: 'physical meaning',
+    });
+
+    // Add units
+    const unitsId = 'units';
+    nodes.push({
+      id: unitsId,
+      label: thought.physicalInterpretation.units,
+      type: 'units',
+    });
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: interpId,
+      target: unitsId,
+      label: 'measured in',
+    });
+
+    // Add conservation laws
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      thought.physicalInterpretation.conservationLaws.forEach((law, index) => {
+        const lawId = `conservation_${index}`;
+        nodes.push({
+          id: lawId,
+          label: includeLabels ? law : `Law ${index + 1}`,
+          type: 'conservation_law',
+        });
+        edges.push({
+          id: `e${edgeCount++}`,
+          source: interpId,
+          target: lawId,
+          label: 'conserves',
+        });
+      });
+    }
+  }
+
+  // Add field theory context if present
+  if (thought.fieldTheoryContext) {
+    const fieldId = 'field_theory';
+    nodes.push({
+      id: fieldId,
+      label: 'Field Theory',
+      type: 'field_theory',
+      metadata: {
+        description: `Symmetry Group: ${thought.fieldTheoryContext.symmetryGroup}`,
+      },
+    });
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: typeId,
+      target: fieldId,
+      label: 'context',
+    });
+
+    // Add fields
+    thought.fieldTheoryContext.fields.forEach((field, index) => {
+      const fId = `field_${index}`;
+      nodes.push({
+        id: fId,
+        label: field,
+        type: 'field',
+      });
+      edges.push({
+        id: `e${edgeCount++}`,
+        source: fieldId,
+        target: fId,
+        label: 'includes field',
+      });
+    });
+
+    // Add symmetry group
+    const symGroupId = 'symmetry_group';
+    nodes.push({
+      id: symGroupId,
+      label: thought.fieldTheoryContext.symmetryGroup,
+      type: 'symmetry_group',
+    });
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: fieldId,
+      target: symGroupId,
+      label: 'has symmetry',
+    });
+  }
+
+  // Add metrics node
+  if (includeMetrics) {
+    const metricsId = 'metrics';
+    nodes.push({
+      id: metricsId,
+      label: `Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`,
+      type: 'metric',
+      metadata: {
+        description: `Assumptions: ${thought.assumptions?.length || 0}`,
+      },
+    });
+  }
+
+  const graphmlOptions: GraphMLOptions = {
+    graphName: 'Physics Visualization',
+  };
+
+  return generateGraphML(nodes, edges, graphmlOptions);
+}
+
+/**
+ * Export physics reasoning to TikZ format
+ */
+function physicsToTikZ(thought: PhysicsThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true, colorScheme = 'default' } = options;
+
+  const nodes: TikZNode[] = [];
+  const edges: TikZEdge[] = [];
+
+  // Root node for the thought type (center top)
+  const typeId = 'type';
+  nodes.push({
+    id: typeId,
+    x: 0,
+    y: 0,
+    label: includeLabels ? (thought.thoughtType || 'Physics').replace(/_/g, ' ') : 'Physics',
+    shape: 'stadium',
+    type: 'primary',
+  });
+
+  let leftColumn = -4;
+  let rightColumn = 4;
+  let currentRow = -2;
+
+  // Add tensor properties on the left
+  if (thought.tensorProperties) {
+    const tensorId = 'tensor';
+    nodes.push({
+      id: tensorId,
+      x: leftColumn,
+      y: currentRow,
+      label: `Tensor (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`,
+      shape: 'ellipse',
+      type: 'tensor',
+    });
+    edges.push({
+      source: typeId,
+      target: tensorId,
+    });
+
+    // Add components below tensor
+    const componentsId = 'components';
+    nodes.push({
+      id: componentsId,
+      x: leftColumn,
+      y: currentRow - 1.5,
+      label: 'Components',
+      shape: 'rectangle',
+      type: 'property',
+    });
+    edges.push({
+      source: tensorId,
+      target: componentsId,
+      style: 'dashed',
+    });
+
+    // Add symmetries if present
+    if (thought.tensorProperties.symmetries.length > 0) {
+      const symId = 'symmetries';
+      nodes.push({
+        id: symId,
+        x: leftColumn - 2,
+        y: currentRow - 3,
+        label: `Symmetries (${thought.tensorProperties.symmetries.length})`,
+        shape: 'diamond',
+        type: 'symmetry',
+      });
+      edges.push({
+        source: tensorId,
+        target: symId,
+      });
+    }
+
+    // Add invariants if present
+    if (thought.tensorProperties.invariants.length > 0) {
+      const invId = 'invariants';
+      nodes.push({
+        id: invId,
+        x: leftColumn + 2,
+        y: currentRow - 3,
+        label: `Invariants (${thought.tensorProperties.invariants.length})`,
+        shape: 'diamond',
+        type: 'invariant',
+      });
+      edges.push({
+        source: tensorId,
+        target: invId,
+      });
+    }
+  }
+
+  // Add physical interpretation on the right
+  if (thought.physicalInterpretation) {
+    const interpId = 'interpretation';
+    nodes.push({
+      id: interpId,
+      x: rightColumn,
+      y: currentRow,
+      label: thought.physicalInterpretation.quantity,
+      shape: 'rounded',
+      type: 'interpretation',
+    });
+    edges.push({
+      source: typeId,
+      target: interpId,
+    });
+
+    // Add units below interpretation
+    const unitsId = 'units';
+    nodes.push({
+      id: unitsId,
+      x: rightColumn,
+      y: currentRow - 1.5,
+      label: thought.physicalInterpretation.units,
+      shape: 'ellipse',
+      type: 'units',
+    });
+    edges.push({
+      source: interpId,
+      target: unitsId,
+      style: 'dashed',
+    });
+
+    // Add conservation laws if present
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      thought.physicalInterpretation.conservationLaws.forEach((law, index) => {
+        const lawId = `conservation_${index}`;
+        const offset = (index - (thought.physicalInterpretation!.conservationLaws.length - 1) / 2) * 2;
+        nodes.push({
+          id: lawId,
+          x: rightColumn + offset,
+          y: currentRow - 3,
+          label: includeLabels ? law.substring(0, 20) : `Law ${index + 1}`,
+          shape: 'rectangle',
+          type: 'conservation_law',
+        });
+        edges.push({
+          source: interpId,
+          target: lawId,
+        });
+      });
+    }
+  }
+
+  // Add field theory context at the bottom center
+  if (thought.fieldTheoryContext) {
+    const fieldId = 'field_theory';
+    nodes.push({
+      id: fieldId,
+      x: 0,
+      y: currentRow - 5,
+      label: 'Field Theory',
+      shape: 'stadium',
+      type: 'field_theory',
+    });
+    edges.push({
+      source: typeId,
+      target: fieldId,
+    });
+
+    // Add fields below field theory
+    thought.fieldTheoryContext.fields.forEach((field, index) => {
+      const fId = `field_${index}`;
+      const offset = (index - (thought.fieldTheoryContext!.fields.length - 1) / 2) * 2.5;
+      nodes.push({
+        id: fId,
+        x: offset,
+        y: currentRow - 6.5,
+        label: field,
+        shape: 'rectangle',
+        type: 'field',
+      });
+      edges.push({
+        source: fieldId,
+        target: fId,
+      });
+    });
+
+    // Add symmetry group
+    const symGroupId = 'symmetry_group';
+    nodes.push({
+      id: symGroupId,
+      x: 0,
+      y: currentRow - 8,
+      label: thought.fieldTheoryContext.symmetryGroup,
+      shape: 'diamond',
+      type: 'symmetry_group',
+    });
+    edges.push({
+      source: fieldId,
+      target: symGroupId,
+      style: 'dashed',
+    });
+  }
+
+  const tikzOptions: TikZOptions = {
+    title: 'Physics Visualization',
+    colorScheme,
+  };
+
+  let tikz = generateTikZ(nodes, edges, tikzOptions);
+
+  // Add metrics if requested
+  if (includeMetrics) {
+    const metrics = [
+      { label: 'Uncertainty', value: `${(thought.uncertainty * 100).toFixed(1)}%` },
+      { label: 'Assumptions', value: thought.assumptions?.length || 0 },
+    ];
+    tikz = tikz.replace('\\end{tikzpicture}', renderTikZMetrics(8, -8, metrics) + '\n\\end{tikzpicture}');
+  }
+
+  return tikz;
 }

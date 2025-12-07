@@ -1,7 +1,8 @@
 /**
- * Abductive Visual Exporter (v7.0.2)
+ * Abductive Visual Exporter (v7.0.3)
  * Sprint 8 Task 8.1: Abductive hypothesis export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
+ * Phase 9: Added GraphML and TikZ export support
  */
 
 import type { AbductiveThought } from '../../types/index.js';
@@ -20,6 +21,16 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  type TikZNode,
+  type TikZEdge,
+} from './tikz-utils.js';
 
 /**
  * Export abductive hypothesis comparison to visual format
@@ -36,6 +47,10 @@ export function exportAbductiveHypotheses(thought: AbductiveThought, options: Vi
       return abductiveToASCII(thought);
     case 'svg':
       return abductiveToSVG(thought, options);
+    case 'graphml':
+      return abductiveToGraphML(thought, options);
+    case 'tikz':
+      return abductiveToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -231,4 +246,130 @@ function abductiveToSVG(thought: AbductiveThought, options: VisualExportOptions)
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export abductive hypotheses to GraphML format
+ */
+function abductiveToGraphML(thought: AbductiveThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  // Create nodes from hypotheses
+  const nodes: GraphMLNode[] = thought.hypotheses.map(hypothesis => ({
+    id: sanitizeId(hypothesis.id),
+    label: includeLabels ? hypothesis.explanation.substring(0, 50) + '...' : hypothesis.id,
+    type: 'hypothesis',
+    metadata: includeMetrics ? {
+      description: hypothesis.explanation,
+      score: hypothesis.score,
+      assumptions: hypothesis.assumptions.join(', '),
+    } : undefined,
+  }));
+
+  // Add observation nodes if available
+  if (thought.observations && thought.observations.length > 0) {
+    for (const obs of thought.observations) {
+      nodes.push({
+        id: sanitizeId(`obs_${obs.id}`),
+        label: includeLabels ? obs.description : `obs_${obs.id}`,
+        type: 'observation',
+        metadata: includeMetrics ? {
+          description: obs.description,
+          confidence: obs.confidence,
+        } : undefined,
+      });
+    }
+  }
+
+  // Create edges linking observations to hypotheses
+  const edges: GraphMLEdge[] = [];
+  let edgeId = 0;
+
+  if (thought.observations && thought.observations.length > 0) {
+    for (const obs of thought.observations) {
+      for (const hypothesis of thought.hypotheses) {
+        edges.push({
+          id: `e${edgeId++}`,
+          source: sanitizeId(`obs_${obs.id}`),
+          target: sanitizeId(hypothesis.id),
+          metadata: includeMetrics ? { weight: obs.confidence } : undefined,
+        });
+      }
+    }
+  }
+
+  return generateGraphML(nodes, edges, {
+    graphName: 'Abductive Hypotheses',
+    includeLabels,
+    includeMetadata: includeMetrics,
+  });
+}
+
+/**
+ * Export abductive hypotheses to TikZ/LaTeX format
+ */
+function abductiveToTikZ(thought: AbductiveThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true, colorScheme = 'default' } = options;
+
+  const nodes: TikZNode[] = [];
+  const edges: TikZEdge[] = [];
+
+  // Position hypotheses horizontally
+  const hypCount = thought.hypotheses.length;
+  const spacing = 3;
+  const totalWidth = (hypCount - 1) * spacing;
+  const startX = 4 - totalWidth / 2;
+
+  for (let i = 0; i < thought.hypotheses.length; i++) {
+    const hypothesis = thought.hypotheses[i];
+    const isBest = thought.bestExplanation?.id === hypothesis.id;
+    const label = includeLabels
+      ? hypothesis.explanation.substring(0, 30) + '...'
+      : hypothesis.id;
+    const scoreLabel = includeMetrics ? ` (${hypothesis.score.toFixed(2)})` : '';
+
+    nodes.push({
+      id: sanitizeId(hypothesis.id),
+      label: label + scoreLabel,
+      x: startX + i * spacing,
+      y: -2,
+      type: isBest ? 'success' : 'hypothesis',
+      shape: 'ellipse',
+    });
+  }
+
+  // Add observation nodes above if available
+  if (thought.observations && thought.observations.length > 0) {
+    const obsCount = thought.observations.length;
+    const obsSpacing = Math.min(spacing, totalWidth / Math.max(1, obsCount - 1));
+    const obsStartX = 4 - ((obsCount - 1) * obsSpacing) / 2;
+
+    for (let i = 0; i < thought.observations.length; i++) {
+      const obs = thought.observations[i];
+      nodes.push({
+        id: sanitizeId(`obs_${obs.id}`),
+        label: includeLabels ? obs.description.substring(0, 30) + '...' : `obs_${obs.id}`,
+        x: obsStartX + i * obsSpacing,
+        y: 0,
+        type: 'info',
+        shape: 'rectangle',
+      });
+
+      // Create edges from observations to hypotheses
+      for (const hypothesis of thought.hypotheses) {
+        edges.push({
+          source: sanitizeId(`obs_${obs.id}`),
+          target: sanitizeId(hypothesis.id),
+          directed: true,
+        });
+      }
+    }
+  }
+
+  return generateTikZ(nodes, edges, {
+    title: 'Abductive Hypotheses',
+    includeLabels,
+    includeMetrics,
+    colorScheme,
+  });
 }

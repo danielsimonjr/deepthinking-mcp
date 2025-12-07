@@ -1,7 +1,7 @@
 /**
- * First Principles Visual Exporter (v7.0.2)
+ * First Principles Visual Exporter (v7.0.3)
  * Sprint 8 Task 8.1: First principles derivation export to Mermaid, DOT, ASCII
- * Phase 9: Added native SVG export support
+ * Phase 9: Added native SVG export support, GraphML, TikZ
  */
 
 import type { FirstPrinciplesThought } from '../../types/index.js';
@@ -21,6 +21,16 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  type TikZNode,
+  type TikZEdge,
+} from './tikz-utils.js';
 
 /**
  * Export first-principles derivation chain to visual format
@@ -37,6 +47,10 @@ export function exportFirstPrinciplesDerivation(thought: FirstPrinciplesThought,
       return firstPrinciplesToASCII(thought);
     case 'svg':
       return firstPrinciplesToSVG(thought, options);
+    case 'graphml':
+      return firstPrinciplesToGraphML(thought, options);
+    case 'tikz':
+      return firstPrinciplesToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -402,4 +416,197 @@ function firstPrinciplesToSVG(thought: FirstPrinciplesThought, options: VisualEx
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export first-principles derivation chain to GraphML format
+ */
+function firstPrinciplesToGraphML(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
+  const { includeLabels = true } = options;
+
+  const nodes: GraphMLNode[] = [];
+  const edges: GraphMLEdge[] = [];
+  let edgeCount = 0;
+
+  // Add question node
+  nodes.push({
+    id: 'question',
+    label: includeLabels ? `Question: ${thought.question}` : 'Question',
+    type: 'question',
+  });
+
+  // Add principle nodes
+  for (const principle of thought.principles) {
+    const principleId = sanitizeId(principle.id);
+    nodes.push({
+      id: principleId,
+      label: includeLabels
+        ? `${principle.type.toUpperCase()}: ${principle.statement.substring(0, 60)}...`
+        : principleId,
+      type: principle.type,
+      metadata: {
+        justification: principle.justification,
+        confidence: principle.confidence,
+      },
+    });
+
+    // Add edges from dependencies
+    if (principle.dependsOn) {
+      for (const depId of principle.dependsOn) {
+        const sanitizedDepId = sanitizeId(depId);
+        edges.push({
+          id: `e${edgeCount++}`,
+          source: sanitizedDepId,
+          target: principleId,
+          label: 'depends on',
+          directed: true,
+        });
+      }
+    }
+  }
+
+  // Add derivation step nodes
+  for (const step of thought.derivationSteps) {
+    const stepId = `Step${step.stepNumber}`;
+    nodes.push({
+      id: stepId,
+      label: includeLabels
+        ? `Step ${step.stepNumber}: ${step.inference.substring(0, 60)}...`
+        : stepId,
+      type: 'derivation_step',
+      metadata: {
+        logicalForm: step.logicalForm,
+        confidence: step.confidence,
+      },
+    });
+
+    // Edge from principle to step
+    const principleId = sanitizeId(step.principle);
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: principleId,
+      target: stepId,
+      label: 'applies',
+      directed: true,
+    });
+  }
+
+  // Add conclusion node
+  nodes.push({
+    id: 'conclusion',
+    label: includeLabels
+      ? `Conclusion: ${thought.conclusion.statement.substring(0, 60)}...`
+      : 'Conclusion',
+    type: 'conclusion',
+    metadata: {
+      certainty: thought.conclusion.certainty,
+      limitations: thought.conclusion.limitations,
+    },
+  });
+
+  // Edges from derivation steps to conclusion
+  for (const stepNum of thought.conclusion.derivationChain) {
+    edges.push({
+      id: `e${edgeCount++}`,
+      source: `Step${stepNum}`,
+      target: 'conclusion',
+      directed: true,
+    });
+  }
+
+  return generateGraphML(nodes, edges, {
+    graphName: 'First Principles Derivation',
+    directed: true,
+    includeLabels,
+  });
+}
+
+/**
+ * Export first-principles derivation chain to TikZ format
+ */
+function firstPrinciplesToTikZ(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
+  const { includeLabels = true, colorScheme = 'default' } = options;
+
+  const nodes: TikZNode[] = [];
+  const edges: TikZEdge[] = [];
+
+  // Position principles at the top (stadium shape for axioms/principles)
+  const principleCount = thought.principles.length;
+  thought.principles.forEach((principle, index) => {
+    const principleId = sanitizeId(principle.id);
+    nodes.push({
+      id: principleId,
+      label: includeLabels
+        ? `${principle.type}: ${principle.statement.substring(0, 25)}...`
+        : principleId,
+      x: index * 3,
+      y: 0,
+      type: principle.type === 'axiom' ? 'primary' : 'secondary',
+      shape: 'stadium',
+    });
+
+    // Add edges for dependencies between principles
+    if (principle.dependsOn) {
+      for (const depId of principle.dependsOn) {
+        const sanitizedDepId = sanitizeId(depId);
+        edges.push({
+          source: sanitizedDepId,
+          target: principleId,
+          directed: true,
+          style: 'dashed',
+        });
+      }
+    }
+  });
+
+  // Position derivation steps in the middle layer
+  const stepY = -2;
+  thought.derivationSteps.forEach((step, index) => {
+    const stepId = `Step${step.stepNumber}`;
+    const principleId = sanitizeId(step.principle);
+
+    nodes.push({
+      id: stepId,
+      label: includeLabels ? `Step ${step.stepNumber}` : stepId,
+      x: index * 3,
+      y: stepY,
+      type: 'neutral',
+      shape: 'rectangle',
+    });
+
+    // Edge from principle to step
+    edges.push({
+      source: principleId,
+      target: stepId,
+      label: 'applies',
+      directed: true,
+      style: 'dashed',
+    });
+  });
+
+  // Position conclusion at the bottom
+  const conclusionX = (principleCount - 1) * 3 / 2; // Center it
+  nodes.push({
+    id: 'conclusion',
+    label: includeLabels ? 'Conclusion' : 'C',
+    x: conclusionX,
+    y: -4,
+    type: 'success',
+    shape: 'stadium',
+  });
+
+  // Edges from derivation steps to conclusion
+  for (const stepNum of thought.conclusion.derivationChain) {
+    edges.push({
+      source: `Step${stepNum}`,
+      target: 'conclusion',
+      directed: true,
+    });
+  }
+
+  return generateTikZ(nodes, edges, {
+    title: 'First Principles Derivation',
+    colorScheme,
+    includeLabels,
+  });
 }

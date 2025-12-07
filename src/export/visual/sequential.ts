@@ -1,7 +1,7 @@
 /**
- * Sequential Visual Exporter (v7.0.2)
+ * Sequential Visual Exporter (v7.0.3)
  * Sprint 8 Task 8.1: Sequential dependency graph export to Mermaid, DOT, ASCII
- * Phase 9: Added native SVG export support
+ * Phase 9: Added native SVG export support, GraphML, TikZ
  */
 
 import type { SequentialThought } from '../../types/index.js';
@@ -18,6 +18,16 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  type TikZNode,
+  type TikZEdge,
+} from './tikz-utils.js';
 
 /**
  * Export sequential dependency graph to visual format
@@ -34,6 +44,10 @@ export function exportSequentialDependencyGraph(thought: SequentialThought, opti
       return sequentialToASCII(thought);
     case 'svg':
       return sequentialToSVG(thought, options);
+    case 'graphml':
+      return sequentialToGraphML(thought, options);
+    case 'tikz':
+      return sequentialToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -249,4 +263,128 @@ function sequentialToSVG(thought: SequentialThought, options: VisualExportOption
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export sequential dependency graph to GraphML format
+ */
+function sequentialToGraphML(thought: SequentialThought, options: VisualExportOptions): string {
+  const { includeLabels = true } = options;
+
+  // Build nodes from thought dependencies (buildUpon) and current thought
+  const nodes: GraphMLNode[] = [];
+  const edges: GraphMLEdge[] = [];
+
+  // If thought has buildUpon dependencies, use them to create a sequential chain
+  if (thought.buildUpon && thought.buildUpon.length > 0) {
+    // Add dependency nodes
+    thought.buildUpon.forEach((depId, index) => {
+      nodes.push({
+        id: sanitizeId(depId),
+        label: includeLabels ? `Step ${index + 1}: ${depId}` : sanitizeId(depId),
+        type: 'dependency',
+      });
+    });
+
+    // Add current thought as final node
+    nodes.push({
+      id: sanitizeId(thought.id),
+      label: includeLabels ? `Step ${nodes.length + 1}: ${thought.content.substring(0, 50)}...` : sanitizeId(thought.id),
+      type: 'current',
+    });
+
+    // Create edges linking sequential steps
+    thought.buildUpon.forEach((depId, index) => {
+      const sourceId = sanitizeId(depId);
+      const targetId = index < thought.buildUpon!.length - 1
+        ? sanitizeId(thought.buildUpon![index + 1])
+        : sanitizeId(thought.id);
+
+      edges.push({
+        id: `e${index}`,
+        source: sourceId,
+        target: targetId,
+        directed: true,
+      });
+    });
+  } else {
+    // Handle empty case - just show the current thought
+    nodes.push({
+      id: sanitizeId(thought.id),
+      label: includeLabels ? thought.content.substring(0, 100) : sanitizeId(thought.id),
+      type: 'current',
+    });
+  }
+
+  return generateGraphML(nodes, edges, {
+    graphName: 'Sequential Dependency Graph',
+    directed: true,
+    includeLabels,
+  });
+}
+
+/**
+ * Export sequential dependency graph to TikZ format
+ */
+function sequentialToTikZ(thought: SequentialThought, options: VisualExportOptions): string {
+  const { includeLabels = true, colorScheme = 'default' } = options;
+
+  // Build nodes from thought dependencies (buildUpon) and current thought
+  const nodes: TikZNode[] = [];
+  const edges: TikZEdge[] = [];
+
+  // If thought has buildUpon dependencies, use them to create a sequential chain
+  if (thought.buildUpon && thought.buildUpon.length > 0) {
+    // Add dependency nodes (completed steps)
+    thought.buildUpon.forEach((depId, index) => {
+      nodes.push({
+        id: sanitizeId(depId),
+        label: includeLabels ? `Step ${index + 1}` : sanitizeId(depId),
+        x: index * 3,
+        y: 0,
+        type: 'success', // Completed steps
+        shape: 'rectangle',
+      });
+    });
+
+    // Add current thought as final node (current step)
+    nodes.push({
+      id: sanitizeId(thought.id),
+      label: includeLabels ? `Step ${nodes.length + 1}` : sanitizeId(thought.id),
+      x: nodes.length * 3,
+      y: 0,
+      type: 'primary', // Current step
+      shape: 'rectangle',
+    });
+
+    // Create edges between consecutive steps
+    thought.buildUpon.forEach((depId, index) => {
+      const sourceId = sanitizeId(depId);
+      const targetId = index < thought.buildUpon!.length - 1
+        ? sanitizeId(thought.buildUpon![index + 1])
+        : sanitizeId(thought.id);
+
+      edges.push({
+        source: sourceId,
+        target: targetId,
+        directed: true,
+      });
+    });
+  } else {
+    // Handle empty case - just show the current thought
+    nodes.push({
+      id: sanitizeId(thought.id),
+      label: includeLabels ? 'Current' : sanitizeId(thought.id),
+      x: 0,
+      y: 0,
+      type: 'primary',
+      shape: 'rectangle',
+    });
+  }
+
+  return generateTikZ(nodes, edges, {
+    title: 'Sequential Dependency Graph',
+    colorScheme,
+    includeLabels,
+  });
 }

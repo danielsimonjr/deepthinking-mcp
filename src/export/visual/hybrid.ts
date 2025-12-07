@@ -1,7 +1,7 @@
 /**
- * Hybrid Visual Exporter (v7.0.2)
+ * Hybrid Visual Exporter (v7.0.3)
  * Phase 7 Sprint 2: Hybrid mode reasoning export to Mermaid, DOT, ASCII
- * Phase 9: Added native SVG export support
+ * Phase 9: Added native SVG export support, GraphML, TikZ
  */
 
 import type { HybridThought } from '../../types/core.js';
@@ -20,6 +20,16 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  type TikZNode,
+  type TikZEdge,
+} from './tikz-utils.js';
 
 /**
  * Export hybrid reasoning to visual format
@@ -36,6 +46,10 @@ export function exportHybridOrchestration(thought: HybridThought, options: Visua
       return hybridToASCII(thought);
     case 'svg':
       return hybridToSVG(thought, options);
+    case 'graphml':
+      return hybridToGraphML(thought, options);
+    case 'tikz':
+      return hybridToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -447,4 +461,173 @@ function hybridToSVG(thought: HybridThought, options: VisualExportOptions): stri
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export hybrid orchestration to GraphML format
+ */
+function hybridToGraphML(thought: HybridThought, options: VisualExportOptions): string {
+  const { includeLabels = true } = options;
+
+  // Build nodes for hybrid orchestration
+  const nodes: GraphMLNode[] = [];
+  const edges: GraphMLEdge[] = [];
+
+  // Central hybrid mode node
+  nodes.push({
+    id: sanitizeId('hybrid_mode'),
+    label: includeLabels ? 'Hybrid Mode' : 'hybrid',
+    type: 'hybrid',
+  });
+
+  // Primary mode node
+  const primaryId = sanitizeId(`primary_${thought.primaryMode}`);
+  nodes.push({
+    id: primaryId,
+    label: includeLabels ? thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1) : thought.primaryMode,
+    type: 'primary',
+  });
+
+  // Edge from hybrid to primary
+  edges.push({
+    id: 'e_hybrid_primary',
+    source: sanitizeId('hybrid_mode'),
+    target: primaryId,
+    directed: true,
+  });
+
+  // Secondary features
+  if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
+    thought.secondaryFeatures.forEach((feature, index) => {
+      const featureId = sanitizeId(`feature_${index}`);
+      nodes.push({
+        id: featureId,
+        label: includeLabels ? feature.substring(0, 50) + (feature.length > 50 ? '...' : '') : `Feature ${index + 1}`,
+        type: 'secondary',
+      });
+
+      // Edge from hybrid to feature
+      edges.push({
+        id: `e_hybrid_feature_${index}`,
+        source: sanitizeId('hybrid_mode'),
+        target: featureId,
+        directed: true,
+      });
+    });
+  }
+
+  // Add stage node if present
+  if (thought.stage) {
+    const stageId = sanitizeId(`stage_${thought.stage}`);
+    nodes.push({
+      id: stageId,
+      label: includeLabels ? thought.stage.replace(/_/g, ' ') : 'stage',
+      type: 'stage',
+    });
+
+    edges.push({
+      id: 'e_primary_stage',
+      source: primaryId,
+      target: stageId,
+      directed: true,
+    });
+  }
+
+  return generateGraphML(nodes, edges, {
+    graphName: 'Hybrid Orchestration',
+    directed: true,
+    includeLabels,
+  });
+}
+
+/**
+ * Export hybrid orchestration to TikZ format
+ */
+function hybridToTikZ(thought: HybridThought, options: VisualExportOptions): string {
+  const { includeLabels = true, colorScheme = 'default' } = options;
+
+  // Build nodes for hybrid orchestration
+  const nodes: TikZNode[] = [];
+  const edges: TikZEdge[] = [];
+
+  // Central hybrid mode node (top of orchestration)
+  nodes.push({
+    id: sanitizeId('hybrid_mode'),
+    label: includeLabels ? 'Hybrid Mode' : 'hybrid',
+    x: 4,
+    y: 0,
+    type: 'success',
+    shape: 'ellipse',
+  });
+
+  // Primary mode node (below hybrid)
+  const primaryId = sanitizeId(`primary_${thought.primaryMode}`);
+  nodes.push({
+    id: primaryId,
+    label: includeLabels ? thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1) : thought.primaryMode,
+    x: 4,
+    y: -2,
+    type: 'primary',
+    shape: 'stadium',
+  });
+
+  // Edge from hybrid to primary
+  edges.push({
+    source: sanitizeId('hybrid_mode'),
+    target: primaryId,
+    directed: true,
+  });
+
+  // Secondary features (positioned horizontally below primary)
+  if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
+    const featureCount = thought.secondaryFeatures.length;
+    const spacing = 3;
+    const totalWidth = (featureCount - 1) * spacing;
+    const startX = 4 - totalWidth / 2;
+
+    thought.secondaryFeatures.forEach((feature, index) => {
+      const featureId = sanitizeId(`feature_${index}`);
+      nodes.push({
+        id: featureId,
+        label: includeLabels ? (feature.length > 20 ? feature.substring(0, 20) + '...' : feature) : `F${index + 1}`,
+        x: startX + index * spacing,
+        y: -4,
+        type: 'secondary',
+        shape: 'rectangle',
+      });
+
+      // Edge from primary to feature
+      edges.push({
+        source: primaryId,
+        target: featureId,
+        directed: true,
+      });
+    });
+  }
+
+  // Add stage node if present
+  if (thought.stage) {
+    const stageId = sanitizeId(`stage_${thought.stage}`);
+    nodes.push({
+      id: stageId,
+      label: includeLabels ? thought.stage.replace(/_/g, ' ') : 'stage',
+      x: 7,
+      y: -2,
+      type: 'info',
+      shape: 'diamond',
+    });
+
+    edges.push({
+      source: primaryId,
+      target: stageId,
+      directed: true,
+      style: 'dashed',
+    });
+  }
+
+  return generateTikZ(nodes, edges, {
+    title: 'Hybrid Orchestration',
+    colorScheme,
+    includeLabels,
+  });
 }

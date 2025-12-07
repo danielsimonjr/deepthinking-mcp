@@ -1,7 +1,7 @@
 /**
- * Game Theory Visual Exporter (v7.0.2)
+ * Game Theory Visual Exporter (v7.0.3)
  * Sprint 8 Task 8.1: Game tree export to Mermaid, DOT, ASCII
- * Phase 9: Added native SVG export support
+ * Phase 9: Added native SVG export support, GraphML, and TikZ
  */
 
 import type { GameTheoryThought } from '../../types/index.js';
@@ -19,6 +19,18 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  createTreeGraphML,
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+} from './graphml-utils.js';
+import {
+  createTreeTikZ,
+  generateTikZ,
+  type TikZNode,
+  type TikZEdge,
+} from './tikz-utils.js';
 
 /**
  * Export game tree to visual format
@@ -35,6 +47,10 @@ export function exportGameTree(thought: GameTheoryThought, options: VisualExport
       return gameTreeToASCII(thought);
     case 'svg':
       return gameTreeToSVG(thought, options);
+    case 'graphml':
+      return gameTreeToGraphML(thought, options);
+    case 'tikz':
+      return gameTreeToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -330,4 +346,164 @@ function gameTreeToSVG(thought: GameTheoryThought, options: VisualExportOptions)
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export game tree to GraphML format
+ */
+function gameTreeToGraphML(thought: GameTheoryThought, options: VisualExportOptions): string {
+  const { includeLabels = true } = options;
+
+  if (!thought.game) {
+    // Empty case: no game defined
+    const nodes: GraphMLNode[] = [{ id: 'root', label: 'No game defined', type: 'root' }];
+    return generateGraphML(nodes, [], { graphName: 'Empty Game Tree' });
+  }
+
+  if (thought.gameTree && thought.gameTree.nodes && thought.gameTree.nodes.length > 0) {
+    // Build GraphMLNode[] from gameTree.nodes
+    const nodes: GraphMLNode[] = thought.gameTree.nodes.map(node => ({
+      id: sanitizeId(node.id),
+      label: includeLabels ? (node.action || node.id) : node.id,
+      type: node.type || 'node',
+      metadata: {
+        action: node.action,
+        player: node.playerId,
+      },
+    }));
+
+    // Build edges from parent-child relationships
+    const edges: GraphMLEdge[] = [];
+    let edgeCount = 0;
+    for (const node of thought.gameTree.nodes) {
+      if (node.childNodes && node.childNodes.length > 0) {
+        for (const childId of node.childNodes) {
+          const childNode = thought.gameTree.nodes.find(n => n.id === childId);
+          edges.push({
+            id: `e${edgeCount++}`,
+            source: sanitizeId(node.id),
+            target: sanitizeId(childId),
+            label: includeLabels && childNode?.action ? childNode.action : undefined,
+            directed: true,
+          });
+        }
+      }
+    }
+
+    return generateGraphML(nodes, edges, { graphName: thought.game?.name || 'Game Tree' });
+  } else if (thought.strategies && thought.strategies.length > 0) {
+    // Create a simple tree with root "Game" and strategy nodes as children
+    const root = {
+      id: 'root',
+      label: 'Game',
+      children: thought.strategies.slice(0, 5).map(strategy => ({
+        id: sanitizeId(strategy.id),
+        label: strategy.name,
+      })),
+    };
+
+    return createTreeGraphML(root, { graphName: thought.game?.name || 'Game Tree' });
+  }
+
+  // Empty case: no tree or strategies
+  const nodes: GraphMLNode[] = [{ id: 'root', label: 'No game tree', type: 'root' }];
+  return generateGraphML(nodes, [], { graphName: thought.game?.name || 'Game Tree' });
+}
+
+/**
+ * Export game tree to TikZ format
+ */
+function gameTreeToTikZ(thought: GameTheoryThought, options: VisualExportOptions): string {
+  const { includeLabels = true, colorScheme = 'default' } = options;
+
+  if (!thought.game) {
+    // Empty case: no game defined
+    const nodes: TikZNode[] = [{ id: 'root', label: 'No game defined', x: 4, y: 0, type: 'root', shape: 'rectangle' }];
+    return generateTikZ(nodes, [], { title: 'Empty Game Tree', colorScheme });
+  }
+
+  if (thought.gameTree && thought.gameTree.nodes && thought.gameTree.nodes.length > 0) {
+    // Calculate depth of each node based on parent-child relationships
+    const nodeDepths = new Map<string, number>();
+    const rootNodes = thought.gameTree.nodes.filter(n => !n.parentNode);
+
+    // BFS to calculate depths
+    const queue: Array<{ nodeId: string; depth: number }> = rootNodes.map(n => ({ nodeId: n.id, depth: 0 }));
+    while (queue.length > 0) {
+      const { nodeId, depth } = queue.shift()!;
+      nodeDepths.set(nodeId, depth);
+      const node = thought.gameTree.nodes.find(n => n.id === nodeId);
+      if (node && node.childNodes) {
+        for (const childId of node.childNodes) {
+          queue.push({ nodeId: childId, depth: depth + 1 });
+        }
+      }
+    }
+
+    // Group nodes by depth for layout
+    const nodesByDepth = new Map<number, typeof thought.gameTree.nodes>();
+    for (const node of thought.gameTree.nodes) {
+      const depth = nodeDepths.get(node.id) || 0;
+      if (!nodesByDepth.has(depth)) {
+        nodesByDepth.set(depth, []);
+      }
+      nodesByDepth.get(depth)!.push(node);
+    }
+
+    // Build TikZNode[] with positions based on tree depth
+    const nodes: TikZNode[] = [];
+    const depths = Array.from(nodesByDepth.keys()).sort((a, b) => a - b);
+
+    for (const depth of depths) {
+      const nodesAtDepth = nodesByDepth.get(depth)!;
+      const layerWidth = nodesAtDepth.length * 3;
+      const startX = (8 - layerWidth) / 2 + 1.5;
+
+      for (let i = 0; i < nodesAtDepth.length; i++) {
+        const node = nodesAtDepth[i];
+        nodes.push({
+          id: sanitizeId(node.id),
+          label: includeLabels ? (node.action || node.id) : node.id,
+          x: startX + i * 3,
+          y: -depth * 2, // y decreases by 2 per level
+          type: node.type || 'neutral',
+          shape: node.type === 'terminal' ? 'ellipse' : 'rectangle', // Use 'ellipse' for terminal nodes
+        });
+      }
+    }
+
+    // Build TikZEdge[] from childNodes relationships
+    const edges: TikZEdge[] = [];
+    for (const node of thought.gameTree.nodes) {
+      if (node.childNodes && node.childNodes.length > 0) {
+        for (const childId of node.childNodes) {
+          const childNode = thought.gameTree.nodes.find(n => n.id === childId);
+          edges.push({
+            source: sanitizeId(node.id),
+            target: sanitizeId(childId),
+            label: includeLabels && childNode?.action ? childNode.action : undefined,
+            directed: true,
+          });
+        }
+      }
+    }
+
+    return generateTikZ(nodes, edges, { title: thought.game?.name || 'Game Tree', colorScheme });
+  } else if (thought.strategies && thought.strategies.length > 0) {
+    // Create a simple tree with root "Game" and strategy nodes as children
+    const root = {
+      id: 'root',
+      label: 'Game',
+      children: thought.strategies.slice(0, 5).map(strategy => ({
+        id: sanitizeId(strategy.id),
+        label: strategy.name,
+      })),
+    };
+
+    return createTreeTikZ(root, { title: thought.game?.name || 'Game Tree', colorScheme });
+  }
+
+  // Empty case: no tree or strategies
+  const nodes: TikZNode[] = [{ id: 'root', label: 'No game tree', x: 4, y: 0, type: 'root', shape: 'rectangle' }];
+  return generateTikZ(nodes, [], { title: thought.game?.name || 'Game Tree', colorScheme });
 }

@@ -1,7 +1,8 @@
 /**
- * Systems Thinking Visual Exporter (v7.0.2)
+ * Systems Thinking Visual Exporter (v7.0.3)
  * Sprint 8 Task 8.1: Systems thinking causal loop export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
+ * Phase 9: Added GraphML and TikZ export support
  */
 
 import type { SystemsThinkingThought } from '../../types/index.js';
@@ -19,6 +20,16 @@ import {
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
 } from './svg-utils.js';
+import {
+  generateGraphML,
+  type GraphMLNode,
+  type GraphMLEdge,
+} from './graphml-utils.js';
+import {
+  generateTikZ,
+  type TikZNode,
+  type TikZEdge,
+} from './tikz-utils.js';
 
 /**
  * Export systems thinking causal loop diagram to visual format
@@ -35,6 +46,10 @@ export function exportSystemsThinkingCausalLoops(thought: SystemsThinkingThought
       return systemsThinkingToASCII(thought);
     case 'svg':
       return systemsThinkingToSVG(thought, options);
+    case 'graphml':
+      return systemsThinkingToGraphML(thought, options);
+    case 'tikz':
+      return systemsThinkingToTikZ(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
@@ -275,4 +290,140 @@ function systemsThinkingToSVG(thought: SystemsThinkingThought, options: VisualEx
 
   svg += '\n' + generateSVGFooter();
   return svg;
+}
+
+/**
+ * Export systems thinking causal loop diagram to GraphML format
+ */
+function systemsThinkingToGraphML(thought: SystemsThinkingThought, options: VisualExportOptions): string {
+  const { includeLabels = true, includeMetrics = true } = options;
+
+  const nodes: GraphMLNode[] = [];
+  const edges: GraphMLEdge[] = [];
+
+  // Create nodes for system components
+  if (thought.components && thought.components.length > 0) {
+    for (const component of thought.components) {
+      nodes.push({
+        id: sanitizeId(component.id),
+        label: component.name,
+        type: component.type,
+        metadata: {
+          description: component.description,
+          unit: component.unit,
+          initialValue: component.initialValue,
+        },
+      });
+    }
+  }
+
+  // Create edges for feedback loops
+  if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+    let edgeCount = 0;
+    for (const loop of thought.feedbackLoops) {
+      const loopComponents = loop.components;
+
+      for (let i = 0; i < loopComponents.length; i++) {
+        const fromId = sanitizeId(loopComponents[i]);
+        const toId = sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
+
+        const label = includeLabels && includeMetrics
+          ? `${loop.type} (${loop.strength.toFixed(2)})`
+          : includeLabels
+            ? loop.type
+            : undefined;
+
+        edges.push({
+          id: `e${edgeCount++}`,
+          source: fromId,
+          target: toId,
+          label,
+          directed: true,
+          metadata: {
+            type: loop.type,
+            weight: loop.strength,
+            polarity: loop.polarity,
+            loopName: loop.name,
+          },
+        });
+      }
+    }
+  }
+
+  return generateGraphML(nodes, edges, {
+    graphName: 'Systems Thinking Causal Loops',
+    directed: true,
+    includeLabels,
+    includeMetadata: includeMetrics,
+  });
+}
+
+/**
+ * Export systems thinking causal loop diagram to TikZ format
+ */
+function systemsThinkingToTikZ(thought: SystemsThinkingThought, options: VisualExportOptions): string {
+  const { colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+
+  const nodes: TikZNode[] = [];
+  const edges: TikZEdge[] = [];
+
+  // Create TikZ nodes for system components
+  if (thought.components && thought.components.length > 0) {
+    const numComponents = thought.components.length;
+    const radius = 4; // Radius of circular layout
+
+    thought.components.forEach((component, index) => {
+      const angle = (2 * Math.PI * index) / numComponents;
+      const x = 4 + radius * Math.cos(angle - Math.PI / 2);
+      const y = -2 + radius * Math.sin(angle - Math.PI / 2);
+
+      nodes.push({
+        id: sanitizeId(component.id),
+        label: component.name,
+        x,
+        y,
+        type: component.type === 'stock' ? 'primary' : 'secondary',
+        shape: component.type === 'stock' ? 'rectangle' : 'ellipse',
+      });
+    });
+  }
+
+  // Create TikZ edges for feedback loops with curved/bent edges
+  if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+    for (const loop of thought.feedbackLoops) {
+      const loopComponents = loop.components;
+
+      for (let i = 0; i < loopComponents.length; i++) {
+        const fromId = sanitizeId(loopComponents[i]);
+        const toId = sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
+
+        const label = includeLabels && includeMetrics
+          ? `${loop.type[0].toUpperCase()} (${loop.strength.toFixed(2)})`
+          : includeLabels
+            ? loop.type[0].toUpperCase()
+            : undefined;
+
+        // Mark reinforcing vs balancing loops differently
+        const style = loop.type === 'reinforcing' ? 'solid' : 'dashed';
+        // Use curved edges for feedback loops
+        const bend = loop.type === 'reinforcing' ? 'left' : 'right';
+
+        edges.push({
+          source: fromId,
+          target: toId,
+          label,
+          style,
+          directed: true,
+          bend,
+        });
+      }
+    }
+  }
+
+  return generateTikZ(nodes, edges, {
+    title: 'Systems Thinking Causal Loops',
+    colorScheme,
+    includeLabels,
+    includeMetrics,
+  });
 }
