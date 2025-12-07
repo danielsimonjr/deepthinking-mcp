@@ -18,6 +18,7 @@ A comprehensive Model Context Protocol (MCP) server featuring **25 reasoning mod
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Reasoning Modes](#reasoning-modes)
+- [Proof Decomposition](#proof-decomposition)
 - [Usage Examples](#usage-examples)
 - [Production Features](#production-features)
 - [API Documentation](#api-documentation)
@@ -274,7 +275,7 @@ mode: 'first-principles'
 // Use for: Fundamental analysis, conceptual understanding, basic truths
 ```
 
-#### Meta-Reasoning ⭐ NEW
+#### Meta-Reasoning
 Strategic oversight of reasoning process - monitors effectiveness, recommends mode switches, assesses quality.
 
 ```typescript
@@ -368,6 +369,84 @@ Reasoning from general principles to specific conclusions.
 ```typescript
 mode: 'deductive'
 // Use for: Logical proofs, applying rules, deriving conclusions
+```
+
+## Proof Decomposition
+
+**New in v7.0.0!** The proof decomposition system provides advanced mathematical reasoning capabilities:
+
+### Components
+
+| Component | Purpose |
+|-----------|---------|
+| **ProofDecomposer** | Breaks proofs into atomic statements with dependency tracking |
+| **GapAnalyzer** | Detects missing steps, unjustified leaps, and implicit assumptions |
+| **AssumptionTracker** | Traces conclusions back to their supporting assumptions |
+| **InconsistencyDetector** | Detects circular dependencies and contradictions |
+| **MathematicsReasoningEngine** | Integrated proof analysis with improvement suggestions |
+
+### Features
+
+- **Atomic Statement Types**: axiom, hypothesis, definition, derived, lemma, conclusion
+- **Inference Rules**: algebraic_manipulation, substitution, modus_ponens, universal_instantiation, etc.
+- **Gap Detection**: Identify missing steps with severity levels (minor, significant, critical)
+- **Rigor Levels**: informal, textbook, rigorous, formal
+- **Visual Export**: Mermaid, DOT, ASCII, and native SVG formats
+
+### Example: Proof Analysis
+
+```json
+{
+  "tool": "deepthinking_math",
+  "arguments": {
+    "mode": "mathematics",
+    "thought": "Analyzing the proof that n² is even when n is even",
+    "thoughtNumber": 1,
+    "totalThoughts": 3,
+    "nextThoughtNeeded": true,
+    "proofDecomposition": {
+      "theorem": "If n is even, then n² is even",
+      "atoms": [
+        {"id": "a1", "content": "n is an even integer", "type": "hypothesis"},
+        {"id": "a2", "content": "n = 2k for some integer k", "type": "definition"},
+        {"id": "a3", "content": "n² = 4k² = 2(2k²)", "type": "derived"},
+        {"id": "a4", "content": "n² is even", "type": "conclusion"}
+      ],
+      "dependencies": {
+        "nodes": ["a1", "a2", "a3", "a4"],
+        "edges": [
+          {"from": "a1", "to": "a2"},
+          {"from": "a2", "to": "a3"},
+          {"from": "a3", "to": "a4"}
+        ]
+      }
+    }
+  }
+}
+```
+
+### Visual Export Formats
+
+Export proof decompositions to multiple visual formats:
+
+```typescript
+// Native SVG (no external tools required)
+exportProofDecomposition(decomposition, {
+  format: 'svg',
+  colorScheme: 'default',  // 'default' | 'pastel' | 'monochrome'
+  includeMetrics: true,
+  svgWidth: 1200,
+  svgHeight: 800
+});
+
+// Mermaid diagram
+exportProofDecomposition(decomposition, { format: 'mermaid' });
+
+// GraphViz DOT
+exportProofDecomposition(decomposition, { format: 'dot' });
+
+// ASCII text
+exportProofDecomposition(decomposition, { format: 'ascii' });
 ```
 
 ## Usage Examples
@@ -469,6 +548,16 @@ mode: 'deductive'
 
 > **Note**: DeepThinking MCP is an MCP server, not a library. These features are accessed through MCP tools and internal architecture. The examples below describe the internal capabilities.
 
+### Proof Decomposition (v7.0.0)
+
+Advanced mathematical reasoning with proof analysis:
+
+- **ProofDecomposer**: Break proofs into atomic statements with dependency graphs
+- **GapAnalyzer**: Detect missing steps, unjustified leaps, implicit assumptions
+- **AssumptionTracker**: Trace conclusions to their supporting assumptions
+- **InconsistencyDetector**: Find circular dependencies and contradictions
+- **Native SVG Export**: Generate proof visualizations without external tools
+
 ### Search Engine
 
 Full-text search with faceted filtering and relevance ranking. Used internally to search across reasoning sessions by mode, tags, date ranges, and content.
@@ -533,7 +622,7 @@ All reasoning is done through MCP tools. Each tool accepts arguments and returns
 | Action | Parameters | Description |
 |--------|------------|-------------|
 | `summarize` | `sessionId` | Generate session summary |
-| `export` | `sessionId`, `exportFormat` | Export to format (json, markdown, latex, html, jupyter, mermaid, dot, ascii) |
+| `export` | `sessionId`, `exportFormat` | Export to format (json, markdown, latex, html, jupyter, mermaid, dot, ascii, svg) |
 | `get_session` | `sessionId` | Get session details |
 | `switch_mode` | `sessionId`, `newMode` | Switch reasoning mode |
 | `recommend_mode` | `problemType` or `problemCharacteristics` | Get mode recommendations |
@@ -572,7 +661,7 @@ For architecture details, see [docs/architecture/](docs/architecture/).
 
 ## Architecture
 
-The codebase is organized into 25 modules with clean separation of concerns. See [docs/architecture/DEPENDENCY_GRAPH.md](docs/architecture/DEPENDENCY_GRAPH.md) for the complete dependency graph.
+The codebase is organized into 26 modules with clean separation of concerns. See [docs/architecture/DEPENDENCY_GRAPH.md](docs/architecture/DEPENDENCY_GRAPH.md) for the complete dependency graph.
 
 ### Core Structure
 
@@ -587,7 +676,13 @@ src/
 │   ├── ExportService.ts     # Multi-format export handling
 │   └── ModeRouter.ts        # Mode switching and recommendations
 ├── session/           # SessionManager, persistence, storage
-├── modes/             # Advanced reasoning implementations (6 files)
+├── modes/             # Advanced reasoning implementations (7 files)
+├── proof/             # Proof decomposition system (v7.0.0)
+│   ├── decomposer.ts        # ProofDecomposer class
+│   ├── gap-analyzer.ts      # GapAnalyzer class
+│   └── assumption-tracker.ts # AssumptionTracker class
+├── reasoning/         # Reasoning engines (v7.0.0)
+│   └── inconsistency-detector.ts  # InconsistencyDetector class
 └── tools/             # MCP tool definitions and schemas
 ```
 
@@ -600,7 +695,9 @@ src/
 │   ├── classifier.ts        # Task classification
 │   └── suggestion-engine.ts # Mode recommendations
 ├── export/            # Visual and document exporters
-│   ├── visual/        # 19 mode-specific visual exporters
+│   ├── visual/        # 20 mode-specific visual exporters + native SVG
+│   │   ├── proof-decomposition.ts  # Proof visualization (v7.0.0)
+│   │   └── [19 mode exporters]     # Mermaid, DOT, ASCII, SVG
 │   └── latex.ts       # LaTeX document generation
 ├── search/            # Full-text search with faceted filtering
 ├── batch/             # Batch processing (8 operations)
