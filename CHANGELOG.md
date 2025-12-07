@@ -9,6 +9,109 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ Features
 
+**Historical Computing Pioneers Extensions (Phase 11 - Turing & von Neumann)**
+
+Added new reasoning modes inspired by the foundational work of Alan Turing and John von Neumann, bringing the total to 27 thinking modes.
+
+#### New Computability Mode (Turing's Legacy)
+- `src/types/modes/computability.ts` - Complete type definitions for:
+  - Turing machine specifications (states, transitions, alphabet)
+  - Computation traces with step-by-step execution
+  - Decision problems and decidability classification
+  - Reduction proofs (many-one, Turing, polynomial-time)
+  - Diagonalization arguments (Cantor, Turing, Gödel patterns)
+  - Complexity analysis (time/space bounds, complexity classes)
+  - Oracle machines and relativization
+  - Classic undecidable problems reference
+
+- `src/validation/validators/modes/computability.ts` - Validator for:
+  - Turing machine well-formedness (state consistency, transition validity)
+  - Reduction correctness structure
+  - Decidability proof completeness
+  - Diagonalization argument validity
+
+- `src/export/visual/computability.ts` - Visual export supporting all 10 formats:
+  - Turing machine state diagrams
+  - Reduction chains and dependency graphs
+  - Computation traces
+  - Decidability classifications
+
+#### New Cryptanalytic Mode (Turing's Bletchley Park Work)
+- `src/types/modes/cryptanalytic.ts` - Type definitions featuring:
+  - **Turing's Deciban System**: Evidence quantification using bans/decibans
+    - 1 ban = log₁₀(10) = factor of 10 in odds
+    - 1 deciban = 0.1 bans ≈ factor of 1.26 in odds
+    - 20 decibans = 100:1 odds (Turing's certainty threshold)
+  - Evidence chains with running totals
+  - Key space analysis and elimination tracking
+  - Frequency analysis with chi-squared statistics
+  - Index of Coincidence calculations
+  - Banburismus analysis (Turing's Enigma technique)
+  - Crib analysis (known plaintext attacks)
+  - Cryptographic hypothesis management
+
+- `src/validation/validators/modes/cryptanalytic.ts` - Validator for:
+  - Evidence chain consistency
+  - Deciban/likelihood ratio consistency
+  - Key space arithmetic validation
+  - Frequency analysis bounds checking
+
+#### Extended Game Theory (von Neumann's Legacy)
+- Enhanced `src/types/modes/gametheory.ts` with:
+  - **Von Neumann's Minimax Theorem (1928)**:
+    - Game value computation
+    - Maximin/minimax analysis
+    - Saddle point detection
+    - Optimal mixed strategy calculation
+    - Proof structure with theorem reference
+  - **Cooperative Game Theory (von Neumann-Morgenstern, 1944)**:
+    - Characteristic function v(S) for coalitions
+    - Core allocations and stability
+    - Shapley value computation with full formula
+    - Nucleolus calculation
+    - Banzhaf power index for voting games
+    - Superadditivity and convexity checking
+  - **Coalition Analysis**:
+    - Grand coalition value
+    - Winning/blocking coalitions
+    - Veto players
+    - Coalition structure stability
+
+- Helper functions:
+  - `createCharacteristicFunction()` - Build coalition value mappings
+  - `checkSuperadditivity()` - Verify game properties
+  - `calculateShapleyValue()` - Compute fair allocations
+
+#### New Thought Types Added
+- `minimax_analysis` - Von Neumann's minimax theorem application
+- `cooperative_analysis` - Cooperative game theory analysis
+- `coalition_formation` - Coalition formation reasoning
+- `shapley_value` - Fair allocation computation
+- `core_analysis` - Core stability analysis
+- `machine_definition` - Turing machine definition
+- `computation_trace` - Step-by-step computation
+- `decidability_proof` - Undecidability proofs
+- `reduction_construction` - Reduction building
+- `diagonalization` - Diagonal argument construction
+- `hypothesis_formation` - Cryptographic hypothesis
+- `evidence_accumulation` - Deciban evidence tracking
+- `frequency_analysis` - Statistical frequency analysis
+- `key_elimination` - Key space reduction
+- `banburismus` - Turing's Enigma technique
+
+#### Type Exports
+New types exported from `src/types/index.ts`:
+- Computability: `TuringMachine`, `Reduction`, `DecidabilityProof`, `DiagonalizationArgument`, etc.
+- Cryptanalytic: `DecibanEvidence`, `EvidenceChain`, `KeySpaceAnalysis`, `FrequencyAnalysis`, etc.
+- Game Theory: `MinimaxAnalysis`, `CooperativeGame`, `CoalitionValue`, `ShapleyValueDetails`, etc.
+
+#### Historical Context
+These extensions honor the intellectual legacy of:
+- **Alan Turing (1912-1954)**: Father of computer science, proved the halting problem (1936), broke Enigma at Bletchley Park (1939-1945)
+- **John von Neumann (1903-1957)**: Proved minimax theorem (1928), co-founded game theory (1944), designed von Neumann architecture
+
+---
+
 **Markdown Visual Export Support (Phase 12)**
 
 Added Markdown export format to all 21 visual exporters, completing the visual export format suite with 11 total output formats.

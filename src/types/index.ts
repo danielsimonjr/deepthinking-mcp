@@ -35,3 +35,59 @@ export {
   type EngineeringAnalysisType,
   isEngineeringThought,
 } from './modes/engineering.js';
+
+// Export computability-specific types (Phase 11 v7.2.0 - Turing's legacy)
+export {
+  type ComputabilityThoughtType,
+  type TuringTransition,
+  type TuringMachine,
+  type ComputationStep,
+  type ComputationTrace,
+  type DecisionProblem,
+  type Reduction,
+  type DiagonalizationArgument,
+  type DecidabilityProof,
+  type ComplexityAnalysis,
+  type OracleAnalysis,
+  type ClassicUndecidableProblem,
+  isComputabilityThought,
+  createSimpleMachine,
+  reductionPreservesDecidability,
+  isPolynomialReduction,
+} from './modes/computability.js';
+
+// Export game theory extensions (Phase 11 v7.2.0 - von Neumann's legacy)
+export {
+  type MinimaxAnalysis,
+  type CooperativeGame,
+  type CoalitionValue,
+  type CoreAllocation,
+  type CoalitionAnalysis,
+  type ShapleyValueDetails,
+  createCharacteristicFunction,
+  checkSuperadditivity,
+  calculateShapleyValue,
+} from './modes/gametheory.js';
+
+// Export cryptanalytic-specific types (Phase 11 v7.2.0 - Turing's Bletchley Park work)
+export {
+  type CryptanalyticThoughtType,
+  type DecibanEvidence,
+  type EvidenceChain,
+  type KeySpaceAnalysis,
+  type FrequencyAnalysis,
+  type BanburismusAnalysis,
+  type CribAnalysis,
+  type CipherType,
+  type CryptographicHypothesis,
+  type IsomorphismPattern,
+  isCryptanalyticThought,
+  toDecibans,
+  fromDecibans,
+  decibansToOdds,
+  decibansToProbability,
+  accumulateEvidence,
+  calculateIndexOfCoincidence,
+  LANGUAGE_IC,
+  ENGLISH_FREQUENCIES,
+} from './modes/cryptanalytic.js';

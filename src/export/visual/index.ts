@@ -72,6 +72,9 @@ export { exportProofDecomposition } from './proof-decomposition.js';
 // Phase 10: Engineering visual export
 export { exportEngineeringAnalysis } from './engineering.js';
 
+// Phase 11: Computability visual export (Turing's legacy)
+export { exportComputability } from './computability.js';
+
 // Import types for unified class
 import type {
   CausalThought,
@@ -95,6 +98,7 @@ import type { MathematicsThought, ProofDecomposition } from '../../types/modes/m
 import type { PhysicsThought } from '../../types/modes/physics.js';
 import type { MetaReasoningThought } from '../../types/modes/metareasoning.js';
 import type { EngineeringThought } from '../../types/modes/engineering.js';
+import type { ComputabilityThought } from '../../types/modes/computability.js';
 
 import type { VisualExportOptions } from './types.js';
 
@@ -126,6 +130,9 @@ import { exportProofDecomposition } from './proof-decomposition.js';
 
 // Phase 10: Import engineering exporter
 import { exportEngineeringAnalysis } from './engineering.js';
+
+// Phase 11: Import computability exporter (Turing's legacy)
+import { exportComputability } from './computability.js';
 
 /**
  * Unified Visual Exporter for backward compatibility
@@ -220,5 +227,11 @@ export class VisualExporter {
 
   exportEngineeringAnalysis(thought: EngineeringThought, options: VisualExportOptions): string {
     return exportEngineeringAnalysis(thought, options);
+  }
+
+  // Phase 11: Computability visual export (Turing's legacy)
+
+  exportComputability(thought: ComputabilityThought, options: VisualExportOptions): string {
+    return exportComputability(thought, options);
   }
 }
