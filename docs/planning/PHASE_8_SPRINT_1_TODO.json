@@ -1,0 +1,108 @@
+{
+  "sprint": 1,
+  "title": "Core Type System & Dependency Graph Infrastructure",
+  "week": "Week 1",
+  "effort": "14-18 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Type System",
+      "description": "Extend MathematicsThoughtType in src/types/modes/mathematics.ts - Add 5 new thought types: proof_decomposition, dependency_analysis, consistency_check, gap_identification, assumption_trace",
+      "status": "pending",
+      "estimatedHours": 1,
+      "files": ["src/types/modes/mathematics.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Type System",
+      "description": "Create AtomicStatement interface in src/types/modes/mathematics.ts - Define id, statement, latex, type (axiom|definition|hypothesis|lemma|derived|conclusion), justification, derivedFrom, usedInferenceRule, confidence, isExplicit, sourceLocation",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": ["src/types/modes/mathematics.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Type System",
+      "description": "Create InferenceRule type in src/types/modes/mathematics.ts - Define 12 inference rules: modus_ponens, modus_tollens, hypothetical_syllogism, disjunctive_syllogism, universal_instantiation, existential_generalization, mathematical_induction, contradiction, direct_implication, substitution, algebraic_manipulation, definition_expansion",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": ["src/types/modes/mathematics.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Type System",
+      "description": "Create DependencyGraph and DependencyEdge interfaces in src/types/modes/mathematics.ts - Define nodes Map, edges array, roots, leaves, depth, width, hasCycles, stronglyConnectedComponents, topologicalOrder",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["src/types/modes/mathematics.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Type System",
+      "description": "Create ProofDecomposition types in src/types/modes/mathematics.ts - Define ProofGap, AssumptionChain, ImplicitAssumption, and ProofDecomposition interfaces with all required fields",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["src/types/modes/mathematics.ts"]
+    },
+    {
+      "id": 6,
+      "category": "Core Infrastructure",
+      "description": "Create src/proof/dependency-graph.ts with DependencyGraphBuilder class - Implement addStatement(), addDependency(), build(), findRoots(), findLeaves(), computeDepth() methods",
+      "status": "pending",
+      "estimatedHours": 3,
+      "files": ["src/proof/dependency-graph.ts"]
+    },
+    {
+      "id": 7,
+      "category": "Core Infrastructure",
+      "description": "Implement cycle detection in DependencyGraphBuilder using Tarjan's algorithm - Add detectCycles(), hasCycles(), getTopologicalOrder() methods for strongly connected component detection",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["src/proof/dependency-graph.ts"]
+    },
+    {
+      "id": 8,
+      "category": "Core Infrastructure",
+      "description": "Create src/proof/index.ts barrel export - Export DependencyGraphBuilder and all proof-related types",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": ["src/proof/index.ts"]
+    },
+    {
+      "id": 9,
+      "category": "Testing",
+      "description": "Create tests/unit/proof/types.test.ts - Test AtomicStatement creation, DependencyGraph building, edge type validation, cycle detection positive/negative cases, topological sort",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["tests/unit/proof/types.test.ts"]
+    },
+    {
+      "id": 10,
+      "category": "Testing",
+      "description": "Create tests/unit/proof/dependency-graph.test.ts - Test simple linear proof (A→B→C), branching proof (A→B, A→C, B+C→D), circular proof detection (A→B→C→A), multiple roots, deep proof analysis",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["tests/unit/proof/dependency-graph.test.ts"]
+    }
+  ],
+  "successCriteria": [
+    "All new types compile without TypeScript errors",
+    "DependencyGraphBuilder passes 20+ unit tests",
+    "Cycle detection correctly identifies circular proofs",
+    "Topological sort produces valid orderings for acyclic graphs",
+    "Zero breaking changes to existing Mathematics mode functionality"
+  ],
+  "filesCreated": [
+    "src/proof/dependency-graph.ts",
+    "src/proof/index.ts",
+    "tests/unit/proof/types.test.ts",
+    "tests/unit/proof/dependency-graph.test.ts"
+  ],
+  "filesModified": [
+    "src/types/modes/mathematics.ts",
+    "src/types/index.ts"
+  ],
+  "totalEstimatedHours": 16.25,
+  "notes": "This sprint establishes the foundation type system for proof decomposition. The DependencyGraphBuilder is critical as all other analysis features depend on it. Tarjan's algorithm implementation should handle edge cases like self-loops and disconnected components. All types should be exported from the main types barrel."
+}

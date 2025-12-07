@@ -1,0 +1,110 @@
+{
+  "sprint": 2,
+  "title": "Proof Decomposition Engine & Gap Detection",
+  "week": "Week 2",
+  "effort": "16-20 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Decomposition Engine",
+      "description": "Create src/proof/decomposer.ts with ProofDecomposer class - Implement decompose(), extractStatements(), inferDependencies(), classifyStatement(), computeMetrics() methods",
+      "status": "pending",
+      "estimatedHours": 4,
+      "files": ["src/proof/decomposer.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Decomposition Engine",
+      "description": "Implement statement extraction logic in ProofDecomposer - Pattern matching for 'Let X be...', 'By [theorem]...', 'Therefore...', 'Since X, we have Y', 'Assume...' structures",
+      "status": "pending",
+      "estimatedHours": 3,
+      "files": ["src/proof/decomposer.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Gap Analysis",
+      "description": "Create src/proof/gap-analyzer.ts with GapAnalyzer class - Implement analyzeGaps(), isValidTransition(), findUnjustifiedLeaps(), findImplicitAssumptions(), computeCompleteness() methods",
+      "status": "pending",
+      "estimatedHours": 3,
+      "files": ["src/proof/gap-analyzer.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Assumption Tracking",
+      "description": "Create src/proof/assumption-tracker.ts with AssumptionTracker class - Implement traceToAssumptions(), analyzeAssumptions(), findMinimalAssumptions(), findUnusedAssumptions(), checkAssumptionDischarge() methods",
+      "status": "pending",
+      "estimatedHours": 3,
+      "files": ["src/proof/assumption-tracker.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Type Integration",
+      "description": "Update MathematicsThought interface in src/types/modes/mathematics.ts - Add optional decomposition, dependencyGraph, gapAnalysis, assumptionAnalysis fields",
+      "status": "pending",
+      "estimatedHours": 1,
+      "files": ["src/types/modes/mathematics.ts"]
+    },
+    {
+      "id": 6,
+      "category": "Type Integration",
+      "description": "Update ThoughtFactory for new thought types in src/services/ThoughtFactory.ts - Handle proof_decomposition, dependency_analysis, consistency_check, gap_identification, assumption_trace thought types",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": ["src/services/ThoughtFactory.ts"]
+    },
+    {
+      "id": 7,
+      "category": "Barrel Export",
+      "description": "Update src/proof/index.ts - Export ProofDecomposer, GapAnalyzer, AssumptionTracker classes and related types",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": ["src/proof/index.ts"]
+    },
+    {
+      "id": 8,
+      "category": "Testing",
+      "description": "Create tests/integration/proof/decomposition.test.ts - Test simple direct proof decomposition, proof by contradiction, induction proof, gap detection in incomplete proofs, assumption chain tracing",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["tests/integration/proof/decomposition.test.ts"]
+    },
+    {
+      "id": 9,
+      "category": "Examples",
+      "description": "Create examples/proof-decomposition.ts - Documented examples: decomposing √2 irrationality proof, simple number theory proof, analyzing an incomplete proof",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": ["examples/proof-decomposition.ts"]
+    },
+    {
+      "id": 10,
+      "category": "Testing",
+      "description": "Run typecheck and full test suite - Verify no TypeScript errors and all tests pass",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": []
+    }
+  ],
+  "successCriteria": [
+    "ProofDecomposer correctly extracts statements from proof steps",
+    "GapAnalyzer identifies missing steps with >80% accuracy on test cases",
+    "AssumptionTracker correctly traces conclusions to assumptions",
+    "ThoughtFactory handles all 5 new thought types without errors",
+    "30+ tests passing for decomposition features"
+  ],
+  "filesCreated": [
+    "src/proof/decomposer.ts",
+    "src/proof/gap-analyzer.ts",
+    "src/proof/assumption-tracker.ts",
+    "tests/integration/proof/decomposition.test.ts",
+    "examples/proof-decomposition.ts"
+  ],
+  "filesModified": [
+    "src/types/modes/mathematics.ts",
+    "src/services/ThoughtFactory.ts",
+    "src/proof/index.ts"
+  ],
+  "totalEstimatedHours": 19.75,
+  "notes": "This sprint builds the core decomposition and gap analysis capabilities. The ProofDecomposer should work with both structured ProofStep[] input and natural language proof text. Pattern matching should be conservative - better to miss a pattern than incorrectly extract. GapAnalyzer should provide actionable suggestions for each gap found."
+}

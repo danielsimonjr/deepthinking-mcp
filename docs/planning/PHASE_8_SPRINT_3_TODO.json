@@ -1,0 +1,110 @@
+{
+  "sprint": 3,
+  "title": "Inconsistency Detection & MathematicsReasoningEngine",
+  "week": "Week 3",
+  "effort": "16-20 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Inconsistency Detection",
+      "description": "Create src/proof/inconsistency-detector.ts with InconsistencyDetector class - Implement analyze(), detectContradictions(), detectTypeMismatches(), detectDomainViolations(), detectUndefinedOperations(), detectAxiomConflicts(), detectQuantifierErrors() methods",
+      "status": "pending",
+      "estimatedHours": 4,
+      "files": ["src/proof/inconsistency-detector.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Inconsistency Detection",
+      "description": "Implement contradiction detection logic - Syntactic negation matching (P and ¬P), semantic contradiction (x>0 and x≤0), derived contradiction, type-based contradiction patterns",
+      "status": "pending",
+      "estimatedHours": 3,
+      "files": ["src/proof/inconsistency-detector.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Circular Reasoning",
+      "description": "Create src/proof/circular-detector.ts with CircularReasoningDetector class - Implement detectCircularReasoning(), isSelfReferential(), findReasoningCycles(), detectBeggingTheQuestion(), detectTautologies() methods",
+      "status": "pending",
+      "estimatedHours": 3,
+      "files": ["src/proof/circular-detector.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Reasoning Engine",
+      "description": "Create src/modes/mathematics-reasoning.ts with MathematicsReasoningEngine class - Orchestrate ProofDecomposer, GapAnalyzer, AssumptionTracker, InconsistencyDetector, CircularReasoningDetector. Implement analyzeProof(), analyzeForThoughtType(), checkConsistency(), generateReport() methods",
+      "status": "pending",
+      "estimatedHours": 3,
+      "files": ["src/modes/mathematics-reasoning.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Integration",
+      "description": "Integrate MathematicsReasoningEngine with MetaMonitor in src/services/MetaMonitor.ts - Track proof decomposition metrics over session, detect when proof quality drops, suggest mode switches",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": ["src/services/MetaMonitor.ts"]
+    },
+    {
+      "id": 6,
+      "category": "Patterns",
+      "description": "Create src/proof/patterns/warnings.ts - Catalog of common mathematical fallacies: division by hidden zero, assuming what's to be proved, affirming consequent, denying antecedent, hasty generalization, ambiguous middle term",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": ["src/proof/patterns/warnings.ts"]
+    },
+    {
+      "id": 7,
+      "category": "Barrel Export",
+      "description": "Update src/proof/index.ts - Export InconsistencyDetector, CircularReasoningDetector, warning patterns, and related types",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": ["src/proof/index.ts"]
+    },
+    {
+      "id": 8,
+      "category": "Testing",
+      "description": "Create tests/unit/proof/inconsistency-detector.test.ts - Test direct contradiction detection (P and ¬P), division by zero detection, circular reasoning detection, hidden assumption detection, quantifier scope errors",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["tests/unit/proof/inconsistency-detector.test.ts"]
+    },
+    {
+      "id": 9,
+      "category": "Testing",
+      "description": "Create tests/integration/proof/consistency.test.ts - Test full consistency analysis workflows: consistent proof passes, inconsistent proof flagged, circular reasoning detected, multiple issues in same proof",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["tests/integration/proof/consistency.test.ts"]
+    },
+    {
+      "id": 10,
+      "category": "Testing",
+      "description": "Run typecheck and full test suite - Verify no TypeScript errors and all tests pass",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": []
+    }
+  ],
+  "successCriteria": [
+    "InconsistencyDetector finds contradictions with >90% accuracy on test cases",
+    "CircularReasoningDetector identifies cycles correctly with no false negatives",
+    "MathematicsReasoningEngine produces complete ProofAnalysisResult",
+    "Integration with MetaMonitor working for proof quality tracking",
+    "40+ tests passing for consistency analysis features"
+  ],
+  "filesCreated": [
+    "src/proof/inconsistency-detector.ts",
+    "src/proof/circular-detector.ts",
+    "src/modes/mathematics-reasoning.ts",
+    "src/proof/patterns/warnings.ts",
+    "tests/unit/proof/inconsistency-detector.test.ts",
+    "tests/integration/proof/consistency.test.ts"
+  ],
+  "filesModified": [
+    "src/services/MetaMonitor.ts",
+    "src/proof/index.ts"
+  ],
+  "totalEstimatedHours": 20.75,
+  "notes": "This sprint builds the inconsistency detection capabilities. The InconsistencyDetector should be conservative - prefer false negatives over false positives to maintain user trust. CircularReasoningDetector uses the DependencyGraphBuilder's cycle detection. MathematicsReasoningEngine is the main orchestrator that ties all components together."
+}
