@@ -49,7 +49,7 @@ The codebase is organized into the following modules:
 - **session**: 7 files
 - **taxonomy**: 7 files
 - **tools**: 16 files
-- **types**: 25 files
+- **types**: 29 files
 - **utils**: 6 files
 - **validation**: 39 files
 
@@ -1818,7 +1818,7 @@ The codebase is organized into the following modules:
 
 ## Types Dependencies
 
-### `src/types/core.ts` - Core type definitions for the DeepThinking MCP server v7.1.0
+### `src/types/core.ts` - Core type definitions for the DeepThinking MCP server v7.4.0
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1836,16 +1836,20 @@ The codebase is organized into the following modules:
 | `./modes/computability.js` | `ComputabilityThought` | Import (type-only) |
 | `./modes/cryptanalytic.js` | `CryptanalyticThought` | Import (type-only) |
 | `./modes/algorithmic.js` | `AlgorithmicThought` | Import (type-only) |
+| `./modes/synthesis.js` | `SynthesisThought` | Import (type-only) |
+| `./modes/argumentation.js` | `ArgumentationThought` | Import (type-only) |
+| `./modes/critique.js` | `CritiqueThought` | Import (type-only) |
+| `./modes/analysis.js` | `AnalysisThought` | Import (type-only) |
 
 **Exports:**
 - Interfaces: `BaseThought`, `MathematicalModel`, `TensorProperties`, `PhysicalInterpretation`, `ProofStrategy`, `Theorem`, `Reference`, `SequentialThought`, `ShannonThought`, `MathematicsThought`, `PhysicsThought`, `HybridThought`, `Observation`, `Hypothesis`, `Evidence`, `EvaluationCriteria`, `AbductiveThought`, `InductiveThought`, `DeductiveThought`, `CausalNode`, `CausalEdge`, `CausalGraph`, `Intervention`, `CausalMechanism`, `Confounder`, `CounterfactualScenario`, `CausalThought`, `BayesianHypothesis`, `PriorProbability`, `Likelihood`, `BayesianEvidence`, `PosteriorProbability`, `SensitivityAnalysis`, `BayesianThought`, `Condition`, `Outcome`, `Scenario`, `Difference`, `CausalChain`, `InterventionPoint`, `CounterfactualComparison`, `CounterfactualThought`, `Entity`, `Relation`, `Property`, `Domain`, `Mapping`, `Insight`, `Inference`, `AnalogicalThought`
 - Enums: `ThinkingMode`, `ShannonStage`
-- Functions: `isFullyImplemented`, `isSequentialThought`, `isShannonThought`, `isMathematicsThought`, `isPhysicsThought`, `isHybridThought`, `isInductiveThought`, `isDeductiveThought`, `isAbductiveThought`, `isCausalThought`, `isBayesianThought`, `isCounterfactualThought`, `isAnalogicalThought`, `isTemporalThought`, `isGameTheoryThought`, `isEvidentialThought`, `isFirstPrinciplesThought`, `isSystemsThinkingThought`, `isScientificMethodThought`, `isOptimizationThought`, `isFormalLogicThought`, `isMetaReasoningThought`, `isEngineeringThought`, `isComputabilityThought`, `isCryptanalyticThought`, `isAlgorithmicThought`
+- Functions: `isFullyImplemented`, `isSequentialThought`, `isShannonThought`, `isMathematicsThought`, `isPhysicsThought`, `isHybridThought`, `isInductiveThought`, `isDeductiveThought`, `isAbductiveThought`, `isCausalThought`, `isBayesianThought`, `isCounterfactualThought`, `isAnalogicalThought`, `isTemporalThought`, `isGameTheoryThought`, `isEvidentialThought`, `isFirstPrinciplesThought`, `isSystemsThinkingThought`, `isScientificMethodThought`, `isOptimizationThought`, `isFormalLogicThought`, `isMetaReasoningThought`, `isEngineeringThought`, `isComputabilityThought`, `isCryptanalyticThought`, `isAlgorithmicThought`, `isSynthesisThought`, `isArgumentationThought`, `isCritiqueThought`, `isAnalysisThought`
 - Constants: `FULLY_IMPLEMENTED_MODES`, `EXPERIMENTAL_MODES`
 
 ---
 
-### `src/types/index.ts` - Type definitions index (v7.1.0)
+### `src/types/index.ts` - Type definitions index (v7.4.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1857,9 +1861,13 @@ The codebase is organized into the following modules:
 | `./modes/computability.js` | `type ComputabilityThoughtType, type TuringTransition, type TuringMachine, type ComputationStep, type ComputationTrace, type DecisionProblem, type Reduction, type DiagonalizationArgument, type DecidabilityProof, type ComplexityAnalysis, type OracleAnalysis, type ClassicUndecidableProblem, isComputabilityThought, createSimpleMachine, reductionPreservesDecidability, isPolynomialReduction` | Re-export |
 | `./modes/gametheory.js` | `type MinimaxAnalysis, type CooperativeGame, type CoalitionValue, type CoreAllocation, type CoalitionAnalysis, type ShapleyValueDetails, createCharacteristicFunction, checkSuperadditivity, calculateShapleyValue` | Re-export |
 | `./modes/cryptanalytic.js` | `type CryptanalyticThoughtType, type DecibanEvidence, type EvidenceChain, type KeySpaceAnalysis, type FrequencyAnalysis, type BanburismusAnalysis, type CribAnalysis, type CipherType, type CryptographicHypothesis, type IsomorphismPattern, isCryptanalyticThought, toDecibans, fromDecibans, decibansToOdds, decibansToProbability, accumulateEvidence, calculateIndexOfCoincidence, LANGUAGE_IC, ENGLISH_FREQUENCIES` | Re-export |
+| `./modes/synthesis.js` | `type SynthesisThoughtType, type SourceType, type SourceQuality, type Source, type Concept, type Theme, type Finding, type Pattern, type ConceptRelation, type LiteratureGap, type Contradiction, type ConceptualFramework, type SynthesisConclusion, type ReviewMetadata, isSynthesisThought` | Re-export |
+| `./modes/argumentation.js` | `type ArgumentationThoughtType, type Claim, type Grounds, type Warrant, type Backing, type Qualifier, type Rebuttal, type RebuttalResponse, type ToulminArgument, type ArgumentChain, type DialecticPosition, type DialecticAnalysis, type RhetoricalAppeal, type RhetoricalStrategy, type AudienceConsideration, type LogicalFallacy, isArgumentationThought` | Re-export |
+| `./modes/critique.js` | `type CritiqueThoughtType, type WorkType, type CritiquedWork, type DesignAssessment, type SampleAssessment, type AnalysisAssessment, type MethodologyEvaluation, type ValidityAssessment, type LogicalStructure, type ArgumentCritique, type EvidenceQuality, type EvidenceUseCritique, type NoveltyAssessment, type ImpactAssessment, type ContributionEvaluation, type CritiquePoint, type ImprovementSuggestion, type CritiqueVerdict, isCritiqueThought` | Re-export |
+| `./modes/analysis.js` | `type AnalysisThoughtType, type AnalysisMethodology, type DataSource, type DataSegment, type CodeType, type Code, type CodeCooccurrence, type Codebook, type ThemeLevel, type QualitativeTheme, type ThematicMap, type MemoType, type AnalyticalMemo, type GTCategory, type TheoreticalSampling, type DiscoursePattern, type QualitativeRigor, isAnalysisThought` | Re-export |
 
 **Exports:**
-- Re-exports: `* from ./core.js`, `* from ./session.js`, `* from ./modes/recommendations.js`, `type Requirement`, `type RequirementPriority`, `type RequirementSource`, `type RequirementStatus`, `type RequirementsTraceability`, `type TradeAlternative`, `type TradeCriterion`, `type TradeScore`, `type TradeStudy`, `type FailureMode`, `type FailureModeAnalysis`, `type SeverityRating`, `type OccurrenceRating`, `type DetectionRating`, `type DesignDecision`, `type DecisionStatus`, `type DecisionAlternative`, `type DesignDecisionLog`, `type EngineeringAnalysisType`, `isEngineeringThought`, `type ComputabilityThoughtType`, `type TuringTransition`, `type TuringMachine`, `type ComputationStep`, `type ComputationTrace`, `type DecisionProblem`, `type Reduction`, `type DiagonalizationArgument`, `type DecidabilityProof`, `type ComplexityAnalysis`, `type OracleAnalysis`, `type ClassicUndecidableProblem`, `isComputabilityThought`, `createSimpleMachine`, `reductionPreservesDecidability`, `isPolynomialReduction`, `type MinimaxAnalysis`, `type CooperativeGame`, `type CoalitionValue`, `type CoreAllocation`, `type CoalitionAnalysis`, `type ShapleyValueDetails`, `createCharacteristicFunction`, `checkSuperadditivity`, `calculateShapleyValue`, `type CryptanalyticThoughtType`, `type DecibanEvidence`, `type EvidenceChain`, `type KeySpaceAnalysis`, `type FrequencyAnalysis`, `type BanburismusAnalysis`, `type CribAnalysis`, `type CipherType`, `type CryptographicHypothesis`, `type IsomorphismPattern`, `isCryptanalyticThought`, `toDecibans`, `fromDecibans`, `decibansToOdds`, `decibansToProbability`, `accumulateEvidence`, `calculateIndexOfCoincidence`, `LANGUAGE_IC`, `ENGLISH_FREQUENCIES`
+- Re-exports: `* from ./core.js`, `* from ./session.js`, `* from ./modes/recommendations.js`, `type Requirement`, `type RequirementPriority`, `type RequirementSource`, `type RequirementStatus`, `type RequirementsTraceability`, `type TradeAlternative`, `type TradeCriterion`, `type TradeScore`, `type TradeStudy`, `type FailureMode`, `type FailureModeAnalysis`, `type SeverityRating`, `type OccurrenceRating`, `type DetectionRating`, `type DesignDecision`, `type DecisionStatus`, `type DecisionAlternative`, `type DesignDecisionLog`, `type EngineeringAnalysisType`, `isEngineeringThought`, `type ComputabilityThoughtType`, `type TuringTransition`, `type TuringMachine`, `type ComputationStep`, `type ComputationTrace`, `type DecisionProblem`, `type Reduction`, `type DiagonalizationArgument`, `type DecidabilityProof`, `type ComplexityAnalysis`, `type OracleAnalysis`, `type ClassicUndecidableProblem`, `isComputabilityThought`, `createSimpleMachine`, `reductionPreservesDecidability`, `isPolynomialReduction`, `type MinimaxAnalysis`, `type CooperativeGame`, `type CoalitionValue`, `type CoreAllocation`, `type CoalitionAnalysis`, `type ShapleyValueDetails`, `createCharacteristicFunction`, `checkSuperadditivity`, `calculateShapleyValue`, `type CryptanalyticThoughtType`, `type DecibanEvidence`, `type EvidenceChain`, `type KeySpaceAnalysis`, `type FrequencyAnalysis`, `type BanburismusAnalysis`, `type CribAnalysis`, `type CipherType`, `type CryptographicHypothesis`, `type IsomorphismPattern`, `isCryptanalyticThought`, `toDecibans`, `fromDecibans`, `decibansToOdds`, `decibansToProbability`, `accumulateEvidence`, `calculateIndexOfCoincidence`, `LANGUAGE_IC`, `ENGLISH_FREQUENCIES`, `type SynthesisThoughtType`, `type SourceType`, `type SourceQuality`, `type Source`, `type Concept`, `type Theme`, `type Finding`, `type Pattern`, `type ConceptRelation`, `type LiteratureGap`, `type Contradiction`, `type ConceptualFramework`, `type SynthesisConclusion`, `type ReviewMetadata`, `isSynthesisThought`, `type ArgumentationThoughtType`, `type Claim`, `type Grounds`, `type Warrant`, `type Backing`, `type Qualifier`, `type Rebuttal`, `type RebuttalResponse`, `type ToulminArgument`, `type ArgumentChain`, `type DialecticPosition`, `type DialecticAnalysis`, `type RhetoricalAppeal`, `type RhetoricalStrategy`, `type AudienceConsideration`, `type LogicalFallacy`, `isArgumentationThought`, `type CritiqueThoughtType`, `type WorkType`, `type CritiquedWork`, `type DesignAssessment`, `type SampleAssessment`, `type AnalysisAssessment`, `type MethodologyEvaluation`, `type ValidityAssessment`, `type LogicalStructure`, `type ArgumentCritique`, `type EvidenceQuality`, `type EvidenceUseCritique`, `type NoveltyAssessment`, `type ImpactAssessment`, `type ContributionEvaluation`, `type CritiquePoint`, `type ImprovementSuggestion`, `type CritiqueVerdict`, `isCritiqueThought`, `type AnalysisThoughtType`, `type AnalysisMethodology`, `type DataSource`, `type DataSegment`, `type CodeType`, `type Code`, `type CodeCooccurrence`, `type Codebook`, `type ThemeLevel`, `type QualitativeTheme`, `type ThematicMap`, `type MemoType`, `type AnalyticalMemo`, `type GTCategory`, `type TheoreticalSampling`, `type DiscoursePattern`, `type QualitativeRigor`, `isAnalysisThought`
 
 ---
 
@@ -1887,6 +1895,32 @@ The codebase is organized into the following modules:
 **Exports:**
 - Interfaces: `Entity`, `Relation`, `Property`, `Domain`, `Mapping`, `Insight`, `Inference`, `AnalogicalThought`
 - Functions: `isAnalogicalThought`
+
+---
+
+### `src/types/modes/analysis.ts` - Analysis Mode - Type Definitions (Phase 13 v7.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `DataSource`, `DataSegment`, `Code`, `CodeCooccurrence`, `Codebook`, `QualitativeTheme`, `ThematicMap`, `AnalyticalMemo`, `GTCategory`, `TheoreticalSampling`, `DiscoursePattern`, `QualitativeRigor`, `AnalysisThought`
+- Functions: `isAnalysisThought`
+
+---
+
+### `src/types/modes/argumentation.ts` - Argumentation Mode - Type Definitions (Phase 13 v7.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `Claim`, `Grounds`, `Warrant`, `Backing`, `Qualifier`, `Rebuttal`, `RebuttalResponse`, `ToulminArgument`, `ArgumentChain`, `DialecticPosition`, `DialecticAnalysis`, `RhetoricalStrategy`, `AudienceConsideration`, `LogicalFallacy`, `ArgumentationThought`
+- Functions: `isArgumentationThought`
 
 ---
 
@@ -1939,6 +1973,19 @@ The codebase is organized into the following modules:
 **Exports:**
 - Interfaces: `Condition`, `Outcome`, `Scenario`, `ScenarioDifference`, `CounterfactualComparison`, `InterventionPoint`, `CausalChain`, `CounterfactualThought`
 - Functions: `isCounterfactualThought`
+
+---
+
+### `src/types/modes/critique.ts` - Critique Mode - Type Definitions (Phase 13 v7.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `CritiquedWork`, `DesignAssessment`, `SampleAssessment`, `AnalysisAssessment`, `MethodologyEvaluation`, `ValidityAssessment`, `LogicalStructure`, `ArgumentCritique`, `EvidenceQuality`, `EvidenceUseCritique`, `NoveltyAssessment`, `ImpactAssessment`, `ContributionEvaluation`, `CritiquePoint`, `ImprovementSuggestion`, `CritiqueVerdict`, `CritiqueThought`
+- Functions: `isCritiqueThought`
 
 ---
 
@@ -2122,6 +2169,19 @@ The codebase is organized into the following modules:
 **Exports:**
 - Interfaces: `ShannonThought`
 - Functions: `isShannonThought`
+
+---
+
+### `src/types/modes/synthesis.ts` - Synthesis Mode - Type Definitions (Phase 13 v7.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `SourceQuality`, `Source`, `Concept`, `Theme`, `Finding`, `Pattern`, `ConceptRelation`, `LiteratureGap`, `Contradiction`, `ConceptualFramework`, `SynthesisConclusion`, `ReviewMetadata`, `SynthesisThought`
+- Functions: `isSynthesisThought`
 
 ---
 
@@ -2881,10 +2941,10 @@ The codebase is organized into the following modules:
 
 ## Circular Dependency Analysis
 
-**37 circular dependencies detected:**
+**41 circular dependencies detected:**
 
 - **Runtime cycles**: 0 (require attention)
-- **Type-only cycles**: 37 (safe, no runtime impact)
+- **Type-only cycles**: 41 (safe, no runtime impact)
 
 ### Type-Only Circular Dependencies
 
@@ -2900,7 +2960,7 @@ These cycles only involve type imports and are safe (erased at runtime):
 - src/types/core.ts -> src/types/modes/formallogic.ts -> src/types/core.ts
 - src/types/core.ts -> src/types/modes/metareasoning.ts -> src/types/core.ts
 - src/types/core.ts -> src/types/modes/engineering.ts -> src/types/core.ts
-- ... and 27 more
+- ... and 31 more
 
 ---
 
@@ -3012,8 +3072,8 @@ graph TD
         N61[index]
         N62[algorithmic]
         N63[analogical]
-        N64[bayesian]
-        N65[...20 more]
+        N64[analysis]
+        N65[...24 more]
     end
 
     subgraph Utils
@@ -3072,19 +3132,19 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 179 |
+| Total TypeScript Files | 183 |
 | Total Modules | 16 |
-| Total Lines of Code | 72182 |
-| Total Exports | 893 |
-| Total Re-exports | 340 |
+| Total Lines of Code | 73537 |
+| Total Exports | 970 |
+| Total Re-exports | 409 |
 | Total Classes | 92 |
-| Total Interfaces | 401 |
-| Total Functions | 315 |
-| Total Type Guards | 58 |
+| Total Interfaces | 459 |
+| Total Functions | 323 |
+| Total Type Guards | 66 |
 | Total Enums | 3 |
-| Type-only Imports | 138 |
+| Type-only Imports | 142 |
 | Runtime Circular Deps | 0 |
-| Type-only Circular Deps | 37 |
+| Type-only Circular Deps | 41 |
 
 ---
 

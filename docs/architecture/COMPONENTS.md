@@ -1,6 +1,6 @@
 # Component Architecture
 
-**Version**: 7.2.0 | **Last Updated**: 2025-12-07
+**Version**: 7.4.0 | **Last Updated**: 2025-12-08
 
 ## Core Components
 
@@ -45,7 +45,7 @@
 createThought(input: ThinkingToolInput, sessionId: string): Thought
 ```
 
-**Supported Modes** (27 total, 23 with dedicated thought types):
+**Supported Modes** (33 total, 29 with dedicated thought types):
 
 **Core Modes** (5):
 1. **Sequential** - Step-by-step linear reasoning
@@ -58,31 +58,41 @@ createThought(input: ThinkingToolInput, sessionId: string): Thought
 6. **Computability** - Turing machines, decidability, reductions, diagonalization
 7. **Cryptanalytic** - Deciban evidence system, Banburismus, frequency analysis
 
+**Algorithmic** (1) - v7.3.0 (CLRS comprehensive coverage):
+8. **Algorithmic** - Algorithm design, complexity analysis, 100+ CLRS algorithms
+
+**Academic Research** (4) - v7.4.0 (PhD students & scientific writing):
+9. **Synthesis** - Literature review, knowledge integration, theme extraction
+10. **Argumentation** - Toulmin model, dialectics, rhetorical structures
+11. **Critique** - Critical analysis, peer review, methodology evaluation
+12. **Analysis** - Qualitative analysis (thematic, grounded theory, discourse)
+
 **Fundamental** (2) - v5.0.0+:
-8. **Inductive** - Observations → general principles
-9. **Deductive** - General principles → specific conclusions
+13. **Inductive** - Observations → general principles
+14. **Deductive** - General principles → specific conclusions
 
 **Advanced Runtime** (6):
-10. **Metareasoning** - Strategic oversight of reasoning (v6.0.0)
-11. **Recursive** - Self-referential analysis
-12. **Modal** - Possibility/necessity logic
-13. **Stochastic** - Probabilistic state transitions
-14. **Constraint** - Constraint satisfaction
-15. **Optimization** - Constraint optimization
+15. **Metareasoning** - Strategic oversight of reasoning (v6.0.0)
+16. **Recursive** - Self-referential analysis
+17. **Modal** - Possibility/necessity logic
+18. **Stochastic** - Probabilistic state transitions
+19. **Constraint** - Constraint satisfaction
+20. **Optimization** - Constraint optimization
 
-**Experimental** (12):
-16. **Abductive** - Inference to best explanation
-17. **Causal** - Causal relationship analysis
-18. **Bayesian** - Probabilistic inference
-19. **Counterfactual** - "What if" analysis
-20. **Analogical** - Reasoning by analogy
-21. **Temporal** - Time-based reasoning
-22. **Game Theory** - Strategic decision making + von Neumann extensions (v7.2.0)
-23. **Evidential** - Dempster-Shafer theory
-24. **First Principles** - Fundamental reasoning
-25. **Systems Thinking** - Holistic system analysis
-26. **Scientific Method** - Hypothesis testing
-27. **Formal Logic** - Logical inference
+**Experimental** (13):
+21. **Abductive** - Inference to best explanation
+22. **Causal** - Causal relationship analysis
+23. **Bayesian** - Probabilistic inference
+24. **Counterfactual** - "What if" analysis
+25. **Analogical** - Reasoning by analogy
+26. **Temporal** - Time-based reasoning
+27. **Game Theory** - Strategic decision making + von Neumann extensions (v7.2.0)
+28. **Evidential** - Dempster-Shafer theory
+29. **First Principles** - Fundamental reasoning
+30. **Systems Thinking** - Holistic system analysis
+31. **Scientific Method** - Hypothesis testing
+32. **Formal Logic** - Logical inference
+33. **Engineering** - Engineering analysis (v7.1.0)
 
 **Line Count**: 243 lines
 
@@ -1106,5 +1116,5 @@ TaxonomySystem
 
 ---
 
-*Last Updated*: 2025-12-07
-*Component Version*: 7.2.0
+*Last Updated*: 2025-12-08
+*Component Version*: 7.4.0

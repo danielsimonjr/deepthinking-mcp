@@ -641,7 +641,7 @@ export class AdaptiveModeSelector {
 
   /**
    * Suggest alternatives to current mode
-   * Now considers all 29 reasoning modes with intelligent pairing (v7.3.0)
+   * Now considers all 29 reasoning modes with intelligent pairing (v7.4.0)
    */
   private suggestAlternatives(currentMode: ThinkingMode, context: SelectionContext): ModeRecommendation[] {
     // Mode affinity groups - modes that work well as alternatives to each other
@@ -692,6 +692,12 @@ export class AdaptiveModeSelector {
 
       // Algorithmic mode (Phase 12 v7.3.0)
       [ThinkingMode.ALGORITHMIC]: [ThinkingMode.COMPUTABILITY, ThinkingMode.RECURSIVE, ThinkingMode.OPTIMIZATION],
+
+      // Academic research modes (Phase 13 v7.4.0)
+      [ThinkingMode.SYNTHESIS]: [ThinkingMode.CRITIQUE, ThinkingMode.ANALYSIS, ThinkingMode.SYSTEMSTHINKING],
+      [ThinkingMode.ARGUMENTATION]: [ThinkingMode.CRITIQUE, ThinkingMode.FORMALLOGIC, ThinkingMode.DEDUCTIVE],
+      [ThinkingMode.CRITIQUE]: [ThinkingMode.SYNTHESIS, ThinkingMode.ARGUMENTATION, ThinkingMode.EVIDENTIAL],
+      [ThinkingMode.ANALYSIS]: [ThinkingMode.SYNTHESIS, ThinkingMode.SCIENTIFICMETHOD, ThinkingMode.INDUCTIVE],
 
       // Default fallback
       [ThinkingMode.CUSTOM]: [ThinkingMode.HYBRID, ThinkingMode.SEQUENTIAL, ThinkingMode.METAREASONING],
