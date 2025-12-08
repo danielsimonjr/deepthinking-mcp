@@ -4,9 +4,18 @@
 
 DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 33 specialized thinking modes (29 with dedicated thought types). The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, meta-reasoning for strategic oversight, enterprise security features, proof decomposition for mathematical reasoning, and comprehensive export capabilities including native SVG generation.
 
-**Version**: 7.4.0 | **Node**: >=18.0.0 | **License**: MIT
+**Version**: 7.5.0 | **Node**: >=18.0.0 | **License**: MIT
 
 ---
+
+## What's New in v7.5.0
+
+- **Phase 14: Accessible Reasoning Modes** - All 29 modes with dedicated thought types are now accessible via MCP tools
+- **2 New Tools**: `deepthinking_engineering` and `deepthinking_academic`
+- **12 Total Tools** (up from 10)
+- **deepthinking_engineering**: Engineering, Algorithmic modes
+- **deepthinking_academic**: Synthesis, Argumentation, Critique, Analysis modes
+- **Updated Tools**: `deepthinking_mathematics` now includes Computability; `deepthinking_analytical` now includes Cryptanalytic
 
 ## What's New in v7.4.0
 
@@ -36,17 +45,17 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 | Metric | Value |
 |--------|-------|
 | Total Lines of Code | ~62,000 |
-| TypeScript Files | 183 |
+| TypeScript Files | 185 |
 | Test Files | 40 |
-| Passing Tests | 792+ |
+| Passing Tests | 787+ |
 | Type Suppressions | 0 |
 | Thinking Modes | 33 (29 with thought types) |
-| MCP Tools | 10 focused + 1 legacy |
+| MCP Tools | 12 focused + 1 legacy |
 | Export Formats | 11 (including native SVG) |
 | Visual Formats | 11 (mermaid, dot, ascii, svg, etc.) |
 | Reasoning Types | 69 (110 planned) |
 | Visual Exporters | 21 mode-specific |
-| Total Exports | 970 |
+| Total Exports | 978 |
 | Modules | 16 |
 
 ---
@@ -245,18 +254,19 @@ The server supports 33 reasoning modes organized into categories:
 | **Computability** | Turing machines, decidability, reductions, diagonalization | `deepthinking_mathematics` |
 | **Cryptanalytic** | Deciban evidence system, Banburismus, frequency analysis | `deepthinking_analytical` |
 
-### Algorithmic Mode (v7.3.0) - CLRS Coverage
+### Engineering & Algorithmic Modes (v7.1.0, v7.3.0)
 | Mode | Purpose | Tool |
 |------|---------|------|
-| **Algorithmic** | Algorithm design, complexity analysis, CLRS algorithms | `deepthinking_strategic` |
+| **Engineering** | Requirements, trade studies, FMEA, ADRs | `deepthinking_engineering` |
+| **Algorithmic** | Algorithm design, complexity analysis, CLRS algorithms | `deepthinking_engineering` |
 
 ### Academic Research Modes (v7.4.0) - PhD Students & Scientific Writing
 | Mode | Purpose | Tool |
 |------|---------|------|
-| **Synthesis** | Literature review, knowledge integration, theme extraction | `deepthinking_analytical` |
-| **Argumentation** | Toulmin model, dialectics, rhetorical structures | `deepthinking_analytical` |
-| **Critique** | Critical analysis, peer review, methodology evaluation | `deepthinking_analytical` |
-| **Analysis** | Qualitative analysis (thematic, grounded theory, discourse) | `deepthinking_analytical` |
+| **Synthesis** | Literature review, knowledge integration, theme extraction | `deepthinking_academic` |
+| **Argumentation** | Toulmin model, dialectics, rhetorical structures | `deepthinking_academic` |
+| **Critique** | Critical analysis, peer review, methodology evaluation | `deepthinking_academic` |
+| **Analysis** | Qualitative analysis (thematic, grounded theory, discourse) | `deepthinking_academic` |
 
 ---
 
@@ -367,19 +377,21 @@ Configured in `tsconfig.json`:
 
 ## MCP Integration
 
-### The 10 Focused Tools (v5.0.0+)
+### The 12 Focused Tools (v7.5.0)
 
 | Tool | Description | Modes Supported |
 |------|-------------|-----------------|
 | `deepthinking_core` | Fundamental reasoning | inductive, deductive, abductive |
 | `deepthinking_standard` | Standard workflows | sequential, shannon, hybrid |
-| `deepthinking_mathematics` | Mathematical/physical | mathematics, physics |
+| `deepthinking_mathematics` | Mathematical/physical/computability | mathematics, physics, computability |
 | `deepthinking_temporal` | Time-based reasoning | temporal |
 | `deepthinking_probabilistic` | Probability reasoning | bayesian, evidential |
 | `deepthinking_causal` | Causal analysis | causal, counterfactual |
 | `deepthinking_strategic` | Strategic decision-making | gametheory, optimization |
-| `deepthinking_analytical` | Analytical reasoning | analogical, firstprinciples, metareasoning |
+| `deepthinking_analytical` | Analytical reasoning | analogical, firstprinciples, metareasoning, cryptanalytic |
 | `deepthinking_scientific` | Scientific methods | scientificmethod, systemsthinking, formallogic |
+| `deepthinking_engineering` | Engineering/algorithmic | engineering, algorithmic |
+| `deepthinking_academic` | Academic research | synthesis, argumentation, critique, analysis |
 | `deepthinking_session` | Session management | All (create, list, delete, export) |
 
 ### Configuration
@@ -463,4 +475,4 @@ tests/
 ---
 
 *Last Updated*: 2025-12-08
-*Version*: 7.4.0
+*Version*: 7.5.0

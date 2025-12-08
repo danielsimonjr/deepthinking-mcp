@@ -2,13 +2,15 @@
  * MCP Protocol Compliance Tests
  *
  * Tests that the deepthinking MCP tools properly implement the MCP protocol:
- * - Tool definition structure (10 focused tools + 1 legacy)
+ * - Tool definition structure (12 focused tools + 1 legacy)
  * - Schema validation
- * - Mode coverage (20 modes)
+ * - Mode coverage (29 modes with dedicated thought types)
  * - Input/output contracts
  *
  * Note: v4.0.0 split the monolithic tool into 9 focused tools.
  * v5.0.0 added deepthinking_core (inductive, deductive, abductive).
+ * v7.5.0 added deepthinking_engineering (engineering, algorithmic) and
+ *        deepthinking_academic (synthesis, argumentation, critique, analysis).
  * The legacy 'deepthinking' tool is deprecated but maintained for backward compatibility.
  */
 
@@ -35,8 +37,8 @@ describe('MCP Protocol Compliance', () => {
       expect(thinkingTool.description).toContain('DEPRECATED');
     });
 
-    it('should have 10 focused tools in v5.0.0', () => {
-      expect(toolList).toHaveLength(10);
+    it('should have 12 focused tools in v7.5.0', () => {
+      expect(toolList).toHaveLength(12);
 
       const toolNames = toolList.map((t: any) => t.name);
       expect(toolNames).toContain('deepthinking_core');
@@ -48,6 +50,8 @@ describe('MCP Protocol Compliance', () => {
       expect(toolNames).toContain('deepthinking_strategic');
       expect(toolNames).toContain('deepthinking_analytical');
       expect(toolNames).toContain('deepthinking_scientific');
+      expect(toolNames).toContain('deepthinking_engineering');
+      expect(toolNames).toContain('deepthinking_academic');
       expect(toolNames).toContain('deepthinking_session');
     });
 

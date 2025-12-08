@@ -3,9 +3,9 @@
     "name": "deepthinking-mcp",
     "version": "7.4.0",
     "lastUpdated": "2025-12-08",
-    "totalFiles": 183,
+    "totalFiles": 185,
     "totalModules": 16,
-    "totalExports": 970
+    "totalExports": 978
   },
   "entryPoints": [
     {
@@ -5837,7 +5837,7 @@
     },
     "tools": {
       "src/tools/definitions.ts": {
-        "description": "Focused Tool Definitions (v4.4.0)",
+        "description": "Focused Tool Definitions (v7.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -5901,6 +5901,18 @@
             "imports": [
               "ScientificSchema"
             ]
+          },
+          {
+            "file": "./schemas/modes/engineering.js",
+            "imports": [
+              "EngineeringSchema"
+            ]
+          },
+          {
+            "file": "./schemas/modes/academic.js",
+            "imports": [
+              "AcademicSchema"
+            ]
           }
         ],
         "exports": [
@@ -5939,6 +5951,8 @@
           "deepthinking_strategic_schema",
           "deepthinking_analytical_schema",
           "deepthinking_scientific_schema",
+          "deepthinking_engineering_schema",
+          "deepthinking_academic_schema",
           "deepthinking_session_schema",
           "jsonSchemas"
         ],
@@ -5952,6 +5966,8 @@
           "deepthinking_strategic_schema",
           "deepthinking_analytical_schema",
           "deepthinking_scientific_schema",
+          "deepthinking_engineering_schema",
+          "deepthinking_academic_schema",
           "deepthinking_session_schema",
           "jsonSchemas"
         ]
@@ -6113,6 +6129,32 @@
           "type ScientificInput"
         ]
       },
+      "src/tools/schemas/modes/academic.ts": {
+        "description": "Academic Mode Schemas (v7.5.0)",
+        "externalDependencies": [
+          {
+            "package": "zod",
+            "imports": [
+              "z"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../base.js",
+            "imports": [
+              "BaseThoughtSchema"
+            ]
+          }
+        ],
+        "exports": [
+          "AcademicSchema"
+        ],
+        "constants": [
+          "AcademicSchema"
+        ]
+      },
       "src/tools/schemas/modes/analytical.ts": {
         "description": "Analytical Mode Schemas (v6.0.0)",
         "externalDependencies": [
@@ -6201,8 +6243,34 @@
           "CoreSchema"
         ]
       },
+      "src/tools/schemas/modes/engineering.ts": {
+        "description": "Engineering Mode Schemas (v7.5.0)",
+        "externalDependencies": [
+          {
+            "package": "zod",
+            "imports": [
+              "z"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../base.js",
+            "imports": [
+              "BaseThoughtSchema"
+            ]
+          }
+        ],
+        "exports": [
+          "EngineeringSchema"
+        ],
+        "constants": [
+          "EngineeringSchema"
+        ]
+      },
       "src/tools/schemas/modes/index.ts": {
-        "description": "Mode Schemas Index (v4.0.0)",
+        "description": "Mode Schemas Index (v7.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -6269,6 +6337,22 @@
               "type ScientificInput"
             ],
             "reExport": true
+          },
+          {
+            "file": "./engineering.js",
+            "imports": [
+              "EngineeringSchema",
+              "type EngineeringInput"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./academic.js",
+            "imports": [
+              "AcademicSchema",
+              "type AcademicInput"
+            ],
+            "reExport": true
           }
         ],
         "exports": [
@@ -6287,7 +6371,11 @@
           "AnalyticalSchema",
           "type AnalyticalInput",
           "ScientificSchema",
-          "type ScientificInput"
+          "type ScientificInput",
+          "EngineeringSchema",
+          "type EngineeringInput",
+          "AcademicSchema",
+          "type AcademicInput"
         ],
         "reExported": [
           "CoreSchema",
@@ -6305,7 +6393,11 @@
           "AnalyticalSchema",
           "type AnalyticalInput",
           "ScientificSchema",
-          "type ScientificInput"
+          "type ScientificInput",
+          "EngineeringSchema",
+          "type EngineeringInput",
+          "AcademicSchema",
+          "type AcademicInput"
         ]
       },
       "src/tools/schemas/modes/mathematics.ts": {
@@ -9710,7 +9802,7 @@
         ]
       },
       "src/validation/validators/modes/evidential.ts": {
-        "description": "Evidential Mode Validator (v7.1.0)",
+        "description": "Evidential Mode Validator (v7.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -10888,9 +10980,11 @@
           "src/tools/json-schemas.ts",
           "src/tools/schemas/base.ts",
           "src/tools/schemas/index.ts",
+          "src/tools/schemas/modes/academic.ts",
           "src/tools/schemas/modes/analytical.ts",
           "src/tools/schemas/modes/causal.ts",
           "src/tools/schemas/modes/core.ts",
+          "src/tools/schemas/modes/engineering.ts",
           "src/tools/schemas/modes/index.ts",
           "src/tools/schemas/modes/mathematics.ts",
           "src/tools/schemas/modes/probabilistic.ts",
@@ -10994,17 +11088,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 183,
+    "totalTypeScriptFiles": 185,
     "totalModules": 16,
-    "totalLinesOfCode": 73537,
-    "totalExports": 970,
+    "totalLinesOfCode": 73942,
+    "totalExports": 978,
     "totalClasses": 92,
     "totalInterfaces": 459,
     "totalFunctions": 323,
     "totalTypeGuards": 66,
     "totalEnums": 3,
-    "totalConstants": 156,
-    "totalReExports": 409,
+    "totalConstants": 160,
+    "totalReExports": 413,
     "totalTypeOnlyImports": 142,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 41

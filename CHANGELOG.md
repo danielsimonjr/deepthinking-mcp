@@ -7,38 +7,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### 🔄 Changed
+---
 
-**Tool Naming Convention Update**
+## [7.5.0] - 2025-12-08
 
-- **Renamed `deepthinking_math` to `deepthinking_mathematics`** - The MCP tool for mathematics and physics modes has been renamed for consistency and clarity:
-  - Updated tool name in `src/tools/definitions.ts`
-  - Updated JSON schema constant name in `src/tools/json-schemas.ts`
-  - Updated mode-to-tool mapping for `mathematics` and `physics` modes
-  - Updated version metadata in `src/tools/schemas/version.ts`
+### ✨ Features
+
+**Phase 14: Accessible Reasoning Modes**
+
+All 29 reasoning modes with dedicated thought types are now accessible via MCP tools. This release adds 2 new tools and updates 2 existing tools to ensure complete mode coverage.
+
+#### New MCP Tools
+
+- **`deepthinking_engineering`** - Engineering and algorithmic reasoning:
+  - `engineering` mode - Requirements traceability, trade studies, FMEA, ADRs
+  - `algorithmic` mode - CLRS algorithm design, complexity analysis, correctness proofs
+  - Supports engineering-specific properties (requirementId, tradeStudy, fmeaEntry)
+  - Supports algorithmic-specific properties (algorithmName, designPattern, complexityAnalysis, correctnessProof)
+
+- **`deepthinking_academic`** - Academic research reasoning:
+  - `synthesis` mode - Literature review, knowledge integration, theme extraction
+  - `argumentation` mode - Toulmin model (claim, data, warrant, backing, qualifier, rebuttal)
+  - `critique` mode - Critical analysis, peer review, methodology evaluation
+  - `analysis` mode - Qualitative analysis (thematic, grounded theory, discourse, content)
+
+#### Updated MCP Tools
+
+- **`deepthinking_mathematics`** - Now includes `computability` mode (Turing machines, decidability)
+- **`deepthinking_analytical`** - Now includes `cryptanalytic` mode (deciban evidence system)
+
+#### Tool Count
+
+- **12 focused MCP tools** (up from 10):
+  1. `deepthinking_core` - inductive, deductive, abductive
+  2. `deepthinking_standard` - sequential, shannon, hybrid
+  3. `deepthinking_mathematics` - mathematics, physics, computability
+  4. `deepthinking_temporal` - temporal
+  5. `deepthinking_probabilistic` - bayesian, evidential
+  6. `deepthinking_causal` - causal, counterfactual
+  7. `deepthinking_strategic` - gametheory, optimization
+  8. `deepthinking_analytical` - analogical, firstprinciples, metareasoning, cryptanalytic
+  9. `deepthinking_scientific` - scientificmethod, systemsthinking, formallogic
+  10. `deepthinking_engineering` - engineering, algorithmic (NEW)
+  11. `deepthinking_academic` - synthesis, argumentation, critique, analysis (NEW)
+  12. `deepthinking_session` - session management
+
+### 🐛 Bug Fixes
+
+- Fixed pre-existing syntax error in `src/validation/validators/modes/bayesian.ts` (duplicate code blocks)
+- Fixed pre-existing duplicate code and undefined variable references in `src/validation/validators/modes/evidential.ts`
 
 ### 📚 Documentation
 
-- Updated all documentation to reflect the `deepthinking_mathematics` tool name:
-  - `README.md` - Tool reference and examples
-  - `CLAUDE.md` - MCP tools table
-  - `docs/architecture/OVERVIEW.md` - Tool mappings
-  - `docs/architecture/ARCHITECTURE.md` - Architecture diagram
-  - `docs/architecture/COMPONENTS.md` - Component listing
-  - `docs/modes/MATHEMATICS.md` - Mathematics mode documentation
-  - `docs/modes/PHYSICS.md` - Physics mode documentation
-  - `docs/migration/v4.0-tool-splitting.md` - Migration guide
-  - `docs/ADDING_NEW_MODE.md` - Mode scaffolding guide
-  - `templates/mode-scaffolding/example-mode.json-schema.ts` - Template example
-- Regenerated dependency graph documentation
+- Updated `README.md` with new tool table (12 tools)
+- Updated `CLAUDE.md` with new metrics and tool mappings
+- Updated `docs/architecture/OVERVIEW.md` with Phase 14 changes
+- Regenerated `docs/architecture/DEPENDENCY_GRAPH.md`
 
 ### 🔧 Maintenance
 
-- Updated test files to use new tool name:
-  - `tests/integration/mcp-compliance.test.ts`
-  - `tests/unit/tools/schemas/schema-validation.test.ts`
+- Updated test files for 12-tool architecture:
   - `tests/unit/tools/schemas/tool-definitions.test.ts`
-- All 787 tests passing after rename
+  - `tests/unit/tools/schemas/schema-validation.test.ts`
+  - `tests/integration/mcp-compliance.test.ts`
+- All 787 tests passing
+- Renamed `deepthinking_math` to `deepthinking_mathematics` for consistency
 
 ---
 

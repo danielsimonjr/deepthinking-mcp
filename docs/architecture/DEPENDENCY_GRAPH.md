@@ -48,7 +48,7 @@ The codebase is organized into the following modules:
 - **services**: 5 files
 - **session**: 7 files
 - **taxonomy**: 7 files
-- **tools**: 16 files
+- **tools**: 18 files
 - **types**: 29 files
 - **utils**: 6 files
 - **validation**: 39 files
@@ -1557,7 +1557,7 @@ The codebase is organized into the following modules:
 
 ## Tools Dependencies
 
-### `src/tools/definitions.ts` - Focused Tool Definitions (v4.4.0)
+### `src/tools/definitions.ts` - Focused Tool Definitions (v7.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1572,6 +1572,8 @@ The codebase is organized into the following modules:
 | `./schemas/modes/strategic.js` | `StrategicSchema` | Import |
 | `./schemas/modes/analytical.js` | `AnalyticalSchema` | Import |
 | `./schemas/modes/scientific.js` | `ScientificSchema` | Import |
+| `./schemas/modes/engineering.js` | `EngineeringSchema` | Import |
+| `./schemas/modes/academic.js` | `AcademicSchema` | Import |
 
 **Exports:**
 - Functions: `getToolForMode`, `isValidTool`, `getSchemaForTool`
@@ -1582,7 +1584,7 @@ The codebase is organized into the following modules:
 ### `src/tools/json-schemas.ts` - Hand-Written JSON Schemas for MCP Tools (v4.4.0)
 
 **Exports:**
-- Constants: `deepthinking_core_schema`, `deepthinking_standard_schema`, `deepthinking_mathematics_schema`, `deepthinking_temporal_schema`, `deepthinking_probabilistic_schema`, `deepthinking_causal_schema`, `deepthinking_strategic_schema`, `deepthinking_analytical_schema`, `deepthinking_scientific_schema`, `deepthinking_session_schema`, `jsonSchemas`
+- Constants: `deepthinking_core_schema`, `deepthinking_standard_schema`, `deepthinking_mathematics_schema`, `deepthinking_temporal_schema`, `deepthinking_probabilistic_schema`, `deepthinking_causal_schema`, `deepthinking_strategic_schema`, `deepthinking_analytical_schema`, `deepthinking_scientific_schema`, `deepthinking_engineering_schema`, `deepthinking_academic_schema`, `deepthinking_session_schema`, `jsonSchemas`
 
 ---
 
@@ -1620,6 +1622,23 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Re-exports: `BaseThoughtSchema`, `SessionActionSchema`, `type BaseThoughtInput`, `type SessionActionInput`, `CoreSchema`, `type CoreInput`, `MathSchema`, `type MathInput`, `TemporalSchema`, `type TemporalInput`, `ProbabilisticSchema`, `type ProbabilisticInput`, `CausalSchema`, `type CausalInput`, `StrategicSchema`, `type StrategicInput`, `AnalyticalSchema`, `type AnalyticalInput`, `ScientificSchema`, `type ScientificInput`
+
+---
+
+### `src/tools/schemas/modes/academic.ts` - Academic Mode Schemas (v7.5.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../base.js` | `BaseThoughtSchema` | Import |
+
+**Exports:**
+- Constants: `AcademicSchema`
 
 ---
 
@@ -1675,7 +1694,24 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/tools/schemas/modes/index.ts` - Mode Schemas Index (v4.0.0)
+### `src/tools/schemas/modes/engineering.ts` - Engineering Mode Schemas (v7.5.0)
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../base.js` | `BaseThoughtSchema` | Import |
+
+**Exports:**
+- Constants: `EngineeringSchema`
+
+---
+
+### `src/tools/schemas/modes/index.ts` - Mode Schemas Index (v7.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1688,9 +1724,11 @@ The codebase is organized into the following modules:
 | `./strategic.js` | `StrategicSchema, type StrategicInput` | Re-export |
 | `./analytical.js` | `AnalyticalSchema, type AnalyticalInput` | Re-export |
 | `./scientific.js` | `ScientificSchema, type ScientificInput` | Re-export |
+| `./engineering.js` | `EngineeringSchema, type EngineeringInput` | Re-export |
+| `./academic.js` | `AcademicSchema, type AcademicInput` | Re-export |
 
 **Exports:**
-- Re-exports: `CoreSchema`, `type CoreInput`, `MathSchema`, `type MathInput`, `TemporalSchema`, `type TemporalInput`, `ProbabilisticSchema`, `type ProbabilisticInput`, `CausalSchema`, `type CausalInput`, `StrategicSchema`, `type StrategicInput`, `AnalyticalSchema`, `type AnalyticalInput`, `ScientificSchema`, `type ScientificInput`
+- Re-exports: `CoreSchema`, `type CoreInput`, `MathSchema`, `type MathInput`, `TemporalSchema`, `type TemporalInput`, `ProbabilisticSchema`, `type ProbabilisticInput`, `CausalSchema`, `type CausalInput`, `StrategicSchema`, `type StrategicInput`, `AnalyticalSchema`, `type AnalyticalInput`, `ScientificSchema`, `type ScientificInput`, `EngineeringSchema`, `type EngineeringInput`, `AcademicSchema`, `type AcademicInput`
 
 ---
 
@@ -2602,7 +2640,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/validation/validators/modes/evidential.ts` - Evidential Mode Validator (v7.1.0)
+### `src/validation/validators/modes/evidential.ts` - Evidential Mode Validator (v7.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -3063,8 +3101,8 @@ graph TD
         N55[json-schemas]
         N56[base]
         N57[index]
-        N58[analytical]
-        N59[...11 more]
+        N58[academic]
+        N59[...13 more]
     end
 
     subgraph Types
@@ -3132,11 +3170,11 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 183 |
+| Total TypeScript Files | 185 |
 | Total Modules | 16 |
-| Total Lines of Code | 73537 |
-| Total Exports | 970 |
-| Total Re-exports | 409 |
+| Total Lines of Code | 73942 |
+| Total Exports | 978 |
+| Total Re-exports | 413 |
 | Total Classes | 92 |
 | Total Interfaces | 459 |
 | Total Functions | 323 |

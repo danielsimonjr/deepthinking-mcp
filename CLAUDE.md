@@ -6,19 +6,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **33 reasoning modes** (29 with dedicated thought types) with taxonomy-based classification (69 reasoning types across 12 categories, 110 planned), enterprise security, proof decomposition, and visual export capabilities including native SVG.
 
-**Version**: 7.4.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
+**Version**: 7.5.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
 
 ## Project Metrics
 
 | Metric | Value |
 |--------|-------|
-| TypeScript Files | 179 |
-| Total Exports | 893 (340 re-exports) |
-| Passing Tests | 792 |
+| TypeScript Files | 185 |
+| Total Exports | 978 (413 re-exports) |
+| Passing Tests | 787 |
 | Reasoning Modes | 33 (21 fully implemented + 12 experimental) |
-| MCP Tools | 10 focused + 1 legacy |
+| MCP Tools | 12 focused + 1 legacy |
 | Export Formats | 8 + native SVG |
-| Circular Dependencies | 37 (all type-only, 0 runtime) |
+| Circular Dependencies | 41 (all type-only, 0 runtime) |
 
 ## Build & Development Commands
 
@@ -127,16 +127,16 @@ Note: 29 modes have dedicated thought types. 4 modes (Recursive, Modal, Stochast
 
 | Version | Phase | Key Features |
 |---------|-------|--------------|
+| **v7.5.0** | Phase 14 | Accessible Reasoning Modes - All 29 modes with thought types now accessible via MCP tools (12 tools) |
 | **v7.4.0** | Phase 13 | Academic Research modes - Synthesis, Argumentation, Critique, Analysis (PhD/scientific writing) |
 | **v7.3.0** | Phase 12 | ALGORITHMIC mode - CLRS algorithms, DP formulations, correctness proofs, amortized analysis |
 | **v7.2.0** | Phase 11 | COMPUTABILITY (Turing machines), CRYPTANALYTIC (deciban system), von Neumann Game Theory |
 | **v7.1.0** | Phase 10 | ENGINEERING mode - Requirements traceability, Trade studies, FMEA, Design decisions |
 | **v7.0.0** | Phase 8 | Proof Decomposition, Native SVG export, MathematicsReasoningEngine |
-| **v6.1.x** | Phase 7 | Visual export integration, circular dependency fixes |
 
 ## MCP Tools
 
-The server provides 10 focused tools + 1 legacy tool:
+The server provides 12 focused tools + 1 legacy tool:
 
 | Tool | Modes |
 |------|-------|
@@ -149,6 +149,8 @@ The server provides 10 focused tools + 1 legacy tool:
 | `deepthinking_strategic` | gametheory, optimization |
 | `deepthinking_analytical` | analogical, firstprinciples, metareasoning, cryptanalytic |
 | `deepthinking_scientific` | scientificmethod, systemsthinking, formallogic |
+| `deepthinking_engineering` | engineering, algorithmic |
+| `deepthinking_academic` | synthesis, argumentation, critique, analysis |
 | `deepthinking_session` | Session management (create, list, delete, export) |
 
 ## Adding New Features

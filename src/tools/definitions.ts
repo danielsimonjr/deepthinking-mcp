@@ -1,6 +1,7 @@
 /**
- * Focused Tool Definitions (v4.4.0)
- * Sprint 5 Task 5.4: Split monolithic tool into 9 focused tools
+ * Focused Tool Definitions (v7.5.0)
+ * Sprint 5 Task 5.4: Split monolithic tool into focused tools
+ * Phase 14: Added deepthinking_engineering and deepthinking_academic (12 total tools)
  *
  * REFACTORED: Now using hand-written JSON schemas like working MCP servers
  * - Follows pattern from sequential-thinking-mcp and memory-mcp
@@ -17,11 +18,14 @@ import { CausalSchema } from './schemas/modes/causal.js';
 import { StrategicSchema } from './schemas/modes/strategic.js';
 import { AnalyticalSchema } from './schemas/modes/analytical.js';
 import { ScientificSchema } from './schemas/modes/scientific.js';
+import { EngineeringSchema } from './schemas/modes/engineering.js';
+import { AcademicSchema } from './schemas/modes/academic.js';
 
 /**
- * 10 focused tools with hand-written JSON schemas (v5.0.0)
+ * 12 focused tools with hand-written JSON schemas (v7.5.0)
  * Zod schemas used only for runtime validation
  * Phase 5: Added deepthinking_core for fundamental reasoning
+ * Phase 14: Added deepthinking_engineering and deepthinking_academic
  */
 export const tools = {
   deepthinking_core: jsonSchemas[0],
@@ -33,7 +37,9 @@ export const tools = {
   deepthinking_strategic: jsonSchemas[6],
   deepthinking_analytical: jsonSchemas[7],
   deepthinking_scientific: jsonSchemas[8],
-  deepthinking_session: jsonSchemas[9],
+  deepthinking_engineering: jsonSchemas[9],
+  deepthinking_academic: jsonSchemas[10],
+  deepthinking_session: jsonSchemas[11],
 };
 
 /**
@@ -43,6 +49,7 @@ export const toolList = jsonSchemas;
 
 /**
  * Tool name to schema mapping for validation
+ * Phase 14: Added engineering and academic schemas
  */
 export const toolSchemas = {
   deepthinking_core: CoreModeSchema,
@@ -54,11 +61,14 @@ export const toolSchemas = {
   deepthinking_strategic: StrategicSchema,
   deepthinking_analytical: AnalyticalSchema,
   deepthinking_scientific: ScientificSchema,
+  deepthinking_engineering: EngineeringSchema,
+  deepthinking_academic: AcademicSchema,
   deepthinking_session: SessionActionSchema,
 } as const;
 
 /**
  * Mode to tool name mapping for routing
+ * Phase 14: All 29 modes with dedicated thought types are now accessible
  */
 export const modeToToolMap: Record<string, string> = {
   // Core reasoning modes (fundamental)
@@ -71,9 +81,10 @@ export const modeToToolMap: Record<string, string> = {
   shannon: 'deepthinking_standard',
   hybrid: 'deepthinking_standard',
 
-  // Math/Physics modes
+  // Math/Physics/Computability modes
   mathematics: 'deepthinking_mathematics',
   physics: 'deepthinking_mathematics',
+  computability: 'deepthinking_mathematics',
 
   // Temporal mode
   temporal: 'deepthinking_temporal',
@@ -82,7 +93,7 @@ export const modeToToolMap: Record<string, string> = {
   bayesian: 'deepthinking_probabilistic',
   evidential: 'deepthinking_probabilistic',
 
-  // Causal modes (abductive moved to core)
+  // Causal modes
   causal: 'deepthinking_causal',
   counterfactual: 'deepthinking_causal',
 
@@ -90,15 +101,26 @@ export const modeToToolMap: Record<string, string> = {
   gametheory: 'deepthinking_strategic',
   optimization: 'deepthinking_strategic',
 
-  // Analytical modes
+  // Analytical modes (includes cryptanalytic)
   analogical: 'deepthinking_analytical',
   firstprinciples: 'deepthinking_analytical',
   metareasoning: 'deepthinking_analytical',
+  cryptanalytic: 'deepthinking_analytical',
 
   // Scientific modes
   scientificmethod: 'deepthinking_scientific',
   systemsthinking: 'deepthinking_scientific',
   formallogic: 'deepthinking_scientific',
+
+  // Engineering modes (Phase 14)
+  engineering: 'deepthinking_engineering',
+  algorithmic: 'deepthinking_engineering',
+
+  // Academic research modes (Phase 14)
+  synthesis: 'deepthinking_academic',
+  argumentation: 'deepthinking_academic',
+  critique: 'deepthinking_academic',
+  analysis: 'deepthinking_academic',
 };
 
 /**

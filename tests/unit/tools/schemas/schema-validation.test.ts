@@ -19,8 +19,8 @@ import {
  */
 describe('JSON Schema 2020-12 Compliance', () => {
   describe('All Tools Schema Generation', () => {
-    it('should generate valid JSON schemas for all 10 tools', () => {
-      expect(toolList).toHaveLength(10);
+    it('should generate valid JSON schemas for all 12 tools', () => {
+      expect(toolList).toHaveLength(12);
 
       for (const tool of toolList) {
         const schema = (tool as any).inputSchema;
