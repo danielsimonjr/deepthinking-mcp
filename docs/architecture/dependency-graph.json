@@ -1,11 +1,11 @@
 {
   "metadata": {
     "name": "deepthinking-mcp",
-    "version": "7.1.0",
-    "lastUpdated": "2025-12-07",
-    "totalFiles": 178,
+    "version": "7.3.0",
+    "lastUpdated": "2025-12-08",
+    "totalFiles": 179,
     "totalModules": 16,
-    "totalExports": 888
+    "totalExports": 893
   },
   "entryPoints": [
     {
@@ -6649,6 +6649,13 @@
               "CryptanalyticThought"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "./modes/algorithmic.js",
+            "imports": [
+              "AlgorithmicThought"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -6679,6 +6686,7 @@
           "isEngineeringThought",
           "isComputabilityThought",
           "isCryptanalyticThought",
+          "isAlgorithmicThought",
           "ThinkingMode",
           "ShannonStage"
         ],
@@ -6759,7 +6767,8 @@
           "isMetaReasoningThought",
           "isEngineeringThought",
           "isComputabilityThought",
-          "isCryptanalyticThought"
+          "isCryptanalyticThought",
+          "isAlgorithmicThought"
         ],
         "enums": [
           "ThinkingMode",
@@ -7019,6 +7028,49 @@
           "calculateIndexOfCoincidence",
           "LANGUAGE_IC",
           "ENGLISH_FREQUENCIES"
+        ]
+      },
+      "src/types/modes/algorithmic.ts": {
+        "description": "Algorithmic Mode - Type Definitions",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../core.js",
+            "imports": [
+              "BaseThought",
+              "ThinkingMode"
+            ]
+          }
+        ],
+        "exports": [
+          "COMMON_RECURRENCES",
+          "isAlgorithmicThought",
+          "suggestDesignPattern",
+          "applyMasterTheorem"
+        ],
+        "interfaces": [
+          "TimeComplexity",
+          "SpaceComplexity",
+          "LoopInvariant",
+          "CorrectnessProof",
+          "Recurrence",
+          "AlgorithmSpec",
+          "DPFormulation",
+          "GreedyProof",
+          "GraphAlgorithmContext",
+          "DataStructureSpec",
+          "AmortizedAnalysis",
+          "AlgorithmComparison",
+          "AlgorithmicThought"
+        ],
+        "functions": [
+          "isAlgorithmicThought",
+          "suggestDesignPattern",
+          "applyMasterTheorem"
+        ],
+        "constants": [
+          "COMMON_RECURRENCES"
         ]
       },
       "src/types/modes/analogical.ts": {
@@ -10089,6 +10141,11 @@
           "src/types/core.ts"
         ],
         [
+          "src/types/core.ts",
+          "src/types/modes/algorithmic.ts",
+          "src/types/core.ts"
+        ],
+        [
           "src/validation/validator.ts",
           "src/validation/validators/index.ts",
           "src/validation/validators/modes/sequential.ts",
@@ -10233,9 +10290,9 @@
           "src/validation/validator.ts"
         ]
       ],
-      "total": 36,
+      "total": 37,
       "runtimeCount": 0,
-      "typeOnlyCount": 36
+      "typeOnlyCount": 37
     },
     "layers": [
       {
@@ -10417,6 +10474,7 @@
         "files": [
           "src/types/core.ts",
           "src/types/index.ts",
+          "src/types/modes/algorithmic.ts",
           "src/types/modes/analogical.ts",
           "src/types/modes/bayesian.ts",
           "src/types/modes/causal.ts",
@@ -10499,19 +10557,19 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 178,
+    "totalTypeScriptFiles": 179,
     "totalModules": 16,
-    "totalLinesOfCode": 70593,
-    "totalExports": 888,
+    "totalLinesOfCode": 72182,
+    "totalExports": 893,
     "totalClasses": 92,
-    "totalInterfaces": 388,
-    "totalFunctions": 311,
-    "totalTypeGuards": 56,
+    "totalInterfaces": 401,
+    "totalFunctions": 315,
+    "totalTypeGuards": 58,
     "totalEnums": 3,
-    "totalConstants": 155,
+    "totalConstants": 156,
     "totalReExports": 340,
-    "totalTypeOnlyImports": 137,
+    "totalTypeOnlyImports": 138,
     "runtimeCircularDeps": 0,
-    "typeOnlyCircularDeps": 36
+    "typeOnlyCircularDeps": 37
   }
 }

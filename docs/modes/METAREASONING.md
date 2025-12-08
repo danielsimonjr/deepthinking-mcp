@@ -1,8 +1,22 @@
 # Meta-Reasoning Mode
 
-**Version**: 6.0.0
+**Version**: 7.3.0
 **Tool**: `deepthinking_analytical`
 **Status**: Stable
+**Source**: `src/types/modes/metareasoning.ts`
+
+## Dependencies
+
+| Dependency | Type | Imports |
+|------------|------|---------|
+| `../core.js` | Internal | `BaseThought`, `ThinkingMode` |
+
+## Exports
+
+- **Interfaces**: `CurrentStrategy`, `StrategyEvaluation`, `AlternativeStrategy`, `StrategyRecommendation`, `ResourceAllocation`, `QualityMetrics`, `SessionContext`, `MetaReasoningThought`
+- **Functions**: `isMetaReasoningThought`
+
+---
 
 ## Overview
 
@@ -164,7 +178,7 @@ Meta-reasoning integrates with `ModeRouter` for adaptive mode switching:
 
 ## Integration with Other Modes
 
-Meta-reasoning works alongside all 20 reasoning modes:
+Meta-reasoning works alongside all 25 reasoning modes:
 
 ### Monitoring
 - Tracks which modes you've used (`modesUsed`)
