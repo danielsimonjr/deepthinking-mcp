@@ -112,7 +112,7 @@
       //
       // EXAMPLES from existing modes:
       //
-      // Mathematics (deepthinking_math):
+      // Mathematics (deepthinking_mathematics):
       //   mathematicalModel: {
       //     type: 'object',
       //     properties: {

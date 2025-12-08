@@ -92,7 +92,7 @@ DeepThinking MCP provides 10 focused tools for different reasoning domains:
 |------|-------|-------------|
 | `deepthinking_core` | inductive, deductive, abductive | Fundamental reasoning |
 | `deepthinking_standard` | sequential, shannon, hybrid | Standard workflow modes |
-| `deepthinking_math` | mathematics, physics | Mathematical/scientific reasoning |
+| `deepthinking_mathematics` | mathematics, physics | Mathematical/scientific reasoning |
 | `deepthinking_temporal` | temporal | Time-based reasoning |
 | `deepthinking_probabilistic` | bayesian, evidential | Probabilistic reasoning |
 | `deepthinking_causal` | causal, counterfactual | Cause-effect analysis |
@@ -490,7 +490,7 @@ mode: 'analysis'
 
 ```json
 {
-  "tool": "deepthinking_math",
+  "tool": "deepthinking_mathematics",
   "arguments": {
     "mode": "mathematics",
     "thought": "Analyzing the proof that n² is even when n is even",

@@ -41,7 +41,7 @@ describe('MCP Protocol Compliance', () => {
       const toolNames = toolList.map((t: any) => t.name);
       expect(toolNames).toContain('deepthinking_core');
       expect(toolNames).toContain('deepthinking_standard');
-      expect(toolNames).toContain('deepthinking_math');
+      expect(toolNames).toContain('deepthinking_mathematics');
       expect(toolNames).toContain('deepthinking_temporal');
       expect(toolNames).toContain('deepthinking_probabilistic');
       expect(toolNames).toContain('deepthinking_causal');
@@ -57,8 +57,8 @@ describe('MCP Protocol Compliance', () => {
       expect(tools.deepthinking_standard.description).toContain('shannon');
       expect(tools.deepthinking_standard.description).toContain('hybrid');
 
-      // Math modes documented in deepthinking_math
-      expect(tools.deepthinking_math.description.toLowerCase()).toContain('math');
+      // Math modes documented in deepthinking_mathematics
+      expect(tools.deepthinking_mathematics.description.toLowerCase()).toContain('math');
 
       // Temporal mode
       expect(tools.deepthinking_temporal.description.toLowerCase()).toContain('temporal');

@@ -12,7 +12,7 @@
 **10 Focused Tools** (v5.0.0+):
 - `deepthinking_core` - Fundamental reasoning (inductive, deductive, abductive)
 - `deepthinking_standard` - Standard workflows (sequential, shannon, hybrid)
-- `deepthinking_math` - Mathematical/physical reasoning
+- `deepthinking_mathematics` - Mathematical/physical reasoning
 - `deepthinking_temporal` - Time-based reasoning
 - `deepthinking_probabilistic` - Probability reasoning (bayesian, evidential)
 - `deepthinking_causal` - Causal analysis (causal, counterfactual)

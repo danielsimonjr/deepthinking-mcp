@@ -25,7 +25,7 @@ describe('Tool Definitions', () => {
       const expectedTools = [
         'deepthinking_core',
         'deepthinking_standard',
-        'deepthinking_math',
+        'deepthinking_mathematics',
         'deepthinking_temporal',
         'deepthinking_probabilistic',
         'deepthinking_causal',
@@ -107,8 +107,8 @@ describe('Tool Definitions', () => {
     });
 
     it('should map math modes correctly', () => {
-      expect(modeToToolMap.mathematics).toBe('deepthinking_math');
-      expect(modeToToolMap.physics).toBe('deepthinking_math');
+      expect(modeToToolMap.mathematics).toBe('deepthinking_mathematics');
+      expect(modeToToolMap.physics).toBe('deepthinking_mathematics');
     });
   });
 

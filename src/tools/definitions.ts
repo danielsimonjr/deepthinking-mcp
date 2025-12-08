@@ -26,7 +26,7 @@ import { ScientificSchema } from './schemas/modes/scientific.js';
 export const tools = {
   deepthinking_core: jsonSchemas[0],
   deepthinking_standard: jsonSchemas[1],
-  deepthinking_math: jsonSchemas[2],
+  deepthinking_mathematics: jsonSchemas[2],
   deepthinking_temporal: jsonSchemas[3],
   deepthinking_probabilistic: jsonSchemas[4],
   deepthinking_causal: jsonSchemas[5],
@@ -47,7 +47,7 @@ export const toolList = jsonSchemas;
 export const toolSchemas = {
   deepthinking_core: CoreModeSchema,
   deepthinking_standard: StandardSchema,
-  deepthinking_math: MathSchema,
+  deepthinking_mathematics: MathSchema,
   deepthinking_temporal: TemporalSchema,
   deepthinking_probabilistic: ProbabilisticSchema,
   deepthinking_causal: CausalSchema,
@@ -72,8 +72,8 @@ export const modeToToolMap: Record<string, string> = {
   hybrid: 'deepthinking_standard',
 
   // Math/Physics modes
-  mathematics: 'deepthinking_math',
-  physics: 'deepthinking_math',
+  mathematics: 'deepthinking_mathematics',
+  physics: 'deepthinking_mathematics',
 
   // Temporal mode
   temporal: 'deepthinking_temporal',

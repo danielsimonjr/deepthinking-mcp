@@ -142,7 +142,7 @@ The server provides 10 focused tools + 1 legacy tool:
 |------|-------|
 | `deepthinking_core` | inductive, deductive, abductive |
 | `deepthinking_standard` | sequential, shannon, hybrid |
-| `deepthinking_math` | mathematics, physics, computability |
+| `deepthinking_mathematics` | mathematics, physics, computability |
 | `deepthinking_temporal` | temporal |
 | `deepthinking_probabilistic` | bayesian, evidential |
 | `deepthinking_causal` | causal, counterfactual |

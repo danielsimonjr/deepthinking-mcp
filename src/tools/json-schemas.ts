@@ -205,11 +205,11 @@ export const deepthinking_standard_schema = {
 } as const;
 
 /**
- * deepthinking_math - Mathematics and Physics modes
+ * deepthinking_mathematics - Mathematics and Physics modes
  * Phase 8: Added proof decomposition fields
  */
-export const deepthinking_math_schema = {
-  name: "deepthinking_math",
+export const deepthinking_mathematics_schema = {
+  name: "deepthinking_mathematics",
   description: "Math/physics: proofs, proof decomposition, consistency checking, tensors, LaTeX, conservation laws",
   inputSchema: {
     type: "object",
@@ -1029,7 +1029,7 @@ export const deepthinking_session_schema = {
 export const jsonSchemas = [
   deepthinking_core_schema,
   deepthinking_standard_schema,
-  deepthinking_math_schema,
+  deepthinking_mathematics_schema,
   deepthinking_temporal_schema,
   deepthinking_probabilistic_schema,
   deepthinking_causal_schema,

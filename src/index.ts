@@ -8,7 +8,7 @@
  *
  * Tools:
  * - deepthinking_core: sequential, shannon, hybrid modes
- * - deepthinking_math: mathematics, physics modes
+ * - deepthinking_mathematics: mathematics, physics modes
  * - deepthinking_temporal: temporal reasoning
  * - deepthinking_probabilistic: bayesian, evidential modes
  * - deepthinking_causal: causal, counterfactual, abductive modes
@@ -133,7 +133,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       // Add deprecation warning
       const deprecationWarning = '⚠️ DEPRECATED: The "deepthinking" tool is deprecated. ' +
-        'Use the focused tools instead: deepthinking_core, deepthinking_math, ' +
+        'Use the focused tools instead: deepthinking_core, deepthinking_mathematics, ' +
         'deepthinking_temporal, deepthinking_probabilistic, deepthinking_causal, ' +
         'deepthinking_strategic, deepthinking_analytical, deepthinking_scientific, ' +
         'deepthinking_session. See docs/migration/v4.0-tool-splitting.md for details.\n\n';

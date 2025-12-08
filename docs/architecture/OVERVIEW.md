@@ -207,8 +207,8 @@ The server supports 33 reasoning modes organized into categories:
 ### Math/Physics Modes
 | Mode | Purpose | Tool |
 |------|---------|------|
-| **Mathematics** | Formal proofs, theorems | `deepthinking_math` |
-| **Physics** | Physical models, conservation laws | `deepthinking_math` |
+| **Mathematics** | Formal proofs, theorems | `deepthinking_mathematics` |
+| **Physics** | Physical models, conservation laws | `deepthinking_mathematics` |
 
 ### Advanced Runtime Modes (Full Runtime)
 | Mode | Purpose | Tool |
@@ -242,7 +242,7 @@ The server supports 33 reasoning modes organized into categories:
 ### Historical Computing Modes (v7.2.0) - Turing & von Neumann
 | Mode | Purpose | Tool |
 |------|---------|------|
-| **Computability** | Turing machines, decidability, reductions, diagonalization | `deepthinking_math` |
+| **Computability** | Turing machines, decidability, reductions, diagonalization | `deepthinking_mathematics` |
 | **Cryptanalytic** | Deciban evidence system, Banburismus, frequency analysis | `deepthinking_analytical` |
 
 ### Algorithmic Mode (v7.3.0) - CLRS Coverage
@@ -373,7 +373,7 @@ Configured in `tsconfig.json`:
 |------|-------------|-----------------|
 | `deepthinking_core` | Fundamental reasoning | inductive, deductive, abductive |
 | `deepthinking_standard` | Standard workflows | sequential, shannon, hybrid |
-| `deepthinking_math` | Mathematical/physical | mathematics, physics |
+| `deepthinking_mathematics` | Mathematical/physical | mathematics, physics |
 | `deepthinking_temporal` | Time-based reasoning | temporal |
 | `deepthinking_probabilistic` | Probability reasoning | bayesian, evidential |
 | `deepthinking_causal` | Causal analysis | causal, counterfactual |
