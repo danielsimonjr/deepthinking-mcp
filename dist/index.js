@@ -28619,8 +28619,8 @@ var deepthinking_standard_schema = {
     additionalProperties: false
   }
 };
-var deepthinking_math_schema = {
-  name: "deepthinking_math",
+var deepthinking_mathematics_schema = {
+  name: "deepthinking_mathematics",
   description: "Math/physics: proofs, proof decomposition, consistency checking, tensors, LaTeX, conservation laws",
   inputSchema: {
     type: "object",
@@ -29408,7 +29408,7 @@ var deepthinking_session_schema = {
 var jsonSchemas = [
   deepthinking_core_schema,
   deepthinking_standard_schema,
-  deepthinking_math_schema,
+  deepthinking_mathematics_schema,
   deepthinking_temporal_schema,
   deepthinking_probabilistic_schema,
   deepthinking_causal_schema,
@@ -29777,7 +29777,7 @@ var toolList = jsonSchemas;
 var toolSchemas = {
   deepthinking_core: CoreModeSchema,
   deepthinking_standard: StandardSchema,
-  deepthinking_math: MathSchema,
+  deepthinking_mathematics: MathSchema,
   deepthinking_temporal: TemporalSchema,
   deepthinking_probabilistic: ProbabilisticSchema,
   deepthinking_causal: CausalSchema,
@@ -29796,8 +29796,8 @@ var modeToToolMap = {
   shannon: "deepthinking_standard",
   hybrid: "deepthinking_standard",
   // Math/Physics modes
-  mathematics: "deepthinking_math",
-  physics: "deepthinking_math",
+  mathematics: "deepthinking_mathematics",
+  physics: "deepthinking_mathematics",
   // Temporal mode
   temporal: "deepthinking_temporal",
   // Probabilistic modes
@@ -29897,7 +29897,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     if (name === "deepthinking") {
       const { ThinkingToolSchema: ThinkingToolSchema2 } = await Promise.resolve().then(() => (init_thinking(), thinking_exports));
       const input = ThinkingToolSchema2.parse(args);
-      const deprecationWarning = '\u26A0\uFE0F DEPRECATED: The "deepthinking" tool is deprecated. Use the focused tools instead: deepthinking_core, deepthinking_math, deepthinking_temporal, deepthinking_probabilistic, deepthinking_causal, deepthinking_strategic, deepthinking_analytical, deepthinking_scientific, deepthinking_session. See docs/migration/v4.0-tool-splitting.md for details.\n\n';
+      const deprecationWarning = '\u26A0\uFE0F DEPRECATED: The "deepthinking" tool is deprecated. Use the focused tools instead: deepthinking_core, deepthinking_mathematics, deepthinking_temporal, deepthinking_probabilistic, deepthinking_causal, deepthinking_strategic, deepthinking_analytical, deepthinking_scientific, deepthinking_session. See docs/migration/v4.0-tool-splitting.md for details.\n\n';
       switch (input.action) {
         case "add_thought": {
           const result = await handleAddThought(input, modeToToolMap[input.mode || "hybrid"] || "deepthinking_core");

@@ -62,7 +62,7 @@ This release introduces a comprehensive proof decomposition system for mathemati
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │              10 Focused Tool Handlers (v5.0.0+)        │ │
 │  │  • deepthinking_core         • deepthinking_standard   │ │
-│  │  • deepthinking_math         • deepthinking_temporal   │ │
+│  │  • deepthinking_mathematics  • deepthinking_temporal   │ │
 │  │  • deepthinking_probabilistic • deepthinking_causal    │ │
 │  │  • deepthinking_strategic    • deepthinking_analytical │ │
 │  │  • deepthinking_scientific   • deepthinking_session    │ │

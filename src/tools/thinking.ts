@@ -723,7 +723,7 @@ export type ThinkingToolInput = z.infer<typeof ThinkingToolSchema>;
  * Legacy tool definition - DEPRECATED
  *
  * Use the focused tools instead:
- * - deepthinking_core, deepthinking_math, deepthinking_temporal
+ * - deepthinking_core, deepthinking_mathematics, deepthinking_temporal
  * - deepthinking_probabilistic, deepthinking_causal, deepthinking_strategic
  * - deepthinking_analytical, deepthinking_scientific, deepthinking_session
  *

@@ -1,7 +1,7 @@
 # Mathematics Reasoning Mode
 
 **Version**: 7.3.0
-**Tool**: `deepthinking_math`
+**Tool**: `deepthinking_mathematics`
 **Status**: Stable (Fully Implemented)
 **Source**: `src/types/modes/mathematics.ts`
 
@@ -153,7 +153,7 @@ Detect inconsistencies in reasoning:
 
 ```typescript
 // Define a theorem
-const theorem = await deepthinking_math({
+const theorem = await deepthinking_mathematics({
   mode: 'mathematics',
   thought: 'State the fundamental theorem of calculus',
   thoughtNumber: 1,
@@ -173,7 +173,7 @@ const theorem = await deepthinking_math({
 });
 
 // Construct a proof
-const proof = await deepthinking_math({
+const proof = await deepthinking_mathematics({
   mode: 'mathematics',
   thought: 'Prove using definition of derivative and properties of integrals',
   thoughtNumber: 2,
@@ -204,7 +204,7 @@ const proof = await deepthinking_math({
 });
 
 // Analyze proof for gaps (Phase 8)
-const analysis = await deepthinking_math({
+const analysis = await deepthinking_mathematics({
   mode: 'mathematics',
   thought: 'Check proof for gaps and implicit assumptions',
   thoughtNumber: 3,

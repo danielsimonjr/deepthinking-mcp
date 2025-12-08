@@ -547,7 +547,7 @@ Study these examples for patterns:
 **Medium Complexity**:
 - Types: `src/types/modes/mathematics.ts`
 - Validator: `src/validation/validators/modes/mathematics.ts`
-- JSON Schema: `deepthinking_math` in `src/tools/json-schemas.ts`
+- JSON Schema: `deepthinking_mathematics` in `src/tools/json-schemas.ts`
 
 **Complex Mode**:
 - Types: `src/types/modes/temporal.ts` or `src/types/modes/gametheory.ts`

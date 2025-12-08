@@ -95,8 +95,8 @@ describe('JSON Schema 2020-12 Compliance', () => {
       expect(Object.keys(schema.properties).length).toBeGreaterThanOrEqual(10);
     });
 
-    it('deepthinking_math should have mathematics-specific fields', () => {
-      const tool = tools.deepthinking_math;
+    it('deepthinking_mathematics should have mathematics-specific fields', () => {
+      const tool = tools.deepthinking_mathematics;
       const schema = (tool as any).inputSchema;
 
       expect(schema.type).toBe('object');

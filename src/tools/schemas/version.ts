@@ -36,7 +36,7 @@ export const schemaMetadata = {
 
   tools: [
     { name: 'deepthinking_core', modes: ['sequential', 'shannon', 'hybrid'] },
-    { name: 'deepthinking_math', modes: ['mathematics', 'physics'] },
+    { name: 'deepthinking_mathematics', modes: ['mathematics', 'physics'] },
     { name: 'deepthinking_temporal', modes: ['temporal'] },
     { name: 'deepthinking_probabilistic', modes: ['bayesian', 'evidential'] },
     { name: 'deepthinking_causal', modes: ['causal', 'counterfactual', 'abductive'] },

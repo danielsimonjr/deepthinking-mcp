@@ -7,9 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### ✨ Features
+### 🔄 Changed
 
-*No unreleased changes*
+**Tool Naming Convention Update**
+
+- **Renamed `deepthinking_math` to `deepthinking_mathematics`** - The MCP tool for mathematics and physics modes has been renamed for consistency and clarity:
+  - Updated tool name in `src/tools/definitions.ts`
+  - Updated JSON schema constant name in `src/tools/json-schemas.ts`
+  - Updated mode-to-tool mapping for `mathematics` and `physics` modes
+  - Updated version metadata in `src/tools/schemas/version.ts`
+
+### 📚 Documentation
+
+- Updated all documentation to reflect the `deepthinking_mathematics` tool name:
+  - `README.md` - Tool reference and examples
+  - `CLAUDE.md` - MCP tools table
+  - `docs/architecture/OVERVIEW.md` - Tool mappings
+  - `docs/architecture/ARCHITECTURE.md` - Architecture diagram
+  - `docs/architecture/COMPONENTS.md` - Component listing
+  - `docs/modes/MATHEMATICS.md` - Mathematics mode documentation
+  - `docs/modes/PHYSICS.md` - Physics mode documentation
+  - `docs/migration/v4.0-tool-splitting.md` - Migration guide
+  - `docs/ADDING_NEW_MODE.md` - Mode scaffolding guide
+  - `templates/mode-scaffolding/example-mode.json-schema.ts` - Template example
+- Regenerated dependency graph documentation
+
+### 🔧 Maintenance
+
+- Updated test files to use new tool name:
+  - `tests/integration/mcp-compliance.test.ts`
+  - `tests/unit/tools/schemas/schema-validation.test.ts`
+  - `tests/unit/tools/schemas/tool-definitions.test.ts`
+- All 787 tests passing after rename
 
 ---
 

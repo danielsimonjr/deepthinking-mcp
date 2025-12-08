@@ -1,7 +1,7 @@
 # Physics Reasoning Mode
 
 **Version**: 7.3.0
-**Tool**: `deepthinking_math`
+**Tool**: `deepthinking_mathematicsematics`
 **Status**: Stable (Fully Implemented)
 **Source**: `src/types/modes/physics.ts`
 
@@ -101,7 +101,7 @@ interface FieldTheoryContext {
 
 ```typescript
 // Define a physics problem with tensor formulation
-const tensorAnalysis = await deepthinking_math({
+const tensorAnalysis = await deepthinking_mathematics({
   mode: 'physics',
   thought: 'Analyze the electromagnetic field tensor',
   thoughtNumber: 1,
@@ -125,7 +125,7 @@ const tensorAnalysis = await deepthinking_math({
 });
 
 // Symmetry analysis
-const symmetry = await deepthinking_math({
+const symmetry = await deepthinking_mathematics({
   mode: 'physics',
   thought: 'Analyze gauge symmetry of electromagnetism',
   thoughtNumber: 2,
@@ -145,7 +145,7 @@ const symmetry = await deepthinking_math({
 });
 
 // Conservation law derivation
-const conservation = await deepthinking_math({
+const conservation = await deepthinking_mathematics({
   mode: 'physics',
   thought: 'Derive charge conservation from gauge symmetry',
   thoughtNumber: 3,
@@ -166,7 +166,7 @@ const conservation = await deepthinking_math({
 });
 
 // Dimensional analysis
-const dimensions = await deepthinking_math({
+const dimensions = await deepthinking_mathematics({
   mode: 'physics',
   thought: 'Verify dimensional consistency of field equations',
   thoughtNumber: 4,
@@ -186,7 +186,7 @@ const dimensions = await deepthinking_math({
 });
 
 // Lagrangian formulation
-const lagrangian = await deepthinking_math({
+const lagrangian = await deepthinking_mathematics({
   mode: 'physics',
   thought: 'Write electromagnetic Lagrangian density',
   thoughtNumber: 5,

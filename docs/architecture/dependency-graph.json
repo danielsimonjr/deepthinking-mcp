@@ -1,7 +1,7 @@
 {
   "metadata": {
     "name": "deepthinking-mcp",
-    "version": "7.3.0",
+    "version": "7.4.0",
     "lastUpdated": "2025-12-08",
     "totalFiles": 183,
     "totalModules": 16,
@@ -249,7 +249,7 @@
               "exportScientificMethodExperiment",
               "exportOptimizationSolution",
               "exportFormalLogicProof",
-              "// Phase 8: Proof decomposition\r\n  exportProofDecomposition"
+              "// Phase 8: Proof decomposition\n  exportProofDecomposition"
             ],
             "reExport": true
           },
@@ -282,7 +282,7 @@
           "exportScientificMethodExperiment",
           "exportOptimizationSolution",
           "exportFormalLogicProof",
-          "// Phase 8: Proof decomposition\r\n  exportProofDecomposition",
+          "// Phase 8: Proof decomposition\n  exportProofDecomposition",
           "LaTeXExporter",
           "type LaTeXExportOptions"
         ],
@@ -306,7 +306,7 @@
           "exportScientificMethodExperiment",
           "exportOptimizationSolution",
           "exportFormalLogicProof",
-          "// Phase 8: Proof decomposition\r\n  exportProofDecomposition",
+          "// Phase 8: Proof decomposition\n  exportProofDecomposition",
           "LaTeXExporter",
           "type LaTeXExportOptions"
         ]
@@ -4705,44 +4705,6 @@
           "FileSessionRepository"
         ]
       },
-      "src/repositories/index.ts": {
-        "description": "Repository module exports (v3.4.5)",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./ISessionRepository.js",
-            "imports": [
-              "ISessionRepository"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./FileSessionRepository.js",
-            "imports": [
-              "FileSessionRepository"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./MemorySessionRepository.js",
-            "imports": [
-              "MemorySessionRepository"
-            ],
-            "reExport": true
-          }
-        ],
-        "exports": [
-          "ISessionRepository",
-          "FileSessionRepository",
-          "MemorySessionRepository"
-        ],
-        "reExported": [
-          "ISessionRepository",
-          "FileSessionRepository",
-          "MemorySessionRepository"
-        ]
-      },
       "src/repositories/ISessionRepository.ts": {
         "description": "Session Repository Interface (v3.4.5)",
         "externalDependencies": [],
@@ -4786,6 +4748,44 @@
           "MemorySessionRepository"
         ],
         "classes": [
+          "MemorySessionRepository"
+        ]
+      },
+      "src/repositories/index.ts": {
+        "description": "Repository module exports (v3.4.5)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./ISessionRepository.js",
+            "imports": [
+              "ISessionRepository"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./FileSessionRepository.js",
+            "imports": [
+              "FileSessionRepository"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./MemorySessionRepository.js",
+            "imports": [
+              "MemorySessionRepository"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [
+          "ISessionRepository",
+          "FileSessionRepository",
+          "MemorySessionRepository"
+        ],
+        "reExported": [
+          "ISessionRepository",
+          "FileSessionRepository",
           "MemorySessionRepository"
         ]
       }
@@ -4997,7 +4997,7 @@
               "FirstPrinciplesThought",
               "isMetaReasoningThought",
               "HybridThought",
-              "// Sprint 1: Visual export integration types\r\n  SequentialThought",
+              "// Sprint 1: Visual export integration types\n  SequentialThought",
               "ShannonThought",
               "AbductiveThought",
               "CounterfactualThought",
@@ -5070,44 +5070,6 @@
         ],
         "classes": [
           "ExportService"
-        ]
-      },
-      "src/services/index.ts": {
-        "description": "Services module exports (v3.4.5)",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./ThoughtFactory.js",
-            "imports": [
-              "ThoughtFactory"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./ExportService.js",
-            "imports": [
-              "ExportService"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./ModeRouter.js",
-            "imports": [
-              "ModeRouter"
-            ],
-            "reExport": true
-          }
-        ],
-        "exports": [
-          "ThoughtFactory",
-          "ExportService",
-          "ModeRouter"
-        ],
-        "reExported": [
-          "ThoughtFactory",
-          "ExportService",
-          "ModeRouter"
         ]
       },
       "src/services/MetaMonitor.ts": {
@@ -5255,9 +5217,82 @@
         "classes": [
           "ThoughtFactory"
         ]
+      },
+      "src/services/index.ts": {
+        "description": "Services module exports (v3.4.5)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./ThoughtFactory.js",
+            "imports": [
+              "ThoughtFactory"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ExportService.js",
+            "imports": [
+              "ExportService"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ModeRouter.js",
+            "imports": [
+              "ModeRouter"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [
+          "ThoughtFactory",
+          "ExportService",
+          "ModeRouter"
+        ],
+        "reExported": [
+          "ThoughtFactory",
+          "ExportService",
+          "ModeRouter"
+        ]
       }
     },
     "session": {
+      "src/session/SessionMetricsCalculator.ts": {
+        "description": "Session Metrics Calculator (v3.4.5)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/index.js",
+            "imports": [
+              "ThinkingSession",
+              "SessionMetrics",
+              "Thought"
+            ]
+          },
+          {
+            "file": "../types/core.js",
+            "imports": [
+              "isTemporalThought",
+              "isGameTheoryThought",
+              "isEvidentialThought"
+            ]
+          },
+          {
+            "file": "../validation/cache.js",
+            "imports": [
+              "validationCache"
+            ]
+          }
+        ],
+        "exports": [
+          "SessionMetricsCalculator"
+        ],
+        "classes": [
+          "SessionMetricsCalculator"
+        ]
+      },
       "src/session/index.ts": {
         "description": "Session module exports (v4.3.0)",
         "externalDependencies": [],
@@ -5425,41 +5460,6 @@
         ],
         "functions": [
           "createSessionStore"
-        ]
-      },
-      "src/session/SessionMetricsCalculator.ts": {
-        "description": "Session Metrics Calculator (v3.4.5)",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../types/index.js",
-            "imports": [
-              "ThinkingSession",
-              "SessionMetrics",
-              "Thought"
-            ]
-          },
-          {
-            "file": "../types/core.js",
-            "imports": [
-              "isTemporalThought",
-              "isGameTheoryThought",
-              "isEvidentialThought"
-            ]
-          },
-          {
-            "file": "../validation/cache.js",
-            "imports": [
-              "validationCache"
-            ]
-          }
-        ],
-        "exports": [
-          "SessionMetricsCalculator"
-        ],
-        "classes": [
-          "SessionMetricsCalculator"
         ]
       },
       "src/session/storage/file-store.ts": {
@@ -5932,7 +5932,7 @@
         "exports": [
           "deepthinking_core_schema",
           "deepthinking_standard_schema",
-          "deepthinking_math_schema",
+          "deepthinking_mathematics_schema",
           "deepthinking_temporal_schema",
           "deepthinking_probabilistic_schema",
           "deepthinking_causal_schema",
@@ -5945,7 +5945,7 @@
         "constants": [
           "deepthinking_core_schema",
           "deepthinking_standard_schema",
-          "deepthinking_math_schema",
+          "deepthinking_mathematics_schema",
           "deepthinking_temporal_schema",
           "deepthinking_probabilistic_schema",
           "deepthinking_causal_schema",
@@ -8520,7 +8520,7 @@
           {
             "file": "./schema-utils.js",
             "imports": [
-              "// Primitive schemas\r\n  probabilitySchema",
+              "// Primitive schemas\n  probabilitySchema",
               "confidenceSchema",
               "progressSchema",
               "weightSchema",
@@ -8529,7 +8529,7 @@
               "nonEmptyStringSchema",
               "uuidSchema",
               "timestampSchema",
-              "// Composite schemas - Hypothesis & Evidence\r\n  hypothesisSchema",
+              "// Composite schemas - Hypothesis & Evidence\n  hypothesisSchema",
               "probabilityWithJustificationSchema",
               "probabilityWithCalculationSchema",
               "evidenceSchema",
@@ -8539,7 +8539,7 @@
               "type ProbabilityWithCalculation",
               "type EvidenceInput",
               "type EvidenceWithSupport",
-              "// Graph schemas\r\n  createNodeSchema",
+              "// Graph schemas\n  createNodeSchema",
               "createEdgeSchema",
               "nodeSchema",
               "weightedNodeSchema",
@@ -8551,48 +8551,48 @@
               "type EdgeInput",
               "type WeightedEdgeInput",
               "type CausalEdgeInput",
-              "// Temporal schemas\r\n  timePointSchema",
+              "// Temporal schemas\n  timePointSchema",
               "timeIntervalSchema",
               "temporalEventSchema",
               "type TimePointInput",
               "type TimeIntervalInput",
               "type TemporalEventInput",
-              "// Mathematical schemas\r\n  mathExpressionSchema",
+              "// Mathematical schemas\n  mathExpressionSchema",
               "valueWithUnitSchema",
               "measurementSchema",
               "type MathExpressionInput",
               "type ValueWithUnitInput",
               "type MeasurementInput",
-              "// Game Theory schemas\r\n  playerSchema",
+              "// Game Theory schemas\n  playerSchema",
               "strategySchema",
               "payoffSchema",
               "type PlayerInput",
               "type StrategyInput",
               "type PayoffInput",
-              "// Reasoning schemas\r\n  reasoningStepSchema",
+              "// Reasoning schemas\n  reasoningStepSchema",
               "propositionSchema",
               "inferenceRuleSchema",
               "type ReasoningStepInput",
               "type PropositionInput",
               "type InferenceRuleInput",
-              "// Optimization schemas\r\n  constraintSchema",
+              "// Optimization schemas\n  constraintSchema",
               "objectiveSchema",
               "solutionSchema",
               "type ConstraintInput",
               "type ObjectiveInput",
               "type SolutionInput",
-              "// Base schemas\r\n  baseThoughtSchema",
+              "// Base schemas\n  baseThoughtSchema",
               "sequentialThoughtExtensionSchema",
               "bayesianThoughtExtensionSchema",
               "type BaseThoughtInput",
-              "// Helpers\r\n  createRangeSchema",
+              "// Helpers\n  createRangeSchema",
               "createEnumSchema",
               "createOptionalStringWithDefault",
               "createOptionalNumberWithDefault",
               "createOptionalBooleanWithDefault",
               "uniqueIdArraySchema",
               "createGraphSchema",
-              "// Namespace export\r\n  SchemaUtils"
+              "// Namespace export\n  SchemaUtils"
             ],
             "reExport": true
           }
@@ -8627,7 +8627,7 @@
           "type BatchOperationInput",
           "validateInput",
           "safeValidateInput",
-          "// Primitive schemas\r\n  probabilitySchema",
+          "// Primitive schemas\n  probabilitySchema",
           "confidenceSchema",
           "progressSchema",
           "weightSchema",
@@ -8636,7 +8636,7 @@
           "nonEmptyStringSchema",
           "uuidSchema",
           "timestampSchema",
-          "// Composite schemas - Hypothesis & Evidence\r\n  hypothesisSchema",
+          "// Composite schemas - Hypothesis & Evidence\n  hypothesisSchema",
           "probabilityWithJustificationSchema",
           "probabilityWithCalculationSchema",
           "evidenceSchema",
@@ -8646,7 +8646,7 @@
           "type ProbabilityWithCalculation",
           "type EvidenceInput",
           "type EvidenceWithSupport",
-          "// Graph schemas\r\n  createNodeSchema",
+          "// Graph schemas\n  createNodeSchema",
           "createEdgeSchema",
           "nodeSchema",
           "weightedNodeSchema",
@@ -8658,48 +8658,48 @@
           "type EdgeInput",
           "type WeightedEdgeInput",
           "type CausalEdgeInput",
-          "// Temporal schemas\r\n  timePointSchema",
+          "// Temporal schemas\n  timePointSchema",
           "timeIntervalSchema",
           "temporalEventSchema",
           "type TimePointInput",
           "type TimeIntervalInput",
           "type TemporalEventInput",
-          "// Mathematical schemas\r\n  mathExpressionSchema",
+          "// Mathematical schemas\n  mathExpressionSchema",
           "valueWithUnitSchema",
           "measurementSchema",
           "type MathExpressionInput",
           "type ValueWithUnitInput",
           "type MeasurementInput",
-          "// Game Theory schemas\r\n  playerSchema",
+          "// Game Theory schemas\n  playerSchema",
           "strategySchema",
           "payoffSchema",
           "type PlayerInput",
           "type StrategyInput",
           "type PayoffInput",
-          "// Reasoning schemas\r\n  reasoningStepSchema",
+          "// Reasoning schemas\n  reasoningStepSchema",
           "propositionSchema",
           "inferenceRuleSchema",
           "type ReasoningStepInput",
           "type PropositionInput",
           "type InferenceRuleInput",
-          "// Optimization schemas\r\n  constraintSchema",
+          "// Optimization schemas\n  constraintSchema",
           "objectiveSchema",
           "solutionSchema",
           "type ConstraintInput",
           "type ObjectiveInput",
           "type SolutionInput",
-          "// Base schemas\r\n  baseThoughtSchema",
+          "// Base schemas\n  baseThoughtSchema",
           "sequentialThoughtExtensionSchema",
           "bayesianThoughtExtensionSchema",
           "type BaseThoughtInput",
-          "// Helpers\r\n  createRangeSchema",
+          "// Helpers\n  createRangeSchema",
           "createEnumSchema",
           "createOptionalStringWithDefault",
           "createOptionalNumberWithDefault",
           "createOptionalBooleanWithDefault",
           "uniqueIdArraySchema",
           "createGraphSchema",
-          "// Namespace export\r\n  SchemaUtils"
+          "// Namespace export\n  SchemaUtils"
         ],
         "reExported": [
           "IssueSeverity",
@@ -8731,7 +8731,7 @@
           "type BatchOperationInput",
           "validateInput",
           "safeValidateInput",
-          "// Primitive schemas\r\n  probabilitySchema",
+          "// Primitive schemas\n  probabilitySchema",
           "confidenceSchema",
           "progressSchema",
           "weightSchema",
@@ -8740,7 +8740,7 @@
           "nonEmptyStringSchema",
           "uuidSchema",
           "timestampSchema",
-          "// Composite schemas - Hypothesis & Evidence\r\n  hypothesisSchema",
+          "// Composite schemas - Hypothesis & Evidence\n  hypothesisSchema",
           "probabilityWithJustificationSchema",
           "probabilityWithCalculationSchema",
           "evidenceSchema",
@@ -8750,7 +8750,7 @@
           "type ProbabilityWithCalculation",
           "type EvidenceInput",
           "type EvidenceWithSupport",
-          "// Graph schemas\r\n  createNodeSchema",
+          "// Graph schemas\n  createNodeSchema",
           "createEdgeSchema",
           "nodeSchema",
           "weightedNodeSchema",
@@ -8762,48 +8762,48 @@
           "type EdgeInput",
           "type WeightedEdgeInput",
           "type CausalEdgeInput",
-          "// Temporal schemas\r\n  timePointSchema",
+          "// Temporal schemas\n  timePointSchema",
           "timeIntervalSchema",
           "temporalEventSchema",
           "type TimePointInput",
           "type TimeIntervalInput",
           "type TemporalEventInput",
-          "// Mathematical schemas\r\n  mathExpressionSchema",
+          "// Mathematical schemas\n  mathExpressionSchema",
           "valueWithUnitSchema",
           "measurementSchema",
           "type MathExpressionInput",
           "type ValueWithUnitInput",
           "type MeasurementInput",
-          "// Game Theory schemas\r\n  playerSchema",
+          "// Game Theory schemas\n  playerSchema",
           "strategySchema",
           "payoffSchema",
           "type PlayerInput",
           "type StrategyInput",
           "type PayoffInput",
-          "// Reasoning schemas\r\n  reasoningStepSchema",
+          "// Reasoning schemas\n  reasoningStepSchema",
           "propositionSchema",
           "inferenceRuleSchema",
           "type ReasoningStepInput",
           "type PropositionInput",
           "type InferenceRuleInput",
-          "// Optimization schemas\r\n  constraintSchema",
+          "// Optimization schemas\n  constraintSchema",
           "objectiveSchema",
           "solutionSchema",
           "type ConstraintInput",
           "type ObjectiveInput",
           "type SolutionInput",
-          "// Base schemas\r\n  baseThoughtSchema",
+          "// Base schemas\n  baseThoughtSchema",
           "sequentialThoughtExtensionSchema",
           "bayesianThoughtExtensionSchema",
           "type BaseThoughtInput",
-          "// Helpers\r\n  createRangeSchema",
+          "// Helpers\n  createRangeSchema",
           "createEnumSchema",
           "createOptionalStringWithDefault",
           "createOptionalNumberWithDefault",
           "createOptionalBooleanWithDefault",
           "uniqueIdArraySchema",
           "createGraphSchema",
-          "// Namespace export\r\n  SchemaUtils"
+          "// Namespace export\n  SchemaUtils"
         ]
       },
       "src/validation/schema-utils.ts": {
@@ -10832,9 +10832,9 @@
         "name": "Repositories",
         "files": [
           "src/repositories/FileSessionRepository.ts",
-          "src/repositories/index.ts",
           "src/repositories/ISessionRepository.ts",
-          "src/repositories/MemorySessionRepository.ts"
+          "src/repositories/MemorySessionRepository.ts",
+          "src/repositories/index.ts"
         ]
       },
       {
@@ -10851,19 +10851,19 @@
         "name": "Services",
         "files": [
           "src/services/ExportService.ts",
-          "src/services/index.ts",
           "src/services/MetaMonitor.ts",
           "src/services/ModeRouter.ts",
-          "src/services/ThoughtFactory.ts"
+          "src/services/ThoughtFactory.ts",
+          "src/services/index.ts"
         ]
       },
       {
         "name": "Session",
         "files": [
+          "src/session/SessionMetricsCalculator.ts",
           "src/session/index.ts",
           "src/session/manager.ts",
           "src/session/persistence.ts",
-          "src/session/SessionMetricsCalculator.ts",
           "src/session/storage/file-store.ts",
           "src/session/storage/index.ts",
           "src/session/storage/interface.ts"
