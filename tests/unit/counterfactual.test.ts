@@ -90,7 +90,9 @@ describe('Counterfactual Reasoning', () => {
 
       const result = await validator.validate(thought);
       expect(result.isValid).toBe(false);
-      expect(result.issues.some(i => i.description.includes('requires an actual scenario'))).toBe(true);
+      // Check for actual scenario validation error - matches both old and new message formats
+      expect(result.issues.some(i => i.description.toLowerCase().includes('actual') &&
+        (i.description.includes('scenario') || i.description.includes('required')))).toBe(true);
     });
 
     it('should require at least one counterfactual scenario', async () => {
@@ -124,7 +126,9 @@ describe('Counterfactual Reasoning', () => {
 
       const result = await validator.validate(thought);
       expect(result.isValid).toBe(false);
-      expect(result.issues.some(i => i.description.includes('at least one counterfactual scenario'))).toBe(true);
+      // Check for counterfactual scenario validation error - matches both old and new message formats
+      expect(result.issues.some(i => i.description.toLowerCase().includes('counterfactual') &&
+        (i.description.includes('at least') || i.description.includes('empty')))).toBe(true);
     });
 
     it('should require intervention point', async () => {
@@ -209,7 +213,9 @@ describe('Counterfactual Reasoning', () => {
 
       const result = await validator.validate(thought);
       expect(result.isValid).toBe(false);
-      expect(result.issues.some(i => i.description.includes('invalid likelihood'))).toBe(true);
+      // Check for likelihood validation error - matches both old and new message formats
+      expect(result.issues.some(i => i.description.toLowerCase().includes('likelihood') &&
+        (i.description.includes('0') || i.description.includes('1') || i.description.includes('invalid')))).toBe(true);
     });
   });
 

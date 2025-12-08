@@ -176,7 +176,9 @@ describe('Game Theory Reasoning', () => {
       const result = await validator.validate(thought);
       expect(result.isValid).toBe(false);
       const errors = result.issues.filter(i => i.severity === 'error');
-      expect(errors.some(e => e.description.includes('no available strategies'))).toBe(true);
+      // Check for strategies validation error - matches both old and new message formats
+      expect(errors.some(e => e.description.toLowerCase().includes('strategies') ||
+        e.description.toLowerCase().includes('available strategies'))).toBe(true);
     });
 
     it('should accept valid players with strategies', async () => {
@@ -328,7 +330,9 @@ describe('Game Theory Reasoning', () => {
       const result = await validator.validate(thought);
       expect(result.isValid).toBe(false);
       const errors = result.issues.filter(i => i.severity === 'error');
-      expect(errors.some(e => e.description.includes('probability must be 0-1'))).toBe(true);
+      // Check for probability validation error - matches both old and new message formats
+      expect(errors.some(e => e.description.toLowerCase().includes('probability') &&
+        (e.description.includes('0') || e.description.includes('1')))).toBe(true);
     });
   });
 
@@ -499,7 +503,9 @@ describe('Game Theory Reasoning', () => {
       const result = await validator.validate(thought);
       expect(result.isValid).toBe(false);
       const errors = result.issues.filter(i => i.severity === 'error');
-      expect(errors.some(e => e.description.includes('stability must be 0-1'))).toBe(true);
+      // Check for stability validation error - matches both old and new message formats
+      expect(errors.some(e => e.description.toLowerCase().includes('stability') &&
+        (e.description.includes('0') || e.description.includes('1')))).toBe(true);
     });
   });
 

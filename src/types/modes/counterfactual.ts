@@ -3,7 +3,7 @@
  * What-if analysis and alternative scenario exploration
  */
 
-import { BaseThought } from '../core.js';
+import { BaseThought, ThinkingMode } from '../core.js';
 
 /**
  * Condition in a scenario
@@ -27,17 +27,30 @@ export interface Outcome {
  * Scenario (actual or counterfactual)
  */
 export interface Scenario {
+  id?: string;
   name: string;
+  description?: string;
   conditions: Condition[];
-  outcome: Outcome;
+  outcome?: Outcome;
+  outcomes?: Outcome[];
   probability?: number; // 0-1
+  likelihood?: number; // 0-1 (alternative name for probability)
+}
+
+/**
+ * Difference between actual and counterfactual scenarios
+ */
+export interface ScenarioDifference {
+  aspect: string;
+  actual?: string;
+  counterfactual?: string;
 }
 
 /**
  * Comparison between scenarios
  */
 export interface CounterfactualComparison {
-  differences: string[];
+  differences: string[] | ScenarioDifference[];
   insights: string[];
   lessons: string[];
 }
@@ -63,7 +76,7 @@ export interface CausalChain {
 }
 
 export interface CounterfactualThought extends BaseThought {
-  mode: 'counterfactual';
+  mode: ThinkingMode.COUNTERFACTUAL;
   actual: Scenario;
   counterfactuals: Scenario[];
   comparison: CounterfactualComparison;

@@ -12,6 +12,8 @@ dist/
 # Testing
 coverage/
 .vitest/
+test-backups/
+test-backups-e2e/
 
 # Environment
 .env
@@ -24,6 +26,9 @@ coverage/
 *.swp
 *.swo
 *~
+
+# Claude Code settings (local only)
+.claude/
 
 # OS
 .DS_Store
@@ -39,7 +44,32 @@ test-server.js
 test-tool-call.js
 restore-mcps.cjs
 
+# Temporary debug/test scripts (Claude-created)
+test-*.js
+test-*.mjs
+debug-*.js
+debug-*.mjs
+temp-*.js
+temp-*.mjs
+
+# Note files for user/Claude communication (local only, never commit)
+.error.txt
+.note.txt
+
+# Test output files (auto-generated)
+test-output.txt
+test-results.txt
+test-final.txt
+*-output.txt
+*-results.txt
+
 # Backup files
 *.backup
 *.bak
 add-to-config.cjs
+
+# Archives (don't track zip files)
+*.zip
+/.claude
+/.claude
+.claude/settings.local.json

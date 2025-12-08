@@ -1,9 +1,12 @@
 /**
- * Bayesian Mode Validator
+ * Bayesian Mode Validator (v7.1.0)
+ * Refactored to use BaseValidator shared methods
  */
 
-import { BayesianThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { BayesianThought, ValidationIssue } from '../../../types/index.js';
+import type { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
+import { IssueCategory, IssueSeverity } from '../../constants.js';
 
 export class BayesianValidator extends BaseValidator<BayesianThought> {
   getMode(): string {
@@ -16,20 +19,12 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
     // Common validation
     issues.push(...this.validateCommon(thought));
 
-    // Validate prior probability
+    // Validate prior probability using shared method
     if (thought.prior !== undefined) {
-      if (thought.prior.probability < 0 || thought.prior.probability > 1) {
-        issues.push({
-          severity: 'error',
-          thoughtNumber: thought.thoughtNumber,
-          description: 'Prior probability must be between 0 and 1',
-          suggestion: 'Provide prior as decimal (e.g., 0.3 for 30%)',
-          category: 'structural',
-        });
-      }
+      issues.push(...this.validateProbability(thought, thought.prior.probability, 'Prior probability'));
     }
 
-    // Validate likelihood
+    // Validate likelihood using shared method
     if (thought.likelihood !== undefined) {
       if (thought.likelihood.probability < 0 || thought.likelihood.probability > 1) {
         issues.push({
@@ -44,29 +39,21 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
 
     // Validate posterior probability
     if (thought.posterior !== undefined) {
-      if (thought.posterior.probability < 0 || thought.posterior.probability > 1) {
-        issues.push({
-          severity: 'error',
-          thoughtNumber: thought.thoughtNumber,
-          description: 'Posterior probability must be between 0 and 1',
-          suggestion: 'Provide posterior as decimal',
-          category: 'structural',
-        });
-      }
+      issues.push(...this.validateProbability(thought, thought.posterior.probability, 'Posterior probability'));
 
       // Warn if posterior calculation is missing
       if (!thought.posterior.calculation || thought.posterior.calculation.trim() === '') {
         issues.push({
-          severity: 'warning',
+          severity: IssueSeverity.WARNING,
           thoughtNumber: thought.thoughtNumber,
           description: 'Posterior calculation should be shown',
           suggestion: 'Provide calculation showing how posterior was derived',
-          category: 'completeness',
+          category: IssueCategory.STRUCTURAL,
         });
       }
     }
 
-    // Validate evidence likelihoods
+    // Validate evidence likelihoods using shared method
     if (thought.evidence) {
       for (const evidence of thought.evidence) {
         if (evidence.likelihoodGivenHypothesis < 0 || evidence.likelihoodGivenHypothesis > 1) {
@@ -90,17 +77,18 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
       }
     }
 
-    // Validate Bayes factor
-    if (thought.bayesFactor !== undefined) {
-      if (thought.bayesFactor < 0) {
-        issues.push({
-          severity: 'error',
-          thoughtNumber: thought.thoughtNumber,
-          description: 'Bayes factor must be non-negative',
-          suggestion: 'Bayes factor should be >= 0',
-          category: 'structural',
-        });
-      }
+    // Validate Bayes factor using shared method (non-negative)
+    issues.push(
+      ...this.validateNumberRange(
+        thought,
+        thought.bayesFactor,
+        'Bayes factor',
+        0,
+        Infinity,
+        IssueSeverity.ERROR,
+        IssueCategory.MATHEMATICAL
+      )
+    );
 
       // Provide info when Bayes factor > 1 (supports hypothesis)
       if (thought.bayesFactor > 1) {

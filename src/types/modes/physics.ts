@@ -3,7 +3,7 @@
  * Physical modeling with tensor mathematics and field theory
  */
 
-import { BaseThought } from '../core.js';
+import { BaseThought, ThinkingMode } from '../core.js';
 
 /**
  * Physics thought types
@@ -55,7 +55,7 @@ export interface FieldTheoryContext {
 }
 
 export interface PhysicsThought extends BaseThought {
-  mode: 'physics';
+  mode: ThinkingMode.PHYSICS;
   thoughtType: PhysicsThoughtType;
   tensorProperties?: TensorProperties;
   physicalInterpretation?: PhysicalInterpretation;

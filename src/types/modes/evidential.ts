@@ -3,10 +3,10 @@
  * Phase 3C (v2.3) - Dempster-Shafer theory, belief functions, evidence combination
  */
 
-import { BaseThought } from '../core.js';
+import { BaseThought, ThinkingMode } from '../core.js';
 
 export interface EvidentialThought extends BaseThought {
-  mode: 'evidential';
+  mode: ThinkingMode.EVIDENTIAL;
   thoughtType:
     | 'hypothesis_definition'
     | 'evidence_collection'

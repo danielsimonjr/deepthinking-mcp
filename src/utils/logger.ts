@@ -3,37 +3,11 @@
  * Provides structured logging with levels and context
  */
 
-/**
- * Log levels
- */
-export enum LogLevel {
-  DEBUG = 0,
-  INFO = 1,
-  WARN = 2,
-  ERROR = 3,
-  SILENT = 4,
-}
+import type { ILogger } from '../interfaces/ILogger.js';
+import { LogLevel, type LogEntry, type LoggerConfig } from './logger-types.js';
 
-/**
- * Log entry structure
- */
-export interface LogEntry {
-  level: LogLevel;
-  message: string;
-  timestamp: Date;
-  context?: Record<string, unknown>;
-  error?: Error;
-}
-
-/**
- * Logger configuration
- */
-export interface LoggerConfig {
-  minLevel: LogLevel;
-  enableConsole: boolean;
-  enableTimestamps: boolean;
-  prettyPrint: boolean;
-}
+// Re-export types for backwards compatibility
+export { LogLevel, type LogEntry, type LoggerConfig } from './logger-types.js';
 
 /**
  * Default logger configuration
@@ -48,7 +22,7 @@ const DEFAULT_CONFIG: LoggerConfig = {
 /**
  * Simple logger implementation
  */
-export class Logger {
+export class Logger implements ILogger {
   private config: LoggerConfig;
   private logs: LogEntry[] = [];
 

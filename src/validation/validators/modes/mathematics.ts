@@ -2,7 +2,8 @@
  * Mathematics Mode Validator
  */
 
-import { MathematicsThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { MathematicsThought, ValidationIssue } from '../../../types/index.js';
+import type { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
 
 export class MathematicsValidator extends BaseValidator<MathematicsThought> {

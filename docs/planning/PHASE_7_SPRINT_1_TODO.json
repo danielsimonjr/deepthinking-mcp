@@ -1,0 +1,175 @@
+{
+  "sprint": 1,
+  "title": "Integration of Existing Visual Exporters",
+  "week": "Week 1",
+  "effort": "12-16 hours",
+  "status": "completed",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Type System",
+      "description": "Update src/services/ExportService.ts - Add imports for 10 mode types (SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought)",
+      "status": "completed",
+      "estimatedHours": 1,
+      "files": ["src/services/ExportService.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Integration Blocks",
+      "description": "Add Sequential mode integration block to ExportService.exportVisual() - type guard checks mode === ThinkingMode.SEQUENTIAL && 'buildUpon' in thought",
+      "status": "completed",
+      "estimatedHours": 1,
+      "files": ["src/services/ExportService.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Integration Blocks",
+      "description": "Add Shannon mode integration block to ExportService.exportVisual() - type guard checks mode === ThinkingMode.SHANNON && 'stage' in thought",
+      "status": "completed",
+      "estimatedHours": 1,
+      "files": ["src/services/ExportService.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Integration Blocks",
+      "description": "Add Abductive mode integration block to ExportService.exportVisual() - type guard checks mode === ThinkingMode.ABDUCTIVE && 'hypotheses' in thought",
+      "status": "completed",
+      "estimatedHours": 1,
+      "files": ["src/services/ExportService.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Integration Blocks",
+      "description": "Add Counterfactual mode integration block to ExportService.exportVisual() - type guard checks mode === ThinkingMode.COUNTERFACTUAL && 'scenarios' in thought",
+      "status": "completed",
+      "estimatedHours": 1,
+      "files": ["src/services/ExportService.ts"]
+    },
+    {
+      "id": 6,
+      "category": "Integration Blocks",
+      "description": "Add Analogical mode integration block to ExportService.exportVisual() - type guard checks mode === ThinkingMode.ANALOGICAL && 'sourceAnalogy' in thought",
+      "status": "completed",
+      "estimatedHours": 1,
+      "files": ["src/services/ExportService.ts"]
+    },
+    {
+      "id": 7,
+      "category": "Integration Blocks",
+      "description": "Add Evidential mode integration block to ExportService.exportVisual() - type guard checks mode === ThinkingMode.EVIDENTIAL && 'frameOfDiscernment' in thought",
+      "status": "completed",
+      "estimatedHours": 1,
+      "files": ["src/services/ExportService.ts"]
+    },
+    {
+      "id": 8,
+      "category": "Integration Blocks",
+      "description": "Add Systems Thinking mode integration block to ExportService.exportVisual() - type guard checks mode === ThinkingMode.SYSTEMSTHINKING && 'systemComponents' in thought",
+      "status": "completed",
+      "estimatedHours": 1,
+      "files": ["src/services/ExportService.ts"]
+    },
+    {
+      "id": 9,
+      "category": "Integration Blocks",
+      "description": "Add Scientific Method mode integration block to ExportService.exportVisual() - type guard checks mode === ThinkingMode.SCIENTIFICMETHOD && 'hypothesis' in thought",
+      "status": "completed",
+      "estimatedHours": 1,
+      "files": ["src/services/ExportService.ts"]
+    },
+    {
+      "id": 10,
+      "category": "Integration Blocks",
+      "description": "Add Optimization mode integration block to ExportService.exportVisual() - type guard checks mode === ThinkingMode.OPTIMIZATION && 'objectiveFunction' in thought",
+      "status": "completed",
+      "estimatedHours": 1,
+      "files": ["src/services/ExportService.ts"]
+    },
+    {
+      "id": 11,
+      "category": "Integration Blocks",
+      "description": "Add Formal Logic mode integration block to ExportService.exportVisual() - type guard checks mode === ThinkingMode.FORMALLOGIC && 'premises' in thought",
+      "status": "completed",
+      "estimatedHours": 1,
+      "files": ["src/services/ExportService.ts"]
+    },
+    {
+      "id": 12,
+      "category": "Wrapper Methods",
+      "description": "Update src/export/visual/index.ts - Add 10 wrapper methods to VisualExporter class (exportSequentialDependencyGraph, exportShannonStageFlow, exportAbductiveHypotheses, exportCounterfactualScenarios, exportAnalogicalMapping, exportEvidentialBeliefs, exportSystemsThinkingCausalLoops, exportScientificMethodExperiment, exportOptimizationSolution, exportFormalLogicProof)",
+      "status": "completed",
+      "estimatedHours": 2,
+      "files": ["src/export/visual/index.ts"]
+    },
+    {
+      "id": 13,
+      "category": "Testing",
+      "description": "Create integration tests for all 10 modes - one test file per mode verifying Mermaid, DOT, ASCII export",
+      "status": "completed",
+      "estimatedHours": 2,
+      "files": [
+        "tests/integration/export/sequential-visual.test.ts",
+        "tests/integration/export/shannon-visual.test.ts",
+        "tests/integration/export/abductive-visual.test.ts",
+        "tests/integration/export/counterfactual-visual.test.ts",
+        "tests/integration/export/analogical-visual.test.ts",
+        "tests/integration/export/evidential-visual.test.ts",
+        "tests/integration/export/systems-thinking-visual.test.ts",
+        "tests/integration/export/scientific-method-visual.test.ts",
+        "tests/integration/export/optimization-visual.test.ts",
+        "tests/integration/export/formal-logic-visual.test.ts"
+      ]
+    },
+    {
+      "id": 14,
+      "category": "Testing",
+      "description": "Create visual export coverage test - verify all 15 integrated modes can export to all 3 formats without falling back to generic",
+      "status": "completed",
+      "estimatedHours": 1,
+      "files": ["tests/integration/export/visual-export-coverage.test.ts"]
+    },
+    {
+      "id": 15,
+      "category": "Testing",
+      "description": "Run typecheck - verify no TypeScript errors",
+      "status": "completed",
+      "estimatedHours": 0.25,
+      "files": []
+    },
+    {
+      "id": 16,
+      "category": "Testing",
+      "description": "Run full test suite - verify all 745+ tests pass with new integrations",
+      "status": "completed",
+      "estimatedHours": 0.5,
+      "files": []
+    }
+  ],
+  "successCriteria": [
+    "15/21 modes with visual exports (71% coverage)",
+    "All existing tests passing",
+    "10+ new integration tests added",
+    "No TypeScript errors",
+    "Zero breaking changes to existing functionality",
+    "All visual exporters delegate to existing modules"
+  ],
+  "filesCreated": [
+    "tests/integration/export/sequential-visual.test.ts",
+    "tests/integration/export/shannon-visual.test.ts",
+    "tests/integration/export/abductive-visual.test.ts",
+    "tests/integration/export/counterfactual-visual.test.ts",
+    "tests/integration/export/analogical-visual.test.ts",
+    "tests/integration/export/evidential-visual.test.ts",
+    "tests/integration/export/systems-thinking-visual.test.ts",
+    "tests/integration/export/scientific-method-visual.test.ts",
+    "tests/integration/export/optimization-visual.test.ts",
+    "tests/integration/export/formal-logic-visual.test.ts",
+    "tests/integration/export/visual-export-coverage.test.ts"
+  ],
+  "filesModified": [
+    "src/services/ExportService.ts",
+    "src/export/visual/index.ts"
+  ],
+  "totalEstimatedHours": 15.75,
+  "notes": "This sprint focuses on integration only - no new exporter code needs to be written. All 10 visual export modules already exist in src/export/visual/. The goal is to wire them up to ExportService so users can access them via the export tool."
+}

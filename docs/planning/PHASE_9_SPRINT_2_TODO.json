@@ -1,0 +1,123 @@
+{
+  "phase": 9,
+  "sprint": 2,
+  "title": "Consolidate Utilities & Clean Up Dead Utils",
+  "week": "Week 2",
+  "effort": "3-4 hours",
+  "status": "completed",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Dead Code Removal",
+      "description": "Delete src/utils/sanitize.ts - Path security utilities not imported anywhere (dead code)",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": ["src/utils/sanitize.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Dead Code Removal",
+      "description": "Delete src/utils/rate-limiter.ts - Rate limiter utility not imported anywhere (dead code)",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": ["src/utils/rate-limiter.ts"]
+    },
+    {
+      "id": 3,
+      "category": "Documentation",
+      "description": "Add JSDoc clarification to src/utils/sanitization.ts header - Document that this is the primary sanitization module for input validation and HTML/LaTeX escaping",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": ["src/utils/sanitization.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Documentation",
+      "description": "Update CLAUDE.md - Remove references to deleted directories, update directory structure section",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": ["CLAUDE.md"]
+    },
+    {
+      "id": 5,
+      "category": "Documentation",
+      "description": "Update docs/planning/DEPENDENCY_CONSOLIDATION_PLAN.md - Update dead code table to reflect utils dead code found",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": ["docs/planning/DEPENDENCY_CONSOLIDATION_PLAN.md"]
+    },
+    {
+      "id": 6,
+      "category": "Verification",
+      "description": "Audit remaining utils/ files for dead code - Check errors.ts, log-sanitizer.ts, logger.ts, logger-types.ts, type-guards.ts",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": []
+    },
+    {
+      "id": 7,
+      "category": "Verification",
+      "description": "Run npm run typecheck - Verify no TypeScript errors after utility cleanup",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": []
+    },
+    {
+      "id": 8,
+      "category": "Verification",
+      "description": "Run npm run test:run - Verify all tests pass after utility cleanup",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": []
+    },
+    {
+      "id": 9,
+      "category": "Verification",
+      "description": "Run npm run build - Verify clean build output",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": []
+    },
+    {
+      "id": 10,
+      "category": "Dependency Analysis",
+      "description": "Run tools/create-dependency-graph.ts - Update dependency graph after all Sprint 1 & 2 deletions",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": [
+        "docs/architecture/dependency-graph.json",
+        "docs/architecture/DEPENDENCY_GRAPH.md"
+      ]
+    },
+    {
+      "id": 11,
+      "category": "Documentation",
+      "description": "Update docs/architecture/ARCHITECTURE.md - Reflect new simplified directory structure",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": ["docs/architecture/ARCHITECTURE.md"]
+    }
+  ],
+  "successCriteria": [
+    "Dead utility files removed (sanitize.ts, rate-limiter.ts)",
+    "Utils directory reduced from 8 to 6 files",
+    "CLAUDE.md accurately reflects current structure",
+    "Zero TypeScript compilation errors",
+    "All tests pass",
+    "Dependency graph regenerated and accurate"
+  ],
+  "filesDeleted": [
+    "src/utils/sanitize.ts",
+    "src/utils/rate-limiter.ts"
+  ],
+  "filesModified": [
+    "src/utils/sanitization.ts",
+    "CLAUDE.md",
+    "docs/planning/DEPENDENCY_CONSOLIDATION_PLAN.md",
+    "docs/architecture/ARCHITECTURE.md",
+    "docs/architecture/dependency-graph.json",
+    "docs/architecture/DEPENDENCY_GRAPH.md"
+  ],
+  "totalEstimatedHours": 3.45,
+  "notes": "Sprint 2 focuses on cleaning up dead utility files discovered during Sprint 1 verification. The original plan called for renaming sanitize.ts to path-security.ts for clarity, but analysis revealed it's completely unused - the batch/types.ts reference to 'sanitize' is just a string enum value, not an import. Both sanitize.ts and rate-limiter.ts can be safely deleted."
+}

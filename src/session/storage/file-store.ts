@@ -64,7 +64,9 @@ export class FileSessionStore implements SessionStorage {
         config: this.config,
       });
     } catch (error) {
-      logger.error('Failed to initialize FileSessionStore', { error });
+      logger.error('Failed to initialize FileSessionStore', error instanceof Error ? error : new Error(String(error)), {
+        baseDir: this.baseDir,
+      });
       throw error;
     }
   }
@@ -94,9 +96,8 @@ export class FileSessionStore implements SessionStorage {
 
       logger.debug('Session saved', { sessionId: session.id, path: sessionPath });
     } catch (error) {
-      logger.error('Failed to save session', {
+      logger.error('Failed to save session', error instanceof Error ? error : new Error(String(error)), {
         sessionId: session.id,
-        error,
       });
       throw error;
     }
@@ -128,7 +129,7 @@ export class FileSessionStore implements SessionStorage {
       logger.debug('Session loaded', { sessionId });
       return session;
     } catch (error) {
-      logger.error('Failed to load session', { sessionId, error });
+      logger.error('Failed to load session', error instanceof Error ? error : new Error(String(error)), { sessionId });
       return null;
     }
   }
@@ -159,7 +160,7 @@ export class FileSessionStore implements SessionStorage {
       logger.info('Session deleted', { sessionId });
       return true;
     } catch (error) {
-      logger.error('Failed to delete session', { sessionId, error });
+      logger.error('Failed to delete session', error instanceof Error ? error : new Error(String(error)), { sessionId });
       return false;
     }
   }

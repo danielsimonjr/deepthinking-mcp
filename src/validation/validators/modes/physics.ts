@@ -2,7 +2,8 @@
  * Physics Mode Validator
  */
 
-import { PhysicsThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { PhysicsThought, ValidationIssue } from '../../../types/index.js';
+import type { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
 
 export class PhysicsValidator extends BaseValidator<PhysicsThought> {

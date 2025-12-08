@@ -1,0 +1,232 @@
+[
+  {
+    "content": "Task 1.1: Create LaTeX export infrastructure (preamble, options, basic structure)",
+    "status": "completed",
+    "activeForm": "Creating LaTeX export infrastructure"
+  },
+  {
+    "content": "Task 1.2: Add Mathematics mode LaTeX export with equation formatting",
+    "status": "completed",
+    "activeForm": "Adding Mathematics mode LaTeX export"
+  },
+  {
+    "content": "Task 1.3: Add Causal graph LaTeX export with TikZ diagrams",
+    "status": "completed",
+    "activeForm": "Adding Causal graph LaTeX export"
+  },
+  {
+    "content": "Task 1.4: Add Bayesian & Analogical LaTeX export",
+    "status": "completed",
+    "activeForm": "Adding Bayesian & Analogical LaTeX export"
+  },
+  {
+    "content": "Task 1.4a: Add Phase 3 modes LaTeX export (Temporal, Game Theory, Evidential)",
+    "status": "completed",
+    "activeForm": "Adding Phase 3 modes LaTeX export"
+  },
+  {
+    "content": "Task 1.4b: Integrate Phase 3 Visual Exporter with LaTeX (Mermaid diagrams)",
+    "status": "completed",
+    "activeForm": "Integrating Phase 3 Visual Exporter with LaTeX"
+  },
+  {
+    "content": "Task 1.5: Add LaTeX export tests (15+ tests)",
+    "status": "completed",
+    "activeForm": "Adding LaTeX export tests"
+  },
+  {
+    "content": "Task 3.1: Create Mermaid generator infrastructure",
+    "status": "completed",
+    "activeForm": "Creating Mermaid generator infrastructure"
+  },
+  {
+    "content": "Task 3.2: Add interactive Mermaid features (zoom, click handlers, animations)",
+    "status": "completed",
+    "activeForm": "Adding interactive Mermaid features"
+  },
+  {
+    "content": "Task 3.3: Add thought flow sequence diagrams",
+    "status": "completed",
+    "activeForm": "Adding thought flow sequence diagrams"
+  },
+  {
+    "content": "Task 3.4: Add reasoning state chart diagrams",
+    "status": "completed",
+    "activeForm": "Adding reasoning state chart diagrams"
+  },
+  {
+    "content": "Task 3.5: Add knowledge mind map generation",
+    "status": "completed",
+    "activeForm": "Adding knowledge mind map generation"
+  },
+  {
+    "content": "Task 5.1: Create collaboration types and permissions system",
+    "status": "completed",
+    "activeForm": "Creating collaboration types and permissions system"
+  },
+  {
+    "content": "Task 5.2: Implement WebSocket-based real-time sync",
+    "status": "completed",
+    "activeForm": "Implementing WebSocket-based real-time sync"
+  },
+  {
+    "content": "Task 5.3: Create commenting system with threading",
+    "status": "completed",
+    "activeForm": "Creating commenting system with threading"
+  },
+  {
+    "content": "Task 5.4: Add conflict resolution for concurrent edits",
+    "status": "completed",
+    "activeForm": "Adding conflict resolution for concurrent edits"
+  },
+  {
+    "content": "Task 7.1: Initialize 110-type reasoning taxonomy database",
+    "status": "completed",
+    "activeForm": "Initializing 110-type reasoning taxonomy database"
+  },
+  {
+    "content": "Task 7.2: Build taxonomy classifier for thought classification",
+    "status": "completed",
+    "activeForm": "Building taxonomy classifier for thought classification"
+  },
+  {
+    "content": "Task 7.3: Implement enhanced metadata (cognitive load, dual-process, quality metrics)",
+    "status": "completed",
+    "activeForm": "Implementing enhanced metadata"
+  },
+  {
+    "content": "Task 7.4: Build multi-modal reasoning analyzer",
+    "status": "completed",
+    "activeForm": "Building multi-modal reasoning analyzer"
+  },
+  {
+    "content": "Task 7.5: Implement adaptive mode selector with taxonomy insights",
+    "status": "completed",
+    "activeForm": "Implementing adaptive mode selector"
+  },
+  {
+    "content": "Task 7.6: Integrate taxonomy with LaTeX exports",
+    "status": "completed",
+    "activeForm": "Integrating taxonomy with LaTeX exports"
+  },
+  {
+    "content": "Task 7.7: Testing taxonomy system (25+ tests)",
+    "status": "completed",
+    "activeForm": "Testing taxonomy system"
+  },
+  {
+    "content": "Task 8.1: Implement Meta-Reasoning mode (reasoning about reasoning)",
+    "status": "completed",
+    "activeForm": "Implementing Meta-Reasoning mode"
+  },
+  {
+    "content": "Task 8.2: Implement Modal Reasoning mode (necessity, possibility, impossibility)",
+    "status": "completed",
+    "activeForm": "Implementing Modal Reasoning mode"
+  },
+  {
+    "content": "Task 8.3: Implement Constraint-Based Reasoning mode",
+    "status": "completed",
+    "activeForm": "Implementing Constraint-Based Reasoning mode"
+  },
+  {
+    "content": "Task 8.4: Implement Optimization Reasoning mode",
+    "status": "completed",
+    "activeForm": "Implementing Optimization Reasoning mode"
+  },
+  {
+    "content": "Task 8.5: Implement Stochastic Reasoning mode",
+    "status": "completed",
+    "activeForm": "Implementing Stochastic Reasoning mode"
+  },
+  {
+    "content": "Task 8.6: Implement Recursive Reasoning mode",
+    "status": "completed",
+    "activeForm": "Implementing Recursive Reasoning mode"
+  },
+  {
+    "content": "Task 8.7: Update core types for new modes (ThinkingMode enum)",
+    "status": "completed",
+    "activeForm": "Updating core types for new modes"
+  },
+  {
+    "content": "Task 8.8: Update validator for new modes",
+    "status": "completed",
+    "activeForm": "Updating validator for new modes"
+  },
+  {
+    "content": "Task 9.1: Build session search & query system (full-text, taxonomy filtering)",
+    "status": "completed",
+    "activeForm": "Building session search & query system"
+  },
+  {
+    "content": "Task 9.2: Build real-time analytics dashboard (mode/taxonomy distribution)",
+    "status": "completed",
+    "activeForm": "Building real-time analytics dashboard"
+  },
+  {
+    "content": "Task 9.3: Implement session templates system (6+ built-in templates)",
+    "status": "completed",
+    "activeForm": "Implementing session templates system"
+  },
+  {
+    "content": "Task 9.4: Implement batch processing system",
+    "status": "completed",
+    "activeForm": "Implementing batch processing system"
+  },
+  {
+    "content": "Task 9.5: Implement API rate limiting and quota management",
+    "status": "completed",
+    "activeForm": "Implementing API rate limiting and quota management"
+  },
+  {
+    "content": "Task 9.6: Implement LRU caching layer (LRU/LFU/FIFO strategies)",
+    "status": "completed",
+    "activeForm": "Implementing LRU caching layer"
+  },
+  {
+    "content": "Task 9.7: Implement webhook and event system (8+ event types)",
+    "status": "completed",
+    "activeForm": "Implementing webhook and event system"
+  },
+  {
+    "content": "Task 9.8: Implement backup and restore system (local, S3, GCS, Azure)",
+    "status": "completed",
+    "activeForm": "Implementing backup and restore system"
+  },
+  {
+    "content": "Task 9.9: Implement session comparison tools",
+    "status": "completed",
+    "activeForm": "Implementing session comparison tools"
+  },
+  {
+    "content": "Task 9.10: Integration testing for production features (30+ tests)",
+    "status": "pending",
+    "activeForm": "Running integration testing for production features"
+  },
+  {
+    "content": "Task 10: Implement pattern recognition system",
+    "status": "pending",
+    "activeForm": "Implementing pattern recognition system"
+  },
+  {
+    "content": "Task 11: Implement success metrics analyzer",
+    "status": "pending",
+    "activeForm": "Implementing success metrics analyzer"
+  },
+  {
+    "content": "Task 12: Create recommendation engine",
+    "status": "pending",
+    "activeForm": "Creating recommendation engine"
+  },
+  {
+    "content": "Task 13: Train ML models on session data with taxonomy features",
+    "status": "pending",
+    "activeForm": "Training ML models on session data"
+  },
+  {
+    "content": "Update Phase 4 documentation to reflect removals",
+    "status": "pending",
+    "activeForm": "Updating Phase 4 documentation"
+  }
+]

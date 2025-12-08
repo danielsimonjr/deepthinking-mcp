@@ -1,0 +1,133 @@
+{
+  "sprint": 4,
+  "title": "Existing Tool Enhancement, Visual Exports & Release v7.0.0",
+  "week": "Week 4",
+  "effort": "14-18 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Tool Schema Extension",
+      "description": "Extend deepthinking tool schema in src/tools/thinking.ts - Add proofSteps (array), theorem (string), hypotheses (array), analysisDepth (enum), includeConsistencyCheck (boolean), traceAssumptions (boolean) fields to ThinkingToolInput interface and JSON schema",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["src/tools/thinking.ts"]
+    },
+    {
+      "id": 2,
+      "category": "Handler Update",
+      "description": "Update deepthinking handler in src/index.ts - Add isDecompositionThoughtType() check, invoke MathematicsReasoningEngine when mode=mathematics and thoughtType is proof_decomposition|dependency_analysis|consistency_check|gap_identification|assumption_trace, enrich thought with analysis results",
+      "status": "pending",
+      "estimatedHours": 2.5,
+      "files": ["src/index.ts"]
+    },
+    {
+      "id": 3,
+      "category": "ThoughtFactory Update",
+      "description": "Update ThoughtFactory for enriched mathematics thoughts in src/services/ThoughtFactory.ts - Accept proofSteps, theorem, hypotheses from input, pass analysis results to thought structure, validate decomposition fields",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": ["src/services/ThoughtFactory.ts"]
+    },
+    {
+      "id": 4,
+      "category": "Visual Export",
+      "description": "Create src/export/visual/proof-decomposition.ts - Implement exportProofDecomposition() with Mermaid (dependency graph), DOT (full graph with chains), ASCII (tree view) formats. Style: axioms=green rounded, hypotheses=blue rect, derived=gray, conclusions=purple diamond, gaps=red dashed",
+      "status": "pending",
+      "estimatedHours": 3,
+      "files": ["src/export/visual/proof-decomposition.ts"]
+    },
+    {
+      "id": 5,
+      "category": "Visual Export Integration",
+      "description": "Update src/services/ExportService.ts and src/export/visual/index.ts - Add proof decomposition visual export integration, wrapper method, handle MathematicsThought with decomposition field",
+      "status": "pending",
+      "estimatedHours": 1,
+      "files": ["src/services/ExportService.ts", "src/export/visual/index.ts"]
+    },
+    {
+      "id": 6,
+      "category": "Validation",
+      "description": "Create src/validation/validators/modes/mathematics-extended.ts - Zod validators for AtomicStatement, DependencyGraph, ProofDecomposition, ConsistencyReport, ProofStepInput",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["src/validation/validators/modes/mathematics-extended.ts"]
+    },
+    {
+      "id": 7,
+      "category": "Documentation",
+      "description": "Update docs/modes/MATHEMATICS.md - Document new thought types (proof_decomposition, dependency_analysis, consistency_check, gap_identification, assumption_trace), new input fields, enriched output structure",
+      "status": "pending",
+      "estimatedHours": 1,
+      "files": ["docs/modes/MATHEMATICS.md"]
+    },
+    {
+      "id": 8,
+      "category": "Documentation",
+      "description": "Update README.md and CHANGELOG.md - Add proof decomposition capabilities to feature list, document v7.0.0 changes including new thought types and analysis features",
+      "status": "pending",
+      "estimatedHours": 1,
+      "files": ["README.md", "CHANGELOG.md"]
+    },
+    {
+      "id": 9,
+      "category": "Testing",
+      "description": "Create tests/integration/mathematics/proof-decomposition.test.ts - Test deepthinking with mode=mathematics + proof_decomposition, consistency_check, assumption_trace thought types, verify decomposition/consistencyReport/gapAnalysis fields populated",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["tests/integration/mathematics/proof-decomposition.test.ts"]
+    },
+    {
+      "id": 10,
+      "category": "Release",
+      "description": "Run typecheck, full test suite, and build - Verify no TypeScript errors, all 850+ tests pass, dist/ output is clean",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": []
+    },
+    {
+      "id": 11,
+      "category": "Release",
+      "description": "Update package.json version to 7.0.0, commit changes, tag v7.0.0 release",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": ["package.json"]
+    },
+    {
+      "id": 12,
+      "category": "Release",
+      "description": "Publish to npm and update memory-mcp with v7.0.0 completion details",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": []
+    }
+  ],
+  "successCriteria": [
+    "deepthinking tool accepts new proof decomposition fields (proofSteps, theorem, hypotheses, analysisDepth)",
+    "Mathematics mode with decomposition thought types triggers MathematicsReasoningEngine analysis",
+    "Thoughts are enriched with decomposition, consistencyReport, gapAnalysis, assumptionAnalysis fields",
+    "Visual exports generate valid Mermaid/DOT/ASCII for proof decomposition",
+    "Zod validators pass all test cases",
+    "Documentation complete and accurate",
+    "v7.0.0 ready for npm publish",
+    "50+ new tests passing"
+  ],
+  "filesCreated": [
+    "src/export/visual/proof-decomposition.ts",
+    "src/validation/validators/modes/mathematics-extended.ts",
+    "tests/integration/mathematics/proof-decomposition.test.ts"
+  ],
+  "filesModified": [
+    "src/tools/thinking.ts",
+    "src/index.ts",
+    "src/services/ThoughtFactory.ts",
+    "src/services/ExportService.ts",
+    "src/export/visual/index.ts",
+    "docs/modes/MATHEMATICS.md",
+    "README.md",
+    "CHANGELOG.md",
+    "package.json"
+  ],
+  "totalEstimatedHours": 17.5,
+  "notes": "This sprint integrates all proof decomposition features with the existing deepthinking tool. The key design principle is that NO new MCP tools are created - all functionality works through the existing deepthinking tool using the new MathematicsThoughtType values. When users call deepthinking with mode='mathematics' and a decomposition thought type, the handler invokes MathematicsReasoningEngine and enriches the returned thought with analysis results."
+}

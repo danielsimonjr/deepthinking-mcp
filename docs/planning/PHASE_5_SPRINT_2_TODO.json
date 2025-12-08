@@ -1,0 +1,112 @@
+{
+  "sprint": 2,
+  "title": "Create New Core Mode",
+  "week": "Week 1-2",
+  "effort": "16-24 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": 1,
+      "description": "Create src/types/modes/inductive.ts - Clone from causal.ts structure, adapt for inductive reasoning",
+      "status": "pending",
+      "files": ["src/types/modes/inductive.ts"]
+    },
+    {
+      "id": 2,
+      "description": "Create src/types/modes/deductive.ts - Clone from causal.ts structure, adapt for deductive reasoning",
+      "status": "pending",
+      "files": ["src/types/modes/deductive.ts"]
+    },
+    {
+      "id": 3,
+      "description": "Update src/types/core.ts - Add INDUCTIVE, DEDUCTIVE to ThinkingMode enum",
+      "status": "pending",
+      "files": ["src/types/core.ts"]
+    },
+    {
+      "id": 4,
+      "description": "Update src/types/core.ts - Add InductiveThought, DeductiveThought to Thought union type",
+      "status": "pending",
+      "files": ["src/types/core.ts"]
+    },
+    {
+      "id": 5,
+      "description": "Update src/types/core.ts - Add type guards isInductiveThought(), isDeductiveThought()",
+      "status": "pending",
+      "files": ["src/types/core.ts"]
+    },
+    {
+      "id": 6,
+      "description": "Create src/validation/validators/modes/inductive.ts - Clone existing validator, adapt rules",
+      "status": "pending",
+      "files": ["src/validation/validators/modes/inductive.ts"]
+    },
+    {
+      "id": 7,
+      "description": "Create src/validation/validators/modes/deductive.ts - Clone existing validator, adapt rules",
+      "status": "pending",
+      "files": ["src/validation/validators/modes/deductive.ts"]
+    },
+    {
+      "id": 8,
+      "description": "Update src/validation/validator.ts - Register new validators",
+      "status": "pending",
+      "files": ["src/validation/validator.ts"]
+    },
+    {
+      "id": 9,
+      "description": "Create src/tools/json-schemas.ts - Add NEW deepthinking_core_schema (inductive/deductive/abductive)",
+      "status": "pending",
+      "files": ["src/tools/json-schemas.ts"]
+    },
+    {
+      "id": 10,
+      "description": "Update src/tools/json-schemas.ts - Remove abductive from deepthinking_causal_schema",
+      "status": "pending",
+      "files": ["src/tools/json-schemas.ts"]
+    },
+    {
+      "id": 11,
+      "description": "Update src/tools/definitions.ts - Add deepthinking_core tool, route inductive/deductive/abductive to it",
+      "status": "pending",
+      "files": ["src/tools/definitions.ts"]
+    },
+    {
+      "id": 12,
+      "description": "Update src/services/ThoughtFactory.ts - Add cases for inductive and deductive modes",
+      "status": "pending",
+      "files": ["src/services/ThoughtFactory.ts"]
+    },
+    {
+      "id": 13,
+      "description": "Create src/validation/schemas.ts - Add InductiveSchema and DeductiveSchema (Zod)",
+      "status": "pending",
+      "files": ["src/validation/schemas.ts"]
+    },
+    {
+      "id": 14,
+      "description": "Update src/types/core.ts - Move INDUCTIVE, DEDUCTIVE to FULLY_IMPLEMENTED_MODES",
+      "status": "pending",
+      "files": ["src/types/core.ts"]
+    },
+    {
+      "id": 15,
+      "description": "Run typecheck - verify no errors",
+      "status": "pending",
+      "files": []
+    },
+    {
+      "id": 16,
+      "description": "Run full test suite - all tests must pass",
+      "status": "pending",
+      "files": []
+    }
+  ],
+  "successCriteria": [
+    "New deepthinking_core tool exists with 3 modes: inductive, deductive, abductive",
+    "Abductive moved from causal tool to core tool",
+    "Type system, validators, schemas all in place",
+    "ThoughtFactory creates correct thought types",
+    "All tests passing"
+  ]
+}

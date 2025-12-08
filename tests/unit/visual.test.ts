@@ -141,20 +141,21 @@ describe('Visual Export', () => {
       game: {
         id: 'pd',
         name: "Prisoner's Dilemma",
-        type: 'normal-form',
-        players: ['player1', 'player2'],
-        informationStructure: 'perfect',
-        simultaneousMoves: true,
+        description: 'Classic game theory example',
+        type: 'normal_form',
+        numPlayers: 2,
+        isPerfectInformation: true,
+        isZeroSum: false,
       },
       strategies: [
-        { id: 's1', playerId: 'player1', name: 'Cooperate', description: 'Stay silent', type: 'pure', actions: [] },
-        { id: 's2', playerId: 'player1', name: 'Defect', description: 'Betray', type: 'pure', actions: [] },
+        { id: 's1', playerId: 'player1', name: 'Cooperate', description: 'Stay silent', isPure: true },
+        { id: 's2', playerId: 'player1', name: 'Defect', description: 'Betray', isPure: true },
       ],
       gameTree: {
         nodes: [
-          { id: 'root', name: 'Root', isTerminal: false, playerId: 'player1', parentNode: undefined, childNodes: ['n1', 'n2'], action: undefined },
-          { id: 'n1', name: 'Cooperate', isTerminal: true, playerId: 'player1', parentNode: 'root', childNodes: [], action: 'Cooperate', payoffs: [-1, -1] },
-          { id: 'n2', name: 'Defect', isTerminal: true, playerId: 'player1', parentNode: 'root', childNodes: [], action: 'Defect', payoffs: [0, -3] },
+          { id: 'root', type: 'decision', playerId: 'player1', parentNode: undefined, childNodes: ['n1', 'n2'], action: undefined },
+          { id: 'n1', type: 'terminal', playerId: 'player1', parentNode: 'root', childNodes: [], action: 'Cooperate', payoffs: [-1, -1] },
+          { id: 'n2', type: 'terminal', playerId: 'player1', parentNode: 'root', childNodes: [], action: 'Defect', payoffs: [0, -3] },
         ],
       },
     };
@@ -163,7 +164,7 @@ describe('Visual Export', () => {
       const result = exporter.exportGameTree(gameThought, { format: 'mermaid' });
 
       expect(result).toContain('graph TD');
-      expect(result).toContain('root[Root]');
+      expect(result).toContain('root[root]');
       expect(result).toContain('n1[[Cooperate]]');
       expect(result).toContain('n2[[Defect]]');
       expect(result).toContain('root --> |Cooperate| n1');
@@ -175,8 +176,8 @@ describe('Visual Export', () => {
 
       expect(result).toContain("Game: Prisoner's Dilemma");
       expect(result).toContain('Strategies:');
-      expect(result).toContain('• Cooperate (pure)');
-      expect(result).toContain('• Defect (pure)');
+      expect(result).toContain('• Cooperate (Pure)');
+      expect(result).toContain('• Defect (Pure)');
     });
   });
 
@@ -192,11 +193,11 @@ describe('Visual Export', () => {
       nextThoughtNeeded: false,
       hypothesis: { id: 'h1', statement: 'Feature improves conversion', alternatives: [] },
       prior: { probability: 0.5, justification: 'No prior data' },
-      likelihood: { probability: 0.8, observation: 'Test results', hypothesis: 'h1' },
+      likelihood: { probability: 0.8, description: 'Test results' },
       evidence: [
-        { id: 'ev1', observation: 'A/B test shows 20% lift', likelihood: 0.8, timestamp: new Date() },
+        { id: 'ev1', description: 'A/B test shows 20% lift', likelihoodGivenHypothesis: 0.8, likelihoodGivenNotHypothesis: 0.2 },
       ],
-      posterior: { probability: 0.76, justification: 'Bayesian update', confidence: 0.9 },
+      posterior: { probability: 0.76, calculation: 'Bayesian update', confidence: 0.9 },
       bayesFactor: 3.8,
     };
 

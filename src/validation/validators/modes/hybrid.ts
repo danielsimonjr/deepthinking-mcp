@@ -2,7 +2,8 @@
  * Hybrid Mode Validator
  */
 
-import { HybridThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { HybridThought, ValidationIssue } from '../../../types/index.js';
+import type { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
 
 export class HybridValidator extends BaseValidator<HybridThought> {

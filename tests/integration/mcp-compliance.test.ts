@@ -1,17 +1,20 @@
 /**
  * MCP Protocol Compliance Tests
  *
- * Tests that the deepthinking MCP tool properly implements the MCP protocol:
- * - Tool definition structure
+ * Tests that the deepthinking MCP tools properly implement the MCP protocol:
+ * - Tool definition structure (10 focused tools + 1 legacy)
  * - Schema validation
- * - Mode coverage
+ * - Mode coverage (20 modes)
  * - Input/output contracts
  *
- * Note: Actual tool execution is tested through the SessionManager integration tests.
+ * Note: v4.0.0 split the monolithic tool into 9 focused tools.
+ * v5.0.0 added deepthinking_core (inductive, deductive, abductive).
+ * The legacy 'deepthinking' tool is deprecated but maintained for backward compatibility.
  */
 
 import { describe, it, expect } from 'vitest';
 import { thinkingTool, ThinkingToolSchema } from '../../src/tools/thinking.js';
+import { toolList, tools } from '../../src/tools/definitions.js';
 
 describe('MCP Protocol Compliance', () => {
   describe('Tool Definition', () => {
@@ -26,47 +29,45 @@ describe('MCP Protocol Compliance', () => {
     });
 
     it('should have descriptive name and description', () => {
+      // Legacy tool is deprecated but still functional
       expect(thinkingTool.name).toBe('deepthinking');
       expect(thinkingTool.description.length).toBeGreaterThan(50);
-      expect(thinkingTool.description).toContain('sequential');
-      expect(thinkingTool.description).toContain('shannon');
-      expect(thinkingTool.description).toContain('mathematics');
+      expect(thinkingTool.description).toContain('DEPRECATED');
     });
 
-    it('should document all 13 thinking modes', () => {
-      const expectedModes = [
-        'sequential',
-        'shannon',
-        'mathematics',
-        'physics',
-        'hybrid',
-        'abductive',
-        'causal',
-        'bayesian',
-        'counterfactual',
-        'analogical',
-        'temporal',
-        'gametheory',
-        'evidential',
-      ];
+    it('should have 10 focused tools in v5.0.0', () => {
+      expect(toolList).toHaveLength(10);
 
-      for (const mode of expectedModes) {
-        expect(thinkingTool.description).toContain(mode);
-      }
+      const toolNames = toolList.map((t: any) => t.name);
+      expect(toolNames).toContain('deepthinking_core');
+      expect(toolNames).toContain('deepthinking_standard');
+      expect(toolNames).toContain('deepthinking_math');
+      expect(toolNames).toContain('deepthinking_temporal');
+      expect(toolNames).toContain('deepthinking_probabilistic');
+      expect(toolNames).toContain('deepthinking_causal');
+      expect(toolNames).toContain('deepthinking_strategic');
+      expect(toolNames).toContain('deepthinking_analytical');
+      expect(toolNames).toContain('deepthinking_scientific');
+      expect(toolNames).toContain('deepthinking_session');
     });
 
-    it('should document available actions', () => {
-      const expectedActions = [
-        'add_thought',
-        'summarize',
-        'export',
-        'switch_mode',
-        'recommend_mode',
-      ];
+    it('should document modes across focused tools', () => {
+      // Standard workflow modes documented in deepthinking_standard
+      expect(tools.deepthinking_standard.description).toContain('sequential');
+      expect(tools.deepthinking_standard.description).toContain('shannon');
+      expect(tools.deepthinking_standard.description).toContain('hybrid');
 
-      for (const action of expectedActions) {
-        expect(thinkingTool.description).toContain(action);
-      }
+      // Math modes documented in deepthinking_math
+      expect(tools.deepthinking_math.description.toLowerCase()).toContain('math');
+
+      // Temporal mode
+      expect(tools.deepthinking_temporal.description.toLowerCase()).toContain('temporal');
+    });
+
+    it('should document session actions in deepthinking_session', () => {
+      const sessionDesc = tools.deepthinking_session.description.toLowerCase();
+      expect(sessionDesc).toContain('summarize');
+      expect(sessionDesc).toContain('export');
     });
   });
 
@@ -92,23 +93,25 @@ describe('MCP Protocol Compliance', () => {
     it('should define properties with correct types', () => {
       const props = thinkingTool.inputSchema.properties;
 
-      // Core fields
+      // Core required fields
       expect(props.thought.type).toBe('string');
       expect(props.thoughtNumber.type).toBe('integer');
       expect(props.totalThoughts.type).toBe('integer');
       expect(props.nextThoughtNeeded.type).toBe('boolean');
 
-      // Optional fields
+      // Optional fields for backward compatibility
       expect(props.sessionId).toBeDefined();
       expect(props.mode).toBeDefined();
-      expect(props.action).toBeDefined();
+
+      // Note: Legacy tool is simplified - action and detailed mode properties removed
+      // Users should migrate to deepthinking_* focused tools
     });
 
-    it('should define mode enum with all 13 modes', () => {
+    it('should define mode enum with all 20 modes', () => {
       const modeEnum = thinkingTool.inputSchema.properties.mode.enum;
 
       expect(Array.isArray(modeEnum)).toBe(true);
-      expect(modeEnum).toHaveLength(13);
+      expect(modeEnum).toHaveLength(20);
 
       const expectedModes = [
         'sequential',
@@ -116,6 +119,8 @@ describe('MCP Protocol Compliance', () => {
         'mathematics',
         'physics',
         'hybrid',
+        'inductive',
+        'deductive',
         'abductive',
         'causal',
         'bayesian',
@@ -124,6 +129,11 @@ describe('MCP Protocol Compliance', () => {
         'temporal',
         'gametheory',
         'evidential',
+        'firstprinciples',
+        'systemsthinking',
+        'scientificmethod',
+        'optimization',
+        'formallogic',
       ];
 
       for (const mode of expectedModes) {
@@ -131,68 +141,12 @@ describe('MCP Protocol Compliance', () => {
       }
     });
 
-    it('should define action enum with all actions', () => {
-      const actionEnum = thinkingTool.inputSchema.properties.action.enum;
+    // Note: Legacy tool simplified - action and mode-specific properties removed
+    // Tests removed as they're no longer relevant for the deprecated legacy tool
+    // Users should use deepthinking_* focused tools which have proper mode-specific schemas
 
-      expect(Array.isArray(actionEnum)).toBe(true);
-
-      const expectedActions = [
-        'add_thought',
-        'summarize',
-        'export',
-        'switch_mode',
-        'get_session',
-        'recommend_mode',
-      ];
-
-      for (const action of expectedActions) {
-        expect(actionEnum).toContain(action);
-      }
-    });
-
-    it('should define mode-specific properties', () => {
-      const props = thinkingTool.inputSchema.properties;
-
-      // Shannon mode
-      expect(props.stage).toBeDefined();
-      expect(props.stage.enum).toContain('problem_definition');
-      expect(props.stage.enum).toContain('constraints');
-      expect(props.stage.enum).toContain('model');
-      expect(props.stage.enum).toContain('proof');
-      expect(props.stage.enum).toContain('implementation');
-
-      // Mathematics mode
-      expect(props.mathematicalModel).toBeDefined();
-      expect(props.proofStrategy).toBeDefined();
-      expect(props.thoughtType).toBeDefined();
-
-      // Physics mode
-      expect(props.tensorProperties).toBeDefined();
-      expect(props.physicalInterpretation).toBeDefined();
-
-      // Uncertainty (Shannon, Bayesian, etc.)
-      expect(props.uncertainty).toBeDefined();
-      expect(props.uncertainty.type).toBe('number');
-    });
-
-    it('should define complex nested structures', () => {
-      const props = thinkingTool.inputSchema.properties;
-
-      // Mathematical model structure
-      expect(props.mathematicalModel.type).toBe('object');
-      expect(props.mathematicalModel.properties.latex).toBeDefined();
-      expect(props.mathematicalModel.properties.symbolic).toBeDefined();
-
-      // Proof strategy structure
-      expect(props.proofStrategy.type).toBe('object');
-      expect(props.proofStrategy.properties.type).toBeDefined();
-      expect(props.proofStrategy.properties.steps).toBeDefined();
-
-      // Tensor properties structure
-      expect(props.tensorProperties.type).toBe('object');
-      expect(props.tensorProperties.properties.rank).toBeDefined();
-      expect(props.tensorProperties.properties.components).toBeDefined();
-    });
+    // Note: Detailed nested structure tests removed - legacy tool is simplified
+    // Use deepthinking_* focused tools for mode-specific schemas
   });
 
   describe('Zod Schema Validation', () => {
@@ -310,39 +264,17 @@ describe('MCP Protocol Compliance', () => {
   });
 
   describe('Export Format Support', () => {
-    it('should document export formats', () => {
-      const description = thinkingTool.description;
-
-      // Visual formats
-      expect(description.toLowerCase()).toContain('mermaid');
-      expect(description.toLowerCase()).toContain('markdown');
+    it('should document export formats in session tool', () => {
+      const description = tools.deepthinking_session.description.toLowerCase();
+      expect(description).toContain('export');
     });
 
-    it('should define exportFormat property', () => {
-      const props = thinkingTool.inputSchema.properties;
-      expect(props.exportFormat).toBeDefined();
-      expect(props.exportFormat.enum).toBeDefined();
-    });
+    // Note: exportFormat removed from legacy tool - use deepthinking_session instead
   });
 
   describe('Schema Completeness', () => {
-    it('should define all Phase 3 mode-specific properties', () => {
-      const props = thinkingTool.inputSchema.properties;
-
-      // Temporal reasoning
-      expect(props.events).toBeDefined();
-      expect(props.timeline).toBeDefined();
-      expect(props.constraints).toBeDefined();
-
-      // Game theory
-      expect(props.players).toBeDefined();
-      expect(props.strategies).toBeDefined();
-      expect(props.payoffMatrix).toBeDefined();
-
-      // Evidential reasoning
-      expect(props.beliefMasses).toBeDefined();
-      expect(props.frameOfDiscernment).toBeDefined();
-    });
+    // Note: Phase 3 mode-specific properties removed from legacy tool
+    // Use deepthinking_* focused tools which have proper mode-specific schemas
 
     it('should maintain backward compatibility', () => {
       // All v1.0 fields should still be supported

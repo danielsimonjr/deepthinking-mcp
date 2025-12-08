@@ -3,13 +3,13 @@
  * Systematic 5-stage problem-solving approach inspired by Claude Shannon
  */
 
-import { BaseThought, ShannonStage } from '../core.js';
+import { BaseThought, ThinkingMode, ShannonStage } from '../core.js';
 
 // Re-export for convenience
 export { ShannonStage };
 
 export interface ShannonThought extends BaseThought {
-  mode: 'shannon';
+  mode: ThinkingMode.SHANNON;
   stage: ShannonStage;
   uncertainty: number; // 0-1
   dependencies: string[]; // Dependencies on other thoughts or information

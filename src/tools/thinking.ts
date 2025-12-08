@@ -1,6 +1,9 @@
 /**
- * Unified thinking tool for DeepThinking MCP v2.1+
- * Supports 13 thinking modes
+ * Legacy thinking tool for DeepThinking MCP v4.4.0
+ * DEPRECATED: Use focused tools (deepthinking_*) instead
+ *
+ * This file provides backward compatibility only.
+ * Zod schema kept for runtime validation. JSON schema is hand-written.
  */
 
 import { z } from 'zod';
@@ -10,7 +13,7 @@ import { z } from 'zod';
  */
 export const ThinkingToolSchema = z.object({
   sessionId: z.string().optional(),
-  mode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential']).default('hybrid'),
+  mode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'inductive', 'deductive', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential', 'firstprinciples', 'systemsthinking', 'scientificmethod', 'optimization', 'formallogic']).default('hybrid'),
   thought: z.string(),
   thoughtNumber: z.number().int().positive(),
   totalThoughts: z.number().int().positive(),
@@ -47,12 +50,26 @@ export const ThinkingToolSchema = z.object({
     units: z.string(),
     conservationLaws: z.array(z.string()),
   }).optional(),
+  // Inductive reasoning properties (Phase 5, v5.0.0)
+  pattern: z.string().optional(),
+  generalization: z.string().optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  counterexamples: z.array(z.string()).optional(),
+  sampleSize: z.number().int().min(1).optional(),
+  // Deductive reasoning properties (Phase 5, v5.0.0)
+  premises: z.array(z.string()).optional(),
+  logicForm: z.string().optional(),
+  validityCheck: z.boolean().optional(),
+  soundnessCheck: z.boolean().optional(),
   // Abductive reasoning properties (v2.0)
-  observations: z.array(z.object({
-    id: z.string(),
-    description: z.string(),
-    confidence: z.number().min(0).max(1),
-  })).optional(),
+  observations: z.union([
+    z.array(z.string()), // For inductive reasoning - simple strings
+    z.array(z.object({   // For abductive reasoning - structured objects
+      id: z.string(),
+      description: z.string(),
+      confidence: z.number().min(0).max(1),
+    })),
+  ]).optional(),
   hypotheses: z.array(z.object({
     id: z.string(),
     // Abductive fields
@@ -262,7 +279,7 @@ export const ThinkingToolSchema = z.object({
     timestamp: z.number(),
     duration: z.number().optional(),
     type: z.enum(['instant', 'interval']),
-    properties: z.record(z.any()),
+    properties: z.record(z.string(), z.any()),
   })).optional(),
   intervals: z.array(z.object({
     id: z.string(),
@@ -398,9 +415,291 @@ export const ThinkingToolSchema = z.object({
       risk: z.number(),
     })),
   })).optional(),
+  // First-Principles properties (Phase 3, v3.1.0)
+  question: z.string().optional(),
+  principles: z.array(z.object({
+    id: z.string(),
+    type: z.enum(['axiom', 'definition', 'observation', 'logical_inference', 'assumption']),
+    statement: z.string(),
+    justification: z.string(),
+    dependsOn: z.array(z.string()).optional(),
+    confidence: z.number().min(0).max(1).optional(),
+  })).optional(),
+  derivationSteps: z.array(z.object({
+    stepNumber: z.number().int().positive(),
+    principle: z.string(),
+    inference: z.string(),
+    logicalForm: z.string().optional(),
+    confidence: z.number().min(0).max(1),
+  })).optional(),
+  conclusion: z.union([
+    z.string(), // For deductive reasoning - simple conclusion
+    z.object({  // For first-principles reasoning - structured conclusion
+      statement: z.string(),
+      derivationChain: z.array(z.number()),
+      certainty: z.number().min(0).max(1),
+      limitations: z.array(z.string()).optional(),
+    }),
+  ]).optional(),
+  alternativeInterpretations: z.array(z.string()).optional(),
+
+  // Systems Thinking properties (Phase 4, v3.2.0)
+  system: z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    boundary: z.string(),
+    purpose: z.string(),
+    timeHorizon: z.string().optional(),
+  }).optional(),
+  components: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    type: z.enum(['stock', 'flow', 'variable', 'parameter', 'delay']),
+    description: z.string(),
+    unit: z.string().optional(),
+    initialValue: z.number().optional(),
+    formula: z.string().optional(),
+    influencedBy: z.array(z.string()).optional(),
+  })).optional(),
+  feedbackLoops: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    type: z.enum(['reinforcing', 'balancing']),
+    description: z.string(),
+    components: z.array(z.string()),
+    polarity: z.enum(['+', '-']),
+    strength: z.number().min(0).max(1),
+    delay: z.number().optional(),
+    dominance: z.enum(['early', 'middle', 'late']).optional(),
+  })).optional(),
+  leveragePoints: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    location: z.string(),
+    description: z.string(),
+    effectiveness: z.number().min(0).max(1),
+    difficulty: z.number().min(0).max(1),
+    type: z.enum(['parameter', 'feedback', 'structure', 'goal', 'paradigm']),
+    interventionExamples: z.array(z.string()),
+  })).optional(),
+  behaviors: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    pattern: z.enum(['growth', 'decline', 'oscillation', 'equilibrium', 'chaos', 'overshoot_collapse']),
+    causes: z.array(z.string()),
+    timeframe: z.string(),
+    unintendedConsequences: z.array(z.string()).optional(),
+  })).optional(),
+
+  // Scientific Method properties (Phase 4, v3.2.0)
+  researchQuestion: z.object({
+    id: z.string(),
+    question: z.string(),
+    background: z.string(),
+    rationale: z.string(),
+    significance: z.string(),
+    variables: z.object({
+      independent: z.array(z.string()),
+      dependent: z.array(z.string()),
+      control: z.array(z.string()),
+    }),
+  }).optional(),
+  scientificHypotheses: z.array(z.object({
+    id: z.string(),
+    type: z.enum(['null', 'alternative', 'directional', 'non_directional']),
+    statement: z.string(),
+    prediction: z.string(),
+    rationale: z.string(),
+    testable: z.boolean(),
+    falsifiable: z.boolean(),
+  })).optional(),
+  experiment: z.object({
+    id: z.string(),
+    type: z.enum(['experimental', 'quasi_experimental', 'observational', 'correlational']),
+    design: z.string(),
+    sampleSize: z.number().int().positive(),
+    sampleSizeJustification: z.string().optional(),
+    randomization: z.boolean(),
+    blinding: z.enum(['none', 'single', 'double', 'triple']).optional(),
+    controls: z.array(z.string()),
+    procedure: z.array(z.string()),
+    materials: z.array(z.string()).optional(),
+    duration: z.string().optional(),
+    ethicalConsiderations: z.array(z.string()).optional(),
+  }).optional(),
+  dataCollection: z.object({
+    id: z.string(),
+    method: z.array(z.string()),
+    instruments: z.array(z.string()),
+    dataQuality: z.object({
+      completeness: z.number().min(0).max(1),
+      reliability: z.number().min(0).max(1),
+      validity: z.number().min(0).max(1),
+    }),
+    limitations: z.array(z.string()).optional(),
+  }).optional(),
+  statisticalAnalysis: z.object({
+    id: z.string(),
+    tests: z.array(z.object({
+      id: z.string(),
+      name: z.string(),
+      hypothesisTested: z.string(),
+      testStatistic: z.number(),
+      pValue: z.number().min(0).max(1),
+      confidenceInterval: z.tuple([z.number(), z.number()]).optional(),
+      alpha: z.number().min(0).max(1),
+      result: z.enum(['reject_null', 'fail_to_reject_null']),
+      interpretation: z.string(),
+    })),
+    summary: z.string(),
+    effectSize: z.object({
+      type: z.string(),
+      value: z.number(),
+      interpretation: z.string(),
+    }).optional(),
+    powerAnalysis: z.object({
+      power: z.number().min(0).max(1),
+      alpha: z.number().min(0).max(1),
+      interpretation: z.string(),
+    }).optional(),
+  }).optional(),
+  scientificConclusion: z.object({
+    id: z.string(),
+    statement: z.string(),
+    supportedHypotheses: z.array(z.string()),
+    rejectedHypotheses: z.array(z.string()),
+    confidence: z.number().min(0).max(1),
+    limitations: z.array(z.string()),
+    alternativeExplanations: z.array(z.string()).optional(),
+    futureDirections: z.array(z.string()),
+    replicationConsiderations: z.array(z.string()),
+    practicalImplications: z.array(z.string()).optional(),
+    theoreticalImplications: z.array(z.string()).optional(),
+  }).optional(),
+
+  // Optimization properties (Phase 4, v3.2.0)
+  optimizationProblem: z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    type: z.enum(['linear', 'nonlinear', 'integer', 'mixed_integer', 'constraint_satisfaction', 'multi_objective']),
+    approach: z.enum(['exact', 'heuristic', 'metaheuristic', 'approximation']).optional(),
+    complexity: z.string().optional(),
+  }).optional(),
+  decisionVariables: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    type: z.enum(['continuous', 'integer', 'binary', 'categorical']),
+    unit: z.string().optional(),
+    semantics: z.string(),
+  })).optional(),
+  optimizationConstraints: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    type: z.enum(['hard', 'soft']),
+    formula: z.string(),
+    variables: z.array(z.string()),
+    penalty: z.number().optional(),
+    rationale: z.string(),
+    priority: z.number().optional(),
+  })).optional(),
+  objectives: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    type: z.enum(['minimize', 'maximize']),
+    formula: z.string(),
+    variables: z.array(z.string()),
+    weight: z.number().min(0).max(1).optional(),
+    units: z.string().optional(),
+    idealValue: z.number().optional(),
+    acceptableRange: z.tuple([z.number(), z.number()]).optional(),
+  })).optional(),
+  solution: z.object({
+    id: z.string(),
+    type: z.enum(['optimal', 'feasible', 'infeasible', 'unbounded', 'approximate']),
+    variableValues: z.record(z.string(), z.union([z.number(), z.string()])),
+    objectiveValues: z.record(z.string(), z.number()),
+    quality: z.number().min(0).max(1),
+    computationTime: z.number().optional(),
+    iterations: z.number().optional(),
+    method: z.string().optional(),
+    guarantees: z.array(z.string()).optional(),
+  }).optional(),
+  sensitivityAnalysis: z.object({
+    id: z.string(),
+    robustness: z.number().min(0).max(1),
+    criticalConstraints: z.array(z.string()),
+    shadowPrices: z.record(z.string(), z.number()).optional(),
+    recommendations: z.array(z.string()),
+  }).optional(),
+
+  // Formal Logic properties (Phase 4, v3.2.0)
+  propositions: z.array(z.object({
+    id: z.string(),
+    symbol: z.string(),
+    statement: z.string(),
+    truthValue: z.boolean().optional(),
+    type: z.enum(['atomic', 'compound']),
+    formula: z.string().optional(),
+  })).optional(),
+  logicalInferences: z.array(z.object({
+    id: z.string(),
+    rule: z.enum(['modus_ponens', 'modus_tollens', 'hypothetical_syllogism', 'disjunctive_syllogism', 'conjunction', 'simplification', 'addition', 'resolution', 'contradiction', 'excluded_middle']),
+    premises: z.array(z.string()),
+    conclusion: z.string(),
+    justification: z.string(),
+    valid: z.boolean(),
+  })).optional(),
+  logicalProof: z.object({
+    id: z.string(),
+    theorem: z.string(),
+    technique: z.enum(['direct', 'contradiction', 'contrapositive', 'cases', 'induction', 'natural_deduction', 'resolution', 'semantic_tableaux']),
+    steps: z.array(z.object({
+      stepNumber: z.number().int().positive(),
+      statement: z.string(),
+      formula: z.string().optional(),
+      justification: z.string(),
+      rule: z.enum(['modus_ponens', 'modus_tollens', 'hypothetical_syllogism', 'disjunctive_syllogism', 'conjunction', 'simplification', 'addition', 'resolution', 'contradiction', 'excluded_middle']).optional(),
+      referencesSteps: z.array(z.number()).optional(),
+      isAssumption: z.boolean().optional(),
+      dischargesAssumption: z.number().optional(),
+    })),
+    conclusion: z.string(),
+    valid: z.boolean(),
+    completeness: z.number().min(0).max(1),
+    assumptions: z.array(z.string()).optional(),
+  }).optional(),
+  truthTable: z.object({
+    id: z.string(),
+    propositions: z.array(z.string()),
+    formula: z.string().optional(),
+    rows: z.array(z.object({
+      rowNumber: z.number().int().positive(),
+      assignments: z.record(z.string(), z.boolean()),
+      result: z.boolean(),
+    })),
+    isTautology: z.boolean(),
+    isContradiction: z.boolean(),
+    isContingent: z.boolean(),
+  }).optional(),
+  satisfiability: z.object({
+    id: z.string(),
+    formula: z.string(),
+    satisfiable: z.boolean(),
+    model: z.record(z.string(), z.boolean()).optional(),
+    method: z.enum(['dpll', 'cdcl', 'resolution', 'truth_table', 'other']),
+    complexity: z.string().optional(),
+    explanation: z.string(),
+  }).optional(),
+
   action: z.enum(['add_thought', 'summarize', 'export', 'switch_mode', 'get_session', 'recommend_mode']).default('add_thought'),
   exportFormat: z.enum(['markdown', 'latex', 'json', 'html', 'jupyter', 'mermaid', 'dot', 'ascii']).optional(),
-  newMode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential']).optional(),
+  newMode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'inductive', 'deductive', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential', 'firstprinciples', 'systemsthinking', 'scientificmethod', 'optimization', 'formallogic']).optional(),
   // Mode recommendation parameters (v2.4)
   problemType: z.string().optional(),
   problemCharacteristics: z.object({
@@ -421,436 +720,79 @@ export const ThinkingToolSchema = z.object({
 export type ThinkingToolInput = z.infer<typeof ThinkingToolSchema>;
 
 /**
- * Tool definition using plain JSON Schema (MCP standard format)
+ * Legacy tool definition - DEPRECATED
+ *
+ * Use the focused tools instead:
+ * - deepthinking_core, deepthinking_math, deepthinking_temporal
+ * - deepthinking_probabilistic, deepthinking_causal, deepthinking_strategic
+ * - deepthinking_analytical, deepthinking_scientific, deepthinking_session
+ *
+ * NOTE: This tool accepts a superset of all focused tool properties for backward compatibility.
+ * The schema lists all possible properties but most are optional.
  */
 export const thinkingTool = {
   name: 'deepthinking',
-  description: `Advanced deep thinking tool supporting 13 reasoning modes:
-
-Core Modes:
-- sequential: Iterative refinement and exploration
-- shannon: Systematic 5-stage problem-solving
-- mathematics: Theorem proving and symbolic reasoning
-- physics: Tensor mathematics and field theory
-- hybrid: Intelligently combines multiple approaches
-
-Advanced Modes (v2.0):
-- abductive: Inference to the best explanation, hypothesis generation
-- causal: Cause-effect analysis with causal graphs
-- bayesian: Probabilistic reasoning with evidence updates
-- counterfactual: What-if scenario analysis
-- analogical: Cross-domain pattern matching and insights
-
-Phase 3 Modes (v2.1+):
-- temporal: Event timelines, temporal constraints, causal relations over time
-- gametheory: Nash equilibria, strategic analysis, payoff matrices
-- evidential: Dempster-Shafer theory, belief functions, evidence combination
-
-Actions:
-- add_thought: Add a new thought to the session (default)
-- summarize: Generate a summary of the session
-- export: Export session in various formats (markdown, latex, json, html, jupyter, mermaid, dot, ascii)
-- switch_mode: Change reasoning mode mid-session
-- get_session: Retrieve session information
-- recommend_mode: Get intelligent mode recommendations based on problem characteristics
-
-Mode Recommendations (v2.4):
-Use action 'recommend_mode' with either:
-  • problemType: Quick recommendation (e.g., 'debugging', 'proof', 'timeline', 'strategy')
-  • problemCharacteristics: Detailed analysis with 10 dimensions (domain, complexity, uncertainty, etc.)
-  • includeCombinations: Set to true for synergistic mode combination suggestions
-
-Choose the mode that best fits your problem type, or use recommend_mode to get intelligent suggestions.`,
+  description: '[DEPRECATED] Use deepthinking_* tools instead. Legacy tool supporting 18 reasoning modes with auto-routing to focused tools.',
   inputSchema: {
-    type: "object",
+    type: "object" as const,
     properties: {
-      sessionId: {
-        type: "string",
-        description: "Session ID (creates new if omitted)"
-      },
+      sessionId: { type: "string" },
       mode: {
         type: "string",
-        enum: ["sequential", "shannon", "mathematics", "physics", "hybrid", "abductive", "causal", "bayesian", "counterfactual", "analogical", "temporal", "gametheory", "evidential"],
-        description: "Thinking mode to use"
+        enum: ['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'inductive', 'deductive', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential', 'firstprinciples', 'systemsthinking', 'scientificmethod', 'optimization', 'formallogic'],
+        default: 'hybrid'
       },
-      thought: {
-        type: "string",
-        description: "The thought content"
-      },
-      thoughtNumber: {
-        type: "integer",
-        minimum: 1,
-        description: "Position in sequence"
-      },
-      totalThoughts: {
-        type: "integer",
-        minimum: 1,
-        description: "Estimated total thoughts"
-      },
-      nextThoughtNeeded: {
-        type: "boolean",
-        description: "Should thinking continue?"
-      },
-      isRevision: {
-        type: "boolean",
-        description: "Whether this revises previous thinking"
-      },
-      revisesThought: {
-        type: "string",
-        description: "Which thought is being reconsidered"
-      },
-      revisionReason: {
-        type: "string",
-        description: "Reason for revision"
-      },
-      branchFrom: {
-        type: "string",
-        description: "Branching point thought"
-      },
-      branchId: {
-        type: "string",
-        description: "Branch identifier"
-      },
+      thought: { type: "string", minLength: 1 },
+      thoughtNumber: { type: "integer", minimum: 1 },
+      totalThoughts: { type: "integer", minimum: 1 },
+      nextThoughtNeeded: { type: "boolean" },
+      isRevision: { type: "boolean" },
+      revisesThought: { type: "string" },
+      revisionReason: { type: "string" },
+      branchFrom: { type: "string" },
+      branchId: { type: "string" },
       stage: {
         type: "string",
-        enum: ["problem_definition", "constraints", "model", "proof", "implementation"],
-        description: "Shannon methodology stage"
+        enum: ['problem_definition', 'constraints', 'model', 'proof', 'implementation']
       },
-      uncertainty: {
-        type: "number",
-        minimum: 0,
-        maximum: 1,
-        description: "Uncertainty level (0-1)"
-      },
-      dependencies: {
-        type: "array",
-        items: { type: "string" },
-        description: "Dependencies on other thoughts"
-      },
-      assumptions: {
-        type: "array",
-        items: { type: "string" },
-        description: "Assumptions made"
-      },
-      thoughtType: {
-        type: "string",
-        description: "Type of mathematical thought"
-      },
+      uncertainty: { type: "number", minimum: 0, maximum: 1 },
+      dependencies: { type: "array", items: { type: "string" } },
+      assumptions: { type: "array", items: { type: "string" } },
+      thoughtType: { type: "string" },
+      // Math/Physics properties
       mathematicalModel: {
         type: "object",
         properties: {
-          latex: { type: "string", description: "LaTeX representation" },
-          symbolic: { type: "string", description: "Symbolic representation" },
-          ascii: { type: "string", description: "ASCII representation" }
+          latex: { type: "string" },
+          symbolic: { type: "string" },
+          ascii: { type: "string" }
         },
-        required: ["latex", "symbolic"]
+        additionalProperties: false
       },
       proofStrategy: {
         type: "object",
         properties: {
-          type: {
-            type: "string",
-            enum: ["direct", "contradiction", "induction", "construction", "contrapositive"]
-          },
-          steps: {
-            type: "array",
-            items: { type: "string" }
-          }
+          type: { type: "string", enum: ['direct', 'contradiction', 'induction', 'construction', 'contrapositive'] },
+          steps: { type: "array", items: { type: "string" } }
         },
-        required: ["type", "steps"]
+        additionalProperties: false
       },
       tensorProperties: {
         type: "object",
         properties: {
-          rank: {
-            type: "array",
-            items: { type: "number" },
-            minItems: 2,
-            maxItems: 2
-          },
+          rank: { type: "array", items: { type: "number" }, minItems: 2, maxItems: 2 },
           components: { type: "string" },
           latex: { type: "string" },
-          symmetries: {
-            type: "array",
-            items: { type: "string" }
-          },
-          invariants: {
-            type: "array",
-            items: { type: "string" }
-          },
-          transformation: {
-            type: "string",
-            enum: ["covariant", "contravariant", "mixed"]
-          }
+          symmetries: { type: "array", items: { type: "string" } },
+          invariants: { type: "array", items: { type: "string" } },
+          transformation: { type: "string", enum: ['covariant', 'contravariant', 'mixed'] }
         },
-        required: ["rank", "components", "latex", "symmetries", "invariants", "transformation"]
+        additionalProperties: false
       },
-      physicalInterpretation: {
-        type: "object",
-        properties: {
-          quantity: { type: "string" },
-          units: { type: "string" },
-          conservationLaws: {
-            type: "array",
-            items: { type: "string" }
-          }
-        },
-        required: ["quantity", "units", "conservationLaws"]
-      },
-      // Temporal reasoning properties (Phase 3, v2.1)
-      timeline: {
-        type: "object",
-        properties: {
-          id: { type: "string" },
-          name: { type: "string" },
-          timeUnit: {
-            type: "string",
-            enum: ["milliseconds", "seconds", "minutes", "hours", "days", "months", "years"],
-            description: "Time unit for the timeline"
-          },
-          startTime: { type: "number", description: "Optional start time" },
-          endTime: { type: "number", description: "Optional end time" },
-          events: {
-            type: "array",
-            items: { type: "string" },
-            description: "Event IDs in this timeline"
-          }
-        },
-        required: ["id", "name", "timeUnit", "events"],
-        description: "Timeline structure for temporal reasoning"
-      },
-      events: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            id: { type: "string" },
-            name: { type: "string" },
-            description: { type: "string" },
-            timestamp: { type: "number", description: "Event timestamp" },
-            duration: { type: "number", description: "Duration for interval events" },
-            type: {
-              type: "string",
-              enum: ["instant", "interval"],
-              description: "Event type"
-            },
-            properties: {
-              type: "object",
-              description: "Additional event properties"
-            }
-          },
-          required: ["id", "name", "description", "timestamp", "type", "properties"]
-        },
-        description: "Temporal events"
-      },
-      intervals: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            id: { type: "string" },
-            name: { type: "string" },
-            start: { type: "number", description: "Interval start time" },
-            end: { type: "number", description: "Interval end time" },
-            overlaps: {
-              type: "array",
-              items: { type: "string" },
-              description: "IDs of overlapping intervals"
-            },
-            contains: {
-              type: "array",
-              items: { type: "string" },
-              description: "IDs of contained intervals"
-            }
-          },
-          required: ["id", "name", "start", "end"]
-        },
-        description: "Time intervals with Allen's algebra relationships"
-      },
-      constraints: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            id: { type: "string" },
-            type: {
-              type: "string",
-              enum: ["before", "after", "during", "overlaps", "meets", "starts", "finishes", "equals"],
-              description: "Allen's interval algebra constraint type"
-            },
-            subject: { type: "string", description: "Subject event/interval ID" },
-            object: { type: "string", description: "Object event/interval ID" },
-            confidence: {
-              type: "number",
-              minimum: 0,
-              maximum: 1,
-              description: "Confidence in constraint (0-1)"
-            }
-          },
-          required: ["id", "type", "subject", "object", "confidence"]
-        },
-        description: "Temporal constraints using Allen's interval algebra"
-      },
-      relations: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            id: { type: "string" },
-            from: { type: "string", description: "Source event ID" },
-            to: { type: "string", description: "Target event ID" },
-            relationType: {
-              type: "string",
-              enum: ["causes", "enables", "prevents", "precedes", "follows"],
-              description: "Type of temporal relation"
-            },
-            strength: {
-              type: "number",
-              minimum: 0,
-              maximum: 1,
-              description: "Relation strength (0-1)"
-            },
-            delay: { type: "number", description: "Optional time delay between events" }
-          },
-          required: ["id", "from", "to", "relationType", "strength"]
-        },
-        description: "Temporal causal/enabling relations"
-      },
-      // Game theory properties (Phase 3, v2.2)
-      players: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            id: { type: "string" },
-            name: { type: "string" },
-            role: { type: "string" },
-            isRational: { type: "boolean" },
-            availableStrategies: {
-              type: "array",
-              items: { type: "string" }
-            }
-          },
-          required: ["id", "name", "isRational", "availableStrategies"]
-        },
-        description: "Players in the game"
-      },
-      strategies: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            id: { type: "string" },
-            playerId: { type: "string" },
-            name: { type: "string" },
-            description: { type: "string" },
-            isPure: { type: "boolean" },
-            probability: { type: "number", minimum: 0, maximum: 1 }
-          },
-          required: ["id", "playerId", "name", "description", "isPure"]
-        },
-        description: "Available strategies"
-      },
-      payoffMatrix: {
-        type: "object",
-        properties: {
-          players: {
-            type: "array",
-            items: { type: "string" }
-          },
-          dimensions: {
-            type: "array",
-            items: { type: "number" }
-          },
-          payoffs: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                strategyProfile: {
-                  type: "array",
-                  items: { type: "string" }
-                },
-                payoffs: {
-                  type: "array",
-                  items: { type: "number" }
-                }
-              },
-              required: ["strategyProfile", "payoffs"]
-            }
-          }
-        },
-        required: ["players", "dimensions", "payoffs"],
-        description: "Payoff matrix for the game"
-      },
-      // Evidential reasoning properties (Phase 3, v2.3)
-      frameOfDiscernment: {
-        type: "array",
-        items: { type: "string" },
-        description: "Frame of discernment (set of all possible hypotheses)"
-      },
-      beliefMasses: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            hypothesisSet: {
-              type: "array",
-              items: { type: "string" }
-            },
-            mass: {
-              type: "number",
-              minimum: 0,
-              maximum: 1
-            },
-            justification: { type: "string" }
-          },
-          required: ["hypothesisSet", "mass", "justification"]
-        },
-        description: "Belief mass assignments (Dempster-Shafer)"
-      },
-      action: {
-        type: "string",
-        enum: ["add_thought", "summarize", "export", "switch_mode", "get_session", "recommend_mode"],
-        description: "Action to perform"
-      },
-      exportFormat: {
-        type: "string",
-        enum: ["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"],
-        description: "Export format"
-      },
-      newMode: {
-        type: "string",
-        enum: ["sequential", "shannon", "mathematics", "physics", "hybrid", "abductive", "causal", "bayesian", "counterfactual", "analogical", "temporal", "gametheory", "evidential"],
-        description: "New mode for switch_mode action"
-      }
-,
-      problemType: {
-        type: "string",
-        description: "Simple problem type for quick recommendations (e.g., 'debugging', 'proof', 'timeline')"
-      },
-      problemCharacteristics: {
-        type: "object",
-        properties: {
-          domain: { type: "string", description: "Problem domain" },
-          complexity: { type: "string", enum: ["low", "medium", "high"], description: "Problem complexity" },
-          uncertainty: { type: "string", enum: ["low", "medium", "high"], description: "Uncertainty level" },
-          timeDependent: { type: "boolean", description: "Whether problem involves time sequences" },
-          multiAgent: { type: "boolean", description: "Whether multiple agents interact" },
-          requiresProof: { type: "boolean", description: "Whether formal proof is needed" },
-          requiresQuantification: { type: "boolean", description: "Whether quantification is needed" },
-          hasIncompleteInfo: { type: "boolean", description: "Whether information is incomplete" },
-          requiresExplanation: { type: "boolean", description: "Whether explanation is needed" },
-          hasAlternatives: { type: "boolean", description: "Whether alternative scenarios exist" }
-        },
-        required: ["domain", "complexity", "uncertainty", "timeDependent", "multiAgent", "requiresProof", "requiresQuantification", "hasIncompleteInfo", "requiresExplanation", "hasAlternatives"],
-        description: "Detailed problem characteristics for comprehensive recommendations"
-      },
-      includeCombinations: {
-        type: "boolean",
-        description: "Whether to include mode combination suggestions"
-      }
+      // All other optional properties from various modes (simplified for legacy compatibility)
+      // Most users should migrate to focused tools for full schema validation
     },
-    required: ["thought", "thoughtNumber", "totalThoughts", "nextThoughtNeeded"]
+    required: ["thought", "thoughtNumber", "totalThoughts", "nextThoughtNeeded"],
+    additionalProperties: true  // Allow extra properties for backward compatibility
   }
 };

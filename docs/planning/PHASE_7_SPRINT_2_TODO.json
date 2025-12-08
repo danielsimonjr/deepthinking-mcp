@@ -1,0 +1,211 @@
+{
+  "sprint": 2,
+  "title": "New Visual Exporters & Release v6.1.0",
+  "week": "Week 2",
+  "effort": "16-20 hours",
+  "status": "completed",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "New Visual Exporters",
+      "description": "Create src/export/visual/mathematics.ts - Equation derivation trees with proof steps, LaTeX equations in labels, proof structure visualization",
+      "status": "completed",
+      "estimatedHours": 3,
+      "files": ["src/export/visual/mathematics.ts"]
+    },
+    {
+      "id": 2,
+      "category": "New Visual Exporters",
+      "description": "Create src/export/visual/physics.ts - Tensor diagrams with rank/components, conservation law flows, physical interpretation visualization",
+      "status": "completed",
+      "estimatedHours": 3,
+      "files": ["src/export/visual/physics.ts"]
+    },
+    {
+      "id": 3,
+      "category": "New Visual Exporters",
+      "description": "Create src/export/visual/hybrid.ts - Multi-mode orchestration diagrams showing active modes, mode transitions, synthesis points",
+      "status": "completed",
+      "estimatedHours": 2.5,
+      "files": ["src/export/visual/hybrid.ts"]
+    },
+    {
+      "id": 4,
+      "category": "New Visual Exporters",
+      "description": "Create src/export/visual/metareasoning.ts - Strategy evaluation flowcharts with current strategy, alternatives, quality metrics, recommendations",
+      "status": "completed",
+      "estimatedHours": 3,
+      "files": ["src/export/visual/metareasoning.ts"]
+    },
+    {
+      "id": 5,
+      "category": "New Visual Exporters",
+      "description": "Create src/export/visual/recursive.ts - Recursion trees with base cases, recursive calls, depth visualization, stack trace representation",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["src/export/visual/recursive.ts"]
+    },
+    {
+      "id": 6,
+      "category": "New Visual Exporters",
+      "description": "Create src/export/visual/modal.ts - Possible worlds diagrams with accessibility relations, modal operators, truth value propagation",
+      "status": "pending",
+      "estimatedHours": 2.5,
+      "files": ["src/export/visual/modal.ts"]
+    },
+    {
+      "id": 7,
+      "category": "Integration",
+      "description": "Update src/services/ExportService.ts - Add 4 integration blocks for Mathematics, Physics, Hybrid, Metareasoning modes",
+      "status": "completed",
+      "estimatedHours": 1,
+      "files": ["src/services/ExportService.ts"]
+    },
+    {
+      "id": 8,
+      "category": "Integration",
+      "description": "Update src/export/visual/index.ts - Add 4 wrapper methods and re-exports for new visual exporters",
+      "status": "completed",
+      "estimatedHours": 1,
+      "files": ["src/export/visual/index.ts"]
+    },
+    {
+      "id": 9,
+      "category": "Testing",
+      "description": "Create integration tests for all 6 new modes - one test file per mode verifying Mermaid, DOT, ASCII export",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": [
+        "tests/integration/export/mathematics-visual.test.ts",
+        "tests/integration/export/physics-visual.test.ts",
+        "tests/integration/export/hybrid-visual.test.ts",
+        "tests/integration/export/metareasoning-visual.test.ts",
+        "tests/integration/export/recursive-visual.test.ts",
+        "tests/integration/export/modal-visual.test.ts"
+      ]
+    },
+    {
+      "id": 10,
+      "category": "Testing",
+      "description": "Create comprehensive all-modes visual test - verify all 21 modes can export to all 3 formats",
+      "status": "pending",
+      "estimatedHours": 1,
+      "files": ["tests/integration/export/all-modes-visual.test.ts"]
+    },
+    {
+      "id": 11,
+      "category": "Testing",
+      "description": "Run full test suite 5 times - verify all 790+ tests pass consistently",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": []
+    },
+    {
+      "id": 12,
+      "category": "Documentation & Release",
+      "description": "Create docs/VISUAL_EXPORTS.md - Comprehensive visual export guide with examples for all 21 modes",
+      "status": "pending",
+      "estimatedHours": 2,
+      "files": ["docs/VISUAL_EXPORTS.md"]
+    },
+    {
+      "id": 13,
+      "category": "Documentation & Release",
+      "description": "Update README.md - Add visual export coverage documentation and examples",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": ["README.md"]
+    },
+    {
+      "id": 14,
+      "category": "Documentation & Release",
+      "description": "Update CHANGELOG.md - Add v6.1.0 entry with visual export features, new exporters, integration changes",
+      "status": "completed",
+      "estimatedHours": 0.5,
+      "files": ["CHANGELOG.md"]
+    },
+    {
+      "id": 15,
+      "category": "Documentation & Release",
+      "description": "Run typecheck - verify no TypeScript errors",
+      "status": "completed",
+      "estimatedHours": 0.25,
+      "files": []
+    },
+    {
+      "id": 16,
+      "category": "Documentation & Release",
+      "description": "Run npm run build - verify dist/ output is clean",
+      "status": "completed",
+      "estimatedHours": 0.25,
+      "files": []
+    },
+    {
+      "id": 17,
+      "category": "Documentation & Release",
+      "description": "Update package.json version to 6.1.0",
+      "status": "completed",
+      "estimatedHours": 0.1,
+      "files": ["package.json"]
+    },
+    {
+      "id": 18,
+      "category": "Documentation & Release",
+      "description": "Commit changes and tag v6.1.0 release",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": []
+    },
+    {
+      "id": 19,
+      "category": "Documentation & Release",
+      "description": "Publish to npm - npm publish",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": []
+    },
+    {
+      "id": 20,
+      "category": "Documentation & Release",
+      "description": "Update memory-mcp with v6.1.0 completion and visual export coverage details",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": []
+    }
+  ],
+  "successCriteria": [
+    "21/21 modes with visual exports (100% coverage)",
+    "All 6 new visual export modules created and functional",
+    "All 6 new modes integrated with ExportService",
+    "All tests passing (expect 790+ tests)",
+    "Comprehensive documentation complete",
+    "Zero breaking changes to existing functionality",
+    "npm package published successfully",
+    "Memory updated with release details"
+  ],
+  "filesCreated": [
+    "src/export/visual/mathematics.ts",
+    "src/export/visual/physics.ts",
+    "src/export/visual/hybrid.ts",
+    "src/export/visual/metareasoning.ts",
+    "src/export/visual/recursive.ts",
+    "src/export/visual/modal.ts",
+    "tests/integration/export/mathematics-visual.test.ts",
+    "tests/integration/export/physics-visual.test.ts",
+    "tests/integration/export/hybrid-visual.test.ts",
+    "tests/integration/export/metareasoning-visual.test.ts",
+    "tests/integration/export/recursive-visual.test.ts",
+    "tests/integration/export/modal-visual.test.ts",
+    "tests/integration/export/all-modes-visual.test.ts",
+    "docs/VISUAL_EXPORTS.md"
+  ],
+  "filesModified": [
+    "src/services/ExportService.ts",
+    "src/export/visual/index.ts",
+    "README.md",
+    "CHANGELOG.md",
+    "package.json"
+  ],
+  "totalEstimatedHours": 22.35,
+  "notes": "This sprint creates 6 new visual export modules from scratch following the pattern in existing exporters (e.g., causal.ts, temporal.ts). Each exporter must support Mermaid, DOT, and ASCII formats. The meta-reasoning exporter should visualize strategy evaluations and mode switching recommendations. Focus on clarity and usefulness of diagrams."
+}

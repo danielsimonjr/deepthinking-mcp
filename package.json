@@ -1,7 +1,7 @@
 {
   "name": "deepthinking-mcp",
-  "version": "3.0.0",
-  "description": "Comprehensive MCP server with 13 advanced reasoning modes and visual export capabilities (Mermaid, DOT, ASCII) for complex problem-solving and analysis",
+  "version": "7.4.0",
+  "description": "Comprehensive MCP server with 33 reasoning modes including academic research (synthesis, argumentation, critique, analysis), algorithmic (CLRS), meta-reasoning for strategic oversight, taxonomy classifier, enterprise security, and visual export capabilities for complex problem-solving and analysis",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -15,33 +15,38 @@
     "README.md",
     "LICENSE"
   ],
+  "sideEffects": false,
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest",
     "test:run": "vitest --run",
+    "test:publish": "cross-env SKIP_BENCHMARKS=1 vitest --run",
     "test:coverage": "vitest --coverage",
     "lint": "eslint src/",
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build && npm run test:run"
+    "typecheck:tools": "tsc -p tools/tsconfig.json",
+    "prepublishOnly": "npm run build && npm run test:publish",
+    "docs:deps": "npx tsx tools/create-dependency-graph.ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.4",
-    "zod": "^3.22.4",
-    "zod-to-json-schema": "^3.24.6"
+    "@modelcontextprotocol/sdk": "^1.24.3",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "@typescript-eslint/eslint-plugin": "^6.19.0",
-    "@typescript-eslint/parser": "^6.19.0",
-    "@vitest/coverage-v8": "^1.2.0",
-    "eslint": "^8.56.0",
-    "prettier": "^3.2.4",
-    "tsup": "^8.0.1",
-    "typescript": "^5.3.3",
-    "vitest": "^1.2.0"
+    "@types/node": "^24.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.48.1",
+    "@typescript-eslint/parser": "^8.48.1",
+    "@vitest/coverage-v8": "^4.0.15",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
   },
   "keywords": [
     "mcp",

@@ -1,25 +1,28 @@
 /**
- * Session Manager for DeepThinking MCP
- * Manages thinking sessions, persistence, and analytics
+ * Session Manager for DeepThinking MCP (v6.0.0)
+ * Sprint 3 Task 3.4: Refactored to use SessionMetricsCalculator
+ * Phase 6 Sprint 2: Integrated with MetaMonitor for meta-reasoning tracking
+ *
+ * Manages thinking sessions, persistence, and coordinates with metrics calculator.
+ * Tracks session thoughts for meta-reasoning insights and adaptive mode switching.
  */
 
 import { randomUUID } from 'crypto';
 import {
   ThinkingSession,
   SessionConfig,
-  SessionMetrics,
   SessionMetadata,
   Thought,
   ThinkingMode
 } from '../types/index.js';
-import { isTemporalThought } from '../types/modes/temporal.js';
-import { isGameTheoryThought } from '../types/modes/gametheory.js';
-import { isEvidentialThought } from '../types/modes/evidential.js';
 import { SessionNotFoundError } from '../utils/errors.js';
 import { sanitizeString, sanitizeThoughtContent, validateSessionId, MAX_LENGTHS } from '../utils/sanitization.js';
-import { Logger, createLogger, LogLevel } from '../utils/logger.js';
-import { validationCache } from '../validation/cache.js';
+import { createLogger, LogLevel } from '../utils/logger.js';
+import { ILogger } from '../interfaces/ILogger.js';
 import { SessionStorage } from './storage/interface.js';
+import { LRUCache } from '../cache/lru.js';
+import { SessionMetricsCalculator } from './SessionMetricsCalculator.js';
+import { metaMonitor, MetaMonitor } from '../services/MetaMonitor.js';
 
 /**
  * Default session configuration
@@ -63,27 +66,35 @@ const DEFAULT_CONFIG: SessionConfig = {
  * ```
  */
 export class SessionManager {
-  private activeSessions: Map<string, ThinkingSession>;
+  private activeSessions: LRUCache<ThinkingSession>;
   private config: Partial<SessionConfig>;
-  private logger: Logger;
+  private logger: ILogger;
   private storage?: SessionStorage;
+  private metricsCalculator: SessionMetricsCalculator;
+  private monitor: MetaMonitor;
 
   /**
    * Creates a new SessionManager instance
    *
    * @param config - Optional default configuration applied to all new sessions
-   * @param logLevel - Optional minimum log level (default: INFO)
+   * @param logger - Optional logger instance or log level (default: INFO level logger)
    * @param storage - Optional persistent storage backend for sessions
+   * @param monitor - Optional MetaMonitor instance for dependency injection
    *
    * @example
    * ```typescript
-   * // Memory-only mode (default)
+   * // Memory-only mode with default logger
    * const manager = new SessionManager({
    *   enableAutoSave: true,
    *   maxThoughtsInMemory: 500
-   * }, LogLevel.DEBUG);
+   * });
    *
-   * // With file-based persistence
+   * // With custom logger (DI)
+   * import { createLogger, LogLevel } from './utils/logger.js';
+   * const logger = createLogger({ minLevel: LogLevel.DEBUG });
+   * const manager = new SessionManager({}, logger);
+   *
+   * // With file-based persistence (backward compatible)
    * import { FileSessionStore } from './storage/file-store.js';
    * const storage = new FileSessionStore('./sessions');
    * await storage.initialize();
@@ -92,16 +103,44 @@ export class SessionManager {
    */
   constructor(
     config?: Partial<SessionConfig>,
-    logLevel?: LogLevel,
-    storage?: SessionStorage
+    logger?: ILogger | LogLevel,
+    storage?: SessionStorage,
+    monitor?: MetaMonitor
   ) {
-    this.activeSessions = new Map();
+    // Initialize LRU cache for sessions (max 1000 sessions, ~10-50MB)
+    this.activeSessions = new LRUCache<ThinkingSession>({
+      maxSize: 1000,
+      enableStats: true,
+      onEvict: async (key: string, session: ThinkingSession) => {
+        // Auto-save evicted sessions to persistent storage if available
+        if (this.storage && session.config.enableAutoSave) {
+          try {
+            await this.storage.saveSession(session);
+            this.logger.debug('Evicted session saved to storage', { sessionId: key });
+          } catch (error) {
+            this.logger.error('Failed to save evicted session', error as Error, { sessionId: key });
+          }
+        }
+        // Clear meta-monitoring data for evicted session
+        if (this.monitor) {
+          this.monitor.clearSession(key);
+        }
+      }
+    });
     this.config = config || {};
     this.storage = storage;
-    this.logger = createLogger({
-      minLevel: logLevel || LogLevel.INFO,
-      enableConsole: true
-    });
+    this.monitor = monitor || metaMonitor;
+
+    // Support both ILogger injection (DI) and LogLevel (backward compatibility)
+    if (logger && typeof logger === 'object' && 'info' in logger) {
+      this.logger = logger;
+    } else {
+      this.logger = createLogger({
+        minLevel: (logger as LogLevel) || LogLevel.INFO,
+        enableConsole: true
+      });
+    }
+    this.metricsCalculator = new SessionMetricsCalculator();
   }
 
   /**
@@ -163,7 +202,7 @@ export class SessionManager {
       author,
       currentThoughtNumber: 0,
       isComplete: false,
-      metrics: this.initializeMetrics(),
+      metrics: this.metricsCalculator.initializeMetrics(),
       tags: [],
       collaborators: author ? [author] : []
     };
@@ -180,6 +219,9 @@ export class SessionManager {
         // Don't throw - session is still created in memory
       }
     }
+
+    // Start meta-monitoring strategy tracking
+    this.monitor.startStrategy(sessionId, session.mode);
 
     this.logger.info('Session created', {
       sessionId,
@@ -217,7 +259,7 @@ export class SessionManager {
     // If not in memory and storage is available, try loading from storage
     if (!session && this.storage) {
       try {
-        session = await this.storage.loadSession(sessionId);
+        session = (await this.storage.loadSession(sessionId)) ?? undefined;
         if (session) {
           // Add to active sessions cache
           this.activeSessions.set(sessionId, session);
@@ -281,7 +323,10 @@ export class SessionManager {
     session.updatedAt = new Date();
 
     // Update metrics
-    this.updateMetrics(session, thought);
+    this.metricsCalculator.updateMetrics(session, thought);
+
+    // Record thought for meta-reasoning insights
+    this.monitor.recordThought(sessionId, thought);
 
     // Check if session is complete
     if (!thought.nextThoughtNeeded) {
@@ -523,161 +568,4 @@ export class SessionManager {
     } as SessionConfig;
   }
 
-  /**
-   * Initialize metrics (private helper)
-   *
-   * Creates a fresh SessionMetrics object with zero values
-   */
-  private initializeMetrics(): SessionMetrics {
-    return {
-      totalThoughts: 0,
-      thoughtsByType: {},
-      averageUncertainty: 0,
-      revisionCount: 0,
-      timeSpent: 0,
-      dependencyDepth: 0,
-      customMetrics: new Map(),
-      cacheStats: {
-        hits: 0,
-        misses: 0,
-        hitRate: 0,
-        size: 0,
-        maxSize: 0,
-      },
-    };
-  }
-
-  /**
-   * Update session metrics (private helper)
-   *
-   * Incrementally updates metrics using O(1) algorithms for performance.
-   * Handles mode-specific metrics for temporal, game theory, and evidential modes.
-   *
-   * @param session - Session to update
-   * @param thought - Newly added thought
-   */
-  private updateMetrics(session: ThinkingSession, thought: Thought): void {
-    const metrics = session.metrics;
-
-    // Update total thoughts
-    metrics.totalThoughts = session.thoughts.length;
-
-    // Update thoughtsByType incrementally (O(1) instead of recalculating)
-    const thoughtType = thought.type || 'unknown';
-    metrics.thoughtsByType[thoughtType] = (metrics.thoughtsByType[thoughtType] || 0) + 1;
-
-    // Update revision count
-    if (thought.isRevision) {
-      metrics.revisionCount++;
-    }
-
-    // Update time spent (in milliseconds)
-    metrics.timeSpent = session.updatedAt.getTime() - session.createdAt.getTime();
-
-    // Update average uncertainty incrementally (O(1) instead of O(n))
-    if ('uncertainty' in thought && typeof (thought as any).uncertainty === 'number') {
-      const uncertaintyValue = (thought as any).uncertainty;
-      const currentSum = metrics._uncertaintySum || 0;
-      const currentCount = metrics._uncertaintyCount || 0;
-
-      metrics._uncertaintySum = currentSum + uncertaintyValue;
-      metrics._uncertaintyCount = currentCount + 1;
-      metrics.averageUncertainty = metrics._uncertaintySum / metrics._uncertaintyCount;
-    }
-
-    // Update dependency depth
-    if ('dependencies' in thought && thought.dependencies) {
-      const deps = (thought as any).dependencies as string[];
-      if (deps && deps.length > metrics.dependencyDepth) {
-        metrics.dependencyDepth = deps.length;
-      }
-    }
-
-    // Temporal-specific metrics (Phase 3, v2.1)
-    if (isTemporalThought(thought)) {
-      if (thought.events) {
-        metrics.customMetrics.set('totalEvents', thought.events.length);
-      }
-      if (thought.timeline) {
-        metrics.customMetrics.set('timelineUnit', thought.timeline.timeUnit);
-      }
-      if (thought.relations) {
-        const causalRelations = thought.relations.filter(r => r.relationType === 'causes');
-        metrics.customMetrics.set('causalRelations', causalRelations.length);
-      }
-      if (thought.constraints) {
-        metrics.customMetrics.set('temporalConstraints', thought.constraints.length);
-      }
-      if (thought.intervals) {
-        metrics.customMetrics.set('timeIntervals', thought.intervals.length);
-      }
-    }
-
-    // Game theory-specific metrics (Phase 3, v2.2)
-    if (isGameTheoryThought(thought)) {
-      if (thought.players) {
-        metrics.customMetrics.set('numPlayers', thought.players.length);
-      }
-      if (thought.strategies) {
-        metrics.customMetrics.set('totalStrategies', thought.strategies.length);
-        const mixedStrategies = thought.strategies.filter(s => !s.isPure);
-        metrics.customMetrics.set('mixedStrategies', mixedStrategies.length);
-      }
-      if (thought.nashEquilibria) {
-        metrics.customMetrics.set('nashEquilibria', thought.nashEquilibria.length);
-        const pureEquilibria = thought.nashEquilibria.filter(e => e.type === 'pure');
-        metrics.customMetrics.set('pureNashEquilibria', pureEquilibria.length);
-      }
-      if (thought.dominantStrategies) {
-        metrics.customMetrics.set('dominantStrategies', thought.dominantStrategies.length);
-      }
-      if (thought.game) {
-        metrics.customMetrics.set('gameType', thought.game.type);
-        metrics.customMetrics.set('isZeroSum', thought.game.isZeroSum);
-      }
-    }
-
-    // Evidential-specific metrics (Phase 3, v2.3)
-    if (isEvidentialThought(thought)) {
-      if (thought.hypotheses) {
-        metrics.customMetrics.set('totalHypotheses', thought.hypotheses.length);
-      }
-      if (thought.evidence) {
-        metrics.customMetrics.set('totalEvidence', thought.evidence.length);
-        const avgReliability = thought.evidence.reduce((sum, e) => sum + e.reliability, 0) / thought.evidence.length;
-        metrics.customMetrics.set('avgEvidenceReliability', avgReliability);
-      }
-      if (thought.beliefFunctions) {
-        metrics.customMetrics.set('beliefFunctions', thought.beliefFunctions.length);
-      }
-      if (thought.combinedBelief) {
-        metrics.customMetrics.set('hasCombinedBelief', true);
-        if (thought.combinedBelief.conflictMass !== undefined) {
-          metrics.customMetrics.set('conflictMass', thought.combinedBelief.conflictMass);
-        }
-      }
-      if (thought.decisions) {
-        metrics.customMetrics.set('decisions', thought.decisions.length);
-      }
-    }
-
-    // Update validation cache statistics
-    this.updateCacheStats(session);
-  }
-
-  /**
-   * Update validation cache statistics in session metrics
-   *
-   * @param session - Session to update
-   */
-  private updateCacheStats(session: ThinkingSession): void {
-    const cacheStats = validationCache.getStats();
-    session.metrics.cacheStats = {
-      hits: cacheStats.hits,
-      misses: cacheStats.misses,
-      hitRate: cacheStats.hitRate,
-      size: cacheStats.size,
-      maxSize: cacheStats.maxSize,
-    };
-  }
 }

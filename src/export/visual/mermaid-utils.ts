@@ -1,0 +1,540 @@
+/**
+ * Mermaid Utilities (v7.1.0)
+ * Shared utility functions for Mermaid diagram generation across all visual exporters
+ */
+
+// =============================================================================
+// Types
+// =============================================================================
+
+/** Mermaid graph direction */
+export type MermaidDirection = 'TD' | 'TB' | 'LR' | 'RL' | 'BT';
+
+/** Mermaid node shape identifiers */
+export type MermaidNodeShape =
+  | 'rectangle'      // [label]
+  | 'rounded'        // (label)
+  | 'stadium'        // ([label])
+  | 'subroutine'     // [[label]]
+  | 'cylinder'       // [(label)]
+  | 'circle'         // ((label))
+  | 'asymmetric'     // >label]
+  | 'rhombus'        // {label}
+  | 'hexagon'        // {{label}}
+  | 'parallelogram'  // [/label/]
+  | 'parallelogram-alt' // [\label\]
+  | 'trapezoid'      // [/label\]
+  | 'trapezoid-alt'  // [\label/]
+  | 'double-circle'; // (((label)))
+
+/** Mermaid edge/link style */
+export type MermaidEdgeStyle =
+  | 'arrow'          // -->
+  | 'open'           // ---
+  | 'dotted'         // -.->
+  | 'thick'          // ==>
+  | 'invisible';     // ~~~
+
+/** Mermaid node definition */
+export interface MermaidNode {
+  id: string;
+  label: string;
+  shape?: MermaidNodeShape;
+  style?: {
+    fill?: string;
+    stroke?: string;
+    strokeWidth?: string;
+    color?: string;
+  };
+  className?: string;
+}
+
+/** Mermaid edge definition */
+export interface MermaidEdge {
+  source: string;
+  target: string;
+  style?: MermaidEdgeStyle;
+  label?: string;
+  labelPosition?: 'middle' | 'start' | 'end';
+}
+
+/** Mermaid subgraph definition */
+export interface MermaidSubgraph {
+  id: string;
+  label: string;
+  nodes: string[];
+  direction?: MermaidDirection;
+}
+
+/** Mermaid diagram options */
+export interface MermaidOptions {
+  direction?: MermaidDirection;
+  title?: string;
+  includeLabels?: boolean;
+  colorScheme?: 'default' | 'pastel' | 'monochrome';
+}
+
+// =============================================================================
+// ID and String Utilities
+// =============================================================================
+
+/**
+ * Sanitize an ID for use in Mermaid diagrams
+ * Mermaid IDs should be alphanumeric with underscores
+ */
+export function sanitizeMermaidId(id: string): string {
+  return id
+    .replace(/[^a-zA-Z0-9_]/g, '_')
+    .replace(/^(\d)/, '_$1')
+    .replace(/__+/g, '_')
+    .replace(/^_+|_+$/g, '') || 'node';
+}
+
+/**
+ * Escape special characters in Mermaid labels
+ * Handles quotes and special markdown characters
+ */
+export function escapeMermaidLabel(label: string): string {
+  return label
+    .replace(/"/g, '#quot;')
+    .replace(/</g, '#lt;')
+    .replace(/>/g, '#gt;')
+    .replace(/\[/g, '#91;')
+    .replace(/\]/g, '#93;')
+    .replace(/\{/g, '#123;')
+    .replace(/\}/g, '#125;')
+    .replace(/\(/g, '#40;')
+    .replace(/\)/g, '#41;')
+    .replace(/\|/g, '#124;')
+    .replace(/\n/g, '<br/>');
+}
+
+/**
+ * Truncate a label to a maximum length
+ */
+export function truncateLabel(label: string, maxLength: number = 40): string {
+  if (label.length <= maxLength) return label;
+  return label.substring(0, maxLength - 3) + '...';
+}
+
+// =============================================================================
+// Node Shape Rendering
+// =============================================================================
+
+/**
+ * Get the opening and closing brackets for a node shape
+ */
+export function getNodeShapeBrackets(shape: MermaidNodeShape): [string, string] {
+  switch (shape) {
+    case 'rectangle':
+      return ['[', ']'];
+    case 'rounded':
+      return ['(', ')'];
+    case 'stadium':
+      return ['([', '])'];
+    case 'subroutine':
+      return ['[[', ']]'];
+    case 'cylinder':
+      return ['[(', ')]'];
+    case 'circle':
+      return ['((', '))'];
+    case 'asymmetric':
+      return ['>', ']'];
+    case 'rhombus':
+      return ['{', '}'];
+    case 'hexagon':
+      return ['{{', '}}'];
+    case 'parallelogram':
+      return ['[/', '/]'];
+    case 'parallelogram-alt':
+      return ['[\\', '\\]'];
+    case 'trapezoid':
+      return ['[/', '\\]'];
+    case 'trapezoid-alt':
+      return ['[\\', '/]'];
+    case 'double-circle':
+      return ['(((', ')))'];
+    default:
+      return ['[', ']'];
+  }
+}
+
+/**
+ * Render a single Mermaid node
+ */
+export function renderMermaidNode(node: MermaidNode): string {
+  const id = sanitizeMermaidId(node.id);
+  const label = escapeMermaidLabel(node.label);
+  const [open, close] = getNodeShapeBrackets(node.shape || 'rectangle');
+
+  let nodeStr = `  ${id}${open}"${label}"${close}`;
+
+  if (node.className) {
+    nodeStr += `:::${node.className}`;
+  }
+
+  return nodeStr;
+}
+
+/**
+ * Render a node style definition
+ */
+export function renderMermaidNodeStyle(nodeId: string, style: MermaidNode['style']): string {
+  if (!style) return '';
+
+  const id = sanitizeMermaidId(nodeId);
+  const styles: string[] = [];
+
+  if (style.fill) styles.push(`fill:${style.fill}`);
+  if (style.stroke) styles.push(`stroke:${style.stroke}`);
+  if (style.strokeWidth) styles.push(`stroke-width:${style.strokeWidth}`);
+  if (style.color) styles.push(`color:${style.color}`);
+
+  if (styles.length === 0) return '';
+  return `  style ${id} ${styles.join(',')}`;
+}
+
+// =============================================================================
+// Edge Rendering
+// =============================================================================
+
+/**
+ * Get the arrow syntax for an edge style
+ */
+export function getEdgeArrow(style: MermaidEdgeStyle): string {
+  switch (style) {
+    case 'arrow':
+      return '-->';
+    case 'open':
+      return '---';
+    case 'dotted':
+      return '-.->';
+    case 'thick':
+      return '==>';
+    case 'invisible':
+      return '~~~';
+    default:
+      return '-->';
+  }
+}
+
+/**
+ * Render a single Mermaid edge
+ */
+export function renderMermaidEdge(edge: MermaidEdge): string {
+  const source = sanitizeMermaidId(edge.source);
+  const target = sanitizeMermaidId(edge.target);
+  const arrow = getEdgeArrow(edge.style || 'arrow');
+
+  if (edge.label) {
+    const label = escapeMermaidLabel(edge.label);
+    return `  ${source} ${arrow}|${label}| ${target}`;
+  }
+
+  return `  ${source} ${arrow} ${target}`;
+}
+
+// =============================================================================
+// Subgraph Rendering
+// =============================================================================
+
+/**
+ * Render a Mermaid subgraph
+ */
+export function renderMermaidSubgraph(subgraph: MermaidSubgraph): string {
+  const lines: string[] = [];
+  const id = sanitizeMermaidId(subgraph.id);
+  const label = escapeMermaidLabel(subgraph.label);
+
+  lines.push(`  subgraph ${id}["${label}"]`);
+
+  if (subgraph.direction) {
+    lines.push(`    direction ${subgraph.direction}`);
+  }
+
+  for (const nodeId of subgraph.nodes) {
+    lines.push(`    ${sanitizeMermaidId(nodeId)}`);
+  }
+
+  lines.push('  end');
+
+  return lines.join('\n');
+}
+
+// =============================================================================
+// Color Utilities
+// =============================================================================
+
+/** Color palettes for different schemes */
+export const MERMAID_COLORS = {
+  default: {
+    primary: '#a8d5ff',
+    secondary: '#ffd699',
+    success: '#81c784',
+    warning: '#ffb74d',
+    danger: '#e57373',
+    info: '#4fc3f7',
+    neutral: '#e0e0e0',
+  },
+  pastel: {
+    primary: '#e1f5ff',
+    secondary: '#fff3e0',
+    success: '#c8e6c9',
+    warning: '#ffecb3',
+    danger: '#ffcdd2',
+    info: '#b3e5fc',
+    neutral: '#f5f5f5',
+  },
+  monochrome: {
+    primary: '#e0e0e0',
+    secondary: '#bdbdbd',
+    success: '#9e9e9e',
+    warning: '#757575',
+    danger: '#616161',
+    info: '#424242',
+    neutral: '#f5f5f5',
+  },
+};
+
+/**
+ * Get a color from the specified scheme
+ */
+export function getMermaidColor(
+  type: keyof typeof MERMAID_COLORS.default,
+  scheme: 'default' | 'pastel' | 'monochrome' = 'default'
+): string {
+  return MERMAID_COLORS[scheme][type];
+}
+
+// =============================================================================
+// Complete Diagram Generation
+// =============================================================================
+
+/**
+ * Generate a complete Mermaid flowchart diagram
+ */
+export function generateMermaidFlowchart(
+  nodes: MermaidNode[],
+  edges: MermaidEdge[],
+  options: MermaidOptions = {}
+): string {
+  const { direction = 'TD', colorScheme = 'default' } = options;
+  const lines: string[] = [];
+
+  // Header
+  lines.push(`graph ${direction}`);
+
+  // Nodes
+  if (nodes.length > 0) {
+    lines.push('');
+    for (const node of nodes) {
+      lines.push(renderMermaidNode(node));
+    }
+  }
+
+  // Edges
+  if (edges.length > 0) {
+    lines.push('');
+    for (const edge of edges) {
+      lines.push(renderMermaidEdge(edge));
+    }
+  }
+
+  // Styles
+  if (colorScheme !== 'monochrome') {
+    const styledNodes = nodes.filter(n => n.style);
+    if (styledNodes.length > 0) {
+      lines.push('');
+      for (const node of styledNodes) {
+        const styleStr = renderMermaidNodeStyle(node.id, node.style);
+        if (styleStr) lines.push(styleStr);
+      }
+    }
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Generate a linear flow diagram (start -> step1 -> step2 -> ... -> end)
+ */
+export function generateLinearFlowMermaid(
+  steps: string[],
+  options: MermaidOptions = {}
+): string {
+  const { direction = 'TD', colorScheme = 'default' } = options;
+
+  if (steps.length === 0) {
+    return `graph ${direction}\n  Empty["No steps"]`;
+  }
+
+  const nodes: MermaidNode[] = steps.map((step, index) => ({
+    id: `step_${index}`,
+    label: truncateLabel(step),
+    shape: index === 0 ? 'stadium' : index === steps.length - 1 ? 'stadium' : 'rectangle',
+    style: {
+      fill: index === 0
+        ? getMermaidColor('primary', colorScheme)
+        : index === steps.length - 1
+          ? getMermaidColor('success', colorScheme)
+          : undefined,
+    },
+  }));
+
+  const edges: MermaidEdge[] = [];
+  for (let i = 0; i < steps.length - 1; i++) {
+    edges.push({
+      source: `step_${i}`,
+      target: `step_${i + 1}`,
+      style: 'arrow',
+    });
+  }
+
+  return generateMermaidFlowchart(nodes, edges, options);
+}
+
+/**
+ * Generate a hierarchical/tree diagram
+ */
+export function generateHierarchyMermaid(
+  root: { id: string; label: string; children?: Array<{ id: string; label: string; children?: unknown[] }> },
+  options: MermaidOptions = {}
+): string {
+  const { direction = 'TD' } = options;
+  const nodes: MermaidNode[] = [];
+  const edges: MermaidEdge[] = [];
+
+  function traverse(
+    node: { id: string; label: string; children?: unknown[] },
+    parentId?: string
+  ): void {
+    nodes.push({
+      id: node.id,
+      label: truncateLabel(node.label),
+      shape: parentId ? 'rectangle' : 'stadium',
+    });
+
+    if (parentId) {
+      edges.push({
+        source: parentId,
+        target: node.id,
+        style: 'arrow',
+      });
+    }
+
+    if (node.children && Array.isArray(node.children)) {
+      for (const child of node.children as Array<{ id: string; label: string; children?: unknown[] }>) {
+        traverse(child, node.id);
+      }
+    }
+  }
+
+  traverse(root);
+  return generateMermaidFlowchart(nodes, edges, { ...options, direction });
+}
+
+/**
+ * Generate a state diagram
+ */
+export function generateMermaidStateDiagram(
+  states: Array<{ id: string; label: string; type?: 'start' | 'end' | 'normal' | 'choice' }>,
+  transitions: Array<{ from: string; to: string; label?: string }>
+): string {
+  const lines: string[] = ['stateDiagram-v2'];
+
+  // Define states
+  for (const state of states) {
+    if (state.type === 'start') {
+      lines.push(`  [*] --> ${sanitizeMermaidId(state.id)}`);
+    } else if (state.type === 'end') {
+      lines.push(`  ${sanitizeMermaidId(state.id)} --> [*]`);
+    }
+
+    if (state.type !== 'start' && state.type !== 'end') {
+      lines.push(`  ${sanitizeMermaidId(state.id)} : ${escapeMermaidLabel(state.label)}`);
+    }
+  }
+
+  // Define transitions
+  lines.push('');
+  for (const trans of transitions) {
+    const from = sanitizeMermaidId(trans.from);
+    const to = sanitizeMermaidId(trans.to);
+    if (trans.label) {
+      lines.push(`  ${from} --> ${to} : ${escapeMermaidLabel(trans.label)}`);
+    } else {
+      lines.push(`  ${from} --> ${to}`);
+    }
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Generate a class diagram
+ */
+export function generateMermaidClassDiagram(
+  classes: Array<{
+    name: string;
+    attributes?: string[];
+    methods?: string[];
+  }>,
+  relationships: Array<{
+    from: string;
+    to: string;
+    type: 'inheritance' | 'composition' | 'aggregation' | 'association' | 'dependency';
+    label?: string;
+  }>
+): string {
+  const lines: string[] = ['classDiagram'];
+
+  // Define classes
+  for (const cls of classes) {
+    lines.push(`  class ${sanitizeMermaidId(cls.name)} {`);
+    if (cls.attributes) {
+      for (const attr of cls.attributes) {
+        lines.push(`    ${attr}`);
+      }
+    }
+    if (cls.methods) {
+      for (const method of cls.methods) {
+        lines.push(`    ${method}`);
+      }
+    }
+    lines.push('  }');
+  }
+
+  // Define relationships
+  lines.push('');
+  for (const rel of relationships) {
+    const from = sanitizeMermaidId(rel.from);
+    const to = sanitizeMermaidId(rel.to);
+    let arrow: string;
+    switch (rel.type) {
+      case 'inheritance':
+        arrow = '<|--';
+        break;
+      case 'composition':
+        arrow = '*--';
+        break;
+      case 'aggregation':
+        arrow = 'o--';
+        break;
+      case 'association':
+        arrow = '-->';
+        break;
+      case 'dependency':
+        arrow = '..>';
+        break;
+      default:
+        arrow = '-->';
+    }
+    if (rel.label) {
+      lines.push(`  ${from} ${arrow} ${to} : ${escapeMermaidLabel(rel.label)}`);
+    } else {
+      lines.push(`  ${from} ${arrow} ${to}`);
+    }
+  }
+
+  return lines.join('\n');
+}

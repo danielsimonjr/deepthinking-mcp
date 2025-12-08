@@ -1,9 +1,12 @@
 /**
- * Evidential Mode Validator
+ * Evidential Mode Validator (v7.1.0)
+ * Refactored to use BaseValidator shared methods
  */
 
-import { EvidentialThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { EvidentialThought, ValidationIssue } from '../../../types/index.js';
+import type { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
+import { IssueCategory, IssueSeverity } from '../../constants.js';
 
 export class EvidentialValidator extends BaseValidator<EvidentialThought> {
   getMode(): string {
@@ -16,15 +19,27 @@ export class EvidentialValidator extends BaseValidator<EvidentialThought> {
     // Common validation
     issues.push(...this.validateCommon(thought));
 
-    // Validate frame of discernment
-    if (thought.frameOfDiscernment && thought.frameOfDiscernment.length === 0) {
-      issues.push({
-        severity: 'warning',
-        thoughtNumber: thought.thoughtNumber,
-        description: 'Frame of discernment is empty',
-        suggestion: 'Define the set of possible hypotheses',
-        category: 'structural',
-      });
+    // Collect hypothesis IDs
+    const hypothesisIds = new Set(thought.hypotheses?.map(h => h.id) || []);
+
+    // Validate hypotheses
+    if (thought.hypotheses) {
+      for (const hypothesis of thought.hypotheses) {
+        // Validate subset references
+        if (hypothesis.subsets) {
+          for (const subset of hypothesis.subsets) {
+            if (!hypothesisIds.has(subset)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Hypothesis "${hypothesis.name}" references unknown subset: ${subset}`,
+                suggestion: 'Ensure subsets reference existing hypotheses',
+                category: IssueCategory.STRUCTURAL,
+              });
+            }
+          }
+        }
+      }
     }
 
     // Create hypothesis ID set for validation
@@ -183,25 +198,13 @@ export class EvidentialValidator extends BaseValidator<EvidentialThought> {
       for (const mass of thought.beliefMasses) {
         if (mass.mass < 0 || mass.mass > 1) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
-            description: `Belief mass for "${mass.hypothesis}" must be between 0 and 1`,
-            suggestion: 'Provide mass as decimal',
-            category: 'structural',
+            description: `Belief function "${beliefFunction.id}" mass assignments must sum to 1.0 (current: ${totalMass.toFixed(3)})`,
+            suggestion: 'Ensure all mass assignments sum to exactly 1.0',
+            category: IssueCategory.MATHEMATICAL,
           });
         }
-        totalMass += mass.mass;
-      }
-
-      const tolerance = 0.001;
-      if (Math.abs(totalMass - 1.0) > tolerance) {
-        issues.push({
-          severity: 'error',
-          thoughtNumber: thought.thoughtNumber,
-          description: `Belief masses must sum to 1 (current sum: ${totalMass.toFixed(3)})`,
-          suggestion: 'Ensure all belief masses sum to exactly 1.0',
-          category: 'structural',
-        });
       }
     }
 
@@ -213,12 +216,47 @@ export class EvidentialValidator extends BaseValidator<EvidentialThought> {
 
         if (belief > plausibility) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
-            description: `Belief cannot exceed plausibility for "${key}"`,
+            description: `Belief ${assignment.belief} cannot exceed plausibility ${assignment.plausibility}`,
             suggestion: 'Ensure Bel(A) ≤ Pl(A) for all hypotheses',
-            category: 'logical',
+            category: IssueCategory.LOGICAL,
           });
+        }
+
+        // Validate uncertainty interval matches belief and plausibility
+        if (assignment.uncertaintyInterval) {
+          const [lower, upper] = assignment.uncertaintyInterval;
+          if (Math.abs(lower - assignment.belief) > 0.001 ||
+              Math.abs(upper - assignment.plausibility) > 0.001) {
+            issues.push({
+              severity: IssueSeverity.ERROR,
+              thoughtNumber: thought.thoughtNumber,
+              description: `Uncertainty interval [${lower}, ${upper}] does not match [belief, plausibility] [${assignment.belief}, ${assignment.plausibility}]`,
+              suggestion: 'Ensure uncertainty interval is [belief, plausibility]',
+              category: IssueCategory.STRUCTURAL,
+            });
+          }
+        }
+      }
+    }
+
+    // Validate decisions
+    if (thought.decisions) {
+      for (const decision of thought.decisions) {
+        // Validate selected hypotheses exist
+        if (decision.selectedHypothesis) {
+          for (const hypothesisId of decision.selectedHypothesis) {
+            if (!hypothesisIds.has(hypothesisId)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Decision "${decision.name}" selects unknown hypothesis: ${hypothesisId}`,
+                suggestion: 'Ensure decisions reference existing hypotheses',
+                category: IssueCategory.STRUCTURAL,
+              });
+            }
+          }
         }
       }
     }

@@ -1,8 +1,21 @@
 #!/usr/bin/env node
 
 /**
- * DeepThinking MCP Server
- * Unified deep thinking server combining sequential, Shannon, and mathematical reasoning
+ * DeepThinking MCP Server (v6.1.0)
+ *
+ * 21 advanced reasoning modes with meta-reasoning, taxonomy classifier,
+ * enterprise security, and visual export capabilities.
+ *
+ * Tools:
+ * - deepthinking_core: sequential, shannon, hybrid modes
+ * - deepthinking_math: mathematics, physics modes
+ * - deepthinking_temporal: temporal reasoning
+ * - deepthinking_probabilistic: bayesian, evidential modes
+ * - deepthinking_causal: causal, counterfactual, abductive modes
+ * - deepthinking_strategic: gametheory, optimization modes
+ * - deepthinking_analytical: analogical, firstprinciples, metareasoning modes
+ * - deepthinking_scientific: scientificmethod, systemsthinking, formallogic modes
+ * - deepthinking_session: summarize, export, get_session, switch_mode, recommend_mode
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -11,7 +24,6 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
-import { randomUUID } from 'crypto';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -23,29 +35,14 @@ const packageJson = JSON.parse(
   readFileSync(join(__dirname, '../package.json'), 'utf-8')
 );
 
-import { thinkingTool, ThinkingToolInput, ThinkingToolSchema } from './tools/thinking.js';
-import { SessionManager } from './session/index.js';
-import {
-  ThinkingMode,
-  ShannonStage,
-  SequentialThought,
-  ShannonThought,
-  MathematicsThought,
-  PhysicsThought,
-  HybridThought,
-  AbductiveThought,
-  CausalThought,
-  BayesianThought,
-  CounterfactualThought,
-  AnalogicalThought,
-  TemporalThought,
-  GameTheoryThought,
-  EvidentialThought,
-  ModeRecommender,
-} from './types/index.js';
-import { VisualExporter, type VisualFormat } from './export/visual.js';
-import { toExtendedThoughtType } from './utils/type-guards.js';
+// Import new tool definitions and schemas
+import { toolList, toolSchemas, isValidTool, modeToToolMap } from './tools/definitions.js';
+import { thinkingTool } from './tools/thinking.js'; // Legacy tool for backward compatibility
+import type { SessionManager } from './session/index.js';
+import { ThinkingMode } from './types/index.js';
+import type { ThoughtFactory, ExportService, ModeRouter } from './services/index.js';
 
+// Initialize server
 const server = new Server(
   {
     name: packageJson.name,
@@ -58,89 +55,271 @@ const server = new Server(
   }
 );
 
-const sessionManager = new SessionManager();
+/**
+ * Lazy Service Initialization (Sprint 9.1)
+ * Services are loaded on first use to reduce startup time
+ */
+let _sessionManager: SessionManager | null = null;
+let _thoughtFactory: ThoughtFactory | null = null;
+let _exportService: ExportService | null = null;
+let _modeRouter: ModeRouter | null = null;
 
+async function getSessionManager(): Promise<SessionManager> {
+  if (!_sessionManager) {
+    const { SessionManager } = await import('./session/index.js');
+    _sessionManager = new SessionManager();
+  }
+  return _sessionManager;
+}
+
+async function getThoughtFactory(): Promise<ThoughtFactory> {
+  if (!_thoughtFactory) {
+    const { ThoughtFactory } = await import('./services/index.js');
+    _thoughtFactory = new ThoughtFactory();
+  }
+  return _thoughtFactory;
+}
+
+async function getExportService(): Promise<ExportService> {
+  if (!_exportService) {
+    const { ExportService } = await import('./services/index.js');
+    _exportService = new ExportService();
+  }
+  return _exportService;
+}
+
+async function getModeRouter(): Promise<ModeRouter> {
+  if (!_modeRouter) {
+    const { ModeRouter } = await import('./services/index.js');
+    const sessionManager = await getSessionManager();
+    _modeRouter = new ModeRouter(sessionManager);
+  }
+  return _modeRouter;
+}
+
+// Register tool list handler - now returns all 9 focused tools + legacy
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
-    tools: [thinkingTool],
+    tools: [
+      ...toolList,      // 9 new focused tools
+      thinkingTool,     // Legacy tool for backward compatibility
+    ],
   };
 });
 
+// Register tool call handler
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
-  if (name === 'deepthinking') {
-    try {
-      const input = ThinkingToolSchema.parse(args) as ThinkingToolInput;
+  try {
+    // Handle new focused tools
+    if (isValidTool(name)) {
+      const schema = toolSchemas[name as keyof typeof toolSchemas];
+      const input = schema.parse(args);
+
+      // Session action tool
+      if (name === 'deepthinking_session') {
+        return await handleSessionAction(input);
+      }
+
+      // All other tools are for adding thoughts
+      return await handleAddThought(input, name);
+    }
+
+    // Handle legacy tool (backward compatibility)
+    if (name === 'deepthinking') {
+      const { ThinkingToolSchema } = await import('./tools/thinking.js');
+      const input = ThinkingToolSchema.parse(args);
+
+      // Add deprecation warning
+      const deprecationWarning = '⚠️ DEPRECATED: The "deepthinking" tool is deprecated. ' +
+        'Use the focused tools instead: deepthinking_core, deepthinking_math, ' +
+        'deepthinking_temporal, deepthinking_probabilistic, deepthinking_causal, ' +
+        'deepthinking_strategic, deepthinking_analytical, deepthinking_scientific, ' +
+        'deepthinking_session. See docs/migration/v4.0-tool-splitting.md for details.\n\n';
 
       switch (input.action) {
-        case 'add_thought':
-          return await handleAddThought(input);
+        case 'add_thought': {
+          const result = await handleAddThought(input, modeToToolMap[input.mode || 'hybrid'] || 'deepthinking_core');
+          return prependWarning(result, deprecationWarning);
+        }
         case 'summarize':
-          return await handleSummarize(input);
         case 'export':
-          return await handleExport(input);
         case 'switch_mode':
-          return await handleSwitchMode(input);
         case 'get_session':
-          return await handleGetSession(input);
-        case 'recommend_mode':
-          return await handleRecommendMode(input);
+        case 'recommend_mode': {
+          const result = await handleSessionAction(input);
+          return prependWarning(result, deprecationWarning);
+        }
         default:
           throw new Error(`Unknown action: ${input.action}`);
       }
-    } catch (error) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-          },
-        ],
-        isError: true,
-      };
     }
-  }
 
-  throw new Error(`Unknown tool: ${name}`);
+    throw new Error(`Unknown tool: ${name}`);
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
+      isError: true,
+    };
+  }
 });
 
-async function handleAddThought(input: ThinkingToolInput) {
+/**
+ * Prepend a warning message to a tool result
+ */
+function prependWarning(result: any, warning: string) {
+  if (result.content && result.content[0] && result.content[0].type === 'text') {
+    result.content[0].text = warning + result.content[0].text;
+  }
+  return result;
+}
+
+/**
+ * Check if a thought type is a proof decomposition type (Phase 8)
+ */
+function isDecompositionThoughtType(thoughtType: string | undefined): boolean {
+  return [
+    'proof_decomposition',
+    'dependency_analysis',
+    'consistency_check',
+    'gap_identification',
+    'assumption_trace',
+  ].includes(thoughtType || '');
+}
+
+/**
+ * Lazy load MathematicsReasoningEngine (Phase 8)
+ */
+let _mathEngine: any = null;
+async function getMathematicsReasoningEngine() {
+  if (!_mathEngine) {
+    const { MathematicsReasoningEngine } = await import('./modes/mathematics-reasoning.js');
+    _mathEngine = new MathematicsReasoningEngine();
+  }
+  return _mathEngine;
+}
+
+/**
+ * Handle add_thought action for any thinking mode
+ */
+async function handleAddThought(input: any, _toolName: string) {
+  const sessionManager = await getSessionManager();
+  const thoughtFactory = await getThoughtFactory();
+
   let sessionId = input.sessionId;
+
+  // Determine mode from tool name or input
+  let mode: ThinkingMode = input.mode || ThinkingMode.HYBRID;
+
+  // Create session if none provided
   if (!sessionId) {
     const session = await sessionManager.createSession({
-      mode: input.mode as ThinkingMode,
+      mode: mode,
       title: `Thinking Session ${new Date().toISOString()}`,
     });
     sessionId = session.id;
   }
 
-  const thought = createThought(input, sessionId);
+  // Use ThoughtFactory to create thought
+  const thought = thoughtFactory.createThought({ ...input, mode }, sessionId);
+
+  // Phase 8: Enrich mathematics thoughts with proof decomposition analysis
+  if (mode === ThinkingMode.MATHEMATICS && isDecompositionThoughtType(input.thoughtType)) {
+    try {
+      const mathEngine = await getMathematicsReasoningEngine();
+
+      // Build proof input from tool input
+      const proofInput = input.proofSteps || input.thought;
+
+      // Run analysis based on thought type
+      const analysisResult = mathEngine.analyzeForThoughtType(
+        proofInput,
+        input.thoughtType,
+        input.theorem
+      );
+
+      // Enrich the thought with analysis results
+      (thought as any).decomposition = analysisResult.decomposition;
+      (thought as any).consistencyReport = analysisResult.consistencyReport;
+      (thought as any).gapAnalysis = analysisResult.gapAnalysis;
+      (thought as any).assumptionAnalysis = analysisResult.assumptionAnalysis;
+    } catch (error) {
+      // Log but don't fail - analysis is optional enhancement
+      console.error('Proof analysis failed:', error);
+    }
+  }
+
   const session = await sessionManager.addThought(sessionId, thought);
+
+  // Build response with analysis results if present
+  const response: any = {
+    sessionId: session.id,
+    thoughtId: thought.id,
+    thoughtNumber: thought.thoughtNumber,
+    mode: thought.mode,
+    nextThoughtNeeded: thought.nextThoughtNeeded,
+    sessionComplete: session.isComplete,
+    totalThoughts: session.thoughts.length,
+  };
+
+  // Include analysis results in response if available
+  if ((thought as any).decomposition) {
+    response.decomposition = (thought as any).decomposition;
+  }
+  if ((thought as any).consistencyReport) {
+    response.consistencyReport = (thought as any).consistencyReport;
+  }
+  if ((thought as any).gapAnalysis) {
+    response.gapAnalysis = (thought as any).gapAnalysis;
+  }
 
   return {
     content: [
       {
         type: 'text',
-        text: JSON.stringify({
-          sessionId: session.id,
-          thoughtId: thought.id,
-          thoughtNumber: thought.thoughtNumber,
-          mode: thought.mode,
-          nextThoughtNeeded: thought.nextThoughtNeeded,
-          sessionComplete: session.isComplete,
-          totalThoughts: session.thoughts.length,
-        }, null, 2),
+        text: JSON.stringify(response, null, 2),
       },
     ],
   };
 }
 
-async function handleSummarize(input: ThinkingToolInput) {
+/**
+ * Handle session actions (summarize, export, switch_mode, get_session, recommend_mode)
+ */
+async function handleSessionAction(input: any) {
+  const action = input.action;
+
+  switch (action) {
+    case 'summarize':
+      return await handleSummarize(input);
+    case 'export':
+      return await handleExport(input);
+    case 'switch_mode':
+      return await handleSwitchMode(input);
+    case 'get_session':
+      return await handleGetSession(input);
+    case 'recommend_mode':
+      return await handleRecommendMode(input);
+    default:
+      throw new Error(`Unknown session action: ${action}`);
+  }
+}
+
+/**
+ * Handle summarize action
+ */
+async function handleSummarize(input: any) {
   if (!input.sessionId) {
     throw new Error('sessionId required for summarize action');
   }
 
+  const sessionManager = await getSessionManager();
   const summary = await sessionManager.generateSummary(input.sessionId);
 
   return {
@@ -153,10 +332,16 @@ async function handleSummarize(input: ThinkingToolInput) {
   };
 }
 
-async function handleExport(input: ThinkingToolInput) {
+/**
+ * Handle export action
+ */
+async function handleExport(input: any) {
   if (!input.sessionId) {
     throw new Error('sessionId required for export action');
   }
+
+  const sessionManager = await getSessionManager();
+  const exportService = await getExportService();
 
   const session = await sessionManager.getSession(input.sessionId);
   if (!session) {
@@ -164,87 +349,7 @@ async function handleExport(input: ThinkingToolInput) {
   }
 
   const format = input.exportFormat || 'json';
-
-  // For visual formats, check if applicable and use VisualExporter
-  if (format === 'mermaid' || format === 'dot' || format === 'ascii') {
-    const visualExporter = new VisualExporter();
-    const lastThought = session.thoughts[session.thoughts.length - 1];
-
-    if (!lastThought) {
-      throw new Error('No thoughts in session to export');
-    }
-
-    let exported: string;
-
-    // Determine which visual export method to use based on mode
-    if (lastThought.mode === 'causal' && 'causalGraph' in lastThought) {
-      exported = visualExporter.exportCausalGraph(lastThought as CausalThought, {
-        format: format as VisualFormat,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
-    } else if (lastThought.mode === 'temporal' && 'timeline' in lastThought) {
-      exported = visualExporter.exportTemporalTimeline(lastThought as TemporalThought, {
-        format: format as VisualFormat,
-        includeLabels: true,
-      });
-    } else if (lastThought.mode === 'gametheory' && 'game' in lastThought) {
-      exported = visualExporter.exportGameTree(lastThought as GameTheoryThought, {
-        format: format as VisualFormat,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
-    } else if (lastThought.mode === 'bayesian' && 'hypothesis' in lastThought) {
-      exported = visualExporter.exportBayesianNetwork(lastThought as BayesianThought, {
-        format: format as VisualFormat,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
-    } else {
-      throw new Error(`Visual export not supported for mode: ${lastThought.mode}`);
-    }
-
-    return {
-      content: [{
-        type: 'text' as const,
-        text: exported,
-      }],
-    };
-  }
-
-  // Standard exports (json, markdown, latex, html, jupyter)
-  const sessionWithCustomMetrics = {
-    ...session,
-    metrics: {
-      ...session.metrics,
-      customMetrics: Object.fromEntries(session.metrics.customMetrics),
-    },
-  };
-
-  let exported: string;
-
-  switch (format) {
-    case 'json':
-      exported = JSON.stringify(sessionWithCustomMetrics, null, 2);
-      break;
-    case 'markdown':
-      exported = exportToMarkdown(sessionWithCustomMetrics);
-      break;
-    case 'latex':
-      exported = exportToLatex(sessionWithCustomMetrics);
-      break;
-    case 'html':
-      exported = exportToHTML(sessionWithCustomMetrics);
-      break;
-    case 'jupyter':
-      exported = exportToJupyter(sessionWithCustomMetrics);
-      break;
-    default:
-      exported = JSON.stringify(sessionWithCustomMetrics, null, 2);
-  }
+  const exported = exportService.exportSession(session, format as any);
 
   return {
     content: [{
@@ -254,13 +359,16 @@ async function handleExport(input: ThinkingToolInput) {
   };
 }
 
-
-async function handleSwitchMode(input: ThinkingToolInput) {
+/**
+ * Handle switch_mode action
+ */
+async function handleSwitchMode(input: any) {
   if (!input.sessionId || !input.newMode) {
     throw new Error('sessionId and newMode required for switch_mode action');
   }
 
-  const session = await sessionManager.switchMode(
+  const modeRouter = await getModeRouter();
+  const session = await modeRouter.switchMode(
     input.sessionId,
     input.newMode as ThinkingMode,
     'User requested mode switch'
@@ -276,11 +384,15 @@ async function handleSwitchMode(input: ThinkingToolInput) {
   };
 }
 
-async function handleGetSession(input: ThinkingToolInput) {
+/**
+ * Handle get_session action
+ */
+async function handleGetSession(input: any) {
   if (!input.sessionId) {
     throw new Error('sessionId required for get_session action');
   }
 
+  const sessionManager = await getSessionManager();
   const session = await sessionManager.getSession(input.sessionId);
   if (!session) {
     throw new Error(`Session ${input.sessionId} not found`);
@@ -309,248 +421,17 @@ async function handleGetSession(input: ThinkingToolInput) {
   };
 }
 
-function createThought(input: ThinkingToolInput, sessionId: string) {
-  const baseThought = {
-    id: randomUUID(),
-    sessionId,
-    thoughtNumber: input.thoughtNumber,
-    totalThoughts: input.totalThoughts,
-    content: input.thought,
-    timestamp: new Date(),
-    nextThoughtNeeded: input.nextThoughtNeeded,
-    isRevision: input.isRevision,
-    revisesThought: input.revisesThought,
-  };
-
-  switch (input.mode) {
-    case 'sequential':
-      return {
-        ...baseThought,
-        mode: ThinkingMode.SEQUENTIAL,
-        revisionReason: input.revisionReason,
-        branchFrom: input.branchFrom,
-        branchId: input.branchId,
-      } as SequentialThought;
-
-    case 'shannon':
-      return {
-        ...baseThought,
-        mode: ThinkingMode.SHANNON,
-        stage: (input.stage as ShannonStage) || ShannonStage.PROBLEM_DEFINITION,
-        uncertainty: input.uncertainty || 0.5,
-        dependencies: input.dependencies || [],
-        assumptions: input.assumptions || [],
-      } as ShannonThought;
-
-    case 'mathematics':
-      return {
-        ...baseThought,
-        mode: ThinkingMode.MATHEMATICS,
-        thoughtType: toExtendedThoughtType(input.thoughtType, 'model'),
-        mathematicalModel: input.mathematicalModel,
-        proofStrategy: input.proofStrategy,
-        dependencies: input.dependencies || [],
-        assumptions: input.assumptions || [],
-        uncertainty: input.uncertainty || 0.5,
-      } as MathematicsThought;
-
-    case 'physics':
-      return {
-        ...baseThought,
-        mode: ThinkingMode.PHYSICS,
-        thoughtType: toExtendedThoughtType(input.thoughtType, 'model'),
-        tensorProperties: input.tensorProperties,
-        physicalInterpretation: input.physicalInterpretation,
-        dependencies: input.dependencies || [],
-        assumptions: input.assumptions || [],
-        uncertainty: input.uncertainty || 0.5,
-      } as PhysicsThought;
-
-    case 'abductive':
-      return {
-        ...baseThought,
-        mode: ThinkingMode.ABDUCTIVE,
-        thoughtType: toExtendedThoughtType(input.thoughtType, 'problem_definition'),
-        observations: input.observations || [],
-        hypotheses: input.hypotheses || [],
-        evaluationCriteria: input.evaluationCriteria,
-        evidence: input.evidence || [],
-        bestExplanation: input.bestExplanation,
-      } as AbductiveThought;
-
-    case 'causal':
-      return {
-        ...baseThought,
-        mode: ThinkingMode.CAUSAL,
-        thoughtType: toExtendedThoughtType(input.thoughtType, 'problem_definition'),
-        causalGraph: input.causalGraph,
-        interventions: input.interventions || [],
-        mechanisms: input.mechanisms || [],
-        confounders: input.confounders || [],
-      } as CausalThought;
-
-    case 'bayesian':
-      return {
-        ...baseThought,
-        mode: ThinkingMode.BAYESIAN,
-        thoughtType: toExtendedThoughtType(input.thoughtType, 'problem_definition'),
-        hypothesis: input.hypothesis,
-        prior: input.prior,
-        likelihood: input.likelihood,
-        evidence: input.evidence || [],
-        posterior: input.posterior,
-        bayesFactor: input.bayesFactor,
-      } as unknown as BayesianThought;
-
-    case 'counterfactual':
-      return {
-        ...baseThought,
-        mode: ThinkingMode.COUNTERFACTUAL,
-        thoughtType: toExtendedThoughtType(input.thoughtType, 'problem_definition'),
-        actual: input.actual,
-        counterfactuals: input.counterfactuals || [],
-        comparison: input.comparison,
-        interventionPoint: input.interventionPoint,
-        causalChains: input.causalChains || [],
-      } as CounterfactualThought;
-
-    case 'analogical':
-      return {
-        ...baseThought,
-        mode: ThinkingMode.ANALOGICAL,
-        thoughtType: toExtendedThoughtType(input.thoughtType, 'analogy'),
-        sourceDomain: input.sourceDomain,
-        targetDomain: input.targetDomain,
-        mapping: input.mapping || [],
-        insights: input.insights || [],
-        inferences: input.inferences || [],
-        limitations: input.limitations || [],
-        analogyStrength: input.analogyStrength,
-      } as unknown as AnalogicalThought;
-
-    case 'temporal':
-      return {
-        ...baseThought,
-        mode: ThinkingMode.TEMPORAL,
-        thoughtType: input.thoughtType || 'event_definition',
-        timeline: input.timeline,
-        events: input.events || [],
-        intervals: input.intervals || [],
-        constraints: input.constraints || [],
-        relations: input.relations || [],
-      } as unknown as TemporalThought;
-
-    case 'gametheory':
-      return {
-        ...baseThought,
-        mode: ThinkingMode.GAMETHEORY,
-        thoughtType: input.thoughtType || 'game_definition',
-        game: input.game,
-        players: input.players || [],
-        strategies: input.strategies || [],
-        payoffMatrix: input.payoffMatrix,
-        nashEquilibria: input.nashEquilibria || [],
-        dominantStrategies: input.dominantStrategies || [],
-        gameTree: input.gameTree,
-      } as unknown as GameTheoryThought;
-
-    case 'evidential':
-      return {
-        ...baseThought,
-        mode: ThinkingMode.EVIDENTIAL,
-        thoughtType: input.thoughtType || 'hypothesis_definition',
-        frameOfDiscernment: input.frameOfDiscernment,
-        hypotheses: input.hypotheses || [],
-        evidence: input.evidence || [],
-        beliefFunctions: input.beliefFunctions || [],
-        combinedBelief: input.combinedBelief,
-        plausibility: input.plausibility,
-        decisions: input.decisions || [],
-      } as unknown as EvidentialThought;
-
-    case 'hybrid':
-    default:
-      return {
-        ...baseThought,
-        mode: ThinkingMode.HYBRID,
-        thoughtType: toExtendedThoughtType(input.thoughtType, 'synthesis'),
-        stage: input.stage as ShannonStage,
-        uncertainty: input.uncertainty,
-        dependencies: input.dependencies,
-        assumptions: input.assumptions,
-        mathematicalModel: input.mathematicalModel,
-        tensorProperties: input.tensorProperties,
-        physicalInterpretation: input.physicalInterpretation,
-        primaryMode: (input.mode || ThinkingMode.HYBRID) as any,
-        secondaryFeatures: [],
-      } as unknown as HybridThought;
-  }
-}
-
-
 /**
- * Handle mode recommendation requests
+ * Handle recommend_mode action
  */
-async function handleRecommendMode(input: ThinkingToolInput) {
-  const recommender = new ModeRecommender();
-  
+async function handleRecommendMode(input: any) {
+  const modeRouter = await getModeRouter();
+
   // Quick recommendation based on problem type
   if (input.problemType && !input.problemCharacteristics) {
-    const recommendedMode = recommender.quickRecommend(input.problemType);
-    
-    return {
-      content: [{
-        type: 'text' as const,
-        text: `Quick recommendation for "${input.problemType}":\n\n**Recommended Mode**: ${recommendedMode}\n\nFor more detailed recommendations, provide problemCharacteristics.`
-      }],
-      isError: false,
-    };
-  }
-  
-  // Comprehensive recommendations based on problem characteristics
-  if (input.problemCharacteristics) {
-    const modeRecs = recommender.recommendModes(input.problemCharacteristics);
-    const combinationRecs = input.includeCombinations 
-      ? recommender.recommendCombinations(input.problemCharacteristics)
-      : [];
-    
-    let response = '# Mode Recommendations\n\n';
-    
-    // Single mode recommendations
-    response += '## Individual Modes\n\n';
-    for (const rec of modeRecs) {
-      response += `### ${rec.mode} (Score: ${rec.score})\n`;
-      response += `**Reasoning**: ${rec.reasoning}\n\n`;
-      response += `**Strengths**:\n`;
-      for (const strength of rec.strengths) {
-        response += `- ${strength}\n`;
-      }
-      response += `\n**Limitations**:\n`;
-      for (const limitation of rec.limitations) {
-        response += `- ${limitation}\n`;
-      }
-      response += `\n**Examples**: ${rec.examples.join(', ')}\n\n`;
-      response += '---\n\n';
-    }
-    
-    // Mode combinations
-    if (combinationRecs.length > 0) {
-      response += '## Recommended Mode Combinations\n\n';
-      for (const combo of combinationRecs) {
-        response += `### ${combo.modes.join(' + ')} (${combo.sequence})\n`;
-        response += `**Rationale**: ${combo.rationale}\n\n`;
-        response += `**Benefits**:\n`;
-        for (const benefit of combo.benefits) {
-          response += `- ${benefit}\n`;
-        }
-        response += `\n**Synergies**:\n`;
-        for (const synergy of combo.synergies) {
-          response += `- ${synergy}\n`;
-        }
-        response += '\n---\n\n';
-      }
-    }
-    
+    const recommendedMode = modeRouter.quickRecommend(input.problemType);
+    const response = modeRouter.formatQuickRecommendation(input.problemType, recommendedMode);
+
     return {
       content: [{
         type: 'text' as const,
@@ -559,7 +440,23 @@ async function handleRecommendMode(input: ThinkingToolInput) {
       isError: false,
     };
   }
-  
+
+  // Comprehensive recommendations based on problem characteristics
+  if (input.problemCharacteristics) {
+    const response = modeRouter.getRecommendations(
+      input.problemCharacteristics,
+      input.includeCombinations || false
+    );
+
+    return {
+      content: [{
+        type: 'text' as const,
+        text: response
+      }],
+      isError: false,
+    };
+  }
+
   // No valid input provided
   return {
     content: [{
@@ -570,140 +467,9 @@ async function handleRecommendMode(input: ThinkingToolInput) {
   };
 }
 
-
-// Helper export functions
-function exportToMarkdown(session: any): string {
-  let md = `# Thinking Session: ${session.id}
-
-`;
-  md += `**Mode**: ${session.mode}
-`;
-  md += `**Created**: ${session.createdAt}
-`;
-  md += `**Status**: ${session.status}
-
-`;
-  md += `## Thoughts
-
-`;
-
-  for (const thought of session.thoughts) {
-    md += `### Thought ${thought.thoughtNumber}/${session.thoughts.length}
-
-`;
-    md += `${thought.content}
-
-`;
-  }
-
-  return md;
-}
-
-function exportToLatex(session: any): string {
-  let latex = `\\documentclass{article}
-`;
-  latex += `\\title{Thinking Session: ${session.id}}
-`;
-  latex += `\\begin{document}
-`;
-  latex += `\\maketitle
-
-`;
-  latex += `\\section{Session Details}
-`;
-  latex += `Mode: ${session.mode}\\\\
-`;
-  latex += `Status: ${session.status}\\\\
-
-`;
-  latex += `\\section{Thoughts}
-`;
-
-  for (const thought of session.thoughts) {
-    latex += `\\subsection{Thought ${thought.thoughtNumber}}
-`;
-    latex += `${thought.content}
-
-`;
-  }
-
-  latex += `\\end{document}
-`;
-  return latex;
-}
-
-function exportToHTML(session: any): string {
-  let html = `<!DOCTYPE html>
-<html>
-<head>
-`;
-  html += `  <title>Thinking Session: ${session.id}</title>
-`;
-  html += `  <style>body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; }</style>
-`;
-  html += `</head>
-<body>
-`;
-  html += `  <h1>Thinking Session: ${session.id}</h1>
-`;
-  html += `  <p><strong>Mode:</strong> ${session.mode}</p>
-`;
-  html += `  <p><strong>Status:</strong> ${session.status}</p>
-`;
-  html += `  <h2>Thoughts</h2>
-`;
-
-  for (const thought of session.thoughts) {
-    html += `  <div>
-`;
-    html += `    <h3>Thought ${thought.thoughtNumber}/${session.thoughts.length}</h3>
-`;
-    html += `    <p>${thought.content}</p>
-`;
-    html += `  </div>
-`;
-  }
-
-  html += `</body>
-</html>
-`;
-  return html;
-}
-
-function exportToJupyter(session: any): string {
-  const notebook = {
-    cells: [] as any[],
-    metadata: {},
-    nbformat: 4,
-    nbformat_minor: 2,
-  };
-
-  // Add title cell
-  notebook.cells.push({
-    cell_type: 'markdown',
-    metadata: {},
-    source: [`# Thinking Session: ${session.id}
-`, `
-`, `**Mode**: ${session.mode}  
-`, `**Status**: ${session.status}
-`],
-  });
-
-  // Add thought cells
-  for (const thought of session.thoughts) {
-    notebook.cells.push({
-      cell_type: 'markdown',
-      metadata: {},
-      source: [`## Thought ${thought.thoughtNumber}/${session.thoughts.length}
-`, `
-`, `${thought.content}
-`],
-    });
-  }
-
-  return JSON.stringify(notebook, null, 2);
-}
-
+/**
+ * Main server startup
+ */
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);

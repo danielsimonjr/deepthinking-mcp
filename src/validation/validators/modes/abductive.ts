@@ -1,9 +1,12 @@
 /**
- * Abductive Mode Validator
+ * Abductive Mode Validator (v7.1.0)
+ * Refactored to use BaseValidator shared methods
  */
 
-import { AbductiveThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { AbductiveThought, ValidationIssue } from '../../../types/index.js';
+import type { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
+import { IssueCategory, IssueSeverity } from '../../constants.js';
 
 export class AbductiveValidator extends BaseValidator<AbductiveThought> {
   getMode(): string {
@@ -16,29 +19,17 @@ export class AbductiveValidator extends BaseValidator<AbductiveThought> {
     // Common validation
     issues.push(...this.validateCommon(thought));
 
-    // At least one observation required
-    if (!thought.observations || thought.observations.length === 0) {
-      issues.push({
-        severity: 'error',
-        thoughtNumber: thought.thoughtNumber,
-        description: 'Abductive reasoning requires at least one observation',
-        suggestion: 'Provide observations that need explanation',
-        category: 'structural',
-      });
-    }
+    // At least one observation required using shared method (ERROR severity for required array)
+    issues.push(
+      ...this.validateNonEmptyArray(thought, thought.observations, 'observations', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
+    );
 
-    // Validate observation confidence values
+    // Validate observation confidence values using shared method
     if (thought.observations) {
       for (const obs of thought.observations) {
-        if (obs.confidence < 0 || obs.confidence > 1) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Observation "${obs.description}" has invalid confidence: ${obs.confidence}`,
-            suggestion: 'Confidence must be between 0 and 1',
-            category: 'structural',
-          });
-        }
+        issues.push(
+          ...this.validateConfidence(thought, obs.confidence, `Observation "${obs.description}" confidence`)
+        );
       }
     }
 
@@ -48,50 +39,24 @@ export class AbductiveValidator extends BaseValidator<AbductiveThought> {
       for (const hyp of thought.hypotheses) {
         if (hypothesisIds.has(hyp.id)) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Duplicate hypothesis ID: ${hyp.id}`,
             suggestion: 'Each hypothesis must have a unique ID',
-            category: 'logical',
+            category: IssueCategory.LOGICAL,
           });
         }
         hypothesisIds.add(hyp.id);
       }
     }
 
-    // Validate evaluation criteria
+    // Validate evaluation criteria using shared methods
     if (thought.evaluationCriteria) {
       const { parsimony, explanatoryPower, plausibility } = thought.evaluationCriteria;
 
-      if (parsimony < 0 || parsimony > 1) {
-        issues.push({
-          severity: 'error',
-          thoughtNumber: thought.thoughtNumber,
-          description: 'Parsimony score must be between 0 and 1',
-          suggestion: 'Provide parsimony as decimal',
-          category: 'structural',
-        });
-      }
-
-      if (explanatoryPower < 0 || explanatoryPower > 1) {
-        issues.push({
-          severity: 'error',
-          thoughtNumber: thought.thoughtNumber,
-          description: 'Explanatory power must be between 0 and 1',
-          suggestion: 'Provide explanatory power as decimal',
-          category: 'structural',
-        });
-      }
-
-      if (plausibility < 0 || plausibility > 1) {
-        issues.push({
-          severity: 'error',
-          thoughtNumber: thought.thoughtNumber,
-          description: 'Plausibility must be between 0 and 1',
-          suggestion: 'Provide plausibility as decimal',
-          category: 'structural',
-        });
-      }
+      issues.push(...this.validateProbability(thought, parsimony, 'Parsimony score'));
+      issues.push(...this.validateProbability(thought, explanatoryPower, 'Explanatory power'));
+      issues.push(...this.validateProbability(thought, plausibility, 'Plausibility'));
     }
 
     // Validate best explanation references existing hypothesis
@@ -99,11 +64,11 @@ export class AbductiveValidator extends BaseValidator<AbductiveThought> {
       const hypothesisIds = thought.hypotheses.map((h) => h.id);
       if (!hypothesisIds.includes(thought.bestExplanation.id)) {
         issues.push({
-          severity: 'error',
+          severity: IssueSeverity.ERROR,
           thoughtNumber: thought.thoughtNumber,
           description: 'Best explanation must be from the hypotheses list',
           suggestion: 'Ensure bestExplanation references an existing hypothesis',
-          category: 'logical',
+          category: IssueCategory.LOGICAL,
         });
       }
     }

@@ -3,13 +3,13 @@
  * Phase 3 (v2.1) - Temporal reasoning with events, intervals, constraints, and causal relations
  */
 
-import { BaseThought } from '../core.js';
+import { BaseThought, ThinkingMode } from '../core.js';
 
 /**
  * Temporal thought extends base thought with time-dependent reasoning
  */
 export interface TemporalThought extends BaseThought {
-  mode: 'temporal';
+  mode: ThinkingMode.TEMPORAL;
   thoughtType:
     | 'event_definition'
     | 'interval_analysis'
@@ -70,6 +70,7 @@ export interface TemporalConstraint {
   subject: string; // Event/Interval ID
   object: string; // Event/Interval ID
   confidence: number; // 0-1
+  formula?: string; // LaTeX formula for temporal logic constraint
 }
 
 /**
@@ -82,6 +83,7 @@ export interface TemporalRelation {
   relationType: 'causes' | 'enables' | 'prevents' | 'precedes' | 'follows';
   strength: number; // 0-1
   delay?: number; // Time delay between events
+  formula?: string; // LaTeX formula for relationship dynamics
 }
 
 /**

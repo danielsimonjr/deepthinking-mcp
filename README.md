@@ -1,683 +1,897 @@
-# DeepThinking MCP v2.5
+# DeepThinking MCP
 
-A comprehensive Model Context Protocol (MCP) server featuring **13 advanced reasoning modes** with intelligent mode recommendation and visual export capabilities for complex problem-solving, analysis, and decision-making.
+[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue.svg)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
 
-## Overview
+A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning modes** (29 with dedicated thought types, 4 advanced runtime modes) including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
-DeepThinking MCP v2.5 provides a complete toolkit for structured reasoning with 13 specialized modes, an intelligent recommendation system, and powerful visual export capabilities:
+> 📋 **Latest Release**: v7.4.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
+>
+> 🎉 **New in v7.4.0**: Phase 13 Academic Research Modes for PhD students! Synthesis (literature review), Argumentation (Toulmin model), Critique (peer review), and Analysis (qualitative methods) modes.
+>
+> ✨ **v7.3.0**: Phase 12 Algorithmic Reasoning Mode with comprehensive CLRS coverage! 100+ named algorithms, complexity analysis, design patterns.
+>
+> ✨ **v7.2.0**: Phase 11 Historical Computing Extensions! Computability mode (Turing machines), Cryptanalytic mode (deciban evidence system), extended Game Theory (von Neumann).
+>
+> ✨ **v7.0.0**: Phase 8 Proof Decomposition System with native SVG export! Break proofs into atomic statements, detect gaps and implicit assumptions, track assumption chains.
 
-### Core Modes
-- **Sequential**: Iterative refinement with revision capabilities
-- **Shannon**: 5-stage systematic problem-solving methodology
-- **Mathematics**: Theorem proving and symbolic computation
-- **Physics**: Tensor mathematics and field theory
-- **Hybrid**: Intelligently combines multiple approaches
+## Table of Contents
 
-### Advanced Modes (v2.0)
-- **Abductive**: Inference to the best explanation, hypothesis generation and evaluation
-- **Causal**: Cause-effect analysis with causal graphs and interventions
-- **Bayesian**: Probabilistic reasoning with evidence updates
-- **Counterfactual**: What-if scenario analysis and alternative histories
-- **Analogical**: Cross-domain pattern matching and knowledge transfer
-n### Phase 3 Modes (v2.3+)
-- **Temporal**: Event timelines, temporal constraints, Allen's interval algebra, causal relations over time
-- **Game Theory**: Nash equilibria, strategic analysis, payoff matrices, dominant strategies, game trees
-- **Evidential**: Dempster-Shafer theory, belief functions, evidence combination, uncertainty intervals
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Reasoning Modes](#reasoning-modes)
+- [Proof Decomposition](#proof-decomposition)
+- [Usage Examples](#usage-examples)
+- [Production Features](#production-features)
+- [API Documentation](#api-documentation)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Features
 
-### 13 Specialized Reasoning Modes
-
-#### Core Modes
-- **Sequential**: Iterative refinement with revision capabilities and branching
-- **Shannon**: Systematic 5-stage problem-solving (problem definition → constraints → model → proof → implementation)
-- **Mathematics**: Theorem proving, lemma derivation, symbolic computation
-- **Physics**: Tensor formulation, dimensional analysis, conservation laws
-- **Hybrid**: Intelligently combines modes based on problem characteristics
-
-#### Advanced Reasoning Modes (v2.0)
-- **Abductive**: Generate and evaluate hypotheses to explain observations. Perfect for debugging, root cause analysis, and diagnostic reasoning.
-- **Causal**: Build causal graphs with nodes and edges, analyze interventions and their effects. Ideal for impact analysis and system design.
-- **Bayesian**: Update beliefs using probabilistic reasoning with priors, likelihoods, and evidence. Essential for risk assessment and A/B testing.
-- **Counterfactual**: Explore alternative scenarios and compare outcomes. Excellent for post-mortems and strategic planning.
-- **Analogical**: Transfer knowledge across domains by identifying structural similarities. Great for design patterns and innovative problem-solving.
-n#### Phase 3 Reasoning Modes (v2.3+)
-- **Temporal**: Model events, intervals, and temporal relationships using Allen's interval algebra. Track causality over time with timestamps, durations, and temporal constraints. Perfect for timeline analysis, scheduling problems, and understanding event sequences.
-- **Game Theory**: Analyze strategic interactions between rational agents. Define games, players, and strategies. Compute Nash equilibria (pure and mixed), identify dominant strategies, construct payoff matrices, and build extensive-form game trees. Ideal for competitive analysis, mechanism design, and strategic decision-making.
-- **Evidential**: Apply Dempster-Shafer theory for reasoning with uncertain and incomplete evidence. Define hypotheses, collect evidence with reliability scores, assign belief functions with mass assignments, combine evidence using Dempster's rule, compute belief and plausibility intervals, and make decisions under uncertainty. Ideal for sensor fusion, diagnostic reasoning, intelligence analysis, and situations with incomplete information.
-
-### Mathematical Enhancements
-- **Symbolic computation** support with LaTeX and symbolic formats
-- **Theorem and proof** structures
-- **Lemma derivation** and corollary tracking
-- **Algebraic manipulation** and numerical analysis
-- **Logical form** with premises, conclusions, and inference rules
-
-### Physics Capabilities
-- **Tensor mathematics** with rank, symmetries, and invariants
-- **Dimensional analysis** for unit consistency
-- **Conservation law** verification
-- **Field theory** context (Lagrangian, Hamiltonian, gauge symmetries)
-- **Physical interpretation** with units and observables
-
-### Session Management
-- Persistent thinking sessions
-- Automatic metrics tracking
-- Mode switching during problem-solving
-- Export to multiple formats (Markdown, LaTeX, JSON)
-
-### Mode Recommendation System (v2.4)
-- **Intelligent Mode Selection**: Automatically recommends the best reasoning modes based on problem characteristics
-- **Combination Suggestions**: Identifies synergistic mode combinations for complex problems
-- **Quick Recommendations**: Simple problem-type based recommendations
-- **Problem Characteristics Analysis**: Analyzes domain, complexity, uncertainty, time-dependence, and more
-- **Ranked Recommendations**: Returns modes sorted by suitability score with detailed reasoning
+- **33 Specialized Reasoning Modes** - From sequential thinking to game theory, formal logic, and meta-reasoning (29 with full thought types, 4 advanced runtime modes)
+- **Academic Research Modes (NEW!)** - Synthesis (literature review), Argumentation (Toulmin), Critique (peer review), Analysis (qualitative methods)
+- **Algorithmic Reasoning (v7.3.0)** - Comprehensive CLRS coverage with 100+ named algorithms, complexity analysis, design patterns
+- **Historical Computing Extensions** - Computability (Turing machines), Cryptanalytic (decibans), extended Game Theory (von Neumann)
+- **Proof Decomposition** - Break proofs into atomic statements, detect gaps, track assumption chains
+- **Native SVG Export** - Direct SVG generation without external tools for proof visualizations
+- **Meta-Reasoning** - Strategic oversight that monitors effectiveness, recommends mode switches, and assesses quality
+- **Adaptive Mode Switching** - Automatic evaluation-based mode switching when effectiveness drops below thresholds
+- **Intelligent Mode Recommendation** - Automatic mode selection based on problem characteristics
+- **Taxonomy Classifier** - 69 reasoning types across 12 categories for intelligent task classification (110 planned)
+- **Visual Exports** - Generate Mermaid diagrams, DOT graphs, ASCII art, SVG graphics, and LaTeX documents
+- **Production-Ready** - Search engine, templates, batch processing, caching, backup/restore
+- **Enterprise Security** - Input validation (Zod), rate limiting, path sanitization, PII redaction
+- **High Performance** - LRU caching with auto-eviction, async I/O, 4-5x validation speedups
+- **Type-Safe** - 100% TypeScript with zero suppressions (down from 231 baseline)
+- **Repository Pattern** - Clean architecture with dependency injection
+- **Extensible** - Plugin architecture for custom reasoning modes
+- **MCP Compatible** - Full integration with Model Context Protocol
 
 ## Installation
+
+### NPM Package
 
 ```bash
 npm install deepthinking-mcp
 ```
 
-## Configuration
+### From Source
 
-Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS or `%APPDATA%\Claude\claude_desktop_config.json` on Windows):
+```bash
+git clone https://github.com/danielsimonjr/deepthinking-mcp.git
+cd deepthinking-mcp
+npm install
+npm run build
+```
+
+### MCP Configuration
+
+Add to your MCP settings file:
 
 ```json
 {
   "mcpServers": {
     "deepthinking": {
       "command": "npx",
-      "args": ["-y", "deepthinking-mcp"]
+      "args": ["deepthinking-mcp"]
     }
   }
 }
 ```
 
-## Usage
+## Quick Start
 
-### Basic Sequential Thinking
+### MCP Tool Usage
 
-```
-Use the deepthinking tool to help me think through this step by step...
-```
+DeepThinking MCP provides 10 focused tools for different reasoning domains:
 
-The tool will automatically create a session and track your thoughts.
+| Tool | Modes | Description |
+|------|-------|-------------|
+| `deepthinking_core` | inductive, deductive, abductive | Fundamental reasoning |
+| `deepthinking_standard` | sequential, shannon, hybrid | Standard workflow modes |
+| `deepthinking_math` | mathematics, physics | Mathematical/scientific reasoning |
+| `deepthinking_temporal` | temporal | Time-based reasoning |
+| `deepthinking_probabilistic` | bayesian, evidential | Probabilistic reasoning |
+| `deepthinking_causal` | causal, counterfactual | Cause-effect analysis |
+| `deepthinking_strategic` | gametheory, optimization | Strategic reasoning |
+| `deepthinking_analytical` | analogical, firstprinciples, metareasoning | Analytical reasoning |
+| `deepthinking_scientific` | scientificmethod, systemsthinking, formallogic | Scientific reasoning |
+| `deepthinking_session` | - | Session management (summarize, export, switch_mode) |
 
-### Mathematical Reasoning
+### Example: Sequential Reasoning
 
-```
-Use deepthinking in mathematics mode to prove the Pythagorean theorem...
-```
-
-### Physics Problems
-
-```
-Use deepthinking in physics mode to derive the electromagnetic tensor formulation...
-```
-
-### Hybrid Mode (Default)
-
-```
-Use deepthinking to solve this complex problem...
-```
-
-The hybrid mode automatically selects the best features from each mode.
-
-### Mode Recommendations (v2.4)
-
-The recommendation system helps you choose the best reasoning mode for your problem:
-
-```
-What mode should I use for debugging this application?
-```
-
-Returns: **Abductive mode** - Perfect for hypothesis generation and root cause analysis.
-
-```
-I need to analyze a competitive business scenario with multiple players. What modes should I use?
-```
-
-Returns: **Game Theory mode** for strategic analysis, potentially combined with **Counterfactual mode** for scenario exploration.
-
-#### Problem Characteristics
-
-The recommender analyzes:
-- **Domain**: General, mathematics, physics, engineering, etc.
-- **Complexity**: Low, medium, or high
-- **Uncertainty**: How much unknown information exists
-- **Time-dependent**: Whether events occur over time
-- **Multi-agent**: Whether multiple actors interact strategically
-- **Requires proof**: Whether formal mathematical proof is needed
-- **Requires quantification**: Whether probabilities or measurements are needed
-- **Incomplete information**: Whether data gaps exist
-- **Requires explanation**: Whether understanding "why" is important
-- **Has alternatives**: Whether alternative scenarios should be explored
-
-#### Quick Recommendations
-
-For simple cases, use problem-type keywords:
-- `debugging` → Abductive mode
-- `proof` → Mathematics mode
-- `timeline` → Temporal mode
-- `strategy` → Game Theory mode
-- `uncertainty` → Evidential mode
-- `causality` → Causal mode
-- `probability` → Bayesian mode
-- `what-if` → Counterfactual mode
-
-### Visual Exports (v2.5)
-
-Export your reasoning sessions as visual diagrams in multiple formats for presentation, documentation, and analysis:
-
-#### Supported Formats
-- **Mermaid**: Flowcharts, Gantt charts, and graphs (compatible with GitHub, Markdown renderers, and documentation tools)
-- **DOT**: Graphviz format for professional graph visualization and publication-quality diagrams
-- **ASCII**: Plain text diagrams for terminal output, logs, and text-based documentation
-
-#### Supported Modes
-- **Causal Mode**: Export causal graphs showing cause-effect relationships with node types (causes, effects, mediators, confounders) and edge strengths
-- **Temporal Mode**: Export timelines as Gantt charts showing events, intervals, and temporal relationships
-- **Game Theory Mode**: Export game trees with strategies, decision nodes, and payoffs
-- **Bayesian Mode**: Export Bayesian networks showing prior/posterior relationships and evidence flow
-
-#### Visual Export Examples
-
-**Causal Graph to Mermaid:**
 ```json
 {
-  "action": "export",
-  "sessionId": "session-id",
-  "exportFormat": "mermaid"
+  "tool": "deepthinking_standard",
+  "arguments": {
+    "mode": "sequential",
+    "thought": "First, identify the main bottlenecks in the distributed system",
+    "thoughtNumber": 1,
+    "totalThoughts": 5,
+    "nextThoughtNeeded": true
+  }
 }
 ```
 
-Returns a Mermaid diagram:
-```mermaid
-graph TB
-  marketing([Marketing Budget])
-  awareness[Brand Awareness]
-  revenue[[Revenue]]
+### Example: Causal Analysis
 
-  marketing --> |0.80| awareness
-  awareness --> |0.90| revenue
-
-  style marketing fill:#a8d5ff
-  style revenue fill:#ffb3b3
-```
-
-**Temporal Timeline to ASCII:**
 ```json
 {
-  "action": "export",
-  "sessionId": "session-id",
-  "exportFormat": "ascii"
-}
-```
-
-Returns a text timeline:
-```
-Timeline: Project Timeline (days)
-
-t=   0 ⦿ Project Start
-       Kickoff meeting
-
-t=   5 ━ Development (duration: 10 days)
-       Code implementation
-
-t=  20 ⦿ Launch
-       Product release
-```
-
-**Game Tree to DOT:**
-```json
-{
-  "action": "export",
-  "sessionId": "session-id",
-  "exportFormat": "dot"
-}
-```
-
-Returns Graphviz DOT format for rendering with `dot` or graph visualization tools.
-
-#### Color Schemes
-Visual exports support multiple color schemes:
-- **default**: Vibrant colors for causes (blue), effects (red), mediators (yellow)
-- **pastel**: Soft, pastel colors for presentations
-- **monochrome**: No colors for print or accessibility
-
-#### Integration
-Visual exports work seamlessly with:
-- GitHub Markdown (Mermaid diagrams render automatically)
-- Documentation generators (MkDocs, Docusaurus, etc.)
-- Graphviz tools (`dot`, `neato`, `fdp` for DOT format)
-- Terminal output (ASCII format)
-- Jupyter notebooks (via Mermaid magic)
-
-
-## Tool Parameters
-
-### Core Parameters
-- `thought` (string, required): The thought content
-- `thoughtNumber` (number, required): Position in sequence
-- `totalThoughts` (number, required): Estimated total thoughts needed
-- `nextThoughtNeeded` (boolean, required): Whether to continue thinking
-- `mode` (string, optional): `sequential`, `shannon`, `mathematics`, `physics`, `hybrid`, `abductive`, `causal`, `bayesian`, `counterfactual`, `analogical`, or `temporal` (default: `hybrid`)
-
-### Mode-Specific Parameters
-
-#### Sequential Mode
-- `isRevision`: Whether this revises a previous thought
-- `revisesThought`: ID of thought being revised
-- `revisionReason`: Why the revision was needed
-
-#### Shannon Mode
-- `stage`: Which Shannon stage (problem_definition, constraints, model, proof, implementation)
-- `uncertainty`: Confidence level (0-1)
-- `dependencies`: IDs of dependent thoughts
-- `assumptions`: Explicit assumptions
-
-#### Mathematics Mode
-- `thoughtType`: Specific type (axiom_definition, theorem_statement, proof_construction, etc.)
-- `mathematicalModel`: LaTeX and symbolic representation
-- `proofStrategy`: Type and steps of proof
-- `logicalForm`: Premises, conclusion, inference rules
-
-#### Physics Mode
-- `thoughtType`: Specific type (tensor_formulation, symmetry_analysis, etc.)
-- `tensorProperties`: Rank, components, symmetries, invariants
-- `physicalInterpretation`: Quantity, units, conservation laws
-- `dimensionalAnalysis`: Unit consistency checking
-
-#### Abductive Mode
-- `observations`: Array of observations requiring explanation (id, description, confidence)
-- `hypotheses`: Generated hypotheses with assumptions and predictions
-- `evaluationCriteria`: Parsimony, explanatory power, plausibility, testability
-- `evidence`: Supporting or contradicting evidence
-- `bestExplanation`: Selected hypothesis that best explains observations
-
-#### Causal Mode
-- `causalGraph`: Nodes (causes, effects, mediators) and edges (causal relationships)
-- `interventions`: Actions on nodes with expected effects
-- `mechanisms`: Direct, indirect, or feedback mechanisms
-- `confounders`: Variables affecting multiple nodes
-
-#### Bayesian Mode
-- `hypothesis`: Statement being evaluated
-- `prior`: Prior probability with justification
-- `likelihood`: P(Evidence|Hypothesis)
-- `evidence`: Observations with likelihoods
-- `posterior`: Updated belief after seeing evidence
-- `bayesFactor`: Strength of evidence (optional)
-
-#### Counterfactual Mode
-- `actual`: The scenario that actually occurred
-- `counterfactuals`: Alternative "what if" scenarios
-- `interventionPoint`: Where the scenarios diverge
-- `comparison`: Differences, insights, and lessons learned
-- `causalChains`: Intervention → steps → outcome paths
-
-#### Analogical Mode
-- `sourceDomain`: Known domain with entities and relations
-- `targetDomain`: Domain being analyzed
-- `mapping`: Entity-to-entity mappings with justifications
-- `insights`: Knowledge transferred from source to target
-- `inferences`: Predictions based on analogical reasoning
-- `limitations`: Where the analogy breaks down
-- `analogyStrength`: Overall confidence in the analogy (0-1)
-n#### Temporal Mode
-- `timeline`: Timeline structure with id, name, timeUnit, events array
-- `events`: Temporal events (instant or interval) with timestamps, duration, properties
-- `intervals`: Time intervals with start, end, overlaps, contains relationships
-- `constraints`: Allen's interval algebra constraints (before, after, during, overlaps, meets, starts, finishes, equals)
-- `relations`: Temporal causal relations (causes, enables, prevents, precedes, follows) with strength and delay
-
-#### Game Theory Mode
-- `game`: Game definition (id, name, type, numPlayers, isZeroSum, isPerfectInformation)
-- `players`: Player definitions with roles, rationality, available strategies
-- `strategies`: Pure or mixed strategies with probabilities
-- `payoffMatrix`: Normal-form payoff matrix with strategy profiles and payoffs
-- `nashEquilibria`: Nash equilibrium solutions (pure/mixed, strict, stability)
-- `dominantStrategies`: Dominant strategy analysis (strictly/weakly dominant)
-- `gameTree`: Extensive-form game tree with decision, chance, and terminal nodes
-
-#### Evidential Mode
-- `frameOfDiscernment`: Set of all possible hypotheses being considered
-- `hypotheses`: Hypothesis definitions (id, name, description, mutuallyExclusive, subsets)
-- `evidence`: Evidence items with source, reliability (0-1), timestamp, supports, contradicts
-- `beliefFunctions`: Belief function with mass assignments (hypothesisSet, mass, justification)
-- `combinedBelief`: Belief function resulting from Dempster-Shafer combination (includes conflictMass)
-- `plausibility`: Plausibility function with belief/plausibility values and uncertainty intervals
-- `decisions`: Decision analysis (selectedHypothesis, confidence, reasoning, alternatives)
-
-### Actions
-- `add_thought` (default): Add a new thought to session
-- `summarize`: Generate session summary
-- `export`: Export session (requires `exportFormat`)
-- `switch_mode`: Change thinking mode (requires `newMode`)
-- `get_session`: Get session metadata
-
-## Examples
-
-### Example 1: Sequential Problem Solving
-
-```
-Thought 1: "Let me break down this optimization problem..."
-- mode: sequential
-- thoughtNumber: 1
-- nextThoughtNeeded: true
-
-Thought 2: "Building on my previous thought, I realize..."
-- mode: sequential
-- thoughtNumber: 2
-- buildUpon: [thought1_id]
-- nextThoughtNeeded: true
-
-Thought 3: "Actually, let me revise my first approach..."
-- mode: sequential
-- isRevision: true
-- revisesThought: thought1_id
-- revisionReason: "Found a more efficient approach"
-```
-
-### Example 2: Mathematical Proof
-
-```
-Thought 1: "State the theorem: For all right triangles..."
-- mode: mathematics
-- thoughtType: theorem_statement
-- mathematicalModel: { latex: "a^2 + b^2 = c^2", symbolic: "a**2 + b**2 == c**2" }
-
-Thought 2: "Proof by construction..."
-- mode: mathematics
-- thoughtType: proof_construction
-- proofStrategy: { type: "construction", steps: ["Draw square on each side", ...] }
-```
-
-### Example 3: Physics Tensor Analysis
-
-```
-Thought 1: "Define the electromagnetic field tensor"
-- mode: physics
-- thoughtType: tensor_formulation
-- tensorProperties: {
-    rank: [2, 0],
-    components: "F^{μν} = ∂^μ A^ν - ∂^ν A^μ",
-    latex: "F^{\\mu\\nu}",
-    symmetries: ["antisymmetric"],
-    invariants: ["F_{μν}F^{μν}"],
-    transformation: "contravariant"
-  }
-- physicalInterpretation: {
-    quantity: "Electromagnetic field strength",
-    units: "GeV^2",
-    conservationLaws: ["Energy-momentum", "Charge"]
-  }
-```
-
-### Example 4: Abductive Reasoning (Debugging)
-
-```
-Thought 1: "System crashes at 3 AM - need to find root cause"
-- mode: abductive
-- observations: [
-    { id: "obs1", description: "Crash at 3 AM daily", confidence: 0.95 },
-    { id: "obs2", description: "Memory usage spikes before crash", confidence: 0.8 }
-  ]
-- hypotheses: [
-    {
-      id: "h1",
-      explanation: "Memory leak in background job",
-      assumptions: ["Job runs at 3 AM"],
-      predictions: ["Memory should grow until crash"],
-      score: 0.85
-    },
-    {
-      id: "h2",
-      explanation: "External service timeout",
-      assumptions: ["Service maintenance window at 3 AM"],
-      predictions: ["Network errors in logs"],
-      score: 0.6
-    }
-  ]
-- evaluationCriteria: {
-    parsimony: 0.7,
-    explanatoryPower: 0.85,
-    plausibility: 0.8,
-    testability: true
-  }
-- bestExplanation: h1
-```
-
-### Example 5: Causal Analysis (Impact Assessment)
-
-```
-Thought 1: "Analyze impact of increasing marketing budget"
-- mode: causal
-- causalGraph: {
-    nodes: [
-      { id: "marketing", name: "Marketing Budget", type: "cause" },
-      { id: "awareness", name: "Brand Awareness", type: "mediator" },
-      { id: "leads", name: "Lead Generation", type: "mediator" },
-      { id: "revenue", name: "Revenue", type: "effect" }
-    ],
-    edges: [
-      { from: "marketing", to: "awareness", strength: 0.8, confidence: 0.9 },
-      { from: "awareness", to: "leads", strength: 0.7, confidence: 0.85 },
-      { from: "leads", to: "revenue", strength: 0.9, confidence: 0.95 }
-    ]
-  }
-- interventions: [
-    {
-      nodeId: "marketing",
-      action: "Increase budget by 20%",
-      expectedEffects: [
-        { nodeId: "revenue", expectedChange: "+12%", confidence: 0.7 }
+  "tool": "deepthinking_causal",
+  "arguments": {
+    "mode": "causal",
+    "thought": "Analyzing the root cause of the service outage",
+    "thoughtNumber": 1,
+    "totalThoughts": 3,
+    "nextThoughtNeeded": true,
+    "causalGraph": {
+      "nodes": [
+        {"id": "n1", "name": "High Load", "type": "cause"},
+        {"id": "n2", "name": "Memory Exhaustion", "type": "mediator"},
+        {"id": "n3", "name": "Service Crash", "type": "effect"}
+      ],
+      "edges": [
+        {"from": "n1", "to": "n2", "strength": 0.9},
+        {"from": "n2", "to": "n3", "strength": 0.95}
       ]
     }
-  ]
+  }
+}
 ```
 
-### Example 6: Bayesian Reasoning (A/B Test Analysis)
+### Example: Session Export
 
-```
-Thought 1: "Evaluate if new feature increases engagement"
-- mode: bayesian
-- hypothesis: { id: "h1", statement: "New feature increases engagement" }
-- prior: {
-    probability: 0.5,
-    justification: "No prior information, neutral stance"
+```json
+{
+  "tool": "deepthinking_session",
+  "arguments": {
+    "action": "export",
+    "sessionId": "session-123",
+    "exportFormat": "markdown"
   }
-- evidence: [
-    {
-      id: "e1",
-      description: "Test group showed 15% increase",
-      likelihoodGivenHypothesis: 0.8,
-      likelihoodGivenNotHypothesis: 0.2
-    }
-  ]
-- posterior: {
-    probability: 0.8,
-    calculation: "P(H|E) = P(E|H) * P(H) / P(E) = 0.8 * 0.5 / 0.5 = 0.8"
-  }
-- bayesFactor: 4.0  // Strong evidence for hypothesis
+}
 ```
 
-### Example 7: Counterfactual Analysis (Post-Mortem)
+## Reasoning Modes
 
+The server supports 33 reasoning modes organized into categories:
+
+- **Core Modes (5)**: Sequential, Shannon, Mathematics, Physics, Hybrid
+- **Historical Computing (2)**: Computability (Turing), Cryptanalytic (Turing) - *v7.2.0*
+- **Algorithmic (1)**: Algorithmic (CLRS) - *v7.3.0*
+- **Academic Research (4)**: Synthesis, Argumentation, Critique, Analysis - *v7.4.0*
+- **Advanced Runtime Modes (6)**: Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
+- **Fundamental Modes (2)**: Inductive, Deductive
+- **Experimental Modes (13)**: Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory (+ von Neumann extensions), Evidential, First Principles, Systems Thinking, Scientific Method, Formal Logic, Engineering
+
+### Core Modes
+
+#### Sequential
+Iterative refinement with revision capabilities. Perfect for step-by-step problem solving.
+
+```typescript
+mode: 'sequential'
+// Use for: Debugging, algorithmic thinking, systematic analysis
 ```
-Thought 1: "What if we had chosen microservices instead of monolith?"
-- mode: counterfactual
-- actual: {
-    id: "actual",
-    name: "Monolithic Architecture",
-    description: "Built as single application",
-    conditions: [{ factor: "Architecture", value: "Monolith" }],
-    outcomes: [
-      { description: "Deployment bottleneck", impact: "negative", magnitude: 0.7 },
-      { description: "Fast initial development", impact: "positive", magnitude: 0.8 }
-    ]
-  }
-- counterfactuals: [
-    {
-      id: "cf1",
-      name: "Microservices Architecture",
-      description: "Built as independent services",
-      conditions: [{ factor: "Architecture", value: "Microservices" }],
-      outcomes: [
-        { description: "Independent deployment", impact: "positive", magnitude: 0.9 },
-        { description: "Higher operational complexity", impact: "negative", magnitude: 0.6 }
-      ]
-    }
-  ]
-- interventionPoint: {
-    description: "Initial architecture decision",
-    alternatives: ["Monolith", "Microservices", "Modular Monolith"]
-  }
-- comparison: {
-    differences: [
-      {
-        aspect: "Scalability",
-        actual: "Limited",
-        counterfactual: "Highly scalable",
-        significance: "high"
+
+#### Shannon
+5-stage systematic problem-solving methodology (problem → constraints → model → proof → implementation).
+
+```typescript
+mode: 'shannon'
+// Use for: Engineering problems, system design, complex optimizations
+```
+
+#### Mathematics
+Theorem proving, lemma derivation, symbolic computation with LaTeX support.
+
+```typescript
+mode: 'mathematics'
+// Use for: Proofs, mathematical modeling, symbolic algebra
+```
+
+#### Physics
+Tensor mathematics, dimensional analysis, conservation laws, field theory.
+
+```typescript
+mode: 'physics'
+// Use for: Physical modeling, dimensional analysis, scientific computing
+```
+
+#### Hybrid
+Intelligently combines multiple reasoning modes based on problem characteristics.
+
+```typescript
+mode: 'hybrid'
+// Use for: Complex multi-faceted problems requiring diverse approaches
+```
+
+### Advanced Modes
+
+#### Abductive
+Generate and evaluate hypotheses to explain observations.
+
+```typescript
+mode: 'abductive'
+// Use for: Debugging, root cause analysis, diagnostic reasoning
+```
+
+#### Causal
+Build causal graphs, analyze interventions and effects.
+
+```typescript
+mode: 'causal'
+// Use for: Impact analysis, system design, decision making
+```
+
+#### Bayesian
+Probabilistic reasoning with priors, likelihoods, and evidence updates.
+
+```typescript
+mode: 'bayesian'
+// Use for: Risk assessment, A/B testing, uncertainty quantification
+```
+
+#### Counterfactual
+Explore alternative scenarios and compare outcomes.
+
+```typescript
+mode: 'counterfactual'
+// Use for: Post-mortems, strategic planning, what-if analysis
+```
+
+#### Analogical
+Transfer knowledge across domains by identifying structural similarities.
+
+```typescript
+mode: 'analogical'
+// Use for: Design patterns, innovative problem-solving, knowledge transfer
+```
+
+### Specialized Modes
+
+#### Temporal
+Model events, intervals, and temporal relationships using Allen's interval algebra.
+
+```typescript
+mode: 'temporal'
+// Use for: Timeline analysis, scheduling, event sequencing
+```
+
+#### Game Theory
+Analyze strategic interactions, compute Nash equilibria, build game trees.
+
+```typescript
+mode: 'game-theory'
+// Use for: Competitive analysis, mechanism design, strategic decisions
+```
+
+#### Evidential
+Dempster-Shafer theory for reasoning with uncertain evidence.
+
+```typescript
+mode: 'evidential'
+// Use for: Sensor fusion, intelligence analysis, incomplete information
+```
+
+#### First Principles
+Derive conclusions from foundational axioms using deductive reasoning.
+
+```typescript
+mode: 'first-principles'
+// Use for: Fundamental analysis, conceptual understanding, basic truths
+```
+
+#### Meta-Reasoning
+Strategic oversight of reasoning process - monitors effectiveness, recommends mode switches, assesses quality.
+
+```typescript
+mode: 'metareasoning'
+// Use for: Strategy evaluation, adaptive mode switching, quality assessment
+// Metrics: Effectiveness, Efficiency, Confidence, Quality (6 dimensions)
+// Auto-switches at effectiveness < 0.3
+```
+
+See [full documentation](docs/modes/METAREASONING.md) for detailed usage.
+
+#### Systems Thinking
+Holistic analysis of complex systems, feedback loops, and emergence.
+
+```typescript
+mode: 'systems-thinking'
+// Use for: Complex systems, organizational design, ecosystem analysis
+```
+
+#### Scientific Method
+Hypothesis-driven experimentation with research design and statistical analysis.
+
+```typescript
+mode: 'scientific-method'
+// Use for: Experimental design, hypothesis testing, research
+```
+
+#### Optimization
+Constraint satisfaction and optimization with decision variables.
+
+```typescript
+mode: 'optimization'
+// Use for: Resource allocation, scheduling, constrained optimization
+```
+
+#### Formal Logic
+Rigorous logical reasoning with formal systems and proof verification.
+
+```typescript
+mode: 'formal-logic'
+// Use for: Proof verification, logical analysis, formal methods
+```
+
+### Advanced Runtime Modes
+
+#### Recursive
+Recursive problem decomposition - break complex problems into smaller subproblems.
+
+```typescript
+mode: 'recursive'
+// Use for: Divide-and-conquer, tree-structured problems, recursive algorithms
+```
+
+#### Modal
+Possibility and necessity reasoning using modal logic.
+
+```typescript
+mode: 'modal'
+// Use for: What's possible vs necessary, requirement analysis, constraint exploration
+```
+
+#### Stochastic
+Probabilistic state transitions and Markov chain reasoning.
+
+```typescript
+mode: 'stochastic'
+// Use for: Process modeling, state machines, probabilistic sequences
+```
+
+#### Constraint
+Constraint satisfaction problem solving.
+
+```typescript
+mode: 'constraint'
+// Use for: Scheduling, resource allocation, constraint propagation
+```
+
+### Fundamental Modes
+
+#### Inductive
+Reasoning from specific observations to general principles.
+
+```typescript
+mode: 'inductive'
+// Use for: Pattern recognition, generalization, empirical reasoning
+```
+
+#### Deductive
+Reasoning from general principles to specific conclusions.
+
+```typescript
+mode: 'deductive'
+// Use for: Logical proofs, applying rules, deriving conclusions
+```
+
+### Historical Computing Modes (v7.2.0)
+
+Tributes to Alan Turing and John von Neumann's foundational work.
+
+#### Computability
+Turing machines, decidability proofs, reductions, and diagonalization arguments.
+
+```typescript
+mode: 'computability'
+// Use for: Decidability analysis, algorithm limits, computational complexity
+// Features: Turing machine simulation, reduction chains, halting problem analysis
+```
+
+#### Cryptanalytic
+Turing's deciban evidence system from Bletchley Park.
+
+```typescript
+mode: 'cryptanalytic'
+// Use for: Evidence quantification, hypothesis testing, code-breaking analysis
+// Features: Deciban accumulation (10 db ≈ 10:1 odds), frequency analysis, Banburismus
+```
+
+#### Extended Game Theory (v7.2.0)
+Von Neumann's minimax theorem, cooperative games, and Shapley values.
+
+```typescript
+mode: 'gametheory'
+// Enhanced with: Minimax analysis, cooperative game theory, coalition analysis
+// Use for: Zero-sum games, fair value distribution, strategic decision-making
+```
+
+### Algorithmic Mode (v7.3.0)
+
+#### Algorithmic
+Comprehensive coverage of algorithms from "Introduction to Algorithms" (CLRS) with 100+ named algorithms.
+
+```typescript
+mode: 'algorithmic'
+// Use for: Algorithm design, complexity analysis, correctness proofs
+// Features: Divide-and-conquer, dynamic programming, greedy, graph algorithms
+// Coverage: Sorting, searching, graph, string, computational geometry
+```
+
+### Academic Research Modes (v7.4.0)
+
+Designed for PhD students and scientific paper writing.
+
+#### Synthesis
+Literature review and knowledge integration.
+
+```typescript
+mode: 'synthesis'
+// Use for: Literature reviews, theme extraction, knowledge integration
+// Features: Source synthesis, pattern identification, gap analysis
+```
+
+#### Argumentation
+Academic argumentation using the Toulmin model.
+
+```typescript
+mode: 'argumentation'
+// Use for: Building arguments, dialectical reasoning, rhetorical analysis
+// Features: Toulmin model (claim, data, warrant, backing), counter-arguments
+```
+
+#### Critique
+Critical analysis and peer review frameworks.
+
+```typescript
+mode: 'critique'
+// Use for: Peer review, methodology evaluation, evidence assessment
+// Features: Systematic critique, strengths/weaknesses analysis
+```
+
+#### Analysis
+Qualitative analysis methods.
+
+```typescript
+mode: 'analysis'
+// Use for: Thematic analysis, grounded theory, discourse analysis
+// Features: Multiple qualitative analysis frameworks, coding support
+```
+
+## Proof Decomposition
+
+**New in v7.0.0!** The proof decomposition system provides advanced mathematical reasoning capabilities:
+
+### Components
+
+| Component | Purpose |
+|-----------|---------|
+| **ProofDecomposer** | Breaks proofs into atomic statements with dependency tracking |
+| **GapAnalyzer** | Detects missing steps, unjustified leaps, and implicit assumptions |
+| **AssumptionTracker** | Traces conclusions back to their supporting assumptions |
+| **InconsistencyDetector** | Detects circular dependencies and contradictions |
+| **MathematicsReasoningEngine** | Integrated proof analysis with improvement suggestions |
+
+### Features
+
+- **Atomic Statement Types**: axiom, hypothesis, definition, derived, lemma, conclusion
+- **Inference Rules**: algebraic_manipulation, substitution, modus_ponens, universal_instantiation, etc.
+- **Gap Detection**: Identify missing steps with severity levels (minor, significant, critical)
+- **Rigor Levels**: informal, textbook, rigorous, formal
+- **Visual Export**: Mermaid, DOT, ASCII, and native SVG formats
+
+### Example: Proof Analysis
+
+```json
+{
+  "tool": "deepthinking_math",
+  "arguments": {
+    "mode": "mathematics",
+    "thought": "Analyzing the proof that n² is even when n is even",
+    "thoughtNumber": 1,
+    "totalThoughts": 3,
+    "nextThoughtNeeded": true,
+    "proofDecomposition": {
+      "theorem": "If n is even, then n² is even",
+      "atoms": [
+        {"id": "a1", "content": "n is an even integer", "type": "hypothesis"},
+        {"id": "a2", "content": "n = 2k for some integer k", "type": "definition"},
+        {"id": "a3", "content": "n² = 4k² = 2(2k²)", "type": "derived"},
+        {"id": "a4", "content": "n² is even", "type": "conclusion"}
+      ],
+      "dependencies": {
+        "nodes": ["a1", "a2", "a3", "a4"],
+        "edges": [
+          {"from": "a1", "to": "a2"},
+          {"from": "a2", "to": "a3"},
+          {"from": "a3", "to": "a4"}
+        ]
       }
-    ],
-    insights: ["Microservices would have enabled better scaling"],
-    lessons: ["Consider future scale requirements in architecture decisions"]
-  }
-```
-
-### Example 8: Analogical Reasoning (Design Patterns)
-
-```
-Thought 1: "Apply immune system principles to cybersecurity"
-- mode: analogical
-- sourceDomain: {
-    id: "immune",
-    name: "Biological Immune System",
-    entities: [
-      { id: "antibody", name: "Antibody", type: "defender" },
-      { id: "pathogen", name: "Pathogen", type: "threat" }
-    ],
-    relations: [
-      { id: "r1", type: "neutralizes", from: "antibody", to: "pathogen" }
-    ]
-  }
-- targetDomain: {
-    id: "cyber",
-    name: "Cybersecurity System",
-    entities: [
-      { id: "firewall", name: "Firewall", type: "defender" },
-      { id: "malware", name: "Malware", type: "threat" }
-    ],
-    relations: [
-      { id: "r2", type: "blocks", from: "firewall", to: "malware" }
-    ]
-  }
-- mapping: [
-    {
-      sourceEntityId: "antibody",
-      targetEntityId: "firewall",
-      justification: "Both identify and neutralize threats",
-      confidence: 0.85
     }
-  ]
-- insights: [
-    {
-      description: "Layered defense strategy",
-      sourceEvidence: "Immune system has innate + adaptive layers",
-      targetApplication: "Implement defense-in-depth security"
+  }
+}
+```
+
+### Visual Export Formats
+
+Export proof decompositions to multiple visual formats:
+
+```typescript
+// Native SVG (no external tools required)
+exportProofDecomposition(decomposition, {
+  format: 'svg',
+  colorScheme: 'default',  // 'default' | 'pastel' | 'monochrome'
+  includeMetrics: true,
+  svgWidth: 1200,
+  svgHeight: 800
+});
+
+// Mermaid diagram
+exportProofDecomposition(decomposition, { format: 'mermaid' });
+
+// GraphViz DOT
+exportProofDecomposition(decomposition, { format: 'dot' });
+
+// ASCII text
+exportProofDecomposition(decomposition, { format: 'ascii' });
+```
+
+## Usage Examples
+
+### Example 1: Debugging with Abductive Reasoning
+
+```json
+// Step 1: Start with observation
+{
+  "tool": "deepthinking_core",
+  "arguments": {
+    "mode": "abductive",
+    "thought": "Observed: Users report intermittent 500 errors on checkout during high traffic periods",
+    "thoughtNumber": 1,
+    "totalThoughts": 4,
+    "nextThoughtNeeded": true,
+    "observations": ["Errors occur during high traffic", "Checkout page affected", "Intermittent pattern"]
+  }
+}
+
+// Step 2: Generate hypothesis
+{
+  "tool": "deepthinking_core",
+  "arguments": {
+    "sessionId": "session-from-step-1",
+    "mode": "abductive",
+    "thought": "Hypothesis: Database connection pool exhaustion under load",
+    "thoughtNumber": 2,
+    "totalThoughts": 4,
+    "nextThoughtNeeded": true,
+    "hypotheses": [{
+      "id": "h1",
+      "explanation": "Connection pool exhausted",
+      "assumptions": ["Fixed pool size", "No connection recycling"],
+      "predictions": ["Errors correlate with traffic spikes"],
+      "score": 0.8
+    }]
+  }
+}
+```
+
+### Example 2: Impact Analysis with Causal Reasoning
+
+```json
+{
+  "tool": "deepthinking_causal",
+  "arguments": {
+    "mode": "causal",
+    "thought": "Analyzing impact of increasing API rate limits on system behavior",
+    "thoughtNumber": 1,
+    "totalThoughts": 3,
+    "nextThoughtNeeded": true,
+    "causalGraph": {
+      "nodes": [
+        {"id": "rate_limit", "name": "Rate Limit", "type": "cause", "description": "API rate limit setting"},
+        {"id": "server_load", "name": "Server Load", "type": "mediator", "description": "CPU/Memory usage"},
+        {"id": "response_time", "name": "Response Time", "type": "effect", "description": "API latency"},
+        {"id": "satisfaction", "name": "User Satisfaction", "type": "effect", "description": "User experience"}
+      ],
+      "edges": [
+        {"from": "rate_limit", "to": "server_load", "strength": 0.9, "confidence": 0.85},
+        {"from": "server_load", "to": "response_time", "strength": 0.85, "confidence": 0.9},
+        {"from": "response_time", "to": "satisfaction", "strength": -0.7, "confidence": 0.8}
+      ]
     }
-  ]
-- limitations: [
-    "Biological systems self-heal, digital systems don't",
-    "Pathogens evolve naturally, malware is designed"
-  ]
-- analogyStrength: 0.75
+  }
+}
 ```
 
-## Development
+### Example 3: Strategic Analysis with Game Theory
 
-### Building
-
-```bash
-npm install
-npm run build
+```json
+{
+  "tool": "deepthinking_strategic",
+  "arguments": {
+    "mode": "gametheory",
+    "thought": "Analyzing pricing strategy in competitive market using game theory",
+    "thoughtNumber": 1,
+    "totalThoughts": 3,
+    "nextThoughtNeeded": true,
+    "game": {
+      "type": "strategic",
+      "players": ["Company A", "Company B"],
+      "strategies": {
+        "Company A": ["premium", "competitive", "discount"],
+        "Company B": ["premium", "competitive", "discount"]
+      },
+      "payoffMatrix": [
+        [{"A": 10, "B": 10}, {"A": 5, "B": 15}, {"A": 2, "B": 12}],
+        [{"A": 15, "B": 5}, {"A": 8, "B": 8}, {"A": 4, "B": 10}],
+        [{"A": 12, "B": 2}, {"A": 10, "B": 4}, {"A": 6, "B": 6}]
+      ]
+    }
+  }
+}
 ```
 
-### Testing
+## Production Features
 
-```bash
-npm test
+> **Note**: DeepThinking MCP is an MCP server, not a library. These features are accessed through MCP tools and internal architecture. The examples below describe the internal capabilities.
+
+### Proof Decomposition (v7.0.0)
+
+Advanced mathematical reasoning with proof analysis:
+
+- **ProofDecomposer**: Break proofs into atomic statements with dependency graphs
+- **GapAnalyzer**: Detect missing steps, unjustified leaps, implicit assumptions
+- **AssumptionTracker**: Trace conclusions to their supporting assumptions
+- **InconsistencyDetector**: Find circular dependencies and contradictions
+- **Native SVG Export**: Generate proof visualizations without external tools
+
+### Search Engine
+
+Full-text search with faceted filtering and relevance ranking. Used internally to search across reasoning sessions by mode, tags, date ranges, and content.
+
+### Template System
+
+Pre-built templates for common reasoning patterns, accessible through session creation.
+
+### Batch Processing
+
+Process multiple sessions concurrently with 8 operation types:
+
+- **export** - Batch export sessions to various formats
+- **import** - Batch import sessions from files
+- **analyze** - Batch taxonomy/quality/pattern analysis
+- **validate** - Batch session validation
+- **transform** - Batch mode switching, merging, splitting
+- **index** - Batch search/analytics indexing
+- **backup** - Batch backup with compression
+- **cleanup** - Batch cleanup of old/incomplete sessions
+
+### Backup & Restore
+
+Automated backup with compression and local storage, with support for multiple providers (Local, S3, GCS, Azure).
+
+### Session Comparison
+
+Compare reasoning sessions to analyze differences and similarities with quantitative metrics.
+
+### Security & Validation
+
+Enterprise-grade security features built into the MCP server:
+
+- **Input Validation** - Zod schemas validate all 33 mode inputs
+- **Rate Limiting** - Sliding window rate limiter for API protection
+- **Path Sanitization** - Prevents directory traversal attacks
+- **PII Redaction** - GDPR-compliant log sanitization
+
+### Taxonomy Classifier
+
+Intelligent classification of reasoning tasks using 69 reasoning types across 12 categories. Use the `recommend_mode` action in `deepthinking_session` to get mode recommendations based on problem characteristics.
+
+## API Documentation
+
+### MCP Tool Interface
+
+All reasoning is done through MCP tools. Each tool accepts arguments and returns JSON responses.
+
+#### Common Parameters (all thinking tools)
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `sessionId` | string | No | Session ID (auto-created if omitted) |
+| `thought` | string | Yes | The reasoning content |
+| `thoughtNumber` | integer | Yes | Current thought number (1-based) |
+| `totalThoughts` | integer | Yes | Estimated total thoughts |
+| `nextThoughtNeeded` | boolean | Yes | Whether more reasoning needed |
+| `mode` | string | Yes | The reasoning mode |
+
+#### Session Actions (`deepthinking_session`)
+
+| Action | Parameters | Description |
+|--------|------------|-------------|
+| `summarize` | `sessionId` | Generate session summary |
+| `export` | `sessionId`, `exportFormat` | Export to format (json, markdown, latex, html, jupyter, mermaid, dot, ascii, svg) |
+| `get_session` | `sessionId` | Get session details |
+| `switch_mode` | `sessionId`, `newMode` | Switch reasoning mode |
+| `recommend_mode` | `problemType` or `problemCharacteristics` | Get mode recommendations |
+
+#### Example Response
+
+```json
+{
+  "sessionId": "session-abc123",
+  "thoughtId": "thought-xyz789",
+  "thoughtNumber": 1,
+  "mode": "sequential",
+  "nextThoughtNeeded": true,
+  "sessionComplete": false,
+  "totalThoughts": 3
+}
 ```
 
-### Type Checking
+For architecture details, see [docs/architecture/](docs/architecture/).
 
-```bash
-npm run typecheck
-```
+## Project Stats
+
+| Metric | Value |
+|--------|-------|
+| TypeScript Files | 183 |
+| Lines of Code | ~62,000 |
+| Test Files | 40 |
+| Passing Tests | 792+ |
+| Thinking Modes | 33 (29 with thought types) |
+| MCP Tools | 10 focused + 1 legacy |
+| Export Formats | 11 (including native SVG) |
+| Visual Formats | 11 (mermaid, dot, ascii, svg, etc.) |
+| Reasoning Types | 69 (110 planned) |
+| Modules | 16 |
+| Total Exports | 970 |
 
 ## Architecture
 
+The codebase is organized into 16 modules with clean separation of concerns. See [docs/architecture/DEPENDENCY_GRAPH.md](docs/architecture/DEPENDENCY_GRAPH.md) for the complete dependency graph.
+
+### Core Structure
+
 ```
-deepthinking-mcp/
-├── src/
-│   ├── types/          # Type definitions
-│   │   ├── core.ts     # Core thought types
-│   │   └── session.ts  # Session management types
-│   ├── tools/          # MCP tool definitions
-│   ├── session/        # Session manager
-│   ├── modes/          # Mode implementations
-│   ├── validation/     # Validation logic
-│   └── index.ts        # Main MCP server
-├── tests/              # Test suite
-├── docs/               # Documentation
-└── examples/           # Usage examples
+src/
+├── index.ts           # MCP server entry point (tool handlers)
+├── types/             # Type definitions including 33 mode types
+│   ├── core.ts        # ThinkingMode enum, Thought union type
+│   └── modes/         # One file per reasoning mode (23 files)
+├── services/          # Business logic layer
+│   ├── ThoughtFactory.ts    # Thought creation and validation
+│   ├── ExportService.ts     # Multi-format export handling
+│   └── ModeRouter.ts        # Mode switching and recommendations
+├── session/           # SessionManager, persistence, storage
+├── modes/             # Advanced reasoning implementations (7 files)
+├── proof/             # Proof decomposition system (v7.0.0)
+│   ├── decomposer.ts        # ProofDecomposer class
+│   ├── gap-analyzer.ts      # GapAnalyzer class
+│   └── assumption-tracker.ts # AssumptionTracker class
+├── reasoning/         # Reasoning engines (v7.0.0)
+│   └── inconsistency-detector.ts  # InconsistencyDetector class
+└── tools/             # MCP tool definitions and schemas
 ```
 
-## Roadmap
+### Feature Modules
 
-### Phase 1 (Completed - v1.0)
-- ✅ Core type system
-- ✅ Session management
-- ✅ Unified thinking tool
-- ✅ 5 core reasoning modes
+```
+src/
+├── taxonomy/          # 69 reasoning types, classifier, suggestion engine
+│   ├── reasoning-types.ts   # Full taxonomy definitions
+│   ├── classifier.ts        # Task classification
+│   └── suggestion-engine.ts # Mode recommendations
+├── export/            # Visual and document exporters
+│   ├── visual/        # 21 mode-specific visual exporters + native SVG
+│   │   ├── proof-decomposition.ts  # Proof visualization (v7.0.0)
+│   │   └── [19 mode exporters]     # Mermaid, DOT, ASCII, SVG
+│   └── latex.ts       # LaTeX document generation
+├── search/            # Full-text search with faceted filtering
+├── batch/             # Batch processing (8 operations)
+├── backup/            # Backup manager with provider abstraction
+├── cache/             # LRU/LFU/FIFO caching strategies
+├── rate-limit/        # Sliding window rate limiter
+├── validation/        # Zod schemas (25+ mode validators)
+├── comparison/        # Session comparison & diff generation
+├── templates/         # Session templates with usage tracking
+├── analytics/         # Analytics engine and dashboard
+├── webhooks/          # Event-driven webhook system
+├── collaboration/     # Annotations and conflict resolution
+└── ml/                # Pattern recognition & recommendations
+```
 
-### Phase 2 (Completed - v2.0)
-- ✅ Validation engine
-- ✅ 5 advanced reasoning modes (Abductive, Causal, Bayesian, Counterfactual, Analogical)
-- ✅ Comprehensive test suite (77 tests)
-- ✅ Enhanced type safety
+### Security Features
 
-### Phase 3 (In Progress)
-- ✅ Temporal reasoning mode (v2.1)
-- ✅ Game theory mode (v2.2)
-- ✅ Evidential reasoning mode (v2.3)
-- ✅ Mode recommendation system (v2.4)
-- ✅ Visual exports - Mermaid, DOT, ASCII (v2.5)
-- ✅ Export to LaTeX/Jupyter/HTML (v2.5)
-- [ ] Math-MCP integration
-- [ ] Persistence layer
-- [ ] Collaborative thinking sessions
-- [ ] Pattern learning from successful reasoning chains
+Security is built into multiple modules:
+
+- **validation/** - Input validation with Zod schemas for all 33 modes
+- **utils/sanitization.ts** - Path sanitization & traversal prevention
+- **utils/log-sanitizer.ts** - PII redaction for GDPR compliance
+- **rate-limit/** - Per-key rate limiting with sliding windows
+- **utils/errors.ts** - Standardized error hierarchy with context
 
 ## Contributing
 
-Contributions welcome! Please read our contributing guidelines and submit PRs.
+We welcome contributions! Please open an issue or pull request on [GitHub](https://github.com/danielsimonjr/deepthinking-mcp).
+
+### Adding New Reasoning Modes
+
+Want to add a new reasoning mode? We've made it easy:
+
+📖 **[Complete Guide: Adding a New Mode](docs/ADDING_NEW_MODE.md)**
+
+This guide includes:
+- Step-by-step instructions for all 8 required files
+- Template files in `templates/mode-scaffolding/`
+- Code examples and common patterns
+- Complete checklist to ensure nothing is missed
+- Testing guidelines
+
+**Quick Start**:
+```bash
+# Copy template files
+cp templates/mode-scaffolding/example-mode.type.ts src/types/modes/yourmode.ts
+cp templates/mode-scaffolding/example-mode.validator.ts src/validation/validators/modes/yourmode.ts
+
+# Follow the guide
+cat docs/ADDING_NEW_MODE.md
+```
+
+### Development Setup
+
+```bash
+# Clone repository
+git clone https://github.com/danielsimonjr/deepthinking-mcp.git
+cd deepthinking-mcp
+
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Run type checking
+npm run typecheck
+
+# Build
+npm run build
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test file
+npm test -- path/to/test.test.ts
+
+# Run with coverage
+npm run test:coverage
+```
 
 ## License
 
-MIT
+MIT License - see [LICENSE](LICENSE) file for details.
 
-## Credits
+## Acknowledgments
 
-Built upon:
-- [sequential-thinking](https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking) by Anthropic
-- [shannon-thinking](https://github.com/olaservo/shannon-thinking) by olaservo
-- Enhanced for mathematical and physics reasoning by Daniel Simon Jr.
+- Built on the [Model Context Protocol](https://modelcontextprotocol.io)
+- Inspired by research in cognitive science and AI reasoning
+- Community contributions from researchers and practitioners
 
 ## Support
 
-- GitHub Issues: [Report bugs or request features](https://github.com/danielsimonjr/deepthinking-mcp/issues)
-- Documentation: [Full docs](https://github.com/danielsimonjr/deepthinking-mcp/tree/main/docs)
+- 📚 [Documentation](docs/)
+- 🐛 [Issue Tracker](https://github.com/danielsimonjr/deepthinking-mcp/issues)
+- 💬 [Discussions](https://github.com/danielsimonjr/deepthinking-mcp/discussions)
+
+---
+
+Made with ❤️ by the DeepThinking MCP team

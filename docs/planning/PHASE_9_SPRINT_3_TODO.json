@@ -1,0 +1,145 @@
+{
+  "phase": 9,
+  "sprint": 3,
+  "title": "Documentation & Release v7.0.1",
+  "week": "Week 3",
+  "effort": "2-4 hours",
+  "status": "completed",
+  "tasks": [
+    {
+      "id": 1,
+      "category": "Architecture Documentation",
+      "description": "Create docs/architecture/DIRECTORY_STRUCTURE.md - Comprehensive guide to each directory's purpose and responsibilities",
+      "status": "pending",
+      "estimatedHours": 1,
+      "files": ["docs/architecture/DIRECTORY_STRUCTURE.md"]
+    },
+    {
+      "id": 2,
+      "category": "Architecture Documentation",
+      "description": "Add Mermaid dependency graph diagram to DIRECTORY_STRUCTURE.md - Visual representation of module dependencies",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": ["docs/architecture/DIRECTORY_STRUCTURE.md"]
+    },
+    {
+      "id": 3,
+      "category": "Architecture Documentation",
+      "description": "Document per-mode file pattern rationale in DIRECTORY_STRUCTURE.md - Explain why types/modes/, export/visual/, validation/validators/modes/ have many files",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": ["docs/architecture/DIRECTORY_STRUCTURE.md"]
+    },
+    {
+      "id": 4,
+      "category": "Final Cleanup",
+      "description": "Search for any orphaned type exports referencing deleted modules - Clean up any remaining references",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": []
+    },
+    {
+      "id": 5,
+      "category": "Final Cleanup",
+      "description": "Check for unused test fixtures related to deleted code - Remove any orphaned test helpers",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": []
+    },
+    {
+      "id": 6,
+      "category": "Final Cleanup",
+      "description": "Verify package.json files entry doesn't reference deleted directories",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": ["package.json"]
+    },
+    {
+      "id": 7,
+      "category": "Release",
+      "description": "Update CHANGELOG.md with v7.0.1 consolidation changes - Document all removed directories and rationale",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": ["CHANGELOG.md"]
+    },
+    {
+      "id": 8,
+      "category": "Release",
+      "description": "Bump version in package.json to 7.0.1 - Patch version for internal cleanup (no API changes)",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": ["package.json"]
+    },
+    {
+      "id": 9,
+      "category": "Release",
+      "description": "Run npm run typecheck && npm run test:run && npm run build - Final verification before release",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": []
+    },
+    {
+      "id": 10,
+      "category": "Release",
+      "description": "Run tools/create-dependency-graph.ts - Generate final dependency graph for v7.0.1",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": [
+        "docs/architecture/dependency-graph.json",
+        "docs/architecture/DEPENDENCY_GRAPH.md"
+      ]
+    },
+    {
+      "id": 11,
+      "category": "Release",
+      "description": "Create git commit with all Phase 9 changes - Use descriptive commit message",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": []
+    },
+    {
+      "id": 12,
+      "category": "Release",
+      "description": "Tag release v7.0.1 in git",
+      "status": "pending",
+      "estimatedHours": 0.1,
+      "files": []
+    },
+    {
+      "id": 13,
+      "category": "Verification",
+      "description": "Compare before/after metrics - Document file count, directory count, and bundle size reduction",
+      "status": "pending",
+      "estimatedHours": 0.25,
+      "files": []
+    }
+  ],
+  "successCriteria": [
+    "Complete architecture documentation created",
+    "Clean git history with consolidation commits",
+    "Version bumped to 7.0.1",
+    "CHANGELOG updated with all changes",
+    "All 790+ tests passing",
+    "No orphaned code or references",
+    "Final dependency graph generated",
+    "Ready for npm publish"
+  ],
+  "filesCreated": [
+    "docs/architecture/DIRECTORY_STRUCTURE.md"
+  ],
+  "filesModified": [
+    "CHANGELOG.md",
+    "package.json",
+    "docs/architecture/dependency-graph.json",
+    "docs/architecture/DEPENDENCY_GRAPH.md"
+  ],
+  "totalEstimatedHours": 4.15,
+  "notes": "This sprint completes Phase 9 by documenting the new architecture, cleaning up any remaining orphans, and preparing the v7.0.1 release. The version bump is a patch (7.0.0 → 7.0.1) because there are no breaking API changes - all modifications are internal cleanup. After this sprint, the codebase will be cleaner, smaller, and easier to maintain.",
+  "expectedMetricsChange": {
+    "directoriesRemoved": 10,
+    "filesRemoved": 43,
+    "estimatedBundleSizeReduction": "~250 KB",
+    "newDirectoryCount": 17,
+    "newFileCount": "~158"
+  }
+}

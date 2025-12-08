@@ -43,6 +43,76 @@ export class ModeRecommender {
   recommendModes(characteristics: ProblemCharacteristics): ModeRecommendation[] {
     const recommendations: ModeRecommendation[] = [];
 
+    // Core reasoning modes - prioritize for philosophical/metaphysical domains
+    const isPhilosophical = characteristics.domain.toLowerCase().includes('metaphysics') ||
+                           characteristics.domain.toLowerCase().includes('theology') ||
+                           characteristics.domain.toLowerCase().includes('philosophy') ||
+                           characteristics.domain.toLowerCase().includes('epistemology') ||
+                           characteristics.domain.toLowerCase().includes('ethics');
+
+    // Hybrid mode - for complex multi-faceted problems
+    if (characteristics.complexity === 'high' &&
+        (characteristics.requiresExplanation || characteristics.hasAlternatives || isPhilosophical)) {
+      recommendations.push({
+        mode: ThinkingMode.HYBRID,
+        score: 0.92,
+        reasoning: 'Complex problem benefits from multi-modal synthesis combining inductive, deductive, and abductive reasoning',
+        strengths: ['Comprehensive analysis', 'Combines empirical and logical approaches', 'Maximum evidential strength', 'Convergent validation'],
+        limitations: ['Time-intensive', 'Requires understanding of multiple reasoning types'],
+        examples: ['Philosophical arguments', 'Scientific theories', 'Complex decision-making', 'Metaphysical questions'],
+      });
+    }
+
+    // Inductive reasoning - pattern recognition and generalization
+    if (!characteristics.requiresProof &&
+        (characteristics.requiresQuantification || characteristics.hasIncompleteInfo || isPhilosophical)) {
+      recommendations.push({
+        mode: ThinkingMode.INDUCTIVE,
+        score: isPhilosophical ? 0.85 : 0.80,
+        reasoning: 'Problem requires pattern recognition and generalization from observations',
+        strengths: ['Empirical grounding', 'Pattern detection', 'Probabilistic reasoning', 'Scientific discovery'],
+        limitations: ['Cannot prove with certainty', 'Vulnerable to black swans', 'Sample size dependent'],
+        examples: ['Scientific hypotheses', 'Trend analysis', 'Empirical arguments', 'Data-driven insights'],
+      });
+    }
+
+    // Deductive reasoning - logical derivation from principles
+    if (characteristics.requiresProof || isPhilosophical) {
+      recommendations.push({
+        mode: ThinkingMode.DEDUCTIVE,
+        score: characteristics.requiresProof ? 0.90 : 0.75,
+        reasoning: 'Problem requires logical derivation from general principles to specific conclusions',
+        strengths: ['Logical validity', 'Rigorous inference', 'Exposes contradictions', 'Formal reasoning'],
+        limitations: ['Soundness depends on premise truth', 'Vulnerable to definitional disputes', 'May not handle uncertainty well'],
+        examples: ['Logical proofs', 'Mathematical theorems', 'Philosophical arguments', 'Formal verification'],
+      });
+    }
+
+    // Abductive reasoning - inference to best explanation
+    if (characteristics.requiresExplanation || isPhilosophical) {
+      recommendations.push({
+        mode: ThinkingMode.ABDUCTIVE,
+        score: isPhilosophical ? 0.90 : 0.87,
+        reasoning: 'Problem requires finding best explanations through comparative hypothesis evaluation',
+        strengths: ['Hypothesis generation', 'Comparative evaluation', 'Explanatory power assessment', 'Handles competing theories'],
+        limitations: ['May miss non-obvious explanations', 'Explanatory power is subjective'],
+        examples: ['Scientific explanation', 'Debugging', 'Diagnosis', 'Theory selection', 'Metaphysical arguments'],
+      });
+    }
+
+    // Meta-reasoning - reasoning about reasoning itself
+    if (characteristics.complexity === 'high' ||
+        (characteristics.hasAlternatives && characteristics.uncertainty === 'high')) {
+      recommendations.push({
+        mode: ThinkingMode.METAREASONING,
+        score: characteristics.complexity === 'high' ? 0.88 : 0.82,
+        reasoning: 'Complex or uncertain problems benefit from strategic monitoring and adaptive reasoning',
+        strengths: ['Strategy evaluation', 'Mode switching recommendations', 'Quality monitoring', 'Resource allocation', 'Self-reflection'],
+        limitations: ['Meta-level overhead', 'Requires understanding of other modes', 'May not directly solve the problem'],
+        examples: ['Strategy selection', 'Debugging stuck reasoning', 'Quality assessment', 'Adaptive problem-solving'],
+      });
+    }
+
     // Temporal reasoning
     if (characteristics.timeDependent) {
       recommendations.push({
@@ -68,26 +138,14 @@ export class ModeRecommender {
     }
 
     // Evidential reasoning
-    if (characteristics.hasIncompleteInfo && characteristics.uncertainty === 'high') {
+    if (characteristics.hasIncompleteInfo && characteristics.uncertainty === 'high' && !isPhilosophical) {
       recommendations.push({
         mode: ThinkingMode.EVIDENTIAL,
-        score: 0.88,
-        reasoning: 'Problem has incomplete information and high uncertainty',
+        score: 0.82,
+        reasoning: 'Problem has incomplete information and high uncertainty requiring Dempster-Shafer belief functions',
         strengths: ['Handles ignorance', 'Evidence combination', 'Uncertainty intervals'],
-        limitations: ['Computational complexity', 'Requires careful mass assignment'],
+        limitations: ['Computational complexity', 'Requires careful mass assignment', 'Better for sensor fusion than philosophical reasoning'],
         examples: ['Sensor fusion', 'Diagnostic reasoning', 'Intelligence analysis'],
-      });
-    }
-
-    // Abductive reasoning
-    if (characteristics.requiresExplanation) {
-      recommendations.push({
-        mode: ThinkingMode.ABDUCTIVE,
-        score: 0.87,
-        reasoning: 'Problem requires finding best explanations',
-        strengths: ['Hypothesis generation', 'Root cause analysis', 'Explanation quality'],
-        limitations: ['May miss non-obvious explanations'],
-        examples: ['Debugging', 'Diagnosis', 'Scientific discovery'],
       });
     }
 
@@ -175,6 +233,191 @@ export class ModeRecommender {
       });
     }
 
+    // ===== NEW MODES (v7.2.0) =====
+
+    // Engineering reasoning - for design, systems, and implementation problems
+    if (characteristics.domain === 'engineering' ||
+        characteristics.domain === 'software' ||
+        characteristics.domain === 'systems' ||
+        (characteristics.requiresQuantification && !characteristics.requiresProof)) {
+      recommendations.push({
+        mode: ThinkingMode.ENGINEERING,
+        score: characteristics.domain === 'engineering' ? 0.92 : 0.85,
+        reasoning: 'Problem requires systematic engineering analysis with trade-offs and constraints',
+        strengths: ['Requirements analysis', 'Trade-off evaluation', 'System design', 'Failure mode analysis', 'Implementation planning'],
+        limitations: ['May over-engineer simple problems', 'Requires domain expertise'],
+        examples: ['System architecture', 'Design decisions', 'Performance optimization', 'Reliability analysis', 'Technical debt assessment'],
+      });
+    }
+
+    // Computability reasoning - for computational limits and algorithmic decidability
+    if (characteristics.domain === 'computer science' ||
+        characteristics.domain === 'computation' ||
+        (characteristics.requiresProof && characteristics.domain.includes('algorithm'))) {
+      recommendations.push({
+        mode: ThinkingMode.COMPUTABILITY,
+        score: 0.88,
+        reasoning: 'Problem involves computational complexity, decidability, or algorithmic analysis',
+        strengths: ['Turing machine analysis', 'Decidability proofs', 'Complexity classification', 'Halting problem variants'],
+        limitations: ['Highly theoretical', 'Requires formal CS background'],
+        examples: ['Algorithm decidability', 'Complexity bounds', 'Reduction proofs', 'Computational limits'],
+      });
+    }
+
+    // Cryptanalytic reasoning - for security, cryptography, and information analysis
+    if (characteristics.domain === 'security' ||
+        characteristics.domain === 'cryptography' ||
+        characteristics.domain.includes('crypto')) {
+      recommendations.push({
+        mode: ThinkingMode.CRYPTANALYTIC,
+        score: 0.90,
+        reasoning: 'Problem involves cryptographic analysis, security assessment, or information-theoretic reasoning',
+        strengths: ['Statistical analysis', 'Pattern detection', 'Deciban calculations', 'Key space analysis', 'Attack surface evaluation'],
+        limitations: ['Specialized domain', 'Requires mathematical background'],
+        examples: ['Cipher analysis', 'Protocol security', 'Key management', 'Attack vectors', 'Information leakage'],
+      });
+    }
+
+    // Recursive reasoning - for self-referential and decomposable problems
+    if (characteristics.complexity === 'high' &&
+        (characteristics.hasAlternatives || characteristics.requiresExplanation)) {
+      recommendations.push({
+        mode: ThinkingMode.RECURSIVE,
+        score: 0.82,
+        reasoning: 'Problem has recursive structure or can be decomposed into smaller similar subproblems',
+        strengths: ['Problem decomposition', 'Self-similar analysis', 'Base case identification', 'Recursive patterns'],
+        limitations: ['Stack overflow risk in deep recursion', 'May miss non-recursive solutions'],
+        examples: ['Divide and conquer', 'Tree traversal', 'Fractal analysis', 'Self-referential problems'],
+      });
+    }
+
+    // Modal reasoning - for possibility, necessity, and possible worlds
+    if (characteristics.hasAlternatives && characteristics.uncertainty === 'high') {
+      recommendations.push({
+        mode: ThinkingMode.MODAL,
+        score: 0.80,
+        reasoning: 'Problem involves possibility, necessity, or reasoning about alternative scenarios',
+        strengths: ['Possible worlds analysis', 'Necessity vs possibility', 'Epistemic reasoning', 'Deontic analysis'],
+        limitations: ['Abstract and theoretical', 'May overcomplicate simple choices'],
+        examples: ['Modal logic proofs', 'Necessity analysis', 'Epistemic uncertainty', 'Deontic obligations'],
+      });
+    }
+
+    // Stochastic reasoning - for probabilistic processes and random events
+    if (characteristics.uncertainty === 'high' && characteristics.requiresQuantification) {
+      recommendations.push({
+        mode: ThinkingMode.STOCHASTIC,
+        score: 0.84,
+        reasoning: 'Problem involves random processes, probabilistic transitions, or stochastic modeling',
+        strengths: ['Markov chains', 'Random process modeling', 'Probabilistic state transitions', 'Monte Carlo methods'],
+        limitations: ['Requires probability theory', 'Computationally intensive'],
+        examples: ['Queueing systems', 'Random walks', 'Stochastic optimization', 'Process simulation'],
+      });
+    }
+
+    // Constraint reasoning - for constraint satisfaction and optimization
+    if (characteristics.hasAlternatives && characteristics.requiresQuantification) {
+      recommendations.push({
+        mode: ThinkingMode.CONSTRAINT,
+        score: 0.83,
+        reasoning: 'Problem involves multiple constraints that must be satisfied simultaneously',
+        strengths: ['Constraint propagation', 'Feasibility analysis', 'SAT solving', 'CSP formulation'],
+        limitations: ['NP-hard in general', 'May have no solution'],
+        examples: ['Scheduling', 'Resource allocation', 'Configuration', 'Puzzle solving'],
+      });
+    }
+
+    // Optimization reasoning - for finding optimal solutions
+    if (characteristics.requiresQuantification && characteristics.hasAlternatives) {
+      recommendations.push({
+        mode: ThinkingMode.OPTIMIZATION,
+        score: 0.86,
+        reasoning: 'Problem requires finding optimal or near-optimal solutions from alternatives',
+        strengths: ['Objective function formulation', 'Gradient methods', 'Convex optimization', 'Meta-heuristics'],
+        limitations: ['Local optima', 'Computational complexity', 'May require relaxation'],
+        examples: ['Resource optimization', 'Parameter tuning', 'Portfolio optimization', 'Route planning'],
+      });
+    }
+
+    // First Principles reasoning - for fundamental analysis from ground truth
+    if (isPhilosophical ||
+        (characteristics.complexity === 'high' && characteristics.requiresExplanation)) {
+      recommendations.push({
+        mode: ThinkingMode.FIRSTPRINCIPLES,
+        score: isPhilosophical ? 0.88 : 0.82,
+        reasoning: 'Problem benefits from breaking down to fundamental truths and building up from there',
+        strengths: ['Assumption identification', 'Foundational analysis', 'Novel solutions', 'Deep understanding'],
+        limitations: ['Time-intensive', 'May rediscover known solutions', 'Requires broad knowledge'],
+        examples: ['Innovation challenges', 'Paradigm shifts', 'Root cause analysis', 'Foundational questions'],
+      });
+    }
+
+    // Systems Thinking reasoning - for complex interconnected systems
+    if (characteristics.complexity === 'high' &&
+        (characteristics.timeDependent || characteristics.multiAgent)) {
+      recommendations.push({
+        mode: ThinkingMode.SYSTEMSTHINKING,
+        score: 0.85,
+        reasoning: 'Problem involves complex systems with interconnected components and feedback loops',
+        strengths: ['Holistic view', 'Feedback loop analysis', 'Emergence detection', 'Leverage point identification'],
+        limitations: ['Can be overwhelming', 'Requires system boundaries definition'],
+        examples: ['Organizational change', 'Ecosystem analysis', 'Market dynamics', 'Social systems'],
+      });
+    }
+
+    // Scientific Method reasoning - for empirical investigation
+    if (characteristics.hasIncompleteInfo &&
+        (characteristics.requiresExplanation || characteristics.requiresQuantification)) {
+      recommendations.push({
+        mode: ThinkingMode.SCIENTIFICMETHOD,
+        score: 0.84,
+        reasoning: 'Problem requires systematic empirical investigation and hypothesis testing',
+        strengths: ['Hypothesis formulation', 'Experimental design', 'Falsification', 'Reproducibility'],
+        limitations: ['Requires data collection', 'Time for experiments', 'May not apply to all domains'],
+        examples: ['Research questions', 'A/B testing', 'Empirical studies', 'Data-driven decisions'],
+      });
+    }
+
+    // Formal Logic reasoning - for rigorous logical analysis
+    if (characteristics.requiresProof && !characteristics.requiresQuantification) {
+      recommendations.push({
+        mode: ThinkingMode.FORMALLOGIC,
+        score: 0.87,
+        reasoning: 'Problem requires rigorous formal logical analysis and proof construction',
+        strengths: ['Propositional logic', 'Predicate logic', 'Proof systems', 'Logical completeness'],
+        limitations: ['May be overly formal', 'Limited expressiveness for some domains'],
+        examples: ['Formal verification', 'Logical puzzles', 'Argument validity', 'Theorem proving'],
+      });
+    }
+
+    // Algorithmic reasoning - for algorithm design, analysis, and optimization
+    if (characteristics.domain === 'computer science' ||
+        characteristics.domain === 'algorithms' ||
+        characteristics.domain === 'data structures' ||
+        characteristics.domain === 'software' ||
+        (characteristics.requiresProof && characteristics.requiresQuantification)) {
+      recommendations.push({
+        mode: ThinkingMode.ALGORITHMIC,
+        score: characteristics.domain === 'algorithms' ? 0.95 : 0.88,
+        reasoning: 'Problem involves algorithm design, complexity analysis, or data structure optimization',
+        strengths: [
+          'Algorithm design patterns (divide-and-conquer, DP, greedy)',
+          'Complexity analysis (time, space, amortized)',
+          'Correctness proofs (loop invariants, induction)',
+          'Data structure selection and analysis',
+          'Graph algorithms and optimization',
+        ],
+        limitations: ['Focused on computational problems', 'Requires algorithmic thinking'],
+        examples: [
+          'Sorting and searching',
+          'Graph traversal (BFS, DFS)',
+          'Dynamic programming formulation',
+          'Shortest path algorithms',
+          'NP-completeness proofs',
+        ],
+      });
+    }
+
     // Sequential reasoning (default fallback)
     if (recommendations.length === 0) {
       recommendations.push({
@@ -196,6 +439,23 @@ export class ModeRecommender {
    */
   recommendCombinations(characteristics: ProblemCharacteristics): CombinationRecommendation[] {
     const combinations: CombinationRecommendation[] = [];
+
+    const isPhilosophical = characteristics.domain.toLowerCase().includes('metaphysics') ||
+                           characteristics.domain.toLowerCase().includes('theology') ||
+                           characteristics.domain.toLowerCase().includes('philosophy') ||
+                           characteristics.domain.toLowerCase().includes('epistemology') ||
+                           characteristics.domain.toLowerCase().includes('ethics');
+
+    // Inductive + Deductive + Abductive (Hybrid) - for philosophical/complex problems
+    if (isPhilosophical || (characteristics.complexity === 'high' && characteristics.requiresExplanation && characteristics.hasAlternatives)) {
+      combinations.push({
+        modes: [ThinkingMode.INDUCTIVE, ThinkingMode.DEDUCTIVE, ThinkingMode.ABDUCTIVE],
+        sequence: 'hybrid',
+        rationale: 'Synthesize empirical patterns, logical derivations, and explanatory hypotheses for maximum evidential strength',
+        benefits: ['Convergent validation from three independent methods', 'Empirical grounding + logical rigor + explanatory power', 'Highest achievable confidence through multi-modal synthesis', 'Exposes both empirical patterns and logical contradictions'],
+        synergies: ['Inductive patterns inform abductive hypotheses', 'Deductive logic tests hypothesis validity', 'Abductive explanations guide inductive search', 'All three methods converge on same conclusion'],
+      });
+    }
 
     // Temporal + Causal
     if (characteristics.timeDependent && characteristics.requiresExplanation) {
@@ -252,16 +512,6 @@ export class ModeRecommender {
       });
     }
 
-    // Analogical + Abductive
-    if (characteristics.requiresExplanation && characteristics.complexity === 'high') {
-      combinations.push({
-        modes: [ThinkingMode.ANALOGICAL, ThinkingMode.ABDUCTIVE],
-        sequence: 'parallel',
-        rationale: 'Use analogies to inspire hypotheses while systematically generating explanations',
-        benefits: ['Creative hypothesis generation', 'Cross-domain insights'],
-        synergies: ['Analogies suggest hypotheses', 'Hypotheses validated by analogical reasoning'],
-      });
-    }
 
     // Mathematics + Shannon (for complex proofs)
     if (characteristics.requiresProof && characteristics.complexity === 'high') {
@@ -274,17 +524,255 @@ export class ModeRecommender {
       });
     }
 
+    // ===== NEW MODE COMBINATIONS (v7.2.0) =====
+
+    // Engineering + Optimization (for system design with optimal solutions)
+    if ((characteristics.domain === 'engineering' || characteristics.domain === 'software') &&
+        characteristics.hasAlternatives) {
+      combinations.push({
+        modes: [ThinkingMode.ENGINEERING, ThinkingMode.OPTIMIZATION],
+        sequence: 'sequential',
+        rationale: 'Design system architecture, then optimize for performance/cost',
+        benefits: ['Structured design', 'Optimal trade-offs', 'Measurable improvements'],
+        synergies: ['Engineering constraints feed optimization', 'Optimization validates design choices'],
+      });
+    }
+
+    // Engineering + Constraint (for constrained design problems)
+    if (characteristics.requiresQuantification && characteristics.hasAlternatives &&
+        (characteristics.domain === 'engineering' || characteristics.domain === 'software')) {
+      combinations.push({
+        modes: [ThinkingMode.CONSTRAINT, ThinkingMode.ENGINEERING],
+        sequence: 'sequential',
+        rationale: 'Identify constraints first, then design within those boundaries',
+        benefits: ['Feasibility guaranteed', 'Requirements satisfaction', 'Clear boundaries'],
+        synergies: ['Constraints define engineering solution space', 'Engineering validates constraint satisfaction'],
+      });
+    }
+
+    // First Principles + Systems Thinking (for complex systemic problems)
+    if (characteristics.complexity === 'high' && characteristics.requiresExplanation) {
+      combinations.push({
+        modes: [ThinkingMode.FIRSTPRINCIPLES, ThinkingMode.SYSTEMSTHINKING],
+        sequence: 'sequential',
+        rationale: 'Build from fundamental truths, then analyze systemic interactions',
+        benefits: ['Deep understanding', 'Holistic view', 'Novel insights'],
+        synergies: ['First principles reveal core elements', 'Systems thinking shows interconnections'],
+      });
+    }
+
+    // Scientific Method + Bayesian (for empirical research with uncertainty)
+    if (characteristics.hasIncompleteInfo && characteristics.requiresQuantification) {
+      combinations.push({
+        modes: [ThinkingMode.SCIENTIFICMETHOD, ThinkingMode.BAYESIAN],
+        sequence: 'hybrid',
+        rationale: 'Design experiments and update beliefs with Bayesian inference',
+        benefits: ['Rigorous methodology', 'Quantified uncertainty', 'Evidence integration'],
+        synergies: ['Experiments generate evidence', 'Bayesian updates refine hypotheses'],
+      });
+    }
+
+    // Formal Logic + Deductive (for rigorous proofs)
+    if (characteristics.requiresProof && !characteristics.hasIncompleteInfo) {
+      combinations.push({
+        modes: [ThinkingMode.FORMALLOGIC, ThinkingMode.DEDUCTIVE],
+        sequence: 'hybrid',
+        rationale: 'Use formal logic systems with deductive derivation',
+        benefits: ['Maximum rigor', 'Logically valid conclusions', 'Formal verification'],
+        synergies: ['Formal logic provides structure', 'Deduction ensures valid inference'],
+      });
+    }
+
+    // Recursive + Optimization (for divide-and-conquer optimization)
+    if (characteristics.complexity === 'high' && characteristics.hasAlternatives) {
+      combinations.push({
+        modes: [ThinkingMode.RECURSIVE, ThinkingMode.OPTIMIZATION],
+        sequence: 'hybrid',
+        rationale: 'Decompose problem recursively, optimize at each level',
+        benefits: ['Scalable solutions', 'Local and global optimization', 'Manageable complexity'],
+        synergies: ['Recursion breaks down problem', 'Optimization solves subproblems optimally'],
+      });
+    }
+
+    // Stochastic + Bayesian (for probabilistic modeling)
+    if (characteristics.uncertainty === 'high' && characteristics.requiresQuantification) {
+      combinations.push({
+        modes: [ThinkingMode.STOCHASTIC, ThinkingMode.BAYESIAN],
+        sequence: 'parallel',
+        rationale: 'Model random processes while updating beliefs probabilistically',
+        benefits: ['Complete uncertainty model', 'Dynamic belief updates', 'Probabilistic predictions'],
+        synergies: ['Stochastic models generate distributions', 'Bayesian reasoning integrates evidence'],
+      });
+    }
+
+    // Computability + Formal Logic (for theoretical computer science)
+    if (characteristics.domain === 'computer science' && characteristics.requiresProof) {
+      combinations.push({
+        modes: [ThinkingMode.COMPUTABILITY, ThinkingMode.FORMALLOGIC],
+        sequence: 'hybrid',
+        rationale: 'Analyze computational limits with formal logical proofs',
+        benefits: ['Decidability analysis', 'Rigorous complexity proofs', 'Theoretical foundations'],
+        synergies: ['Computability defines limits', 'Formal logic proves properties'],
+      });
+    }
+
+    // Cryptanalytic + Stochastic (for probabilistic security analysis)
+    if (characteristics.domain === 'security' && characteristics.uncertainty === 'high') {
+      combinations.push({
+        modes: [ThinkingMode.CRYPTANALYTIC, ThinkingMode.STOCHASTIC],
+        sequence: 'parallel',
+        rationale: 'Analyze cryptographic systems with probabilistic attack modeling',
+        benefits: ['Security assessment', 'Attack probability estimation', 'Key space analysis'],
+        synergies: ['Cryptanalysis identifies vulnerabilities', 'Stochastic models attack success rates'],
+      });
+    }
+
+    // Systems Thinking + Engineering (for complex system design)
+    if (characteristics.complexity === 'high' &&
+        (characteristics.multiAgent || characteristics.timeDependent)) {
+      combinations.push({
+        modes: [ThinkingMode.SYSTEMSTHINKING, ThinkingMode.ENGINEERING],
+        sequence: 'sequential',
+        rationale: 'Understand system dynamics holistically, then engineer solutions',
+        benefits: ['Holistic design', 'Feedback-aware engineering', 'Emergent behavior consideration'],
+        synergies: ['Systems view informs design', 'Engineering implements systemic solutions'],
+      });
+    }
+
+    // Modal + Counterfactual (for possibility analysis)
+    if (characteristics.hasAlternatives && characteristics.uncertainty === 'high') {
+      combinations.push({
+        modes: [ThinkingMode.MODAL, ThinkingMode.COUNTERFACTUAL],
+        sequence: 'parallel',
+        rationale: 'Analyze possible worlds and counterfactual scenarios together',
+        benefits: ['Complete possibility space', 'What-if analysis', 'Robust decision making'],
+        synergies: ['Modal logic structures possibilities', 'Counterfactuals explore specific alternatives'],
+      });
+    }
+
+    // Metareasoning + Optimization (for strategy optimization)
+    if (characteristics.complexity === 'high' && characteristics.hasAlternatives) {
+      combinations.push({
+        modes: [ThinkingMode.METAREASONING, ThinkingMode.OPTIMIZATION],
+        sequence: 'hybrid',
+        rationale: 'Monitor reasoning strategies and optimize approach selection',
+        benefits: ['Adaptive reasoning', 'Resource optimization', 'Strategy refinement'],
+        synergies: ['Metareasoning evaluates strategies', 'Optimization selects best approach'],
+      });
+    }
+
+    // Metareasoning + Formal Logic + Abductive (for cognitive bias detection and counter-arguments)
+    if (characteristics.requiresExplanation && characteristics.hasAlternatives) {
+      combinations.push({
+        modes: [ThinkingMode.METAREASONING, ThinkingMode.FORMALLOGIC, ThinkingMode.ABDUCTIVE],
+        sequence: 'sequential',
+        rationale: 'Detect cognitive biases through meta-analysis, identify logical fallacies, and generate alternative explanations as counter-arguments',
+        benefits: ['Comprehensive bias detection', 'Fallacy identification', 'Counter-argument generation', 'Critical analysis'],
+        synergies: ['Metareasoning identifies reasoning flaws', 'Formal logic validates argument structure', 'Abductive generates alternative explanations'],
+      });
+    }
+
+    // Metareasoning + Counterfactual (for bias mitigation and alternative perspectives)
+    if (characteristics.hasAlternatives && characteristics.uncertainty !== 'low') {
+      combinations.push({
+        modes: [ThinkingMode.METAREASONING, ThinkingMode.COUNTERFACTUAL],
+        sequence: 'parallel',
+        rationale: 'Self-reflect on reasoning while exploring alternative scenarios to counter biases',
+        benefits: ['Bias awareness', 'Alternative perspective generation', 'Decision robustness'],
+        synergies: ['Metareasoning detects bias patterns', 'Counterfactual explores what-if scenarios'],
+      });
+    }
+
+    // ===== ALGORITHMIC MODE COMBINATIONS (v7.3.0) =====
+
+    // Algorithmic + Computability (for theoretical algorithm analysis)
+    if (characteristics.domain === 'computer science' && characteristics.requiresProof) {
+      combinations.push({
+        modes: [ThinkingMode.ALGORITHMIC, ThinkingMode.COMPUTABILITY],
+        sequence: 'hybrid',
+        rationale: 'Combine algorithm design with computability analysis for theoretical completeness',
+        benefits: ['Algorithm correctness proofs', 'Complexity class analysis', 'Decidability bounds'],
+        synergies: ['Algorithmic design informs complexity', 'Computability proves fundamental limits'],
+      });
+    }
+
+    // Algorithmic + Optimization (for algorithm optimization)
+    if (characteristics.hasAlternatives && characteristics.requiresQuantification) {
+      combinations.push({
+        modes: [ThinkingMode.ALGORITHMIC, ThinkingMode.OPTIMIZATION],
+        sequence: 'sequential',
+        rationale: 'Design algorithm first, then optimize for performance',
+        benefits: ['Correct-by-construction', 'Performance optimization', 'Trade-off analysis'],
+        synergies: ['Algorithm provides baseline', 'Optimization improves constants and bounds'],
+      });
+    }
+
+    // Algorithmic + Mathematics (for algorithm correctness proofs)
+    if (characteristics.requiresProof && characteristics.domain !== 'philosophy') {
+      combinations.push({
+        modes: [ThinkingMode.ALGORITHMIC, ThinkingMode.MATHEMATICS],
+        sequence: 'hybrid',
+        rationale: 'Combine algorithm design with mathematical proof techniques',
+        benefits: ['Rigorous correctness proofs', 'Loop invariant verification', 'Inductive reasoning'],
+        synergies: ['Algorithmic structures guide proof strategy', 'Mathematical rigor ensures correctness'],
+      });
+    }
+
+    // Algorithmic + Recursive (for divide-and-conquer problems)
+    if (characteristics.complexity === 'high' && characteristics.hasAlternatives) {
+      combinations.push({
+        modes: [ThinkingMode.ALGORITHMIC, ThinkingMode.RECURSIVE],
+        sequence: 'parallel',
+        rationale: 'Apply divide-and-conquer paradigm with recursive decomposition',
+        benefits: ['Natural problem decomposition', 'Recurrence solving', 'Subproblem identification'],
+        synergies: ['Algorithmic patterns guide recursion', 'Recursive structure enables Master Theorem'],
+      });
+    }
+
+    // Algorithmic + Stochastic (for randomized algorithms)
+    if (characteristics.uncertainty !== 'low' && characteristics.requiresQuantification) {
+      combinations.push({
+        modes: [ThinkingMode.ALGORITHMIC, ThinkingMode.STOCHASTIC],
+        sequence: 'parallel',
+        rationale: 'Design randomized algorithms with probabilistic analysis',
+        benefits: ['Expected-case analysis', 'Monte Carlo methods', 'Las Vegas algorithms'],
+        synergies: ['Algorithmic framework structures randomization', 'Stochastic analysis proves bounds'],
+      });
+    }
+
     return combinations;
   }
 
   /**
    * Get a simple mode recommendation based on a few key characteristics
    * Simplified version for quick recommendations
+   * Supports all 28 reasoning modes (v7.2.0)
    */
   quickRecommend(problemType: string): ThinkingMode {
     const typeMap: Record<string, ThinkingMode> = {
+      // Core reasoning modes
+      'explanation': ThinkingMode.ABDUCTIVE,
+      'hypothesis': ThinkingMode.ABDUCTIVE,
+      'inference': ThinkingMode.ABDUCTIVE,
+      'pattern': ThinkingMode.INDUCTIVE,
+      'generalization': ThinkingMode.INDUCTIVE,
+      'empirical': ThinkingMode.INDUCTIVE,
+      'logic': ThinkingMode.DEDUCTIVE,
+      'proof': ThinkingMode.DEDUCTIVE,
+      'derivation': ThinkingMode.DEDUCTIVE,
+      'complex': ThinkingMode.HYBRID,
+      'synthesis': ThinkingMode.HYBRID,
+      'philosophical': ThinkingMode.HYBRID,
+      'metaphysical': ThinkingMode.HYBRID,
+      // Meta-reasoning
+      'meta': ThinkingMode.METAREASONING,
+      'strategy-selection': ThinkingMode.METAREASONING,
+      'quality-assessment': ThinkingMode.METAREASONING,
+      'reflection': ThinkingMode.METAREASONING,
+      'self-evaluation': ThinkingMode.METAREASONING,
+      // Specialized modes
       'debugging': ThinkingMode.ABDUCTIVE,
-      'proof': ThinkingMode.MATHEMATICS,
+      'mathematical': ThinkingMode.MATHEMATICS,
       'timeline': ThinkingMode.TEMPORAL,
       'strategy': ThinkingMode.GAMETHEORY,
       'uncertainty': ThinkingMode.EVIDENTIAL,
@@ -294,6 +782,291 @@ export class ModeRecommender {
       'analogy': ThinkingMode.ANALOGICAL,
       'physics': ThinkingMode.PHYSICS,
       'systematic': ThinkingMode.SHANNON,
+
+      // ===== NEW MODES (v7.2.0) =====
+      // Engineering reasoning
+      'engineering': ThinkingMode.ENGINEERING,
+      'design': ThinkingMode.ENGINEERING,
+      'architecture': ThinkingMode.ENGINEERING,
+      'trade-off': ThinkingMode.ENGINEERING,
+      'tradeoff': ThinkingMode.ENGINEERING,
+      'system-design': ThinkingMode.ENGINEERING,
+      'implementation': ThinkingMode.ENGINEERING,
+      'reliability': ThinkingMode.ENGINEERING,
+      'scalability': ThinkingMode.ENGINEERING,
+      'performance': ThinkingMode.ENGINEERING,
+
+      // Computability reasoning
+      'computability': ThinkingMode.COMPUTABILITY,
+      'decidability': ThinkingMode.COMPUTABILITY,
+      'turing': ThinkingMode.COMPUTABILITY,
+      'halting': ThinkingMode.COMPUTABILITY,
+      'complexity-class': ThinkingMode.COMPUTABILITY,
+      'undecidable': ThinkingMode.COMPUTABILITY,
+
+      // Cryptanalytic reasoning
+      'cryptanalysis': ThinkingMode.CRYPTANALYTIC,
+      'cryptography': ThinkingMode.CRYPTANALYTIC,
+      'security': ThinkingMode.CRYPTANALYTIC,
+      'cipher': ThinkingMode.CRYPTANALYTIC,
+      'encryption': ThinkingMode.CRYPTANALYTIC,
+      'decryption': ThinkingMode.CRYPTANALYTIC,
+      'attack-vector': ThinkingMode.CRYPTANALYTIC,
+      'key-analysis': ThinkingMode.CRYPTANALYTIC,
+      'protocol-security': ThinkingMode.CRYPTANALYTIC,
+
+      // Recursive reasoning
+      'recursive': ThinkingMode.RECURSIVE,
+      'recursion': ThinkingMode.RECURSIVE,
+      'divide-conquer': ThinkingMode.RECURSIVE,
+      'self-similar': ThinkingMode.RECURSIVE,
+      'decomposition': ThinkingMode.RECURSIVE,
+      'fractal': ThinkingMode.RECURSIVE,
+      'tree-traversal': ThinkingMode.RECURSIVE,
+
+      // Modal reasoning
+      'modal': ThinkingMode.MODAL,
+      'possibility': ThinkingMode.MODAL,
+      'necessity': ThinkingMode.MODAL,
+      'possible-worlds': ThinkingMode.MODAL,
+      'epistemic': ThinkingMode.MODAL,
+      'deontic': ThinkingMode.MODAL,
+      'alethic': ThinkingMode.MODAL,
+
+      // Stochastic reasoning
+      'stochastic': ThinkingMode.STOCHASTIC,
+      'random-process': ThinkingMode.STOCHASTIC,
+      'markov': ThinkingMode.STOCHASTIC,
+      'monte-carlo': ThinkingMode.STOCHASTIC,
+      'probabilistic-process': ThinkingMode.STOCHASTIC,
+      'queueing': ThinkingMode.STOCHASTIC,
+      'random-walk': ThinkingMode.STOCHASTIC,
+
+      // Constraint reasoning
+      'constraint': ThinkingMode.CONSTRAINT,
+      'constraints': ThinkingMode.CONSTRAINT,
+      'csp': ThinkingMode.CONSTRAINT,
+      'sat': ThinkingMode.CONSTRAINT,
+      'scheduling': ThinkingMode.CONSTRAINT,
+      'allocation': ThinkingMode.CONSTRAINT,
+      'feasibility': ThinkingMode.CONSTRAINT,
+      'satisfiability': ThinkingMode.CONSTRAINT,
+
+      // Optimization reasoning
+      'optimization': ThinkingMode.OPTIMIZATION,
+      'optimize': ThinkingMode.OPTIMIZATION,
+      'optimal': ThinkingMode.OPTIMIZATION,
+      'minimize': ThinkingMode.OPTIMIZATION,
+      'maximize': ThinkingMode.OPTIMIZATION,
+      'gradient': ThinkingMode.OPTIMIZATION,
+      'convex': ThinkingMode.OPTIMIZATION,
+      'heuristic': ThinkingMode.OPTIMIZATION,
+      'search': ThinkingMode.OPTIMIZATION,
+
+      // First Principles reasoning
+      'first-principles': ThinkingMode.FIRSTPRINCIPLES,
+      'fundamental': ThinkingMode.FIRSTPRINCIPLES,
+      'foundational': ThinkingMode.FIRSTPRINCIPLES,
+      'axiom': ThinkingMode.FIRSTPRINCIPLES,
+      'ground-truth': ThinkingMode.FIRSTPRINCIPLES,
+      'from-scratch': ThinkingMode.FIRSTPRINCIPLES,
+      'basic-principles': ThinkingMode.FIRSTPRINCIPLES,
+      'root-cause': ThinkingMode.FIRSTPRINCIPLES,
+
+      // Systems Thinking reasoning
+      'systems-thinking': ThinkingMode.SYSTEMSTHINKING,
+      'systems': ThinkingMode.SYSTEMSTHINKING,
+      'holistic': ThinkingMode.SYSTEMSTHINKING,
+      'feedback-loop': ThinkingMode.SYSTEMSTHINKING,
+      'emergence': ThinkingMode.SYSTEMSTHINKING,
+      'interconnected': ThinkingMode.SYSTEMSTHINKING,
+      'ecosystem': ThinkingMode.SYSTEMSTHINKING,
+      'leverage-point': ThinkingMode.SYSTEMSTHINKING,
+
+      // Scientific Method reasoning
+      'scientific': ThinkingMode.SCIENTIFICMETHOD,
+      'experiment': ThinkingMode.SCIENTIFICMETHOD,
+      'research': ThinkingMode.SCIENTIFICMETHOD,
+      'falsification': ThinkingMode.SCIENTIFICMETHOD,
+      'hypothesis-testing': ThinkingMode.SCIENTIFICMETHOD,
+      'a/b-testing': ThinkingMode.SCIENTIFICMETHOD,
+      'reproducibility': ThinkingMode.SCIENTIFICMETHOD,
+      'control-group': ThinkingMode.SCIENTIFICMETHOD,
+
+      // Formal Logic reasoning
+      'formal-logic': ThinkingMode.FORMALLOGIC,
+      'propositional': ThinkingMode.FORMALLOGIC,
+      'predicate': ThinkingMode.FORMALLOGIC,
+      'theorem-proving': ThinkingMode.FORMALLOGIC,
+      'formal-proof': ThinkingMode.FORMALLOGIC,
+      'validity': ThinkingMode.FORMALLOGIC,
+      'soundness': ThinkingMode.FORMALLOGIC,
+      'completeness': ThinkingMode.FORMALLOGIC,
+
+      // Bias detection and critical analysis
+      'bias': ThinkingMode.METAREASONING,
+      'bias-detection': ThinkingMode.METAREASONING,
+      'cognitive-bias': ThinkingMode.METAREASONING,
+      'fallacy': ThinkingMode.FORMALLOGIC,
+      'fallacies': ThinkingMode.FORMALLOGIC,
+      'logical-fallacy': ThinkingMode.FORMALLOGIC,
+      'counter-argument': ThinkingMode.COUNTERFACTUAL,
+      'counterargument': ThinkingMode.COUNTERFACTUAL,
+      'rebuttal': ThinkingMode.COUNTERFACTUAL,
+      'critique': ThinkingMode.METAREASONING,
+      'critical-analysis': ThinkingMode.METAREASONING,
+      'fact-check': ThinkingMode.EVIDENTIAL,
+      'misinformation': ThinkingMode.EVIDENTIAL,
+      'disinformation': ThinkingMode.EVIDENTIAL,
+      'reasoning-flaw': ThinkingMode.METAREASONING,
+      'argument-analysis': ThinkingMode.FORMALLOGIC,
+
+      // ===== ALGORITHMIC REASONING (v7.3.0) - CLRS Coverage =====
+
+      // General algorithm terms
+      'algorithm': ThinkingMode.ALGORITHMIC,
+      'algorithms': ThinkingMode.ALGORITHMIC,
+      'algorithmic': ThinkingMode.ALGORITHMIC,
+      'data-structure': ThinkingMode.ALGORITHMIC,
+      'data-structures': ThinkingMode.ALGORITHMIC,
+      'complexity': ThinkingMode.ALGORITHMIC,
+      'time-complexity': ThinkingMode.ALGORITHMIC,
+      'space-complexity': ThinkingMode.ALGORITHMIC,
+      'big-o': ThinkingMode.ALGORITHMIC,
+      'asymptotic': ThinkingMode.ALGORITHMIC,
+      'correctness-proof': ThinkingMode.ALGORITHMIC,
+      'loop-invariant': ThinkingMode.ALGORITHMIC,
+      'invariant': ThinkingMode.ALGORITHMIC,
+
+      // Design patterns
+      'divide-and-conquer': ThinkingMode.ALGORITHMIC,
+      'dynamic-programming': ThinkingMode.ALGORITHMIC,
+      'dp': ThinkingMode.ALGORITHMIC,
+      'memoization': ThinkingMode.ALGORITHMIC,
+      'greedy-algorithm': ThinkingMode.ALGORITHMIC,
+      'backtracking': ThinkingMode.ALGORITHMIC,
+      'branch-and-bound': ThinkingMode.ALGORITHMIC,
+      'amortized': ThinkingMode.ALGORITHMIC,
+      'amortized-analysis': ThinkingMode.ALGORITHMIC,
+
+      // Sorting algorithms
+      'sorting': ThinkingMode.ALGORITHMIC,
+      'sort': ThinkingMode.ALGORITHMIC,
+      'insertion-sort': ThinkingMode.ALGORITHMIC,
+      'merge-sort': ThinkingMode.ALGORITHMIC,
+      'mergesort': ThinkingMode.ALGORITHMIC,
+      'quicksort': ThinkingMode.ALGORITHMIC,
+      'quick-sort': ThinkingMode.ALGORITHMIC,
+      'heapsort': ThinkingMode.ALGORITHMIC,
+      'heap-sort': ThinkingMode.ALGORITHMIC,
+      'counting-sort': ThinkingMode.ALGORITHMIC,
+      'radix-sort': ThinkingMode.ALGORITHMIC,
+      'bucket-sort': ThinkingMode.ALGORITHMIC,
+      'comparison-sort': ThinkingMode.ALGORITHMIC,
+
+      // Searching and selection
+      'binary-search': ThinkingMode.ALGORITHMIC,
+      'linear-search': ThinkingMode.ALGORITHMIC,
+      'selection-algorithm': ThinkingMode.ALGORITHMIC,
+      'median-of-medians': ThinkingMode.ALGORITHMIC,
+      'order-statistics': ThinkingMode.ALGORITHMIC,
+
+      // Data structures
+      'heap': ThinkingMode.ALGORITHMIC,
+      'binary-heap': ThinkingMode.ALGORITHMIC,
+      'priority-queue': ThinkingMode.ALGORITHMIC,
+      'hash-table': ThinkingMode.ALGORITHMIC,
+      'hashing': ThinkingMode.ALGORITHMIC,
+      'binary-search-tree': ThinkingMode.ALGORITHMIC,
+      'bst': ThinkingMode.ALGORITHMIC,
+      'red-black-tree': ThinkingMode.ALGORITHMIC,
+      'avl-tree': ThinkingMode.ALGORITHMIC,
+      'b-tree': ThinkingMode.ALGORITHMIC,
+      'fibonacci-heap': ThinkingMode.ALGORITHMIC,
+      'union-find': ThinkingMode.ALGORITHMIC,
+      'disjoint-set': ThinkingMode.ALGORITHMIC,
+      'trie': ThinkingMode.ALGORITHMIC,
+      'segment-tree': ThinkingMode.ALGORITHMIC,
+      'fenwick-tree': ThinkingMode.ALGORITHMIC,
+
+      // Graph algorithms
+      'graph-algorithm': ThinkingMode.ALGORITHMIC,
+      'bfs': ThinkingMode.ALGORITHMIC,
+      'breadth-first': ThinkingMode.ALGORITHMIC,
+      'dfs': ThinkingMode.ALGORITHMIC,
+      'depth-first': ThinkingMode.ALGORITHMIC,
+      'topological-sort': ThinkingMode.ALGORITHMIC,
+      'strongly-connected': ThinkingMode.ALGORITHMIC,
+      'scc': ThinkingMode.ALGORITHMIC,
+      'minimum-spanning-tree': ThinkingMode.ALGORITHMIC,
+      'mst': ThinkingMode.ALGORITHMIC,
+      'kruskal': ThinkingMode.ALGORITHMIC,
+      'prim': ThinkingMode.ALGORITHMIC,
+      'dijkstra': ThinkingMode.ALGORITHMIC,
+      'bellman-ford': ThinkingMode.ALGORITHMIC,
+      'floyd-warshall': ThinkingMode.ALGORITHMIC,
+      'shortest-path': ThinkingMode.ALGORITHMIC,
+      'max-flow': ThinkingMode.ALGORITHMIC,
+      'ford-fulkerson': ThinkingMode.ALGORITHMIC,
+      'edmonds-karp': ThinkingMode.ALGORITHMIC,
+      'bipartite-matching': ThinkingMode.ALGORITHMIC,
+
+      // Dynamic programming problems
+      'lcs': ThinkingMode.ALGORITHMIC,
+      'longest-common-subsequence': ThinkingMode.ALGORITHMIC,
+      'edit-distance': ThinkingMode.ALGORITHMIC,
+      'levenshtein': ThinkingMode.ALGORITHMIC,
+      'knapsack': ThinkingMode.ALGORITHMIC,
+      'matrix-chain': ThinkingMode.ALGORITHMIC,
+      'optimal-bst': ThinkingMode.ALGORITHMIC,
+      'rod-cutting': ThinkingMode.ALGORITHMIC,
+      'coin-change': ThinkingMode.ALGORITHMIC,
+
+      // String algorithms
+      'string-matching': ThinkingMode.ALGORITHMIC,
+      'pattern-matching': ThinkingMode.ALGORITHMIC,
+      'kmp': ThinkingMode.ALGORITHMIC,
+      'knuth-morris-pratt': ThinkingMode.ALGORITHMIC,
+      'rabin-karp': ThinkingMode.ALGORITHMIC,
+      'boyer-moore': ThinkingMode.ALGORITHMIC,
+      'suffix-array': ThinkingMode.ALGORITHMIC,
+      'suffix-tree': ThinkingMode.ALGORITHMIC,
+
+      // Computational geometry
+      'convex-hull': ThinkingMode.ALGORITHMIC,
+      'graham-scan': ThinkingMode.ALGORITHMIC,
+      'jarvis-march': ThinkingMode.ALGORITHMIC,
+      'closest-pair': ThinkingMode.ALGORITHMIC,
+      'line-intersection': ThinkingMode.ALGORITHMIC,
+
+      // Number theory algorithms
+      'gcd': ThinkingMode.ALGORITHMIC,
+      'euclidean': ThinkingMode.ALGORITHMIC,
+      'modular-arithmetic': ThinkingMode.ALGORITHMIC,
+      'primality': ThinkingMode.ALGORITHMIC,
+      'miller-rabin': ThinkingMode.ALGORITHMIC,
+      'rsa': ThinkingMode.ALGORITHMIC,
+
+      // Matrix algorithms
+      'strassen': ThinkingMode.ALGORITHMIC,
+      'matrix-multiplication': ThinkingMode.ALGORITHMIC,
+      'matrix-exponentiation': ThinkingMode.ALGORITHMIC,
+
+      // Advanced topics
+      'fft': ThinkingMode.ALGORITHMIC,
+      'fast-fourier': ThinkingMode.ALGORITHMIC,
+      'polynomial-multiplication': ThinkingMode.ALGORITHMIC,
+      'linear-programming': ThinkingMode.ALGORITHMIC,
+      'simplex': ThinkingMode.ALGORITHMIC,
+      'approximation-algorithm': ThinkingMode.ALGORITHMIC,
+      'np-hard': ThinkingMode.ALGORITHMIC,
+      'np-complete': ThinkingMode.ALGORITHMIC,
+
+      // Recurrences and analysis
+      'recurrence': ThinkingMode.ALGORITHMIC,
+      'master-theorem': ThinkingMode.ALGORITHMIC,
+      'recursion-tree': ThinkingMode.ALGORITHMIC,
+      'substitution-method': ThinkingMode.ALGORITHMIC,
     };
 
     return typeMap[problemType.toLowerCase()] || ThinkingMode.SEQUENTIAL;

@@ -86,7 +86,7 @@ export interface SessionMetrics {
   revisionCount: number;
   timeSpent: number;
   dependencyDepth: number;
-  customMetrics: Map<string, any>;
+  customMetrics: Map<string, unknown>;
 
   // Validation cache statistics
   cacheStats?: {
@@ -98,6 +98,7 @@ export interface SessionMetrics {
   };
 
   // Running totals for incremental calculation (internal use)
+  // These fields are internal implementation details for O(1) average calculation
   _uncertaintySum?: number;
   _uncertaintyCount?: number;
 }

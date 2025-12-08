@@ -3,14 +3,13 @@
  * General-purpose iterative reasoning with revision and branching support
  */
 
-import { BaseThought } from '../core.js';
+import { BaseThought, ThinkingMode } from '../core.js';
 
 export interface SequentialThought extends BaseThought {
-  mode: 'sequential';
+  mode: ThinkingMode.SEQUENTIAL;
 
   // Revision tracking
   revisionReason?: string;
-  revisesThought?: number; // Which thought number is being reconsidered
   isRevision?: boolean; // Whether this revises previous thinking
 
   // Dependency tracking

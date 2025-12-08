@@ -1,9 +1,12 @@
 /**
- * Counterfactual Mode Validator
+ * Counterfactual Mode Validator (v7.1.0)
+ * Refactored to use BaseValidator shared methods
  */
 
-import { CounterfactualThought, ValidationIssue, ValidationContext } from '../../../types/index.js';
+import { CounterfactualThought, ValidationIssue } from '../../../types/index.js';
+import type { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
+import { IssueCategory, IssueSeverity } from '../../constants.js';
 
 export class CounterfactualValidator extends BaseValidator<CounterfactualThought> {
   getMode(): string {
@@ -39,13 +42,13 @@ export class CounterfactualValidator extends BaseValidator<CounterfactualThought
     }
 
     // Require intervention point
-    if (!thought.interventionPoint) {
+    if (!thought.interventionPoint || !thought.interventionPoint.description) {
       issues.push({
-        severity: 'error',
+        severity: IssueSeverity.ERROR,
         thoughtNumber: thought.thoughtNumber,
-        description: 'Intervention point is required',
+        description: 'Intervention point must be specified',
         suggestion: 'Specify where and how intervention could change the outcome',
-        category: 'structural',
+        category: IssueCategory.STRUCTURAL,
       });
     } else if (!thought.interventionPoint.description || thought.interventionPoint.description.trim() === '') {
       issues.push({
@@ -106,25 +109,34 @@ export class CounterfactualValidator extends BaseValidator<CounterfactualThought
 
     if (thought.counterfactuals) {
       for (const scenario of thought.counterfactuals) {
-        if (scenario.probability !== undefined &&
-            (scenario.probability < 0 || scenario.probability > 1)) {
-          issues.push({
-            severity: 'error',
-            thoughtNumber: thought.thoughtNumber,
-            description: `Counterfactual scenario "${scenario.name}" probability must be between 0 and 1`,
-            suggestion: 'Provide probability as decimal',
-            category: 'structural',
-          });
-        }
+        issues.push(
+          ...this.validateProbability(thought, scenario.likelihood, `Counterfactual scenario "${scenario.name}" likelihood`)
+        );
         // Validate outcome magnitude
-        if (scenario.outcome && scenario.outcome.magnitude !== undefined &&
-            (scenario.outcome.magnitude < 0 || scenario.outcome.magnitude > 1)) {
+        if (scenario.outcomes) {
+          for (const outcome of scenario.outcomes) {
+            issues.push(
+              ...this.validateProbability(
+                thought,
+                outcome.magnitude,
+                `Counterfactual scenario "${scenario.name}" outcome magnitude`
+              )
+            );
+          }
+        }
+      }
+    }
+
+    // Validate comparison differences
+    if (thought.comparison && thought.comparison.differences) {
+      for (const diff of thought.comparison.differences) {
+        if (!diff.actual || !diff.counterfactual) {
           issues.push({
-            severity: 'error',
+            severity: IssueSeverity.WARNING,
             thoughtNumber: thought.thoughtNumber,
-            description: `Counterfactual scenario "${scenario.name}" outcome magnitude must be between 0 and 1`,
-            suggestion: 'Provide magnitude as decimal',
-            category: 'structural',
+            description: `Difference "${diff.aspect}" should reference both actual and counterfactual values`,
+            suggestion: 'Provide both actual and counterfactual values for complete comparison',
+            category: IssueCategory.STRUCTURAL,
           });
         }
       }
