@@ -28628,8 +28628,8 @@ var deepthinking_math_schema = {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["mathematics", "physics"],
-        description: "Mathematical reasoning mode"
+        enum: ["mathematics", "physics", "computability"],
+        description: "Mathematical reasoning mode (includes Turing machines/decidability)"
       },
       thoughtType: {
         type: "string",
@@ -29061,7 +29061,7 @@ var deepthinking_strategic_schema = {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["gametheory", "optimization"],
+        enum: ["gametheory", "optimization", "algorithmic"],
         description: "Strategic reasoning mode"
       },
       players: {
@@ -29179,7 +29179,7 @@ var deepthinking_analytical_schema = {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["analogical", "firstprinciples", "metareasoning"],
+        enum: ["analogical", "firstprinciples", "metareasoning", "cryptanalytic", "synthesis", "argumentation", "critique", "analysis"],
         description: "Analytical reasoning mode"
       },
       sourceAnalogy: {
@@ -29252,7 +29252,7 @@ var deepthinking_scientific_schema = {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["scientificmethod", "systemsthinking", "formallogic"],
+        enum: ["scientificmethod", "systemsthinking", "formallogic", "engineering"],
         description: "Scientific reasoning mode"
       },
       hypothesis: {
@@ -29602,7 +29602,7 @@ var ProofStepInputSchema = z.object({
   referencesSteps: z.array(z.number()).optional()
 });
 var MathSchema = BaseThoughtSchema.extend({
-  mode: z.enum(["mathematics", "physics"]),
+  mode: z.enum(["mathematics", "physics", "computability"]),
   thoughtType: z.string().optional(),
   proofStrategy: ProofStrategySchema.optional(),
   mathematicalModel: MathematicalModelSchema.optional(),
@@ -29755,7 +29755,7 @@ var PayoffMatrixSchema = z.object({
   payoffs: z.array(PayoffEntrySchema)
 });
 var StrategicSchema = BaseThoughtSchema.extend({
-  mode: z.enum(["gametheory", "optimization"]),
+  mode: z.enum(["gametheory", "optimization", "algorithmic"]),
   // Game theory specific
   players: z.array(PlayerSchema).optional(),
   strategies: z.array(StrategySchema).optional(),
@@ -29765,13 +29765,13 @@ var StrategicSchema = BaseThoughtSchema.extend({
 // src/tools/schemas/modes/analytical.ts
 init_esm_shims();
 var AnalyticalSchema = BaseThoughtSchema.extend({
-  mode: z.enum(["analogical", "firstprinciples", "metareasoning"])
+  mode: z.enum(["analogical", "firstprinciples", "metareasoning", "cryptanalytic", "synthesis", "argumentation", "critique", "analysis"])
 });
 
 // src/tools/schemas/modes/scientific.ts
 init_esm_shims();
 var ScientificSchema = BaseThoughtSchema.extend({
-  mode: z.enum(["scientificmethod", "systemsthinking", "formallogic"])
+  mode: z.enum(["scientificmethod", "systemsthinking", "formallogic", "engineering"])
 });
 var toolList = jsonSchemas;
 var toolSchemas = {
@@ -29798,6 +29798,8 @@ var modeToToolMap = {
   // Math/Physics modes
   mathematics: "deepthinking_math",
   physics: "deepthinking_math",
+  computability: "deepthinking_math",
+  // Phase 11 v7.2.0 - Turing machines
   // Temporal mode
   temporal: "deepthinking_temporal",
   // Probabilistic modes
@@ -29809,14 +29811,28 @@ var modeToToolMap = {
   // Strategic modes
   gametheory: "deepthinking_strategic",
   optimization: "deepthinking_strategic",
+  algorithmic: "deepthinking_strategic",
+  // Phase 12 v7.3.0 - CLRS algorithms
   // Analytical modes
   analogical: "deepthinking_analytical",
   firstprinciples: "deepthinking_analytical",
   metareasoning: "deepthinking_analytical",
+  cryptanalytic: "deepthinking_analytical",
+  // Phase 11 v7.2.0 - Turing's decibans
+  synthesis: "deepthinking_analytical",
+  // Phase 13 v7.4.0 - Literature synthesis
+  argumentation: "deepthinking_analytical",
+  // Phase 13 v7.4.0 - Toulmin model
+  critique: "deepthinking_analytical",
+  // Phase 13 v7.4.0 - Critical analysis
+  analysis: "deepthinking_analytical",
+  // Phase 13 v7.4.0 - Qualitative analysis
   // Scientific modes
   scientificmethod: "deepthinking_scientific",
   systemsthinking: "deepthinking_scientific",
-  formallogic: "deepthinking_scientific"
+  formallogic: "deepthinking_scientific",
+  engineering: "deepthinking_scientific"
+  // Phase 10 v7.1.0 - Engineering analysis
 };
 function isValidTool(toolName) {
   return toolName in toolSchemas;

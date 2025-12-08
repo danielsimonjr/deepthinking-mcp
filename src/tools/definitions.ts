@@ -74,6 +74,7 @@ export const modeToToolMap: Record<string, string> = {
   // Math/Physics modes
   mathematics: 'deepthinking_math',
   physics: 'deepthinking_math',
+  computability: 'deepthinking_math', // Phase 11 v7.2.0 - Turing machines
 
   // Temporal mode
   temporal: 'deepthinking_temporal',
@@ -89,16 +90,23 @@ export const modeToToolMap: Record<string, string> = {
   // Strategic modes
   gametheory: 'deepthinking_strategic',
   optimization: 'deepthinking_strategic',
+  algorithmic: 'deepthinking_strategic', // Phase 12 v7.3.0 - CLRS algorithms
 
   // Analytical modes
   analogical: 'deepthinking_analytical',
   firstprinciples: 'deepthinking_analytical',
   metareasoning: 'deepthinking_analytical',
+  cryptanalytic: 'deepthinking_analytical', // Phase 11 v7.2.0 - Turing's decibans
+  synthesis: 'deepthinking_analytical', // Phase 13 v7.4.0 - Literature synthesis
+  argumentation: 'deepthinking_analytical', // Phase 13 v7.4.0 - Toulmin model
+  critique: 'deepthinking_analytical', // Phase 13 v7.4.0 - Critical analysis
+  analysis: 'deepthinking_analytical', // Phase 13 v7.4.0 - Qualitative analysis
 
   // Scientific modes
   scientificmethod: 'deepthinking_scientific',
   systemsthinking: 'deepthinking_scientific',
   formallogic: 'deepthinking_scientific',
+  engineering: 'deepthinking_scientific', // Phase 10 v7.1.0 - Engineering analysis
 };
 
 /**

@@ -46,7 +46,7 @@ const PayoffMatrixSchema = z.object({
  * Strategic reasoning schema (Game Theory + Optimization)
  */
 export const StrategicSchema = BaseThoughtSchema.extend({
-  mode: z.enum(['gametheory', 'optimization']),
+  mode: z.enum(['gametheory', 'optimization', 'algorithmic']),
 
   // Game theory specific
   players: z.array(PlayerSchema).optional(),

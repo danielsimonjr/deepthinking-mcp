@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { BaseThoughtSchema } from '../base.js';
 
 export const ScientificSchema = BaseThoughtSchema.extend({
-  mode: z.enum(['scientificmethod', 'systemsthinking', 'formallogic']),
+  mode: z.enum(['scientificmethod', 'systemsthinking', 'formallogic', 'engineering']),
 });
 
 export type ScientificInput = z.infer<typeof ScientificSchema>;

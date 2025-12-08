@@ -29,6 +29,7 @@ const VALIDATOR_REGISTRY: Record<string, ValidatorConfig> = {
   engineering: { module: './modes/engineering.js', className: 'EngineeringValidator' }, // Phase 10 v7.1.0
   computability: { module: './modes/computability.js', className: 'ComputabilityValidator' }, // Phase 11 v7.2.0
   cryptanalytic: { module: './modes/cryptanalytic.js', className: 'CryptanalyticValidator' }, // Phase 11 v7.2.0
+  algorithmic: { module: './modes/algorithmic.js', className: 'AlgorithmicValidator' }, // Phase 12 v7.3.0
   inductive: { module: './modes/inductive.js', className: 'InductiveValidator' },
   deductive: { module: './modes/deductive.js', className: 'DeductiveValidator' },
   abductive: { module: './modes/abductive.js', className: 'AbductiveValidator' },
@@ -45,6 +46,11 @@ const VALIDATOR_REGISTRY: Record<string, ValidatorConfig> = {
   optimization: { module: './modes/optimization.js', className: 'OptimizationValidator' },
   formallogic: { module: './modes/formallogic.js', className: 'FormalLogicValidator' },
   metareasoning: { module: './modes/metareasoning.js', className: 'MetaReasoningValidator' },
+  // Phase 13 v7.4.0 - Academic Research Modes
+  synthesis: { module: './modes/synthesis.js', className: 'SynthesisValidator' },
+  argumentation: { module: './modes/argumentation.js', className: 'ArgumentationValidator' },
+  critique: { module: './modes/critique.js', className: 'CritiqueValidator' },
+  analysis: { module: './modes/analysis.js', className: 'AnalysisValidator' },
 };
 
 /**

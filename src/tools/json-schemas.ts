@@ -217,8 +217,8 @@ export const deepthinking_math_schema = {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["mathematics", "physics"],
-        description: "Mathematical reasoning mode"
+        enum: ["mathematics", "physics", "computability"],
+        description: "Mathematical reasoning mode (includes Turing machines/decidability)"
       },
       thoughtType: {
         type: "string",
@@ -666,7 +666,7 @@ export const deepthinking_strategic_schema = {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["gametheory", "optimization"],
+        enum: ["gametheory", "optimization", "algorithmic"],
         description: "Strategic reasoning mode"
       },
       players: {
@@ -788,7 +788,7 @@ export const deepthinking_analytical_schema = {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["analogical", "firstprinciples", "metareasoning"],
+        enum: ["analogical", "firstprinciples", "metareasoning", "cryptanalytic", "synthesis", "argumentation", "critique", "analysis"],
         description: "Analytical reasoning mode"
       },
       sourceAnalogy: {
@@ -865,7 +865,7 @@ export const deepthinking_scientific_schema = {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["scientificmethod", "systemsthinking", "formallogic"],
+        enum: ["scientificmethod", "systemsthinking", "formallogic", "engineering"],
         description: "Scientific reasoning mode"
       },
       hypothesis: {
