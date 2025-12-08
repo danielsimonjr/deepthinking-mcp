@@ -1,8 +1,12 @@
 /**
- * Core type definitions for the DeepThinking MCP server v7.1.0
- * Supports 19 thinking modes: Sequential, Shannon, Mathematics, Physics, Hybrid, Engineering,
- * Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory, Evidential, FirstPrinciples,
- * SystemsThinking, ScientificMethod, Optimization, FormalLogic
+ * Core type definitions for the DeepThinking MCP server v7.4.0
+ * Supports 29 thinking modes including:
+ * - Core: Sequential, Shannon, Mathematics, Physics, Hybrid, Engineering
+ * - Theory: Computability, Cryptanalytic, Algorithmic
+ * - Advanced: Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
+ * - Reasoning: Inductive, Deductive, Abductive, Causal, Bayesian, Counterfactual, Analogical
+ * - Analysis: Temporal, GameTheory, Evidential, FirstPrinciples, SystemsThinking, ScientificMethod, FormalLogic
+ * - Academic: Synthesis, Argumentation, Critique, Analysis
  */
 
 // Import Phase 3 mode types
@@ -29,6 +33,12 @@ import type { CryptanalyticThought } from './modes/cryptanalytic.js';
 
 // Import Phase 12 mode types (v7.3.0) - Algorithmic reasoning
 import type { AlgorithmicThought } from './modes/algorithmic.js';
+
+// Import Phase 13 mode types (v7.4.0) - Academic research modes
+import type { SynthesisThought } from './modes/synthesis.js';
+import type { ArgumentationThought } from './modes/argumentation.js';
+import type { CritiqueThought } from './modes/critique.js';
+import type { AnalysisThought } from './modes/analysis.js';
 
 /**
  * Available thinking modes
@@ -69,6 +79,12 @@ export enum ThinkingMode {
   SYSTEMSTHINKING = 'systemsthinking', // ⚠️ Experimental (Phase 4 v3.2.0) - Systems thinking
   SCIENTIFICMETHOD = 'scientificmethod', // ⚠️ Experimental (Phase 4 v3.2.0) - Scientific method
   FORMALLOGIC = 'formallogic', // ⚠️ Experimental (Phase 4 v3.2.0) - Formal logic
+
+  // ===== Academic Research Modes (Phase 13 v7.4.0) =====
+  SYNTHESIS = 'synthesis', // Phase 13 (v7.4.0) - Literature synthesis and integration
+  ARGUMENTATION = 'argumentation', // Phase 13 (v7.4.0) - Academic argumentation (Toulmin model)
+  CRITIQUE = 'critique', // Phase 13 (v7.4.0) - Critical analysis and evaluation
+  ANALYSIS = 'analysis', // Phase 13 (v7.4.0) - Qualitative analysis methods
 
   CUSTOM = 'custom'
 }
@@ -113,6 +129,11 @@ export const EXPERIMENTAL_MODES: ReadonlyArray<ThinkingMode> = [
   ThinkingMode.SYSTEMSTHINKING,
   ThinkingMode.SCIENTIFICMETHOD,
   ThinkingMode.FORMALLOGIC,
+  // Phase 13 (v7.4.0) - Academic Research Modes
+  ThinkingMode.SYNTHESIS,
+  ThinkingMode.ARGUMENTATION,
+  ThinkingMode.CRITIQUE,
+  ThinkingMode.ANALYSIS,
 ];
 
 /**
@@ -792,7 +813,11 @@ export type Thought =
   | ScientificMethodThought
   | OptimizationThought
   | FormalLogicThought
-  | MetaReasoningThought;
+  | MetaReasoningThought
+  | SynthesisThought
+  | ArgumentationThought
+  | CritiqueThought
+  | AnalysisThought;
 
 // ========== TYPE GUARDS ==========
 
@@ -920,6 +945,25 @@ export function isAlgorithmicThought(thought: Thought): thought is AlgorithmicTh
   return thought.mode === ThinkingMode.ALGORITHMIC;
 }
 
+/**
+ * Type guards for Phase 13 modes (v7.4.0) - Academic Research Modes
+ */
+export function isSynthesisThought(thought: Thought): thought is SynthesisThought {
+  return thought.mode === ThinkingMode.SYNTHESIS;
+}
+
+export function isArgumentationThought(thought: Thought): thought is ArgumentationThought {
+  return thought.mode === ThinkingMode.ARGUMENTATION;
+}
+
+export function isCritiqueThought(thought: Thought): thought is CritiqueThought {
+  return thought.mode === ThinkingMode.CRITIQUE;
+}
+
+export function isAnalysisThought(thought: Thought): thought is AnalysisThought {
+  return thought.mode === ThinkingMode.ANALYSIS;
+}
+
 // Re-export Phase 3 types
 export type { TemporalThought, GameTheoryThought, EvidentialThought, FirstPrinciplesThought };
 
@@ -937,3 +981,6 @@ export type { ComputabilityThought, CryptanalyticThought };
 
 // Re-export Phase 12 types (v7.3.0) - Algorithmic reasoning
 export type { AlgorithmicThought };
+
+// Re-export Phase 13 types (v7.4.0) - Academic Research Modes
+export type { SynthesisThought, ArgumentationThought, CritiqueThought, AnalysisThought };
