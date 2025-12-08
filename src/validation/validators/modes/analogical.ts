@@ -19,11 +19,27 @@ export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {
     // Common validation
     issues.push(...this.validateCommon(thought));
 
-    // Require source domain using shared method
-    issues.push(...this.validateRequired(thought, thought.sourceDomain, 'Source domain', IssueCategory.STRUCTURAL));
+    // Require source domain
+    if (!thought.sourceDomain) {
+      issues.push({
+        severity: 'error',
+        thoughtNumber: thought.thoughtNumber,
+        description: 'Analogical reasoning requires a source domain',
+        suggestion: 'Provide the source domain for the analogy',
+        category: 'structural',
+      });
+    }
 
-    // Require target domain using shared method
-    issues.push(...this.validateRequired(thought, thought.targetDomain, 'Target domain', IssueCategory.STRUCTURAL));
+    // Require target domain
+    if (!thought.targetDomain) {
+      issues.push({
+        severity: 'error',
+        thoughtNumber: thought.thoughtNumber,
+        description: 'Analogical reasoning requires a target domain',
+        suggestion: 'Provide the target domain for the analogy',
+        category: 'structural',
+      });
+    }
 
     // Validate analogy strength range using shared method
     issues.push(...this.validateProbability(thought, thought.analogyStrength, 'Analogy strength'));
@@ -84,8 +100,8 @@ export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {
         severity: IssueSeverity.WARNING,
         thoughtNumber: thought.thoughtNumber,
         description: 'Good analogies acknowledge their limitations',
-        suggestion: 'Identify where the analogy breaks down or doesn\'t apply',
-        category: IssueCategory.LOGICAL,
+        suggestion: 'Consider identifying potential limitations or weaknesses of the analogy',
+        category: 'completeness',
       });
     }
 

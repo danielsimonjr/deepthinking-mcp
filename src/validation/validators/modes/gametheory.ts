@@ -83,10 +83,17 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
           });
         }
 
-        // Validate probability range using shared method
-        issues.push(
-          ...this.validateProbability(thought, strategy.probability, `Strategy "${strategy.name}" probability`)
-        );
+        // Validate probability range
+        if (strategy.probability !== undefined &&
+            (strategy.probability < 0 || strategy.probability > 1)) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Strategy "${strategy.name}" probability must be 0-1`,
+            suggestion: 'Provide probability as decimal',
+            category: 'structural',
+          });
+        }
       }
     }
 
@@ -140,10 +147,16 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
           });
         }
 
-        // Validate stability range using shared method
-        issues.push(
-          ...this.validateProbability(thought, equilibrium.stability, `Nash equilibrium "${equilibrium.id}" stability`)
-        );
+        // Validate stability range
+        if (equilibrium.stability < 0 || equilibrium.stability > 1) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Nash equilibrium "${equilibrium.id}" stability must be 0-1`,
+            suggestion: 'Provide stability as decimal',
+            category: 'structural',
+          });
+        }
       }
     }
 
@@ -169,7 +182,7 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
           issues.push({
             severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
-            description: `Terminal node ${node.id} missing payoffs`,
+            description: `Terminal node ${node.id} is missing payoffs`,
             suggestion: 'Provide payoffs for terminal nodes',
             category: IssueCategory.STRUCTURAL,
           });

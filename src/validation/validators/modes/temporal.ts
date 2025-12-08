@@ -146,21 +146,27 @@ export class TemporalValidator extends BaseValidator<TemporalThought> {
           });
         }
 
-        // Validate relation strength range using shared method
-        issues.push(...this.validateProbability(thought, relation.strength, `Relation ${relation.id} strength`));
+        // Validate relation strength range
+        if (relation.strength < 0 || relation.strength > 1) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Temporal relation ${relation.id} strength must be 0-1`,
+            suggestion: 'Provide strength as decimal',
+            category: 'structural',
+          });
+        }
 
-        // Validate relation delay is non-negative using shared method
-        issues.push(
-          ...this.validateNumberRange(
-            thought,
-            relation.delay,
-            `Temporal relation ${relation.id} delay`,
-            0,
-            Infinity,
-            IssueSeverity.ERROR,
-            IssueCategory.STRUCTURAL
-          )
-        );
+        // Validate relation delay is non-negative
+        if (relation.delay !== undefined && relation.delay < 0) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Temporal relation ${relation.id} delay cannot be negative`,
+            suggestion: 'Use non-negative delay values',
+            category: 'structural',
+          });
+        }
       }
     }
 

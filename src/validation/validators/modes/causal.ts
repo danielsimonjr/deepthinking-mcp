@@ -68,16 +68,18 @@ export class CausalValidator extends BaseValidator<CausalThought> {
 
       // Detect cycles in causal graph
       const hasCycle = this.detectCycle(edges, nodeIds);
-      // Only warn about cycles if no feedback mechanisms are explicitly marked
-      const hasFeedbackMechanism = thought.mechanisms?.some(m => m.type === 'feedback');
-      if (hasCycle && !hasFeedbackMechanism) {
-        issues.push({
-          severity: 'warning',
-          thoughtNumber: thought.thoughtNumber,
-          description: 'Causal graph contains cycles (feedback loops)',
-          suggestion: 'Verify that cyclical relationships are intentional',
-          category: 'structural',
-        });
+      if (hasCycle) {
+        // Check if cycle is explained by a feedback mechanism
+        const hasFeedbackMechanism = thought.mechanisms?.some(m => m.type === 'feedback');
+        if (!hasFeedbackMechanism) {
+          issues.push({
+            severity: 'warning',
+            thoughtNumber: thought.thoughtNumber,
+            description: 'Causal graph contains cycles (feedback loops)',
+            suggestion: 'Verify that cyclical relationships are intentional',
+            category: 'structural',
+          });
+        }
       }
 
       // Check for isolated nodes

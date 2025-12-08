@@ -26,7 +26,15 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
 
     // Validate likelihood using shared method
     if (thought.likelihood !== undefined) {
-      issues.push(...this.validateProbability(thought, thought.likelihood.probability, 'Likelihood probability'));
+      if (thought.likelihood.probability < 0 || thought.likelihood.probability > 1) {
+        issues.push({
+          severity: 'error',
+          thoughtNumber: thought.thoughtNumber,
+          description: 'Likelihood probability must be between 0 and 1',
+          suggestion: 'Provide likelihood as decimal',
+          category: 'structural',
+        });
+      }
     }
 
     // Validate posterior probability
@@ -48,20 +56,24 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
     // Validate evidence likelihoods using shared method
     if (thought.evidence) {
       for (const evidence of thought.evidence) {
-        issues.push(
-          ...this.validateProbability(
-            thought,
-            evidence.likelihoodGivenHypothesis,
-            `Evidence "${evidence.description}" P(E|H)`
-          )
-        );
-        issues.push(
-          ...this.validateProbability(
-            thought,
-            evidence.likelihoodGivenNotHypothesis,
-            `Evidence "${evidence.description}" P(E|¬H)`
-          )
-        );
+        if (evidence.likelihoodGivenHypothesis < 0 || evidence.likelihoodGivenHypothesis > 1) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Evidence "${evidence.description}" has invalid P(E|H): ${evidence.likelihoodGivenHypothesis}`,
+            suggestion: 'Likelihood must be between 0 and 1',
+            category: 'structural',
+          });
+        }
+        if (evidence.likelihoodGivenNotHypothesis < 0 || evidence.likelihoodGivenNotHypothesis > 1) {
+          issues.push({
+            severity: 'error',
+            thoughtNumber: thought.thoughtNumber,
+            description: `Evidence "${evidence.description}" has invalid P(E|¬H): ${evidence.likelihoodGivenNotHypothesis}`,
+            suggestion: 'Likelihood must be between 0 and 1',
+            category: 'structural',
+          });
+        }
       }
     }
 
@@ -78,26 +90,27 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
       )
     );
 
-    // Provide info when Bayes factor > 1 (supports hypothesis)
-    if (thought.bayesFactor !== undefined && thought.bayesFactor > 1) {
-      issues.push({
-        severity: IssueSeverity.INFO,
-        thoughtNumber: thought.thoughtNumber,
-        description: `Bayes factor ${thought.bayesFactor.toFixed(2)} > 1: evidence supports hypothesis`,
-        suggestion: 'Evidence favors the hypothesis over the alternative',
-        category: IssueCategory.LOGICAL,
-      });
-    }
+      // Provide info when Bayes factor > 1 (supports hypothesis)
+      if (thought.bayesFactor > 1) {
+        issues.push({
+          severity: 'info',
+          thoughtNumber: thought.thoughtNumber,
+          description: `Bayes factor ${thought.bayesFactor.toFixed(2)} > 1, evidence supports hypothesis`,
+          suggestion: 'Evidence favors the hypothesis over the alternative',
+          category: 'interpretation',
+        });
+      }
 
-    // Provide info when Bayes factor < 1 (contradicts hypothesis)
-    if (thought.bayesFactor !== undefined && thought.bayesFactor < 1 && thought.bayesFactor >= 0) {
-      issues.push({
-        severity: IssueSeverity.INFO,
-        thoughtNumber: thought.thoughtNumber,
-        description: `Bayes factor ${thought.bayesFactor.toFixed(2)} < 1: evidence contradicts hypothesis`,
-        suggestion: 'Evidence favors the alternative over the hypothesis',
-        category: IssueCategory.LOGICAL,
-      });
+      // Provide info when Bayes factor < 1 (contradicts hypothesis)
+      if (thought.bayesFactor < 1 && thought.bayesFactor >= 0) {
+        issues.push({
+          severity: 'info',
+          thoughtNumber: thought.thoughtNumber,
+          description: `Bayes factor ${thought.bayesFactor.toFixed(2)} < 1, evidence contradicts hypothesis`,
+          suggestion: 'Evidence favors the alternative over the hypothesis',
+          category: 'interpretation',
+        });
+      }
     }
 
     return issues;
