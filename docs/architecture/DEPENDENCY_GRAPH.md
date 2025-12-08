@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 7.1.0 | **Last Updated**: 2025-12-07
+**Version**: 7.3.0 | **Last Updated**: 2025-12-08
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -49,7 +49,7 @@ The codebase is organized into the following modules:
 - **session**: 7 files
 - **taxonomy**: 7 files
 - **tools**: 16 files
-- **types**: 24 files
+- **types**: 25 files
 - **utils**: 6 files
 - **validation**: 39 files
 
@@ -1835,11 +1835,12 @@ The codebase is organized into the following modules:
 | `./modes/engineering.js` | `EngineeringThought` | Import (type-only) |
 | `./modes/computability.js` | `ComputabilityThought` | Import (type-only) |
 | `./modes/cryptanalytic.js` | `CryptanalyticThought` | Import (type-only) |
+| `./modes/algorithmic.js` | `AlgorithmicThought` | Import (type-only) |
 
 **Exports:**
 - Interfaces: `BaseThought`, `MathematicalModel`, `TensorProperties`, `PhysicalInterpretation`, `ProofStrategy`, `Theorem`, `Reference`, `SequentialThought`, `ShannonThought`, `MathematicsThought`, `PhysicsThought`, `HybridThought`, `Observation`, `Hypothesis`, `Evidence`, `EvaluationCriteria`, `AbductiveThought`, `InductiveThought`, `DeductiveThought`, `CausalNode`, `CausalEdge`, `CausalGraph`, `Intervention`, `CausalMechanism`, `Confounder`, `CounterfactualScenario`, `CausalThought`, `BayesianHypothesis`, `PriorProbability`, `Likelihood`, `BayesianEvidence`, `PosteriorProbability`, `SensitivityAnalysis`, `BayesianThought`, `Condition`, `Outcome`, `Scenario`, `Difference`, `CausalChain`, `InterventionPoint`, `CounterfactualComparison`, `CounterfactualThought`, `Entity`, `Relation`, `Property`, `Domain`, `Mapping`, `Insight`, `Inference`, `AnalogicalThought`
 - Enums: `ThinkingMode`, `ShannonStage`
-- Functions: `isFullyImplemented`, `isSequentialThought`, `isShannonThought`, `isMathematicsThought`, `isPhysicsThought`, `isHybridThought`, `isInductiveThought`, `isDeductiveThought`, `isAbductiveThought`, `isCausalThought`, `isBayesianThought`, `isCounterfactualThought`, `isAnalogicalThought`, `isTemporalThought`, `isGameTheoryThought`, `isEvidentialThought`, `isFirstPrinciplesThought`, `isSystemsThinkingThought`, `isScientificMethodThought`, `isOptimizationThought`, `isFormalLogicThought`, `isMetaReasoningThought`, `isEngineeringThought`, `isComputabilityThought`, `isCryptanalyticThought`
+- Functions: `isFullyImplemented`, `isSequentialThought`, `isShannonThought`, `isMathematicsThought`, `isPhysicsThought`, `isHybridThought`, `isInductiveThought`, `isDeductiveThought`, `isAbductiveThought`, `isCausalThought`, `isBayesianThought`, `isCounterfactualThought`, `isAnalogicalThought`, `isTemporalThought`, `isGameTheoryThought`, `isEvidentialThought`, `isFirstPrinciplesThought`, `isSystemsThinkingThought`, `isScientificMethodThought`, `isOptimizationThought`, `isFormalLogicThought`, `isMetaReasoningThought`, `isEngineeringThought`, `isComputabilityThought`, `isCryptanalyticThought`, `isAlgorithmicThought`
 - Constants: `FULLY_IMPLEMENTED_MODES`, `EXPERIMENTAL_MODES`
 
 ---
@@ -1859,6 +1860,20 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Re-exports: `* from ./core.js`, `* from ./session.js`, `* from ./modes/recommendations.js`, `type Requirement`, `type RequirementPriority`, `type RequirementSource`, `type RequirementStatus`, `type RequirementsTraceability`, `type TradeAlternative`, `type TradeCriterion`, `type TradeScore`, `type TradeStudy`, `type FailureMode`, `type FailureModeAnalysis`, `type SeverityRating`, `type OccurrenceRating`, `type DetectionRating`, `type DesignDecision`, `type DecisionStatus`, `type DecisionAlternative`, `type DesignDecisionLog`, `type EngineeringAnalysisType`, `isEngineeringThought`, `type ComputabilityThoughtType`, `type TuringTransition`, `type TuringMachine`, `type ComputationStep`, `type ComputationTrace`, `type DecisionProblem`, `type Reduction`, `type DiagonalizationArgument`, `type DecidabilityProof`, `type ComplexityAnalysis`, `type OracleAnalysis`, `type ClassicUndecidableProblem`, `isComputabilityThought`, `createSimpleMachine`, `reductionPreservesDecidability`, `isPolynomialReduction`, `type MinimaxAnalysis`, `type CooperativeGame`, `type CoalitionValue`, `type CoreAllocation`, `type CoalitionAnalysis`, `type ShapleyValueDetails`, `createCharacteristicFunction`, `checkSuperadditivity`, `calculateShapleyValue`, `type CryptanalyticThoughtType`, `type DecibanEvidence`, `type EvidenceChain`, `type KeySpaceAnalysis`, `type FrequencyAnalysis`, `type BanburismusAnalysis`, `type CribAnalysis`, `type CipherType`, `type CryptographicHypothesis`, `type IsomorphismPattern`, `isCryptanalyticThought`, `toDecibans`, `fromDecibans`, `decibansToOdds`, `decibansToProbability`, `accumulateEvidence`, `calculateIndexOfCoincidence`, `LANGUAGE_IC`, `ENGLISH_FREQUENCIES`
+
+---
+
+### `src/types/modes/algorithmic.ts` - Algorithmic Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `TimeComplexity`, `SpaceComplexity`, `LoopInvariant`, `CorrectnessProof`, `Recurrence`, `AlgorithmSpec`, `DPFormulation`, `GreedyProof`, `GraphAlgorithmContext`, `DataStructureSpec`, `AmortizedAnalysis`, `AlgorithmComparison`, `AlgorithmicThought`
+- Functions: `isAlgorithmicThought`, `suggestDesignPattern`, `applyMasterTheorem`
+- Constants: `COMMON_RECURRENCES`
 
 ---
 
@@ -2866,10 +2881,10 @@ The codebase is organized into the following modules:
 
 ## Circular Dependency Analysis
 
-**36 circular dependencies detected:**
+**37 circular dependencies detected:**
 
 - **Runtime cycles**: 0 (require attention)
-- **Type-only cycles**: 36 (safe, no runtime impact)
+- **Type-only cycles**: 37 (safe, no runtime impact)
 
 ### Type-Only Circular Dependencies
 
@@ -2885,7 +2900,7 @@ These cycles only involve type imports and are safe (erased at runtime):
 - src/types/core.ts -> src/types/modes/formallogic.ts -> src/types/core.ts
 - src/types/core.ts -> src/types/modes/metareasoning.ts -> src/types/core.ts
 - src/types/core.ts -> src/types/modes/engineering.ts -> src/types/core.ts
-- ... and 26 more
+- ... and 27 more
 
 ---
 
@@ -2995,10 +3010,10 @@ graph TD
     subgraph Types
         N60[core]
         N61[index]
-        N62[analogical]
-        N63[bayesian]
-        N64[causal]
-        N65[...19 more]
+        N62[algorithmic]
+        N63[analogical]
+        N64[bayesian]
+        N65[...20 more]
     end
 
     subgraph Utils
@@ -3057,21 +3072,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 178 |
+| Total TypeScript Files | 179 |
 | Total Modules | 16 |
-| Total Lines of Code | 70593 |
-| Total Exports | 888 |
+| Total Lines of Code | 72182 |
+| Total Exports | 893 |
 | Total Re-exports | 340 |
 | Total Classes | 92 |
-| Total Interfaces | 388 |
-| Total Functions | 311 |
-| Total Type Guards | 56 |
+| Total Interfaces | 401 |
+| Total Functions | 315 |
+| Total Type Guards | 58 |
 | Total Enums | 3 |
-| Type-only Imports | 137 |
+| Type-only Imports | 138 |
 | Runtime Circular Deps | 0 |
-| Type-only Circular Deps | 36 |
+| Type-only Circular Deps | 37 |
 
 ---
 
-*Last Updated*: 2025-12-07
-*Version*: 7.1.0
+*Last Updated*: 2025-12-08
+*Version*: 7.3.0
