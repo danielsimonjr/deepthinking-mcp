@@ -9,6 +9,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ Features
 
+*No unreleased changes*
+
+---
+
+## [7.4.0] - 2025-12-08
+
+### ✨ Features
+
+**Academic Research Modes (Phase 13 - PhD Students & Scientific Writing)**
+
+Added 4 new academic research modes designed for PhD students and scientific paper writing, bringing the total to 33 thinking modes.
+
+#### New Academic Research Modes
+
+- **Synthesis Mode** (`src/types/modes/synthesis.ts`) - Literature review and knowledge integration:
+  - Literature synthesis across multiple sources
+  - Theme extraction and pattern identification
+  - Knowledge integration and gap analysis
+  - Cross-disciplinary synthesis
+
+- **Argumentation Mode** (`src/types/modes/argumentation.ts`) - Academic argumentation:
+  - Toulmin model support (claim, data, warrant, backing, qualifier, rebuttal)
+  - Dialectical reasoning structures
+  - Rhetorical analysis capabilities
+  - Counter-argument development
+
+- **Critique Mode** (`src/types/modes/critique.ts`) - Critical analysis:
+  - Systematic peer review frameworks
+  - Methodology evaluation
+  - Evidence quality assessment
+  - Strengths/weaknesses analysis
+
+- **Analysis Mode** (`src/types/modes/analysis.ts`) - Qualitative analysis methods:
+  - Thematic analysis
+  - Grounded theory approach
+  - Discourse analysis
+  - Content analysis frameworks
+
+#### New Documentation
+- `docs/modes/SYNTHESIS.md` - Comprehensive guide for synthesis mode
+- `docs/modes/ARGUMENTATION.md` - Complete argumentation documentation
+- `docs/modes/CRITIQUE.md` - Critical analysis mode guide
+- `docs/modes/ANALYSIS.md` - Qualitative analysis documentation
+
+#### Updated Core Files
+- `src/types/core.ts` - Added 4 new ThinkingMode enum values
+- `src/types/index.ts` - Exported new type definitions
+- `src/taxonomy/adaptive-selector.ts` - Added mode affinities for new modes
+
+---
+
+## [7.3.0] - 2025-12-07
+
+### ✨ Features
+
 **Algorithmic Reasoning Mode (Phase 12 - CLRS Comprehensive Coverage)**
 
 Added new ALGORITHMIC reasoning mode with comprehensive coverage of algorithms from "Introduction to Algorithms" (CLRS) and beyond, bringing the total to 29 thinking modes.
@@ -70,6 +125,12 @@ Added new ALGORITHMIC reasoning mode with comprehensive coverage of algorithms f
 - `string_matching` - Pattern matching
 - `computational_geometry` - Geometric algorithms
 - `approximation` - Approximation algorithms
+
+---
+
+## [7.2.0] - 2025-12-07
+
+### ✨ Features
 
 **Historical Computing Pioneers Extensions (Phase 11 - Turing & von Neumann)**
 
