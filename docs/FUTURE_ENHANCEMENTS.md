@@ -12,11 +12,11 @@ This document outlines the comprehensive roadmap for DeepThinking MCP evolution 
 - ✅ Session management with metrics
 
 **Document Sections**:
-1. [Near-Term Enhancements (v2.5-v3.0)](#near-term-enhancements)
-2. [Mid-Term Capabilities (v3.x-v4.0)](#mid-term-capabilities)
-3. [Long-Term Vision (v5.0+)](#long-term-vision)
-4. [Research & Innovation](#research--innovation)
-5. [Ecosystem & Integration](#ecosystem--integration)
+1. [Near-Term Enhancements (v2.5-v3.0)](#1-near-term-enhancements-v25-v30)
+2. [Mid-Term Capabilities (v3.x-v4.0)](#2-mid-term-capabilities-v3x-v40)
+3. [Long-Term Vision (v5.0+)](#3-long-term-vision-v50)
+4. [Research & Innovation](#4-research--innovation)
+5. [Ecosystem & Integration](#5-ecosystem--integration)
 
 ---
 
