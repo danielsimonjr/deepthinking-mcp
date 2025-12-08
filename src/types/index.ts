@@ -1,5 +1,5 @@
 /**
- * Type definitions index (v7.1.0)
+ * Type definitions index (v7.4.0)
  * Exports all types for the DeepThinking MCP server
  *
  * Note: All thought types are exported from core.ts to avoid duplicate exports.
@@ -91,3 +91,88 @@ export {
   LANGUAGE_IC,
   ENGLISH_FREQUENCIES,
 } from './modes/cryptanalytic.js';
+
+// Export synthesis-specific types (Phase 13 v7.4.0 - Academic Research)
+export {
+  type SynthesisThoughtType,
+  type SourceType,
+  type SourceQuality,
+  type Source,
+  type Concept,
+  type Theme,
+  type Finding,
+  type Pattern,
+  type ConceptRelation,
+  type LiteratureGap,
+  type Contradiction,
+  type ConceptualFramework,
+  type SynthesisConclusion,
+  type ReviewMetadata,
+  isSynthesisThought,
+} from './modes/synthesis.js';
+
+// Export argumentation-specific types (Phase 13 v7.4.0 - Academic Research)
+export {
+  type ArgumentationThoughtType,
+  type Claim,
+  type Grounds,
+  type Warrant,
+  type Backing,
+  type Qualifier,
+  type Rebuttal,
+  type RebuttalResponse,
+  type ToulminArgument,
+  type ArgumentChain,
+  type DialecticPosition,
+  type DialecticAnalysis,
+  type RhetoricalAppeal,
+  type RhetoricalStrategy,
+  type AudienceConsideration,
+  type LogicalFallacy,
+  isArgumentationThought,
+} from './modes/argumentation.js';
+
+// Export critique-specific types (Phase 13 v7.4.0 - Academic Research)
+export {
+  type CritiqueThoughtType,
+  type WorkType,
+  type CritiquedWork,
+  type DesignAssessment,
+  type SampleAssessment,
+  type AnalysisAssessment,
+  type MethodologyEvaluation,
+  type ValidityAssessment,
+  type LogicalStructure,
+  type ArgumentCritique,
+  type EvidenceQuality,
+  type EvidenceUseCritique,
+  type NoveltyAssessment,
+  type ImpactAssessment,
+  type ContributionEvaluation,
+  type CritiquePoint,
+  type ImprovementSuggestion,
+  type CritiqueVerdict,
+  isCritiqueThought,
+} from './modes/critique.js';
+
+// Export analysis-specific types (Phase 13 v7.4.0 - Academic Research)
+export {
+  type AnalysisThoughtType,
+  type AnalysisMethodology,
+  type DataSource,
+  type DataSegment,
+  type CodeType,
+  type Code,
+  type CodeCooccurrence,
+  type Codebook,
+  type ThemeLevel,
+  type QualitativeTheme,
+  type ThematicMap,
+  type MemoType,
+  type AnalyticalMemo,
+  type GTCategory,
+  type TheoreticalSampling,
+  type DiscoursePattern,
+  type QualitativeRigor,
+  isAnalysisThought,
+} from './modes/analysis.js';
