@@ -205,19 +205,20 @@ export const deepthinking_standard_schema = {
 } as const;
 
 /**
- * deepthinking_mathematics - Mathematics and Physics modes
+ * deepthinking_mathematics - Mathematics, Physics, and Computability modes
  * Phase 8: Added proof decomposition fields
+ * Phase 14: Added computability mode
  */
 export const deepthinking_mathematics_schema = {
   name: "deepthinking_mathematics",
-  description: "Math/physics: proofs, proof decomposition, consistency checking, tensors, LaTeX, conservation laws",
+  description: "Math/physics/computability: proofs, Turing machines, decidability, tensors, LaTeX, conservation laws",
   inputSchema: {
     type: "object",
     properties: {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["mathematics", "physics"],
+        enum: ["mathematics", "physics", "computability"],
         description: "Mathematical reasoning mode"
       },
       thoughtType: {
@@ -777,18 +778,19 @@ export const deepthinking_strategic_schema = {
 } as const;
 
 /**
- * deepthinking_analytical - Analogical, First Principles, and Meta-Reasoning
+ * deepthinking_analytical - Analogical, First Principles, Meta-Reasoning, and Cryptanalytic
+ * Phase 14: Added cryptanalytic mode
  */
 export const deepthinking_analytical_schema = {
   name: "deepthinking_analytical",
-  description: "Analytical: analogical mapping, first principles, meta-reasoning",
+  description: "Analytical: analogical mapping, first principles, meta-reasoning, cryptanalytic (decibans)",
   inputSchema: {
     type: "object",
     properties: {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["analogical", "firstprinciples", "metareasoning"],
+        enum: ["analogical", "firstprinciples", "metareasoning", "cryptanalytic"],
         description: "Analytical reasoning mode"
       },
       sourceAnalogy: {
@@ -957,6 +959,219 @@ export const deepthinking_scientific_schema = {
 } as const;
 
 /**
+ * deepthinking_engineering - Engineering and Algorithmic modes
+ * Phase 14: New tool for engineering-focused reasoning
+ */
+export const deepthinking_engineering_schema = {
+  name: "deepthinking_engineering",
+  description: "Engineering: requirements, trade studies, FMEA, ADRs, algorithm design (CLRS)",
+  inputSchema: {
+    type: "object",
+    properties: {
+      ...baseThoughtProperties,
+      mode: {
+        type: "string",
+        enum: ["engineering", "algorithmic"],
+        description: "Engineering reasoning mode"
+      },
+      // Engineering-specific properties
+      requirementId: {
+        type: "string",
+        description: "Requirement ID being analyzed"
+      },
+      tradeStudy: {
+        type: "object",
+        properties: {
+          options: {
+            type: "array",
+            items: { type: "string" },
+            description: "Options being compared"
+          },
+          criteria: {
+            type: "array",
+            items: { type: "string" },
+            description: "Evaluation criteria"
+          },
+          weights: {
+            type: "object",
+            additionalProperties: { type: "number" },
+            description: "Criteria weights"
+          }
+        },
+        additionalProperties: false,
+        description: "Trade study configuration"
+      },
+      fmeaEntry: {
+        type: "object",
+        properties: {
+          failureMode: { type: "string" },
+          severity: { type: "integer", minimum: 1, maximum: 10 },
+          occurrence: { type: "integer", minimum: 1, maximum: 10 },
+          detection: { type: "integer", minimum: 1, maximum: 10 },
+          rpn: { type: "integer", description: "Risk Priority Number = S * O * D" }
+        },
+        additionalProperties: false,
+        description: "FMEA analysis entry"
+      },
+      // Algorithmic-specific properties
+      algorithmName: {
+        type: "string",
+        description: "Name of the algorithm being analyzed"
+      },
+      designPattern: {
+        type: "string",
+        enum: ["divide-and-conquer", "dynamic-programming", "greedy", "backtracking", "branch-and-bound", "randomized", "approximation"],
+        description: "Algorithm design pattern"
+      },
+      complexityAnalysis: {
+        type: "object",
+        properties: {
+          timeComplexity: { type: "string", description: "Time complexity (e.g., O(n log n))" },
+          spaceComplexity: { type: "string", description: "Space complexity (e.g., O(n))" },
+          bestCase: { type: "string" },
+          averageCase: { type: "string" },
+          worstCase: { type: "string" }
+        },
+        additionalProperties: false,
+        description: "Complexity analysis"
+      },
+      correctnessProof: {
+        type: "object",
+        properties: {
+          invariant: { type: "string", description: "Loop invariant" },
+          termination: { type: "string", description: "Termination argument" },
+          correctness: { type: "string", description: "Correctness proof" }
+        },
+        additionalProperties: false,
+        description: "Algorithm correctness proof"
+      }
+    },
+    required: [...baseThoughtRequired],
+    additionalProperties: false
+  }
+} as const;
+
+/**
+ * deepthinking_academic - Academic Research modes
+ * Phase 14: New tool for academic research reasoning
+ * Designed for PhD students and scientific paper writing
+ */
+export const deepthinking_academic_schema = {
+  name: "deepthinking_academic",
+  description: "Academic: synthesis (literature review), argumentation (Toulmin), critique (peer review), analysis (qualitative)",
+  inputSchema: {
+    type: "object",
+    properties: {
+      ...baseThoughtProperties,
+      mode: {
+        type: "string",
+        enum: ["synthesis", "argumentation", "critique", "analysis"],
+        description: "Academic research reasoning mode"
+      },
+      // Synthesis-specific properties
+      sources: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            citation: { type: "string" },
+            keyFindings: { type: "array", items: { type: "string" } },
+            methodology: { type: "string" },
+            relevance: { type: "number", minimum: 0, maximum: 1 }
+          },
+          additionalProperties: false
+        },
+        description: "Literature sources being synthesized"
+      },
+      themes: {
+        type: "array",
+        items: { type: "string" },
+        description: "Identified themes across sources"
+      },
+      researchGaps: {
+        type: "array",
+        items: { type: "string" },
+        description: "Identified gaps in the literature"
+      },
+      // Argumentation-specific properties (Toulmin model)
+      claim: {
+        type: "string",
+        description: "Main claim or thesis"
+      },
+      data: {
+        type: "array",
+        items: { type: "string" },
+        description: "Evidence supporting the claim"
+      },
+      warrant: {
+        type: "string",
+        description: "Reasoning connecting data to claim"
+      },
+      backing: {
+        type: "string",
+        description: "Support for the warrant"
+      },
+      qualifier: {
+        type: "string",
+        description: "Degree of certainty (e.g., 'probably', 'likely')"
+      },
+      rebuttal: {
+        type: "string",
+        description: "Potential counter-arguments"
+      },
+      // Critique-specific properties
+      strengths: {
+        type: "array",
+        items: { type: "string" },
+        description: "Identified strengths"
+      },
+      weaknesses: {
+        type: "array",
+        items: { type: "string" },
+        description: "Identified weaknesses"
+      },
+      methodologyAssessment: {
+        type: "object",
+        properties: {
+          validity: { type: "string" },
+          reliability: { type: "string" },
+          limitations: { type: "array", items: { type: "string" } }
+        },
+        additionalProperties: false,
+        description: "Assessment of methodology"
+      },
+      // Analysis-specific properties
+      analysisMethod: {
+        type: "string",
+        enum: ["thematic", "grounded-theory", "discourse", "content", "narrative", "phenomenological"],
+        description: "Qualitative analysis method"
+      },
+      codes: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            code: { type: "string" },
+            description: { type: "string" },
+            examples: { type: "array", items: { type: "string" } }
+          },
+          additionalProperties: false
+        },
+        description: "Coding scheme for analysis"
+      },
+      categories: {
+        type: "array",
+        items: { type: "string" },
+        description: "Categories derived from codes"
+      }
+    },
+    required: [...baseThoughtRequired],
+    additionalProperties: false
+  }
+} as const;
+
+/**
  * deepthinking_session - Session management actions
  */
 export const deepthinking_session_schema = {
@@ -1024,7 +1239,8 @@ export const deepthinking_session_schema = {
 } as const;
 
 /**
- * All tool schemas as array
+ * All tool schemas as array (12 focused tools)
+ * Phase 14: Added deepthinking_engineering and deepthinking_academic
  */
 export const jsonSchemas = [
   deepthinking_core_schema,
@@ -1036,5 +1252,7 @@ export const jsonSchemas = [
   deepthinking_strategic_schema,
   deepthinking_analytical_schema,
   deepthinking_scientific_schema,
+  deepthinking_engineering_schema,
+  deepthinking_academic_schema,
   deepthinking_session_schema,
 ] as const;

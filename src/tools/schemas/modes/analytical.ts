@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { BaseThoughtSchema } from '../base.js';
 
 export const AnalyticalSchema = BaseThoughtSchema.extend({
-  mode: z.enum(['analogical', 'firstprinciples', 'metareasoning']),
+  mode: z.enum(['analogical', 'firstprinciples', 'metareasoning', 'cryptanalytic']),
 });
 
 export type AnalyticalInput = z.infer<typeof AnalyticalSchema>;

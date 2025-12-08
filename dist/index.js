@@ -28621,14 +28621,14 @@ var deepthinking_standard_schema = {
 };
 var deepthinking_mathematics_schema = {
   name: "deepthinking_mathematics",
-  description: "Math/physics: proofs, proof decomposition, consistency checking, tensors, LaTeX, conservation laws",
+  description: "Math/physics/computability: proofs, Turing machines, decidability, tensors, LaTeX, conservation laws",
   inputSchema: {
     type: "object",
     properties: {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["mathematics", "physics"],
+        enum: ["mathematics", "physics", "computability"],
         description: "Mathematical reasoning mode"
       },
       thoughtType: {
@@ -29172,14 +29172,14 @@ var deepthinking_strategic_schema = {
 };
 var deepthinking_analytical_schema = {
   name: "deepthinking_analytical",
-  description: "Analytical: analogical mapping, first principles, meta-reasoning",
+  description: "Analytical: analogical mapping, first principles, meta-reasoning, cryptanalytic (decibans)",
   inputSchema: {
     type: "object",
     properties: {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["analogical", "firstprinciples", "metareasoning"],
+        enum: ["analogical", "firstprinciples", "metareasoning", "cryptanalytic"],
         description: "Analytical reasoning mode"
       },
       sourceAnalogy: {
@@ -29342,6 +29342,208 @@ var deepthinking_scientific_schema = {
     additionalProperties: false
   }
 };
+var deepthinking_engineering_schema = {
+  name: "deepthinking_engineering",
+  description: "Engineering: requirements, trade studies, FMEA, ADRs, algorithm design (CLRS)",
+  inputSchema: {
+    type: "object",
+    properties: {
+      ...baseThoughtProperties,
+      mode: {
+        type: "string",
+        enum: ["engineering", "algorithmic"],
+        description: "Engineering reasoning mode"
+      },
+      // Engineering-specific properties
+      requirementId: {
+        type: "string",
+        description: "Requirement ID being analyzed"
+      },
+      tradeStudy: {
+        type: "object",
+        properties: {
+          options: {
+            type: "array",
+            items: { type: "string" },
+            description: "Options being compared"
+          },
+          criteria: {
+            type: "array",
+            items: { type: "string" },
+            description: "Evaluation criteria"
+          },
+          weights: {
+            type: "object",
+            additionalProperties: { type: "number" },
+            description: "Criteria weights"
+          }
+        },
+        additionalProperties: false,
+        description: "Trade study configuration"
+      },
+      fmeaEntry: {
+        type: "object",
+        properties: {
+          failureMode: { type: "string" },
+          severity: { type: "integer", minimum: 1, maximum: 10 },
+          occurrence: { type: "integer", minimum: 1, maximum: 10 },
+          detection: { type: "integer", minimum: 1, maximum: 10 },
+          rpn: { type: "integer", description: "Risk Priority Number = S * O * D" }
+        },
+        additionalProperties: false,
+        description: "FMEA analysis entry"
+      },
+      // Algorithmic-specific properties
+      algorithmName: {
+        type: "string",
+        description: "Name of the algorithm being analyzed"
+      },
+      designPattern: {
+        type: "string",
+        enum: ["divide-and-conquer", "dynamic-programming", "greedy", "backtracking", "branch-and-bound", "randomized", "approximation"],
+        description: "Algorithm design pattern"
+      },
+      complexityAnalysis: {
+        type: "object",
+        properties: {
+          timeComplexity: { type: "string", description: "Time complexity (e.g., O(n log n))" },
+          spaceComplexity: { type: "string", description: "Space complexity (e.g., O(n))" },
+          bestCase: { type: "string" },
+          averageCase: { type: "string" },
+          worstCase: { type: "string" }
+        },
+        additionalProperties: false,
+        description: "Complexity analysis"
+      },
+      correctnessProof: {
+        type: "object",
+        properties: {
+          invariant: { type: "string", description: "Loop invariant" },
+          termination: { type: "string", description: "Termination argument" },
+          correctness: { type: "string", description: "Correctness proof" }
+        },
+        additionalProperties: false,
+        description: "Algorithm correctness proof"
+      }
+    },
+    required: [...baseThoughtRequired],
+    additionalProperties: false
+  }
+};
+var deepthinking_academic_schema = {
+  name: "deepthinking_academic",
+  description: "Academic: synthesis (literature review), argumentation (Toulmin), critique (peer review), analysis (qualitative)",
+  inputSchema: {
+    type: "object",
+    properties: {
+      ...baseThoughtProperties,
+      mode: {
+        type: "string",
+        enum: ["synthesis", "argumentation", "critique", "analysis"],
+        description: "Academic research reasoning mode"
+      },
+      // Synthesis-specific properties
+      sources: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            citation: { type: "string" },
+            keyFindings: { type: "array", items: { type: "string" } },
+            methodology: { type: "string" },
+            relevance: { type: "number", minimum: 0, maximum: 1 }
+          },
+          additionalProperties: false
+        },
+        description: "Literature sources being synthesized"
+      },
+      themes: {
+        type: "array",
+        items: { type: "string" },
+        description: "Identified themes across sources"
+      },
+      researchGaps: {
+        type: "array",
+        items: { type: "string" },
+        description: "Identified gaps in the literature"
+      },
+      // Argumentation-specific properties (Toulmin model)
+      claim: {
+        type: "string",
+        description: "Main claim or thesis"
+      },
+      data: {
+        type: "array",
+        items: { type: "string" },
+        description: "Evidence supporting the claim"
+      },
+      warrant: {
+        type: "string",
+        description: "Reasoning connecting data to claim"
+      },
+      backing: {
+        type: "string",
+        description: "Support for the warrant"
+      },
+      qualifier: {
+        type: "string",
+        description: "Degree of certainty (e.g., 'probably', 'likely')"
+      },
+      rebuttal: {
+        type: "string",
+        description: "Potential counter-arguments"
+      },
+      // Critique-specific properties
+      strengths: {
+        type: "array",
+        items: { type: "string" },
+        description: "Identified strengths"
+      },
+      weaknesses: {
+        type: "array",
+        items: { type: "string" },
+        description: "Identified weaknesses"
+      },
+      methodologyAssessment: {
+        type: "object",
+        properties: {
+          validity: { type: "string" },
+          reliability: { type: "string" },
+          limitations: { type: "array", items: { type: "string" } }
+        },
+        additionalProperties: false,
+        description: "Assessment of methodology"
+      },
+      // Analysis-specific properties
+      analysisMethod: {
+        type: "string",
+        enum: ["thematic", "grounded-theory", "discourse", "content", "narrative", "phenomenological"],
+        description: "Qualitative analysis method"
+      },
+      codes: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            code: { type: "string" },
+            description: { type: "string" },
+            examples: { type: "array", items: { type: "string" } }
+          },
+          additionalProperties: false
+        },
+        description: "Coding scheme for analysis"
+      },
+      categories: {
+        type: "array",
+        items: { type: "string" },
+        description: "Categories derived from codes"
+      }
+    },
+    required: [...baseThoughtRequired],
+    additionalProperties: false
+  }
+};
 var deepthinking_session_schema = {
   name: "deepthinking_session",
   description: "Session: summarize, export, get, switch_mode, recommend",
@@ -29415,6 +29617,8 @@ var jsonSchemas = [
   deepthinking_strategic_schema,
   deepthinking_analytical_schema,
   deepthinking_scientific_schema,
+  deepthinking_engineering_schema,
+  deepthinking_academic_schema,
   deepthinking_session_schema
 ];
 
@@ -29602,7 +29806,7 @@ var ProofStepInputSchema = z.object({
   referencesSteps: z.array(z.number()).optional()
 });
 var MathSchema = BaseThoughtSchema.extend({
-  mode: z.enum(["mathematics", "physics"]),
+  mode: z.enum(["mathematics", "physics", "computability"]),
   thoughtType: z.string().optional(),
   proofStrategy: ProofStrategySchema.optional(),
   mathematicalModel: MathematicalModelSchema.optional(),
@@ -29765,13 +29969,25 @@ var StrategicSchema = BaseThoughtSchema.extend({
 // src/tools/schemas/modes/analytical.ts
 init_esm_shims();
 var AnalyticalSchema = BaseThoughtSchema.extend({
-  mode: z.enum(["analogical", "firstprinciples", "metareasoning"])
+  mode: z.enum(["analogical", "firstprinciples", "metareasoning", "cryptanalytic"])
 });
 
 // src/tools/schemas/modes/scientific.ts
 init_esm_shims();
 var ScientificSchema = BaseThoughtSchema.extend({
   mode: z.enum(["scientificmethod", "systemsthinking", "formallogic"])
+});
+
+// src/tools/schemas/modes/engineering.ts
+init_esm_shims();
+var EngineeringSchema = BaseThoughtSchema.extend({
+  mode: z.enum(["engineering", "algorithmic"])
+});
+
+// src/tools/schemas/modes/academic.ts
+init_esm_shims();
+var AcademicSchema = BaseThoughtSchema.extend({
+  mode: z.enum(["synthesis", "argumentation", "critique", "analysis"])
 });
 var toolList = jsonSchemas;
 var toolSchemas = {
@@ -29784,6 +30000,8 @@ var toolSchemas = {
   deepthinking_strategic: StrategicSchema,
   deepthinking_analytical: AnalyticalSchema,
   deepthinking_scientific: ScientificSchema,
+  deepthinking_engineering: EngineeringSchema,
+  deepthinking_academic: AcademicSchema,
   deepthinking_session: SessionActionSchema
 };
 var modeToToolMap = {
@@ -29795,28 +30013,38 @@ var modeToToolMap = {
   sequential: "deepthinking_standard",
   shannon: "deepthinking_standard",
   hybrid: "deepthinking_standard",
-  // Math/Physics modes
+  // Math/Physics/Computability modes
   mathematics: "deepthinking_mathematics",
   physics: "deepthinking_mathematics",
+  computability: "deepthinking_mathematics",
   // Temporal mode
   temporal: "deepthinking_temporal",
   // Probabilistic modes
   bayesian: "deepthinking_probabilistic",
   evidential: "deepthinking_probabilistic",
-  // Causal modes (abductive moved to core)
+  // Causal modes
   causal: "deepthinking_causal",
   counterfactual: "deepthinking_causal",
   // Strategic modes
   gametheory: "deepthinking_strategic",
   optimization: "deepthinking_strategic",
-  // Analytical modes
+  // Analytical modes (includes cryptanalytic)
   analogical: "deepthinking_analytical",
   firstprinciples: "deepthinking_analytical",
   metareasoning: "deepthinking_analytical",
+  cryptanalytic: "deepthinking_analytical",
   // Scientific modes
   scientificmethod: "deepthinking_scientific",
   systemsthinking: "deepthinking_scientific",
-  formallogic: "deepthinking_scientific"
+  formallogic: "deepthinking_scientific",
+  // Engineering modes (Phase 14)
+  engineering: "deepthinking_engineering",
+  algorithmic: "deepthinking_engineering",
+  // Academic research modes (Phase 14)
+  synthesis: "deepthinking_academic",
+  argumentation: "deepthinking_academic",
+  critique: "deepthinking_academic",
+  analysis: "deepthinking_academic"
 };
 function isValidTool(toolName) {
   return toolName in toolSchemas;

@@ -47,7 +47,7 @@ const ProofStepInputSchema = z.object({
 });
 
 export const MathSchema = BaseThoughtSchema.extend({
-  mode: z.enum(['mathematics', 'physics']),
+  mode: z.enum(['mathematics', 'physics', 'computability']),
   thoughtType: z.string().optional(),
   proofStrategy: ProofStrategySchema.optional(),
   mathematicalModel: MathematicalModelSchema.optional(),

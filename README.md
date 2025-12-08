@@ -6,15 +6,15 @@
 
 A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning modes** (29 with dedicated thought types, 4 advanced runtime modes) including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
-> 📋 **Latest Release**: v7.4.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
+> 📋 **Latest Release**: v7.5.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
 >
-> 🎉 **New in v7.4.0**: Phase 13 Academic Research Modes for PhD students! Synthesis (literature review), Argumentation (Toulmin model), Critique (peer review), and Analysis (qualitative methods) modes.
+> 🎉 **New in v7.5.0**: Phase 14 Accessible Reasoning Modes! All 29 modes with dedicated thought types are now accessible via MCP tools. 2 new tools: `deepthinking_engineering` and `deepthinking_academic`. Total: 12 focused tools.
+>
+> ✨ **v7.4.0**: Phase 13 Academic Research Modes for PhD students! Synthesis (literature review), Argumentation (Toulmin model), Critique (peer review), and Analysis (qualitative methods) modes.
 >
 > ✨ **v7.3.0**: Phase 12 Algorithmic Reasoning Mode with comprehensive CLRS coverage! 100+ named algorithms, complexity analysis, design patterns.
 >
 > ✨ **v7.2.0**: Phase 11 Historical Computing Extensions! Computability mode (Turing machines), Cryptanalytic mode (deciban evidence system), extended Game Theory (von Neumann).
->
-> ✨ **v7.0.0**: Phase 8 Proof Decomposition System with native SVG export! Break proofs into atomic statements, detect gaps and implicit assumptions, track assumption chains.
 
 ## Table of Contents
 
@@ -86,20 +86,22 @@ Add to your MCP settings file:
 
 ### MCP Tool Usage
 
-DeepThinking MCP provides 10 focused tools for different reasoning domains:
+DeepThinking MCP provides 12 focused tools for different reasoning domains:
 
 | Tool | Modes | Description |
 |------|-------|-------------|
 | `deepthinking_core` | inductive, deductive, abductive | Fundamental reasoning |
 | `deepthinking_standard` | sequential, shannon, hybrid | Standard workflow modes |
-| `deepthinking_mathematics` | mathematics, physics | Mathematical/scientific reasoning |
+| `deepthinking_mathematics` | mathematics, physics, computability | Math/physics/computability |
 | `deepthinking_temporal` | temporal | Time-based reasoning |
 | `deepthinking_probabilistic` | bayesian, evidential | Probabilistic reasoning |
 | `deepthinking_causal` | causal, counterfactual | Cause-effect analysis |
 | `deepthinking_strategic` | gametheory, optimization | Strategic reasoning |
-| `deepthinking_analytical` | analogical, firstprinciples, metareasoning | Analytical reasoning |
+| `deepthinking_analytical` | analogical, firstprinciples, metareasoning, cryptanalytic | Analytical reasoning |
 | `deepthinking_scientific` | scientificmethod, systemsthinking, formallogic | Scientific reasoning |
-| `deepthinking_session` | - | Session management (summarize, export, switch_mode) |
+| `deepthinking_engineering` | engineering, algorithmic | Engineering/algorithmic |
+| `deepthinking_academic` | synthesis, argumentation, critique, analysis | Academic research |
+| `deepthinking_session` | - | Session management |
 
 ### Example: Sequential Reasoning
 

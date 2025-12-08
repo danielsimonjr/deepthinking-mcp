@@ -90,27 +90,26 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
       )
     );
 
-      // Provide info when Bayes factor > 1 (supports hypothesis)
-      if (thought.bayesFactor > 1) {
-        issues.push({
-          severity: 'info',
-          thoughtNumber: thought.thoughtNumber,
-          description: `Bayes factor ${thought.bayesFactor.toFixed(2)} > 1, evidence supports hypothesis`,
-          suggestion: 'Evidence favors the hypothesis over the alternative',
-          category: 'interpretation',
-        });
-      }
+    // Provide info when Bayes factor > 1 (supports hypothesis)
+    if (thought.bayesFactor !== undefined && thought.bayesFactor > 1) {
+      issues.push({
+        severity: 'info',
+        thoughtNumber: thought.thoughtNumber,
+        description: `Bayes factor ${thought.bayesFactor.toFixed(2)} > 1, evidence supports hypothesis`,
+        suggestion: 'Evidence favors the hypothesis over the alternative',
+        category: 'interpretation',
+      });
+    }
 
-      // Provide info when Bayes factor < 1 (contradicts hypothesis)
-      if (thought.bayesFactor < 1 && thought.bayesFactor >= 0) {
-        issues.push({
-          severity: 'info',
-          thoughtNumber: thought.thoughtNumber,
-          description: `Bayes factor ${thought.bayesFactor.toFixed(2)} < 1, evidence contradicts hypothesis`,
-          suggestion: 'Evidence favors the alternative over the hypothesis',
-          category: 'interpretation',
-        });
-      }
+    // Provide info when Bayes factor < 1 (contradicts hypothesis)
+    if (thought.bayesFactor !== undefined && thought.bayesFactor < 1 && thought.bayesFactor >= 0) {
+      issues.push({
+        severity: 'info',
+        thoughtNumber: thought.thoughtNumber,
+        description: `Bayes factor ${thought.bayesFactor.toFixed(2)} < 1, evidence contradicts hypothesis`,
+        suggestion: 'Evidence favors the alternative over the hypothesis',
+        category: 'interpretation',
+      });
     }
 
     return issues;
