@@ -42,7 +42,7 @@
     "@vitest/coverage-v8": "^4.0.14",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.1",
-    "prettier": "^3.7.3",
+    "prettier": "^3.7.4",
     "tsup": "^8.5.1",
     "tsx": "^4.19.0",
     "typescript": "^5.3.3",
