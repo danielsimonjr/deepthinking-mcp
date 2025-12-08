@@ -166,8 +166,8 @@ The server supports 33 reasoning modes organized into categories:
 - **Algorithmic (1)**: Algorithmic (CLRS) - *v7.3.0*
 - **Academic Research (4)**: Synthesis, Argumentation, Critique, Analysis - *v7.4.0*
 - **Advanced Runtime Modes (6)**: Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
-- **Fundamental Modes (2)**: Inductive, Deductive
-- **Experimental Modes (13)**: Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory (+ von Neumann extensions), Evidential, First Principles, Systems Thinking, Scientific Method, Formal Logic, Engineering
+- **Fundamental Modes (3)**: Inductive, Deductive, Abductive
+- **Experimental Modes (12)**: Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory (+ von Neumann extensions), Evidential, First Principles, Systems Thinking, Scientific Method, Formal Logic, Engineering
 
 ### Core Modes
 
@@ -212,14 +212,6 @@ mode: 'hybrid'
 ```
 
 ### Advanced Modes
-
-#### Abductive
-Generate and evaluate hypotheses to explain observations.
-
-```typescript
-mode: 'abductive'
-// Use for: Debugging, root cause analysis, diagnostic reasoning
-```
 
 #### Causal
 Build causal graphs, analyze interventions and effects.
@@ -381,6 +373,14 @@ Reasoning from general principles to specific conclusions.
 ```typescript
 mode: 'deductive'
 // Use for: Logical proofs, applying rules, deriving conclusions
+```
+
+#### Abductive
+Generate and evaluate hypotheses to explain observations.
+
+```typescript
+mode: 'abductive'
+// Use for: Debugging, root cause analysis, diagnostic reasoning
 ```
 
 ### Historical Computing Modes (v7.2.0)
