@@ -3,9 +3,9 @@
     "name": "deepthinking-mcp",
     "version": "7.3.0",
     "lastUpdated": "2025-12-08",
-    "totalFiles": 179,
+    "totalFiles": 183,
     "totalModules": 16,
-    "totalExports": 893
+    "totalExports": 970
   },
   "entryPoints": [
     {
@@ -6562,7 +6562,7 @@
     },
     "types": {
       "src/types/core.ts": {
-        "description": "Core type definitions for the DeepThinking MCP server v7.1.0",
+        "description": "Core type definitions for the DeepThinking MCP server v7.4.0",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -6656,6 +6656,34 @@
               "AlgorithmicThought"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "./modes/synthesis.js",
+            "imports": [
+              "SynthesisThought"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./modes/argumentation.js",
+            "imports": [
+              "ArgumentationThought"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./modes/critique.js",
+            "imports": [
+              "CritiqueThought"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./modes/analysis.js",
+            "imports": [
+              "AnalysisThought"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [
@@ -6687,6 +6715,10 @@
           "isComputabilityThought",
           "isCryptanalyticThought",
           "isAlgorithmicThought",
+          "isSynthesisThought",
+          "isArgumentationThought",
+          "isCritiqueThought",
+          "isAnalysisThought",
           "ThinkingMode",
           "ShannonStage"
         ],
@@ -6768,7 +6800,11 @@
           "isEngineeringThought",
           "isComputabilityThought",
           "isCryptanalyticThought",
-          "isAlgorithmicThought"
+          "isAlgorithmicThought",
+          "isSynthesisThought",
+          "isArgumentationThought",
+          "isCritiqueThought",
+          "isAnalysisThought"
         ],
         "enums": [
           "ThinkingMode",
@@ -6780,7 +6816,7 @@
         ]
       },
       "src/types/index.ts": {
-        "description": "Type definitions index (v7.1.0)",
+        "description": "Type definitions index (v7.4.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -6892,6 +6928,99 @@
               "ENGLISH_FREQUENCIES"
             ],
             "reExport": true
+          },
+          {
+            "file": "./modes/synthesis.js",
+            "imports": [
+              "type SynthesisThoughtType",
+              "type SourceType",
+              "type SourceQuality",
+              "type Source",
+              "type Concept",
+              "type Theme",
+              "type Finding",
+              "type Pattern",
+              "type ConceptRelation",
+              "type LiteratureGap",
+              "type Contradiction",
+              "type ConceptualFramework",
+              "type SynthesisConclusion",
+              "type ReviewMetadata",
+              "isSynthesisThought"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./modes/argumentation.js",
+            "imports": [
+              "type ArgumentationThoughtType",
+              "type Claim",
+              "type Grounds",
+              "type Warrant",
+              "type Backing",
+              "type Qualifier",
+              "type Rebuttal",
+              "type RebuttalResponse",
+              "type ToulminArgument",
+              "type ArgumentChain",
+              "type DialecticPosition",
+              "type DialecticAnalysis",
+              "type RhetoricalAppeal",
+              "type RhetoricalStrategy",
+              "type AudienceConsideration",
+              "type LogicalFallacy",
+              "isArgumentationThought"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./modes/critique.js",
+            "imports": [
+              "type CritiqueThoughtType",
+              "type WorkType",
+              "type CritiquedWork",
+              "type DesignAssessment",
+              "type SampleAssessment",
+              "type AnalysisAssessment",
+              "type MethodologyEvaluation",
+              "type ValidityAssessment",
+              "type LogicalStructure",
+              "type ArgumentCritique",
+              "type EvidenceQuality",
+              "type EvidenceUseCritique",
+              "type NoveltyAssessment",
+              "type ImpactAssessment",
+              "type ContributionEvaluation",
+              "type CritiquePoint",
+              "type ImprovementSuggestion",
+              "type CritiqueVerdict",
+              "isCritiqueThought"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./modes/analysis.js",
+            "imports": [
+              "type AnalysisThoughtType",
+              "type AnalysisMethodology",
+              "type DataSource",
+              "type DataSegment",
+              "type CodeType",
+              "type Code",
+              "type CodeCooccurrence",
+              "type Codebook",
+              "type ThemeLevel",
+              "type QualitativeTheme",
+              "type ThematicMap",
+              "type MemoType",
+              "type AnalyticalMemo",
+              "type GTCategory",
+              "type TheoreticalSampling",
+              "type DiscoursePattern",
+              "type QualitativeRigor",
+              "isAnalysisThought"
+            ],
+            "reExport": true
           }
         ],
         "exports": [
@@ -6958,7 +7087,76 @@
           "accumulateEvidence",
           "calculateIndexOfCoincidence",
           "LANGUAGE_IC",
-          "ENGLISH_FREQUENCIES"
+          "ENGLISH_FREQUENCIES",
+          "type SynthesisThoughtType",
+          "type SourceType",
+          "type SourceQuality",
+          "type Source",
+          "type Concept",
+          "type Theme",
+          "type Finding",
+          "type Pattern",
+          "type ConceptRelation",
+          "type LiteratureGap",
+          "type Contradiction",
+          "type ConceptualFramework",
+          "type SynthesisConclusion",
+          "type ReviewMetadata",
+          "isSynthesisThought",
+          "type ArgumentationThoughtType",
+          "type Claim",
+          "type Grounds",
+          "type Warrant",
+          "type Backing",
+          "type Qualifier",
+          "type Rebuttal",
+          "type RebuttalResponse",
+          "type ToulminArgument",
+          "type ArgumentChain",
+          "type DialecticPosition",
+          "type DialecticAnalysis",
+          "type RhetoricalAppeal",
+          "type RhetoricalStrategy",
+          "type AudienceConsideration",
+          "type LogicalFallacy",
+          "isArgumentationThought",
+          "type CritiqueThoughtType",
+          "type WorkType",
+          "type CritiquedWork",
+          "type DesignAssessment",
+          "type SampleAssessment",
+          "type AnalysisAssessment",
+          "type MethodologyEvaluation",
+          "type ValidityAssessment",
+          "type LogicalStructure",
+          "type ArgumentCritique",
+          "type EvidenceQuality",
+          "type EvidenceUseCritique",
+          "type NoveltyAssessment",
+          "type ImpactAssessment",
+          "type ContributionEvaluation",
+          "type CritiquePoint",
+          "type ImprovementSuggestion",
+          "type CritiqueVerdict",
+          "isCritiqueThought",
+          "type AnalysisThoughtType",
+          "type AnalysisMethodology",
+          "type DataSource",
+          "type DataSegment",
+          "type CodeType",
+          "type Code",
+          "type CodeCooccurrence",
+          "type Codebook",
+          "type ThemeLevel",
+          "type QualitativeTheme",
+          "type ThematicMap",
+          "type MemoType",
+          "type AnalyticalMemo",
+          "type GTCategory",
+          "type TheoreticalSampling",
+          "type DiscoursePattern",
+          "type QualitativeRigor",
+          "isAnalysisThought"
         ],
         "reExported": [
           "* from ./core.js",
@@ -7027,7 +7225,76 @@
           "accumulateEvidence",
           "calculateIndexOfCoincidence",
           "LANGUAGE_IC",
-          "ENGLISH_FREQUENCIES"
+          "ENGLISH_FREQUENCIES",
+          "type SynthesisThoughtType",
+          "type SourceType",
+          "type SourceQuality",
+          "type Source",
+          "type Concept",
+          "type Theme",
+          "type Finding",
+          "type Pattern",
+          "type ConceptRelation",
+          "type LiteratureGap",
+          "type Contradiction",
+          "type ConceptualFramework",
+          "type SynthesisConclusion",
+          "type ReviewMetadata",
+          "isSynthesisThought",
+          "type ArgumentationThoughtType",
+          "type Claim",
+          "type Grounds",
+          "type Warrant",
+          "type Backing",
+          "type Qualifier",
+          "type Rebuttal",
+          "type RebuttalResponse",
+          "type ToulminArgument",
+          "type ArgumentChain",
+          "type DialecticPosition",
+          "type DialecticAnalysis",
+          "type RhetoricalAppeal",
+          "type RhetoricalStrategy",
+          "type AudienceConsideration",
+          "type LogicalFallacy",
+          "isArgumentationThought",
+          "type CritiqueThoughtType",
+          "type WorkType",
+          "type CritiquedWork",
+          "type DesignAssessment",
+          "type SampleAssessment",
+          "type AnalysisAssessment",
+          "type MethodologyEvaluation",
+          "type ValidityAssessment",
+          "type LogicalStructure",
+          "type ArgumentCritique",
+          "type EvidenceQuality",
+          "type EvidenceUseCritique",
+          "type NoveltyAssessment",
+          "type ImpactAssessment",
+          "type ContributionEvaluation",
+          "type CritiquePoint",
+          "type ImprovementSuggestion",
+          "type CritiqueVerdict",
+          "isCritiqueThought",
+          "type AnalysisThoughtType",
+          "type AnalysisMethodology",
+          "type DataSource",
+          "type DataSegment",
+          "type CodeType",
+          "type Code",
+          "type CodeCooccurrence",
+          "type Codebook",
+          "type ThemeLevel",
+          "type QualitativeTheme",
+          "type ThematicMap",
+          "type MemoType",
+          "type AnalyticalMemo",
+          "type GTCategory",
+          "type TheoreticalSampling",
+          "type DiscoursePattern",
+          "type QualitativeRigor",
+          "isAnalysisThought"
         ]
       },
       "src/types/modes/algorithmic.ts": {
@@ -7101,6 +7368,78 @@
         ],
         "functions": [
           "isAnalogicalThought"
+        ]
+      },
+      "src/types/modes/analysis.ts": {
+        "description": "Analysis Mode - Type Definitions (Phase 13 v7.4.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../core.js",
+            "imports": [
+              "BaseThought",
+              "ThinkingMode"
+            ]
+          }
+        ],
+        "exports": [
+          "isAnalysisThought"
+        ],
+        "interfaces": [
+          "DataSource",
+          "DataSegment",
+          "Code",
+          "CodeCooccurrence",
+          "Codebook",
+          "QualitativeTheme",
+          "ThematicMap",
+          "AnalyticalMemo",
+          "GTCategory",
+          "TheoreticalSampling",
+          "DiscoursePattern",
+          "QualitativeRigor",
+          "AnalysisThought"
+        ],
+        "functions": [
+          "isAnalysisThought"
+        ]
+      },
+      "src/types/modes/argumentation.ts": {
+        "description": "Argumentation Mode - Type Definitions (Phase 13 v7.4.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../core.js",
+            "imports": [
+              "BaseThought",
+              "ThinkingMode"
+            ]
+          }
+        ],
+        "exports": [
+          "isArgumentationThought"
+        ],
+        "interfaces": [
+          "Claim",
+          "Grounds",
+          "Warrant",
+          "Backing",
+          "Qualifier",
+          "Rebuttal",
+          "RebuttalResponse",
+          "ToulminArgument",
+          "ArgumentChain",
+          "DialecticPosition",
+          "DialecticAnalysis",
+          "RhetoricalStrategy",
+          "AudienceConsideration",
+          "LogicalFallacy",
+          "ArgumentationThought"
+        ],
+        "functions": [
+          "isArgumentationThought"
         ]
       },
       "src/types/modes/bayesian.ts": {
@@ -7229,6 +7568,45 @@
         ],
         "functions": [
           "isCounterfactualThought"
+        ]
+      },
+      "src/types/modes/critique.ts": {
+        "description": "Critique Mode - Type Definitions (Phase 13 v7.4.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../core.js",
+            "imports": [
+              "BaseThought",
+              "ThinkingMode"
+            ]
+          }
+        ],
+        "exports": [
+          "isCritiqueThought"
+        ],
+        "interfaces": [
+          "CritiquedWork",
+          "DesignAssessment",
+          "SampleAssessment",
+          "AnalysisAssessment",
+          "MethodologyEvaluation",
+          "ValidityAssessment",
+          "LogicalStructure",
+          "ArgumentCritique",
+          "EvidenceQuality",
+          "EvidenceUseCritique",
+          "NoveltyAssessment",
+          "ImpactAssessment",
+          "ContributionEvaluation",
+          "CritiquePoint",
+          "ImprovementSuggestion",
+          "CritiqueVerdict",
+          "CritiqueThought"
+        ],
+        "functions": [
+          "isCritiqueThought"
         ]
       },
       "src/types/modes/cryptanalytic.ts": {
@@ -7686,6 +8064,41 @@
         ],
         "functions": [
           "isShannonThought"
+        ]
+      },
+      "src/types/modes/synthesis.ts": {
+        "description": "Synthesis Mode - Type Definitions (Phase 13 v7.4.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../core.js",
+            "imports": [
+              "BaseThought",
+              "ThinkingMode"
+            ]
+          }
+        ],
+        "exports": [
+          "isSynthesisThought"
+        ],
+        "interfaces": [
+          "SourceQuality",
+          "Source",
+          "Concept",
+          "Theme",
+          "Finding",
+          "Pattern",
+          "ConceptRelation",
+          "LiteratureGap",
+          "Contradiction",
+          "ConceptualFramework",
+          "SynthesisConclusion",
+          "ReviewMetadata",
+          "SynthesisThought"
+        ],
+        "functions": [
+          "isSynthesisThought"
         ]
       },
       "src/types/modes/systemsthinking.ts": {
@@ -10146,6 +10559,26 @@
           "src/types/core.ts"
         ],
         [
+          "src/types/core.ts",
+          "src/types/modes/synthesis.ts",
+          "src/types/core.ts"
+        ],
+        [
+          "src/types/core.ts",
+          "src/types/modes/argumentation.ts",
+          "src/types/core.ts"
+        ],
+        [
+          "src/types/core.ts",
+          "src/types/modes/critique.ts",
+          "src/types/core.ts"
+        ],
+        [
+          "src/types/core.ts",
+          "src/types/modes/analysis.ts",
+          "src/types/core.ts"
+        ],
+        [
           "src/validation/validator.ts",
           "src/validation/validators/index.ts",
           "src/validation/validators/modes/sequential.ts",
@@ -10290,9 +10723,9 @@
           "src/validation/validator.ts"
         ]
       ],
-      "total": 37,
+      "total": 41,
       "runtimeCount": 0,
-      "typeOnlyCount": 37
+      "typeOnlyCount": 41
     },
     "layers": [
       {
@@ -10476,10 +10909,13 @@
           "src/types/index.ts",
           "src/types/modes/algorithmic.ts",
           "src/types/modes/analogical.ts",
+          "src/types/modes/analysis.ts",
+          "src/types/modes/argumentation.ts",
           "src/types/modes/bayesian.ts",
           "src/types/modes/causal.ts",
           "src/types/modes/computability.ts",
           "src/types/modes/counterfactual.ts",
+          "src/types/modes/critique.ts",
           "src/types/modes/cryptanalytic.ts",
           "src/types/modes/engineering.ts",
           "src/types/modes/evidential.ts",
@@ -10494,6 +10930,7 @@
           "src/types/modes/scientificmethod.ts",
           "src/types/modes/sequential.ts",
           "src/types/modes/shannon.ts",
+          "src/types/modes/synthesis.ts",
           "src/types/modes/systemsthinking.ts",
           "src/types/modes/temporal.ts",
           "src/types/session.ts"
@@ -10557,19 +10994,19 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 179,
+    "totalTypeScriptFiles": 183,
     "totalModules": 16,
-    "totalLinesOfCode": 72182,
-    "totalExports": 893,
+    "totalLinesOfCode": 73537,
+    "totalExports": 970,
     "totalClasses": 92,
-    "totalInterfaces": 401,
-    "totalFunctions": 315,
-    "totalTypeGuards": 58,
+    "totalInterfaces": 459,
+    "totalFunctions": 323,
+    "totalTypeGuards": 66,
     "totalEnums": 3,
     "totalConstants": 156,
-    "totalReExports": 340,
-    "totalTypeOnlyImports": 138,
+    "totalReExports": 409,
+    "totalTypeOnlyImports": 142,
     "runtimeCircularDeps": 0,
-    "typeOnlyCircularDeps": 37
+    "typeOnlyCircularDeps": 41
   }
 }

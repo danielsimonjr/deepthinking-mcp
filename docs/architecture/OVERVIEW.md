@@ -2,11 +2,25 @@
 
 ## Project Summary
 
-DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 27 specialized thinking modes (23 with dedicated thought types). The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, meta-reasoning for strategic oversight, enterprise security features, proof decomposition for mathematical reasoning, and comprehensive export capabilities including native SVG generation.
+DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 33 specialized thinking modes (29 with dedicated thought types). The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, meta-reasoning for strategic oversight, enterprise security features, proof decomposition for mathematical reasoning, and comprehensive export capabilities including native SVG generation.
 
-**Version**: 7.2.0 | **Node**: >=18.0.0 | **License**: MIT
+**Version**: 7.4.0 | **Node**: >=18.0.0 | **License**: MIT
 
 ---
+
+## What's New in v7.4.0
+
+- **Phase 13: Academic Research Modes** - 4 new modes designed for PhD students and scientific writing
+- **Synthesis Mode** - Literature review, knowledge integration, theme extraction
+- **Argumentation Mode** - Toulmin model, dialectics, rhetorical structures
+- **Critique Mode** - Critical analysis, peer review, methodology evaluation
+- **Analysis Mode** - Qualitative analysis (thematic, grounded theory, discourse)
+
+## What's New in v7.3.0
+
+- **Phase 12: Algorithmic Reasoning Mode** - Comprehensive CLRS algorithm coverage
+- **100+ Named Algorithms** - Sorting, graph, DP, string matching, computational geometry
+- **Complexity Analysis** - Time/space complexity, amortized analysis, Master theorem
 
 ## What's New in v7.2.0
 
@@ -15,31 +29,24 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 - **Cryptanalytic Mode** - Turing's deciban system, Banburismus analysis, frequency analysis, key space elimination
 - **Extended Game Theory** - von Neumann's minimax theorem, cooperative games, Shapley value calculations
 
-## What's New in v7.0.0
-
-- **Phase 8: Proof Decomposition System** - Break proofs into atomic statements, detect gaps, track assumptions
-- **Native SVG Export** - Direct SVG generation without external tools
-- **MathematicsReasoningEngine** - Advanced mathematical analysis
-- **InconsistencyDetector** - Logical inconsistency detection
-
 ---
 
 ## Key Metrics
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~58,000 |
-| TypeScript Files | 178 |
+| Total Lines of Code | ~62,000 |
+| TypeScript Files | 183 |
 | Test Files | 40 |
 | Passing Tests | 792+ |
 | Type Suppressions | 0 |
-| Thinking Modes | 27 (23 with thought types) |
+| Thinking Modes | 33 (29 with thought types) |
 | MCP Tools | 10 focused + 1 legacy |
-| Export Formats | 8 (+ native SVG) |
-| Visual Formats | 4 (mermaid, dot, ascii, svg) |
+| Export Formats | 11 (including native SVG) |
+| Visual Formats | 11 (mermaid, dot, ascii, svg, etc.) |
 | Reasoning Types | 69 (110 planned) |
 | Visual Exporters | 21 mode-specific |
-| Total Exports | 888 |
+| Total Exports | 970 |
 | Modules | 16 |
 
 ---
@@ -79,15 +86,15 @@ deepthinking-mcp/
 
 ### `src/types/` - Type System
 
-Comprehensive TypeScript definitions for 27 reasoning modes (23 with dedicated thought types):
+Comprehensive TypeScript definitions for 33 reasoning modes (29 with dedicated thought types):
 
 ```
 src/types/
-├── core.ts                 # ThinkingMode enum (27 modes), Thought union type (23 types)
+├── core.ts                 # ThinkingMode enum (33 modes), Thought union type (29 types)
 ├── config.ts               # Configuration types
 ├── session.ts              # Session & validation types
 ├── events.ts               # Event system types
-└── modes/                  # Mode-specific types (19 files)
+└── modes/                  # Mode-specific types (23 files)
     ├── sequential.ts       # Sequential thinking
     ├── shannon.ts          # Information theory
     ├── mathematics.ts      # Mathematical reasoning
@@ -98,7 +105,12 @@ src/types/
     ├── metareasoning.ts    # Meta-reasoning (v6.0.0)
     ├── computability.ts    # Turing machines, decidability (v7.2.0)
     ├── cryptanalytic.ts    # Turing's deciban system (v7.2.0)
-    └── [9 more modes]
+    ├── algorithmic.ts      # Algorithm design & analysis - CLRS (v7.3.0)
+    ├── synthesis.ts        # Literature synthesis (v7.4.0)
+    ├── argumentation.ts    # Academic argumentation (v7.4.0)
+    ├── critique.ts         # Critical analysis (v7.4.0)
+    ├── analysis.ts         # Qualitative analysis (v7.4.0)
+    └── [8 more modes]
 ```
 
 ### `src/services/` - Business Logic Layer
@@ -167,14 +179,16 @@ src/taxonomy/
 
 ---
 
-## The 27 Thinking Modes
+## The 33 Thinking Modes
 
-The server supports 27 reasoning modes organized into categories:
+The server supports 33 reasoning modes organized into categories:
 - **Core Modes (5)**: Sequential, Shannon, Mathematics, Physics, Hybrid
 - **Historical Computing (2)**: Computability (Turing), Cryptanalytic (Turing) - *v7.2.0*
+- **Algorithmic (1)**: Algorithmic (CLRS) - *v7.3.0*
+- **Academic Research (4)**: Synthesis, Argumentation, Critique, Analysis - *v7.4.0*
 - **Advanced Runtime Modes (6)**: Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
 - **Fundamental Modes (2)**: Inductive, Deductive
-- **Experimental Modes (12)**: Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory (+ von Neumann extensions), Evidential, First Principles, Systems Thinking, Scientific Method, Formal Logic
+- **Experimental Modes (13)**: Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory (+ von Neumann extensions), Evidential, First Principles, Systems Thinking, Scientific Method, Formal Logic, Engineering
 
 ### Core Reasoning Modes (Fundamental) - v5.0.0+
 | Mode | Purpose | Tool |
@@ -230,6 +244,19 @@ The server supports 27 reasoning modes organized into categories:
 |------|---------|------|
 | **Computability** | Turing machines, decidability, reductions, diagonalization | `deepthinking_math` |
 | **Cryptanalytic** | Deciban evidence system, Banburismus, frequency analysis | `deepthinking_analytical` |
+
+### Algorithmic Mode (v7.3.0) - CLRS Coverage
+| Mode | Purpose | Tool |
+|------|---------|------|
+| **Algorithmic** | Algorithm design, complexity analysis, CLRS algorithms | `deepthinking_strategic` |
+
+### Academic Research Modes (v7.4.0) - PhD Students & Scientific Writing
+| Mode | Purpose | Tool |
+|------|---------|------|
+| **Synthesis** | Literature review, knowledge integration, theme extraction | `deepthinking_analytical` |
+| **Argumentation** | Toulmin model, dialectics, rhetorical structures | `deepthinking_analytical` |
+| **Critique** | Critical analysis, peer review, methodology evaluation | `deepthinking_analytical` |
+| **Analysis** | Qualitative analysis (thematic, grounded theory, discourse) | `deepthinking_analytical` |
 
 ---
 
@@ -435,5 +462,5 @@ tests/
 
 ---
 
-*Last Updated*: 2025-12-07
-*Version*: 7.2.0
+*Last Updated*: 2025-12-08
+*Version*: 7.4.0

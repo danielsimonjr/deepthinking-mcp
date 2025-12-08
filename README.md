@@ -4,15 +4,17 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
 
-A comprehensive Model Context Protocol (MCP) server featuring **27 reasoning modes** (23 with dedicated thought types, 4 advanced runtime modes) including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning modes** (29 with dedicated thought types, 4 advanced runtime modes) including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
-> 📋 **Latest Release**: v7.2.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
+> 📋 **Latest Release**: v7.4.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
 >
-> 🎉 **New in v7.2.0**: Phase 11 Historical Computing Extensions! Computability mode (Turing machines, decidability, reductions), Cryptanalytic mode (deciban evidence system, Banburismus), and extended Game Theory (von Neumann's minimax theorem, cooperative games, Shapley values).
+> 🎉 **New in v7.4.0**: Phase 13 Academic Research Modes for PhD students! Synthesis (literature review), Argumentation (Toulmin model), Critique (peer review), and Analysis (qualitative methods) modes.
+>
+> ✨ **v7.3.0**: Phase 12 Algorithmic Reasoning Mode with comprehensive CLRS coverage! 100+ named algorithms, complexity analysis, design patterns.
+>
+> ✨ **v7.2.0**: Phase 11 Historical Computing Extensions! Computability mode (Turing machines), Cryptanalytic mode (deciban evidence system), extended Game Theory (von Neumann).
 >
 > ✨ **v7.0.0**: Phase 8 Proof Decomposition System with native SVG export! Break proofs into atomic statements, detect gaps and implicit assumptions, track assumption chains.
->
-> ✨ **v6.0.0+**: Meta-Reasoning mode for strategic oversight! Monitor reasoning effectiveness, get adaptive mode-switching recommendations, and assess quality metrics across 6 dimensions.
 
 ## Table of Contents
 
@@ -29,8 +31,10 @@ A comprehensive Model Context Protocol (MCP) server featuring **27 reasoning mod
 
 ## Features
 
-- **27 Specialized Reasoning Modes** - From sequential thinking to game theory, formal logic, and meta-reasoning (23 with full thought types, 4 advanced runtime modes)
-- **Historical Computing Extensions (NEW!)** - Computability (Turing machines), Cryptanalytic (decibans), extended Game Theory (von Neumann)
+- **33 Specialized Reasoning Modes** - From sequential thinking to game theory, formal logic, and meta-reasoning (29 with full thought types, 4 advanced runtime modes)
+- **Academic Research Modes (NEW!)** - Synthesis (literature review), Argumentation (Toulmin), Critique (peer review), Analysis (qualitative methods)
+- **Algorithmic Reasoning (v7.3.0)** - Comprehensive CLRS coverage with 100+ named algorithms, complexity analysis, design patterns
+- **Historical Computing Extensions** - Computability (Turing machines), Cryptanalytic (decibans), extended Game Theory (von Neumann)
 - **Proof Decomposition** - Break proofs into atomic statements, detect gaps, track assumption chains
 - **Native SVG Export** - Direct SVG generation without external tools for proof visualizations
 - **Meta-Reasoning** - Strategic oversight that monitors effectiveness, recommends mode switches, and assesses quality
@@ -153,13 +157,15 @@ DeepThinking MCP provides 10 focused tools for different reasoning domains:
 
 ## Reasoning Modes
 
-The server supports 27 reasoning modes organized into categories:
+The server supports 33 reasoning modes organized into categories:
 
 - **Core Modes (5)**: Sequential, Shannon, Mathematics, Physics, Hybrid
 - **Historical Computing (2)**: Computability (Turing), Cryptanalytic (Turing) - *v7.2.0*
+- **Algorithmic (1)**: Algorithmic (CLRS) - *v7.3.0*
+- **Academic Research (4)**: Synthesis, Argumentation, Critique, Analysis - *v7.4.0*
 - **Advanced Runtime Modes (6)**: Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
 - **Fundamental Modes (2)**: Inductive, Deductive
-- **Experimental Modes (12)**: Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory (+ von Neumann extensions), Evidential, First Principles, Systems Thinking, Scientific Method, Formal Logic
+- **Experimental Modes (13)**: Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory (+ von Neumann extensions), Evidential, First Principles, Systems Thinking, Scientific Method, Formal Logic, Engineering
 
 ### Core Modes
 
@@ -406,6 +412,58 @@ mode: 'gametheory'
 // Use for: Zero-sum games, fair value distribution, strategic decision-making
 ```
 
+### Algorithmic Mode (v7.3.0)
+
+#### Algorithmic
+Comprehensive coverage of algorithms from "Introduction to Algorithms" (CLRS) with 100+ named algorithms.
+
+```typescript
+mode: 'algorithmic'
+// Use for: Algorithm design, complexity analysis, correctness proofs
+// Features: Divide-and-conquer, dynamic programming, greedy, graph algorithms
+// Coverage: Sorting, searching, graph, string, computational geometry
+```
+
+### Academic Research Modes (v7.4.0)
+
+Designed for PhD students and scientific paper writing.
+
+#### Synthesis
+Literature review and knowledge integration.
+
+```typescript
+mode: 'synthesis'
+// Use for: Literature reviews, theme extraction, knowledge integration
+// Features: Source synthesis, pattern identification, gap analysis
+```
+
+#### Argumentation
+Academic argumentation using the Toulmin model.
+
+```typescript
+mode: 'argumentation'
+// Use for: Building arguments, dialectical reasoning, rhetorical analysis
+// Features: Toulmin model (claim, data, warrant, backing), counter-arguments
+```
+
+#### Critique
+Critical analysis and peer review frameworks.
+
+```typescript
+mode: 'critique'
+// Use for: Peer review, methodology evaluation, evidence assessment
+// Features: Systematic critique, strengths/weaknesses analysis
+```
+
+#### Analysis
+Qualitative analysis methods.
+
+```typescript
+mode: 'analysis'
+// Use for: Thematic analysis, grounded theory, discourse analysis
+// Features: Multiple qualitative analysis frameworks, coding support
+```
+
 ## Proof Decomposition
 
 **New in v7.0.0!** The proof decomposition system provides advanced mathematical reasoning capabilities:
@@ -626,7 +684,7 @@ Compare reasoning sessions to analyze differences and similarities with quantita
 
 Enterprise-grade security features built into the MCP server:
 
-- **Input Validation** - Zod schemas validate all 27 mode inputs
+- **Input Validation** - Zod schemas validate all 33 mode inputs
 - **Rate Limiting** - Sliding window rate limiter for API protection
 - **Path Sanitization** - Prevents directory traversal attacks
 - **PII Redaction** - GDPR-compliant log sanitization
@@ -682,17 +740,17 @@ For architecture details, see [docs/architecture/](docs/architecture/).
 
 | Metric | Value |
 |--------|-------|
-| TypeScript Files | 178 |
-| Lines of Code | ~58,000 |
+| TypeScript Files | 183 |
+| Lines of Code | ~62,000 |
 | Test Files | 40 |
 | Passing Tests | 792+ |
-| Thinking Modes | 27 (23 with thought types) |
+| Thinking Modes | 33 (29 with thought types) |
 | MCP Tools | 10 focused + 1 legacy |
-| Export Formats | 8 (+ native SVG) |
-| Visual Formats | 4 (mermaid, dot, ascii, svg) |
+| Export Formats | 11 (including native SVG) |
+| Visual Formats | 11 (mermaid, dot, ascii, svg, etc.) |
 | Reasoning Types | 69 (110 planned) |
 | Modules | 16 |
-| Total Exports | 888 |
+| Total Exports | 970 |
 
 ## Architecture
 
@@ -703,9 +761,9 @@ The codebase is organized into 16 modules with clean separation of concerns. See
 ```
 src/
 ├── index.ts           # MCP server entry point (tool handlers)
-├── types/             # Type definitions including 27 mode types
+├── types/             # Type definitions including 33 mode types
 │   ├── core.ts        # ThinkingMode enum, Thought union type
-│   └── modes/         # One file per reasoning mode (19 files)
+│   └── modes/         # One file per reasoning mode (23 files)
 ├── services/          # Business logic layer
 │   ├── ThoughtFactory.ts    # Thought creation and validation
 │   ├── ExportService.ts     # Multi-format export handling
@@ -752,7 +810,7 @@ src/
 
 Security is built into multiple modules:
 
-- **validation/** - Input validation with Zod schemas for all 27 modes
+- **validation/** - Input validation with Zod schemas for all 33 modes
 - **utils/sanitization.ts** - Path sanitization & traversal prevention
 - **utils/log-sanitizer.ts** - PII redaction for GDPR compliance
 - **rate-limit/** - Per-key rate limiting with sliding windows
