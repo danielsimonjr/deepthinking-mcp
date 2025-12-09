@@ -418,6 +418,111 @@ export class ModeRecommender {
       });
     }
 
+    // ===== ACADEMIC RESEARCH MODES (v7.4.0) =====
+
+    // Synthesis mode - for literature review and knowledge integration
+    if (characteristics.domain === 'research' ||
+        characteristics.domain === 'academic' ||
+        characteristics.domain === 'literature' ||
+        (characteristics.hasIncompleteInfo && characteristics.requiresExplanation && !characteristics.requiresProof)) {
+      recommendations.push({
+        mode: ThinkingMode.SYNTHESIS,
+        score: characteristics.domain === 'research' || characteristics.domain === 'academic' ? 0.92 : 0.85,
+        reasoning: 'Problem requires integrating knowledge from multiple sources and identifying themes',
+        strengths: [
+          'Literature integration',
+          'Theme extraction',
+          'Gap identification',
+          'Cross-source analysis',
+          'Knowledge synthesis',
+        ],
+        limitations: ['Requires access to multiple sources', 'Time-intensive', 'May miss emerging research'],
+        examples: [
+          'Literature reviews',
+          'Systematic reviews',
+          'Meta-analyses',
+          'Research synthesis',
+          'State-of-the-art surveys',
+        ],
+      });
+    }
+
+    // Argumentation mode - for academic argumentation and Toulmin model
+    if (characteristics.requiresExplanation &&
+        (characteristics.hasAlternatives || characteristics.domain === 'academic' || characteristics.domain === 'philosophy')) {
+      recommendations.push({
+        mode: ThinkingMode.ARGUMENTATION,
+        score: characteristics.domain === 'academic' ? 0.90 : 0.84,
+        reasoning: 'Problem requires structured argumentation with claims, evidence, and warrants',
+        strengths: [
+          'Toulmin model support',
+          'Claim-evidence structure',
+          'Warrant articulation',
+          'Rebuttal handling',
+          'Qualifier specification',
+        ],
+        limitations: ['Formal structure may feel rigid', 'Requires clear claim formulation'],
+        examples: [
+          'Academic papers',
+          'Thesis arguments',
+          'Policy proposals',
+          'Debate preparation',
+          'Position papers',
+        ],
+      });
+    }
+
+    // Critique mode - for critical analysis and peer review
+    if (characteristics.requiresExplanation &&
+        (characteristics.domain === 'academic' || characteristics.domain === 'research' || characteristics.domain === 'review')) {
+      recommendations.push({
+        mode: ThinkingMode.CRITIQUE,
+        score: characteristics.domain === 'review' ? 0.92 : 0.86,
+        reasoning: 'Problem requires critical evaluation of methodology, validity, and limitations',
+        strengths: [
+          'Methodology assessment',
+          'Validity evaluation',
+          'Limitation identification',
+          'Strength recognition',
+          'Constructive feedback',
+        ],
+        limitations: ['Requires domain expertise', 'May seem overly critical'],
+        examples: [
+          'Peer review',
+          'Paper critiques',
+          'Methodology evaluation',
+          'Research assessment',
+          'Quality analysis',
+        ],
+      });
+    }
+
+    // Analysis mode - for qualitative analysis methods
+    if (characteristics.hasIncompleteInfo &&
+        characteristics.requiresExplanation &&
+        (characteristics.domain === 'research' || characteristics.domain === 'qualitative' || characteristics.domain === 'social science')) {
+      recommendations.push({
+        mode: ThinkingMode.ANALYSIS,
+        score: characteristics.domain === 'qualitative' ? 0.93 : 0.85,
+        reasoning: 'Problem requires systematic qualitative analysis using established methods',
+        strengths: [
+          'Thematic analysis',
+          'Grounded theory',
+          'Discourse analysis',
+          'Content analysis',
+          'Code development',
+        ],
+        limitations: ['Subjective interpretation', 'Time-intensive coding', 'Requires methodological rigor'],
+        examples: [
+          'Interview analysis',
+          'Document analysis',
+          'Ethnographic research',
+          'Case study analysis',
+          'Narrative analysis',
+        ],
+      });
+    }
+
     // Sequential reasoning (default fallback)
     if (recommendations.length === 0) {
       recommendations.push({
@@ -740,6 +845,85 @@ export class ModeRecommender {
       });
     }
 
+    // ===== ACADEMIC RESEARCH MODE COMBINATIONS (v7.4.0) =====
+
+    // Synthesis + Critique (for comprehensive literature review)
+    if (characteristics.domain === 'research' || characteristics.domain === 'academic') {
+      combinations.push({
+        modes: [ThinkingMode.SYNTHESIS, ThinkingMode.CRITIQUE],
+        sequence: 'sequential',
+        rationale: 'Synthesize literature first, then critically evaluate the synthesized findings',
+        benefits: ['Comprehensive review', 'Critical evaluation', 'Research gap identification'],
+        synergies: ['Synthesis identifies patterns', 'Critique validates findings'],
+      });
+    }
+
+    // Synthesis + Analysis (for qualitative research synthesis)
+    if (characteristics.hasIncompleteInfo && characteristics.requiresExplanation) {
+      combinations.push({
+        modes: [ThinkingMode.SYNTHESIS, ThinkingMode.ANALYSIS],
+        sequence: 'hybrid',
+        rationale: 'Combine literature synthesis with qualitative analysis methods',
+        benefits: ['Multi-source integration', 'Thematic consistency', 'Methodological rigor'],
+        synergies: ['Synthesis provides sources', 'Analysis extracts themes'],
+      });
+    }
+
+    // Argumentation + Critique (for academic debate and evaluation)
+    if (characteristics.requiresExplanation && characteristics.hasAlternatives) {
+      combinations.push({
+        modes: [ThinkingMode.ARGUMENTATION, ThinkingMode.CRITIQUE],
+        sequence: 'parallel',
+        rationale: 'Build arguments while critically evaluating opposing views',
+        benefits: ['Strong arguments', 'Addressed weaknesses', 'Robust conclusions'],
+        synergies: ['Argumentation structures claims', 'Critique strengthens rebuttals'],
+      });
+    }
+
+    // Argumentation + Deductive (for rigorous academic arguments)
+    if (characteristics.requiresProof && characteristics.requiresExplanation) {
+      combinations.push({
+        modes: [ThinkingMode.ARGUMENTATION, ThinkingMode.DEDUCTIVE],
+        sequence: 'hybrid',
+        rationale: 'Combine Toulmin argumentation with deductive logical rigor',
+        benefits: ['Structured arguments', 'Logical validity', 'Academic rigor'],
+        synergies: ['Toulmin provides structure', 'Deduction ensures validity'],
+      });
+    }
+
+    // Analysis + Inductive (for qualitative pattern discovery)
+    if (characteristics.hasIncompleteInfo && !characteristics.requiresProof) {
+      combinations.push({
+        modes: [ThinkingMode.ANALYSIS, ThinkingMode.INDUCTIVE],
+        sequence: 'sequential',
+        rationale: 'Apply qualitative analysis then generalize through inductive reasoning',
+        benefits: ['Grounded findings', 'Pattern generalization', 'Theory building'],
+        synergies: ['Analysis identifies codes', 'Induction builds theory'],
+      });
+    }
+
+    // Critique + Metareasoning (for self-aware critical analysis)
+    if (characteristics.complexity === 'high' && characteristics.requiresExplanation) {
+      combinations.push({
+        modes: [ThinkingMode.CRITIQUE, ThinkingMode.METAREASONING],
+        sequence: 'parallel',
+        rationale: 'Critically analyze while monitoring own biases and reasoning quality',
+        benefits: ['Self-aware critique', 'Bias mitigation', 'Improved objectivity'],
+        synergies: ['Critique evaluates content', 'Metareasoning evaluates process'],
+      });
+    }
+
+    // Synthesis + Bayesian (for evidence-based literature review)
+    if (characteristics.requiresQuantification && characteristics.hasIncompleteInfo) {
+      combinations.push({
+        modes: [ThinkingMode.SYNTHESIS, ThinkingMode.BAYESIAN],
+        sequence: 'hybrid',
+        rationale: 'Synthesize literature while quantifying evidence strength',
+        benefits: ['Quantified synthesis', 'Evidence weighting', 'Probabilistic conclusions'],
+        synergies: ['Synthesis gathers evidence', 'Bayesian weights findings'],
+      });
+    }
+
     return combinations;
   }
 
@@ -761,7 +945,6 @@ export class ModeRecommender {
       'proof': ThinkingMode.DEDUCTIVE,
       'derivation': ThinkingMode.DEDUCTIVE,
       'complex': ThinkingMode.HYBRID,
-      'synthesis': ThinkingMode.HYBRID,
       'philosophical': ThinkingMode.HYBRID,
       'metaphysical': ThinkingMode.HYBRID,
       // Meta-reasoning
@@ -912,9 +1095,6 @@ export class ModeRecommender {
       'logical-fallacy': ThinkingMode.FORMALLOGIC,
       'counter-argument': ThinkingMode.COUNTERFACTUAL,
       'counterargument': ThinkingMode.COUNTERFACTUAL,
-      'rebuttal': ThinkingMode.COUNTERFACTUAL,
-      'critique': ThinkingMode.METAREASONING,
-      'critical-analysis': ThinkingMode.METAREASONING,
       'fact-check': ThinkingMode.EVIDENTIAL,
       'misinformation': ThinkingMode.EVIDENTIAL,
       'disinformation': ThinkingMode.EVIDENTIAL,
@@ -1067,6 +1247,67 @@ export class ModeRecommender {
       'master-theorem': ThinkingMode.ALGORITHMIC,
       'recursion-tree': ThinkingMode.ALGORITHMIC,
       'substitution-method': ThinkingMode.ALGORITHMIC,
+
+      // ===== ACADEMIC RESEARCH MODES (v7.4.0) =====
+
+      // Synthesis mode - literature review and knowledge integration
+      'synthesis': ThinkingMode.SYNTHESIS,
+      'literature-review': ThinkingMode.SYNTHESIS,
+      'literature-synthesis': ThinkingMode.SYNTHESIS,
+      'systematic-review': ThinkingMode.SYNTHESIS,
+      'meta-analysis': ThinkingMode.SYNTHESIS,
+      'knowledge-integration': ThinkingMode.SYNTHESIS,
+      'research-synthesis': ThinkingMode.SYNTHESIS,
+      'state-of-the-art': ThinkingMode.SYNTHESIS,
+      'survey-paper': ThinkingMode.SYNTHESIS,
+      'theme-extraction': ThinkingMode.SYNTHESIS,
+      'gap-analysis': ThinkingMode.SYNTHESIS,
+      'cross-study': ThinkingMode.SYNTHESIS,
+
+      // Argumentation mode - academic argumentation and Toulmin model
+      'argumentation': ThinkingMode.ARGUMENTATION,
+      'argument': ThinkingMode.ARGUMENTATION,
+      'toulmin': ThinkingMode.ARGUMENTATION,
+      'toulmin-model': ThinkingMode.ARGUMENTATION,
+      'claim-evidence': ThinkingMode.ARGUMENTATION,
+      'warrant': ThinkingMode.ARGUMENTATION,
+      'backing': ThinkingMode.ARGUMENTATION,
+      'qualifier': ThinkingMode.ARGUMENTATION,
+      'rebuttal': ThinkingMode.ARGUMENTATION,
+      'thesis-argument': ThinkingMode.ARGUMENTATION,
+      'position-paper': ThinkingMode.ARGUMENTATION,
+      'debate': ThinkingMode.ARGUMENTATION,
+      'persuasion': ThinkingMode.ARGUMENTATION,
+      'dialectic': ThinkingMode.ARGUMENTATION,
+      'rhetorical': ThinkingMode.ARGUMENTATION,
+
+      // Critique mode - critical analysis and peer review
+      'critique': ThinkingMode.CRITIQUE,
+      'critical-analysis': ThinkingMode.CRITIQUE,
+      'peer-review': ThinkingMode.CRITIQUE,
+      'paper-review': ThinkingMode.CRITIQUE,
+      'methodology-critique': ThinkingMode.CRITIQUE,
+      'validity-assessment': ThinkingMode.CRITIQUE,
+      'limitation-analysis': ThinkingMode.CRITIQUE,
+      'strength-weakness': ThinkingMode.CRITIQUE,
+      'constructive-feedback': ThinkingMode.CRITIQUE,
+      'research-critique': ThinkingMode.CRITIQUE,
+      'evaluation': ThinkingMode.CRITIQUE,
+
+      // Analysis mode - qualitative analysis methods
+      'qualitative-analysis': ThinkingMode.ANALYSIS,
+      'thematic-analysis': ThinkingMode.ANALYSIS,
+      'grounded-theory': ThinkingMode.ANALYSIS,
+      'discourse-analysis': ThinkingMode.ANALYSIS,
+      'content-analysis': ThinkingMode.ANALYSIS,
+      'narrative-analysis': ThinkingMode.ANALYSIS,
+      'phenomenological': ThinkingMode.ANALYSIS,
+      'ethnographic': ThinkingMode.ANALYSIS,
+      'coding': ThinkingMode.ANALYSIS,
+      'interview-analysis': ThinkingMode.ANALYSIS,
+      'document-analysis': ThinkingMode.ANALYSIS,
+      'case-study': ThinkingMode.ANALYSIS,
+      'qualitative': ThinkingMode.ANALYSIS,
     };
 
     return typeMap[problemType.toLowerCase()] || ThinkingMode.SEQUENTIAL;
