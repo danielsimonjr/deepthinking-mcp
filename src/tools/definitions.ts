@@ -18,6 +18,7 @@ import { CausalSchema } from './schemas/modes/causal.js';
 import { StrategicSchema } from './schemas/modes/strategic.js';
 import { AnalyticalSchema } from './schemas/modes/analytical.js';
 import { ScientificSchema } from './schemas/modes/scientific.js';
+<<<<<<< Updated upstream
 import { EngineeringSchema } from './schemas/modes/engineering.js';
 import { AcademicSchema } from './schemas/modes/academic.js';
 
@@ -26,6 +27,15 @@ import { AcademicSchema } from './schemas/modes/academic.js';
  * Zod schemas used only for runtime validation
  * Phase 5: Added deepthinking_core for fundamental reasoning
  * Phase 14: Added deepthinking_engineering and deepthinking_academic
+=======
+import { AcademicSchema } from './schemas/modes/academic.js';
+
+/**
+ * 11 focused tools with hand-written JSON schemas (v7.4.0)
+ * Zod schemas used only for runtime validation
+ * Phase 5: Added deepthinking_core for fundamental reasoning
+ * Phase 13: Added deepthinking_academic for PhD/research modes
+>>>>>>> Stashed changes
  */
 export const tools = {
   deepthinking_core: jsonSchemas[0],
@@ -37,9 +47,11 @@ export const tools = {
   deepthinking_strategic: jsonSchemas[6],
   deepthinking_analytical: jsonSchemas[7],
   deepthinking_scientific: jsonSchemas[8],
+<<<<<<< Updated upstream
   deepthinking_engineering: jsonSchemas[9],
   deepthinking_academic: jsonSchemas[10],
   deepthinking_session: jsonSchemas[11],
+>>>>>>> Stashed changes
 };
 
 /**
@@ -61,7 +73,10 @@ export const toolSchemas = {
   deepthinking_strategic: StrategicSchema,
   deepthinking_analytical: AnalyticalSchema,
   deepthinking_scientific: ScientificSchema,
+<<<<<<< Updated upstream
   deepthinking_engineering: EngineeringSchema,
+=======
+>>>>>>> Stashed changes
   deepthinking_academic: AcademicSchema,
   deepthinking_session: SessionActionSchema,
 } as const;
@@ -112,11 +127,13 @@ export const modeToToolMap: Record<string, string> = {
   systemsthinking: 'deepthinking_scientific',
   formallogic: 'deepthinking_scientific',
 
+<<<<<<< Updated upstream
   // Engineering modes (Phase 14)
   engineering: 'deepthinking_engineering',
   algorithmic: 'deepthinking_engineering',
 
   // Academic research modes (Phase 14)
+=======
   synthesis: 'deepthinking_academic',
   argumentation: 'deepthinking_academic',
   critique: 'deepthinking_academic',
