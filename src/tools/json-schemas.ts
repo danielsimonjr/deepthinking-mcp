@@ -1239,8 +1239,50 @@ export const deepthinking_session_schema = {
 } as const;
 
 /**
+<<<<<<< Updated upstream
  * All tool schemas as array (12 focused tools)
  * Phase 14: Added deepthinking_engineering and deepthinking_academic
+=======
+ * deepthinking_academic - Academic research modes (Phase 13 v7.4.0)
+ */
+export const deepthinking_academic_schema = {
+  name: "deepthinking_academic",
+  description: "Academic research: synthesis (literature review), argumentation (Toulmin model), critique (peer review), analysis (qualitative methods)",
+  inputSchema: {
+    type: "object",
+    properties: {
+      ...baseThoughtProperties,
+      mode: {
+        type: "string",
+        enum: ["synthesis", "argumentation", "critique", "analysis"],
+        description: "Academic research mode"
+      },
+      thoughtType: { type: "string", description: "Specific thought type" },
+      sources: { type: "array", items: { type: "object" }, description: "Academic sources (synthesis)" },
+      themes: { type: "array", items: { type: "object" }, description: "Themes identified (synthesis)" },
+      gaps: { type: "array", items: { type: "object" }, description: "Literature gaps (synthesis)" },
+      claims: { type: "array", items: { type: "object" }, description: "Claims/theses (argumentation)" },
+      grounds: { type: "array", items: { type: "object" }, description: "Evidence/data (argumentation)" },
+      warrants: { type: "array", items: { type: "object" }, description: "Reasoning connectors (argumentation)" },
+      rebuttals: { type: "array", items: { type: "object" }, description: "Counterarguments (argumentation)" },
+      argumentStrength: { type: "number", minimum: 0, maximum: 1, description: "Overall argument strength" },
+      critiquedWork: { type: "object", description: "Work being critiqued" },
+      strengths: { type: "array", items: { type: "string" }, description: "Identified strengths (critique)" },
+      weaknesses: { type: "array", items: { type: "string" }, description: "Identified weaknesses (critique)" },
+      suggestions: { type: "array", items: { type: "string" }, description: "Improvements (critique)" },
+      methodology: { type: "string", description: "Qualitative methodology (analysis)" },
+      codes: { type: "array", items: { type: "object" }, description: "Qualitative codes (analysis)" },
+      memos: { type: "array", items: { type: "object" }, description: "Analytical memos (analysis)" },
+      keyInsight: { type: "string", description: "Key insight" }
+    },
+    required: baseThoughtRequired,
+    additionalProperties: false
+  }
+} as const;
+
+/**
+ * All tool schemas as array
+>>>>>>> Stashed changes
  */
 export const jsonSchemas = [
   deepthinking_core_schema,
@@ -1252,7 +1294,10 @@ export const jsonSchemas = [
   deepthinking_strategic_schema,
   deepthinking_analytical_schema,
   deepthinking_scientific_schema,
+<<<<<<< Updated upstream
   deepthinking_engineering_schema,
+=======
+>>>>>>> Stashed changes
   deepthinking_academic_schema,
   deepthinking_session_schema,
 ] as const;
