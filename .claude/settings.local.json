@@ -78,7 +78,12 @@
       "Bash(npm run docs:deps:*)",
       "Bash(mkdir:*)",
       "Bash(rm:*)",
-      "Bash(certutil -hashfile:*)"
+      "Bash(certutil -hashfile:*)",
+      "Bash(npm version:*)",
+      "mcp__deepthinking-mcp__deepthinking_mathematics",
+      "mcp__deepthinking-mcp__deepthinking_engineering",
+      "mcp__deepthinking-mcp__deepthinking_academic",
+      "Bash(powershell -Command \"(Get-Content ''src/services/ThoughtFactory.ts'' -Raw) -replace ''import \\{ randomUUID \\} from ''''crypto'''';\\r?\\nimport \\{\\r?\\n  ThinkingMode,\\r?\\n  ShannonStage,\\r?\\n  SequentialThought,\\r?\\n  ShannonThought,\\r?\\n  MathematicsThought,\\r?\\n  PhysicsThought,\\r?\\n  InductiveThought,\\r?\\n  DeductiveThought,\\r?\\n  AbductiveThought,\\r?\\n  CausalThought,\\r?\\n  Thought,\\r?\\n  EngineeringThought,\\r?\\n\\} from ''''\\.\\.\\/types\\/index\\.js'''';'', ''import { randomUUID } from ''''crypto'''';\nimport {\n  ThinkingMode,\n  ShannonStage,\n  SequentialThought,\n  ShannonThought,\n  MathematicsThought,\n  PhysicsThought,\n  InductiveThought,\n  DeductiveThought,\n  AbductiveThought,\n  CausalThought,\n  Thought,\n  EngineeringThought,\n  ComputabilityThought,\n  CryptanalyticThought,\n  AlgorithmicThought,\n  SystemsThinkingThought,\n  ScientificMethodThought,\n  FormalLogicThought,\n  OptimizationThought,\n  SynthesisThought,\n  ArgumentationThought,\n  CritiqueThought,\n  AnalysisThought,\n} from ''''../types/index.js'''';'' | Set-Content ''src/services/ThoughtFactory.ts''\")"
     ],
     "deny": [],
     "ask": []
