@@ -29607,6 +29607,40 @@ var deepthinking_session_schema = {
     additionalProperties: false
   }
 };
+var deepthinking_academic_schema = {
+  name: "deepthinking_academic",
+  description: "Academic research: synthesis (literature review), argumentation (Toulmin model), critique (peer review), analysis (qualitative methods)",
+  inputSchema: {
+    type: "object",
+    properties: {
+      ...baseThoughtProperties,
+      mode: {
+        type: "string",
+        enum: ["synthesis", "argumentation", "critique", "analysis"],
+        description: "Academic research mode"
+      },
+      thoughtType: { type: "string", description: "Specific thought type" },
+      sources: { type: "array", items: { type: "object" }, description: "Academic sources (synthesis)" },
+      themes: { type: "array", items: { type: "object" }, description: "Themes identified (synthesis)" },
+      gaps: { type: "array", items: { type: "object" }, description: "Literature gaps (synthesis)" },
+      claims: { type: "array", items: { type: "object" }, description: "Claims/theses (argumentation)" },
+      grounds: { type: "array", items: { type: "object" }, description: "Evidence/data (argumentation)" },
+      warrants: { type: "array", items: { type: "object" }, description: "Reasoning connectors (argumentation)" },
+      rebuttals: { type: "array", items: { type: "object" }, description: "Counterarguments (argumentation)" },
+      argumentStrength: { type: "number", minimum: 0, maximum: 1, description: "Overall argument strength" },
+      critiquedWork: { type: "object", description: "Work being critiqued" },
+      strengths: { type: "array", items: { type: "string" }, description: "Identified strengths (critique)" },
+      weaknesses: { type: "array", items: { type: "string" }, description: "Identified weaknesses (critique)" },
+      suggestions: { type: "array", items: { type: "string" }, description: "Improvements (critique)" },
+      methodology: { type: "string", description: "Qualitative methodology (analysis)" },
+      codes: { type: "array", items: { type: "object" }, description: "Qualitative codes (analysis)" },
+      memos: { type: "array", items: { type: "object" }, description: "Analytical memos (analysis)" },
+      keyInsight: { type: "string", description: "Key insight" }
+    },
+    required: baseThoughtRequired,
+    additionalProperties: false
+  }
+};
 var jsonSchemas = [
   deepthinking_core_schema,
   deepthinking_standard_schema,
@@ -29617,7 +29651,10 @@ var jsonSchemas = [
   deepthinking_strategic_schema,
   deepthinking_analytical_schema,
   deepthinking_scientific_schema,
+<<<<<<< Updated upstream
   deepthinking_engineering_schema,
+=======
+>>>>>>> Stashed changes
   deepthinking_academic_schema,
   deepthinking_session_schema
 ];
@@ -29978,6 +30015,7 @@ var ScientificSchema = BaseThoughtSchema.extend({
   mode: z.enum(["scientificmethod", "systemsthinking", "formallogic"])
 });
 
+<<<<<<< Updated upstream
 // src/tools/schemas/modes/engineering.ts
 init_esm_shims();
 var EngineeringSchema = BaseThoughtSchema.extend({
@@ -29988,6 +30026,125 @@ var EngineeringSchema = BaseThoughtSchema.extend({
 init_esm_shims();
 var AcademicSchema = BaseThoughtSchema.extend({
   mode: z.enum(["synthesis", "argumentation", "critique", "analysis"])
+=======
+// src/tools/schemas/modes/academic.ts
+init_esm_shims();
+var AcademicModeEnum = z.enum(["synthesis", "argumentation", "critique", "analysis"]);
+var SourceSchema = z.object({
+  id: z.string(),
+  type: z.string().optional(),
+  title: z.string(),
+  authors: z.array(z.string()).optional(),
+  year: z.number().int().optional(),
+  venue: z.string().optional(),
+  doi: z.string().optional(),
+  relevance: ConfidenceSchema.optional()
+});
+var ThemeSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  sourceIds: z.array(z.string()).optional(),
+  strength: ConfidenceSchema.optional(),
+  consensus: z.enum(["strong", "moderate", "weak", "contested"]).optional()
+});
+var GapSchema = z.object({
+  id: z.string(),
+  description: z.string(),
+  type: z.enum(["empirical", "theoretical", "methodological", "population", "contextual"]).optional(),
+  importance: z.enum(["critical", "significant", "moderate", "minor"]).optional()
+});
+var ClaimSchema = z.object({
+  id: z.string(),
+  statement: z.string(),
+  type: z.enum(["fact", "value", "policy", "definition", "cause"]).optional(),
+  strength: z.enum(["strong", "moderate", "tentative"]).optional()
+});
+var GroundsSchema = z.object({
+  id: z.string(),
+  type: z.enum(["empirical", "statistical", "testimonial", "analogical", "logical", "textual"]).optional(),
+  content: z.string(),
+  source: z.string().optional(),
+  reliability: ConfidenceSchema.optional()
+});
+var WarrantSchema = z.object({
+  id: z.string(),
+  statement: z.string(),
+  type: z.enum(["generalization", "analogy", "causal", "authority", "principle", "definition"]).optional(),
+  groundsIds: z.array(z.string()).optional(),
+  claimId: z.string().optional()
+});
+var RebuttalSchema = z.object({
+  id: z.string(),
+  objection: z.string(),
+  type: z.enum(["factual", "logical", "ethical", "practical", "definitional"]).optional(),
+  strength: z.enum(["strong", "moderate", "weak"]).optional(),
+  response: z.string().optional()
+});
+var CritiquedWorkSchema = z.object({
+  id: z.string().optional(),
+  title: z.string(),
+  authors: z.array(z.string()).optional(),
+  year: z.number().int().optional(),
+  type: z.string().optional(),
+  field: z.string().optional()
+});
+var CodeSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  definition: z.string().optional(),
+  type: z.enum(["descriptive", "in_vivo", "process", "initial", "focused", "axial", "theoretical", "emotion", "value"]).optional(),
+  frequency: z.number().int().optional(),
+  examples: z.array(z.string()).optional()
+});
+var MemoSchema = z.object({
+  id: z.string(),
+  type: z.enum(["analytical", "theoretical", "methodological", "reflexive", "code", "operational"]).optional(),
+  content: z.string(),
+  relatedCodes: z.array(z.string()).optional()
+});
+var AcademicSchema = BaseThoughtSchema.extend({
+  mode: AcademicModeEnum,
+  thoughtType: z.string().optional(),
+  // Synthesis properties
+  sources: z.array(SourceSchema).optional(),
+  themes: z.array(ThemeSchema).optional(),
+  gaps: z.array(GapSchema).optional(),
+  // Argumentation properties (Toulmin model)
+  claims: z.array(ClaimSchema).optional(),
+  grounds: z.array(GroundsSchema).optional(),
+  warrants: z.array(WarrantSchema).optional(),
+  rebuttals: z.array(RebuttalSchema).optional(),
+  argumentStrength: ConfidenceSchema.optional(),
+  // Critique properties
+  critiquedWork: CritiquedWorkSchema.optional(),
+  strengths: z.array(z.string()).optional(),
+  weaknesses: z.array(z.string()).optional(),
+  suggestions: z.array(z.string()).optional(),
+  // Analysis properties (qualitative)
+  methodology: z.enum([
+    "thematic_analysis",
+    "grounded_theory",
+    "discourse_analysis",
+    "content_analysis",
+    "phenomenological",
+    "narrative_analysis",
+    "framework_analysis",
+    "template_analysis",
+    "mixed_qualitative"
+  ]).optional(),
+  dataSources: z.array(z.object({
+    id: z.string(),
+    type: z.string(),
+    description: z.string().optional(),
+    participantId: z.string().optional()
+  })).optional(),
+  codes: z.array(CodeSchema).optional(),
+  memos: z.array(MemoSchema).optional(),
+  saturationReached: z.boolean().optional(),
+  // Shared
+  keyInsight: z.string().optional()
+>>>>>>> Stashed changes
 });
 var toolList = jsonSchemas;
 var toolSchemas = {
@@ -30000,7 +30157,10 @@ var toolSchemas = {
   deepthinking_strategic: StrategicSchema,
   deepthinking_analytical: AnalyticalSchema,
   deepthinking_scientific: ScientificSchema,
+<<<<<<< Updated upstream
   deepthinking_engineering: EngineeringSchema,
+=======
+>>>>>>> Stashed changes
   deepthinking_academic: AcademicSchema,
   deepthinking_session: SessionActionSchema
 };
@@ -30037,10 +30197,13 @@ var modeToToolMap = {
   scientificmethod: "deepthinking_scientific",
   systemsthinking: "deepthinking_scientific",
   formallogic: "deepthinking_scientific",
+<<<<<<< Updated upstream
   // Engineering modes (Phase 14)
   engineering: "deepthinking_engineering",
   algorithmic: "deepthinking_engineering",
   // Academic research modes (Phase 14)
+=======
+>>>>>>> Stashed changes
   synthesis: "deepthinking_academic",
   argumentation: "deepthinking_academic",
   critique: "deepthinking_academic",
