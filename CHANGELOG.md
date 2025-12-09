@@ -9,6 +9,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [7.5.1] - 2025-12-09
+
+### 🐛 Bug Fixes
+
+- Fixed merge conflict markers in 4 tool schema files:
+  - `src/tools/definitions.ts` - Restored 12-tool architecture
+  - `src/tools/json-schemas.ts` - Removed duplicate schema definition
+  - `src/tools/schemas/modes/academic.ts` - Rewrote complete schema
+  - `tests/unit/tools/schemas/tool-definitions.test.ts` - Updated test expectations
+- Fixed `IssueCategory` enum missing values in `src/validation/constants.ts`:
+  - Added `COMPLETENESS: 'completeness'`
+  - Added `INTERPRETATION: 'interpretation'`
+- Fixed `ValidationIssue` interface in `src/types/session.ts` to include all category values
+- Fixed `counterfactual.ts` validator using wrong property name (`probability` → `likelihood`)
+
+### ✨ Features
+
+- Added YAML export to dependency graph generator (`docs/architecture/dependency-graph.yaml`)
+  - 23% smaller than JSON (225KB vs 294KB)
+  - Human-readable hierarchical format
+- Added compact summary export for LLM consumption (`docs/architecture/dependency-summary.compact.json`)
+  - CTON-style key abbreviation (7.9KB, ~2K tokens)
+  - Contains: metadata, statistics, circular deps, module summaries, hot paths
+  - Fits within LLM context limits for architectural overview
+
+### 📚 Documentation
+
+- Regenerated dependency graph documentation with new export formats
+- Updated `tools/create-dependency-graph.ts` with js-yaml integration
+
+### 🔧 Maintenance
+
+- All 791 tests passing
+- 0 runtime circular dependencies (41 type-only, safe)
+
+---
+
 ## [7.5.0] - 2025-12-08
 
 ### ✨ Features

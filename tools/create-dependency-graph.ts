@@ -4,8 +4,9 @@
  * Generic Dependency Graph Generator
  *
  * Scans a TypeScript codebase and generates:
- * - docs/architecture/DEPENDENCY_GRAPH.md
- * - docs/architecture/dependency-graph.json
+ * - docs/architecture/DEPENDENCY_GRAPH.md (human-readable)
+ * - docs/architecture/dependency-graph.json (machine-readable)
+ * - docs/architecture/dependency-graph.yaml (compact, ~40% smaller than JSON)
  *
  * Usage: npx tsx tools/create-dependency-graph.ts
  *
@@ -16,6 +17,7 @@
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname, relative, basename } from 'path';
 import { fileURLToPath } from 'url';
+import yaml from 'js-yaml';
 
 // Types
 interface Dependency {
@@ -953,6 +955,75 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
 }
 
 /**
+ * Generate compact summary for LLM consumption (~10KB target)
+ * Uses CTON-style compression: no whitespace, abbreviated keys
+ */
+function generateCompactSummary(files: ParsedFile[], modules: ModuleMap, stats: Statistics, circularDeps: CircularDependencyResult): string {
+  // Abbreviate module names and create compact structure
+  const summary = {
+    m: { // metadata
+      n: packageJson.name,
+      v: packageJson.version,
+      d: new Date().toISOString().split('T')[0],
+      f: stats.totalTypeScriptFiles,
+      e: stats.totalExports,
+      re: stats.totalReExports
+    },
+    s: { // statistics
+      loc: stats.totalLinesOfCode,
+      cls: stats.totalClasses,
+      int: stats.totalInterfaces,
+      fn: stats.totalFunctions,
+      tg: stats.totalTypeGuards,
+      en: stats.totalEnums,
+      co: stats.totalConstants,
+      toi: stats.totalTypeOnlyImports
+    },
+    c: { // circular deps
+      rt: circularDeps.runtime.length,
+      to: circularDeps.typeOnly.length,
+      // Only include first 5 runtime cycles (if any) for context
+      rtp: circularDeps.runtime.slice(0, 5).map(c => c.map(p => p.split('/').pop()?.replace('.ts', '')).join('→'))
+    },
+    mod: {} as Record<string, { f: number; exp: string[]; cls?: string[]; int?: string[] }>,
+    // Hot paths: files with most dependencies
+    hp: [] as { p: string; i: number; o: number }[]
+  };
+
+  // Compact module summary
+  for (const [modName, modFiles] of Object.entries(modules)) {
+    const fileList = Object.values(modFiles);
+    const exports = fileList.flatMap(f => f.exports.named).slice(0, 20);
+    const classes = fileList.flatMap(f => f.exports.classes);
+    const interfaces = fileList.flatMap(f => f.exports.interfaces).slice(0, 10);
+
+    summary.mod[modName] = {
+      f: Object.keys(modFiles).length,
+      exp: [...new Set(exports)]
+    };
+    if (classes.length > 0) summary.mod[modName].cls = [...new Set(classes)];
+    if (interfaces.length > 0) summary.mod[modName].int = [...new Set(interfaces)];
+  }
+
+  // Find hot paths (files with highest connectivity)
+  const connectivity = files.map(f => ({
+    p: f.path.split('/').slice(-2).join('/'),
+    i: f.internalDependencies.length,
+    o: files.filter(other =>
+      other.internalDependencies.some(d => {
+        const resolved = resolvePath(other.path, d.file);
+        return resolved === f.path;
+      })
+    ).length
+  })).sort((a, b) => (b.i + b.o) - (a.i + a.o));
+
+  summary.hp = connectivity.slice(0, 15);
+
+  // Output as minified JSON (CTON-style: no whitespace)
+  return JSON.stringify(summary);
+}
+
+/**
  * Main function
  */
 async function main(): Promise<void> {
@@ -1001,8 +1072,26 @@ async function main(): Promise<void> {
   writeFileSync(join(OUTPUT_DIR, 'dependency-graph.json'), JSON.stringify(json, null, 2));
   console.log('Written: docs/architecture/dependency-graph.json');
 
+  // Write YAML output (more compact, ~40% smaller than JSON)
+  const yamlOutput = yaml.dump(json, {
+    indent: 2,
+    lineWidth: 120,
+    noRefs: true,
+    sortKeys: false,
+    quotingType: '"',
+    forceQuotes: false,
+  });
+  writeFileSync(join(OUTPUT_DIR, 'dependency-graph.yaml'), yamlOutput);
+  console.log('Written: docs/architecture/dependency-graph.yaml');
+
   writeFileSync(join(OUTPUT_DIR, 'DEPENDENCY_GRAPH.md'), markdown);
   console.log('Written: docs/architecture/DEPENDENCY_GRAPH.md');
+
+  // Write compact summary for LLM consumption (CTON-style, ~10KB)
+  const compactSummary = generateCompactSummary(parsedFiles, modules, stats, circularDeps);
+  writeFileSync(join(OUTPUT_DIR, 'dependency-summary.compact.json'), compactSummary);
+  const compactSize = Buffer.byteLength(compactSummary, 'utf8');
+  console.log(`Written: docs/architecture/dependency-summary.compact.json (${(compactSize / 1024).toFixed(1)}KB)`);
 
   console.log('\nDependency graph generation complete!');
   console.log(`  - ${stats.totalTypeScriptFiles} files analyzed`);

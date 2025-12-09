@@ -1,5 +1,5 @@
 /**
- * Tool Definitions Tests (v5.0.0)
+ * Tool Definitions Tests (v7.5.0)
  * Testing for hand-written schema architecture
  */
 
@@ -17,11 +17,8 @@ import { SCHEMA_VERSION, schemaMetadata, getDeprecationWarning } from '../../../
 
 describe('Tool Definitions', () => {
   describe('tools object', () => {
-<<<<<<< Updated upstream
     it('should have all 12 tools defined', () => {
       expect(Object.keys(tools)).toHaveLength(12);
-=======
->>>>>>> Stashed changes
     });
 
     it('should have correct tool names', () => {
@@ -35,10 +32,7 @@ describe('Tool Definitions', () => {
         'deepthinking_strategic',
         'deepthinking_analytical',
         'deepthinking_scientific',
-<<<<<<< Updated upstream
         'deepthinking_engineering',
-=======
->>>>>>> Stashed changes
         'deepthinking_academic',
         'deepthinking_session',
       ];
@@ -57,10 +51,7 @@ describe('Tool Definitions', () => {
 
   describe('toolList', () => {
     it('should contain all tools as array', () => {
-<<<<<<< Updated upstream
       expect(toolList).toHaveLength(12);
-=======
->>>>>>> Stashed changes
     });
 
     it('should have valid MCP tool format', () => {
@@ -76,10 +67,7 @@ describe('Tool Definitions', () => {
 
   describe('toolSchemas', () => {
     it('should have schemas for all tools', () => {
-<<<<<<< Updated upstream
       expect(Object.keys(toolSchemas)).toHaveLength(12);
-=======
->>>>>>> Stashed changes
     });
 
     it('should have parse method on each schema', () => {
@@ -90,9 +78,7 @@ describe('Tool Definitions', () => {
   });
 
   describe('modeToToolMap', () => {
-<<<<<<< Updated upstream
     it('should map all 29 modes with dedicated thought types', () => {
->>>>>>> Stashed changes
       const modes = [
         'sequential', 'shannon', 'hybrid',
         'mathematics', 'physics', 'computability',
@@ -103,10 +89,7 @@ describe('Tool Definitions', () => {
         'gametheory', 'optimization',
         'analogical', 'firstprinciples', 'metareasoning', 'cryptanalytic',
         'scientificmethod', 'systemsthinking', 'formallogic',
-<<<<<<< Updated upstream
         'engineering', 'algorithmic',
-=======
->>>>>>> Stashed changes
         'synthesis', 'argumentation', 'critique', 'analysis',
       ];
 
@@ -131,6 +114,18 @@ describe('Tool Definitions', () => {
       expect(modeToToolMap.mathematics).toBe('deepthinking_mathematics');
       expect(modeToToolMap.physics).toBe('deepthinking_mathematics');
     });
+
+    it('should map engineering modes correctly', () => {
+      expect(modeToToolMap.engineering).toBe('deepthinking_engineering');
+      expect(modeToToolMap.algorithmic).toBe('deepthinking_engineering');
+    });
+
+    it('should map academic modes correctly', () => {
+      expect(modeToToolMap.synthesis).toBe('deepthinking_academic');
+      expect(modeToToolMap.argumentation).toBe('deepthinking_academic');
+      expect(modeToToolMap.critique).toBe('deepthinking_academic');
+      expect(modeToToolMap.analysis).toBe('deepthinking_academic');
+    });
   });
 
   describe('getToolForMode', () => {
@@ -140,7 +135,7 @@ describe('Tool Definitions', () => {
       expect(getToolForMode('bayesian')).toBe('deepthinking_probabilistic');
     });
 
-    it('should default to core for unknown modes', () => {
+    it('should default to standard for unknown modes', () => {
       expect(getToolForMode('unknown')).toBe('deepthinking_standard');
     });
   });
@@ -149,6 +144,8 @@ describe('Tool Definitions', () => {
     it('should return true for valid tools', () => {
       expect(isValidTool('deepthinking_standard')).toBe(true);
       expect(isValidTool('deepthinking_temporal')).toBe(true);
+      expect(isValidTool('deepthinking_engineering')).toBe(true);
+      expect(isValidTool('deepthinking_academic')).toBe(true);
     });
 
     it('should return false for invalid tools', () => {
@@ -274,6 +271,34 @@ describe('Schema Validation', () => {
         action: 'export',
         sessionId: 'test-session',
         exportFormat: 'markdown',
+      };
+      expect(() => schema.parse(input)).not.toThrow();
+    });
+  });
+
+  describe('AcademicSchema', () => {
+    it('should validate synthesis input', () => {
+      const schema = getSchemaForTool('deepthinking_academic');
+      const input = {
+        thought: 'Synthesizing literature on AI safety',
+        thoughtNumber: 1,
+        totalThoughts: 5,
+        nextThoughtNeeded: true,
+        mode: 'synthesis',
+        sources: [{ id: 'src-1', title: 'AI Safety Survey' }],
+      };
+      expect(() => schema.parse(input)).not.toThrow();
+    });
+
+    it('should validate argumentation input', () => {
+      const schema = getSchemaForTool('deepthinking_academic');
+      const input = {
+        thought: 'Building argument for thesis',
+        thoughtNumber: 2,
+        totalThoughts: 5,
+        nextThoughtNeeded: true,
+        mode: 'argumentation',
+        claims: [{ id: 'claim-1', statement: 'AI systems require safety constraints' }],
       };
       expect(() => schema.parse(input)).not.toThrow();
     });

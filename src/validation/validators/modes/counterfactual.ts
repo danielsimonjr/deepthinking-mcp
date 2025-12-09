@@ -84,14 +84,14 @@ export class CounterfactualValidator extends BaseValidator<CounterfactualThought
       }
     }
 
-    // Validate scenario probability and likelihood ranges
-    if (thought.actual && thought.actual.probability !== undefined &&
-        (thought.actual.probability < 0 || thought.actual.probability > 1)) {
+    // Validate scenario likelihood ranges
+    if (thought.actual && thought.actual.likelihood !== undefined &&
+        (thought.actual.likelihood < 0 || thought.actual.likelihood > 1)) {
       issues.push({
         severity: 'error',
         thoughtNumber: thought.thoughtNumber,
-        description: 'Actual scenario probability must be between 0 and 1',
-        suggestion: 'Provide probability as decimal',
+        description: 'Actual scenario likelihood must be between 0 and 1',
+        suggestion: 'Provide likelihood as decimal',
         category: 'structural',
       });
     }

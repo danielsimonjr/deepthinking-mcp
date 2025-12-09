@@ -167,5 +167,5 @@ export interface ValidationIssue {
   thoughtNumber: number;
   description: string;
   suggestion: string;
-  category: 'logical' | 'mathematical' | 'physical' | 'structural';
+  category: 'logical' | 'mathematical' | 'physical' | 'structural' | 'completeness' | 'interpretation';
 }

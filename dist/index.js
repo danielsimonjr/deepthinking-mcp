@@ -29607,40 +29607,6 @@ var deepthinking_session_schema = {
     additionalProperties: false
   }
 };
-var deepthinking_academic_schema = {
-  name: "deepthinking_academic",
-  description: "Academic research: synthesis (literature review), argumentation (Toulmin model), critique (peer review), analysis (qualitative methods)",
-  inputSchema: {
-    type: "object",
-    properties: {
-      ...baseThoughtProperties,
-      mode: {
-        type: "string",
-        enum: ["synthesis", "argumentation", "critique", "analysis"],
-        description: "Academic research mode"
-      },
-      thoughtType: { type: "string", description: "Specific thought type" },
-      sources: { type: "array", items: { type: "object" }, description: "Academic sources (synthesis)" },
-      themes: { type: "array", items: { type: "object" }, description: "Themes identified (synthesis)" },
-      gaps: { type: "array", items: { type: "object" }, description: "Literature gaps (synthesis)" },
-      claims: { type: "array", items: { type: "object" }, description: "Claims/theses (argumentation)" },
-      grounds: { type: "array", items: { type: "object" }, description: "Evidence/data (argumentation)" },
-      warrants: { type: "array", items: { type: "object" }, description: "Reasoning connectors (argumentation)" },
-      rebuttals: { type: "array", items: { type: "object" }, description: "Counterarguments (argumentation)" },
-      argumentStrength: { type: "number", minimum: 0, maximum: 1, description: "Overall argument strength" },
-      critiquedWork: { type: "object", description: "Work being critiqued" },
-      strengths: { type: "array", items: { type: "string" }, description: "Identified strengths (critique)" },
-      weaknesses: { type: "array", items: { type: "string" }, description: "Identified weaknesses (critique)" },
-      suggestions: { type: "array", items: { type: "string" }, description: "Improvements (critique)" },
-      methodology: { type: "string", description: "Qualitative methodology (analysis)" },
-      codes: { type: "array", items: { type: "object" }, description: "Qualitative codes (analysis)" },
-      memos: { type: "array", items: { type: "object" }, description: "Analytical memos (analysis)" },
-      keyInsight: { type: "string", description: "Key insight" }
-    },
-    required: baseThoughtRequired,
-    additionalProperties: false
-  }
-};
 var jsonSchemas = [
   deepthinking_core_schema,
   deepthinking_standard_schema,
@@ -29651,10 +29617,7 @@ var jsonSchemas = [
   deepthinking_strategic_schema,
   deepthinking_analytical_schema,
   deepthinking_scientific_schema,
-<<<<<<< Updated upstream
   deepthinking_engineering_schema,
-=======
->>>>>>> Stashed changes
   deepthinking_academic_schema,
   deepthinking_session_schema
 ];
@@ -30015,18 +29978,12 @@ var ScientificSchema = BaseThoughtSchema.extend({
   mode: z.enum(["scientificmethod", "systemsthinking", "formallogic"])
 });
 
-<<<<<<< Updated upstream
 // src/tools/schemas/modes/engineering.ts
 init_esm_shims();
 var EngineeringSchema = BaseThoughtSchema.extend({
   mode: z.enum(["engineering", "algorithmic"])
 });
 
-// src/tools/schemas/modes/academic.ts
-init_esm_shims();
-var AcademicSchema = BaseThoughtSchema.extend({
-  mode: z.enum(["synthesis", "argumentation", "critique", "analysis"])
-=======
 // src/tools/schemas/modes/academic.ts
 init_esm_shims();
 var AcademicModeEnum = z.enum(["synthesis", "argumentation", "critique", "analysis"]);
@@ -30144,7 +30101,6 @@ var AcademicSchema = BaseThoughtSchema.extend({
   saturationReached: z.boolean().optional(),
   // Shared
   keyInsight: z.string().optional()
->>>>>>> Stashed changes
 });
 var toolList = jsonSchemas;
 var toolSchemas = {
@@ -30157,10 +30113,7 @@ var toolSchemas = {
   deepthinking_strategic: StrategicSchema,
   deepthinking_analytical: AnalyticalSchema,
   deepthinking_scientific: ScientificSchema,
-<<<<<<< Updated upstream
   deepthinking_engineering: EngineeringSchema,
-=======
->>>>>>> Stashed changes
   deepthinking_academic: AcademicSchema,
   deepthinking_session: SessionActionSchema
 };
@@ -30197,13 +30150,10 @@ var modeToToolMap = {
   scientificmethod: "deepthinking_scientific",
   systemsthinking: "deepthinking_scientific",
   formallogic: "deepthinking_scientific",
-<<<<<<< Updated upstream
   // Engineering modes (Phase 14)
   engineering: "deepthinking_engineering",
   algorithmic: "deepthinking_engineering",
   // Academic research modes (Phase 14)
-=======
->>>>>>> Stashed changes
   synthesis: "deepthinking_academic",
   argumentation: "deepthinking_academic",
   critique: "deepthinking_academic",

@@ -1,21 +1,12 @@
 /**
-<<<<<<< Updated upstream
- * Academic Mode Schemas (v7.5.0)
+ * Academic Mode Schema (v7.5.0)
  * Phase 14: Academic research modes accessible via MCP tools
  * Designed for PhD students and scientific paper writing
-=======
- * Academic Mode Schema (Phase 13 v7.4.0)
  * Zod validation schema for synthesis, argumentation, critique, analysis modes
->>>>>>> Stashed changes
  */
 
 import { z } from 'zod';
 import { BaseThoughtSchema } from '../base.js';
-<<<<<<< Updated upstream
-
-export const AcademicSchema = BaseThoughtSchema.extend({
-  mode: z.enum(['synthesis', 'argumentation', 'critique', 'analysis']),
-=======
 import { ConfidenceSchema } from '../shared.js';
 
 /**
@@ -185,7 +176,6 @@ export const AcademicSchema = BaseThoughtSchema.extend({
 
   // Shared
   keyInsight: z.string().optional(),
->>>>>>> Stashed changes
 });
 
 export type AcademicInput = z.infer<typeof AcademicSchema>;

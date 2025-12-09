@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 7.4.0 | **Last Updated**: 2025-12-08
+**Version**: 7.5.0 | **Last Updated**: 2025-12-09
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -1141,6 +1141,20 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/repositories/index.ts` - Repository module exports (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./ISessionRepository.js` | `ISessionRepository` | Re-export |
+| `./FileSessionRepository.js` | `FileSessionRepository` | Re-export |
+| `./MemorySessionRepository.js` | `MemorySessionRepository` | Re-export |
+
+**Exports:**
+- Re-exports: `ISessionRepository`, `FileSessionRepository`, `MemorySessionRepository`
+
+---
+
 ### `src/repositories/ISessionRepository.ts` - Session Repository Interface (v3.4.5)
 
 **Internal Dependencies:**
@@ -1160,20 +1174,6 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Classes: `MemorySessionRepository`
-
----
-
-### `src/repositories/index.ts` - Repository module exports (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./ISessionRepository.js` | `ISessionRepository` | Re-export |
-| `./FileSessionRepository.js` | `FileSessionRepository` | Re-export |
-| `./MemorySessionRepository.js` | `MemorySessionRepository` | Re-export |
-
-**Exports:**
-- Re-exports: `ISessionRepository`, `FileSessionRepository`, `MemorySessionRepository`
 
 ---
 
@@ -1266,6 +1266,20 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/services/index.ts` - Services module exports (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./ThoughtFactory.js` | `ThoughtFactory` | Re-export |
+| `./ExportService.js` | `ExportService` | Re-export |
+| `./ModeRouter.js` | `ModeRouter` | Re-export |
+
+**Exports:**
+- Re-exports: `ThoughtFactory`, `ExportService`, `ModeRouter`
+
+---
+
 ### `src/services/MetaMonitor.ts` - Meta-Reasoning Monitor Service (v6.0.0)
 
 **Internal Dependencies:**
@@ -1318,35 +1332,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/services/index.ts` - Services module exports (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./ThoughtFactory.js` | `ThoughtFactory` | Re-export |
-| `./ExportService.js` | `ExportService` | Re-export |
-| `./ModeRouter.js` | `ModeRouter` | Re-export |
-
-**Exports:**
-- Re-exports: `ThoughtFactory`, `ExportService`, `ModeRouter`
-
----
-
 ## Session Dependencies
-
-### `src/session/SessionMetricsCalculator.ts` - Session Metrics Calculator (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `ThinkingSession, SessionMetrics, Thought` | Import |
-| `../types/core.js` | `isTemporalThought, isGameTheoryThought, isEvidentialThought` | Import |
-| `../validation/cache.js` | `validationCache` | Import |
-
-**Exports:**
-- Classes: `SessionMetricsCalculator`
-
----
 
 ### `src/session/index.ts` - Session module exports (v4.3.0)
 
@@ -1406,6 +1392,20 @@ The codebase is organized into the following modules:
 - Classes: `InMemorySessionStore`, `FileSessionStore`
 - Interfaces: `ISessionStore`
 - Functions: `createSessionStore`
+
+---
+
+### `src/session/SessionMetricsCalculator.ts` - Session Metrics Calculator (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `ThinkingSession, SessionMetrics, Thought` | Import |
+| `../types/core.js` | `isTemporalThought, isGameTheoryThought, isEvidentialThought` | Import |
+| `../validation/cache.js` | `validationCache` | Import |
+
+**Exports:**
+- Classes: `SessionMetricsCalculator`
 
 ---
 
@@ -1625,7 +1625,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/tools/schemas/modes/academic.ts` - Academic Mode Schemas (v7.5.0)
+### `src/tools/schemas/modes/academic.ts` - Academic Mode Schema (v7.5.0)
 
 **External Dependencies:**
 | Package | Import |
@@ -1636,9 +1636,10 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
+| `../shared.js` | `ConfidenceSchema` | Import |
 
 **Exports:**
-- Constants: `AcademicSchema`
+- Constants: `AcademicModeEnum`, `AcademicSchema`
 
 ---
 
@@ -3057,9 +3058,9 @@ graph TD
 
     subgraph Repositories
         N28[FileSessionRepository]
-        N29[ISessionRepository]
-        N30[MemorySessionRepository]
-        N31[index]
+        N29[index]
+        N30[ISessionRepository]
+        N31[MemorySessionRepository]
     end
 
     subgraph Search
@@ -3072,17 +3073,17 @@ graph TD
 
     subgraph Services
         N37[ExportService]
-        N38[MetaMonitor]
-        N39[ModeRouter]
-        N40[ThoughtFactory]
-        N41[index]
+        N38[index]
+        N39[MetaMonitor]
+        N40[ModeRouter]
+        N41[ThoughtFactory]
     end
 
     subgraph Session
-        N42[SessionMetricsCalculator]
-        N43[index]
-        N44[manager]
-        N45[persistence]
+        N42[index]
+        N43[manager]
+        N44[persistence]
+        N45[SessionMetricsCalculator]
         N46[file-store]
         N47[...2 more]
     end
@@ -3145,9 +3146,9 @@ graph TD
     N10 --> N61
     N11 --> N61
     N13 --> N54
-    N13 --> N43
+    N13 --> N42
     N13 --> N61
-    N13 --> N41
+    N13 --> N38
     N14 --> N68
     N15 --> N14
     N16 --> N61
@@ -3159,7 +3160,7 @@ graph TD
     N18 --> N60
     N19 --> N61
     N24 --> N25
-    N28 --> N29
+    N28 --> N30
     N28 --> N61
     N28 --> N69
 ```
@@ -3172,8 +3173,8 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 185 |
 | Total Modules | 16 |
-| Total Lines of Code | 73942 |
-| Total Exports | 978 |
+| Total Lines of Code | 74111 |
+| Total Exports | 979 |
 | Total Re-exports | 413 |
 | Total Classes | 92 |
 | Total Interfaces | 459 |
@@ -3186,5 +3187,5 @@ graph TD
 
 ---
 
-*Last Updated*: 2025-12-08
-*Version*: 7.4.0
+*Last Updated*: 2025-12-09
+*Version*: 7.5.0

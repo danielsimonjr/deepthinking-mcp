@@ -26,6 +26,8 @@ export const IssueCategory = {
   LOGICAL: 'logical',
   MATHEMATICAL: 'mathematical',
   PHYSICAL: 'physical',
+  COMPLETENESS: 'completeness',
+  INTERPRETATION: 'interpretation',
 } as const;
 
 export type IssueCategory = (typeof IssueCategory)[keyof typeof IssueCategory];
