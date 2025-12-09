@@ -17,8 +17,11 @@ import { SCHEMA_VERSION, schemaMetadata, getDeprecationWarning } from '../../../
 
 describe('Tool Definitions', () => {
   describe('tools object', () => {
+<<<<<<< Updated upstream
     it('should have all 12 tools defined', () => {
       expect(Object.keys(tools)).toHaveLength(12);
+=======
+>>>>>>> Stashed changes
     });
 
     it('should have correct tool names', () => {
@@ -32,7 +35,10 @@ describe('Tool Definitions', () => {
         'deepthinking_strategic',
         'deepthinking_analytical',
         'deepthinking_scientific',
+<<<<<<< Updated upstream
         'deepthinking_engineering',
+=======
+>>>>>>> Stashed changes
         'deepthinking_academic',
         'deepthinking_session',
       ];
@@ -51,7 +57,10 @@ describe('Tool Definitions', () => {
 
   describe('toolList', () => {
     it('should contain all tools as array', () => {
+<<<<<<< Updated upstream
       expect(toolList).toHaveLength(12);
+=======
+>>>>>>> Stashed changes
     });
 
     it('should have valid MCP tool format', () => {
@@ -67,7 +76,10 @@ describe('Tool Definitions', () => {
 
   describe('toolSchemas', () => {
     it('should have schemas for all tools', () => {
+<<<<<<< Updated upstream
       expect(Object.keys(toolSchemas)).toHaveLength(12);
+=======
+>>>>>>> Stashed changes
     });
 
     it('should have parse method on each schema', () => {
@@ -78,7 +90,9 @@ describe('Tool Definitions', () => {
   });
 
   describe('modeToToolMap', () => {
+<<<<<<< Updated upstream
     it('should map all 29 modes with dedicated thought types', () => {
+>>>>>>> Stashed changes
       const modes = [
         'sequential', 'shannon', 'hybrid',
         'mathematics', 'physics', 'computability',
@@ -89,7 +103,10 @@ describe('Tool Definitions', () => {
         'gametheory', 'optimization',
         'analogical', 'firstprinciples', 'metareasoning', 'cryptanalytic',
         'scientificmethod', 'systemsthinking', 'formallogic',
+<<<<<<< Updated upstream
         'engineering', 'algorithmic',
+=======
+>>>>>>> Stashed changes
         'synthesis', 'argumentation', 'critique', 'analysis',
       ];
 
