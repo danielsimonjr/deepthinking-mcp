@@ -77,7 +77,8 @@
       "Bash(npm run typecheck:tools:*)",
       "Bash(npm run docs:deps:*)",
       "Bash(mkdir:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(certutil -hashfile:*)"
     ],
     "deny": [],
     "ask": []
