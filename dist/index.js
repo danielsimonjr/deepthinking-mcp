@@ -3788,6 +3788,248 @@ var init_ThoughtFactory = __esm({
               assessment: engInput.assessment
             };
           }
+          // ===== Phase 11 v7.2.0 - Turing's legacy =====
+          case "computability": {
+            const compInput = input;
+            return {
+              ...baseThought,
+              mode: "computability" /* COMPUTABILITY */,
+              thoughtType: compInput.thoughtType || "machine_definition",
+              machines: compInput.machines || [],
+              currentMachine: compInput.currentMachine,
+              computationTrace: compInput.computationTrace,
+              problems: compInput.problems || [],
+              currentProblem: compInput.currentProblem,
+              reductions: compInput.reductions || [],
+              reductionChain: compInput.reductionChain || [],
+              decidabilityProof: compInput.decidabilityProof,
+              diagonalization: compInput.diagonalization,
+              complexityAnalysis: compInput.complexityAnalysis,
+              oracleAnalysis: compInput.oracleAnalysis,
+              dependencies: compInput.dependencies || [],
+              assumptions: compInput.assumptions || [],
+              uncertainty: compInput.uncertainty ?? 0.5,
+              classicProblems: compInput.classicProblems || [],
+              keyInsight: compInput.keyInsight
+            };
+          }
+          case "cryptanalytic": {
+            const cryptInput = input;
+            return {
+              ...baseThought,
+              mode: "cryptanalytic" /* CRYPTANALYTIC */,
+              thoughtType: cryptInput.thoughtType || "hypothesis_formation",
+              ciphertext: cryptInput.ciphertext,
+              plaintext: cryptInput.plaintext,
+              hypotheses: cryptInput.hypotheses || [],
+              currentHypothesis: cryptInput.currentHypothesis,
+              evidenceChains: cryptInput.evidenceChains || [],
+              keySpaceAnalysis: cryptInput.keySpaceAnalysis,
+              frequencyAnalysis: cryptInput.frequencyAnalysis,
+              banburismusAnalysis: cryptInput.banburismusAnalysis || [],
+              cribAnalysis: cryptInput.cribAnalysis || [],
+              patterns: cryptInput.patterns || [],
+              cipherType: cryptInput.cipherType,
+              dependencies: cryptInput.dependencies || [],
+              assumptions: cryptInput.assumptions || [],
+              uncertainty: cryptInput.uncertainty ?? 0.5,
+              keyInsight: cryptInput.keyInsight
+            };
+          }
+          // ===== Phase 12 v7.3.0 - CLRS algorithms =====
+          case "algorithmic": {
+            const algoInput = input;
+            return {
+              ...baseThought,
+              mode: "algorithmic" /* ALGORITHMIC */,
+              thoughtType: algoInput.thoughtType || "algorithm_definition",
+              algorithm: algoInput.algorithm,
+              clrsCategory: algoInput.clrsCategory,
+              clrsAlgorithm: algoInput.clrsAlgorithm,
+              designPattern: algoInput.designPattern,
+              timeComplexity: algoInput.timeComplexity,
+              spaceComplexity: algoInput.spaceComplexity,
+              recurrence: algoInput.recurrence,
+              correctnessProof: algoInput.correctnessProof,
+              loopInvariants: algoInput.loopInvariants || [],
+              dpFormulation: algoInput.dpFormulation,
+              greedyProof: algoInput.greedyProof,
+              graphContext: algoInput.graphContext,
+              dataStructure: algoInput.dataStructure,
+              amortizedAnalysis: algoInput.amortizedAnalysis,
+              comparison: algoInput.comparison,
+              dependencies: algoInput.dependencies || [],
+              assumptions: algoInput.assumptions || [],
+              uncertainty: algoInput.uncertainty ?? 0.5,
+              keyInsight: algoInput.keyInsight,
+              pseudocode: algoInput.pseudocode,
+              executionTrace: algoInput.executionTrace
+            };
+          }
+          // ===== Phase 4 v3.2.0 - Scientific modes =====
+          case "systemsthinking": {
+            const sysInput = input;
+            return {
+              ...baseThought,
+              mode: "systemsthinking" /* SYSTEMSTHINKING */,
+              thoughtType: sysInput.thoughtType || "system_definition",
+              system: sysInput.system,
+              components: sysInput.components || [],
+              feedbackLoops: sysInput.feedbackLoops || [],
+              leveragePoints: sysInput.leveragePoints || [],
+              behaviors: sysInput.behaviors || []
+            };
+          }
+          case "scientificmethod": {
+            const sciInput = input;
+            return {
+              ...baseThought,
+              mode: "scientificmethod" /* SCIENTIFICMETHOD */,
+              thoughtType: sciInput.thoughtType || "question_formulation",
+              researchQuestion: sciInput.researchQuestion,
+              scientificHypotheses: sciInput.scientificHypotheses || [],
+              experiment: sciInput.experiment,
+              data: sciInput.data,
+              analysis: sciInput.analysis,
+              conclusion: sciInput.conclusion
+            };
+          }
+          case "formallogic": {
+            const logicInput = input;
+            return {
+              ...baseThought,
+              mode: "formallogic" /* FORMALLOGIC */,
+              thoughtType: logicInput.thoughtType || "proposition_definition",
+              propositions: logicInput.propositions || [],
+              logicalInferences: logicInput.logicalInferences || [],
+              proof: logicInput.proof,
+              truthTable: logicInput.truthTable,
+              satisfiability: logicInput.satisfiability
+            };
+          }
+          case "optimization": {
+            const optInput = input;
+            return {
+              ...baseThought,
+              mode: "optimization" /* OPTIMIZATION */,
+              thoughtType: optInput.thoughtType || "problem_formulation",
+              objectiveFunction: optInput.objectiveFunction,
+              constraints: optInput.constraints || [],
+              variables: optInput.variables || [],
+              solution: optInput.solution,
+              method: optInput.method,
+              convergence: optInput.convergence,
+              sensitivity: optInput.sensitivity
+            };
+          }
+          // ===== Phase 13 v7.4.0 - Academic Research modes =====
+          case "synthesis": {
+            const synthInput = input;
+            return {
+              ...baseThought,
+              mode: "synthesis" /* SYNTHESIS */,
+              thoughtType: synthInput.thoughtType || "source_identification",
+              sources: synthInput.sources || [],
+              reviewMetadata: synthInput.reviewMetadata,
+              concepts: synthInput.concepts || [],
+              themes: synthInput.themes || [],
+              findings: synthInput.findings || [],
+              patterns: synthInput.patterns || [],
+              relations: synthInput.relations || [],
+              gaps: synthInput.gaps || [],
+              contradictions: synthInput.contradictions || [],
+              framework: synthInput.framework,
+              conclusions: synthInput.conclusions || [],
+              dependencies: synthInput.dependencies || [],
+              assumptions: synthInput.assumptions || [],
+              uncertainty: synthInput.uncertainty ?? 0.5,
+              keyInsight: synthInput.keyInsight
+            };
+          }
+          case "argumentation": {
+            const argInput = input;
+            return {
+              ...baseThought,
+              mode: "argumentation" /* ARGUMENTATION */,
+              thoughtType: argInput.thoughtType || "claim_formulation",
+              claims: argInput.claims || [],
+              currentClaim: argInput.currentClaim,
+              grounds: argInput.grounds || [],
+              warrants: argInput.warrants || [],
+              backings: argInput.backings || [],
+              qualifiers: argInput.qualifiers || [],
+              rebuttals: argInput.rebuttals || [],
+              arguments: argInput.arguments || [],
+              currentArgument: argInput.currentArgument,
+              argumentChain: argInput.argumentChain,
+              dialectic: argInput.dialectic,
+              rhetoricalStrategies: argInput.rhetoricalStrategies || [],
+              audienceConsideration: argInput.audienceConsideration,
+              fallacies: argInput.fallacies || [],
+              argumentStrength: argInput.argumentStrength ?? 0.5,
+              dependencies: argInput.dependencies || [],
+              assumptions: argInput.assumptions || [],
+              uncertainty: argInput.uncertainty ?? 0.5,
+              keyInsight: argInput.keyInsight
+            };
+          }
+          case "critique": {
+            const critInput = input;
+            return {
+              ...baseThought,
+              mode: "critique" /* CRITIQUE */,
+              thoughtType: critInput.thoughtType || "work_characterization",
+              work: critInput.work || {
+                id: randomUUID(),
+                title: "Untitled Work",
+                authors: [],
+                year: (/* @__PURE__ */ new Date()).getFullYear(),
+                type: "empirical_study",
+                field: "Unknown",
+                claimedContribution: ""
+              },
+              methodologyEvaluation: critInput.methodologyEvaluation,
+              argumentCritique: critInput.argumentCritique,
+              evidenceCritique: critInput.evidenceCritique,
+              contributionEvaluation: critInput.contributionEvaluation,
+              critiquePoints: critInput.critiquePoints || [],
+              improvements: critInput.improvements || [],
+              verdict: critInput.verdict,
+              strengthsIdentified: critInput.strengthsIdentified ?? 0,
+              weaknessesIdentified: critInput.weaknessesIdentified ?? 0,
+              balanceRatio: critInput.balanceRatio ?? 1,
+              dependencies: critInput.dependencies || [],
+              assumptions: critInput.assumptions || [],
+              uncertainty: critInput.uncertainty ?? 0.5,
+              keyInsight: critInput.keyInsight
+            };
+          }
+          case "analysis": {
+            const analInput = input;
+            return {
+              ...baseThought,
+              mode: "analysis" /* ANALYSIS */,
+              thoughtType: analInput.thoughtType || "data_familiarization",
+              methodology: analInput.methodology || "thematic_analysis",
+              dataSources: analInput.dataSources || [],
+              dataSegments: analInput.dataSegments || [],
+              totalSegments: analInput.totalSegments,
+              codebook: analInput.codebook,
+              currentCodes: analInput.currentCodes || [],
+              codingProgress: analInput.codingProgress,
+              themes: analInput.themes || [],
+              thematicMap: analInput.thematicMap,
+              memos: analInput.memos || [],
+              gtCategories: analInput.gtCategories || [],
+              theoreticalSampling: analInput.theoreticalSampling || [],
+              discoursePatterns: analInput.discoursePatterns || [],
+              rigorAssessment: analInput.rigorAssessment,
+              dependencies: analInput.dependencies || [],
+              assumptions: analInput.assumptions || [],
+              uncertainty: analInput.uncertainty ?? 0.5,
+              keyInsight: analInput.keyInsight
+            };
+          }
           case "hybrid":
           default:
             return {

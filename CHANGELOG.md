@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [7.5.2] - 2025-12-08
+
+### 🐛 Bug Fixes
+
+- Fixed experimental modes defaulting to hybrid in ThoughtFactory.createThought()
+  - Added 11 missing case statements for modes that were falling through to default:
+    - Phase 11 v7.2.0: `computability`, `cryptanalytic`
+    - Phase 12 v7.3.0: `algorithmic`
+    - Phase 4 v3.2.0: `systemsthinking`, `scientificmethod`, `formallogic`, `optimization`
+    - Phase 13 v7.4.0: `synthesis`, `argumentation`, `critique`, `analysis`
+  - Each mode now properly sets its mode type instead of returning `"mode": "hybrid"`
+
+---
+
 ## [7.5.1] - 2025-12-09
 
 ### 🐛 Bug Fixes
