@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **33 reasoning modes** (29 with dedicated thought types) with taxonomy-based classification (69 reasoning types across 12 categories, 110 planned), enterprise security, proof decomposition, and visual export capabilities including native SVG.
 
-**Version**: 7.5.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
+**Version**: 7.5.2 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
 
 ## Project Metrics
 
@@ -14,7 +14,7 @@ DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring *
 |--------|-------|
 | TypeScript Files | 185 |
 | Total Exports | 978 (413 re-exports) |
-| Passing Tests | 787 |
+| Passing Tests | 791 |
 | Reasoning Modes | 33 (21 fully implemented + 12 experimental) |
 | MCP Tools | 12 focused + 1 legacy |
 | Export Formats | 8 + native SVG |
@@ -127,6 +127,8 @@ Note: 29 modes have dedicated thought types. 4 modes (Recursive, Modal, Stochast
 
 | Version | Phase | Key Features |
 |---------|-------|--------------|
+| **v7.5.2** | Phase 14 | Bug fix: All 11 experimental modes now return correct mode type instead of defaulting to hybrid |
+| **v7.5.1** | Phase 14 | Bug fixes: Merge conflicts, validator issues, YAML/compact exports |
 | **v7.5.0** | Phase 14 | Accessible Reasoning Modes - All 29 modes with thought types now accessible via MCP tools (12 tools) |
 | **v7.4.0** | Phase 13 | Academic Research modes - Synthesis, Argumentation, Critique, Analysis (PhD/scientific writing) |
 | **v7.3.0** | Phase 12 | ALGORITHMIC mode - CLRS algorithms, DP formulations, correctness proofs, amortized analysis |
