@@ -38,7 +38,7 @@
       "Bash(npm install:*)",
       "Bash(timeout 120 npx tsc:*)",
       "Bash(grep:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
       "Bash(xargs:*)",
       "Bash(for f in src/expression/Help.js src/expression/node/AccessorNode.js src/expression/node/ArrayNode.js src/expression/node/AssignmentNode.js src/expression/node/BlockNode.js src/expression/node/ConditionalNode.js src/expression/node/ConstantNode.js src/expression/node/FunctionAssignmentNode.js src/expression/node/FunctionNode.js src/expression/node/IndexNode.js src/expression/node/Node.js src/expression/node/ObjectNode.js src/expression/node/OperatorNode.js src/expression/node/ParenthesisNode.js src/expression/node/RangeNode.js src/expression/node/RelationalNode.js src/expression/node/SymbolNode.js src/type/unit/Unit.js)",
       "Bash(do tsfile=\"$f%.js.ts\")",
@@ -53,7 +53,7 @@
       "Bash(else echo \"JS ONLY: $js\")",
       "Bash(python -m twine upload:*)",
       "mcp__windows-mcp__Wait-Tool",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
       "Bash(LC_ALL=C timeout 180 npx tsc:*)"
     ],
     "deny": [],
