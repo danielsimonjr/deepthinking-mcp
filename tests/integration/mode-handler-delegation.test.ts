@@ -32,16 +32,25 @@ describe('Mode Handler Delegation', () => {
     it('should auto-register specialized handlers on construction', () => {
       const stats = factory.getStats();
 
-      expect(stats.specializedHandlers).toBe(3);
+      // 3 from Sprint 2 (Causal, Bayesian, GameTheory) + 4 from Sprint 2B (Counterfactual, Synthesis, SystemsThinking, Critique)
+      expect(stats.specializedHandlers).toBe(7);
       expect(stats.modesWithHandlers).toContain(ThinkingMode.CAUSAL);
       expect(stats.modesWithHandlers).toContain(ThinkingMode.BAYESIAN);
       expect(stats.modesWithHandlers).toContain(ThinkingMode.GAMETHEORY);
+      expect(stats.modesWithHandlers).toContain(ThinkingMode.COUNTERFACTUAL);
+      expect(stats.modesWithHandlers).toContain(ThinkingMode.SYNTHESIS);
+      expect(stats.modesWithHandlers).toContain(ThinkingMode.SYSTEMSTHINKING);
+      expect(stats.modesWithHandlers).toContain(ThinkingMode.CRITIQUE);
     });
 
     it('should report specialized handler status correctly', () => {
       expect(factory.hasSpecializedHandler(ThinkingMode.CAUSAL)).toBe(true);
       expect(factory.hasSpecializedHandler(ThinkingMode.BAYESIAN)).toBe(true);
       expect(factory.hasSpecializedHandler(ThinkingMode.GAMETHEORY)).toBe(true);
+      expect(factory.hasSpecializedHandler(ThinkingMode.COUNTERFACTUAL)).toBe(true);
+      expect(factory.hasSpecializedHandler(ThinkingMode.SYNTHESIS)).toBe(true);
+      expect(factory.hasSpecializedHandler(ThinkingMode.SYSTEMSTHINKING)).toBe(true);
+      expect(factory.hasSpecializedHandler(ThinkingMode.CRITIQUE)).toBe(true);
       expect(factory.hasSpecializedHandler(ThinkingMode.SEQUENTIAL)).toBe(false);
       expect(factory.hasSpecializedHandler(ThinkingMode.HYBRID)).toBe(false);
     });

@@ -9,6 +9,94 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.2.0] - 2025-12-14
+
+### ✨ Features
+
+**Phase 10 Sprint 2B: ModeHandler Migration - Advanced Modes**
+
+This release migrates four additional modes to the specialized handler pattern with domain-specific validation and intelligent analysis.
+
+#### Specialized Handlers
+
+- **CounterfactualHandler** (`src/modes/handlers/CounterfactualHandler.ts`)
+  - World state tracking with scenario comparison
+  - Divergence point identification in causal chains
+  - Intervention marker validation (`isIntervention` flag)
+  - Outcome comparison metrics between actual and counterfactual scenarios
+  - Causal chain validation (minimum 2 events, branching point required)
+  - Feasibility and expected impact range validation (0-1)
+  - Mental models: Possible Worlds, Nearest World Semantics, Intervention Calculus
+
+- **SynthesisHandler** (`src/modes/handlers/SynthesisHandler.ts`)
+  - Source coverage tracking (which sources are referenced by themes)
+  - Automatic contradiction detection from contested themes
+  - Theme strength and consensus validation
+  - Quality metrics validation (methodologicalRigor, relevance, etc.)
+  - Duplicate source ID detection
+  - Uncovered source warnings
+  - Literature gap identification suggestions
+  - Mental models: Thematic Analysis, Systematic Review, Meta-Analysis Framework
+
+- **SystemsThinkingHandler** (`src/modes/handlers/SystemsThinkingHandler.ts`)
+  - **8 Systems Archetypes detection** (based on Peter Senge's "The Fifth Discipline"):
+    - Fixes that Fail
+    - Shifting the Burden
+    - Limits to Growth
+    - Success to the Successful
+    - Tragedy of the Commons
+    - Escalation
+    - Growth and Underinvestment
+    - Eroding Goals
+  - Feedback loop validation (minimum 2 components, component reference checks)
+  - Loop strength and polarity validation
+  - Leverage point effectiveness/difficulty range validation
+  - System boundary definition warnings
+  - Balance ratio tracking (reinforcing vs balancing loops)
+  - Mental models: Feedback Loops, Systems Archetypes, Leverage Points, Stocks and Flows
+
+- **CritiqueHandler** (`src/modes/handlers/CritiqueHandler.ts`)
+  - **Socratic Question Framework** (6 categories based on Richard Paul's taxonomy):
+    - Clarification questions
+    - Assumption-probing questions
+    - Evidence/reasoning questions
+    - Perspective/viewpoint questions
+    - Implications/consequences questions
+    - Meta-questions about the question itself
+  - Balanced critique tracking (strengths vs weaknesses ratio)
+  - Methodology evaluation validation (rating ranges)
+  - Argument structure analysis (circular reasoning detection)
+  - Critique point severity validation
+  - Mental models: Socratic Questioning, Peer Review Framework, Critical Analysis
+
+#### Type System Updates
+
+- **ModeEnhancements interface** extended with:
+  - `socraticQuestions?: Record<string, string[]>` for critique mode
+  - `detectedArchetypes?: DetectedArchetype[]` for systems thinking mode
+- **DetectedArchetype interface** added for archetype detection results
+- **CausalChain type** updated in core.ts to support counterfactual analysis
+
+#### Integration
+
+- Registry now has 7 specialized handlers (3 from Sprint 2 + 4 from Sprint 2B)
+- Updated integration tests to verify all handler registrations
+
+### 🧪 Tests
+
+- Added 100+ new tests for specialized handlers:
+  - `CounterfactualHandler.test.ts` - 24 tests for counterfactual validation
+  - `SynthesisHandler.test.ts` - 28 tests for synthesis and source coverage
+  - `SystemsThinkingHandler.test.ts` - 30 tests for archetype detection
+  - `CritiqueHandler.test.ts` - 28 tests for Socratic questions and critique balance
+
+### 📊 Test Results
+
+- All 1046 tests passing (101 new tests added)
+- 0 runtime circular dependencies
+
+---
+
 ## [8.1.0] - 2025-12-13
 
 ### ✨ Features

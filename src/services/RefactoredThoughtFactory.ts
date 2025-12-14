@@ -1,5 +1,5 @@
 /**
- * RefactoredThoughtFactory - Phase 10 Sprint 2 (v8.1.0)
+ * RefactoredThoughtFactory - Phase 10 Sprint 2B (v8.2.0)
  *
  * A wrapper that delegates to ModeHandlerRegistry for modes with
  * specialized handlers, and falls back to the original ThoughtFactory
@@ -9,6 +9,7 @@
  * to the Strategy Pattern without breaking existing functionality.
  *
  * Sprint 2 adds specialized handlers for: Causal, Bayesian, GameTheory
+ * Sprint 2B adds: Counterfactual, Synthesis, SystemsThinking, Critique
  */
 
 import { ThinkingMode, Thought } from '../types/core.js';
@@ -21,6 +22,10 @@ import {
   CausalHandler,
   BayesianHandler,
   GameTheoryHandler,
+  CounterfactualHandler,
+  SynthesisHandler,
+  SystemsThinkingHandler,
+  CritiqueHandler,
 } from '../modes/handlers/index.js';
 import { ILogger } from '../interfaces/ILogger.js';
 import { createLogger, LogLevel } from '../utils/logger.js';
@@ -114,8 +119,22 @@ export class RefactoredThoughtFactory {
     this.registry.replace(new BayesianHandler());
     this.registry.replace(new GameTheoryHandler());
 
+    // Phase 10 Sprint 2B handlers
+    this.registry.replace(new CounterfactualHandler());
+    this.registry.replace(new SynthesisHandler());
+    this.registry.replace(new SystemsThinkingHandler());
+    this.registry.replace(new CritiqueHandler());
+
     this.logger.debug('Specialized handlers registered', {
-      handlers: ['CausalHandler', 'BayesianHandler', 'GameTheoryHandler'],
+      handlers: [
+        'CausalHandler',
+        'BayesianHandler',
+        'GameTheoryHandler',
+        'CounterfactualHandler',
+        'SynthesisHandler',
+        'SystemsThinkingHandler',
+        'CritiqueHandler',
+      ],
     });
   }
 

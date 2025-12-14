@@ -50,6 +50,15 @@ export interface ValidationWarning {
 }
 
 /**
+ * Detected archetype information for systems thinking
+ */
+export interface DetectedArchetype {
+  name: string;
+  confidence: number;
+  matchedPatterns: string[];
+}
+
+/**
  * Mode-specific enhancements to include in responses
  */
 export interface ModeEnhancements {
@@ -65,6 +74,10 @@ export interface ModeEnhancements {
   warnings?: string[];
   /** Mental models relevant to this mode */
   mentalModels?: string[];
+  /** Socratic questions for critique mode (by category) */
+  socraticQuestions?: Record<string, string[]>;
+  /** Detected archetypes for systems thinking mode */
+  detectedArchetypes?: DetectedArchetype[];
 }
 
 /**

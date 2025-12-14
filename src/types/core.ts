@@ -657,9 +657,10 @@ export interface Difference {
  * Causal chain from intervention to outcome
  */
 export interface CausalChain {
-  intervention: string;
-  steps: string[];
-  finalOutcome: string;
+  id: string;
+  events: string[];
+  branchingPoint: string;
+  divergence: string;
 }
 
 /**
