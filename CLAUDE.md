@@ -13,11 +13,13 @@ DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring *
 | Metric | Value |
 |--------|-------|
 | TypeScript Files | 185 |
+| Lines of Code | 74,443 |
 | Total Exports | 978 (413 re-exports) |
-| Passing Tests | 791 |
+| Passing Tests | 791 (39 test files) |
 | Reasoning Modes | 33 (21 fully implemented + 12 experimental) |
 | MCP Tools | 12 focused + 1 legacy |
 | Export Formats | 8 + native SVG |
+| Visual Exporters | 35+ mode-specific files |
 | Circular Dependencies | 41 (all type-only, 0 runtime) |
 
 ## Build & Development Commands
@@ -55,10 +57,12 @@ Test framework: Vitest with V8 coverage provider.
 
 Business logic extracted from `src/index.ts` into focused services:
 
-- **ThoughtFactory** (`src/services/ThoughtFactory.ts`) - Creates mode-specific thoughts with validation
-- **ExportService** (`src/services/ExportService.ts`) - Multi-format export (Markdown, LaTeX, Mermaid, DOT, ASCII, SVG)
-- **ModeRouter** (`src/services/ModeRouter.ts`) - Mode switching and recommendations
-- **MetaMonitor** (`src/services/MetaMonitor.ts`) - Session tracking and meta-reasoning insights
+| Service | File | Size | Purpose |
+|---------|------|------|---------|
+| **ThoughtFactory** | `src/services/ThoughtFactory.ts` | 25KB | Mode-specific thought creation for all 33 modes |
+| **ExportService** | `src/services/ExportService.ts` | 21KB | Multi-format export orchestration |
+| **ModeRouter** | `src/services/ModeRouter.ts` | 12KB | Mode switching and recommendations |
+| **MetaMonitor** | `src/services/MetaMonitor.ts` | 9KB | Session tracking and meta-reasoning insights |
 
 ### Key Directories
 
@@ -73,7 +77,7 @@ src/
 ├── taxonomy/          # 69 reasoning types (110 planned), classifier
 ├── export/            # Visual and document exporters
 │   └── visual/        # Per-mode visual exporters (Mermaid, DOT, ASCII, SVG)
-├── proof/             # Proof decomposition, gap analysis, assumption tracking
+├── proof/             # Proof decomposition system (6 modules: decomposer, gap-analyzer, assumption-tracker, inconsistency-detector, circular-detector, dependency-graph)
 ├── search/            # Full-text search engine with faceted filtering
 ├── cache/             # LRU/LFU/FIFO caching strategies
 ├── repositories/      # Repository pattern (ISessionRepository interface)

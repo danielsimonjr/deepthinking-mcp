@@ -54,22 +54,28 @@
       "Bash(python -m twine upload:*)",
       "mcp__windows-mcp__Wait-Tool",
       "Bash(pip install:*)",
-      "Bash(LC_ALL=C timeout 180 npx tsc:*)"
+      "Bash(LC_ALL=C timeout 180 npx tsc:*)",
+      "Bash(wc:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run test:run:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
-    "sequential-thinking-mcp",
+    "deepthinking-mcp",
     "everything-mcp",
     "fermat-mcp",
-    "math-mcp",
-    "playwright",
-    "substack-mcp",
-    "time",
-    "memory-mcp",
     "fzf-mcp",
-    "deepthinking-mcp"
+    "math-mcp",
+    "memory-mcp",
+    "remember-mcp",
+    "substack-mcp",
+    "sequential-thinking-mcp",
+    "playwright",
+    "time",
+    "windows-mcp"
   ]
 }

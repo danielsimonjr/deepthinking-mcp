@@ -2,7 +2,7 @@
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { z } from 'zod';
-import { createHash, randomUUID } from 'crypto';
+import { randomUUID, createHash } from 'crypto';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
@@ -806,6 +806,9 @@ var init_thinking = __esm({
 });
 
 // src/types/core.ts
+function isFullyImplemented(mode) {
+  return FULLY_IMPLEMENTED_MODES.includes(mode);
+}
 function isTemporalThought(thought) {
   return thought.mode === "temporal" /* TEMPORAL */;
 }
@@ -818,15 +821,105 @@ function isEvidentialThought(thought) {
 function isMetaReasoningThought(thought) {
   return thought.mode === "metareasoning" /* METAREASONING */;
 }
+var ThinkingMode, FULLY_IMPLEMENTED_MODES;
 var init_core = __esm({
   "src/types/core.ts"() {
     init_esm_shims();
+    ThinkingMode = /* @__PURE__ */ ((ThinkingMode2) => {
+      ThinkingMode2["SEQUENTIAL"] = "sequential";
+      ThinkingMode2["SHANNON"] = "shannon";
+      ThinkingMode2["MATHEMATICS"] = "mathematics";
+      ThinkingMode2["PHYSICS"] = "physics";
+      ThinkingMode2["HYBRID"] = "hybrid";
+      ThinkingMode2["ENGINEERING"] = "engineering";
+      ThinkingMode2["COMPUTABILITY"] = "computability";
+      ThinkingMode2["CRYPTANALYTIC"] = "cryptanalytic";
+      ThinkingMode2["ALGORITHMIC"] = "algorithmic";
+      ThinkingMode2["METAREASONING"] = "metareasoning";
+      ThinkingMode2["RECURSIVE"] = "recursive";
+      ThinkingMode2["MODAL"] = "modal";
+      ThinkingMode2["STOCHASTIC"] = "stochastic";
+      ThinkingMode2["CONSTRAINT"] = "constraint";
+      ThinkingMode2["OPTIMIZATION"] = "optimization";
+      ThinkingMode2["INDUCTIVE"] = "inductive";
+      ThinkingMode2["DEDUCTIVE"] = "deductive";
+      ThinkingMode2["ABDUCTIVE"] = "abductive";
+      ThinkingMode2["CAUSAL"] = "causal";
+      ThinkingMode2["BAYESIAN"] = "bayesian";
+      ThinkingMode2["COUNTERFACTUAL"] = "counterfactual";
+      ThinkingMode2["ANALOGICAL"] = "analogical";
+      ThinkingMode2["TEMPORAL"] = "temporal";
+      ThinkingMode2["GAMETHEORY"] = "gametheory";
+      ThinkingMode2["EVIDENTIAL"] = "evidential";
+      ThinkingMode2["FIRSTPRINCIPLES"] = "firstprinciples";
+      ThinkingMode2["SYSTEMSTHINKING"] = "systemsthinking";
+      ThinkingMode2["SCIENTIFICMETHOD"] = "scientificmethod";
+      ThinkingMode2["FORMALLOGIC"] = "formallogic";
+      ThinkingMode2["SYNTHESIS"] = "synthesis";
+      ThinkingMode2["ARGUMENTATION"] = "argumentation";
+      ThinkingMode2["CRITIQUE"] = "critique";
+      ThinkingMode2["ANALYSIS"] = "analysis";
+      ThinkingMode2["CUSTOM"] = "custom";
+      return ThinkingMode2;
+    })(ThinkingMode || {});
+    FULLY_IMPLEMENTED_MODES = [
+      "sequential" /* SEQUENTIAL */,
+      "shannon" /* SHANNON */,
+      "mathematics" /* MATHEMATICS */,
+      "physics" /* PHYSICS */,
+      "hybrid" /* HYBRID */,
+      "engineering" /* ENGINEERING */,
+      // Phase 10 v7.1.0
+      "computability" /* COMPUTABILITY */,
+      // Phase 11 v7.2.0 - Turing's legacy
+      "cryptanalytic" /* CRYPTANALYTIC */,
+      // Phase 11 v7.2.0 - Turing's Bletchley Park work
+      "algorithmic" /* ALGORITHMIC */,
+      // Phase 12 v7.3.0 - CLRS algorithms
+      "metareasoning" /* METAREASONING */,
+      "recursive" /* RECURSIVE */,
+      "modal" /* MODAL */,
+      "stochastic" /* STOCHASTIC */,
+      "constraint" /* CONSTRAINT */,
+      "optimization" /* OPTIMIZATION */,
+      "inductive" /* INDUCTIVE */,
+      // Phase 5 v5.0.0
+      "deductive" /* DEDUCTIVE */
+      // Phase 5 v5.0.0
+    ];
   }
 });
 
 // src/types/session.ts
 var init_session = __esm({
   "src/types/session.ts"() {
+    init_esm_shims();
+  }
+});
+
+// src/modes/handlers/ModeHandler.ts
+function validationSuccess(warnings = []) {
+  return {
+    valid: true,
+    errors: [],
+    warnings
+  };
+}
+function validationFailure(errors, warnings = []) {
+  return {
+    valid: false,
+    errors,
+    warnings
+  };
+}
+function createValidationError(field, message, code) {
+  return { field, message, code };
+}
+function createValidationWarning(field, message, suggestion) {
+  return { field, message, suggestion };
+}
+var init_ModeHandler = __esm({
+  "src/modes/handlers/ModeHandler.ts"() {
     init_esm_shims();
   }
 });
@@ -1904,6 +1997,64 @@ var init_types = __esm({
     init_core();
     init_session();
     init_recommendations();
+  }
+});
+
+// src/utils/type-guards.ts
+function isExtendedThoughtType(value) {
+  return typeof value === "string" && VALID_THOUGHT_TYPES.includes(value);
+}
+function toExtendedThoughtType(value, fallback) {
+  if (isExtendedThoughtType(value)) {
+    return value;
+  }
+  if (fallback !== void 0) {
+    return fallback;
+  }
+  throw new Error(
+    `Invalid ExtendedThoughtType: ${value}. Must be one of: ${VALID_THOUGHT_TYPES.join(", ")}`
+  );
+}
+var VALID_THOUGHT_TYPES;
+var init_type_guards = __esm({
+  "src/utils/type-guards.ts"() {
+    init_esm_shims();
+    VALID_THOUGHT_TYPES = [
+      "problem_definition",
+      "constraints",
+      "model",
+      "proof",
+      "implementation",
+      "axiom_definition",
+      "theorem_statement",
+      "proof_construction",
+      "lemma_derivation",
+      "corollary",
+      "counterexample",
+      "algebraic_manipulation",
+      "symbolic_computation",
+      "numerical_analysis",
+      "symmetry_analysis",
+      "gauge_theory",
+      "field_equations",
+      "lagrangian",
+      "hamiltonian",
+      "conservation_law",
+      "dimensional_analysis",
+      "tensor_formulation",
+      "differential_geometry",
+      "decomposition",
+      "synthesis",
+      "abstraction",
+      "analogy",
+      "metacognition",
+      // Phase 8: Proof Decomposition Types
+      "proof_decomposition",
+      "dependency_analysis",
+      "consistency_check",
+      "gap_identification",
+      "assumption_trace"
+    ];
   }
 });
 
@@ -3440,64 +3591,6 @@ var init_session2 = __esm({
   "src/session/index.ts"() {
     init_esm_shims();
     init_manager();
-  }
-});
-
-// src/utils/type-guards.ts
-function isExtendedThoughtType(value) {
-  return typeof value === "string" && VALID_THOUGHT_TYPES.includes(value);
-}
-function toExtendedThoughtType(value, fallback) {
-  if (isExtendedThoughtType(value)) {
-    return value;
-  }
-  if (fallback !== void 0) {
-    return fallback;
-  }
-  throw new Error(
-    `Invalid ExtendedThoughtType: ${value}. Must be one of: ${VALID_THOUGHT_TYPES.join(", ")}`
-  );
-}
-var VALID_THOUGHT_TYPES;
-var init_type_guards = __esm({
-  "src/utils/type-guards.ts"() {
-    init_esm_shims();
-    VALID_THOUGHT_TYPES = [
-      "problem_definition",
-      "constraints",
-      "model",
-      "proof",
-      "implementation",
-      "axiom_definition",
-      "theorem_statement",
-      "proof_construction",
-      "lemma_derivation",
-      "corollary",
-      "counterexample",
-      "algebraic_manipulation",
-      "symbolic_computation",
-      "numerical_analysis",
-      "symmetry_analysis",
-      "gauge_theory",
-      "field_equations",
-      "lagrangian",
-      "hamiltonian",
-      "conservation_law",
-      "dimensional_analysis",
-      "tensor_formulation",
-      "differential_geometry",
-      "decomposition",
-      "synthesis",
-      "abstraction",
-      "analogy",
-      "metacognition",
-      // Phase 8: Proof Decomposition Types
-      "proof_decomposition",
-      "dependency_analysis",
-      "consistency_check",
-      "gap_identification",
-      "assumption_trace"
-    ];
   }
 });
 var ThoughtFactory;
@@ -30610,6 +30703,578 @@ function isValidTool(toolName) {
 
 // src/index.ts
 init_thinking();
+init_types();
+
+// src/modes/handlers/index.ts
+init_esm_shims();
+
+// src/modes/handlers/GenericModeHandler.ts
+init_esm_shims();
+init_core();
+init_ModeHandler();
+init_type_guards();
+var GenericModeHandler = class {
+  mode;
+  modeName;
+  description;
+  constructor(mode, modeName, description) {
+    this.mode = mode;
+    this.modeName = modeName || this.getDefaultModeName(mode);
+    this.description = description || this.getDefaultDescription(mode);
+  }
+  /**
+   * Create a thought object from input
+   *
+   * This replicates the logic from ThoughtFactory.createThought()
+   * for the mode this handler is configured for.
+   */
+  createThought(input, sessionId) {
+    const baseThought = this.createBaseThought(input, sessionId);
+    return this.createModeSpecificThought(input, baseThought);
+  }
+  /**
+   * Create the base thought structure common to all modes
+   */
+  createBaseThought(input, sessionId) {
+    return {
+      id: randomUUID(),
+      sessionId,
+      thoughtNumber: input.thoughtNumber,
+      totalThoughts: input.totalThoughts,
+      content: input.thought,
+      timestamp: /* @__PURE__ */ new Date(),
+      nextThoughtNeeded: input.nextThoughtNeeded,
+      isRevision: input.isRevision,
+      revisesThought: input.revisesThought
+    };
+  }
+  /**
+   * Create mode-specific thought structure
+   *
+   * Override this method in specialized handlers to add
+   * mode-specific logic and validation.
+   */
+  createModeSpecificThought(input, baseThought) {
+    const mode = input.mode || this.mode;
+    switch (mode) {
+      case "sequential" /* SEQUENTIAL */:
+        return {
+          ...baseThought,
+          mode: "sequential" /* SEQUENTIAL */,
+          revisionReason: input.revisionReason,
+          branchFrom: input.branchFrom,
+          branchId: input.branchId
+        };
+      case "shannon" /* SHANNON */:
+        return {
+          ...baseThought,
+          mode: "shannon" /* SHANNON */,
+          stage: input.stage || "problem_definition" /* PROBLEM_DEFINITION */,
+          uncertainty: input.uncertainty || 0.5,
+          dependencies: input.dependencies || [],
+          assumptions: input.assumptions || []
+        };
+      case "mathematics" /* MATHEMATICS */:
+        return {
+          ...baseThought,
+          mode: "mathematics" /* MATHEMATICS */,
+          thoughtType: toExtendedThoughtType(input.thoughtType, "model"),
+          mathematicalModel: input.mathematicalModel,
+          proofStrategy: input.proofStrategy,
+          dependencies: input.dependencies || [],
+          assumptions: input.assumptions || [],
+          uncertainty: input.uncertainty || 0.5
+        };
+      case "physics" /* PHYSICS */:
+        return {
+          ...baseThought,
+          mode: "physics" /* PHYSICS */,
+          thoughtType: toExtendedThoughtType(input.thoughtType, "model"),
+          tensorProperties: input.tensorProperties,
+          physicalInterpretation: input.physicalInterpretation,
+          dependencies: input.dependencies || [],
+          assumptions: input.assumptions || [],
+          uncertainty: input.uncertainty || 0.5
+        };
+      case "inductive" /* INDUCTIVE */:
+        return {
+          ...baseThought,
+          mode: "inductive" /* INDUCTIVE */,
+          observations: input.observations || [],
+          pattern: input.pattern,
+          generalization: input.generalization || "",
+          confidence: input.confidence ?? 0.5,
+          counterexamples: input.counterexamples || [],
+          sampleSize: input.sampleSize
+        };
+      case "deductive" /* DEDUCTIVE */:
+        return {
+          ...baseThought,
+          mode: "deductive" /* DEDUCTIVE */,
+          premises: input.premises || [],
+          conclusion: input.conclusion || "",
+          logicForm: input.logicForm,
+          validityCheck: input.validityCheck ?? false,
+          soundnessCheck: input.soundnessCheck
+        };
+      case "abductive" /* ABDUCTIVE */:
+        return {
+          ...baseThought,
+          mode: "abductive" /* ABDUCTIVE */,
+          thoughtType: toExtendedThoughtType(input.thoughtType, "problem_definition"),
+          observations: input.observations || [],
+          hypotheses: input.hypotheses || [],
+          evaluationCriteria: input.evaluationCriteria,
+          evidence: input.evidence || [],
+          bestExplanation: input.bestExplanation
+        };
+      case "causal" /* CAUSAL */:
+        return this.createCausalThought(input, baseThought);
+      case "hybrid" /* HYBRID */:
+      default:
+        return this.createHybridThought(input, baseThought);
+    }
+  }
+  /**
+   * Create a causal thought with graph handling
+   */
+  createCausalThought(input, baseThought) {
+    const inputAny = input;
+    const causalGraph = input.causalGraph || {
+      nodes: inputAny.nodes || [],
+      edges: inputAny.edges || []
+    };
+    return {
+      ...baseThought,
+      mode: "causal" /* CAUSAL */,
+      thoughtType: toExtendedThoughtType(input.thoughtType, "problem_definition"),
+      causalGraph,
+      interventions: input.interventions || [],
+      mechanisms: input.mechanisms || [],
+      confounders: input.confounders || []
+    };
+  }
+  /**
+   * Create a hybrid thought (default fallback)
+   */
+  createHybridThought(input, baseThought) {
+    return {
+      ...baseThought,
+      mode: "hybrid" /* HYBRID */,
+      thoughtType: toExtendedThoughtType(input.thoughtType, "synthesis"),
+      stage: input.stage,
+      uncertainty: input.uncertainty,
+      dependencies: input.dependencies,
+      assumptions: input.assumptions,
+      mathematicalModel: input.mathematicalModel,
+      tensorProperties: input.tensorProperties,
+      physicalInterpretation: input.physicalInterpretation,
+      primaryMode: input.mode || "hybrid" /* HYBRID */,
+      secondaryFeatures: []
+    };
+  }
+  /**
+   * Validate mode-specific input
+   *
+   * The generic handler performs basic validation.
+   * Specialized handlers should override for deeper validation.
+   */
+  validate(input) {
+    const warnings = [];
+    if (!input.thought || input.thought.trim().length === 0) {
+      return validationFailure([
+        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+      ]);
+    }
+    if (input.thoughtNumber > input.totalThoughts) {
+      return validationFailure([
+        createValidationError(
+          "thoughtNumber",
+          `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
+          "INVALID_THOUGHT_NUMBER"
+        )
+      ]);
+    }
+    const mode = input.mode || "hybrid" /* HYBRID */;
+    if (!isFullyImplemented(mode)) {
+      warnings.push(
+        createValidationWarning(
+          "mode",
+          `Mode '${mode}' is experimental with limited runtime implementation`,
+          "Consider using a fully implemented mode for production use"
+        )
+      );
+    }
+    return validationSuccess(warnings);
+  }
+  /**
+   * Get mode-specific enhancements
+   *
+   * The generic handler returns minimal enhancements.
+   * Specialized handlers can provide richer context.
+   */
+  getEnhancements(thought) {
+    return {
+      suggestions: [],
+      relatedModes: this.getRelatedModes(thought.mode)
+    };
+  }
+  /**
+   * Get mode status information
+   */
+  getModeStatus() {
+    return {
+      mode: this.mode,
+      isFullyImplemented: isFullyImplemented(this.mode),
+      hasSpecializedHandler: false,
+      // GenericHandler is not specialized
+      note: isFullyImplemented(this.mode) ? void 0 : "This mode is experimental with limited runtime implementation"
+    };
+  }
+  /**
+   * Get related modes for suggestions
+   */
+  getRelatedModes(mode) {
+    const relatedModes = {
+      ["sequential" /* SEQUENTIAL */]: ["hybrid" /* HYBRID */, "shannon" /* SHANNON */],
+      ["shannon" /* SHANNON */]: ["sequential" /* SEQUENTIAL */, "mathematics" /* MATHEMATICS */],
+      ["mathematics" /* MATHEMATICS */]: ["physics" /* PHYSICS */, "algorithmic" /* ALGORITHMIC */],
+      ["physics" /* PHYSICS */]: ["mathematics" /* MATHEMATICS */, "engineering" /* ENGINEERING */],
+      ["hybrid" /* HYBRID */]: ["sequential" /* SEQUENTIAL */, "metareasoning" /* METAREASONING */],
+      ["causal" /* CAUSAL */]: ["bayesian" /* BAYESIAN */, "counterfactual" /* COUNTERFACTUAL */],
+      ["bayesian" /* BAYESIAN */]: ["causal" /* CAUSAL */, "evidential" /* EVIDENTIAL */],
+      ["inductive" /* INDUCTIVE */]: ["deductive" /* DEDUCTIVE */, "abductive" /* ABDUCTIVE */],
+      ["deductive" /* DEDUCTIVE */]: ["inductive" /* INDUCTIVE */, "formallogic" /* FORMALLOGIC */],
+      ["abductive" /* ABDUCTIVE */]: ["inductive" /* INDUCTIVE */, "causal" /* CAUSAL */],
+      ["counterfactual" /* COUNTERFACTUAL */]: ["causal" /* CAUSAL */, "gametheory" /* GAMETHEORY */],
+      ["analogical" /* ANALOGICAL */]: ["inductive" /* INDUCTIVE */, "firstprinciples" /* FIRSTPRINCIPLES */],
+      ["temporal" /* TEMPORAL */]: ["causal" /* CAUSAL */, "sequential" /* SEQUENTIAL */],
+      ["gametheory" /* GAMETHEORY */]: ["optimization" /* OPTIMIZATION */, "counterfactual" /* COUNTERFACTUAL */],
+      ["evidential" /* EVIDENTIAL */]: ["bayesian" /* BAYESIAN */, "scientificmethod" /* SCIENTIFICMETHOD */],
+      ["firstprinciples" /* FIRSTPRINCIPLES */]: ["deductive" /* DEDUCTIVE */, "analogical" /* ANALOGICAL */],
+      ["systemsthinking" /* SYSTEMSTHINKING */]: ["causal" /* CAUSAL */, "optimization" /* OPTIMIZATION */],
+      ["scientificmethod" /* SCIENTIFICMETHOD */]: ["evidential" /* EVIDENTIAL */, "synthesis" /* SYNTHESIS */],
+      ["formallogic" /* FORMALLOGIC */]: ["deductive" /* DEDUCTIVE */, "mathematics" /* MATHEMATICS */],
+      ["metareasoning" /* METAREASONING */]: ["hybrid" /* HYBRID */, "critique" /* CRITIQUE */],
+      ["recursive" /* RECURSIVE */]: ["algorithmic" /* ALGORITHMIC */, "mathematics" /* MATHEMATICS */],
+      ["modal" /* MODAL */]: ["formallogic" /* FORMALLOGIC */, "counterfactual" /* COUNTERFACTUAL */],
+      ["stochastic" /* STOCHASTIC */]: ["bayesian" /* BAYESIAN */, "optimization" /* OPTIMIZATION */],
+      ["constraint" /* CONSTRAINT */]: ["optimization" /* OPTIMIZATION */, "formallogic" /* FORMALLOGIC */],
+      ["optimization" /* OPTIMIZATION */]: ["constraint" /* CONSTRAINT */, "gametheory" /* GAMETHEORY */],
+      ["engineering" /* ENGINEERING */]: ["optimization" /* OPTIMIZATION */, "systemsthinking" /* SYSTEMSTHINKING */],
+      ["computability" /* COMPUTABILITY */]: ["algorithmic" /* ALGORITHMIC */, "formallogic" /* FORMALLOGIC */],
+      ["cryptanalytic" /* CRYPTANALYTIC */]: ["bayesian" /* BAYESIAN */, "algorithmic" /* ALGORITHMIC */],
+      ["algorithmic" /* ALGORITHMIC */]: ["mathematics" /* MATHEMATICS */, "optimization" /* OPTIMIZATION */],
+      ["synthesis" /* SYNTHESIS */]: ["critique" /* CRITIQUE */, "analysis" /* ANALYSIS */],
+      ["argumentation" /* ARGUMENTATION */]: ["critique" /* CRITIQUE */, "formallogic" /* FORMALLOGIC */],
+      ["critique" /* CRITIQUE */]: ["argumentation" /* ARGUMENTATION */, "synthesis" /* SYNTHESIS */],
+      ["analysis" /* ANALYSIS */]: ["synthesis" /* SYNTHESIS */, "scientificmethod" /* SCIENTIFICMETHOD */],
+      ["custom" /* CUSTOM */]: ["hybrid" /* HYBRID */]
+    };
+    return relatedModes[mode] || ["hybrid" /* HYBRID */];
+  }
+  /**
+   * Get default mode name
+   */
+  getDefaultModeName(mode) {
+    const names = {
+      ["sequential" /* SEQUENTIAL */]: "Sequential Thinking",
+      ["shannon" /* SHANNON */]: "Shannon Problem-Solving",
+      ["mathematics" /* MATHEMATICS */]: "Mathematical Reasoning",
+      ["physics" /* PHYSICS */]: "Physics Modeling",
+      ["hybrid" /* HYBRID */]: "Hybrid Mode",
+      ["inductive" /* INDUCTIVE */]: "Inductive Reasoning",
+      ["deductive" /* DEDUCTIVE */]: "Deductive Reasoning",
+      ["abductive" /* ABDUCTIVE */]: "Abductive Reasoning",
+      ["causal" /* CAUSAL */]: "Causal Analysis",
+      ["bayesian" /* BAYESIAN */]: "Bayesian Inference",
+      ["counterfactual" /* COUNTERFACTUAL */]: "Counterfactual Reasoning",
+      ["analogical" /* ANALOGICAL */]: "Analogical Reasoning",
+      ["temporal" /* TEMPORAL */]: "Temporal Reasoning",
+      ["gametheory" /* GAMETHEORY */]: "Game Theory",
+      ["evidential" /* EVIDENTIAL */]: "Evidential Reasoning",
+      ["firstprinciples" /* FIRSTPRINCIPLES */]: "First Principles",
+      ["systemsthinking" /* SYSTEMSTHINKING */]: "Systems Thinking",
+      ["scientificmethod" /* SCIENTIFICMETHOD */]: "Scientific Method",
+      ["formallogic" /* FORMALLOGIC */]: "Formal Logic",
+      ["metareasoning" /* METAREASONING */]: "Meta-Reasoning",
+      ["recursive" /* RECURSIVE */]: "Recursive Reasoning",
+      ["modal" /* MODAL */]: "Modal Logic",
+      ["stochastic" /* STOCHASTIC */]: "Stochastic Reasoning",
+      ["constraint" /* CONSTRAINT */]: "Constraint Satisfaction",
+      ["optimization" /* OPTIMIZATION */]: "Optimization",
+      ["engineering" /* ENGINEERING */]: "Engineering Analysis",
+      ["computability" /* COMPUTABILITY */]: "Computability Theory",
+      ["cryptanalytic" /* CRYPTANALYTIC */]: "Cryptanalysis",
+      ["algorithmic" /* ALGORITHMIC */]: "Algorithm Design",
+      ["synthesis" /* SYNTHESIS */]: "Literature Synthesis",
+      ["argumentation" /* ARGUMENTATION */]: "Academic Argumentation",
+      ["critique" /* CRITIQUE */]: "Critical Analysis",
+      ["analysis" /* ANALYSIS */]: "Qualitative Analysis",
+      ["custom" /* CUSTOM */]: "Custom Mode"
+    };
+    return names[mode] || "Unknown Mode";
+  }
+  /**
+   * Get default mode description
+   */
+  getDefaultDescription(mode) {
+    const descriptions = {
+      ["sequential" /* SEQUENTIAL */]: "Step-by-step logical reasoning",
+      ["shannon" /* SHANNON */]: "Claude Shannon's 5-stage problem-solving methodology",
+      ["mathematics" /* MATHEMATICS */]: "Mathematical proofs and formal reasoning",
+      ["physics" /* PHYSICS */]: "Physical modeling with tensors and conservation laws",
+      ["hybrid" /* HYBRID */]: "Flexible combination of multiple reasoning modes",
+      ["inductive" /* INDUCTIVE */]: "Reasoning from specific cases to general principles",
+      ["deductive" /* DEDUCTIVE */]: "Reasoning from general principles to specific conclusions",
+      ["abductive" /* ABDUCTIVE */]: "Inference to the best explanation",
+      ["causal" /* CAUSAL */]: "Causal graph analysis and intervention reasoning",
+      ["bayesian" /* BAYESIAN */]: "Probabilistic reasoning with prior updates",
+      ["counterfactual" /* COUNTERFACTUAL */]: "What-if scenario analysis",
+      ["analogical" /* ANALOGICAL */]: "Reasoning by structural similarity",
+      ["temporal" /* TEMPORAL */]: "Temporal logic and event sequencing",
+      ["gametheory" /* GAMETHEORY */]: "Strategic interaction and Nash equilibria",
+      ["evidential" /* EVIDENTIAL */]: "Dempster-Shafer evidence theory",
+      ["firstprinciples" /* FIRSTPRINCIPLES */]: "Reasoning from fundamental truths",
+      ["systemsthinking" /* SYSTEMSTHINKING */]: "Feedback loops and system dynamics",
+      ["scientificmethod" /* SCIENTIFICMETHOD */]: "Hypothesis testing and experimentation",
+      ["formallogic" /* FORMALLOGIC */]: "Propositional and predicate logic",
+      ["metareasoning" /* METAREASONING */]: "Reasoning about reasoning strategies",
+      ["recursive" /* RECURSIVE */]: "Self-similar problem decomposition",
+      ["modal" /* MODAL */]: "Possibility and necessity reasoning",
+      ["stochastic" /* STOCHASTIC */]: "Probabilistic state transitions",
+      ["constraint" /* CONSTRAINT */]: "Constraint satisfaction problems",
+      ["optimization" /* OPTIMIZATION */]: "Objective function optimization",
+      ["engineering" /* ENGINEERING */]: "Requirements, trade studies, and FMEA",
+      ["computability" /* COMPUTABILITY */]: "Turing machines and decidability",
+      ["cryptanalytic" /* CRYPTANALYTIC */]: "Cryptanalysis with deciban evidence",
+      ["algorithmic" /* ALGORITHMIC */]: "CLRS algorithm design and analysis",
+      ["synthesis" /* SYNTHESIS */]: "Literature review and integration",
+      ["argumentation" /* ARGUMENTATION */]: "Toulmin model academic arguments",
+      ["critique" /* CRITIQUE */]: "Critical evaluation of scholarly work",
+      ["analysis" /* ANALYSIS */]: "Qualitative data analysis methods",
+      ["custom" /* CUSTOM */]: "User-defined reasoning mode"
+    };
+    return descriptions[mode] || "Unknown reasoning mode";
+  }
+};
+
+// src/modes/handlers/registry.ts
+init_esm_shims();
+init_core();
+init_ModeHandler();
+var ModeHandlerRegistry = class _ModeHandlerRegistry {
+  static instance = null;
+  handlers = /* @__PURE__ */ new Map();
+  constructor() {
+  }
+  /**
+   * Get the singleton instance
+   */
+  static getInstance() {
+    if (!_ModeHandlerRegistry.instance) {
+      _ModeHandlerRegistry.instance = new _ModeHandlerRegistry();
+    }
+    return _ModeHandlerRegistry.instance;
+  }
+  /**
+   * Reset the singleton (for testing)
+   */
+  static resetInstance() {
+    _ModeHandlerRegistry.instance = null;
+  }
+  /**
+   * Register a mode handler
+   *
+   * @param handler - The handler to register
+   * @throws Error if handler for mode is already registered
+   */
+  register(handler) {
+    if (this.handlers.has(handler.mode)) {
+      throw new Error(
+        `Handler for mode '${handler.mode}' is already registered. Use replace() to override an existing handler.`
+      );
+    }
+    this.handlers.set(handler.mode, handler);
+  }
+  /**
+   * Replace an existing handler or register a new one
+   *
+   * @param handler - The handler to register/replace
+   */
+  replace(handler) {
+    this.handlers.set(handler.mode, handler);
+  }
+  /**
+   * Unregister a handler
+   *
+   * @param mode - The mode to unregister
+   * @returns true if handler was removed, false if not found
+   */
+  unregister(mode) {
+    return this.handlers.delete(mode);
+  }
+  /**
+   * Get handler for a mode
+   *
+   * Returns the specialized handler if registered,
+   * otherwise returns the generic handler.
+   *
+   * @param mode - The thinking mode
+   * @returns The handler for the mode
+   */
+  getHandler(mode) {
+    return this.handlers.get(mode) || this.createGenericHandlerForMode(mode);
+  }
+  /**
+   * Check if a specialized handler is registered for a mode
+   *
+   * @param mode - The thinking mode
+   * @returns true if a specialized handler exists
+   */
+  hasSpecializedHandler(mode) {
+    return this.handlers.has(mode);
+  }
+  /**
+   * Get all registered modes
+   *
+   * @returns Array of modes with specialized handlers
+   */
+  getRegisteredModes() {
+    return Array.from(this.handlers.keys());
+  }
+  /**
+   * Create a thought using the appropriate handler
+   *
+   * This is the main entry point for thought creation.
+   * Delegates to specialized handler if registered,
+   * otherwise uses generic handler.
+   *
+   * @param input - The tool input
+   * @param sessionId - The session ID
+   * @returns Created thought
+   */
+  createThought(input, sessionId) {
+    const mode = input.mode || "hybrid" /* HYBRID */;
+    const handler = this.getHandler(mode);
+    return handler.createThought(input, sessionId);
+  }
+  /**
+   * Validate input using the appropriate handler
+   *
+   * @param input - The tool input
+   * @returns Validation result
+   */
+  validate(input) {
+    const mode = input.mode || "hybrid" /* HYBRID */;
+    if (!input.thought || input.thought.trim().length === 0) {
+      return validationFailure([
+        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+      ]);
+    }
+    const handler = this.getHandler(mode);
+    return handler.validate(input);
+  }
+  /**
+   * Get mode status information
+   *
+   * @param mode - The thinking mode
+   * @returns Mode status for API response
+   */
+  getModeStatus(mode) {
+    const hasSpecialized = this.hasSpecializedHandler(mode);
+    const handler = this.getHandler(mode);
+    return {
+      mode,
+      isFullyImplemented: isFullyImplemented(mode),
+      hasSpecializedHandler: hasSpecialized,
+      note: this.getModeNote(mode, hasSpecialized),
+      supportedThoughtTypes: this.getSupportedThoughtTypes(handler, mode)
+    };
+  }
+  /**
+   * Get registry statistics
+   *
+   * @returns Statistics about registered handlers
+   */
+  getStats() {
+    const allModes = Object.values(ThinkingMode).filter(
+      (v) => typeof v === "string"
+    );
+    const modesWithHandlers = this.getRegisteredModes();
+    const modesWithGenericHandler = allModes.filter(
+      (mode) => !this.handlers.has(mode)
+    );
+    return {
+      totalHandlers: this.handlers.size,
+      specializedHandlers: this.handlers.size,
+      modesWithHandlers,
+      modesWithGenericHandler
+    };
+  }
+  /**
+   * Create a generic handler configured for a specific mode
+   */
+  createGenericHandlerForMode(mode) {
+    return new GenericModeHandler(mode);
+  }
+  /**
+   * Get appropriate note for mode status
+   */
+  getModeNote(mode, hasSpecialized) {
+    if (!isFullyImplemented(mode)) {
+      return "This mode is experimental with limited runtime implementation";
+    }
+    if (!hasSpecialized) {
+      return "Using generic handler - specialized validation not available";
+    }
+    return void 0;
+  }
+  /**
+   * Get supported thought types for a mode
+   */
+  getSupportedThoughtTypes(_handler, mode) {
+    const thoughtTypes = {
+      mathematics: [
+        "problem_definition",
+        "constraints",
+        "model",
+        "proof",
+        "implementation",
+        "proof_decomposition",
+        "dependency_analysis",
+        "consistency_check",
+        "gap_identification",
+        "assumption_trace"
+      ],
+      physics: [
+        "problem_definition",
+        "model",
+        "tensor_formulation",
+        "conservation_law",
+        "dimensional_analysis"
+      ],
+      causal: ["problem_definition", "graph_construction", "intervention_analysis", "mechanism_identification"],
+      bayesian: ["prior_definition", "likelihood_assessment", "posterior_calculation", "sensitivity_analysis"],
+      temporal: ["event_definition", "interval_analysis", "constraint_checking", "timeline_construction"],
+      gametheory: ["game_definition", "strategy_analysis", "equilibrium_finding", "payoff_calculation"],
+      synthesis: ["source_identification", "theme_extraction", "gap_analysis", "framework_construction"],
+      argumentation: ["claim_formulation", "grounds_development", "warrant_construction", "rebuttal_analysis"],
+      critique: ["work_characterization", "methodology_evaluation", "argument_critique", "contribution_assessment"],
+      analysis: ["data_familiarization", "coding", "theme_development", "pattern_analysis"]
+    };
+    const modeKey = mode.toLowerCase();
+    return thoughtTypes[modeKey] || ["general"];
+  }
+  /**
+   * Clear all registered handlers (for testing)
+   */
+  clear() {
+    this.handlers.clear();
+  }
+};
+
+// src/index.ts
 var __filename2 = fileURLToPath(import.meta.url);
 var __dirname2 = dirname(__filename2);
 var packageJson = JSON.parse(
@@ -30768,6 +31433,13 @@ async function handleAddThought(input, _toolName) {
     }
   }
   const session = await sessionManager.addThought(sessionId, thought);
+  const registry = ModeHandlerRegistry.getInstance();
+  const modeStatus = {
+    mode: thought.mode,
+    isFullyImplemented: isFullyImplemented(thought.mode),
+    hasSpecializedHandler: registry.hasSpecializedHandler(thought.mode),
+    note: !isFullyImplemented(thought.mode) ? "This mode is experimental with limited runtime implementation" : registry.hasSpecializedHandler(thought.mode) ? void 0 : "Using generic handler - specialized validation not available"
+  };
   const response = {
     sessionId: session.id,
     thoughtId: thought.id,
@@ -30775,7 +31447,9 @@ async function handleAddThought(input, _toolName) {
     mode: thought.mode,
     nextThoughtNeeded: thought.nextThoughtNeeded,
     sessionComplete: session.isComplete,
-    totalThoughts: session.thoughts.length
+    totalThoughts: session.thoughts.length,
+    modeStatus
+    // Phase 10 Sprint 1: API transparency
   };
   if (thought.decomposition) {
     response.decomposition = thought.decomposition;

@@ -1,5 +1,5 @@
 /**
- * Type definitions index (v7.4.0)
+ * Type definitions index (v8.0.0)
  * Exports all types for the DeepThinking MCP server
  *
  * Note: All thought types are exported from core.ts to avoid duplicate exports.
@@ -8,6 +8,20 @@
 
 export * from './core.js';
 export * from './session.js';
+
+// Export ModeHandler types (Phase 10 v8.0.0)
+export {
+  type ModeHandler,
+  type ValidationResult,
+  type ValidationError,
+  type ValidationWarning,
+  type ModeEnhancements,
+  type ModeStatus,
+  validationSuccess,
+  validationFailure,
+  createValidationError,
+  createValidationWarning,
+} from '../modes/handlers/ModeHandler.js';
 
 // Export mode recommendation types (doesn't conflict with core exports)
 export * from './modes/recommendations.js';
