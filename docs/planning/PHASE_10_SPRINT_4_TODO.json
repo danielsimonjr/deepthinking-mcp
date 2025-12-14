@@ -1,0 +1,114 @@
+{
+  "phase": 10,
+  "sprint": 4,
+  "title": "New Reasoning Modes",
+  "week": "Week 4",
+  "effort": "6-7 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": "10.4.1",
+      "category": "Mode",
+      "description": "Implement Inversion Mode - InversionThought type with goal, failureModes (description, likelihood, severity), antiPatterns, mitigations, derivedActions. Handler with failure mode analysis logic",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": [
+        "src/types/modes/inversion.ts",
+        "src/modes/handlers/InversionHandler.ts",
+        "src/validation/validators/modes/inversion.ts"
+      ]
+    },
+    {
+      "id": "10.4.2",
+      "category": "Mode",
+      "description": "Implement Reference Class Mode - ReferenceClassThought type with prediction, referenceClasses (name, baseRate, sampleSize, relevance), distinguishingFeatures, adjustedForecast. Handler with base rate calculations",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": [
+        "src/types/modes/referenceclass.ts",
+        "src/modes/handlers/ReferenceClassHandler.ts",
+        "src/validation/validators/modes/referenceclass.ts"
+      ]
+    },
+    {
+      "id": "10.4.3",
+      "category": "Mode",
+      "description": "Implement Abstraction Ladder Mode - AbstractionLadderThought type with observation, ladder levels (raw_observation, specific_instance, category, general_rule, universal_principle), transferApplications. Handler with level validation",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": [
+        "src/types/modes/abstraction.ts",
+        "src/modes/handlers/AbstractionHandler.ts",
+        "src/validation/validators/modes/abstraction.ts"
+      ]
+    },
+    {
+      "id": "10.4.4",
+      "category": "Export",
+      "description": "Add Visual Exporters for New Modes - Create Mermaid, DOT, ASCII, SVG exporters for inversion, referenceclass, and abstraction modes",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/export/visual/inversion.ts",
+        "src/export/visual/referenceclass.ts",
+        "src/export/visual/abstraction.ts"
+      ]
+    },
+    {
+      "id": "10.4.5",
+      "category": "API",
+      "description": "Add New Modes to MCP Tools - Add inversion, referenceclass, abstraction to deepthinking_analytical tool or create new tool group. Update json-schemas.ts and definitions.ts",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": [
+        "src/tools/json-schemas.ts",
+        "src/tools/definitions.ts",
+        "src/types/core.ts"
+      ]
+    },
+    {
+      "id": "10.4.6",
+      "category": "Testing",
+      "description": "Add New Mode Tests - Unit tests for each new mode handler, integration tests for MCP tool access, visual export tests for all formats",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "tests/unit/modes/handlers/InversionHandler.test.ts",
+        "tests/unit/modes/handlers/ReferenceClassHandler.test.ts",
+        "tests/unit/modes/handlers/AbstractionHandler.test.ts",
+        "tests/integration/new-modes.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "3 new modes (inversion, referenceclass, abstraction) fully implemented",
+    "Each mode accessible via MCP tools",
+    "Visual exports working for all formats (Mermaid, DOT, ASCII, SVG)",
+    "36 reasoning modes total (33 + 3)"
+  ],
+  "filesCreated": [
+    "src/types/modes/inversion.ts",
+    "src/types/modes/referenceclass.ts",
+    "src/types/modes/abstraction.ts",
+    "src/modes/handlers/InversionHandler.ts",
+    "src/modes/handlers/ReferenceClassHandler.ts",
+    "src/modes/handlers/AbstractionHandler.ts",
+    "src/validation/validators/modes/inversion.ts",
+    "src/validation/validators/modes/referenceclass.ts",
+    "src/validation/validators/modes/abstraction.ts",
+    "src/export/visual/inversion.ts",
+    "src/export/visual/referenceclass.ts",
+    "src/export/visual/abstraction.ts",
+    "tests/unit/modes/handlers/InversionHandler.test.ts",
+    "tests/unit/modes/handlers/ReferenceClassHandler.test.ts",
+    "tests/unit/modes/handlers/AbstractionHandler.test.ts",
+    "tests/integration/new-modes.test.ts"
+  ],
+  "filesModified": [
+    "src/tools/json-schemas.ts",
+    "src/tools/definitions.ts",
+    "src/types/core.ts"
+  ],
+  "totalEstimatedHours": 7.0,
+  "notes": "High-value new modes from 'How to Understand Anything' framework - Inversion for failure analysis, Reference Class for forecasting, Abstraction for conceptual hierarchy"
+}

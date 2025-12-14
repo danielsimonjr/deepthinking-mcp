@@ -1,0 +1,132 @@
+{
+  "phase": 10,
+  "sprint": 6,
+  "title": "Enhancements, Visual Export Refactoring & Documentation",
+  "week": "Week 6-7",
+  "effort": "7-8 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": "10.6.1",
+      "category": "Refactoring",
+      "description": "Visual Export Template System - Create ExportTemplate interface for mode-specific data extraction, create generic renderers per format (MermaidRenderer, DOTRenderer, ASCIIRenderer, SVGRenderer), reduce 35 files to ~15 with shared logic",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "files": [
+        "src/export/visual/templates/ExportTemplate.ts",
+        "src/export/visual/renderers/MermaidRenderer.ts",
+        "src/export/visual/renderers/DOTRenderer.ts",
+        "src/export/visual/renderers/ASCIIRenderer.ts",
+        "src/export/visual/renderers/index.ts"
+      ]
+    },
+    {
+      "id": "10.6.2",
+      "category": "Feature",
+      "description": "Add Feynman Technique Session Type - FEYNMAN_STEPS constant with 6 steps (Choose, Explain Simply, Identify Gaps, Return to Source, Analogize, Review), add Feynman session workflow that chains appropriate modes",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/framework/feynman-technique.ts",
+        "src/session/feynman-session.ts"
+      ]
+    },
+    {
+      "id": "10.6.3",
+      "category": "Enhancement",
+      "description": "Integrate Taxonomy Classifier with Mode Selection - Use classifier for pre-session mode recommendation, add confidence tracking during sessions via ModeRouter, enhance quickRecommend with classification context",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/services/ModeRouter.ts",
+        "src/taxonomy/classifier.ts"
+      ]
+    },
+    {
+      "id": "10.6.4",
+      "category": "Feature",
+      "description": "Add Calibration Tracking - CalibrationMetrics interface tracking predictions with stated confidence and outcomes, bucket scoring (90%, 70%, 50%), cross-session calibration score calculation",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/session/calibration.ts",
+        "src/types/session.ts"
+      ]
+    },
+    {
+      "id": "10.6.5",
+      "category": "Testing",
+      "description": "Add Mode Chaining Integration Tests - Test context preservation across mode switches, test multi-mode session coherence, test autopilot-to-execution flow, test Feynman session workflow",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "tests/integration/mode-chaining.test.ts",
+        "tests/integration/autopilot-flow.test.ts",
+        "tests/integration/feynman-session.test.ts"
+      ]
+    },
+    {
+      "id": "10.6.6",
+      "category": "Documentation",
+      "description": "Update Documentation - Update CLAUDE.md with new architecture (ModeHandler, framework/, handlers), update CHANGELOG.md for v8.0.0, create docs/modes/ for new modes, update README with autopilot examples",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": [
+        "CLAUDE.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/modes/INVERSION.md",
+        "docs/modes/REFERENCECLASS.md",
+        "docs/modes/ABSTRACTION.md",
+        "docs/architecture/MODEHANDLER.md"
+      ]
+    },
+    {
+      "id": "10.6.7",
+      "category": "Release",
+      "description": "Final Verification & Version Bump - Run full test suite (850+ expected), verify all 36 modes accessible, verify visual export refactoring, bump version to v8.0.0, prepare for npm publish",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": [
+        "package.json"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "Visual export files reduced from 35 to ~15 with template-based architecture",
+    "Feynman technique session type available for understanding validation",
+    "Mode selection leverages TaxonomyClassifier for better recommendations",
+    "Calibration metrics tracked across sessions with bucket scoring",
+    "All documentation updated for v8.0.0",
+    "All tests passing (850+ expected)",
+    "Ready for npm publish"
+  ],
+  "filesCreated": [
+    "src/export/visual/templates/ExportTemplate.ts",
+    "src/export/visual/renderers/MermaidRenderer.ts",
+    "src/export/visual/renderers/DOTRenderer.ts",
+    "src/export/visual/renderers/ASCIIRenderer.ts",
+    "src/export/visual/renderers/index.ts",
+    "src/framework/feynman-technique.ts",
+    "src/session/feynman-session.ts",
+    "src/session/calibration.ts",
+    "tests/integration/mode-chaining.test.ts",
+    "tests/integration/autopilot-flow.test.ts",
+    "tests/integration/feynman-session.test.ts",
+    "docs/modes/INVERSION.md",
+    "docs/modes/REFERENCECLASS.md",
+    "docs/modes/ABSTRACTION.md",
+    "docs/architecture/MODEHANDLER.md"
+  ],
+  "filesModified": [
+    "src/services/ModeRouter.ts",
+    "src/taxonomy/classifier.ts",
+    "src/types/session.ts",
+    "CLAUDE.md",
+    "CHANGELOG.md",
+    "README.md",
+    "package.json"
+  ],
+  "totalEstimatedHours": 8.0,
+  "notes": "Added Visual Export Refactoring per Issue 6 from code-analysis.md. Added Feynman Technique per framework-mapping.md. Socratic Critique enhancement moved to Sprint 2B with CritiqueHandler."
+}

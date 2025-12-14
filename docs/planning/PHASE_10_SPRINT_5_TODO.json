@@ -1,0 +1,105 @@
+{
+  "phase": 10,
+  "sprint": 5,
+  "title": "Framework Integration Features",
+  "week": "Week 5",
+  "effort": "6-7 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": "10.5.1",
+      "category": "Framework",
+      "description": "Create Systems Archetypes Module - SYSTEMS_ARCHETYPES constant with 12 archetypes (Limits to Growth, Shifting the Burden, Escalation, etc.), detectSystemArchetype() function with keyword matching",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/framework/systems-archetypes.ts",
+        "tests/unit/framework/systems-archetypes.test.ts"
+      ]
+    },
+    {
+      "id": "10.5.2",
+      "category": "Framework",
+      "description": "Implement Guiding Questions Feature - QUICK_FIRE_QUESTIONS by category (decomposition, pattern, challenge, synthesis, validation), getGuidingQuestions(mode, thoughtNumber, totalThoughts), include in handleAddThought response",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/framework/guiding-questions.ts",
+        "src/index.ts",
+        "tests/unit/framework/guiding-questions.test.ts"
+      ]
+    },
+    {
+      "id": "10.5.3",
+      "category": "Framework",
+      "description": "Implement Bias Warnings Feature - COGNITIVE_BIASES constant with 10 biases (Confirmation, Planning Fallacy, Survivorship, etc.) and counter-questions, getBiasWarnings(problemDescription), include in autopilot and validation responses",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/framework/bias-warnings.ts",
+        "tests/unit/framework/bias-warnings.test.ts"
+      ]
+    },
+    {
+      "id": "10.5.4",
+      "category": "Framework",
+      "description": "Implement Stuck Detection - EMERGENCY_PROTOCOLS (WHEN_STUCK, WHEN_WRONG, WHEN_OVERWHELMED) with steps and suggested modes, detectStuckState(sessionThoughts, currentThought) using content similarity, integrate into MetaMonitor",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": [
+        "src/framework/stuck-detection.ts",
+        "src/services/MetaMonitor.ts",
+        "tests/unit/framework/stuck-detection.test.ts"
+      ]
+    },
+    {
+      "id": "10.5.5",
+      "category": "Framework",
+      "description": "Add Seven Pillars Organization - SEVEN_PILLARS constant mapping modes to 7 pillars (Foundations, Patterns, Questions, Synthesis, Validation, Tools, Mindset), add pillar-based mode discovery endpoint",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/framework/seven-pillars.ts",
+        "src/framework/index.ts"
+      ]
+    },
+    {
+      "id": "10.5.6",
+      "category": "Framework",
+      "description": "Add Mental Model Prompts to Handlers - Add relevantMentalModels property to ModeHandler interface, populate for key modes (Economics models for GameTheory, Psychology for Critique, Systems for SystemsThinking, Math for Bayesian)",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/modes/handlers/ModeHandler.ts",
+        "src/framework/mental-models.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "detectSystemArchetype identifies 12 archetypes with interventions",
+    "Session responses include relevant guiding questions based on mode and progress",
+    "Bias warnings appear for high-risk contexts (planning, attribution, success stories)",
+    "Stuck detection triggers emergency protocols when repetition or overwhelm detected",
+    "Mental models surfaced for relevant modes"
+  ],
+  "filesCreated": [
+    "src/framework/systems-archetypes.ts",
+    "src/framework/guiding-questions.ts",
+    "src/framework/bias-warnings.ts",
+    "src/framework/stuck-detection.ts",
+    "src/framework/seven-pillars.ts",
+    "src/framework/mental-models.ts",
+    "src/framework/index.ts",
+    "tests/unit/framework/systems-archetypes.test.ts",
+    "tests/unit/framework/guiding-questions.test.ts",
+    "tests/unit/framework/bias-warnings.test.ts",
+    "tests/unit/framework/stuck-detection.test.ts"
+  ],
+  "filesModified": [
+    "src/services/MetaMonitor.ts",
+    "src/modes/handlers/ModeHandler.ts",
+    "src/index.ts"
+  ],
+  "totalEstimatedHours": 6.5,
+  "notes": "Systems Archetypes integration with SystemsThinkingHandler done in Sprint 2B. This sprint creates the framework modules that handlers consume. Added Mental Model Prompts per framework-mapping.md."
+}

@@ -1,0 +1,96 @@
+{
+  "phase": 10,
+  "sprint": 3,
+  "title": "Autopilot Implementation",
+  "week": "Week 3",
+  "effort": "6-7 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": "10.3.1",
+      "category": "Service",
+      "description": "Create PatternDetector Service - 11 specialized detectors for problem characteristics: proofs, quantities, causality, competition, uncertainty, time, analogies, decomposition, synthesis, strategies, processes",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": [
+        "src/services/PatternDetector.ts"
+      ]
+    },
+    {
+      "id": "10.3.2",
+      "category": "Service",
+      "description": "Create ProblemAnalyzer Service - Combines pattern detection with TaxonomyClassifier, extracts ProblemCharacteristics from natural language problem descriptions",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": [
+        "src/services/ProblemAnalyzer.ts"
+      ]
+    },
+    {
+      "id": "10.3.3",
+      "category": "Service",
+      "description": "Create AutopilotSelector Service - Maps problem characteristics to mode recommendations, generates mode chains for complex problems, provides reasoning for selections",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/services/AutopilotSelector.ts"
+      ]
+    },
+    {
+      "id": "10.3.4",
+      "category": "Framework",
+      "description": "Implement Decision Tree Logic - Implement walkDecisionTree() from framework mapping with node types: IS_FAMILIAR, DECOMPOSITION, HYPOTHESIZE, FALSIFY, APPLY, REFRAME",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/framework/decision-tree.ts"
+      ]
+    },
+    {
+      "id": "10.3.5",
+      "category": "API",
+      "description": "Add deepthinking_auto MCP Tool - JSON schema for autopilot tool accepting natural language, handler in index.ts returning primaryMode, modeChain, reasoning, biasWarnings",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/tools/schemas/autopilot.ts",
+        "src/tools/json-schemas.ts",
+        "src/index.ts"
+      ]
+    },
+    {
+      "id": "10.3.6",
+      "category": "Testing",
+      "description": "Add Autopilot Tests - Test pattern detection accuracy, mode selection quality, decision tree traversal, and end-to-end autopilot flow",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "tests/unit/services/PatternDetector.test.ts",
+        "tests/unit/services/ProblemAnalyzer.test.ts",
+        "tests/unit/services/AutopilotSelector.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "deepthinking_auto tool accepts natural language problem descriptions",
+    "Returns primary mode, mode chain, reasoning, and bias warnings",
+    "Accurately maps problem types to appropriate modes",
+    "Pattern detection covers all 11 characteristic types"
+  ],
+  "filesCreated": [
+    "src/services/PatternDetector.ts",
+    "src/services/ProblemAnalyzer.ts",
+    "src/services/AutopilotSelector.ts",
+    "src/framework/decision-tree.ts",
+    "src/tools/schemas/autopilot.ts",
+    "tests/unit/services/PatternDetector.test.ts",
+    "tests/unit/services/ProblemAnalyzer.test.ts",
+    "tests/unit/services/AutopilotSelector.test.ts"
+  ],
+  "filesModified": [
+    "src/tools/json-schemas.ts",
+    "src/index.ts"
+  ],
+  "totalEstimatedHours": 7.0,
+  "notes": "Key UX improvement - enables users to describe problems in natural language and get intelligent mode recommendations"
+}

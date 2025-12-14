@@ -1,0 +1,98 @@
+{
+  "phase": 10,
+  "sprint": 1,
+  "title": "Foundation - ModeHandler Infrastructure & API Transparency",
+  "week": "Week 1",
+  "effort": "5-6 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": "10.1.1",
+      "category": "Architecture",
+      "description": "Create ModeHandler Interface & Registry - Create src/modes/handlers/ModeHandler.ts with generic interface, src/modes/handlers/registry.ts with ModeHandlerRegistry class, src/modes/handlers/index.ts for exports",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": [
+        "src/modes/handlers/ModeHandler.ts",
+        "src/modes/handlers/registry.ts",
+        "src/modes/handlers/index.ts"
+      ]
+    },
+    {
+      "id": "10.1.2",
+      "category": "Implementation",
+      "description": "Create GenericModeHandler for fallback - Implement GenericModeHandler that replicates current ThoughtFactory behavior for modes without specialized logic",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/modes/handlers/GenericModeHandler.ts"
+      ]
+    },
+    {
+      "id": "10.1.3",
+      "category": "API",
+      "description": "Add Implementation Status to API Responses - Add modeStatus field to handleAddThought response in index.ts with isFullyImplemented, hasSpecializedHandler, and note for experimental modes",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": [
+        "src/index.ts"
+      ]
+    },
+    {
+      "id": "10.1.4",
+      "category": "Architecture",
+      "description": "Create RefactoredThoughtFactory wrapper - Wrapper that delegates to registry when handler exists, else uses current switch for incremental migration",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/services/RefactoredThoughtFactory.ts"
+      ]
+    },
+    {
+      "id": "10.1.5",
+      "category": "Testing",
+      "description": "Add ModeHandler Tests - Unit tests for registry, interface contracts, and integration test for factory delegation",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "tests/unit/modes/handlers/ModeHandler.test.ts",
+        "tests/unit/modes/handlers/registry.test.ts",
+        "tests/unit/modes/handlers/GenericModeHandler.test.ts"
+      ]
+    },
+    {
+      "id": "10.1.6",
+      "category": "Types",
+      "description": "Update Type Definitions - Add ModeStatus interface to types, export new handler types from src/types/core.ts and src/types/index.ts",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": [
+        "src/types/core.ts",
+        "src/types/index.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "ModeHandlerRegistry functional with register/createThought methods",
+    "GenericModeHandler passes same tests as current ThoughtFactory",
+    "API responses include modeStatus field",
+    "All existing tests pass"
+  ],
+  "filesCreated": [
+    "src/modes/handlers/ModeHandler.ts",
+    "src/modes/handlers/registry.ts",
+    "src/modes/handlers/index.ts",
+    "src/modes/handlers/GenericModeHandler.ts",
+    "src/services/RefactoredThoughtFactory.ts",
+    "tests/unit/modes/handlers/ModeHandler.test.ts",
+    "tests/unit/modes/handlers/registry.test.ts",
+    "tests/unit/modes/handlers/GenericModeHandler.test.ts"
+  ],
+  "filesModified": [
+    "src/index.ts",
+    "src/types/core.ts",
+    "src/types/index.ts"
+  ],
+  "totalEstimatedHours": 5.5,
+  "notes": "Foundation sprint establishing ModeHandler pattern infrastructure for incremental migration from ThoughtFactory switch statement"
+}

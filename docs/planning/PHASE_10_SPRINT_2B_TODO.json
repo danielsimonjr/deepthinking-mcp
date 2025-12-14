@@ -1,0 +1,84 @@
+{
+  "phase": 10,
+  "sprint": "2B",
+  "title": "ModeHandler Migration - Additional Modes",
+  "week": "Week 2-3",
+  "effort": "4-5 hours",
+  "status": "pending",
+  "tasks": [
+    {
+      "id": "10.2B.1",
+      "category": "Migration",
+      "description": "Migrate CounterfactualHandler - Maintains world state tracking, validates divergence points, compares outcomes between actual and hypothetical",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/modes/handlers/CounterfactualHandler.ts",
+        "tests/unit/modes/handlers/CounterfactualHandler.test.ts"
+      ]
+    },
+    {
+      "id": "10.2B.2",
+      "category": "Migration",
+      "description": "Migrate SynthesisHandler - Tracks source coverage, validates theme extraction, detects contradictions between sources",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/modes/handlers/SynthesisHandler.ts",
+        "tests/unit/modes/handlers/SynthesisHandler.test.ts"
+      ]
+    },
+    {
+      "id": "10.2B.3",
+      "category": "Migration",
+      "description": "Migrate SystemsThinkingHandler - Integrates Systems Archetypes detection, adds warning signs and intervention suggestions",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "files": [
+        "src/modes/handlers/SystemsThinkingHandler.ts",
+        "tests/unit/modes/handlers/SystemsThinkingHandler.test.ts"
+      ]
+    },
+    {
+      "id": "10.2B.4",
+      "category": "Migration",
+      "description": "Migrate CritiqueHandler - Adds Socratic question categories (clarification, assumptions, evidence, perspectives, implications, meta)",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "files": [
+        "src/modes/handlers/CritiqueHandler.ts",
+        "tests/unit/modes/handlers/CritiqueHandler.test.ts"
+      ]
+    },
+    {
+      "id": "10.2B.5",
+      "category": "Testing",
+      "description": "Verify All Handler Migrations - Run full test suite, verify all migrated handlers produce identical output to original switch cases",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "files": [
+        "tests/integration/handler-parity.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "4 additional modes migrated (Counterfactual, Synthesis, SystemsThinking, Critique)",
+    "SystemsThinkingHandler includes archetype detection",
+    "CritiqueHandler includes Socratic question framework",
+    "All handlers produce identical results to original ThoughtFactory"
+  ],
+  "filesCreated": [
+    "src/modes/handlers/CounterfactualHandler.ts",
+    "src/modes/handlers/SynthesisHandler.ts",
+    "src/modes/handlers/SystemsThinkingHandler.ts",
+    "src/modes/handlers/CritiqueHandler.ts",
+    "tests/unit/modes/handlers/CounterfactualHandler.test.ts",
+    "tests/unit/modes/handlers/SynthesisHandler.test.ts",
+    "tests/unit/modes/handlers/SystemsThinkingHandler.test.ts",
+    "tests/unit/modes/handlers/CritiqueHandler.test.ts",
+    "tests/integration/handler-parity.test.ts"
+  ],
+  "filesModified": [],
+  "totalEstimatedHours": 5.0,
+  "notes": "Additional handler migrations split from Sprint 2. SystemsThinking and Critique handlers now include framework-aligned enhancements (Archetypes and Socratic questions)."
+}
