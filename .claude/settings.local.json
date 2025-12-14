@@ -58,7 +58,8 @@
       "Bash(wc:*)",
       "Bash(npm run typecheck:*)",
       "Bash(npm run test:run:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(if not exist \"C:\\mcp-servers\\deepthinking-mcp\\tests\\integration\" mkdir \"C:\\mcp-servers\\deepthinking-mcp\\tests\\integration\")"
     ],
     "deny": [],
     "ask": []

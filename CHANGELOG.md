@@ -9,6 +9,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.1.0] - 2025-12-13
+
+### ✨ Features
+
+**Phase 10 Sprint 2: ModeHandler Migration - Core Modes**
+
+This release migrates three core modes to the specialized handler pattern with semantic validation and automatic calculations.
+
+#### Specialized Handlers
+
+- **CausalHandler** (`src/modes/handlers/CausalHandler.ts`)
+  - Semantic validation of causal graph structure
+  - Cycle detection in causal graphs (warns for feedback loops)
+  - Intervention target validation
+  - Edge strength and confidence range validation
+  - Self-loop detection
+  - Confounder identification suggestions
+  - Graph metrics (node count, edge count, density)
+  - Entry/exit node identification for guiding questions
+
+- **BayesianHandler** (`src/modes/handlers/BayesianHandler.ts`)
+  - Automatic posterior calculation using Bayes' theorem
+  - Probability validation (0-1 range, extreme value warnings)
+  - Evidence likelihood validation
+  - Bayes factor computation for evidence strength
+  - Posterior confidence estimation
+  - Bayes factor interpretation (Kass & Raftery scale)
+  - Prior-posterior shift analysis
+  - Sensitivity analysis suggestions
+
+- **GameTheoryHandler** (`src/modes/handlers/GameTheoryHandler.ts`)
+  - Payoff matrix dimension validation
+  - Player/strategy consistency checks
+  - Pure strategy Nash equilibrium detection
+  - Dominant strategy identification
+  - Zero-sum game detection
+  - Pareto optimality checking
+  - Equilibrium stability scoring
+  - Mixed strategy probability validation
+  - Cooperative game mental models
+
+#### Integration
+
+- **RefactoredThoughtFactory** auto-registers specialized handlers on construction
+- `autoRegisterHandlers` config option (default: true)
+- Registry stats now show 3 specialized handlers
+
+### 🧪 Tests
+
+- Added 50+ new tests for specialized handlers:
+  - `CausalHandler.test.ts` - 23 tests for causal validation and enhancements
+  - `BayesianHandler.test.ts` - 27 tests for Bayesian inference and calculations
+  - `GameTheoryHandler.test.ts` - 27 tests for game theory validation
+- Added integration test `mode-handler-delegation.test.ts` - 20 tests for factory delegation
+
+### 📊 Test Results
+
+- All 945 tests passing (98 new tests added)
+- 0 runtime circular dependencies
+
+---
+
 ## [8.0.0] - 2025-12-13
 
 ### ✨ Features

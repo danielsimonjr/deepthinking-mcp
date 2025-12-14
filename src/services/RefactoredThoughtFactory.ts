@@ -1,5 +1,5 @@
 /**
- * RefactoredThoughtFactory - Phase 10 Sprint 1 (v8.0.0)
+ * RefactoredThoughtFactory - Phase 10 Sprint 2 (v8.1.0)
  *
  * A wrapper that delegates to ModeHandlerRegistry for modes with
  * specialized handlers, and falls back to the original ThoughtFactory
@@ -7,6 +7,8 @@
  *
  * This enables incremental migration from the monolithic switch statement
  * to the Strategy Pattern without breaking existing functionality.
+ *
+ * Sprint 2 adds specialized handlers for: Causal, Bayesian, GameTheory
  */
 
 import { ThinkingMode, Thought } from '../types/core.js';
@@ -16,6 +18,9 @@ import {
   ModeHandlerRegistry,
   ModeStatus,
   ValidationResult,
+  CausalHandler,
+  BayesianHandler,
+  GameTheoryHandler,
 } from '../modes/handlers/index.js';
 import { ILogger } from '../interfaces/ILogger.js';
 import { createLogger, LogLevel } from '../utils/logger.js';
@@ -31,6 +36,13 @@ export interface RefactoredThoughtFactoryConfig {
    * Default: false (incremental migration mode)
    */
   useRegistryForAll?: boolean;
+
+  /**
+   * Whether to automatically register specialized handlers on construction
+   *
+   * Default: true
+   */
+  autoRegisterHandlers?: boolean;
 
   /**
    * Logger instance
@@ -81,6 +93,30 @@ export class RefactoredThoughtFactory {
     this.useRegistryForAll = config.useRegistryForAll ?? false;
     this.logger =
       config.logger || createLogger({ minLevel: LogLevel.INFO, enableConsole: true });
+
+    // Auto-register specialized handlers (Phase 10 Sprint 2)
+    if (config.autoRegisterHandlers !== false) {
+      this.registerSpecializedHandlers();
+    }
+  }
+
+  /**
+   * Register all specialized handlers
+   *
+   * Called automatically during construction unless disabled.
+   * Uses replace() to allow re-registration without errors.
+   */
+  private registerSpecializedHandlers(): void {
+    this.logger.debug('Registering specialized handlers');
+
+    // Phase 10 Sprint 2 handlers
+    this.registry.replace(new CausalHandler());
+    this.registry.replace(new BayesianHandler());
+    this.registry.replace(new GameTheoryHandler());
+
+    this.logger.debug('Specialized handlers registered', {
+      handlers: ['CausalHandler', 'BayesianHandler', 'GameTheoryHandler'],
+    });
   }
 
   /**
