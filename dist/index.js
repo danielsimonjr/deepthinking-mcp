@@ -2057,6 +2057,3886 @@ var init_type_guards = __esm({
     ];
   }
 });
+var GenericModeHandler;
+var init_GenericModeHandler = __esm({
+  "src/modes/handlers/GenericModeHandler.ts"() {
+    init_esm_shims();
+    init_core();
+    init_ModeHandler();
+    init_type_guards();
+    GenericModeHandler = class {
+      mode;
+      modeName;
+      description;
+      constructor(mode, modeName, description) {
+        this.mode = mode;
+        this.modeName = modeName || this.getDefaultModeName(mode);
+        this.description = description || this.getDefaultDescription(mode);
+      }
+      /**
+       * Create a thought object from input
+       *
+       * This replicates the logic from ThoughtFactory.createThought()
+       * for the mode this handler is configured for.
+       */
+      createThought(input, sessionId) {
+        const baseThought = this.createBaseThought(input, sessionId);
+        return this.createModeSpecificThought(input, baseThought);
+      }
+      /**
+       * Create the base thought structure common to all modes
+       */
+      createBaseThought(input, sessionId) {
+        return {
+          id: randomUUID(),
+          sessionId,
+          thoughtNumber: input.thoughtNumber,
+          totalThoughts: input.totalThoughts,
+          content: input.thought,
+          timestamp: /* @__PURE__ */ new Date(),
+          nextThoughtNeeded: input.nextThoughtNeeded,
+          isRevision: input.isRevision,
+          revisesThought: input.revisesThought
+        };
+      }
+      /**
+       * Create mode-specific thought structure
+       *
+       * Override this method in specialized handlers to add
+       * mode-specific logic and validation.
+       */
+      createModeSpecificThought(input, baseThought) {
+        const mode = input.mode || this.mode;
+        switch (mode) {
+          case "sequential" /* SEQUENTIAL */:
+            return {
+              ...baseThought,
+              mode: "sequential" /* SEQUENTIAL */,
+              revisionReason: input.revisionReason,
+              branchFrom: input.branchFrom,
+              branchId: input.branchId
+            };
+          case "shannon" /* SHANNON */:
+            return {
+              ...baseThought,
+              mode: "shannon" /* SHANNON */,
+              stage: input.stage || "problem_definition" /* PROBLEM_DEFINITION */,
+              uncertainty: input.uncertainty || 0.5,
+              dependencies: input.dependencies || [],
+              assumptions: input.assumptions || []
+            };
+          case "mathematics" /* MATHEMATICS */:
+            return {
+              ...baseThought,
+              mode: "mathematics" /* MATHEMATICS */,
+              thoughtType: toExtendedThoughtType(input.thoughtType, "model"),
+              mathematicalModel: input.mathematicalModel,
+              proofStrategy: input.proofStrategy,
+              dependencies: input.dependencies || [],
+              assumptions: input.assumptions || [],
+              uncertainty: input.uncertainty || 0.5
+            };
+          case "physics" /* PHYSICS */:
+            return {
+              ...baseThought,
+              mode: "physics" /* PHYSICS */,
+              thoughtType: toExtendedThoughtType(input.thoughtType, "model"),
+              tensorProperties: input.tensorProperties,
+              physicalInterpretation: input.physicalInterpretation,
+              dependencies: input.dependencies || [],
+              assumptions: input.assumptions || [],
+              uncertainty: input.uncertainty || 0.5
+            };
+          case "inductive" /* INDUCTIVE */:
+            return {
+              ...baseThought,
+              mode: "inductive" /* INDUCTIVE */,
+              observations: input.observations || [],
+              pattern: input.pattern,
+              generalization: input.generalization || "",
+              confidence: input.confidence ?? 0.5,
+              counterexamples: input.counterexamples || [],
+              sampleSize: input.sampleSize
+            };
+          case "deductive" /* DEDUCTIVE */:
+            return {
+              ...baseThought,
+              mode: "deductive" /* DEDUCTIVE */,
+              premises: input.premises || [],
+              conclusion: input.conclusion || "",
+              logicForm: input.logicForm,
+              validityCheck: input.validityCheck ?? false,
+              soundnessCheck: input.soundnessCheck
+            };
+          case "abductive" /* ABDUCTIVE */:
+            return {
+              ...baseThought,
+              mode: "abductive" /* ABDUCTIVE */,
+              thoughtType: toExtendedThoughtType(input.thoughtType, "problem_definition"),
+              observations: input.observations || [],
+              hypotheses: input.hypotheses || [],
+              evaluationCriteria: input.evaluationCriteria,
+              evidence: input.evidence || [],
+              bestExplanation: input.bestExplanation
+            };
+          case "causal" /* CAUSAL */:
+            return this.createCausalThought(input, baseThought);
+          case "hybrid" /* HYBRID */:
+          default:
+            return this.createHybridThought(input, baseThought);
+        }
+      }
+      /**
+       * Create a causal thought with graph handling
+       */
+      createCausalThought(input, baseThought) {
+        const inputAny = input;
+        const causalGraph = input.causalGraph || {
+          nodes: inputAny.nodes || [],
+          edges: inputAny.edges || []
+        };
+        return {
+          ...baseThought,
+          mode: "causal" /* CAUSAL */,
+          thoughtType: toExtendedThoughtType(input.thoughtType, "problem_definition"),
+          causalGraph,
+          interventions: input.interventions || [],
+          mechanisms: input.mechanisms || [],
+          confounders: input.confounders || []
+        };
+      }
+      /**
+       * Create a hybrid thought (default fallback)
+       */
+      createHybridThought(input, baseThought) {
+        return {
+          ...baseThought,
+          mode: "hybrid" /* HYBRID */,
+          thoughtType: toExtendedThoughtType(input.thoughtType, "synthesis"),
+          stage: input.stage,
+          uncertainty: input.uncertainty,
+          dependencies: input.dependencies,
+          assumptions: input.assumptions,
+          mathematicalModel: input.mathematicalModel,
+          tensorProperties: input.tensorProperties,
+          physicalInterpretation: input.physicalInterpretation,
+          primaryMode: input.mode || "hybrid" /* HYBRID */,
+          secondaryFeatures: []
+        };
+      }
+      /**
+       * Validate mode-specific input
+       *
+       * The generic handler performs basic validation.
+       * Specialized handlers should override for deeper validation.
+       */
+      validate(input) {
+        const warnings = [];
+        if (!input.thought || input.thought.trim().length === 0) {
+          return validationFailure([
+            createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+          ]);
+        }
+        if (input.thoughtNumber > input.totalThoughts) {
+          return validationFailure([
+            createValidationError(
+              "thoughtNumber",
+              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
+              "INVALID_THOUGHT_NUMBER"
+            )
+          ]);
+        }
+        const mode = input.mode || "hybrid" /* HYBRID */;
+        if (!isFullyImplemented(mode)) {
+          warnings.push(
+            createValidationWarning(
+              "mode",
+              `Mode '${mode}' is experimental with limited runtime implementation`,
+              "Consider using a fully implemented mode for production use"
+            )
+          );
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Get mode-specific enhancements
+       *
+       * The generic handler returns minimal enhancements.
+       * Specialized handlers can provide richer context.
+       */
+      getEnhancements(thought) {
+        return {
+          suggestions: [],
+          relatedModes: this.getRelatedModes(thought.mode)
+        };
+      }
+      /**
+       * Get mode status information
+       */
+      getModeStatus() {
+        return {
+          mode: this.mode,
+          isFullyImplemented: isFullyImplemented(this.mode),
+          hasSpecializedHandler: false,
+          // GenericHandler is not specialized
+          note: isFullyImplemented(this.mode) ? void 0 : "This mode is experimental with limited runtime implementation"
+        };
+      }
+      /**
+       * Get related modes for suggestions
+       */
+      getRelatedModes(mode) {
+        const relatedModes = {
+          ["sequential" /* SEQUENTIAL */]: ["hybrid" /* HYBRID */, "shannon" /* SHANNON */],
+          ["shannon" /* SHANNON */]: ["sequential" /* SEQUENTIAL */, "mathematics" /* MATHEMATICS */],
+          ["mathematics" /* MATHEMATICS */]: ["physics" /* PHYSICS */, "algorithmic" /* ALGORITHMIC */],
+          ["physics" /* PHYSICS */]: ["mathematics" /* MATHEMATICS */, "engineering" /* ENGINEERING */],
+          ["hybrid" /* HYBRID */]: ["sequential" /* SEQUENTIAL */, "metareasoning" /* METAREASONING */],
+          ["causal" /* CAUSAL */]: ["bayesian" /* BAYESIAN */, "counterfactual" /* COUNTERFACTUAL */],
+          ["bayesian" /* BAYESIAN */]: ["causal" /* CAUSAL */, "evidential" /* EVIDENTIAL */],
+          ["inductive" /* INDUCTIVE */]: ["deductive" /* DEDUCTIVE */, "abductive" /* ABDUCTIVE */],
+          ["deductive" /* DEDUCTIVE */]: ["inductive" /* INDUCTIVE */, "formallogic" /* FORMALLOGIC */],
+          ["abductive" /* ABDUCTIVE */]: ["inductive" /* INDUCTIVE */, "causal" /* CAUSAL */],
+          ["counterfactual" /* COUNTERFACTUAL */]: ["causal" /* CAUSAL */, "gametheory" /* GAMETHEORY */],
+          ["analogical" /* ANALOGICAL */]: ["inductive" /* INDUCTIVE */, "firstprinciples" /* FIRSTPRINCIPLES */],
+          ["temporal" /* TEMPORAL */]: ["causal" /* CAUSAL */, "sequential" /* SEQUENTIAL */],
+          ["gametheory" /* GAMETHEORY */]: ["optimization" /* OPTIMIZATION */, "counterfactual" /* COUNTERFACTUAL */],
+          ["evidential" /* EVIDENTIAL */]: ["bayesian" /* BAYESIAN */, "scientificmethod" /* SCIENTIFICMETHOD */],
+          ["firstprinciples" /* FIRSTPRINCIPLES */]: ["deductive" /* DEDUCTIVE */, "analogical" /* ANALOGICAL */],
+          ["systemsthinking" /* SYSTEMSTHINKING */]: ["causal" /* CAUSAL */, "optimization" /* OPTIMIZATION */],
+          ["scientificmethod" /* SCIENTIFICMETHOD */]: ["evidential" /* EVIDENTIAL */, "synthesis" /* SYNTHESIS */],
+          ["formallogic" /* FORMALLOGIC */]: ["deductive" /* DEDUCTIVE */, "mathematics" /* MATHEMATICS */],
+          ["metareasoning" /* METAREASONING */]: ["hybrid" /* HYBRID */, "critique" /* CRITIQUE */],
+          ["recursive" /* RECURSIVE */]: ["algorithmic" /* ALGORITHMIC */, "mathematics" /* MATHEMATICS */],
+          ["modal" /* MODAL */]: ["formallogic" /* FORMALLOGIC */, "counterfactual" /* COUNTERFACTUAL */],
+          ["stochastic" /* STOCHASTIC */]: ["bayesian" /* BAYESIAN */, "optimization" /* OPTIMIZATION */],
+          ["constraint" /* CONSTRAINT */]: ["optimization" /* OPTIMIZATION */, "formallogic" /* FORMALLOGIC */],
+          ["optimization" /* OPTIMIZATION */]: ["constraint" /* CONSTRAINT */, "gametheory" /* GAMETHEORY */],
+          ["engineering" /* ENGINEERING */]: ["optimization" /* OPTIMIZATION */, "systemsthinking" /* SYSTEMSTHINKING */],
+          ["computability" /* COMPUTABILITY */]: ["algorithmic" /* ALGORITHMIC */, "formallogic" /* FORMALLOGIC */],
+          ["cryptanalytic" /* CRYPTANALYTIC */]: ["bayesian" /* BAYESIAN */, "algorithmic" /* ALGORITHMIC */],
+          ["algorithmic" /* ALGORITHMIC */]: ["mathematics" /* MATHEMATICS */, "optimization" /* OPTIMIZATION */],
+          ["synthesis" /* SYNTHESIS */]: ["critique" /* CRITIQUE */, "analysis" /* ANALYSIS */],
+          ["argumentation" /* ARGUMENTATION */]: ["critique" /* CRITIQUE */, "formallogic" /* FORMALLOGIC */],
+          ["critique" /* CRITIQUE */]: ["argumentation" /* ARGUMENTATION */, "synthesis" /* SYNTHESIS */],
+          ["analysis" /* ANALYSIS */]: ["synthesis" /* SYNTHESIS */, "scientificmethod" /* SCIENTIFICMETHOD */],
+          ["custom" /* CUSTOM */]: ["hybrid" /* HYBRID */]
+        };
+        return relatedModes[mode] || ["hybrid" /* HYBRID */];
+      }
+      /**
+       * Get default mode name
+       */
+      getDefaultModeName(mode) {
+        const names = {
+          ["sequential" /* SEQUENTIAL */]: "Sequential Thinking",
+          ["shannon" /* SHANNON */]: "Shannon Problem-Solving",
+          ["mathematics" /* MATHEMATICS */]: "Mathematical Reasoning",
+          ["physics" /* PHYSICS */]: "Physics Modeling",
+          ["hybrid" /* HYBRID */]: "Hybrid Mode",
+          ["inductive" /* INDUCTIVE */]: "Inductive Reasoning",
+          ["deductive" /* DEDUCTIVE */]: "Deductive Reasoning",
+          ["abductive" /* ABDUCTIVE */]: "Abductive Reasoning",
+          ["causal" /* CAUSAL */]: "Causal Analysis",
+          ["bayesian" /* BAYESIAN */]: "Bayesian Inference",
+          ["counterfactual" /* COUNTERFACTUAL */]: "Counterfactual Reasoning",
+          ["analogical" /* ANALOGICAL */]: "Analogical Reasoning",
+          ["temporal" /* TEMPORAL */]: "Temporal Reasoning",
+          ["gametheory" /* GAMETHEORY */]: "Game Theory",
+          ["evidential" /* EVIDENTIAL */]: "Evidential Reasoning",
+          ["firstprinciples" /* FIRSTPRINCIPLES */]: "First Principles",
+          ["systemsthinking" /* SYSTEMSTHINKING */]: "Systems Thinking",
+          ["scientificmethod" /* SCIENTIFICMETHOD */]: "Scientific Method",
+          ["formallogic" /* FORMALLOGIC */]: "Formal Logic",
+          ["metareasoning" /* METAREASONING */]: "Meta-Reasoning",
+          ["recursive" /* RECURSIVE */]: "Recursive Reasoning",
+          ["modal" /* MODAL */]: "Modal Logic",
+          ["stochastic" /* STOCHASTIC */]: "Stochastic Reasoning",
+          ["constraint" /* CONSTRAINT */]: "Constraint Satisfaction",
+          ["optimization" /* OPTIMIZATION */]: "Optimization",
+          ["engineering" /* ENGINEERING */]: "Engineering Analysis",
+          ["computability" /* COMPUTABILITY */]: "Computability Theory",
+          ["cryptanalytic" /* CRYPTANALYTIC */]: "Cryptanalysis",
+          ["algorithmic" /* ALGORITHMIC */]: "Algorithm Design",
+          ["synthesis" /* SYNTHESIS */]: "Literature Synthesis",
+          ["argumentation" /* ARGUMENTATION */]: "Academic Argumentation",
+          ["critique" /* CRITIQUE */]: "Critical Analysis",
+          ["analysis" /* ANALYSIS */]: "Qualitative Analysis",
+          ["custom" /* CUSTOM */]: "Custom Mode"
+        };
+        return names[mode] || "Unknown Mode";
+      }
+      /**
+       * Get default mode description
+       */
+      getDefaultDescription(mode) {
+        const descriptions = {
+          ["sequential" /* SEQUENTIAL */]: "Step-by-step logical reasoning",
+          ["shannon" /* SHANNON */]: "Claude Shannon's 5-stage problem-solving methodology",
+          ["mathematics" /* MATHEMATICS */]: "Mathematical proofs and formal reasoning",
+          ["physics" /* PHYSICS */]: "Physical modeling with tensors and conservation laws",
+          ["hybrid" /* HYBRID */]: "Flexible combination of multiple reasoning modes",
+          ["inductive" /* INDUCTIVE */]: "Reasoning from specific cases to general principles",
+          ["deductive" /* DEDUCTIVE */]: "Reasoning from general principles to specific conclusions",
+          ["abductive" /* ABDUCTIVE */]: "Inference to the best explanation",
+          ["causal" /* CAUSAL */]: "Causal graph analysis and intervention reasoning",
+          ["bayesian" /* BAYESIAN */]: "Probabilistic reasoning with prior updates",
+          ["counterfactual" /* COUNTERFACTUAL */]: "What-if scenario analysis",
+          ["analogical" /* ANALOGICAL */]: "Reasoning by structural similarity",
+          ["temporal" /* TEMPORAL */]: "Temporal logic and event sequencing",
+          ["gametheory" /* GAMETHEORY */]: "Strategic interaction and Nash equilibria",
+          ["evidential" /* EVIDENTIAL */]: "Dempster-Shafer evidence theory",
+          ["firstprinciples" /* FIRSTPRINCIPLES */]: "Reasoning from fundamental truths",
+          ["systemsthinking" /* SYSTEMSTHINKING */]: "Feedback loops and system dynamics",
+          ["scientificmethod" /* SCIENTIFICMETHOD */]: "Hypothesis testing and experimentation",
+          ["formallogic" /* FORMALLOGIC */]: "Propositional and predicate logic",
+          ["metareasoning" /* METAREASONING */]: "Reasoning about reasoning strategies",
+          ["recursive" /* RECURSIVE */]: "Self-similar problem decomposition",
+          ["modal" /* MODAL */]: "Possibility and necessity reasoning",
+          ["stochastic" /* STOCHASTIC */]: "Probabilistic state transitions",
+          ["constraint" /* CONSTRAINT */]: "Constraint satisfaction problems",
+          ["optimization" /* OPTIMIZATION */]: "Objective function optimization",
+          ["engineering" /* ENGINEERING */]: "Requirements, trade studies, and FMEA",
+          ["computability" /* COMPUTABILITY */]: "Turing machines and decidability",
+          ["cryptanalytic" /* CRYPTANALYTIC */]: "Cryptanalysis with deciban evidence",
+          ["algorithmic" /* ALGORITHMIC */]: "CLRS algorithm design and analysis",
+          ["synthesis" /* SYNTHESIS */]: "Literature review and integration",
+          ["argumentation" /* ARGUMENTATION */]: "Toulmin model academic arguments",
+          ["critique" /* CRITIQUE */]: "Critical evaluation of scholarly work",
+          ["analysis" /* ANALYSIS */]: "Qualitative data analysis methods",
+          ["custom" /* CUSTOM */]: "User-defined reasoning mode"
+        };
+        return descriptions[mode] || "Unknown reasoning mode";
+      }
+    };
+  }
+});
+var CausalHandler;
+var init_CausalHandler = __esm({
+  "src/modes/handlers/CausalHandler.ts"() {
+    init_esm_shims();
+    init_ModeHandler();
+    init_type_guards();
+    CausalHandler = class {
+      mode = "causal" /* CAUSAL */;
+      modeName = "Causal Analysis";
+      description = "Causal graph analysis with intervention reasoning and cycle detection";
+      /**
+       * Supported thought types for causal mode
+       */
+      supportedThoughtTypes = [
+        "problem_definition",
+        "causal_graph_construction",
+        "intervention_analysis",
+        "counterfactual_analysis",
+        "confounder_identification",
+        "mechanism_discovery"
+      ];
+      /**
+       * Create a causal thought from input
+       */
+      createThought(input, sessionId) {
+        const inputAny = input;
+        const causalGraph = input.causalGraph || {
+          nodes: inputAny.nodes || [],
+          edges: inputAny.edges || []
+        };
+        return {
+          id: randomUUID(),
+          sessionId,
+          thoughtNumber: input.thoughtNumber,
+          totalThoughts: input.totalThoughts,
+          content: input.thought,
+          timestamp: /* @__PURE__ */ new Date(),
+          nextThoughtNeeded: input.nextThoughtNeeded,
+          isRevision: input.isRevision,
+          revisesThought: input.revisesThought,
+          mode: "causal" /* CAUSAL */,
+          thoughtType: toExtendedThoughtType(input.thoughtType, "problem_definition"),
+          causalGraph,
+          interventions: input.interventions || [],
+          mechanisms: input.mechanisms || [],
+          confounders: input.confounders || []
+        };
+      }
+      /**
+       * Validate causal-specific input
+       *
+       * Performs semantic validation:
+       * 1. Basic input validation
+       * 2. Causal graph structure validation
+       * 3. Cycle detection (warns, doesn't fail - cycles may be intentional feedback loops)
+       * 4. Intervention target validation
+       */
+      validate(input) {
+        const errors = [];
+        const warnings = [];
+        const inputAny = input;
+        if (!input.thought || input.thought.trim().length === 0) {
+          return validationFailure([
+            createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+          ]);
+        }
+        if (input.thoughtNumber > input.totalThoughts) {
+          return validationFailure([
+            createValidationError(
+              "thoughtNumber",
+              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
+              "INVALID_THOUGHT_NUMBER"
+            )
+          ]);
+        }
+        const causalGraph = input.causalGraph || {
+          nodes: inputAny.nodes || [],
+          edges: inputAny.edges || []
+        };
+        if (causalGraph.nodes.length > 0 || causalGraph.edges.length > 0) {
+          const graphValidation = this.validateCausalGraph(causalGraph);
+          errors.push(...graphValidation.errors);
+          warnings.push(...graphValidation.warnings);
+        }
+        if (input.interventions && input.interventions.length > 0) {
+          const interventionValidation = this.validateInterventions(
+            input.interventions,
+            causalGraph
+          );
+          errors.push(...interventionValidation.errors);
+          warnings.push(...interventionValidation.warnings);
+        }
+        if (causalGraph.edges.length > 0) {
+          const cycles = this.detectCycles(causalGraph);
+          if (cycles.length > 0) {
+            warnings.push(
+              createValidationWarning(
+                "causalGraph",
+                `Detected ${cycles.length} cycle(s) in causal graph: ${cycles.map((c) => c.join(" -> ")).join("; ")}`,
+                "Cycles may indicate feedback loops. Verify this is intentional."
+              )
+            );
+          }
+        }
+        if ((!input.confounders || input.confounders.length === 0) && causalGraph.nodes.length >= 3) {
+          warnings.push(
+            createValidationWarning(
+              "confounders",
+              "No confounders specified in the causal model",
+              "Consider identifying potential confounders that might affect multiple nodes"
+            )
+          );
+        }
+        if (errors.length > 0) {
+          return validationFailure(errors, warnings);
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Get causal-specific enhancements
+       */
+      getEnhancements(thought) {
+        const enhancements = {
+          suggestions: [],
+          relatedModes: ["bayesian" /* BAYESIAN */, "counterfactual" /* COUNTERFACTUAL */],
+          guidingQuestions: [],
+          warnings: [],
+          mentalModels: ["Causal Diagrams", "Do-Calculus", "Structural Equation Models"]
+        };
+        if (thought.causalGraph) {
+          const nodeCount = thought.causalGraph.nodes.length;
+          const edgeCount = thought.causalGraph.edges.length;
+          if (nodeCount > 0 && edgeCount === 0) {
+            enhancements.suggestions.push(
+              "Add causal edges to connect your nodes and establish causal relationships"
+            );
+          }
+          if (edgeCount > nodeCount * 2) {
+            enhancements.suggestions.push(
+              "Graph is densely connected. Consider identifying the most significant causal paths"
+            );
+          }
+          enhancements.metrics = {
+            nodeCount,
+            edgeCount,
+            density: nodeCount > 1 ? edgeCount / (nodeCount * (nodeCount - 1)) : 0
+          };
+          const entryNodes = this.findEntryNodes(thought.causalGraph);
+          const exitNodes = this.findExitNodes(thought.causalGraph);
+          if (entryNodes.length > 0) {
+            enhancements.guidingQuestions.push(
+              `What external factors influence the root causes: ${entryNodes.join(", ")}?`
+            );
+          }
+          if (exitNodes.length > 0) {
+            enhancements.guidingQuestions.push(
+              `What are the downstream consequences of ${exitNodes.join(", ")}?`
+            );
+          }
+        }
+        if (!thought.interventions || thought.interventions.length === 0) {
+          enhancements.guidingQuestions.push(
+            "What interventions could be tested to verify causal relationships?"
+          );
+        }
+        if (!thought.confounders || thought.confounders.length === 0) {
+          enhancements.guidingQuestions.push(
+            "Are there any hidden common causes (confounders) that might affect multiple variables?"
+          );
+        }
+        return enhancements;
+      }
+      /**
+       * Check if this handler supports a specific thought type
+       */
+      supportsThoughtType(thoughtType) {
+        return this.supportedThoughtTypes.includes(thoughtType);
+      }
+      /**
+       * Validate causal graph structure
+       */
+      validateCausalGraph(graph) {
+        const errors = [];
+        const warnings = [];
+        const nodeIds = new Set(graph.nodes.map((n) => n.id));
+        if (nodeIds.size !== graph.nodes.length) {
+          errors.push(
+            createValidationError(
+              "causalGraph.nodes",
+              "Duplicate node IDs detected in causal graph",
+              "DUPLICATE_NODE_IDS"
+            )
+          );
+        }
+        for (const edge of graph.edges) {
+          if (!nodeIds.has(edge.from)) {
+            errors.push(
+              createValidationError(
+                "causalGraph.edges",
+                `Edge references non-existent source node: ${edge.from}`,
+                "INVALID_EDGE_SOURCE"
+              )
+            );
+          }
+          if (!nodeIds.has(edge.to)) {
+            errors.push(
+              createValidationError(
+                "causalGraph.edges",
+                `Edge references non-existent target node: ${edge.to}`,
+                "INVALID_EDGE_TARGET"
+              )
+            );
+          }
+          if (edge.strength !== void 0 && (edge.strength < -1 || edge.strength > 1)) {
+            warnings.push(
+              createValidationWarning(
+                "causalGraph.edges",
+                `Edge strength ${edge.strength} is outside [-1, 1] range`,
+                "Normalize edge strength to [-1, 1] where negative indicates inhibitory effects"
+              )
+            );
+          }
+          if (edge.confidence !== void 0 && (edge.confidence < 0 || edge.confidence > 1)) {
+            warnings.push(
+              createValidationWarning(
+                "causalGraph.edges",
+                `Edge confidence ${edge.confidence} is outside [0, 1] range`,
+                "Confidence should be a probability between 0 and 1"
+              )
+            );
+          }
+        }
+        const selfLoops = graph.edges.filter((e) => e.from === e.to);
+        if (selfLoops.length > 0) {
+          warnings.push(
+            createValidationWarning(
+              "causalGraph.edges",
+              `${selfLoops.length} self-loop(s) detected: ${selfLoops.map((e) => e.from).join(", ")}`,
+              "Self-loops may indicate self-reinforcing effects. Verify this is intentional."
+            )
+          );
+        }
+        if (errors.length > 0) {
+          return validationFailure(errors, warnings);
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Validate interventions reference existing nodes
+       */
+      validateInterventions(interventions, graph) {
+        const errors = [];
+        const warnings = [];
+        const nodeIds = new Set(graph.nodes.map((n) => n.id));
+        for (const intervention of interventions) {
+          if (!nodeIds.has(intervention.nodeId)) {
+            errors.push(
+              createValidationError(
+                "interventions",
+                `Intervention targets non-existent node: ${intervention.nodeId}`,
+                "INVALID_INTERVENTION_TARGET"
+              )
+            );
+          }
+          if (intervention.expectedEffects) {
+            for (const effect of intervention.expectedEffects) {
+              if (!nodeIds.has(effect.nodeId)) {
+                warnings.push(
+                  createValidationWarning(
+                    "interventions.expectedEffects",
+                    `Expected effect references non-existent node: ${effect.nodeId}`,
+                    "Ensure all expected effect nodes are in the causal graph"
+                  )
+                );
+              }
+              if (effect.confidence !== void 0 && (effect.confidence < 0 || effect.confidence > 1)) {
+                warnings.push(
+                  createValidationWarning(
+                    "interventions.expectedEffects",
+                    `Effect confidence ${effect.confidence} is outside [0, 1] range`,
+                    "Confidence should be a probability between 0 and 1"
+                  )
+                );
+              }
+            }
+          }
+        }
+        if (errors.length > 0) {
+          return validationFailure(errors, warnings);
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Detect cycles in the causal graph using DFS
+       *
+       * Returns list of cycles found, where each cycle is a list of node IDs
+       */
+      detectCycles(graph) {
+        const cycles = [];
+        const visited = /* @__PURE__ */ new Set();
+        const recursionStack = /* @__PURE__ */ new Set();
+        const path2 = [];
+        const adjacencyList = /* @__PURE__ */ new Map();
+        for (const node of graph.nodes) {
+          adjacencyList.set(node.id, []);
+        }
+        for (const edge of graph.edges) {
+          const neighbors = adjacencyList.get(edge.from);
+          if (neighbors) {
+            neighbors.push(edge.to);
+          }
+        }
+        const dfs = (nodeId) => {
+          visited.add(nodeId);
+          recursionStack.add(nodeId);
+          path2.push(nodeId);
+          const neighbors = adjacencyList.get(nodeId) || [];
+          for (const neighbor of neighbors) {
+            if (!visited.has(neighbor)) {
+              dfs(neighbor);
+            } else if (recursionStack.has(neighbor)) {
+              const cycleStart = path2.indexOf(neighbor);
+              const cycle = path2.slice(cycleStart);
+              cycle.push(neighbor);
+              cycles.push(cycle);
+            }
+          }
+          path2.pop();
+          recursionStack.delete(nodeId);
+        };
+        for (const node of graph.nodes) {
+          if (!visited.has(node.id)) {
+            dfs(node.id);
+          }
+        }
+        return cycles;
+      }
+      /**
+       * Find entry nodes (nodes with no incoming edges)
+       */
+      findEntryNodes(graph) {
+        const hasIncoming = new Set(graph.edges.map((e) => e.to));
+        return graph.nodes.filter((n) => !hasIncoming.has(n.id)).map((n) => n.name || n.id);
+      }
+      /**
+       * Find exit nodes (nodes with no outgoing edges)
+       */
+      findExitNodes(graph) {
+        const hasOutgoing = new Set(graph.edges.map((e) => e.from));
+        return graph.nodes.filter((n) => !hasOutgoing.has(n.id)).map((n) => n.name || n.id);
+      }
+    };
+  }
+});
+var BayesianHandler;
+var init_BayesianHandler = __esm({
+  "src/modes/handlers/BayesianHandler.ts"() {
+    init_esm_shims();
+    init_ModeHandler();
+    BayesianHandler = class {
+      mode = "bayesian" /* BAYESIAN */;
+      modeName = "Bayesian Inference";
+      description = "Probabilistic reasoning with Bayes theorem and evidence updates";
+      /**
+       * Supported thought types for Bayesian mode
+       */
+      supportedThoughtTypes = [
+        "prior_elicitation",
+        "likelihood_assessment",
+        "posterior_update",
+        "evidence_evaluation",
+        "sensitivity_analysis",
+        "hypothesis_comparison"
+      ];
+      /**
+       * Create a Bayesian thought from input
+       *
+       * Automatically calculates posterior if prior and likelihood are provided
+       */
+      createThought(input, sessionId) {
+        const inputAny = input;
+        const hypothesis = inputAny.hypothesis || {
+          id: randomUUID(),
+          statement: input.thought,
+          alternatives: []
+        };
+        const prior = {
+          probability: inputAny.priorProbability ?? 0.5,
+          justification: inputAny.priorJustification || "Default prior"
+        };
+        const likelihood = {
+          probability: inputAny.likelihood ?? 0.5,
+          description: inputAny.likelihoodDescription || "Default likelihood"
+        };
+        const evidence = inputAny.evidence || [];
+        const posterior = this.calculatePosterior(prior, likelihood, evidence, inputAny);
+        const bayesFactor = this.calculateBayesFactor(evidence);
+        return {
+          id: randomUUID(),
+          sessionId,
+          thoughtNumber: input.thoughtNumber,
+          totalThoughts: input.totalThoughts,
+          content: input.thought,
+          timestamp: /* @__PURE__ */ new Date(),
+          nextThoughtNeeded: input.nextThoughtNeeded,
+          isRevision: input.isRevision,
+          revisesThought: input.revisesThought,
+          mode: "bayesian" /* BAYESIAN */,
+          hypothesis,
+          prior,
+          likelihood,
+          evidence,
+          posterior,
+          bayesFactor,
+          sensitivity: inputAny.sensitivity
+        };
+      }
+      /**
+       * Validate Bayesian-specific input
+       *
+       * Performs semantic validation:
+       * 1. Basic input validation
+       * 2. Probability value range validation
+       * 3. Evidence likelihood ratio validation
+       * 4. Consistency checks
+       */
+      validate(input) {
+        const errors = [];
+        const warnings = [];
+        const inputAny = input;
+        if (!input.thought || input.thought.trim().length === 0) {
+          return validationFailure([
+            createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+          ]);
+        }
+        if (input.thoughtNumber > input.totalThoughts) {
+          return validationFailure([
+            createValidationError(
+              "thoughtNumber",
+              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
+              "INVALID_THOUGHT_NUMBER"
+            )
+          ]);
+        }
+        const priorProb = inputAny.priorProbability;
+        if (priorProb !== void 0) {
+          const priorValidation = this.validateProbability(priorProb, "priorProbability");
+          if (!priorValidation.valid) {
+            errors.push(...priorValidation.errors);
+          }
+          warnings.push(...priorValidation.warnings);
+        }
+        const likelihoodProb = inputAny.likelihood;
+        if (likelihoodProb !== void 0) {
+          const likelihoodValidation = this.validateProbability(likelihoodProb, "likelihood");
+          if (!likelihoodValidation.valid) {
+            errors.push(...likelihoodValidation.errors);
+          }
+          warnings.push(...likelihoodValidation.warnings);
+        }
+        const posteriorProb = inputAny.posteriorProbability;
+        if (posteriorProb !== void 0) {
+          const posteriorValidation = this.validateProbability(posteriorProb, "posteriorProbability");
+          if (!posteriorValidation.valid) {
+            errors.push(...posteriorValidation.errors);
+          }
+          warnings.push(...posteriorValidation.warnings);
+        }
+        if (inputAny.evidence && Array.isArray(inputAny.evidence)) {
+          for (let i = 0; i < inputAny.evidence.length; i++) {
+            const evidenceItem = inputAny.evidence[i];
+            const evidenceValidation = this.validateEvidence(evidenceItem, i);
+            if (!evidenceValidation.valid) {
+              errors.push(...evidenceValidation.errors);
+            }
+            warnings.push(...evidenceValidation.warnings);
+          }
+        }
+        if (inputAny.hypothesis?.alternatives) {
+          const numAlternatives = inputAny.hypothesis.alternatives.length;
+          if (numAlternatives > 0 && priorProb !== void 0) {
+            if (priorProb > 0.9 && numAlternatives > 2) {
+              warnings.push(
+                createValidationWarning(
+                  "priorProbability",
+                  `High prior probability (${priorProb}) with ${numAlternatives} alternatives`,
+                  "Consider whether prior properly reflects uncertainty across alternatives"
+                )
+              );
+            }
+          }
+        }
+        if (!inputAny.evidence || inputAny.evidence.length === 0) {
+          warnings.push(
+            createValidationWarning(
+              "evidence",
+              "No evidence provided for Bayesian update",
+              "Add evidence with likelihood ratios to update the posterior"
+            )
+          );
+        }
+        if (errors.length > 0) {
+          return validationFailure(errors, warnings);
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Get Bayesian-specific enhancements
+       */
+      getEnhancements(thought) {
+        const enhancements = {
+          suggestions: [],
+          relatedModes: ["causal" /* CAUSAL */, "evidential" /* EVIDENTIAL */],
+          guidingQuestions: [],
+          warnings: [],
+          metrics: {},
+          mentalModels: ["Bayes Theorem", "Prior Updating", "Likelihood Ratio", "Base Rate Fallacy"]
+        };
+        enhancements.metrics = {
+          priorProbability: thought.prior.probability,
+          likelihoodProbability: thought.likelihood.probability,
+          posteriorProbability: thought.posterior.probability,
+          evidenceCount: thought.evidence.length
+        };
+        if (thought.bayesFactor !== void 0) {
+          enhancements.metrics.bayesFactor = thought.bayesFactor;
+          const bf = thought.bayesFactor;
+          let strength;
+          if (bf < 1) {
+            strength = bf < 0.1 ? "Strong evidence against" : bf < 0.33 ? "Moderate evidence against" : "Weak evidence against";
+          } else {
+            strength = bf > 10 ? "Strong evidence for" : bf > 3 ? "Moderate evidence for" : "Weak evidence for";
+          }
+          enhancements.suggestions.push(`Bayes factor (${bf.toFixed(2)}) indicates: ${strength} the hypothesis`);
+        }
+        const shift = Math.abs(thought.posterior.probability - thought.prior.probability);
+        if (shift < 0.05) {
+          enhancements.suggestions.push(
+            "Small prior-to-posterior shift. Consider seeking more diagnostic evidence."
+          );
+        } else if (shift > 0.4) {
+          enhancements.warnings.push(
+            "Large belief update. Verify evidence quality and likelihood estimates."
+          );
+        }
+        if (thought.posterior.probability > 0.9) {
+          enhancements.guidingQuestions.push(
+            "What evidence could potentially disconfirm this high-confidence belief?"
+          );
+        } else if (thought.posterior.probability < 0.1) {
+          enhancements.guidingQuestions.push(
+            "What new evidence would be needed to revive this hypothesis?"
+          );
+        } else {
+          enhancements.guidingQuestions.push(
+            "What additional evidence could help resolve the remaining uncertainty?"
+          );
+        }
+        if (!thought.sensitivity) {
+          enhancements.guidingQuestions.push(
+            "How sensitive is the posterior to changes in the prior probability?"
+          );
+        }
+        return enhancements;
+      }
+      /**
+       * Check if this handler supports a specific thought type
+       */
+      supportsThoughtType(thoughtType) {
+        return this.supportedThoughtTypes.includes(thoughtType);
+      }
+      /**
+       * Calculate posterior probability using Bayes' theorem
+       *
+       * P(H|E) = P(E|H) * P(H) / P(E)
+       * where P(E) = P(E|H) * P(H) + P(E|~H) * P(~H)
+       */
+      calculatePosterior(prior, likelihood, evidence, inputAny) {
+        if (inputAny.posteriorProbability !== void 0) {
+          return {
+            probability: inputAny.posteriorProbability,
+            calculation: "Provided directly",
+            confidence: inputAny.posteriorConfidence ?? 0.8
+          };
+        }
+        let currentPosterior = prior.probability;
+        if (evidence.length > 0) {
+          for (const ev of evidence) {
+            const pEgivenH = ev.likelihoodGivenHypothesis;
+            const pEgivenNotH = ev.likelihoodGivenNotHypothesis;
+            const pE = pEgivenH * currentPosterior + pEgivenNotH * (1 - currentPosterior);
+            if (pE > 0) {
+              currentPosterior = pEgivenH * currentPosterior / pE;
+            }
+          }
+        } else {
+          const pEgivenH = likelihood.probability;
+          const pEgivenNotH = 1 - likelihood.probability;
+          const pE = pEgivenH * prior.probability + pEgivenNotH * (1 - prior.probability);
+          if (pE > 0) {
+            currentPosterior = pEgivenH * prior.probability / pE;
+          }
+        }
+        const calculation = evidence.length > 0 ? `Updated through ${evidence.length} evidence items using Bayes theorem` : `P(H|E) = P(E|H)P(H) / [P(E|H)P(H) + P(E|~H)P(~H)]`;
+        return {
+          probability: Math.max(0, Math.min(1, currentPosterior)),
+          // Clamp to [0, 1]
+          calculation,
+          confidence: this.estimatePosteriorConfidence(evidence)
+        };
+      }
+      /**
+       * Calculate Bayes factor from evidence
+       *
+       * BF = ∏ P(E_i|H) / P(E_i|~H)
+       */
+      calculateBayesFactor(evidence) {
+        if (evidence.length === 0) {
+          return void 0;
+        }
+        let bayesFactor = 1;
+        for (const ev of evidence) {
+          if (ev.likelihoodGivenNotHypothesis > 0) {
+            bayesFactor *= ev.likelihoodGivenHypothesis / ev.likelihoodGivenNotHypothesis;
+          }
+        }
+        return bayesFactor;
+      }
+      /**
+       * Estimate confidence in posterior calculation
+       */
+      estimatePosteriorConfidence(evidence) {
+        if (evidence.length === 0) {
+          return 0.5;
+        }
+        const evidenceContribution = Math.min(0.4, evidence.length * 0.1);
+        let qualityScore = 0;
+        for (const ev of evidence) {
+          const ratio = ev.likelihoodGivenHypothesis / (ev.likelihoodGivenNotHypothesis || 0.01);
+          if (ratio > 100 || ratio < 0.01) {
+            qualityScore += 0.05;
+          } else {
+            qualityScore += 0.1;
+          }
+        }
+        const avgQuality = qualityScore / evidence.length;
+        return Math.min(0.95, 0.5 + evidenceContribution + avgQuality);
+      }
+      /**
+       * Validate a probability value
+       */
+      validateProbability(value, field) {
+        const errors = [];
+        const warnings = [];
+        if (typeof value !== "number" || isNaN(value)) {
+          errors.push(
+            createValidationError(
+              field,
+              `${field} must be a valid number`,
+              "INVALID_PROBABILITY_TYPE"
+            )
+          );
+        } else if (value < 0 || value > 1) {
+          errors.push(
+            createValidationError(
+              field,
+              `${field} (${value}) must be between 0 and 1`,
+              "PROBABILITY_OUT_OF_RANGE"
+            )
+          );
+        } else if (value === 0 || value === 1) {
+          warnings.push(
+            createValidationWarning(
+              field,
+              `Extreme probability value (${value}) leaves no room for updating`,
+              "Consider using values slightly away from 0 and 1 (e.g., 0.01 or 0.99)"
+            )
+          );
+        }
+        if (errors.length > 0) {
+          return validationFailure(errors, warnings);
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Validate an evidence item
+       */
+      validateEvidence(evidence, index) {
+        const errors = [];
+        const warnings = [];
+        const prefix = `evidence[${index}]`;
+        if (!evidence.id || !evidence.description) {
+          warnings.push(
+            createValidationWarning(
+              prefix,
+              "Evidence item missing id or description",
+              "Add descriptive id and description for better tracking"
+            )
+          );
+        }
+        const pEH = evidence.likelihoodGivenHypothesis;
+        if (pEH !== void 0) {
+          if (typeof pEH !== "number" || isNaN(pEH)) {
+            errors.push(
+              createValidationError(
+                `${prefix}.likelihoodGivenHypothesis`,
+                "Likelihood given hypothesis must be a valid number",
+                "INVALID_LIKELIHOOD_TYPE"
+              )
+            );
+          } else if (pEH < 0 || pEH > 1) {
+            errors.push(
+              createValidationError(
+                `${prefix}.likelihoodGivenHypothesis`,
+                `Likelihood given hypothesis (${pEH}) must be between 0 and 1`,
+                "LIKELIHOOD_OUT_OF_RANGE"
+              )
+            );
+          }
+        }
+        const pEnH = evidence.likelihoodGivenNotHypothesis;
+        if (pEnH !== void 0) {
+          if (typeof pEnH !== "number" || isNaN(pEnH)) {
+            errors.push(
+              createValidationError(
+                `${prefix}.likelihoodGivenNotHypothesis`,
+                "Likelihood given not hypothesis must be a valid number",
+                "INVALID_LIKELIHOOD_TYPE"
+              )
+            );
+          } else if (pEnH < 0 || pEnH > 1) {
+            errors.push(
+              createValidationError(
+                `${prefix}.likelihoodGivenNotHypothesis`,
+                `Likelihood given not hypothesis (${pEnH}) must be between 0 and 1`,
+                "LIKELIHOOD_OUT_OF_RANGE"
+              )
+            );
+          }
+        }
+        if (pEH !== void 0 && pEnH !== void 0 && Math.abs(pEH - pEnH) < 0.1) {
+          warnings.push(
+            createValidationWarning(
+              prefix,
+              `Evidence has low diagnostic value (P(E|H)=${pEH}, P(E|~H)=${pEnH})`,
+              "Evidence is more useful when likelihood ratios differ significantly"
+            )
+          );
+        }
+        if (errors.length > 0) {
+          return validationFailure(errors, warnings);
+        }
+        return validationSuccess(warnings);
+      }
+    };
+  }
+});
+var GameTheoryHandler;
+var init_GameTheoryHandler = __esm({
+  "src/modes/handlers/GameTheoryHandler.ts"() {
+    init_esm_shims();
+    init_ModeHandler();
+    GameTheoryHandler = class {
+      mode = "gametheory" /* GAMETHEORY */;
+      modeName = "Game Theory";
+      description = "Strategic interaction analysis with Nash equilibria and payoff matrices";
+      /**
+       * Supported thought types for game theory mode
+       */
+      supportedThoughtTypes = [
+        "game_definition",
+        "strategy_analysis",
+        "equilibrium_finding",
+        "payoff_computation",
+        "dominance_analysis",
+        "minimax_analysis",
+        "cooperative_analysis",
+        "coalition_formation",
+        "shapley_value",
+        "core_analysis"
+      ];
+      /**
+       * Create a game theory thought from input
+       */
+      createThought(input, sessionId) {
+        const inputAny = input;
+        const game = inputAny.game;
+        const players = inputAny.players || [];
+        const strategies = inputAny.strategies || [];
+        const payoffMatrix = inputAny.payoffMatrix;
+        let nashEquilibria = inputAny.nashEquilibria;
+        if (!nashEquilibria && payoffMatrix && players.length > 0) {
+          nashEquilibria = this.findPureStrategyNashEquilibria(payoffMatrix, players, strategies);
+        }
+        let dominantStrategies = inputAny.dominantStrategies;
+        if (!dominantStrategies && payoffMatrix && players.length > 0) {
+          dominantStrategies = this.findDominantStrategies(payoffMatrix, players, strategies);
+        }
+        return {
+          id: randomUUID(),
+          sessionId,
+          thoughtNumber: input.thoughtNumber,
+          totalThoughts: input.totalThoughts,
+          content: input.thought,
+          timestamp: /* @__PURE__ */ new Date(),
+          nextThoughtNeeded: input.nextThoughtNeeded,
+          isRevision: input.isRevision,
+          revisesThought: input.revisesThought,
+          mode: "gametheory" /* GAMETHEORY */,
+          thoughtType: this.resolveThoughtType(input.thoughtType),
+          game,
+          players,
+          strategies,
+          payoffMatrix,
+          nashEquilibria,
+          dominantStrategies,
+          gameTree: inputAny.gameTree,
+          minimaxAnalysis: inputAny.minimaxAnalysis,
+          cooperativeGame: inputAny.cooperativeGame,
+          coalitionAnalysis: inputAny.coalitionAnalysis
+        };
+      }
+      /**
+       * Validate game theory-specific input
+       *
+       * Performs semantic validation:
+       * 1. Basic input validation
+       * 2. Payoff matrix dimension validation
+       * 3. Player-strategy consistency
+       * 4. Payoff value validation
+       */
+      validate(input) {
+        const errors = [];
+        const warnings = [];
+        const inputAny = input;
+        if (!input.thought || input.thought.trim().length === 0) {
+          return validationFailure([
+            createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+          ]);
+        }
+        if (input.thoughtNumber > input.totalThoughts) {
+          return validationFailure([
+            createValidationError(
+              "thoughtNumber",
+              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
+              "INVALID_THOUGHT_NUMBER"
+            )
+          ]);
+        }
+        const players = inputAny.players || [];
+        const strategies = inputAny.strategies || [];
+        const payoffMatrix = inputAny.payoffMatrix;
+        if (players.length > 0) {
+          const playerValidation = this.validatePlayers(players, strategies);
+          if (!playerValidation.valid) {
+            errors.push(...playerValidation.errors);
+          }
+          warnings.push(...playerValidation.warnings);
+        }
+        if (strategies.length > 0) {
+          const strategyValidation = this.validateStrategies(strategies, players);
+          if (!strategyValidation.valid) {
+            errors.push(...strategyValidation.errors);
+          }
+          warnings.push(...strategyValidation.warnings);
+        }
+        if (payoffMatrix) {
+          const matrixValidation = this.validatePayoffMatrix(payoffMatrix, players, strategies);
+          if (!matrixValidation.valid) {
+            errors.push(...matrixValidation.errors);
+          }
+          warnings.push(...matrixValidation.warnings);
+        }
+        if (players.length === 0 && !payoffMatrix) {
+          warnings.push(
+            createValidationWarning(
+              "players",
+              "No players or payoff matrix defined",
+              "Define players and their strategies for game theory analysis"
+            )
+          );
+        }
+        const game = inputAny.game;
+        if (!game && players.length > 0) {
+          warnings.push(
+            createValidationWarning(
+              "game",
+              "No formal game definition provided",
+              "Consider adding a Game object with type, name, and properties"
+            )
+          );
+        }
+        if (errors.length > 0) {
+          return validationFailure(errors, warnings);
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Get game theory-specific enhancements
+       */
+      getEnhancements(thought) {
+        const enhancements = {
+          suggestions: [],
+          relatedModes: ["optimization" /* OPTIMIZATION */, "counterfactual" /* COUNTERFACTUAL */],
+          guidingQuestions: [],
+          warnings: [],
+          metrics: {},
+          mentalModels: [
+            "Nash Equilibrium",
+            "Dominant Strategy",
+            "Pareto Efficiency",
+            "Minimax Theorem",
+            "Prisoner's Dilemma"
+          ]
+        };
+        if (thought.players) {
+          enhancements.metrics.playerCount = thought.players.length;
+        }
+        if (thought.strategies) {
+          enhancements.metrics.strategyCount = thought.strategies.length;
+        }
+        if (thought.payoffMatrix) {
+          enhancements.metrics.payoffEntries = thought.payoffMatrix.payoffs.length;
+          const isZeroSum = this.isZeroSumGame(thought.payoffMatrix);
+          enhancements.metrics.isZeroSum = isZeroSum ? 1 : 0;
+          if (isZeroSum) {
+            enhancements.suggestions.push(
+              "This is a zero-sum game. Consider minimax strategies."
+            );
+            enhancements.relatedModes.unshift("optimization" /* OPTIMIZATION */);
+          }
+        }
+        if (thought.nashEquilibria && thought.nashEquilibria.length > 0) {
+          enhancements.metrics.nashEquilibriaCount = thought.nashEquilibria.length;
+          if (thought.nashEquilibria.length > 1) {
+            enhancements.suggestions.push(
+              `Multiple Nash equilibria found (${thought.nashEquilibria.length}). Consider coordination mechanisms or focal points.`
+            );
+            enhancements.guidingQuestions.push(
+              "Which equilibrium is most likely to emerge? Are there Schelling focal points?"
+            );
+          }
+          const paretoOptimal = this.checkParetoOptimality(thought.nashEquilibria, thought.payoffMatrix);
+          if (!paretoOptimal) {
+            enhancements.warnings.push(
+              "Nash equilibrium may not be Pareto optimal (like in Prisoner's Dilemma)"
+            );
+            enhancements.guidingQuestions.push(
+              "Is there a mechanism to achieve a Pareto-superior outcome through cooperation?"
+            );
+          }
+        } else if (thought.payoffMatrix) {
+          enhancements.suggestions.push(
+            "No pure strategy Nash equilibria found. Consider mixed strategies."
+          );
+          enhancements.guidingQuestions.push(
+            "What are the optimal mixed strategy probabilities for each player?"
+          );
+        }
+        if (thought.dominantStrategies && thought.dominantStrategies.length > 0) {
+          enhancements.metrics.dominantStrategyCount = thought.dominantStrategies.length;
+          enhancements.suggestions.push(
+            `${thought.dominantStrategies.length} dominant strategy(ies) identified. These simplify equilibrium analysis.`
+          );
+        }
+        if (thought.game) {
+          if (thought.game.type === "cooperative") {
+            enhancements.guidingQuestions.push(
+              "What coalitions might form? How should payoffs be divided fairly?"
+            );
+            enhancements.mentalModels.push("Shapley Value", "Core", "Coalition Formation");
+          } else if (thought.game.type === "extensive_form") {
+            enhancements.guidingQuestions.push(
+              "What is the subgame perfect equilibrium? Use backward induction."
+            );
+            enhancements.mentalModels.push("Backward Induction", "Subgame Perfect Equilibrium");
+          }
+        }
+        return enhancements;
+      }
+      /**
+       * Check if this handler supports a specific thought type
+       */
+      supportsThoughtType(thoughtType) {
+        return this.supportedThoughtTypes.includes(thoughtType);
+      }
+      /**
+       * Resolve input thought type to valid GameTheory thought type
+       */
+      resolveThoughtType(inputType) {
+        if (inputType && this.supportedThoughtTypes.includes(inputType)) {
+          return inputType;
+        }
+        return "game_definition";
+      }
+      /**
+       * Validate players array
+       */
+      validatePlayers(players, strategies) {
+        const errors = [];
+        const warnings = [];
+        const playerIds = /* @__PURE__ */ new Set();
+        for (const player of players) {
+          if (playerIds.has(player.id)) {
+            errors.push(
+              createValidationError(
+                "players",
+                `Duplicate player ID: ${player.id}`,
+                "DUPLICATE_PLAYER_ID"
+              )
+            );
+          }
+          playerIds.add(player.id);
+          if (!player.availableStrategies || player.availableStrategies.length === 0) {
+            warnings.push(
+              createValidationWarning(
+                `players.${player.id}`,
+                `Player ${player.name || player.id} has no available strategies`,
+                "Define available strategies for meaningful game analysis"
+              )
+            );
+          } else {
+            for (const stratId of player.availableStrategies) {
+              const strategyExists = strategies.some((s) => s.id === stratId);
+              if (!strategyExists && strategies.length > 0) {
+                errors.push(
+                  createValidationError(
+                    `players.${player.id}.availableStrategies`,
+                    `Player references non-existent strategy: ${stratId}`,
+                    "INVALID_STRATEGY_REFERENCE"
+                  )
+                );
+              }
+            }
+          }
+        }
+        if (errors.length > 0) {
+          return validationFailure(errors, warnings);
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Validate strategies array
+       */
+      validateStrategies(strategies, players) {
+        const errors = [];
+        const warnings = [];
+        const strategyIds = /* @__PURE__ */ new Set();
+        const playerIds = new Set(players.map((p) => p.id));
+        for (const strategy of strategies) {
+          if (strategyIds.has(strategy.id)) {
+            errors.push(
+              createValidationError(
+                "strategies",
+                `Duplicate strategy ID: ${strategy.id}`,
+                "DUPLICATE_STRATEGY_ID"
+              )
+            );
+          }
+          strategyIds.add(strategy.id);
+          if (strategy.playerId && !playerIds.has(strategy.playerId) && players.length > 0) {
+            errors.push(
+              createValidationError(
+                `strategies.${strategy.id}`,
+                `Strategy references non-existent player: ${strategy.playerId}`,
+                "INVALID_PLAYER_REFERENCE"
+              )
+            );
+          }
+          if (!strategy.isPure && strategy.probability !== void 0) {
+            if (strategy.probability < 0 || strategy.probability > 1) {
+              errors.push(
+                createValidationError(
+                  `strategies.${strategy.id}.probability`,
+                  `Mixed strategy probability (${strategy.probability}) must be between 0 and 1`,
+                  "INVALID_PROBABILITY"
+                )
+              );
+            }
+          }
+        }
+        for (const player of players) {
+          const playerStrategies = strategies.filter((s) => s.playerId === player.id && !s.isPure);
+          if (playerStrategies.length > 0) {
+            const probSum = playerStrategies.reduce((sum, s) => sum + (s.probability || 0), 0);
+            if (Math.abs(probSum - 1) > 1e-3) {
+              warnings.push(
+                createValidationWarning(
+                  `strategies`,
+                  `Mixed strategy probabilities for player ${player.id} sum to ${probSum.toFixed(3)}, not 1`,
+                  "Ensure mixed strategy probabilities sum to exactly 1"
+                )
+              );
+            }
+          }
+        }
+        if (errors.length > 0) {
+          return validationFailure(errors, warnings);
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Validate payoff matrix
+       */
+      validatePayoffMatrix(matrix, _players, strategies) {
+        const errors = [];
+        const warnings = [];
+        if (matrix.players.length !== matrix.dimensions.length) {
+          errors.push(
+            createValidationError(
+              "payoffMatrix",
+              `Player count (${matrix.players.length}) doesn't match dimension count (${matrix.dimensions.length})`,
+              "DIMENSION_MISMATCH"
+            )
+          );
+        }
+        const expectedEntries = matrix.dimensions.reduce((a, b) => a * b, 1);
+        if (matrix.payoffs.length !== expectedEntries) {
+          warnings.push(
+            createValidationWarning(
+              "payoffMatrix.payoffs",
+              `Expected ${expectedEntries} payoff entries based on dimensions, got ${matrix.payoffs.length}`,
+              "Ensure all strategy combinations have payoff entries"
+            )
+          );
+        }
+        for (let i = 0; i < matrix.payoffs.length; i++) {
+          const entry = matrix.payoffs[i];
+          if (entry.strategyProfile.length !== matrix.players.length) {
+            errors.push(
+              createValidationError(
+                `payoffMatrix.payoffs[${i}]`,
+                `Strategy profile has ${entry.strategyProfile.length} strategies, expected ${matrix.players.length}`,
+                "INVALID_STRATEGY_PROFILE"
+              )
+            );
+          }
+          if (entry.payoffs.length !== matrix.players.length) {
+            errors.push(
+              createValidationError(
+                `payoffMatrix.payoffs[${i}]`,
+                `Payoff entry has ${entry.payoffs.length} values, expected ${matrix.players.length}`,
+                "INVALID_PAYOFF_COUNT"
+              )
+            );
+          }
+          for (const stratId of entry.strategyProfile) {
+            const strategyExists = strategies.some((s) => s.id === stratId);
+            if (!strategyExists && strategies.length > 0) {
+              errors.push(
+                createValidationError(
+                  `payoffMatrix.payoffs[${i}].strategyProfile`,
+                  `Payoff entry references non-existent strategy: ${stratId}`,
+                  "INVALID_STRATEGY_REFERENCE"
+                )
+              );
+            }
+          }
+        }
+        if (errors.length > 0) {
+          return validationFailure(errors, warnings);
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Find pure strategy Nash equilibria
+       *
+       * A strategy profile is a Nash equilibrium if no player can
+       * improve their payoff by unilaterally changing their strategy.
+       */
+      findPureStrategyNashEquilibria(matrix, players, strategies) {
+        const equilibria = [];
+        if (matrix.players.length !== 2 || matrix.dimensions.length !== 2) {
+          return equilibria;
+        }
+        for (const entry of matrix.payoffs) {
+          if (this.isNashEquilibrium(entry, matrix, players, strategies)) {
+            equilibria.push({
+              id: randomUUID(),
+              strategyProfile: entry.strategyProfile,
+              payoffs: entry.payoffs,
+              type: "pure",
+              isStrict: this.isStrictEquilibrium(entry, matrix, players, strategies),
+              stability: this.calculateEquilibriumStability(entry, matrix, players, strategies)
+            });
+          }
+        }
+        return equilibria;
+      }
+      /**
+       * Check if a strategy profile is a Nash equilibrium
+       */
+      isNashEquilibrium(entry, matrix, _players, _strategies) {
+        for (let playerIdx = 0; playerIdx < matrix.players.length; playerIdx++) {
+          const currentPayoff = entry.payoffs[playerIdx];
+          for (const altEntry of matrix.payoffs) {
+            let onlyThisPlayerDiffers = true;
+            for (let i = 0; i < matrix.players.length; i++) {
+              if (i === playerIdx) {
+                if (altEntry.strategyProfile[i] === entry.strategyProfile[i]) {
+                  onlyThisPlayerDiffers = false;
+                  break;
+                }
+              } else {
+                if (altEntry.strategyProfile[i] !== entry.strategyProfile[i]) {
+                  onlyThisPlayerDiffers = false;
+                  break;
+                }
+              }
+            }
+            if (onlyThisPlayerDiffers && altEntry.payoffs[playerIdx] > currentPayoff) {
+              return false;
+            }
+          }
+        }
+        return true;
+      }
+      /**
+       * Check if equilibrium is strict (strictly better than all deviations)
+       */
+      isStrictEquilibrium(entry, matrix, _players, _strategies) {
+        for (let playerIdx = 0; playerIdx < matrix.players.length; playerIdx++) {
+          const currentPayoff = entry.payoffs[playerIdx];
+          for (const altEntry of matrix.payoffs) {
+            let onlyThisPlayerDiffers = true;
+            for (let i = 0; i < matrix.players.length; i++) {
+              if (i === playerIdx) {
+                if (altEntry.strategyProfile[i] === entry.strategyProfile[i]) {
+                  onlyThisPlayerDiffers = false;
+                  break;
+                }
+              } else {
+                if (altEntry.strategyProfile[i] !== entry.strategyProfile[i]) {
+                  onlyThisPlayerDiffers = false;
+                  break;
+                }
+              }
+            }
+            if (onlyThisPlayerDiffers && altEntry.payoffs[playerIdx] >= currentPayoff) {
+              return false;
+            }
+          }
+        }
+        return true;
+      }
+      /**
+       * Calculate equilibrium stability score
+       */
+      calculateEquilibriumStability(entry, matrix, _players, _strategies) {
+        let totalPenalty = 0;
+        let deviationCount = 0;
+        for (let playerIdx = 0; playerIdx < matrix.players.length; playerIdx++) {
+          const currentPayoff = entry.payoffs[playerIdx];
+          for (const altEntry of matrix.payoffs) {
+            let onlyThisPlayerDiffers = true;
+            for (let i = 0; i < matrix.players.length; i++) {
+              if (i === playerIdx) {
+                if (altEntry.strategyProfile[i] === entry.strategyProfile[i]) {
+                  onlyThisPlayerDiffers = false;
+                  break;
+                }
+              } else {
+                if (altEntry.strategyProfile[i] !== entry.strategyProfile[i]) {
+                  onlyThisPlayerDiffers = false;
+                  break;
+                }
+              }
+            }
+            if (onlyThisPlayerDiffers) {
+              totalPenalty += currentPayoff - altEntry.payoffs[playerIdx];
+              deviationCount++;
+            }
+          }
+        }
+        const avgPenalty = deviationCount > 0 ? totalPenalty / deviationCount : 0;
+        return Math.min(1, Math.max(0, 0.5 + avgPenalty / 10));
+      }
+      /**
+       * Find dominant strategies
+       */
+      findDominantStrategies(matrix, players, strategies) {
+        const dominantStrategies = [];
+        if (matrix.players.length !== 2) {
+          return dominantStrategies;
+        }
+        for (let playerIdx = 0; playerIdx < players.length; playerIdx++) {
+          const player = players[playerIdx];
+          const playerStrategies = strategies.filter((s) => s.playerId === player.id);
+          for (const strategy of playerStrategies) {
+            const dominates = this.checkDominance(strategy, playerIdx, matrix, playerStrategies);
+            if (dominates.length > 0) {
+              dominantStrategies.push({
+                playerId: player.id,
+                strategyId: strategy.id,
+                type: dominates.length === playerStrategies.length - 1 ? "strictly_dominant" : "weakly_dominant",
+                dominatesStrategies: dominates,
+                justification: `Strategy ${strategy.name || strategy.id} dominates: ${dominates.join(", ")}`
+              });
+            }
+          }
+        }
+        return dominantStrategies;
+      }
+      /**
+       * Check which strategies a given strategy dominates
+       */
+      checkDominance(strategy, playerIdx, matrix, playerStrategies) {
+        const dominates = [];
+        for (const otherStrategy of playerStrategies) {
+          if (otherStrategy.id === strategy.id) continue;
+          let dominatesAll = true;
+          const strategyPayoffs = /* @__PURE__ */ new Map();
+          const otherPayoffs = /* @__PURE__ */ new Map();
+          for (const entry of matrix.payoffs) {
+            const key = entry.strategyProfile.filter((_, i) => i !== playerIdx).join("-");
+            if (entry.strategyProfile[playerIdx] === strategy.id) {
+              strategyPayoffs.set(key, entry.payoffs[playerIdx]);
+            }
+            if (entry.strategyProfile[playerIdx] === otherStrategy.id) {
+              otherPayoffs.set(key, entry.payoffs[playerIdx]);
+            }
+          }
+          for (const [key, payoff] of strategyPayoffs) {
+            const otherPayoff = otherPayoffs.get(key);
+            if (otherPayoff !== void 0 && payoff <= otherPayoff) {
+              dominatesAll = false;
+              break;
+            }
+          }
+          if (dominatesAll && strategyPayoffs.size > 0) {
+            dominates.push(otherStrategy.id);
+          }
+        }
+        return dominates;
+      }
+      /**
+       * Check if game is zero-sum
+       */
+      isZeroSumGame(matrix) {
+        if (matrix.players.length !== 2) {
+          return false;
+        }
+        for (const entry of matrix.payoffs) {
+          const sum = entry.payoffs.reduce((a, b) => a + b, 0);
+          if (Math.abs(sum) > 1e-3) {
+            return false;
+          }
+        }
+        return true;
+      }
+      /**
+       * Check if Nash equilibria are Pareto optimal
+       */
+      checkParetoOptimality(equilibria, matrix) {
+        if (!matrix || equilibria.length === 0) {
+          return true;
+        }
+        for (const eq of equilibria) {
+          for (const entry of matrix.payoffs) {
+            let paretoDominates = true;
+            let strictlyBetter = false;
+            for (let i = 0; i < entry.payoffs.length; i++) {
+              if (entry.payoffs[i] < eq.payoffs[i]) {
+                paretoDominates = false;
+                break;
+              }
+              if (entry.payoffs[i] > eq.payoffs[i]) {
+                strictlyBetter = true;
+              }
+            }
+            if (paretoDominates && strictlyBetter) {
+              return false;
+            }
+          }
+        }
+        return true;
+      }
+    };
+  }
+});
+var CounterfactualHandler;
+var init_CounterfactualHandler = __esm({
+  "src/modes/handlers/CounterfactualHandler.ts"() {
+    init_esm_shims();
+    init_ModeHandler();
+    CounterfactualHandler = class {
+      mode = "counterfactual" /* COUNTERFACTUAL */;
+      modeName = "Counterfactual Analysis";
+      description = "What-if analysis with world state tracking and divergence point identification";
+      /**
+       * Supported thought types for counterfactual mode
+       */
+      supportedThoughtTypes = [
+        "problem_definition",
+        "scenario_construction",
+        "divergence_analysis",
+        "outcome_comparison",
+        "intervention_identification",
+        "causal_chain_analysis"
+      ];
+      /**
+       * Create a counterfactual thought from input
+       */
+      createThought(input, sessionId) {
+        const inputAny = input;
+        const actual = inputAny.actual || {
+          id: randomUUID().slice(0, 8),
+          name: "Actual Scenario",
+          description: "",
+          conditions: inputAny.actualConditions || [],
+          outcomes: inputAny.actualOutcomes || []
+        };
+        const counterfactuals = inputAny.counterfactuals || [];
+        const comparison = inputAny.comparison || {
+          differences: [],
+          insights: [],
+          lessons: []
+        };
+        const interventionPoint = inputAny.interventionPoint || {
+          description: "",
+          timing: "",
+          feasibility: 0.5,
+          expectedImpact: 0.5
+        };
+        const thought = {
+          id: randomUUID(),
+          sessionId,
+          thoughtNumber: input.thoughtNumber,
+          totalThoughts: input.totalThoughts,
+          content: input.thought,
+          timestamp: /* @__PURE__ */ new Date(),
+          nextThoughtNeeded: input.nextThoughtNeeded,
+          isRevision: input.isRevision,
+          revisesThought: input.revisesThought,
+          mode: "counterfactual" /* COUNTERFACTUAL */,
+          actual,
+          counterfactuals,
+          comparison,
+          interventionPoint,
+          causalChains: inputAny.causalChains || []
+        };
+        return thought;
+      }
+      /**
+       * Validate counterfactual-specific input
+       */
+      validate(input) {
+        const errors = [];
+        const warnings = [];
+        const inputAny = input;
+        if (!input.thought || input.thought.trim().length === 0) {
+          return validationFailure([
+            createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+          ]);
+        }
+        if (input.thoughtNumber > input.totalThoughts) {
+          return validationFailure([
+            createValidationError(
+              "thoughtNumber",
+              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
+              "INVALID_THOUGHT_NUMBER"
+            )
+          ]);
+        }
+        if (inputAny.actual) {
+          const actualValidation = this.validateScenario(inputAny.actual, "actual");
+          errors.push(...actualValidation.errors);
+          warnings.push(...actualValidation.warnings);
+        }
+        if (inputAny.counterfactuals && Array.isArray(inputAny.counterfactuals)) {
+          for (let i = 0; i < inputAny.counterfactuals.length; i++) {
+            const cf = inputAny.counterfactuals[i];
+            const cfValidation = this.validateScenario(cf, `counterfactuals[${i}]`);
+            errors.push(...cfValidation.errors);
+            warnings.push(...cfValidation.warnings);
+            if (cf.conditions && Array.isArray(cf.conditions)) {
+              const hasIntervention = cf.conditions.some((c) => c.isIntervention === true);
+              if (!hasIntervention) {
+                warnings.push(
+                  createValidationWarning(
+                    `counterfactuals[${i}]`,
+                    "Counterfactual scenario has no conditions marked as interventions",
+                    "Mark changed conditions with isIntervention: true to track divergence points"
+                  )
+                );
+              }
+            }
+          }
+          if (inputAny.counterfactuals.length === 0 && inputAny.actual) {
+            warnings.push(
+              createValidationWarning(
+                "counterfactuals",
+                "No counterfactual scenarios provided",
+                "Add alternative scenarios to explore what-if possibilities"
+              )
+            );
+          }
+        }
+        if (inputAny.interventionPoint) {
+          const ipValidation = this.validateInterventionPoint(inputAny.interventionPoint);
+          errors.push(...ipValidation.errors);
+          warnings.push(...ipValidation.warnings);
+        }
+        if (inputAny.causalChains && Array.isArray(inputAny.causalChains)) {
+          for (let i = 0; i < inputAny.causalChains.length; i++) {
+            const chain = inputAny.causalChains[i];
+            const chainValidation = this.validateCausalChain(chain, i);
+            errors.push(...chainValidation.errors);
+            warnings.push(...chainValidation.warnings);
+          }
+        }
+        if (inputAny.comparison) {
+          const compValidation = this.validateComparison(inputAny.comparison);
+          warnings.push(...compValidation.warnings);
+        }
+        if (errors.length > 0) {
+          return validationFailure(errors, warnings);
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Get counterfactual-specific enhancements
+       */
+      getEnhancements(thought) {
+        const enhancements = {
+          suggestions: [],
+          relatedModes: ["causal" /* CAUSAL */, "bayesian" /* BAYESIAN */, "temporal" /* TEMPORAL */],
+          guidingQuestions: [],
+          warnings: [],
+          mentalModels: ["Possible Worlds", "Nearest World Semantics", "Intervention Calculus"]
+        };
+        const actualConditions = thought.actual?.conditions?.length || 0;
+        const counterfactualCount = thought.counterfactuals?.length || 0;
+        const totalInterventions = this.countInterventions(thought);
+        enhancements.metrics = {
+          actualConditions,
+          counterfactualCount,
+          totalInterventions,
+          comparisonDepth: this.calculateComparisonDepth(thought.comparison)
+        };
+        if (counterfactualCount === 0) {
+          enhancements.suggestions.push(
+            "Define at least one counterfactual scenario to explore alternatives"
+          );
+        } else if (counterfactualCount === 1) {
+          enhancements.suggestions.push(
+            "Consider adding more counterfactual scenarios to explore the decision space"
+          );
+        }
+        if (totalInterventions === 0 && counterfactualCount > 0) {
+          enhancements.suggestions.push(
+            "Mark which conditions were changed from actual using isIntervention: true"
+          );
+        }
+        if (thought.actual && thought.actual.outcomes && thought.actual.outcomes.length > 0) {
+          enhancements.guidingQuestions.push(
+            "What single change would have most altered the actual outcome?"
+          );
+        }
+        if (thought.interventionPoint && thought.interventionPoint.description) {
+          enhancements.guidingQuestions.push(
+            `Is the intervention point "${thought.interventionPoint.description}" the earliest possible point of change?`
+          );
+        }
+        if (!thought.causalChains || thought.causalChains.length === 0) {
+          enhancements.guidingQuestions.push(
+            "What causal chain led from conditions to outcome?"
+          );
+        }
+        if (thought.comparison) {
+          if (thought.comparison.insights.length === 0) {
+            enhancements.warnings.push(
+              "No insights extracted from comparison. What did the counterfactual analysis reveal?"
+            );
+          }
+          if (thought.comparison.lessons.length === 0) {
+            enhancements.guidingQuestions.push(
+              "What actionable lessons can be drawn from this counterfactual analysis?"
+            );
+          }
+        }
+        return enhancements;
+      }
+      /**
+       * Check if this handler supports a specific thought type
+       */
+      supportsThoughtType(thoughtType) {
+        return this.supportedThoughtTypes.includes(thoughtType);
+      }
+      /**
+       * Validate a scenario
+       */
+      validateScenario(scenario, path2) {
+        const errors = [];
+        const warnings = [];
+        if (!scenario.name || scenario.name.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              `${path2}.name`,
+              "Scenario has no name",
+              "Add a descriptive name to identify the scenario"
+            )
+          );
+        }
+        if (scenario.conditions && Array.isArray(scenario.conditions)) {
+          for (let i = 0; i < scenario.conditions.length; i++) {
+            const condition = scenario.conditions[i];
+            if (!condition.factor || condition.factor.trim().length === 0) {
+              warnings.push(
+                createValidationWarning(
+                  `${path2}.conditions[${i}].factor`,
+                  "Condition has no factor specified",
+                  "Each condition should identify what factor is being set"
+                )
+              );
+            }
+          }
+        }
+        if (scenario.outcomes && scenario.outcomes.length > 0) {
+          for (let i = 0; i < scenario.outcomes.length; i++) {
+            const outcome = scenario.outcomes[i];
+            if (outcome.magnitude !== void 0) {
+              const magnitude = outcome.magnitude;
+              if (magnitude < 0 || magnitude > 1) {
+                warnings.push(
+                  createValidationWarning(
+                    `${path2}.outcomes[${i}].magnitude`,
+                    `Outcome magnitude ${magnitude} is outside [0, 1] range`,
+                    "Magnitude should be normalized to [0, 1]"
+                  )
+                );
+              }
+            }
+          }
+        }
+        if (scenario.likelihood !== void 0) {
+          if (scenario.likelihood < 0 || scenario.likelihood > 1) {
+            warnings.push(
+              createValidationWarning(
+                `${path2}.likelihood`,
+                `Scenario likelihood ${scenario.likelihood} is outside [0, 1] range`,
+                "Likelihood must be between 0 and 1"
+              )
+            );
+          }
+        }
+        return errors.length > 0 ? validationFailure(errors, warnings) : validationSuccess(warnings);
+      }
+      /**
+       * Validate intervention point
+       */
+      validateInterventionPoint(ip) {
+        const warnings = [];
+        if (ip.feasibility !== void 0) {
+          if (ip.feasibility < 0 || ip.feasibility > 1) {
+            warnings.push(
+              createValidationWarning(
+                "interventionPoint.feasibility",
+                `Feasibility ${ip.feasibility} is outside [0, 1] range`,
+                "Feasibility should be a probability between 0 and 1"
+              )
+            );
+          }
+        }
+        if (ip.expectedImpact !== void 0) {
+          if (ip.expectedImpact < 0 || ip.expectedImpact > 1) {
+            warnings.push(
+              createValidationWarning(
+                "interventionPoint.expectedImpact",
+                `Expected impact ${ip.expectedImpact} is outside [0, 1] range`,
+                "Expected impact should be normalized to [0, 1]"
+              )
+            );
+          }
+        }
+        if (!ip.description || ip.description.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              "interventionPoint.description",
+              "Intervention point has no description",
+              "Describe what intervention would be made at this point"
+            )
+          );
+        }
+        if (!ip.timing || ip.timing.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              "interventionPoint.timing",
+              "Intervention point has no timing specified",
+              "Specify when the intervention would occur"
+            )
+          );
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Validate causal chain
+       */
+      validateCausalChain(chain, index) {
+        const errors = [];
+        const warnings = [];
+        if (!chain.id || chain.id.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              `causalChains[${index}].id`,
+              "Causal chain has no ID",
+              "Add an ID to track the causal chain"
+            )
+          );
+        }
+        if (!chain.events || chain.events.length === 0) {
+          warnings.push(
+            createValidationWarning(
+              `causalChains[${index}].events`,
+              "Causal chain has no events",
+              "Add events to show the causal sequence"
+            )
+          );
+        } else if (chain.events.length < 2) {
+          warnings.push(
+            createValidationWarning(
+              `causalChains[${index}].events`,
+              "Causal chain has only one event",
+              "A causal chain should have at least two events to show causation"
+            )
+          );
+        }
+        if (!chain.branchingPoint || chain.branchingPoint.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              `causalChains[${index}].branchingPoint`,
+              "Causal chain has no branching point",
+              "Identify where actual and counterfactual paths diverge"
+            )
+          );
+        }
+        return errors.length > 0 ? validationFailure(errors, warnings) : validationSuccess(warnings);
+      }
+      /**
+       * Validate comparison
+       */
+      validateComparison(comparison) {
+        const warnings = [];
+        if (!comparison.differences || comparison.differences.length === 0) {
+          warnings.push(
+            createValidationWarning(
+              "comparison.differences",
+              "No differences identified between scenarios",
+              "List key differences between actual and counterfactual scenarios"
+            )
+          );
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Count total interventions across all counterfactual scenarios
+       */
+      countInterventions(thought) {
+        let count = 0;
+        if (thought.counterfactuals) {
+          for (const cf of thought.counterfactuals) {
+            if (cf.conditions) {
+              count += cf.conditions.filter((c) => c.isIntervention === true).length;
+            }
+          }
+        }
+        return count;
+      }
+      /**
+       * Calculate comparison depth based on fields populated
+       */
+      calculateComparisonDepth(comparison) {
+        if (!comparison) return 0;
+        let depth = 0;
+        if (comparison.differences && comparison.differences.length > 0) depth++;
+        if (comparison.insights && comparison.insights.length > 0) depth++;
+        if (comparison.lessons && comparison.lessons.length > 0) depth++;
+        return depth;
+      }
+    };
+  }
+});
+var SynthesisHandler;
+var init_SynthesisHandler = __esm({
+  "src/modes/handlers/SynthesisHandler.ts"() {
+    init_esm_shims();
+    init_ModeHandler();
+    SynthesisHandler = class {
+      mode = "synthesis" /* SYNTHESIS */;
+      modeName = "Literature Synthesis";
+      description = "Multi-source synthesis with theme extraction, contradiction detection, and gap analysis";
+      /**
+       * Supported thought types for synthesis mode
+       */
+      supportedThoughtTypes = [
+        "source_identification",
+        "source_evaluation",
+        "theme_extraction",
+        "pattern_integration",
+        "gap_identification",
+        "synthesis_construction",
+        "framework_development"
+      ];
+      /**
+       * Create a synthesis thought from input
+       */
+      createThought(input, sessionId) {
+        const inputAny = input;
+        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        let contradictions = inputAny.contradictions || [];
+        if (contradictions.length === 0 && inputAny.sources && inputAny.sources.length > 1) {
+          contradictions = this.detectPotentialContradictions(inputAny.sources, inputAny.themes);
+        }
+        const sourceCoverage = this.calculateSourceCoverage(
+          inputAny.sources || [],
+          inputAny.themes || []
+        );
+        return {
+          id: randomUUID(),
+          sessionId,
+          thoughtNumber: input.thoughtNumber,
+          totalThoughts: input.totalThoughts,
+          content: input.thought,
+          timestamp: /* @__PURE__ */ new Date(),
+          nextThoughtNeeded: input.nextThoughtNeeded,
+          isRevision: input.isRevision,
+          revisesThought: input.revisesThought,
+          mode: "synthesis" /* SYNTHESIS */,
+          thoughtType,
+          sources: inputAny.sources || [],
+          reviewMetadata: inputAny.reviewMetadata,
+          concepts: inputAny.concepts || [],
+          themes: inputAny.themes || [],
+          findings: inputAny.findings || [],
+          patterns: inputAny.patterns || [],
+          relations: inputAny.relations || [],
+          gaps: inputAny.gaps || [],
+          contradictions,
+          framework: inputAny.framework,
+          conclusions: inputAny.conclusions || [],
+          dependencies: inputAny.dependencies || [],
+          assumptions: inputAny.assumptions || [],
+          uncertainty: inputAny.uncertainty ?? 0.5,
+          keyInsight: inputAny.keyInsight,
+          // Store calculated metrics in a way accessible to enhancements
+          _sourceCoverage: sourceCoverage
+        };
+      }
+      /**
+       * Validate synthesis-specific input
+       */
+      validate(input) {
+        const errors = [];
+        const warnings = [];
+        const inputAny = input;
+        if (!input.thought || input.thought.trim().length === 0) {
+          return validationFailure([
+            createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+          ]);
+        }
+        if (input.thoughtNumber > input.totalThoughts) {
+          return validationFailure([
+            createValidationError(
+              "thoughtNumber",
+              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
+              "INVALID_THOUGHT_NUMBER"
+            )
+          ]);
+        }
+        if (inputAny.sources && Array.isArray(inputAny.sources)) {
+          const sourceIds = /* @__PURE__ */ new Set();
+          for (let i = 0; i < inputAny.sources.length; i++) {
+            const source = inputAny.sources[i];
+            const sourceValidation = this.validateSource(source, i, sourceIds);
+            errors.push(...sourceValidation.errors);
+            warnings.push(...sourceValidation.warnings);
+            if (source.id) sourceIds.add(source.id);
+          }
+          if (sourceIds.size !== inputAny.sources.filter((s) => s.id).length) {
+            errors.push(
+              createValidationError(
+                "sources",
+                "Duplicate source IDs detected",
+                "DUPLICATE_SOURCE_IDS"
+              )
+            );
+          }
+          if (inputAny.themes && Array.isArray(inputAny.themes)) {
+            for (let i = 0; i < inputAny.themes.length; i++) {
+              const theme = inputAny.themes[i];
+              const themeValidation = this.validateTheme(theme, i, sourceIds);
+              errors.push(...themeValidation.errors);
+              warnings.push(...themeValidation.warnings);
+            }
+          }
+          if (inputAny.contradictions && Array.isArray(inputAny.contradictions)) {
+            for (let i = 0; i < inputAny.contradictions.length; i++) {
+              const contradiction = inputAny.contradictions[i];
+              const contValidation = this.validateContradiction(contradiction, i, sourceIds);
+              errors.push(...contValidation.errors);
+              warnings.push(...contValidation.warnings);
+            }
+          }
+          if (inputAny.sources.length === 1) {
+            warnings.push(
+              createValidationWarning(
+                "sources",
+                "Only one source provided",
+                "Synthesis typically requires multiple sources for meaningful integration"
+              )
+            );
+          }
+        }
+        if (inputAny.gaps && Array.isArray(inputAny.gaps) && inputAny.themes) {
+          const themeIds = new Set(inputAny.themes.map((t) => t.id).filter(Boolean));
+          for (let i = 0; i < inputAny.gaps.length; i++) {
+            const gap = inputAny.gaps[i];
+            if (gap.relatedThemes) {
+              for (const themeId of gap.relatedThemes) {
+                if (!themeIds.has(themeId)) {
+                  warnings.push(
+                    createValidationWarning(
+                      `gaps[${i}].relatedThemes`,
+                      `Gap references non-existent theme: ${themeId}`,
+                      "Ensure all gap theme references exist in themes array"
+                    )
+                  );
+                }
+              }
+            }
+          }
+        }
+        if (errors.length > 0) {
+          return validationFailure(errors, warnings);
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Get synthesis-specific enhancements
+       */
+      getEnhancements(thought) {
+        const enhancements = {
+          suggestions: [],
+          relatedModes: ["critique" /* CRITIQUE */, "argumentation" /* ARGUMENTATION */, "analysis" /* ANALYSIS */],
+          guidingQuestions: [],
+          warnings: [],
+          mentalModels: [
+            "Thematic Analysis",
+            "Systematic Review",
+            "Conceptual Framework",
+            "Evidence Synthesis"
+          ]
+        };
+        const sourceCount = thought.sources?.length || 0;
+        const themeCount = thought.themes?.length || 0;
+        const contradictionCount = thought.contradictions?.length || 0;
+        const gapCount = thought.gaps?.length || 0;
+        const coverage = this.calculateSourceCoverage(
+          thought.sources || [],
+          thought.themes || []
+        );
+        enhancements.metrics = {
+          sourceCount,
+          themeCount,
+          contradictionCount,
+          gapCount,
+          sourceCoverage: coverage.coverageRatio,
+          uncoveredSources: coverage.uncoveredSources.length
+        };
+        if (sourceCount === 0) {
+          enhancements.suggestions.push(
+            "Add sources to synthesize. Include bibliographic details and quality assessments."
+          );
+        } else if (sourceCount < 5) {
+          enhancements.suggestions.push(
+            "Consider adding more sources for comprehensive synthesis (typically 10+ for reviews)"
+          );
+        }
+        if (sourceCount >= 2 && themeCount === 0) {
+          enhancements.suggestions.push(
+            "Extract common themes across your sources to begin synthesis"
+          );
+        }
+        if (coverage.uncoveredSources.length > 0) {
+          enhancements.warnings.push(
+            `${coverage.uncoveredSources.length} source(s) not referenced in any theme: consider their contribution`
+          );
+        }
+        if (sourceCount >= 3 && contradictionCount === 0) {
+          enhancements.guidingQuestions.push(
+            "Are there any disagreements or contradictions between sources?"
+          );
+        }
+        if (themeCount >= 2 && gapCount === 0) {
+          enhancements.guidingQuestions.push(
+            "What gaps exist in the current literature? What questions remain unanswered?"
+          );
+        }
+        const weakConsensus = (thought.themes || []).filter(
+          (t) => t.consensus === "weak" || t.consensus === "contested"
+        );
+        if (weakConsensus.length > 0) {
+          enhancements.warnings.push(
+            `${weakConsensus.length} theme(s) have weak/contested consensus. Consider exploring why.`
+          );
+        }
+        if (themeCount >= 3 && !thought.framework) {
+          enhancements.suggestions.push(
+            "Consider developing a conceptual framework to organize themes and relationships"
+          );
+        }
+        if (themeCount >= 2 && (!thought.conclusions || thought.conclusions.length === 0)) {
+          enhancements.guidingQuestions.push(
+            "What synthesized conclusions can you draw from the themes identified?"
+          );
+        }
+        return enhancements;
+      }
+      /**
+       * Check if this handler supports a specific thought type
+       */
+      supportsThoughtType(thoughtType) {
+        return this.supportedThoughtTypes.includes(thoughtType);
+      }
+      /**
+       * Resolve thought type to valid SynthesisThoughtType
+       */
+      resolveThoughtType(inputType) {
+        if (inputType && this.supportedThoughtTypes.includes(inputType)) {
+          return inputType;
+        }
+        return "source_identification";
+      }
+      /**
+       * Validate a source
+       */
+      validateSource(source, index, existingIds) {
+        const errors = [];
+        const warnings = [];
+        if (!source.id || source.id.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              `sources[${index}].id`,
+              "Source has no ID",
+              "Add an ID to reference this source in themes and contradictions"
+            )
+          );
+        } else if (existingIds.has(source.id)) {
+          errors.push(
+            createValidationError(
+              `sources[${index}].id`,
+              `Duplicate source ID: ${source.id}`,
+              "DUPLICATE_SOURCE_ID"
+            )
+          );
+        }
+        if (!source.title || source.title.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              `sources[${index}].title`,
+              "Source has no title",
+              "Add a title to identify the source"
+            )
+          );
+        }
+        if (source.quality) {
+          const qualityFields = [
+            "methodologicalRigor",
+            "relevance",
+            "recency",
+            "authorCredibility",
+            "overallQuality"
+          ];
+          for (const field of qualityFields) {
+            const value = source.quality[field];
+            if (value !== void 0 && (value < 0 || value > 1)) {
+              warnings.push(
+                createValidationWarning(
+                  `sources[${index}].quality.${field}`,
+                  `Quality metric ${field} (${value}) is outside [0, 1] range`,
+                  "Quality metrics should be normalized to [0, 1]"
+                )
+              );
+            }
+          }
+        }
+        return errors.length > 0 ? validationFailure(errors, warnings) : validationSuccess(warnings);
+      }
+      /**
+       * Validate a theme
+       */
+      validateTheme(theme, index, sourceIds) {
+        const warnings = [];
+        if (!theme.id || theme.id.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              `themes[${index}].id`,
+              "Theme has no ID",
+              "Add an ID to track this theme"
+            )
+          );
+        }
+        if (!theme.name || theme.name.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              `themes[${index}].name`,
+              "Theme has no name",
+              "Add a descriptive name for the theme"
+            )
+          );
+        }
+        if (theme.sourceIds && theme.sourceIds.length > 0) {
+          for (const sourceId of theme.sourceIds) {
+            if (!sourceIds.has(sourceId)) {
+              warnings.push(
+                createValidationWarning(
+                  `themes[${index}].sourceIds`,
+                  `Theme references non-existent source: ${sourceId}`,
+                  "Ensure all source references exist in sources array"
+                )
+              );
+            }
+          }
+        } else {
+          warnings.push(
+            createValidationWarning(
+              `themes[${index}].sourceIds`,
+              "Theme has no source references",
+              "Link the theme to supporting sources"
+            )
+          );
+        }
+        if (theme.strength !== void 0 && (theme.strength < 0 || theme.strength > 1)) {
+          warnings.push(
+            createValidationWarning(
+              `themes[${index}].strength`,
+              `Theme strength (${theme.strength}) is outside [0, 1] range`,
+              "Strength should be normalized to [0, 1]"
+            )
+          );
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Validate a contradiction
+       */
+      validateContradiction(contradiction, index, sourceIds) {
+        const warnings = [];
+        if (contradiction.position1?.sourceIds) {
+          for (const sourceId of contradiction.position1.sourceIds) {
+            if (!sourceIds.has(sourceId)) {
+              warnings.push(
+                createValidationWarning(
+                  `contradictions[${index}].position1.sourceIds`,
+                  `Position 1 references non-existent source: ${sourceId}`,
+                  "Ensure source references exist"
+                )
+              );
+            }
+          }
+        }
+        if (contradiction.position2?.sourceIds) {
+          for (const sourceId of contradiction.position2.sourceIds) {
+            if (!sourceIds.has(sourceId)) {
+              warnings.push(
+                createValidationWarning(
+                  `contradictions[${index}].position2.sourceIds`,
+                  `Position 2 references non-existent source: ${sourceId}`,
+                  "Ensure source references exist"
+                )
+              );
+            }
+          }
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Calculate source coverage by themes
+       */
+      calculateSourceCoverage(sources, themes) {
+        const sourceIds = new Set(sources.map((s) => s.id).filter(Boolean));
+        const coveredSourceIds = /* @__PURE__ */ new Set();
+        for (const theme of themes) {
+          if (theme.sourceIds) {
+            for (const sourceId of theme.sourceIds) {
+              coveredSourceIds.add(sourceId);
+            }
+          }
+        }
+        const coveredSources = Array.from(coveredSourceIds).filter((id) => sourceIds.has(id));
+        const uncoveredSources = Array.from(sourceIds).filter((id) => !coveredSourceIds.has(id));
+        return {
+          coverageRatio: sourceIds.size > 0 ? coveredSources.length / sourceIds.size : 0,
+          uncoveredSources,
+          coveredSources
+        };
+      }
+      /**
+       * Detect potential contradictions between sources based on themes
+       *
+       * Simple heuristic: sources in themes with 'contested' consensus might contradict
+       */
+      detectPotentialContradictions(_sources, themes) {
+        const contradictions = [];
+        if (!themes || themes.length === 0) return contradictions;
+        const contestedThemes = themes.filter((t) => t.consensus === "contested");
+        for (const theme of contestedThemes) {
+          if (theme.sourceIds && theme.sourceIds.length >= 2) {
+            const sourceA = theme.sourceIds[0];
+            const sourceB = theme.sourceIds[1];
+            contradictions.push({
+              id: `auto-${randomUUID().slice(0, 8)}`,
+              description: `Potential contradiction in contested theme: ${theme.name}`,
+              position1: {
+                statement: `View from source ${sourceA}`,
+                sourceIds: [sourceA],
+                reasoning: "Auto-detected from contested theme consensus"
+              },
+              position2: {
+                statement: `View from source ${sourceB}`,
+                sourceIds: [sourceB],
+                reasoning: "Auto-detected from contested theme consensus"
+              },
+              possibleResolution: "Requires further investigation"
+            });
+          }
+        }
+        return contradictions;
+      }
+    };
+  }
+});
+var SYSTEMS_ARCHETYPES, SystemsThinkingHandler;
+var init_SystemsThinkingHandler = __esm({
+  "src/modes/handlers/SystemsThinkingHandler.ts"() {
+    init_esm_shims();
+    init_ModeHandler();
+    SYSTEMS_ARCHETYPES = [
+      {
+        name: "Fixes that Fail",
+        description: "A quick fix creates unintended consequences that make the problem worse",
+        pattern: "Solution \u2192 Short-term relief \u2192 Unintended consequences \u2192 Original problem worsened",
+        warningSigns: [
+          "Quick fixes that keep recurring",
+          "Side effects appearing after solution",
+          "Escalating interventions required"
+        ],
+        interventions: [
+          "Address root cause instead of symptoms",
+          "Consider long-term consequences before acting",
+          "Monitor for unintended side effects"
+        ],
+        loopSignature: { reinforcingCount: 1, balancingCount: 1, hasDelay: true }
+      },
+      {
+        name: "Shifting the Burden",
+        description: "A symptomatic solution undermines the fundamental solution",
+        pattern: "Symptom \u2192 Quick fix AND Fundamental solution, Quick fix erodes capacity for fundamental solution",
+        warningSigns: [
+          "Increasing dependence on quick fixes",
+          "Atrophying fundamental capabilities",
+          "Growing gap between symptoms and root causes"
+        ],
+        interventions: [
+          "Strengthen the fundamental solution",
+          "Reduce reliance on symptomatic solutions",
+          "Build capacity while managing symptoms"
+        ],
+        loopSignature: { reinforcingCount: 1, balancingCount: 2, hasDelay: true }
+      },
+      {
+        name: "Limits to Growth",
+        description: "Growth approaches a limit which slows or stops further growth",
+        pattern: "Growth process \u2192 Success \u2192 Limiting condition activated \u2192 Growth slows/stops",
+        warningSigns: [
+          "Initial rapid growth",
+          "Gradual slowdown despite continued effort",
+          "Diminishing returns on investment"
+        ],
+        interventions: [
+          "Identify and address limiting factors early",
+          "Prepare for growth constraints",
+          "Shift focus from pushing growth to removing limits"
+        ],
+        loopSignature: { reinforcingCount: 1, balancingCount: 1, hasDelay: false }
+      },
+      {
+        name: "Success to the Successful",
+        description: "Success breeds more success, starving other activities",
+        pattern: "Initial advantage \u2192 More resources allocated \u2192 Greater success \u2192 Competitors starved",
+        warningSigns: [
+          "Winner-take-all dynamics",
+          "Declining diversity of options",
+          "Concentration of resources"
+        ],
+        interventions: [
+          "Ensure fair resource allocation",
+          "Support weaker parties",
+          "Maintain diverse options"
+        ],
+        loopSignature: { reinforcingCount: 2, balancingCount: 0, hasDelay: false }
+      },
+      {
+        name: "Tragedy of the Commons",
+        description: "Individual overuse depletes a shared resource",
+        pattern: "Shared resource \u2192 Individual exploitation \u2192 Resource depletion \u2192 Harm to all",
+        warningSigns: [
+          "Declining shared resource",
+          "Increasing individual consumption",
+          "Rational individual behavior leading to collective harm"
+        ],
+        interventions: [
+          "Establish governance mechanisms",
+          "Create feedback on individual impact",
+          "Align individual incentives with collective good"
+        ],
+        loopSignature: { reinforcingCount: 1, balancingCount: 1, hasDelay: true }
+      },
+      {
+        name: "Escalation",
+        description: "Two parties compete, each responding to the other's actions",
+        pattern: "Party A acts \u2192 Party B perceives threat \u2192 Party B responds \u2192 Party A perceives threat \u2192 Cycle",
+        warningSigns: [
+          "Competitive actions and reactions",
+          "Each side feeling justified",
+          "Escalating intensity over time"
+        ],
+        interventions: [
+          "Break the cycle unilaterally",
+          "Establish communication channels",
+          "Find mutual benefit solutions"
+        ],
+        loopSignature: { reinforcingCount: 2, balancingCount: 0, hasDelay: false }
+      },
+      {
+        name: "Growth and Underinvestment",
+        description: "Growth is limited by underinvestment in capacity",
+        pattern: "Demand grows \u2192 Capacity stretched \u2192 Performance drops \u2192 Investment deferred \u2192 Limits growth",
+        warningSigns: [
+          "Quality declining with growth",
+          "Deferred investment in capacity",
+          "Performance standards lowered"
+        ],
+        interventions: [
+          "Invest in capacity ahead of demand",
+          "Maintain performance standards",
+          "Plan for growth requirements"
+        ],
+        loopSignature: { reinforcingCount: 1, balancingCount: 2, hasDelay: true }
+      },
+      {
+        name: "Eroding Goals",
+        description: "Under pressure, goals are lowered rather than addressing the gap",
+        pattern: "Gap between goals and reality \u2192 Pressure \u2192 Goals lowered \u2192 Gap closed artificially",
+        warningSigns: [
+          "Gradual lowering of standards",
+          "Rationalization of declining performance",
+          "Short-term pressure driving decisions"
+        ],
+        interventions: [
+          "Hold firm on essential goals",
+          "Address root causes of gaps",
+          "Distinguish essential from negotiable goals"
+        ],
+        loopSignature: { reinforcingCount: 1, balancingCount: 1, hasDelay: false }
+      }
+    ];
+    SystemsThinkingHandler = class {
+      mode = "systemsthinking" /* SYSTEMSTHINKING */;
+      modeName = "Systems Thinking";
+      description = "Systems analysis with archetype detection, feedback loops, and leverage point identification";
+      /**
+       * Supported thought types for systems thinking mode
+       */
+      supportedThoughtTypes = [
+        "system_definition",
+        "component_analysis",
+        "feedback_identification",
+        "leverage_analysis",
+        "behavior_prediction"
+      ];
+      /**
+       * Create a systems thinking thought from input
+       */
+      createThought(input, sessionId) {
+        const inputAny = input;
+        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        return {
+          id: randomUUID(),
+          sessionId,
+          thoughtNumber: input.thoughtNumber,
+          totalThoughts: input.totalThoughts,
+          content: input.thought,
+          timestamp: /* @__PURE__ */ new Date(),
+          nextThoughtNeeded: input.nextThoughtNeeded,
+          isRevision: input.isRevision,
+          revisesThought: input.revisesThought,
+          mode: "systemsthinking" /* SYSTEMSTHINKING */,
+          thoughtType,
+          system: inputAny.system,
+          components: inputAny.components || [],
+          feedbackLoops: inputAny.feedbackLoops || [],
+          leveragePoints: inputAny.leveragePoints || [],
+          behaviors: inputAny.behaviors || []
+        };
+      }
+      /**
+       * Validate systems thinking-specific input
+       */
+      validate(input) {
+        const errors = [];
+        const warnings = [];
+        const inputAny = input;
+        if (!input.thought || input.thought.trim().length === 0) {
+          return validationFailure([
+            createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+          ]);
+        }
+        if (input.thoughtNumber > input.totalThoughts) {
+          return validationFailure([
+            createValidationError(
+              "thoughtNumber",
+              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
+              "INVALID_THOUGHT_NUMBER"
+            )
+          ]);
+        }
+        const componentIds = /* @__PURE__ */ new Set();
+        if (inputAny.components && Array.isArray(inputAny.components)) {
+          for (const component of inputAny.components) {
+            if (component.id) componentIds.add(component.id);
+          }
+          for (let i = 0; i < inputAny.components.length; i++) {
+            const component = inputAny.components[i];
+            const compValidation = this.validateComponent(component, i, componentIds);
+            errors.push(...compValidation.errors);
+            warnings.push(...compValidation.warnings);
+          }
+        }
+        if (inputAny.feedbackLoops && Array.isArray(inputAny.feedbackLoops)) {
+          for (let i = 0; i < inputAny.feedbackLoops.length; i++) {
+            const loop = inputAny.feedbackLoops[i];
+            const loopValidation = this.validateFeedbackLoop(loop, i, componentIds);
+            errors.push(...loopValidation.errors);
+            warnings.push(...loopValidation.warnings);
+          }
+        }
+        if (inputAny.leveragePoints && Array.isArray(inputAny.leveragePoints)) {
+          for (let i = 0; i < inputAny.leveragePoints.length; i++) {
+            const lp = inputAny.leveragePoints[i];
+            const lpValidation = this.validateLeveragePoint(lp, i, componentIds);
+            errors.push(...lpValidation.errors);
+            warnings.push(...lpValidation.warnings);
+          }
+        }
+        if (inputAny.system) {
+          const sysValidation = this.validateSystem(inputAny.system);
+          warnings.push(...sysValidation.warnings);
+        }
+        if (errors.length > 0) {
+          return validationFailure(errors, warnings);
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Get systems thinking-specific enhancements
+       */
+      getEnhancements(thought) {
+        const enhancements = {
+          suggestions: [],
+          relatedModes: ["causal" /* CAUSAL */, "optimization" /* OPTIMIZATION */, "scientificmethod" /* SCIENTIFICMETHOD */],
+          guidingQuestions: [],
+          warnings: [],
+          mentalModels: [
+            "Feedback Loops",
+            "Stock and Flow",
+            "Systems Archetypes",
+            "Leverage Points",
+            "Emergence"
+          ]
+        };
+        const componentCount = thought.components?.length || 0;
+        const feedbackLoopCount = thought.feedbackLoops?.length || 0;
+        const leveragePointCount = thought.leveragePoints?.length || 0;
+        const behaviorCount = thought.behaviors?.length || 0;
+        const reinforcingLoops = (thought.feedbackLoops || []).filter((l) => l.type === "reinforcing").length;
+        const balancingLoops = (thought.feedbackLoops || []).filter((l) => l.type === "balancing").length;
+        enhancements.metrics = {
+          componentCount,
+          feedbackLoopCount,
+          reinforcingLoops,
+          balancingLoops,
+          leveragePointCount,
+          behaviorCount
+        };
+        const detectedArchetypesResult = this.detectArchetypes(thought);
+        if (detectedArchetypesResult.length > 0) {
+          enhancements.detectedArchetypes = detectedArchetypesResult.map((a) => ({
+            name: a.name,
+            confidence: a.confidence,
+            matchedPatterns: a.archetype.warningSigns
+          }));
+          for (const detected of detectedArchetypesResult) {
+            if (detected.confidence > 0.5) {
+              enhancements.warnings.push(
+                `Potential "${detected.name}" archetype detected. Watch for: ${detected.archetype.warningSigns[0]}`
+              );
+            }
+          }
+        }
+        if (componentCount === 0) {
+          enhancements.suggestions.push(
+            "Define system components (stocks, flows, variables) to model the system"
+          );
+        }
+        if (componentCount >= 2 && feedbackLoopCount === 0) {
+          enhancements.suggestions.push(
+            "Identify feedback loops connecting your components"
+          );
+        }
+        if (reinforcingLoops > 0 && balancingLoops === 0) {
+          enhancements.warnings.push(
+            "Only reinforcing loops detected. System may be unstable without balancing feedback."
+          );
+        }
+        if (feedbackLoopCount >= 2 && leveragePointCount === 0) {
+          enhancements.suggestions.push(
+            "Identify leverage points where small changes could have large effects"
+          );
+        }
+        if (thought.system) {
+          enhancements.guidingQuestions.push(
+            "What is the system optimizing for? Is that the intended goal?"
+          );
+        }
+        if (feedbackLoopCount > 0) {
+          enhancements.guidingQuestions.push(
+            "Which feedback loop is currently dominant in the system behavior?"
+          );
+        }
+        const delayedLoops = (thought.feedbackLoops || []).filter((l) => l.delay && l.delay > 0);
+        if (delayedLoops.length > 0) {
+          enhancements.guidingQuestions.push(
+            "How do delays in feedback affect system predictability?"
+          );
+        }
+        if (componentCount >= 3 && behaviorCount === 0) {
+          enhancements.guidingQuestions.push(
+            "What emergent behaviors arise from the interaction of these components?"
+          );
+        }
+        return enhancements;
+      }
+      /**
+       * Check if this handler supports a specific thought type
+       */
+      supportsThoughtType(thoughtType) {
+        return this.supportedThoughtTypes.includes(thoughtType);
+      }
+      /**
+       * Resolve thought type to valid SystemsThinkingThoughtType
+       */
+      resolveThoughtType(inputType) {
+        if (inputType && this.supportedThoughtTypes.includes(inputType)) {
+          return inputType;
+        }
+        return "system_definition";
+      }
+      /**
+       * Validate a system component
+       */
+      validateComponent(component, index, existingIds) {
+        const errors = [];
+        const warnings = [];
+        if (!component.id || component.id.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              `components[${index}].id`,
+              "Component has no ID",
+              "Add an ID to reference this component in loops"
+            )
+          );
+        }
+        if (!component.name || component.name.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              `components[${index}].name`,
+              "Component has no name",
+              "Add a descriptive name"
+            )
+          );
+        }
+        if (component.influencedBy) {
+          for (const refId of component.influencedBy) {
+            if (!existingIds.has(refId)) {
+              warnings.push(
+                createValidationWarning(
+                  `components[${index}].influencedBy`,
+                  `References non-existent component: ${refId}`,
+                  "Ensure all component references exist"
+                )
+              );
+            }
+          }
+        }
+        return errors.length > 0 ? validationFailure(errors, warnings) : validationSuccess(warnings);
+      }
+      /**
+       * Validate a feedback loop
+       */
+      validateFeedbackLoop(loop, index, componentIds) {
+        const errors = [];
+        const warnings = [];
+        if (!loop.id || loop.id.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              `feedbackLoops[${index}].id`,
+              "Feedback loop has no ID",
+              "Add an ID to track this loop"
+            )
+          );
+        }
+        if (loop.components && loop.components.length > 0) {
+          for (const compId of loop.components) {
+            if (!componentIds.has(compId)) {
+              warnings.push(
+                createValidationWarning(
+                  `feedbackLoops[${index}].components`,
+                  `Loop references non-existent component: ${compId}`,
+                  "Ensure all components in the loop exist"
+                )
+              );
+            }
+          }
+          if (loop.components.length < 2) {
+            warnings.push(
+              createValidationWarning(
+                `feedbackLoops[${index}].components`,
+                "Feedback loop has fewer than 2 components",
+                "A feedback loop needs at least 2 components to form a cycle"
+              )
+            );
+          }
+        } else {
+          warnings.push(
+            createValidationWarning(
+              `feedbackLoops[${index}].components`,
+              "Feedback loop has no components",
+              "Add components that form the feedback loop"
+            )
+          );
+        }
+        if (loop.strength !== void 0 && (loop.strength < 0 || loop.strength > 1)) {
+          warnings.push(
+            createValidationWarning(
+              `feedbackLoops[${index}].strength`,
+              `Loop strength (${loop.strength}) is outside [0, 1] range`,
+              "Strength should be normalized to [0, 1]"
+            )
+          );
+        }
+        return errors.length > 0 ? validationFailure(errors, warnings) : validationSuccess(warnings);
+      }
+      /**
+       * Validate a leverage point
+       */
+      validateLeveragePoint(lp, index, componentIds) {
+        const warnings = [];
+        if (!lp.location || lp.location.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              `leveragePoints[${index}].location`,
+              "Leverage point has no location",
+              "Specify which component or loop this leverage point targets"
+            )
+          );
+        } else if (!componentIds.has(lp.location)) {
+          warnings.push(
+            createValidationWarning(
+              `leveragePoints[${index}].location`,
+              `Leverage point location "${lp.location}" not found in components`,
+              "Ensure the location references an existing component or loop"
+            )
+          );
+        }
+        if (lp.effectiveness !== void 0 && (lp.effectiveness < 0 || lp.effectiveness > 1)) {
+          warnings.push(
+            createValidationWarning(
+              `leveragePoints[${index}].effectiveness`,
+              `Effectiveness (${lp.effectiveness}) is outside [0, 1] range`,
+              "Effectiveness should be normalized to [0, 1]"
+            )
+          );
+        }
+        if (lp.difficulty !== void 0 && (lp.difficulty < 0 || lp.difficulty > 1)) {
+          warnings.push(
+            createValidationWarning(
+              `leveragePoints[${index}].difficulty`,
+              `Difficulty (${lp.difficulty}) is outside [0, 1] range`,
+              "Difficulty should be normalized to [0, 1]"
+            )
+          );
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Validate system definition
+       */
+      validateSystem(system) {
+        const warnings = [];
+        if (!system.boundary || system.boundary.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              "system.boundary",
+              "System has no boundary defined",
+              "Define what is inside and outside the system"
+            )
+          );
+        }
+        if (!system.purpose || system.purpose.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              "system.purpose",
+              "System has no purpose defined",
+              "Define what the system is designed to achieve"
+            )
+          );
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Detect systems archetypes based on structure
+       */
+      detectArchetypes(thought) {
+        const detected = [];
+        const loops = thought.feedbackLoops || [];
+        const reinforcingCount = loops.filter((l) => l.type === "reinforcing").length;
+        const balancingCount = loops.filter((l) => l.type === "balancing").length;
+        const hasDelay = loops.some((l) => l.delay && l.delay > 0);
+        for (const archetype of SYSTEMS_ARCHETYPES) {
+          let confidence = 0;
+          const sig = archetype.loopSignature;
+          if (sig.reinforcingCount !== void 0) {
+            if (reinforcingCount === sig.reinforcingCount) {
+              confidence += 0.4;
+            } else if (Math.abs(reinforcingCount - sig.reinforcingCount) === 1) {
+              confidence += 0.2;
+            }
+          }
+          if (sig.balancingCount !== void 0) {
+            if (balancingCount === sig.balancingCount) {
+              confidence += 0.4;
+            } else if (Math.abs(balancingCount - sig.balancingCount) === 1) {
+              confidence += 0.2;
+            }
+          }
+          if (sig.hasDelay !== void 0) {
+            if (hasDelay === sig.hasDelay) {
+              confidence += 0.2;
+            }
+          }
+          if (confidence >= 0.4) {
+            detected.push({
+              name: archetype.name,
+              confidence: Math.min(confidence, 1),
+              archetype
+            });
+          }
+        }
+        detected.sort((a, b) => b.confidence - a.confidence);
+        return detected.slice(0, 3);
+      }
+    };
+  }
+});
+var SOCRATIC_CATEGORIES, CritiqueHandler;
+var init_CritiqueHandler = __esm({
+  "src/modes/handlers/CritiqueHandler.ts"() {
+    init_esm_shims();
+    init_ModeHandler();
+    SOCRATIC_CATEGORIES = [
+      {
+        name: "Clarification",
+        description: "Questions that probe for clarity and understanding",
+        purpose: "Ensure clear understanding before critique",
+        exampleQuestions: [
+          "What do you mean by...?",
+          "Could you put that another way?",
+          "What is your main point?",
+          "Could you give me an example?",
+          "Can you explain that term?"
+        ]
+      },
+      {
+        name: "Assumptions",
+        description: "Questions that probe underlying assumptions",
+        purpose: "Uncover hidden assumptions that may be flawed",
+        exampleQuestions: [
+          "What are you assuming here?",
+          "Is that always the case?",
+          "Why would you assume that?",
+          "What could we assume instead?",
+          "What if the opposite were true?"
+        ]
+      },
+      {
+        name: "Evidence",
+        description: "Questions that probe reasons and evidence",
+        purpose: "Evaluate the quality and relevance of evidence",
+        exampleQuestions: [
+          "What evidence supports this?",
+          "How do you know this is true?",
+          "What would change your mind?",
+          "Is there counter-evidence?",
+          "How reliable is this source?"
+        ]
+      },
+      {
+        name: "Perspectives",
+        description: "Questions that probe viewpoints and perspectives",
+        purpose: "Consider alternative viewpoints",
+        exampleQuestions: [
+          "What would X say about this?",
+          "How might others view this?",
+          "What is an alternative interpretation?",
+          "Who benefits from this view?",
+          "What perspective is missing?"
+        ]
+      },
+      {
+        name: "Implications",
+        description: "Questions that probe implications and consequences",
+        purpose: "Explore logical consequences of claims",
+        exampleQuestions: [
+          "What follows from this?",
+          "What are the consequences?",
+          "How does this affect...?",
+          "If this is true, what else must be true?",
+          "What are the risks?"
+        ]
+      },
+      {
+        name: "Meta",
+        description: "Questions about the question itself",
+        purpose: "Examine the reasoning process",
+        exampleQuestions: [
+          "Why is this question important?",
+          "What makes this hard to answer?",
+          "What do we need to know to answer this?",
+          "How can we find out?",
+          "What assumptions underlie this question?"
+        ]
+      }
+    ];
+    CritiqueHandler = class {
+      mode = "critique" /* CRITIQUE */;
+      modeName = "Critical Analysis";
+      description = "Scholarly critique with Socratic questioning, balanced evaluation, and methodology assessment";
+      /**
+       * Supported thought types for critique mode
+       */
+      supportedThoughtTypes = [
+        "work_characterization",
+        "methodology_evaluation",
+        "argument_analysis",
+        "evidence_assessment",
+        "contribution_evaluation",
+        "limitation_identification",
+        "strength_recognition",
+        "improvement_suggestion"
+      ];
+      /**
+       * Create a critique thought from input
+       */
+      createThought(input, sessionId) {
+        const inputAny = input;
+        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const work = inputAny.work || {
+          id: randomUUID().slice(0, 8),
+          title: "Untitled Work",
+          authors: [],
+          year: (/* @__PURE__ */ new Date()).getFullYear(),
+          type: "empirical_study",
+          field: "Unknown",
+          claimedContribution: ""
+        };
+        const critiquePoints = inputAny.critiquePoints || [];
+        const strengthsIdentified = critiquePoints.filter(
+          (p) => p.type === "strength"
+        ).length;
+        const weaknessesIdentified = critiquePoints.filter(
+          (p) => p.type === "weakness" || p.type === "concern"
+        ).length;
+        const balanceRatio = this.calculateBalanceRatio(strengthsIdentified, weaknessesIdentified);
+        return {
+          id: randomUUID(),
+          sessionId,
+          thoughtNumber: input.thoughtNumber,
+          totalThoughts: input.totalThoughts,
+          content: input.thought,
+          timestamp: /* @__PURE__ */ new Date(),
+          nextThoughtNeeded: input.nextThoughtNeeded,
+          isRevision: input.isRevision,
+          revisesThought: input.revisesThought,
+          mode: "critique" /* CRITIQUE */,
+          thoughtType,
+          work,
+          methodologyEvaluation: inputAny.methodologyEvaluation,
+          argumentCritique: inputAny.argumentCritique,
+          evidenceCritique: inputAny.evidenceCritique,
+          contributionEvaluation: inputAny.contributionEvaluation,
+          critiquePoints,
+          improvements: inputAny.improvements || [],
+          verdict: inputAny.verdict,
+          strengthsIdentified,
+          weaknessesIdentified,
+          balanceRatio,
+          dependencies: inputAny.dependencies || [],
+          assumptions: inputAny.assumptions || [],
+          uncertainty: inputAny.uncertainty ?? 0.5,
+          keyInsight: inputAny.keyInsight
+        };
+      }
+      /**
+       * Validate critique-specific input
+       */
+      validate(input) {
+        const errors = [];
+        const warnings = [];
+        const inputAny = input;
+        if (!input.thought || input.thought.trim().length === 0) {
+          return validationFailure([
+            createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+          ]);
+        }
+        if (input.thoughtNumber > input.totalThoughts) {
+          return validationFailure([
+            createValidationError(
+              "thoughtNumber",
+              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
+              "INVALID_THOUGHT_NUMBER"
+            )
+          ]);
+        }
+        if (inputAny.work) {
+          const workValidation = this.validateWork(inputAny.work);
+          warnings.push(...workValidation.warnings);
+        }
+        if (inputAny.methodologyEvaluation) {
+          const methValidation = this.validateMethodologyEvaluation(inputAny.methodologyEvaluation);
+          errors.push(...methValidation.errors);
+          warnings.push(...methValidation.warnings);
+        }
+        if (inputAny.argumentCritique) {
+          const argValidation = this.validateArgumentCritique(inputAny.argumentCritique);
+          warnings.push(...argValidation.warnings);
+        }
+        if (inputAny.critiquePoints && Array.isArray(inputAny.critiquePoints)) {
+          for (let i = 0; i < inputAny.critiquePoints.length; i++) {
+            const point = inputAny.critiquePoints[i];
+            const pointValidation = this.validateCritiquePoint(point, i);
+            warnings.push(...pointValidation.warnings);
+          }
+          const strengths = inputAny.critiquePoints.filter(
+            (p) => p.type === "strength"
+          ).length;
+          const weaknesses = inputAny.critiquePoints.filter(
+            (p) => p.type === "weakness" || p.type === "concern"
+          ).length;
+          if (inputAny.critiquePoints.length >= 3) {
+            if (strengths === 0) {
+              warnings.push(
+                createValidationWarning(
+                  "critiquePoints",
+                  "No strengths identified in critique",
+                  "A balanced critique should acknowledge strengths as well as weaknesses"
+                )
+              );
+            } else if (weaknesses === 0) {
+              warnings.push(
+                createValidationWarning(
+                  "critiquePoints",
+                  "No weaknesses or concerns identified",
+                  "A thorough critique should identify areas for improvement"
+                )
+              );
+            }
+          }
+        }
+        if (inputAny.verdict) {
+          const verdictValidation = this.validateVerdict(inputAny.verdict);
+          warnings.push(...verdictValidation.warnings);
+        }
+        if (errors.length > 0) {
+          return validationFailure(errors, warnings);
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Get critique-specific enhancements with Socratic questions
+       */
+      getEnhancements(thought) {
+        const enhancements = {
+          suggestions: [],
+          relatedModes: ["argumentation" /* ARGUMENTATION */, "synthesis" /* SYNTHESIS */, "analysis" /* ANALYSIS */],
+          guidingQuestions: [],
+          warnings: [],
+          mentalModels: [
+            "Socratic Questioning",
+            "Peer Review Framework",
+            "Toulmin Model",
+            "Critical Thinking"
+          ]
+        };
+        const critiquePointCount = thought.critiquePoints?.length || 0;
+        const improvementCount = thought.improvements?.length || 0;
+        enhancements.metrics = {
+          strengthsIdentified: thought.strengthsIdentified,
+          weaknessesIdentified: thought.weaknessesIdentified,
+          balanceRatio: thought.balanceRatio,
+          critiquePointCount,
+          improvementCount,
+          hasVerdict: thought.verdict ? 1 : 0
+        };
+        const socraticCategories = this.getSocraticQuestions(thought.thoughtType);
+        const socraticQuestionsRecord = {};
+        for (const category of socraticCategories) {
+          socraticQuestionsRecord[category.name] = category.exampleQuestions;
+        }
+        enhancements.socraticQuestions = socraticQuestionsRecord;
+        for (const category of socraticCategories.slice(0, 2)) {
+          enhancements.guidingQuestions.push(category.exampleQuestions[0]);
+        }
+        if (thought.balanceRatio < 0.2) {
+          enhancements.warnings.push(
+            "Critique appears heavily weighted toward weaknesses. Consider identifying strengths."
+          );
+        } else if (thought.balanceRatio > 0.8) {
+          enhancements.warnings.push(
+            "Critique appears heavily weighted toward strengths. Consider identifying limitations."
+          );
+        }
+        if (!thought.methodologyEvaluation && thought.work?.type === "empirical_study") {
+          enhancements.suggestions.push(
+            "Consider adding methodology evaluation for empirical work"
+          );
+        }
+        if (!thought.argumentCritique && thought.work?.type === "theoretical_paper") {
+          enhancements.suggestions.push(
+            "Consider adding argument structure analysis for theoretical work"
+          );
+        }
+        if (critiquePointCount >= 5 && !thought.verdict) {
+          enhancements.suggestions.push(
+            "Consider providing an overall verdict summarizing the critique"
+          );
+        }
+        if (thought.weaknessesIdentified > 0 && improvementCount === 0) {
+          enhancements.suggestions.push(
+            "Consider adding constructive improvement suggestions for identified weaknesses"
+          );
+        }
+        if (thought.work) {
+          if (!thought.work.researchQuestion && thought.work.type === "empirical_study") {
+            enhancements.guidingQuestions.push(
+              "What is the research question being addressed?"
+            );
+          }
+        }
+        if (thought.critiquePoints && thought.critiquePoints.length > 0) {
+          const criticalCount = thought.critiquePoints.filter(
+            (p) => p.severity === "critical"
+          ).length;
+          const majorCount = thought.critiquePoints.filter(
+            (p) => p.severity === "major"
+          ).length;
+          if (criticalCount > 0 && thought.verdict?.recommendation === "accept") {
+            enhancements.warnings.push(
+              "Accept recommendation despite critical issues. Verify this is intentional."
+            );
+          }
+          if (criticalCount === 0 && majorCount === 0 && thought.verdict?.recommendation === "reject") {
+            enhancements.warnings.push(
+              "Reject recommendation with no critical/major issues. Consider revising verdict."
+            );
+          }
+        }
+        return enhancements;
+      }
+      /**
+       * Check if this handler supports a specific thought type
+       */
+      supportsThoughtType(thoughtType) {
+        return this.supportedThoughtTypes.includes(thoughtType);
+      }
+      /**
+       * Resolve thought type to valid CritiqueThoughtType
+       */
+      resolveThoughtType(inputType) {
+        if (inputType && this.supportedThoughtTypes.includes(inputType)) {
+          return inputType;
+        }
+        return "work_characterization";
+      }
+      /**
+       * Calculate balance ratio (0 = all weaknesses, 1 = all strengths, 0.5 = balanced)
+       */
+      calculateBalanceRatio(strengths, weaknesses) {
+        const total = strengths + weaknesses;
+        if (total === 0) return 0.5;
+        return strengths / total;
+      }
+      /**
+       * Validate work being critiqued
+       */
+      validateWork(work) {
+        const warnings = [];
+        if (!work.title || work.title.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              "work.title",
+              "Work has no title",
+              "Add a title to identify the work being critiqued"
+            )
+          );
+        }
+        if (!work.authors || work.authors.length === 0) {
+          warnings.push(
+            createValidationWarning(
+              "work.authors",
+              "No authors specified",
+              "Add author information for proper attribution"
+            )
+          );
+        }
+        if (!work.claimedContribution || work.claimedContribution.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              "work.claimedContribution",
+              "No claimed contribution specified",
+              "Identify what contribution the work claims to make"
+            )
+          );
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Validate methodology evaluation
+       */
+      validateMethodologyEvaluation(meth) {
+        const errors = [];
+        const warnings = [];
+        if (meth.overallRating !== void 0 && (meth.overallRating < 0 || meth.overallRating > 1)) {
+          warnings.push(
+            createValidationWarning(
+              "methodologyEvaluation.overallRating",
+              `overallRating (${meth.overallRating}) is outside [0, 1] range`,
+              "Ratings should be normalized to [0, 1]"
+            )
+          );
+        }
+        const subRatings = ["design.rating", "sample.rating", "analysis.rating"];
+        for (const path2 of subRatings) {
+          const [parent, child] = path2.split(".");
+          const parentObj = meth[parent];
+          if (parentObj && parentObj[child] !== void 0) {
+            const value = parentObj[child];
+            if (value < 0 || value > 1) {
+              warnings.push(
+                createValidationWarning(
+                  `methodologyEvaluation.${path2}`,
+                  `${path2} (${value}) is outside [0, 1] range`,
+                  "Ratings should be normalized to [0, 1]"
+                )
+              );
+            }
+          }
+        }
+        return errors.length > 0 ? validationFailure(errors, warnings) : validationSuccess(warnings);
+      }
+      /**
+       * Validate argument critique
+       */
+      validateArgumentCritique(arg) {
+        const warnings = [];
+        if (arg.rating !== void 0 && (arg.rating < 0 || arg.rating > 1)) {
+          warnings.push(
+            createValidationWarning(
+              "argumentCritique.rating",
+              `Argument rating (${arg.rating}) is outside [0, 1] range`,
+              "Rating should be normalized to [0, 1]"
+            )
+          );
+        }
+        if (arg.logicalStructure) {
+          if (arg.logicalStructure.overallCoherence !== void 0) {
+            if (arg.logicalStructure.overallCoherence < 0 || arg.logicalStructure.overallCoherence > 1) {
+              warnings.push(
+                createValidationWarning(
+                  "argumentCritique.logicalStructure.overallCoherence",
+                  `Coherence (${arg.logicalStructure.overallCoherence}) is outside [0, 1] range`,
+                  "Coherence should be normalized to [0, 1]"
+                )
+              );
+            }
+          }
+          if (arg.logicalStructure.circularReasoning) {
+            warnings.push(
+              createValidationWarning(
+                "argumentCritique.logicalStructure",
+                "Circular reasoning detected in the argument",
+                "This is a significant logical flaw that should be addressed"
+              )
+            );
+          }
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Validate a critique point
+       */
+      validateCritiquePoint(point, index) {
+        const warnings = [];
+        if (!point.description || point.description.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              `critiquePoints[${index}].description`,
+              "Critique point has no description",
+              "Add a detailed description of the critique"
+            )
+          );
+        }
+        if (point.type === "weakness" || point.type === "concern") {
+          if (!point.recommendation) {
+            warnings.push(
+              createValidationWarning(
+                `critiquePoints[${index}].recommendation`,
+                "Weakness has no recommendation for improvement",
+                "Consider adding a constructive suggestion"
+              )
+            );
+          }
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Validate verdict
+       */
+      validateVerdict(verdict) {
+        const warnings = [];
+        if (verdict.confidence !== void 0 && (verdict.confidence < 0 || verdict.confidence > 1)) {
+          warnings.push(
+            createValidationWarning(
+              "verdict.confidence",
+              `Verdict confidence (${verdict.confidence}) is outside [0, 1] range`,
+              "Confidence should be between 0 and 1"
+            )
+          );
+        }
+        if (!verdict.summary || verdict.summary.trim().length === 0) {
+          warnings.push(
+            createValidationWarning(
+              "verdict.summary",
+              "Verdict has no summary",
+              "Add a summary explaining the recommendation"
+            )
+          );
+        }
+        return validationSuccess(warnings);
+      }
+      /**
+       * Get Socratic questions based on thought type
+       */
+      getSocraticQuestions(thoughtType) {
+        const typeToCategories = {
+          work_characterization: ["Clarification", "Meta"],
+          methodology_evaluation: ["Evidence", "Assumptions"],
+          argument_analysis: ["Assumptions", "Implications"],
+          evidence_assessment: ["Evidence", "Perspectives"],
+          contribution_evaluation: ["Implications", "Perspectives"],
+          limitation_identification: ["Assumptions", "Evidence"],
+          strength_recognition: ["Clarification", "Implications"],
+          improvement_suggestion: ["Perspectives", "Meta"]
+        };
+        const categoryNames = typeToCategories[thoughtType] || ["Clarification", "Evidence"];
+        return SOCRATIC_CATEGORIES.filter((c) => categoryNames.includes(c.name));
+      }
+    };
+  }
+});
+
+// src/modes/handlers/registry.ts
+var ModeHandlerRegistry;
+var init_registry = __esm({
+  "src/modes/handlers/registry.ts"() {
+    init_esm_shims();
+    init_core();
+    init_ModeHandler();
+    init_GenericModeHandler();
+    ModeHandlerRegistry = class _ModeHandlerRegistry {
+      static instance = null;
+      handlers = /* @__PURE__ */ new Map();
+      constructor() {
+      }
+      /**
+       * Get the singleton instance
+       */
+      static getInstance() {
+        if (!_ModeHandlerRegistry.instance) {
+          _ModeHandlerRegistry.instance = new _ModeHandlerRegistry();
+        }
+        return _ModeHandlerRegistry.instance;
+      }
+      /**
+       * Reset the singleton (for testing)
+       */
+      static resetInstance() {
+        _ModeHandlerRegistry.instance = null;
+      }
+      /**
+       * Register a mode handler
+       *
+       * @param handler - The handler to register
+       * @throws Error if handler for mode is already registered
+       */
+      register(handler) {
+        if (this.handlers.has(handler.mode)) {
+          throw new Error(
+            `Handler for mode '${handler.mode}' is already registered. Use replace() to override an existing handler.`
+          );
+        }
+        this.handlers.set(handler.mode, handler);
+      }
+      /**
+       * Replace an existing handler or register a new one
+       *
+       * @param handler - The handler to register/replace
+       */
+      replace(handler) {
+        this.handlers.set(handler.mode, handler);
+      }
+      /**
+       * Unregister a handler
+       *
+       * @param mode - The mode to unregister
+       * @returns true if handler was removed, false if not found
+       */
+      unregister(mode) {
+        return this.handlers.delete(mode);
+      }
+      /**
+       * Get handler for a mode
+       *
+       * Returns the specialized handler if registered,
+       * otherwise returns the generic handler.
+       *
+       * @param mode - The thinking mode
+       * @returns The handler for the mode
+       */
+      getHandler(mode) {
+        return this.handlers.get(mode) || this.createGenericHandlerForMode(mode);
+      }
+      /**
+       * Check if a specialized handler is registered for a mode
+       *
+       * @param mode - The thinking mode
+       * @returns true if a specialized handler exists
+       */
+      hasSpecializedHandler(mode) {
+        return this.handlers.has(mode);
+      }
+      /**
+       * Get all registered modes
+       *
+       * @returns Array of modes with specialized handlers
+       */
+      getRegisteredModes() {
+        return Array.from(this.handlers.keys());
+      }
+      /**
+       * Create a thought using the appropriate handler
+       *
+       * This is the main entry point for thought creation.
+       * Delegates to specialized handler if registered,
+       * otherwise uses generic handler.
+       *
+       * @param input - The tool input
+       * @param sessionId - The session ID
+       * @returns Created thought
+       */
+      createThought(input, sessionId) {
+        const mode = input.mode || "hybrid" /* HYBRID */;
+        const handler = this.getHandler(mode);
+        return handler.createThought(input, sessionId);
+      }
+      /**
+       * Validate input using the appropriate handler
+       *
+       * @param input - The tool input
+       * @returns Validation result
+       */
+      validate(input) {
+        const mode = input.mode || "hybrid" /* HYBRID */;
+        if (!input.thought || input.thought.trim().length === 0) {
+          return validationFailure([
+            createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+          ]);
+        }
+        const handler = this.getHandler(mode);
+        return handler.validate(input);
+      }
+      /**
+       * Get mode status information
+       *
+       * @param mode - The thinking mode
+       * @returns Mode status for API response
+       */
+      getModeStatus(mode) {
+        const hasSpecialized = this.hasSpecializedHandler(mode);
+        const handler = this.getHandler(mode);
+        return {
+          mode,
+          isFullyImplemented: isFullyImplemented(mode),
+          hasSpecializedHandler: hasSpecialized,
+          note: this.getModeNote(mode, hasSpecialized),
+          supportedThoughtTypes: this.getSupportedThoughtTypes(handler, mode)
+        };
+      }
+      /**
+       * Get registry statistics
+       *
+       * @returns Statistics about registered handlers
+       */
+      getStats() {
+        const allModes = Object.values(ThinkingMode).filter(
+          (v) => typeof v === "string"
+        );
+        const modesWithHandlers = this.getRegisteredModes();
+        const modesWithGenericHandler = allModes.filter(
+          (mode) => !this.handlers.has(mode)
+        );
+        return {
+          totalHandlers: this.handlers.size,
+          specializedHandlers: this.handlers.size,
+          modesWithHandlers,
+          modesWithGenericHandler
+        };
+      }
+      /**
+       * Create a generic handler configured for a specific mode
+       */
+      createGenericHandlerForMode(mode) {
+        return new GenericModeHandler(mode);
+      }
+      /**
+       * Get appropriate note for mode status
+       */
+      getModeNote(mode, hasSpecialized) {
+        if (!isFullyImplemented(mode)) {
+          return "This mode is experimental with limited runtime implementation";
+        }
+        if (!hasSpecialized) {
+          return "Using generic handler - specialized validation not available";
+        }
+        return void 0;
+      }
+      /**
+       * Get supported thought types for a mode
+       */
+      getSupportedThoughtTypes(_handler, mode) {
+        const thoughtTypes = {
+          mathematics: [
+            "problem_definition",
+            "constraints",
+            "model",
+            "proof",
+            "implementation",
+            "proof_decomposition",
+            "dependency_analysis",
+            "consistency_check",
+            "gap_identification",
+            "assumption_trace"
+          ],
+          physics: [
+            "problem_definition",
+            "model",
+            "tensor_formulation",
+            "conservation_law",
+            "dimensional_analysis"
+          ],
+          causal: ["problem_definition", "graph_construction", "intervention_analysis", "mechanism_identification"],
+          bayesian: ["prior_definition", "likelihood_assessment", "posterior_calculation", "sensitivity_analysis"],
+          temporal: ["event_definition", "interval_analysis", "constraint_checking", "timeline_construction"],
+          gametheory: ["game_definition", "strategy_analysis", "equilibrium_finding", "payoff_calculation"],
+          synthesis: ["source_identification", "theme_extraction", "gap_analysis", "framework_construction"],
+          argumentation: ["claim_formulation", "grounds_development", "warrant_construction", "rebuttal_analysis"],
+          critique: ["work_characterization", "methodology_evaluation", "argument_critique", "contribution_assessment"],
+          analysis: ["data_familiarization", "coding", "theme_development", "pattern_analysis"]
+        };
+        const modeKey = mode.toLowerCase();
+        return thoughtTypes[modeKey] || ["general"];
+      }
+      /**
+       * Clear all registered handlers (for testing)
+       */
+      clear() {
+        this.handlers.clear();
+      }
+    };
+  }
+});
+
+// src/modes/handlers/index.ts
+var init_handlers = __esm({
+  "src/modes/handlers/index.ts"() {
+    init_esm_shims();
+    init_CausalHandler();
+    init_BayesianHandler();
+    init_GameTheoryHandler();
+    init_CounterfactualHandler();
+    init_SynthesisHandler();
+    init_SystemsThinkingHandler();
+    init_CritiqueHandler();
+    init_registry();
+  }
+});
 
 // src/utils/errors.ts
 var DeepThinkingError, SessionNotFoundError;
@@ -3599,10 +7479,46 @@ var init_ThoughtFactory = __esm({
     init_esm_shims();
     init_type_guards();
     init_logger();
+    init_handlers();
     ThoughtFactory = class {
       logger;
+      registry;
       constructor(logger2) {
         this.logger = logger2 || createLogger({ minLevel: 1 /* INFO */, enableConsole: true });
+        this.registry = ModeHandlerRegistry.getInstance();
+        this.registerSpecializedHandlers();
+      }
+      /**
+       * Register all specialized handlers (Phase 10 Sprint 2 + 2B)
+       */
+      registerSpecializedHandlers() {
+        this.registry.replace(new CausalHandler());
+        this.registry.replace(new BayesianHandler());
+        this.registry.replace(new GameTheoryHandler());
+        this.registry.replace(new CounterfactualHandler());
+        this.registry.replace(new SynthesisHandler());
+        this.registry.replace(new SystemsThinkingHandler());
+        this.registry.replace(new CritiqueHandler());
+        this.logger.debug("Specialized handlers registered", {
+          count: 7,
+          handlers: ["Causal", "Bayesian", "GameTheory", "Counterfactual", "Synthesis", "SystemsThinking", "Critique"]
+        });
+      }
+      /**
+       * Check if a mode has a specialized handler
+       */
+      hasSpecializedHandler(mode) {
+        return this.registry.hasSpecializedHandler(mode);
+      }
+      /**
+       * Get stats about registered handlers
+       */
+      getStats() {
+        const stats = this.registry.getStats();
+        return {
+          specializedHandlers: stats.specializedHandlers,
+          modesWithHandlers: stats.modesWithHandlers
+        };
       }
       /**
        * Create a thought object based on input and mode
@@ -3627,13 +7543,19 @@ var init_ThoughtFactory = __esm({
        * ```
        */
       createThought(input, sessionId) {
+        const mode = input.mode || "hybrid" /* HYBRID */;
         this.logger.debug("Creating thought", {
           sessionId,
-          mode: input.mode,
+          mode,
           thoughtNumber: input.thoughtNumber,
           totalThoughts: input.totalThoughts,
-          isRevision: input.isRevision
+          isRevision: input.isRevision,
+          hasSpecializedHandler: this.registry.hasSpecializedHandler(mode)
         });
+        if (this.registry.hasSpecializedHandler(mode)) {
+          this.logger.debug("Using specialized handler", { mode });
+          return this.registry.createThought(input, sessionId);
+        }
         const baseThought = {
           id: randomUUID(),
           sessionId,
@@ -4140,6 +8062,145 @@ var init_ThoughtFactory = __esm({
               secondaryFeatures: []
             };
         }
+      }
+    };
+  }
+});
+
+// src/services/RefactoredThoughtFactory.ts
+var RefactoredThoughtFactory;
+var init_RefactoredThoughtFactory = __esm({
+  "src/services/RefactoredThoughtFactory.ts"() {
+    init_esm_shims();
+    init_ThoughtFactory();
+    init_handlers();
+    init_logger();
+    RefactoredThoughtFactory = class {
+      registry;
+      legacyFactory;
+      useRegistryForAll;
+      logger;
+      constructor(config = {}) {
+        this.registry = ModeHandlerRegistry.getInstance();
+        this.legacyFactory = new ThoughtFactory();
+        this.useRegistryForAll = config.useRegistryForAll ?? false;
+        this.logger = config.logger || createLogger({ minLevel: 1 /* INFO */, enableConsole: true });
+        if (config.autoRegisterHandlers !== false) {
+          this.registerSpecializedHandlers();
+        }
+      }
+      /**
+       * Register all specialized handlers
+       *
+       * Called automatically during construction unless disabled.
+       * Uses replace() to allow re-registration without errors.
+       */
+      registerSpecializedHandlers() {
+        this.logger.debug("Registering specialized handlers");
+        this.registry.replace(new CausalHandler());
+        this.registry.replace(new BayesianHandler());
+        this.registry.replace(new GameTheoryHandler());
+        this.registry.replace(new CounterfactualHandler());
+        this.registry.replace(new SynthesisHandler());
+        this.registry.replace(new SystemsThinkingHandler());
+        this.registry.replace(new CritiqueHandler());
+        this.logger.debug("Specialized handlers registered", {
+          handlers: [
+            "CausalHandler",
+            "BayesianHandler",
+            "GameTheoryHandler",
+            "CounterfactualHandler",
+            "SynthesisHandler",
+            "SystemsThinkingHandler",
+            "CritiqueHandler"
+          ]
+        });
+      }
+      /**
+       * Create a thought object from input
+       *
+       * Routes to appropriate handler based on mode and configuration:
+       * - If specialized handler exists, use it
+       * - If useRegistryForAll is true, use generic handler from registry
+       * - Otherwise, fall back to legacy ThoughtFactory
+       *
+       * @param input - Tool input
+       * @param sessionId - Session ID
+       * @returns Created thought
+       */
+      createThought(input, sessionId) {
+        const mode = input.mode || "hybrid" /* HYBRID */;
+        this.logger.debug("Creating thought", {
+          sessionId,
+          mode,
+          hasSpecializedHandler: this.registry.hasSpecializedHandler(mode),
+          useRegistryForAll: this.useRegistryForAll
+        });
+        if (this.shouldUseRegistry(mode)) {
+          this.logger.debug("Using registry handler", { mode });
+          return this.registry.createThought(input, sessionId);
+        }
+        this.logger.debug("Using legacy factory", { mode });
+        return this.legacyFactory.createThought(input, sessionId);
+      }
+      /**
+       * Validate input using appropriate handler
+       *
+       * @param input - Tool input to validate
+       * @returns Validation result
+       */
+      validate(input) {
+        const mode = input.mode || "hybrid" /* HYBRID */;
+        if (this.shouldUseRegistry(mode)) {
+          return this.registry.validate(input);
+        }
+        return this.registry.validate(input);
+      }
+      /**
+       * Get mode status for API response
+       *
+       * @param mode - The thinking mode
+       * @returns Mode status information
+       */
+      getModeStatus(mode) {
+        return this.registry.getModeStatus(mode);
+      }
+      /**
+       * Check if a specialized handler exists for a mode
+       *
+       * @param mode - The thinking mode
+       * @returns true if specialized handler is registered
+       */
+      hasSpecializedHandler(mode) {
+        return this.registry.hasSpecializedHandler(mode);
+      }
+      /**
+       * Get the underlying registry for direct access
+       *
+       * Use this to register new handlers or access registry stats.
+       *
+       * @returns The ModeHandlerRegistry instance
+       */
+      getRegistry() {
+        return this.registry;
+      }
+      /**
+       * Get registry statistics
+       */
+      getStats() {
+        return this.registry.getStats();
+      }
+      /**
+       * Determine if registry should be used for a mode
+       */
+      shouldUseRegistry(mode) {
+        if (this.registry.hasSpecializedHandler(mode)) {
+          return true;
+        }
+        if (this.useRegistryForAll) {
+          return true;
+        }
+        return false;
       }
     };
   }
@@ -25985,12 +30046,14 @@ var services_exports = {};
 __export(services_exports, {
   ExportService: () => ExportService,
   ModeRouter: () => ModeRouter,
+  RefactoredThoughtFactory: () => RefactoredThoughtFactory,
   ThoughtFactory: () => ThoughtFactory
 });
 var init_services = __esm({
   "src/services/index.ts"() {
     init_esm_shims();
     init_ThoughtFactory();
+    init_RefactoredThoughtFactory();
     init_ExportService();
     init_ModeRouter();
   }
@@ -30704,577 +34767,7 @@ function isValidTool(toolName) {
 // src/index.ts
 init_thinking();
 init_types();
-
-// src/modes/handlers/index.ts
-init_esm_shims();
-
-// src/modes/handlers/GenericModeHandler.ts
-init_esm_shims();
-init_core();
-init_ModeHandler();
-init_type_guards();
-var GenericModeHandler = class {
-  mode;
-  modeName;
-  description;
-  constructor(mode, modeName, description) {
-    this.mode = mode;
-    this.modeName = modeName || this.getDefaultModeName(mode);
-    this.description = description || this.getDefaultDescription(mode);
-  }
-  /**
-   * Create a thought object from input
-   *
-   * This replicates the logic from ThoughtFactory.createThought()
-   * for the mode this handler is configured for.
-   */
-  createThought(input, sessionId) {
-    const baseThought = this.createBaseThought(input, sessionId);
-    return this.createModeSpecificThought(input, baseThought);
-  }
-  /**
-   * Create the base thought structure common to all modes
-   */
-  createBaseThought(input, sessionId) {
-    return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: /* @__PURE__ */ new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
-      isRevision: input.isRevision,
-      revisesThought: input.revisesThought
-    };
-  }
-  /**
-   * Create mode-specific thought structure
-   *
-   * Override this method in specialized handlers to add
-   * mode-specific logic and validation.
-   */
-  createModeSpecificThought(input, baseThought) {
-    const mode = input.mode || this.mode;
-    switch (mode) {
-      case "sequential" /* SEQUENTIAL */:
-        return {
-          ...baseThought,
-          mode: "sequential" /* SEQUENTIAL */,
-          revisionReason: input.revisionReason,
-          branchFrom: input.branchFrom,
-          branchId: input.branchId
-        };
-      case "shannon" /* SHANNON */:
-        return {
-          ...baseThought,
-          mode: "shannon" /* SHANNON */,
-          stage: input.stage || "problem_definition" /* PROBLEM_DEFINITION */,
-          uncertainty: input.uncertainty || 0.5,
-          dependencies: input.dependencies || [],
-          assumptions: input.assumptions || []
-        };
-      case "mathematics" /* MATHEMATICS */:
-        return {
-          ...baseThought,
-          mode: "mathematics" /* MATHEMATICS */,
-          thoughtType: toExtendedThoughtType(input.thoughtType, "model"),
-          mathematicalModel: input.mathematicalModel,
-          proofStrategy: input.proofStrategy,
-          dependencies: input.dependencies || [],
-          assumptions: input.assumptions || [],
-          uncertainty: input.uncertainty || 0.5
-        };
-      case "physics" /* PHYSICS */:
-        return {
-          ...baseThought,
-          mode: "physics" /* PHYSICS */,
-          thoughtType: toExtendedThoughtType(input.thoughtType, "model"),
-          tensorProperties: input.tensorProperties,
-          physicalInterpretation: input.physicalInterpretation,
-          dependencies: input.dependencies || [],
-          assumptions: input.assumptions || [],
-          uncertainty: input.uncertainty || 0.5
-        };
-      case "inductive" /* INDUCTIVE */:
-        return {
-          ...baseThought,
-          mode: "inductive" /* INDUCTIVE */,
-          observations: input.observations || [],
-          pattern: input.pattern,
-          generalization: input.generalization || "",
-          confidence: input.confidence ?? 0.5,
-          counterexamples: input.counterexamples || [],
-          sampleSize: input.sampleSize
-        };
-      case "deductive" /* DEDUCTIVE */:
-        return {
-          ...baseThought,
-          mode: "deductive" /* DEDUCTIVE */,
-          premises: input.premises || [],
-          conclusion: input.conclusion || "",
-          logicForm: input.logicForm,
-          validityCheck: input.validityCheck ?? false,
-          soundnessCheck: input.soundnessCheck
-        };
-      case "abductive" /* ABDUCTIVE */:
-        return {
-          ...baseThought,
-          mode: "abductive" /* ABDUCTIVE */,
-          thoughtType: toExtendedThoughtType(input.thoughtType, "problem_definition"),
-          observations: input.observations || [],
-          hypotheses: input.hypotheses || [],
-          evaluationCriteria: input.evaluationCriteria,
-          evidence: input.evidence || [],
-          bestExplanation: input.bestExplanation
-        };
-      case "causal" /* CAUSAL */:
-        return this.createCausalThought(input, baseThought);
-      case "hybrid" /* HYBRID */:
-      default:
-        return this.createHybridThought(input, baseThought);
-    }
-  }
-  /**
-   * Create a causal thought with graph handling
-   */
-  createCausalThought(input, baseThought) {
-    const inputAny = input;
-    const causalGraph = input.causalGraph || {
-      nodes: inputAny.nodes || [],
-      edges: inputAny.edges || []
-    };
-    return {
-      ...baseThought,
-      mode: "causal" /* CAUSAL */,
-      thoughtType: toExtendedThoughtType(input.thoughtType, "problem_definition"),
-      causalGraph,
-      interventions: input.interventions || [],
-      mechanisms: input.mechanisms || [],
-      confounders: input.confounders || []
-    };
-  }
-  /**
-   * Create a hybrid thought (default fallback)
-   */
-  createHybridThought(input, baseThought) {
-    return {
-      ...baseThought,
-      mode: "hybrid" /* HYBRID */,
-      thoughtType: toExtendedThoughtType(input.thoughtType, "synthesis"),
-      stage: input.stage,
-      uncertainty: input.uncertainty,
-      dependencies: input.dependencies,
-      assumptions: input.assumptions,
-      mathematicalModel: input.mathematicalModel,
-      tensorProperties: input.tensorProperties,
-      physicalInterpretation: input.physicalInterpretation,
-      primaryMode: input.mode || "hybrid" /* HYBRID */,
-      secondaryFeatures: []
-    };
-  }
-  /**
-   * Validate mode-specific input
-   *
-   * The generic handler performs basic validation.
-   * Specialized handlers should override for deeper validation.
-   */
-  validate(input) {
-    const warnings = [];
-    if (!input.thought || input.thought.trim().length === 0) {
-      return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
-      ]);
-    }
-    if (input.thoughtNumber > input.totalThoughts) {
-      return validationFailure([
-        createValidationError(
-          "thoughtNumber",
-          `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          "INVALID_THOUGHT_NUMBER"
-        )
-      ]);
-    }
-    const mode = input.mode || "hybrid" /* HYBRID */;
-    if (!isFullyImplemented(mode)) {
-      warnings.push(
-        createValidationWarning(
-          "mode",
-          `Mode '${mode}' is experimental with limited runtime implementation`,
-          "Consider using a fully implemented mode for production use"
-        )
-      );
-    }
-    return validationSuccess(warnings);
-  }
-  /**
-   * Get mode-specific enhancements
-   *
-   * The generic handler returns minimal enhancements.
-   * Specialized handlers can provide richer context.
-   */
-  getEnhancements(thought) {
-    return {
-      suggestions: [],
-      relatedModes: this.getRelatedModes(thought.mode)
-    };
-  }
-  /**
-   * Get mode status information
-   */
-  getModeStatus() {
-    return {
-      mode: this.mode,
-      isFullyImplemented: isFullyImplemented(this.mode),
-      hasSpecializedHandler: false,
-      // GenericHandler is not specialized
-      note: isFullyImplemented(this.mode) ? void 0 : "This mode is experimental with limited runtime implementation"
-    };
-  }
-  /**
-   * Get related modes for suggestions
-   */
-  getRelatedModes(mode) {
-    const relatedModes = {
-      ["sequential" /* SEQUENTIAL */]: ["hybrid" /* HYBRID */, "shannon" /* SHANNON */],
-      ["shannon" /* SHANNON */]: ["sequential" /* SEQUENTIAL */, "mathematics" /* MATHEMATICS */],
-      ["mathematics" /* MATHEMATICS */]: ["physics" /* PHYSICS */, "algorithmic" /* ALGORITHMIC */],
-      ["physics" /* PHYSICS */]: ["mathematics" /* MATHEMATICS */, "engineering" /* ENGINEERING */],
-      ["hybrid" /* HYBRID */]: ["sequential" /* SEQUENTIAL */, "metareasoning" /* METAREASONING */],
-      ["causal" /* CAUSAL */]: ["bayesian" /* BAYESIAN */, "counterfactual" /* COUNTERFACTUAL */],
-      ["bayesian" /* BAYESIAN */]: ["causal" /* CAUSAL */, "evidential" /* EVIDENTIAL */],
-      ["inductive" /* INDUCTIVE */]: ["deductive" /* DEDUCTIVE */, "abductive" /* ABDUCTIVE */],
-      ["deductive" /* DEDUCTIVE */]: ["inductive" /* INDUCTIVE */, "formallogic" /* FORMALLOGIC */],
-      ["abductive" /* ABDUCTIVE */]: ["inductive" /* INDUCTIVE */, "causal" /* CAUSAL */],
-      ["counterfactual" /* COUNTERFACTUAL */]: ["causal" /* CAUSAL */, "gametheory" /* GAMETHEORY */],
-      ["analogical" /* ANALOGICAL */]: ["inductive" /* INDUCTIVE */, "firstprinciples" /* FIRSTPRINCIPLES */],
-      ["temporal" /* TEMPORAL */]: ["causal" /* CAUSAL */, "sequential" /* SEQUENTIAL */],
-      ["gametheory" /* GAMETHEORY */]: ["optimization" /* OPTIMIZATION */, "counterfactual" /* COUNTERFACTUAL */],
-      ["evidential" /* EVIDENTIAL */]: ["bayesian" /* BAYESIAN */, "scientificmethod" /* SCIENTIFICMETHOD */],
-      ["firstprinciples" /* FIRSTPRINCIPLES */]: ["deductive" /* DEDUCTIVE */, "analogical" /* ANALOGICAL */],
-      ["systemsthinking" /* SYSTEMSTHINKING */]: ["causal" /* CAUSAL */, "optimization" /* OPTIMIZATION */],
-      ["scientificmethod" /* SCIENTIFICMETHOD */]: ["evidential" /* EVIDENTIAL */, "synthesis" /* SYNTHESIS */],
-      ["formallogic" /* FORMALLOGIC */]: ["deductive" /* DEDUCTIVE */, "mathematics" /* MATHEMATICS */],
-      ["metareasoning" /* METAREASONING */]: ["hybrid" /* HYBRID */, "critique" /* CRITIQUE */],
-      ["recursive" /* RECURSIVE */]: ["algorithmic" /* ALGORITHMIC */, "mathematics" /* MATHEMATICS */],
-      ["modal" /* MODAL */]: ["formallogic" /* FORMALLOGIC */, "counterfactual" /* COUNTERFACTUAL */],
-      ["stochastic" /* STOCHASTIC */]: ["bayesian" /* BAYESIAN */, "optimization" /* OPTIMIZATION */],
-      ["constraint" /* CONSTRAINT */]: ["optimization" /* OPTIMIZATION */, "formallogic" /* FORMALLOGIC */],
-      ["optimization" /* OPTIMIZATION */]: ["constraint" /* CONSTRAINT */, "gametheory" /* GAMETHEORY */],
-      ["engineering" /* ENGINEERING */]: ["optimization" /* OPTIMIZATION */, "systemsthinking" /* SYSTEMSTHINKING */],
-      ["computability" /* COMPUTABILITY */]: ["algorithmic" /* ALGORITHMIC */, "formallogic" /* FORMALLOGIC */],
-      ["cryptanalytic" /* CRYPTANALYTIC */]: ["bayesian" /* BAYESIAN */, "algorithmic" /* ALGORITHMIC */],
-      ["algorithmic" /* ALGORITHMIC */]: ["mathematics" /* MATHEMATICS */, "optimization" /* OPTIMIZATION */],
-      ["synthesis" /* SYNTHESIS */]: ["critique" /* CRITIQUE */, "analysis" /* ANALYSIS */],
-      ["argumentation" /* ARGUMENTATION */]: ["critique" /* CRITIQUE */, "formallogic" /* FORMALLOGIC */],
-      ["critique" /* CRITIQUE */]: ["argumentation" /* ARGUMENTATION */, "synthesis" /* SYNTHESIS */],
-      ["analysis" /* ANALYSIS */]: ["synthesis" /* SYNTHESIS */, "scientificmethod" /* SCIENTIFICMETHOD */],
-      ["custom" /* CUSTOM */]: ["hybrid" /* HYBRID */]
-    };
-    return relatedModes[mode] || ["hybrid" /* HYBRID */];
-  }
-  /**
-   * Get default mode name
-   */
-  getDefaultModeName(mode) {
-    const names = {
-      ["sequential" /* SEQUENTIAL */]: "Sequential Thinking",
-      ["shannon" /* SHANNON */]: "Shannon Problem-Solving",
-      ["mathematics" /* MATHEMATICS */]: "Mathematical Reasoning",
-      ["physics" /* PHYSICS */]: "Physics Modeling",
-      ["hybrid" /* HYBRID */]: "Hybrid Mode",
-      ["inductive" /* INDUCTIVE */]: "Inductive Reasoning",
-      ["deductive" /* DEDUCTIVE */]: "Deductive Reasoning",
-      ["abductive" /* ABDUCTIVE */]: "Abductive Reasoning",
-      ["causal" /* CAUSAL */]: "Causal Analysis",
-      ["bayesian" /* BAYESIAN */]: "Bayesian Inference",
-      ["counterfactual" /* COUNTERFACTUAL */]: "Counterfactual Reasoning",
-      ["analogical" /* ANALOGICAL */]: "Analogical Reasoning",
-      ["temporal" /* TEMPORAL */]: "Temporal Reasoning",
-      ["gametheory" /* GAMETHEORY */]: "Game Theory",
-      ["evidential" /* EVIDENTIAL */]: "Evidential Reasoning",
-      ["firstprinciples" /* FIRSTPRINCIPLES */]: "First Principles",
-      ["systemsthinking" /* SYSTEMSTHINKING */]: "Systems Thinking",
-      ["scientificmethod" /* SCIENTIFICMETHOD */]: "Scientific Method",
-      ["formallogic" /* FORMALLOGIC */]: "Formal Logic",
-      ["metareasoning" /* METAREASONING */]: "Meta-Reasoning",
-      ["recursive" /* RECURSIVE */]: "Recursive Reasoning",
-      ["modal" /* MODAL */]: "Modal Logic",
-      ["stochastic" /* STOCHASTIC */]: "Stochastic Reasoning",
-      ["constraint" /* CONSTRAINT */]: "Constraint Satisfaction",
-      ["optimization" /* OPTIMIZATION */]: "Optimization",
-      ["engineering" /* ENGINEERING */]: "Engineering Analysis",
-      ["computability" /* COMPUTABILITY */]: "Computability Theory",
-      ["cryptanalytic" /* CRYPTANALYTIC */]: "Cryptanalysis",
-      ["algorithmic" /* ALGORITHMIC */]: "Algorithm Design",
-      ["synthesis" /* SYNTHESIS */]: "Literature Synthesis",
-      ["argumentation" /* ARGUMENTATION */]: "Academic Argumentation",
-      ["critique" /* CRITIQUE */]: "Critical Analysis",
-      ["analysis" /* ANALYSIS */]: "Qualitative Analysis",
-      ["custom" /* CUSTOM */]: "Custom Mode"
-    };
-    return names[mode] || "Unknown Mode";
-  }
-  /**
-   * Get default mode description
-   */
-  getDefaultDescription(mode) {
-    const descriptions = {
-      ["sequential" /* SEQUENTIAL */]: "Step-by-step logical reasoning",
-      ["shannon" /* SHANNON */]: "Claude Shannon's 5-stage problem-solving methodology",
-      ["mathematics" /* MATHEMATICS */]: "Mathematical proofs and formal reasoning",
-      ["physics" /* PHYSICS */]: "Physical modeling with tensors and conservation laws",
-      ["hybrid" /* HYBRID */]: "Flexible combination of multiple reasoning modes",
-      ["inductive" /* INDUCTIVE */]: "Reasoning from specific cases to general principles",
-      ["deductive" /* DEDUCTIVE */]: "Reasoning from general principles to specific conclusions",
-      ["abductive" /* ABDUCTIVE */]: "Inference to the best explanation",
-      ["causal" /* CAUSAL */]: "Causal graph analysis and intervention reasoning",
-      ["bayesian" /* BAYESIAN */]: "Probabilistic reasoning with prior updates",
-      ["counterfactual" /* COUNTERFACTUAL */]: "What-if scenario analysis",
-      ["analogical" /* ANALOGICAL */]: "Reasoning by structural similarity",
-      ["temporal" /* TEMPORAL */]: "Temporal logic and event sequencing",
-      ["gametheory" /* GAMETHEORY */]: "Strategic interaction and Nash equilibria",
-      ["evidential" /* EVIDENTIAL */]: "Dempster-Shafer evidence theory",
-      ["firstprinciples" /* FIRSTPRINCIPLES */]: "Reasoning from fundamental truths",
-      ["systemsthinking" /* SYSTEMSTHINKING */]: "Feedback loops and system dynamics",
-      ["scientificmethod" /* SCIENTIFICMETHOD */]: "Hypothesis testing and experimentation",
-      ["formallogic" /* FORMALLOGIC */]: "Propositional and predicate logic",
-      ["metareasoning" /* METAREASONING */]: "Reasoning about reasoning strategies",
-      ["recursive" /* RECURSIVE */]: "Self-similar problem decomposition",
-      ["modal" /* MODAL */]: "Possibility and necessity reasoning",
-      ["stochastic" /* STOCHASTIC */]: "Probabilistic state transitions",
-      ["constraint" /* CONSTRAINT */]: "Constraint satisfaction problems",
-      ["optimization" /* OPTIMIZATION */]: "Objective function optimization",
-      ["engineering" /* ENGINEERING */]: "Requirements, trade studies, and FMEA",
-      ["computability" /* COMPUTABILITY */]: "Turing machines and decidability",
-      ["cryptanalytic" /* CRYPTANALYTIC */]: "Cryptanalysis with deciban evidence",
-      ["algorithmic" /* ALGORITHMIC */]: "CLRS algorithm design and analysis",
-      ["synthesis" /* SYNTHESIS */]: "Literature review and integration",
-      ["argumentation" /* ARGUMENTATION */]: "Toulmin model academic arguments",
-      ["critique" /* CRITIQUE */]: "Critical evaluation of scholarly work",
-      ["analysis" /* ANALYSIS */]: "Qualitative data analysis methods",
-      ["custom" /* CUSTOM */]: "User-defined reasoning mode"
-    };
-    return descriptions[mode] || "Unknown reasoning mode";
-  }
-};
-
-// src/modes/handlers/registry.ts
-init_esm_shims();
-init_core();
-init_ModeHandler();
-var ModeHandlerRegistry = class _ModeHandlerRegistry {
-  static instance = null;
-  handlers = /* @__PURE__ */ new Map();
-  constructor() {
-  }
-  /**
-   * Get the singleton instance
-   */
-  static getInstance() {
-    if (!_ModeHandlerRegistry.instance) {
-      _ModeHandlerRegistry.instance = new _ModeHandlerRegistry();
-    }
-    return _ModeHandlerRegistry.instance;
-  }
-  /**
-   * Reset the singleton (for testing)
-   */
-  static resetInstance() {
-    _ModeHandlerRegistry.instance = null;
-  }
-  /**
-   * Register a mode handler
-   *
-   * @param handler - The handler to register
-   * @throws Error if handler for mode is already registered
-   */
-  register(handler) {
-    if (this.handlers.has(handler.mode)) {
-      throw new Error(
-        `Handler for mode '${handler.mode}' is already registered. Use replace() to override an existing handler.`
-      );
-    }
-    this.handlers.set(handler.mode, handler);
-  }
-  /**
-   * Replace an existing handler or register a new one
-   *
-   * @param handler - The handler to register/replace
-   */
-  replace(handler) {
-    this.handlers.set(handler.mode, handler);
-  }
-  /**
-   * Unregister a handler
-   *
-   * @param mode - The mode to unregister
-   * @returns true if handler was removed, false if not found
-   */
-  unregister(mode) {
-    return this.handlers.delete(mode);
-  }
-  /**
-   * Get handler for a mode
-   *
-   * Returns the specialized handler if registered,
-   * otherwise returns the generic handler.
-   *
-   * @param mode - The thinking mode
-   * @returns The handler for the mode
-   */
-  getHandler(mode) {
-    return this.handlers.get(mode) || this.createGenericHandlerForMode(mode);
-  }
-  /**
-   * Check if a specialized handler is registered for a mode
-   *
-   * @param mode - The thinking mode
-   * @returns true if a specialized handler exists
-   */
-  hasSpecializedHandler(mode) {
-    return this.handlers.has(mode);
-  }
-  /**
-   * Get all registered modes
-   *
-   * @returns Array of modes with specialized handlers
-   */
-  getRegisteredModes() {
-    return Array.from(this.handlers.keys());
-  }
-  /**
-   * Create a thought using the appropriate handler
-   *
-   * This is the main entry point for thought creation.
-   * Delegates to specialized handler if registered,
-   * otherwise uses generic handler.
-   *
-   * @param input - The tool input
-   * @param sessionId - The session ID
-   * @returns Created thought
-   */
-  createThought(input, sessionId) {
-    const mode = input.mode || "hybrid" /* HYBRID */;
-    const handler = this.getHandler(mode);
-    return handler.createThought(input, sessionId);
-  }
-  /**
-   * Validate input using the appropriate handler
-   *
-   * @param input - The tool input
-   * @returns Validation result
-   */
-  validate(input) {
-    const mode = input.mode || "hybrid" /* HYBRID */;
-    if (!input.thought || input.thought.trim().length === 0) {
-      return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
-      ]);
-    }
-    const handler = this.getHandler(mode);
-    return handler.validate(input);
-  }
-  /**
-   * Get mode status information
-   *
-   * @param mode - The thinking mode
-   * @returns Mode status for API response
-   */
-  getModeStatus(mode) {
-    const hasSpecialized = this.hasSpecializedHandler(mode);
-    const handler = this.getHandler(mode);
-    return {
-      mode,
-      isFullyImplemented: isFullyImplemented(mode),
-      hasSpecializedHandler: hasSpecialized,
-      note: this.getModeNote(mode, hasSpecialized),
-      supportedThoughtTypes: this.getSupportedThoughtTypes(handler, mode)
-    };
-  }
-  /**
-   * Get registry statistics
-   *
-   * @returns Statistics about registered handlers
-   */
-  getStats() {
-    const allModes = Object.values(ThinkingMode).filter(
-      (v) => typeof v === "string"
-    );
-    const modesWithHandlers = this.getRegisteredModes();
-    const modesWithGenericHandler = allModes.filter(
-      (mode) => !this.handlers.has(mode)
-    );
-    return {
-      totalHandlers: this.handlers.size,
-      specializedHandlers: this.handlers.size,
-      modesWithHandlers,
-      modesWithGenericHandler
-    };
-  }
-  /**
-   * Create a generic handler configured for a specific mode
-   */
-  createGenericHandlerForMode(mode) {
-    return new GenericModeHandler(mode);
-  }
-  /**
-   * Get appropriate note for mode status
-   */
-  getModeNote(mode, hasSpecialized) {
-    if (!isFullyImplemented(mode)) {
-      return "This mode is experimental with limited runtime implementation";
-    }
-    if (!hasSpecialized) {
-      return "Using generic handler - specialized validation not available";
-    }
-    return void 0;
-  }
-  /**
-   * Get supported thought types for a mode
-   */
-  getSupportedThoughtTypes(_handler, mode) {
-    const thoughtTypes = {
-      mathematics: [
-        "problem_definition",
-        "constraints",
-        "model",
-        "proof",
-        "implementation",
-        "proof_decomposition",
-        "dependency_analysis",
-        "consistency_check",
-        "gap_identification",
-        "assumption_trace"
-      ],
-      physics: [
-        "problem_definition",
-        "model",
-        "tensor_formulation",
-        "conservation_law",
-        "dimensional_analysis"
-      ],
-      causal: ["problem_definition", "graph_construction", "intervention_analysis", "mechanism_identification"],
-      bayesian: ["prior_definition", "likelihood_assessment", "posterior_calculation", "sensitivity_analysis"],
-      temporal: ["event_definition", "interval_analysis", "constraint_checking", "timeline_construction"],
-      gametheory: ["game_definition", "strategy_analysis", "equilibrium_finding", "payoff_calculation"],
-      synthesis: ["source_identification", "theme_extraction", "gap_analysis", "framework_construction"],
-      argumentation: ["claim_formulation", "grounds_development", "warrant_construction", "rebuttal_analysis"],
-      critique: ["work_characterization", "methodology_evaluation", "argument_critique", "contribution_assessment"],
-      analysis: ["data_familiarization", "coding", "theme_development", "pattern_analysis"]
-    };
-    const modeKey = mode.toLowerCase();
-    return thoughtTypes[modeKey] || ["general"];
-  }
-  /**
-   * Clear all registered handlers (for testing)
-   */
-  clear() {
-    this.handlers.clear();
-  }
-};
-
-// src/index.ts
+init_handlers();
 var __filename2 = fileURLToPath(import.meta.url);
 var __dirname2 = dirname(__filename2);
 var packageJson = JSON.parse(

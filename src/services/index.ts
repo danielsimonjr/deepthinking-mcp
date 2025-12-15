@@ -7,5 +7,6 @@
  */
 
 export { ThoughtFactory } from './ThoughtFactory.js';
+export { RefactoredThoughtFactory } from './RefactoredThoughtFactory.js';
 export { ExportService } from './ExportService.js';
 export { ModeRouter } from './ModeRouter.js';

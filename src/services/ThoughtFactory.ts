@@ -44,6 +44,16 @@ import { ThinkingToolInput } from '../tools/thinking.js';
 import { toExtendedThoughtType } from '../utils/type-guards.js';
 import { ILogger } from '../interfaces/ILogger.js';
 import { createLogger, LogLevel } from '../utils/logger.js';
+import {
+  ModeHandlerRegistry,
+  CausalHandler,
+  BayesianHandler,
+  GameTheoryHandler,
+  CounterfactualHandler,
+  SynthesisHandler,
+  SystemsThinkingHandler,
+  CritiqueHandler,
+} from '../modes/handlers/index.js';
 
 /**
  * Thought Factory - Creates mode-specific thought objects
@@ -60,9 +70,51 @@ import { createLogger, LogLevel } from '../utils/logger.js';
  */
 export class ThoughtFactory {
   private logger: ILogger;
+  private registry: ModeHandlerRegistry;
 
   constructor(logger?: ILogger) {
     this.logger = logger || createLogger({ minLevel: LogLevel.INFO, enableConsole: true });
+    this.registry = ModeHandlerRegistry.getInstance();
+    this.registerSpecializedHandlers();
+  }
+
+  /**
+   * Register all specialized handlers (Phase 10 Sprint 2 + 2B)
+   */
+  private registerSpecializedHandlers(): void {
+    // Sprint 2 handlers
+    this.registry.replace(new CausalHandler());
+    this.registry.replace(new BayesianHandler());
+    this.registry.replace(new GameTheoryHandler());
+
+    // Sprint 2B handlers
+    this.registry.replace(new CounterfactualHandler());
+    this.registry.replace(new SynthesisHandler());
+    this.registry.replace(new SystemsThinkingHandler());
+    this.registry.replace(new CritiqueHandler());
+
+    this.logger.debug('Specialized handlers registered', {
+      count: 7,
+      handlers: ['Causal', 'Bayesian', 'GameTheory', 'Counterfactual', 'Synthesis', 'SystemsThinking', 'Critique'],
+    });
+  }
+
+  /**
+   * Check if a mode has a specialized handler
+   */
+  hasSpecializedHandler(mode: ThinkingMode): boolean {
+    return this.registry.hasSpecializedHandler(mode);
+  }
+
+  /**
+   * Get stats about registered handlers
+   */
+  getStats(): { specializedHandlers: number; modesWithHandlers: ThinkingMode[] } {
+    const stats = this.registry.getStats();
+    return {
+      specializedHandlers: stats.specializedHandlers,
+      modesWithHandlers: stats.modesWithHandlers,
+    };
   }
   /**
    * Create a thought object based on input and mode
@@ -87,14 +139,24 @@ export class ThoughtFactory {
    * ```
    */
   createThought(input: ThinkingToolInput, sessionId: string): Thought {
+    const mode = (input.mode as ThinkingMode) || ThinkingMode.HYBRID;
+
     this.logger.debug('Creating thought', {
       sessionId,
-      mode: input.mode,
+      mode,
       thoughtNumber: input.thoughtNumber,
       totalThoughts: input.totalThoughts,
       isRevision: input.isRevision,
+      hasSpecializedHandler: this.registry.hasSpecializedHandler(mode),
     });
 
+    // Use specialized handler if available (Phase 10 Sprint 2/2B)
+    if (this.registry.hasSpecializedHandler(mode)) {
+      this.logger.debug('Using specialized handler', { mode });
+      return this.registry.createThought(input, sessionId);
+    }
+
+    // Fall back to switch statement for non-migrated modes
     const baseThought = {
       id: randomUUID(),
       sessionId,
