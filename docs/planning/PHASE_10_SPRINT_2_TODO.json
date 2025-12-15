@@ -4,13 +4,14 @@
   "title": "ModeHandler Migration - Core Modes",
   "week": "Week 2",
   "effort": "5-6 hours",
-  "status": "pending",
+  "status": "completed",
+  "completedDate": "2025-12-13",
   "tasks": [
     {
       "id": "10.2.1",
       "category": "Migration",
       "description": "Migrate CausalHandler - Full ModeHandler implementation with semantic validation, validates causal graph structure, detects cycles, propagates interventions",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.5,
       "files": [
         "src/modes/handlers/CausalHandler.ts",
@@ -21,7 +22,7 @@
       "id": "10.2.2",
       "category": "Migration",
       "description": "Migrate BayesianHandler - Implements automatic posterior calculation from prior and likelihood, validates probability values sum to 1",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.5,
       "files": [
         "src/modes/handlers/BayesianHandler.ts",
@@ -32,7 +33,7 @@
       "id": "10.2.3",
       "category": "Migration",
       "description": "Migrate GameTheoryHandler - Validates payoff matrix dimensions, checks player/strategy consistency, computes basic Nash equilibria",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.0,
       "files": [
         "src/modes/handlers/GameTheoryHandler.ts",
@@ -43,7 +44,7 @@
       "id": "10.2.4",
       "category": "Integration",
       "description": "Update ThoughtFactory to Use Registry - Wire RefactoredThoughtFactory into index.ts, register migrated handlers, verify incremental migration works",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.0,
       "files": [
         "src/index.ts",
@@ -54,7 +55,7 @@
       "id": "10.2.5",
       "category": "Testing",
       "description": "Add Handler Integration Tests - Test that factory correctly delegates to handlers, test fallback to GenericModeHandler for non-migrated modes",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 0.5,
       "files": [
         "tests/integration/mode-handler-delegation.test.ts"
@@ -62,10 +63,10 @@
     }
   ],
   "successCriteria": [
-    "3 modes migrated to handler pattern (Causal, Bayesian, GameTheory)",
-    "Each handler has specialized validation logic that adds value",
-    "Factory delegates to handlers for migrated modes",
-    "All 791+ tests pass"
+    "3 modes migrated to handler pattern (Causal, Bayesian, GameTheory) ✓",
+    "Each handler has specialized validation logic that adds value ✓",
+    "Factory delegates to handlers for migrated modes ✓",
+    "All 791+ tests pass ✓"
   ],
   "filesCreated": [
     "src/modes/handlers/CausalHandler.ts",
@@ -81,5 +82,7 @@
     "src/services/ThoughtFactory.ts"
   ],
   "totalEstimatedHours": 5.5,
-  "notes": "Reduced from 5 handlers to 3 per PACKAGE_SUMMARY recommendation of ~2 handlers per week. Counterfactual and Synthesis moved to Sprint 2B."
+  "actualHours": 5,
+  "notes": "Core mode migration complete. Handlers integrated directly into ThoughtFactory (v8.2.1) instead of using RefactoredThoughtFactory wrapper.",
+  "commit": "11f5a1a"
 }

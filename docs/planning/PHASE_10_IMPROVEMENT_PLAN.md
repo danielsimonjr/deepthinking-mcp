@@ -552,30 +552,31 @@ src/
 - [ ] Create git branch `phase-10-improvements`
 - [ ] Review improvement documents thoroughly
 
-### Sprint 1 Checklist
-- [ ] Create ModeHandler interface and registry
-- [ ] Create GenericModeHandler
-- [ ] Add modeStatus to API responses
-- [ ] Create RefactoredThoughtFactory
-- [ ] Add handler tests
-- [ ] Update type definitions
-- [ ] Commit: "feat: Add ModeHandler infrastructure"
+### Sprint 1 Checklist ✅ (v8.0.0 - Completed 2025-12-13)
+- [x] Create ModeHandler interface and registry
+- [x] Create GenericModeHandler
+- [x] Add modeStatus to API responses
+- [x] Create RefactoredThoughtFactory
+- [x] Add handler tests
+- [x] Update type definitions
+- [x] Commit: "feat(v8.0.0): Phase 10 Sprint 1 - ModeHandler Infrastructure" (17fa6b2)
 
-### Sprint 2 Checklist
-- [ ] Migrate CausalHandler
-- [ ] Migrate BayesianHandler
-- [ ] Migrate GameTheoryHandler
-- [ ] Wire factory to registry
-- [ ] Add handler integration tests
-- [ ] Commit: "feat: Migrate 3 core modes to ModeHandler pattern"
+### Sprint 2 Checklist ✅ (v8.1.0 - Completed 2025-12-13)
+- [x] Migrate CausalHandler
+- [x] Migrate BayesianHandler
+- [x] Migrate GameTheoryHandler
+- [x] Wire factory to registry
+- [x] Add handler integration tests
+- [x] Commit: "feat(v8.1.0): Phase 10 Sprint 2 - ModeHandler Migration - Core Modes" (11f5a1a)
 
-### Sprint 2B Checklist
-- [ ] Migrate CounterfactualHandler
-- [ ] Migrate SynthesisHandler
-- [ ] Migrate SystemsThinkingHandler (with archetypes)
-- [ ] Migrate CritiqueHandler (with Socratic questions)
-- [ ] Verify all handler migrations
-- [ ] Commit: "feat: Migrate 4 additional modes with enhancements"
+### Sprint 2B Checklist ✅ (v8.2.0/v8.2.1 - Completed 2025-12-14)
+- [x] Migrate CounterfactualHandler
+- [x] Migrate SynthesisHandler
+- [x] Migrate SystemsThinkingHandler (with archetypes)
+- [x] Migrate CritiqueHandler (with Socratic questions)
+- [x] Verify all handler migrations
+- [x] Commit: "feat(v8.2.0): Phase 10 Sprint 2B - ModeHandler Migration - Advanced Modes" (6a14b1a)
+- [x] Fix: "fix(v8.2.1): Integrate ModeHandlers into ThoughtFactory for MCP server usage" (35c98af)
 
 ### Sprint 3 Checklist
 - [ ] Create PatternDetector
