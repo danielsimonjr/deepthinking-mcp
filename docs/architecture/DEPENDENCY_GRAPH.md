@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 8.2.0 | **Last Updated**: 2025-12-16
+**Version**: 8.2.1 | **Last Updated**: 2025-12-16
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -3433,4 +3433,4 @@ graph TD
 ---
 
 *Last Updated*: 2025-12-16
-*Version*: 8.2.0
+*Version*: 8.2.1

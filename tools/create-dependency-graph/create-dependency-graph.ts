@@ -16,7 +16,6 @@
 
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname, relative, basename } from 'path';
-import { fileURLToPath } from 'url';
 import yaml from 'js-yaml';
 
 // Types
@@ -94,10 +93,42 @@ interface PackageJson {
   version: string;
 }
 
-// Constants
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const ROOT_DIR = join(__dirname, '..');
+// Constants - support CLI argument or current working directory for portability
+function getProjectRoot(): string {
+  // Check for CLI argument: --root=/path/to/project or first positional arg
+  const args = process.argv.slice(2);
+  for (const arg of args) {
+    if (arg.startsWith('--root=')) {
+      return arg.slice(7);
+    }
+    if (arg === '--help' || arg === '-h') {
+      console.log(`
+Dependency Graph Generator
+
+Usage:
+  create-dependency-graph [options] [project-root]
+
+Options:
+  --root=<path>   Project root directory (default: current directory)
+  --help, -h      Show this help
+
+Examples:
+  create-dependency-graph                     # Use current directory
+  create-dependency-graph ./my-project        # Specify project path
+  create-dependency-graph --root=C:/projects/my-app
+`);
+      process.exit(0);
+    }
+    // First non-flag argument is the project root
+    if (!arg.startsWith('-') && existsSync(arg)) {
+      return arg;
+    }
+  }
+  // Fallback to current working directory
+  return process.cwd();
+}
+
+const ROOT_DIR = getProjectRoot();
 const SRC_DIR = join(ROOT_DIR, 'src');
 const OUTPUT_DIR = join(ROOT_DIR, 'docs', 'architecture');
 

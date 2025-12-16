@@ -70,6 +70,9 @@ add-to-config.cjs
 
 # Archives (don't track zip files)
 *.zip
+
+# Compiled executables (Bun compiled, ~114MB each)
+*.exe
 /.claude
 /.claude
 .claude/settings.local.json

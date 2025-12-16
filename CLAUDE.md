@@ -4,22 +4,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **33 reasoning modes** (29 with dedicated thought types) with taxonomy-based classification (69 reasoning types across 12 categories, 110 planned), enterprise security, proof decomposition, and visual export capabilities including native SVG.
+DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **33 reasoning modes** (29 with dedicated thought types) with taxonomy-based classification (69 reasoning types across 12 categories, 110 planned), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
-**Version**: 7.5.2 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
+**Version**: 8.2.1 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
 
 ## Project Metrics
 
 | Metric | Value |
 |--------|-------|
-| TypeScript Files | 185 |
-| Lines of Code | 74,443 |
-| Total Exports | 978 (413 re-exports) |
-| Passing Tests | 791 (39 test files) |
+| TypeScript Files | 197 |
+| Lines of Code | ~80,336 |
+| Total Exports | 1033 (448 re-exports) |
+| Passing Tests | 1046 (50 test files) |
 | Reasoning Modes | 33 (21 fully implemented + 12 experimental) |
 | MCP Tools | 12 focused + 1 legacy |
 | Export Formats | 8 + native SVG |
 | Visual Exporters | 35+ mode-specific files |
+| Specialized Handlers | 7 ModeHandlers (v8.x architecture) |
 | Circular Dependencies | 41 (all type-only, 0 runtime) |
 
 ## Build & Development Commands
@@ -63,6 +64,22 @@ Business logic extracted from `src/index.ts` into focused services:
 | **ExportService** | `src/services/ExportService.ts` | 21KB | Multi-format export orchestration |
 | **ModeRouter** | `src/services/ModeRouter.ts` | 12KB | Mode switching and recommendations |
 | **MetaMonitor** | `src/services/MetaMonitor.ts` | 9KB | Session tracking and meta-reasoning insights |
+
+### ModeHandler Architecture (v8.x)
+
+The Strategy Pattern-based ModeHandler system in `src/modes/handlers/`:
+
+| Handler | Features |
+|---------|----------|
+| **CausalHandler** | Graph validation, cycle detection, intervention tracking |
+| **BayesianHandler** | Auto posterior calculation, evidence tracking |
+| **GameTheoryHandler** | Payoff matrix validation, Nash equilibria detection |
+| **CounterfactualHandler** | World state tracking, consequence analysis |
+| **SynthesisHandler** | Source coverage tracking, theme extraction |
+| **SystemsThinkingHandler** | 8 Systems Archetypes detection (Senge patterns) |
+| **CritiqueHandler** | 6 Socratic question categories (Paul framework) |
+
+Handler registration via `ModeHandlerRegistry` singleton with `GenericModeHandler` fallback.
 
 ### Key Directories
 
@@ -131,14 +148,15 @@ Note: 29 modes have dedicated thought types. 4 modes (Recursive, Modal, Stochast
 
 | Version | Phase | Key Features |
 |---------|-------|--------------|
-| **v7.5.2** | Phase 14 | Bug fix: All 11 experimental modes now return correct mode type instead of defaulting to hybrid |
-| **v7.5.1** | Phase 14 | Bug fixes: Merge conflicts, validator issues, YAML/compact exports |
-| **v7.5.0** | Phase 14 | Accessible Reasoning Modes - All 29 modes with thought types now accessible via MCP tools (12 tools) |
-| **v7.4.0** | Phase 13 | Academic Research modes - Synthesis, Argumentation, Critique, Analysis (PhD/scientific writing) |
-| **v7.3.0** | Phase 12 | ALGORITHMIC mode - CLRS algorithms, DP formulations, correctness proofs, amortized analysis |
-| **v7.2.0** | Phase 11 | COMPUTABILITY (Turing machines), CRYPTANALYTIC (deciban system), von Neumann Game Theory |
-| **v7.1.0** | Phase 10 | ENGINEERING mode - Requirements traceability, Trade studies, FMEA, Design decisions |
-| **v7.0.0** | Phase 8 | Proof Decomposition, Native SVG export, MathematicsReasoningEngine |
+| **v8.2.1** | Phase 10 Sprint 2B | ThoughtFactory handler integration fix, documentation updates |
+| **v8.2.0** | Phase 10 Sprint 2B | Advanced ModeHandlers: Synthesis, SystemsThinking (8 archetypes), Critique (6 Socratic categories) |
+| **v8.1.0** | Phase 10 Sprint 2 | Core ModeHandlers: Causal, Bayesian, GameTheory, Counterfactual |
+| **v8.0.0** | Phase 10 Sprint 1 | ModeHandler Infrastructure - Strategy Pattern architecture, Registry singleton |
+| **v7.5.2** | Phase 14 | Bug fix: All 11 experimental modes now return correct mode type |
+| **v7.5.0** | Phase 14 | Accessible Reasoning Modes - 12 focused MCP tools |
+| **v7.4.0** | Phase 13 | Academic Research modes - Synthesis, Argumentation, Critique, Analysis |
+| **v7.3.0** | Phase 12 | ALGORITHMIC mode - CLRS algorithms, DP formulations |
+| **v7.0.0** | Phase 8 | Proof Decomposition, Native SVG export |
 
 ## MCP Tools
 
@@ -211,6 +229,9 @@ The server provides 12 focused tools + 1 legacy tool:
 | `src/types/modes/argumentation.ts` | Toulmin model argumentation types |
 | `src/types/modes/critique.ts` | Critical analysis types |
 | `src/types/modes/analysis.ts` | Qualitative analysis types |
+| `src/modes/handlers/ModeHandler.ts` | Handler interface definition |
+| `src/modes/handlers/ModeHandlerRegistry.ts` | Singleton registry for handlers |
+| `src/modes/handlers/SystemsThinkingHandler.ts` | 8 Systems Archetypes detection |
 
 ## Development Best Practices
 
@@ -290,3 +311,25 @@ Mode-specific documentation in `docs/modes/`:
 - `ANALYSIS.md` - Qualitative analysis documentation
 
 Generate dependency docs: `npm run docs:deps`
+
+## Standalone Tools
+
+The `tools/` directory contains standalone utilities compiled to executables with Bun:
+
+| Tool | Location | Purpose |
+|------|----------|---------|
+| **compress-for-context.exe** | `tools/compress-for-context/` | CTON context compression for LLM context windows |
+| **create-dependency-graph.exe** | `tools/create-dependency-graph/` | Generates dependency graph documentation |
+
+### Usage
+
+```bash
+# Compress files for LLM context
+tools/compress-for-context/compress-for-context.exe README.md -l aggressive
+tools/compress-for-context/compress-for-context.exe -b -r -p "*.md" ./docs
+
+# Generate dependency graph (run from any TypeScript project)
+tools/create-dependency-graph/create-dependency-graph.exe C:\path\to\project
+```
+
+Both tools are self-contained (~114MB each, includes Bun runtime) and require no Node.js installation.
