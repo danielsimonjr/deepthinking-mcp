@@ -6,15 +6,15 @@
 
 A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning modes** (29 with dedicated thought types, 4 advanced runtime modes) including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
-> 📋 **Latest Release**: v7.5.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
+> 📋 **Latest Release**: v8.2.1 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
 >
-> 🎉 **New in v7.5.0**: Phase 14 Accessible Reasoning Modes! All 29 modes with dedicated thought types are now accessible via MCP tools. 2 new tools: `deepthinking_engineering` and `deepthinking_academic`. Total: 12 focused tools.
+> 🎉 **New in v8.2.x**: Phase 10 ModeHandler Architecture! 7 specialized handlers with advanced validation and enhancements - Systems Archetypes detection, Socratic question framework, automatic Bayesian posterior calculation, Nash equilibria computation.
 >
-> ✨ **v7.4.0**: Phase 13 Academic Research Modes for PhD students! Synthesis (literature review), Argumentation (Toulmin model), Critique (peer review), and Analysis (qualitative methods) modes.
+> ✨ **v8.0.0**: ModeHandler infrastructure with Strategy pattern for mode-specific processing.
 >
-> ✨ **v7.3.0**: Phase 12 Algorithmic Reasoning Mode with comprehensive CLRS coverage! 100+ named algorithms, complexity analysis, design patterns.
+> ✨ **v7.5.0**: All 29 modes with dedicated thought types accessible via 12 focused MCP tools.
 >
-> ✨ **v7.2.0**: Phase 11 Historical Computing Extensions! Computability mode (Turing machines), Cryptanalytic mode (deciban evidence system), extended Game Theory (von Neumann).
+> ✨ **v7.4.0**: Academic Research Modes - Synthesis (literature review), Argumentation (Toulmin model), Critique (peer review), Analysis (qualitative methods).
 
 ## Table of Contents
 
@@ -32,8 +32,10 @@ A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning mod
 ## Features
 
 - **33 Specialized Reasoning Modes** - From sequential thinking to game theory, formal logic, and meta-reasoning (29 with full thought types, 4 advanced runtime modes)
-- **Academic Research Modes (NEW!)** - Synthesis (literature review), Argumentation (Toulmin), Critique (peer review), Analysis (qualitative methods)
-- **Algorithmic Reasoning (v7.3.0)** - Comprehensive CLRS coverage with 100+ named algorithms, complexity analysis, design patterns
+- **ModeHandler Architecture (v8.x)** - Strategy pattern with 7 specialized handlers providing advanced validation and enhancements
+- **Specialized Handler Enhancements** - Systems Archetypes (8 patterns), Socratic Questions (6 categories), auto Bayesian posteriors, Nash equilibria
+- **Academic Research Modes** - Synthesis (literature review), Argumentation (Toulmin), Critique (peer review), Analysis (qualitative methods)
+- **Algorithmic Reasoning** - Comprehensive CLRS coverage with 100+ named algorithms, complexity analysis, design patterns
 - **Historical Computing Extensions** - Computability (Turing machines), Cryptanalytic (decibans), extended Game Theory (von Neumann)
 - **Proof Decomposition** - Break proofs into atomic statements, detect gaps, track assumption chains
 - **Native SVG Export** - Direct SVG generation without external tools for proof visualizations
@@ -466,6 +468,44 @@ mode: 'analysis'
 // Features: Multiple qualitative analysis frameworks, coding support
 ```
 
+### Specialized Mode Handlers (v8.x)
+
+Phase 10 introduced 7 specialized handlers with advanced validation and enhancements:
+
+| Handler | Mode | Key Enhancements |
+|---------|------|------------------|
+| **CausalHandler** | causal | Validates graph structure, detects cycles, propagates interventions |
+| **BayesianHandler** | bayesian | Auto-calculates posteriors from prior × likelihood, validates probability sums |
+| **GameTheoryHandler** | gametheory | Validates payoff matrix dimensions, computes Nash equilibria |
+| **CounterfactualHandler** | counterfactual | Tracks world states, validates divergence points, compares outcomes |
+| **SynthesisHandler** | synthesis | Tracks source coverage, validates theme extraction, detects contradictions |
+| **SystemsThinkingHandler** | systemsthinking | Detects 8 Systems Archetypes, adds warning signs and interventions |
+| **CritiqueHandler** | critique | 6 Socratic question categories for rigorous critical analysis |
+
+#### Systems Archetypes Detection
+
+SystemsThinkingHandler automatically detects Peter Senge's 8 archetypes:
+
+- **Fixes that Fail** - Short-term fixes with unintended consequences
+- **Shifting the Burden** - Symptomatic vs fundamental solutions
+- **Limits to Growth** - Growth hitting constraints
+- **Success to the Successful** - Winner-take-all dynamics
+- **Tragedy of the Commons** - Shared resource depletion
+- **Escalation** - Competitive escalation spirals
+- **Accidental Adversaries** - Alliance deterioration
+- **Growth and Underinvestment** - Capacity constraints
+
+#### Socratic Question Framework
+
+CritiqueHandler uses Richard Paul's 6 categories:
+
+- **Clarification** - "What do you mean by...?"
+- **Assumptions** - "What are you assuming?"
+- **Evidence** - "What evidence supports this?"
+- **Perspectives** - "Are there alternative viewpoints?"
+- **Implications** - "What are the consequences?"
+- **Meta** - "Why is this question important?"
+
 ## Proof Decomposition
 
 **New in v7.0.0!** The proof decomposition system provides advanced mathematical reasoning capabilities:
@@ -742,17 +782,18 @@ For architecture details, see [docs/architecture/](docs/architecture/).
 
 | Metric | Value |
 |--------|-------|
-| TypeScript Files | 183 |
-| Lines of Code | ~62,000 |
-| Test Files | 40 |
-| Passing Tests | 792+ |
+| TypeScript Files | 197 |
+| Lines of Code | ~80,336 |
+| Test Files | 39 |
+| Passing Tests | 1046+ |
 | Thinking Modes | 33 (29 with thought types) |
-| MCP Tools | 10 focused + 1 legacy |
-| Export Formats | 11 (including native SVG) |
-| Visual Formats | 11 (mermaid, dot, ascii, svg, etc.) |
+| Specialized Handlers | 7 |
+| MCP Tools | 12 focused + 1 legacy |
+| Export Formats | 8 (including native SVG) |
+| Visual Exporters | 35+ mode-specific files |
 | Reasoning Types | 69 (110 planned) |
 | Modules | 16 |
-| Total Exports | 970 |
+| Total Exports | 1033 (448 re-exports) |
 
 ## Architecture
 
@@ -765,13 +806,22 @@ src/
 ├── index.ts           # MCP server entry point (tool handlers)
 ├── types/             # Type definitions including 33 mode types
 │   ├── core.ts        # ThinkingMode enum, Thought union type
-│   └── modes/         # One file per reasoning mode (23 files)
+│   └── modes/         # One file per reasoning mode (26 files)
 ├── services/          # Business logic layer
-│   ├── ThoughtFactory.ts    # Thought creation and validation
+│   ├── ThoughtFactory.ts    # Thought creation with handler integration
 │   ├── ExportService.ts     # Multi-format export handling
 │   └── ModeRouter.ts        # Mode switching and recommendations
 ├── session/           # SessionManager, persistence, storage
-├── modes/             # Advanced reasoning implementations (7 files)
+├── modes/             # ModeHandler architecture (v8.x)
+│   ├── handlers/            # 7 specialized handlers
+│   │   ├── CausalHandler.ts
+│   │   ├── BayesianHandler.ts
+│   │   ├── GameTheoryHandler.ts
+│   │   ├── CounterfactualHandler.ts
+│   │   ├── SynthesisHandler.ts
+│   │   ├── SystemsThinkingHandler.ts
+│   │   └── CritiqueHandler.ts
+│   └── base/                # ModeHandler interface, registry
 ├── proof/             # Proof decomposition system (v7.0.0)
 │   ├── decomposer.ts        # ProofDecomposer class
 │   ├── gap-analyzer.ts      # GapAnalyzer class
@@ -780,6 +830,30 @@ src/
 │   └── inconsistency-detector.ts  # InconsistencyDetector class
 └── tools/             # MCP tool definitions and schemas
 ```
+
+### ModeHandler Architecture (v8.x)
+
+Phase 10 introduced the ModeHandler pattern (Strategy pattern) for mode-specific processing:
+
+```typescript
+// Handler interface
+interface ModeHandler {
+  mode: ThinkingMode;
+  validate(input: ThinkingToolInput): ValidationResult;
+  enhance(thought: Thought, context: SessionContext): Thought;
+  getSuggestions(thought: Thought): string[];
+}
+
+// Registry manages all handlers
+const registry = ModeHandlerRegistry.getInstance();
+registry.hasSpecializedHandler('causal'); // true for 7 modes
+```
+
+**Benefits:**
+- Specialized validation logic per mode
+- Automatic enhancements (posteriors, equilibria, archetypes)
+- Mode-specific suggestions and warnings
+- Clean separation from ThoughtFactory switch statement
 
 ### Feature Modules
 
@@ -799,7 +873,7 @@ src/
 ├── backup/            # Backup manager with provider abstraction
 ├── cache/             # LRU/LFU/FIFO caching strategies
 ├── rate-limit/        # Sliding window rate limiter
-├── validation/        # Zod schemas (25+ mode validators)
+├── validation/        # Zod schemas (31+ mode validators)
 ├── comparison/        # Session comparison & diff generation
 ├── templates/         # Session templates with usage tracking
 ├── analytics/         # Analytics engine and dashboard
