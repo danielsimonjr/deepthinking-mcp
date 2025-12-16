@@ -2,53 +2,41 @@
 
 ## System Architecture
 
-DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced reasoning capabilities through 27 thinking modes (23 with dedicated thought types) with meta-reasoning for strategic oversight. The architecture follows a modular, service-oriented design with clear separation of concerns.
+DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced reasoning capabilities through 33 thinking modes (29 with dedicated thought types) with meta-reasoning for strategic oversight. The architecture follows a modular, service-oriented design with clear separation of concerns.
 
-**Version**: 7.2.0 | **Node**: >=18.0.0
+**Version**: 8.2.1 | **Node**: >=18.0.0
 
-## What's New in v7.2.0
+## What's New in v8.2.x
 
-### Phase 11: Historical Computing Extensions - Turing & von Neumann Tributes
+### Phase 10: ModeHandler Architecture
 
-This release introduces modes inspired by the foundational work of Alan Turing and John von Neumann:
+This release introduces the ModeHandler pattern for mode-specific processing:
 
-- **ComputabilityMode** (`src/types/modes/computability.ts`): Turing machines, decidability proofs, reductions, diagonalization
-- **CryptanalyticMode** (`src/types/modes/cryptanalytic.ts`): Turing's deciban system, Banburismus, frequency analysis
-- **Extended GameTheory** (`src/types/modes/gametheory.ts`): von Neumann's minimax theorem, cooperative games, Shapley values
-- **ComputabilityValidator** (`src/validation/validators/modes/computability.ts`): Turing machine well-formedness validation
-- **CryptanalyticValidator** (`src/validation/validators/modes/cryptanalytic.ts`): Deciban calculation validation
-- **ComputabilityExporter** (`src/export/visual/computability.ts`): State diagram and reduction chain visualizations
+- **ModeHandler Interface** (`src/modes/handlers/ModeHandler.ts`): Strategy pattern for mode-specific validation and enhancement
+- **ModeHandlerRegistry** (`src/modes/handlers/ModeHandlerRegistry.ts`): Singleton registry managing all specialized handlers
+- **7 Specialized Handlers**: CausalHandler, BayesianHandler, GameTheoryHandler, CounterfactualHandler, SynthesisHandler, SystemsThinkingHandler, CritiqueHandler
+- **ThoughtFactory Integration**: Handlers integrated directly for seamless thought creation
 
-### Key Features (v7.2.0)
-- Turing machine simulation with tape, head, and state transitions
-- Decidability proofs with reduction chains
-- Diagonalization arguments for undecidability
-- Evidence chains with deciban accumulation (10 decibans ≈ 10:1 odds)
-- Key space analysis with elimination methods
-- Frequency analysis with index of coincidence
-- Minimax analysis for zero-sum games
-- Cooperative game theory with coalition analysis
-- Shapley value calculations for fair value distribution
+### Key Handler Enhancements (v8.2.x)
+- **CausalHandler**: Validates graph structure, detects cycles, propagates interventions
+- **BayesianHandler**: Auto-calculates posteriors from prior × likelihood, validates probability sums
+- **GameTheoryHandler**: Validates payoff matrix dimensions, computes Nash equilibria
+- **CounterfactualHandler**: Tracks world states, validates divergence points, compares outcomes
+- **SynthesisHandler**: Tracks source coverage, validates theme extraction, detects contradictions
+- **SystemsThinkingHandler**: Detects 8 Systems Archetypes (Peter Senge) with warning signs and interventions
+- **CritiqueHandler**: Applies 6 Socratic question categories (Richard Paul) for rigorous analysis
+
+## What's New in v7.5.0
+
+- **Phase 14: Accessible Reasoning Modes** - All 29 modes accessible via 12 focused MCP tools
 
 ## What's New in v7.0.0
 
 ### Phase 8: Proof Decomposition & Mathematical Reasoning Engine
 
-This release introduces a comprehensive proof decomposition system for mathematical reasoning:
-
-- **ProofDecomposer** (`src/proof/decomposer.ts`): Breaks proofs into atomic statements
-- **GapAnalyzer** (`src/proof/gap-analyzer.ts`): Detects gaps and implicit assumptions
-- **AssumptionTracker** (`src/proof/assumption-tracker.ts`): Traces conclusions to assumptions
-- **MathematicsReasoningEngine** (`src/modes/mathematics-reasoning.ts`): Advanced mathematical analysis
-- **InconsistencyDetector** (`src/reasoning/inconsistency-detector.ts`): Logical inconsistency detection
-- **Native SVG Export**: Direct SVG generation for proof decomposition visualizations
-
-### Key Features
-- Decompose proofs into atomic statements with dependency graphs
-- Detect gaps: missing steps, unjustified leaps, implicit assumptions
-- Track assumption chains and discharge status
-- Compute completeness and rigor metrics
-- Visual exports in Mermaid, DOT, ASCII, and native SVG formats
+- **ProofDecomposer**: Breaks proofs into atomic statements with dependency graphs
+- **GapAnalyzer**: Detects gaps, missing steps, implicit assumptions
+- **Native SVG Export**: Direct SVG generation without external tools
 
 ## High-Level Architecture
 
@@ -60,12 +48,13 @@ This release introduces a comprehensive proof decomposition system for mathemati
 ┌───────────────────┴─────────────────────────────────────────┐
 │                   MCP Server (index.ts)                     │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │              10 Focused Tool Handlers (v5.0.0+)        │ │
+│  │              12 Focused Tool Handlers (v7.5.0+)        │ │
 │  │  • deepthinking_core         • deepthinking_standard   │ │
 │  │  • deepthinking_mathematics  • deepthinking_temporal   │ │
 │  │  • deepthinking_probabilistic • deepthinking_causal    │ │
 │  │  • deepthinking_strategic    • deepthinking_analytical │ │
-│  │  • deepthinking_scientific   • deepthinking_session    │ │
+│  │  • deepthinking_scientific   • deepthinking_engineering│ │
+│  │  • deepthinking_academic     • deepthinking_session    │ │
 │  └────────────────────────────────────────────────────────┘ │
 └───────┬──────────┬──────────┬───────────┬───────────────────┘
         │          │          │           │
@@ -108,12 +97,14 @@ This release introduces a comprehensive proof decomposition system for mathemati
 ### 2. Service Layer
 
 #### ThoughtFactory (`src/services/ThoughtFactory.ts`)
-- **Role**: Centralized thought creation for all 27 thinking modes
+- **Role**: Centralized thought creation for all 33 thinking modes with handler integration (v8.x)
 - **Responsibilities**:
   - Creates mode-specific thought objects
-  - Applies mode-specific validation
+  - Delegates to specialized handlers via ModeHandlerRegistry (v8.x)
+  - Applies mode-specific validation and enhancements
   - Handles thought revisions and dependencies
-- **Modes Supported**: Sequential, Shannon, Mathematics, Physics, Hybrid, Inductive, Deductive, Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory, Evidential, First Principles, Systems Thinking, Scientific Method, Optimization, Formal Logic, Metareasoning, Recursive, Modal, Stochastic, Constraint, **Computability** (v7.2.0), **Cryptanalytic** (v7.2.0)
+- **Handler Integration (v8.x)**: Checks `registry.hasSpecializedHandler(mode)` before falling back to switch statement
+- **Modes Supported**: 33 modes including Sequential, Shannon, Mathematics, Physics, Hybrid, Inductive, Deductive, Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory, Evidential, First Principles, Systems Thinking, Scientific Method, Optimization, Formal Logic, Metareasoning, Recursive, Modal, Stochastic, Constraint, Computability, Cryptanalytic, Algorithmic, Synthesis, Argumentation, Critique, Analysis, Engineering
 
 #### ExportService (`src/services/ExportService.ts`)
 - **Role**: Unified export logic for multiple formats
@@ -468,45 +459,38 @@ Response with updated session
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~58,000 |
-| TypeScript Files | 178 |
+| Total Lines of Code | ~80,336 |
+| TypeScript Files | 197 |
 | Type Suppressions | 0 |
-| Test Files | 40 |
-| Tests | 792+ |
-| Thinking Modes | 27 (23 with thought types) |
-| MCP Tools | 10 focused + 1 legacy |
-| Export Formats | 8 (+ native SVG) |
-| Visual Formats | 4 (mermaid, dot, ascii, svg) |
+| Test Files | 39 |
+| Tests | 1046+ |
+| Thinking Modes | 33 (29 with thought types) |
+| Specialized Handlers | 7 |
+| MCP Tools | 12 focused + 1 legacy |
+| Export Formats | 8 (including native SVG) |
+| Visual Exporters | 35+ mode-specific |
 | Backup Providers | 4 |
-| Visual Exporters | 21 mode-specific |
 | Reasoning Types | 69 (110 planned) |
 | Modules | 16 |
-| Total Exports | 888 |
+| Total Exports | 1033 (448 re-exports) |
 
 ## Version History
 
-- **v7.2.0** (Current): Phase 11 historical computing extensions, Computability mode (Turing machines), Cryptanalytic mode (decibans), extended Game Theory (von Neumann)
-- **v7.1.0**: Markdown visual export format for all 21 exporters
-- **v7.0.0**: Phase 8 proof decomposition system, native SVG export, MathematicsReasoningEngine
-- **v6.1.2**: Fixed causal graph exports (nodes/edges preserved in Zod validation)
-- **v6.1.1**: Eliminated 24 runtime circular dependencies
-- **v6.1.0**: Circular dependency fixes, logger-types.ts extraction
-- **v6.0.0**: Meta-reasoning mode, MetaMonitor service, adaptive mode switching, quality metrics
-- **v5.0.1**: Mode recommendation bugfixes for philosophical domains
-- **v5.0.0**: Fundamental reasoning modes (Inductive, Deductive), deepthinking_core tool
-- **v4.4.0**: 10 focused tools with hand-written JSON schemas
-- **v4.3.0**: Visual export modularization, lazy validator loading, validation constants, tree-shaking optimizations
-- **v4.2.0**: Schema consolidation, tree-shaking configuration
-- **v4.1.0**: Token optimization, lazy schema loading
-- **v4.0.0**: Tool splitting, major refactoring
-- **v3.5.0**: Production-ready architecture, enterprise security
-- **v3.4.0**: Taxonomy system, backup management
-- **v3.3.0**: Visualization, interactive features
-- **v3.2.0**: Advanced reasoning modes
-- **v3.1.0**: Search and batch processing
+- **v8.2.1** (Current): Phase 10 ModeHandler integration fix in ThoughtFactory
+- **v8.2.0**: Phase 10 Sprint 2B - Additional mode handlers (Counterfactual, Synthesis, SystemsThinking, Critique)
+- **v8.1.0**: Phase 10 Sprint 2 - Core mode handlers (Causal, Bayesian, GameTheory)
+- **v8.0.0**: Phase 10 Sprint 1 - ModeHandler infrastructure and registry
+- **v7.5.0**: Phase 14 accessible reasoning modes - 12 focused MCP tools
+- **v7.4.0**: Phase 13 academic research modes (Synthesis, Argumentation, Critique, Analysis)
+- **v7.3.0**: Phase 12 algorithmic reasoning mode with CLRS coverage
+- **v7.2.0**: Phase 11 historical computing (Computability, Cryptanalytic, von Neumann Game Theory)
+- **v7.0.0**: Phase 8 proof decomposition system, native SVG export
+- **v6.0.0**: Meta-reasoning mode, MetaMonitor service, adaptive mode switching
+- **v5.0.0**: Fundamental reasoning modes (Inductive, Deductive)
+- **v4.3.0**: Visual export modularization, lazy validator loading
 - **v3.0.0**: MCP integration
 
 ---
 
-*Last Updated*: 2025-12-07
-*Architecture Version*: 7.2.0
+*Last Updated*: 2025-12-15
+*Architecture Version*: 8.2.1

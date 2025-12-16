@@ -4,39 +4,30 @@
 
 DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 33 specialized thinking modes (29 with dedicated thought types). The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, meta-reasoning for strategic oversight, enterprise security features, proof decomposition for mathematical reasoning, and comprehensive export capabilities including native SVG generation.
 
-**Version**: 7.5.0 | **Node**: >=18.0.0 | **License**: MIT
+**Version**: 8.2.1 | **Node**: >=18.0.0 | **License**: MIT
 
 ---
 
+## What's New in v8.2.x
+
+- **Phase 10: ModeHandler Architecture** - Strategy pattern with 7 specialized handlers
+- **Specialized Handlers**: CausalHandler, BayesianHandler, GameTheoryHandler, CounterfactualHandler, SynthesisHandler, SystemsThinkingHandler, CritiqueHandler
+- **Handler Enhancements**: Systems Archetypes detection (8 patterns), Socratic Questions (6 categories), auto Bayesian posteriors, Nash equilibria computation
+- **ModeHandlerRegistry**: Centralized handler management with `hasSpecializedHandler()` API
+- **ThoughtFactory Integration**: Handlers integrated directly into ThoughtFactory for seamless processing
+
 ## What's New in v7.5.0
 
-- **Phase 14: Accessible Reasoning Modes** - All 29 modes with dedicated thought types are now accessible via MCP tools
-- **2 New Tools**: `deepthinking_engineering` and `deepthinking_academic`
-- **12 Total Tools** (up from 10)
-- **deepthinking_engineering**: Engineering, Algorithmic modes
-- **deepthinking_academic**: Synthesis, Argumentation, Critique, Analysis modes
-- **Updated Tools**: `deepthinking_mathematics` now includes Computability; `deepthinking_analytical` now includes Cryptanalytic
+- **Phase 14: Accessible Reasoning Modes** - All 29 modes with dedicated thought types accessible via 12 MCP tools
+- **12 Focused Tools**: Including `deepthinking_engineering` and `deepthinking_academic`
 
 ## What's New in v7.4.0
 
-- **Phase 13: Academic Research Modes** - 4 new modes designed for PhD students and scientific writing
-- **Synthesis Mode** - Literature review, knowledge integration, theme extraction
-- **Argumentation Mode** - Toulmin model, dialectics, rhetorical structures
-- **Critique Mode** - Critical analysis, peer review, methodology evaluation
-- **Analysis Mode** - Qualitative analysis (thematic, grounded theory, discourse)
+- **Phase 13: Academic Research Modes** - Synthesis, Argumentation, Critique, Analysis for PhD students
 
 ## What's New in v7.3.0
 
-- **Phase 12: Algorithmic Reasoning Mode** - Comprehensive CLRS algorithm coverage
-- **100+ Named Algorithms** - Sorting, graph, DP, string matching, computational geometry
-- **Complexity Analysis** - Time/space complexity, amortized analysis, Master theorem
-
-## What's New in v7.2.0
-
-- **Phase 11: Historical Computing Extensions** - Tributes to Turing & von Neumann
-- **Computability Mode** - Turing machines, decidability proofs, reductions, diagonalization arguments
-- **Cryptanalytic Mode** - Turing's deciban system, Banburismus analysis, frequency analysis, key space elimination
-- **Extended Game Theory** - von Neumann's minimax theorem, cooperative games, Shapley value calculations
+- **Phase 12: Algorithmic Reasoning Mode** - Comprehensive CLRS coverage with 100+ algorithms
 
 ---
 
@@ -44,18 +35,18 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~62,000 |
-| TypeScript Files | 185 |
-| Test Files | 40 |
-| Passing Tests | 787+ |
+| Total Lines of Code | ~80,336 |
+| TypeScript Files | 197 |
+| Test Files | 39 |
+| Passing Tests | 1046+ |
 | Type Suppressions | 0 |
 | Thinking Modes | 33 (29 with thought types) |
+| Specialized Handlers | 7 |
 | MCP Tools | 12 focused + 1 legacy |
-| Export Formats | 11 (including native SVG) |
-| Visual Formats | 11 (mermaid, dot, ascii, svg, etc.) |
+| Export Formats | 8 (including native SVG) |
+| Visual Exporters | 35+ mode-specific |
 | Reasoning Types | 69 (110 planned) |
-| Visual Exporters | 21 mode-specific |
-| Total Exports | 978 |
+| Total Exports | 1033 (448 re-exports) |
 | Modules | 16 |
 
 ---
@@ -128,10 +119,24 @@ Core services extracted from the entry point:
 
 | Service | File | Responsibility |
 |---------|------|----------------|
-| **ThoughtFactory** | `ThoughtFactory.ts` | Mode-specific thought creation and validation |
+| **ThoughtFactory** | `ThoughtFactory.ts` | Mode-specific thought creation with handler integration (v8.x) |
 | **ExportService** | `ExportService.ts` | Multi-format export (8 formats) |
 | **ModeRouter** | `ModeRouter.ts` | Mode switching, recommendations, and adaptive switching |
-| **MetaMonitor** | `MetaMonitor.ts` | Session tracking, strategy evaluation, meta-reasoning insights (v6.0.0) |
+| **MetaMonitor** | `MetaMonitor.ts` | Session tracking, strategy evaluation, meta-reasoning insights |
+
+### `src/modes/handlers/` - Specialized Mode Handlers (v8.x)
+
+7 specialized handlers implementing the ModeHandler pattern:
+
+| Handler | Mode | Key Enhancements |
+|---------|------|------------------|
+| **CausalHandler** | causal | Graph validation, cycle detection, intervention propagation |
+| **BayesianHandler** | bayesian | Auto posterior calculation, probability sum validation |
+| **GameTheoryHandler** | gametheory | Payoff matrix validation, Nash equilibria computation |
+| **CounterfactualHandler** | counterfactual | World state tracking, divergence validation |
+| **SynthesisHandler** | synthesis | Source coverage, theme extraction, contradiction detection |
+| **SystemsThinkingHandler** | systemsthinking | 8 Systems Archetypes detection (Peter Senge) |
+| **CritiqueHandler** | critique | 6 Socratic question categories (Richard Paul) |
 
 ### `src/session/` - Session Management
 
@@ -328,10 +333,13 @@ Business logic extracted into focused service classes with single responsibiliti
 Storage abstraction through `ISessionRepository` interface enables swappable backends.
 
 ### 3. Factory Pattern
-`ThoughtFactory` centralizes mode-specific thought creation.
+`ThoughtFactory` centralizes mode-specific thought creation with handler delegation.
 
-### 4. Strategy Pattern
-Different thinking modes implemented as interchangeable strategies.
+### 4. Strategy Pattern (ModeHandler - v8.x)
+Different thinking modes implemented as interchangeable handlers via `ModeHandler` interface:
+- `validate()` - Mode-specific input validation
+- `enhance()` - Automatic thought enhancements (posteriors, equilibria, archetypes)
+- `getSuggestions()` - Context-aware suggestions and warnings
 
 ### 5. Lazy Loading Pattern (v4.3.0)
 - Validators loaded on-demand via dynamic imports
@@ -340,6 +348,9 @@ Different thinking modes implemented as interchangeable strategies.
 
 ### 6. Observer Pattern
 Progress callbacks and event handlers for async operations.
+
+### 7. Registry Pattern (v8.x)
+`ModeHandlerRegistry` manages specialized handlers with singleton access.
 
 ---
 
@@ -474,5 +485,5 @@ tests/
 
 ---
 
-*Last Updated*: 2025-12-08
-*Version*: 7.5.0
+*Last Updated*: 2025-12-15
+*Version*: 8.2.1

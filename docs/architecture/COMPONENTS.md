@@ -1,6 +1,6 @@
 # Component Architecture
 
-**Version**: 7.4.0 | **Last Updated**: 2025-12-08
+**Version**: 8.2.1 | **Last Updated**: 2025-12-15
 
 ## Core Components
 
@@ -9,16 +9,18 @@
 #### `src/index.ts` - MCP Server Entry Point
 **Purpose**: Main server implementation and tool request orchestration
 
-**10 Focused Tools** (v5.0.0+):
+**12 Focused Tools** (v7.5.0+):
 - `deepthinking_core` - Fundamental reasoning (inductive, deductive, abductive)
 - `deepthinking_standard` - Standard workflows (sequential, shannon, hybrid)
-- `deepthinking_mathematics` - Mathematical/physical reasoning
+- `deepthinking_mathematics` - Mathematical/physical/computability reasoning
 - `deepthinking_temporal` - Time-based reasoning
 - `deepthinking_probabilistic` - Probability reasoning (bayesian, evidential)
 - `deepthinking_causal` - Causal analysis (causal, counterfactual)
 - `deepthinking_strategic` - Strategic decision-making (gametheory, optimization)
-- `deepthinking_analytical` - Analytical reasoning (analogical, firstprinciples, metareasoning)
+- `deepthinking_analytical` - Analytical reasoning (analogical, firstprinciples, metareasoning, cryptanalytic)
 - `deepthinking_scientific` - Scientific methods (scientificmethod, systemsthinking, formallogic)
+- `deepthinking_engineering` - Engineering/algorithmic reasoning
+- `deepthinking_academic` - Academic research (synthesis, argumentation, critique, analysis)
 - `deepthinking_session` - Session management
 
 **Dependencies**:
@@ -94,9 +96,45 @@ createThought(input: ThinkingToolInput, sessionId: string): Thought
 32. **Formal Logic** - Logical inference
 33. **Engineering** - Engineering analysis (v7.1.0)
 
-**Line Count**: 243 lines
+**Line Count**: ~800 lines (with handler integration)
 
 **Testing**: Covered by mode-specific unit tests and integration tests
+
+---
+
+### ModeHandler Architecture (v8.x)
+
+#### `src/modes/handlers/` - Specialized Mode Handlers
+
+**Purpose**: Strategy pattern implementation for mode-specific validation and enhancement
+
+**7 Specialized Handlers**:
+
+| Handler | Mode | Key Enhancements |
+|---------|------|------------------|
+| **CausalHandler** | causal | Graph validation, cycle detection, intervention propagation |
+| **BayesianHandler** | bayesian | Auto posterior calculation (prior × likelihood), probability sum validation |
+| **GameTheoryHandler** | gametheory | Payoff matrix validation, Nash equilibria computation |
+| **CounterfactualHandler** | counterfactual | World state tracking, divergence point validation |
+| **SynthesisHandler** | synthesis | Source coverage tracking, theme extraction, contradiction detection |
+| **SystemsThinkingHandler** | systemsthinking | 8 Systems Archetypes detection (Peter Senge) |
+| **CritiqueHandler** | critique | 6 Socratic question categories (Richard Paul) |
+
+**ModeHandler Interface**:
+```typescript
+interface ModeHandler {
+  mode: ThinkingMode;
+  validate(input: ThinkingToolInput): ValidationResult;
+  enhance(thought: Thought, context: SessionContext): Thought;
+  getSuggestions(thought: Thought): string[];
+}
+```
+
+**ModeHandlerRegistry**:
+- Singleton pattern for global handler access
+- `hasSpecializedHandler(mode)` - Check if handler exists
+- `replace(handler)` - Register/update handler
+- `createThought(input, sessionId)` - Delegate thought creation
 
 ---
 
@@ -1108,13 +1146,14 @@ TaxonomySystem
 
 ### Coverage Targets
 - **Critical Paths**: 80%+ coverage ✅
-- **Tests**: 972 passing
-- **Test Files**: 40
+- **Tests**: 1046+ passing
+- **Test Files**: 39
 - **Type Safety**: 100% (0 type suppressions)
-- **Mode Coverage**: All 27 modes have validators
+- **Mode Coverage**: All 33 modes have validators
+- **Handler Coverage**: All 7 specialized handlers tested
 - **Proof Decomposition**: Full coverage for Phase 8 components
 
 ---
 
-*Last Updated*: 2025-12-08
-*Component Version*: 7.4.0
+*Last Updated*: 2025-12-15
+*Component Version*: 8.2.1

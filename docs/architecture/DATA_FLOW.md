@@ -1,6 +1,6 @@
 # Data Flow Architecture
 
-**Version**: 7.0.0 | **Last Updated**: 2025-12-07
+**Version**: 8.2.1 | **Last Updated**: 2025-12-15
 
 ## Overview
 
@@ -167,6 +167,9 @@ Client                    Server                    Storage
 1. Client sends thought with session ID
 2. Server validates with AddThoughtSchema
 3. ThoughtFactory creates mode-specific thought object
+   - **v8.x**: Checks `registry.hasSpecializedHandler(mode)` first
+   - If handler exists: delegates to handler for validation and enhancement
+   - Otherwise: falls back to switch statement
 4. SessionManager adds thought to session
 5. **MetaMonitor records thought for meta-reasoning analysis (v6.0.0)**
 6. SessionMetricsCalculator updates metrics incrementally (O(1))
@@ -176,11 +179,12 @@ Client                    Server                    Storage
 
 **Data Transformations**:
 - Input: Flat thought parameters
+- ModeHandler (v8.x): Validates, enhances with auto-calculations (posteriors, archetypes, etc.)
 - ThoughtFactory: Rich Thought object with mode-specific fields
 - SessionManager: Updated session state
 - MetaMonitor: Session history and mode transitions (v6.0.0)
 - Metrics: Incremental calculations (avg uncertainty, etc.)
-- Output: Complete updated session
+- Output: Complete updated session with `hasSpecializedHandler` flag
 
 **Performance**:
 - O(1) thought addition
@@ -1004,5 +1008,5 @@ Storage
 
 ---
 
-*Last Updated*: 2025-12-07
-*Data Flow Version*: 7.0.0
+*Last Updated*: 2025-12-15
+*Data Flow Version*: 8.2.1
