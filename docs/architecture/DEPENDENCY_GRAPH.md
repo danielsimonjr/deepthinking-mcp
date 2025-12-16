@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 7.5.0 | **Last Updated**: 2025-12-09
+**Version**: 8.2.0 | **Last Updated**: 2025-12-16
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -41,11 +41,11 @@ The codebase is organized into the following modules:
 - **export**: 40 files
 - **entry**: 1 file
 - **interfaces**: 2 files
-- **modes**: 7 files
+- **modes**: 18 files
 - **proof**: 8 files
 - **repositories**: 4 files
 - **search**: 5 files
-- **services**: 5 files
+- **services**: 6 files
 - **session**: 7 files
 - **taxonomy**: 7 files
 - **tools**: 18 files
@@ -860,7 +860,7 @@ The codebase is organized into the following modules:
 
 ## Entry Dependencies
 
-### `src/index.ts` - DeepThinking MCP Server (v6.1.0)
+### `src/index.ts` - DeepThinking MCP Server (v8.0.0)
 
 **External Dependencies:**
 | Package | Import |
@@ -882,8 +882,9 @@ The codebase is organized into the following modules:
 | `./tools/definitions.js` | `toolList, toolSchemas, isValidTool, modeToToolMap` | Import |
 | `./tools/thinking.js` | `thinkingTool` | Import |
 | `./session/index.js` | `SessionManager` | Import (type-only) |
-| `./types/index.js` | `ThinkingMode` | Import |
+| `./types/index.js` | `ThinkingMode, isFullyImplemented` | Import |
 | `./services/index.js` | `ThoughtFactory, ExportService, ModeRouter` | Import (type-only) |
+| `./modes/handlers/index.js` | `ModeHandlerRegistry` | Import |
 
 ---
 
@@ -925,6 +926,227 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `ConstraintReasoningEngine`
 - Interfaces: `Variable`, `Constraint`, `CSP`, `ObjectiveFunction`, `Assignment`, `Solution`, `ConstraintReasoningThought`, `ConstraintPropagation`, `ConstraintAnalysis`
+
+---
+
+### `src/modes/handlers/BayesianHandler.ts` - BayesianHandler - Phase 10 Sprint 2 (v8.1.0)
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode, BayesianThought` | Import |
+| `../../types/modes/bayesian.js` | `BayesianHypothesis, PriorProbability, Likelihood, BayesianEvidence, PosteriorProbability` | Import (type-only) |
+| `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+
+**Exports:**
+- Classes: `BayesianHandler`
+
+---
+
+### `src/modes/handlers/CausalHandler.ts` - CausalHandler - Phase 10 Sprint 2 (v8.1.0)
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode, CausalThought` | Import |
+| `../../types/modes/causal.js` | `CausalGraph, Intervention` | Import (type-only) |
+| `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `../../utils/type-guards.js` | `toExtendedThoughtType` | Import |
+
+**Exports:**
+- Classes: `CausalHandler`
+
+---
+
+### `src/modes/handlers/CounterfactualHandler.ts` - CounterfactualHandler - Phase 10 Sprint 2B (v8.2.0)
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode, CounterfactualThought, Scenario, Condition, CounterfactualComparison, InterventionPoint, CausalChain, Difference` | Import |
+| `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ValidationError, ValidationWarning, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+
+**Exports:**
+- Classes: `CounterfactualHandler`
+
+---
+
+### `src/modes/handlers/CritiqueHandler.ts` - CritiqueHandler - Phase 10 Sprint 2B (v8.2.0)
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode, CritiqueThought` | Import |
+| `../../types/modes/critique.js` | `CritiqueThoughtType, CritiquedWork, CritiquePoint, MethodologyEvaluation, ArgumentCritique, CritiqueVerdict` | Import (type-only) |
+| `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ValidationError, ValidationWarning, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+
+**Exports:**
+- Classes: `CritiqueHandler`
+
+---
+
+### `src/modes/handlers/GameTheoryHandler.ts` - GameTheoryHandler - Phase 10 Sprint 2 (v8.1.0)
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode, GameTheoryThought` | Import |
+| `../../types/modes/gametheory.js` | `Game, Player, Strategy, PayoffMatrix, PayoffEntry, NashEquilibrium, DominantStrategy` | Import (type-only) |
+| `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+
+**Exports:**
+- Classes: `GameTheoryHandler`
+
+---
+
+### `src/modes/handlers/GenericModeHandler.ts` - GenericModeHandler - Phase 10 Sprint 1 (v8.0.0)
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode, Thought, ShannonStage, SequentialThought, ShannonThought, MathematicsThought, PhysicsThought, HybridThought, InductiveThought, DeductiveThought, AbductiveThought, CausalThought, isFullyImplemented` | Import |
+| `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, ModeStatus, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `../../utils/type-guards.js` | `toExtendedThoughtType` | Import |
+
+**Exports:**
+- Classes: `GenericModeHandler`
+
+---
+
+### `src/modes/handlers/index.ts` - Mode Handlers Index - Phase 10 Sprint 2B (v8.2.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./CausalHandler.js` | `CausalHandler` | Import |
+| `./BayesianHandler.js` | `BayesianHandler` | Import |
+| `./GameTheoryHandler.js` | `GameTheoryHandler` | Import |
+| `./CounterfactualHandler.js` | `CounterfactualHandler` | Import |
+| `./SynthesisHandler.js` | `SynthesisHandler` | Import |
+| `./SystemsThinkingHandler.js` | `SystemsThinkingHandler` | Import |
+| `./CritiqueHandler.js` | `CritiqueHandler` | Import |
+| `./registry.js` | `getRegistry` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ValidationError, ValidationWarning, ModeEnhancements, ModeStatus, DetectedArchetype, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Re-export |
+| `./GenericModeHandler.js` | `GenericModeHandler` | Re-export |
+| `./CausalHandler.js` | `CausalHandler` | Re-export |
+| `./BayesianHandler.js` | `BayesianHandler` | Re-export |
+| `./GameTheoryHandler.js` | `GameTheoryHandler` | Re-export |
+| `./CounterfactualHandler.js` | `CounterfactualHandler` | Re-export |
+| `./SynthesisHandler.js` | `SynthesisHandler` | Re-export |
+| `./SystemsThinkingHandler.js` | `SystemsThinkingHandler` | Re-export |
+| `./CritiqueHandler.js` | `CritiqueHandler` | Re-export |
+| `./registry.js` | `ModeHandlerRegistry, RegistryStats, getRegistry, registerHandler, createThought` | Re-export |
+
+**Exports:**
+- Functions: `registerAllHandlers`
+- Re-exports: `ModeHandler`, `ValidationResult`, `ValidationError`, `ValidationWarning`, `ModeEnhancements`, `ModeStatus`, `DetectedArchetype`, `validationSuccess`, `validationFailure`, `createValidationError`, `createValidationWarning`, `GenericModeHandler`, `CausalHandler`, `BayesianHandler`, `GameTheoryHandler`, `CounterfactualHandler`, `SynthesisHandler`, `SystemsThinkingHandler`, `CritiqueHandler`, `ModeHandlerRegistry`, `RegistryStats`, `getRegistry`, `registerHandler`, `createThought`
+
+---
+
+### `src/modes/handlers/ModeHandler.ts` - ModeHandler Interface - Phase 10 Sprint 1 (v8.0.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode, Thought` | Import (type-only) |
+| `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+
+**Exports:**
+- Interfaces: `ValidationResult`, `ValidationError`, `ValidationWarning`, `DetectedArchetype`, `ModeEnhancements`, `ModeHandler`, `ModeStatus`
+- Functions: `validationSuccess`, `validationFailure`, `createValidationError`, `createValidationWarning`
+
+---
+
+### `src/modes/handlers/registry.ts` - ModeHandlerRegistry - Phase 10 Sprint 1 (v8.0.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode, Thought, isFullyImplemented` | Import |
+| `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+| `./ModeHandler.js` | `ModeHandler, ModeStatus, ValidationResult, validationFailure, createValidationError` | Import |
+| `./GenericModeHandler.js` | `GenericModeHandler` | Import |
+
+**Exports:**
+- Classes: `ModeHandlerRegistry`
+- Interfaces: `RegistryStats`
+- Functions: `getRegistry`, `registerHandler`, `createThought`
+
+---
+
+### `src/modes/handlers/SynthesisHandler.ts` - SynthesisHandler - Phase 10 Sprint 2B (v8.2.0)
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode, SynthesisThought` | Import |
+| `../../types/modes/synthesis.js` | `Source, Theme, Contradiction, LiteratureGap, SynthesisThoughtType` | Import (type-only) |
+| `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+
+**Exports:**
+- Classes: `SynthesisHandler`
+
+---
+
+### `src/modes/handlers/SystemsThinkingHandler.ts` - SystemsThinkingHandler - Phase 10 Sprint 2B (v8.2.0)
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode, SystemsThinkingThought` | Import |
+| `../../types/modes/systemsthinking.js` | `SystemDefinition, SystemComponent, FeedbackLoop, LeveragePoint` | Import (type-only) |
+| `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ValidationError, ValidationWarning, ModeEnhancements, DetectedArchetype, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+
+**Exports:**
+- Classes: `SystemsThinkingHandler`
 
 ---
 
@@ -1272,11 +1494,12 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `./ThoughtFactory.js` | `ThoughtFactory` | Re-export |
+| `./RefactoredThoughtFactory.js` | `RefactoredThoughtFactory` | Re-export |
 | `./ExportService.js` | `ExportService` | Re-export |
 | `./ModeRouter.js` | `ModeRouter` | Re-export |
 
 **Exports:**
-- Re-exports: `ThoughtFactory`, `ExportService`, `ModeRouter`
+- Re-exports: `ThoughtFactory`, `RefactoredThoughtFactory`, `ExportService`, `ModeRouter`
 
 ---
 
@@ -1311,6 +1534,25 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/services/RefactoredThoughtFactory.ts` - RefactoredThoughtFactory - Phase 10 Sprint 2B (v8.2.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/core.js` | `ThinkingMode, Thought` | Import |
+| `../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+| `./ThoughtFactory.js` | `ThoughtFactory` | Import |
+| `../modes/handlers/index.js` | `ModeHandlerRegistry, ModeStatus, ValidationResult, CausalHandler, BayesianHandler, GameTheoryHandler, CounterfactualHandler, SynthesisHandler, SystemsThinkingHandler, CritiqueHandler` | Import |
+| `../interfaces/ILogger.js` | `ILogger` | Import |
+| `../utils/logger.js` | `createLogger, LogLevel` | Import |
+
+**Exports:**
+- Classes: `RefactoredThoughtFactory`
+- Interfaces: `RefactoredThoughtFactoryConfig`
+- Functions: `createRefactoredFactory`
+
+---
+
 ### `src/services/ThoughtFactory.ts` - Thought Factory Service (v3.4.5)
 
 **Node.js Built-in Dependencies:**
@@ -1321,11 +1563,12 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingMode, ShannonStage, SequentialThought, ShannonThought, MathematicsThought, PhysicsThought, InductiveThought, DeductiveThought, AbductiveThought, CausalThought, Thought, EngineeringThought` | Import |
+| `../types/index.js` | `ThinkingMode, ShannonStage, SequentialThought, ShannonThought, MathematicsThought, PhysicsThought, InductiveThought, DeductiveThought, AbductiveThought, CausalThought, Thought, EngineeringThought, ComputabilityThought, CryptanalyticThought, AlgorithmicThought, SystemsThinkingThought, ScientificMethodThought, FormalLogicThought, OptimizationThought, SynthesisThought, ArgumentationThought, CritiqueThought, AnalysisThought` | Import |
 | `../tools/thinking.js` | `ThinkingToolInput` | Import |
 | `../utils/type-guards.js` | `toExtendedThoughtType` | Import |
 | `../interfaces/ILogger.js` | `ILogger` | Import |
 | `../utils/logger.js` | `createLogger, LogLevel` | Import |
+| `../modes/handlers/index.js` | `ModeHandlerRegistry, CausalHandler, BayesianHandler, GameTheoryHandler, CounterfactualHandler, SynthesisHandler, SystemsThinkingHandler, CritiqueHandler` | Import |
 
 **Exports:**
 - Classes: `ThoughtFactory`
@@ -1888,7 +2131,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/types/index.ts` - Type definitions index (v7.4.0)
+### `src/types/index.ts` - Type definitions index (v8.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1896,6 +2139,7 @@ The codebase is organized into the following modules:
 | `./core.js` | `*` | Re-export |
 | `./session.js` | `*` | Re-export |
 | `./modes/recommendations.js` | `*` | Re-export |
+| `../modes/handlers/ModeHandler.js` | `type ModeHandler, type ValidationResult, type ValidationError, type ValidationWarning, type ModeEnhancements, type ModeStatus, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Re-export |
 | `./modes/engineering.js` | `type Requirement, type RequirementPriority, type RequirementSource, type RequirementStatus, type RequirementsTraceability, type TradeAlternative, type TradeCriterion, type TradeScore, type TradeStudy, type FailureMode, type FailureModeAnalysis, type SeverityRating, type OccurrenceRating, type DetectionRating, type DesignDecision, type DecisionStatus, type DecisionAlternative, type DesignDecisionLog, type EngineeringAnalysisType, isEngineeringThought` | Re-export |
 | `./modes/computability.js` | `type ComputabilityThoughtType, type TuringTransition, type TuringMachine, type ComputationStep, type ComputationTrace, type DecisionProblem, type Reduction, type DiagonalizationArgument, type DecidabilityProof, type ComplexityAnalysis, type OracleAnalysis, type ClassicUndecidableProblem, isComputabilityThought, createSimpleMachine, reductionPreservesDecidability, isPolynomialReduction` | Re-export |
 | `./modes/gametheory.js` | `type MinimaxAnalysis, type CooperativeGame, type CoalitionValue, type CoreAllocation, type CoalitionAnalysis, type ShapleyValueDetails, createCharacteristicFunction, checkSuperadditivity, calculateShapleyValue` | Re-export |
@@ -1906,7 +2150,7 @@ The codebase is organized into the following modules:
 | `./modes/analysis.js` | `type AnalysisThoughtType, type AnalysisMethodology, type DataSource, type DataSegment, type CodeType, type Code, type CodeCooccurrence, type Codebook, type ThemeLevel, type QualitativeTheme, type ThematicMap, type MemoType, type AnalyticalMemo, type GTCategory, type TheoreticalSampling, type DiscoursePattern, type QualitativeRigor, isAnalysisThought` | Re-export |
 
 **Exports:**
-- Re-exports: `* from ./core.js`, `* from ./session.js`, `* from ./modes/recommendations.js`, `type Requirement`, `type RequirementPriority`, `type RequirementSource`, `type RequirementStatus`, `type RequirementsTraceability`, `type TradeAlternative`, `type TradeCriterion`, `type TradeScore`, `type TradeStudy`, `type FailureMode`, `type FailureModeAnalysis`, `type SeverityRating`, `type OccurrenceRating`, `type DetectionRating`, `type DesignDecision`, `type DecisionStatus`, `type DecisionAlternative`, `type DesignDecisionLog`, `type EngineeringAnalysisType`, `isEngineeringThought`, `type ComputabilityThoughtType`, `type TuringTransition`, `type TuringMachine`, `type ComputationStep`, `type ComputationTrace`, `type DecisionProblem`, `type Reduction`, `type DiagonalizationArgument`, `type DecidabilityProof`, `type ComplexityAnalysis`, `type OracleAnalysis`, `type ClassicUndecidableProblem`, `isComputabilityThought`, `createSimpleMachine`, `reductionPreservesDecidability`, `isPolynomialReduction`, `type MinimaxAnalysis`, `type CooperativeGame`, `type CoalitionValue`, `type CoreAllocation`, `type CoalitionAnalysis`, `type ShapleyValueDetails`, `createCharacteristicFunction`, `checkSuperadditivity`, `calculateShapleyValue`, `type CryptanalyticThoughtType`, `type DecibanEvidence`, `type EvidenceChain`, `type KeySpaceAnalysis`, `type FrequencyAnalysis`, `type BanburismusAnalysis`, `type CribAnalysis`, `type CipherType`, `type CryptographicHypothesis`, `type IsomorphismPattern`, `isCryptanalyticThought`, `toDecibans`, `fromDecibans`, `decibansToOdds`, `decibansToProbability`, `accumulateEvidence`, `calculateIndexOfCoincidence`, `LANGUAGE_IC`, `ENGLISH_FREQUENCIES`, `type SynthesisThoughtType`, `type SourceType`, `type SourceQuality`, `type Source`, `type Concept`, `type Theme`, `type Finding`, `type Pattern`, `type ConceptRelation`, `type LiteratureGap`, `type Contradiction`, `type ConceptualFramework`, `type SynthesisConclusion`, `type ReviewMetadata`, `isSynthesisThought`, `type ArgumentationThoughtType`, `type Claim`, `type Grounds`, `type Warrant`, `type Backing`, `type Qualifier`, `type Rebuttal`, `type RebuttalResponse`, `type ToulminArgument`, `type ArgumentChain`, `type DialecticPosition`, `type DialecticAnalysis`, `type RhetoricalAppeal`, `type RhetoricalStrategy`, `type AudienceConsideration`, `type LogicalFallacy`, `isArgumentationThought`, `type CritiqueThoughtType`, `type WorkType`, `type CritiquedWork`, `type DesignAssessment`, `type SampleAssessment`, `type AnalysisAssessment`, `type MethodologyEvaluation`, `type ValidityAssessment`, `type LogicalStructure`, `type ArgumentCritique`, `type EvidenceQuality`, `type EvidenceUseCritique`, `type NoveltyAssessment`, `type ImpactAssessment`, `type ContributionEvaluation`, `type CritiquePoint`, `type ImprovementSuggestion`, `type CritiqueVerdict`, `isCritiqueThought`, `type AnalysisThoughtType`, `type AnalysisMethodology`, `type DataSource`, `type DataSegment`, `type CodeType`, `type Code`, `type CodeCooccurrence`, `type Codebook`, `type ThemeLevel`, `type QualitativeTheme`, `type ThematicMap`, `type MemoType`, `type AnalyticalMemo`, `type GTCategory`, `type TheoreticalSampling`, `type DiscoursePattern`, `type QualitativeRigor`, `isAnalysisThought`
+- Re-exports: `* from ./core.js`, `* from ./session.js`, `* from ./modes/recommendations.js`, `type ModeHandler`, `type ValidationResult`, `type ValidationError`, `type ValidationWarning`, `type ModeEnhancements`, `type ModeStatus`, `validationSuccess`, `validationFailure`, `createValidationError`, `createValidationWarning`, `type Requirement`, `type RequirementPriority`, `type RequirementSource`, `type RequirementStatus`, `type RequirementsTraceability`, `type TradeAlternative`, `type TradeCriterion`, `type TradeScore`, `type TradeStudy`, `type FailureMode`, `type FailureModeAnalysis`, `type SeverityRating`, `type OccurrenceRating`, `type DetectionRating`, `type DesignDecision`, `type DecisionStatus`, `type DecisionAlternative`, `type DesignDecisionLog`, `type EngineeringAnalysisType`, `isEngineeringThought`, `type ComputabilityThoughtType`, `type TuringTransition`, `type TuringMachine`, `type ComputationStep`, `type ComputationTrace`, `type DecisionProblem`, `type Reduction`, `type DiagonalizationArgument`, `type DecidabilityProof`, `type ComplexityAnalysis`, `type OracleAnalysis`, `type ClassicUndecidableProblem`, `isComputabilityThought`, `createSimpleMachine`, `reductionPreservesDecidability`, `isPolynomialReduction`, `type MinimaxAnalysis`, `type CooperativeGame`, `type CoalitionValue`, `type CoreAllocation`, `type CoalitionAnalysis`, `type ShapleyValueDetails`, `createCharacteristicFunction`, `checkSuperadditivity`, `calculateShapleyValue`, `type CryptanalyticThoughtType`, `type DecibanEvidence`, `type EvidenceChain`, `type KeySpaceAnalysis`, `type FrequencyAnalysis`, `type BanburismusAnalysis`, `type CribAnalysis`, `type CipherType`, `type CryptographicHypothesis`, `type IsomorphismPattern`, `isCryptanalyticThought`, `toDecibans`, `fromDecibans`, `decibansToOdds`, `decibansToProbability`, `accumulateEvidence`, `calculateIndexOfCoincidence`, `LANGUAGE_IC`, `ENGLISH_FREQUENCIES`, `type SynthesisThoughtType`, `type SourceType`, `type SourceQuality`, `type Source`, `type Concept`, `type Theme`, `type Finding`, `type Pattern`, `type ConceptRelation`, `type LiteratureGap`, `type Contradiction`, `type ConceptualFramework`, `type SynthesisConclusion`, `type ReviewMetadata`, `isSynthesisThought`, `type ArgumentationThoughtType`, `type Claim`, `type Grounds`, `type Warrant`, `type Backing`, `type Qualifier`, `type Rebuttal`, `type RebuttalResponse`, `type ToulminArgument`, `type ArgumentChain`, `type DialecticPosition`, `type DialecticAnalysis`, `type RhetoricalAppeal`, `type RhetoricalStrategy`, `type AudienceConsideration`, `type LogicalFallacy`, `isArgumentationThought`, `type CritiqueThoughtType`, `type WorkType`, `type CritiquedWork`, `type DesignAssessment`, `type SampleAssessment`, `type AnalysisAssessment`, `type MethodologyEvaluation`, `type ValidityAssessment`, `type LogicalStructure`, `type ArgumentCritique`, `type EvidenceQuality`, `type EvidenceUseCritique`, `type NoveltyAssessment`, `type ImpactAssessment`, `type ContributionEvaluation`, `type CritiquePoint`, `type ImprovementSuggestion`, `type CritiqueVerdict`, `isCritiqueThought`, `type AnalysisThoughtType`, `type AnalysisMethodology`, `type DataSource`, `type DataSegment`, `type CodeType`, `type Code`, `type CodeCooccurrence`, `type Codebook`, `type ThemeLevel`, `type QualitativeTheme`, `type ThematicMap`, `type MemoType`, `type AnalyticalMemo`, `type GTCategory`, `type TheoreticalSampling`, `type DiscoursePattern`, `type QualitativeRigor`, `isAnalysisThought`
 
 ---
 
@@ -3040,11 +3284,11 @@ graph TD
 
     subgraph Modes
         N16[constraint-reasoning]
-        N17[mathematics-reasoning]
-        N18[meta-reasoning]
-        N19[modal-reasoning]
-        N20[optimization-reasoning]
-        N21[...2 more]
+        N17[BayesianHandler]
+        N18[CausalHandler]
+        N19[CounterfactualHandler]
+        N20[CritiqueHandler]
+        N21[...13 more]
     end
 
     subgraph Proof
@@ -3076,61 +3320,62 @@ graph TD
         N38[index]
         N39[MetaMonitor]
         N40[ModeRouter]
-        N41[ThoughtFactory]
+        N41[RefactoredThoughtFactory]
+        N42[...1 more]
     end
 
     subgraph Session
-        N42[index]
-        N43[manager]
-        N44[persistence]
-        N45[SessionMetricsCalculator]
-        N46[file-store]
-        N47[...2 more]
+        N43[index]
+        N44[manager]
+        N45[persistence]
+        N46[SessionMetricsCalculator]
+        N47[file-store]
+        N48[...2 more]
     end
 
     subgraph Taxonomy
-        N48[adaptive-selector]
-        N49[classifier]
-        N50[multi-modal-analyzer]
-        N51[navigator]
-        N52[reasoning-types]
-        N53[...2 more]
+        N49[adaptive-selector]
+        N50[classifier]
+        N51[multi-modal-analyzer]
+        N52[navigator]
+        N53[reasoning-types]
+        N54[...2 more]
     end
 
     subgraph Tools
-        N54[definitions]
-        N55[json-schemas]
-        N56[base]
-        N57[index]
-        N58[academic]
-        N59[...13 more]
+        N55[definitions]
+        N56[json-schemas]
+        N57[base]
+        N58[index]
+        N59[academic]
+        N60[...13 more]
     end
 
     subgraph Types
-        N60[core]
-        N61[index]
-        N62[algorithmic]
-        N63[analogical]
-        N64[analysis]
-        N65[...24 more]
+        N61[core]
+        N62[index]
+        N63[algorithmic]
+        N64[analogical]
+        N65[analysis]
+        N66[...24 more]
     end
 
     subgraph Utils
-        N66[errors]
-        N67[log-sanitizer]
-        N68[logger-types]
-        N69[logger]
-        N70[sanitization]
-        N71[...1 more]
+        N67[errors]
+        N68[log-sanitizer]
+        N69[logger-types]
+        N70[logger]
+        N71[sanitization]
+        N72[...1 more]
     end
 
     subgraph Validation
-        N72[cache]
-        N73[constants]
-        N74[index]
-        N75[schema-utils]
-        N76[schemas]
-        N77[...34 more]
+        N73[cache]
+        N74[constants]
+        N75[index]
+        N76[schema-utils]
+        N77[schemas]
+        N78[...34 more]
     end
 
     N0 --> N4
@@ -3141,28 +3386,28 @@ graph TD
     N2 --> N1
     N2 --> N0
     N7 --> N9
-    N8 --> N61
-    N9 --> N61
-    N10 --> N61
-    N11 --> N61
-    N13 --> N54
-    N13 --> N42
-    N13 --> N61
+    N8 --> N62
+    N9 --> N62
+    N10 --> N62
+    N11 --> N62
+    N13 --> N55
+    N13 --> N43
+    N13 --> N62
     N13 --> N38
-    N14 --> N68
+    N14 --> N69
     N15 --> N14
-    N16 --> N61
-    N17 --> N24
-    N17 --> N26
-    N17 --> N22
-    N17 --> N23
+    N16 --> N62
+    N17 --> N61
     N18 --> N61
-    N18 --> N60
     N19 --> N61
+    N20 --> N61
     N24 --> N25
     N28 --> N30
-    N28 --> N61
-    N28 --> N69
+    N28 --> N62
+    N28 --> N70
+    N28 --> N67
+    N29 --> N30
+    N29 --> N28
 ```
 
 ---
@@ -3171,21 +3416,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 185 |
+| Total TypeScript Files | 197 |
 | Total Modules | 16 |
-| Total Lines of Code | 74111 |
-| Total Exports | 979 |
-| Total Re-exports | 413 |
-| Total Classes | 92 |
-| Total Interfaces | 459 |
-| Total Functions | 323 |
+| Total Lines of Code | 80336 |
+| Total Exports | 1033 |
+| Total Re-exports | 448 |
+| Total Classes | 102 |
+| Total Interfaces | 468 |
+| Total Functions | 332 |
 | Total Type Guards | 66 |
 | Total Enums | 3 |
-| Type-only Imports | 142 |
+| Type-only Imports | 160 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 41 |
 
 ---
 
-*Last Updated*: 2025-12-09
-*Version*: 7.5.0
+*Last Updated*: 2025-12-16
+*Version*: 8.2.0

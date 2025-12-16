@@ -1,14 +1,14 @@
 metadata:
   name: deepthinking-mcp
-  version: 7.5.0
-  lastUpdated: "2025-12-09"
-  totalFiles: 185
+  version: 8.2.0
+  lastUpdated: "2025-12-16"
+  totalFiles: 197
   totalModules: 16
-  totalExports: 979
+  totalExports: 1033
 entryPoints:
   - file: src/index.ts
     type: main
-    description: DeepThinking MCP Server (v6.1.0)
+    description: DeepThinking MCP Server (v8.0.0)
 modules:
   cache:
     src/cache/factory.ts:
@@ -2761,7 +2761,7 @@ modules:
         - VisualExportOptions
   entry:
     src/index.ts:
-      description: DeepThinking MCP Server (v6.1.0)
+      description: DeepThinking MCP Server (v8.0.0)
       externalDependencies:
         - package: "@modelcontextprotocol/sdk/server/index.js"
           imports:
@@ -2801,12 +2801,16 @@ modules:
         - file: ./types/index.js
           imports:
             - ThinkingMode
+            - isFullyImplemented
         - file: ./services/index.js
           imports:
             - ThoughtFactory
             - ExportService
             - ModeRouter
           typeOnly: true
+        - file: ./modes/handlers/index.js
+          imports:
+            - ModeHandlerRegistry
       exports: []
   interfaces:
     src/interfaces/ILogger.ts:
@@ -2878,6 +2882,521 @@ modules:
         - ConstraintReasoningThought
         - ConstraintPropagation
         - ConstraintAnalysis
+    src/modes/handlers/BayesianHandler.ts:
+      description: BayesianHandler - Phase 10 Sprint 2 (v8.1.0)
+      externalDependencies: []
+      nodeDependencies:
+        - module: crypto
+          imports:
+            - randomUUID
+      internalDependencies:
+        - file: ../../types/core.js
+          imports:
+            - ThinkingMode
+            - BayesianThought
+        - file: ../../types/modes/bayesian.js
+          imports:
+            - BayesianHypothesis
+            - PriorProbability
+            - Likelihood
+            - BayesianEvidence
+            - PosteriorProbability
+          typeOnly: true
+        - file: ../../tools/thinking.js
+          imports:
+            - ThinkingToolInput
+          typeOnly: true
+        - file: ./ModeHandler.js
+          imports:
+            - ModeHandler
+            - ValidationResult
+            - ModeEnhancements
+            - validationSuccess
+            - validationFailure
+            - createValidationError
+            - createValidationWarning
+      exports:
+        - BayesianHandler
+      classes:
+        - BayesianHandler
+    src/modes/handlers/CausalHandler.ts:
+      description: CausalHandler - Phase 10 Sprint 2 (v8.1.0)
+      externalDependencies: []
+      nodeDependencies:
+        - module: crypto
+          imports:
+            - randomUUID
+      internalDependencies:
+        - file: ../../types/core.js
+          imports:
+            - ThinkingMode
+            - CausalThought
+        - file: ../../types/modes/causal.js
+          imports:
+            - CausalGraph
+            - Intervention
+          typeOnly: true
+        - file: ../../tools/thinking.js
+          imports:
+            - ThinkingToolInput
+          typeOnly: true
+        - file: ./ModeHandler.js
+          imports:
+            - ModeHandler
+            - ValidationResult
+            - ModeEnhancements
+            - validationSuccess
+            - validationFailure
+            - createValidationError
+            - createValidationWarning
+        - file: ../../utils/type-guards.js
+          imports:
+            - toExtendedThoughtType
+      exports:
+        - CausalHandler
+      classes:
+        - CausalHandler
+    src/modes/handlers/CounterfactualHandler.ts:
+      description: CounterfactualHandler - Phase 10 Sprint 2B (v8.2.0)
+      externalDependencies: []
+      nodeDependencies:
+        - module: crypto
+          imports:
+            - randomUUID
+      internalDependencies:
+        - file: ../../types/core.js
+          imports:
+            - ThinkingMode
+            - CounterfactualThought
+            - Scenario
+            - Condition
+            - CounterfactualComparison
+            - InterventionPoint
+            - CausalChain
+            - Difference
+        - file: ../../tools/thinking.js
+          imports:
+            - ThinkingToolInput
+          typeOnly: true
+        - file: ./ModeHandler.js
+          imports:
+            - ModeHandler
+            - ValidationResult
+            - ValidationError
+            - ValidationWarning
+            - ModeEnhancements
+            - validationSuccess
+            - validationFailure
+            - createValidationError
+            - createValidationWarning
+      exports:
+        - CounterfactualHandler
+      classes:
+        - CounterfactualHandler
+    src/modes/handlers/CritiqueHandler.ts:
+      description: CritiqueHandler - Phase 10 Sprint 2B (v8.2.0)
+      externalDependencies: []
+      nodeDependencies:
+        - module: crypto
+          imports:
+            - randomUUID
+      internalDependencies:
+        - file: ../../types/core.js
+          imports:
+            - ThinkingMode
+            - CritiqueThought
+        - file: ../../types/modes/critique.js
+          imports:
+            - CritiqueThoughtType
+            - CritiquedWork
+            - CritiquePoint
+            - MethodologyEvaluation
+            - ArgumentCritique
+            - CritiqueVerdict
+          typeOnly: true
+        - file: ../../tools/thinking.js
+          imports:
+            - ThinkingToolInput
+          typeOnly: true
+        - file: ./ModeHandler.js
+          imports:
+            - ModeHandler
+            - ValidationResult
+            - ValidationError
+            - ValidationWarning
+            - ModeEnhancements
+            - validationSuccess
+            - validationFailure
+            - createValidationError
+            - createValidationWarning
+      exports:
+        - CritiqueHandler
+      classes:
+        - CritiqueHandler
+    src/modes/handlers/GameTheoryHandler.ts:
+      description: GameTheoryHandler - Phase 10 Sprint 2 (v8.1.0)
+      externalDependencies: []
+      nodeDependencies:
+        - module: crypto
+          imports:
+            - randomUUID
+      internalDependencies:
+        - file: ../../types/core.js
+          imports:
+            - ThinkingMode
+            - GameTheoryThought
+        - file: ../../types/modes/gametheory.js
+          imports:
+            - Game
+            - Player
+            - Strategy
+            - PayoffMatrix
+            - PayoffEntry
+            - NashEquilibrium
+            - DominantStrategy
+          typeOnly: true
+        - file: ../../tools/thinking.js
+          imports:
+            - ThinkingToolInput
+          typeOnly: true
+        - file: ./ModeHandler.js
+          imports:
+            - ModeHandler
+            - ValidationResult
+            - ModeEnhancements
+            - validationSuccess
+            - validationFailure
+            - createValidationError
+            - createValidationWarning
+      exports:
+        - GameTheoryHandler
+      classes:
+        - GameTheoryHandler
+    src/modes/handlers/GenericModeHandler.ts:
+      description: GenericModeHandler - Phase 10 Sprint 1 (v8.0.0)
+      externalDependencies: []
+      nodeDependencies:
+        - module: crypto
+          imports:
+            - randomUUID
+      internalDependencies:
+        - file: ../../types/core.js
+          imports:
+            - ThinkingMode
+            - Thought
+            - ShannonStage
+            - SequentialThought
+            - ShannonThought
+            - MathematicsThought
+            - PhysicsThought
+            - HybridThought
+            - InductiveThought
+            - DeductiveThought
+            - AbductiveThought
+            - CausalThought
+            - isFullyImplemented
+        - file: ../../tools/thinking.js
+          imports:
+            - ThinkingToolInput
+          typeOnly: true
+        - file: ./ModeHandler.js
+          imports:
+            - ModeHandler
+            - ValidationResult
+            - ModeEnhancements
+            - ModeStatus
+            - validationSuccess
+            - validationFailure
+            - createValidationError
+            - createValidationWarning
+        - file: ../../utils/type-guards.js
+          imports:
+            - toExtendedThoughtType
+      exports:
+        - GenericModeHandler
+      classes:
+        - GenericModeHandler
+    src/modes/handlers/index.ts:
+      description: Mode Handlers Index - Phase 10 Sprint 2B (v8.2.0)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./CausalHandler.js
+          imports:
+            - CausalHandler
+        - file: ./BayesianHandler.js
+          imports:
+            - BayesianHandler
+        - file: ./GameTheoryHandler.js
+          imports:
+            - GameTheoryHandler
+        - file: ./CounterfactualHandler.js
+          imports:
+            - CounterfactualHandler
+        - file: ./SynthesisHandler.js
+          imports:
+            - SynthesisHandler
+        - file: ./SystemsThinkingHandler.js
+          imports:
+            - SystemsThinkingHandler
+        - file: ./CritiqueHandler.js
+          imports:
+            - CritiqueHandler
+        - file: ./registry.js
+          imports:
+            - getRegistry
+        - file: ./ModeHandler.js
+          imports:
+            - ModeHandler
+            - ValidationResult
+            - ValidationError
+            - ValidationWarning
+            - ModeEnhancements
+            - ModeStatus
+            - DetectedArchetype
+            - validationSuccess
+            - validationFailure
+            - createValidationError
+            - createValidationWarning
+          reExport: true
+        - file: ./GenericModeHandler.js
+          imports:
+            - GenericModeHandler
+          reExport: true
+        - file: ./CausalHandler.js
+          imports:
+            - CausalHandler
+          reExport: true
+        - file: ./BayesianHandler.js
+          imports:
+            - BayesianHandler
+          reExport: true
+        - file: ./GameTheoryHandler.js
+          imports:
+            - GameTheoryHandler
+          reExport: true
+        - file: ./CounterfactualHandler.js
+          imports:
+            - CounterfactualHandler
+          reExport: true
+        - file: ./SynthesisHandler.js
+          imports:
+            - SynthesisHandler
+          reExport: true
+        - file: ./SystemsThinkingHandler.js
+          imports:
+            - SystemsThinkingHandler
+          reExport: true
+        - file: ./CritiqueHandler.js
+          imports:
+            - CritiqueHandler
+          reExport: true
+        - file: ./registry.js
+          imports:
+            - ModeHandlerRegistry
+            - RegistryStats
+            - getRegistry
+            - registerHandler
+            - createThought
+          reExport: true
+      exports:
+        - ModeHandler
+        - ValidationResult
+        - ValidationError
+        - ValidationWarning
+        - ModeEnhancements
+        - ModeStatus
+        - DetectedArchetype
+        - validationSuccess
+        - validationFailure
+        - createValidationError
+        - createValidationWarning
+        - GenericModeHandler
+        - CausalHandler
+        - BayesianHandler
+        - GameTheoryHandler
+        - CounterfactualHandler
+        - SynthesisHandler
+        - SystemsThinkingHandler
+        - CritiqueHandler
+        - ModeHandlerRegistry
+        - RegistryStats
+        - getRegistry
+        - registerHandler
+        - createThought
+        - registerAllHandlers
+      reExported:
+        - ModeHandler
+        - ValidationResult
+        - ValidationError
+        - ValidationWarning
+        - ModeEnhancements
+        - ModeStatus
+        - DetectedArchetype
+        - validationSuccess
+        - validationFailure
+        - createValidationError
+        - createValidationWarning
+        - GenericModeHandler
+        - CausalHandler
+        - BayesianHandler
+        - GameTheoryHandler
+        - CounterfactualHandler
+        - SynthesisHandler
+        - SystemsThinkingHandler
+        - CritiqueHandler
+        - ModeHandlerRegistry
+        - RegistryStats
+        - getRegistry
+        - registerHandler
+        - createThought
+      functions:
+        - registerAllHandlers
+    src/modes/handlers/ModeHandler.ts:
+      description: ModeHandler Interface - Phase 10 Sprint 1 (v8.0.0)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../types/core.js
+          imports:
+            - ThinkingMode
+            - Thought
+          typeOnly: true
+        - file: ../../tools/thinking.js
+          imports:
+            - ThinkingToolInput
+          typeOnly: true
+      exports:
+        - validationSuccess
+        - validationFailure
+        - createValidationError
+        - createValidationWarning
+      interfaces:
+        - ValidationResult
+        - ValidationError
+        - ValidationWarning
+        - DetectedArchetype
+        - ModeEnhancements
+        - ModeHandler
+        - ModeStatus
+      functions:
+        - validationSuccess
+        - validationFailure
+        - createValidationError
+        - createValidationWarning
+    src/modes/handlers/registry.ts:
+      description: ModeHandlerRegistry - Phase 10 Sprint 1 (v8.0.0)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../types/core.js
+          imports:
+            - ThinkingMode
+            - Thought
+            - isFullyImplemented
+        - file: ../../tools/thinking.js
+          imports:
+            - ThinkingToolInput
+          typeOnly: true
+        - file: ./ModeHandler.js
+          imports:
+            - ModeHandler
+            - ModeStatus
+            - ValidationResult
+            - validationFailure
+            - createValidationError
+        - file: ./GenericModeHandler.js
+          imports:
+            - GenericModeHandler
+      exports:
+        - getRegistry
+        - registerHandler
+        - createThought
+        - ModeHandlerRegistry
+      classes:
+        - ModeHandlerRegistry
+      interfaces:
+        - RegistryStats
+      functions:
+        - getRegistry
+        - registerHandler
+        - createThought
+    src/modes/handlers/SynthesisHandler.ts:
+      description: SynthesisHandler - Phase 10 Sprint 2B (v8.2.0)
+      externalDependencies: []
+      nodeDependencies:
+        - module: crypto
+          imports:
+            - randomUUID
+      internalDependencies:
+        - file: ../../types/core.js
+          imports:
+            - ThinkingMode
+            - SynthesisThought
+        - file: ../../types/modes/synthesis.js
+          imports:
+            - Source
+            - Theme
+            - Contradiction
+            - LiteratureGap
+            - SynthesisThoughtType
+          typeOnly: true
+        - file: ../../tools/thinking.js
+          imports:
+            - ThinkingToolInput
+          typeOnly: true
+        - file: ./ModeHandler.js
+          imports:
+            - ModeHandler
+            - ValidationResult
+            - ModeEnhancements
+            - validationSuccess
+            - validationFailure
+            - createValidationError
+            - createValidationWarning
+      exports:
+        - SynthesisHandler
+      classes:
+        - SynthesisHandler
+    src/modes/handlers/SystemsThinkingHandler.ts:
+      description: SystemsThinkingHandler - Phase 10 Sprint 2B (v8.2.0)
+      externalDependencies: []
+      nodeDependencies:
+        - module: crypto
+          imports:
+            - randomUUID
+      internalDependencies:
+        - file: ../../types/core.js
+          imports:
+            - ThinkingMode
+            - SystemsThinkingThought
+        - file: ../../types/modes/systemsthinking.js
+          imports:
+            - SystemDefinition
+            - SystemComponent
+            - FeedbackLoop
+            - LeveragePoint
+          typeOnly: true
+        - file: ../../tools/thinking.js
+          imports:
+            - ThinkingToolInput
+          typeOnly: true
+        - file: ./ModeHandler.js
+          imports:
+            - ModeHandler
+            - ValidationResult
+            - ValidationError
+            - ValidationWarning
+            - ModeEnhancements
+            - DetectedArchetype
+            - validationSuccess
+            - validationFailure
+            - createValidationError
+            - createValidationWarning
+      exports:
+        - SystemsThinkingHandler
+      classes:
+        - SystemsThinkingHandler
     src/modes/mathematics-reasoning.ts:
       description: Mathematics Reasoning Engine - Phase 8 Sprint 3
       externalDependencies: []
@@ -3553,6 +4072,10 @@ modules:
           imports:
             - ThoughtFactory
           reExport: true
+        - file: ./RefactoredThoughtFactory.js
+          imports:
+            - RefactoredThoughtFactory
+          reExport: true
         - file: ./ExportService.js
           imports:
             - ExportService
@@ -3563,10 +4086,12 @@ modules:
           reExport: true
       exports:
         - ThoughtFactory
+        - RefactoredThoughtFactory
         - ExportService
         - ModeRouter
       reExported:
         - ThoughtFactory
+        - RefactoredThoughtFactory
         - ExportService
         - ModeRouter
     src/services/MetaMonitor.ts:
@@ -3622,6 +4147,50 @@ modules:
       interfaces:
         - ModeRecommendation
         - ModeCombinationRecommendation
+    src/services/RefactoredThoughtFactory.ts:
+      description: RefactoredThoughtFactory - Phase 10 Sprint 2B (v8.2.0)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/core.js
+          imports:
+            - ThinkingMode
+            - Thought
+        - file: ../tools/thinking.js
+          imports:
+            - ThinkingToolInput
+          typeOnly: true
+        - file: ./ThoughtFactory.js
+          imports:
+            - ThoughtFactory
+        - file: ../modes/handlers/index.js
+          imports:
+            - ModeHandlerRegistry
+            - ModeStatus
+            - ValidationResult
+            - CausalHandler
+            - BayesianHandler
+            - GameTheoryHandler
+            - CounterfactualHandler
+            - SynthesisHandler
+            - SystemsThinkingHandler
+            - CritiqueHandler
+        - file: ../interfaces/ILogger.js
+          imports:
+            - ILogger
+        - file: ../utils/logger.js
+          imports:
+            - createLogger
+            - LogLevel
+      exports:
+        - createRefactoredFactory
+        - RefactoredThoughtFactory
+      classes:
+        - RefactoredThoughtFactory
+      interfaces:
+        - RefactoredThoughtFactoryConfig
+      functions:
+        - createRefactoredFactory
     src/services/ThoughtFactory.ts:
       description: Thought Factory Service (v3.4.5)
       externalDependencies: []
@@ -3644,6 +4213,17 @@ modules:
             - CausalThought
             - Thought
             - EngineeringThought
+            - ComputabilityThought
+            - CryptanalyticThought
+            - AlgorithmicThought
+            - SystemsThinkingThought
+            - ScientificMethodThought
+            - FormalLogicThought
+            - OptimizationThought
+            - SynthesisThought
+            - ArgumentationThought
+            - CritiqueThought
+            - AnalysisThought
         - file: ../tools/thinking.js
           imports:
             - ThinkingToolInput
@@ -3657,6 +4237,16 @@ modules:
           imports:
             - createLogger
             - LogLevel
+        - file: ../modes/handlers/index.js
+          imports:
+            - ModeHandlerRegistry
+            - CausalHandler
+            - BayesianHandler
+            - GameTheoryHandler
+            - CounterfactualHandler
+            - SynthesisHandler
+            - SystemsThinkingHandler
+            - CritiqueHandler
       exports:
         - ThoughtFactory
       classes:
@@ -4785,7 +5375,7 @@ modules:
         - FULLY_IMPLEMENTED_MODES
         - EXPERIMENTAL_MODES
     src/types/index.ts:
-      description: Type definitions index (v7.4.0)
+      description: Type definitions index (v8.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -4800,6 +5390,19 @@ modules:
         - file: ./modes/recommendations.js
           imports:
             - "*"
+          reExport: true
+        - file: ../modes/handlers/ModeHandler.js
+          imports:
+            - type ModeHandler
+            - type ValidationResult
+            - type ValidationError
+            - type ValidationWarning
+            - type ModeEnhancements
+            - type ModeStatus
+            - validationSuccess
+            - validationFailure
+            - createValidationError
+            - createValidationWarning
           reExport: true
         - file: ./modes/engineering.js
           imports:
@@ -4959,6 +5562,16 @@ modules:
             - isAnalysisThought
           reExport: true
       exports:
+        - type ModeHandler
+        - type ValidationResult
+        - type ValidationError
+        - type ValidationWarning
+        - type ModeEnhancements
+        - type ModeStatus
+        - validationSuccess
+        - validationFailure
+        - createValidationError
+        - createValidationWarning
         - type Requirement
         - type RequirementPriority
         - type RequirementSource
@@ -5096,6 +5709,16 @@ modules:
         - "* from ./core.js"
         - "* from ./session.js"
         - "* from ./modes/recommendations.js"
+        - type ModeHandler
+        - type ValidationResult
+        - type ValidationError
+        - type ValidationWarning
+        - type ModeEnhancements
+        - type ModeStatus
+        - validationSuccess
+        - validationFailure
+        - createValidationError
+        - createValidationWarning
         - type Requirement
         - type RequirementPriority
         - type RequirementSource
@@ -7769,6 +8392,17 @@ dependencyGraph:
     - name: Modes
       files:
         - src/modes/constraint-reasoning.ts
+        - src/modes/handlers/BayesianHandler.ts
+        - src/modes/handlers/CausalHandler.ts
+        - src/modes/handlers/CounterfactualHandler.ts
+        - src/modes/handlers/CritiqueHandler.ts
+        - src/modes/handlers/GameTheoryHandler.ts
+        - src/modes/handlers/GenericModeHandler.ts
+        - src/modes/handlers/index.ts
+        - src/modes/handlers/ModeHandler.ts
+        - src/modes/handlers/registry.ts
+        - src/modes/handlers/SynthesisHandler.ts
+        - src/modes/handlers/SystemsThinkingHandler.ts
         - src/modes/mathematics-reasoning.ts
         - src/modes/meta-reasoning.ts
         - src/modes/modal-reasoning.ts
@@ -7804,6 +8438,7 @@ dependencyGraph:
         - src/services/index.ts
         - src/services/MetaMonitor.ts
         - src/services/ModeRouter.ts
+        - src/services/RefactoredThoughtFactory.ts
         - src/services/ThoughtFactory.ts
     - name: Session
       files:
@@ -7924,17 +8559,17 @@ dependencyGraph:
         - src/validation/validators/modes/temporal.ts
         - src/validation/validators/registry.ts
 statistics:
-  totalTypeScriptFiles: 185
+  totalTypeScriptFiles: 197
   totalModules: 16
-  totalLinesOfCode: 74111
-  totalExports: 979
-  totalClasses: 92
-  totalInterfaces: 459
-  totalFunctions: 323
+  totalLinesOfCode: 80336
+  totalExports: 1033
+  totalClasses: 102
+  totalInterfaces: 468
+  totalFunctions: 332
   totalTypeGuards: 66
   totalEnums: 3
   totalConstants: 161
-  totalReExports: 413
-  totalTypeOnlyImports: 142
+  totalReExports: 448
+  totalTypeOnlyImports: 160
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 41
