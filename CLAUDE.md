@@ -211,6 +211,55 @@ The server provides 12 focused tools + 1 legacy tool:
 }
 ```
 
+### Multi-Instance Configuration
+
+For parallel reasoning or handling multiple concurrent sessions, you can run multiple instances that share a common session directory:
+
+```json
+{
+  "mcpServers": {
+    "deepthinking-1": {
+      "command": "node",
+      "args": ["C:/path/to/deepthinking-mcp/dist/index.js"],
+      "env": {
+        "SESSION_DIR": "C:/shared/deepthinking-sessions"
+      }
+    },
+    "deepthinking-2": {
+      "command": "node",
+      "args": ["C:/path/to/deepthinking-mcp/dist/index.js"],
+      "env": {
+        "SESSION_DIR": "C:/shared/deepthinking-sessions"
+      }
+    },
+    "deepthinking-3": {
+      "command": "node",
+      "args": ["C:/path/to/deepthinking-mcp/dist/index.js"],
+      "env": {
+        "SESSION_DIR": "C:/shared/deepthinking-sessions"
+      }
+    }
+  }
+}
+```
+
+**Features:**
+- **Shared Sessions**: All instances share sessions via file-based storage
+- **File Locking**: Automatic cross-process file locking prevents race conditions
+- **Concurrent Reads**: Multiple instances can read sessions simultaneously (shared locks)
+- **Safe Writes**: Exclusive locks ensure atomic writes
+- **Stale Lock Detection**: Automatic cleanup of locks from crashed processes
+
+**Environment Variables:**
+- `SESSION_DIR` - Path to shared session directory (enables file-based storage)
+  - If not set: Uses in-memory storage (single instance mode)
+  - If set: Uses FileSessionStore with cross-process file locking
+
+**Use Cases:**
+- Run different reasoning modes in parallel
+- Handle multiple conversations simultaneously
+- Distribute complex analysis across multiple instances
+
 ## Key Files
 
 | File | Purpose |

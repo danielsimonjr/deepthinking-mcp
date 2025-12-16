@@ -9,6 +9,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.3.0] - 2025-12-16
+
+### ✨ Features
+
+**Multi-Instance MCP Server Support**
+
+This release adds support for running multiple MCP server instances that share sessions via file-based storage with cross-process file locking.
+
+#### New Files
+
+- **`src/utils/file-lock.ts`** - Cross-process file locking utility
+  - Exclusive locks for write operations (single writer)
+  - Shared locks for read operations (multiple concurrent readers)
+  - Automatic stale lock detection and cleanup (30s threshold)
+  - Retry with configurable timeout (default 10s)
+  - Windows-compatible error handling (EEXIST, EPERM, ENOENT)
+
+#### Changes
+
+- **FileSessionStore** (`src/session/storage/file-store.ts`)
+  - Added file locking to all session operations
+  - `saveSession()` uses exclusive lock
+  - `loadSession()` uses shared lock (allows concurrent reads)
+  - `deleteSession()` uses exclusive lock
+  - Metadata index operations use appropriate locks
+  - Merge logic for metadata from multiple instances
+
+- **Session Manager Wiring** (`src/index.ts`)
+  - Added `SESSION_DIR` environment variable support
+  - When set: Uses FileSessionStore with cross-process locking
+  - When not set: Uses in-memory storage (original single-instance behavior)
+  - Logs storage mode on startup
+
+#### Configuration
+
+Set `SESSION_DIR` environment variable in your MCP config to enable multi-instance support:
+
+```json
+{
+  "mcpServers": {
+    "deepthinking-1": {
+      "command": "node",
+      "args": ["path/to/dist/index.js"],
+      "env": { "SESSION_DIR": "C:/shared/deepthinking-sessions" }
+    },
+    "deepthinking-2": {
+      "command": "node",
+      "args": ["path/to/dist/index.js"],
+      "env": { "SESSION_DIR": "C:/shared/deepthinking-sessions" }
+    }
+  }
+}
+```
+
+#### Use Cases
+
+- Run different reasoning modes in parallel across instances
+- Handle multiple concurrent conversations with shared context
+- Distribute complex analysis across multiple server instances
+
+---
+
 ## [8.2.1] - 2025-12-15
 
 ### 🐛 Bug Fixes

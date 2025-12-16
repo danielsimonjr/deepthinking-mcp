@@ -71,7 +71,21 @@ let _modeRouter: ModeRouter | null = null;
 async function getSessionManager(): Promise<SessionManager> {
   if (!_sessionManager) {
     const { SessionManager } = await import('./session/index.js');
-    _sessionManager = new SessionManager();
+
+    // Check for SESSION_DIR environment variable for multi-instance support
+    const sessionDir = process.env.SESSION_DIR;
+
+    if (sessionDir) {
+      // Use file-based storage with shared directory for multi-instance support
+      const { FileSessionStore } = await import('./session/storage/file-store.js');
+      const storage = new FileSessionStore(sessionDir);
+      await storage.initialize();
+      _sessionManager = new SessionManager({}, undefined, storage);
+      console.error(`[deepthinking-mcp] Using file-based session storage: ${sessionDir}`);
+    } else {
+      // Default: in-memory only (single instance)
+      _sessionManager = new SessionManager();
+    }
   }
   return _sessionManager;
 }

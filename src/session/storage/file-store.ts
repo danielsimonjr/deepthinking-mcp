@@ -4,6 +4,11 @@
  * Stores sessions as JSON files in a directory structure:
  * - {baseDir}/sessions/{sessionId}.json
  * - {baseDir}/metadata/index.json (for fast listings)
+ *
+ * Supports multi-instance MCP servers via file locking:
+ * - Exclusive locks for write operations
+ * - Shared locks for read operations
+ * - Automatic stale lock detection and cleanup
  */
 
 import { promises as fs } from 'fs';
@@ -16,9 +21,19 @@ import {
   DEFAULT_STORAGE_CONFIG,
 } from './interface.js';
 import { logger } from '../../utils/logger.js';
+import { withLock, withSharedLock, type LockOptions } from '../../utils/file-lock.js';
 
 /**
- * File-based session storage
+ * Default lock options for file operations
+ */
+const DEFAULT_LOCK_OPTIONS: LockOptions = {
+  timeout: 10000,      // 10 seconds
+  retryInterval: 50,   // 50ms between retries
+  staleThreshold: 30000, // 30 seconds before lock is considered stale
+};
+
+/**
+ * File-based session storage with multi-instance support
  */
 export class FileSessionStore implements SessionStorage {
   private baseDir: string;
@@ -27,6 +42,7 @@ export class FileSessionStore implements SessionStorage {
   private config: StorageConfig;
   private metadataCache: Map<string, SessionMetadata>;
   private initialized: boolean = false;
+  private lockOptions: LockOptions;
 
   /**
    * Create a new FileSessionStore
@@ -40,6 +56,7 @@ export class FileSessionStore implements SessionStorage {
     this.metadataFile = path.join(baseDir, 'metadata', 'index.json');
     this.config = { ...DEFAULT_STORAGE_CONFIG, ...config };
     this.metadataCache = new Map();
+    this.lockOptions = { ...DEFAULT_LOCK_OPTIONS };
   }
 
   /**
@@ -55,7 +72,7 @@ export class FileSessionStore implements SessionStorage {
       await fs.mkdir(this.sessionsDir, { recursive: true });
       await fs.mkdir(path.dirname(this.metadataFile), { recursive: true });
 
-      // Load metadata index
+      // Load metadata index (with shared lock for reading)
       await this.loadMetadataIndex();
 
       this.initialized = true;
@@ -72,26 +89,29 @@ export class FileSessionStore implements SessionStorage {
   }
 
   /**
-   * Save a session to disk
+   * Save a session to disk (with exclusive lock)
    */
   async saveSession(session: ThinkingSession): Promise<void> {
     await this.ensureInitialized();
 
+    const sessionPath = this.getSessionPath(session.id);
+
     try {
-      const sessionPath = this.getSessionPath(session.id);
+      // Use exclusive lock for writing session file
+      await withLock(sessionPath, async () => {
+        // Prepare session for serialization (convert special types)
+        const serializable = this.prepareForSerialization(session);
 
-      // Prepare session for serialization (convert special types)
-      const serializable = this.prepareForSerialization(session);
+        // Serialize session
+        const json = this.config.serialization?.prettyPrint
+          ? JSON.stringify(serializable, null, 2)
+          : JSON.stringify(serializable);
 
-      // Serialize session
-      const json = this.config.serialization?.prettyPrint
-        ? JSON.stringify(serializable, null, 2)
-        : JSON.stringify(serializable);
+        // Write session file
+        await fs.writeFile(sessionPath, json, 'utf-8');
+      }, this.lockOptions);
 
-      // Write session file
-      await fs.writeFile(sessionPath, json, 'utf-8');
-
-      // Update metadata
+      // Update metadata (with exclusive lock on metadata file)
       await this.updateMetadata(session);
 
       logger.debug('Session saved', { sessionId: session.id, path: sessionPath });
@@ -104,14 +124,14 @@ export class FileSessionStore implements SessionStorage {
   }
 
   /**
-   * Load a session from disk
+   * Load a session from disk (with shared lock)
    */
   async loadSession(sessionId: string): Promise<ThinkingSession | null> {
     await this.ensureInitialized();
 
-    try {
-      const sessionPath = this.getSessionPath(sessionId);
+    const sessionPath = this.getSessionPath(sessionId);
 
+    try {
       // Check if file exists
       try {
         await fs.access(sessionPath);
@@ -119,12 +139,15 @@ export class FileSessionStore implements SessionStorage {
         return null; // File doesn't exist
       }
 
-      // Read and parse session
-      const json = await fs.readFile(sessionPath, 'utf-8');
-      const parsed = JSON.parse(json);
+      // Use shared lock for reading (allows concurrent reads)
+      const session = await withSharedLock(sessionPath, async () => {
+        // Read and parse session
+        const json = await fs.readFile(sessionPath, 'utf-8');
+        const parsed = JSON.parse(json);
 
-      // Restore special types
-      const session = this.restoreFromSerialization(parsed) as ThinkingSession;
+        // Restore special types
+        return this.restoreFromSerialization(parsed) as ThinkingSession;
+      }, this.lockOptions);
 
       logger.debug('Session loaded', { sessionId });
       return session;
@@ -135,14 +158,14 @@ export class FileSessionStore implements SessionStorage {
   }
 
   /**
-   * Delete a session from disk
+   * Delete a session from disk (with exclusive lock)
    */
   async deleteSession(sessionId: string): Promise<boolean> {
     await this.ensureInitialized();
 
-    try {
-      const sessionPath = this.getSessionPath(sessionId);
+    const sessionPath = this.getSessionPath(sessionId);
 
+    try {
       // Check if file exists
       try {
         await fs.access(sessionPath);
@@ -150,10 +173,13 @@ export class FileSessionStore implements SessionStorage {
         return false; // File doesn't exist
       }
 
-      // Delete session file
-      await fs.unlink(sessionPath);
+      // Use exclusive lock for deleting
+      await withLock(sessionPath, async () => {
+        // Delete session file
+        await fs.unlink(sessionPath);
+      }, this.lockOptions);
 
-      // Remove from metadata
+      // Remove from metadata (with exclusive lock on metadata file)
       this.metadataCache.delete(sessionId);
       await this.saveMetadataIndex();
 
@@ -167,9 +193,14 @@ export class FileSessionStore implements SessionStorage {
 
   /**
    * List all sessions (metadata only)
+   * Refreshes from disk to get updates from other instances
    */
   async listSessions(): Promise<SessionMetadata[]> {
     await this.ensureInitialized();
+
+    // Refresh metadata from disk to see changes from other instances
+    await this.loadMetadataIndex();
+
     return Array.from(this.metadataCache.values());
   }
 
@@ -178,6 +209,10 @@ export class FileSessionStore implements SessionStorage {
    */
   async exists(sessionId: string): Promise<boolean> {
     await this.ensureInitialized();
+
+    // Refresh metadata to check for updates from other instances
+    await this.loadMetadataIndex();
+
     return this.metadataCache.has(sessionId);
   }
 
@@ -186,6 +221,9 @@ export class FileSessionStore implements SessionStorage {
    */
   async getStats(): Promise<StorageStats> {
     await this.ensureInitialized();
+
+    // Refresh metadata
+    await this.loadMetadataIndex();
 
     const sessions = Array.from(this.metadataCache.values());
     const totalSessions = sessions.length;
@@ -196,9 +234,11 @@ export class FileSessionStore implements SessionStorage {
     try {
       const files = await fs.readdir(this.sessionsDir);
       for (const file of files) {
-        const filePath = path.join(this.sessionsDir, file);
-        const stats = await fs.stat(filePath);
-        storageSize += stats.size;
+        if (file.endsWith('.json')) {
+          const filePath = path.join(this.sessionsDir, file);
+          const stats = await fs.stat(filePath);
+          storageSize += stats.size;
+        }
       }
     } catch (error) {
       logger.warn('Failed to calculate storage size', { error });
@@ -234,6 +274,9 @@ export class FileSessionStore implements SessionStorage {
    */
   async cleanup(maxAgeMs: number): Promise<number> {
     await this.ensureInitialized();
+
+    // Refresh metadata first
+    await this.loadMetadataIndex();
 
     const now = Date.now();
     const sessions = Array.from(this.metadataCache.values());
@@ -274,7 +317,7 @@ export class FileSessionStore implements SessionStorage {
   }
 
   /**
-   * Update metadata cache and index
+   * Update metadata cache and index (with exclusive lock)
    */
   private async updateMetadata(session: ThinkingSession): Promise<void> {
     const metadata: SessionMetadata = {
@@ -292,16 +335,20 @@ export class FileSessionStore implements SessionStorage {
   }
 
   /**
-   * Load metadata index from disk
+   * Load metadata index from disk (with shared lock)
    */
   private async loadMetadataIndex(): Promise<void> {
     try {
       await fs.access(this.metadataFile);
-      const json = await fs.readFile(this.metadataFile, 'utf-8');
-      const parsed = JSON.parse(json) as any[];
-      const metadata = parsed.map((item) =>
-        this.restoreFromSerialization(item)
-      ) as SessionMetadata[];
+
+      // Use shared lock for reading metadata
+      const metadata = await withSharedLock(this.metadataFile, async () => {
+        const json = await fs.readFile(this.metadataFile, 'utf-8');
+        const parsed = JSON.parse(json) as any[];
+        return parsed.map((item) =>
+          this.restoreFromSerialization(item)
+        ) as SessionMetadata[];
+      }, this.lockOptions);
 
       this.metadataCache.clear();
       for (const meta of metadata) {
@@ -318,14 +365,43 @@ export class FileSessionStore implements SessionStorage {
   }
 
   /**
-   * Save metadata index to disk
+   * Save metadata index to disk (with exclusive lock)
    */
   private async saveMetadataIndex(): Promise<void> {
-    const metadata = Array.from(this.metadataCache.values());
-    const serializable = metadata.map((item) => this.prepareForSerialization(item));
-    const json = JSON.stringify(serializable, null, 2);
+    // First, reload to merge with any changes from other instances
+    try {
+      await fs.access(this.metadataFile);
+      const existingJson = await fs.readFile(this.metadataFile, 'utf-8');
+      const existingParsed = JSON.parse(existingJson) as any[];
+      const existingMetadata = existingParsed.map((item) =>
+        this.restoreFromSerialization(item)
+      ) as SessionMetadata[];
 
-    await fs.writeFile(this.metadataFile, json, 'utf-8');
+      // Merge: our cache takes precedence, but include items we don't have
+      for (const meta of existingMetadata) {
+        if (!this.metadataCache.has(meta.id)) {
+          // Check if the session file still exists
+          const sessionPath = this.getSessionPath(meta.id);
+          try {
+            await fs.access(sessionPath);
+            this.metadataCache.set(meta.id, meta);
+          } catch {
+            // Session file was deleted, don't include in cache
+          }
+        }
+      }
+    } catch {
+      // File doesn't exist yet, continue with current cache
+    }
+
+    // Now save with exclusive lock
+    await withLock(this.metadataFile, async () => {
+      const metadata = Array.from(this.metadataCache.values());
+      const serializable = metadata.map((item) => this.prepareForSerialization(item));
+      const json = JSON.stringify(serializable, null, 2);
+
+      await fs.writeFile(this.metadataFile, json, 'utf-8');
+    }, this.lockOptions);
   }
 
   /**
