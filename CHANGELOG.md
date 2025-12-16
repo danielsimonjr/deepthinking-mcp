@@ -9,6 +9,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [8.2.1] - 2025-12-15
+
+### 🐛 Bug Fixes
+
+**ThoughtFactory Handler Integration**
+
+Fixed an issue where specialized handlers created in Sprint 2 and 2B were not being used by the MCP server because `index.ts` was using the original `ThoughtFactory` instead of the `RefactoredThoughtFactory`.
+
+#### Changes
+
+- **ThoughtFactory Integration** (`src/services/ThoughtFactory.ts`)
+  - Added `ModeHandlerRegistry` initialization in constructor
+  - Added `registerSpecializedHandlers()` method to register all 7 handlers
+  - Modified `createThought()` to check for specialized handler first, then fallback to switch statement
+  - Added `hasSpecializedHandler(mode)` helper method
+  - Added `getStats()` helper method for registry statistics
+
+- **Handlers Now Operational**
+  - CausalHandler ✅
+  - BayesianHandler ✅
+  - GameTheoryHandler ✅
+  - CounterfactualHandler ✅
+  - SynthesisHandler ✅
+  - SystemsThinkingHandler ✅
+  - CritiqueHandler ✅
+
+#### Impact
+
+All 7 specialized handlers now work through the MCP server with `hasSpecializedHandler: true` in API responses. The fix ensures:
+- Mode-specific validation is applied
+- Mental models and guiding questions are provided
+- Enhancements (archetype detection, Socratic questions, etc.) are included in responses
+
+---
+
 ## [8.2.0] - 2025-12-14
 
 ### ✨ Features
