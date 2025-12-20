@@ -41074,12 +41074,15 @@ var deepthinking_academic_schema = {
           type: "object",
           properties: {
             id: { type: "string" },
-            citation: { type: "string" },
-            keyFindings: { type: "array", items: { type: "string" } },
-            methodology: { type: "string" },
+            type: { type: "string" },
+            title: { type: "string" },
+            authors: { type: "array", items: { type: "string" } },
+            year: { type: "integer" },
+            venue: { type: "string" },
+            doi: { type: "string" },
             relevance: { type: "number", minimum: 0, maximum: 1 }
           },
-          additionalProperties: false
+          required: ["id", "title"]
         },
         description: "Literature sources being synthesized"
       },
@@ -41176,11 +41179,14 @@ var deepthinking_academic_schema = {
         items: {
           type: "object",
           properties: {
-            code: { type: "string" },
-            description: { type: "string" },
+            id: { type: "string" },
+            label: { type: "string" },
+            definition: { type: "string" },
+            type: { type: "string", enum: ["descriptive", "in_vivo", "process", "initial", "focused", "axial", "theoretical", "emotion", "value"] },
+            frequency: { type: "integer" },
             examples: { type: "array", items: { type: "string" } }
           },
-          additionalProperties: false
+          required: ["id", "label"]
         },
         description: "Coding scheme for analysis"
       },
