@@ -1,27 +1,28 @@
 /**
- * Mode Handler Delegation Integration Tests - Phase 10 Sprint 2
+ * Mode Handler Delegation Integration Tests - Phase 15 (v8.4.0)
  *
- * Tests that verify:
- * - RefactoredThoughtFactory correctly delegates to specialized handlers
- * - Non-migrated modes fall back to GenericModeHandler
+ * Comprehensive tests for all 33 modes that verify:
+ * - ThoughtFactory correctly delegates to specialized handlers
+ * - All modes have specialized handlers registered
  * - Registry properly tracks handler registrations
  * - Integration between handlers and thought creation
+ * - Mode-specific features are properly preserved
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { RefactoredThoughtFactory } from '../../src/services/RefactoredThoughtFactory.js';
-import { ModeHandlerRegistry } from '../../src/modes/handlers/registry.js';
+import { ThoughtFactory } from '../../src/services/ThoughtFactory.js';
+import { ModeHandlerRegistry } from '../../src/modes/registry.js';
 import { ThinkingMode } from '../../src/types/core.js';
 import type { ThinkingToolInput } from '../../src/tools/thinking.js';
 
 describe('Mode Handler Delegation', () => {
-  let factory: RefactoredThoughtFactory;
+  let factory: ThoughtFactory;
 
   beforeEach(() => {
     // Reset registry before each test
     ModeHandlerRegistry.resetInstance();
     // Create factory with auto-registration
-    factory = new RefactoredThoughtFactory({ autoRegisterHandlers: true });
+    factory = new ThoughtFactory({ autoRegisterHandlers: true });
   });
 
   afterEach(() => {
@@ -29,11 +30,11 @@ describe('Mode Handler Delegation', () => {
   });
 
   describe('Specialized Handler Registration', () => {
-    it('should auto-register specialized handlers on construction', () => {
+    it('should auto-register all 33 specialized handlers on construction', () => {
       const stats = factory.getStats();
 
-      // 3 from Sprint 2 (Causal, Bayesian, GameTheory) + 4 from Sprint 2B (Counterfactual, Synthesis, SystemsThinking, Critique)
-      expect(stats.specializedHandlers).toBe(7);
+      // Phase 10 Sprint 3 v8.4.0: All 33 modes + GenericModeHandler fallback = 34 handlers
+      expect(stats.specializedHandlers).toBeGreaterThanOrEqual(33);
       expect(stats.modesWithHandlers).toContain(ThinkingMode.CAUSAL);
       expect(stats.modesWithHandlers).toContain(ThinkingMode.BAYESIAN);
       expect(stats.modesWithHandlers).toContain(ThinkingMode.GAMETHEORY);
@@ -41,9 +42,16 @@ describe('Mode Handler Delegation', () => {
       expect(stats.modesWithHandlers).toContain(ThinkingMode.SYNTHESIS);
       expect(stats.modesWithHandlers).toContain(ThinkingMode.SYSTEMSTHINKING);
       expect(stats.modesWithHandlers).toContain(ThinkingMode.CRITIQUE);
+      // Also verify some of the newly added handlers
+      expect(stats.modesWithHandlers).toContain(ThinkingMode.SEQUENTIAL);
+      expect(stats.modesWithHandlers).toContain(ThinkingMode.HYBRID);
+      expect(stats.modesWithHandlers).toContain(ThinkingMode.RECURSIVE);
+      expect(stats.modesWithHandlers).toContain(ThinkingMode.MODAL);
+      expect(stats.modesWithHandlers).toContain(ThinkingMode.CUSTOM);
     });
 
-    it('should report specialized handler status correctly', () => {
+    it('should report specialized handler status correctly for all modes', () => {
+      // Phase 10 Sprint 3 v8.4.0: All modes now have specialized handlers
       expect(factory.hasSpecializedHandler(ThinkingMode.CAUSAL)).toBe(true);
       expect(factory.hasSpecializedHandler(ThinkingMode.BAYESIAN)).toBe(true);
       expect(factory.hasSpecializedHandler(ThinkingMode.GAMETHEORY)).toBe(true);
@@ -51,8 +59,8 @@ describe('Mode Handler Delegation', () => {
       expect(factory.hasSpecializedHandler(ThinkingMode.SYNTHESIS)).toBe(true);
       expect(factory.hasSpecializedHandler(ThinkingMode.SYSTEMSTHINKING)).toBe(true);
       expect(factory.hasSpecializedHandler(ThinkingMode.CRITIQUE)).toBe(true);
-      expect(factory.hasSpecializedHandler(ThinkingMode.SEQUENTIAL)).toBe(false);
-      expect(factory.hasSpecializedHandler(ThinkingMode.HYBRID)).toBe(false);
+      expect(factory.hasSpecializedHandler(ThinkingMode.SEQUENTIAL)).toBe(true);
+      expect(factory.hasSpecializedHandler(ThinkingMode.HYBRID)).toBe(true);
     });
   });
 
@@ -196,20 +204,20 @@ describe('Mode Handler Delegation', () => {
       expect(causalStatus.hasSpecializedHandler).toBe(true);
     });
 
-    it('should report correct status for non-specialized modes', () => {
+    it('should report correct status for all modes (all have specialized handlers now)', () => {
+      // Phase 10 Sprint 3 v8.4.0: Sequential now has a specialized handler
       const sequentialStatus = factory.getModeStatus(ThinkingMode.SEQUENTIAL);
 
       expect(sequentialStatus.mode).toBe(ThinkingMode.SEQUENTIAL);
-      expect(sequentialStatus.hasSpecializedHandler).toBe(false);
-      expect(sequentialStatus.isFullyImplemented).toBe(true); // Sequential is fully implemented
+      expect(sequentialStatus.hasSpecializedHandler).toBe(true);
+      expect(sequentialStatus.isFullyImplemented).toBe(true);
     });
 
-    it('should include note for experimental modes', () => {
+    it('should report fully implemented status for modes with handlers', () => {
       const counterfactualStatus = factory.getModeStatus(ThinkingMode.COUNTERFACTUAL);
 
-      expect(counterfactualStatus.isFullyImplemented).toBe(false);
-      expect(counterfactualStatus.note).toBeDefined();
-      expect(counterfactualStatus.note).toContain('experimental');
+      expect(counterfactualStatus.isFullyImplemented).toBe(true);
+      expect(counterfactualStatus.hasSpecializedHandler).toBe(true);
     });
   });
 
@@ -278,7 +286,7 @@ describe('Mode Handler Delegation', () => {
   describe('useRegistryForAll Mode', () => {
     it('should use generic handler from registry when useRegistryForAll is true', () => {
       ModeHandlerRegistry.resetInstance();
-      const factoryWithRegistryForAll = new RefactoredThoughtFactory({
+      const factoryWithRegistryForAll = new ThoughtFactory({
         autoRegisterHandlers: true,
         useRegistryForAll: true,
       });
@@ -426,6 +434,721 @@ describe('Mode Handler Delegation', () => {
       const nash = thought.nashEquilibria[0];
       expect(nash.strategyProfile).toEqual(['D', 'D']);
       expect(nash.type).toBe('pure');
+    });
+  });
+
+  describe('All 33 Modes Delegation', () => {
+    const allModes = [
+      // Core modes
+      'sequential',
+      'shannon',
+      'hybrid',
+      // Fundamental modes
+      'inductive',
+      'deductive',
+      'abductive',
+      // Math/Physics modes
+      'mathematics',
+      'physics',
+      'computability',
+      // Analytical modes
+      'analogical',
+      'firstprinciples',
+      'metareasoning',
+      'cryptanalytic',
+      // Scientific modes
+      'scientificmethod',
+      'formallogic',
+      'temporal',
+      // Strategic modes
+      'causal',
+      'bayesian',
+      'counterfactual',
+      'gametheory',
+      // Systems modes
+      'systemsthinking',
+      'optimization',
+      // Evidential modes
+      'evidential',
+      // Engineering modes
+      'engineering',
+      'algorithmic',
+      // Academic modes
+      'synthesis',
+      'argumentation',
+      'critique',
+      'analysis',
+      // Advanced modes
+      'recursive',
+      'modal',
+      'stochastic',
+      'constraint',
+      // Custom mode
+      'custom',
+    ];
+
+    it('should have specialized handlers for all 33 modes', () => {
+      const stats = factory.getStats();
+      // 33 specialized handlers + GenericModeHandler fallback = 34
+      expect(stats.specializedHandlers).toBeGreaterThanOrEqual(33);
+
+      for (const mode of allModes) {
+        const modeEnum = mode.toUpperCase() as keyof typeof ThinkingMode;
+        if (ThinkingMode[modeEnum]) {
+          expect(
+            factory.hasSpecializedHandler(ThinkingMode[modeEnum]),
+            `Mode ${mode} should have specialized handler`
+          ).toBe(true);
+        }
+      }
+    });
+
+    describe('Core modes delegation', () => {
+      it('should delegate SEQUENTIAL mode', () => {
+        const input: ThinkingToolInput = {
+          thought: 'Sequential step',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'sequential',
+        };
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.SEQUENTIAL);
+      });
+
+      it('should delegate SHANNON mode with stages', () => {
+        const input = {
+          thought: 'Shannon methodology',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'shannon',
+          stage: 'problem_definition',
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.SHANNON);
+        expect((thought as any).stage).toBe('problem_definition');
+      });
+
+      it('should delegate HYBRID mode with active modes', () => {
+        const input = {
+          thought: 'Hybrid analysis',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'hybrid',
+          activeModes: ['inductive', 'deductive'],
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.HYBRID);
+        expect((thought as any).activeModes).toBeDefined();
+      });
+    });
+
+    describe('Fundamental modes delegation', () => {
+      it('should delegate INDUCTIVE mode with observations', () => {
+        const input = {
+          thought: 'Inductive reasoning',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'inductive',
+          observations: ['Observation 1', 'Observation 2'],
+          sampleSize: 100,
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.INDUCTIVE);
+        expect((thought as any).observations).toHaveLength(2);
+      });
+
+      it('should delegate DEDUCTIVE mode with premises', () => {
+        const input = {
+          thought: 'Deductive reasoning',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'deductive',
+          premises: ['All men are mortal', 'Socrates is a man'],
+          conclusion: 'Socrates is mortal',
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.DEDUCTIVE);
+        expect((thought as any).premises).toHaveLength(2);
+      });
+
+      it('should delegate ABDUCTIVE mode with hypotheses', () => {
+        const input = {
+          thought: 'Abductive reasoning',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'abductive',
+          hypotheses: [
+            { id: 'h1', explanation: 'Hypothesis 1' },
+            { id: 'h2', explanation: 'Hypothesis 2' },
+          ],
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.ABDUCTIVE);
+        expect((thought as any).hypotheses).toHaveLength(2);
+      });
+    });
+
+    describe('Math/Physics modes delegation', () => {
+      it('should delegate MATHEMATICS mode with proof strategy', () => {
+        const input = {
+          thought: 'Mathematical proof',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'mathematics',
+          proofStrategy: {
+            type: 'direct',
+            steps: ['Step 1', 'Step 2'],
+          },
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.MATHEMATICS);
+        expect((thought as any).proofStrategy).toBeDefined();
+      });
+
+      it('should delegate PHYSICS mode with tensor properties', () => {
+        const input = {
+          thought: 'Physics analysis',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'physics',
+          tensorProperties: {
+            rank: [1, 0],
+            components: 'v^i',
+            latex: 'v^i',
+            transformation: 'contravariant',
+          },
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.PHYSICS);
+        expect((thought as any).tensorProperties).toBeDefined();
+      });
+
+      it('should delegate COMPUTABILITY mode with Turing machine', () => {
+        const input = {
+          thought: 'Computability analysis',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'computability',
+          turingMachine: {
+            states: ['q0', 'q1', 'qf'],
+            alphabet: ['0', '1', '_'],
+            transitions: [],
+            initialState: 'q0',
+            acceptStates: ['qf'],
+          },
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.COMPUTABILITY);
+        // The handler processes the Turing machine - verify mode is correct
+        expect(thought.content).toBe('Computability analysis');
+      });
+    });
+
+    describe('Analytical modes delegation', () => {
+      it('should delegate ANALOGICAL mode with mappings', () => {
+        const input = {
+          thought: 'Analogical reasoning',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'analogical',
+          sourceAnalogy: { domain: 'Source', elements: ['a', 'b'] },
+          targetAnalogy: { domain: 'Target', elements: ['x', 'y'] },
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.ANALOGICAL);
+        expect((thought as any).sourceDomain).toBeDefined();
+      });
+
+      it('should delegate FIRSTPRINCIPLES mode', () => {
+        const input = {
+          thought: 'First principles analysis',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'firstprinciples',
+          fundamentals: ['Axiom 1', 'Axiom 2'],
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.FIRSTPRINCIPLES);
+      });
+
+      it('should delegate METAREASONING mode', () => {
+        const input = {
+          thought: 'Meta-level reasoning',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'metareasoning',
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.METAREASONING);
+      });
+
+      it('should delegate CRYPTANALYTIC mode with decibans', () => {
+        const input = {
+          thought: 'Cryptanalytic analysis',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'cryptanalytic',
+          hypotheses: [
+            { id: 'h1', description: 'Hypothesis 1', priorOdds: 1 },
+          ],
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.CRYPTANALYTIC);
+      });
+    });
+
+    describe('Scientific modes delegation', () => {
+      it('should delegate SCIENTIFICMETHOD mode', () => {
+        const input = {
+          thought: 'Scientific method',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'scientificmethod',
+          hypothesis: 'Test hypothesis',
+          predictions: ['Prediction 1'],
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.SCIENTIFICMETHOD);
+      });
+
+      it('should delegate FORMALLOGIC mode', () => {
+        const input = {
+          thought: 'Formal logic',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'formallogic',
+          premises: ['P1', 'P2'],
+          inference: 'modus_ponens',
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.FORMALLOGIC);
+      });
+
+      it('should delegate TEMPORAL mode with timeline', () => {
+        const input = {
+          thought: 'Temporal analysis',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'temporal',
+          timeline: {
+            id: 't1',
+            name: 'Main Timeline',
+            timeUnit: 'days',
+            events: ['e1'],
+          },
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.TEMPORAL);
+        expect((thought as any).timeline).toBeDefined();
+      });
+    });
+
+    describe('Systems and strategic modes delegation', () => {
+      it('should delegate SYSTEMSTHINKING mode', () => {
+        const input = {
+          thought: 'Systems analysis',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'systemsthinking',
+          systemComponents: [
+            { id: 'c1', name: 'Component 1' },
+          ],
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.SYSTEMSTHINKING);
+      });
+
+      it('should delegate OPTIMIZATION mode', () => {
+        const input = {
+          thought: 'Optimization problem',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'optimization',
+          objectiveFunction: 'maximize profit',
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.OPTIMIZATION);
+      });
+
+      it('should delegate COUNTERFACTUAL mode', () => {
+        const input = {
+          thought: 'Counterfactual analysis',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'counterfactual',
+          counterfactual: {
+            actual: 'What happened',
+            hypothetical: 'What if',
+            consequence: 'Result',
+          },
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.COUNTERFACTUAL);
+        // Verify counterfactual mode is properly delegated
+        expect(thought.content).toBe('Counterfactual analysis');
+      });
+    });
+
+    describe('Engineering modes delegation', () => {
+      it('should delegate ENGINEERING mode with requirements', () => {
+        const input = {
+          thought: 'Engineering analysis',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'engineering',
+          requirementId: 'REQ-001',
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.ENGINEERING);
+      });
+
+      it('should delegate ALGORITHMIC mode', () => {
+        const input = {
+          thought: 'Algorithm analysis',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'algorithmic',
+          algorithmName: 'quicksort',
+          designPattern: 'divide-and-conquer',
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.ALGORITHMIC);
+      });
+    });
+
+    describe('Academic modes delegation', () => {
+      it('should delegate SYNTHESIS mode with sources', () => {
+        const input = {
+          thought: 'Literature synthesis',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'synthesis',
+          sources: [
+            { id: 's1', citation: 'Author (2020)', keyFindings: ['Finding 1'] },
+          ],
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.SYNTHESIS);
+      });
+
+      it('should delegate ARGUMENTATION mode with Toulmin model', () => {
+        const input = {
+          thought: 'Argumentation',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'argumentation',
+          claim: 'Main claim',
+          data: ['Evidence 1'],
+          warrant: 'Reasoning',
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.ARGUMENTATION);
+      });
+
+      it('should delegate CRITIQUE mode', () => {
+        const input = {
+          thought: 'Critical analysis',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'critique',
+          strengths: ['Strength 1'],
+          weaknesses: ['Weakness 1'],
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.CRITIQUE);
+      });
+
+      it('should delegate ANALYSIS mode', () => {
+        const input = {
+          thought: 'Qualitative analysis',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'analysis',
+          analysisMethod: 'thematic',
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.ANALYSIS);
+      });
+    });
+
+    describe('Advanced modes delegation', () => {
+      it('should delegate RECURSIVE mode', () => {
+        const input = {
+          thought: 'Recursive problem decomposition',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'recursive',
+          recursionDepth: 3,
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.RECURSIVE);
+      });
+
+      it('should delegate MODAL mode with possible worlds', () => {
+        const input = {
+          thought: 'Modal logic analysis',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'modal',
+          logicSystem: 'S5',
+          domain: 'epistemic',
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.MODAL);
+      });
+
+      it('should delegate STOCHASTIC mode with Markov chain', () => {
+        const input = {
+          thought: 'Stochastic process',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'stochastic',
+          processType: 'discrete_time',
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.STOCHASTIC);
+      });
+
+      it('should delegate CONSTRAINT mode', () => {
+        const input = {
+          thought: 'Constraint satisfaction',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'constraint',
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.CONSTRAINT);
+      });
+
+      it('should delegate EVIDENTIAL mode with Dempster-Shafer', () => {
+        const input = {
+          thought: 'Evidential reasoning',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'evidential',
+          frameOfDiscernment: ['H1', 'H2'],
+          massFunction: { H1: 0.6, H2: 0.3, 'H1,H2': 0.1 },
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.EVIDENTIAL);
+      });
+    });
+
+    describe('Custom mode delegation', () => {
+      it('should delegate CUSTOM mode', () => {
+        const input = {
+          thought: 'Custom reasoning',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode: 'custom',
+          customModeName: 'My Custom Mode',
+          customFields: [
+            { name: 'field1', type: 'string', value: 'test' },
+          ],
+        } as any;
+
+        const thought = factory.createThought(input, 'session-1');
+
+        expect(thought.mode).toBe(ThinkingMode.CUSTOM);
+        expect((thought as any).customModeName).toBe('My Custom Mode');
+      });
+    });
+  });
+
+  describe('Validation for All Modes', () => {
+    const modeValidationTests = [
+      { mode: 'sequential', validInput: { thought: 'Valid' } },
+      { mode: 'shannon', validInput: { thought: 'Valid', stage: 'problem_definition' } },
+      { mode: 'hybrid', validInput: { thought: 'Valid' } },
+      { mode: 'inductive', validInput: { thought: 'Valid' } },
+      { mode: 'deductive', validInput: { thought: 'Valid' } },
+      { mode: 'abductive', validInput: { thought: 'Valid' } },
+      { mode: 'mathematics', validInput: { thought: 'Valid' } },
+      { mode: 'physics', validInput: { thought: 'Valid' } },
+      { mode: 'computability', validInput: { thought: 'Valid' } },
+      { mode: 'analogical', validInput: { thought: 'Valid' } },
+      { mode: 'firstprinciples', validInput: { thought: 'Valid' } },
+      { mode: 'metareasoning', validInput: { thought: 'Valid' } },
+      { mode: 'cryptanalytic', validInput: { thought: 'Valid' } },
+      { mode: 'scientificmethod', validInput: { thought: 'Valid' } },
+      { mode: 'formallogic', validInput: { thought: 'Valid' } },
+      { mode: 'temporal', validInput: { thought: 'Valid' } },
+      { mode: 'causal', validInput: { thought: 'Valid' } },
+      { mode: 'bayesian', validInput: { thought: 'Valid' } },
+      { mode: 'counterfactual', validInput: { thought: 'Valid' } },
+      { mode: 'gametheory', validInput: { thought: 'Valid' } },
+      { mode: 'systemsthinking', validInput: { thought: 'Valid' } },
+      { mode: 'optimization', validInput: { thought: 'Valid' } },
+      { mode: 'evidential', validInput: { thought: 'Valid' } },
+      { mode: 'engineering', validInput: { thought: 'Valid' } },
+      { mode: 'algorithmic', validInput: { thought: 'Valid' } },
+      { mode: 'synthesis', validInput: { thought: 'Valid' } },
+      { mode: 'argumentation', validInput: { thought: 'Valid' } },
+      { mode: 'critique', validInput: { thought: 'Valid' } },
+      { mode: 'analysis', validInput: { thought: 'Valid' } },
+      { mode: 'recursive', validInput: { thought: 'Valid' } },
+      { mode: 'modal', validInput: { thought: 'Valid' } },
+      { mode: 'stochastic', validInput: { thought: 'Valid' } },
+      { mode: 'constraint', validInput: { thought: 'Valid' } },
+      { mode: 'custom', validInput: { thought: 'Valid' } },
+    ];
+
+    it.each(modeValidationTests)(
+      'should validate $mode mode with valid input',
+      ({ mode, validInput }) => {
+        const input: ThinkingToolInput = {
+          ...validInput,
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode,
+        } as any;
+
+        const result = factory.validate(input);
+
+        expect(result.valid).toBe(true);
+      }
+    );
+
+    it.each(modeValidationTests)(
+      'should reject $mode mode with empty thought',
+      ({ mode }) => {
+        const input: ThinkingToolInput = {
+          thought: '',
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode,
+        } as any;
+
+        const result = factory.validate(input);
+
+        expect(result.valid).toBe(false);
+        expect(result.errors.some((e) => e.code === 'EMPTY_THOUGHT')).toBe(true);
+      }
+    );
+  });
+
+  describe('Performance: All Modes Thought Creation', () => {
+    it('should create thoughts for all 33 modes in under 100ms total', () => {
+      const modes = [
+        'sequential', 'shannon', 'hybrid', 'inductive', 'deductive', 'abductive',
+        'mathematics', 'physics', 'computability', 'analogical', 'firstprinciples',
+        'metareasoning', 'cryptanalytic', 'scientificmethod', 'formallogic', 'temporal',
+        'causal', 'bayesian', 'counterfactual', 'gametheory', 'systemsthinking',
+        'optimization', 'evidential', 'engineering', 'algorithmic', 'synthesis',
+        'argumentation', 'critique', 'analysis', 'recursive', 'modal', 'stochastic',
+        'constraint', 'custom',
+      ];
+
+      const start = performance.now();
+
+      for (const mode of modes) {
+        const input: ThinkingToolInput = {
+          thought: `Testing ${mode} performance`,
+          thoughtNumber: 1,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          mode,
+        } as any;
+
+        factory.createThought(input, `perf-session-${mode}`);
+      }
+
+      const duration = performance.now() - start;
+
+      expect(duration).toBeLessThan(100);
     });
   });
 });

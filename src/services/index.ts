@@ -6,7 +6,6 @@
  * Services encapsulate business logic and provide clean, testable interfaces.
  */
 
-export { ThoughtFactory } from './ThoughtFactory.js';
-export { RefactoredThoughtFactory } from './RefactoredThoughtFactory.js';
+export { ThoughtFactory, ThoughtFactoryConfig } from './ThoughtFactory.js';
 export { ExportService } from './ExportService.js';
 export { ModeRouter } from './ModeRouter.js';

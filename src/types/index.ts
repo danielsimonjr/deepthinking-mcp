@@ -190,3 +190,62 @@ export {
   type QualitativeRigor,
   isAnalysisThought,
 } from './modes/analysis.js';
+
+// Export recursive-specific types (Phase 10 Sprint 3 v8.4.0)
+export {
+  type RecursiveStrategy,
+  type Subproblem,
+  type BaseCase,
+  type RecurrenceRelation,
+  type RecursiveCall,
+  type MemoizationState,
+  isRecursiveThought,
+} from './modes/recursive.js';
+
+// Export modal-specific types (Phase 10 Sprint 3 v8.4.0)
+export {
+  type ModalLogicSystem,
+  type ModalDomain,
+  type PossibleWorld,
+  type AccessibilityRelation,
+  type ModalProposition,
+  type ModalOperator,
+  type KripkeFrame,
+  type KripkeProperty,
+  isModalThought,
+} from './modes/modal.js';
+
+// Export stochastic-specific types (Phase 10 Sprint 3 v8.4.0)
+export {
+  type StochasticProcessType,
+  type StochasticState,
+  type StateTransition,
+  type MarkovChain,
+  type RandomVariable,
+  type DistributionType,
+  type SimulationResult,
+  type SimulationStatistics,
+  isStochasticThought,
+} from './modes/stochastic.js';
+
+// Export constraint-specific types (Phase 10 Sprint 3 v8.4.0)
+export {
+  type CSPVariable,
+  type CSPConstraint,
+  type ConstraintType,
+  type Arc,
+  type PropagationMethod,
+  type SearchStrategy,
+  type ConsistencyLevel,
+  type Assignment,
+  isConstraintThought,
+} from './modes/constraint.js';
+
+// Export custom-specific types (Phase 10 Sprint 3 v8.4.0)
+export {
+  type CustomField,
+  type CustomFieldType,
+  type CustomStage,
+  type CustomValidationRule,
+  isCustomThought,
+} from './modes/custom.js';

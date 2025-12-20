@@ -9,16 +9,16 @@
  */
 
 import { randomUUID } from 'crypto';
+import { ThinkingMode } from '../../types/core.js';
 import {
-  ThinkingMode,
   CounterfactualThought,
   Scenario,
   Condition,
   CounterfactualComparison,
   InterventionPoint,
   CausalChain,
-  Difference,
-} from '../../types/core.js';
+  ScenarioDifference,
+} from '../../types/modes/counterfactual.js';
 import type { ThinkingToolInput } from '../../tools/thinking.js';
 import {
   ModeHandler,
@@ -87,9 +87,9 @@ export class CounterfactualHandler implements ModeHandler {
     // Build counterfactual scenarios
     const counterfactuals: Scenario[] = inputAny.counterfactuals || [];
 
-    // Build comparison (using Difference type from core.ts)
+    // Build comparison
     const comparison: CounterfactualComparison = inputAny.comparison || {
-      differences: [] as Difference[],
+      differences: [] as ScenarioDifference[],
       insights: [],
       lessons: [],
     };

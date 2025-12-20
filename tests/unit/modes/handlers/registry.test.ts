@@ -10,7 +10,7 @@ import {
   getRegistry,
   registerHandler,
   createThought,
-} from '../../../../src/modes/handlers/registry.js';
+} from '../../../../src/modes/registry.js';
 import { GenericModeHandler } from '../../../../src/modes/handlers/GenericModeHandler.js';
 import {
   ModeHandler,
@@ -246,11 +246,11 @@ describe('ModeHandlerRegistry', () => {
       expect(status.isFullyImplemented).toBe(true);
     });
 
-    it('should include note for experimental modes', () => {
+    it('should show abductive as fully implemented', () => {
       const status = registry.getModeStatus(ThinkingMode.ABDUCTIVE);
 
-      expect(status.isFullyImplemented).toBe(false);
-      expect(status.note).toContain('experimental');
+      // Abductive is now fully implemented with specialized handler
+      expect(status.isFullyImplemented).toBe(true);
     });
   });
 

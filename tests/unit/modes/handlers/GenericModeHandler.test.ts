@@ -266,11 +266,11 @@ describe('GenericModeHandler', () => {
       expect(result.errors[0].code).toBe('INVALID_THOUGHT_NUMBER');
     });
 
-    it('should warn for experimental modes', () => {
-      const handler = new GenericModeHandler(ThinkingMode.ABDUCTIVE);
+    it('should not warn for fully implemented modes', () => {
+      const handler = new GenericModeHandler(ThinkingMode.SEQUENTIAL);
       const input: ThinkingToolInput = {
-        mode: 'abductive',
-        thought: 'Test hypothesis',
+        mode: 'sequential',
+        thought: 'Test thought',
         thoughtNumber: 1,
         totalThoughts: 3,
         nextThoughtNeeded: true,
@@ -279,8 +279,9 @@ describe('GenericModeHandler', () => {
       const result = handler.validate(input);
 
       expect(result.valid).toBe(true);
-      expect(result.warnings).toHaveLength(1);
-      expect(result.warnings[0].message).toContain('experimental');
+      // No warnings about experimental status
+      const experimentalWarnings = result.warnings.filter(w => w.message.includes('experimental'));
+      expect(experimentalWarnings).toHaveLength(0);
     });
   });
 
@@ -314,13 +315,13 @@ describe('GenericModeHandler', () => {
       expect(status.hasSpecializedHandler).toBe(false);
     });
 
-    it('should return mode status for experimental mode', () => {
+    it('should return mode status for abductive mode', () => {
       const handler = new GenericModeHandler(ThinkingMode.ABDUCTIVE);
       const status = handler.getModeStatus();
 
       expect(status.mode).toBe(ThinkingMode.ABDUCTIVE);
-      expect(status.isFullyImplemented).toBe(false);
-      expect(status.note).toContain('experimental');
+      // Abductive is now fully implemented
+      expect(status.isFullyImplemented).toBe(true);
     });
   });
 

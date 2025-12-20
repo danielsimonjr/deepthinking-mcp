@@ -6,9 +6,11 @@
 
 A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning modes** (29 with dedicated thought types, 4 advanced runtime modes) including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
-> 📋 **Latest Release**: v8.2.1 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
+> 📋 **Latest Release**: v8.3.1 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
 >
-> 🎉 **New in v8.2.x**: Phase 10 ModeHandler Architecture! 7 specialized handlers with advanced validation and enhancements - Systems Archetypes detection, Socratic question framework, automatic Bayesian posterior calculation, Nash equilibria computation.
+> 🎉 **New in v8.3.x**: Multi-instance support with file locking, dependency graph tool with unused code detection, codebase cleanup.
+>
+> ✨ **v8.2.x**: Phase 10 ModeHandler Architecture! 7 specialized handlers with advanced validation and enhancements - Systems Archetypes detection, Socratic question framework, automatic Bayesian posterior calculation, Nash equilibria computation.
 >
 > ✨ **v8.0.0**: ModeHandler infrastructure with Strategy pattern for mode-specific processing.
 >

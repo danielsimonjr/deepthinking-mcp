@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { exportProofDecomposition } from '../../../src/export/visual/proof-decomposition.js';
+import { exportProofDecomposition } from '../../../src/export/visual/modes/proof-decomposition.js';
 import type { ProofDecomposition, AtomicStatement, DependencyGraph } from '../../../src/types/modes/mathematics.js';
 
 describe('Proof Decomposition Visual Export', () => {

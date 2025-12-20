@@ -1,6 +1,6 @@
 {
   "name": "deepthinking-mcp",
-  "version": "8.3.0",
+  "version": "8.3.1",
   "description": "Comprehensive MCP server with 33 reasoning modes (29 accessible via 12 focused tools) including academic research (synthesis, argumentation, critique, analysis), engineering/algorithmic (CLRS), meta-reasoning for strategic oversight, taxonomy classifier, enterprise security, and visual export capabilities",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -42,10 +42,12 @@
     "@vitest/coverage-v8": "^4.0.15",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.1",
+    "globals": "^16.5.0",
     "prettier": "^3.7.4",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.50.0",
     "vitest": "^4.0.15"
   },
   "keywords": [

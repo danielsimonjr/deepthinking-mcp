@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { LaTeXExporter } from '../../../src/export/latex.js';
-import { LatexMermaidIntegrator } from '../../../src/export/latex-mermaid-integration.js';
+import { LaTeXExporter } from '../../../src/export/visual/utils/latex.js';
+import { LatexMermaidIntegrator } from '../../../src/export/visual/utils/latex-mermaid-integration.js';
 import type { ThinkingSession, Thought, MathematicsThought, CausalThought } from '../../../src/types/index.js';
 
 describe('LaTeX Exporter', () => {

@@ -339,12 +339,99 @@ export class ExportService {
     }
 
     // Generic thought sequence export for modes without specific visual exporters
-    const thoughts = session.thoughts.map((t, i) =>
+    return this.exportGenericThoughtSequence(session, format);
+  }
+
+  /**
+   * Export a generic thought sequence diagram for any mode
+   * Creates a flowchart showing the thought progression
+   */
+  private exportGenericThoughtSequence(session: ThinkingSession, format: VisualFormat): string {
+    const thoughts = session.thoughts;
+    const title = (session.title || 'Thinking Session').replace(/"/g, "'");
+    const mode = session.mode;
+
+    if (format === 'mermaid') {
+      let diagram = 'flowchart TD\n';
+      diagram += `    subgraph "${title}"\n`;
+      diagram += '    direction TB\n';
+      diagram += `    SESSION["Session: ${mode}<br/>${thoughts.length} thoughts"]\n`;
+
+      for (let i = 0; i < thoughts.length; i++) {
+        const t = thoughts[i];
+        const truncated = t.content.length > 50
+          ? t.content.substring(0, 47).replace(/"/g, "'").replace(/\n/g, ' ') + '...'
+          : t.content.replace(/"/g, "'").replace(/\n/g, ' ');
+        const status = t.nextThoughtNeeded ? '...' : 'Done';
+        diagram += `    T${i + 1}["Thought ${i + 1} [${status}]<br/>${truncated}"]\n`;
+      }
+
+      diagram += '    SESSION --> T1\n';
+      for (let i = 1; i < thoughts.length; i++) {
+        diagram += `    T${i} --> T${i + 1}\n`;
+      }
+
+      const lastT = thoughts[thoughts.length - 1];
+      if (lastT && !lastT.nextThoughtNeeded) {
+        diagram += `    T${thoughts.length} --> COMPLETE["Complete"]\n`;
+      }
+
+      diagram += '    end\n';
+      return diagram;
+    }
+
+    if (format === 'dot') {
+      let dot = 'digraph ThinkingSession {\n';
+      dot += '    rankdir=TB;\n';
+      dot += '    node [shape=box, style=rounded];\n';
+      dot += `    label="${title} (${mode})";\n\n`;
+
+      for (let i = 0; i < thoughts.length; i++) {
+        const t = thoughts[i];
+        const truncated = t.content.length > 40
+          ? t.content.substring(0, 37).replace(/"/g, '\\"').replace(/\n/g, ' ') + '...'
+          : t.content.replace(/"/g, '\\"').replace(/\n/g, ' ');
+        dot += `    T${i + 1} [label="Thought ${i + 1}\\n${truncated}"];\n`;
+      }
+
+      for (let i = 1; i < thoughts.length; i++) {
+        dot += `    T${i} -> T${i + 1};\n`;
+      }
+
+      dot += '}\n';
+      return dot;
+    }
+
+    if (format === 'ascii') {
+      const bar = '═'.repeat(50);
+      let ascii = `╔${bar}╗\n`;
+      ascii += `║ ${title.substring(0, 48).padEnd(48)} ║\n`;
+      ascii += `║ Mode: ${mode.padEnd(42)} ║\n`;
+      ascii += `╠${bar}╣\n`;
+
+      for (let i = 0; i < thoughts.length; i++) {
+        const t = thoughts[i];
+        const status = t.nextThoughtNeeded ? '[→]' : '[✓]';
+        const truncated = t.content.substring(0, 35).replace(/\n/g, ' ');
+        ascii += `║ ${status} Thought ${i + 1}: ${truncated.padEnd(35)} ║\n`;
+        if (i < thoughts.length - 1) {
+          ascii += '║     │                                              ║\n';
+          ascii += '║     ▼                                              ║\n';
+        }
+      }
+
+      ascii += `╚${bar}╝\n`;
+      return ascii;
+    }
+
+    // Fallback for other visual formats
+    const thoughtsText = thoughts.map((t, i) =>
       `Thought ${i + 1} (${t.mode}):\n${t.content}\n`
     ).join('\n');
 
-    return `Session: ${session.title || 'Untitled'}\nMode: ${lastThought.mode}\n\n${thoughts}`;
+    return `Session: ${title}\nMode: ${mode}\n\n${thoughtsText}`;
   }
+
 
   /**
    * Export session to JSON format

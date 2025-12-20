@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { LaTeXExporter } from '../../../src/export/latex.js';
+import { LaTeXExporter } from '../../../src/export/visual/utils/latex.js';
 import {
   ThinkingMode,
   type MathematicsThought,

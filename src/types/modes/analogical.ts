@@ -68,13 +68,13 @@ export interface Insight {
 }
 
 /**
- * Inference from analogy
+ * Inference based on analogy
  */
 export interface Inference {
-  description: string;
-  basedOn: string; // Mapping/insight id
+  sourcePattern: string;
+  targetPrediction: string;
   confidence: number; // 0-1
-  testability: string;
+  needsVerification: boolean;
 }
 
 export interface AnalogicalThought extends BaseThought {

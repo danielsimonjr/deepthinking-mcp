@@ -1176,7 +1176,7 @@ export const deepthinking_academic_schema = {
  */
 export const deepthinking_session_schema = {
   name: "deepthinking_session",
-  description: "Session: summarize, export, get, switch_mode, recommend",
+  description: "Session: summarize, export, get, switch_mode, recommend, delete",
   inputSchema: {
     type: "object",
     properties: {
@@ -1186,7 +1186,7 @@ export const deepthinking_session_schema = {
       },
       action: {
         type: "string",
-        enum: ["summarize", "export", "get_session", "switch_mode", "recommend_mode"],
+        enum: ["summarize", "export", "get_session", "switch_mode", "recommend_mode", "delete_session"],
         description: "Session action to perform"
       },
       exportFormat: {

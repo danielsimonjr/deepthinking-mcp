@@ -31,4 +31,4 @@ export {
 } from './visual/index.js';
 
 // LaTeX exports
-export { LaTeXExporter, type LaTeXExportOptions } from './latex.js';
+export { LaTeXExporter, type LaTeXExportOptions } from './visual/utils/latex.js';

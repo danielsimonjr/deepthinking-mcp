@@ -13,8 +13,6 @@ import {
   isValidTool,
   getSchemaForTool,
 } from '../../../../src/tools/definitions.js';
-import { SCHEMA_VERSION, schemaMetadata, getDeprecationWarning } from '../../../../src/tools/schemas/version.js';
-
 describe('Tool Definitions', () => {
   describe('tools object', () => {
     it('should have all 12 tools defined', () => {
@@ -163,47 +161,6 @@ describe('Tool Definitions', () => {
 
     it('should throw for invalid tool', () => {
       expect(() => getSchemaForTool('invalid')).toThrow('Unknown tool: invalid');
-    });
-  });
-});
-
-describe('Schema Versioning', () => {
-  describe('SCHEMA_VERSION', () => {
-    it('should be version 4.0.0', () => {
-      expect(SCHEMA_VERSION).toBe('4.0.0');
-    });
-  });
-
-  describe('schemaMetadata', () => {
-    it('should have correct structure', () => {
-      expect(schemaMetadata).toHaveProperty('version');
-      expect(schemaMetadata).toHaveProperty('breakingChanges');
-      expect(schemaMetadata).toHaveProperty('deprecated');
-      expect(schemaMetadata).toHaveProperty('tools');
-    });
-
-    it('should list all tools', () => {
-      // Note: schemaMetadata may not be updated yet, checking for at least 9
-      expect(schemaMetadata.tools.length).toBeGreaterThanOrEqual(9);
-    });
-
-    it('should have deprecation for old tool', () => {
-      const deprecated = schemaMetadata.deprecated.find(d => d.tool === 'deepthinking');
-      expect(deprecated).toBeDefined();
-      expect(deprecated?.replacement).toBe('deepthinking_*');
-    });
-  });
-
-  describe('getDeprecationWarning', () => {
-    it('should return warning for deprecated tool', () => {
-      const warning = getDeprecationWarning('deepthinking');
-      expect(warning).toContain('DEPRECATED');
-      expect(warning).toContain('deepthinking_*');
-    });
-
-    it('should return null for non-deprecated tool', () => {
-      const warning = getDeprecationWarning('deepthinking_standard');
-      expect(warning).toBeNull();
     });
   });
 });

@@ -1,17 +1,20 @@
 /**
- * Thought Factory Service (v3.4.5)
- * Sprint 3 Task 3.3: Extract thought creation logic from index.ts
- * Sprint 3 Task 3.2: Added dependency injection support
+ * Thought Factory Service (v8.4.0)
+ * Phase 10 Sprint 3: Full ModeHandler Integration
  *
  * Centralizes thought creation logic for all thinking modes.
  * Provides type-safe thought construction based on mode-specific requirements.
  *
  * RESPONSIBILITY:
- * - Create properly typed thought objects for all 18 thinking modes
+ * - Create properly typed thought objects for all 33 thinking modes
+ * - Delegate to specialized ModeHandlers via registry
  * - Apply mode-specific defaults and transformations
  * - Ensure thought structure consistency across modes
  *
- * EXTRACTED FROM: src/index.ts (createThought function)
+ * ARCHITECTURE:
+ * - Uses ModeHandlerRegistry for all mode handling (v8.4.0)
+ * - All 33 modes have dedicated handlers
+ * - Legacy switch statement kept for backward compatibility (deprecated)
  */
 
 import { randomUUID } from 'crypto';
@@ -46,20 +49,52 @@ import { ILogger } from '../interfaces/ILogger.js';
 import { createLogger, LogLevel } from '../utils/logger.js';
 import {
   ModeHandlerRegistry,
-  CausalHandler,
-  BayesianHandler,
-  GameTheoryHandler,
-  CounterfactualHandler,
-  SynthesisHandler,
-  SystemsThinkingHandler,
-  CritiqueHandler,
-} from '../modes/handlers/index.js';
+  ModeStatus,
+  ValidationResult,
+  registerAllHandlers,
+} from '../modes/index.js';
+
+/**
+ * Configuration for ThoughtFactory
+ */
+export interface ThoughtFactoryConfig {
+  /**
+   * Whether to use the registry for all modes (true)
+   * or fall back to switch statement for non-migrated modes (false)
+   *
+   * Default: true (v8.4.0 - all 33 modes have handlers)
+   */
+  useRegistryForAll?: boolean;
+
+  /**
+   * Whether to automatically register specialized handlers on construction
+   *
+   * Default: true
+   */
+  autoRegisterHandlers?: boolean;
+
+  /**
+   * Logger instance
+   */
+  logger?: ILogger;
+}
 
 /**
  * Thought Factory - Creates mode-specific thought objects
  *
  * Handles the complexity of creating properly structured thought objects
- * for all 18 thinking modes, applying defaults and mode-specific logic.
+ * for all 33 thinking modes via the ModeHandler registry.
+ *
+ * As of v8.4.0, all modes have dedicated handlers:
+ * - Core (5): Sequential, Shannon, Mathematics, Physics, Hybrid
+ * - Fundamental Triad (3): Inductive, Deductive, Abductive
+ * - Causal/Probabilistic (6): Causal, Bayesian, Counterfactual, Temporal, GameTheory, Evidential
+ * - Analogical/First Principles (2): Analogical, FirstPrinciples
+ * - Systems/Scientific (3): SystemsThinking, ScientificMethod, FormalLogic
+ * - Academic (4): Synthesis, Argumentation, Critique, Analysis
+ * - Engineering (4): Engineering, Computability, Cryptanalytic, Algorithmic
+ * - Advanced Runtime (6): MetaReasoning, Recursive, Modal, Stochastic, Constraint, Optimization
+ * - User-Defined (1): Custom
  *
  * @example
  * ```typescript
@@ -71,33 +106,55 @@ import {
 export class ThoughtFactory {
   private logger: ILogger;
   private registry: ModeHandlerRegistry;
+  private useRegistryForAll: boolean;
 
-  constructor(logger?: ILogger) {
-    this.logger = logger || createLogger({ minLevel: LogLevel.INFO, enableConsole: true });
+  constructor(config: ThoughtFactoryConfig = {}) {
+    this.logger = config.logger || createLogger({ minLevel: LogLevel.INFO, enableConsole: true });
     this.registry = ModeHandlerRegistry.getInstance();
-    this.registerSpecializedHandlers();
+    this.useRegistryForAll = config.useRegistryForAll ?? true; // v8.4.0: all 33 modes have handlers
+
+    // Auto-register all 33 handlers (Phase 10 Sprint 3)
+    if (config.autoRegisterHandlers !== false) {
+      this.registerAllModeHandlers();
+    }
   }
 
   /**
-   * Register all specialized handlers (Phase 10 Sprint 2 + 2B)
+   * Register all 33 mode handlers (Phase 10 Sprint 3 v8.4.0)
+   *
+   * Uses the centralized registerAllHandlers() function from modes/index.ts
+   * which registers handlers for all ThinkingModes:
+   * - Core (5): Sequential, Shannon, Mathematics, Physics, Hybrid
+   * - Fundamental Triad (3): Inductive, Deductive, Abductive
+   * - Causal/Probabilistic (6): Causal, Bayesian, Counterfactual, Temporal, GameTheory, Evidential
+   * - Analogical/First Principles (2): Analogical, FirstPrinciples
+   * - Systems/Scientific (3): SystemsThinking, ScientificMethod, FormalLogic
+   * - Academic (4): Synthesis, Argumentation, Critique, Analysis
+   * - Engineering (4): Engineering, Computability, Cryptanalytic, Algorithmic
+   * - Advanced Runtime (6): MetaReasoning, Recursive, Modal, Stochastic, Constraint, Optimization
+   * - User-Defined (1): Custom
    */
-  private registerSpecializedHandlers(): void {
-    // Sprint 2 handlers
-    this.registry.replace(new CausalHandler());
-    this.registry.replace(new BayesianHandler());
-    this.registry.replace(new GameTheoryHandler());
+  private registerAllModeHandlers(): void {
+    registerAllHandlers();
 
-    // Sprint 2B handlers
-    this.registry.replace(new CounterfactualHandler());
-    this.registry.replace(new SynthesisHandler());
-    this.registry.replace(new SystemsThinkingHandler());
-    this.registry.replace(new CritiqueHandler());
-
-    this.logger.debug('Specialized handlers registered', {
-      count: 7,
-      handlers: ['Causal', 'Bayesian', 'GameTheory', 'Counterfactual', 'Synthesis', 'SystemsThinking', 'Critique'],
+    const stats = this.registry.getStats();
+    this.logger.debug('All mode handlers registered', {
+      count: stats.specializedHandlers,
+      categories: [
+        'Core (5)',
+        'Fundamental Triad (3)',
+        'Causal/Probabilistic (6)',
+        'Analogical/First Principles (2)',
+        'Systems/Scientific (3)',
+        'Academic (4)',
+        'Engineering (4)',
+        'Advanced Runtime (6)',
+        'User-Defined (1)',
+      ],
     });
   }
+
+  // @deprecated registerSpecializedHandlers() - use registerAllModeHandlers() instead
 
   /**
    * Check if a mode has a specialized handler
@@ -116,6 +173,56 @@ export class ThoughtFactory {
       modesWithHandlers: stats.modesWithHandlers,
     };
   }
+
+  /**
+   * Validate input using appropriate handler
+   *
+   * @param input - Tool input to validate
+   * @returns Validation result
+   */
+  validate(input: ThinkingToolInput): ValidationResult {
+    return this.registry.validate(input);
+  }
+
+  /**
+   * Get mode status for API response
+   *
+   * @param mode - The thinking mode
+   * @returns Mode status information
+   */
+  getModeStatus(mode: ThinkingMode): ModeStatus {
+    return this.registry.getModeStatus(mode);
+  }
+
+  /**
+   * Get the underlying registry for direct access
+   *
+   * Use this to register new handlers or access registry stats.
+   *
+   * @returns The ModeHandlerRegistry instance
+   */
+  getRegistry(): ModeHandlerRegistry {
+    return this.registry;
+  }
+
+  /**
+   * Determine if registry should be used for a mode
+   */
+  private shouldUseRegistry(mode: ThinkingMode): boolean {
+    // Always use registry if specialized handler exists
+    if (this.registry.hasSpecializedHandler(mode)) {
+      return true;
+    }
+
+    // Use registry for all modes if configured
+    if (this.useRegistryForAll) {
+      return true;
+    }
+
+    // Otherwise fall back to switch statement
+    return false;
+  }
+
   /**
    * Create a thought object based on input and mode
    *
@@ -148,15 +255,21 @@ export class ThoughtFactory {
       totalThoughts: input.totalThoughts,
       isRevision: input.isRevision,
       hasSpecializedHandler: this.registry.hasSpecializedHandler(mode),
+      useRegistryForAll: this.useRegistryForAll,
     });
 
-    // Use specialized handler if available (Phase 10 Sprint 2/2B)
-    if (this.registry.hasSpecializedHandler(mode)) {
-      this.logger.debug('Using specialized handler', { mode });
+    // Use registry handler if appropriate (Phase 10 Sprint 2/2B)
+    if (this.shouldUseRegistry(mode)) {
+      this.logger.debug('Using registry handler', { mode });
       return this.registry.createThought(input, sessionId);
     }
 
-    // Fall back to switch statement for non-migrated modes
+    // @deprecated: Legacy switch statement (v8.4.0 - should never be reached)
+    // All 33 modes now have handlers. This code path only runs if:
+    // 1. useRegistryForAll is explicitly set to false, AND
+    // 2. A mode somehow lacks a handler
+    // Kept for backward compatibility only.
+    this.logger.warn('Using legacy switch statement - mode handler not found', { mode });
     const baseThought = {
       id: randomUUID(),
       sessionId,

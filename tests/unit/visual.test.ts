@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { VisualExporter } from '../../src/export/visual.js';
+import { VisualExporter } from '../../src/export/visual/index.js';
 import type { CausalThought, TemporalThought, GameTheoryThought, BayesianThought } from '../../src/types/index.js';
 
 describe('Visual Export', () => {

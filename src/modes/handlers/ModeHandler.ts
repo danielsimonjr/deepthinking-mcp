@@ -66,8 +66,8 @@ export interface ModeEnhancements {
   suggestions?: string[];
   /** Related modes that might be useful */
   relatedModes?: ThinkingMode[];
-  /** Mode-specific metrics or scores */
-  metrics?: Record<string, number>;
+  /** Mode-specific metrics or scores (can be numeric or descriptive) */
+  metrics?: Record<string, number | string>;
   /** Guiding questions for the next thought */
   guidingQuestions?: string[];
   /** Warnings about potential issues */
@@ -84,7 +84,7 @@ export interface ModeEnhancements {
  * ModeHandler Interface
  *
  * Implement this interface to create a specialized handler for a thinking mode.
- * Handlers are registered with ModeHandlerRegistry for use by RefactoredThoughtFactory.
+ * Handlers are registered with ModeHandlerRegistry for use by ThoughtFactory.
  *
  * @example
  * ```typescript

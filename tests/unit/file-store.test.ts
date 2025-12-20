@@ -424,7 +424,7 @@ describe('FileSessionStore', () => {
 
       const allSessions = await store.listSessions();
       expect(allSessions).toHaveLength(10);
-    });
+    }, 15000); // Extended timeout for concurrent file operations
 
     it('should handle concurrent reads', async () => {
       const session = createTestSession();

@@ -44,7 +44,7 @@ import { thinkingTool } from './tools/thinking.js'; // Legacy tool for backward 
 import type { SessionManager } from './session/index.js';
 import { ThinkingMode, isFullyImplemented } from './types/index.js';
 import type { ThoughtFactory, ExportService, ModeRouter } from './services/index.js';
-import { ModeHandlerRegistry } from './modes/handlers/index.js';
+import { ModeHandlerRegistry } from './modes/index.js';
 
 // Initialize server
 const server = new Server(
@@ -199,31 +199,6 @@ function prependWarning(result: any, warning: string) {
 }
 
 /**
- * Check if a thought type is a proof decomposition type (Phase 8)
- */
-function isDecompositionThoughtType(thoughtType: string | undefined): boolean {
-  return [
-    'proof_decomposition',
-    'dependency_analysis',
-    'consistency_check',
-    'gap_identification',
-    'assumption_trace',
-  ].includes(thoughtType || '');
-}
-
-/**
- * Lazy load MathematicsReasoningEngine (Phase 8)
- */
-let _mathEngine: any = null;
-async function getMathematicsReasoningEngine() {
-  if (!_mathEngine) {
-    const { MathematicsReasoningEngine } = await import('./modes/mathematics-reasoning.js');
-    _mathEngine = new MathematicsReasoningEngine();
-  }
-  return _mathEngine;
-}
-
-/**
  * Handle add_thought action for any thinking mode
  */
 async function handleAddThought(input: any, _toolName: string) {
@@ -233,7 +208,7 @@ async function handleAddThought(input: any, _toolName: string) {
   let sessionId = input.sessionId;
 
   // Determine mode from tool name or input
-  let mode: ThinkingMode = input.mode || ThinkingMode.HYBRID;
+  const mode: ThinkingMode = input.mode || ThinkingMode.HYBRID;
 
   // Create session if none provided
   if (!sessionId) {
@@ -246,32 +221,6 @@ async function handleAddThought(input: any, _toolName: string) {
 
   // Use ThoughtFactory to create thought
   const thought = thoughtFactory.createThought({ ...input, mode }, sessionId);
-
-  // Phase 8: Enrich mathematics thoughts with proof decomposition analysis
-  if (mode === ThinkingMode.MATHEMATICS && isDecompositionThoughtType(input.thoughtType)) {
-    try {
-      const mathEngine = await getMathematicsReasoningEngine();
-
-      // Build proof input from tool input
-      const proofInput = input.proofSteps || input.thought;
-
-      // Run analysis based on thought type
-      const analysisResult = mathEngine.analyzeForThoughtType(
-        proofInput,
-        input.thoughtType,
-        input.theorem
-      );
-
-      // Enrich the thought with analysis results
-      (thought as any).decomposition = analysisResult.decomposition;
-      (thought as any).consistencyReport = analysisResult.consistencyReport;
-      (thought as any).gapAnalysis = analysisResult.gapAnalysis;
-      (thought as any).assumptionAnalysis = analysisResult.assumptionAnalysis;
-    } catch (error) {
-      // Log but don't fail - analysis is optional enhancement
-      console.error('Proof analysis failed:', error);
-    }
-  }
 
   const session = await sessionManager.addThought(sessionId, thought);
 
@@ -321,7 +270,7 @@ async function handleAddThought(input: any, _toolName: string) {
 }
 
 /**
- * Handle session actions (summarize, export, switch_mode, get_session, recommend_mode)
+ * Handle session actions (summarize, export, switch_mode, get_session, recommend_mode, delete_session)
  */
 async function handleSessionAction(input: any) {
   const action = input.action;
@@ -337,6 +286,8 @@ async function handleSessionAction(input: any) {
       return await handleGetSession(input);
     case 'recommend_mode':
       return await handleRecommendMode(input);
+    case 'delete_session':
+      return await handleDeleteSession(input);
     default:
       throw new Error(`Unknown session action: ${action}`);
   }
@@ -497,6 +448,33 @@ async function handleRecommendMode(input: any) {
     isError: true,
   };
 }
+/**
+ * Handle delete_session action
+ */
+async function handleDeleteSession(input: any) {
+  if (!input.sessionId) {
+    throw new Error('sessionId required for delete_session action');
+  }
+
+  const sessionManager = await getSessionManager();
+  const session = await sessionManager.getSession(input.sessionId);
+
+  if (!session) {
+    throw new Error(`Session ${input.sessionId} not found`);
+  }
+
+  await sessionManager.deleteSession(input.sessionId);
+
+  return {
+    content: [
+      {
+        type: 'text',
+        text: `Session ${input.sessionId} deleted successfully`,
+      },
+    ],
+  };
+}
+
 
 /**
  * Main server startup

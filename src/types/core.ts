@@ -1,140 +1,186 @@
 /**
- * Core type definitions for the DeepThinking MCP server v7.4.0
- * Supports 29 thinking modes including:
- * - Core: Sequential, Shannon, Mathematics, Physics, Hybrid, Engineering
- * - Theory: Computability, Cryptanalytic, Algorithmic
- * - Advanced: Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
- * - Reasoning: Inductive, Deductive, Abductive, Causal, Bayesian, Counterfactual, Analogical
- * - Analysis: Temporal, GameTheory, Evidential, FirstPrinciples, SystemsThinking, ScientificMethod, FormalLogic
- * - Academic: Synthesis, Argumentation, Critique, Analysis
+ * Core type definitions for the DeepThinking MCP server v8.5.0
+ *
+ * This file contains ONLY:
+ * - ThinkingMode enum (all 33 mode identifiers)
+ * - Base types shared by all modes (BaseThought, ShannonStage, ExtendedThoughtType)
+ * - The fundamental reasoning triad: Inductive, Deductive, Abductive
+ * - Thought union type (importing from mode-specific files)
+ * - Type guards
+ *
+ * All other mode-specific types are defined in src/types/modes/*.ts
  */
 
-// Import Phase 3 mode types
+// ============================================================================
+// IMPORTS FROM MODE-SPECIFIC FILES
+// ============================================================================
+
+// Core modes
+import type { SequentialThought } from './modes/sequential.js';
+import type { ShannonThought } from './modes/shannon.js';
+import type { MathematicsThought } from './modes/mathematics.js';
+import type { PhysicsThought } from './modes/physics.js';
+import type { HybridThought } from './modes/hybrid.js';
+
+// Engineering and theory modes
+import type { EngineeringThought } from './modes/engineering.js';
+import type { ComputabilityThought } from './modes/computability.js';
+import type { CryptanalyticThought } from './modes/cryptanalytic.js';
+import type { AlgorithmicThought } from './modes/algorithmic.js';
+
+// Advanced modes
+import type { MetaReasoningThought } from './modes/metareasoning.js';
+import type { OptimizationThought } from './modes/optimization.js';
+
+// Causal and probabilistic modes
+import type { CausalThought } from './modes/causal.js';
+import type { BayesianThought } from './modes/bayesian.js';
+import type { CounterfactualThought } from './modes/counterfactual.js';
 import type { TemporalThought } from './modes/temporal.js';
 import type { GameTheoryThought } from './modes/gametheory.js';
 import type { EvidentialThought } from './modes/evidential.js';
+
+// Analytical modes
+import type { AnalogicalThought } from './modes/analogical.js';
 import type { FirstPrinciplesThought } from './modes/firstprinciples.js';
 
-// Import Phase 4 mode types (v3.2.0)
+// Scientific modes
 import type { SystemsThinkingThought } from './modes/systemsthinking.js';
 import type { ScientificMethodThought } from './modes/scientificmethod.js';
-import type { OptimizationThought } from './modes/optimization.js';
 import type { FormalLogicThought } from './modes/formallogic.js';
 
-// Import Phase 6 mode types (v6.0.0)
-import type { MetaReasoningThought } from './modes/metareasoning.js';
-
-// Import Phase 10 mode types (v7.1.0)
-import type { EngineeringThought } from './modes/engineering.js';
-
-// Import Phase 11 mode types (v7.2.0) - Turing/von Neumann extensions
-import type { ComputabilityThought } from './modes/computability.js';
-import type { CryptanalyticThought } from './modes/cryptanalytic.js';
-
-// Import Phase 12 mode types (v7.3.0) - Algorithmic reasoning
-import type { AlgorithmicThought } from './modes/algorithmic.js';
-
-// Import Phase 13 mode types (v7.4.0) - Academic research modes
+// Academic research modes
 import type { SynthesisThought } from './modes/synthesis.js';
 import type { ArgumentationThought } from './modes/argumentation.js';
 import type { CritiqueThought } from './modes/critique.js';
 import type { AnalysisThought } from './modes/analysis.js';
 
+// Advanced runtime modes (Phase 10 Sprint 3 v8.4.0)
+import type { RecursiveThought } from './modes/recursive.js';
+import type { ModalThought } from './modes/modal.js';
+import type { StochasticThought } from './modes/stochastic.js';
+import type { ConstraintThought } from './modes/constraint.js';
+
+// User-defined modes (Phase 10 Sprint 3 v8.4.0)
+import type { CustomThought } from './modes/custom.js';
+
+// ============================================================================
+// THINKING MODE ENUM
+// ============================================================================
+
 /**
- * Available thinking modes
+ * Available thinking modes (33 total)
  */
 export enum ThinkingMode {
-  // ===== Fully Implemented Modes =====
+  // ===== Core Modes =====
   SEQUENTIAL = 'sequential',
   SHANNON = 'shannon',
   MATHEMATICS = 'mathematics',
   PHYSICS = 'physics',
   HYBRID = 'hybrid',
-  ENGINEERING = 'engineering', // Phase 10 (v7.1.0) - Engineering analysis
-  COMPUTABILITY = 'computability', // Phase 11 (v7.2.0) - Computability theory, Turing machines
-  CRYPTANALYTIC = 'cryptanalytic', // Phase 11 (v7.2.0) - Cryptanalysis, Turing's deciban system
-  ALGORITHMIC = 'algorithmic', // Phase 12 (v7.3.0) - Algorithm design and analysis (CLRS)
 
-  // ===== Implemented - Advanced Modes (Phase 4) =====
-  METAREASONING = 'metareasoning', // Phase 4 (v3.3.0) - Self-reflection and strategy selection
-  RECURSIVE = 'recursive', // Phase 4 (v3.3.0) - Recursive problem decomposition
-  MODAL = 'modal', // Phase 4 (v3.3.0) - Possibility and necessity reasoning
-  STOCHASTIC = 'stochastic', // Phase 4 (v3.3.0) - Probabilistic state transitions
-  CONSTRAINT = 'constraint', // Phase 4 (v3.3.0) - Constraint satisfaction
-  OPTIMIZATION = 'optimization', // Phase 4 (v3.2.0) - Optimization strategies
+  // ===== Engineering & Theory Modes =====
+  ENGINEERING = 'engineering',
+  COMPUTABILITY = 'computability',
+  CRYPTANALYTIC = 'cryptanalytic',
+  ALGORITHMIC = 'algorithmic',
 
-  // ===== Experimental - Limited Implementation =====
-  // These modes have validators and type definitions but limited runtime logic
-  INDUCTIVE = 'inductive', // ⚠️ Experimental (Phase 5 v5.0.0) - Inductive reasoning
-  DEDUCTIVE = 'deductive', // ⚠️ Experimental (Phase 5 v5.0.0) - Deductive reasoning
-  ABDUCTIVE = 'abductive', // ⚠️ Experimental - Inference to best explanation
-  CAUSAL = 'causal', // ⚠️ Experimental - Causal reasoning
-  BAYESIAN = 'bayesian', // ⚠️ Experimental - Bayesian inference
-  COUNTERFACTUAL = 'counterfactual', // ⚠️ Experimental - What-if scenarios
-  ANALOGICAL = 'analogical', // ⚠️ Experimental - Reasoning by analogy
-  TEMPORAL = 'temporal', // ⚠️ Experimental (Phase 3 v2.1) - Temporal logic
-  GAMETHEORY = 'gametheory', // ⚠️ Experimental (Phase 3 v2.2) - Game theory analysis
-  EVIDENTIAL = 'evidential', // ⚠️ Experimental (Phase 3 v2.3) - Evidence-based reasoning
-  FIRSTPRINCIPLES = 'firstprinciples', // ⚠️ Experimental (Phase 3 v3.1.0) - First principles thinking
-  SYSTEMSTHINKING = 'systemsthinking', // ⚠️ Experimental (Phase 4 v3.2.0) - Systems thinking
-  SCIENTIFICMETHOD = 'scientificmethod', // ⚠️ Experimental (Phase 4 v3.2.0) - Scientific method
-  FORMALLOGIC = 'formallogic', // ⚠️ Experimental (Phase 4 v3.2.0) - Formal logic
+  // ===== Advanced Runtime Modes =====
+  METAREASONING = 'metareasoning',
+  RECURSIVE = 'recursive',
+  MODAL = 'modal',
+  STOCHASTIC = 'stochastic',
+  CONSTRAINT = 'constraint',
+  OPTIMIZATION = 'optimization',
 
-  // ===== Academic Research Modes (Phase 13 v7.4.0) =====
-  SYNTHESIS = 'synthesis', // Phase 13 (v7.4.0) - Literature synthesis and integration
-  ARGUMENTATION = 'argumentation', // Phase 13 (v7.4.0) - Academic argumentation (Toulmin model)
-  CRITIQUE = 'critique', // Phase 13 (v7.4.0) - Critical analysis and evaluation
-  ANALYSIS = 'analysis', // Phase 13 (v7.4.0) - Qualitative analysis methods
+  // ===== Fundamental Reasoning Triad =====
+  INDUCTIVE = 'inductive',
+  DEDUCTIVE = 'deductive',
+  ABDUCTIVE = 'abductive',
 
-  CUSTOM = 'custom'
+  // ===== Causal & Probabilistic Modes =====
+  CAUSAL = 'causal',
+  BAYESIAN = 'bayesian',
+  COUNTERFACTUAL = 'counterfactual',
+  TEMPORAL = 'temporal',
+  GAMETHEORY = 'gametheory',
+  EVIDENTIAL = 'evidential',
+
+  // ===== Analytical Modes =====
+  ANALOGICAL = 'analogical',
+  FIRSTPRINCIPLES = 'firstprinciples',
+
+  // ===== Scientific Modes =====
+  SYSTEMSTHINKING = 'systemsthinking',
+  SCIENTIFICMETHOD = 'scientificmethod',
+  FORMALLOGIC = 'formallogic',
+
+  // ===== Academic Research Modes =====
+  SYNTHESIS = 'synthesis',
+  ARGUMENTATION = 'argumentation',
+  CRITIQUE = 'critique',
+  ANALYSIS = 'analysis',
+
+  CUSTOM = 'custom',
 }
 
+// ============================================================================
+// MODE CLASSIFICATION
+// ============================================================================
+
 /**
- * Modes with full implementation including specialized thought creation logic
+ * All modes are fully implemented with specialized handlers (v8.4.0+)
  */
 export const FULLY_IMPLEMENTED_MODES: ReadonlyArray<ThinkingMode> = [
+  // Core modes
   ThinkingMode.SEQUENTIAL,
   ThinkingMode.SHANNON,
   ThinkingMode.MATHEMATICS,
   ThinkingMode.PHYSICS,
   ThinkingMode.HYBRID,
-  ThinkingMode.ENGINEERING, // Phase 10 v7.1.0
-  ThinkingMode.COMPUTABILITY, // Phase 11 v7.2.0 - Turing's legacy
-  ThinkingMode.CRYPTANALYTIC, // Phase 11 v7.2.0 - Turing's Bletchley Park work
-  ThinkingMode.ALGORITHMIC, // Phase 12 v7.3.0 - CLRS algorithms
+  // Engineering modes
+  ThinkingMode.ENGINEERING,
+  ThinkingMode.COMPUTABILITY,
+  ThinkingMode.CRYPTANALYTIC,
+  ThinkingMode.ALGORITHMIC,
+  // Advanced runtime modes
   ThinkingMode.METAREASONING,
   ThinkingMode.RECURSIVE,
   ThinkingMode.MODAL,
   ThinkingMode.STOCHASTIC,
   ThinkingMode.CONSTRAINT,
   ThinkingMode.OPTIMIZATION,
-  ThinkingMode.INDUCTIVE, // Phase 5 v5.0.0
-  ThinkingMode.DEDUCTIVE, // Phase 5 v5.0.0
-];
-
-/**
- * Experimental modes - have validators but limited runtime implementation
- * These modes will create base thoughts without specialized logic
- */
-export const EXPERIMENTAL_MODES: ReadonlyArray<ThinkingMode> = [
+  // Fundamental reasoning modes
+  ThinkingMode.INDUCTIVE,
+  ThinkingMode.DEDUCTIVE,
   ThinkingMode.ABDUCTIVE,
+  // Causal/Temporal modes
   ThinkingMode.CAUSAL,
-  ThinkingMode.BAYESIAN,
   ThinkingMode.COUNTERFACTUAL,
-  ThinkingMode.ANALOGICAL,
   ThinkingMode.TEMPORAL,
-  ThinkingMode.GAMETHEORY,
+  // Probabilistic modes
+  ThinkingMode.BAYESIAN,
   ThinkingMode.EVIDENTIAL,
+  // Strategic modes
+  ThinkingMode.GAMETHEORY,
+  // Analytical modes
+  ThinkingMode.ANALOGICAL,
   ThinkingMode.FIRSTPRINCIPLES,
+  // Scientific modes
   ThinkingMode.SYSTEMSTHINKING,
   ThinkingMode.SCIENTIFICMETHOD,
   ThinkingMode.FORMALLOGIC,
-  // Phase 13 (v7.4.0) - Academic Research Modes
+  // Academic research modes
   ThinkingMode.SYNTHESIS,
   ThinkingMode.ARGUMENTATION,
   ThinkingMode.CRITIQUE,
   ThinkingMode.ANALYSIS,
 ];
+
+/**
+ * @deprecated All modes are now fully implemented. Kept for backward compatibility.
+ */
+export const EXPERIMENTAL_MODES: ReadonlyArray<ThinkingMode> = [];
 
 /**
  * Check if a mode is fully implemented
@@ -143,19 +189,73 @@ export function isFullyImplemented(mode: ThinkingMode): boolean {
   return FULLY_IMPLEMENTED_MODES.includes(mode);
 }
 
+// ============================================================================
+// SHARED ENUMS AND TYPES
+// ============================================================================
+
 /**
- * Shannon methodology stages
+ * Shannon methodology stages (used by Shannon and Hybrid modes)
  */
 export enum ShannonStage {
   PROBLEM_DEFINITION = 'problem_definition',
   CONSTRAINTS = 'constraints',
   MODEL = 'model',
   PROOF = 'proof',
-  IMPLEMENTATION = 'implementation'
+  IMPLEMENTATION = 'implementation',
 }
 
 /**
- * Base thought interface
+ * Extended thought types for mathematical and physics reasoning
+ */
+export type ExtendedThoughtType =
+  | 'problem_definition'
+  | 'constraints'
+  | 'model'
+  | 'proof'
+  | 'implementation'
+  | 'axiom_definition'
+  | 'theorem_statement'
+  | 'proof_construction'
+  | 'lemma_derivation'
+  | 'corollary'
+  | 'counterexample'
+  | 'algebraic_manipulation'
+  | 'symbolic_computation'
+  | 'numerical_analysis'
+  | 'symmetry_analysis'
+  | 'gauge_theory'
+  | 'field_equations'
+  | 'lagrangian'
+  | 'hamiltonian'
+  | 'conservation_law'
+  | 'dimensional_analysis'
+  | 'tensor_formulation'
+  | 'differential_geometry'
+  | 'decomposition'
+  | 'synthesis'
+  | 'abstraction'
+  | 'analogy'
+  | 'metacognition'
+  // Phase 8: Proof Decomposition Types
+  | 'proof_decomposition'
+  | 'dependency_analysis'
+  | 'consistency_check'
+  | 'gap_identification'
+  | 'assumption_trace'
+  // Phase 10: Hybrid Mode Types
+  | 'mode_selection'
+  | 'parallel_analysis'
+  | 'sequential_analysis'
+  | 'convergence_check'
+  | 'confidence_assessment'
+  | 'mode_switching';
+
+// ============================================================================
+// BASE THOUGHT INTERFACE
+// ============================================================================
+
+/**
+ * Base thought interface - all mode-specific thoughts extend this
  */
 export interface BaseThought {
   id: string;
@@ -172,202 +272,43 @@ export interface BaseThought {
   importance?: number;
 }
 
-/**
- * Extended thought types for mathematical and physics reasoning
- */
-export type ExtendedThoughtType =
-  | 'problem_definition' | 'constraints' | 'model' | 'proof' | 'implementation'
-  | 'axiom_definition' | 'theorem_statement' | 'proof_construction'
-  | 'lemma_derivation' | 'corollary' | 'counterexample'
-  | 'algebraic_manipulation' | 'symbolic_computation' | 'numerical_analysis'
-  | 'symmetry_analysis' | 'gauge_theory' | 'field_equations'
-  | 'lagrangian' | 'hamiltonian' | 'conservation_law'
-  | 'dimensional_analysis' | 'tensor_formulation' | 'differential_geometry'
-  | 'decomposition' | 'synthesis' | 'abstraction' | 'analogy' | 'metacognition'
-  // Phase 8: Proof Decomposition Types
-  | 'proof_decomposition' | 'dependency_analysis' | 'consistency_check'
-  | 'gap_identification' | 'assumption_trace';
+// ============================================================================
+// FUNDAMENTAL REASONING TRIAD
+// These are the three foundational reasoning modes that other modes build upon
+// ============================================================================
+
+// ----- INDUCTIVE REASONING -----
 
 /**
- * Mathematical model representation
+ * Inductive reasoning thought
+ * Reasoning from specific observations to general principles
  */
-export interface MathematicalModel {
-  latex: string;
-  symbolic: string;
-  ascii?: string;
-  tensorRank?: number;
-  dimensions?: number[];
-  invariants?: string[];
-  symmetries?: string[];
-  complexity?: string;
-  stabilityNotes?: string;
-  validated?: boolean;
-  validationMethod?: string;
+export interface InductiveThought extends BaseThought {
+  mode: ThinkingMode.INDUCTIVE;
+  observations: string[]; // Specific cases observed
+  pattern?: string; // Identified pattern
+  generalization: string; // General principle formed
+  confidence: number; // 0-1: Strength of inference
+  counterexamples?: string[]; // Known exceptions
+  sampleSize?: number; // Number of observations
 }
 
-/**
- * Tensor properties for physics modeling
- */
-export interface TensorProperties {
-  rank: [number, number];
-  components: string;
-  latex: string;
-  symmetries: string[];
-  invariants: string[];
-  transformation: 'covariant' | 'contravariant' | 'mixed';
-  indexStructure?: string;
-  coordinateSystem?: string;
-}
+// ----- DEDUCTIVE REASONING -----
 
 /**
- * Physical interpretation
+ * Deductive reasoning thought
+ * Reasoning from general principles to specific conclusions
  */
-export interface PhysicalInterpretation {
-  quantity: string;
-  units: string;
-  conservationLaws: string[];
-  constraints?: string[];
-  observables?: string[];
+export interface DeductiveThought extends BaseThought {
+  mode: ThinkingMode.DEDUCTIVE;
+  premises: string[]; // General principles
+  conclusion: string; // Specific conclusion
+  logicForm?: string; // e.g., "modus ponens", "modus tollens"
+  validityCheck: boolean; // Is the deduction logically valid?
+  soundnessCheck?: boolean; // Are the premises true?
 }
 
-/**
- * Proof strategy for mathematical reasoning
- */
-export interface ProofStrategy {
-  type: 'direct' | 'contradiction' | 'induction' | 'construction' | 'contrapositive';
-  steps: string[];
-  baseCase?: string;
-  inductiveStep?: string;
-  completeness: number;
-}
-
-/**
- * Theorem definition
- */
-export interface Theorem {
-  name: string;
-  statement: string;
-  hypotheses: string[];
-  conclusion: string;
-  proof?: string;
-  references?: Reference[];
-}
-
-/**
- * Reference to external sources
- */
-export interface Reference {
-  type: 'paper' | 'book' | 'arxiv' | 'url' | 'theorem';
-  citation: string;
-  relevance: string;
-  url?: string;
-}
-
-// ========== EXISTING MODES ==========
-
-/**
- * Sequential-mode thought
- */
-export interface SequentialThought extends BaseThought {
-  mode: ThinkingMode.SEQUENTIAL;
-  revisionReason?: string;
-  buildUpon?: string[];
-  branchFrom?: string;
-  branchId?: string;
-  needsMoreThoughts?: boolean;
-}
-
-/**
- * Shannon-mode thought
- */
-export interface ShannonThought extends BaseThought {
-  mode: ThinkingMode.SHANNON;
-  stage: ShannonStage;
-  uncertainty: number;
-  dependencies: string[];
-  assumptions: string[];
-  recheckStep?: {
-    stepToRecheck: string;
-    reason: string;
-    newInformation?: string;
-  };
-  confidenceFactors?: {
-    dataQuality: number;
-    methodologyRobustness: number;
-    assumptionValidity: number;
-  };
-  alternativeApproaches?: string[];
-  knownLimitations?: string[];
-}
-
-/**
- * Mathematical thought
- */
-export interface MathematicsThought extends BaseThought {
-  mode: ThinkingMode.MATHEMATICS;
-  thoughtType: ExtendedThoughtType;
-  mathematicalModel?: MathematicalModel;
-  proofStrategy?: ProofStrategy;
-  theorems?: Theorem[];
-  dependencies: string[];
-  assumptions: string[];
-  uncertainty: number;
-  logicalForm?: {
-    premises: string[];
-    conclusion: string;
-    rules: string[];
-  };
-  references?: Reference[];
-}
-
-/**
- * Physics thought
- */
-export interface PhysicsThought extends BaseThought {
-  mode: ThinkingMode.PHYSICS;
-  thoughtType: ExtendedThoughtType;
-  tensorProperties?: TensorProperties;
-  physicalInterpretation?: PhysicalInterpretation;
-  conservationLaws?: string[];
-  dimensionalAnalysis?: {
-    isConsistent: boolean;
-    dimensions: Record<string, string>;
-    issues?: string[];
-  };
-  mathematicalModel?: MathematicalModel;
-  dependencies: string[];
-  assumptions: string[];
-  uncertainty: number;
-  fieldTheoryContext?: {
-    fields: string[];
-    interactions: string[];
-    symmetryGroup: string;
-    gaugeSymmetries?: string[];
-  };
-}
-
-/**
- * Hybrid-mode thought
- */
-export interface HybridThought extends BaseThought {
-  mode: ThinkingMode.HYBRID;
-  thoughtType?: ExtendedThoughtType;
-  stage?: ShannonStage;
-  uncertainty?: number;
-  dependencies?: string[];
-  assumptions?: string[];
-  revisionReason?: string;
-  mathematicalModel?: MathematicalModel;
-  tensorProperties?: TensorProperties;
-  physicalInterpretation?: PhysicalInterpretation;
-  primaryMode: 'sequential' | 'shannon' | 'mathematics' | 'physics';
-  secondaryFeatures: string[];
-  switchReason?: string;
-}
-
-// ========== NEW MODES (v2.0) ==========
-
-// ===== ABDUCTIVE REASONING =====
+// ----- ABDUCTIVE REASONING -----
 
 /**
  * Observation requiring explanation
@@ -404,14 +345,15 @@ export interface Evidence {
  * Criteria for evaluating hypotheses
  */
 export interface EvaluationCriteria {
-  parsimony: number;      // Simplicity score (0-1)
+  parsimony: number; // Simplicity score (0-1)
   explanatoryPower: number; // How well it explains observations (0-1)
-  plausibility: number;   // Prior probability (0-1)
-  testability: boolean;   // Can it be tested?
+  plausibility: number; // Prior probability (0-1)
+  testability: boolean; // Can it be tested?
 }
 
 /**
  * Abductive reasoning thought
+ * Inference to the best explanation
  */
 export interface AbductiveThought extends BaseThought {
   mode: ThinkingMode.ABDUCTIVE;
@@ -423,408 +365,79 @@ export interface AbductiveThought extends BaseThought {
   bestExplanation?: Hypothesis;
 }
 
-// ===== INDUCTIVE REASONING =====
+// ============================================================================
+// THOUGHT UNION TYPE
+// ============================================================================
 
 /**
- * Inductive reasoning thought
- * Reasoning from specific observations to general principles
- */
-export interface InductiveThought extends BaseThought {
-  mode: ThinkingMode.INDUCTIVE;
-  observations: string[];        // Specific cases observed
-  pattern?: string;              // Identified pattern
-  generalization: string;        // General principle formed
-  confidence: number;            // 0-1: Strength of inference
-  counterexamples?: string[];    // Known exceptions
-  sampleSize?: number;           // Number of observations
-}
-
-// ===== DEDUCTIVE REASONING =====
-
-/**
- * Deductive reasoning thought
- * Reasoning from general principles to specific conclusions
- */
-export interface DeductiveThought extends BaseThought {
-  mode: ThinkingMode.DEDUCTIVE;
-  premises: string[];            // General principles
-  conclusion: string;            // Specific conclusion
-  logicForm?: string;            // e.g., "modus ponens", "modus tollens"
-  validityCheck: boolean;        // Is the deduction logically valid?
-  soundnessCheck?: boolean;      // Are the premises true?
-}
-
-// ===== CAUSAL REASONING =====
-
-/**
- * Node in causal graph
- */
-export interface CausalNode {
-  id: string;
-  name: string;
-  type: 'cause' | 'effect' | 'mediator' | 'confounder';
-  description: string;
-}
-
-/**
- * Edge in causal graph (causal relationship)
- */
-export interface CausalEdge {
-  from: string; // node id
-  to: string;   // node id
-  strength: number; // -1 to 1 (negative = inhibitory)
-  confidence: number; // 0-1
-  mechanism?: string;
-  formula?: string; // LaTeX formula for mathematical relationship
-}
-
-/**
- * Causal graph structure
- */
-export interface CausalGraph {
-  nodes: CausalNode[];
-  edges: CausalEdge[];
-}
-
-/**
- * Intervention on causal system
- */
-export interface Intervention {
-  nodeId: string;
-  action: string;
-  expectedEffects: {
-    nodeId: string;
-    expectedChange: string;
-    confidence: number;
-  }[];
-}
-
-/**
- * Causal mechanism description
- */
-export interface CausalMechanism {
-  from: string;
-  to: string;
-  description: string;
-  type: 'direct' | 'indirect' | 'feedback';
-  formula?: string; // LaTeX formula describing the mechanism
-}
-
-/**
- * Confounding variable
- */
-export interface Confounder {
-  nodeId: string;
-  affects: string[]; // node ids
-  description: string;
-}
-
-/**
- * Counterfactual scenario for causal analysis
- */
-export interface CounterfactualScenario {
-  description: string;
-  modifiedNodes: { nodeId: string; newValue: string }[];
-  predictedOutcome: string;
-}
-
-/**
- * Causal reasoning thought
- */
-export interface CausalThought extends BaseThought {
-  mode: ThinkingMode.CAUSAL;
-  causalGraph: CausalGraph;
-  interventions?: Intervention[];
-  counterfactuals?: CounterfactualScenario[];
-  mechanisms: CausalMechanism[];
-  confounders?: Confounder[];
-}
-
-// ===== BAYESIAN REASONING =====
-
-/**
- * Hypothesis for Bayesian analysis
- */
-export interface BayesianHypothesis {
-  id: string;
-  statement: string;
-  alternatives?: string[];
-}
-
-/**
- * Prior probability
- */
-export interface PriorProbability {
-  probability: number; // 0-1
-  justification: string;
-  latex?: string; // LaTeX formula for prior distribution
-}
-
-/**
- * Likelihood of evidence
- */
-export interface Likelihood {
-  probability: number; // 0-1
-  description: string;
-  latex?: string; // LaTeX formula for likelihood function
-}
-
-/**
- * Evidence for Bayesian update
- */
-export interface BayesianEvidence {
-  id: string;
-  description: string;
-  likelihoodGivenHypothesis: number;    // P(E|H)
-  likelihoodGivenNotHypothesis: number; // P(E|¬H)
-  timestamp?: string;
-}
-
-/**
- * Posterior probability (updated belief)
- */
-export interface PosteriorProbability {
-  probability: number; // 0-1
-  calculation: string; // Show the math
-  latex?: string; // LaTeX formula for Bayesian update calculation
-}
-
-/**
- * Sensitivity analysis for Bayesian reasoning
- */
-export interface SensitivityAnalysis {
-  priorRange: [number, number];
-  posteriorRange: [number, number];
-}
-
-/**
- * Bayesian reasoning thought
- */
-export interface BayesianThought extends BaseThought {
-  mode: ThinkingMode.BAYESIAN;
-  hypothesis: BayesianHypothesis;
-  prior: PriorProbability;
-  likelihood: Likelihood;
-  evidence: BayesianEvidence[];
-  posterior: PosteriorProbability;
-  bayesFactor?: number; // Strength of evidence
-  sensitivity?: SensitivityAnalysis;
-}
-
-// ===== COUNTERFACTUAL REASONING =====
-
-/**
- * Condition in a scenario
- */
-export interface Condition {
-  factor: string;
-  value: string;
-  isIntervention?: boolean; // Was this changed from actual?
-}
-
-/**
- * Outcome of a scenario
- */
-export interface Outcome {
-  description: string;
-  impact: 'positive' | 'negative' | 'neutral';
-  magnitude?: number; // 0-1
-}
-
-/**
- * Scenario (actual or counterfactual)
- */
-export interface Scenario {
-  id: string;
-  name: string;
-  description: string;
-  conditions: Condition[];
-  outcomes: Outcome[];
-  likelihood?: number; // 0-1
-}
-
-/**
- * Difference between actual and counterfactual
- */
-export interface Difference {
-  aspect: string;
-  actual: string;
-  counterfactual: string;
-  significance: 'high' | 'medium' | 'low';
-}
-
-/**
- * Causal chain from intervention to outcome
- */
-export interface CausalChain {
-  id: string;
-  events: string[];
-  branchingPoint: string;
-  divergence: string;
-}
-
-/**
- * Point of intervention in timeline
- */
-export interface InterventionPoint {
-  description: string;
-  timestamp?: string;
-  timing: string;
-  feasibility: number; // 0-1
-  expectedImpact: number; // 0-1
-  alternatives: string[];
-}
-
-/**
- * Comparison between scenarios
- */
-export interface CounterfactualComparison {
-  differences: Difference[];
-  insights: string[];
-  lessons: string[];
-}
-
-/**
- * Counterfactual reasoning thought
- */
-export interface CounterfactualThought extends BaseThought {
-  mode: ThinkingMode.COUNTERFACTUAL;
-  actual: Scenario;
-  counterfactuals: Scenario[];
-  comparison: CounterfactualComparison;
-  interventionPoint: InterventionPoint;
-  causalChains?: CausalChain[];
-}
-
-// ===== ANALOGICAL REASONING =====
-
-/**
- * Entity in a domain
- */
-export interface Entity {
-  id: string;
-  name: string;
-  type: string;
-  description: string;
-}
-
-/**
- * Relation between entities
- */
-export interface Relation {
-  id: string;
-  type: string;
-  from: string; // entity id
-  to: string;   // entity id
-  description: string;
-}
-
-/**
- * Property of an entity
- */
-export interface Property {
-  entityId: string;
-  name: string;
-  value: string;
-}
-
-/**
- * Domain (source or target)
- */
-export interface Domain {
-  id: string;
-  name: string;
-  description: string;
-  entities: Entity[];
-  relations: Relation[];
-  properties: Property[];
-}
-
-/**
- * Mapping between source and target domains
- */
-export interface Mapping {
-  sourceEntityId: string;
-  targetEntityId: string;
-  justification: string;
-  confidence: number; // 0-1
-}
-
-/**
- * Insight from analogy
- */
-export interface Insight {
-  description: string;
-  sourceEvidence: string;
-  targetApplication: string;
-  novelty: number; // 0-1
-}
-
-/**
- * Inference based on analogy
- */
-export interface Inference {
-  sourcePattern: string;
-  targetPrediction: string;
-  confidence: number; // 0-1
-  needsVerification: boolean;
-}
-
-/**
- * Analogical reasoning thought
- */
-export interface AnalogicalThought extends BaseThought {
-  mode: ThinkingMode.ANALOGICAL;
-  sourceDomain: Domain;
-  targetDomain: Domain;
-  mapping: Mapping[];
-  insights: Insight[];
-  inferences: Inference[];
-  limitations: string[];
-  analogyStrength: number; // 0-1
-}
-
-// ========== UNION TYPES ==========
-
-/**
- * Union type of all thoughts
+ * Union type of all thought types
  */
 export type Thought =
+  // Core modes
   | SequentialThought
   | ShannonThought
   | MathematicsThought
   | PhysicsThought
   | HybridThought
+  // Engineering and theory
   | EngineeringThought
   | ComputabilityThought
   | CryptanalyticThought
   | AlgorithmicThought
+  // Fundamental triad (defined in this file)
   | InductiveThought
   | DeductiveThought
   | AbductiveThought
+  // Causal and probabilistic
   | CausalThought
   | BayesianThought
   | CounterfactualThought
-  | AnalogicalThought
   | TemporalThought
   | GameTheoryThought
   | EvidentialThought
+  // Analytical
+  | AnalogicalThought
   | FirstPrinciplesThought
+  // Scientific
   | SystemsThinkingThought
   | ScientificMethodThought
   | OptimizationThought
   | FormalLogicThought
-  | MetaReasoningThought
+  // Academic research
   | SynthesisThought
   | ArgumentationThought
   | CritiqueThought
-  | AnalysisThought;
+  | AnalysisThought
+  // Meta
+  | MetaReasoningThought
+  // Advanced runtime (Phase 10 Sprint 3 v8.4.0)
+  | RecursiveThought
+  | ModalThought
+  | StochasticThought
+  | ConstraintThought
+  // User-defined
+  | CustomThought;
 
-// ========== TYPE GUARDS ==========
+// ============================================================================
+// TYPE GUARDS
+// ============================================================================
 
-/**
- * Type guards for existing modes
- */
+// ----- Fundamental Triad -----
+
+export function isInductiveThought(thought: Thought): thought is InductiveThought {
+  return thought.mode === ThinkingMode.INDUCTIVE;
+}
+
+export function isDeductiveThought(thought: Thought): thought is DeductiveThought {
+  return thought.mode === ThinkingMode.DEDUCTIVE;
+}
+
+export function isAbductiveThought(thought: Thought): thought is AbductiveThought {
+  return thought.mode === ThinkingMode.ABDUCTIVE;
+}
+
+// ----- Core Modes -----
+
 export function isSequentialThought(thought: Thought): thought is SequentialThought {
   return thought.mode === ThinkingMode.SEQUENTIAL;
 }
@@ -845,20 +458,35 @@ export function isHybridThought(thought: Thought): thought is HybridThought {
   return thought.mode === ThinkingMode.HYBRID;
 }
 
-/**
- * Type guards for new modes (v2.0)
- */
-export function isInductiveThought(thought: Thought): thought is InductiveThought {
-  return thought.mode === ThinkingMode.INDUCTIVE;
+// ----- Engineering & Theory -----
+
+export function isEngineeringThought(thought: Thought): thought is EngineeringThought {
+  return thought.mode === ThinkingMode.ENGINEERING;
 }
 
-export function isDeductiveThought(thought: Thought): thought is DeductiveThought {
-  return thought.mode === ThinkingMode.DEDUCTIVE;
+export function isComputabilityThought(thought: Thought): thought is ComputabilityThought {
+  return thought.mode === ThinkingMode.COMPUTABILITY;
 }
 
-export function isAbductiveThought(thought: Thought): thought is AbductiveThought {
-  return thought.mode === ThinkingMode.ABDUCTIVE;
+export function isCryptanalyticThought(thought: Thought): thought is CryptanalyticThought {
+  return thought.mode === ThinkingMode.CRYPTANALYTIC;
 }
+
+export function isAlgorithmicThought(thought: Thought): thought is AlgorithmicThought {
+  return thought.mode === ThinkingMode.ALGORITHMIC;
+}
+
+// ----- Advanced Modes -----
+
+export function isMetaReasoningThought(thought: Thought): thought is MetaReasoningThought {
+  return thought.mode === ThinkingMode.METAREASONING;
+}
+
+export function isOptimizationThought(thought: Thought): thought is OptimizationThought {
+  return thought.mode === ThinkingMode.OPTIMIZATION;
+}
+
+// ----- Causal & Probabilistic -----
 
 export function isCausalThought(thought: Thought): thought is CausalThought {
   return thought.mode === ThinkingMode.CAUSAL;
@@ -872,13 +500,6 @@ export function isCounterfactualThought(thought: Thought): thought is Counterfac
   return thought.mode === ThinkingMode.COUNTERFACTUAL;
 }
 
-export function isAnalogicalThought(thought: Thought): thought is AnalogicalThought {
-  return thought.mode === ThinkingMode.ANALOGICAL;
-}
-
-/**
- * Type guards for Phase 3 modes (v2.1+)
- */
 export function isTemporalThought(thought: Thought): thought is TemporalThought {
   return thought.mode === ThinkingMode.TEMPORAL;
 }
@@ -891,13 +512,18 @@ export function isEvidentialThought(thought: Thought): thought is EvidentialThou
   return thought.mode === ThinkingMode.EVIDENTIAL;
 }
 
+// ----- Analytical -----
+
+export function isAnalogicalThought(thought: Thought): thought is AnalogicalThought {
+  return thought.mode === ThinkingMode.ANALOGICAL;
+}
+
 export function isFirstPrinciplesThought(thought: Thought): thought is FirstPrinciplesThought {
   return thought.mode === ThinkingMode.FIRSTPRINCIPLES;
 }
 
-/**
- * Type guards for Phase 4 modes (v3.2.0)
- */
+// ----- Scientific -----
+
 export function isSystemsThinkingThought(thought: Thought): thought is SystemsThinkingThought {
   return thought.mode === ThinkingMode.SYSTEMSTHINKING;
 }
@@ -906,49 +532,12 @@ export function isScientificMethodThought(thought: Thought): thought is Scientif
   return thought.mode === ThinkingMode.SCIENTIFICMETHOD;
 }
 
-export function isOptimizationThought(thought: Thought): thought is OptimizationThought {
-  return thought.mode === ThinkingMode.OPTIMIZATION;
-}
-
 export function isFormalLogicThought(thought: Thought): thought is FormalLogicThought {
   return thought.mode === ThinkingMode.FORMALLOGIC;
 }
 
-/**
- * Type guards for Phase 6 modes (v6.0.0)
- */
-export function isMetaReasoningThought(thought: Thought): thought is MetaReasoningThought {
-  return thought.mode === ThinkingMode.METAREASONING;
-}
+// ----- Academic Research -----
 
-/**
- * Type guards for Phase 10 modes (v7.1.0)
- */
-export function isEngineeringThought(thought: Thought): thought is EngineeringThought {
-  return thought.mode === ThinkingMode.ENGINEERING;
-}
-
-/**
- * Type guards for Phase 11 modes (v7.2.0) - Turing/von Neumann extensions
- */
-export function isComputabilityThought(thought: Thought): thought is ComputabilityThought {
-  return thought.mode === ThinkingMode.COMPUTABILITY;
-}
-
-export function isCryptanalyticThought(thought: Thought): thought is CryptanalyticThought {
-  return thought.mode === ThinkingMode.CRYPTANALYTIC;
-}
-
-/**
- * Type guards for Phase 12 modes (v7.3.0) - Algorithmic reasoning
- */
-export function isAlgorithmicThought(thought: Thought): thought is AlgorithmicThought {
-  return thought.mode === ThinkingMode.ALGORITHMIC;
-}
-
-/**
- * Type guards for Phase 13 modes (v7.4.0) - Academic Research Modes
- */
 export function isSynthesisThought(thought: Thought): thought is SynthesisThought {
   return thought.mode === ThinkingMode.SYNTHESIS;
 }
@@ -965,23 +554,68 @@ export function isAnalysisThought(thought: Thought): thought is AnalysisThought 
   return thought.mode === ThinkingMode.ANALYSIS;
 }
 
-// Re-export Phase 3 types
-export type { TemporalThought, GameTheoryThought, EvidentialThought, FirstPrinciplesThought };
+// ----- Advanced Runtime (Phase 10 Sprint 3 v8.4.0) -----
 
-// Re-export Phase 4 types
-export type { SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought };
+export function isRecursiveThought(thought: Thought): thought is RecursiveThought {
+  return thought.mode === ThinkingMode.RECURSIVE;
+}
 
-// Re-export Phase 6 types
-export type { MetaReasoningThought };
+export function isModalThought(thought: Thought): thought is ModalThought {
+  return thought.mode === ThinkingMode.MODAL;
+}
 
-// Re-export Phase 10 types
-export type { EngineeringThought };
+export function isStochasticThought(thought: Thought): thought is StochasticThought {
+  return thought.mode === ThinkingMode.STOCHASTIC;
+}
 
-// Re-export Phase 11 types (v7.2.0) - Turing/von Neumann extensions
-export type { ComputabilityThought, CryptanalyticThought };
+export function isConstraintThought(thought: Thought): thought is ConstraintThought {
+  return thought.mode === ThinkingMode.CONSTRAINT;
+}
 
-// Re-export Phase 12 types (v7.3.0) - Algorithmic reasoning
-export type { AlgorithmicThought };
+// ----- User-Defined -----
 
-// Re-export Phase 13 types (v7.4.0) - Academic Research Modes
-export type { SynthesisThought, ArgumentationThought, CritiqueThought, AnalysisThought };
+export function isCustomThought(thought: Thought): thought is CustomThought {
+  return thought.mode === ThinkingMode.CUSTOM;
+}
+
+// ============================================================================
+// RE-EXPORTS FROM MODE FILES
+// This allows importing everything from core.ts for backwards compatibility
+// ============================================================================
+
+// Re-export thought types
+export type {
+  SequentialThought,
+  ShannonThought,
+  MathematicsThought,
+  PhysicsThought,
+  HybridThought,
+  EngineeringThought,
+  ComputabilityThought,
+  CryptanalyticThought,
+  AlgorithmicThought,
+  MetaReasoningThought,
+  OptimizationThought,
+  CausalThought,
+  BayesianThought,
+  CounterfactualThought,
+  TemporalThought,
+  GameTheoryThought,
+  EvidentialThought,
+  AnalogicalThought,
+  FirstPrinciplesThought,
+  SystemsThinkingThought,
+  ScientificMethodThought,
+  FormalLogicThought,
+  SynthesisThought,
+  ArgumentationThought,
+  CritiqueThought,
+  AnalysisThought,
+  // Advanced runtime (Phase 10 Sprint 3 v8.4.0)
+  RecursiveThought,
+  ModalThought,
+  StochasticThought,
+  ConstraintThought,
+  // User-defined
+  CustomThought,
+};

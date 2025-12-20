@@ -74,7 +74,7 @@ export class Tokenizer {
     }
 
     // Convert to lowercase if enabled
-    let processed = this.options.lowercase ? text.toLowerCase() : text;
+    const processed = this.options.lowercase ? text.toLowerCase() : text;
 
     // Split on word boundaries
     const tokens = processed.match(/\b\w+\b/g) || [];

@@ -27,14 +27,12 @@ export interface Outcome {
  * Scenario (actual or counterfactual)
  */
 export interface Scenario {
-  id?: string;
+  id: string;
   name: string;
-  description?: string;
+  description: string;
   conditions: Condition[];
-  outcome?: Outcome;
-  outcomes?: Outcome[];
-  probability?: number; // 0-1
-  likelihood?: number; // 0-1 (alternative name for probability)
+  outcomes: Outcome[];
+  likelihood?: number; // 0-1 probability of this scenario
 }
 
 /**
@@ -50,7 +48,7 @@ export interface ScenarioDifference {
  * Comparison between scenarios
  */
 export interface CounterfactualComparison {
-  differences: string[] | ScenarioDifference[];
+  differences: ScenarioDifference[];
   insights: string[];
   lessons: string[];
 }

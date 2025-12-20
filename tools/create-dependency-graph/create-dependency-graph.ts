@@ -80,6 +80,19 @@ interface Statistics {
   totalTypeOnlyImports: number;
   runtimeCircularDeps: number;  // Excludes type-only cycles
   typeOnlyCircularDeps: number; // Type-only cycles (not runtime issues)
+  unusedFilesCount: number;
+  unusedExportsCount: number;
+}
+
+interface UnusedExport {
+  file: string;
+  name: string;
+  type: 'function' | 'class' | 'interface' | 'type' | 'constant' | 'enum' | 'other';
+}
+
+interface UnusedAnalysis {
+  unusedFiles: string[];
+  unusedExports: UnusedExport[];
 }
 
 interface ModuleMap {
@@ -563,9 +576,99 @@ function detectCircularDependencies(files: ParsedFile[]): CircularDependencyResu
 }
 
 /**
+ * Detect unused files and exports
+ */
+function detectUnused(files: ParsedFile[]): UnusedAnalysis {
+  const filePaths = new Set(files.map(f => f.path));
+
+  // Build a set of all imported files
+  const importedFiles = new Set<string>();
+  // Build a map of all imported symbols per file
+  const importedSymbols = new Map<string, Set<string>>();
+
+  for (const file of files) {
+    for (const dep of file.internalDependencies) {
+      const resolved = resolvePath(file.path, dep.file);
+      if (filePaths.has(resolved)) {
+        importedFiles.add(resolved);
+
+        // Track which symbols are imported
+        if (!importedSymbols.has(resolved)) {
+          importedSymbols.set(resolved, new Set());
+        }
+        const symbols = importedSymbols.get(resolved)!;
+        for (const imp of dep.imports) {
+          if (imp === '*') {
+            // Wildcard import - mark all exports as used
+            symbols.add('*');
+          } else {
+            symbols.add(imp.replace(/^\* as /, ''));
+          }
+        }
+      }
+    }
+  }
+
+  // Find unused files (excluding entry point and index files which are re-export hubs)
+  const unusedFiles: string[] = [];
+  for (const file of files) {
+    if (file.path === 'src/index.ts') continue; // Entry point is always "used"
+    if (file.name === 'index' && file.exports.reExported.length > 0) continue; // Re-export hubs
+    if (!importedFiles.has(file.path)) {
+      unusedFiles.push(file.path);
+    }
+  }
+
+  // Find unused exports
+  const unusedExports: UnusedExport[] = [];
+  for (const file of files) {
+    const usedSymbols = importedSymbols.get(file.path);
+    const isWildcardImported = usedSymbols?.has('*');
+
+    // Skip if file is not imported at all (already reported as unused file)
+    // or if it's wildcard imported (all exports considered used)
+    if (!usedSymbols || isWildcardImported) continue;
+
+    // Check each export
+    for (const fn of file.exports.functions) {
+      if (!usedSymbols.has(fn)) {
+        unusedExports.push({ file: file.path, name: fn, type: 'function' });
+      }
+    }
+    for (const cls of file.exports.classes) {
+      if (!usedSymbols.has(cls)) {
+        unusedExports.push({ file: file.path, name: cls, type: 'class' });
+      }
+    }
+    for (const iface of file.exports.interfaces) {
+      if (!usedSymbols.has(iface)) {
+        unusedExports.push({ file: file.path, name: iface, type: 'interface' });
+      }
+    }
+    for (const type of file.exports.types) {
+      if (!usedSymbols.has(type) && !file.exports.interfaces.includes(type)) {
+        unusedExports.push({ file: file.path, name: type, type: 'type' });
+      }
+    }
+    for (const en of file.exports.enums) {
+      if (!usedSymbols.has(en)) {
+        unusedExports.push({ file: file.path, name: en, type: 'enum' });
+      }
+    }
+    for (const constant of file.exports.constants) {
+      if (!usedSymbols.has(constant)) {
+        unusedExports.push({ file: file.path, name: constant, type: 'constant' });
+      }
+    }
+  }
+
+  return { unusedFiles, unusedExports };
+}
+
+/**
  * Generate statistics from parsed files
  */
-function generateStatistics(files: ParsedFile[], modules: ModuleMap, circularDeps: CircularDependencyResult): Statistics {
+function generateStatistics(files: ParsedFile[], modules: ModuleMap, circularDeps: CircularDependencyResult, unusedAnalysis: UnusedAnalysis): Statistics {
   let totalExports = 0;
   let totalClasses = 0;
   let totalInterfaces = 0;
@@ -615,7 +718,9 @@ function generateStatistics(files: ParsedFile[], modules: ModuleMap, circularDep
     totalReExports,
     totalTypeOnlyImports,
     runtimeCircularDeps: circularDeps.runtime.length,
-    typeOnlyCircularDeps: circularDeps.typeOnly.length
+    typeOnlyCircularDeps: circularDeps.typeOnly.length,
+    unusedFilesCount: unusedAnalysis.unusedFiles.length,
+    unusedExportsCount: unusedAnalysis.unusedExports.length
   };
 }
 
@@ -1087,8 +1192,11 @@ async function main(): Promise<void> {
   const circularDeps = detectCircularDependencies(parsedFiles);
   console.log(`Found ${circularDeps.all.length} circular dependencies (${circularDeps.runtime.length} runtime, ${circularDeps.typeOnly.length} type-only)`);
 
-  // Generate statistics (now needs circularDeps)
-  const stats = generateStatistics(parsedFiles, modules, circularDeps);
+  // Detect unused files and exports
+  const unusedAnalysis = detectUnused(parsedFiles);
+
+  // Generate statistics
+  const stats = generateStatistics(parsedFiles, modules, circularDeps, unusedAnalysis);
   console.log('Generated statistics');
 
   // Build dependency matrix
@@ -1131,6 +1239,76 @@ async function main(): Promise<void> {
   console.log(`  - ${circularDeps.all.length} circular dependencies:`);
   console.log(`      ${circularDeps.runtime.length} runtime (require attention)`);
   console.log(`      ${circularDeps.typeOnly.length} type-only (safe)`);
+  console.log(`  - ${unusedAnalysis.unusedFiles.length} potentially unused files`);
+  console.log(`  - ${unusedAnalysis.unusedExports.length} potentially unused exports`);
+
+  // Print unused files if any
+  if (unusedAnalysis.unusedFiles.length > 0) {
+    console.log('\nPotentially unused files:');
+    for (const file of unusedAnalysis.unusedFiles.slice(0, 20)) {
+      console.log(`  - ${file}`);
+    }
+    if (unusedAnalysis.unusedFiles.length > 20) {
+      console.log(`  ... and ${unusedAnalysis.unusedFiles.length - 20} more`);
+    }
+  }
+
+  // Print unused exports if any (grouped by file)
+  if (unusedAnalysis.unusedExports.length > 0) {
+    console.log('\nPotentially unused exports:');
+    const byFile = new Map<string, UnusedExport[]>();
+    for (const exp of unusedAnalysis.unusedExports) {
+      if (!byFile.has(exp.file)) byFile.set(exp.file, []);
+      byFile.get(exp.file)!.push(exp);
+    }
+    let shown = 0;
+    for (const [file, exports] of byFile) {
+      if (shown >= 10) {
+        console.log(`  ... and ${byFile.size - 10} more files with unused exports`);
+        break;
+      }
+      console.log(`  ${file}:`);
+      for (const exp of exports.slice(0, 5)) {
+        console.log(`    - ${exp.name} (${exp.type})`);
+      }
+      if (exports.length > 5) {
+        console.log(`    ... and ${exports.length - 5} more`);
+      }
+      shown++;
+    }
+  }
+
+  // Write full unused analysis to a separate file
+  const unusedReportPath = join(OUTPUT_DIR, 'unused-analysis.md');
+  let unusedReport = '# Unused Files and Exports Analysis\n\n';
+  unusedReport += `**Generated**: ${new Date().toISOString().split('T')[0]}\n\n`;
+  unusedReport += `## Summary\n\n`;
+  unusedReport += `- **Potentially unused files**: ${unusedAnalysis.unusedFiles.length}\n`;
+  unusedReport += `- **Potentially unused exports**: ${unusedAnalysis.unusedExports.length}\n\n`;
+
+  unusedReport += `## Potentially Unused Files\n\n`;
+  unusedReport += `These files are not imported by any other file in the codebase:\n\n`;
+  for (const file of unusedAnalysis.unusedFiles) {
+    unusedReport += `- \`${file}\`\n`;
+  }
+
+  unusedReport += `\n## Potentially Unused Exports\n\n`;
+  unusedReport += `These exports are not imported by any other file in the codebase:\n\n`;
+  const byFileForReport = new Map<string, UnusedExport[]>();
+  for (const exp of unusedAnalysis.unusedExports) {
+    if (!byFileForReport.has(exp.file)) byFileForReport.set(exp.file, []);
+    byFileForReport.get(exp.file)!.push(exp);
+  }
+  for (const [file, exports] of byFileForReport) {
+    unusedReport += `### \`${file}\`\n\n`;
+    for (const exp of exports) {
+      unusedReport += `- \`${exp.name}\` (${exp.type})\n`;
+    }
+    unusedReport += '\n';
+  }
+
+  writeFileSync(unusedReportPath, unusedReport);
+  console.log(`\nWritten: ${unusedReportPath}`);
 }
 
 main().catch(console.error);
