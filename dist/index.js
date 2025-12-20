@@ -41122,32 +41122,85 @@ var deepthinking_academic_schema = {
         description: "Identified gaps in the literature (structured)"
       },
       // Argumentation-specific properties (Toulmin model)
-      claim: {
-        type: "string",
-        description: "Main claim or thesis"
-      },
-      data: {
+      claims: {
         type: "array",
-        items: { type: "string" },
-        description: "Evidence supporting the claim"
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            statement: { type: "string" },
+            type: { type: "string", enum: ["fact", "value", "policy", "definition", "cause"] },
+            strength: { type: "string", enum: ["strong", "moderate", "tentative"] }
+          },
+          required: ["id", "statement"]
+        },
+        description: "Claims in the argument"
       },
-      warrant: {
-        type: "string",
-        description: "Reasoning connecting data to claim"
+      grounds: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            type: { type: "string", enum: ["empirical", "statistical", "testimonial", "analogical", "logical", "textual"] },
+            content: { type: "string" },
+            source: { type: "string" },
+            reliability: { type: "number", minimum: 0, maximum: 1 }
+          },
+          required: ["id", "content"]
+        },
+        description: "Grounds/evidence supporting claims"
       },
-      backing: {
-        type: "string",
-        description: "Support for the warrant"
+      warrants: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            statement: { type: "string" },
+            type: { type: "string", enum: ["generalization", "analogy", "causal", "authority", "principle", "definition"] },
+            groundsIds: { type: "array", items: { type: "string" } },
+            claimId: { type: "string" }
+          },
+          required: ["id", "statement"]
+        },
+        description: "Warrants connecting grounds to claims"
       },
-      qualifier: {
-        type: "string",
-        description: "Degree of certainty (e.g., 'probably', 'likely')"
+      rebuttals: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            objection: { type: "string" },
+            type: { type: "string", enum: ["factual", "logical", "ethical", "practical", "definitional"] },
+            strength: { type: "string", enum: ["strong", "moderate", "weak"] },
+            response: { type: "string" }
+          },
+          required: ["id", "objection"]
+        },
+        description: "Potential rebuttals and counter-arguments"
       },
-      rebuttal: {
-        type: "string",
-        description: "Potential counter-arguments"
+      argumentStrength: {
+        type: "number",
+        minimum: 0,
+        maximum: 1,
+        description: "Overall argument strength (0-1)"
       },
       // Critique-specific properties
+      critiquedWork: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+          title: { type: "string" },
+          authors: { type: "array", items: { type: "string" } },
+          year: { type: "integer" },
+          type: { type: "string" },
+          field: { type: "string" }
+        },
+        required: ["title"],
+        description: "Work being critiqued"
+      },
       strengths: {
         type: "array",
         items: { type: "string" },
@@ -41158,21 +41211,35 @@ var deepthinking_academic_schema = {
         items: { type: "string" },
         description: "Identified weaknesses"
       },
-      methodologyAssessment: {
-        type: "object",
-        properties: {
-          validity: { type: "string" },
-          reliability: { type: "string" },
-          limitations: { type: "array", items: { type: "string" } }
-        },
-        additionalProperties: false,
-        description: "Assessment of methodology"
+      suggestions: {
+        type: "array",
+        items: { type: "string" },
+        description: "Improvement suggestions"
       },
       // Analysis-specific properties
       analysisMethod: {
         type: "string",
         enum: ["thematic", "grounded-theory", "discourse", "content", "narrative", "phenomenological"],
-        description: "Qualitative analysis method"
+        description: "Qualitative analysis method (simplified)"
+      },
+      methodology: {
+        type: "string",
+        enum: ["thematic_analysis", "grounded_theory", "discourse_analysis", "content_analysis", "phenomenological", "narrative_analysis", "framework_analysis", "template_analysis", "mixed_qualitative"],
+        description: "Qualitative analysis methodology"
+      },
+      dataSources: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            type: { type: "string" },
+            description: { type: "string" },
+            participantId: { type: "string" }
+          },
+          required: ["id", "type"]
+        },
+        description: "Data sources for analysis"
       },
       codes: {
         type: "array",
@@ -41190,10 +41257,32 @@ var deepthinking_academic_schema = {
         },
         description: "Coding scheme for analysis"
       },
+      memos: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            type: { type: "string", enum: ["analytical", "theoretical", "methodological", "reflexive", "code", "operational"] },
+            content: { type: "string" },
+            relatedCodes: { type: "array", items: { type: "string" } }
+          },
+          required: ["id", "content"]
+        },
+        description: "Analytical memos"
+      },
       categories: {
         type: "array",
         items: { type: "string" },
         description: "Categories derived from codes"
+      },
+      saturationReached: {
+        type: "boolean",
+        description: "Whether theoretical saturation has been reached"
+      },
+      keyInsight: {
+        type: "string",
+        description: "Key insight from the analysis"
       }
     },
     required: [...baseThoughtRequired],
@@ -41531,6 +41620,11 @@ var TemporalSchema = BaseThoughtSchema.extend({
 
 // src/tools/schemas/modes/probabilistic.ts
 init_esm_shims();
+var HypothesisSchema = z.object({
+  id: z.string(),
+  description: z.string(),
+  probability: ConfidenceSchema.optional()
+});
 var BeliefMassSchema = z.object({
   hypothesisSet: z.array(z.string()),
   mass: ConfidenceSchema,
@@ -41538,9 +41632,18 @@ var BeliefMassSchema = z.object({
 });
 var ProbabilisticSchema = BaseThoughtSchema.extend({
   mode: z.enum(["bayesian", "evidential"]),
-  // Evidential (Dempster-Shafer) specific
+  // Bayesian reasoning
+  hypotheses: z.array(HypothesisSchema).optional(),
+  priorProbability: ConfidenceSchema.optional(),
+  likelihood: ConfidenceSchema.optional(),
+  posteriorProbability: ConfidenceSchema.optional(),
+  evidence: z.array(z.string()).optional(),
+  // Evidential (Dempster-Shafer) reasoning
   frameOfDiscernment: z.array(z.string()).optional(),
-  beliefMasses: z.array(BeliefMassSchema).optional()
+  beliefMasses: z.array(BeliefMassSchema).optional(),
+  massFunction: z.record(z.string(), ConfidenceSchema).optional(),
+  beliefFunction: z.record(z.string(), ConfidenceSchema).optional(),
+  plausibilityFunction: z.record(z.string(), ConfidenceSchema).optional()
 });
 
 // src/tools/schemas/modes/causal.ts
@@ -41615,30 +41718,129 @@ var PayoffMatrixSchema = z.object({
   dimensions: z.array(z.number()),
   payoffs: z.array(PayoffEntrySchema)
 });
+var SolutionSchema = z.object({
+  value: z.string(),
+  variables: z.record(z.string(), z.number()).optional()
+});
 var StrategicSchema = BaseThoughtSchema.extend({
   mode: z.enum(["gametheory", "optimization"]),
   // Game theory specific
   players: z.array(PlayerSchema).optional(),
   strategies: z.array(StrategySchema).optional(),
-  payoffMatrix: PayoffMatrixSchema.optional()
+  payoffMatrix: PayoffMatrixSchema.optional(),
+  // Optimization specific
+  objectiveFunction: z.string().optional(),
+  constraints: z.array(z.string()).optional(),
+  optimizationMethod: z.string().optional(),
+  solution: SolutionSchema.optional()
 });
 
 // src/tools/schemas/modes/analytical.ts
 init_esm_shims();
+var DomainSchema = z.object({
+  domain: z.string(),
+  elements: z.array(z.string()).optional(),
+  relations: z.array(z.string()).optional()
+});
+var MappingSchema = z.object({
+  source: z.string(),
+  target: z.string(),
+  confidence: ConfidenceSchema.optional()
+});
 var AnalyticalSchema = BaseThoughtSchema.extend({
-  mode: z.enum(["analogical", "firstprinciples", "metareasoning", "cryptanalytic"])
+  mode: z.enum(["analogical", "firstprinciples", "metareasoning", "cryptanalytic"]),
+  // Analogical reasoning
+  sourceAnalogy: DomainSchema.optional(),
+  targetAnalogy: DomainSchema.optional(),
+  mappings: z.array(MappingSchema).optional(),
+  // First principles reasoning
+  fundamentals: z.array(z.string()).optional(),
+  derivedInsights: z.array(z.string()).optional()
 });
 
 // src/tools/schemas/modes/scientific.ts
 init_esm_shims();
+var ExperimentSchema = z.object({
+  id: z.string(),
+  description: z.string(),
+  result: z.string().optional()
+});
+var SystemComponentSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  role: z.string().optional()
+});
+var InteractionSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  type: z.string()
+});
+var FeedbackLoopSchema = z.object({
+  type: z.enum(["positive", "negative", "neutral"]),
+  components: z.array(z.string())
+});
 var ScientificSchema = BaseThoughtSchema.extend({
-  mode: z.enum(["scientificmethod", "systemsthinking", "formallogic"])
+  mode: z.enum(["scientificmethod", "systemsthinking", "formallogic"]),
+  // Scientific method
+  hypothesis: z.string().optional(),
+  predictions: z.array(z.string()).optional(),
+  experiments: z.array(ExperimentSchema).optional(),
+  // Systems thinking
+  systemComponents: z.array(SystemComponentSchema).optional(),
+  interactions: z.array(InteractionSchema).optional(),
+  feedbackLoops: z.array(FeedbackLoopSchema).optional(),
+  // Formal logic
+  premises: z.array(z.string()).optional(),
+  conclusion: z.string().optional(),
+  inference: z.string().optional()
 });
 
 // src/tools/schemas/modes/engineering.ts
 init_esm_shims();
+var TradeStudySchema = z.object({
+  options: z.array(z.string()),
+  criteria: z.array(z.string()),
+  weights: z.record(z.string(), z.number()).optional()
+});
+var FmeaEntrySchema = z.object({
+  failureMode: z.string(),
+  severity: z.number().int().min(1).max(10),
+  occurrence: z.number().int().min(1).max(10),
+  detection: z.number().int().min(1).max(10),
+  rpn: z.number().int().optional()
+});
+var ComplexityAnalysisSchema = z.object({
+  timeComplexity: z.string(),
+  spaceComplexity: z.string().optional(),
+  bestCase: z.string().optional(),
+  averageCase: z.string().optional(),
+  worstCase: z.string().optional()
+});
+var CorrectnessProofSchema = z.object({
+  invariant: z.string(),
+  termination: z.string(),
+  correctness: z.string()
+});
+var DesignPatternEnum = z.enum([
+  "divide-and-conquer",
+  "dynamic-programming",
+  "greedy",
+  "backtracking",
+  "branch-and-bound",
+  "randomized",
+  "approximation"
+]);
 var EngineeringSchema = BaseThoughtSchema.extend({
-  mode: z.enum(["engineering", "algorithmic"])
+  mode: z.enum(["engineering", "algorithmic"]),
+  // Engineering mode
+  requirementId: z.string().optional(),
+  tradeStudy: TradeStudySchema.optional(),
+  fmeaEntry: FmeaEntrySchema.optional(),
+  // Algorithmic mode (CLRS)
+  algorithmName: z.string().optional(),
+  designPattern: DesignPatternEnum.optional(),
+  complexityAnalysis: ComplexityAnalysisSchema.optional(),
+  correctnessProof: CorrectnessProofSchema.optional()
 });
 
 // src/tools/schemas/modes/academic.ts

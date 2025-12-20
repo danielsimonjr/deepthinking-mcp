@@ -1,7 +1,7 @@
 /**
- * Strategic Mode Schemas (v4.1.0)
+ * Strategic Mode Schemas (v8.4.0)
  * Sprint 5 Task 5.3: Game Theory, Optimization modes
- * Sprint 7 Task 7.5: Use shared schemas
+ * Phase 15: Aligned with JSON schema for complete validation
  */
 
 import { z } from 'zod';
@@ -43,6 +43,14 @@ const PayoffMatrixSchema = z.object({
 });
 
 /**
+ * Solution schema for optimization
+ */
+const SolutionSchema = z.object({
+  value: z.string(),
+  variables: z.record(z.string(), z.number()).optional(),
+});
+
+/**
  * Strategic reasoning schema (Game Theory + Optimization)
  */
 export const StrategicSchema = BaseThoughtSchema.extend({
@@ -52,6 +60,12 @@ export const StrategicSchema = BaseThoughtSchema.extend({
   players: z.array(PlayerSchema).optional(),
   strategies: z.array(StrategySchema).optional(),
   payoffMatrix: PayoffMatrixSchema.optional(),
+
+  // Optimization specific
+  objectiveFunction: z.string().optional(),
+  constraints: z.array(z.string()).optional(),
+  optimizationMethod: z.string().optional(),
+  solution: SolutionSchema.optional(),
 });
 
 export type StrategicInput = z.infer<typeof StrategicSchema>;

@@ -1123,32 +1123,85 @@ export const deepthinking_academic_schema = {
         description: "Identified gaps in the literature (structured)"
       },
       // Argumentation-specific properties (Toulmin model)
-      claim: {
-        type: "string",
-        description: "Main claim or thesis"
-      },
-      data: {
+      claims: {
         type: "array",
-        items: { type: "string" },
-        description: "Evidence supporting the claim"
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            statement: { type: "string" },
+            type: { type: "string", enum: ["fact", "value", "policy", "definition", "cause"] },
+            strength: { type: "string", enum: ["strong", "moderate", "tentative"] }
+          },
+          required: ["id", "statement"]
+        },
+        description: "Claims in the argument"
       },
-      warrant: {
-        type: "string",
-        description: "Reasoning connecting data to claim"
+      grounds: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            type: { type: "string", enum: ["empirical", "statistical", "testimonial", "analogical", "logical", "textual"] },
+            content: { type: "string" },
+            source: { type: "string" },
+            reliability: { type: "number", minimum: 0, maximum: 1 }
+          },
+          required: ["id", "content"]
+        },
+        description: "Grounds/evidence supporting claims"
       },
-      backing: {
-        type: "string",
-        description: "Support for the warrant"
+      warrants: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            statement: { type: "string" },
+            type: { type: "string", enum: ["generalization", "analogy", "causal", "authority", "principle", "definition"] },
+            groundsIds: { type: "array", items: { type: "string" } },
+            claimId: { type: "string" }
+          },
+          required: ["id", "statement"]
+        },
+        description: "Warrants connecting grounds to claims"
       },
-      qualifier: {
-        type: "string",
-        description: "Degree of certainty (e.g., 'probably', 'likely')"
+      rebuttals: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            objection: { type: "string" },
+            type: { type: "string", enum: ["factual", "logical", "ethical", "practical", "definitional"] },
+            strength: { type: "string", enum: ["strong", "moderate", "weak"] },
+            response: { type: "string" }
+          },
+          required: ["id", "objection"]
+        },
+        description: "Potential rebuttals and counter-arguments"
       },
-      rebuttal: {
-        type: "string",
-        description: "Potential counter-arguments"
+      argumentStrength: {
+        type: "number",
+        minimum: 0,
+        maximum: 1,
+        description: "Overall argument strength (0-1)"
       },
       // Critique-specific properties
+      critiquedWork: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+          title: { type: "string" },
+          authors: { type: "array", items: { type: "string" } },
+          year: { type: "integer" },
+          type: { type: "string" },
+          field: { type: "string" }
+        },
+        required: ["title"],
+        description: "Work being critiqued"
+      },
       strengths: {
         type: "array",
         items: { type: "string" },
@@ -1159,21 +1212,35 @@ export const deepthinking_academic_schema = {
         items: { type: "string" },
         description: "Identified weaknesses"
       },
-      methodologyAssessment: {
-        type: "object",
-        properties: {
-          validity: { type: "string" },
-          reliability: { type: "string" },
-          limitations: { type: "array", items: { type: "string" } }
-        },
-        additionalProperties: false,
-        description: "Assessment of methodology"
+      suggestions: {
+        type: "array",
+        items: { type: "string" },
+        description: "Improvement suggestions"
       },
       // Analysis-specific properties
       analysisMethod: {
         type: "string",
         enum: ["thematic", "grounded-theory", "discourse", "content", "narrative", "phenomenological"],
-        description: "Qualitative analysis method"
+        description: "Qualitative analysis method (simplified)"
+      },
+      methodology: {
+        type: "string",
+        enum: ["thematic_analysis", "grounded_theory", "discourse_analysis", "content_analysis", "phenomenological", "narrative_analysis", "framework_analysis", "template_analysis", "mixed_qualitative"],
+        description: "Qualitative analysis methodology"
+      },
+      dataSources: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            type: { type: "string" },
+            description: { type: "string" },
+            participantId: { type: "string" }
+          },
+          required: ["id", "type"]
+        },
+        description: "Data sources for analysis"
       },
       codes: {
         type: "array",
@@ -1191,10 +1258,32 @@ export const deepthinking_academic_schema = {
         },
         description: "Coding scheme for analysis"
       },
+      memos: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            type: { type: "string", enum: ["analytical", "theoretical", "methodological", "reflexive", "code", "operational"] },
+            content: { type: "string" },
+            relatedCodes: { type: "array", items: { type: "string" } }
+          },
+          required: ["id", "content"]
+        },
+        description: "Analytical memos"
+      },
       categories: {
         type: "array",
         items: { type: "string" },
         description: "Categories derived from codes"
+      },
+      saturationReached: {
+        type: "boolean",
+        description: "Whether theoretical saturation has been reached"
+      },
+      keyInsight: {
+        type: "string",
+        description: "Key insight from the analysis"
       }
     },
     required: [...baseThoughtRequired],
