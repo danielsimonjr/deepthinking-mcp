@@ -1086,13 +1086,38 @@ export const deepthinking_academic_schema = {
       },
       themes: {
         type: "array",
-        items: { type: "string" },
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            description: { type: "string" },
+            sourceIds: { type: "array", items: { type: "string" } },
+            strength: { type: "number", minimum: 0, maximum: 1 },
+            consensus: { type: "string", enum: ["strong", "moderate", "weak", "contested"] }
+          },
+          required: ["id", "name"]
+        },
         description: "Identified themes across sources"
       },
       researchGaps: {
         type: "array",
         items: { type: "string" },
         description: "Identified gaps in the literature"
+      },
+      gaps: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            description: { type: "string" },
+            type: { type: "string", enum: ["empirical", "theoretical", "methodological", "population", "contextual"] },
+            importance: { type: "string", enum: ["critical", "significant", "moderate", "minor"] }
+          },
+          required: ["id", "description"]
+        },
+        description: "Identified gaps in the literature (structured)"
       },
       // Argumentation-specific properties (Toulmin model)
       claim: {
