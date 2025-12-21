@@ -268,6 +268,12 @@ export interface BaseThought {
   nextThoughtNeeded: boolean;
   isRevision?: boolean;
   revisesThought?: string;
+  revisionReason?: string;
+  branchFrom?: string;
+  branchId?: string;
+  uncertainty?: number;
+  dependencies?: string[];
+  assumptions?: string[];
   tags?: string[];
   importance?: number;
 }

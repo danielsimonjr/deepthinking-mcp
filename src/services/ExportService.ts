@@ -144,18 +144,29 @@ export class ExportService {
    * Uses VisualExporter to generate visual representations
    * based on the session's thinking mode and thought structure.
    *
+   * For multi-thought sessions, always includes the full thought sequence
+   * showing all thoughts with their branches, revisions, and dependencies.
+   *
    * @param session - The session to export
    * @param format - Visual format (mermaid, dot, ascii)
    * @returns Visual representation as string
    * @throws {Error} If session has no thoughts
    */
   private exportVisual(session: ThinkingSession, format: VisualFormat): string {
-    const lastThought = session.thoughts[session.thoughts.length - 1];
+    const thoughts = session.thoughts;
+    const lastThought = thoughts[thoughts.length - 1];
 
     if (!lastThought) {
       throw new Error('No thoughts in session to export');
     }
 
+    // For multi-thought sessions, always use session-level visualization
+    // This ensures all thoughts, branches, revisions, and dependencies are shown
+    if (thoughts.length > 1) {
+      return this.exportSessionWithThoughtDetails(session, format);
+    }
+
+    // For single-thought sessions, use mode-specific visualization if available
     // Determine which visual export method to use based on mode
     if (lastThought.mode === 'causal' && 'causalGraph' in lastThought) {
       return this.visualExporter.exportCausalGraph(lastThought as CausalThought, {
@@ -430,6 +441,245 @@ export class ExportService {
     ).join('\n');
 
     return `Session: ${title}\nMode: ${mode}\n\n${thoughtsText}`;
+  }
+
+  /**
+   * Export session with full thought details including branches, revisions, and dependencies
+   * This method properly handles multi-thought sessions showing all relationships
+   */
+  private exportSessionWithThoughtDetails(session: ThinkingSession, format: VisualFormat): string {
+    const thoughts = session.thoughts;
+    const title = (session.title || 'Thinking Session').replace(/"/g, "'");
+    const mode = session.mode;
+
+    // Build a map of thought IDs/numbers for reference
+    const thoughtMap = new Map<string, number>();
+    thoughts.forEach((t, i) => {
+      if (t.id) thoughtMap.set(t.id, i + 1);
+    });
+
+    // Identify branches, revisions, and dependencies
+    const branches = new Set<string>();
+    const revisions: Array<{ from: number; to: number }> = [];
+    const dependencies: Array<{ from: number; to: number }> = [];
+
+    thoughts.forEach((t, i) => {
+      const thoughtNum = i + 1;
+
+      // Track branches
+      if (t.branchId) branches.add(t.branchId);
+
+      // Track revisions
+      if (t.isRevision && t.revisesThought) {
+        const revisedNum = thoughtMap.get(t.revisesThought);
+        if (revisedNum) {
+          revisions.push({ from: revisedNum, to: thoughtNum });
+        }
+      }
+
+      // Track dependencies
+      if (t.dependencies && t.dependencies.length > 0) {
+        for (const depId of t.dependencies) {
+          const depNum = thoughtMap.get(depId);
+          if (depNum) {
+            dependencies.push({ from: depNum, to: thoughtNum });
+          }
+        }
+      }
+
+      // Track branchFrom
+      if (t.branchFrom) {
+        const branchFromNum = thoughtMap.get(t.branchFrom);
+        if (branchFromNum) {
+          dependencies.push({ from: branchFromNum, to: thoughtNum });
+        }
+      }
+    });
+
+    if (format === 'mermaid') {
+      let diagram = 'flowchart TD\n';
+      diagram += `    subgraph session["${title}"]\n`;
+      diagram += '    direction TB\n';
+
+      // Session info node
+      const branchInfo = branches.size > 0 ? `<br/>${branches.size} branch(es)` : '';
+      const revisionInfo = revisions.length > 0 ? `<br/>${revisions.length} revision(s)` : '';
+      diagram += `    SESSION["📊 Session: ${mode}<br/>${thoughts.length} thoughts${branchInfo}${revisionInfo}"]\n`;
+
+      // Thought nodes with status indicators
+      for (let i = 0; i < thoughts.length; i++) {
+        const t = thoughts[i];
+        const truncated = t.content.length > 40
+          ? t.content.substring(0, 37).replace(/"/g, "'").replace(/\n/g, ' ').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '...'
+          : t.content.replace(/"/g, "'").replace(/\n/g, ' ').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        // Status indicators
+        const isComplete = !t.nextThoughtNeeded;
+        const isRev = t.isRevision;
+        const hasBranch = t.branchId;
+        const statusIcon = isComplete ? '✓' : '→';
+        const revIcon = isRev ? '🔄' : '';
+        const branchIcon = hasBranch ? '🌿' : '';
+
+        diagram += `    T${i + 1}["${statusIcon}${revIcon}${branchIcon} Thought ${i + 1}<br/>${truncated}"]\n`;
+      }
+
+      // Basic thought sequence (linear flow)
+      diagram += '\n    %% Linear flow\n';
+      diagram += '    SESSION --> T1\n';
+      for (let i = 1; i < thoughts.length; i++) {
+        // Only add linear edge if not already connected by revision/dependency
+        const hasSpecialEdge = revisions.some(r => r.from === i && r.to === i + 1) ||
+                              dependencies.some(d => d.from === i && d.to === i + 1);
+        if (!hasSpecialEdge) {
+          diagram += `    T${i} --> T${i + 1}\n`;
+        }
+      }
+
+      // Add revision edges (dashed)
+      if (revisions.length > 0) {
+        diagram += '\n    %% Revisions\n';
+        for (const rev of revisions) {
+          diagram += `    T${rev.from} -.->|revises| T${rev.to}\n`;
+        }
+      }
+
+      // Add dependency edges (dotted)
+      if (dependencies.length > 0) {
+        diagram += '\n    %% Dependencies\n';
+        for (const dep of dependencies) {
+          diagram += `    T${dep.from} ==>|depends| T${dep.to}\n`;
+        }
+      }
+
+      // Completion indicator
+      const lastT = thoughts[thoughts.length - 1];
+      if (lastT && !lastT.nextThoughtNeeded) {
+        diagram += `\n    T${thoughts.length} --> COMPLETE["✅ Complete"]\n`;
+      }
+
+      diagram += '    end\n';
+
+      // Style definitions
+      diagram += '\n    %% Styles\n';
+      diagram += '    classDef revision fill:#ffe6cc,stroke:#d79b00\n';
+      diagram += '    classDef branch fill:#dae8fc,stroke:#6c8ebf\n';
+      diagram += '    classDef complete fill:#d5e8d4,stroke:#82b366\n';
+
+      // Apply styles to revision nodes
+      const revisionNodes = thoughts
+        .map((t, i) => t.isRevision ? `T${i + 1}` : null)
+        .filter(Boolean);
+      if (revisionNodes.length > 0) {
+        diagram += `    class ${revisionNodes.join(',')} revision\n`;
+      }
+
+      // Apply styles to branch nodes
+      const branchNodes = thoughts
+        .map((t, i) => t.branchId ? `T${i + 1}` : null)
+        .filter(Boolean);
+      if (branchNodes.length > 0) {
+        diagram += `    class ${branchNodes.join(',')} branch\n`;
+      }
+
+      return diagram;
+    }
+
+    if (format === 'dot') {
+      let dot = 'digraph ThinkingSession {\n';
+      dot += '    rankdir=TB;\n';
+      dot += '    node [shape=box, style="rounded,filled", fillcolor=white];\n';
+      dot += `    label="${title} (${mode})";\n`;
+      dot += '    labelloc=t;\n\n';
+
+      // Session start node
+      dot += `    SESSION [label="Session\\n${thoughts.length} thoughts", shape=ellipse, fillcolor="#f5f5f5"];\n\n`;
+
+      // Thought nodes
+      for (let i = 0; i < thoughts.length; i++) {
+        const t = thoughts[i];
+        const truncated = t.content.length > 35
+          ? t.content.substring(0, 32).replace(/"/g, '\\"').replace(/\n/g, ' ') + '...'
+          : t.content.replace(/"/g, '\\"').replace(/\n/g, ' ');
+
+        let fillcolor = 'white';
+        if (t.isRevision) fillcolor = '#ffe6cc';
+        else if (t.branchId) fillcolor = '#dae8fc';
+        else if (!t.nextThoughtNeeded) fillcolor = '#d5e8d4';
+
+        const statusMark = t.isRevision ? '🔄 ' : (t.branchId ? '🌿 ' : '');
+        dot += `    T${i + 1} [label="${statusMark}Thought ${i + 1}\\n${truncated}", fillcolor="${fillcolor}"];\n`;
+      }
+
+      // Edges
+      dot += '\n    // Linear flow\n';
+      dot += '    SESSION -> T1;\n';
+      for (let i = 1; i < thoughts.length; i++) {
+        dot += `    T${i} -> T${i + 1};\n`;
+      }
+
+      // Revision edges
+      if (revisions.length > 0) {
+        dot += '\n    // Revisions\n';
+        for (const rev of revisions) {
+          dot += `    T${rev.from} -> T${rev.to} [style=dashed, color="#d79b00", label="revises"];\n`;
+        }
+      }
+
+      // Dependency edges
+      if (dependencies.length > 0) {
+        dot += '\n    // Dependencies\n';
+        for (const dep of dependencies) {
+          dot += `    T${dep.from} -> T${dep.to} [style=bold, color="#6c8ebf", label="depends"];\n`;
+        }
+      }
+
+      dot += '}\n';
+      return dot;
+    }
+
+    if (format === 'ascii') {
+      const bar = '═'.repeat(60);
+      let ascii = `╔${bar}╗\n`;
+      ascii += `║ ${title.substring(0, 58).padEnd(58)} ║\n`;
+      ascii += `║ Mode: ${mode.padEnd(52)} ║\n`;
+      ascii += `║ Thoughts: ${thoughts.length.toString().padEnd(48)} ║\n`;
+      if (branches.size > 0) {
+        ascii += `║ Branches: ${branches.size.toString().padEnd(48)} ║\n`;
+      }
+      if (revisions.length > 0) {
+        ascii += `║ Revisions: ${revisions.length.toString().padEnd(47)} ║\n`;
+      }
+      ascii += `╠${bar}╣\n`;
+
+      for (let i = 0; i < thoughts.length; i++) {
+        const t = thoughts[i];
+        const statusIcon = t.nextThoughtNeeded ? '[→]' : '[✓]';
+        const revMark = t.isRevision ? ' 🔄' : '';
+        const branchMark = t.branchId ? ' 🌿' : '';
+        const truncated = t.content.substring(0, 40).replace(/\n/g, ' ');
+        ascii += `║ ${statusIcon} T${(i + 1).toString().padStart(2)}${revMark}${branchMark}: ${truncated.padEnd(45 - revMark.length - branchMark.length)} ║\n`;
+
+        // Show revision connection
+        if (t.isRevision && t.revisesThought) {
+          const revisedNum = thoughtMap.get(t.revisesThought);
+          if (revisedNum) {
+            ascii += `║      ↳ revises T${revisedNum}                                         ║\n`.substring(0, 64) + '║\n';
+          }
+        }
+
+        if (i < thoughts.length - 1) {
+          ascii += '║     │                                                            ║\n'.substring(0, 64) + '║\n';
+          ascii += '║     ▼                                                            ║\n'.substring(0, 64) + '║\n';
+        }
+      }
+
+      ascii += `╚${bar}╝\n`;
+      return ascii;
+    }
+
+    // Fallback: use generic sequence
+    return this.exportGenericThoughtSequence(session, format);
   }
 
 
