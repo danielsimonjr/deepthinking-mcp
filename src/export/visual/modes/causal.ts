@@ -224,7 +224,9 @@ function causalGraphToASCII(thought: CausalThought): string {
 
   ascii += 'Nodes:\n';
   for (const node of thought.causalGraph.nodes) {
-    ascii += `  [${node.type.toUpperCase()}] ${node.name}: ${node.description}\n`;
+    const nodeType = node.type ? `[${node.type.toUpperCase()}] ` : '';
+    const nodeDesc = node.description ? `: ${node.description}` : '';
+    ascii += `  ${nodeType}${node.name}${nodeDesc}\n`;
   }
 
   ascii += '\nEdges:\n';
@@ -822,7 +824,7 @@ function causalToMarkdown(thought: CausalThought, options: VisualExportOptions):
   const nodeRows = thought.causalGraph.nodes.map(node => [
     node.id,
     node.name,
-    node.type.toUpperCase(),
+    node.type ? node.type.toUpperCase() : '-',
     node.description || '-',
   ]);
   parts.push(section('Nodes', table(['ID', 'Name', 'Type', 'Description'], nodeRows)));
