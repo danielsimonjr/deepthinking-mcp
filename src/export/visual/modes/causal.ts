@@ -502,11 +502,11 @@ function causalGraphToHTML(thought: CausalThought, options: VisualExportOptions)
 
   // Nodes table
   const nodeRows = thought.causalGraph.nodes.map(node => {
-    const typeBadge = renderBadge(node.type,
+    const typeBadge = node.type ? renderBadge(node.type,
       node.type === 'cause' ? 'success' :
       node.type === 'effect' ? 'warning' :
       node.type === 'confounder' ? 'danger' : 'secondary'
-    );
+    ) : '-';
     return [node.id, node.name, typeBadge, node.description || '-'];
   });
   html += renderSection('Nodes', renderTable(
@@ -537,7 +537,7 @@ function causalGraphToHTML(thought: CausalThought, options: VisualExportOptions)
     html += renderSection('⚠️ Confounding Variables', `
       <p class="text-warning">The following variables may confound causal inference:</p>
       <ul class="list-styled">
-        ${confounders.map(c => `<li><strong>${escapeHTML(c.name)}</strong>: ${escapeHTML(c.description)}</li>`).join('\n')}
+        ${confounders.map(c => `<li><strong>${escapeHTML(c.name)}</strong>: ${c.description ? escapeHTML(c.description) : '-'}</li>`).join('\n')}
       </ul>
     `);
   }
@@ -571,7 +571,7 @@ function causalToModelica(thought: CausalThought, options: VisualExportOptions):
     for (const cause of causes) {
       const causeId = sanitizeModelicaId(cause.id);
       lines.push(`  record Cause_${causeId}`);
-      lines.push(`    constant String description = "${escapeModelicaString(cause.description)}";`);
+      lines.push(`    constant String description = "${cause.description ? escapeModelicaString(cause.description) : ''}";`);
       lines.push(`    constant String name = "${escapeModelicaString(cause.name)}";`);
       lines.push(`  end Cause_${causeId};`);
       lines.push('');
@@ -585,7 +585,7 @@ function causalToModelica(thought: CausalThought, options: VisualExportOptions):
     for (const effect of effects) {
       const effectId = sanitizeModelicaId(effect.id);
       lines.push(`  record Effect_${effectId}`);
-      lines.push(`    constant String description = "${escapeModelicaString(effect.description)}";`);
+      lines.push(`    constant String description = "${effect.description ? escapeModelicaString(effect.description) : ''}";`);
       lines.push(`    constant String name = "${escapeModelicaString(effect.name)}";`);
       lines.push(`  end Effect_${effectId};`);
       lines.push('');
@@ -844,7 +844,7 @@ function causalToMarkdown(thought: CausalThought, options: VisualExportOptions):
 
   // Confounders warning
   if (confounders.length > 0) {
-    const confounderList = confounders.map(c => `**${c.name}**: ${c.description}`);
+    const confounderList = confounders.map(c => `**${c.name}**: ${c.description || '-'}`);
     parts.push(section('⚠️ Confounding Variables', list(confounderList)));
   }
 
