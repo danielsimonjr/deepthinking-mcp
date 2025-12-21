@@ -557,10 +557,10 @@ function counterfactualToModelica(thought: CounterfactualThought, options: Visua
     const recordName = sanitizeModelicaId(`CF_${scenario.id}`);
 
     modelica += `  record ${recordName}\n`;
-    modelica += `    "Counterfactual: ${escapeModelicaString(scenario.name)}"\n`;
+    modelica += `    "Counterfactual: ${scenario.name ? escapeModelicaString(scenario.name) : ''}"\n`;
     modelica += `    String id = "${sanitizeModelicaId(scenario.id)}";\n`;
-    modelica += `    String name = "${escapeModelicaString(scenario.name)}";\n`;
-    modelica += `    String description = "${escapeModelicaString(scenario.description)}";\n`;
+    modelica += `    String name = "${scenario.name ? escapeModelicaString(scenario.name) : ''}";\n`;
+    modelica += `    String description = "${scenario.description ? escapeModelicaString(scenario.description) : ''}";\n`;
 
     if (includeMetrics && scenario.likelihood !== undefined) {
       modelica += `    Real likelihood = ${scenario.likelihood};\n`;
@@ -569,7 +569,7 @@ function counterfactualToModelica(thought: CounterfactualThought, options: Visua
     // Add outcomes if present
     if (scenario.outcomes && scenario.outcomes.length > 0) {
       modelica += `    String outcomes[${scenario.outcomes.length}] = {`;
-      modelica += scenario.outcomes.map(o => `"${escapeModelicaString(o.description)}"`).join(', ');
+      modelica += scenario.outcomes.map(o => `"${o.description ? escapeModelicaString(o.description) : ''}"`).join(', ');
       modelica += '};\n';
     }
 

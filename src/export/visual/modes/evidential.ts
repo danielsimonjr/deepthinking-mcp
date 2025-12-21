@@ -541,11 +541,11 @@ function evidentialToHTML(thought: EvidentialThought, options: VisualExportOptio
   if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
     const bfContent = thought.beliefFunctions.map(bf => {
       const massRows = bf.massAssignments.map(ma =>
-        `<tr><td>{${ma.hypothesisSet.join(', ')}}</td><td>${ma.mass.toFixed(3)}</td><td>${escapeHTML(ma.justification)}</td></tr>`
+        `<tr><td>{${ma.hypothesisSet.join(', ')}}</td><td>${ma.mass.toFixed(3)}</td><td>${ma.justification ? escapeHTML(ma.justification) : '-'}</td></tr>`
       ).join('\n');
       return `
         <div class="card">
-          <div class="card-header">Belief from: ${escapeHTML(bf.source)}</div>
+          <div class="card-header">Belief from: ${bf.source ? escapeHTML(bf.source) : '-'}</div>
           ${bf.conflictMass ? `<p><strong>Conflict Mass:</strong> ${bf.conflictMass.toFixed(3)}</p>` : ''}
           <table class="table">
             <thead><tr><th>Hypothesis Set</th><th>Mass</th><th>Justification</th></tr></thead>
@@ -560,7 +560,7 @@ function evidentialToHTML(thought: EvidentialThought, options: VisualExportOptio
   // Combined belief if available
   if (thought.combinedBelief) {
     const massRows = thought.combinedBelief.massAssignments.map(ma =>
-      `<tr><td>{${ma.hypothesisSet.join(', ')}}</td><td>${ma.mass.toFixed(3)}</td><td>${escapeHTML(ma.justification)}</td></tr>`
+      `<tr><td>{${ma.hypothesisSet.join(', ')}}</td><td>${ma.mass.toFixed(3)}</td><td>${ma.justification ? escapeHTML(ma.justification) : '-'}</td></tr>`
     ).join('\n');
     html += renderSection('Combined Belief', `
       <table class="table">
@@ -589,7 +589,7 @@ function evidentialToModelica(thought: EvidentialThought, options: VisualExportO
     modelica += '  // Evidence Items\n';
     for (const evidence of thought.evidence) {
       const evId = sanitizeModelicaId(evidence.id);
-      const desc = includeLabels ? escapeModelicaString(evidence.description) : '';
+      const desc = includeLabels && evidence.description ? escapeModelicaString(evidence.description) : '';
 
       modelica += `  record ${evId}\n`;
       modelica += `    "Evidence: ${desc}"\n`;
@@ -609,7 +609,7 @@ function evidentialToModelica(thought: EvidentialThought, options: VisualExportO
       const bfId = sanitizeModelicaId(belief.id);
 
       modelica += `  record ${bfId}\n`;
-      modelica += `    "Belief function from ${escapeModelicaString(belief.source)}"\n`;
+      modelica += `    "Belief function from ${belief.source ? escapeModelicaString(belief.source) : ''}"\n`;
 
       // Mass assignments as parameters
       if (belief.massAssignments && belief.massAssignments.length > 0) {

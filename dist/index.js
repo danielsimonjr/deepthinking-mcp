@@ -21246,7 +21246,7 @@ function mathematicsToASCII(thought) {
   if (thought.theorems && thought.theorems.length > 0) {
     ascii += "Theorems:\n";
     thought.theorems.forEach((theorem, index) => {
-      ascii += `  [${index + 1}] ${theorem.name}: ${theorem.statement}
+      ascii += `  [${index + 1}] ${theorem.name || `Theorem ${index + 1}`}: ${theorem.statement}
 `;
       if (theorem.hypotheses.length > 0) {
         ascii += `      Hypotheses: ${theorem.hypotheses.join(", ")}
@@ -25631,7 +25631,7 @@ function temporalToModelica(thought, _options) {
     const eventId = sanitizeModelicaId(event.id);
     modelica += `  record ${eventId}
 `;
-    modelica += `    "${escapeModelicaString(event.name)}"
+    modelica += `    "${event.name ? escapeModelicaString(event.name) : ""}"
 `;
     modelica += `    parameter Real timestamp = ${event.timestamp} "Event timestamp";
 `;
@@ -25639,7 +25639,7 @@ function temporalToModelica(thought, _options) {
       modelica += `    parameter Real duration = ${event.duration} "Event duration";
 `;
     }
-    modelica += `    parameter String eventType = "${event.type}" "Event type (instant/interval)";
+    modelica += `    parameter String eventType = "${event.type || "instant"}" "Event type (instant/interval)";
 `;
     if (event.description) {
       modelica += `    parameter String description = "${escapeModelicaString(event.description)}";
@@ -26219,13 +26219,13 @@ function counterfactualToModelica(thought, options) {
     const recordName = sanitizeModelicaId(`CF_${scenario.id}`);
     modelica += `  record ${recordName}
 `;
-    modelica += `    "Counterfactual: ${escapeModelicaString(scenario.name)}"
+    modelica += `    "Counterfactual: ${scenario.name ? escapeModelicaString(scenario.name) : ""}"
 `;
     modelica += `    String id = "${sanitizeModelicaId(scenario.id)}";
 `;
-    modelica += `    String name = "${escapeModelicaString(scenario.name)}";
+    modelica += `    String name = "${scenario.name ? escapeModelicaString(scenario.name) : ""}";
 `;
-    modelica += `    String description = "${escapeModelicaString(scenario.description)}";
+    modelica += `    String description = "${scenario.description ? escapeModelicaString(scenario.description) : ""}";
 `;
     if (includeMetrics && scenario.likelihood !== void 0) {
       modelica += `    Real likelihood = ${scenario.likelihood};
@@ -26233,7 +26233,7 @@ function counterfactualToModelica(thought, options) {
     }
     if (scenario.outcomes && scenario.outcomes.length > 0) {
       modelica += `    String outcomes[${scenario.outcomes.length}] = {`;
-      modelica += scenario.outcomes.map((o) => `"${escapeModelicaString(o.description)}"`).join(", ");
+      modelica += scenario.outcomes.map((o) => `"${o.description ? escapeModelicaString(o.description) : ""}"`).join(", ");
       modelica += "};\n";
     }
     modelica += `  end ${recordName};
@@ -26512,20 +26512,20 @@ function bayesianToASCII(thought) {
 `;
   ascii += `Prior Probability: ${thought.prior.probability.toFixed(3)}
 `;
-  ascii += `  Justification: ${thought.prior.justification}
+  ascii += `  Justification: ${thought.prior.justification || "-"}
 
 `;
   if (thought.evidence && thought.evidence.length > 0) {
     ascii += "Evidence:\n";
     for (const ev of thought.evidence) {
-      ascii += `  \u2022 ${ev.description}
+      ascii += `  \u2022 ${ev.description || "-"}
 `;
     }
     ascii += "\n";
   }
   ascii += `Posterior Probability: ${thought.posterior.probability.toFixed(3)}
 `;
-  ascii += `  Calculation: ${thought.posterior.calculation}
+  ascii += `  Calculation: ${thought.posterior.calculation || "-"}
 `;
   if (thought.bayesFactor !== void 0) {
     ascii += `
@@ -26675,18 +26675,18 @@ function bayesianToHTML(thought, options) {
     html += '<div class="card">';
     html += '<div class="card-header">Prior Probability</div>';
     html += renderProgressBar(thought.prior.probability * 100, "primary");
-    html += `<p class="text-secondary" style="margin-top: 0.5rem">${escapeHTML(thought.prior.justification)}</p>`;
+    html += `<p class="text-secondary" style="margin-top: 0.5rem">${thought.prior.justification ? escapeHTML(thought.prior.justification) : "-"}</p>`;
     html += "</div>\n";
     html += '<div class="card">';
     html += '<div class="card-header">Posterior Probability</div>';
     html += renderProgressBar(thought.posterior.probability * 100, "success");
-    html += `<p class="text-secondary" style="margin-top: 0.5rem">${escapeHTML(thought.posterior.calculation)}</p>`;
+    html += `<p class="text-secondary" style="margin-top: 0.5rem">${thought.posterior.calculation ? escapeHTML(thought.posterior.calculation) : "-"}</p>`;
     html += "</div>\n";
   }
   if (thought.evidence && thought.evidence.length > 0) {
     const evidenceRows = thought.evidence.map((ev, i) => [
       (i + 1).toString(),
-      ev.description,
+      ev.description || "-",
       ev.likelihoodGivenHypothesis?.toFixed(3) || "-",
       ev.likelihoodGivenNotHypothesis?.toFixed(3) || "-"
     ]);
@@ -26742,7 +26742,7 @@ function bayesianToModelica(thought, options) {
     for (let i = 0; i < thought.evidence.length; i++) {
       const ev = thought.evidence[i];
       lines.push(`  record Evidence_${i + 1}`);
-      lines.push(`    constant String description = "${escapeModelicaString(ev.description)}";`);
+      lines.push(`    constant String description = "${ev.description ? escapeModelicaString(ev.description) : ""}";`);
       if (ev.likelihoodGivenHypothesis !== void 0) {
         lines.push(`    constant Real likelihoodGivenH = ${ev.likelihoodGivenHypothesis.toFixed(6)};`);
       }
@@ -26840,15 +26840,15 @@ function bayesianToMarkdown(thought, options) {
     parts.push(section("Probabilities", metricsContent));
     parts.push(section("Prior", `${progressBar(thought.prior.probability * 100)}
 
-${thought.prior.justification}`));
+${thought.prior.justification || "-"}`));
     parts.push(section("Posterior", `${progressBar(thought.posterior.probability * 100)}
 
-${thought.posterior.calculation}`));
+${thought.posterior.calculation || "-"}`));
   }
   if (thought.evidence && thought.evidence.length > 0) {
     const evidenceRows = thought.evidence.map((ev, i) => [
       (i + 1).toString(),
-      ev.description,
+      ev.description || "-",
       ev.likelihoodGivenHypothesis?.toFixed(3) || "-",
       ev.likelihoodGivenNotHypothesis?.toFixed(3) || "-"
     ]);
@@ -27265,11 +27265,11 @@ function evidentialToHTML(thought, options) {
   if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
     const bfContent = thought.beliefFunctions.map((bf) => {
       const massRows = bf.massAssignments.map(
-        (ma) => `<tr><td>{${ma.hypothesisSet.join(", ")}}</td><td>${ma.mass.toFixed(3)}</td><td>${escapeHTML(ma.justification)}</td></tr>`
+        (ma) => `<tr><td>{${ma.hypothesisSet.join(", ")}}</td><td>${ma.mass.toFixed(3)}</td><td>${ma.justification ? escapeHTML(ma.justification) : "-"}</td></tr>`
       ).join("\n");
       return `
         <div class="card">
-          <div class="card-header">Belief from: ${escapeHTML(bf.source)}</div>
+          <div class="card-header">Belief from: ${bf.source ? escapeHTML(bf.source) : "-"}</div>
           ${bf.conflictMass ? `<p><strong>Conflict Mass:</strong> ${bf.conflictMass.toFixed(3)}</p>` : ""}
           <table class="table">
             <thead><tr><th>Hypothesis Set</th><th>Mass</th><th>Justification</th></tr></thead>
@@ -27282,7 +27282,7 @@ function evidentialToHTML(thought, options) {
   }
   if (thought.combinedBelief) {
     const massRows = thought.combinedBelief.massAssignments.map(
-      (ma) => `<tr><td>{${ma.hypothesisSet.join(", ")}}</td><td>${ma.mass.toFixed(3)}</td><td>${escapeHTML(ma.justification)}</td></tr>`
+      (ma) => `<tr><td>{${ma.hypothesisSet.join(", ")}}</td><td>${ma.mass.toFixed(3)}</td><td>${ma.justification ? escapeHTML(ma.justification) : "-"}</td></tr>`
     ).join("\n");
     html += renderSection("Combined Belief", `
       <table class="table">
@@ -27303,7 +27303,7 @@ function evidentialToModelica(thought, options) {
     modelica += "  // Evidence Items\n";
     for (const evidence of thought.evidence) {
       const evId = sanitizeModelicaId(evidence.id);
-      const desc = includeLabels ? escapeModelicaString(evidence.description) : "";
+      const desc = includeLabels && evidence.description ? escapeModelicaString(evidence.description) : "";
       modelica += `  record ${evId}
 `;
       modelica += `    "Evidence: ${desc}"
@@ -27327,7 +27327,7 @@ function evidentialToModelica(thought, options) {
       const bfId = sanitizeModelicaId(belief.id);
       modelica += `  record ${bfId}
 `;
-      modelica += `    "Belief function from ${escapeModelicaString(belief.source)}"
+      modelica += `    "Belief function from ${belief.source ? escapeModelicaString(belief.source) : ""}"
 `;
       if (belief.massAssignments && belief.massAssignments.length > 0) {
         for (let i = 0; i < belief.massAssignments.length; i++) {
@@ -28089,8 +28089,8 @@ function gameTreeToHTML(thought, options) {
     return html;
   }
   html += renderSection("Game Information", `
-    <p><strong>Type:</strong> ${escapeHTML(thought.game.type)}</p>
-    <p><strong>Players:</strong> ${thought.players ? thought.players.map((p) => escapeHTML(p.name)).join(", ") : thought.game.numPlayers}</p>
+    <p><strong>Type:</strong> ${thought.game.type ? escapeHTML(thought.game.type) : "-"}</p>
+    <p><strong>Players:</strong> ${thought.players ? thought.players.map((p) => p.name ? escapeHTML(p.name) : "-").join(", ") : thought.game.numPlayers}</p>
     ${thought.game.description ? `<p>${escapeHTML(thought.game.description)}</p>` : ""}
   `, "\u{1F3AE}");
   if (includeMetrics) {
@@ -28152,12 +28152,13 @@ function gameTheoryToModelica(thought, options) {
     modelica += '    String name "Player name";\n';
     modelica += "  end Player;\n\n";
     for (const player of thought.players) {
-      const playerId = sanitizeModelicaId(player.id || player.name);
+      const playerIdStr = player.id || player.name || "player";
+      const playerId = sanitizeModelicaId(playerIdStr);
       modelica += `  constant Player ${playerId} = Player(
 `;
-      modelica += `    id="${escapeModelicaString(player.id || player.name)}",
+      modelica += `    id="${escapeModelicaString(playerIdStr)}",
 `;
-      modelica += `    name="${escapeModelicaString(player.name)}"
+      modelica += `    name="${player.name ? escapeModelicaString(player.name) : ""}"
 `;
       modelica += "  );\n";
     }
@@ -28175,12 +28176,12 @@ function gameTheoryToModelica(thought, options) {
     modelica += '    Boolean isPure "Whether strategy is pure or mixed";\n';
     modelica += "  end Strategy;\n\n";
     for (const strategy of thought.strategies) {
-      const stratId = sanitizeModelicaId(strategy.id);
+      const stratId = sanitizeModelicaId(strategy.id || strategy.name || "strategy");
       modelica += `  constant Strategy ${stratId} = Strategy(
 `;
-      modelica += `    id="${escapeModelicaString(strategy.id)}",
+      modelica += `    id="${strategy.id ? escapeModelicaString(strategy.id) : ""}",
 `;
-      modelica += `    name="${escapeModelicaString(strategy.name)}",
+      modelica += `    name="${strategy.name ? escapeModelicaString(strategy.name) : ""}",
 `;
       modelica += `    isPure=${strategy.isPure ? "true" : "false"}
 `;
@@ -28200,11 +28201,11 @@ function gameTheoryToModelica(thought, options) {
       const eq = thought.nashEquilibria[i];
       modelica += `  constant NashEquilibrium equilibrium${i + 1} = NashEquilibrium(
 `;
-      modelica += `    equilibriumType="${escapeModelicaString(eq.type)}",
+      modelica += `    equilibriumType="${eq.type ? escapeModelicaString(eq.type) : ""}",
 `;
-      modelica += `    strategyProfile={${eq.strategyProfile.map((s) => `"${escapeModelicaString(s)}"`).join(", ")}},
+      modelica += `    strategyProfile={${eq.strategyProfile ? eq.strategyProfile.map((s) => `"${s ? escapeModelicaString(s) : ""}"`).join(", ") : ""}},
 `;
-      modelica += `    payoffs={${eq.payoffs.join(", ")}},
+      modelica += `    payoffs={${eq.payoffs ? eq.payoffs.join(", ") : ""}},
 `;
       modelica += `    isStrict=${eq.isStrict ? "true" : "false"}
 `;
@@ -28650,7 +28651,7 @@ function optimizationToASCII(thought) {
 `;
     ascii += `Type: ${thought.problem.type}
 `;
-    ascii += `${thought.problem.description}
+    ascii += `${thought.problem.description || "-"}
 
 `;
   }
@@ -28994,7 +28995,7 @@ function optimizationToHTML(thought, options) {
     const variableRows = thought.variables.map((v) => {
       const varType = v.type || "unknown";
       const domain = v.domain ? `[${v.domain.lowerBound}, ${v.domain.upperBound}]` : "N/A";
-      return [v.name, varType, domain, v.description];
+      return [v.name, varType, domain, v.description || "-"];
     });
     const variablesTable = renderTable(
       ["Name", "Type", "Domain", "Description"],
@@ -29061,7 +29062,7 @@ function optimizationToModelica(thought, options) {
   const packageName = thought.problem ? sanitizeModelicaId(thought.problem.name) : "OptimizationProblem";
   modelica += `package ${packageName}
 `;
-  if (thought.problem) {
+  if (thought.problem && thought.problem.description) {
     modelica += `  annotation(Documentation(info="${escapeModelicaString(thought.problem.description)}"));
 
 `;
@@ -29143,7 +29144,7 @@ function optimizationToUML(thought, options) {
       shape: "package",
       attributes: [
         `type: ${thought.problem.type}`,
-        `description: ${thought.problem.description}`
+        `description: ${thought.problem.description || "-"}`
       ]
     });
   }
@@ -29400,7 +29401,7 @@ function optimizationToMarkdown(thought, options) {
     const variableRows = thought.variables.map((v) => {
       const varType = v.type || "unknown";
       const domain = v.domain ? `[${v.domain.lowerBound}, ${v.domain.upperBound}]` : "N/A";
-      return [v.name, varType, domain, v.description];
+      return [v.name, varType, domain, v.description || "-"];
     });
     const variablesTable = table(
       ["Name", "Type", "Domain", "Description"],
@@ -30342,20 +30343,22 @@ function analogicalToHTML(thought, options) {
 function analogicalToModelica(thought, options) {
   const { includeMetrics = true } = options;
   const pkgName = sanitizeModelicaId("AnalogicalMapping");
+  const sourceName = thought.sourceDomain.name || "Source";
+  const targetName = thought.targetDomain.name || "Target";
   let modelica = `package ${pkgName}
 `;
-  modelica += `  "${escapeModelicaString("Analogical domain mapping: " + thought.sourceDomain.name + " \u2192 " + thought.targetDomain.name)}"
+  modelica += `  "${escapeModelicaString("Analogical domain mapping: " + sourceName + " \u2192 " + targetName)}"
 
 `;
-  modelica += `  record SourceDomain "${escapeModelicaString(thought.sourceDomain.name)}"
+  modelica += `  record SourceDomain "${escapeModelicaString(sourceName)}"
 `;
-  modelica += `    String name = "${escapeModelicaString(thought.sourceDomain.name)}";
+  modelica += `    String name = "${escapeModelicaString(sourceName)}";
 `;
   modelica += `    String description = "${escapeModelicaString(thought.sourceDomain.description || "")}";
 `;
   thought.sourceDomain.entities.forEach((entity) => {
     const entityId = sanitizeModelicaId(entity.id);
-    modelica += `    parameter String entity_${entityId} = "${escapeModelicaString(entity.name)}";
+    modelica += `    parameter String entity_${entityId} = "${entity.name ? escapeModelicaString(entity.name) : ""}";
 `;
     if (entity.description) {
       modelica += `    parameter String entity_${entityId}_desc = "${escapeModelicaString(entity.description)}";
@@ -30365,15 +30368,15 @@ function analogicalToModelica(thought, options) {
   modelica += `  end SourceDomain;
 
 `;
-  modelica += `  record TargetDomain "${escapeModelicaString(thought.targetDomain.name)}"
+  modelica += `  record TargetDomain "${escapeModelicaString(targetName)}"
 `;
-  modelica += `    String name = "${escapeModelicaString(thought.targetDomain.name)}";
+  modelica += `    String name = "${escapeModelicaString(targetName)}";
 `;
   modelica += `    String description = "${escapeModelicaString(thought.targetDomain.description || "")}";
 `;
   thought.targetDomain.entities.forEach((entity) => {
     const entityId = sanitizeModelicaId(entity.id);
-    modelica += `    parameter String entity_${entityId} = "${escapeModelicaString(entity.name)}";
+    modelica += `    parameter String entity_${entityId} = "${entity.name ? escapeModelicaString(entity.name) : ""}";
 `;
     if (entity.description) {
       modelica += `    parameter String entity_${entityId}_desc = "${escapeModelicaString(entity.description)}";
@@ -30861,7 +30864,7 @@ function firstPrinciplesToASCII(thought) {
 `;
     ascii += `  Statement: ${principle.statement}
 `;
-    ascii += `  Justification: ${principle.justification}
+    ascii += `  Justification: ${principle.justification || "-"}
 `;
     if (principle.dependsOn && principle.dependsOn.length > 0) {
       ascii += `  Depends on: ${principle.dependsOn.join(", ")}
@@ -31221,7 +31224,7 @@ function firstPrinciplesToModelica(thought, options) {
       { name: "id", type: "String", value: `"${escapeModelicaString(principle.id)}"` },
       { name: "principleType", type: "String", value: `"${escapeModelicaString(principle.type)}"` },
       { name: "statement", type: "String", value: `"${escapeModelicaString(principle.statement)}"` },
-      { name: "justification", type: "String", value: `"${escapeModelicaString(principle.justification)}"` }
+      { name: "justification", type: "String", value: `"${principle.justification ? escapeModelicaString(principle.justification) : ""}"` }
     ];
     if (includeMetrics && principle.confidence !== void 0) {
       fields.push({
@@ -32633,7 +32636,7 @@ function metaReasoningToUML(thought, options) {
       `action: ${thought.recommendation.action}`,
       thought.recommendation.targetMode ? `targetMode: ${thought.recommendation.targetMode}` : void 0,
       `confidence: ${(thought.recommendation.confidence * 100).toFixed(1)}%`,
-      `justification: ${thought.recommendation.justification.substring(0, 40)}...`
+      thought.recommendation.justification ? `justification: ${thought.recommendation.justification.substring(0, 40)}...` : void 0
     ].filter(Boolean)
   });
   edges.push({
@@ -35275,9 +35278,9 @@ function formalLogicToHTML(thought, options) {
       const validBadge = inference.valid ? renderBadge("VALID", "success") : renderBadge("INVALID", "danger");
       inferencesContent += `
         <div class="card">
-          <div class="card-header">${escapeHTML(inference.rule)} ${validBadge}</div>
-          <p><strong>Premises:</strong> ${inference.premises.map((p) => escapeHTML(p)).join(", ")}</p>
-          <p><strong>Conclusion:</strong> ${escapeHTML(inference.conclusion)}</p>
+          <div class="card-header">${inference.rule ? escapeHTML(inference.rule) : "-"} ${validBadge}</div>
+          <p><strong>Premises:</strong> ${inference.premises ? inference.premises.map((p) => p ? escapeHTML(p) : "-").join(", ") : "-"}</p>
+          <p><strong>Conclusion:</strong> ${inference.conclusion ? escapeHTML(inference.conclusion) : "-"}</p>
         </div>
       `;
     }
@@ -35288,8 +35291,8 @@ function formalLogicToHTML(thought, options) {
     for (const step of thought.proof.steps) {
       stepsContent += `
         <li>
-          <strong>${escapeHTML(step.statement)}</strong>
-          <p><em>Justification:</em> ${escapeHTML(step.justification)}</p>
+          <strong>${step.statement ? escapeHTML(step.statement) : "-"}</strong>
+          <p><em>Justification:</em> ${step.justification ? escapeHTML(step.justification) : "-"}</p>
           ${step.rule ? `<p><em>Rule:</em> ${renderBadge(step.rule, "info")}</p>` : ""}
           ${step.referencesSteps && step.referencesSteps.length > 0 ? `<p><em>References steps:</em> ${step.referencesSteps.join(", ")}</p>` : ""}
         </li>
@@ -35302,7 +35305,7 @@ function formalLogicToHTML(thought, options) {
     const conclusionBadge = thought.proof.valid ? renderBadge("PROVEN", "success") : renderBadge("NOT PROVEN", "danger");
     const conclusionContent = `
       <p>${conclusionBadge}</p>
-      <p>${escapeHTML(thought.proof.conclusion)}</p>
+      <p>${thought.proof.conclusion ? escapeHTML(thought.proof.conclusion) : "-"}</p>
     `;
     html += renderSection("Conclusion", conclusionContent, "\u2705");
   }
@@ -35325,7 +35328,9 @@ function formalLogicToModelica(thought, options) {
     modelica += "  // Logical Propositions\n";
     for (const proposition of thought.propositions) {
       const propId = sanitizeModelicaId(proposition.id);
-      const comment = includeLabels ? ` "${escapeModelicaString(proposition.symbol)}: ${escapeModelicaString(proposition.statement)}"` : "";
+      const symbol = proposition.symbol || proposition.id;
+      const statement = proposition.statement || "";
+      const comment = includeLabels ? ` "${escapeModelicaString(symbol)}: ${escapeModelicaString(statement)}"` : "";
       const truthValue = proposition.truthValue !== void 0 ? String(proposition.truthValue) : "false";
       modelica += `  parameter Boolean ${propId} = ${truthValue}${comment};
 `;
@@ -35335,19 +35340,20 @@ function formalLogicToModelica(thought, options) {
   if (thought.logicalInferences && thought.logicalInferences.length > 0) {
     modelica += "  // Inference Rules\n";
     for (const inference of thought.logicalInferences) {
-      const ruleName = sanitizeModelicaId(inference.rule.replace(/[^a-zA-Z0-9]/g, "_"));
+      const ruleStr = inference.rule || "Inference";
+      const ruleName = sanitizeModelicaId(ruleStr.replace(/[^a-zA-Z0-9]/g, "_"));
       modelica += `  function ${ruleName}
 `;
-      modelica += `    "${escapeModelicaString(inference.rule)}"
+      modelica += `    "${escapeModelicaString(ruleStr)}"
 `;
       if (inference.premises && inference.premises.length > 0) {
         for (let i = 0; i < inference.premises.length; i++) {
-          const premiseId = sanitizeModelicaId(inference.premises[i]);
+          const premiseId = sanitizeModelicaId(inference.premises[i] || `premise${i + 1}`);
           modelica += `    input Boolean premise${i + 1} "${escapeModelicaString(premiseId)}";
 `;
         }
       }
-      modelica += `    output Boolean conclusion "${escapeModelicaString(inference.conclusion)}";
+      modelica += `    output Boolean conclusion "${inference.conclusion ? escapeModelicaString(inference.conclusion) : ""}";
 `;
       modelica += `  algorithm
 `;
@@ -35368,12 +35374,12 @@ function formalLogicToModelica(thought, options) {
     modelica += "  // Proof Steps\n";
     modelica += `  model ProofSequence
 `;
-    modelica += `    "${escapeModelicaString(thought.proof.theorem)}"
+    modelica += `    "${thought.proof.theorem ? escapeModelicaString(thought.proof.theorem) : ""}"
 
 `;
     for (const step of thought.proof.steps) {
       const stepId = sanitizeModelicaId(`Step${step.stepNumber}`);
-      const comment = includeLabels ? ` "${escapeModelicaString(step.statement)}"` : "";
+      const comment = includeLabels && step.statement ? ` "${escapeModelicaString(step.statement)}"` : "";
       modelica += `    parameter Boolean ${stepId} = true${comment};
 `;
       if (step.rule) {
@@ -38478,7 +38484,7 @@ function proofDecompositionToHTML(decomposition, options) {
       assumption.type,
       assumption.statement,
       assumption.shouldBeExplicit ? "Yes" : "No",
-      assumption.suggestedFormulation
+      assumption.suggestedFormulation || "N/A"
     ]);
     html += renderSection("Implicit Assumptions", renderTable(["Type", "Statement", "Should Be Explicit", "Suggested Formulation"], assumptionsRows), "warning");
   }

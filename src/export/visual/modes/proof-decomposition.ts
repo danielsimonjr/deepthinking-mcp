@@ -1072,7 +1072,7 @@ function proofDecompositionToHTML(
       assumption.type,
       assumption.statement,
       assumption.shouldBeExplicit ? 'Yes' : 'No',
-      assumption.suggestedFormulation,
+      assumption.suggestedFormulation || 'N/A',
     ]);
     html += renderSection('Implicit Assumptions', renderTable(['Type', 'Statement', 'Should Be Explicit', 'Suggested Formulation'], assumptionsRows), 'warning');
   }

@@ -265,7 +265,7 @@ function mathematicsToASCII(thought: MathematicsThought): string {
   if (thought.theorems && thought.theorems.length > 0) {
     ascii += 'Theorems:\n';
     thought.theorems.forEach((theorem, index) => {
-      ascii += `  [${index + 1}] ${theorem.name}: ${theorem.statement}\n`;
+      ascii += `  [${index + 1}] ${theorem.name || `Theorem ${index + 1}`}: ${theorem.statement}\n`;
       if (theorem.hypotheses.length > 0) {
         ascii += `      Hypotheses: ${theorem.hypotheses.join(', ')}\n`;
       }

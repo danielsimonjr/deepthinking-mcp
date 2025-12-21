@@ -573,8 +573,8 @@ function gameTreeToHTML(thought: GameTheoryThought, options: VisualExportOptions
 
   // Game info
   html += renderSection('Game Information', `
-    <p><strong>Type:</strong> ${escapeHTML(thought.game.type)}</p>
-    <p><strong>Players:</strong> ${thought.players ? thought.players.map((p: any) => escapeHTML(p.name)).join(', ') : thought.game.numPlayers}</p>
+    <p><strong>Type:</strong> ${thought.game.type ? escapeHTML(thought.game.type) : '-'}</p>
+    <p><strong>Players:</strong> ${thought.players ? thought.players.map((p: any) => p.name ? escapeHTML(p.name) : '-').join(', ') : thought.game.numPlayers}</p>
     ${thought.game.description ? `<p>${escapeHTML(thought.game.description)}</p>` : ''}
   `, '🎮');
 
@@ -651,10 +651,11 @@ function gameTheoryToModelica(thought: GameTheoryThought, options: VisualExportO
 
     // Player instances
     for (const player of thought.players) {
-      const playerId = sanitizeModelicaId(player.id || player.name);
+      const playerIdStr = player.id || player.name || 'player';
+      const playerId = sanitizeModelicaId(playerIdStr);
       modelica += `  constant Player ${playerId} = Player(\n`;
-      modelica += `    id="${escapeModelicaString(player.id || player.name)}",\n`;
-      modelica += `    name="${escapeModelicaString(player.name)}"\n`;
+      modelica += `    id="${escapeModelicaString(playerIdStr)}",\n`;
+      modelica += `    name="${player.name ? escapeModelicaString(player.name) : ''}"\n`;
       modelica += '  );\n';
     }
     modelica += '\n';
@@ -676,10 +677,10 @@ function gameTheoryToModelica(thought: GameTheoryThought, options: VisualExportO
     modelica += '  end Strategy;\n\n';
 
     for (const strategy of thought.strategies) {
-      const stratId = sanitizeModelicaId(strategy.id);
+      const stratId = sanitizeModelicaId(strategy.id || strategy.name || 'strategy');
       modelica += `  constant Strategy ${stratId} = Strategy(\n`;
-      modelica += `    id="${escapeModelicaString(strategy.id)}",\n`;
-      modelica += `    name="${escapeModelicaString(strategy.name)}",\n`;
+      modelica += `    id="${strategy.id ? escapeModelicaString(strategy.id) : ''}",\n`;
+      modelica += `    name="${strategy.name ? escapeModelicaString(strategy.name) : ''}",\n`;
       modelica += `    isPure=${strategy.isPure ? 'true' : 'false'}\n`;
       modelica += '  );\n';
     }
@@ -699,9 +700,9 @@ function gameTheoryToModelica(thought: GameTheoryThought, options: VisualExportO
     for (let i = 0; i < thought.nashEquilibria.length; i++) {
       const eq = thought.nashEquilibria[i];
       modelica += `  constant NashEquilibrium equilibrium${i + 1} = NashEquilibrium(\n`;
-      modelica += `    equilibriumType="${escapeModelicaString(eq.type)}",\n`;
-      modelica += `    strategyProfile={${eq.strategyProfile.map(s => `"${escapeModelicaString(s)}"`).join(', ')}},\n`;
-      modelica += `    payoffs={${eq.payoffs.join(', ')}},\n`;
+      modelica += `    equilibriumType="${eq.type ? escapeModelicaString(eq.type) : ''}",\n`;
+      modelica += `    strategyProfile={${eq.strategyProfile ? eq.strategyProfile.map(s => `"${s ? escapeModelicaString(s) : ''}"`).join(', ') : ''}},\n`;
+      modelica += `    payoffs={${eq.payoffs ? eq.payoffs.join(', ') : ''}},\n`;
       modelica += `    isStrict=${eq.isStrict ? 'true' : 'false'}\n`;
       modelica += '  );\n';
     }

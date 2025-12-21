@@ -394,12 +394,12 @@ function temporalToModelica(thought: TemporalThought, _options: VisualExportOpti
   for (const event of sortedEvents) {
     const eventId = sanitizeModelicaId(event.id);
     modelica += `  record ${eventId}\n`;
-    modelica += `    "${escapeModelicaString(event.name)}"\n`;
+    modelica += `    "${event.name ? escapeModelicaString(event.name) : ''}"\n`;
     modelica += `    parameter Real timestamp = ${event.timestamp} "Event timestamp";\n`;
     if (event.duration !== undefined) {
       modelica += `    parameter Real duration = ${event.duration} "Event duration";\n`;
     }
-    modelica += `    parameter String eventType = "${event.type}" "Event type (instant/interval)";\n`;
+    modelica += `    parameter String eventType = "${event.type || 'instant'}" "Event type (instant/interval)";\n`;
     if (event.description) {
       modelica += `    parameter String description = "${escapeModelicaString(event.description)}";\n`;
     }

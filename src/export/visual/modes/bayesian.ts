@@ -156,18 +156,18 @@ function bayesianToASCII(thought: BayesianThought): string {
 
   ascii += `Hypothesis: ${thought.hypothesis.statement}\n\n`;
   ascii += `Prior Probability: ${thought.prior.probability.toFixed(3)}\n`;
-  ascii += `  Justification: ${thought.prior.justification}\n\n`;
+  ascii += `  Justification: ${thought.prior.justification || '-'}\n\n`;
 
   if (thought.evidence && thought.evidence.length > 0) {
     ascii += 'Evidence:\n';
     for (const ev of thought.evidence) {
-      ascii += `  • ${ev.description}\n`;
+      ascii += `  • ${ev.description || '-'}\n`;
     }
     ascii += '\n';
   }
 
   ascii += `Posterior Probability: ${thought.posterior.probability.toFixed(3)}\n`;
-  ascii += `  Calculation: ${thought.posterior.calculation}\n`;
+  ascii += `  Calculation: ${thought.posterior.calculation || '-'}\n`;
 
   if (thought.bayesFactor !== undefined) {
     ascii += `\nBayes Factor: ${thought.bayesFactor.toFixed(2)}\n`;
@@ -376,14 +376,14 @@ function bayesianToHTML(thought: BayesianThought, options: VisualExportOptions):
     html += '<div class="card">';
     html += '<div class="card-header">Prior Probability</div>';
     html += renderProgressBar(thought.prior.probability * 100, 'primary');
-    html += `<p class="text-secondary" style="margin-top: 0.5rem">${escapeHTML(thought.prior.justification)}</p>`;
+    html += `<p class="text-secondary" style="margin-top: 0.5rem">${thought.prior.justification ? escapeHTML(thought.prior.justification) : '-'}</p>`;
     html += '</div>\n';
 
     // Posterior probability bar
     html += '<div class="card">';
     html += '<div class="card-header">Posterior Probability</div>';
     html += renderProgressBar(thought.posterior.probability * 100, 'success');
-    html += `<p class="text-secondary" style="margin-top: 0.5rem">${escapeHTML(thought.posterior.calculation)}</p>`;
+    html += `<p class="text-secondary" style="margin-top: 0.5rem">${thought.posterior.calculation ? escapeHTML(thought.posterior.calculation) : '-'}</p>`;
     html += '</div>\n';
   }
 
@@ -391,7 +391,7 @@ function bayesianToHTML(thought: BayesianThought, options: VisualExportOptions):
   if (thought.evidence && thought.evidence.length > 0) {
     const evidenceRows = thought.evidence.map((ev, i) => [
       (i + 1).toString(),
-      ev.description,
+      ev.description || '-',
       ev.likelihoodGivenHypothesis?.toFixed(3) || '-',
       ev.likelihoodGivenNotHypothesis?.toFixed(3) || '-',
     ]);
@@ -464,7 +464,7 @@ function bayesianToModelica(thought: BayesianThought, options: VisualExportOptio
     for (let i = 0; i < thought.evidence.length; i++) {
       const ev = thought.evidence[i];
       lines.push(`  record Evidence_${i + 1}`);
-      lines.push(`    constant String description = "${escapeModelicaString(ev.description)}";`);
+      lines.push(`    constant String description = "${ev.description ? escapeModelicaString(ev.description) : ''}";`);
       if (ev.likelihoodGivenHypothesis !== undefined) {
         lines.push(`    constant Real likelihoodGivenH = ${ev.likelihoodGivenHypothesis.toFixed(6)};`);
       }
@@ -589,15 +589,15 @@ function bayesianToMarkdown(thought: BayesianThought, options: VisualExportOptio
     parts.push(section('Probabilities', metricsContent));
 
     // Progress bars
-    parts.push(section('Prior', `${progressBar(thought.prior.probability * 100)}\n\n${thought.prior.justification}`));
-    parts.push(section('Posterior', `${progressBar(thought.posterior.probability * 100)}\n\n${thought.posterior.calculation}`));
+    parts.push(section('Prior', `${progressBar(thought.prior.probability * 100)}\n\n${thought.prior.justification || '-'}`));
+    parts.push(section('Posterior', `${progressBar(thought.posterior.probability * 100)}\n\n${thought.posterior.calculation || '-'}`));
   }
 
   // Evidence section
   if (thought.evidence && thought.evidence.length > 0) {
     const evidenceRows = thought.evidence.map((ev, i) => [
       (i + 1).toString(),
-      ev.description,
+      ev.description || '-',
       ev.likelihoodGivenHypothesis?.toFixed(3) || '-',
       ev.likelihoodGivenNotHypothesis?.toFixed(3) || '-',
     ]);

@@ -747,9 +747,9 @@ function formalLogicToHTML(thought: FormalLogicThought, options: VisualExportOpt
       const validBadge = inference.valid ? renderBadge('VALID', 'success') : renderBadge('INVALID', 'danger');
       inferencesContent += `
         <div class="card">
-          <div class="card-header">${escapeHTML(inference.rule)} ${validBadge}</div>
-          <p><strong>Premises:</strong> ${inference.premises.map(p => escapeHTML(p)).join(', ')}</p>
-          <p><strong>Conclusion:</strong> ${escapeHTML(inference.conclusion)}</p>
+          <div class="card-header">${inference.rule ? escapeHTML(inference.rule) : '-'} ${validBadge}</div>
+          <p><strong>Premises:</strong> ${inference.premises ? inference.premises.map(p => p ? escapeHTML(p) : '-').join(', ') : '-'}</p>
+          <p><strong>Conclusion:</strong> ${inference.conclusion ? escapeHTML(inference.conclusion) : '-'}</p>
         </div>
       `;
     }
@@ -762,8 +762,8 @@ function formalLogicToHTML(thought: FormalLogicThought, options: VisualExportOpt
     for (const step of thought.proof.steps) {
       stepsContent += `
         <li>
-          <strong>${escapeHTML(step.statement)}</strong>
-          <p><em>Justification:</em> ${escapeHTML(step.justification)}</p>
+          <strong>${step.statement ? escapeHTML(step.statement) : '-'}</strong>
+          <p><em>Justification:</em> ${step.justification ? escapeHTML(step.justification) : '-'}</p>
           ${step.rule ? `<p><em>Rule:</em> ${renderBadge(step.rule, 'info')}</p>` : ''}
           ${step.referencesSteps && step.referencesSteps.length > 0 ? `<p><em>References steps:</em> ${step.referencesSteps.join(', ')}</p>` : ''}
         </li>
@@ -778,7 +778,7 @@ function formalLogicToHTML(thought: FormalLogicThought, options: VisualExportOpt
     const conclusionBadge = thought.proof.valid ? renderBadge('PROVEN', 'success') : renderBadge('NOT PROVEN', 'danger');
     const conclusionContent = `
       <p>${conclusionBadge}</p>
-      <p>${escapeHTML(thought.proof.conclusion)}</p>
+      <p>${thought.proof.conclusion ? escapeHTML(thought.proof.conclusion) : '-'}</p>
     `;
     html += renderSection('Conclusion', conclusionContent, '✅');
   }
@@ -811,8 +811,10 @@ function formalLogicToModelica(thought: FormalLogicThought, options: VisualExpor
     modelica += '  // Logical Propositions\n';
     for (const proposition of thought.propositions) {
       const propId = sanitizeModelicaId(proposition.id);
+      const symbol = proposition.symbol || proposition.id;
+      const statement = proposition.statement || '';
       const comment = includeLabels
-        ? ` "${escapeModelicaString(proposition.symbol)}: ${escapeModelicaString(proposition.statement)}"`
+        ? ` "${escapeModelicaString(symbol)}: ${escapeModelicaString(statement)}"`
         : '';
       const truthValue = proposition.truthValue !== undefined ? String(proposition.truthValue) : 'false';
       modelica += `  parameter Boolean ${propId} = ${truthValue}${comment};\n`;
@@ -824,21 +826,22 @@ function formalLogicToModelica(thought: FormalLogicThought, options: VisualExpor
   if (thought.logicalInferences && thought.logicalInferences.length > 0) {
     modelica += '  // Inference Rules\n';
     for (const inference of thought.logicalInferences) {
-      const ruleName = sanitizeModelicaId(inference.rule.replace(/[^a-zA-Z0-9]/g, '_'));
+      const ruleStr = inference.rule || 'Inference';
+      const ruleName = sanitizeModelicaId(ruleStr.replace(/[^a-zA-Z0-9]/g, '_'));
 
       modelica += `  function ${ruleName}\n`;
-      modelica += `    "${escapeModelicaString(inference.rule)}"\n`;
+      modelica += `    "${escapeModelicaString(ruleStr)}"\n`;
 
       // Input parameters for premises
       if (inference.premises && inference.premises.length > 0) {
         for (let i = 0; i < inference.premises.length; i++) {
-          const premiseId = sanitizeModelicaId(inference.premises[i]);
+          const premiseId = sanitizeModelicaId(inference.premises[i] || `premise${i + 1}`);
           modelica += `    input Boolean premise${i + 1} "${escapeModelicaString(premiseId)}";\n`;
         }
       }
 
       // Output parameter for conclusion
-      modelica += `    output Boolean conclusion "${escapeModelicaString(inference.conclusion)}";\n`;
+      modelica += `    output Boolean conclusion "${inference.conclusion ? escapeModelicaString(inference.conclusion) : ''}";\n`;
       modelica += `  algorithm\n`;
 
       // Simple logical operation (all premises must be true)
@@ -857,11 +860,11 @@ function formalLogicToModelica(thought: FormalLogicThought, options: VisualExpor
   if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
     modelica += '  // Proof Steps\n';
     modelica += `  model ProofSequence\n`;
-    modelica += `    "${escapeModelicaString(thought.proof.theorem)}"\n\n`;
+    modelica += `    "${thought.proof.theorem ? escapeModelicaString(thought.proof.theorem) : ''}"\n\n`;
 
     for (const step of thought.proof.steps) {
       const stepId = sanitizeModelicaId(`Step${step.stepNumber}`);
-      const comment = includeLabels
+      const comment = includeLabels && step.statement
         ? ` "${escapeModelicaString(step.statement)}"`
         : '';
       modelica += `    parameter Boolean ${stepId} = true${comment};\n`;

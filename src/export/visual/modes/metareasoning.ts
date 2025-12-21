@@ -1192,7 +1192,7 @@ function metaReasoningToUML(thought: MetaReasoningThought, options: VisualExport
       `action: ${thought.recommendation.action}`,
       thought.recommendation.targetMode ? `targetMode: ${thought.recommendation.targetMode}` : undefined,
       `confidence: ${(thought.recommendation.confidence * 100).toFixed(1)}%`,
-      `justification: ${thought.recommendation.justification.substring(0, 40)}...`,
+      thought.recommendation.justification ? `justification: ${thought.recommendation.justification.substring(0, 40)}...` : undefined,
     ].filter(Boolean) as string[],
   });
 

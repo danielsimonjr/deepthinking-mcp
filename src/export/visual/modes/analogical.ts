@@ -549,18 +549,20 @@ function analogicalToModelica(thought: AnalogicalThought, options: VisualExportO
   const { includeMetrics = true } = options;
 
   const pkgName = sanitizeModelicaId('AnalogicalMapping');
+  const sourceName = thought.sourceDomain.name || 'Source';
+  const targetName = thought.targetDomain.name || 'Target';
   let modelica = `package ${pkgName}\n`;
-  modelica += `  "${escapeModelicaString('Analogical domain mapping: ' + thought.sourceDomain.name + ' → ' + thought.targetDomain.name)}"\n\n`;
+  modelica += `  "${escapeModelicaString('Analogical domain mapping: ' + sourceName + ' → ' + targetName)}"\n\n`;
 
   // Source domain record
-  modelica += `  record SourceDomain "${escapeModelicaString(thought.sourceDomain.name)}"\n`;
-  modelica += `    String name = "${escapeModelicaString(thought.sourceDomain.name)}";\n`;
+  modelica += `  record SourceDomain "${escapeModelicaString(sourceName)}"\n`;
+  modelica += `    String name = "${escapeModelicaString(sourceName)}";\n`;
   modelica += `    String description = "${escapeModelicaString(thought.sourceDomain.description || '')}";\n`;
 
   // Add source entities as parameters
   thought.sourceDomain.entities.forEach(entity => {
     const entityId = sanitizeModelicaId(entity.id);
-    modelica += `    parameter String entity_${entityId} = "${escapeModelicaString(entity.name)}";\n`;
+    modelica += `    parameter String entity_${entityId} = "${entity.name ? escapeModelicaString(entity.name) : ''}";\n`;
     if (entity.description) {
       modelica += `    parameter String entity_${entityId}_desc = "${escapeModelicaString(entity.description)}";\n`;
     }
@@ -568,14 +570,14 @@ function analogicalToModelica(thought: AnalogicalThought, options: VisualExportO
   modelica += `  end SourceDomain;\n\n`;
 
   // Target domain record
-  modelica += `  record TargetDomain "${escapeModelicaString(thought.targetDomain.name)}"\n`;
-  modelica += `    String name = "${escapeModelicaString(thought.targetDomain.name)}";\n`;
+  modelica += `  record TargetDomain "${escapeModelicaString(targetName)}"\n`;
+  modelica += `    String name = "${escapeModelicaString(targetName)}";\n`;
   modelica += `    String description = "${escapeModelicaString(thought.targetDomain.description || '')}";\n`;
 
   // Add target entities as parameters
   thought.targetDomain.entities.forEach(entity => {
     const entityId = sanitizeModelicaId(entity.id);
-    modelica += `    parameter String entity_${entityId} = "${escapeModelicaString(entity.name)}";\n`;
+    modelica += `    parameter String entity_${entityId} = "${entity.name ? escapeModelicaString(entity.name) : ''}";\n`;
     if (entity.description) {
       modelica += `    parameter String entity_${entityId}_desc = "${escapeModelicaString(entity.description)}";\n`;
     }

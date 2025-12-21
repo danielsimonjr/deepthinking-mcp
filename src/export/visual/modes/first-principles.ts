@@ -302,7 +302,7 @@ function firstPrinciplesToASCII(thought: FirstPrinciplesThought): string {
   for (const principle of thought.principles) {
     ascii += `[${principle.id}] ${principle.type.toUpperCase()}\n`;
     ascii += `  Statement: ${principle.statement}\n`;
-    ascii += `  Justification: ${principle.justification}\n`;
+    ascii += `  Justification: ${principle.justification || '-'}\n`;
     if (principle.dependsOn && principle.dependsOn.length > 0) {
       ascii += `  Depends on: ${principle.dependsOn.join(', ')}\n`;
     }
@@ -753,7 +753,7 @@ function firstPrinciplesToModelica(thought: FirstPrinciplesThought, options: Vis
       { name: 'id', type: 'String', value: `"${escapeModelicaString(principle.id)}"` },
       { name: 'principleType', type: 'String', value: `"${escapeModelicaString(principle.type)}"` },
       { name: 'statement', type: 'String', value: `"${escapeModelicaString(principle.statement)}"` },
-      { name: 'justification', type: 'String', value: `"${escapeModelicaString(principle.justification)}"` },
+      { name: 'justification', type: 'String', value: `"${principle.justification ? escapeModelicaString(principle.justification) : ''}"` },
     ];
 
     if (includeMetrics && principle.confidence !== undefined) {

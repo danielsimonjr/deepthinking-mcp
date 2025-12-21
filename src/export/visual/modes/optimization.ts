@@ -243,7 +243,7 @@ function optimizationToASCII(thought: OptimizationThought): string {
   if (thought.problem) {
     ascii += `Problem: ${thought.problem.name}\n`;
     ascii += `Type: ${thought.problem.type}\n`;
-    ascii += `${thought.problem.description}\n\n`;
+    ascii += `${thought.problem.description || '-'}\n\n`;
   }
 
   if (thought.variables && thought.variables.length > 0) {
@@ -658,7 +658,7 @@ function optimizationToHTML(thought: OptimizationThought, options: VisualExportO
       const domain = v.domain
         ? `[${(v.domain as any).lowerBound}, ${(v.domain as any).upperBound}]`
         : 'N/A';
-      return [v.name, varType, domain, v.description];
+      return [v.name, varType, domain, v.description || '-'];
     });
     const variablesTable = renderTable(
       ['Name', 'Type', 'Domain', 'Description'],
@@ -747,7 +747,7 @@ function optimizationToModelica(thought: OptimizationThought, options: VisualExp
 
   modelica += `package ${packageName}\n`;
 
-  if (thought.problem) {
+  if (thought.problem && thought.problem.description) {
     modelica += `  annotation(Documentation(info="${escapeModelicaString(thought.problem.description)}"));\n\n`;
   }
 
@@ -843,7 +843,7 @@ function optimizationToUML(thought: OptimizationThought, options: VisualExportOp
       shape: 'package',
       attributes: [
         `type: ${thought.problem.type}`,
-        `description: ${thought.problem.description}`,
+        `description: ${thought.problem.description || '-'}`,
       ],
     });
   }
@@ -1166,7 +1166,7 @@ function optimizationToMarkdown(thought: OptimizationThought, options: VisualExp
       const domain = v.domain
         ? `[${(v.domain as any).lowerBound}, ${(v.domain as any).upperBound}]`
         : 'N/A';
-      return [v.name, varType, domain, v.description];
+      return [v.name, varType, domain, v.description || '-'];
     });
     const variablesTable = table(
       ['Name', 'Type', 'Domain', 'Description'],
