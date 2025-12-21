@@ -1,0 +1,154 @@
+{
+  "phase": 11,
+  "sprint": 4,
+  "title": "Temporal & Probabilistic Modes",
+  "week": "Week 2-3",
+  "effort": "5-6 hours",
+  "status": "pending",
+  "description": "Comprehensive coverage for deepthinking_temporal (Allen interval algebra) and deepthinking_probabilistic (Bayesian, Dempster-Shafer)",
+  "tasks": [
+    {
+      "id": "11.4.1",
+      "category": "Temporal-Events",
+      "description": "Temporal event tests - T-TMP-001 through T-TMP-012 covering events, intervals, timestamps, durations",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "testCases": [
+        "T-TMP-001: Basic temporal thought",
+        "T-TMP-002: Temporal with events array (2 events)",
+        "T-TMP-003: Temporal with events array (10+ events)",
+        "T-TMP-004: Temporal with events[].type = instant",
+        "T-TMP-005: Temporal with events[].type = interval",
+        "T-TMP-006: Temporal with events[].duration",
+        "T-TMP-007: Temporal with events[].timestamp",
+        "T-TMP-008: Temporal with events[].properties",
+        "T-TMP-009: Temporal with intervals array",
+        "T-TMP-010: Temporal with intervals[].start and .end",
+        "T-TMP-011: Temporal with intervals[].contains (event references)",
+        "T-TMP-012: Temporal with intervals[].overlaps (interval references)"
+      ],
+      "files": [
+        "tests/integration/tools/temporal-events.test.ts"
+      ]
+    },
+    {
+      "id": "11.4.2",
+      "category": "Temporal-Relations",
+      "description": "Temporal relations tests - T-TMP-013 through T-TMP-030 covering all Allen interval relations and constraints",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "testCases": [
+        "T-TMP-013: Temporal with relations array",
+        "T-TMP-014: Temporal with relations[].relationType = before",
+        "T-TMP-015: Temporal with relations[].relationType = after",
+        "T-TMP-016: Temporal with relations[].relationType = during",
+        "T-TMP-017: Temporal with relations[].relationType = overlaps",
+        "T-TMP-018: Temporal with relations[].relationType = meets",
+        "T-TMP-019: Temporal with relations[].relationType = starts",
+        "T-TMP-020: Temporal with relations[].relationType = finishes",
+        "T-TMP-021: Temporal with relations[].relationType = equals",
+        "T-TMP-022: Temporal with relations[].relationType = causes",
+        "T-TMP-023: Temporal with relations[].delay",
+        "T-TMP-024: Temporal with relations[].strength",
+        "T-TMP-025: Temporal with constraints array",
+        "T-TMP-026: Temporal with constraints[].type = before",
+        "T-TMP-027: Temporal with constraints[].type = after",
+        "T-TMP-028: Temporal with constraints[].type = during",
+        "T-TMP-029: Temporal with constraints[].type = simultaneous",
+        "T-TMP-030: Temporal with constraints[].confidence"
+      ],
+      "files": [
+        "tests/integration/tools/temporal-relations.test.ts"
+      ]
+    },
+    {
+      "id": "11.4.3",
+      "category": "Temporal-Timeline",
+      "description": "Temporal timeline tests - T-TMP-031 through T-TMP-040 covering timeline construction, time units, constraint propagation",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-TMP-031: Temporal with timeline object",
+        "T-TMP-032: Temporal with timeline.timeUnit = milliseconds",
+        "T-TMP-033: Temporal with timeline.timeUnit = seconds",
+        "T-TMP-034: Temporal with timeline.timeUnit = days",
+        "T-TMP-035: Temporal with timeline.timeUnit = years",
+        "T-TMP-036: Temporal with timeline.startTime and .endTime",
+        "T-TMP-037: Temporal multi-thought timeline construction",
+        "T-TMP-038: Temporal with Allen interval algebra validation",
+        "T-TMP-039: Temporal constraint propagation session",
+        "T-TMP-040: Temporal with branching alternative timelines"
+      ],
+      "files": [
+        "tests/integration/tools/temporal-timeline.test.ts"
+      ]
+    },
+    {
+      "id": "11.4.4",
+      "category": "Bayesian",
+      "description": "Bayesian mode tests - T-PRB-001 through T-PRB-015 covering priors, likelihoods, posteriors, evidence updates",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-PRB-001: Basic bayesian thought",
+        "T-PRB-002: Bayesian with priorProbability (0.1)",
+        "T-PRB-003: Bayesian with priorProbability (0.5)",
+        "T-PRB-004: Bayesian with priorProbability (0.9)",
+        "T-PRB-005: Bayesian with likelihood",
+        "T-PRB-006: Bayesian with posteriorProbability",
+        "T-PRB-007: Bayesian with evidence array",
+        "T-PRB-008: Bayesian with hypotheses array (2 hypotheses)",
+        "T-PRB-009: Bayesian with hypotheses array (5+ hypotheses)",
+        "T-PRB-010: Bayesian with hypotheses[].probability",
+        "T-PRB-011: Bayesian update session (3 evidence updates)",
+        "T-PRB-012: Bayesian with competing hypotheses",
+        "T-PRB-013: Bayesian posterior calculation verification",
+        "T-PRB-014: Bayesian multi-thought belief update",
+        "T-PRB-015: Bayesian with revision on new evidence"
+      ],
+      "files": [
+        "tests/integration/tools/probabilistic-bayesian.test.ts"
+      ]
+    },
+    {
+      "id": "11.4.5",
+      "category": "Evidential",
+      "description": "Dempster-Shafer evidential mode tests - T-PRB-016 through T-PRB-025 covering belief/plausibility functions",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-PRB-016: Basic evidential thought",
+        "T-PRB-017: Evidential with frameOfDiscernment array",
+        "T-PRB-018: Evidential with massFunction object",
+        "T-PRB-019: Evidential with beliefFunction object",
+        "T-PRB-020: Evidential with plausibilityFunction object",
+        "T-PRB-021: Evidential mass function normalization",
+        "T-PRB-022: Evidential belief-plausibility relationship",
+        "T-PRB-023: Evidential Dempster combination rule",
+        "T-PRB-024: Evidential multi-source evidence fusion",
+        "T-PRB-025: Evidential with conflicting evidence"
+      ],
+      "files": [
+        "tests/integration/tools/probabilistic-evidential.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "40 temporal tests implemented covering all Allen relations",
+    "25 probabilistic tests implemented (Bayesian + Dempster-Shafer)",
+    "All 9 temporal relation types tested",
+    "Evidence update chains verified",
+    "All tests pass"
+  ],
+  "filesCreated": [
+    "tests/integration/tools/temporal-events.test.ts",
+    "tests/integration/tools/temporal-relations.test.ts",
+    "tests/integration/tools/temporal-timeline.test.ts",
+    "tests/integration/tools/probabilistic-bayesian.test.ts",
+    "tests/integration/tools/probabilistic-evidential.test.ts"
+  ],
+  "filesModified": [],
+  "totalEstimatedHours": 6.0,
+  "testCaseCount": 65,
+  "notes": "Temporal reasoning with Allen algebra and probabilistic modes are critical for uncertainty handling"
+}

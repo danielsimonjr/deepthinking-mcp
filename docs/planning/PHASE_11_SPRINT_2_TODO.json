@@ -1,0 +1,160 @@
+{
+  "phase": 11,
+  "sprint": 2,
+  "title": "Standard Workflows & Common Parameters",
+  "week": "Week 1-2",
+  "effort": "5.5-6 hours",
+  "status": "pending",
+  "description": "Comprehensive coverage for deepthinking_standard tool (sequential, shannon, hybrid, runtime-only modes) and common parameter validation across all modes",
+  "tasks": [
+    {
+      "id": "11.2.1",
+      "category": "Standard-Sequential",
+      "description": "Sequential mode comprehensive tests - T-STD-001 through T-STD-010 covering multi-thought sessions, branching, revisions",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-STD-001: Basic sequential thought with required params only",
+        "T-STD-002: Sequential 3-thought session",
+        "T-STD-003: Sequential 10-thought session",
+        "T-STD-004: Sequential with assumptions array",
+        "T-STD-005: Sequential with uncertainty values",
+        "T-STD-006: Sequential with dependencies between thoughts",
+        "T-STD-007: Sequential with branch creation mid-session",
+        "T-STD-008: Sequential with revision of earlier thought",
+        "T-STD-009: Sequential with multiple branches",
+        "T-STD-010: Sequential session completion verification"
+      ],
+      "files": [
+        "tests/integration/tools/standard-sequential.test.ts"
+      ]
+    },
+    {
+      "id": "11.2.2",
+      "category": "Standard-Shannon",
+      "description": "Shannon mode comprehensive tests - T-STD-011 through T-STD-020 covering all 5 stages, transitions, multi-thought per stage",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-STD-011: Shannon stage = problem_definition",
+        "T-STD-012: Shannon stage = constraints",
+        "T-STD-013: Shannon stage = model",
+        "T-STD-014: Shannon stage = proof",
+        "T-STD-015: Shannon stage = implementation",
+        "T-STD-016: Shannon full 5-stage session",
+        "T-STD-017: Shannon with stage transitions",
+        "T-STD-018: Shannon with stage revision",
+        "T-STD-019: Shannon multi-thought per stage",
+        "T-STD-020: Shannon with branching at model stage"
+      ],
+      "files": [
+        "tests/integration/tools/standard-shannon.test.ts"
+      ]
+    },
+    {
+      "id": "11.2.3",
+      "category": "Standard-Hybrid",
+      "description": "Hybrid mode comprehensive tests - T-STD-021 through T-STD-030 covering activeModes combinations, convergence",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-STD-021: Basic hybrid thought",
+        "T-STD-022: Hybrid with activeModes = [inductive, deductive]",
+        "T-STD-023: Hybrid with activeModes = 3 modes",
+        "T-STD-024: Hybrid with activeModes = 5+ modes",
+        "T-STD-025: Hybrid multi-thought session",
+        "T-STD-026: Hybrid with mode-specific params for each active mode",
+        "T-STD-027: Hybrid with branching per mode",
+        "T-STD-028: Hybrid convergence session",
+        "T-STD-029: Hybrid with metareasoning integration",
+        "T-STD-030: Hybrid session export verification"
+      ],
+      "files": [
+        "tests/integration/tools/standard-hybrid.test.ts"
+      ]
+    },
+    {
+      "id": "11.2.4",
+      "category": "Standard-RuntimeOnly",
+      "description": "Runtime-only mode tests (via Hybrid) - T-STD-031 through T-STD-038 covering Recursive, Modal, Stochastic, Constraint modes",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "testCases": [
+        "T-STD-031: Recursive mode basic activation via hybrid",
+        "T-STD-032: Recursive mode multi-level reasoning session",
+        "T-STD-033: Modal mode basic activation via hybrid",
+        "T-STD-034: Modal mode with possibility/necessity analysis",
+        "T-STD-035: Stochastic mode basic activation via hybrid",
+        "T-STD-036: Stochastic mode probability sampling session",
+        "T-STD-037: Constraint mode basic activation via hybrid",
+        "T-STD-038: Constraint mode satisfaction solving session"
+      ],
+      "files": [
+        "tests/integration/tools/standard-runtime-only.test.ts"
+      ]
+    },
+    {
+      "id": "11.2.5",
+      "category": "Parameters",
+      "description": "Common parameter validation tests - T-PAR-001 through T-PAR-032 covering all shared parameters across modes",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "testCases": [
+        "T-PAR-001: thought - minimum length (1 char)",
+        "T-PAR-002: thought - maximum length (10000+ chars)",
+        "T-PAR-003: thought - Unicode characters",
+        "T-PAR-004: thought - Special characters",
+        "T-PAR-005: thoughtNumber - minimum (1)",
+        "T-PAR-006: thoughtNumber - large value (100+)",
+        "T-PAR-007: totalThoughts - minimum (1)",
+        "T-PAR-008: totalThoughts - dynamic update",
+        "T-PAR-009: nextThoughtNeeded - true path",
+        "T-PAR-010: nextThoughtNeeded - false (completion)",
+        "T-PAR-011: sessionId - new session (omitted)",
+        "T-PAR-012: sessionId - existing session",
+        "T-PAR-013: sessionId - invalid session",
+        "T-PAR-014: uncertainty - 0.0 boundary",
+        "T-PAR-015: uncertainty - 0.5 midpoint",
+        "T-PAR-016: uncertainty - 1.0 boundary",
+        "T-PAR-017: assumptions - empty array",
+        "T-PAR-018: assumptions - single item",
+        "T-PAR-019: assumptions - multiple items",
+        "T-PAR-020: dependencies - single dependency",
+        "T-PAR-021: dependencies - multiple dependencies",
+        "T-PAR-022: dependencies - circular reference handling",
+        "T-PAR-023: branchFrom - valid thought ID",
+        "T-PAR-024: branchFrom - invalid thought ID",
+        "T-PAR-025: branchId - alphanumeric",
+        "T-PAR-026: branchId - special characters",
+        "T-PAR-027: isRevision - true with revisesThought",
+        "T-PAR-028: isRevision - true without revisesThought",
+        "T-PAR-029: revisesThought - valid thought ID",
+        "T-PAR-030: revisesThought - invalid thought ID",
+        "T-PAR-031: revisionReason - with revision",
+        "T-PAR-032: revisionReason - without revision"
+      ],
+      "files": [
+        "tests/integration/tools/common-parameters.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "38 standard workflow tests implemented (T-STD-001 through T-STD-038)",
+    "32 common parameter tests implemented (T-PAR-001 through T-PAR-032)",
+    "100% coverage of sequential, shannon, hybrid parameters",
+    "Runtime-only modes (Recursive, Modal, Stochastic, Constraint) tested via hybrid",
+    "Branching and revision flows fully tested",
+    "All tests pass"
+  ],
+  "filesCreated": [
+    "tests/integration/tools/standard-sequential.test.ts",
+    "tests/integration/tools/standard-shannon.test.ts",
+    "tests/integration/tools/standard-hybrid.test.ts",
+    "tests/integration/tools/standard-runtime-only.test.ts",
+    "tests/integration/tools/common-parameters.test.ts"
+  ],
+  "filesModified": [],
+  "totalEstimatedHours": 5.5,
+  "testCaseCount": 70,
+  "notes": "Standard workflows are foundational - hybrid mode particularly important for multi-modal reasoning. Runtime-only modes (Recursive, Modal, Stochastic, Constraint) have no dedicated thought types but are activated via hybrid mode."
+}

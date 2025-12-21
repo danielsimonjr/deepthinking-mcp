@@ -1,0 +1,222 @@
+{
+  "phase": 11,
+  "title": "Comprehensive Test Coverage Initiative",
+  "description": "Systematic testing to achieve 95%+ coverage across all deepthinking-mcp tools, modes, and features",
+  "targetCoverage": "95%+",
+  "totalSprints": 11,
+  "totalEstimatedHours": 66.5,
+  "totalTestCases": 700,
+  "status": "pending",
+  "sprints": [
+    {
+      "sprint": 1,
+      "title": "Test Infrastructure & Core Tool Coverage",
+      "focus": "Test utilities, inductive, deductive, abductive modes",
+      "testCases": 45,
+      "hours": 5.0,
+      "file": "PHASE_11_SPRINT_1_TODO.json"
+    },
+    {
+      "sprint": 2,
+      "title": "Standard Workflows & Common Parameters",
+      "focus": "Sequential, shannon, hybrid, runtime-only modes + common parameter validation",
+      "testCases": 70,
+      "hours": 5.5,
+      "file": "PHASE_11_SPRINT_2_TODO.json"
+    },
+    {
+      "sprint": 3,
+      "title": "Mathematics, Physics & Computability Modes",
+      "focus": "Proof strategies, tensors, Turing machines",
+      "testCases": 54,
+      "hours": 6.0,
+      "file": "PHASE_11_SPRINT_3_TODO.json"
+    },
+    {
+      "sprint": 4,
+      "title": "Temporal & Probabilistic Modes",
+      "focus": "Allen interval algebra, Bayesian, Dempster-Shafer",
+      "testCases": 65,
+      "hours": 6.0,
+      "file": "PHASE_11_SPRINT_4_TODO.json"
+    },
+    {
+      "sprint": 5,
+      "title": "Causal & Strategic Modes",
+      "focus": "Causal graphs, counterfactuals, game theory, optimization",
+      "testCases": 60,
+      "hours": 5.0,
+      "file": "PHASE_11_SPRINT_5_TODO.json"
+    },
+    {
+      "sprint": 6,
+      "title": "Analytical & Scientific Modes",
+      "focus": "Analogical, firstprinciples, metareasoning, systems archetypes",
+      "testCases": 72,
+      "hours": 6.5,
+      "file": "PHASE_11_SPRINT_6_TODO.json"
+    },
+    {
+      "sprint": 7,
+      "title": "Engineering & Academic Modes",
+      "focus": "Trade studies, FMEA, CLRS algorithms, Toulmin argumentation, qualitative analysis",
+      "testCases": 119,
+      "hours": 8.5,
+      "file": "PHASE_11_SPRINT_7_TODO.json"
+    },
+    {
+      "sprint": 8,
+      "title": "Session Management & Export Formats",
+      "focus": "All session actions, all 8 export formats, mode-specific exports",
+      "testCases": 87,
+      "hours": 7.0,
+      "file": "PHASE_11_SPRINT_8_TODO.json"
+    },
+    {
+      "sprint": 9,
+      "title": "ModeHandler Specialized Tests",
+      "focus": "7 ModeHandlers: Causal, Bayesian, GameTheory, Counterfactual, Synthesis, SystemsThinking, Critique",
+      "testCases": 43,
+      "hours": 6.25,
+      "file": "PHASE_11_SPRINT_9_TODO.json"
+    },
+    {
+      "sprint": 10,
+      "title": "Edge Cases & Error Handling",
+      "focus": "Input validation, type checking, boundaries, regression tests",
+      "testCases": 45,
+      "hours": 4.75,
+      "file": "PHASE_11_SPRINT_10_TODO.json"
+    },
+    {
+      "sprint": 11,
+      "title": "Integration Scenarios & Performance",
+      "focus": "Multi-mode workflows, branching, real-world scenarios, latency, throughput, stress",
+      "testCases": 40,
+      "hours": 6.0,
+      "file": "PHASE_11_SPRINT_11_TODO.json"
+    }
+  ],
+  "testCategories": {
+    "COR": { "name": "Core Reasoning", "tests": 45 },
+    "STD": { "name": "Standard Workflows", "tests": 38 },
+    "PAR": { "name": "Common Parameters", "tests": 32 },
+    "MTH": { "name": "Mathematics/Physics/Computability", "tests": 54 },
+    "TMP": { "name": "Temporal", "tests": 40 },
+    "PRB": { "name": "Probabilistic", "tests": 25 },
+    "CSL": { "name": "Causal/Counterfactual", "tests": 30 },
+    "STR": { "name": "Strategic", "tests": 30 },
+    "ANL": { "name": "Analytical", "tests": 34 },
+    "SCI": { "name": "Scientific", "tests": 38 },
+    "ENG": { "name": "Engineering/Algorithmic", "tests": 36 },
+    "ACD": { "name": "Academic", "tests": 83 },
+    "SES": { "name": "Session Management", "tests": 26 },
+    "EXP": { "name": "Export Formats", "tests": 61 },
+    "HDL": { "name": "ModeHandler Logic", "tests": 43 },
+    "EDG": { "name": "Edge Cases", "tests": 35 },
+    "REG": { "name": "Regression", "tests": 10 },
+    "INT": { "name": "Integration", "tests": 20 },
+    "PRF": { "name": "Performance", "tests": 20 }
+  },
+  "filesCreated": {
+    "testUtils": [
+      "tests/utils/session-factory.ts",
+      "tests/utils/thought-factory.ts",
+      "tests/utils/assertion-helpers.ts",
+      "tests/utils/mock-data.ts"
+    ],
+    "integrationTools": [
+      "tests/integration/tools/core-inductive.test.ts",
+      "tests/integration/tools/core-deductive.test.ts",
+      "tests/integration/tools/core-abductive.test.ts",
+      "tests/integration/tools/standard-sequential.test.ts",
+      "tests/integration/tools/standard-shannon.test.ts",
+      "tests/integration/tools/standard-hybrid.test.ts",
+      "tests/integration/tools/standard-runtime-only.test.ts",
+      "tests/integration/tools/common-parameters.test.ts",
+      "tests/integration/tools/mathematics-core.test.ts",
+      "tests/integration/tools/mathematics-analysis.test.ts",
+      "tests/integration/tools/physics.test.ts",
+      "tests/integration/tools/computability.test.ts",
+      "tests/integration/tools/temporal-events.test.ts",
+      "tests/integration/tools/temporal-relations.test.ts",
+      "tests/integration/tools/temporal-timeline.test.ts",
+      "tests/integration/tools/probabilistic-bayesian.test.ts",
+      "tests/integration/tools/probabilistic-evidential.test.ts",
+      "tests/integration/tools/causal.test.ts",
+      "tests/integration/tools/counterfactual.test.ts",
+      "tests/integration/tools/strategic-gametheory.test.ts",
+      "tests/integration/tools/strategic-optimization.test.ts",
+      "tests/integration/tools/analytical-analogical.test.ts",
+      "tests/integration/tools/analytical-firstprinciples.test.ts",
+      "tests/integration/tools/analytical-metareasoning.test.ts",
+      "tests/integration/tools/analytical-cryptanalytic.test.ts",
+      "tests/integration/tools/scientific-method.test.ts",
+      "tests/integration/tools/scientific-systemsthinking.test.ts",
+      "tests/integration/tools/scientific-formallogic.test.ts",
+      "tests/integration/tools/engineering.test.ts",
+      "tests/integration/tools/algorithmic.test.ts",
+      "tests/integration/tools/academic-synthesis.test.ts",
+      "tests/integration/tools/academic-argumentation.test.ts",
+      "tests/integration/tools/academic-critique.test.ts",
+      "tests/integration/tools/academic-analysis.test.ts",
+      "tests/integration/tools/session-lifecycle.test.ts",
+      "tests/integration/tools/session-actions.test.ts",
+      "tests/integration/tools/session-multiinstance.test.ts"
+    ],
+    "integrationExports": [
+      "tests/integration/exports/mermaid.test.ts",
+      "tests/integration/exports/dot.test.ts",
+      "tests/integration/exports/ascii.test.ts",
+      "tests/integration/exports/html.test.ts",
+      "tests/integration/exports/json.test.ts",
+      "tests/integration/exports/markdown.test.ts",
+      "tests/integration/exports/latex.test.ts",
+      "tests/integration/exports/jupyter.test.ts",
+      "tests/integration/exports/mode-specific.test.ts"
+    ],
+    "integrationHandlers": [
+      "tests/integration/handlers/causal.handler.test.ts",
+      "tests/integration/handlers/bayesian.handler.test.ts",
+      "tests/integration/handlers/gametheory.handler.test.ts",
+      "tests/integration/handlers/counterfactual.handler.test.ts",
+      "tests/integration/handlers/synthesis.handler.test.ts",
+      "tests/integration/handlers/systemsthinking.handler.test.ts",
+      "tests/integration/handlers/critique.handler.test.ts"
+    ],
+    "integrationScenarios": [
+      "tests/integration/scenarios/multi-mode.test.ts",
+      "tests/integration/scenarios/complex-branching.test.ts",
+      "tests/integration/scenarios/real-world-workflows.test.ts",
+      "tests/integration/scenarios/export-roundtrip.test.ts"
+    ],
+    "edgeCases": [
+      "tests/edge-cases/input-validation.test.ts",
+      "tests/edge-cases/type-validation.test.ts",
+      "tests/edge-cases/boundaries.test.ts",
+      "tests/edge-cases/session-edges.test.ts",
+      "tests/edge-cases/error-responses.test.ts",
+      "tests/edge-cases/regression.test.ts"
+    ],
+    "performance": [
+      "tests/performance/latency.test.ts",
+      "tests/performance/throughput.test.ts",
+      "tests/performance/memory.test.ts",
+      "tests/performance/stress.test.ts"
+    ]
+  },
+  "executionOrder": [
+    "Sprint 1: Infrastructure + Core (foundation)",
+    "Sprint 2: Standard + Parameters (common patterns)",
+    "Sprint 3: Mathematics (complex parameters)",
+    "Sprint 4: Temporal + Probabilistic",
+    "Sprint 5: Causal + Strategic",
+    "Sprint 6: Analytical + Scientific",
+    "Sprint 7: Engineering + Academic (largest sprint)",
+    "Sprint 8: Session + Exports",
+    "Sprint 9: ModeHandlers (specialized logic)",
+    "Sprint 10: Edge Cases + Regression",
+    "Sprint 11: Integration + Performance (final validation)"
+  ],
+  "notes": "Phase 11 is purely test-focused - no production code changes. All sprints can be executed in parallel if multiple developers available. Sprint 7 is the largest and may need to be split if time-constrained."
+}

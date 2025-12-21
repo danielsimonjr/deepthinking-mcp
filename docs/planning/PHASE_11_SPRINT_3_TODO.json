@@ -1,0 +1,130 @@
+{
+  "phase": 11,
+  "sprint": 3,
+  "title": "Mathematics, Physics & Computability Modes",
+  "week": "Week 2",
+  "effort": "6-7 hours",
+  "status": "pending",
+  "description": "Comprehensive coverage for deepthinking_mathematics tool covering all proof strategies, tensor properties, physical interpretations, and computability theory",
+  "tasks": [
+    {
+      "id": "11.3.1",
+      "category": "Mathematics-Core",
+      "description": "Mathematics mode core tests - T-MTH-001 through T-MTH-017 covering proof strategies, mathematical models, hypotheses, theorems",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "testCases": [
+        "T-MTH-001: Basic mathematics thought",
+        "T-MTH-002: Mathematics with proofStrategy.type = direct",
+        "T-MTH-003: Mathematics with proofStrategy.type = contradiction",
+        "T-MTH-004: Mathematics with proofStrategy.type = induction",
+        "T-MTH-005: Mathematics with proofStrategy.type = construction",
+        "T-MTH-006: Mathematics with proofStrategy.type = contrapositive",
+        "T-MTH-007: Mathematics with proofStrategy.steps array",
+        "T-MTH-008: Mathematics with mathematicalModel.latex",
+        "T-MTH-009: Mathematics with mathematicalModel.symbolic",
+        "T-MTH-010: Mathematics with mathematicalModel.ascii",
+        "T-MTH-011: Mathematics with hypotheses array",
+        "T-MTH-012: Mathematics with theorem statement",
+        "T-MTH-013: Mathematics with proofSteps array (structured proof)",
+        "T-MTH-014: Mathematics with proofSteps[].justification",
+        "T-MTH-015: Mathematics with proofSteps[].latex",
+        "T-MTH-016: Mathematics with proofSteps[].referencesSteps",
+        "T-MTH-017: Mathematics multi-step proof session"
+      ],
+      "files": [
+        "tests/integration/tools/mathematics-core.test.ts"
+      ]
+    },
+    {
+      "id": "11.3.2",
+      "category": "Mathematics-Analysis",
+      "description": "Mathematics proof analysis tests - T-MTH-018 through T-MTH-027 covering thoughtTypes and analysis depths",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-MTH-018: Mathematics with thoughtType = proof_decomposition",
+        "T-MTH-019: Mathematics with thoughtType = dependency_analysis",
+        "T-MTH-020: Mathematics with thoughtType = consistency_check",
+        "T-MTH-021: Mathematics with thoughtType = gap_identification",
+        "T-MTH-022: Mathematics with thoughtType = assumption_trace",
+        "T-MTH-023: Mathematics with analysisDepth = shallow",
+        "T-MTH-024: Mathematics with analysisDepth = standard",
+        "T-MTH-025: Mathematics with analysisDepth = deep",
+        "T-MTH-026: Mathematics with includeConsistencyCheck = true",
+        "T-MTH-027: Mathematics with traceAssumptions = true"
+      ],
+      "files": [
+        "tests/integration/tools/mathematics-analysis.test.ts"
+      ]
+    },
+    {
+      "id": "11.3.3",
+      "category": "Physics",
+      "description": "Physics mode comprehensive tests - T-MTH-028 through T-MTH-045 covering tensor properties, transformations, physical interpretations",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "testCases": [
+        "T-MTH-028: Basic physics thought",
+        "T-MTH-029: Physics with tensorProperties.rank = [0, 0] (scalar)",
+        "T-MTH-030: Physics with tensorProperties.rank = [1, 0] (vector)",
+        "T-MTH-031: Physics with tensorProperties.rank = [0, 1] (covector)",
+        "T-MTH-032: Physics with tensorProperties.rank = [2, 0] (matrix)",
+        "T-MTH-033: Physics with tensorProperties.rank = [1, 1] (mixed)",
+        "T-MTH-034: Physics with tensorProperties.components",
+        "T-MTH-035: Physics with tensorProperties.latex",
+        "T-MTH-036: Physics with tensorProperties.transformation = covariant",
+        "T-MTH-037: Physics with tensorProperties.transformation = contravariant",
+        "T-MTH-038: Physics with tensorProperties.transformation = mixed",
+        "T-MTH-039: Physics with tensorProperties.symmetries",
+        "T-MTH-040: Physics with tensorProperties.invariants",
+        "T-MTH-041: Physics with physicalInterpretation.quantity",
+        "T-MTH-042: Physics with physicalInterpretation.units",
+        "T-MTH-043: Physics with physicalInterpretation.conservationLaws",
+        "T-MTH-044: Physics multi-thought tensor derivation",
+        "T-MTH-045: Physics with mathematical model integration"
+      ],
+      "files": [
+        "tests/integration/tools/physics.test.ts"
+      ]
+    },
+    {
+      "id": "11.3.4",
+      "category": "Computability",
+      "description": "Computability mode tests - T-MTH-046 through T-MTH-054 covering Turing machines, decidability, complexity",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-MTH-046: Basic computability thought",
+        "T-MTH-047: Computability Turing machine definition",
+        "T-MTH-048: Computability decidability analysis",
+        "T-MTH-049: Computability halting problem reference",
+        "T-MTH-050: Computability reduction proof",
+        "T-MTH-051: Computability complexity class analysis",
+        "T-MTH-052: Computability multi-thought session",
+        "T-MTH-053: Computability with proofStrategy",
+        "T-MTH-054: Computability with mathematicalModel"
+      ],
+      "files": [
+        "tests/integration/tools/computability.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "54 mathematics/physics/computability tests implemented",
+    "All 5 proof strategy types tested",
+    "All tensor ranks and transformations tested",
+    "All 5 thoughtTypes for proof analysis tested",
+    "All tests pass"
+  ],
+  "filesCreated": [
+    "tests/integration/tools/mathematics-core.test.ts",
+    "tests/integration/tools/mathematics-analysis.test.ts",
+    "tests/integration/tools/physics.test.ts",
+    "tests/integration/tools/computability.test.ts"
+  ],
+  "filesModified": [],
+  "totalEstimatedHours": 6.0,
+  "testCaseCount": 54,
+  "notes": "Mathematics modes are complex with many optional parameters - thorough coverage critical for proof-based reasoning"
+}

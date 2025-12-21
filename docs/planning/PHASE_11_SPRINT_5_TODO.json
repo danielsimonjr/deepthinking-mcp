@@ -1,0 +1,136 @@
+{
+  "phase": 11,
+  "sprint": 5,
+  "title": "Causal & Strategic Modes",
+  "week": "Week 3",
+  "effort": "5-6 hours",
+  "status": "pending",
+  "description": "Comprehensive coverage for deepthinking_causal (causal graphs, counterfactuals) and deepthinking_strategic (game theory, optimization)",
+  "tasks": [
+    {
+      "id": "11.5.1",
+      "category": "Causal",
+      "description": "Causal mode tests - T-CSL-001 through T-CSL-020 covering graphs, interventions, d-separation",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "testCases": [
+        "T-CSL-001: Basic causal thought",
+        "T-CSL-002: Causal with nodes array (3 nodes)",
+        "T-CSL-003: Causal with nodes array (10+ nodes)",
+        "T-CSL-004: Causal with nodes[].description",
+        "T-CSL-005: Causal with edges array",
+        "T-CSL-006: Causal with edges[].type",
+        "T-CSL-007: Causal with edges[].strength",
+        "T-CSL-008: Causal graph construction session",
+        "T-CSL-009: Causal with cycle detection",
+        "T-CSL-010: Causal with interventions array",
+        "T-CSL-011: Causal with interventions[].value",
+        "T-CSL-012: Causal with interventions[].effect",
+        "T-CSL-013: Causal do-calculus intervention",
+        "T-CSL-014: Causal with observations array",
+        "T-CSL-015: Causal with explanations array",
+        "T-CSL-016: Causal with explanations[].plausibility",
+        "T-CSL-017: Causal multi-thought graph refinement",
+        "T-CSL-018: Causal with d-separation analysis",
+        "T-CSL-019: Causal confounding detection",
+        "T-CSL-020: Causal mediator identification"
+      ],
+      "files": [
+        "tests/integration/tools/causal.test.ts"
+      ]
+    },
+    {
+      "id": "11.5.2",
+      "category": "Counterfactual",
+      "description": "Counterfactual mode tests - T-CSL-021 through T-CSL-030 covering world states, consequences, alternatives",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-CSL-021: Basic counterfactual thought",
+        "T-CSL-022: Counterfactual with counterfactual.actual",
+        "T-CSL-023: Counterfactual with counterfactual.hypothetical",
+        "T-CSL-024: Counterfactual with counterfactual.consequence",
+        "T-CSL-025: Counterfactual world state tracking",
+        "T-CSL-026: Counterfactual multiple alternatives",
+        "T-CSL-027: Counterfactual consequence analysis",
+        "T-CSL-028: Counterfactual with causal graph",
+        "T-CSL-029: Counterfactual multi-thought scenario",
+        "T-CSL-030: Counterfactual branching alternatives"
+      ],
+      "files": [
+        "tests/integration/tools/counterfactual.test.ts"
+      ]
+    },
+    {
+      "id": "11.5.3",
+      "category": "GameTheory",
+      "description": "Game theory mode tests - T-STR-001 through T-STR-020 covering players, strategies, payoffs, Nash equilibria",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "testCases": [
+        "T-STR-001: Basic gametheory thought",
+        "T-STR-002: GameTheory with players array (2 players)",
+        "T-STR-003: GameTheory with players array (3+ players)",
+        "T-STR-004: GameTheory with players[].isRational",
+        "T-STR-005: GameTheory with players[].role",
+        "T-STR-006: GameTheory with players[].availableStrategies",
+        "T-STR-007: GameTheory with strategies array",
+        "T-STR-008: GameTheory with strategies[].isPure = true",
+        "T-STR-009: GameTheory with strategies[].isPure = false (mixed)",
+        "T-STR-010: GameTheory with strategies[].probability",
+        "T-STR-011: GameTheory with payoffMatrix",
+        "T-STR-012: GameTheory with payoffMatrix.dimensions",
+        "T-STR-013: GameTheory with payoffMatrix.payoffs array",
+        "T-STR-014: GameTheory Prisoner's Dilemma setup",
+        "T-STR-015: GameTheory Nash equilibrium detection",
+        "T-STR-016: GameTheory dominant strategy identification",
+        "T-STR-017: GameTheory mixed strategy equilibrium",
+        "T-STR-018: GameTheory multi-thought game analysis",
+        "T-STR-019: GameTheory with strategic form representation",
+        "T-STR-020: GameTheory extensive form game"
+      ],
+      "files": [
+        "tests/integration/tools/strategic-gametheory.test.ts"
+      ]
+    },
+    {
+      "id": "11.5.4",
+      "category": "Optimization",
+      "description": "Optimization mode tests - T-STR-021 through T-STR-030 covering objectives, constraints, methods",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-STR-021: Basic optimization thought",
+        "T-STR-022: Optimization with objectiveFunction",
+        "T-STR-023: Optimization with constraints array",
+        "T-STR-024: Optimization with optimizationMethod",
+        "T-STR-025: Optimization with solution.variables",
+        "T-STR-026: Optimization with solution.value",
+        "T-STR-027: Optimization linear programming",
+        "T-STR-028: Optimization quadratic programming",
+        "T-STR-029: Optimization integer programming",
+        "T-STR-030: Optimization multi-objective"
+      ],
+      "files": [
+        "tests/integration/tools/strategic-optimization.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "30 causal/counterfactual tests implemented",
+    "30 strategic tests implemented (game theory + optimization)",
+    "Causal graph validation fully tested",
+    "Nash equilibrium detection verified",
+    "All tests pass"
+  ],
+  "filesCreated": [
+    "tests/integration/tools/causal.test.ts",
+    "tests/integration/tools/counterfactual.test.ts",
+    "tests/integration/tools/strategic-gametheory.test.ts",
+    "tests/integration/tools/strategic-optimization.test.ts"
+  ],
+  "filesModified": [],
+  "totalEstimatedHours": 5.0,
+  "testCaseCount": 60,
+  "notes": "Causal and strategic modes have specialized ModeHandlers - tests should verify handler logic"
+}

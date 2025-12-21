@@ -1,0 +1,148 @@
+{
+  "phase": 11,
+  "sprint": 10,
+  "title": "Edge Cases & Error Handling",
+  "week": "Week 5-6",
+  "effort": "5-6 hours",
+  "status": "pending",
+  "description": "Comprehensive error handling, input validation, and boundary condition testing",
+  "tasks": [
+    {
+      "id": "11.10.1",
+      "category": "InputValidation",
+      "description": "Input validation tests - T-EDG-001 through T-EDG-012 covering missing/invalid required parameters",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-EDG-001: Missing required thought parameter",
+        "T-EDG-002: Missing required thoughtNumber parameter",
+        "T-EDG-003: Missing required totalThoughts parameter",
+        "T-EDG-004: Missing required nextThoughtNeeded parameter",
+        "T-EDG-005: thoughtNumber = 0 (invalid)",
+        "T-EDG-006: thoughtNumber > totalThoughts",
+        "T-EDG-007: totalThoughts = 0 (invalid)",
+        "T-EDG-008: uncertainty < 0 (invalid)",
+        "T-EDG-009: uncertainty > 1 (invalid)",
+        "T-EDG-010: Invalid mode value",
+        "T-EDG-011: Empty thought string",
+        "T-EDG-012: Null parameter handling"
+      ],
+      "files": [
+        "tests/edge-cases/input-validation.test.ts"
+      ]
+    },
+    {
+      "id": "11.10.2",
+      "category": "TypeValidation",
+      "description": "Type validation tests - T-EDG-013 through T-EDG-018 covering type mismatches",
+      "status": "pending",
+      "estimatedHours": 0.75,
+      "testCases": [
+        "T-EDG-013: String where number expected",
+        "T-EDG-014: Number where string expected",
+        "T-EDG-015: Object where array expected",
+        "T-EDG-016: Array where object expected",
+        "T-EDG-017: Boolean where string expected",
+        "T-EDG-018: Nested type validation"
+      ],
+      "files": [
+        "tests/edge-cases/type-validation.test.ts"
+      ]
+    },
+    {
+      "id": "11.10.3",
+      "category": "Boundaries",
+      "description": "Boundary condition tests - T-EDG-019 through T-EDG-024 covering limits and edge values",
+      "status": "pending",
+      "estimatedHours": 0.75,
+      "testCases": [
+        "T-EDG-019: Maximum session size (1000+ thoughts)",
+        "T-EDG-020: Maximum thought length",
+        "T-EDG-021: Maximum array sizes",
+        "T-EDG-022: Maximum nesting depth",
+        "T-EDG-023: Empty arrays handling",
+        "T-EDG-024: Empty objects handling"
+      ],
+      "files": [
+        "tests/edge-cases/boundaries.test.ts"
+      ]
+    },
+    {
+      "id": "11.10.4",
+      "category": "SessionEdgeCases",
+      "description": "Session edge case tests - T-EDG-025 through T-EDG-030",
+      "status": "pending",
+      "estimatedHours": 0.75,
+      "testCases": [
+        "T-EDG-025: Resume non-existent session",
+        "T-EDG-026: Export empty session",
+        "T-EDG-027: Delete active session",
+        "T-EDG-028: Switch mode on completed session",
+        "T-EDG-029: Concurrent modification handling",
+        "T-EDG-030: Session ID collision"
+      ],
+      "files": [
+        "tests/edge-cases/session-edges.test.ts"
+      ]
+    },
+    {
+      "id": "11.10.5",
+      "category": "ErrorResponses",
+      "description": "Error response format tests - T-EDG-031 through T-EDG-035",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "testCases": [
+        "T-EDG-031: Error message structure",
+        "T-EDG-032: Error code consistency",
+        "T-EDG-033: Error details inclusion",
+        "T-EDG-034: Stack trace exclusion in production",
+        "T-EDG-035: Graceful degradation"
+      ],
+      "files": [
+        "tests/edge-cases/error-responses.test.ts"
+      ]
+    },
+    {
+      "id": "11.10.6",
+      "category": "RegressionBugs",
+      "description": "Regression tests for known fixed bugs - T-REG-001 through T-REG-010",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-REG-001: Undefined value in visual exporters (v8.3.0 fix)",
+        "T-REG-002: Multi-thought Mermaid/DOT/ASCII export (v8.2.1 fix)",
+        "T-REG-003: Experimental modes return correct type (v7.5.2 fix)",
+        "T-REG-004: Schema alignment JSON/Zod (v8.2.0 fix)",
+        "T-REG-005: Optional property guards in exports",
+        "T-REG-006: Tool registration verification",
+        "T-REG-007: Mode routing accuracy",
+        "T-REG-008: Session persistence integrity",
+        "T-REG-009: Export completeness",
+        "T-REG-010: Error handling consistency"
+      ],
+      "files": [
+        "tests/edge-cases/regression.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "35 edge case tests implemented",
+    "10 regression tests implemented",
+    "All validation errors return appropriate messages",
+    "No crashes on invalid input",
+    "Known bugs remain fixed",
+    "All tests pass"
+  ],
+  "filesCreated": [
+    "tests/edge-cases/input-validation.test.ts",
+    "tests/edge-cases/type-validation.test.ts",
+    "tests/edge-cases/boundaries.test.ts",
+    "tests/edge-cases/session-edges.test.ts",
+    "tests/edge-cases/error-responses.test.ts",
+    "tests/edge-cases/regression.test.ts"
+  ],
+  "filesModified": [],
+  "totalEstimatedHours": 4.75,
+  "testCaseCount": 45,
+  "notes": "Edge case and error handling tests critical for robustness in production"
+}

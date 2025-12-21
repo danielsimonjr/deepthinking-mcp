@@ -1,0 +1,245 @@
+{
+  "phase": 11,
+  "sprint": 8,
+  "title": "Session Management & Export Formats",
+  "week": "Week 4-5",
+  "effort": "6-7 hours",
+  "status": "pending",
+  "description": "Comprehensive coverage for deepthinking_session tool (all actions) and all 8 export formats with mode-specific content verification",
+  "tasks": [
+    {
+      "id": "11.8.1",
+      "category": "Session-Lifecycle",
+      "description": "Session lifecycle tests - T-SES-001 through T-SES-008 covering creation, resume, completion, persistence",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-SES-001: Create new session (auto-generated ID)",
+        "T-SES-002: Create session with specific mode",
+        "T-SES-003: Resume existing session",
+        "T-SES-004: Session completion detection",
+        "T-SES-005: Session timeout handling",
+        "T-SES-006: Session persistence across server restart",
+        "T-SES-007: Multiple concurrent sessions",
+        "T-SES-008: Session mode switching mid-session"
+      ],
+      "files": [
+        "tests/integration/tools/session-lifecycle.test.ts"
+      ]
+    },
+    {
+      "id": "11.8.2",
+      "category": "Session-Actions",
+      "description": "Session action tests - T-SES-009 through T-SES-021 covering all 6 actions",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-SES-009: export action - all 8 formats",
+        "T-SES-010: summarize action - single thought session",
+        "T-SES-011: summarize action - multi-thought session",
+        "T-SES-012: summarize action - branched session",
+        "T-SES-013: get_session action - full data",
+        "T-SES-014: get_session action - non-existent session",
+        "T-SES-015: switch_mode action - compatible mode",
+        "T-SES-016: switch_mode action - all modes",
+        "T-SES-017: recommend_mode action - quick (problemType)",
+        "T-SES-018: recommend_mode action - detailed (problemCharacteristics)",
+        "T-SES-019: recommend_mode action - with combinations",
+        "T-SES-020: delete_session action - existing session",
+        "T-SES-021: delete_session action - non-existent session"
+      ],
+      "files": [
+        "tests/integration/tools/session-actions.test.ts"
+      ]
+    },
+    {
+      "id": "11.8.3",
+      "category": "Session-MultiInstance",
+      "description": "Multi-instance session tests - T-SES-022 through T-SES-026 covering file locking",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "testCases": [
+        "T-SES-022: Two instances sharing SESSION_DIR",
+        "T-SES-023: Concurrent read access",
+        "T-SES-024: Concurrent write handling",
+        "T-SES-025: File locking verification",
+        "T-SES-026: Stale lock detection"
+      ],
+      "files": [
+        "tests/integration/tools/session-multiinstance.test.ts"
+      ]
+    },
+    {
+      "id": "11.8.4",
+      "category": "Export-Mermaid",
+      "description": "Mermaid export tests - T-EXP-001 through T-EXP-007",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "testCases": [
+        "T-EXP-001: Mermaid single thought",
+        "T-EXP-002: Mermaid multi-thought linear",
+        "T-EXP-003: Mermaid with branches",
+        "T-EXP-004: Mermaid with revisions",
+        "T-EXP-005: Mermaid syntax validation",
+        "T-EXP-006: Mermaid special character escaping",
+        "T-EXP-007: Mermaid mode-specific styling"
+      ],
+      "files": [
+        "tests/integration/exports/mermaid.test.ts"
+      ]
+    },
+    {
+      "id": "11.8.5",
+      "category": "Export-DOT",
+      "description": "DOT export tests - T-EXP-008 through T-EXP-014",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "testCases": [
+        "T-EXP-008: DOT single thought",
+        "T-EXP-009: DOT multi-thought",
+        "T-EXP-010: DOT with branches",
+        "T-EXP-011: DOT with revisions",
+        "T-EXP-012: DOT syntax validation",
+        "T-EXP-013: DOT GraphViz compatibility",
+        "T-EXP-014: DOT mode-specific attributes"
+      ],
+      "files": [
+        "tests/integration/exports/dot.test.ts"
+      ]
+    },
+    {
+      "id": "11.8.6",
+      "category": "Export-ASCII",
+      "description": "ASCII export tests - T-EXP-015 through T-EXP-020",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "testCases": [
+        "T-EXP-015: ASCII single thought",
+        "T-EXP-016: ASCII multi-thought",
+        "T-EXP-017: ASCII with branches",
+        "T-EXP-018: ASCII with revisions",
+        "T-EXP-019: ASCII width constraints",
+        "T-EXP-020: ASCII Unicode handling"
+      ],
+      "files": [
+        "tests/integration/exports/ascii.test.ts"
+      ]
+    },
+    {
+      "id": "11.8.7",
+      "category": "Export-HTML-JSON",
+      "description": "HTML and JSON export tests - T-EXP-021 through T-EXP-031",
+      "status": "pending",
+      "estimatedHours": 0.75,
+      "testCases": [
+        "T-EXP-021: HTML single thought",
+        "T-EXP-022: HTML multi-thought",
+        "T-EXP-023: HTML with branches",
+        "T-EXP-024: HTML XSS prevention",
+        "T-EXP-025: HTML mode-specific styling",
+        "T-EXP-026: HTML accessibility",
+        "T-EXP-027: JSON single thought",
+        "T-EXP-028: JSON multi-thought",
+        "T-EXP-029: JSON schema validation",
+        "T-EXP-030: JSON roundtrip fidelity",
+        "T-EXP-031: JSON mode-specific fields"
+      ],
+      "files": [
+        "tests/integration/exports/html.test.ts",
+        "tests/integration/exports/json.test.ts"
+      ]
+    },
+    {
+      "id": "11.8.8",
+      "category": "Export-Markdown-LaTeX",
+      "description": "Markdown and LaTeX export tests - T-EXP-032 through T-EXP-043",
+      "status": "pending",
+      "estimatedHours": 0.75,
+      "testCases": [
+        "T-EXP-032: Markdown single thought",
+        "T-EXP-033: Markdown multi-thought",
+        "T-EXP-034: Markdown with branches",
+        "T-EXP-035: Markdown table formatting",
+        "T-EXP-036: Markdown code blocks",
+        "T-EXP-037: Markdown mode-specific sections",
+        "T-EXP-038: LaTeX single thought",
+        "T-EXP-039: LaTeX multi-thought",
+        "T-EXP-040: LaTeX mathematical notation",
+        "T-EXP-041: LaTeX special character escaping",
+        "T-EXP-042: LaTeX document structure",
+        "T-EXP-043: LaTeX compilability"
+      ],
+      "files": [
+        "tests/integration/exports/markdown.test.ts",
+        "tests/integration/exports/latex.test.ts"
+      ]
+    },
+    {
+      "id": "11.8.9",
+      "category": "Export-Jupyter",
+      "description": "Jupyter export tests - T-EXP-044 through T-EXP-048",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "testCases": [
+        "T-EXP-044: Jupyter single thought",
+        "T-EXP-045: Jupyter multi-thought",
+        "T-EXP-046: Jupyter notebook structure",
+        "T-EXP-047: Jupyter cell types",
+        "T-EXP-048: Jupyter metadata"
+      ],
+      "files": [
+        "tests/integration/exports/jupyter.test.ts"
+      ]
+    },
+    {
+      "id": "11.8.10",
+      "category": "Export-ModeSpecific",
+      "description": "Mode-specific export tests - T-EXP-049 through T-EXP-061",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-EXP-049: Sequential mode export (all formats)",
+        "T-EXP-050: Shannon mode export with stages",
+        "T-EXP-051: Mathematics mode export with LaTeX",
+        "T-EXP-052: Physics mode export with tensors",
+        "T-EXP-053: Temporal mode export with timeline",
+        "T-EXP-054: Bayesian mode export with probabilities",
+        "T-EXP-055: Causal mode export with graph",
+        "T-EXP-056: GameTheory mode export with payoff matrix",
+        "T-EXP-057: Algorithmic mode export with complexity",
+        "T-EXP-058: Synthesis mode export with sources",
+        "T-EXP-059: Argumentation mode export with Toulmin structure",
+        "T-EXP-060: Critique mode export with Socratic questions",
+        "T-EXP-061: Analysis mode export with codes"
+      ],
+      "files": [
+        "tests/integration/exports/mode-specific.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "26 session management tests implemented",
+    "61 export format tests implemented",
+    "All 8 export formats verified for all key modes",
+    "Multi-instance file locking verified",
+    "All tests pass"
+  ],
+  "filesCreated": [
+    "tests/integration/tools/session-lifecycle.test.ts",
+    "tests/integration/tools/session-actions.test.ts",
+    "tests/integration/tools/session-multiinstance.test.ts",
+    "tests/integration/exports/mermaid.test.ts",
+    "tests/integration/exports/dot.test.ts",
+    "tests/integration/exports/ascii.test.ts",
+    "tests/integration/exports/html.test.ts",
+    "tests/integration/exports/json.test.ts",
+    "tests/integration/exports/markdown.test.ts",
+    "tests/integration/exports/latex.test.ts",
+    "tests/integration/exports/jupyter.test.ts",
+    "tests/integration/exports/mode-specific.test.ts"
+  ],
+  "filesModified": [],
+  "totalEstimatedHours": 7.0,
+  "testCaseCount": 87,
+  "notes": "Export format testing critical for visualization and documentation generation use cases"
+}

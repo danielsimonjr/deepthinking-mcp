@@ -1,0 +1,223 @@
+{
+  "phase": 11,
+  "sprint": 7,
+  "title": "Engineering & Academic Modes",
+  "week": "Week 4",
+  "effort": "7-8 hours",
+  "status": "pending",
+  "description": "Comprehensive coverage for deepthinking_engineering (engineering, algorithmic) and deepthinking_academic (synthesis, argumentation, critique, analysis)",
+  "tasks": [
+    {
+      "id": "11.7.1",
+      "category": "Engineering",
+      "description": "Engineering mode tests - T-ENG-001 through T-ENG-016 covering trade studies, FMEA, ADRs",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "testCases": [
+        "T-ENG-001: Basic engineering thought",
+        "T-ENG-002: Engineering with requirementId",
+        "T-ENG-003: Engineering with tradeStudy object",
+        "T-ENG-004: Engineering with tradeStudy.options array",
+        "T-ENG-005: Engineering with tradeStudy.criteria array",
+        "T-ENG-006: Engineering with tradeStudy.weights",
+        "T-ENG-007: Engineering trade study evaluation",
+        "T-ENG-008: Engineering with fmeaEntry object",
+        "T-ENG-009: Engineering with fmeaEntry.failureMode",
+        "T-ENG-010: Engineering with fmeaEntry.severity (1-10)",
+        "T-ENG-011: Engineering with fmeaEntry.occurrence (1-10)",
+        "T-ENG-012: Engineering with fmeaEntry.detection (1-10)",
+        "T-ENG-013: Engineering with fmeaEntry.rpn calculation",
+        "T-ENG-014: Engineering FMEA multi-failure analysis",
+        "T-ENG-015: Engineering ADR creation session",
+        "T-ENG-016: Engineering multi-thought requirements analysis"
+      ],
+      "files": [
+        "tests/integration/tools/engineering.test.ts"
+      ]
+    },
+    {
+      "id": "11.7.2",
+      "category": "Algorithmic",
+      "description": "Algorithmic mode tests - T-ENG-017 through T-ENG-036 covering CLRS patterns, complexity analysis, correctness proofs",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "testCases": [
+        "T-ENG-017: Basic algorithmic thought",
+        "T-ENG-018: Algorithmic with algorithmName",
+        "T-ENG-019: Algorithmic with designPattern = divide-and-conquer",
+        "T-ENG-020: Algorithmic with designPattern = dynamic-programming",
+        "T-ENG-021: Algorithmic with designPattern = greedy",
+        "T-ENG-022: Algorithmic with designPattern = backtracking",
+        "T-ENG-023: Algorithmic with designPattern = branch-and-bound",
+        "T-ENG-024: Algorithmic with designPattern = randomized",
+        "T-ENG-025: Algorithmic with designPattern = approximation",
+        "T-ENG-026: Algorithmic with complexityAnalysis.timeComplexity",
+        "T-ENG-027: Algorithmic with complexityAnalysis.spaceComplexity",
+        "T-ENG-028: Algorithmic with complexityAnalysis.bestCase",
+        "T-ENG-029: Algorithmic with complexityAnalysis.worstCase",
+        "T-ENG-030: Algorithmic with complexityAnalysis.averageCase",
+        "T-ENG-031: Algorithmic with correctnessProof.invariant",
+        "T-ENG-032: Algorithmic with correctnessProof.termination",
+        "T-ENG-033: Algorithmic with correctnessProof.correctness",
+        "T-ENG-034: Algorithmic CLRS-style analysis session",
+        "T-ENG-035: Algorithmic recurrence relation derivation",
+        "T-ENG-036: Algorithmic Master Theorem application"
+      ],
+      "files": [
+        "tests/integration/tools/algorithmic.test.ts"
+      ]
+    },
+    {
+      "id": "11.7.3",
+      "category": "Synthesis",
+      "description": "Synthesis mode tests - T-ACD-001 through T-ACD-019 covering sources, themes, gaps, consensus",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "testCases": [
+        "T-ACD-001: Basic synthesis thought",
+        "T-ACD-002: Synthesis with sources array (3 sources)",
+        "T-ACD-003: Synthesis with sources array (10+ sources)",
+        "T-ACD-004: Synthesis with sources[].authors",
+        "T-ACD-005: Synthesis with sources[].year",
+        "T-ACD-006: Synthesis with sources[].venue",
+        "T-ACD-007: Synthesis with sources[].doi",
+        "T-ACD-008: Synthesis with sources[].type",
+        "T-ACD-009: Synthesis with sources[].relevance",
+        "T-ACD-010: Synthesis with themes array",
+        "T-ACD-011: Synthesis with themes[].sourceIds",
+        "T-ACD-012: Synthesis with themes[].consensus",
+        "T-ACD-013: Synthesis with themes[].strength",
+        "T-ACD-014: Synthesis with researchGaps array",
+        "T-ACD-015: Synthesis with gaps[].type (5 types)",
+        "T-ACD-016: Synthesis with gaps[].importance",
+        "T-ACD-017: Synthesis multi-thought literature review",
+        "T-ACD-018: Synthesis source coverage tracking",
+        "T-ACD-019: Synthesis theme extraction session"
+      ],
+      "files": [
+        "tests/integration/tools/academic-synthesis.test.ts"
+      ]
+    },
+    {
+      "id": "11.7.4",
+      "category": "Argumentation",
+      "description": "Argumentation mode tests - T-ACD-020 through T-ACD-042 covering Toulmin model (claims, grounds, warrants, rebuttals)",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "testCases": [
+        "T-ACD-020: Basic argumentation thought",
+        "T-ACD-021: Argumentation with claims array",
+        "T-ACD-022: Argumentation with claims[].type = fact",
+        "T-ACD-023: Argumentation with claims[].type = value",
+        "T-ACD-024: Argumentation with claims[].type = policy",
+        "T-ACD-025: Argumentation with claims[].type = definition",
+        "T-ACD-026: Argumentation with claims[].type = cause",
+        "T-ACD-027: Argumentation with claims[].strength",
+        "T-ACD-028: Argumentation with grounds array",
+        "T-ACD-029: Argumentation with grounds[].type (6 types)",
+        "T-ACD-030: Argumentation with grounds[].reliability",
+        "T-ACD-031: Argumentation with grounds[].source",
+        "T-ACD-032: Argumentation with warrants array",
+        "T-ACD-033: Argumentation with warrants[].type (6 types)",
+        "T-ACD-034: Argumentation with warrants[].claimId reference",
+        "T-ACD-035: Argumentation with warrants[].groundsIds references",
+        "T-ACD-036: Argumentation with rebuttals array",
+        "T-ACD-037: Argumentation with rebuttals[].type (5 types)",
+        "T-ACD-038: Argumentation with rebuttals[].strength",
+        "T-ACD-039: Argumentation with rebuttals[].response",
+        "T-ACD-040: Argumentation with argumentStrength score",
+        "T-ACD-041: Argumentation Toulmin model complete session",
+        "T-ACD-042: Argumentation multi-claim construction"
+      ],
+      "files": [
+        "tests/integration/tools/academic-argumentation.test.ts"
+      ]
+    },
+    {
+      "id": "11.7.5",
+      "category": "Critique",
+      "description": "Critique mode tests - T-ACD-043 through T-ACD-059 covering 6 Socratic question categories",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-ACD-043: Basic critique thought",
+        "T-ACD-044: Critique with critiquedWork object",
+        "T-ACD-045: Critique with critiquedWork.authors",
+        "T-ACD-046: Critique with critiquedWork.year",
+        "T-ACD-047: Critique with critiquedWork.field",
+        "T-ACD-048: Critique with critiquedWork.type",
+        "T-ACD-049: Critique with strengths array",
+        "T-ACD-050: Critique with weaknesses array",
+        "T-ACD-051: Critique with suggestions array",
+        "T-ACD-052: Critique Socratic Clarification questions",
+        "T-ACD-053: Critique Socratic Assumptions probing",
+        "T-ACD-054: Critique Socratic Evidence questions",
+        "T-ACD-055: Critique Socratic Viewpoints exploration",
+        "T-ACD-056: Critique Socratic Implications analysis",
+        "T-ACD-057: Critique Socratic Meta-questions",
+        "T-ACD-058: Critique peer review simulation",
+        "T-ACD-059: Critique multi-thought critical analysis"
+      ],
+      "files": [
+        "tests/integration/tools/academic-critique.test.ts"
+      ]
+    },
+    {
+      "id": "11.7.6",
+      "category": "Analysis",
+      "description": "Analysis mode tests - T-ACD-060 through T-ACD-083 covering qualitative methodologies, coding, memos",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "testCases": [
+        "T-ACD-060: Basic analysis thought",
+        "T-ACD-061: Analysis with methodology = thematic_analysis",
+        "T-ACD-062: Analysis with methodology = grounded_theory",
+        "T-ACD-063: Analysis with methodology = discourse_analysis",
+        "T-ACD-064: Analysis with methodology = content_analysis",
+        "T-ACD-065: Analysis with methodology = phenomenological",
+        "T-ACD-066: Analysis with methodology = narrative_analysis",
+        "T-ACD-067: Analysis with dataSources array",
+        "T-ACD-068: Analysis with dataSources[].type",
+        "T-ACD-069: Analysis with dataSources[].participantId",
+        "T-ACD-070: Analysis with codes array",
+        "T-ACD-071: Analysis with codes[].type (9 code types)",
+        "T-ACD-072: Analysis with codes[].definition",
+        "T-ACD-073: Analysis with codes[].examples",
+        "T-ACD-074: Analysis with codes[].frequency",
+        "T-ACD-075: Analysis with categories array",
+        "T-ACD-076: Analysis with memos array",
+        "T-ACD-077: Analysis with memos[].type (6 memo types)",
+        "T-ACD-078: Analysis with memos[].relatedCodes",
+        "T-ACD-079: Analysis with saturationReached",
+        "T-ACD-080: Analysis with keyInsight",
+        "T-ACD-081: Analysis with analysisMethod (simplified)",
+        "T-ACD-082: Analysis multi-thought coding session",
+        "T-ACD-083: Analysis theme development session"
+      ],
+      "files": [
+        "tests/integration/tools/academic-analysis.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "36 engineering/algorithmic tests implemented",
+    "83 academic mode tests implemented",
+    "All 7 design patterns tested for algorithmic",
+    "Complete Toulmin model coverage for argumentation",
+    "All 6 Socratic question categories tested for critique",
+    "All 6 qualitative methodologies tested for analysis",
+    "All tests pass"
+  ],
+  "filesCreated": [
+    "tests/integration/tools/engineering.test.ts",
+    "tests/integration/tools/algorithmic.test.ts",
+    "tests/integration/tools/academic-synthesis.test.ts",
+    "tests/integration/tools/academic-argumentation.test.ts",
+    "tests/integration/tools/academic-critique.test.ts",
+    "tests/integration/tools/academic-analysis.test.ts"
+  ],
+  "filesModified": [],
+  "totalEstimatedHours": 8.5,
+  "testCaseCount": 119,
+  "notes": "Academic modes are the most parameter-rich - requires extensive testing of all Toulmin and qualitative research constructs"
+}

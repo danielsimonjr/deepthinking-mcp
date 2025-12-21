@@ -1,0 +1,125 @@
+{
+  "phase": 11,
+  "sprint": 1,
+  "title": "Test Infrastructure & Core Tool Coverage",
+  "week": "Week 1",
+  "effort": "5-6 hours",
+  "status": "pending",
+  "description": "Establish test infrastructure and achieve comprehensive coverage for deepthinking_core tool (inductive, deductive, abductive modes)",
+  "tasks": [
+    {
+      "id": "11.1.1",
+      "category": "Infrastructure",
+      "description": "Create test utilities - session-factory.ts, thought-factory.ts, assertion-helpers.ts, mock-data.ts in tests/utils/",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [],
+      "files": [
+        "tests/utils/session-factory.ts",
+        "tests/utils/thought-factory.ts",
+        "tests/utils/assertion-helpers.ts",
+        "tests/utils/mock-data.ts"
+      ]
+    },
+    {
+      "id": "11.1.2",
+      "category": "Core-Inductive",
+      "description": "Inductive mode comprehensive tests - T-COR-001 through T-COR-020 covering observations, patterns, generalizations, confidence, counterexamples, branching, revisions",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "testCases": [
+        "T-COR-001: Basic inductive thought with required params only",
+        "T-COR-002: Inductive with observations array (3 items)",
+        "T-COR-003: Inductive with observations array (10+ items)",
+        "T-COR-004: Inductive with pattern identification",
+        "T-COR-005: Inductive with generalization statement",
+        "T-COR-006: Inductive with sampleSize parameter",
+        "T-COR-007: Inductive with confidence score (0.0)",
+        "T-COR-008: Inductive with confidence score (0.5)",
+        "T-COR-009: Inductive with confidence score (1.0)",
+        "T-COR-010: Inductive with counterexamples array",
+        "T-COR-011: Inductive with all optional params combined",
+        "T-COR-012: Inductive multi-thought session (5 thoughts)",
+        "T-COR-013: Inductive with assumptions array",
+        "T-COR-014: Inductive with uncertainty parameter",
+        "T-COR-015: Inductive with branchFrom (create branch)",
+        "T-COR-016: Inductive with branchId (named branch)",
+        "T-COR-017: Inductive with isRevision = true",
+        "T-COR-018: Inductive with revisesThought reference",
+        "T-COR-019: Inductive with revisionReason",
+        "T-COR-020: Inductive with dependencies array"
+      ],
+      "files": [
+        "tests/integration/tools/core-inductive.test.ts"
+      ]
+    },
+    {
+      "id": "11.1.3",
+      "category": "Core-Deductive",
+      "description": "Deductive mode comprehensive tests - T-COR-021 through T-COR-035 covering premises, conclusions, logic forms, validity/soundness checks",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "testCases": [
+        "T-COR-021: Basic deductive thought with required params only",
+        "T-COR-022: Deductive with premises array (2 items)",
+        "T-COR-023: Deductive with premises array (5+ items)",
+        "T-COR-024: Deductive with conclusion statement",
+        "T-COR-025: Deductive with logicForm = modus_ponens",
+        "T-COR-026: Deductive with logicForm = modus_tollens",
+        "T-COR-027: Deductive with logicForm = hypothetical_syllogism",
+        "T-COR-028: Deductive with logicForm = disjunctive_syllogism",
+        "T-COR-029: Deductive with validityCheck = true",
+        "T-COR-030: Deductive with validityCheck = false",
+        "T-COR-031: Deductive with soundnessCheck = true",
+        "T-COR-032: Deductive with soundnessCheck = false",
+        "T-COR-033: Deductive with all optional params combined",
+        "T-COR-034: Deductive multi-thought proof chain (4 steps)",
+        "T-COR-035: Deductive with branching alternative conclusion"
+      ],
+      "files": [
+        "tests/integration/tools/core-deductive.test.ts"
+      ]
+    },
+    {
+      "id": "11.1.4",
+      "category": "Core-Abductive",
+      "description": "Abductive mode comprehensive tests - T-COR-036 through T-COR-045 covering observations, hypotheses, scoring, best explanation selection",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-COR-036: Basic abductive thought with required params only",
+        "T-COR-037: Abductive with observations array",
+        "T-COR-038: Abductive with hypotheses array (2 hypotheses)",
+        "T-COR-039: Abductive with hypotheses array (5+ hypotheses)",
+        "T-COR-040: Abductive with hypothesis score values",
+        "T-COR-041: Abductive with bestExplanation selection",
+        "T-COR-042: Abductive with bestExplanation.score",
+        "T-COR-043: Abductive multi-thought hypothesis refinement",
+        "T-COR-044: Abductive with competing hypotheses comparison",
+        "T-COR-045: Abductive with revision after new evidence"
+      ],
+      "files": [
+        "tests/integration/tools/core-abductive.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "Test utilities created and functional",
+    "45 core mode tests implemented (T-COR-001 through T-COR-045)",
+    "100% coverage of inductive, deductive, abductive parameters",
+    "All tests pass"
+  ],
+  "filesCreated": [
+    "tests/utils/session-factory.ts",
+    "tests/utils/thought-factory.ts",
+    "tests/utils/assertion-helpers.ts",
+    "tests/utils/mock-data.ts",
+    "tests/integration/tools/core-inductive.test.ts",
+    "tests/integration/tools/core-deductive.test.ts",
+    "tests/integration/tools/core-abductive.test.ts"
+  ],
+  "filesModified": [],
+  "totalEstimatedHours": 5.0,
+  "testCaseCount": 45,
+  "notes": "Foundation sprint establishing test infrastructure and comprehensive core tool coverage"
+}

@@ -361,6 +361,51 @@ Mode-specific documentation in `docs/modes/`:
 
 Generate dependency docs: `npm run docs:deps`
 
+## Phase 11: Comprehensive Test Coverage Initiative
+
+Phase 11 is a dedicated testing phase targeting 95%+ coverage across all deepthinking-mcp tools, modes, and features.
+
+**Planning Documents** in `docs/planning/`:
+- `TEST_PLAN.md` - Master test plan with 700 enumerated test cases
+- `PHASE_11_INDEX.json` - Sprint index and category breakdown
+- `PHASE_11_SPRINT_1_TODO.json` through `PHASE_11_SPRINT_11_TODO.json` - Individual sprint tasks
+
+**Test Categories (19 total, 700 tests)**:
+| Category | Tests | Focus |
+|----------|-------|-------|
+| COR | 45 | Core reasoning (inductive, deductive, abductive) |
+| STD | 38 | Standard workflows + runtime-only modes |
+| PAR | 32 | Common parameters validation |
+| MTH | 54 | Mathematics, physics, computability |
+| TMP | 40 | Temporal reasoning |
+| PRB | 25 | Probabilistic (Bayesian, evidential) |
+| CSL | 30 | Causal and counterfactual |
+| STR | 30 | Strategic (game theory, optimization) |
+| ANL | 34 | Analytical modes |
+| SCI | 38 | Scientific modes |
+| ENG | 36 | Engineering and algorithmic |
+| ACD | 83 | Academic research modes |
+| SES | 26 | Session management |
+| EXP | 61 | Export formats |
+| HDL | 43 | ModeHandler specialized tests |
+| EDG | 35 | Edge cases |
+| REG | 10 | Regression tests |
+| INT | 20 | Integration scenarios |
+| PRF | 20 | Performance tests |
+
+**Sprint Overview** (66.5 hours total):
+1. Test Infrastructure & Core (45 tests)
+2. Standard Workflows & Parameters (70 tests)
+3. Mathematics/Physics/Computability (54 tests)
+4. Temporal & Probabilistic (65 tests)
+5. Causal & Strategic (60 tests)
+6. Analytical & Scientific (72 tests)
+7. Engineering & Academic (119 tests) - largest sprint
+8. Session & Exports (87 tests)
+9. ModeHandler Specialized (43 tests)
+10. Edge Cases & Regression (45 tests)
+11. Integration & Performance (40 tests)
+
 ## Standalone Tools
 
 The `tools/` directory contains standalone utilities compiled to executables with Bun:

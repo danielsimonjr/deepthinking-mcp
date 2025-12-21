@@ -1,0 +1,169 @@
+{
+  "phase": 11,
+  "sprint": 11,
+  "title": "Integration Scenarios & Performance",
+  "week": "Week 6",
+  "effort": "5-6 hours",
+  "status": "pending",
+  "description": "Real-world integration scenarios, multi-mode workflows, and performance/stress testing",
+  "tasks": [
+    {
+      "id": "11.11.1",
+      "category": "MultiMode",
+      "description": "Multi-mode session tests - T-INT-001 through T-INT-005 covering mode switching and chaining",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-INT-001: Start sequential, switch to mathematics",
+        "T-INT-002: Start inductive, switch to deductive",
+        "T-INT-003: Hybrid mode with 3+ active modes",
+        "T-INT-004: Mode chain: abductive -> deductive -> synthesis",
+        "T-INT-005: Full workflow: problem -> analysis -> solution"
+      ],
+      "files": [
+        "tests/integration/scenarios/multi-mode.test.ts"
+      ]
+    },
+    {
+      "id": "11.11.2",
+      "category": "ComplexBranching",
+      "description": "Complex branching tests - T-INT-006 through T-INT-010",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-INT-006: Create 3+ parallel branches",
+        "T-INT-007: Branch from branch (nested)",
+        "T-INT-008: Merge branch insights",
+        "T-INT-009: Revision after branching",
+        "T-INT-010: Branch comparison export"
+      ],
+      "files": [
+        "tests/integration/scenarios/complex-branching.test.ts"
+      ]
+    },
+    {
+      "id": "11.11.3",
+      "category": "RealWorldWorkflows",
+      "description": "Real-world workflow tests - T-INT-011 through T-INT-015",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-INT-011: Literature review workflow",
+        "T-INT-012: Algorithm design workflow",
+        "T-INT-013: Causal analysis workflow",
+        "T-INT-014: Decision-making workflow",
+        "T-INT-015: Proof construction workflow"
+      ],
+      "files": [
+        "tests/integration/scenarios/real-world-workflows.test.ts"
+      ]
+    },
+    {
+      "id": "11.11.4",
+      "category": "ExportRoundtrip",
+      "description": "Export roundtrip tests - T-INT-016 through T-INT-020",
+      "status": "pending",
+      "estimatedHours": 0.75,
+      "testCases": [
+        "T-INT-016: JSON export -> import verification",
+        "T-INT-017: Export all formats for same session",
+        "T-INT-018: Export after mode switch",
+        "T-INT-019: Export branched session",
+        "T-INT-020: Export with revisions"
+      ],
+      "files": [
+        "tests/integration/scenarios/export-roundtrip.test.ts"
+      ]
+    },
+    {
+      "id": "11.11.5",
+      "category": "Latency",
+      "description": "Latency performance tests - T-PRF-001 through T-PRF-005",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "testCases": [
+        "T-PRF-001: Single thought response time < 100ms",
+        "T-PRF-002: 10-thought session total time < 500ms",
+        "T-PRF-003: Export response time < 200ms",
+        "T-PRF-004: Mode switch response time < 50ms",
+        "T-PRF-005: Session resume time < 100ms"
+      ],
+      "files": [
+        "tests/performance/latency.test.ts"
+      ]
+    },
+    {
+      "id": "11.11.6",
+      "category": "Throughput",
+      "description": "Throughput performance tests - T-PRF-006 through T-PRF-010",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "testCases": [
+        "T-PRF-006: 100 thoughts/second sustained",
+        "T-PRF-007: 10 concurrent sessions",
+        "T-PRF-008: 50 concurrent sessions",
+        "T-PRF-009: Rapid mode switching",
+        "T-PRF-010: Bulk export operations"
+      ],
+      "files": [
+        "tests/performance/throughput.test.ts"
+      ]
+    },
+    {
+      "id": "11.11.7",
+      "category": "Memory",
+      "description": "Memory performance tests - T-PRF-011 through T-PRF-015",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "testCases": [
+        "T-PRF-011: Memory usage with 100 sessions",
+        "T-PRF-012: Memory usage with 1000-thought session",
+        "T-PRF-013: Memory cleanup after session delete",
+        "T-PRF-014: LRU cache effectiveness",
+        "T-PRF-015: No memory leaks over time"
+      ],
+      "files": [
+        "tests/performance/memory.test.ts"
+      ]
+    },
+    {
+      "id": "11.11.8",
+      "category": "Stress",
+      "description": "Stress tests - T-PRF-016 through T-PRF-020",
+      "status": "pending",
+      "estimatedHours": 0.75,
+      "testCases": [
+        "T-PRF-016: 10,000 thoughts total",
+        "T-PRF-017: 100 concurrent sessions",
+        "T-PRF-018: Rapid create/delete cycles",
+        "T-PRF-019: Extended runtime (24h - manual)",
+        "T-PRF-020: Recovery from resource exhaustion"
+      ],
+      "files": [
+        "tests/performance/stress.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "20 integration scenario tests implemented",
+    "20 performance tests implemented",
+    "All latency benchmarks met",
+    "No memory leaks detected",
+    "Stress tests pass without crashes",
+    "All tests pass"
+  ],
+  "filesCreated": [
+    "tests/integration/scenarios/multi-mode.test.ts",
+    "tests/integration/scenarios/complex-branching.test.ts",
+    "tests/integration/scenarios/real-world-workflows.test.ts",
+    "tests/integration/scenarios/export-roundtrip.test.ts",
+    "tests/performance/latency.test.ts",
+    "tests/performance/throughput.test.ts",
+    "tests/performance/memory.test.ts",
+    "tests/performance/stress.test.ts"
+  ],
+  "filesModified": [],
+  "totalEstimatedHours": 6.0,
+  "testCaseCount": 40,
+  "notes": "Final sprint covers real-world usage patterns and ensures production readiness"
+}

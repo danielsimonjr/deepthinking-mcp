@@ -1,0 +1,159 @@
+{
+  "phase": 11,
+  "sprint": 9,
+  "title": "ModeHandler Specialized Tests",
+  "week": "Week 5",
+  "effort": "5-6 hours",
+  "status": "pending",
+  "description": "Deep testing of all 7 specialized ModeHandler implementations to verify their domain-specific logic",
+  "tasks": [
+    {
+      "id": "11.9.1",
+      "category": "CausalHandler",
+      "description": "CausalHandler tests - T-HDL-001 through T-HDL-006 covering graph validation, cycle detection, interventions",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-HDL-001: Graph validation - valid DAG",
+        "T-HDL-002: Graph validation - cycle detection",
+        "T-HDL-003: Graph validation - self-loop detection",
+        "T-HDL-004: Intervention tracking",
+        "T-HDL-005: Effect propagation",
+        "T-HDL-006: D-separation checking"
+      ],
+      "files": [
+        "tests/integration/handlers/causal.handler.test.ts"
+      ]
+    },
+    {
+      "id": "11.9.2",
+      "category": "BayesianHandler",
+      "description": "BayesianHandler tests - T-HDL-007 through T-HDL-011 covering auto posterior calculation",
+      "status": "pending",
+      "estimatedHours": 0.75,
+      "testCases": [
+        "T-HDL-007: Auto posterior calculation",
+        "T-HDL-008: Evidence accumulation",
+        "T-HDL-009: Prior update sequence",
+        "T-HDL-010: Likelihood computation",
+        "T-HDL-011: Normalization verification"
+      ],
+      "files": [
+        "tests/integration/handlers/bayesian.handler.test.ts"
+      ]
+    },
+    {
+      "id": "11.9.3",
+      "category": "GameTheoryHandler",
+      "description": "GameTheoryHandler tests - T-HDL-012 through T-HDL-016 covering payoff validation, Nash detection",
+      "status": "pending",
+      "estimatedHours": 0.75,
+      "testCases": [
+        "T-HDL-012: Payoff matrix validation",
+        "T-HDL-013: Dimension consistency",
+        "T-HDL-014: Nash equilibria detection",
+        "T-HDL-015: Dominant strategy identification",
+        "T-HDL-016: Mixed strategy computation"
+      ],
+      "files": [
+        "tests/integration/handlers/gametheory.handler.test.ts"
+      ]
+    },
+    {
+      "id": "11.9.4",
+      "category": "CounterfactualHandler",
+      "description": "CounterfactualHandler tests - T-HDL-017 through T-HDL-020 covering world state tracking",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "testCases": [
+        "T-HDL-017: World state tracking",
+        "T-HDL-018: Consequence analysis",
+        "T-HDL-019: Alternative comparison",
+        "T-HDL-020: Causal graph integration"
+      ],
+      "files": [
+        "tests/integration/handlers/counterfactual.handler.test.ts"
+      ]
+    },
+    {
+      "id": "11.9.5",
+      "category": "SynthesisHandler",
+      "description": "SynthesisHandler tests - T-HDL-021 through T-HDL-025 covering source coverage, theme extraction",
+      "status": "pending",
+      "estimatedHours": 0.75,
+      "testCases": [
+        "T-HDL-021: Source coverage tracking",
+        "T-HDL-022: Theme extraction",
+        "T-HDL-023: Gap identification",
+        "T-HDL-024: Consensus detection",
+        "T-HDL-025: Source-theme mapping"
+      ],
+      "files": [
+        "tests/integration/handlers/synthesis.handler.test.ts"
+      ]
+    },
+    {
+      "id": "11.9.6",
+      "category": "SystemsThinkingHandler",
+      "description": "SystemsThinkingHandler tests - T-HDL-026 through T-HDL-035 covering all 8 Senge archetypes",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "testCases": [
+        "T-HDL-026: Fixes that Fail archetype detection",
+        "T-HDL-027: Shifting the Burden archetype detection",
+        "T-HDL-028: Limits to Growth archetype detection",
+        "T-HDL-029: Tragedy of the Commons archetype detection",
+        "T-HDL-030: Escalation archetype detection",
+        "T-HDL-031: Success to Successful archetype detection",
+        "T-HDL-032: Drifting Goals archetype detection",
+        "T-HDL-033: Growth and Underinvestment archetype detection",
+        "T-HDL-034: Feedback loop analysis",
+        "T-HDL-035: Component interaction mapping"
+      ],
+      "files": [
+        "tests/integration/handlers/systemsthinking.handler.test.ts"
+      ]
+    },
+    {
+      "id": "11.9.7",
+      "category": "CritiqueHandler",
+      "description": "CritiqueHandler tests - T-HDL-036 through T-HDL-043 covering 6 Socratic question categories",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "testCases": [
+        "T-HDL-036: Socratic Clarification generation",
+        "T-HDL-037: Socratic Assumptions probing",
+        "T-HDL-038: Socratic Evidence questioning",
+        "T-HDL-039: Socratic Viewpoints exploration",
+        "T-HDL-040: Socratic Implications analysis",
+        "T-HDL-041: Socratic Meta-questions generation",
+        "T-HDL-042: Weakness categorization",
+        "T-HDL-043: Suggestion generation"
+      ],
+      "files": [
+        "tests/integration/handlers/critique.handler.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "43 ModeHandler-specific tests implemented",
+    "All 7 specialized handlers tested",
+    "All 8 Systems Archetypes detection verified",
+    "All 6 Socratic question categories verified",
+    "Graph validation and cycle detection verified",
+    "All tests pass"
+  ],
+  "filesCreated": [
+    "tests/integration/handlers/causal.handler.test.ts",
+    "tests/integration/handlers/bayesian.handler.test.ts",
+    "tests/integration/handlers/gametheory.handler.test.ts",
+    "tests/integration/handlers/counterfactual.handler.test.ts",
+    "tests/integration/handlers/synthesis.handler.test.ts",
+    "tests/integration/handlers/systemsthinking.handler.test.ts",
+    "tests/integration/handlers/critique.handler.test.ts"
+  ],
+  "filesModified": [],
+  "totalEstimatedHours": 6.25,
+  "testCaseCount": 43,
+  "notes": "ModeHandler tests verify the specialized domain logic that adds value beyond basic thought creation"
+}
