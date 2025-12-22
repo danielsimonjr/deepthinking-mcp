@@ -6,47 +6,6 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
 
 **Version**: 8.3.2 | **Node**: >=18.0.0
 
-## What's New in v8.3.x
-
-### Phase 11: Comprehensive Test Coverage + Bug Fixes
-
-- **Mode Recommendation Fix**: `quickRecommend()` now uses substring matching with 10 new Bayesian keywords
-- **Export Improvements**: Markdown/LaTeX/Jupyter exports include mode-specific structured data via `extractModeSpecificMarkdown()` and `extractModeSpecificLatex()` helpers
-- **Test Coverage**: 143 test files, 3539 passing tests (up from 74 files, 2161 tests)
-- **Version Alignment**: All visual exporters updated to v8.3.1
-
-## What's New in v8.2.x
-
-### Phase 10: ModeHandler Architecture
-
-This release introduces the ModeHandler pattern for mode-specific processing:
-
-- **ModeHandler Interface** (`src/modes/handlers/ModeHandler.ts`): Strategy pattern for mode-specific validation and enhancement
-- **ModeHandlerRegistry** (`src/modes/handlers/ModeHandlerRegistry.ts`): Singleton registry managing all specialized handlers
-- **7 Specialized Handlers**: CausalHandler, BayesianHandler, GameTheoryHandler, CounterfactualHandler, SynthesisHandler, SystemsThinkingHandler, CritiqueHandler
-- **ThoughtFactory Integration**: Handlers integrated directly for seamless thought creation
-
-### Key Handler Enhancements (v8.2.x)
-- **CausalHandler**: Validates graph structure, detects cycles, propagates interventions
-- **BayesianHandler**: Auto-calculates posteriors from prior × likelihood, validates probability sums
-- **GameTheoryHandler**: Validates payoff matrix dimensions, computes Nash equilibria
-- **CounterfactualHandler**: Tracks world states, validates divergence points, compares outcomes
-- **SynthesisHandler**: Tracks source coverage, validates theme extraction, detects contradictions
-- **SystemsThinkingHandler**: Detects 8 Systems Archetypes (Peter Senge) with warning signs and interventions
-- **CritiqueHandler**: Applies 6 Socratic question categories (Richard Paul) for rigorous analysis
-
-## What's New in v7.5.0
-
-- **Phase 14: Accessible Reasoning Modes** - All 29 modes accessible via 12 focused MCP tools
-
-## What's New in v7.0.0
-
-### Phase 8: Proof Decomposition & Mathematical Reasoning Engine
-
-- **ProofDecomposer**: Breaks proofs into atomic statements with dependency graphs
-- **GapAnalyzer**: Detects gaps, missing steps, implicit assumptions
-- **Native SVG Export**: Direct SVG generation without external tools
-
 ## High-Level Architecture
 
 ```
