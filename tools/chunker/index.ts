@@ -9,15 +9,17 @@
  *
  * Options:
  *   -o, --output <dir>     Output directory for chunks (default: <file>_chunks/)
- *   -l, --level <n>        Split at heading level n (default: 2, i.e., ##)
- *   -m, --max-lines <n>    Max lines per chunk before sub-splitting (default: 500)
- *   -t, --type <type>      File type: auto, markdown (default: auto)
+ *   -l, --level <n>        Split at heading level n (default: 2 for markdown)
+ *   -m, --max-lines <n>    Max lines per chunk before warning (default: 500)
+ *   -t, --type <type>      File type: auto, markdown, json, typescript (default: auto)
  *   --dry-run              Show what would be done without writing files
  *   -h, --help             Show this help message
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
+
+type FileType = 'markdown' | 'json' | 'typescript';
 
 interface ChunkInfo {
   index: number;
@@ -36,8 +38,17 @@ interface Manifest {
   sourceFile: string;
   sourceHash: string;
   createdAt: string;
+  fileType: FileType;
   splitLevel: number;
   chunks: ChunkInfo[];
+}
+
+interface Section {
+  title: string;
+  level: number;
+  content: string;
+  startLine: number;
+  endLine: number;
 }
 
 // Simple hash function for change detection
@@ -46,22 +57,58 @@ function simpleHash(content: string): string {
   for (let i = 0; i < content.length; i++) {
     const char = content.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
+    hash = hash & hash;
   }
   return Math.abs(hash).toString(16).padStart(8, '0');
 }
 
-// Parse markdown into sections based on heading level
-function parseMarkdownSections(content: string, splitLevel: number): { title: string; level: number; content: string; startLine: number; endLine: number }[] {
-  // Normalize line endings (handle CRLF on Windows)
-  const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+// Normalize line endings
+function normalizeLineEndings(content: string): string {
+  return content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+}
+
+// Detect file type from extension
+function detectFileType(filePath: string): FileType {
+  const ext = path.extname(filePath).toLowerCase();
+  switch (ext) {
+    case '.md':
+    case '.markdown':
+      return 'markdown';
+    case '.json':
+      return 'json';
+    case '.ts':
+    case '.tsx':
+    case '.js':
+    case '.jsx':
+    case '.mjs':
+    case '.cjs':
+      return 'typescript';
+    default:
+      return 'markdown'; // Default fallback
+  }
+}
+
+// Get file extension for chunks based on file type
+function getChunkExtension(fileType: FileType): string {
+  switch (fileType) {
+    case 'markdown': return '.md';
+    case 'json': return '.json';
+    case 'typescript': return '.ts';
+  }
+}
+
+// ============================================================================
+// MARKDOWN PARSER
+// ============================================================================
+
+function parseMarkdownSections(content: string, splitLevel: number): Section[] {
+  const normalizedContent = normalizeLineEndings(content);
   const lines = normalizedContent.split('\n');
-  const sections: { title: string; level: number; content: string; startLine: number; endLine: number }[] = [];
+  const sections: Section[] = [];
 
   let currentSection: { title: string; level: number; lines: string[]; startLine: number } | null = null;
   const headingRegex = new RegExp(`^(#{1,${splitLevel}})\\s+(.+)$`);
 
-  // Handle content before first heading
   let preambleLines: string[] = [];
   let preambleStart = 0;
   let foundFirstHeading = false;
@@ -72,7 +119,6 @@ function parseMarkdownSections(content: string, splitLevel: number): { title: st
 
     if (match) {
       foundFirstHeading = true;
-      // Save preamble if exists
       if (preambleLines.length > 0 && currentSection === null) {
         sections.push({
           title: '_preamble',
@@ -84,7 +130,6 @@ function parseMarkdownSections(content: string, splitLevel: number): { title: st
         preambleLines = [];
       }
 
-      // Save previous section
       if (currentSection) {
         sections.push({
           title: currentSection.title,
@@ -95,7 +140,6 @@ function parseMarkdownSections(content: string, splitLevel: number): { title: st
         });
       }
 
-      // Start new section
       const level = match[1].length;
       currentSection = {
         title: match[2].trim(),
@@ -113,7 +157,6 @@ function parseMarkdownSections(content: string, splitLevel: number): { title: st
     }
   }
 
-  // Don't forget the last section
   if (currentSection) {
     sections.push({
       title: currentSection.title,
@@ -123,7 +166,6 @@ function parseMarkdownSections(content: string, splitLevel: number): { title: st
       endLine: lines.length
     });
   } else if (preambleLines.length > 0) {
-    // File has no headings, treat entire content as one section
     sections.push({
       title: '_content',
       level: 0,
@@ -136,19 +178,349 @@ function parseMarkdownSections(content: string, splitLevel: number): { title: st
   return sections;
 }
 
-// Generate a safe filename from title
-function sanitizeFilename(title: string, index: number): string {
+// ============================================================================
+// JSON PARSER
+// ============================================================================
+
+function parseJsonSections(content: string): Section[] {
+  const normalizedContent = normalizeLineEndings(content);
+  const sections: Section[] = [];
+
+  try {
+    const parsed = JSON.parse(normalizedContent);
+
+    if (Array.isArray(parsed)) {
+      // Split array into chunks of elements
+      const lines = normalizedContent.split('\n');
+      sections.push({
+        title: '_array',
+        level: 0,
+        content: normalizedContent,
+        startLine: 1,
+        endLine: lines.length
+      });
+    } else if (typeof parsed === 'object' && parsed !== null) {
+      // Split by top-level keys
+      const keys = Object.keys(parsed);
+
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const value = parsed[key];
+        const chunkContent = JSON.stringify({ [key]: value }, null, 2);
+        const lineCount = chunkContent.split('\n').length;
+
+        sections.push({
+          title: key,
+          level: 1,
+          content: chunkContent,
+          startLine: i + 1, // Approximate
+          endLine: i + lineCount
+        });
+      }
+    }
+  } catch (e) {
+    // If JSON parsing fails, treat as single chunk
+    const lines = normalizedContent.split('\n');
+    sections.push({
+      title: '_invalid_json',
+      level: 0,
+      content: normalizedContent,
+      startLine: 1,
+      endLine: lines.length
+    });
+  }
+
+  return sections;
+}
+
+// Merge JSON chunks back together
+function mergeJsonChunks(chunks: string[]): string {
+  const merged: Record<string, any> = {};
+
+  for (const chunk of chunks) {
+    try {
+      const parsed = JSON.parse(chunk);
+      if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+        Object.assign(merged, parsed);
+      }
+    } catch (e) {
+      // Skip invalid JSON chunks
+      console.error('Warning: Skipping invalid JSON chunk');
+    }
+  }
+
+  return JSON.stringify(merged, null, 2);
+}
+
+// ============================================================================
+// TYPESCRIPT PARSER
+// ============================================================================
+
+function parseTypeScriptSections(content: string): Section[] {
+  const normalizedContent = normalizeLineEndings(content);
+  const lines = normalizedContent.split('\n');
+  const sections: Section[] = [];
+
+  // Patterns for top-level declarations
+  const patterns = {
+    import: /^import\s+/,
+    export: /^export\s+(?:default\s+)?(?:async\s+)?(?:function|class|interface|type|const|let|var|enum)/,
+    exportFrom: /^export\s+\{[^}]*\}\s+from/,
+    exportAll: /^export\s+\*\s+from/,
+    function: /^(?:async\s+)?function\s+(\w+)/,
+    class: /^class\s+(\w+)/,
+    interface: /^interface\s+(\w+)/,
+    type: /^type\s+(\w+)/,
+    const: /^(?:export\s+)?const\s+(\w+)/,
+    let: /^(?:export\s+)?let\s+(\w+)/,
+    var: /^(?:export\s+)?var\s+(\w+)/,
+    enum: /^(?:export\s+)?enum\s+(\w+)/,
+  };
+
+  let currentSection: { title: string; level: number; lines: string[]; startLine: number; type: string } | null = null;
+  let importLines: string[] = [];
+  let importStart = -1;
+  let bracketDepth = 0;
+  let parenDepth = 0;
+  let inMultilineString = false;
+  let stringChar = '';
+
+  // Helper to count brackets in a line (respecting strings)
+  function countBrackets(line: string): { brackets: number; parens: number } {
+    let brackets = 0;
+    let parens = 0;
+    let inString = false;
+    let strChar = '';
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      const prevChar = i > 0 ? line[i - 1] : '';
+
+      if (inString) {
+        if (char === strChar && prevChar !== '\\') {
+          inString = false;
+        }
+      } else {
+        if (char === '"' || char === "'" || char === '`') {
+          inString = true;
+          strChar = char;
+        } else if (char === '{') {
+          brackets++;
+        } else if (char === '}') {
+          brackets--;
+        } else if (char === '(') {
+          parens++;
+        } else if (char === ')') {
+          parens--;
+        }
+      }
+    }
+
+    return { brackets, parens };
+  }
+
+  // Helper to save current section
+  function saveCurrentSection(endLine: number) {
+    if (currentSection && currentSection.lines.length > 0) {
+      sections.push({
+        title: currentSection.title,
+        level: currentSection.level,
+        content: currentSection.lines.join('\n'),
+        startLine: currentSection.startLine,
+        endLine: endLine
+      });
+    }
+    currentSection = null;
+    bracketDepth = 0;
+    parenDepth = 0;
+  }
+
+  // Helper to save imports
+  function saveImports(endLine: number) {
+    if (importLines.length > 0) {
+      sections.push({
+        title: '_imports',
+        level: 0,
+        content: importLines.join('\n'),
+        startLine: importStart + 1,
+        endLine: endLine
+      });
+      importLines = [];
+      importStart = -1;
+    }
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmedLine = line.trim();
+
+    // Skip empty lines and comments when looking for new declarations
+    if (!currentSection && (trimmedLine === '' || trimmedLine.startsWith('//'))) {
+      if (importLines.length > 0) {
+        importLines.push(line);
+      }
+      continue;
+    }
+
+    // Handle multi-line comments
+    if (trimmedLine.startsWith('/*') && !trimmedLine.includes('*/')) {
+      if (currentSection) {
+        currentSection.lines.push(line);
+      }
+      continue;
+    }
+
+    // If we're inside a declaration, continue until brackets balance
+    if (currentSection) {
+      currentSection.lines.push(line);
+      const { brackets, parens } = countBrackets(line);
+      bracketDepth += brackets;
+      parenDepth += parens;
+
+      // Check if declaration is complete
+      if (bracketDepth <= 0 && parenDepth <= 0) {
+        // Check for semicolon or closing bracket to confirm end
+        if (trimmedLine.endsWith(';') || trimmedLine.endsWith('}') || trimmedLine.endsWith(',')) {
+          saveCurrentSection(i + 1);
+        }
+      }
+      continue;
+    }
+
+    // Check for import statements - group all imports together
+    if (patterns.import.test(trimmedLine)) {
+      if (importStart === -1) importStart = i;
+      importLines.push(line);
+      continue;
+    }
+
+    // If we have imports and hit a non-import, save them as one group
+    if (importLines.length > 0) {
+      saveImports(i);
+    }
+
+    // Check for various declarations
+    let matched = false;
+    let title = '';
+    let level = 1;
+
+    // Export statements
+    if (patterns.exportAll.test(trimmedLine) || patterns.exportFrom.test(trimmedLine)) {
+      title = '_exports';
+      level = 0;
+      matched = true;
+    }
+    // Function declaration
+    else if (patterns.function.test(trimmedLine) || /^(?:export\s+)?(?:async\s+)?function\s+(\w+)/.test(trimmedLine)) {
+      const match = trimmedLine.match(/function\s+(\w+)/);
+      title = match ? `function:${match[1]}` : '_function';
+      level = 1;
+      matched = true;
+    }
+    // Class declaration
+    else if (patterns.class.test(trimmedLine) || /^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/.test(trimmedLine)) {
+      const match = trimmedLine.match(/class\s+(\w+)/);
+      title = match ? `class:${match[1]}` : '_class';
+      level = 1;
+      matched = true;
+    }
+    // Interface declaration
+    else if (patterns.interface.test(trimmedLine) || /^(?:export\s+)?interface\s+(\w+)/.test(trimmedLine)) {
+      const match = trimmedLine.match(/interface\s+(\w+)/);
+      title = match ? `interface:${match[1]}` : '_interface';
+      level = 2;
+      matched = true;
+    }
+    // Type declaration
+    else if (patterns.type.test(trimmedLine) || /^(?:export\s+)?type\s+(\w+)/.test(trimmedLine)) {
+      const match = trimmedLine.match(/type\s+(\w+)/);
+      title = match ? `type:${match[1]}` : '_type';
+      level = 2;
+      matched = true;
+    }
+    // Enum declaration
+    else if (patterns.enum.test(trimmedLine) || /^(?:export\s+)?enum\s+(\w+)/.test(trimmedLine)) {
+      const match = trimmedLine.match(/enum\s+(\w+)/);
+      title = match ? `enum:${match[1]}` : '_enum';
+      level = 2;
+      matched = true;
+    }
+    // Const/let/var declaration
+    else if (patterns.const.test(trimmedLine)) {
+      const match = trimmedLine.match(/const\s+(\w+)/);
+      title = match ? `const:${match[1]}` : '_const';
+      level = 2;
+      matched = true;
+    }
+    else if (patterns.let.test(trimmedLine)) {
+      const match = trimmedLine.match(/let\s+(\w+)/);
+      title = match ? `let:${match[1]}` : '_let';
+      level = 2;
+      matched = true;
+    }
+    else if (patterns.var.test(trimmedLine)) {
+      const match = trimmedLine.match(/var\s+(\w+)/);
+      title = match ? `var:${match[1]}` : '_var';
+      level = 2;
+      matched = true;
+    }
+
+    if (matched) {
+      currentSection = {
+        title,
+        level,
+        lines: [line],
+        startLine: i + 1,
+        type: title.split(':')[0]
+      };
+      const { brackets, parens } = countBrackets(line);
+      bracketDepth = brackets;
+      parenDepth = parens;
+
+      // Check if single-line declaration
+      if (bracketDepth <= 0 && parenDepth <= 0 && (trimmedLine.endsWith(';') || trimmedLine.endsWith('}'))) {
+        saveCurrentSection(i + 1);
+      }
+    }
+  }
+
+  // Save any remaining sections
+  saveImports(lines.length);
+  saveCurrentSection(lines.length);
+
+  // If no sections found, return entire content as one section
+  if (sections.length === 0) {
+    sections.push({
+      title: '_content',
+      level: 0,
+      content: normalizedContent,
+      startLine: 1,
+      endLine: lines.length
+    });
+  }
+
+  return sections;
+}
+
+// ============================================================================
+// FILENAME GENERATION
+// ============================================================================
+
+function sanitizeFilename(title: string, index: number, fileType: FileType): string {
+  const ext = getChunkExtension(fileType);
   const safe = title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
     .substring(0, 50);
-  return `${String(index).padStart(3, '0')}-${safe || 'section'}.md`;
+  return `${String(index).padStart(3, '0')}-${safe || 'section'}${ext}`;
 }
 
-// Split command
-function splitFile(inputFile: string, options: { output?: string; level?: number; maxLines?: number; dryRun?: boolean }) {
-  const splitLevel = options.level ?? 2;
+// ============================================================================
+// SPLIT COMMAND
+// ============================================================================
+
+function splitFile(inputFile: string, options: { output?: string; level?: number; maxLines?: number; type?: string; dryRun?: boolean }) {
   const maxLines = options.maxLines ?? 500;
   const dryRun = options.dryRun ?? false;
 
@@ -159,11 +531,19 @@ function splitFile(inputFile: string, options: { output?: string; level?: number
     process.exit(1);
   }
 
+  // Detect or use specified file type
+  const fileType: FileType = (options.type && options.type !== 'auto')
+    ? options.type as FileType
+    : detectFileType(absoluteInput);
+
+  const splitLevel = options.level ?? (fileType === 'markdown' ? 2 : 1);
+
   const content = fs.readFileSync(absoluteInput, 'utf-8');
   const sourceHash = simpleHash(content);
 
   // Determine output directory
-  const baseName = path.basename(inputFile, '.md');
+  const ext = path.extname(inputFile);
+  const baseName = path.basename(inputFile, ext);
   const outputDir = options.output
     ? path.resolve(options.output)
     : path.join(path.dirname(absoluteInput), `${baseName}_chunks`);
@@ -172,13 +552,29 @@ function splitFile(inputFile: string, options: { output?: string; level?: number
   console.log(`${'='.repeat(50)}`);
   console.log(`Source:      ${absoluteInput}`);
   console.log(`Output:      ${outputDir}`);
-  console.log(`Split Level: h${splitLevel} (${'#'.repeat(splitLevel)})`);
+  console.log(`File Type:   ${fileType}`);
+  if (fileType === 'markdown') {
+    console.log(`Split Level: h${splitLevel} (${'#'.repeat(splitLevel)})`);
+  }
   console.log(`Max Lines:   ${maxLines}`);
   console.log(`Dry Run:     ${dryRun}`);
   console.log();
 
-  // Parse sections
-  const sections = parseMarkdownSections(content, splitLevel);
+  // Parse sections based on file type
+  let sections: Section[];
+  switch (fileType) {
+    case 'markdown':
+      sections = parseMarkdownSections(content, splitLevel);
+      break;
+    case 'json':
+      sections = parseJsonSections(content);
+      break;
+    case 'typescript':
+      sections = parseTypeScriptSections(content);
+      break;
+    default:
+      sections = parseMarkdownSections(content, splitLevel);
+  }
 
   if (sections.length === 0) {
     console.log('No sections found to split.');
@@ -192,7 +588,7 @@ function splitFile(inputFile: string, options: { output?: string; level?: number
 
   for (let i = 0; i < sections.length; i++) {
     const section = sections[i];
-    const filename = sanitizeFilename(section.title, i + 1);
+    const filename = sanitizeFilename(section.title, i + 1, fileType);
     const lineCount = section.content.split('\n').length;
 
     const chunk: ChunkInfo = {
@@ -209,9 +605,11 @@ function splitFile(inputFile: string, options: { output?: string; level?: number
 
     chunks.push(chunk);
 
-    const levelIndicator = section.level > 0 ? `h${section.level}` : 'pre';
+    const levelIndicator = fileType === 'markdown'
+      ? (section.level > 0 ? `h${section.level}` : 'pre')
+      : (section.level === 0 ? 'meta' : section.level === 1 ? 'decl' : 'type');
     const sizeWarning = lineCount > maxLines ? ' [LARGE]' : '';
-    console.log(`  ${String(i + 1).padStart(2)}. [${levelIndicator}] ${section.title.substring(0, 40).padEnd(40)} ${String(lineCount).padStart(4)} lines${sizeWarning}`);
+    console.log(`  ${String(i + 1).padStart(2)}. [${levelIndicator.padEnd(4)}] ${section.title.substring(0, 40).padEnd(40)} ${String(lineCount).padStart(4)} lines${sizeWarning}`);
 
     // Write chunk file
     if (!dryRun) {
@@ -225,10 +623,11 @@ function splitFile(inputFile: string, options: { output?: string; level?: number
 
   // Create manifest
   const manifest: Manifest = {
-    version: '1.0.0',
+    version: '1.1.0',
     sourceFile: absoluteInput,
     sourceHash: sourceHash,
     createdAt: new Date().toISOString(),
+    fileType: fileType,
     splitLevel: splitLevel,
     chunks: chunks
   };
@@ -247,19 +646,22 @@ function splitFile(inputFile: string, options: { output?: string; level?: number
   console.log(`  Total chunks:  ${chunks.length}`);
   console.log(`  Total lines:   ${totalLines}`);
   if (largeChunks > 0) {
-    console.log(`  Large chunks:  ${largeChunks} (>${maxLines} lines - consider lower split level)`);
+    console.log(`  Large chunks:  ${largeChunks} (>${maxLines} lines)`);
   }
 
   if (dryRun) {
     console.log(`\n[DRY RUN] No files were written.`);
   } else {
     console.log(`\nChunks written to: ${outputDir}`);
-    console.log(`\nTo edit: Modify individual .md files in the chunks directory`);
+    console.log(`\nTo edit: Modify individual chunk files in the directory`);
     console.log(`To merge: chunker merge "${path.join(outputDir, 'manifest.json')}"`);
   }
 }
 
-// Merge command
+// ============================================================================
+// MERGE COMMAND
+// ============================================================================
+
 function mergeChunks(manifestPath: string, options: { output?: string; dryRun?: boolean }) {
   const dryRun = options.dryRun ?? false;
 
@@ -271,11 +673,13 @@ function mergeChunks(manifestPath: string, options: { output?: string; dryRun?: 
 
   const manifest: Manifest = JSON.parse(fs.readFileSync(absoluteManifest, 'utf-8'));
   const chunksDir = path.dirname(absoluteManifest);
+  const fileType = manifest.fileType || 'markdown'; // Backwards compatibility
 
   console.log(`\nchunker - Merging Chunks`);
   console.log(`${'='.repeat(50)}`);
   console.log(`Manifest:    ${absoluteManifest}`);
   console.log(`Source:      ${manifest.sourceFile}`);
+  console.log(`File Type:   ${fileType}`);
   console.log(`Created:     ${manifest.createdAt}`);
   console.log(`Chunks:      ${manifest.chunks.length}`);
   console.log();
@@ -306,8 +710,14 @@ function mergeChunks(manifestPath: string, options: { output?: string; dryRun?: 
 
   console.log(`\nModified chunks: ${modifiedCount} of ${manifest.chunks.length}`);
 
-  // Merge content
-  const mergedContent = chunkContents.join('\n');
+  // Merge content based on file type
+  let mergedContent: string;
+  if (fileType === 'json') {
+    mergedContent = mergeJsonChunks(chunkContents);
+  } else {
+    // Markdown and TypeScript: simple concatenation
+    mergedContent = chunkContents.join('\n');
+  }
 
   // Determine output path
   const outputPath = options.output
@@ -343,7 +753,10 @@ function mergeChunks(manifestPath: string, options: { output?: string; dryRun?: 
   }
 }
 
-// Status command
+// ============================================================================
+// STATUS COMMAND
+// ============================================================================
+
 function showStatus(manifestPath: string) {
   const absoluteManifest = path.resolve(manifestPath);
   if (!fs.existsSync(absoluteManifest)) {
@@ -353,12 +766,16 @@ function showStatus(manifestPath: string) {
 
   const manifest: Manifest = JSON.parse(fs.readFileSync(absoluteManifest, 'utf-8'));
   const chunksDir = path.dirname(absoluteManifest);
+  const fileType = manifest.fileType || 'markdown';
 
   console.log(`\nchunker - Chunk Status`);
   console.log(`${'='.repeat(50)}`);
-  console.log(`Source:   ${manifest.sourceFile}`);
-  console.log(`Created:  ${manifest.createdAt}`);
-  console.log(`Level:    h${manifest.splitLevel}`);
+  console.log(`Source:    ${manifest.sourceFile}`);
+  console.log(`File Type: ${fileType}`);
+  console.log(`Created:   ${manifest.createdAt}`);
+  if (fileType === 'markdown') {
+    console.log(`Level:     h${manifest.splitLevel}`);
+  }
   console.log();
 
   let modifiedCount = 0;
@@ -413,7 +830,10 @@ function showStatus(manifestPath: string) {
   }
 }
 
-// Help text
+// ============================================================================
+// HELP
+// ============================================================================
+
 function showHelp() {
   console.log(`
 chunker - Split and merge large files for editing
@@ -425,9 +845,9 @@ USAGE:
 
 SPLIT OPTIONS:
   -o, --output <dir>     Output directory for chunks (default: <file>_chunks/)
-  -l, --level <n>        Split at heading level n (default: 2, i.e., ##)
+  -l, --level <n>        Split level (markdown: heading level, default: 2)
   -m, --max-lines <n>    Max lines per chunk for warnings (default: 500)
-  -t, --type <type>      File type: auto, markdown (default: auto)
+  -t, --type <type>      File type: auto, markdown, json, typescript (default: auto)
   --dry-run              Show what would be done without writing files
 
 MERGE OPTIONS:
@@ -435,34 +855,40 @@ MERGE OPTIONS:
   --dry-run              Show what would be done without writing files
 
 EXAMPLES:
-  # Split a large markdown file by ## headings
+  # Split markdown by ## headings
   chunker split ARCHITECTURE.md
 
-  # Split by ### headings into custom directory
-  chunker split docs/OVERVIEW.md -l 3 -o ./chunks
+  # Split TypeScript by declarations
+  chunker split src/index.ts
 
-  # Check status of edited chunks
-  chunker status ./ARCHITECTURE_chunks/manifest.json
+  # Split JSON by top-level keys
+  chunker split package.json
 
-  # Merge edited chunks back
-  chunker merge ./ARCHITECTURE_chunks/manifest.json
+  # Split with explicit type
+  chunker split config.txt -t json
 
-  # Merge to a different file
-  chunker merge ./chunks/manifest.json -o ./ARCHITECTURE-new.md
-
-WORKFLOW:
-  1. Split:   chunker split large-doc.md
-  2. Edit:    Modify individual chunk files in the _chunks directory
-  3. Status:  chunker status large-doc_chunks/manifest.json
-  4. Merge:   chunker merge large-doc_chunks/manifest.json
+  # Check status and merge
+  chunker status ./src_chunks/manifest.json
+  chunker merge ./src_chunks/manifest.json
 
 SUPPORTED FILE TYPES:
-  - Markdown (.md)  - Splits by heading levels (##, ###, etc.)
-  - More formats coming soon (JSON, TypeScript, etc.)
+  - Markdown (.md)     - Splits by heading levels (##, ###, etc.)
+  - JSON (.json)       - Splits by top-level object keys
+  - TypeScript (.ts)   - Splits by declarations (imports, functions, classes, types)
+  - JavaScript (.js)   - Same as TypeScript
+
+WORKFLOW:
+  1. Split:   chunker split large-file.ts
+  2. Edit:    Modify individual chunk files
+  3. Status:  chunker status large-file_chunks/manifest.json
+  4. Merge:   chunker merge large-file_chunks/manifest.json
 `);
 }
 
-// Parse command line arguments
+// ============================================================================
+// CLI
+// ============================================================================
+
 function parseArgs(args: string[]): { command: string; target: string; options: Record<string, any> } {
   const command = args[0] || 'help';
   const target = args[1] || '';
@@ -477,6 +903,8 @@ function parseArgs(args: string[]): { command: string; target: string; options: 
       options.level = parseInt(args[++i], 10);
     } else if (arg === '-m' || arg === '--max-lines') {
       options.maxLines = parseInt(args[++i], 10);
+    } else if (arg === '-t' || arg === '--type') {
+      options.type = args[++i];
     } else if (arg === '--dry-run') {
       options.dryRun = true;
     } else if (arg === '-h' || arg === '--help') {
@@ -487,7 +915,6 @@ function parseArgs(args: string[]): { command: string; target: string; options: 
   return { command, target, options };
 }
 
-// Main
 function main() {
   const args = process.argv.slice(2);
 
