@@ -4,7 +4,16 @@
 
 DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced reasoning capabilities through 33 thinking modes (29 with dedicated thought types) with meta-reasoning for strategic oversight. The architecture follows a modular, service-oriented design with clear separation of concerns.
 
-**Version**: 8.2.1 | **Node**: >=18.0.0
+**Version**: 8.3.2 | **Node**: >=18.0.0
+
+## What's New in v8.3.x
+
+### Phase 11: Comprehensive Test Coverage + Bug Fixes
+
+- **Mode Recommendation Fix**: `quickRecommend()` now uses substring matching with 10 new Bayesian keywords
+- **Export Improvements**: Markdown/LaTeX/Jupyter exports include mode-specific structured data via `extractModeSpecificMarkdown()` and `extractModeSpecificLatex()` helpers
+- **Test Coverage**: 143 test files, 3539 passing tests (up from 74 files, 2161 tests)
+- **Version Alignment**: All visual exporters updated to v8.3.1
 
 ## What's New in v8.2.x
 
@@ -436,34 +445,42 @@ Response with updated session
 - **0 type suppressions** (down from 231)
 - Comprehensive type definitions for all 27 modes
 
-## Testing Architecture
+## Testing Architecture (Phase 11 Complete)
 
-### Test Pyramid
+### Test Structure
 ```
-┌────────────────────┐
-│  Integration (7)   │  ← Full workflow tests
-├────────────────────┤
-│  Unit Tests (36)   │  ← Component tests
-├────────────────────┤
-│ Critical Path (3)  │  ← SearchEngine, BatchProcessor, BackupManager
-└────────────────────┘
+tests/
+├── unit/                       # 50+ unit test files
+│   ├── session/                # Session management
+│   ├── validation/             # Validators
+│   ├── services/               # Service layer
+│   ├── modes/handlers/         # ModeHandler tests
+│   └── proof/                  # Proof decomposition
+├── integration/                # Integration tests
+│   ├── handlers/               # 7 handler tests
+│   ├── tools/                  # 37 MCP tool tests
+│   ├── exports/                # 9 export format tests
+│   └── scenarios/              # 4 workflow tests
+├── edge-cases/                 # 6 edge case files
+├── performance/                # 4 stress/perf tests
+└── utils/                      # 5 test utilities
 ```
 
-### Coverage
-- **Tests**: 763 passing
-- **Test Files**: 36
-- **Critical Paths**: 80%+ coverage
+### Coverage (v8.3.2)
+- **Test Files**: 143 total
+- **Passing Tests**: 3539
+- **Test Categories**: 19 (COR, STD, PAR, MTH, TMP, PRB, CSL, STR, ANL, SCI, ENG, ACD, SES, EXP, HDL, EDG, REG, INT, PRF)
 - **TypeScript**: 100% type coverage (0 errors)
 
 ## Key Metrics
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~80,336 |
-| TypeScript Files | 197 |
+| Total Lines of Code | ~89,490 |
+| TypeScript Files | 221 |
 | Type Suppressions | 0 |
-| Test Files | 39 |
-| Tests | 1046+ |
+| Test Files | 143 |
+| Passing Tests | 3539 |
 | Thinking Modes | 33 (29 with thought types) |
 | Specialized Handlers | 7 |
 | MCP Tools | 12 focused + 1 legacy |
@@ -472,11 +489,14 @@ Response with updated session
 | Backup Providers | 4 |
 | Reasoning Types | 69 (110 planned) |
 | Modules | 16 |
-| Total Exports | 1033 (448 re-exports) |
+| Total Exports | 1117 (515 re-exports) |
+| Circular Dependencies | 55 (all type-only, 0 runtime) |
 
 ## Version History
 
-- **v8.2.1** (Current): Phase 10 ModeHandler integration fix in ThoughtFactory
+- **v8.3.2** (Current): Phase 11 complete, mode recommendation fix, export improvements
+- **v8.3.1**: Codebase cleanup, dependency graph enhancements
+- **v8.2.1**: Phase 10 ModeHandler integration fix in ThoughtFactory
 - **v8.2.0**: Phase 10 Sprint 2B - Additional mode handlers (Counterfactual, Synthesis, SystemsThinking, Critique)
 - **v8.1.0**: Phase 10 Sprint 2 - Core mode handlers (Causal, Bayesian, GameTheory)
 - **v8.0.0**: Phase 10 Sprint 1 - ModeHandler infrastructure and registry
@@ -492,5 +512,5 @@ Response with updated session
 
 ---
 
-*Last Updated*: 2025-12-15
-*Architecture Version*: 8.2.1
+*Last Updated*: 2025-12-22
+*Architecture Version*: 8.3.2

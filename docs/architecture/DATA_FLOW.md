@@ -1,6 +1,6 @@
 # Data Flow Architecture
 
-**Version**: 8.2.1 | **Last Updated**: 2025-12-15
+**Version**: 8.3.2 | **Last Updated**: 2025-12-22
 
 ## Overview
 
@@ -357,20 +357,28 @@ Client                    Server                    Storage
 1. Client requests export in specific format
 2. SessionManager retrieves session from storage/cache
 3. ExportService transforms to requested format
-4. Response contains formatted output
+4. **Mode-specific data extraction** via `extractModeSpecificMarkdown()` or `extractModeSpecificLatex()` (v8.3.2)
+5. Response contains formatted output with structured data
 
 **Supported Formats & Transformations**:
 
 | Format | Output | Use Case |
 |--------|---------|----------|
 | JSON | `{"id": "...", "thoughts": [...]}` | API integration, backup |
-| Markdown | `# Session\n## Thoughts\n...` | Documentation, sharing |
-| LaTeX | `\documentclass{article}...` | Academic papers |
+| Markdown | `# Session\n## Thoughts\n...` + mode-specific sections | Documentation, sharing |
+| LaTeX | `\documentclass{article}...` + `\itemize` for structured data | Academic papers |
 | HTML | `<html><body>...</body></html>` | Web display |
-| Jupyter | `{"cells": [...], "nbformat": 4}` | Interactive analysis |
+| Jupyter | `{"cells": [...]}` + separate cells for mode data | Interactive analysis |
 | Mermaid | `graph TD; A-->B;` | Visual diagrams |
 | DOT | `digraph G { A -> B; }` | GraphViz |
 | ASCII | `├── Thought 1\n└── Thought 2` | Terminal display |
+
+**Mode-Specific Data Extraction** (v8.3.2):
+- Causal: Nodes, edges with strengths, interventions
+- Bayesian: Hypotheses, priors, posteriors, evidence
+- Temporal: Events, intervals, timelines with relations
+- Game Theory: Players, strategies, payoff matrices
+- Systems Thinking: Components, feedback loops, archetypes
 
 **No Storage Write**: Export is read-only operation
 

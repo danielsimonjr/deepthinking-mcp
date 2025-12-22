@@ -1,7 +1,7 @@
 metadata:
   name: deepthinking-mcp
-  version: 8.3.0
-  lastUpdated: "2025-12-20"
+  version: 8.3.2
+  lastUpdated: "2025-12-22"
   totalFiles: 221
   totalModules: 16
   totalExports: 1117
@@ -4960,6 +4960,17 @@ modules:
             - BayesianThought
             - FirstPrinciplesThought
             - isMetaReasoningThought
+            - isCausalThought
+            - isBayesianThought
+            - isTemporalThought
+            - isGameTheoryThought
+            - isFirstPrinciplesThought
+            - isSystemsThinkingThought
+            - isSynthesisThought
+            - isArgumentationThought
+            - isAnalysisThought
+            - isAlgorithmicThought
+            - isScientificMethodThought
             - HybridThought
             - "// Sprint 1: Visual export integration types\r\n  SequentialThought"
             - ShannonThought
@@ -4971,6 +4982,10 @@ modules:
             - ScientificMethodThought
             - OptimizationThought
             - FormalLogicThought
+            - SynthesisThought
+            - ArgumentationThought
+            - AnalysisThought
+            - AlgorithmicThought
         - file: ../types/modes/mathematics.js
           imports:
             - MathematicsThought
@@ -5717,7 +5732,7 @@ modules:
         - AcademicModeEnum
         - AcademicSchema
     src/tools/schemas/modes/analytical.ts:
-      description: Analytical Mode Schemas (v6.0.0)
+      description: Analytical Mode Schemas (v8.4.0)
       externalDependencies:
         - package: zod
           imports:
@@ -5727,6 +5742,9 @@ modules:
         - file: ../base.js
           imports:
             - BaseThoughtSchema
+        - file: ../shared.js
+          imports:
+            - ConfidenceSchema
       exports:
         - AnalyticalSchema
       constants:
@@ -5769,7 +5787,7 @@ modules:
         - CoreModeSchema
         - CoreSchema
     src/tools/schemas/modes/engineering.ts:
-      description: Engineering Mode Schemas (v7.5.0)
+      description: Engineering Mode Schemas (v8.4.0)
       externalDependencies:
         - package: zod
           imports:
@@ -5900,7 +5918,7 @@ modules:
       constants:
         - MathSchema
     src/tools/schemas/modes/probabilistic.ts:
-      description: Probabilistic Mode Schemas (v4.1.0)
+      description: Probabilistic Mode Schemas (v8.4.0)
       externalDependencies:
         - package: zod
           imports:
@@ -5918,7 +5936,7 @@ modules:
       constants:
         - ProbabilisticSchema
     src/tools/schemas/modes/scientific.ts:
-      description: Scientific Mode Schemas (v4.1.0)
+      description: Scientific Mode Schemas (v8.4.0)
       externalDependencies:
         - package: zod
           imports:
@@ -5933,7 +5951,7 @@ modules:
       constants:
         - ScientificSchema
     src/tools/schemas/modes/strategic.ts:
-      description: Strategic Mode Schemas (v4.1.0)
+      description: Strategic Mode Schemas (v8.4.0)
       externalDependencies:
         - package: zod
           imports:
@@ -9759,7 +9777,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 221
   totalModules: 16
-  totalLinesOfCode: 86248
+  totalLinesOfCode: 87275
   totalExports: 1117
   totalClasses: 118
   totalInterfaces: 407

@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 8.3.0 | **Last Updated**: 2025-12-20
+**Version**: 8.3.2 | **Last Updated**: 2025-12-22
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -1958,8 +1958,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingSession, ThinkingMode, CausalThought, TemporalThought, GameTheoryThought, BayesianThought, FirstPrinciplesThought, isMetaReasoningThought, HybridThought, // Sprint 1: Visual export integration types
-  SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought` | Import |
+| `../types/index.js` | `ThinkingSession, ThinkingMode, CausalThought, TemporalThought, GameTheoryThought, BayesianThought, FirstPrinciplesThought, isMetaReasoningThought, isCausalThought, isBayesianThought, isTemporalThought, isGameTheoryThought, isFirstPrinciplesThought, isSystemsThinkingThought, isSynthesisThought, isArgumentationThought, isAnalysisThought, isAlgorithmicThought, isScientificMethodThought, HybridThought, // Sprint 1: Visual export integration types
+  SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought, SynthesisThought, ArgumentationThought, AnalysisThought, AlgorithmicThought` | Import |
 | `../types/modes/mathematics.js` | `MathematicsThought` | Import (type-only) |
 | `../types/modes/physics.js` | `PhysicsThought` | Import (type-only) |
 | `../types/modes/metareasoning.js` | `MetaReasoningThought` | Import (type-only) |
@@ -2332,7 +2332,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/tools/schemas/modes/analytical.ts` - Analytical Mode Schemas (v6.0.0)
+### `src/tools/schemas/modes/analytical.ts` - Analytical Mode Schemas (v8.4.0)
 
 **External Dependencies:**
 | Package | Import |
@@ -2343,6 +2343,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
+| `../shared.js` | `ConfidenceSchema` | Import |
 
 **Exports:**
 - Constants: `AnalyticalSchema`
@@ -2384,7 +2385,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/tools/schemas/modes/engineering.ts` - Engineering Mode Schemas (v7.5.0)
+### `src/tools/schemas/modes/engineering.ts` - Engineering Mode Schemas (v8.4.0)
 
 **External Dependencies:**
 | Package | Import |
@@ -2440,7 +2441,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/tools/schemas/modes/probabilistic.ts` - Probabilistic Mode Schemas (v4.1.0)
+### `src/tools/schemas/modes/probabilistic.ts` - Probabilistic Mode Schemas (v8.4.0)
 
 **External Dependencies:**
 | Package | Import |
@@ -2458,7 +2459,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/tools/schemas/modes/scientific.ts` - Scientific Mode Schemas (v4.1.0)
+### `src/tools/schemas/modes/scientific.ts` - Scientific Mode Schemas (v8.4.0)
 
 **External Dependencies:**
 | Package | Import |
@@ -2475,7 +2476,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/tools/schemas/modes/strategic.ts` - Strategic Mode Schemas (v4.1.0)
+### `src/tools/schemas/modes/strategic.ts` - Strategic Mode Schemas (v8.4.0)
 
 **External Dependencies:**
 | Package | Import |
@@ -3957,7 +3958,7 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 221 |
 | Total Modules | 16 |
-| Total Lines of Code | 86248 |
+| Total Lines of Code | 87275 |
 | Total Exports | 1117 |
 | Total Re-exports | 515 |
 | Total Classes | 118 |
@@ -3971,5 +3972,5 @@ graph TD
 
 ---
 
-*Last Updated*: 2025-12-20
-*Version*: 8.3.0
+*Last Updated*: 2025-12-22
+*Version*: 8.3.2

@@ -1,6 +1,6 @@
 # Directory Structure Guide
 
-**Version**: 8.2.1 | **Last Updated**: 2025-12-15
+**Version**: 8.3.2 | **Last Updated**: 2025-12-22
 
 This document describes the purpose and organization of each directory in the DeepThinking MCP codebase.
 
@@ -8,7 +8,7 @@ This document describes the purpose and organization of each directory in the De
 
 ## Overview
 
-The codebase is organized into **16 modules** with **197 TypeScript files** totaling approximately **80,336 lines of code**.
+The codebase is organized into **16 modules** with **221 TypeScript files** totaling approximately **89,490 lines of code**.
 
 ```
 src/

@@ -4,9 +4,16 @@
 
 DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 33 specialized thinking modes (29 with dedicated thought types). The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, meta-reasoning for strategic oversight, enterprise security features, proof decomposition for mathematical reasoning, and comprehensive export capabilities including native SVG generation.
 
-**Version**: 8.2.1 | **Node**: >=18.0.0 | **License**: MIT
+**Version**: 8.3.2 | **Node**: >=18.0.0 | **License**: MIT
 
 ---
+
+## What's New in v8.3.x
+
+- **Bug Fixes**: Mode recommendation logic now uses substring matching with prioritized keywords
+- **Export Improvements**: Markdown/LaTeX/Jupyter exports include mode-specific structured data (causal graphs, probabilities, temporal events)
+- **Phase 11 Complete**: Comprehensive test coverage - 143 test files, 3539 passing tests
+- **Version Alignment**: All visual exporters updated to v8.3.1
 
 ## What's New in v8.2.x
 
@@ -35,10 +42,10 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~80,336 |
-| TypeScript Files | 197 |
-| Test Files | 39 |
-| Passing Tests | 1046+ |
+| Total Lines of Code | ~89,490 |
+| TypeScript Files | 221 |
+| Test Files | 143 |
+| Passing Tests | 3539 |
 | Type Suppressions | 0 |
 | Thinking Modes | 33 (29 with thought types) |
 | Specialized Handlers | 7 |
@@ -46,8 +53,9 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 | Export Formats | 8 (including native SVG) |
 | Visual Exporters | 35+ mode-specific |
 | Reasoning Types | 69 (110 planned) |
-| Total Exports | 1033 (448 re-exports) |
+| Total Exports | 1117 (515 re-exports) |
 | Modules | 16 |
+| Circular Dependencies | 55 (all type-only, 0 runtime) |
 
 ---
 
@@ -454,23 +462,30 @@ Configured in `tsconfig.json`:
 
 ## Testing
 
-### Test Structure
+### Test Structure (Phase 11 Complete)
 ```
 tests/
-├── unit/                   # 36 unit test files
-│   ├── session/            # Session management tests
-│   ├── validation/         # Validator tests
-│   ├── services/           # Service layer tests
-│   └── modes/              # Mode-specific tests
-└── integration/            # 7 integration tests
+├── unit/                       # Unit tests (50+ files)
+│   ├── session/                # Session management tests
+│   ├── validation/             # Validator tests
+│   ├── services/               # Service layer tests
+│   ├── modes/handlers/         # ModeHandler tests
+│   └── proof/                  # Proof decomposition tests
+├── integration/                # Integration tests
+│   ├── handlers/               # 7 handler integration tests
+│   ├── tools/                  # 37 MCP tool tests
+│   ├── exports/                # 9 export format tests
+│   └── scenarios/              # 4 real-world workflow tests
+├── edge-cases/                 # 6 edge case test files
+├── performance/                # 4 performance/stress tests
+└── utils/                      # 5 test utility files
 ```
 
-### Coverage
-- **Unit Tests**: 40 files
-- **Integration Tests**: 8 files (including proof decomposition)
-- **Total Tests**: 972 passing
-- **Critical Paths**: 80%+ coverage
-- **Phase 8**: Full coverage for proof decomposition components
+### Coverage (v8.3.2)
+- **Test Files**: 143 total
+- **Passing Tests**: 3539
+- **Test Categories**: 19 (COR, STD, PAR, MTH, TMP, PRB, CSL, STR, ANL, SCI, ENG, ACD, SES, EXP, HDL, EDG, REG, INT, PRF)
+- **Phase 11**: Comprehensive coverage across all tools, modes, handlers, and exports
 
 ---
 
@@ -485,5 +500,5 @@ tests/
 
 ---
 
-*Last Updated*: 2025-12-15
-*Version*: 8.2.1
+*Last Updated*: 2025-12-22
+*Version*: 8.3.2

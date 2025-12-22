@@ -1,6 +1,6 @@
 # Component Architecture
 
-**Version**: 8.2.1 | **Last Updated**: 2025-12-15
+**Version**: 8.3.2 | **Last Updated**: 2025-12-22
 
 ## Core Components
 
@@ -140,19 +140,21 @@ interface ModeHandler {
 
 ### `src/services/ExportService.ts` - Export Service
 
-**Purpose**: Unified export logic for multiple output formats
+**Purpose**: Unified export logic for multiple output formats with mode-specific structured data extraction (v8.3.2)
 
-**Key Method**:
+**Key Methods**:
 ```typescript
 exportSession(session: ThinkingSession, format: ExportFormat): string
+extractModeSpecificMarkdown(thought: Thought): string  // v8.3.2
+extractModeSpecificLatex(thought: Thought): string     // v8.3.2
 ```
 
 **Supported Formats**:
 - **JSON**: Structured data export
-- **Markdown**: Human-readable documentation
-- **LaTeX**: Academic paper format
+- **Markdown**: Human-readable documentation with mode-specific sections (v8.3.2)
+- **LaTeX**: Academic paper format with mode-specific formatting (v8.3.2)
 - **HTML**: Web-ready output with styling
-- **Jupyter**: Interactive notebook (.ipynb)
+- **Jupyter**: Interactive notebook with mode-specific cells (v8.3.2)
 - **Mermaid**: Diagram-based visualization
 - **DOT**: GraphViz format
 - **ASCII**: Terminal-friendly tree view
@@ -161,12 +163,20 @@ exportSession(session: ThinkingSession, format: ExportFormat): string
 - Format-specific transformations
 - Metadata preservation
 - Thought hierarchy rendering
-- Mode-specific formatting
+- **Mode-specific structured data extraction** (v8.3.2):
+  - Causal graphs with nodes, edges, interventions
+  - Bayesian probabilities with hypotheses and evidence
+  - Temporal events with timelines and intervals
+  - Game theory matrices with players and strategies
+  - First principles with fundamentals and derivations
+  - Systems thinking with components and feedback loops
+  - Academic modes with sources, themes, claims, codes
 
-**Line Count**: 360 lines
+**Line Count**: ~700 lines (expanded with mode-specific helpers)
 
 **Dependencies**:
 - VisualExporter (for Mermaid, DOT, ASCII)
+- Type guards (isCausalThought, isBayesianThought, etc.)
 
 ---
 
@@ -177,7 +187,7 @@ exportSession(session: ThinkingSession, format: ExportFormat): string
 **Key Methods**:
 ```typescript
 switchMode(sessionId: string, newMode: ThinkingMode, reason: string): Promise<ThinkingSession>
-quickRecommend(problemType: string): ThinkingMode
+quickRecommend(problemType: string): ThinkingMode  // Uses substring matching with prioritized keywords (v8.3.2)
 getRecommendations(characteristics: ProblemCharacteristics): string
 evaluateAndSuggestSwitch(sessionId: string, problemType?: string): Promise<EvaluationResult>  // v6.0.0
 autoSwitchIfNeeded(sessionId: string, problemType?: string): Promise<SwitchResult>  // v6.0.0
@@ -185,11 +195,12 @@ autoSwitchIfNeeded(sessionId: string, problemType?: string): Promise<SwitchResul
 
 **Features**:
 - Safe mode transitions
-- Problem-based recommendations
+- Problem-based recommendations with substring matching (v8.3.2)
 - Integration with taxonomy system
 - Mode combination suggestions
 - **Adaptive mode switching** based on MetaMonitor evaluation (v6.0.0)
 - **Auto-switching** when effectiveness < 0.3 to prevent thrashing (v6.0.0)
+- **10 Bayesian keywords** for probability-related queries (v8.3.2)
 
 **Line Count**: ~380 lines
 
