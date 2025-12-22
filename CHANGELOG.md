@@ -25,6 +25,21 @@ Added a new standalone tool for splitting and merging large files for editing wi
 
 ### 📝 Documentation
 
+**README.md Comprehensive Update**
+
+Updated README.md to reflect accurate codebase metrics and current state:
+
+- **Version**: 8.3.1 → 8.3.2
+- **TypeScript Files**: 197 → 221
+- **Lines of Code**: ~80,336 → ~87,000
+- **Test Files**: 39 → 143
+- **Passing Tests**: 1046+ → 3,539
+- **ModeHandlers**: "7 specialized" → "36 handlers (7 specialized + 29 generic)"
+- **Visual Exporters**: 35+ → 41 mode-specific files
+- **Validation Files**: 31+ → 39 validators
+- **Type Suppressions**: "zero" → "1 suppression"
+- Updated release notes to highlight v8.3.x features (chunker, scaffolding templates, comprehensive test coverage)
+
 **Mode Scaffolding Templates Update**
 
 Updated all template files in `templates/mode-scaffolding/` for v8+ architecture compatibility.

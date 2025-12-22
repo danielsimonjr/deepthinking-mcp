@@ -6,17 +6,13 @@
 
 A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning modes** (29 with dedicated thought types, 4 advanced runtime modes) including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
-> 📋 **Latest Release**: v8.3.1 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
+> 📋 **Latest Release**: v8.3.2 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
 >
-> 🎉 **New in v8.3.x**: Multi-instance support with file locking, dependency graph tool with unused code detection, codebase cleanup.
+> 🎉 **New in v8.3.x**: Multi-instance support with file locking, chunker utility for large file management, mode scaffolding templates for v8+ architecture, comprehensive test coverage (3500+ tests).
 >
-> ✨ **v8.2.x**: Phase 10 ModeHandler Architecture! 7 specialized handlers with advanced validation and enhancements - Systems Archetypes detection, Socratic question framework, automatic Bayesian posterior calculation, Nash equilibria computation.
+> ✨ **v8.2.x**: Phase 10 ModeHandler Architecture with 7 specialized handlers - Systems Archetypes detection, Socratic question framework, automatic Bayesian posterior calculation, Nash equilibria computation.
 >
 > ✨ **v8.0.0**: ModeHandler infrastructure with Strategy pattern for mode-specific processing.
->
-> ✨ **v7.5.0**: All 29 modes with dedicated thought types accessible via 12 focused MCP tools.
->
-> ✨ **v7.4.0**: Academic Research Modes - Synthesis (literature review), Argumentation (Toulmin model), Critique (peer review), Analysis (qualitative methods).
 
 ## Table of Contents
 
@@ -34,7 +30,7 @@ A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning mod
 ## Features
 
 - **33 Specialized Reasoning Modes** - From sequential thinking to game theory, formal logic, and meta-reasoning (29 with full thought types, 4 advanced runtime modes)
-- **ModeHandler Architecture (v8.x)** - Strategy pattern with 7 specialized handlers providing advanced validation and enhancements
+- **ModeHandler Architecture (v8.x)** - Strategy pattern with 36 handlers (7 specialized + 29 generic) providing advanced validation and enhancements
 - **Specialized Handler Enhancements** - Systems Archetypes (8 patterns), Socratic Questions (6 categories), auto Bayesian posteriors, Nash equilibria
 - **Academic Research Modes** - Synthesis (literature review), Argumentation (Toulmin), Critique (peer review), Analysis (qualitative methods)
 - **Algorithmic Reasoning** - Comprehensive CLRS coverage with 100+ named algorithms, complexity analysis, design patterns
@@ -49,7 +45,7 @@ A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning mod
 - **Production-Ready** - Search engine, templates, batch processing, caching, backup/restore
 - **Enterprise Security** - Input validation (Zod), rate limiting, path sanitization, PII redaction
 - **High Performance** - LRU caching with auto-eviction, async I/O, 4-5x validation speedups
-- **Type-Safe** - 100% TypeScript with zero suppressions (down from 231 baseline)
+- **Type-Safe** - 100% TypeScript with 1 suppression (down from 231 baseline)
 - **Repository Pattern** - Clean architecture with dependency injection
 - **Extensible** - Plugin architecture for custom reasoning modes
 - **MCP Compatible** - Full integration with Model Context Protocol
@@ -784,18 +780,18 @@ For architecture details, see [docs/architecture/](docs/architecture/).
 
 | Metric | Value |
 |--------|-------|
-| TypeScript Files | 197 |
-| Lines of Code | ~80,336 |
-| Test Files | 39 |
-| Passing Tests | 1046+ |
+| TypeScript Files | 221 |
+| Lines of Code | ~87,000 |
+| Test Files | 143 |
+| Passing Tests | 3,539 |
 | Thinking Modes | 33 (29 with thought types) |
-| Specialized Handlers | 7 |
+| ModeHandlers | 36 (7 specialized + 29 generic) |
 | MCP Tools | 12 focused + 1 legacy |
 | Export Formats | 8 (including native SVG) |
-| Visual Exporters | 35+ mode-specific files |
+| Visual Exporters | 41 mode-specific files |
 | Reasoning Types | 69 (110 planned) |
 | Modules | 16 |
-| Total Exports | 1033 (448 re-exports) |
+| Total Exports | 1,134 (519 re-exports) |
 
 ## Architecture
 
@@ -815,14 +811,15 @@ src/
 │   └── ModeRouter.ts        # Mode switching and recommendations
 ├── session/           # SessionManager, persistence, storage
 ├── modes/             # ModeHandler architecture (v8.x)
-│   ├── handlers/            # 7 specialized handlers
-│   │   ├── CausalHandler.ts
-│   │   ├── BayesianHandler.ts
-│   │   ├── GameTheoryHandler.ts
-│   │   ├── CounterfactualHandler.ts
-│   │   ├── SynthesisHandler.ts
-│   │   ├── SystemsThinkingHandler.ts
-│   │   └── CritiqueHandler.ts
+│   ├── handlers/            # 36 handlers (7 specialized + 29 generic)
+│   │   ├── CausalHandler.ts        # Graph validation, cycle detection
+│   │   ├── BayesianHandler.ts      # Auto posterior calculation
+│   │   ├── GameTheoryHandler.ts    # Nash equilibria detection
+│   │   ├── CounterfactualHandler.ts # World state tracking
+│   │   ├── SynthesisHandler.ts     # Source coverage tracking
+│   │   ├── SystemsThinkingHandler.ts # 8 Systems Archetypes
+│   │   ├── CritiqueHandler.ts      # 6 Socratic categories
+│   │   └── [29 GenericModeHandlers] # One per remaining mode
 │   └── base/                # ModeHandler interface, registry
 ├── proof/             # Proof decomposition system (v7.0.0)
 │   ├── decomposer.ts        # ProofDecomposer class
@@ -866,16 +863,16 @@ src/
 │   ├── classifier.ts        # Task classification
 │   └── suggestion-engine.ts # Mode recommendations
 ├── export/            # Visual and document exporters
-│   ├── visual/        # 21 mode-specific visual exporters + native SVG
+│   ├── visual/        # 41 mode-specific visual exporters + native SVG
 │   │   ├── proof-decomposition.ts  # Proof visualization (v7.0.0)
-│   │   └── [19 mode exporters]     # Mermaid, DOT, ASCII, SVG
+│   │   └── modes/                  # 23 mode-specific exporters
 │   └── latex.ts       # LaTeX document generation
 ├── search/            # Full-text search with faceted filtering
 ├── batch/             # Batch processing (8 operations)
 ├── backup/            # Backup manager with provider abstraction
 ├── cache/             # LRU/LFU/FIFO caching strategies
 ├── rate-limit/        # Sliding window rate limiter
-├── validation/        # Zod schemas (31+ mode validators)
+├── validation/        # Zod schemas (39 validators)
 ├── comparison/        # Session comparison & diff generation
 ├── templates/         # Session templates with usage tracking
 ├── analytics/         # Analytics engine and dashboard
