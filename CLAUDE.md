@@ -436,3 +436,48 @@ tools/create-dependency-graph/create-dependency-graph.exe C:\path\to\project
 ```
 
 All tools are self-contained (~114MB each, includes Bun runtime) and require no Node.js installation.
+
+### Recommended Workflow for Large Files
+
+When working with large documentation files that exceed context limits:
+
+| Phase | Tool | Purpose |
+|-------|------|---------|
+| **Reading/Understanding** | compress-for-context | Reduce large file to fit context window |
+| **Editing** | chunker | Split into sections, edit, merge back |
+
+**Step-by-step workflow:**
+
+```
+1. Encounter large file (e.g., ARCHITECTURE.md - 500+ lines)
+     ↓
+2. compress-for-context → Read compressed version to understand structure
+     ↓
+3. Identify which sections need editing
+     ↓
+4. chunker split → Creates individual section files
+     ↓
+5. Edit only the relevant chunk files (smaller context per edit)
+     ↓
+6. chunker status → Verify what changed
+     ↓
+7. chunker merge → Reassemble with automatic backup
+```
+
+**Example session:**
+```bash
+# 1. Understand the large file structure
+tools/compress-for-context/compress-for-context.exe docs/ARCHITECTURE.md -l moderate
+
+# 2. Split into editable chunks
+tools/chunker/chunker.exe split docs/ARCHITECTURE.md
+
+# 3. Edit specific sections (e.g., 008-core-components.md)
+# ... make edits to individual chunk files ...
+
+# 4. Check what changed
+tools/chunker/chunker.exe status docs/ARCHITECTURE_chunks/manifest.json
+
+# 5. Merge back with backup
+tools/chunker/chunker.exe merge docs/ARCHITECTURE_chunks/manifest.json
+```
