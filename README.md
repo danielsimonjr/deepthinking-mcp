@@ -957,6 +957,12 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
+This project builds upon foundational work from the MCP community:
+
+- **[Anthropic's sequential-thinking MCP](https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking)** - The original sequential thinking server that inspired this project's core architecture
+- **[olaservo's shannon-thinking MCP](https://github.com/olaservo/shannon-thinking)** - Introduced the Shannon 5-stage methodology that became one of our core reasoning modes
+
+Additional acknowledgments:
 - Built on the [Model Context Protocol](https://modelcontextprotocol.io)
 - Inspired by research in cognitive science and AI reasoning
 - Community contributions from researchers and practitioners
