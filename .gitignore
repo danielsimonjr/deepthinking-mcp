@@ -28,6 +28,7 @@ coverage/
 
 # Claude Code settings (local only)
 .claude/
+.claude
 
 # OS
 .DS_Store
@@ -72,6 +73,3 @@ add-to-config.cjs
 
 # Compiled executables (Bun compiled, ~114MB each)
 *.exe
-/.claude
-/.claude
-.claude/settings.local.json
