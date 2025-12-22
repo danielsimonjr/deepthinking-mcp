@@ -7,6 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ✨ New Features
+
+**Chunker Utility Tool**
+
+Added a new standalone tool for splitting and merging large files for editing within context limits.
+
+- **`tools/chunker/`** - Multi-file-type chunking utility
+  - Split Markdown files by heading level (default: h2)
+  - Split JSON files by top-level keys
+  - Split TypeScript/JavaScript files by declarations (imports, functions, classes, interfaces, types, enums, constants)
+  - Merge chunks back with change detection via SHA-256 hashing
+  - Manifest tracking with version 1.1.0 format including fileType field
+  - Commands: `split`, `merge`, `status`
+  - Options: `-o/--output`, `-l/--level`, `-m/--max-lines`, `-t/--type`, `--dry-run`
+  - Compiled to standalone executable with Bun (~90MB)
+
+### 📝 Documentation
+
+**Mode Scaffolding Templates Update**
+
+Updated all template files in `templates/mode-scaffolding/` for v8+ architecture compatibility.
+
+- **NEW: `example-mode.handler.ts`** - ModeHandler template for v8+ Strategy Pattern architecture
+  - Complete implementation example with createThought, validate, and getEnhancements methods
+  - Comprehensive inline documentation with common patterns
+- **`README.md`** - Added v8+ ModeHandler architecture section, updated file checklist
+- **`example-mode.json-schema.ts`** - Fixed `baseProperties` → `baseThoughtProperties`
+- **`example-mode.schema.ts`** - Clarified it's a snippet to add to schemas.ts, not standalone
+- **`example-mode.validator.ts`** - Fixed import to use `type { ValidationContext }`
+- **`example-mode.type.ts`** - Clearer instructions and examples from actual modes
+
+**CLAUDE.md Updates**
+
+- Added "Recommended Workflow for Large Files" section (compress-for-context + chunker)
+- Added "Chunker - Supported File Types" table with Markdown, JSON, TypeScript support
+
+**Architecture Documentation Cleanup**
+
+- Removed redundant "What's New" sections from `docs/architecture/ARCHITECTURE.md` (42 lines)
+- Removed redundant "What's New" sections from `docs/architecture/OVERVIEW.md` (30 lines)
+- These sections duplicated information already in CHANGELOG.md
+
+### 🧹 Maintenance
+
+**Root Directory Cleanup**
+
+- Removed unused `test-backups/` and `test-backups-e2e/` directories (legacy test artifacts)
+- Removed corresponding entries from `.gitignore`
+- Removed malformed `C:mcp-serverstools/` directory (accidental creation)
+- Removed stale `.error.txt` file
+
 ---
 
 ## [8.3.2] - 2025-12-22
