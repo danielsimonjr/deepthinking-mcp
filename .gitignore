@@ -24,6 +24,7 @@ coverage/
 *.swp
 *.swo
 *~
+*.code-workspace
 
 # Claude Code settings (local only)
 .claude/
