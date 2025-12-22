@@ -3,29 +3,33 @@
  *
  * INSTRUCTIONS:
  * 1. Copy this file to: src/types/modes/yourmode.ts
- * 2. Replace all instances of "ExampleMode" with your mode name (PascalCase)
- * 3. Replace all instances of "examplemode" with your mode name (lowercase)
- * 4. Define your mode-specific properties and interfaces
- * 5. Remove this instruction block
+ * 2. Replace "ExampleMode" with your mode name (PascalCase)
+ * 3. Replace "examplemode" with your mode name (lowercase)
+ * 4. Replace "EXAMPLEMODE" with your mode name (UPPERCASE)
+ * 5. Define your mode-specific properties
+ * 6. Remove this instruction block
+ *
+ * REFERENCE: See src/types/modes/sequential.ts for a simple example
  */
 
 import { BaseThought, ThinkingMode } from '../core.js';
 
 /**
- * ExampleMode thought extends base thought with mode-specific properties
+ * ExampleMode thought extends BaseThought with mode-specific properties
  *
- * CUSTOMIZE: Add description of what this mode does and when to use it
+ * TODO: Add description of what this mode does and when to use it
  */
 export interface ExampleModeThought extends BaseThought {
   mode: ThinkingMode.EXAMPLEMODE;
 
   /**
-   * Optional: Specific thought sub-types for this mode
-   * CUSTOMIZE: Define the types of reasoning steps in this mode
-   * Examples:
-   * - Sequential: 'reasoning_step' | 'conclusion'
-   * - Mathematics: 'axiom' | 'lemma' | 'theorem' | 'proof'
-   * - Temporal: 'event_definition' | 'interval_analysis' | 'sequence_construction'
+   * Optional thought sub-type for this mode
+   *
+   * Examples from existing modes:
+   * - Sequential: (none, uses generic thoughtType)
+   * - Mathematics: 'proof_decomposition' | 'dependency_analysis' | 'consistency_check'
+   * - Temporal: 'event_definition' | 'interval_analysis' | 'constraint_check'
+   * - Synthesis: 'source_analysis' | 'theme_identification' | 'gap_analysis'
    */
   thoughtType?:
     | 'step_type_1'
@@ -35,52 +39,50 @@ export interface ExampleModeThought extends BaseThought {
   // ============================================================
   // MODE-SPECIFIC PROPERTIES
   // ============================================================
-  // CUSTOMIZE: Add your mode's unique properties here
   //
   // Common patterns:
   //
-  // 1. Simple fields:
+  // 1. Simple optional fields:
   //    hypothesis?: string;
-  //    confidence?: number;  // Use 0-1 range
+  //    confidence?: number;  // 0-1 range
   //
-  // 2. Arrays of complex objects:
-  //    entities?: Entity[];
-  //    relationships?: Relationship[];
+  // 2. Arrays of primitive types:
+  //    observations?: string[];
+  //    tags?: string[];
   //
-  // 3. Optional nested structures:
+  // 3. Arrays of complex objects (define interface below):
+  //    entities?: ExampleEntity[];
+  //    relationships?: ExampleRelationship[];
+  //
+  // 4. Nested structures:
   //    analysis?: {
   //      findings: string[];
   //      confidence: number;
   //      recommendations?: string[];
   //    };
   //
-  // 4. References to other elements:
-  //    dependencies?: string[]; // IDs of related thoughts/entities
+  // 5. Record types:
+  //    metadata?: Record<string, unknown>;
   //
-  // Examples from existing modes:
-  // - Mathematics: mathematicalModel, proofStrategy, dependencies
-  // - Temporal: timeline, events, intervals, constraints, relations
-  // - GameTheory: players, strategies, payoffMatrix
-  // - Bayesian: priorProbability, posteriorProbability, evidence, likelihoodRatio
-  //
-  // REPLACE THIS COMMENT BLOCK WITH YOUR ACTUAL PROPERTIES
+  // REPLACE THIS COMMENT BLOCK WITH YOUR PROPERTIES
 }
 
 // ============================================================
 // SUPPORTING INTERFACES
 // ============================================================
-// CUSTOMIZE: Define any complex types used by your mode
 //
-// Examples:
+// Define complex types used by your mode here.
 //
-// export interface Entity {
+// Example:
+//
+// export interface ExampleEntity {
 //   id: string;
 //   name: string;
 //   type: string;
 //   properties?: Record<string, unknown>;
 // }
 //
-// export interface Relationship {
+// export interface ExampleRelationship {
 //   id: string;
 //   from: string;  // Entity ID
 //   to: string;    // Entity ID
@@ -88,16 +90,14 @@ export interface ExampleModeThought extends BaseThought {
 //   strength?: number;  // 0-1 range
 // }
 //
-// REPLACE THIS COMMENT BLOCK WITH YOUR ACTUAL INTERFACES
+// REPLACE THIS COMMENT BLOCK WITH YOUR INTERFACES
 
 /**
  * Type guard for ExampleMode thoughts
  *
- * CUSTOMIZE: Replace 'examplemode' with your mode name (lowercase)
- *
  * @example
  * if (isExampleModeThought(thought)) {
- *   // TypeScript now knows thought is ExampleModeThought
+ *   // TypeScript knows thought is ExampleModeThought
  *   console.log(thought.someProperty);
  * }
  */

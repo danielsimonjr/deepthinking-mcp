@@ -1,6 +1,6 @@
 # Mode Scaffolding Templates
 
-This directory contains template files for adding new reasoning modes to DeepThinking MCP.
+This directory contains template files for adding new reasoning modes to DeepThinking MCP v8+.
 
 ## Quick Start
 
@@ -21,43 +21,51 @@ Template for TypeScript type definitions.
 - Main thought interface extending `BaseThought`
 - Supporting interfaces for complex types
 - Type guard function
-- Detailed comments explaining common patterns
 
 ### `example-mode.validator.ts`
-Template for Zod-based runtime validation.
+Template for mode-specific validation.
 
 **Copy to**: `src/validation/validators/modes/yourmode.ts`
 
 **Contains**:
 - Validator class extending `BaseValidator`
 - Common validation patterns with examples
-- Severity levels and categories explanation
+- Severity levels and categories
 
 ### `example-mode.schema.ts`
-Template for Zod schema definition.
+Template for Zod schema definition (snippet).
 
 **Add to**: `src/validation/schemas.ts`
 
 **Contains**:
 - Zod schema extending `BaseThoughtSchema`
-- Examples of field validation
-- References to shared schemas
+- Field validation examples
 - Type inference
 
 ### `example-mode.json-schema.ts`
-Template for MCP tool JSON schema.
+Template for MCP tool JSON schema (snippet).
 
 **Add to**: `src/tools/json-schemas.ts` array
 
 **Contains**:
-- Hand-written JSON Schema (draft 2020-12)
-- Tool name and description
-- Input schema with mode-specific properties
-- Examples from existing modes
+- JSON Schema for MCP tool definition
+- Uses `baseThoughtProperties` for shared fields
+- Mode-specific property examples
+
+### `example-mode.handler.ts` (v8+ Architecture)
+Template for ModeHandler implementation.
+
+**Copy to**: `src/modes/handlers/YourModeHandler.ts`
+
+**Contains**:
+- ModeHandler interface implementation
+- Thought creation logic
+- Mode-specific validation
+- Optional enhancements (suggestions, warnings)
 
 ## Usage Example
 
-Let's add a "Dialectical" reasoning mode:
+Adding a "Dialectical" reasoning mode:
 
 ```bash
 # 1. Copy type definition
@@ -66,98 +74,84 @@ cp templates/mode-scaffolding/example-mode.type.ts src/types/modes/dialectical.t
 # 2. Copy validator
 cp templates/mode-scaffolding/example-mode.validator.ts src/validation/validators/modes/dialectical.ts
 
-# 3. Edit files, replacing "ExampleMode" with "Dialectical" and "examplemode" with "dialectical"
+# 3. Copy handler (v8+ required)
+cp templates/mode-scaffolding/example-mode.handler.ts src/modes/handlers/DialecticalHandler.ts
 
-# 4. Follow the complete guide in docs/ADDING_NEW_MODE.md for remaining steps
+# 4. Edit files, replacing "ExampleMode" with "Dialectical"
+
+# 5. Follow docs/ADDING_NEW_MODE.md for remaining integration steps
 ```
 
 ## Search & Replace
 
 When customizing templates, replace:
 
-- `ExampleMode` → `YourMode` (PascalCase, for class/interface names)
-- `examplemode` → `yourmode` (lowercase, for mode string literals)
-- `EXAMPLEMODE` → `YOURMODE` (UPPERCASE, for enum values)
+- `ExampleMode` -> `YourMode` (PascalCase, for class/interface names)
+- `examplemode` -> `yourmode` (lowercase, for mode string literals)
+- `EXAMPLEMODE` -> `YOURMODE` (UPPERCASE, for enum values)
+
+## Architecture (v8+)
+
+Since v8.0.0, modes use the **ModeHandler architecture** (Strategy Pattern):
+
+```
+ThoughtFactory --> ModeHandlerRegistry --> YourModeHandler
+                                               |
+                                               v
+                                         Creates Thought
+```
+
+**Benefits**:
+- Encapsulated mode logic
+- Mode-specific validation
+- Optional enhancements (suggestions, warnings)
+- Easier testing
 
 ## Common Patterns Reference
 
-### Simple Mode (Minimal Properties)
-See: `src/types/modes/sequential.ts`
+### Simple Mode
+See: `src/types/modes/sequential.ts`, `src/modes/handlers/SequentialHandler.ts`
 - Few mode-specific fields
-- Focus on thought sequencing and revision
-- ~50 lines of code
+- Basic validation
+- ~50-100 lines
 
 ### Medium Complexity
-See: `src/types/modes/mathematics.ts`
-- Structured data (mathematical models, proofs)
+See: `src/types/modes/mathematics.ts`, `src/modes/handlers/MathematicsHandler.ts`
+- Structured data (models, proofs)
 - Multiple supporting interfaces
-- ~150 lines of code
+- ~150-200 lines
 
-### Complex Mode (Many Properties)
-See: `src/types/modes/temporal.ts` or `src/types/modes/gametheory.ts`
+### Complex Mode
+See: `src/types/modes/temporal.ts`, `src/modes/handlers/TemporalHandler.ts`
 - Multiple entity types and relationships
 - Rich validation requirements
-- ~200+ lines of code
+- Optional enhancements
+- ~200+ lines
 
-## Validation Examples
+## File Checklist
 
-### Range Validation
-```typescript
-if (thought.confidence !== undefined &&
-    (thought.confidence < 0 || thought.confidence > 1)) {
-  issues.push({
-    severity: 'error',
-    description: 'Confidence must be 0-1',
-    category: 'structural',
-  });
-}
-```
+When adding a new mode, create/modify these files:
 
-### Reference Validation
-```typescript
-const entityIds = new Set(thought.entities?.map(e => e.id) || []);
-for (const rel of thought.relationships || []) {
-  if (!entityIds.has(rel.from)) {
-    issues.push({
-      severity: 'error',
-      description: `Invalid reference: ${rel.from}`,
-      category: 'reference',
-    });
-  }
-}
-```
+### Required Files
+- [ ] `src/types/modes/yourmode.ts` - Type definition
+- [ ] `src/types/core.ts` - Add to enum and union type
+- [ ] `src/validation/schemas.ts` - Zod schema
+- [ ] `src/validation/validators/modes/yourmode.ts` - Validator
+- [ ] `src/validation/validator.ts` - Register validator
+- [ ] `src/tools/json-schemas.ts` - JSON schema (add to array)
+- [ ] `src/tools/definitions.ts` - Export tool with correct index
+- [ ] `src/modes/handlers/YourModeHandler.ts` - ModeHandler (v8+)
+- [ ] `src/modes/handlers/index.ts` - Export handler
+- [ ] `src/services/ThoughtFactory.ts` - Register with factory
 
-### Logical Consistency
-```typescript
-if (thought.startTime !== undefined &&
-    thought.endTime !== undefined &&
-    thought.startTime >= thought.endTime) {
-  issues.push({
-    severity: 'error',
-    description: 'Start time must be before end time',
-    category: 'logical',
-  });
-}
-```
-
-## Shared Schemas
-
-Import from `src/tools/schemas/shared.ts` instead of redefining:
-
-```typescript
-import {
-  ConfidenceSchema,      // 0-1 range
-  PositiveIntSchema,     // 1+
-  LevelEnum,             // 'low' | 'medium' | 'high'
-  TimeUnitEnum,          // Time units
-  ProofTypeEnum,         // Proof strategies
-  ImpactEnum,            // Impact assessment
-} from '../tools/schemas/shared.js';
-```
+### Optional Files
+- [ ] `src/services/ExportService.ts` - Custom export formatting
+- [ ] `src/export/visual/modes/yourmode.ts` - Visual exporter
+- [ ] `tests/unit/validation/validators/yourmode.test.ts` - Unit tests
+- [ ] `tests/integration/tools/yourmode.test.ts` - Integration tests
+- [ ] `README.md` - Documentation
 
 ## Testing Your Mode
-
-After implementing, test with:
 
 ```bash
 # Type checking
@@ -166,7 +160,7 @@ npm run typecheck
 # Build
 npm run build
 
-# Run tests
+# Run all tests
 npm run test:run
 
 # Test specific mode
@@ -177,23 +171,5 @@ npm test -- -t "YourMode"
 
 1. **Full guide**: Read `docs/ADDING_NEW_MODE.md`
 2. **Examples**: Study existing modes in `src/types/modes/`
-3. **Architecture**: See `CLAUDE.md` for project structure
-4. **Questions**: Check README.md or create an issue
-
-## File Checklist
-
-When adding a mode, you'll need to create/modify these files:
-
-- [ ] `src/types/modes/yourmode.ts` - Type definition
-- [ ] `src/types/core.ts` - Add to enum and union type
-- [ ] `src/validation/schemas.ts` - Zod schema
-- [ ] `src/validation/validators/modes/yourmode.ts` - Validator
-- [ ] `src/validation/validator.ts` - Register validator
-- [ ] `src/tools/json-schemas.ts` - JSON schema
-- [ ] `src/tools/definitions.ts` - Export tool
-- [ ] `src/services/ThoughtFactory.ts` - Factory logic
-- [ ] `src/services/ExportService.ts` - Export formatting (optional)
-- [ ] `README.md` - Documentation
-- [ ] `tests/unit/validation/validators/yourmode.test.ts` - Tests (optional)
-
-See the complete guide for detailed instructions on each file!
+3. **Handlers**: Study `src/modes/handlers/` for v8+ patterns
+4. **Architecture**: See `CLAUDE.md` for project structure

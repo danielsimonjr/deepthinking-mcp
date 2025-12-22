@@ -111,7 +111,8 @@
       "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" merge \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\docs\\\\architecture\\\\DIRECTORY_STRUCTURE_chunks\\\\manifest.json\" --dry-run)",
       "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" split \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\package.json\" --dry-run)",
       "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" split \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\src\\\\types\\\\core.ts\" --dry-run)",
-      "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" split \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\src\\\\index.ts\" --dry-run)"
+      "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" split \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\src\\\\index.ts\" --dry-run)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

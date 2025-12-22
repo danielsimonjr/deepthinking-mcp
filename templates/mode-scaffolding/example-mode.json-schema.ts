@@ -2,49 +2,58 @@
  * ExampleMode JSON Schema Template (for MCP Tool Definition)
  *
  * INSTRUCTIONS:
- * 1. Add this object to the array in: src/tools/json-schemas.ts
- * 2. Replace "ExampleMode" with your mode name (PascalCase)
- * 3. Replace "examplemode" with your mode name (lowercase)
- * 4. Customize the description with use cases
- * 5. Define mode-specific properties
- * 6. Update src/tools/definitions.ts with the correct array index
- * 7. Remove this instruction block
+ * This is a CODE SNIPPET to add to src/tools/json-schemas.ts
+ * It is NOT a standalone file.
  *
- * LOCATION: Insert into jsonSchemas array in src/tools/json-schemas.ts
+ * 1. Open src/tools/json-schemas.ts
+ * 2. Add this object to the jsonSchemas array
+ * 3. Replace "ExampleMode" with your mode name (PascalCase)
+ * 4. Replace "examplemode" with your mode name (lowercase)
+ * 5. Update src/tools/definitions.ts with the correct array index
+ * 6. Add mode to modeToToolMap in definitions.ts
+ *
+ * REFERENCE: See existing schemas in src/tools/json-schemas.ts
  */
 
-// ADD THIS OBJECT TO THE jsonSchemas ARRAY:
+// ============================================================
+// ADD THIS OBJECT TO THE jsonSchemas ARRAY IN src/tools/json-schemas.ts
+// ============================================================
+
+// The file already defines:
+// const baseThoughtProperties = { sessionId, thought, thoughtNumber, totalThoughts, nextThoughtNeeded, ... }
+// const baseThoughtRequired = ["thought", "thoughtNumber", "totalThoughts", "nextThoughtNeeded"]
+
 {
   name: 'deepthinking_examplemode',
 
-  // CUSTOMIZE: Clear description with use cases and when to use this mode
-  // Best practices:
-  // - Start with what the mode does
-  // - List 2-3 specific use cases
-  // - Mention what it's best for
-  // - Keep under 500 characters for readability
+  // Clear description with use cases (keep under 500 chars)
   description: 'ExampleMode reasoning for [brief description]. ' +
-    'Use cases: [use case 1], [use case 2], [use case 3]. ' +
-    'Best for: [when to use this mode]. ' +
-    'Supports: [key features of this mode].',
+    'Use cases: [use case 1], [use case 2]. ' +
+    'Best for: [when to use this mode].',
 
   inputSchema: {
     type: 'object',
     properties: {
-      // REQUIRED: Include base properties (all modes need these)
-      ...baseProperties,  // Provides: thought, thoughtNumber, totalThoughts, nextThoughtNeeded, etc.
+      // REQUIRED: Spread base properties (defined at top of json-schemas.ts)
+      ...baseThoughtProperties,
 
-      // OPTIONAL: Thought type (if your mode has sub-types)
+      // Mode identifier
+      mode: {
+        type: 'string',
+        enum: ['examplemode'],
+        description: 'ExampleMode reasoning mode',
+      },
+
+      // Optional thought type (if your mode has sub-types)
       thoughtType: {
         type: 'string',
         enum: ['step_type_1', 'step_type_2', 'step_type_3'],
-        description: 'Type of reasoning step in ExampleMode',
+        description: 'Type of reasoning step',
       },
 
       // ============================================================
       // MODE-SPECIFIC PROPERTIES
       // ============================================================
-      // CUSTOMIZE: Add your mode's unique properties here
       //
       // JSON Schema patterns:
       //
@@ -70,10 +79,10 @@
       //    },
       //
       // 4. Array of strings:
-      //    tags: {
+      //    observations: {
       //      type: 'array',
       //      items: { type: 'string' },
-      //      description: 'Tags for categorization',
+      //      description: 'Observed cases',
       //    },
       //
       // 5. Array of objects:
@@ -82,13 +91,13 @@
       //      items: {
       //        type: 'object',
       //        properties: {
-      //          id: { type: 'string', description: 'Unique identifier' },
+      //          id: { type: 'string', description: 'Unique ID' },
       //          name: { type: 'string', description: 'Entity name' },
       //          type: { type: 'string', description: 'Entity type' },
       //        },
       //        required: ['id', 'name'],
       //      },
-      //      description: 'Entities involved in reasoning',
+      //      description: 'Entities involved',
       //    },
       //
       // 6. Nested object:
@@ -98,83 +107,52 @@
       //        findings: {
       //          type: 'array',
       //          items: { type: 'string' },
-      //          description: 'Key findings',
       //        },
       //        confidence: {
       //          type: 'number',
       //          minimum: 0,
       //          maximum: 1,
-      //          description: 'Overall confidence',
       //        },
       //      },
       //      description: 'Analysis results',
       //    },
       //
-      // EXAMPLES from existing modes:
-      //
-      // Mathematics (deepthinking_mathematics):
-      //   mathematicalModel: {
-      //     type: 'object',
-      //     properties: {
-      //       latex: { type: 'string' },
-      //       symbolic: { type: 'string' },
-      //       ascii: { type: 'string' },
-      //     },
-      //     required: ['latex', 'symbolic'],
-      //   },
-      //
-      // Temporal (deepthinking_temporal):
-      //   timeline: {
-      //     type: 'object',
-      //     properties: {
-      //       id: { type: 'string' },
-      //       name: { type: 'string' },
-      //       timeUnit: {
-      //         type: 'string',
-      //         enum: ['milliseconds', 'seconds', 'minutes', 'hours', 'days'],
-      //       },
-      //     },
-      //     required: ['id', 'name', 'timeUnit'],
-      //   },
-      //
-      // Strategic (deepthinking_strategic):
-      //   players: {
-      //     type: 'array',
-      //     items: {
-      //       type: 'object',
-      //       properties: {
-      //         id: { type: 'string' },
-      //         name: { type: 'string' },
-      //         isRational: { type: 'boolean' },
-      //       },
-      //       required: ['id', 'name', 'isRational'],
-      //     },
-      //   },
-      //
       // REPLACE THIS COMMENT BLOCK WITH YOUR PROPERTIES
     },
 
-    // REQUIRED: Base properties that all modes need
-    required: ['thought', 'thoughtNumber', 'totalThoughts', 'nextThoughtNeeded'],
+    // Required fields (base + any mode-specific required fields)
+    required: [...baseThoughtRequired],
 
-    // REQUIRED: Strict validation (no additional properties allowed)
+    // Strict validation
     additionalProperties: false,
   },
 }
 
-// NEXT STEPS AFTER ADDING TO json-schemas.ts:
+// ============================================================
+// AFTER ADDING TO json-schemas.ts:
+// ============================================================
 //
-// 1. Count the index of your schema in the jsonSchemas array (0-based)
-//    Example: If it's the 10th item, index is 9
+// 1. Note the array index of your schema (0-based)
+//    Example: If it's the 13th item, index is 12
 //
 // 2. Update src/tools/definitions.ts:
+//
 //    export const tools = {
 //      // ... existing tools ...
-//      deepthinking_examplemode: jsonSchemas[X],  // Replace X with your index
+//      deepthinking_examplemode: jsonSchemas[12],  // Your index
 //    };
 //
-// 3. Verify with:
-//    npm run build
-//    node -e "const tools = require('./dist/tools/definitions.js'); console.log(tools.tools.deepthinking_examplemode.name);"
+// 3. Add to modeToToolMap in definitions.ts:
 //
-// 4. Test in MCP client to ensure schema is recognized
+//    export const modeToToolMap: Record<string, string> = {
+//      // ... existing mappings ...
+//      examplemode: 'deepthinking_examplemode',
+//    };
+//
+// 4. If adding a NEW tool (not adding mode to existing tool):
+//    - Add Zod schema to src/tools/schemas/modes/yourmode.ts
+//    - Import and add to toolSchemas in definitions.ts
+//
+// 5. Verify:
+//    npm run build
+//    npm run typecheck

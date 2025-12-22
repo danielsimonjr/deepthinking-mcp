@@ -2,74 +2,73 @@
  * ExampleMode Zod Schema Template
  *
  * INSTRUCTIONS:
- * 1. Add this schema to: src/validation/schemas.ts
- * 2. Replace "ExampleMode" with your mode name (PascalCase)
- * 3. Replace "examplemode" with your mode name (lowercase)
- * 4. Import shared schemas from src/tools/schemas/shared.ts
- * 5. Define your mode-specific validation rules
- * 6. Remove this instruction block
+ * This is a CODE SNIPPET to add to src/validation/schemas.ts
+ * It is NOT a standalone file.
  *
- * LOCATION: Add near similar mode schemas in src/validation/schemas.ts
+ * 1. Open src/validation/schemas.ts
+ * 2. Add the schema below near similar mode schemas
+ * 3. Replace "ExampleMode" with your mode name (PascalCase)
+ * 4. Replace "examplemode" with your mode name (lowercase)
+ * 5. Import shared schemas as needed
+ *
+ * REFERENCE: Search for "SequentialSchema" in src/validation/schemas.ts
  */
+
+// ============================================================
+// ADD THIS TO src/validation/schemas.ts
+// ============================================================
 
 import { z } from 'zod';
-import { BaseThoughtSchema } from './base.js';  // If needed
-// Import shared schemas - CUSTOMIZE based on your needs
-// import {
-//   ConfidenceSchema,      // 0-1 range for probabilities/confidence
-//   PositiveIntSchema,     // Positive integers (1+)
-//   LevelEnum,             // 'low' | 'medium' | 'high'
-//   TimeUnitEnum,          // Time units
-//   ProofTypeEnum,         // Proof strategy types
-// } from '../tools/schemas/shared.js';
+// BaseThoughtSchema is already defined in schemas.ts
+// Import shared schemas if needed:
+// import { ConfidenceSchema, LevelEnum } from '../tools/schemas/shared.js';
 
 /**
- * ExampleMode Zod Schema
+ * ExampleMode Schema
  *
- * CUSTOMIZE: Add description of what this schema validates
+ * TODO: Add description of what this schema validates
  */
 export const ExampleModeSchema = BaseThoughtSchema.extend({
-  // Mode identifier - CUSTOMIZE: Replace 'examplemode' with your mode name
+  // Mode identifier - must match ThinkingMode enum value (lowercase)
   mode: z.literal('examplemode'),
 
-  // Optional thought type - CUSTOMIZE or remove if not needed
+  // Optional thought type
   thoughtType: z.enum(['step_type_1', 'step_type_2', 'step_type_3']).optional(),
 
   // ============================================================
   // MODE-SPECIFIC FIELDS
   // ============================================================
-  // CUSTOMIZE: Define your mode's validation schema
   //
-  // Common patterns:
+  // Common validation patterns:
   //
-  // 1. Simple optional fields:
+  // 1. Simple optional string:
   //    hypothesis: z.string().min(1).max(1000).optional(),
-  //    confidence: ConfidenceSchema.optional(),  // 0-1 range
   //
-  // 2. Arrays of objects:
+  // 2. Number with range (0-1):
+  //    confidence: z.number().min(0).max(1).optional(),
+  //    // Or use shared: confidence: ConfidenceSchema.optional(),
+  //
+  // 3. Enum values:
+  //    priority: z.enum(['low', 'medium', 'high']).optional(),
+  //    // Or use shared: priority: LevelEnum.optional(),
+  //
+  // 4. Array of strings:
+  //    observations: z.array(z.string()).optional(),
+  //
+  // 5. Array of objects:
   //    entities: z.array(z.object({
   //      id: z.string(),
   //      name: z.string().min(1).max(200),
   //      type: z.string(),
-  //      properties: z.record(z.string(), z.unknown()).optional(),
   //    })).optional(),
   //
-  // 3. Nested structures:
+  // 6. Nested object:
   //    analysis: z.object({
   //      findings: z.array(z.string()),
-  //      confidence: ConfidenceSchema,
-  //      recommendations: z.array(z.string()).optional(),
+  //      confidence: z.number().min(0).max(1),
   //    }).optional(),
   //
-  // 4. Enums (use shared or define custom):
-  //    priority: LevelEnum.optional(),  // From shared schemas
-  //    customEnum: z.enum(['option1', 'option2', 'option3']).optional(),
-  //
-  // 5. Numbers with constraints:
-  //    count: z.number().int().min(0).max(100).optional(),
-  //    percentage: z.number().min(0).max(100).optional(),
-  //
-  // 6. Complex validation with refinement:
+  // 7. With refinement (cross-field validation):
   //    startTime: z.number().optional(),
   //    endTime: z.number().optional(),
   // }).refine(
@@ -82,55 +81,17 @@ export const ExampleModeSchema = BaseThoughtSchema.extend({
   //   { message: 'startTime must be before endTime' }
   // );
   //
-  // USE SHARED SCHEMAS from src/tools/schemas/shared.ts:
-  // - ConfidenceSchema - For probabilities, confidence, strength (0-1)
-  // - PositiveIntSchema - For counts, indices (1+)
-  // - LevelEnum - For low/medium/high scales
-  // - TimeUnitEnum - For time units
-  // - ProofTypeEnum - For proof strategies
-  // - ImpactEnum - For impact assessment (positive/negative/neutral)
-  // - ExportFormatEnum - For export formats
+  // SHARED SCHEMAS (from src/tools/schemas/shared.ts):
+  // - ConfidenceSchema: 0-1 range
+  // - PositiveIntSchema: 1+ integers
+  // - LevelEnum: 'low' | 'medium' | 'high'
+  // - TimeUnitEnum: time units
+  // - ProofTypeEnum: proof strategies
   //
-  // EXAMPLES from existing modes:
-  //
-  // Mathematics:
-  //   mathematicalModel: z.object({
-  //     latex: z.string(),
-  //     symbolic: z.string(),
-  //     ascii: z.string().optional(),
-  //   }).optional(),
-  //   proofStrategy: z.object({
-  //     type: ProofTypeEnum,
-  //     steps: z.array(z.string()),
-  //   }).optional(),
-  //
-  // Temporal:
-  //   timeline: z.object({
-  //     id: z.string(),
-  //     name: z.string(),
-  //     timeUnit: TimeUnitEnum,
-  //     startTime: z.number().optional(),
-  //     endTime: z.number().optional(),
-  //     events: z.array(z.string()),
-  //   }).optional(),
-  //   events: z.array(z.object({
-  //     id: z.string(),
-  //     name: z.string(),
-  //     timestamp: z.number(),
-  //     type: z.enum(['instant', 'interval']),
-  //   })).optional(),
-  //
-  // Bayesian:
-  //   priorProbability: ConfidenceSchema.optional(),
-  //   posteriorProbability: ConfidenceSchema.optional(),
-  //   evidence: z.array(z.string()).optional(),
-  //   likelihoodRatio: z.number().min(0).optional(),
-  //
-  // REPLACE THIS COMMENT BLOCK WITH YOUR SCHEMA DEFINITION
+  // REPLACE THIS COMMENT BLOCK WITH YOUR SCHEMA FIELDS
 });
 
 /**
  * TypeScript type inferred from schema
- * CUSTOMIZE: This provides type safety for inputs
  */
 export type ExampleModeInput = z.infer<typeof ExampleModeSchema>;
