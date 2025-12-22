@@ -416,15 +416,28 @@ The `tools/` directory contains standalone utilities compiled to executables wit
 | **compress-for-context.exe** | `tools/compress-for-context/` | CTON context compression for LLM context windows |
 | **create-dependency-graph.exe** | `tools/create-dependency-graph/` | Generates dependency graph documentation |
 
+### Chunker - Supported File Types
+
+| File Type | Extensions | Split Strategy |
+|-----------|------------|----------------|
+| **Markdown** | `.md` | By heading levels (`##`, `###`, etc.) |
+| **JSON** | `.json` | By top-level object keys |
+| **TypeScript** | `.ts`, `.tsx`, `.js`, `.jsx` | By declarations (imports, functions, classes, types) |
+
 ### Usage
 
 ```bash
-# Split a large markdown file into editable chunks
+# Split markdown by ## headings
 tools/chunker/chunker.exe split docs/ARCHITECTURE.md
-# Edit individual chunk files in the _chunks directory
-# Check status of edited chunks
+
+# Split TypeScript by declarations (functions, classes, types)
+tools/chunker/chunker.exe split src/index.ts
+
+# Split JSON by top-level keys
+tools/chunker/chunker.exe split package.json
+
+# Check status and merge
 tools/chunker/chunker.exe status docs/ARCHITECTURE_chunks/manifest.json
-# Merge chunks back into the original file
 tools/chunker/chunker.exe merge docs/ARCHITECTURE_chunks/manifest.json
 
 # Compress files for LLM context
