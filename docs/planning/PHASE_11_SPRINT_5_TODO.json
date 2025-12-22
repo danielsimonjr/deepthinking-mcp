@@ -4,14 +4,14 @@
   "title": "Causal & Strategic Modes",
   "week": "Week 3",
   "effort": "5-6 hours",
-  "status": "pending",
+  "status": "completed",
   "description": "Comprehensive coverage for deepthinking_causal (causal graphs, counterfactuals) and deepthinking_strategic (game theory, optimization)",
   "tasks": [
     {
       "id": "11.5.1",
       "category": "Causal",
       "description": "Causal mode tests - T-CSL-001 through T-CSL-020 covering graphs, interventions, d-separation",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.5,
       "testCases": [
         "T-CSL-001: Basic causal thought",
@@ -43,7 +43,7 @@
       "id": "11.5.2",
       "category": "Counterfactual",
       "description": "Counterfactual mode tests - T-CSL-021 through T-CSL-030 covering world states, consequences, alternatives",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.0,
       "testCases": [
         "T-CSL-021: Basic counterfactual thought",
@@ -65,7 +65,7 @@
       "id": "11.5.3",
       "category": "GameTheory",
       "description": "Game theory mode tests - T-STR-001 through T-STR-020 covering players, strategies, payoffs, Nash equilibria",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.5,
       "testCases": [
         "T-STR-001: Basic gametheory thought",
@@ -97,7 +97,7 @@
       "id": "11.5.4",
       "category": "Optimization",
       "description": "Optimization mode tests - T-STR-021 through T-STR-030 covering objectives, constraints, methods",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.0,
       "testCases": [
         "T-STR-021: Basic optimization thought",

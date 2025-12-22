@@ -4,14 +4,14 @@
   "title": "Standard Workflows & Common Parameters",
   "week": "Week 1-2",
   "effort": "5.5-6 hours",
-  "status": "pending",
+  "status": "completed",
   "description": "Comprehensive coverage for deepthinking_standard tool (sequential, shannon, hybrid, runtime-only modes) and common parameter validation across all modes",
   "tasks": [
     {
       "id": "11.2.1",
       "category": "Standard-Sequential",
       "description": "Sequential mode comprehensive tests - T-STD-001 through T-STD-010 covering multi-thought sessions, branching, revisions",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.0,
       "testCases": [
         "T-STD-001: Basic sequential thought with required params only",
@@ -33,7 +33,7 @@
       "id": "11.2.2",
       "category": "Standard-Shannon",
       "description": "Shannon mode comprehensive tests - T-STD-011 through T-STD-020 covering all 5 stages, transitions, multi-thought per stage",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.0,
       "testCases": [
         "T-STD-011: Shannon stage = problem_definition",
@@ -55,7 +55,7 @@
       "id": "11.2.3",
       "category": "Standard-Hybrid",
       "description": "Hybrid mode comprehensive tests - T-STD-021 through T-STD-030 covering activeModes combinations, convergence",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.0,
       "testCases": [
         "T-STD-021: Basic hybrid thought",
@@ -77,7 +77,7 @@
       "id": "11.2.4",
       "category": "Standard-RuntimeOnly",
       "description": "Runtime-only mode tests (via Hybrid) - T-STD-031 through T-STD-038 covering Recursive, Modal, Stochastic, Constraint modes",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 0.5,
       "testCases": [
         "T-STD-031: Recursive mode basic activation via hybrid",
@@ -97,7 +97,7 @@
       "id": "11.2.5",
       "category": "Parameters",
       "description": "Common parameter validation tests - T-PAR-001 through T-PAR-032 covering all shared parameters across modes",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 2.0,
       "testCases": [
         "T-PAR-001: thought - minimum length (1 char)",
