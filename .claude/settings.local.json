@@ -100,7 +100,18 @@
       "Bash(do sed -i 's/\\\\\"\"/\"\"/g' \"$f\")",
       "Bash(npm test:*)",
       "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\create-dependency-graph\\\\create-dependency-graph.exe\" \"C:\\\\mcp-servers\\\\deepthinking-mcp\")",
-      "mcp__windows-mcp__Powershell-Tool"
+      "mcp__windows-mcp__Powershell-Tool",
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/create-dependency-graph/create-dependency-graph.exe\" \"C:/mcp-servers/deepthinking-mcp\")",
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/compress-for-context/compress-for-context.exe\" --help)",
+      "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" split \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\docs\\\\architecture\\\\ARCHITECTURE.md\" --dry-run)",
+      "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" split \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\docs\\\\architecture\\\\ARCHITECTURE.md\" -l 1 --dry-run)",
+      "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" --help)",
+      "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" split \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\docs\\\\architecture\\\\DIRECTORY_STRUCTURE.md\")",
+      "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" status \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\docs\\\\architecture\\\\DIRECTORY_STRUCTURE_chunks\\\\manifest.json\")",
+      "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" merge \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\docs\\\\architecture\\\\DIRECTORY_STRUCTURE_chunks\\\\manifest.json\" --dry-run)",
+      "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" split \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\package.json\" --dry-run)",
+      "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" split \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\src\\\\types\\\\core.ts\" --dry-run)",
+      "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" split \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\src\\\\index.ts\" --dry-run)"
     ],
     "deny": [],
     "ask": []

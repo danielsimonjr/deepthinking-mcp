@@ -12,8 +12,6 @@ dist/
 # Testing
 coverage/
 .vitest/
-test-backups/
-test-backups-e2e/
 
 # Environment
 .env
