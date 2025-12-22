@@ -412,12 +412,21 @@ The `tools/` directory contains standalone utilities compiled to executables wit
 
 | Tool | Location | Purpose |
 |------|----------|---------|
+| **chunker.exe** | `tools/chunker/` | Split large files into editable sections, then merge back |
 | **compress-for-context.exe** | `tools/compress-for-context/` | CTON context compression for LLM context windows |
 | **create-dependency-graph.exe** | `tools/create-dependency-graph/` | Generates dependency graph documentation |
 
 ### Usage
 
 ```bash
+# Split a large markdown file into editable chunks
+tools/chunker/chunker.exe split docs/ARCHITECTURE.md
+# Edit individual chunk files in the _chunks directory
+# Check status of edited chunks
+tools/chunker/chunker.exe status docs/ARCHITECTURE_chunks/manifest.json
+# Merge chunks back into the original file
+tools/chunker/chunker.exe merge docs/ARCHITECTURE_chunks/manifest.json
+
 # Compress files for LLM context
 tools/compress-for-context/compress-for-context.exe README.md -l aggressive
 tools/compress-for-context/compress-for-context.exe -b -r -p "*.md" ./docs
@@ -426,4 +435,4 @@ tools/compress-for-context/compress-for-context.exe -b -r -p "*.md" ./docs
 tools/create-dependency-graph/create-dependency-graph.exe C:\path\to\project
 ```
 
-Both tools are self-contained (~114MB each, includes Bun runtime) and require no Node.js installation.
+All tools are self-contained (~114MB each, includes Bun runtime) and require no Node.js installation.
