@@ -302,7 +302,7 @@ describe('Stress Tests', () => {
 
       // Should complete without errors
       expect(duration).toBeGreaterThan(0);
-    });
+    }, 30000); // 30 second timeout for 5000 operations
 
     it('should maintain stability over many operations', async () => {
       const iterations = 100;

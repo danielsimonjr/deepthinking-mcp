@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [8.3.2] - 2025-12-22
+
+### 🐛 Bug Fixes
+
+**Mode Recommendation & Export Improvements**
+
+Fixed critical issues discovered during comprehensive MCP client testing.
+
+#### Mode Recommendation Logic
+
+- **`src/types/modes/recommendations.ts`** - Fixed `quickRecommend()` returning wrong mode for probability-related queries
+  - Added 10 new Bayesian keywords: `bayesian`, `bayes`, `posterior`, `prior`, `likelihood`, `evidence-update`, `belief-update`, `conditional-probability`, `hypothesis-testing`, `probabilistic`
+  - Implemented substring matching with prioritized keyword list instead of exact string matching
+  - Queries like "analyzing probability of a hypothesis given evidence" now correctly return `bayesian` instead of `sequential`
+
+#### Session Export Enhancements
+
+- **`src/services/ExportService.ts`** - Fixed exports missing mode-specific structured data
+  - Added `extractModeSpecificMarkdown()` helper (~280 lines) covering 11 thought types
+  - Added `extractModeSpecificLatex()` helper (~60 lines) for LaTeX exports
+  - Markdown exports now include causal graphs (nodes, edges, interventions), Bayesian probabilities, temporal events, game theory matrices, etc.
+  - LaTeX exports include proper formatting with `\itemize` and `$\rightarrow$` for causal relationships
+  - Jupyter exports add mode-specific data as separate cells
+
+#### Version Number Updates
+
+- Updated hardcoded version numbers from `v7.1.0` to `v8.3.1` in 7 visual exporter files:
+  - `src/export/visual/modes/causal.ts`
+  - `src/export/visual/modes/bayesian.ts`
+  - `src/export/visual/modes/engineering.ts`
+  - `src/export/visual/modes/sequential.ts`
+  - `src/export/visual/modes/scientific-method.ts`
+  - `src/export/visual/utils/html.ts`
+  - `src/export/visual/utils/json.ts`
+
+#### Test Fixes
+
+- **`tests/performance/stress.test.ts`** - Fixed timeout in T-PRF-019 Extended Runtime test
+  - Added 30 second timeout for test performing 5000 operations (was using default 5 second timeout)
+
 ### 🧪 Testing
 
 **Phase 11: Comprehensive Test Coverage Initiative**

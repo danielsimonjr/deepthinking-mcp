@@ -961,6 +961,16 @@ export class ModeRecommender {
       'uncertainty': ThinkingMode.EVIDENTIAL,
       'causality': ThinkingMode.CAUSAL,
       'probability': ThinkingMode.BAYESIAN,
+      'bayesian': ThinkingMode.BAYESIAN,
+      'bayes': ThinkingMode.BAYESIAN,
+      'posterior': ThinkingMode.BAYESIAN,
+      'prior': ThinkingMode.BAYESIAN,
+      'likelihood': ThinkingMode.BAYESIAN,
+      'evidence-update': ThinkingMode.BAYESIAN,
+      'belief-update': ThinkingMode.BAYESIAN,
+      'conditional-probability': ThinkingMode.BAYESIAN,
+      'hypothesis-testing': ThinkingMode.BAYESIAN,
+      'probabilistic': ThinkingMode.BAYESIAN,
       'what-if': ThinkingMode.COUNTERFACTUAL,
       'analogy': ThinkingMode.ANALOGICAL,
       'physics': ThinkingMode.PHYSICS,
@@ -1071,7 +1081,6 @@ export class ModeRecommender {
       'experiment': ThinkingMode.SCIENTIFICMETHOD,
       'research': ThinkingMode.SCIENTIFICMETHOD,
       'falsification': ThinkingMode.SCIENTIFICMETHOD,
-      'hypothesis-testing': ThinkingMode.SCIENTIFICMETHOD,
       'a/b-testing': ThinkingMode.SCIENTIFICMETHOD,
       'reproducibility': ThinkingMode.SCIENTIFICMETHOD,
       'control-group': ThinkingMode.SCIENTIFICMETHOD,
@@ -1310,6 +1319,52 @@ export class ModeRecommender {
       'qualitative': ThinkingMode.ANALYSIS,
     };
 
-    return typeMap[problemType.toLowerCase()] || ThinkingMode.SEQUENTIAL;
+    const normalizedInput = problemType.toLowerCase();
+
+    // First try exact match
+    if (typeMap[normalizedInput]) {
+      return typeMap[normalizedInput];
+    }
+
+    // Then try substring matching - find keywords within the problem description
+    // Priority order: more specific keywords first
+    const prioritizedKeywords = [
+      // High priority - specific technical terms
+      'bayesian', 'posterior', 'prior', 'likelihood', 'conditional-probability',
+      'hypothesis-testing', 'probabilistic', 'probability',
+      'counterfactual', 'what-if',
+      'causal', 'causality',
+      'game-theory', 'nash', 'payoff',
+      'temporal', 'timeline',
+      'mathematical', 'proof', 'theorem',
+      // Medium priority - domain terms
+      'optimization', 'constraint',
+      'systems', 'feedback',
+      'scientific', 'experiment',
+      'synthesis', 'literature',
+      'argumentation', 'toulmin',
+      'critique', 'evaluation',
+      'analysis', 'qualitative',
+      // Lower priority - general terms
+      'uncertainty', 'evidence',
+      'logic', 'deductive',
+      'pattern', 'inductive',
+      'hypothesis', 'explanation', 'abductive',
+    ];
+
+    for (const keyword of prioritizedKeywords) {
+      if (normalizedInput.includes(keyword) && typeMap[keyword]) {
+        return typeMap[keyword];
+      }
+    }
+
+    // Also check all keys in the typeMap for substring matches
+    for (const [key, mode] of Object.entries(typeMap)) {
+      if (normalizedInput.includes(key)) {
+        return mode;
+      }
+    }
+
+    return ThinkingMode.SEQUENTIAL;
   }
 }

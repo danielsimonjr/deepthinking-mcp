@@ -24,6 +24,17 @@ import {
   BayesianThought,
   FirstPrinciplesThought,
   isMetaReasoningThought,
+  isCausalThought,
+  isBayesianThought,
+  isTemporalThought,
+  isGameTheoryThought,
+  isFirstPrinciplesThought,
+  isSystemsThinkingThought,
+  isSynthesisThought,
+  isArgumentationThought,
+  isAnalysisThought,
+  isAlgorithmicThought,
+  isScientificMethodThought,
   HybridThought,
   // Sprint 1: Visual export integration types
   SequentialThought,
@@ -36,6 +47,10 @@ import {
   ScientificMethodThought,
   OptimizationThought,
   FormalLogicThought,
+  type SynthesisThought,
+  type ArgumentationThought,
+  type AnalysisThought,
+  type AlgorithmicThought,
 } from '../types/index.js';
 import type { MathematicsThought } from '../types/modes/mathematics.js';
 import type { PhysicsThought } from '../types/modes/physics.js';
@@ -725,6 +740,9 @@ export class ExportService {
       md += `### Thought ${thought.thoughtNumber}/${session.thoughts.length}\n\n`;
       md += `${thought.content}\n\n`;
 
+      // Add mode-specific structured data
+      md += this.extractModeSpecificMarkdown(thought);
+
       // Display meta-reasoning insights if this is a meta-reasoning thought
       if (isMetaReasoningThought(thought)) {
         md += `#### 📊 Meta-Reasoning Analysis\n\n`;
@@ -810,6 +828,8 @@ export class ExportService {
     for (const thought of session.thoughts) {
       latex += `\\subsection{Thought ${thought.thoughtNumber}}\n`;
       latex += `${escapeLatex(thought.content)}\n\n`;
+      // Add mode-specific structured data
+      latex += this.extractModeSpecificLatex(thought);
     }
 
     latex += `\\end{document}\n`;
@@ -903,6 +923,7 @@ export class ExportService {
 
     // Add thought cells
     for (const thought of session.thoughts) {
+      // Main thought content
       notebook.cells.push({
         cell_type: 'markdown',
         metadata: {},
@@ -912,8 +933,385 @@ export class ExportService {
           `${thought.content}\n`,
         ],
       });
+
+      // Add mode-specific structured data as a separate cell
+      const modeSpecificContent = this.extractModeSpecificMarkdown(thought);
+      if (modeSpecificContent.trim()) {
+        notebook.cells.push({
+          cell_type: 'markdown',
+          metadata: {},
+          source: modeSpecificContent.split('\n').map(line => line + '\n'),
+        });
+      }
     }
 
     return JSON.stringify(notebook, null, 2);
+  }
+
+  /**
+   * Extract mode-specific structured data as Markdown
+   * Provides rich output for various thought types beyond just the content text
+   */
+  private extractModeSpecificMarkdown(thought: unknown): string {
+    let md = '';
+
+    // Causal thoughts - include graph structure
+    if (isCausalThought(thought)) {
+      if (thought.causalGraph?.nodes?.length) {
+        md += `#### Causal Graph\n\n`;
+        md += `**Nodes:**\n`;
+        for (const node of thought.causalGraph.nodes) {
+          md += `- **${node.name}** (${node.id})${node.description ? `: ${node.description}` : ''}\n`;
+        }
+        md += `\n`;
+      }
+      if (thought.causalGraph?.edges?.length) {
+        md += `**Causal Relationships:**\n`;
+        for (const edge of thought.causalGraph.edges) {
+          const strengthVal = typeof edge.strength === 'number' ? edge.strength : Number(edge.strength);
+          const strength = edge.strength !== undefined && !isNaN(strengthVal) ? ` (strength: ${strengthVal.toFixed(2)})` : '';
+          md += `- ${edge.from} → ${edge.to}${strength}\n`;
+        }
+        md += `\n`;
+      }
+      if (thought.interventions?.length) {
+        md += `**Interventions:**\n`;
+        for (const intervention of thought.interventions) {
+          md += `- ${intervention.node}: ${intervention.value}${intervention.effect ? ` → ${intervention.effect}` : ''}\n`;
+        }
+        md += `\n`;
+      }
+    }
+
+    // Bayesian thoughts - include probability data
+    if (isBayesianThought(thought)) {
+      md += `#### Bayesian Analysis\n\n`;
+      if (thought.priorProbability !== undefined) {
+        const prior = typeof thought.priorProbability === 'number' ? thought.priorProbability : Number(thought.priorProbability);
+        md += `- **Prior Probability:** ${(prior * 100).toFixed(1)}%\n`;
+      }
+      if (thought.likelihood !== undefined) {
+        const likelihood = typeof thought.likelihood === 'number' ? thought.likelihood : Number(thought.likelihood);
+        md += `- **Likelihood:** ${(likelihood * 100).toFixed(1)}%\n`;
+      }
+      if (thought.posteriorProbability !== undefined) {
+        const posterior = typeof thought.posteriorProbability === 'number' ? thought.posteriorProbability : Number(thought.posteriorProbability);
+        md += `- **Posterior Probability:** ${(posterior * 100).toFixed(1)}%\n`;
+      }
+      if (thought.evidence?.length) {
+        md += `\n**Evidence:**\n`;
+        for (const e of thought.evidence) {
+          md += `- ${e}\n`;
+        }
+      }
+      if (thought.hypotheses?.length) {
+        md += `\n**Hypotheses:**\n`;
+        for (const h of thought.hypotheses) {
+          let prob = '';
+          if (h.probability !== undefined) {
+            const probVal = typeof h.probability === 'number' ? h.probability : Number(h.probability);
+            prob = ` (${(probVal * 100).toFixed(1)}%)`;
+          }
+          md += `- ${h.description}${prob}\n`;
+        }
+      }
+      md += `\n`;
+    }
+
+    // Temporal thoughts - include timeline data
+    if (isTemporalThought(thought)) {
+      if (thought.events?.length) {
+        md += `#### Timeline\n\n`;
+        md += `**Events:**\n`;
+        for (const event of thought.events) {
+          md += `- **${event.name}** (t=${event.timestamp}): ${event.description}\n`;
+        }
+        md += `\n`;
+      }
+      if (thought.intervals?.length) {
+        md += `**Intervals:**\n`;
+        for (const interval of thought.intervals) {
+          md += `- **${interval.name}**: ${interval.start} → ${interval.end}\n`;
+        }
+        md += `\n`;
+      }
+      if (thought.relations?.length) {
+        md += `**Temporal Relations:**\n`;
+        for (const rel of thought.relations) {
+          md += `- ${rel.from} ${rel.relationType} ${rel.to}\n`;
+        }
+        md += `\n`;
+      }
+    }
+
+    // Game theory thoughts - include players and strategies
+    if (isGameTheoryThought(thought)) {
+      md += `#### Game Theory Analysis\n\n`;
+      if (thought.players?.length) {
+        md += `**Players:**\n`;
+        for (const player of thought.players) {
+          md += `- **${player.name}** (${player.id})${player.isRational ? ' - rational' : ''}\n`;
+        }
+        md += `\n`;
+      }
+      if (thought.strategies?.length) {
+        md += `**Strategies:**\n`;
+        for (const strat of thought.strategies) {
+          md += `- ${strat.name}: ${strat.description}\n`;
+        }
+        md += `\n`;
+      }
+      if (thought.payoffMatrix) {
+        md += `**Payoff Matrix:** ${thought.payoffMatrix.dimensions?.join('x') || 'defined'}\n\n`;
+      }
+    }
+
+    // Systems thinking - include components and feedback loops
+    if (isSystemsThinkingThought(thought)) {
+      md += `#### Systems Analysis\n\n`;
+      if (thought.components?.length) {
+        md += `**Components:**\n`;
+        for (const comp of thought.components) {
+          md += `- **${comp.name}** (${comp.role || comp.id})\n`;
+        }
+        md += `\n`;
+      }
+      if (thought.feedbackLoops?.length) {
+        md += `**Feedback Loops:**\n`;
+        for (const loop of thought.feedbackLoops) {
+          md += `- ${loop.type}: ${loop.components?.join(' → ') || 'defined'}\n`;
+        }
+        md += `\n`;
+      }
+    }
+
+    // Synthesis - include sources and themes
+    if (isSynthesisThought(thought)) {
+      md += `#### Literature Synthesis\n\n`;
+      if (thought.sources?.length) {
+        md += `**Sources (${thought.sources.length}):**\n`;
+        for (const source of thought.sources.slice(0, 5)) {
+          const authors = source.authors?.join(', ') || 'Unknown';
+          md += `- ${source.title} (${authors}, ${source.year || 'n.d.'})\n`;
+        }
+        if (thought.sources.length > 5) {
+          md += `- ... and ${thought.sources.length - 5} more\n`;
+        }
+        md += `\n`;
+      }
+      if (thought.themes?.length) {
+        md += `**Themes:**\n`;
+        for (const theme of thought.themes) {
+          const consensus = theme.consensus ? ` [${theme.consensus}]` : '';
+          md += `- **${theme.name}**${consensus}: ${theme.description || ''}\n`;
+        }
+        md += `\n`;
+      }
+      if (thought.gaps?.length) {
+        md += `**Research Gaps:**\n`;
+        for (const gap of thought.gaps) {
+          md += `- ${gap.description} (${gap.type || 'general'})\n`;
+        }
+        md += `\n`;
+      }
+    }
+
+    // Argumentation - include claims and grounds
+    if (isArgumentationThought(thought)) {
+      md += `#### Argumentation Structure\n\n`;
+      if (thought.claims?.length) {
+        md += `**Claims:**\n`;
+        for (const claim of thought.claims) {
+          md += `- ${claim.statement} [${claim.type || 'claim'}]\n`;
+        }
+        md += `\n`;
+      }
+      if (thought.grounds?.length) {
+        md += `**Grounds/Evidence:**\n`;
+        for (const ground of thought.grounds) {
+          md += `- ${ground.content} (${ground.type || 'evidence'})\n`;
+        }
+        md += `\n`;
+      }
+      if (thought.rebuttals?.length) {
+        md += `**Rebuttals:**\n`;
+        for (const rebuttal of thought.rebuttals) {
+          md += `- ${rebuttal.objection}${rebuttal.response ? ` → ${rebuttal.response}` : ''}\n`;
+        }
+        md += `\n`;
+      }
+    }
+
+    // Analysis - include codes and categories
+    if (isAnalysisThought(thought)) {
+      md += `#### Qualitative Analysis\n\n`;
+      if (thought.methodology) {
+        md += `**Methodology:** ${thought.methodology}\n\n`;
+      }
+      if (thought.codes?.length) {
+        md += `**Codes:**\n`;
+        for (const code of thought.codes.slice(0, 10)) {
+          const freq = code.frequency ? ` (n=${code.frequency})` : '';
+          md += `- **${code.label}**${freq}: ${code.definition || ''}\n`;
+        }
+        if (thought.codes.length > 10) {
+          md += `- ... and ${thought.codes.length - 10} more codes\n`;
+        }
+        md += `\n`;
+      }
+      if (thought.categories?.length) {
+        md += `**Categories:** ${thought.categories.join(', ')}\n\n`;
+      }
+      if (thought.keyInsight) {
+        md += `**Key Insight:** ${thought.keyInsight}\n\n`;
+      }
+    }
+
+    // Algorithmic - include complexity analysis
+    if (isAlgorithmicThought(thought)) {
+      md += `#### Algorithm Analysis\n\n`;
+      if (thought.algorithmName) {
+        md += `**Algorithm:** ${thought.algorithmName}\n`;
+      }
+      if (thought.designPattern) {
+        md += `**Design Pattern:** ${thought.designPattern}\n`;
+      }
+      if (thought.complexityAnalysis) {
+        md += `\n**Complexity:**\n`;
+        if (thought.complexityAnalysis.timeComplexity) {
+          md += `- Time: ${thought.complexityAnalysis.timeComplexity}\n`;
+        }
+        if (thought.complexityAnalysis.spaceComplexity) {
+          md += `- Space: ${thought.complexityAnalysis.spaceComplexity}\n`;
+        }
+      }
+      if (thought.correctnessProof) {
+        md += `\n**Correctness Proof:**\n`;
+        if (thought.correctnessProof.invariant) {
+          md += `- Invariant: ${thought.correctnessProof.invariant}\n`;
+        }
+        if (thought.correctnessProof.termination) {
+          md += `- Termination: ${thought.correctnessProof.termination}\n`;
+        }
+      }
+      md += `\n`;
+    }
+
+    // Scientific method - include hypothesis and experiments
+    if (isScientificMethodThought(thought)) {
+      md += `#### Scientific Method\n\n`;
+      if (thought.hypothesis) {
+        md += `**Hypothesis:** ${thought.hypothesis}\n\n`;
+      }
+      if (thought.predictions?.length) {
+        md += `**Predictions:**\n`;
+        for (const pred of thought.predictions) {
+          md += `- ${pred}\n`;
+        }
+        md += `\n`;
+      }
+      if (thought.experiments?.length) {
+        md += `**Experiments:**\n`;
+        for (const exp of thought.experiments) {
+          const result = exp.result ? ` → ${exp.result}` : '';
+          md += `- ${exp.description}${result}\n`;
+        }
+        md += `\n`;
+      }
+    }
+
+    // First principles - include fundamentals and insights
+    if (isFirstPrinciplesThought(thought)) {
+      md += `#### First Principles Analysis\n\n`;
+      if (thought.fundamentals?.length) {
+        md += `**Fundamental Truths:**\n`;
+        for (const f of thought.fundamentals) {
+          md += `- ${f}\n`;
+        }
+        md += `\n`;
+      }
+      if (thought.derivedInsights?.length) {
+        md += `**Derived Insights:**\n`;
+        for (const insight of thought.derivedInsights) {
+          md += `- ${insight}\n`;
+        }
+        md += `\n`;
+      }
+    }
+
+    return md;
+  }
+
+  /**
+   * Extract mode-specific structured data as LaTeX
+   */
+  private extractModeSpecificLatex(thought: unknown): string {
+    let latex = '';
+
+    if (isCausalThought(thought)) {
+      if (thought.causalGraph?.nodes?.length) {
+        latex += `\\subsubsection{Causal Graph}\n`;
+        latex += `\\textbf{Nodes:}\n\\begin{itemize}\n`;
+        for (const node of thought.causalGraph.nodes) {
+          latex += `  \\item \\textbf{${escapeLatex(node.name)}} (${escapeLatex(node.id)})`;
+          if (node.description) latex += `: ${escapeLatex(node.description)}`;
+          latex += `\n`;
+        }
+        latex += `\\end{itemize}\n\n`;
+      }
+      if (thought.causalGraph?.edges?.length) {
+        latex += `\\textbf{Causal Relationships:}\n\\begin{itemize}\n`;
+        for (const edge of thought.causalGraph.edges) {
+          const strengthVal = typeof edge.strength === 'number' ? edge.strength : Number(edge.strength);
+          const strength = edge.strength !== undefined && !isNaN(strengthVal) ? ` (strength: ${strengthVal.toFixed(2)})` : '';
+          latex += `  \\item ${escapeLatex(edge.from)} $\\rightarrow$ ${escapeLatex(edge.to)}${strength}\n`;
+        }
+        latex += `\\end{itemize}\n\n`;
+      }
+    }
+
+    if (isBayesianThought(thought)) {
+      latex += `\\subsubsection{Bayesian Analysis}\n`;
+      if (thought.priorProbability !== undefined) {
+        const prior = typeof thought.priorProbability === 'number' ? thought.priorProbability : Number(thought.priorProbability);
+        latex += `Prior: $P(H) = ${prior.toFixed(3)}$\\\\\n`;
+      }
+      if (thought.likelihood !== undefined) {
+        const likelihood = typeof thought.likelihood === 'number' ? thought.likelihood : Number(thought.likelihood);
+        latex += `Likelihood: $P(E|H) = ${likelihood.toFixed(3)}$\\\\\n`;
+      }
+      if (thought.posteriorProbability !== undefined) {
+        const posterior = typeof thought.posteriorProbability === 'number' ? thought.posteriorProbability : Number(thought.posteriorProbability);
+        latex += `Posterior: $P(H|E) = ${posterior.toFixed(3)}$\\\\\n`;
+      }
+      latex += `\n`;
+    }
+
+    if (isGameTheoryThought(thought) && thought.players?.length) {
+      latex += `\\subsubsection{Game Theory Analysis}\n`;
+      latex += `\\textbf{Players:} ${thought.players.map(p => escapeLatex(p.name)).join(', ')}\\\\\n`;
+      if (thought.payoffMatrix) {
+        latex += `\\textbf{Payoff Matrix:} ${thought.payoffMatrix.dimensions?.join('$\\times$') || 'defined'}\\\\\n`;
+      }
+      latex += `\n`;
+    }
+
+    if (isAlgorithmicThought(thought)) {
+      latex += `\\subsubsection{Algorithm Analysis}\n`;
+      if (thought.algorithmName) {
+        latex += `\\textbf{Algorithm:} ${escapeLatex(thought.algorithmName)}\\\\\n`;
+      }
+      if (thought.complexityAnalysis) {
+        if (thought.complexityAnalysis.timeComplexity) {
+          latex += `\\textbf{Time Complexity:} $${escapeLatex(thought.complexityAnalysis.timeComplexity)}$\\\\\n`;
+        }
+        if (thought.complexityAnalysis.spaceComplexity) {
+          latex += `\\textbf{Space Complexity:} $${escapeLatex(thought.complexityAnalysis.spaceComplexity)}$\\\\\n`;
+        }
+      }
+      latex += `\n`;
+    }
+
+    return latex;
   }
 }

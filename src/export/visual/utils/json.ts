@@ -86,7 +86,7 @@ export function createJsonGraph(
       title,
       mode,
       exportedAt: new Date().toISOString(),
-      generator: 'DeepThinking MCP v7.1.0',
+      generator: 'DeepThinking MCP v8.3.1',
     },
     nodes: [],
     edges: [],

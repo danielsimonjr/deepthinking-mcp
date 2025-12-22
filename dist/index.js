@@ -816,8 +816,17 @@ var init_thinking = __esm({
 function isFullyImplemented(mode) {
   return FULLY_IMPLEMENTED_MODES.includes(mode);
 }
+function isAlgorithmicThought(thought) {
+  return thought.mode === "algorithmic" /* ALGORITHMIC */;
+}
 function isMetaReasoningThought(thought) {
   return thought.mode === "metareasoning" /* METAREASONING */;
+}
+function isCausalThought(thought) {
+  return thought.mode === "causal" /* CAUSAL */;
+}
+function isBayesianThought(thought) {
+  return thought.mode === "bayesian" /* BAYESIAN */;
 }
 function isTemporalThought(thought) {
   return thought.mode === "temporal" /* TEMPORAL */;
@@ -827,6 +836,15 @@ function isGameTheoryThought(thought) {
 }
 function isEvidentialThought(thought) {
   return thought.mode === "evidential" /* EVIDENTIAL */;
+}
+function isFirstPrinciplesThought(thought) {
+  return thought.mode === "firstprinciples" /* FIRSTPRINCIPLES */;
+}
+function isSystemsThinkingThought(thought) {
+  return thought.mode === "systemsthinking" /* SYSTEMSTHINKING */;
+}
+function isScientificMethodThought(thought) {
+  return thought.mode === "scientificmethod" /* SCIENTIFICMETHOD */;
 }
 var ThinkingMode, FULLY_IMPLEMENTED_MODES;
 var init_core = __esm({
@@ -1695,6 +1713,16 @@ var init_recommendations = __esm({
           "uncertainty": "evidential" /* EVIDENTIAL */,
           "causality": "causal" /* CAUSAL */,
           "probability": "bayesian" /* BAYESIAN */,
+          "bayesian": "bayesian" /* BAYESIAN */,
+          "bayes": "bayesian" /* BAYESIAN */,
+          "posterior": "bayesian" /* BAYESIAN */,
+          "prior": "bayesian" /* BAYESIAN */,
+          "likelihood": "bayesian" /* BAYESIAN */,
+          "evidence-update": "bayesian" /* BAYESIAN */,
+          "belief-update": "bayesian" /* BAYESIAN */,
+          "conditional-probability": "bayesian" /* BAYESIAN */,
+          "hypothesis-testing": "bayesian" /* BAYESIAN */,
+          "probabilistic": "bayesian" /* BAYESIAN */,
           "what-if": "counterfactual" /* COUNTERFACTUAL */,
           "analogy": "analogical" /* ANALOGICAL */,
           "physics": "physics" /* PHYSICS */,
@@ -1794,7 +1822,6 @@ var init_recommendations = __esm({
           "experiment": "scientificmethod" /* SCIENTIFICMETHOD */,
           "research": "scientificmethod" /* SCIENTIFICMETHOD */,
           "falsification": "scientificmethod" /* SCIENTIFICMETHOD */,
-          "hypothesis-testing": "scientificmethod" /* SCIENTIFICMETHOD */,
           "a/b-testing": "scientificmethod" /* SCIENTIFICMETHOD */,
           "reproducibility": "scientificmethod" /* SCIENTIFICMETHOD */,
           "control-group": "scientificmethod" /* SCIENTIFICMETHOD */,
@@ -2011,7 +2038,69 @@ var init_recommendations = __esm({
           "case-study": "analysis" /* ANALYSIS */,
           "qualitative": "analysis" /* ANALYSIS */
         };
-        return typeMap[problemType.toLowerCase()] || "sequential" /* SEQUENTIAL */;
+        const normalizedInput = problemType.toLowerCase();
+        if (typeMap[normalizedInput]) {
+          return typeMap[normalizedInput];
+        }
+        const prioritizedKeywords = [
+          // High priority - specific technical terms
+          "bayesian",
+          "posterior",
+          "prior",
+          "likelihood",
+          "conditional-probability",
+          "hypothesis-testing",
+          "probabilistic",
+          "probability",
+          "counterfactual",
+          "what-if",
+          "causal",
+          "causality",
+          "game-theory",
+          "nash",
+          "payoff",
+          "temporal",
+          "timeline",
+          "mathematical",
+          "proof",
+          "theorem",
+          // Medium priority - domain terms
+          "optimization",
+          "constraint",
+          "systems",
+          "feedback",
+          "scientific",
+          "experiment",
+          "synthesis",
+          "literature",
+          "argumentation",
+          "toulmin",
+          "critique",
+          "evaluation",
+          "analysis",
+          "qualitative",
+          // Lower priority - general terms
+          "uncertainty",
+          "evidence",
+          "logic",
+          "deductive",
+          "pattern",
+          "inductive",
+          "hypothesis",
+          "explanation",
+          "abductive"
+        ];
+        for (const keyword of prioritizedKeywords) {
+          if (normalizedInput.includes(keyword) && typeMap[keyword]) {
+            return typeMap[keyword];
+          }
+        }
+        for (const [key, mode] of Object.entries(typeMap)) {
+          if (normalizedInput.includes(key)) {
+            return mode;
+          }
+        }
+        return "sequential" /* SEQUENTIAL */;
       }
     };
   }
@@ -2035,6 +2124,36 @@ var init_cryptanalytic = __esm({
   }
 });
 
+// src/types/modes/synthesis.ts
+function isSynthesisThought(thought) {
+  return thought.mode === "synthesis";
+}
+var init_synthesis = __esm({
+  "src/types/modes/synthesis.ts"() {
+    init_esm_shims();
+  }
+});
+
+// src/types/modes/argumentation.ts
+function isArgumentationThought(thought) {
+  return thought.mode === "argumentation";
+}
+var init_argumentation = __esm({
+  "src/types/modes/argumentation.ts"() {
+    init_esm_shims();
+  }
+});
+
+// src/types/modes/analysis.ts
+function isAnalysisThought(thought) {
+  return thought.mode === "analysis";
+}
+var init_analysis = __esm({
+  "src/types/modes/analysis.ts"() {
+    init_esm_shims();
+  }
+});
+
 // src/types/index.ts
 var init_types = __esm({
   "src/types/index.ts"() {
@@ -2042,6 +2161,9 @@ var init_types = __esm({
     init_core();
     init_session();
     init_recommendations();
+    init_synthesis();
+    init_argumentation();
+    init_analysis();
   }
 });
 
@@ -19360,7 +19482,7 @@ function generateHTMLFooter(standalone = true) {
   }
   return `
   <div class="footer">
-    Generated by DeepThinking MCP v7.1.0
+    Generated by DeepThinking MCP v8.3.1
   </div>
 </body>
 </html>`;
@@ -19732,7 +19854,7 @@ function createJsonGraph(title, mode, options = {}) {
       title,
       mode,
       exportedAt: (/* @__PURE__ */ new Date()).toISOString(),
-      generator: "DeepThinking MCP v7.1.0"
+      generator: "DeepThinking MCP v8.3.1"
     },
     nodes: [],
     edges: [],
@@ -20525,7 +20647,7 @@ function sequentialToModelica(thought, options) {
   if (modelicaIncludeAnnotations) {
     lines.push("  annotation(");
     lines.push('    Documentation(info="<html>');
-    lines.push("      <p>Generated by DeepThinking MCP v7.1.0</p>");
+    lines.push("      <p>Generated by DeepThinking MCP v8.3.1</p>");
     lines.push('    </html>")');
     lines.push("  );");
   }
@@ -25155,7 +25277,7 @@ function causalToModelica(thought, options) {
     lines.push(`      <p>Effects: ${effects.length}</p>`);
     lines.push(`      <p>Total Nodes: ${thought.causalGraph.nodes.length}</p>`);
     lines.push(`      <p>Edges: ${thought.causalGraph.edges?.length || 0}</p>`);
-    lines.push("      <p>Generated by DeepThinking MCP v7.1.0</p>");
+    lines.push("      <p>Generated by DeepThinking MCP v8.3.1</p>");
     lines.push('    </html>")');
     lines.push("  );");
   }
@@ -26758,7 +26880,7 @@ function bayesianToModelica(thought, options) {
     lines.push('    Documentation(info="<html>');
     lines.push(`      <p><b>Prior:</b> ${(thought.prior.probability * 100).toFixed(1)}%</p>`);
     lines.push(`      <p><b>Posterior:</b> ${(thought.posterior.probability * 100).toFixed(1)}%</p>`);
-    lines.push("      <p>Generated by DeepThinking MCP v7.1.0</p>");
+    lines.push("      <p>Generated by DeepThinking MCP v8.3.1</p>");
     lines.push('    </html>")');
     lines.push("  );");
   }
@@ -34429,7 +34551,7 @@ function scientificMethodToModelica(thought, options) {
       lines.push(`      <p>Confidence: ${(thought.conclusion.confidence * 100).toFixed(0)}%</p>`);
     }
   }
-  lines.push("      <p>Generated by DeepThinking MCP v7.1.0</p>");
+  lines.push("      <p>Generated by DeepThinking MCP v8.3.1</p>");
   lines.push('    </html>"),');
   lines.push('    version="1.0.0"');
   lines.push("  );");
@@ -36470,7 +36592,7 @@ function engineeringToModelica(thought, options) {
     lines.push(`    Documentation(info="<html>`);
     lines.push(`      <h2>Engineering Analysis: ${escapeModelicaString2(thought.analysisType)}</h2>`);
     lines.push(`      <p><b>Design Challenge:</b> ${escapeModelicaString2(thought.designChallenge)}</p>`);
-    lines.push(`      <p>Generated by DeepThinking MCP v7.1.0</p>`);
+    lines.push(`      <p>Generated by DeepThinking MCP v8.3.1</p>`);
     lines.push(`    </html>"),`);
     lines.push(`    version="1.0.0"`);
     lines.push(`  );`);
@@ -39733,6 +39855,7 @@ ${thoughtsText}`;
           md += `${thought.content}
 
 `;
+          md += this.extractModeSpecificMarkdown(thought);
           if (isMetaReasoningThought(thought)) {
             md += `#### \u{1F4CA} Meta-Reasoning Analysis
 
@@ -39849,6 +39972,7 @@ ${thoughtsText}`;
           latex += `${escapeLatex(thought.content)}
 
 `;
+          latex += this.extractModeSpecificLatex(thought);
         }
         latex += `\\end{document}
 `;
@@ -39954,8 +40078,496 @@ ${thoughtsText}`;
 `
             ]
           });
+          const modeSpecificContent = this.extractModeSpecificMarkdown(thought);
+          if (modeSpecificContent.trim()) {
+            notebook.cells.push({
+              cell_type: "markdown",
+              metadata: {},
+              source: modeSpecificContent.split("\n").map((line) => line + "\n")
+            });
+          }
         }
         return JSON.stringify(notebook, null, 2);
+      }
+      /**
+       * Extract mode-specific structured data as Markdown
+       * Provides rich output for various thought types beyond just the content text
+       */
+      extractModeSpecificMarkdown(thought) {
+        let md = "";
+        if (isCausalThought(thought)) {
+          if (thought.causalGraph?.nodes?.length) {
+            md += `#### Causal Graph
+
+`;
+            md += `**Nodes:**
+`;
+            for (const node of thought.causalGraph.nodes) {
+              md += `- **${node.name}** (${node.id})${node.description ? `: ${node.description}` : ""}
+`;
+            }
+            md += `
+`;
+          }
+          if (thought.causalGraph?.edges?.length) {
+            md += `**Causal Relationships:**
+`;
+            for (const edge of thought.causalGraph.edges) {
+              const strengthVal = typeof edge.strength === "number" ? edge.strength : Number(edge.strength);
+              const strength = edge.strength !== void 0 && !isNaN(strengthVal) ? ` (strength: ${strengthVal.toFixed(2)})` : "";
+              md += `- ${edge.from} \u2192 ${edge.to}${strength}
+`;
+            }
+            md += `
+`;
+          }
+          if (thought.interventions?.length) {
+            md += `**Interventions:**
+`;
+            for (const intervention of thought.interventions) {
+              md += `- ${intervention.node}: ${intervention.value}${intervention.effect ? ` \u2192 ${intervention.effect}` : ""}
+`;
+            }
+            md += `
+`;
+          }
+        }
+        if (isBayesianThought(thought)) {
+          md += `#### Bayesian Analysis
+
+`;
+          if (thought.priorProbability !== void 0) {
+            const prior = typeof thought.priorProbability === "number" ? thought.priorProbability : Number(thought.priorProbability);
+            md += `- **Prior Probability:** ${(prior * 100).toFixed(1)}%
+`;
+          }
+          if (thought.likelihood !== void 0) {
+            const likelihood = typeof thought.likelihood === "number" ? thought.likelihood : Number(thought.likelihood);
+            md += `- **Likelihood:** ${(likelihood * 100).toFixed(1)}%
+`;
+          }
+          if (thought.posteriorProbability !== void 0) {
+            const posterior = typeof thought.posteriorProbability === "number" ? thought.posteriorProbability : Number(thought.posteriorProbability);
+            md += `- **Posterior Probability:** ${(posterior * 100).toFixed(1)}%
+`;
+          }
+          if (thought.evidence?.length) {
+            md += `
+**Evidence:**
+`;
+            for (const e of thought.evidence) {
+              md += `- ${e}
+`;
+            }
+          }
+          if (thought.hypotheses?.length) {
+            md += `
+**Hypotheses:**
+`;
+            for (const h of thought.hypotheses) {
+              let prob = "";
+              if (h.probability !== void 0) {
+                const probVal = typeof h.probability === "number" ? h.probability : Number(h.probability);
+                prob = ` (${(probVal * 100).toFixed(1)}%)`;
+              }
+              md += `- ${h.description}${prob}
+`;
+            }
+          }
+          md += `
+`;
+        }
+        if (isTemporalThought(thought)) {
+          if (thought.events?.length) {
+            md += `#### Timeline
+
+`;
+            md += `**Events:**
+`;
+            for (const event of thought.events) {
+              md += `- **${event.name}** (t=${event.timestamp}): ${event.description}
+`;
+            }
+            md += `
+`;
+          }
+          if (thought.intervals?.length) {
+            md += `**Intervals:**
+`;
+            for (const interval of thought.intervals) {
+              md += `- **${interval.name}**: ${interval.start} \u2192 ${interval.end}
+`;
+            }
+            md += `
+`;
+          }
+          if (thought.relations?.length) {
+            md += `**Temporal Relations:**
+`;
+            for (const rel of thought.relations) {
+              md += `- ${rel.from} ${rel.relationType} ${rel.to}
+`;
+            }
+            md += `
+`;
+          }
+        }
+        if (isGameTheoryThought(thought)) {
+          md += `#### Game Theory Analysis
+
+`;
+          if (thought.players?.length) {
+            md += `**Players:**
+`;
+            for (const player of thought.players) {
+              md += `- **${player.name}** (${player.id})${player.isRational ? " - rational" : ""}
+`;
+            }
+            md += `
+`;
+          }
+          if (thought.strategies?.length) {
+            md += `**Strategies:**
+`;
+            for (const strat of thought.strategies) {
+              md += `- ${strat.name}: ${strat.description}
+`;
+            }
+            md += `
+`;
+          }
+          if (thought.payoffMatrix) {
+            md += `**Payoff Matrix:** ${thought.payoffMatrix.dimensions?.join("x") || "defined"}
+
+`;
+          }
+        }
+        if (isSystemsThinkingThought(thought)) {
+          md += `#### Systems Analysis
+
+`;
+          if (thought.components?.length) {
+            md += `**Components:**
+`;
+            for (const comp of thought.components) {
+              md += `- **${comp.name}** (${comp.role || comp.id})
+`;
+            }
+            md += `
+`;
+          }
+          if (thought.feedbackLoops?.length) {
+            md += `**Feedback Loops:**
+`;
+            for (const loop of thought.feedbackLoops) {
+              md += `- ${loop.type}: ${loop.components?.join(" \u2192 ") || "defined"}
+`;
+            }
+            md += `
+`;
+          }
+        }
+        if (isSynthesisThought(thought)) {
+          md += `#### Literature Synthesis
+
+`;
+          if (thought.sources?.length) {
+            md += `**Sources (${thought.sources.length}):**
+`;
+            for (const source of thought.sources.slice(0, 5)) {
+              const authors = source.authors?.join(", ") || "Unknown";
+              md += `- ${source.title} (${authors}, ${source.year || "n.d."})
+`;
+            }
+            if (thought.sources.length > 5) {
+              md += `- ... and ${thought.sources.length - 5} more
+`;
+            }
+            md += `
+`;
+          }
+          if (thought.themes?.length) {
+            md += `**Themes:**
+`;
+            for (const theme of thought.themes) {
+              const consensus = theme.consensus ? ` [${theme.consensus}]` : "";
+              md += `- **${theme.name}**${consensus}: ${theme.description || ""}
+`;
+            }
+            md += `
+`;
+          }
+          if (thought.gaps?.length) {
+            md += `**Research Gaps:**
+`;
+            for (const gap of thought.gaps) {
+              md += `- ${gap.description} (${gap.type || "general"})
+`;
+            }
+            md += `
+`;
+          }
+        }
+        if (isArgumentationThought(thought)) {
+          md += `#### Argumentation Structure
+
+`;
+          if (thought.claims?.length) {
+            md += `**Claims:**
+`;
+            for (const claim of thought.claims) {
+              md += `- ${claim.statement} [${claim.type || "claim"}]
+`;
+            }
+            md += `
+`;
+          }
+          if (thought.grounds?.length) {
+            md += `**Grounds/Evidence:**
+`;
+            for (const ground of thought.grounds) {
+              md += `- ${ground.content} (${ground.type || "evidence"})
+`;
+            }
+            md += `
+`;
+          }
+          if (thought.rebuttals?.length) {
+            md += `**Rebuttals:**
+`;
+            for (const rebuttal of thought.rebuttals) {
+              md += `- ${rebuttal.objection}${rebuttal.response ? ` \u2192 ${rebuttal.response}` : ""}
+`;
+            }
+            md += `
+`;
+          }
+        }
+        if (isAnalysisThought(thought)) {
+          md += `#### Qualitative Analysis
+
+`;
+          if (thought.methodology) {
+            md += `**Methodology:** ${thought.methodology}
+
+`;
+          }
+          if (thought.codes?.length) {
+            md += `**Codes:**
+`;
+            for (const code of thought.codes.slice(0, 10)) {
+              const freq = code.frequency ? ` (n=${code.frequency})` : "";
+              md += `- **${code.label}**${freq}: ${code.definition || ""}
+`;
+            }
+            if (thought.codes.length > 10) {
+              md += `- ... and ${thought.codes.length - 10} more codes
+`;
+            }
+            md += `
+`;
+          }
+          if (thought.categories?.length) {
+            md += `**Categories:** ${thought.categories.join(", ")}
+
+`;
+          }
+          if (thought.keyInsight) {
+            md += `**Key Insight:** ${thought.keyInsight}
+
+`;
+          }
+        }
+        if (isAlgorithmicThought(thought)) {
+          md += `#### Algorithm Analysis
+
+`;
+          if (thought.algorithmName) {
+            md += `**Algorithm:** ${thought.algorithmName}
+`;
+          }
+          if (thought.designPattern) {
+            md += `**Design Pattern:** ${thought.designPattern}
+`;
+          }
+          if (thought.complexityAnalysis) {
+            md += `
+**Complexity:**
+`;
+            if (thought.complexityAnalysis.timeComplexity) {
+              md += `- Time: ${thought.complexityAnalysis.timeComplexity}
+`;
+            }
+            if (thought.complexityAnalysis.spaceComplexity) {
+              md += `- Space: ${thought.complexityAnalysis.spaceComplexity}
+`;
+            }
+          }
+          if (thought.correctnessProof) {
+            md += `
+**Correctness Proof:**
+`;
+            if (thought.correctnessProof.invariant) {
+              md += `- Invariant: ${thought.correctnessProof.invariant}
+`;
+            }
+            if (thought.correctnessProof.termination) {
+              md += `- Termination: ${thought.correctnessProof.termination}
+`;
+            }
+          }
+          md += `
+`;
+        }
+        if (isScientificMethodThought(thought)) {
+          md += `#### Scientific Method
+
+`;
+          if (thought.hypothesis) {
+            md += `**Hypothesis:** ${thought.hypothesis}
+
+`;
+          }
+          if (thought.predictions?.length) {
+            md += `**Predictions:**
+`;
+            for (const pred of thought.predictions) {
+              md += `- ${pred}
+`;
+            }
+            md += `
+`;
+          }
+          if (thought.experiments?.length) {
+            md += `**Experiments:**
+`;
+            for (const exp of thought.experiments) {
+              const result = exp.result ? ` \u2192 ${exp.result}` : "";
+              md += `- ${exp.description}${result}
+`;
+            }
+            md += `
+`;
+          }
+        }
+        if (isFirstPrinciplesThought(thought)) {
+          md += `#### First Principles Analysis
+
+`;
+          if (thought.fundamentals?.length) {
+            md += `**Fundamental Truths:**
+`;
+            for (const f of thought.fundamentals) {
+              md += `- ${f}
+`;
+            }
+            md += `
+`;
+          }
+          if (thought.derivedInsights?.length) {
+            md += `**Derived Insights:**
+`;
+            for (const insight of thought.derivedInsights) {
+              md += `- ${insight}
+`;
+            }
+            md += `
+`;
+          }
+        }
+        return md;
+      }
+      /**
+       * Extract mode-specific structured data as LaTeX
+       */
+      extractModeSpecificLatex(thought) {
+        let latex = "";
+        if (isCausalThought(thought)) {
+          if (thought.causalGraph?.nodes?.length) {
+            latex += `\\subsubsection{Causal Graph}
+`;
+            latex += `\\textbf{Nodes:}
+\\begin{itemize}
+`;
+            for (const node of thought.causalGraph.nodes) {
+              latex += `  \\item \\textbf{${escapeLatex(node.name)}} (${escapeLatex(node.id)})`;
+              if (node.description) latex += `: ${escapeLatex(node.description)}`;
+              latex += `
+`;
+            }
+            latex += `\\end{itemize}
+
+`;
+          }
+          if (thought.causalGraph?.edges?.length) {
+            latex += `\\textbf{Causal Relationships:}
+\\begin{itemize}
+`;
+            for (const edge of thought.causalGraph.edges) {
+              const strengthVal = typeof edge.strength === "number" ? edge.strength : Number(edge.strength);
+              const strength = edge.strength !== void 0 && !isNaN(strengthVal) ? ` (strength: ${strengthVal.toFixed(2)})` : "";
+              latex += `  \\item ${escapeLatex(edge.from)} $\\rightarrow$ ${escapeLatex(edge.to)}${strength}
+`;
+            }
+            latex += `\\end{itemize}
+
+`;
+          }
+        }
+        if (isBayesianThought(thought)) {
+          latex += `\\subsubsection{Bayesian Analysis}
+`;
+          if (thought.priorProbability !== void 0) {
+            const prior = typeof thought.priorProbability === "number" ? thought.priorProbability : Number(thought.priorProbability);
+            latex += `Prior: $P(H) = ${prior.toFixed(3)}$\\\\
+`;
+          }
+          if (thought.likelihood !== void 0) {
+            const likelihood = typeof thought.likelihood === "number" ? thought.likelihood : Number(thought.likelihood);
+            latex += `Likelihood: $P(E|H) = ${likelihood.toFixed(3)}$\\\\
+`;
+          }
+          if (thought.posteriorProbability !== void 0) {
+            const posterior = typeof thought.posteriorProbability === "number" ? thought.posteriorProbability : Number(thought.posteriorProbability);
+            latex += `Posterior: $P(H|E) = ${posterior.toFixed(3)}$\\\\
+`;
+          }
+          latex += `
+`;
+        }
+        if (isGameTheoryThought(thought) && thought.players?.length) {
+          latex += `\\subsubsection{Game Theory Analysis}
+`;
+          latex += `\\textbf{Players:} ${thought.players.map((p) => escapeLatex(p.name)).join(", ")}\\\\
+`;
+          if (thought.payoffMatrix) {
+            latex += `\\textbf{Payoff Matrix:} ${thought.payoffMatrix.dimensions?.join("$\\times$") || "defined"}\\\\
+`;
+          }
+          latex += `
+`;
+        }
+        if (isAlgorithmicThought(thought)) {
+          latex += `\\subsubsection{Algorithm Analysis}
+`;
+          if (thought.algorithmName) {
+            latex += `\\textbf{Algorithm:} ${escapeLatex(thought.algorithmName)}\\\\
+`;
+          }
+          if (thought.complexityAnalysis) {
+            if (thought.complexityAnalysis.timeComplexity) {
+              latex += `\\textbf{Time Complexity:} $${escapeLatex(thought.complexityAnalysis.timeComplexity)}$\\\\
+`;
+            }
+            if (thought.complexityAnalysis.spaceComplexity) {
+              latex += `\\textbf{Space Complexity:} $${escapeLatex(thought.complexityAnalysis.spaceComplexity)}$\\\\
+`;
+            }
+          }
+          latex += `
+`;
+        }
+        return latex;
       }
     };
   }
