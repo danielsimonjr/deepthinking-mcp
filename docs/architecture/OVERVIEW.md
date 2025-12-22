@@ -8,36 +8,6 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 
 ---
 
-## What's New in v8.3.x
-
-- **Bug Fixes**: Mode recommendation logic now uses substring matching with prioritized keywords
-- **Export Improvements**: Markdown/LaTeX/Jupyter exports include mode-specific structured data (causal graphs, probabilities, temporal events)
-- **Phase 11 Complete**: Comprehensive test coverage - 143 test files, 3539 passing tests
-- **Version Alignment**: All visual exporters updated to v8.3.1
-
-## What's New in v8.2.x
-
-- **Phase 10: ModeHandler Architecture** - Strategy pattern with 7 specialized handlers
-- **Specialized Handlers**: CausalHandler, BayesianHandler, GameTheoryHandler, CounterfactualHandler, SynthesisHandler, SystemsThinkingHandler, CritiqueHandler
-- **Handler Enhancements**: Systems Archetypes detection (8 patterns), Socratic Questions (6 categories), auto Bayesian posteriors, Nash equilibria computation
-- **ModeHandlerRegistry**: Centralized handler management with `hasSpecializedHandler()` API
-- **ThoughtFactory Integration**: Handlers integrated directly into ThoughtFactory for seamless processing
-
-## What's New in v7.5.0
-
-- **Phase 14: Accessible Reasoning Modes** - All 29 modes with dedicated thought types accessible via 12 MCP tools
-- **12 Focused Tools**: Including `deepthinking_engineering` and `deepthinking_academic`
-
-## What's New in v7.4.0
-
-- **Phase 13: Academic Research Modes** - Synthesis, Argumentation, Critique, Analysis for PhD students
-
-## What's New in v7.3.0
-
-- **Phase 12: Algorithmic Reasoning Mode** - Comprehensive CLRS coverage with 100+ algorithms
-
----
-
 ## Key Metrics
 
 | Metric | Value |
