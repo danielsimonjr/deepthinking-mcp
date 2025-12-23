@@ -3,7 +3,7 @@
   "title": "Advanced Reasoning Features",
   "description": "Major feature enhancements for proof decomposition, multi-mode analysis, export system, stochastic reasoning, and graph analysis",
   "totalSprints": 6,
-  "totalEstimatedHours": 88,
+  "totalEstimatedHours": 90,
   "status": "planning",
   "sprints": [
     {
@@ -56,7 +56,7 @@
       "title": "Enhanced Graph Analysis",
       "focus": "Centrality algorithms, D-separation, Do-calculus, CausalHandler enhancements",
       "tasks": 5,
-      "hours": 15,
+      "hours": 17,
       "file": "PHASE_12_SPRINT_6_TODO.json",
       "status": "pending"
     }
@@ -73,14 +73,19 @@
       "src/proof/branch-analyzer.ts",
       "src/proof/branch-types.ts",
       "src/proof/strategy-recommender.ts",
-      "src/proof/verifier.ts"
+      "src/proof/verifier.ts",
+      "src/proof/hierarchical-proof.ts"
     ],
     "combinations": [
       "src/modes/combinations/index.ts",
       "src/modes/combinations/combination-types.ts",
       "src/modes/combinations/merger.ts",
       "src/modes/combinations/conflict-resolver.ts",
-      "src/modes/combinations/presets.ts"
+      "src/modes/combinations/presets.ts",
+      "src/modes/combinations/analyzer.ts"
+    ],
+    "tools": [
+      "src/tools/schemas/analyze.ts"
     ],
     "export": [
       "src/export/profiles.ts",
@@ -92,13 +97,13 @@
       "src/modes/stochastic/models/distribution.ts",
       "src/modes/stochastic/models/monte-carlo.ts",
       "src/modes/stochastic/sampling/rng.ts",
-      "src/modes/stochastic/sampling/samplers.ts",
       "src/modes/stochastic/analysis/statistics.ts",
       "src/modes/stochastic/analysis/convergence.ts"
     ],
     "graph": [
       "src/modes/causal/graph/index.ts",
       "src/modes/causal/graph/types.ts",
+      "src/modes/causal/graph/algorithms/index.ts",
       "src/modes/causal/graph/algorithms/centrality.ts",
       "src/modes/causal/graph/algorithms/d-separation.ts",
       "src/modes/causal/graph/algorithms/intervention.ts"
@@ -109,10 +114,16 @@
   },
   "modifiedFiles": [
     "src/proof/decomposer.ts",
+    "src/proof/index.ts",
     "src/services/ExportService.ts",
+    "src/services/ThoughtFactory.ts",
     "src/modes/handlers/CausalHandler.ts",
-    "src/index.ts",
-    "src/types/core.ts"
+    "src/modes/handlers/ModeHandlerRegistry.ts",
+    "src/modes/stochastic/index.ts",
+    "src/modes/causal/graph/index.ts",
+    "src/types/modes/causal.ts",
+    "src/types/modes/stochastic.ts",
+    "src/index.ts"
   ],
   "newMCPTools": [
     "deepthinking_analyze"

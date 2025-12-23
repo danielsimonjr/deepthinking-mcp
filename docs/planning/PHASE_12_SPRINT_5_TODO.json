@@ -14,12 +14,13 @@
       "status": "pending",
       "estimatedHours": 4.0,
       "details": [
+        "NOTE: DistributionType exists in src/types/modes/stochastic.ts - this implements sampling logic",
         "Implement Normal distribution sampler (Box-Muller transform)",
         "Implement Uniform distribution sampler",
         "Implement Exponential distribution sampler",
         "Implement Poisson distribution sampler",
         "Implement Binomial distribution sampler",
-        "Implement Categorical distribution sampler",
+        "Implement Categorical distribution sampler (extends existing types)",
         "Add parameter validation for each distribution",
         "Create Distribution factory function"
       ],
@@ -99,7 +100,7 @@
         "Implement enhance() to run simulations and add results",
         "Implement getSuggestions() for stochastic analysis tips",
         "Register handler in ModeHandlerRegistry",
-        "Add StochasticThought type if not exists",
+        "Extend StochasticThought with Monte Carlo result fields (type already exists)",
         "Update ThoughtFactory for stochastic mode"
       ],
       "files": [

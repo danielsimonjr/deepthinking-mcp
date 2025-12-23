@@ -67,14 +67,15 @@
     },
     {
       "id": "12.1.4",
-      "category": "Stochastic Types",
-      "description": "Define types for stochastic reasoning and Monte Carlo",
+      "category": "Monte Carlo Types",
+      "description": "Define Monte Carlo extension types (StochasticThought already exists in src/types/modes/stochastic.ts)",
       "status": "pending",
       "estimatedHours": 3.0,
       "details": [
+        "NOTE: StochasticThought, DistributionType, RandomVariable already exist - extend, don't replace",
         "Create StochasticModel interface with variables, dependencies, constraints",
         "Create StochasticVariable interface with name, distribution, domain",
-        "Create Distribution type union (normal, uniform, exponential, poisson, binomial, categorical, custom)",
+        "Create extended Distribution type union for Monte Carlo sampling",
         "Create MonteCarloConfig interface with iterations, burnIn, thinning, convergenceThreshold",
         "Create MonteCarloResult interface with samples, statistics, convergenceDiagnostics",
         "Create SimulationProgress interface for progress callbacks"

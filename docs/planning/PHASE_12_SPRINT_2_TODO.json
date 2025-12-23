@@ -71,7 +71,8 @@
       "status": "pending",
       "estimatedHours": 3.0,
       "details": [
-        "Extend ProofDecomposer to handle HierarchicalProof",
+        "NOTE: HierarchicalProof and ProofTree interfaces defined in branch-types.ts (Sprint 1)",
+        "Create hierarchical-proof.ts with implementation logic for nested proofs",
         "Implement lemma extraction and organization",
         "Add dependency tracking between lemmas",
         "Implement proof tree visualization",

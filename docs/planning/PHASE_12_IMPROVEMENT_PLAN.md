@@ -6,7 +6,7 @@ This document outlines five major feature enhancements for DeepThinking MCP to e
 
 **Status**: Planning (Not Started)
 **Priority**: Medium
-**Estimated Effort**: 80-100 hours across 6 sprints
+**Estimated Effort**: ~90 hours across 6 sprints
 
 ---
 
@@ -512,13 +512,18 @@ export class FileExporter {
 
 ### Current State
 
-Stochastic mode exists as a runtime-only mode without dedicated implementation.
+Stochastic mode exists with a dedicated `StochasticThought` type in `src/types/modes/stochastic.ts` including:
+- `StochasticProcessType`, `StochasticState`, `StateTransition`
+- `MarkovChain`, `RandomVariable`, `DistributionType`
+- `SimulationResult`, `SimulationStatistics`
+
+However, it lacks a dedicated handler and Monte Carlo simulation engine.
 
 ### Proposed Enhancements
 
-#### 4.1 Stochastic Model Definition
+#### 4.1 Monte Carlo Extensions
 
-Define probabilistic models for reasoning under uncertainty.
+Extend the existing stochastic types with Monte Carlo simulation capabilities.
 
 **New Files**:
 ```
@@ -539,9 +544,11 @@ src/modes/stochastic/
     └── visualization.ts        # Result visualization
 ```
 
-**Types**:
+**New Types** (Monte Carlo extensions - complements existing `src/types/modes/stochastic.ts`):
 ```typescript
-// src/modes/stochastic/types.ts
+// src/modes/stochastic/types.ts - Monte Carlo specific types
+// NOTE: StochasticThought, DistributionType, RandomVariable already exist in src/types/modes/stochastic.ts
+
 export interface StochasticModel {
   type: 'discrete' | 'continuous' | 'mixed';
   variables: StochasticVariable[];
@@ -555,6 +562,7 @@ export interface StochasticVariable {
   domain: Domain;
 }
 
+// Extended distribution type for Monte Carlo (supplements existing DistributionType)
 export type Distribution =
   | { type: 'normal'; mean: number; stdDev: number }
   | { type: 'uniform'; min: number; max: number }
