@@ -1,6 +1,7 @@
 /**
- * Tool Definitions Tests (v7.5.0)
+ * Tool Definitions Tests (v8.4.0)
  * Testing for hand-written schema architecture
+ * Phase 12 Sprint 3: Added deepthinking_analyze (13 total tools)
  */
 
 import { describe, it, expect } from 'vitest';
@@ -15,8 +16,8 @@ import {
 } from '../../../../src/tools/definitions.js';
 describe('Tool Definitions', () => {
   describe('tools object', () => {
-    it('should have all 12 tools defined', () => {
-      expect(Object.keys(tools)).toHaveLength(12);
+    it('should have all 13 tools defined', () => {
+      expect(Object.keys(tools)).toHaveLength(13);
     });
 
     it('should have correct tool names', () => {
@@ -33,6 +34,7 @@ describe('Tool Definitions', () => {
         'deepthinking_engineering',
         'deepthinking_academic',
         'deepthinking_session',
+        'deepthinking_analyze',
       ];
       expect(Object.keys(tools)).toEqual(expectedTools);
     });
@@ -49,7 +51,7 @@ describe('Tool Definitions', () => {
 
   describe('toolList', () => {
     it('should contain all tools as array', () => {
-      expect(toolList).toHaveLength(12);
+      expect(toolList).toHaveLength(13);
     });
 
     it('should have valid MCP tool format', () => {
@@ -65,7 +67,7 @@ describe('Tool Definitions', () => {
 
   describe('toolSchemas', () => {
     it('should have schemas for all tools', () => {
-      expect(Object.keys(toolSchemas)).toHaveLength(12);
+      expect(Object.keys(toolSchemas)).toHaveLength(13);
     });
 
     it('should have parse method on each schema', () => {
@@ -149,6 +151,10 @@ describe('Tool Definitions', () => {
     it('should return false for invalid tools', () => {
       expect(isValidTool('invalid_tool')).toBe(false);
       expect(isValidTool('deepthinking')).toBe(false);
+    });
+
+    it('should return true for deepthinking_analyze', () => {
+      expect(isValidTool('deepthinking_analyze')).toBe(true);
     });
   });
 
@@ -258,6 +264,61 @@ describe('Schema Validation', () => {
         claims: [{ id: 'claim-1', statement: 'AI systems require safety constraints' }],
       };
       expect(() => schema.parse(input)).not.toThrow();
+    });
+  });
+
+  describe('AnalyzeSchema', () => {
+    it('should validate analyze input with preset', () => {
+      const schema = getSchemaForTool('deepthinking_analyze');
+      const input = {
+        thought: 'Analyzing complex problem from multiple perspectives',
+        preset: 'comprehensive_analysis',
+      };
+      expect(() => schema.parse(input)).not.toThrow();
+    });
+
+    it('should validate analyze input with custom modes', () => {
+      const schema = getSchemaForTool('deepthinking_analyze');
+      const input = {
+        thought: 'Multi-mode analysis test',
+        customModes: ['deductive', 'inductive', 'abductive'],
+        mergeStrategy: 'weighted',
+      };
+      expect(() => schema.parse(input)).not.toThrow();
+    });
+
+    it('should reject analyze input with too few custom modes', () => {
+      const schema = getSchemaForTool('deepthinking_analyze');
+      const input = {
+        thought: 'Multi-mode analysis test',
+        customModes: ['deductive'], // needs at least 2
+      };
+      expect(() => schema.parse(input)).toThrow();
+    });
+
+    it('should validate all preset options', () => {
+      const schema = getSchemaForTool('deepthinking_analyze');
+      const presets = ['comprehensive_analysis', 'hypothesis_testing', 'decision_making', 'root_cause', 'future_planning'];
+      for (const preset of presets) {
+        const input = {
+          thought: `Testing ${preset}`,
+          preset,
+        };
+        expect(() => schema.parse(input)).not.toThrow();
+      }
+    });
+
+    it('should validate all merge strategies', () => {
+      const schema = getSchemaForTool('deepthinking_analyze');
+      const strategies = ['union', 'intersection', 'weighted', 'hierarchical', 'dialectical'];
+      for (const mergeStrategy of strategies) {
+        const input = {
+          thought: `Testing ${mergeStrategy}`,
+          preset: 'comprehensive_analysis',
+          mergeStrategy,
+        };
+        expect(() => schema.parse(input)).not.toThrow();
+      }
     });
   });
 });

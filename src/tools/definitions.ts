@@ -1,7 +1,8 @@
 /**
- * Focused Tool Definitions (v7.5.0)
+ * Focused Tool Definitions (v8.4.0)
  * Sprint 5 Task 5.4: Split monolithic tool into focused tools
- * Phase 14: Added deepthinking_engineering and deepthinking_academic (12 total tools)
+ * Phase 12 Sprint 3: Added deepthinking_analyze (13 total tools)
+ * Phase 14: Added deepthinking_engineering and deepthinking_academic
  *
  * REFACTORED: Now using hand-written JSON schemas like working MCP servers
  * - Follows pattern from sequential-thinking-mcp and memory-mcp
@@ -20,11 +21,13 @@ import { AnalyticalSchema } from './schemas/modes/analytical.js';
 import { ScientificSchema } from './schemas/modes/scientific.js';
 import { EngineeringSchema } from './schemas/modes/engineering.js';
 import { AcademicSchema } from './schemas/modes/academic.js';
+import { analyzeInputSchema } from './schemas/analyze.js';
 
 /**
- * 12 focused tools with hand-written JSON schemas (v7.5.0)
+ * 13 focused tools with hand-written JSON schemas (v8.4.0)
  * Zod schemas used only for runtime validation
  * Phase 5: Added deepthinking_core for fundamental reasoning
+ * Phase 12 Sprint 3: Added deepthinking_analyze
  * Phase 14: Added deepthinking_engineering and deepthinking_academic
  */
 export const tools = {
@@ -40,6 +43,7 @@ export const tools = {
   deepthinking_engineering: jsonSchemas[9],
   deepthinking_academic: jsonSchemas[10],
   deepthinking_session: jsonSchemas[11],
+  deepthinking_analyze: jsonSchemas[12],
 };
 
 /**
@@ -49,6 +53,7 @@ export const toolList = jsonSchemas;
 
 /**
  * Tool name to schema mapping for validation
+ * Phase 12 Sprint 3: Added deepthinking_analyze
  * Phase 14: Added engineering and academic schemas
  */
 export const toolSchemas = {
@@ -64,6 +69,7 @@ export const toolSchemas = {
   deepthinking_engineering: EngineeringSchema,
   deepthinking_academic: AcademicSchema,
   deepthinking_session: SessionActionSchema,
+  deepthinking_analyze: analyzeInputSchema,
 } as const;
 
 /**

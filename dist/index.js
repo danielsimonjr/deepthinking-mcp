@@ -40875,6 +40875,1721 @@ var init_services = __esm({
   }
 });
 
+// src/modes/combinations/presets.ts
+function getPreset(id) {
+  return PRESETS[id];
+}
+function getAllPresets() {
+  return Object.values(PRESETS);
+}
+function getPresetsByTag(tag) {
+  return Object.values(PRESETS).filter(
+    (preset) => preset.tags?.includes(tag.toLowerCase())
+  );
+}
+function getPresetsWithMode(mode) {
+  return Object.values(PRESETS).filter(
+    (preset) => preset.modes.includes(mode)
+  );
+}
+function getPresetsByStrategy(strategy) {
+  return Object.values(PRESETS).filter(
+    (preset) => preset.mergeStrategy === strategy
+  );
+}
+function combinePresets(presetIds, name, mergeStrategy = "union") {
+  const modes = /* @__PURE__ */ new Set();
+  const tags = /* @__PURE__ */ new Set();
+  for (const id of presetIds) {
+    const preset = PRESETS[id];
+    if (preset) {
+      preset.modes.forEach((m) => modes.add(m));
+      preset.tags?.forEach((t) => tags.add(t));
+    }
+  }
+  return {
+    id: `custom_${presetIds.join("_")}`,
+    name,
+    description: `Custom combination of ${presetIds.join(", ")}`,
+    modes: [...modes],
+    mergeStrategy,
+    useCase: "Custom combination for specialized analysis",
+    tags: [...tags, "custom"]
+  };
+}
+function isValidPresetId(id) {
+  return id in PRESETS;
+}
+function getPresetMetadata(id) {
+  const preset = PRESETS[id];
+  if (!preset) return void 0;
+  return {
+    id: preset.id,
+    name: preset.name,
+    description: preset.description,
+    modeCount: preset.modes.length,
+    strategy: preset.mergeStrategy,
+    tags: preset.tags || []
+  };
+}
+function listPresetIds() {
+  return Object.keys(PRESETS);
+}
+var comprehensiveAnalysis, hypothesisTesting, decisionMaking, rootCause, futurePlanning, PRESETS;
+var init_presets = __esm({
+  "src/modes/combinations/presets.ts"() {
+    init_esm_shims();
+    comprehensiveAnalysis = {
+      id: "comprehensive_analysis",
+      name: "Comprehensive Analysis",
+      description: "Analyzes a problem from multiple perspectives using deductive, inductive, and abductive reasoning along with systems thinking",
+      modes: [
+        "deductive" /* DEDUCTIVE */,
+        "inductive" /* INDUCTIVE */,
+        "abductive" /* ABDUCTIVE */,
+        "systemsthinking" /* SYSTEMSTHINKING */,
+        "firstprinciples" /* FIRSTPRINCIPLES */
+      ],
+      mergeStrategy: "weighted",
+      useCase: "Use when you need a thorough understanding of a complex problem from multiple angles",
+      mergeConfig: {
+        weights: /* @__PURE__ */ new Map([
+          ["deductive" /* DEDUCTIVE */, 0.9],
+          ["inductive" /* INDUCTIVE */, 0.8],
+          ["abductive" /* ABDUCTIVE */, 0.7],
+          ["systemsthinking" /* SYSTEMSTHINKING */, 0.85],
+          ["firstprinciples" /* FIRSTPRINCIPLES */, 0.9]
+        ]),
+        threshold: 0.5,
+        defaultWeight: 0.6
+      },
+      tags: ["analysis", "comprehensive", "multi-perspective"]
+    };
+    hypothesisTesting = {
+      id: "hypothesis_testing",
+      name: "Hypothesis Testing",
+      description: "Evaluates hypotheses using scientific method, Bayesian reasoning, and evidential analysis",
+      modes: [
+        "scientificmethod" /* SCIENTIFICMETHOD */,
+        "bayesian" /* BAYESIAN */,
+        "evidential" /* EVIDENTIAL */,
+        "deductive" /* DEDUCTIVE */
+      ],
+      mergeStrategy: "hierarchical",
+      useCase: "Use when evaluating hypotheses with evidence, updating beliefs based on new data",
+      mergeConfig: {
+        primaryMode: "scientificmethod" /* SCIENTIFICMETHOD */,
+        supportingModes: [
+          "bayesian" /* BAYESIAN */,
+          "evidential" /* EVIDENTIAL */,
+          "deductive" /* DEDUCTIVE */
+        ],
+        allowOverride: true,
+        overrideThreshold: 2
+      },
+      tags: ["scientific", "hypothesis", "evidence-based"]
+    };
+    decisionMaking = {
+      id: "decision_making",
+      name: "Decision Making",
+      description: "Analyzes decisions using game theory, optimization, and counterfactual analysis",
+      modes: [
+        "gametheory" /* GAMETHEORY */,
+        "optimization" /* OPTIMIZATION */,
+        "counterfactual" /* COUNTERFACTUAL */,
+        "bayesian" /* BAYESIAN */
+      ],
+      mergeStrategy: "weighted",
+      useCase: "Use when making strategic decisions, evaluating options, or analyzing competitive scenarios",
+      mergeConfig: {
+        weights: /* @__PURE__ */ new Map([
+          ["gametheory" /* GAMETHEORY */, 0.9],
+          ["optimization" /* OPTIMIZATION */, 0.85],
+          ["counterfactual" /* COUNTERFACTUAL */, 0.8],
+          ["bayesian" /* BAYESIAN */, 0.75]
+        ]),
+        threshold: 0.6,
+        defaultWeight: 0.5
+      },
+      tags: ["decision", "strategy", "optimization"]
+    };
+    rootCause = {
+      id: "root_cause",
+      name: "Root Cause Analysis",
+      description: "Identifies root causes using causal inference, systems thinking, and first principles",
+      modes: [
+        "causal" /* CAUSAL */,
+        "systemsthinking" /* SYSTEMSTHINKING */,
+        "firstprinciples" /* FIRSTPRINCIPLES */,
+        "abductive" /* ABDUCTIVE */
+      ],
+      mergeStrategy: "hierarchical",
+      useCase: "Use when diagnosing problems, finding root causes, or understanding causal chains",
+      mergeConfig: {
+        primaryMode: "causal" /* CAUSAL */,
+        supportingModes: [
+          "systemsthinking" /* SYSTEMSTHINKING */,
+          "firstprinciples" /* FIRSTPRINCIPLES */,
+          "abductive" /* ABDUCTIVE */
+        ],
+        allowOverride: false,
+        overrideThreshold: 3
+      },
+      tags: ["causal", "diagnosis", "root-cause"]
+    };
+    futurePlanning = {
+      id: "future_planning",
+      name: "Future Planning",
+      description: "Plans future scenarios using temporal reasoning, counterfactuals, and Bayesian prediction",
+      modes: [
+        "temporal" /* TEMPORAL */,
+        "counterfactual" /* COUNTERFACTUAL */,
+        "bayesian" /* BAYESIAN */,
+        "optimization" /* OPTIMIZATION */
+      ],
+      mergeStrategy: "dialectical",
+      useCase: "Use when planning for the future, scenario analysis, or forecasting",
+      mergeConfig: {
+        thesisMode: "temporal" /* TEMPORAL */,
+        antithesisMode: "counterfactual" /* COUNTERFACTUAL */,
+        synthesisModes: ["bayesian" /* BAYESIAN */],
+        preserveOriginals: true
+      },
+      tags: ["planning", "future", "temporal", "scenarios"]
+    };
+    PRESETS = {
+      comprehensive_analysis: comprehensiveAnalysis,
+      hypothesis_testing: hypothesisTesting,
+      decision_making: decisionMaking,
+      root_cause: rootCause,
+      future_planning: futurePlanning
+    };
+  }
+});
+var InsightMerger;
+var init_merger = __esm({
+  "src/modes/combinations/merger.ts"() {
+    init_esm_shims();
+    InsightMerger = class {
+      config;
+      constructor(config = {}) {
+        this.config = {
+          similarityThreshold: config.similarityThreshold ?? 0.8,
+          minConfidence: config.minConfidence ?? 0.3,
+          preserveOriginals: config.preserveOriginals ?? false
+        };
+      }
+      /**
+       * Merge insights using the specified strategy
+       */
+      merge(insightsByMode, strategy, strategyConfig) {
+        const startTime = Date.now();
+        const allInsights = this.flattenInsights(insightsByMode);
+        let result;
+        switch (strategy) {
+          case "union":
+            result = this.mergeUnion(allInsights);
+            break;
+          case "intersection":
+            result = this.mergeIntersection(insightsByMode);
+            break;
+          case "weighted":
+            result = this.mergeWeighted(
+              insightsByMode,
+              strategyConfig
+            );
+            break;
+          case "hierarchical":
+            result = this.mergeHierarchical(
+              insightsByMode,
+              strategyConfig
+            );
+            break;
+          case "dialectical":
+            result = this.mergeDialectical(
+              insightsByMode,
+              strategyConfig
+            );
+            break;
+          default:
+            result = this.mergeUnion(allInsights);
+        }
+        result.statistics.mergeTime = Date.now() - startTime;
+        return result;
+      }
+      /**
+       * Union merge: Combine all insights, deduplicate
+       */
+      mergeUnion(allInsights) {
+        const totalBefore = allInsights.length;
+        const conflicts = [];
+        const { unique, duplicatesRemoved } = this.deduplicateInsights(allInsights);
+        const filtered = unique.filter(
+          (i) => i.confidence >= this.config.minConfidence
+        );
+        const detectedConflicts = this.detectConflicts(filtered);
+        conflicts.push(...detectedConflicts);
+        return {
+          insights: filtered,
+          conflicts,
+          statistics: this.createStatistics(
+            totalBefore,
+            filtered.length,
+            duplicatesRemoved,
+            conflicts.length
+          )
+        };
+      }
+      /**
+       * Intersection merge: Only keep insights agreed upon by multiple modes
+       */
+      mergeIntersection(insightsByMode) {
+        const allInsights = this.flattenInsights(insightsByMode);
+        const totalBefore = allInsights.length;
+        const conflicts = [];
+        const groups = this.groupSimilarInsights(allInsights);
+        const intersected = [];
+        let duplicatesRemoved = 0;
+        for (const group of groups) {
+          const uniqueModes = new Set(group.map((i) => i.sourceMode));
+          if (uniqueModes.size >= 2) {
+            const merged = this.mergeInsightGroup(group);
+            intersected.push(merged);
+            duplicatesRemoved += group.length - 1;
+          } else {
+            duplicatesRemoved += group.length;
+          }
+        }
+        const filtered = intersected.filter(
+          (i) => i.confidence >= this.config.minConfidence
+        );
+        return {
+          insights: filtered,
+          conflicts,
+          statistics: this.createStatistics(
+            totalBefore,
+            filtered.length,
+            duplicatesRemoved,
+            0
+          )
+        };
+      }
+      /**
+       * Weighted merge: Weight insights by mode confidence
+       */
+      mergeWeighted(insightsByMode, config) {
+        const allInsights = this.flattenInsights(insightsByMode);
+        const totalBefore = allInsights.length;
+        const conflicts = [];
+        const defaultWeight = config?.defaultWeight ?? 0.6;
+        const threshold = config?.threshold ?? 0.5;
+        const weightedInsights = allInsights.map((insight) => {
+          const weight = config?.weights?.get(insight.sourceMode) ?? defaultWeight;
+          return {
+            ...insight,
+            confidence: insight.confidence * weight
+          };
+        });
+        const groups = this.groupSimilarInsights(weightedInsights);
+        const merged = [];
+        let duplicatesRemoved = 0;
+        for (const group of groups) {
+          if (group.length > 1) {
+            const combinedConfidence = Math.min(
+              1,
+              group.reduce((sum, i) => sum + i.confidence, 0) / group.length
+            );
+            const merged_insight = this.mergeInsightGroup(group);
+            merged_insight.confidence = combinedConfidence;
+            if (combinedConfidence >= threshold) {
+              merged.push(merged_insight);
+            }
+            duplicatesRemoved += group.length - 1;
+          } else if (group[0].confidence >= threshold) {
+            merged.push(group[0]);
+          }
+        }
+        const detectedConflicts = this.detectConflicts(merged);
+        conflicts.push(...detectedConflicts);
+        return {
+          insights: merged,
+          conflicts,
+          statistics: this.createStatistics(
+            totalBefore,
+            merged.length,
+            duplicatesRemoved,
+            conflicts.length
+          )
+        };
+      }
+      /**
+       * Hierarchical merge: Primary mode with supporting modes
+       */
+      mergeHierarchical(insightsByMode, config) {
+        const allInsights = this.flattenInsights(insightsByMode);
+        const totalBefore = allInsights.length;
+        const conflicts = [];
+        if (!config) {
+          return this.mergeUnion(allInsights);
+        }
+        const primaryInsights = insightsByMode.get(config.primaryMode) || [];
+        const supportingInsights = [];
+        for (const mode of config.supportingModes) {
+          const modeInsights = insightsByMode.get(mode) || [];
+          supportingInsights.push(...modeInsights);
+        }
+        const result = [...primaryInsights];
+        let duplicatesRemoved = 0;
+        for (const supporting of supportingInsights) {
+          const similar = this.findSimilar(supporting, result);
+          if (!similar) {
+            result.push({
+              ...supporting,
+              evidence: [
+                ...supporting.evidence || [],
+                `Supporting insight from ${supporting.sourceMode}`
+              ]
+            });
+          } else if (config.allowOverride) {
+            const supportCount = supportingInsights.filter(
+              (s) => this.areSimilar(s, supporting)
+            ).length;
+            if (supportCount >= config.overrideThreshold) {
+              conflicts.push({
+                insight1: {
+                  mode: similar.sourceMode,
+                  content: similar.content,
+                  confidence: similar.confidence,
+                  insightId: similar.id
+                },
+                insight2: {
+                  mode: supporting.sourceMode,
+                  content: supporting.content,
+                  confidence: supporting.confidence,
+                  insightId: supporting.id
+                },
+                conflictType: "confidence_mismatch",
+                severity: Math.abs(similar.confidence - supporting.confidence)
+              });
+            }
+            duplicatesRemoved++;
+          } else {
+            duplicatesRemoved++;
+          }
+        }
+        const filtered = result.filter(
+          (i) => i.confidence >= this.config.minConfidence
+        );
+        return {
+          insights: filtered,
+          conflicts,
+          statistics: this.createStatistics(
+            totalBefore,
+            filtered.length,
+            duplicatesRemoved,
+            conflicts.length
+          )
+        };
+      }
+      /**
+       * Dialectical merge: Thesis/antithesis/synthesis
+       */
+      mergeDialectical(insightsByMode, config) {
+        const allInsights = this.flattenInsights(insightsByMode);
+        const totalBefore = allInsights.length;
+        const conflicts = [];
+        if (!config) {
+          return this.mergeUnion(allInsights);
+        }
+        const thesisInsights = insightsByMode.get(config.thesisMode) || [];
+        const antithesisInsights = insightsByMode.get(config.antithesisMode) || [];
+        const synthesisInsights = [];
+        if (config.synthesisModes) {
+          for (const mode of config.synthesisModes) {
+            synthesisInsights.push(...insightsByMode.get(mode) || []);
+          }
+        }
+        const result = [];
+        let duplicatesRemoved = 0;
+        for (const thesis of thesisInsights) {
+          const antithesis = this.findContradicting(thesis, antithesisInsights);
+          if (antithesis) {
+            conflicts.push({
+              insight1: {
+                mode: thesis.sourceMode,
+                content: thesis.content,
+                confidence: thesis.confidence,
+                insightId: thesis.id
+              },
+              insight2: {
+                mode: antithesis.sourceMode,
+                content: antithesis.content,
+                confidence: antithesis.confidence,
+                insightId: antithesis.id
+              },
+              conflictType: "direct_contradiction",
+              severity: 0.8
+            });
+            const synthesis = this.findSynthesis(thesis, antithesis, synthesisInsights);
+            if (synthesis) {
+              result.push({
+                ...synthesis,
+                evidence: [
+                  `Synthesis of thesis: "${thesis.content.substring(0, 50)}..."`,
+                  `And antithesis: "${antithesis.content.substring(0, 50)}..."`,
+                  ...synthesis.evidence || []
+                ],
+                category: "synthesis"
+              });
+            } else {
+              result.push({
+                id: randomUUID(),
+                content: `Considering both "${thesis.content.substring(0, 30)}..." and "${antithesis.content.substring(0, 30)}...", a balanced view suggests examining both perspectives.`,
+                sourceMode: config.thesisMode,
+                // Attribute to thesis mode
+                confidence: (thesis.confidence + antithesis.confidence) / 2,
+                evidence: [
+                  `Thesis: ${thesis.content}`,
+                  `Antithesis: ${antithesis.content}`
+                ],
+                timestamp: /* @__PURE__ */ new Date(),
+                category: "auto_synthesis"
+              });
+            }
+            if (config.preserveOriginals) {
+              result.push({
+                ...thesis,
+                category: "thesis"
+              });
+              result.push({
+                ...antithesis,
+                category: "antithesis"
+              });
+            }
+            duplicatesRemoved += 2;
+          } else {
+            result.push(thesis);
+          }
+        }
+        for (const antithesis of antithesisInsights) {
+          const hasMatchingThesis = thesisInsights.some(
+            (t) => this.areContradicting(t, antithesis)
+          );
+          if (!hasMatchingThesis) {
+            result.push(antithesis);
+          }
+        }
+        const filtered = result.filter(
+          (i) => i.confidence >= this.config.minConfidence
+        );
+        return {
+          insights: filtered,
+          conflicts,
+          statistics: this.createStatistics(
+            totalBefore,
+            filtered.length,
+            duplicatesRemoved,
+            conflicts.length
+          )
+        };
+      }
+      // ============================================================================
+      // HELPER METHODS
+      // ============================================================================
+      /**
+       * Flatten insights from all modes into a single array
+       */
+      flattenInsights(insightsByMode) {
+        const all = [];
+        for (const insights of insightsByMode.values()) {
+          all.push(...insights);
+        }
+        return all;
+      }
+      /**
+       * Deduplicate similar insights
+       */
+      deduplicateInsights(insights) {
+        const groups = this.groupSimilarInsights(insights);
+        const unique = [];
+        let duplicatesRemoved = 0;
+        for (const group of groups) {
+          if (group.length > 1) {
+            unique.push(this.mergeInsightGroup(group));
+            duplicatesRemoved += group.length - 1;
+          } else {
+            unique.push(group[0]);
+          }
+        }
+        return { unique, duplicatesRemoved };
+      }
+      /**
+       * Group similar insights together
+       */
+      groupSimilarInsights(insights) {
+        const groups = [];
+        const assigned = /* @__PURE__ */ new Set();
+        for (const insight of insights) {
+          if (assigned.has(insight.id)) continue;
+          const group = [insight];
+          assigned.add(insight.id);
+          for (const other of insights) {
+            if (assigned.has(other.id)) continue;
+            if (this.areSimilar(insight, other)) {
+              group.push(other);
+              assigned.add(other.id);
+            }
+          }
+          groups.push(group);
+        }
+        return groups;
+      }
+      /**
+       * Check if two insights are similar
+       */
+      areSimilar(a, b) {
+        return this.calculateSimilarity(a.content, b.content) >= this.config.similarityThreshold;
+      }
+      /**
+       * Calculate text similarity (simplified Jaccard)
+       */
+      calculateSimilarity(text1, text2) {
+        const words1 = new Set(text1.toLowerCase().split(/\s+/));
+        const words2 = new Set(text2.toLowerCase().split(/\s+/));
+        const intersection = new Set([...words1].filter((w) => words2.has(w)));
+        const union = /* @__PURE__ */ new Set([...words1, ...words2]);
+        return union.size > 0 ? intersection.size / union.size : 0;
+      }
+      /**
+       * Find a similar insight in a list
+       */
+      findSimilar(insight, list2) {
+        return list2.find((i) => this.areSimilar(insight, i));
+      }
+      /**
+       * Merge a group of similar insights into one
+       */
+      mergeInsightGroup(group) {
+        const sorted = [...group].sort((a, b) => b.confidence - a.confidence);
+        const base = sorted[0];
+        const allEvidence = /* @__PURE__ */ new Set();
+        const allModes = /* @__PURE__ */ new Set();
+        for (const insight of group) {
+          allModes.add(insight.sourceMode);
+          insight.evidence?.forEach((e) => allEvidence.add(e));
+        }
+        return {
+          ...base,
+          id: randomUUID(),
+          evidence: [...allEvidence],
+          relatedInsights: group.map((i) => i.id),
+          confidence: Math.min(1, base.confidence * (1 + (group.length - 1) * 0.1))
+        };
+      }
+      /**
+       * Detect conflicts between insights
+       */
+      detectConflicts(insights) {
+        const conflicts = [];
+        for (let i = 0; i < insights.length; i++) {
+          for (let j = i + 1; j < insights.length; j++) {
+            if (this.areContradicting(insights[i], insights[j])) {
+              conflicts.push({
+                insight1: {
+                  mode: insights[i].sourceMode,
+                  content: insights[i].content,
+                  confidence: insights[i].confidence,
+                  insightId: insights[i].id
+                },
+                insight2: {
+                  mode: insights[j].sourceMode,
+                  content: insights[j].content,
+                  confidence: insights[j].confidence,
+                  insightId: insights[j].id
+                },
+                conflictType: "direct_contradiction",
+                severity: 0.7
+              });
+            }
+          }
+        }
+        return conflicts;
+      }
+      /**
+       * Check if two insights are contradicting
+       */
+      areContradicting(a, b) {
+        const contentA = a.content.toLowerCase();
+        const contentB = b.content.toLowerCase();
+        const negationPatterns = [
+          { pos: /\bis\b/, neg: /\bis not\b|\bisn't\b/ },
+          { pos: /\bcan\b/, neg: /\bcannot\b|\bcan't\b/ },
+          { pos: /\bwill\b/, neg: /\bwill not\b|\bwon't\b/ },
+          { pos: /\bshould\b/, neg: /\bshould not\b|\bshouldn't\b/ },
+          { pos: /\btrue\b/, neg: /\bfalse\b/ },
+          { pos: /\byes\b/, neg: /\bno\b/ },
+          { pos: /\bincrease\b/, neg: /\bdecrease\b/ },
+          { pos: /\bhigh\b/, neg: /\blow\b/ }
+        ];
+        for (const pattern of negationPatterns) {
+          if (pattern.pos.test(contentA) && pattern.neg.test(contentB) || pattern.neg.test(contentA) && pattern.pos.test(contentB)) {
+            return true;
+          }
+        }
+        return false;
+      }
+      /**
+       * Find a contradicting insight
+       */
+      findContradicting(insight, candidates) {
+        return candidates.find((c) => this.areContradicting(insight, c));
+      }
+      /**
+       * Find a synthesis insight that bridges thesis and antithesis
+       */
+      findSynthesis(thesis, antithesis, candidates) {
+        return candidates.find((c) => {
+          const simToThesis = this.calculateSimilarity(c.content, thesis.content);
+          const simToAntithesis = this.calculateSimilarity(c.content, antithesis.content);
+          return simToThesis > 0.3 && simToAntithesis > 0.3;
+        });
+      }
+      /**
+       * Create merge statistics
+       */
+      createStatistics(totalBefore, totalAfter, duplicatesRemoved, conflictsDetected) {
+        return {
+          totalInsightsBefore: totalBefore,
+          totalInsightsAfter: totalAfter,
+          duplicatesRemoved,
+          conflictsDetected,
+          conflictsResolved: 0,
+          // Will be updated by conflict resolver
+          averageConfidence: 0,
+          // Will be calculated after merge
+          mergeTime: 0
+          // Will be set by caller
+        };
+      }
+    };
+  }
+});
+var ConflictResolver;
+var init_conflict_resolver = __esm({
+  "src/modes/combinations/conflict-resolver.ts"() {
+    init_esm_shims();
+    ConflictResolver = class {
+      config;
+      constructor(config = {}) {
+        this.config = {
+          defaultStrategy: config.defaultStrategy ?? "favor_higher_confidence",
+          confidenceThreshold: config.confidenceThreshold ?? 0.2,
+          alwaysPreserveBoth: config.alwaysPreserveBoth ?? false,
+          customRules: config.customRules ?? /* @__PURE__ */ new Map()
+        };
+      }
+      /**
+       * Detect conflicts between a set of insights
+       */
+      detectConflicts(insights) {
+        const conflicts = [];
+        for (let i = 0; i < insights.length; i++) {
+          for (let j = i + 1; j < insights.length; j++) {
+            const conflict = this.analyzeConflict(insights[i], insights[j]);
+            if (conflict) {
+              conflicts.push(conflict);
+            }
+          }
+        }
+        return conflicts;
+      }
+      /**
+       * Analyze two insights for potential conflicts
+       */
+      analyzeConflict(a, b) {
+        if (a.sourceMode === b.sourceMode) {
+          return null;
+        }
+        const contradiction = this.checkDirectContradiction(a, b);
+        if (contradiction) {
+          return this.createConflict(a, b, "direct_contradiction", 0.9);
+        }
+        const overlap = this.checkPartialOverlap(a, b);
+        if (overlap) {
+          return this.createConflict(a, b, "partial_overlap", 0.5);
+        }
+        const scopeDiff = this.checkScopeDifference(a, b);
+        if (scopeDiff) {
+          return this.createConflict(a, b, "scope_difference", 0.3);
+        }
+        const confMismatch = this.checkConfidenceMismatch(a, b);
+        if (confMismatch) {
+          return this.createConflict(a, b, "confidence_mismatch", 0.4);
+        }
+        const evidenceConflict = this.checkEvidenceConflict(a, b);
+        if (evidenceConflict) {
+          return this.createConflict(a, b, "evidence_conflict", 0.6);
+        }
+        return null;
+      }
+      /**
+       * Resolve a single conflict
+       */
+      resolveConflict(conflict) {
+        const strategy = this.determineStrategy(conflict);
+        let resolution;
+        const newInsights = [];
+        switch (strategy) {
+          case "favor_higher_confidence":
+            resolution = this.resolveByConfidence(conflict);
+            break;
+          case "synthesize":
+            const { resolved, synthesized } = this.resolveBySynthesis(conflict);
+            resolution = resolved;
+            if (synthesized) {
+              newInsights.push(synthesized);
+            }
+            break;
+          case "preserve_both":
+            resolution = this.resolveByPreservingBoth(conflict);
+            break;
+          case "defer":
+            resolution = this.resolveByDefer(conflict);
+            break;
+          default:
+            resolution = this.resolveByConfidence(conflict);
+        }
+        conflict.resolution = resolution;
+        return {
+          conflict,
+          resolution,
+          newInsights
+        };
+      }
+      /**
+       * Resolve all conflicts in a list
+       */
+      resolveAll(conflicts) {
+        return conflicts.map((c) => this.resolveConflict(c));
+      }
+      /**
+       * Apply resolutions to update insight list
+       */
+      applyResolutions(insights, resolutions) {
+        const toRemove = /* @__PURE__ */ new Set();
+        const toAdd = [];
+        for (const result of resolutions) {
+          const strategy = result.resolution.resolutionStrategy;
+          if (strategy === "favor_higher_confidence") {
+            const conf1 = result.conflict.insight1.confidence;
+            const conf2 = result.conflict.insight2.confidence;
+            const loser = conf1 < conf2 ? result.conflict.insight1.insightId : result.conflict.insight2.insightId;
+            toRemove.add(loser);
+          } else if (strategy === "synthesize") {
+            toRemove.add(result.conflict.insight1.insightId);
+            toRemove.add(result.conflict.insight2.insightId);
+            toAdd.push(...result.newInsights);
+          }
+        }
+        const updated = insights.filter((i) => !toRemove.has(i.id));
+        updated.push(...toAdd);
+        return updated;
+      }
+      // ============================================================================
+      // CONFLICT DETECTION METHODS
+      // ============================================================================
+      /**
+       * Check for direct contradiction between insights
+       */
+      checkDirectContradiction(a, b) {
+        const contentA = a.content.toLowerCase();
+        const contentB = b.content.toLowerCase();
+        const negationPairs = [
+          [/\bis\b/, /\bis not\b|\bisn't\b|\bis never\b/],
+          [/\bcan\b/, /\bcannot\b|\bcan't\b|\bcan never\b/],
+          [/\bwill\b/, /\bwill not\b|\bwon't\b/],
+          [/\bshould\b/, /\bshould not\b|\bshouldn't\b/],
+          [/\bmust\b/, /\bmust not\b|\bmustn't\b/],
+          [/\btrue\b/, /\bfalse\b|\buntrue\b/],
+          [/\bcorrect\b/, /\bincorrect\b|\bwrong\b/],
+          [/\byes\b/, /\bno\b/],
+          [/\balways\b/, /\bnever\b/],
+          [/\bevery\b/, /\bnone\b|\bno\b/],
+          [/\bincrease\b|\brise\b|\bgrow\b/, /\bdecrease\b|\bfall\b|\bshrink\b/],
+          [/\bhigh\b|\blarge\b/, /\blow\b|\bsmall\b/],
+          [/\bpositive\b/, /\bnegative\b/],
+          [/\bsuccess\b/, /\bfailure\b|\bfail\b/]
+        ];
+        for (const [posPattern, negPattern] of negationPairs) {
+          if (posPattern.test(contentA) && negPattern.test(contentB) || negPattern.test(contentA) && posPattern.test(contentB)) {
+            const similarity = this.calculateSimilarity(contentA, contentB);
+            if (similarity > 0.3) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+      /**
+       * Check for partial overlap requiring reconciliation
+       */
+      checkPartialOverlap(a, b) {
+        const similarity = this.calculateSimilarity(a.content, b.content);
+        if (similarity > 0.4 && similarity < 0.8) {
+          const conclusionA = this.extractConclusion(a.content);
+          const conclusionB = this.extractConclusion(b.content);
+          if (conclusionA && conclusionB) {
+            const conclusionSim = this.calculateSimilarity(conclusionA, conclusionB);
+            return conclusionSim < 0.5;
+          }
+        }
+        return false;
+      }
+      /**
+       * Check for scope difference (same topic, different granularity)
+       */
+      checkScopeDifference(a, b) {
+        const contentA = a.content.toLowerCase();
+        const contentB = b.content.toLowerCase();
+        const broadIndicators = /\bin general\b|\boverall\b|\btypically\b|\busually\b|\bmost\b|\ball\b/;
+        const narrowIndicators = /\bspecifically\b|\bin this case\b|\bfor this\b|\bhere\b|\bsome\b|\bfew\b/;
+        const aIsBroad = broadIndicators.test(contentA);
+        const aIsNarrow = narrowIndicators.test(contentA);
+        const bIsBroad = broadIndicators.test(contentB);
+        const bIsNarrow = narrowIndicators.test(contentB);
+        if (aIsBroad && bIsNarrow || aIsNarrow && bIsBroad) {
+          const similarity = this.calculateSimilarity(a.content, b.content);
+          return similarity > 0.3;
+        }
+        return false;
+      }
+      /**
+       * Check for confidence mismatch on similar conclusions
+       */
+      checkConfidenceMismatch(a, b) {
+        const similarity = this.calculateSimilarity(a.content, b.content);
+        if (similarity > 0.7) {
+          const confDiff = Math.abs(a.confidence - b.confidence);
+          return confDiff > this.config.confidenceThreshold * 2;
+        }
+        return false;
+      }
+      /**
+       * Check for evidence conflict
+       */
+      checkEvidenceConflict(a, b) {
+        if (!a.evidence?.length || !b.evidence?.length) {
+          return false;
+        }
+        for (const evA of a.evidence) {
+          for (const evB of b.evidence) {
+            const evALower = evA.toLowerCase();
+            const evBLower = evB.toLowerCase();
+            if (evALower.includes("because") && evBLower.includes("because") || evALower.includes("due to") && evBLower.includes("due to")) {
+              if (this.checkDirectContradiction(
+                { ...a, content: evA },
+                { ...b, content: evB }
+              )) {
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      }
+      // ============================================================================
+      // RESOLUTION METHODS
+      // ============================================================================
+      /**
+       * Determine resolution strategy for a conflict
+       */
+      determineStrategy(conflict) {
+        const customRule = this.config.customRules.get(conflict.conflictType);
+        if (customRule) {
+          return customRule;
+        }
+        if (this.config.alwaysPreserveBoth) {
+          return "preserve_both";
+        }
+        switch (conflict.conflictType) {
+          case "direct_contradiction":
+            return "synthesize";
+          case "confidence_mismatch":
+            return "favor_higher_confidence";
+          case "partial_overlap":
+            return "synthesize";
+          case "scope_difference":
+            return "preserve_both";
+          case "evidence_conflict":
+            return "defer";
+          default:
+            return this.config.defaultStrategy;
+        }
+      }
+      /**
+       * Resolve by favoring higher confidence
+       */
+      resolveByConfidence(conflict) {
+        const conf1 = conflict.insight1.confidence;
+        const conf2 = conflict.insight2.confidence;
+        const winner = conf1 >= conf2 ? conflict.insight1 : conflict.insight2;
+        const loser = conf1 >= conf2 ? conflict.insight2 : conflict.insight1;
+        return {
+          resolvedInsight: winner.content,
+          explanation: `Favored insight from ${winner.mode} (confidence: ${winner.confidence.toFixed(2)}) over ${loser.mode} (confidence: ${loser.confidence.toFixed(2)})`,
+          preservedFrom: [winner.mode],
+          resolutionStrategy: "favor_higher_confidence",
+          confidence: winner.confidence
+        };
+      }
+      /**
+       * Resolve by synthesizing both insights
+       */
+      resolveBySynthesis(conflict) {
+        const synthesis = this.generateSynthesis(
+          conflict.insight1.content,
+          conflict.insight2.content
+        );
+        const synthesizedInsight = {
+          id: randomUUID(),
+          content: synthesis,
+          sourceMode: conflict.insight1.mode,
+          // Primary attribution
+          confidence: (conflict.insight1.confidence + conflict.insight2.confidence) / 2,
+          evidence: [
+            `Synthesized from ${conflict.insight1.mode}: "${conflict.insight1.content.substring(0, 50)}..."`,
+            `And ${conflict.insight2.mode}: "${conflict.insight2.content.substring(0, 50)}..."`
+          ],
+          timestamp: /* @__PURE__ */ new Date(),
+          category: "synthesis"
+        };
+        return {
+          resolved: {
+            resolvedInsight: synthesis,
+            explanation: `Synthesized insights from ${conflict.insight1.mode} and ${conflict.insight2.mode} to create a unified perspective`,
+            preservedFrom: [conflict.insight1.mode, conflict.insight2.mode],
+            resolutionStrategy: "synthesize",
+            confidence: synthesizedInsight.confidence
+          },
+          synthesized: synthesizedInsight
+        };
+      }
+      /**
+       * Generate synthesis of two conflicting insights
+       */
+      generateSynthesis(content1, content2) {
+        const key1 = this.extractKeyPoint(content1);
+        const key2 = this.extractKeyPoint(content2);
+        return `While ${key1.toLowerCase()}, it's also important to consider that ${key2.toLowerCase()}. A balanced view incorporates both perspectives.`;
+      }
+      /**
+       * Extract the key point from an insight
+       */
+      extractKeyPoint(content) {
+        const sentences = content.split(/[.!?]+/).filter((s) => s.trim());
+        if (sentences.length > 0) {
+          const main2 = sentences[0].trim();
+          return main2.length > 100 ? main2.substring(0, 100) + "..." : main2;
+        }
+        return content.substring(0, 100);
+      }
+      /**
+       * Resolve by preserving both insights
+       */
+      resolveByPreservingBoth(conflict) {
+        return {
+          resolvedInsight: `Two perspectives: (1) ${conflict.insight1.content.substring(0, 50)}... (2) ${conflict.insight2.content.substring(0, 50)}...`,
+          explanation: `Preserved both insights as they represent different valid perspectives from ${conflict.insight1.mode} and ${conflict.insight2.mode}`,
+          preservedFrom: [conflict.insight1.mode, conflict.insight2.mode],
+          resolutionStrategy: "preserve_both",
+          confidence: Math.max(conflict.insight1.confidence, conflict.insight2.confidence)
+        };
+      }
+      /**
+       * Defer resolution to user/external process
+       */
+      resolveByDefer(conflict) {
+        return {
+          resolvedInsight: `[UNRESOLVED] Conflict between ${conflict.insight1.mode} and ${conflict.insight2.mode} requires manual review`,
+          explanation: `The conflict between these insights requires human judgment to resolve`,
+          preservedFrom: [],
+          resolutionStrategy: "defer",
+          confidence: 0
+        };
+      }
+      // ============================================================================
+      // UTILITY METHODS
+      // ============================================================================
+      /**
+       * Create a conflict object
+       */
+      createConflict(a, b, type, severity) {
+        return {
+          insight1: {
+            mode: a.sourceMode,
+            content: a.content,
+            confidence: a.confidence,
+            insightId: a.id
+          },
+          insight2: {
+            mode: b.sourceMode,
+            content: b.content,
+            confidence: b.confidence,
+            insightId: b.id
+          },
+          conflictType: type,
+          severity
+        };
+      }
+      /**
+       * Calculate text similarity
+       */
+      calculateSimilarity(text1, text2) {
+        const words1 = new Set(text1.toLowerCase().split(/\s+/));
+        const words2 = new Set(text2.toLowerCase().split(/\s+/));
+        const intersection = new Set([...words1].filter((w) => words2.has(w)));
+        const union = /* @__PURE__ */ new Set([...words1, ...words2]);
+        return union.size > 0 ? intersection.size / union.size : 0;
+      }
+      /**
+       * Extract conclusion from content
+       */
+      extractConclusion(content) {
+        const conclusionPatterns = [
+          /therefore[,:]?\s*(.+)/i,
+          /thus[,:]?\s*(.+)/i,
+          /hence[,:]?\s*(.+)/i,
+          /consequently[,:]?\s*(.+)/i,
+          /as a result[,:]?\s*(.+)/i,
+          /this means[,:]?\s*(.+)/i,
+          /we conclude[,:]?\s*(.+)/i
+        ];
+        for (const pattern of conclusionPatterns) {
+          const match = content.match(pattern);
+          if (match) {
+            return match[1].trim();
+          }
+        }
+        return null;
+      }
+      /**
+       * Get conflict statistics
+       */
+      getStatistics(conflicts) {
+        const byType = {
+          direct_contradiction: 0,
+          partial_overlap: 0,
+          scope_difference: 0,
+          confidence_mismatch: 0,
+          evidence_conflict: 0
+        };
+        let totalSeverity = 0;
+        let resolved = 0;
+        for (const conflict of conflicts) {
+          byType[conflict.conflictType]++;
+          totalSeverity += conflict.severity;
+          if (conflict.resolution) {
+            resolved++;
+          }
+        }
+        return {
+          total: conflicts.length,
+          byType,
+          averageSeverity: conflicts.length > 0 ? totalSeverity / conflicts.length : 0,
+          resolved
+        };
+      }
+    };
+  }
+});
+async function analyzeMultiMode(request, config) {
+  const analyzer = new MultiModeAnalyzer(config);
+  return analyzer.analyze(request);
+}
+var DEFAULT_CONFIG3, MultiModeAnalyzer;
+var init_analyzer = __esm({
+  "src/modes/combinations/analyzer.ts"() {
+    init_esm_shims();
+    init_merger();
+    init_conflict_resolver();
+    init_presets();
+    DEFAULT_CONFIG3 = {
+      defaultTimeoutPerMode: 3e4,
+      continueOnError: true,
+      maxParallelModes: 5,
+      minConfidenceThreshold: 0.3,
+      verbose: false
+    };
+    MultiModeAnalyzer = class {
+      config;
+      merger;
+      conflictResolver;
+      constructor(config = {}) {
+        this.config = { ...DEFAULT_CONFIG3, ...config };
+        this.merger = new InsightMerger();
+        this.conflictResolver = new ConflictResolver();
+      }
+      /**
+       * Analyze a thought using multiple reasoning modes
+       *
+       * @param request - The analysis request
+       * @param onProgress - Optional callback for progress updates
+       * @returns The multi-mode analysis response
+       */
+      async analyze(request, onProgress) {
+        const startTime = Date.now();
+        const errors = [];
+        this.reportProgress(onProgress, {
+          phase: "initializing",
+          percentage: 0,
+          modesCompleted: 0,
+          totalModes: 0,
+          message: "Initializing multi-mode analysis..."
+        });
+        const { modes, combination } = this.resolveModes(request);
+        if (modes.length === 0) {
+          return this.createEmptyResponse(startTime, "No modes specified or preset not found");
+        }
+        const totalModes = modes.length;
+        this.reportProgress(onProgress, {
+          phase: "executing_modes",
+          percentage: 10,
+          modesCompleted: 0,
+          totalModes,
+          message: `Executing ${totalModes} reasoning modes...`
+        });
+        const modeResults = await this.executeModes(
+          modes,
+          request,
+          errors,
+          (completed, current) => {
+            const percentage = 10 + Math.floor(completed / totalModes * 50);
+            this.reportProgress(onProgress, {
+              phase: "executing_modes",
+              percentage,
+              modesCompleted: completed,
+              totalModes,
+              currentMode: current,
+              message: `Executing ${current} (${completed}/${totalModes})...`
+            });
+          }
+        );
+        this.reportProgress(onProgress, {
+          phase: "collecting_insights",
+          percentage: 60,
+          modesCompleted: totalModes,
+          totalModes,
+          message: "Collecting insights from all modes..."
+        });
+        const insightsByMode = this.collectInsights(modeResults);
+        const allInsights = this.flattenInsights(insightsByMode);
+        this.reportProgress(onProgress, {
+          phase: "resolving_conflicts",
+          percentage: 70,
+          modesCompleted: totalModes,
+          totalModes,
+          message: "Detecting and resolving conflicts..."
+        });
+        const conflicts = this.conflictResolver.detectConflicts(allInsights);
+        const resolutions = this.conflictResolver.resolveAll(conflicts);
+        const resolvedInsights = this.conflictResolver.applyResolutions(allInsights, resolutions);
+        this.reportProgress(onProgress, {
+          phase: "merging",
+          percentage: 85,
+          modesCompleted: totalModes,
+          totalModes,
+          message: "Merging insights using selected strategy..."
+        });
+        const mergeStrategy = request.mergeStrategy || combination?.mergeStrategy || "union";
+        const mergeConfig = combination?.mergeConfig;
+        const resolvedByMode = this.groupInsightsByMode(resolvedInsights);
+        const mergeResult = this.merger.merge(resolvedByMode, mergeStrategy, mergeConfig);
+        this.reportProgress(onProgress, {
+          phase: "complete",
+          percentage: 100,
+          modesCompleted: totalModes,
+          totalModes,
+          message: "Analysis complete"
+        });
+        const analysis = this.createMergedAnalysis(
+          mergeResult,
+          conflicts,
+          modes,
+          mergeStrategy,
+          startTime
+        );
+        return {
+          analysis,
+          modeResults,
+          success: errors.filter((e) => !e.recoverable).length === 0,
+          errors: errors.length > 0 ? errors : void 0,
+          executionTime: Date.now() - startTime
+        };
+      }
+      /**
+       * Analyze using a specific preset
+       *
+       * @param thought - The thought to analyze
+       * @param presetId - The preset ID to use
+       * @param onProgress - Optional progress callback
+       */
+      async analyzeWithPreset(thought, presetId, onProgress) {
+        return this.analyze({ thought, preset: presetId }, onProgress);
+      }
+      /**
+       * Analyze using custom modes
+       *
+       * @param thought - The thought to analyze
+       * @param modes - The modes to use
+       * @param mergeStrategy - The merge strategy
+       * @param onProgress - Optional progress callback
+       */
+      async analyzeWithModes(thought, modes, mergeStrategy = "union", onProgress) {
+        return this.analyze({ thought, customModes: modes, mergeStrategy }, onProgress);
+      }
+      /**
+       * Get available presets for analysis
+       */
+      getAvailablePresets() {
+        return ["comprehensive_analysis", "hypothesis_testing", "decision_making", "root_cause", "future_planning"];
+      }
+      /**
+       * Get supported modes for analysis
+       */
+      getSupportedModes() {
+        return [
+          "sequential" /* SEQUENTIAL */,
+          "shannon" /* SHANNON */,
+          "mathematics" /* MATHEMATICS */,
+          "physics" /* PHYSICS */,
+          "hybrid" /* HYBRID */,
+          "inductive" /* INDUCTIVE */,
+          "deductive" /* DEDUCTIVE */,
+          "abductive" /* ABDUCTIVE */,
+          "causal" /* CAUSAL */,
+          "bayesian" /* BAYESIAN */,
+          "counterfactual" /* COUNTERFACTUAL */,
+          "temporal" /* TEMPORAL */,
+          "gametheory" /* GAMETHEORY */,
+          "evidential" /* EVIDENTIAL */,
+          "analogical" /* ANALOGICAL */,
+          "firstprinciples" /* FIRSTPRINCIPLES */,
+          "systemsthinking" /* SYSTEMSTHINKING */,
+          "scientificmethod" /* SCIENTIFICMETHOD */,
+          "formallogic" /* FORMALLOGIC */,
+          "optimization" /* OPTIMIZATION */,
+          "engineering" /* ENGINEERING */,
+          "computability" /* COMPUTABILITY */,
+          "cryptanalytic" /* CRYPTANALYTIC */,
+          "algorithmic" /* ALGORITHMIC */,
+          "synthesis" /* SYNTHESIS */,
+          "argumentation" /* ARGUMENTATION */,
+          "critique" /* CRITIQUE */,
+          "analysis" /* ANALYSIS */,
+          "metareasoning" /* METAREASONING */
+        ];
+      }
+      // ============================================================================
+      // PRIVATE METHODS
+      // ============================================================================
+      /**
+       * Resolve which modes to use from request
+       */
+      resolveModes(request) {
+        if (request.customModes && request.customModes.length > 0) {
+          return { modes: request.customModes, combination: void 0 };
+        }
+        if (request.preset && isValidPresetId(request.preset)) {
+          const combination = getPreset(request.preset);
+          if (combination) {
+            return { modes: combination.modes, combination };
+          }
+        }
+        const defaultCombination = getPreset("comprehensive_analysis");
+        return {
+          modes: defaultCombination?.modes || ["deductive" /* DEDUCTIVE */, "inductive" /* INDUCTIVE */],
+          combination: defaultCombination
+        };
+      }
+      /**
+       * Execute all modes and collect results
+       */
+      async executeModes(modes, request, errors, onModeComplete) {
+        const results = /* @__PURE__ */ new Map();
+        let completed = 0;
+        const batches = this.createBatches(modes, this.config.maxParallelModes);
+        for (const batch of batches) {
+          const batchPromises = batch.map(async (mode) => {
+            const modeStartTime = Date.now();
+            try {
+              onModeComplete?.(completed, mode);
+              const insights = this.generateModeInsights(mode, request.thought, request.context);
+              const result = {
+                mode,
+                insights,
+                success: true,
+                executionTime: Date.now() - modeStartTime
+              };
+              results.set(mode, result);
+              completed++;
+            } catch (error) {
+              const errorMessage = error instanceof Error ? error.message : String(error);
+              errors.push({
+                mode,
+                message: errorMessage,
+                recoverable: this.config.continueOnError
+              });
+              results.set(mode, {
+                mode,
+                insights: [],
+                success: false,
+                error: errorMessage,
+                executionTime: Date.now() - modeStartTime
+              });
+              completed++;
+              if (!this.config.continueOnError) {
+                throw error;
+              }
+            }
+          });
+          await Promise.all(batchPromises);
+        }
+        return results;
+      }
+      /**
+       * Generate representative insights for a mode
+       * This is a placeholder - in production, this would integrate with ThoughtFactory
+       */
+      generateModeInsights(mode, thought, context) {
+        const baseConfidence = 0.7 + Math.random() * 0.2;
+        const timestamp = /* @__PURE__ */ new Date();
+        const insights = [];
+        switch (mode) {
+          case "deductive" /* DEDUCTIVE */:
+            insights.push({
+              id: randomUUID(),
+              content: `Logical deduction from premises: ${thought.substring(0, 50)}...`,
+              sourceMode: mode,
+              confidence: baseConfidence,
+              evidence: ["Premise analysis", "Logical inference"],
+              timestamp,
+              category: "deductive_conclusion",
+              priority: 8
+            });
+            break;
+          case "inductive" /* INDUCTIVE */:
+            insights.push({
+              id: randomUUID(),
+              content: `Pattern identified from analysis: Generalizing observations about ${thought.substring(0, 30)}...`,
+              sourceMode: mode,
+              confidence: baseConfidence * 0.9,
+              evidence: ["Pattern recognition", "Statistical inference"],
+              timestamp,
+              category: "inductive_generalization",
+              priority: 7
+            });
+            break;
+          case "abductive" /* ABDUCTIVE */:
+            insights.push({
+              id: randomUUID(),
+              content: `Best explanation hypothesis: Most likely cause for ${thought.substring(0, 30)}...`,
+              sourceMode: mode,
+              confidence: baseConfidence * 0.85,
+              evidence: ["Inference to best explanation"],
+              timestamp,
+              category: "abductive_hypothesis",
+              priority: 6
+            });
+            break;
+          case "causal" /* CAUSAL */:
+            insights.push({
+              id: randomUUID(),
+              content: `Causal relationship identified: Factors influencing ${thought.substring(0, 30)}...`,
+              sourceMode: mode,
+              confidence: baseConfidence,
+              evidence: ["Causal graph analysis", "Intervention analysis"],
+              timestamp,
+              category: "causal_mechanism",
+              priority: 8
+            });
+            break;
+          case "bayesian" /* BAYESIAN */:
+            insights.push({
+              id: randomUUID(),
+              content: `Probability assessment: Updated belief about ${thought.substring(0, 30)}...`,
+              sourceMode: mode,
+              confidence: baseConfidence,
+              evidence: ["Prior probability", "Evidence likelihood", "Posterior calculation"],
+              timestamp,
+              category: "probabilistic_assessment",
+              priority: 7
+            });
+            break;
+          case "systemsthinking" /* SYSTEMSTHINKING */:
+            insights.push({
+              id: randomUUID(),
+              content: `System dynamics: Feedback loops and interactions in ${thought.substring(0, 30)}...`,
+              sourceMode: mode,
+              confidence: baseConfidence * 0.9,
+              evidence: ["Feedback loop analysis", "Stock-flow modeling"],
+              timestamp,
+              category: "systems_insight",
+              priority: 7
+            });
+            break;
+          case "firstprinciples" /* FIRSTPRINCIPLES */:
+            insights.push({
+              id: randomUUID(),
+              content: `First principles analysis: Core assumptions about ${thought.substring(0, 30)}...`,
+              sourceMode: mode,
+              confidence: baseConfidence,
+              evidence: ["Fundamental axioms", "Deconstruction analysis"],
+              timestamp,
+              category: "foundational_insight",
+              priority: 9
+            });
+            break;
+          case "gametheory" /* GAMETHEORY */:
+            insights.push({
+              id: randomUUID(),
+              content: `Strategic analysis: Nash equilibrium considerations for ${thought.substring(0, 30)}...`,
+              sourceMode: mode,
+              confidence: baseConfidence * 0.95,
+              evidence: ["Payoff matrix", "Equilibrium analysis"],
+              timestamp,
+              category: "strategic_insight",
+              priority: 7
+            });
+            break;
+          case "counterfactual" /* COUNTERFACTUAL */:
+            insights.push({
+              id: randomUUID(),
+              content: `Counterfactual scenario: Alternative outcomes if ${thought.substring(0, 30)}...`,
+              sourceMode: mode,
+              confidence: baseConfidence * 0.8,
+              evidence: ["World state modeling", "Alternative history analysis"],
+              timestamp,
+              category: "counterfactual_scenario",
+              priority: 6
+            });
+            break;
+          case "temporal" /* TEMPORAL */:
+            insights.push({
+              id: randomUUID(),
+              content: `Temporal analysis: Timeline and sequencing for ${thought.substring(0, 30)}...`,
+              sourceMode: mode,
+              confidence: baseConfidence,
+              evidence: ["Event sequencing", "Allen interval analysis"],
+              timestamp,
+              category: "temporal_insight",
+              priority: 7
+            });
+            break;
+          case "optimization" /* OPTIMIZATION */:
+            insights.push({
+              id: randomUUID(),
+              content: `Optimization insight: Optimal approach for ${thought.substring(0, 30)}...`,
+              sourceMode: mode,
+              confidence: baseConfidence,
+              evidence: ["Constraint satisfaction", "Objective optimization"],
+              timestamp,
+              category: "optimization_result",
+              priority: 8
+            });
+            break;
+          default:
+            insights.push({
+              id: randomUUID(),
+              content: `Analysis via ${mode}: Key observations about ${thought.substring(0, 40)}...`,
+              sourceMode: mode,
+              confidence: baseConfidence * 0.85,
+              evidence: [`${mode} methodology`],
+              timestamp,
+              category: "general_insight",
+              priority: 5
+            });
+        }
+        if (context) {
+          insights.push({
+            id: randomUUID(),
+            content: `Context-aware insight: Considering ${context.substring(0, 30)} in relation to the problem...`,
+            sourceMode: mode,
+            confidence: baseConfidence * 0.9,
+            evidence: ["Contextual analysis"],
+            timestamp,
+            category: "contextual_insight",
+            priority: 6
+          });
+        }
+        return insights;
+      }
+      /**
+       * Collect insights from mode results into a map
+       */
+      collectInsights(results) {
+        const insightsByMode = /* @__PURE__ */ new Map();
+        for (const [mode, result] of results) {
+          if (result.success && result.insights.length > 0) {
+            insightsByMode.set(mode, result.insights);
+          }
+        }
+        return insightsByMode;
+      }
+      /**
+       * Flatten insights map to array
+       */
+      flattenInsights(insightsByMode) {
+        const allInsights = [];
+        for (const insights of insightsByMode.values()) {
+          allInsights.push(...insights);
+        }
+        return allInsights;
+      }
+      /**
+       * Group insights by their source mode
+       */
+      groupInsightsByMode(insights) {
+        const grouped = /* @__PURE__ */ new Map();
+        for (const insight of insights) {
+          const existing = grouped.get(insight.sourceMode) || [];
+          existing.push(insight);
+          grouped.set(insight.sourceMode, existing);
+        }
+        return grouped;
+      }
+      /**
+       * Create the final merged analysis result
+       */
+      createMergedAnalysis(mergeResult, conflicts, modes, mergeStrategy, _startTime) {
+        const statistics = {
+          ...mergeResult.statistics,
+          conflictsDetected: conflicts.length,
+          conflictsResolved: conflicts.filter((c) => c.resolution !== void 0).length
+        };
+        const supportingEvidence = /* @__PURE__ */ new Map();
+        for (const insight of mergeResult.insights) {
+          const existing = supportingEvidence.get(insight.id) || [];
+          existing.push(insight.sourceMode);
+          supportingEvidence.set(insight.id, existing);
+        }
+        const synthesizedConclusion = this.synthesizeConclusion(mergeResult.insights, conflicts);
+        return {
+          id: randomUUID(),
+          primaryInsights: mergeResult.insights,
+          supportingEvidence,
+          conflicts,
+          synthesizedConclusion,
+          confidenceScore: mergeResult.insights.reduce((acc, i) => acc + i.confidence, 0) / Math.max(mergeResult.insights.length, 1),
+          contributingModes: modes,
+          mergeStrategy,
+          statistics,
+          timestamp: /* @__PURE__ */ new Date()
+        };
+      }
+      /**
+       * Synthesize a conclusion from merged insights
+       */
+      synthesizeConclusion(insights, conflicts) {
+        if (insights.length === 0) {
+          return "No insights generated from the analysis.";
+        }
+        const sortedInsights = [...insights].sort((a, b) => {
+          const priorityDiff = (b.priority || 5) - (a.priority || 5);
+          if (priorityDiff !== 0) return priorityDiff;
+          return b.confidence - a.confidence;
+        });
+        const topInsights = sortedInsights.slice(0, 3);
+        let conclusion = "Multi-mode analysis reveals: ";
+        conclusion += topInsights.map((i) => i.content).join(" Furthermore, ");
+        if (conflicts.length > 0) {
+          conclusion += ` Note: ${conflicts.length} conflict(s) were detected and resolved during synthesis.`;
+        }
+        return conclusion;
+      }
+      /**
+       * Create batches for parallel execution
+       */
+      createBatches(items, batchSize) {
+        const batches = [];
+        for (let i = 0; i < items.length; i += batchSize) {
+          batches.push(items.slice(i, i + batchSize));
+        }
+        return batches;
+      }
+      /**
+       * Report progress to callback
+       */
+      reportProgress(callback, progress) {
+        if (callback) {
+          callback(progress);
+        }
+        if (this.config.verbose) {
+          console.log(`[MultiModeAnalyzer] ${progress.phase}: ${progress.message} (${progress.percentage}%)`);
+        }
+      }
+      /**
+       * Create empty response for error cases
+       */
+      createEmptyResponse(startTime, errorMessage) {
+        return {
+          analysis: {
+            id: randomUUID(),
+            primaryInsights: [],
+            supportingEvidence: /* @__PURE__ */ new Map(),
+            conflicts: [],
+            synthesizedConclusion: errorMessage,
+            confidenceScore: 0,
+            contributingModes: [],
+            mergeStrategy: "union",
+            statistics: {
+              totalInsightsBefore: 0,
+              totalInsightsAfter: 0,
+              duplicatesRemoved: 0,
+              conflictsDetected: 0,
+              conflictsResolved: 0,
+              averageConfidence: 0,
+              mergeTime: 0
+            },
+            timestamp: /* @__PURE__ */ new Date()
+          },
+          modeResults: /* @__PURE__ */ new Map(),
+          success: false,
+          errors: [{ mode: "hybrid" /* HYBRID */, message: errorMessage, recoverable: false }],
+          executionTime: Date.now() - startTime
+        };
+      }
+    };
+  }
+});
+
+// src/modes/combinations/index.ts
+var combinations_exports = {};
+__export(combinations_exports, {
+  ConflictResolver: () => ConflictResolver,
+  InsightMerger: () => InsightMerger,
+  MultiModeAnalyzer: () => MultiModeAnalyzer,
+  PRESETS: () => PRESETS,
+  analyzeMultiMode: () => analyzeMultiMode,
+  combinePresets: () => combinePresets,
+  getAllPresets: () => getAllPresets,
+  getPreset: () => getPreset,
+  getPresetMetadata: () => getPresetMetadata,
+  getPresetsByStrategy: () => getPresetsByStrategy,
+  getPresetsByTag: () => getPresetsByTag,
+  getPresetsWithMode: () => getPresetsWithMode,
+  isValidPresetId: () => isValidPresetId,
+  listPresetIds: () => listPresetIds
+});
+var init_combinations = __esm({
+  "src/modes/combinations/index.ts"() {
+    init_esm_shims();
+    init_presets();
+    init_merger();
+    init_conflict_resolver();
+    init_analyzer();
+  }
+});
+
 // src/index.ts
 init_esm_shims();
 
@@ -42175,6 +43890,105 @@ var deepthinking_session_schema = {
     additionalProperties: false
   }
 };
+var deepthinking_analyze_schema = {
+  name: "deepthinking_analyze",
+  description: `Multi-mode reasoning analysis: combines insights from multiple thinking modes.
+
+Executes 2-10 reasoning modes in parallel, merges insights using a specified strategy,
+handles conflicts between perspectives, and produces a synthesized conclusion.
+
+**Presets:**
+- comprehensive_analysis: Thorough multi-perspective analysis (5 modes)
+- hypothesis_testing: Evidence-based hypothesis evaluation (4 modes)
+- decision_making: Strategic decision analysis (4 modes)
+- root_cause: Causal analysis for problem diagnosis (4 modes)
+- future_planning: Temporal and scenario analysis (4 modes)
+
+**Merge Strategies:**
+- union: Combine all insights, remove duplicates
+- intersection: Only insights agreed upon by all modes
+- weighted: Weight insights by mode confidence/importance
+- hierarchical: Primary mode with supporting evidence
+- dialectical: Thesis-antithesis-synthesis approach`,
+  inputSchema: {
+    type: "object",
+    properties: {
+      thought: {
+        type: "string",
+        description: "The thought, problem, or question to analyze using multiple reasoning modes",
+        minLength: 1
+      },
+      preset: {
+        type: "string",
+        enum: ["comprehensive_analysis", "hypothesis_testing", "decision_making", "root_cause", "future_planning"],
+        description: "Pre-defined mode combination preset"
+      },
+      customModes: {
+        type: "array",
+        items: {
+          type: "string",
+          enum: [
+            "sequential",
+            "shannon",
+            "mathematics",
+            "physics",
+            "hybrid",
+            "inductive",
+            "deductive",
+            "abductive",
+            "causal",
+            "bayesian",
+            "counterfactual",
+            "temporal",
+            "gametheory",
+            "evidential",
+            "analogical",
+            "firstprinciples",
+            "systemsthinking",
+            "scientificmethod",
+            "formallogic",
+            "optimization",
+            "engineering",
+            "computability",
+            "cryptanalytic",
+            "algorithmic",
+            "synthesis",
+            "argumentation",
+            "critique",
+            "analysis",
+            "metareasoning"
+          ]
+        },
+        minItems: 2,
+        maxItems: 10,
+        description: "Custom selection of modes (overrides preset). Minimum 2, maximum 10 modes."
+      },
+      mergeStrategy: {
+        type: "string",
+        enum: ["union", "intersection", "weighted", "hierarchical", "dialectical"],
+        default: "union",
+        description: "Strategy for merging insights from different modes"
+      },
+      sessionId: {
+        type: "string",
+        description: "Optional session ID to associate analysis with"
+      },
+      context: {
+        type: "string",
+        description: "Additional context or background information for the analysis"
+      },
+      timeoutPerMode: {
+        type: "integer",
+        minimum: 1e3,
+        maximum: 12e4,
+        default: 3e4,
+        description: "Maximum time in milliseconds per mode (default: 30000)"
+      }
+    },
+    required: ["thought"],
+    additionalProperties: false
+  }
+};
 var jsonSchemas = [
   deepthinking_core_schema,
   deepthinking_standard_schema,
@@ -42187,7 +44001,8 @@ var jsonSchemas = [
   deepthinking_scientific_schema,
   deepthinking_engineering_schema,
   deepthinking_academic_schema,
-  deepthinking_session_schema
+  deepthinking_session_schema,
+  deepthinking_analyze_schema
 ];
 
 // src/tools/schemas/base.ts
@@ -42784,6 +44599,118 @@ var AcademicSchema = BaseThoughtSchema.extend({
   // Shared
   keyInsight: z.string().optional()
 });
+
+// src/tools/schemas/analyze.ts
+init_esm_shims();
+var analyzeInputSchema = z.object({
+  /** The thought or problem to analyze */
+  thought: z.string().min(1, "Thought is required").describe("The thought, problem, or question to analyze using multiple reasoning modes"),
+  /** Optional preset combination to use */
+  preset: z.enum([
+    "comprehensive_analysis",
+    "hypothesis_testing",
+    "decision_making",
+    "root_cause",
+    "future_planning"
+  ]).optional().describe(
+    "Pre-defined mode combination preset. Available presets: comprehensive_analysis (deductive, inductive, abductive, systems, first principles), hypothesis_testing (scientific method, Bayesian, evidential), decision_making (game theory, optimization, counterfactual), root_cause (causal, systems, first principles), future_planning (temporal, counterfactual, Bayesian)"
+  ),
+  /** Optional custom modes to use (overrides preset) */
+  customModes: z.array(
+    z.enum([
+      "sequential",
+      "shannon",
+      "mathematics",
+      "physics",
+      "hybrid",
+      "inductive",
+      "deductive",
+      "abductive",
+      "causal",
+      "bayesian",
+      "counterfactual",
+      "temporal",
+      "gametheory",
+      "evidential",
+      "analogical",
+      "firstprinciples",
+      "systemsthinking",
+      "scientificmethod",
+      "formallogic",
+      "optimization",
+      "engineering",
+      "computability",
+      "cryptanalytic",
+      "algorithmic",
+      "synthesis",
+      "argumentation",
+      "critique",
+      "analysis",
+      "metareasoning"
+    ])
+  ).min(2, "At least 2 modes required for multi-mode analysis").max(10, "Maximum 10 modes allowed").optional().describe(
+    "Custom selection of modes to use. Overrides preset if provided. Minimum 2 modes required."
+  ),
+  /** Optional merge strategy */
+  mergeStrategy: z.enum(["union", "intersection", "weighted", "hierarchical", "dialectical"]).optional().default("union").describe(
+    "Strategy for merging insights: union (combine all), intersection (only agreed), weighted (by confidence), hierarchical (primary + supporting), dialectical (thesis/antithesis/synthesis)"
+  ),
+  /** Optional session ID for tracking */
+  sessionId: z.string().optional().describe("Session ID to associate this analysis with an existing session"),
+  /** Optional context for the analysis */
+  context: z.string().optional().describe("Additional context or background information to consider during analysis"),
+  /** Optional timeout per mode in milliseconds */
+  timeoutPerMode: z.number().int().min(1e3).max(12e4).optional().default(3e4).describe("Maximum time in milliseconds to spend on each mode (default: 30000, max: 120000)")
+});
+z.object({
+  /** Whether the analysis succeeded */
+  success: z.boolean(),
+  /** Analysis ID */
+  analysisId: z.string(),
+  /** Number of modes used */
+  modesUsed: z.number(),
+  /** List of modes that contributed */
+  contributingModes: z.array(z.string()),
+  /** Synthesized conclusion from all modes */
+  synthesizedConclusion: z.string(),
+  /** Overall confidence score (0-1) */
+  confidenceScore: z.number().min(0).max(1),
+  /** Primary insights from the analysis */
+  primaryInsights: z.array(
+    z.object({
+      id: z.string(),
+      content: z.string(),
+      sourceMode: z.string(),
+      confidence: z.number(),
+      category: z.string().optional(),
+      priority: z.number().optional()
+    })
+  ),
+  /** Number of conflicts detected */
+  conflictsDetected: z.number(),
+  /** Number of conflicts resolved */
+  conflictsResolved: z.number(),
+  /** Merge strategy used */
+  mergeStrategy: z.string(),
+  /** Total execution time in milliseconds */
+  executionTime: z.number(),
+  /** Any errors encountered */
+  errors: z.array(
+    z.object({
+      mode: z.string(),
+      message: z.string(),
+      recoverable: z.boolean()
+    })
+  ).optional(),
+  /** Statistics about the merge */
+  statistics: z.object({
+    totalInsightsBefore: z.number(),
+    totalInsightsAfter: z.number(),
+    duplicatesRemoved: z.number(),
+    averageConfidence: z.number(),
+    mergeTime: z.number()
+  })
+});
 var toolList = jsonSchemas;
 var toolSchemas = {
   deepthinking_core: CoreModeSchema,
@@ -42797,7 +44724,8 @@ var toolSchemas = {
   deepthinking_scientific: ScientificSchema,
   deepthinking_engineering: EngineeringSchema,
   deepthinking_academic: AcademicSchema,
-  deepthinking_session: SessionActionSchema
+  deepthinking_session: SessionActionSchema,
+  deepthinking_analyze: analyzeInputSchema
 };
 var modeToToolMap = {
   // Core reasoning modes (fundamental)
@@ -42925,6 +44853,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const input = schema.parse(args);
       if (name === "deepthinking_session") {
         return await handleSessionAction(input);
+      }
+      if (name === "deepthinking_analyze") {
+        return await handleAnalyze(input);
       }
       return await handleAddThought(input, name);
     }
@@ -43168,6 +45099,63 @@ async function handleDeleteSession(input) {
       {
         type: "text",
         text: `Session ${input.sessionId} deleted successfully`
+      }
+    ]
+  };
+}
+async function handleAnalyze(input) {
+  const { MultiModeAnalyzer: MultiModeAnalyzer2 } = await Promise.resolve().then(() => (init_combinations(), combinations_exports));
+  const analyzer = new MultiModeAnalyzer2({
+    defaultTimeoutPerMode: input.timeoutPerMode || 3e4,
+    continueOnError: true,
+    verbose: false
+  });
+  let customModes;
+  if (input.customModes && input.customModes.length > 0) {
+    customModes = input.customModes.map((mode) => mode);
+  }
+  const response = await analyzer.analyze({
+    thought: input.thought,
+    preset: input.preset,
+    customModes,
+    mergeStrategy: input.mergeStrategy || "union",
+    sessionId: input.sessionId,
+    context: input.context,
+    timeoutPerMode: input.timeoutPerMode
+  });
+  const result = {
+    success: response.success,
+    analysisId: response.analysis.id,
+    modesUsed: response.analysis.contributingModes.length,
+    contributingModes: response.analysis.contributingModes,
+    synthesizedConclusion: response.analysis.synthesizedConclusion,
+    confidenceScore: response.analysis.confidenceScore,
+    primaryInsights: response.analysis.primaryInsights.map((i) => ({
+      id: i.id,
+      content: i.content,
+      sourceMode: i.sourceMode,
+      confidence: i.confidence,
+      category: i.category,
+      priority: i.priority
+    })),
+    conflictsDetected: response.analysis.statistics.conflictsDetected,
+    conflictsResolved: response.analysis.statistics.conflictsResolved,
+    mergeStrategy: response.analysis.mergeStrategy,
+    executionTime: response.executionTime,
+    errors: response.errors,
+    statistics: {
+      totalInsightsBefore: response.analysis.statistics.totalInsightsBefore,
+      totalInsightsAfter: response.analysis.statistics.totalInsightsAfter,
+      duplicatesRemoved: response.analysis.statistics.duplicatesRemoved,
+      averageConfidence: response.analysis.statistics.averageConfidence,
+      mergeTime: response.analysis.statistics.mergeTime
+    }
+  };
+  return {
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify(result, null, 2)
       }
     ]
   };

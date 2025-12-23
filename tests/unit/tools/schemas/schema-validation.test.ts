@@ -16,11 +16,12 @@ import {
 /**
  * JSON Schema 2020-12 Compliance Tests
  * These tests verify MCP protocol compatibility
+ * Phase 12 Sprint 3: Updated for 13 tools (added deepthinking_analyze)
  */
 describe('JSON Schema 2020-12 Compliance', () => {
   describe('All Tools Schema Generation', () => {
-    it('should generate valid JSON schemas for all 12 tools', () => {
-      expect(toolList).toHaveLength(12);
+    it('should generate valid JSON schemas for all 13 tools', () => {
+      expect(toolList).toHaveLength(13);
 
       for (const tool of toolList) {
         const schema = (tool as any).inputSchema;

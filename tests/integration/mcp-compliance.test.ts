@@ -37,8 +37,8 @@ describe('MCP Protocol Compliance', () => {
       expect(thinkingTool.description).toContain('DEPRECATED');
     });
 
-    it('should have 12 focused tools in v7.5.0', () => {
-      expect(toolList).toHaveLength(12);
+    it('should have 13 focused tools in v8.4.0', () => {
+      expect(toolList).toHaveLength(13);
 
       const toolNames = toolList.map((t: any) => t.name);
       expect(toolNames).toContain('deepthinking_core');
@@ -53,6 +53,7 @@ describe('MCP Protocol Compliance', () => {
       expect(toolNames).toContain('deepthinking_engineering');
       expect(toolNames).toContain('deepthinking_academic');
       expect(toolNames).toContain('deepthinking_session');
+      expect(toolNames).toContain('deepthinking_analyze');
     });
 
     it('should document modes across focused tools', () => {

@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 /**
- * DeepThinking MCP Server (v8.0.0)
+ * DeepThinking MCP Server (v8.4.0)
  *
  * 33 advanced reasoning modes with ModeHandler pattern, meta-reasoning,
  * taxonomy classifier, enterprise security, and visual export capabilities.
  *
- * Tools:
+ * Tools (13 total):
  * - deepthinking_core: inductive, deductive, abductive modes
  * - deepthinking_standard: sequential, shannon, hybrid modes
  * - deepthinking_mathematics: mathematics, physics, computability modes
@@ -19,6 +19,7 @@
  * - deepthinking_engineering: engineering, algorithmic modes
  * - deepthinking_academic: synthesis, argumentation, critique, analysis modes
  * - deepthinking_session: summarize, export, get_session, switch_mode, recommend_mode
+ * - deepthinking_analyze: multi-mode analysis with presets and merge strategies (Phase 12 Sprint 3)
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -138,6 +139,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // Session action tool
       if (name === 'deepthinking_session') {
         return await handleSessionAction(input);
+      }
+
+      // Multi-mode analyze tool (Phase 12 Sprint 3)
+      if (name === 'deepthinking_analyze') {
+        return await handleAnalyze(input);
       }
 
       // All other tools are for adding thoughts
@@ -475,6 +481,73 @@ async function handleDeleteSession(input: any) {
   };
 }
 
+/**
+ * Handle multi-mode analyze action (Phase 12 Sprint 3)
+ */
+async function handleAnalyze(input: any) {
+  const { MultiModeAnalyzer } = await import('./modes/combinations/index.js');
+
+  const analyzer = new MultiModeAnalyzer({
+    defaultTimeoutPerMode: input.timeoutPerMode || 30000,
+    continueOnError: true,
+    verbose: false,
+  });
+
+  // Map string modes to ThinkingMode enum values if provided
+  let customModes: ThinkingMode[] | undefined;
+  if (input.customModes && input.customModes.length > 0) {
+    customModes = input.customModes.map((mode: string) => mode as ThinkingMode);
+  }
+
+  const response = await analyzer.analyze({
+    thought: input.thought,
+    preset: input.preset,
+    customModes,
+    mergeStrategy: input.mergeStrategy || 'union',
+    sessionId: input.sessionId,
+    context: input.context,
+    timeoutPerMode: input.timeoutPerMode,
+  });
+
+  // Format the response for MCP output
+  const result = {
+    success: response.success,
+    analysisId: response.analysis.id,
+    modesUsed: response.analysis.contributingModes.length,
+    contributingModes: response.analysis.contributingModes,
+    synthesizedConclusion: response.analysis.synthesizedConclusion,
+    confidenceScore: response.analysis.confidenceScore,
+    primaryInsights: response.analysis.primaryInsights.map((i) => ({
+      id: i.id,
+      content: i.content,
+      sourceMode: i.sourceMode,
+      confidence: i.confidence,
+      category: i.category,
+      priority: i.priority,
+    })),
+    conflictsDetected: response.analysis.statistics.conflictsDetected,
+    conflictsResolved: response.analysis.statistics.conflictsResolved,
+    mergeStrategy: response.analysis.mergeStrategy,
+    executionTime: response.executionTime,
+    errors: response.errors,
+    statistics: {
+      totalInsightsBefore: response.analysis.statistics.totalInsightsBefore,
+      totalInsightsAfter: response.analysis.statistics.totalInsightsAfter,
+      duplicatesRemoved: response.analysis.statistics.duplicatesRemoved,
+      averageConfidence: response.analysis.statistics.averageConfidence,
+      mergeTime: response.analysis.statistics.mergeTime,
+    },
+  };
+
+  return {
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(result, null, 2),
+      },
+    ],
+  };
+}
 
 /**
  * Main server startup

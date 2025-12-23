@@ -1359,7 +1359,90 @@ export const deepthinking_session_schema = {
 } as const;
 
 /**
- * All tool schemas as array (v7.5.0 - 12 tools)
+ * deepthinking_analyze - Multi-Mode Analysis Tool
+ * Phase 12 Sprint 3: Combines multiple reasoning modes for comprehensive analysis
+ */
+export const deepthinking_analyze_schema = {
+  name: "deepthinking_analyze",
+  description: `Multi-mode reasoning analysis: combines insights from multiple thinking modes.
+
+Executes 2-10 reasoning modes in parallel, merges insights using a specified strategy,
+handles conflicts between perspectives, and produces a synthesized conclusion.
+
+**Presets:**
+- comprehensive_analysis: Thorough multi-perspective analysis (5 modes)
+- hypothesis_testing: Evidence-based hypothesis evaluation (4 modes)
+- decision_making: Strategic decision analysis (4 modes)
+- root_cause: Causal analysis for problem diagnosis (4 modes)
+- future_planning: Temporal and scenario analysis (4 modes)
+
+**Merge Strategies:**
+- union: Combine all insights, remove duplicates
+- intersection: Only insights agreed upon by all modes
+- weighted: Weight insights by mode confidence/importance
+- hierarchical: Primary mode with supporting evidence
+- dialectical: Thesis-antithesis-synthesis approach`,
+  inputSchema: {
+    type: "object",
+    properties: {
+      thought: {
+        type: "string",
+        description: "The thought, problem, or question to analyze using multiple reasoning modes",
+        minLength: 1
+      },
+      preset: {
+        type: "string",
+        enum: ["comprehensive_analysis", "hypothesis_testing", "decision_making", "root_cause", "future_planning"],
+        description: "Pre-defined mode combination preset"
+      },
+      customModes: {
+        type: "array",
+        items: {
+          type: "string",
+          enum: [
+            "sequential", "shannon", "mathematics", "physics", "hybrid",
+            "inductive", "deductive", "abductive", "causal", "bayesian",
+            "counterfactual", "temporal", "gametheory", "evidential",
+            "analogical", "firstprinciples", "systemsthinking", "scientificmethod",
+            "formallogic", "optimization", "engineering", "computability",
+            "cryptanalytic", "algorithmic", "synthesis", "argumentation",
+            "critique", "analysis", "metareasoning"
+          ]
+        },
+        minItems: 2,
+        maxItems: 10,
+        description: "Custom selection of modes (overrides preset). Minimum 2, maximum 10 modes."
+      },
+      mergeStrategy: {
+        type: "string",
+        enum: ["union", "intersection", "weighted", "hierarchical", "dialectical"],
+        default: "union",
+        description: "Strategy for merging insights from different modes"
+      },
+      sessionId: {
+        type: "string",
+        description: "Optional session ID to associate analysis with"
+      },
+      context: {
+        type: "string",
+        description: "Additional context or background information for the analysis"
+      },
+      timeoutPerMode: {
+        type: "integer",
+        minimum: 1000,
+        maximum: 120000,
+        default: 30000,
+        description: "Maximum time in milliseconds per mode (default: 30000)"
+      }
+    },
+    required: ["thought"],
+    additionalProperties: false
+  }
+} as const;
+
+/**
+ * All tool schemas as array (v8.4.0 - 13 tools)
+ * Phase 12 Sprint 3: Added deepthinking_analyze
  * Phase 14: Added deepthinking_engineering and deepthinking_academic
  */
 export const jsonSchemas = [
@@ -1375,4 +1458,5 @@ export const jsonSchemas = [
   deepthinking_engineering_schema,
   deepthinking_academic_schema,
   deepthinking_session_schema,
+  deepthinking_analyze_schema,
 ] as const;

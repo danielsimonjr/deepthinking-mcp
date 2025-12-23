@@ -80,6 +80,46 @@ Added advanced proof decomposition capabilities with branch analysis, strategy r
   - Completeness checking
   - Mermaid diagram export for proof visualization
 
+**Phase 12 Sprint 3: Multi-Mode Analysis & Synthesis**
+
+Added the `deepthinking_analyze` MCP tool for analyzing problems using multiple reasoning modes simultaneously:
+
+- **Mode Combination Presets** (`src/modes/combinations/presets.ts`)
+  - 5 pre-built presets: `comprehensive_analysis`, `hypothesis_testing`, `decision_making`, `root_cause`, `future_planning`
+  - Each preset optimized with specific mode combinations and merge strategies
+  - Weighted, hierarchical, and dialectical merge configurations
+  - Tag-based filtering and preset discovery functions
+
+- **Insight Merger** (`src/modes/combinations/merger.ts`)
+  - `InsightMerger` class for combining insights from multiple reasoning modes
+  - 5 merge strategies: union, intersection, weighted, hierarchical, dialectical
+  - Duplicate detection via semantic similarity (Jaccard index)
+  - Category-based insight grouping (evidence, conclusion, pattern, causation, prediction, recommendation)
+  - Confidence aggregation and priority scoring
+  - Supporting/conflicting insight tracking
+
+- **Conflict Resolver** (`src/modes/combinations/conflict-resolver.ts`)
+  - `ConflictResolver` class for detecting and resolving conflicting insights
+  - Automatic conflict detection with 5 resolution strategies
+  - Resolution strategies: confidence-based, mode-priority, synthesis, voting, expert (weighted voting)
+  - Confidence adjustments for resolved insights
+  - Detailed resolution explanations and audit trail
+
+- **Multi-Mode Analyzer** (`src/modes/combinations/analyzer.ts`)
+  - `MultiModeAnalyzer` orchestration class for multi-mode analysis
+  - Parallel mode execution with configurable timeouts
+  - Progress callbacks for tracking execution phases
+  - 6 execution phases: initialization, mode execution, insight collection, conflict resolution, merging, completion
+  - Automatic preset resolution and custom mode support
+  - Comprehensive statistics (insights before/after, duplicates removed, conflicts detected/resolved)
+
+- **MCP Tool Integration** (`src/tools/`, `src/index.ts`)
+  - New `deepthinking_analyze` tool (13th focused tool)
+  - Zod schema validation for tool inputs
+  - JSON schema for MCP protocol compliance
+  - Full integration with existing session management
+  - Support for all 29 reasoning modes via presets or custom selection
+
 **Chunker Utility Tool**
 
 Added a new standalone tool for splitting and merging large files for editing within context limits.
