@@ -1,0 +1,121 @@
+{
+  "phase": 12,
+  "sprint": 1,
+  "title": "Foundation & Infrastructure",
+  "week": "Week 1",
+  "effort": "12-15 hours",
+  "status": "pending",
+  "description": "Set up infrastructure for all Phase 12 features including directory structure, shared types, base classes, and build configuration updates",
+  "tasks": [
+    {
+      "id": "12.1.1",
+      "category": "Directory Structure",
+      "description": "Create directory structure for all new modules",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Create src/proof/ subdirectories if needed",
+        "Create src/modes/combinations/ directory",
+        "Create src/modes/stochastic/ with models/, sampling/, analysis/ subdirs",
+        "Create src/modes/causal/graph/ with algorithms/ subdir",
+        "Update .gitkeep files for empty directories"
+      ],
+      "files": [
+        "src/modes/combinations/.gitkeep",
+        "src/modes/stochastic/index.ts",
+        "src/modes/stochastic/models/.gitkeep",
+        "src/modes/stochastic/sampling/.gitkeep",
+        "src/modes/stochastic/analysis/.gitkeep",
+        "src/modes/causal/graph/index.ts",
+        "src/modes/causal/graph/algorithms/.gitkeep"
+      ]
+    },
+    {
+      "id": "12.1.2",
+      "category": "Proof Types",
+      "description": "Define shared types for proof decomposition features",
+      "status": "pending",
+      "estimatedHours": 3.0,
+      "details": [
+        "Create ProofBranch interface with id, steps, dependencies, dependents, isIndependent",
+        "Create HierarchicalProof interface for nested proofs (theorem/lemma/corollary)",
+        "Create ProofTree interface with root, lemmas map, dependencyOrder",
+        "Create StrategyRecommendation interface",
+        "Create VerificationResult interface with errors, warnings, coverage",
+        "Export all types from branch-types.ts"
+      ],
+      "files": [
+        "src/proof/branch-types.ts"
+      ]
+    },
+    {
+      "id": "12.1.3",
+      "category": "Combination Types",
+      "description": "Define types for multi-mode analysis and synthesis",
+      "status": "pending",
+      "estimatedHours": 2.5,
+      "details": [
+        "Create ModeCombination interface with id, name, modes, mergeStrategy",
+        "Create MergeStrategy type union (union, intersection, weighted, hierarchical, dialectical)",
+        "Create MergedAnalysis interface with insights, evidence, conflicts, conclusion",
+        "Create ConflictingInsight interface for conflict detection",
+        "Create Insight interface with content, source mode, confidence"
+      ],
+      "files": [
+        "src/modes/combinations/combination-types.ts"
+      ]
+    },
+    {
+      "id": "12.1.4",
+      "category": "Stochastic Types",
+      "description": "Define types for stochastic reasoning and Monte Carlo",
+      "status": "pending",
+      "estimatedHours": 3.0,
+      "details": [
+        "Create StochasticModel interface with variables, dependencies, constraints",
+        "Create StochasticVariable interface with name, distribution, domain",
+        "Create Distribution type union (normal, uniform, exponential, poisson, binomial, categorical, custom)",
+        "Create MonteCarloConfig interface with iterations, burnIn, thinning, convergenceThreshold",
+        "Create MonteCarloResult interface with samples, statistics, convergenceDiagnostics",
+        "Create SimulationProgress interface for progress callbacks"
+      ],
+      "files": [
+        "src/modes/stochastic/types.ts"
+      ]
+    },
+    {
+      "id": "12.1.5",
+      "category": "Graph Types",
+      "description": "Define types for enhanced graph analysis",
+      "status": "pending",
+      "estimatedHours": 2.5,
+      "details": [
+        "Create CentralityMeasures interface (degree, betweenness, closeness, pageRank, eigenvector)",
+        "Create DSeparationResult interface with separated flag, blocking/open paths",
+        "Create InterventionResult interface for do-calculus results",
+        "Create Path interface for graph traversal",
+        "Create AdjustmentFormula interface for causal adjustment"
+      ],
+      "files": [
+        "src/modes/causal/graph/types.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "All directory structures created",
+    "Type definitions compile without errors",
+    "Types are properly exported from index files",
+    "No circular dependencies introduced"
+  ],
+  "filesCreated": [
+    "src/proof/branch-types.ts",
+    "src/modes/combinations/combination-types.ts",
+    "src/modes/stochastic/types.ts",
+    "src/modes/stochastic/index.ts",
+    "src/modes/causal/graph/types.ts",
+    "src/modes/causal/graph/index.ts"
+  ],
+  "filesModified": [],
+  "totalEstimatedHours": 13.0,
+  "notes": "Foundation sprint - all subsequent sprints depend on these types being defined correctly"
+}

@@ -1,0 +1,132 @@
+{
+  "phase": 12,
+  "sprint": 3,
+  "title": "Multi-Mode Analysis & Synthesis",
+  "week": "Week 3",
+  "effort": "12-15 hours",
+  "status": "pending",
+  "description": "Implement multi-mode analysis framework with mode combinations, insight merging, conflict resolution, and the new deepthinking_analyze MCP tool",
+  "tasks": [
+    {
+      "id": "12.3.1",
+      "category": "Mode Presets",
+      "description": "Create pre-defined mode combination presets",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Define 5 mode presets: comprehensive_analysis, hypothesis_testing, decision_making, root_cause, future_planning",
+        "Document use cases for each preset",
+        "Define recommended merge strategies per preset",
+        "Add weight configurations for weighted merging",
+        "Create preset registry for lookup"
+      ],
+      "files": [
+        "src/modes/combinations/presets.ts",
+        "tests/unit/modes/combinations/presets.test.ts"
+      ]
+    },
+    {
+      "id": "12.3.2",
+      "category": "Insight Merger",
+      "description": "Implement insight merging logic for combining mode outputs",
+      "status": "pending",
+      "estimatedHours": 4.0,
+      "details": [
+        "Implement InsightMerger class",
+        "Implement union merge strategy (combine all, deduplicate)",
+        "Implement intersection merge strategy (only agreed insights)",
+        "Implement weighted merge strategy (by mode confidence)",
+        "Implement hierarchical merge strategy (primary + supporting)",
+        "Implement dialectical merge strategy (thesis/antithesis/synthesis)",
+        "Add confidence score calculation for merged insights"
+      ],
+      "files": [
+        "src/modes/combinations/merger.ts",
+        "tests/unit/modes/combinations/merger.test.ts"
+      ]
+    },
+    {
+      "id": "12.3.3",
+      "category": "Conflict Resolution",
+      "description": "Implement conflict detection and resolution for contradictory insights",
+      "status": "pending",
+      "estimatedHours": 3.0,
+      "details": [
+        "Implement ConflictResolver class",
+        "Detect direct contradictions between mode outputs",
+        "Detect partial overlaps requiring reconciliation",
+        "Detect scope differences (different aspects of same topic)",
+        "Implement resolution strategies per conflict type",
+        "Add explanation generation for resolutions"
+      ],
+      "files": [
+        "src/modes/combinations/conflict-resolver.ts",
+        "tests/unit/modes/combinations/conflict-resolver.test.ts"
+      ]
+    },
+    {
+      "id": "12.3.4",
+      "category": "MCP Tool",
+      "description": "Implement deepthinking_analyze MCP tool",
+      "status": "pending",
+      "estimatedHours": 3.0,
+      "details": [
+        "Define tool schema with thought, preset, customModes, mergeStrategy params",
+        "Implement tool handler in src/index.ts",
+        "Execute selected modes and collect thoughts",
+        "Apply merge strategy to combine insights",
+        "Return synthesized analysis with supporting evidence",
+        "Add session integration for tracking multi-mode analysis"
+      ],
+      "files": [
+        "src/tools/schemas/analyze.ts",
+        "src/index.ts",
+        "tests/integration/tools/analyze.test.ts"
+      ]
+    },
+    {
+      "id": "12.3.5",
+      "category": "Module Integration",
+      "description": "Create module index and integrate with services",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Create src/modes/combinations/index.ts exporting all components",
+        "Add MultiModeAnalyzer service class orchestrating the workflow",
+        "Integrate with ThoughtFactory for mode execution",
+        "Add progress tracking for multi-mode execution",
+        "Document API in JSDoc comments"
+      ],
+      "files": [
+        "src/modes/combinations/index.ts",
+        "src/modes/combinations/analyzer.ts",
+        "tests/integration/modes/multi-mode.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "5 preset combinations available and documented",
+    "All 5 merge strategies implemented and tested",
+    "Conflict detection works for all conflict types",
+    "deepthinking_analyze tool successfully combines 3+ modes",
+    "Merged insights have proper attribution to source modes"
+  ],
+  "filesCreated": [
+    "src/modes/combinations/presets.ts",
+    "src/modes/combinations/merger.ts",
+    "src/modes/combinations/conflict-resolver.ts",
+    "src/modes/combinations/analyzer.ts",
+    "src/modes/combinations/index.ts",
+    "src/tools/schemas/analyze.ts",
+    "tests/unit/modes/combinations/presets.test.ts",
+    "tests/unit/modes/combinations/merger.test.ts",
+    "tests/unit/modes/combinations/conflict-resolver.test.ts",
+    "tests/integration/tools/analyze.test.ts",
+    "tests/integration/modes/multi-mode.test.ts"
+  ],
+  "filesModified": [
+    "src/index.ts"
+  ],
+  "totalEstimatedHours": 14.0,
+  "notes": "This sprint adds a powerful new capability for running multiple reasoning modes simultaneously. The deepthinking_analyze tool will be a key user-facing feature."
+}

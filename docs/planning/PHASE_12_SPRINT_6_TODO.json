@@ -1,0 +1,132 @@
+{
+  "phase": 12,
+  "sprint": 6,
+  "title": "Enhanced Graph Analysis",
+  "week": "Week 6",
+  "effort": "15-18 hours",
+  "status": "pending",
+  "description": "Implement advanced graph analysis algorithms including centrality measures, D-separation for causal inference, and Do-calculus for interventional queries",
+  "tasks": [
+    {
+      "id": "12.6.1",
+      "category": "Centrality Algorithms",
+      "description": "Implement graph centrality measures",
+      "status": "pending",
+      "estimatedHours": 4.0,
+      "details": [
+        "Create CentralityAnalyzer class",
+        "Implement degree centrality (in-degree, out-degree, total)",
+        "Implement betweenness centrality (shortest path frequency)",
+        "Implement closeness centrality (inverse average distance)",
+        "Implement PageRank algorithm",
+        "Implement eigenvector centrality",
+        "Add getInfluentialNodes() to find top-N by any measure"
+      ],
+      "files": [
+        "src/modes/causal/graph/algorithms/centrality.ts",
+        "tests/unit/modes/causal/graph/centrality.test.ts"
+      ]
+    },
+    {
+      "id": "12.6.2",
+      "category": "D-Separation",
+      "description": "Implement D-separation analysis for causal independence",
+      "status": "pending",
+      "estimatedHours": 4.0,
+      "details": [
+        "Create DSeparationAnalyzer class",
+        "Implement findAllPaths() between variable sets",
+        "Implement isPathBlocked() checking colliders and conditioning",
+        "Implement isDSeparated() main API",
+        "Implement findMinimalSeparator() for minimal conditioning set",
+        "Handle v-structures (colliders) correctly"
+      ],
+      "files": [
+        "src/modes/causal/graph/algorithms/d-separation.ts",
+        "tests/unit/modes/causal/graph/d-separation.test.ts"
+      ]
+    },
+    {
+      "id": "12.6.3",
+      "category": "Do-Calculus",
+      "description": "Implement do-calculus for interventional queries",
+      "status": "pending",
+      "estimatedHours": 4.0,
+      "details": [
+        "Create DoCalculus class",
+        "Implement checkIdentifiability() for causal effects",
+        "Implement findAdjustmentSet() (backdoor criterion)",
+        "Implement computeInterventionalEffect() using adjustment",
+        "Generate LaTeX estimand formulas",
+        "Handle non-identifiable cases gracefully"
+      ],
+      "files": [
+        "src/modes/causal/graph/algorithms/intervention.ts",
+        "tests/unit/modes/causal/graph/intervention.test.ts"
+      ]
+    },
+    {
+      "id": "12.6.4",
+      "category": "CausalHandler Enhancement",
+      "description": "Integrate new graph algorithms into CausalHandler",
+      "status": "pending",
+      "estimatedHours": 3.0,
+      "details": [
+        "Add centrality computation for graphs with 3+ nodes",
+        "Add keyNodes field to CausalThought",
+        "Add d-separation analysis when queryVariables provided",
+        "Add intervention effect computation for do() operations",
+        "Update enhance() to include all new analysis",
+        "Add graph-specific suggestions based on structure"
+      ],
+      "files": [
+        "src/modes/handlers/CausalHandler.ts",
+        "src/types/modes/causal.ts",
+        "tests/unit/modes/handlers/causal.handler.test.ts"
+      ]
+    },
+    {
+      "id": "12.6.5",
+      "category": "Module Export & Docs",
+      "description": "Export module and add documentation",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Create src/modes/causal/graph/index.ts exporting all algorithms",
+        "Add JSDoc documentation for all public APIs",
+        "Create graph analysis usage examples",
+        "Add integration tests for full causal workflow",
+        "Update CausalHandler documentation"
+      ],
+      "files": [
+        "src/modes/causal/graph/index.ts",
+        "src/modes/causal/graph/algorithms/index.ts",
+        "tests/integration/modes/causal-graph.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "Centrality measures match known values for test graphs",
+    "D-separation correctly identifies conditional independence",
+    "Do-calculus identifies adjustment sets when they exist",
+    "Non-identifiable effects are flagged appropriately",
+    "CausalHandler provides rich graph analysis in enhanced thoughts"
+  ],
+  "filesCreated": [
+    "src/modes/causal/graph/algorithms/centrality.ts",
+    "src/modes/causal/graph/algorithms/d-separation.ts",
+    "src/modes/causal/graph/algorithms/intervention.ts",
+    "src/modes/causal/graph/algorithms/index.ts",
+    "tests/unit/modes/causal/graph/centrality.test.ts",
+    "tests/unit/modes/causal/graph/d-separation.test.ts",
+    "tests/unit/modes/causal/graph/intervention.test.ts",
+    "tests/integration/modes/causal-graph.test.ts"
+  ],
+  "filesModified": [
+    "src/modes/handlers/CausalHandler.ts",
+    "src/types/modes/causal.ts",
+    "src/modes/causal/graph/index.ts"
+  ],
+  "totalEstimatedHours": 17.0,
+  "notes": "This sprint adds powerful causal inference capabilities. D-separation and do-calculus are foundational concepts from Pearl's causal inference framework."
+}

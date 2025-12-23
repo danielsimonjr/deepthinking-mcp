@@ -1,0 +1,142 @@
+{
+  "phase": 12,
+  "sprint": 5,
+  "title": "Monte Carlo & Stochastic Reasoning",
+  "week": "Week 5",
+  "effort": "18-20 hours",
+  "status": "pending",
+  "description": "Implement full stochastic reasoning capability with probability distributions, random number generation, Monte Carlo simulation engine, and StochasticHandler",
+  "tasks": [
+    {
+      "id": "12.5.1",
+      "category": "Distributions",
+      "description": "Implement probability distribution samplers",
+      "status": "pending",
+      "estimatedHours": 4.0,
+      "details": [
+        "Implement Normal distribution sampler (Box-Muller transform)",
+        "Implement Uniform distribution sampler",
+        "Implement Exponential distribution sampler",
+        "Implement Poisson distribution sampler",
+        "Implement Binomial distribution sampler",
+        "Implement Categorical distribution sampler",
+        "Add parameter validation for each distribution",
+        "Create Distribution factory function"
+      ],
+      "files": [
+        "src/modes/stochastic/models/distribution.ts",
+        "tests/unit/modes/stochastic/distribution.test.ts"
+      ]
+    },
+    {
+      "id": "12.5.2",
+      "category": "RNG",
+      "description": "Implement seeded random number generator",
+      "status": "pending",
+      "estimatedHours": 2.5,
+      "details": [
+        "Implement SeededRNG class with seed parameter",
+        "Use xorshift128+ or similar fast PRNG algorithm",
+        "Add next() method returning uniform [0, 1)",
+        "Add convenience methods: uniform(min, max), normal(mean, std), etc.",
+        "Ensure reproducibility with same seed",
+        "Add state save/restore for checkpointing"
+      ],
+      "files": [
+        "src/modes/stochastic/sampling/rng.ts",
+        "tests/unit/modes/stochastic/rng.test.ts"
+      ]
+    },
+    {
+      "id": "12.5.3",
+      "category": "Monte Carlo Engine",
+      "description": "Implement Monte Carlo simulation engine",
+      "status": "pending",
+      "estimatedHours": 5.0,
+      "details": [
+        "Create MonteCarloEngine class",
+        "Implement simulate() with iterations, burn-in, thinning support",
+        "Add progress callback for long simulations",
+        "Implement early stopping on convergence",
+        "Support parallel batch distribution (seeds per batch)",
+        "Return MonteCarloResult with samples and statistics"
+      ],
+      "files": [
+        "src/modes/stochastic/models/monte-carlo.ts",
+        "tests/unit/modes/stochastic/monte-carlo.test.ts"
+      ]
+    },
+    {
+      "id": "12.5.4",
+      "category": "Statistics",
+      "description": "Implement statistical analysis and convergence diagnostics",
+      "status": "pending",
+      "estimatedHours": 4.0,
+      "details": [
+        "Implement computeStatistics() for mean, variance, percentiles",
+        "Implement calculatePercentiles() for arbitrary quantiles",
+        "Implement Geweke diagnostic for convergence",
+        "Implement effective sample size calculation",
+        "Implement R-hat statistic for multiple chains",
+        "Add correlation matrix computation"
+      ],
+      "files": [
+        "src/modes/stochastic/analysis/statistics.ts",
+        "src/modes/stochastic/analysis/convergence.ts",
+        "tests/unit/modes/stochastic/statistics.test.ts",
+        "tests/unit/modes/stochastic/convergence.test.ts"
+      ]
+    },
+    {
+      "id": "12.5.5",
+      "category": "Handler Integration",
+      "description": "Create StochasticHandler and integrate with mode system",
+      "status": "pending",
+      "estimatedHours": 3.5,
+      "details": [
+        "Create StochasticHandler implementing ModeHandler interface",
+        "Implement validate() for stochastic-specific params",
+        "Implement enhance() to run simulations and add results",
+        "Implement getSuggestions() for stochastic analysis tips",
+        "Register handler in ModeHandlerRegistry",
+        "Add StochasticThought type if not exists",
+        "Update ThoughtFactory for stochastic mode"
+      ],
+      "files": [
+        "src/modes/handlers/StochasticHandler.ts",
+        "src/modes/handlers/ModeHandlerRegistry.ts",
+        "src/types/modes/stochastic.ts",
+        "tests/unit/modes/handlers/stochastic.handler.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "All 6 distribution types produce statistically correct samples",
+    "SeededRNG is reproducible with same seed",
+    "Monte Carlo engine converges for known distributions",
+    "Convergence diagnostics correctly identify converged chains",
+    "StochasticHandler integrates with existing mode system"
+  ],
+  "filesCreated": [
+    "src/modes/stochastic/models/distribution.ts",
+    "src/modes/stochastic/sampling/rng.ts",
+    "src/modes/stochastic/models/monte-carlo.ts",
+    "src/modes/stochastic/analysis/statistics.ts",
+    "src/modes/stochastic/analysis/convergence.ts",
+    "src/modes/handlers/StochasticHandler.ts",
+    "tests/unit/modes/stochastic/distribution.test.ts",
+    "tests/unit/modes/stochastic/rng.test.ts",
+    "tests/unit/modes/stochastic/monte-carlo.test.ts",
+    "tests/unit/modes/stochastic/statistics.test.ts",
+    "tests/unit/modes/stochastic/convergence.test.ts",
+    "tests/unit/modes/handlers/stochastic.handler.test.ts"
+  ],
+  "filesModified": [
+    "src/modes/handlers/ModeHandlerRegistry.ts",
+    "src/modes/stochastic/index.ts",
+    "src/types/modes/stochastic.ts",
+    "src/services/ThoughtFactory.ts"
+  ],
+  "totalEstimatedHours": 19.0,
+  "notes": "This is the most complex sprint implementing a full Monte Carlo simulation system. Distribution implementations should be validated against known statistical properties."
+}

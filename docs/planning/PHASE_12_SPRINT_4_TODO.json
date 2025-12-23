@@ -1,0 +1,108 @@
+{
+  "phase": 12,
+  "sprint": 4,
+  "title": "Comprehensive Export System",
+  "week": "Week 4",
+  "effort": "8-10 hours",
+  "status": "pending",
+  "description": "Enhance the export system with export profiles, export_all action, file system export capabilities, and progress reporting",
+  "tasks": [
+    {
+      "id": "12.4.1",
+      "category": "Export Profiles",
+      "description": "Create pre-defined export profile bundles",
+      "status": "pending",
+      "estimatedHours": 2.5,
+      "details": [
+        "Define ExportProfile interface with id, name, formats, options",
+        "Create 'academic' profile (latex, markdown, json)",
+        "Create 'presentation' profile (mermaid, svg, markdown)",
+        "Create 'documentation' profile (markdown, mermaid, ascii)",
+        "Create 'archive' profile (json, markdown, latex, jupyter)",
+        "Add profile-specific export options (citations, simplify diagrams, etc.)"
+      ],
+      "files": [
+        "src/export/profiles.ts",
+        "tests/unit/export/profiles.test.ts"
+      ]
+    },
+    {
+      "id": "12.4.2",
+      "category": "Export All Action",
+      "description": "Implement export_all action for deepthinking_session tool",
+      "status": "pending",
+      "estimatedHours": 2.5,
+      "details": [
+        "Add 'export_all' case to session tool handler",
+        "Export all 8 formats: markdown, latex, mermaid, dot, ascii, svg, json, jupyter",
+        "Handle individual format failures gracefully",
+        "Return success/failure counts with results",
+        "Add profile parameter to export using a preset profile"
+      ],
+      "files": [
+        "src/index.ts",
+        "tests/integration/tools/session-export-all.test.ts"
+      ]
+    },
+    {
+      "id": "12.4.3",
+      "category": "File Exporter",
+      "description": "Implement file system export with directory organization",
+      "status": "pending",
+      "estimatedHours": 3.0,
+      "details": [
+        "Create FileExporter class with exportToFiles() method",
+        "Support configurable output directory",
+        "Create subdirectory structure by session/date",
+        "Implement filename pattern templating ({session}_{mode}_{date})",
+        "Add overwrite protection option",
+        "Support profile-based batch export to files"
+      ],
+      "files": [
+        "src/export/file-exporter.ts",
+        "tests/unit/export/file-exporter.test.ts"
+      ]
+    },
+    {
+      "id": "12.4.4",
+      "category": "Progress & Integration",
+      "description": "Add progress reporting and integrate with ExportService",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Add ExportProgress callback interface",
+        "Report per-format progress (started, completed, failed)",
+        "Update ExportService to support profiles and export_all",
+        "Export FileExporter from export module",
+        "Add documentation for new export capabilities"
+      ],
+      "files": [
+        "src/services/ExportService.ts",
+        "src/export/index.ts",
+        "tests/integration/export/batch-export.test.ts"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "4 export profiles defined and usable",
+    "export_all action exports all 8 formats successfully",
+    "File exporter creates organized directory structure",
+    "Progress reporting works for batch exports",
+    "All exports handle errors gracefully without crashing"
+  ],
+  "filesCreated": [
+    "src/export/profiles.ts",
+    "src/export/file-exporter.ts",
+    "tests/unit/export/profiles.test.ts",
+    "tests/unit/export/file-exporter.test.ts",
+    "tests/integration/tools/session-export-all.test.ts",
+    "tests/integration/export/batch-export.test.ts"
+  ],
+  "filesModified": [
+    "src/index.ts",
+    "src/services/ExportService.ts",
+    "src/export/index.ts"
+  ],
+  "totalEstimatedHours": 10.0,
+  "notes": "This is the smallest sprint focused on export enhancements. File export is useful for generating documentation or reports from reasoning sessions."
+}
