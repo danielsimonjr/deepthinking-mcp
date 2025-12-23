@@ -9,6 +9,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ New Features
 
+**Phase 12 Sprint 1: Foundation & Infrastructure**
+
+Added foundational types for advanced reasoning features planned in Phase 12:
+
+- **Proof Branch Types** (`src/proof/branch-types.ts`)
+  - `ProofBranch` interface for independent branch detection
+  - `HierarchicalProof` and `ProofTree` for nested proof structures
+  - `StrategyRecommendation` and `ProofTemplate` for proof strategy recommendations
+  - `VerificationResult`, `VerificationError`, `VerificationWarning` for proof verification
+  - `JustificationType` and `StepJustification` for step justifications
+
+- **Multi-Mode Combination Types** (`src/modes/combinations/`)
+  - `ModeCombination` interface for combining reasoning modes
+  - `MergeStrategy` types: union, intersection, weighted, hierarchical, dialectical
+  - `Insight`, `ConflictingInsight`, `ConflictResolution` for insight management
+  - `MergedAnalysis` for combined mode analysis results
+  - `MultiModeAnalysisRequest/Response` for API contracts
+
+- **Monte Carlo Extension Types** (`src/modes/stochastic/`)
+  - Extended `Distribution` type with 11 distribution types (normal, uniform, exponential, poisson, binomial, categorical, beta, gamma, lognormal, triangular, custom)
+  - `StochasticModel`, `StochasticVariable`, `Dependency`, `Constraint` for model definition
+  - `MonteCarloConfig` and `MonteCarloResult` for simulation configuration/results
+  - `ConvergenceDiagnostics` with Geweke, ESS, and R-hat statistics
+  - `SeededRNGInterface` for reproducible random number generation
+
+- **Enhanced Graph Analysis Types** (`src/modes/causal/graph/`)
+  - `CentralityMeasures` with degree, betweenness, closeness, pageRank, eigenvector
+  - `DSeparationResult` and `DSeparationRequest` for d-separation analysis
+  - `InterventionResult`, `Intervention`, `AdjustmentFormula` for do-calculus
+  - `CausalGraph`, `GraphNode`, `GraphEdge`, `Path` for graph structures
+  - `CausalQuery` and `QueryVariables` for causal inference queries
+
 **Chunker Utility Tool**
 
 Added a new standalone tool for splitting and merging large files for editing within context limits.
