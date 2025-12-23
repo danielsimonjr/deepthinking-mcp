@@ -18,6 +18,7 @@
 import {
   ThinkingSession,
   ThinkingMode,
+  Thought,
   CausalThought,
   TemporalThought,
   GameTheoryThought,
@@ -47,10 +48,6 @@ import {
   ScientificMethodThought,
   OptimizationThought,
   FormalLogicThought,
-  type SynthesisThought,
-  type ArgumentationThought,
-  type AnalysisThought,
-  type AlgorithmicThought,
 } from '../types/index.js';
 import type { MathematicsThought } from '../types/modes/mathematics.js';
 import type { PhysicsThought } from '../types/modes/physics.js';
@@ -952,7 +949,7 @@ export class ExportService {
    * Extract mode-specific structured data as Markdown
    * Provides rich output for various thought types beyond just the content text
    */
-  private extractModeSpecificMarkdown(thought: unknown): string {
+  private extractModeSpecificMarkdown(thought: Thought): string {
     let md = '';
 
     // Causal thoughts - include graph structure
@@ -977,7 +974,10 @@ export class ExportService {
       if (thought.interventions?.length) {
         md += `**Interventions:**\n`;
         for (const intervention of thought.interventions) {
-          md += `- ${intervention.node}: ${intervention.value}${intervention.effect ? ` → ${intervention.effect}` : ''}\n`;
+          const effectsText = intervention.expectedEffects?.length
+            ? ` → ${intervention.expectedEffects.map(e => e.expectedChange).join(', ')}`
+            : '';
+          md += `- ${intervention.nodeId}: ${intervention.action}${effectsText}\n`;
         }
         md += `\n`;
       }
@@ -986,33 +986,32 @@ export class ExportService {
     // Bayesian thoughts - include probability data
     if (isBayesianThought(thought)) {
       md += `#### Bayesian Analysis\n\n`;
-      if (thought.priorProbability !== undefined) {
-        const prior = typeof thought.priorProbability === 'number' ? thought.priorProbability : Number(thought.priorProbability);
+      if (thought.prior?.probability !== undefined) {
+        const prior = typeof thought.prior.probability === 'number' ? thought.prior.probability : Number(thought.prior.probability);
         md += `- **Prior Probability:** ${(prior * 100).toFixed(1)}%\n`;
       }
-      if (thought.likelihood !== undefined) {
-        const likelihood = typeof thought.likelihood === 'number' ? thought.likelihood : Number(thought.likelihood);
+      if (thought.likelihood?.probability !== undefined) {
+        const likelihood = typeof thought.likelihood.probability === 'number' ? thought.likelihood.probability : Number(thought.likelihood.probability);
         md += `- **Likelihood:** ${(likelihood * 100).toFixed(1)}%\n`;
       }
-      if (thought.posteriorProbability !== undefined) {
-        const posterior = typeof thought.posteriorProbability === 'number' ? thought.posteriorProbability : Number(thought.posteriorProbability);
+      if (thought.posterior?.probability !== undefined) {
+        const posterior = typeof thought.posterior.probability === 'number' ? thought.posterior.probability : Number(thought.posterior.probability);
         md += `- **Posterior Probability:** ${(posterior * 100).toFixed(1)}%\n`;
       }
       if (thought.evidence?.length) {
         md += `\n**Evidence:**\n`;
         for (const e of thought.evidence) {
-          md += `- ${e}\n`;
+          md += `- ${e.description}\n`;
         }
       }
-      if (thought.hypotheses?.length) {
-        md += `\n**Hypotheses:**\n`;
-        for (const h of thought.hypotheses) {
-          let prob = '';
-          if (h.probability !== undefined) {
-            const probVal = typeof h.probability === 'number' ? h.probability : Number(h.probability);
-            prob = ` (${(probVal * 100).toFixed(1)}%)`;
+      if (thought.hypothesis) {
+        md += `\n**Hypothesis:**\n`;
+        md += `- ${thought.hypothesis.statement}\n`;
+        if (thought.hypothesis.alternatives?.length) {
+          md += `\n**Alternatives:**\n`;
+          for (const alt of thought.hypothesis.alternatives) {
+            md += `- ${alt}\n`;
           }
-          md += `- ${h.description}${prob}\n`;
         }
       }
       md += `\n`;
@@ -1072,7 +1071,7 @@ export class ExportService {
       if (thought.components?.length) {
         md += `**Components:**\n`;
         for (const comp of thought.components) {
-          md += `- **${comp.name}** (${comp.role || comp.id})\n`;
+          md += `- **${comp.name}** (${comp.type})\n`;
         }
         md += `\n`;
       }
@@ -1148,19 +1147,19 @@ export class ExportService {
       if (thought.methodology) {
         md += `**Methodology:** ${thought.methodology}\n\n`;
       }
-      if (thought.codes?.length) {
+      if (thought.currentCodes?.length) {
         md += `**Codes:**\n`;
-        for (const code of thought.codes.slice(0, 10)) {
+        for (const code of thought.currentCodes.slice(0, 10)) {
           const freq = code.frequency ? ` (n=${code.frequency})` : '';
           md += `- **${code.label}**${freq}: ${code.definition || ''}\n`;
         }
-        if (thought.codes.length > 10) {
-          md += `- ... and ${thought.codes.length - 10} more codes\n`;
+        if (thought.currentCodes.length > 10) {
+          md += `- ... and ${thought.currentCodes.length - 10} more codes\n`;
         }
         md += `\n`;
       }
-      if (thought.categories?.length) {
-        md += `**Categories:** ${thought.categories.join(', ')}\n\n`;
+      if (thought.gtCategories?.length) {
+        md += `**Categories:** ${thought.gtCategories.map(c => c.name).join(', ')}\n\n`;
       }
       if (thought.keyInsight) {
         md += `**Key Insight:** ${thought.keyInsight}\n\n`;
@@ -1170,28 +1169,28 @@ export class ExportService {
     // Algorithmic - include complexity analysis
     if (isAlgorithmicThought(thought)) {
       md += `#### Algorithm Analysis\n\n`;
-      if (thought.algorithmName) {
-        md += `**Algorithm:** ${thought.algorithmName}\n`;
+      if (thought.algorithm?.name) {
+        md += `**Algorithm:** ${thought.algorithm.name}\n`;
       }
       if (thought.designPattern) {
         md += `**Design Pattern:** ${thought.designPattern}\n`;
       }
-      if (thought.complexityAnalysis) {
+      if (thought.timeComplexity || thought.spaceComplexity) {
         md += `\n**Complexity:**\n`;
-        if (thought.complexityAnalysis.timeComplexity) {
-          md += `- Time: ${thought.complexityAnalysis.timeComplexity}\n`;
+        if (thought.timeComplexity?.worstCase) {
+          md += `- Time: ${thought.timeComplexity.worstCase}\n`;
         }
-        if (thought.complexityAnalysis.spaceComplexity) {
-          md += `- Space: ${thought.complexityAnalysis.spaceComplexity}\n`;
+        if (thought.spaceComplexity?.auxiliary) {
+          md += `- Space: ${thought.spaceComplexity.auxiliary}\n`;
         }
       }
       if (thought.correctnessProof) {
         md += `\n**Correctness Proof:**\n`;
-        if (thought.correctnessProof.invariant) {
-          md += `- Invariant: ${thought.correctnessProof.invariant}\n`;
+        if (thought.correctnessProof.invariants?.length) {
+          md += `- Invariants: ${thought.correctnessProof.invariants.map(i => i.description).join('; ')}\n`;
         }
-        if (thought.correctnessProof.termination) {
-          md += `- Termination: ${thought.correctnessProof.termination}\n`;
+        if (thought.correctnessProof.terminationArgument) {
+          md += `- Termination: ${thought.correctnessProof.terminationArgument.proof}\n`;
         }
       }
       md += `\n`;
@@ -1200,21 +1199,22 @@ export class ExportService {
     // Scientific method - include hypothesis and experiments
     if (isScientificMethodThought(thought)) {
       md += `#### Scientific Method\n\n`;
-      if (thought.hypothesis) {
-        md += `**Hypothesis:** ${thought.hypothesis}\n\n`;
-      }
-      if (thought.predictions?.length) {
-        md += `**Predictions:**\n`;
-        for (const pred of thought.predictions) {
-          md += `- ${pred}\n`;
+      if (thought.scientificHypotheses?.length) {
+        md += `**Hypotheses:**\n`;
+        for (const h of thought.scientificHypotheses) {
+          md += `- ${h.statement}\n`;
+          if (h.prediction) {
+            md += `  - Prediction: ${h.prediction}\n`;
+          }
         }
         md += `\n`;
       }
-      if (thought.experiments?.length) {
-        md += `**Experiments:**\n`;
-        for (const exp of thought.experiments) {
-          const result = exp.result ? ` → ${exp.result}` : '';
-          md += `- ${exp.description}${result}\n`;
+      if (thought.experiment) {
+        md += `**Experiment:**\n`;
+        md += `- Type: ${thought.experiment.type}\n`;
+        md += `- Design: ${thought.experiment.design}\n`;
+        if (thought.experiment.procedure?.length) {
+          md += `- Procedure: ${thought.experiment.procedure.length} steps\n`;
         }
         md += `\n`;
       }
@@ -1223,17 +1223,17 @@ export class ExportService {
     // First principles - include fundamentals and insights
     if (isFirstPrinciplesThought(thought)) {
       md += `#### First Principles Analysis\n\n`;
-      if (thought.fundamentals?.length) {
-        md += `**Fundamental Truths:**\n`;
-        for (const f of thought.fundamentals) {
-          md += `- ${f}\n`;
+      if (thought.principles?.length) {
+        md += `**Fundamental Principles:**\n`;
+        for (const p of thought.principles) {
+          md += `- ${p.statement}\n`;
         }
         md += `\n`;
       }
-      if (thought.derivedInsights?.length) {
-        md += `**Derived Insights:**\n`;
-        for (const insight of thought.derivedInsights) {
-          md += `- ${insight}\n`;
+      if (thought.derivationSteps?.length) {
+        md += `**Derivation Steps:**\n`;
+        for (const step of thought.derivationSteps) {
+          md += `- Step ${step.stepNumber}: ${step.inference}\n`;
         }
         md += `\n`;
       }
@@ -1245,7 +1245,7 @@ export class ExportService {
   /**
    * Extract mode-specific structured data as LaTeX
    */
-  private extractModeSpecificLatex(thought: unknown): string {
+  private extractModeSpecificLatex(thought: Thought): string {
     let latex = '';
 
     if (isCausalThought(thought)) {
@@ -1272,16 +1272,16 @@ export class ExportService {
 
     if (isBayesianThought(thought)) {
       latex += `\\subsubsection{Bayesian Analysis}\n`;
-      if (thought.priorProbability !== undefined) {
-        const prior = typeof thought.priorProbability === 'number' ? thought.priorProbability : Number(thought.priorProbability);
+      if (thought.prior?.probability !== undefined) {
+        const prior = typeof thought.prior.probability === 'number' ? thought.prior.probability : Number(thought.prior.probability);
         latex += `Prior: $P(H) = ${prior.toFixed(3)}$\\\\\n`;
       }
-      if (thought.likelihood !== undefined) {
-        const likelihood = typeof thought.likelihood === 'number' ? thought.likelihood : Number(thought.likelihood);
+      if (thought.likelihood?.probability !== undefined) {
+        const likelihood = typeof thought.likelihood.probability === 'number' ? thought.likelihood.probability : Number(thought.likelihood.probability);
         latex += `Likelihood: $P(E|H) = ${likelihood.toFixed(3)}$\\\\\n`;
       }
-      if (thought.posteriorProbability !== undefined) {
-        const posterior = typeof thought.posteriorProbability === 'number' ? thought.posteriorProbability : Number(thought.posteriorProbability);
+      if (thought.posterior?.probability !== undefined) {
+        const posterior = typeof thought.posterior.probability === 'number' ? thought.posterior.probability : Number(thought.posterior.probability);
         latex += `Posterior: $P(H|E) = ${posterior.toFixed(3)}$\\\\\n`;
       }
       latex += `\n`;
@@ -1298,15 +1298,15 @@ export class ExportService {
 
     if (isAlgorithmicThought(thought)) {
       latex += `\\subsubsection{Algorithm Analysis}\n`;
-      if (thought.algorithmName) {
-        latex += `\\textbf{Algorithm:} ${escapeLatex(thought.algorithmName)}\\\\\n`;
+      if (thought.algorithm?.name) {
+        latex += `\\textbf{Algorithm:} ${escapeLatex(thought.algorithm.name)}\\\\\n`;
       }
-      if (thought.complexityAnalysis) {
-        if (thought.complexityAnalysis.timeComplexity) {
-          latex += `\\textbf{Time Complexity:} $${escapeLatex(thought.complexityAnalysis.timeComplexity)}$\\\\\n`;
+      if (thought.timeComplexity || thought.spaceComplexity) {
+        if (thought.timeComplexity?.worstCase) {
+          latex += `\\textbf{Time Complexity:} $${escapeLatex(thought.timeComplexity.worstCase)}$\\\\\n`;
         }
-        if (thought.complexityAnalysis.spaceComplexity) {
-          latex += `\\textbf{Space Complexity:} $${escapeLatex(thought.complexityAnalysis.spaceComplexity)}$\\\\\n`;
+        if (thought.spaceComplexity?.auxiliary) {
+          latex += `\\textbf{Space Complexity:} $${escapeLatex(thought.spaceComplexity.auxiliary)}$\\\\\n`;
         }
       }
       latex += `\n`;

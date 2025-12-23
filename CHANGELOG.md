@@ -175,6 +175,42 @@ Updated all template files in `templates/mode-scaffolding/` for v8+ architecture
 - Removed redundant "What's New" sections from `docs/architecture/OVERVIEW.md` (30 lines)
 - These sections duplicated information already in CHANGELOG.md
 
+### 🧪 Tests
+
+**Phase 12 Test Coverage**
+
+Added comprehensive test coverage for Phase 12 Sprint 2 and Sprint 3 features:
+
+- **Proof Module Tests** (`tests/unit/proof/`)
+  - `branch-analyzer.test.ts` - 68 tests covering dependency graph construction, branch partitioning, complexity estimation, metadata extraction, and edge cases
+  - `strategy-recommender.test.ts` - 45 tests for feature extraction, strategy scoring, template generation, and recommendation ranking
+  - `verifier.test.ts` - 52 tests for justification validation, inference rules, circular reference detection, and strict mode
+  - `hierarchical-proof.test.ts` - 42 tests for proof tree construction, lemma extraction, dependency tracking, and Mermaid export
+
+- **Mode Combinations Tests** (`tests/unit/modes/combinations/`)
+  - `presets.test.ts` - 57 tests for preset configuration, tag filtering, mode lookups, and preset combination
+  - `merger.test.ts` - 48 tests for all 5 merge strategies (union, intersection, weighted, hierarchical, dialectical), duplicate detection, and confidence aggregation
+  - `conflict-resolver.test.ts` - 34 tests for conflict detection, all resolution strategies, and audit trail generation
+
+- **Integration Tests** (`tests/integration/tools/`)
+  - `analyze.test.ts` - 45 tests for MultiModeAnalyzer orchestration, progress callbacks, preset execution, and parallel mode execution
+
+### 🐛 Bug Fixes
+
+**ExportService Type Alignment**
+
+Fixed 20+ type errors in `src/services/ExportService.ts` to align with actual type definitions:
+
+- **BayesianThought** - Fixed property paths: `priorProbability` → `prior.probability`, `posteriorProbability` → `posterior.probability`, `hypotheses` → `hypothesis`
+- **AlgorithmicThought** - Fixed property paths: `algorithmName` → `algorithm?.name`, `complexityAnalysis` → `timeComplexity/spaceComplexity`, `correctnessProof.invariant` → `correctnessProof.invariants`, `correctnessProof.termination` → `correctnessProof.terminationArgument`
+- **AnalysisThought** - Fixed property names: `codes` → `currentCodes`, `categories` → `gtCategories`
+- **ScientificMethodThought** - Fixed property names: `hypothesis` → `scientificHypotheses`, `experiments` → `experiment`
+- **FirstPrinciplesThought** - Fixed property names: `fundamentals` → `principles`, `derivedInsights` → `derivationSteps`
+- **CausalThought** - Fixed Intervention interface: `node/value/effect` → `nodeId/action/expectedEffects`
+- **SystemsThinkingThought** - Fixed SystemComponent: `comp.role` → `comp.type`
+- Removed 4 unused type imports (SynthesisThought, ArgumentationThought, AnalysisThought, AlgorithmicThought)
+- Changed method signatures from `unknown` to `Thought` for proper type checking
+
 ### 🧹 Maintenance
 
 **Root Directory Cleanup**
