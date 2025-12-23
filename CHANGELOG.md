@@ -41,6 +41,45 @@ Added foundational types for advanced reasoning features planned in Phase 12:
   - `CausalGraph`, `GraphNode`, `GraphEdge`, `Path` for graph structures
   - `CausalQuery` and `QueryVariables` for causal inference queries
 
+**Phase 12 Sprint 2: Advanced Proof Decomposition**
+
+Added advanced proof decomposition capabilities with branch analysis, strategy recommendations, verification, and hierarchical proof support:
+
+- **Branch Analyzer** (`src/proof/branch-analyzer.ts`)
+  - `BranchAnalyzer` class for detecting independent proof branches
+  - Connected component analysis for branch partitioning
+  - Dependency graph construction from proof steps
+  - Topological sorting for parallel execution ordering
+  - Complexity estimation for load balancing
+  - Branch metadata extraction (reasoning type, assumptions)
+
+- **Strategy Recommender** (`src/proof/strategy-recommender.ts`)
+  - `StrategyRecommender` class for proof strategy recommendations
+  - Feature extraction from theorem statements (quantifiers, domains, etc.)
+  - 12 proof strategies: direct, contradiction, induction, strong induction, structural induction, case analysis, contrapositive, construction, pigeonhole, diagonalization, well-ordering, infinite descent
+  - Strategy-feature weight matching with domain bonuses
+  - Proof template generation with structured sections
+  - Confidence scoring for recommendations
+
+- **Proof Verifier** (`src/proof/verifier.ts`)
+  - `ProofVerifier` class for validating proof step justifications
+  - 30+ recognized inference rules (modus ponens, universal/existential instantiation, etc.)
+  - Circular reference detection via DFS
+  - Undefined term checking
+  - Coverage statistics (verified steps percentage)
+  - Strict mode option (warnings as errors)
+  - Custom rule support
+
+- **Hierarchical Proof Manager** (`src/proof/hierarchical-proof.ts`)
+  - `HierarchicalProofManager` class for nested proof structures
+  - Support for theorems, lemmas, corollaries, claims, propositions
+  - Auto-extraction of lemmas from proof text
+  - Dependency tracking between proof elements
+  - Proof tree construction with statistics
+  - Topological ordering for proof element dependencies
+  - Completeness checking
+  - Mermaid diagram export for proof visualization
+
 **Chunker Utility Tool**
 
 Added a new standalone tool for splitting and merging large files for editing within context limits.
