@@ -1,0 +1,146 @@
+{
+  "phase": 12,
+  "title": "Client-Side Test Index",
+  "description": "Manual test execution tracking for Phase 12 features through MCP client",
+  "testPlanDocument": "PHASE_12_CLIENT_TEST_PLAN.md",
+  "totalTests": 89,
+  "estimatedTime": "4-6 hours",
+  "status": "pending",
+  "summary": {
+    "pending": 89,
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0
+  },
+  "categories": [
+    {
+      "id": "S1",
+      "name": "Sprint 1: Foundation & Infrastructure",
+      "tests": [
+        {"id": "T-S1-001", "name": "Proof Branch Types Available", "tool": "deepthinking_mathematics", "status": "pending"},
+        {"id": "T-S1-002", "name": "Multi-Mode Combination Types", "tool": "deepthinking_analyze", "status": "pending"},
+        {"id": "T-S1-003", "name": "Monte Carlo Types Integration", "tool": "deepthinking_probabilistic", "status": "pending"},
+        {"id": "T-S1-004", "name": "Enhanced Graph Types", "tool": "deepthinking_causal", "status": "pending"}
+      ]
+    },
+    {
+      "id": "S2",
+      "name": "Sprint 2: Advanced Proof Decomposition",
+      "tests": [
+        {"id": "T-S2-001", "name": "Branch Analysis Basic", "tool": "deepthinking_mathematics", "status": "pending"},
+        {"id": "T-S2-002", "name": "Strategy Recommendation - Induction", "tool": "deepthinking_mathematics", "status": "pending"},
+        {"id": "T-S2-003", "name": "Strategy Recommendation - Contradiction", "tool": "deepthinking_mathematics", "status": "pending"},
+        {"id": "T-S2-004", "name": "Hierarchical Proof Structure", "tool": "deepthinking_mathematics", "status": "pending"},
+        {"id": "T-S2-005", "name": "Proof Verification - Valid Proof", "tool": "deepthinking_mathematics", "status": "pending"},
+        {"id": "T-S2-006", "name": "Proof Verification - Invalid Step", "tool": "deepthinking_mathematics", "status": "pending"},
+        {"id": "T-S2-007", "name": "Circular Reference Detection", "tool": "deepthinking_mathematics", "status": "pending"}
+      ]
+    },
+    {
+      "id": "S3",
+      "name": "Sprint 3: Multi-Mode Analysis & Synthesis",
+      "tests": [
+        {"id": "T-S3-001", "name": "Preset - Comprehensive Analysis", "tool": "deepthinking_analyze", "status": "pending"},
+        {"id": "T-S3-002", "name": "Preset - Hypothesis Testing", "tool": "deepthinking_analyze", "status": "pending"},
+        {"id": "T-S3-003", "name": "Preset - Decision Making", "tool": "deepthinking_analyze", "status": "pending"},
+        {"id": "T-S3-004", "name": "Preset - Root Cause", "tool": "deepthinking_analyze", "status": "pending"},
+        {"id": "T-S3-005", "name": "Preset - Future Planning", "tool": "deepthinking_analyze", "status": "pending"},
+        {"id": "T-S3-006", "name": "Custom Mode Selection", "tool": "deepthinking_analyze", "status": "pending"},
+        {"id": "T-S3-007", "name": "Conflict Detection", "tool": "deepthinking_analyze", "status": "pending"},
+        {"id": "T-S3-008", "name": "Insight Merging - Union Strategy", "tool": "deepthinking_analyze", "status": "pending"},
+        {"id": "T-S3-009", "name": "Insight Merging - Intersection Strategy", "tool": "deepthinking_analyze", "status": "pending"},
+        {"id": "T-S3-010", "name": "Insight Merging - Dialectical Strategy", "tool": "deepthinking_analyze", "status": "pending"},
+        {"id": "T-S3-011", "name": "Progress Tracking", "tool": "deepthinking_analyze", "status": "pending"},
+        {"id": "T-S3-012", "name": "Empty/Minimal Problem", "tool": "deepthinking_analyze", "status": "pending"}
+      ]
+    },
+    {
+      "id": "S4",
+      "name": "Sprint 4: Comprehensive Export System",
+      "tests": [
+        {"id": "T-S4-001", "name": "Export All Formats", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-S4-002", "name": "Export with Academic Profile", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-S4-003", "name": "Export with Presentation Profile", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-S4-004", "name": "Export with Minimal Profile", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-S4-005", "name": "Export Individual Format - Markdown", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-S4-006", "name": "Export Individual Format - LaTeX", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-S4-007", "name": "Export Individual Format - Jupyter", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-S4-008", "name": "Export Individual Format - Mermaid", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-S4-009", "name": "Export Individual Format - DOT", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-S4-010", "name": "Export Individual Format - ASCII", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-S4-011", "name": "Export Empty Session", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-S4-012", "name": "Export Invalid Session ID", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-S4-013", "name": "Export Mode-Specific Content - Causal", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-S4-014", "name": "Export Mode-Specific Content - Bayesian", "tool": "deepthinking_session", "status": "pending"}
+      ]
+    },
+    {
+      "id": "S5",
+      "name": "Sprint 5: Monte Carlo & Stochastic Reasoning",
+      "tests": [
+        {"id": "T-S5-001", "name": "Bayesian Analysis Basic", "tool": "deepthinking_probabilistic", "status": "pending"},
+        {"id": "T-S5-002", "name": "Bayesian with Multiple Evidence", "tool": "deepthinking_probabilistic", "status": "pending"},
+        {"id": "T-S5-003", "name": "Bayesian Hypothesis Comparison", "tool": "deepthinking_probabilistic", "status": "pending"},
+        {"id": "T-S5-004", "name": "Evidential Reasoning Basic", "tool": "deepthinking_probabilistic", "status": "pending"},
+        {"id": "T-S5-005", "name": "Stochastic Model Definition", "tool": "deepthinking_probabilistic", "status": "pending"},
+        {"id": "T-S5-006", "name": "Convergence Indication", "tool": "deepthinking_probabilistic", "status": "pending"},
+        {"id": "T-S5-007", "name": "Edge Case - Zero Probability", "tool": "deepthinking_probabilistic", "status": "pending"},
+        {"id": "T-S5-008", "name": "Edge Case - Probability Near 1", "tool": "deepthinking_probabilistic", "status": "pending"}
+      ]
+    },
+    {
+      "id": "S6",
+      "name": "Sprint 6: Enhanced Graph Analysis",
+      "tests": [
+        {"id": "T-S6-001", "name": "Causal Graph with Centrality Analysis", "tool": "deepthinking_causal", "status": "pending"},
+        {"id": "T-S6-002", "name": "Star Graph Centrality", "tool": "deepthinking_causal", "status": "pending"},
+        {"id": "T-S6-003", "name": "Chain Graph Betweenness", "tool": "deepthinking_causal", "status": "pending"},
+        {"id": "T-S6-004", "name": "D-Separation Basic", "tool": "deepthinking_causal", "status": "pending"},
+        {"id": "T-S6-005", "name": "D-Separation Collider (V-Structure)", "tool": "deepthinking_causal", "status": "pending"},
+        {"id": "T-S6-006", "name": "Backdoor Criterion", "tool": "deepthinking_causal", "status": "pending"},
+        {"id": "T-S6-007", "name": "Intervention (Do-Calculus)", "tool": "deepthinking_causal", "status": "pending"},
+        {"id": "T-S6-008", "name": "Counterfactual Analysis", "tool": "deepthinking_causal", "status": "pending"},
+        {"id": "T-S6-009", "name": "Complex Graph - Multiple Paths", "tool": "deepthinking_causal", "status": "pending"},
+        {"id": "T-S6-010", "name": "Empty Graph Handling", "tool": "deepthinking_causal", "status": "pending"},
+        {"id": "T-S6-011", "name": "Cycle Detection", "tool": "deepthinking_causal", "status": "pending"}
+      ]
+    },
+    {
+      "id": "INT",
+      "name": "Integration Tests",
+      "tests": [
+        {"id": "T-INT-001", "name": "Full Session Workflow", "tool": "multiple", "status": "pending"},
+        {"id": "T-INT-002", "name": "Multi-Mode Then Export", "tool": "multiple", "status": "pending"},
+        {"id": "T-INT-003", "name": "Mode Switching Mid-Session", "tool": "multiple", "status": "pending"},
+        {"id": "T-INT-004", "name": "Session Summarize After Complex Analysis", "tool": "multiple", "status": "pending"},
+        {"id": "T-INT-005", "name": "Proof Analysis Then Export", "tool": "multiple", "status": "pending"}
+      ]
+    },
+    {
+      "id": "ERR",
+      "name": "Edge Cases & Error Handling",
+      "tests": [
+        {"id": "T-ERR-001", "name": "Invalid Mode Name", "tool": "deepthinking_standard", "status": "pending"},
+        {"id": "T-ERR-002", "name": "Missing Required Field", "tool": "deepthinking_core", "status": "pending"},
+        {"id": "T-ERR-003", "name": "Invalid Session ID Format", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-ERR-004", "name": "Negative Thought Number", "tool": "deepthinking_standard", "status": "pending"},
+        {"id": "T-ERR-005", "name": "Probability Out of Range", "tool": "deepthinking_probabilistic", "status": "pending"},
+        {"id": "T-ERR-006", "name": "Empty Preset Name", "tool": "deepthinking_analyze", "status": "pending"},
+        {"id": "T-ERR-007", "name": "Invalid Export Format", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-ERR-008", "name": "Circular Edge Reference", "tool": "deepthinking_causal", "status": "pending"}
+      ]
+    },
+    {
+      "id": "PERF",
+      "name": "Performance Tests",
+      "tests": [
+        {"id": "T-PERF-001", "name": "Large Thought Content", "tool": "deepthinking_standard", "status": "pending"},
+        {"id": "T-PERF-002", "name": "Large Graph (50+ Nodes)", "tool": "deepthinking_causal", "status": "pending"},
+        {"id": "T-PERF-003", "name": "Multi-Mode Analysis Timeout", "tool": "deepthinking_analyze", "status": "pending"},
+        {"id": "T-PERF-004", "name": "Export Large Session", "tool": "deepthinking_session", "status": "pending"}
+      ]
+    }
+  ],
+  "lastUpdated": "2025-12-24T03:30:00.000Z",
+  "notes": "Update status to 'passed', 'failed', or 'skipped' as tests are executed. See PHASE_12_CLIENT_TEST_PLAN.md for detailed test instructions."
+}
