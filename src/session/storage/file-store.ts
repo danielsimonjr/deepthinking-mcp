@@ -136,7 +136,9 @@ export class FileSessionStore implements SessionStorage {
       try {
         await fs.access(sessionPath);
       } catch {
-        return null; // File doesn't exist
+        // File access failed - session doesn't exist or was deleted
+        // This is an expected condition for non-existent sessions
+        return null;
       }
 
       // Use shared lock for reading (allows concurrent reads)
@@ -170,7 +172,9 @@ export class FileSessionStore implements SessionStorage {
       try {
         await fs.access(sessionPath);
       } catch {
-        return false; // File doesn't exist
+        // File access failed - session doesn't exist or was already deleted
+        // Return false to indicate nothing was deleted
+        return false;
       }
 
       // Use exclusive lock for deleting
@@ -359,7 +363,8 @@ export class FileSessionStore implements SessionStorage {
         sessionCount: metadata.length,
       });
     } catch {
-      // File doesn't exist yet - start with empty cache
+      // Metadata file doesn't exist yet (first run) or is temporarily unavailable
+      // Start with empty cache - it will be populated as sessions are created
       this.metadataCache.clear();
     }
   }
@@ -386,12 +391,14 @@ export class FileSessionStore implements SessionStorage {
             await fs.access(sessionPath);
             this.metadataCache.set(meta.id, meta);
           } catch {
-            // Session file was deleted, don't include in cache
+            // Session file no longer exists (deleted by another instance or cleanup)
+            // Skip adding to cache to prevent stale references
           }
         }
       }
     } catch {
-      // File doesn't exist yet, continue with current cache
+      // Metadata file doesn't exist yet (first run) - proceed with current cache
+      // The file will be created when we write the metadata below
     }
 
     // Now save with exclusive lock

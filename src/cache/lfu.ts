@@ -192,10 +192,12 @@ export class LFUCache<T> implements Cache<T> {
   }
 
   private estimateSize(value: T): number {
+    const DEFAULT_SIZE = 100; // Fallback for non-serializable values
     try {
       return JSON.stringify(value).length * 2;
     } catch {
-      return 0;
+      // Non-serializable value (circular refs, BigInt, etc.) - use default size
+      return DEFAULT_SIZE;
     }
   }
 

@@ -530,7 +530,9 @@ export class CustomHandler implements ModeHandler {
       // Default to true for unknown rules
       return true;
     } catch {
-      return true; // Don't fail on rule evaluation errors
+      // Validation rule evaluation failed - allow value to prevent blocking valid input
+      // Common causes: type coercion errors, missing properties on value
+      return true;
     }
   }
 }

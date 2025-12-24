@@ -46,11 +46,25 @@ export interface MultiModeAnalyzerConfig {
 /**
  * Default configuration values
  */
+/**
+ * Constants for multi-mode analysis
+ */
+const ANALYZER_CONSTANTS = {
+  /** Default timeout per mode in milliseconds */
+  DEFAULT_TIMEOUT_MS: 30000,
+  /** Maximum parallel mode execution */
+  MAX_PARALLEL_MODES: 5,
+  /** Minimum confidence threshold for insights */
+  MIN_CONFIDENCE_THRESHOLD: 0.3,
+  /** Base confidence for placeholder insights (pending ThoughtFactory integration) */
+  BASE_INSIGHT_CONFIDENCE: 0.8,
+} as const;
+
 const DEFAULT_CONFIG: Required<MultiModeAnalyzerConfig> = {
-  defaultTimeoutPerMode: 30000,
+  defaultTimeoutPerMode: ANALYZER_CONSTANTS.DEFAULT_TIMEOUT_MS,
   continueOnError: true,
-  maxParallelModes: 5,
-  minConfidenceThreshold: 0.3,
+  maxParallelModes: ANALYZER_CONSTANTS.MAX_PARALLEL_MODES,
+  minConfidenceThreshold: ANALYZER_CONSTANTS.MIN_CONFIDENCE_THRESHOLD,
   verbose: false,
 };
 
@@ -422,7 +436,9 @@ export class MultiModeAnalyzer {
    * This is a placeholder - in production, this would integrate with ThoughtFactory
    */
   private generateModeInsights(mode: ThinkingMode, thought: string, context?: string): Insight[] {
-    const baseConfidence = 0.7 + Math.random() * 0.2;
+    // Use deterministic confidence based on mode characteristics
+    // TODO: Replace with actual ThoughtFactory integration for real confidence scoring
+    const baseConfidence = ANALYZER_CONSTANTS.BASE_INSIGHT_CONFIDENCE;
     const timestamp = new Date();
 
     // Generate mode-appropriate insights

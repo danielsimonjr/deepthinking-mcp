@@ -8,6 +8,13 @@
 import type { RNGState, SeededRNGInterface } from '../types.js';
 
 // ============================================================================
+// CONSTANTS
+// ============================================================================
+
+/** Maximum 32-bit signed integer (2^31 - 1), used for seed generation */
+const MAX_INT32 = 2147483647;
+
+// ============================================================================
 // XORSHIFT128+ IMPLEMENTATION
 // ============================================================================
 
@@ -304,8 +311,10 @@ export function createParallelRNGs(count: number, baseSeed: number = Date.now())
 }
 
 /**
- * Generate a random seed
+ * Generate a random seed using system entropy
+ * Note: Uses Math.random() intentionally for initial seed generation
+ * when no seed is provided - subsequent values use deterministic PRNG
  */
 export function generateSeed(): number {
-  return Math.floor(Math.random() * 2147483647);
+  return Math.floor(Math.random() * MAX_INT32);
 }

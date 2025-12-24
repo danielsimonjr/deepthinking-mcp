@@ -329,7 +329,8 @@ export class CausalHandler implements ModeHandler {
         };
       }
     } catch {
-      // Silently handle errors in centrality computation
+      // Centrality computation is optional enrichment - proceed without it
+      // Common causes: malformed graph, empty node set, numerical issues
     }
 
     // Find v-structures (colliders)
@@ -337,7 +338,7 @@ export class CausalHandler implements ModeHandler {
     try {
       vStructures = findVStructures(graphForAnalysis);
     } catch {
-      // Silently handle errors
+      // V-structure detection is optional - graph may not have proper structure
     }
 
     // Check identifiability if we have clear treatment and outcome
@@ -356,7 +357,7 @@ export class CausalHandler implements ModeHandler {
           identifiability = isIdentifiable(graphForAnalysis, treatment, outcome);
           backdoorSets = findAllBackdoorSets(graphForAnalysis, treatment, outcome, 3);
         } catch {
-          // Silently handle errors
+          // Identifiability analysis is optional - may fail for complex/cyclic graphs
         }
       }
     }

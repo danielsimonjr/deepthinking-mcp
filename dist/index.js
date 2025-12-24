@@ -723,7 +723,7 @@ var init_thinking = __esm({
         complexity: z.string().optional(),
         explanation: z.string()
       }).optional(),
-      action: z.enum(["add_thought", "summarize", "export", "switch_mode", "get_session", "recommend_mode", "delete_session"]).default("add_thought"),
+      action: z.enum(["add_thought", "summarize", "export", "export_all", "switch_mode", "get_session", "recommend_mode", "delete_session"]).default("add_thought"),
       exportFormat: z.enum(["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"]).optional(),
       newMode: z.enum(["sequential", "shannon", "mathematics", "physics", "hybrid", "inductive", "deductive", "abductive", "causal", "bayesian", "counterfactual", "analogical", "temporal", "gametheory", "evidential", "firstprinciples", "systemsthinking", "scientificmethod", "optimization", "formallogic"]).optional(),
       // Mode recommendation parameters (v2.4)
@@ -5122,12 +5122,779 @@ var init_AbductiveHandler = __esm({
     };
   }
 });
+
+// src/modes/causal/graph/algorithms/centrality.ts
+function buildAdjacencyList(graph, directed = true) {
+  const outgoing = /* @__PURE__ */ new Map();
+  const incoming = /* @__PURE__ */ new Map();
+  for (const node of graph.nodes) {
+    outgoing.set(node.id, []);
+    incoming.set(node.id, []);
+  }
+  for (const edge of graph.edges) {
+    outgoing.get(edge.from)?.push(edge.to);
+    incoming.get(edge.to)?.push(edge.from);
+    if (!directed || edge.type === "undirected" || edge.type === "bidirected") {
+      outgoing.get(edge.to)?.push(edge.from);
+      incoming.get(edge.from)?.push(edge.to);
+    }
+  }
+  return { outgoing, incoming };
+}
+function computeDegreeCentrality(graph, normalize = true) {
+  const { outgoing, incoming } = buildAdjacencyList(graph);
+  const n = graph.nodes.length;
+  const normFactor = normalize && n > 1 ? n - 1 : 1;
+  const degree = /* @__PURE__ */ new Map();
+  const inDegree = /* @__PURE__ */ new Map();
+  const outDegree = /* @__PURE__ */ new Map();
+  for (const node of graph.nodes) {
+    const outDeg = (outgoing.get(node.id) || []).length;
+    const inDeg = (incoming.get(node.id) || []).length;
+    outDegree.set(node.id, outDeg / normFactor);
+    inDegree.set(node.id, inDeg / normFactor);
+    degree.set(node.id, (outDeg + inDeg) / normFactor);
+  }
+  return { degree, inDegree, outDegree };
+}
+function computeBetweennessCentrality(graph, normalize = true) {
+  const { outgoing } = buildAdjacencyList(graph, false);
+  const n = graph.nodes.length;
+  const betweenness = /* @__PURE__ */ new Map();
+  for (const node of graph.nodes) {
+    betweenness.set(node.id, 0);
+  }
+  for (const s of graph.nodes) {
+    const stack = [];
+    const pred = /* @__PURE__ */ new Map();
+    const sigma = /* @__PURE__ */ new Map();
+    const dist = /* @__PURE__ */ new Map();
+    const delta = /* @__PURE__ */ new Map();
+    for (const v of graph.nodes) {
+      pred.set(v.id, []);
+      sigma.set(v.id, 0);
+      dist.set(v.id, -1);
+      delta.set(v.id, 0);
+    }
+    sigma.set(s.id, 1);
+    dist.set(s.id, 0);
+    const queue = [s.id];
+    while (queue.length > 0) {
+      const v = queue.shift();
+      stack.push(v);
+      for (const w of outgoing.get(v) || []) {
+        if (dist.get(w) < 0) {
+          dist.set(w, dist.get(v) + 1);
+          queue.push(w);
+        }
+        if (dist.get(w) === dist.get(v) + 1) {
+          sigma.set(w, sigma.get(w) + sigma.get(v));
+          pred.get(w).push(v);
+        }
+      }
+    }
+    while (stack.length > 0) {
+      const w = stack.pop();
+      for (const v of pred.get(w)) {
+        const contribution = sigma.get(v) / sigma.get(w) * (1 + delta.get(w));
+        delta.set(v, delta.get(v) + contribution);
+      }
+      if (w !== s.id) {
+        betweenness.set(w, betweenness.get(w) + delta.get(w));
+      }
+    }
+  }
+  if (normalize && n > 2) {
+    const normFactor = (n - 1) * (n - 2);
+    for (const [node, value] of betweenness) {
+      betweenness.set(node, value * 2 / normFactor);
+    }
+  }
+  return betweenness;
+}
+function computeClosenessCentrality(graph, normalize = true) {
+  const { outgoing } = buildAdjacencyList(graph, false);
+  const n = graph.nodes.length;
+  const closeness = /* @__PURE__ */ new Map();
+  for (const source of graph.nodes) {
+    const dist = /* @__PURE__ */ new Map();
+    for (const node of graph.nodes) {
+      dist.set(node.id, Infinity);
+    }
+    dist.set(source.id, 0);
+    const queue = [source.id];
+    while (queue.length > 0) {
+      const current = queue.shift();
+      for (const neighbor of outgoing.get(current) || []) {
+        if (dist.get(neighbor) === Infinity) {
+          dist.set(neighbor, dist.get(current) + 1);
+          queue.push(neighbor);
+        }
+      }
+    }
+    let totalDist = 0;
+    let reachable = 0;
+    for (const [_, d] of dist) {
+      if (d !== Infinity && d > 0) {
+        totalDist += d;
+        reachable++;
+      }
+    }
+    if (reachable > 0 && totalDist > 0) {
+      const cc = reachable / totalDist;
+      closeness.set(source.id, normalize && n > 1 ? cc * (n - 1) / n : cc);
+    } else {
+      closeness.set(source.id, 0);
+    }
+  }
+  return closeness;
+}
+function computePageRank(graph, dampingFactor = 0.85, maxIterations = 100, tolerance = 1e-6) {
+  const { outgoing } = buildAdjacencyList(graph);
+  const n = graph.nodes.length;
+  if (n === 0) return /* @__PURE__ */ new Map();
+  let pageRank = /* @__PURE__ */ new Map();
+  for (const node of graph.nodes) {
+    pageRank.set(node.id, 1 / n);
+  }
+  for (let iter = 0; iter < maxIterations; iter++) {
+    const newPageRank = /* @__PURE__ */ new Map();
+    for (const node of graph.nodes) {
+      newPageRank.set(node.id, (1 - dampingFactor) / n);
+    }
+    for (const node of graph.nodes) {
+      const neighbors = outgoing.get(node.id) || [];
+      const outDegree = neighbors.length;
+      if (outDegree > 0) {
+        const contribution = dampingFactor * pageRank.get(node.id) / outDegree;
+        for (const neighbor of neighbors) {
+          newPageRank.set(neighbor, newPageRank.get(neighbor) + contribution);
+        }
+      } else {
+        const contribution = dampingFactor * pageRank.get(node.id) / n;
+        for (const other of graph.nodes) {
+          newPageRank.set(other.id, newPageRank.get(other.id) + contribution);
+        }
+      }
+    }
+    let maxDiff = 0;
+    for (const node of graph.nodes) {
+      maxDiff = Math.max(
+        maxDiff,
+        Math.abs(newPageRank.get(node.id) - pageRank.get(node.id))
+      );
+    }
+    pageRank = newPageRank;
+    if (maxDiff < tolerance) {
+      break;
+    }
+  }
+  return pageRank;
+}
+function computeEigenvectorCentrality(graph, maxIterations = 100, tolerance = 1e-6) {
+  const { incoming } = buildAdjacencyList(graph, false);
+  const n = graph.nodes.length;
+  if (n === 0) return /* @__PURE__ */ new Map();
+  let centrality = /* @__PURE__ */ new Map();
+  for (const node of graph.nodes) {
+    centrality.set(node.id, 1 / Math.sqrt(n));
+  }
+  for (let iter = 0; iter < maxIterations; iter++) {
+    const newCentrality = /* @__PURE__ */ new Map();
+    for (const node of graph.nodes) {
+      let sum = 0;
+      for (const neighbor of incoming.get(node.id) || []) {
+        sum += centrality.get(neighbor);
+      }
+      newCentrality.set(node.id, sum);
+    }
+    let norm = 0;
+    for (const value of newCentrality.values()) {
+      norm += value * value;
+    }
+    norm = Math.sqrt(norm);
+    if (norm > 0) {
+      for (const [node, value] of newCentrality) {
+        newCentrality.set(node, value / norm);
+      }
+    }
+    let maxDiff = 0;
+    for (const node of graph.nodes) {
+      maxDiff = Math.max(
+        maxDiff,
+        Math.abs(newCentrality.get(node.id) - centrality.get(node.id))
+      );
+    }
+    centrality = newCentrality;
+    if (maxDiff < tolerance) {
+      break;
+    }
+  }
+  return centrality;
+}
+function computeKatzCentrality(graph, alpha = 0.1, beta = 1, maxIterations = 100, tolerance = 1e-6) {
+  const { incoming } = buildAdjacencyList(graph);
+  const n = graph.nodes.length;
+  if (n === 0) return /* @__PURE__ */ new Map();
+  let centrality = /* @__PURE__ */ new Map();
+  for (const node of graph.nodes) {
+    centrality.set(node.id, 0);
+  }
+  for (let iter = 0; iter < maxIterations; iter++) {
+    const newCentrality = /* @__PURE__ */ new Map();
+    for (const node of graph.nodes) {
+      let sum = beta;
+      for (const neighbor of incoming.get(node.id) || []) {
+        sum += alpha * centrality.get(neighbor);
+      }
+      newCentrality.set(node.id, sum);
+    }
+    let maxDiff = 0;
+    for (const node of graph.nodes) {
+      maxDiff = Math.max(
+        maxDiff,
+        Math.abs(newCentrality.get(node.id) - centrality.get(node.id))
+      );
+    }
+    centrality = newCentrality;
+    if (maxDiff < tolerance) {
+      break;
+    }
+  }
+  let maxVal = 0;
+  for (const value of centrality.values()) {
+    maxVal = Math.max(maxVal, value);
+  }
+  if (maxVal > 0) {
+    for (const [node, value] of centrality) {
+      centrality.set(node, value / maxVal);
+    }
+  }
+  return centrality;
+}
+function getMostCentralNode(graph, measure = "pagerank") {
+  let centralityMap;
+  switch (measure) {
+    case "degree":
+    case "in_degree":
+    case "out_degree":
+      const { degree, inDegree, outDegree } = computeDegreeCentrality(graph);
+      centralityMap = measure === "in_degree" ? inDegree : measure === "out_degree" ? outDegree : degree;
+      break;
+    case "betweenness":
+      centralityMap = computeBetweennessCentrality(graph);
+      break;
+    case "closeness":
+      centralityMap = computeClosenessCentrality(graph);
+      break;
+    case "pagerank":
+      centralityMap = computePageRank(graph);
+      break;
+    case "eigenvector":
+      centralityMap = computeEigenvectorCentrality(graph);
+      break;
+    case "katz":
+      centralityMap = computeKatzCentrality(graph);
+      break;
+    default:
+      return null;
+  }
+  if (centralityMap.size === 0) return null;
+  let maxNode = null;
+  let maxScore = -Infinity;
+  for (const [nodeId, score] of centralityMap) {
+    if (score > maxScore) {
+      maxScore = score;
+      maxNode = nodeId;
+    }
+  }
+  return maxNode ? { nodeId: maxNode, score: maxScore } : null;
+}
+var init_centrality = __esm({
+  "src/modes/causal/graph/algorithms/centrality.ts"() {
+    init_esm_shims();
+  }
+});
+
+// src/modes/causal/graph/algorithms/d-separation.ts
+function buildBidirectionalAdjacency(graph) {
+  const adj = /* @__PURE__ */ new Map();
+  for (const node of graph.nodes) {
+    adj.set(node.id, []);
+  }
+  for (const edge of graph.edges) {
+    adj.get(edge.from)?.push({ neighbor: edge.to, edge, direction: "forward" });
+    adj.get(edge.to)?.push({ neighbor: edge.from, edge, direction: "backward" });
+  }
+  return adj;
+}
+function getParents(graph, nodeId) {
+  return graph.edges.filter((e) => e.to === nodeId && e.type !== "bidirected").map((e) => e.from);
+}
+function getDescendants(graph, nodeId) {
+  const descendants = /* @__PURE__ */ new Set();
+  const stack = [nodeId];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    for (const edge of graph.edges) {
+      if (edge.from === current && !descendants.has(edge.to)) {
+        descendants.add(edge.to);
+        stack.push(edge.to);
+      }
+    }
+  }
+  return descendants;
+}
+function findVStructures(graph) {
+  const vStructures = [];
+  for (const node of graph.nodes) {
+    const parents = getParents(graph, node.id);
+    if (parents.length >= 2) {
+      for (let i = 0; i < parents.length; i++) {
+        for (let j = i + 1; j < parents.length; j++) {
+          const connected = graph.edges.some(
+            (e) => e.from === parents[i] && e.to === parents[j] || e.from === parents[j] && e.to === parents[i]
+          );
+          if (!connected) {
+            vStructures.push({
+              parent1: parents[i],
+              collider: node.id,
+              parent2: parents[j],
+              activatedWhenConditioned: true
+            });
+          }
+        }
+      }
+    }
+  }
+  return vStructures;
+}
+function isColliderOnPath(pathEdges, nodeIndex) {
+  if (nodeIndex <= 0 || nodeIndex >= pathEdges.length) {
+    return false;
+  }
+  const incomingEdge = pathEdges[nodeIndex - 1];
+  const outgoingEdge = pathEdges[nodeIndex];
+  return incomingEdge.direction === "forward" && outgoingEdge.direction === "backward";
+}
+function findAllPaths(graph, sourceNodes, targetNodes, maxLength = 10) {
+  const adj = buildBidirectionalAdjacency(graph);
+  const targetSet = new Set(targetNodes);
+  const allPaths = [];
+  function dfs(current, visited, pathNodes, pathEdges) {
+    if (pathNodes.length > maxLength) return;
+    if (targetSet.has(current) && pathNodes.length > 1) {
+      allPaths.push({
+        nodes: [...pathNodes],
+        edges: [...pathEdges],
+        length: pathNodes.length - 1
+      });
+      return;
+    }
+    for (const { neighbor, edge, direction } of adj.get(current) || []) {
+      if (!visited.has(neighbor)) {
+        visited.add(neighbor);
+        pathNodes.push(neighbor);
+        pathEdges.push({
+          from: direction === "forward" ? edge.from : edge.to,
+          to: direction === "forward" ? edge.to : edge.from,
+          direction,
+          edgeType: edge.type || "directed"
+        });
+        dfs(neighbor, visited, pathNodes, pathEdges);
+        pathNodes.pop();
+        pathEdges.pop();
+        visited.delete(neighbor);
+      }
+    }
+  }
+  for (const source of sourceNodes) {
+    const visited = /* @__PURE__ */ new Set([source]);
+    dfs(source, visited, [source], []);
+  }
+  return allPaths;
+}
+function isPathBlocked(graph, path4, conditioningSet) {
+  const nodes = path4.nodes;
+  const edges = path4.edges;
+  if (nodes.length < 3) {
+    if (conditioningSet.has(nodes[0]) || conditioningSet.has(nodes[nodes.length - 1])) {
+      return { blocked: true, reason: "Source or target is conditioned" };
+    }
+    return { blocked: false, reason: "" };
+  }
+  for (let i = 1; i < nodes.length - 1; i++) {
+    const node = nodes[i];
+    const isCollider = isColliderOnPath(edges, i);
+    if (isCollider) {
+      const descendants = getDescendants(graph, node);
+      const colliderOrDescendantConditioned = conditioningSet.has(node) || Array.from(descendants).some((d) => conditioningSet.has(d));
+      if (!colliderOrDescendantConditioned) {
+        return { blocked: true, reason: `Collider ${node} not conditioned` };
+      }
+    } else {
+      if (conditioningSet.has(node)) {
+        return { blocked: true, reason: `Non-collider ${node} is conditioned` };
+      }
+    }
+  }
+  return { blocked: false, reason: "" };
+}
+function checkDSeparation(graph, request, config = {}) {
+  const maxPathLength = config.maxPathLength ?? 10;
+  const conditioningSet = new Set(request.z);
+  const allPaths = findAllPaths(graph, request.x, request.y, maxPathLength);
+  const blockingPaths = [];
+  const openPaths = [];
+  for (const path4 of allPaths) {
+    const { blocked, reason } = isPathBlocked(graph, path4, conditioningSet);
+    if (blocked) {
+      path4.isBlocked = true;
+      path4.blockingReason = reason;
+      blockingPaths.push(path4);
+    } else {
+      path4.isBlocked = false;
+      openPaths.push(path4);
+    }
+  }
+  const separated = openPaths.length === 0;
+  let explanation;
+  if (separated) {
+    if (allPaths.length === 0) {
+      explanation = `No paths exist between {${request.x.join(", ")}} and {${request.y.join(", ")}}`;
+    } else {
+      explanation = `All ${allPaths.length} path(s) are blocked by conditioning on {${request.z.join(", ")}}`;
+    }
+  } else {
+    explanation = `${openPaths.length} of ${allPaths.length} path(s) remain open after conditioning on {${request.z.join(", ")}}`;
+  }
+  return {
+    separated,
+    blockingPaths: config.includePathDetails ? blockingPaths : [],
+    openPaths: config.includePathDetails ? openPaths : [],
+    conditioningSet: request.z,
+    explanation
+  };
+}
+function isValidBackdoorAdjustment(graph, treatment, outcome, adjustmentSet) {
+  const treatmentDescendants = getDescendants(graph, treatment);
+  for (const z15 of adjustmentSet) {
+    if (treatmentDescendants.has(z15)) {
+      return false;
+    }
+  }
+  const backdoorPaths = findBackdoorPaths(graph, treatment, outcome);
+  const conditioningSet = new Set(adjustmentSet);
+  for (const path4 of backdoorPaths) {
+    const { blocked } = isPathBlocked(graph, path4, conditioningSet);
+    if (!blocked) {
+      return false;
+    }
+  }
+  return true;
+}
+function findBackdoorPaths(graph, treatment, outcome, maxLength = 10) {
+  const adj = buildBidirectionalAdjacency(graph);
+  const paths = [];
+  function dfs(current, visited2, pathNodes, pathEdges, _startedBackward) {
+    if (pathNodes.length > maxLength) return;
+    if (current === outcome && pathNodes.length > 1) {
+      paths.push({
+        nodes: [...pathNodes],
+        edges: [...pathEdges],
+        length: pathNodes.length - 1
+      });
+      return;
+    }
+    for (const { neighbor, edge, direction } of adj.get(current) || []) {
+      if (!visited2.has(neighbor)) {
+        if (pathNodes.length === 1 && direction !== "backward") {
+          continue;
+        }
+        visited2.add(neighbor);
+        pathNodes.push(neighbor);
+        pathEdges.push({
+          from: direction === "forward" ? edge.from : edge.to,
+          to: direction === "forward" ? edge.to : edge.from,
+          direction,
+          edgeType: edge.type || "directed"
+        });
+        dfs(neighbor, visited2, pathNodes, pathEdges);
+        pathNodes.pop();
+        pathEdges.pop();
+        visited2.delete(neighbor);
+      }
+    }
+  }
+  const visited = /* @__PURE__ */ new Set([treatment]);
+  dfs(treatment, visited, [treatment], []);
+  return paths;
+}
+function findBackdoorAdjustmentSet(graph, treatment, outcome) {
+  const treatmentDescendants = getDescendants(graph, treatment);
+  const candidates = graph.nodes.map((n) => n.id).filter((id) => id !== treatment && id !== outcome && !treatmentDescendants.has(id));
+  for (let size = 0; size <= candidates.length; size++) {
+    const result = findBackdoorSetOfSize(graph, treatment, outcome, candidates, size);
+    if (result !== null) {
+      return result;
+    }
+  }
+  return null;
+}
+function findBackdoorSetOfSize(graph, treatment, outcome, candidates, size) {
+  function* combinations(arr, k) {
+    if (k === 0) {
+      yield [];
+      return;
+    }
+    for (let i = 0; i <= arr.length - k; i++) {
+      for (const rest of combinations(arr.slice(i + 1), k - 1)) {
+        yield [arr[i], ...rest];
+      }
+    }
+  }
+  for (const subset of combinations(candidates, size)) {
+    if (isValidBackdoorAdjustment(graph, treatment, outcome, subset)) {
+      return subset;
+    }
+  }
+  return null;
+}
+var init_d_separation = __esm({
+  "src/modes/causal/graph/algorithms/d-separation.ts"() {
+    init_esm_shims();
+  }
+});
+
+// src/modes/causal/graph/algorithms/intervention.ts
+function createMutilatedGraph(graph, interventions) {
+  const intervenedVars = new Set(interventions.map((i) => i.variable));
+  const newEdges = graph.edges.filter((edge) => !intervenedVars.has(edge.to));
+  return {
+    ...graph,
+    id: `${graph.id}_mutilated`,
+    edges: newEdges,
+    metadata: {
+      ...graph.metadata,
+      description: `Mutilated graph with interventions on: ${Array.from(intervenedVars).join(", ")}`
+    }
+  };
+}
+function isIdentifiable(graph, treatment, outcome) {
+  const backdoorSet = findBackdoorAdjustmentSet(graph, treatment, outcome);
+  if (backdoorSet !== null) {
+    return {
+      identifiable: true,
+      reason: "Backdoor criterion satisfied",
+      method: "backdoor"
+    };
+  }
+  const frontdoorResult = checkFrontdoorCriterion(graph, treatment, outcome);
+  if (frontdoorResult.satisfied) {
+    return {
+      identifiable: true,
+      reason: "Frontdoor criterion satisfied",
+      method: "frontdoor"
+    };
+  }
+  const instrumentalResult = findInstrumentalVariable(graph, treatment, outcome);
+  if (instrumentalResult !== null) {
+    return {
+      identifiable: true,
+      reason: "Instrumental variable available",
+      method: "instrumental"
+    };
+  }
+  const generalResult = checkGeneralIdentifiability(graph, treatment, outcome);
+  if (generalResult.identifiable) {
+    return {
+      identifiable: true,
+      reason: "Identifiable via do-calculus",
+      method: "general"
+    };
+  }
+  return {
+    identifiable: false,
+    reason: "No valid adjustment set found and frontdoor criterion not satisfied"
+  };
+}
+function findAllBackdoorSets(graph, treatment, outcome, maxSize = 5) {
+  const treatmentDescendants = getDescendants2(graph, treatment);
+  const candidates = graph.nodes.map((n) => n.id).filter((id) => id !== treatment && id !== outcome && !treatmentDescendants.has(id));
+  const validSets = [];
+  for (let size = 0; size <= Math.min(maxSize, candidates.length); size++) {
+    for (const subset of getCombinations(candidates, size)) {
+      if (isValidBackdoorAdjustment(graph, treatment, outcome, subset)) {
+        validSets.push(subset);
+      }
+    }
+  }
+  return validSets;
+}
+function checkFrontdoorCriterion(graph, treatment, outcome) {
+  const mediators = findMediators(graph, treatment, outcome);
+  if (mediators.length === 0) {
+    return { satisfied: false, mediators: [] };
+  }
+  for (const m of mediators) {
+    if (!interceptsAllDirectedPaths(graph, treatment, outcome, [m])) {
+      continue;
+    }
+    const mutilatedForXM = createMutilatedGraph(graph, [{ variable: treatment, value: 0, type: "atomic" }]);
+    checkDSeparation(graph, { x: [treatment], y: [m], z: [] });
+    checkDSeparation(mutilatedForXM, { x: [treatment], y: [m], z: [] });
+    const backdoorMY = checkDSeparation(graph, { x: [m], y: [outcome], z: [treatment] });
+    if (backdoorMY.separated) {
+      return { satisfied: true, mediators: [m] };
+    }
+  }
+  return { satisfied: false, mediators: [] };
+}
+function findMediators(graph, treatment, outcome) {
+  const mediators = [];
+  const descendants = getDescendants2(graph, treatment);
+  const ancestors = getAncestors(graph, outcome);
+  for (const nodeId of descendants) {
+    if (nodeId !== outcome && ancestors.has(nodeId)) {
+      mediators.push(nodeId);
+    }
+  }
+  return mediators;
+}
+function interceptsAllDirectedPaths(graph, treatment, outcome, mediators) {
+  const mediatorSet = new Set(mediators);
+  function dfs(current, visited) {
+    if (current === outcome) {
+      return false;
+    }
+    if (mediatorSet.has(current) && current !== treatment) {
+      return true;
+    }
+    for (const edge of graph.edges) {
+      if (edge.from === current && !visited.has(edge.to)) {
+        visited.add(edge.to);
+        if (!dfs(edge.to, visited)) {
+          return false;
+        }
+        visited.delete(edge.to);
+      }
+    }
+    return true;
+  }
+  return dfs(treatment, /* @__PURE__ */ new Set([treatment]));
+}
+function findInstrumentalVariable(graph, treatment, outcome) {
+  for (const node of graph.nodes) {
+    if (node.id === treatment || node.id === outcome) continue;
+    const affectsX = graph.edges.some((e) => e.from === node.id && e.to === treatment);
+    if (!affectsX) continue;
+    const affectsYDirectly = graph.edges.some((e) => e.from === node.id && e.to === outcome);
+    if (affectsYDirectly) continue;
+    const mutilated = createMutilatedGraph(graph, [{ variable: treatment, value: 0, type: "atomic" }]);
+    const independentOfY = checkDSeparation(mutilated, { x: [node.id], y: [outcome], z: [] });
+    if (independentOfY.separated) {
+      return node.id;
+    }
+  }
+  return null;
+}
+function checkGeneralIdentifiability(graph, treatment, outcome) {
+  const hasBidirected = graph.edges.some((e) => e.type === "bidirected");
+  if (!hasBidirected) {
+    return {
+      identifiable: true,
+      formula: `P(${outcome}|do(${treatment}))`
+    };
+  }
+  const bidirectedConnected = areBidirectedConnected(graph, treatment, outcome);
+  if (!bidirectedConnected) {
+    return {
+      identifiable: true,
+      formula: `P(${outcome}|do(${treatment}))`
+    };
+  }
+  return { identifiable: false };
+}
+function areBidirectedConnected(graph, node1, node2) {
+  const bidirectedAdj = /* @__PURE__ */ new Map();
+  for (const node of graph.nodes) {
+    bidirectedAdj.set(node.id, []);
+  }
+  for (const edge of graph.edges) {
+    if (edge.type === "bidirected") {
+      bidirectedAdj.get(edge.from)?.push(edge.to);
+      bidirectedAdj.get(edge.to)?.push(edge.from);
+    }
+  }
+  const visited = /* @__PURE__ */ new Set();
+  const queue = [node1];
+  visited.add(node1);
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (current === node2) return true;
+    for (const neighbor of bidirectedAdj.get(current) || []) {
+      if (!visited.has(neighbor)) {
+        visited.add(neighbor);
+        queue.push(neighbor);
+      }
+    }
+  }
+  return false;
+}
+function getDescendants2(graph, nodeId) {
+  const descendants = /* @__PURE__ */ new Set();
+  const stack = [nodeId];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    for (const edge of graph.edges) {
+      if (edge.from === current && !descendants.has(edge.to)) {
+        descendants.add(edge.to);
+        stack.push(edge.to);
+      }
+    }
+  }
+  return descendants;
+}
+function getAncestors(graph, nodeId) {
+  const ancestors = /* @__PURE__ */ new Set();
+  const stack = [nodeId];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    for (const edge of graph.edges) {
+      if (edge.to === current && !ancestors.has(edge.from)) {
+        ancestors.add(edge.from);
+        stack.push(edge.from);
+      }
+    }
+  }
+  return ancestors;
+}
+function* getCombinations(arr, k) {
+  if (k === 0) {
+    yield [];
+    return;
+  }
+  for (let i = 0; i <= arr.length - k; i++) {
+    for (const rest of getCombinations(arr.slice(i + 1), k - 1)) {
+      yield [arr[i], ...rest];
+    }
+  }
+}
+var init_intervention = __esm({
+  "src/modes/causal/graph/algorithms/intervention.ts"() {
+    init_esm_shims();
+    init_d_separation();
+  }
+});
 var CausalHandler;
 var init_CausalHandler = __esm({
   "src/modes/handlers/CausalHandler.ts"() {
     init_esm_shims();
     init_ModeHandler();
     init_type_guards();
+    init_centrality();
+    init_d_separation();
+    init_intervention();
     CausalHandler = class {
       mode = "causal" /* CAUSAL */;
       modeName = "Causal Analysis";
@@ -5281,6 +6048,42 @@ var init_CausalHandler = __esm({
               `What are the downstream consequences of ${exitNodes.join(", ")}?`
             );
           }
+          if (nodeCount >= 2 && edgeCount >= 1) {
+            const advancedAnalysis = this.performAdvancedGraphAnalysis(thought.causalGraph);
+            if (advancedAnalysis.centralNode) {
+              enhancements.suggestions.push(
+                `Node "${advancedAnalysis.centralNode}" is most central (highest PageRank). Consider its importance in causal pathways.`
+              );
+            }
+            if (advancedAnalysis.vStructures.length > 0) {
+              enhancements.warnings.push(
+                `Detected ${advancedAnalysis.vStructures.length} v-structure(s)/collider(s) that affect d-separation analysis.`
+              );
+            }
+            if (advancedAnalysis.identifiability && entryNodes.length > 0 && exitNodes.length > 0) {
+              if (advancedAnalysis.identifiability.identifiable) {
+                enhancements.suggestions.push(
+                  `Causal effect is identifiable via ${advancedAnalysis.identifiability.method || "standard methods"}.`
+                );
+              } else {
+                enhancements.warnings.push(
+                  `Causal effect may not be identifiable: ${advancedAnalysis.identifiability.reason}`
+                );
+              }
+            }
+            if (advancedAnalysis.backdoorSets && advancedAnalysis.backdoorSets.length > 0) {
+              const setDescription = advancedAnalysis.backdoorSets[0].length === 0 ? "No adjustment needed" : `Adjust for: ${advancedAnalysis.backdoorSets[0].join(", ")}`;
+              enhancements.suggestions.push(
+                `Valid backdoor adjustment set found. ${setDescription}`
+              );
+            }
+            if (advancedAnalysis.centralityMetrics) {
+              enhancements.metrics = {
+                ...enhancements.metrics,
+                ...advancedAnalysis.centralityMetrics
+              };
+            }
+          }
         }
         if (!thought.interventions || thought.interventions.length === 0) {
           enhancements.guidingQuestions.push(
@@ -5293,6 +6096,93 @@ var init_CausalHandler = __esm({
           );
         }
         return enhancements;
+      }
+      /**
+       * Perform advanced graph analysis using Sprint 6 algorithms
+       */
+      performAdvancedGraphAnalysis(graph) {
+        const graphForAnalysis = this.toGraphAnalysisFormat(graph);
+        let centralNode = null;
+        let centralityMetrics = null;
+        try {
+          const mostCentral = getMostCentralNode(graphForAnalysis, "pagerank");
+          if (mostCentral) {
+            centralNode = mostCentral.nodeId;
+            const { degree } = computeDegreeCentrality(graphForAnalysis);
+            centralityMetrics = {
+              maxDegree: Math.max(...Array.from(degree.values())),
+              maxPageRank: mostCentral.score,
+              avgDegree: Array.from(degree.values()).reduce((a, b) => a + b, 0) / degree.size
+            };
+          }
+        } catch {
+        }
+        let vStructures = [];
+        try {
+          vStructures = findVStructures(graphForAnalysis);
+        } catch {
+        }
+        let identifiability = null;
+        let backdoorSets = null;
+        const entryNodes = this.findEntryNodes(graph);
+        const exitNodes = this.findExitNodes(graph);
+        if (entryNodes.length > 0 && exitNodes.length > 0) {
+          const treatment = graph.nodes.find((n) => n.name === entryNodes[0] || n.id === entryNodes[0])?.id;
+          const outcome = graph.nodes.find((n) => n.name === exitNodes[0] || n.id === exitNodes[0])?.id;
+          if (treatment && outcome) {
+            try {
+              identifiability = isIdentifiable(graphForAnalysis, treatment, outcome);
+              backdoorSets = findAllBackdoorSets(graphForAnalysis, treatment, outcome, 3);
+            } catch {
+            }
+          }
+        }
+        return {
+          centralNode,
+          vStructures,
+          identifiability,
+          backdoorSets,
+          centralityMetrics
+        };
+      }
+      /**
+       * Convert internal CausalGraph to graph analysis format
+       */
+      toGraphAnalysisFormat(graph) {
+        return {
+          id: "analysis-graph",
+          nodes: graph.nodes.map((n) => ({
+            id: n.id,
+            name: n.name || n.id,
+            description: n.description,
+            // Map internal type to graph analysis type
+            type: this.mapNodeType(n.type)
+          })),
+          edges: graph.edges.map((e) => ({
+            from: e.from,
+            to: e.to,
+            type: "directed",
+            // CausalEdge doesn't have type, assume directed
+            weight: e.strength
+          }))
+        };
+      }
+      /**
+       * Map internal node type to graph analysis type
+       */
+      mapNodeType(type) {
+        switch (type) {
+          case "cause":
+            return "observed";
+          case "effect":
+            return "outcome";
+          case "mediator":
+            return "observed";
+          case "confounder":
+            return "latent";
+          default:
+            return void 0;
+        }
       }
       /**
        * Check if this handler supports a specific thought type
@@ -5503,10 +6393,18 @@ var init_BayesianHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
+        let alternatives = [];
+        if (inputAny.hypotheses && Array.isArray(inputAny.hypotheses)) {
+          alternatives = inputAny.hypotheses.map((h) => ({
+            id: h.id || randomUUID(),
+            statement: h.description || h.explanation || h.statement || "",
+            probability: h.probability
+          }));
+        }
         const hypothesis = inputAny.hypothesis || {
           id: randomUUID(),
           statement: input.thought,
-          alternatives: []
+          alternatives: alternatives.length > 0 ? alternatives : []
         };
         const prior = {
           probability: inputAny.priorProbability ?? 0.5,
@@ -7099,6 +7997,22 @@ var init_EvidentialHandler = __esm({
       createThought(input, sessionId) {
         const inputAny = input;
         const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        let beliefFunctions = inputAny.beliefFunctions || [];
+        if (inputAny.massFunction && typeof inputAny.massFunction === "object" && beliefFunctions.length === 0) {
+          const massAssignments = Object.entries(inputAny.massFunction).map(
+            ([key, mass]) => ({
+              hypothesisSet: key.split(",").map((s) => s.trim()),
+              mass,
+              justification: "From mass function input"
+            })
+          );
+          beliefFunctions = [{
+            id: "bf-from-mass-function",
+            source: "input",
+            massAssignments,
+            conflictMass: 0
+          }];
+        }
         return {
           id: randomUUID(),
           sessionId,
@@ -7114,7 +8028,7 @@ var init_EvidentialHandler = __esm({
           frameOfDiscernment: inputAny.frameOfDiscernment || [],
           hypotheses: inputAny.hypotheses || [],
           evidence: inputAny.evidence || [],
-          beliefFunctions: inputAny.beliefFunctions || [],
+          beliefFunctions,
           combinedBelief: inputAny.combinedBelief,
           plausibility: inputAny.plausibility,
           decisions: inputAny.decisions || []
@@ -15888,10 +16802,11 @@ var init_lru = __esm({
        * Estimate entry size
        */
       estimateSize(value) {
+        const DEFAULT_SIZE = 100;
         try {
           return JSON.stringify(value).length * 2;
         } catch {
-          return 0;
+          return DEFAULT_SIZE;
         }
       }
       /**
@@ -17722,17 +18637,36 @@ var init_ThoughtFactory = __esm({
               dependencies: input.dependencies || [],
               assumptions: input.assumptions || []
             };
-          case "mathematics":
+          case "mathematics": {
+            const mathInput = input;
+            const mathTheorems = mathInput.theorem ? [
+              {
+                name: "Theorem",
+                statement: mathInput.theorem,
+                hypotheses: mathInput.hypotheses || [],
+                conclusion: mathInput.theorem
+              }
+            ] : [];
             return {
               ...baseThought,
               mode: "mathematics" /* MATHEMATICS */,
-              thoughtType: toExtendedThoughtType(input.thoughtType, "model"),
+              thoughtType: toExtendedThoughtType(input.thoughtType, "axiom_definition"),
               mathematicalModel: input.mathematicalModel,
-              proofStrategy: input.proofStrategy,
+              proofStrategy: input.proofStrategy ? { ...input.proofStrategy, completeness: 0 } : void 0,
+              theorems: mathTheorems,
               dependencies: input.dependencies || [],
               assumptions: input.assumptions || [],
-              uncertainty: input.uncertainty || 0.5
+              uncertainty: input.uncertainty || 0.5,
+              references: [],
+              // Phase 8: Store proof decomposition inputs for analysis
+              _proofInputs: mathInput.proofSteps ? {
+                proofSteps: mathInput.proofSteps,
+                analysisDepth: mathInput.analysisDepth || "standard",
+                includeConsistencyCheck: mathInput.includeConsistencyCheck ?? false,
+                traceAssumptions: mathInput.traceAssumptions ?? false
+              } : void 0
             };
+          }
           case "physics":
             return {
               ...baseThought,
@@ -17852,6 +18786,24 @@ var init_ThoughtFactory = __esm({
               gameTree: input.gameTree
             };
           case "evidential":
+            const evidentialInput = input;
+            let beliefFunctions = input.beliefFunctions || [];
+            if (evidentialInput.massFunction && typeof evidentialInput.massFunction === "object" && beliefFunctions.length === 0) {
+              const massAssignments = Object.entries(evidentialInput.massFunction).map(
+                ([key, mass]) => ({
+                  hypothesisSet: key.split(",").map((s) => s.trim()),
+                  // Support comma-separated hypothesis sets
+                  mass,
+                  justification: "From mass function input"
+                })
+              );
+              beliefFunctions = [{
+                id: "bf-from-mass-function",
+                source: "input",
+                massAssignments,
+                conflictMass: 0
+              }];
+            }
             return {
               ...baseThought,
               mode: "evidential" /* EVIDENTIAL */,
@@ -17859,7 +18811,7 @@ var init_ThoughtFactory = __esm({
               frameOfDiscernment: input.frameOfDiscernment,
               hypotheses: input.hypotheses || [],
               evidence: input.evidence || [],
-              beliefFunctions: input.beliefFunctions || [],
+              beliefFunctions,
               combinedBelief: input.combinedBelief,
               plausibility: input.plausibility,
               decisions: input.decisions || []
@@ -40125,7 +41077,8 @@ ${thoughtsText}`;
             md += `**Interventions:**
 `;
             for (const intervention of thought.interventions) {
-              md += `- ${intervention.node}: ${intervention.value}${intervention.effect ? ` \u2192 ${intervention.effect}` : ""}
+              const effectsText = intervention.expectedEffects?.length ? ` \u2192 ${intervention.expectedEffects.map((e) => e.expectedChange).join(", ")}` : "";
+              md += `- ${intervention.nodeId}: ${intervention.action}${effectsText}
 `;
             }
             md += `
@@ -40136,18 +41089,18 @@ ${thoughtsText}`;
           md += `#### Bayesian Analysis
 
 `;
-          if (thought.priorProbability !== void 0) {
-            const prior = typeof thought.priorProbability === "number" ? thought.priorProbability : Number(thought.priorProbability);
+          if (thought.prior?.probability !== void 0) {
+            const prior = typeof thought.prior.probability === "number" ? thought.prior.probability : Number(thought.prior.probability);
             md += `- **Prior Probability:** ${(prior * 100).toFixed(1)}%
 `;
           }
-          if (thought.likelihood !== void 0) {
-            const likelihood = typeof thought.likelihood === "number" ? thought.likelihood : Number(thought.likelihood);
+          if (thought.likelihood?.probability !== void 0) {
+            const likelihood = typeof thought.likelihood.probability === "number" ? thought.likelihood.probability : Number(thought.likelihood.probability);
             md += `- **Likelihood:** ${(likelihood * 100).toFixed(1)}%
 `;
           }
-          if (thought.posteriorProbability !== void 0) {
-            const posterior = typeof thought.posteriorProbability === "number" ? thought.posteriorProbability : Number(thought.posteriorProbability);
+          if (thought.posterior?.probability !== void 0) {
+            const posterior = typeof thought.posterior.probability === "number" ? thought.posterior.probability : Number(thought.posterior.probability);
             md += `- **Posterior Probability:** ${(posterior * 100).toFixed(1)}%
 `;
           }
@@ -40156,22 +41109,24 @@ ${thoughtsText}`;
 **Evidence:**
 `;
             for (const e of thought.evidence) {
-              md += `- ${e}
+              md += `- ${e.description}
 `;
             }
           }
-          if (thought.hypotheses?.length) {
+          if (thought.hypothesis) {
             md += `
-**Hypotheses:**
+**Hypothesis:**
 `;
-            for (const h of thought.hypotheses) {
-              let prob = "";
-              if (h.probability !== void 0) {
-                const probVal = typeof h.probability === "number" ? h.probability : Number(h.probability);
-                prob = ` (${(probVal * 100).toFixed(1)}%)`;
+            md += `- ${thought.hypothesis.statement}
+`;
+            if (thought.hypothesis.alternatives?.length) {
+              md += `
+**Alternatives:**
+`;
+              for (const alt of thought.hypothesis.alternatives) {
+                md += `- ${alt}
+`;
               }
-              md += `- ${h.description}${prob}
-`;
             }
           }
           md += `
@@ -40250,7 +41205,7 @@ ${thoughtsText}`;
             md += `**Components:**
 `;
             for (const comp of thought.components) {
-              md += `- **${comp.name}** (${comp.role || comp.id})
+              md += `- **${comp.name}** (${comp.type})
 `;
             }
             md += `
@@ -40352,23 +41307,23 @@ ${thoughtsText}`;
 
 `;
           }
-          if (thought.codes?.length) {
+          if (thought.currentCodes?.length) {
             md += `**Codes:**
 `;
-            for (const code of thought.codes.slice(0, 10)) {
+            for (const code of thought.currentCodes.slice(0, 10)) {
               const freq = code.frequency ? ` (n=${code.frequency})` : "";
               md += `- **${code.label}**${freq}: ${code.definition || ""}
 `;
             }
-            if (thought.codes.length > 10) {
-              md += `- ... and ${thought.codes.length - 10} more codes
+            if (thought.currentCodes.length > 10) {
+              md += `- ... and ${thought.currentCodes.length - 10} more codes
 `;
             }
             md += `
 `;
           }
-          if (thought.categories?.length) {
-            md += `**Categories:** ${thought.categories.join(", ")}
+          if (thought.gtCategories?.length) {
+            md += `**Categories:** ${thought.gtCategories.map((c) => c.name).join(", ")}
 
 `;
           }
@@ -40382,24 +41337,24 @@ ${thoughtsText}`;
           md += `#### Algorithm Analysis
 
 `;
-          if (thought.algorithmName) {
-            md += `**Algorithm:** ${thought.algorithmName}
+          if (thought.algorithm?.name) {
+            md += `**Algorithm:** ${thought.algorithm.name}
 `;
           }
           if (thought.designPattern) {
             md += `**Design Pattern:** ${thought.designPattern}
 `;
           }
-          if (thought.complexityAnalysis) {
+          if (thought.timeComplexity || thought.spaceComplexity) {
             md += `
 **Complexity:**
 `;
-            if (thought.complexityAnalysis.timeComplexity) {
-              md += `- Time: ${thought.complexityAnalysis.timeComplexity}
+            if (thought.timeComplexity?.worstCase) {
+              md += `- Time: ${thought.timeComplexity.worstCase}
 `;
             }
-            if (thought.complexityAnalysis.spaceComplexity) {
-              md += `- Space: ${thought.complexityAnalysis.spaceComplexity}
+            if (thought.spaceComplexity?.auxiliary) {
+              md += `- Space: ${thought.spaceComplexity.auxiliary}
 `;
             }
           }
@@ -40407,12 +41362,12 @@ ${thoughtsText}`;
             md += `
 **Correctness Proof:**
 `;
-            if (thought.correctnessProof.invariant) {
-              md += `- Invariant: ${thought.correctnessProof.invariant}
+            if (thought.correctnessProof.invariants?.length) {
+              md += `- Invariants: ${thought.correctnessProof.invariants.map((i) => i.description).join("; ")}
 `;
             }
-            if (thought.correctnessProof.termination) {
-              md += `- Termination: ${thought.correctnessProof.termination}
+            if (thought.correctnessProof.terminationArgument) {
+              md += `- Termination: ${thought.correctnessProof.terminationArgument.proof}
 `;
             }
           }
@@ -40423,27 +41378,29 @@ ${thoughtsText}`;
           md += `#### Scientific Method
 
 `;
-          if (thought.hypothesis) {
-            md += `**Hypothesis:** ${thought.hypothesis}
-
+          if (thought.scientificHypotheses?.length) {
+            md += `**Hypotheses:**
 `;
-          }
-          if (thought.predictions?.length) {
-            md += `**Predictions:**
+            for (const h of thought.scientificHypotheses) {
+              md += `- ${h.statement}
 `;
-            for (const pred of thought.predictions) {
-              md += `- ${pred}
+              if (h.prediction) {
+                md += `  - Prediction: ${h.prediction}
 `;
+              }
             }
             md += `
 `;
           }
-          if (thought.experiments?.length) {
-            md += `**Experiments:**
+          if (thought.experiment) {
+            md += `**Experiment:**
 `;
-            for (const exp of thought.experiments) {
-              const result = exp.result ? ` \u2192 ${exp.result}` : "";
-              md += `- ${exp.description}${result}
+            md += `- Type: ${thought.experiment.type}
+`;
+            md += `- Design: ${thought.experiment.design}
+`;
+            if (thought.experiment.procedure?.length) {
+              md += `- Procedure: ${thought.experiment.procedure.length} steps
 `;
             }
             md += `
@@ -40454,21 +41411,21 @@ ${thoughtsText}`;
           md += `#### First Principles Analysis
 
 `;
-          if (thought.fundamentals?.length) {
-            md += `**Fundamental Truths:**
+          if (thought.principles?.length) {
+            md += `**Fundamental Principles:**
 `;
-            for (const f of thought.fundamentals) {
-              md += `- ${f}
+            for (const p of thought.principles) {
+              md += `- ${p.statement}
 `;
             }
             md += `
 `;
           }
-          if (thought.derivedInsights?.length) {
-            md += `**Derived Insights:**
+          if (thought.derivationSteps?.length) {
+            md += `**Derivation Steps:**
 `;
-            for (const insight of thought.derivedInsights) {
-              md += `- ${insight}
+            for (const step of thought.derivationSteps) {
+              md += `- Step ${step.stepNumber}: ${step.inference}
 `;
             }
             md += `
@@ -40517,18 +41474,18 @@ ${thoughtsText}`;
         if (isBayesianThought(thought)) {
           latex += `\\subsubsection{Bayesian Analysis}
 `;
-          if (thought.priorProbability !== void 0) {
-            const prior = typeof thought.priorProbability === "number" ? thought.priorProbability : Number(thought.priorProbability);
+          if (thought.prior?.probability !== void 0) {
+            const prior = typeof thought.prior.probability === "number" ? thought.prior.probability : Number(thought.prior.probability);
             latex += `Prior: $P(H) = ${prior.toFixed(3)}$\\\\
 `;
           }
-          if (thought.likelihood !== void 0) {
-            const likelihood = typeof thought.likelihood === "number" ? thought.likelihood : Number(thought.likelihood);
+          if (thought.likelihood?.probability !== void 0) {
+            const likelihood = typeof thought.likelihood.probability === "number" ? thought.likelihood.probability : Number(thought.likelihood.probability);
             latex += `Likelihood: $P(E|H) = ${likelihood.toFixed(3)}$\\\\
 `;
           }
-          if (thought.posteriorProbability !== void 0) {
-            const posterior = typeof thought.posteriorProbability === "number" ? thought.posteriorProbability : Number(thought.posteriorProbability);
+          if (thought.posterior?.probability !== void 0) {
+            const posterior = typeof thought.posterior.probability === "number" ? thought.posterior.probability : Number(thought.posterior.probability);
             latex += `Posterior: $P(H|E) = ${posterior.toFixed(3)}$\\\\
 `;
           }
@@ -40550,17 +41507,17 @@ ${thoughtsText}`;
         if (isAlgorithmicThought(thought)) {
           latex += `\\subsubsection{Algorithm Analysis}
 `;
-          if (thought.algorithmName) {
-            latex += `\\textbf{Algorithm:} ${escapeLatex(thought.algorithmName)}\\\\
+          if (thought.algorithm?.name) {
+            latex += `\\textbf{Algorithm:} ${escapeLatex(thought.algorithm.name)}\\\\
 `;
           }
-          if (thought.complexityAnalysis) {
-            if (thought.complexityAnalysis.timeComplexity) {
-              latex += `\\textbf{Time Complexity:} $${escapeLatex(thought.complexityAnalysis.timeComplexity)}$\\\\
+          if (thought.timeComplexity || thought.spaceComplexity) {
+            if (thought.timeComplexity?.worstCase) {
+              latex += `\\textbf{Time Complexity:} $${escapeLatex(thought.timeComplexity.worstCase)}$\\\\
 `;
             }
-            if (thought.complexityAnalysis.spaceComplexity) {
-              latex += `\\textbf{Space Complexity:} $${escapeLatex(thought.complexityAnalysis.spaceComplexity)}$\\\\
+            if (thought.spaceComplexity?.auxiliary) {
+              latex += `\\textbf{Space Complexity:} $${escapeLatex(thought.spaceComplexity.auxiliary)}$\\\\
 `;
             }
           }
@@ -40872,6 +41829,209 @@ var init_services = __esm({
     init_ThoughtFactory();
     init_ExportService();
     init_ModeRouter();
+  }
+});
+
+// src/export/profiles.ts
+var profiles_exports = {};
+__export(profiles_exports, {
+  EXPORT_PROFILES: () => EXPORT_PROFILES,
+  combineExportProfiles: () => combineExportProfiles,
+  getAllExportProfiles: () => getAllExportProfiles,
+  getExportProfile: () => getExportProfile,
+  getExportProfileMetadata: () => getExportProfileMetadata,
+  getExportProfilesByFormat: () => getExportProfilesByFormat,
+  getExportProfilesByTag: () => getExportProfilesByTag,
+  isValidExportProfileId: () => isValidExportProfileId,
+  listExportProfileIds: () => listExportProfileIds,
+  recommendExportProfile: () => recommendExportProfile
+});
+function getExportProfile(id) {
+  return EXPORT_PROFILES[id];
+}
+function getAllExportProfiles() {
+  return Object.values(EXPORT_PROFILES);
+}
+function getExportProfilesByTag(tag) {
+  const lowerTag = tag.toLowerCase();
+  return getAllExportProfiles().filter(
+    (p) => p.tags.some((t) => t.toLowerCase() === lowerTag)
+  );
+}
+function getExportProfilesByFormat(format) {
+  return getAllExportProfiles().filter((p) => p.formats.includes(format));
+}
+function isValidExportProfileId(id) {
+  return id in EXPORT_PROFILES;
+}
+function listExportProfileIds() {
+  return Object.keys(EXPORT_PROFILES);
+}
+function getExportProfileMetadata(id) {
+  const profile = EXPORT_PROFILES[id];
+  if (!profile) return void 0;
+  return {
+    id: profile.id,
+    name: profile.name,
+    description: profile.description,
+    formatCount: profile.formats.length,
+    formats: profile.formats,
+    tags: profile.tags
+  };
+}
+function combineExportProfiles(profileIds, name, mergeOptions = "union") {
+  const profiles = profileIds.map((id) => EXPORT_PROFILES[id]).filter((p) => p !== void 0);
+  if (profiles.length === 0) {
+    return {
+      id: "minimal",
+      name,
+      description: "Custom combined profile",
+      formats: ["json", "markdown"],
+      options: {},
+      useCase: "Custom profile",
+      tags: ["custom"]
+    };
+  }
+  let formats;
+  if (mergeOptions === "union") {
+    const formatSet = /* @__PURE__ */ new Set();
+    profiles.forEach((p) => p.formats.forEach((f) => formatSet.add(f)));
+    formats = Array.from(formatSet);
+  } else {
+    formats = profiles[0].formats.filter(
+      (f) => profiles.every((p) => p.formats.includes(f))
+    );
+    if (formats.length === 0) {
+      formats = ["json", "markdown"];
+    }
+  }
+  const mergedOptions = {};
+  profiles.forEach((p) => Object.assign(mergedOptions, p.options));
+  const tagSet = /* @__PURE__ */ new Set();
+  profiles.forEach((p) => p.tags.forEach((t) => tagSet.add(t)));
+  tagSet.add("custom");
+  return {
+    id: `custom_${Date.now()}`,
+    name,
+    description: `Combined profile from: ${profileIds.join(", ")}`,
+    formats,
+    options: mergedOptions,
+    useCase: "Custom combined profile",
+    tags: Array.from(tagSet)
+  };
+}
+function recommendExportProfile(keywords) {
+  const lowerKeywords = keywords.map((k) => k.toLowerCase());
+  if (lowerKeywords.some(
+    (k) => ["paper", "thesis", "publication", "academic", "research", "latex", "citation"].includes(k)
+  )) {
+    return "academic";
+  }
+  if (lowerKeywords.some(
+    (k) => ["slide", "presentation", "visual", "diagram", "dashboard"].includes(k)
+  )) {
+    return "presentation";
+  }
+  if (lowerKeywords.some(
+    (k) => ["documentation", "readme", "technical", "doc", "wiki"].includes(k)
+  )) {
+    return "documentation";
+  }
+  if (lowerKeywords.some(
+    (k) => ["archive", "backup", "storage", "comprehensive", "full"].includes(k)
+  )) {
+    return "archive";
+  }
+  return "minimal";
+}
+var ACADEMIC_PROFILE, PRESENTATION_PROFILE, DOCUMENTATION_PROFILE, ARCHIVE_PROFILE, MINIMAL_PROFILE, EXPORT_PROFILES;
+var init_profiles = __esm({
+  "src/export/profiles.ts"() {
+    init_esm_shims();
+    ACADEMIC_PROFILE = {
+      id: "academic",
+      name: "Academic",
+      description: "Optimized for academic papers, theses, and publications",
+      formats: ["latex", "markdown", "json"],
+      options: {
+        includeCitations: true,
+        includeMetadata: true,
+        includeTimestamps: true,
+        includeStatistics: true,
+        includeTableOfContents: true,
+        latexDocumentClass: "article"
+      },
+      useCase: "Use for generating content for academic papers, research documentation, or formal publications.",
+      tags: ["academic", "formal", "citations", "latex"]
+    };
+    PRESENTATION_PROFILE = {
+      id: "presentation",
+      name: "Presentation",
+      description: "Optimized for slides, visual presentations, and diagrams",
+      formats: ["mermaid", "svg", "markdown"],
+      options: {
+        simplifyDiagrams: true,
+        abbreviateModeNames: true,
+        maxDiagramNodes: 15,
+        includeMetadata: false,
+        includeStatistics: false
+      },
+      useCase: "Use for creating visual content for presentations, slides, or dashboards.",
+      tags: ["presentation", "visual", "diagrams", "slides"]
+    };
+    DOCUMENTATION_PROFILE = {
+      id: "documentation",
+      name: "Documentation",
+      description: "Optimized for technical documentation and READMEs",
+      formats: ["markdown", "mermaid", "ascii"],
+      options: {
+        includeMetadata: true,
+        includeTimestamps: true,
+        includeTableOfContents: true,
+        includeStatistics: true,
+        simplifyDiagrams: false
+      },
+      useCase: "Use for creating technical documentation, README files, or knowledge base articles.",
+      tags: ["documentation", "technical", "readme", "markdown"]
+    };
+    ARCHIVE_PROFILE = {
+      id: "archive",
+      name: "Archive",
+      description: "Comprehensive export for long-term storage and backup",
+      formats: ["json", "markdown", "latex", "jupyter"],
+      options: {
+        includeCitations: true,
+        includeMetadata: true,
+        includeTimestamps: true,
+        includeStatistics: true,
+        includeTableOfContents: true,
+        jupyterKernel: "python3"
+      },
+      useCase: "Use for creating comprehensive backups or archiving reasoning sessions.",
+      tags: ["archive", "backup", "comprehensive", "storage"]
+    };
+    MINIMAL_PROFILE = {
+      id: "minimal",
+      name: "Minimal",
+      description: "Lightweight export with essential content only",
+      formats: ["json", "markdown"],
+      options: {
+        includeMetadata: false,
+        includeTimestamps: false,
+        includeStatistics: false,
+        simplifyDiagrams: true,
+        abbreviateModeNames: true
+      },
+      useCase: "Use for quick exports or when storage/bandwidth is limited.",
+      tags: ["minimal", "lightweight", "quick"]
+    };
+    EXPORT_PROFILES = {
+      academic: ACADEMIC_PROFILE,
+      presentation: PRESENTATION_PROFILE,
+      documentation: DOCUMENTATION_PROFILE,
+      archive: ARCHIVE_PROFILE,
+      minimal: MINIMAL_PROFILE
+    };
   }
 });
 
@@ -42006,18 +43166,28 @@ async function analyzeMultiMode(request, config) {
   const analyzer = new MultiModeAnalyzer(config);
   return analyzer.analyze(request);
 }
-var DEFAULT_CONFIG3, MultiModeAnalyzer;
+var ANALYZER_CONSTANTS, DEFAULT_CONFIG3, MultiModeAnalyzer;
 var init_analyzer = __esm({
   "src/modes/combinations/analyzer.ts"() {
     init_esm_shims();
     init_merger();
     init_conflict_resolver();
     init_presets();
+    ANALYZER_CONSTANTS = {
+      /** Default timeout per mode in milliseconds */
+      DEFAULT_TIMEOUT_MS: 3e4,
+      /** Maximum parallel mode execution */
+      MAX_PARALLEL_MODES: 5,
+      /** Minimum confidence threshold for insights */
+      MIN_CONFIDENCE_THRESHOLD: 0.3,
+      /** Base confidence for placeholder insights (pending ThoughtFactory integration) */
+      BASE_INSIGHT_CONFIDENCE: 0.8
+    };
     DEFAULT_CONFIG3 = {
-      defaultTimeoutPerMode: 3e4,
+      defaultTimeoutPerMode: ANALYZER_CONSTANTS.DEFAULT_TIMEOUT_MS,
       continueOnError: true,
-      maxParallelModes: 5,
-      minConfidenceThreshold: 0.3,
+      maxParallelModes: ANALYZER_CONSTANTS.MAX_PARALLEL_MODES,
+      minConfidenceThreshold: ANALYZER_CONSTANTS.MIN_CONFIDENCE_THRESHOLD,
       verbose: false
     };
     MultiModeAnalyzer = class {
@@ -42261,7 +43431,7 @@ var init_analyzer = __esm({
        * This is a placeholder - in production, this would integrate with ThoughtFactory
        */
       generateModeInsights(mode, thought, context) {
-        const baseConfidence = 0.7 + Math.random() * 0.2;
+        const baseConfidence = ANALYZER_CONSTANTS.BASE_INSIGHT_CONFIDENCE;
         const timestamp = /* @__PURE__ */ new Date();
         const insights = [];
         switch (mode) {
@@ -43829,7 +44999,7 @@ var deepthinking_academic_schema = {
 };
 var deepthinking_session_schema = {
   name: "deepthinking_session",
-  description: "Session: summarize, export, get, switch_mode, recommend, delete",
+  description: "Session: summarize, export, export_all, get, switch_mode, recommend, delete",
   inputSchema: {
     type: "object",
     properties: {
@@ -43839,13 +45009,17 @@ var deepthinking_session_schema = {
       },
       action: {
         type: "string",
-        enum: ["summarize", "export", "get_session", "switch_mode", "recommend_mode", "delete_session"],
+        enum: ["summarize", "export", "export_all", "get_session", "switch_mode", "recommend_mode", "delete_session"],
         description: "Session action to perform"
       },
       exportFormat: {
         type: "string",
         enum: ["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"],
         description: "Export format (for export action)"
+      },
+      includeContent: {
+        type: "boolean",
+        description: "Include full export content in response (for export_all action)"
       },
       newMode: {
         type: "string",
@@ -44027,10 +45201,18 @@ var ExportFormatEnum = z.enum([
 var SessionActionEnum = z.enum([
   "summarize",
   "export",
+  "export_all",
   "get_session",
   "switch_mode",
   "recommend_mode",
   "delete_session"
+]);
+var ExportProfileEnum = z.enum([
+  "academic",
+  "presentation",
+  "documentation",
+  "archive",
+  "minimal"
 ]);
 var ProofTypeEnum = z.enum([
   "direct",
@@ -44106,6 +45288,10 @@ var SessionActionSchema = z.object({
   sessionId: z.string().optional(),
   action: SessionActionEnum,
   exportFormat: ExportFormatEnum.optional(),
+  exportProfile: ExportProfileEnum.optional(),
+  // Phase 12: Pre-configured export bundles
+  includeContent: z.boolean().optional(),
+  // For export_all action
   newMode: z.string().optional(),
   problemType: z.string().optional(),
   problemCharacteristics: z.object({
@@ -44911,7 +46097,7 @@ async function handleAddThought(input, _toolName) {
     });
     sessionId = session2.id;
   }
-  const thought = thoughtFactory.createThought({ ...input, mode }, sessionId);
+  const thought = thoughtFactory.createThought(input, sessionId);
   const session = await sessionManager.addThought(sessionId, thought);
   const registry = ModeHandlerRegistry.getInstance();
   const modeStatus = {
@@ -44920,6 +46106,7 @@ async function handleAddThought(input, _toolName) {
     hasSpecializedHandler: registry.hasSpecializedHandler(thought.mode),
     note: !isFullyImplemented(thought.mode) ? "This mode is experimental with limited runtime implementation" : registry.hasSpecializedHandler(thought.mode) ? void 0 : "Using generic handler - specialized validation not available"
   };
+  const thoughtRecord = thought;
   const response = {
     sessionId: session.id,
     thoughtId: thought.id,
@@ -44928,18 +46115,13 @@ async function handleAddThought(input, _toolName) {
     nextThoughtNeeded: thought.nextThoughtNeeded,
     sessionComplete: session.isComplete,
     totalThoughts: session.thoughts.length,
-    modeStatus
+    modeStatus,
     // Phase 10 Sprint 1: API transparency
+    // Include analysis results in response if available
+    decomposition: thoughtRecord.decomposition,
+    consistencyReport: thoughtRecord.consistencyReport,
+    gapAnalysis: thoughtRecord.gapAnalysis
   };
-  if (thought.decomposition) {
-    response.decomposition = thought.decomposition;
-  }
-  if (thought.consistencyReport) {
-    response.consistencyReport = thought.consistencyReport;
-  }
-  if (thought.gapAnalysis) {
-    response.gapAnalysis = thought.gapAnalysis;
-  }
   return {
     content: [
       {
@@ -44956,6 +46138,8 @@ async function handleSessionAction(input) {
       return await handleSummarize(input);
     case "export":
       return await handleExport(input);
+    case "export_all":
+      return await handleExportAll(input);
     case "switch_mode":
       return await handleSwitchMode(input);
     case "get_session":
@@ -44993,6 +46177,53 @@ async function handleExport(input) {
   if (!session) {
     throw new Error(`Session ${input.sessionId} not found`);
   }
+  const exportProfile = input.exportProfile;
+  if (exportProfile) {
+    const { getExportProfile: getExportProfile2 } = await Promise.resolve().then(() => (init_profiles(), profiles_exports));
+    const profile = getExportProfile2(exportProfile);
+    if (!profile) {
+      throw new Error(`Unknown export profile: ${exportProfile}. Valid profiles: academic, presentation, documentation, archive, minimal`);
+    }
+    const results = [];
+    for (const format2 of profile.formats) {
+      try {
+        if (format2 === "svg") continue;
+        const exported2 = exportService.exportSession(session, format2);
+        results.push({ format: format2, success: true, content: exported2 });
+      } catch (error) {
+        results.push({
+          format: format2,
+          success: false,
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
+    }
+    const successCount = results.filter((r) => r.success).length;
+    const output = {
+      profile: {
+        id: profile.id,
+        name: profile.name,
+        description: profile.description,
+        options: profile.options
+      },
+      summary: {
+        totalFormats: results.length,
+        successful: successCount,
+        failed: results.length - successCount
+      },
+      exports: results.map((r) => ({
+        format: r.format,
+        success: r.success,
+        ...r.success ? { content: r.content } : { error: r.error }
+      }))
+    };
+    return {
+      content: [{
+        type: "text",
+        text: JSON.stringify(output, null, 2)
+      }]
+    };
+  }
   const format = input.exportFormat || "json";
   const exported = exportService.exportSession(session, format);
   return {
@@ -45002,14 +46233,83 @@ async function handleExport(input) {
     }]
   };
 }
+async function handleExportAll(input) {
+  if (!input.sessionId) {
+    throw new Error("sessionId required for export_all action");
+  }
+  const sessionManager = await getSessionManager();
+  const exportService = await getExportService();
+  const session = await sessionManager.getSession(input.sessionId);
+  if (!session) {
+    throw new Error(`Session ${input.sessionId} not found`);
+  }
+  let formats = ["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"];
+  const exportAllProfile = input.exportProfile;
+  if (exportAllProfile) {
+    const { getExportProfile: getExportProfile2 } = await Promise.resolve().then(() => (init_profiles(), profiles_exports));
+    const profile = getExportProfile2(exportAllProfile);
+    if (!profile) {
+      throw new Error(`Unknown export profile: ${exportAllProfile}. Valid profiles: academic, presentation, documentation, archive, minimal`);
+    }
+    formats = profile.formats.filter((f) => f !== "svg");
+  }
+  const results = [];
+  for (const format of formats) {
+    try {
+      const exported = exportService.exportSession(session, format);
+      results.push({ format, success: true, content: exported });
+    } catch (error) {
+      results.push({
+        format,
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  }
+  const successCount = results.filter((r) => r.success).length;
+  const failureCount = results.filter((r) => !r.success).length;
+  const summary = {
+    sessionId: input.sessionId,
+    totalFormats: formats.length,
+    successCount,
+    failureCount,
+    results: results.map((r) => ({
+      format: r.format,
+      success: r.success,
+      size: r.content?.length || 0,
+      error: r.error
+    }))
+  };
+  if (input.includeContent) {
+    const contentMap = {};
+    for (const r of results) {
+      if (r.success && r.content) {
+        contentMap[r.format] = r.content;
+      }
+    }
+    return {
+      content: [{
+        type: "text",
+        text: JSON.stringify({ ...summary, exports: contentMap }, null, 2)
+      }]
+    };
+  }
+  return {
+    content: [{
+      type: "text",
+      text: JSON.stringify(summary, null, 2)
+    }]
+  };
+}
 async function handleSwitchMode(input) {
-  if (!input.sessionId || !input.newMode) {
+  const newMode = input.newMode;
+  if (!input.sessionId || !newMode) {
     throw new Error("sessionId and newMode required for switch_mode action");
   }
   const modeRouter = await getModeRouter();
   const session = await modeRouter.switchMode(
     input.sessionId,
-    input.newMode,
+    newMode,
     "User requested mode switch"
   );
   return {
@@ -45052,37 +46352,32 @@ async function handleGetSession(input) {
 }
 async function handleRecommendMode(input) {
   const modeRouter = await getModeRouter();
-  if (input.problemType && !input.problemCharacteristics) {
-    const recommendedMode = modeRouter.quickRecommend(input.problemType);
-    const response = modeRouter.formatQuickRecommendation(input.problemType, recommendedMode);
+  const problemType = input.problemType;
+  const problemCharacteristics = input.problemCharacteristics;
+  const includeCombinations = input.includeCombinations;
+  if (problemType && !problemCharacteristics) {
+    const recommendedMode = modeRouter.quickRecommend(problemType);
+    const response = modeRouter.formatQuickRecommendation(problemType, recommendedMode);
     return {
       content: [{
         type: "text",
         text: response
-      }],
-      isError: false
+      }]
     };
   }
-  if (input.problemCharacteristics) {
+  if (problemCharacteristics) {
     const response = modeRouter.getRecommendations(
-      input.problemCharacteristics,
-      input.includeCombinations || false
+      problemCharacteristics,
+      includeCombinations || false
     );
     return {
       content: [{
         type: "text",
         text: response
-      }],
-      isError: false
+      }]
     };
   }
-  return {
-    content: [{
-      type: "text",
-      text: "Error: Please provide either problemType or problemCharacteristics for mode recommendations."
-    }],
-    isError: true
-  };
+  throw new Error("Please provide either problemType or problemCharacteristics for mode recommendations.");
 }
 async function handleDeleteSession(input) {
   if (!input.sessionId) {
@@ -45105,8 +46400,9 @@ async function handleDeleteSession(input) {
 }
 async function handleAnalyze(input) {
   const { MultiModeAnalyzer: MultiModeAnalyzer2 } = await Promise.resolve().then(() => (init_combinations(), combinations_exports));
+  const DEFAULT_TIMEOUT_PER_MODE = 3e4;
   const analyzer = new MultiModeAnalyzer2({
-    defaultTimeoutPerMode: input.timeoutPerMode || 3e4,
+    defaultTimeoutPerMode: input.timeoutPerMode || DEFAULT_TIMEOUT_PER_MODE,
     continueOnError: true,
     verbose: false
   });
@@ -45123,8 +46419,35 @@ async function handleAnalyze(input) {
     context: input.context,
     timeoutPerMode: input.timeoutPerMode
   });
+  const sessionManager = await getSessionManager();
+  const TITLE_MAX_LENGTH = 50;
+  const session = await sessionManager.createSession({
+    title: `Multi-mode Analysis: ${input.thought.substring(0, TITLE_MAX_LENGTH)}${input.thought.length > TITLE_MAX_LENGTH ? "..." : ""}`,
+    mode: "hybrid" /* HYBRID */
+  });
+  const analysisContent = `Multi-mode analysis: ${input.thought}
+
+Conclusion: ${response.analysis.synthesizedConclusion}
+
+Insights:
+${response.analysis.primaryInsights.map((i) => `- [${i.sourceMode}] ${i.content}`).join("\n")}`;
+  const hybridThought = {
+    id: response.analysis.id,
+    sessionId: session.id,
+    content: analysisContent,
+    // Use 'content' not 'thought' for exporters
+    thoughtNumber: 1,
+    totalThoughts: 1,
+    timestamp: /* @__PURE__ */ new Date(),
+    nextThoughtNeeded: false,
+    mode: "hybrid" /* HYBRID */
+  };
+  await sessionManager.addThought(session.id, hybridThought);
+  const sessionId = session.id;
   const result = {
     success: response.success,
+    sessionId,
+    // Include session ID for export
     analysisId: response.analysis.id,
     modesUsed: response.analysis.contributingModes.length,
     contributingModes: response.analysis.contributingModes,
@@ -45133,7 +46456,7 @@ async function handleAnalyze(input) {
     primaryInsights: response.analysis.primaryInsights.map((i) => ({
       id: i.id,
       content: i.content,
-      sourceMode: i.sourceMode,
+      sourceMode: String(i.sourceMode),
       confidence: i.confidence,
       category: i.category,
       priority: i.priority
@@ -45149,7 +46472,10 @@ async function handleAnalyze(input) {
       duplicatesRemoved: response.analysis.statistics.duplicatesRemoved,
       averageConfidence: response.analysis.statistics.averageConfidence,
       mergeTime: response.analysis.statistics.mergeTime
-    }
+    },
+    exportable: true,
+    // Indicate session is exportable
+    exportHint: `Use deepthinking_session with action: 'export', sessionId: '${sessionId}' to export results`
   };
   return {
     content: [

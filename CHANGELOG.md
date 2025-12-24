@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🔧 Code Quality Improvements (Phase 15)
+
+**Type Safety Initiative**
+
+- Added proper TypeScript types to all 10 MCP handler functions in `src/index.ts`
+- Created handler input types: `ThoughtInput`, `SessionInput`, `AnalyzeInputType`
+- Made `MCPResponse` interface extensible with index signature for SDK compatibility
+- Fixed type assertions for Zod schema compatibility with handler signatures
+
+**Error Handling Documentation**
+
+Improved all 16 empty catch blocks across 7 files with explanatory comments:
+
+- `src/cache/fifo.ts`, `lfu.ts`, `lru.ts` - Non-serializable value handling in estimateSize()
+- `src/modes/handlers/CausalHandler.ts` - Optional centrality computation failures
+- `src/modes/handlers/CustomHandler.ts` - Validation rule evaluation errors
+- `src/session/storage/file-store.ts` (5 blocks) - File access and existence checks
+- `src/utils/file-lock.ts` (3 blocks) - Lock file operations and cleanup
+- `src/validation/validators/registry.ts` - Module loading failures
+
+**Magic Number Extraction**
+
+- Created `ANALYZER_CONSTANTS` object in `src/modes/combinations/analyzer.ts` with documented constants:
+  - `DEFAULT_TIMEOUT_MS: 30000`
+  - `MAX_PARALLEL_MODES: 5`
+  - `MIN_CONFIDENCE_THRESHOLD: 0.3`
+  - `BASE_INSIGHT_CONFIDENCE: 0.8`
+- Added `MAX_INT32` constant (2^31 - 1) in `src/modes/stochastic/sampling/rng.ts`
+
+**Deterministic Logic**
+
+- Replaced `Math.random()` with deterministic `BASE_INSIGHT_CONFIDENCE` constant in analyzer.ts
+- Documented intentional `Math.random()` usage in rng.ts for seed generation
+
 ### ✨ New Features
 
 **Phase 12 Sprint 1: Foundation & Infrastructure**

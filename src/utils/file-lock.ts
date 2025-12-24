@@ -93,6 +93,8 @@ async function readLockInfo(lockPath: string): Promise<LockInfo | null> {
     const content = await fs.readFile(lockPath, 'utf-8');
     return JSON.parse(content) as LockInfo;
   } catch {
+    // Lock file doesn't exist or is unreadable - treat as unlocked
+    // Expected when: no lock exists, lock was just released, file corrupted
     return null;
   }
 }
@@ -114,7 +116,8 @@ async function writeLockInfo(lockPath: string, lockInfo: LockInfo): Promise<bool
     try {
       await fs.unlink(tempPath);
     } catch {
-      // Ignore cleanup errors
+      // Temp file cleanup is best-effort - may already be deleted by concurrent process
+      // or may not exist if write failed before creation
     }
 
     // EEXIST means another process created the lock
@@ -261,7 +264,8 @@ async function acquireSharedLock(
             await fs.rmdir(sharedLockDir);
           }
         } catch {
-          // Ignore cleanup errors
+          // Directory cleanup is best-effort - may have concurrent readers adding locks
+          // or may be deleted by another process releasing the last shared lock
         }
       };
     } catch (error: any) {

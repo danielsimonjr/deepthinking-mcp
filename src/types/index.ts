@@ -249,3 +249,23 @@ export {
   type CustomValidationRule,
   isCustomThought,
 } from './modes/custom.js';
+
+// Export handler types (Phase 15 Type Safety Initiative)
+export {
+  type MCPTextContent,
+  type MCPResponse,
+  type AddThoughtInput,
+  type SummarizeInput,
+  type ExportInput,
+  type ExportAllInput,
+  type SwitchModeInput,
+  type GetSessionInput,
+  type RecommendModeInput,
+  type DeleteSessionInput,
+  type ModeStatus as HandlerModeStatus,
+  type AddThoughtResponse,
+  type AnalyzeResponse,
+  isAddThoughtInput,
+  isSessionActionInput,
+  isAnalyzeInput,
+} from './handlers.js';

@@ -120,6 +120,8 @@ class ValidatorRegistry {
 
       return validator;
     } catch {
+      // Module loading failed - could be missing file, syntax error, or missing export
+      // Clean up promise cache and return undefined to indicate validator unavailable
       this.loadPromises.delete(mode);
       return undefined;
     }
