@@ -18,7 +18,7 @@
  * - deepthinking_scientific: scientificmethod, systemsthinking, formallogic modes
  * - deepthinking_engineering: engineering, algorithmic modes
  * - deepthinking_academic: synthesis, argumentation, critique, analysis modes
- * - deepthinking_session: summarize, export, get_session, switch_mode, recommend_mode
+ * - deepthinking_session: summarize, export, export_all, get_session, switch_mode, recommend_mode
  * - deepthinking_analyze: multi-mode analysis with presets and merge strategies (Phase 12 Sprint 3)
  */
 
@@ -276,7 +276,7 @@ async function handleAddThought(input: any, _toolName: string) {
 }
 
 /**
- * Handle session actions (summarize, export, switch_mode, get_session, recommend_mode, delete_session)
+ * Handle session actions (summarize, export, export_all, switch_mode, get_session, recommend_mode, delete_session)
  */
 async function handleSessionAction(input: any) {
   const action = input.action;
@@ -286,6 +286,8 @@ async function handleSessionAction(input: any) {
       return await handleSummarize(input);
     case 'export':
       return await handleExport(input);
+    case 'export_all':
+      return await handleExportAll(input);
     case 'switch_mode':
       return await handleSwitchMode(input);
     case 'get_session':
@@ -343,6 +345,80 @@ async function handleExport(input: any) {
     content: [{
       type: 'text' as const,
       text: exported,
+    }],
+  };
+}
+
+/**
+ * Handle export_all action - exports all 8 formats at once
+ * Phase 12 Sprint 4
+ */
+async function handleExportAll(input: any) {
+  if (!input.sessionId) {
+    throw new Error('sessionId required for export_all action');
+  }
+
+  const sessionManager = await getSessionManager();
+  const exportService = await getExportService();
+
+  const session = await sessionManager.getSession(input.sessionId);
+  if (!session) {
+    throw new Error(`Session ${input.sessionId} not found`);
+  }
+
+  const formats = ['markdown', 'latex', 'json', 'html', 'jupyter', 'mermaid', 'dot', 'ascii'] as const;
+  const results: { format: string; success: boolean; content?: string; error?: string }[] = [];
+
+  for (const format of formats) {
+    try {
+      const exported = exportService.exportSession(session, format as any);
+      results.push({ format, success: true, content: exported });
+    } catch (error) {
+      results.push({
+        format,
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  const successCount = results.filter(r => r.success).length;
+  const failureCount = results.filter(r => !r.success).length;
+
+  // Build summary
+  const summary = {
+    sessionId: input.sessionId,
+    totalFormats: formats.length,
+    successCount,
+    failureCount,
+    results: results.map(r => ({
+      format: r.format,
+      success: r.success,
+      size: r.content?.length || 0,
+      error: r.error,
+    })),
+  };
+
+  // If includeContent is true, include all successful exports
+  if (input.includeContent) {
+    const contentMap: Record<string, string> = {};
+    for (const r of results) {
+      if (r.success && r.content) {
+        contentMap[r.format] = r.content;
+      }
+    }
+    return {
+      content: [{
+        type: 'text' as const,
+        text: JSON.stringify({ ...summary, exports: contentMap }, null, 2),
+      }],
+    };
+  }
+
+  return {
+    content: [{
+      type: 'text' as const,
+      text: JSON.stringify(summary, null, 2),
     }],
   };
 }

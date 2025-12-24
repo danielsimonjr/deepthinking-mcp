@@ -41,6 +41,7 @@ export const SessionActionSchema = z.object({
   sessionId: z.string().optional(),
   action: SessionActionEnum,
   exportFormat: ExportFormatEnum.optional(),
+  includeContent: z.boolean().optional(), // For export_all action
   newMode: z.string().optional(),
   problemType: z.string().optional(),
   problemCharacteristics: z.object({

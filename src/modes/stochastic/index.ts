@@ -1,6 +1,6 @@
 /**
  * Stochastic Reasoning Module
- * Phase 12 Sprint 1 - Foundation & Infrastructure
+ * Phase 12 Sprint 5 - Monte Carlo & Stochastic Reasoning
  *
  * Provides Monte Carlo simulation, probability distributions,
  * and stochastic reasoning capabilities.
@@ -9,9 +9,37 @@
 // Export types
 export * from './types.js';
 
-// Future exports (to be implemented in Sprint 5):
-// export * from './models/distribution.js';
-// export * from './models/monte-carlo.js';
-// export * from './sampling/rng.js';
-// export * from './analysis/statistics.js';
-// export * from './analysis/convergence.js';
+// Phase 12 Sprint 5: Distribution samplers
+export {
+  createSampler,
+  NormalSampler,
+  UniformSampler,
+  ExponentialSampler,
+  PoissonSampler,
+  BinomialSampler,
+  CategoricalSampler,
+  BetaSampler,
+  GammaSampler,
+  sampleWithStatistics,
+  type DistributionSampler,
+} from './models/distribution.js';
+
+// Phase 12 Sprint 5: Monte Carlo engine
+export {
+  MonteCarloEngine,
+  createMonteCarloEngine,
+  runMonteCarloSimulation,
+  type ProgressCallback,
+  type ModelEvaluator,
+} from './models/monte-carlo.js';
+
+// Phase 12 Sprint 5: Seeded RNG
+export {
+  SeededRNG,
+  createRNG,
+  createParallelRNGs,
+  generateSeed,
+} from './sampling/rng.js';
+
+// Phase 12 Sprint 5: Analysis
+export * from './analysis/index.js';

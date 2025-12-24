@@ -1296,7 +1296,7 @@ export const deepthinking_academic_schema = {
  */
 export const deepthinking_session_schema = {
   name: "deepthinking_session",
-  description: "Session: summarize, export, get, switch_mode, recommend, delete",
+  description: "Session: summarize, export, export_all, get, switch_mode, recommend, delete",
   inputSchema: {
     type: "object",
     properties: {
@@ -1306,13 +1306,17 @@ export const deepthinking_session_schema = {
       },
       action: {
         type: "string",
-        enum: ["summarize", "export", "get_session", "switch_mode", "recommend_mode", "delete_session"],
+        enum: ["summarize", "export", "export_all", "get_session", "switch_mode", "recommend_mode", "delete_session"],
         description: "Session action to perform"
       },
       exportFormat: {
         type: "string",
         enum: ["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"],
         description: "Export format (for export action)"
+      },
+      includeContent: {
+        type: "boolean",
+        description: "Include full export content in response (for export_all action)"
       },
       newMode: {
         type: "string",

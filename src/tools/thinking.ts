@@ -697,7 +697,7 @@ export const ThinkingToolSchema = z.object({
     explanation: z.string(),
   }).optional(),
 
-  action: z.enum(['add_thought', 'summarize', 'export', 'switch_mode', 'get_session', 'recommend_mode', 'delete_session']).default('add_thought'),
+  action: z.enum(['add_thought', 'summarize', 'export', 'export_all', 'switch_mode', 'get_session', 'recommend_mode', 'delete_session']).default('add_thought'),
   exportFormat: z.enum(['markdown', 'latex', 'json', 'html', 'jupyter', 'mermaid', 'dot', 'ascii']).optional(),
   newMode: z.enum(['sequential', 'shannon', 'mathematics', 'physics', 'hybrid', 'inductive', 'deductive', 'abductive', 'causal', 'bayesian', 'counterfactual', 'analogical', 'temporal', 'gametheory', 'evidential', 'firstprinciples', 'systemsthinking', 'scientificmethod', 'optimization', 'formallogic']).optional(),
   // Mode recommendation parameters (v2.4)

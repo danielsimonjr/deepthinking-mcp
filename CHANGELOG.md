@@ -120,6 +120,102 @@ Added the `deepthinking_analyze` MCP tool for analyzing problems using multiple 
   - Full integration with existing session management
   - Support for all 29 reasoning modes via presets or custom selection
 
+**Phase 12 Sprint 4: Comprehensive Export System**
+
+Added file-based export capabilities with profiles and batch export support:
+
+- **Export Profiles** (`src/export/profiles.ts`)
+  - `ExportProfile` interface with 5 pre-built profiles: minimal, standard, academic, visual, comprehensive
+  - Profile definitions include format lists, descriptions, and use cases
+  - `getExportProfile()`, `getProfileFormats()`, `listProfiles()` functions
+  - Extensible design for custom profiles
+
+- **File Exporter** (`src/export/file-exporter.ts`)
+  - `FileExporter` class for file system export
+  - `exportToFile()` - Single format export
+  - `exportToFiles()` - Multi-format batch export
+  - `exportWithProfile()` - Profile-based export
+  - `exportAll()` - All 8 formats export
+  - Session subdirectory and date subdirectory options
+  - Filename templating with `{session}`, `{mode}`, `{format}`, `{date}` placeholders
+  - Progress callbacks for batch exports
+  - Automatic directory creation and file size tracking
+
+**Phase 12 Sprint 5: Monte Carlo & Stochastic Reasoning**
+
+Added Monte Carlo simulation engine with distribution samplers and statistical analysis:
+
+- **Distribution Samplers** (`src/modes/stochastic/models/distribution.ts`)
+  - 8 distribution sampler classes: Normal, Uniform, Exponential, Poisson, Binomial, Categorical, Beta, Gamma
+  - Box-Muller transform for normal distribution
+  - Marsaglia and Tsang method for gamma distribution
+  - Factory function `createSampler()` supporting all 11 distribution types
+  - `sampleWithStatistics()` utility function
+
+- **Seeded RNG** (`src/modes/stochastic/sampling/rng.ts`)
+  - `SeededRNG` class using xorshift128+ algorithm
+  - Reproducible random number generation with seeds
+  - `createParallelRNGs()` for multi-chain simulations
+  - `generateSeed()` utility function
+
+- **Monte Carlo Engine** (`src/modes/stochastic/models/monte-carlo.ts`)
+  - `MonteCarloEngine` class for simulation orchestration
+  - Burn-in and thinning support
+  - Configurable convergence thresholds
+  - Timeout handling with configurable limits
+  - Progress reporting with percentage and ETA
+  - Early stopping on convergence detection
+
+- **Statistical Analysis** (`src/modes/stochastic/analysis/statistics.ts`)
+  - Mean, variance, standard deviation, percentiles, skewness, kurtosis
+  - Correlation matrix computation
+  - Equal-tailed and highest posterior density (HPD) credible intervals
+  - Kernel density estimation (KDE)
+  - Monte Carlo Standard Error (MCSE) calculation
+
+- **Convergence Diagnostics** (`src/modes/stochastic/analysis/convergence.ts`)
+  - Geweke diagnostic statistic
+  - Effective Sample Size (ESS) estimation
+  - R-hat split-chain diagnostic
+  - Autocorrelation analysis
+  - Convergence assessment with detailed summaries
+
+**Phase 12 Sprint 6: Enhanced Graph Analysis**
+
+Added advanced graph algorithms for causal inference:
+
+- **Centrality Algorithms** (`src/modes/causal/graph/algorithms/centrality.ts`)
+  - Degree centrality (in/out/total)
+  - Betweenness centrality with BFS shortest paths
+  - Closeness centrality with reachability handling
+  - PageRank with configurable damping factor
+  - Eigenvector centrality via power iteration
+  - Katz centrality with attenuation parameter
+  - `computeAllCentrality()` for comprehensive analysis
+  - `getMostCentralNode()` utility
+
+- **D-Separation Analysis** (`src/modes/causal/graph/algorithms/d-separation.ts`)
+  - V-structure (collider) detection
+  - Path enumeration between node sets
+  - Path blocking analysis (chains, forks, colliders)
+  - `checkDSeparation()` for conditional independence testing
+  - `findMinimalSeparator()` for minimal adjustment sets
+  - Backdoor criterion validation
+  - Markov blanket computation
+  - Implied independencies enumeration
+  - `getAncestors()` and `getDescendants()` utilities
+
+- **Do-Calculus Implementation** (`src/modes/causal/graph/algorithms/intervention.ts`)
+  - `createMutilatedGraph()` for intervention graphs (removing incoming edges)
+  - `createMarginalizedGraph()` for variable marginalization
+  - `isIdentifiable()` for causal effect identifiability
+  - `findAllBackdoorSets()` for valid adjustment sets
+  - `generateBackdoorFormula()` with LaTeX and plain text output
+  - Frontdoor criterion checking and formula generation
+  - Instrumental variable detection and formula generation
+  - Pearl's three rules of do-calculus: `applyRule1()`, `applyRule2()`, `applyRule3()`
+  - `analyzeIntervention()` comprehensive intervention analysis
+
 **Chunker Utility Tool**
 
 Added a new standalone tool for splitting and merging large files for editing within context limits.
