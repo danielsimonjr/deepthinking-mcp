@@ -1,11 +1,14 @@
 /**
- * CausalHandler - Phase 10 Sprint 2 (v8.1.0)
+ * CausalHandler - Phase 12 Sprint 6 Enhanced (v8.3.0)
  *
  * Specialized handler for Causal reasoning mode with:
  * - Semantic validation of causal graph structure
  * - Cycle detection in causal graphs
  * - Intervention propagation analysis
  * - Confounder identification suggestions
+ * - Centrality analysis (PageRank, Betweenness, Closeness)
+ * - D-separation analysis
+ * - Do-calculus identifiability checking
  */
 
 import { randomUUID } from 'crypto';
@@ -22,6 +25,18 @@ import {
   createValidationWarning,
 } from './ModeHandler.js';
 import { toExtendedThoughtType } from '../../utils/type-guards.js';
+import {
+  computeDegreeCentrality,
+  getMostCentralNode,
+} from '../causal/graph/algorithms/centrality.js';
+import {
+  findVStructures,
+} from '../causal/graph/algorithms/d-separation.js';
+import {
+  isIdentifiable,
+  findAllBackdoorSets,
+} from '../causal/graph/algorithms/intervention.js';
+import type { CausalGraph as GraphCausalGraph } from '../causal/graph/types.js';
 
 /**
  * CausalHandler - Specialized handler for causal reasoning
@@ -217,6 +232,52 @@ export class CausalHandler implements ModeHandler {
           `What are the downstream consequences of ${exitNodes.join(', ')}?`
         );
       }
+
+      // Enhanced analysis using Sprint 6 algorithms
+      if (nodeCount >= 2 && edgeCount >= 1) {
+        const advancedAnalysis = this.performAdvancedGraphAnalysis(thought.causalGraph);
+
+        if (advancedAnalysis.centralNode) {
+          enhancements.suggestions!.push(
+            `Node "${advancedAnalysis.centralNode}" is most central (highest PageRank). Consider its importance in causal pathways.`
+          );
+        }
+
+        if (advancedAnalysis.vStructures.length > 0) {
+          enhancements.warnings!.push(
+            `Detected ${advancedAnalysis.vStructures.length} v-structure(s)/collider(s) that affect d-separation analysis.`
+          );
+        }
+
+        if (advancedAnalysis.identifiability && entryNodes.length > 0 && exitNodes.length > 0) {
+          if (advancedAnalysis.identifiability.identifiable) {
+            enhancements.suggestions!.push(
+              `Causal effect is identifiable via ${advancedAnalysis.identifiability.method || 'standard methods'}.`
+            );
+          } else {
+            enhancements.warnings!.push(
+              `Causal effect may not be identifiable: ${advancedAnalysis.identifiability.reason}`
+            );
+          }
+        }
+
+        if (advancedAnalysis.backdoorSets && advancedAnalysis.backdoorSets.length > 0) {
+          const setDescription = advancedAnalysis.backdoorSets[0].length === 0
+            ? 'No adjustment needed'
+            : `Adjust for: ${advancedAnalysis.backdoorSets[0].join(', ')}`;
+          enhancements.suggestions!.push(
+            `Valid backdoor adjustment set found. ${setDescription}`
+          );
+        }
+
+        // Add centrality metrics
+        if (advancedAnalysis.centralityMetrics) {
+          enhancements.metrics = {
+            ...enhancements.metrics,
+            ...advancedAnalysis.centralityMetrics,
+          };
+        }
+      }
     }
 
     // Suggest interventions if none provided
@@ -234,6 +295,119 @@ export class CausalHandler implements ModeHandler {
     }
 
     return enhancements;
+  }
+
+  /**
+   * Perform advanced graph analysis using Sprint 6 algorithms
+   */
+  private performAdvancedGraphAnalysis(graph: CausalGraph): {
+    centralNode: string | null;
+    vStructures: Array<{ parent1: string; collider: string; parent2: string }>;
+    identifiability: { identifiable: boolean; reason: string; method?: string } | null;
+    backdoorSets: string[][] | null;
+    centralityMetrics: Record<string, number> | null;
+  } {
+    // Convert to graph types format
+    const graphForAnalysis = this.toGraphAnalysisFormat(graph);
+
+    // Find central node using PageRank
+    let centralNode: string | null = null;
+    let centralityMetrics: Record<string, number> | null = null;
+
+    try {
+      const mostCentral = getMostCentralNode(graphForAnalysis, 'pagerank');
+      if (mostCentral) {
+        centralNode = mostCentral.nodeId;
+
+        // Also compute degree centrality for metrics
+        const { degree } = computeDegreeCentrality(graphForAnalysis);
+
+        centralityMetrics = {
+          maxDegree: Math.max(...Array.from(degree.values())),
+          maxPageRank: mostCentral.score,
+          avgDegree: Array.from(degree.values()).reduce((a, b) => a + b, 0) / degree.size,
+        };
+      }
+    } catch {
+      // Silently handle errors in centrality computation
+    }
+
+    // Find v-structures (colliders)
+    let vStructures: Array<{ parent1: string; collider: string; parent2: string }> = [];
+    try {
+      vStructures = findVStructures(graphForAnalysis);
+    } catch {
+      // Silently handle errors
+    }
+
+    // Check identifiability if we have clear treatment and outcome
+    let identifiability: { identifiable: boolean; reason: string; method?: string } | null = null;
+    let backdoorSets: string[][] | null = null;
+
+    const entryNodes = this.findEntryNodes(graph);
+    const exitNodes = this.findExitNodes(graph);
+
+    if (entryNodes.length > 0 && exitNodes.length > 0) {
+      const treatment = graph.nodes.find(n => n.name === entryNodes[0] || n.id === entryNodes[0])?.id;
+      const outcome = graph.nodes.find(n => n.name === exitNodes[0] || n.id === exitNodes[0])?.id;
+
+      if (treatment && outcome) {
+        try {
+          identifiability = isIdentifiable(graphForAnalysis, treatment, outcome);
+          backdoorSets = findAllBackdoorSets(graphForAnalysis, treatment, outcome, 3);
+        } catch {
+          // Silently handle errors
+        }
+      }
+    }
+
+    return {
+      centralNode,
+      vStructures,
+      identifiability,
+      backdoorSets,
+      centralityMetrics,
+    };
+  }
+
+  /**
+   * Convert internal CausalGraph to graph analysis format
+   */
+  private toGraphAnalysisFormat(graph: CausalGraph): GraphCausalGraph {
+    return {
+      id: 'analysis-graph',
+      nodes: graph.nodes.map(n => ({
+        id: n.id,
+        name: n.name || n.id,
+        description: n.description,
+        // Map internal type to graph analysis type
+        type: this.mapNodeType(n.type),
+      })),
+      edges: graph.edges.map(e => ({
+        from: e.from,
+        to: e.to,
+        type: 'directed' as const, // CausalEdge doesn't have type, assume directed
+        weight: e.strength,
+      })),
+    };
+  }
+
+  /**
+   * Map internal node type to graph analysis type
+   */
+  private mapNodeType(type: string): 'observed' | 'latent' | 'intervention' | 'outcome' | undefined {
+    switch (type) {
+      case 'cause':
+        return 'observed';
+      case 'effect':
+        return 'outcome';
+      case 'mediator':
+        return 'observed';
+      case 'confounder':
+        return 'latent';
+      default:
+        return undefined;
+    }
   }
 
   /**

@@ -4,14 +4,14 @@
   "title": "Monte Carlo & Stochastic Reasoning",
   "week": "Week 5",
   "effort": "18-20 hours",
-  "status": "pending",
+  "status": "completed",
   "description": "Implement full stochastic reasoning capability with probability distributions, random number generation, Monte Carlo simulation engine, and StochasticHandler",
   "tasks": [
     {
       "id": "12.5.1",
       "category": "Distributions",
       "description": "Implement probability distribution samplers",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 4.0,
       "details": [
         "NOTE: DistributionType exists in src/types/modes/stochastic.ts - this implements sampling logic",
@@ -33,7 +33,7 @@
       "id": "12.5.2",
       "category": "RNG",
       "description": "Implement seeded random number generator",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 2.5,
       "details": [
         "Implement SeededRNG class with seed parameter",
@@ -52,7 +52,7 @@
       "id": "12.5.3",
       "category": "Monte Carlo Engine",
       "description": "Implement Monte Carlo simulation engine",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 5.0,
       "details": [
         "Create MonteCarloEngine class",
@@ -71,7 +71,7 @@
       "id": "12.5.4",
       "category": "Statistics",
       "description": "Implement statistical analysis and convergence diagnostics",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 4.0,
       "details": [
         "Implement computeStatistics() for mean, variance, percentiles",
@@ -92,7 +92,7 @@
       "id": "12.5.5",
       "category": "Handler Integration",
       "description": "Create StochasticHandler and integrate with mode system",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 3.5,
       "details": [
         "Create StochasticHandler implementing ModeHandler interface",

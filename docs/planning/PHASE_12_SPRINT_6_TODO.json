@@ -4,14 +4,14 @@
   "title": "Enhanced Graph Analysis",
   "week": "Week 6",
   "effort": "15-18 hours",
-  "status": "pending",
+  "status": "completed",
   "description": "Implement advanced graph analysis algorithms including centrality measures, D-separation for causal inference, and Do-calculus for interventional queries",
   "tasks": [
     {
       "id": "12.6.1",
       "category": "Centrality Algorithms",
       "description": "Implement graph centrality measures",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 4.0,
       "details": [
         "Create CentralityAnalyzer class",
@@ -31,7 +31,7 @@
       "id": "12.6.2",
       "category": "D-Separation",
       "description": "Implement D-separation analysis for causal independence",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 4.0,
       "details": [
         "Create DSeparationAnalyzer class",
@@ -50,7 +50,7 @@
       "id": "12.6.3",
       "category": "Do-Calculus",
       "description": "Implement do-calculus for interventional queries",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 4.0,
       "details": [
         "Create DoCalculus class",
@@ -69,7 +69,7 @@
       "id": "12.6.4",
       "category": "CausalHandler Enhancement",
       "description": "Integrate new graph algorithms into CausalHandler",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 3.0,
       "details": [
         "Add centrality computation for graphs with 3+ nodes",
@@ -89,7 +89,7 @@
       "id": "12.6.5",
       "category": "Module Export & Docs",
       "description": "Export module and add documentation",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 2.0,
       "details": [
         "Create src/modes/causal/graph/index.ts exporting all algorithms",
