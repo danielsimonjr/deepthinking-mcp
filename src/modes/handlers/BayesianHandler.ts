@@ -62,11 +62,22 @@ export class BayesianHandler implements ModeHandler {
   createThought(input: ThinkingToolInput, sessionId: string): BayesianThought {
     const inputAny = input as any;
 
+    // Phase 12 fix: Map hypotheses array from API to alternatives
+    // The API accepts hypotheses[] which should populate hypothesis.alternatives
+    let alternatives: BayesianHypothesis[] = [];
+    if (inputAny.hypotheses && Array.isArray(inputAny.hypotheses)) {
+      alternatives = inputAny.hypotheses.map((h: any) => ({
+        id: h.id || randomUUID(),
+        statement: h.description || h.explanation || h.statement || '',
+        probability: h.probability,
+      }));
+    }
+
     // Extract Bayesian components from input
     const hypothesis: BayesianHypothesis = inputAny.hypothesis || {
       id: randomUUID(),
       statement: input.thought,
-      alternatives: [],
+      alternatives: alternatives.length > 0 ? alternatives : [],
     };
 
     const prior: PriorProbability = {

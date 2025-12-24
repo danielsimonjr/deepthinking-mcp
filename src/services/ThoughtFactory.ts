@@ -302,17 +302,44 @@ export class ThoughtFactory {
           assumptions: input.assumptions || [],
         } as ShannonThought;
 
-      case 'mathematics':
+      case 'mathematics': {
+        // Phase 8: Access extended fields from schema (cast to any for schema-only fields)
+        const mathInput = input as any;
+        // Build theorems array from input if provided
+        const mathTheorems = mathInput.theorem
+          ? [
+              {
+                name: 'Theorem',
+                statement: mathInput.theorem,
+                hypotheses: mathInput.hypotheses || [],
+                conclusion: mathInput.theorem,
+              },
+            ]
+          : [];
         return {
           ...baseThought,
           mode: ThinkingMode.MATHEMATICS,
-          thoughtType: toExtendedThoughtType(input.thoughtType, 'model'),
+          thoughtType: toExtendedThoughtType(input.thoughtType, 'axiom_definition'),
           mathematicalModel: input.mathematicalModel,
-          proofStrategy: input.proofStrategy,
+          proofStrategy: input.proofStrategy
+            ? { ...input.proofStrategy, completeness: 0 }
+            : undefined,
+          theorems: mathTheorems,
           dependencies: input.dependencies || [],
           assumptions: input.assumptions || [],
           uncertainty: input.uncertainty || 0.5,
+          references: [],
+          // Phase 8: Store proof decomposition inputs for analysis
+          _proofInputs: mathInput.proofSteps
+            ? {
+                proofSteps: mathInput.proofSteps,
+                analysisDepth: mathInput.analysisDepth || 'standard',
+                includeConsistencyCheck: mathInput.includeConsistencyCheck ?? false,
+                traceAssumptions: mathInput.traceAssumptions ?? false,
+              }
+            : undefined,
         } as MathematicsThought;
+      }
 
       case 'physics':
         return {
@@ -445,6 +472,27 @@ export class ThoughtFactory {
         } as any;
 
       case 'evidential':
+        // Phase 12 fix: Map massFunction from API to beliefFunctions format
+        // Cast to any to access massFunction which is in the JSON schema but not the strict type
+        const evidentialInput = input as any;
+        let beliefFunctions = input.beliefFunctions || [];
+        if (evidentialInput.massFunction && typeof evidentialInput.massFunction === 'object' && beliefFunctions.length === 0) {
+          // Convert Record<string, number> massFunction to BeliefFunction[]
+          const massAssignments = Object.entries(evidentialInput.massFunction as Record<string, number>).map(
+            ([key, mass]) => ({
+              hypothesisSet: key.split(',').map(s => s.trim()), // Support comma-separated hypothesis sets
+              mass: mass as number,
+              justification: 'From mass function input',
+            })
+          );
+          beliefFunctions = [{
+            id: 'bf-from-mass-function',
+            source: 'input',
+            massAssignments,
+            conflictMass: 0,
+          }];
+        }
+
         return {
           ...baseThought,
           mode: ThinkingMode.EVIDENTIAL,
@@ -452,7 +500,7 @@ export class ThoughtFactory {
           frameOfDiscernment: input.frameOfDiscernment,
           hypotheses: input.hypotheses || [],
           evidence: input.evidence || [],
-          beliefFunctions: input.beliefFunctions || [],
+          beliefFunctions,
           combinedBelief: input.combinedBelief,
           plausibility: input.plausibility,
           decisions: input.decisions || [],

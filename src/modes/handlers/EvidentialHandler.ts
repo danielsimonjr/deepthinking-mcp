@@ -56,6 +56,25 @@ export class EvidentialHandler implements ModeHandler {
     // Resolve thought type
     const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
 
+    // Phase 12 fix: Map massFunction from API to beliefFunctions format
+    let beliefFunctions = inputAny.beliefFunctions || [];
+    if (inputAny.massFunction && typeof inputAny.massFunction === 'object' && beliefFunctions.length === 0) {
+      // Convert Record<string, number> massFunction to BeliefFunction[]
+      const massAssignments = Object.entries(inputAny.massFunction as Record<string, number>).map(
+        ([key, mass]) => ({
+          hypothesisSet: key.split(',').map((s: string) => s.trim()),
+          mass: mass as number,
+          justification: 'From mass function input',
+        })
+      );
+      beliefFunctions = [{
+        id: 'bf-from-mass-function',
+        source: 'input',
+        massAssignments,
+        conflictMass: 0,
+      }];
+    }
+
     return {
       id: randomUUID(),
       sessionId,
@@ -71,7 +90,7 @@ export class EvidentialHandler implements ModeHandler {
       frameOfDiscernment: inputAny.frameOfDiscernment || [],
       hypotheses: inputAny.hypotheses || [],
       evidence: inputAny.evidence || [],
-      beliefFunctions: inputAny.beliefFunctions || [],
+      beliefFunctions,
       combinedBelief: inputAny.combinedBelief,
       plausibility: inputAny.plausibility,
       decisions: inputAny.decisions || [],
