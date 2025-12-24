@@ -1314,9 +1314,22 @@ export const deepthinking_session_schema = {
         enum: ["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"],
         description: "Export format (for export action)"
       },
+      exportProfile: {
+        type: "string",
+        enum: ["academic", "presentation", "documentation", "archive", "minimal"],
+        description: "Pre-configured export bundle. academic: LaTeX+Mermaid+JSON, presentation: Mermaid+HTML+ASCII, documentation: Markdown+HTML+JSON, archive: all formats, minimal: Markdown+JSON"
+      },
       includeContent: {
         type: "boolean",
         description: "Include full export content in response (for export_all action)"
+      },
+      outputDir: {
+        type: "string",
+        description: "Output directory path for file export. When provided, exports write to files instead of returning content. Creates session subdirectory automatically."
+      },
+      overwrite: {
+        type: "boolean",
+        description: "Overwrite existing files when exporting to outputDir (default: false)"
       },
       newMode: {
         type: "string",

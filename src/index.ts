@@ -354,6 +354,7 @@ async function handleSummarize(input: SessionInput): Promise<MCPResponse> {
 
 /**
  * Handle export action
+ * Phase 16: Added file export support via outputDir parameter or MCP_EXPORT_DIR config
  */
 async function handleExport(input: SessionInput): Promise<MCPResponse> {
   if (!input.sessionId) {
@@ -368,6 +369,12 @@ async function handleExport(input: SessionInput): Promise<MCPResponse> {
     throw new Error(`Session ${input.sessionId} not found`);
   }
 
+  // Phase 16: File export support - use config defaults if not specified in request
+  const { getConfig } = await import('./config/index.js');
+  const config = getConfig();
+  const outputDir = (input.outputDir as string | undefined) || config.exportDir || undefined;
+  const overwrite = (input.overwrite as boolean) ?? config.exportOverwrite;
+
   // Phase 12: Support export profiles
   const exportProfile = input.exportProfile as string | undefined;
   if (exportProfile) {
@@ -379,7 +386,40 @@ async function handleExport(input: SessionInput): Promise<MCPResponse> {
       throw new Error(`Unknown export profile: ${exportProfile}. Valid profiles: academic, presentation, documentation, archive, minimal`);
     }
 
-    // Export all formats defined in the profile
+    // Phase 16: If outputDir provided, use FileExporter
+    if (outputDir) {
+      const { createFileExporter } = await import('./export/file-exporter.js');
+      const fileExporter = createFileExporter(
+        { outputDir, overwrite, createDir: true },
+        (s, f) => exportService.exportSession(s, f as any)
+      );
+
+      const formats = profile.formats.filter((f: string) => f !== 'svg');
+      const batchResult = await fileExporter.exportToFiles(session, formats);
+
+      return {
+        content: [{
+          type: 'text' as const,
+          text: JSON.stringify({
+            mode: 'file',
+            profile: { id: profile.id, name: profile.name },
+            outputDir: batchResult.outputDir,
+            successCount: batchResult.successCount,
+            failureCount: batchResult.failureCount,
+            totalSize: batchResult.totalSize,
+            files: batchResult.results.map(r => ({
+              format: r.format,
+              path: r.filePath,
+              success: r.success,
+              size: r.size,
+              error: r.error,
+            })),
+          }, null, 2),
+        }],
+      };
+    }
+
+    // Export all formats defined in the profile (return as content)
     const results: { format: string; success: boolean; content?: string; error?: string }[] = [];
 
     for (const format of profile.formats) {
@@ -427,6 +467,33 @@ async function handleExport(input: SessionInput): Promise<MCPResponse> {
 
   // Standard single-format export
   const format = input.exportFormat || 'json';
+
+  // Phase 16: If outputDir provided, write to file
+  if (outputDir) {
+    const { createFileExporter } = await import('./export/file-exporter.js');
+    const fileExporter = createFileExporter(
+      { outputDir, overwrite, createDir: true },
+      (s, f) => exportService.exportSession(s, f as any)
+    );
+
+    const result = await fileExporter.exportToFile(session, format as any);
+
+    return {
+      content: [{
+        type: 'text' as const,
+        text: JSON.stringify({
+          mode: 'file',
+          format: result.format,
+          path: result.filePath,
+          success: result.success,
+          size: result.size,
+          error: result.error,
+        }, null, 2),
+      }],
+    };
+  }
+
+  // Return content as text (original behavior)
   const exported = exportService.exportSession(session, format as any);
 
   return {
@@ -439,7 +506,7 @@ async function handleExport(input: SessionInput): Promise<MCPResponse> {
 
 /**
  * Handle export_all action - exports all 8 formats at once (or profile-specific formats)
- * Phase 12 Sprint 4
+ * Phase 12 Sprint 4, Phase 16: Added file export support via outputDir parameter or MCP_EXPORT_DIR config
  */
 async function handleExportAll(input: SessionInput): Promise<MCPResponse> {
   if (!input.sessionId) {
@@ -453,6 +520,12 @@ async function handleExportAll(input: SessionInput): Promise<MCPResponse> {
   if (!session) {
     throw new Error(`Session ${input.sessionId} not found`);
   }
+
+  // Phase 16: File export support - use config defaults if not specified in request
+  const { getConfig } = await import('./config/index.js');
+  const config = getConfig();
+  const outputDir = (input.outputDir as string | undefined) || config.exportDir || undefined;
+  const overwrite = (input.overwrite as boolean) ?? config.exportOverwrite;
 
   // Phase 12: Support export profiles in export_all
   let formats: readonly string[] = ['markdown', 'latex', 'json', 'html', 'jupyter', 'mermaid', 'dot', 'ascii'];
@@ -470,6 +543,41 @@ async function handleExportAll(input: SessionInput): Promise<MCPResponse> {
     // Use only the formats defined in the profile (excluding svg which isn't widely supported)
     formats = profile.formats.filter((f: string) => f !== 'svg');
   }
+
+  // Phase 16: If outputDir provided, use FileExporter
+  if (outputDir) {
+    const { createFileExporter } = await import('./export/file-exporter.js');
+    const fileExporter = createFileExporter(
+      { outputDir, overwrite, createDir: true },
+      (s, f) => exportService.exportSession(s, f as any)
+    );
+
+    const batchResult = await fileExporter.exportToFiles(session, formats as any);
+
+    return {
+      content: [{
+        type: 'text' as const,
+        text: JSON.stringify({
+          mode: 'file',
+          sessionId: input.sessionId,
+          outputDir: batchResult.outputDir,
+          successCount: batchResult.successCount,
+          failureCount: batchResult.failureCount,
+          totalSize: batchResult.totalSize,
+          exportedAt: batchResult.exportedAt.toISOString(),
+          files: batchResult.results.map(r => ({
+            format: r.format,
+            path: r.filePath,
+            success: r.success,
+            size: r.size,
+            error: r.error,
+          })),
+        }, null, 2),
+      }],
+    };
+  }
+
+  // Original behavior: generate content in memory
   const results: { format: string; success: boolean; content?: string; error?: string }[] = [];
 
   for (const format of formats) {

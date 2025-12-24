@@ -10,6 +10,7 @@ import {
   PositiveIntSchema,
   SessionActionEnum,
   ExportFormatEnum,
+  ExportProfileEnum,
   LevelEnum,
 } from './shared.js';
 
@@ -41,7 +42,10 @@ export const SessionActionSchema = z.object({
   sessionId: z.string().optional(),
   action: SessionActionEnum,
   exportFormat: ExportFormatEnum.optional(),
+  exportProfile: ExportProfileEnum.optional(), // Phase 12: Pre-configured export bundles
   includeContent: z.boolean().optional(), // For export_all action
+  outputDir: z.string().optional(), // Phase 16: File export - when provided, exports write to files instead of returning content
+  overwrite: z.boolean().optional(), // Phase 16: File export - overwrite existing files (default: false)
   newMode: z.string().optional(),
   problemType: z.string().optional(),
   problemCharacteristics: z.object({

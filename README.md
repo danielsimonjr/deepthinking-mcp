@@ -42,6 +42,7 @@ A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning mod
 - **Intelligent Mode Recommendation** - Automatic mode selection based on problem characteristics
 - **Taxonomy Classifier** - 69 reasoning types across 12 categories for intelligent task classification (110 planned)
 - **Visual Exports** - Generate Mermaid diagrams, DOT graphs, ASCII art, SVG graphics, and LaTeX documents
+- **File Export System** - Export sessions to files with configurable output directory, profiles, and batch support
 - **Production-Ready** - Search engine, templates, batch processing, caching, backup/restore
 - **Enterprise Security** - Input validation (Zod), rate limiting, path sanitization, PII redaction
 - **High Performance** - LRU caching with auto-eviction, async I/O, 4-5x validation speedups
@@ -81,6 +82,35 @@ Add to your MCP settings file:
   }
 }
 ```
+
+### Configuration with Environment Variables
+
+Configure the server with environment variables:
+
+```json
+{
+  "mcpServers": {
+    "deepthinking": {
+      "command": "npx",
+      "args": ["deepthinking-mcp"],
+      "env": {
+        "MCP_EXPORT_PATH": "C:/deepthinking-exports",
+        "MCP_EXPORT_OVERWRITE": "false",
+        "MCP_LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `MCP_EXPORT_PATH` | Default directory for file exports | `` (returns content) |
+| `MCP_EXPORT_OVERWRITE` | Overwrite existing files | `false` |
+| `MCP_LOG_LEVEL` | Log level (debug/info/warn/error) | `info` |
+| `MCP_MAX_SESSIONS` | Maximum active sessions | `100` |
+| `MCP_SESSION_TIMEOUT_MS` | Session timeout (0 = none) | `0` |
+| `SESSION_DIR` | Shared session storage for multi-instance | `` (in-memory) |
 
 ## Quick Start
 
@@ -698,6 +728,27 @@ Full-text search with faceted filtering and relevance ranking. Used internally t
 ### Template System
 
 Pre-built templates for common reasoning patterns, accessible through session creation.
+
+### File Export System (v8.4.0)
+
+Export reasoning sessions directly to files with automatic directory organization:
+
+- **Automatic File Output** - Configure `MCP_EXPORT_PATH` to write exports to disk instead of returning content
+- **Session Subdirectories** - Files organized by session ID for easy management
+- **Export Profiles** - Pre-configured bundles: `academic` (LaTeX+Markdown+JSON), `presentation` (Mermaid+HTML+ASCII), `documentation`, `archive`, `minimal`
+- **8 Export Formats** - Markdown, LaTeX, JSON, HTML, Jupyter, Mermaid, DOT, ASCII
+- **Overwrite Protection** - Files won't be overwritten unless `overwrite: true` or `MCP_EXPORT_OVERWRITE=true`
+
+```json
+// Export single format
+{ "action": "export", "sessionId": "...", "exportFormat": "mermaid" }
+
+// Export with profile
+{ "action": "export", "sessionId": "...", "exportProfile": "academic" }
+
+// Export all 8 formats
+{ "action": "export_all", "sessionId": "..." }
+```
 
 ### Batch Processing
 

@@ -43,6 +43,38 @@ Improved all 16 empty catch blocks across 7 files with explanatory comments:
 
 ### ✨ New Features
 
+**Phase 16: File Export System**
+
+Added built-in file export capability for reasoning sessions:
+
+- **Environment Configuration**
+  - `MCP_EXPORT_PATH` - Set default export directory for all sessions
+  - `MCP_EXPORT_OVERWRITE` - Control file overwrite behavior (default: false)
+
+- **Export Actions Enhanced**
+  - `export` action now writes to files when `MCP_EXPORT_PATH` is configured
+  - `export_all` action exports all 8 formats to the configured directory
+  - Request-level `outputDir` parameter overrides the environment setting
+  - Request-level `overwrite` parameter overrides `MCP_EXPORT_OVERWRITE`
+
+- **Export Profiles**
+  - `academic` - LaTeX + Markdown + JSON (for papers/documentation)
+  - `presentation` - Mermaid + HTML + ASCII (for slides/demos)
+  - `documentation` - Markdown + HTML + JSON
+  - `archive` - All 8 formats
+  - `minimal` - Markdown + JSON
+
+- **File Organization**
+  - Session subdirectories: `{exportDir}/{sessionId}/`
+  - Filename pattern: `{sessionId}_{mode}_{format}.{ext}`
+  - Automatic directory creation
+
+- **Files Modified**
+  - `src/config/index.ts` - Added `exportDir` and `exportOverwrite` to ServerConfig
+  - `src/tools/schemas/base.ts` - Added `outputDir` and `overwrite` parameters
+  - `src/tools/json-schemas.ts` - Added `exportProfile`, `outputDir`, `overwrite` to session tool
+  - `src/index.ts` - Updated `handleExport()` and `handleExportAll()` to use FileExporter
+
 **Phase 12 Sprint 1: Foundation & Infrastructure**
 
 Added foundational types for advanced reasoning features planned in Phase 12:

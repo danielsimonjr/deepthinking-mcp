@@ -66,6 +66,18 @@ export const SessionActionEnum = z.enum([
 ]);
 
 /**
+ * Export profile presets (Phase 12 Sprint 4)
+ * Defines pre-configured export bundles for common use cases
+ */
+export const ExportProfileEnum = z.enum([
+  'academic',
+  'presentation',
+  'documentation',
+  'archive',
+  'minimal',
+]);
+
+/**
  * Proof strategy types (mathematics mode)
  */
 export const ProofTypeEnum = z.enum([

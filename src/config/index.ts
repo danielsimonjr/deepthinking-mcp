@@ -44,6 +44,12 @@ export interface ServerConfig {
 
   /** Enable performance metrics logging */
   enablePerformanceMetrics: boolean;
+
+  /** Default directory for file exports (Phase 16). Empty string = return content as text */
+  exportDir: string;
+
+  /** Overwrite existing files when exporting (Phase 16) */
+  exportOverwrite: boolean;
 }
 
 /**
@@ -62,6 +68,8 @@ const defaultConfig: ServerConfig = {
   persistenceDir: process.env.MCP_PERSISTENCE_DIR || './.deepthinking-sessions',
   logLevel: (process.env.MCP_LOG_LEVEL || 'info') as ServerConfig['logLevel'],
   enablePerformanceMetrics: process.env.MCP_ENABLE_PERF_METRICS === 'true',
+  exportDir: process.env.MCP_EXPORT_PATH || '',
+  exportOverwrite: process.env.MCP_EXPORT_OVERWRITE === 'true',
 };
 
 /**
