@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document outlines the refactoring of the visual exporter module to reduce file sizes below 1000 lines and adopt existing utility modules. The refactoring addresses architectural debt where 21 out of 22 mode exporters ignore the comprehensive DOT, Mermaid, and ASCII utility modules.
+This document outlines the refactoring of the visual exporter module to adopt existing utility modules instead of maintaining self-contained implementations. The primary goal is **utility module adoption** — using shared DOT, Mermaid, and ASCII utilities rather than duplicating logic inline. File size reduction below 1000 lines is a natural consequence of this modular approach.
+
+The `sequential.ts` file (Phase 11 refactor) demonstrates the target pattern: it imports and uses all utility modules, resulting in cleaner, more maintainable code. Currently, 21 out of 22 mode exporters ignore these utilities and duplicate the same logic inline.
 
 **Status**: Planned
 **Priority**: Medium
@@ -415,13 +417,25 @@ describe('physics.ts refactoring', () => {
 
 ## Success Criteria
 
+### Primary: Utility Module Adoption
+
+| Metric | Current | Target |
+|--------|---------|--------|
+| DOT utility adoption | 1/22 (4.5%) | 22/22 (100%) |
+| Mermaid utility adoption | 1/22 (4.5%) | 22/22 (100%) |
+| ASCII utility adoption | 1/22 (4.5%) | 22/22 (100%) |
+
+### Secondary: File Size Reduction (natural consequence)
+
 | Metric | Current | Target |
 |--------|---------|--------|
 | Files >1000 lines | 12 | 0 |
 | Total mode file lines | 24,046 | <15,000 |
-| DOT utility adoption | 1/22 (4.5%) | 22/22 (100%) |
-| Mermaid utility adoption | 1/22 (4.5%) | 22/22 (100%) |
-| ASCII utility adoption | 1/22 (4.5%) | 22/22 (100%) |
+
+### Quality Gates
+
+| Metric | Current | Target |
+|--------|---------|--------|
 | Tests passing | 3,539 | 3,539+ |
 | Visual output | N/A | Identical before/after |
 
@@ -459,7 +473,7 @@ During analysis, a bug was discovered in `tools/chunking-for-files/`:
 | physics.ts `physicsToDOT()` | 1,562 lines | ~84 lines |
 | metareasoning.ts `metaReasoningToDOT()` | 1,418 lines | ~75 lines |
 
-The refactoring focus is correctly on **file size** (>1000 lines) and **utility adoption** (1/22), not individual function sizes.
+The refactoring focus is correctly on **utility module adoption** (only 1/22 files use shared utilities) with file size reduction (>1000 lines) as a secondary benefit, not individual function sizes.
 
 ---
 
