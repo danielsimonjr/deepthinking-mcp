@@ -25,6 +25,7 @@ Found **25 files over 500 lines** (out of 250 total TypeScript files).
 ### 1. src/export/visual/modes/physics.ts (1,781 lines)
 
 **Chunker Analysis**:
+
 ```
 Found 17 section(s):
   15. function:exportPhysicsVisualization        30 lines
@@ -32,22 +33,33 @@ Found 17 section(s):
   17. function:physicsToDOT                   1,562 lines [LARGE] ⚠️
 ```
 
-**Problem**: The `physicsToDOT()` function is **1,562 lines** - this is essentially an entire module crammed into a single function.
+**Problem**: The `physicsToDOT()` function is **1,562 lines** - builds DOT strings from scratch instead of using `src/export/visual/utils/dot.ts` (594 lines of helpers).
 
 **Recommended Refactoring**:
-```
-src/export/visual/modes/physics/
-├── index.ts              (Main export, 30 lines)
-├── mermaid.ts            (Mermaid exporter, 115 lines)
-├── dot/
-│   ├── index.ts          (DOT orchestrator, ~100 lines)
-│   ├── tensor-graph.ts   (Tensor visualization, ~300 lines)
-│   ├── conservation.ts   (Conservation law graphs, ~300 lines)
-│   ├── field-theory.ts   (Field theory diagrams, ~300 lines)
-│   ├── equation-graph.ts (Equation relationships, ~300 lines)
-│   └── styles.ts         (DOT styling utilities, ~200 lines)
-└── types.ts              (Shared types, ~50 lines)
-```
+
+1. **Use existing `utils/dot.ts`** - Add DOTGraphBuilder class with existing DotNode/DotEdge types
+2. **Refactor physicsToDOT()** - Replace inline string building with builder pattern:
+
+   ```typescript
+   const builder = new DOTGraphBuilder()
+     .setOptions({ rankDir: 'TB' })
+     .addNode({ id: 'tensor', label: 'Tensor Field', shape: 'box' })
+     .addEdge({ source: 'tensor', target: 'field' });
+   return builder.render(); // Uses existing generateDotGraph()
+   ```
+
+3. **Extract domain logic** - Keep physics-specific graph construction in physics.ts, but use utilities for rendering
+4. **Optional subdirectory** - If still >500 lines after refactor, split into:
+
+   ```
+   src/export/visual/modes/physics/
+   ├── index.ts          (Main export + orchestration, ~100 lines)
+   ├── tensor-graphs.ts  (Tensor visualization logic, ~150 lines)
+   ├── conservation.ts   (Conservation law logic, ~150 lines)
+   └── field-theory.ts   (Field theory logic, ~150 lines)
+   ```
+
+**Key Insight**: Don't create new DOT utilities - **use** `src/export/visual/utils/dot.ts` with new builder pattern.
 
 **Estimated Effort**: 4-6 hours
 **Priority**: HIGH (largest function in codebase)
@@ -57,6 +69,7 @@ src/export/visual/modes/physics/
 ### 2. src/export/visual/modes/engineering.ts (1,691 lines)
 
 **Chunker Analysis**:
+
 ```
 Found 20 section(s):
   12. function:exportEngineeringAnalysis         33 lines
@@ -70,27 +83,38 @@ Found 20 section(s):
   20. function:escapeModelicaString             954 lines [LARGE] ⚠️
 ```
 
-**Problem**: The `escapeModelicaString()` function is **954 lines**. Name suggests it should be ~50 lines max.
+**Problem**: The `escapeModelicaString()` function is **954 lines**. Misleading name - actually contains full Modelica exporter. Other format functions don't use existing utilities in `src/export/visual/utils/`.
 
 **Recommended Refactoring**:
-```
-src/export/visual/modes/engineering/
-├── index.ts                (Main export, 33 lines)
-├── mermaid.ts              (Mermaid exporter, 83 lines)
-├── dot.ts                  (DOT exporter, 83 lines)
-├── ascii.ts                (ASCII exporter, 92 lines)
-├── svg.ts                  (SVG exporter, 91 lines)
-├── graphml.ts              (GraphML exporter, 141 lines)
-├── tikz.ts                 (TikZ exporter, 89 lines)
-├── modelica/
-│   ├── index.ts            (Modelica orchestrator, ~100 lines)
-│   ├── requirements.ts     (Requirements modeling, ~200 lines)
-│   ├── trade-studies.ts    (Trade study models, ~200 lines)
-│   ├── fmea.ts             (FMEA modeling, ~200 lines)
-│   ├── systems.ts          (System architecture, ~200 lines)
-│   └── utils.ts            (sanitizeModelicaId, etc., ~50 lines)
-└── types.ts                (Shared types, ~50 lines)
-```
+
+1. **Use existing format utilities**:
+   - `engineeringToMermaid()` - Use `utils/mermaid.ts` helpers
+   - `engineeringToDOT()` - Use `utils/dot.ts` with DOTGraphBuilder
+   - `engineeringToASCII()` - Use `utils/ascii.ts` box drawing helpers
+   - `engineeringToSVG()` - Use `utils/svg.ts` rendering helpers
+   - `engineeringToTikZ()` - Use `utils/tikz.ts` LaTeX helpers
+   - `engineeringToGraphML()` - Use `utils/graphml.ts` XML generation
+
+2. **Extract Modelica exporter** - Move `escapeModelicaString()` logic to `utils/modelica.ts`:
+
+   ```typescript
+   // Add to src/export/visual/utils/modelica.ts
+   export function generateModelicaRequirements(requirements: Requirement[]): string;
+   export function generateModelicaTradeStudy(study: TradeStudy): string;
+   export function generateModelicaFMEA(fmea: FMEA): string;
+   ```
+
+3. **Optional subdirectory** - If engineering.ts still >300 lines after using utilities:
+
+   ```
+   src/export/visual/modes/engineering/
+   ├── index.ts          (Main export + orchestration, ~100 lines)
+   ├── requirements.ts   (Requirements visualization logic, ~150 lines)
+   ├── trade-studies.ts  (Trade study logic, ~150 lines)
+   └── fmea.ts           (FMEA analysis logic, ~150 lines)
+   ```
+
+**Key Insight**: Already has 7 format exporters - all should use corresponding `utils/*.ts` modules. Move Modelica logic to `utils/modelica.ts`.
 
 **Estimated Effort**: 5-7 hours
 **Priority**: HIGH (misleading function name masks complexity)
@@ -100,6 +124,7 @@ src/export/visual/modes/engineering/
 ### 3. src/export/visual/modes/metareasoning.ts (1,628 lines)
 
 **Chunker Analysis**:
+
 ```
 Found 17 section(s):
   15. function:exportMetaReasoningVisualization   30 lines
@@ -107,22 +132,33 @@ Found 17 section(s):
   17. function:metaReasoningToDOT              1,418 lines [LARGE] ⚠️
 ```
 
-**Problem**: The `metaReasoningToDOT()` function is **1,418 lines**.
+**Problem**: The `metaReasoningToDOT()` function is **1,418 lines** - builds DOT strings inline instead of using `src/export/visual/utils/dot.ts`.
 
 **Recommended Refactoring**:
-```
-src/export/visual/modes/metareasoning/
-├── index.ts                  (Main export, 30 lines)
-├── mermaid.ts                (Mermaid exporter, 105 lines)
-├── dot/
-│   ├── index.ts              (DOT orchestrator, ~100 lines)
-│   ├── reasoning-graph.ts    (Reasoning quality graphs, ~300 lines)
-│   ├── meta-analysis.ts      (Meta-analysis visualization, ~300 lines)
-│   ├── insight-graph.ts      (Insight relationships, ~300 lines)
-│   ├── improvement-graph.ts  (Improvement suggestions, ~300 lines)
-│   └── styles.ts             (DOT styling utilities, ~150 lines)
-└── types.ts                  (Shared types, ~50 lines)
-```
+
+1. **Use existing `utils/dot.ts`** - Leverage DOTGraphBuilder with existing DotNode/DotEdge/DotSubgraph types
+2. **Refactor metaReasoningToDOT()** - Replace string concatenation with builder calls:
+
+   ```typescript
+   const builder = new DOTGraphBuilder()
+     .addSubgraph({ id: 'reasoning', label: 'Reasoning Quality', nodes: [...] })
+     .addNode({ id: 'insight', label: 'Key Insight', shape: 'diamond' })
+     .addEdge({ source: 'reasoning', target: 'insight', style: 'dashed' });
+   return builder.render();
+   ```
+
+3. **Extract domain logic** - Keep meta-reasoning graph construction logic in metareasoning.ts
+4. **Optional subdirectory** - If still >500 lines after refactor, split into:
+
+   ```
+   src/export/visual/modes/metareasoning/
+   ├── index.ts            (Main export + orchestration, ~100 lines)
+   ├── reasoning-graphs.ts (Reasoning quality logic, ~150 lines)
+   ├── insight-graphs.ts   (Insight relationship logic, ~150 lines)
+   └── improvement.ts      (Improvement suggestion logic, ~150 lines)
+   ```
+
+**Key Insight**: Use `utils/dot.ts` helpers - don't rebuild what exists.
 
 **Estimated Effort**: 4-6 hours
 **Priority**: HIGH (second-largest function)
@@ -132,6 +168,7 @@ src/export/visual/modes/metareasoning/
 ### 4. src/export/visual/modes/proof-decomposition.ts (1,624 lines)
 
 **Chunker Analysis**:
+
 ```
 Found 12 section(s):
    7. function:exportProofDecomposition          37 lines
@@ -142,22 +179,34 @@ Found 12 section(s):
   12. function:proofDecompositionToDOT         1,332 lines [LARGE] ⚠️
 ```
 
-**Problem**: The `proofDecompositionToDOT()` function is **1,332 lines**.
+**Problem**: The `proofDecompositionToDOT()` function is **1,332 lines** - manually builds DOT strings instead of using `src/export/visual/utils/dot.ts`.
 
 **Recommended Refactoring**:
-```
-src/export/visual/modes/proof-decomposition/
-├── index.ts              (Main export, 37 lines)
-├── mermaid.ts            (Mermaid exporter, 142 lines)
-├── dot/
-│   ├── index.ts          (DOT orchestrator, ~100 lines)
-│   ├── proof-tree.ts     (Proof tree structure, ~300 lines)
-│   ├── strategy-graph.ts (Strategy visualization, ~300 lines)
-│   ├── lemma-graph.ts    (Lemma relationships, ~300 lines)
-│   ├── step-graph.ts     (Proof step dependencies, ~300 lines)
-│   └── styles.ts         (DOT styling utilities, ~150 lines)
-└── types.ts              (Shared types, ~50 lines)
-```
+
+1. **Use existing `utils/dot.ts`** - Leverage DOTGraphBuilder and existing rendering functions
+2. **Refactor proofDecompositionToDOT()** - Replace string templates with builder:
+
+   ```typescript
+   const builder = new DOTGraphBuilder()
+     .setOptions({ rankDir: 'TB', splines: 'ortho' })
+     .addNode({ id: 'proof', label: 'Main Theorem', shape: 'box' })
+     .addNode({ id: 'lemma1', label: 'Lemma 1', shape: 'ellipse' })
+     .addEdge({ source: 'proof', target: 'lemma1', label: 'requires' });
+   return builder.render();
+   ```
+
+3. **Extract domain logic** - Keep proof decomposition logic in proof-decomposition.ts
+4. **Optional subdirectory** - If still >500 lines after refactor, split into:
+
+   ```
+   src/export/visual/modes/proof-decomposition/
+   ├── index.ts          (Main export + orchestration, ~100 lines)
+   ├── proof-tree.ts     (Proof tree construction, ~150 lines)
+   ├── strategy.ts       (Strategy visualization, ~150 lines)
+   └── dependencies.ts   (Step dependency logic, ~150 lines)
+   ```
+
+**Key Insight**: Leverage `utils/dot.ts` (594 lines) instead of reinventing DOT generation.
 
 **Estimated Effort**: 4-6 hours
 **Priority**: HIGH (third-largest function)
@@ -167,6 +216,7 @@ src/export/visual/modes/proof-decomposition/
 ### 5. src/tools/json-schemas.ts (1,479 lines)
 
 **Chunker Analysis**:
+
 ```
 Found 16 section(s):
    1. const:baseThoughtProperties                61 lines
@@ -190,6 +240,7 @@ Found 16 section(s):
 **Problem**: 13 tool schemas in one file. Already well-structured with separate constants, but could benefit from splitting for maintainability.
 
 **Recommended Refactoring**:
+
 ```
 src/tools/schemas/
 ├── index.ts                      (Main aggregator + jsonSchemas export)
@@ -248,37 +299,64 @@ src/tools/schemas/
 ### Visual Exporter Anti-Pattern
 
 **15 files** follow the same problematic pattern:
-1. Small entry function (~30 lines)
-2. Reasonable Mermaid exporter (~100-150 lines)
+
+1. Small entry function (~30 lines) ✅
+2. Reasonable Mermaid exporter (~100-150 lines) ✅
 3. **MASSIVE DOT exporter (900-1,500+ lines)** ⚠️
 
-**Root Cause**: DOT format exporters generate complex graph syntax inline instead of using helper functions.
+**Root Cause**: DOT exporters build GraphViz syntax inline **instead of using existing `src/export/visual/utils/dot.ts`** (594 lines with comprehensive helpers, types, and color schemes).
 
-**Common Structure**:
+**Current Anti-Pattern**:
+
 ```typescript
 function modeXToDOT(thought: XThought, options: VisualOptions): string {
-  // 1,000+ lines of:
-  // - String concatenation for DOT syntax
-  // - Inline node/edge generation
-  // - Inline styling logic
-  // - No helper functions
-  // - No modularization
+  let dot = 'digraph G {\n';
+  dot += '  rankdir=TB;\n';
+  dot += '  node [shape=box, style=rounded];\n\n';
+  
+  // 1,000+ lines of string concatenation:
+  dot += `  "${sanitize(id)}" [label="${escapeDotString(label)}", `;
+  dot += `fillcolor="${color}", shape=${shape}];\n`;
+  // ... hundreds more lines ...
+  
+  return dot;
 }
 ```
 
-**Recommended Pattern**:
+**Recommended Pattern** (uses existing infrastructure):
+
 ```typescript
-// dot/index.ts
-export function modeXToDOT(thought: XThought, options: VisualOptions): string {
-  const graph = new DOTGraphBuilder();
-
-  addNodes(graph, thought);
-  addEdges(graph, thought);
-  addClusters(graph, thought);
-  applyStyles(graph, options);
-
-  return graph.render();
+// In mode file: physics.ts, metareasoning.ts, etc.
+function modeXToDOT(thought: XThought, options: VisualOptions): string {
+  const builder = new DOTGraphBuilder()  // NEW: Add to utils/dot.ts
+    .setOptions({ rankDir: 'TB' });
+  
+  addNodes(builder, thought);            // Focused helper (100-200 lines)
+  addEdges(builder, thought);            // Focused helper (100-200 lines)
+  addClusters(builder, thought);         // Focused helper (100-200 lines)
+  
+  return builder.render();               // Uses existing generateDotGraph()
 }
+
+function addNodes(builder: DOTGraphBuilder, thought: XThought): void {
+  builder.addNode({  // Uses existing DotNode type from utils/dot.ts
+    id: 'node1',
+    label: 'Label',
+    shape: 'box',     // Type-checked DotNodeShape
+    fillColor: getDotColor('primary'),  // Existing helper from utils/dot.ts
+  });
+}
+```
+
+**Available Utility Modules** (already exist, should be used):
+- `utils/dot.ts` (594 lines) - DotNode, DotEdge, DotSubgraph types + rendering
+- `utils/mermaid.ts` - Mermaid diagram helpers
+- `utils/ascii.ts` - ASCII box drawing
+- `utils/svg.ts` - SVG rendering
+- `utils/latex.ts` - LaTeX math/diagram generation
+- `utils/tikz.ts` - TikZ/PGF helpers
+- `utils/graphml.ts` - GraphML XML generation
+- `utils/modelica.ts` - Modelica language generation
 
 // dot/nodes.ts
 export function addNodes(graph: DOTGraphBuilder, thought: XThought): void {
@@ -311,18 +389,18 @@ export function addEdges(graph: DOTGraphBuilder, thought: XThought): void {
 
 ### Phase 2: High Priority (1 week)
 
-5. **Refactor metareasoning.ts** - Split `metaReasoningToDOT()` (1,418 lines)
-6. **Refactor proof-decomposition.ts** - Split `proofDecompositionToDOT()` (1,332 lines)
-7. **Refactor json-schemas.ts** - Split into 15 focused schema files
+1. **Refactor metareasoning.ts** - Split `metaReasoningToDOT()` (1,418 lines)
+2. **Refactor proof-decomposition.ts** - Split `proofDecompositionToDOT()` (1,332 lines)
+3. **Refactor json-schemas.ts** - Split into 15 focused schema files
 
 **Estimated Time**: 12-16 hours
 **Impact**: Removes 2,750 more lines from single functions/files
 
 ### Phase 3: Medium Priority (2 weeks)
 
-8. **Refactor remaining visual exporters** - Apply same pattern to 11 more files
-9. **Enhance `src/export/visual/utils/dot.ts`** - Add DOTGraphBuilder class to existing 594-line utility module
-10. **Extract LaTeX utilities** - Split latex.ts by domain
+1. **Refactor remaining visual exporters** - Apply same pattern to 11 more files
+2. **Enhance `src/export/visual/utils/dot.ts`** - Add DOTGraphBuilder class to existing 594-line utility module
+3. **Extract LaTeX utilities** - Split latex.ts by domain
 
 **Estimated Time**: 16-24 hours
 **Impact**: Consistent architecture across all exporters
@@ -332,18 +410,21 @@ export function addEdges(graph: DOTGraphBuilder, thought: XThought): void {
 ## Metrics & Goals
 
 ### Current State
+
 - **Files >1,000 lines**: 16 files
 - **Files >500 lines**: 25 files
 - **Largest function**: 1,562 lines (physicsToDOT)
 - **Total bloat (4 functions)**: 5,266 lines
 
 ### Target State (After Phase 1-2)
+
 - **Files >1,000 lines**: 5 files (mostly type definitions - acceptable)
 - **Files >500 lines**: 20 files
 - **Largest function**: <300 lines
 - **Bloat removed**: 5,266 lines refactored into ~26 focused modules
 
 ### Success Criteria
+
 - ✅ No single function exceeds 300 lines
 - ✅ All visual exporters follow modular pattern
 - ✅ DOT generation uses shared utility classes
@@ -374,12 +455,12 @@ export class DOTGraphBuilder {
   private edges: DotEdge[] = [];        // Already defined interface
   private subgraphs: DotSubgraph[] = []; // Already defined interface
   private options: DotOptions = {};      // Already defined interface
-  
+
   addNode(node: DotNode): this { this.nodes.push(node); return this; }
   addEdge(edge: DotEdge): this { this.edges.push(edge); return this; }
   addSubgraph(sub: DotSubgraph): this { this.subgraphs.push(sub); return this; }
   setOptions(opts: DotOptions): this { this.options = opts; return this; }
-  
+
   render(): string {
     // Uses existing generateDotGraph() function
     return generateDotGraph(this.nodes, this.edges, this.options);
@@ -396,6 +477,7 @@ return builder.render(); // Uses existing generateDotGraph()
 ```
 
 **Benefits**:
+
 - Leverages existing 594-line utility with all types, helpers, and color schemes defined
 - Reduces DOT code by 60-70% through builder pattern
 - Ensures consistent formatting using existing `renderDotNode()`, `renderDotEdge()` functions
