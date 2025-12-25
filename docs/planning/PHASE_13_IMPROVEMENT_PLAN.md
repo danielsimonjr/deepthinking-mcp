@@ -10,6 +10,8 @@ The `sequential.ts` file (Phase 11 refactor) demonstrates the target pattern: it
 **Priority**: Medium
 **Estimated Effort**: ~28-42 hours across 3 sprints
 
+> **Effort Note**: Source analysis documents estimated 42-55 hours based on inflated function size claims. With verified ~85 line DOT functions (not 1,400+), the lower 28-42 hour estimate is appropriate. Each refactored function requires: (1) adding utility imports, (2) converting string concatenation to builder/helper calls, (3) snapshot test verification.
+
 ---
 
 ## Feature Summary
@@ -427,10 +429,12 @@ describe('physics.ts refactoring', () => {
 
 ### Secondary: File Size Reduction (natural consequence)
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| Files >1000 lines | 12 | 0 |
-| Total mode file lines | 24,046 | <15,000 |
+| Metric | Current | Target | Notes |
+|--------|---------|--------|-------|
+| Files >1000 lines | 12 | 0 | May require file splitting (R-4) |
+| Total mode file lines | 24,046 | ~18,000-19,000 | Based on verified ~5,800 lines duplication |
+
+**Note**: Original target of <15,000 lines was based on inflated ~15,000 duplication estimate. With verified ~5,800 lines of duplication, a 20-25% reduction to ~18,000-19,000 lines is more realistic. Files may still need splitting (R-4) to achieve <1000 lines each.
 
 ### Quality Gates
 
@@ -460,26 +464,85 @@ describe('physics.ts refactoring', () => {
 
 ---
 
-## Note: Chunker Tool Bug
+## Note: Chunker Tool Bug & Corrected Analysis
 
 During analysis, a bug was discovered in `tools/chunking-for-files/`:
 
 - The TypeScript parser fails on `{{` and `}}` (Mermaid hexagon syntax)
 - This caused incorrect function size reporting in original analysis documents
-- **File sizes are accurate; function size claims were inflated by the bug**
+- **File sizes are accurate; function size claims were massively inflated by the bug**
 
-| File | Chunker Claimed | Actual |
-|------|-----------------|--------|
-| physics.ts `physicsToDOT()` | 1,562 lines | ~84 lines |
-| metareasoning.ts `metaReasoningToDOT()` | 1,418 lines | ~75 lines |
+### Corrected Function Sizes (Verified December 25, 2025)
+
+| File | Chunker Claimed | Actual | Verification Method |
+|------|-----------------|--------|---------------------|
+| physics.ts `physicsToDOT()` | 1,562 lines | ~84 lines | grep + line count |
+| metareasoning.ts `metaReasoningToDOT()` | 1,418 lines | ~75 lines | grep + line count |
+| engineering.ts `escapeModelicaString()` | 954 lines | **7 lines** | source inspection |
+| engineering.ts `engineeringToModelica()` | (not reported) | ~249 lines | source inspection |
+
+**Critical Correction**: The `escapeModelicaString()` function (7 lines) was confused with `engineeringToModelica()` (249 lines) in the original analysis. The chunker bug caused the entire file after line 739 to be attributed to that function.
+
+### Why Files Are Large (Actual Reason)
+
+Files exceed 1000 lines because they contain **12+ export format functions**, not because of "monster functions":
+
+| File | Functions | Average Size | Total |
+|------|-----------|--------------|-------|
+| physics.ts | 12 formats | ~145 lines | 1,781 |
+| engineering.ts | 14 formats | ~120 lines | 1,691 |
+| metareasoning.ts | 12 formats | ~135 lines | 1,628 |
+
+### Corrected Duplication Estimate
+
+Original analysis claimed ~15,000 lines of duplication. Verified calculation:
+
+| Format | Avg Function Size | Files Missing Utility | Duplicated Lines |
+|--------|-------------------|----------------------|------------------|
+| DOT | ~85 lines | 21 files | ~1,785 lines |
+| Mermaid | ~90 lines | 21 files | ~1,890 lines |
+| ASCII | ~100 lines | 21 files | ~2,100 lines |
+| **Total** | | | **~5,775 lines** |
+
+**Corrected estimate: ~5,800 lines** (not 15,000). The utility adoption goal remains valid, but expected reduction is more modest.
 
 The refactoring focus is correctly on **utility module adoption** (only 1/22 files use shared utilities) with file size reduction (>1000 lines) as a secondary benefit, not individual function sizes.
 
 ---
 
+## Out of Scope (Explicitly Deferred)
+
+The following items were identified in source analysis documents but are **intentionally excluded** from Phase 13:
+
+### JSON Schemas Splitting
+
+`src/tools/json-schemas.ts` (1,479 lines) contains 13 schema exports that could be split into separate files:
+
+```
+src/tools/schemas/
+├── index.ts              # Aggregator + jsonSchemas export
+├── base.ts               # baseThoughtProperties, baseThoughtRequired
+├── core.ts               # deepthinking_core_schema
+├── standard.ts           # deepthinking_standard_schema
+├── mathematics.ts        # deepthinking_mathematics_schema
+└── ... (10 more schema files)
+```
+
+**Rationale for Exclusion**: This file is well-structured with clear constant definitions. While splitting would improve maintainability, it's not related to the visual exporter utility adoption goal. Consider for Phase 14.
+
+### Other Large Modules
+
+| File | Lines | Reason for Exclusion |
+|------|-------|---------------------|
+| `src/taxonomy/suggestion-engine.ts` | 907 | Complex logic engine, well-structured |
+| `src/services/ThoughtFactory.ts` | 873 | Service orchestrator, already refactored |
+| `src/export/visual/utils/latex.ts` | 1,284 | Utility module, not an exporter |
+
+---
+
 ## Future Considerations
 
-- **Phase 14**: Apply similar refactoring to other large modules
+- **Phase 14**: Apply similar refactoring to JSON schemas and other large modules
 - **Utility Enhancement**: Add more specialized graph patterns to utilities
 - **Code Generation**: Consider generating boilerplate exporter code from templates
 - **Performance**: Benchmark and optimize builder pattern if needed
@@ -500,3 +563,12 @@ The refactoring focus is correctly on **utility module adoption** (only 1/22 fil
 
 *Generated: December 25, 2025*
 *Verified: File sizes via `wc -l`, utility imports via `grep`, function boundaries via source inspection*
+
+---
+
+## Revision History
+
+| Date | Changes |
+|------|---------|
+| Dec 25, 2025 (Initial) | Document created from source analysis |
+| Dec 25, 2025 (Rev 1) | **Fidelity review against source documents**: Corrected function sizes (chunker bug), revised duplication estimate from ~15,000 to ~5,800 lines, adjusted target reduction to ~18,000-19,000 lines, added Out of Scope section for JSON schemas, clarified engineering.ts Modelica function naming, added effort estimate justification |
