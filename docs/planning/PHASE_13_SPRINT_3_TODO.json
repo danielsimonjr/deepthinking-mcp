@@ -1,118 +1,145 @@
 {
   "phase": 13,
   "sprint": 3,
-  "title": "File Splitting & Cleanup",
-  "week": "Week 4",
-  "effort": "8-12 hours",
+  "title": "Document Format Builders",
+  "week": "Week 2",
+  "effort": "5-6 hours",
   "status": "pending",
-  "description": "Split any files still exceeding 1000 lines after utility adoption, update imports throughout codebase, and perform final integration testing",
+  "description": "Add fluent API builder classes for document formats (UML, HTML, Markdown, Modelica, JSON)",
   "tasks": [
     {
       "id": "13.3.1",
-      "category": "Analysis",
-      "description": "Identify files still exceeding 1000 lines after utility adoption",
+      "category": "UML Builder",
+      "description": "Add UMLBuilder class to utils/uml.ts",
       "status": "pending",
-      "estimatedHours": 1.0,
+      "estimatedHours": 1.5,
+      "priority": "medium",
       "details": [
-        "Run line count analysis on all 12 refactored files",
-        "Identify any files still >1000 lines",
-        "Document which files need splitting",
-        "Plan split strategy per file (by format category)",
-        "Create list of new subdirectories needed"
+        "Create UMLBuilder class with fluent API for PlantUML",
+        "Implement addClass(name: string, members?: string[], methods?: string[]): this method",
+        "Implement addInterface(name: string, methods?: string[]): this method",
+        "Implement addRelation(from: string, to: string, type: UMLRelationType): this method",
+        "Implement addNote(text: string, position?: string): this method",
+        "Implement beginPackage(name: string): this method",
+        "Implement endPackage(): this method",
+        "Implement render(): string method",
+        "Export UMLBuilder from utils/uml.ts"
       ],
-      "files": [],
-      "notes": "This task determines scope of remaining work. If all files are <1000 lines after Sprint 2, this sprint may be shorter."
+      "files": [
+        "src/export/visual/utils/uml.ts"
+      ],
+      "notes": "UML utility for PlantUML syntax generation"
     },
     {
       "id": "13.3.2",
-      "category": "File Splitting",
-      "description": "Split remaining large files into format-category subdirectories",
+      "category": "HTML Builder",
+      "description": "Add HTMLDocBuilder class to utils/html.ts",
       "status": "pending",
-      "estimatedHours": 6.0,
+      "estimatedHours": 1.0,
+      "priority": "medium",
       "details": [
-        "For each file still >1000 lines, create subdirectory structure:",
-        "  src/export/visual/modes/{mode}/index.ts (re-exports all)",
-        "  src/export/visual/modes/{mode}/visual.ts (DOT, Mermaid, ASCII, SVG)",
-        "  src/export/visual/modes/{mode}/structured.ts (GraphML, TikZ, UML)",
-        "  src/export/visual/modes/{mode}/document.ts (JSON, Markdown, HTML, etc.)",
-        "Move functions to appropriate files based on format category",
-        "Create index.ts that re-exports all functions",
-        "Ensure each split file is <500 lines"
+        "Create HTMLDocBuilder class with fluent API",
+        "Implement setTitle(title: string): this method",
+        "Implement addStyle(css: string): this method",
+        "Implement addHeading(level: 1-6, text: string): this method",
+        "Implement addParagraph(text: string): this method",
+        "Implement addList(items: string[], ordered?: boolean): this method",
+        "Implement addTable(headers: string[], rows: string[][]): this method",
+        "Implement addDiv(content: string, className?: string): this method",
+        "Implement render(): string method with full HTML document structure",
+        "Export HTMLDocBuilder from utils/html.ts"
       ],
       "files": [
-        "src/export/visual/modes/physics/index.ts",
-        "src/export/visual/modes/physics/visual.ts",
-        "src/export/visual/modes/physics/structured.ts",
-        "src/export/visual/modes/physics/document.ts"
+        "src/export/visual/utils/html.ts"
       ],
-      "notes": "File list is tentative - depends on which files still exceed 1000 lines after Sprint 2. If no splitting needed, skip to task 13.3.3."
+      "notes": "HTML already has 95% adoption - builder simplifies document assembly"
     },
     {
       "id": "13.3.3",
-      "category": "Import Updates",
-      "description": "Update all imports throughout codebase for split files",
+      "category": "Markdown Builder",
+      "description": "Add MarkdownBuilder class to utils/markdown.ts",
       "status": "pending",
-      "estimatedHours": 3.0,
+      "estimatedHours": 1.0,
+      "priority": "medium",
       "details": [
-        "Find all imports of split mode exporter files",
-        "Update import paths to use new subdirectory structure",
-        "Verify barrel exports (index.ts) provide same public API",
-        "Run TypeScript compiler to catch any broken imports",
-        "Update any tests that import mode exporters directly",
-        "Update ExportService if it references split files"
+        "Create MarkdownBuilder class with fluent API",
+        "Implement addHeading(level: 1-6, text: string): this method",
+        "Implement addParagraph(text: string): this method",
+        "Implement addBulletList(items: string[]): this method",
+        "Implement addNumberedList(items: string[]): this method",
+        "Implement addCodeBlock(code: string, language?: string): this method",
+        "Implement addTable(headers: string[], rows: string[][]): this method",
+        "Implement addBlockquote(text: string): this method",
+        "Implement addHorizontalRule(): this method",
+        "Implement render(): string method",
+        "Export MarkdownBuilder from utils/markdown.ts"
       ],
       "files": [
-        "src/services/ExportService.ts",
-        "src/export/visual/index.ts",
-        "tests/unit/export/visual/**/*.test.ts"
+        "src/export/visual/utils/markdown.ts"
       ],
-      "notes": "Import updates are automated if using barrel exports correctly. The public API should remain unchanged."
+      "notes": "Markdown commonly used for documentation export"
     },
     {
       "id": "13.3.4",
-      "category": "Integration Testing",
-      "description": "Final integration testing and cleanup",
+      "category": "Modelica Builder",
+      "description": "Add ModelicaBuilder class to utils/modelica.ts",
       "status": "pending",
-      "estimatedHours": 2.0,
+      "estimatedHours": 1.0,
+      "priority": "low",
       "details": [
-        "Run full test suite (npm run test:run)",
-        "Run typecheck (npm run typecheck)",
-        "Run lint (npm run lint)",
-        "Verify all 3,539+ tests pass",
-        "Generate final line count report for all mode files",
-        "Document final utility adoption percentages",
-        "Update CLAUDE.md metrics if changed",
-        "Update package.json version if needed"
+        "Create ModelicaBuilder class with fluent API",
+        "Implement beginModel(name: string): this method",
+        "Implement addParameter(name: string, type: string, value?: string): this method",
+        "Implement addVariable(name: string, type: string): this method",
+        "Implement addEquation(equation: string): this method",
+        "Implement addConnection(from: string, to: string): this method",
+        "Implement endModel(): this method",
+        "Implement render(): string method",
+        "Export ModelicaBuilder from utils/modelica.ts"
       ],
       "files": [
-        "CLAUDE.md",
-        "package.json"
+        "src/export/visual/utils/modelica.ts"
       ],
-      "notes": "Final verification that refactoring is complete and no regressions introduced"
+      "notes": "Modelica specialized for physics/engineering mode exports"
+    },
+    {
+      "id": "13.3.5",
+      "category": "JSON Builder",
+      "description": "Add JSONExportBuilder class to utils/json.ts",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "priority": "low",
+      "details": [
+        "Create JSONExportBuilder class with fluent API for structured JSON output",
+        "Implement setMetadata(metadata: Record<string, unknown>): this method",
+        "Implement addSection(name: string, data: unknown): this method",
+        "Implement addArraySection(name: string, items: unknown[]): this method",
+        "Implement setFormatting(pretty: boolean, indent?: number): this method",
+        "Implement render(): string method",
+        "Export JSONExportBuilder from utils/json.ts"
+      ],
+      "files": [
+        "src/export/visual/utils/json.ts"
+      ],
+      "notes": "JSON already has 100% adoption - builder provides structured approach for complex exports"
     }
   ],
   "successCriteria": [
-    "All mode exporter files are <1000 lines",
-    "All imports compile without errors",
-    "Full test suite passes (3,539+ tests)",
-    "TypeScript compilation succeeds",
-    "Lint check passes",
-    "DOT utility adoption: 22/22 (100%)",
-    "Mermaid utility adoption: 22/22 (100%)",
-    "ASCII utility adoption: 22/22 (100%)",
-    "Visual output identical to pre-refactor state"
+    "UMLBuilder class is exported and functional",
+    "HTMLDocBuilder class is exported and functional",
+    "MarkdownBuilder class is exported and functional",
+    "ModelicaBuilder class is exported and functional",
+    "JSONExportBuilder class is exported and functional",
+    "No breaking changes to existing utility exports"
   ],
   "filesCreated": [],
   "filesModified": [
-    "src/services/ExportService.ts",
-    "src/export/visual/index.ts",
-    "CLAUDE.md"
+    "src/export/visual/utils/uml.ts",
+    "src/export/visual/utils/html.ts",
+    "src/export/visual/utils/markdown.ts",
+    "src/export/visual/utils/modelica.ts",
+    "src/export/visual/utils/json.ts"
   ],
-  "conditionalWork": {
-    "trigger": "Any files still >1000 lines after Sprint 2",
-    "action": "Create subdirectory structure and split files",
-    "estimatedHours": "4-6 additional hours"
-  },
-  "totalEstimatedHours": 12.0,
-  "notes": "Sprint 3 scope depends on Sprint 2 results. If all files are <1000 lines after utility adoption, this sprint focuses on import updates and final testing only (2-4 hours). If files still exceed 1000 lines, file splitting is required (full 12 hours)."
+  "totalEstimatedHours": 5.5,
+  "notes": "Document format builders - complete the builder infrastructure"
 }

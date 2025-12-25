@@ -1,0 +1,107 @@
+{
+  "phase": 13,
+  "sprint": 5,
+  "title": "Critical Files Batch 1 - Largest",
+  "week": "Week 3",
+  "effort": "8-10 hours",
+  "status": "pending",
+  "description": "Refactor the 4 largest mode exporter files (1,624-1,781 lines) to use shared utility builders",
+  "tasks": [
+    {
+      "id": "13.5.1",
+      "category": "Physics Exporter",
+      "description": "Refactor physics.ts (1,781 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.5,
+      "priority": "high",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor physicsToDOT() to use DOTGraphBuilder",
+        "Refactor physicsToMermaid() to use MermaidGraphBuilder",
+        "Refactor physicsToASCII() to use ASCIIDocBuilder",
+        "Create helper functions: addTensorNodes(), addFieldTheoryNodes(), etc.",
+        "Run snapshot tests to verify output unchanged",
+        "Verify file is now <1000 lines"
+      ],
+      "files": [
+        "src/export/visual/modes/physics.ts"
+      ],
+      "notes": "Largest file (1,781 lines). Reference sequential.ts pattern."
+    },
+    {
+      "id": "13.5.2",
+      "category": "Engineering Exporter",
+      "description": "Refactor engineering.ts (1,691 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.5,
+      "priority": "high",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor engineeringToDOT() to use DOTGraphBuilder",
+        "Refactor engineeringToMermaid() to use MermaidGraphBuilder",
+        "Refactor engineeringToASCII() to use ASCIIDocBuilder",
+        "Create domain-specific helpers for engineering concepts",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/engineering.ts"
+      ],
+      "notes": "Second largest file (1,691 lines)"
+    },
+    {
+      "id": "13.5.3",
+      "category": "MetaReasoning Exporter",
+      "description": "Refactor metareasoning.ts (1,628 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.5,
+      "priority": "high",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor metaReasoningToDOT() to use DOTGraphBuilder",
+        "Refactor metaReasoningToMermaid() to use MermaidGraphBuilder",
+        "Refactor metaReasoningToASCII() to use ASCIIDocBuilder",
+        "Create helpers for strategy visualization, monitoring nodes",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/metareasoning.ts"
+      ],
+      "notes": "Third largest file (1,628 lines)"
+    },
+    {
+      "id": "13.5.4",
+      "category": "Proof Decomposition Exporter",
+      "description": "Refactor proof-decomposition.ts (1,624 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.5,
+      "priority": "high",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor proofDecompositionToDOT() to use DOTGraphBuilder",
+        "Refactor proofDecompositionToMermaid() to use MermaidGraphBuilder",
+        "Refactor proofDecompositionToASCII() to use ASCIIDocBuilder",
+        "Create helpers for step visualization, dependency graphs",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/proof-decomposition.ts"
+      ],
+      "notes": "Has 18 export functions (most of any file)"
+    }
+  ],
+  "successCriteria": [
+    "All 4 files use DOT/Mermaid/ASCII builders",
+    "All 4 files are <1000 lines after refactoring",
+    "All existing tests pass",
+    "Visual output unchanged (snapshot tests)"
+  ],
+  "filesCreated": [],
+  "filesModified": [
+    "src/export/visual/modes/physics.ts",
+    "src/export/visual/modes/engineering.ts",
+    "src/export/visual/modes/metareasoning.ts",
+    "src/export/visual/modes/proof-decomposition.ts"
+  ],
+  "totalEstimatedHours": 10.0,
+  "notes": "The 4 largest files - expected 55% reduction each based on sequential.ts pattern"
+}

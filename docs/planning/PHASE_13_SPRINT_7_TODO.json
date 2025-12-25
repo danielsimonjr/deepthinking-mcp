@@ -1,0 +1,107 @@
+{
+  "phase": 13,
+  "sprint": 7,
+  "title": "Critical Files Batch 3",
+  "week": "Week 4-5",
+  "effort": "7-8 hours",
+  "status": "pending",
+  "description": "Refactor the final 4 critical mode exporter files (1,023-1,224 lines) to use shared utility builders",
+  "tasks": [
+    {
+      "id": "13.7.1",
+      "category": "First Principles Exporter",
+      "description": "Refactor first-principles.ts (1,224 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "priority": "high",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor firstPrinciplesToDOT() to use DOTGraphBuilder",
+        "Refactor firstPrinciplesToMermaid() to use MermaidGraphBuilder",
+        "Refactor firstPrinciplesToASCII() to use ASCIIDocBuilder",
+        "Create helpers for decomposition tree, fundamental assumption nodes",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/first-principles.ts"
+      ],
+      "notes": "Ninth largest file (1,224 lines)"
+    },
+    {
+      "id": "13.7.2",
+      "category": "Mathematics Exporter",
+      "description": "Refactor mathematics.ts (1,211 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "priority": "high",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor mathematicsToDOT() to use DOTGraphBuilder",
+        "Refactor mathematicsToMermaid() to use MermaidGraphBuilder",
+        "Refactor mathematicsToASCII() to use ASCIIDocBuilder",
+        "Create helpers for theorem, proof step, definition nodes",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/mathematics.ts"
+      ],
+      "notes": "Tenth largest file (1,211 lines)"
+    },
+    {
+      "id": "13.7.3",
+      "category": "Game Theory Exporter",
+      "description": "Refactor game-theory.ts (1,028 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "priority": "high",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor gameTheoryToDOT() to use DOTGraphBuilder",
+        "Refactor gameTheoryToMermaid() to use MermaidGraphBuilder",
+        "Refactor gameTheoryToASCII() to use ASCIIDocBuilder",
+        "Create helpers for player nodes, strategy edges, payoff tables",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/game-theory.ts"
+      ],
+      "notes": "Eleventh largest file (1,028 lines) - close to target already"
+    },
+    {
+      "id": "13.7.4",
+      "category": "Evidential Exporter",
+      "description": "Refactor evidential.ts (1,023 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "priority": "high",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor evidentialToDOT() to use DOTGraphBuilder",
+        "Refactor evidentialToMermaid() to use MermaidGraphBuilder",
+        "Refactor evidentialToASCII() to use ASCIIDocBuilder",
+        "Create helpers for evidence nodes, belief state visualization",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/evidential.ts"
+      ],
+      "notes": "Twelfth largest file (1,023 lines) - smallest of critical files"
+    }
+  ],
+  "successCriteria": [
+    "All 4 files use DOT/Mermaid/ASCII builders",
+    "All 4 files are <1000 lines after refactoring",
+    "All 12 critical files now complete",
+    "All existing tests pass",
+    "Visual output unchanged (snapshot tests)"
+  ],
+  "filesCreated": [],
+  "filesModified": [
+    "src/export/visual/modes/first-principles.ts",
+    "src/export/visual/modes/mathematics.ts",
+    "src/export/visual/modes/game-theory.ts",
+    "src/export/visual/modes/evidential.ts"
+  ],
+  "totalEstimatedHours": 7.0,
+  "notes": "Last batch of critical files - all 12 critical files (>1000 lines) complete after this sprint"
+}

@@ -1,52 +1,116 @@
 {
   "phase": 13,
   "title": "Visual Exporter Refactoring",
-  "description": "Utility module adoption for visual exporters - adding fluent API builder classes to ALL utility modules (DOT, Mermaid, ASCII, SVG, GraphML, TikZ, UML, HTML, Markdown, Modelica, JSON) and refactoring mode exporters to use them. File size reduction below 1000 lines is a natural consequence of this modular approach.",
-  "totalSprints": 3,
-  "totalEstimatedHours": 54,
+  "description": "Comprehensive utility module adoption - adding fluent API builder classes to ALL 11 utility modules and refactoring ALL 21 mode exporters to use them. File size reduction below 1000 lines is a natural consequence of this modular approach.",
+  "totalSprints": 10,
+  "totalTasks": 42,
+  "totalEstimatedHours": 63,
   "status": "planned",
   "sprints": [
     {
       "sprint": 1,
-      "title": "Infrastructure & Builder Classes",
-      "focus": "Add fluent API builder classes to ALL 11 utility modules (DOT, Mermaid, ASCII, SVG, GraphML, TikZ, UML, HTML, Markdown, Modelica, JSON)",
-      "tasks": 14,
-      "hours": 18,
+      "title": "Core Graph Builders",
+      "focus": "DOTGraphBuilder, MermaidGraphBuilder, GraphMLBuilder + unit tests",
+      "tasks": 4,
+      "hours": 5.5,
       "file": "PHASE_13_SPRINT_1_TODO.json",
       "status": "pending"
     },
     {
       "sprint": 2,
-      "title": "Critical Files Refactoring",
-      "focus": "Refactor 12 files exceeding 1,000 lines to use shared utilities and builders",
-      "tasks": 12,
-      "hours": 24,
+      "title": "Visual Format Builders",
+      "focus": "ASCIIDocBuilder, SVGBuilder, TikZBuilder + unit tests",
+      "tasks": 4,
+      "hours": 6,
       "file": "PHASE_13_SPRINT_2_TODO.json",
       "status": "pending"
     },
     {
       "sprint": 3,
-      "title": "File Splitting & Cleanup",
-      "focus": "Split remaining large files, update imports, final integration testing",
-      "tasks": 4,
-      "hours": 12,
+      "title": "Document Format Builders",
+      "focus": "UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder",
+      "tasks": 5,
+      "hours": 5.5,
       "file": "PHASE_13_SPRINT_3_TODO.json",
+      "status": "pending"
+    },
+    {
+      "sprint": 4,
+      "title": "Builder Integration & Testing",
+      "focus": "Document builder tests, JSDoc, index exports, integration verification",
+      "tasks": 4,
+      "hours": 4,
+      "file": "PHASE_13_SPRINT_4_TODO.json",
+      "status": "pending"
+    },
+    {
+      "sprint": 5,
+      "title": "Critical Files Batch 1 - Largest",
+      "focus": "physics.ts, engineering.ts, metareasoning.ts, proof-decomposition.ts",
+      "tasks": 4,
+      "hours": 10,
+      "file": "PHASE_13_SPRINT_5_TODO.json",
+      "status": "pending"
+    },
+    {
+      "sprint": 6,
+      "title": "Critical Files Batch 2",
+      "focus": "hybrid.ts, formal-logic.ts, scientific-method.ts, optimization.ts",
+      "tasks": 4,
+      "hours": 8,
+      "file": "PHASE_13_SPRINT_6_TODO.json",
+      "status": "pending"
+    },
+    {
+      "sprint": 7,
+      "title": "Critical Files Batch 3",
+      "focus": "first-principles.ts, mathematics.ts, game-theory.ts, evidential.ts",
+      "tasks": 4,
+      "hours": 7,
+      "file": "PHASE_13_SPRINT_7_TODO.json",
+      "status": "pending"
+    },
+    {
+      "sprint": 8,
+      "title": "Remaining Modes Batch 1",
+      "focus": "systems-thinking.ts, analogical.ts, causal.ts, computability.ts, counterfactual.ts",
+      "tasks": 5,
+      "hours": 6.5,
+      "file": "PHASE_13_SPRINT_8_TODO.json",
+      "status": "pending"
+    },
+    {
+      "sprint": 9,
+      "title": "Remaining Modes Batch 2",
+      "focus": "abductive.ts, bayesian.ts, temporal.ts, shannon.ts",
+      "tasks": 4,
+      "hours": 4,
+      "file": "PHASE_13_SPRINT_9_TODO.json",
+      "status": "pending"
+    },
+    {
+      "sprint": 10,
+      "title": "File Splitting & Final Cleanup",
+      "focus": "Analysis, file splitting if needed, final testing, documentation",
+      "tasks": 4,
+      "hours": 4.5,
+      "file": "PHASE_13_SPRINT_10_TODO.json",
       "status": "pending"
     }
   ],
   "features": {
-    "R-1": { "name": "DOT Utility Adoption", "sprints": [1, 2], "status": "pending", "priority": "high" },
-    "R-2": { "name": "Mermaid Utility Adoption", "sprints": [1, 2], "status": "pending", "priority": "high" },
-    "R-3": { "name": "ASCII Utility Adoption", "sprints": [1, 2], "status": "pending", "priority": "high" },
-    "R-4": { "name": "SVG Builder Pattern", "sprints": [1], "status": "pending", "priority": "medium" },
-    "R-5": { "name": "GraphML Builder Pattern", "sprints": [1], "status": "pending", "priority": "medium" },
-    "R-6": { "name": "TikZ Builder Pattern", "sprints": [1], "status": "pending", "priority": "medium" },
-    "R-7": { "name": "UML Builder Pattern", "sprints": [1], "status": "pending", "priority": "medium" },
-    "R-8": { "name": "HTML Builder Pattern", "sprints": [1], "status": "pending", "priority": "medium" },
-    "R-9": { "name": "Markdown Builder Pattern", "sprints": [1], "status": "pending", "priority": "medium" },
-    "R-10": { "name": "Modelica Builder Pattern", "sprints": [1], "status": "pending", "priority": "low" },
-    "R-11": { "name": "JSON Builder Pattern", "sprints": [1], "status": "pending", "priority": "low" },
-    "R-12": { "name": "File Splitting (if needed)", "sprints": [3], "status": "pending", "priority": "medium" }
+    "R-1": { "name": "DOT Builder & Adoption", "sprints": [1, 5, 6, 7, 8, 9], "status": "pending", "priority": "high" },
+    "R-2": { "name": "Mermaid Builder & Adoption", "sprints": [1, 5, 6, 7, 8, 9], "status": "pending", "priority": "high" },
+    "R-3": { "name": "ASCII Builder & Adoption", "sprints": [2, 5, 6, 7, 8, 9], "status": "pending", "priority": "high" },
+    "R-4": { "name": "SVG Builder", "sprints": [2], "status": "pending", "priority": "medium" },
+    "R-5": { "name": "GraphML Builder", "sprints": [1], "status": "pending", "priority": "medium" },
+    "R-6": { "name": "TikZ Builder", "sprints": [2], "status": "pending", "priority": "medium" },
+    "R-7": { "name": "UML Builder", "sprints": [3], "status": "pending", "priority": "medium" },
+    "R-8": { "name": "HTML Builder", "sprints": [3], "status": "pending", "priority": "medium" },
+    "R-9": { "name": "Markdown Builder", "sprints": [3], "status": "pending", "priority": "medium" },
+    "R-10": { "name": "Modelica Builder", "sprints": [3], "status": "pending", "priority": "low" },
+    "R-11": { "name": "JSON Builder", "sprints": [3], "status": "pending", "priority": "low" },
+    "R-12": { "name": "File Splitting", "sprints": [10], "status": "pending", "priority": "medium" }
   },
   "targetMetrics": {
     "dotUtilityAdoption": { "current": "1/22 (4.5%)", "target": "22/22 (100%)" },
@@ -54,91 +118,73 @@
     "asciiUtilityAdoption": { "current": "1/22 (4.5%)", "target": "22/22 (100%)" },
     "filesOver1000Lines": { "current": 12, "target": 0 },
     "totalModeFileLines": { "current": 24046, "target": "18000-19000" },
-    "builderClassesAdded": { "current": 0, "target": 11 }
+    "builderClassesAdded": { "current": 0, "target": 11 },
+    "modeExportersRefactored": { "current": 1, "target": 22 }
   },
   "criticalFiles": [
-    { "file": "physics.ts", "lines": 1781, "target": "<1000" },
-    { "file": "engineering.ts", "lines": 1691, "target": "<1000" },
-    { "file": "metareasoning.ts", "lines": 1628, "target": "<1000" },
-    { "file": "proof-decomposition.ts", "lines": 1624, "target": "<1000" },
-    { "file": "hybrid.ts", "lines": 1450, "target": "<1000" },
-    { "file": "formal-logic.ts", "lines": 1290, "target": "<1000" },
-    { "file": "scientific-method.ts", "lines": 1257, "target": "<1000" },
-    { "file": "optimization.ts", "lines": 1234, "target": "<1000" },
-    { "file": "first-principles.ts", "lines": 1224, "target": "<1000" },
-    { "file": "mathematics.ts", "lines": 1211, "target": "<1000" },
-    { "file": "game-theory.ts", "lines": 1028, "target": "<1000" },
-    { "file": "evidential.ts", "lines": 1023, "target": "<1000" }
+    { "file": "physics.ts", "lines": 1781, "target": "<1000", "sprint": 5 },
+    { "file": "engineering.ts", "lines": 1691, "target": "<1000", "sprint": 5 },
+    { "file": "metareasoning.ts", "lines": 1628, "target": "<1000", "sprint": 5 },
+    { "file": "proof-decomposition.ts", "lines": 1624, "target": "<1000", "sprint": 5 },
+    { "file": "hybrid.ts", "lines": 1450, "target": "<1000", "sprint": 6 },
+    { "file": "formal-logic.ts", "lines": 1290, "target": "<1000", "sprint": 6 },
+    { "file": "scientific-method.ts", "lines": 1257, "target": "<1000", "sprint": 6 },
+    { "file": "optimization.ts", "lines": 1234, "target": "<1000", "sprint": 6 },
+    { "file": "first-principles.ts", "lines": 1224, "target": "<1000", "sprint": 7 },
+    { "file": "mathematics.ts", "lines": 1211, "target": "<1000", "sprint": 7 },
+    { "file": "game-theory.ts", "lines": 1028, "target": "<1000", "sprint": 7 },
+    { "file": "evidential.ts", "lines": 1023, "target": "<1000", "sprint": 7 }
+  ],
+  "remainingModes": [
+    { "file": "systems-thinking.ts", "lines": 909, "sprint": 8 },
+    { "file": "analogical.ts", "lines": 875, "sprint": 8 },
+    { "file": "causal.ts", "lines": 866, "sprint": 8 },
+    { "file": "computability.ts", "lines": 823, "sprint": 8 },
+    { "file": "counterfactual.ts", "lines": 807, "sprint": 8 },
+    { "file": "abductive.ts", "lines": 666, "sprint": 9 },
+    { "file": "bayesian.ts", "lines": 631, "sprint": 9 },
+    { "file": "temporal.ts", "lines": 623, "sprint": 9 },
+    { "file": "shannon.ts", "lines": 558, "sprint": 9 }
   ],
   "utilityModules": {
-    "dot": { "path": "src/export/visual/utils/dot.ts", "lines": 593, "adoption": "4.5%", "builder": "DOTGraphBuilder", "priority": "high" },
-    "mermaid": { "path": "src/export/visual/utils/mermaid.ts", "lines": 540, "adoption": "4.5%", "builder": "MermaidGraphBuilder", "priority": "high" },
-    "ascii": { "path": "src/export/visual/utils/ascii.ts", "lines": 721, "adoption": "4.5%", "builder": "ASCIIDocBuilder", "priority": "high" },
-    "svg": { "path": "src/export/visual/utils/svg.ts", "lines": 548, "adoption": "95%", "builder": "SVGBuilder", "priority": "medium" },
-    "graphml": { "path": "src/export/visual/utils/graphml.ts", "lines": 269, "adoption": "95%", "builder": "GraphMLBuilder", "priority": "medium" },
-    "tikz": { "path": "src/export/visual/utils/tikz.ts", "lines": 446, "adoption": "100%", "builder": "TikZBuilder", "priority": "medium" },
-    "uml": { "path": "src/export/visual/utils/uml.ts", "lines": 459, "adoption": "N/A", "builder": "UMLBuilder", "priority": "medium" },
-    "html": { "path": "src/export/visual/utils/html.ts", "lines": 365, "adoption": "95%", "builder": "HTMLDocBuilder", "priority": "medium" },
-    "markdown": { "path": "src/export/visual/utils/markdown.ts", "lines": 401, "adoption": "N/A", "builder": "MarkdownBuilder", "priority": "medium" },
-    "modelica": { "path": "src/export/visual/utils/modelica.ts", "lines": 257, "adoption": "N/A", "builder": "ModelicaBuilder", "priority": "low" },
-    "json": { "path": "src/export/visual/utils/json.ts", "lines": 521, "adoption": "100%", "builder": "JSONExportBuilder", "priority": "low" }
+    "dot": { "path": "src/export/visual/utils/dot.ts", "lines": 593, "builder": "DOTGraphBuilder", "sprint": 1 },
+    "mermaid": { "path": "src/export/visual/utils/mermaid.ts", "lines": 540, "builder": "MermaidGraphBuilder", "sprint": 1 },
+    "graphml": { "path": "src/export/visual/utils/graphml.ts", "lines": 269, "builder": "GraphMLBuilder", "sprint": 1 },
+    "ascii": { "path": "src/export/visual/utils/ascii.ts", "lines": 721, "builder": "ASCIIDocBuilder", "sprint": 2 },
+    "svg": { "path": "src/export/visual/utils/svg.ts", "lines": 548, "builder": "SVGBuilder", "sprint": 2 },
+    "tikz": { "path": "src/export/visual/utils/tikz.ts", "lines": 446, "builder": "TikZBuilder", "sprint": 2 },
+    "uml": { "path": "src/export/visual/utils/uml.ts", "lines": 459, "builder": "UMLBuilder", "sprint": 3 },
+    "html": { "path": "src/export/visual/utils/html.ts", "lines": 365, "builder": "HTMLDocBuilder", "sprint": 3 },
+    "markdown": { "path": "src/export/visual/utils/markdown.ts", "lines": 401, "builder": "MarkdownBuilder", "sprint": 3 },
+    "modelica": { "path": "src/export/visual/utils/modelica.ts", "lines": 257, "builder": "ModelicaBuilder", "sprint": 3 },
+    "json": { "path": "src/export/visual/utils/json.ts", "lines": 521, "builder": "JSONExportBuilder", "sprint": 3 }
   },
   "excludedModules": [
-    { "file": "latex.ts", "lines": 1284, "reason": "Large specialized module with only 2 exports - defer to separate effort" },
-    { "file": "latex-mermaid-integration.ts", "lines": 347, "reason": "Integration helper with only 2 exports - not a primary utility module" }
+    { "file": "latex.ts", "lines": 1284, "reason": "Large specialized module - defer to separate effort" },
+    { "file": "latex-mermaid-integration.ts", "lines": 347, "reason": "Integration helper - not a primary utility" }
   ],
   "referenceImplementation": "src/export/visual/modes/sequential.ts",
-  "modifiedFiles": [
-    "src/export/visual/utils/dot.ts",
-    "src/export/visual/utils/mermaid.ts",
-    "src/export/visual/utils/ascii.ts",
-    "src/export/visual/utils/svg.ts",
-    "src/export/visual/utils/graphml.ts",
-    "src/export/visual/utils/tikz.ts",
-    "src/export/visual/utils/uml.ts",
-    "src/export/visual/utils/html.ts",
-    "src/export/visual/utils/markdown.ts",
-    "src/export/visual/utils/modelica.ts",
-    "src/export/visual/utils/json.ts",
-    "src/export/visual/utils/index.ts",
-    "src/export/visual/modes/physics.ts",
-    "src/export/visual/modes/engineering.ts",
-    "src/export/visual/modes/metareasoning.ts",
-    "src/export/visual/modes/proof-decomposition.ts",
-    "src/export/visual/modes/hybrid.ts",
-    "src/export/visual/modes/formal-logic.ts",
-    "src/export/visual/modes/scientific-method.ts",
-    "src/export/visual/modes/optimization.ts",
-    "src/export/visual/modes/first-principles.ts",
-    "src/export/visual/modes/mathematics.ts",
-    "src/export/visual/modes/game-theory.ts",
-    "src/export/visual/modes/evidential.ts"
-  ],
-  "newFiles": [
-    "tests/unit/export/visual/utils/builders.test.ts"
-  ],
   "successCriteria": [
-    "All 11 builder classes are implemented and exported",
-    "All builders follow consistent fluent API pattern (methods return this)",
-    "All 22 mode files use utility functions instead of inline string building",
-    "All mode files are <1000 lines (may require file splitting)",
+    "All 11 builder classes implemented and exported",
+    "All builders follow consistent fluent API pattern",
+    "All 21 mode exporters use builders (sequential.ts already compliant)",
+    "All mode files <1000 lines",
     "All 3,539+ tests pass",
     "60+ new builder unit tests pass",
-    "Visual output is identical before/after (snapshot tests)"
+    "Visual output identical before/after"
   ],
   "risks": [
-    { "risk": "Breaking visual output", "impact": "HIGH", "mitigation": "Snapshot tests for all formats before/after" },
+    { "risk": "Breaking visual output", "impact": "HIGH", "mitigation": "Snapshot tests for all formats" },
     { "risk": "Regression in specific modes", "impact": "MEDIUM", "mitigation": "Per-mode integration tests" },
-    { "risk": "Builder pattern overhead", "impact": "LOW", "mitigation": "Benchmark performance (expected: negligible)" },
-    { "risk": "Scope creep", "impact": "MEDIUM", "mitigation": "Strictly limit to utility adoption, no new features" }
+    { "risk": "Builder pattern overhead", "impact": "LOW", "mitigation": "Benchmark performance" },
+    { "risk": "Scope creep", "impact": "MEDIUM", "mitigation": "Strict task boundaries" }
   ],
   "outOfScope": [
     "JSON schemas splitting (src/tools/json-schemas.ts)",
     "src/taxonomy/suggestion-engine.ts refactoring",
     "src/services/ThoughtFactory.ts changes",
-    "src/export/visual/utils/latex.ts changes",
-    "src/export/visual/utils/latex-mermaid-integration.ts changes"
+    "src/export/visual/utils/latex.ts changes"
   ],
   "dependencies": [],
-  "notes": "Phase 13 focuses on comprehensive utility module adoption with fluent API builder classes for ALL 11 primary utility modules. Sprint 1 (18 hours) adds 11 builder classes. Sprint 2 (24 hours) refactors 12 critical files. Sprint 3 (12 hours) handles file splitting if needed. The sequential.ts file demonstrates the target pattern: 805 lines vs 1,781 lines for physics.ts (55% reduction)."
+  "notes": "Phase 13 restructured into 10 sprints with 4-5 tasks each. Sprints 1-4 build infrastructure (11 builders). Sprints 5-7 refactor 12 critical files (>1000 lines). Sprints 8-9 refactor 9 remaining modes for consistency. Sprint 10 handles cleanup and file splitting if needed."
 }

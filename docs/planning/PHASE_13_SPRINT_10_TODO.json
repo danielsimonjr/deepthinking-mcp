@@ -1,0 +1,106 @@
+{
+  "phase": 13,
+  "sprint": 10,
+  "title": "File Splitting & Final Cleanup",
+  "week": "Week 6",
+  "effort": "4-5 hours",
+  "status": "pending",
+  "description": "Split any files still exceeding 1000 lines, update imports, and perform final integration testing",
+  "tasks": [
+    {
+      "id": "13.10.1",
+      "category": "Analysis",
+      "description": "Identify files still exceeding 1000 lines after builder adoption",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "priority": "high",
+      "details": [
+        "Run line count analysis on all 21 refactored mode files",
+        "Identify any files still >1000 lines",
+        "Document which files need splitting",
+        "Plan split strategy per file (by format category)",
+        "Create list of new subdirectories needed"
+      ],
+      "files": [],
+      "notes": "Determines scope of remaining work. If all files <1000 lines, skip to task 13.10.3"
+    },
+    {
+      "id": "13.10.2",
+      "category": "File Splitting",
+      "description": "Split remaining large files into format-category subdirectories",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "priority": "medium",
+      "details": [
+        "For each file still >1000 lines, create subdirectory structure:",
+        "  src/export/visual/modes/{mode}/index.ts (re-exports all)",
+        "  src/export/visual/modes/{mode}/visual.ts (DOT, Mermaid, ASCII, SVG)",
+        "  src/export/visual/modes/{mode}/structured.ts (GraphML, TikZ, UML)",
+        "  src/export/visual/modes/{mode}/document.ts (JSON, Markdown, HTML)",
+        "Move functions to appropriate files based on format category",
+        "Create index.ts that re-exports all functions",
+        "Update imports in ExportService and other consumers"
+      ],
+      "files": [],
+      "notes": "Conditional - only if files still exceed 1000 lines after builder adoption"
+    },
+    {
+      "id": "13.10.3",
+      "category": "Final Testing",
+      "description": "Run comprehensive integration tests and verify all changes",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "priority": "high",
+      "details": [
+        "Run full test suite (npm run test:run)",
+        "Run typecheck (npm run typecheck)",
+        "Run lint (npm run lint)",
+        "Verify all 3,539+ tests pass",
+        "Run visual comparison tests for all 21 mode exporters",
+        "Generate final line count report"
+      ],
+      "files": [],
+      "notes": "Final verification of Phase 13 completion"
+    },
+    {
+      "id": "13.10.4",
+      "category": "Documentation Update",
+      "description": "Update project documentation with Phase 13 results",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "priority": "medium",
+      "details": [
+        "Update CLAUDE.md with new metrics",
+        "Document final utility adoption percentages (should be 100%)",
+        "Update version in package.json if needed",
+        "Add Phase 13 to version history",
+        "Document any architectural changes or new patterns"
+      ],
+      "files": [
+        "CLAUDE.md",
+        "package.json"
+      ],
+      "notes": "Capture final state of Phase 13 refactoring"
+    }
+  ],
+  "successCriteria": [
+    "All mode exporter files are <1000 lines",
+    "All imports compile without errors",
+    "Full test suite passes (3,539+ tests)",
+    "TypeScript compilation succeeds",
+    "Lint check passes",
+    "DOT utility adoption: 22/22 (100%)",
+    "Mermaid utility adoption: 22/22 (100%)",
+    "ASCII utility adoption: 22/22 (100%)",
+    "All 11 builders in use across codebase",
+    "Visual output identical to pre-refactor state",
+    "Documentation updated"
+  ],
+  "filesCreated": [],
+  "filesModified": [
+    "CLAUDE.md",
+    "package.json"
+  ],
+  "totalEstimatedHours": 4.5,
+  "notes": "Final cleanup sprint - scope depends on Sprint 5-9 results. File splitting only if needed."
+}
