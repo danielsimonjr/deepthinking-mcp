@@ -8,9 +8,11 @@ The `sequential.ts` file (Phase 11 refactor) demonstrates the target pattern: it
 
 **Status**: Planned
 **Priority**: Medium
-**Estimated Effort**: ~28-42 hours across 3 sprints
+**Estimated Effort**: 67 hours across 10 sprints (see `PHASE_13_*.json` for detailed breakdown)
 
-> **Effort Note**: Source analysis documents estimated 42-55 hours based on inflated function size claims. With verified ~85 line DOT functions (not 1,400+), the lower 28-42 hour estimate is appropriate. Each refactored function requires: (1) adding utility imports, (2) converting string concatenation to builder/helper calls, (3) snapshot test verification.
+> **Note**: This plan was restructured from the original 3-sprint estimate to 10 granular sprints with 4-5 tasks each for better tracking. See `PHASE_13_INDEX.json` for the current sprint structure.
+
+> **Effort Note**: Original estimate was 28-42 hours for 3 sprints. Final detailed planning expanded this to 67 hours across 10 sprints to include: 11 builder classes (not just DOT/Mermaid), comprehensive unit tests, integration tests, snapshot baselines, and adoption verification. The additional effort ensures thorough testing and consistent architecture.
 
 ---
 
@@ -328,7 +330,23 @@ src/export/visual/modes/physics/
 
 ## Implementation Phases
 
-### Sprint 1: Infrastructure (4-6 hours)
+> **Note**: The implementation has been restructured into 10 detailed sprints. See `PHASE_13_INDEX.json` and individual `PHASE_13_SPRINT_*.json` files for the current breakdown.
+
+### High-Level Structure (10 Sprints)
+
+| Phase | Sprints | Hours | Focus |
+|-------|---------|-------|-------|
+| **Infrastructure** | 1-4 | 22.5 | Create 11 builder classes, tests, documentation |
+| **Critical Files** | 5-7 | 28 | Refactor 12 files >1000 lines |
+| **Remaining Modes** | 8-9 | 12 | Refactor 9 files <1000 lines for consistency |
+| **Cleanup** | 10 | 4.5 | File splitting if needed, final verification |
+
+### Original 3-Sprint Outline (Preserved for Reference)
+
+<details>
+<summary>Click to expand original sprint structure</summary>
+
+#### Sprint 1: Infrastructure (4-6 hours)
 
 **Objective**: Add builder classes to utility modules
 
@@ -341,7 +359,7 @@ src/export/visual/modes/physics/
 - Enhanced `src/export/visual/utils/dot.ts`
 - Tests in `tests/unit/export/visual/utils/`
 
-### Sprint 2: Critical Files (16-24 hours)
+#### Sprint 2: Critical Files (16-24 hours)
 
 **Objective**: Refactor 12 files exceeding 1,000 lines to <1000
 
@@ -363,7 +381,7 @@ src/export/visual/modes/physics/
 - All tests passing
 - Visual output unchanged (verified by comparison tests)
 
-### Sprint 3: File Splitting & Cleanup (8-12 hours)
+#### Sprint 3: File Splitting & Cleanup (8-12 hours)
 
 **Objective**: Split any files still exceeding 1000 lines after utility adoption
 
@@ -376,6 +394,8 @@ src/export/visual/modes/physics/
 - All mode files <1000 lines
 - Clean directory structure
 - Updated import paths
+
+</details>
 
 ---
 
@@ -572,3 +592,4 @@ src/tools/schemas/
 | Dec 25, 2025 (Initial) | Document created from source analysis |
 | Dec 25, 2025 (Rev 1) | Fidelity review: Corrected duplication estimate (~5,800 lines), adjusted targets, added Out of Scope section |
 | Dec 25, 2025 (Rev 2) | Clarified chunker bug: reported numbers were remaining file size from function start, not function sizes |
+| Dec 25, 2025 (Rev 3) | Plan restructured: 3 sprints → 10 sprints (4-5 tasks each), 28-42 hours → 67 hours. Detailed breakdown in `PHASE_13_*.json` files |
