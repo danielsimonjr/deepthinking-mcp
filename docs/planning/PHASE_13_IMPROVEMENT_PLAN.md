@@ -1,229 +1,509 @@
-# Phase 13: Code Quality Improvements
+# Phase 13: Visual Exporter Refactoring Plan
 
-## Executive Summary
+## Overview
 
-This document consolidates findings from the `docs/analysis/` directory after **independent verification against the actual codebase**.
+This document outlines the refactoring of the visual exporter module to reduce file sizes below 500 lines and adopt existing utility modules. The refactoring addresses architectural debt where 21 out of 22 mode exporters ignore the comprehensive DOT, Mermaid, and ASCII utility modules.
 
-| Finding Category | Original Claim | Verified Status |
-|-----------------|----------------|-----------------|
-| Monster functions (1,000+ lines) | 4 functions totaling 5,266 lines | **FALSE** - Largest is 258 lines |
-| Utility adoption gap | Only sequential.ts uses dot/mermaid/ascii | **TRUE** |
-| File sizes | 4 files over 1,600 lines | **TRUE** |
-| Magic numbers in taxonomy | ~30 hardcoded coefficients | **TRUE** |
-| Silent error swallowing | 11 instances in file-lock.ts | **FALSE** - Was fixed |
-| Type casts in index.ts | Multiple `as any` for format types | **TRUE** |
+**Status**: Planned
+**Priority**: Medium
+**Estimated Effort**: ~40-54 hours across 4 sprints
 
 ---
 
-## Verified Findings
+## Feature Summary
 
-### 1. Visual Exporter Utility Adoption Gap (TRUE)
+| Feature | Priority | Complexity | Estimated Hours |
+|---------|----------|------------|-----------------|
+| R-1: DOT Utility Adoption | High | Medium | 20-25 |
+| R-2: Mermaid Utility Adoption | Medium | Low | 8-10 |
+| R-3: ASCII Utility Adoption | Low | Low | 4-6 |
+| R-4: File Splitting (if needed) | Medium | Medium | 8-12 |
 
-**Verified**: Only `sequential.ts` imports from `utils/dot.ts`, `utils/mermaid.ts`, and `utils/ascii.ts`.
+---
 
-```
-DOT utility imports:     sequential.ts only (1/22)
-Mermaid utility imports: sequential.ts only (1/22)
-ASCII utility imports:   sequential.ts only (1/22)
-SVG utility imports:     21/22 files
-GraphML utility imports: 21/22 files
-TikZ utility imports:    22/22 files
-```
+## Current State Analysis
 
-**What this means**: 21 files do inline DOT/Mermaid/ASCII generation instead of using the typed helper functions in `utils/`. This creates inconsistency but functions are reasonably sized (75-130 lines for DOT functions).
+### File Size Distribution
 
-**Priority**: Low-Medium (code works, just inconsistent patterns)
+| Category | Files | Lines Range | Target |
+|----------|-------|-------------|--------|
+| Critical (>1000 lines) | 12 | 1,023 - 1,781 | <500 |
+| High (500-1000 lines) | 10 | 558 - 909 | <500 |
+| OK (<500 lines) | 1 | 42 (index.ts) | ✅ |
 
-### 2. File Sizes (TRUE)
+**22 out of 23 mode files exceed the 500 line target.**
 
-| File | Lines | Functions |
-|------|-------|-----------|
-| physics.ts | 1,781 | 11 export functions |
-| engineering.ts | 1,691 | 13 export functions |
-| metareasoning.ts | 1,628 | 11 export functions |
-| proof-decomposition.ts | 1,624 | 18 functions |
-| hybrid.ts | 1,450 | 11 export functions |
+### Top 12 Largest Files
 
-**What this means**: Files are large because they contain 10-18 functions covering all export formats (Mermaid, DOT, ASCII, SVG, GraphML, TikZ, HTML, Modelica, UML, JSON, Markdown).
+| File | Lines | Functions | Primary Issue |
+|------|-------|-----------|---------------|
+| physics.ts | 1,781 | 11 | Inline DOT/Mermaid/ASCII |
+| engineering.ts | 1,691 | 13 | Inline DOT/Mermaid/ASCII |
+| metareasoning.ts | 1,628 | 11 | Inline DOT/Mermaid/ASCII |
+| proof-decomposition.ts | 1,624 | 18 | Inline DOT/Mermaid/ASCII |
+| hybrid.ts | 1,450 | 11 | Inline DOT/Mermaid/ASCII |
+| formal-logic.ts | 1,290 | 11 | Inline DOT/Mermaid/ASCII |
+| scientific-method.ts | 1,257 | 11 | Inline DOT/Mermaid/ASCII |
+| optimization.ts | 1,234 | 11 | Inline DOT/Mermaid/ASCII |
+| first-principles.ts | 1,224 | 11 | Inline DOT/Mermaid/ASCII |
+| mathematics.ts | 1,211 | 11 | Inline DOT/Mermaid/ASCII |
+| game-theory.ts | 1,028 | 11 | Inline DOT/Mermaid/ASCII |
+| evidential.ts | 1,023 | 11 | Inline DOT/Mermaid/ASCII |
 
-**Priority**: Low (well-organized, each function is 75-260 lines)
+### Utility Adoption Status
 
-### 3. Actual Function Sizes (CORRECTS FALSE CLAIMS)
+| Utility Module | Lines | Adoption Rate | Status |
+|----------------|-------|---------------|--------|
+| `utils/dot.ts` | 593 | 1/22 (4.5%) | **Critical Gap** |
+| `utils/mermaid.ts` | 540 | 1/22 (4.5%) | **Critical Gap** |
+| `utils/ascii.ts` | 721 | 1/22 (4.5%) | **Critical Gap** |
+| `utils/svg.ts` | 548 | 21/22 (95%) | ✅ Excellent |
+| `utils/graphml.ts` | 269 | 21/22 (95%) | ✅ Excellent |
+| `utils/tikz.ts` | 446 | 22/22 (100%) | ✅ Excellent |
+| `utils/json.ts` | 521 | 22/22 (100%) | ✅ Excellent |
+| `utils/html.ts` | 365 | 21/22 (95%) | ✅ Excellent |
 
-The original analysis claimed 1,000+ line functions. **Actual measurements**:
+**Key Finding**: Phase 9 utilities (SVG, GraphML, TikZ) show 95%+ adoption, proving the modular utility pattern works. The DOT/Mermaid/ASCII utilities existed earlier but were never adopted beyond `sequential.ts`.
 
-| File | Function | Claimed | Actual |
-|------|----------|---------|--------|
-| physics.ts | physicsToDOT() | 1,562 | **84 lines** |
-| metareasoning.ts | metaReasoningToDOT() | 1,418 | **75 lines** |
-| proof-decomposition.ts | proofDecompositionToDOT() | 1,332 | **123 lines** |
-| engineering.ts | escapeModelicaString() | 954 | **8 lines** |
+---
 
-**Largest actual functions**:
-- engineeringToModelica(): 258 lines
-- physicsToJSON(): 234 lines
-- physicsToTikZ(): 214 lines
-- physicsToGraphML(): 209 lines
+## Evidence: Utility Adoption Reduces File Size
 
-**Priority**: None needed (functions are reasonable size)
+| File | Uses All Utilities | Lines | Functions |
+|------|-------------------|-------|-----------|
+| sequential.ts | ✅ Yes | 805 | 11 |
+| physics.ts | ❌ No | 1,781 | 11 |
+| **Difference** | | **-976 (55%)** | Same |
 
-### 4. Magic Numbers in Taxonomy (TRUE)
+Both files have 11 export functions. The only difference is utility usage. This demonstrates **55% size reduction** is achievable.
 
-Found in `src/taxonomy/`:
+---
+
+## R-1: DOT Utility Adoption
+
+### Current State
+
+The `utils/dot.ts` module (593 lines) provides comprehensive DOT generation infrastructure:
 
 ```typescript
-// multi-modal-analyzer.ts:444
-return Math.min((transitionRatio * 0.5 + uniqueModes * 0.05), 1.0);
+// Existing types in utils/dot.ts
+export interface DotNode {
+  id: string;
+  label: string;
+  shape?: DotNodeShape;
+  style?: DotNodeStyle | DotNodeStyle[];
+  fillColor?: string;
+  fontColor?: string;
+  // ... more properties
+}
 
-// multi-modal-analyzer.ts:461
-return avgEffectiveness * 0.7 + patternStrength * 0.3;
+export interface DotEdge {
+  source: string;
+  target: string;
+  label?: string;
+  style?: DotEdgeStyle;
+  arrowHead?: DotArrowHead;
+  // ... more properties
+}
 
-// suggestion-engine.ts:743-744
-prob += metadata.qualityMetrics.reliability * 0.2;
-prob += metadata.qualityMetrics.practicality * 0.1;
+// Existing helper functions
+export function generateDotGraph(nodes: DotNode[], edges: DotEdge[], options?: DotOptions): string;
+export function renderDotNode(node: DotNode): string;
+export function renderDotEdge(edge: DotEdge, directed?: boolean): string;
+export function sanitizeDotId(id: string): string;
+export function escapeDotString(str: string): string;
+export function getDotColor(colorName: string, scheme?: string): string;
 ```
 
-**Priority**: Low (values work, but documentation would help maintainability)
+**Problem**: 21 files build DOT strings inline instead of using these helpers.
 
-### 5. File-Lock Error Handling (FALSE - Was Fixed)
+### Proposed Enhancement
 
-Original claim: 11 silent `.catch(() => {})` patterns
-
-**Actual**: All error handling uses `handleUnlinkError()`:
+Add a `DOTGraphBuilder` class to the existing `utils/dot.ts`:
 
 ```typescript
-// src/utils/file-lock.ts:27-36
-function handleUnlinkError(error: any, filePath: string, context: string): void {
-  if (error && error.code !== 'ENOENT') {
-    logger.warn(`Failed to cleanup ${context}`, {
-      path: filePath,
-      code: error.code,
-      message: error.message,
-      pid: process.pid,
-      instanceId: INSTANCE_ID,
-    });
+// Add to src/export/visual/utils/dot.ts
+export class DOTGraphBuilder {
+  private nodes: DotNode[] = [];
+  private edges: DotEdge[] = [];
+  private subgraphs: DotSubgraph[] = [];
+  private options: DotOptions = {};
+
+  addNode(node: DotNode): this {
+    this.nodes.push(node);
+    return this;
+  }
+
+  addEdge(edge: DotEdge): this {
+    this.edges.push(edge);
+    return this;
+  }
+
+  addSubgraph(subgraph: DotSubgraph): this {
+    this.subgraphs.push(subgraph);
+    return this;
+  }
+
+  setOptions(options: DotOptions): this {
+    this.options = { ...this.options, ...options };
+    return this;
+  }
+
+  render(): string {
+    // Uses existing generateDotGraph() function
+    return generateDotGraph(this.nodes, this.edges, this.options);
   }
 }
 ```
 
-**Priority**: None (already properly handled)
+### Usage Pattern
 
-### 6. Type Casts in index.ts (TRUE)
-
-Found 8 instances of `format as any` in export-related code:
+**Before** (anti-pattern in 21 files):
 
 ```typescript
-// Lines 400, 435, 482, 485, 503, 558, 561, 591
-exportService.exportSession(session, format as any)
+function physicsToDOT(thought: PhysicsThought): string {
+  let dot = 'digraph PhysicsVisualization {\n';
+  dot += '  rankdir=TB;\n';
+  dot += '  node [shape=box, style=rounded];\n\n';
+
+  const typeId = sanitizeId(`type_${thought.thoughtType}`);
+  dot += `  ${typeId} [label="${typeLabel}", shape=doubleoctagon];\n`;
+  // ... 80+ more lines of string concatenation
+
+  dot += '}\n';
+  return dot;
+}
 ```
 
-**Priority**: Low (Zod validates input, casts are for internal type compatibility)
-
-### 7. Circular Dependencies (TRUE - But Safe)
-
-55 circular dependencies detected, all are type-only between `types/core.ts` and mode type files:
-
-```
-types/core.ts > types/modes/algorithmic.ts
-types/core.ts > types/modes/analogical.ts
-... (all 29 mode types)
-```
-
-**Priority**: None (type-only cycles are erased at compile time, intentional for discriminated union pattern)
-
----
-
-## What the Original Analysis Got Wrong
-
-| Claim | Reality |
-|-------|---------|
-| "physicsToDOT() is 1,562 lines" | 84 lines (function ends at line 303) |
-| "metaReasoningToDOT() is 1,418 lines" | 75 lines (function ends at line 286) |
-| "proofDecompositionToDOT() is 1,332 lines" | 123 lines (function ends at line 416) |
-| "escapeModelicaString() is 954 lines" | 8 lines (lines 739-746) |
-| "5,266 lines in 4 functions" | ~290 lines actual |
-| "~15,000 lines of duplicated code" | Vastly overstated |
-| "11 silent error swallowing" | Fixed with handleUnlinkError() |
-
----
-
-## Recommended Actions
-
-### Priority: Low (Optional Consistency Improvements)
-
-1. **Adopt DOT/Mermaid/ASCII utilities** in mode files when they're modified for other reasons
-   - Follow sequential.ts pattern
-   - No dedicated sprint needed
-
-2. **Document magic numbers** in taxonomy code
-   - Add comments explaining the weight coefficients
-   - Consider extracting to named constants
-
-### Priority: None (Already Good)
-
-- File sizes are reasonable (10-18 well-organized functions per file)
-- Function sizes are reasonable (75-260 lines)
-- Error handling is proper
-- Type-only circular dependencies are intentional
-
----
-
-## Verification Methodology
-
-All claims were verified by:
-
-1. **File sizes**: `wc -l` on actual files
-2. **Function sizes**: `grep -n "^function"` to find boundaries, then line counting
-3. **Utility imports**: `grep "from '../utils/"` across all mode files
-4. **Error handling**: Direct code review of file-lock.ts
-5. **Circular deps**: `npx madge --circular src/`
-6. **Magic numbers**: `grep` for `* 0.\d+` patterns
-
----
-
-## Root Cause: Chunker Tool Bug
-
-The false "monster function" data originated from a **bug in the chunker tool** (`tools/chunking-for-files/`).
-
-### The Bug
-
-The chunker's `countBrackets()` function fails when template literals contain `{{` and `}}` (Mermaid hexagon syntax):
+**After** (using utilities):
 
 ```typescript
-// metareasoning.ts:131 - This breaks the chunker
-mermaid += `  ${evalId}{{"Effectiveness: ${...}%"}}\n`;
+function physicsToDOT(thought: PhysicsThought): string {
+  const builder = new DOTGraphBuilder()
+    .setOptions({ rankDir: 'TB' });
+
+  // Domain-specific node creation
+  builder.addNode({
+    id: `type_${thought.thoughtType}`,
+    label: thought.thoughtType || 'Physics',
+    shape: 'doubleoctagon',
+  });
+
+  if (thought.tensorProperties) {
+    addTensorNodes(builder, thought.tensorProperties);
+  }
+
+  if (thought.fieldTheoryContext) {
+    addFieldTheoryNodes(builder, thought.fieldTheoryContext);
+  }
+
+  return builder.render();
+}
+
+function addTensorNodes(builder: DOTGraphBuilder, tensor: TensorProperties): void {
+  builder
+    .addNode({ id: 'tensor', label: `Rank (${tensor.rank})`, shape: 'ellipse' })
+    .addEdge({ source: 'type_physics', target: 'tensor' });
+}
 ```
 
-The bracket counter sees `{{` as two open braces but doesn't account for them being inside a template literal's string portion.
+### Files to Refactor
 
-### Evidence
-
-| File | `{{}}` patterns | Chunker DOT size | Actual DOT size |
-|------|----------------|------------------|-----------------|
-| sequential.ts | 0 | 61 lines ✓ | 61 lines |
-| physics.ts | 4 | 1,562 lines ✗ | 84 lines |
-| metareasoning.ts | 3 | 1,418 lines ✗ | 75 lines |
-
-Files without Mermaid hexagon syntax are parsed correctly.
-
-### Recommendation
-
-**Fix the chunker's TypeScript parser** to properly handle `{{` and `}}` inside template literal strings. This is a separate issue from code quality.
+| Priority | File | Current Lines | Target Lines |
+|----------|------|---------------|--------------|
+| 1 | physics.ts | 1,781 | ~800 |
+| 2 | engineering.ts | 1,691 | ~760 |
+| 3 | metareasoning.ts | 1,628 | ~730 |
+| 4 | proof-decomposition.ts | 1,624 | ~730 |
+| 5 | hybrid.ts | 1,450 | ~650 |
+| 6-12 | 7 more files | 1,000-1,300 | ~450-580 |
+| 13-21 | 9 more files | 558-909 | ~250-410 |
 
 ---
 
-## Conclusion
+## R-2: Mermaid Utility Adoption
 
-The codebase is **well-structured**. The original analysis documents contained incorrect function sizes due to a **chunker tool bug**, not actual code problems.
+### Current State
 
-Real improvements are minor:
-- **Utility adoption consistency**: Optional, low priority
-- **Magic number documentation**: Nice-to-have
-- **Fix chunker bug**: Separate tooling issue
+The `utils/mermaid.ts` module (540 lines) provides:
 
-No urgent code refactoring needed.
+```typescript
+// Existing types
+export interface MermaidNode {
+  id: string;
+  label: string;
+  shape?: MermaidNodeShape;
+  style?: { fill?: string; stroke?: string; };
+}
+
+export interface MermaidEdge {
+  source: string;
+  target: string;
+  style?: MermaidEdgeStyle;
+  label?: string;
+}
+
+// Existing functions
+export function generateMermaidFlowchart(nodes: MermaidNode[], edges: MermaidEdge[], options?: MermaidOptions): string;
+export function truncateLabel(label: string, maxLength?: number): string;
+export function getMermaidColor(colorName: string): string;
+export function sanitizeMermaidId(id: string): string;
+```
+
+### Proposed Pattern
+
+Follow `sequential.ts` pattern:
+
+```typescript
+function physicsToMermaid(thought: PhysicsThought): string {
+  const nodes: MermaidNode[] = [];
+  const edges: MermaidEdge[] = [];
+
+  nodes.push({
+    id: 'physics_main',
+    label: truncateLabel(thought.thoughtType || 'Physics'),
+    shape: 'stadium',
+  });
+
+  // Domain-specific node creation...
+
+  return generateMermaidFlowchart(nodes, edges, { direction: 'TD' });
+}
+```
+
+---
+
+## R-3: ASCII Utility Adoption
+
+### Current State
+
+The `utils/ascii.ts` module (721 lines) provides:
+
+```typescript
+export function generateAsciiHeader(title: string, style?: 'equals' | 'dashes' | 'stars'): string;
+export function generateAsciiSectionHeader(title: string): string;
+export function generateAsciiBulletList(items: string[]): string;
+export function generateAsciiBox(content: string, width?: number): string;
+export function generateAsciiTree(root: TreeNode): string;
+```
+
+### Proposed Pattern
+
+```typescript
+function physicsToASCII(thought: PhysicsThought): string {
+  const lines: string[] = [];
+
+  lines.push(generateAsciiHeader('Physics Analysis', 'equals'));
+  lines.push('');
+
+  lines.push(generateAsciiSectionHeader('Tensor Properties'));
+  if (thought.tensorProperties) {
+    lines.push(generateAsciiBulletList([
+      `Rank: (${thought.tensorProperties.rank})`,
+      `Components: ${thought.tensorProperties.components}`,
+    ]));
+  }
+
+  return lines.join('\n');
+}
+```
+
+---
+
+## R-4: File Splitting (If Needed)
+
+If files still exceed 500 lines after utility adoption, split by format category:
+
+```
+src/export/visual/modes/physics/
+├── index.ts              # Main export (re-exports all) ~50 lines
+├── visual.ts             # DOT, Mermaid, ASCII, SVG ~200 lines
+├── structured.ts         # GraphML, TikZ, UML ~150 lines
+└── document.ts           # JSON, Markdown, HTML, Modelica ~200 lines
+```
+
+---
+
+## Implementation Phases
+
+### Sprint 1: Infrastructure (4-6 hours)
+
+**Objective**: Add builder classes to utility modules
+
+1. Add `DOTGraphBuilder` class to `utils/dot.ts`
+2. Add `MermaidGraphBuilder` class to `utils/mermaid.ts` (optional)
+3. Write unit tests for new builder classes
+4. Update utility module documentation
+
+**Deliverables**:
+- Enhanced `src/export/visual/utils/dot.ts`
+- Tests in `tests/unit/export/visual/utils/`
+
+### Sprint 2: Critical Files (16-20 hours)
+
+**Objective**: Refactor 12 files exceeding 1,000 lines
+
+1. physics.ts (1,781 → ~800 lines)
+2. engineering.ts (1,691 → ~760 lines)
+3. metareasoning.ts (1,628 → ~730 lines)
+4. proof-decomposition.ts (1,624 → ~730 lines)
+5. hybrid.ts (1,450 → ~650 lines)
+6. formal-logic.ts (1,290 → ~580 lines)
+7. scientific-method.ts (1,257 → ~565 lines)
+8. optimization.ts (1,234 → ~555 lines)
+9. first-principles.ts (1,224 → ~550 lines)
+10. mathematics.ts (1,211 → ~545 lines)
+11. game-theory.ts (1,028 → ~460 lines)
+12. evidential.ts (1,023 → ~460 lines)
+
+**Deliverables**:
+- 12 refactored mode files
+- All tests passing
+- Visual output unchanged (verified by comparison tests)
+
+### Sprint 3: High Priority Files (12-16 hours)
+
+**Objective**: Refactor 9 files between 500-1,000 lines
+
+1. systems-thinking.ts (909 → ~410 lines)
+2. analogical.ts (875 → ~395 lines)
+3. causal.ts (866 → ~390 lines)
+4. computability.ts (823 → ~370 lines)
+5. counterfactual.ts (807 → ~365 lines)
+6. abductive.ts (666 → ~300 lines)
+7. bayesian.ts (631 → ~285 lines)
+8. temporal.ts (623 → ~280 lines)
+9. shannon.ts (558 → ~250 lines)
+
+**Deliverables**:
+- 9 refactored mode files
+- All tests passing
+
+### Sprint 4: File Splitting & Cleanup (8-12 hours)
+
+**Objective**: Split any files still exceeding 500 lines
+
+1. Identify files still >500 lines after utility adoption
+2. Split into format-category subdirectories
+3. Update imports throughout codebase
+4. Final integration testing
+
+**Deliverables**:
+- All mode files <500 lines
+- Clean directory structure
+- Updated import paths
+
+---
+
+## Testing Strategy
+
+### Unit Tests
+
+```
+tests/unit/export/visual/
+├── utils/
+│   ├── dot-builder.test.ts          # DOTGraphBuilder tests
+│   ├── mermaid-builder.test.ts      # MermaidGraphBuilder tests
+│   └── ascii-helpers.test.ts        # ASCII utility tests
+└── modes/
+    ├── physics.test.ts              # Physics exporter tests
+    ├── engineering.test.ts          # Engineering exporter tests
+    └── ... (all mode files)
+```
+
+### Visual Comparison Tests
+
+For each refactored file, verify output is identical:
+
+```typescript
+describe('physics.ts refactoring', () => {
+  it('DOT output unchanged', () => {
+    const thought = createTestPhysicsThought();
+    const newOutput = exportPhysicsVisualization(thought, { format: 'dot' });
+    expect(newOutput).toMatchSnapshot();
+  });
+
+  it('Mermaid output unchanged', () => {
+    const thought = createTestPhysicsThought();
+    const newOutput = exportPhysicsVisualization(thought, { format: 'mermaid' });
+    expect(newOutput).toMatchSnapshot();
+  });
+});
+```
+
+---
+
+## Success Criteria
+
+| Metric | Current | Target |
+|--------|---------|--------|
+| Files >1000 lines | 12 | 0 |
+| Files >500 lines | 22 | 0 |
+| Total mode file lines | 24,046 | <11,000 |
+| DOT utility adoption | 1/22 (4.5%) | 22/22 (100%) |
+| Mermaid utility adoption | 1/22 (4.5%) | 22/22 (100%) |
+| ASCII utility adoption | 1/22 (4.5%) | 22/22 (100%) |
+| Tests passing | 3,539 | 3,539+ |
+| Visual output | N/A | Identical before/after |
+
+---
+
+## Dependencies
+
+- No new external dependencies
+- Builds on existing `src/export/visual/utils/` infrastructure
+- Reference implementation: `sequential.ts` (Phase 11 refactor)
+
+---
+
+## Risks and Mitigations
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Breaking visual output | HIGH | Snapshot tests for all formats before/after |
+| Regression in specific modes | MEDIUM | Per-mode integration tests |
+| Builder pattern overhead | LOW | Benchmark performance (expected: negligible) |
+| Scope creep | MEDIUM | Strictly limit to utility adoption, no new features |
+
+---
+
+## Note: Chunker Tool Bug
+
+During analysis, a bug was discovered in `tools/chunking-for-files/`:
+
+- The TypeScript parser fails on `{{` and `}}` (Mermaid hexagon syntax)
+- This caused incorrect function size reporting in original analysis documents
+- **File sizes are accurate; function size claims were inflated by the bug**
+
+| File | Chunker Claimed | Actual |
+|------|-----------------|--------|
+| physics.ts `physicsToDOT()` | 1,562 lines | ~84 lines |
+| metareasoning.ts `metaReasoningToDOT()` | 1,418 lines | ~75 lines |
+
+The refactoring focus is correctly on **file size** (>500 lines) and **utility adoption** (1/22), not individual function sizes.
+
+---
+
+## Future Considerations
+
+- **Phase 14**: Apply similar refactoring to other large modules
+- **Utility Enhancement**: Add more specialized graph patterns to utilities
+- **Code Generation**: Consider generating boilerplate exporter code from templates
+- **Performance**: Benchmark and optimize builder pattern if needed
+
+---
+
+## References
+
+- `docs/analysis/Comprehensive_Codebase_Review.md` - Full codebase review
+- `docs/analysis/file-splitting-analysis.md` - File size analysis
+- `docs/analysis/export-utility-usage-analysis.md` - Utility adoption matrix
+- `src/export/visual/modes/sequential.ts` - Reference implementation
+- `src/export/visual/utils/dot.ts` - DOT utility module (593 lines)
+- `src/export/visual/utils/mermaid.ts` - Mermaid utility module (540 lines)
+- `src/export/visual/utils/ascii.ts` - ASCII utility module (721 lines)
 
 ---
 
 *Generated: December 25, 2025*
-*Verified against actual codebase via grep, wc, file reading, and chunker debugging*
+*Verified: File sizes via `wc -l`, utility imports via `grep`, function boundaries via source inspection*
