@@ -181,17 +181,49 @@ All claims were verified by:
 
 ---
 
+## Root Cause: Chunker Tool Bug
+
+The false "monster function" data originated from a **bug in the chunker tool** (`tools/chunking-for-files/`).
+
+### The Bug
+
+The chunker's `countBrackets()` function fails when template literals contain `{{` and `}}` (Mermaid hexagon syntax):
+
+```typescript
+// metareasoning.ts:131 - This breaks the chunker
+mermaid += `  ${evalId}{{"Effectiveness: ${...}%"}}\n`;
+```
+
+The bracket counter sees `{{` as two open braces but doesn't account for them being inside a template literal's string portion.
+
+### Evidence
+
+| File | `{{}}` patterns | Chunker DOT size | Actual DOT size |
+|------|----------------|------------------|-----------------|
+| sequential.ts | 0 | 61 lines ✓ | 61 lines |
+| physics.ts | 4 | 1,562 lines ✗ | 84 lines |
+| metareasoning.ts | 3 | 1,418 lines ✗ | 75 lines |
+
+Files without Mermaid hexagon syntax are parsed correctly.
+
+### Recommendation
+
+**Fix the chunker's TypeScript parser** to properly handle `{{` and `}}` inside template literal strings. This is a separate issue from code quality.
+
+---
+
 ## Conclusion
 
-The codebase is **well-structured**. The original analysis documents contained **fabricated function size data** (likely hallucinated or from a different tool/codebase).
+The codebase is **well-structured**. The original analysis documents contained incorrect function sizes due to a **chunker tool bug**, not actual code problems.
 
 Real improvements are minor:
 - **Utility adoption consistency**: Optional, low priority
 - **Magic number documentation**: Nice-to-have
+- **Fix chunker bug**: Separate tooling issue
 
-No urgent refactoring needed.
+No urgent code refactoring needed.
 
 ---
 
 *Generated: December 25, 2025*
-*Verified against actual codebase via grep, wc, and file reading*
+*Verified against actual codebase via grep, wc, file reading, and chunker debugging*
