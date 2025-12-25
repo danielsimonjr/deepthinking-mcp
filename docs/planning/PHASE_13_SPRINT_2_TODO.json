@@ -1,0 +1,277 @@
+{
+  "phase": 13,
+  "sprint": 2,
+  "title": "Critical Files Refactoring",
+  "week": "Week 2-3",
+  "effort": "16-24 hours",
+  "status": "pending",
+  "description": "Refactor 12 mode exporter files exceeding 1,000 lines to use shared DOT, Mermaid, and ASCII utility modules instead of inline string building",
+  "tasks": [
+    {
+      "id": "13.2.1",
+      "category": "Physics Exporter",
+      "description": "Refactor physics.ts (1,781 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Import DOTGraphBuilder, MermaidNode, MermaidEdge, ASCII helpers",
+        "Refactor physicsToDOT() to use DOTGraphBuilder",
+        "Refactor physicsToMermaid() to use MermaidNode/Edge + generateMermaidFlowchart()",
+        "Refactor physicsToASCII() to use generateAsciiHeader(), generateAsciiBulletList()",
+        "Create helper functions: addTensorNodes(), addFieldTheoryNodes(), etc.",
+        "Run snapshot tests to verify output unchanged",
+        "Verify file is now <1000 lines"
+      ],
+      "files": [
+        "src/export/visual/modes/physics.ts",
+        "tests/unit/export/visual/modes/physics.test.ts"
+      ],
+      "notes": "Largest file (1,781 lines). Reference sequential.ts pattern for utility imports."
+    },
+    {
+      "id": "13.2.2",
+      "category": "Engineering Exporter",
+      "description": "Refactor engineering.ts (1,691 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Import DOTGraphBuilder, MermaidNode, MermaidEdge, ASCII helpers",
+        "Refactor engineeringToDOT() to use builder pattern",
+        "Refactor engineeringToMermaid() to use utility functions",
+        "Refactor engineeringToASCII() to use ASCII helpers",
+        "Create domain-specific helpers for engineering concepts",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/engineering.ts",
+        "tests/unit/export/visual/modes/engineering.test.ts"
+      ],
+      "notes": "Second largest file (1,691 lines)"
+    },
+    {
+      "id": "13.2.3",
+      "category": "MetaReasoning Exporter",
+      "description": "Refactor metareasoning.ts (1,628 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Import DOTGraphBuilder, Mermaid utilities, ASCII helpers",
+        "Refactor metaReasoningToDOT() to use builder pattern",
+        "Refactor metaReasoningToMermaid() to use utility functions",
+        "Refactor metaReasoningToASCII() to use ASCII helpers",
+        "Create helpers for strategy visualization, monitoring nodes",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/metareasoning.ts",
+        "tests/unit/export/visual/modes/metareasoning.test.ts"
+      ],
+      "notes": "Third largest file (1,628 lines)"
+    },
+    {
+      "id": "13.2.4",
+      "category": "Proof Decomposition Exporter",
+      "description": "Refactor proof-decomposition.ts (1,624 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Import DOTGraphBuilder, Mermaid utilities, ASCII helpers",
+        "Refactor proofDecompositionToDOT() to use builder pattern",
+        "Refactor proofDecompositionToMermaid() to use utility functions",
+        "Refactor proofDecompositionToASCII() to use ASCII helpers",
+        "Create helpers for step visualization, dependency graphs",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/proof-decomposition.ts",
+        "tests/unit/export/visual/modes/proof-decomposition.test.ts"
+      ],
+      "notes": "Has 18 export functions (most of any file)"
+    },
+    {
+      "id": "13.2.5",
+      "category": "Hybrid Exporter",
+      "description": "Refactor hybrid.ts (1,450 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Import DOTGraphBuilder, Mermaid utilities, ASCII helpers",
+        "Refactor hybridToDOT() to use builder pattern",
+        "Refactor hybridToMermaid() to use utility functions",
+        "Refactor hybridToASCII() to use ASCII helpers",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/hybrid.ts",
+        "tests/unit/export/visual/modes/hybrid.test.ts"
+      ],
+      "notes": "Fifth largest file (1,450 lines)"
+    },
+    {
+      "id": "13.2.6",
+      "category": "Formal Logic Exporter",
+      "description": "Refactor formal-logic.ts (1,290 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Import DOTGraphBuilder, Mermaid utilities, ASCII helpers",
+        "Refactor formalLogicToDOT() to use builder pattern",
+        "Refactor formalLogicToMermaid() to use utility functions",
+        "Refactor formalLogicToASCII() to use ASCII helpers",
+        "Create helpers for proof step nodes, logical connectives",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/formal-logic.ts",
+        "tests/unit/export/visual/modes/formal-logic.test.ts"
+      ],
+      "notes": "Sixth largest file (1,290 lines)"
+    },
+    {
+      "id": "13.2.7",
+      "category": "Scientific Method Exporter",
+      "description": "Refactor scientific-method.ts (1,257 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Import DOTGraphBuilder, Mermaid utilities, ASCII helpers",
+        "Refactor scientificMethodToDOT() to use builder pattern",
+        "Refactor scientificMethodToMermaid() to use utility functions",
+        "Refactor scientificMethodToASCII() to use ASCII helpers",
+        "Create helpers for hypothesis, experiment, observation nodes",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/scientific-method.ts",
+        "tests/unit/export/visual/modes/scientific-method.test.ts"
+      ],
+      "notes": "Seventh largest file (1,257 lines)"
+    },
+    {
+      "id": "13.2.8",
+      "category": "Optimization Exporter",
+      "description": "Refactor optimization.ts (1,234 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Import DOTGraphBuilder, Mermaid utilities, ASCII helpers",
+        "Refactor optimizationToDOT() to use builder pattern",
+        "Refactor optimizationToMermaid() to use utility functions",
+        "Refactor optimizationToASCII() to use ASCII helpers",
+        "Create helpers for constraint nodes, objective function visualization",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/optimization.ts",
+        "tests/unit/export/visual/modes/optimization.test.ts"
+      ],
+      "notes": "Eighth largest file (1,234 lines)"
+    },
+    {
+      "id": "13.2.9",
+      "category": "First Principles Exporter",
+      "description": "Refactor first-principles.ts (1,224 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Import DOTGraphBuilder, Mermaid utilities, ASCII helpers",
+        "Refactor firstPrinciplesToDOT() to use builder pattern",
+        "Refactor firstPrinciplesToMermaid() to use utility functions",
+        "Refactor firstPrinciplesToASCII() to use ASCII helpers",
+        "Create helpers for decomposition tree, fundamental assumption nodes",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/first-principles.ts",
+        "tests/unit/export/visual/modes/first-principles.test.ts"
+      ],
+      "notes": "Ninth largest file (1,224 lines)"
+    },
+    {
+      "id": "13.2.10",
+      "category": "Mathematics Exporter",
+      "description": "Refactor mathematics.ts (1,211 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Import DOTGraphBuilder, Mermaid utilities, ASCII helpers",
+        "Refactor mathematicsToDOT() to use builder pattern",
+        "Refactor mathematicsToMermaid() to use utility functions",
+        "Refactor mathematicsToASCII() to use ASCII helpers",
+        "Create helpers for theorem, proof step, definition nodes",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/mathematics.ts",
+        "tests/unit/export/visual/modes/mathematics.test.ts"
+      ],
+      "notes": "Tenth largest file (1,211 lines)"
+    },
+    {
+      "id": "13.2.11",
+      "category": "Game Theory Exporter",
+      "description": "Refactor game-theory.ts (1,028 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Import DOTGraphBuilder, Mermaid utilities, ASCII helpers",
+        "Refactor gameTheoryToDOT() to use builder pattern",
+        "Refactor gameTheoryToMermaid() to use utility functions",
+        "Refactor gameTheoryToASCII() to use ASCII helpers",
+        "Create helpers for player nodes, strategy edges, payoff tables",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/game-theory.ts",
+        "tests/unit/export/visual/modes/game-theory.test.ts"
+      ],
+      "notes": "Eleventh largest file (1,028 lines) - close to target already"
+    },
+    {
+      "id": "13.2.12",
+      "category": "Evidential Exporter",
+      "description": "Refactor evidential.ts (1,023 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "details": [
+        "Import DOTGraphBuilder, Mermaid utilities, ASCII helpers",
+        "Refactor evidentialToDOT() to use builder pattern",
+        "Refactor evidentialToMermaid() to use utility functions",
+        "Refactor evidentialToASCII() to use ASCII helpers",
+        "Create helpers for evidence nodes, belief state visualization",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/evidential.ts",
+        "tests/unit/export/visual/modes/evidential.test.ts"
+      ],
+      "notes": "Twelfth file (1,023 lines) - smallest of critical files"
+    }
+  ],
+  "successCriteria": [
+    "All 12 files use DOT utility functions (100% adoption)",
+    "All 12 files use Mermaid utility functions (100% adoption)",
+    "All 12 files use ASCII utility functions (100% adoption)",
+    "All 12 files are <1000 lines after refactoring",
+    "All existing tests pass (3,539+ tests)",
+    "Visual output unchanged (snapshot tests)",
+    "No new dependencies introduced"
+  ],
+  "filesCreated": [],
+  "filesModified": [
+    "src/export/visual/modes/physics.ts",
+    "src/export/visual/modes/engineering.ts",
+    "src/export/visual/modes/metareasoning.ts",
+    "src/export/visual/modes/proof-decomposition.ts",
+    "src/export/visual/modes/hybrid.ts",
+    "src/export/visual/modes/formal-logic.ts",
+    "src/export/visual/modes/scientific-method.ts",
+    "src/export/visual/modes/optimization.ts",
+    "src/export/visual/modes/first-principles.ts",
+    "src/export/visual/modes/mathematics.ts",
+    "src/export/visual/modes/game-theory.ts",
+    "src/export/visual/modes/evidential.ts"
+  ],
+  "totalEstimatedHours": 24.0,
+  "notes": "This is the core refactoring sprint. Each file follows the same pattern: import utilities, convert inline string building to builder/helper calls, verify output with snapshots. Reference sequential.ts (805 lines) which already uses all utilities. Expected reduction: ~55% per file based on sequential.ts evidence."
+}
