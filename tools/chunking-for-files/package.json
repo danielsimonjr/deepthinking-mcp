@@ -7,7 +7,7 @@
     "chunker": "./index.ts"
   },
   "scripts": {
-    "build": "bun build index.ts --compile --outfile chunker.exe",
+    "build": "bun build index.ts --compile --outfile chunking-for-files.exe",
     "start": "bun run index.ts"
   },
   "keywords": [
