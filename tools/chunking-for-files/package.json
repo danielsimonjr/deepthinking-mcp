@@ -8,6 +8,8 @@
   },
   "scripts": {
     "build": "bun build chunking-for-files.ts --compile --outfile chunking-for-files.exe",
+    "build:ts": "tsc",
+    "build:exe": "npm run build:ts && pkg dist/chunking-for-files.js --target node18-win-x64 --output chunking-for-files.exe",
     "start": "bun run chunking-for-files.ts"
   },
   "keywords": [

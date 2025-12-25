@@ -5,6 +5,8 @@
   "type": "module",
    "scripts": {
     "build": "bun build compress-for-context.ts --compile --outfile compress-for-context.exe",
+    "build:ts": "tsc",
+    "build:exe": "npm run build:ts && pkg dist/compress-for-context.js --target node18-win-x64 --output compress-for-context.exe",
     "start": "bun run compress-for-context.ts"
   },
   "bin": {
