@@ -14,9 +14,9 @@
  * It dynamically discovers the project structure from the filesystem.
  */
 
-import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync } from 'fs';
-import { join, dirname, relative, basename } from 'path';
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import yaml from 'js-yaml';
+import { basename, dirname, join, relative } from 'path';
 
 // Types
 interface Dependency {

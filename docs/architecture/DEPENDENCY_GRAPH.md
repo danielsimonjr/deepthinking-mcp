@@ -910,18 +910,19 @@ The codebase is organized into the following modules:
 | Module | Import |
 |--------|--------|
 | `fs` | `readFileSync` |
-| `url` | `fileURLToPath` |
 | `path` | `dirname, join` |
+| `url` | `fileURLToPath` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./tools/definitions.js` | `toolList, toolSchemas, isValidTool, modeToToolMap` | Import |
-| `./tools/thinking.js` | `thinkingTool` | Import |
-| `./session/index.js` | `SessionManager` | Import (type-only) |
-| `./types/index.js` | `ThinkingMode, isFullyImplemented, MCPResponse, AddThoughtResponse, AnalyzeResponse, ProblemCharacteristics` | Import |
-| `./services/index.js` | `ThoughtFactory, ExportService, ModeRouter` | Import (type-only) |
 | `./modes/index.js` | `ModeHandlerRegistry` | Import |
+| `./services/index.js` | `ExportService, ModeRouter, ThoughtFactory` | Import (type-only) |
+| `./session/index.js` | `SessionManager` | Import (type-only) |
+| `./tools/definitions.js` | `isValidTool, modeToToolMap, toolList, toolSchemas` | Import |
+| `./tools/thinking.js` | `thinkingTool` | Import |
+| `./types/index.js` | `ThinkingMode, isFullyImplemented, AddThoughtResponse, AnalyzeResponse, MCPResponse, ProblemCharacteristics` | Import |
+| `./tools/thinking.js` | `ThinkingToolInput` | Import |
 
 **Exports:**
 - Constants: `format`
@@ -3473,6 +3474,11 @@ The codebase is organized into the following modules:
 | `fs` | `promises` |
 | `path` | `* as path` |
 
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./logger.js` | `createLogger, LogLevel` | Import |
+
 **Exports:**
 - Interfaces: `LockOptions`
 - Functions: `acquireLock`, `withLock`, `withSharedLock`, `isLocked`, `forceUnlock`
@@ -4348,10 +4354,10 @@ graph TD
     N8 --> N9
     N8 --> N7
     N11 --> N61
-    N13 --> N53
-    N13 --> N41
-    N13 --> N61
     N13 --> N37
+    N13 --> N41
+    N13 --> N53
+    N13 --> N61
     N14 --> N67
     N15 --> N14
     N18 --> N16
@@ -4376,7 +4382,7 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 250 |
 | Total Modules | 16 |
-| Total Lines of Code | 100518 |
+| Total Lines of Code | 100542 |
 | Total Exports | 1411 |
 | Total Re-exports | 684 |
 | Total Classes | 136 |

@@ -313,12 +313,12 @@ function modeXToDOT(thought: XThought, options: VisualOptions): string {
   let dot = 'digraph G {\n';
   dot += '  rankdir=TB;\n';
   dot += '  node [shape=box, style=rounded];\n\n';
-  
+
   // 1,000+ lines of string concatenation:
   dot += `  "${sanitize(id)}" [label="${escapeDotString(label)}", `;
   dot += `fillcolor="${color}", shape=${shape}];\n`;
   // ... hundreds more lines ...
-  
+
   return dot;
 }
 ```
@@ -330,11 +330,11 @@ function modeXToDOT(thought: XThought, options: VisualOptions): string {
 function modeXToDOT(thought: XThought, options: VisualOptions): string {
   const builder = new DOTGraphBuilder()  // NEW: Add to utils/dot.ts
     .setOptions({ rankDir: 'TB' });
-  
+
   addNodes(builder, thought);            // Focused helper (100-200 lines)
   addEdges(builder, thought);            // Focused helper (100-200 lines)
   addClusters(builder, thought);         // Focused helper (100-200 lines)
-  
+
   return builder.render();               // Uses existing generateDotGraph()
 }
 
@@ -349,6 +349,7 @@ function addNodes(builder: DOTGraphBuilder, thought: XThought): void {
 ```
 
 **Available Utility Modules** (already exist, should be used):
+
 - `utils/dot.ts` (594 lines) - DotNode, DotEdge, DotSubgraph types + rendering
 - `utils/mermaid.ts` - Mermaid diagram helpers
 - `utils/ascii.ts` - ASCII box drawing
@@ -369,6 +370,7 @@ export function addEdges(graph: DOTGraphBuilder, thought: XThought): void {
 }
 
 // etc.
+
 ```
 
 ---

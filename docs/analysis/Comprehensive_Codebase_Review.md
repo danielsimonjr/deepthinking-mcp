@@ -497,10 +497,12 @@ The codebase demonstrates **exceptional architectural discipline**:
 
 ## File Splitting Analysis (December 24, 2025)
 
-**Tools Used**: `create-dependency-graph`, `chunking-for-files`
-**Full Report**: [docs/analysis/file-splitting-analysis.md](../analysis/file-splitting-analysis.md)
+**Tools Used**: `create-dependency-graph`, `chunking-for-files`, manual utility import analysis
+**Full Reports**:
+- [file-splitting-analysis.md](../analysis/file-splitting-analysis.md)
+- [export-utility-usage-analysis.md](../analysis/export-utility-usage-analysis.md)
 
-### Critical Finding: Massive Monolithic Functions
+### Critical Finding: Architectural Debt from Utility Non-Adoption
 
 The chunker tool identified **4 monster functions containing 5,266 lines total**:
 
@@ -511,15 +513,29 @@ The chunker tool identified **4 monster functions containing 5,266 lines total**
 | metareasoning.ts | `metaReasoningToDOT()` | 1,418 | Massive inline DOT string building |
 | proof-decomposition.ts | `proofDecompositionToDOT()` | 1,332 | No helper functions or modularization |
 
+**Deeper Analysis Revealed**: This is not a file size problem - it's an **architectural debt problem**. Only **1 out of 22 mode files** (sequential.ts) imports and uses the comprehensive `utils/dot.ts` utility (594 lines with full DOT generation infrastructure). The remaining 21 files implement DOT generation inline, resulting in an estimated **~15,000 lines of duplicated code**.
+
+### Utility Adoption Analysis
+
+| Utility Module | Adoption Rate | Status |
+|----------------|---------------|--------|
+| **json.ts** | 22/22 (100%) | ✅ Universal |
+| **svg.ts, graphml.ts, tikz.ts, html.ts** | 21/22 (95%) | ✅ Excellent (Phase 9 additions) |
+| **dot.ts, mermaid.ts, ascii.ts** | 1/22 (4.5%) | ❌ **Critical Gap** |
+
+**Key Insight**: Phase 9 utilities (SVG, GraphML, TikZ) show 95%+ adoption, proving the modular utility pattern **works when consistently applied**. The DOT/Mermaid/ASCII utilities existed earlier but were never adopted beyond sequential.ts (refactored in Phase 11).
+
 ### Pattern Analysis
 
-**15 visual exporter files** follow the same anti-pattern:
+**21 out of 22 visual exporter files** follow the same anti-pattern:
 
 1. Small entry function (~30 lines) ✅
-2. Reasonable Mermaid exporter (~100-150 lines) ✅
-3. **MASSIVE DOT exporter (900-1,500+ lines)** ⚠️
+2. Reasonable Mermaid exporter (~100-150 lines) ✅ but inline instead of using `utils/mermaid.ts`
+3. **MASSIVE DOT exporter (900-1,500+ lines)** ⚠️ inline instead of using `utils/dot.ts`
+4. ASCII exporter (~50-100 lines) ✅ but inline instead of using `utils/ascii.ts`
+5. SVG/GraphML/TikZ exporters ✅ correctly use utility modules
 
-**Root Cause**: DOT format exporters generate complex GraphViz syntax inline without helper functions, abstraction layers, or modularization.
+**Root Cause**: DOT, Mermaid, and ASCII exporters build output inline with manual string concatenation **instead of using the comprehensive 594-line `utils/dot.ts` module** and companion utilities. This represents massive architectural debt, not just a file size issue.
 
 ### Recommended Solution
 
@@ -535,7 +551,7 @@ export class DOTGraphBuilder {
   private nodes: DotNode[] = [];
   private edges: DotEdge[] = [];
   private subgraphs: DotSubgraph[] = [];
-  
+
   addNode(node: DotNode): this;
   addEdge(edge: DotEdge): this;
   addSubgraph(subgraph: DotSubgraph): this;
@@ -550,6 +566,37 @@ export class DOTGraphBuilder {
 - Ensures consistent formatting across all 23 mode exporters
 - Enables unit testing of graph construction
 - No function exceeds 300 lines
+- **Eliminates ~15,000 lines of duplicated DOT generation code**
+
+### Impact Analysis
+
+**Current State** (from utility usage analysis):
+- Total mode exporter lines: ~28,000 lines across 22 files
+- DOT generation: ~15,000 lines of inline duplication (21 files)
+- Mermaid generation: ~2,000-3,000 lines of inline duplication (21 files)
+- ASCII generation: ~1,000-2,000 lines of inline duplication (21 files)
+- **Total duplication**: ~18,000-20,000 lines
+
+**Target State** (after utility adoption):
+- DOT generation: Use `DOTGraphBuilder` from `utils/dot.ts` (60-70% reduction)
+- Mermaid generation: Use `generateMermaidFlowchart()` from `utils/mermaid.ts` (40-50% reduction)
+- ASCII generation: Use helpers from `utils/ascii.ts` (30-40% reduction)
+- **Total mode exporter lines**: ~16,000-18,000 lines (40-43% reduction)
+- **Code eliminated**: ~10,000-12,000 lines of duplication
+
+### Sequential.ts as Reference Implementation
+
+**sequential.ts** (Phase 11 refactor) demonstrates the correct pattern:
+```typescript
+// Imports from ALL utility modules
+import { generateMermaidFlowchart, truncateLabel, getMermaidColor } from '../utils/mermaid.js';
+import { generateDotGraph, truncateDotLabel, type DotNode, type DotEdge } from '../utils/dot.js';
+import { generateAsciiHeader, generateAsciiSectionHeader } from '../utils/ascii.js';
+import { generateSVGHeader, renderRectNode, renderEdge } from '../utils/svg.js';
+// ... etc for GraphML, TikZ, HTML, Modelica, UML
+```
+
+**Result**: sequential.ts has no massive functions - all format generation delegated to utilities.
 
 ### Effort Estimates
 

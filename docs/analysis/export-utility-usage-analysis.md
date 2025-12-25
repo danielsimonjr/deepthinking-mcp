@@ -1,7 +1,7 @@
 # Export Utility Usage Analysis
 
-**Generated**: December 24, 2025  
-**Purpose**: Evaluate how mode exporters consume existing export services and utilities  
+**Generated**: December 24, 2025
+**Purpose**: Evaluate how mode exporters consume existing export services and utilities
 **Scope**: 22 mode files in `src/export/visual/modes/`
 
 ---
@@ -10,7 +10,7 @@
 
 **Critical Finding**: Only **1 out of 22 mode files** (`sequential.ts`) imports the comprehensive DOT utility module (`utils/dot.ts`, 594 lines). The remaining 21 files implement DOT generation inline, resulting in **massive code duplication**.
 
-**Impact**: 
+**Impact**:
 - 15 files have DOT functions ranging from 900-1,562 lines
 - Total estimated duplication: **~15,000 lines** of redundant DOT generation code
 - Pattern identified in chunker analysis (4 monster functions: 5,266 lines)
@@ -71,7 +71,7 @@ function physicsToDOT(...): string {
   let dot = 'digraph PhysicsVisualization {\n';
   dot += '  rankdir=TB;\n';
   dot += '  node [shape=box, style=rounded];\n\n';
-  
+
   // 1,562 lines of manual string building
   const typeId = sanitizeId(`type_${thought.thoughtType}`);
   dot += `  ${typeId} [label="${typeLabel}", shape=doubleoctagon];\n`;
@@ -84,14 +84,14 @@ function physicsToDOT(...): string {
 function physicsToDOT(...): string {
   const builder = new DOTGraphBuilder()
     .setOptions({ rankDir: 'TB' });
-  
+
   builder.addNode({
     id: `type_${thought.thoughtType}`,
     label: thought.thoughtType,
     shape: 'doubleoctagon'
   });
   // ... focused domain logic ...
-  
+
   return builder.render(); // Uses existing generateDotGraph()
 }
 ```
@@ -329,5 +329,5 @@ The analysis reveals a **critical architectural debt**: 21 out of 22 mode files 
 
 ---
 
-*Analysis completed: December 24, 2025*  
+*Analysis completed: December 24, 2025*
 *Tool used: Manual analysis of all mode files in src/export/visual/modes/*

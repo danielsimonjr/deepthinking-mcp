@@ -4063,34 +4063,34 @@
             ]
           },
           {
-            "module": "url",
-            "imports": [
-              "fileURLToPath"
-            ]
-          },
-          {
             "module": "path",
             "imports": [
               "dirname",
               "join"
             ]
+          },
+          {
+            "module": "url",
+            "imports": [
+              "fileURLToPath"
+            ]
           }
         ],
         "internalDependencies": [
           {
-            "file": "./tools/definitions.js",
+            "file": "./modes/index.js",
             "imports": [
-              "toolList",
-              "toolSchemas",
-              "isValidTool",
-              "modeToToolMap"
+              "ModeHandlerRegistry"
             ]
           },
           {
-            "file": "./tools/thinking.js",
+            "file": "./services/index.js",
             "imports": [
-              "thinkingTool"
-            ]
+              "ExportService",
+              "ModeRouter",
+              "ThoughtFactory"
+            ],
+            "typeOnly": true
           },
           {
             "file": "./session/index.js",
@@ -4100,29 +4100,35 @@
             "typeOnly": true
           },
           {
+            "file": "./tools/definitions.js",
+            "imports": [
+              "isValidTool",
+              "modeToToolMap",
+              "toolList",
+              "toolSchemas"
+            ]
+          },
+          {
+            "file": "./tools/thinking.js",
+            "imports": [
+              "thinkingTool"
+            ]
+          },
+          {
             "file": "./types/index.js",
             "imports": [
               "ThinkingMode",
               "isFullyImplemented",
-              "MCPResponse",
               "AddThoughtResponse",
               "AnalyzeResponse",
+              "MCPResponse",
               "ProblemCharacteristics"
             ]
           },
           {
-            "file": "./services/index.js",
+            "file": "./tools/thinking.js",
             "imports": [
-              "ThoughtFactory",
-              "ExportService",
-              "ModeRouter"
-            ],
-            "typeOnly": true
-          },
-          {
-            "file": "./modes/index.js",
-            "imports": [
-              "ModeHandlerRegistry"
+              "ThinkingToolInput"
             ]
           }
         ],
@@ -12780,7 +12786,15 @@
             ]
           }
         ],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./logger.js",
+            "imports": [
+              "createLogger",
+              "LogLevel"
+            ]
+          }
+        ],
         "exports": [
           "acquireLock",
           "withLock",
@@ -15681,7 +15695,7 @@
   "statistics": {
     "totalTypeScriptFiles": 250,
     "totalModules": 16,
-    "totalLinesOfCode": 100518,
+    "totalLinesOfCode": 100542,
     "totalExports": 1411,
     "totalClasses": 136,
     "totalInterfaces": 506,
