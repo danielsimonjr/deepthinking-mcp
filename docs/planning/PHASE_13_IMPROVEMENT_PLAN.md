@@ -2,11 +2,11 @@
 
 ## Overview
 
-This document outlines the refactoring of the visual exporter module to reduce file sizes below 500 lines and adopt existing utility modules. The refactoring addresses architectural debt where 21 out of 22 mode exporters ignore the comprehensive DOT, Mermaid, and ASCII utility modules.
+This document outlines the refactoring of the visual exporter module to reduce file sizes below 1000 lines and adopt existing utility modules. The refactoring addresses architectural debt where 21 out of 22 mode exporters ignore the comprehensive DOT, Mermaid, and ASCII utility modules.
 
 **Status**: Planned
 **Priority**: Medium
-**Estimated Effort**: ~40-54 hours across 4 sprints
+**Estimated Effort**: ~28-42 hours across 3 sprints
 
 ---
 
@@ -14,10 +14,10 @@ This document outlines the refactoring of the visual exporter module to reduce f
 
 | Feature | Priority | Complexity | Estimated Hours |
 |---------|----------|------------|-----------------|
-| R-1: DOT Utility Adoption | High | Medium | 20-25 |
-| R-2: Mermaid Utility Adoption | Medium | Low | 8-10 |
+| R-1: DOT Utility Adoption | High | Medium | 12-16 |
+| R-2: Mermaid Utility Adoption | Medium | Low | 6-8 |
 | R-3: ASCII Utility Adoption | Low | Low | 4-6 |
-| R-4: File Splitting (if needed) | Medium | Medium | 8-12 |
+| R-4: File Splitting (if needed) | Medium | Medium | 6-12 |
 
 ---
 
@@ -27,11 +27,10 @@ This document outlines the refactoring of the visual exporter module to reduce f
 
 | Category | Files | Lines Range | Target |
 |----------|-------|-------------|--------|
-| Critical (>1000 lines) | 12 | 1,023 - 1,781 | <500 |
-| High (500-1000 lines) | 10 | 558 - 909 | <500 |
-| OK (<500 lines) | 1 | 42 (index.ts) | ✅ |
+| Critical (>1000 lines) | 12 | 1,023 - 1,781 | <1000 |
+| OK (<1000 lines) | 11 | 42 - 909 | ✅ |
 
-**22 out of 23 mode files exceed the 500 line target.**
+**12 out of 23 mode files exceed the 1000 line target.**
 
 ### Top 12 Largest Files
 
@@ -211,13 +210,12 @@ function addTensorNodes(builder: DOTGraphBuilder, tensor: TensorProperties): voi
 
 | Priority | File | Current Lines | Target Lines |
 |----------|------|---------------|--------------|
-| 1 | physics.ts | 1,781 | ~800 |
-| 2 | engineering.ts | 1,691 | ~760 |
-| 3 | metareasoning.ts | 1,628 | ~730 |
-| 4 | proof-decomposition.ts | 1,624 | ~730 |
-| 5 | hybrid.ts | 1,450 | ~650 |
-| 6-12 | 7 more files | 1,000-1,300 | ~450-580 |
-| 13-21 | 9 more files | 558-909 | ~250-410 |
+| 1 | physics.ts | 1,781 | <1000 |
+| 2 | engineering.ts | 1,691 | <1000 |
+| 3 | metareasoning.ts | 1,628 | <1000 |
+| 4 | proof-decomposition.ts | 1,624 | <1000 |
+| 5 | hybrid.ts | 1,450 | <1000 |
+| 6-12 | 7 more files | 1,023-1,290 | <1000 |
 
 ---
 
@@ -312,7 +310,7 @@ function physicsToASCII(thought: PhysicsThought): string {
 
 ## R-4: File Splitting (If Needed)
 
-If files still exceed 500 lines after utility adoption, split by format category:
+If files still exceed 1000 lines after utility adoption, split by format category:
 
 ```
 src/export/visual/modes/physics/
@@ -339,57 +337,39 @@ src/export/visual/modes/physics/
 - Enhanced `src/export/visual/utils/dot.ts`
 - Tests in `tests/unit/export/visual/utils/`
 
-### Sprint 2: Critical Files (16-20 hours)
+### Sprint 2: Critical Files (16-24 hours)
 
-**Objective**: Refactor 12 files exceeding 1,000 lines
+**Objective**: Refactor 12 files exceeding 1,000 lines to <1000
 
-1. physics.ts (1,781 → ~800 lines)
-2. engineering.ts (1,691 → ~760 lines)
-3. metareasoning.ts (1,628 → ~730 lines)
-4. proof-decomposition.ts (1,624 → ~730 lines)
-5. hybrid.ts (1,450 → ~650 lines)
-6. formal-logic.ts (1,290 → ~580 lines)
-7. scientific-method.ts (1,257 → ~565 lines)
-8. optimization.ts (1,234 → ~555 lines)
-9. first-principles.ts (1,224 → ~550 lines)
-10. mathematics.ts (1,211 → ~545 lines)
-11. game-theory.ts (1,028 → ~460 lines)
-12. evidential.ts (1,023 → ~460 lines)
+1. physics.ts (1,781 → <1000 lines)
+2. engineering.ts (1,691 → <1000 lines)
+3. metareasoning.ts (1,628 → <1000 lines)
+4. proof-decomposition.ts (1,624 → <1000 lines)
+5. hybrid.ts (1,450 → <1000 lines)
+6. formal-logic.ts (1,290 → <1000 lines)
+7. scientific-method.ts (1,257 → <1000 lines)
+8. optimization.ts (1,234 → <1000 lines)
+9. first-principles.ts (1,224 → <1000 lines)
+10. mathematics.ts (1,211 → <1000 lines)
+11. game-theory.ts (1,028 → <1000 lines)
+12. evidential.ts (1,023 → <1000 lines)
 
 **Deliverables**:
 - 12 refactored mode files
 - All tests passing
 - Visual output unchanged (verified by comparison tests)
 
-### Sprint 3: High Priority Files (12-16 hours)
+### Sprint 3: File Splitting & Cleanup (8-12 hours)
 
-**Objective**: Refactor 9 files between 500-1,000 lines
+**Objective**: Split any files still exceeding 1000 lines after utility adoption
 
-1. systems-thinking.ts (909 → ~410 lines)
-2. analogical.ts (875 → ~395 lines)
-3. causal.ts (866 → ~390 lines)
-4. computability.ts (823 → ~370 lines)
-5. counterfactual.ts (807 → ~365 lines)
-6. abductive.ts (666 → ~300 lines)
-7. bayesian.ts (631 → ~285 lines)
-8. temporal.ts (623 → ~280 lines)
-9. shannon.ts (558 → ~250 lines)
-
-**Deliverables**:
-- 9 refactored mode files
-- All tests passing
-
-### Sprint 4: File Splitting & Cleanup (8-12 hours)
-
-**Objective**: Split any files still exceeding 500 lines
-
-1. Identify files still >500 lines after utility adoption
+1. Identify files still >1000 lines after utility adoption
 2. Split into format-category subdirectories
 3. Update imports throughout codebase
 4. Final integration testing
 
 **Deliverables**:
-- All mode files <500 lines
+- All mode files <1000 lines
 - Clean directory structure
 - Updated import paths
 
@@ -438,8 +418,7 @@ describe('physics.ts refactoring', () => {
 | Metric | Current | Target |
 |--------|---------|--------|
 | Files >1000 lines | 12 | 0 |
-| Files >500 lines | 22 | 0 |
-| Total mode file lines | 24,046 | <11,000 |
+| Total mode file lines | 24,046 | <15,000 |
 | DOT utility adoption | 1/22 (4.5%) | 22/22 (100%) |
 | Mermaid utility adoption | 1/22 (4.5%) | 22/22 (100%) |
 | ASCII utility adoption | 1/22 (4.5%) | 22/22 (100%) |
@@ -480,7 +459,7 @@ During analysis, a bug was discovered in `tools/chunking-for-files/`:
 | physics.ts `physicsToDOT()` | 1,562 lines | ~84 lines |
 | metareasoning.ts `metaReasoningToDOT()` | 1,418 lines | ~75 lines |
 
-The refactoring focus is correctly on **file size** (>500 lines) and **utility adoption** (1/22), not individual function sizes.
+The refactoring focus is correctly on **file size** (>1000 lines) and **utility adoption** (1/22), not individual function sizes.
 
 ---
 
