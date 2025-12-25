@@ -3,7 +3,7 @@
   "sprint": 3,
   "title": "Document Format Builders",
   "week": "Week 2",
-  "effort": "6-7 hours",
+  "effort": "5-6 hours",
   "status": "pending",
   "description": "Add fluent API builder classes for document formats (UML, HTML, Markdown, Modelica, JSON) with unit tests",
   "tasks": [
@@ -142,5 +142,5 @@
     "src/export/visual/utils/json.ts"
   ],
   "totalEstimatedHours": 5.5,
-  "notes": "Document format builders with unit tests - completes the builder infrastructure"
+  "notes": "Document format builders with unit tests - completes all 11 builder classes"
 }

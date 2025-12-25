@@ -77,7 +77,7 @@
         "Run snapshot tests for temporal.ts exports",
         "Run snapshot tests for shannon.ts exports",
         "Compare DOT, Mermaid, ASCII output against baselines",
-        "All 21 mode exporters now use builders (except sequential.ts reference)"
+        "All 22 mode exporters now use builders (sequential.ts was already compliant)"
       ],
       "files": [
         "tests/unit/export/visual/modes/snapshot-baseline.test.ts"
@@ -105,7 +105,7 @@
   ],
   "successCriteria": [
     "All 4 files use DOT/Mermaid/ASCII builders",
-    "All 21 mode exporters now use builders",
+    "All 22 mode exporters now use builders",
     "All snapshot tests pass (output unchanged)",
     "100% utility adoption achieved",
     "All existing tests pass"
