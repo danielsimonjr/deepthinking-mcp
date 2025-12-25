@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 8.3.2 | **Last Updated**: 2025-12-22
+**Version**: 8.4.0 | **Last Updated**: 2025-12-25
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -38,18 +38,18 @@ The codebase is organized into the following modules:
 
 - **cache**: 6 files
 - **config**: 1 file
-- **export**: 42 files
+- **export**: 44 files
 - **entry**: 1 file
 - **interfaces**: 2 files
-- **modes**: 38 files
-- **proof**: 8 files
+- **modes**: 58 files
+- **proof**: 13 files
 - **repositories**: 4 files
 - **search**: 4 files
 - **services**: 5 files
 - **session**: 6 files
 - **taxonomy**: 7 files
-- **tools**: 17 files
-- **types**: 35 files
+- **tools**: 18 files
+- **types**: 36 files
 - **utils**: 6 files
 - **validation**: 39 files
 
@@ -141,7 +141,29 @@ The codebase is organized into the following modules:
 
 ## Export Dependencies
 
-### `src/export/index.ts` - Export module index (v4.3.0)
+### `src/export/file-exporter.ts` - File Exporter Module - Phase 12 Sprint 4
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `fs` | `* as fs` |
+| `path` | `* as path` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/session.js` | `ThinkingSession` | Import (type-only) |
+| `./profiles.js` | `ExportFormatType, ExportProfileId` | Import (type-only) |
+| `./profiles.js` | `getExportProfile` | Import |
+
+**Exports:**
+- Classes: `FileExporter`
+- Interfaces: `FileExportConfig`, `FileExportResult`, `BatchExportResult`, `ExportProgress`
+- Functions: `createFileExporter`
+
+---
+
+### `src/export/index.ts` - Export module index (v4.4.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -149,10 +171,21 @@ The codebase is organized into the following modules:
 | `./visual/index.js` | `type VisualFormat, type VisualExportOptions, sanitizeId, VisualExporter, exportCausalGraph, exportTemporalTimeline, exportGameTree, exportBayesianNetwork, exportSequentialDependencyGraph, exportShannonStageFlow, exportAbductiveHypotheses, exportCounterfactualScenarios, exportAnalogicalMapping, exportEvidentialBeliefs, exportFirstPrinciplesDerivation, exportSystemsThinkingCausalLoops, exportScientificMethodExperiment, exportOptimizationSolution, exportFormalLogicProof, // Phase 8: Proof decomposition
   exportProofDecomposition` | Re-export |
 | `./visual/utils/latex.js` | `LaTeXExporter, type LaTeXExportOptions` | Re-export |
+| `./profiles.js` | `type ExportFormatType, type ProfileExportOptions, type ExportProfile, type ExportProfileId, type ExportProfileMetadata, EXPORT_PROFILES, getExportProfile, getAllExportProfiles, getExportProfilesByTag, getExportProfilesByFormat, isValidExportProfileId, listExportProfileIds, getExportProfileMetadata, combineExportProfiles, recommendExportProfile` | Re-export |
+| `./file-exporter.js` | `type FileExportConfig, type FileExportResult, type BatchExportResult, type ExportProgress, type ExportProgressCallback, FileExporter, createFileExporter` | Re-export |
 
 **Exports:**
 - Re-exports: `type VisualFormat`, `type VisualExportOptions`, `sanitizeId`, `VisualExporter`, `exportCausalGraph`, `exportTemporalTimeline`, `exportGameTree`, `exportBayesianNetwork`, `exportSequentialDependencyGraph`, `exportShannonStageFlow`, `exportAbductiveHypotheses`, `exportCounterfactualScenarios`, `exportAnalogicalMapping`, `exportEvidentialBeliefs`, `exportFirstPrinciplesDerivation`, `exportSystemsThinkingCausalLoops`, `exportScientificMethodExperiment`, `exportOptimizationSolution`, `exportFormalLogicProof`, `// Phase 8: Proof decomposition
-  exportProofDecomposition`, `LaTeXExporter`, `type LaTeXExportOptions`
+  exportProofDecomposition`, `LaTeXExporter`, `type LaTeXExportOptions`, `type ExportFormatType`, `type ProfileExportOptions`, `type ExportProfile`, `type ExportProfileId`, `type ExportProfileMetadata`, `EXPORT_PROFILES`, `getExportProfile`, `getAllExportProfiles`, `getExportProfilesByTag`, `getExportProfilesByFormat`, `isValidExportProfileId`, `listExportProfileIds`, `getExportProfileMetadata`, `combineExportProfiles`, `recommendExportProfile`, `type FileExportConfig`, `type FileExportResult`, `type BatchExportResult`, `type ExportProgress`, `type ExportProgressCallback`, `FileExporter`, `createFileExporter`
+
+---
+
+### `src/export/profiles.ts` - Export Profiles Module - Phase 12 Sprint 4
+
+**Exports:**
+- Interfaces: `ProfileExportOptions`, `ExportProfile`, `ExportProfileMetadata`
+- Functions: `getExportProfile`, `getAllExportProfiles`, `getExportProfilesByTag`, `getExportProfilesByFormat`, `isValidExportProfileId`, `listExportProfileIds`, `getExportProfileMetadata`, `combineExportProfiles`, `recommendExportProfile`
+- Constants: `EXPORT_PROFILES`
 
 ---
 
@@ -864,7 +897,7 @@ The codebase is organized into the following modules:
 
 ## Entry Dependencies
 
-### `src/index.ts` - DeepThinking MCP Server (v8.0.0)
+### `src/index.ts` - DeepThinking MCP Server (v8.4.0)
 
 **External Dependencies:**
 | Package | Import |
@@ -886,9 +919,12 @@ The codebase is organized into the following modules:
 | `./tools/definitions.js` | `toolList, toolSchemas, isValidTool, modeToToolMap` | Import |
 | `./tools/thinking.js` | `thinkingTool` | Import |
 | `./session/index.js` | `SessionManager` | Import (type-only) |
-| `./types/index.js` | `ThinkingMode, isFullyImplemented` | Import |
+| `./types/index.js` | `ThinkingMode, isFullyImplemented, MCPResponse, AddThoughtResponse, AnalyzeResponse, ProblemCharacteristics` | Import |
 | `./services/index.js` | `ThoughtFactory, ExportService, ModeRouter` | Import (type-only) |
 | `./modes/index.js` | `ModeHandlerRegistry` | Import |
+
+**Exports:**
+- Constants: `format`
 
 ---
 
@@ -919,6 +955,174 @@ The codebase is organized into the following modules:
 ---
 
 ## Modes Dependencies
+
+### `src/modes/causal/graph/algorithms/centrality.ts` - Centrality Algorithms - Phase 12 Sprint 6
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types.js` | `CausalGraph, CentralityMeasures, CentralityConfig, CentralityResult, CentralityType` | Import (type-only) |
+
+**Exports:**
+- Functions: `computeDegreeCentrality`, `computeBetweennessCentrality`, `computeClosenessCentrality`, `computePageRank`, `computeEigenvectorCentrality`, `computeKatzCentrality`, `computeAllCentrality`, `getMostCentralNode`
+
+---
+
+### `src/modes/causal/graph/algorithms/d-separation.ts` - D-Separation Analyzer - Phase 12 Sprint 6
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types.js` | `CausalGraph, GraphEdge, Path, PathEdge, DSeparationResult, DSeparationRequest, DSeparationConfig, VStructure` | Import (type-only) |
+
+**Exports:**
+- Functions: `getAncestors`, `findVStructures`, `findAllPaths`, `isPathBlocked`, `checkDSeparation`, `findMinimalSeparator`, `isValidBackdoorAdjustment`, `findBackdoorAdjustmentSet`, `computeMarkovBlanket`, `getImpliedIndependencies`
+
+---
+
+### `src/modes/causal/graph/algorithms/index.ts` - Causal Graph Algorithms - Phase 12 Sprint 6
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./centrality.js` | `computeDegreeCentrality, computeBetweennessCentrality, computeClosenessCentrality, computePageRank, computeEigenvectorCentrality, computeKatzCentrality, computeAllCentrality, getMostCentralNode` | Re-export |
+| `./d-separation.js` | `findVStructures, findAllPaths, isPathBlocked, checkDSeparation, findMinimalSeparator, isValidBackdoorAdjustment, findBackdoorAdjustmentSet, computeMarkovBlanket, getImpliedIndependencies, getAncestors` | Re-export |
+| `./intervention.js` | `createMutilatedGraph, createMarginalizedGraph, isIdentifiable, findAllBackdoorSets, generateBackdoorFormula, checkFrontdoorCriterion, generateFrontdoorFormula, findInstrumentalVariable, generateIVFormula, applyRule1, applyRule2, applyRule3, analyzeIntervention` | Re-export |
+
+**Exports:**
+- Re-exports: `computeDegreeCentrality`, `computeBetweennessCentrality`, `computeClosenessCentrality`, `computePageRank`, `computeEigenvectorCentrality`, `computeKatzCentrality`, `computeAllCentrality`, `getMostCentralNode`, `findVStructures`, `findAllPaths`, `isPathBlocked`, `checkDSeparation`, `findMinimalSeparator`, `isValidBackdoorAdjustment`, `findBackdoorAdjustmentSet`, `computeMarkovBlanket`, `getImpliedIndependencies`, `getAncestors`, `createMutilatedGraph`, `createMarginalizedGraph`, `isIdentifiable`, `findAllBackdoorSets`, `generateBackdoorFormula`, `checkFrontdoorCriterion`, `generateFrontdoorFormula`, `findInstrumentalVariable`, `generateIVFormula`, `applyRule1`, `applyRule2`, `applyRule3`, `analyzeIntervention`
+
+---
+
+### `src/modes/causal/graph/algorithms/intervention.ts` - Do-Calculus and Intervention Analysis - Phase 12 Sprint 6
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types.js` | `CausalGraph, GraphEdge, Intervention, InterventionResult, InterventionRequest, AdjustmentFormula` | Import (type-only) |
+| `./d-separation.js` | `checkDSeparation, findBackdoorAdjustmentSet, isValidBackdoorAdjustment` | Import |
+
+**Exports:**
+- Functions: `createMutilatedGraph`, `createMarginalizedGraph`, `isIdentifiable`, `findAllBackdoorSets`, `generateBackdoorFormula`, `checkFrontdoorCriterion`, `generateFrontdoorFormula`, `findInstrumentalVariable`, `generateIVFormula`, `applyRule1`, `applyRule2`, `applyRule3`, `analyzeIntervention`
+
+---
+
+### `src/modes/causal/graph/index.ts` - Causal Graph Analysis Module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `*` | Re-export |
+| `./algorithms/index.js` | `*` | Re-export |
+
+**Exports:**
+- Re-exports: `* from ./types.js`, `* from ./algorithms/index.js`
+
+---
+
+### `src/modes/causal/graph/types.ts` - Enhanced Graph Analysis Types for Causal Reasoning
+
+---
+
+### `src/modes/combinations/analyzer.ts` - Multi-Mode Analyzer - Phase 12 Sprint 3
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode` | Import |
+| `./combination-types.js` | `MultiModeAnalysisRequest, MultiModeAnalysisResponse, ModeAnalysisResult, MergedAnalysis, Insight, ModeError, MergeStatistics` | Import (type-only) |
+| `./merger.js` | `InsightMerger, MergeResult` | Import |
+| `./conflict-resolver.js` | `ConflictResolver` | Import |
+| `./presets.js` | `getPreset, isValidPresetId, PresetId` | Import |
+| `./combination-types.js` | `ModeCombination` | Import (type-only) |
+
+**Exports:**
+- Classes: `MultiModeAnalyzer`
+- Interfaces: `MultiModeAnalyzerConfig`, `AnalysisProgress`
+- Functions: `analyzeMultiMode`
+
+---
+
+### `src/modes/combinations/combination-types.ts` - Multi-Mode Analysis & Synthesis Types
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode` | Import (type-only) |
+
+---
+
+### `src/modes/combinations/conflict-resolver.ts` - Conflict Resolver - Phase 12 Sprint 3
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./combination-types.js` | `Insight, ConflictingInsight, ConflictResolution, ConflictType` | Import (type-only) |
+
+**Exports:**
+- Classes: `ConflictResolver`
+- Interfaces: `ConflictResolverConfig`, `ResolutionResult`
+
+---
+
+### `src/modes/combinations/index.ts` - Multi-Mode Analysis & Synthesis Module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./modes/combinations` | `*   MultiModeAnalyzer, *   analyzeMultiMode, *   getPreset, *   InsightMerger, *   ConflictResolver, *` | Import |
+| `./presets.js` | `type PresetId, PRESETS, getPreset, getAllPresets, getPresetsByTag, getPresetsWithMode, getPresetsByStrategy, combinePresets, isValidPresetId, getPresetMetadata, listPresetIds` | Re-export |
+| `./merger.js` | `InsightMerger, type MergeResult, type InsightMergerConfig` | Re-export |
+| `./conflict-resolver.js` | `ConflictResolver, type ResolutionResult, type ConflictResolverConfig` | Re-export |
+| `./analyzer.js` | `MultiModeAnalyzer, analyzeMultiMode, type MultiModeAnalyzerConfig, type ProgressCallback, type AnalysisProgress` | Re-export |
+
+**Exports:**
+- Re-exports: `type PresetId`, `PRESETS`, `getPreset`, `getAllPresets`, `getPresetsByTag`, `getPresetsWithMode`, `getPresetsByStrategy`, `combinePresets`, `isValidPresetId`, `getPresetMetadata`, `listPresetIds`, `InsightMerger`, `type MergeResult`, `type InsightMergerConfig`, `ConflictResolver`, `type ResolutionResult`, `type ConflictResolverConfig`, `MultiModeAnalyzer`, `analyzeMultiMode`, `type MultiModeAnalyzerConfig`, `type ProgressCallback`, `type AnalysisProgress`
+
+---
+
+### `src/modes/combinations/merger.ts` - Insight Merger - Phase 12 Sprint 3
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode` | Import (type-only) |
+| `./combination-types.js` | `Insight, MergeStrategy, WeightedMergeConfig, HierarchicalMergeConfig, DialecticalMergeConfig, MergeStatistics, ConflictingInsight` | Import (type-only) |
+
+**Exports:**
+- Classes: `InsightMerger`
+- Interfaces: `InsightMergerConfig`, `MergeResult`
+
+---
+
+### `src/modes/combinations/presets.ts` - Mode Combination Presets - Phase 12 Sprint 3
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode` | Import |
+| `./combination-types.js` | `ModeCombination, MergeStrategy, WeightedMergeConfig, HierarchicalMergeConfig, DialecticalMergeConfig` | Import (type-only) |
+
+**Exports:**
+- Functions: `getPreset`, `getAllPresets`, `getPresetsByTag`, `getPresetsWithMode`, `getPresetsByStrategy`, `combinePresets`, `isValidPresetId`, `getPresetMetadata`, `listPresetIds`
+- Constants: `PRESETS`
+
+---
 
 ### `src/modes/handlers/AbductiveHandler.ts` - AbductiveHandler - Phase 15 (v8.4.0)
 
@@ -1039,7 +1243,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/modes/handlers/CausalHandler.ts` - CausalHandler - Phase 10 Sprint 2 (v8.1.0)
+### `src/modes/handlers/CausalHandler.ts` - CausalHandler - Phase 12 Sprint 6 Enhanced (v8.3.0)
 
 **Node.js Built-in Dependencies:**
 | Module | Import |
@@ -1054,6 +1258,10 @@ The codebase is organized into the following modules:
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
 | `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
 | `../../utils/type-guards.js` | `toExtendedThoughtType` | Import |
+| `../causal/graph/algorithms/centrality.js` | `computeDegreeCentrality, getMostCentralNode` | Import |
+| `../causal/graph/algorithms/d-separation.js` | `findVStructures` | Import |
+| `../causal/graph/algorithms/intervention.js` | `isIdentifiable, findAllBackdoorSets` | Import |
+| `../causal/graph/types.js` | `CausalGraph` | Import (type-only) |
 
 **Exports:**
 - Classes: `CausalHandler`
@@ -1729,6 +1937,108 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/modes/stochastic/analysis/convergence.ts` - Convergence Diagnostics Module - Phase 12 Sprint 5
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types.js` | `ConvergenceDiagnostics` | Import (type-only) |
+| `./statistics.js` | `mean, variance, stdDev` | Import |
+
+**Exports:**
+- Interfaces: `ConvergenceResult`, `TraceStats`, `DiagnosticSummary`
+- Functions: `autocorrelation`, `integratedAutocorrelationTime`, `effectiveSampleSize`, `effectiveSampleSizeMultiple`, `minEffectiveSampleSize`, `gewekeStatistic`, `gewekeStatisticMultiple`, `aggregateGewekeStatistic`, `rHatSingleChain`, `rHatMultipleChains`, `mcse`, `mcseMultiple`, `assessConvergence`, `computeConvergenceDiagnostics`, `traceStatistics`, `generateDiagnosticSummary`
+
+---
+
+### `src/modes/stochastic/analysis/index.ts` - Stochastic Analysis Module Exports - Phase 12 Sprint 5
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./statistics.js` | `mean, variance, stdDev, median, percentile, percentiles, skewness, kurtosis, mode, covariance, correlation, correlationMatrix, covarianceMatrix, equalTailedInterval, hpdInterval, computeSampleStatistics, mcse, estimateESS, summarizePosterior, summarizeAllPosteriors, probExceedsThreshold, probInRange, probAExceedsB, histogram, kde, type CredibleInterval, type PosteriorSummary, type HistogramBin` | Re-export |
+| `./convergence.js` | `autocorrelation, integratedAutocorrelationTime, effectiveSampleSize, effectiveSampleSizeMultiple, minEffectiveSampleSize, gewekeStatistic, gewekeStatisticMultiple, aggregateGewekeStatistic, rHatSingleChain, rHatMultipleChains, mcse, mcseMultiple, assessConvergence, computeConvergenceDiagnostics, traceStatistics, generateDiagnosticSummary, type ConvergenceResult, type TraceStats, type DiagnosticSummary` | Re-export |
+
+**Exports:**
+- Re-exports: `mean`, `variance`, `stdDev`, `median`, `percentile`, `percentiles`, `skewness`, `kurtosis`, `mode`, `covariance`, `correlation`, `correlationMatrix`, `covarianceMatrix`, `equalTailedInterval`, `hpdInterval`, `computeSampleStatistics`, `mcse`, `estimateESS`, `summarizePosterior`, `summarizeAllPosteriors`, `probExceedsThreshold`, `probInRange`, `probAExceedsB`, `histogram`, `kde`, `type CredibleInterval`, `type PosteriorSummary`, `type HistogramBin`, `autocorrelation`, `integratedAutocorrelationTime`, `effectiveSampleSize`, `effectiveSampleSizeMultiple`, `minEffectiveSampleSize`, `gewekeStatistic`, `gewekeStatisticMultiple`, `aggregateGewekeStatistic`, `rHatSingleChain`, `rHatMultipleChains`, `mcseMultiple`, `assessConvergence`, `computeConvergenceDiagnostics`, `traceStatistics`, `generateDiagnosticSummary`, `type ConvergenceResult`, `type TraceStats`, `type DiagnosticSummary`
+
+---
+
+### `src/modes/stochastic/analysis/statistics.ts` - Statistical Analysis Module - Phase 12 Sprint 5
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types.js` | `SampleStatistics` | Import (type-only) |
+
+**Exports:**
+- Interfaces: `CredibleInterval`, `PosteriorSummary`, `HistogramBin`
+- Functions: `mean`, `variance`, `stdDev`, `median`, `percentile`, `percentiles`, `skewness`, `kurtosis`, `mode`, `covariance`, `correlation`, `correlationMatrix`, `covarianceMatrix`, `equalTailedInterval`, `hpdInterval`, `computeSampleStatistics`, `mcse`, `estimateESS`, `summarizePosterior`, `summarizeAllPosteriors`, `probExceedsThreshold`, `probInRange`, `probAExceedsB`, `histogram`, `kde`
+
+---
+
+### `src/modes/stochastic/index.ts` - Stochastic Reasoning Module
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `*` | Re-export |
+| `./analysis/index.js` | `*` | Re-export |
+| `./models/distribution.js` | `createSampler, NormalSampler, UniformSampler, ExponentialSampler, PoissonSampler, BinomialSampler, CategoricalSampler, BetaSampler, GammaSampler, sampleWithStatistics, type DistributionSampler` | Re-export |
+| `./models/monte-carlo.js` | `MonteCarloEngine, createMonteCarloEngine, runMonteCarloSimulation, type ProgressCallback, type ModelEvaluator` | Re-export |
+| `./sampling/rng.js` | `SeededRNG, createRNG, createParallelRNGs, generateSeed` | Re-export |
+
+**Exports:**
+- Re-exports: `* from ./types.js`, `* from ./analysis/index.js`, `createSampler`, `NormalSampler`, `UniformSampler`, `ExponentialSampler`, `PoissonSampler`, `BinomialSampler`, `CategoricalSampler`, `BetaSampler`, `GammaSampler`, `sampleWithStatistics`, `type DistributionSampler`, `MonteCarloEngine`, `createMonteCarloEngine`, `runMonteCarloSimulation`, `type ProgressCallback`, `type ModelEvaluator`, `SeededRNG`, `createRNG`, `createParallelRNGs`, `generateSeed`
+
+---
+
+### `src/modes/stochastic/models/distribution.ts` - Distribution Samplers - Phase 12 Sprint 5
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types.js` | `Distribution, SamplingResult` | Import (type-only) |
+
+**Exports:**
+- Classes: `NormalSampler`, `UniformSampler`, `ExponentialSampler`, `PoissonSampler`, `BinomialSampler`, `CategoricalSampler`, `BetaSampler`, `GammaSampler`
+- Interfaces: `DistributionSampler`
+- Functions: `createSampler`, `sampleWithStatistics`
+
+---
+
+### `src/modes/stochastic/models/monte-carlo.ts` - Monte Carlo Simulation Engine - Phase 12 Sprint 5
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types.js` | `MonteCarloConfig, MonteCarloResult, StochasticModel, SimulationProgress, SampleStatistics, ConvergenceDiagnostics` | Import (type-only) |
+| `../sampling/rng.js` | `SeededRNG` | Import |
+| `./distribution.js` | `createSampler` | Import |
+
+**Exports:**
+- Classes: `MonteCarloEngine`
+- Functions: `createMonteCarloEngine`, `runMonteCarloSimulation`
+
+---
+
+### `src/modes/stochastic/sampling/rng.ts` - Seeded Random Number Generator - Phase 12 Sprint 5
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types.js` | `RNGState, SeededRNGInterface` | Import (type-only) |
+
+**Exports:**
+- Classes: `SeededRNG`
+- Functions: `createRNG`, `createParallelRNGs`, `generateSeed`
+
+---
+
+### `src/modes/stochastic/types.ts` - Monte Carlo Extension Types for Stochastic Reasoning
+
+---
+
 ## Proof Dependencies
 
 ### `src/proof/assumption-tracker.ts` - Assumption Tracker - Phase 8 Sprint 2
@@ -1740,6 +2050,34 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Classes: `AssumptionTracker`
+
+---
+
+### `src/proof/branch-analyzer.ts` - Branch Analyzer - Phase 12 Sprint 2
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./decomposer.js` | `ProofStep` | Import (type-only) |
+| `./branch-types.js` | `ProofBranch, BranchAnalysisResult` | Import (type-only) |
+
+**Exports:**
+- Classes: `BranchAnalyzer`
+- Interfaces: `BranchAnalyzerOptions`
+
+---
+
+### `src/proof/branch-types.ts` - Branch Analysis Types for Proof Decomposition
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./decomposer.js` | `ProofStep` | Import (type-only) |
 
 ---
 
@@ -1805,6 +2143,25 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/proof/hierarchical-proof.ts` - Hierarchical Proof Manager - Phase 12 Sprint 2
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./decomposer.js` | `ProofStep` | Import (type-only) |
+| `./branch-types.js` | `HierarchicalProof, HierarchicalProofType, ProofTree` | Import (type-only) |
+
+**Exports:**
+- Classes: `HierarchicalProofManager`
+- Interfaces: `HierarchicalProofOptions`, `ProofElementInput`
+
+---
+
 ### `src/proof/inconsistency-detector.ts` - Inconsistency Detector - Phase 8 Sprint 3
 
 **Internal Dependencies:**
@@ -1818,7 +2175,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/proof/index.ts` - Proof Analysis Module (Phase 8 - v7.0.0)
+### `src/proof/index.ts` - Proof Analysis Module (Phase 8 - v7.0.0, Phase 12 - v8.4.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1830,9 +2187,13 @@ The codebase is organized into the following modules:
 | `./inconsistency-detector.js` | `InconsistencyDetector, type InconsistencyDetectorConfig` | Re-export |
 | `./circular-detector.js` | `CircularReasoningDetector, type CircularReasoningResult` | Re-export |
 | `./patterns/warnings.js` | `type WarningPattern, type WarningCategory, ALL_WARNING_PATTERNS, getPatternsByCategory, getPatternsBySeverity, checkStatement, checkProof` | Re-export |
+| `./branch-analyzer.js` | `BranchAnalyzer, type BranchAnalyzerOptions` | Re-export |
+| `./strategy-recommender.js` | `StrategyRecommender, type StrategyRecommenderConfig` | Re-export |
+| `./verifier.js` | `ProofVerifier, type ProofVerifierConfig` | Re-export |
+| `./hierarchical-proof.js` | `HierarchicalProofManager, type HierarchicalProofOptions, type ProofElementInput` | Re-export |
 
 **Exports:**
-- Re-exports: `DependencyGraphBuilder`, `ProofDecomposer`, `type ProofStep`, `GapAnalyzer`, `type GapAnalyzerConfig`, `AssumptionTracker`, `InconsistencyDetector`, `type InconsistencyDetectorConfig`, `CircularReasoningDetector`, `type CircularReasoningResult`, `type WarningPattern`, `type WarningCategory`, `ALL_WARNING_PATTERNS`, `getPatternsByCategory`, `getPatternsBySeverity`, `checkStatement`, `checkProof`
+- Re-exports: `DependencyGraphBuilder`, `ProofDecomposer`, `type ProofStep`, `GapAnalyzer`, `type GapAnalyzerConfig`, `AssumptionTracker`, `InconsistencyDetector`, `type InconsistencyDetectorConfig`, `CircularReasoningDetector`, `type CircularReasoningResult`, `type WarningPattern`, `type WarningCategory`, `ALL_WARNING_PATTERNS`, `getPatternsByCategory`, `getPatternsBySeverity`, `checkStatement`, `checkProof`, `BranchAnalyzer`, `type BranchAnalyzerOptions`, `StrategyRecommender`, `type StrategyRecommenderConfig`, `ProofVerifier`, `type ProofVerifierConfig`, `HierarchicalProofManager`, `type HierarchicalProofOptions`, `type ProofElementInput`
 
 ---
 
@@ -1842,6 +2203,33 @@ The codebase is organized into the following modules:
 - Interfaces: `WarningPattern`
 - Functions: `getPatternsByCategory`, `getPatternsBySeverity`, `checkStatement`, `checkProof`
 - Constants: `DIVISION_BY_HIDDEN_ZERO`, `ASSUMING_CONCLUSION`, `AFFIRMING_CONSEQUENT`, `DENYING_ANTECEDENT`, `HASTY_GENERALIZATION`, `AMBIGUOUS_MIDDLE`, `ILLEGAL_CANCELLATION`, `INFINITY_ARITHMETIC`, `NECESSARY_SUFFICIENT_CONFUSION`, `EXISTENTIAL_INSTANTIATION_ERROR`, `SQRT_SIGN_ERROR`, `LIMIT_EXCHANGE_ERROR`, `ALL_WARNING_PATTERNS`
+
+---
+
+### `src/proof/strategy-recommender.ts` - Strategy Recommender - Phase 12 Sprint 2
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./branch-types.js` | `ProofStrategyType, ProofTemplate, StrategyRecommendation, TheoremFeatures` | Import (type-only) |
+
+**Exports:**
+- Classes: `StrategyRecommender`
+- Interfaces: `StrategyRecommenderConfig`
+
+---
+
+### `src/proof/verifier.ts` - Proof Verifier - Phase 12 Sprint 2
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./decomposer.js` | `ProofStep` | Import (type-only) |
+| `./branch-types.js` | `StepJustification, VerificationResult, VerificationError, VerificationWarning, VerificationCoverage` | Import (type-only) |
+
+**Exports:**
+- Classes: `ProofVerifier`
+- Interfaces: `ProofVerifierConfig`
 
 ---
 
@@ -1958,8 +2346,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingSession, ThinkingMode, CausalThought, TemporalThought, GameTheoryThought, BayesianThought, FirstPrinciplesThought, isMetaReasoningThought, isCausalThought, isBayesianThought, isTemporalThought, isGameTheoryThought, isFirstPrinciplesThought, isSystemsThinkingThought, isSynthesisThought, isArgumentationThought, isAnalysisThought, isAlgorithmicThought, isScientificMethodThought, HybridThought, // Sprint 1: Visual export integration types
-  SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought, SynthesisThought, ArgumentationThought, AnalysisThought, AlgorithmicThought` | Import |
+| `../types/index.js` | `ThinkingSession, ThinkingMode, Thought, CausalThought, TemporalThought, GameTheoryThought, BayesianThought, FirstPrinciplesThought, isMetaReasoningThought, isCausalThought, isBayesianThought, isTemporalThought, isGameTheoryThought, isFirstPrinciplesThought, isSystemsThinkingThought, isSynthesisThought, isArgumentationThought, isAnalysisThought, isAlgorithmicThought, isScientificMethodThought, HybridThought, // Sprint 1: Visual export integration types
+  SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought` | Import |
 | `../types/modes/mathematics.js` | `MathematicsThought` | Import (type-only) |
 | `../types/modes/physics.js` | `PhysicsThought` | Import (type-only) |
 | `../types/modes/metareasoning.js` | `MetaReasoningThought` | Import (type-only) |
@@ -2246,7 +2634,7 @@ The codebase is organized into the following modules:
 
 ## Tools Dependencies
 
-### `src/tools/definitions.ts` - Focused Tool Definitions (v7.5.0)
+### `src/tools/definitions.ts` - Focused Tool Definitions (v8.4.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -2263,6 +2651,7 @@ The codebase is organized into the following modules:
 | `./schemas/modes/scientific.js` | `ScientificSchema` | Import |
 | `./schemas/modes/engineering.js` | `EngineeringSchema` | Import |
 | `./schemas/modes/academic.js` | `AcademicSchema` | Import |
+| `./schemas/analyze.js` | `analyzeInputSchema` | Import |
 
 **Exports:**
 - Functions: `getToolForMode`, `isValidTool`, `getSchemaForTool`
@@ -2273,7 +2662,20 @@ The codebase is organized into the following modules:
 ### `src/tools/json-schemas.ts` - Hand-Written JSON Schemas for MCP Tools (v4.4.0)
 
 **Exports:**
-- Constants: `deepthinking_core_schema`, `deepthinking_standard_schema`, `deepthinking_mathematics_schema`, `deepthinking_temporal_schema`, `deepthinking_probabilistic_schema`, `deepthinking_causal_schema`, `deepthinking_strategic_schema`, `deepthinking_analytical_schema`, `deepthinking_scientific_schema`, `deepthinking_engineering_schema`, `deepthinking_academic_schema`, `deepthinking_session_schema`, `jsonSchemas`
+- Constants: `deepthinking_core_schema`, `deepthinking_standard_schema`, `deepthinking_mathematics_schema`, `deepthinking_temporal_schema`, `deepthinking_probabilistic_schema`, `deepthinking_causal_schema`, `deepthinking_strategic_schema`, `deepthinking_analytical_schema`, `deepthinking_scientific_schema`, `deepthinking_engineering_schema`, `deepthinking_academic_schema`, `deepthinking_session_schema`, `deepthinking_analyze_schema`, `jsonSchemas`
+
+---
+
+### `src/tools/schemas/analyze.ts` - Multi-Mode Analyze Tool Schema - Phase 12 Sprint 3
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
+
+**Exports:**
+- Functions: `mapModeStringToEnum`
+- Constants: `analyzeInputSchema`, `analyzeOutputSchema`, `analyzeToolDefinition`
 
 ---
 
@@ -2287,7 +2689,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./shared.js` | `ConfidenceSchema, PositiveIntSchema, SessionActionEnum, ExportFormatEnum, LevelEnum` | Import |
+| `./shared.js` | `ConfidenceSchema, PositiveIntSchema, SessionActionEnum, ExportFormatEnum, ExportProfileEnum, LevelEnum` | Import |
 
 **Exports:**
 - Constants: `BaseThoughtSchema`, `SessionActionSchema`
@@ -2520,7 +2922,7 @@ The codebase is organized into the following modules:
 | `zod` | `z` |
 
 **Exports:**
-- Constants: `ConfidenceSchema`, `PositiveIntSchema`, `LevelEnum`, `ImpactEnum`, `ExportFormatEnum`, `SessionActionEnum`, `ProofTypeEnum`, `TimeUnitEnum`, `TemporalConstraintEnum`, `TemporalRelationEnum`, `EventTypeEnum`, `TransformationEnum`, `ShannonStageEnum`, `EntitySchema`, `DescribedEntitySchema`
+- Constants: `ConfidenceSchema`, `PositiveIntSchema`, `LevelEnum`, `ImpactEnum`, `ExportFormatEnum`, `SessionActionEnum`, `ExportProfileEnum`, `ProofTypeEnum`, `TimeUnitEnum`, `TemporalConstraintEnum`, `TemporalRelationEnum`, `EventTypeEnum`, `TransformationEnum`, `ShannonStageEnum`, `EntitySchema`, `DescribedEntitySchema`
 
 ---
 
@@ -2583,6 +2985,21 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/types/handlers.ts` - Handler Input/Output Types - Phase 15 Type Safety Initiative
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./core.js` | `ThinkingMode` | Import |
+| `../tools/schemas/base.js` | `SessionActionInput` | Import (type-only) |
+| `../tools/schemas/analyze.js` | `AnalyzeInput` | Import (type-only) |
+
+**Exports:**
+- Interfaces: `MCPTextContent`, `MCPResponse`, `AddThoughtInput`, `SummarizeInput`, `ExportInput`, `ExportAllInput`, `SwitchModeInput`, `GetSessionInput`, `RecommendModeInput`, `DeleteSessionInput`, `ModeStatus`, `AddThoughtResponse`, `AnalyzeResponse`
+- Functions: `isAddThoughtInput`, `isSessionActionInput`, `isAnalyzeInput`
+
+---
+
 ### `src/types/index.ts` - Type definitions index (v8.0.0)
 
 **Internal Dependencies:**
@@ -2605,9 +3022,10 @@ The codebase is organized into the following modules:
 | `./modes/stochastic.js` | `type StochasticProcessType, type StochasticState, type StateTransition, type MarkovChain, type RandomVariable, type DistributionType, type SimulationResult, type SimulationStatistics, isStochasticThought` | Re-export |
 | `./modes/constraint.js` | `type CSPVariable, type CSPConstraint, type ConstraintType, type Arc, type PropagationMethod, type SearchStrategy, type ConsistencyLevel, type Assignment, isConstraintThought` | Re-export |
 | `./modes/custom.js` | `type CustomField, type CustomFieldType, type CustomStage, type CustomValidationRule, isCustomThought` | Re-export |
+| `./handlers.js` | `type MCPTextContent, type MCPResponse, type AddThoughtInput, type SummarizeInput, type ExportInput, type ExportAllInput, type SwitchModeInput, type GetSessionInput, type RecommendModeInput, type DeleteSessionInput, type ModeStatus, type AddThoughtResponse, type AnalyzeResponse, isAddThoughtInput, isSessionActionInput, isAnalyzeInput` | Re-export |
 
 **Exports:**
-- Re-exports: `* from ./core.js`, `* from ./session.js`, `* from ./modes/recommendations.js`, `type ModeHandler`, `type ValidationResult`, `type ValidationError`, `type ValidationWarning`, `type ModeEnhancements`, `type ModeStatus`, `validationSuccess`, `validationFailure`, `createValidationError`, `createValidationWarning`, `type Requirement`, `type RequirementPriority`, `type RequirementSource`, `type RequirementStatus`, `type RequirementsTraceability`, `type TradeAlternative`, `type TradeCriterion`, `type TradeScore`, `type TradeStudy`, `type FailureMode`, `type FailureModeAnalysis`, `type SeverityRating`, `type OccurrenceRating`, `type DetectionRating`, `type DesignDecision`, `type DecisionStatus`, `type DecisionAlternative`, `type DesignDecisionLog`, `type EngineeringAnalysisType`, `isEngineeringThought`, `type ComputabilityThoughtType`, `type TuringTransition`, `type TuringMachine`, `type ComputationStep`, `type ComputationTrace`, `type DecisionProblem`, `type Reduction`, `type DiagonalizationArgument`, `type DecidabilityProof`, `type ComplexityAnalysis`, `type OracleAnalysis`, `type ClassicUndecidableProblem`, `isComputabilityThought`, `createSimpleMachine`, `reductionPreservesDecidability`, `isPolynomialReduction`, `type MinimaxAnalysis`, `type CooperativeGame`, `type CoalitionValue`, `type CoreAllocation`, `type CoalitionAnalysis`, `type ShapleyValueDetails`, `createCharacteristicFunction`, `checkSuperadditivity`, `calculateShapleyValue`, `type CryptanalyticThoughtType`, `type DecibanEvidence`, `type EvidenceChain`, `type KeySpaceAnalysis`, `type FrequencyAnalysis`, `type BanburismusAnalysis`, `type CribAnalysis`, `type CipherType`, `type CryptographicHypothesis`, `type IsomorphismPattern`, `isCryptanalyticThought`, `toDecibans`, `fromDecibans`, `decibansToOdds`, `decibansToProbability`, `accumulateEvidence`, `calculateIndexOfCoincidence`, `LANGUAGE_IC`, `ENGLISH_FREQUENCIES`, `type SynthesisThoughtType`, `type SourceType`, `type SourceQuality`, `type Source`, `type Concept`, `type Theme`, `type Finding`, `type Pattern`, `type ConceptRelation`, `type LiteratureGap`, `type Contradiction`, `type ConceptualFramework`, `type SynthesisConclusion`, `type ReviewMetadata`, `isSynthesisThought`, `type ArgumentationThoughtType`, `type Claim`, `type Grounds`, `type Warrant`, `type Backing`, `type Qualifier`, `type Rebuttal`, `type RebuttalResponse`, `type ToulminArgument`, `type ArgumentChain`, `type DialecticPosition`, `type DialecticAnalysis`, `type RhetoricalAppeal`, `type RhetoricalStrategy`, `type AudienceConsideration`, `type LogicalFallacy`, `isArgumentationThought`, `type CritiqueThoughtType`, `type WorkType`, `type CritiquedWork`, `type DesignAssessment`, `type SampleAssessment`, `type AnalysisAssessment`, `type MethodologyEvaluation`, `type ValidityAssessment`, `type LogicalStructure`, `type ArgumentCritique`, `type EvidenceQuality`, `type EvidenceUseCritique`, `type NoveltyAssessment`, `type ImpactAssessment`, `type ContributionEvaluation`, `type CritiquePoint`, `type ImprovementSuggestion`, `type CritiqueVerdict`, `isCritiqueThought`, `type AnalysisThoughtType`, `type AnalysisMethodology`, `type DataSource`, `type DataSegment`, `type CodeType`, `type Code`, `type CodeCooccurrence`, `type Codebook`, `type ThemeLevel`, `type QualitativeTheme`, `type ThematicMap`, `type MemoType`, `type AnalyticalMemo`, `type GTCategory`, `type TheoreticalSampling`, `type DiscoursePattern`, `type QualitativeRigor`, `isAnalysisThought`, `type RecursiveStrategy`, `type Subproblem`, `type BaseCase`, `type RecurrenceRelation`, `type RecursiveCall`, `type MemoizationState`, `isRecursiveThought`, `type ModalLogicSystem`, `type ModalDomain`, `type PossibleWorld`, `type AccessibilityRelation`, `type ModalProposition`, `type ModalOperator`, `type KripkeFrame`, `type KripkeProperty`, `isModalThought`, `type StochasticProcessType`, `type StochasticState`, `type StateTransition`, `type MarkovChain`, `type RandomVariable`, `type DistributionType`, `type SimulationResult`, `type SimulationStatistics`, `isStochasticThought`, `type CSPVariable`, `type CSPConstraint`, `type ConstraintType`, `type Arc`, `type PropagationMethod`, `type SearchStrategy`, `type ConsistencyLevel`, `type Assignment`, `isConstraintThought`, `type CustomField`, `type CustomFieldType`, `type CustomStage`, `type CustomValidationRule`, `isCustomThought`
+- Re-exports: `* from ./core.js`, `* from ./session.js`, `* from ./modes/recommendations.js`, `type ModeHandler`, `type ValidationResult`, `type ValidationError`, `type ValidationWarning`, `type ModeEnhancements`, `type ModeStatus`, `validationSuccess`, `validationFailure`, `createValidationError`, `createValidationWarning`, `type Requirement`, `type RequirementPriority`, `type RequirementSource`, `type RequirementStatus`, `type RequirementsTraceability`, `type TradeAlternative`, `type TradeCriterion`, `type TradeScore`, `type TradeStudy`, `type FailureMode`, `type FailureModeAnalysis`, `type SeverityRating`, `type OccurrenceRating`, `type DetectionRating`, `type DesignDecision`, `type DecisionStatus`, `type DecisionAlternative`, `type DesignDecisionLog`, `type EngineeringAnalysisType`, `isEngineeringThought`, `type ComputabilityThoughtType`, `type TuringTransition`, `type TuringMachine`, `type ComputationStep`, `type ComputationTrace`, `type DecisionProblem`, `type Reduction`, `type DiagonalizationArgument`, `type DecidabilityProof`, `type ComplexityAnalysis`, `type OracleAnalysis`, `type ClassicUndecidableProblem`, `isComputabilityThought`, `createSimpleMachine`, `reductionPreservesDecidability`, `isPolynomialReduction`, `type MinimaxAnalysis`, `type CooperativeGame`, `type CoalitionValue`, `type CoreAllocation`, `type CoalitionAnalysis`, `type ShapleyValueDetails`, `createCharacteristicFunction`, `checkSuperadditivity`, `calculateShapleyValue`, `type CryptanalyticThoughtType`, `type DecibanEvidence`, `type EvidenceChain`, `type KeySpaceAnalysis`, `type FrequencyAnalysis`, `type BanburismusAnalysis`, `type CribAnalysis`, `type CipherType`, `type CryptographicHypothesis`, `type IsomorphismPattern`, `isCryptanalyticThought`, `toDecibans`, `fromDecibans`, `decibansToOdds`, `decibansToProbability`, `accumulateEvidence`, `calculateIndexOfCoincidence`, `LANGUAGE_IC`, `ENGLISH_FREQUENCIES`, `type SynthesisThoughtType`, `type SourceType`, `type SourceQuality`, `type Source`, `type Concept`, `type Theme`, `type Finding`, `type Pattern`, `type ConceptRelation`, `type LiteratureGap`, `type Contradiction`, `type ConceptualFramework`, `type SynthesisConclusion`, `type ReviewMetadata`, `isSynthesisThought`, `type ArgumentationThoughtType`, `type Claim`, `type Grounds`, `type Warrant`, `type Backing`, `type Qualifier`, `type Rebuttal`, `type RebuttalResponse`, `type ToulminArgument`, `type ArgumentChain`, `type DialecticPosition`, `type DialecticAnalysis`, `type RhetoricalAppeal`, `type RhetoricalStrategy`, `type AudienceConsideration`, `type LogicalFallacy`, `isArgumentationThought`, `type CritiqueThoughtType`, `type WorkType`, `type CritiquedWork`, `type DesignAssessment`, `type SampleAssessment`, `type AnalysisAssessment`, `type MethodologyEvaluation`, `type ValidityAssessment`, `type LogicalStructure`, `type ArgumentCritique`, `type EvidenceQuality`, `type EvidenceUseCritique`, `type NoveltyAssessment`, `type ImpactAssessment`, `type ContributionEvaluation`, `type CritiquePoint`, `type ImprovementSuggestion`, `type CritiqueVerdict`, `isCritiqueThought`, `type AnalysisThoughtType`, `type AnalysisMethodology`, `type DataSource`, `type DataSegment`, `type CodeType`, `type Code`, `type CodeCooccurrence`, `type Codebook`, `type ThemeLevel`, `type QualitativeTheme`, `type ThematicMap`, `type MemoType`, `type AnalyticalMemo`, `type GTCategory`, `type TheoreticalSampling`, `type DiscoursePattern`, `type QualitativeRigor`, `isAnalysisThought`, `type RecursiveStrategy`, `type Subproblem`, `type BaseCase`, `type RecurrenceRelation`, `type RecursiveCall`, `type MemoizationState`, `isRecursiveThought`, `type ModalLogicSystem`, `type ModalDomain`, `type PossibleWorld`, `type AccessibilityRelation`, `type ModalProposition`, `type ModalOperator`, `type KripkeFrame`, `type KripkeProperty`, `isModalThought`, `type StochasticProcessType`, `type StochasticState`, `type StateTransition`, `type MarkovChain`, `type RandomVariable`, `type DistributionType`, `type SimulationResult`, `type SimulationStatistics`, `isStochasticThought`, `type CSPVariable`, `type CSPConstraint`, `type ConstraintType`, `type Arc`, `type PropagationMethod`, `type SearchStrategy`, `type ConsistencyLevel`, `type Assignment`, `isConstraintThought`, `type CustomField`, `type CustomFieldType`, `type CustomStage`, `type CustomValidationRule`, `isCustomThought`, `type MCPTextContent`, `type MCPResponse`, `type AddThoughtInput`, `type SummarizeInput`, `type ExportInput`, `type ExportAllInput`, `type SwitchModeInput`, `type GetSessionInput`, `type RecommendModeInput`, `type DeleteSessionInput`, `type AddThoughtResponse`, `type AnalyzeResponse`, `isAddThoughtInput`, `isSessionActionInput`, `isAnalyzeInput`
 
 ---
 
@@ -3738,7 +4156,9 @@ The codebase is organized into the following modules:
 | `lru` | 1 files | 3 files |
 | `types` | 0 files | 5 files |
 | `index` | 0 files | 2 files |
-| `index` | 2 files | 0 files |
+| `file-exporter` | 2 files | 1 files |
+| `index` | 4 files | 0 files |
+| `profiles` | 0 files | 2 files |
 | `index` | 5 files | 2 files |
 | `abductive` | 11 files | 1 files |
 | `analogical` | 11 files | 1 files |
@@ -3759,8 +4179,6 @@ The codebase is organized into the following modules:
 | `physics` | 11 files | 1 files |
 | `proof-decomposition` | 8 files | 1 files |
 | `scientific-method` | 11 files | 1 files |
-| `sequential` | 14 files | 1 files |
-| `shannon` | 11 files | 1 files |
 
 ---
 
@@ -3807,12 +4225,12 @@ graph TD
     end
 
     subgraph Export
-        N7[index]
+        N7[file-exporter]
         N8[index]
-        N9[abductive]
-        N10[analogical]
-        N11[bayesian]
-        N12[...37 more]
+        N9[profiles]
+        N10[index]
+        N11[abductive]
+        N12[...39 more]
     end
 
     subgraph Entry
@@ -3825,21 +4243,21 @@ graph TD
     end
 
     subgraph Modes
-        N16[AbductiveHandler]
-        N17[AlgorithmicHandler]
-        N18[AnalogicalHandler]
-        N19[AnalysisHandler]
-        N20[ArgumentationHandler]
-        N21[...33 more]
+        N16[centrality]
+        N17[d-separation]
+        N18[index]
+        N19[intervention]
+        N20[index]
+        N21[...53 more]
     end
 
     subgraph Proof
         N22[assumption-tracker]
-        N23[circular-detector]
-        N24[decomposer]
-        N25[dependency-graph]
-        N26[gap-analyzer]
-        N27[...3 more]
+        N23[branch-analyzer]
+        N24[branch-types]
+        N25[circular-detector]
+        N26[decomposer]
+        N27[...8 more]
     end
 
     subgraph Repositories
@@ -3885,19 +4303,19 @@ graph TD
     subgraph Tools
         N53[definitions]
         N54[json-schemas]
-        N55[base]
-        N56[index]
-        N57[academic]
-        N58[...12 more]
+        N55[analyze]
+        N56[base]
+        N57[index]
+        N58[...13 more]
     end
 
     subgraph Types
         N59[core]
-        N60[index]
-        N61[algorithmic]
-        N62[analogical]
-        N63[analysis]
-        N64[...30 more]
+        N60[handlers]
+        N61[index]
+        N62[algorithmic]
+        N63[analogical]
+        N64[...31 more]
     end
 
     subgraph Utils
@@ -3925,27 +4343,27 @@ graph TD
     N2 --> N3
     N2 --> N1
     N2 --> N0
-    N7 --> N8
-    N9 --> N60
-    N10 --> N60
-    N11 --> N60
+    N7 --> N9
+    N8 --> N10
+    N8 --> N9
+    N8 --> N7
+    N11 --> N61
     N13 --> N53
     N13 --> N41
-    N13 --> N60
+    N13 --> N61
     N13 --> N37
     N14 --> N67
     N15 --> N14
-    N16 --> N59
-    N17 --> N59
-    N17 --> N61
-    N18 --> N59
-    N18 --> N62
-    N19 --> N59
-    N19 --> N63
-    N20 --> N59
-    N24 --> N25
+    N18 --> N16
+    N18 --> N17
+    N18 --> N19
+    N19 --> N17
+    N20 --> N18
+    N23 --> N26
+    N23 --> N24
+    N24 --> N26
     N28 --> N30
-    N28 --> N60
+    N28 --> N61
     N28 --> N68
     N28 --> N65
 ```
@@ -3956,21 +4374,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 221 |
+| Total TypeScript Files | 250 |
 | Total Modules | 16 |
-| Total Lines of Code | 87275 |
-| Total Exports | 1117 |
-| Total Re-exports | 515 |
-| Total Classes | 118 |
-| Total Interfaces | 407 |
-| Total Functions | 339 |
-| Total Type Guards | 77 |
+| Total Lines of Code | 100518 |
+| Total Exports | 1411 |
+| Total Re-exports | 684 |
+| Total Classes | 136 |
+| Total Interfaces | 506 |
+| Total Functions | 442 |
+| Total Type Guards | 85 |
 | Total Enums | 3 |
-| Type-only Imports | 208 |
+| Type-only Imports | 236 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 55 |
 
 ---
 
-*Last Updated*: 2025-12-22
-*Version*: 8.3.2
+*Last Updated*: 2025-12-25
+*Version*: 8.4.0

@@ -1,11 +1,11 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2025-12-22
+**Generated**: 2025-12-25
 
 ## Summary
 
 - **Potentially unused files**: 9
-- **Potentially unused exports**: 393
+- **Potentially unused exports**: 441
 
 ## Potentially Unused Files
 
@@ -41,6 +41,20 @@ These exports are not imported by any other file in the codebase:
 - `ServerConfig` (interface)
 - `CONFIG` (constant)
 
+### `src/export/file-exporter.ts`
+
+- `FileExportConfig` (interface)
+- `FileExportResult` (interface)
+- `BatchExportResult` (interface)
+- `ExportProgress` (interface)
+- `ExportProgressCallback` (type)
+
+### `src/export/profiles.ts`
+
+- `ProfileExportOptions` (interface)
+- `ExportProfile` (interface)
+- `ExportProfileMetadata` (interface)
+
 ### `src/export/visual/modes/engineering.ts`
 
 - `for` (function)
@@ -48,6 +62,21 @@ These exports are not imported by any other file in the codebase:
 ### `src/export/visual/types.ts`
 
 - `VisualFormat` (type)
+
+### `src/modes/combinations/analyzer.ts`
+
+- `MultiModeAnalyzerConfig` (interface)
+- `AnalysisProgress` (interface)
+- `ProgressCallback` (type)
+
+### `src/modes/combinations/conflict-resolver.ts`
+
+- `ConflictResolverConfig` (interface)
+- `ResolutionResult` (interface)
+
+### `src/modes/combinations/merger.ts`
+
+- `InsightMergerConfig` (interface)
 
 ### `src/modes/handlers/CustomHandler.ts`
 
@@ -57,17 +86,50 @@ These exports are not imported by any other file in the codebase:
 
 - `HybridThought` (interface)
 
+### `src/modes/stochastic/analysis/convergence.ts`
+
+- `ConvergenceResult` (interface)
+- `TraceStats` (interface)
+- `DiagnosticSummary` (interface)
+
+### `src/modes/stochastic/analysis/statistics.ts`
+
+- `CredibleInterval` (interface)
+- `PosteriorSummary` (interface)
+- `HistogramBin` (interface)
+
+### `src/modes/stochastic/models/distribution.ts`
+
+- `DistributionSampler` (interface)
+
+### `src/modes/stochastic/models/monte-carlo.ts`
+
+- `ProgressCallback` (type)
+- `ModelEvaluator` (type)
+
+### `src/proof/branch-analyzer.ts`
+
+- `BranchAnalyzerOptions` (interface)
+
+### `src/proof/branch-types.ts`
+
+- `ProofTemplateSection` (interface)
+- `VerificationSeverity` (type)
+- `VerificationErrorType` (type)
+- `JustificationType` (type)
+
 ### `src/proof/circular-detector.ts`
 
 - `CircularReasoningResult` (interface)
 
-### `src/proof/decomposer.ts`
-
-- `ProofStep` (interface)
-
 ### `src/proof/gap-analyzer.ts`
 
 - `GapAnalyzerConfig` (interface)
+
+### `src/proof/hierarchical-proof.ts`
+
+- `HierarchicalProofOptions` (interface)
+- `ProofElementInput` (interface)
 
 ### `src/proof/inconsistency-detector.ts`
 
@@ -89,6 +151,14 @@ These exports are not imported by any other file in the codebase:
 - `EXISTENTIAL_INSTANTIATION_ERROR` (constant)
 - `SQRT_SIGN_ERROR` (constant)
 - `LIMIT_EXCHANGE_ERROR` (constant)
+
+### `src/proof/strategy-recommender.ts`
+
+- `StrategyRecommenderConfig` (interface)
+
+### `src/proof/verifier.ts`
+
+- `ProofVerifierConfig` (interface)
 
 ### `src/search/tokenizer.ts`
 
@@ -160,11 +230,18 @@ These exports are not imported by any other file in the codebase:
 - `deepthinking_engineering_schema` (constant)
 - `deepthinking_academic_schema` (constant)
 - `deepthinking_session_schema` (constant)
+- `deepthinking_analyze_schema` (constant)
+
+### `src/tools/schemas/analyze.ts`
+
+- `mapModeStringToEnum` (function)
+- `AnalyzeOutput` (type)
+- `analyzeOutputSchema` (constant)
+- `analyzeToolDefinition` (constant)
 
 ### `src/tools/schemas/base.ts`
 
 - `BaseThoughtInput` (type)
-- `SessionActionInput` (type)
 
 ### `src/tools/schemas/modes/academic.ts`
 
@@ -230,6 +307,22 @@ These exports are not imported by any other file in the codebase:
 ### `src/tools/thinking.ts`
 
 - `ThinkingToolSchema` (constant)
+
+### `src/types/handlers.ts`
+
+- `MCPTextContent` (interface)
+- `MCPResponse` (interface)
+- `AddThoughtInput` (interface)
+- `SummarizeInput` (interface)
+- `ExportInput` (interface)
+- `ExportAllInput` (interface)
+- `SwitchModeInput` (interface)
+- `GetSessionInput` (interface)
+- `RecommendModeInput` (interface)
+- `DeleteSessionInput` (interface)
+- `ModeStatus` (interface)
+- `AddThoughtResponse` (interface)
+- `AnalyzeResponse` (interface)
 
 ### `src/types/modes/algorithmic.ts`
 

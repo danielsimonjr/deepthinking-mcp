@@ -1,14 +1,14 @@
 metadata:
   name: deepthinking-mcp
-  version: 8.3.2
-  lastUpdated: "2025-12-22"
-  totalFiles: 221
+  version: 8.4.0
+  lastUpdated: "2025-12-25"
+  totalFiles: 250
   totalModules: 16
-  totalExports: 1117
+  totalExports: 1411
 entryPoints:
   - file: src/index.ts
     type: main
-    description: DeepThinking MCP Server (v8.0.0)
+    description: DeepThinking MCP Server (v8.4.0)
 modules:
   cache:
     src/cache/factory.ts:
@@ -154,8 +154,43 @@ modules:
       constants:
         - CONFIG
   export:
+    src/export/file-exporter.ts:
+      description: File Exporter Module - Phase 12 Sprint 4
+      externalDependencies: []
+      nodeDependencies:
+        - module: fs
+          imports:
+            - "* as fs"
+        - module: path
+          imports:
+            - "* as path"
+      internalDependencies:
+        - file: ../types/session.js
+          imports:
+            - ThinkingSession
+          typeOnly: true
+        - file: ./profiles.js
+          imports:
+            - ExportFormatType
+            - ExportProfileId
+          typeOnly: true
+        - file: ./profiles.js
+          imports:
+            - getExportProfile
+      exports:
+        - createFileExporter
+        - FileExporter
+      classes:
+        - FileExporter
+      interfaces:
+        - FileExportConfig
+        - FileExportResult
+        - BatchExportResult
+        - ExportProgress
+      functions:
+        - createFileExporter
     src/export/index.ts:
-      description: Export module index (v4.3.0)
+      description: Export module index (v4.4.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -187,6 +222,34 @@ modules:
             - LaTeXExporter
             - type LaTeXExportOptions
           reExport: true
+        - file: ./profiles.js
+          imports:
+            - type ExportFormatType
+            - type ProfileExportOptions
+            - type ExportProfile
+            - type ExportProfileId
+            - type ExportProfileMetadata
+            - EXPORT_PROFILES
+            - getExportProfile
+            - getAllExportProfiles
+            - getExportProfilesByTag
+            - getExportProfilesByFormat
+            - isValidExportProfileId
+            - listExportProfileIds
+            - getExportProfileMetadata
+            - combineExportProfiles
+            - recommendExportProfile
+          reExport: true
+        - file: ./file-exporter.js
+          imports:
+            - type FileExportConfig
+            - type FileExportResult
+            - type BatchExportResult
+            - type ExportProgress
+            - type ExportProgressCallback
+            - FileExporter
+            - createFileExporter
+          reExport: true
       exports:
         - type VisualFormat
         - type VisualExportOptions
@@ -210,6 +273,28 @@ modules:
         - "// Phase 8: Proof decomposition\r\n  exportProofDecomposition"
         - LaTeXExporter
         - type LaTeXExportOptions
+        - type ExportFormatType
+        - type ProfileExportOptions
+        - type ExportProfile
+        - type ExportProfileId
+        - type ExportProfileMetadata
+        - EXPORT_PROFILES
+        - getExportProfile
+        - getAllExportProfiles
+        - getExportProfilesByTag
+        - getExportProfilesByFormat
+        - isValidExportProfileId
+        - listExportProfileIds
+        - getExportProfileMetadata
+        - combineExportProfiles
+        - recommendExportProfile
+        - type FileExportConfig
+        - type FileExportResult
+        - type BatchExportResult
+        - type ExportProgress
+        - type ExportProgressCallback
+        - FileExporter
+        - createFileExporter
       reExported:
         - type VisualFormat
         - type VisualExportOptions
@@ -233,6 +318,60 @@ modules:
         - "// Phase 8: Proof decomposition\r\n  exportProofDecomposition"
         - LaTeXExporter
         - type LaTeXExportOptions
+        - type ExportFormatType
+        - type ProfileExportOptions
+        - type ExportProfile
+        - type ExportProfileId
+        - type ExportProfileMetadata
+        - EXPORT_PROFILES
+        - getExportProfile
+        - getAllExportProfiles
+        - getExportProfilesByTag
+        - getExportProfilesByFormat
+        - isValidExportProfileId
+        - listExportProfileIds
+        - getExportProfileMetadata
+        - combineExportProfiles
+        - recommendExportProfile
+        - type FileExportConfig
+        - type FileExportResult
+        - type BatchExportResult
+        - type ExportProgress
+        - type ExportProgressCallback
+        - FileExporter
+        - createFileExporter
+    src/export/profiles.ts:
+      description: Export Profiles Module - Phase 12 Sprint 4
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - EXPORT_PROFILES
+        - getExportProfile
+        - getAllExportProfiles
+        - getExportProfilesByTag
+        - getExportProfilesByFormat
+        - isValidExportProfileId
+        - listExportProfileIds
+        - getExportProfileMetadata
+        - combineExportProfiles
+        - recommendExportProfile
+      interfaces:
+        - ProfileExportOptions
+        - ExportProfile
+        - ExportProfileMetadata
+      functions:
+        - getExportProfile
+        - getAllExportProfiles
+        - getExportProfilesByTag
+        - getExportProfilesByFormat
+        - isValidExportProfileId
+        - listExportProfileIds
+        - getExportProfileMetadata
+        - combineExportProfiles
+        - recommendExportProfile
+      constants:
+        - EXPORT_PROFILES
     src/export/visual/index.ts:
       description: Visual Export Module (v8.3.0)
       externalDependencies: []
@@ -2739,7 +2878,7 @@ modules:
         - VisualExporter
   entry:
     src/index.ts:
-      description: DeepThinking MCP Server (v8.0.0)
+      description: DeepThinking MCP Server (v8.4.0)
       externalDependencies:
         - package: "@modelcontextprotocol/sdk/server/index.js"
           imports:
@@ -2780,6 +2919,10 @@ modules:
           imports:
             - ThinkingMode
             - isFullyImplemented
+            - MCPResponse
+            - AddThoughtResponse
+            - AnalyzeResponse
+            - ProblemCharacteristics
         - file: ./services/index.js
           imports:
             - ThoughtFactory
@@ -2789,7 +2932,10 @@ modules:
         - file: ./modes/index.js
           imports:
             - ModeHandlerRegistry
-      exports: []
+      exports:
+        - format
+      constants:
+        - format
   interfaces:
     src/interfaces/ILogger.ts:
       description: Logger Interface (v3.4.5)
@@ -2836,6 +2982,531 @@ modules:
         - CacheConfig
         - CacheStats
   modes:
+    src/modes/causal/graph/algorithms/centrality.ts:
+      description: Centrality Algorithms - Phase 12 Sprint 6
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types.js
+          imports:
+            - CausalGraph
+            - CentralityMeasures
+            - CentralityConfig
+            - CentralityResult
+            - CentralityType
+          typeOnly: true
+      exports:
+        - computeDegreeCentrality
+        - computeBetweennessCentrality
+        - computeClosenessCentrality
+        - computePageRank
+        - computeEigenvectorCentrality
+        - computeKatzCentrality
+        - computeAllCentrality
+        - getMostCentralNode
+      functions:
+        - computeDegreeCentrality
+        - computeBetweennessCentrality
+        - computeClosenessCentrality
+        - computePageRank
+        - computeEigenvectorCentrality
+        - computeKatzCentrality
+        - computeAllCentrality
+        - getMostCentralNode
+    src/modes/causal/graph/algorithms/d-separation.ts:
+      description: D-Separation Analyzer - Phase 12 Sprint 6
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types.js
+          imports:
+            - CausalGraph
+            - GraphEdge
+            - Path
+            - PathEdge
+            - DSeparationResult
+            - DSeparationRequest
+            - DSeparationConfig
+            - VStructure
+          typeOnly: true
+      exports:
+        - getAncestors
+        - findVStructures
+        - findAllPaths
+        - isPathBlocked
+        - checkDSeparation
+        - findMinimalSeparator
+        - isValidBackdoorAdjustment
+        - findBackdoorAdjustmentSet
+        - computeMarkovBlanket
+        - getImpliedIndependencies
+      functions:
+        - getAncestors
+        - findVStructures
+        - findAllPaths
+        - isPathBlocked
+        - checkDSeparation
+        - findMinimalSeparator
+        - isValidBackdoorAdjustment
+        - findBackdoorAdjustmentSet
+        - computeMarkovBlanket
+        - getImpliedIndependencies
+    src/modes/causal/graph/algorithms/index.ts:
+      description: Causal Graph Algorithms - Phase 12 Sprint 6
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./centrality.js
+          imports:
+            - computeDegreeCentrality
+            - computeBetweennessCentrality
+            - computeClosenessCentrality
+            - computePageRank
+            - computeEigenvectorCentrality
+            - computeKatzCentrality
+            - computeAllCentrality
+            - getMostCentralNode
+          reExport: true
+        - file: ./d-separation.js
+          imports:
+            - findVStructures
+            - findAllPaths
+            - isPathBlocked
+            - checkDSeparation
+            - findMinimalSeparator
+            - isValidBackdoorAdjustment
+            - findBackdoorAdjustmentSet
+            - computeMarkovBlanket
+            - getImpliedIndependencies
+            - getAncestors
+          reExport: true
+        - file: ./intervention.js
+          imports:
+            - createMutilatedGraph
+            - createMarginalizedGraph
+            - isIdentifiable
+            - findAllBackdoorSets
+            - generateBackdoorFormula
+            - checkFrontdoorCriterion
+            - generateFrontdoorFormula
+            - findInstrumentalVariable
+            - generateIVFormula
+            - applyRule1
+            - applyRule2
+            - applyRule3
+            - analyzeIntervention
+          reExport: true
+      exports:
+        - computeDegreeCentrality
+        - computeBetweennessCentrality
+        - computeClosenessCentrality
+        - computePageRank
+        - computeEigenvectorCentrality
+        - computeKatzCentrality
+        - computeAllCentrality
+        - getMostCentralNode
+        - findVStructures
+        - findAllPaths
+        - isPathBlocked
+        - checkDSeparation
+        - findMinimalSeparator
+        - isValidBackdoorAdjustment
+        - findBackdoorAdjustmentSet
+        - computeMarkovBlanket
+        - getImpliedIndependencies
+        - getAncestors
+        - createMutilatedGraph
+        - createMarginalizedGraph
+        - isIdentifiable
+        - findAllBackdoorSets
+        - generateBackdoorFormula
+        - checkFrontdoorCriterion
+        - generateFrontdoorFormula
+        - findInstrumentalVariable
+        - generateIVFormula
+        - applyRule1
+        - applyRule2
+        - applyRule3
+        - analyzeIntervention
+      reExported:
+        - computeDegreeCentrality
+        - computeBetweennessCentrality
+        - computeClosenessCentrality
+        - computePageRank
+        - computeEigenvectorCentrality
+        - computeKatzCentrality
+        - computeAllCentrality
+        - getMostCentralNode
+        - findVStructures
+        - findAllPaths
+        - isPathBlocked
+        - checkDSeparation
+        - findMinimalSeparator
+        - isValidBackdoorAdjustment
+        - findBackdoorAdjustmentSet
+        - computeMarkovBlanket
+        - getImpliedIndependencies
+        - getAncestors
+        - createMutilatedGraph
+        - createMarginalizedGraph
+        - isIdentifiable
+        - findAllBackdoorSets
+        - generateBackdoorFormula
+        - checkFrontdoorCriterion
+        - generateFrontdoorFormula
+        - findInstrumentalVariable
+        - generateIVFormula
+        - applyRule1
+        - applyRule2
+        - applyRule3
+        - analyzeIntervention
+    src/modes/causal/graph/algorithms/intervention.ts:
+      description: Do-Calculus and Intervention Analysis - Phase 12 Sprint 6
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types.js
+          imports:
+            - CausalGraph
+            - GraphEdge
+            - Intervention
+            - InterventionResult
+            - InterventionRequest
+            - AdjustmentFormula
+          typeOnly: true
+        - file: ./d-separation.js
+          imports:
+            - checkDSeparation
+            - findBackdoorAdjustmentSet
+            - isValidBackdoorAdjustment
+      exports:
+        - createMutilatedGraph
+        - createMarginalizedGraph
+        - isIdentifiable
+        - findAllBackdoorSets
+        - generateBackdoorFormula
+        - checkFrontdoorCriterion
+        - generateFrontdoorFormula
+        - findInstrumentalVariable
+        - generateIVFormula
+        - applyRule1
+        - applyRule2
+        - applyRule3
+        - analyzeIntervention
+      functions:
+        - createMutilatedGraph
+        - createMarginalizedGraph
+        - isIdentifiable
+        - findAllBackdoorSets
+        - generateBackdoorFormula
+        - checkFrontdoorCriterion
+        - generateFrontdoorFormula
+        - findInstrumentalVariable
+        - generateIVFormula
+        - applyRule1
+        - applyRule2
+        - applyRule3
+        - analyzeIntervention
+    src/modes/causal/graph/index.ts:
+      description: Causal Graph Analysis Module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./types.js
+          imports:
+            - "*"
+          reExport: true
+        - file: ./algorithms/index.js
+          imports:
+            - "*"
+          reExport: true
+      exports: []
+      reExported:
+        - "* from ./types.js"
+        - "* from ./algorithms/index.js"
+    src/modes/causal/graph/types.ts:
+      description: Enhanced Graph Analysis Types for Causal Reasoning
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports: []
+      interfaces:
+        - GraphNode
+        - GraphEdge
+        - CausalGraph
+        - Path
+        - PathEdge
+        - CentralityMeasures
+        - CentralityConfig
+        - CentralityResult
+        - DSeparationResult
+        - DSeparationRequest
+        - DSeparationConfig
+        - VStructure
+        - Intervention
+        - ProbabilityDistribution
+        - AdjustmentFormula
+        - InterventionResult
+        - InterventionRequest
+        - CycleDetectionResult
+        - ShortestPathResult
+        - ConnectivityResult
+        - QueryVariables
+        - CausalQuery
+    src/modes/combinations/analyzer.ts:
+      description: Multi-Mode Analyzer - Phase 12 Sprint 3
+      externalDependencies: []
+      nodeDependencies:
+        - module: crypto
+          imports:
+            - randomUUID
+      internalDependencies:
+        - file: ../../types/core.js
+          imports:
+            - ThinkingMode
+        - file: ./combination-types.js
+          imports:
+            - MultiModeAnalysisRequest
+            - MultiModeAnalysisResponse
+            - ModeAnalysisResult
+            - MergedAnalysis
+            - Insight
+            - ModeError
+            - MergeStatistics
+          typeOnly: true
+        - file: ./merger.js
+          imports:
+            - InsightMerger
+            - MergeResult
+        - file: ./conflict-resolver.js
+          imports:
+            - ConflictResolver
+        - file: ./presets.js
+          imports:
+            - getPreset
+            - isValidPresetId
+            - PresetId
+        - file: ./combination-types.js
+          imports:
+            - ModeCombination
+          typeOnly: true
+      exports:
+        - analyzeMultiMode
+        - MultiModeAnalyzer
+      classes:
+        - MultiModeAnalyzer
+      interfaces:
+        - MultiModeAnalyzerConfig
+        - AnalysisProgress
+      functions:
+        - analyzeMultiMode
+    src/modes/combinations/combination-types.ts:
+      description: Multi-Mode Analysis & Synthesis Types
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../types/core.js
+          imports:
+            - ThinkingMode
+          typeOnly: true
+      exports: []
+      interfaces:
+        - WeightedMergeConfig
+        - HierarchicalMergeConfig
+        - DialecticalMergeConfig
+        - ModeCombination
+        - Insight
+        - ConflictingInsight
+        - ConflictResolution
+        - MergedAnalysis
+        - MergeStatistics
+        - MultiModeAnalysisRequest
+        - MultiModeAnalysisResponse
+        - ModeAnalysisResult
+        - ModeError
+    src/modes/combinations/conflict-resolver.ts:
+      description: Conflict Resolver - Phase 12 Sprint 3
+      externalDependencies: []
+      nodeDependencies:
+        - module: crypto
+          imports:
+            - randomUUID
+      internalDependencies:
+        - file: ./combination-types.js
+          imports:
+            - Insight
+            - ConflictingInsight
+            - ConflictResolution
+            - ConflictType
+          typeOnly: true
+      exports:
+        - ConflictResolver
+      classes:
+        - ConflictResolver
+      interfaces:
+        - ConflictResolverConfig
+        - ResolutionResult
+    src/modes/combinations/index.ts:
+      description: Multi-Mode Analysis & Synthesis Module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./modes/combinations
+          imports:
+            - "*   MultiModeAnalyzer"
+            - "*   analyzeMultiMode"
+            - "*   getPreset"
+            - "*   InsightMerger"
+            - "*   ConflictResolver"
+            - "*"
+        - file: ./presets.js
+          imports:
+            - type PresetId
+            - PRESETS
+            - getPreset
+            - getAllPresets
+            - getPresetsByTag
+            - getPresetsWithMode
+            - getPresetsByStrategy
+            - combinePresets
+            - isValidPresetId
+            - getPresetMetadata
+            - listPresetIds
+          reExport: true
+        - file: ./merger.js
+          imports:
+            - InsightMerger
+            - type MergeResult
+            - type InsightMergerConfig
+          reExport: true
+        - file: ./conflict-resolver.js
+          imports:
+            - ConflictResolver
+            - type ResolutionResult
+            - type ConflictResolverConfig
+          reExport: true
+        - file: ./analyzer.js
+          imports:
+            - MultiModeAnalyzer
+            - analyzeMultiMode
+            - type MultiModeAnalyzerConfig
+            - type ProgressCallback
+            - type AnalysisProgress
+          reExport: true
+      exports:
+        - type PresetId
+        - PRESETS
+        - getPreset
+        - getAllPresets
+        - getPresetsByTag
+        - getPresetsWithMode
+        - getPresetsByStrategy
+        - combinePresets
+        - isValidPresetId
+        - getPresetMetadata
+        - listPresetIds
+        - InsightMerger
+        - type MergeResult
+        - type InsightMergerConfig
+        - ConflictResolver
+        - type ResolutionResult
+        - type ConflictResolverConfig
+        - MultiModeAnalyzer
+        - analyzeMultiMode
+        - type MultiModeAnalyzerConfig
+        - type ProgressCallback
+        - type AnalysisProgress
+      reExported:
+        - type PresetId
+        - PRESETS
+        - getPreset
+        - getAllPresets
+        - getPresetsByTag
+        - getPresetsWithMode
+        - getPresetsByStrategy
+        - combinePresets
+        - isValidPresetId
+        - getPresetMetadata
+        - listPresetIds
+        - InsightMerger
+        - type MergeResult
+        - type InsightMergerConfig
+        - ConflictResolver
+        - type ResolutionResult
+        - type ConflictResolverConfig
+        - MultiModeAnalyzer
+        - analyzeMultiMode
+        - type MultiModeAnalyzerConfig
+        - type ProgressCallback
+        - type AnalysisProgress
+    src/modes/combinations/merger.ts:
+      description: Insight Merger - Phase 12 Sprint 3
+      externalDependencies: []
+      nodeDependencies:
+        - module: crypto
+          imports:
+            - randomUUID
+      internalDependencies:
+        - file: ../../types/core.js
+          imports:
+            - ThinkingMode
+          typeOnly: true
+        - file: ./combination-types.js
+          imports:
+            - Insight
+            - MergeStrategy
+            - WeightedMergeConfig
+            - HierarchicalMergeConfig
+            - DialecticalMergeConfig
+            - MergeStatistics
+            - ConflictingInsight
+          typeOnly: true
+      exports:
+        - InsightMerger
+      classes:
+        - InsightMerger
+      interfaces:
+        - InsightMergerConfig
+        - MergeResult
+    src/modes/combinations/presets.ts:
+      description: Mode Combination Presets - Phase 12 Sprint 3
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../types/core.js
+          imports:
+            - ThinkingMode
+        - file: ./combination-types.js
+          imports:
+            - ModeCombination
+            - MergeStrategy
+            - WeightedMergeConfig
+            - HierarchicalMergeConfig
+            - DialecticalMergeConfig
+          typeOnly: true
+      exports:
+        - PRESETS
+        - getPreset
+        - getAllPresets
+        - getPresetsByTag
+        - getPresetsWithMode
+        - getPresetsByStrategy
+        - combinePresets
+        - isValidPresetId
+        - getPresetMetadata
+        - listPresetIds
+      functions:
+        - getPreset
+        - getAllPresets
+        - getPresetsByTag
+        - getPresetsWithMode
+        - getPresetsByStrategy
+        - combinePresets
+        - isValidPresetId
+        - getPresetMetadata
+        - listPresetIds
+      constants:
+        - PRESETS
     src/modes/handlers/AbductiveHandler.ts:
       description: AbductiveHandler - Phase 15 (v8.4.0)
       externalDependencies: []
@@ -3059,7 +3730,7 @@ modules:
       classes:
         - BayesianHandler
     src/modes/handlers/CausalHandler.ts:
-      description: CausalHandler - Phase 10 Sprint 2 (v8.1.0)
+      description: CausalHandler - Phase 12 Sprint 6 Enhanced (v8.3.0)
       externalDependencies: []
       nodeDependencies:
         - module: crypto
@@ -3091,6 +3762,21 @@ modules:
         - file: ../../utils/type-guards.js
           imports:
             - toExtendedThoughtType
+        - file: ../causal/graph/algorithms/centrality.js
+          imports:
+            - computeDegreeCentrality
+            - getMostCentralNode
+        - file: ../causal/graph/algorithms/d-separation.js
+          imports:
+            - findVStructures
+        - file: ../causal/graph/algorithms/intervention.js
+          imports:
+            - isIdentifiable
+            - findAllBackdoorSets
+        - file: ../causal/graph/types.js
+          imports:
+            - CausalGraph
+          typeOnly: true
       exports:
         - CausalHandler
       classes:
@@ -4521,6 +5207,466 @@ modules:
         - getRegistry
         - registerHandler
         - createThought
+    src/modes/stochastic/analysis/convergence.ts:
+      description: Convergence Diagnostics Module - Phase 12 Sprint 5
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types.js
+          imports:
+            - ConvergenceDiagnostics
+          typeOnly: true
+        - file: ./statistics.js
+          imports:
+            - mean
+            - variance
+            - stdDev
+      exports:
+        - autocorrelation
+        - integratedAutocorrelationTime
+        - effectiveSampleSize
+        - effectiveSampleSizeMultiple
+        - minEffectiveSampleSize
+        - gewekeStatistic
+        - gewekeStatisticMultiple
+        - aggregateGewekeStatistic
+        - rHatSingleChain
+        - rHatMultipleChains
+        - mcse
+        - mcseMultiple
+        - assessConvergence
+        - computeConvergenceDiagnostics
+        - traceStatistics
+        - generateDiagnosticSummary
+      interfaces:
+        - ConvergenceResult
+        - TraceStats
+        - DiagnosticSummary
+      functions:
+        - autocorrelation
+        - integratedAutocorrelationTime
+        - effectiveSampleSize
+        - effectiveSampleSizeMultiple
+        - minEffectiveSampleSize
+        - gewekeStatistic
+        - gewekeStatisticMultiple
+        - aggregateGewekeStatistic
+        - rHatSingleChain
+        - rHatMultipleChains
+        - mcse
+        - mcseMultiple
+        - assessConvergence
+        - computeConvergenceDiagnostics
+        - traceStatistics
+        - generateDiagnosticSummary
+    src/modes/stochastic/analysis/index.ts:
+      description: Stochastic Analysis Module Exports - Phase 12 Sprint 5
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./statistics.js
+          imports:
+            - mean
+            - variance
+            - stdDev
+            - median
+            - percentile
+            - percentiles
+            - skewness
+            - kurtosis
+            - mode
+            - covariance
+            - correlation
+            - correlationMatrix
+            - covarianceMatrix
+            - equalTailedInterval
+            - hpdInterval
+            - computeSampleStatistics
+            - mcse
+            - estimateESS
+            - summarizePosterior
+            - summarizeAllPosteriors
+            - probExceedsThreshold
+            - probInRange
+            - probAExceedsB
+            - histogram
+            - kde
+            - type CredibleInterval
+            - type PosteriorSummary
+            - type HistogramBin
+          reExport: true
+        - file: ./convergence.js
+          imports:
+            - autocorrelation
+            - integratedAutocorrelationTime
+            - effectiveSampleSize
+            - effectiveSampleSizeMultiple
+            - minEffectiveSampleSize
+            - gewekeStatistic
+            - gewekeStatisticMultiple
+            - aggregateGewekeStatistic
+            - rHatSingleChain
+            - rHatMultipleChains
+            - mcse
+            - mcseMultiple
+            - assessConvergence
+            - computeConvergenceDiagnostics
+            - traceStatistics
+            - generateDiagnosticSummary
+            - type ConvergenceResult
+            - type TraceStats
+            - type DiagnosticSummary
+          reExport: true
+      exports:
+        - mean
+        - variance
+        - stdDev
+        - median
+        - percentile
+        - percentiles
+        - skewness
+        - kurtosis
+        - mode
+        - covariance
+        - correlation
+        - correlationMatrix
+        - covarianceMatrix
+        - equalTailedInterval
+        - hpdInterval
+        - computeSampleStatistics
+        - mcse
+        - estimateESS
+        - summarizePosterior
+        - summarizeAllPosteriors
+        - probExceedsThreshold
+        - probInRange
+        - probAExceedsB
+        - histogram
+        - kde
+        - type CredibleInterval
+        - type PosteriorSummary
+        - type HistogramBin
+        - autocorrelation
+        - integratedAutocorrelationTime
+        - effectiveSampleSize
+        - effectiveSampleSizeMultiple
+        - minEffectiveSampleSize
+        - gewekeStatistic
+        - gewekeStatisticMultiple
+        - aggregateGewekeStatistic
+        - rHatSingleChain
+        - rHatMultipleChains
+        - mcseMultiple
+        - assessConvergence
+        - computeConvergenceDiagnostics
+        - traceStatistics
+        - generateDiagnosticSummary
+        - type ConvergenceResult
+        - type TraceStats
+        - type DiagnosticSummary
+      reExported:
+        - mean
+        - variance
+        - stdDev
+        - median
+        - percentile
+        - percentiles
+        - skewness
+        - kurtosis
+        - mode
+        - covariance
+        - correlation
+        - correlationMatrix
+        - covarianceMatrix
+        - equalTailedInterval
+        - hpdInterval
+        - computeSampleStatistics
+        - mcse
+        - estimateESS
+        - summarizePosterior
+        - summarizeAllPosteriors
+        - probExceedsThreshold
+        - probInRange
+        - probAExceedsB
+        - histogram
+        - kde
+        - type CredibleInterval
+        - type PosteriorSummary
+        - type HistogramBin
+        - autocorrelation
+        - integratedAutocorrelationTime
+        - effectiveSampleSize
+        - effectiveSampleSizeMultiple
+        - minEffectiveSampleSize
+        - gewekeStatistic
+        - gewekeStatisticMultiple
+        - aggregateGewekeStatistic
+        - rHatSingleChain
+        - rHatMultipleChains
+        - mcseMultiple
+        - assessConvergence
+        - computeConvergenceDiagnostics
+        - traceStatistics
+        - generateDiagnosticSummary
+        - type ConvergenceResult
+        - type TraceStats
+        - type DiagnosticSummary
+    src/modes/stochastic/analysis/statistics.ts:
+      description: Statistical Analysis Module - Phase 12 Sprint 5
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types.js
+          imports:
+            - SampleStatistics
+          typeOnly: true
+      exports:
+        - mean
+        - variance
+        - stdDev
+        - median
+        - percentile
+        - percentiles
+        - skewness
+        - kurtosis
+        - mode
+        - covariance
+        - correlation
+        - correlationMatrix
+        - covarianceMatrix
+        - equalTailedInterval
+        - hpdInterval
+        - computeSampleStatistics
+        - mcse
+        - estimateESS
+        - summarizePosterior
+        - summarizeAllPosteriors
+        - probExceedsThreshold
+        - probInRange
+        - probAExceedsB
+        - histogram
+        - kde
+      interfaces:
+        - CredibleInterval
+        - PosteriorSummary
+        - HistogramBin
+      functions:
+        - mean
+        - variance
+        - stdDev
+        - median
+        - percentile
+        - percentiles
+        - skewness
+        - kurtosis
+        - mode
+        - covariance
+        - correlation
+        - correlationMatrix
+        - covarianceMatrix
+        - equalTailedInterval
+        - hpdInterval
+        - computeSampleStatistics
+        - mcse
+        - estimateESS
+        - summarizePosterior
+        - summarizeAllPosteriors
+        - probExceedsThreshold
+        - probInRange
+        - probAExceedsB
+        - histogram
+        - kde
+    src/modes/stochastic/index.ts:
+      description: Stochastic Reasoning Module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./types.js
+          imports:
+            - "*"
+          reExport: true
+        - file: ./analysis/index.js
+          imports:
+            - "*"
+          reExport: true
+        - file: ./models/distribution.js
+          imports:
+            - createSampler
+            - NormalSampler
+            - UniformSampler
+            - ExponentialSampler
+            - PoissonSampler
+            - BinomialSampler
+            - CategoricalSampler
+            - BetaSampler
+            - GammaSampler
+            - sampleWithStatistics
+            - type DistributionSampler
+          reExport: true
+        - file: ./models/monte-carlo.js
+          imports:
+            - MonteCarloEngine
+            - createMonteCarloEngine
+            - runMonteCarloSimulation
+            - type ProgressCallback
+            - type ModelEvaluator
+          reExport: true
+        - file: ./sampling/rng.js
+          imports:
+            - SeededRNG
+            - createRNG
+            - createParallelRNGs
+            - generateSeed
+          reExport: true
+      exports:
+        - createSampler
+        - NormalSampler
+        - UniformSampler
+        - ExponentialSampler
+        - PoissonSampler
+        - BinomialSampler
+        - CategoricalSampler
+        - BetaSampler
+        - GammaSampler
+        - sampleWithStatistics
+        - type DistributionSampler
+        - MonteCarloEngine
+        - createMonteCarloEngine
+        - runMonteCarloSimulation
+        - type ProgressCallback
+        - type ModelEvaluator
+        - SeededRNG
+        - createRNG
+        - createParallelRNGs
+        - generateSeed
+      reExported:
+        - "* from ./types.js"
+        - "* from ./analysis/index.js"
+        - createSampler
+        - NormalSampler
+        - UniformSampler
+        - ExponentialSampler
+        - PoissonSampler
+        - BinomialSampler
+        - CategoricalSampler
+        - BetaSampler
+        - GammaSampler
+        - sampleWithStatistics
+        - type DistributionSampler
+        - MonteCarloEngine
+        - createMonteCarloEngine
+        - runMonteCarloSimulation
+        - type ProgressCallback
+        - type ModelEvaluator
+        - SeededRNG
+        - createRNG
+        - createParallelRNGs
+        - generateSeed
+    src/modes/stochastic/models/distribution.ts:
+      description: Distribution Samplers - Phase 12 Sprint 5
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types.js
+          imports:
+            - Distribution
+            - SamplingResult
+          typeOnly: true
+      exports:
+        - createSampler
+        - sampleWithStatistics
+        - NormalSampler
+        - UniformSampler
+        - ExponentialSampler
+        - PoissonSampler
+        - BinomialSampler
+        - CategoricalSampler
+        - BetaSampler
+        - GammaSampler
+      classes:
+        - NormalSampler
+        - UniformSampler
+        - ExponentialSampler
+        - PoissonSampler
+        - BinomialSampler
+        - CategoricalSampler
+        - BetaSampler
+        - GammaSampler
+      interfaces:
+        - DistributionSampler
+      functions:
+        - createSampler
+        - sampleWithStatistics
+    src/modes/stochastic/models/monte-carlo.ts:
+      description: Monte Carlo Simulation Engine - Phase 12 Sprint 5
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types.js
+          imports:
+            - MonteCarloConfig
+            - MonteCarloResult
+            - StochasticModel
+            - SimulationProgress
+            - SampleStatistics
+            - ConvergenceDiagnostics
+          typeOnly: true
+        - file: ../sampling/rng.js
+          imports:
+            - SeededRNG
+        - file: ./distribution.js
+          imports:
+            - createSampler
+      exports:
+        - createMonteCarloEngine
+        - runMonteCarloSimulation
+        - MonteCarloEngine
+      classes:
+        - MonteCarloEngine
+      functions:
+        - createMonteCarloEngine
+        - runMonteCarloSimulation
+    src/modes/stochastic/sampling/rng.ts:
+      description: Seeded Random Number Generator - Phase 12 Sprint 5
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types.js
+          imports:
+            - RNGState
+            - SeededRNGInterface
+          typeOnly: true
+      exports:
+        - createRNG
+        - createParallelRNGs
+        - generateSeed
+        - SeededRNG
+      classes:
+        - SeededRNG
+      functions:
+        - createRNG
+        - createParallelRNGs
+        - generateSeed
+    src/modes/stochastic/types.ts:
+      description: Monte Carlo Extension Types for Stochastic Reasoning
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports: []
+      interfaces:
+        - StochasticVariable
+        - Dependency
+        - Constraint
+        - StochasticModel
+        - MonteCarloConfig
+        - SimulationProgress
+        - SampleStatistics
+        - ConvergenceDiagnostics
+        - MonteCarloResult
+        - RNGState
+        - SeededRNGInterface
+        - SamplerConfig
+        - SamplingResult
   proof:
     src/proof/assumption-tracker.ts:
       description: Assumption Tracker - Phase 8 Sprint 2
@@ -4539,6 +5685,53 @@ modules:
         - AssumptionTracker
       classes:
         - AssumptionTracker
+    src/proof/branch-analyzer.ts:
+      description: Branch Analyzer - Phase 12 Sprint 2
+      externalDependencies: []
+      nodeDependencies:
+        - module: crypto
+          imports:
+            - randomUUID
+      internalDependencies:
+        - file: ./decomposer.js
+          imports:
+            - ProofStep
+          typeOnly: true
+        - file: ./branch-types.js
+          imports:
+            - ProofBranch
+            - BranchAnalysisResult
+          typeOnly: true
+      exports:
+        - BranchAnalyzer
+      classes:
+        - BranchAnalyzer
+      interfaces:
+        - BranchAnalyzerOptions
+    src/proof/branch-types.ts:
+      description: Branch Analysis Types for Proof Decomposition
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./decomposer.js
+          imports:
+            - ProofStep
+          typeOnly: true
+      exports: []
+      interfaces:
+        - ProofBranch
+        - BranchAnalysisResult
+        - HierarchicalProof
+        - ProofTree
+        - ProofTemplate
+        - ProofTemplateSection
+        - StrategyRecommendation
+        - TheoremFeatures
+        - VerificationError
+        - VerificationWarning
+        - VerificationCoverage
+        - VerificationResult
+        - StepJustification
     src/proof/circular-detector.ts:
       description: Circular Reasoning Detector - Phase 8 Sprint 3
       externalDependencies: []
@@ -4623,6 +5816,31 @@ modules:
         - GapAnalyzer
       interfaces:
         - GapAnalyzerConfig
+    src/proof/hierarchical-proof.ts:
+      description: Hierarchical Proof Manager - Phase 12 Sprint 2
+      externalDependencies: []
+      nodeDependencies:
+        - module: crypto
+          imports:
+            - randomUUID
+      internalDependencies:
+        - file: ./decomposer.js
+          imports:
+            - ProofStep
+          typeOnly: true
+        - file: ./branch-types.js
+          imports:
+            - HierarchicalProof
+            - HierarchicalProofType
+            - ProofTree
+          typeOnly: true
+      exports:
+        - HierarchicalProofManager
+      classes:
+        - HierarchicalProofManager
+      interfaces:
+        - HierarchicalProofOptions
+        - ProofElementInput
     src/proof/inconsistency-detector.ts:
       description: Inconsistency Detector - Phase 8 Sprint 3
       externalDependencies: []
@@ -4642,7 +5860,7 @@ modules:
       interfaces:
         - InconsistencyDetectorConfig
     src/proof/index.ts:
-      description: Proof Analysis Module (Phase 8 - v7.0.0)
+      description: Proof Analysis Module (Phase 8 - v7.0.0, Phase 12 - v8.4.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -4684,6 +5902,27 @@ modules:
             - checkStatement
             - checkProof
           reExport: true
+        - file: ./branch-analyzer.js
+          imports:
+            - BranchAnalyzer
+            - type BranchAnalyzerOptions
+          reExport: true
+        - file: ./strategy-recommender.js
+          imports:
+            - StrategyRecommender
+            - type StrategyRecommenderConfig
+          reExport: true
+        - file: ./verifier.js
+          imports:
+            - ProofVerifier
+            - type ProofVerifierConfig
+          reExport: true
+        - file: ./hierarchical-proof.js
+          imports:
+            - HierarchicalProofManager
+            - type HierarchicalProofOptions
+            - type ProofElementInput
+          reExport: true
       exports:
         - DependencyGraphBuilder
         - ProofDecomposer
@@ -4702,6 +5941,15 @@ modules:
         - getPatternsBySeverity
         - checkStatement
         - checkProof
+        - BranchAnalyzer
+        - type BranchAnalyzerOptions
+        - StrategyRecommender
+        - type StrategyRecommenderConfig
+        - ProofVerifier
+        - type ProofVerifierConfig
+        - HierarchicalProofManager
+        - type HierarchicalProofOptions
+        - type ProofElementInput
       reExported:
         - DependencyGraphBuilder
         - ProofDecomposer
@@ -4720,6 +5968,15 @@ modules:
         - getPatternsBySeverity
         - checkStatement
         - checkProof
+        - BranchAnalyzer
+        - type BranchAnalyzerOptions
+        - StrategyRecommender
+        - type StrategyRecommenderConfig
+        - ProofVerifier
+        - type ProofVerifierConfig
+        - HierarchicalProofManager
+        - type HierarchicalProofOptions
+        - type ProofElementInput
     src/proof/patterns/warnings.ts:
       description: Mathematical Fallacy and Warning Patterns - Phase 8 Sprint 3
       externalDependencies: []
@@ -4764,6 +6021,47 @@ modules:
         - SQRT_SIGN_ERROR
         - LIMIT_EXCHANGE_ERROR
         - ALL_WARNING_PATTERNS
+    src/proof/strategy-recommender.ts:
+      description: Strategy Recommender - Phase 12 Sprint 2
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./branch-types.js
+          imports:
+            - ProofStrategyType
+            - ProofTemplate
+            - StrategyRecommendation
+            - TheoremFeatures
+          typeOnly: true
+      exports:
+        - StrategyRecommender
+      classes:
+        - StrategyRecommender
+      interfaces:
+        - StrategyRecommenderConfig
+    src/proof/verifier.ts:
+      description: Proof Verifier - Phase 12 Sprint 2
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./decomposer.js
+          imports:
+            - ProofStep
+          typeOnly: true
+        - file: ./branch-types.js
+          imports:
+            - StepJustification
+            - VerificationResult
+            - VerificationError
+            - VerificationWarning
+            - VerificationCoverage
+          typeOnly: true
+      exports:
+        - ProofVerifier
+      classes:
+        - ProofVerifier
+      interfaces:
+        - ProofVerifierConfig
   repositories:
     src/repositories/FileSessionRepository.ts:
       description: File-based Session Repository Implementation (v3.4.5)
@@ -4954,6 +6252,7 @@ modules:
           imports:
             - ThinkingSession
             - ThinkingMode
+            - Thought
             - CausalThought
             - TemporalThought
             - GameTheoryThought
@@ -4982,10 +6281,6 @@ modules:
             - ScientificMethodThought
             - OptimizationThought
             - FormalLogicThought
-            - SynthesisThought
-            - ArgumentationThought
-            - AnalysisThought
-            - AlgorithmicThought
         - file: ../types/modes/mathematics.js
           imports:
             - MathematicsThought
@@ -5505,7 +6800,7 @@ modules:
         - TaxonomyLatexOptions
   tools:
     src/tools/definitions.ts:
-      description: Focused Tool Definitions (v7.5.0)
+      description: Focused Tool Definitions (v8.4.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -5546,6 +6841,9 @@ modules:
         - file: ./schemas/modes/academic.js
           imports:
             - AcademicSchema
+        - file: ./schemas/analyze.js
+          imports:
+            - analyzeInputSchema
       exports:
         - tools
         - toolList
@@ -5581,6 +6879,7 @@ modules:
         - deepthinking_engineering_schema
         - deepthinking_academic_schema
         - deepthinking_session_schema
+        - deepthinking_analyze_schema
         - jsonSchemas
       constants:
         - deepthinking_core_schema
@@ -5595,7 +6894,27 @@ modules:
         - deepthinking_engineering_schema
         - deepthinking_academic_schema
         - deepthinking_session_schema
+        - deepthinking_analyze_schema
         - jsonSchemas
+    src/tools/schemas/analyze.ts:
+      description: Multi-Mode Analyze Tool Schema - Phase 12 Sprint 3
+      externalDependencies:
+        - package: zod
+          imports:
+            - z
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - analyzeInputSchema
+        - analyzeOutputSchema
+        - analyzeToolDefinition
+        - mapModeStringToEnum
+      functions:
+        - mapModeStringToEnum
+      constants:
+        - analyzeInputSchema
+        - analyzeOutputSchema
+        - analyzeToolDefinition
     src/tools/schemas/base.ts:
       description: Base Thought Schema (v4.1.0)
       externalDependencies:
@@ -5610,6 +6929,7 @@ modules:
             - PositiveIntSchema
             - SessionActionEnum
             - ExportFormatEnum
+            - ExportProfileEnum
             - LevelEnum
       exports:
         - BaseThoughtSchema
@@ -6005,6 +7325,7 @@ modules:
         - ImpactEnum
         - ExportFormatEnum
         - SessionActionEnum
+        - ExportProfileEnum
         - ProofTypeEnum
         - TimeUnitEnum
         - TemporalConstraintEnum
@@ -6021,6 +7342,7 @@ modules:
         - ImpactEnum
         - ExportFormatEnum
         - SessionActionEnum
+        - ExportProfileEnum
         - ProofTypeEnum
         - TimeUnitEnum
         - TemporalConstraintEnum
@@ -6265,6 +7587,44 @@ modules:
       constants:
         - FULLY_IMPLEMENTED_MODES
         - EXPERIMENTAL_MODES
+    src/types/handlers.ts:
+      description: Handler Input/Output Types - Phase 15 Type Safety Initiative
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./core.js
+          imports:
+            - ThinkingMode
+        - file: ../tools/schemas/base.js
+          imports:
+            - SessionActionInput
+          typeOnly: true
+        - file: ../tools/schemas/analyze.js
+          imports:
+            - AnalyzeInput
+          typeOnly: true
+      exports:
+        - isAddThoughtInput
+        - isSessionActionInput
+        - isAnalyzeInput
+      interfaces:
+        - MCPTextContent
+        - MCPResponse
+        - AddThoughtInput
+        - SummarizeInput
+        - ExportInput
+        - ExportAllInput
+        - SwitchModeInput
+        - GetSessionInput
+        - RecommendModeInput
+        - DeleteSessionInput
+        - ModeStatus
+        - AddThoughtResponse
+        - AnalyzeResponse
+      functions:
+        - isAddThoughtInput
+        - isSessionActionInput
+        - isAnalyzeInput
     src/types/index.ts:
       description: Type definitions index (v8.0.0)
       externalDependencies: []
@@ -6506,6 +7866,25 @@ modules:
             - type CustomValidationRule
             - isCustomThought
           reExport: true
+        - file: ./handlers.js
+          imports:
+            - type MCPTextContent
+            - type MCPResponse
+            - type AddThoughtInput
+            - type SummarizeInput
+            - type ExportInput
+            - type ExportAllInput
+            - type SwitchModeInput
+            - type GetSessionInput
+            - type RecommendModeInput
+            - type DeleteSessionInput
+            - type ModeStatus
+            - type AddThoughtResponse
+            - type AnalyzeResponse
+            - isAddThoughtInput
+            - isSessionActionInput
+            - isAnalyzeInput
+          reExport: true
       exports:
         - type ModeHandler
         - type ValidationResult
@@ -6689,6 +8068,21 @@ modules:
         - type CustomStage
         - type CustomValidationRule
         - isCustomThought
+        - type MCPTextContent
+        - type MCPResponse
+        - type AddThoughtInput
+        - type SummarizeInput
+        - type ExportInput
+        - type ExportAllInput
+        - type SwitchModeInput
+        - type GetSessionInput
+        - type RecommendModeInput
+        - type DeleteSessionInput
+        - type AddThoughtResponse
+        - type AnalyzeResponse
+        - isAddThoughtInput
+        - isSessionActionInput
+        - isAnalyzeInput
       reExported:
         - "* from ./core.js"
         - "* from ./session.js"
@@ -6875,6 +8269,21 @@ modules:
         - type CustomStage
         - type CustomValidationRule
         - isCustomThought
+        - type MCPTextContent
+        - type MCPResponse
+        - type AddThoughtInput
+        - type SummarizeInput
+        - type ExportInput
+        - type ExportAllInput
+        - type SwitchModeInput
+        - type GetSessionInput
+        - type RecommendModeInput
+        - type DeleteSessionInput
+        - type AddThoughtResponse
+        - type AnalyzeResponse
+        - isAddThoughtInput
+        - isSessionActionInput
+        - isAnalyzeInput
     src/types/modes/algorithmic.ts:
       description: Algorithmic Mode - Type Definitions
       externalDependencies: []
@@ -9534,7 +10943,9 @@ dependencyGraph:
         - src/config/index.ts
     - name: Export
       files:
+        - src/export/file-exporter.ts
         - src/export/index.ts
+        - src/export/profiles.ts
         - src/export/visual/index.ts
         - src/export/visual/modes/abductive.ts
         - src/export/visual/modes/analogical.ts
@@ -9585,6 +10996,18 @@ dependencyGraph:
         - src/interfaces/index.ts
     - name: Modes
       files:
+        - src/modes/causal/graph/algorithms/centrality.ts
+        - src/modes/causal/graph/algorithms/d-separation.ts
+        - src/modes/causal/graph/algorithms/index.ts
+        - src/modes/causal/graph/algorithms/intervention.ts
+        - src/modes/causal/graph/index.ts
+        - src/modes/causal/graph/types.ts
+        - src/modes/combinations/analyzer.ts
+        - src/modes/combinations/combination-types.ts
+        - src/modes/combinations/conflict-resolver.ts
+        - src/modes/combinations/index.ts
+        - src/modes/combinations/merger.ts
+        - src/modes/combinations/presets.ts
         - src/modes/handlers/AbductiveHandler.ts
         - src/modes/handlers/AlgorithmicHandler.ts
         - src/modes/handlers/AnalogicalHandler.ts
@@ -9623,16 +11046,29 @@ dependencyGraph:
         - src/modes/handlers/TemporalHandler.ts
         - src/modes/index.ts
         - src/modes/registry.ts
+        - src/modes/stochastic/analysis/convergence.ts
+        - src/modes/stochastic/analysis/index.ts
+        - src/modes/stochastic/analysis/statistics.ts
+        - src/modes/stochastic/index.ts
+        - src/modes/stochastic/models/distribution.ts
+        - src/modes/stochastic/models/monte-carlo.ts
+        - src/modes/stochastic/sampling/rng.ts
+        - src/modes/stochastic/types.ts
     - name: Proof
       files:
         - src/proof/assumption-tracker.ts
+        - src/proof/branch-analyzer.ts
+        - src/proof/branch-types.ts
         - src/proof/circular-detector.ts
         - src/proof/decomposer.ts
         - src/proof/dependency-graph.ts
         - src/proof/gap-analyzer.ts
+        - src/proof/hierarchical-proof.ts
         - src/proof/inconsistency-detector.ts
         - src/proof/index.ts
         - src/proof/patterns/warnings.ts
+        - src/proof/strategy-recommender.ts
+        - src/proof/verifier.ts
     - name: Repositories
       files:
         - src/repositories/FileSessionRepository.ts
@@ -9673,6 +11109,7 @@ dependencyGraph:
       files:
         - src/tools/definitions.ts
         - src/tools/json-schemas.ts
+        - src/tools/schemas/analyze.ts
         - src/tools/schemas/base.ts
         - src/tools/schemas/index.ts
         - src/tools/schemas/modes/academic.ts
@@ -9691,6 +11128,7 @@ dependencyGraph:
     - name: Types
       files:
         - src/types/core.ts
+        - src/types/handlers.ts
         - src/types/index.ts
         - src/types/modes/algorithmic.ts
         - src/types/modes/analogical.ts
@@ -9775,19 +11213,19 @@ dependencyGraph:
         - src/validation/validators/modes/temporal.ts
         - src/validation/validators/registry.ts
 statistics:
-  totalTypeScriptFiles: 221
+  totalTypeScriptFiles: 250
   totalModules: 16
-  totalLinesOfCode: 87275
-  totalExports: 1117
-  totalClasses: 118
-  totalInterfaces: 407
-  totalFunctions: 339
-  totalTypeGuards: 77
+  totalLinesOfCode: 100518
+  totalExports: 1411
+  totalClasses: 136
+  totalInterfaces: 506
+  totalFunctions: 442
+  totalTypeGuards: 85
   totalEnums: 3
-  totalConstants: 159
-  totalReExports: 515
-  totalTypeOnlyImports: 208
+  totalConstants: 167
+  totalReExports: 684
+  totalTypeOnlyImports: 236
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 55
   unusedFilesCount: 9
-  unusedExportsCount: 393
+  unusedExportsCount: 441

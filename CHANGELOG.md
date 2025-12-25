@@ -7,7 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### 🔧 Code Quality Improvements (Phase 15)
+### � Critical Bug Fixes (December 24, 2025)
+
+**API Boundary Type Safety Fix** 🚨
+
+- **Fixed**: API boundary type gap in `src/index.ts` where Zod validation was discarded with unsafe cast
+- **Before**: `thoughtFactory.createThought(input as Parameters<...>[0], sessionId)` - lost type safety
+- **After**: Proper type definitions with `Omit<ThinkingToolInput, ...>` and explicit property handling
+- **Impact**: Compile-time type checking now catches API contract violations
+- **Files**: `src/index.ts` lines 213-270
+
+**File-Lock Error Logging Enhancement** ⚠️
+
+- **Fixed**: 11 instances of `.catch(() => {})` in `src/utils/file-lock.ts` silently swallowing all errors
+- **Added**: Conditional error logging via `handleUnlinkError()` helper function
+- **Behavior**:
+  - ENOENT errors (expected) are silently ignored
+  - Permission errors (EPERM, EACCES) and filesystem errors are logged with context
+- **Impact**: Real lock cleanup failures no longer masked, preventing stale lock issues
+- **Files**: `src/utils/file-lock.ts` lines 1-465
+
+**TypeScript Configuration Fix**
+
+- **Removed**: Invalid `ignoreDeprecations: "6.0"` from `tsconfig.json` (TypeScript doesn't support this property)
+- **Impact**: `npm run typecheck` now runs successfully
+- **Files**: `tsconfig.json` line 9
+
+### ✅ Validation
+
+- **Type Check**: ✅ Passes (`npm run typecheck`)
+- **Test Suite**: ✅ 4,300 tests passing (`npm run test:publish`)
+- **Coverage**: No regressions in test coverage
+
+### �🔧 Code Quality Improvements (Phase 15)
 
 **Type Safety Initiative**
 
@@ -4133,7 +4165,7 @@ None - SessionManager constructor signature extended with optional `storage` par
   - `recommendModes()`: Returns ranked mode recommendations with scores, reasoning, strengths, limitations, and examples
   - `recommendCombinations()`: Suggests synergistic mode combinations (parallel, sequential, or hybrid)
   - `quickRecommend()`: Simple problem-type based recommendations using keyword mapping
-  
+
 #### Problem Characteristics Analysis
 - **ProblemCharacteristics** interface with 10 dimensions:
   - Domain (general, mathematics, physics, engineering, etc.)

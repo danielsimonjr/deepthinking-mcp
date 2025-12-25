@@ -25,12 +25,12 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
+    CallToolRequestSchema,
+    ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
 // Import package.json for version sync
 const __filename = fileURLToPath(import.meta.url);
@@ -40,19 +40,19 @@ const packageJson = JSON.parse(
 );
 
 // Import new tool definitions and schemas
-import { toolList, toolSchemas, isValidTool, modeToToolMap } from './tools/definitions.js';
-import { thinkingTool } from './tools/thinking.js'; // Legacy tool for backward compatibility
-import type { SessionManager } from './session/index.js';
-import {
-  ThinkingMode,
-  isFullyImplemented,
-  type MCPResponse,
-  type AddThoughtResponse,
-  type AnalyzeResponse,
-  type ProblemCharacteristics,
-} from './types/index.js';
-import type { ThoughtFactory, ExportService, ModeRouter } from './services/index.js';
 import { ModeHandlerRegistry } from './modes/index.js';
+import type { ExportService, ModeRouter, ThoughtFactory } from './services/index.js';
+import type { SessionManager } from './session/index.js';
+import { isValidTool, modeToToolMap, toolList, toolSchemas } from './tools/definitions.js';
+import { thinkingTool } from './tools/thinking.js'; // Legacy tool for backward compatibility
+import {
+    ThinkingMode,
+    isFullyImplemented,
+    type AddThoughtResponse,
+    type AnalyzeResponse,
+    type MCPResponse,
+    type ProblemCharacteristics,
+} from './types/index.js';
 
 // Initialize server
 const server = new Server(
@@ -211,14 +211,14 @@ function prependWarning(result: MCPResponse, warning: string): MCPResponse {
   return result;
 }
 
+import { ThinkingToolInput } from './tools/thinking.js';
+
 /** Input type for thought handlers - validated by Zod schemas */
-type ThoughtInput = Record<string, unknown> & {
+type ThoughtInput = Omit<ThinkingToolInput, 'action' | 'exportFormat' | 'newMode' | 'problemType' | 'problemCharacteristics' | 'includeCombinations'> & {
+  // Override sessionId to be properly typed
   sessionId?: string;
-  thought: string;
-  thoughtNumber: number;
-  totalThoughts: number;
-  nextThoughtNeeded: boolean;
-  mode?: string;
+  // Index signature to support all mode-specific properties (e.g., mathematicalModel, proofStrategy, etc.)
+  [key: string]: unknown;
 };
 
 /** Input type for session action handlers - validated by Zod schemas */
@@ -240,6 +240,10 @@ type AnalyzeInputType = Record<string, unknown> & {
 
 /**
  * Handle add_thought action for any thinking mode
+ *
+ * @param input - Validated thought input from Zod schema (contains all mode-specific properties)
+ * @param _toolName - Name of the tool that invoked this handler (for debugging)
+ * @returns MCP response with created thought and session data
  */
 async function handleAddThought(input: ThoughtInput, _toolName: string): Promise<MCPResponse> {
   const sessionManager = await getSessionManager();
@@ -259,9 +263,11 @@ async function handleAddThought(input: ThoughtInput, _toolName: string): Promise
     sessionId = session.id;
   }
 
-  // Use ThoughtFactory to create thought - cast input for schema compatibility
+  // Use ThoughtFactory to create thought
+  // Input is already validated by Zod and properly typed with index signature
   // The factory internally handles mode conversion from string to ThinkingMode
-  const thought = thoughtFactory.createThought(input as Parameters<typeof thoughtFactory.createThought>[0], sessionId);
+  // Add action='add_thought' to satisfy ThinkingToolInput interface (legacy compatibility)
+  const thought = thoughtFactory.createThought({ ...input, action: 'add_thought' as const }, sessionId);
 
   const session = await sessionManager.addThought(sessionId, thought);
 

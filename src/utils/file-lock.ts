@@ -14,6 +14,27 @@
 
 import { promises as fs } from 'fs';
 import * as path from 'path';
+import { createLogger, LogLevel } from './logger.js';
+
+// Logger for file-lock operations
+const logger = createLogger({ minLevel: LogLevel.WARN });
+
+/**
+ * Helper to log file deletion errors (except expected ENOENT)
+ * ENOENT is expected when: lock already released, file cleaned by another process, or lock never existed
+ * Other errors (EPERM, EACCES, etc.) indicate real problems that should be logged
+ */
+function handleUnlinkError(error: any, filePath: string, context: string): void {
+  if (error && error.code !== 'ENOENT') {
+    logger.warn(`Failed to cleanup ${context}`, {
+      path: filePath,
+      code: error.code,
+      message: error.message,
+      pid: process.pid,
+      instanceId: INSTANCE_ID,
+    });
+  }
+}
 
 /**
  * Lock file content structure
@@ -113,12 +134,7 @@ async function writeLockInfo(lockPath: string, lockInfo: LockInfo): Promise<bool
     return true;
   } catch (error: any) {
     // Clean up temp file if it exists
-    try {
-      await fs.unlink(tempPath);
-    } catch {
-      // Temp file cleanup is best-effort - may already be deleted by concurrent process
-      // or may not exist if write failed before creation
-    }
+    await fs.unlink(tempPath).catch((err) => handleUnlinkError(err, tempPath, 'temp lock file'));
 
     // EEXIST means another process created the lock
     // EPERM can happen on Windows during concurrent renames
@@ -150,14 +166,14 @@ async function acquireExclusiveLock(
       if (existingLock.instanceId === INSTANCE_ID) {
         // Already hold the lock
         return async () => {
-          await fs.unlink(lockPath).catch(() => {});
+          await fs.unlink(lockPath).catch((err) => handleUnlinkError(err, lockPath, 'exclusive lock'));
         };
       }
 
       // Check if stale
       if (isLockStale(existingLock, options.staleThreshold)) {
         // Remove stale lock
-        await fs.unlink(lockPath).catch(() => {});
+        await fs.unlink(lockPath).catch((err) => handleUnlinkError(err, lockPath, 'stale exclusive lock'));
       } else {
         // Lock is held by another process, wait and retry
         await sleep(options.retryInterval);
@@ -178,7 +194,7 @@ async function acquireExclusiveLock(
           validSharedLocks.push(sharedLockInfo);
         } else {
           // Clean up stale shared lock
-          await fs.unlink(sharedLockPath).catch(() => {});
+          await fs.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, 'stale shared lock'));
         }
       }
 
@@ -199,7 +215,7 @@ async function acquireExclusiveLock(
     if (await writeLockInfo(lockPath, lockInfo)) {
       // Successfully acquired lock
       return async () => {
-        await fs.unlink(lockPath).catch(() => {});
+        await fs.unlink(lockPath).catch((err) => handleUnlinkError(err, lockPath, 'exclusive lock'));
       };
     }
 
@@ -229,7 +245,7 @@ async function acquireSharedLock(
     if (exclusiveLock) {
       if (isLockStale(exclusiveLock, options.staleThreshold)) {
         // Remove stale exclusive lock
-        await fs.unlink(exclusiveLockPath).catch(() => {});
+        await fs.unlink(exclusiveLockPath).catch((err) => handleUnlinkError(err, exclusiveLockPath, 'stale exclusive lock'));
       } else {
         // Exclusive lock is held, wait
         await sleep(options.retryInterval);
@@ -249,14 +265,14 @@ async function acquireSharedLock(
       const recheck = await readLockInfo(exclusiveLockPath);
       if (recheck && !isLockStale(recheck, options.staleThreshold)) {
         // Exclusive lock appeared, release our shared lock and retry
-        await fs.unlink(sharedLockPath).catch(() => {});
+        await fs.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, 'shared lock rollback'));
         await sleep(options.retryInterval);
         continue;
       }
 
       // Successfully acquired shared lock
       return async () => {
-        await fs.unlink(sharedLockPath).catch(() => {});
+        await fs.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, 'shared lock'));
         // Clean up empty shared lock directory
         try {
           const remaining = await fs.readdir(sharedLockDir);
@@ -272,7 +288,7 @@ async function acquireSharedLock(
       if (error.code === 'EEXIST') {
         // Our lock already exists (shouldn't happen but handle it)
         return async () => {
-          await fs.unlink(sharedLockPath).catch(() => {});
+          await fs.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, 'existing shared lock'));
         };
       }
       throw error;
@@ -425,15 +441,17 @@ export async function forceUnlock(filePath: string): Promise<void> {
   const sharedLockDir = getSharedLockDir(filePath);
 
   // Remove exclusive lock
-  await fs.unlink(exclusiveLockPath).catch(() => {});
+  await fs.unlink(exclusiveLockPath).catch((err) => handleUnlinkError(err, exclusiveLockPath, 'force unlock exclusive'));
 
   // Remove all shared locks
   try {
     const sharedLocks = await fs.readdir(sharedLockDir);
     for (const lockFile of sharedLocks) {
-      await fs.unlink(path.join(sharedLockDir, lockFile)).catch(() => {});
+      await fs.unlink(path.join(sharedLockDir, lockFile)).catch((err) =>
+        handleUnlinkError(err, path.join(sharedLockDir, lockFile), 'force unlock shared lock')
+      );
     }
-    await fs.rmdir(sharedLockDir).catch(() => {});
+    await fs.rmdir(sharedLockDir).catch((err) => handleUnlinkError(err, sharedLockDir, 'force unlock shared dir'));
   } catch (error: any) {
     if (error.code !== 'ENOENT') {
       throw error;
