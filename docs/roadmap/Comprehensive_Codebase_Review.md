@@ -488,10 +488,10 @@ The codebase demonstrates **exceptional architectural discipline**:
 
 **Priority Actions** (in order of impact):
 
-1. 🚨 **Fix API boundary type safety** - Eliminate `as any` cast at index.ts:265
-2. ⚠️ **Add error logging to file-lock** - Log cleanup failures that mask real issues
-3. ⚠️ **Document magic numbers** - Extract coefficients to named constants
-4. ⚠️ **Refactor large exporters** - Split 4+ files >1,400 lines
+1. ✅ **FIXED: API boundary type safety** - Eliminated `as any` cast at index.ts:265 (commit b43a4c5)
+2. ✅ **FIXED: Error logging to file-lock** - Added conditional logging for 11 cleanup operations (commit b43a4c5)
+3. ⚠️ **DEFERRED: Document magic numbers** - Extract coefficients to named constants (future PR)
+4. ⚠️ **DEFERRED: Refactor large exporters** - Split 4+ files >1,400 lines (future PR)
 
 **NOT Priority**: Most other issues are either acceptable defensive patterns or non-existent (false positives).
 
