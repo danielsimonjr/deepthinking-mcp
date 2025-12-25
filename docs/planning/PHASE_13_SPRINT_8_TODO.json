@@ -3,9 +3,9 @@
   "sprint": 8,
   "title": "Remaining Modes Batch 1",
   "week": "Week 5",
-  "effort": "6-7 hours",
+  "effort": "7-8 hours",
   "status": "pending",
-  "description": "Refactor 5 remaining mode exporters (<1000 lines) to use new utility builders for consistency",
+  "description": "Refactor 5 remaining mode exporters (<1000 lines) to use new utility builders for consistency, with snapshot verification",
   "tasks": [
     {
       "id": "13.8.1",
@@ -19,8 +19,7 @@
         "Refactor systemsThinkingToDOT() to use DOTGraphBuilder",
         "Refactor systemsThinkingToMermaid() to use MermaidGraphBuilder",
         "Refactor systemsThinkingToASCII() to use ASCIIDocBuilder",
-        "Create helpers for archetype visualization",
-        "Run snapshot tests to verify output unchanged"
+        "Create helpers for archetype visualization"
       ],
       "files": [
         "src/export/visual/modes/systems-thinking.ts"
@@ -39,8 +38,7 @@
         "Refactor analogicalToDOT() to use DOTGraphBuilder",
         "Refactor analogicalToMermaid() to use MermaidGraphBuilder",
         "Refactor analogicalToASCII() to use ASCIIDocBuilder",
-        "Create helpers for mapping visualization",
-        "Run snapshot tests to verify output unchanged"
+        "Create helpers for mapping visualization"
       ],
       "files": [
         "src/export/visual/modes/analogical.ts"
@@ -59,8 +57,7 @@
         "Refactor causalToDOT() to use DOTGraphBuilder",
         "Refactor causalToMermaid() to use MermaidGraphBuilder",
         "Refactor causalToASCII() to use ASCIIDocBuilder",
-        "Create helpers for causal chain visualization",
-        "Run snapshot tests to verify output unchanged"
+        "Create helpers for causal chain visualization"
       ],
       "files": [
         "src/export/visual/modes/causal.ts"
@@ -69,49 +66,48 @@
     },
     {
       "id": "13.8.4",
-      "category": "Computability Exporter",
-      "description": "Refactor computability.ts (823 lines) to use builders",
+      "category": "Computability & Counterfactual",
+      "description": "Refactor computability.ts (823) and counterfactual.ts (807) to use builders",
       "status": "pending",
-      "estimatedHours": 1.0,
+      "estimatedHours": 1.5,
       "priority": "medium",
       "details": [
-        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
-        "Refactor computabilityToDOT() to use DOTGraphBuilder",
-        "Refactor computabilityToMermaid() to use MermaidGraphBuilder",
-        "Refactor computabilityToASCII() to use ASCIIDocBuilder",
-        "Create helpers for Turing machine visualization",
-        "Run snapshot tests to verify output unchanged"
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder to both files",
+        "Refactor computabilityToDOT/Mermaid/ASCII() to use builders",
+        "Refactor counterfactualToDOT/Mermaid/ASCII() to use builders",
+        "Create helpers for Turing machine and alternate timeline visualization"
       ],
       "files": [
-        "src/export/visual/modes/computability.ts"
+        "src/export/visual/modes/computability.ts",
+        "src/export/visual/modes/counterfactual.ts"
       ],
-      "notes": "Turing machine state visualization"
+      "notes": "Combined task for two smaller files"
     },
     {
       "id": "13.8.5",
-      "category": "Counterfactual Exporter",
-      "description": "Refactor counterfactual.ts (807 lines) to use builders",
+      "category": "Snapshot Verification",
+      "description": "Verify snapshot tests pass for refactored exporters",
       "status": "pending",
       "estimatedHours": 1.0,
-      "priority": "medium",
+      "priority": "high",
       "details": [
-        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
-        "Refactor counterfactualToDOT() to use DOTGraphBuilder",
-        "Refactor counterfactualToMermaid() to use MermaidGraphBuilder",
-        "Refactor counterfactualToASCII() to use ASCIIDocBuilder",
-        "Create helpers for alternate timeline visualization",
-        "Run snapshot tests to verify output unchanged"
+        "Run snapshot tests for systems-thinking.ts exports",
+        "Run snapshot tests for analogical.ts exports",
+        "Run snapshot tests for causal.ts exports",
+        "Run snapshot tests for computability.ts exports",
+        "Run snapshot tests for counterfactual.ts exports",
+        "Compare DOT, Mermaid, ASCII output against baselines"
       ],
       "files": [
-        "src/export/visual/modes/counterfactual.ts"
+        "tests/unit/export/visual/modes/snapshot-baseline.test.ts"
       ],
-      "notes": "Counterfactual world visualization"
+      "notes": "Uses baseline snapshots from Sprint 4. Output must match exactly."
     }
   ],
   "successCriteria": [
     "All 5 files use DOT/Mermaid/ASCII builders",
+    "All snapshot tests pass (output unchanged)",
     "All existing tests pass",
-    "Visual output unchanged (snapshot tests)",
     "Consistent code style across all mode exporters"
   ],
   "filesCreated": [],
@@ -122,6 +118,6 @@
     "src/export/visual/modes/computability.ts",
     "src/export/visual/modes/counterfactual.ts"
   ],
-  "totalEstimatedHours": 6.5,
+  "totalEstimatedHours": 7.0,
   "notes": "First batch of remaining modes - these are already <1000 lines but need builder adoption for consistency"
 }

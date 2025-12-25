@@ -3,16 +3,16 @@
   "sprint": 3,
   "title": "Document Format Builders",
   "week": "Week 2",
-  "effort": "5-6 hours",
+  "effort": "6-7 hours",
   "status": "pending",
-  "description": "Add fluent API builder classes for document formats (UML, HTML, Markdown, Modelica, JSON)",
+  "description": "Add fluent API builder classes for document formats (UML, HTML, Markdown, Modelica, JSON) with unit tests",
   "tasks": [
     {
       "id": "13.3.1",
       "category": "UML Builder",
       "description": "Add UMLBuilder class to utils/uml.ts",
       "status": "pending",
-      "estimatedHours": 1.5,
+      "estimatedHours": 1.0,
       "priority": "medium",
       "details": [
         "Create UMLBuilder class with fluent API for PlantUML",
@@ -59,7 +59,7 @@
       "category": "Markdown Builder",
       "description": "Add MarkdownBuilder class to utils/markdown.ts",
       "status": "pending",
-      "estimatedHours": 1.0,
+      "estimatedHours": 0.75,
       "priority": "medium",
       "details": [
         "Create MarkdownBuilder class with fluent API",
@@ -81,47 +81,45 @@
     },
     {
       "id": "13.3.4",
-      "category": "Modelica Builder",
-      "description": "Add ModelicaBuilder class to utils/modelica.ts",
+      "category": "Modelica & JSON Builders",
+      "description": "Add ModelicaBuilder and JSONExportBuilder classes",
       "status": "pending",
-      "estimatedHours": 1.0,
+      "estimatedHours": 1.25,
       "priority": "low",
       "details": [
         "Create ModelicaBuilder class with fluent API",
-        "Implement beginModel(name: string): this method",
-        "Implement addParameter(name: string, type: string, value?: string): this method",
-        "Implement addVariable(name: string, type: string): this method",
-        "Implement addEquation(equation: string): this method",
-        "Implement addConnection(from: string, to: string): this method",
-        "Implement endModel(): this method",
-        "Implement render(): string method",
-        "Export ModelicaBuilder from utils/modelica.ts"
-      ],
-      "files": [
-        "src/export/visual/utils/modelica.ts"
-      ],
-      "notes": "Modelica specialized for physics/engineering mode exports"
-    },
-    {
-      "id": "13.3.5",
-      "category": "JSON Builder",
-      "description": "Add JSONExportBuilder class to utils/json.ts",
-      "status": "pending",
-      "estimatedHours": 1.0,
-      "priority": "low",
-      "details": [
-        "Create JSONExportBuilder class with fluent API for structured JSON output",
-        "Implement setMetadata(metadata: Record<string, unknown>): this method",
-        "Implement addSection(name: string, data: unknown): this method",
-        "Implement addArraySection(name: string, items: unknown[]): this method",
-        "Implement setFormatting(pretty: boolean, indent?: number): this method",
-        "Implement render(): string method",
+        "Implement beginModel(), addParameter(), addVariable(), addEquation(), addConnection(), endModel(), render()",
+        "Export ModelicaBuilder from utils/modelica.ts",
+        "Create JSONExportBuilder class with fluent API",
+        "Implement setMetadata(), addSection(), addArraySection(), setFormatting(), render()",
         "Export JSONExportBuilder from utils/json.ts"
       ],
       "files": [
+        "src/export/visual/utils/modelica.ts",
         "src/export/visual/utils/json.ts"
       ],
-      "notes": "JSON already has 100% adoption - builder provides structured approach for complex exports"
+      "notes": "Lower priority builders combined into single task"
+    },
+    {
+      "id": "13.3.5",
+      "category": "Unit Tests",
+      "description": "Create unit tests for document format builders",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "priority": "high",
+      "details": [
+        "Create tests/unit/export/visual/utils/document-builders.test.ts",
+        "Test UMLBuilder: classes, interfaces, relations, packages, notes",
+        "Test HTMLDocBuilder: structure, elements, styling, full document render",
+        "Test MarkdownBuilder: headings, lists, code blocks, tables, blockquotes",
+        "Test ModelicaBuilder: models, parameters, equations, connections",
+        "Test JSONExportBuilder: sections, metadata, formatting options",
+        "Verify builder output matches expected format for each builder"
+      ],
+      "files": [
+        "tests/unit/export/visual/utils/document-builders.test.ts"
+      ],
+      "notes": "NEW FILE - No existing tests for document builders. Each builder should have 5-8 test cases."
     }
   ],
   "successCriteria": [
@@ -130,9 +128,12 @@
     "MarkdownBuilder class is exported and functional",
     "ModelicaBuilder class is exported and functional",
     "JSONExportBuilder class is exported and functional",
+    "All unit tests pass (25+ new tests)",
     "No breaking changes to existing utility exports"
   ],
-  "filesCreated": [],
+  "filesCreated": [
+    "tests/unit/export/visual/utils/document-builders.test.ts"
+  ],
   "filesModified": [
     "src/export/visual/utils/uml.ts",
     "src/export/visual/utils/html.ts",
@@ -141,5 +142,5 @@
     "src/export/visual/utils/json.ts"
   ],
   "totalEstimatedHours": 5.5,
-  "notes": "Document format builders - complete the builder infrastructure"
+  "notes": "Document format builders with unit tests - completes the builder infrastructure"
 }

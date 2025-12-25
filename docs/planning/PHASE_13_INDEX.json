@@ -3,8 +3,8 @@
   "title": "Visual Exporter Refactoring",
   "description": "Comprehensive utility module adoption - adding fluent API builder classes to ALL 11 utility modules and refactoring ALL 21 mode exporters to use them. File size reduction below 1000 lines is a natural consequence of this modular approach.",
   "totalSprints": 10,
-  "totalTasks": 42,
-  "totalEstimatedHours": 63,
+  "totalTasks": 46,
+  "totalEstimatedHours": 67,
   "status": "planned",
   "sprints": [
     {
@@ -37,54 +37,54 @@
     {
       "sprint": 4,
       "title": "Builder Integration & Testing",
-      "focus": "Document builder tests, JSDoc, index exports, integration verification",
+      "focus": "JSDoc, index exports, integration tests, baseline snapshot generation",
       "tasks": 4,
-      "hours": 4,
+      "hours": 5.5,
       "file": "PHASE_13_SPRINT_4_TODO.json",
       "status": "pending"
     },
     {
       "sprint": 5,
       "title": "Critical Files Batch 1 - Largest",
-      "focus": "physics.ts, engineering.ts, metareasoning.ts, proof-decomposition.ts",
-      "tasks": 4,
-      "hours": 10,
+      "focus": "physics.ts, engineering.ts, metareasoning.ts, proof-decomposition.ts + snapshot verification",
+      "tasks": 5,
+      "hours": 11,
       "file": "PHASE_13_SPRINT_5_TODO.json",
       "status": "pending"
     },
     {
       "sprint": 6,
       "title": "Critical Files Batch 2",
-      "focus": "hybrid.ts, formal-logic.ts, scientific-method.ts, optimization.ts",
-      "tasks": 4,
-      "hours": 8,
+      "focus": "hybrid.ts, formal-logic.ts, scientific-method.ts, optimization.ts + snapshot verification",
+      "tasks": 5,
+      "hours": 9,
       "file": "PHASE_13_SPRINT_6_TODO.json",
       "status": "pending"
     },
     {
       "sprint": 7,
       "title": "Critical Files Batch 3",
-      "focus": "first-principles.ts, mathematics.ts, game-theory.ts, evidential.ts",
-      "tasks": 4,
-      "hours": 7,
+      "focus": "first-principles.ts, mathematics.ts, game-theory.ts, evidential.ts + snapshot verification",
+      "tasks": 5,
+      "hours": 8,
       "file": "PHASE_13_SPRINT_7_TODO.json",
       "status": "pending"
     },
     {
       "sprint": 8,
       "title": "Remaining Modes Batch 1",
-      "focus": "systems-thinking.ts, analogical.ts, causal.ts, computability.ts, counterfactual.ts",
+      "focus": "systems-thinking.ts, analogical.ts, causal.ts, computability.ts, counterfactual.ts + snapshot verification",
       "tasks": 5,
-      "hours": 6.5,
+      "hours": 7,
       "file": "PHASE_13_SPRINT_8_TODO.json",
       "status": "pending"
     },
     {
       "sprint": 9,
       "title": "Remaining Modes Batch 2",
-      "focus": "abductive.ts, bayesian.ts, temporal.ts, shannon.ts",
-      "tasks": 4,
-      "hours": 4,
+      "focus": "abductive.ts, bayesian.ts, temporal.ts, shannon.ts + snapshot & adoption verification",
+      "tasks": 5,
+      "hours": 5,
       "file": "PHASE_13_SPRINT_9_TODO.json",
       "status": "pending"
     },
