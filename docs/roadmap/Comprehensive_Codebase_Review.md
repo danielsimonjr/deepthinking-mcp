@@ -491,7 +491,72 @@ The codebase demonstrates **exceptional architectural discipline**:
 1. ✅ **FIXED: API boundary type safety** - Eliminated `as any` cast at index.ts:265 (commit b43a4c5)
 2. ✅ **FIXED: Error logging to file-lock** - Added conditional logging for 11 cleanup operations (commit b43a4c5)
 3. ⚠️ **DEFERRED: Document magic numbers** - Extract coefficients to named constants (future PR)
-4. ⚠️ **DEFERRED: Refactor large exporters** - Split 4+ files >1,400 lines (future PR)
+4. ⚠️ **ANALYZED: Refactor large exporters** - Detailed analysis completed (see below)
+
+---
+
+## File Splitting Analysis (December 24, 2025)
+
+**Tools Used**: `create-dependency-graph`, `chunking-for-files`  
+**Full Report**: [docs/analysis/file-splitting-analysis.md](../analysis/file-splitting-analysis.md)
+
+### Critical Finding: Massive Monolithic Functions
+
+The chunker tool identified **4 monster functions containing 5,266 lines total**:
+
+| File | Function | Lines | Issue |
+|------|----------|-------|-------|
+| physics.ts | `physicsToDOT()` | 1,562 | DOT generation in single function |
+| engineering.ts | `escapeModelicaString()` | 954 | Misleading name, actually full Modelica exporter |
+| metareasoning.ts | `metaReasoningToDOT()` | 1,418 | Massive inline DOT string building |
+| proof-decomposition.ts | `proofDecompositionToDOT()` | 1,332 | No helper functions or modularization |
+
+### Pattern Analysis
+
+**15 visual exporter files** follow the same anti-pattern:
+1. Small entry function (~30 lines) ✅
+2. Reasonable Mermaid exporter (~100-150 lines) ✅
+3. **MASSIVE DOT exporter (900-1,500+ lines)** ⚠️
+
+**Root Cause**: DOT format exporters generate complex GraphViz syntax inline without helper functions, abstraction layers, or modularization.
+
+### Recommended Solution
+
+**Create shared DOTGraphBuilder utility**:
+```typescript
+class DOTGraphBuilder {
+  addNode(id: string, props: NodeProps): this;
+  addEdge(from: string, to: string, props: EdgeProps): this;
+  addCluster(id: string, nodes: string[], props: ClusterProps): this;
+  render(): string;
+}
+```
+
+**Benefits**:
+- Reduces DOT code by 60-70%
+- Ensures consistent formatting
+- Enables unit testing
+- No function exceeds 300 lines
+
+### Effort Estimates
+
+- **Phase 1** (physics.ts, engineering.ts): 8-12 hours
+- **Phase 2** (metareasoning.ts, proof-decomposition.ts, json-schemas.ts): 12-16 hours
+- **Phase 3** (11 remaining exporters + DOTGraphBuilder): 16-24 hours
+- **Total**: 25-30 hours
+
+### Next Steps
+
+1. Create DOTGraphBuilder utility class
+2. Refactor physics.ts as proof of concept
+3. Apply pattern to remaining 14 exporters
+4. Extract json-schemas.ts into 15 focused files
+
+**See full analysis**: [file-splitting-analysis.md](../analysis/file-splitting-analysis.md)
+
+---
+
+**Original Priority Actions** (for reference):
 
 **NOT Priority**: Most other issues are either acceptable defensive patterns or non-existent (false positives).
 
