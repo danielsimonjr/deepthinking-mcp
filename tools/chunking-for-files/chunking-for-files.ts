@@ -275,6 +275,11 @@ function parseTypeScriptSections(content: string): Section[] {
     let: /^(?:export\s+)?let\s+(\w+)/,
     var: /^(?:export\s+)?var\s+(\w+)/,
     enum: /^(?:export\s+)?enum\s+(\w+)/,
+    arrowFunction: /^(?:export\s+)?const\s+(\w+)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>/,
+    arrowFunctionSimple: /^(?:export\s+)?const\s+(\w+)\s*=\s*(?:async\s+)?\w+\s*=>/,
+    decorator: /^@(\w+)(?:\([^)]*\))?$/,
+    namespace: /^(?:export\s+)?namespace\s+(\w+)/,
+    classMethod: /^\s+(?:public|private|protected|static|async|readonly)*\s*(?:get|set)?\s*(\w+)\s*[<(]/,
   };
 
   let currentSection: { title: string; level: number; lines: string[]; startLine: number; type: string } | null = null;
@@ -284,6 +289,14 @@ function parseTypeScriptSections(content: string): Section[] {
   let parenDepth = 0;
   let inMultilineString = false;
   let stringChar = '';
+  let inClass = false;
+  let currentClassName = '';
+  let classDepth = 0;
+  let pendingComments: string[] = [];
+  let commentStartLine = -1;
+  let inMultilineComment = false;
+  let decorators: string[] = [];
+  let decoratorStartLine = -1;
 
   // Helper to count brackets in a line (respecting strings)
   function countBrackets(line: string): { brackets: number; parens: number } {
@@ -322,17 +335,25 @@ function parseTypeScriptSections(content: string): Section[] {
   // Helper to save current section
   function saveCurrentSection(endLine: number) {
     if (currentSection && currentSection.lines.length > 0) {
+      // Prepend any JSDoc comments and decorators
+      const allLines = [...decorators, ...pendingComments, ...currentSection.lines];
+      const adjustedStartLine = currentSection.startLine - decorators.length - pendingComments.length;
+
       sections.push({
         title: currentSection.title,
         level: currentSection.level,
-        content: currentSection.lines.join('\n'),
-        startLine: currentSection.startLine,
+        content: allLines.join('\n'),
+        startLine: adjustedStartLine > 0 ? adjustedStartLine : currentSection.startLine,
         endLine: endLine
       });
     }
     currentSection = null;
     bracketDepth = 0;
     parenDepth = 0;
+    pendingComments = [];
+    commentStartLine = -1;
+    decorators = [];
+    decoratorStartLine = -1;
   }
 
   // Helper to save imports
@@ -354,16 +375,45 @@ function parseTypeScriptSections(content: string): Section[] {
     const line = lines[i];
     const trimmedLine = line.trim();
 
+    // Handle JSDoc comments (/** ... */)
+    if (trimmedLine.startsWith('/**')) {
+      inMultilineComment = true;
+      if (commentStartLine === -1) commentStartLine = i;
+      pendingComments.push(line);
+      if (trimmedLine.includes('*/')) {
+        inMultilineComment = false;
+      }
+      continue;
+    }
+    if (inMultilineComment) {
+      pendingComments.push(line);
+      if (trimmedLine.includes('*/')) {
+        inMultilineComment = false;
+      }
+      continue;
+    }
+
+    // Handle decorators (@decorator)
+    if (patterns.decorator.test(trimmedLine)) {
+      if (decoratorStartLine === -1) decoratorStartLine = i;
+      decorators.push(line);
+      continue;
+    }
+
     // Skip empty lines and comments when looking for new declarations
     if (!currentSection && (trimmedLine === '' || trimmedLine.startsWith('//'))) {
       if (importLines.length > 0) {
         importLines.push(line);
       }
-      continue;
+      // Clear pending comments/decorators if we hit empty space
+      if (trimmedLine === '' && pendingComments.length === 0 && decorators.length === 0) {
+        continue;
+      }
+      if (trimmedLine === '') continue;
     }
 
-    // Handle multi-line comments
-    if (trimmedLine.startsWith('/*') && !trimmedLine.includes('*/')) {
+    // Handle regular multi-line comments (not JSDoc)
+    if (trimmedLine.startsWith('/*') && !trimmedLine.startsWith('/**') && !trimmedLine.includes('*/')) {
       if (currentSection) {
         currentSection.lines.push(line);
       }
@@ -377,11 +427,43 @@ function parseTypeScriptSections(content: string): Section[] {
       bracketDepth += brackets;
       parenDepth += parens;
 
+      // Track class depth for method extraction
+      if (inClass) {
+        classDepth += brackets;
+
+        // Check for class methods inside the class
+        if (classDepth === 1 && patterns.classMethod.test(trimmedLine)) {
+          const methodMatch = trimmedLine.match(/(?:get|set)?\s*(\w+)\s*[<(]/);
+          if (methodMatch) {
+            // Save current class section
+            saveCurrentSection(i);
+
+            // Start method section
+            const methodName = methodMatch[1];
+            currentSection = {
+              title: `class:${currentClassName}.${methodName}`,
+              level: 2,
+              lines: [line],
+              startLine: i + 1,
+              type: 'method'
+            };
+            const methodBrackets = countBrackets(line);
+            bracketDepth = methodBrackets.brackets;
+            parenDepth = methodBrackets.parens;
+            continue;
+          }
+        }
+      }
+
       // Check if declaration is complete
       if (bracketDepth <= 0 && parenDepth <= 0) {
         // Check for semicolon or closing bracket to confirm end
         if (trimmedLine.endsWith(';') || trimmedLine.endsWith('}') || trimmedLine.endsWith(',')) {
           saveCurrentSection(i + 1);
+          if (inClass && classDepth <= 0) {
+            inClass = false;
+            currentClassName = '';
+          }
         }
       }
       continue;
@@ -410,6 +492,13 @@ function parseTypeScriptSections(content: string): Section[] {
       level = 0;
       matched = true;
     }
+    // Arrow function declaration
+    else if (patterns.arrowFunction.test(trimmedLine) || patterns.arrowFunctionSimple.test(trimmedLine)) {
+      const match = trimmedLine.match(/const\s+(\w+)/);
+      title = match ? `function:${match[1]}` : '_function';
+      level = 1;
+      matched = true;
+    }
     // Function declaration
     else if (patterns.function.test(trimmedLine) || /^(?:export\s+)?(?:async\s+)?function\s+(\w+)/.test(trimmedLine)) {
       const match = trimmedLine.match(/function\s+(\w+)/);
@@ -417,26 +506,52 @@ function parseTypeScriptSections(content: string): Section[] {
       level = 1;
       matched = true;
     }
+    // Namespace declaration
+    else if (patterns.namespace.test(trimmedLine)) {
+      const match = trimmedLine.match(/namespace\s+(\w+)/);
+      title = match ? `namespace:${match[1]}` : '_namespace';
+      level = 1;
+      matched = true;
+    }
     // Class declaration
     else if (patterns.class.test(trimmedLine) || /^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/.test(trimmedLine)) {
       const match = trimmedLine.match(/class\s+(\w+)/);
       title = match ? `class:${match[1]}` : '_class';
+      currentClassName = match ? match[1] : '';
+      inClass = true;
+      classDepth = 0;
       level = 1;
       matched = true;
     }
-    // Interface declaration
+    // Interface declaration (with generic support)
     else if (patterns.interface.test(trimmedLine) || /^(?:export\s+)?interface\s+(\w+)/.test(trimmedLine)) {
       const match = trimmedLine.match(/interface\s+(\w+)/);
       title = match ? `interface:${match[1]}` : '_interface';
       level = 2;
       matched = true;
+      // Handle generic parameters <T, U>
+      if (trimmedLine.includes('<') && !trimmedLine.includes('{')) {
+        const angleBrackets = (trimmedLine.match(/</g) || []).length - (trimmedLine.match(/>/g) || []).length;
+        if (angleBrackets > 0) {
+          // Multi-line generic, don't count angle brackets as part of body
+          bracketDepth = 0;
+        }
+      }
     }
-    // Type declaration
+    // Type declaration (with generic and union/intersection support)
     else if (patterns.type.test(trimmedLine) || /^(?:export\s+)?type\s+(\w+)/.test(trimmedLine)) {
       const match = trimmedLine.match(/type\s+(\w+)/);
       title = match ? `type:${match[1]}` : '_type';
       level = 2;
       matched = true;
+      // Handle generic parameters <T, U>
+      if (trimmedLine.includes('<') && !trimmedLine.includes('=')) {
+        const angleBrackets = (trimmedLine.match(/</g) || []).length - (trimmedLine.match(/>/g) || []).length;
+        if (angleBrackets > 0) {
+          // Multi-line generic, don't count angle brackets
+          bracketDepth = 0;
+        }
+      }
     }
     // Enum declaration
     else if (patterns.enum.test(trimmedLine) || /^(?:export\s+)?enum\s+(\w+)/.test(trimmedLine)) {
@@ -470,7 +585,7 @@ function parseTypeScriptSections(content: string): Section[] {
         title,
         level,
         lines: [line],
-        startLine: i + 1,
+        startLine: decoratorStartLine !== -1 ? decoratorStartLine + 1 : (commentStartLine !== -1 ? commentStartLine + 1 : i + 1),
         type: title.split(':')[0]
       };
       const { brackets, parens } = countBrackets(line);
@@ -480,6 +595,14 @@ function parseTypeScriptSections(content: string): Section[] {
       // Check if single-line declaration
       if (bracketDepth <= 0 && parenDepth <= 0 && (trimmedLine.endsWith(';') || trimmedLine.endsWith('}'))) {
         saveCurrentSection(i + 1);
+      }
+    } else {
+      // No match - clear pending comments/decorators if not followed by a declaration
+      if (trimmedLine !== '' && !trimmedLine.startsWith('//')) {
+        pendingComments = [];
+        commentStartLine = -1;
+        decorators = [];
+        decoratorStartLine = -1;
       }
     }
   }
@@ -607,9 +730,10 @@ function splitFile(inputFile: string, options: { output?: string; level?: number
 
     const levelIndicator = fileType === 'markdown'
       ? (section.level > 0 ? `h${section.level}` : 'pre')
-      : (section.level === 0 ? 'meta' : section.level === 1 ? 'decl' : 'type');
+      : (section.level === 0 ? 'meta' : section.level === 1 ? 'decl' : section.level === 2 ? 'type' : 'meth');
     const sizeWarning = lineCount > maxLines ? ' [LARGE]' : '';
-    console.log(`  ${String(i + 1).padStart(2)}. [${levelIndicator.padEnd(4)}] ${section.title.substring(0, 40).padEnd(40)} ${String(lineCount).padStart(4)} lines${sizeWarning}`);
+    const warningColor = lineCount > maxLines ? '⚠️ ' : '';
+    console.log(`  ${String(i + 1).padStart(2)}. [${levelIndicator.padEnd(4)}] ${section.title.substring(0, 40).padEnd(40)} ${String(lineCount).padStart(4)} lines${sizeWarning ? ' ' + warningColor + sizeWarning : ''}`);
 
     // Write chunk file
     if (!dryRun) {
