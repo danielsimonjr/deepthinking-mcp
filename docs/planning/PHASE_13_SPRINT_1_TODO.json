@@ -2,17 +2,18 @@
   "phase": 13,
   "sprint": 1,
   "title": "Infrastructure & Builder Classes",
-  "week": "Week 1",
-  "effort": "4-6 hours",
+  "week": "Week 1-2",
+  "effort": "14-18 hours",
   "status": "pending",
-  "description": "Add builder pattern classes to DOT and Mermaid utility modules to enable fluent API for graph construction, with comprehensive unit tests",
+  "description": "Add builder pattern fluent API classes to ALL utility modules (DOT, Mermaid, ASCII, SVG, GraphML, TikZ, UML, HTML, Markdown, Modelica, JSON) to enable consistent, clean APIs for mode exporters",
   "tasks": [
     {
       "id": "13.1.1",
       "category": "DOT Builder",
       "description": "Add DOTGraphBuilder class to utils/dot.ts",
       "status": "pending",
-      "estimatedHours": 2.0,
+      "estimatedHours": 1.5,
+      "priority": "high",
       "details": [
         "Create DOTGraphBuilder class with fluent API",
         "Implement addNode(node: DotNode): this method",
@@ -26,14 +27,15 @@
       "files": [
         "src/export/visual/utils/dot.ts"
       ],
-      "notes": "The builder wraps existing functionality (generateDotGraph, renderDotNode, etc.) to provide a cleaner API for mode exporters"
+      "notes": "Critical for Sprint 2 - all 12 files have inline DOT string building. Builder wraps existing generateDotGraph(), renderDotNode(), etc."
     },
     {
       "id": "13.1.2",
       "category": "Mermaid Builder",
-      "description": "Add MermaidGraphBuilder class to utils/mermaid.ts (optional enhancement)",
+      "description": "Add MermaidGraphBuilder class to utils/mermaid.ts",
       "status": "pending",
       "estimatedHours": 1.5,
+      "priority": "high",
       "details": [
         "Create MermaidGraphBuilder class with fluent API",
         "Implement addNode(node: MermaidNode): this method",
@@ -46,65 +48,340 @@
       "files": [
         "src/export/visual/utils/mermaid.ts"
       ],
-      "notes": "Optional enhancement - mode exporters can use existing functions directly. Builder provides consistency with DOT approach"
+      "notes": "Critical for Sprint 2 - all 12 files have inline Mermaid string building"
     },
     {
       "id": "13.1.3",
-      "category": "Unit Tests",
-      "description": "Write comprehensive unit tests for new builder classes",
+      "category": "ASCII Builder",
+      "description": "Add ASCIIDocBuilder class to utils/ascii.ts",
       "status": "pending",
-      "estimatedHours": 2.0,
+      "estimatedHours": 1.5,
+      "priority": "high",
       "details": [
-        "Create tests/unit/export/visual/utils/dot-builder.test.ts",
-        "Test DOTGraphBuilder node addition and rendering",
-        "Test DOTGraphBuilder edge addition with various styles",
-        "Test DOTGraphBuilder subgraph support",
-        "Test DOTGraphBuilder options (rankDir, splines, etc.)",
-        "Create tests/unit/export/visual/utils/mermaid-builder.test.ts",
-        "Test MermaidGraphBuilder with various node shapes",
-        "Test MermaidGraphBuilder subgraph rendering",
-        "Verify builder output matches existing function output"
+        "Create ASCIIDocBuilder class with fluent API",
+        "Implement addHeader(title: string, style?: HeaderStyle): this method",
+        "Implement addSection(title: string): this method",
+        "Implement addBulletList(items: string[]): this method",
+        "Implement addNumberedList(items: string[]): this method",
+        "Implement addBox(content: string, width?: number): this method",
+        "Implement addTree(root: TreeNode): this method",
+        "Implement addTable(headers: string[], rows: string[][]): this method",
+        "Implement render(): string method",
+        "Export ASCIIDocBuilder from utils/ascii.ts"
       ],
       "files": [
-        "tests/unit/export/visual/utils/dot-builder.test.ts",
-        "tests/unit/export/visual/utils/mermaid-builder.test.ts"
+        "src/export/visual/utils/ascii.ts"
       ],
-      "notes": "Tests should verify that builder output is equivalent to direct function calls"
+      "notes": "Critical for Sprint 2 - wraps generateAsciiHeader(), generateAsciiBulletList(), generateAsciiTree(), etc."
     },
     {
       "id": "13.1.4",
-      "category": "Documentation",
-      "description": "Update utility module documentation with builder usage examples",
+      "category": "SVG Builder",
+      "description": "Add SVGBuilder class to utils/svg.ts",
       "status": "pending",
-      "estimatedHours": 0.5,
+      "estimatedHours": 1.5,
+      "priority": "medium",
       "details": [
-        "Add JSDoc comments to DOTGraphBuilder class and methods",
-        "Add JSDoc comments to MermaidGraphBuilder class and methods",
-        "Include usage examples in JSDoc @example tags",
-        "Document the before/after refactoring pattern"
+        "Create SVGBuilder class with fluent API",
+        "Implement setDimensions(width: number, height: number): this method",
+        "Implement addRect(x, y, width, height, options?): this method",
+        "Implement addCircle(cx, cy, r, options?): this method",
+        "Implement addText(x, y, text, options?): this method",
+        "Implement addLine(x1, y1, x2, y2, options?): this method",
+        "Implement addPath(d: string, options?): this method",
+        "Implement addGroup(id?: string): SVGGroupBuilder method",
+        "Implement render(): string method",
+        "Export SVGBuilder from utils/svg.ts"
+      ],
+      "files": [
+        "src/export/visual/utils/svg.ts"
+      ],
+      "notes": "SVG already has 95% adoption but builder pattern will improve consistency"
+    },
+    {
+      "id": "13.1.5",
+      "category": "GraphML Builder",
+      "description": "Add GraphMLBuilder class to utils/graphml.ts",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "priority": "medium",
+      "details": [
+        "Create GraphMLBuilder class with fluent API",
+        "Implement addNode(id: string, label: string, attributes?: Record<string, string>): this method",
+        "Implement addEdge(source: string, target: string, attributes?: Record<string, string>): this method",
+        "Implement defineNodeAttribute(name: string, type: string): this method",
+        "Implement defineEdgeAttribute(name: string, type: string): this method",
+        "Implement render(): string method",
+        "Export GraphMLBuilder from utils/graphml.ts"
+      ],
+      "files": [
+        "src/export/visual/utils/graphml.ts"
+      ],
+      "notes": "GraphML already has 95% adoption - builder provides cleaner API"
+    },
+    {
+      "id": "13.1.6",
+      "category": "TikZ Builder",
+      "description": "Add TikZBuilder class to utils/tikz.ts",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "priority": "medium",
+      "details": [
+        "Create TikZBuilder class with fluent API",
+        "Implement addNode(id: string, label: string, options?: TikZNodeOptions): this method",
+        "Implement addEdge(from: string, to: string, options?: TikZEdgeOptions): this method",
+        "Implement addStyle(name: string, style: string): this method",
+        "Implement setOptions(options: TikZOptions): this method",
+        "Implement beginScope(options?: string): this method",
+        "Implement endScope(): this method",
+        "Implement render(): string method",
+        "Export TikZBuilder from utils/tikz.ts"
+      ],
+      "files": [
+        "src/export/visual/utils/tikz.ts"
+      ],
+      "notes": "TikZ has 100% adoption - builder will simplify complex diagram construction"
+    },
+    {
+      "id": "13.1.7",
+      "category": "UML Builder",
+      "description": "Add UMLBuilder class to utils/uml.ts",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "priority": "medium",
+      "details": [
+        "Create UMLBuilder class with fluent API for PlantUML",
+        "Implement addClass(name: string, members?: string[], methods?: string[]): this method",
+        "Implement addInterface(name: string, methods?: string[]): this method",
+        "Implement addRelation(from: string, to: string, type: UMLRelationType): this method",
+        "Implement addNote(text: string, position?: string): this method",
+        "Implement beginPackage(name: string): this method",
+        "Implement endPackage(): this method",
+        "Implement render(): string method",
+        "Export UMLBuilder from utils/uml.ts"
+      ],
+      "files": [
+        "src/export/visual/utils/uml.ts"
+      ],
+      "notes": "UML utility for PlantUML syntax generation"
+    },
+    {
+      "id": "13.1.8",
+      "category": "HTML Builder",
+      "description": "Add HTMLDocBuilder class to utils/html.ts",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "priority": "medium",
+      "details": [
+        "Create HTMLDocBuilder class with fluent API",
+        "Implement setTitle(title: string): this method",
+        "Implement addStyle(css: string): this method",
+        "Implement addHeading(level: 1-6, text: string): this method",
+        "Implement addParagraph(text: string): this method",
+        "Implement addList(items: string[], ordered?: boolean): this method",
+        "Implement addTable(headers: string[], rows: string[][]): this method",
+        "Implement addDiv(content: string, className?: string): this method",
+        "Implement render(): string method with full HTML document structure",
+        "Export HTMLDocBuilder from utils/html.ts"
+      ],
+      "files": [
+        "src/export/visual/utils/html.ts"
+      ],
+      "notes": "HTML already has 95% adoption - builder simplifies document assembly"
+    },
+    {
+      "id": "13.1.9",
+      "category": "Markdown Builder",
+      "description": "Add MarkdownBuilder class to utils/markdown.ts",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "priority": "medium",
+      "details": [
+        "Create MarkdownBuilder class with fluent API",
+        "Implement addHeading(level: 1-6, text: string): this method",
+        "Implement addParagraph(text: string): this method",
+        "Implement addBulletList(items: string[]): this method",
+        "Implement addNumberedList(items: string[]): this method",
+        "Implement addCodeBlock(code: string, language?: string): this method",
+        "Implement addTable(headers: string[], rows: string[][]): this method",
+        "Implement addBlockquote(text: string): this method",
+        "Implement addHorizontalRule(): this method",
+        "Implement render(): string method",
+        "Export MarkdownBuilder from utils/markdown.ts"
+      ],
+      "files": [
+        "src/export/visual/utils/markdown.ts"
+      ],
+      "notes": "Markdown is commonly used for documentation export"
+    },
+    {
+      "id": "13.1.10",
+      "category": "Modelica Builder",
+      "description": "Add ModelicaBuilder class to utils/modelica.ts",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "priority": "low",
+      "details": [
+        "Create ModelicaBuilder class with fluent API",
+        "Implement beginModel(name: string): this method",
+        "Implement addParameter(name: string, type: string, value?: string): this method",
+        "Implement addVariable(name: string, type: string): this method",
+        "Implement addEquation(equation: string): this method",
+        "Implement addConnection(from: string, to: string): this method",
+        "Implement endModel(): this method",
+        "Implement render(): string method",
+        "Export ModelicaBuilder from utils/modelica.ts"
+      ],
+      "files": [
+        "src/export/visual/utils/modelica.ts"
+      ],
+      "notes": "Modelica is specialized for physics/engineering mode exports"
+    },
+    {
+      "id": "13.1.11",
+      "category": "JSON Builder",
+      "description": "Add JSONExportBuilder class to utils/json.ts",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "priority": "low",
+      "details": [
+        "Create JSONExportBuilder class with fluent API for structured JSON output",
+        "Implement setMetadata(metadata: Record<string, unknown>): this method",
+        "Implement addSection(name: string, data: unknown): this method",
+        "Implement addArraySection(name: string, items: unknown[]): this method",
+        "Implement setFormatting(pretty: boolean, indent?: number): this method",
+        "Implement render(): string method",
+        "Export JSONExportBuilder from utils/json.ts"
+      ],
+      "files": [
+        "src/export/visual/utils/json.ts"
+      ],
+      "notes": "JSON already has 100% adoption - builder provides structured approach for complex exports"
+    },
+    {
+      "id": "13.1.12",
+      "category": "Unit Tests",
+      "description": "Write comprehensive unit tests for all new builder classes",
+      "status": "pending",
+      "estimatedHours": 3.0,
+      "priority": "high",
+      "details": [
+        "Create tests/unit/export/visual/utils/builders.test.ts",
+        "Test DOTGraphBuilder: nodes, edges, subgraphs, options, render",
+        "Test MermaidGraphBuilder: nodes, edges, subgraphs, render",
+        "Test ASCIIDocBuilder: headers, lists, boxes, trees, tables",
+        "Test SVGBuilder: shapes, text, groups, dimensions",
+        "Test GraphMLBuilder: nodes, edges, attributes",
+        "Test TikZBuilder: nodes, edges, styles, scopes",
+        "Test UMLBuilder: classes, interfaces, relations",
+        "Test HTMLDocBuilder: structure, elements, styling",
+        "Test MarkdownBuilder: headings, lists, code blocks, tables",
+        "Test ModelicaBuilder: models, parameters, equations",
+        "Test JSONExportBuilder: sections, formatting",
+        "Verify all builders produce output equivalent to direct function calls"
+      ],
+      "files": [
+        "tests/unit/export/visual/utils/builders.test.ts"
+      ],
+      "notes": "Consolidated test file for all builders. Each builder should have ~5-10 test cases."
+    },
+    {
+      "id": "13.1.13",
+      "category": "Documentation",
+      "description": "Add JSDoc documentation to all builder classes",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "priority": "medium",
+      "details": [
+        "Add class-level JSDoc with description and @example for each builder",
+        "Document all public methods with @param and @returns",
+        "Include usage examples showing before/after refactoring pattern",
+        "Document fluent API chaining pattern",
+        "Add @see references to underlying utility functions"
       ],
       "files": [
         "src/export/visual/utils/dot.ts",
-        "src/export/visual/utils/mermaid.ts"
+        "src/export/visual/utils/mermaid.ts",
+        "src/export/visual/utils/ascii.ts",
+        "src/export/visual/utils/svg.ts",
+        "src/export/visual/utils/graphml.ts",
+        "src/export/visual/utils/tikz.ts",
+        "src/export/visual/utils/uml.ts",
+        "src/export/visual/utils/html.ts",
+        "src/export/visual/utils/markdown.ts",
+        "src/export/visual/utils/modelica.ts",
+        "src/export/visual/utils/json.ts"
       ],
-      "notes": "Documentation helps future maintainers understand the utility adoption pattern"
+      "notes": "Consistent documentation pattern across all builders"
+    },
+    {
+      "id": "13.1.14",
+      "category": "Index Export",
+      "description": "Update utils/index.ts to export all builder classes",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "priority": "high",
+      "details": [
+        "Add exports for DOTGraphBuilder",
+        "Add exports for MermaidGraphBuilder",
+        "Add exports for ASCIIDocBuilder",
+        "Add exports for SVGBuilder",
+        "Add exports for GraphMLBuilder",
+        "Add exports for TikZBuilder",
+        "Add exports for UMLBuilder",
+        "Add exports for HTMLDocBuilder",
+        "Add exports for MarkdownBuilder",
+        "Add exports for ModelicaBuilder",
+        "Add exports for JSONExportBuilder",
+        "Verify all builders are accessible via @export/visual/utils"
+      ],
+      "files": [
+        "src/export/visual/utils/index.ts"
+      ],
+      "notes": "Ensures all builders are easily importable by mode exporters"
     }
   ],
   "successCriteria": [
-    "DOTGraphBuilder class is exported and functional",
-    "MermaidGraphBuilder class is exported and functional",
-    "All builder unit tests pass",
+    "All 11 builder classes are implemented and exported",
+    "All builders follow consistent fluent API pattern (methods return this)",
+    "All builders have render(): string method",
     "Builder output is equivalent to direct function calls",
-    "No breaking changes to existing utility exports"
+    "All unit tests pass (60+ new tests)",
+    "No breaking changes to existing utility exports",
+    "JSDoc documentation complete for all builders"
   ],
   "filesCreated": [
-    "tests/unit/export/visual/utils/dot-builder.test.ts",
-    "tests/unit/export/visual/utils/mermaid-builder.test.ts"
+    "tests/unit/export/visual/utils/builders.test.ts"
   ],
   "filesModified": [
     "src/export/visual/utils/dot.ts",
-    "src/export/visual/utils/mermaid.ts"
+    "src/export/visual/utils/mermaid.ts",
+    "src/export/visual/utils/ascii.ts",
+    "src/export/visual/utils/svg.ts",
+    "src/export/visual/utils/graphml.ts",
+    "src/export/visual/utils/tikz.ts",
+    "src/export/visual/utils/uml.ts",
+    "src/export/visual/utils/html.ts",
+    "src/export/visual/utils/markdown.ts",
+    "src/export/visual/utils/modelica.ts",
+    "src/export/visual/utils/json.ts",
+    "src/export/visual/utils/index.ts"
   ],
-  "totalEstimatedHours": 6.0,
-  "notes": "Infrastructure sprint - creates the builder classes that will be used in Sprint 2 to refactor the 12 critical files. The builder pattern is optional but recommended for cleaner code."
+  "excludedModules": [
+    {
+      "file": "latex.ts",
+      "reason": "Large specialized module (1,284 lines) with only 2 exports - defer to separate effort"
+    },
+    {
+      "file": "latex-mermaid-integration.ts",
+      "reason": "Integration helper with only 2 exports - not a primary utility module"
+    }
+  ],
+  "builderSummary": {
+    "highPriority": ["DOTGraphBuilder", "MermaidGraphBuilder", "ASCIIDocBuilder"],
+    "mediumPriority": ["SVGBuilder", "GraphMLBuilder", "TikZBuilder", "UMLBuilder", "HTMLDocBuilder", "MarkdownBuilder"],
+    "lowPriority": ["ModelicaBuilder", "JSONExportBuilder"]
+  },
+  "totalEstimatedHours": 18.0,
+  "notes": "Expanded infrastructure sprint - creates builder classes for ALL 11 utility modules (excluding latex.ts and latex-mermaid-integration.ts). High-priority builders (DOT, Mermaid, ASCII) are critical for Sprint 2 refactoring. Other builders provide consistency and cleaner APIs. All builders wrap existing utility functions."
 }

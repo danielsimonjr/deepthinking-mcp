@@ -1,24 +1,24 @@
 {
   "phase": 13,
   "title": "Visual Exporter Refactoring",
-  "description": "Utility module adoption for visual exporters - using shared DOT, Mermaid, and ASCII utilities instead of duplicating logic inline. File size reduction below 1000 lines is a natural consequence of this modular approach.",
+  "description": "Utility module adoption for visual exporters - adding fluent API builder classes to ALL utility modules (DOT, Mermaid, ASCII, SVG, GraphML, TikZ, UML, HTML, Markdown, Modelica, JSON) and refactoring mode exporters to use them. File size reduction below 1000 lines is a natural consequence of this modular approach.",
   "totalSprints": 3,
-  "totalEstimatedHours": 42,
+  "totalEstimatedHours": 54,
   "status": "planned",
   "sprints": [
     {
       "sprint": 1,
       "title": "Infrastructure & Builder Classes",
-      "focus": "Add builder classes to DOT and Mermaid utility modules, unit tests",
-      "tasks": 4,
-      "hours": 6,
+      "focus": "Add fluent API builder classes to ALL 11 utility modules (DOT, Mermaid, ASCII, SVG, GraphML, TikZ, UML, HTML, Markdown, Modelica, JSON)",
+      "tasks": 14,
+      "hours": 18,
       "file": "PHASE_13_SPRINT_1_TODO.json",
       "status": "pending"
     },
     {
       "sprint": 2,
       "title": "Critical Files Refactoring",
-      "focus": "Refactor 12 files exceeding 1,000 lines to use shared utilities",
+      "focus": "Refactor 12 files exceeding 1,000 lines to use shared utilities and builders",
       "tasks": 12,
       "hours": 24,
       "file": "PHASE_13_SPRINT_2_TODO.json",
@@ -36,16 +36,25 @@
   ],
   "features": {
     "R-1": { "name": "DOT Utility Adoption", "sprints": [1, 2], "status": "pending", "priority": "high" },
-    "R-2": { "name": "Mermaid Utility Adoption", "sprints": [1, 2], "status": "pending", "priority": "medium" },
-    "R-3": { "name": "ASCII Utility Adoption", "sprints": [2], "status": "pending", "priority": "low" },
-    "R-4": { "name": "File Splitting (if needed)", "sprints": [3], "status": "pending", "priority": "medium" }
+    "R-2": { "name": "Mermaid Utility Adoption", "sprints": [1, 2], "status": "pending", "priority": "high" },
+    "R-3": { "name": "ASCII Utility Adoption", "sprints": [1, 2], "status": "pending", "priority": "high" },
+    "R-4": { "name": "SVG Builder Pattern", "sprints": [1], "status": "pending", "priority": "medium" },
+    "R-5": { "name": "GraphML Builder Pattern", "sprints": [1], "status": "pending", "priority": "medium" },
+    "R-6": { "name": "TikZ Builder Pattern", "sprints": [1], "status": "pending", "priority": "medium" },
+    "R-7": { "name": "UML Builder Pattern", "sprints": [1], "status": "pending", "priority": "medium" },
+    "R-8": { "name": "HTML Builder Pattern", "sprints": [1], "status": "pending", "priority": "medium" },
+    "R-9": { "name": "Markdown Builder Pattern", "sprints": [1], "status": "pending", "priority": "medium" },
+    "R-10": { "name": "Modelica Builder Pattern", "sprints": [1], "status": "pending", "priority": "low" },
+    "R-11": { "name": "JSON Builder Pattern", "sprints": [1], "status": "pending", "priority": "low" },
+    "R-12": { "name": "File Splitting (if needed)", "sprints": [3], "status": "pending", "priority": "medium" }
   },
   "targetMetrics": {
     "dotUtilityAdoption": { "current": "1/22 (4.5%)", "target": "22/22 (100%)" },
     "mermaidUtilityAdoption": { "current": "1/22 (4.5%)", "target": "22/22 (100%)" },
     "asciiUtilityAdoption": { "current": "1/22 (4.5%)", "target": "22/22 (100%)" },
     "filesOver1000Lines": { "current": 12, "target": 0 },
-    "totalModeFileLines": { "current": 24046, "target": "18000-19000" }
+    "totalModeFileLines": { "current": 24046, "target": "18000-19000" },
+    "builderClassesAdded": { "current": 0, "target": 11 }
   },
   "criticalFiles": [
     { "file": "physics.ts", "lines": 1781, "target": "<1000" },
@@ -62,14 +71,36 @@
     { "file": "evidential.ts", "lines": 1023, "target": "<1000" }
   ],
   "utilityModules": {
-    "dot": { "path": "src/export/visual/utils/dot.ts", "lines": 593, "adoption": "4.5%" },
-    "mermaid": { "path": "src/export/visual/utils/mermaid.ts", "lines": 540, "adoption": "4.5%" },
-    "ascii": { "path": "src/export/visual/utils/ascii.ts", "lines": 721, "adoption": "4.5%" }
+    "dot": { "path": "src/export/visual/utils/dot.ts", "lines": 593, "adoption": "4.5%", "builder": "DOTGraphBuilder", "priority": "high" },
+    "mermaid": { "path": "src/export/visual/utils/mermaid.ts", "lines": 540, "adoption": "4.5%", "builder": "MermaidGraphBuilder", "priority": "high" },
+    "ascii": { "path": "src/export/visual/utils/ascii.ts", "lines": 721, "adoption": "4.5%", "builder": "ASCIIDocBuilder", "priority": "high" },
+    "svg": { "path": "src/export/visual/utils/svg.ts", "lines": 548, "adoption": "95%", "builder": "SVGBuilder", "priority": "medium" },
+    "graphml": { "path": "src/export/visual/utils/graphml.ts", "lines": 269, "adoption": "95%", "builder": "GraphMLBuilder", "priority": "medium" },
+    "tikz": { "path": "src/export/visual/utils/tikz.ts", "lines": 446, "adoption": "100%", "builder": "TikZBuilder", "priority": "medium" },
+    "uml": { "path": "src/export/visual/utils/uml.ts", "lines": 459, "adoption": "N/A", "builder": "UMLBuilder", "priority": "medium" },
+    "html": { "path": "src/export/visual/utils/html.ts", "lines": 365, "adoption": "95%", "builder": "HTMLDocBuilder", "priority": "medium" },
+    "markdown": { "path": "src/export/visual/utils/markdown.ts", "lines": 401, "adoption": "N/A", "builder": "MarkdownBuilder", "priority": "medium" },
+    "modelica": { "path": "src/export/visual/utils/modelica.ts", "lines": 257, "adoption": "N/A", "builder": "ModelicaBuilder", "priority": "low" },
+    "json": { "path": "src/export/visual/utils/json.ts", "lines": 521, "adoption": "100%", "builder": "JSONExportBuilder", "priority": "low" }
   },
+  "excludedModules": [
+    { "file": "latex.ts", "lines": 1284, "reason": "Large specialized module with only 2 exports - defer to separate effort" },
+    { "file": "latex-mermaid-integration.ts", "lines": 347, "reason": "Integration helper with only 2 exports - not a primary utility module" }
+  ],
   "referenceImplementation": "src/export/visual/modes/sequential.ts",
   "modifiedFiles": [
     "src/export/visual/utils/dot.ts",
     "src/export/visual/utils/mermaid.ts",
+    "src/export/visual/utils/ascii.ts",
+    "src/export/visual/utils/svg.ts",
+    "src/export/visual/utils/graphml.ts",
+    "src/export/visual/utils/tikz.ts",
+    "src/export/visual/utils/uml.ts",
+    "src/export/visual/utils/html.ts",
+    "src/export/visual/utils/markdown.ts",
+    "src/export/visual/utils/modelica.ts",
+    "src/export/visual/utils/json.ts",
+    "src/export/visual/utils/index.ts",
     "src/export/visual/modes/physics.ts",
     "src/export/visual/modes/engineering.ts",
     "src/export/visual/modes/metareasoning.ts",
@@ -84,15 +115,15 @@
     "src/export/visual/modes/evidential.ts"
   ],
   "newFiles": [
-    "tests/unit/export/visual/utils/dot-builder.test.ts",
-    "tests/unit/export/visual/utils/mermaid-builder.test.ts"
+    "tests/unit/export/visual/utils/builders.test.ts"
   ],
   "successCriteria": [
-    "All 22 mode files use DOT utility functions instead of inline string building",
-    "All 22 mode files use Mermaid utility functions",
-    "All 22 mode files use ASCII utility functions",
+    "All 11 builder classes are implemented and exported",
+    "All builders follow consistent fluent API pattern (methods return this)",
+    "All 22 mode files use utility functions instead of inline string building",
     "All mode files are <1000 lines (may require file splitting)",
     "All 3,539+ tests pass",
+    "60+ new builder unit tests pass",
     "Visual output is identical before/after (snapshot tests)"
   ],
   "risks": [
@@ -105,8 +136,9 @@
     "JSON schemas splitting (src/tools/json-schemas.ts)",
     "src/taxonomy/suggestion-engine.ts refactoring",
     "src/services/ThoughtFactory.ts changes",
-    "src/export/visual/utils/latex.ts changes"
+    "src/export/visual/utils/latex.ts changes",
+    "src/export/visual/utils/latex-mermaid-integration.ts changes"
   ],
   "dependencies": [],
-  "notes": "Phase 13 focuses on utility module adoption. The sequential.ts file demonstrates the target pattern: it imports and uses all utility modules, resulting in 805 lines vs 1,781 lines for physics.ts (55% reduction). Currently, 21 out of 22 mode exporters ignore these utilities and duplicate logic inline."
+  "notes": "Phase 13 focuses on comprehensive utility module adoption with fluent API builder classes for ALL 11 primary utility modules. Sprint 1 (18 hours) adds 11 builder classes. Sprint 2 (24 hours) refactors 12 critical files. Sprint 3 (12 hours) handles file splitting if needed. The sequential.ts file demonstrates the target pattern: 805 lines vs 1,781 lines for physics.ts (55% reduction)."
 }
