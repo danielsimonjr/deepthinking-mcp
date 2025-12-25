@@ -4,6 +4,7 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { z } from 'zod';
 import { randomUUID, createHash } from 'crypto';
+import * as fs3 from 'fs';
 import { readFileSync, promises } from 'fs';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -5514,9 +5515,9 @@ function findAllPaths(graph, sourceNodes, targetNodes, maxLength = 10) {
   }
   return allPaths;
 }
-function isPathBlocked(graph, path4, conditioningSet) {
-  const nodes = path4.nodes;
-  const edges = path4.edges;
+function isPathBlocked(graph, path5, conditioningSet) {
+  const nodes = path5.nodes;
+  const edges = path5.edges;
   if (nodes.length < 3) {
     if (conditioningSet.has(nodes[0]) || conditioningSet.has(nodes[nodes.length - 1])) {
       return { blocked: true, reason: "Source or target is conditioned" };
@@ -5546,15 +5547,15 @@ function checkDSeparation(graph, request, config = {}) {
   const allPaths = findAllPaths(graph, request.x, request.y, maxPathLength);
   const blockingPaths = [];
   const openPaths = [];
-  for (const path4 of allPaths) {
-    const { blocked, reason } = isPathBlocked(graph, path4, conditioningSet);
+  for (const path5 of allPaths) {
+    const { blocked, reason } = isPathBlocked(graph, path5, conditioningSet);
     if (blocked) {
-      path4.isBlocked = true;
-      path4.blockingReason = reason;
-      blockingPaths.push(path4);
+      path5.isBlocked = true;
+      path5.blockingReason = reason;
+      blockingPaths.push(path5);
     } else {
-      path4.isBlocked = false;
-      openPaths.push(path4);
+      path5.isBlocked = false;
+      openPaths.push(path5);
     }
   }
   const separated = openPaths.length === 0;
@@ -5585,8 +5586,8 @@ function isValidBackdoorAdjustment(graph, treatment, outcome, adjustmentSet) {
   }
   const backdoorPaths = findBackdoorPaths(graph, treatment, outcome);
   const conditioningSet = new Set(adjustmentSet);
-  for (const path4 of backdoorPaths) {
-    const { blocked } = isPathBlocked(graph, path4, conditioningSet);
+  for (const path5 of backdoorPaths) {
+    const { blocked } = isPathBlocked(graph, path5, conditioningSet);
     if (!blocked) {
       return false;
     }
@@ -6313,7 +6314,7 @@ var init_CausalHandler = __esm({
         const cycles = [];
         const visited = /* @__PURE__ */ new Set();
         const recursionStack = /* @__PURE__ */ new Set();
-        const path4 = [];
+        const path5 = [];
         const adjacencyList = /* @__PURE__ */ new Map();
         for (const node of graph.nodes) {
           adjacencyList.set(node.id, []);
@@ -6327,19 +6328,19 @@ var init_CausalHandler = __esm({
         const dfs = (nodeId) => {
           visited.add(nodeId);
           recursionStack.add(nodeId);
-          path4.push(nodeId);
+          path5.push(nodeId);
           const neighbors = adjacencyList.get(nodeId) || [];
           for (const neighbor of neighbors) {
             if (!visited.has(neighbor)) {
               dfs(neighbor);
             } else if (recursionStack.has(neighbor)) {
-              const cycleStart = path4.indexOf(neighbor);
-              const cycle = path4.slice(cycleStart);
+              const cycleStart = path5.indexOf(neighbor);
+              const cycle = path5.slice(cycleStart);
               cycle.push(neighbor);
               cycles.push(cycle);
             }
           }
-          path4.pop();
+          path5.pop();
           recursionStack.delete(nodeId);
         };
         for (const node of graph.nodes) {
@@ -6989,13 +6990,13 @@ var init_CounterfactualHandler = __esm({
       /**
        * Validate a scenario
        */
-      validateScenario(scenario, path4) {
+      validateScenario(scenario, path5) {
         const errors = [];
         const warnings = [];
         if (!scenario.name || scenario.name.trim().length === 0) {
           warnings.push(
             createValidationWarning(
-              `${path4}.name`,
+              `${path5}.name`,
               "Scenario has no name",
               "Add a descriptive name to identify the scenario"
             )
@@ -7007,7 +7008,7 @@ var init_CounterfactualHandler = __esm({
             if (!condition.factor || condition.factor.trim().length === 0) {
               warnings.push(
                 createValidationWarning(
-                  `${path4}.conditions[${i}].factor`,
+                  `${path5}.conditions[${i}].factor`,
                   "Condition has no factor specified",
                   "Each condition should identify what factor is being set"
                 )
@@ -7023,7 +7024,7 @@ var init_CounterfactualHandler = __esm({
               if (magnitude < 0 || magnitude > 1) {
                 warnings.push(
                   createValidationWarning(
-                    `${path4}.outcomes[${i}].magnitude`,
+                    `${path5}.outcomes[${i}].magnitude`,
                     `Outcome magnitude ${magnitude} is outside [0, 1] range`,
                     "Magnitude should be normalized to [0, 1]"
                   )
@@ -7036,7 +7037,7 @@ var init_CounterfactualHandler = __esm({
           if (scenario.likelihood < 0 || scenario.likelihood > 1) {
             warnings.push(
               createValidationWarning(
-                `${path4}.likelihood`,
+                `${path5}.likelihood`,
                 `Scenario likelihood ${scenario.likelihood} is outside [0, 1] range`,
                 "Likelihood must be between 0 and 1"
               )
@@ -10759,16 +10760,16 @@ var init_CritiqueHandler = __esm({
           );
         }
         const subRatings = ["design.rating", "sample.rating", "analysis.rating"];
-        for (const path4 of subRatings) {
-          const [parent, child] = path4.split(".");
+        for (const path5 of subRatings) {
+          const [parent, child] = path5.split(".");
           const parentObj = meth[parent];
           if (parentObj && parentObj[child] !== void 0) {
             const value = parentObj[child];
             if (value < 0 || value > 1) {
               warnings.push(
                 createValidationWarning(
-                  `methodologyEvaluation.${path4}`,
-                  `${path4} (${value}) is outside [0, 1] range`,
+                  `methodologyEvaluation.${path5}`,
+                  `${path5} (${value}) is outside [0, 1] range`,
                   "Ratings should be normalized to [0, 1]"
                 )
               );
@@ -16828,8 +16829,23 @@ var init_lru = __esm({
 });
 
 // src/config/index.ts
+var config_exports = {};
+__export(config_exports, {
+  CONFIG: () => CONFIG,
+  getConfig: () => getConfig,
+  resetConfig: () => resetConfig,
+  updateConfig: () => updateConfig,
+  validateConfig: () => validateConfig
+});
 function getConfig() {
   return Object.freeze({ ...activeConfig });
+}
+function updateConfig(updates) {
+  activeConfig = { ...activeConfig, ...updates };
+  return getConfig();
+}
+function resetConfig() {
+  activeConfig = { ...defaultConfig };
 }
 function validateConfig(config) {
   if (config.maxThoughtsInMemory < 1) {
@@ -16857,7 +16873,7 @@ function validateConfig(config) {
     throw new Error("logLevel must be one of: debug, info, warn, error");
   }
 }
-var defaultConfig, activeConfig;
+var defaultConfig, activeConfig, CONFIG;
 var init_config = __esm({
   "src/config/index.ts"() {
     init_esm_shims();
@@ -16873,11 +16889,13 @@ var init_config = __esm({
       enablePersistence: process.env.MCP_ENABLE_PERSISTENCE === "true",
       persistenceDir: process.env.MCP_PERSISTENCE_DIR || "./.deepthinking-sessions",
       logLevel: process.env.MCP_LOG_LEVEL || "info",
-      enablePerformanceMetrics: process.env.MCP_ENABLE_PERF_METRICS === "true"
+      enablePerformanceMetrics: process.env.MCP_ENABLE_PERF_METRICS === "true",
+      exportDir: process.env.MCP_EXPORT_PATH || "",
+      exportOverwrite: process.env.MCP_EXPORT_OVERWRITE === "true"
     };
     activeConfig = { ...defaultConfig };
     validateConfig(activeConfig);
-    getConfig();
+    CONFIG = getConfig();
   }
 });
 var ValidationCache, validationCache;
@@ -19636,12 +19654,12 @@ function renderEdge(fromPos, toPos, options = {}) {
   const toX = toPos.x + toPos.width / 2;
   const toY = toPos.y;
   const midY = (fromY + toY) / 2;
-  const path4 = `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY - 8}`;
+  const path5 = `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY - 8}`;
   const dashStyle = style === "dashed" ? 'stroke-dasharray="8,4"' : style === "dotted" ? 'stroke-dasharray="2,2"' : "";
   const labelElement = label ? `<text x="${(fromX + toX) / 2}" y="${midY - 5}" text-anchor="middle" class="edge-label">${escapeSVGText(label)}</text>` : "";
   return `
     <g class="edge">
-      <path d="${path4}" fill="none" stroke="${color}" stroke-width="2" ${dashStyle} marker-end="url(#${markerEnd})"/>
+      <path d="${path5}" fill="none" stroke="${color}" stroke-width="2" ${dashStyle} marker-end="url(#${markerEnd})"/>
       ${labelElement}
     </g>`;
 }
@@ -39308,12 +39326,12 @@ function renderSVGEdge(fromPos, toPos, label, isDashed = false, color = "#333333
   const toX = toPos.x + toPos.width / 2;
   const toY = toPos.y;
   const midY = (fromY + toY) / 2;
-  const path4 = `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY - 8}`;
+  const path5 = `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY - 8}`;
   const dashStyle = isDashed ? 'stroke-dasharray="5,5"' : "";
   const labelElement = label ? `<text x="${(fromX + toX) / 2}" y="${midY - 5}" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">${escapeSVGText2(label)}</text>` : "";
   return `
     <g class="edge">
-      <path d="${path4}" fill="none" stroke="${color}" stroke-width="2" ${dashStyle} marker-end="url(#arrowhead)"/>
+      <path d="${path5}" fill="none" stroke="${color}" stroke-width="2" ${dashStyle} marker-end="url(#arrowhead)"/>
       ${labelElement}
     </g>`;
 }
@@ -42031,6 +42049,232 @@ var init_profiles = __esm({
       documentation: DOCUMENTATION_PROFILE,
       archive: ARCHIVE_PROFILE,
       minimal: MINIMAL_PROFILE
+    };
+  }
+});
+
+// src/export/file-exporter.ts
+var file_exporter_exports = {};
+__export(file_exporter_exports, {
+  FileExporter: () => FileExporter,
+  createFileExporter: () => createFileExporter
+});
+function createFileExporter(config, exportFunction) {
+  return new FileExporter(config, exportFunction);
+}
+var FORMAT_EXTENSIONS, FileExporter;
+var init_file_exporter = __esm({
+  "src/export/file-exporter.ts"() {
+    init_esm_shims();
+    init_profiles();
+    FORMAT_EXTENSIONS = {
+      markdown: ".md",
+      latex: ".tex",
+      json: ".json",
+      html: ".html",
+      jupyter: ".ipynb",
+      mermaid: ".mmd",
+      dot: ".dot",
+      ascii: ".txt",
+      svg: ".svg"
+    };
+    FileExporter = class {
+      config;
+      exportFunction;
+      constructor(config, exportFunction) {
+        this.config = {
+          outputDir: config.outputDir || "./exports",
+          createSessionSubdir: config.createSessionSubdir ?? true,
+          createDateSubdir: config.createDateSubdir ?? false,
+          filenamePattern: config.filenamePattern || "{session}_{mode}_{format}",
+          overwrite: config.overwrite ?? false,
+          createDir: config.createDir ?? true,
+          dateFormat: config.dateFormat || "iso"
+        };
+        this.exportFunction = exportFunction;
+      }
+      /**
+       * Export a session to a single format
+       */
+      async exportToFile(session, format) {
+        try {
+          const outputDir = this.resolveOutputDir(session);
+          if (this.config.createDir) {
+            await this.ensureDir(outputDir);
+          }
+          const filename = this.generateFilename(session, format);
+          const filePath = path3.join(outputDir, filename);
+          if (!this.config.overwrite && fs3.existsSync(filePath)) {
+            return {
+              format,
+              filePath,
+              success: false,
+              error: "File already exists and overwrite is disabled"
+            };
+          }
+          const content = this.exportFunction(session, format);
+          await fs3.promises.writeFile(filePath, content, "utf-8");
+          const stats = await fs3.promises.stat(filePath);
+          return {
+            format,
+            filePath,
+            success: true,
+            size: stats.size
+          };
+        } catch (error) {
+          return {
+            format,
+            filePath: "",
+            success: false,
+            error: error instanceof Error ? error.message : String(error)
+          };
+        }
+      }
+      /**
+       * Export a session to multiple formats
+       */
+      async exportToFiles(session, formats, onProgress) {
+        const results = [];
+        const outputDir = this.resolveOutputDir(session);
+        const exportedAt = /* @__PURE__ */ new Date();
+        for (let i = 0; i < formats.length; i++) {
+          const format = formats[i];
+          if (onProgress) {
+            onProgress({
+              currentFormat: format,
+              currentIndex: i + 1,
+              totalExports: formats.length,
+              percentage: Math.round(i / formats.length * 100),
+              phase: "exporting"
+            });
+          }
+          const result = await this.exportToFile(session, format);
+          results.push(result);
+          if (onProgress) {
+            onProgress({
+              currentFormat: format,
+              currentIndex: i + 1,
+              totalExports: formats.length,
+              percentage: Math.round((i + 1) / formats.length * 100),
+              phase: result.success ? "completed" : "failed"
+            });
+          }
+        }
+        const successCount = results.filter((r) => r.success).length;
+        const failureCount = results.filter((r) => !r.success).length;
+        const totalSize = results.reduce((sum, r) => sum + (r.size || 0), 0);
+        return {
+          outputDir,
+          results,
+          successCount,
+          failureCount,
+          totalSize,
+          exportedAt
+        };
+      }
+      /**
+       * Export using a profile
+       */
+      async exportWithProfile(session, profileId, onProgress) {
+        const profile = getExportProfile(profileId);
+        if (!profile) {
+          return {
+            outputDir: this.config.outputDir,
+            results: [],
+            successCount: 0,
+            failureCount: 1,
+            totalSize: 0,
+            exportedAt: /* @__PURE__ */ new Date()
+          };
+        }
+        return this.exportToFiles(session, profile.formats, onProgress);
+      }
+      /**
+       * Export all supported formats
+       */
+      async exportAll(session, onProgress) {
+        const allFormats = [
+          "markdown",
+          "latex",
+          "json",
+          "html",
+          "jupyter",
+          "mermaid",
+          "dot",
+          "ascii"
+        ];
+        return this.exportToFiles(session, allFormats, onProgress);
+      }
+      /**
+       * Resolve the output directory with optional subdirectories
+       */
+      resolveOutputDir(session) {
+        let dir = this.config.outputDir;
+        if (this.config.createDateSubdir) {
+          const date = this.formatDate(/* @__PURE__ */ new Date(), "short");
+          dir = path3.join(dir, date);
+        }
+        if (this.config.createSessionSubdir) {
+          dir = path3.join(dir, session.id);
+        }
+        return dir;
+      }
+      /**
+       * Generate a filename based on the pattern
+       */
+      generateFilename(session, format) {
+        const pattern = this.config.filenamePattern || "{session}_{format}";
+        const extension = FORMAT_EXTENSIONS[format];
+        const date = this.formatDate(/* @__PURE__ */ new Date(), this.config.dateFormat || "iso");
+        const mode = session.mode || "unknown";
+        let filename = pattern.replace("{session}", this.sanitizeFilename(session.id)).replace("{mode}", this.sanitizeFilename(mode)).replace("{format}", format).replace("{date}", date);
+        return filename + extension;
+      }
+      /**
+       * Format date according to configuration
+       */
+      formatDate(date, format) {
+        switch (format) {
+          case "iso":
+            return date.toISOString().split("T")[0];
+          case "short":
+            return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
+          case "timestamp":
+            return String(date.getTime());
+          default:
+            return date.toISOString().split("T")[0];
+        }
+      }
+      /**
+       * Sanitize a string for use in filenames
+       */
+      sanitizeFilename(str) {
+        return str.replace(/[<>:"/\\|?*]/g, "_").replace(/\s+/g, "-");
+      }
+      /**
+       * Ensure a directory exists
+       */
+      async ensureDir(dir) {
+        try {
+          await fs3.promises.mkdir(dir, { recursive: true });
+        } catch (error) {
+          if (error.code !== "EEXIST") {
+            throw error;
+          }
+        }
+      }
+      /**
+       * Get current configuration
+       */
+      getConfig() {
+        return { ...this.config };
+      }
+      /**
+       * Update configuration
+       */
+      updateConfig(updates) {
+        this.config = { ...this.config, ...updates };
+      }
     };
   }
 });
@@ -45017,9 +45261,22 @@ var deepthinking_session_schema = {
         enum: ["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"],
         description: "Export format (for export action)"
       },
+      exportProfile: {
+        type: "string",
+        enum: ["academic", "presentation", "documentation", "archive", "minimal"],
+        description: "Pre-configured export bundle. academic: LaTeX+Mermaid+JSON, presentation: Mermaid+HTML+ASCII, documentation: Markdown+HTML+JSON, archive: all formats, minimal: Markdown+JSON"
+      },
       includeContent: {
         type: "boolean",
         description: "Include full export content in response (for export_all action)"
+      },
+      outputDir: {
+        type: "string",
+        description: "Output directory path for file export. When provided, exports write to files instead of returning content. Creates session subdirectory automatically."
+      },
+      overwrite: {
+        type: "boolean",
+        description: "Overwrite existing files when exporting to outputDir (default: false)"
       },
       newMode: {
         type: "string",
@@ -45292,6 +45549,10 @@ var SessionActionSchema = z.object({
   // Phase 12: Pre-configured export bundles
   includeContent: z.boolean().optional(),
   // For export_all action
+  outputDir: z.string().optional(),
+  // Phase 16: File export - when provided, exports write to files instead of returning content
+  overwrite: z.boolean().optional(),
+  // Phase 16: File export - overwrite existing files (default: false)
   newMode: z.string().optional(),
   problemType: z.string().optional(),
   problemCharacteristics: z.object({
@@ -46177,12 +46438,45 @@ async function handleExport(input) {
   if (!session) {
     throw new Error(`Session ${input.sessionId} not found`);
   }
+  const { getConfig: getConfig2 } = await Promise.resolve().then(() => (init_config(), config_exports));
+  const config = getConfig2();
+  const outputDir = input.outputDir || config.exportDir || void 0;
+  const overwrite = input.overwrite ?? config.exportOverwrite;
   const exportProfile = input.exportProfile;
   if (exportProfile) {
     const { getExportProfile: getExportProfile2 } = await Promise.resolve().then(() => (init_profiles(), profiles_exports));
     const profile = getExportProfile2(exportProfile);
     if (!profile) {
       throw new Error(`Unknown export profile: ${exportProfile}. Valid profiles: academic, presentation, documentation, archive, minimal`);
+    }
+    if (outputDir) {
+      const { createFileExporter: createFileExporter2 } = await Promise.resolve().then(() => (init_file_exporter(), file_exporter_exports));
+      const fileExporter = createFileExporter2(
+        { outputDir, overwrite, createDir: true },
+        (s, f) => exportService.exportSession(s, f)
+      );
+      const formats = profile.formats.filter((f) => f !== "svg");
+      const batchResult = await fileExporter.exportToFiles(session, formats);
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({
+            mode: "file",
+            profile: { id: profile.id, name: profile.name },
+            outputDir: batchResult.outputDir,
+            successCount: batchResult.successCount,
+            failureCount: batchResult.failureCount,
+            totalSize: batchResult.totalSize,
+            files: batchResult.results.map((r) => ({
+              format: r.format,
+              path: r.filePath,
+              success: r.success,
+              size: r.size,
+              error: r.error
+            }))
+          }, null, 2)
+        }]
+      };
     }
     const results = [];
     for (const format2 of profile.formats) {
@@ -46225,6 +46519,27 @@ async function handleExport(input) {
     };
   }
   const format = input.exportFormat || "json";
+  if (outputDir) {
+    const { createFileExporter: createFileExporter2 } = await Promise.resolve().then(() => (init_file_exporter(), file_exporter_exports));
+    const fileExporter = createFileExporter2(
+      { outputDir, overwrite, createDir: true },
+      (s, f) => exportService.exportSession(s, f)
+    );
+    const result = await fileExporter.exportToFile(session, format);
+    return {
+      content: [{
+        type: "text",
+        text: JSON.stringify({
+          mode: "file",
+          format: result.format,
+          path: result.filePath,
+          success: result.success,
+          size: result.size,
+          error: result.error
+        }, null, 2)
+      }]
+    };
+  }
   const exported = exportService.exportSession(session, format);
   return {
     content: [{
@@ -46243,6 +46558,10 @@ async function handleExportAll(input) {
   if (!session) {
     throw new Error(`Session ${input.sessionId} not found`);
   }
+  const { getConfig: getConfig2 } = await Promise.resolve().then(() => (init_config(), config_exports));
+  const config = getConfig2();
+  const outputDir = input.outputDir || config.exportDir || void 0;
+  const overwrite = input.overwrite ?? config.exportOverwrite;
   let formats = ["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"];
   const exportAllProfile = input.exportProfile;
   if (exportAllProfile) {
@@ -46252,6 +46571,35 @@ async function handleExportAll(input) {
       throw new Error(`Unknown export profile: ${exportAllProfile}. Valid profiles: academic, presentation, documentation, archive, minimal`);
     }
     formats = profile.formats.filter((f) => f !== "svg");
+  }
+  if (outputDir) {
+    const { createFileExporter: createFileExporter2 } = await Promise.resolve().then(() => (init_file_exporter(), file_exporter_exports));
+    const fileExporter = createFileExporter2(
+      { outputDir, overwrite, createDir: true },
+      (s, f) => exportService.exportSession(s, f)
+    );
+    const batchResult = await fileExporter.exportToFiles(session, formats);
+    return {
+      content: [{
+        type: "text",
+        text: JSON.stringify({
+          mode: "file",
+          sessionId: input.sessionId,
+          outputDir: batchResult.outputDir,
+          successCount: batchResult.successCount,
+          failureCount: batchResult.failureCount,
+          totalSize: batchResult.totalSize,
+          exportedAt: batchResult.exportedAt.toISOString(),
+          files: batchResult.results.map((r) => ({
+            format: r.format,
+            path: r.filePath,
+            success: r.success,
+            size: r.size,
+            error: r.error
+          }))
+        }, null, 2)
+      }]
+    };
   }
   const results = [];
   for (const format of formats) {

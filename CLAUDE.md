@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **33 reasoning modes** (29 with dedicated thought types) with taxonomy-based classification (69 reasoning types across 12 categories, 110 planned), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
-**Version**: 8.3.2 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
+**Version**: 8.4.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
 
 ## Project Metrics
 
@@ -16,11 +16,11 @@ DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring *
 | Lines of Code | ~89,490 |
 | Total Exports | 1134 (519 re-exports) |
 | Passing Tests | 3539 (143 test files) |
-| Reasoning Modes | 33 (21 fully implemented + 12 experimental) |
-| MCP Tools | 12 focused + 1 legacy |
-| Export Formats | 8 + native SVG |
-| Visual Exporters | 35+ mode-specific files |
-| Specialized Handlers | 7 ModeHandlers (v8.x architecture) |
+| Reasoning Modes | 33 (29 with dedicated types + 4 advanced runtime) |
+| MCP Tools | 13 focused (includes deepthinking_analyze) |
+| Export Formats | 8 + native SVG + file export |
+| Visual Exporters | 25+ mode-specific files |
+| Specialized Handlers | 36 (33 modes + GenericModeHandler + CustomHandler) |
 | Circular Dependencies | 55 (all type-only, 0 runtime) |
 
 ## Build & Development Commands
@@ -67,19 +67,28 @@ Business logic extracted from `src/index.ts` into focused services:
 
 ### ModeHandler Architecture (v8.x)
 
-The Strategy Pattern-based ModeHandler system in `src/modes/handlers/`:
+**Phase 10 Sprint 3 (v8.4.0)**: All 33 reasoning modes now have fully implemented specialized handlers.
 
-| Handler | Features |
-|---------|----------|
-| **CausalHandler** | Graph validation, cycle detection, intervention tracking |
-| **BayesianHandler** | Auto posterior calculation, evidence tracking |
-| **GameTheoryHandler** | Payoff matrix validation, Nash equilibria detection |
-| **CounterfactualHandler** | World state tracking, consequence analysis |
-| **SynthesisHandler** | Source coverage tracking, theme extraction |
-| **SystemsThinkingHandler** | 8 Systems Archetypes detection (Senge patterns) |
-| **CritiqueHandler** | 6 Socratic question categories (Paul framework) |
+The Strategy Pattern-based ModeHandler system in `src/modes/handlers/` provides 36 total handlers:
 
-Handler registration via `ModeHandlerRegistry` singleton with `GenericModeHandler` fallback.
+| Category | Handlers | Key Features |
+|----------|----------|--------------|
+| **Core (5)** | Sequential, Shannon, Mathematics, Physics, Hybrid | Mode-specific validation and thought creation |
+| **Fundamental (3)** | Inductive, Deductive, Abductive | Reasoning triad implementation |
+| **Causal/Probabilistic (6)** | Causal, Bayesian, Counterfactual, Temporal, GameTheory, Evidential | Auto computation (posteriors, equilibria), validation |
+| **Analogical (2)** | Analogical, FirstPrinciples | Mapping and decomposition logic |
+| **Systems/Scientific (3)** | SystemsThinking, ScientificMethod, FormalLogic | 8 Archetypes detection, proof logic |
+| **Academic (4)** | Synthesis, Argumentation, Critique, Analysis | Coverage tracking, Socratic questions |
+| **Engineering (4)** | Engineering, Computability, Cryptanalytic, Algorithmic | CLRS coverage, Turing machines, Decibans |
+| **Advanced Runtime (6)** | MetaReasoning, Recursive, Modal, Stochastic, Constraint, Optimization | Strategic oversight, constraint solving |
+| **Fallback (2)** | GenericModeHandler, CustomHandler | Default behavior, user-defined modes |
+
+**ModeHandlerRegistry** singleton manages all handlers via Strategy pattern:
+
+- `hasSpecializedHandler(mode)` - Check implementation status
+- `getHandler(mode)` - Get handler (specialized or generic fallback)
+- `createThought(input, sessionId)` - Delegate to appropriate handler
+- `registerAllHandlers()` - Initialize all 33 handlers at startup
 
 ### Key Directories
 
@@ -107,6 +116,7 @@ src/
 ### Type System
 
 All 33 reasoning modes defined in `src/types/core.ts`:
+
 - `ThinkingMode` enum - Mode identifiers
 - `Thought` union type - Discriminated union of all thought types
 - `FULLY_IMPLEMENTED_MODES` - 21 modes with complete runtime logic
@@ -118,6 +128,7 @@ Mode-specific types in `src/types/modes/` (one file per mode).
 ### Path Aliases
 
 Configured in `tsconfig.json`:
+
 - `@/*` → `src/*`
 - `@types/*` → `src/types/*`
 - `@utils/*` → `src/utils/*`
@@ -126,60 +137,70 @@ Configured in `tsconfig.json`:
 
 ## The 33 Reasoning Modes
 
-### Fully Implemented (21 modes)
+### Fully Implemented (29 modes with dedicated thought types)
 
-| Category | Modes |
-|----------|-------|
-| **Core (5)** | Sequential, Shannon, Mathematics, Physics, Hybrid |
-| **Engineering (1)** | Engineering - Requirements, Trade Studies, FMEA, ADRs |
-| **Historical Computing (2)** | Computability, Cryptanalytic |
-| **Algorithmic (1)** | Algorithmic - CLRS coverage |
-| **Academic Research (4)** | Synthesis, Argumentation, Critique, Analysis |
-| **Advanced Runtime (6)** | MetaReasoning, Recursive, Modal, Stochastic, Constraint, Optimization |
-| **Fundamental (2)** | Inductive, Deductive |
+| Category | Modes | Status |
+|----------|-------|--------|
+| **Core (5)** | Sequential, Shannon, Mathematics, Physics, Hybrid | ✅ Full implementation |
+| **Fundamental (3)** | Inductive, Deductive, Abductive | ✅ Full implementation |
+| **Causal/Probabilistic (6)** | Causal, Bayesian, Counterfactual, Temporal, GameTheory, Evidential | ✅ Full implementation |
+| **Analogical (2)** | Analogical, FirstPrinciples | ✅ Full implementation |
+| **Systems/Scientific (3)** | SystemsThinking, ScientificMethod, FormalLogic | ✅ Full implementation |
+| **Academic (4)** | Synthesis, Argumentation, Critique, Analysis | ✅ Full implementation |
+| **Engineering (4)** | Engineering, Computability, Cryptanalytic, Algorithmic | ✅ Full implementation |
 
-### Experimental (12 modes)
+### Advanced Runtime Modes (4 modes - validators + handlers)
 
-Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory, Evidential, FirstPrinciples, SystemsThinking, ScientificMethod, FormalLogic
+| Mode | Status | Purpose |
+|------|--------|---------|
+| **MetaReasoning** | ✅ Handler v8.4.0 | Strategic oversight of reasoning |
+| **Recursive** | ✅ Handler v8.4.0 | Self-referential analysis |
+| **Modal** | ✅ Handler v8.4.0 | Possibility/necessity logic |
+| **Stochastic** | ✅ Handler v8.4.0 | Probabilistic state transitions |
+| **Constraint** | ⚠️ Validator only | Constraint satisfaction |
+| **Optimization** | ✅ Handler v8.4.0 | Constraint optimization |
 
-Note: 29 modes have dedicated thought types. 4 modes (Recursive, Modal, Stochastic, Constraint) are runtime-only.
+**Note**: All 33 modes have specialized handlers as of v8.4.0. Advanced runtime modes have limited business logic but full ModeHandler support.
 
 ## Recent Version History
 
 | Version | Phase | Key Features |
 |---------|-------|--------------|
+| **v8.4.0** | Phase 10 Sprint 3 | **ALL 33 MODES SPECIALIZED**: Complete ModeHandler coverage, 36 total handlers, registerAllHandlers() function |
+| **v8.3.2** | Phase 15 | Code quality: Type safety, error handling docs, magic number extraction, deterministic logic |
+| **v8.3.1** | Phase 15 | Version synchronization in visual exporters, Phase 11 documentation |
+| **v8.3.0** | Phase 15 | Mode scaffolding templates for v8+ architecture, chunker utility for file management |
 | **v8.2.1** | Phase 10 Sprint 2B | ThoughtFactory handler integration fix, documentation updates |
 | **v8.2.0** | Phase 10 Sprint 2B | Advanced ModeHandlers: Synthesis, SystemsThinking (8 archetypes), Critique (6 Socratic categories) |
 | **v8.1.0** | Phase 10 Sprint 2 | Core ModeHandlers: Causal, Bayesian, GameTheory, Counterfactual |
 | **v8.0.0** | Phase 10 Sprint 1 | ModeHandler Infrastructure - Strategy Pattern architecture, Registry singleton |
 | **v7.5.2** | Phase 14 | Bug fix: All 11 experimental modes now return correct mode type |
 | **v7.5.0** | Phase 14 | Accessible Reasoning Modes - 12 focused MCP tools |
-| **v7.4.0** | Phase 13 | Academic Research modes - Synthesis, Argumentation, Critique, Analysis |
-| **v7.3.0** | Phase 12 | ALGORITHMIC mode - CLRS algorithms, DP formulations |
-| **v7.0.0** | Phase 8 | Proof Decomposition, Native SVG export |
 
-## MCP Tools
+## MCP Tools (v8.4.0)
 
-The server provides 12 focused tools + 1 legacy tool:
+The server provides 13 focused tools + 1 legacy tool with hand-written JSON schemas:
 
-| Tool | Modes |
-|------|-------|
-| `deepthinking_core` | inductive, deductive, abductive |
-| `deepthinking_standard` | sequential, shannon, hybrid |
-| `deepthinking_mathematics` | mathematics, physics, computability |
-| `deepthinking_temporal` | temporal |
-| `deepthinking_probabilistic` | bayesian, evidential |
-| `deepthinking_causal` | causal, counterfactual |
-| `deepthinking_strategic` | gametheory, optimization |
-| `deepthinking_analytical` | analogical, firstprinciples, metareasoning, cryptanalytic |
-| `deepthinking_scientific` | scientificmethod, systemsthinking, formallogic |
-| `deepthinking_engineering` | engineering, algorithmic |
-| `deepthinking_academic` | synthesis, argumentation, critique, analysis |
-| `deepthinking_session` | Session management (create, list, delete, export) |
+| Tool | Modes/Functions | Version |
+|------|--------|---------|
+| `deepthinking_core` | inductive, deductive, abductive | ✅ v8.4.0 |
+| `deepthinking_standard` | sequential, shannon, hybrid | ✅ v8.4.0 |
+| `deepthinking_mathematics` | mathematics, physics, computability | ✅ v8.4.0 |
+| `deepthinking_temporal` | temporal | ✅ v8.4.0 |
+| `deepthinking_probabilistic` | bayesian, evidential | ✅ v8.4.0 |
+| `deepthinking_causal` | causal, counterfactual | ✅ v8.4.0 |
+| `deepthinking_strategic` | gametheory, optimization | ✅ v8.4.0 |
+| `deepthinking_analytical` | analogical, firstprinciples, metareasoning, cryptanalytic | ✅ v8.4.0 |
+| `deepthinking_scientific` | scientificmethod, systemsthinking, formallogic | ✅ v8.4.0 |
+| `deepthinking_engineering` | engineering, algorithmic | ✅ v8.4.0 |
+| `deepthinking_academic` | synthesis, argumentation, critique, analysis | ✅ v8.4.0 |
+| `deepthinking_session` | Session management (create, list, delete, export, get_session, switch_mode, recommend_mode) | ✅ v8.4.0 |
+| `deepthinking_analyze` | Multi-mode analysis with presets and merge strategies | ✅ Phase 12 Sprint 3 |
 
 ## Adding New Features
 
 ### New Reasoning Mode
+
 1. Create type definition: `src/types/modes/newmode.ts`
 2. Add to `ThinkingMode` enum in `src/types/core.ts`
 3. Add to `Thought` union type and appropriate mode array
@@ -189,11 +210,13 @@ The server provides 12 focused tools + 1 legacy tool:
 7. Create visual exporter in `src/export/visual/`
 
 ### New Export Format
+
 1. Create exporter: `src/export/newformat.ts`
 2. Register in `src/services/ExportService.ts`
 3. Add to export format enum/list
 
 ### New MCP Tool
+
 1. Define schema in `src/tools/schemas/`
 2. Add handler in `src/index.ts`
 3. Implement logic in appropriate service
@@ -244,6 +267,7 @@ For parallel reasoning or handling multiple concurrent sessions, you can run mul
 ```
 
 **Features:**
+
 - **Shared Sessions**: All instances share sessions via file-based storage
 - **File Locking**: Automatic cross-process file locking prevents race conditions
 - **Concurrent Reads**: Multiple instances can read sessions simultaneously (shared locks)
@@ -251,11 +275,13 @@ For parallel reasoning or handling multiple concurrent sessions, you can run mul
 - **Stale Lock Detection**: Automatic cleanup of locks from crashed processes
 
 **Environment Variables:**
+
 - `SESSION_DIR` - Path to shared session directory (enables file-based storage)
   - If not set: Uses in-memory storage (single instance mode)
   - If set: Uses FileSessionStore with cross-process file locking
 
 **Use Cases:**
+
 - Run different reasoning modes in parallel
 - Handle multiple conversations simultaneously
 - Distribute complex analysis across multiple instances
@@ -300,6 +326,7 @@ git diff --cached
 ```
 
 **Cleanup Checklist:**
+
 - Remove temporary test scripts (e.g., `test-mcp-server.mjs`, `test-schema-output.js`)
 - Delete debug files created during troubleshooting
 - Check for `.error.txt` or other runtime artifacts
@@ -323,12 +350,14 @@ git diff --cached
 ```
 
 **Why This Order Matters:**
+
 - Typecheck catches errors before wasting time on builds
 - Tests verify correctness before building
 - Building only when code is verified saves time
 - Never commit broken code
 
 **Common Mistakes:**
+
 - Building before typechecking (wastes time if types are wrong)
 - Building before testing (wastes time if tests fail)
 - Committing source without rebuilding dist/
@@ -347,6 +376,7 @@ This ensures continuity across sessions and prevents loss of important project c
 ## Documentation
 
 Additional documentation in `docs/architecture/`:
+
 - `OVERVIEW.md` - Comprehensive project overview
 - `ARCHITECTURE.md` - Detailed system architecture
 - `COMPONENTS.md` - Component deep-dive
@@ -354,6 +384,7 @@ Additional documentation in `docs/architecture/`:
 - `DEPENDENCY_GRAPH.md` - Module dependency analysis (auto-generated)
 
 Mode-specific documentation in `docs/modes/`:
+
 - `SYNTHESIS.md` - Literature synthesis mode guide
 - `ARGUMENTATION.md` - Academic argumentation documentation
 - `CRITIQUE.md` - Critical analysis mode guide
@@ -361,16 +392,55 @@ Mode-specific documentation in `docs/modes/`:
 
 Generate dependency docs: `npm run docs:deps`
 
+## Phase 15: Code Quality & Tooling
+
+**Type Safety Initiative (v8.3.2)**
+
+- Added proper TypeScript types to all 10 MCP handler functions in `src/index.ts`
+- Created handler input types: `ThoughtInput`, `SessionInput`, `AnalyzeInputType`
+- Made `MCPResponse` interface extensible with index signature for SDK compatibility
+- Fixed type assertions for Zod schema compatibility
+
+**Error Handling Documentation**
+Improved 16 empty catch blocks across 7 files with explanatory comments:
+
+- Cache modules (LRU, LFU, FIFO) - Non-serializable value handling in estimateSize()
+- CausalHandler - Optional centrality computation failures
+- CustomHandler - Validation rule evaluation errors
+- FileSessionStore (5 blocks) - File access and existence checks
+- FileLock (3 blocks) - Lock file operations and cleanup
+- ValidatorRegistry - Module loading failures
+
+**Magic Number Extraction**
+
+- Created `ANALYZER_CONSTANTS` object in `src/modes/combinations/analyzer.ts`:
+  - `DEFAULT_TIMEOUT_MS: 30000`
+  - `MAX_PARALLEL_MODES: 5`
+  - `MIN_CONFIDENCE_THRESHOLD: 0.3`
+  - `BASE_INSIGHT_CONFIDENCE: 0.8`
+- Added `MAX_INT32` constant (2^31 - 1) in stochastic RNG
+- Replaced `Math.random()` with deterministic `BASE_INSIGHT_CONFIDENCE` where appropriate
+
+**Phase 16: File Export System (Unreleased)**
+
+- **Environment Configuration**
+  - `MCP_EXPORT_PATH` - Set default export directory
+  - `MCP_EXPORT_OVERWRITE` - Control file overwrite (default: false)
+- **Export Profiles**: academic, presentation, documentation, archive, minimal
+- **File Organization**: `{exportDir}/{sessionId}/{sessionId}_{mode}_{format}.{ext}`
+
 ## Phase 11: Comprehensive Test Coverage Initiative
 
-Phase 11 is a dedicated testing phase targeting 95%+ coverage across all deepthinking-mcp tools, modes, and features.
+Phase 11 is a dedicated testing phase targeting 95%+ coverage (700 tests across 19 categories) for all deepthinking-mcp tools, modes, and features.
 
 **Planning Documents** in `docs/planning/`:
+
 - `TEST_PLAN.md` - Master test plan with 700 enumerated test cases
 - `PHASE_11_INDEX.json` - Sprint index and category breakdown
 - `PHASE_11_SPRINT_1_TODO.json` through `PHASE_11_SPRINT_11_TODO.json` - Individual sprint tasks
 
 **Test Categories (19 total, 700 tests)**:
+
 | Category | Tests | Focus |
 |----------|-------|-------|
 | COR | 45 | Core reasoning (inductive, deductive, abductive) |
@@ -394,6 +464,7 @@ Phase 11 is a dedicated testing phase targeting 95%+ coverage across all deepthi
 | PRF | 20 | Performance tests |
 
 **Sprint Overview** (66.5 hours total):
+
 1. Test Infrastructure & Core (45 tests)
 2. Standard Workflows & Parameters (70 tests)
 3. Mathematics/Physics/Computability (54 tests)
@@ -478,6 +549,7 @@ When working with large documentation files that exceed context limits:
 ```
 
 **Example session:**
+
 ```bash
 # 1. Understand the large file structure
 tools/compress-for-context/compress-for-context.exe docs/ARCHITECTURE.md -l moderate

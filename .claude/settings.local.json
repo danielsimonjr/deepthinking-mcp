@@ -115,7 +115,12 @@
       "Bash(findstr:*)",
       "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" split \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\README.md\" -l 2)",
       "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" merge \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\README_chunks\\\\manifest.json\" --dry-run)",
-      "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" merge \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\README_chunks\\\\manifest.json\")"
+      "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" merge \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\README_chunks\\\\manifest.json\")",
+      "mcp__deepthinking-mcp__deepthinking_analyze",
+      "Bash(npm run test:coverage:*)",
+      "Bash(\"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\tools\\\\chunker\\\\chunker.exe\" split \"C:\\\\mcp-servers\\\\deepthinking-mcp\\\\README.md\" -l 2 --dry-run)",
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunker.exe\":*)",
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunker.exe\" merge \"C:/mcp-servers/deepthinking-mcp/README_chunks/manifest.json\")"
     ],
     "deny": [],
     "ask": []
