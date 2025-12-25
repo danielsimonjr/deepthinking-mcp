@@ -285,10 +285,9 @@ function parseTypeScriptSections(content: string): Section[] {
   let currentSection: { title: string; level: number; lines: string[]; startLine: number; type: string } | null = null;
   let importLines: string[] = [];
   let importStart = -1;
+  let importBracketDepth = 0; // Track brackets within import statements
   let bracketDepth = 0;
   let parenDepth = 0;
-  let inMultilineString = false;
-  let stringChar = '';
   let inClass = false;
   let currentClassName = '';
   let classDepth = 0;
@@ -298,38 +297,192 @@ function parseTypeScriptSections(content: string): Section[] {
   let decorators: string[] = [];
   let decoratorStartLine = -1;
 
-  // Helper to count brackets in a line (respecting strings)
+  // State for tracking multi-line strings, comments, and regexes
+  interface ParserState {
+    inString: boolean;
+    stringChar: string;
+    templateExpressionDepth: number; // Track ${...} nesting in template literals
+    inBlockComment: boolean; // Track /* ... */ comments
+    nestedStringChar: string; // Track nested strings inside template expressions
+    inRegex: boolean; // Track /.../ regular expressions
+  }
+
+  let stringState: ParserState = {
+    inString: false,
+    stringChar: '',
+    templateExpressionDepth: 0,
+    inBlockComment: false,
+    nestedStringChar: '',
+    inRegex: false
+  };
+
+  // Helper to count brackets in a line (respecting strings and comments, with cross-line state)
   function countBrackets(line: string): { brackets: number; parens: number } {
     let brackets = 0;
     let parens = 0;
-    let inString = false;
-    let strChar = '';
 
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
       const prevChar = i > 0 ? line[i - 1] : '';
+      const nextChar = i < line.length - 1 ? line[i + 1] : '';
 
-      if (inString) {
-        if (char === strChar && prevChar !== '\\') {
-          inString = false;
+      // Handle block comments /* ... */
+      if (stringState.inBlockComment) {
+        if (char === '*' && nextChar === '/') {
+          stringState.inBlockComment = false;
+          i++; // Skip the '/'
         }
+        continue; // Skip everything in block comments
+      }
+
+      // Check for block comment start (if not in string)
+      if (!stringState.inString && char === '/' && nextChar === '*') {
+        stringState.inBlockComment = true;
+        i++; // Skip the '*'
+        continue;
+      }
+
+      // Skip single-line comments (but only if not in a string or regex)
+      if (!stringState.inString && !stringState.inRegex && char === '/' && nextChar === '/') {
+        break; // Rest of line is a comment, stop counting
+      }
+
+      // Handle regex literals /.../
+      if (stringState.inRegex) {
+        if (char === '/' && prevChar !== '\\') {
+          // End of regex (check for escaped slash)
+          let backslashCount = 0;
+          let j = i - 1;
+          while (j >= 0 && line[j] === '\\') {
+            backslashCount++;
+            j--;
+          }
+          if (backslashCount % 2 === 0) {
+            stringState.inRegex = false;
+            // Skip regex flags (g, i, m, s, u, y)
+            while (i + 1 < line.length && /[gimsuy]/.test(line[i + 1])) {
+              i++;
+            }
+          }
+        }
+        continue; // Skip everything in regex
+      }
+
+      // Check for regex start (heuristic: / after certain characters likely starts a regex)
+      if (!stringState.inString && char === '/') {
+        // Look back for context - regex can follow: ( , [ = ! & | : ; { }
+        // Find the last non-whitespace character before this /
+        let lastNonWs = '';
+        for (let j = i - 1; j >= 0; j--) {
+          if (!/\s/.test(line[j])) {
+            lastNonWs = line[j];
+            break;
+          }
+        }
+        // These characters typically precede a regex, not a division operator
+        if (/[(\[=!&|:;{},]/.test(lastNonWs) || lastNonWs === '' || i === 0) {
+          // Likely a regex, but make sure next char isn't = (for /=)
+          if (nextChar !== '=' && nextChar !== '*' && nextChar !== '/') {
+            stringState.inRegex = true;
+            continue;
+          }
+        }
+      }
+
+      if (stringState.inString) {
+        // Inside a string - check for end or template expression
+        // Determine which quote char to match
+        const activeQuote = stringState.nestedStringChar || stringState.stringChar;
+
+        if (stringState.stringChar === '`' && stringState.nestedStringChar === '' && char === '$' && nextChar === '{') {
+          // Entering ${...} expression inside template literal (only when not in nested string)
+          stringState.templateExpressionDepth++;
+          stringState.inString = false;
+          i++; // Skip the '{'
+          brackets++; // Count this '{' as it's part of JS syntax
+        } else if (char === activeQuote) {
+          // Check if this quote is escaped
+          let backslashCount = 0;
+          let j = i - 1;
+          while (j >= 0 && line[j] === '\\') {
+            backslashCount++;
+            j--;
+          }
+          // If even number of backslashes (including 0), the quote is not escaped
+          if (backslashCount % 2 === 0) {
+            if (stringState.nestedStringChar !== '') {
+              // Exiting nested string, back to template expression
+              stringState.nestedStringChar = '';
+              stringState.inString = false;
+            } else {
+              // Exiting main string
+              stringState.inString = false;
+              if (stringState.templateExpressionDepth === 0) {
+                stringState.stringChar = '';
+              }
+            }
+          }
+        }
+        // Otherwise, we're in a string - don't count anything
       } else {
-        if (char === '"' || char === "'" || char === '`') {
-          inString = true;
-          strChar = char;
-        } else if (char === '{') {
-          brackets++;
-        } else if (char === '}') {
-          brackets--;
-        } else if (char === '(') {
-          parens++;
-        } else if (char === ')') {
-          parens--;
+        // Not in a string - but might be inside template expression
+        if (stringState.templateExpressionDepth > 0 && stringState.stringChar === '`') {
+          // Inside a ${...} template expression
+          if (char === '"' || char === "'") {
+            // Nested string inside expression
+            stringState.inString = true;
+            stringState.nestedStringChar = char;
+          } else if (char === '`') {
+            // Nested template literal inside expression (rare)
+            stringState.templateExpressionDepth++;
+            stringState.inString = true;
+          } else if (char === '}') {
+            // Closing a ${...} expression
+            stringState.templateExpressionDepth--;
+            brackets--; // Count this '}' as it's part of JS syntax
+            if (stringState.templateExpressionDepth === 0) {
+              // Back into the outer template literal
+              stringState.inString = true;
+            }
+          } else if (char === '{') {
+            // Nested object literal inside template expression
+            brackets++;
+          } else if (char === '(') {
+            parens++;
+          } else if (char === ')') {
+            parens--;
+          }
+        } else {
+          // Not in any string or template expression
+          if (char === '"' || char === "'" || char === '`') {
+            stringState.inString = true;
+            stringState.stringChar = char;
+          } else if (char === '{') {
+            brackets++;
+          } else if (char === '}') {
+            brackets--;
+          } else if (char === '(') {
+            parens++;
+          } else if (char === ')') {
+            parens--;
+          }
         }
       }
     }
 
     return { brackets, parens };
+  }
+
+  // Reset parser state when starting a new declaration
+  function resetStringState() {
+    stringState = {
+      inString: false,
+      stringChar: '',
+      templateExpressionDepth: 0,
+      inBlockComment: false,
+      nestedStringChar: '',
+      inRegex: false
+    };
   }
 
   // Helper to save current section
@@ -350,6 +503,7 @@ function parseTypeScriptSections(content: string): Section[] {
     currentSection = null;
     bracketDepth = 0;
     parenDepth = 0;
+    resetStringState(); // Reset string tracking state for next section
     pendingComments = [];
     commentStartLine = -1;
     decorators = [];
@@ -470,15 +624,28 @@ function parseTypeScriptSections(content: string): Section[] {
     }
 
     // Check for import statements - group all imports together
+    // Handle multi-line imports by tracking bracket depth
     if (patterns.import.test(trimmedLine)) {
       if (importStart === -1) importStart = i;
       importLines.push(line);
+      // Count brackets in import line (simple count, not respecting strings for imports)
+      importBracketDepth += (line.match(/{/g) || []).length;
+      importBracketDepth -= (line.match(/}/g) || []).length;
       continue;
     }
 
-    // If we have imports and hit a non-import, save them as one group
+    // Continue collecting multi-line import if brackets aren't balanced
+    if (importLines.length > 0 && importBracketDepth > 0) {
+      importLines.push(line);
+      importBracketDepth += (line.match(/{/g) || []).length;
+      importBracketDepth -= (line.match(/}/g) || []).length;
+      continue;
+    }
+
+    // If we have imports and brackets are balanced (or hit a non-import), save them as one group
     if (importLines.length > 0) {
       saveImports(i);
+      importBracketDepth = 0;
     }
 
     // Check for various declarations
