@@ -5,7 +5,7 @@
   "week": "Week 5-6",
   "effort": "5-6 hours",
   "status": "pending",
-  "description": "Refactor final 4 remaining mode exporters (<1000 lines) to use new utility builders for consistency",
+  "description": "Refactor final 4 remaining mode exporters (<1000 lines) to use new utility builders, with snapshot verification",
   "tasks": [
     {
       "id": "13.9.1",
@@ -19,8 +19,7 @@
         "Refactor abductiveToDOT() to use DOTGraphBuilder",
         "Refactor abductiveToMermaid() to use MermaidGraphBuilder",
         "Refactor abductiveToASCII() to use ASCIIDocBuilder",
-        "Create helpers for hypothesis ranking visualization",
-        "Run snapshot tests to verify output unchanged"
+        "Create helpers for hypothesis ranking visualization"
       ],
       "files": [
         "src/export/visual/modes/abductive.ts"
@@ -39,8 +38,7 @@
         "Refactor bayesianToDOT() to use DOTGraphBuilder",
         "Refactor bayesianToMermaid() to use MermaidGraphBuilder",
         "Refactor bayesianToASCII() to use ASCIIDocBuilder",
-        "Create helpers for probability network visualization",
-        "Run snapshot tests to verify output unchanged"
+        "Create helpers for probability network visualization"
       ],
       "files": [
         "src/export/visual/modes/bayesian.ts"
@@ -49,59 +47,78 @@
     },
     {
       "id": "13.9.3",
-      "category": "Temporal Exporter",
-      "description": "Refactor temporal.ts (623 lines) to use builders",
+      "category": "Temporal & Shannon",
+      "description": "Refactor temporal.ts (623) and shannon.ts (558) to use builders",
       "status": "pending",
-      "estimatedHours": 1.0,
+      "estimatedHours": 1.5,
       "priority": "medium",
       "details": [
-        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
-        "Refactor temporalToDOT() to use DOTGraphBuilder",
-        "Refactor temporalToMermaid() to use MermaidGraphBuilder",
-        "Refactor temporalToASCII() to use ASCIIDocBuilder",
-        "Create helpers for timeline visualization",
-        "Run snapshot tests to verify output unchanged"
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder to both files",
+        "Refactor temporalToDOT/Mermaid/ASCII() to use builders",
+        "Refactor shannonToDOT/Mermaid/ASCII() to use builders",
+        "Create helpers for timeline and information flow visualization"
       ],
       "files": [
-        "src/export/visual/modes/temporal.ts"
+        "src/export/visual/modes/temporal.ts",
+        "src/export/visual/modes/shannon.ts"
       ],
-      "notes": "Temporal reasoning timeline visualization"
+      "notes": "Combined task for two smallest remaining files"
     },
     {
       "id": "13.9.4",
-      "category": "Shannon Exporter",
-      "description": "Refactor shannon.ts (558 lines) to use builders",
+      "category": "Snapshot Verification",
+      "description": "Verify snapshot tests pass for all refactored exporters",
       "status": "pending",
       "estimatedHours": 1.0,
-      "priority": "medium",
+      "priority": "high",
       "details": [
-        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
-        "Refactor shannonToDOT() to use DOTGraphBuilder",
-        "Refactor shannonToMermaid() to use MermaidGraphBuilder",
-        "Refactor shannonToASCII() to use ASCIIDocBuilder",
-        "Create helpers for information flow visualization",
-        "Run snapshot tests to verify output unchanged"
+        "Run snapshot tests for abductive.ts exports",
+        "Run snapshot tests for bayesian.ts exports",
+        "Run snapshot tests for temporal.ts exports",
+        "Run snapshot tests for shannon.ts exports",
+        "Compare DOT, Mermaid, ASCII output against baselines",
+        "All 21 mode exporters now use builders (except sequential.ts reference)"
       ],
       "files": [
-        "src/export/visual/modes/shannon.ts"
+        "tests/unit/export/visual/modes/snapshot-baseline.test.ts"
       ],
-      "notes": "Shannon information theory visualization"
+      "notes": "Final snapshot verification - 100% builder adoption complete"
+    },
+    {
+      "id": "13.9.5",
+      "category": "Adoption Verification",
+      "description": "Create adoption verification test",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "priority": "medium",
+      "details": [
+        "Create tests/unit/export/visual/modes/builder-adoption.test.ts",
+        "Test that all 21 mode exporters import builder classes",
+        "Verify no inline DOT/Mermaid/ASCII string building remains",
+        "Document final adoption metrics"
+      ],
+      "files": [
+        "tests/unit/export/visual/modes/builder-adoption.test.ts"
+      ],
+      "notes": "NEW FILE - Verifies 100% builder adoption across all mode exporters"
     }
   ],
   "successCriteria": [
     "All 4 files use DOT/Mermaid/ASCII builders",
-    "All 21 mode exporters now use builders (excluding sequential.ts reference)",
-    "All existing tests pass",
-    "Visual output unchanged (snapshot tests)",
-    "100% utility adoption achieved"
+    "All 21 mode exporters now use builders",
+    "All snapshot tests pass (output unchanged)",
+    "100% utility adoption achieved",
+    "All existing tests pass"
   ],
-  "filesCreated": [],
+  "filesCreated": [
+    "tests/unit/export/visual/modes/builder-adoption.test.ts"
+  ],
   "filesModified": [
     "src/export/visual/modes/abductive.ts",
     "src/export/visual/modes/bayesian.ts",
     "src/export/visual/modes/temporal.ts",
     "src/export/visual/modes/shannon.ts"
   ],
-  "totalEstimatedHours": 4.0,
+  "totalEstimatedHours": 5.0,
   "notes": "Final batch of remaining modes - completes 100% builder adoption across all mode exporters"
 }

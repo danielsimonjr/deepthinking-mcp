@@ -3,9 +3,9 @@
   "sprint": 6,
   "title": "Critical Files Batch 2",
   "week": "Week 4",
-  "effort": "7-8 hours",
+  "effort": "8-10 hours",
   "status": "pending",
-  "description": "Refactor 4 mode exporter files (1,234-1,450 lines) to use shared utility builders",
+  "description": "Refactor 4 mode exporter files (1,234-1,450 lines) to use shared utility builders, with snapshot verification",
   "tasks": [
     {
       "id": "13.6.1",
@@ -18,8 +18,7 @@
         "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
         "Refactor hybridToDOT() to use DOTGraphBuilder",
         "Refactor hybridToMermaid() to use MermaidGraphBuilder",
-        "Refactor hybridToASCII() to use ASCIIDocBuilder",
-        "Run snapshot tests to verify output unchanged"
+        "Refactor hybridToASCII() to use ASCIIDocBuilder"
       ],
       "files": [
         "src/export/visual/modes/hybrid.ts"
@@ -38,8 +37,7 @@
         "Refactor formalLogicToDOT() to use DOTGraphBuilder",
         "Refactor formalLogicToMermaid() to use MermaidGraphBuilder",
         "Refactor formalLogicToASCII() to use ASCIIDocBuilder",
-        "Create helpers for proof step nodes, logical connectives",
-        "Run snapshot tests to verify output unchanged"
+        "Create helpers for proof step nodes, logical connectives"
       ],
       "files": [
         "src/export/visual/modes/formal-logic.ts"
@@ -58,8 +56,7 @@
         "Refactor scientificMethodToDOT() to use DOTGraphBuilder",
         "Refactor scientificMethodToMermaid() to use MermaidGraphBuilder",
         "Refactor scientificMethodToASCII() to use ASCIIDocBuilder",
-        "Create helpers for hypothesis, experiment, observation nodes",
-        "Run snapshot tests to verify output unchanged"
+        "Create helpers for hypothesis, experiment, observation nodes"
       ],
       "files": [
         "src/export/visual/modes/scientific-method.ts"
@@ -78,20 +75,39 @@
         "Refactor optimizationToDOT() to use DOTGraphBuilder",
         "Refactor optimizationToMermaid() to use MermaidGraphBuilder",
         "Refactor optimizationToASCII() to use ASCIIDocBuilder",
-        "Create helpers for constraint nodes, objective function visualization",
-        "Run snapshot tests to verify output unchanged"
+        "Create helpers for constraint nodes, objective function visualization"
       ],
       "files": [
         "src/export/visual/modes/optimization.ts"
       ],
       "notes": "Eighth largest file (1,234 lines)"
+    },
+    {
+      "id": "13.6.5",
+      "category": "Snapshot Verification",
+      "description": "Verify snapshot tests pass for refactored exporters",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "priority": "high",
+      "details": [
+        "Run snapshot tests for hybrid.ts exports",
+        "Run snapshot tests for formal-logic.ts exports",
+        "Run snapshot tests for scientific-method.ts exports",
+        "Run snapshot tests for optimization.ts exports",
+        "Compare DOT, Mermaid, ASCII output against baselines",
+        "Fix any output differences"
+      ],
+      "files": [
+        "tests/unit/export/visual/modes/snapshot-baseline.test.ts"
+      ],
+      "notes": "Uses baseline snapshots from Sprint 4. Output must match exactly."
     }
   ],
   "successCriteria": [
     "All 4 files use DOT/Mermaid/ASCII builders",
     "All 4 files are <1000 lines after refactoring",
-    "All existing tests pass",
-    "Visual output unchanged (snapshot tests)"
+    "All snapshot tests pass (output unchanged)",
+    "All existing tests pass"
   ],
   "filesCreated": [],
   "filesModified": [
@@ -100,6 +116,6 @@
     "src/export/visual/modes/scientific-method.ts",
     "src/export/visual/modes/optimization.ts"
   ],
-  "totalEstimatedHours": 8.0,
+  "totalEstimatedHours": 9.0,
   "notes": "Medium-large files - all should easily reach <1000 lines target"
 }
