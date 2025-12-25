@@ -497,7 +497,7 @@ The codebase demonstrates **exceptional architectural discipline**:
 
 ## File Splitting Analysis (December 24, 2025)
 
-**Tools Used**: `create-dependency-graph`, `chunking-for-files`  
+**Tools Used**: `create-dependency-graph`, `chunking-for-files`
 **Full Report**: [docs/analysis/file-splitting-analysis.md](../analysis/file-splitting-analysis.md)
 
 ### Critical Finding: Massive Monolithic Functions
@@ -514,6 +514,7 @@ The chunker tool identified **4 monster functions containing 5,266 lines total**
 ### Pattern Analysis
 
 **15 visual exporter files** follow the same anti-pattern:
+
 1. Small entry function (~30 lines) ✅
 2. Reasonable Mermaid exporter (~100-150 lines) ✅
 3. **MASSIVE DOT exporter (900-1,500+ lines)** ⚠️
@@ -522,20 +523,32 @@ The chunker tool identified **4 monster functions containing 5,266 lines total**
 
 ### Recommended Solution
 
-**Create shared DOTGraphBuilder utility**:
+**Enhance existing `src/export/visual/utils/dot.ts` with builder pattern**:
+
+The codebase already has a comprehensive DOT utility module (`src/export/visual/utils/dot.ts`, 594 lines) with helper functions like `renderDotNode()`, `renderDotEdge()`, `renderDotSubgraph()`, and `generateDotGraph()`. However, the massive exporter functions don't use them.
+
+**Add DOTGraphBuilder class to existing dot.ts**:
+
 ```typescript
-class DOTGraphBuilder {
-  addNode(id: string, props: NodeProps): this;
-  addEdge(from: string, to: string, props: EdgeProps): this;
-  addCluster(id: string, nodes: string[], props: ClusterProps): this;
-  render(): string;
+// Add to src/export/visual/utils/dot.ts
+export class DOTGraphBuilder {
+  private nodes: DotNode[] = [];
+  private edges: DotEdge[] = [];
+  private subgraphs: DotSubgraph[] = [];
+  
+  addNode(node: DotNode): this;
+  addEdge(edge: DotEdge): this;
+  addSubgraph(subgraph: DotSubgraph): this;
+  render(options?: DotOptions): string;
 }
 ```
 
 **Benefits**:
-- Reduces DOT code by 60-70%
-- Ensures consistent formatting
-- Enables unit testing
+
+- Leverages existing 594-line utility module (types, helpers, color schemes)
+- Reduces DOT code by 60-70% through builder pattern
+- Ensures consistent formatting across all 23 mode exporters
+- Enables unit testing of graph construction
 - No function exceeds 300 lines
 
 ### Effort Estimates
@@ -547,10 +560,13 @@ class DOTGraphBuilder {
 
 ### Next Steps
 
-1. Create DOTGraphBuilder utility class
-2. Refactor physics.ts as proof of concept
-3. Apply pattern to remaining 14 exporters
-4. Extract json-schemas.ts into 15 focused files
+1. **Enhance `src/export/visual/utils/dot.ts`** - Add DOTGraphBuilder class to existing 594-line utility module
+2. **Refactor physics.ts** - Convert `physicsToDOT()` to use builder pattern as proof of concept
+3. **Apply to remaining 14 mode exporters** - Update all `*ToDOT()` functions to use the builder
+4. **Extract json-schemas.ts** - Split into 15 focused schema files in `src/tools/schemas/`
+5. **Extract other utilities if needed** - Modelica helpers, LaTeX math rendering, SVG components
+
+**Key Insight**: The export module structure (`visual/utils/*.ts`) already exists with comprehensive helpers. The refactoring is about **using** the existing infrastructure, not building from scratch.
 
 **See full analysis**: [file-splitting-analysis.md](../analysis/file-splitting-analysis.md)
 

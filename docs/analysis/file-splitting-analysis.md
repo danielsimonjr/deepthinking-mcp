@@ -321,7 +321,7 @@ export function addEdges(graph: DOTGraphBuilder, thought: XThought): void {
 ### Phase 3: Medium Priority (2 weeks)
 
 8. **Refactor remaining visual exporters** - Apply same pattern to 11 more files
-9. **Create DOTGraphBuilder utility** - Shared helper for all DOT exporters
+9. **Enhance `src/export/visual/utils/dot.ts`** - Add DOTGraphBuilder class to existing 594-line utility module
 10. **Extract LaTeX utilities** - Split latex.ts by domain
 
 **Estimated Time**: 16-24 hours
@@ -358,38 +358,49 @@ export function addEdges(graph: DOTGraphBuilder, thought: XThought): void {
 ### Why DOT Exporters Are So Large
 
 1. **DOT Format Verbosity**: GraphViz DOT syntax requires extensive string formatting
-2. **No Abstraction Layer**: Each exporter builds DOT from scratch
+2. **No Abstraction Layer**: Each exporter builds DOT from scratch instead of using existing `src/export/visual/utils/dot.ts`
 3. **Inline Everything**: Node properties, edge styles, clusters all inline
 4. **Domain Complexity**: Physics/Engineering diagrams have many specialized elements
-5. **Lack of Utilities**: No shared DOT builder, styling helpers, or templates
+5. **Existing Helpers Unused**: The 594-line `src/export/visual/utils/dot.ts` already has `renderDotNode()`, `renderDotEdge()`, `generateDotGraph()` but mode exporters don't use them
 
-### Proposed DOT Builder API
+### Proposed Enhancement to Existing DOT Utility
+
+**Add to `src/export/visual/utils/dot.ts`** (already has comprehensive helpers):
 
 ```typescript
-class DOTGraphBuilder {
-  addNode(id: string, props: NodeProps): this;
-  addEdge(from: string, to: string, props: EdgeProps): this;
-  addCluster(id: string, nodes: string[], props: ClusterProps): this;
-  setGraphProps(props: GraphProps): this;
-  render(): string;
+// Add builder pattern to existing 594-line dot.ts utility
+export class DOTGraphBuilder {
+  private nodes: DotNode[] = [];        // Already defined interface
+  private edges: DotEdge[] = [];        // Already defined interface
+  private subgraphs: DotSubgraph[] = []; // Already defined interface
+  private options: DotOptions = {};      // Already defined interface
+  
+  addNode(node: DotNode): this { this.nodes.push(node); return this; }
+  addEdge(edge: DotEdge): this { this.edges.push(edge); return this; }
+  addSubgraph(sub: DotSubgraph): this { this.subgraphs.push(sub); return this; }
+  setOptions(opts: DotOptions): this { this.options = opts; return this; }
+  
+  render(): string {
+    // Uses existing generateDotGraph() function
+    return generateDotGraph(this.nodes, this.edges, this.options);
+  }
 }
 
-// Usage:
-const graph = new DOTGraphBuilder()
-  .setGraphProps({ rankdir: 'TB', fontname: 'Arial' })
-  .addNode('A', { label: 'Tensor', shape: 'box', color: 'blue' })
-  .addNode('B', { label: 'Field', shape: 'ellipse', color: 'red' })
-  .addEdge('A', 'B', { label: 'transforms', style: 'dashed' })
-  .addCluster('physics', ['A', 'B'], { label: 'Physical System' });
+// Usage in physics.ts:
+const builder = new DOTGraphBuilder()
+  .setOptions({ rankDir: 'TB', fontName: 'Arial' })
+  .addNode({ id: 'tensor', label: 'Tensor', shape: 'box' }) // Already typed
+  .addEdge({ source: 'tensor', target: 'field' });           // Already typed
 
-return graph.render();
+return builder.render(); // Uses existing generateDotGraph()
 ```
 
 **Benefits**:
-- Reduces DOT code by 60-70%
-- Ensures consistent formatting
+- Leverages existing 594-line utility with all types, helpers, and color schemes defined
+- Reduces DOT code by 60-70% through builder pattern
+- Ensures consistent formatting using existing `renderDotNode()`, `renderDotEdge()` functions
 - Enables unit testing of graph structure
-- Simplifies maintenance
+- Zero new dependencies - extends what already exists
 
 ---
 
