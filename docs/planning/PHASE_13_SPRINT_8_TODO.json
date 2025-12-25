@@ -1,0 +1,127 @@
+{
+  "phase": 13,
+  "sprint": 8,
+  "title": "Remaining Modes Batch 1",
+  "week": "Week 5",
+  "effort": "6-7 hours",
+  "status": "pending",
+  "description": "Refactor 5 remaining mode exporters (<1000 lines) to use new utility builders for consistency",
+  "tasks": [
+    {
+      "id": "13.8.1",
+      "category": "Systems Thinking Exporter",
+      "description": "Refactor systems-thinking.ts (909 lines) to use builders",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "priority": "medium",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor systemsThinkingToDOT() to use DOTGraphBuilder",
+        "Refactor systemsThinkingToMermaid() to use MermaidGraphBuilder",
+        "Refactor systemsThinkingToASCII() to use ASCIIDocBuilder",
+        "Create helpers for archetype visualization",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/systems-thinking.ts"
+      ],
+      "notes": "8 Systems Archetypes visualization"
+    },
+    {
+      "id": "13.8.2",
+      "category": "Analogical Exporter",
+      "description": "Refactor analogical.ts (875 lines) to use builders",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "priority": "medium",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor analogicalToDOT() to use DOTGraphBuilder",
+        "Refactor analogicalToMermaid() to use MermaidGraphBuilder",
+        "Refactor analogicalToASCII() to use ASCIIDocBuilder",
+        "Create helpers for mapping visualization",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/analogical.ts"
+      ],
+      "notes": "Analogy mapping visualization"
+    },
+    {
+      "id": "13.8.3",
+      "category": "Causal Exporter",
+      "description": "Refactor causal.ts (866 lines) to use builders",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "priority": "medium",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor causalToDOT() to use DOTGraphBuilder",
+        "Refactor causalToMermaid() to use MermaidGraphBuilder",
+        "Refactor causalToASCII() to use ASCIIDocBuilder",
+        "Create helpers for causal chain visualization",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/causal.ts"
+      ],
+      "notes": "Causal graph visualization"
+    },
+    {
+      "id": "13.8.4",
+      "category": "Computability Exporter",
+      "description": "Refactor computability.ts (823 lines) to use builders",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "priority": "medium",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor computabilityToDOT() to use DOTGraphBuilder",
+        "Refactor computabilityToMermaid() to use MermaidGraphBuilder",
+        "Refactor computabilityToASCII() to use ASCIIDocBuilder",
+        "Create helpers for Turing machine visualization",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/computability.ts"
+      ],
+      "notes": "Turing machine state visualization"
+    },
+    {
+      "id": "13.8.5",
+      "category": "Counterfactual Exporter",
+      "description": "Refactor counterfactual.ts (807 lines) to use builders",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "priority": "medium",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor counterfactualToDOT() to use DOTGraphBuilder",
+        "Refactor counterfactualToMermaid() to use MermaidGraphBuilder",
+        "Refactor counterfactualToASCII() to use ASCIIDocBuilder",
+        "Create helpers for alternate timeline visualization",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/counterfactual.ts"
+      ],
+      "notes": "Counterfactual world visualization"
+    }
+  ],
+  "successCriteria": [
+    "All 5 files use DOT/Mermaid/ASCII builders",
+    "All existing tests pass",
+    "Visual output unchanged (snapshot tests)",
+    "Consistent code style across all mode exporters"
+  ],
+  "filesCreated": [],
+  "filesModified": [
+    "src/export/visual/modes/systems-thinking.ts",
+    "src/export/visual/modes/analogical.ts",
+    "src/export/visual/modes/causal.ts",
+    "src/export/visual/modes/computability.ts",
+    "src/export/visual/modes/counterfactual.ts"
+  ],
+  "totalEstimatedHours": 6.5,
+  "notes": "First batch of remaining modes - these are already <1000 lines but need builder adoption for consistency"
+}

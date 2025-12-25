@@ -1,0 +1,123 @@
+{
+  "phase": 13,
+  "sprint": 4,
+  "title": "Builder Integration & Testing",
+  "week": "Week 2-3",
+  "effort": "4-5 hours",
+  "status": "pending",
+  "description": "Complete unit tests for document builders, add JSDoc documentation, update index exports, and verify integration",
+  "tasks": [
+    {
+      "id": "13.4.1",
+      "category": "Unit Tests",
+      "description": "Write unit tests for document format builders",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "priority": "high",
+      "details": [
+        "Create tests/unit/export/visual/utils/document-builders.test.ts",
+        "Test UMLBuilder: classes, interfaces, relations, packages",
+        "Test HTMLDocBuilder: structure, elements, styling",
+        "Test MarkdownBuilder: headings, lists, code blocks, tables",
+        "Test ModelicaBuilder: models, parameters, equations",
+        "Test JSONExportBuilder: sections, formatting",
+        "Verify builder output matches existing function output"
+      ],
+      "files": [
+        "tests/unit/export/visual/utils/document-builders.test.ts"
+      ],
+      "notes": "Each builder should have 5-10 test cases"
+    },
+    {
+      "id": "13.4.2",
+      "category": "Documentation",
+      "description": "Add JSDoc documentation to all builder classes",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "priority": "medium",
+      "details": [
+        "Add class-level JSDoc with description and @example for each builder",
+        "Document all public methods with @param and @returns",
+        "Include usage examples showing before/after refactoring pattern",
+        "Document fluent API chaining pattern",
+        "Add @see references to underlying utility functions"
+      ],
+      "files": [
+        "src/export/visual/utils/dot.ts",
+        "src/export/visual/utils/mermaid.ts",
+        "src/export/visual/utils/ascii.ts",
+        "src/export/visual/utils/svg.ts",
+        "src/export/visual/utils/graphml.ts",
+        "src/export/visual/utils/tikz.ts",
+        "src/export/visual/utils/uml.ts",
+        "src/export/visual/utils/html.ts",
+        "src/export/visual/utils/markdown.ts",
+        "src/export/visual/utils/modelica.ts",
+        "src/export/visual/utils/json.ts"
+      ],
+      "notes": "Consistent documentation pattern across all builders"
+    },
+    {
+      "id": "13.4.3",
+      "category": "Index Export",
+      "description": "Update utils/index.ts to export all builder classes",
+      "status": "pending",
+      "estimatedHours": 0.5,
+      "priority": "high",
+      "details": [
+        "Add exports for DOTGraphBuilder",
+        "Add exports for MermaidGraphBuilder",
+        "Add exports for ASCIIDocBuilder",
+        "Add exports for SVGBuilder",
+        "Add exports for GraphMLBuilder",
+        "Add exports for TikZBuilder",
+        "Add exports for UMLBuilder",
+        "Add exports for HTMLDocBuilder",
+        "Add exports for MarkdownBuilder",
+        "Add exports for ModelicaBuilder",
+        "Add exports for JSONExportBuilder",
+        "Verify all builders are accessible via @export/visual/utils"
+      ],
+      "files": [
+        "src/export/visual/utils/index.ts"
+      ],
+      "notes": "Ensures all builders are easily importable by mode exporters"
+    },
+    {
+      "id": "13.4.4",
+      "category": "Integration Verification",
+      "description": "Verify all builders integrate correctly with existing functions",
+      "status": "pending",
+      "estimatedHours": 1.0,
+      "priority": "high",
+      "details": [
+        "Run full test suite to ensure no regressions",
+        "Verify TypeScript compilation succeeds",
+        "Test that builder output matches direct function calls",
+        "Create integration test with sample mode exporter using builders",
+        "Document any edge cases or limitations discovered"
+      ],
+      "files": [
+        "tests/integration/export/builders-integration.test.ts"
+      ],
+      "notes": "Final verification before starting mode refactoring"
+    }
+  ],
+  "successCriteria": [
+    "All 11 builder classes have comprehensive unit tests",
+    "All builders have JSDoc documentation",
+    "All builders exported from utils/index.ts",
+    "Full test suite passes",
+    "TypeScript compilation succeeds",
+    "Integration test demonstrates builder usage pattern"
+  ],
+  "filesCreated": [
+    "tests/unit/export/visual/utils/document-builders.test.ts",
+    "tests/integration/export/builders-integration.test.ts"
+  ],
+  "filesModified": [
+    "src/export/visual/utils/index.ts"
+  ],
+  "totalEstimatedHours": 4.0,
+  "notes": "Complete builder infrastructure - all 11 builders ready for use in Sprints 5-9"
+}

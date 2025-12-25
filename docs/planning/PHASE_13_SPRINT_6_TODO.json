@@ -1,0 +1,105 @@
+{
+  "phase": 13,
+  "sprint": 6,
+  "title": "Critical Files Batch 2",
+  "week": "Week 4",
+  "effort": "7-8 hours",
+  "status": "pending",
+  "description": "Refactor 4 mode exporter files (1,234-1,450 lines) to use shared utility builders",
+  "tasks": [
+    {
+      "id": "13.6.1",
+      "category": "Hybrid Exporter",
+      "description": "Refactor hybrid.ts (1,450 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "priority": "high",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor hybridToDOT() to use DOTGraphBuilder",
+        "Refactor hybridToMermaid() to use MermaidGraphBuilder",
+        "Refactor hybridToASCII() to use ASCIIDocBuilder",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/hybrid.ts"
+      ],
+      "notes": "Fifth largest file (1,450 lines)"
+    },
+    {
+      "id": "13.6.2",
+      "category": "Formal Logic Exporter",
+      "description": "Refactor formal-logic.ts (1,290 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "priority": "high",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor formalLogicToDOT() to use DOTGraphBuilder",
+        "Refactor formalLogicToMermaid() to use MermaidGraphBuilder",
+        "Refactor formalLogicToASCII() to use ASCIIDocBuilder",
+        "Create helpers for proof step nodes, logical connectives",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/formal-logic.ts"
+      ],
+      "notes": "Sixth largest file (1,290 lines)"
+    },
+    {
+      "id": "13.6.3",
+      "category": "Scientific Method Exporter",
+      "description": "Refactor scientific-method.ts (1,257 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "priority": "high",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor scientificMethodToDOT() to use DOTGraphBuilder",
+        "Refactor scientificMethodToMermaid() to use MermaidGraphBuilder",
+        "Refactor scientificMethodToASCII() to use ASCIIDocBuilder",
+        "Create helpers for hypothesis, experiment, observation nodes",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/scientific-method.ts"
+      ],
+      "notes": "Seventh largest file (1,257 lines)"
+    },
+    {
+      "id": "13.6.4",
+      "category": "Optimization Exporter",
+      "description": "Refactor optimization.ts (1,234 lines → <1000)",
+      "status": "pending",
+      "estimatedHours": 2.0,
+      "priority": "high",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor optimizationToDOT() to use DOTGraphBuilder",
+        "Refactor optimizationToMermaid() to use MermaidGraphBuilder",
+        "Refactor optimizationToASCII() to use ASCIIDocBuilder",
+        "Create helpers for constraint nodes, objective function visualization",
+        "Run snapshot tests to verify output unchanged"
+      ],
+      "files": [
+        "src/export/visual/modes/optimization.ts"
+      ],
+      "notes": "Eighth largest file (1,234 lines)"
+    }
+  ],
+  "successCriteria": [
+    "All 4 files use DOT/Mermaid/ASCII builders",
+    "All 4 files are <1000 lines after refactoring",
+    "All existing tests pass",
+    "Visual output unchanged (snapshot tests)"
+  ],
+  "filesCreated": [],
+  "filesModified": [
+    "src/export/visual/modes/hybrid.ts",
+    "src/export/visual/modes/formal-logic.ts",
+    "src/export/visual/modes/scientific-method.ts",
+    "src/export/visual/modes/optimization.ts"
+  ],
+  "totalEstimatedHours": 8.0,
+  "notes": "Medium-large files - all should easily reach <1000 lines target"
+}
