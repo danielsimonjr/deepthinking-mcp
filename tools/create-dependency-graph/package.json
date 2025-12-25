@@ -4,11 +4,11 @@
   "description": "Shared tools for MCP servers",
   "type": "module",
    "scripts": {
-    "build": "bun build compress-for-context.ts --compile --outfile compress-for-context.exe",
-    "start": "bun run compress-for-context.ts"
+    "build": "bun build create-dependency-graph.ts --compile --outfile create-dependency-graph.exe",
+    "start": "bun run create-dependency-graph.ts"
   },
   "bin": {
-    "compress-for-context": "./dist/compress-for-context.js"
+    "create-dependency-graph": "./dist/create-dependency-graph.js"
   },
   "devDependencies": {
     "@types/node": "^25.0.2",

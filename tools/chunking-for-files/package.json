@@ -1,18 +1,19 @@
 {
-  "name": "chunker",
+  "name": "chunking-for-files",
   "version": "1.0.0",
   "description": "Split and merge large files for editing within context limits",
-  "main": "index.ts",
+  "main": "chunking-for-files.ts",
   "bin": {
-    "chunker": "./index.ts"
+    "chunking-for-files": "./chunking-for-files.ts"
   },
   "scripts": {
-    "build": "bun build index.ts --compile --outfile chunking-for-files.exe",
-    "start": "bun run index.ts"
+    "build": "bun build chunking-for-files.ts --compile --outfile chunking-for-files.exe",
+    "start": "bun run chunking-for-files.ts"
   },
   "keywords": [
     "markdown",
     "chunker",
+    "chunking",
     "split",
     "merge",
     "llm",
