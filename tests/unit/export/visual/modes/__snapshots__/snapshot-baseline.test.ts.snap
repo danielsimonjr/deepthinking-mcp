@@ -1,0 +1,461 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Bayesian Mode Exporter Snapshots > ASCII format 1`] = `
+"Bayesian Network:
+=================
+
+Hypothesis: Test hypothesis
+
+Prior Probability: 0.300
+  Justification: Base rate
+
+Posterior Probability: 0.670
+  Calculation: Bayes rule
+"
+`;
+
+exports[`Bayesian Mode Exporter Snapshots > DOT format 1`] = `
+"digraph BayesianNetwork {
+  rankdir=LR;
+  node [shape=ellipse];
+
+  Prior [label="Prior: 0.300"];
+  Hypothesis [label="Hypothesis", shape=box];
+  Evidence [label="Evidence"];
+  Posterior [label="Posterior: 0.670", shape=doublecircle];
+
+  Prior -> Hypothesis;
+  Evidence -> Hypothesis;
+  Hypothesis -> Posterior;
+}
+"
+`;
+
+exports[`Bayesian Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph LR
+  H([Hypothesis])
+  Prior[Prior: 0.300]
+  Evidence[Evidence]
+  Posterior[[Posterior: 0.670]]
+
+  Prior --> H
+  Evidence --> H
+  H --> Posterior
+
+  style Prior fill:#a8d5ff
+  style Posterior fill:#81c784
+"
+`;
+
+exports[`Causal Mode Exporter Snapshots > ASCII format 1`] = `
+"Causal Graph:
+=============
+
+Nodes:
+  [CAUSE] Cause: Root cause
+  [EFFECT] Effect: Final effect
+
+Edges:
+  Cause --> Effect (strength: 0.80)
+"
+`;
+
+exports[`Causal Mode Exporter Snapshots > DOT format 1`] = `
+"digraph CausalGraph {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+  c1 [label="Cause", shape=ellipse];
+  e1 [label="Effect", shape=doubleoctagon];
+
+  c1 -> e1 [label="0.80"];
+}
+"
+`;
+
+exports[`Causal Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TB
+  c1([Cause])
+  e1[[Effect]]
+
+  c1 --> |0.80| e1
+
+  style c1 fill:#a8d5ff
+  style e1 fill:#ffd699
+"
+`;
+
+exports[`Computability Mode Exporter Snapshots > ASCII format 1`] = `
+"COMPUTABILITY ANALYSIS
+==================================================
+
+Type: undefined
+"
+`;
+
+exports[`Computability Mode Exporter Snapshots > DOT format 1`] = `
+"digraph Computability {
+  rankdir=TD;
+  type [label="undefined"];
+}
+"
+`;
+
+exports[`Computability Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+  type["undefined"]
+"
+`;
+
+exports[`Evidential Mode Exporter Snapshots > ASCII format 1`] = `
+"Evidential Belief Visualization:
+================================
+
+Frame of Discernment:
+  (not defined)
+
+"
+`;
+
+exports[`Evidential Mode Exporter Snapshots > DOT format 1`] = `
+"digraph EvidentialBeliefs {
+  rankdir=TD;
+  node [shape=box, style=rounded];
+
+  Frame [label="Frame of Discernment", shape=ellipse];
+
+}
+"
+`;
+
+exports[`Evidential Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+  Frame["Frame of Discernment"]
+"
+`;
+
+exports[`Formal Logic Mode Exporter Snapshots > ASCII format 1`] = `
+"Formal Logic Proof:
+==================
+
+"
+`;
+
+exports[`Formal Logic Mode Exporter Snapshots > DOT format 1`] = `
+"digraph FormalLogic {
+  rankdir=TD;
+  node [shape=box, style=rounded];
+
+}
+"
+`;
+
+exports[`Formal Logic Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+
+"
+`;
+
+exports[`Game Theory Mode Exporter Snapshots > ASCII format 1`] = `
+"Game: Untitled
+========================================
+
+"
+`;
+
+exports[`Game Theory Mode Exporter Snapshots > DOT format 1`] = `
+"digraph GameTree {
+  rankdir=TD;
+  node [shape=circle];
+
+  root [label="No game"];
+}
+"
+`;
+
+exports[`Game Theory Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+  root[No game defined]
+"
+`;
+
+exports[`Hybrid Mode Exporter Snapshots > ASCII format 1`] = `
+"Hybrid Mode Orchestration:
+==========================
+
+Primary Mode: Sequential
+
+Secondary Features:
+  1. causal-links
+  2. temporal-ordering
+
+"
+`;
+
+exports[`Hybrid Mode Exporter Snapshots > DOT format 1`] = `
+"digraph HybridOrchestration {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+  hybrid_mode [label="Hybrid Mode", shape=doubleoctagon];
+  primary_sequential [label="Sequential", shape=box, style="filled,rounded", fillcolor=lightblue];
+  hybrid_mode -> primary_sequential [style=bold, penwidth=2];
+  secondary_features [label="Secondary Features", shape=ellipse];
+  hybrid_mode -> secondary_features;
+  feature_0 [label="causal-links"];
+  secondary_features -> feature_0;
+  feature_1 [label="temporal-ordering"];
+  secondary_features -> feature_1;
+}
+"
+`;
+
+exports[`Hybrid Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TB
+  hybrid_mode(("Hybrid Mode"))
+  primary_sequential[["Sequential"]]
+  hybrid_mode ==> primary_sequential
+  secondary_features(["Secondary Features"])
+  hybrid_mode --> secondary_features
+  feature_0["causal-links"]
+  secondary_features --> feature_0
+  feature_1["temporal-ordering"]
+  secondary_features --> feature_1
+
+  style hybrid_mode fill:#90EE90
+  style primary_sequential fill:#87CEEB
+  style secondary_features fill:#FFD700
+"
+`;
+
+exports[`Mathematics Mode Exporter Snapshots > ASCII format 1`] = `
+"Mathematics Derivation:
+=======================
+
+Type: proof
+Uncertainty: NaN%
+
+"
+`;
+
+exports[`Mathematics Mode Exporter Snapshots > DOT format 1`] = `
+"digraph MathematicsDerivation {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+  type_proof [label="Proof", shape=doubleoctagon];
+}
+"
+`;
+
+exports[`Mathematics Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TB
+  type_proof[["Proof"]]
+
+  style type_proof fill:#90EE90
+"
+`;
+
+exports[`Optimization Mode Exporter Snapshots > ASCII format 1`] = `
+"Optimization Problem:
+====================
+
+Decision Variables:
+  x (continuous)
+
+"
+`;
+
+exports[`Physics Mode Exporter Snapshots > ASCII format 1`] = `
+"Physics Analysis:
+=================
+
+Type: physics
+Uncertainty: NaN%
+
+"
+`;
+
+exports[`Physics Mode Exporter Snapshots > DOT format 1`] = `
+"digraph PhysicsVisualization {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+  type_physics [label="Physics", shape=doubleoctagon];
+  uncertainty [label="NaN%", shape=diamond];
+}
+"
+`;
+
+exports[`Physics Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TB
+  type_physics[["Physics"]]
+  uncertainty{{Uncertainty: NaN%}}
+
+  style type_physics fill:#87CEEB
+"
+`;
+
+exports[`Scientific Method Mode Exporter Snapshots > ASCII format 1`] = `
+"Scientific Method Process:
+==========================
+
+Conclusion:
+Hypothesis supported
+Confidence: 0.95
+"
+`;
+
+exports[`Scientific Method Mode Exporter Snapshots > DOT format 1`] = `
+"digraph ScientificMethod {
+  rankdir=TD;
+  node [shape=box, style=rounded];
+
+  Stats [label="Statistical Analysis"];
+  Conclusion [label="Conclusion:\\nHypothesis supported...\\nconf: 0.95", shape=doubleoctagon];
+  Stats -> Conclusion;
+}
+"
+`;
+
+exports[`Scientific Method Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+  Stats["Statistical Analysis"]
+
+  Conclusion["Conclusion: Hypothesis supported... (conf: 0.95)"]
+  Stats --> Conclusion
+
+  style Conclusion fill:#a5d6a7
+"
+`;
+
+exports[`Sequential Mode Exporter Snapshots > ASCII format 1`] = `
+"Sequential Dependency Graph
+===========================
+
+Current Thought: seq-1
+Content: Sequential reasoning step...
+"
+`;
+
+exports[`Sequential Mode Exporter Snapshots > DOT format 1`] = `
+"digraph SequentialDependency {
+  rankdir=TB;
+  node [shape=box, style="rounded"];
+
+  seq_1 [label="Sequential reasoning step", shape=box, style="rounded,filled", fillcolor="#a8d5ff"];
+}"
+`;
+
+exports[`Sequential Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+
+  seq_1(["Sequential reasoning step"])
+
+  style seq_1 fill:#a8d5ff"
+`;
+
+exports[`Shannon Mode Exporter Snapshots > ASCII format 1`] = `
+"Shannon Stage Flow:
+===================
+
+Flow: Problem Definition → Constraints → Model → Proof → Implementation
+
+Current Stage: undefined
+Uncertainty: 0.50
+
+Dependencies:
+  • data-source
+
+Assumptions:
+  • Channel is reliable
+"
+`;
+
+exports[`Shannon Mode Exporter Snapshots > DOT format 1`] = `
+"digraph ShannonStageFlow {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+
+  problem_definition [label="Problem Definition"];
+  problem_definition -> constraints;
+  constraints [label="Constraints"];
+  constraints -> model;
+  model [label="Model"];
+  model -> proof;
+  proof [label="Proof"];
+  proof -> implementation;
+  implementation [label="Implementation"];
+
+  uncertainty [label="Uncertainty: 0.50", shape=ellipse];
+  uncertainty -> encoding [style=dashed];
+}
+"
+`;
+
+exports[`Shannon Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph LR
+  problem_definition["Problem Definition"]
+  problem_definition --> constraints
+  constraints["Constraints"]
+  constraints --> model
+  model["Model"]
+  model --> proof
+  proof["Proof"]
+  proof --> implementation
+  implementation["Implementation"]
+
+  style encoding fill:#a8d5ff,stroke:#333,stroke-width:3px
+
+  uncertainty["Uncertainty: 0.50"]
+  uncertainty -.-> encoding
+"
+`;
+
+exports[`Systems Thinking Mode Exporter Snapshots > ASCII format 1`] = `
+"Systems Thinking Model:
+======================
+
+"
+`;
+
+exports[`Systems Thinking Mode Exporter Snapshots > DOT format 1`] = `
+"digraph SystemsThinking {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+}
+"
+`;
+
+exports[`Systems Thinking Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TB
+"
+`;
+
+exports[`Temporal Mode Exporter Snapshots > ASCII format 1`] = `
+"Timeline: Untitled
+========================================
+
+No events
+"
+`;
+
+exports[`Temporal Mode Exporter Snapshots > DOT format 1`] = `
+"digraph Timeline {
+  rankdir=LR;
+  node [shape=box];
+
+}
+"
+`;
+
+exports[`Temporal Mode Exporter Snapshots > Mermaid format 1`] = `
+"gantt
+  title Timeline
+  dateFormat X
+  axisFormat %s
+
+  No events
+"
+`;

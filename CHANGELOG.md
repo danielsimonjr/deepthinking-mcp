@@ -123,7 +123,7 @@ Added five new builder classes for UML, HTML, Markdown, Modelica, and JSON forma
 
 ---
 
-### Added - Phase 13 Sprint 4: Integration Tests & Documentation
+### Added - Phase 13 Sprint 4: Integration Tests & Snapshot Baselines
 
 **Integration Tests for Builder Usage Patterns**
 
@@ -145,24 +145,24 @@ Created comprehensive integration tests demonstrating real-world builder usage:
   - Cross-builder patterns: Nested path setting, builder reuse with clear(), builder reset
 
 - **`tests/integration/export/visual/mode-exporters-snapshot.test.ts`** (15 tests)
-  - DOT Builder Output Snapshots: Sequential flows, subgraph handling
-  - Mermaid Builder Output Snapshots: Flowchart generation
-  - GraphML Builder Output Snapshots: Valid XML structure
-  - SVG Builder Output Snapshots: SVG element rendering
-  - TikZ Builder Output Snapshots: LaTeX output, standalone documents
-  - UML Builder Output Snapshots: PlantUML class diagrams
-  - HTML Builder Output Snapshots: HTML document structure
-  - Markdown Builder Output Snapshots: Markdown formatting
-  - Modelica Builder Output Snapshots: Modelica package generation
-  - JSON Builder Output Snapshots: JSON structure validation
-  - Cross-Builder Consistency Tests: Node/edge counts, format consistency
+  - Builder output snapshots for DOT, Mermaid, GraphML, SVG, TikZ, UML, HTML, Markdown, Modelica, JSON formats
+  - Cross-builder consistency tests
+
+**Mode Exporter Snapshot Baselines (Partial)**
+
+Created baseline snapshot tests for mode exporters (DOT, Mermaid, ASCII formats):
+
+- **`tests/unit/export/visual/modes/snapshot-baseline.test.ts`** (43/63 tests passing)
+  - Tests 21 mode exporters: Sequential, Shannon, Mathematics, Physics, Hybrid, Causal, Temporal, Counterfactual, Bayesian, Evidential, GameTheory, Optimization, Abductive, Analogical, FirstPrinciples, MetaReasoning, SystemsThinking, ScientificMethod, FormalLogic, Engineering, Computability
+  - ⚠️ 20 tests need fixture refinement (7 modes × 3 formats) - complex type structures
+  - Purpose: Ensure Sprints 5-9 refactoring preserves visual output
 
 ### Validation - Sprint 4
 
-- **Integration Tests**: ✅ 33 tests passing (18 builder integration + 15 snapshot tests)
-- **Full Test Suite**: ✅ 4573 tests passing
+- **Builder Integration Tests**: ✅ 33 tests passing
+- **Mode Exporter Snapshots**: ⚠️ 43/63 tests passing (68%) - fixture work needed
+- **Full Test Suite**: ✅ 4644 passing (20 failing in new snapshot tests)
 - **Typecheck**: ✅ Clean
-- **Build**: ✅ Successful
 
 ---
 
