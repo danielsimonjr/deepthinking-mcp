@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **33 reasoning modes** (29 with dedicated thought types) with taxonomy-based classification (69 reasoning types across 12 categories, 110 planned), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
-**Version**: 8.4.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
+**Version**: 8.5.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
 
 ## Project Metrics
 
@@ -15,7 +15,7 @@ DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring *
 | TypeScript Files | 221 |
 | Lines of Code | ~89,490 |
 | Total Exports | 1134 (519 re-exports) |
-| Passing Tests | 3539 (143 test files) |
+| Passing Tests | 4364 (163 test files) |
 | Reasoning Modes | 33 (29 with dedicated types + 4 advanced runtime) |
 | MCP Tools | 13 focused (includes deepthinking_analyze) |
 | Export Formats | 8 + native SVG + file export |
@@ -166,6 +166,7 @@ Configured in `tsconfig.json`:
 
 | Version | Phase | Key Features |
 |---------|-------|--------------|
+| **v8.5.0** | Phase 13 Sprint 1 | **GRAPH BUILDERS**: DOTGraphBuilder, MermaidGraphBuilder, GraphMLBuilder fluent APIs for visual export refactoring |
 | **v8.4.0** | Phase 10 Sprint 3 | **ALL 33 MODES SPECIALIZED**: Complete ModeHandler coverage, 36 total handlers, registerAllHandlers() function |
 | **v8.3.2** | Phase 15 | Code quality: Type safety, error handling docs, magic number extraction, deterministic logic |
 | **v8.3.1** | Phase 15 | Version synchronization in visual exporters, Phase 11 documentation |
@@ -391,6 +392,46 @@ Mode-specific documentation in `docs/modes/`:
 - `ANALYSIS.md` - Qualitative analysis documentation
 
 Generate dependency docs: `npm run docs:deps`
+
+## Phase 13: Visual Exporter Refactoring
+
+**Goal**: Adopt shared utility modules (DOT, Mermaid, ASCII) across all 22 visual mode exporters to reduce code duplication and file sizes.
+
+**Sprint 1 (v8.5.0)**: Core Graph Builders
+
+- Added `DOTGraphBuilder` fluent API class to `src/export/visual/utils/dot.ts`
+- Added `MermaidGraphBuilder` fluent API class to `src/export/visual/utils/mermaid.ts`
+- Added `GraphMLBuilder` fluent API class to `src/export/visual/utils/graphml.ts`
+- Created 64 unit tests in `tests/unit/export/visual/utils/graph-builders.test.ts`
+
+**Builder Pattern Benefits**:
+
+```typescript
+// Before: Inline string building (duplicated in 21 files)
+let dot = 'digraph G {\n';
+dot += '  rankdir=TB;\n';
+dot += `  ${id} [label="${label}"];\n`;
+dot += '}\n';
+
+// After: Fluent API builder
+const dot = new DOTGraphBuilder()
+  .setRankDir('TB')
+  .addNode({ id, label })
+  .render();
+```
+
+**Remaining Sprints** (9 more planned):
+
+| Sprint | Focus |
+|--------|-------|
+| 2 | ASCIIDocBuilder, SVGBuilder, TikZBuilder |
+| 3 | UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder |
+| 4 | JSDoc, integration tests, snapshot baselines |
+| 5-7 | Refactor 12 critical files (>1000 lines) |
+| 8-9 | Refactor remaining 9 modes for consistency |
+| 10 | File splitting if needed, final verification |
+
+See `docs/planning/PHASE_13_*.json` for detailed sprint breakdowns.
 
 ## Phase 15: Code Quality & Tooling
 

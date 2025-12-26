@@ -1,6 +1,7 @@
 /**
- * Mermaid Utilities (v7.1.0)
+ * Mermaid Utilities (v8.5.0)
  * Shared utility functions for Mermaid diagram generation across all visual exporters
+ * Phase 13: Added MermaidGraphBuilder fluent API
  */
 
 // =============================================================================
@@ -537,4 +538,313 @@ export function generateMermaidClassDiagram(
   }
 
   return lines.join('\n');
+}
+
+// =============================================================================
+// MermaidGraphBuilder - Fluent API Builder Class (Phase 13)
+// =============================================================================
+
+/**
+ * Fluent API builder for Mermaid diagrams
+ *
+ * Provides a chainable interface for constructing Mermaid flowchart diagrams,
+ * wrapping the existing utility functions for easier use.
+ *
+ * @example
+ * ```typescript
+ * const mermaid = new MermaidGraphBuilder()
+ *   .setDirection('LR')
+ *   .addNode({ id: 'a', label: 'Start', shape: 'stadium' })
+ *   .addNode({ id: 'b', label: 'Process', shape: 'rectangle' })
+ *   .addEdge({ source: 'a', target: 'b', style: 'arrow' })
+ *   .render();
+ * ```
+ */
+export class MermaidGraphBuilder {
+  private nodes: MermaidNode[] = [];
+  private edges: MermaidEdge[] = [];
+  private subgraphs: MermaidSubgraph[] = [];
+  private options: MermaidOptions = {};
+
+  /**
+   * Add a node to the diagram
+   * @param node - The node definition
+   * @returns this for chaining
+   */
+  addNode(node: MermaidNode): this {
+    this.nodes.push(node);
+    return this;
+  }
+
+  /**
+   * Add multiple nodes to the diagram
+   * @param nodes - Array of node definitions
+   * @returns this for chaining
+   */
+  addNodes(nodes: MermaidNode[]): this {
+    this.nodes.push(...nodes);
+    return this;
+  }
+
+  /**
+   * Add an edge to the diagram
+   * @param edge - The edge definition
+   * @returns this for chaining
+   */
+  addEdge(edge: MermaidEdge): this {
+    this.edges.push(edge);
+    return this;
+  }
+
+  /**
+   * Add multiple edges to the diagram
+   * @param edges - Array of edge definitions
+   * @returns this for chaining
+   */
+  addEdges(edges: MermaidEdge[]): this {
+    this.edges.push(...edges);
+    return this;
+  }
+
+  /**
+   * Add a subgraph to the diagram
+   * @param id - Subgraph ID
+   * @param label - Subgraph label/title
+   * @param nodeIds - Array of node IDs to include in the subgraph
+   * @param direction - Optional direction for the subgraph
+   * @returns this for chaining
+   */
+  addSubgraph(id: string, label: string, nodeIds: string[], direction?: MermaidDirection): this {
+    this.subgraphs.push({
+      id,
+      label,
+      nodes: nodeIds,
+      direction,
+    });
+    return this;
+  }
+
+  /**
+   * Add a subgraph object to the diagram
+   * @param subgraph - The subgraph definition
+   * @returns this for chaining
+   */
+  addSubgraphDef(subgraph: MermaidSubgraph): this {
+    this.subgraphs.push(subgraph);
+    return this;
+  }
+
+  /**
+   * Add multiple subgraphs to the diagram
+   * @param subgraphs - Array of subgraph definitions
+   * @returns this for chaining
+   */
+  addSubgraphs(subgraphs: MermaidSubgraph[]): this {
+    this.subgraphs.push(...subgraphs);
+    return this;
+  }
+
+  /**
+   * Set or merge diagram options
+   * @param options - Diagram options to set/merge
+   * @returns this for chaining
+   */
+  setOptions(options: MermaidOptions): this {
+    this.options = { ...this.options, ...options };
+    return this;
+  }
+
+  /**
+   * Set the diagram direction
+   * @param direction - The direction (TD, TB, LR, RL, BT)
+   * @returns this for chaining
+   */
+  setDirection(direction: MermaidDirection): this {
+    this.options.direction = direction;
+    return this;
+  }
+
+  /**
+   * Set the diagram title
+   * @param title - The title
+   * @returns this for chaining
+   */
+  setTitle(title: string): this {
+    this.options.title = title;
+    return this;
+  }
+
+  /**
+   * Set the color scheme
+   * @param scheme - The color scheme (default, pastel, monochrome)
+   * @returns this for chaining
+   */
+  setColorScheme(scheme: 'default' | 'pastel' | 'monochrome'): this {
+    this.options.colorScheme = scheme;
+    return this;
+  }
+
+  /**
+   * Get the current node count
+   */
+  get nodeCount(): number {
+    return this.nodes.length;
+  }
+
+  /**
+   * Get the current edge count
+   */
+  get edgeCount(): number {
+    return this.edges.length;
+  }
+
+  /**
+   * Get the current subgraph count
+   */
+  get subgraphCount(): number {
+    return this.subgraphs.length;
+  }
+
+  /**
+   * Clear all nodes, edges, and subgraphs
+   * @returns this for chaining
+   */
+  clear(): this {
+    this.nodes = [];
+    this.edges = [];
+    this.subgraphs = [];
+    return this;
+  }
+
+  /**
+   * Reset options to defaults
+   * @returns this for chaining
+   */
+  resetOptions(): this {
+    this.options = {};
+    return this;
+  }
+
+  /**
+   * Render the diagram as a Mermaid string
+   *
+   * If subgraphs are present, nodes are organized into their
+   * respective subgraphs. Nodes not in any subgraph are rendered
+   * at the top level.
+   *
+   * @returns The complete Mermaid diagram string
+   */
+  render(): string {
+    const { direction = 'TD', colorScheme = 'default' } = this.options;
+    const lines: string[] = [];
+
+    // Header
+    lines.push(`graph ${direction}`);
+
+    // Collect node IDs that are in subgraphs
+    const nodesInSubgraphs = new Set<string>();
+    for (const subgraph of this.subgraphs) {
+      for (const nodeId of subgraph.nodes) {
+        nodesInSubgraphs.add(nodeId);
+      }
+    }
+
+    // Render nodes not in subgraphs
+    const topLevelNodes = this.nodes.filter(n => !nodesInSubgraphs.has(n.id));
+    if (topLevelNodes.length > 0) {
+      lines.push('');
+      for (const node of topLevelNodes) {
+        lines.push(renderMermaidNode(node));
+      }
+    }
+
+    // Render subgraphs
+    if (this.subgraphs.length > 0) {
+      lines.push('');
+      for (const subgraph of this.subgraphs) {
+        lines.push(renderMermaidSubgraph(subgraph));
+
+        // Find and render full node definitions for nodes in this subgraph
+        const subgraphNodes = this.nodes.filter(n => subgraph.nodes.includes(n.id));
+        for (const node of subgraphNodes) {
+          // Render node inside subgraph context (add extra indent)
+          const nodeStr = renderMermaidNode(node);
+          lines.push(`  ${nodeStr}`);
+        }
+      }
+    }
+
+    // Render edges
+    if (this.edges.length > 0) {
+      lines.push('');
+      for (const edge of this.edges) {
+        lines.push(renderMermaidEdge(edge));
+      }
+    }
+
+    // Render styles
+    if (colorScheme !== 'monochrome') {
+      const styledNodes = this.nodes.filter(n => n.style);
+      if (styledNodes.length > 0) {
+        lines.push('');
+        for (const node of styledNodes) {
+          const styleStr = renderMermaidNodeStyle(node.id, node.style);
+          if (styleStr) lines.push(styleStr);
+        }
+      }
+    }
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Render as a state diagram instead of flowchart
+   * @param states - State definitions with optional types
+   * @param transitions - Transition definitions
+   * @returns The Mermaid state diagram string
+   */
+  renderAsStateDiagram(
+    states: Array<{ id: string; label: string; type?: 'start' | 'end' | 'normal' | 'choice' }>,
+    transitions: Array<{ from: string; to: string; label?: string }>
+  ): string {
+    return generateMermaidStateDiagram(states, transitions);
+  }
+
+  /**
+   * Render as a class diagram
+   * @param classes - Class definitions
+   * @param relationships - Relationship definitions
+   * @returns The Mermaid class diagram string
+   */
+  renderAsClassDiagram(
+    classes: Array<{ name: string; attributes?: string[]; methods?: string[] }>,
+    relationships: Array<{
+      from: string;
+      to: string;
+      type: 'inheritance' | 'composition' | 'aggregation' | 'association' | 'dependency';
+      label?: string;
+    }>
+  ): string {
+    return generateMermaidClassDiagram(classes, relationships);
+  }
+
+  /**
+   * Create a builder from existing nodes, edges, and options
+   * Useful for modifying existing diagram structures
+   * @param nodes - Initial nodes
+   * @param edges - Initial edges
+   * @param options - Initial options
+   * @returns A new MermaidGraphBuilder instance
+   */
+  static from(
+    nodes: MermaidNode[] = [],
+    edges: MermaidEdge[] = [],
+    options: MermaidOptions = {}
+  ): MermaidGraphBuilder {
+    const builder = new MermaidGraphBuilder();
+    builder.nodes = [...nodes];
+    builder.edges = [...edges];
+    builder.options = { ...options };
+    return builder;
+  }
 }

@@ -1,6 +1,7 @@
 /**
- * GraphML Export Utilities (v7.0.3)
+ * GraphML Export Utilities (v8.5.0)
  * Phase 9: Shared GraphML generation utilities for all visual exporters
+ * Phase 13: Added GraphMLBuilder fluent API
  *
  * GraphML is an XML-based format for graph representation, compatible with:
  * - yEd Graph Editor
@@ -266,4 +267,374 @@ export function createLayeredGraphML(
   }));
 
   return generateGraphML(nodes, edges, options);
+}
+
+// =============================================================================
+// GraphMLBuilder - Fluent API Builder Class (Phase 13)
+// =============================================================================
+
+/**
+ * Custom attribute definition for GraphML
+ */
+export interface GraphMLAttribute {
+  id: string;
+  name: string;
+  type: 'string' | 'double' | 'int' | 'boolean';
+  for: 'node' | 'edge' | 'graph';
+  defaultValue?: string;
+}
+
+/**
+ * Fluent API builder for GraphML documents
+ *
+ * Provides a chainable interface for constructing GraphML XML documents,
+ * wrapping the existing utility functions for easier use.
+ *
+ * @example
+ * ```typescript
+ * const graphml = new GraphMLBuilder()
+ *   .setGraphId('MyGraph')
+ *   .setDirected(true)
+ *   .addNode('n1', 'Node 1', { type: 'start' })
+ *   .addNode('n2', 'Node 2', { type: 'process' })
+ *   .addEdge('n1', 'n2', { label: 'flow' })
+ *   .render();
+ * ```
+ */
+export class GraphMLBuilder {
+  private nodes: GraphMLNode[] = [];
+  private edges: GraphMLEdge[] = [];
+  private customAttributes: GraphMLAttribute[] = [];
+  private options: GraphMLOptions = { ...DEFAULT_GRAPHML_OPTIONS };
+  private edgeCounter: number = 0;
+
+  /**
+   * Add a node to the graph
+   * @param id - Node ID
+   * @param label - Node label
+   * @param attributes - Optional node attributes (type, metadata)
+   * @returns this for chaining
+   */
+  addNode(
+    id: string,
+    label: string,
+    attributes?: { type?: string; metadata?: Record<string, unknown> }
+  ): this {
+    this.nodes.push({
+      id,
+      label,
+      type: attributes?.type,
+      metadata: attributes?.metadata,
+    });
+    return this;
+  }
+
+  /**
+   * Add a node object to the graph
+   * @param node - The complete node definition
+   * @returns this for chaining
+   */
+  addNodeDef(node: GraphMLNode): this {
+    this.nodes.push(node);
+    return this;
+  }
+
+  /**
+   * Add multiple nodes to the graph
+   * @param nodes - Array of node definitions
+   * @returns this for chaining
+   */
+  addNodes(nodes: GraphMLNode[]): this {
+    this.nodes.push(...nodes);
+    return this;
+  }
+
+  /**
+   * Add an edge to the graph
+   * @param source - Source node ID
+   * @param target - Target node ID
+   * @param attributes - Optional edge attributes (label, metadata)
+   * @returns this for chaining
+   */
+  addEdge(
+    source: string,
+    target: string,
+    attributes?: { label?: string; metadata?: Record<string, unknown> }
+  ): this {
+    this.edges.push({
+      id: `e${this.edgeCounter++}`,
+      source,
+      target,
+      label: attributes?.label,
+      metadata: attributes?.metadata,
+    });
+    return this;
+  }
+
+  /**
+   * Add an edge object to the graph
+   * @param edge - The complete edge definition
+   * @returns this for chaining
+   */
+  addEdgeDef(edge: GraphMLEdge): this {
+    this.edges.push(edge);
+    return this;
+  }
+
+  /**
+   * Add multiple edges to the graph
+   * @param edges - Array of edge definitions
+   * @returns this for chaining
+   */
+  addEdges(edges: GraphMLEdge[]): this {
+    this.edges.push(...edges);
+    return this;
+  }
+
+  /**
+   * Define a custom node attribute
+   * @param name - Attribute name
+   * @param type - Attribute type
+   * @param defaultValue - Optional default value
+   * @returns this for chaining
+   */
+  defineNodeAttribute(
+    name: string,
+    type: 'string' | 'double' | 'int' | 'boolean',
+    defaultValue?: string
+  ): this {
+    this.customAttributes.push({
+      id: `node_${name}`,
+      name,
+      type,
+      for: 'node',
+      defaultValue,
+    });
+    return this;
+  }
+
+  /**
+   * Define a custom edge attribute
+   * @param name - Attribute name
+   * @param type - Attribute type
+   * @param defaultValue - Optional default value
+   * @returns this for chaining
+   */
+  defineEdgeAttribute(
+    name: string,
+    type: 'string' | 'double' | 'int' | 'boolean',
+    defaultValue?: string
+  ): this {
+    this.customAttributes.push({
+      id: `edge_${name}`,
+      name,
+      type,
+      for: 'edge',
+      defaultValue,
+    });
+    return this;
+  }
+
+  /**
+   * Set or merge graph options
+   * @param options - Graph options to set/merge
+   * @returns this for chaining
+   */
+  setOptions(options: GraphMLOptions): this {
+    this.options = { ...this.options, ...options };
+    return this;
+  }
+
+  /**
+   * Set the graph ID
+   * @param id - The graph ID
+   * @returns this for chaining
+   */
+  setGraphId(id: string): this {
+    this.options.graphId = id;
+    return this;
+  }
+
+  /**
+   * Set the graph name
+   * @param name - The graph name
+   * @returns this for chaining
+   */
+  setGraphName(name: string): this {
+    this.options.graphName = name;
+    return this;
+  }
+
+  /**
+   * Set whether the graph is directed
+   * @param directed - true for directed, false for undirected
+   * @returns this for chaining
+   */
+  setDirected(directed: boolean): this {
+    this.options.directed = directed;
+    return this;
+  }
+
+  /**
+   * Set whether to include metadata
+   * @param include - true to include metadata
+   * @returns this for chaining
+   */
+  setIncludeMetadata(include: boolean): this {
+    this.options.includeMetadata = include;
+    return this;
+  }
+
+  /**
+   * Set whether to include labels
+   * @param include - true to include labels
+   * @returns this for chaining
+   */
+  setIncludeLabels(include: boolean): this {
+    this.options.includeLabels = include;
+    return this;
+  }
+
+  /**
+   * Get the current node count
+   */
+  get nodeCount(): number {
+    return this.nodes.length;
+  }
+
+  /**
+   * Get the current edge count
+   */
+  get edgeCount(): number {
+    return this.edges.length;
+  }
+
+  /**
+   * Clear all nodes and edges
+   * @returns this for chaining
+   */
+  clear(): this {
+    this.nodes = [];
+    this.edges = [];
+    this.edgeCounter = 0;
+    return this;
+  }
+
+  /**
+   * Reset options to defaults
+   * @returns this for chaining
+   */
+  resetOptions(): this {
+    this.options = { ...DEFAULT_GRAPHML_OPTIONS };
+    this.customAttributes = [];
+    return this;
+  }
+
+  /**
+   * Render the graph as a GraphML XML string
+   *
+   * Generates a complete, valid GraphML document with all nodes,
+   * edges, and custom attribute definitions.
+   *
+   * @returns The complete GraphML XML string
+   */
+  render(): string {
+    // If we have custom attributes, we need to generate custom header
+    if (this.customAttributes.length > 0) {
+      return this.renderWithCustomAttributes();
+    }
+
+    // Use existing generateGraphML for standard output
+    return generateGraphML(this.nodes, this.edges, this.options);
+  }
+
+  /**
+   * Render with custom attribute definitions
+   */
+  private renderWithCustomAttributes(): string {
+    const { graphId = 'G', directed = true, graphName, includeLabels = true, includeMetadata = true } = this.options;
+
+    let graphml = `<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
+         http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+
+  <!-- Standard node attributes -->
+  <key id="label" for="node" attr.name="label" attr.type="string"/>
+  <key id="type" for="node" attr.name="type" attr.type="string"/>
+  <key id="description" for="node" attr.name="description" attr.type="string"/>
+
+  <!-- Standard edge attributes -->
+  <key id="edgeLabel" for="edge" attr.name="label" attr.type="string"/>
+  <key id="weight" for="edge" attr.name="weight" attr.type="double"/>
+  <key id="edgeType" for="edge" attr.name="type" attr.type="string"/>
+
+  <!-- Graph attributes -->
+  <key id="graphName" for="graph" attr.name="name" attr.type="string"/>`;
+
+    // Add custom attributes
+    for (const attr of this.customAttributes) {
+      graphml += `\n  <key id="${escapeXMLInternal(attr.id)}" for="${attr.for}" attr.name="${escapeXMLInternal(attr.name)}" attr.type="${attr.type}"`;
+      if (attr.defaultValue !== undefined) {
+        graphml += `>\n    <default>${escapeXMLInternal(attr.defaultValue)}</default>\n  </key>`;
+      } else {
+        graphml += `/>`;
+      }
+    }
+
+    graphml += `\n\n  <graph id="${escapeXMLInternal(graphId)}" edgedefault="${directed ? 'directed' : 'undirected'}">`;
+
+    if (graphName) {
+      graphml += `\n    <data key="graphName">${escapeXMLInternal(graphName)}</data>`;
+    }
+
+    // Add nodes
+    graphml += '\n\n    <!-- Nodes -->';
+    for (const node of this.nodes) {
+      graphml += renderGraphMLNode(node, { includeLabels, includeMetadata });
+    }
+
+    // Add edges
+    graphml += '\n\n    <!-- Edges -->';
+    for (const edge of this.edges) {
+      graphml += renderGraphMLEdge(edge, { includeLabels, includeMetadata });
+    }
+
+    graphml += generateGraphMLFooter();
+    return graphml;
+  }
+
+  /**
+   * Create a builder from existing nodes, edges, and options
+   * @param nodes - Initial nodes
+   * @param edges - Initial edges
+   * @param options - Initial options
+   * @returns A new GraphMLBuilder instance
+   */
+  static from(
+    nodes: GraphMLNode[] = [],
+    edges: GraphMLEdge[] = [],
+    options: GraphMLOptions = {}
+  ): GraphMLBuilder {
+    const builder = new GraphMLBuilder();
+    builder.nodes = [...nodes];
+    builder.edges = [...edges];
+    builder.edgeCounter = edges.length;
+    builder.options = { ...DEFAULT_GRAPHML_OPTIONS, ...options };
+    return builder;
+  }
+}
+
+/**
+ * Internal XML escape function for GraphMLBuilder
+ * (duplicated to avoid circular dependencies)
+ */
+function escapeXMLInternal(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
 }
