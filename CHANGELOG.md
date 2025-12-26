@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed - Phase 13 Sprint 8: Mode Exporter Refactoring (continued)
+
+**Refactored 5 Mode Exporters to Use Builder Classes**
+
+Refactored five mode exporter files to use the fluent builder APIs:
+
+- **systems-thinking.ts** (`src/export/visual/modes/systems-thinking.ts`)
+  - Refactored `systemsThinkingToMermaid()` to use `MermaidGraphBuilder`
+  - Refactored `systemsThinkingToDOT()` to use `DOTGraphBuilder`
+  - Refactored `systemsThinkingToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **analogical.ts** (`src/export/visual/modes/analogical.ts`)
+  - Refactored `analogicalToMermaid()` to use `MermaidGraphBuilder` with subgraphs
+  - Refactored `analogicalToDOT()` to use `DOTGraphBuilder` with subgraphs
+  - Refactored `analogicalToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **causal.ts** (`src/export/visual/modes/causal.ts`)
+  - Refactored `causalGraphToMermaid()` to use `MermaidGraphBuilder` with color scheme styling
+  - Refactored `causalGraphToDOT()` to use `DOTGraphBuilder`
+  - Refactored `causalGraphToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **computability.ts** (`src/export/visual/modes/computability.ts`)
+  - Kept `turingMachineToMermaid()` using raw strings (stateDiagram-v2 not supported by builder)
+  - Refactored `reductionChainToMermaid()` to use `MermaidGraphBuilder`
+  - Refactored `decidabilityProofToMermaid()` to use `MermaidGraphBuilder`
+  - Refactored `turingMachineToDOT()` to use `DOTGraphBuilder`
+  - Refactored `reductionChainToDOT()` to use `DOTGraphBuilder`
+  - Refactored `computabilityToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **counterfactual.ts** (`src/export/visual/modes/counterfactual.ts`)
+  - Refactored `counterfactualToMermaid()` to use `MermaidGraphBuilder`
+  - Refactored `counterfactualToDOT()` to use `DOTGraphBuilder`
+  - Refactored `counterfactualToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+### Fixed - Sprint 8
+
+- Updated 13 snapshot baselines for systems-thinking, analogical, causal, computability, and counterfactual modes
+- Fixed `DotRankDir` type error by changing `"TD"` to `"TB"` in counterfactual.ts
+- Fixed `DotNodeStyle` type issues in computability.ts and counterfactual.ts
+- Updated visual.test.ts assertions to match new Mermaid/ASCII output formats
+
+### Validation - Sprint 8
+
+- **Builder Adoption**: ✅ All 5 files use fluent builder APIs (except Turing machine state diagrams)
+- **Typecheck**: ✅ Clean (`npm run typecheck` - no issues in refactored files)
+- **Full Test Suite**: ✅ 4686 tests passing across 170 test files
+- **Total Mode Exporters Refactored**: 17/22 (77%)
+
+---
+
 ### Changed - Phase 13 Sprint 7: Mode Exporter Refactoring (continued)
 
 **Refactored 4 Mode Exporters to Use Builder Classes**

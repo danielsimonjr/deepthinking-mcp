@@ -1,13 +1,18 @@
 /**
- * Systems Thinking Visual Exporter (v7.0.3)
+ * Systems Thinking Visual Exporter (v8.5.0)
  * Sprint 8 Task 8.1: Systems thinking causal loop export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
  * Phase 9: Added GraphML and TikZ export support
+ * Phase 13 Sprint 8: Refactored to use fluent builder classes
  */
 
 import type { SystemsThinkingThought } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -105,22 +110,25 @@ function systemsThinkingToMermaid(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph TB\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('TB');
 
+  // Add system node if present
   if (thought.system) {
-    mermaid += `  System["${thought.system.name}"]\n\n`;
+    builder.addNode({ id: 'System', label: thought.system.name, shape: 'rectangle' });
   }
 
+  // Add component nodes
   if (thought.components && thought.components.length > 0) {
     for (const component of thought.components) {
       const compId = sanitizeId(component.id);
       const label = includeLabels ? component.name : compId;
-      const shape = component.type === 'stock' ? ['[[', ']]'] : ['[', ']'];
-      mermaid += `  ${compId}${shape[0]}${label}${shape[1]}\n`;
+      const shape = component.type === 'stock' ? 'subroutine' : 'rectangle';
+      builder.addNode({ id: compId, label, shape });
     }
-    mermaid += '\n';
   }
 
+  // Add feedback loop edges
   if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
     for (const loop of thought.feedbackLoops) {
       const loopComponents = loop.components;
@@ -130,28 +138,16 @@ function systemsThinkingToMermaid(
         const toId = sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
 
         const edgeLabel = includeMetrics
-          ? `|${loop.type} (${loop.strength.toFixed(2)})| `
-          : `|${loop.type}| `;
+          ? `${loop.type} (${loop.strength.toFixed(2)})`
+          : loop.type;
 
-        const edgeStyle = loop.type === 'reinforcing' ? '-->' : '-..->';
-        mermaid += `  ${fromId} ${edgeStyle}${edgeLabel}${toId}\n`;
+        const edgeStyle = loop.type === 'reinforcing' ? 'arrow' : 'dotted';
+        builder.addEdge({ source: fromId, target: toId, label: edgeLabel, style: edgeStyle });
       }
     }
-    mermaid += '\n';
   }
 
-  if (colorScheme !== 'monochrome' && thought.components) {
-    const stockColor = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
-    const flowColor = colorScheme === 'pastel' ? '#fff3e0' : '#ffd699';
-
-    for (const component of thought.components) {
-      const compId = sanitizeId(component.id);
-      const color = component.type === 'stock' ? stockColor : flowColor;
-      mermaid += `  style ${compId} fill:${color}\n`;
-    }
-  }
-
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function systemsThinkingToDOT(
@@ -159,21 +155,22 @@ function systemsThinkingToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph SystemsThinking {\n';
-  dot += '  rankdir=TB;\n';
-  dot += '  node [shape=box, style=rounded];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('SystemsThinking')
+    .setRankDir('TB')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
+  // Add component nodes
   if (thought.components && thought.components.length > 0) {
     for (const component of thought.components) {
       const compId = sanitizeId(component.id);
       const label = includeLabels ? component.name : compId;
       const shape = component.type === 'stock' ? 'box' : 'ellipse';
-
-      dot += `  ${compId} [label="${label}", shape=${shape}];\n`;
+      builder.addNode({ id: compId, label, shape });
     }
-    dot += '\n';
   }
 
+  // Add feedback loop edges
   if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
     for (const loop of thought.feedbackLoops) {
       const loopComponents = loop.components;
@@ -183,57 +180,62 @@ function systemsThinkingToDOT(
         const toId = sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
 
         const edgeLabel = includeMetrics
-          ? `, label="${loop.type} (${loop.strength.toFixed(2)})"`
-          : `, label="${loop.type}"`;
+          ? `${loop.type} (${loop.strength.toFixed(2)})`
+          : loop.type;
 
         const edgeStyle = loop.type === 'reinforcing' ? 'solid' : 'dashed';
-        dot += `  ${fromId} -> ${toId} [style=${edgeStyle}${edgeLabel}];\n`;
+        builder.addEdge({ source: fromId, target: toId, label: edgeLabel, style: edgeStyle });
       }
     }
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function systemsThinkingToASCII(thought: SystemsThinkingThought): string {
-  let ascii = 'Systems Thinking Model:\n';
-  ascii += '======================\n\n';
+  const builder = new ASCIIDocBuilder()
+    .setMaxWidth(60)
+    .addHeader('Systems Thinking Model');
 
+  // System overview
   if (thought.system) {
-    ascii += `System: ${thought.system.name}\n`;
-    ascii += `${thought.system.description}\n\n`;
+    builder.addSection('System')
+      .addText(`${thought.system.name}\n${thought.system.description}\n`)
+      .addEmptyLine();
   }
 
+  // Components
   if (thought.components && thought.components.length > 0) {
-    ascii += 'Components:\n';
+    builder.addSection('Components');
     for (const component of thought.components) {
       const typeIcon = component.type === 'stock' ? '[■]' : '(○)';
-      ascii += `  ${typeIcon} ${component.name}: ${component.description}\n`;
+      builder.addText(`${typeIcon} ${component.name}: ${component.description}\n`);
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
+  // Feedback loops
   if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
-    ascii += 'Feedback Loops:\n';
+    builder.addSection('Feedback Loops');
     for (const loop of thought.feedbackLoops) {
       const loopIcon = loop.type === 'reinforcing' ? '⊕' : '⊖';
-      ascii += `  ${loopIcon} ${loop.name} (${loop.type})\n`;
-      ascii += `    Strength: ${loop.strength.toFixed(2)}\n`;
-      ascii += `    Components: ${loop.components.join(' → ')}\n`;
+      builder.addText(`${loopIcon} ${loop.name} (${loop.type})\n`);
+      builder.addText(`  Strength: ${loop.strength.toFixed(2)}\n`);
+      builder.addText(`  Components: ${loop.components.join(' → ')}\n`);
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
+  // Leverage points
   if (thought.leveragePoints && thought.leveragePoints.length > 0) {
-    ascii += 'Leverage Points:\n';
+    builder.addSection('Leverage Points');
     for (const point of thought.leveragePoints) {
-      ascii += `  ★ ${point.location} (effectiveness: ${point.effectiveness.toFixed(2)})\n`;
-      ascii += `    ${point.description}\n`;
+      builder.addText(`★ ${point.location} (effectiveness: ${point.effectiveness.toFixed(2)})\n`);
+      builder.addText(`  ${point.description}\n`);
     }
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**

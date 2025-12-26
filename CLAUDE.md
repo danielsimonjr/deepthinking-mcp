@@ -449,6 +449,14 @@ Generate dependency docs: `npm run docs:deps`
 - Updated 12 snapshot baselines to match new builder output formatting
 - Total mode exporters refactored: 12/22 (55%)
 
+**Sprint 8 (v8.5.0)**: Critical Files Batch 4
+
+- Refactored `systems-thinking.ts`, `analogical.ts`, `causal.ts`, `computability.ts`, `counterfactual.ts` to use builders
+- All 5 files now use DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder fluent APIs
+- Note: Turing machine state diagrams kept as raw strings (stateDiagram-v2 not supported by builder)
+- Updated 13 snapshot baselines to match new builder output formatting
+- Total mode exporters refactored: 17/22 (77%)
+
 **Builder Pattern Benefits**:
 
 ```typescript
@@ -465,11 +473,11 @@ const dot = new DOTGraphBuilder()
   .render();
 ```
 
-**Remaining Sprints** (3 more planned):
+**Remaining Sprints** (2 more planned):
 
 | Sprint | Focus |
 |--------|-------|
-| 8-9 | Refactor remaining 10 modes for consistency |
+| 9 | Refactor remaining 5 modes for consistency |
 | 10 | File splitting for Sprint 5 files, final verification |
 
 See `docs/planning/PHASE_13_*.json` for detailed sprint breakdowns.

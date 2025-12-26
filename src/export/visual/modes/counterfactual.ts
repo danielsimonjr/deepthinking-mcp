@@ -1,13 +1,18 @@
 /**
- * Counterfactual Visual Exporter (v7.0.3)
+ * Counterfactual Visual Exporter (v8.5.0)
  * Sprint 8 Task 8.1: Counterfactual scenario export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
  * Phase 9: Added GraphML and TikZ export support
+ * Phase 13 Sprint 8: Refactored to use fluent builder classes
  */
 
 import type { CounterfactualThought } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder, type DotNodeStyle } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -104,16 +109,20 @@ function counterfactualToMermaid(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph TD\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('TD');
 
+  // Intervention point node
   const interventionId = 'intervention';
-  mermaid += `  ${interventionId}["${thought.interventionPoint.description}"]\n`;
+  builder.addNode({ id: interventionId, label: thought.interventionPoint.description, shape: 'rectangle' });
 
+  // Actual scenario node
   const actualId = sanitizeId(thought.actual.id);
-  const actualLabel = includeLabels ? thought.actual.name : actualId;
-  mermaid += `  ${actualId}["Actual: ${actualLabel}"]\n`;
-  mermaid += `  ${interventionId} -->|no change| ${actualId}\n`;
+  const actualLabel = includeLabels ? `Actual: ${thought.actual.name}` : `Actual: ${actualId}`;
+  builder.addNode({ id: actualId, label: actualLabel, shape: 'rectangle' });
+  builder.addEdge({ source: interventionId, target: actualId, label: 'no change' });
 
+  // Counterfactual scenario nodes
   for (const scenario of thought.counterfactuals) {
     const scenarioId = sanitizeId(scenario.id);
     const label = includeLabels ? scenario.name : scenarioId;
@@ -121,23 +130,11 @@ function counterfactualToMermaid(
       ? ` (${scenario.likelihood.toFixed(2)})`
       : '';
 
-    mermaid += `  ${scenarioId}["CF: ${label}${likelihoodLabel}"]\n`;
-    mermaid += `  ${interventionId} -->|intervene| ${scenarioId}\n`;
+    builder.addNode({ id: scenarioId, label: `CF: ${label}${likelihoodLabel}`, shape: 'rectangle' });
+    builder.addEdge({ source: interventionId, target: scenarioId, label: 'intervene' });
   }
 
-  if (colorScheme !== 'monochrome') {
-    mermaid += '\n';
-    const actualColor = colorScheme === 'pastel' ? '#fff3e0' : '#ffd699';
-    mermaid += `  style ${actualId} fill:${actualColor}\n`;
-
-    const cfColor = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
-    for (const scenario of thought.counterfactuals) {
-      const scenarioId = sanitizeId(scenario.id);
-      mermaid += `  style ${scenarioId} fill:${cfColor}\n`;
-    }
-  }
-
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function counterfactualToDOT(
@@ -145,18 +142,28 @@ function counterfactualToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph CounterfactualScenarios {\n';
-  dot += '  rankdir=TD;\n';
-  dot += '  node [shape=box, style=rounded];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('CounterfactualScenarios')
+    .setRankDir('TB')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
+  // Intervention point node (diamond shape)
   const interventionId = 'intervention';
-  dot += `  ${interventionId} [label="${thought.interventionPoint.description}", shape=diamond];\n\n`;
+  builder.addNode({ id: interventionId, label: thought.interventionPoint.description, shape: 'diamond' });
 
+  // Actual scenario node
   const actualId = sanitizeId(thought.actual.id);
   const actualLabel = includeLabels ? thought.actual.name : actualId;
-  dot += `  ${actualId} [label="Actual: ${actualLabel}", style=filled, fillcolor=lightyellow];\n`;
-  dot += `  ${interventionId} -> ${actualId} [label="no change"];\n\n`;
+  const filledStyle: DotNodeStyle[] = ['filled'];
+  builder.addNode({
+    id: actualId,
+    label: `Actual: ${actualLabel}`,
+    style: filledStyle,
+    fillColor: 'lightyellow',
+  });
+  builder.addEdge({ source: interventionId, target: actualId, label: 'no change' });
 
+  // Counterfactual scenario nodes
   for (const scenario of thought.counterfactuals) {
     const scenarioId = sanitizeId(scenario.id);
     const label = includeLabels ? scenario.name : scenarioId;
@@ -164,34 +171,45 @@ function counterfactualToDOT(
       ? ` (${scenario.likelihood.toFixed(2)})`
       : '';
 
-    dot += `  ${scenarioId} [label="CF: ${label}${likelihoodLabel}", style=filled, fillcolor=lightblue];\n`;
-    dot += `  ${interventionId} -> ${scenarioId} [label="intervene"];\n`;
+    builder.addNode({
+      id: scenarioId,
+      label: `CF: ${label}${likelihoodLabel}`,
+      style: filledStyle,
+      fillColor: 'lightblue',
+    });
+    builder.addEdge({ source: interventionId, target: scenarioId, label: 'intervene' });
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function counterfactualToASCII(thought: CounterfactualThought): string {
-  let ascii = 'Counterfactual Scenario Tree:\n';
-  ascii += '=============================\n\n';
+  const builder = new ASCIIDocBuilder()
+    .setMaxWidth(60)
+    .addHeader('Counterfactual Scenario Tree');
 
-  ascii += `Intervention Point: ${thought.interventionPoint.description}\n`;
-  ascii += `Timing: ${thought.interventionPoint.timing}\n`;
-  ascii += `Feasibility: ${thought.interventionPoint.feasibility.toFixed(2)}\n\n`;
+  // Intervention point
+  builder.addSection('Intervention Point')
+    .addText(`Description: ${thought.interventionPoint.description}\n`)
+    .addText(`Timing: ${thought.interventionPoint.timing}\n`)
+    .addText(`Feasibility: ${thought.interventionPoint.feasibility.toFixed(2)}\n`)
+    .addEmptyLine();
 
-  ascii += '┌─ Actual Scenario:\n';
-  ascii += `│  ${thought.actual.name}\n`;
-  ascii += `│  ${thought.actual.description}\n\n`;
+  // Actual scenario
+  builder.addSection('Actual Scenario')
+    .addText(`┌─ ${thought.actual.name}\n`)
+    .addText(`│  ${thought.actual.description}\n`)
+    .addEmptyLine();
 
-  ascii += '└─ Counterfactual Scenarios:\n';
+  // Counterfactual scenarios
+  builder.addSection('Counterfactual Scenarios');
   for (const scenario of thought.counterfactuals) {
     const likelihoodStr = scenario.likelihood ? ` (likelihood: ${scenario.likelihood.toFixed(2)})` : '';
-    ascii += `   ├─ ${scenario.name}${likelihoodStr}\n`;
-    ascii += `   │  ${scenario.description}\n`;
+    builder.addText(`├─ ${scenario.name}${likelihoodStr}\n`);
+    builder.addText(`│  ${scenario.description}\n`);
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**

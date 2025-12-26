@@ -49,21 +49,33 @@ exports[`Abductive Mode Exporter Snapshots > Mermaid format 1`] = `
 `;
 
 exports[`Analogical Mode Exporter Snapshots > ASCII format 1`] = `
-"Analogical Domain Mapping:
-==========================
-
-Source Domain: Source Domain
+"Analogical Domain Mapping
+=========================
+Source Domain:
+--------------
+Source Domain
 The source domain for analogy
 
-Target Domain: Target Domain
+
+Target Domain:
+--------------
+Target Domain
 The target domain for analogy
 
-Mappings:
-  Entity A ←→ Entity X (confidence: 0.90)
-    Similar structural role
-  Entity B ←→ Entity Y (confidence: 0.80)
-    Similar behavioral patterns
 
+Mappings:
+---------
+Entity A ←→ Entity X (confidence: 0.90)
+
+  Similar structural role
+
+Entity B ←→ Entity Y (confidence: 0.80)
+
+  Similar behavioral patterns
+
+
+Summary:
+--------
 Analogy Strength: 0.85
 "
 `;
@@ -71,52 +83,47 @@ Analogy Strength: 0.85
 exports[`Analogical Mode Exporter Snapshots > DOT format 1`] = `
 "digraph AnalogicalMapping {
   rankdir=LR;
-  node [shape=box, style=rounded];
+  node [shape=box, style="rounded"];
 
-  subgraph cluster_source {
+
+  subgraph cluster_cluster_source {
     label="Source Domain";
     style=filled;
-    fillcolor=lightyellow;
-
+    fillcolor="lightyellow";
     src_src_a [label="Entity A"];
     src_src_b [label="Entity B"];
   }
-
-  subgraph cluster_target {
+  subgraph cluster_cluster_target {
     label="Target Domain";
     style=filled;
-    fillcolor=lightblue;
-
+    fillcolor="lightblue";
     tgt_tgt_x [label="Entity X"];
     tgt_tgt_y [label="Entity Y"];
   }
 
-  src_src_a -> tgt_tgt_x [style=dashed, label="0.90"];
-  src_src_b -> tgt_tgt_y [style=dashed, label="0.80"];
-}
-"
+  src_src_a -> tgt_tgt_x [label="0.90", style=dashed];
+  src_src_b -> tgt_tgt_y [label="0.80", style=dashed];
+}"
 `;
 
 exports[`Analogical Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph LR
+
   subgraph Source["Source Domain"]
+    src_src_a
+    src_src_b
+  end
     src_src_a["Entity A"]
     src_src_b["Entity B"]
-  end
-
   subgraph Target["Target Domain"]
+    tgt_tgt_x
+    tgt_tgt_y
+  end
     tgt_tgt_x["Entity X"]
     tgt_tgt_y["Entity Y"]
-  end
 
   src_src_a -.->|0.90| tgt_tgt_x
-  src_src_b -.->|0.80| tgt_tgt_y
-
-  style src_src_a fill:#ffd699
-  style src_src_b fill:#ffd699
-  style tgt_tgt_x fill:#a8d5ff
-  style tgt_tgt_y fill:#a8d5ff
-"
+  src_src_b -.->|0.80| tgt_tgt_y"
 `;
 
 exports[`Bayesian Mode Exporter Snapshots > ASCII format 1`] = `
@@ -167,48 +174,52 @@ exports[`Bayesian Mode Exporter Snapshots > Mermaid format 1`] = `
 `;
 
 exports[`Causal Mode Exporter Snapshots > ASCII format 1`] = `
-"Causal Graph:
-=============
-
+"Causal Graph
+============
 Nodes:
-  [CAUSE] Cause: Root cause
-  [EFFECT] Effect: Final effect
+------
+[CAUSE] Cause: Root cause
+
+[EFFECT] Effect: Final effect
+
 
 Edges:
-  Cause --> Effect (strength: 0.80)
+------
+Cause --> Effect (strength: 0.80)
 "
 `;
 
 exports[`Causal Mode Exporter Snapshots > DOT format 1`] = `
 "digraph CausalGraph {
   rankdir=TB;
-  node [shape=box, style=rounded];
+  node [shape=box, style="rounded"];
 
   c1 [label="Cause", shape=ellipse];
   e1 [label="Effect", shape=doubleoctagon];
 
   c1 -> e1 [label="0.80"];
-}
-"
+}"
 `;
 
 exports[`Causal Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph TB
-  c1([Cause])
-  e1[[Effect]]
 
-  c1 --> |0.80| e1
+  c1(["Cause"])
+  e1[["Effect"]]
+
+  c1 -->|0.80| e1
 
   style c1 fill:#a8d5ff
-  style e1 fill:#ffd699
-"
+  style e1 fill:#ffd699"
 `;
 
 exports[`Computability Mode Exporter Snapshots > ASCII format 1`] = `
 "COMPUTABILITY ANALYSIS
-==================================================
+======================
+Type:
+-----
+undefined
 
-Type: undefined
 "
 `;
 
@@ -227,50 +238,55 @@ exports[`Computability Mode Exporter Snapshots > Mermaid format 1`] = `
 `;
 
 exports[`Counterfactual Mode Exporter Snapshots > ASCII format 1`] = `
-"Counterfactual Scenario Tree:
-=============================
+"Counterfactual Scenario Tree
+============================
+Intervention Point:
+-------------------
+Description: Change X to Y
 
-Intervention Point: Change X to Y
 Timing: early
+
 Feasibility: 0.85
 
-┌─ Actual Scenario:
-│  Actual Outcome
+
+Actual Scenario:
+----------------
+┌─ Actual Outcome
+
 │  What actually happened
 
-└─ Counterfactual Scenarios:
-   ├─ Alternative Outcome (likelihood: 0.70)
-   │  What would have happened
+
+Counterfactual Scenarios:
+-------------------------
+├─ Alternative Outcome (likelihood: 0.70)
+
+│  What would have happened
 "
 `;
 
 exports[`Counterfactual Mode Exporter Snapshots > DOT format 1`] = `
 "digraph CounterfactualScenarios {
-  rankdir=TD;
-  node [shape=box, style=rounded];
+  rankdir=TB;
+  node [shape=box, style="rounded"];
 
   intervention [label="Change X to Y", shape=diamond];
+  actual_1 [label="Actual: Actual Outcome", style="filled", fillcolor="lightyellow"];
+  cf_scenario_1 [label="CF: Alternative Outcome (0.70)", style="filled", fillcolor="lightblue"];
 
-  actual_1 [label="Actual: Actual Outcome", style=filled, fillcolor=lightyellow];
   intervention -> actual_1 [label="no change"];
-
-  cf_scenario_1 [label="CF: Alternative Outcome (0.70)", style=filled, fillcolor=lightblue];
   intervention -> cf_scenario_1 [label="intervene"];
-}
-"
+}"
 `;
 
 exports[`Counterfactual Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph TD
+
   intervention["Change X to Y"]
   actual_1["Actual: Actual Outcome"]
-  intervention -->|no change| actual_1
-  cf_scenario_1["CF: Alternative Outcome (0.70)"]
-  intervention -->|intervene| cf_scenario_1
+  cf_scenario_1["CF: Alternative Outcome #40;0.70#41;"]
 
-  style actual_1 fill:#ffd699
-  style cf_scenario_1 fill:#a8d5ff
-"
+  intervention -->|no change| actual_1
+  intervention -->|intervene| cf_scenario_1"
 `;
 
 exports[`Engineering Mode Exporter Snapshots > ASCII format 1`] = `
@@ -961,25 +977,19 @@ exports[`Shannon Mode Exporter Snapshots > Mermaid format 1`] = `
 `;
 
 exports[`Systems Thinking Mode Exporter Snapshots > ASCII format 1`] = `
-"Systems Thinking Model:
-======================
-
-"
+"Systems Thinking Model
+======================"
 `;
 
 exports[`Systems Thinking Mode Exporter Snapshots > DOT format 1`] = `
 "digraph SystemsThinking {
   rankdir=TB;
-  node [shape=box, style=rounded];
+  node [shape=box, style="rounded"];
 
-}
-"
+}"
 `;
 
-exports[`Systems Thinking Mode Exporter Snapshots > Mermaid format 1`] = `
-"graph TB
-"
-`;
+exports[`Systems Thinking Mode Exporter Snapshots > Mermaid format 1`] = `"graph TB"`;
 
 exports[`Temporal Mode Exporter Snapshots > ASCII format 1`] = `
 "Timeline: Untitled
