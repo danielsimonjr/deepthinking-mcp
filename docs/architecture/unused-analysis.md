@@ -4,7 +4,7 @@
 
 ## Summary
 
-- **Potentially unused files**: 9
+- **Potentially unused files**: 14
 - **Potentially unused exports**: 441
 
 ## Potentially Unused Files
@@ -14,11 +14,16 @@ These files are not imported by any other file in the codebase:
 - `src/search/engine.ts`
 - `src/taxonomy/adaptive-selector.ts`
 - `src/taxonomy/taxonomy-latex.ts`
+- `src/validation/validators/modes/algorithmic.ts`
+- `src/validation/validators/modes/analysis.ts`
+- `src/validation/validators/modes/argumentation.ts`
+- `src/validation/validators/modes/critique.ts`
 - `src/validation/validators/modes/engineering.ts`
 - `src/validation/validators/modes/firstprinciples.ts`
 - `src/validation/validators/modes/formallogic.ts`
 - `src/validation/validators/modes/mathematics-extended.ts`
 - `src/validation/validators/modes/scientificmethod.ts`
+- `src/validation/validators/modes/synthesis.ts`
 - `src/validation/validators/modes/systemsthinking.ts`
 
 ## Potentially Unused Exports

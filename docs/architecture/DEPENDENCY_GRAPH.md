@@ -51,7 +51,7 @@ The codebase is organized into the following modules:
 - **tools**: 18 files
 - **types**: 36 files
 - **utils**: 6 files
-- **validation**: 39 files
+- **validation**: 44 files
 
 ---
 
@@ -3793,6 +3793,21 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/validation/validators/modes/algorithmic.ts` - Algorithmic Mode Validator (v7.3.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/modes/algorithmic.js` | `AlgorithmicThought` | Import (type-only) |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
+| `../base.js` | `BaseValidator` | Import |
+
+**Exports:**
+- Classes: `AlgorithmicValidator`
+
+---
+
 ### `src/validation/validators/modes/analogical.ts` - Analogical Mode Validator (v7.1.0)
 
 **Internal Dependencies:**
@@ -3805,6 +3820,36 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Classes: `AnalogicalValidator`
+
+---
+
+### `src/validation/validators/modes/analysis.ts` - Analysis Mode Validator (v7.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/modes/analysis.js` | `AnalysisThought` | Import (type-only) |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
+| `../base.js` | `BaseValidator` | Import |
+
+**Exports:**
+- Classes: `AnalysisValidator`
+
+---
+
+### `src/validation/validators/modes/argumentation.ts` - Argumentation Mode Validator (v7.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/modes/argumentation.js` | `ArgumentationThought` | Import (type-only) |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
+| `../base.js` | `BaseValidator` | Import |
+
+**Exports:**
+- Classes: `ArgumentationValidator`
 
 ---
 
@@ -3879,6 +3924,21 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Classes: `CounterfactualValidator`
+
+---
+
+### `src/validation/validators/modes/critique.ts` - Critique Mode Validator (v7.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/modes/critique.js` | `CritiqueThought` | Import (type-only) |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
+| `../base.js` | `BaseValidator` | Import |
+
+**Exports:**
+- Classes: `CritiqueValidator`
 
 ---
 
@@ -4181,6 +4241,21 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/validation/validators/modes/synthesis.ts` - Synthesis Mode Validator (v7.4.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/modes/synthesis.js` | `SynthesisThought` | Import (type-only) |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
+| `../base.js` | `BaseValidator` | Import |
+
+**Exports:**
+- Classes: `SynthesisValidator`
+
+---
+
 ### `src/validation/validators/modes/systemsthinking.ts` - Systems Thinking Mode Validator (v7.1.0)
 
 **Internal Dependencies:**
@@ -4414,7 +4489,7 @@ graph TD
         N73[index]
         N74[schema-utils]
         N75[schemas]
-        N76[...34 more]
+        N76[...39 more]
     end
 
     N0 --> N4
@@ -4455,17 +4530,17 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 250 |
+| Total TypeScript Files | 255 |
 | Total Modules | 16 |
-| Total Lines of Code | 105125 |
-| Total Exports | 1426 |
+| Total Lines of Code | 106197 |
+| Total Exports | 1431 |
 | Total Re-exports | 684 |
-| Total Classes | 150 |
+| Total Classes | 155 |
 | Total Interfaces | 533 |
 | Total Functions | 443 |
 | Total Type Guards | 85 |
 | Total Enums | 3 |
-| Type-only Imports | 236 |
+| Type-only Imports | 246 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 55 |
 

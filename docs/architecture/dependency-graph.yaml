@@ -2,9 +2,9 @@ metadata:
   name: deepthinking-mcp
   version: 8.5.0
   lastUpdated: "2025-12-26"
-  totalFiles: 250
+  totalFiles: 255
   totalModules: 16
-  totalExports: 1426
+  totalExports: 1431
 entryPoints:
   - file: src/index.ts
     type: main
@@ -10359,6 +10359,29 @@ modules:
         - AbductiveValidator
       classes:
         - AbductiveValidator
+    src/validation/validators/modes/algorithmic.ts:
+      description: Algorithmic Mode Validator (v7.3.0)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../../types/index.js
+          imports:
+            - ValidationIssue
+        - file: ../../../types/modes/algorithmic.js
+          imports:
+            - AlgorithmicThought
+          typeOnly: true
+        - file: ../../validator.js
+          imports:
+            - ValidationContext
+          typeOnly: true
+        - file: ../base.js
+          imports:
+            - BaseValidator
+      exports:
+        - AlgorithmicValidator
+      classes:
+        - AlgorithmicValidator
     src/validation/validators/modes/analogical.ts:
       description: Analogical Mode Validator (v7.1.0)
       externalDependencies: []
@@ -10383,6 +10406,52 @@ modules:
         - AnalogicalValidator
       classes:
         - AnalogicalValidator
+    src/validation/validators/modes/analysis.ts:
+      description: Analysis Mode Validator (v7.4.0)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../../types/index.js
+          imports:
+            - ValidationIssue
+        - file: ../../../types/modes/analysis.js
+          imports:
+            - AnalysisThought
+          typeOnly: true
+        - file: ../../validator.js
+          imports:
+            - ValidationContext
+          typeOnly: true
+        - file: ../base.js
+          imports:
+            - BaseValidator
+      exports:
+        - AnalysisValidator
+      classes:
+        - AnalysisValidator
+    src/validation/validators/modes/argumentation.ts:
+      description: Argumentation Mode Validator (v7.4.0)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../../types/index.js
+          imports:
+            - ValidationIssue
+        - file: ../../../types/modes/argumentation.js
+          imports:
+            - ArgumentationThought
+          typeOnly: true
+        - file: ../../validator.js
+          imports:
+            - ValidationContext
+          typeOnly: true
+        - file: ../base.js
+          imports:
+            - BaseValidator
+      exports:
+        - ArgumentationValidator
+      classes:
+        - ArgumentationValidator
     src/validation/validators/modes/bayesian.ts:
       description: Bayesian Mode Validator (v7.1.0)
       externalDependencies: []
@@ -10502,6 +10571,29 @@ modules:
         - CounterfactualValidator
       classes:
         - CounterfactualValidator
+    src/validation/validators/modes/critique.ts:
+      description: Critique Mode Validator (v7.4.0)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../../types/index.js
+          imports:
+            - ValidationIssue
+        - file: ../../../types/modes/critique.js
+          imports:
+            - CritiqueThought
+          typeOnly: true
+        - file: ../../validator.js
+          imports:
+            - ValidationContext
+          typeOnly: true
+        - file: ../base.js
+          imports:
+            - BaseValidator
+      exports:
+        - CritiqueValidator
+      classes:
+        - CritiqueValidator
     src/validation/validators/modes/cryptanalytic.ts:
       description: Cryptanalytic Mode Validator (v7.2.0)
       externalDependencies: []
@@ -10995,6 +11087,29 @@ modules:
         - StochasticValidator
       classes:
         - StochasticValidator
+    src/validation/validators/modes/synthesis.ts:
+      description: Synthesis Mode Validator (v7.4.0)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../../types/index.js
+          imports:
+            - ValidationIssue
+        - file: ../../../types/modes/synthesis.js
+          imports:
+            - SynthesisThought
+          typeOnly: true
+        - file: ../../validator.js
+          imports:
+            - ValidationContext
+          typeOnly: true
+        - file: ../base.js
+          imports:
+            - BaseValidator
+      exports:
+        - SynthesisValidator
+      classes:
+        - SynthesisValidator
     src/validation/validators/modes/systemsthinking.ts:
       description: Systems Thinking Mode Validator (v7.1.0)
       externalDependencies: []
@@ -11516,12 +11631,16 @@ dependencyGraph:
         - src/validation/validators/base.ts
         - src/validation/validators/index.ts
         - src/validation/validators/modes/abductive.ts
+        - src/validation/validators/modes/algorithmic.ts
         - src/validation/validators/modes/analogical.ts
+        - src/validation/validators/modes/analysis.ts
+        - src/validation/validators/modes/argumentation.ts
         - src/validation/validators/modes/bayesian.ts
         - src/validation/validators/modes/causal.ts
         - src/validation/validators/modes/computability.ts
         - src/validation/validators/modes/constraint.ts
         - src/validation/validators/modes/counterfactual.ts
+        - src/validation/validators/modes/critique.ts
         - src/validation/validators/modes/cryptanalytic.ts
         - src/validation/validators/modes/deductive.ts
         - src/validation/validators/modes/engineering.ts
@@ -11543,23 +11662,24 @@ dependencyGraph:
         - src/validation/validators/modes/sequential.ts
         - src/validation/validators/modes/shannon.ts
         - src/validation/validators/modes/stochastic.ts
+        - src/validation/validators/modes/synthesis.ts
         - src/validation/validators/modes/systemsthinking.ts
         - src/validation/validators/modes/temporal.ts
         - src/validation/validators/registry.ts
 statistics:
-  totalTypeScriptFiles: 250
+  totalTypeScriptFiles: 255
   totalModules: 16
-  totalLinesOfCode: 105125
-  totalExports: 1426
-  totalClasses: 150
+  totalLinesOfCode: 106197
+  totalExports: 1431
+  totalClasses: 155
   totalInterfaces: 533
   totalFunctions: 443
   totalTypeGuards: 85
   totalEnums: 3
   totalConstants: 167
   totalReExports: 684
-  totalTypeOnlyImports: 236
+  totalTypeOnlyImports: 246
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 55
-  unusedFilesCount: 9
+  unusedFilesCount: 14
   unusedExportsCount: 441

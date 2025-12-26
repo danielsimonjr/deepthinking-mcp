@@ -1,6 +1,6 @@
 # Directory Structure Guide
 
-**Version**: 8.3.2 | **Last Updated**: 2025-12-22
+**Version**: 8.5.0 | **Last Updated**: 2025-12-26
 
 This document describes the purpose and organization of each directory in the DeepThinking MCP codebase.
 
@@ -8,7 +8,7 @@ This document describes the purpose and organization of each directory in the De
 
 ## Overview
 
-The codebase is organized into **16 modules** with **221 TypeScript files** totaling approximately **89,490 lines of code**.
+The codebase is organized into **16 modules** with **255 TypeScript files** totaling approximately **105,000 lines of code**.
 
 ```
 src/
@@ -104,17 +104,18 @@ One file per reasoning mode providing Mermaid, DOT, and ASCII diagram generation
 - `mathematics-reasoning.ts` - Mathematical proof analysis
 
 #### `modes/handlers/` - Specialized Mode Handlers (v8.x)
-7 handlers implementing the ModeHandler pattern:
+36 handlers implementing the ModeHandler pattern (all 33 modes covered):
 - `ModeHandler.ts` - Handler interface definition
 - `ModeHandlerRegistry.ts` - Singleton registry for handler management
 - `GenericModeHandler.ts` - Fallback handler for non-specialized modes
-- `CausalHandler.ts` - Causal graph validation, cycle detection
-- `BayesianHandler.ts` - Auto posterior calculation
-- `GameTheoryHandler.ts` - Payoff matrix validation, Nash equilibria
-- `CounterfactualHandler.ts` - World state tracking
-- `SynthesisHandler.ts` - Source coverage, theme extraction
-- `SystemsThinkingHandler.ts` - 8 Systems Archetypes detection
-- `CritiqueHandler.ts` - 6 Socratic question categories
+- **Core (5)**: Sequential, Shannon, Mathematics, Physics, Hybrid handlers
+- **Fundamental (3)**: Inductive, Deductive, Abductive handlers
+- **Causal/Probabilistic (6)**: Causal, Bayesian, Counterfactual, Temporal, GameTheory, Evidential
+- **Analogical (2)**: Analogical, FirstPrinciples handlers
+- **Systems/Scientific (3)**: SystemsThinking, ScientificMethod, FormalLogic handlers
+- **Academic (4)**: Synthesis, Argumentation, Critique, Analysis handlers
+- **Engineering (4)**: Engineering, Computability, Cryptanalytic, Algorithmic handlers
+- **Advanced Runtime (6)**: MetaReasoning, Recursive, Modal, Stochastic, Constraint, Optimization
 
 ---
 
@@ -343,16 +344,18 @@ graph TD
 
 | Metric | Value |
 |--------|-------|
-| Total TypeScript files | 197 |
+| Total TypeScript files | 255 |
 | Total modules | 16 |
-| Lines of code | ~80,336 |
+| Lines of code | ~105,000 |
 | Reasoning modes | 33 |
-| Specialized handlers | 7 |
-| Visual exporters | 35+ |
-| Mode validators | 31+ |
+| Specialized handlers | 36 (all modes covered) |
+| Visual exporters | 41 files (23 mode-specific) |
+| Builder classes | 14 fluent APIs |
+| Mode validators | 28 |
+| Total exports | 1,431 (684 re-exports) |
 | Runtime circular deps | 0 |
-| Type-only circular deps | 41 (safe) |
+| Type-only circular deps | 55 (safe) |
 
 ---
 
-*Updated for Phase 10 ModeHandler Architecture (v8.2.1)*
+*Updated for Phase 13 Builder Classes & v8.5.0 Architecture*

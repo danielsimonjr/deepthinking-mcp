@@ -270,18 +270,21 @@ Provides 69 reasoning types (110 planned) organized across 12 categories.
 ### 12. Type System (`src/types/`)
 
 #### Organized by Domain:
-- **core.ts**: Base types, ThinkingMode enum (27 modes), Thought union type (23 types)
-- **modes/*.ts**: Mode-specific thought types (19 files)
+- **core.ts**: Base types, ThinkingMode enum (33 modes), Thought union type (29 types)
+- **modes/*.ts**: Mode-specific thought types (26 files)
 - **config.ts**: Configuration types
 - **session.ts**: Session and validation types
 - **events.ts**: Event system types
 
-#### Mode Categories (v7.2.0):
+#### Mode Categories (v8.5.0):
 - **Core Modes** (5): Sequential, Shannon, Mathematics, Physics, Hybrid
-- **Historical Computing** (2): Computability (Turing), Cryptanalytic (Turing) - *v7.2.0*
-- **Advanced Runtime** (6): Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
-- **Fundamental** (2): Inductive, Deductive
-- **Experimental** (12): Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, GameTheory (+ von Neumann extensions), Evidential, FirstPrinciples, SystemsThinking, ScientificMethod, FormalLogic
+- **Fundamental** (3): Inductive, Deductive, Abductive
+- **Causal/Probabilistic** (6): Causal, Bayesian, Counterfactual, Temporal, GameTheory, Evidential
+- **Analogical** (2): Analogical, FirstPrinciples
+- **Systems/Scientific** (3): SystemsThinking, ScientificMethod, FormalLogic
+- **Academic** (4): Synthesis, Argumentation, Critique, Analysis
+- **Engineering** (4): Engineering, Computability, Cryptanalytic, Algorithmic
+- **Advanced Runtime** (6): MetaReasoning, Recursive, Modal, Stochastic, Constraint, Optimization
 
 ## Architectural Patterns
 
@@ -404,7 +407,7 @@ Response with updated session
 ### Type Safety
 - TypeScript strict mode enabled
 - **0 type suppressions** (down from 231)
-- Comprehensive type definitions for all 27 modes
+- Comprehensive type definitions for all 33 modes
 
 ## Testing Architecture (Phase 11 Complete)
 
@@ -427,9 +430,9 @@ tests/
 └── utils/                      # 5 test utilities
 ```
 
-### Coverage (v8.3.2)
-- **Test Files**: 143 total
-- **Passing Tests**: 3539
+### Coverage (v8.5.0)
+- **Test Files**: 170 total
+- **Passing Tests**: 4,686
 - **Test Categories**: 19 (COR, STD, PAR, MTH, TMP, PRB, CSL, STR, ANL, SCI, ENG, ACD, SES, EXP, HDL, EDG, REG, INT, PRF)
 - **TypeScript**: 100% type coverage (0 errors)
 
@@ -437,20 +440,22 @@ tests/
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~89,490 |
-| TypeScript Files | 221 |
+| Total Lines of Code | ~105,000 |
+| TypeScript Files | 255 |
 | Type Suppressions | 0 |
-| Test Files | 143 |
-| Passing Tests | 3539 |
+| Test Files | 170 |
+| Passing Tests | 4,686 |
 | Thinking Modes | 33 (29 with thought types) |
-| Specialized Handlers | 7 |
-| MCP Tools | 12 focused + 1 legacy |
+| Specialized Handlers | 36 (all modes covered) |
+| MCP Tools | 13 focused |
 | Export Formats | 8 (including native SVG) |
-| Visual Exporters | 35+ mode-specific |
+| Visual Exporters | 41 files (23 mode-specific) |
+| Builder Classes | 14 fluent APIs |
 | Backup Providers | 4 |
 | Reasoning Types | 69 (110 planned) |
+| Mode Validators | 28 |
 | Modules | 16 |
-| Total Exports | 1117 (515 re-exports) |
+| Total Exports | 1,431 (684 re-exports) |
 | Circular Dependencies | 55 (all type-only, 0 runtime) |
 
 ## Version History
@@ -473,5 +478,5 @@ tests/
 
 ---
 
-*Last Updated*: 2025-12-22
-*Architecture Version*: 8.3.2
+*Last Updated*: 2025-12-26
+*Architecture Version*: 8.5.0
