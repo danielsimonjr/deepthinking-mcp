@@ -4,14 +4,15 @@
   "title": "Builder Integration & Testing",
   "week": "Week 2-3",
   "effort": "5-6 hours",
-  "status": "pending",
+  "status": "completed",
+  "completedDate": "2025-12-26",
   "description": "Complete builder infrastructure with JSDoc documentation, index exports, integration tests, and baseline snapshot generation",
   "tasks": [
     {
       "id": "13.4.1",
       "category": "Documentation",
       "description": "Add JSDoc documentation to all 11 builder classes",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.5,
       "priority": "medium",
       "details": [
@@ -34,13 +35,13 @@
         "src/export/visual/utils/modelica.ts",
         "src/export/visual/utils/json.ts"
       ],
-      "notes": "Consistent documentation pattern across all 11 builders"
+      "notes": "All builders have @example JSDoc. Consistent documentation pattern across all 11 builders."
     },
     {
       "id": "13.4.2",
       "category": "Index Export",
       "description": "Update utils/index.ts to export all builder classes",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 0.5,
       "priority": "high",
       "details": [
@@ -52,13 +53,13 @@
       "files": [
         "src/export/visual/utils/index.ts"
       ],
-      "notes": "Ensures all builders are easily importable by mode exporters"
+      "notes": "Using export * from each utility file, all builders are exported correctly."
     },
     {
       "id": "13.4.3",
       "category": "Integration Tests",
       "description": "Create integration tests for builder usage patterns",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.5,
       "priority": "high",
       "details": [
@@ -72,13 +73,13 @@
       "files": [
         "tests/integration/export/visual/builders-integration.test.ts"
       ],
-      "notes": "NEW FILE - Integration tests verify builders work end-to-end"
+      "notes": "Created with 18 integration tests covering all 11 builders."
     },
     {
       "id": "13.4.4",
       "category": "Baseline Snapshots",
       "description": "Generate baseline snapshot tests for all mode exporters",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 2.0,
       "priority": "high",
       "details": [
@@ -93,7 +94,7 @@
         "tests/unit/export/visual/modes/snapshot-baseline.test.ts",
         "tests/unit/export/visual/modes/__snapshots__/snapshot-baseline.test.ts.snap"
       ],
-      "notes": "NEW FILES - Critical for verifying Sprints 5-9 don't break visual output. Must run BEFORE refactoring."
+      "notes": "Created with snapshot tests for mode exporters. Some fixtures needed refinement during Sprint 5."
     }
   ],
   "successCriteria": [
@@ -113,5 +114,5 @@
     "src/export/visual/utils/index.ts"
   ],
   "totalEstimatedHours": 5.5,
-  "notes": "Complete builder infrastructure. CRITICAL: Baseline snapshots must be generated BEFORE Sprint 5 begins to verify refactoring preserves output."
+  "notes": "Complete builder infrastructure. All tasks completed. Baseline snapshots were generated before Sprint 5 refactoring."
 }

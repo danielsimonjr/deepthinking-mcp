@@ -1,6 +1,7 @@
 /**
- * Engineering Visual Exporter (v7.1.0)
+ * Engineering Visual Exporter (v8.5.0)
  * Phase 10: Visual export for engineering analysis thoughts
+ * Phase 13 Sprint 5: Refactored to use fluent builder classes
  *
  * Exports engineering analysis to visual formats:
  * - Mermaid: Flowcharts and sequence diagrams
@@ -15,6 +16,10 @@
 import type { EngineeringThought } from '../../../types/modes/engineering.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -111,86 +116,94 @@ export function exportEngineeringAnalysis(
 
 function engineeringToMermaid(thought: EngineeringThought, options: VisualExportOptions): string {
   const { includeLabels = true, includeMetrics = true } = options;
-  const lines: string[] = ['flowchart TB'];
+  const builder = new MermaidGraphBuilder().setDirection('TB');
 
-  // Title node
-  lines.push(`  title["🔧 ${thought.analysisType.toUpperCase()} Analysis"]`);
-  lines.push(`  title --> challenge["${thought.designChallenge.slice(0, 50)}${thought.designChallenge.length > 50 ? '...' : ''}"]`);
+  // Title and challenge nodes
+  builder
+    .addNode({ id: 'title', label: `🔧 ${thought.analysisType.toUpperCase()} Analysis` })
+    .addNode({ id: 'challenge', label: thought.designChallenge.slice(0, 50) + (thought.designChallenge.length > 50 ? '...' : '') })
+    .addEdge({ source: 'title', target: 'challenge' });
 
   // Requirements section
-  if (thought.requirements && thought.requirements.requirements.length > 0) {
-    lines.push('');
-    lines.push('  subgraph Requirements ["📋 Requirements"]');
+  if (thought.requirements?.requirements.length) {
+    const reqIds: string[] = [];
     for (const req of thought.requirements.requirements.slice(0, 5)) {
+      const id = sanitizeId(req.id);
       const label = includeLabels ? req.title.slice(0, 30) : req.id;
       const status = req.status === 'verified' ? '✓' : req.status === 'implemented' ? '⚙' : '○';
-      lines.push(`    ${sanitizeId(req.id)}["${status} ${label}"]`);
+      builder.addNode({ id, label: `${status} ${label}` });
+      reqIds.push(id);
     }
     if (thought.requirements.requirements.length > 5) {
-      lines.push(`    reqMore["... +${thought.requirements.requirements.length - 5} more"]`);
+      builder.addNode({ id: 'reqMore', label: `... +${thought.requirements.requirements.length - 5} more` });
+      reqIds.push('reqMore');
     }
-    lines.push('  end');
-    lines.push('  challenge --> Requirements');
+    builder.addSubgraph('Requirements', '📋 Requirements', reqIds);
+    builder.addEdge({ source: 'challenge', target: 'Requirements' });
   }
 
   // Trade Study section
   if (thought.tradeStudy) {
-    lines.push('');
-    lines.push('  subgraph TradeStudy ["⚖️ Trade Study"]');
+    const altIds: string[] = [];
     for (const alt of thought.tradeStudy.alternatives.slice(0, 4)) {
-      const isRecommended = alt.id === thought.tradeStudy.recommendation;
-      const icon = isRecommended ? '★' : '○';
+      const id = sanitizeId(alt.id);
+      const icon = alt.id === thought.tradeStudy.recommendation ? '★' : '○';
       const label = includeLabels ? alt.name.slice(0, 25) : alt.id;
-      lines.push(`    ${sanitizeId(alt.id)}["${icon} ${label}"]`);
+      builder.addNode({ id, label: `${icon} ${label}` });
+      altIds.push(id);
     }
     if (thought.tradeStudy.alternatives.length > 4) {
-      lines.push(`    altMore["... +${thought.tradeStudy.alternatives.length - 4} more"]`);
+      builder.addNode({ id: 'altMore', label: `... +${thought.tradeStudy.alternatives.length - 4} more` });
+      altIds.push('altMore');
     }
-    lines.push('  end');
-    lines.push('  challenge --> TradeStudy');
+    builder.addSubgraph('TradeStudy', '⚖️ Trade Study', altIds);
+    builder.addEdge({ source: 'challenge', target: 'TradeStudy' });
   }
 
   // FMEA section
-  if (thought.fmea && thought.fmea.failureModes.length > 0) {
-    lines.push('');
-    lines.push('  subgraph FMEA ["⚠️ Failure Modes"]');
+  if (thought.fmea?.failureModes.length) {
+    const fmIds: string[] = [];
     const sortedModes = [...thought.fmea.failureModes].sort((a, b) => b.rpn - a.rpn);
     for (const fm of sortedModes.slice(0, 4)) {
+      const id = sanitizeId(fm.id);
       const risk = fm.rpn >= thought.fmea.rpnThreshold ? '🔴' : fm.rpn >= 100 ? '🟡' : '🟢';
       const label = includeMetrics ? `${fm.failureMode.slice(0, 20)} (RPN:${fm.rpn})` : fm.failureMode.slice(0, 25);
-      lines.push(`    ${sanitizeId(fm.id)}{{"${risk} ${label}"}}`);
+      builder.addNode({ id, label: `${risk} ${label}`, shape: 'hexagon' });
+      fmIds.push(id);
     }
     if (thought.fmea.failureModes.length > 4) {
-      lines.push(`    fmMore["... +${thought.fmea.failureModes.length - 4} more"]`);
+      builder.addNode({ id: 'fmMore', label: `... +${thought.fmea.failureModes.length - 4} more` });
+      fmIds.push('fmMore');
     }
-    lines.push('  end');
-    lines.push('  challenge --> FMEA');
+    builder.addSubgraph('FMEA', '⚠️ Failure Modes', fmIds);
+    builder.addEdge({ source: 'challenge', target: 'FMEA' });
   }
 
   // Design Decisions section
-  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
-    lines.push('');
-    lines.push('  subgraph Decisions ["📝 Design Decisions"]');
+  if (thought.designDecisions?.decisions.length) {
+    const decIds: string[] = [];
     for (const dec of thought.designDecisions.decisions.slice(0, 4)) {
+      const id = sanitizeId(dec.id);
       const status = dec.status === 'accepted' ? '✓' : dec.status === 'proposed' ? '?' : '✗';
       const label = includeLabels ? dec.title.slice(0, 25) : dec.id;
-      lines.push(`    ${sanitizeId(dec.id)}(["${status} ${label}"])`);
+      builder.addNode({ id, label: `${status} ${label}`, shape: 'stadium' });
+      decIds.push(id);
     }
     if (thought.designDecisions.decisions.length > 4) {
-      lines.push(`    decMore["... +${thought.designDecisions.decisions.length - 4} more"]`);
+      builder.addNode({ id: 'decMore', label: `... +${thought.designDecisions.decisions.length - 4} more` });
+      decIds.push('decMore');
     }
-    lines.push('  end');
-    lines.push('  challenge --> Decisions');
+    builder.addSubgraph('Decisions', '📝 Design Decisions', decIds);
+    builder.addEdge({ source: 'challenge', target: 'Decisions' });
   }
 
   // Metrics summary
   if (includeMetrics && thought.assessment) {
-    lines.push('');
-    lines.push(`  metrics["📊 Confidence: ${(thought.assessment.confidence * 100).toFixed(0)}%"]`);
-    lines.push('  challenge --> metrics');
+    builder.addNode({ id: 'metrics', label: `📊 Confidence: ${(thought.assessment.confidence * 100).toFixed(0)}%` });
+    builder.addEdge({ source: 'challenge', target: 'metrics' });
   }
 
-  return lines.join('\n');
+  return builder.render();
 }
 
 // =============================================================================
@@ -199,86 +212,102 @@ function engineeringToMermaid(thought: EngineeringThought, options: VisualExport
 
 function engineeringToDOT(thought: EngineeringThought, options: VisualExportOptions): string {
   const { includeLabels = true, includeMetrics = true } = options;
-  const lines: string[] = [
-    'digraph EngineeringAnalysis {',
-    '  rankdir=TB;',
-    '  node [fontname="Arial", fontsize=10];',
-    '  edge [fontname="Arial", fontsize=9];',
-    '',
-  ];
+  const builder = new DOTGraphBuilder()
+    .setGraphName('EngineeringAnalysis')
+    .setRankDir('TB')
+    .setNodeDefaults({ fontName: 'Arial', fontSize: 10 })
+    .setEdgeDefaults({});
 
   // Challenge node
-  lines.push(`  challenge [label="${thought.designChallenge.slice(0, 40)}", shape=box, style=filled, fillcolor=lightblue];`);
+  builder.addNode({
+    id: 'challenge',
+    label: thought.designChallenge.slice(0, 40),
+    shape: 'box',
+    style: 'filled',
+    fillColor: 'lightblue',
+  });
 
   // Requirements cluster
-  if (thought.requirements && thought.requirements.requirements.length > 0) {
-    lines.push('');
-    lines.push('  subgraph cluster_requirements {');
-    lines.push('    label="Requirements";');
-    lines.push('    style=filled;');
-    lines.push('    fillcolor=lightyellow;');
+  if (thought.requirements?.requirements.length) {
     for (const req of thought.requirements.requirements) {
-      const label = includeLabels ? `${req.id}\\n${req.title.slice(0, 20)}` : req.id;
-      const color = req.status === 'verified' ? 'green' : req.status === 'implemented' ? 'blue' : 'gray';
-      lines.push(`    ${sanitizeId(req.id)} [label="${label}", color=${color}];`);
+      builder.addNode({
+        id: sanitizeId(req.id),
+        label: includeLabels ? `${req.id}\\n${req.title.slice(0, 20)}` : req.id,
+        color: req.status === 'verified' ? 'green' : req.status === 'implemented' ? 'blue' : 'gray',
+      });
     }
-    lines.push('  }');
-    lines.push('  challenge -> ' + sanitizeId(thought.requirements.requirements[0]?.id || 'req') + ';');
+    builder.addSubgraph({
+      id: 'cluster_requirements',
+      label: 'Requirements',
+      nodes: thought.requirements.requirements.map((req) => sanitizeId(req.id)),
+      style: 'filled',
+      fillColor: 'lightyellow',
+    });
+    builder.addEdge({ source: 'challenge', target: sanitizeId(thought.requirements.requirements[0]?.id || 'req') });
   }
 
   // Trade Study cluster
   if (thought.tradeStudy) {
-    lines.push('');
-    lines.push('  subgraph cluster_trade {');
-    lines.push('    label="Trade Study";');
-    lines.push('    style=filled;');
-    lines.push('    fillcolor=lightgreen;');
     for (const alt of thought.tradeStudy.alternatives) {
-      const label = includeLabels ? `${alt.id}\\n${alt.name.slice(0, 20)}` : alt.id;
-      const style = alt.id === thought.tradeStudy.recommendation ? 'bold' : 'solid';
-      const color = alt.id === thought.tradeStudy.recommendation ? 'gold' : 'white';
-      lines.push(`    ${sanitizeId(alt.id)} [label="${label}", style="${style},filled", fillcolor=${color}];`);
+      builder.addNode({
+        id: sanitizeId(alt.id),
+        label: includeLabels ? `${alt.id}\\n${alt.name.slice(0, 20)}` : alt.id,
+        style: alt.id === thought.tradeStudy.recommendation ? ['filled'] : 'filled',
+        fillColor: alt.id === thought.tradeStudy.recommendation ? 'gold' : 'white',
+      });
     }
-    lines.push('  }');
-    lines.push('  challenge -> ' + sanitizeId(thought.tradeStudy.alternatives[0]?.id || 'alt') + ';');
+    builder.addSubgraph({
+      id: 'cluster_trade',
+      label: 'Trade Study',
+      nodes: thought.tradeStudy.alternatives.map((alt) => sanitizeId(alt.id)),
+      style: 'filled',
+      fillColor: 'lightgreen',
+    });
+    builder.addEdge({ source: 'challenge', target: sanitizeId(thought.tradeStudy.alternatives[0]?.id || 'alt') });
   }
 
   // FMEA cluster
-  if (thought.fmea && thought.fmea.failureModes.length > 0) {
-    lines.push('');
-    lines.push('  subgraph cluster_fmea {');
-    lines.push('    label="FMEA";');
-    lines.push('    style=filled;');
-    lines.push('    fillcolor=mistyrose;');
+  if (thought.fmea?.failureModes.length) {
     for (const fm of thought.fmea.failureModes) {
-      const label = includeMetrics
-        ? `${fm.id}\\n${fm.failureMode.slice(0, 15)}\\nRPN:${fm.rpn}`
-        : `${fm.id}\\n${fm.failureMode.slice(0, 20)}`;
-      const color = fm.rpn >= thought.fmea.rpnThreshold ? 'red' : fm.rpn >= 100 ? 'orange' : 'green';
-      lines.push(`    ${sanitizeId(fm.id)} [label="${label}", shape=diamond, color=${color}];`);
+      builder.addNode({
+        id: sanitizeId(fm.id),
+        label: includeMetrics
+          ? `${fm.id}\\n${fm.failureMode.slice(0, 15)}\\nRPN:${fm.rpn}`
+          : `${fm.id}\\n${fm.failureMode.slice(0, 20)}`,
+        shape: 'diamond',
+        color: fm.rpn >= thought.fmea!.rpnThreshold ? 'red' : fm.rpn >= 100 ? 'orange' : 'green',
+      });
     }
-    lines.push('  }');
-    lines.push('  challenge -> ' + sanitizeId(thought.fmea.failureModes[0]?.id || 'fm') + ';');
+    builder.addSubgraph({
+      id: 'cluster_fmea',
+      label: 'FMEA',
+      nodes: thought.fmea.failureModes.map((fm) => sanitizeId(fm.id)),
+      style: 'filled',
+      fillColor: 'mistyrose',
+    });
+    builder.addEdge({ source: 'challenge', target: sanitizeId(thought.fmea.failureModes[0]?.id || 'fm') });
   }
 
   // Design Decisions cluster
-  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
-    lines.push('');
-    lines.push('  subgraph cluster_decisions {');
-    lines.push('    label="Design Decisions";');
-    lines.push('    style=filled;');
-    lines.push('    fillcolor=lavender;');
+  if (thought.designDecisions?.decisions.length) {
     for (const dec of thought.designDecisions.decisions) {
-      const label = includeLabels ? `${dec.id}\\n${dec.title.slice(0, 20)}` : dec.id;
-      const shape = dec.status === 'accepted' ? 'box' : 'ellipse';
-      lines.push(`    ${sanitizeId(dec.id)} [label="${label}", shape=${shape}];`);
+      builder.addNode({
+        id: sanitizeId(dec.id),
+        label: includeLabels ? `${dec.id}\\n${dec.title.slice(0, 20)}` : dec.id,
+        shape: dec.status === 'accepted' ? 'box' : 'ellipse',
+      });
     }
-    lines.push('  }');
-    lines.push('  challenge -> ' + sanitizeId(thought.designDecisions.decisions[0]?.id || 'dec') + ';');
+    builder.addSubgraph({
+      id: 'cluster_decisions',
+      label: 'Design Decisions',
+      nodes: thought.designDecisions.decisions.map((dec) => sanitizeId(dec.id)),
+      style: 'filled',
+      fillColor: 'lavender',
+    });
+    builder.addEdge({ source: 'challenge', target: sanitizeId(thought.designDecisions.decisions[0]?.id || 'dec') });
   }
 
-  lines.push('}');
-  return lines.join('\n');
+  return builder.render();
 }
 
 // =============================================================================
@@ -286,96 +315,82 @@ function engineeringToDOT(thought: EngineeringThought, options: VisualExportOpti
 // =============================================================================
 
 function engineeringToASCII(thought: EngineeringThought): string {
-  const lines: string[] = [];
-  const width = 60;
-
-  // Header
-  lines.push('╔' + '═'.repeat(width - 2) + '╗');
-  lines.push('║' + ` 🔧 ENGINEERING: ${thought.analysisType.toUpperCase()} `.padEnd(width - 2) + '║');
-  lines.push('╠' + '═'.repeat(width - 2) + '╣');
-
-  // Design Challenge
-  lines.push('║' + ` Challenge: ${thought.designChallenge.slice(0, width - 14)}`.padEnd(width - 2) + '║');
-  lines.push('╠' + '─'.repeat(width - 2) + '╣');
+  const builder = new ASCIIDocBuilder()
+    .setBoxStyle('double')
+    .addBoxedTitle(`🔧 ENGINEERING: ${thought.analysisType.toUpperCase()}`)
+    .addText(`Challenge: ${thought.designChallenge.slice(0, 46)}\n`)
+    .addEmptyLine();
 
   // Requirements
-  if (thought.requirements && thought.requirements.requirements.length > 0) {
-    lines.push('║' + ' 📋 REQUIREMENTS'.padEnd(width - 2) + '║');
-    lines.push('║' + '─'.repeat(width - 2) + '║');
-    for (const req of thought.requirements.requirements.slice(0, 5)) {
+  if (thought.requirements?.requirements.length) {
+    builder.addSection('📋 REQUIREMENTS');
+    const reqItems = thought.requirements.requirements.slice(0, 5).map((req) => {
       const status = req.status === 'verified' ? '[✓]' : req.status === 'implemented' ? '[⚙]' : '[ ]';
-      const line = ` ${status} ${req.id}: ${req.title.slice(0, width - 20)}`;
-      lines.push('║' + line.padEnd(width - 2) + '║');
-    }
+      return `${status} ${req.id}: ${req.title.slice(0, 40)}`;
+    });
+    builder.addBulletList(reqItems, 'asciiBullet');
     if (thought.requirements.requirements.length > 5) {
-      lines.push('║' + `   ... +${thought.requirements.requirements.length - 5} more`.padEnd(width - 2) + '║');
+      builder.addText(`   ... +${thought.requirements.requirements.length - 5} more\n`);
     }
-    lines.push('║' + `   Coverage: ${thought.requirements.coverage.verified}/${thought.requirements.coverage.total} verified`.padEnd(width - 2) + '║');
-    lines.push('╠' + '─'.repeat(width - 2) + '╣');
+    builder.addText(`   Coverage: ${thought.requirements.coverage.verified}/${thought.requirements.coverage.total} verified\n`);
+    builder.addEmptyLine();
   }
 
   // Trade Study
   if (thought.tradeStudy) {
-    lines.push('║' + ' ⚖️ TRADE STUDY'.padEnd(width - 2) + '║');
-    lines.push('║' + '─'.repeat(width - 2) + '║');
-    for (const alt of thought.tradeStudy.alternatives) {
-      const isRec = alt.id === thought.tradeStudy.recommendation;
-      const marker = isRec ? '★' : '○';
-      const line = ` ${marker} ${alt.name.slice(0, width - 8)}`;
-      lines.push('║' + line.padEnd(width - 2) + '║');
-    }
-    lines.push('║' + `   Recommended: ${thought.tradeStudy.recommendation}`.padEnd(width - 2) + '║');
-    lines.push('╠' + '─'.repeat(width - 2) + '╣');
+    builder.addSection('⚖️ TRADE STUDY');
+    const altItems = thought.tradeStudy.alternatives.map((alt) => {
+      const marker = alt.id === thought.tradeStudy!.recommendation ? '★' : '○';
+      return `${marker} ${alt.name.slice(0, 50)}`;
+    });
+    builder.addBulletList(altItems, 'asciiBullet');
+    builder.addText(`   Recommended: ${thought.tradeStudy.recommendation}\n`);
+    builder.addEmptyLine();
   }
 
   // FMEA
-  if (thought.fmea && thought.fmea.failureModes.length > 0) {
-    lines.push('║' + ' ⚠️ FAILURE MODES (FMEA)'.padEnd(width - 2) + '║');
-    lines.push('║' + '─'.repeat(width - 2) + '║');
+  if (thought.fmea?.failureModes.length) {
+    builder.addSection('⚠️ FAILURE MODES (FMEA)');
     const sortedModes = [...thought.fmea.failureModes].sort((a, b) => b.rpn - a.rpn);
-    for (const fm of sortedModes.slice(0, 5)) {
-      const risk = fm.rpn >= thought.fmea.rpnThreshold ? '🔴' : fm.rpn >= 100 ? '🟡' : '🟢';
-      const line = ` ${risk} ${fm.failureMode.slice(0, width - 25)} RPN:${fm.rpn}`;
-      lines.push('║' + line.padEnd(width - 2) + '║');
-    }
+    const fmItems = sortedModes.slice(0, 5).map((fm) => {
+      const risk = fm.rpn >= thought.fmea!.rpnThreshold ? '🔴' : fm.rpn >= 100 ? '🟡' : '🟢';
+      return `${risk} ${fm.failureMode.slice(0, 35)} RPN:${fm.rpn}`;
+    });
+    builder.addBulletList(fmItems, 'asciiBullet');
     if (thought.fmea.failureModes.length > 5) {
-      lines.push('║' + `   ... +${thought.fmea.failureModes.length - 5} more`.padEnd(width - 2) + '║');
+      builder.addText(`   ... +${thought.fmea.failureModes.length - 5} more\n`);
     }
-    lines.push('║' + `   Critical: ${thought.fmea.summary.criticalModes} modes above threshold`.padEnd(width - 2) + '║');
-    lines.push('╠' + '─'.repeat(width - 2) + '╣');
+    builder.addText(`   Critical: ${thought.fmea.summary.criticalModes} modes above threshold\n`);
+    builder.addEmptyLine();
   }
 
   // Design Decisions
-  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
-    lines.push('║' + ' 📝 DESIGN DECISIONS'.padEnd(width - 2) + '║');
-    lines.push('║' + '─'.repeat(width - 2) + '║');
-    for (const dec of thought.designDecisions.decisions.slice(0, 5)) {
+  if (thought.designDecisions?.decisions.length) {
+    builder.addSection('📝 DESIGN DECISIONS');
+    const decItems = thought.designDecisions.decisions.slice(0, 5).map((dec) => {
       const status = dec.status === 'accepted' ? '[✓]' : dec.status === 'proposed' ? '[?]' : '[✗]';
-      const line = ` ${status} ${dec.id}: ${dec.title.slice(0, width - 20)}`;
-      lines.push('║' + line.padEnd(width - 2) + '║');
-    }
+      return `${status} ${dec.id}: ${dec.title.slice(0, 40)}`;
+    });
+    builder.addBulletList(decItems, 'asciiBullet');
     if (thought.designDecisions.decisions.length > 5) {
-      lines.push('║' + `   ... +${thought.designDecisions.decisions.length - 5} more`.padEnd(width - 2) + '║');
+      builder.addText(`   ... +${thought.designDecisions.decisions.length - 5} more\n`);
     }
-    lines.push('╠' + '─'.repeat(width - 2) + '╣');
+    builder.addEmptyLine();
   }
 
   // Assessment
   if (thought.assessment) {
-    lines.push('║' + ' 📊 ASSESSMENT'.padEnd(width - 2) + '║');
-    lines.push('║' + `   Confidence: ${(thought.assessment.confidence * 100).toFixed(0)}%`.padEnd(width - 2) + '║');
+    builder.addSection('📊 ASSESSMENT');
+    builder.addText(`   Confidence: ${(thought.assessment.confidence * 100).toFixed(0)}%\n`);
     if (thought.assessment.keyRisks.length > 0) {
-      lines.push('║' + `   Key Risks: ${thought.assessment.keyRisks.length}`.padEnd(width - 2) + '║');
+      builder.addText(`   Key Risks: ${thought.assessment.keyRisks.length}\n`);
     }
     if (thought.assessment.openIssues.length > 0) {
-      lines.push('║' + `   Open Issues: ${thought.assessment.openIssues.length}`.padEnd(width - 2) + '║');
+      builder.addText(`   Open Issues: ${thought.assessment.openIssues.length}\n`);
     }
   }
 
-  // Footer
-  lines.push('╚' + '═'.repeat(width - 2) + '╝');
-
-  return lines.join('\n');
+  return builder.render();
 }
 
 // =============================================================================

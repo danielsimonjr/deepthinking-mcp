@@ -1,13 +1,18 @@
 /**
- * MetaReasoning Visual Exporter (v7.0.3)
+ * MetaReasoning Visual Exporter (v8.5.0)
  * Phase 7 Sprint 2: Meta-reasoning export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
  * Phase 9: Added GraphML and TikZ export support
+ * Phase 13 Sprint 5: Refactored to use fluent builder classes
  */
 
 import type { MetaReasoningThought } from '../../../types/modes/metareasoning.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -109,104 +114,69 @@ function metaReasoningToMermaid(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph TB\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('TB');
 
   // Meta-reasoning central node
   const metaId = sanitizeId('meta_reasoning');
-  mermaid += `  ${metaId}(("Meta-Reasoning"))\n`;
-
-  // Current strategy
   const currentId = sanitizeId('current_strategy');
-  const currentLabel = includeLabels ? thought.currentStrategy.approach : 'Current Strategy';
-  mermaid += `  ${currentId}[["${currentLabel}"]]\n`;
-  mermaid += `  ${metaId} ==> ${currentId}\n`;
-
-  // Current mode
-  const modeId = sanitizeId('current_mode');
-  mermaid += `  ${modeId}(["Mode: ${thought.currentStrategy.mode}"])\n`;
-  mermaid += `  ${currentId} --> ${modeId}\n`;
-
-  // Strategy evaluation
   const evalId = sanitizeId('evaluation');
-  mermaid += `  ${evalId}{{"Effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%"}}\n`;
-  mermaid += `  ${currentId} --> ${evalId}\n`;
+  const recId = sanitizeId('recommendation');
 
-  // Issues (if any)
+  builder
+    .addNode({ id: metaId, label: 'Meta-Reasoning', shape: 'circle' })
+    .addNode({ id: currentId, label: includeLabels ? thought.currentStrategy.approach : 'Current Strategy', shape: 'subroutine' })
+    .addNode({ id: sanitizeId('current_mode'), label: `Mode: ${thought.currentStrategy.mode}`, shape: 'stadium' })
+    .addNode({ id: evalId, label: `Effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`, shape: 'hexagon' })
+    .addEdge({ source: metaId, target: currentId, label: '', style: 'thick' })
+    .addEdge({ source: currentId, target: sanitizeId('current_mode') })
+    .addEdge({ source: currentId, target: evalId });
+
+  // Issues and strengths
   if (thought.strategyEvaluation.issues.length > 0) {
-    const issuesId = sanitizeId('issues');
-    mermaid += `  ${issuesId}>"Issues: ${thought.strategyEvaluation.issues.length}"]\n`;
-    mermaid += `  ${evalId} --> ${issuesId}\n`;
+    builder.addNode({ id: sanitizeId('issues'), label: `Issues: ${thought.strategyEvaluation.issues.length}`, shape: 'asymmetric' })
+      .addEdge({ source: evalId, target: sanitizeId('issues') });
   }
-
-  // Strengths (if any)
   if (thought.strategyEvaluation.strengths.length > 0) {
-    const strengthsId = sanitizeId('strengths');
-    mermaid += `  ${strengthsId}>"Strengths: ${thought.strategyEvaluation.strengths.length}"]\n`;
-    mermaid += `  ${evalId} --> ${strengthsId}\n`;
+    builder.addNode({ id: sanitizeId('strengths'), label: `Strengths: ${thought.strategyEvaluation.strengths.length}`, shape: 'asymmetric' })
+      .addEdge({ source: evalId, target: sanitizeId('strengths') });
   }
 
   // Alternative strategies
   if (thought.alternativeStrategies.length > 0) {
     const altsId = sanitizeId('alternatives');
-    mermaid += `  ${altsId}(["Alternative Strategies"])\n`;
-    mermaid += `  ${metaId} --> ${altsId}\n`;
+    builder.addNode({ id: altsId, label: 'Alternative Strategies', shape: 'stadium' })
+      .addEdge({ source: metaId, target: altsId });
 
     thought.alternativeStrategies.forEach((alt, index) => {
       const altId = sanitizeId(`alt_${index}`);
-      const altLabel = includeLabels
-        ? `${alt.mode}: ${(alt.recommendationScore * 100).toFixed(0)}%`
-        : `Alt ${index + 1}`;
-      mermaid += `  ${altId}["${altLabel}"]\n`;
-      mermaid += `  ${altsId} --> ${altId}\n`;
+      const altLabel = includeLabels ? `${alt.mode}: ${(alt.recommendationScore * 100).toFixed(0)}%` : `Alt ${index + 1}`;
+      builder.addNode({ id: altId, label: altLabel })
+        .addEdge({ source: altsId, target: altId });
     });
   }
 
   // Recommendation
-  const recId = sanitizeId('recommendation');
   const recLabel = `${thought.recommendation.action}${thought.recommendation.targetMode ? ` → ${thought.recommendation.targetMode}` : ''}`;
-  mermaid += `  ${recId}[/"${recLabel}"/]\n`;
-  mermaid += `  ${metaId} ==> ${recId}\n`;
+  builder.addNode({ id: recId, label: recLabel, shape: 'parallelogram' })
+    .addEdge({ source: metaId, target: recId, label: '', style: 'thick' });
 
-  // Recommendation confidence
+  // Metrics
   if (includeMetrics) {
-    const confId = sanitizeId('rec_confidence');
-    mermaid += `  ${confId}{{"Confidence: ${(thought.recommendation.confidence * 100).toFixed(0)}%"}}\n`;
-    mermaid += `  ${recId} --> ${confId}\n`;
+    builder.addNode({ id: sanitizeId('rec_confidence'), label: `Confidence: ${(thought.recommendation.confidence * 100).toFixed(0)}%`, shape: 'hexagon' })
+      .addNode({ id: sanitizeId('quality'), label: `Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`, shape: 'hexagon' })
+      .addEdge({ source: recId, target: sanitizeId('rec_confidence') })
+      .addEdge({ source: metaId, target: sanitizeId('quality'), style: 'dotted' });
   }
 
-  // Quality metrics
-  if (includeMetrics) {
-    const qualityId = sanitizeId('quality');
-    const qualityLabel = `Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`;
-    mermaid += `  ${qualityId}{{"${qualityLabel}"}}\n`;
-    mermaid += `  ${metaId} -.-> ${qualityId}\n`;
-  }
+  // Resource allocation and session context
+  builder
+    .addNode({ id: sanitizeId('resources'), label: `Complexity: ${thought.resourceAllocation.complexityLevel}`, shape: 'cylinder' })
+    .addNode({ id: sanitizeId('session'), label: `Thoughts: ${thought.sessionContext.totalThoughts}`, shape: 'asymmetric' })
+    .addEdge({ source: metaId, target: sanitizeId('resources'), style: 'dotted' })
+    .addEdge({ source: metaId, target: sanitizeId('session'), style: 'dotted' });
 
-  // Resource allocation
-  const resourceId = sanitizeId('resources');
-  mermaid += `  ${resourceId}[("Complexity: ${thought.resourceAllocation.complexityLevel}")]\n`;
-  mermaid += `  ${metaId} -.-> ${resourceId}\n`;
-
-  // Session context
-  const sessionId = sanitizeId('session');
-  mermaid += `  ${sessionId}>"Thoughts: ${thought.sessionContext.totalThoughts}"]\n`;
-  mermaid += `  ${metaId} -.-> ${sessionId}\n`;
-
-  // Color scheme
-  if (colorScheme !== 'monochrome') {
-    const colors = colorScheme === 'pastel'
-      ? { meta: '#f3e5f5', current: '#e3f2fd', rec: '#e8f5e9', alt: '#fff3e0' }
-      : { meta: '#DDA0DD', current: '#87CEEB', rec: '#90EE90', alt: '#FFD700' };
-
-    mermaid += `\n  style ${metaId} fill:${colors.meta}\n`;
-    mermaid += `  style ${currentId} fill:${colors.current}\n`;
-    mermaid += `  style ${recId} fill:${colors.rec}\n`;
-    if (thought.alternativeStrategies.length > 0) {
-      mermaid += `  style ${sanitizeId('alternatives')} fill:${colors.alt}\n`;
-    }
-  }
-
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function metaReasoningToDOT(
@@ -214,178 +184,173 @@ function metaReasoningToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph MetaReasoning {\n';
-  dot += '  rankdir=TB;\n';
-  dot += '  node [shape=box, style=rounded];\n\n';
-
-  // Subgraph for current strategy
-  dot += '  subgraph cluster_current {\n';
-  dot += '    label="Current Strategy";\n';
-  dot += '    style=filled;\n';
-  dot += '    fillcolor=lightblue;\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('MetaReasoning')
+    .setRankDir('TB')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
   const currentId = sanitizeId('current_strategy');
-  const currentLabel = includeLabels
-    ? thought.currentStrategy.approach.slice(0, 30).replace(/"/g, '\"')
-    : 'Current Strategy';
-  dot += `    ${currentId} [label="${currentLabel}"];\n`;
-
   const modeId = sanitizeId('current_mode');
-  dot += `    ${modeId} [label="${thought.currentStrategy.mode}", shape=ellipse];\n`;
-  dot += `    ${currentId} -> ${modeId};\n`;
+  const recId = sanitizeId('recommendation');
+
+  // Current strategy nodes
+  builder
+    .addNode({
+      id: currentId,
+      label: includeLabels ? thought.currentStrategy.approach.slice(0, 30).replace(/"/g, '\\"') : 'Current Strategy',
+    })
+    .addNode({ id: modeId, label: thought.currentStrategy.mode, shape: 'ellipse' })
+    .addEdge({ source: currentId, target: modeId });
 
   // Evaluation metrics
   if (includeMetrics) {
-    const evalId = sanitizeId('evaluation');
-    dot += `    ${evalId} [label="Eff: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%", shape=diamond];\n`;
-    dot += `    ${currentId} -> ${evalId};\n`;
+    builder
+      .addNode({ id: sanitizeId('evaluation'), label: `Eff: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`, shape: 'diamond' })
+      .addEdge({ source: currentId, target: sanitizeId('evaluation') });
   }
 
-  dot += '  }\n\n';
+  // Current strategy subgraph
+  builder.addSubgraph({
+    id: 'cluster_current',
+    label: 'Current Strategy',
+    nodes: includeMetrics ? [currentId, modeId, sanitizeId('evaluation')] : [currentId, modeId],
+    style: 'filled',
+    fillColor: 'lightblue',
+  });
 
-  // Subgraph for alternatives
+  // Alternative strategies
   if (thought.alternativeStrategies.length > 0) {
-    dot += '  subgraph cluster_alternatives {\n';
-    dot += '    label="Alternatives";\n';
-    dot += '    style=filled;\n';
-    dot += '    fillcolor=lightyellow;\n';
-
-    thought.alternativeStrategies.forEach((alt, index) => {
+    const altIds = thought.alternativeStrategies.map((alt, index) => {
       const altId = sanitizeId(`alt_${index}`);
-      const altLabel = `${alt.mode}\\n${(alt.recommendationScore * 100).toFixed(0)}%`;
-      dot += `    ${altId} [label="${altLabel}"];\n`;
+      builder.addNode({ id: altId, label: `${alt.mode}\\n${(alt.recommendationScore * 100).toFixed(0)}%` });
+      return altId;
     });
 
-    dot += '  }\n\n';
+    builder.addSubgraph({
+      id: 'cluster_alternatives',
+      label: 'Alternatives',
+      nodes: altIds,
+      style: 'filled',
+      fillColor: 'lightyellow',
+    });
+
+    // Edges from alternatives to recommendation
+    altIds.forEach((altId) => {
+      builder.addEdge({ source: altId, target: recId, style: 'dashed' });
+    });
   }
 
   // Recommendation node
-  const recId = sanitizeId('recommendation');
-  const recLabel = `${thought.recommendation.action}${thought.recommendation.targetMode ? `\\n→ ${thought.recommendation.targetMode}` : ''}`;
-  dot += `  ${recId} [label="${recLabel}", shape=hexagon, style="filled", fillcolor=lightgreen];\n`;
+  builder.addNode({
+    id: recId,
+    label: `${thought.recommendation.action}${thought.recommendation.targetMode ? `\\n→ ${thought.recommendation.targetMode}` : ''}`,
+    shape: 'hexagon',
+    style: 'filled',
+    fillColor: 'lightgreen',
+  });
 
   // Quality metrics
   if (includeMetrics) {
-    const qualityId = sanitizeId('quality');
-    const qualityLabel = `Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`;
-    dot += `  ${qualityId} [label="${qualityLabel}", shape=diamond];\n`;
+    builder.addNode({
+      id: sanitizeId('quality'),
+      label: `Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`,
+      shape: 'diamond',
+    });
   }
 
-  // Edges
-  dot += `  ${currentId} -> ${recId} [style=bold, penwidth=2];\n`;
+  // Main edge from current to recommendation
+  builder.addEdge({ source: currentId, target: recId, style: 'bold' });
 
-  // Edges from alternatives to recommendation
-  thought.alternativeStrategies.forEach((_, index) => {
-    const altId = sanitizeId(`alt_${index}`);
-    dot += `  ${altId} -> ${recId} [style=dashed];\n`;
-  });
-
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function metaReasoningToASCII(thought: MetaReasoningThought): string {
-  let ascii = 'Meta-Reasoning Analysis:\n';
-  ascii += '========================\n\n';
+  const builder = new ASCIIDocBuilder()
+    .addHeader('Meta-Reasoning Analysis');
 
   // Current Strategy
-  ascii += 'CURRENT STRATEGY\n';
-  ascii += '----------------\n';
-  ascii += `Mode: ${thought.currentStrategy.mode}\n`;
-  ascii += `Approach: ${thought.currentStrategy.approach}\n`;
-  ascii += `Thoughts Spent: ${thought.currentStrategy.thoughtsSpent}\n`;
+  builder.addSection('CURRENT STRATEGY')
+    .addText(`Mode: ${thought.currentStrategy.mode}\n`)
+    .addText(`Approach: ${thought.currentStrategy.approach}\n`)
+    .addText(`Thoughts Spent: ${thought.currentStrategy.thoughtsSpent}\n`);
   if (thought.currentStrategy.progressIndicators.length > 0) {
-    ascii += 'Progress Indicators:\n';
-    thought.currentStrategy.progressIndicators.forEach((ind, index) => {
-      ascii += `  ${index + 1}. ${ind}\n`;
-    });
+    builder.addText('Progress Indicators:\n').addNumberedList(thought.currentStrategy.progressIndicators);
   }
-  ascii += '\n';
+  builder.addEmptyLine();
 
   // Strategy Evaluation
-  ascii += 'STRATEGY EVALUATION\n';
-  ascii += '-------------------\n';
-  ascii += `Effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%\n`;
-  ascii += `Efficiency: ${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%\n`;
-  ascii += `Confidence: ${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%\n`;
-  ascii += `Progress Rate: ${thought.strategyEvaluation.progressRate.toFixed(2)} insights/thought\n`;
-  ascii += `Quality Score: ${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%\n`;
+  builder.addSection('STRATEGY EVALUATION')
+    .addText(`Effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%\n`)
+    .addText(`Efficiency: ${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%\n`)
+    .addText(`Confidence: ${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%\n`)
+    .addText(`Progress Rate: ${thought.strategyEvaluation.progressRate.toFixed(2)} insights/thought\n`)
+    .addText(`Quality Score: ${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%\n`);
 
   if (thought.strategyEvaluation.strengths.length > 0) {
-    ascii += 'Strengths:\n';
-    thought.strategyEvaluation.strengths.forEach((s, index) => {
-      ascii += `  + ${index + 1}. ${s}\n`;
-    });
+    builder.addText('Strengths:\n').addBulletList(thought.strategyEvaluation.strengths.map((s, i) => `+ ${i + 1}. ${s}`));
   }
-
   if (thought.strategyEvaluation.issues.length > 0) {
-    ascii += 'Issues:\n';
-    thought.strategyEvaluation.issues.forEach((issue, index) => {
-      ascii += `  - ${index + 1}. ${issue}\n`;
-    });
+    builder.addText('Issues:\n').addBulletList(thought.strategyEvaluation.issues.map((s, i) => `- ${i + 1}. ${s}`));
   }
-  ascii += '\n';
+  builder.addEmptyLine();
 
   // Alternative Strategies
   if (thought.alternativeStrategies.length > 0) {
-    ascii += 'ALTERNATIVE STRATEGIES\n';
-    ascii += '----------------------\n';
+    builder.addSection('ALTERNATIVE STRATEGIES');
     thought.alternativeStrategies.forEach((alt, index) => {
-      ascii += `[${index + 1}] ${alt.mode}\n`;
-      ascii += `    Reasoning: ${alt.reasoning}\n`;
-      ascii += `    Expected Benefit: ${alt.expectedBenefit}\n`;
-      ascii += `    Switching Cost: ${(alt.switchingCost * 100).toFixed(0)}%\n`;
-      ascii += `    Recommendation Score: ${(alt.recommendationScore * 100).toFixed(0)}%\n`;
+      builder
+        .addText(`[${index + 1}] ${alt.mode}\n`)
+        .addText(`    Reasoning: ${alt.reasoning}\n`)
+        .addText(`    Expected Benefit: ${alt.expectedBenefit}\n`)
+        .addText(`    Switching Cost: ${(alt.switchingCost * 100).toFixed(0)}%\n`)
+        .addText(`    Recommendation Score: ${(alt.recommendationScore * 100).toFixed(0)}%\n`);
     });
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
   // Recommendation
-  ascii += 'RECOMMENDATION\n';
-  ascii += '--------------\n';
-  ascii += `Action: ${thought.recommendation.action}\n`;
+  builder.addSection('RECOMMENDATION')
+    .addText(`Action: ${thought.recommendation.action}\n`);
   if (thought.recommendation.targetMode) {
-    ascii += `Target Mode: ${thought.recommendation.targetMode}\n`;
+    builder.addText(`Target Mode: ${thought.recommendation.targetMode}\n`);
   }
-  ascii += `Justification: ${thought.recommendation.justification}\n`;
-  ascii += `Confidence: ${(thought.recommendation.confidence * 100).toFixed(1)}%\n`;
-  ascii += `Expected Improvement: ${thought.recommendation.expectedImprovement}\n`;
-  ascii += '\n';
+  builder
+    .addText(`Justification: ${thought.recommendation.justification}\n`)
+    .addText(`Confidence: ${(thought.recommendation.confidence * 100).toFixed(1)}%\n`)
+    .addText(`Expected Improvement: ${thought.recommendation.expectedImprovement}\n`)
+    .addEmptyLine();
 
   // Resource Allocation
-  ascii += 'RESOURCE ALLOCATION\n';
-  ascii += '-------------------\n';
-  ascii += `Time Spent: ${thought.resourceAllocation.timeSpent}ms\n`;
-  ascii += `Thoughts Remaining: ${thought.resourceAllocation.thoughtsRemaining}\n`;
-  ascii += `Complexity: ${thought.resourceAllocation.complexityLevel}\n`;
-  ascii += `Urgency: ${thought.resourceAllocation.urgency}\n`;
-  ascii += `Recommendation: ${thought.resourceAllocation.recommendation}\n`;
-  ascii += '\n';
+  builder.addSection('RESOURCE ALLOCATION')
+    .addText(`Time Spent: ${thought.resourceAllocation.timeSpent}ms\n`)
+    .addText(`Thoughts Remaining: ${thought.resourceAllocation.thoughtsRemaining}\n`)
+    .addText(`Complexity: ${thought.resourceAllocation.complexityLevel}\n`)
+    .addText(`Urgency: ${thought.resourceAllocation.urgency}\n`)
+    .addText(`Recommendation: ${thought.resourceAllocation.recommendation}\n`)
+    .addEmptyLine();
 
   // Quality Metrics
-  ascii += 'QUALITY METRICS\n';
-  ascii += '---------------\n';
-  ascii += `Logical Consistency: ${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%\n`;
-  ascii += `Evidence Quality: ${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%\n`;
-  ascii += `Completeness: ${(thought.qualityMetrics.completeness * 100).toFixed(1)}%\n`;
-  ascii += `Originality: ${(thought.qualityMetrics.originality * 100).toFixed(1)}%\n`;
-  ascii += `Clarity: ${(thought.qualityMetrics.clarity * 100).toFixed(1)}%\n`;
-  ascii += `Overall Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%\n`;
-  ascii += '\n';
+  builder.addSection('QUALITY METRICS')
+    .addText(`Logical Consistency: ${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%\n`)
+    .addText(`Evidence Quality: ${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%\n`)
+    .addText(`Completeness: ${(thought.qualityMetrics.completeness * 100).toFixed(1)}%\n`)
+    .addText(`Originality: ${(thought.qualityMetrics.originality * 100).toFixed(1)}%\n`)
+    .addText(`Clarity: ${(thought.qualityMetrics.clarity * 100).toFixed(1)}%\n`)
+    .addText(`Overall Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%\n`)
+    .addEmptyLine();
 
   // Session Context
-  ascii += 'SESSION CONTEXT\n';
-  ascii += '---------------\n';
-  ascii += `Session ID: ${thought.sessionContext.sessionId}\n`;
-  ascii += `Total Thoughts: ${thought.sessionContext.totalThoughts}\n`;
-  ascii += `Mode Switches: ${thought.sessionContext.modeSwitches}\n`;
-  ascii += `Problem Type: ${thought.sessionContext.problemType}\n`;
-  ascii += `Modes Used: ${thought.sessionContext.modesUsed.join(', ')}\n`;
+  builder.addSection('SESSION CONTEXT')
+    .addText(`Session ID: ${thought.sessionContext.sessionId}\n`)
+    .addText(`Total Thoughts: ${thought.sessionContext.totalThoughts}\n`)
+    .addText(`Mode Switches: ${thought.sessionContext.modeSwitches}\n`)
+    .addText(`Problem Type: ${thought.sessionContext.problemType}\n`)
+    .addText(`Modes Used: ${thought.sessionContext.modesUsed.join(', ')}\n`);
   if (thought.sessionContext.historicalEffectiveness !== undefined) {
-    ascii += `Historical Effectiveness: ${(thought.sessionContext.historicalEffectiveness * 100).toFixed(1)}%\n`;
+    builder.addText(`Historical Effectiveness: ${(thought.sessionContext.historicalEffectiveness * 100).toFixed(1)}%\n`);
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**
