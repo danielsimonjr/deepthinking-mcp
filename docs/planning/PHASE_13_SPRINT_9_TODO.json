@@ -92,7 +92,7 @@
         "Updated 12 snapshot tests for new builder output format",
         "Updated visual.test.ts assertions for bayesian exports",
         "All 22 mode exporters now use builders",
-        "4681 tests passing across 168 test files"
+        "4686 tests passing across 170 test files"
       ],
       "files": [
         "tests/unit/export/visual/modes/snapshot-baseline.test.ts",
@@ -106,7 +106,7 @@
     "All 22 mode exporters now use builders - ACHIEVED",
     "All snapshot tests pass (output updated) - ACHIEVED",
     "100% utility adoption achieved - ACHIEVED",
-    "All existing tests pass - ACHIEVED (4681 tests)"
+    "All existing tests pass - ACHIEVED (4686 tests)"
   ],
   "filesCreated": [],
   "filesModified": [
