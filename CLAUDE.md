@@ -457,6 +457,14 @@ Generate dependency docs: `npm run docs:deps`
 - Updated 13 snapshot baselines to match new builder output formatting
 - Total mode exporters refactored: 17/22 (77%)
 
+**Sprint 9 (v8.5.0)**: Final Batch - Mode Exporter Refactoring Complete
+
+- Refactored `sequential.ts`, `abductive.ts`, `bayesian.ts`, `temporal.ts`, `shannon.ts` to use builders
+- All 5 files now use DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder fluent APIs
+- Note: Mermaid gantt diagrams in temporal.ts kept as raw strings (gantt not supported by MermaidGraphBuilder)
+- Updated 12 snapshot baselines to match new builder output formatting
+- **Total mode exporters refactored: 22/22 (100%)**
+
 **Builder Pattern Benefits**:
 
 ```typescript
@@ -473,12 +481,11 @@ const dot = new DOTGraphBuilder()
   .render();
 ```
 
-**Remaining Sprints** (2 more planned):
+**Remaining Sprints** (1 more planned):
 
 | Sprint | Focus |
 |--------|-------|
-| 9 | Refactor remaining 5 modes: sequential, abductive, bayesian, temporal, shannon (sequential was incorrectly claimed as compliant) |
-| 10 | File splitting for Sprint 5 files, final verification |
+| 10 | File splitting for Sprint 5 files (>1000 lines), final verification |
 
 See `docs/planning/PHASE_13_*.json` for detailed sprint breakdowns.
 

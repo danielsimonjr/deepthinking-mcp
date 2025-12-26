@@ -1,34 +1,18 @@
 /**
- * Sequential Visual Exporter (v7.1.0)
+ * Sequential Visual Exporter (v8.5.0)
  * Sprint 8 Task 8.1: Sequential dependency graph export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support, GraphML, TikZ
  * Phase 11: Refactored to use shared utility modules
+ * Phase 13 Sprint 9: Refactored to use fluent builder classes
  */
 
 import type { SequentialThought } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
-// Mermaid utilities
-import {
-  generateMermaidFlowchart,
-  truncateLabel,
-  getMermaidColor,
-  type MermaidNode,
-  type MermaidEdge,
-} from '../utils/mermaid.js';
-// DOT utilities
-import {
-  generateDotGraph,
-  truncateDotLabel,
-  type DotNode,
-  type DotEdge,
-} from '../utils/dot.js';
-// ASCII utilities
-import {
-  generateAsciiHeader,
-  generateAsciiSectionHeader,
-  generateAsciiBulletList,
-} from '../utils/ascii.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 // SVG utilities
 import {
   generateSVGHeader,
@@ -122,21 +106,22 @@ function sequentialToMermaid(
   includeLabels: boolean
 ): string {
   const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
-  const nodes: MermaidNode[] = [];
-  const edges: MermaidEdge[] = [];
+  const builder = new MermaidGraphBuilder().setDirection('TD');
 
   // Current thought node
   const nodeId = sanitizeId(thought.id);
-  const label = includeLabels ? truncateLabel(thought.content, 50) : nodeId;
+  const label = includeLabels ? thought.content.substring(0, 50) + (thought.content.length > 50 ? '...' : '') : nodeId;
 
-  nodes.push({
+  // Determine color based on scheme
+  const primaryColor = scheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
+  const warningColor = scheme === 'pastel' ? '#fff3e0' : '#ffd699';
+
+  builder.addNode({
     id: nodeId,
     label,
     shape: thought.isRevision ? 'hexagon' : 'stadium',
-    style: colorScheme !== 'monochrome' ? {
-      fill: thought.isRevision
-        ? getMermaidColor('warning', scheme)
-        : getMermaidColor('primary', scheme),
+    style: scheme !== 'monochrome' ? {
+      fill: thought.isRevision ? warningColor : primaryColor,
     } : undefined,
   });
 
@@ -144,12 +129,12 @@ function sequentialToMermaid(
   if (thought.buildUpon && thought.buildUpon.length > 0) {
     for (const depId of thought.buildUpon) {
       const depNodeId = sanitizeId(depId);
-      nodes.push({
+      builder.addNode({
         id: depNodeId,
         label: depNodeId,
         shape: 'rectangle',
       });
-      edges.push({
+      builder.addEdge({
         source: depNodeId,
         target: nodeId,
         style: 'arrow',
@@ -160,7 +145,7 @@ function sequentialToMermaid(
   // Branch relationship
   if (thought.branchFrom) {
     const branchId = sanitizeId(thought.branchFrom);
-    edges.push({
+    builder.addEdge({
       source: branchId,
       target: nodeId,
       style: 'dotted',
@@ -171,7 +156,7 @@ function sequentialToMermaid(
   // Revision relationship
   if (thought.revisesThought) {
     const revisedId = sanitizeId(thought.revisesThought);
-    edges.push({
+    builder.addEdge({
       source: revisedId,
       target: nodeId,
       style: 'thick',
@@ -179,18 +164,20 @@ function sequentialToMermaid(
     });
   }
 
-  return generateMermaidFlowchart(nodes, edges, { direction: 'TD', colorScheme: scheme });
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function sequentialToDOT(thought: SequentialThought, includeLabels: boolean): string {
-  const nodes: DotNode[] = [];
-  const edges: DotEdge[] = [];
+  const builder = new DOTGraphBuilder()
+    .setGraphName('SequentialDependency')
+    .setRankDir('TB')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
   // Current thought node
   const nodeId = sanitizeId(thought.id);
-  const label = includeLabels ? truncateDotLabel(thought.content, 50) : nodeId;
+  const label = includeLabels ? thought.content.substring(0, 50) + (thought.content.length > 50 ? '...' : '') : nodeId;
 
-  nodes.push({
+  builder.addNode({
     id: nodeId,
     label,
     shape: thought.isRevision ? 'hexagon' : 'box',
@@ -202,13 +189,13 @@ function sequentialToDOT(thought: SequentialThought, includeLabels: boolean): st
   if (thought.buildUpon && thought.buildUpon.length > 0) {
     for (const depId of thought.buildUpon) {
       const depNodeId = sanitizeId(depId);
-      nodes.push({
+      builder.addNode({
         id: depNodeId,
         label: depNodeId,
         shape: 'box',
         style: 'rounded',
       });
-      edges.push({
+      builder.addEdge({
         source: depNodeId,
         target: nodeId,
       });
@@ -218,7 +205,7 @@ function sequentialToDOT(thought: SequentialThought, includeLabels: boolean): st
   // Branch relationship
   if (thought.branchFrom) {
     const branchId = sanitizeId(thought.branchFrom);
-    edges.push({
+    builder.addEdge({
       source: branchId,
       target: nodeId,
       style: 'dashed',
@@ -229,7 +216,7 @@ function sequentialToDOT(thought: SequentialThought, includeLabels: boolean): st
   // Revision relationship
   if (thought.revisesThought) {
     const revisedId = sanitizeId(thought.revisesThought);
-    edges.push({
+    builder.addEdge({
       source: revisedId,
       target: nodeId,
       style: 'bold',
@@ -237,57 +224,50 @@ function sequentialToDOT(thought: SequentialThought, includeLabels: boolean): st
     });
   }
 
-  return generateDotGraph(nodes, edges, {
-    graphName: 'SequentialDependency',
-    rankDir: 'TB',
-    nodeDefaults: { shape: 'box', style: 'rounded' },
-  });
+  return builder.render();
 }
 
 function sequentialToASCII(thought: SequentialThought): string {
-  const lines: string[] = [];
-
-  // Title
-  lines.push(generateAsciiHeader('Sequential Dependency Graph', 'equals'));
-  lines.push('');
+  const builder = new ASCIIDocBuilder()
+    .setMaxWidth(60)
+    .addHeader('Sequential Dependency Graph');
 
   // Current thought
-  lines.push(`Current Thought: ${thought.id}`);
-  lines.push(`Content: ${thought.content.substring(0, 100)}...`);
-  lines.push('');
+  builder.addSection('Current Thought')
+    .addText(`ID: ${thought.id}\n`)
+    .addText(`Content: ${thought.content.substring(0, 100)}...\n`)
+    .addEmptyLine();
 
   // Dependencies
   if (thought.buildUpon && thought.buildUpon.length > 0) {
-    lines.push(generateAsciiSectionHeader('Builds Upon'));
-    lines.push(generateAsciiBulletList(
-      thought.buildUpon.map(depId => `↓ ${depId}`),
-      'asciiBullet',
-      0
-    ));
-    lines.push('');
+    builder.addSection('Builds Upon');
+    for (const depId of thought.buildUpon) {
+      builder.addText(`  ↓ ${depId}\n`);
+    }
+    builder.addEmptyLine();
   }
 
   // Branch info
   if (thought.branchFrom) {
-    lines.push(generateAsciiSectionHeader('Branch Information'));
-    lines.push(`  Branches From: ${thought.branchFrom}`);
+    builder.addSection('Branch Information')
+      .addText(`  Branches From: ${thought.branchFrom}\n`);
     if (thought.branchId) {
-      lines.push(`  Branch ID: ${thought.branchId}`);
+      builder.addText(`  Branch ID: ${thought.branchId}\n`);
     }
-    lines.push('');
+    builder.addEmptyLine();
   }
 
   // Revision info
   if (thought.revisesThought) {
-    lines.push(generateAsciiSectionHeader('Revision Information'));
-    lines.push(`  Revises: ${thought.revisesThought}`);
+    builder.addSection('Revision Information')
+      .addText(`  Revises: ${thought.revisesThought}\n`);
     if (thought.revisionReason) {
-      lines.push(`  Reason: ${thought.revisionReason}`);
+      builder.addText(`  Reason: ${thought.revisionReason}\n`);
     }
-    lines.push('');
+    builder.addEmptyLine();
   }
 
-  return lines.join('\n');
+  return builder.render();
 }
 
 /**

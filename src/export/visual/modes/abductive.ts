@@ -1,13 +1,18 @@
 /**
- * Abductive Visual Exporter (v7.0.3)
+ * Abductive Visual Exporter (v8.5.0)
  * Sprint 8 Task 8.1: Abductive hypothesis export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
  * Phase 9: Added GraphML and TikZ export support
+ * Phase 13 Sprint 9: Refactored to use fluent builder classes
  */
 
 import type { AbductiveThought } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -100,27 +105,42 @@ function abductiveToMermaid(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph TD\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('TD');
 
-  mermaid += '  Observations["Observations"]\n';
+  // Observations node
+  builder.addNode({
+    id: 'Observations',
+    label: 'Observations',
+    shape: 'rectangle',
+  });
 
+  // Add hypothesis nodes
   for (const hypothesis of thought.hypotheses) {
     const hypId = sanitizeId(hypothesis.id);
     const label = includeLabels ? hypothesis.explanation.substring(0, 50) + '...' : hypId;
     const scoreLabel = includeMetrics ? ` (${hypothesis.score.toFixed(2)})` : '';
+    const isBest = thought.bestExplanation?.id === hypothesis.id;
 
-    mermaid += `  ${hypId}["${label}${scoreLabel}"]\n`;
-    mermaid += `  Observations --> ${hypId}\n`;
+    // Style for best hypothesis
+    const color = scheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
+    const nodeStyle = isBest && scheme !== 'monochrome' ? { fill: color, strokeWidth: '3px' } : undefined;
+
+    builder.addNode({
+      id: hypId,
+      label: label + scoreLabel,
+      shape: 'rectangle',
+      style: nodeStyle,
+    });
+
+    builder.addEdge({
+      source: 'Observations',
+      target: hypId,
+      style: 'arrow',
+    });
   }
 
-  if (thought.bestExplanation && colorScheme !== 'monochrome') {
-    mermaid += '\n';
-    const bestId = sanitizeId(thought.bestExplanation.id);
-    const color = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
-    mermaid += `  style ${bestId} fill:${color},stroke:#333,stroke-width:3px\n`;
-  }
-
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function abductiveToDOT(
@@ -128,53 +148,72 @@ function abductiveToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph AbductiveHypotheses {\n';
-  dot += '  rankdir=TD;\n';
-  dot += '  node [shape=box, style=rounded];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('AbductiveHypotheses')
+    .setRankDir('TB')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
-  dot += '  Observations [label="Observations", shape=ellipse];\n\n';
+  // Observations node
+  builder.addNode({
+    id: 'Observations',
+    label: 'Observations',
+    shape: 'ellipse',
+  });
 
+  // Add hypothesis nodes
   for (const hypothesis of thought.hypotheses) {
     const hypId = sanitizeId(hypothesis.id);
     const label = includeLabels ? hypothesis.explanation.substring(0, 50) + '...' : hypId;
     const scoreLabel = includeMetrics ? ` (${hypothesis.score.toFixed(2)})` : '';
-
     const isBest = thought.bestExplanation?.id === hypothesis.id;
-    const style = isBest ? ', style=filled, fillcolor=lightblue' : '';
 
-    dot += `  ${hypId} [label="${label}${scoreLabel}"${style}];\n`;
-    dot += `  Observations -> ${hypId};\n`;
+    builder.addNode({
+      id: hypId,
+      label: label + scoreLabel,
+      style: isBest ? 'filled' : undefined,
+      fillColor: isBest ? 'lightblue' : undefined,
+    });
+
+    builder.addEdge({
+      source: 'Observations',
+      target: hypId,
+    });
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function abductiveToASCII(thought: AbductiveThought): string {
-  let ascii = 'Abductive Hypothesis Comparison:\n';
-  ascii += '================================\n\n';
+  const builder = new ASCIIDocBuilder()
+    .setMaxWidth(60)
+    .addHeader('Abductive Hypothesis Comparison');
 
-  ascii += 'Observations:\n';
+  // Observations section
+  builder.addSection('Observations');
   for (const obs of thought.observations) {
-    ascii += `  • ${obs.description} (confidence: ${obs.confidence.toFixed(2)})\n`;
+    builder.addText(`  • ${obs.description} (confidence: ${obs.confidence.toFixed(2)})\n`);
   }
+  builder.addEmptyLine();
 
-  ascii += '\nHypotheses:\n';
+  // Hypotheses section
+  builder.addSection('Hypotheses');
   for (const hypothesis of thought.hypotheses) {
     const isBest = thought.bestExplanation?.id === hypothesis.id;
     const marker = isBest ? '★' : '•';
 
-    ascii += `  ${marker} ${hypothesis.explanation}\n`;
-    ascii += `    Score: ${hypothesis.score.toFixed(2)}\n`;
-    ascii += `    Assumptions: ${hypothesis.assumptions.join(', ')}\n`;
-    ascii += '\n';
+    builder.addText(`  ${marker} ${hypothesis.explanation}\n`);
+    builder.addText(`    Score: ${hypothesis.score.toFixed(2)}\n`);
+    builder.addText(`    Assumptions: ${hypothesis.assumptions.join(', ')}\n`);
+    builder.addEmptyLine();
   }
 
+  // Best explanation
   if (thought.bestExplanation) {
-    ascii += `Best Explanation: ${thought.bestExplanation.explanation}\n`;
+    builder.addSection('Best Explanation')
+      .addText(`${thought.bestExplanation.explanation}\n`);
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**

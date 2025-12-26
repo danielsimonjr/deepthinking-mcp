@@ -1,13 +1,18 @@
 /**
- * Shannon Visual Exporter (v7.0.3)
+ * Shannon Visual Exporter (v8.5.0)
  * Sprint 8 Task 8.1: Shannon stage flow export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
  * Phase 9: Added GraphML and TikZ export support
+ * Phase 13 Sprint 9: Refactored to use fluent builder classes
  */
 
 import type { ShannonThought } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -112,34 +117,52 @@ function shannonToMermaid(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph LR\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('LR');
 
+  // Determine color based on scheme
+  const currentColor = scheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
+
+  // Add stage nodes
   for (let i = 0; i < stages.length; i++) {
     const stage = stages[i];
     const stageId = sanitizeId(stage);
     const label = includeLabels ? stageLabels[stage] : stageId;
+    const isCurrent = stage === thought.stage;
 
-    mermaid += `  ${stageId}["${label}"]\n`;
+    builder.addNode({
+      id: stageId,
+      label,
+      shape: 'rectangle',
+      style: isCurrent && scheme !== 'monochrome' ? { fill: currentColor, strokeWidth: '3px' } : undefined,
+    });
 
+    // Add edge to next stage
     if (i < stages.length - 1) {
       const nextStageId = sanitizeId(stages[i + 1]);
-      mermaid += `  ${stageId} --> ${nextStageId}\n`;
+      builder.addEdge({
+        source: stageId,
+        target: nextStageId,
+        style: 'arrow',
+      });
     }
   }
 
-  if (colorScheme !== 'monochrome') {
-    mermaid += '\n';
-    const currentStageId = sanitizeId(thought.stage);
-    const color = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
-    mermaid += `  style ${currentStageId} fill:${color},stroke:#333,stroke-width:3px\n`;
-  }
-
+  // Add uncertainty node if metrics enabled
   if (includeMetrics && thought.uncertainty !== undefined) {
-    mermaid += `\n  uncertainty["Uncertainty: ${thought.uncertainty.toFixed(2)}"]\n`;
-    mermaid += `  uncertainty -.-> ${sanitizeId(thought.stage)}\n`;
+    builder.addNode({
+      id: 'uncertainty',
+      label: `Uncertainty: ${thought.uncertainty.toFixed(2)}`,
+      shape: 'rectangle',
+    });
+    builder.addEdge({
+      source: 'uncertainty',
+      target: sanitizeId(thought.stage),
+      style: 'dotted',
+    });
   }
 
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function shannonToDOT(
@@ -147,74 +170,100 @@ function shannonToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph ShannonStageFlow {\n';
-  dot += '  rankdir=LR;\n';
-  dot += '  node [shape=box, style=rounded];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('ShannonStageFlow')
+    .setRankDir('LR')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
+  // Add stage nodes
   for (let i = 0; i < stages.length; i++) {
     const stage = stages[i];
     const stageId = sanitizeId(stage);
     const label = includeLabels ? stageLabels[stage] : stageId;
-
     const isCurrent = stage === thought.stage;
-    const style = isCurrent ? ', style=filled, fillcolor=lightblue' : '';
 
-    dot += `  ${stageId} [label="${label}"${style}];\n`;
+    builder.addNode({
+      id: stageId,
+      label,
+      style: isCurrent ? 'filled' : undefined,
+      fillColor: isCurrent ? 'lightblue' : undefined,
+    });
 
+    // Add edge to next stage
     if (i < stages.length - 1) {
       const nextStageId = sanitizeId(stages[i + 1]);
-      dot += `  ${stageId} -> ${nextStageId};\n`;
+      builder.addEdge({
+        source: stageId,
+        target: nextStageId,
+      });
     }
   }
 
+  // Add uncertainty node if metrics enabled
   if (includeMetrics && thought.uncertainty !== undefined) {
-    dot += `\n  uncertainty [label="Uncertainty: ${thought.uncertainty.toFixed(2)}", shape=ellipse];\n`;
-    dot += `  uncertainty -> ${sanitizeId(thought.stage)} [style=dashed];\n`;
+    builder.addNode({
+      id: 'uncertainty',
+      label: `Uncertainty: ${thought.uncertainty.toFixed(2)}`,
+      shape: 'ellipse',
+    });
+    builder.addEdge({
+      source: 'uncertainty',
+      target: sanitizeId(thought.stage),
+      style: 'dashed',
+    });
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function shannonToASCII(thought: ShannonThought): string {
-  let ascii = 'Shannon Stage Flow:\n';
-  ascii += '===================\n\n';
+  const builder = new ASCIIDocBuilder()
+    .setMaxWidth(60)
+    .addHeader('Shannon Stage Flow');
 
-  ascii += 'Flow: ';
+  // Stage flow visualization
+  let flowLine = 'Flow: ';
   for (let i = 0; i < stages.length; i++) {
     const stage = stages[i];
     const isCurrent = stage === thought.stage;
 
     if (isCurrent) {
-      ascii += `[${stageLabels[stage]}]`;
+      flowLine += `[${stageLabels[stage]}]`;
     } else {
-      ascii += stageLabels[stage];
+      flowLine += stageLabels[stage];
     }
 
     if (i < stages.length - 1) {
-      ascii += ' → ';
+      flowLine += ' → ';
     }
   }
+  builder.addText(`${flowLine}\n`);
+  builder.addEmptyLine();
 
-  ascii += '\n\n';
-  ascii += `Current Stage: ${stageLabels[thought.stage]}\n`;
-  ascii += `Uncertainty: ${thought.uncertainty.toFixed(2)}\n`;
+  // Current stage info
+  builder.addSection('Current Stage')
+    .addText(`${stageLabels[thought.stage]}\n`)
+    .addText(`Uncertainty: ${thought.uncertainty.toFixed(2)}\n`)
+    .addEmptyLine();
 
+  // Dependencies
   if (thought.dependencies && thought.dependencies.length > 0) {
-    ascii += '\nDependencies:\n';
+    builder.addSection('Dependencies');
     for (const dep of thought.dependencies) {
-      ascii += `  • ${dep}\n`;
+      builder.addText(`  • ${dep}\n`);
     }
+    builder.addEmptyLine();
   }
 
+  // Assumptions
   if (thought.assumptions && thought.assumptions.length > 0) {
-    ascii += '\nAssumptions:\n';
+    builder.addSection('Assumptions');
     for (const assumption of thought.assumptions) {
-      ascii += `  • ${assumption}\n`;
+      builder.addText(`  • ${assumption}\n`);
     }
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**
