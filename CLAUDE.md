@@ -12,10 +12,10 @@ DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring *
 
 | Metric | Value |
 |--------|-------|
-| TypeScript Files | 221 |
-| Lines of Code | ~89,490 |
-| Total Exports | 1134 (519 re-exports) |
-| Passing Tests | 4364 (163 test files) |
+| TypeScript Files | 222 |
+| Lines of Code | ~92,000 |
+| Total Exports | 1150 (525 re-exports) |
+| Passing Tests | 4573 (168 test files) |
 | Reasoning Modes | 33 (29 with dedicated types + 4 advanced runtime) |
 | MCP Tools | 13 focused (includes deepthinking_analyze) |
 | Export Formats | 8 + native SVG + file export |
@@ -411,6 +411,15 @@ Generate dependency docs: `npm run docs:deps`
 - Added `TikZBuilder` fluent API class to `src/export/visual/utils/tikz.ts`
 - Created 89 unit tests in `tests/unit/export/visual/utils/visual-builders.test.ts`
 
+**Sprint 3 (v8.5.0)**: Document Format Builders
+
+- Added `UMLBuilder` fluent API class to `src/export/visual/utils/uml.ts`
+- Added `HTMLDocBuilder` fluent API class to `src/export/visual/utils/html.ts`
+- Added `MarkdownBuilder` fluent API class to `src/export/visual/utils/markdown.ts`
+- Added `ModelicaBuilder` fluent API class to `src/export/visual/utils/modelica.ts`
+- Added `JSONExportBuilder` fluent API class to `src/export/visual/utils/json.ts`
+- Created 115 unit tests in `tests/unit/export/visual/utils/document-builders.test.ts`
+
 **Builder Pattern Benefits**:
 
 ```typescript
@@ -427,11 +436,10 @@ const dot = new DOTGraphBuilder()
   .render();
 ```
 
-**Remaining Sprints** (8 more planned):
+**Remaining Sprints** (7 more planned):
 
 | Sprint | Focus |
 |--------|-------|
-| 3 | UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder |
 | 4 | JSDoc, integration tests, snapshot baselines |
 | 5-7 | Refactor 12 critical files (>1000 lines) |
 | 8-9 | Refactor remaining 9 modes for consistency |

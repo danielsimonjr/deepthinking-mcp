@@ -1,6 +1,7 @@
 /**
- * UML/PlantUML Export Utilities (v7.1.0)
+ * UML/PlantUML Export Utilities (v8.5.0)
  * Shared utilities for UML diagram export (PlantUML syntax)
+ * Phase 13 Sprint 3: Added UMLBuilder fluent API
  */
 
 /**
@@ -456,4 +457,473 @@ export function generateUseCaseDiagram(
   lines.push(generateUmlFooter());
 
   return lines.join('\n');
+}
+
+// =============================================================================
+// UMLBuilder Fluent API (Phase 13 Sprint 3)
+// =============================================================================
+
+/**
+ * UML relation type for builder
+ */
+export type UMLRelationType =
+  | 'association'
+  | 'dependency'
+  | 'inheritance'
+  | 'implementation'
+  | 'composition'
+  | 'aggregation'
+  | 'uses'
+  | 'includes'
+  | 'extends';
+
+/**
+ * UML class definition for builder
+ */
+export interface UMLClassDef {
+  name: string;
+  members?: string[];
+  methods?: string[];
+  stereotype?: string;
+  abstract?: boolean;
+}
+
+/**
+ * UML interface definition for builder
+ */
+export interface UMLInterfaceDef {
+  name: string;
+  methods?: string[];
+  stereotype?: string;
+}
+
+/**
+ * UML relation definition for builder
+ */
+export interface UMLRelationDef {
+  from: string;
+  to: string;
+  type: UMLRelationType;
+  label?: string;
+  sourceLabel?: string;
+  targetLabel?: string;
+}
+
+/**
+ * UML note definition for builder
+ */
+export interface UMLNoteDef {
+  text: string;
+  position?: 'top' | 'bottom' | 'left' | 'right';
+  attachTo?: string;
+}
+
+/**
+ * UMLBuilder options
+ */
+export interface UMLBuilderOptions {
+  diagramType?: 'class' | 'component' | 'usecase' | 'activity' | 'state' | 'sequence' | 'object';
+  title?: string;
+  theme?: 'default' | 'sketchy' | 'blueprint' | 'plain' | 'cerulean' | 'reddress';
+  direction?: 'left to right' | 'top to bottom';
+  scale?: number;
+  skinparam?: Record<string, string>;
+}
+
+/**
+ * Get PlantUML arrow for relation type
+ */
+function getRelationArrow(type: UMLRelationType): string {
+  switch (type) {
+    case 'dependency':
+      return '..>';
+    case 'inheritance':
+      return '--|>';
+    case 'implementation':
+      return '..|>';
+    case 'composition':
+      return '*--';
+    case 'aggregation':
+      return 'o--';
+    case 'uses':
+      return '..>';
+    case 'includes':
+      return '..>';
+    case 'extends':
+      return '<|--';
+    case 'association':
+    default:
+      return '--';
+  }
+}
+
+/**
+ * UMLBuilder - Fluent API for building PlantUML diagrams
+ *
+ * @example
+ * ```typescript
+ * const uml = new UMLBuilder()
+ *   .setTitle('Class Diagram')
+ *   .setDirection('top to bottom')
+ *   .addClass({ name: 'Animal', members: ['+name: string'], methods: ['+speak(): void'] })
+ *   .addClass({ name: 'Dog', methods: ['+bark(): void'] })
+ *   .addRelation({ from: 'Dog', to: 'Animal', type: 'inheritance' })
+ *   .render();
+ * ```
+ */
+export class UMLBuilder {
+  private classes: UMLClassDef[] = [];
+  private interfaces: UMLInterfaceDef[] = [];
+  private relations: UMLRelationDef[] = [];
+  private notes: UMLNoteDef[] = [];
+  private packages: { name: string; content: string[] }[] = [];
+  private currentPackage: { name: string; content: string[] } | null = null;
+  private rawLines: string[] = [];
+  private options: UMLBuilderOptions = {};
+
+  /**
+   * Set or merge builder options
+   * @param options - Options to set/merge
+   * @returns this for chaining
+   */
+  setOptions(options: UMLBuilderOptions): this {
+    this.options = { ...this.options, ...options };
+    return this;
+  }
+
+  /**
+   * Set the diagram title
+   * @param title - The diagram title
+   * @returns this for chaining
+   */
+  setTitle(title: string): this {
+    this.options.title = title;
+    return this;
+  }
+
+  /**
+   * Set the theme
+   * @param theme - The PlantUML theme name
+   * @returns this for chaining
+   */
+  setTheme(theme: UMLBuilderOptions['theme']): this {
+    this.options.theme = theme;
+    return this;
+  }
+
+  /**
+   * Set the layout direction
+   * @param direction - The layout direction
+   * @returns this for chaining
+   */
+  setDirection(direction: 'left to right' | 'top to bottom'): this {
+    this.options.direction = direction;
+    return this;
+  }
+
+  /**
+   * Set the diagram scale
+   * @param scale - The scale factor
+   * @returns this for chaining
+   */
+  setScale(scale: number): this {
+    this.options.scale = scale;
+    return this;
+  }
+
+  /**
+   * Add a skinparam setting
+   * @param param - The skinparam name
+   * @param value - The skinparam value
+   * @returns this for chaining
+   */
+  addSkinparam(param: string, value: string): this {
+    if (!this.options.skinparam) {
+      this.options.skinparam = {};
+    }
+    this.options.skinparam[param] = value;
+    return this;
+  }
+
+  /**
+   * Add a class to the diagram
+   * @param classDef - The class definition
+   * @returns this for chaining
+   */
+  addClass(classDef: UMLClassDef): this {
+    this.classes.push(classDef);
+    return this;
+  }
+
+  /**
+   * Add multiple classes to the diagram
+   * @param classes - Array of class definitions
+   * @returns this for chaining
+   */
+  addClasses(classes: UMLClassDef[]): this {
+    this.classes.push(...classes);
+    return this;
+  }
+
+  /**
+   * Add an interface to the diagram
+   * @param interfaceDef - The interface definition
+   * @returns this for chaining
+   */
+  addInterface(interfaceDef: UMLInterfaceDef): this {
+    this.interfaces.push(interfaceDef);
+    return this;
+  }
+
+  /**
+   * Add multiple interfaces to the diagram
+   * @param interfaces - Array of interface definitions
+   * @returns this for chaining
+   */
+  addInterfaces(interfaces: UMLInterfaceDef[]): this {
+    this.interfaces.push(...interfaces);
+    return this;
+  }
+
+  /**
+   * Add a relation between classes/interfaces
+   * @param relation - The relation definition
+   * @returns this for chaining
+   */
+  addRelation(relation: UMLRelationDef): this {
+    this.relations.push(relation);
+    return this;
+  }
+
+  /**
+   * Add multiple relations
+   * @param relations - Array of relation definitions
+   * @returns this for chaining
+   */
+  addRelations(relations: UMLRelationDef[]): this {
+    this.relations.push(...relations);
+    return this;
+  }
+
+  /**
+   * Add a note to the diagram
+   * @param note - The note definition
+   * @returns this for chaining
+   */
+  addNote(note: UMLNoteDef): this {
+    this.notes.push(note);
+    return this;
+  }
+
+  /**
+   * Begin a package block
+   * @param name - The package name
+   * @returns this for chaining
+   */
+  beginPackage(name: string): this {
+    if (this.currentPackage) {
+      // Close current package if one is open
+      this.packages.push(this.currentPackage);
+    }
+    this.currentPackage = { name, content: [] };
+    return this;
+  }
+
+  /**
+   * End the current package block
+   * @returns this for chaining
+   */
+  endPackage(): this {
+    if (this.currentPackage) {
+      this.packages.push(this.currentPackage);
+      this.currentPackage = null;
+    }
+    return this;
+  }
+
+  /**
+   * Add raw PlantUML line(s)
+   * @param line - The raw line(s) to add
+   * @returns this for chaining
+   */
+  addRaw(line: string | string[]): this {
+    if (Array.isArray(line)) {
+      this.rawLines.push(...line);
+    } else {
+      this.rawLines.push(line);
+    }
+    return this;
+  }
+
+  /**
+   * Reset the builder to initial state
+   * @returns this for chaining
+   */
+  reset(): this {
+    this.classes = [];
+    this.interfaces = [];
+    this.relations = [];
+    this.notes = [];
+    this.packages = [];
+    this.currentPackage = null;
+    this.rawLines = [];
+    this.options = {};
+    return this;
+  }
+
+  /**
+   * Render the diagram to PlantUML string
+   * @returns The complete PlantUML diagram
+   */
+  render(): string {
+    // Close any open package
+    if (this.currentPackage) {
+      this.packages.push(this.currentPackage);
+      this.currentPackage = null;
+    }
+
+    const lines: string[] = [];
+
+    // Header
+    lines.push('@startuml');
+
+    // Title
+    if (this.options.title) {
+      lines.push(`title ${escapeUml(this.options.title)}`);
+    }
+
+    // Theme
+    if (this.options.theme && this.options.theme !== 'default') {
+      lines.push(`!theme ${this.options.theme}`);
+    }
+
+    // Direction
+    if (this.options.direction) {
+      lines.push(
+        this.options.direction === 'left to right'
+          ? 'left to right direction'
+          : 'top to bottom direction'
+      );
+    }
+
+    // Scale
+    if (this.options.scale) {
+      lines.push(`scale ${this.options.scale}`);
+    }
+
+    // Skinparams
+    if (this.options.skinparam) {
+      for (const [param, value] of Object.entries(this.options.skinparam)) {
+        lines.push(`skinparam ${param} ${value}`);
+      }
+    }
+
+    lines.push('');
+
+    // Packages
+    for (const pkg of this.packages) {
+      lines.push(`package "${escapeUml(pkg.name)}" {`);
+      for (const content of pkg.content) {
+        lines.push(`  ${content}`);
+      }
+      lines.push('}');
+      lines.push('');
+    }
+
+    // Classes
+    if (this.classes.length > 0) {
+      for (const cls of this.classes) {
+        const keyword = cls.abstract ? 'abstract class' : 'class';
+        const stereotype = cls.stereotype ? ` <<${escapeUml(cls.stereotype)}>>` : '';
+        const safeId = sanitizeUmlId(cls.name);
+
+        lines.push(`${keyword} "${escapeUml(cls.name)}"${stereotype} as ${safeId} {`);
+
+        // Members (attributes)
+        if (cls.members && cls.members.length > 0) {
+          for (const member of cls.members) {
+            lines.push(`  ${escapeUml(member)}`);
+          }
+        }
+
+        // Divider between members and methods if both exist
+        if (cls.members && cls.members.length > 0 && cls.methods && cls.methods.length > 0) {
+          lines.push('  --');
+        }
+
+        // Methods
+        if (cls.methods && cls.methods.length > 0) {
+          for (const method of cls.methods) {
+            lines.push(`  ${escapeUml(method)}`);
+          }
+        }
+
+        lines.push('}');
+      }
+      lines.push('');
+    }
+
+    // Interfaces
+    if (this.interfaces.length > 0) {
+      for (const iface of this.interfaces) {
+        const stereotype = iface.stereotype ? ` <<${escapeUml(iface.stereotype)}>>` : '';
+        const safeId = sanitizeUmlId(iface.name);
+
+        lines.push(`interface "${escapeUml(iface.name)}"${stereotype} as ${safeId} {`);
+
+        if (iface.methods && iface.methods.length > 0) {
+          for (const method of iface.methods) {
+            lines.push(`  ${escapeUml(method)}`);
+          }
+        }
+
+        lines.push('}');
+      }
+      lines.push('');
+    }
+
+    // Relations
+    if (this.relations.length > 0) {
+      for (const rel of this.relations) {
+        const fromId = sanitizeUmlId(rel.from);
+        const toId = sanitizeUmlId(rel.to);
+        const arrow = getRelationArrow(rel.type);
+        let line = `${fromId} ${arrow} ${toId}`;
+
+        if (rel.label) {
+          line += ` : ${escapeUml(rel.label)}`;
+        }
+
+        lines.push(line);
+      }
+      lines.push('');
+    }
+
+    // Notes
+    if (this.notes.length > 0) {
+      for (const note of this.notes) {
+        const position = note.position || 'right';
+        if (note.attachTo) {
+          const attachId = sanitizeUmlId(note.attachTo);
+          lines.push(`note ${position} of ${attachId}: ${escapeUml(note.text)}`);
+        } else {
+          lines.push(`note "${escapeUml(note.text)}" as N${this.notes.indexOf(note)}`);
+        }
+      }
+      lines.push('');
+    }
+
+    // Raw lines
+    if (this.rawLines.length > 0) {
+      for (const raw of this.rawLines) {
+        lines.push(raw);
+      }
+      lines.push('');
+    }
+
+    // Footer
+    lines.push('@enduml');
+
+    return lines.join('\n');
+  }
 }

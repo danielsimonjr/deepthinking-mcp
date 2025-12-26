@@ -1,6 +1,7 @@
 /**
- * HTML Export Utilities (v7.1.0)
+ * HTML Export Utilities (v8.5.0)
  * Phase 10: Shared utilities for HTML visual exports
+ * Phase 13 Sprint 3: Added HTMLDocBuilder fluent API
  *
  * Provides reusable functions for generating HTML exports across all modes.
  */
@@ -362,4 +363,265 @@ export function renderList(items: string[], ordered: boolean = false): string {
   const tag = ordered ? 'ol' : 'ul';
   const listItems = items.map(item => `<li>${escapeHTML(item)}</li>`).join('\n');
   return `<${tag} class="list-styled">${listItems}</${tag}>`;
+}
+
+// =============================================================================
+// HTMLDocBuilder Fluent API (Phase 13 Sprint 3)
+// =============================================================================
+
+/**
+ * HTMLDocBuilder options
+ */
+export interface HTMLDocBuilderOptions {
+  standalone?: boolean;
+  theme?: 'light' | 'dark' | 'auto';
+  customStyles?: string;
+}
+
+/**
+ * HTMLDocBuilder - Fluent API for building HTML documents
+ *
+ * @example
+ * ```typescript
+ * const html = new HTMLDocBuilder()
+ *   .setTitle('Analysis Report')
+ *   .setTheme('light')
+ *   .addHeading(1, 'Main Title')
+ *   .addParagraph('This is a paragraph.')
+ *   .addTable(['Col1', 'Col2'], [['A', 'B'], ['C', 'D']])
+ *   .render();
+ * ```
+ */
+export class HTMLDocBuilder {
+  private title: string = 'Document';
+  private sections: string[] = [];
+  private options: HTMLDocBuilderOptions = { standalone: true, theme: 'light' };
+  private styles: string[] = [];
+
+  /**
+   * Set or merge builder options
+   * @param options - Options to set/merge
+   * @returns this for chaining
+   */
+  setOptions(options: HTMLDocBuilderOptions): this {
+    this.options = { ...this.options, ...options };
+    return this;
+  }
+
+  /**
+   * Set the document title
+   * @param title - The document title
+   * @returns this for chaining
+   */
+  setTitle(title: string): this {
+    this.title = title;
+    return this;
+  }
+
+  /**
+   * Set the theme
+   * @param theme - The theme ('light', 'dark', or 'auto')
+   * @returns this for chaining
+   */
+  setTheme(theme: 'light' | 'dark' | 'auto'): this {
+    this.options.theme = theme;
+    return this;
+  }
+
+  /**
+   * Set standalone mode
+   * @param standalone - Whether to generate a full HTML document
+   * @returns this for chaining
+   */
+  setStandalone(standalone: boolean): this {
+    this.options.standalone = standalone;
+    return this;
+  }
+
+  /**
+   * Add custom CSS styles
+   * @param css - CSS string to add
+   * @returns this for chaining
+   */
+  addStyle(css: string): this {
+    this.styles.push(css);
+    return this;
+  }
+
+  /**
+   * Add a heading
+   * @param level - Heading level (1-6)
+   * @param text - Heading text
+   * @returns this for chaining
+   */
+  addHeading(level: 1 | 2 | 3 | 4 | 5 | 6, text: string): this {
+    this.sections.push(`<h${level}>${escapeHTML(text)}</h${level}>`);
+    return this;
+  }
+
+  /**
+   * Add a paragraph
+   * @param text - Paragraph text
+   * @param className - Optional CSS class name
+   * @returns this for chaining
+   */
+  addParagraph(text: string, className?: string): this {
+    const classAttr = className ? ` class="${className}"` : '';
+    this.sections.push(`<p${classAttr}>${escapeHTML(text)}</p>`);
+    return this;
+  }
+
+  /**
+   * Add raw HTML content
+   * @param html - Raw HTML string
+   * @returns this for chaining
+   */
+  addRaw(html: string): this {
+    this.sections.push(html);
+    return this;
+  }
+
+  /**
+   * Add a list
+   * @param items - List items
+   * @param ordered - Whether the list is ordered
+   * @returns this for chaining
+   */
+  addList(items: string[], ordered: boolean = false): this {
+    this.sections.push(renderList(items, ordered));
+    return this;
+  }
+
+  /**
+   * Add a table
+   * @param headers - Table headers
+   * @param rows - Table rows
+   * @param caption - Optional table caption
+   * @returns this for chaining
+   */
+  addTable(headers: string[], rows: (string | number)[][], caption?: string): this {
+    this.sections.push(renderTable(headers, rows, { caption }));
+    return this;
+  }
+
+  /**
+   * Add a div container
+   * @param content - Content to wrap
+   * @param className - Optional CSS class
+   * @returns this for chaining
+   */
+  addDiv(content: string, className?: string): this {
+    const classAttr = className ? ` class="${className}"` : '';
+    this.sections.push(`<div${classAttr}>${content}</div>`);
+    return this;
+  }
+
+  /**
+   * Add a section with header
+   * @param title - Section title
+   * @param content - Section content
+   * @param icon - Optional icon
+   * @returns this for chaining
+   */
+  addSection(title: string, content: string, icon?: string): this {
+    this.sections.push(renderSection(title, content, icon));
+    return this;
+  }
+
+  /**
+   * Add a metric card
+   * @param label - Metric label
+   * @param value - Metric value
+   * @param color - Optional color ('primary', 'success', 'warning', 'danger', 'info')
+   * @returns this for chaining
+   */
+  addMetricCard(label: string, value: string | number, color?: string): this {
+    this.sections.push(renderMetricCard(label, value, color));
+    return this;
+  }
+
+  /**
+   * Add a progress bar
+   * @param percent - Progress percentage (0-100)
+   * @param color - Optional color
+   * @returns this for chaining
+   */
+  addProgressBar(percent: number, color: string = 'primary'): this {
+    this.sections.push(renderProgressBar(percent, color));
+    return this;
+  }
+
+  /**
+   * Add a badge
+   * @param text - Badge text
+   * @param type - Badge type
+   * @returns this for chaining
+   */
+  addBadge(text: string, type: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'secondary' = 'primary'): this {
+    this.sections.push(renderBadge(text, type));
+    return this;
+  }
+
+  /**
+   * Begin a metrics grid container
+   * @returns this for chaining
+   */
+  beginMetricsGrid(): this {
+    this.sections.push('<div class="metrics-grid">');
+    return this;
+  }
+
+  /**
+   * End a metrics grid container
+   * @returns this for chaining
+   */
+  endMetricsGrid(): this {
+    this.sections.push('</div>');
+    return this;
+  }
+
+  /**
+   * Add a card
+   * @param header - Card header
+   * @param content - Card content
+   * @returns this for chaining
+   */
+  addCard(header: string, content: string): this {
+    this.sections.push(`
+      <div class="card">
+        <div class="card-header">${escapeHTML(header)}</div>
+        ${content}
+      </div>`);
+    return this;
+  }
+
+  /**
+   * Reset the builder to initial state
+   * @returns this for chaining
+   */
+  reset(): this {
+    this.title = 'Document';
+    this.sections = [];
+    this.styles = [];
+    this.options = { standalone: true, theme: 'light' };
+    return this;
+  }
+
+  /**
+   * Render the document to HTML string
+   * @returns The complete HTML document or fragment
+   */
+  render(): string {
+    const customStyles = this.styles.join('\n');
+    const header = generateHTMLHeader(this.title, {
+      standalone: this.options.standalone,
+      theme: this.options.theme,
+      customStyles,
+    });
+
+    const content = this.sections.join('\n');
+    const footer = generateHTMLFooter(this.options.standalone);
+
+    return header + content + footer;
+  }
 }
