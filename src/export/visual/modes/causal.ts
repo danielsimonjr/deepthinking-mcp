@@ -1,13 +1,18 @@
 /**
- * Causal Visual Exporter (v7.0.3)
+ * Causal Visual Exporter (v8.5.0)
  * Sprint 8 Task 8.1: Causal graph export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
  * Phase 9: Added GraphML and TikZ export support
+ * Phase 13 Sprint 8: Refactored to use fluent builder classes
  */
 
 import type { CausalThought } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder, type DotNodeShape } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -105,67 +110,61 @@ function causalGraphToMermaid(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph TB\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('TB');
 
   if (!thought.causalGraph || !thought.causalGraph.nodes) {
-    return mermaid + '  NoData["No causal graph data"]\n';
+    builder.addNode({ id: 'NoData', label: 'No causal graph data', shape: 'rectangle' });
+    return builder.render();
   }
 
+  // Determine colors based on scheme
+  const causeColor = scheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
+  const effectColor = scheme === 'pastel' ? '#fff3e0' : '#ffd699';
+
+  // Add nodes with appropriate shapes and styles
   for (const node of thought.causalGraph.nodes) {
     const nodeId = sanitizeId(node.id);
     const label = includeLabels ? node.name : nodeId;
 
-    let shape: [string, string];
+    let shape: 'stadium' | 'subroutine' | 'rectangle' | 'rhombus';
+    let fillColor: string | undefined;
     switch (node.type) {
       case 'cause':
-        shape = ['([', '])'];
+        shape = 'stadium';
+        fillColor = causeColor;
         break;
       case 'effect':
-        shape = ['[[', ']]'];
+        shape = 'subroutine';
+        fillColor = effectColor;
         break;
       case 'mediator':
-        shape = ['[', ']'];
+        shape = 'rectangle';
         break;
       case 'confounder':
-        shape = ['{', '}'];
+        shape = 'rhombus';
         break;
       default:
-        shape = ['[', ']'];
+        shape = 'rectangle';
     }
 
-    mermaid += `  ${nodeId}${shape[0]}${label}${shape[1]}\n`;
+    // Add node with style for color scheme
+    const nodeStyle = fillColor && scheme !== 'monochrome' ? { fill: fillColor } : undefined;
+    builder.addNode({ id: nodeId, label, shape, style: nodeStyle });
   }
 
-  mermaid += '\n';
-
+  // Add edges
   for (const edge of thought.causalGraph.edges) {
     const fromId = sanitizeId(edge.from);
     const toId = sanitizeId(edge.to);
+    const label = includeMetrics && edge.strength !== undefined
+      ? edge.strength.toFixed(2)
+      : undefined;
 
-    if (includeMetrics && edge.strength !== undefined) {
-      mermaid += `  ${fromId} --> |${edge.strength.toFixed(2)}| ${toId}\n`;
-    } else {
-      mermaid += `  ${fromId} --> ${toId}\n`;
-    }
+    builder.addEdge({ source: fromId, target: toId, label });
   }
 
-  if (colorScheme !== 'monochrome') {
-    mermaid += '\n';
-    const causes = thought.causalGraph.nodes.filter(n => n.type === 'cause');
-    const effects = thought.causalGraph.nodes.filter(n => n.type === 'effect');
-
-    for (const node of causes) {
-      const color = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
-      mermaid += `  style ${sanitizeId(node.id)} fill:${color}\n`;
-    }
-
-    for (const node of effects) {
-      const color = colorScheme === 'pastel' ? '#fff3e0' : '#ffd699';
-      mermaid += `  style ${sanitizeId(node.id)} fill:${color}\n`;
-    }
-  }
-
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function causalGraphToDOT(
@@ -173,20 +172,22 @@ function causalGraphToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph CausalGraph {\n';
-  dot += '  rankdir=TB;\n';
-  dot += '  node [shape=box, style=rounded];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('CausalGraph')
+    .setRankDir('TB')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
   if (!thought.causalGraph || !thought.causalGraph.nodes) {
-    dot += '  NoData [label="No causal graph data"];\n}\n';
-    return dot;
+    builder.addNode({ id: 'NoData', label: 'No causal graph data' });
+    return builder.render();
   }
 
+  // Add nodes with appropriate shapes
   for (const node of thought.causalGraph.nodes) {
     const nodeId = sanitizeId(node.id);
     const label = includeLabels ? node.name : nodeId;
 
-    let shape = 'box';
+    let shape: DotNodeShape = 'box';
     switch (node.type) {
       case 'cause': shape = 'ellipse'; break;
       case 'effect': shape = 'doubleoctagon'; break;
@@ -194,50 +195,53 @@ function causalGraphToDOT(
       case 'confounder': shape = 'diamond'; break;
     }
 
-    dot += `  ${nodeId} [label="${label}", shape=${shape}];\n`;
+    builder.addNode({ id: nodeId, label, shape });
   }
 
-  dot += '\n';
-
+  // Add edges
   for (const edge of thought.causalGraph.edges) {
     const fromId = sanitizeId(edge.from);
     const toId = sanitizeId(edge.to);
+    const label = includeMetrics && edge.strength !== undefined
+      ? edge.strength.toFixed(2)
+      : undefined;
 
-    if (includeMetrics && edge.strength !== undefined) {
-      dot += `  ${fromId} -> ${toId} [label="${edge.strength.toFixed(2)}"];\n`;
-    } else {
-      dot += `  ${fromId} -> ${toId};\n`;
-    }
+    builder.addEdge({ source: fromId, target: toId, label });
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function causalGraphToASCII(thought: CausalThought): string {
-  let ascii = 'Causal Graph:\n';
-  ascii += '=============\n\n';
+  const builder = new ASCIIDocBuilder()
+    .setMaxWidth(60)
+    .addHeader('Causal Graph');
 
   if (!thought.causalGraph || !thought.causalGraph.nodes) {
-    return ascii + 'No causal graph data\n';
+    builder.addSection('Status')
+      .addText('No causal graph data\n');
+    return builder.render();
   }
 
-  ascii += 'Nodes:\n';
+  // Nodes section
+  builder.addSection('Nodes');
   for (const node of thought.causalGraph.nodes) {
     const nodeType = node.type ? `[${node.type.toUpperCase()}] ` : '';
     const nodeDesc = node.description ? `: ${node.description}` : '';
-    ascii += `  ${nodeType}${node.name}${nodeDesc}\n`;
+    builder.addText(`${nodeType}${node.name}${nodeDesc}\n`);
   }
+  builder.addEmptyLine();
 
-  ascii += '\nEdges:\n';
+  // Edges section
+  builder.addSection('Edges');
   for (const edge of thought.causalGraph.edges) {
     const fromNode = thought.causalGraph.nodes.find(n => n.id === edge.from);
     const toNode = thought.causalGraph.nodes.find(n => n.id === edge.to);
     const strength = edge.strength !== undefined ? ` (strength: ${edge.strength.toFixed(2)})` : '';
-    ascii += `  ${fromNode?.name} --> ${toNode?.name}${strength}\n`;
+    builder.addText(`${fromNode?.name} --> ${toNode?.name}${strength}\n`);
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**

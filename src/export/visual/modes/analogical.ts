@@ -1,13 +1,18 @@
 /**
- * Analogical Visual Exporter (v7.0.3)
+ * Analogical Visual Exporter (v8.5.0)
  * Sprint 8 Task 8.1: Analogical domain mapping export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
  * Phase 9: Added GraphML and TikZ export support
+ * Phase 13 Sprint 8: Refactored to use fluent builder classes
  */
 
 import type { AnalogicalThought } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -108,49 +113,40 @@ function analogicalToMermaid(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph LR\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('LR');
 
-  mermaid += '  subgraph Source["Source Domain"]\n';
+  // Collect source domain node IDs
+  const sourceNodeIds: string[] = [];
   for (const entity of thought.sourceDomain.entities) {
     const entityId = sanitizeId('src_' + entity.id);
     const label = includeLabels ? entity.name : entityId;
-    mermaid += `    ${entityId}["${label}"]\n`;
+    builder.addNode({ id: entityId, label, shape: 'rectangle' });
+    sourceNodeIds.push(entityId);
   }
-  mermaid += '  end\n\n';
 
-  mermaid += '  subgraph Target["Target Domain"]\n';
+  // Collect target domain node IDs
+  const targetNodeIds: string[] = [];
   for (const entity of thought.targetDomain.entities) {
     const entityId = sanitizeId('tgt_' + entity.id);
     const label = includeLabels ? entity.name : entityId;
-    mermaid += `    ${entityId}["${label}"]\n`;
+    builder.addNode({ id: entityId, label, shape: 'rectangle' });
+    targetNodeIds.push(entityId);
   }
-  mermaid += '  end\n\n';
 
+  // Add subgraphs
+  builder.addSubgraph('Source', 'Source Domain', sourceNodeIds);
+  builder.addSubgraph('Target', 'Target Domain', targetNodeIds);
+
+  // Add mapping edges
   for (const mapping of thought.mapping) {
     const srcId = sanitizeId('src_' + mapping.sourceEntityId);
     const tgtId = sanitizeId('tgt_' + mapping.targetEntityId);
-    const confidenceLabel = includeMetrics ? `|${mapping.confidence.toFixed(2)}|` : '';
-
-    mermaid += `  ${srcId} -.->${confidenceLabel} ${tgtId}\n`;
+    const label = includeMetrics ? mapping.confidence.toFixed(2) : undefined;
+    builder.addEdge({ source: srcId, target: tgtId, label, style: 'dotted' });
   }
 
-  if (colorScheme !== 'monochrome') {
-    mermaid += '\n';
-    const srcColor = colorScheme === 'pastel' ? '#fff3e0' : '#ffd699';
-    const tgtColor = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
-
-    for (const entity of thought.sourceDomain.entities) {
-      const entityId = sanitizeId('src_' + entity.id);
-      mermaid += `  style ${entityId} fill:${srcColor}\n`;
-    }
-
-    for (const entity of thought.targetDomain.entities) {
-      const entityId = sanitizeId('tgt_' + entity.id);
-      mermaid += `  style ${entityId} fill:${tgtColor}\n`;
-    }
-  }
-
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function analogicalToDOT(
@@ -158,72 +154,89 @@ function analogicalToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph AnalogicalMapping {\n';
-  dot += '  rankdir=LR;\n';
-  dot += '  node [shape=box, style=rounded];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('AnalogicalMapping')
+    .setRankDir('LR')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
-  dot += '  subgraph cluster_source {\n';
-  dot += '    label="Source Domain";\n';
-  dot += '    style=filled;\n';
-  dot += '    fillcolor=lightyellow;\n\n';
-
+  // Collect source domain node IDs
+  const sourceNodeIds: string[] = [];
   for (const entity of thought.sourceDomain.entities) {
     const entityId = sanitizeId('src_' + entity.id);
     const label = includeLabels ? entity.name : entityId;
-    dot += `    ${entityId} [label="${label}"];\n`;
+    builder.addNode({ id: entityId, label });
+    sourceNodeIds.push(entityId);
   }
 
-  dot += '  }\n\n';
-
-  dot += '  subgraph cluster_target {\n';
-  dot += '    label="Target Domain";\n';
-  dot += '    style=filled;\n';
-  dot += '    fillcolor=lightblue;\n\n';
-
+  // Collect target domain node IDs
+  const targetNodeIds: string[] = [];
   for (const entity of thought.targetDomain.entities) {
     const entityId = sanitizeId('tgt_' + entity.id);
     const label = includeLabels ? entity.name : entityId;
-    dot += `    ${entityId} [label="${label}"];\n`;
+    builder.addNode({ id: entityId, label });
+    targetNodeIds.push(entityId);
   }
 
-  dot += '  }\n\n';
+  // Add subgraphs (clusters)
+  builder.addSubgraph({
+    id: 'cluster_source',
+    label: 'Source Domain',
+    nodes: sourceNodeIds,
+    style: 'filled',
+    fillColor: 'lightyellow',
+  });
+  builder.addSubgraph({
+    id: 'cluster_target',
+    label: 'Target Domain',
+    nodes: targetNodeIds,
+    style: 'filled',
+    fillColor: 'lightblue',
+  });
 
+  // Mapping edges
   for (const mapping of thought.mapping) {
     const srcId = sanitizeId('src_' + mapping.sourceEntityId);
     const tgtId = sanitizeId('tgt_' + mapping.targetEntityId);
-    const confidenceLabel = includeMetrics ? `, label="${mapping.confidence.toFixed(2)}"` : '';
-
-    dot += `  ${srcId} -> ${tgtId} [style=dashed${confidenceLabel}];\n`;
+    const label = includeMetrics ? mapping.confidence.toFixed(2) : undefined;
+    builder.addEdge({ source: srcId, target: tgtId, label, style: 'dashed' });
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function analogicalToASCII(thought: AnalogicalThought): string {
-  let ascii = 'Analogical Domain Mapping:\n';
-  ascii += '==========================\n\n';
+  const builder = new ASCIIDocBuilder()
+    .setMaxWidth(60)
+    .addHeader('Analogical Domain Mapping');
 
-  ascii += `Source Domain: ${thought.sourceDomain.name}\n`;
-  ascii += `${thought.sourceDomain.description}\n\n`;
+  // Source domain
+  builder.addSection('Source Domain')
+    .addText(`${thought.sourceDomain.name}\n${thought.sourceDomain.description}\n`)
+    .addEmptyLine();
 
-  ascii += `Target Domain: ${thought.targetDomain.name}\n`;
-  ascii += `${thought.targetDomain.description}\n\n`;
+  // Target domain
+  builder.addSection('Target Domain')
+    .addText(`${thought.targetDomain.name}\n${thought.targetDomain.description}\n`)
+    .addEmptyLine();
 
-  ascii += 'Mappings:\n';
+  // Mappings
+  builder.addSection('Mappings');
   for (const mapping of thought.mapping) {
     const srcEntity = thought.sourceDomain.entities.find(e => e.id === mapping.sourceEntityId);
     const tgtEntity = thought.targetDomain.entities.find(e => e.id === mapping.targetEntityId);
 
     if (srcEntity && tgtEntity) {
-      ascii += `  ${srcEntity.name} ←→ ${tgtEntity.name} (confidence: ${mapping.confidence.toFixed(2)})\n`;
-      ascii += `    ${mapping.justification}\n`;
+      builder.addText(`${srcEntity.name} ←→ ${tgtEntity.name} (confidence: ${mapping.confidence.toFixed(2)})\n`);
+      builder.addText(`  ${mapping.justification}\n`);
     }
   }
+  builder.addEmptyLine();
 
-  ascii += `\nAnalogy Strength: ${thought.analogyStrength.toFixed(2)}\n`;
+  // Summary
+  builder.addSection('Summary')
+    .addText(`Analogy Strength: ${thought.analogyStrength.toFixed(2)}\n`);
 
-  return ascii;
+  return builder.render();
 }
 
 /**

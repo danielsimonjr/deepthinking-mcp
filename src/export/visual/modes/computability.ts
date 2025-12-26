@@ -1,6 +1,7 @@
 /**
- * Computability Visual Exporter (v7.2.0)
+ * Computability Visual Exporter (v8.5.0)
  * Phase 11: Turing machine diagrams, reduction chains, computation traces
+ * Phase 13 Sprint 8: Refactored to use fluent builder classes
  *
  * Inspired by Alan Turing's foundational work on computability (1936)
  * Exports reasoning about computability theory to visual formats
@@ -9,6 +10,10 @@
 import type { ComputabilityThought, TuringMachine, Reduction } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder, type DotNodeStyle } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -119,6 +124,7 @@ function computabilityToMermaid(thought: ComputabilityThought, options: VisualEx
 
 /**
  * Turing machine to Mermaid state diagram
+ * Note: Uses raw string building as MermaidGraphBuilder doesn't support stateDiagram-v2 syntax
  */
 function turingMachineToMermaid(machine: TuringMachine, includeLabels: boolean): string {
   let mermaid = 'stateDiagram-v2\n';
@@ -146,7 +152,7 @@ function turingMachineToMermaid(machine: TuringMachine, includeLabels: boolean):
  * Reduction chain to Mermaid
  */
 function reductionChainToMermaid(reductions: Reduction[], chain: string[] | undefined, includeLabels: boolean): string {
-  let mermaid = 'graph LR\n';
+  const builder = new MermaidGraphBuilder().setDirection('LR');
 
   if (chain && chain.length > 0) {
     // Use the chain ordering
@@ -154,20 +160,24 @@ function reductionChainToMermaid(reductions: Reduction[], chain: string[] | unde
       const from = sanitizeId(chain[i]);
       const to = sanitizeId(chain[i + 1]);
       const reduction = reductions.find(r => r.fromProblem === chain[i] && r.toProblem === chain[i + 1]);
-      const label = includeLabels && reduction ? `≤${reduction.type === 'polynomial_time' ? 'p' : 'm'}` : '';
-      mermaid += `  ${from}["${chain[i]}"] -->|${label}| ${to}["${chain[i + 1]}"]\n`;
+      const label = includeLabels && reduction ? `≤${reduction.type === 'polynomial_time' ? 'p' : 'm'}` : undefined;
+      builder.addNode({ id: from, label: chain[i], shape: 'rectangle' });
+      builder.addNode({ id: to, label: chain[i + 1], shape: 'rectangle' });
+      builder.addEdge({ source: from, target: to, label });
     }
   } else {
     // Show all reductions
     for (const r of reductions) {
       const from = sanitizeId(r.fromProblem);
       const to = sanitizeId(r.toProblem);
-      const label = includeLabels ? `≤${r.type === 'polynomial_time' ? 'p' : 'm'}` : '';
-      mermaid += `  ${from}["${r.fromProblem}"] -->|${label}| ${to}["${r.toProblem}"]\n`;
+      const label = includeLabels ? `≤${r.type === 'polynomial_time' ? 'p' : 'm'}` : undefined;
+      builder.addNode({ id: from, label: r.fromProblem, shape: 'rectangle' });
+      builder.addNode({ id: to, label: r.toProblem, shape: 'rectangle' });
+      builder.addEdge({ source: from, target: to, label });
     }
   }
 
-  return mermaid;
+  return builder.render();
 }
 
 /**
@@ -175,23 +185,16 @@ function reductionChainToMermaid(reductions: Reduction[], chain: string[] | unde
  */
 function decidabilityProofToMermaid(thought: ComputabilityThought, _includeLabels: boolean): string {
   const proof = thought.decidabilityProof!;
-  let mermaid = 'graph TD\n';
+  const builder = new MermaidGraphBuilder().setDirection('TD');
 
-  mermaid += `  problem["Problem: ${proof.problem}"]\n`;
-  mermaid += `  method["Method: ${proof.method}"]\n`;
-  mermaid += `  conclusion["${proof.conclusion.toUpperCase()}"]\n`;
+  builder.addNode({ id: 'problem', label: `Problem: ${proof.problem}`, shape: 'rectangle' });
+  builder.addNode({ id: 'method', label: `Method: ${proof.method}`, shape: 'rectangle' });
+  builder.addNode({ id: 'conclusion', label: proof.conclusion.toUpperCase(), shape: 'rectangle' });
 
-  mermaid += '  problem --> method\n';
-  mermaid += '  method --> conclusion\n';
+  builder.addEdge({ source: 'problem', target: 'method' });
+  builder.addEdge({ source: 'method', target: 'conclusion' });
 
-  // Style based on conclusion
-  if (proof.conclusion === 'undecidable') {
-    mermaid += '  style conclusion fill:#ffcccc,stroke:#ff0000\n';
-  } else if (proof.conclusion === 'decidable') {
-    mermaid += '  style conclusion fill:#ccffcc,stroke:#00ff00\n';
-  }
-
-  return mermaid;
+  return builder.render();
 }
 
 /**
@@ -220,153 +223,152 @@ function computabilityToDOT(thought: ComputabilityThought, options: VisualExport
  * Turing machine to DOT
  */
 function turingMachineToDOT(machine: TuringMachine, includeLabels: boolean): string {
-  let dot = `digraph TuringMachine {\n`;
-  dot += '  rankdir=LR;\n';
-  dot += '  node [shape=circle];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('TuringMachine')
+    .setRankDir('LR')
+    .setNodeDefaults({ shape: 'circle' });
 
   // Initial state marker
-  dot += '  start [shape=point];\n';
-  dot += `  start -> ${sanitizeId(machine.initialState)};\n\n`;
+  builder.addNode({ id: 'start', shape: 'point' });
+  builder.addEdge({ source: 'start', target: sanitizeId(machine.initialState) });
 
   // States
   for (const state of machine.states) {
     const isAccept = machine.acceptStates.includes(state);
     const isReject = machine.rejectStates.includes(state);
-    const shape = isAccept ? 'doublecircle' : isReject ? 'circle, style=filled, fillcolor=lightgray' : 'circle';
-    dot += `  ${sanitizeId(state)} [label="${state}", shape=${shape}];\n`;
+    const shape = isAccept ? 'doublecircle' : 'circle';
+    const style: DotNodeStyle | DotNodeStyle[] | undefined = isReject ? ['filled'] as DotNodeStyle[] : undefined;
+    const fillColor = isReject ? 'lightgray' : undefined;
+    builder.addNode({ id: sanitizeId(state), label: state, shape, style, fillColor });
   }
-
-  dot += '\n';
 
   // Transitions
   for (const t of machine.transitions) {
-    const label = includeLabels ? `${t.readSymbol}/${t.writeSymbol},${t.direction}` : '';
-    dot += `  ${sanitizeId(t.fromState)} -> ${sanitizeId(t.toState)}`;
-    if (label) {
-      dot += ` [label="${label}"]`;
-    }
-    dot += ';\n';
+    const label = includeLabels ? `${t.readSymbol}/${t.writeSymbol},${t.direction}` : undefined;
+    builder.addEdge({ source: sanitizeId(t.fromState), target: sanitizeId(t.toState), label });
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 /**
  * Reduction chain to DOT
  */
 function reductionChainToDOT(reductions: Reduction[], _chain: string[] | undefined, includeLabels: boolean): string {
-  let dot = 'digraph ReductionChain {\n';
-  dot += '  rankdir=LR;\n';
-  dot += '  node [shape=box, style=rounded];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('ReductionChain')
+    .setRankDir('LR')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
+  // Collect all problems
   const problems = new Set<string>();
   for (const r of reductions) {
     problems.add(r.fromProblem);
     problems.add(r.toProblem);
   }
 
+  // Add problem nodes
   for (const p of problems) {
-    dot += `  ${sanitizeId(p)} [label="${p}"];\n`;
+    builder.addNode({ id: sanitizeId(p), label: p });
   }
 
-  dot += '\n';
-
+  // Add reduction edges
   for (const r of reductions) {
-    const label = includeLabels ? `≤${r.type === 'polynomial_time' ? 'p' : 'm'}` : '';
-    dot += `  ${sanitizeId(r.fromProblem)} -> ${sanitizeId(r.toProblem)}`;
-    if (label) {
-      dot += ` [label="${label}"]`;
-    }
-    dot += ';\n';
+    const label = includeLabels ? `≤${r.type === 'polynomial_time' ? 'p' : 'm'}` : undefined;
+    builder.addEdge({ source: sanitizeId(r.fromProblem), target: sanitizeId(r.toProblem), label });
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 /**
  * Export to ASCII art
  */
 function computabilityToASCII(thought: ComputabilityThought): string {
-  let ascii = 'COMPUTABILITY ANALYSIS\n';
-  ascii += '='.repeat(50) + '\n\n';
+  const builder = new ASCIIDocBuilder()
+    .setMaxWidth(50)
+    .addHeader('COMPUTABILITY ANALYSIS');
 
-  ascii += `Type: ${thought.thoughtType}\n`;
+  builder.addSection('Type')
+    .addText(`${thought.thoughtType}\n`)
+    .addEmptyLine();
 
   if (thought.keyInsight) {
-    ascii += `\nKey Insight: ${thought.keyInsight}\n`;
+    builder.addSection('Key Insight')
+      .addText(`${thought.keyInsight}\n`)
+      .addEmptyLine();
   }
 
   // Turing machine
   if (thought.currentMachine) {
     const m = thought.currentMachine;
-    ascii += `\nTuring Machine: ${m.name}\n`;
-    ascii += '-'.repeat(30) + '\n';
-    ascii += `States: {${m.states.join(', ')}}\n`;
-    ascii += `Initial: ${m.initialState}\n`;
-    ascii += `Accept: {${m.acceptStates.join(', ')}}\n`;
-    ascii += `Transitions: ${m.transitions.length}\n`;
+    builder.addSection('Turing Machine')
+      .addText(`Name: ${m.name}\n`)
+      .addText(`States: {${m.states.join(', ')}}\n`)
+      .addText(`Initial: ${m.initialState}\n`)
+      .addText(`Accept: {${m.acceptStates.join(', ')}}\n`)
+      .addText(`Transitions: ${m.transitions.length}\n`)
+      .addEmptyLine();
   }
 
   // Computation trace
   if (thought.computationTrace) {
     const trace = thought.computationTrace;
-    ascii += `\nComputation Trace:\n`;
-    ascii += '-'.repeat(30) + '\n';
-    ascii += `Input: ${trace.input}\n`;
-    ascii += `Steps: ${trace.totalSteps}\n`;
-    ascii += `Result: ${trace.result.toUpperCase()}\n`;
+    builder.addSection('Computation Trace')
+      .addText(`Input: ${trace.input}\n`)
+      .addText(`Steps: ${trace.totalSteps}\n`)
+      .addText(`Result: ${trace.result.toUpperCase()}\n`);
 
     // Show first few steps
     for (const step of trace.steps.slice(0, 5)) {
       const head = ' '.repeat(step.headPosition) + 'v';
-      ascii += `  [${step.stepNumber}] ${step.state}: ${step.tapeContents}\n`;
-      ascii += `       ${head}\n`;
+      builder.addText(`[${step.stepNumber}] ${step.state}: ${step.tapeContents}\n`);
+      builder.addText(`     ${head}\n`);
     }
     if (trace.steps.length > 5) {
-      ascii += `  ... (${trace.steps.length - 5} more steps)\n`;
+      builder.addText(`... (${trace.steps.length - 5} more steps)\n`);
     }
+    builder.addEmptyLine();
   }
 
   // Decidability proof
   if (thought.decidabilityProof) {
     const proof = thought.decidabilityProof;
-    ascii += `\nDecidability Analysis:\n`;
-    ascii += '-'.repeat(30) + '\n';
-    ascii += `Problem: ${proof.problem}\n`;
-    ascii += `Method: ${proof.method}\n`;
-    ascii += `Conclusion: ${proof.conclusion.toUpperCase()}\n`;
+    builder.addSection('Decidability Analysis')
+      .addText(`Problem: ${proof.problem}\n`)
+      .addText(`Method: ${proof.method}\n`)
+      .addText(`Conclusion: ${proof.conclusion.toUpperCase()}\n`);
 
     if (proof.proofSteps.length > 0) {
-      ascii += '\nProof Steps:\n';
+      builder.addEmptyLine()
+        .addText('Proof Steps:\n');
       for (let i = 0; i < Math.min(proof.proofSteps.length, 5); i++) {
-        ascii += `  ${i + 1}. ${proof.proofSteps[i]}\n`;
+        builder.addText(`  ${i + 1}. ${proof.proofSteps[i]}\n`);
       }
     }
+    builder.addEmptyLine();
   }
 
   // Reductions
   if (thought.reductions && thought.reductions.length > 0) {
-    ascii += `\nReductions:\n`;
-    ascii += '-'.repeat(30) + '\n';
+    builder.addSection('Reductions');
     for (const r of thought.reductions) {
-      ascii += `  ${r.fromProblem} ≤${r.type === 'polynomial_time' ? 'p' : 'm'} ${r.toProblem}\n`;
+      builder.addText(`${r.fromProblem} ≤${r.type === 'polynomial_time' ? 'p' : 'm'} ${r.toProblem}\n`);
     }
+    builder.addEmptyLine();
   }
 
   // Diagonalization
   if (thought.diagonalization) {
     const diag = thought.diagonalization;
-    ascii += `\nDiagonalization Argument:\n`;
-    ascii += '-'.repeat(30) + '\n';
-    ascii += `Pattern: ${diag.pattern}\n`;
-    ascii += `Enumeration: ${diag.enumeration.description}\n`;
-    ascii += `Diagonal: ${diag.diagonalConstruction.description}\n`;
-    ascii += `Contradiction: ${diag.contradiction.impossibility}\n`;
+    builder.addSection('Diagonalization Argument')
+      .addText(`Pattern: ${diag.pattern}\n`)
+      .addText(`Enumeration: ${diag.enumeration.description}\n`)
+      .addText(`Diagonal: ${diag.diagonalConstruction.description}\n`)
+      .addText(`Contradiction: ${diag.contradiction.impossibility}\n`);
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**

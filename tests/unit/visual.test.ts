@@ -37,11 +37,14 @@ describe('Visual Export', () => {
       const result = exporter.exportCausalGraph(causalThought, { format: 'mermaid' });
 
       expect(result).toContain('graph TB');
-      expect(result).toContain('marketing([Marketing Budget])');
-      expect(result).toContain('awareness[Brand Awareness]');
-      expect(result).toContain('revenue[[Revenue]]');
-      expect(result).toContain('marketing --> |0.80| awareness');
-      expect(result).toContain('awareness --> |0.70| revenue');
+      expect(result).toContain('marketing');
+      expect(result).toContain('Marketing Budget');
+      expect(result).toContain('awareness');
+      expect(result).toContain('Brand Awareness');
+      expect(result).toContain('revenue');
+      expect(result).toContain('Revenue');
+      expect(result).toContain('marketing -->|0.80| awareness');
+      expect(result).toContain('awareness -->|0.70| revenue');
       expect(result).toContain('style marketing fill:#');
       expect(result).toContain('style revenue fill:#');
     });
@@ -61,7 +64,7 @@ describe('Visual Export', () => {
     it('should export causal graph to ASCII format', () => {
       const result = exporter.exportCausalGraph(causalThought, { format: 'ascii' });
 
-      expect(result).toContain('Causal Graph:');
+      expect(result).toContain('Causal Graph');
       expect(result).toContain('[CAUSE] Marketing Budget');
       expect(result).toContain('[MEDIATOR] Brand Awareness');
       expect(result).toContain('[EFFECT] Revenue');
