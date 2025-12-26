@@ -336,16 +336,26 @@ const counterfactualThought = {
   id: 'cf-1',
   mode: ThinkingMode.COUNTERFACTUAL,
   content: 'Counterfactual analysis',
-  interventionPoint: { description: 'Change X to Y', impact: 'high' },
-  scenarios: [
+  interventionPoint: {
+    description: 'Change X to Y',
+    timing: 'early',
+    feasibility: 0.85,
+    impact: 'high',
+  },
+  actual: {
+    id: 'actual-1',
+    name: 'Actual Outcome',
+    description: 'What actually happened',
+  },
+  counterfactuals: [
     {
-      id: 's1',
-      description: 'What if scenario',
-      antecedent: 'If X had happened',
-      consequent: 'Then Y would follow',
-      plausibility: 0.7,
+      id: 'cf-scenario-1',
+      name: 'Alternative Outcome',
+      description: 'What would have happened',
+      likelihood: 0.7,
     },
   ],
+  scenarios: [],
   comparisons: [],
 } as any;
 
@@ -487,10 +497,28 @@ const optimizationThought = {
   id: 'opt-1',
   mode: ThinkingMode.OPTIMIZATION,
   content: 'Optimization problem',
-  objectiveFunction: 'maximize f(x)',
-  constraints: ['x >= 0'],
-  variables: [{ name: 'x', type: 'continuous', bounds: [0, 100] }],
-  currentSolution: { x: 50 },
+  problem: { name: 'Maximize Resource Allocation' },
+  variables: [
+    {
+      id: 'var-x',
+      name: 'x',
+      type: 'continuous',
+      domain: { lowerBound: 0, upperBound: 100 },
+    },
+    {
+      id: 'var-y',
+      name: 'y',
+      type: 'continuous',
+      domain: { lowerBound: 0, upperBound: 50 },
+    },
+  ],
+  optimizationConstraints: [
+    { id: 'c1', name: 'Budget Constraint', expression: 'x + y <= 100' },
+  ],
+  objectives: [
+    { id: 'obj-1', name: 'Maximize Output', type: 'maximize' },
+  ],
+  solution: { quality: 0.95 },
   optimality: 0.95,
 } as any;
 
@@ -523,11 +551,32 @@ const abductiveThought = {
   id: 'abd-1',
   mode: ThinkingMode.ABDUCTIVE,
   content: 'Abductive reasoning',
-  observations: ['Observation 1', 'Observation 2'],
-  hypotheses: [
-    { id: 'h1', description: 'Hypothesis 1', plausibility: 0.8, explanatoryPower: 0.9 },
+  observations: [
+    { id: 'obs-1', description: 'Observation 1', confidence: 0.9 },
+    { id: 'obs-2', description: 'Observation 2', confidence: 0.85 },
   ],
-  bestExplanation: 'Hypothesis 1',
+  hypotheses: [
+    {
+      id: 'h1',
+      explanation: 'Hypothesis 1 explains the observations based on prior knowledge and inference patterns',
+      score: 0.8,
+      assumptions: ['Assumption A', 'Assumption B'],
+      plausibility: 0.8,
+      explanatoryPower: 0.9,
+    },
+    {
+      id: 'h2',
+      explanation: 'Hypothesis 2 provides an alternative explanation with different assumptions',
+      score: 0.6,
+      assumptions: ['Assumption C'],
+      plausibility: 0.6,
+      explanatoryPower: 0.7,
+    },
+  ],
+  bestExplanation: {
+    id: 'h1',
+    explanation: 'Hypothesis 1 explains the observations based on prior knowledge and inference patterns',
+  },
 } as any;
 
 describe('Abductive Mode Exporter Snapshots', () => {
@@ -559,9 +608,39 @@ const analogicalThought = {
   id: 'ana-1',
   mode: ThinkingMode.ANALOGICAL,
   content: 'Analogical reasoning',
-  sourceDomain: { name: 'Source', elements: ['A', 'B'], relations: [{ from: 'A', to: 'B', type: 'causes' }] },
-  targetDomain: { name: 'Target', elements: ['X', 'Y'], relations: [] },
-  mappings: [{ source: 'A', target: 'X', strength: 0.9, justification: 'Similar role' }],
+  sourceDomain: {
+    name: 'Source Domain',
+    description: 'The source domain for analogy',
+    entities: [
+      { id: 'src-a', name: 'Entity A' },
+      { id: 'src-b', name: 'Entity B' },
+    ],
+    relations: [{ from: 'src-a', to: 'src-b', type: 'causes' }],
+  },
+  targetDomain: {
+    name: 'Target Domain',
+    description: 'The target domain for analogy',
+    entities: [
+      { id: 'tgt-x', name: 'Entity X' },
+      { id: 'tgt-y', name: 'Entity Y' },
+    ],
+    relations: [],
+  },
+  mapping: [
+    {
+      sourceEntityId: 'src-a',
+      targetEntityId: 'tgt-x',
+      confidence: 0.9,
+      justification: 'Similar structural role',
+    },
+    {
+      sourceEntityId: 'src-b',
+      targetEntityId: 'tgt-y',
+      confidence: 0.8,
+      justification: 'Similar behavioral patterns',
+    },
+  ],
+  analogyStrength: 0.85,
   insights: ['Insight from analogy'],
 } as any;
 
@@ -594,11 +673,49 @@ const firstPrinciplesThought = {
   id: 'fp-1',
   mode: ThinkingMode.FIRSTPRINCIPLES,
   content: 'First principles analysis',
-  fundamentalPrinciples: [
-    { id: 'p1', statement: 'Principle 1', domain: 'general', certainty: 1.0 },
+  question: 'What are the fundamental truths that govern this problem?',
+  principles: [
+    {
+      id: 'p1',
+      type: 'axiom',
+      statement: 'Principle 1: Every effect has a cause, and every action has a consequence',
+      justification: 'Fundamental law of causality',
+      dependsOn: [],
+      confidence: 1.0,
+    },
+    {
+      id: 'p2',
+      type: 'definition',
+      statement: 'Principle 2: Systems tend toward equilibrium unless perturbed by external forces',
+      justification: 'Thermodynamic principle',
+      dependsOn: ['p1'],
+      confidence: 0.95,
+    },
   ],
   derivationSteps: [
-    { stepNumber: 1, statement: 'From principle 1', fromPrinciples: ['p1'], justification: 'Direct' },
+    {
+      stepNumber: 1,
+      principle: 'p1',
+      inference: 'From the causality principle, we can derive that the observed phenomenon must have an underlying cause',
+      confidence: 0.9,
+      logicalForm: 'P → Q',
+    },
+    {
+      stepNumber: 2,
+      principle: 'p2',
+      inference: 'Applying the equilibrium principle, the system will stabilize at a predictable state',
+      confidence: 0.85,
+      logicalForm: '∀x(S(x) → E(x))',
+    },
+  ],
+  conclusion: {
+    statement: 'Based on first principles, the system behavior is deterministic and predictable',
+    derivationChain: [1, 2],
+    certainty: 0.88,
+    limitations: ['Assumes closed system', 'Ignores quantum effects'],
+  },
+  fundamentalPrinciples: [
+    { id: 'p1', statement: 'Principle 1', domain: 'general', certainty: 1.0 },
   ],
   derivedConclusion: { statement: 'Conclusion', confidence: 0.9 },
 } as any;
@@ -632,8 +749,56 @@ const metaReasoningThought = {
   id: 'meta-1',
   mode: ThinkingMode.METAREASONING,
   content: 'Meta reasoning',
-  currentStrategy: { name: 'Strategy 1', effectiveness: 0.8, description: 'Test strategy' },
-  strategyEvaluation: { accuracy: 0.9, efficiency: 0.85, appropriateness: 0.8 },
+  currentStrategy: {
+    approach: 'Systematic decomposition with parallel evaluation',
+    mode: 'sequential',
+    effectiveness: 0.8,
+    description: 'Test strategy',
+    thoughtsSpent: 5,
+    progressIndicators: [
+      { name: 'Problem Definition', status: 'complete' },
+      { name: 'Solution Search', status: 'in_progress' },
+    ],
+  },
+  strategyEvaluation: {
+    effectiveness: 0.85,
+    accuracy: 0.9,
+    efficiency: 0.85,
+    appropriateness: 0.8,
+    qualityScore: 0.87,
+    progressRate: 0.72,
+    confidence: 0.88,
+    issues: ['Limited exploration depth', 'May miss edge cases'],
+    strengths: ['Fast convergence', 'Low resource usage'],
+  },
+  qualityMetrics: {
+    overallQuality: 0.82,
+    coherence: 0.9,
+    completeness: 0.75,
+    consistency: 0.85,
+  },
+  resourceAllocation: {
+    timeSpent: 1500,
+    thoughtsRemaining: 10,
+    complexityLevel: 'medium',
+  },
+  sessionContext: {
+    sessionId: 'session-meta-1',
+    totalThoughts: 15,
+    modeSwitches: 2,
+    problemType: 'analytical',
+    modesUsed: ['sequential', 'causal', 'bayesian'],
+    historicalEffectiveness: 0.78,
+  },
+  alternativeStrategies: [
+    { mode: 'causal', recommendationScore: 0.75 },
+    { mode: 'bayesian', recommendationScore: 0.65 },
+  ],
+  recommendation: {
+    action: 'continue',
+    targetMode: 'causal',
+    justification: 'Causal mode offers better exploration',
+  },
   adaptations: [],
 } as any;
 
@@ -780,16 +945,31 @@ const engineeringThought = {
   mode: ThinkingMode.ENGINEERING,
   content: 'Engineering analysis',
   analysisType: 'system',
-  designChallenge: 'Build a scalable architecture',
+  designChallenge: 'Build a scalable microservices architecture with high availability',
   requirements: {
     requirements: [
-      { id: 'r1', title: 'Requirement 1', description: 'Desc 1', priority: 'high', type: 'functional', status: 'verified' },
+      { id: 'r1', title: 'High Availability Requirement', description: '99.9% uptime', priority: 'high', type: 'functional', status: 'verified' },
+      { id: 'r2', title: 'Scalability Requirement', description: 'Handle 10x load', priority: 'high', type: 'functional', status: 'implemented' },
     ],
+    coverage: {
+      verified: 1,
+      implemented: 1,
+      total: 2,
+      percentage: 100,
+    },
   },
   designDecisions: {
     decisions: [
-      { id: 'd1', description: 'Decision 1', rationale: 'Best option', tradeoffs: [] },
+      { id: 'd1', title: 'Use Kubernetes', description: 'Container orchestration', status: 'accepted', rationale: 'Industry standard', tradeoffs: [] },
+      { id: 'd2', title: 'Event-driven architecture', description: 'Async messaging', status: 'proposed', rationale: 'Loose coupling', tradeoffs: [] },
     ],
+  },
+  assessment: {
+    confidence: 0.85,
+    risks: [],
+    keyRisks: ['Data migration complexity', 'Third-party API dependencies'],
+    openIssues: ['Performance testing pending', 'Security audit scheduled'],
+    recommendations: [],
   },
   constraints: ['Budget limit', 'Time constraint'],
   implementation: { status: 'in_progress', completeness: 0.5 },

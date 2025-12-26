@@ -706,6 +706,7 @@ export class MermaidGraphBuilder {
 
   /**
    * Get the current node count
+   * @returns The number of nodes in the diagram
    */
   get nodeCount(): number {
     return this.nodes.length;
@@ -713,6 +714,7 @@ export class MermaidGraphBuilder {
 
   /**
    * Get the current edge count
+   * @returns The number of edges in the diagram
    */
   get edgeCount(): number {
     return this.edges.length;
@@ -720,6 +722,7 @@ export class MermaidGraphBuilder {
 
   /**
    * Get the current subgraph count
+   * @returns The number of subgraphs in the diagram
    */
   get subgraphCount(): number {
     return this.subgraphs.length;

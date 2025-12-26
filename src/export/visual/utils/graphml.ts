@@ -497,6 +497,7 @@ export class GraphMLBuilder {
 
   /**
    * Get the current node count
+   * @returns The number of nodes in the graph
    */
   get nodeCount(): number {
     return this.nodes.length;
@@ -504,6 +505,7 @@ export class GraphMLBuilder {
 
   /**
    * Get the current edge count
+   * @returns The number of edges in the graph
    */
   get edgeCount(): number {
     return this.edges.length;

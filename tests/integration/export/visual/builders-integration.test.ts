@@ -521,6 +521,147 @@ describe('Builder Integration Tests', () => {
   });
 
   // ============================================================================
+  // Error Handling Tests
+  // ============================================================================
+  describe('Builder error handling', () => {
+    it('DOTGraphBuilder should handle empty graph gracefully', () => {
+      const builder = new DOTGraphBuilder();
+      const result = builder.render();
+      expect(result).toContain('digraph');
+      expect(result).toContain('}');
+    });
+
+    it('DOTGraphBuilder should handle nodes with special characters in IDs', () => {
+      const builder = new DOTGraphBuilder()
+        .addNode({ id: 'node-with-dashes', label: 'Test' })
+        .addNode({ id: 'node_with_underscores', label: 'Test 2' })
+        .addNode({ id: 'node123', label: 'Test 3' });
+
+      const result = builder.render();
+      expect(result).toContain('node-with-dashes');
+      expect(result).toContain('node_with_underscores');
+    });
+
+    it('MermaidGraphBuilder should handle empty graph gracefully', () => {
+      const builder = new MermaidGraphBuilder();
+      const result = builder.render();
+      expect(result).toContain('graph');
+    });
+
+    it('GraphMLBuilder should handle empty graph gracefully', () => {
+      const builder = new GraphMLBuilder();
+      const result = builder.render();
+      expect(result).toContain('<?xml');
+      expect(result).toContain('<graphml');
+      expect(result).toContain('</graphml>');
+    });
+
+    it('SVGBuilder should handle missing dimensions with defaults', () => {
+      const builder = new SVGBuilder();
+      const result = builder.render();
+      expect(result).toContain('<svg');
+      expect(result).toContain('</svg>');
+    });
+
+    it('TikZBuilder should handle empty diagram gracefully', () => {
+      const builder = new TikZBuilder();
+      const result = builder.render();
+      expect(result).toContain('\\begin{tikzpicture}');
+      expect(result).toContain('\\end{tikzpicture}');
+    });
+
+    it('UMLBuilder should handle empty diagram gracefully', () => {
+      const builder = new UMLBuilder();
+      const result = builder.render();
+      expect(result).toContain('@startuml');
+      expect(result).toContain('@enduml');
+    });
+
+    it('HTMLDocBuilder should handle minimal document', () => {
+      const builder = new HTMLDocBuilder();
+      const result = builder.render();
+      expect(result).toContain('<!DOCTYPE html>');
+      expect(result).toContain('</html>');
+    });
+
+    it('MarkdownBuilder should handle minimal document', () => {
+      const builder = new MarkdownBuilder();
+      const result = builder.render();
+      expect(typeof result).toBe('string');
+    });
+
+    it('ModelicaBuilder should handle minimal package', () => {
+      const builder = new ModelicaBuilder()
+        .beginPackage('MinimalPackage', 'A minimal package')
+        .endPackage();
+      const result = builder.render();
+      expect(result).toContain('package MinimalPackage');
+      expect(result).toContain('end MinimalPackage');
+    });
+
+    it('JSONExportBuilder should handle export with minimal metadata', () => {
+      const builder = new JSONExportBuilder()
+        .setMetadata({ title: 'Empty Export' });
+      const result = builder.render();
+      const parsed = JSON.parse(result);
+      expect(parsed).toBeDefined();
+      expect(parsed.metadata).toBeDefined();
+      expect(parsed.metadata.title).toBe('Empty Export');
+    });
+
+    it('DOTGraphBuilder should track node and edge counts accurately', () => {
+      const builder = new DOTGraphBuilder()
+        .addNode({ id: 'a', label: 'A' })
+        .addNode({ id: 'b', label: 'B' })
+        .addNode({ id: 'c', label: 'C' })
+        .addEdge({ source: 'a', target: 'b' })
+        .addEdge({ source: 'b', target: 'c' });
+
+      expect(builder.nodeCount).toBe(3);
+      expect(builder.edgeCount).toBe(2);
+    });
+
+    it('ASCIIDocBuilder should handle empty document gracefully', () => {
+      const builder = new ASCIIDocBuilder();
+      const result = builder.render();
+      expect(typeof result).toBe('string');
+    });
+
+    it('SVGBuilder should handle zero dimensions gracefully', () => {
+      const builder = new SVGBuilder().setDimensions(0, 0);
+      const result = builder.render();
+      expect(result).toContain('<svg');
+    });
+
+    it('TikZBuilder standalone should include all LaTeX document structure', () => {
+      const builder = TikZBuilder.standalone();
+      const result = builder.render();
+      expect(result).toContain('\\documentclass');
+      expect(result).toContain('\\usepackage{tikz}');
+      expect(result).toContain('\\begin{document}');
+      expect(result).toContain('\\end{document}');
+    });
+
+    it('HTMLDocBuilder should handle dark theme', () => {
+      const builder = new HTMLDocBuilder().setTheme('dark');
+      const result = builder.render();
+      expect(result).toContain('<!DOCTYPE html>');
+    });
+
+    it('MarkdownBuilder should handle table of contents with sections', () => {
+      const builder = new MarkdownBuilder()
+        .enableTableOfContents()
+        .addHeading(1, 'Section 1')
+        .addHeading(2, 'Subsection 1.1')
+        .addHeading(1, 'Section 2');
+
+      const result = builder.render();
+      expect(result).toContain('# Section 1');
+      expect(result).toContain('## Subsection 1.1');
+    });
+  });
+
+  // ============================================================================
   // Builder Chaining and Composition Patterns
   // ============================================================================
   describe('Builder composition patterns', () => {

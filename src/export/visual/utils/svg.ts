@@ -706,6 +706,7 @@ export class SVGGroupBuilder {
 
   /**
    * Render the group as SVG string
+   * @returns The complete SVG group element string
    */
   render(): string {
     const attrs: string[] = [];
@@ -1063,6 +1064,7 @@ export class SVGBuilder {
 
   /**
    * Get the current element count
+   * @returns The number of SVG elements added
    */
   get elementCount(): number {
     return this.elements.length;
