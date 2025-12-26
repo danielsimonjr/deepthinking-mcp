@@ -47,7 +47,7 @@ Refactored four mode exporter files to use the fluent builder APIs:
 - **Builder Adoption**: ✅ All 4 files use fluent builder APIs
 - **Typecheck**: ✅ Clean (`npm run typecheck` - no issues in refactored files)
 - **Full Test Suite**: ✅ 4681 tests passing across 168 test files
-- **Total Mode Exporters Refactored**: 13/22 (59%)
+- **Total Mode Exporters Refactored**: 12/22 (55%)
 
 ---
 
