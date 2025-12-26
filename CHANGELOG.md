@@ -123,6 +123,49 @@ Added five new builder classes for UML, HTML, Markdown, Modelica, and JSON forma
 
 ---
 
+### Added - Phase 13 Sprint 4: Integration Tests & Documentation
+
+**Integration Tests for Builder Usage Patterns**
+
+Created comprehensive integration tests demonstrating real-world builder usage:
+
+- **`tests/integration/export/visual/builders-integration.test.ts`** (18 tests)
+  - DOTGraphBuilder: Sequential reasoning flows, causal networks with subgraphs
+  - MermaidGraphBuilder: Bayesian reasoning flows, workflow diagrams with subgraphs
+  - GraphMLBuilder: Dependency graphs for analysis mode
+  - ASCIIDocBuilder: Reasoning summary documents
+  - SVGBuilder: Visual reasoning diagrams with shapes/text/lines
+  - SVGGroupBuilder: Grouped SVG elements
+  - TikZBuilder: LaTeX-compatible diagrams, standalone documents
+  - UMLBuilder: Reasoning architecture class diagrams
+  - HTMLDocBuilder: Analysis report HTML documents
+  - MarkdownBuilder: Reasoning session summaries
+  - ModelicaBuilder: System dynamics models
+  - JSONExportBuilder: Complete reasoning session exports
+  - Cross-builder patterns: Nested path setting, builder reuse with clear(), builder reset
+
+- **`tests/integration/export/visual/mode-exporters-snapshot.test.ts`** (15 tests)
+  - DOT Builder Output Snapshots: Sequential flows, subgraph handling
+  - Mermaid Builder Output Snapshots: Flowchart generation
+  - GraphML Builder Output Snapshots: Valid XML structure
+  - SVG Builder Output Snapshots: SVG element rendering
+  - TikZ Builder Output Snapshots: LaTeX output, standalone documents
+  - UML Builder Output Snapshots: PlantUML class diagrams
+  - HTML Builder Output Snapshots: HTML document structure
+  - Markdown Builder Output Snapshots: Markdown formatting
+  - Modelica Builder Output Snapshots: Modelica package generation
+  - JSON Builder Output Snapshots: JSON structure validation
+  - Cross-Builder Consistency Tests: Node/edge counts, format consistency
+
+### Validation - Sprint 4
+
+- **Integration Tests**: ✅ 33 tests passing (18 builder integration + 15 snapshot tests)
+- **Full Test Suite**: ✅ 4573 tests passing
+- **Typecheck**: ✅ Clean
+- **Build**: ✅ Successful
+
+---
+
 ### Added - Phase 13 Sprint 1: Core Graph Builders
 
 **Fluent API Builder Classes for Visual Export Refactoring**

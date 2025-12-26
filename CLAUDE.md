@@ -420,6 +420,12 @@ Generate dependency docs: `npm run docs:deps`
 - Added `JSONExportBuilder` fluent API class to `src/export/visual/utils/json.ts`
 - Created 115 unit tests in `tests/unit/export/visual/utils/document-builders.test.ts`
 
+**Sprint 4 (v8.5.0)**: Integration Tests & Documentation
+
+- Created `tests/integration/export/visual/builders-integration.test.ts` with 18 real-world usage tests
+- Created `tests/integration/export/visual/mode-exporters-snapshot.test.ts` with 15 snapshot tests
+- Tests cover all 11 builder classes: DOTGraphBuilder, MermaidGraphBuilder, GraphMLBuilder, ASCIIDocBuilder, SVGBuilder, SVGGroupBuilder, TikZBuilder, UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder
+
 **Builder Pattern Benefits**:
 
 ```typescript
@@ -436,11 +442,10 @@ const dot = new DOTGraphBuilder()
   .render();
 ```
 
-**Remaining Sprints** (7 more planned):
+**Remaining Sprints** (6 more planned):
 
 | Sprint | Focus |
 |--------|-------|
-| 4 | JSDoc, integration tests, snapshot baselines |
 | 5-7 | Refactor 12 critical files (>1000 lines) |
 | 8-9 | Refactor remaining 9 modes for consistency |
 | 10 | File splitting if needed, final verification |

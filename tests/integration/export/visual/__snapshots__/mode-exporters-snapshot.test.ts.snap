@@ -1,0 +1,379 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DOT Builder Output Snapshots > should generate consistent DOT output for sequential flow 1`] = `
+"digraph SequentialFlow {
+  rankdir=LR;
+
+  step1 [label="Identify Problem", shape=ellipse, color="lightblue"];
+  step2 [label="Analyze", shape=box];
+  step3 [label="Solve", shape=box];
+  step4 [label="Verify", shape=doubleoctagon, color="lightgreen"];
+
+  step1 -> step2;
+  step2 -> step3;
+  step3 -> step4;
+}"
+`;
+
+exports[`HTML Builder Output Snapshots > should generate valid HTML document 1`] = `
+"<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Report</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #333333;
+      --primary-color: #2563eb;
+      --secondary-color: #6b7280;
+      --success-color: #16a34a;
+      --warning-color: #ca8a04;
+      --danger-color: #dc2626;
+      --info-color: #0891b2;
+      --border-color: #e5e7eb;
+      --table-header-bg: #f3f4f6;
+      --table-row-bg: #ffffff;
+      --table-row-alt-bg: #f9fafb;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--text-color);
+      background-color: var(--bg-color);
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    h1, h2, h3, h4 { margin-top: 1.5rem; margin-bottom: 0.5rem; }
+    h1 { font-size: 2rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; color: var(--primary-color); }
+    h3 { font-size: 1.25rem; }
+
+    .section {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-primary { background: var(--primary-color); color: white; }
+    .badge-success { background: var(--success-color); color: white; }
+    .badge-warning { background: var(--warning-color); color: black; }
+    .badge-danger { background: var(--danger-color); color: white; }
+    .badge-info { background: var(--info-color); color: white; }
+    .badge-secondary { background: var(--secondary-color); color: white; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border-color);
+    }
+
+    th {
+      background: var(--table-header-bg);
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) { background: var(--table-row-alt-bg); }
+    tr:nth-child(odd) { background: var(--table-row-bg); }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .metric-card {
+      padding: 1rem;
+      background: var(--table-header-bg);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+
+    .metric-label {
+      font-size: 0.85rem;
+      color: var(--secondary-color);
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary-color);
+      transition: width 0.3s ease;
+    }
+
+    .list-styled {
+      list-style: none;
+      padding: 0;
+    }
+
+    .list-styled li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .list-styled li:last-child { border-bottom: none; }
+
+    .icon { margin-right: 0.5rem; }
+
+    .text-success { color: var(--success-color); }
+    .text-warning { color: var(--warning-color); }
+    .text-danger { color: var(--danger-color); }
+    .text-info { color: var(--info-color); }
+    .text-secondary { color: var(--secondary-color); }
+
+    .card {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 0.5rem 0;
+    }
+
+    .card-header {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .flex { display: flex; }
+    .flex-wrap { flex-wrap: wrap; }
+    .gap-1 { gap: 0.5rem; }
+    .gap-2 { gap: 1rem; }
+
+    .footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: var(--secondary-color);
+      text-align: center;
+    }
+
+    
+  </style>
+</head>
+<body>
+<h1>Report Title</h1>
+<p>This is a test paragraph.</p>
+<table><thead><tr><th>Column A</th><th>Column B</th></tr></thead><tbody><tr><td>Value 1</td><td>Value 2</td></tr></tbody></table>
+  <div class="footer">
+    Generated by DeepThinking MCP v8.3.1
+  </div>
+</body>
+</html>"
+`;
+
+exports[`Markdown Builder Output Snapshots > should generate valid Markdown document 1`] = `
+"# Test Document
+
+## Section One
+
+This is a paragraph.
+
+- Item 1
+- Item 2
+- Item 3
+
+\`\`\`typescript
+const x = 1;
+\`\`\`
+"
+`;
+
+exports[`Mermaid Builder Output Snapshots > should generate consistent Mermaid flowchart 1`] = `
+"graph TD
+
+  a(["Start"])
+  b["Process"]
+  c["Decision"]
+  d(["End"])
+
+  a --> b
+  b --> c
+  c -->|yes| d"
+`;
+
+exports[`Modelica Builder Output Snapshots > should generate valid Modelica package 1`] = `
+"package TestPackage
+  "A test package"
+
+  model TestModel
+    "A test model"
+
+    parameter Real x() = 1 "Parameter x";
+    Real y(start=0) "Variable y";
+    equation
+      der(y) = x;
+    annotation(
+      Documentation(info="<html>
+        <p>A test model</p>
+      </html>")
+    );
+  end TestModel;
+
+  annotation(
+    Documentation(info="<html>
+      <p>Generated by DeepThinking MCP v8.5.0</p>
+    </html>"),
+    version="1.0.0"
+  );
+end TestPackage;"
+`;
+
+exports[`SVG Builder Output Snapshots > should generate valid SVG structure 1`] = `
+"<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e53935"/>
+    </marker>
+    <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#388e3c"/>
+    </marker>
+    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1976d2"/>
+    </marker>
+  </defs>
+
+  <style>
+    .title { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; }
+    .subtitle { font-family: Arial, sans-serif; font-size: 12px; fill: #666; font-style: italic; }
+    .node-label { font-family: Arial, sans-serif; font-size: 12px; }
+    .edge-label { font-family: Arial, sans-serif; font-size: 10px; fill: #666; }
+    .metrics { font-family: Arial, sans-serif; font-size: 11px; fill: #444; }
+    .legend-text { font-family: Arial, sans-serif; font-size: 10px; }
+    .node { fill: #e0e0e0; }
+  </style>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#fafafa"/>
+
+  <!-- Title -->
+  <text x="200" y="25" text-anchor="middle" class="title">Test Diagram</text>
+
+  <!-- Elements -->
+  <rect x="50" y="50" width="100" height="50" rx="5"/>
+  <text x="100" y="80" text-anchor="middle">Node 1</text>
+  <line x1="150" y1="75" x2="200" y2="75" stroke="#333"/>
+  <rect x="200" y="50" width="100" height="50" rx="5"/>
+  <text x="250" y="80" text-anchor="middle">Node 2</text>
+</svg>"
+`;
+
+exports[`TikZ Builder Output Snapshots > should generate standalone TikZ document 1`] = `
+"\\documentclass[tikz,border=10pt]{standalone}
+\\usepackage{tikz}
+\\usetikzlibrary{shapes,arrows,positioning,calc,backgrounds,fit}
+\\begin{document}
+\\begin{tikzpicture}[
+  every node/.style={font=\\small},
+  box/.style={rectangle, draw, rounded corners=3pt, minimum width=2cm, minimum height=0.8cm, text centered},
+  circle node/.style={circle, draw, minimum size=0.8cm, text centered},
+  ellipse node/.style={ellipse, draw, minimum width=2cm, minimum height=0.8cm, text centered},
+  diamond node/.style={diamond, draw, aspect=2, minimum width=1.5cm, text centered},
+  stadium node/.style={rectangle, draw, rounded corners=0.4cm, minimum width=2cm, minimum height=0.8cm, text centered},
+  arrow/.style={->, >=stealth, thick},
+  dashed arrow/.style={->, >=stealth, thick, dashed},
+  dotted arrow/.style={->, >=stealth, thick, dotted},
+  edge label/.style={font=\\footnotesize, fill=white, inner sep=1pt}
+]
+
+% Title
+\\node[font=\\large\\bfseries] at (4, 0.5) {Diagram};
+
+  % Nodes
+
+  \\node[box, fill=gray!20, draw=gray!60] (root) at (0, 0) {Root};
+\\end{tikzpicture}
+\\end{document}"
+`;
+
+exports[`TikZ Builder Output Snapshots > should generate valid TikZ output 1`] = `
+"\\begin{tikzpicture}[
+  every node/.style={font=\\small},
+  box/.style={rectangle, draw, rounded corners=3pt, minimum width=2cm, minimum height=0.8cm, text centered},
+  circle node/.style={circle, draw, minimum size=0.8cm, text centered},
+  ellipse node/.style={ellipse, draw, minimum width=2cm, minimum height=0.8cm, text centered},
+  diamond node/.style={diamond, draw, aspect=2, minimum width=1.5cm, text centered},
+  stadium node/.style={rectangle, draw, rounded corners=0.4cm, minimum width=2cm, minimum height=0.8cm, text centered},
+  arrow/.style={->, >=stealth, thick},
+  dashed arrow/.style={->, >=stealth, thick, dashed},
+  dotted arrow/.style={->, >=stealth, thick, dotted},
+  edge label/.style={font=\\footnotesize, fill=white, inner sep=1pt}
+]
+
+  % Nodes
+
+  \\node[box, fill=blue!20, draw=blue!60] (a) at (0, 0) {Node A};
+
+  \\node[box, fill=gray!20, draw=gray!60, right=3cm of a] (b) {Node B};
+
+  % Edges
+
+  \\draw[arrow] (a) -- node[edge label, midway] {connects} (b);
+\\end{tikzpicture}"
+`;
+
+exports[`UML Builder Output Snapshots > should generate valid PlantUML class diagram 1`] = `
+"@startuml
+title Class Diagram
+top to bottom direction
+
+abstract class "BaseClass" as BaseClass {
+  -field: string
+  --
+  +method(): void
+}
+class "DerivedClass" as DerivedClass {
+  +specialMethod(): number
+}
+
+DerivedClass --|> BaseClass
+
+@enduml"
+`;
