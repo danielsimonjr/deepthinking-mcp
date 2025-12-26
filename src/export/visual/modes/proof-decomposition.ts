@@ -1,6 +1,7 @@
 /**
- * Proof Decomposition Visual Exporter (v7.0.0)
+ * Proof Decomposition Visual Exporter (v8.5.0)
  * Phase 8 Sprint 4: Visual export for proof decomposition structures
+ * Phase 13 Sprint 5: Refactored to use fluent builder classes
  *
  * Exports ProofDecomposition to Mermaid, DOT, ASCII, and SVG formats
  * with styled nodes based on statement type:
@@ -14,6 +15,10 @@
 import type { ProofDecomposition, AtomicStatement } from '../../../types/modes/mathematics.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateHTMLHeader,
   generateHTMLFooter,
@@ -89,54 +94,7 @@ export function exportProofDecomposition(
   }
 }
 
-/**
- * Get node shape for Mermaid based on statement type
- */
-function getMermaidShape(type: AtomicStatement['type']): [string, string] {
-  switch (type) {
-    case 'axiom':
-      return ['([', '])'];  // Stadium/rounded
-    case 'definition':
-      return ['[[', ']]'];  // Subroutine
-    case 'hypothesis':
-      return ['[', ']'];    // Rectangle
-    case 'lemma':
-      return ['{{', '}}'];  // Hexagon
-    case 'derived':
-      return ['(', ')'];    // Default rounded
-    case 'conclusion':
-      return ['{', '}'];    // Diamond shape via styling
-    default:
-      return ['(', ')'];
-  }
-}
-
-/**
- * Get color for statement type
- */
-function getNodeColor(type: AtomicStatement['type'], colorScheme: string): string {
-  if (colorScheme === 'monochrome') return '#ffffff';
-
-  const colors = colorScheme === 'pastel'
-    ? {
-        axiom: '#c8e6c9',      // Light green
-        definition: '#e1bee7',  // Light purple
-        hypothesis: '#bbdefb',  // Light blue
-        lemma: '#fff9c4',       // Light yellow
-        derived: '#e0e0e0',     // Light gray
-        conclusion: '#d1c4e9',  // Light purple
-      }
-    : {
-        axiom: '#81c784',      // Green
-        definition: '#ba68c8',  // Purple
-        hypothesis: '#64b5f6',  // Blue
-        lemma: '#ffd54f',       // Yellow
-        derived: '#bdbdbd',     // Gray
-        conclusion: '#9575cd',  // Purple
-      };
-
-  return colors[type] || colors.derived;
-}
+// Note: getMermaidShape and getNodeColor removed in Phase 13 Sprint 5 - now using builder classes
 
 /**
  * Convert proof decomposition to Mermaid format
@@ -147,13 +105,8 @@ function proofDecompositionToMermaid(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph TD\n';
-
-  // Add title
-  if (decomposition.theorem) {
-    mermaid += `  title["Proof: ${decomposition.theorem.substring(0, 50)}..."]\n`;
-    mermaid += '  style title fill:#f5f5f5,stroke:#333\n\n';
-  }
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('TD');
 
   // Group atoms by type
   const axioms = decomposition.atoms.filter((a) => a.type === 'axiom');
@@ -161,120 +114,121 @@ function proofDecompositionToMermaid(
   const derived = decomposition.atoms.filter((a) => a.type === 'derived' || a.type === 'lemma');
   const conclusions = decomposition.atoms.filter((a) => a.type === 'conclusion');
 
-  // Axioms subgraph
-  if (axioms.length > 0) {
-    mermaid += '  subgraph Axioms["Axioms"]\n';
-    for (const atom of axioms) {
-      const nodeId = sanitizeId(atom.id);
-      const label = includeLabels
-        ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? '...' : '')
-        : atom.id;
-      const [open, close] = getMermaidShape(atom.type);
-      mermaid += `    ${nodeId}${open}"${label}"${close}\n`;
+  // Helper for label
+  const getLabel = (atom: AtomicStatement) => includeLabels
+    ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? '...' : '')
+    : atom.id;
+
+  // Helper to map type to Mermaid shape
+  const typeToShape = (type: AtomicStatement['type']): 'stadium' | 'subroutine' | 'rectangle' | 'hexagon' | 'circle' | 'rhombus' => {
+    switch (type) {
+      case 'axiom': return 'stadium';
+      case 'definition': return 'subroutine';
+      case 'hypothesis': return 'rectangle';
+      case 'lemma': return 'hexagon';
+      case 'conclusion': return 'rhombus';
+      default: return 'circle';
     }
-    mermaid += '  end\n\n';
+  };
+
+  // Helper to get node style based on atom type and color scheme
+  const getNodeStyle = (type: AtomicStatement['type']): { fill?: string; stroke?: string } | undefined => {
+    if (scheme === 'monochrome') return undefined;
+    const colors: Record<AtomicStatement['type'], { fill: string; stroke: string }> = {
+      axiom: { fill: '#81c784', stroke: '#388e3c' },
+      definition: { fill: '#ba68c8', stroke: '#7b1fa2' },
+      hypothesis: { fill: '#64b5f6', stroke: '#1976d2' },
+      lemma: { fill: '#ffd54f', stroke: '#ffa000' },
+      derived: { fill: '#bdbdbd', stroke: '#616161' },
+      conclusion: { fill: '#9575cd', stroke: '#512da8' },
+    };
+    return colors[type] || colors.derived;
+  };
+
+  // Title
+  if (decomposition.theorem) {
+    builder.addNode({ id: 'title', label: `Proof: ${decomposition.theorem.substring(0, 50)}...` });
   }
 
-  // Hypotheses subgraph
-  if (hypotheses.length > 0) {
-    mermaid += '  subgraph Hypotheses["Hypotheses"]\n';
-    for (const atom of hypotheses) {
-      const nodeId = sanitizeId(atom.id);
-      const label = includeLabels
-        ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? '...' : '')
-        : atom.id;
-      const [open, close] = getMermaidShape(atom.type);
-      mermaid += `    ${nodeId}${open}"${label}"${close}\n`;
-    }
-    mermaid += '  end\n\n';
-  }
-
-  // Derived statements (no subgraph, just nodes)
-  for (const atom of derived) {
+  // Add axioms
+  const axiomIds: string[] = [];
+  for (const atom of axioms) {
     const nodeId = sanitizeId(atom.id);
-    const label = includeLabels
-      ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? '...' : '')
-      : atom.id;
-    const [open, close] = getMermaidShape(atom.type);
-    mermaid += `  ${nodeId}${open}"${label}"${close}\n`;
+    builder.addNode({ id: nodeId, label: getLabel(atom), shape: typeToShape(atom.type), style: getNodeStyle(atom.type) });
+    axiomIds.push(nodeId);
+  }
+  if (axiomIds.length > 0) builder.addSubgraph('Axioms', 'Axioms', axiomIds);
+
+  // Add hypotheses
+  const hypIds: string[] = [];
+  for (const atom of hypotheses) {
+    const nodeId = sanitizeId(atom.id);
+    builder.addNode({ id: nodeId, label: getLabel(atom), shape: typeToShape(atom.type), style: getNodeStyle(atom.type) });
+    hypIds.push(nodeId);
+  }
+  if (hypIds.length > 0) builder.addSubgraph('Hypotheses', 'Hypotheses', hypIds);
+
+  // Derived statements (no subgraph)
+  for (const atom of derived) {
+    builder.addNode({ id: sanitizeId(atom.id), label: getLabel(atom), shape: typeToShape(atom.type), style: getNodeStyle(atom.type) });
   }
 
-  // Conclusions subgraph
-  if (conclusions.length > 0) {
-    mermaid += '\n  subgraph Conclusions["Conclusions"]\n';
-    for (const atom of conclusions) {
-      const nodeId = sanitizeId(atom.id);
-      const label = includeLabels
-        ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? '...' : '')
-        : atom.id;
-      mermaid += `    ${nodeId}{"${label}"}\n`;  // Diamond shape
-    }
-    mermaid += '  end\n\n';
+  // Conclusions
+  const concIds: string[] = [];
+  for (const atom of conclusions) {
+    const nodeId = sanitizeId(atom.id);
+    builder.addNode({ id: nodeId, label: getLabel(atom), shape: 'rhombus', style: getNodeStyle(atom.type) });
+    concIds.push(nodeId);
   }
+  if (concIds.length > 0) builder.addSubgraph('Conclusions', 'Conclusions', concIds);
 
-  // Add edges from dependency graph
-  if (decomposition.dependencies && decomposition.dependencies.edges) {
+  // Add dependency edges
+  if (decomposition.dependencies?.edges) {
     for (const edge of decomposition.dependencies.edges) {
-      const fromId = sanitizeId(edge.from);
-      const toId = sanitizeId(edge.to);
-      const edgeLabel = edge.inferenceRule ? ` -->|${edge.inferenceRule}| ` : ' --> ';
-      mermaid += `  ${fromId}${edgeLabel}${toId}\n`;
+      builder.addEdge({
+        source: sanitizeId(edge.from),
+        target: sanitizeId(edge.to),
+        label: edge.inferenceRule || undefined,
+      });
     }
   }
 
-  // Add gaps as dashed nodes
-  if (decomposition.gaps && decomposition.gaps.length > 0) {
-    mermaid += '\n  subgraph Gaps["Identified Gaps"]\n';
+  // Gaps
+  if (decomposition.gaps?.length) {
+    const gapIds: string[] = [];
     for (const gap of decomposition.gaps) {
       const gapId = sanitizeId(gap.id);
-      const label = gap.description.substring(0, 30) + '...';
-      mermaid += `    ${gapId}["${label}"]\n`;
-      mermaid += `    ${sanitizeId(gap.location.from)} -.->|gap| ${gapId}\n`;
-      mermaid += `    ${gapId} -.-> ${sanitizeId(gap.location.to)}\n`;
+      builder.addNode({ id: gapId, label: gap.description.substring(0, 30) + '...' });
+      builder.addEdge({ source: sanitizeId(gap.location.from), target: gapId, label: 'gap', style: 'dotted' });
+      builder.addEdge({ source: gapId, target: sanitizeId(gap.location.to), style: 'dotted' });
+      gapIds.push(gapId);
     }
-    mermaid += '  end\n';
+    builder.addSubgraph('Gaps', 'Identified Gaps', gapIds);
   }
 
-  // Add metrics
+  // Metrics
   if (includeMetrics) {
-    mermaid += '\n  subgraph Metrics["Metrics"]\n';
-    mermaid += `    m1["Completeness: ${(decomposition.completeness * 100).toFixed(0)}%"]\n`;
-    mermaid += `    m2["Rigor: ${decomposition.rigorLevel}"]\n`;
-    mermaid += `    m3["Atoms: ${decomposition.atomCount}"]\n`;
-    mermaid += `    m4["Depth: ${decomposition.maxDependencyDepth}"]\n`;
-    mermaid += '  end\n';
+    const metricIds = ['m1', 'm2', 'm3', 'm4'];
+    builder
+      .addNode({ id: 'm1', label: `Completeness: ${(decomposition.completeness * 100).toFixed(0)}%` })
+      .addNode({ id: 'm2', label: `Rigor: ${decomposition.rigorLevel}` })
+      .addNode({ id: 'm3', label: `Atoms: ${decomposition.atomCount}` })
+      .addNode({ id: 'm4', label: `Depth: ${decomposition.maxDependencyDepth}` })
+      .addSubgraph('Metrics', 'Metrics', metricIds);
   }
 
-  // Apply colors
-  if (colorScheme !== 'monochrome') {
-    mermaid += '\n';
-    for (const atom of decomposition.atoms) {
-      const nodeId = sanitizeId(atom.id);
-      const color = getNodeColor(atom.type, colorScheme);
-      mermaid += `  style ${nodeId} fill:${color}\n`;
-    }
-
-    // Style gaps as red dashed
-    if (decomposition.gaps) {
-      for (const gap of decomposition.gaps) {
-        const gapId = sanitizeId(gap.id);
-        mermaid += `  style ${gapId} fill:#ffcdd2,stroke:#e53935,stroke-dasharray: 5 5\n`;
-      }
-    }
-  }
-
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 /**
  * Get DOT node shape for statement type
  */
-function getDOTShape(type: AtomicStatement['type']): string {
+function getDOTShape(type: AtomicStatement['type']): 'ellipse' | 'box' | 'hexagon' | 'diamond' {
   switch (type) {
     case 'axiom':
       return 'ellipse';
     case 'definition':
-      return 'box3d';
+      return 'box';
     case 'hypothesis':
       return 'box';
     case 'lemma':
@@ -296,247 +250,182 @@ function proofDecompositionToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph ProofDecomposition {\n';
-  dot += '  rankdir=TB;\n';
-  dot += '  compound=true;\n';
-  dot += '  node [style="rounded,filled", fontname="Arial"];\n';
-  dot += '  edge [fontname="Arial", fontsize=10];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('ProofDecomposition')
+    .setRankDir('TB')
+    .setNodeDefaults({ style: ['rounded', 'filled'], fontName: 'Arial' })
+    .setEdgeDefaults({});
 
-  // Title
-  if (decomposition.theorem) {
-    dot += `  label="Proof: ${decomposition.theorem.substring(0, 60)}...";\n`;
-    dot += '  labelloc=t;\n';
-    dot += '  fontsize=14;\n\n';
-  }
-
-  // Group atoms by type for clustering
+  // Group atoms by type
   const axioms = decomposition.atoms.filter((a) => a.type === 'axiom');
   const hypotheses = decomposition.atoms.filter((a) => a.type === 'hypothesis');
+  const derived = decomposition.atoms.filter((a) => a.type === 'derived' || a.type === 'lemma');
   const conclusions = decomposition.atoms.filter((a) => a.type === 'conclusion');
 
-  // Axioms cluster
+  // Helper for labels
+  const getLabel = (atom: AtomicStatement) => includeLabels
+    ? atom.statement.substring(0, 40).replace(/"/g, '\\"')
+    : atom.id;
+
+  // Axioms
+  for (const atom of axioms) {
+    builder.addNode({ id: sanitizeId(atom.id), label: getLabel(atom), shape: getDOTShape(atom.type), fillColor: '#81c784' });
+  }
   if (axioms.length > 0) {
-    dot += '  subgraph cluster_axioms {\n';
-    dot += '    label="Axioms";\n';
-    dot += '    style=filled;\n';
-    dot += '    color="#e8f5e9";\n';
-    for (const atom of axioms) {
-      const nodeId = sanitizeId(atom.id);
-      const label = includeLabels
-        ? atom.statement.substring(0, 40).replace(/"/g, '\\"')
-        : atom.id;
-      dot += `    ${nodeId} [label="${label}", shape=${getDOTShape(atom.type)}, fillcolor="#81c784"];\n`;
-    }
-    dot += '  }\n\n';
+    builder.addSubgraph({ id: 'cluster_axioms', label: 'Axioms', nodes: axioms.map((a) => sanitizeId(a.id)), style: 'filled', color: '#e8f5e9' });
   }
 
-  // Hypotheses cluster
+  // Hypotheses
+  for (const atom of hypotheses) {
+    builder.addNode({ id: sanitizeId(atom.id), label: getLabel(atom), shape: getDOTShape(atom.type), fillColor: '#64b5f6' });
+  }
   if (hypotheses.length > 0) {
-    dot += '  subgraph cluster_hypotheses {\n';
-    dot += '    label="Hypotheses";\n';
-    dot += '    style=filled;\n';
-    dot += '    color="#e3f2fd";\n';
-    for (const atom of hypotheses) {
-      const nodeId = sanitizeId(atom.id);
-      const label = includeLabels
-        ? atom.statement.substring(0, 40).replace(/"/g, '\\"')
-        : atom.id;
-      dot += `    ${nodeId} [label="${label}", shape=${getDOTShape(atom.type)}, fillcolor="#64b5f6"];\n`;
-    }
-    dot += '  }\n\n';
+    builder.addSubgraph({ id: 'cluster_hypotheses', label: 'Hypotheses', nodes: hypotheses.map((a) => sanitizeId(a.id)), style: 'filled', color: '#e3f2fd' });
   }
 
-  // Derived statements (middle layer)
-  const derived = decomposition.atoms.filter((a) => a.type === 'derived' || a.type === 'lemma');
+  // Derived statements
   for (const atom of derived) {
-    const nodeId = sanitizeId(atom.id);
-    const label = includeLabels
-      ? atom.statement.substring(0, 40).replace(/"/g, '\\"')
-      : atom.id;
     const color = atom.type === 'lemma' ? '#ffd54f' : '#bdbdbd';
-    dot += `  ${nodeId} [label="${label}", shape=${getDOTShape(atom.type)}, fillcolor="${color}"];\n`;
+    builder.addNode({ id: sanitizeId(atom.id), label: getLabel(atom), shape: getDOTShape(atom.type), fillColor: color });
   }
-  dot += '\n';
 
-  // Conclusions cluster
+  // Conclusions
+  for (const atom of conclusions) {
+    builder.addNode({ id: sanitizeId(atom.id), label: getLabel(atom), shape: getDOTShape(atom.type), fillColor: '#9575cd' });
+  }
   if (conclusions.length > 0) {
-    dot += '  subgraph cluster_conclusions {\n';
-    dot += '    label="Conclusions";\n';
-    dot += '    style=filled;\n';
-    dot += '    color="#ede7f6";\n';
-    for (const atom of conclusions) {
-      const nodeId = sanitizeId(atom.id);
-      const label = includeLabels
-        ? atom.statement.substring(0, 40).replace(/"/g, '\\"')
-        : atom.id;
-      dot += `    ${nodeId} [label="${label}", shape=${getDOTShape(atom.type)}, fillcolor="#9575cd"];\n`;
-    }
-    dot += '  }\n\n';
+    builder.addSubgraph({ id: 'cluster_conclusions', label: 'Conclusions', nodes: conclusions.map((a) => sanitizeId(a.id)), style: 'filled', color: '#ede7f6' });
   }
 
-  // Add edges
-  if (decomposition.dependencies && decomposition.dependencies.edges) {
+  // Dependency edges
+  if (decomposition.dependencies?.edges) {
     for (const edge of decomposition.dependencies.edges) {
-      const fromId = sanitizeId(edge.from);
-      const toId = sanitizeId(edge.to);
-      const edgeLabel = edge.inferenceRule ? ` [label="${edge.inferenceRule}"]` : '';
-      dot += `  ${fromId} -> ${toId}${edgeLabel};\n`;
+      builder.addEdge({ source: sanitizeId(edge.from), target: sanitizeId(edge.to), label: edge.inferenceRule });
     }
   }
 
-  // Add gaps
-  if (decomposition.gaps && decomposition.gaps.length > 0) {
-    dot += '\n  // Gaps (dashed red)\n';
+  // Gaps
+  if (decomposition.gaps?.length) {
     for (const gap of decomposition.gaps) {
       const gapId = sanitizeId(gap.id);
-      const label = gap.description.substring(0, 30).replace(/"/g, '\\"');
-      dot += `  ${gapId} [label="${label}", shape=note, fillcolor="#ffcdd2", style="dashed,filled"];\n`;
-      dot += `  ${sanitizeId(gap.location.from)} -> ${gapId} [style=dashed, color=red];\n`;
-      dot += `  ${gapId} -> ${sanitizeId(gap.location.to)} [style=dashed, color=red];\n`;
+      builder.addNode({ id: gapId, label: gap.description.substring(0, 30).replace(/"/g, '\\"'), shape: 'note', fillColor: '#ffcdd2', style: 'dashed' });
+      builder.addEdge({ source: sanitizeId(gap.location.from), target: gapId, style: 'dashed', color: 'red' });
+      builder.addEdge({ source: gapId, target: sanitizeId(gap.location.to), style: 'dashed', color: 'red' });
     }
   }
 
-  // Add metrics
+  // Metrics
   if (includeMetrics) {
-    dot += '\n  // Metrics\n';
-    dot += '  subgraph cluster_metrics {\n';
-    dot += '    label="Metrics";\n';
-    dot += '    style=filled;\n';
-    dot += '    color="#f5f5f5";\n';
-    dot += `    metrics [label="Completeness: ${(decomposition.completeness * 100).toFixed(0)}%\\nRigor: ${decomposition.rigorLevel}\\nAtoms: ${decomposition.atomCount}\\nDepth: ${decomposition.maxDependencyDepth}", shape=note];\n`;
-    dot += '  }\n';
+    builder.addNode({ id: 'metrics', label: `Completeness: ${(decomposition.completeness * 100).toFixed(0)}%\\nRigor: ${decomposition.rigorLevel}\\nAtoms: ${decomposition.atomCount}\\nDepth: ${decomposition.maxDependencyDepth}`, shape: 'note' });
+    builder.addSubgraph({ id: 'cluster_metrics', label: 'Metrics', nodes: ['metrics'], style: 'filled', color: '#f5f5f5' });
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 /**
  * Convert proof decomposition to ASCII format
  */
 function proofDecompositionToASCII(decomposition: ProofDecomposition): string {
-  let ascii = '';
-
-  // Title
-  ascii += '╔════════════════════════════════════════════════════════════════╗\n';
-  ascii += '║                    PROOF DECOMPOSITION                         ║\n';
-  ascii += '╚════════════════════════════════════════════════════════════════╝\n\n';
+  const builder = new ASCIIDocBuilder()
+    .setBoxStyle('double')
+    .addBoxedTitle('PROOF DECOMPOSITION');
 
   if (decomposition.theorem) {
-    ascii += `Theorem: ${decomposition.theorem}\n\n`;
+    builder.addText(`Theorem: ${decomposition.theorem}\n`).addEmptyLine();
   }
 
   // Metrics summary
-  ascii += '┌─────────────────────────────────────────────────────────────────┐\n';
-  ascii += '│ METRICS                                                         │\n';
-  ascii += '├─────────────────────────────────────────────────────────────────┤\n';
-  ascii += `│ Completeness: ${(decomposition.completeness * 100).toFixed(0)}%`.padEnd(66) + '│\n';
-  ascii += `│ Rigor Level:  ${decomposition.rigorLevel}`.padEnd(66) + '│\n';
-  ascii += `│ Atom Count:   ${decomposition.atomCount}`.padEnd(66) + '│\n';
-  ascii += `│ Max Depth:    ${decomposition.maxDependencyDepth}`.padEnd(66) + '│\n';
-  ascii += '└─────────────────────────────────────────────────────────────────┘\n\n';
+  builder.addSection('METRICS')
+    .addText(`Completeness: ${(decomposition.completeness * 100).toFixed(0)}%\n`)
+    .addText(`Rigor Level:  ${decomposition.rigorLevel}\n`)
+    .addText(`Atom Count:   ${decomposition.atomCount}\n`)
+    .addText(`Max Depth:    ${decomposition.maxDependencyDepth}\n`)
+    .addEmptyLine();
 
   // Axioms
   const axioms = decomposition.atoms.filter((a) => a.type === 'axiom');
   if (axioms.length > 0) {
-    ascii += '┌─ AXIOMS ────────────────────────────────────────────────────────┐\n';
+    builder.addSection('AXIOMS');
     for (const atom of axioms) {
-      const marker = '◉';  // Filled circle for axioms
-      const line = `│ ${marker} [${atom.id}] ${atom.statement}`;
-      ascii += line.substring(0, 65).padEnd(66) + '│\n';
+      builder.addText(`◉ [${atom.id}] ${atom.statement.substring(0, 55)}\n`);
     }
-    ascii += '└─────────────────────────────────────────────────────────────────┘\n\n';
+    builder.addEmptyLine();
   }
 
   // Hypotheses
   const hypotheses = decomposition.atoms.filter((a) => a.type === 'hypothesis');
   if (hypotheses.length > 0) {
-    ascii += '┌─ HYPOTHESES ────────────────────────────────────────────────────┐\n';
+    builder.addSection('HYPOTHESES');
     for (const atom of hypotheses) {
-      const marker = '◆';  // Diamond for hypotheses
-      const line = `│ ${marker} [${atom.id}] ${atom.statement}`;
-      ascii += line.substring(0, 65).padEnd(66) + '│\n';
+      builder.addText(`◆ [${atom.id}] ${atom.statement.substring(0, 55)}\n`);
     }
-    ascii += '└─────────────────────────────────────────────────────────────────┘\n\n';
+    builder.addEmptyLine();
   }
 
-  // Derivation chain (derived statements with dependencies)
+  // Derivation chain
   const derived = decomposition.atoms.filter((a) => a.type === 'derived' || a.type === 'lemma');
   if (derived.length > 0) {
-    ascii += '┌─ DERIVATION CHAIN ──────────────────────────────────────────────┐\n';
+    builder.addSection('DERIVATION CHAIN');
     for (const atom of derived) {
       const marker = atom.type === 'lemma' ? '◇' : '○';
-      const deps = atom.derivedFrom && atom.derivedFrom.length > 0
-        ? ` ← [${atom.derivedFrom.join(', ')}]`
-        : '';
-      const line = `│ ${marker} [${atom.id}] ${atom.statement}${deps}`;
-      ascii += line.substring(0, 65).padEnd(66) + '│\n';
-
-      // Show inference rule if present
+      const deps = atom.derivedFrom?.length ? ` ← [${atom.derivedFrom.join(', ')}]` : '';
+      builder.addText(`${marker} [${atom.id}] ${atom.statement.substring(0, 45)}${deps}\n`);
       if (atom.usedInferenceRule) {
-        ascii += `│   └─ Rule: ${atom.usedInferenceRule}`.padEnd(66) + '│\n';
+        builder.addText(`   └─ Rule: ${atom.usedInferenceRule}\n`);
       }
     }
-    ascii += '└─────────────────────────────────────────────────────────────────┘\n\n';
+    builder.addEmptyLine();
   }
 
   // Conclusions
   const conclusions = decomposition.atoms.filter((a) => a.type === 'conclusion');
   if (conclusions.length > 0) {
-    ascii += '┌─ CONCLUSIONS ───────────────────────────────────────────────────┐\n';
+    builder.addSection('CONCLUSIONS');
     for (const atom of conclusions) {
-      const marker = '★';  // Star for conclusions
-      const deps = atom.derivedFrom && atom.derivedFrom.length > 0
-        ? ` ← [${atom.derivedFrom.join(', ')}]`
-        : '';
-      const line = `│ ${marker} [${atom.id}] ${atom.statement}${deps}`;
-      ascii += line.substring(0, 65).padEnd(66) + '│\n';
+      const deps = atom.derivedFrom?.length ? ` ← [${atom.derivedFrom.join(', ')}]` : '';
+      builder.addText(`★ [${atom.id}] ${atom.statement.substring(0, 45)}${deps}\n`);
     }
-    ascii += '└─────────────────────────────────────────────────────────────────┘\n\n';
+    builder.addEmptyLine();
   }
 
   // Gaps
-  if (decomposition.gaps && decomposition.gaps.length > 0) {
-    ascii += '┌─ GAPS (Missing Steps) ──────────────────────────────────────────┐\n';
+  if (decomposition.gaps?.length) {
+    builder.addSection('GAPS (Missing Steps)');
     for (const gap of decomposition.gaps) {
       const severityIcon = gap.severity === 'critical' ? '⚠' : gap.severity === 'significant' ? '!' : '?';
-      ascii += `│ ${severityIcon} [${gap.type}] ${gap.description}`.substring(0, 65).padEnd(66) + '│\n';
-      ascii += `│   Between: ${gap.location.from} → ${gap.location.to}`.padEnd(66) + '│\n';
+      builder.addText(`${severityIcon} [${gap.type}] ${gap.description.substring(0, 50)}\n`);
+      builder.addText(`   Between: ${gap.location.from} → ${gap.location.to}\n`);
       if (gap.suggestedFix) {
-        ascii += `│   Fix: ${gap.suggestedFix}`.substring(0, 65).padEnd(66) + '│\n';
+        builder.addText(`   Fix: ${gap.suggestedFix.substring(0, 50)}\n`);
       }
     }
-    ascii += '└─────────────────────────────────────────────────────────────────┘\n\n';
+    builder.addEmptyLine();
   }
 
   // Implicit assumptions
-  if (decomposition.implicitAssumptions && decomposition.implicitAssumptions.length > 0) {
-    ascii += '┌─ IMPLICIT ASSUMPTIONS ──────────────────────────────────────────┐\n';
+  if (decomposition.implicitAssumptions?.length) {
+    builder.addSection('IMPLICIT ASSUMPTIONS');
     for (const assumption of decomposition.implicitAssumptions) {
-      ascii += `│ • [${assumption.type}]`.padEnd(66) + '│\n';
-      ascii += `│   ${assumption.statement}`.substring(0, 65).padEnd(66) + '│\n';
+      builder.addText(`• [${assumption.type}]\n`);
+      builder.addText(`   ${assumption.statement.substring(0, 55)}\n`);
       if (assumption.shouldBeExplicit) {
-        ascii += `│   ⚠ Should be explicit`.padEnd(66) + '│\n';
+        builder.addText(`   ⚠ Should be explicit\n`);
       }
     }
-    ascii += '└─────────────────────────────────────────────────────────────────┘\n\n';
+    builder.addEmptyLine();
   }
 
-  // Dependency tree visualization
-  if (decomposition.dependencies && decomposition.dependencies.edges.length > 0) {
-    ascii += '┌─ DEPENDENCY TREE ─────────────────────────────────────────────────┐\n';
-    ascii += '│                                                                    │\n';
-
-    // Find roots (no incoming edges)
+  // Dependency tree
+  if (decomposition.dependencies?.edges.length) {
+    builder.addSection('DEPENDENCY TREE');
     const roots = decomposition.dependencies.roots || [];
     for (const rootId of roots) {
-      ascii += buildASCIITree(rootId, decomposition, 0, new Set());
+      builder.addText(buildASCIITree(rootId, decomposition, 0, new Set()));
     }
-
-    ascii += '└──────────────────────────────────────────────────────────────────┘\n';
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**

@@ -274,75 +274,84 @@ exports[`Counterfactual Mode Exporter Snapshots > Mermaid format 1`] = `
 `;
 
 exports[`Engineering Mode Exporter Snapshots > ASCII format 1`] = `
-"╔══════════════════════════════════════════════════════════╗
-║ 🔧 ENGINEERING: SYSTEM                                   ║
-╠══════════════════════════════════════════════════════════╣
-║ Challenge: Build a scalable microservices architecture wi║
-╠──────────────────────────────────────────────────────────╣
-║ 📋 REQUIREMENTS                                          ║
-║──────────────────────────────────────────────────────────║
-║ [✓] r1: High Availability Requirement                    ║
-║ [⚙] r2: Scalability Requirement                          ║
-║   Coverage: 1/2 verified                                 ║
-╠──────────────────────────────────────────────────────────╣
-║ 📝 DESIGN DECISIONS                                      ║
-║──────────────────────────────────────────────────────────║
-║ [✓] d1: Use Kubernetes                                   ║
-║ [?] d2: Event-driven architecture                        ║
-╠──────────────────────────────────────────────────────────╣
-║ 📊 ASSESSMENT                                            ║
-║   Confidence: 85%                                        ║
-║   Key Risks: 2                                           ║
-║   Open Issues: 2                                         ║
-╚══════════════════════════════════════════════════════════╝"
+"╔════════════════════════╗
+║ 🔧 ENGINEERING: SYSTEM ║
+╚════════════════════════╝
+Challenge: Build a scalable microservices architecture wi
+
+
+📋 REQUIREMENTS:
+----------------
+  * [✓] r1: High Availability Requirement
+  * [⚙] r2: Scalability Requirement
+   Coverage: 1/2 verified
+
+
+📝 DESIGN DECISIONS:
+--------------------
+  * [✓] d1: Use Kubernetes
+  * [?] d2: Event-driven architecture
+
+📊 ASSESSMENT:
+--------------
+   Confidence: 85%
+
+   Key Risks: 2
+
+   Open Issues: 2
+"
 `;
 
 exports[`Engineering Mode Exporter Snapshots > DOT format 1`] = `
 "digraph EngineeringAnalysis {
   rankdir=TB;
   node [fontname="Arial", fontsize=10];
-  edge [fontname="Arial", fontsize=9];
 
-  challenge [label="Build a scalable microservices architect", shape=box, style=filled, fillcolor=lightblue];
+  challenge [label="Build a scalable microservices architect", shape=box, style="filled", fillcolor="lightblue"];
 
-  subgraph cluster_requirements {
+  subgraph cluster_cluster_requirements {
     label="Requirements";
     style=filled;
-    fillcolor=lightyellow;
-    r1 [label="r1\\nHigh Availability Re", color=green];
-    r2 [label="r2\\nScalability Requirem", color=blue];
+    fillcolor="lightyellow";
+    r1 [label="r1\\\\nHigh Availability Re", color="green"];
+    r2 [label="r2\\\\nScalability Requirem", color="blue"];
   }
-  challenge -> r1;
-
-  subgraph cluster_decisions {
+  subgraph cluster_cluster_decisions {
     label="Design Decisions";
     style=filled;
-    fillcolor=lavender;
-    d1 [label="d1\\nUse Kubernetes", shape=box];
-    d2 [label="d2\\nEvent-driven archite", shape=ellipse];
+    fillcolor="lavender";
+    d1 [label="d1\\\\nUse Kubernetes", shape=box];
+    d2 [label="d2\\\\nEvent-driven archite", shape=ellipse];
   }
+
+  challenge -> r1;
   challenge -> d1;
 }"
 `;
 
 exports[`Engineering Mode Exporter Snapshots > Mermaid format 1`] = `
-"flowchart TB
-  title["🔧 SYSTEM Analysis"]
-  title --> challenge["Build a scalable microservices architecture with h..."]
+"graph TB
 
-  subgraph Requirements ["📋 Requirements"]
+  title["🔧 SYSTEM Analysis"]
+  challenge["Build a scalable microservices architecture with h..."]
+  metrics["📊 Confidence: 85%"]
+
+  subgraph Requirements["📋 Requirements"]
+    r1
+    r2
+  end
     r1["✓ High Availability Requirement"]
     r2["⚙ Scalability Requirement"]
+  subgraph Decisions["📝 Design Decisions"]
+    d1
+    d2
   end
-  challenge --> Requirements
-
-  subgraph Decisions ["📝 Design Decisions"]
     d1(["✓ Use Kubernetes"])
     d2(["? Event-driven architecture"])
-  end
-  challenge --> Decisions
 
-  metrics["📊 Confidence: 85%"]
+  title --> challenge
+  challenge --> Requirements
+  challenge --> Decisions
   challenge --> metrics"
 `;
 
@@ -588,77 +597,118 @@ exports[`Mathematics Mode Exporter Snapshots > Mermaid format 1`] = `
 `;
 
 exports[`Meta Reasoning Mode Exporter Snapshots > ASCII format 1`] = `
-"Meta-Reasoning Analysis:
-========================
-
-CURRENT STRATEGY
-----------------
+"Meta-Reasoning Analysis
+=======================
+CURRENT STRATEGY:
+-----------------
 Mode: sequential
+
 Approach: Systematic decomposition with parallel evaluation
+
 Thoughts Spent: 5
+
 Progress Indicators:
+
   1. [object Object]
   2. [object Object]
 
-STRATEGY EVALUATION
--------------------
+STRATEGY EVALUATION:
+--------------------
 Effectiveness: 85.0%
-Efficiency: 85.0%
-Confidence: 88.0%
-Progress Rate: 0.72 insights/thought
-Quality Score: 87.0%
-Strengths:
-  + 1. Fast convergence
-  + 2. Low resource usage
-Issues:
-  - 1. Limited exploration depth
-  - 2. May miss edge cases
 
-ALTERNATIVE STRATEGIES
-----------------------
+Efficiency: 85.0%
+
+Confidence: 88.0%
+
+Progress Rate: 0.72 insights/thought
+
+Quality Score: 87.0%
+
+Strengths:
+
+  • + 1. Fast convergence
+  • + 2. Low resource usage
+Issues:
+
+  • - 1. Limited exploration depth
+  • - 2. May miss edge cases
+
+ALTERNATIVE STRATEGIES:
+-----------------------
 [1] causal
+
     Reasoning: undefined
+
     Expected Benefit: undefined
+
     Switching Cost: NaN%
+
     Recommendation Score: 75%
+
 [2] bayesian
+
     Reasoning: undefined
+
     Expected Benefit: undefined
+
     Switching Cost: NaN%
+
     Recommendation Score: 65%
 
-RECOMMENDATION
---------------
+
+RECOMMENDATION:
+---------------
 Action: continue
+
 Target Mode: causal
+
 Justification: Causal mode offers better exploration
+
 Confidence: NaN%
+
 Expected Improvement: undefined
 
-RESOURCE ALLOCATION
--------------------
+
+RESOURCE ALLOCATION:
+--------------------
 Time Spent: 1500ms
+
 Thoughts Remaining: 10
+
 Complexity: medium
+
 Urgency: undefined
+
 Recommendation: undefined
 
-QUALITY METRICS
----------------
+
+QUALITY METRICS:
+----------------
 Logical Consistency: NaN%
+
 Evidence Quality: NaN%
+
 Completeness: 75.0%
+
 Originality: NaN%
+
 Clarity: NaN%
+
 Overall Quality: 82.0%
 
-SESSION CONTEXT
----------------
+
+SESSION CONTEXT:
+----------------
 Session ID: session-meta-1
+
 Total Thoughts: 15
+
 Mode Switches: 2
+
 Problem Type: analytical
+
 Modes Used: sequential, causal, bayesian
+
 Historical Effectiveness: 78.0%
 "
 `;
@@ -666,71 +716,66 @@ Historical Effectiveness: 78.0%
 exports[`Meta Reasoning Mode Exporter Snapshots > DOT format 1`] = `
 "digraph MetaReasoning {
   rankdir=TB;
-  node [shape=box, style=rounded];
+  node [shape=box, style="rounded"];
 
-  subgraph cluster_current {
+  recommendation [label="continue\\\\n→ causal", shape=hexagon, style="filled", fillcolor="lightgreen"];
+  quality [label="Quality: 82%", shape=diamond];
+
+  subgraph cluster_cluster_current {
     label="Current Strategy";
     style=filled;
-    fillcolor=lightblue;
+    fillcolor="lightblue";
     current_strategy [label="Systematic decomposition with "];
     current_mode [label="sequential", shape=ellipse];
-    current_strategy -> current_mode;
     evaluation [label="Eff: 85%", shape=diamond];
-    current_strategy -> evaluation;
   }
-
-  subgraph cluster_alternatives {
+  subgraph cluster_cluster_alternatives {
     label="Alternatives";
     style=filled;
-    fillcolor=lightyellow;
-    alt_0 [label="causal\\n75%"];
-    alt_1 [label="bayesian\\n65%"];
+    fillcolor="lightyellow";
+    alt_0 [label="causal\\\\n75%"];
+    alt_1 [label="bayesian\\\\n65%"];
   }
 
-  recommendation [label="continue\\n→ causal", shape=hexagon, style="filled", fillcolor=lightgreen];
-  quality [label="Quality: 82%", shape=diamond];
-  current_strategy -> recommendation [style=bold, penwidth=2];
+  current_strategy -> current_mode;
+  current_strategy -> evaluation;
   alt_0 -> recommendation [style=dashed];
   alt_1 -> recommendation [style=dashed];
-}
-"
+  current_strategy -> recommendation [style=bold];
+}"
 `;
 
 exports[`Meta Reasoning Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph TB
+
   meta_reasoning(("Meta-Reasoning"))
   current_strategy[["Systematic decomposition with parallel evaluation"]]
-  meta_reasoning ==> current_strategy
   current_mode(["Mode: sequential"])
-  current_strategy --> current_mode
   evaluation{{"Effectiveness: 85%"}}
-  current_strategy --> evaluation
   issues>"Issues: 2"]
-  evaluation --> issues
   strengths>"Strengths: 2"]
-  evaluation --> strengths
   alternatives(["Alternative Strategies"])
-  meta_reasoning --> alternatives
   alt_0["causal: 75%"]
-  alternatives --> alt_0
   alt_1["bayesian: 65%"]
-  alternatives --> alt_1
   recommendation[/"continue → causal"/]
-  meta_reasoning ==> recommendation
   rec_confidence{{"Confidence: NaN%"}}
-  recommendation --> rec_confidence
   quality{{"Quality: 82%"}}
-  meta_reasoning -.-> quality
   resources[("Complexity: medium")]
-  meta_reasoning -.-> resources
   session>"Thoughts: 15"]
-  meta_reasoning -.-> session
 
-  style meta_reasoning fill:#DDA0DD
-  style current_strategy fill:#87CEEB
-  style recommendation fill:#90EE90
-  style alternatives fill:#FFD700
-"
+  meta_reasoning ==> current_strategy
+  current_strategy --> current_mode
+  current_strategy --> evaluation
+  evaluation --> issues
+  evaluation --> strengths
+  meta_reasoning --> alternatives
+  alternatives --> alt_0
+  alternatives --> alt_1
+  meta_reasoning ==> recommendation
+  recommendation --> rec_confidence
+  meta_reasoning -.-> quality
+  meta_reasoning -.-> resources
+  meta_reasoning -.-> session"
 `;
 
 exports[`Optimization Mode Exporter Snapshots > ASCII format 1`] = `
@@ -808,10 +853,10 @@ exports[`Optimization Mode Exporter Snapshots > Mermaid format 1`] = `
 `;
 
 exports[`Physics Mode Exporter Snapshots > ASCII format 1`] = `
-"Physics Analysis:
-=================
-
+"Physics Analysis
+================
 Type: physics
+
 Uncertainty: NaN%
 
 "
@@ -820,21 +865,18 @@ Uncertainty: NaN%
 exports[`Physics Mode Exporter Snapshots > DOT format 1`] = `
 "digraph PhysicsVisualization {
   rankdir=TB;
-  node [shape=box, style=rounded];
+  node [shape=box, style="rounded"];
 
   type_physics [label="Physics", shape=doubleoctagon];
   uncertainty [label="NaN%", shape=diamond];
-}
-"
+}"
 `;
 
 exports[`Physics Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph TB
-  type_physics[["Physics"]]
-  uncertainty{{Uncertainty: NaN%}}
 
-  style type_physics fill:#87CEEB
-"
+  type_physics[["Physics"]]
+  uncertainty{{"Uncertainty: NaN%"}}"
 `;
 
 exports[`Scientific Method Mode Exporter Snapshots > ASCII format 1`] = `

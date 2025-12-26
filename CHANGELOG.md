@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed - Phase 13 Sprint 5: Mode Exporter Refactoring
+
+**Refactored 4 Large Mode Exporters to Use Builder Classes**
+
+Refactored four mode exporter files (each 1600+ lines) to use the fluent builder APIs created in Sprints 1-3:
+
+- **physics.ts** (`src/export/visual/modes/physics.ts`)
+  - Refactored `physicsToMermaid()` to use `MermaidGraphBuilder`
+  - Refactored `physicsToDOT()` to use `DOTGraphBuilder`
+  - Refactored `physicsToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **engineering.ts** (`src/export/visual/modes/engineering.ts`)
+  - Refactored `engineeringToMermaid()` to use `MermaidGraphBuilder`
+  - Refactored `engineeringToDOT()` to use `DOTGraphBuilder` with subgraphs
+  - Refactored `engineeringToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **metareasoning.ts** (`src/export/visual/modes/metareasoning.ts`)
+  - Refactored `metaReasoningToMermaid()` to use `MermaidGraphBuilder`
+  - Refactored `metaReasoningToDOT()` to use `DOTGraphBuilder`
+  - Refactored `metaReasoningToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **proof-decomposition.ts** (`src/export/visual/modes/proof-decomposition.ts`)
+  - Refactored `proofDecompositionToMermaid()` to use `MermaidGraphBuilder` with styles
+  - Refactored `proofDecompositionToDOT()` to use `DOTGraphBuilder`
+  - Refactored `proofDecompositionToASCII()` to use `ASCIIDocBuilder`
+  - Removed unused helper functions (`getMermaidShape`, `getNodeColor`)
+  - Updated version to v8.5.0
+
+### Fixed
+
+- Updated snapshot baselines for physics, engineering, metareasoning, and proof-decomposition modes to match new builder output formatting
+
+### Validation - Sprint 5
+
+- **Typecheck**: ✅ Clean (`npm run typecheck`)
+- **Full Test Suite**: ✅ 4686 tests passing across 170 test files
+- **Build**: ✅ Successful
+
+---
+
 ## [8.5.0] - 2025-12-26
 
 ### Added - Phase 13 Sprint 2: Visual Format Builders
