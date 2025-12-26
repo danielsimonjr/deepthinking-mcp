@@ -1,6 +1,7 @@
 /**
- * Markdown Export Utilities (v7.1.0)
+ * Markdown Export Utilities (v8.5.0)
  * Phase 12: Shared utilities for Markdown visual exports
+ * Phase 13 Sprint 3: Added MarkdownBuilder fluent API
  *
  * Provides reusable functions for generating Markdown exports across all modes.
  */
@@ -398,4 +399,316 @@ export function escapeMarkdown(text: string): string {
 export function truncate(text: string, maxLength: number = 100): string {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength - 3) + '...';
+}
+
+// =============================================================================
+// MarkdownBuilder Fluent API (Phase 13 Sprint 3)
+// =============================================================================
+
+/**
+ * MarkdownBuilder options
+ */
+export interface MarkdownBuilderOptions {
+  includeFrontmatter?: boolean;
+  metadata?: Record<string, string | number | boolean | string[]>;
+  includeTableOfContents?: boolean;
+}
+
+/**
+ * MarkdownBuilder - Fluent API for building Markdown documents
+ *
+ * @example
+ * ```typescript
+ * const md = new MarkdownBuilder()
+ *   .addHeading(1, 'Main Title')
+ *   .addParagraph('This is a paragraph.')
+ *   .addBulletList(['Item 1', 'Item 2', 'Item 3'])
+ *   .addCodeBlock('console.log("Hello");', 'javascript')
+ *   .render();
+ * ```
+ */
+export class MarkdownBuilder {
+  private content: string[] = [];
+  private options: MarkdownBuilderOptions = {};
+  private documentTitle: string = '';
+
+  /**
+   * Set or merge builder options
+   * @param options - Options to set/merge
+   * @returns this for chaining
+   */
+  setOptions(options: MarkdownBuilderOptions): this {
+    this.options = { ...this.options, ...options };
+    return this;
+  }
+
+  /**
+   * Set the document title (for frontmatter)
+   * @param title - The document title
+   * @returns this for chaining
+   */
+  setTitle(title: string): this {
+    this.documentTitle = title;
+    return this;
+  }
+
+  /**
+   * Enable frontmatter generation
+   * @param metadata - Optional metadata to include
+   * @returns this for chaining
+   */
+  enableFrontmatter(metadata?: Record<string, string | number | boolean | string[]>): this {
+    this.options.includeFrontmatter = true;
+    if (metadata) {
+      this.options.metadata = { ...this.options.metadata, ...metadata };
+    }
+    return this;
+  }
+
+  /**
+   * Enable table of contents generation
+   * @returns this for chaining
+   */
+  enableTableOfContents(): this {
+    this.options.includeTableOfContents = true;
+    return this;
+  }
+
+  /**
+   * Add a heading
+   * @param level - Heading level (1-6)
+   * @param text - Heading text
+   * @returns this for chaining
+   */
+  addHeading(level: HeadingLevel, text: string): this {
+    this.content.push(heading(text, level));
+    return this;
+  }
+
+  /**
+   * Add a paragraph
+   * @param text - Paragraph text
+   * @returns this for chaining
+   */
+  addParagraph(text: string): this {
+    this.content.push(text + '\n');
+    return this;
+  }
+
+  /**
+   * Add a bullet list
+   * @param items - List items
+   * @returns this for chaining
+   */
+  addBulletList(items: string[]): this {
+    this.content.push(list(items, 'bullet'));
+    return this;
+  }
+
+  /**
+   * Add a numbered list
+   * @param items - List items
+   * @returns this for chaining
+   */
+  addNumberedList(items: string[]): this {
+    this.content.push(list(items, 'numbered'));
+    return this;
+  }
+
+  /**
+   * Add a task list
+   * @param items - Task items with completion status
+   * @returns this for chaining
+   */
+  addTaskList(items: Array<{ text: string; completed: boolean }>): this {
+    this.content.push(taskList(items));
+    return this;
+  }
+
+  /**
+   * Add a code block
+   * @param code - The code content
+   * @param language - Optional language for syntax highlighting
+   * @returns this for chaining
+   */
+  addCodeBlock(code: string, language?: string): this {
+    this.content.push(codeBlock(code, language));
+    return this;
+  }
+
+  /**
+   * Add a table
+   * @param headers - Table headers
+   * @param rows - Table rows
+   * @param alignments - Optional column alignments
+   * @returns this for chaining
+   */
+  addTable(headers: string[], rows: string[][], alignments?: TableAlignment[]): this {
+    this.content.push(table(headers, rows, alignments));
+    return this;
+  }
+
+  /**
+   * Add a blockquote
+   * @param text - Quoted text
+   * @returns this for chaining
+   */
+  addBlockquote(text: string): this {
+    this.content.push(blockquote(text));
+    return this;
+  }
+
+  /**
+   * Add a horizontal rule
+   * @returns this for chaining
+   */
+  addHorizontalRule(): this {
+    this.content.push(horizontalRule());
+    return this;
+  }
+
+  /**
+   * Add a link
+   * @param text - Link text
+   * @param url - Link URL
+   * @param title - Optional link title
+   * @returns this for chaining
+   */
+  addLink(text: string, url: string, title?: string): this {
+    this.content.push(link(text, url, title) + '\n');
+    return this;
+  }
+
+  /**
+   * Add an image
+   * @param alt - Alt text
+   * @param url - Image URL
+   * @param title - Optional image title
+   * @returns this for chaining
+   */
+  addImage(alt: string, url: string, title?: string): this {
+    this.content.push(image(alt, url, title) + '\n');
+    return this;
+  }
+
+  /**
+   * Add a Mermaid diagram
+   * @param diagram - Mermaid diagram content
+   * @returns this for chaining
+   */
+  addMermaidDiagram(diagram: string): this {
+    this.content.push(mermaidBlock(diagram));
+    return this;
+  }
+
+  /**
+   * Add a collapsible section
+   * @param summary - Summary text
+   * @param detailContent - Content inside the collapsible
+   * @returns this for chaining
+   */
+  addCollapsible(summary: string, detailContent: string): this {
+    this.content.push(collapsible(summary, detailContent));
+    return this;
+  }
+
+  /**
+   * Add a key-value section
+   * @param items - Key-value pairs
+   * @returns this for chaining
+   */
+  addKeyValueSection(items: Record<string, string | number | boolean>): this {
+    this.content.push(keyValueSection(items));
+    return this;
+  }
+
+  /**
+   * Add raw Markdown content
+   * @param markdown - Raw Markdown string
+   * @returns this for chaining
+   */
+  addRaw(markdown: string): this {
+    this.content.push(markdown);
+    return this;
+  }
+
+  /**
+   * Add a section with heading and content
+   * @param title - Section title
+   * @param sectionContent - Section content
+   * @param level - Heading level (default: 2)
+   * @returns this for chaining
+   */
+  addSection(title: string, sectionContent: string, level: HeadingLevel = 2): this {
+    this.content.push(section(title, sectionContent, level));
+    return this;
+  }
+
+  /**
+   * Add a badge (GitHub style)
+   * @param label - Badge label
+   * @param value - Badge value
+   * @param color - Badge color (default: 'blue')
+   * @returns this for chaining
+   */
+  addBadge(label: string, value: string, color: string = 'blue'): this {
+    this.content.push(badge(label, value, color) + '\n');
+    return this;
+  }
+
+  /**
+   * Add a progress bar
+   * @param value - Current progress value
+   * @param max - Maximum value (default: 100)
+   * @param width - Bar width in characters (default: 20)
+   * @returns this for chaining
+   */
+  addProgressBar(value: number, max: number = 100, width: number = 20): this {
+    this.content.push(progressBar(value, max, width) + '\n');
+    return this;
+  }
+
+  /**
+   * Reset the builder to initial state
+   * @returns this for chaining
+   */
+  reset(): this {
+    this.content = [];
+    this.options = {};
+    this.documentTitle = '';
+    return this;
+  }
+
+  /**
+   * Render the document to Markdown string
+   * @returns The complete Markdown document
+   */
+  render(): string {
+    const parts: string[] = [];
+
+    // Frontmatter
+    if (this.options.includeFrontmatter) {
+      const fm = {
+        title: this.documentTitle,
+        date: new Date().toISOString().split('T')[0],
+        ...this.options.metadata,
+      };
+      parts.push(frontmatter(fm));
+    }
+
+    // Document title (if set and not using frontmatter with title)
+    if (this.documentTitle && !this.options.includeFrontmatter) {
+      parts.push(heading(this.documentTitle, 1));
+    }
+
+    // Table of contents
+    if (this.options.includeTableOfContents) {
+      parts.push('\n## Table of Contents\n\n[TOC]\n');
+    }
+
+    // Content
+    parts.push(this.content.join('\n'));
+
+    return parts.join('\n');
+  }
 }

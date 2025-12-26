@@ -36,7 +36,9 @@
       "tasks": 5,
       "hours": 5.5,
       "file": "PHASE_13_SPRINT_3_TODO.json",
-      "status": "pending"
+      "status": "completed",
+      "completedDate": "2025-12-26",
+      "actualTests": 115
     },
     {
       "sprint": 4,
@@ -109,11 +111,11 @@
     "R-4": { "name": "SVG Builder", "sprints": [2], "status": "completed", "priority": "medium" },
     "R-5": { "name": "GraphML Builder", "sprints": [1], "status": "completed", "priority": "medium" },
     "R-6": { "name": "TikZ Builder", "sprints": [2], "status": "completed", "priority": "medium" },
-    "R-7": { "name": "UML Builder", "sprints": [3], "status": "pending", "priority": "medium" },
-    "R-8": { "name": "HTML Builder", "sprints": [3], "status": "pending", "priority": "medium" },
-    "R-9": { "name": "Markdown Builder", "sprints": [3], "status": "pending", "priority": "medium" },
-    "R-10": { "name": "Modelica Builder", "sprints": [3], "status": "pending", "priority": "low" },
-    "R-11": { "name": "JSON Builder", "sprints": [3], "status": "pending", "priority": "low" },
+    "R-7": { "name": "UML Builder", "sprints": [3], "status": "completed", "priority": "medium" },
+    "R-8": { "name": "HTML Builder", "sprints": [3], "status": "completed", "priority": "medium" },
+    "R-9": { "name": "Markdown Builder", "sprints": [3], "status": "completed", "priority": "medium" },
+    "R-10": { "name": "Modelica Builder", "sprints": [3], "status": "completed", "priority": "low" },
+    "R-11": { "name": "JSON Builder", "sprints": [3], "status": "completed", "priority": "low" },
     "R-12": { "name": "File Splitting", "sprints": [10], "status": "pending", "priority": "medium" }
   },
   "targetMetrics": {
@@ -122,7 +124,7 @@
     "asciiUtilityAdoption": { "current": "1/22 (4.5%)", "target": "22/22 (100%)" },
     "filesOver1000Lines": { "current": 12, "target": 0 },
     "totalModeFileLines": { "current": 24046, "target": "18000-19000" },
-    "builderClassesAdded": { "current": 6, "target": 11 },
+    "builderClassesAdded": { "current": 11, "target": 11 },
     "modeExportersRefactored": { "current": 1, "target": 22 }
   },
   "criticalFiles": [
@@ -157,11 +159,11 @@
     "ascii": { "path": "src/export/visual/utils/ascii.ts", "lines": 1071, "builder": "ASCIIDocBuilder", "sprint": 2, "builderStatus": "completed" },
     "svg": { "path": "src/export/visual/utils/svg.ts", "lines": 1196, "builder": "SVGBuilder", "sprint": 2, "builderStatus": "completed" },
     "tikz": { "path": "src/export/visual/utils/tikz.ts", "lines": 935, "builder": "TikZBuilder", "sprint": 2, "builderStatus": "completed" },
-    "uml": { "path": "src/export/visual/utils/uml.ts", "lines": 459, "builder": "UMLBuilder", "sprint": 3 },
-    "html": { "path": "src/export/visual/utils/html.ts", "lines": 365, "builder": "HTMLDocBuilder", "sprint": 3 },
-    "markdown": { "path": "src/export/visual/utils/markdown.ts", "lines": 401, "builder": "MarkdownBuilder", "sprint": 3 },
-    "modelica": { "path": "src/export/visual/utils/modelica.ts", "lines": 257, "builder": "ModelicaBuilder", "sprint": 3 },
-    "json": { "path": "src/export/visual/utils/json.ts", "lines": 521, "builder": "JSONExportBuilder", "sprint": 3 }
+    "uml": { "path": "src/export/visual/utils/uml.ts", "lines": 929, "builder": "UMLBuilder", "sprint": 3, "builderStatus": "completed" },
+    "html": { "path": "src/export/visual/utils/html.ts", "lines": 627, "builder": "HTMLDocBuilder", "sprint": 3, "builderStatus": "completed" },
+    "markdown": { "path": "src/export/visual/utils/markdown.ts", "lines": 714, "builder": "MarkdownBuilder", "sprint": 3, "builderStatus": "completed" },
+    "modelica": { "path": "src/export/visual/utils/modelica.ts", "lines": 520, "builder": "ModelicaBuilder", "sprint": 3, "builderStatus": "completed" },
+    "json": { "path": "src/export/visual/utils/json.ts", "lines": 800, "builder": "JSONExportBuilder", "sprint": 3, "builderStatus": "completed" }
   },
   "excludedModules": [
     { "file": "latex.ts", "lines": 1284, "reason": "Large specialized module - defer to separate effort" },

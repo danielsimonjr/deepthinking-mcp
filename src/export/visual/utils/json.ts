@@ -1,6 +1,7 @@
 /**
- * JSON Visual Export Utilities (v7.1.0)
+ * JSON Visual Export Utilities (v8.5.0)
  * Shared utilities for JSON-based visualization data export
+ * Phase 13 Sprint 3: Added JSONExportBuilder fluent API
  */
 
 /**
@@ -518,4 +519,282 @@ export function generateCausalJson(
   }
 
   return serializeGraph(graph, options);
+}
+
+// =============================================================================
+// JSONExportBuilder Fluent API (Phase 13 Sprint 3)
+// =============================================================================
+
+/**
+ * JSON section definition for builder
+ */
+export interface JSONSectionDef {
+  key: string;
+  value: unknown;
+}
+
+/**
+ * JSONExportBuilder options
+ */
+export interface JSONExportBuilderOptions {
+  prettyPrint?: boolean;
+  indent?: number;
+  includeNullValues?: boolean;
+  sortKeys?: boolean;
+}
+
+/**
+ * JSONExportBuilder - Fluent API for building JSON export structures
+ *
+ * @example
+ * ```typescript
+ * const json = new JSONExportBuilder()
+ *   .setMetadata({ title: 'Analysis', version: '1.0.0' })
+ *   .addSection('summary', { total: 100, passed: 95 })
+ *   .addArraySection('items', ['A', 'B', 'C'])
+ *   .setFormatting({ prettyPrint: true, indent: 2 })
+ *   .render();
+ * ```
+ */
+export class JSONExportBuilder {
+  private data: Record<string, unknown> = {};
+  private options: JSONExportBuilderOptions = { prettyPrint: true, indent: 2 };
+
+  /**
+   * Set or merge builder options
+   * @param options - Options to set/merge
+   * @returns this for chaining
+   */
+  setOptions(options: JSONExportBuilderOptions): this {
+    this.options = { ...this.options, ...options };
+    return this;
+  }
+
+  /**
+   * Set formatting options
+   * @param formatting - Formatting options
+   * @returns this for chaining
+   */
+  setFormatting(formatting: { prettyPrint?: boolean; indent?: number }): this {
+    if (formatting.prettyPrint !== undefined) {
+      this.options.prettyPrint = formatting.prettyPrint;
+    }
+    if (formatting.indent !== undefined) {
+      this.options.indent = formatting.indent;
+    }
+    return this;
+  }
+
+  /**
+   * Set document metadata
+   * @param metadata - Metadata object
+   * @returns this for chaining
+   */
+  setMetadata(metadata: Record<string, unknown>): this {
+    this.data.metadata = {
+      ...((this.data.metadata as Record<string, unknown>) || {}),
+      ...metadata,
+      exportedAt: new Date().toISOString(),
+      generator: 'DeepThinking MCP v8.5.0',
+    };
+    return this;
+  }
+
+  /**
+   * Add a section to the JSON structure
+   * @param key - Section key
+   * @param value - Section value
+   * @returns this for chaining
+   */
+  addSection(key: string, value: unknown): this {
+    this.data[key] = value;
+    return this;
+  }
+
+  /**
+   * Add an array section to the JSON structure
+   * @param key - Section key
+   * @param items - Array items
+   * @returns this for chaining
+   */
+  addArraySection(key: string, items: unknown[]): this {
+    this.data[key] = items;
+    return this;
+  }
+
+  /**
+   * Add an object section to the JSON structure
+   * @param key - Section key
+   * @param object - Object value
+   * @returns this for chaining
+   */
+  addObjectSection(key: string, object: Record<string, unknown>): this {
+    this.data[key] = object;
+    return this;
+  }
+
+  /**
+   * Merge multiple sections at once
+   * @param sections - Array of section definitions
+   * @returns this for chaining
+   */
+  addSections(sections: JSONSectionDef[]): this {
+    for (const section of sections) {
+      this.data[section.key] = section.value;
+    }
+    return this;
+  }
+
+  /**
+   * Add a nested object at a path
+   * @param path - Dot-separated path (e.g., 'config.settings.theme')
+   * @param value - Value to set
+   * @returns this for chaining
+   */
+  setPath(path: string, value: unknown): this {
+    const parts = path.split('.');
+    let current: Record<string, unknown> = this.data;
+
+    for (let i = 0; i < parts.length - 1; i++) {
+      const part = parts[i];
+      if (!(part in current) || typeof current[part] !== 'object') {
+        current[part] = {};
+      }
+      current = current[part] as Record<string, unknown>;
+    }
+
+    current[parts[parts.length - 1]] = value;
+    return this;
+  }
+
+  /**
+   * Add graph nodes and edges (visual graph format)
+   * @param nodes - Array of nodes
+   * @param edges - Array of edges
+   * @returns this for chaining
+   */
+  addGraph(nodes: JsonVisualNode[], edges: JsonVisualEdge[]): this {
+    this.data.nodes = nodes;
+    this.data.edges = edges;
+    return this;
+  }
+
+  /**
+   * Add layout information
+   * @param layout - Layout configuration
+   * @returns this for chaining
+   */
+  addLayout(
+    layout: { type: 'hierarchical' | 'force' | 'circular' | 'tree' | 'linear'; direction?: 'TB' | 'BT' | 'LR' | 'RL' }
+  ): this {
+    this.data.layout = layout;
+    return this;
+  }
+
+  /**
+   * Add metrics to the JSON structure
+   * @param metrics - Metrics object
+   * @returns this for chaining
+   */
+  addMetrics(metrics: Record<string, unknown>): this {
+    this.data.metrics = {
+      ...((this.data.metrics as Record<string, unknown>) || {}),
+      ...metrics,
+    };
+    return this;
+  }
+
+  /**
+   * Add legend items
+   * @param legend - Array of legend items
+   * @returns this for chaining
+   */
+  addLegend(legend: Array<{ label: string; color: string; shape?: string }>): this {
+    this.data.legend = legend;
+    return this;
+  }
+
+  /**
+   * Remove a section by key
+   * @param key - Section key to remove
+   * @returns this for chaining
+   */
+  removeSection(key: string): this {
+    delete this.data[key];
+    return this;
+  }
+
+  /**
+   * Reset the builder to initial state
+   * @returns this for chaining
+   */
+  reset(): this {
+    this.data = {};
+    this.options = { prettyPrint: true, indent: 2 };
+    return this;
+  }
+
+  /**
+   * Get the raw data object
+   * @returns The underlying data object
+   */
+  getData(): Record<string, unknown> {
+    return { ...this.data };
+  }
+
+  /**
+   * Render the JSON structure to string
+   * @returns The JSON string
+   */
+  render(): string {
+    let result = this.data;
+
+    // Remove null values if configured
+    if (!this.options.includeNullValues) {
+      result = this.removeNulls(result);
+    }
+
+    // Sort keys if configured
+    if (this.options.sortKeys) {
+      result = this.sortKeysRecursive(result);
+    }
+
+    const indent = this.options.prettyPrint ? this.options.indent : 0;
+    return JSON.stringify(result, null, indent);
+  }
+
+  /**
+   * Remove null values from object recursively
+   */
+  private removeNulls(obj: Record<string, unknown>): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value === null || value === undefined) {
+        continue;
+      }
+      if (typeof value === 'object' && !Array.isArray(value)) {
+        result[key] = this.removeNulls(value as Record<string, unknown>);
+      } else {
+        result[key] = value;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Sort object keys recursively
+   */
+  private sortKeysRecursive(obj: Record<string, unknown>): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
+    const sortedKeys = Object.keys(obj).sort();
+    for (const key of sortedKeys) {
+      const value = obj[key];
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        result[key] = this.sortKeysRecursive(value as Record<string, unknown>);
+      } else {
+        result[key] = value;
+      }
+    }
+    return result;
+  }
 }

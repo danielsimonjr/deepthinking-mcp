@@ -4,14 +4,15 @@
   "title": "Document Format Builders",
   "week": "Week 2",
   "effort": "5-6 hours",
-  "status": "pending",
+  "status": "completed",
+  "completedDate": "2025-12-26",
   "description": "Add fluent API builder classes for document formats (UML, HTML, Markdown, Modelica, JSON) with unit tests",
   "tasks": [
     {
       "id": "13.3.1",
       "category": "UML Builder",
       "description": "Add UMLBuilder class to utils/uml.ts",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.0,
       "priority": "medium",
       "details": [
@@ -34,7 +35,7 @@
       "id": "13.3.2",
       "category": "HTML Builder",
       "description": "Add HTMLDocBuilder class to utils/html.ts",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.0,
       "priority": "medium",
       "details": [
@@ -58,7 +59,7 @@
       "id": "13.3.3",
       "category": "Markdown Builder",
       "description": "Add MarkdownBuilder class to utils/markdown.ts",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 0.75,
       "priority": "medium",
       "details": [
@@ -83,7 +84,7 @@
       "id": "13.3.4",
       "category": "Modelica & JSON Builders",
       "description": "Add ModelicaBuilder and JSONExportBuilder classes",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.25,
       "priority": "low",
       "details": [
@@ -104,7 +105,7 @@
       "id": "13.3.5",
       "category": "Unit Tests",
       "description": "Create unit tests for document format builders",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.5,
       "priority": "high",
       "details": [

@@ -57,6 +57,72 @@ Added three new builder classes for ASCII, SVG, and TikZ visual formats:
 
 ---
 
+### Added - Phase 13 Sprint 3: Document Format Builders
+
+**Fluent API Builder Classes for Document Format Generation**
+
+Added five new builder classes for UML, HTML, Markdown, Modelica, and JSON formats:
+
+- **UMLBuilder** (`src/export/visual/utils/uml.ts`)
+  - Classes/Interfaces: `addClass()`, `addClasses()`, `addInterface()`, `addInterfaces()`
+  - Relations: `addRelation()`, `addRelations()` with types (inheritance, implementation, composition, aggregation, dependency, etc.)
+  - Notes: `addNote()` with positioning options
+  - Packages: `beginPackage()`, `endPackage()`
+  - Options: `setTitle()`, `setTheme()`, `setDirection()`, `setScale()`, `addSkinparam()`
+  - Utilities: `addRaw()`, `reset()`, `render()`
+  - New types: `UMLRelationType`, `UMLClassDef`, `UMLInterfaceDef`, `UMLRelationDef`, `UMLNoteDef`, `UMLBuilderOptions`
+
+- **HTMLDocBuilder** (`src/export/visual/utils/html.ts`)
+  - Structure: `addHeading()`, `addParagraph()`, `addList()`, `addTable()`, `addDiv()`, `addSection()`
+  - Components: `addMetricCard()`, `addProgressBar()`, `addBadge()`, `addCard()`
+  - Containers: `beginMetricsGrid()`, `endMetricsGrid()`
+  - Options: `setTitle()`, `setTheme()`, `setStandalone()`, `addStyle()`
+  - Utilities: `addRaw()`, `reset()`, `render()`
+  - New types: `HTMLDocBuilderOptions`
+
+- **MarkdownBuilder** (`src/export/visual/utils/markdown.ts`)
+  - Content: `addHeading()`, `addParagraph()`, `addBulletList()`, `addNumberedList()`, `addTaskList()`, `addCodeBlock()`, `addTable()`, `addBlockquote()`, `addHorizontalRule()`
+  - Links/Images: `addLink()`, `addImage()`, `addMermaidDiagram()`
+  - Advanced: `addCollapsible()`, `addKeyValueSection()`, `addSection()`, `addBadge()`, `addProgressBar()`
+  - Frontmatter: `setTitle()`, `enableFrontmatter()`, `enableTableOfContents()`
+  - Utilities: `addRaw()`, `reset()`, `render()`
+  - New types: `MarkdownBuilderOptions`
+
+- **ModelicaBuilder** (`src/export/visual/utils/modelica.ts`)
+  - Models: `beginModel()`, `endModel()`
+  - Packages: `beginPackage()`, `endPackage()`
+  - Components: `addParameter()`, `addVariable()`, `addEquation()`, `addConnection()`
+  - Options: `setOptions()` with annotation control
+  - Utilities: `addRaw()`, `reset()`, `render()`
+  - New types: `ModelicaParameterDef`, `ModelicaVariableDef`, `ModelicaEquationDef`, `ModelicaConnectionDef`, `ModelicaBuilderOptions`
+
+- **JSONExportBuilder** (`src/export/visual/utils/json.ts`)
+  - Sections: `addSection()`, `addArraySection()`, `addObjectSection()`, `addSections()`
+  - Metadata: `setMetadata()`, `addMetrics()`, `addLegend()`
+  - Graphs: `addGraph()`, `addLayout()`
+  - Paths: `setPath()` for nested object creation
+  - Options: `setFormatting()`, `setOptions()` (prettyPrint, indent, sortKeys, includeNullValues)
+  - Utilities: `removeSection()`, `getData()`, `reset()`, `render()`
+  - New types: `JSONSectionDef`, `JSONExportBuilderOptions`
+
+### Added - Tests
+
+- Created `tests/unit/export/visual/utils/document-builders.test.ts` with 115 comprehensive unit tests
+- Tests cover: UML class/interface/relation operations, HTML document structure/components, Markdown content/formatting, Modelica model/package/equation handling, JSON structure/metadata/graph building
+- Integration tests for complete document generation in each format
+
+### Changed
+
+- Updated utility file version headers to v8.5.0 (uml.ts, html.ts, markdown.ts, modelica.ts, json.ts)
+
+### Validation - Sprint 3
+
+- **Test Suite**: ✅ 268 visual/document builder tests passing (64 Sprint 1 + 89 Sprint 2 + 115 Sprint 3)
+- **Full Test Suite**: ✅ 4573 tests passing
+- **Build**: ✅ Successful (`npm run build`)
+
+---
+
 ### Added - Phase 13 Sprint 1: Core Graph Builders
 
 **Fluent API Builder Classes for Visual Export Refactoring**
