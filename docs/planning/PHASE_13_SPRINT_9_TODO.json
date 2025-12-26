@@ -115,9 +115,10 @@
     "src/export/visual/modes/bayesian.ts",
     "src/export/visual/modes/temporal.ts",
     "src/export/visual/modes/shannon.ts",
+    "src/export/visual/modes/computability.ts",
     "tests/unit/visual.test.ts"
   ],
   "totalEstimatedHours": 6.0,
   "actualHours": 5.5,
-  "notes": "COMPLETED: Sprint 9 successfully refactored all 5 remaining mode exporters. This completes 100% builder adoption across all 22 mode exporters. Exceptions: temporal.ts gantt diagrams and computability.ts Turing machine state diagrams are kept as raw strings since MermaidGraphBuilder doesn't support those diagram types."
+  "notes": "COMPLETED: Sprint 9 successfully refactored all 5 remaining mode exporters AND fixed 2 undocumented builder bypasses in computability.ts (default fallback paths). This achieves TRUE 100% builder adoption across all 22 mode exporters. Only exceptions: temporal.ts gantt diagrams and computability.ts Turing machine state diagrams (stateDiagram-v2) - kept as raw strings since MermaidGraphBuilder doesn't support these diagram types."
 }

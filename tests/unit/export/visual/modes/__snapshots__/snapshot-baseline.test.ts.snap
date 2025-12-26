@@ -244,16 +244,16 @@ undefined
 
 exports[`Computability Mode Exporter Snapshots > DOT format 1`] = `
 "digraph Computability {
-  rankdir=TD;
-  type [label="undefined"];
-}
-"
+  rankdir=TB;
+
+  type [label="Computability"];
+}"
 `;
 
 exports[`Computability Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph TD
-  type["undefined"]
-"
+
+  type["Computability"]"
 `;
 
 exports[`Counterfactual Mode Exporter Snapshots > ASCII format 1`] = `

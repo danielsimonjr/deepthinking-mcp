@@ -112,14 +112,14 @@ function computabilityToMermaid(thought: ComputabilityThought, options: VisualEx
     return decidabilityProofToMermaid(thought, includeLabels);
   }
 
-  // Default: show thought type and key insight
-  let mermaid = 'graph TD\n';
-  mermaid += `  type["${thought.thoughtType}"]\n`;
+  // Default: show thought type and key insight using builder
+  const builder = new MermaidGraphBuilder().setDirection('TD');
+  builder.addNode({ id: 'type', label: thought.thoughtType || 'Computability', shape: 'rectangle' });
   if (thought.keyInsight) {
-    mermaid += `  insight["${thought.keyInsight.substring(0, 50)}..."]\n`;
-    mermaid += '  type --> insight\n';
+    builder.addNode({ id: 'insight', label: `${thought.keyInsight.substring(0, 50)}...`, shape: 'rectangle' });
+    builder.addEdge({ source: 'type', target: 'insight' });
   }
-  return mermaid;
+  return builder.render();
 }
 
 /**
@@ -211,12 +211,12 @@ function computabilityToDOT(thought: ComputabilityThought, options: VisualExport
     return reductionChainToDOT(thought.reductions, thought.reductionChain, includeLabels);
   }
 
-  // Default
-  let dot = 'digraph Computability {\n';
-  dot += '  rankdir=TD;\n';
-  dot += `  type [label="${thought.thoughtType}"];\n`;
-  dot += '}\n';
-  return dot;
+  // Default: show thought type using builder
+  const builder = new DOTGraphBuilder()
+    .setGraphName('Computability')
+    .setRankDir('TB');
+  builder.addNode({ id: 'type', label: thought.thoughtType || 'Computability' });
+  return builder.render();
 }
 
 /**

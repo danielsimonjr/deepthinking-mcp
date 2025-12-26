@@ -43,16 +43,20 @@ Refactored the final five mode exporter files to use the fluent builder APIs:
   - Refactored `shannonToASCII()` to use `ASCIIDocBuilder`
   - Updated version to v8.5.0
 
-### Fixed - Sprint 9
+### Fixed - Sprint 9 (continued)
 
-- Updated 12 snapshot baselines for sequential, abductive, bayesian, temporal, and shannon modes
+- **computability.ts** - Fixed 2 undocumented builder bypasses discovered during audit:
+  - Refactored default Mermaid fallback (lines 115-122) to use `MermaidGraphBuilder`
+  - Refactored default DOT fallback (lines 214-219) to use `DOTGraphBuilder`
+  - Added null safety for `thoughtType` with fallback to 'Computability'
+- Updated 14 snapshot baselines total (12 initial + 2 computability fixes)
 - Updated visual.test.ts assertions to match new Mermaid/ASCII output formats for bayesian exports
 
 ### Validation - Sprint 9
 
-- **Builder Adoption**: ✅ All 5 files use fluent builder APIs (except gantt diagrams in temporal.ts)
-- **Typecheck**: ✅ Clean (`npm run typecheck` - no issues in refactored files)
-- **Full Test Suite**: ✅ 4681 tests passing across 168 test files
+- **Builder Adoption**: ✅ TRUE 100% - All code paths now use builders (only 2 documented exceptions: gantt, stateDiagram-v2)
+- **Typecheck**: ✅ Clean (`npm run typecheck` - no issues)
+- **Full Test Suite**: ✅ 4686 tests passing across 170 test files
 - **Total Mode Exporters Refactored**: 22/22 (100%)
 
 ---

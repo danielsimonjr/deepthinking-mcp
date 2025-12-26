@@ -461,9 +461,10 @@ Generate dependency docs: `npm run docs:deps`
 
 - Refactored `sequential.ts`, `abductive.ts`, `bayesian.ts`, `temporal.ts`, `shannon.ts` to use builders
 - All 5 files now use DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder fluent APIs
-- Note: Mermaid gantt diagrams in temporal.ts kept as raw strings (gantt not supported by MermaidGraphBuilder)
-- Updated 12 snapshot baselines to match new builder output formatting
-- **Total mode exporters refactored: 22/22 (100%)**
+- Fixed `computability.ts` default fallback paths (2 undocumented builder bypasses) to use builders
+- Note: Mermaid gantt diagrams in temporal.ts and stateDiagram-v2 in computability.ts kept as raw strings (not supported by MermaidGraphBuilder)
+- Updated 14 snapshot baselines to match new builder output formatting
+- **Total mode exporters refactored: 22/22 (100%) - TRUE 100% builder adoption**
 
 **Builder Pattern Benefits**:
 

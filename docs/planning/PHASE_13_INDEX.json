@@ -159,7 +159,7 @@
     { "file": "systems-thinking.ts", "lines": 911, "sprint": 8, "status": "refactored" },
     { "file": "analogical.ts", "lines": 888, "sprint": 8, "status": "refactored" },
     { "file": "causal.ts", "lines": 870, "sprint": 8, "status": "refactored" },
-    { "file": "computability.ts", "lines": 825, "sprint": 8, "status": "refactored", "notes": "Turing machine state diagrams kept as raw strings" },
+    { "file": "computability.ts", "lines": 825, "sprint": 8, "status": "refactored", "notes": "Sprint 9 fix: default fallbacks now use builders. Only Turing machine state diagrams kept as raw strings." },
     { "file": "counterfactual.ts", "lines": 825, "sprint": 8, "status": "refactored" },
     { "file": "sequential.ts", "lines": 785, "sprint": 9, "status": "refactored", "notes": "Fixed incorrect claim - now uses builders" },
     { "file": "abductive.ts", "lines": 705, "sprint": 9, "status": "refactored" },
