@@ -475,26 +475,20 @@ exports[`First Principles Mode Exporter Snapshots > Mermaid format 1`] = `
 `;
 
 exports[`Formal Logic Mode Exporter Snapshots > ASCII format 1`] = `
-"Formal Logic Proof:
+"Formal Logic Proof
 ==================
-
 "
 `;
 
 exports[`Formal Logic Mode Exporter Snapshots > DOT format 1`] = `
 "digraph FormalLogic {
-  rankdir=TD;
-  node [shape=box, style=rounded];
+  rankdir=TB;
+  node [shape=box, style="rounded"];
 
-}
-"
+}"
 `;
 
-exports[`Formal Logic Mode Exporter Snapshots > Mermaid format 1`] = `
-"graph TD
-
-"
-`;
+exports[`Formal Logic Mode Exporter Snapshots > Mermaid format 1`] = `"graph TD"`;
 
 exports[`Game Theory Mode Exporter Snapshots > ASCII format 1`] = `
 "Game: Untitled
@@ -520,52 +514,50 @@ exports[`Game Theory Mode Exporter Snapshots > Mermaid format 1`] = `
 `;
 
 exports[`Hybrid Mode Exporter Snapshots > ASCII format 1`] = `
-"Hybrid Mode Orchestration:
-==========================
+"Hybrid Mode Orchestration
+=========================
 
 Primary Mode: Sequential
 
 Secondary Features:
+-------------------
+
   1. causal-links
   2. temporal-ordering
-
 "
 `;
 
 exports[`Hybrid Mode Exporter Snapshots > DOT format 1`] = `
 "digraph HybridOrchestration {
   rankdir=TB;
-  node [shape=box, style=rounded];
+  node [shape=box, style="rounded"];
 
   hybrid_mode [label="Hybrid Mode", shape=doubleoctagon];
-  primary_sequential [label="Sequential", shape=box, style="filled,rounded", fillcolor=lightblue];
-  hybrid_mode -> primary_sequential [style=bold, penwidth=2];
+  primary_sequential [label="Sequential", shape=box, style="filled,rounded", fillcolor="lightblue"];
   secondary_features [label="Secondary Features", shape=ellipse];
-  hybrid_mode -> secondary_features;
   feature_0 [label="causal-links"];
-  secondary_features -> feature_0;
   feature_1 [label="temporal-ordering"];
+
+  hybrid_mode -> primary_sequential [style=bold, penwidth=2];
+  hybrid_mode -> secondary_features;
+  secondary_features -> feature_0;
   secondary_features -> feature_1;
-}
-"
+}"
 `;
 
 exports[`Hybrid Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph TB
-  hybrid_mode(("Hybrid Mode"))
-  primary_sequential[["Sequential"]]
-  hybrid_mode ==> primary_sequential
-  secondary_features(["Secondary Features"])
-  hybrid_mode --> secondary_features
-  feature_0["causal-links"]
-  secondary_features --> feature_0
-  feature_1["temporal-ordering"]
-  secondary_features --> feature_1
 
-  style hybrid_mode fill:#90EE90
-  style primary_sequential fill:#87CEEB
-  style secondary_features fill:#FFD700
-"
+  hybrid_mode((("Hybrid Mode")))
+  primary_sequential[["Sequential"]]
+  secondary_features(["Secondary Features"])
+  feature_0["causal-links"]
+  feature_1["temporal-ordering"]
+
+  hybrid_mode ==> primary_sequential
+  hybrid_mode --> secondary_features
+  secondary_features --> feature_0
+  secondary_features --> feature_1"
 `;
 
 exports[`Mathematics Mode Exporter Snapshots > ASCII format 1`] = `
@@ -779,7 +771,7 @@ exports[`Meta Reasoning Mode Exporter Snapshots > Mermaid format 1`] = `
 `;
 
 exports[`Optimization Mode Exporter Snapshots > ASCII format 1`] = `
-"Optimization Problem:
+"Optimization Problem
 ====================
 
 Problem: Maximize Resource Allocation
@@ -787,69 +779,66 @@ Type: undefined
 -
 
 Decision Variables:
+-------------------
+
   x (continuous)
     Domain: [0, 100]
   y (continuous)
     Domain: [0, 50]
 
 Constraints:
+------------
+
   Budget Constraint (undefined)
     undefined
 
 Objectives:
+-----------
+
   MAXIMIZE: Maximize Output
     undefined
 
 Solution:
-  Quality: 0.95
-"
+---------
+
+  Quality: 0.95"
 `;
 
 exports[`Optimization Mode Exporter Snapshots > DOT format 1`] = `
 "digraph Optimization {
-  rankdir=TD;
-  node [shape=box, style=rounded];
+  rankdir=TB;
+  node [shape=box, style="rounded"];
 
   Problem [label="Problem:\\nMaximize Resource Allocation", shape=ellipse];
-
-  subgraph cluster_variables {
-    label="Decision Variables";
-    var_x [label="x\\n[0, 100]"];
-    var_y [label="y\\n[0, 50]"];
-  }
-
-  subgraph cluster_constraints {
-    label="Constraints";
-    c1 [label="Budget Constraint", shape=diamond];
-  }
-
+  var_x [label="x\\n[0, 100]"];
+  var_y [label="y\\n[0, 50]"];
+  c1 [label="Budget Constraint", shape=diamond];
   obj_1 [label="maximize:\\nMaximize Output"];
-  Solution [label="Solution\\nquality: 0.95", shape=doubleoctagon, style=filled, fillcolor=lightgreen];
+  Solution [label="Solution\\nquality: 0.95", shape=doubleoctagon, style="filled", fillcolor="lightgreen"];
+
   obj_1 -> Solution;
-}
-"
+}"
 `;
 
 exports[`Optimization Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph TD
+
   Problem["Problem: Maximize Resource Allocation"]
+  obj_1["maximize: Maximize Output"]
+  Solution["Solution #40;quality: 0.95#41;"]
 
   subgraph Variables["Decision Variables"]
-    var_x["x [0,100]"]
-    var_y["y [0,50]"]
+    var_x
+    var_y
   end
-
+    var_x["x #91;0,100#93;"]
+    var_y["y #91;0,50#93;"]
   subgraph Constraints["Constraints"]
-    c1["Budget Constraint"]
+    c1
   end
+    c1["Budget Constraint"]
 
-  obj_1["maximize: Maximize Output"]
-
-  Solution["Solution (quality: 0.95)"]
-  obj_1 --> Solution
-
-  style Solution fill:#a5d6a7
-"
+  obj_1 --> Solution"
 `;
 
 exports[`Physics Mode Exporter Snapshots > ASCII format 1`] = `
@@ -880,36 +869,35 @@ exports[`Physics Mode Exporter Snapshots > Mermaid format 1`] = `
 `;
 
 exports[`Scientific Method Mode Exporter Snapshots > ASCII format 1`] = `
-"Scientific Method Process:
-==========================
+"Scientific Method Process
+=========================
 
 Conclusion:
+-----------
+
 Hypothesis supported
-Confidence: 0.95
-"
+Confidence: 0.95"
 `;
 
 exports[`Scientific Method Mode Exporter Snapshots > DOT format 1`] = `
 "digraph ScientificMethod {
-  rankdir=TD;
-  node [shape=box, style=rounded];
+  rankdir=TB;
+  node [shape=box, style="rounded"];
 
   Stats [label="Statistical Analysis"];
   Conclusion [label="Conclusion:\\nHypothesis supported...\\nconf: 0.95", shape=doubleoctagon];
+
   Stats -> Conclusion;
-}
-"
+}"
 `;
 
 exports[`Scientific Method Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph TD
+
   Stats["Statistical Analysis"]
+  Conclusion["Conclusion: Hypothesis supported... #40;conf: 0.95#41;"]
 
-  Conclusion["Conclusion: Hypothesis supported... (conf: 0.95)"]
-  Stats --> Conclusion
-
-  style Conclusion fill:#a5d6a7
-"
+  Stats --> Conclusion"
 `;
 
 exports[`Sequential Mode Exporter Snapshots > ASCII format 1`] = `

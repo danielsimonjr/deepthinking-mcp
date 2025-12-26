@@ -1,13 +1,18 @@
 /**
- * Optimization Visual Exporter (v7.0.3)
+ * Optimization Visual Exporter (v8.5.0)
  * Sprint 8 Task 8.1: Optimization constraint graph export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
  * Phase 9: Added GraphML and TikZ export support
+ * Phase 13 Sprint 6: Refactored to use fluent builder classes
  */
 
 import type { OptimizationThought } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -105,71 +110,70 @@ function optimizationToMermaid(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph TD\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('TD');
 
+  // Problem
   if (thought.problem) {
     const problemLabel = includeLabels
       ? `Problem: ${thought.problem.name}`
       : 'Problem';
-    mermaid += `  Problem["${problemLabel}"]\n\n`;
+    builder.addNode({ id: 'Problem', label: problemLabel, shape: 'rectangle' });
   }
 
+  // Variables
   if (thought.variables && thought.variables.length > 0) {
-    mermaid += '  subgraph Variables["Decision Variables"]\n';
+    const varNodeIds: string[] = [];
     for (const variable of thought.variables) {
       const varId = sanitizeId(variable.id);
+      varNodeIds.push(varId);
       const label = includeLabels ? variable.name : varId;
       const domainLabel = includeMetrics && variable.domain
         ? ` [${(variable.domain as any).lowerBound},${(variable.domain as any).upperBound}]`
         : '';
-      mermaid += `    ${varId}["${label}${domainLabel}"]\n`;
+      builder.addNode({ id: varId, label: `${label}${domainLabel}`, shape: 'rectangle' });
     }
-    mermaid += '  end\n\n';
+    builder.addSubgraph('Variables', 'Decision Variables', varNodeIds);
   }
 
+  // Constraints
   if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
-    mermaid += '  subgraph Constraints["Constraints"]\n';
+    const constNodeIds: string[] = [];
     for (const constraint of thought.optimizationConstraints) {
       const constId = sanitizeId(constraint.id);
+      constNodeIds.push(constId);
       const label = includeLabels ? constraint.name : constId;
-      mermaid += `    ${constId}["${label}"]\n`;
+      builder.addNode({ id: constId, label, shape: 'rectangle' });
     }
-    mermaid += '  end\n\n';
+    builder.addSubgraph('Constraints', 'Constraints', constNodeIds);
   }
 
+  // Objectives
   if (thought.objectives && thought.objectives.length > 0) {
     for (const objective of thought.objectives) {
       const objId = sanitizeId(objective.id);
       const label = includeLabels
         ? `${objective.type}: ${objective.name}`
         : objId;
-      mermaid += `  ${objId}["${label}"]\n`;
+      builder.addNode({ id: objId, label, shape: 'rectangle' });
     }
-    mermaid += '\n';
   }
 
+  // Solution
   if (thought.solution) {
     const qualityLabel = includeMetrics && thought.solution.quality
       ? ` (quality: ${thought.solution.quality.toFixed(2)})`
       : '';
-    mermaid += `  Solution["Solution${qualityLabel}"]\n`;
+    builder.addNode({ id: 'Solution', label: `Solution${qualityLabel}`, shape: 'rectangle' });
     if (thought.objectives) {
       for (const objective of thought.objectives) {
         const objId = sanitizeId(objective.id);
-        mermaid += `  ${objId} --> Solution\n`;
+        builder.addEdge({ source: objId, target: 'Solution' });
       }
     }
   }
 
-  if (colorScheme !== 'monochrome') {
-    mermaid += '\n';
-    const solutionColor = colorScheme === 'pastel' ? '#e8f5e9' : '#a5d6a7';
-    if (thought.solution) {
-      mermaid += `  style Solution fill:${solutionColor}\n`;
-    }
-  }
-
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function optimizationToDOT(
@@ -177,126 +181,138 @@ function optimizationToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph Optimization {\n';
-  dot += '  rankdir=TD;\n';
-  dot += '  node [shape=box, style=rounded];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('Optimization')
+    .setRankDir('TB')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
+  // Problem
   if (thought.problem) {
     const label = includeLabels ? thought.problem.name : 'Problem';
-    dot += `  Problem [label="Problem:\\n${label}", shape=ellipse];\n\n`;
+    builder.addNode({ id: 'Problem', label: `Problem:\n${label}`, shape: 'ellipse' });
   }
 
+  // Variables
   if (thought.variables && thought.variables.length > 0) {
-    dot += '  subgraph cluster_variables {\n';
-    dot += '    label="Decision Variables";\n';
     for (const variable of thought.variables) {
       const varId = sanitizeId(variable.id);
       const label = includeLabels ? variable.name : varId;
       const domainLabel = includeMetrics && variable.domain
-        ? `\\n[${(variable.domain as any).lowerBound}, ${(variable.domain as any).upperBound}]`
+        ? `\n[${(variable.domain as any).lowerBound}, ${(variable.domain as any).upperBound}]`
         : '';
-      dot += `    ${varId} [label="${label}${domainLabel}"];\n`;
+      builder.addNode({ id: varId, label: `${label}${domainLabel}` });
     }
-    dot += '  }\n\n';
   }
 
+  // Constraints
   if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
-    dot += '  subgraph cluster_constraints {\n';
-    dot += '    label="Constraints";\n';
     for (const constraint of thought.optimizationConstraints) {
       const constId = sanitizeId(constraint.id);
       const label = includeLabels ? constraint.name : constId;
-      dot += `    ${constId} [label="${label}", shape=diamond];\n`;
+      builder.addNode({ id: constId, label, shape: 'diamond' });
     }
-    dot += '  }\n\n';
   }
 
+  // Objectives
   if (thought.objectives) {
     for (const objective of thought.objectives) {
       const objId = sanitizeId(objective.id);
-      const label = includeLabels ? `${objective.type}:\\n${objective.name}` : objId;
-      dot += `  ${objId} [label="${label}"];\n`;
+      const label = includeLabels ? `${objective.type}:\n${objective.name}` : objId;
+      builder.addNode({ id: objId, label });
     }
   }
 
+  // Solution
   if (thought.solution) {
     const qualityLabel = includeMetrics && thought.solution.quality
-      ? `\\nquality: ${thought.solution.quality.toFixed(2)}`
+      ? `\nquality: ${thought.solution.quality.toFixed(2)}`
       : '';
-    dot += `  Solution [label="Solution${qualityLabel}", shape=doubleoctagon, style=filled, fillcolor=lightgreen];\n`;
+    builder.addNode({
+      id: 'Solution',
+      label: `Solution${qualityLabel}`,
+      shape: 'doubleoctagon',
+      style: ['filled'],
+      fillColor: 'lightgreen'
+    });
     if (thought.objectives) {
       for (const objective of thought.objectives) {
         const objId = sanitizeId(objective.id);
-        dot += `  ${objId} -> Solution;\n`;
+        builder.addEdge({ source: objId, target: 'Solution' });
       }
     }
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function optimizationToASCII(thought: OptimizationThought): string {
-  let ascii = 'Optimization Problem:\n';
-  ascii += '====================\n\n';
+  const builder = new ASCIIDocBuilder()
+    .addHeader('Optimization Problem', 'equals')
+    .addEmptyLine();
 
+  // Problem
   if (thought.problem) {
-    ascii += `Problem: ${thought.problem.name}\n`;
-    ascii += `Type: ${thought.problem.type}\n`;
-    ascii += `${thought.problem.description || '-'}\n\n`;
+    builder.addText(`Problem: ${thought.problem.name}`);
+    builder.addText(`Type: ${thought.problem.type}`);
+    builder.addText(`${thought.problem.description || '-'}`);
+    builder.addEmptyLine();
   }
 
+  // Variables
   if (thought.variables && thought.variables.length > 0) {
-    ascii += 'Decision Variables:\n';
+    builder.addSection('Decision Variables').addEmptyLine();
     for (const variable of thought.variables) {
       const varType = (variable as any).type || 'unknown';
-      ascii += `  ${variable.name} (${varType})\n`;
+      builder.addText(`  ${variable.name} (${varType})`);
       if (variable.domain) {
-        ascii += `    Domain: [${(variable.domain as any).lowerBound}, ${(variable.domain as any).upperBound}]\n`;
+        builder.addText(`    Domain: [${(variable.domain as any).lowerBound}, ${(variable.domain as any).upperBound}]`);
       }
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
+  // Constraints
   if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
-    ascii += 'Constraints:\n';
+    builder.addSection('Constraints').addEmptyLine();
     for (const constraint of thought.optimizationConstraints) {
-      ascii += `  ${constraint.name} (${constraint.type})\n`;
-      ascii += `    ${constraint.formula}\n`;
+      builder.addText(`  ${constraint.name} (${constraint.type})`);
+      builder.addText(`    ${constraint.formula}`);
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
+  // Objectives
   if (thought.objectives && thought.objectives.length > 0) {
-    ascii += 'Objectives:\n';
+    builder.addSection('Objectives').addEmptyLine();
     for (const objective of thought.objectives) {
-      ascii += `  ${objective.type.toUpperCase()}: ${objective.name}\n`;
-      ascii += `    ${objective.formula}\n`;
+      builder.addText(`  ${objective.type.toUpperCase()}: ${objective.name}`);
+      builder.addText(`    ${objective.formula}`);
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
+  // Solution
   if (thought.solution) {
-    ascii += 'Solution:\n';
+    builder.addSection('Solution').addEmptyLine();
     const solution = thought.solution as any;
     if (solution.status) {
-      ascii += `  Status: ${solution.status}\n`;
+      builder.addText(`  Status: ${solution.status}`);
     }
     if (solution.optimalValue !== undefined) {
-      ascii += `  Optimal Value: ${solution.optimalValue}\n`;
+      builder.addText(`  Optimal Value: ${solution.optimalValue}`);
     }
     if (solution.quality !== undefined) {
-      ascii += `  Quality: ${solution.quality.toFixed(2)}\n`;
+      builder.addText(`  Quality: ${solution.quality.toFixed(2)}`);
     }
     if (solution.assignments) {
-      ascii += '  Assignments:\n';
+      builder.addText('  Assignments:');
       for (const [varId, value] of Object.entries(solution.assignments)) {
-        ascii += `    ${varId} = ${value}\n`;
+        builder.addText(`    ${varId} = ${value}`);
       }
     }
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**

@@ -1,12 +1,17 @@
 /**
- * Formal Logic Visual Exporter (v7.0.3)
+ * Formal Logic Visual Exporter (v8.5.0)
  * Sprint 8 Task 8.1: Formal logic proof tree export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support, GraphML, TikZ
+ * Phase 13 Sprint 6: Refactored to use fluent builder classes
  */
 
 import type { FormalLogicThought } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -105,23 +110,27 @@ function formalLogicToMermaid(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph TD\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('TD');
 
+  // Add propositions to a subgraph
   if (thought.propositions && thought.propositions.length > 0) {
-    mermaid += '  subgraph Propositions["Propositions"]\n';
+    const propNodeIds: string[] = [];
     for (const proposition of thought.propositions) {
       const propId = sanitizeId(proposition.id);
+      propNodeIds.push(propId);
       const label = includeLabels
         ? `${proposition.symbol}: ${proposition.statement.substring(0, 40)}...`
         : proposition.symbol;
-      const shape = proposition.type === 'atomic' ? ['[', ']'] : ['[[', ']]'];
-      mermaid += `    ${propId}${shape[0]}${label}${shape[1]}\n`;
+      const shape = proposition.type === 'atomic' ? 'rectangle' : 'subroutine';
+      builder.addNode({ id: propId, label, shape });
     }
-    mermaid += '  end\n\n';
+    builder.addSubgraph('Propositions', 'Propositions', propNodeIds);
   }
 
+  // Add proof steps and theorem
   if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
-    mermaid += '  Theorem["Theorem"]\n';
+    builder.addNode({ id: 'Theorem', label: 'Theorem', shape: 'rectangle' });
 
     for (const step of thought.proof.steps) {
       const stepId = `Step${step.stepNumber}`;
@@ -129,60 +138,46 @@ function formalLogicToMermaid(
         ? `${step.stepNumber}. ${step.statement.substring(0, 40)}...`
         : `Step ${step.stepNumber}`;
 
-      mermaid += `  ${stepId}["${label}"]\n`;
+      builder.addNode({ id: stepId, label, shape: 'rectangle' });
 
       if (step.referencesSteps && step.referencesSteps.length > 0) {
         for (const refStep of step.referencesSteps) {
-          mermaid += `  Step${refStep} --> ${stepId}\n`;
+          builder.addEdge({ source: `Step${refStep}`, target: stepId });
         }
       }
     }
 
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
-    mermaid += `  Step${lastStep.stepNumber} --> Theorem\n`;
+    builder.addEdge({ source: `Step${lastStep.stepNumber}`, target: 'Theorem' });
 
     if (includeMetrics) {
       const completeness = (thought.proof.completeness * 100).toFixed(0);
-      mermaid += `\n  Completeness["Completeness: ${completeness}%"]\n`;
-      mermaid += `  Completeness -.-> Theorem\n`;
+      builder.addNode({ id: 'Completeness', label: `Completeness: ${completeness}%`, shape: 'rectangle' });
+      builder.addEdge({ source: 'Completeness', target: 'Theorem', style: 'dotted' });
     }
   }
 
+  // Add logical inferences
   if (thought.logicalInferences && thought.logicalInferences.length > 0) {
-    mermaid += '\n';
     for (const inference of thought.logicalInferences) {
       const infId = sanitizeId(inference.id);
       const label = includeLabels ? inference.rule : infId;
 
-      mermaid += `  ${infId}{{"${label}"}}\n`;
+      builder.addNode({ id: infId, label, shape: 'hexagon' });
 
       if (inference.premises) {
         for (const premiseId of inference.premises) {
           const propId = sanitizeId(premiseId);
-          mermaid += `  ${propId} --> ${infId}\n`;
+          builder.addEdge({ source: propId, target: infId });
         }
       }
 
       const conclusionId = sanitizeId(inference.conclusion);
-      mermaid += `  ${infId} --> ${conclusionId}\n`;
+      builder.addEdge({ source: infId, target: conclusionId });
     }
   }
 
-  if (colorScheme !== 'monochrome') {
-    mermaid += '\n';
-    const atomicColor = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
-    const compoundColor = colorScheme === 'pastel' ? '#fff3e0' : '#ffd699';
-
-    if (thought.propositions) {
-      for (const proposition of thought.propositions) {
-        const propId = sanitizeId(proposition.id);
-        const color = proposition.type === 'atomic' ? atomicColor : compoundColor;
-        mermaid += `  style ${propId} fill:${color}\n`;
-      }
-    }
-  }
-
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function formalLogicToDOT(
@@ -190,126 +185,137 @@ function formalLogicToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph FormalLogic {\n';
-  dot += '  rankdir=TD;\n';
-  dot += '  node [shape=box, style=rounded];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('FormalLogic')
+    .setRankDir('TB')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
+  // Add propositions
   if (thought.propositions && thought.propositions.length > 0) {
-    dot += '  subgraph cluster_propositions {\n';
-    dot += '    label="Propositions";\n';
     for (const proposition of thought.propositions) {
       const propId = sanitizeId(proposition.id);
       const label = includeLabels
-        ? `${proposition.symbol}:\\n${proposition.statement.substring(0, 40)}...`
+        ? `${proposition.symbol}:\n${proposition.statement.substring(0, 40)}...`
         : proposition.symbol;
       const shape = proposition.type === 'atomic' ? 'ellipse' : 'box';
-      dot += `    ${propId} [label="${label}", shape=${shape}];\n`;
+      builder.addNode({ id: propId, label, shape });
     }
-    dot += '  }\n\n';
   }
 
+  // Add theorem and proof steps
   if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
-    dot += `  Theorem [label="Theorem:\\n${thought.proof.theorem.substring(0, 50)}...", shape=doubleoctagon, style=bold];\n\n`;
+    builder.addNode({
+      id: 'Theorem',
+      label: `Theorem:\n${thought.proof.theorem.substring(0, 50)}...`,
+      shape: 'doubleoctagon',
+      style: ['bold']
+    });
 
     for (const step of thought.proof.steps) {
       const stepId = `Step${step.stepNumber}`;
       const label = includeLabels
         ? `${step.stepNumber}. ${step.statement.substring(0, 40)}...`
         : `Step ${step.stepNumber}`;
-      const ruleLabel = step.rule ? `\\n(${step.rule})` : '';
+      const ruleLabel = step.rule ? `\n(${step.rule})` : '';
 
-      dot += `  ${stepId} [label="${label}${ruleLabel}"];\n`;
+      builder.addNode({ id: stepId, label: label + ruleLabel });
 
       if (step.referencesSteps) {
         for (const refStep of step.referencesSteps) {
-          dot += `  Step${refStep} -> ${stepId};\n`;
+          builder.addEdge({ source: `Step${refStep}`, target: stepId });
         }
       }
     }
 
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
-    dot += `  Step${lastStep.stepNumber} -> Theorem;\n`;
+    builder.addEdge({ source: `Step${lastStep.stepNumber}`, target: 'Theorem' });
 
     if (includeMetrics) {
       const completeness = (thought.proof.completeness * 100).toFixed(0);
-      dot += `\n  Completeness [label="Completeness: ${completeness}%", shape=note];\n`;
+      builder.addNode({ id: 'Completeness', label: `Completeness: ${completeness}%`, shape: 'note' });
     }
   }
 
+  // Add logical inferences
   if (thought.logicalInferences && thought.logicalInferences.length > 0) {
-    dot += '\n';
     for (const inference of thought.logicalInferences) {
       const infId = sanitizeId(inference.id);
       const label = includeLabels ? inference.rule : infId;
 
-      dot += `  ${infId} [label="${label}", shape=diamond];\n`;
+      builder.addNode({ id: infId, label, shape: 'diamond' });
 
       if (inference.premises) {
         for (const premiseId of inference.premises) {
           const propId = sanitizeId(premiseId);
-          dot += `  ${propId} -> ${infId};\n`;
+          builder.addEdge({ source: propId, target: infId });
         }
       }
 
       const conclusionId = sanitizeId(inference.conclusion);
-      dot += `  ${infId} -> ${conclusionId};\n`;
+      builder.addEdge({ source: infId, target: conclusionId });
     }
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function formalLogicToASCII(thought: FormalLogicThought): string {
-  let ascii = 'Formal Logic Proof:\n';
-  ascii += '==================\n\n';
+  const builder = new ASCIIDocBuilder()
+    .addHeader('Formal Logic Proof', 'equals')
+    .addEmptyLine();
 
+  // Propositions
   if (thought.propositions && thought.propositions.length > 0) {
-    ascii += 'Propositions:\n';
-    for (const proposition of thought.propositions) {
+    builder.addSection('Propositions').addEmptyLine();
+    const propItems = thought.propositions.map(proposition => {
       const typeMarker = proposition.type === 'atomic' ? '●' : '◆';
-      ascii += `  ${typeMarker} ${proposition.symbol}: ${proposition.statement}\n`;
-    }
-    ascii += '\n';
+      return `${typeMarker} ${proposition.symbol}: ${proposition.statement}`;
+    });
+    builder.addBulletList(propItems).addEmptyLine();
   }
 
+  // Logical inferences
   if (thought.logicalInferences && thought.logicalInferences.length > 0) {
-    ascii += 'Inferences:\n';
+    builder.addSection('Inferences').addEmptyLine();
     for (const inference of thought.logicalInferences) {
-      ascii += `  [${inference.rule}]\n`;
-      ascii += `    Premises: ${inference.premises.join(', ')}\n`;
-      ascii += `    Conclusion: ${inference.conclusion}\n`;
-      ascii += `    Valid: ${inference.valid ? '✓' : '✗'}\n`;
+      builder.addText(`  [${inference.rule}]`);
+      builder.addText(`    Premises: ${inference.premises.join(', ')}`);
+      builder.addText(`    Conclusion: ${inference.conclusion}`);
+      builder.addText(`    Valid: ${inference.valid ? '✓' : '✗'}`);
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
+  // Proof details
   if (thought.proof) {
-    ascii += `Proof: ${thought.proof.theorem}\n`;
-    ascii += `Technique: ${thought.proof.technique}\n`;
-    ascii += `Completeness: ${(thought.proof.completeness * 100).toFixed(0)}%\n\n`;
+    builder.addText(`Proof: ${thought.proof.theorem}`);
+    builder.addText(`Technique: ${thought.proof.technique}`);
+    builder.addText(`Completeness: ${(thought.proof.completeness * 100).toFixed(0)}%`);
+    builder.addEmptyLine();
 
     if (thought.proof.steps && thought.proof.steps.length > 0) {
-      ascii += 'Proof Steps:\n';
+      builder.addSection('Proof Steps').addEmptyLine();
       for (const step of thought.proof.steps) {
-        ascii += `  ${step.stepNumber}. ${step.statement}\n`;
-        ascii += `     Justification: ${step.justification}\n`;
+        builder.addText(`  ${step.stepNumber}. ${step.statement}`);
+        builder.addText(`     Justification: ${step.justification}`);
       }
-      ascii += '\n';
+      builder.addEmptyLine();
     }
 
-    ascii += `Conclusion: ${thought.proof.conclusion}\n`;
-    ascii += `Valid: ${thought.proof.valid ? '✓' : '✗'}\n`;
+    builder.addText(`Conclusion: ${thought.proof.conclusion}`);
+    builder.addText(`Valid: ${thought.proof.valid ? '✓' : '✗'}`);
   }
 
+  // Truth table
   if (thought.truthTable) {
-    ascii += '\nTruth Table:\n';
-    ascii += `  Tautology: ${thought.truthTable.isTautology ? '✓' : '✗'}\n`;
-    ascii += `  Contradiction: ${thought.truthTable.isContradiction ? '✓' : '✗'}\n`;
-    ascii += `  Contingent: ${thought.truthTable.isContingent ? '✓' : '✗'}\n`;
+    builder.addEmptyLine();
+    builder.addSection('Truth Table').addEmptyLine();
+    builder.addText(`  Tautology: ${thought.truthTable.isTautology ? '✓' : '✗'}`);
+    builder.addText(`  Contradiction: ${thought.truthTable.isContradiction ? '✓' : '✗'}`);
+    builder.addText(`  Contingent: ${thought.truthTable.isContingent ? '✓' : '✗'}`);
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**

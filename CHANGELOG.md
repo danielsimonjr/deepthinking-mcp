@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed - Phase 13 Sprint 6: Mode Exporter Refactoring (continued)
+
+**Refactored 4 Mode Exporters to Use Builder Classes**
+
+Refactored four mode exporter files to use the fluent builder APIs:
+
+- **hybrid.ts** (`src/export/visual/modes/hybrid.ts`)
+  - Refactored `hybridToMermaid()` to use `MermaidGraphBuilder`
+  - Refactored `hybridToDOT()` to use `DOTGraphBuilder`
+  - Refactored `hybridToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **formal-logic.ts** (`src/export/visual/modes/formal-logic.ts`)
+  - Refactored `formalLogicToMermaid()` to use `MermaidGraphBuilder` with subgraphs
+  - Refactored `formalLogicToDOT()` to use `DOTGraphBuilder`
+  - Refactored `formalLogicToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **scientific-method.ts** (`src/export/visual/modes/scientific-method.ts`)
+  - Refactored `scientificMethodToMermaid()` to use `MermaidGraphBuilder`
+  - Refactored `scientificMethodToDOT()` to use `DOTGraphBuilder`
+  - Refactored `scientificMethodToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **optimization.ts** (`src/export/visual/modes/optimization.ts`)
+  - Refactored `optimizationToMermaid()` to use `MermaidGraphBuilder` with subgraphs
+  - Refactored `optimizationToDOT()` to use `DOTGraphBuilder`
+  - Refactored `optimizationToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+### Fixed - Sprint 6
+
+- Updated 12 snapshot baselines for hybrid, formal-logic, scientific-method, and optimization modes to match new builder output formatting
+- Fixed `DotRankDir` type error by changing `"TD"` to `"TB"` (supported value)
+- Removed calls to non-existent `addCluster()` method on `DOTGraphBuilder`
+
+### Validation - Sprint 6
+
+- **Builder Adoption**: ✅ All 4 files use fluent builder APIs
+- **Typecheck**: ✅ Clean (`npm run typecheck`)
+- **Full Test Suite**: ✅ 4686 tests passing across 170 test files
+- **Build**: Ready
+
+---
+
 ### Changed - Phase 13 Sprint 5: Mode Exporter Refactoring
 
 **Refactored 4 Large Mode Exporters to Use Builder Classes**

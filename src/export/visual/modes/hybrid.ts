@@ -1,12 +1,17 @@
 /**
- * Hybrid Visual Exporter (v7.0.3)
+ * Hybrid Visual Exporter (v8.5.0)
  * Phase 7 Sprint 2: Hybrid mode reasoning export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support, GraphML, TikZ
+ * Phase 13 Sprint 6: Refactored to use fluent builder classes
  */
 
 import type { HybridThought } from '../../../types/core.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -106,29 +111,30 @@ function hybridToMermaid(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph TB\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('TB');
 
   // Add hybrid mode node (central orchestrator)
   const hybridId = sanitizeId('hybrid_mode');
-  mermaid += `  ${hybridId}(("Hybrid Mode"))\n`;
+  builder.addNode({ id: hybridId, label: 'Hybrid Mode', shape: 'double-circle' });
 
   // Add primary mode
   const primaryId = sanitizeId(`primary_${thought.primaryMode}`);
   const primaryLabel = includeLabels ? thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1) : primaryId;
-  mermaid += `  ${primaryId}[["${primaryLabel}"]]\n`;
-  mermaid += `  ${hybridId} ==> ${primaryId}\n`;
+  builder.addNode({ id: primaryId, label: primaryLabel, shape: 'subroutine' });
+  builder.addEdge({ source: hybridId, target: primaryId, style: 'thick' });
 
   // Add secondary features
   if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
     const secondaryId = sanitizeId('secondary_features');
-    mermaid += `  ${secondaryId}(["Secondary Features"])\n`;
-    mermaid += `  ${hybridId} --> ${secondaryId}\n`;
+    builder.addNode({ id: secondaryId, label: 'Secondary Features', shape: 'stadium' });
+    builder.addEdge({ source: hybridId, target: secondaryId });
 
     thought.secondaryFeatures.forEach((feature, index) => {
       const featureId = sanitizeId(`feature_${index}`);
       const featureLabel = includeLabels ? feature.slice(0, 30) + (feature.length > 30 ? '...' : '') : `Feature ${index + 1}`;
-      mermaid += `  ${featureId}["${featureLabel}"]\n`;
-      mermaid += `  ${secondaryId} --> ${featureId}\n`;
+      builder.addNode({ id: featureId, label: featureLabel, shape: 'rectangle' });
+      builder.addEdge({ source: secondaryId, target: featureId });
     });
   }
 
@@ -138,74 +144,61 @@ function hybridToMermaid(
     const switchLabel = includeLabels
       ? thought.switchReason.slice(0, 40) + (thought.switchReason.length > 40 ? '...' : '')
       : 'Switch Reason';
-    mermaid += `  ${switchId}>"${switchLabel}"]\n`;
-    mermaid += `  ${hybridId} -.-> ${switchId}\n`;
+    builder.addNode({ id: switchId, label: switchLabel, shape: 'asymmetric' });
+    builder.addEdge({ source: hybridId, target: switchId, style: 'dotted' });
   }
 
   // Add stage if present (Shannon-style staging)
   if (thought.stage) {
     const stageId = sanitizeId(`stage_${thought.stage}`);
-    const stageLabel = thought.stage.replace(/_/g, ' ');
-    mermaid += `  ${stageId}{{"Stage: ${stageLabel}"}}\n`;
-    mermaid += `  ${primaryId} --> ${stageId}\n`;
+    const stageLabel = `Stage: ${thought.stage.replace(/_/g, ' ')}`;
+    builder.addNode({ id: stageId, label: stageLabel, shape: 'hexagon' });
+    builder.addEdge({ source: primaryId, target: stageId });
   }
 
   // Add mathematical model if present
   if (thought.mathematicalModel) {
     const modelId = sanitizeId('math_model');
     const modelLabel = thought.mathematicalModel.symbolic || 'Mathematical Model';
-    mermaid += `  ${modelId}["${modelLabel}"]\n`;
-    mermaid += `  ${primaryId} --> ${modelId}\n`;
+    builder.addNode({ id: modelId, label: modelLabel, shape: 'rectangle' });
+    builder.addEdge({ source: primaryId, target: modelId });
   }
 
   // Add tensor properties if present
   if (thought.tensorProperties) {
     const tensorId = sanitizeId('tensor');
     const tensorLabel = `Tensor (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`;
-    mermaid += `  ${tensorId}[/"${tensorLabel}"/]\n`;
-    mermaid += `  ${primaryId} --> ${tensorId}\n`;
+    builder.addNode({ id: tensorId, label: tensorLabel, shape: 'parallelogram' });
+    builder.addEdge({ source: primaryId, target: tensorId });
   }
 
   // Add physical interpretation if present
   if (thought.physicalInterpretation) {
     const physId = sanitizeId('physical');
-    mermaid += `  ${physId}[/"${thought.physicalInterpretation.quantity}"/]\n`;
-    mermaid += `  ${primaryId} --> ${physId}\n`;
+    builder.addNode({ id: physId, label: thought.physicalInterpretation.quantity, shape: 'parallelogram' });
+    builder.addEdge({ source: primaryId, target: physId });
   }
 
   // Add uncertainty metric
   if (includeMetrics && thought.uncertainty !== undefined) {
     const uncertId = sanitizeId('uncertainty');
     const uncertLabel = `Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`;
-    mermaid += `  ${uncertId}{{${uncertLabel}}}\n`;
+    builder.addNode({ id: uncertId, label: uncertLabel, shape: 'hexagon' });
   }
 
   // Add assumptions
   if (thought.assumptions && thought.assumptions.length > 0) {
     const assumptionsId = sanitizeId('assumptions');
-    mermaid += `  ${assumptionsId}>"Assumptions: ${thought.assumptions.length}"]\n`;
+    builder.addNode({ id: assumptionsId, label: `Assumptions: ${thought.assumptions.length}`, shape: 'asymmetric' });
   }
 
   // Add dependencies
   if (thought.dependencies && thought.dependencies.length > 0) {
     const depsId = sanitizeId('dependencies');
-    mermaid += `  ${depsId}>"Dependencies: ${thought.dependencies.length}"]\n`;
+    builder.addNode({ id: depsId, label: `Dependencies: ${thought.dependencies.length}`, shape: 'asymmetric' });
   }
 
-  // Color scheme
-  if (colorScheme !== 'monochrome') {
-    const colors = colorScheme === 'pastel'
-      ? { hybrid: '#e8f4e8', primary: '#e3f2fd', secondary: '#fff3e0' }
-      : { hybrid: '#90EE90', primary: '#87CEEB', secondary: '#FFD700' };
-
-    mermaid += `\n  style ${hybridId} fill:${colors.hybrid}\n`;
-    mermaid += `  style ${primaryId} fill:${colors.primary}\n`;
-    if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
-      mermaid += `  style ${sanitizeId('secondary_features')} fill:${colors.secondary}\n`;
-    }
-  }
-
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function hybridToDOT(
@@ -213,31 +206,32 @@ function hybridToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph HybridOrchestration {\n';
-  dot += '  rankdir=TB;\n';
-  dot += '  node [shape=box, style=rounded];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('HybridOrchestration')
+    .setRankDir('TB')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
   // Hybrid mode node (central)
   const hybridId = sanitizeId('hybrid_mode');
-  dot += `  ${hybridId} [label="Hybrid Mode", shape=doubleoctagon];\n`;
+  builder.addNode({ id: hybridId, label: 'Hybrid Mode', shape: 'doubleoctagon' });
 
   // Primary mode
   const primaryId = sanitizeId(`primary_${thought.primaryMode}`);
   const primaryLabel = thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1);
-  dot += `  ${primaryId} [label="${primaryLabel}", shape=box, style="filled,rounded", fillcolor=lightblue];\n`;
-  dot += `  ${hybridId} -> ${primaryId} [style=bold, penwidth=2];\n`;
+  builder.addNode({ id: primaryId, label: primaryLabel, shape: 'box', style: ['filled', 'rounded'], fillColor: 'lightblue' });
+  builder.addEdge({ source: hybridId, target: primaryId, style: 'bold', penWidth: 2 });
 
   // Secondary features
   if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
     const secondaryId = sanitizeId('secondary_features');
-    dot += `  ${secondaryId} [label="Secondary Features", shape=ellipse];\n`;
-    dot += `  ${hybridId} -> ${secondaryId};\n`;
+    builder.addNode({ id: secondaryId, label: 'Secondary Features', shape: 'ellipse' });
+    builder.addEdge({ source: hybridId, target: secondaryId });
 
     thought.secondaryFeatures.forEach((feature, index) => {
       const featureId = sanitizeId(`feature_${index}`);
-      const featureLabel = includeLabels ? feature.slice(0, 25).replace(/"/g, '"') : `Feature ${index + 1}`;
-      dot += `  ${featureId} [label="${featureLabel}"];\n`;
-      dot += `  ${secondaryId} -> ${featureId};\n`;
+      const featureLabel = includeLabels ? feature.slice(0, 25) : `Feature ${index + 1}`;
+      builder.addNode({ id: featureId, label: featureLabel });
+      builder.addEdge({ source: secondaryId, target: featureId });
     });
   }
 
@@ -245,150 +239,141 @@ function hybridToDOT(
   if (thought.switchReason) {
     const switchId = sanitizeId('switch_reason');
     const switchLabel = includeLabels
-      ? thought.switchReason.slice(0, 30).replace(/"/g, '"')
+      ? thought.switchReason.slice(0, 30)
       : 'Switch Reason';
-    dot += `  ${switchId} [label="${switchLabel}", shape=note];\n`;
-    dot += `  ${hybridId} -> ${switchId} [style=dashed];\n`;
+    builder.addNode({ id: switchId, label: switchLabel, shape: 'note' });
+    builder.addEdge({ source: hybridId, target: switchId, style: 'dashed' });
   }
 
   // Stage
   if (thought.stage) {
     const stageId = sanitizeId(`stage_${thought.stage}`);
-    dot += `  ${stageId} [label="${thought.stage.replace(/_/g, ' ')}", shape=diamond];\n`;
-    dot += `  ${primaryId} -> ${stageId};\n`;
+    builder.addNode({ id: stageId, label: thought.stage.replace(/_/g, ' '), shape: 'diamond' });
+    builder.addEdge({ source: primaryId, target: stageId });
   }
 
   // Mathematical model
   if (thought.mathematicalModel) {
     const modelId = sanitizeId('math_model');
     const modelLabel = thought.mathematicalModel.symbolic
-      ? thought.mathematicalModel.symbolic.slice(0, 25).replace(/"/g, '"')
+      ? thought.mathematicalModel.symbolic.slice(0, 25)
       : 'Math Model';
-    dot += `  ${modelId} [label="${modelLabel}", shape=parallelogram];\n`;
-    dot += `  ${primaryId} -> ${modelId};\n`;
+    builder.addNode({ id: modelId, label: modelLabel, shape: 'parallelogram' });
+    builder.addEdge({ source: primaryId, target: modelId });
   }
 
   // Tensor properties
   if (thought.tensorProperties) {
     const tensorId = sanitizeId('tensor');
-    dot += `  ${tensorId} [label="Tensor (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})", shape=parallelogram];\n`;
-    dot += `  ${primaryId} -> ${tensorId};\n`;
+    builder.addNode({ id: tensorId, label: `Tensor (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`, shape: 'parallelogram' });
+    builder.addEdge({ source: primaryId, target: tensorId });
   }
 
   // Physical interpretation
   if (thought.physicalInterpretation) {
     const physId = sanitizeId('physical');
-    dot += `  ${physId} [label="${thought.physicalInterpretation.quantity}", shape=parallelogram];\n`;
-    dot += `  ${primaryId} -> ${physId};\n`;
+    builder.addNode({ id: physId, label: thought.physicalInterpretation.quantity, shape: 'parallelogram' });
+    builder.addEdge({ source: primaryId, target: physId });
   }
 
   // Uncertainty
   if (includeMetrics && thought.uncertainty !== undefined) {
     const uncertId = sanitizeId('uncertainty');
-    dot += `  ${uncertId} [label="${(thought.uncertainty * 100).toFixed(1)}%", shape=diamond];\n`;
+    builder.addNode({ id: uncertId, label: `${(thought.uncertainty * 100).toFixed(1)}%`, shape: 'diamond' });
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function hybridToASCII(thought: HybridThought): string {
-  let ascii = 'Hybrid Mode Orchestration:\n';
-  ascii += '==========================\n\n';
+  const builder = new ASCIIDocBuilder()
+    .addHeader('Hybrid Mode Orchestration', 'equals')
+    .addEmptyLine();
 
   // Primary mode
-  ascii += `Primary Mode: ${thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1)}\n`;
+  builder.addText(`Primary Mode: ${thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1)}`);
 
   // Stage
   if (thought.stage) {
-    ascii += `Current Stage: ${thought.stage.replace(/_/g, ' ')}\n`;
+    builder.addText(`Current Stage: ${thought.stage.replace(/_/g, ' ')}`);
   }
 
   // Uncertainty
   if (thought.uncertainty !== undefined) {
-    ascii += `Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%\n`;
+    builder.addText(`Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`);
   }
 
-  ascii += '\n';
+  builder.addEmptyLine();
 
   // Switch reason
   if (thought.switchReason) {
-    ascii += `Switch Reason: ${thought.switchReason}\n\n`;
+    builder.addText(`Switch Reason: ${thought.switchReason}`).addEmptyLine();
   }
 
   // Secondary features
   if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
-    ascii += 'Secondary Features:\n';
-    thought.secondaryFeatures.forEach((feature, index) => {
-      ascii += `  ${index + 1}. ${feature}\n`;
-    });
-    ascii += '\n';
+    builder.addSection('Secondary Features').addEmptyLine();
+    builder.addNumberedList(thought.secondaryFeatures).addEmptyLine();
   }
 
   // Mathematical model
   if (thought.mathematicalModel) {
-    ascii += 'Mathematical Model:\n';
-    ascii += `  LaTeX: ${thought.mathematicalModel.latex}\n`;
-    ascii += `  Symbolic: ${thought.mathematicalModel.symbolic}\n`;
+    builder.addSection('Mathematical Model').addEmptyLine();
+    builder.addText(`  LaTeX: ${thought.mathematicalModel.latex}`);
+    builder.addText(`  Symbolic: ${thought.mathematicalModel.symbolic}`);
     if (thought.mathematicalModel.ascii) {
-      ascii += `  ASCII: ${thought.mathematicalModel.ascii}\n`;
+      builder.addText(`  ASCII: ${thought.mathematicalModel.ascii}`);
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
   // Tensor properties
   if (thought.tensorProperties) {
-    ascii += 'Tensor Properties:\n';
-    ascii += `  Rank: (${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})\n`;
-    ascii += `  Components: ${thought.tensorProperties.components}\n`;
-    ascii += `  Transformation: ${thought.tensorProperties.transformation}\n`;
+    builder.addSection('Tensor Properties').addEmptyLine();
+    builder.addText(`  Rank: (${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`);
+    builder.addText(`  Components: ${thought.tensorProperties.components}`);
+    builder.addText(`  Transformation: ${thought.tensorProperties.transformation}`);
     if (thought.tensorProperties.symmetries.length > 0) {
-      ascii += '  Symmetries:\n';
+      builder.addText('  Symmetries:');
       thought.tensorProperties.symmetries.forEach((sym, index) => {
-        ascii += `    ${index + 1}. ${sym}\n`;
+        builder.addText(`    ${index + 1}. ${sym}`);
       });
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
   // Physical interpretation
   if (thought.physicalInterpretation) {
-    ascii += 'Physical Interpretation:\n';
-    ascii += `  Quantity: ${thought.physicalInterpretation.quantity}\n`;
-    ascii += `  Units: ${thought.physicalInterpretation.units}\n`;
+    builder.addSection('Physical Interpretation').addEmptyLine();
+    builder.addText(`  Quantity: ${thought.physicalInterpretation.quantity}`);
+    builder.addText(`  Units: ${thought.physicalInterpretation.units}`);
     if (thought.physicalInterpretation.conservationLaws.length > 0) {
-      ascii += '  Conservation Laws:\n';
+      builder.addText('  Conservation Laws:');
       thought.physicalInterpretation.conservationLaws.forEach((law, index) => {
-        ascii += `    ${index + 1}. ${law}\n`;
+        builder.addText(`    ${index + 1}. ${law}`);
       });
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
   // Assumptions
   if (thought.assumptions && thought.assumptions.length > 0) {
-    ascii += 'Assumptions:\n';
-    thought.assumptions.forEach((assumption, index) => {
-      ascii += `  ${index + 1}. ${assumption}\n`;
-    });
-    ascii += '\n';
+    builder.addSection('Assumptions').addEmptyLine();
+    builder.addNumberedList(thought.assumptions).addEmptyLine();
   }
 
   // Dependencies
   if (thought.dependencies && thought.dependencies.length > 0) {
-    ascii += 'Dependencies:\n';
-    thought.dependencies.forEach((dep, index) => {
-      ascii += `  ${index + 1}. ${dep}\n`;
-    });
-    ascii += '\n';
+    builder.addSection('Dependencies').addEmptyLine();
+    builder.addNumberedList(thought.dependencies).addEmptyLine();
   }
 
   // Revision reason
   if (thought.revisionReason) {
-    ascii += `Revision Reason: ${thought.revisionReason}\n`;
+    builder.addText(`Revision Reason: ${thought.revisionReason}`);
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**

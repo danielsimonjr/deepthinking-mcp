@@ -70,7 +70,9 @@
       "tasks": 5,
       "hours": 9,
       "file": "PHASE_13_SPRINT_6_TODO.json",
-      "status": "pending"
+      "status": "completed",
+      "completedDate": "2025-12-26",
+      "notes": "BUILDER ADOPTION COMPLETE. 4 files refactored, 12 snapshots updated, 4686 tests passing."
     },
     {
       "sprint": 7,
@@ -111,9 +113,9 @@
     }
   ],
   "features": {
-    "R-1": { "name": "DOT Builder & Adoption", "sprints": [1, 5, 6, 7, 8, 9], "status": "in-progress", "priority": "high", "notes": "Builder complete, 5/22 modes adopted" },
-    "R-2": { "name": "Mermaid Builder & Adoption", "sprints": [1, 5, 6, 7, 8, 9], "status": "in-progress", "priority": "high", "notes": "Builder complete, 5/22 modes adopted" },
-    "R-3": { "name": "ASCII Builder & Adoption", "sprints": [2, 5, 6, 7, 8, 9], "status": "in-progress", "priority": "high", "notes": "Builder complete, 5/22 modes adopted" },
+    "R-1": { "name": "DOT Builder & Adoption", "sprints": [1, 5, 6, 7, 8, 9], "status": "in-progress", "priority": "high", "notes": "Builder complete, 9/22 modes adopted" },
+    "R-2": { "name": "Mermaid Builder & Adoption", "sprints": [1, 5, 6, 7, 8, 9], "status": "in-progress", "priority": "high", "notes": "Builder complete, 9/22 modes adopted" },
+    "R-3": { "name": "ASCII Builder & Adoption", "sprints": [2, 5, 6, 7, 8, 9], "status": "in-progress", "priority": "high", "notes": "Builder complete, 9/22 modes adopted" },
     "R-4": { "name": "SVG Builder", "sprints": [2], "status": "completed", "priority": "medium" },
     "R-5": { "name": "GraphML Builder", "sprints": [1], "status": "completed", "priority": "medium" },
     "R-6": { "name": "TikZ Builder", "sprints": [2], "status": "completed", "priority": "medium" },
@@ -125,23 +127,23 @@
     "R-12": { "name": "File Splitting", "sprints": [10], "status": "pending", "priority": "high", "notes": "CRITICAL - 4 files from Sprint 5 need splitting" }
   },
   "targetMetrics": {
-    "dotUtilityAdoption": { "current": "5/22 (23%)", "target": "22/22 (100%)" },
-    "mermaidUtilityAdoption": { "current": "5/22 (23%)", "target": "22/22 (100%)" },
-    "asciiUtilityAdoption": { "current": "5/22 (23%)", "target": "22/22 (100%)" },
-    "filesOver1000Lines": { "current": 12, "target": 0, "notes": "Sprint 5 did not reduce - 4 files still >1500 lines" },
+    "dotUtilityAdoption": { "current": "9/22 (41%)", "target": "22/22 (100%)" },
+    "mermaidUtilityAdoption": { "current": "9/22 (41%)", "target": "22/22 (100%)" },
+    "asciiUtilityAdoption": { "current": "9/22 (41%)", "target": "22/22 (100%)" },
+    "filesOver1000Lines": { "current": 12, "target": 0, "notes": "Sprint 5-6 did not reduce - files still >1000 lines" },
     "totalModeFileLines": { "current": 23848, "target": "18000-19000", "notes": "Reduced by ~200 lines in Sprint 5" },
     "builderClassesAdded": { "current": 12, "target": 11, "notes": "11 primary + SVGGroupBuilder" },
-    "modeExportersRefactored": { "current": 5, "target": 22, "notes": "sequential + physics + engineering + metareasoning + proof-decomposition" }
+    "modeExportersRefactored": { "current": 9, "target": 22, "notes": "sequential + physics + engineering + metareasoning + proof-decomposition + hybrid + formal-logic + scientific-method + optimization" }
   },
   "criticalFiles": [
     { "file": "physics.ts", "lines": 1724, "originalLines": 1781, "target": "<1000", "sprint": 5, "status": "refactored-oversized", "reduction": "3%" },
     { "file": "engineering.ts", "lines": 1706, "originalLines": 1691, "target": "<1000", "sprint": 5, "status": "refactored-oversized", "reduction": "-1%" },
     { "file": "metareasoning.ts", "lines": 1593, "originalLines": 1628, "target": "<1000", "sprint": 5, "status": "refactored-oversized", "reduction": "2%" },
     { "file": "proof-decomposition.ts", "lines": 1513, "originalLines": 1624, "target": "<1000", "sprint": 5, "status": "refactored-oversized", "reduction": "7%" },
-    { "file": "hybrid.ts", "lines": 1450, "target": "<1000", "sprint": 6 },
-    { "file": "formal-logic.ts", "lines": 1290, "target": "<1000", "sprint": 6 },
-    { "file": "scientific-method.ts", "lines": 1257, "target": "<1000", "sprint": 6 },
-    { "file": "optimization.ts", "lines": 1234, "target": "<1000", "sprint": 6 },
+    { "file": "hybrid.ts", "lines": 1450, "target": "<1000", "sprint": 6, "status": "refactored-oversized" },
+    { "file": "formal-logic.ts", "lines": 1290, "target": "<1000", "sprint": 6, "status": "refactored-oversized" },
+    { "file": "scientific-method.ts", "lines": 1257, "target": "<1000", "sprint": 6, "status": "refactored-oversized" },
+    { "file": "optimization.ts", "lines": 1234, "target": "<1000", "sprint": 6, "status": "refactored-oversized" },
     { "file": "first-principles.ts", "lines": 1224, "target": "<1000", "sprint": 7 },
     { "file": "mathematics.ts", "lines": 1211, "target": "<1000", "sprint": 7 },
     { "file": "game-theory.ts", "lines": 1028, "target": "<1000", "sprint": 7 },
