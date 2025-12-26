@@ -1,12 +1,17 @@
 /**
- * Game Theory Visual Exporter (v7.0.3)
+ * Game Theory Visual Exporter (v8.5.0)
  * Sprint 8 Task 8.1: Game tree export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support, GraphML, and TikZ
+ * Phase 13 Sprint 7: Refactored to use fluent builder classes
  */
 
 import type { GameTheoryThought } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -101,26 +106,28 @@ export function exportGameTree(thought: GameTheoryThought, options: VisualExport
 
 function gameTreeToMermaid(
   thought: GameTheoryThought,
-  _colorScheme: string,
+  colorScheme: string,
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph TD\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('TD');
 
   if (!thought.game) {
-    return mermaid + '  root[No game defined]\n';
+    builder.addNode({ id: 'root', label: 'No game defined', shape: 'rectangle' });
+    return builder.setOptions({ colorScheme: scheme }).render();
   }
 
   if (thought.gameTree && thought.gameTree.nodes) {
+    // Add nodes
     for (const node of thought.gameTree.nodes) {
       const nodeId = sanitizeId(node.id);
       const label = includeLabels ? (node.action || node.id) : nodeId;
-      const shape = node.type === 'terminal' ? ['[[', ']]'] : ['[', ']'];
-      mermaid += `  ${nodeId}${shape[0]}${label}${shape[1]}\n`;
+      const shape = node.type === 'terminal' ? 'subroutine' as const : 'rectangle' as const;
+      builder.addNode({ id: nodeId, label, shape });
     }
 
-    mermaid += '\n';
-
+    // Add edges
     for (const node of thought.gameTree.nodes) {
       if (node.childNodes && node.childNodes.length > 0) {
         for (const childId of node.childNodes) {
@@ -129,24 +136,25 @@ function gameTreeToMermaid(
           const childNode = thought.gameTree.nodes.find(n => n.id === childId);
 
           if (includeMetrics && childNode?.action) {
-            mermaid += `  ${fromId} --> |${childNode.action}| ${toId}\n`;
+            builder.addEdge({ source: fromId, target: toId, label: childNode.action });
           } else {
-            mermaid += `  ${fromId} --> ${toId}\n`;
+            builder.addEdge({ source: fromId, target: toId });
           }
         }
       }
     }
   } else {
-    mermaid += '  root[Game]\n';
+    builder.addNode({ id: 'root', label: 'Game', shape: 'rectangle' });
     if (thought.strategies) {
       for (const strategy of thought.strategies.slice(0, 5)) {
         const stratId = sanitizeId(strategy.id);
-        mermaid += `  root --> ${stratId}[${strategy.name}]\n`;
+        builder.addNode({ id: stratId, label: strategy.name, shape: 'rectangle' });
+        builder.addEdge({ source: 'root', target: stratId });
       }
     }
   }
 
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function gameTreeToDOT(
@@ -154,26 +162,26 @@ function gameTreeToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph GameTree {\n';
-  dot += '  rankdir=TD;\n';
-  dot += '  node [shape=circle];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('GameTree')
+    .setRankDir('TB')
+    .setNodeDefaults({ shape: 'circle' });
 
   if (!thought.game) {
-    dot += '  root [label="No game"];\n}\n';
-    return dot;
+    builder.addNode({ id: 'root', label: 'No game' });
+    return builder.render();
   }
 
   if (thought.gameTree && thought.gameTree.nodes) {
+    // Add nodes
     for (const node of thought.gameTree.nodes) {
       const nodeId = sanitizeId(node.id);
       const label = includeLabels ? (node.action || node.id) : nodeId;
-      const shape = node.type === 'terminal' ? 'doublecircle' : 'circle';
-
-      dot += `  ${nodeId} [label="${label}", shape=${shape}];\n`;
+      const shape = node.type === 'terminal' ? 'doublecircle' as const : 'circle' as const;
+      builder.addNode({ id: nodeId, label, shape });
     }
 
-    dot += '\n';
-
+    // Add edges
     for (const node of thought.gameTree.nodes) {
       if (node.childNodes && node.childNodes.length > 0) {
         for (const childId of node.childNodes) {
@@ -182,40 +190,41 @@ function gameTreeToDOT(
           const childNode = thought.gameTree.nodes.find(n => n.id === childId);
 
           if (includeMetrics && childNode?.action) {
-            dot += `  ${fromId} -> ${toId} [label="${childNode.action}"];\n`;
+            builder.addEdge({ source: fromId, target: toId, label: childNode.action });
           } else {
-            dot += `  ${fromId} -> ${toId};\n`;
+            builder.addEdge({ source: fromId, target: toId });
           }
         }
       }
     }
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function gameTreeToASCII(thought: GameTheoryThought): string {
-  let ascii = `Game: ${thought.game?.name || 'Untitled'}\n`;
-  ascii += '='.repeat(40) + '\n\n';
+  const builder = new ASCIIDocBuilder();
+
+  builder.addHeader(`Game: ${thought.game?.name || 'Untitled'}`);
 
   if (thought.strategies && thought.strategies.length > 0) {
-    ascii += 'Strategies:\n';
+    builder.addText('Strategies:');
     for (const strategy of thought.strategies) {
       const strategyType = strategy.isPure ? 'Pure' : 'Mixed';
-      ascii += `  • ${strategy.name} (${strategyType})\n`;
+      builder.addText(`  • ${strategy.name} (${strategyType})`);
     }
   }
 
   if (thought.nashEquilibria && thought.nashEquilibria.length > 0) {
-    ascii += '\nEquilibria:\n';
+    builder.addEmptyLine();
+    builder.addText('Equilibria:');
     for (const eq of thought.nashEquilibria) {
-      ascii += `  ⚖ ${eq.type}: ${eq.strategyProfile.join(', ')}\n`;
-      ascii += `    Payoffs: [${eq.payoffs.join(', ')}]\n`;
+      builder.addText(`  ⚖ ${eq.type}: ${eq.strategyProfile.join(', ')}`);
+      builder.addText(`    Payoffs: [${eq.payoffs.join(', ')}]`);
     }
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**

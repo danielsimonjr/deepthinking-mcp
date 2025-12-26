@@ -19278,6 +19278,20 @@ function renderMermaidEdge(edge) {
   }
   return `  ${source} ${arrow} ${target}`;
 }
+function renderMermaidSubgraph(subgraph) {
+  const lines = [];
+  const id = sanitizeMermaidId(subgraph.id);
+  const label = escapeMermaidLabel(subgraph.label);
+  lines.push(`  subgraph ${id}["${label}"]`);
+  if (subgraph.direction) {
+    lines.push(`    direction ${subgraph.direction}`);
+  }
+  for (const nodeId of subgraph.nodes) {
+    lines.push(`    ${sanitizeMermaidId(nodeId)}`);
+  }
+  lines.push("  end");
+  return lines.join("\n");
+}
 function getMermaidColor(type, scheme = "default") {
   return MERMAID_COLORS[scheme][type];
 }
@@ -19309,7 +19323,79 @@ function generateMermaidFlowchart(nodes, edges, options = {}) {
   }
   return lines.join("\n");
 }
-var MERMAID_COLORS;
+function generateMermaidStateDiagram(states, transitions) {
+  const lines = ["stateDiagram-v2"];
+  for (const state of states) {
+    if (state.type === "start") {
+      lines.push(`  [*] --> ${sanitizeMermaidId(state.id)}`);
+    } else if (state.type === "end") {
+      lines.push(`  ${sanitizeMermaidId(state.id)} --> [*]`);
+    }
+    if (state.type !== "start" && state.type !== "end") {
+      lines.push(`  ${sanitizeMermaidId(state.id)} : ${escapeMermaidLabel(state.label)}`);
+    }
+  }
+  lines.push("");
+  for (const trans of transitions) {
+    const from = sanitizeMermaidId(trans.from);
+    const to = sanitizeMermaidId(trans.to);
+    if (trans.label) {
+      lines.push(`  ${from} --> ${to} : ${escapeMermaidLabel(trans.label)}`);
+    } else {
+      lines.push(`  ${from} --> ${to}`);
+    }
+  }
+  return lines.join("\n");
+}
+function generateMermaidClassDiagram(classes, relationships) {
+  const lines = ["classDiagram"];
+  for (const cls of classes) {
+    lines.push(`  class ${sanitizeMermaidId(cls.name)} {`);
+    if (cls.attributes) {
+      for (const attr of cls.attributes) {
+        lines.push(`    ${attr}`);
+      }
+    }
+    if (cls.methods) {
+      for (const method of cls.methods) {
+        lines.push(`    ${method}`);
+      }
+    }
+    lines.push("  }");
+  }
+  lines.push("");
+  for (const rel of relationships) {
+    const from = sanitizeMermaidId(rel.from);
+    const to = sanitizeMermaidId(rel.to);
+    let arrow;
+    switch (rel.type) {
+      case "inheritance":
+        arrow = "<|--";
+        break;
+      case "composition":
+        arrow = "*--";
+        break;
+      case "aggregation":
+        arrow = "o--";
+        break;
+      case "association":
+        arrow = "-->";
+        break;
+      case "dependency":
+        arrow = "..>";
+        break;
+      default:
+        arrow = "-->";
+    }
+    if (rel.label) {
+      lines.push(`  ${from} ${arrow} ${to} : ${escapeMermaidLabel(rel.label)}`);
+    } else {
+      lines.push(`  ${from} ${arrow} ${to}`);
+    }
+  }
+  return lines.join("\n");
+}
+var MERMAID_COLORS, MermaidGraphBuilder;
 var init_mermaid = __esm({
   "src/export/visual/utils/mermaid.ts"() {
     init_esm_shims();
@@ -19340,6 +19426,246 @@ var init_mermaid = __esm({
         danger: "#616161",
         info: "#424242",
         neutral: "#f5f5f5"
+      }
+    };
+    MermaidGraphBuilder = class _MermaidGraphBuilder {
+      nodes = [];
+      edges = [];
+      subgraphs = [];
+      options = {};
+      /**
+       * Add a node to the diagram
+       * @param node - The node definition
+       * @returns this for chaining
+       */
+      addNode(node) {
+        this.nodes.push(node);
+        return this;
+      }
+      /**
+       * Add multiple nodes to the diagram
+       * @param nodes - Array of node definitions
+       * @returns this for chaining
+       */
+      addNodes(nodes) {
+        this.nodes.push(...nodes);
+        return this;
+      }
+      /**
+       * Add an edge to the diagram
+       * @param edge - The edge definition
+       * @returns this for chaining
+       */
+      addEdge(edge) {
+        this.edges.push(edge);
+        return this;
+      }
+      /**
+       * Add multiple edges to the diagram
+       * @param edges - Array of edge definitions
+       * @returns this for chaining
+       */
+      addEdges(edges) {
+        this.edges.push(...edges);
+        return this;
+      }
+      /**
+       * Add a subgraph to the diagram
+       * @param id - Subgraph ID
+       * @param label - Subgraph label/title
+       * @param nodeIds - Array of node IDs to include in the subgraph
+       * @param direction - Optional direction for the subgraph
+       * @returns this for chaining
+       */
+      addSubgraph(id, label, nodeIds, direction) {
+        this.subgraphs.push({
+          id,
+          label,
+          nodes: nodeIds,
+          direction
+        });
+        return this;
+      }
+      /**
+       * Add a subgraph object to the diagram
+       * @param subgraph - The subgraph definition
+       * @returns this for chaining
+       */
+      addSubgraphDef(subgraph) {
+        this.subgraphs.push(subgraph);
+        return this;
+      }
+      /**
+       * Add multiple subgraphs to the diagram
+       * @param subgraphs - Array of subgraph definitions
+       * @returns this for chaining
+       */
+      addSubgraphs(subgraphs) {
+        this.subgraphs.push(...subgraphs);
+        return this;
+      }
+      /**
+       * Set or merge diagram options
+       * @param options - Diagram options to set/merge
+       * @returns this for chaining
+       */
+      setOptions(options) {
+        this.options = { ...this.options, ...options };
+        return this;
+      }
+      /**
+       * Set the diagram direction
+       * @param direction - The direction (TD, TB, LR, RL, BT)
+       * @returns this for chaining
+       */
+      setDirection(direction) {
+        this.options.direction = direction;
+        return this;
+      }
+      /**
+       * Set the diagram title
+       * @param title - The title
+       * @returns this for chaining
+       */
+      setTitle(title) {
+        this.options.title = title;
+        return this;
+      }
+      /**
+       * Set the color scheme
+       * @param scheme - The color scheme (default, pastel, monochrome)
+       * @returns this for chaining
+       */
+      setColorScheme(scheme) {
+        this.options.colorScheme = scheme;
+        return this;
+      }
+      /**
+       * Get the current node count
+       * @returns The number of nodes in the diagram
+       */
+      get nodeCount() {
+        return this.nodes.length;
+      }
+      /**
+       * Get the current edge count
+       * @returns The number of edges in the diagram
+       */
+      get edgeCount() {
+        return this.edges.length;
+      }
+      /**
+       * Get the current subgraph count
+       * @returns The number of subgraphs in the diagram
+       */
+      get subgraphCount() {
+        return this.subgraphs.length;
+      }
+      /**
+       * Clear all nodes, edges, and subgraphs
+       * @returns this for chaining
+       */
+      clear() {
+        this.nodes = [];
+        this.edges = [];
+        this.subgraphs = [];
+        return this;
+      }
+      /**
+       * Reset options to defaults
+       * @returns this for chaining
+       */
+      resetOptions() {
+        this.options = {};
+        return this;
+      }
+      /**
+       * Render the diagram as a Mermaid string
+       *
+       * If subgraphs are present, nodes are organized into their
+       * respective subgraphs. Nodes not in any subgraph are rendered
+       * at the top level.
+       *
+       * @returns The complete Mermaid diagram string
+       */
+      render() {
+        const { direction = "TD", colorScheme = "default" } = this.options;
+        const lines = [];
+        lines.push(`graph ${direction}`);
+        const nodesInSubgraphs = /* @__PURE__ */ new Set();
+        for (const subgraph of this.subgraphs) {
+          for (const nodeId of subgraph.nodes) {
+            nodesInSubgraphs.add(nodeId);
+          }
+        }
+        const topLevelNodes = this.nodes.filter((n) => !nodesInSubgraphs.has(n.id));
+        if (topLevelNodes.length > 0) {
+          lines.push("");
+          for (const node of topLevelNodes) {
+            lines.push(renderMermaidNode(node));
+          }
+        }
+        if (this.subgraphs.length > 0) {
+          lines.push("");
+          for (const subgraph of this.subgraphs) {
+            lines.push(renderMermaidSubgraph(subgraph));
+            const subgraphNodes = this.nodes.filter((n) => subgraph.nodes.includes(n.id));
+            for (const node of subgraphNodes) {
+              const nodeStr = renderMermaidNode(node);
+              lines.push(`  ${nodeStr}`);
+            }
+          }
+        }
+        if (this.edges.length > 0) {
+          lines.push("");
+          for (const edge of this.edges) {
+            lines.push(renderMermaidEdge(edge));
+          }
+        }
+        if (colorScheme !== "monochrome") {
+          const styledNodes = this.nodes.filter((n) => n.style);
+          if (styledNodes.length > 0) {
+            lines.push("");
+            for (const node of styledNodes) {
+              const styleStr = renderMermaidNodeStyle(node.id, node.style);
+              if (styleStr) lines.push(styleStr);
+            }
+          }
+        }
+        return lines.join("\n");
+      }
+      /**
+       * Render as a state diagram instead of flowchart
+       * @param states - State definitions with optional types
+       * @param transitions - Transition definitions
+       * @returns The Mermaid state diagram string
+       */
+      renderAsStateDiagram(states, transitions) {
+        return generateMermaidStateDiagram(states, transitions);
+      }
+      /**
+       * Render as a class diagram
+       * @param classes - Class definitions
+       * @param relationships - Relationship definitions
+       * @returns The Mermaid class diagram string
+       */
+      renderAsClassDiagram(classes, relationships) {
+        return generateMermaidClassDiagram(classes, relationships);
+      }
+      /**
+       * Create a builder from existing nodes, edges, and options
+       * Useful for modifying existing diagram structures
+       * @param nodes - Initial nodes
+       * @param edges - Initial edges
+       * @param options - Initial options
+       * @returns A new MermaidGraphBuilder instance
+       */
+      static from(nodes = [], edges = [], options = {}) {
+        const builder = new _MermaidGraphBuilder();
+        builder.nodes = [...nodes];
+        builder.edges = [...edges];
+        builder.options = { ...options };
+        return builder;
       }
     };
   }
@@ -19508,13 +19834,312 @@ function generateDotGraph(nodes, edges, options = {}) {
   lines.push("}");
   return lines.join("\n");
 }
+var DOTGraphBuilder;
 var init_dot = __esm({
   "src/export/visual/utils/dot.ts"() {
     init_esm_shims();
+    DOTGraphBuilder = class _DOTGraphBuilder {
+      nodes = [];
+      edges = [];
+      subgraphs = [];
+      options = {};
+      /**
+       * Add a node to the graph
+       * @param node - The node definition
+       * @returns this for chaining
+       */
+      addNode(node) {
+        this.nodes.push(node);
+        return this;
+      }
+      /**
+       * Add multiple nodes to the graph
+       * @param nodes - Array of node definitions
+       * @returns this for chaining
+       */
+      addNodes(nodes) {
+        this.nodes.push(...nodes);
+        return this;
+      }
+      /**
+       * Add an edge to the graph
+       * @param edge - The edge definition
+       * @returns this for chaining
+       */
+      addEdge(edge) {
+        this.edges.push(edge);
+        return this;
+      }
+      /**
+       * Add multiple edges to the graph
+       * @param edges - Array of edge definitions
+       * @returns this for chaining
+       */
+      addEdges(edges) {
+        this.edges.push(...edges);
+        return this;
+      }
+      /**
+       * Add a subgraph (cluster) to the graph
+       * @param subgraph - The subgraph definition
+       * @returns this for chaining
+       */
+      addSubgraph(subgraph) {
+        this.subgraphs.push(subgraph);
+        return this;
+      }
+      /**
+       * Add multiple subgraphs to the graph
+       * @param subgraphs - Array of subgraph definitions
+       * @returns this for chaining
+       */
+      addSubgraphs(subgraphs) {
+        this.subgraphs.push(...subgraphs);
+        return this;
+      }
+      /**
+       * Set or merge graph options
+       * @param options - Graph options to set/merge
+       * @returns this for chaining
+       */
+      setOptions(options) {
+        this.options = { ...this.options, ...options };
+        return this;
+      }
+      /**
+       * Set the graph name
+       * @param name - The graph name
+       * @returns this for chaining
+       */
+      setGraphName(name) {
+        this.options.graphName = name;
+        return this;
+      }
+      /**
+       * Set the rank direction
+       * @param direction - The rank direction (TB, BT, LR, RL)
+       * @returns this for chaining
+       */
+      setRankDir(direction) {
+        this.options.rankDir = direction;
+        return this;
+      }
+      /**
+       * Set whether the graph is directed
+       * @param directed - true for digraph, false for graph
+       * @returns this for chaining
+       */
+      setDirected(directed) {
+        this.options.graphType = directed ? "digraph" : "graph";
+        return this;
+      }
+      /**
+       * Set default node attributes
+       * @param defaults - Default node attributes
+       * @returns this for chaining
+       */
+      setNodeDefaults(defaults) {
+        this.options.nodeDefaults = defaults;
+        return this;
+      }
+      /**
+       * Set default edge attributes
+       * @param defaults - Default edge attributes
+       * @returns this for chaining
+       */
+      setEdgeDefaults(defaults) {
+        this.options.edgeDefaults = defaults;
+        return this;
+      }
+      /**
+       * Get the current node count
+       * @returns The number of nodes in the graph
+       */
+      get nodeCount() {
+        return this.nodes.length;
+      }
+      /**
+       * Get the current edge count
+       * @returns The number of edges in the graph
+       */
+      get edgeCount() {
+        return this.edges.length;
+      }
+      /**
+       * Get the current subgraph count
+       * @returns The number of subgraphs in the graph
+       */
+      get subgraphCount() {
+        return this.subgraphs.length;
+      }
+      /**
+       * Clear all nodes, edges, and subgraphs
+       * @returns this for chaining
+       */
+      clear() {
+        this.nodes = [];
+        this.edges = [];
+        this.subgraphs = [];
+        return this;
+      }
+      /**
+       * Reset options to defaults
+       * @returns this for chaining
+       */
+      resetOptions() {
+        this.options = {};
+        return this;
+      }
+      /**
+       * Render the graph as a DOT string
+       *
+       * If subgraphs are present, they are rendered inline within the graph.
+       * Nodes not in subgraphs are rendered first, followed by subgraphs,
+       * then edges.
+       *
+       * @returns The complete DOT graph string
+       */
+      render() {
+        const {
+          graphType = "digraph",
+          graphName = "G",
+          rankDir = "TB",
+          splines,
+          overlap,
+          concentrate,
+          compound,
+          bgcolor,
+          fontName,
+          fontSize,
+          nodeDefaults,
+          edgeDefaults
+        } = this.options;
+        const lines = [];
+        const directed = graphType === "digraph";
+        lines.push(`${graphType} ${sanitizeDotId(graphName)} {`);
+        lines.push(`  rankdir=${rankDir};`);
+        if (splines) lines.push(`  splines=${splines};`);
+        if (overlap !== void 0) lines.push(`  overlap=${overlap};`);
+        if (concentrate) lines.push("  concentrate=true;");
+        if (compound) lines.push("  compound=true;");
+        if (bgcolor) lines.push(`  bgcolor="${bgcolor}";`);
+        if (fontName) lines.push(`  fontname="${fontName}";`);
+        if (fontSize) lines.push(`  fontsize=${fontSize};`);
+        if (nodeDefaults) {
+          const defaultAttrs = [];
+          if (nodeDefaults.shape) defaultAttrs.push(`shape=${nodeDefaults.shape}`);
+          if (nodeDefaults.style) {
+            const styleStr = Array.isArray(nodeDefaults.style) ? nodeDefaults.style.join(",") : nodeDefaults.style;
+            defaultAttrs.push(`style="${styleStr}"`);
+          }
+          if (nodeDefaults.fillColor) defaultAttrs.push(`fillcolor="${nodeDefaults.fillColor}"`);
+          if (nodeDefaults.fontName) defaultAttrs.push(`fontname="${nodeDefaults.fontName}"`);
+          if (nodeDefaults.fontSize) defaultAttrs.push(`fontsize=${nodeDefaults.fontSize}`);
+          if (defaultAttrs.length > 0) {
+            lines.push(`  node [${defaultAttrs.join(", ")}];`);
+          }
+        }
+        if (edgeDefaults) {
+          const defaultAttrs = [];
+          if (edgeDefaults.style) defaultAttrs.push(`style=${edgeDefaults.style}`);
+          if (edgeDefaults.color) defaultAttrs.push(`color="${edgeDefaults.color}"`);
+          if (edgeDefaults.arrowHead) defaultAttrs.push(`arrowhead=${edgeDefaults.arrowHead}`);
+          if (defaultAttrs.length > 0) {
+            lines.push(`  edge [${defaultAttrs.join(", ")}];`);
+          }
+        }
+        lines.push("");
+        const nodesInSubgraphs = /* @__PURE__ */ new Set();
+        for (const subgraph of this.subgraphs) {
+          for (const nodeId of subgraph.nodes) {
+            nodesInSubgraphs.add(nodeId);
+          }
+        }
+        for (const node of this.nodes) {
+          if (!nodesInSubgraphs.has(node.id)) {
+            lines.push(renderDotNode(node));
+          }
+        }
+        if (this.subgraphs.length > 0) {
+          lines.push("");
+          for (const subgraph of this.subgraphs) {
+            const subgraphNodeDefs = this.nodes.filter((n) => subgraph.nodes.includes(n.id));
+            lines.push(`  subgraph ${sanitizeDotId(`cluster_${subgraph.id}`)} {`);
+            if (subgraph.label) {
+              lines.push(`    label="${escapeDotString(subgraph.label)}";`);
+            }
+            if (subgraph.style) {
+              lines.push(`    style=${subgraph.style};`);
+            }
+            if (subgraph.fillColor) {
+              lines.push(`    fillcolor="${subgraph.fillColor}";`);
+            }
+            if (subgraph.color) {
+              lines.push(`    color="${subgraph.color}";`);
+            }
+            if (subgraph.rank) {
+              lines.push(`    rank=${subgraph.rank};`);
+            }
+            for (const node of subgraphNodeDefs) {
+              const nodeStr = renderDotNode(node);
+              lines.push(`  ${nodeStr}`);
+            }
+            for (const nodeId of subgraph.nodes) {
+              if (!subgraphNodeDefs.find((n) => n.id === nodeId)) {
+                lines.push(`    ${sanitizeDotId(nodeId)};`);
+              }
+            }
+            lines.push("  }");
+          }
+        }
+        if (this.edges.length > 0) {
+          lines.push("");
+          for (const edge of this.edges) {
+            lines.push(renderDotEdge(edge, directed));
+          }
+        }
+        lines.push("}");
+        return lines.join("\n");
+      }
+      /**
+       * Create a builder from existing nodes, edges, and options
+       * Useful for modifying existing graph structures
+       * @param nodes - Initial nodes
+       * @param edges - Initial edges
+       * @param options - Initial options
+       * @returns A new DOTGraphBuilder instance
+       */
+      static from(nodes = [], edges = [], options = {}) {
+        const builder = new _DOTGraphBuilder();
+        builder.nodes = [...nodes];
+        builder.edges = [...edges];
+        builder.options = { ...options };
+        return builder;
+      }
+    };
   }
 });
 
 // src/export/visual/utils/ascii.ts
+function truncateAscii(str, maxLength, suffix = "...") {
+  if (str.length <= maxLength) return str;
+  return str.substring(0, maxLength - suffix.length) + suffix;
+}
+function padAscii(str, width, align = "left", padChar = " ") {
+  if (str.length >= width) return str.substring(0, width);
+  const padding = width - str.length;
+  switch (align) {
+    case "right":
+      return padChar.repeat(padding) + str;
+    case "center":
+      const leftPad = Math.floor(padding / 2);
+      const rightPad = padding - leftPad;
+      return padChar.repeat(leftPad) + str + padChar.repeat(rightPad);
+    case "left":
+    default:
+      return str + padChar.repeat(padding);
+  }
+}
 function generateAsciiHeader(title, style = "equals") {
   const underlineChar = style === "double" ? "\u2550" : style === "equals" ? "=" : style === "single" ? "\u2500" : "-";
   const underline = underlineChar.repeat(title.length);
@@ -19522,19 +20147,291 @@ function generateAsciiHeader(title, style = "equals") {
 ${underline}`;
 }
 function generateAsciiSectionHeader(title, icon) {
-  const prefix = "";
+  const prefix = icon ? `${icon} ` : "";
   return `${prefix}${title}:
 ${"-".repeat((prefix + title + ":").length)}`;
+}
+function generateAsciiBoxedTitle(title, style = "single") {
+  const chars = BOX_CHARS[style];
+  const width = title.length + 4;
+  const top = chars.topLeft + chars.horizontal.repeat(width - 2) + chars.topRight;
+  const middle = chars.vertical + " " + title + " " + chars.vertical;
+  const bottom = chars.bottomLeft + chars.horizontal.repeat(width - 2) + chars.bottomRight;
+  return `${top}
+${middle}
+${bottom}`;
+}
+function generateAsciiBox(content, options = {}) {
+  const { style = "single", title, width, padding = 1 } = options;
+  const chars = BOX_CHARS[style];
+  const lines = Array.isArray(content) ? content : content.split("\n");
+  let maxContentWidth = Math.max(...lines.map((l) => l.length));
+  if (title) {
+    maxContentWidth = Math.max(maxContentWidth, title.length);
+  }
+  const boxWidth = width || maxContentWidth + padding * 2 + 2;
+  const contentWidth = boxWidth - 2 - padding * 2;
+  const result = [];
+  if (title) {
+    const titlePadded = " " + title + " ";
+    const leftBorder = Math.floor((boxWidth - 2 - titlePadded.length) / 2);
+    const rightBorder = boxWidth - 2 - titlePadded.length - leftBorder;
+    result.push(
+      chars.topLeft + chars.horizontal.repeat(leftBorder) + titlePadded + chars.horizontal.repeat(rightBorder) + chars.topRight
+    );
+  } else {
+    result.push(chars.topLeft + chars.horizontal.repeat(boxWidth - 2) + chars.topRight);
+  }
+  for (let i = 0; i < padding; i++) {
+    result.push(chars.vertical + " ".repeat(boxWidth - 2) + chars.vertical);
+  }
+  for (const line of lines) {
+    const paddedLine = padAscii(line, contentWidth, "left");
+    result.push(
+      chars.vertical + " ".repeat(padding) + paddedLine + " ".repeat(padding) + chars.vertical
+    );
+  }
+  for (let i = 0; i < padding; i++) {
+    result.push(chars.vertical + " ".repeat(boxWidth - 2) + chars.vertical);
+  }
+  result.push(chars.bottomLeft + chars.horizontal.repeat(boxWidth - 2) + chars.bottomRight);
+  return result.join("\n");
 }
 function generateAsciiBulletList(items, bullet = "bullet", indent = 2) {
   const bulletChar = BULLETS[bullet];
   const indentStr = " ".repeat(indent);
   return items.map((item) => `${indentStr}${bulletChar} ${item}`).join("\n");
 }
-var BULLETS;
+function generateAsciiNumberedList(items, indent = 2, startNumber = 1) {
+  const indentStr = " ".repeat(indent);
+  const maxNumWidth = String(startNumber + items.length - 1).length;
+  return items.map((item, index) => {
+    const num = String(startNumber + index).padStart(maxNumWidth, " ");
+    return `${indentStr}${num}. ${item}`;
+  }).join("\n");
+}
+function generateAsciiTreeList(items, prefix = "") {
+  const lines = [];
+  items.forEach((item, index) => {
+    const isLast = index === items.length - 1;
+    const connector = isLast ? "\u2514\u2500\u2500 " : "\u251C\u2500\u2500 ";
+    const childPrefix = isLast ? "    " : "\u2502   ";
+    lines.push(prefix + connector + item.label);
+    if (item.children && item.children.length > 0) {
+      const childTree = generateAsciiTreeList(
+        item.children,
+        prefix + childPrefix
+      );
+      lines.push(childTree);
+    }
+  });
+  return lines.join("\n");
+}
+function generateAsciiTable(headers, rows, options = {}) {
+  const { style = "single", columnWidths, alignments } = options;
+  const chars = BOX_CHARS[style];
+  const widths = columnWidths || headers.map((header, colIndex) => {
+    const colValues = [header, ...rows.map((row) => row[colIndex] || "")];
+    return Math.max(...colValues.map((v) => String(v).length));
+  });
+  const renderRow = (cells) => {
+    return chars.vertical + cells.map((cell, i) => {
+      const align = alignments?.[i] || "left";
+      return " " + padAscii(String(cell), widths[i], align) + " ";
+    }).join(chars.vertical) + chars.vertical;
+  };
+  const renderSeparator = (left, mid, right) => {
+    return left + widths.map((w) => chars.horizontal.repeat(w + 2)).join(mid) + right;
+  };
+  const result = [];
+  result.push(renderSeparator(chars.topLeft, chars.teeDown, chars.topRight));
+  result.push(renderRow(headers));
+  result.push(renderSeparator(chars.teeRight, chars.cross, chars.teeLeft));
+  for (const row of rows) {
+    result.push(renderRow(row));
+  }
+  result.push(renderSeparator(chars.bottomLeft, chars.teeUp, chars.bottomRight));
+  return result.join("\n");
+}
+function getAsciiArrow(direction, useAscii = false) {
+  if (useAscii) {
+    switch (direction) {
+      case "right":
+        return ARROWS.asciiRight;
+      case "left":
+        return ARROWS.asciiLeft;
+      case "up":
+        return ARROWS.asciiUp;
+      case "down":
+        return ARROWS.asciiDown;
+      case "bidirectional":
+        return ARROWS.asciiBidirectional;
+    }
+  }
+  return ARROWS[direction];
+}
+function generateAsciiFlowDiagram(steps, direction = "vertical", options = {}) {
+  const { boxStyle = "single", maxWidth = 40 } = options;
+  if (steps.length === 0) {
+    return generateAsciiBox("(empty)", { style: boxStyle });
+  }
+  if (direction === "horizontal") {
+    const boxes = steps.map((step) => {
+      const truncated = truncateAscii(step, maxWidth);
+      return `[${truncated}]`;
+    });
+    return boxes.join(" \u2192 ");
+  }
+  const lines = [];
+  const chars = BOX_CHARS[boxStyle];
+  for (let i = 0; i < steps.length; i++) {
+    const step = truncateAscii(steps[i], maxWidth);
+    const boxWidth = Math.max(step.length + 4, 20);
+    lines.push(chars.topLeft + chars.horizontal.repeat(boxWidth - 2) + chars.topRight);
+    lines.push(chars.vertical + " " + padAscii(step, boxWidth - 4) + " " + chars.vertical);
+    lines.push(chars.bottomLeft + chars.horizontal.repeat(boxWidth - 2) + chars.bottomRight);
+    if (i < steps.length - 1) {
+      const arrowPadding = " ".repeat(Math.floor(boxWidth / 2) - 1);
+      lines.push(arrowPadding + "\u2193");
+    }
+  }
+  return lines.join("\n");
+}
+function generateAsciiProgressBar(value, max = 100, width = 20, options = {}) {
+  const { filled = "\u2588", empty = "\u2591", showPercent = true } = options;
+  const percent = Math.min(100, Math.max(0, value / max * 100));
+  const filledWidth = Math.round(percent / 100 * width);
+  const emptyWidth = width - filledWidth;
+  const bar = filled.repeat(filledWidth) + empty.repeat(emptyWidth);
+  const percentStr = showPercent ? ` ${percent.toFixed(0)}%` : "";
+  return `[${bar}]${percentStr}`;
+}
+function generateAsciiMetric(label, value, maxLabelWidth = 20) {
+  const paddedLabel = padAscii(label + ":", maxLabelWidth, "left");
+  return `${paddedLabel} ${value}`;
+}
+function generateAsciiMetricsPanel(metrics, options = {}) {
+  const { style = "single", title = "Metrics" } = options;
+  const maxLabelWidth = Math.max(...metrics.map((m) => m.label.length)) + 1;
+  const content = metrics.map((m) => generateAsciiMetric(m.label, m.value, maxLabelWidth));
+  return generateAsciiBox(content, { style, title });
+}
+function generateAsciiGraph(nodes, edges) {
+  const lines = [];
+  lines.push("Nodes:");
+  for (const node of nodes) {
+    const typeStr = node.type ? ` [${node.type}]` : "";
+    lines.push(`  ${BULLETS.filledCircle} ${node.label}${typeStr}`);
+  }
+  if (edges.length > 0) {
+    lines.push("");
+    lines.push("Edges:");
+    for (const edge of edges) {
+      const sourceNode = nodes.find((n) => n.id === edge.source);
+      const targetNode = nodes.find((n) => n.id === edge.target);
+      const arrow = getAsciiArrow(edge.direction || "right");
+      const label = edge.label ? ` (${edge.label})` : "";
+      lines.push(`  ${sourceNode?.label || edge.source} ${arrow} ${targetNode?.label || edge.target}${label}`);
+    }
+  }
+  return lines.join("\n");
+}
+function generateHierarchyAscii(root) {
+  const lines = [];
+  lines.push(root.label);
+  if (root.children && root.children.length > 0) {
+    lines.push(generateAsciiTreeList(root.children));
+  }
+  return lines.join("\n");
+}
+var BOX_CHARS, ARROWS, BULLETS, ASCIIDocBuilder;
 var init_ascii = __esm({
   "src/export/visual/utils/ascii.ts"() {
     init_esm_shims();
+    BOX_CHARS = {
+      single: {
+        topLeft: "\u250C",
+        topRight: "\u2510",
+        bottomLeft: "\u2514",
+        bottomRight: "\u2518",
+        horizontal: "\u2500",
+        vertical: "\u2502",
+        teeRight: "\u251C",
+        teeLeft: "\u2524",
+        teeDown: "\u252C",
+        teeUp: "\u2534",
+        cross: "\u253C"
+      },
+      double: {
+        topLeft: "\u2554",
+        topRight: "\u2557",
+        bottomLeft: "\u255A",
+        bottomRight: "\u255D",
+        horizontal: "\u2550",
+        vertical: "\u2551",
+        teeRight: "\u2560",
+        teeLeft: "\u2563",
+        teeDown: "\u2566",
+        teeUp: "\u2569",
+        cross: "\u256C"
+      },
+      rounded: {
+        topLeft: "\u256D",
+        topRight: "\u256E",
+        bottomLeft: "\u2570",
+        bottomRight: "\u256F",
+        horizontal: "\u2500",
+        vertical: "\u2502",
+        teeRight: "\u251C",
+        teeLeft: "\u2524",
+        teeDown: "\u252C",
+        teeUp: "\u2534",
+        cross: "\u253C"
+      },
+      bold: {
+        topLeft: "\u250F",
+        topRight: "\u2513",
+        bottomLeft: "\u2517",
+        bottomRight: "\u251B",
+        horizontal: "\u2501",
+        vertical: "\u2503",
+        teeRight: "\u2523",
+        teeLeft: "\u252B",
+        teeDown: "\u2533",
+        teeUp: "\u253B",
+        cross: "\u254B"
+      },
+      ascii: {
+        topLeft: "+",
+        topRight: "+",
+        bottomLeft: "+",
+        bottomRight: "+",
+        horizontal: "-",
+        vertical: "|",
+        teeRight: "+",
+        teeLeft: "+",
+        teeDown: "+",
+        teeUp: "+",
+        cross: "+"
+      }
+    };
+    ARROWS = {
+      right: "\u2192",
+      left: "\u2190",
+      up: "\u2191",
+      down: "\u2193",
+      bidirectional: "\u2194",
+      doubleRight: "\u21D2",
+      doubleLeft: "\u21D0",
+      doubleUp: "\u21D1",
+      doubleDown: "\u21D3",
+      doubleBidirectional: "\u21D4",
+      asciiRight: "->",
+      asciiLeft: "<-",
+      asciiUp: "^",
+      asciiDown: "v",
+      asciiBidirectional: "<->"
+    };
     BULLETS = {
       circle: "\u25CB",
       filledCircle: "\u25CF",
@@ -19552,6 +20449,283 @@ var init_ascii = __esm({
       bullet: "\u2022",
       asciiBullet: "*",
       asciiDash: "-"
+    };
+    ASCIIDocBuilder = class _ASCIIDocBuilder {
+      content = [];
+      options = {};
+      /**
+       * Set or merge document options
+       * @param options - Document options to set/merge
+       * @returns this for chaining
+       */
+      setOptions(options) {
+        this.options = { ...this.options, ...options };
+        return this;
+      }
+      /**
+       * Set the box style for subsequent boxes
+       * @param style - The box style to use
+       * @returns this for chaining
+       */
+      setBoxStyle(style) {
+        this.options.boxStyle = style;
+        return this;
+      }
+      /**
+       * Set the maximum width for content
+       * @param width - Maximum width in characters
+       * @returns this for chaining
+       */
+      setMaxWidth(width) {
+        this.options.maxWidth = width;
+        return this;
+      }
+      /**
+       * Set the indent level
+       * @param indent - Number of spaces for indentation
+       * @returns this for chaining
+       */
+      setIndent(indent) {
+        this.options.indent = indent;
+        return this;
+      }
+      /**
+       * Add a header with underline
+       * @param title - The header title
+       * @param style - The underline style (default: 'equals')
+       * @returns this for chaining
+       */
+      addHeader(title, style = "equals") {
+        this.content.push(generateAsciiHeader(title, style));
+        return this;
+      }
+      /**
+       * Add a section header
+       * @param title - The section title
+       * @param icon - Optional icon prefix
+       * @returns this for chaining
+       */
+      addSection(title, icon) {
+        this.content.push(generateAsciiSectionHeader(title, icon));
+        return this;
+      }
+      /**
+       * Add a boxed title
+       * @param title - The title to box
+       * @param style - The box style (uses builder default if not specified)
+       * @returns this for chaining
+       */
+      addBoxedTitle(title, style) {
+        this.content.push(generateAsciiBoxedTitle(title, style || this.options.boxStyle || "single"));
+        return this;
+      }
+      /**
+       * Add a bullet list
+       * @param items - Array of list items
+       * @param bullet - The bullet style (default: 'bullet')
+       * @param indent - Indentation level (uses builder default if not specified)
+       * @returns this for chaining
+       */
+      addBulletList(items, bullet = "bullet", indent) {
+        this.content.push(generateAsciiBulletList(items, bullet, indent ?? this.options.indent ?? 2));
+        return this;
+      }
+      /**
+       * Add a numbered list
+       * @param items - Array of list items
+       * @param indent - Indentation level (uses builder default if not specified)
+       * @param startNumber - Starting number (default: 1)
+       * @returns this for chaining
+       */
+      addNumberedList(items, indent, startNumber = 1) {
+        this.content.push(generateAsciiNumberedList(items, indent ?? this.options.indent ?? 2, startNumber));
+        return this;
+      }
+      /**
+       * Add a box around content
+       * @param content - The content to box (string or array of lines)
+       * @param boxOptions - Box options (title, style, width, padding)
+       * @returns this for chaining
+       */
+      addBox(content, boxOptions) {
+        const mergedOptions = {
+          style: boxOptions?.style || this.options.boxStyle || "single",
+          title: boxOptions?.title,
+          width: boxOptions?.width,
+          padding: boxOptions?.padding
+        };
+        this.content.push(generateAsciiBox(content, mergedOptions));
+        return this;
+      }
+      /**
+       * Add a tree/hierarchy structure
+       * @param root - The root node of the tree
+       * @returns this for chaining
+       */
+      addTree(root) {
+        this.content.push(generateHierarchyAscii(root));
+        return this;
+      }
+      /**
+       * Add a tree list (without root label)
+       * @param items - Array of tree nodes
+       * @returns this for chaining
+       */
+      addTreeList(items) {
+        this.content.push(generateAsciiTreeList(items));
+        return this;
+      }
+      /**
+       * Add a table
+       * @param headers - Array of column headers
+       * @param rows - 2D array of row data
+       * @param tableOptions - Table options (style, columnWidths, alignments)
+       * @returns this for chaining
+       */
+      addTable(headers, rows, tableOptions) {
+        const mergedOptions = {
+          style: tableOptions?.style || this.options.boxStyle || "single",
+          columnWidths: tableOptions?.columnWidths,
+          alignments: tableOptions?.alignments
+        };
+        this.content.push(generateAsciiTable(headers, rows, mergedOptions));
+        return this;
+      }
+      /**
+       * Add a flow diagram
+       * @param steps - Array of step labels
+       * @param direction - Flow direction ('horizontal' or 'vertical')
+       * @returns this for chaining
+       */
+      addFlowDiagram(steps, direction = "vertical") {
+        this.content.push(generateAsciiFlowDiagram(steps, direction, {
+          boxStyle: this.options.boxStyle,
+          maxWidth: this.options.maxWidth
+        }));
+        return this;
+      }
+      /**
+       * Add a progress bar
+       * @param value - Current value
+       * @param max - Maximum value (default: 100)
+       * @param width - Bar width in characters (default: 20)
+       * @param barOptions - Progress bar options
+       * @returns this for chaining
+       */
+      addProgressBar(value, max = 100, width = 20, barOptions) {
+        this.content.push(generateAsciiProgressBar(value, max, width, barOptions));
+        return this;
+      }
+      /**
+       * Add a metrics panel
+       * @param metrics - Array of label/value pairs
+       * @param panelOptions - Panel options (style, title)
+       * @returns this for chaining
+       */
+      addMetricsPanel(metrics, panelOptions) {
+        const mergedOptions = {
+          style: panelOptions?.style || this.options.boxStyle || "single",
+          title: panelOptions?.title || "Metrics"
+        };
+        this.content.push(generateAsciiMetricsPanel(metrics, mergedOptions));
+        return this;
+      }
+      /**
+       * Add a graph representation
+       * @param nodes - Array of graph nodes
+       * @param edges - Array of graph edges
+       * @returns this for chaining
+       */
+      addGraph(nodes, edges) {
+        this.content.push(generateAsciiGraph(nodes, edges));
+        return this;
+      }
+      /**
+       * Add raw text content
+       * @param text - The text to add
+       * @returns this for chaining
+       */
+      addText(text) {
+        this.content.push(text);
+        return this;
+      }
+      /**
+       * Add an empty line
+       * @param count - Number of empty lines to add (default: 1)
+       * @returns this for chaining
+       */
+      addEmptyLine(count = 1) {
+        for (let i = 0; i < count; i++) {
+          this.content.push("");
+        }
+        return this;
+      }
+      /**
+       * Add a horizontal rule
+       * @param width - Width of the rule (default: 40)
+       * @param char - Character to use (default: '-')
+       * @returns this for chaining
+       */
+      addHorizontalRule(width = 40, char = "-") {
+        this.content.push(char.repeat(width));
+        return this;
+      }
+      /**
+       * Get the current content line count
+       * @returns The total number of lines in the document
+       */
+      get lineCount() {
+        return this.content.reduce((count, item) => {
+          return count + item.split("\n").length;
+        }, 0);
+      }
+      /**
+       * Get the current content section count
+       * @returns The number of content sections in the document
+       */
+      get sectionCount() {
+        return this.content.length;
+      }
+      /**
+       * Clear all content
+       * @returns this for chaining
+       */
+      clear() {
+        this.content = [];
+        return this;
+      }
+      /**
+       * Reset options to defaults
+       * @returns this for chaining
+       */
+      resetOptions() {
+        this.options = {};
+        return this;
+      }
+      /**
+       * Render the document as a string
+       * @param separator - Separator between content sections (default: '\n')
+       * @returns The complete ASCII document
+       */
+      render(separator = "\n") {
+        let result = this.content.join(separator);
+        if (this.options.includeTimestamp) {
+          result = `Generated: ${(/* @__PURE__ */ new Date()).toISOString()}
+
+${result}`;
+        }
+        return result;
+      }
+      /**
+       * Create a builder with pre-configured options
+       * @param options - Initial options
+       * @returns A new ASCIIDocBuilder instance
+       */
+      static withOptions(options) {
+        const builder = new _ASCIIDocBuilder();
+        builder.options = { ...options };
+        return builder;
+      }
     };
   }
 });
@@ -22187,186 +23361,131 @@ function exportMathematicsDerivation(thought, options) {
   }
 }
 function mathematicsToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph TB\n";
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("TB");
   const typeId = sanitizeId(`type_${thought.thoughtType || "proof"}`);
   const typeLabel = includeLabels ? (thought.thoughtType || "Proof").replace(/_/g, " ") : typeId;
-  mermaid += `  ${typeId}[["${typeLabel}"]]
-`;
+  builder.addNode({ id: typeId, label: typeLabel, shape: "subroutine" });
   if (thought.proofStrategy) {
     const strategyId = sanitizeId("strategy");
-    const strategyLabel = thought.proofStrategy.type;
-    mermaid += `  ${strategyId}(["${strategyLabel}"])
-`;
-    mermaid += `  ${typeId} --> ${strategyId}
-`;
+    builder.addNode({ id: strategyId, label: thought.proofStrategy.type, shape: "stadium" });
+    builder.addEdge({ source: typeId, target: strategyId });
     let prevStepId = strategyId;
     thought.proofStrategy.steps.forEach((step, index) => {
       const stepId = sanitizeId(`step_${index}`);
       const stepLabel = includeLabels ? step.slice(0, 40) + (step.length > 40 ? "..." : "") : `Step ${index + 1}`;
-      mermaid += `  ${stepId}["${stepLabel}"]
-`;
-      mermaid += `  ${prevStepId} --> ${stepId}
-`;
+      builder.addNode({ id: stepId, label: stepLabel, shape: "rectangle" });
+      builder.addEdge({ source: prevStepId, target: stepId });
       prevStepId = stepId;
     });
     if (includeMetrics) {
       const completenessId = sanitizeId("completeness");
       const completenessLabel = `Completeness: ${(thought.proofStrategy.completeness * 100).toFixed(0)}%`;
-      mermaid += `  ${completenessId}{{${completenessLabel}}}
-`;
-      mermaid += `  ${prevStepId} --> ${completenessId}
-`;
+      builder.addNode({ id: completenessId, label: completenessLabel, shape: "hexagon" });
+      builder.addEdge({ source: prevStepId, target: completenessId });
     }
   }
   if (thought.mathematicalModel) {
     const modelId = sanitizeId("model");
     const modelLabel = thought.mathematicalModel.symbolic || "Mathematical Model";
-    mermaid += `  ${modelId}["${modelLabel}"]
-`;
-    mermaid += `  ${typeId} --> ${modelId}
-`;
+    builder.addNode({ id: modelId, label: modelLabel, shape: "rectangle" });
+    builder.addEdge({ source: typeId, target: modelId });
   }
   if (thought.theorems && thought.theorems.length > 0) {
     thought.theorems.forEach((theorem, index) => {
       const theoremId = sanitizeId(`theorem_${index}`);
       const theoremLabel = theorem.name || `Theorem ${index + 1}`;
-      mermaid += `  ${theoremId}[/"${theoremLabel}"/]
-`;
-      mermaid += `  ${typeId} --> ${theoremId}
-`;
+      builder.addNode({ id: theoremId, label: theoremLabel, shape: "trapezoid" });
+      builder.addEdge({ source: typeId, target: theoremId });
     });
   }
   if (thought.assumptions && thought.assumptions.length > 0) {
     const assumptionsId = sanitizeId("assumptions");
-    mermaid += `  ${assumptionsId}>"Assumptions: ${thought.assumptions.length}"]
-`;
+    builder.addNode({ id: assumptionsId, label: `Assumptions: ${thought.assumptions.length}`, shape: "asymmetric" });
   }
-  if (colorScheme !== "monochrome") {
-    const colors = colorScheme === "pastel" ? { type: "#e8f4e8", strategy: "#fff3e0"} : { type: "#90EE90", strategy: "#FFD700"};
-    mermaid += `
-  style ${typeId} fill:${colors.type}
-`;
-    if (thought.proofStrategy) {
-      mermaid += `  style ${sanitizeId("strategy")} fill:${colors.strategy}
-`;
-    }
-  }
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 function mathematicsToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph MathematicsDerivation {\n";
-  dot += "  rankdir=TB;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
+  const builder = new DOTGraphBuilder().setGraphName("MathematicsDerivation").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
   const typeId = sanitizeId(`type_${thought.thoughtType || "proof"}`);
   const typeLabel = includeLabels ? (thought.thoughtType || "Proof").replace(/_/g, " ") : typeId;
-  dot += `  ${typeId} [label="${typeLabel}", shape=doubleoctagon];
-`;
+  builder.addNode({ id: typeId, label: typeLabel, shape: "doubleoctagon" });
   if (thought.proofStrategy) {
     const strategyId = sanitizeId("strategy");
-    dot += `  ${strategyId} [label="${thought.proofStrategy.type}", shape=ellipse];
-`;
-    dot += `  ${typeId} -> ${strategyId};
-`;
+    builder.addNode({ id: strategyId, label: thought.proofStrategy.type, shape: "ellipse" });
+    builder.addEdge({ source: typeId, target: strategyId });
     let prevStepId = strategyId;
     thought.proofStrategy.steps.forEach((step, index) => {
       const stepId = sanitizeId(`step_${index}`);
       const stepLabel = includeLabels ? step.slice(0, 30).replace(/"/g, '\\"') : `Step ${index + 1}`;
-      dot += `  ${stepId} [label="${stepLabel}"];
-`;
-      dot += `  ${prevStepId} -> ${stepId};
-`;
+      builder.addNode({ id: stepId, label: stepLabel });
+      builder.addEdge({ source: prevStepId, target: stepId });
       prevStepId = stepId;
     });
     if (includeMetrics) {
       const completenessId = sanitizeId("completeness");
-      dot += `  ${completenessId} [label="${(thought.proofStrategy.completeness * 100).toFixed(0)}%", shape=diamond];
-`;
-      dot += `  ${prevStepId} -> ${completenessId};
-`;
+      builder.addNode({ id: completenessId, label: `${(thought.proofStrategy.completeness * 100).toFixed(0)}%`, shape: "diamond" });
+      builder.addEdge({ source: prevStepId, target: completenessId });
     }
   }
   if (thought.theorems) {
     thought.theorems.forEach((theorem, index) => {
       const theoremId = sanitizeId(`theorem_${index}`);
-      dot += `  ${theoremId} [label="${theorem.name || `Theorem ${index + 1}`}", shape=parallelogram];
-`;
-      dot += `  ${typeId} -> ${theoremId};
-`;
+      builder.addNode({ id: theoremId, label: theorem.name || `Theorem ${index + 1}`, shape: "parallelogram" });
+      builder.addEdge({ source: typeId, target: theoremId });
     });
   }
-  dot += "}\n";
-  return dot;
+  return builder.render();
 }
 function mathematicsToASCII(thought) {
-  let ascii = "Mathematics Derivation:\n";
-  ascii += "=======================\n\n";
-  ascii += `Type: ${(thought.thoughtType || "proof").replace(/_/g, " ")}
-`;
-  ascii += `Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%
-
-`;
+  const builder = new ASCIIDocBuilder();
+  builder.addHeader("Mathematics Derivation");
+  builder.addText(`Type: ${(thought.thoughtType || "proof").replace(/_/g, " ")}`);
+  builder.addText(`Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`);
+  builder.addEmptyLine();
   if (thought.mathematicalModel) {
-    ascii += "Mathematical Model:\n";
-    ascii += `  LaTeX: ${thought.mathematicalModel.latex}
-`;
-    ascii += `  Symbolic: ${thought.mathematicalModel.symbolic}
-`;
+    builder.addText("Mathematical Model:");
+    builder.addText(`  LaTeX: ${thought.mathematicalModel.latex}`);
+    builder.addText(`  Symbolic: ${thought.mathematicalModel.symbolic}`);
     if (thought.mathematicalModel.ascii) {
-      ascii += `  ASCII: ${thought.mathematicalModel.ascii}
-`;
+      builder.addText(`  ASCII: ${thought.mathematicalModel.ascii}`);
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.proofStrategy) {
-    ascii += `Proof Strategy: ${thought.proofStrategy.type}
-`;
-    ascii += `Completeness: ${(thought.proofStrategy.completeness * 100).toFixed(0)}%
-`;
-    ascii += "Steps:\n";
-    thought.proofStrategy.steps.forEach((step, index) => {
-      ascii += `  ${index + 1}. ${step}
-`;
-    });
+    builder.addText(`Proof Strategy: ${thought.proofStrategy.type}`);
+    builder.addText(`Completeness: ${(thought.proofStrategy.completeness * 100).toFixed(0)}%`);
+    builder.addText("Steps:");
+    builder.addNumberedList(thought.proofStrategy.steps);
     if (thought.proofStrategy.baseCase) {
-      ascii += `Base Case: ${thought.proofStrategy.baseCase}
-`;
+      builder.addText(`Base Case: ${thought.proofStrategy.baseCase}`);
     }
     if (thought.proofStrategy.inductiveStep) {
-      ascii += `Inductive Step: ${thought.proofStrategy.inductiveStep}
-`;
+      builder.addText(`Inductive Step: ${thought.proofStrategy.inductiveStep}`);
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.theorems && thought.theorems.length > 0) {
-    ascii += "Theorems:\n";
+    builder.addText("Theorems:");
     thought.theorems.forEach((theorem, index) => {
-      ascii += `  [${index + 1}] ${theorem.name || `Theorem ${index + 1}`}: ${theorem.statement}
-`;
+      builder.addText(`  [${index + 1}] ${theorem.name || `Theorem ${index + 1}`}: ${theorem.statement}`);
       if (theorem.hypotheses.length > 0) {
-        ascii += `      Hypotheses: ${theorem.hypotheses.join(", ")}
-`;
+        builder.addText(`      Hypotheses: ${theorem.hypotheses.join(", ")}`);
       }
-      ascii += `      Conclusion: ${theorem.conclusion}
-`;
+      builder.addText(`      Conclusion: ${theorem.conclusion}`);
     });
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.assumptions && thought.assumptions.length > 0) {
-    ascii += "Assumptions:\n";
-    thought.assumptions.forEach((assumption, index) => {
-      ascii += `  ${index + 1}. ${assumption}
-`;
-    });
-    ascii += "\n";
+    builder.addText("Assumptions:");
+    builder.addNumberedList(thought.assumptions);
+    builder.addEmptyLine();
   }
   if (thought.dependencies && thought.dependencies.length > 0) {
-    ascii += "Dependencies:\n";
-    thought.dependencies.forEach((dep, index) => {
-      ascii += `  ${index + 1}. ${dep}
-`;
-    });
+    builder.addText("Dependencies:");
+    builder.addNumberedList(thought.dependencies);
   }
-  return ascii;
+  return builder.render();
 }
 function mathematicsToSVG(thought, options) {
   const {
@@ -23136,6 +24255,9 @@ var init_mathematics = __esm({
   "src/export/visual/modes/mathematics.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -23178,296 +24300,149 @@ function exportPhysicsVisualization(thought, options) {
   }
 }
 function physicsToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph TB\n";
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("TB");
   const typeId = sanitizeId(`type_${thought.thoughtType || "physics"}`);
   const typeLabel = includeLabels ? (thought.thoughtType || "Physics").replace(/_/g, " ") : typeId;
-  mermaid += `  ${typeId}[["${typeLabel}"]]
-`;
+  builder.addNode({ id: typeId, label: typeLabel, shape: "subroutine" });
   if (thought.tensorProperties) {
     const tensorId = sanitizeId("tensor");
-    const rankLabel = `Rank (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`;
-    mermaid += `  ${tensorId}(["${rankLabel}"])
-`;
-    mermaid += `  ${typeId} --> ${tensorId}
-`;
     const compId = sanitizeId("components");
     const compLabel = includeLabels ? thought.tensorProperties.components.slice(0, 30) + (thought.tensorProperties.components.length > 30 ? "..." : "") : "Components";
-    mermaid += `  ${compId}["${compLabel}"]
-`;
-    mermaid += `  ${tensorId} --> ${compId}
-`;
+    builder.addNode({ id: tensorId, label: `Rank (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`, shape: "stadium" }).addNode({ id: compId, label: compLabel, shape: "rectangle" }).addEdge({ source: typeId, target: tensorId }).addEdge({ source: tensorId, target: compId });
     if (thought.tensorProperties.symmetries.length > 0) {
-      const symId = sanitizeId("symmetries");
-      mermaid += `  ${symId}{{"Symmetries: ${thought.tensorProperties.symmetries.length}"}}
-`;
-      mermaid += `  ${tensorId} --> ${symId}
-`;
+      builder.addNode({ id: sanitizeId("symmetries"), label: `Symmetries: ${thought.tensorProperties.symmetries.length}`, shape: "hexagon" }).addEdge({ source: tensorId, target: sanitizeId("symmetries") });
     }
     if (thought.tensorProperties.invariants.length > 0) {
-      const invId = sanitizeId("invariants");
-      mermaid += `  ${invId}{{"Invariants: ${thought.tensorProperties.invariants.length}"}}
-`;
-      mermaid += `  ${tensorId} --> ${invId}
-`;
+      builder.addNode({ id: sanitizeId("invariants"), label: `Invariants: ${thought.tensorProperties.invariants.length}`, shape: "hexagon" }).addEdge({ source: tensorId, target: sanitizeId("invariants") });
     }
   }
   if (thought.physicalInterpretation) {
     const interpId = sanitizeId("interpretation");
-    const interpLabel = thought.physicalInterpretation.quantity;
-    mermaid += `  ${interpId}[/"${interpLabel}"/]
-`;
-    mermaid += `  ${typeId} --> ${interpId}
-`;
     const unitsId = sanitizeId("units");
-    mermaid += `  ${unitsId}(["${thought.physicalInterpretation.units}"])
-`;
-    mermaid += `  ${interpId} --> ${unitsId}
-`;
-    if (thought.physicalInterpretation.conservationLaws.length > 0) {
-      thought.physicalInterpretation.conservationLaws.forEach((law, index) => {
-        const lawId = sanitizeId(`conservation_${index}`);
-        const lawLabel = includeLabels ? law.slice(0, 25) + (law.length > 25 ? "..." : "") : `Law ${index + 1}`;
-        mermaid += `  ${lawId}>"${lawLabel}"]
-`;
-        mermaid += `  ${interpId} --> ${lawId}
-`;
-      });
-    }
-  }
-  if (thought.fieldTheoryContext) {
-    const fieldId = sanitizeId("field_theory");
-    mermaid += `  ${fieldId}[("Field Theory")]
-`;
-    mermaid += `  ${typeId} --> ${fieldId}
-`;
-    thought.fieldTheoryContext.fields.forEach((field, index) => {
-      const fId = sanitizeId(`field_${index}`);
-      mermaid += `  ${fId}["${field}"]
-`;
-      mermaid += `  ${fieldId} --> ${fId}
-`;
-    });
-    const symGroupId = sanitizeId("symmetry_group");
-    mermaid += `  ${symGroupId}{{"${thought.fieldTheoryContext.symmetryGroup}"}}
-`;
-    mermaid += `  ${fieldId} --> ${symGroupId}
-`;
-  }
-  if (includeMetrics) {
-    const uncertId = sanitizeId("uncertainty");
-    const uncertLabel = `Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`;
-    mermaid += `  ${uncertId}{{${uncertLabel}}}
-`;
-  }
-  if (thought.assumptions && thought.assumptions.length > 0) {
-    const assumptionsId = sanitizeId("assumptions");
-    mermaid += `  ${assumptionsId}>"Assumptions: ${thought.assumptions.length}"]
-`;
-  }
-  if (colorScheme !== "monochrome") {
-    const colors = colorScheme === "pastel" ? { type: "#e3f2fd", tensor: "#fff3e0", interp: "#e8f5e9" } : { type: "#87CEEB", tensor: "#FFD700", interp: "#90EE90" };
-    mermaid += `
-  style ${typeId} fill:${colors.type}
-`;
-    if (thought.tensorProperties) {
-      mermaid += `  style ${sanitizeId("tensor")} fill:${colors.tensor}
-`;
-    }
-    if (thought.physicalInterpretation) {
-      mermaid += `  style ${sanitizeId("interpretation")} fill:${colors.interp}
-`;
-    }
-  }
-  return mermaid;
-}
-function physicsToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph PhysicsVisualization {\n";
-  dot += "  rankdir=TB;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
-  const typeId = sanitizeId(`type_${thought.thoughtType || "physics"}`);
-  const typeLabel = includeLabels ? (thought.thoughtType || "Physics").replace(/_/g, " ") : typeId;
-  dot += `  ${typeId} [label="${typeLabel}", shape=doubleoctagon];
-`;
-  if (thought.tensorProperties) {
-    const tensorId = sanitizeId("tensor");
-    const rankLabel = `Rank (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`;
-    dot += `  ${tensorId} [label="${rankLabel}", shape=ellipse];
-`;
-    dot += `  ${typeId} -> ${tensorId};
-`;
-    const compId = sanitizeId("components");
-    const compLabel = includeLabels ? thought.tensorProperties.components.slice(0, 25).replace(/"/g, '"') : "Components";
-    dot += `  ${compId} [label="${compLabel}"];
-`;
-    dot += `  ${tensorId} -> ${compId};
-`;
-    const transId = sanitizeId("transformation");
-    dot += `  ${transId} [label="${thought.tensorProperties.transformation}", shape=diamond];
-`;
-    dot += `  ${tensorId} -> ${transId};
-`;
-  }
-  if (thought.physicalInterpretation) {
-    const interpId = sanitizeId("interpretation");
-    dot += `  ${interpId} [label="${thought.physicalInterpretation.quantity}", shape=parallelogram];
-`;
-    dot += `  ${typeId} -> ${interpId};
-`;
-    const unitsId = sanitizeId("units");
-    dot += `  ${unitsId} [label="${thought.physicalInterpretation.units}", shape=ellipse];
-`;
-    dot += `  ${interpId} -> ${unitsId};
-`;
+    builder.addNode({ id: interpId, label: thought.physicalInterpretation.quantity, shape: "parallelogram" }).addNode({ id: unitsId, label: thought.physicalInterpretation.units, shape: "stadium" }).addEdge({ source: typeId, target: interpId }).addEdge({ source: interpId, target: unitsId });
     thought.physicalInterpretation.conservationLaws.forEach((law, index) => {
       const lawId = sanitizeId(`conservation_${index}`);
-      const lawLabel = includeLabels ? law.slice(0, 20).replace(/"/g, '"') : `Law ${index + 1}`;
-      dot += `  ${lawId} [label="${lawLabel}", shape=hexagon];
-`;
-      dot += `  ${interpId} -> ${lawId};
-`;
+      const lawLabel = includeLabels ? law.slice(0, 25) + (law.length > 25 ? "..." : "") : `Law ${index + 1}`;
+      builder.addNode({ id: lawId, label: lawLabel, shape: "asymmetric" }).addEdge({ source: interpId, target: lawId });
     });
   }
   if (thought.fieldTheoryContext) {
     const fieldId = sanitizeId("field_theory");
-    dot += `  ${fieldId} [label="Field Theory", shape=cylinder];
-`;
-    dot += `  ${typeId} -> ${fieldId};
-`;
+    const symGroupId = sanitizeId("symmetry_group");
+    builder.addNode({ id: fieldId, label: "Field Theory", shape: "cylinder" }).addNode({ id: symGroupId, label: thought.fieldTheoryContext.symmetryGroup, shape: "hexagon" }).addEdge({ source: typeId, target: fieldId }).addEdge({ source: fieldId, target: symGroupId });
     thought.fieldTheoryContext.fields.forEach((field, index) => {
       const fId = sanitizeId(`field_${index}`);
-      dot += `  ${fId} [label="${field}"];
-`;
-      dot += `  ${fieldId} -> ${fId};
-`;
+      builder.addNode({ id: fId, label: field, shape: "rectangle" }).addEdge({ source: fieldId, target: fId });
     });
-    const symGroupId = sanitizeId("symmetry_group");
-    dot += `  ${symGroupId} [label="${thought.fieldTheoryContext.symmetryGroup}", shape=diamond];
-`;
-    dot += `  ${fieldId} -> ${symGroupId};
-`;
   }
   if (includeMetrics) {
-    const uncertId = sanitizeId("uncertainty");
-    dot += `  ${uncertId} [label="${(thought.uncertainty * 100).toFixed(1)}%", shape=diamond];
-`;
-  }
-  dot += "}\n";
-  return dot;
-}
-function physicsToASCII(thought) {
-  let ascii = "Physics Analysis:\n";
-  ascii += "=================\n\n";
-  ascii += `Type: ${(thought.thoughtType || "physics").replace(/_/g, " ")}
-`;
-  ascii += `Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%
-
-`;
-  if (thought.tensorProperties) {
-    ascii += "Tensor Properties:\n";
-    ascii += `  Rank: (${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})
-`;
-    ascii += `  Components: ${thought.tensorProperties.components}
-`;
-    ascii += `  LaTeX: ${thought.tensorProperties.latex}
-`;
-    ascii += `  Transformation: ${thought.tensorProperties.transformation}
-`;
-    if (thought.tensorProperties.indexStructure) {
-      ascii += `  Index Structure: ${thought.tensorProperties.indexStructure}
-`;
-    }
-    if (thought.tensorProperties.coordinateSystem) {
-      ascii += `  Coordinate System: ${thought.tensorProperties.coordinateSystem}
-`;
-    }
-    if (thought.tensorProperties.symmetries.length > 0) {
-      ascii += "  Symmetries:\n";
-      thought.tensorProperties.symmetries.forEach((sym, index) => {
-        ascii += `    ${index + 1}. ${sym}
-`;
-      });
-    }
-    if (thought.tensorProperties.invariants.length > 0) {
-      ascii += "  Invariants:\n";
-      thought.tensorProperties.invariants.forEach((inv, index) => {
-        ascii += `    ${index + 1}. ${inv}
-`;
-      });
-    }
-    ascii += "\n";
-  }
-  if (thought.physicalInterpretation) {
-    ascii += "Physical Interpretation:\n";
-    ascii += `  Quantity: ${thought.physicalInterpretation.quantity}
-`;
-    ascii += `  Units: ${thought.physicalInterpretation.units}
-`;
-    if (thought.physicalInterpretation.conservationLaws.length > 0) {
-      ascii += "  Conservation Laws:\n";
-      thought.physicalInterpretation.conservationLaws.forEach((law, index) => {
-        ascii += `    ${index + 1}. ${law}
-`;
-      });
-    }
-    if (thought.physicalInterpretation.constraints && thought.physicalInterpretation.constraints.length > 0) {
-      ascii += "  Constraints:\n";
-      thought.physicalInterpretation.constraints.forEach((constraint, index) => {
-        ascii += `    ${index + 1}. ${constraint}
-`;
-      });
-    }
-    if (thought.physicalInterpretation.observables && thought.physicalInterpretation.observables.length > 0) {
-      ascii += "  Observables:\n";
-      thought.physicalInterpretation.observables.forEach((obs, index) => {
-        ascii += `    ${index + 1}. ${obs}
-`;
-      });
-    }
-    ascii += "\n";
-  }
-  if (thought.fieldTheoryContext) {
-    ascii += "Field Theory Context:\n";
-    ascii += `  Symmetry Group: ${thought.fieldTheoryContext.symmetryGroup}
-`;
-    if (thought.fieldTheoryContext.fields.length > 0) {
-      ascii += "  Fields:\n";
-      thought.fieldTheoryContext.fields.forEach((field, index) => {
-        ascii += `    ${index + 1}. ${field}
-`;
-      });
-    }
-    if (thought.fieldTheoryContext.interactions.length > 0) {
-      ascii += "  Interactions:\n";
-      thought.fieldTheoryContext.interactions.forEach((interaction, index) => {
-        ascii += `    ${index + 1}. ${interaction}
-`;
-      });
-    }
-    if (thought.fieldTheoryContext.gaugeSymmetries && thought.fieldTheoryContext.gaugeSymmetries.length > 0) {
-      ascii += "  Gauge Symmetries:\n";
-      thought.fieldTheoryContext.gaugeSymmetries.forEach((gauge, index) => {
-        ascii += `    ${index + 1}. ${gauge}
-`;
-      });
-    }
-    ascii += "\n";
+    builder.addNode({ id: sanitizeId("uncertainty"), label: `Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`, shape: "hexagon" });
   }
   if (thought.assumptions && thought.assumptions.length > 0) {
-    ascii += "Assumptions:\n";
-    thought.assumptions.forEach((assumption, index) => {
-      ascii += `  ${index + 1}. ${assumption}
-`;
-    });
-    ascii += "\n";
+    builder.addNode({ id: sanitizeId("assumptions"), label: `Assumptions: ${thought.assumptions.length}`, shape: "asymmetric" });
   }
-  if (thought.dependencies && thought.dependencies.length > 0) {
-    ascii += "Dependencies:\n";
-    thought.dependencies.forEach((dep, index) => {
-      ascii += `  ${index + 1}. ${dep}
-`;
+  return builder.setOptions({ colorScheme: scheme }).render();
+}
+function physicsToDOT(thought, includeLabels, includeMetrics) {
+  const builder = new DOTGraphBuilder().setGraphName("PhysicsVisualization").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
+  const typeId = sanitizeId(`type_${thought.thoughtType || "physics"}`);
+  const typeLabel = includeLabels ? (thought.thoughtType || "Physics").replace(/_/g, " ") : typeId;
+  builder.addNode({ id: typeId, label: typeLabel, shape: "doubleoctagon" });
+  if (thought.tensorProperties) {
+    const tensorId = sanitizeId("tensor");
+    const compId = sanitizeId("components");
+    const transId = sanitizeId("transformation");
+    const compLabel = includeLabels ? thought.tensorProperties.components.slice(0, 25).replace(/"/g, '\\"') : "Components";
+    builder.addNode({ id: tensorId, label: `Rank (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`, shape: "ellipse" }).addNode({ id: compId, label: compLabel }).addNode({ id: transId, label: thought.tensorProperties.transformation, shape: "diamond" }).addEdge({ source: typeId, target: tensorId }).addEdge({ source: tensorId, target: compId }).addEdge({ source: tensorId, target: transId });
+  }
+  if (thought.physicalInterpretation) {
+    const interpId = sanitizeId("interpretation");
+    const unitsId = sanitizeId("units");
+    builder.addNode({ id: interpId, label: thought.physicalInterpretation.quantity, shape: "parallelogram" }).addNode({ id: unitsId, label: thought.physicalInterpretation.units, shape: "ellipse" }).addEdge({ source: typeId, target: interpId }).addEdge({ source: interpId, target: unitsId });
+    thought.physicalInterpretation.conservationLaws.forEach((law, index) => {
+      const lawId = sanitizeId(`conservation_${index}`);
+      const lawLabel = includeLabels ? law.slice(0, 20).replace(/"/g, '\\"') : `Law ${index + 1}`;
+      builder.addNode({ id: lawId, label: lawLabel, shape: "hexagon" }).addEdge({ source: interpId, target: lawId });
     });
   }
-  return ascii;
+  if (thought.fieldTheoryContext) {
+    const fieldId = sanitizeId("field_theory");
+    const symGroupId = sanitizeId("symmetry_group");
+    builder.addNode({ id: fieldId, label: "Field Theory", shape: "cylinder" }).addNode({ id: symGroupId, label: thought.fieldTheoryContext.symmetryGroup, shape: "diamond" }).addEdge({ source: typeId, target: fieldId }).addEdge({ source: fieldId, target: symGroupId });
+    thought.fieldTheoryContext.fields.forEach((field, index) => {
+      const fId = sanitizeId(`field_${index}`);
+      builder.addNode({ id: fId, label: field }).addEdge({ source: fieldId, target: fId });
+    });
+  }
+  if (includeMetrics) {
+    builder.addNode({ id: sanitizeId("uncertainty"), label: `${(thought.uncertainty * 100).toFixed(1)}%`, shape: "diamond" });
+  }
+  return builder.render();
+}
+function physicsToASCII(thought) {
+  const builder = new ASCIIDocBuilder().addHeader("Physics Analysis").addText(`Type: ${(thought.thoughtType || "physics").replace(/_/g, " ")}
+`).addText(`Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%
+`).addEmptyLine();
+  if (thought.tensorProperties) {
+    builder.addSection("Tensor Properties").addText(`  Rank: (${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})
+`).addText(`  Components: ${thought.tensorProperties.components}
+`).addText(`  LaTeX: ${thought.tensorProperties.latex}
+`).addText(`  Transformation: ${thought.tensorProperties.transformation}
+`);
+    if (thought.tensorProperties.indexStructure) {
+      builder.addText(`  Index Structure: ${thought.tensorProperties.indexStructure}
+`);
+    }
+    if (thought.tensorProperties.coordinateSystem) {
+      builder.addText(`  Coordinate System: ${thought.tensorProperties.coordinateSystem}
+`);
+    }
+    if (thought.tensorProperties.symmetries.length > 0) {
+      builder.addText("  Symmetries:\n").addNumberedList(thought.tensorProperties.symmetries, 4);
+    }
+    if (thought.tensorProperties.invariants.length > 0) {
+      builder.addText("  Invariants:\n").addNumberedList(thought.tensorProperties.invariants, 4);
+    }
+    builder.addEmptyLine();
+  }
+  if (thought.physicalInterpretation) {
+    builder.addSection("Physical Interpretation").addText(`  Quantity: ${thought.physicalInterpretation.quantity}
+`).addText(`  Units: ${thought.physicalInterpretation.units}
+`);
+    if (thought.physicalInterpretation.conservationLaws.length > 0) {
+      builder.addText("  Conservation Laws:\n").addNumberedList(thought.physicalInterpretation.conservationLaws, 4);
+    }
+    if (thought.physicalInterpretation.constraints?.length) {
+      builder.addText("  Constraints:\n").addNumberedList(thought.physicalInterpretation.constraints, 4);
+    }
+    if (thought.physicalInterpretation.observables?.length) {
+      builder.addText("  Observables:\n").addNumberedList(thought.physicalInterpretation.observables, 4);
+    }
+    builder.addEmptyLine();
+  }
+  if (thought.fieldTheoryContext) {
+    builder.addSection("Field Theory Context").addText(`  Symmetry Group: ${thought.fieldTheoryContext.symmetryGroup}
+`);
+    if (thought.fieldTheoryContext.fields.length > 0) {
+      builder.addText("  Fields:\n").addNumberedList(thought.fieldTheoryContext.fields, 4);
+    }
+    if (thought.fieldTheoryContext.interactions.length > 0) {
+      builder.addText("  Interactions:\n").addNumberedList(thought.fieldTheoryContext.interactions, 4);
+    }
+    if (thought.fieldTheoryContext.gaugeSymmetries?.length) {
+      builder.addText("  Gauge Symmetries:\n").addNumberedList(thought.fieldTheoryContext.gaugeSymmetries, 4);
+    }
+    builder.addEmptyLine();
+  }
+  if (thought.assumptions?.length) {
+    builder.addSection("Assumptions").addNumberedList(thought.assumptions);
+    builder.addEmptyLine();
+  }
+  if (thought.dependencies?.length) {
+    builder.addSection("Dependencies").addNumberedList(thought.dependencies);
+  }
+  return builder.render();
 }
 function physicsToSVG(thought, options) {
   const {
@@ -24646,6 +25621,9 @@ var init_physics = __esm({
   "src/export/visual/modes/physics.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -24689,265 +25667,184 @@ function exportHybridOrchestration(thought, options) {
   }
 }
 function hybridToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph TB\n";
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("TB");
   const hybridId = sanitizeId("hybrid_mode");
-  mermaid += `  ${hybridId}(("Hybrid Mode"))
-`;
+  builder.addNode({ id: hybridId, label: "Hybrid Mode", shape: "double-circle" });
   const primaryId = sanitizeId(`primary_${thought.primaryMode}`);
   const primaryLabel = includeLabels ? thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1) : primaryId;
-  mermaid += `  ${primaryId}[["${primaryLabel}"]]
-`;
-  mermaid += `  ${hybridId} ==> ${primaryId}
-`;
+  builder.addNode({ id: primaryId, label: primaryLabel, shape: "subroutine" });
+  builder.addEdge({ source: hybridId, target: primaryId, style: "thick" });
   if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
     const secondaryId = sanitizeId("secondary_features");
-    mermaid += `  ${secondaryId}(["Secondary Features"])
-`;
-    mermaid += `  ${hybridId} --> ${secondaryId}
-`;
+    builder.addNode({ id: secondaryId, label: "Secondary Features", shape: "stadium" });
+    builder.addEdge({ source: hybridId, target: secondaryId });
     thought.secondaryFeatures.forEach((feature, index) => {
       const featureId = sanitizeId(`feature_${index}`);
       const featureLabel = includeLabels ? feature.slice(0, 30) + (feature.length > 30 ? "..." : "") : `Feature ${index + 1}`;
-      mermaid += `  ${featureId}["${featureLabel}"]
-`;
-      mermaid += `  ${secondaryId} --> ${featureId}
-`;
+      builder.addNode({ id: featureId, label: featureLabel, shape: "rectangle" });
+      builder.addEdge({ source: secondaryId, target: featureId });
     });
   }
   if (thought.switchReason) {
     const switchId = sanitizeId("switch_reason");
     const switchLabel = includeLabels ? thought.switchReason.slice(0, 40) + (thought.switchReason.length > 40 ? "..." : "") : "Switch Reason";
-    mermaid += `  ${switchId}>"${switchLabel}"]
-`;
-    mermaid += `  ${hybridId} -.-> ${switchId}
-`;
+    builder.addNode({ id: switchId, label: switchLabel, shape: "asymmetric" });
+    builder.addEdge({ source: hybridId, target: switchId, style: "dotted" });
   }
   if (thought.stage) {
     const stageId = sanitizeId(`stage_${thought.stage}`);
-    const stageLabel = thought.stage.replace(/_/g, " ");
-    mermaid += `  ${stageId}{{"Stage: ${stageLabel}"}}
-`;
-    mermaid += `  ${primaryId} --> ${stageId}
-`;
+    const stageLabel = `Stage: ${thought.stage.replace(/_/g, " ")}`;
+    builder.addNode({ id: stageId, label: stageLabel, shape: "hexagon" });
+    builder.addEdge({ source: primaryId, target: stageId });
   }
   if (thought.mathematicalModel) {
     const modelId = sanitizeId("math_model");
     const modelLabel = thought.mathematicalModel.symbolic || "Mathematical Model";
-    mermaid += `  ${modelId}["${modelLabel}"]
-`;
-    mermaid += `  ${primaryId} --> ${modelId}
-`;
+    builder.addNode({ id: modelId, label: modelLabel, shape: "rectangle" });
+    builder.addEdge({ source: primaryId, target: modelId });
   }
   if (thought.tensorProperties) {
     const tensorId = sanitizeId("tensor");
     const tensorLabel = `Tensor (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`;
-    mermaid += `  ${tensorId}[/"${tensorLabel}"/]
-`;
-    mermaid += `  ${primaryId} --> ${tensorId}
-`;
+    builder.addNode({ id: tensorId, label: tensorLabel, shape: "parallelogram" });
+    builder.addEdge({ source: primaryId, target: tensorId });
   }
   if (thought.physicalInterpretation) {
     const physId = sanitizeId("physical");
-    mermaid += `  ${physId}[/"${thought.physicalInterpretation.quantity}"/]
-`;
-    mermaid += `  ${primaryId} --> ${physId}
-`;
+    builder.addNode({ id: physId, label: thought.physicalInterpretation.quantity, shape: "parallelogram" });
+    builder.addEdge({ source: primaryId, target: physId });
   }
   if (includeMetrics && thought.uncertainty !== void 0) {
     const uncertId = sanitizeId("uncertainty");
     const uncertLabel = `Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`;
-    mermaid += `  ${uncertId}{{${uncertLabel}}}
-`;
+    builder.addNode({ id: uncertId, label: uncertLabel, shape: "hexagon" });
   }
   if (thought.assumptions && thought.assumptions.length > 0) {
     const assumptionsId = sanitizeId("assumptions");
-    mermaid += `  ${assumptionsId}>"Assumptions: ${thought.assumptions.length}"]
-`;
+    builder.addNode({ id: assumptionsId, label: `Assumptions: ${thought.assumptions.length}`, shape: "asymmetric" });
   }
   if (thought.dependencies && thought.dependencies.length > 0) {
     const depsId = sanitizeId("dependencies");
-    mermaid += `  ${depsId}>"Dependencies: ${thought.dependencies.length}"]
-`;
+    builder.addNode({ id: depsId, label: `Dependencies: ${thought.dependencies.length}`, shape: "asymmetric" });
   }
-  if (colorScheme !== "monochrome") {
-    const colors = colorScheme === "pastel" ? { hybrid: "#e8f4e8", primary: "#e3f2fd", secondary: "#fff3e0" } : { hybrid: "#90EE90", primary: "#87CEEB", secondary: "#FFD700" };
-    mermaid += `
-  style ${hybridId} fill:${colors.hybrid}
-`;
-    mermaid += `  style ${primaryId} fill:${colors.primary}
-`;
-    if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
-      mermaid += `  style ${sanitizeId("secondary_features")} fill:${colors.secondary}
-`;
-    }
-  }
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 function hybridToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph HybridOrchestration {\n";
-  dot += "  rankdir=TB;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
+  const builder = new DOTGraphBuilder().setGraphName("HybridOrchestration").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
   const hybridId = sanitizeId("hybrid_mode");
-  dot += `  ${hybridId} [label="Hybrid Mode", shape=doubleoctagon];
-`;
+  builder.addNode({ id: hybridId, label: "Hybrid Mode", shape: "doubleoctagon" });
   const primaryId = sanitizeId(`primary_${thought.primaryMode}`);
   const primaryLabel = thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1);
-  dot += `  ${primaryId} [label="${primaryLabel}", shape=box, style="filled,rounded", fillcolor=lightblue];
-`;
-  dot += `  ${hybridId} -> ${primaryId} [style=bold, penwidth=2];
-`;
+  builder.addNode({ id: primaryId, label: primaryLabel, shape: "box", style: ["filled", "rounded"], fillColor: "lightblue" });
+  builder.addEdge({ source: hybridId, target: primaryId, style: "bold", penWidth: 2 });
   if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
     const secondaryId = sanitizeId("secondary_features");
-    dot += `  ${secondaryId} [label="Secondary Features", shape=ellipse];
-`;
-    dot += `  ${hybridId} -> ${secondaryId};
-`;
+    builder.addNode({ id: secondaryId, label: "Secondary Features", shape: "ellipse" });
+    builder.addEdge({ source: hybridId, target: secondaryId });
     thought.secondaryFeatures.forEach((feature, index) => {
       const featureId = sanitizeId(`feature_${index}`);
-      const featureLabel = includeLabels ? feature.slice(0, 25).replace(/"/g, '"') : `Feature ${index + 1}`;
-      dot += `  ${featureId} [label="${featureLabel}"];
-`;
-      dot += `  ${secondaryId} -> ${featureId};
-`;
+      const featureLabel = includeLabels ? feature.slice(0, 25) : `Feature ${index + 1}`;
+      builder.addNode({ id: featureId, label: featureLabel });
+      builder.addEdge({ source: secondaryId, target: featureId });
     });
   }
   if (thought.switchReason) {
     const switchId = sanitizeId("switch_reason");
-    const switchLabel = includeLabels ? thought.switchReason.slice(0, 30).replace(/"/g, '"') : "Switch Reason";
-    dot += `  ${switchId} [label="${switchLabel}", shape=note];
-`;
-    dot += `  ${hybridId} -> ${switchId} [style=dashed];
-`;
+    const switchLabel = includeLabels ? thought.switchReason.slice(0, 30) : "Switch Reason";
+    builder.addNode({ id: switchId, label: switchLabel, shape: "note" });
+    builder.addEdge({ source: hybridId, target: switchId, style: "dashed" });
   }
   if (thought.stage) {
     const stageId = sanitizeId(`stage_${thought.stage}`);
-    dot += `  ${stageId} [label="${thought.stage.replace(/_/g, " ")}", shape=diamond];
-`;
-    dot += `  ${primaryId} -> ${stageId};
-`;
+    builder.addNode({ id: stageId, label: thought.stage.replace(/_/g, " "), shape: "diamond" });
+    builder.addEdge({ source: primaryId, target: stageId });
   }
   if (thought.mathematicalModel) {
     const modelId = sanitizeId("math_model");
-    const modelLabel = thought.mathematicalModel.symbolic ? thought.mathematicalModel.symbolic.slice(0, 25).replace(/"/g, '"') : "Math Model";
-    dot += `  ${modelId} [label="${modelLabel}", shape=parallelogram];
-`;
-    dot += `  ${primaryId} -> ${modelId};
-`;
+    const modelLabel = thought.mathematicalModel.symbolic ? thought.mathematicalModel.symbolic.slice(0, 25) : "Math Model";
+    builder.addNode({ id: modelId, label: modelLabel, shape: "parallelogram" });
+    builder.addEdge({ source: primaryId, target: modelId });
   }
   if (thought.tensorProperties) {
     const tensorId = sanitizeId("tensor");
-    dot += `  ${tensorId} [label="Tensor (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})", shape=parallelogram];
-`;
-    dot += `  ${primaryId} -> ${tensorId};
-`;
+    builder.addNode({ id: tensorId, label: `Tensor (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`, shape: "parallelogram" });
+    builder.addEdge({ source: primaryId, target: tensorId });
   }
   if (thought.physicalInterpretation) {
     const physId = sanitizeId("physical");
-    dot += `  ${physId} [label="${thought.physicalInterpretation.quantity}", shape=parallelogram];
-`;
-    dot += `  ${primaryId} -> ${physId};
-`;
+    builder.addNode({ id: physId, label: thought.physicalInterpretation.quantity, shape: "parallelogram" });
+    builder.addEdge({ source: primaryId, target: physId });
   }
   if (includeMetrics && thought.uncertainty !== void 0) {
     const uncertId = sanitizeId("uncertainty");
-    dot += `  ${uncertId} [label="${(thought.uncertainty * 100).toFixed(1)}%", shape=diamond];
-`;
+    builder.addNode({ id: uncertId, label: `${(thought.uncertainty * 100).toFixed(1)}%`, shape: "diamond" });
   }
-  dot += "}\n";
-  return dot;
+  return builder.render();
 }
 function hybridToASCII(thought) {
-  let ascii = "Hybrid Mode Orchestration:\n";
-  ascii += "==========================\n\n";
-  ascii += `Primary Mode: ${thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1)}
-`;
+  const builder = new ASCIIDocBuilder().addHeader("Hybrid Mode Orchestration", "equals").addEmptyLine();
+  builder.addText(`Primary Mode: ${thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1)}`);
   if (thought.stage) {
-    ascii += `Current Stage: ${thought.stage.replace(/_/g, " ")}
-`;
+    builder.addText(`Current Stage: ${thought.stage.replace(/_/g, " ")}`);
   }
   if (thought.uncertainty !== void 0) {
-    ascii += `Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%
-`;
+    builder.addText(`Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`);
   }
-  ascii += "\n";
+  builder.addEmptyLine();
   if (thought.switchReason) {
-    ascii += `Switch Reason: ${thought.switchReason}
-
-`;
+    builder.addText(`Switch Reason: ${thought.switchReason}`).addEmptyLine();
   }
   if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
-    ascii += "Secondary Features:\n";
-    thought.secondaryFeatures.forEach((feature, index) => {
-      ascii += `  ${index + 1}. ${feature}
-`;
-    });
-    ascii += "\n";
+    builder.addSection("Secondary Features").addEmptyLine();
+    builder.addNumberedList(thought.secondaryFeatures).addEmptyLine();
   }
   if (thought.mathematicalModel) {
-    ascii += "Mathematical Model:\n";
-    ascii += `  LaTeX: ${thought.mathematicalModel.latex}
-`;
-    ascii += `  Symbolic: ${thought.mathematicalModel.symbolic}
-`;
+    builder.addSection("Mathematical Model").addEmptyLine();
+    builder.addText(`  LaTeX: ${thought.mathematicalModel.latex}`);
+    builder.addText(`  Symbolic: ${thought.mathematicalModel.symbolic}`);
     if (thought.mathematicalModel.ascii) {
-      ascii += `  ASCII: ${thought.mathematicalModel.ascii}
-`;
+      builder.addText(`  ASCII: ${thought.mathematicalModel.ascii}`);
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.tensorProperties) {
-    ascii += "Tensor Properties:\n";
-    ascii += `  Rank: (${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})
-`;
-    ascii += `  Components: ${thought.tensorProperties.components}
-`;
-    ascii += `  Transformation: ${thought.tensorProperties.transformation}
-`;
+    builder.addSection("Tensor Properties").addEmptyLine();
+    builder.addText(`  Rank: (${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`);
+    builder.addText(`  Components: ${thought.tensorProperties.components}`);
+    builder.addText(`  Transformation: ${thought.tensorProperties.transformation}`);
     if (thought.tensorProperties.symmetries.length > 0) {
-      ascii += "  Symmetries:\n";
+      builder.addText("  Symmetries:");
       thought.tensorProperties.symmetries.forEach((sym, index) => {
-        ascii += `    ${index + 1}. ${sym}
-`;
+        builder.addText(`    ${index + 1}. ${sym}`);
       });
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.physicalInterpretation) {
-    ascii += "Physical Interpretation:\n";
-    ascii += `  Quantity: ${thought.physicalInterpretation.quantity}
-`;
-    ascii += `  Units: ${thought.physicalInterpretation.units}
-`;
+    builder.addSection("Physical Interpretation").addEmptyLine();
+    builder.addText(`  Quantity: ${thought.physicalInterpretation.quantity}`);
+    builder.addText(`  Units: ${thought.physicalInterpretation.units}`);
     if (thought.physicalInterpretation.conservationLaws.length > 0) {
-      ascii += "  Conservation Laws:\n";
+      builder.addText("  Conservation Laws:");
       thought.physicalInterpretation.conservationLaws.forEach((law, index) => {
-        ascii += `    ${index + 1}. ${law}
-`;
+        builder.addText(`    ${index + 1}. ${law}`);
       });
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.assumptions && thought.assumptions.length > 0) {
-    ascii += "Assumptions:\n";
-    thought.assumptions.forEach((assumption, index) => {
-      ascii += `  ${index + 1}. ${assumption}
-`;
-    });
-    ascii += "\n";
+    builder.addSection("Assumptions").addEmptyLine();
+    builder.addNumberedList(thought.assumptions).addEmptyLine();
   }
   if (thought.dependencies && thought.dependencies.length > 0) {
-    ascii += "Dependencies:\n";
-    thought.dependencies.forEach((dep, index) => {
-      ascii += `  ${index + 1}. ${dep}
-`;
-    });
-    ascii += "\n";
+    builder.addSection("Dependencies").addEmptyLine();
+    builder.addNumberedList(thought.dependencies).addEmptyLine();
   }
   if (thought.revisionReason) {
-    ascii += `Revision Reason: ${thought.revisionReason}
-`;
+    builder.addText(`Revision Reason: ${thought.revisionReason}`);
   }
-  return ascii;
+  return builder.render();
 }
 function hybridToSVG(thought, options) {
   const {
@@ -25787,6 +26684,9 @@ var init_hybrid = __esm({
   "src/export/visual/modes/hybrid.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -28013,93 +28913,70 @@ function exportEvidentialBeliefs(thought, options) {
   }
 }
 function evidentialToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph TD\n";
-  mermaid += '  Frame["Frame of Discernment"]\n';
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("TD");
+  builder.addNode({ id: "Frame", label: "Frame of Discernment", shape: "rectangle" });
   if (thought.frameOfDiscernment) {
     for (const hypothesis of thought.frameOfDiscernment) {
       const hypId = sanitizeId(hypothesis);
       const label = includeLabels ? hypothesis : hypId;
-      mermaid += `  ${hypId}["${label}"]
-`;
-      mermaid += `  Frame --> ${hypId}
-`;
+      builder.addNode({ id: hypId, label, shape: "rectangle" });
+      builder.addEdge({ source: "Frame", target: hypId });
     }
   }
   if (includeMetrics && thought.massAssignments && thought.massAssignments.length > 0) {
-    mermaid += "\n";
-    for (const mass of thought.massAssignments) {
-      const massId = sanitizeId(mass.subset.join("_"));
-      const label = `{${mass.subset.join(", ")}}`;
-      mermaid += `  ${massId}["${label}: ${mass.mass.toFixed(3)}"]
-`;
-    }
-  }
-  if (colorScheme !== "monochrome" && thought.frameOfDiscernment) {
-    mermaid += "\n";
-    const color = colorScheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
-    for (const hypothesis of thought.frameOfDiscernment) {
-      const hypId = sanitizeId(hypothesis);
-      mermaid += `  style ${hypId} fill:${color}
-`;
-    }
-  }
-  return mermaid;
-}
-function evidentialToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph EvidentialBeliefs {\n";
-  dot += "  rankdir=TD;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
-  dot += '  Frame [label="Frame of Discernment", shape=ellipse];\n\n';
-  if (thought.frameOfDiscernment) {
-    for (const hypothesis of thought.frameOfDiscernment) {
-      const hypId = sanitizeId(hypothesis);
-      const label = includeLabels ? hypothesis : hypId;
-      dot += `  ${hypId} [label="${label}"];
-`;
-      dot += `  Frame -> ${hypId};
-`;
-    }
-  }
-  if (includeMetrics && thought.massAssignments && thought.massAssignments.length > 0) {
-    dot += "\n";
     for (const mass of thought.massAssignments) {
       const massId = sanitizeId(mass.subset.join("_"));
       const label = `{${mass.subset.join(", ")}}: ${mass.mass.toFixed(3)}`;
-      dot += `  ${massId} [label="${label}", shape=note];
-`;
+      builder.addNode({ id: massId, label, shape: "rectangle" });
     }
   }
-  dot += "}\n";
-  return dot;
+  return builder.setOptions({ colorScheme: scheme }).render();
+}
+function evidentialToDOT(thought, includeLabels, includeMetrics) {
+  const builder = new DOTGraphBuilder().setGraphName("EvidentialBeliefs").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
+  builder.addNode({ id: "Frame", label: "Frame of Discernment", shape: "ellipse" });
+  if (thought.frameOfDiscernment) {
+    for (const hypothesis of thought.frameOfDiscernment) {
+      const hypId = sanitizeId(hypothesis);
+      const label = includeLabels ? hypothesis : hypId;
+      builder.addNode({ id: hypId, label });
+      builder.addEdge({ source: "Frame", target: hypId });
+    }
+  }
+  if (includeMetrics && thought.massAssignments && thought.massAssignments.length > 0) {
+    for (const mass of thought.massAssignments) {
+      const massId = sanitizeId(mass.subset.join("_"));
+      const label = `{${mass.subset.join(", ")}}: ${mass.mass.toFixed(3)}`;
+      builder.addNode({ id: massId, label, shape: "note" });
+    }
+  }
+  return builder.render();
 }
 function evidentialToASCII(thought) {
-  let ascii = "Evidential Belief Visualization:\n";
-  ascii += "================================\n\n";
-  ascii += "Frame of Discernment:\n";
+  const builder = new ASCIIDocBuilder();
+  builder.addHeader("Evidential Belief Visualization");
+  builder.addText("Frame of Discernment:");
   if (thought.frameOfDiscernment) {
-    ascii += `  {${thought.frameOfDiscernment.join(", ")}}
-
-`;
+    builder.addText(`  {${thought.frameOfDiscernment.join(", ")}}`);
   } else {
-    ascii += "  (not defined)\n\n";
+    builder.addText("  (not defined)");
   }
+  builder.addEmptyLine();
   if (thought.massAssignments && thought.massAssignments.length > 0) {
-    ascii += "Mass Assignments:\n";
+    builder.addText("Mass Assignments:");
     for (const mass of thought.massAssignments) {
-      ascii += `  m({${mass.subset.join(", ")}}) = ${mass.mass.toFixed(3)}
-`;
+      builder.addText(`  m({${mass.subset.join(", ")}}) = ${mass.mass.toFixed(3)}`);
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
-    ascii += `Belief Functions: ${thought.beliefFunctions.length} defined
-`;
+    builder.addText(`Belief Functions: ${thought.beliefFunctions.length} defined`);
   }
   if (thought.plausibilityFunction) {
-    ascii += `Plausibility: ${thought.plausibilityFunction.toFixed(3)}
-`;
+    builder.addText(`Plausibility: ${thought.plausibilityFunction.toFixed(3)}`);
   }
-  return ascii;
+  return builder.render();
 }
 function evidentialToSVG(thought, options) {
   const {
@@ -28763,6 +29640,9 @@ var init_evidential = __esm({
   "src/export/visual/modes/evidential.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -28804,20 +29684,20 @@ function exportGameTree(thought, options) {
       throw new Error(`Unsupported format: ${format}`);
   }
 }
-function gameTreeToMermaid(thought, _colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph TD\n";
+function gameTreeToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("TD");
   if (!thought.game) {
-    return mermaid + "  root[No game defined]\n";
+    builder.addNode({ id: "root", label: "No game defined", shape: "rectangle" });
+    return builder.setOptions({ colorScheme: scheme }).render();
   }
   if (thought.gameTree && thought.gameTree.nodes) {
     for (const node of thought.gameTree.nodes) {
       const nodeId = sanitizeId(node.id);
       const label = includeLabels ? node.action || node.id : nodeId;
-      const shape = node.type === "terminal" ? ["[[", "]]"] : ["[", "]"];
-      mermaid += `  ${nodeId}${shape[0]}${label}${shape[1]}
-`;
+      const shape = node.type === "terminal" ? "subroutine" : "rectangle";
+      builder.addNode({ id: nodeId, label, shape });
     }
-    mermaid += "\n";
     for (const node of thought.gameTree.nodes) {
       if (node.childNodes && node.childNodes.length > 0) {
         for (const childId of node.childNodes) {
@@ -28825,44 +29705,38 @@ function gameTreeToMermaid(thought, _colorScheme, includeLabels, includeMetrics)
           const toId = sanitizeId(childId);
           const childNode = thought.gameTree.nodes.find((n) => n.id === childId);
           if (includeMetrics && childNode?.action) {
-            mermaid += `  ${fromId} --> |${childNode.action}| ${toId}
-`;
+            builder.addEdge({ source: fromId, target: toId, label: childNode.action });
           } else {
-            mermaid += `  ${fromId} --> ${toId}
-`;
+            builder.addEdge({ source: fromId, target: toId });
           }
         }
       }
     }
   } else {
-    mermaid += "  root[Game]\n";
+    builder.addNode({ id: "root", label: "Game", shape: "rectangle" });
     if (thought.strategies) {
       for (const strategy of thought.strategies.slice(0, 5)) {
         const stratId = sanitizeId(strategy.id);
-        mermaid += `  root --> ${stratId}[${strategy.name}]
-`;
+        builder.addNode({ id: stratId, label: strategy.name, shape: "rectangle" });
+        builder.addEdge({ source: "root", target: stratId });
       }
     }
   }
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 function gameTreeToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph GameTree {\n";
-  dot += "  rankdir=TD;\n";
-  dot += "  node [shape=circle];\n\n";
+  const builder = new DOTGraphBuilder().setGraphName("GameTree").setRankDir("TB").setNodeDefaults({ shape: "circle" });
   if (!thought.game) {
-    dot += '  root [label="No game"];\n}\n';
-    return dot;
+    builder.addNode({ id: "root", label: "No game" });
+    return builder.render();
   }
   if (thought.gameTree && thought.gameTree.nodes) {
     for (const node of thought.gameTree.nodes) {
       const nodeId = sanitizeId(node.id);
       const label = includeLabels ? node.action || node.id : nodeId;
       const shape = node.type === "terminal" ? "doublecircle" : "circle";
-      dot += `  ${nodeId} [label="${label}", shape=${shape}];
-`;
+      builder.addNode({ id: nodeId, label, shape });
     }
-    dot += "\n";
     for (const node of thought.gameTree.nodes) {
       if (node.childNodes && node.childNodes.length > 0) {
         for (const childId of node.childNodes) {
@@ -28870,41 +29744,35 @@ function gameTreeToDOT(thought, includeLabels, includeMetrics) {
           const toId = sanitizeId(childId);
           const childNode = thought.gameTree.nodes.find((n) => n.id === childId);
           if (includeMetrics && childNode?.action) {
-            dot += `  ${fromId} -> ${toId} [label="${childNode.action}"];
-`;
+            builder.addEdge({ source: fromId, target: toId, label: childNode.action });
           } else {
-            dot += `  ${fromId} -> ${toId};
-`;
+            builder.addEdge({ source: fromId, target: toId });
           }
         }
       }
     }
   }
-  dot += "}\n";
-  return dot;
+  return builder.render();
 }
 function gameTreeToASCII(thought) {
-  let ascii = `Game: ${thought.game?.name || "Untitled"}
-`;
-  ascii += "=".repeat(40) + "\n\n";
+  const builder = new ASCIIDocBuilder();
+  builder.addHeader(`Game: ${thought.game?.name || "Untitled"}`);
   if (thought.strategies && thought.strategies.length > 0) {
-    ascii += "Strategies:\n";
+    builder.addText("Strategies:");
     for (const strategy of thought.strategies) {
       const strategyType = strategy.isPure ? "Pure" : "Mixed";
-      ascii += `  \u2022 ${strategy.name} (${strategyType})
-`;
+      builder.addText(`  \u2022 ${strategy.name} (${strategyType})`);
     }
   }
   if (thought.nashEquilibria && thought.nashEquilibria.length > 0) {
-    ascii += "\nEquilibria:\n";
+    builder.addEmptyLine();
+    builder.addText("Equilibria:");
     for (const eq of thought.nashEquilibria) {
-      ascii += `  \u2696 ${eq.type}: ${eq.strategyProfile.join(", ")}
-`;
-      ascii += `    Payoffs: [${eq.payoffs.join(", ")}]
-`;
+      builder.addText(`  \u2696 ${eq.type}: ${eq.strategyProfile.join(", ")}`);
+      builder.addText(`    Payoffs: [${eq.payoffs.join(", ")}]`);
     }
   }
-  return ascii;
+  return builder.render();
 }
 function gameTreeToSVG(thought, options) {
   const {
@@ -29580,6 +30448,9 @@ var init_game_theory = __esm({
   "src/export/visual/modes/game-theory.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -29622,190 +30493,157 @@ function exportOptimizationSolution(thought, options) {
   }
 }
 function optimizationToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph TD\n";
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("TD");
   if (thought.problem) {
     const problemLabel = includeLabels ? `Problem: ${thought.problem.name}` : "Problem";
-    mermaid += `  Problem["${problemLabel}"]
-
-`;
+    builder.addNode({ id: "Problem", label: problemLabel, shape: "rectangle" });
   }
   if (thought.variables && thought.variables.length > 0) {
-    mermaid += '  subgraph Variables["Decision Variables"]\n';
+    const varNodeIds = [];
     for (const variable of thought.variables) {
       const varId = sanitizeId(variable.id);
+      varNodeIds.push(varId);
       const label = includeLabels ? variable.name : varId;
       const domainLabel = includeMetrics && variable.domain ? ` [${variable.domain.lowerBound},${variable.domain.upperBound}]` : "";
-      mermaid += `    ${varId}["${label}${domainLabel}"]
-`;
+      builder.addNode({ id: varId, label: `${label}${domainLabel}`, shape: "rectangle" });
     }
-    mermaid += "  end\n\n";
+    builder.addSubgraph("Variables", "Decision Variables", varNodeIds);
   }
   if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
-    mermaid += '  subgraph Constraints["Constraints"]\n';
+    const constNodeIds = [];
     for (const constraint of thought.optimizationConstraints) {
       const constId = sanitizeId(constraint.id);
+      constNodeIds.push(constId);
       const label = includeLabels ? constraint.name : constId;
-      mermaid += `    ${constId}["${label}"]
-`;
+      builder.addNode({ id: constId, label, shape: "rectangle" });
     }
-    mermaid += "  end\n\n";
+    builder.addSubgraph("Constraints", "Constraints", constNodeIds);
   }
   if (thought.objectives && thought.objectives.length > 0) {
     for (const objective of thought.objectives) {
       const objId = sanitizeId(objective.id);
       const label = includeLabels ? `${objective.type}: ${objective.name}` : objId;
-      mermaid += `  ${objId}["${label}"]
-`;
+      builder.addNode({ id: objId, label, shape: "rectangle" });
     }
-    mermaid += "\n";
   }
   if (thought.solution) {
     const qualityLabel = includeMetrics && thought.solution.quality ? ` (quality: ${thought.solution.quality.toFixed(2)})` : "";
-    mermaid += `  Solution["Solution${qualityLabel}"]
-`;
+    builder.addNode({ id: "Solution", label: `Solution${qualityLabel}`, shape: "rectangle" });
     if (thought.objectives) {
       for (const objective of thought.objectives) {
         const objId = sanitizeId(objective.id);
-        mermaid += `  ${objId} --> Solution
-`;
+        builder.addEdge({ source: objId, target: "Solution" });
       }
     }
   }
-  if (colorScheme !== "monochrome") {
-    mermaid += "\n";
-    const solutionColor = colorScheme === "pastel" ? "#e8f5e9" : "#a5d6a7";
-    if (thought.solution) {
-      mermaid += `  style Solution fill:${solutionColor}
-`;
-    }
-  }
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 function optimizationToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph Optimization {\n";
-  dot += "  rankdir=TD;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
+  const builder = new DOTGraphBuilder().setGraphName("Optimization").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
   if (thought.problem) {
     const label = includeLabels ? thought.problem.name : "Problem";
-    dot += `  Problem [label="Problem:\\n${label}", shape=ellipse];
-
-`;
+    builder.addNode({ id: "Problem", label: `Problem:
+${label}`, shape: "ellipse" });
   }
   if (thought.variables && thought.variables.length > 0) {
-    dot += "  subgraph cluster_variables {\n";
-    dot += '    label="Decision Variables";\n';
     for (const variable of thought.variables) {
       const varId = sanitizeId(variable.id);
       const label = includeLabels ? variable.name : varId;
-      const domainLabel = includeMetrics && variable.domain ? `\\n[${variable.domain.lowerBound}, ${variable.domain.upperBound}]` : "";
-      dot += `    ${varId} [label="${label}${domainLabel}"];
-`;
+      const domainLabel = includeMetrics && variable.domain ? `
+[${variable.domain.lowerBound}, ${variable.domain.upperBound}]` : "";
+      builder.addNode({ id: varId, label: `${label}${domainLabel}` });
     }
-    dot += "  }\n\n";
   }
   if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
-    dot += "  subgraph cluster_constraints {\n";
-    dot += '    label="Constraints";\n';
     for (const constraint of thought.optimizationConstraints) {
       const constId = sanitizeId(constraint.id);
       const label = includeLabels ? constraint.name : constId;
-      dot += `    ${constId} [label="${label}", shape=diamond];
-`;
+      builder.addNode({ id: constId, label, shape: "diamond" });
     }
-    dot += "  }\n\n";
   }
   if (thought.objectives) {
     for (const objective of thought.objectives) {
       const objId = sanitizeId(objective.id);
-      const label = includeLabels ? `${objective.type}:\\n${objective.name}` : objId;
-      dot += `  ${objId} [label="${label}"];
-`;
+      const label = includeLabels ? `${objective.type}:
+${objective.name}` : objId;
+      builder.addNode({ id: objId, label });
     }
   }
   if (thought.solution) {
-    const qualityLabel = includeMetrics && thought.solution.quality ? `\\nquality: ${thought.solution.quality.toFixed(2)}` : "";
-    dot += `  Solution [label="Solution${qualityLabel}", shape=doubleoctagon, style=filled, fillcolor=lightgreen];
-`;
+    const qualityLabel = includeMetrics && thought.solution.quality ? `
+quality: ${thought.solution.quality.toFixed(2)}` : "";
+    builder.addNode({
+      id: "Solution",
+      label: `Solution${qualityLabel}`,
+      shape: "doubleoctagon",
+      style: ["filled"],
+      fillColor: "lightgreen"
+    });
     if (thought.objectives) {
       for (const objective of thought.objectives) {
         const objId = sanitizeId(objective.id);
-        dot += `  ${objId} -> Solution;
-`;
+        builder.addEdge({ source: objId, target: "Solution" });
       }
     }
   }
-  dot += "}\n";
-  return dot;
+  return builder.render();
 }
 function optimizationToASCII(thought) {
-  let ascii = "Optimization Problem:\n";
-  ascii += "====================\n\n";
+  const builder = new ASCIIDocBuilder().addHeader("Optimization Problem", "equals").addEmptyLine();
   if (thought.problem) {
-    ascii += `Problem: ${thought.problem.name}
-`;
-    ascii += `Type: ${thought.problem.type}
-`;
-    ascii += `${thought.problem.description || "-"}
-
-`;
+    builder.addText(`Problem: ${thought.problem.name}`);
+    builder.addText(`Type: ${thought.problem.type}`);
+    builder.addText(`${thought.problem.description || "-"}`);
+    builder.addEmptyLine();
   }
   if (thought.variables && thought.variables.length > 0) {
-    ascii += "Decision Variables:\n";
+    builder.addSection("Decision Variables").addEmptyLine();
     for (const variable of thought.variables) {
       const varType = variable.type || "unknown";
-      ascii += `  ${variable.name} (${varType})
-`;
+      builder.addText(`  ${variable.name} (${varType})`);
       if (variable.domain) {
-        ascii += `    Domain: [${variable.domain.lowerBound}, ${variable.domain.upperBound}]
-`;
+        builder.addText(`    Domain: [${variable.domain.lowerBound}, ${variable.domain.upperBound}]`);
       }
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
-    ascii += "Constraints:\n";
+    builder.addSection("Constraints").addEmptyLine();
     for (const constraint of thought.optimizationConstraints) {
-      ascii += `  ${constraint.name} (${constraint.type})
-`;
-      ascii += `    ${constraint.formula}
-`;
+      builder.addText(`  ${constraint.name} (${constraint.type})`);
+      builder.addText(`    ${constraint.formula}`);
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.objectives && thought.objectives.length > 0) {
-    ascii += "Objectives:\n";
+    builder.addSection("Objectives").addEmptyLine();
     for (const objective of thought.objectives) {
-      ascii += `  ${objective.type.toUpperCase()}: ${objective.name}
-`;
-      ascii += `    ${objective.formula}
-`;
+      builder.addText(`  ${objective.type.toUpperCase()}: ${objective.name}`);
+      builder.addText(`    ${objective.formula}`);
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.solution) {
-    ascii += "Solution:\n";
+    builder.addSection("Solution").addEmptyLine();
     const solution = thought.solution;
     if (solution.status) {
-      ascii += `  Status: ${solution.status}
-`;
+      builder.addText(`  Status: ${solution.status}`);
     }
     if (solution.optimalValue !== void 0) {
-      ascii += `  Optimal Value: ${solution.optimalValue}
-`;
+      builder.addText(`  Optimal Value: ${solution.optimalValue}`);
     }
     if (solution.quality !== void 0) {
-      ascii += `  Quality: ${solution.quality.toFixed(2)}
-`;
+      builder.addText(`  Quality: ${solution.quality.toFixed(2)}`);
     }
     if (solution.assignments) {
-      ascii += "  Assignments:\n";
+      builder.addText("  Assignments:");
       for (const [varId, value] of Object.entries(solution.assignments)) {
-        ascii += `    ${varId} = ${value}
-`;
+        builder.addText(`    ${varId} = ${value}`);
       }
     }
   }
-  return ascii;
+  return builder.render();
 }
 function optimizationToSVG(thought, options) {
   const {
@@ -30555,6 +31393,9 @@ var init_optimization = __esm({
   "src/export/visual/modes/optimization.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -31784,230 +32625,165 @@ function exportFirstPrinciplesDerivation(thought, options) {
   }
 }
 function firstPrinciplesToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph TD\n";
-  mermaid += `  Q["Question: ${thought.question}"]
-`;
-  mermaid += "\n";
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("TD");
+  builder.addNode({ id: "Q", label: `Question: ${thought.question}`, shape: "rectangle" });
+  const getShapeForType = (type) => {
+    switch (type) {
+      case "axiom":
+        return "stadium";
+      case "definition":
+        return "subroutine";
+      case "observation":
+        return "cylinder";
+      case "logical_inference":
+        return "rectangle";
+      case "assumption":
+        return "rhombus";
+      default:
+        return "rectangle";
+    }
+  };
   for (const principle of thought.principles) {
     const principleId = sanitizeId(principle.id);
     const label = includeLabels ? `${principle.type.toUpperCase()}: ${principle.statement.substring(0, 50)}...` : principleId;
-    let shape;
-    switch (principle.type) {
-      case "axiom":
-        shape = ["([", "])"];
-        break;
-      case "definition":
-        shape = ["[[", "]]"];
-        break;
-      case "observation":
-        shape = ["[(", ")]"];
-        break;
-      case "logical_inference":
-        shape = ["[", "]"];
-        break;
-      case "assumption":
-        shape = ["{", "}"];
-        break;
-      default:
-        shape = ["[", "]"];
-    }
-    mermaid += `  ${principleId}${shape[0]}${label}${shape[1]}
-`;
+    builder.addNode({ id: principleId, label, shape: getShapeForType(principle.type) });
     if (principle.dependsOn) {
       for (const depId of principle.dependsOn) {
-        const sanitizedDepId = sanitizeId(depId);
-        mermaid += `  ${sanitizedDepId} --> ${principleId}
-`;
+        builder.addEdge({ source: sanitizeId(depId), target: principleId });
       }
     }
   }
-  mermaid += "\n";
   for (const step of thought.derivationSteps) {
     const stepId = `Step${step.stepNumber}`;
     const principleId = sanitizeId(step.principle);
     const label = includeLabels ? `Step ${step.stepNumber}: ${step.inference.substring(0, 50)}...` : stepId;
-    mermaid += `  ${stepId}["${label}"]
-`;
-    mermaid += `  ${principleId} -.->|applies| ${stepId}
-`;
+    builder.addNode({ id: stepId, label, shape: "rectangle" });
+    builder.addEdge({ source: principleId, target: stepId, style: "dotted", label: "applies" });
     if (includeMetrics && step.confidence !== void 0) {
-      mermaid += `  ${stepId} -.->|conf: ${step.confidence.toFixed(2)}| ${stepId}
-`;
+      builder.addEdge({ source: stepId, target: stepId, style: "dotted", label: `conf: ${step.confidence.toFixed(2)}` });
     }
   }
-  mermaid += "\n";
   const conclusionLabel = includeLabels ? `Conclusion: ${thought.conclusion.statement.substring(0, 50)}...` : "Conclusion";
-  mermaid += `  C["${conclusionLabel}"]
-`;
+  builder.addNode({ id: "C", label: conclusionLabel, shape: "rectangle" });
   for (const stepNum of thought.conclusion.derivationChain) {
-    mermaid += `  Step${stepNum} --> C
-`;
+    builder.addEdge({ source: `Step${stepNum}`, target: "C" });
   }
   if (includeMetrics) {
-    mermaid += `  C -.->|certainty: ${thought.conclusion.certainty.toFixed(2)}| C
-`;
+    builder.addEdge({ source: "C", target: "C", style: "dotted", label: `certainty: ${thought.conclusion.certainty.toFixed(2)}` });
   }
-  if (colorScheme !== "monochrome") {
-    mermaid += "\n";
-    const axiomColor = colorScheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
-    const definitionColor = colorScheme === "pastel" ? "#f3e5f5" : "#ce93d8";
-    const observationColor = colorScheme === "pastel" ? "#fff3e0" : "#ffd699";
-    const inferenceColor = colorScheme === "pastel" ? "#e8f5e9" : "#a5d6a7";
-    const assumptionColor = colorScheme === "pastel" ? "#ffebee" : "#ef9a9a";
-    for (const principle of thought.principles) {
-      const principleId = sanitizeId(principle.id);
-      let color = axiomColor;
-      switch (principle.type) {
-        case "axiom":
-          color = axiomColor;
-          break;
-        case "definition":
-          color = definitionColor;
-          break;
-        case "observation":
-          color = observationColor;
-          break;
-        case "logical_inference":
-          color = inferenceColor;
-          break;
-        case "assumption":
-          color = assumptionColor;
-          break;
-      }
-      mermaid += `  style ${principleId} fill:${color}
-`;
-    }
-    const conclusionColor = colorScheme === "pastel" ? "#c8e6c9" : "#66bb6a";
-    mermaid += `  style C fill:${conclusionColor}
-`;
-  }
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 function firstPrinciplesToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph FirstPrinciples {\n";
-  dot += "  rankdir=TD;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
-  dot += `  Q [label="Question:\\n${thought.question}", shape=ellipse, style=bold];
-
-`;
+  const builder = new DOTGraphBuilder().setGraphName("FirstPrinciples").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
+  builder.addNode({
+    id: "Q",
+    label: `Question:
+${thought.question}`,
+    shape: "ellipse",
+    style: "bold"
+  });
+  const getShapeForType = (type) => {
+    switch (type) {
+      case "axiom":
+        return "ellipse";
+      case "definition":
+        return "box";
+      case "observation":
+        return "cylinder";
+      case "logical_inference":
+        return "box";
+      case "assumption":
+        return "diamond";
+      default:
+        return "box";
+    }
+  };
   for (const principle of thought.principles) {
     const principleId = sanitizeId(principle.id);
-    const label = includeLabels ? `${principle.type.toUpperCase()}:\\n${principle.statement.substring(0, 60)}...` : principleId;
-    let shape = "box";
-    switch (principle.type) {
-      case "axiom":
-        shape = "ellipse";
-        break;
-      case "definition":
-        shape = "box";
-        break;
-      case "observation":
-        shape = "cylinder";
-        break;
-      case "logical_inference":
-        shape = "box";
-        break;
-      case "assumption":
-        shape = "diamond";
-        break;
-    }
-    const confidenceLabel = includeMetrics && principle.confidence ? `\\nconf: ${principle.confidence.toFixed(2)}` : "";
-    dot += `  ${principleId} [label="${label}${confidenceLabel}", shape=${shape}];
-`;
+    const label = includeLabels ? `${principle.type.toUpperCase()}:
+${principle.statement.substring(0, 60)}...` : principleId;
+    const confidenceLabel = includeMetrics && principle.confidence ? `
+conf: ${principle.confidence.toFixed(2)}` : "";
+    builder.addNode({
+      id: principleId,
+      label: `${label}${confidenceLabel}`,
+      shape: getShapeForType(principle.type)
+    });
     if (principle.dependsOn) {
       for (const depId of principle.dependsOn) {
-        const sanitizedDepId = sanitizeId(depId);
-        dot += `  ${sanitizedDepId} -> ${principleId};
-`;
+        builder.addEdge({ source: sanitizeId(depId), target: principleId });
       }
     }
   }
-  dot += "\n";
   for (const step of thought.derivationSteps) {
     const stepId = `Step${step.stepNumber}`;
     const principleId = sanitizeId(step.principle);
-    const label = includeLabels ? `Step ${step.stepNumber}:\\n${step.inference.substring(0, 60)}...` : stepId;
-    const confidenceLabel = includeMetrics ? `\\nconf: ${step.confidence.toFixed(2)}` : "";
-    dot += `  ${stepId} [label="${label}${confidenceLabel}"];
-`;
-    dot += `  ${principleId} -> ${stepId} [style=dashed, label="applies"];
-`;
+    const label = includeLabels ? `Step ${step.stepNumber}:
+${step.inference.substring(0, 60)}...` : stepId;
+    const confidenceLabel = includeMetrics ? `
+conf: ${step.confidence.toFixed(2)}` : "";
+    builder.addNode({ id: stepId, label: `${label}${confidenceLabel}` });
+    builder.addEdge({ source: principleId, target: stepId, style: "dashed", label: "applies" });
   }
-  dot += "\n";
-  const conclusionLabel = includeLabels ? `Conclusion:\\n${thought.conclusion.statement.substring(0, 60)}...` : "Conclusion";
-  const certaintyLabel = includeMetrics ? `\\ncertainty: ${thought.conclusion.certainty.toFixed(2)}` : "";
-  dot += `  C [label="${conclusionLabel}${certaintyLabel}", shape=doubleoctagon, style=bold];
-`;
+  const conclusionLabel = includeLabels ? `Conclusion:
+${thought.conclusion.statement.substring(0, 60)}...` : "Conclusion";
+  const certaintyLabel = includeMetrics ? `
+certainty: ${thought.conclusion.certainty.toFixed(2)}` : "";
+  builder.addNode({
+    id: "C",
+    label: `${conclusionLabel}${certaintyLabel}`,
+    shape: "doubleoctagon",
+    style: "bold"
+  });
   for (const stepNum of thought.conclusion.derivationChain) {
-    dot += `  Step${stepNum} -> C;
-`;
+    builder.addEdge({ source: `Step${stepNum}`, target: "C" });
   }
-  dot += "}\n";
-  return dot;
+  return builder.render();
 }
 function firstPrinciplesToASCII(thought) {
-  let ascii = "First-Principles Derivation:\n";
-  ascii += "============================\n\n";
-  ascii += `Question: ${thought.question}
-
-`;
-  ascii += "Foundational Principles:\n";
-  ascii += "------------------------\n";
+  const builder = new ASCIIDocBuilder();
+  builder.addHeader("First-Principles Derivation");
+  builder.addText(`Question: ${thought.question}`);
+  builder.addEmptyLine();
+  builder.addSection("Foundational Principles");
   for (const principle of thought.principles) {
-    ascii += `[${principle.id}] ${principle.type.toUpperCase()}
-`;
-    ascii += `  Statement: ${principle.statement}
-`;
-    ascii += `  Justification: ${principle.justification || "-"}
-`;
+    builder.addText(`[${principle.id}] ${principle.type.toUpperCase()}`);
+    builder.addText(`  Statement: ${principle.statement}`);
+    builder.addText(`  Justification: ${principle.justification || "-"}`);
     if (principle.dependsOn && principle.dependsOn.length > 0) {
-      ascii += `  Depends on: ${principle.dependsOn.join(", ")}
-`;
+      builder.addText(`  Depends on: ${principle.dependsOn.join(", ")}`);
     }
     if (principle.confidence !== void 0) {
-      ascii += `  Confidence: ${principle.confidence.toFixed(2)}
-`;
+      builder.addText(`  Confidence: ${principle.confidence.toFixed(2)}`);
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
-  ascii += "Derivation Chain:\n";
-  ascii += "----------------\n";
+  builder.addSection("Derivation Chain");
   for (const step of thought.derivationSteps) {
-    ascii += `Step ${step.stepNumber} (using principle: ${step.principle})
-`;
-    ascii += `  Inference: ${step.inference}
-`;
+    builder.addText(`Step ${step.stepNumber} (using principle: ${step.principle})`);
+    builder.addText(`  Inference: ${step.inference}`);
     if (step.logicalForm) {
-      ascii += `  Logical form: ${step.logicalForm}
-`;
+      builder.addText(`  Logical form: ${step.logicalForm}`);
     }
-    ascii += `  Confidence: ${step.confidence.toFixed(2)}
-`;
-    ascii += "\n";
+    builder.addText(`  Confidence: ${step.confidence.toFixed(2)}`);
+    builder.addEmptyLine();
   }
-  ascii += "Conclusion:\n";
-  ascii += "----------\n";
-  ascii += `${thought.conclusion.statement}
-`;
-  ascii += `Derivation chain: Steps [${thought.conclusion.derivationChain.join(", ")}]
-`;
-  ascii += `Certainty: ${thought.conclusion.certainty.toFixed(2)}
-`;
+  builder.addSection("Conclusion");
+  builder.addText(thought.conclusion.statement);
+  builder.addText(`Derivation chain: Steps [${thought.conclusion.derivationChain.join(", ")}]`);
+  builder.addText(`Certainty: ${thought.conclusion.certainty.toFixed(2)}`);
   if (thought.conclusion.limitations && thought.conclusion.limitations.length > 0) {
-    ascii += "\nLimitations:\n";
-    for (const limitation of thought.conclusion.limitations) {
-      ascii += `  - ${limitation}
-`;
-    }
+    builder.addEmptyLine();
+    builder.addText("Limitations:");
+    builder.addBulletList(thought.conclusion.limitations);
   }
   if (thought.alternativeInterpretations && thought.alternativeInterpretations.length > 0) {
-    ascii += "\nAlternative Interpretations:\n";
-    for (const alt of thought.alternativeInterpretations) {
-      ascii += `  - ${alt}
-`;
-    }
+    builder.addEmptyLine();
+    builder.addText("Alternative Interpretations:");
+    builder.addBulletList(thought.alternativeInterpretations);
   }
-  return ascii;
+  return builder.render();
 }
 function firstPrinciplesToSVG(thought, options) {
   const {
@@ -32726,6 +33502,9 @@ var init_first_principles = __esm({
   "src/export/visual/modes/first-principles.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -32768,283 +33547,158 @@ function exportMetaReasoningVisualization(thought, options) {
   }
 }
 function metaReasoningToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph TB\n";
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("TB");
   const metaId = sanitizeId("meta_reasoning");
-  mermaid += `  ${metaId}(("Meta-Reasoning"))
-`;
   const currentId = sanitizeId("current_strategy");
-  const currentLabel = includeLabels ? thought.currentStrategy.approach : "Current Strategy";
-  mermaid += `  ${currentId}[["${currentLabel}"]]
-`;
-  mermaid += `  ${metaId} ==> ${currentId}
-`;
-  const modeId = sanitizeId("current_mode");
-  mermaid += `  ${modeId}(["Mode: ${thought.currentStrategy.mode}"])
-`;
-  mermaid += `  ${currentId} --> ${modeId}
-`;
   const evalId = sanitizeId("evaluation");
-  mermaid += `  ${evalId}{{"Effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%"}}
-`;
-  mermaid += `  ${currentId} --> ${evalId}
-`;
+  const recId = sanitizeId("recommendation");
+  builder.addNode({ id: metaId, label: "Meta-Reasoning", shape: "circle" }).addNode({ id: currentId, label: includeLabels ? thought.currentStrategy.approach : "Current Strategy", shape: "subroutine" }).addNode({ id: sanitizeId("current_mode"), label: `Mode: ${thought.currentStrategy.mode}`, shape: "stadium" }).addNode({ id: evalId, label: `Effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`, shape: "hexagon" }).addEdge({ source: metaId, target: currentId, label: "", style: "thick" }).addEdge({ source: currentId, target: sanitizeId("current_mode") }).addEdge({ source: currentId, target: evalId });
   if (thought.strategyEvaluation.issues.length > 0) {
-    const issuesId = sanitizeId("issues");
-    mermaid += `  ${issuesId}>"Issues: ${thought.strategyEvaluation.issues.length}"]
-`;
-    mermaid += `  ${evalId} --> ${issuesId}
-`;
+    builder.addNode({ id: sanitizeId("issues"), label: `Issues: ${thought.strategyEvaluation.issues.length}`, shape: "asymmetric" }).addEdge({ source: evalId, target: sanitizeId("issues") });
   }
   if (thought.strategyEvaluation.strengths.length > 0) {
-    const strengthsId = sanitizeId("strengths");
-    mermaid += `  ${strengthsId}>"Strengths: ${thought.strategyEvaluation.strengths.length}"]
-`;
-    mermaid += `  ${evalId} --> ${strengthsId}
-`;
+    builder.addNode({ id: sanitizeId("strengths"), label: `Strengths: ${thought.strategyEvaluation.strengths.length}`, shape: "asymmetric" }).addEdge({ source: evalId, target: sanitizeId("strengths") });
   }
   if (thought.alternativeStrategies.length > 0) {
     const altsId = sanitizeId("alternatives");
-    mermaid += `  ${altsId}(["Alternative Strategies"])
-`;
-    mermaid += `  ${metaId} --> ${altsId}
-`;
+    builder.addNode({ id: altsId, label: "Alternative Strategies", shape: "stadium" }).addEdge({ source: metaId, target: altsId });
     thought.alternativeStrategies.forEach((alt, index) => {
       const altId = sanitizeId(`alt_${index}`);
       const altLabel = includeLabels ? `${alt.mode}: ${(alt.recommendationScore * 100).toFixed(0)}%` : `Alt ${index + 1}`;
-      mermaid += `  ${altId}["${altLabel}"]
-`;
-      mermaid += `  ${altsId} --> ${altId}
-`;
+      builder.addNode({ id: altId, label: altLabel }).addEdge({ source: altsId, target: altId });
     });
   }
-  const recId = sanitizeId("recommendation");
   const recLabel = `${thought.recommendation.action}${thought.recommendation.targetMode ? ` \u2192 ${thought.recommendation.targetMode}` : ""}`;
-  mermaid += `  ${recId}[/"${recLabel}"/]
-`;
-  mermaid += `  ${metaId} ==> ${recId}
-`;
+  builder.addNode({ id: recId, label: recLabel, shape: "parallelogram" }).addEdge({ source: metaId, target: recId, label: "", style: "thick" });
   if (includeMetrics) {
-    const confId = sanitizeId("rec_confidence");
-    mermaid += `  ${confId}{{"Confidence: ${(thought.recommendation.confidence * 100).toFixed(0)}%"}}
-`;
-    mermaid += `  ${recId} --> ${confId}
-`;
+    builder.addNode({ id: sanitizeId("rec_confidence"), label: `Confidence: ${(thought.recommendation.confidence * 100).toFixed(0)}%`, shape: "hexagon" }).addNode({ id: sanitizeId("quality"), label: `Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`, shape: "hexagon" }).addEdge({ source: recId, target: sanitizeId("rec_confidence") }).addEdge({ source: metaId, target: sanitizeId("quality"), style: "dotted" });
   }
-  if (includeMetrics) {
-    const qualityId = sanitizeId("quality");
-    const qualityLabel = `Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`;
-    mermaid += `  ${qualityId}{{"${qualityLabel}"}}
-`;
-    mermaid += `  ${metaId} -.-> ${qualityId}
-`;
-  }
-  const resourceId = sanitizeId("resources");
-  mermaid += `  ${resourceId}[("Complexity: ${thought.resourceAllocation.complexityLevel}")]
-`;
-  mermaid += `  ${metaId} -.-> ${resourceId}
-`;
-  const sessionId = sanitizeId("session");
-  mermaid += `  ${sessionId}>"Thoughts: ${thought.sessionContext.totalThoughts}"]
-`;
-  mermaid += `  ${metaId} -.-> ${sessionId}
-`;
-  if (colorScheme !== "monochrome") {
-    const colors = colorScheme === "pastel" ? { meta: "#f3e5f5", current: "#e3f2fd", rec: "#e8f5e9", alt: "#fff3e0" } : { meta: "#DDA0DD", current: "#87CEEB", rec: "#90EE90", alt: "#FFD700" };
-    mermaid += `
-  style ${metaId} fill:${colors.meta}
-`;
-    mermaid += `  style ${currentId} fill:${colors.current}
-`;
-    mermaid += `  style ${recId} fill:${colors.rec}
-`;
-    if (thought.alternativeStrategies.length > 0) {
-      mermaid += `  style ${sanitizeId("alternatives")} fill:${colors.alt}
-`;
-    }
-  }
-  return mermaid;
+  builder.addNode({ id: sanitizeId("resources"), label: `Complexity: ${thought.resourceAllocation.complexityLevel}`, shape: "cylinder" }).addNode({ id: sanitizeId("session"), label: `Thoughts: ${thought.sessionContext.totalThoughts}`, shape: "asymmetric" }).addEdge({ source: metaId, target: sanitizeId("resources"), style: "dotted" }).addEdge({ source: metaId, target: sanitizeId("session"), style: "dotted" });
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 function metaReasoningToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph MetaReasoning {\n";
-  dot += "  rankdir=TB;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
-  dot += "  subgraph cluster_current {\n";
-  dot += '    label="Current Strategy";\n';
-  dot += "    style=filled;\n";
-  dot += "    fillcolor=lightblue;\n";
+  const builder = new DOTGraphBuilder().setGraphName("MetaReasoning").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
   const currentId = sanitizeId("current_strategy");
-  const currentLabel = includeLabels ? thought.currentStrategy.approach.slice(0, 30).replace(/"/g, '"') : "Current Strategy";
-  dot += `    ${currentId} [label="${currentLabel}"];
-`;
   const modeId = sanitizeId("current_mode");
-  dot += `    ${modeId} [label="${thought.currentStrategy.mode}", shape=ellipse];
-`;
-  dot += `    ${currentId} -> ${modeId};
-`;
-  if (includeMetrics) {
-    const evalId = sanitizeId("evaluation");
-    dot += `    ${evalId} [label="Eff: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%", shape=diamond];
-`;
-    dot += `    ${currentId} -> ${evalId};
-`;
-  }
-  dot += "  }\n\n";
-  if (thought.alternativeStrategies.length > 0) {
-    dot += "  subgraph cluster_alternatives {\n";
-    dot += '    label="Alternatives";\n';
-    dot += "    style=filled;\n";
-    dot += "    fillcolor=lightyellow;\n";
-    thought.alternativeStrategies.forEach((alt, index) => {
-      const altId = sanitizeId(`alt_${index}`);
-      const altLabel = `${alt.mode}\\n${(alt.recommendationScore * 100).toFixed(0)}%`;
-      dot += `    ${altId} [label="${altLabel}"];
-`;
-    });
-    dot += "  }\n\n";
-  }
   const recId = sanitizeId("recommendation");
-  const recLabel = `${thought.recommendation.action}${thought.recommendation.targetMode ? `\\n\u2192 ${thought.recommendation.targetMode}` : ""}`;
-  dot += `  ${recId} [label="${recLabel}", shape=hexagon, style="filled", fillcolor=lightgreen];
-`;
+  builder.addNode({
+    id: currentId,
+    label: includeLabels ? thought.currentStrategy.approach.slice(0, 30).replace(/"/g, '\\"') : "Current Strategy"
+  }).addNode({ id: modeId, label: thought.currentStrategy.mode, shape: "ellipse" }).addEdge({ source: currentId, target: modeId });
   if (includeMetrics) {
-    const qualityId = sanitizeId("quality");
-    const qualityLabel = `Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`;
-    dot += `  ${qualityId} [label="${qualityLabel}", shape=diamond];
-`;
+    builder.addNode({ id: sanitizeId("evaluation"), label: `Eff: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`, shape: "diamond" }).addEdge({ source: currentId, target: sanitizeId("evaluation") });
   }
-  dot += `  ${currentId} -> ${recId} [style=bold, penwidth=2];
-`;
-  thought.alternativeStrategies.forEach((_, index) => {
-    const altId = sanitizeId(`alt_${index}`);
-    dot += `  ${altId} -> ${recId} [style=dashed];
-`;
+  builder.addSubgraph({
+    id: "cluster_current",
+    label: "Current Strategy",
+    nodes: includeMetrics ? [currentId, modeId, sanitizeId("evaluation")] : [currentId, modeId],
+    style: "filled",
+    fillColor: "lightblue"
   });
-  dot += "}\n";
-  return dot;
+  if (thought.alternativeStrategies.length > 0) {
+    const altIds = thought.alternativeStrategies.map((alt, index) => {
+      const altId = sanitizeId(`alt_${index}`);
+      builder.addNode({ id: altId, label: `${alt.mode}\\n${(alt.recommendationScore * 100).toFixed(0)}%` });
+      return altId;
+    });
+    builder.addSubgraph({
+      id: "cluster_alternatives",
+      label: "Alternatives",
+      nodes: altIds,
+      style: "filled",
+      fillColor: "lightyellow"
+    });
+    altIds.forEach((altId) => {
+      builder.addEdge({ source: altId, target: recId, style: "dashed" });
+    });
+  }
+  builder.addNode({
+    id: recId,
+    label: `${thought.recommendation.action}${thought.recommendation.targetMode ? `\\n\u2192 ${thought.recommendation.targetMode}` : ""}`,
+    shape: "hexagon",
+    style: "filled",
+    fillColor: "lightgreen"
+  });
+  if (includeMetrics) {
+    builder.addNode({
+      id: sanitizeId("quality"),
+      label: `Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`,
+      shape: "diamond"
+    });
+  }
+  builder.addEdge({ source: currentId, target: recId, style: "bold" });
+  return builder.render();
 }
 function metaReasoningToASCII(thought) {
-  let ascii = "Meta-Reasoning Analysis:\n";
-  ascii += "========================\n\n";
-  ascii += "CURRENT STRATEGY\n";
-  ascii += "----------------\n";
-  ascii += `Mode: ${thought.currentStrategy.mode}
-`;
-  ascii += `Approach: ${thought.currentStrategy.approach}
-`;
-  ascii += `Thoughts Spent: ${thought.currentStrategy.thoughtsSpent}
-`;
+  const builder = new ASCIIDocBuilder().addHeader("Meta-Reasoning Analysis");
+  builder.addSection("CURRENT STRATEGY").addText(`Mode: ${thought.currentStrategy.mode}
+`).addText(`Approach: ${thought.currentStrategy.approach}
+`).addText(`Thoughts Spent: ${thought.currentStrategy.thoughtsSpent}
+`);
   if (thought.currentStrategy.progressIndicators.length > 0) {
-    ascii += "Progress Indicators:\n";
-    thought.currentStrategy.progressIndicators.forEach((ind, index) => {
-      ascii += `  ${index + 1}. ${ind}
-`;
-    });
+    builder.addText("Progress Indicators:\n").addNumberedList(thought.currentStrategy.progressIndicators);
   }
-  ascii += "\n";
-  ascii += "STRATEGY EVALUATION\n";
-  ascii += "-------------------\n";
-  ascii += `Effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%
-`;
-  ascii += `Efficiency: ${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%
-`;
-  ascii += `Confidence: ${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%
-`;
-  ascii += `Progress Rate: ${thought.strategyEvaluation.progressRate.toFixed(2)} insights/thought
-`;
-  ascii += `Quality Score: ${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%
-`;
+  builder.addEmptyLine();
+  builder.addSection("STRATEGY EVALUATION").addText(`Effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%
+`).addText(`Efficiency: ${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%
+`).addText(`Confidence: ${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%
+`).addText(`Progress Rate: ${thought.strategyEvaluation.progressRate.toFixed(2)} insights/thought
+`).addText(`Quality Score: ${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%
+`);
   if (thought.strategyEvaluation.strengths.length > 0) {
-    ascii += "Strengths:\n";
-    thought.strategyEvaluation.strengths.forEach((s, index) => {
-      ascii += `  + ${index + 1}. ${s}
-`;
-    });
+    builder.addText("Strengths:\n").addBulletList(thought.strategyEvaluation.strengths.map((s, i) => `+ ${i + 1}. ${s}`));
   }
   if (thought.strategyEvaluation.issues.length > 0) {
-    ascii += "Issues:\n";
-    thought.strategyEvaluation.issues.forEach((issue, index) => {
-      ascii += `  - ${index + 1}. ${issue}
-`;
-    });
+    builder.addText("Issues:\n").addBulletList(thought.strategyEvaluation.issues.map((s, i) => `- ${i + 1}. ${s}`));
   }
-  ascii += "\n";
+  builder.addEmptyLine();
   if (thought.alternativeStrategies.length > 0) {
-    ascii += "ALTERNATIVE STRATEGIES\n";
-    ascii += "----------------------\n";
+    builder.addSection("ALTERNATIVE STRATEGIES");
     thought.alternativeStrategies.forEach((alt, index) => {
-      ascii += `[${index + 1}] ${alt.mode}
-`;
-      ascii += `    Reasoning: ${alt.reasoning}
-`;
-      ascii += `    Expected Benefit: ${alt.expectedBenefit}
-`;
-      ascii += `    Switching Cost: ${(alt.switchingCost * 100).toFixed(0)}%
-`;
-      ascii += `    Recommendation Score: ${(alt.recommendationScore * 100).toFixed(0)}%
-`;
+      builder.addText(`[${index + 1}] ${alt.mode}
+`).addText(`    Reasoning: ${alt.reasoning}
+`).addText(`    Expected Benefit: ${alt.expectedBenefit}
+`).addText(`    Switching Cost: ${(alt.switchingCost * 100).toFixed(0)}%
+`).addText(`    Recommendation Score: ${(alt.recommendationScore * 100).toFixed(0)}%
+`);
     });
-    ascii += "\n";
+    builder.addEmptyLine();
   }
-  ascii += "RECOMMENDATION\n";
-  ascii += "--------------\n";
-  ascii += `Action: ${thought.recommendation.action}
-`;
+  builder.addSection("RECOMMENDATION").addText(`Action: ${thought.recommendation.action}
+`);
   if (thought.recommendation.targetMode) {
-    ascii += `Target Mode: ${thought.recommendation.targetMode}
-`;
+    builder.addText(`Target Mode: ${thought.recommendation.targetMode}
+`);
   }
-  ascii += `Justification: ${thought.recommendation.justification}
-`;
-  ascii += `Confidence: ${(thought.recommendation.confidence * 100).toFixed(1)}%
-`;
-  ascii += `Expected Improvement: ${thought.recommendation.expectedImprovement}
-`;
-  ascii += "\n";
-  ascii += "RESOURCE ALLOCATION\n";
-  ascii += "-------------------\n";
-  ascii += `Time Spent: ${thought.resourceAllocation.timeSpent}ms
-`;
-  ascii += `Thoughts Remaining: ${thought.resourceAllocation.thoughtsRemaining}
-`;
-  ascii += `Complexity: ${thought.resourceAllocation.complexityLevel}
-`;
-  ascii += `Urgency: ${thought.resourceAllocation.urgency}
-`;
-  ascii += `Recommendation: ${thought.resourceAllocation.recommendation}
-`;
-  ascii += "\n";
-  ascii += "QUALITY METRICS\n";
-  ascii += "---------------\n";
-  ascii += `Logical Consistency: ${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%
-`;
-  ascii += `Evidence Quality: ${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%
-`;
-  ascii += `Completeness: ${(thought.qualityMetrics.completeness * 100).toFixed(1)}%
-`;
-  ascii += `Originality: ${(thought.qualityMetrics.originality * 100).toFixed(1)}%
-`;
-  ascii += `Clarity: ${(thought.qualityMetrics.clarity * 100).toFixed(1)}%
-`;
-  ascii += `Overall Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%
-`;
-  ascii += "\n";
-  ascii += "SESSION CONTEXT\n";
-  ascii += "---------------\n";
-  ascii += `Session ID: ${thought.sessionContext.sessionId}
-`;
-  ascii += `Total Thoughts: ${thought.sessionContext.totalThoughts}
-`;
-  ascii += `Mode Switches: ${thought.sessionContext.modeSwitches}
-`;
-  ascii += `Problem Type: ${thought.sessionContext.problemType}
-`;
-  ascii += `Modes Used: ${thought.sessionContext.modesUsed.join(", ")}
-`;
+  builder.addText(`Justification: ${thought.recommendation.justification}
+`).addText(`Confidence: ${(thought.recommendation.confidence * 100).toFixed(1)}%
+`).addText(`Expected Improvement: ${thought.recommendation.expectedImprovement}
+`).addEmptyLine();
+  builder.addSection("RESOURCE ALLOCATION").addText(`Time Spent: ${thought.resourceAllocation.timeSpent}ms
+`).addText(`Thoughts Remaining: ${thought.resourceAllocation.thoughtsRemaining}
+`).addText(`Complexity: ${thought.resourceAllocation.complexityLevel}
+`).addText(`Urgency: ${thought.resourceAllocation.urgency}
+`).addText(`Recommendation: ${thought.resourceAllocation.recommendation}
+`).addEmptyLine();
+  builder.addSection("QUALITY METRICS").addText(`Logical Consistency: ${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%
+`).addText(`Evidence Quality: ${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%
+`).addText(`Completeness: ${(thought.qualityMetrics.completeness * 100).toFixed(1)}%
+`).addText(`Originality: ${(thought.qualityMetrics.originality * 100).toFixed(1)}%
+`).addText(`Clarity: ${(thought.qualityMetrics.clarity * 100).toFixed(1)}%
+`).addText(`Overall Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%
+`).addEmptyLine();
+  builder.addSection("SESSION CONTEXT").addText(`Session ID: ${thought.sessionContext.sessionId}
+`).addText(`Total Thoughts: ${thought.sessionContext.totalThoughts}
+`).addText(`Mode Switches: ${thought.sessionContext.modeSwitches}
+`).addText(`Problem Type: ${thought.sessionContext.problemType}
+`).addText(`Modes Used: ${thought.sessionContext.modesUsed.join(", ")}
+`);
   if (thought.sessionContext.historicalEffectiveness !== void 0) {
-    ascii += `Historical Effectiveness: ${(thought.sessionContext.historicalEffectiveness * 100).toFixed(1)}%
-`;
+    builder.addText(`Historical Effectiveness: ${(thought.sessionContext.historicalEffectiveness * 100).toFixed(1)}%
+`);
   }
-  return ascii;
+  return builder.render();
 }
 function metaReasoningToSVG(thought, options) {
   const {
@@ -34084,6 +34738,9 @@ var init_metareasoning = __esm({
   "src/export/visual/modes/metareasoning.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -34818,228 +35475,177 @@ function exportScientificMethodExperiment(thought, options) {
   }
 }
 function scientificMethodToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph TD\n";
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("TD");
   if (thought.researchQuestion) {
-    mermaid += `  RQ["Research Question: ${thought.researchQuestion.question.substring(0, 60)}..."]
-`;
-    mermaid += "\n";
+    builder.addNode({
+      id: "RQ",
+      label: `Research Question: ${thought.researchQuestion.question.substring(0, 60)}...`,
+      shape: "rectangle"
+    });
   }
   if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
     for (const hypothesis of thought.scientificHypotheses) {
       const hypId = sanitizeId(hypothesis.id);
       const label = includeLabels ? hypothesis.statement.substring(0, 50) + "..." : hypId;
-      mermaid += `  ${hypId}["H: ${label}"]
-`;
+      builder.addNode({ id: hypId, label: `H: ${label}`, shape: "rectangle" });
       if (thought.researchQuestion) {
-        mermaid += `  RQ --> ${hypId}
-`;
+        builder.addEdge({ source: "RQ", target: hypId });
       }
     }
-    mermaid += "\n";
   }
   if (thought.experiment) {
-    mermaid += `  Exp["Experiment: ${thought.experiment.design}"]
-`;
+    builder.addNode({
+      id: "Exp",
+      label: `Experiment: ${thought.experiment.design}`,
+      shape: "rectangle"
+    });
     if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
       for (const hypothesis of thought.scientificHypotheses) {
         const hypId = sanitizeId(hypothesis.id);
-        mermaid += `  ${hypId} --> Exp
-`;
+        builder.addEdge({ source: hypId, target: "Exp" });
       }
     }
-    mermaid += "\n";
   }
   if (thought.data) {
-    mermaid += `  Data["Data Collection: ${thought.experiment?.sampleSize || 0} samples"]
-`;
+    builder.addNode({
+      id: "Data",
+      label: `Data Collection: ${thought.experiment?.sampleSize || 0} samples`,
+      shape: "rectangle"
+    });
     if (thought.experiment) {
-      mermaid += `  Exp --> Data
-`;
+      builder.addEdge({ source: "Exp", target: "Data" });
     }
-    mermaid += "\n";
   }
   if (thought.analysis) {
-    mermaid += `  Stats["Statistical Analysis"]
-`;
+    builder.addNode({ id: "Stats", label: "Statistical Analysis", shape: "rectangle" });
     if (thought.data) {
-      mermaid += `  Data --> Stats
-`;
+      builder.addEdge({ source: "Data", target: "Stats" });
     }
-    mermaid += "\n";
   }
   if (thought.conclusion) {
-    const conclusionId = "Conclusion";
     const supportLabel = includeMetrics && thought.conclusion.confidence ? ` (conf: ${thought.conclusion.confidence.toFixed(2)})` : "";
-    mermaid += `  ${conclusionId}["Conclusion: ${thought.conclusion.statement.substring(0, 50)}...${supportLabel}"]
-`;
+    builder.addNode({
+      id: "Conclusion",
+      label: `Conclusion: ${thought.conclusion.statement.substring(0, 50)}...${supportLabel}`,
+      shape: "rectangle"
+    });
     if (thought.analysis) {
-      mermaid += `  Stats --> ${conclusionId}
-`;
+      builder.addEdge({ source: "Stats", target: "Conclusion" });
     }
   }
-  if (colorScheme !== "monochrome") {
-    mermaid += "\n";
-    const questionColor = colorScheme === "pastel" ? "#fff3e0" : "#ffd699";
-    const hypothesisColor = colorScheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
-    const conclusionColor = colorScheme === "pastel" ? "#e8f5e9" : "#a5d6a7";
-    if (thought.researchQuestion) {
-      mermaid += `  style RQ fill:${questionColor}
-`;
-    }
-    if (thought.scientificHypotheses) {
-      for (const hypothesis of thought.scientificHypotheses) {
-        const hypId = sanitizeId(hypothesis.id);
-        mermaid += `  style ${hypId} fill:${hypothesisColor}
-`;
-      }
-    }
-    if (thought.conclusion) {
-      mermaid += `  style Conclusion fill:${conclusionColor}
-`;
-    }
-  }
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 function scientificMethodToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph ScientificMethod {\n";
-  dot += "  rankdir=TD;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
+  const builder = new DOTGraphBuilder().setGraphName("ScientificMethod").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
   if (thought.researchQuestion) {
     const label = includeLabels ? thought.researchQuestion.question.substring(0, 60) + "..." : "RQ";
-    dot += `  RQ [label="Research Question:\\n${label}", shape=ellipse];
-
-`;
+    builder.addNode({ id: "RQ", label: `Research Question:
+${label}`, shape: "ellipse" });
   }
   if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
     for (const hypothesis of thought.scientificHypotheses) {
       const hypId = sanitizeId(hypothesis.id);
       const label = includeLabels ? hypothesis.statement.substring(0, 50) + "..." : hypId;
-      dot += `  ${hypId} [label="Hypothesis:\\n${label}"];
-`;
+      builder.addNode({ id: hypId, label: `Hypothesis:
+${label}` });
       if (thought.researchQuestion) {
-        dot += `  RQ -> ${hypId};
-`;
+        builder.addEdge({ source: "RQ", target: hypId });
       }
     }
-    dot += "\n";
   }
   if (thought.experiment) {
     const label = includeLabels ? thought.experiment.design : "Exp";
-    dot += `  Exp [label="Experiment:\\n${label}"];
-`;
+    builder.addNode({ id: "Exp", label: `Experiment:
+${label}` });
     if (thought.scientificHypotheses) {
       for (const hypothesis of thought.scientificHypotheses) {
         const hypId = sanitizeId(hypothesis.id);
-        dot += `  ${hypId} -> Exp;
-`;
+        builder.addEdge({ source: hypId, target: "Exp" });
       }
     }
-    dot += "\n";
   }
   if (thought.data) {
-    const sampleLabel = includeMetrics ? `\\nSamples: ${thought.experiment?.sampleSize || 0}` : "";
-    dot += `  Data [label="Data Collection${sampleLabel}"];
-`;
+    const sampleLabel = includeMetrics ? `
+Samples: ${thought.experiment?.sampleSize || 0}` : "";
+    builder.addNode({ id: "Data", label: `Data Collection${sampleLabel}` });
     if (thought.experiment) {
-      dot += `  Exp -> Data;
-`;
+      builder.addEdge({ source: "Exp", target: "Data" });
     }
   }
   if (thought.analysis) {
-    dot += `  Stats [label="Statistical Analysis"];
-`;
+    builder.addNode({ id: "Stats", label: "Statistical Analysis" });
     if (thought.data) {
-      dot += `  Data -> Stats;
-`;
+      builder.addEdge({ source: "Data", target: "Stats" });
     }
   }
   if (thought.conclusion) {
     const label = includeLabels ? thought.conclusion.statement.substring(0, 50) + "..." : "Conclusion";
-    const confLabel = includeMetrics && thought.conclusion.confidence ? `\\nconf: ${thought.conclusion.confidence.toFixed(2)}` : "";
-    dot += `  Conclusion [label="Conclusion:\\n${label}${confLabel}", shape=doubleoctagon];
-`;
+    const confLabel = includeMetrics && thought.conclusion.confidence ? `
+conf: ${thought.conclusion.confidence.toFixed(2)}` : "";
+    builder.addNode({ id: "Conclusion", label: `Conclusion:
+${label}${confLabel}`, shape: "doubleoctagon" });
     if (thought.analysis) {
-      dot += `  Stats -> Conclusion;
-`;
+      builder.addEdge({ source: "Stats", target: "Conclusion" });
     }
   }
-  dot += "}\n";
-  return dot;
+  return builder.render();
 }
 function scientificMethodToASCII(thought) {
-  let ascii = "Scientific Method Process:\n";
-  ascii += "==========================\n\n";
+  const builder = new ASCIIDocBuilder().addHeader("Scientific Method Process", "equals").addEmptyLine();
   if (thought.researchQuestion) {
-    ascii += `Research Question: ${thought.researchQuestion.question}
-`;
-    ascii += `Background: ${thought.researchQuestion.background}
-
-`;
+    builder.addText(`Research Question: ${thought.researchQuestion.question}`);
+    builder.addText(`Background: ${thought.researchQuestion.background}`);
+    builder.addEmptyLine();
   }
   if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
-    ascii += "Hypotheses:\n";
+    builder.addSection("Hypotheses").addEmptyLine();
     for (const hypothesis of thought.scientificHypotheses) {
       const typeIcon = hypothesis.type === "null" ? "H\u2080" : "H\u2081";
-      ascii += `  ${typeIcon} ${hypothesis.statement}
-`;
+      builder.addText(`  ${typeIcon} ${hypothesis.statement}`);
       if (hypothesis.prediction) {
-        ascii += `    Prediction: ${hypothesis.prediction}
-`;
+        builder.addText(`    Prediction: ${hypothesis.prediction}`);
       }
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.experiment) {
-    ascii += `Experiment: ${thought.experiment.design}
-`;
-    ascii += `Type: ${thought.experiment.type}
-`;
-    ascii += `Design: ${thought.experiment.design}
-
-`;
+    builder.addText(`Experiment: ${thought.experiment.design}`);
+    builder.addText(`Type: ${thought.experiment.type}`);
+    builder.addText(`Design: ${thought.experiment.design}`);
+    builder.addEmptyLine();
   }
   if (thought.data) {
-    ascii += "Data Collection:\n";
-    ascii += `  Sample Size: ${thought.experiment?.sampleSize || 0}
-`;
-    ascii += `  Method: ${thought.data.method}
-`;
+    builder.addSection("Data Collection").addEmptyLine();
+    builder.addText(`  Sample Size: ${thought.experiment?.sampleSize || 0}`);
+    builder.addText(`  Method: ${thought.data.method}`);
     if (thought.data.dataQuality) {
-      ascii += `  Quality:
-`;
-      ascii += `    Completeness: ${thought.data.dataQuality.completeness.toFixed(2)}
-`;
-      ascii += `    Reliability: ${thought.data.dataQuality.reliability.toFixed(2)}
-`;
+      builder.addText("  Quality:");
+      builder.addText(`    Completeness: ${thought.data.dataQuality.completeness.toFixed(2)}`);
+      builder.addText(`    Reliability: ${thought.data.dataQuality.reliability.toFixed(2)}`);
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.analysis && thought.analysis.tests) {
-    ascii += "Statistical Tests:\n";
+    builder.addSection("Statistical Tests").addEmptyLine();
     for (const test of thought.analysis.tests) {
-      ascii += `  \u2022 ${test.name}
-`;
-      ascii += `    p-value: ${test.pValue.toFixed(4)}, \u03B1: ${test.alpha}
-`;
-      ascii += `    Result: ${test.result}
-`;
+      builder.addText(`  \u2022 ${test.name}`);
+      builder.addText(`    p-value: ${test.pValue.toFixed(4)}, \u03B1: ${test.alpha}`);
+      builder.addText(`    Result: ${test.result}`);
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.conclusion) {
-    ascii += "Conclusion:\n";
-    ascii += `${thought.conclusion.statement}
-`;
+    builder.addSection("Conclusion").addEmptyLine();
+    builder.addText(thought.conclusion.statement);
     if (thought.conclusion.supportedHypotheses) {
-      ascii += `Supported hypotheses: ${thought.conclusion.supportedHypotheses.join(", ")}
-`;
+      builder.addText(`Supported hypotheses: ${thought.conclusion.supportedHypotheses.join(", ")}`);
     }
     if (thought.conclusion.confidence) {
-      ascii += `Confidence: ${thought.conclusion.confidence.toFixed(2)}
-`;
+      builder.addText(`Confidence: ${thought.conclusion.confidence.toFixed(2)}`);
     }
   }
-  return ascii;
+  return builder.render();
 }
 function scientificMethodToSVG(thought, options) {
   const {
@@ -35788,6 +36394,9 @@ var init_scientific_method = __esm({
   "src/export/visual/modes/scientific-method.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -35830,202 +36439,155 @@ function exportFormalLogicProof(thought, options) {
   }
 }
 function formalLogicToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph TD\n";
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("TD");
   if (thought.propositions && thought.propositions.length > 0) {
-    mermaid += '  subgraph Propositions["Propositions"]\n';
+    const propNodeIds = [];
     for (const proposition of thought.propositions) {
       const propId = sanitizeId(proposition.id);
+      propNodeIds.push(propId);
       const label = includeLabels ? `${proposition.symbol}: ${proposition.statement.substring(0, 40)}...` : proposition.symbol;
-      const shape = proposition.type === "atomic" ? ["[", "]"] : ["[[", "]]"];
-      mermaid += `    ${propId}${shape[0]}${label}${shape[1]}
-`;
+      const shape = proposition.type === "atomic" ? "rectangle" : "subroutine";
+      builder.addNode({ id: propId, label, shape });
     }
-    mermaid += "  end\n\n";
+    builder.addSubgraph("Propositions", "Propositions", propNodeIds);
   }
   if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
-    mermaid += '  Theorem["Theorem"]\n';
+    builder.addNode({ id: "Theorem", label: "Theorem", shape: "rectangle" });
     for (const step of thought.proof.steps) {
       const stepId = `Step${step.stepNumber}`;
       const label = includeLabels ? `${step.stepNumber}. ${step.statement.substring(0, 40)}...` : `Step ${step.stepNumber}`;
-      mermaid += `  ${stepId}["${label}"]
-`;
+      builder.addNode({ id: stepId, label, shape: "rectangle" });
       if (step.referencesSteps && step.referencesSteps.length > 0) {
         for (const refStep of step.referencesSteps) {
-          mermaid += `  Step${refStep} --> ${stepId}
-`;
+          builder.addEdge({ source: `Step${refStep}`, target: stepId });
         }
       }
     }
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
-    mermaid += `  Step${lastStep.stepNumber} --> Theorem
-`;
+    builder.addEdge({ source: `Step${lastStep.stepNumber}`, target: "Theorem" });
     if (includeMetrics) {
       const completeness = (thought.proof.completeness * 100).toFixed(0);
-      mermaid += `
-  Completeness["Completeness: ${completeness}%"]
-`;
-      mermaid += `  Completeness -.-> Theorem
-`;
+      builder.addNode({ id: "Completeness", label: `Completeness: ${completeness}%`, shape: "rectangle" });
+      builder.addEdge({ source: "Completeness", target: "Theorem", style: "dotted" });
     }
   }
   if (thought.logicalInferences && thought.logicalInferences.length > 0) {
-    mermaid += "\n";
     for (const inference of thought.logicalInferences) {
       const infId = sanitizeId(inference.id);
       const label = includeLabels ? inference.rule : infId;
-      mermaid += `  ${infId}{{"${label}"}}
-`;
+      builder.addNode({ id: infId, label, shape: "hexagon" });
       if (inference.premises) {
         for (const premiseId of inference.premises) {
           const propId = sanitizeId(premiseId);
-          mermaid += `  ${propId} --> ${infId}
-`;
+          builder.addEdge({ source: propId, target: infId });
         }
       }
       const conclusionId = sanitizeId(inference.conclusion);
-      mermaid += `  ${infId} --> ${conclusionId}
-`;
+      builder.addEdge({ source: infId, target: conclusionId });
     }
   }
-  if (colorScheme !== "monochrome") {
-    mermaid += "\n";
-    const atomicColor = colorScheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
-    const compoundColor = colorScheme === "pastel" ? "#fff3e0" : "#ffd699";
-    if (thought.propositions) {
-      for (const proposition of thought.propositions) {
-        const propId = sanitizeId(proposition.id);
-        const color = proposition.type === "atomic" ? atomicColor : compoundColor;
-        mermaid += `  style ${propId} fill:${color}
-`;
-      }
-    }
-  }
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 function formalLogicToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph FormalLogic {\n";
-  dot += "  rankdir=TD;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
+  const builder = new DOTGraphBuilder().setGraphName("FormalLogic").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
   if (thought.propositions && thought.propositions.length > 0) {
-    dot += "  subgraph cluster_propositions {\n";
-    dot += '    label="Propositions";\n';
     for (const proposition of thought.propositions) {
       const propId = sanitizeId(proposition.id);
-      const label = includeLabels ? `${proposition.symbol}:\\n${proposition.statement.substring(0, 40)}...` : proposition.symbol;
+      const label = includeLabels ? `${proposition.symbol}:
+${proposition.statement.substring(0, 40)}...` : proposition.symbol;
       const shape = proposition.type === "atomic" ? "ellipse" : "box";
-      dot += `    ${propId} [label="${label}", shape=${shape}];
-`;
+      builder.addNode({ id: propId, label, shape });
     }
-    dot += "  }\n\n";
   }
   if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
-    dot += `  Theorem [label="Theorem:\\n${thought.proof.theorem.substring(0, 50)}...", shape=doubleoctagon, style=bold];
-
-`;
+    builder.addNode({
+      id: "Theorem",
+      label: `Theorem:
+${thought.proof.theorem.substring(0, 50)}...`,
+      shape: "doubleoctagon",
+      style: ["bold"]
+    });
     for (const step of thought.proof.steps) {
       const stepId = `Step${step.stepNumber}`;
       const label = includeLabels ? `${step.stepNumber}. ${step.statement.substring(0, 40)}...` : `Step ${step.stepNumber}`;
-      const ruleLabel = step.rule ? `\\n(${step.rule})` : "";
-      dot += `  ${stepId} [label="${label}${ruleLabel}"];
-`;
+      const ruleLabel = step.rule ? `
+(${step.rule})` : "";
+      builder.addNode({ id: stepId, label: label + ruleLabel });
       if (step.referencesSteps) {
         for (const refStep of step.referencesSteps) {
-          dot += `  Step${refStep} -> ${stepId};
-`;
+          builder.addEdge({ source: `Step${refStep}`, target: stepId });
         }
       }
     }
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
-    dot += `  Step${lastStep.stepNumber} -> Theorem;
-`;
+    builder.addEdge({ source: `Step${lastStep.stepNumber}`, target: "Theorem" });
     if (includeMetrics) {
       const completeness = (thought.proof.completeness * 100).toFixed(0);
-      dot += `
-  Completeness [label="Completeness: ${completeness}%", shape=note];
-`;
+      builder.addNode({ id: "Completeness", label: `Completeness: ${completeness}%`, shape: "note" });
     }
   }
   if (thought.logicalInferences && thought.logicalInferences.length > 0) {
-    dot += "\n";
     for (const inference of thought.logicalInferences) {
       const infId = sanitizeId(inference.id);
       const label = includeLabels ? inference.rule : infId;
-      dot += `  ${infId} [label="${label}", shape=diamond];
-`;
+      builder.addNode({ id: infId, label, shape: "diamond" });
       if (inference.premises) {
         for (const premiseId of inference.premises) {
           const propId = sanitizeId(premiseId);
-          dot += `  ${propId} -> ${infId};
-`;
+          builder.addEdge({ source: propId, target: infId });
         }
       }
       const conclusionId = sanitizeId(inference.conclusion);
-      dot += `  ${infId} -> ${conclusionId};
-`;
+      builder.addEdge({ source: infId, target: conclusionId });
     }
   }
-  dot += "}\n";
-  return dot;
+  return builder.render();
 }
 function formalLogicToASCII(thought) {
-  let ascii = "Formal Logic Proof:\n";
-  ascii += "==================\n\n";
+  const builder = new ASCIIDocBuilder().addHeader("Formal Logic Proof", "equals").addEmptyLine();
   if (thought.propositions && thought.propositions.length > 0) {
-    ascii += "Propositions:\n";
-    for (const proposition of thought.propositions) {
+    builder.addSection("Propositions").addEmptyLine();
+    const propItems = thought.propositions.map((proposition) => {
       const typeMarker = proposition.type === "atomic" ? "\u25CF" : "\u25C6";
-      ascii += `  ${typeMarker} ${proposition.symbol}: ${proposition.statement}
-`;
-    }
-    ascii += "\n";
+      return `${typeMarker} ${proposition.symbol}: ${proposition.statement}`;
+    });
+    builder.addBulletList(propItems).addEmptyLine();
   }
   if (thought.logicalInferences && thought.logicalInferences.length > 0) {
-    ascii += "Inferences:\n";
+    builder.addSection("Inferences").addEmptyLine();
     for (const inference of thought.logicalInferences) {
-      ascii += `  [${inference.rule}]
-`;
-      ascii += `    Premises: ${inference.premises.join(", ")}
-`;
-      ascii += `    Conclusion: ${inference.conclusion}
-`;
-      ascii += `    Valid: ${inference.valid ? "\u2713" : "\u2717"}
-`;
+      builder.addText(`  [${inference.rule}]`);
+      builder.addText(`    Premises: ${inference.premises.join(", ")}`);
+      builder.addText(`    Conclusion: ${inference.conclusion}`);
+      builder.addText(`    Valid: ${inference.valid ? "\u2713" : "\u2717"}`);
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.proof) {
-    ascii += `Proof: ${thought.proof.theorem}
-`;
-    ascii += `Technique: ${thought.proof.technique}
-`;
-    ascii += `Completeness: ${(thought.proof.completeness * 100).toFixed(0)}%
-
-`;
+    builder.addText(`Proof: ${thought.proof.theorem}`);
+    builder.addText(`Technique: ${thought.proof.technique}`);
+    builder.addText(`Completeness: ${(thought.proof.completeness * 100).toFixed(0)}%`);
+    builder.addEmptyLine();
     if (thought.proof.steps && thought.proof.steps.length > 0) {
-      ascii += "Proof Steps:\n";
+      builder.addSection("Proof Steps").addEmptyLine();
       for (const step of thought.proof.steps) {
-        ascii += `  ${step.stepNumber}. ${step.statement}
-`;
-        ascii += `     Justification: ${step.justification}
-`;
+        builder.addText(`  ${step.stepNumber}. ${step.statement}`);
+        builder.addText(`     Justification: ${step.justification}`);
       }
-      ascii += "\n";
+      builder.addEmptyLine();
     }
-    ascii += `Conclusion: ${thought.proof.conclusion}
-`;
-    ascii += `Valid: ${thought.proof.valid ? "\u2713" : "\u2717"}
-`;
+    builder.addText(`Conclusion: ${thought.proof.conclusion}`);
+    builder.addText(`Valid: ${thought.proof.valid ? "\u2713" : "\u2717"}`);
   }
   if (thought.truthTable) {
-    ascii += "\nTruth Table:\n";
-    ascii += `  Tautology: ${thought.truthTable.isTautology ? "\u2713" : "\u2717"}
-`;
-    ascii += `  Contradiction: ${thought.truthTable.isContradiction ? "\u2713" : "\u2717"}
-`;
-    ascii += `  Contingent: ${thought.truthTable.isContingent ? "\u2713" : "\u2717"}
-`;
+    builder.addEmptyLine();
+    builder.addSection("Truth Table").addEmptyLine();
+    builder.addText(`  Tautology: ${thought.truthTable.isTautology ? "\u2713" : "\u2717"}`);
+    builder.addText(`  Contradiction: ${thought.truthTable.isContradiction ? "\u2713" : "\u2717"}`);
+    builder.addText(`  Contingent: ${thought.truthTable.isContingent ? "\u2713" : "\u2717"}`);
   }
-  return ascii;
+  return builder.render();
 }
 function formalLogicToSVG(thought, options) {
   const {
@@ -36827,6 +37389,9 @@ var init_formal_logic = __esm({
   "src/export/visual/modes/formal-logic.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -36870,218 +37435,233 @@ function exportEngineeringAnalysis(thought, options) {
 }
 function engineeringToMermaid(thought, options) {
   const { includeLabels = true, includeMetrics = true } = options;
-  const lines = ["flowchart TB"];
-  lines.push(`  title["\u{1F527} ${thought.analysisType.toUpperCase()} Analysis"]`);
-  lines.push(`  title --> challenge["${thought.designChallenge.slice(0, 50)}${thought.designChallenge.length > 50 ? "..." : ""}"]`);
-  if (thought.requirements && thought.requirements.requirements.length > 0) {
-    lines.push("");
-    lines.push('  subgraph Requirements ["\u{1F4CB} Requirements"]');
+  const builder = new MermaidGraphBuilder().setDirection("TB");
+  builder.addNode({ id: "title", label: `\u{1F527} ${thought.analysisType.toUpperCase()} Analysis` }).addNode({ id: "challenge", label: thought.designChallenge.slice(0, 50) + (thought.designChallenge.length > 50 ? "..." : "") }).addEdge({ source: "title", target: "challenge" });
+  if (thought.requirements?.requirements.length) {
+    const reqIds = [];
     for (const req of thought.requirements.requirements.slice(0, 5)) {
+      const id = sanitizeId(req.id);
       const label = includeLabels ? req.title.slice(0, 30) : req.id;
       const status = req.status === "verified" ? "\u2713" : req.status === "implemented" ? "\u2699" : "\u25CB";
-      lines.push(`    ${sanitizeId(req.id)}["${status} ${label}"]`);
+      builder.addNode({ id, label: `${status} ${label}` });
+      reqIds.push(id);
     }
     if (thought.requirements.requirements.length > 5) {
-      lines.push(`    reqMore["... +${thought.requirements.requirements.length - 5} more"]`);
+      builder.addNode({ id: "reqMore", label: `... +${thought.requirements.requirements.length - 5} more` });
+      reqIds.push("reqMore");
     }
-    lines.push("  end");
-    lines.push("  challenge --> Requirements");
+    builder.addSubgraph("Requirements", "\u{1F4CB} Requirements", reqIds);
+    builder.addEdge({ source: "challenge", target: "Requirements" });
   }
   if (thought.tradeStudy) {
-    lines.push("");
-    lines.push('  subgraph TradeStudy ["\u2696\uFE0F Trade Study"]');
+    const altIds = [];
     for (const alt of thought.tradeStudy.alternatives.slice(0, 4)) {
-      const isRecommended = alt.id === thought.tradeStudy.recommendation;
-      const icon = isRecommended ? "\u2605" : "\u25CB";
+      const id = sanitizeId(alt.id);
+      const icon = alt.id === thought.tradeStudy.recommendation ? "\u2605" : "\u25CB";
       const label = includeLabels ? alt.name.slice(0, 25) : alt.id;
-      lines.push(`    ${sanitizeId(alt.id)}["${icon} ${label}"]`);
+      builder.addNode({ id, label: `${icon} ${label}` });
+      altIds.push(id);
     }
     if (thought.tradeStudy.alternatives.length > 4) {
-      lines.push(`    altMore["... +${thought.tradeStudy.alternatives.length - 4} more"]`);
+      builder.addNode({ id: "altMore", label: `... +${thought.tradeStudy.alternatives.length - 4} more` });
+      altIds.push("altMore");
     }
-    lines.push("  end");
-    lines.push("  challenge --> TradeStudy");
+    builder.addSubgraph("TradeStudy", "\u2696\uFE0F Trade Study", altIds);
+    builder.addEdge({ source: "challenge", target: "TradeStudy" });
   }
-  if (thought.fmea && thought.fmea.failureModes.length > 0) {
-    lines.push("");
-    lines.push('  subgraph FMEA ["\u26A0\uFE0F Failure Modes"]');
+  if (thought.fmea?.failureModes.length) {
+    const fmIds = [];
     const sortedModes = [...thought.fmea.failureModes].sort((a, b) => b.rpn - a.rpn);
     for (const fm of sortedModes.slice(0, 4)) {
+      const id = sanitizeId(fm.id);
       const risk = fm.rpn >= thought.fmea.rpnThreshold ? "\u{1F534}" : fm.rpn >= 100 ? "\u{1F7E1}" : "\u{1F7E2}";
       const label = includeMetrics ? `${fm.failureMode.slice(0, 20)} (RPN:${fm.rpn})` : fm.failureMode.slice(0, 25);
-      lines.push(`    ${sanitizeId(fm.id)}{{"${risk} ${label}"}}`);
+      builder.addNode({ id, label: `${risk} ${label}`, shape: "hexagon" });
+      fmIds.push(id);
     }
     if (thought.fmea.failureModes.length > 4) {
-      lines.push(`    fmMore["... +${thought.fmea.failureModes.length - 4} more"]`);
+      builder.addNode({ id: "fmMore", label: `... +${thought.fmea.failureModes.length - 4} more` });
+      fmIds.push("fmMore");
     }
-    lines.push("  end");
-    lines.push("  challenge --> FMEA");
+    builder.addSubgraph("FMEA", "\u26A0\uFE0F Failure Modes", fmIds);
+    builder.addEdge({ source: "challenge", target: "FMEA" });
   }
-  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
-    lines.push("");
-    lines.push('  subgraph Decisions ["\u{1F4DD} Design Decisions"]');
+  if (thought.designDecisions?.decisions.length) {
+    const decIds = [];
     for (const dec of thought.designDecisions.decisions.slice(0, 4)) {
+      const id = sanitizeId(dec.id);
       const status = dec.status === "accepted" ? "\u2713" : dec.status === "proposed" ? "?" : "\u2717";
       const label = includeLabels ? dec.title.slice(0, 25) : dec.id;
-      lines.push(`    ${sanitizeId(dec.id)}(["${status} ${label}"])`);
+      builder.addNode({ id, label: `${status} ${label}`, shape: "stadium" });
+      decIds.push(id);
     }
     if (thought.designDecisions.decisions.length > 4) {
-      lines.push(`    decMore["... +${thought.designDecisions.decisions.length - 4} more"]`);
+      builder.addNode({ id: "decMore", label: `... +${thought.designDecisions.decisions.length - 4} more` });
+      decIds.push("decMore");
     }
-    lines.push("  end");
-    lines.push("  challenge --> Decisions");
+    builder.addSubgraph("Decisions", "\u{1F4DD} Design Decisions", decIds);
+    builder.addEdge({ source: "challenge", target: "Decisions" });
   }
   if (includeMetrics && thought.assessment) {
-    lines.push("");
-    lines.push(`  metrics["\u{1F4CA} Confidence: ${(thought.assessment.confidence * 100).toFixed(0)}%"]`);
-    lines.push("  challenge --> metrics");
+    builder.addNode({ id: "metrics", label: `\u{1F4CA} Confidence: ${(thought.assessment.confidence * 100).toFixed(0)}%` });
+    builder.addEdge({ source: "challenge", target: "metrics" });
   }
-  return lines.join("\n");
+  return builder.render();
 }
 function engineeringToDOT(thought, options) {
   const { includeLabels = true, includeMetrics = true } = options;
-  const lines = [
-    "digraph EngineeringAnalysis {",
-    "  rankdir=TB;",
-    '  node [fontname="Arial", fontsize=10];',
-    '  edge [fontname="Arial", fontsize=9];',
-    ""
-  ];
-  lines.push(`  challenge [label="${thought.designChallenge.slice(0, 40)}", shape=box, style=filled, fillcolor=lightblue];`);
-  if (thought.requirements && thought.requirements.requirements.length > 0) {
-    lines.push("");
-    lines.push("  subgraph cluster_requirements {");
-    lines.push('    label="Requirements";');
-    lines.push("    style=filled;");
-    lines.push("    fillcolor=lightyellow;");
+  const builder = new DOTGraphBuilder().setGraphName("EngineeringAnalysis").setRankDir("TB").setNodeDefaults({ fontName: "Arial", fontSize: 10 }).setEdgeDefaults({});
+  builder.addNode({
+    id: "challenge",
+    label: thought.designChallenge.slice(0, 40),
+    shape: "box",
+    style: "filled",
+    fillColor: "lightblue"
+  });
+  if (thought.requirements?.requirements.length) {
     for (const req of thought.requirements.requirements) {
-      const label = includeLabels ? `${req.id}\\n${req.title.slice(0, 20)}` : req.id;
-      const color = req.status === "verified" ? "green" : req.status === "implemented" ? "blue" : "gray";
-      lines.push(`    ${sanitizeId(req.id)} [label="${label}", color=${color}];`);
+      builder.addNode({
+        id: sanitizeId(req.id),
+        label: includeLabels ? `${req.id}\\n${req.title.slice(0, 20)}` : req.id,
+        color: req.status === "verified" ? "green" : req.status === "implemented" ? "blue" : "gray"
+      });
     }
-    lines.push("  }");
-    lines.push("  challenge -> " + sanitizeId(thought.requirements.requirements[0]?.id || "req") + ";");
+    builder.addSubgraph({
+      id: "cluster_requirements",
+      label: "Requirements",
+      nodes: thought.requirements.requirements.map((req) => sanitizeId(req.id)),
+      style: "filled",
+      fillColor: "lightyellow"
+    });
+    builder.addEdge({ source: "challenge", target: sanitizeId(thought.requirements.requirements[0]?.id || "req") });
   }
   if (thought.tradeStudy) {
-    lines.push("");
-    lines.push("  subgraph cluster_trade {");
-    lines.push('    label="Trade Study";');
-    lines.push("    style=filled;");
-    lines.push("    fillcolor=lightgreen;");
     for (const alt of thought.tradeStudy.alternatives) {
-      const label = includeLabels ? `${alt.id}\\n${alt.name.slice(0, 20)}` : alt.id;
-      const style = alt.id === thought.tradeStudy.recommendation ? "bold" : "solid";
-      const color = alt.id === thought.tradeStudy.recommendation ? "gold" : "white";
-      lines.push(`    ${sanitizeId(alt.id)} [label="${label}", style="${style},filled", fillcolor=${color}];`);
+      builder.addNode({
+        id: sanitizeId(alt.id),
+        label: includeLabels ? `${alt.id}\\n${alt.name.slice(0, 20)}` : alt.id,
+        style: alt.id === thought.tradeStudy.recommendation ? ["filled"] : "filled",
+        fillColor: alt.id === thought.tradeStudy.recommendation ? "gold" : "white"
+      });
     }
-    lines.push("  }");
-    lines.push("  challenge -> " + sanitizeId(thought.tradeStudy.alternatives[0]?.id || "alt") + ";");
+    builder.addSubgraph({
+      id: "cluster_trade",
+      label: "Trade Study",
+      nodes: thought.tradeStudy.alternatives.map((alt) => sanitizeId(alt.id)),
+      style: "filled",
+      fillColor: "lightgreen"
+    });
+    builder.addEdge({ source: "challenge", target: sanitizeId(thought.tradeStudy.alternatives[0]?.id || "alt") });
   }
-  if (thought.fmea && thought.fmea.failureModes.length > 0) {
-    lines.push("");
-    lines.push("  subgraph cluster_fmea {");
-    lines.push('    label="FMEA";');
-    lines.push("    style=filled;");
-    lines.push("    fillcolor=mistyrose;");
+  if (thought.fmea?.failureModes.length) {
     for (const fm of thought.fmea.failureModes) {
-      const label = includeMetrics ? `${fm.id}\\n${fm.failureMode.slice(0, 15)}\\nRPN:${fm.rpn}` : `${fm.id}\\n${fm.failureMode.slice(0, 20)}`;
-      const color = fm.rpn >= thought.fmea.rpnThreshold ? "red" : fm.rpn >= 100 ? "orange" : "green";
-      lines.push(`    ${sanitizeId(fm.id)} [label="${label}", shape=diamond, color=${color}];`);
+      builder.addNode({
+        id: sanitizeId(fm.id),
+        label: includeMetrics ? `${fm.id}\\n${fm.failureMode.slice(0, 15)}\\nRPN:${fm.rpn}` : `${fm.id}\\n${fm.failureMode.slice(0, 20)}`,
+        shape: "diamond",
+        color: fm.rpn >= thought.fmea.rpnThreshold ? "red" : fm.rpn >= 100 ? "orange" : "green"
+      });
     }
-    lines.push("  }");
-    lines.push("  challenge -> " + sanitizeId(thought.fmea.failureModes[0]?.id || "fm") + ";");
+    builder.addSubgraph({
+      id: "cluster_fmea",
+      label: "FMEA",
+      nodes: thought.fmea.failureModes.map((fm) => sanitizeId(fm.id)),
+      style: "filled",
+      fillColor: "mistyrose"
+    });
+    builder.addEdge({ source: "challenge", target: sanitizeId(thought.fmea.failureModes[0]?.id || "fm") });
   }
-  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
-    lines.push("");
-    lines.push("  subgraph cluster_decisions {");
-    lines.push('    label="Design Decisions";');
-    lines.push("    style=filled;");
-    lines.push("    fillcolor=lavender;");
+  if (thought.designDecisions?.decisions.length) {
     for (const dec of thought.designDecisions.decisions) {
-      const label = includeLabels ? `${dec.id}\\n${dec.title.slice(0, 20)}` : dec.id;
-      const shape = dec.status === "accepted" ? "box" : "ellipse";
-      lines.push(`    ${sanitizeId(dec.id)} [label="${label}", shape=${shape}];`);
+      builder.addNode({
+        id: sanitizeId(dec.id),
+        label: includeLabels ? `${dec.id}\\n${dec.title.slice(0, 20)}` : dec.id,
+        shape: dec.status === "accepted" ? "box" : "ellipse"
+      });
     }
-    lines.push("  }");
-    lines.push("  challenge -> " + sanitizeId(thought.designDecisions.decisions[0]?.id || "dec") + ";");
+    builder.addSubgraph({
+      id: "cluster_decisions",
+      label: "Design Decisions",
+      nodes: thought.designDecisions.decisions.map((dec) => sanitizeId(dec.id)),
+      style: "filled",
+      fillColor: "lavender"
+    });
+    builder.addEdge({ source: "challenge", target: sanitizeId(thought.designDecisions.decisions[0]?.id || "dec") });
   }
-  lines.push("}");
-  return lines.join("\n");
+  return builder.render();
 }
 function engineeringToASCII(thought) {
-  const lines = [];
-  const width = 60;
-  lines.push("\u2554" + "\u2550".repeat(width - 2) + "\u2557");
-  lines.push("\u2551" + ` \u{1F527} ENGINEERING: ${thought.analysisType.toUpperCase()} `.padEnd(width - 2) + "\u2551");
-  lines.push("\u2560" + "\u2550".repeat(width - 2) + "\u2563");
-  lines.push("\u2551" + ` Challenge: ${thought.designChallenge.slice(0, width - 14)}`.padEnd(width - 2) + "\u2551");
-  lines.push("\u2560" + "\u2500".repeat(width - 2) + "\u2563");
-  if (thought.requirements && thought.requirements.requirements.length > 0) {
-    lines.push("\u2551" + " \u{1F4CB} REQUIREMENTS".padEnd(width - 2) + "\u2551");
-    lines.push("\u2551" + "\u2500".repeat(width - 2) + "\u2551");
-    for (const req of thought.requirements.requirements.slice(0, 5)) {
+  const builder = new ASCIIDocBuilder().setBoxStyle("double").addBoxedTitle(`\u{1F527} ENGINEERING: ${thought.analysisType.toUpperCase()}`).addText(`Challenge: ${thought.designChallenge.slice(0, 46)}
+`).addEmptyLine();
+  if (thought.requirements?.requirements.length) {
+    builder.addSection("\u{1F4CB} REQUIREMENTS");
+    const reqItems = thought.requirements.requirements.slice(0, 5).map((req) => {
       const status = req.status === "verified" ? "[\u2713]" : req.status === "implemented" ? "[\u2699]" : "[ ]";
-      const line = ` ${status} ${req.id}: ${req.title.slice(0, width - 20)}`;
-      lines.push("\u2551" + line.padEnd(width - 2) + "\u2551");
-    }
+      return `${status} ${req.id}: ${req.title.slice(0, 40)}`;
+    });
+    builder.addBulletList(reqItems, "asciiBullet");
     if (thought.requirements.requirements.length > 5) {
-      lines.push("\u2551" + `   ... +${thought.requirements.requirements.length - 5} more`.padEnd(width - 2) + "\u2551");
+      builder.addText(`   ... +${thought.requirements.requirements.length - 5} more
+`);
     }
-    lines.push("\u2551" + `   Coverage: ${thought.requirements.coverage.verified}/${thought.requirements.coverage.total} verified`.padEnd(width - 2) + "\u2551");
-    lines.push("\u2560" + "\u2500".repeat(width - 2) + "\u2563");
+    builder.addText(`   Coverage: ${thought.requirements.coverage.verified}/${thought.requirements.coverage.total} verified
+`);
+    builder.addEmptyLine();
   }
   if (thought.tradeStudy) {
-    lines.push("\u2551" + " \u2696\uFE0F TRADE STUDY".padEnd(width - 2) + "\u2551");
-    lines.push("\u2551" + "\u2500".repeat(width - 2) + "\u2551");
-    for (const alt of thought.tradeStudy.alternatives) {
-      const isRec = alt.id === thought.tradeStudy.recommendation;
-      const marker = isRec ? "\u2605" : "\u25CB";
-      const line = ` ${marker} ${alt.name.slice(0, width - 8)}`;
-      lines.push("\u2551" + line.padEnd(width - 2) + "\u2551");
-    }
-    lines.push("\u2551" + `   Recommended: ${thought.tradeStudy.recommendation}`.padEnd(width - 2) + "\u2551");
-    lines.push("\u2560" + "\u2500".repeat(width - 2) + "\u2563");
+    builder.addSection("\u2696\uFE0F TRADE STUDY");
+    const altItems = thought.tradeStudy.alternatives.map((alt) => {
+      const marker = alt.id === thought.tradeStudy.recommendation ? "\u2605" : "\u25CB";
+      return `${marker} ${alt.name.slice(0, 50)}`;
+    });
+    builder.addBulletList(altItems, "asciiBullet");
+    builder.addText(`   Recommended: ${thought.tradeStudy.recommendation}
+`);
+    builder.addEmptyLine();
   }
-  if (thought.fmea && thought.fmea.failureModes.length > 0) {
-    lines.push("\u2551" + " \u26A0\uFE0F FAILURE MODES (FMEA)".padEnd(width - 2) + "\u2551");
-    lines.push("\u2551" + "\u2500".repeat(width - 2) + "\u2551");
+  if (thought.fmea?.failureModes.length) {
+    builder.addSection("\u26A0\uFE0F FAILURE MODES (FMEA)");
     const sortedModes = [...thought.fmea.failureModes].sort((a, b) => b.rpn - a.rpn);
-    for (const fm of sortedModes.slice(0, 5)) {
+    const fmItems = sortedModes.slice(0, 5).map((fm) => {
       const risk = fm.rpn >= thought.fmea.rpnThreshold ? "\u{1F534}" : fm.rpn >= 100 ? "\u{1F7E1}" : "\u{1F7E2}";
-      const line = ` ${risk} ${fm.failureMode.slice(0, width - 25)} RPN:${fm.rpn}`;
-      lines.push("\u2551" + line.padEnd(width - 2) + "\u2551");
-    }
+      return `${risk} ${fm.failureMode.slice(0, 35)} RPN:${fm.rpn}`;
+    });
+    builder.addBulletList(fmItems, "asciiBullet");
     if (thought.fmea.failureModes.length > 5) {
-      lines.push("\u2551" + `   ... +${thought.fmea.failureModes.length - 5} more`.padEnd(width - 2) + "\u2551");
+      builder.addText(`   ... +${thought.fmea.failureModes.length - 5} more
+`);
     }
-    lines.push("\u2551" + `   Critical: ${thought.fmea.summary.criticalModes} modes above threshold`.padEnd(width - 2) + "\u2551");
-    lines.push("\u2560" + "\u2500".repeat(width - 2) + "\u2563");
+    builder.addText(`   Critical: ${thought.fmea.summary.criticalModes} modes above threshold
+`);
+    builder.addEmptyLine();
   }
-  if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
-    lines.push("\u2551" + " \u{1F4DD} DESIGN DECISIONS".padEnd(width - 2) + "\u2551");
-    lines.push("\u2551" + "\u2500".repeat(width - 2) + "\u2551");
-    for (const dec of thought.designDecisions.decisions.slice(0, 5)) {
+  if (thought.designDecisions?.decisions.length) {
+    builder.addSection("\u{1F4DD} DESIGN DECISIONS");
+    const decItems = thought.designDecisions.decisions.slice(0, 5).map((dec) => {
       const status = dec.status === "accepted" ? "[\u2713]" : dec.status === "proposed" ? "[?]" : "[\u2717]";
-      const line = ` ${status} ${dec.id}: ${dec.title.slice(0, width - 20)}`;
-      lines.push("\u2551" + line.padEnd(width - 2) + "\u2551");
-    }
+      return `${status} ${dec.id}: ${dec.title.slice(0, 40)}`;
+    });
+    builder.addBulletList(decItems, "asciiBullet");
     if (thought.designDecisions.decisions.length > 5) {
-      lines.push("\u2551" + `   ... +${thought.designDecisions.decisions.length - 5} more`.padEnd(width - 2) + "\u2551");
+      builder.addText(`   ... +${thought.designDecisions.decisions.length - 5} more
+`);
     }
-    lines.push("\u2560" + "\u2500".repeat(width - 2) + "\u2563");
+    builder.addEmptyLine();
   }
   if (thought.assessment) {
-    lines.push("\u2551" + " \u{1F4CA} ASSESSMENT".padEnd(width - 2) + "\u2551");
-    lines.push("\u2551" + `   Confidence: ${(thought.assessment.confidence * 100).toFixed(0)}%`.padEnd(width - 2) + "\u2551");
+    builder.addSection("\u{1F4CA} ASSESSMENT");
+    builder.addText(`   Confidence: ${(thought.assessment.confidence * 100).toFixed(0)}%
+`);
     if (thought.assessment.keyRisks.length > 0) {
-      lines.push("\u2551" + `   Key Risks: ${thought.assessment.keyRisks.length}`.padEnd(width - 2) + "\u2551");
+      builder.addText(`   Key Risks: ${thought.assessment.keyRisks.length}
+`);
     }
     if (thought.assessment.openIssues.length > 0) {
-      lines.push("\u2551" + `   Open Issues: ${thought.assessment.openIssues.length}`.padEnd(width - 2) + "\u2551");
+      builder.addText(`   Open Issues: ${thought.assessment.openIssues.length}
+`);
     }
   }
-  lines.push("\u255A" + "\u2550".repeat(width - 2) + "\u255D");
-  return lines.join("\n");
+  return builder.render();
 }
 function engineeringToSVG(thought, options) {
   const { colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
@@ -38159,6 +38739,9 @@ var init_engineering = __esm({
   "src/export/visual/modes/engineering.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -38835,170 +39418,101 @@ function exportProofDecomposition(decomposition, options) {
       throw new Error(`Unsupported format: ${format}`);
   }
 }
-function getMermaidShape(type) {
-  switch (type) {
-    case "axiom":
-      return ["([", "])"];
-    // Stadium/rounded
-    case "definition":
-      return ["[[", "]]"];
-    // Subroutine
-    case "hypothesis":
-      return ["[", "]"];
-    // Rectangle
-    case "lemma":
-      return ["{{", "}}"];
-    // Hexagon
-    case "derived":
-      return ["(", ")"];
-    // Default rounded
-    case "conclusion":
-      return ["{", "}"];
-    // Diamond shape via styling
-    default:
-      return ["(", ")"];
-  }
-}
-function getNodeColor2(type, colorScheme) {
-  if (colorScheme === "monochrome") return "#ffffff";
-  const colors = colorScheme === "pastel" ? {
-    axiom: "#c8e6c9",
-    // Light green
-    definition: "#e1bee7",
-    // Light purple
-    hypothesis: "#bbdefb",
-    // Light blue
-    lemma: "#fff9c4",
-    // Light yellow
-    derived: "#e0e0e0",
-    // Light gray
-    conclusion: "#d1c4e9"
-    // Light purple
-  } : {
-    axiom: "#81c784",
-    // Green
-    definition: "#ba68c8",
-    // Purple
-    hypothesis: "#64b5f6",
-    // Blue
-    lemma: "#ffd54f",
-    // Yellow
-    derived: "#bdbdbd",
-    // Gray
-    conclusion: "#9575cd"
-    // Purple
-  };
-  return colors[type] || colors.derived;
-}
 function proofDecompositionToMermaid(decomposition, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph TD\n";
-  if (decomposition.theorem) {
-    mermaid += `  title["Proof: ${decomposition.theorem.substring(0, 50)}..."]
-`;
-    mermaid += "  style title fill:#f5f5f5,stroke:#333\n\n";
-  }
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("TD");
   const axioms = decomposition.atoms.filter((a) => a.type === "axiom");
   const hypotheses = decomposition.atoms.filter((a) => a.type === "hypothesis");
   const derived = decomposition.atoms.filter((a) => a.type === "derived" || a.type === "lemma");
   const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
-  if (axioms.length > 0) {
-    mermaid += '  subgraph Axioms["Axioms"]\n';
-    for (const atom of axioms) {
-      const nodeId = sanitizeId(atom.id);
-      const label = includeLabels ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? "..." : "") : atom.id;
-      const [open, close] = getMermaidShape(atom.type);
-      mermaid += `    ${nodeId}${open}"${label}"${close}
-`;
+  const getLabel = (atom) => includeLabels ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? "..." : "") : atom.id;
+  const typeToShape = (type) => {
+    switch (type) {
+      case "axiom":
+        return "stadium";
+      case "definition":
+        return "subroutine";
+      case "hypothesis":
+        return "rectangle";
+      case "lemma":
+        return "hexagon";
+      case "conclusion":
+        return "rhombus";
+      default:
+        return "circle";
     }
-    mermaid += "  end\n\n";
+  };
+  const getNodeStyle = (type) => {
+    if (scheme === "monochrome") return void 0;
+    const colors = {
+      axiom: { fill: "#81c784", stroke: "#388e3c" },
+      definition: { fill: "#ba68c8", stroke: "#7b1fa2" },
+      hypothesis: { fill: "#64b5f6", stroke: "#1976d2" },
+      lemma: { fill: "#ffd54f", stroke: "#ffa000" },
+      derived: { fill: "#bdbdbd", stroke: "#616161" },
+      conclusion: { fill: "#9575cd", stroke: "#512da8" }
+    };
+    return colors[type] || colors.derived;
+  };
+  if (decomposition.theorem) {
+    builder.addNode({ id: "title", label: `Proof: ${decomposition.theorem.substring(0, 50)}...` });
   }
-  if (hypotheses.length > 0) {
-    mermaid += '  subgraph Hypotheses["Hypotheses"]\n';
-    for (const atom of hypotheses) {
-      const nodeId = sanitizeId(atom.id);
-      const label = includeLabels ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? "..." : "") : atom.id;
-      const [open, close] = getMermaidShape(atom.type);
-      mermaid += `    ${nodeId}${open}"${label}"${close}
-`;
-    }
-    mermaid += "  end\n\n";
-  }
-  for (const atom of derived) {
+  const axiomIds = [];
+  for (const atom of axioms) {
     const nodeId = sanitizeId(atom.id);
-    const label = includeLabels ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? "..." : "") : atom.id;
-    const [open, close] = getMermaidShape(atom.type);
-    mermaid += `  ${nodeId}${open}"${label}"${close}
-`;
+    builder.addNode({ id: nodeId, label: getLabel(atom), shape: typeToShape(atom.type), style: getNodeStyle(atom.type) });
+    axiomIds.push(nodeId);
   }
-  if (conclusions.length > 0) {
-    mermaid += '\n  subgraph Conclusions["Conclusions"]\n';
-    for (const atom of conclusions) {
-      const nodeId = sanitizeId(atom.id);
-      const label = includeLabels ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? "..." : "") : atom.id;
-      mermaid += `    ${nodeId}{"${label}"}
-`;
-    }
-    mermaid += "  end\n\n";
+  if (axiomIds.length > 0) builder.addSubgraph("Axioms", "Axioms", axiomIds);
+  const hypIds = [];
+  for (const atom of hypotheses) {
+    const nodeId = sanitizeId(atom.id);
+    builder.addNode({ id: nodeId, label: getLabel(atom), shape: typeToShape(atom.type), style: getNodeStyle(atom.type) });
+    hypIds.push(nodeId);
   }
-  if (decomposition.dependencies && decomposition.dependencies.edges) {
+  if (hypIds.length > 0) builder.addSubgraph("Hypotheses", "Hypotheses", hypIds);
+  for (const atom of derived) {
+    builder.addNode({ id: sanitizeId(atom.id), label: getLabel(atom), shape: typeToShape(atom.type), style: getNodeStyle(atom.type) });
+  }
+  const concIds = [];
+  for (const atom of conclusions) {
+    const nodeId = sanitizeId(atom.id);
+    builder.addNode({ id: nodeId, label: getLabel(atom), shape: "rhombus", style: getNodeStyle(atom.type) });
+    concIds.push(nodeId);
+  }
+  if (concIds.length > 0) builder.addSubgraph("Conclusions", "Conclusions", concIds);
+  if (decomposition.dependencies?.edges) {
     for (const edge of decomposition.dependencies.edges) {
-      const fromId = sanitizeId(edge.from);
-      const toId = sanitizeId(edge.to);
-      const edgeLabel = edge.inferenceRule ? ` -->|${edge.inferenceRule}| ` : " --> ";
-      mermaid += `  ${fromId}${edgeLabel}${toId}
-`;
+      builder.addEdge({
+        source: sanitizeId(edge.from),
+        target: sanitizeId(edge.to),
+        label: edge.inferenceRule || void 0
+      });
     }
   }
-  if (decomposition.gaps && decomposition.gaps.length > 0) {
-    mermaid += '\n  subgraph Gaps["Identified Gaps"]\n';
+  if (decomposition.gaps?.length) {
+    const gapIds = [];
     for (const gap of decomposition.gaps) {
       const gapId = sanitizeId(gap.id);
-      const label = gap.description.substring(0, 30) + "...";
-      mermaid += `    ${gapId}["${label}"]
-`;
-      mermaid += `    ${sanitizeId(gap.location.from)} -.->|gap| ${gapId}
-`;
-      mermaid += `    ${gapId} -.-> ${sanitizeId(gap.location.to)}
-`;
+      builder.addNode({ id: gapId, label: gap.description.substring(0, 30) + "..." });
+      builder.addEdge({ source: sanitizeId(gap.location.from), target: gapId, label: "gap", style: "dotted" });
+      builder.addEdge({ source: gapId, target: sanitizeId(gap.location.to), style: "dotted" });
+      gapIds.push(gapId);
     }
-    mermaid += "  end\n";
+    builder.addSubgraph("Gaps", "Identified Gaps", gapIds);
   }
   if (includeMetrics) {
-    mermaid += '\n  subgraph Metrics["Metrics"]\n';
-    mermaid += `    m1["Completeness: ${(decomposition.completeness * 100).toFixed(0)}%"]
-`;
-    mermaid += `    m2["Rigor: ${decomposition.rigorLevel}"]
-`;
-    mermaid += `    m3["Atoms: ${decomposition.atomCount}"]
-`;
-    mermaid += `    m4["Depth: ${decomposition.maxDependencyDepth}"]
-`;
-    mermaid += "  end\n";
+    const metricIds = ["m1", "m2", "m3", "m4"];
+    builder.addNode({ id: "m1", label: `Completeness: ${(decomposition.completeness * 100).toFixed(0)}%` }).addNode({ id: "m2", label: `Rigor: ${decomposition.rigorLevel}` }).addNode({ id: "m3", label: `Atoms: ${decomposition.atomCount}` }).addNode({ id: "m4", label: `Depth: ${decomposition.maxDependencyDepth}` }).addSubgraph("Metrics", "Metrics", metricIds);
   }
-  if (colorScheme !== "monochrome") {
-    mermaid += "\n";
-    for (const atom of decomposition.atoms) {
-      const nodeId = sanitizeId(atom.id);
-      const color = getNodeColor2(atom.type, colorScheme);
-      mermaid += `  style ${nodeId} fill:${color}
-`;
-    }
-    if (decomposition.gaps) {
-      for (const gap of decomposition.gaps) {
-        const gapId = sanitizeId(gap.id);
-        mermaid += `  style ${gapId} fill:#ffcdd2,stroke:#e53935,stroke-dasharray: 5 5
-`;
-      }
-    }
-  }
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 function getDOTShape(type) {
   switch (type) {
     case "axiom":
       return "ellipse";
     case "definition":
-      return "box3d";
+      return "box";
     case "hypothesis":
       return "box";
     case "lemma":
@@ -39012,199 +39526,144 @@ function getDOTShape(type) {
   }
 }
 function proofDecompositionToDOT(decomposition, includeLabels, includeMetrics) {
-  let dot = "digraph ProofDecomposition {\n";
-  dot += "  rankdir=TB;\n";
-  dot += "  compound=true;\n";
-  dot += '  node [style="rounded,filled", fontname="Arial"];\n';
-  dot += '  edge [fontname="Arial", fontsize=10];\n\n';
-  if (decomposition.theorem) {
-    dot += `  label="Proof: ${decomposition.theorem.substring(0, 60)}...";
-`;
-    dot += "  labelloc=t;\n";
-    dot += "  fontsize=14;\n\n";
-  }
+  const builder = new DOTGraphBuilder().setGraphName("ProofDecomposition").setRankDir("TB").setNodeDefaults({ style: ["rounded", "filled"], fontName: "Arial" }).setEdgeDefaults({});
   const axioms = decomposition.atoms.filter((a) => a.type === "axiom");
   const hypotheses = decomposition.atoms.filter((a) => a.type === "hypothesis");
+  const derived = decomposition.atoms.filter((a) => a.type === "derived" || a.type === "lemma");
   const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
+  const getLabel = (atom) => includeLabels ? atom.statement.substring(0, 40).replace(/"/g, '\\"') : atom.id;
+  for (const atom of axioms) {
+    builder.addNode({ id: sanitizeId(atom.id), label: getLabel(atom), shape: getDOTShape(atom.type), fillColor: "#81c784" });
+  }
   if (axioms.length > 0) {
-    dot += "  subgraph cluster_axioms {\n";
-    dot += '    label="Axioms";\n';
-    dot += "    style=filled;\n";
-    dot += '    color="#e8f5e9";\n';
-    for (const atom of axioms) {
-      const nodeId = sanitizeId(atom.id);
-      const label = includeLabels ? atom.statement.substring(0, 40).replace(/"/g, '\\"') : atom.id;
-      dot += `    ${nodeId} [label="${label}", shape=${getDOTShape(atom.type)}, fillcolor="#81c784"];
-`;
-    }
-    dot += "  }\n\n";
+    builder.addSubgraph({ id: "cluster_axioms", label: "Axioms", nodes: axioms.map((a) => sanitizeId(a.id)), style: "filled", color: "#e8f5e9" });
+  }
+  for (const atom of hypotheses) {
+    builder.addNode({ id: sanitizeId(atom.id), label: getLabel(atom), shape: getDOTShape(atom.type), fillColor: "#64b5f6" });
   }
   if (hypotheses.length > 0) {
-    dot += "  subgraph cluster_hypotheses {\n";
-    dot += '    label="Hypotheses";\n';
-    dot += "    style=filled;\n";
-    dot += '    color="#e3f2fd";\n';
-    for (const atom of hypotheses) {
-      const nodeId = sanitizeId(atom.id);
-      const label = includeLabels ? atom.statement.substring(0, 40).replace(/"/g, '\\"') : atom.id;
-      dot += `    ${nodeId} [label="${label}", shape=${getDOTShape(atom.type)}, fillcolor="#64b5f6"];
-`;
-    }
-    dot += "  }\n\n";
+    builder.addSubgraph({ id: "cluster_hypotheses", label: "Hypotheses", nodes: hypotheses.map((a) => sanitizeId(a.id)), style: "filled", color: "#e3f2fd" });
   }
-  const derived = decomposition.atoms.filter((a) => a.type === "derived" || a.type === "lemma");
   for (const atom of derived) {
-    const nodeId = sanitizeId(atom.id);
-    const label = includeLabels ? atom.statement.substring(0, 40).replace(/"/g, '\\"') : atom.id;
     const color = atom.type === "lemma" ? "#ffd54f" : "#bdbdbd";
-    dot += `  ${nodeId} [label="${label}", shape=${getDOTShape(atom.type)}, fillcolor="${color}"];
-`;
+    builder.addNode({ id: sanitizeId(atom.id), label: getLabel(atom), shape: getDOTShape(atom.type), fillColor: color });
   }
-  dot += "\n";
+  for (const atom of conclusions) {
+    builder.addNode({ id: sanitizeId(atom.id), label: getLabel(atom), shape: getDOTShape(atom.type), fillColor: "#9575cd" });
+  }
   if (conclusions.length > 0) {
-    dot += "  subgraph cluster_conclusions {\n";
-    dot += '    label="Conclusions";\n';
-    dot += "    style=filled;\n";
-    dot += '    color="#ede7f6";\n';
-    for (const atom of conclusions) {
-      const nodeId = sanitizeId(atom.id);
-      const label = includeLabels ? atom.statement.substring(0, 40).replace(/"/g, '\\"') : atom.id;
-      dot += `    ${nodeId} [label="${label}", shape=${getDOTShape(atom.type)}, fillcolor="#9575cd"];
-`;
-    }
-    dot += "  }\n\n";
+    builder.addSubgraph({ id: "cluster_conclusions", label: "Conclusions", nodes: conclusions.map((a) => sanitizeId(a.id)), style: "filled", color: "#ede7f6" });
   }
-  if (decomposition.dependencies && decomposition.dependencies.edges) {
+  if (decomposition.dependencies?.edges) {
     for (const edge of decomposition.dependencies.edges) {
-      const fromId = sanitizeId(edge.from);
-      const toId = sanitizeId(edge.to);
-      const edgeLabel = edge.inferenceRule ? ` [label="${edge.inferenceRule}"]` : "";
-      dot += `  ${fromId} -> ${toId}${edgeLabel};
-`;
+      builder.addEdge({ source: sanitizeId(edge.from), target: sanitizeId(edge.to), label: edge.inferenceRule });
     }
   }
-  if (decomposition.gaps && decomposition.gaps.length > 0) {
-    dot += "\n  // Gaps (dashed red)\n";
+  if (decomposition.gaps?.length) {
     for (const gap of decomposition.gaps) {
       const gapId = sanitizeId(gap.id);
-      const label = gap.description.substring(0, 30).replace(/"/g, '\\"');
-      dot += `  ${gapId} [label="${label}", shape=note, fillcolor="#ffcdd2", style="dashed,filled"];
-`;
-      dot += `  ${sanitizeId(gap.location.from)} -> ${gapId} [style=dashed, color=red];
-`;
-      dot += `  ${gapId} -> ${sanitizeId(gap.location.to)} [style=dashed, color=red];
-`;
+      builder.addNode({ id: gapId, label: gap.description.substring(0, 30).replace(/"/g, '\\"'), shape: "note", fillColor: "#ffcdd2", style: "dashed" });
+      builder.addEdge({ source: sanitizeId(gap.location.from), target: gapId, style: "dashed", color: "red" });
+      builder.addEdge({ source: gapId, target: sanitizeId(gap.location.to), style: "dashed", color: "red" });
     }
   }
   if (includeMetrics) {
-    dot += "\n  // Metrics\n";
-    dot += "  subgraph cluster_metrics {\n";
-    dot += '    label="Metrics";\n';
-    dot += "    style=filled;\n";
-    dot += '    color="#f5f5f5";\n';
-    dot += `    metrics [label="Completeness: ${(decomposition.completeness * 100).toFixed(0)}%\\nRigor: ${decomposition.rigorLevel}\\nAtoms: ${decomposition.atomCount}\\nDepth: ${decomposition.maxDependencyDepth}", shape=note];
-`;
-    dot += "  }\n";
+    builder.addNode({ id: "metrics", label: `Completeness: ${(decomposition.completeness * 100).toFixed(0)}%\\nRigor: ${decomposition.rigorLevel}\\nAtoms: ${decomposition.atomCount}\\nDepth: ${decomposition.maxDependencyDepth}`, shape: "note" });
+    builder.addSubgraph({ id: "cluster_metrics", label: "Metrics", nodes: ["metrics"], style: "filled", color: "#f5f5f5" });
   }
-  dot += "}\n";
-  return dot;
+  return builder.render();
 }
 function proofDecompositionToASCII(decomposition) {
-  let ascii = "";
-  ascii += "\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557\n";
-  ascii += "\u2551                    PROOF DECOMPOSITION                         \u2551\n";
-  ascii += "\u255A\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255D\n\n";
+  const builder = new ASCIIDocBuilder().setBoxStyle("double").addBoxedTitle("PROOF DECOMPOSITION");
   if (decomposition.theorem) {
-    ascii += `Theorem: ${decomposition.theorem}
-
-`;
+    builder.addText(`Theorem: ${decomposition.theorem}
+`).addEmptyLine();
   }
-  ascii += "\u250C\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
-  ascii += "\u2502 METRICS                                                         \u2502\n";
-  ascii += "\u251C\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n";
-  ascii += `\u2502 Completeness: ${(decomposition.completeness * 100).toFixed(0)}%`.padEnd(66) + "\u2502\n";
-  ascii += `\u2502 Rigor Level:  ${decomposition.rigorLevel}`.padEnd(66) + "\u2502\n";
-  ascii += `\u2502 Atom Count:   ${decomposition.atomCount}`.padEnd(66) + "\u2502\n";
-  ascii += `\u2502 Max Depth:    ${decomposition.maxDependencyDepth}`.padEnd(66) + "\u2502\n";
-  ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n";
+  builder.addSection("METRICS").addText(`Completeness: ${(decomposition.completeness * 100).toFixed(0)}%
+`).addText(`Rigor Level:  ${decomposition.rigorLevel}
+`).addText(`Atom Count:   ${decomposition.atomCount}
+`).addText(`Max Depth:    ${decomposition.maxDependencyDepth}
+`).addEmptyLine();
   const axioms = decomposition.atoms.filter((a) => a.type === "axiom");
   if (axioms.length > 0) {
-    ascii += "\u250C\u2500 AXIOMS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
+    builder.addSection("AXIOMS");
     for (const atom of axioms) {
-      const marker = "\u25C9";
-      const line = `\u2502 ${marker} [${atom.id}] ${atom.statement}`;
-      ascii += line.substring(0, 65).padEnd(66) + "\u2502\n";
+      builder.addText(`\u25C9 [${atom.id}] ${atom.statement.substring(0, 55)}
+`);
     }
-    ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n";
+    builder.addEmptyLine();
   }
   const hypotheses = decomposition.atoms.filter((a) => a.type === "hypothesis");
   if (hypotheses.length > 0) {
-    ascii += "\u250C\u2500 HYPOTHESES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
+    builder.addSection("HYPOTHESES");
     for (const atom of hypotheses) {
-      const marker = "\u25C6";
-      const line = `\u2502 ${marker} [${atom.id}] ${atom.statement}`;
-      ascii += line.substring(0, 65).padEnd(66) + "\u2502\n";
+      builder.addText(`\u25C6 [${atom.id}] ${atom.statement.substring(0, 55)}
+`);
     }
-    ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n";
+    builder.addEmptyLine();
   }
   const derived = decomposition.atoms.filter((a) => a.type === "derived" || a.type === "lemma");
   if (derived.length > 0) {
-    ascii += "\u250C\u2500 DERIVATION CHAIN \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
+    builder.addSection("DERIVATION CHAIN");
     for (const atom of derived) {
       const marker = atom.type === "lemma" ? "\u25C7" : "\u25CB";
-      const deps = atom.derivedFrom && atom.derivedFrom.length > 0 ? ` \u2190 [${atom.derivedFrom.join(", ")}]` : "";
-      const line = `\u2502 ${marker} [${atom.id}] ${atom.statement}${deps}`;
-      ascii += line.substring(0, 65).padEnd(66) + "\u2502\n";
+      const deps = atom.derivedFrom?.length ? ` \u2190 [${atom.derivedFrom.join(", ")}]` : "";
+      builder.addText(`${marker} [${atom.id}] ${atom.statement.substring(0, 45)}${deps}
+`);
       if (atom.usedInferenceRule) {
-        ascii += `\u2502   \u2514\u2500 Rule: ${atom.usedInferenceRule}`.padEnd(66) + "\u2502\n";
+        builder.addText(`   \u2514\u2500 Rule: ${atom.usedInferenceRule}
+`);
       }
     }
-    ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n";
+    builder.addEmptyLine();
   }
   const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
   if (conclusions.length > 0) {
-    ascii += "\u250C\u2500 CONCLUSIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
+    builder.addSection("CONCLUSIONS");
     for (const atom of conclusions) {
-      const marker = "\u2605";
-      const deps = atom.derivedFrom && atom.derivedFrom.length > 0 ? ` \u2190 [${atom.derivedFrom.join(", ")}]` : "";
-      const line = `\u2502 ${marker} [${atom.id}] ${atom.statement}${deps}`;
-      ascii += line.substring(0, 65).padEnd(66) + "\u2502\n";
+      const deps = atom.derivedFrom?.length ? ` \u2190 [${atom.derivedFrom.join(", ")}]` : "";
+      builder.addText(`\u2605 [${atom.id}] ${atom.statement.substring(0, 45)}${deps}
+`);
     }
-    ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n";
+    builder.addEmptyLine();
   }
-  if (decomposition.gaps && decomposition.gaps.length > 0) {
-    ascii += "\u250C\u2500 GAPS (Missing Steps) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
+  if (decomposition.gaps?.length) {
+    builder.addSection("GAPS (Missing Steps)");
     for (const gap of decomposition.gaps) {
       const severityIcon = gap.severity === "critical" ? "\u26A0" : gap.severity === "significant" ? "!" : "?";
-      ascii += `\u2502 ${severityIcon} [${gap.type}] ${gap.description}`.substring(0, 65).padEnd(66) + "\u2502\n";
-      ascii += `\u2502   Between: ${gap.location.from} \u2192 ${gap.location.to}`.padEnd(66) + "\u2502\n";
+      builder.addText(`${severityIcon} [${gap.type}] ${gap.description.substring(0, 50)}
+`);
+      builder.addText(`   Between: ${gap.location.from} \u2192 ${gap.location.to}
+`);
       if (gap.suggestedFix) {
-        ascii += `\u2502   Fix: ${gap.suggestedFix}`.substring(0, 65).padEnd(66) + "\u2502\n";
+        builder.addText(`   Fix: ${gap.suggestedFix.substring(0, 50)}
+`);
       }
     }
-    ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n";
+    builder.addEmptyLine();
   }
-  if (decomposition.implicitAssumptions && decomposition.implicitAssumptions.length > 0) {
-    ascii += "\u250C\u2500 IMPLICIT ASSUMPTIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
+  if (decomposition.implicitAssumptions?.length) {
+    builder.addSection("IMPLICIT ASSUMPTIONS");
     for (const assumption of decomposition.implicitAssumptions) {
-      ascii += `\u2502 \u2022 [${assumption.type}]`.padEnd(66) + "\u2502\n";
-      ascii += `\u2502   ${assumption.statement}`.substring(0, 65).padEnd(66) + "\u2502\n";
+      builder.addText(`\u2022 [${assumption.type}]
+`);
+      builder.addText(`   ${assumption.statement.substring(0, 55)}
+`);
       if (assumption.shouldBeExplicit) {
-        ascii += `\u2502   \u26A0 Should be explicit`.padEnd(66) + "\u2502\n";
+        builder.addText(`   \u26A0 Should be explicit
+`);
       }
     }
-    ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n";
+    builder.addEmptyLine();
   }
-  if (decomposition.dependencies && decomposition.dependencies.edges.length > 0) {
-    ascii += "\u250C\u2500 DEPENDENCY TREE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n";
-    ascii += "\u2502                                                                    \u2502\n";
+  if (decomposition.dependencies?.edges.length) {
+    builder.addSection("DEPENDENCY TREE");
     const roots = decomposition.dependencies.roots || [];
     for (const rootId of roots) {
-      ascii += buildASCIITree(rootId, decomposition, 0, /* @__PURE__ */ new Set());
+      builder.addText(buildASCIITree(rootId, decomposition, 0, /* @__PURE__ */ new Set()));
     }
-    ascii += "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n";
   }
-  return ascii;
+  return builder.render();
 }
 function buildASCIITree(nodeId, decomposition, depth, visited) {
   if (visited.has(nodeId) || depth > 10) {
@@ -40080,6 +40539,9 @@ var init_proof_decomposition = __esm({
   "src/export/visual/modes/proof-decomposition.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_html();
     init_modelica();
     init_uml();
