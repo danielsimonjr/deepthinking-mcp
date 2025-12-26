@@ -28,7 +28,7 @@
     {
       "sprint": 3,
       "title": "Document Format Builders",
-      "focus": "UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder",
+      "focus": "UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder + unit tests",
       "tasks": 5,
       "hours": 5.5,
       "file": "PHASE_13_SPRINT_3_TODO.json",
@@ -167,7 +167,7 @@
   "successCriteria": [
     "All 11 builder classes implemented and exported",
     "All builders follow consistent fluent API pattern",
-    "All 21 mode exporters use builders (sequential.ts already compliant)",
+    "All 22 mode exporters use builders (sequential.ts already compliant)",
     "All mode files <1000 lines",
     "All 3,539+ tests pass",
     "60+ new builder unit tests pass",
