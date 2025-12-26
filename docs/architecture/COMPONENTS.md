@@ -109,17 +109,19 @@ createThought(input: ThinkingToolInput, sessionId: string): Thought
 
 **Purpose**: Strategy pattern implementation for mode-specific validation and enhancement
 
-**7 Specialized Handlers**:
+**36 Specialized Handlers** (all 33 modes covered):
 
-| Handler | Mode | Key Enhancements |
-|---------|------|------------------|
-| **CausalHandler** | causal | Graph validation, cycle detection, intervention propagation |
-| **BayesianHandler** | bayesian | Auto posterior calculation (prior × likelihood), probability sum validation |
-| **GameTheoryHandler** | gametheory | Payoff matrix validation, Nash equilibria computation |
-| **CounterfactualHandler** | counterfactual | World state tracking, divergence point validation |
-| **SynthesisHandler** | synthesis | Source coverage tracking, theme extraction, contradiction detection |
-| **SystemsThinkingHandler** | systemsthinking | 8 Systems Archetypes detection (Peter Senge) |
-| **CritiqueHandler** | critique | 6 Socratic question categories (Richard Paul) |
+| Category | Handlers | Key Features |
+|----------|----------|--------------|
+| **Core (5)** | Sequential, Shannon, Mathematics, Physics, Hybrid | Mode-specific validation and thought creation |
+| **Fundamental (3)** | Inductive, Deductive, Abductive | Reasoning triad implementation |
+| **Causal/Probabilistic (6)** | Causal, Bayesian, Counterfactual, Temporal, GameTheory, Evidential | Auto computation (posteriors, equilibria), validation |
+| **Analogical (2)** | Analogical, FirstPrinciples | Mapping and decomposition logic |
+| **Systems/Scientific (3)** | SystemsThinking, ScientificMethod, FormalLogic | 8 Archetypes detection, proof logic |
+| **Academic (4)** | Synthesis, Argumentation, Critique, Analysis | Coverage tracking, Socratic questions |
+| **Engineering (4)** | Engineering, Computability, Cryptanalytic, Algorithmic | CLRS coverage, Turing machines, Decibans |
+| **Advanced Runtime (6)** | MetaReasoning, Recursive, Modal, Stochastic, Constraint, Optimization | Strategic oversight, constraint solving |
+| **Fallback (3)** | GenericModeHandler, CustomHandler, utility | Default behavior, user-defined modes |
 
 **ModeHandler Interface**:
 ```typescript
@@ -513,11 +515,11 @@ preload(modes: string[]): Promise<void>                      // Preload specific
 has(mode: string): boolean                                   // Check if mode supported
 ```
 
-**Registry Structure** (consolidated in v4.3.0):
+**Registry Structure** (consolidated in v4.3.0, expanded in v8.5.0):
 ```typescript
 const VALIDATOR_REGISTRY: Record<string, ValidatorConfig> = {
   sequential: { module: './modes/sequential.js', className: 'SequentialValidator' },
-  // ... 24 more modes (25 total)
+  // ... 27 more modes (28 total)
 };
 ```
 
@@ -1158,14 +1160,14 @@ TaxonomySystem
 
 ### Coverage Targets
 - **Critical Paths**: 80%+ coverage ✅
-- **Tests**: 1046+ passing
-- **Test Files**: 39
+- **Tests**: 4,686 passing
+- **Test Files**: 170
 - **Type Safety**: 100% (0 type suppressions)
-- **Mode Coverage**: All 33 modes have validators
-- **Handler Coverage**: All 7 specialized handlers tested
+- **Mode Coverage**: All 33 modes have validators (28 total)
+- **Handler Coverage**: All 36 specialized handlers tested
 - **Proof Decomposition**: Full coverage for Phase 8 components
 
 ---
 
-*Last Updated*: 2025-12-15
-*Component Version*: 8.2.1
+*Last Updated*: 2025-12-26
+*Component Version*: 8.5.0

@@ -13,7 +13,7 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 | Metric | Value |
 |--------|-------|
 | Total Lines of Code | ~105,000 |
-| TypeScript Files | 250 |
+| TypeScript Files | 255 |
 | Test Files | 170 |
 | Passing Tests | 4,686 |
 | Type Suppressions | 0 |
@@ -24,9 +24,10 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 | Visual Exporters | 41 files (23 mode-specific) |
 | Builder Classes | 14 fluent APIs |
 | Reasoning Types | 69 (110 planned) |
-| Total Exports | 1,426 (684 re-exports) |
+| Total Exports | 1,431 (684 re-exports) |
 | Modules | 16 |
 | Circular Dependencies | 55 (all type-only, 0 runtime) |
+| Mode Validators | 28 |
 
 ---
 
@@ -50,7 +51,7 @@ deepthinking-mcp/
 │   ├── repositories/       # Storage abstraction
 │   ├── modes/              # Mode implementations
 │   └── tools/              # MCP tool definitions
-├── tests/                  # Test suite (36 files, 763 tests)
+├── tests/                  # Test suite (170 files, 4,686 tests)
 │   ├── unit/               # Unit tests
 │   └── integration/        # Integration tests
 ├── docs/                   # Documentation
@@ -98,24 +99,26 @@ Core services extracted from the entry point:
 
 | Service | File | Responsibility |
 |---------|------|----------------|
-| **ThoughtFactory** | `ThoughtFactory.ts` | Mode-specific thought creation with handler integration (v8.x) |
+| **ThoughtFactory** | `ThoughtFactory.ts` | Mode-specific thought creation for all 33 modes with handler integration (v8.x) |
 | **ExportService** | `ExportService.ts` | Multi-format export (8 formats) |
 | **ModeRouter** | `ModeRouter.ts` | Mode switching, recommendations, and adaptive switching |
 | **MetaMonitor** | `MetaMonitor.ts` | Session tracking, strategy evaluation, meta-reasoning insights |
 
-### `src/modes/handlers/` - Specialized Mode Handlers (v8.x)
+### `src/modes/handlers/` - Specialized Mode Handlers (v8.4.0)
 
-7 specialized handlers implementing the ModeHandler pattern:
+**36 specialized handlers** implementing the ModeHandler pattern (all 33 modes covered):
 
-| Handler | Mode | Key Enhancements |
-|---------|------|------------------|
-| **CausalHandler** | causal | Graph validation, cycle detection, intervention propagation |
-| **BayesianHandler** | bayesian | Auto posterior calculation, probability sum validation |
-| **GameTheoryHandler** | gametheory | Payoff matrix validation, Nash equilibria computation |
-| **CounterfactualHandler** | counterfactual | World state tracking, divergence validation |
-| **SynthesisHandler** | synthesis | Source coverage, theme extraction, contradiction detection |
-| **SystemsThinkingHandler** | systemsthinking | 8 Systems Archetypes detection (Peter Senge) |
-| **CritiqueHandler** | critique | 6 Socratic question categories (Richard Paul) |
+| Category | Handlers | Key Features |
+|----------|----------|--------------|
+| **Core (5)** | Sequential, Shannon, Mathematics, Physics, Hybrid | Mode-specific validation and thought creation |
+| **Fundamental (3)** | Inductive, Deductive, Abductive | Reasoning triad implementation |
+| **Causal/Probabilistic (6)** | Causal, Bayesian, Counterfactual, Temporal, GameTheory, Evidential | Auto computation (posteriors, equilibria), validation |
+| **Analogical (2)** | Analogical, FirstPrinciples | Mapping and decomposition logic |
+| **Systems/Scientific (3)** | SystemsThinking, ScientificMethod, FormalLogic | 8 Archetypes detection, proof logic |
+| **Academic (4)** | Synthesis, Argumentation, Critique, Analysis | Coverage tracking, Socratic questions |
+| **Engineering (4)** | Engineering, Computability, Cryptanalytic, Algorithmic | CLRS coverage, Turing machines, Decibans |
+| **Advanced Runtime (6)** | MetaReasoning, Recursive, Modal, Stochastic, Constraint, Optimization | Strategic oversight, constraint solving |
+| **Fallback (3)** | GenericModeHandler, CustomHandler, utility | Default behavior, user-defined modes |
 
 ### `src/session/` - Session Management
 
@@ -367,7 +370,7 @@ Configured in `tsconfig.json`:
 
 ## MCP Integration
 
-### The 12 Focused Tools (v7.5.0)
+### The 13 Focused Tools (v8.5.0)
 
 | Tool | Description | Modes Supported |
 |------|-------------|-----------------|
@@ -452,9 +455,9 @@ tests/
 └── utils/                      # 5 test utility files
 ```
 
-### Coverage (v8.3.2)
-- **Test Files**: 143 total
-- **Passing Tests**: 3539
+### Coverage (v8.5.0)
+- **Test Files**: 170 total
+- **Passing Tests**: 4,686
 - **Test Categories**: 19 (COR, STD, PAR, MTH, TMP, PRB, CSL, STR, ANL, SCI, ENG, ACD, SES, EXP, HDL, EDG, REG, INT, PRF)
 - **Phase 11**: Comprehensive coverage across all tools, modes, handlers, and exports
 
@@ -471,5 +474,5 @@ tests/
 
 ---
 
-*Last Updated*: 2025-12-22
-*Version*: 8.3.2
+*Last Updated*: 2025-12-26
+*Version*: 8.5.0
