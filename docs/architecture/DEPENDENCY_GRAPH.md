@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 8.4.0 | **Last Updated**: 2025-12-25
+**Version**: 8.5.0 | **Last Updated**: 2025-12-26
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -205,7 +205,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/abductive.ts` - Abductive Visual Exporter (v7.0.3)
+### `src/export/visual/modes/abductive.ts` - Abductive Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -213,6 +213,9 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `AbductiveThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
@@ -227,7 +230,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/analogical.ts` - Analogical Visual Exporter (v7.0.3)
+### `src/export/visual/modes/analogical.ts` - Analogical Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -235,6 +238,9 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `AnalogicalThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge, GraphMLOptions` | Import |
 | `../utils/tikz.js` | `generateTikZ, getTikZColor, renderTikZMetrics, renderTikZLegend, TikZNode, TikZEdge, TikZOptions` | Import |
@@ -249,13 +255,16 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/bayesian.ts` - Bayesian Visual Exporter (v7.0.3)
+### `src/export/visual/modes/bayesian.ts` - Bayesian Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
 | `../../../types/index.js` | `BayesianThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
@@ -270,7 +279,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/causal.ts` - Causal Visual Exporter (v7.0.3)
+### `src/export/visual/modes/causal.ts` - Causal Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -278,6 +287,9 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `CausalThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder, DotNodeShape` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderStadiumNode, renderRectNode, renderDiamondNode, renderEllipseNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, layoutNodesInLayers, calculateSVGHeight, DEFAULT_SVG_OPTIONS` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge, GraphMLOptions` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge, TikZOptions` | Import |
@@ -292,7 +304,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/computability.ts` - Computability Visual Exporter (v7.2.0)
+### `src/export/visual/modes/computability.ts` - Computability Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -300,6 +312,9 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `ComputabilityThought, TuringMachine, Reduction` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder, DotNodeStyle` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder, MermaidStateDiagramBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
@@ -312,7 +327,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/counterfactual.ts` - Counterfactual Visual Exporter (v7.0.3)
+### `src/export/visual/modes/counterfactual.ts` - Counterfactual Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -320,6 +335,9 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `CounterfactualThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder, DotNodeStyle` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge, GraphMLOptions` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge, TikZOptions` | Import |
@@ -334,7 +352,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/engineering.ts` - Engineering Visual Exporter (v7.1.0)
+### `src/export/visual/modes/engineering.ts` - Engineering Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -342,6 +360,9 @@ The codebase is organized into the following modules:
 | `../../../types/modes/engineering.js` | `EngineeringThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderStadiumNode, renderEdge, getNodeColor, renderMetricsPanel, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
@@ -355,7 +376,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/evidential.ts` - Evidential Visual Exporter (v7.0.3)
+### `src/export/visual/modes/evidential.ts` - Evidential Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -363,6 +384,9 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `EvidentialThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
@@ -377,7 +401,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/first-principles.ts` - First Principles Visual Exporter (v7.0.3)
+### `src/export/visual/modes/first-principles.ts` - First Principles Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -385,6 +409,9 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `FirstPrinciplesThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, calculateSVGHeight, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
@@ -399,7 +426,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/formal-logic.ts` - Formal Logic Visual Exporter (v7.0.3)
+### `src/export/visual/modes/formal-logic.ts` - Formal Logic Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -407,6 +434,9 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `FormalLogicThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
@@ -421,7 +451,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/game-theory.ts` - Game Theory Visual Exporter (v7.0.3)
+### `src/export/visual/modes/game-theory.ts` - Game Theory Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -429,6 +459,9 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `GameTheoryThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `createTreeGraphML, generateGraphML, GraphMLNode, GraphMLEdge` | Import |
 | `../utils/tikz.js` | `createTreeTikZ, generateTikZ, TikZNode, TikZEdge` | Import |
@@ -443,7 +476,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/hybrid.ts` - Hybrid Visual Exporter (v7.0.3)
+### `src/export/visual/modes/hybrid.ts` - Hybrid Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -451,6 +484,9 @@ The codebase is organized into the following modules:
 | `../../../types/core.js` | `HybridThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
@@ -498,7 +534,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/mathematics.ts` - Mathematics Visual Exporter (v7.0.3)
+### `src/export/visual/modes/mathematics.ts` - Mathematics Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -506,6 +542,9 @@ The codebase is organized into the following modules:
 | `../../../types/modes/mathematics.js` | `MathematicsThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
@@ -520,7 +559,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/metareasoning.ts` - MetaReasoning Visual Exporter (v7.0.3)
+### `src/export/visual/modes/metareasoning.ts` - MetaReasoning Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -528,6 +567,9 @@ The codebase is organized into the following modules:
 | `../../../types/modes/metareasoning.js` | `MetaReasoningThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge, GraphMLOptions` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge, TikZOptions` | Import |
@@ -542,7 +584,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/optimization.ts` - Optimization Visual Exporter (v7.0.3)
+### `src/export/visual/modes/optimization.ts` - Optimization Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -550,6 +592,9 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `OptimizationThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
@@ -564,7 +609,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/physics.ts` - Physics Visual Exporter (v7.0.3)
+### `src/export/visual/modes/physics.ts` - Physics Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -572,6 +617,9 @@ The codebase is organized into the following modules:
 | `../../../types/modes/physics.js` | `PhysicsThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge, GraphMLOptions` | Import |
 | `../utils/tikz.js` | `generateTikZ, renderTikZMetrics, TikZNode, TikZEdge, TikZOptions` | Import |
@@ -586,7 +634,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/proof-decomposition.ts` - Proof Decomposition Visual Exporter (v7.0.0)
+### `src/export/visual/modes/proof-decomposition.ts` - Proof Decomposition Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -594,6 +642,9 @@ The codebase is organized into the following modules:
 | `../../../types/modes/mathematics.js` | `ProofDecomposition, AtomicStatement` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/html.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection, renderTable, renderProgressBar` | Import |
 | `../utils/modelica.js` | `sanitizeModelicaId, escapeModelicaString` | Import |
 | `../utils/uml.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
@@ -605,7 +656,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/scientific-method.ts` - Scientific Method Visual Exporter (v7.0.3)
+### `src/export/visual/modes/scientific-method.ts` - Scientific Method Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -613,6 +664,9 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `ScientificMethodThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderStadiumNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
@@ -627,7 +681,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/sequential.ts` - Sequential Visual Exporter (v7.1.0)
+### `src/export/visual/modes/sequential.ts` - Sequential Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -635,9 +689,9 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `SequentialThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
-| `../utils/mermaid.js` | `generateMermaidFlowchart, truncateLabel, getMermaidColor, MermaidNode, MermaidEdge` | Import |
-| `../utils/dot.js` | `generateDotGraph, truncateDotLabel, DotNode, DotEdge` | Import |
-| `../utils/ascii.js` | `generateAsciiHeader, generateAsciiSectionHeader, generateAsciiBulletList` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderStadiumNode, renderEdge, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
@@ -652,7 +706,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/shannon.ts` - Shannon Visual Exporter (v7.0.3)
+### `src/export/visual/modes/shannon.ts` - Shannon Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -660,6 +714,9 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `ShannonThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderStadiumNode, renderHorizontalEdge, renderMetricsPanel, renderLegend, getNodeColor, layoutNodesHorizontally, DEFAULT_SVG_OPTIONS` | Import |
 | `../utils/graphml.js` | `createLinearGraphML` | Import |
 | `../utils/tikz.js` | `TikZNode, TikZEdge, generateTikZ` | Import |
@@ -674,7 +731,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/systems-thinking.ts` - Systems Thinking Visual Exporter (v7.0.3)
+### `src/export/visual/modes/systems-thinking.ts` - Systems Thinking Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -682,6 +739,9 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `SystemsThinkingThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderEdge, renderMetricsPanel, renderLegend, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
 | `../utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
 | `../utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
@@ -696,7 +756,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/modes/temporal.ts` - Temporal Visual Exporter (v7.0.3)
+### `src/export/visual/modes/temporal.ts` - Temporal Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -704,6 +764,9 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `TemporalThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGanttBuilder` | Import |
 | `../utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderEllipseNode, renderHorizontalEdge, renderLegend, getNodeColor, layoutNodesHorizontally, DEFAULT_SVG_OPTIONS` | Import |
 | `../utils/graphml.js` | `createLinearGraphML` | Import |
 | `../utils/tikz.js` | `createLinearTikZ` | Import |
@@ -722,37 +785,41 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/utils/ascii.ts` - ASCII Art Utilities (v7.1.0)
+### `src/export/visual/utils/ascii.ts` - ASCII Art Utilities (v8.5.0)
 
 **Exports:**
-- Interfaces: `AsciiNode`, `AsciiEdge`, `AsciiSection`, `AsciiTableColumn`, `AsciiOptions`, `AsciiTreeNode`
+- Classes: `ASCIIDocBuilder`
+- Interfaces: `AsciiNode`, `AsciiEdge`, `AsciiSection`, `AsciiTableColumn`, `AsciiOptions`, `AsciiTreeNode`, `ASCIIDocBuilderOptions`
 - Functions: `truncateAscii`, `padAscii`, `wrapText`, `indentText`, `generateAsciiHeader`, `generateAsciiSectionHeader`, `generateAsciiBoxedTitle`, `generateAsciiBox`, `generateAsciiBulletList`, `generateAsciiNumberedList`, `generateAsciiTreeList`, `generateAsciiTable`, `getAsciiArrow`, `generateAsciiFlowDiagram`, `generateAsciiSection`, `generateAsciiDocument`, `generateAsciiProgressBar`, `generateAsciiMetric`, `generateAsciiMetricsPanel`, `generateAsciiGraph`, `generateLinearFlowAscii`, `generateHierarchyAscii`
 - Constants: `BOX_CHARS`, `ARROWS`, `BULLETS`
 
 ---
 
-### `src/export/visual/utils/dot.ts` - DOT/GraphViz Utilities (v7.1.0)
+### `src/export/visual/utils/dot.ts` - DOT/GraphViz Utilities (v8.5.0)
 
 **Exports:**
+- Classes: `DOTGraphBuilder`
 - Interfaces: `DotNode`, `DotEdge`, `DotSubgraph`, `DotOptions`
 - Functions: `sanitizeDotId`, `escapeDotString`, `truncateDotLabel`, `renderDotNodeAttrs`, `renderDotEdgeAttrs`, `renderDotNode`, `renderDotEdge`, `renderDotSubgraph`, `getDotColor`, `generateDotGraph`, `generateLinearFlowDot`, `generateHierarchyDot`, `generateNetworkDot`
 - Constants: `DOT_COLORS`
 
 ---
 
-### `src/export/visual/utils/graphml.ts` - GraphML Export Utilities (v7.0.3)
+### `src/export/visual/utils/graphml.ts` - GraphML Export Utilities (v8.5.0)
 
 **Exports:**
-- Interfaces: `GraphMLNode`, `GraphMLEdge`, `GraphMLOptions`
+- Classes: `GraphMLBuilder`
+- Interfaces: `GraphMLNode`, `GraphMLEdge`, `GraphMLOptions`, `GraphMLAttribute`
 - Functions: `generateGraphMLHeader`, `generateGraphMLFooter`, `renderGraphMLNode`, `renderGraphMLEdge`, `generateGraphML`, `createLinearGraphML`, `createTreeGraphML`, `createLayeredGraphML`
 - Constants: `DEFAULT_GRAPHML_OPTIONS`
 
 ---
 
-### `src/export/visual/utils/html.ts` - HTML Export Utilities (v7.1.0)
+### `src/export/visual/utils/html.ts` - HTML Export Utilities (v8.5.0)
 
 **Exports:**
-- Interfaces: `HTMLThemeColors`
+- Classes: `HTMLDocBuilder`
+- Interfaces: `HTMLThemeColors`, `HTMLDocBuilderOptions`
 - Functions: `getHTMLThemeColors`, `generateHTMLHeader`, `generateHTMLFooter`, `escapeHTML`, `renderMetricCard`, `renderProgressBar`, `renderBadge`, `renderTable`, `renderSection`, `renderList`
 
 ---
@@ -781,10 +848,11 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/utils/json.ts` - JSON Visual Export Utilities (v7.1.0)
+### `src/export/visual/utils/json.ts` - JSON Visual Export Utilities (v8.5.0)
 
 **Exports:**
-- Interfaces: `JsonVisualNode`, `JsonVisualEdge`, `JsonVisualGraph`, `JsonVisualOptions`
+- Classes: `JSONExportBuilder`
+- Interfaces: `JsonVisualNode`, `JsonVisualEdge`, `JsonVisualGraph`, `JsonVisualOptions`, `JSONSectionDef`, `JSONExportBuilderOptions`
 - Functions: `createJsonGraph`, `addNode`, `addEdge`, `addMetric`, `addLegendItem`, `serializeGraph`, `generateLinearFlowJson`, `generateHierarchyJson`, `generateNetworkJson`, `generateBayesianJson`, `generateCausalJson`
 
 ---
@@ -819,52 +887,59 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/utils/markdown.ts` - Markdown Export Utilities (v7.1.0)
+### `src/export/visual/utils/markdown.ts` - Markdown Export Utilities (v8.5.0)
 
 **Exports:**
+- Classes: `MarkdownBuilder`
+- Interfaces: `MarkdownBuilderOptions`
 - Functions: `heading`, `bold`, `italic`, `strikethrough`, `inlineCode`, `codeBlock`, `blockquote`, `horizontalRule`, `link`, `image`, `listItem`, `list`, `nestedList`, `table`, `definitionList`, `taskList`, `collapsible`, `badge`, `progressBar`, `metric`, `keyValueSection`, `mermaidBlock`, `section`, `frontmatter`, `document`, `graphNode`, `graphEdge`, `graph`, `escapeMarkdown`, `truncate`
 
 ---
 
-### `src/export/visual/utils/mermaid.ts` - Mermaid Utilities (v7.1.0)
+### `src/export/visual/utils/mermaid.ts` - Mermaid Utilities (v8.5.0)
 
 **Exports:**
-- Interfaces: `MermaidNode`, `MermaidEdge`, `MermaidSubgraph`, `MermaidOptions`
+- Classes: `MermaidGraphBuilder`, `MermaidGanttBuilder`, `MermaidStateDiagramBuilder`
+- Interfaces: `MermaidNode`, `MermaidEdge`, `MermaidSubgraph`, `MermaidOptions`, `GanttTask`, `GanttSection`, `StateDiagramState`, `StateTransition`
 - Functions: `sanitizeMermaidId`, `escapeMermaidLabel`, `truncateLabel`, `getNodeShapeBrackets`, `renderMermaidNode`, `renderMermaidNodeStyle`, `getEdgeArrow`, `renderMermaidEdge`, `renderMermaidSubgraph`, `getMermaidColor`, `generateMermaidFlowchart`, `generateLinearFlowMermaid`, `generateHierarchyMermaid`, `generateMermaidStateDiagram`, `generateMermaidClassDiagram`
 - Constants: `MERMAID_COLORS`
 
 ---
 
-### `src/export/visual/utils/modelica.ts` - Modelica Export Utilities (v7.1.0)
+### `src/export/visual/utils/modelica.ts` - Modelica Export Utilities (v8.5.0)
 
 **Exports:**
-- Interfaces: `ModelicaNode`, `ModelicaEdge`, `ModelicaOptions`
+- Classes: `ModelicaBuilder`
+- Interfaces: `ModelicaNode`, `ModelicaEdge`, `ModelicaOptions`, `ModelicaParameterDef`, `ModelicaVariableDef`, `ModelicaEquationDef`, `ModelicaConnectionDef`, `ModelicaBuilderOptions`
 - Functions: `sanitizeModelicaId`, `escapeModelicaString`, `generateModelicaPackageHeader`, `generateModelicaPackageFooter`, `generateModelicaRecord`, `generateModelicaModel`, `generateLinearFlowModelica`, `generateHierarchyModelica`
 
 ---
 
-### `src/export/visual/utils/svg.ts` - SVG Export Utilities (v7.0.2)
+### `src/export/visual/utils/svg.ts` - SVG Export Utilities (v8.5.0)
 
 **Exports:**
-- Interfaces: `SVGExportOptions`, `SVGNodePosition`, `SVGEdge`, `ColorPalette`
+- Classes: `SVGGroupBuilder`, `SVGBuilder`
+- Interfaces: `SVGExportOptions`, `SVGNodePosition`, `SVGEdge`, `ColorPalette`, `SVGShapeOptions`, `SVGTextOptions`, `SVGLineOptions`, `SVGPathOptions`
 - Functions: `getNodeColor`, `escapeSVGText`, `truncateText`, `generateSVGHeader`, `generateSVGFooter`, `renderRectNode`, `renderStadiumNode`, `renderDiamondNode`, `renderHexagonNode`, `renderEllipseNode`, `renderParallelogramNode`, `renderSubroutineNode`, `renderEdge`, `renderHorizontalEdge`, `renderMetricsPanel`, `renderLegend`, `layoutNodesInLayers`, `layoutNodesHorizontally`, `calculateSVGHeight`
 - Constants: `DEFAULT_SVG_OPTIONS`, `COLOR_PALETTES`
 
 ---
 
-### `src/export/visual/utils/tikz.ts` - TikZ Export Utilities (v7.0.3)
+### `src/export/visual/utils/tikz.ts` - TikZ Export Utilities (v8.5.0)
 
 **Exports:**
-- Interfaces: `TikZNode`, `TikZEdge`, `TikZOptions`
-- Functions: `getTikZColor`, `generateTikZHeader`, `generateTikZFooter`, `renderTikZNode`, `renderTikZNodeRelative`, `renderTikZEdge`, `renderTikZMetrics`, `renderTikZLegend`, `generateTikZ`, `createLinearTikZ`, `createTreeTikZ`, `createLayeredTikZ`
+- Classes: `TikZBuilder`
+- Interfaces: `TikZNode`, `TikZEdge`, `TikZOptions`, `TikZNodeOptions`, `TikZEdgeOptions`, `TikZScopeOptions`
+- Functions: `getTikZColor`, `escapeLatex`, `generateTikZHeader`, `generateTikZFooter`, `renderTikZNode`, `renderTikZNodeRelative`, `renderTikZEdge`, `renderTikZMetrics`, `renderTikZLegend`, `generateTikZ`, `createLinearTikZ`, `createTreeTikZ`, `createLayeredTikZ`
 - Constants: `DEFAULT_TIKZ_OPTIONS`
 
 ---
 
-### `src/export/visual/utils/uml.ts` - UML/PlantUML Export Utilities (v7.1.0)
+### `src/export/visual/utils/uml.ts` - UML/PlantUML Export Utilities (v8.5.0)
 
 **Exports:**
-- Interfaces: `UmlNode`, `UmlEdge`, `UmlOptions`
+- Classes: `UMLBuilder`
+- Interfaces: `UmlNode`, `UmlEdge`, `UmlOptions`, `UMLClassDef`, `UMLInterfaceDef`, `UMLRelationDef`, `UMLNoteDef`, `UMLBuilderOptions`
 - Functions: `sanitizeUmlId`, `escapeUml`, `generateUmlHeader`, `generateUmlFooter`, `renderUmlNode`, `renderUmlEdge`, `generateUmlDiagram`, `generateClassDiagram`, `generateComponentDiagram`, `generateActivityDiagram`, `generateStateDiagram`, `generateUseCaseDiagram`
 
 ---
@@ -2252,20 +2327,6 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/repositories/index.ts` - Repository module exports (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./ISessionRepository.js` | `ISessionRepository` | Re-export |
-| `./FileSessionRepository.js` | `FileSessionRepository` | Re-export |
-| `./MemorySessionRepository.js` | `MemorySessionRepository` | Re-export |
-
-**Exports:**
-- Re-exports: `ISessionRepository`, `FileSessionRepository`, `MemorySessionRepository`
-
----
-
 ### `src/repositories/ISessionRepository.ts` - Session Repository Interface (v3.4.5)
 
 **Internal Dependencies:**
@@ -2285,6 +2346,20 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Classes: `MemorySessionRepository`
+
+---
+
+### `src/repositories/index.ts` - Repository module exports (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./ISessionRepository.js` | `ISessionRepository` | Re-export |
+| `./FileSessionRepository.js` | `FileSessionRepository` | Re-export |
+| `./MemorySessionRepository.js` | `MemorySessionRepository` | Re-export |
+
+**Exports:**
+- Re-exports: `ISessionRepository`, `FileSessionRepository`, `MemorySessionRepository`
 
 ---
 
@@ -2363,20 +2438,6 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/services/index.ts` - Services module exports (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./ThoughtFactory.js` | `ThoughtFactory, ThoughtFactoryConfig` | Re-export |
-| `./ExportService.js` | `ExportService` | Re-export |
-| `./ModeRouter.js` | `ModeRouter` | Re-export |
-
-**Exports:**
-- Re-exports: `ThoughtFactory`, `ThoughtFactoryConfig`, `ExportService`, `ModeRouter`
-
----
-
 ### `src/services/MetaMonitor.ts` - Meta-Reasoning Monitor Service (v6.0.0)
 
 **Internal Dependencies:**
@@ -2431,7 +2492,35 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/services/index.ts` - Services module exports (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./ThoughtFactory.js` | `ThoughtFactory, ThoughtFactoryConfig` | Re-export |
+| `./ExportService.js` | `ExportService` | Re-export |
+| `./ModeRouter.js` | `ModeRouter` | Re-export |
+
+**Exports:**
+- Re-exports: `ThoughtFactory`, `ThoughtFactoryConfig`, `ExportService`, `ModeRouter`
+
+---
+
 ## Session Dependencies
+
+### `src/session/SessionMetricsCalculator.ts` - Session Metrics Calculator (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `ThinkingSession, SessionMetrics, Thought` | Import |
+| `../types/core.js` | `isTemporalThought, isGameTheoryThought, isEvidentialThought` | Import |
+| `../validation/cache.js` | `validationCache` | Import |
+
+**Exports:**
+- Classes: `SessionMetricsCalculator`
+
+---
 
 ### `src/session/index.ts` - Session module exports (v4.3.0)
 
@@ -2469,20 +2558,6 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Classes: `SessionManager`
-
----
-
-### `src/session/SessionMetricsCalculator.ts` - Session Metrics Calculator (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `ThinkingSession, SessionMetrics, Thought` | Import |
-| `../types/core.js` | `isTemporalThought, isGameTheoryThought, isEvidentialThought` | Import |
-| `../validation/cache.js` | `validationCache` | Import |
-
-**Exports:**
-- Classes: `SessionMetricsCalculator`
 
 ---
 
@@ -4166,25 +4241,25 @@ The codebase is organized into the following modules:
 | `index` | 4 files | 0 files |
 | `profiles` | 0 files | 2 files |
 | `index` | 5 files | 2 files |
-| `abductive` | 11 files | 1 files |
-| `analogical` | 11 files | 1 files |
-| `bayesian` | 10 files | 1 files |
-| `causal` | 11 files | 1 files |
-| `computability` | 9 files | 1 files |
-| `counterfactual` | 11 files | 1 files |
-| `engineering` | 10 files | 1 files |
-| `evidential` | 11 files | 1 files |
-| `first-principles` | 11 files | 1 files |
-| `formal-logic` | 11 files | 1 files |
-| `game-theory` | 11 files | 1 files |
-| `hybrid` | 11 files | 1 files |
+| `abductive` | 14 files | 1 files |
+| `analogical` | 14 files | 1 files |
+| `bayesian` | 13 files | 1 files |
+| `causal` | 14 files | 1 files |
+| `computability` | 12 files | 1 files |
+| `counterfactual` | 14 files | 1 files |
+| `engineering` | 13 files | 1 files |
+| `evidential` | 14 files | 1 files |
+| `first-principles` | 14 files | 1 files |
+| `formal-logic` | 14 files | 1 files |
+| `game-theory` | 14 files | 1 files |
+| `hybrid` | 14 files | 1 files |
 | `index` | 22 files | 2 files |
-| `mathematics` | 11 files | 1 files |
-| `metareasoning` | 11 files | 1 files |
-| `optimization` | 11 files | 1 files |
-| `physics` | 11 files | 1 files |
-| `proof-decomposition` | 8 files | 1 files |
-| `scientific-method` | 11 files | 1 files |
+| `mathematics` | 14 files | 1 files |
+| `metareasoning` | 14 files | 1 files |
+| `optimization` | 14 files | 1 files |
+| `physics` | 14 files | 1 files |
+| `proof-decomposition` | 11 files | 1 files |
+| `scientific-method` | 14 files | 1 files |
 
 ---
 
@@ -4268,9 +4343,9 @@ graph TD
 
     subgraph Repositories
         N28[FileSessionRepository]
-        N29[index]
-        N30[ISessionRepository]
-        N31[MemorySessionRepository]
+        N29[ISessionRepository]
+        N30[MemorySessionRepository]
+        N31[index]
     end
 
     subgraph Search
@@ -4282,16 +4357,16 @@ graph TD
 
     subgraph Services
         N36[ExportService]
-        N37[index]
-        N38[MetaMonitor]
-        N39[ModeRouter]
-        N40[ThoughtFactory]
+        N37[MetaMonitor]
+        N38[ModeRouter]
+        N39[ThoughtFactory]
+        N40[index]
     end
 
     subgraph Session
-        N41[index]
-        N42[manager]
-        N43[SessionMetricsCalculator]
+        N41[SessionMetricsCalculator]
+        N42[index]
+        N43[manager]
         N44[file-store]
         N45[index]
         N46[...1 more]
@@ -4354,8 +4429,8 @@ graph TD
     N8 --> N9
     N8 --> N7
     N11 --> N61
-    N13 --> N37
-    N13 --> N41
+    N13 --> N40
+    N13 --> N42
     N13 --> N53
     N13 --> N61
     N14 --> N67
@@ -4368,7 +4443,7 @@ graph TD
     N23 --> N26
     N23 --> N24
     N24 --> N26
-    N28 --> N30
+    N28 --> N29
     N28 --> N61
     N28 --> N68
     N28 --> N65
@@ -4382,12 +4457,12 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 250 |
 | Total Modules | 16 |
-| Total Lines of Code | 100542 |
-| Total Exports | 1411 |
+| Total Lines of Code | 105125 |
+| Total Exports | 1426 |
 | Total Re-exports | 684 |
-| Total Classes | 136 |
-| Total Interfaces | 506 |
-| Total Functions | 442 |
+| Total Classes | 150 |
+| Total Interfaces | 533 |
+| Total Functions | 443 |
 | Total Type Guards | 85 |
 | Total Enums | 3 |
 | Type-only Imports | 236 |
@@ -4396,5 +4471,5 @@ graph TD
 
 ---
 
-*Last Updated*: 2025-12-25
-*Version*: 8.4.0
+*Last Updated*: 2025-12-26
+*Version*: 8.5.0

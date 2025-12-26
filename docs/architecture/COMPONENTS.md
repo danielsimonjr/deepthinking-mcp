@@ -1,6 +1,6 @@
 # Component Architecture
 
-**Version**: 8.3.2 | **Last Updated**: 2025-12-22
+**Version**: 8.5.0 | **Last Updated**: 2025-12-26
 
 ## Core Components
 
@@ -9,7 +9,7 @@
 #### `src/index.ts` - MCP Server Entry Point
 **Purpose**: Main server implementation and tool request orchestration
 
-**12 Focused Tools** (v7.5.0+):
+**13 Focused Tools** (v8.5.0):
 - `deepthinking_core` - Fundamental reasoning (inductive, deductive, abductive)
 - `deepthinking_standard` - Standard workflows (sequential, shannon, hybrid)
 - `deepthinking_mathematics` - Mathematical/physical/computability reasoning
@@ -22,6 +22,7 @@
 - `deepthinking_engineering` - Engineering/algorithmic reasoning
 - `deepthinking_academic` - Academic research (synthesis, argumentation, critique, analysis)
 - `deepthinking_session` - Session management
+- `deepthinking_analyze` - Multi-mode analysis with presets and merge strategies
 
 **Dependencies**:
 - ThoughtFactory
