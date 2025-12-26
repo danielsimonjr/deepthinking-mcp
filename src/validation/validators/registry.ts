@@ -45,6 +45,12 @@ const VALIDATOR_REGISTRY: Record<string, ValidatorConfig> = {
   optimization: { module: './modes/optimization.js', className: 'OptimizationValidator' },
   formallogic: { module: './modes/formallogic.js', className: 'FormalLogicValidator' },
   metareasoning: { module: './modes/metareasoning.js', className: 'MetaReasoningValidator' },
+  // Phase 14: Academic and algorithmic validators (cherry-picked from PR #166)
+  algorithmic: { module: './modes/algorithmic.js', className: 'AlgorithmicValidator' },
+  synthesis: { module: './modes/synthesis.js', className: 'SynthesisValidator' },
+  argumentation: { module: './modes/argumentation.js', className: 'ArgumentationValidator' },
+  critique: { module: './modes/critique.js', className: 'CritiqueValidator' },
+  analysis: { module: './modes/analysis.js', className: 'AnalysisValidator' },
 };
 
 /**
