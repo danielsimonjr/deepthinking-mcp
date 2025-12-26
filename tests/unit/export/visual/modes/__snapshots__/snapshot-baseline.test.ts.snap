@@ -1,0 +1,1002 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Abductive Mode Exporter Snapshots > ASCII format 1`] = `
+"Abductive Hypothesis Comparison:
+================================
+
+Observations:
+  • Observation 1 (confidence: 0.90)
+  • Observation 2 (confidence: 0.85)
+
+Hypotheses:
+  ★ Hypothesis 1 explains the observations based on prior knowledge and inference patterns
+    Score: 0.80
+    Assumptions: Assumption A, Assumption B
+
+  • Hypothesis 2 provides an alternative explanation with different assumptions
+    Score: 0.60
+    Assumptions: Assumption C
+
+Best Explanation: Hypothesis 1 explains the observations based on prior knowledge and inference patterns
+"
+`;
+
+exports[`Abductive Mode Exporter Snapshots > DOT format 1`] = `
+"digraph AbductiveHypotheses {
+  rankdir=TD;
+  node [shape=box, style=rounded];
+
+  Observations [label="Observations", shape=ellipse];
+
+  h1 [label="Hypothesis 1 explains the observations based on pr... (0.80)", style=filled, fillcolor=lightblue];
+  Observations -> h1;
+  h2 [label="Hypothesis 2 provides an alternative explanation w... (0.60)"];
+  Observations -> h2;
+}
+"
+`;
+
+exports[`Abductive Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+  Observations["Observations"]
+  h1["Hypothesis 1 explains the observations based on pr... (0.80)"]
+  Observations --> h1
+  h2["Hypothesis 2 provides an alternative explanation w... (0.60)"]
+  Observations --> h2
+
+  style h1 fill:#a8d5ff,stroke:#333,stroke-width:3px
+"
+`;
+
+exports[`Analogical Mode Exporter Snapshots > ASCII format 1`] = `
+"Analogical Domain Mapping:
+==========================
+
+Source Domain: Source Domain
+The source domain for analogy
+
+Target Domain: Target Domain
+The target domain for analogy
+
+Mappings:
+  Entity A ←→ Entity X (confidence: 0.90)
+    Similar structural role
+  Entity B ←→ Entity Y (confidence: 0.80)
+    Similar behavioral patterns
+
+Analogy Strength: 0.85
+"
+`;
+
+exports[`Analogical Mode Exporter Snapshots > DOT format 1`] = `
+"digraph AnalogicalMapping {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+
+  subgraph cluster_source {
+    label="Source Domain";
+    style=filled;
+    fillcolor=lightyellow;
+
+    src_src_a [label="Entity A"];
+    src_src_b [label="Entity B"];
+  }
+
+  subgraph cluster_target {
+    label="Target Domain";
+    style=filled;
+    fillcolor=lightblue;
+
+    tgt_tgt_x [label="Entity X"];
+    tgt_tgt_y [label="Entity Y"];
+  }
+
+  src_src_a -> tgt_tgt_x [style=dashed, label="0.90"];
+  src_src_b -> tgt_tgt_y [style=dashed, label="0.80"];
+}
+"
+`;
+
+exports[`Analogical Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph LR
+  subgraph Source["Source Domain"]
+    src_src_a["Entity A"]
+    src_src_b["Entity B"]
+  end
+
+  subgraph Target["Target Domain"]
+    tgt_tgt_x["Entity X"]
+    tgt_tgt_y["Entity Y"]
+  end
+
+  src_src_a -.->|0.90| tgt_tgt_x
+  src_src_b -.->|0.80| tgt_tgt_y
+
+  style src_src_a fill:#ffd699
+  style src_src_b fill:#ffd699
+  style tgt_tgt_x fill:#a8d5ff
+  style tgt_tgt_y fill:#a8d5ff
+"
+`;
+
+exports[`Bayesian Mode Exporter Snapshots > ASCII format 1`] = `
+"Bayesian Network:
+=================
+
+Hypothesis: Test hypothesis
+
+Prior Probability: 0.300
+  Justification: Base rate
+
+Posterior Probability: 0.670
+  Calculation: Bayes rule
+"
+`;
+
+exports[`Bayesian Mode Exporter Snapshots > DOT format 1`] = `
+"digraph BayesianNetwork {
+  rankdir=LR;
+  node [shape=ellipse];
+
+  Prior [label="Prior: 0.300"];
+  Hypothesis [label="Hypothesis", shape=box];
+  Evidence [label="Evidence"];
+  Posterior [label="Posterior: 0.670", shape=doublecircle];
+
+  Prior -> Hypothesis;
+  Evidence -> Hypothesis;
+  Hypothesis -> Posterior;
+}
+"
+`;
+
+exports[`Bayesian Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph LR
+  H([Hypothesis])
+  Prior[Prior: 0.300]
+  Evidence[Evidence]
+  Posterior[[Posterior: 0.670]]
+
+  Prior --> H
+  Evidence --> H
+  H --> Posterior
+
+  style Prior fill:#a8d5ff
+  style Posterior fill:#81c784
+"
+`;
+
+exports[`Causal Mode Exporter Snapshots > ASCII format 1`] = `
+"Causal Graph:
+=============
+
+Nodes:
+  [CAUSE] Cause: Root cause
+  [EFFECT] Effect: Final effect
+
+Edges:
+  Cause --> Effect (strength: 0.80)
+"
+`;
+
+exports[`Causal Mode Exporter Snapshots > DOT format 1`] = `
+"digraph CausalGraph {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+  c1 [label="Cause", shape=ellipse];
+  e1 [label="Effect", shape=doubleoctagon];
+
+  c1 -> e1 [label="0.80"];
+}
+"
+`;
+
+exports[`Causal Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TB
+  c1([Cause])
+  e1[[Effect]]
+
+  c1 --> |0.80| e1
+
+  style c1 fill:#a8d5ff
+  style e1 fill:#ffd699
+"
+`;
+
+exports[`Computability Mode Exporter Snapshots > ASCII format 1`] = `
+"COMPUTABILITY ANALYSIS
+==================================================
+
+Type: undefined
+"
+`;
+
+exports[`Computability Mode Exporter Snapshots > DOT format 1`] = `
+"digraph Computability {
+  rankdir=TD;
+  type [label="undefined"];
+}
+"
+`;
+
+exports[`Computability Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+  type["undefined"]
+"
+`;
+
+exports[`Counterfactual Mode Exporter Snapshots > ASCII format 1`] = `
+"Counterfactual Scenario Tree:
+=============================
+
+Intervention Point: Change X to Y
+Timing: early
+Feasibility: 0.85
+
+┌─ Actual Scenario:
+│  Actual Outcome
+│  What actually happened
+
+└─ Counterfactual Scenarios:
+   ├─ Alternative Outcome (likelihood: 0.70)
+   │  What would have happened
+"
+`;
+
+exports[`Counterfactual Mode Exporter Snapshots > DOT format 1`] = `
+"digraph CounterfactualScenarios {
+  rankdir=TD;
+  node [shape=box, style=rounded];
+
+  intervention [label="Change X to Y", shape=diamond];
+
+  actual_1 [label="Actual: Actual Outcome", style=filled, fillcolor=lightyellow];
+  intervention -> actual_1 [label="no change"];
+
+  cf_scenario_1 [label="CF: Alternative Outcome (0.70)", style=filled, fillcolor=lightblue];
+  intervention -> cf_scenario_1 [label="intervene"];
+}
+"
+`;
+
+exports[`Counterfactual Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+  intervention["Change X to Y"]
+  actual_1["Actual: Actual Outcome"]
+  intervention -->|no change| actual_1
+  cf_scenario_1["CF: Alternative Outcome (0.70)"]
+  intervention -->|intervene| cf_scenario_1
+
+  style actual_1 fill:#ffd699
+  style cf_scenario_1 fill:#a8d5ff
+"
+`;
+
+exports[`Engineering Mode Exporter Snapshots > ASCII format 1`] = `
+"╔══════════════════════════════════════════════════════════╗
+║ 🔧 ENGINEERING: SYSTEM                                   ║
+╠══════════════════════════════════════════════════════════╣
+║ Challenge: Build a scalable microservices architecture wi║
+╠──────────────────────────────────────────────────────────╣
+║ 📋 REQUIREMENTS                                          ║
+║──────────────────────────────────────────────────────────║
+║ [✓] r1: High Availability Requirement                    ║
+║ [⚙] r2: Scalability Requirement                          ║
+║   Coverage: 1/2 verified                                 ║
+╠──────────────────────────────────────────────────────────╣
+║ 📝 DESIGN DECISIONS                                      ║
+║──────────────────────────────────────────────────────────║
+║ [✓] d1: Use Kubernetes                                   ║
+║ [?] d2: Event-driven architecture                        ║
+╠──────────────────────────────────────────────────────────╣
+║ 📊 ASSESSMENT                                            ║
+║   Confidence: 85%                                        ║
+║   Key Risks: 2                                           ║
+║   Open Issues: 2                                         ║
+╚══════════════════════════════════════════════════════════╝"
+`;
+
+exports[`Engineering Mode Exporter Snapshots > DOT format 1`] = `
+"digraph EngineeringAnalysis {
+  rankdir=TB;
+  node [fontname="Arial", fontsize=10];
+  edge [fontname="Arial", fontsize=9];
+
+  challenge [label="Build a scalable microservices architect", shape=box, style=filled, fillcolor=lightblue];
+
+  subgraph cluster_requirements {
+    label="Requirements";
+    style=filled;
+    fillcolor=lightyellow;
+    r1 [label="r1\\nHigh Availability Re", color=green];
+    r2 [label="r2\\nScalability Requirem", color=blue];
+  }
+  challenge -> r1;
+
+  subgraph cluster_decisions {
+    label="Design Decisions";
+    style=filled;
+    fillcolor=lavender;
+    d1 [label="d1\\nUse Kubernetes", shape=box];
+    d2 [label="d2\\nEvent-driven archite", shape=ellipse];
+  }
+  challenge -> d1;
+}"
+`;
+
+exports[`Engineering Mode Exporter Snapshots > Mermaid format 1`] = `
+"flowchart TB
+  title["🔧 SYSTEM Analysis"]
+  title --> challenge["Build a scalable microservices architecture with h..."]
+
+  subgraph Requirements ["📋 Requirements"]
+    r1["✓ High Availability Requirement"]
+    r2["⚙ Scalability Requirement"]
+  end
+  challenge --> Requirements
+
+  subgraph Decisions ["📝 Design Decisions"]
+    d1(["✓ Use Kubernetes"])
+    d2(["? Event-driven architecture"])
+  end
+  challenge --> Decisions
+
+  metrics["📊 Confidence: 85%"]
+  challenge --> metrics"
+`;
+
+exports[`Evidential Mode Exporter Snapshots > ASCII format 1`] = `
+"Evidential Belief Visualization:
+================================
+
+Frame of Discernment:
+  (not defined)
+
+"
+`;
+
+exports[`Evidential Mode Exporter Snapshots > DOT format 1`] = `
+"digraph EvidentialBeliefs {
+  rankdir=TD;
+  node [shape=box, style=rounded];
+
+  Frame [label="Frame of Discernment", shape=ellipse];
+
+}
+"
+`;
+
+exports[`Evidential Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+  Frame["Frame of Discernment"]
+"
+`;
+
+exports[`First Principles Mode Exporter Snapshots > ASCII format 1`] = `
+"First-Principles Derivation:
+============================
+
+Question: What are the fundamental truths that govern this problem?
+
+Foundational Principles:
+------------------------
+[p1] AXIOM
+  Statement: Principle 1: Every effect has a cause, and every action has a consequence
+  Justification: Fundamental law of causality
+  Confidence: 1.00
+
+[p2] DEFINITION
+  Statement: Principle 2: Systems tend toward equilibrium unless perturbed by external forces
+  Justification: Thermodynamic principle
+  Depends on: p1
+  Confidence: 0.95
+
+Derivation Chain:
+----------------
+Step 1 (using principle: p1)
+  Inference: From the causality principle, we can derive that the observed phenomenon must have an underlying cause
+  Logical form: P → Q
+  Confidence: 0.90
+
+Step 2 (using principle: p2)
+  Inference: Applying the equilibrium principle, the system will stabilize at a predictable state
+  Logical form: ∀x(S(x) → E(x))
+  Confidence: 0.85
+
+Conclusion:
+----------
+Based on first principles, the system behavior is deterministic and predictable
+Derivation chain: Steps [1, 2]
+Certainty: 0.88
+
+Limitations:
+  - Assumes closed system
+  - Ignores quantum effects
+"
+`;
+
+exports[`First Principles Mode Exporter Snapshots > DOT format 1`] = `
+"digraph FirstPrinciples {
+  rankdir=TD;
+  node [shape=box, style=rounded];
+
+  Q [label="Question:\\nWhat are the fundamental truths that govern this problem?", shape=ellipse, style=bold];
+
+  p1 [label="AXIOM:\\nPrinciple 1: Every effect has a cause, and every action has ...\\nconf: 1.00", shape=ellipse];
+  p2 [label="DEFINITION:\\nPrinciple 2: Systems tend toward equilibrium unless perturbe...\\nconf: 0.95", shape=box];
+  p1 -> p2;
+
+  Step1 [label="Step 1:\\nFrom the causality principle, we can derive that the observe...\\nconf: 0.90"];
+  p1 -> Step1 [style=dashed, label="applies"];
+  Step2 [label="Step 2:\\nApplying the equilibrium principle, the system will stabiliz...\\nconf: 0.85"];
+  p2 -> Step2 [style=dashed, label="applies"];
+
+  C [label="Conclusion:\\nBased on first principles, the system behavior is determinis...\\ncertainty: 0.88", shape=doubleoctagon, style=bold];
+  Step1 -> C;
+  Step2 -> C;
+}
+"
+`;
+
+exports[`First Principles Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+  Q["Question: What are the fundamental truths that govern this problem?"]
+
+  p1([AXIOM: Principle 1: Every effect has a cause, and every a...])
+  p2[[DEFINITION: Principle 2: Systems tend toward equilibrium unles...]]
+  p1 --> p2
+
+  Step1["Step 1: From the causality principle, we can derive that t..."]
+  p1 -.->|applies| Step1
+  Step1 -.->|conf: 0.90| Step1
+  Step2["Step 2: Applying the equilibrium principle, the system wil..."]
+  p2 -.->|applies| Step2
+  Step2 -.->|conf: 0.85| Step2
+
+  C["Conclusion: Based on first principles, the system behavior is ..."]
+  Step1 --> C
+  Step2 --> C
+  C -.->|certainty: 0.88| C
+
+  style p1 fill:#a8d5ff
+  style p2 fill:#ce93d8
+  style C fill:#66bb6a
+"
+`;
+
+exports[`Formal Logic Mode Exporter Snapshots > ASCII format 1`] = `
+"Formal Logic Proof:
+==================
+
+"
+`;
+
+exports[`Formal Logic Mode Exporter Snapshots > DOT format 1`] = `
+"digraph FormalLogic {
+  rankdir=TD;
+  node [shape=box, style=rounded];
+
+}
+"
+`;
+
+exports[`Formal Logic Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+
+"
+`;
+
+exports[`Game Theory Mode Exporter Snapshots > ASCII format 1`] = `
+"Game: Untitled
+========================================
+
+"
+`;
+
+exports[`Game Theory Mode Exporter Snapshots > DOT format 1`] = `
+"digraph GameTree {
+  rankdir=TD;
+  node [shape=circle];
+
+  root [label="No game"];
+}
+"
+`;
+
+exports[`Game Theory Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+  root[No game defined]
+"
+`;
+
+exports[`Hybrid Mode Exporter Snapshots > ASCII format 1`] = `
+"Hybrid Mode Orchestration:
+==========================
+
+Primary Mode: Sequential
+
+Secondary Features:
+  1. causal-links
+  2. temporal-ordering
+
+"
+`;
+
+exports[`Hybrid Mode Exporter Snapshots > DOT format 1`] = `
+"digraph HybridOrchestration {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+  hybrid_mode [label="Hybrid Mode", shape=doubleoctagon];
+  primary_sequential [label="Sequential", shape=box, style="filled,rounded", fillcolor=lightblue];
+  hybrid_mode -> primary_sequential [style=bold, penwidth=2];
+  secondary_features [label="Secondary Features", shape=ellipse];
+  hybrid_mode -> secondary_features;
+  feature_0 [label="causal-links"];
+  secondary_features -> feature_0;
+  feature_1 [label="temporal-ordering"];
+  secondary_features -> feature_1;
+}
+"
+`;
+
+exports[`Hybrid Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TB
+  hybrid_mode(("Hybrid Mode"))
+  primary_sequential[["Sequential"]]
+  hybrid_mode ==> primary_sequential
+  secondary_features(["Secondary Features"])
+  hybrid_mode --> secondary_features
+  feature_0["causal-links"]
+  secondary_features --> feature_0
+  feature_1["temporal-ordering"]
+  secondary_features --> feature_1
+
+  style hybrid_mode fill:#90EE90
+  style primary_sequential fill:#87CEEB
+  style secondary_features fill:#FFD700
+"
+`;
+
+exports[`Mathematics Mode Exporter Snapshots > ASCII format 1`] = `
+"Mathematics Derivation:
+=======================
+
+Type: proof
+Uncertainty: NaN%
+
+"
+`;
+
+exports[`Mathematics Mode Exporter Snapshots > DOT format 1`] = `
+"digraph MathematicsDerivation {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+  type_proof [label="Proof", shape=doubleoctagon];
+}
+"
+`;
+
+exports[`Mathematics Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TB
+  type_proof[["Proof"]]
+
+  style type_proof fill:#90EE90
+"
+`;
+
+exports[`Meta Reasoning Mode Exporter Snapshots > ASCII format 1`] = `
+"Meta-Reasoning Analysis:
+========================
+
+CURRENT STRATEGY
+----------------
+Mode: sequential
+Approach: Systematic decomposition with parallel evaluation
+Thoughts Spent: 5
+Progress Indicators:
+  1. [object Object]
+  2. [object Object]
+
+STRATEGY EVALUATION
+-------------------
+Effectiveness: 85.0%
+Efficiency: 85.0%
+Confidence: 88.0%
+Progress Rate: 0.72 insights/thought
+Quality Score: 87.0%
+Strengths:
+  + 1. Fast convergence
+  + 2. Low resource usage
+Issues:
+  - 1. Limited exploration depth
+  - 2. May miss edge cases
+
+ALTERNATIVE STRATEGIES
+----------------------
+[1] causal
+    Reasoning: undefined
+    Expected Benefit: undefined
+    Switching Cost: NaN%
+    Recommendation Score: 75%
+[2] bayesian
+    Reasoning: undefined
+    Expected Benefit: undefined
+    Switching Cost: NaN%
+    Recommendation Score: 65%
+
+RECOMMENDATION
+--------------
+Action: continue
+Target Mode: causal
+Justification: Causal mode offers better exploration
+Confidence: NaN%
+Expected Improvement: undefined
+
+RESOURCE ALLOCATION
+-------------------
+Time Spent: 1500ms
+Thoughts Remaining: 10
+Complexity: medium
+Urgency: undefined
+Recommendation: undefined
+
+QUALITY METRICS
+---------------
+Logical Consistency: NaN%
+Evidence Quality: NaN%
+Completeness: 75.0%
+Originality: NaN%
+Clarity: NaN%
+Overall Quality: 82.0%
+
+SESSION CONTEXT
+---------------
+Session ID: session-meta-1
+Total Thoughts: 15
+Mode Switches: 2
+Problem Type: analytical
+Modes Used: sequential, causal, bayesian
+Historical Effectiveness: 78.0%
+"
+`;
+
+exports[`Meta Reasoning Mode Exporter Snapshots > DOT format 1`] = `
+"digraph MetaReasoning {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+  subgraph cluster_current {
+    label="Current Strategy";
+    style=filled;
+    fillcolor=lightblue;
+    current_strategy [label="Systematic decomposition with "];
+    current_mode [label="sequential", shape=ellipse];
+    current_strategy -> current_mode;
+    evaluation [label="Eff: 85%", shape=diamond];
+    current_strategy -> evaluation;
+  }
+
+  subgraph cluster_alternatives {
+    label="Alternatives";
+    style=filled;
+    fillcolor=lightyellow;
+    alt_0 [label="causal\\n75%"];
+    alt_1 [label="bayesian\\n65%"];
+  }
+
+  recommendation [label="continue\\n→ causal", shape=hexagon, style="filled", fillcolor=lightgreen];
+  quality [label="Quality: 82%", shape=diamond];
+  current_strategy -> recommendation [style=bold, penwidth=2];
+  alt_0 -> recommendation [style=dashed];
+  alt_1 -> recommendation [style=dashed];
+}
+"
+`;
+
+exports[`Meta Reasoning Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TB
+  meta_reasoning(("Meta-Reasoning"))
+  current_strategy[["Systematic decomposition with parallel evaluation"]]
+  meta_reasoning ==> current_strategy
+  current_mode(["Mode: sequential"])
+  current_strategy --> current_mode
+  evaluation{{"Effectiveness: 85%"}}
+  current_strategy --> evaluation
+  issues>"Issues: 2"]
+  evaluation --> issues
+  strengths>"Strengths: 2"]
+  evaluation --> strengths
+  alternatives(["Alternative Strategies"])
+  meta_reasoning --> alternatives
+  alt_0["causal: 75%"]
+  alternatives --> alt_0
+  alt_1["bayesian: 65%"]
+  alternatives --> alt_1
+  recommendation[/"continue → causal"/]
+  meta_reasoning ==> recommendation
+  rec_confidence{{"Confidence: NaN%"}}
+  recommendation --> rec_confidence
+  quality{{"Quality: 82%"}}
+  meta_reasoning -.-> quality
+  resources[("Complexity: medium")]
+  meta_reasoning -.-> resources
+  session>"Thoughts: 15"]
+  meta_reasoning -.-> session
+
+  style meta_reasoning fill:#DDA0DD
+  style current_strategy fill:#87CEEB
+  style recommendation fill:#90EE90
+  style alternatives fill:#FFD700
+"
+`;
+
+exports[`Optimization Mode Exporter Snapshots > ASCII format 1`] = `
+"Optimization Problem:
+====================
+
+Problem: Maximize Resource Allocation
+Type: undefined
+-
+
+Decision Variables:
+  x (continuous)
+    Domain: [0, 100]
+  y (continuous)
+    Domain: [0, 50]
+
+Constraints:
+  Budget Constraint (undefined)
+    undefined
+
+Objectives:
+  MAXIMIZE: Maximize Output
+    undefined
+
+Solution:
+  Quality: 0.95
+"
+`;
+
+exports[`Optimization Mode Exporter Snapshots > DOT format 1`] = `
+"digraph Optimization {
+  rankdir=TD;
+  node [shape=box, style=rounded];
+
+  Problem [label="Problem:\\nMaximize Resource Allocation", shape=ellipse];
+
+  subgraph cluster_variables {
+    label="Decision Variables";
+    var_x [label="x\\n[0, 100]"];
+    var_y [label="y\\n[0, 50]"];
+  }
+
+  subgraph cluster_constraints {
+    label="Constraints";
+    c1 [label="Budget Constraint", shape=diamond];
+  }
+
+  obj_1 [label="maximize:\\nMaximize Output"];
+  Solution [label="Solution\\nquality: 0.95", shape=doubleoctagon, style=filled, fillcolor=lightgreen];
+  obj_1 -> Solution;
+}
+"
+`;
+
+exports[`Optimization Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+  Problem["Problem: Maximize Resource Allocation"]
+
+  subgraph Variables["Decision Variables"]
+    var_x["x [0,100]"]
+    var_y["y [0,50]"]
+  end
+
+  subgraph Constraints["Constraints"]
+    c1["Budget Constraint"]
+  end
+
+  obj_1["maximize: Maximize Output"]
+
+  Solution["Solution (quality: 0.95)"]
+  obj_1 --> Solution
+
+  style Solution fill:#a5d6a7
+"
+`;
+
+exports[`Physics Mode Exporter Snapshots > ASCII format 1`] = `
+"Physics Analysis:
+=================
+
+Type: physics
+Uncertainty: NaN%
+
+"
+`;
+
+exports[`Physics Mode Exporter Snapshots > DOT format 1`] = `
+"digraph PhysicsVisualization {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+  type_physics [label="Physics", shape=doubleoctagon];
+  uncertainty [label="NaN%", shape=diamond];
+}
+"
+`;
+
+exports[`Physics Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TB
+  type_physics[["Physics"]]
+  uncertainty{{Uncertainty: NaN%}}
+
+  style type_physics fill:#87CEEB
+"
+`;
+
+exports[`Scientific Method Mode Exporter Snapshots > ASCII format 1`] = `
+"Scientific Method Process:
+==========================
+
+Conclusion:
+Hypothesis supported
+Confidence: 0.95
+"
+`;
+
+exports[`Scientific Method Mode Exporter Snapshots > DOT format 1`] = `
+"digraph ScientificMethod {
+  rankdir=TD;
+  node [shape=box, style=rounded];
+
+  Stats [label="Statistical Analysis"];
+  Conclusion [label="Conclusion:\\nHypothesis supported...\\nconf: 0.95", shape=doubleoctagon];
+  Stats -> Conclusion;
+}
+"
+`;
+
+exports[`Scientific Method Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+  Stats["Statistical Analysis"]
+
+  Conclusion["Conclusion: Hypothesis supported... (conf: 0.95)"]
+  Stats --> Conclusion
+
+  style Conclusion fill:#a5d6a7
+"
+`;
+
+exports[`Sequential Mode Exporter Snapshots > ASCII format 1`] = `
+"Sequential Dependency Graph
+===========================
+
+Current Thought: seq-1
+Content: Sequential reasoning step...
+"
+`;
+
+exports[`Sequential Mode Exporter Snapshots > DOT format 1`] = `
+"digraph SequentialDependency {
+  rankdir=TB;
+  node [shape=box, style="rounded"];
+
+  seq_1 [label="Sequential reasoning step", shape=box, style="rounded,filled", fillcolor="#a8d5ff"];
+}"
+`;
+
+exports[`Sequential Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TD
+
+  seq_1(["Sequential reasoning step"])
+
+  style seq_1 fill:#a8d5ff"
+`;
+
+exports[`Shannon Mode Exporter Snapshots > ASCII format 1`] = `
+"Shannon Stage Flow:
+===================
+
+Flow: Problem Definition → Constraints → Model → Proof → Implementation
+
+Current Stage: undefined
+Uncertainty: 0.50
+
+Dependencies:
+  • data-source
+
+Assumptions:
+  • Channel is reliable
+"
+`;
+
+exports[`Shannon Mode Exporter Snapshots > DOT format 1`] = `
+"digraph ShannonStageFlow {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+
+  problem_definition [label="Problem Definition"];
+  problem_definition -> constraints;
+  constraints [label="Constraints"];
+  constraints -> model;
+  model [label="Model"];
+  model -> proof;
+  proof [label="Proof"];
+  proof -> implementation;
+  implementation [label="Implementation"];
+
+  uncertainty [label="Uncertainty: 0.50", shape=ellipse];
+  uncertainty -> encoding [style=dashed];
+}
+"
+`;
+
+exports[`Shannon Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph LR
+  problem_definition["Problem Definition"]
+  problem_definition --> constraints
+  constraints["Constraints"]
+  constraints --> model
+  model["Model"]
+  model --> proof
+  proof["Proof"]
+  proof --> implementation
+  implementation["Implementation"]
+
+  style encoding fill:#a8d5ff,stroke:#333,stroke-width:3px
+
+  uncertainty["Uncertainty: 0.50"]
+  uncertainty -.-> encoding
+"
+`;
+
+exports[`Systems Thinking Mode Exporter Snapshots > ASCII format 1`] = `
+"Systems Thinking Model:
+======================
+
+"
+`;
+
+exports[`Systems Thinking Mode Exporter Snapshots > DOT format 1`] = `
+"digraph SystemsThinking {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+}
+"
+`;
+
+exports[`Systems Thinking Mode Exporter Snapshots > Mermaid format 1`] = `
+"graph TB
+"
+`;
+
+exports[`Temporal Mode Exporter Snapshots > ASCII format 1`] = `
+"Timeline: Untitled
+========================================
+
+No events
+"
+`;
+
+exports[`Temporal Mode Exporter Snapshots > DOT format 1`] = `
+"digraph Timeline {
+  rankdir=LR;
+  node [shape=box];
+
+}
+"
+`;
+
+exports[`Temporal Mode Exporter Snapshots > Mermaid format 1`] = `
+"gantt
+  title Timeline
+  dateFormat X
+  axisFormat %s
+
+  No events
+"
+`;

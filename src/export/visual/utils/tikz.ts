@@ -780,6 +780,7 @@ export class TikZBuilder {
 
   /**
    * Get the current node count
+   * @returns The number of nodes in the diagram
    */
   get nodeCount(): number {
     return this.nodes.length;
@@ -787,6 +788,7 @@ export class TikZBuilder {
 
   /**
    * Get the current edge count
+   * @returns The number of edges in the diagram
    */
   get edgeCount(): number {
     return this.edges.length;
@@ -794,6 +796,7 @@ export class TikZBuilder {
 
   /**
    * Get the current style count
+   * @returns The number of custom styles defined
    */
   get styleCount(): number {
     return this.customStyles.size;

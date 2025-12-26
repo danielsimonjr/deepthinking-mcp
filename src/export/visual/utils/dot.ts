@@ -598,18 +598,49 @@ export function generateNetworkDot(
 // =============================================================================
 
 /**
- * Fluent API builder for DOT graphs
+ * Fluent API builder for DOT/GraphViz graphs.
  *
  * Provides a chainable interface for constructing DOT graphs,
  * wrapping the existing utility functions for easier use.
+ * Supports nodes, edges, subgraphs, and all standard DOT attributes.
  *
- * @example
+ * @see {@link generateDotGraph} - The underlying function this builder wraps
+ * @see {@link renderDotNode} - Used internally for node rendering
+ * @see {@link renderDotEdge} - Used internally for edge rendering
+ * @see {@link renderDotSubgraph} - Used internally for subgraph rendering
+ *
+ * @example Basic usage
  * ```typescript
  * const dot = new DOTGraphBuilder()
  *   .setOptions({ rankDir: 'LR', graphName: 'MyGraph' })
  *   .addNode({ id: 'a', label: 'Node A', shape: 'box' })
  *   .addNode({ id: 'b', label: 'Node B', shape: 'ellipse' })
  *   .addEdge({ source: 'a', target: 'b', label: 'connects' })
+ *   .render();
+ * ```
+ *
+ * @example Before/After refactoring pattern
+ * ```typescript
+ * // Before (inline string building):
+ * let dot = 'digraph G {\n';
+ * dot += '  rankdir=TB;\n';
+ * dot += `  ${id} [label="${label}"];\n`;
+ * dot += '}\n';
+ *
+ * // After (fluent builder):
+ * const dot = new DOTGraphBuilder()
+ *   .setRankDir('TB')
+ *   .addNode({ id, label })
+ *   .render();
+ * ```
+ *
+ * @example With subgraphs
+ * ```typescript
+ * const dot = new DOTGraphBuilder()
+ *   .setGraphName('Workflow')
+ *   .addNode({ id: 'start', label: 'Start' })
+ *   .addSubgraph({ id: 'cluster_0', label: 'Process', nodes: ['a', 'b'] })
+ *   .addEdge({ source: 'start', target: 'a' })
  *   .render();
  * ```
  */
@@ -741,6 +772,7 @@ export class DOTGraphBuilder {
 
   /**
    * Get the current node count
+   * @returns The number of nodes in the graph
    */
   get nodeCount(): number {
     return this.nodes.length;
@@ -748,6 +780,7 @@ export class DOTGraphBuilder {
 
   /**
    * Get the current edge count
+   * @returns The number of edges in the graph
    */
   get edgeCount(): number {
     return this.edges.length;
@@ -755,6 +788,7 @@ export class DOTGraphBuilder {
 
   /**
    * Get the current subgraph count
+   * @returns The number of subgraphs in the graph
    */
   get subgraphCount(): number {
     return this.subgraphs.length;

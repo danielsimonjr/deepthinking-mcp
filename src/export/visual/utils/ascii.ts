@@ -1011,6 +1011,7 @@ export class ASCIIDocBuilder {
 
   /**
    * Get the current content line count
+   * @returns The total number of lines in the document
    */
   get lineCount(): number {
     return this.content.reduce((count, item) => {
@@ -1020,6 +1021,7 @@ export class ASCIIDocBuilder {
 
   /**
    * Get the current content section count
+   * @returns The number of content sections in the document
    */
   get sectionCount(): number {
     return this.content.length;

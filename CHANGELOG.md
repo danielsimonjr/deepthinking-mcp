@@ -123,6 +123,49 @@ Added five new builder classes for UML, HTML, Markdown, Modelica, and JSON forma
 
 ---
 
+### Added - Phase 13 Sprint 4: Integration Tests & Snapshot Baselines
+
+**Integration Tests for Builder Usage Patterns**
+
+Created comprehensive integration tests demonstrating real-world builder usage:
+
+- **`tests/integration/export/visual/builders-integration.test.ts`** (18 tests)
+  - DOTGraphBuilder: Sequential reasoning flows, causal networks with subgraphs
+  - MermaidGraphBuilder: Bayesian reasoning flows, workflow diagrams with subgraphs
+  - GraphMLBuilder: Dependency graphs for analysis mode
+  - ASCIIDocBuilder: Reasoning summary documents
+  - SVGBuilder: Visual reasoning diagrams with shapes/text/lines
+  - SVGGroupBuilder: Grouped SVG elements
+  - TikZBuilder: LaTeX-compatible diagrams, standalone documents
+  - UMLBuilder: Reasoning architecture class diagrams
+  - HTMLDocBuilder: Analysis report HTML documents
+  - MarkdownBuilder: Reasoning session summaries
+  - ModelicaBuilder: System dynamics models
+  - JSONExportBuilder: Complete reasoning session exports
+  - Cross-builder patterns: Nested path setting, builder reuse with clear(), builder reset
+
+- **`tests/integration/export/visual/mode-exporters-snapshot.test.ts`** (15 tests)
+  - Builder output snapshots for DOT, Mermaid, GraphML, SVG, TikZ, UML, HTML, Markdown, Modelica, JSON formats
+  - Cross-builder consistency tests
+
+**Mode Exporter Snapshot Baselines (Partial)**
+
+Created baseline snapshot tests for mode exporters (DOT, Mermaid, ASCII formats):
+
+- **`tests/unit/export/visual/modes/snapshot-baseline.test.ts`** (43/63 tests passing)
+  - Tests 21 mode exporters: Sequential, Shannon, Mathematics, Physics, Hybrid, Causal, Temporal, Counterfactual, Bayesian, Evidential, GameTheory, Optimization, Abductive, Analogical, FirstPrinciples, MetaReasoning, SystemsThinking, ScientificMethod, FormalLogic, Engineering, Computability
+  - ⚠️ 20 tests need fixture refinement (7 modes × 3 formats) - complex type structures
+  - Purpose: Ensure Sprints 5-9 refactoring preserves visual output
+
+### Validation - Sprint 4
+
+- **Builder Integration Tests**: ✅ 33 tests passing
+- **Mode Exporter Snapshots**: ⚠️ 43/63 tests passing (68%) - fixture work needed
+- **Full Test Suite**: ✅ 4644 passing (20 failing in new snapshot tests)
+- **Typecheck**: ✅ Clean
+
+---
+
 ### Added - Phase 13 Sprint 1: Core Graph Builders
 
 **Fluent API Builder Classes for Visual Export Refactoring**

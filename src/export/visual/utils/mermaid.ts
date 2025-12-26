@@ -545,17 +545,37 @@ export function generateMermaidClassDiagram(
 // =============================================================================
 
 /**
- * Fluent API builder for Mermaid diagrams
+ * Fluent API builder for Mermaid diagrams.
  *
  * Provides a chainable interface for constructing Mermaid flowchart diagrams,
  * wrapping the existing utility functions for easier use.
+ * Supports flowcharts, subgraphs, node styling, and all standard Mermaid features.
  *
- * @example
+ * @see {@link generateMermaidFlowchart} - The underlying function this builder wraps
+ * @see {@link renderMermaidNode} - Used internally for node rendering
+ * @see {@link renderMermaidEdge} - Used internally for edge rendering
+ *
+ * @example Basic usage
  * ```typescript
  * const mermaid = new MermaidGraphBuilder()
  *   .setDirection('LR')
  *   .addNode({ id: 'a', label: 'Start', shape: 'stadium' })
  *   .addNode({ id: 'b', label: 'Process', shape: 'rectangle' })
+ *   .addEdge({ source: 'a', target: 'b', style: 'arrow' })
+ *   .render();
+ * ```
+ *
+ * @example Before/After refactoring pattern
+ * ```typescript
+ * // Before (inline string building):
+ * let mermaid = 'flowchart TD\n';
+ * mermaid += `  ${id}[${label}]\n`;
+ * mermaid += `  a --> b\n`;
+ *
+ * // After (fluent builder):
+ * const mermaid = new MermaidGraphBuilder()
+ *   .setDirection('TD')
+ *   .addNode({ id, label, shape: 'rectangle' })
  *   .addEdge({ source: 'a', target: 'b', style: 'arrow' })
  *   .render();
  * ```
@@ -686,6 +706,7 @@ export class MermaidGraphBuilder {
 
   /**
    * Get the current node count
+   * @returns The number of nodes in the diagram
    */
   get nodeCount(): number {
     return this.nodes.length;
@@ -693,6 +714,7 @@ export class MermaidGraphBuilder {
 
   /**
    * Get the current edge count
+   * @returns The number of edges in the diagram
    */
   get edgeCount(): number {
     return this.edges.length;
@@ -700,6 +722,7 @@ export class MermaidGraphBuilder {
 
   /**
    * Get the current subgraph count
+   * @returns The number of subgraphs in the diagram
    */
   get subgraphCount(): number {
     return this.subgraphs.length;
