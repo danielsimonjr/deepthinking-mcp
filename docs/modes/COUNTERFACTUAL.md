@@ -1,8 +1,8 @@
 # Counterfactual Reasoning Mode
 
-**Version**: 7.3.0
+**Version**: 7.3.0 | **Handler**: v8.4.0 (Specialized - World State Tracking)
 **Tool**: `deepthinking_causal`
-**Status**: Experimental
+**Status**: Stable (Fully Implemented)
 **Source**: `src/types/modes/counterfactual.ts`
 
 ## Dependencies

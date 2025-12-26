@@ -1,7 +1,7 @@
 # Optimization Mode
 
-**Version**: 7.3.0
-**Tool**: `deepthinking_analytical`
+**Version**: 7.3.0 | **Handler**: v8.4.0 (Specialized)
+**Tool**: `deepthinking_strategic`
 **Status**: Stable (Fully Implemented)
 **Source**: `src/types/modes/optimization.ts`
 

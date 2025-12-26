@@ -1,8 +1,8 @@
 # Game Theory Mode
 
-**Version**: 7.3.0
+**Version**: 7.3.0 | **Handler**: v8.4.0 (Specialized - Nash Equilibria)
 **Tool**: `deepthinking_strategic`
-**Status**: Experimental
+**Status**: Stable (Fully Implemented)
 **Source**: `src/types/modes/gametheory.ts`
 
 ## Dependencies
