@@ -1,8 +1,8 @@
 # Causal Reasoning Mode
 
-**Version**: 7.3.0
+**Version**: 7.3.0 | **Handler**: v8.4.0 (Specialized - Graph Validation)
 **Tool**: `deepthinking_causal`
-**Status**: Experimental
+**Status**: Stable (Fully Implemented)
 **Source**: `src/types/modes/causal.ts`
 
 ## Dependencies

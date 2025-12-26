@@ -1,6 +1,6 @@
 # Shannon Methodology Mode
 
-**Version**: 7.3.0
+**Version**: 7.3.0 | **Handler**: v8.4.0 (Specialized)
 **Tool**: `deepthinking_standard`
 **Status**: Stable (Fully Implemented)
 **Source**: `src/types/modes/shannon.ts`

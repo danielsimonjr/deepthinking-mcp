@@ -1,7 +1,7 @@
 # Cryptanalytic Reasoning Mode
 
-**Version**: 7.3.0
-**Tool**: `deepthinking_standard`
+**Version**: 7.2.0 | **Handler**: v8.4.0 (Specialized)
+**Tool**: `deepthinking_analytical`
 **Status**: Stable (Phase 11, v7.2.0)
 **Source**: `src/types/modes/cryptanalytic.ts`
 

@@ -1,8 +1,8 @@
 # Systems Thinking Mode
 
-**Version**: 7.3.0
-**Tool**: `deepthinking_analytical`
-**Status**: Experimental
+**Version**: 7.3.0 | **Handler**: v8.4.0 (Specialized - 8 Archetypes)
+**Tool**: `deepthinking_scientific`
+**Status**: Stable (Fully Implemented)
 **Source**: `src/types/modes/systemsthinking.ts`
 
 ## Dependencies

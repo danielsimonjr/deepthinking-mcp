@@ -1,7 +1,7 @@
 # Physics Reasoning Mode
 
-**Version**: 7.3.0
-**Tool**: `deepthinking_mathematicsematics`
+**Version**: 7.3.0 | **Handler**: v8.4.0 (Specialized)
+**Tool**: `deepthinking_mathematics`
 **Status**: Stable (Fully Implemented)
 **Source**: `src/types/modes/physics.ts`
 
