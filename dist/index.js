@@ -19186,491 +19186,6 @@ var init_utils = __esm({
   }
 });
 
-// src/export/visual/utils/mermaid.ts
-function sanitizeMermaidId(id) {
-  return id.replace(/[^a-zA-Z0-9_]/g, "_").replace(/^(\d)/, "_$1").replace(/__+/g, "_").replace(/^_+|_+$/g, "") || "node";
-}
-function escapeMermaidLabel(label) {
-  return label.replace(/"/g, "#quot;").replace(/</g, "#lt;").replace(/>/g, "#gt;").replace(/\[/g, "#91;").replace(/\]/g, "#93;").replace(/\{/g, "#123;").replace(/\}/g, "#125;").replace(/\(/g, "#40;").replace(/\)/g, "#41;").replace(/\|/g, "#124;").replace(/\n/g, "<br/>");
-}
-function truncateLabel(label, maxLength = 40) {
-  if (label.length <= maxLength) return label;
-  return label.substring(0, maxLength - 3) + "...";
-}
-function getNodeShapeBrackets(shape) {
-  switch (shape) {
-    case "rectangle":
-      return ["[", "]"];
-    case "rounded":
-      return ["(", ")"];
-    case "stadium":
-      return ["([", "])"];
-    case "subroutine":
-      return ["[[", "]]"];
-    case "cylinder":
-      return ["[(", ")]"];
-    case "circle":
-      return ["((", "))"];
-    case "asymmetric":
-      return [">", "]"];
-    case "rhombus":
-      return ["{", "}"];
-    case "hexagon":
-      return ["{{", "}}"];
-    case "parallelogram":
-      return ["[/", "/]"];
-    case "parallelogram-alt":
-      return ["[\\", "\\]"];
-    case "trapezoid":
-      return ["[/", "\\]"];
-    case "trapezoid-alt":
-      return ["[\\", "/]"];
-    case "double-circle":
-      return ["(((", ")))"];
-    default:
-      return ["[", "]"];
-  }
-}
-function renderMermaidNode(node) {
-  const id = sanitizeMermaidId(node.id);
-  const label = escapeMermaidLabel(node.label);
-  const [open, close] = getNodeShapeBrackets(node.shape || "rectangle");
-  let nodeStr = `  ${id}${open}"${label}"${close}`;
-  if (node.className) {
-    nodeStr += `:::${node.className}`;
-  }
-  return nodeStr;
-}
-function renderMermaidNodeStyle(nodeId, style) {
-  if (!style) return "";
-  const id = sanitizeMermaidId(nodeId);
-  const styles = [];
-  if (style.fill) styles.push(`fill:${style.fill}`);
-  if (style.stroke) styles.push(`stroke:${style.stroke}`);
-  if (style.strokeWidth) styles.push(`stroke-width:${style.strokeWidth}`);
-  if (style.color) styles.push(`color:${style.color}`);
-  if (styles.length === 0) return "";
-  return `  style ${id} ${styles.join(",")}`;
-}
-function getEdgeArrow(style) {
-  switch (style) {
-    case "arrow":
-      return "-->";
-    case "open":
-      return "---";
-    case "dotted":
-      return "-.->";
-    case "thick":
-      return "==>";
-    case "invisible":
-      return "~~~";
-    default:
-      return "-->";
-  }
-}
-function renderMermaidEdge(edge) {
-  const source = sanitizeMermaidId(edge.source);
-  const target = sanitizeMermaidId(edge.target);
-  const arrow = getEdgeArrow(edge.style || "arrow");
-  if (edge.label) {
-    const label = escapeMermaidLabel(edge.label);
-    return `  ${source} ${arrow}|${label}| ${target}`;
-  }
-  return `  ${source} ${arrow} ${target}`;
-}
-function renderMermaidSubgraph(subgraph) {
-  const lines = [];
-  const id = sanitizeMermaidId(subgraph.id);
-  const label = escapeMermaidLabel(subgraph.label);
-  lines.push(`  subgraph ${id}["${label}"]`);
-  if (subgraph.direction) {
-    lines.push(`    direction ${subgraph.direction}`);
-  }
-  for (const nodeId of subgraph.nodes) {
-    lines.push(`    ${sanitizeMermaidId(nodeId)}`);
-  }
-  lines.push("  end");
-  return lines.join("\n");
-}
-function getMermaidColor(type, scheme = "default") {
-  return MERMAID_COLORS[scheme][type];
-}
-function generateMermaidFlowchart(nodes, edges, options = {}) {
-  const { direction = "TD", colorScheme = "default" } = options;
-  const lines = [];
-  lines.push(`graph ${direction}`);
-  if (nodes.length > 0) {
-    lines.push("");
-    for (const node of nodes) {
-      lines.push(renderMermaidNode(node));
-    }
-  }
-  if (edges.length > 0) {
-    lines.push("");
-    for (const edge of edges) {
-      lines.push(renderMermaidEdge(edge));
-    }
-  }
-  if (colorScheme !== "monochrome") {
-    const styledNodes = nodes.filter((n) => n.style);
-    if (styledNodes.length > 0) {
-      lines.push("");
-      for (const node of styledNodes) {
-        const styleStr = renderMermaidNodeStyle(node.id, node.style);
-        if (styleStr) lines.push(styleStr);
-      }
-    }
-  }
-  return lines.join("\n");
-}
-function generateMermaidStateDiagram(states, transitions) {
-  const lines = ["stateDiagram-v2"];
-  for (const state of states) {
-    if (state.type === "start") {
-      lines.push(`  [*] --> ${sanitizeMermaidId(state.id)}`);
-    } else if (state.type === "end") {
-      lines.push(`  ${sanitizeMermaidId(state.id)} --> [*]`);
-    }
-    if (state.type !== "start" && state.type !== "end") {
-      lines.push(`  ${sanitizeMermaidId(state.id)} : ${escapeMermaidLabel(state.label)}`);
-    }
-  }
-  lines.push("");
-  for (const trans of transitions) {
-    const from = sanitizeMermaidId(trans.from);
-    const to = sanitizeMermaidId(trans.to);
-    if (trans.label) {
-      lines.push(`  ${from} --> ${to} : ${escapeMermaidLabel(trans.label)}`);
-    } else {
-      lines.push(`  ${from} --> ${to}`);
-    }
-  }
-  return lines.join("\n");
-}
-function generateMermaidClassDiagram(classes, relationships) {
-  const lines = ["classDiagram"];
-  for (const cls of classes) {
-    lines.push(`  class ${sanitizeMermaidId(cls.name)} {`);
-    if (cls.attributes) {
-      for (const attr of cls.attributes) {
-        lines.push(`    ${attr}`);
-      }
-    }
-    if (cls.methods) {
-      for (const method of cls.methods) {
-        lines.push(`    ${method}`);
-      }
-    }
-    lines.push("  }");
-  }
-  lines.push("");
-  for (const rel of relationships) {
-    const from = sanitizeMermaidId(rel.from);
-    const to = sanitizeMermaidId(rel.to);
-    let arrow;
-    switch (rel.type) {
-      case "inheritance":
-        arrow = "<|--";
-        break;
-      case "composition":
-        arrow = "*--";
-        break;
-      case "aggregation":
-        arrow = "o--";
-        break;
-      case "association":
-        arrow = "-->";
-        break;
-      case "dependency":
-        arrow = "..>";
-        break;
-      default:
-        arrow = "-->";
-    }
-    if (rel.label) {
-      lines.push(`  ${from} ${arrow} ${to} : ${escapeMermaidLabel(rel.label)}`);
-    } else {
-      lines.push(`  ${from} ${arrow} ${to}`);
-    }
-  }
-  return lines.join("\n");
-}
-var MERMAID_COLORS, MermaidGraphBuilder;
-var init_mermaid = __esm({
-  "src/export/visual/utils/mermaid.ts"() {
-    init_esm_shims();
-    MERMAID_COLORS = {
-      default: {
-        primary: "#a8d5ff",
-        secondary: "#ffd699",
-        success: "#81c784",
-        warning: "#ffb74d",
-        danger: "#e57373",
-        info: "#4fc3f7",
-        neutral: "#e0e0e0"
-      },
-      pastel: {
-        primary: "#e1f5ff",
-        secondary: "#fff3e0",
-        success: "#c8e6c9",
-        warning: "#ffecb3",
-        danger: "#ffcdd2",
-        info: "#b3e5fc",
-        neutral: "#f5f5f5"
-      },
-      monochrome: {
-        primary: "#e0e0e0",
-        secondary: "#bdbdbd",
-        success: "#9e9e9e",
-        warning: "#757575",
-        danger: "#616161",
-        info: "#424242",
-        neutral: "#f5f5f5"
-      }
-    };
-    MermaidGraphBuilder = class _MermaidGraphBuilder {
-      nodes = [];
-      edges = [];
-      subgraphs = [];
-      options = {};
-      /**
-       * Add a node to the diagram
-       * @param node - The node definition
-       * @returns this for chaining
-       */
-      addNode(node) {
-        this.nodes.push(node);
-        return this;
-      }
-      /**
-       * Add multiple nodes to the diagram
-       * @param nodes - Array of node definitions
-       * @returns this for chaining
-       */
-      addNodes(nodes) {
-        this.nodes.push(...nodes);
-        return this;
-      }
-      /**
-       * Add an edge to the diagram
-       * @param edge - The edge definition
-       * @returns this for chaining
-       */
-      addEdge(edge) {
-        this.edges.push(edge);
-        return this;
-      }
-      /**
-       * Add multiple edges to the diagram
-       * @param edges - Array of edge definitions
-       * @returns this for chaining
-       */
-      addEdges(edges) {
-        this.edges.push(...edges);
-        return this;
-      }
-      /**
-       * Add a subgraph to the diagram
-       * @param id - Subgraph ID
-       * @param label - Subgraph label/title
-       * @param nodeIds - Array of node IDs to include in the subgraph
-       * @param direction - Optional direction for the subgraph
-       * @returns this for chaining
-       */
-      addSubgraph(id, label, nodeIds, direction) {
-        this.subgraphs.push({
-          id,
-          label,
-          nodes: nodeIds,
-          direction
-        });
-        return this;
-      }
-      /**
-       * Add a subgraph object to the diagram
-       * @param subgraph - The subgraph definition
-       * @returns this for chaining
-       */
-      addSubgraphDef(subgraph) {
-        this.subgraphs.push(subgraph);
-        return this;
-      }
-      /**
-       * Add multiple subgraphs to the diagram
-       * @param subgraphs - Array of subgraph definitions
-       * @returns this for chaining
-       */
-      addSubgraphs(subgraphs) {
-        this.subgraphs.push(...subgraphs);
-        return this;
-      }
-      /**
-       * Set or merge diagram options
-       * @param options - Diagram options to set/merge
-       * @returns this for chaining
-       */
-      setOptions(options) {
-        this.options = { ...this.options, ...options };
-        return this;
-      }
-      /**
-       * Set the diagram direction
-       * @param direction - The direction (TD, TB, LR, RL, BT)
-       * @returns this for chaining
-       */
-      setDirection(direction) {
-        this.options.direction = direction;
-        return this;
-      }
-      /**
-       * Set the diagram title
-       * @param title - The title
-       * @returns this for chaining
-       */
-      setTitle(title) {
-        this.options.title = title;
-        return this;
-      }
-      /**
-       * Set the color scheme
-       * @param scheme - The color scheme (default, pastel, monochrome)
-       * @returns this for chaining
-       */
-      setColorScheme(scheme) {
-        this.options.colorScheme = scheme;
-        return this;
-      }
-      /**
-       * Get the current node count
-       * @returns The number of nodes in the diagram
-       */
-      get nodeCount() {
-        return this.nodes.length;
-      }
-      /**
-       * Get the current edge count
-       * @returns The number of edges in the diagram
-       */
-      get edgeCount() {
-        return this.edges.length;
-      }
-      /**
-       * Get the current subgraph count
-       * @returns The number of subgraphs in the diagram
-       */
-      get subgraphCount() {
-        return this.subgraphs.length;
-      }
-      /**
-       * Clear all nodes, edges, and subgraphs
-       * @returns this for chaining
-       */
-      clear() {
-        this.nodes = [];
-        this.edges = [];
-        this.subgraphs = [];
-        return this;
-      }
-      /**
-       * Reset options to defaults
-       * @returns this for chaining
-       */
-      resetOptions() {
-        this.options = {};
-        return this;
-      }
-      /**
-       * Render the diagram as a Mermaid string
-       *
-       * If subgraphs are present, nodes are organized into their
-       * respective subgraphs. Nodes not in any subgraph are rendered
-       * at the top level.
-       *
-       * @returns The complete Mermaid diagram string
-       */
-      render() {
-        const { direction = "TD", colorScheme = "default" } = this.options;
-        const lines = [];
-        lines.push(`graph ${direction}`);
-        const nodesInSubgraphs = /* @__PURE__ */ new Set();
-        for (const subgraph of this.subgraphs) {
-          for (const nodeId of subgraph.nodes) {
-            nodesInSubgraphs.add(nodeId);
-          }
-        }
-        const topLevelNodes = this.nodes.filter((n) => !nodesInSubgraphs.has(n.id));
-        if (topLevelNodes.length > 0) {
-          lines.push("");
-          for (const node of topLevelNodes) {
-            lines.push(renderMermaidNode(node));
-          }
-        }
-        if (this.subgraphs.length > 0) {
-          lines.push("");
-          for (const subgraph of this.subgraphs) {
-            lines.push(renderMermaidSubgraph(subgraph));
-            const subgraphNodes = this.nodes.filter((n) => subgraph.nodes.includes(n.id));
-            for (const node of subgraphNodes) {
-              const nodeStr = renderMermaidNode(node);
-              lines.push(`  ${nodeStr}`);
-            }
-          }
-        }
-        if (this.edges.length > 0) {
-          lines.push("");
-          for (const edge of this.edges) {
-            lines.push(renderMermaidEdge(edge));
-          }
-        }
-        if (colorScheme !== "monochrome") {
-          const styledNodes = this.nodes.filter((n) => n.style);
-          if (styledNodes.length > 0) {
-            lines.push("");
-            for (const node of styledNodes) {
-              const styleStr = renderMermaidNodeStyle(node.id, node.style);
-              if (styleStr) lines.push(styleStr);
-            }
-          }
-        }
-        return lines.join("\n");
-      }
-      /**
-       * Render as a state diagram instead of flowchart
-       * @param states - State definitions with optional types
-       * @param transitions - Transition definitions
-       * @returns The Mermaid state diagram string
-       */
-      renderAsStateDiagram(states, transitions) {
-        return generateMermaidStateDiagram(states, transitions);
-      }
-      /**
-       * Render as a class diagram
-       * @param classes - Class definitions
-       * @param relationships - Relationship definitions
-       * @returns The Mermaid class diagram string
-       */
-      renderAsClassDiagram(classes, relationships) {
-        return generateMermaidClassDiagram(classes, relationships);
-      }
-      /**
-       * Create a builder from existing nodes, edges, and options
-       * Useful for modifying existing diagram structures
-       * @param nodes - Initial nodes
-       * @param edges - Initial edges
-       * @param options - Initial options
-       * @returns A new MermaidGraphBuilder instance
-       */
-      static from(nodes = [], edges = [], options = {}) {
-        const builder = new _MermaidGraphBuilder();
-        builder.nodes = [...nodes];
-        builder.edges = [...edges];
-        builder.options = { ...options };
-        return builder;
-      }
-    };
-  }
-});
-
 // src/export/visual/utils/dot.ts
 function sanitizeDotId(id) {
   if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(id)) {
@@ -19680,10 +19195,6 @@ function sanitizeDotId(id) {
 }
 function escapeDotString(str) {
   return str.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t");
-}
-function truncateDotLabel(label, maxLength = 50) {
-  if (label.length <= maxLength) return label;
-  return label.substring(0, maxLength - 3) + "...";
 }
 function renderDotNodeAttrs(node) {
   const attrs = [];
@@ -19771,68 +19282,6 @@ function renderDotEdge(edge, directed = true) {
   const arrow = directed ? "->" : "--";
   const attrs = renderDotEdgeAttrs(edge);
   return `  ${source} ${arrow} ${target}${attrs};`;
-}
-function generateDotGraph(nodes, edges, options = {}) {
-  const {
-    graphType = "digraph",
-    graphName = "G",
-    rankDir = "TB",
-    splines,
-    overlap,
-    concentrate,
-    compound,
-    bgcolor,
-    fontName,
-    fontSize,
-    nodeDefaults,
-    edgeDefaults
-  } = options;
-  const lines = [];
-  const directed = graphType === "digraph";
-  lines.push(`${graphType} ${sanitizeDotId(graphName)} {`);
-  lines.push(`  rankdir=${rankDir};`);
-  if (splines) lines.push(`  splines=${splines};`);
-  if (overlap !== void 0) lines.push(`  overlap=${overlap};`);
-  if (concentrate) lines.push("  concentrate=true;");
-  if (compound) lines.push("  compound=true;");
-  if (bgcolor) lines.push(`  bgcolor="${bgcolor}";`);
-  if (fontName) lines.push(`  fontname="${fontName}";`);
-  if (fontSize) lines.push(`  fontsize=${fontSize};`);
-  if (nodeDefaults) {
-    const defaultAttrs = [];
-    if (nodeDefaults.shape) defaultAttrs.push(`shape=${nodeDefaults.shape}`);
-    if (nodeDefaults.style) {
-      const styleStr = Array.isArray(nodeDefaults.style) ? nodeDefaults.style.join(",") : nodeDefaults.style;
-      defaultAttrs.push(`style="${styleStr}"`);
-    }
-    if (nodeDefaults.fillColor) defaultAttrs.push(`fillcolor="${nodeDefaults.fillColor}"`);
-    if (nodeDefaults.fontName) defaultAttrs.push(`fontname="${nodeDefaults.fontName}"`);
-    if (nodeDefaults.fontSize) defaultAttrs.push(`fontsize=${nodeDefaults.fontSize}`);
-    if (defaultAttrs.length > 0) {
-      lines.push(`  node [${defaultAttrs.join(", ")}];`);
-    }
-  }
-  if (edgeDefaults) {
-    const defaultAttrs = [];
-    if (edgeDefaults.style) defaultAttrs.push(`style=${edgeDefaults.style}`);
-    if (edgeDefaults.color) defaultAttrs.push(`color="${edgeDefaults.color}"`);
-    if (edgeDefaults.arrowHead) defaultAttrs.push(`arrowhead=${edgeDefaults.arrowHead}`);
-    if (defaultAttrs.length > 0) {
-      lines.push(`  edge [${defaultAttrs.join(", ")}];`);
-    }
-  }
-  lines.push("");
-  for (const node of nodes) {
-    lines.push(renderDotNode(node));
-  }
-  if (edges.length > 0) {
-    lines.push("");
-    for (const edge of edges) {
-      lines.push(renderDotEdge(edge, directed));
-    }
-  }
-  lines.push("}");
-  return lines.join("\n");
 }
 var DOTGraphBuilder;
 var init_dot = __esm({
@@ -20115,6 +19564,714 @@ var init_dot = __esm({
         builder.edges = [...edges];
         builder.options = { ...options };
         return builder;
+      }
+    };
+  }
+});
+
+// src/export/visual/utils/mermaid.ts
+function sanitizeMermaidId(id) {
+  return id.replace(/[^a-zA-Z0-9_]/g, "_").replace(/^(\d)/, "_$1").replace(/__+/g, "_").replace(/^_+|_+$/g, "") || "node";
+}
+function escapeMermaidLabel(label) {
+  return label.replace(/"/g, "#quot;").replace(/</g, "#lt;").replace(/>/g, "#gt;").replace(/\[/g, "#91;").replace(/\]/g, "#93;").replace(/\{/g, "#123;").replace(/\}/g, "#125;").replace(/\(/g, "#40;").replace(/\)/g, "#41;").replace(/\|/g, "#124;").replace(/\n/g, "<br/>");
+}
+function getNodeShapeBrackets(shape) {
+  switch (shape) {
+    case "rectangle":
+      return ["[", "]"];
+    case "rounded":
+      return ["(", ")"];
+    case "stadium":
+      return ["([", "])"];
+    case "subroutine":
+      return ["[[", "]]"];
+    case "cylinder":
+      return ["[(", ")]"];
+    case "circle":
+      return ["((", "))"];
+    case "asymmetric":
+      return [">", "]"];
+    case "rhombus":
+      return ["{", "}"];
+    case "hexagon":
+      return ["{{", "}}"];
+    case "parallelogram":
+      return ["[/", "/]"];
+    case "parallelogram-alt":
+      return ["[\\", "\\]"];
+    case "trapezoid":
+      return ["[/", "\\]"];
+    case "trapezoid-alt":
+      return ["[\\", "/]"];
+    case "double-circle":
+      return ["(((", ")))"];
+    default:
+      return ["[", "]"];
+  }
+}
+function renderMermaidNode(node) {
+  const id = sanitizeMermaidId(node.id);
+  const label = escapeMermaidLabel(node.label);
+  const [open, close] = getNodeShapeBrackets(node.shape || "rectangle");
+  let nodeStr = `  ${id}${open}"${label}"${close}`;
+  if (node.className) {
+    nodeStr += `:::${node.className}`;
+  }
+  return nodeStr;
+}
+function renderMermaidNodeStyle(nodeId, style) {
+  if (!style) return "";
+  const id = sanitizeMermaidId(nodeId);
+  const styles = [];
+  if (style.fill) styles.push(`fill:${style.fill}`);
+  if (style.stroke) styles.push(`stroke:${style.stroke}`);
+  if (style.strokeWidth) styles.push(`stroke-width:${style.strokeWidth}`);
+  if (style.color) styles.push(`color:${style.color}`);
+  if (styles.length === 0) return "";
+  return `  style ${id} ${styles.join(",")}`;
+}
+function getEdgeArrow(style) {
+  switch (style) {
+    case "arrow":
+      return "-->";
+    case "open":
+      return "---";
+    case "dotted":
+      return "-.->";
+    case "thick":
+      return "==>";
+    case "invisible":
+      return "~~~";
+    default:
+      return "-->";
+  }
+}
+function renderMermaidEdge(edge) {
+  const source = sanitizeMermaidId(edge.source);
+  const target = sanitizeMermaidId(edge.target);
+  const arrow = getEdgeArrow(edge.style || "arrow");
+  if (edge.label) {
+    const label = escapeMermaidLabel(edge.label);
+    return `  ${source} ${arrow}|${label}| ${target}`;
+  }
+  return `  ${source} ${arrow} ${target}`;
+}
+function renderMermaidSubgraph(subgraph) {
+  const lines = [];
+  const id = sanitizeMermaidId(subgraph.id);
+  const label = escapeMermaidLabel(subgraph.label);
+  lines.push(`  subgraph ${id}["${label}"]`);
+  if (subgraph.direction) {
+    lines.push(`    direction ${subgraph.direction}`);
+  }
+  for (const nodeId of subgraph.nodes) {
+    lines.push(`    ${sanitizeMermaidId(nodeId)}`);
+  }
+  lines.push("  end");
+  return lines.join("\n");
+}
+function generateMermaidStateDiagram(states, transitions) {
+  const lines = ["stateDiagram-v2"];
+  for (const state of states) {
+    if (state.type === "start") {
+      lines.push(`  [*] --> ${sanitizeMermaidId(state.id)}`);
+    } else if (state.type === "end") {
+      lines.push(`  ${sanitizeMermaidId(state.id)} --> [*]`);
+    }
+    if (state.type !== "start" && state.type !== "end") {
+      lines.push(`  ${sanitizeMermaidId(state.id)} : ${escapeMermaidLabel(state.label)}`);
+    }
+  }
+  lines.push("");
+  for (const trans of transitions) {
+    const from = sanitizeMermaidId(trans.from);
+    const to = sanitizeMermaidId(trans.to);
+    if (trans.label) {
+      lines.push(`  ${from} --> ${to} : ${escapeMermaidLabel(trans.label)}`);
+    } else {
+      lines.push(`  ${from} --> ${to}`);
+    }
+  }
+  return lines.join("\n");
+}
+function generateMermaidClassDiagram(classes, relationships) {
+  const lines = ["classDiagram"];
+  for (const cls of classes) {
+    lines.push(`  class ${sanitizeMermaidId(cls.name)} {`);
+    if (cls.attributes) {
+      for (const attr of cls.attributes) {
+        lines.push(`    ${attr}`);
+      }
+    }
+    if (cls.methods) {
+      for (const method of cls.methods) {
+        lines.push(`    ${method}`);
+      }
+    }
+    lines.push("  }");
+  }
+  lines.push("");
+  for (const rel of relationships) {
+    const from = sanitizeMermaidId(rel.from);
+    const to = sanitizeMermaidId(rel.to);
+    let arrow;
+    switch (rel.type) {
+      case "inheritance":
+        arrow = "<|--";
+        break;
+      case "composition":
+        arrow = "*--";
+        break;
+      case "aggregation":
+        arrow = "o--";
+        break;
+      case "association":
+        arrow = "-->";
+        break;
+      case "dependency":
+        arrow = "..>";
+        break;
+      default:
+        arrow = "-->";
+    }
+    if (rel.label) {
+      lines.push(`  ${from} ${arrow} ${to} : ${escapeMermaidLabel(rel.label)}`);
+    } else {
+      lines.push(`  ${from} ${arrow} ${to}`);
+    }
+  }
+  return lines.join("\n");
+}
+var MermaidGraphBuilder, MermaidGanttBuilder, MermaidStateDiagramBuilder;
+var init_mermaid = __esm({
+  "src/export/visual/utils/mermaid.ts"() {
+    init_esm_shims();
+    MermaidGraphBuilder = class _MermaidGraphBuilder {
+      nodes = [];
+      edges = [];
+      subgraphs = [];
+      options = {};
+      /**
+       * Add a node to the diagram
+       * @param node - The node definition
+       * @returns this for chaining
+       */
+      addNode(node) {
+        this.nodes.push(node);
+        return this;
+      }
+      /**
+       * Add multiple nodes to the diagram
+       * @param nodes - Array of node definitions
+       * @returns this for chaining
+       */
+      addNodes(nodes) {
+        this.nodes.push(...nodes);
+        return this;
+      }
+      /**
+       * Add an edge to the diagram
+       * @param edge - The edge definition
+       * @returns this for chaining
+       */
+      addEdge(edge) {
+        this.edges.push(edge);
+        return this;
+      }
+      /**
+       * Add multiple edges to the diagram
+       * @param edges - Array of edge definitions
+       * @returns this for chaining
+       */
+      addEdges(edges) {
+        this.edges.push(...edges);
+        return this;
+      }
+      /**
+       * Add a subgraph to the diagram
+       * @param id - Subgraph ID
+       * @param label - Subgraph label/title
+       * @param nodeIds - Array of node IDs to include in the subgraph
+       * @param direction - Optional direction for the subgraph
+       * @returns this for chaining
+       */
+      addSubgraph(id, label, nodeIds, direction) {
+        this.subgraphs.push({
+          id,
+          label,
+          nodes: nodeIds,
+          direction
+        });
+        return this;
+      }
+      /**
+       * Add a subgraph object to the diagram
+       * @param subgraph - The subgraph definition
+       * @returns this for chaining
+       */
+      addSubgraphDef(subgraph) {
+        this.subgraphs.push(subgraph);
+        return this;
+      }
+      /**
+       * Add multiple subgraphs to the diagram
+       * @param subgraphs - Array of subgraph definitions
+       * @returns this for chaining
+       */
+      addSubgraphs(subgraphs) {
+        this.subgraphs.push(...subgraphs);
+        return this;
+      }
+      /**
+       * Set or merge diagram options
+       * @param options - Diagram options to set/merge
+       * @returns this for chaining
+       */
+      setOptions(options) {
+        this.options = { ...this.options, ...options };
+        return this;
+      }
+      /**
+       * Set the diagram direction
+       * @param direction - The direction (TD, TB, LR, RL, BT)
+       * @returns this for chaining
+       */
+      setDirection(direction) {
+        this.options.direction = direction;
+        return this;
+      }
+      /**
+       * Set the diagram title
+       * @param title - The title
+       * @returns this for chaining
+       */
+      setTitle(title) {
+        this.options.title = title;
+        return this;
+      }
+      /**
+       * Set the color scheme
+       * @param scheme - The color scheme (default, pastel, monochrome)
+       * @returns this for chaining
+       */
+      setColorScheme(scheme) {
+        this.options.colorScheme = scheme;
+        return this;
+      }
+      /**
+       * Get the current node count
+       * @returns The number of nodes in the diagram
+       */
+      get nodeCount() {
+        return this.nodes.length;
+      }
+      /**
+       * Get the current edge count
+       * @returns The number of edges in the diagram
+       */
+      get edgeCount() {
+        return this.edges.length;
+      }
+      /**
+       * Get the current subgraph count
+       * @returns The number of subgraphs in the diagram
+       */
+      get subgraphCount() {
+        return this.subgraphs.length;
+      }
+      /**
+       * Clear all nodes, edges, and subgraphs
+       * @returns this for chaining
+       */
+      clear() {
+        this.nodes = [];
+        this.edges = [];
+        this.subgraphs = [];
+        return this;
+      }
+      /**
+       * Reset options to defaults
+       * @returns this for chaining
+       */
+      resetOptions() {
+        this.options = {};
+        return this;
+      }
+      /**
+       * Render the diagram as a Mermaid string
+       *
+       * If subgraphs are present, nodes are organized into their
+       * respective subgraphs. Nodes not in any subgraph are rendered
+       * at the top level.
+       *
+       * @returns The complete Mermaid diagram string
+       */
+      render() {
+        const { direction = "TD", colorScheme = "default" } = this.options;
+        const lines = [];
+        lines.push(`graph ${direction}`);
+        const nodesInSubgraphs = /* @__PURE__ */ new Set();
+        for (const subgraph of this.subgraphs) {
+          for (const nodeId of subgraph.nodes) {
+            nodesInSubgraphs.add(nodeId);
+          }
+        }
+        const topLevelNodes = this.nodes.filter((n) => !nodesInSubgraphs.has(n.id));
+        if (topLevelNodes.length > 0) {
+          lines.push("");
+          for (const node of topLevelNodes) {
+            lines.push(renderMermaidNode(node));
+          }
+        }
+        if (this.subgraphs.length > 0) {
+          lines.push("");
+          for (const subgraph of this.subgraphs) {
+            lines.push(renderMermaidSubgraph(subgraph));
+            const subgraphNodes = this.nodes.filter((n) => subgraph.nodes.includes(n.id));
+            for (const node of subgraphNodes) {
+              const nodeStr = renderMermaidNode(node);
+              lines.push(`  ${nodeStr}`);
+            }
+          }
+        }
+        if (this.edges.length > 0) {
+          lines.push("");
+          for (const edge of this.edges) {
+            lines.push(renderMermaidEdge(edge));
+          }
+        }
+        if (colorScheme !== "monochrome") {
+          const styledNodes = this.nodes.filter((n) => n.style);
+          if (styledNodes.length > 0) {
+            lines.push("");
+            for (const node of styledNodes) {
+              const styleStr = renderMermaidNodeStyle(node.id, node.style);
+              if (styleStr) lines.push(styleStr);
+            }
+          }
+        }
+        return lines.join("\n");
+      }
+      /**
+       * Render as a state diagram instead of flowchart
+       * @param states - State definitions with optional types
+       * @param transitions - Transition definitions
+       * @returns The Mermaid state diagram string
+       */
+      renderAsStateDiagram(states, transitions) {
+        return generateMermaidStateDiagram(states, transitions);
+      }
+      /**
+       * Render as a class diagram
+       * @param classes - Class definitions
+       * @param relationships - Relationship definitions
+       * @returns The Mermaid class diagram string
+       */
+      renderAsClassDiagram(classes, relationships) {
+        return generateMermaidClassDiagram(classes, relationships);
+      }
+      /**
+       * Create a builder from existing nodes, edges, and options
+       * Useful for modifying existing diagram structures
+       * @param nodes - Initial nodes
+       * @param edges - Initial edges
+       * @param options - Initial options
+       * @returns A new MermaidGraphBuilder instance
+       */
+      static from(nodes = [], edges = [], options = {}) {
+        const builder = new _MermaidGraphBuilder();
+        builder.nodes = [...nodes];
+        builder.edges = [...edges];
+        builder.options = { ...options };
+        return builder;
+      }
+    };
+    MermaidGanttBuilder = class {
+      title = "";
+      dateFormat = "YYYY-MM-DD";
+      axisFormat = "%Y-%m-%d";
+      sections = [];
+      currentSection = null;
+      excludes = [];
+      /**
+       * Set the Gantt chart title
+       * @param title - Chart title
+       */
+      setTitle(title) {
+        this.title = title;
+        return this;
+      }
+      /**
+       * Set the date format for parsing task dates
+       * @param format - Date format (e.g., 'YYYY-MM-DD', 'X' for unix timestamp)
+       */
+      setDateFormat(format) {
+        this.dateFormat = format;
+        return this;
+      }
+      /**
+       * Set the axis format for displaying dates
+       * @param format - Axis format (e.g., '%Y-%m-%d', '%s' for seconds)
+       */
+      setAxisFormat(format) {
+        this.axisFormat = format;
+        return this;
+      }
+      /**
+       * Add excluded days (e.g., weekends)
+       * @param exclusion - Exclusion pattern (e.g., 'weekends', 'saturday', 'sunday')
+       */
+      addExcludes(exclusion) {
+        this.excludes.push(exclusion);
+        return this;
+      }
+      /**
+       * Start a new section
+       * @param name - Section name
+       */
+      addSection(name) {
+        this.currentSection = { name, tasks: [] };
+        this.sections.push(this.currentSection);
+        return this;
+      }
+      /**
+       * Add a task to the current section
+       * @param task - Task definition
+       */
+      addTask(task) {
+        if (!this.currentSection) {
+          this.addSection("Tasks");
+        }
+        this.currentSection.tasks.push({ ...task, type: task.type || "task" });
+        return this;
+      }
+      /**
+       * Add a milestone to the current section
+       * @param milestone - Milestone definition (duration is ignored)
+       */
+      addMilestone(milestone) {
+        if (!this.currentSection) {
+          this.addSection("Tasks");
+        }
+        this.currentSection.tasks.push({ ...milestone, type: "milestone", duration: "0s" });
+        return this;
+      }
+      /**
+       * Add a critical task to the current section
+       * @param task - Task definition
+       */
+      addCriticalTask(task) {
+        if (!this.currentSection) {
+          this.addSection("Tasks");
+        }
+        this.currentSection.tasks.push({ ...task, type: "crit" });
+        return this;
+      }
+      /**
+       * Add a completed task to the current section
+       * @param task - Task definition
+       */
+      addDoneTask(task) {
+        if (!this.currentSection) {
+          this.addSection("Tasks");
+        }
+        this.currentSection.tasks.push({ ...task, type: "done" });
+        return this;
+      }
+      /**
+       * Get the number of sections
+       */
+      getSectionCount() {
+        return this.sections.length;
+      }
+      /**
+       * Get the total number of tasks across all sections
+       */
+      getTaskCount() {
+        return this.sections.reduce((sum, s) => sum + s.tasks.length, 0);
+      }
+      /**
+       * Render the Gantt chart to a Mermaid string
+       */
+      render() {
+        const lines = ["gantt"];
+        if (this.title) {
+          lines.push(`  title ${this.title}`);
+        }
+        lines.push(`  dateFormat ${this.dateFormat}`);
+        lines.push(`  axisFormat ${this.axisFormat}`);
+        for (const exclusion of this.excludes) {
+          lines.push(`  excludes ${exclusion}`);
+        }
+        lines.push("");
+        for (const section2 of this.sections) {
+          lines.push(`  section ${section2.name}`);
+          for (const task of section2.tasks) {
+            const taskLine = this.renderTask(task);
+            lines.push(`  ${taskLine}`);
+          }
+        }
+        return lines.join("\n");
+      }
+      renderTask(task) {
+        const label = escapeMermaidLabel(task.label);
+        let typeModifier = "";
+        if (task.type === "milestone") {
+          typeModifier = "milestone";
+        } else if (task.type === "crit") {
+          typeModifier = "crit";
+        } else if (task.type === "done") {
+          typeModifier = "done";
+        } else if (task.type === "active") {
+          typeModifier = "active";
+        }
+        let timing;
+        if (task.after) {
+          timing = `after ${sanitizeMermaidId(task.after)}`;
+        } else {
+          timing = String(task.start);
+        }
+        if (task.duration !== void 0 && task.type !== "milestone") {
+          timing += `, ${task.duration}`;
+        } else if (task.type === "milestone") {
+          timing += ", 0s";
+        }
+        if (typeModifier) {
+          return `${label} :${typeModifier}, ${timing}`;
+        } else {
+          return `${label} :${timing}`;
+        }
+      }
+    };
+    MermaidStateDiagramBuilder = class {
+      states = [];
+      transitions = [];
+      initialState = null;
+      finalStates = [];
+      direction = "TB";
+      title = "";
+      /**
+       * Set the diagram direction
+       * @param direction - Direction (TB, LR, etc.)
+       */
+      setDirection(direction) {
+        this.direction = direction;
+        return this;
+      }
+      /**
+       * Set the diagram title
+       * @param title - Title text
+       */
+      setTitle(title) {
+        this.title = title;
+        return this;
+      }
+      /**
+       * Set the initial state (adds [*] --> state)
+       * @param stateId - The initial state ID
+       */
+      setInitialState(stateId) {
+        this.initialState = stateId;
+        return this;
+      }
+      /**
+       * Add a state to the diagram
+       * @param state - State definition
+       */
+      addState(state) {
+        this.states.push(state);
+        return this;
+      }
+      /**
+       * Add multiple states to the diagram
+       * @param states - Array of state definitions
+       */
+      addStates(states) {
+        this.states.push(...states);
+        return this;
+      }
+      /**
+       * Mark a state as final (adds state --> [*])
+       * @param stateId - The final state ID
+       */
+      addFinalState(stateId) {
+        if (!this.finalStates.includes(stateId)) {
+          this.finalStates.push(stateId);
+        }
+        return this;
+      }
+      /**
+       * Add a transition between states
+       * @param transition - Transition definition
+       */
+      addTransition(transition) {
+        this.transitions.push(transition);
+        return this;
+      }
+      /**
+       * Add multiple transitions
+       * @param transitions - Array of transition definitions
+       */
+      addTransitions(transitions) {
+        this.transitions.push(...transitions);
+        return this;
+      }
+      /**
+       * Get the number of states
+       */
+      getStateCount() {
+        return this.states.length;
+      }
+      /**
+       * Get the number of transitions
+       */
+      getTransitionCount() {
+        return this.transitions.length;
+      }
+      /**
+       * Render the state diagram to a Mermaid string
+       */
+      render() {
+        const lines = ["stateDiagram-v2"];
+        if (this.direction !== "TB") {
+          lines.push(`  direction ${this.direction}`);
+        }
+        if (this.title) {
+          lines.push(`  note right of [*] : ${escapeMermaidLabel(this.title)}`);
+        }
+        if (this.initialState) {
+          lines.push(`  [*] --> ${sanitizeMermaidId(this.initialState)}`);
+        }
+        for (const state of this.states) {
+          const stateId = sanitizeMermaidId(state.id);
+          if (state.label && state.label !== state.id) {
+            lines.push(`  ${stateId} : ${escapeMermaidLabel(state.label)}`);
+          }
+          if (state.description) {
+            lines.push(`  ${stateId} : ${escapeMermaidLabel(state.description)}`);
+          }
+          if (state.type === "choice") {
+            lines.push(`  state ${stateId} <<choice>>`);
+          } else if (state.type === "fork") {
+            lines.push(`  state ${stateId} <<fork>>`);
+          } else if (state.type === "join") {
+            lines.push(`  state ${stateId} <<join>>`);
+          }
+        }
+        for (const trans of this.transitions) {
+          const from = sanitizeMermaidId(trans.from);
+          const to = sanitizeMermaidId(trans.to);
+          if (trans.label) {
+            lines.push(`  ${from} --> ${to} : ${escapeMermaidLabel(trans.label)}`);
+          } else {
+            lines.push(`  ${from} --> ${to}`);
+          }
+        }
+        for (const finalState of this.finalStates) {
+          lines.push(`  ${sanitizeMermaidId(finalState)} --> [*]`);
+        }
+        return lines.join("\n");
       }
     };
   }
@@ -22403,27 +22560,28 @@ function exportSequentialDependencyGraph(thought, options) {
 }
 function sequentialToMermaid(thought, colorScheme, includeLabels) {
   const scheme = colorScheme;
-  const nodes = [];
-  const edges = [];
+  const builder = new MermaidGraphBuilder().setDirection("TD");
   const nodeId = sanitizeId(thought.id);
-  const label = includeLabels ? truncateLabel(thought.content, 50) : nodeId;
-  nodes.push({
+  const label = includeLabels ? thought.content.substring(0, 50) + (thought.content.length > 50 ? "..." : "") : nodeId;
+  const primaryColor = scheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
+  const warningColor = scheme === "pastel" ? "#fff3e0" : "#ffd699";
+  builder.addNode({
     id: nodeId,
     label,
     shape: thought.isRevision ? "hexagon" : "stadium",
-    style: colorScheme !== "monochrome" ? {
-      fill: thought.isRevision ? getMermaidColor("warning", scheme) : getMermaidColor("primary", scheme)
+    style: scheme !== "monochrome" ? {
+      fill: thought.isRevision ? warningColor : primaryColor
     } : void 0
   });
   if (thought.buildUpon && thought.buildUpon.length > 0) {
     for (const depId of thought.buildUpon) {
       const depNodeId = sanitizeId(depId);
-      nodes.push({
+      builder.addNode({
         id: depNodeId,
         label: depNodeId,
         shape: "rectangle"
       });
-      edges.push({
+      builder.addEdge({
         source: depNodeId,
         target: nodeId,
         style: "arrow"
@@ -22432,7 +22590,7 @@ function sequentialToMermaid(thought, colorScheme, includeLabels) {
   }
   if (thought.branchFrom) {
     const branchId = sanitizeId(thought.branchFrom);
-    edges.push({
+    builder.addEdge({
       source: branchId,
       target: nodeId,
       style: "dotted",
@@ -22441,21 +22599,20 @@ function sequentialToMermaid(thought, colorScheme, includeLabels) {
   }
   if (thought.revisesThought) {
     const revisedId = sanitizeId(thought.revisesThought);
-    edges.push({
+    builder.addEdge({
       source: revisedId,
       target: nodeId,
       style: "thick",
       label: "revises"
     });
   }
-  return generateMermaidFlowchart(nodes, edges, { direction: "TD", colorScheme: scheme });
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 function sequentialToDOT(thought, includeLabels) {
-  const nodes = [];
-  const edges = [];
+  const builder = new DOTGraphBuilder().setGraphName("SequentialDependency").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
   const nodeId = sanitizeId(thought.id);
-  const label = includeLabels ? truncateDotLabel(thought.content, 50) : nodeId;
-  nodes.push({
+  const label = includeLabels ? thought.content.substring(0, 50) + (thought.content.length > 50 ? "..." : "") : nodeId;
+  builder.addNode({
     id: nodeId,
     label,
     shape: thought.isRevision ? "hexagon" : "box",
@@ -22465,13 +22622,13 @@ function sequentialToDOT(thought, includeLabels) {
   if (thought.buildUpon && thought.buildUpon.length > 0) {
     for (const depId of thought.buildUpon) {
       const depNodeId = sanitizeId(depId);
-      nodes.push({
+      builder.addNode({
         id: depNodeId,
         label: depNodeId,
         shape: "box",
         style: "rounded"
       });
-      edges.push({
+      builder.addEdge({
         source: depNodeId,
         target: nodeId
       });
@@ -22479,7 +22636,7 @@ function sequentialToDOT(thought, includeLabels) {
   }
   if (thought.branchFrom) {
     const branchId = sanitizeId(thought.branchFrom);
-    edges.push({
+    builder.addEdge({
       source: branchId,
       target: nodeId,
       style: "dashed",
@@ -22488,52 +22645,47 @@ function sequentialToDOT(thought, includeLabels) {
   }
   if (thought.revisesThought) {
     const revisedId = sanitizeId(thought.revisesThought);
-    edges.push({
+    builder.addEdge({
       source: revisedId,
       target: nodeId,
       style: "bold",
       label: "revises"
     });
   }
-  return generateDotGraph(nodes, edges, {
-    graphName: "SequentialDependency",
-    rankDir: "TB",
-    nodeDefaults: { shape: "box", style: "rounded" }
-  });
+  return builder.render();
 }
 function sequentialToASCII(thought) {
-  const lines = [];
-  lines.push(generateAsciiHeader("Sequential Dependency Graph", "equals"));
-  lines.push("");
-  lines.push(`Current Thought: ${thought.id}`);
-  lines.push(`Content: ${thought.content.substring(0, 100)}...`);
-  lines.push("");
+  const builder = new ASCIIDocBuilder().setMaxWidth(60).addHeader("Sequential Dependency Graph");
+  builder.addSection("Current Thought").addText(`ID: ${thought.id}
+`).addText(`Content: ${thought.content.substring(0, 100)}...
+`).addEmptyLine();
   if (thought.buildUpon && thought.buildUpon.length > 0) {
-    lines.push(generateAsciiSectionHeader("Builds Upon"));
-    lines.push(generateAsciiBulletList(
-      thought.buildUpon.map((depId) => `\u2193 ${depId}`),
-      "asciiBullet",
-      0
-    ));
-    lines.push("");
+    builder.addSection("Builds Upon");
+    for (const depId of thought.buildUpon) {
+      builder.addText(`  \u2193 ${depId}
+`);
+    }
+    builder.addEmptyLine();
   }
   if (thought.branchFrom) {
-    lines.push(generateAsciiSectionHeader("Branch Information"));
-    lines.push(`  Branches From: ${thought.branchFrom}`);
+    builder.addSection("Branch Information").addText(`  Branches From: ${thought.branchFrom}
+`);
     if (thought.branchId) {
-      lines.push(`  Branch ID: ${thought.branchId}`);
+      builder.addText(`  Branch ID: ${thought.branchId}
+`);
     }
-    lines.push("");
+    builder.addEmptyLine();
   }
   if (thought.revisesThought) {
-    lines.push(generateAsciiSectionHeader("Revision Information"));
-    lines.push(`  Revises: ${thought.revisesThought}`);
+    builder.addSection("Revision Information").addText(`  Revises: ${thought.revisesThought}
+`);
     if (thought.revisionReason) {
-      lines.push(`  Reason: ${thought.revisionReason}`);
+      builder.addText(`  Reason: ${thought.revisionReason}
+`);
     }
-    lines.push("");
+    builder.addEmptyLine();
   }
-  return lines.join("\n");
+  return builder.render();
 }
 function sequentialToSVG(thought, options) {
   const {
@@ -22919,8 +23071,8 @@ var init_sequential = __esm({
   "src/export/visual/modes/sequential.ts"() {
     init_esm_shims();
     init_utils();
-    init_mermaid();
     init_dot();
+    init_mermaid();
     init_ascii();
     init_svg();
     init_graphml();
@@ -22964,99 +23116,115 @@ function exportShannonStageFlow(thought, options) {
   }
 }
 function shannonToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph LR\n";
-  for (let i = 0; i < stages.length; i++) {
-    const stage = stages[i];
-    const stageId = sanitizeId(stage);
-    const label = includeLabels ? stageLabels[stage] : stageId;
-    mermaid += `  ${stageId}["${label}"]
-`;
-    if (i < stages.length - 1) {
-      const nextStageId = sanitizeId(stages[i + 1]);
-      mermaid += `  ${stageId} --> ${nextStageId}
-`;
-    }
-  }
-  if (colorScheme !== "monochrome") {
-    mermaid += "\n";
-    const currentStageId = sanitizeId(thought.stage);
-    const color = colorScheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
-    mermaid += `  style ${currentStageId} fill:${color},stroke:#333,stroke-width:3px
-`;
-  }
-  if (includeMetrics && thought.uncertainty !== void 0) {
-    mermaid += `
-  uncertainty["Uncertainty: ${thought.uncertainty.toFixed(2)}"]
-`;
-    mermaid += `  uncertainty -.-> ${sanitizeId(thought.stage)}
-`;
-  }
-  return mermaid;
-}
-function shannonToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph ShannonStageFlow {\n";
-  dot += "  rankdir=LR;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("LR");
+  const currentColor = scheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
   for (let i = 0; i < stages.length; i++) {
     const stage = stages[i];
     const stageId = sanitizeId(stage);
     const label = includeLabels ? stageLabels[stage] : stageId;
     const isCurrent = stage === thought.stage;
-    const style = isCurrent ? ", style=filled, fillcolor=lightblue" : "";
-    dot += `  ${stageId} [label="${label}"${style}];
-`;
+    builder.addNode({
+      id: stageId,
+      label,
+      shape: "rectangle",
+      style: isCurrent && scheme !== "monochrome" ? { fill: currentColor, strokeWidth: "3px" } : void 0
+    });
     if (i < stages.length - 1) {
       const nextStageId = sanitizeId(stages[i + 1]);
-      dot += `  ${stageId} -> ${nextStageId};
-`;
+      builder.addEdge({
+        source: stageId,
+        target: nextStageId,
+        style: "arrow"
+      });
     }
   }
   if (includeMetrics && thought.uncertainty !== void 0) {
-    dot += `
-  uncertainty [label="Uncertainty: ${thought.uncertainty.toFixed(2)}", shape=ellipse];
-`;
-    dot += `  uncertainty -> ${sanitizeId(thought.stage)} [style=dashed];
-`;
+    builder.addNode({
+      id: "uncertainty",
+      label: `Uncertainty: ${thought.uncertainty.toFixed(2)}`,
+      shape: "rectangle"
+    });
+    builder.addEdge({
+      source: "uncertainty",
+      target: sanitizeId(thought.stage),
+      style: "dotted"
+    });
   }
-  dot += "}\n";
-  return dot;
+  return builder.setOptions({ colorScheme: scheme }).render();
+}
+function shannonToDOT(thought, includeLabels, includeMetrics) {
+  const builder = new DOTGraphBuilder().setGraphName("ShannonStageFlow").setRankDir("LR").setNodeDefaults({ shape: "box", style: "rounded" });
+  for (let i = 0; i < stages.length; i++) {
+    const stage = stages[i];
+    const stageId = sanitizeId(stage);
+    const label = includeLabels ? stageLabels[stage] : stageId;
+    const isCurrent = stage === thought.stage;
+    builder.addNode({
+      id: stageId,
+      label,
+      style: isCurrent ? "filled" : void 0,
+      fillColor: isCurrent ? "lightblue" : void 0
+    });
+    if (i < stages.length - 1) {
+      const nextStageId = sanitizeId(stages[i + 1]);
+      builder.addEdge({
+        source: stageId,
+        target: nextStageId
+      });
+    }
+  }
+  if (includeMetrics && thought.uncertainty !== void 0) {
+    builder.addNode({
+      id: "uncertainty",
+      label: `Uncertainty: ${thought.uncertainty.toFixed(2)}`,
+      shape: "ellipse"
+    });
+    builder.addEdge({
+      source: "uncertainty",
+      target: sanitizeId(thought.stage),
+      style: "dashed"
+    });
+  }
+  return builder.render();
 }
 function shannonToASCII(thought) {
-  let ascii = "Shannon Stage Flow:\n";
-  ascii += "===================\n\n";
-  ascii += "Flow: ";
+  const builder = new ASCIIDocBuilder().setMaxWidth(60).addHeader("Shannon Stage Flow");
+  let flowLine = "Flow: ";
   for (let i = 0; i < stages.length; i++) {
     const stage = stages[i];
     const isCurrent = stage === thought.stage;
     if (isCurrent) {
-      ascii += `[${stageLabels[stage]}]`;
+      flowLine += `[${stageLabels[stage]}]`;
     } else {
-      ascii += stageLabels[stage];
+      flowLine += stageLabels[stage];
     }
     if (i < stages.length - 1) {
-      ascii += " \u2192 ";
+      flowLine += " \u2192 ";
     }
   }
-  ascii += "\n\n";
-  ascii += `Current Stage: ${stageLabels[thought.stage]}
-`;
-  ascii += `Uncertainty: ${thought.uncertainty.toFixed(2)}
-`;
+  builder.addText(`${flowLine}
+`);
+  builder.addEmptyLine();
+  builder.addSection("Current Stage").addText(`${stageLabels[thought.stage]}
+`).addText(`Uncertainty: ${thought.uncertainty.toFixed(2)}
+`).addEmptyLine();
   if (thought.dependencies && thought.dependencies.length > 0) {
-    ascii += "\nDependencies:\n";
+    builder.addSection("Dependencies");
     for (const dep of thought.dependencies) {
-      ascii += `  \u2022 ${dep}
-`;
+      builder.addText(`  \u2022 ${dep}
+`);
     }
+    builder.addEmptyLine();
   }
   if (thought.assumptions && thought.assumptions.length > 0) {
-    ascii += "\nAssumptions:\n";
+    builder.addSection("Assumptions");
     for (const assumption of thought.assumptions) {
-      ascii += `  \u2022 ${assumption}
-`;
+      builder.addText(`  \u2022 ${assumption}
+`);
     }
   }
-  return ascii;
+  return builder.render();
 }
 function shannonToSVG(thought, options) {
   const {
@@ -23305,6 +23473,9 @@ var init_shannon = __esm({
   "src/export/visual/modes/shannon.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -26729,69 +26900,53 @@ function exportCausalGraph(thought, options) {
   }
 }
 function causalGraphToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph TB\n";
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("TB");
   if (!thought.causalGraph || !thought.causalGraph.nodes) {
-    return mermaid + '  NoData["No causal graph data"]\n';
+    builder.addNode({ id: "NoData", label: "No causal graph data", shape: "rectangle" });
+    return builder.render();
   }
+  const causeColor = scheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
+  const effectColor = scheme === "pastel" ? "#fff3e0" : "#ffd699";
   for (const node of thought.causalGraph.nodes) {
     const nodeId = sanitizeId(node.id);
     const label = includeLabels ? node.name : nodeId;
     let shape;
+    let fillColor;
     switch (node.type) {
       case "cause":
-        shape = ["([", "])"];
+        shape = "stadium";
+        fillColor = causeColor;
         break;
       case "effect":
-        shape = ["[[", "]]"];
+        shape = "subroutine";
+        fillColor = effectColor;
         break;
       case "mediator":
-        shape = ["[", "]"];
+        shape = "rectangle";
         break;
       case "confounder":
-        shape = ["{", "}"];
+        shape = "rhombus";
         break;
       default:
-        shape = ["[", "]"];
+        shape = "rectangle";
     }
-    mermaid += `  ${nodeId}${shape[0]}${label}${shape[1]}
-`;
+    const nodeStyle = fillColor && scheme !== "monochrome" ? { fill: fillColor } : void 0;
+    builder.addNode({ id: nodeId, label, shape, style: nodeStyle });
   }
-  mermaid += "\n";
   for (const edge of thought.causalGraph.edges) {
     const fromId = sanitizeId(edge.from);
     const toId = sanitizeId(edge.to);
-    if (includeMetrics && edge.strength !== void 0) {
-      mermaid += `  ${fromId} --> |${edge.strength.toFixed(2)}| ${toId}
-`;
-    } else {
-      mermaid += `  ${fromId} --> ${toId}
-`;
-    }
+    const label = includeMetrics && edge.strength !== void 0 ? edge.strength.toFixed(2) : void 0;
+    builder.addEdge({ source: fromId, target: toId, label });
   }
-  if (colorScheme !== "monochrome") {
-    mermaid += "\n";
-    const causes = thought.causalGraph.nodes.filter((n) => n.type === "cause");
-    const effects = thought.causalGraph.nodes.filter((n) => n.type === "effect");
-    for (const node of causes) {
-      const color = colorScheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
-      mermaid += `  style ${sanitizeId(node.id)} fill:${color}
-`;
-    }
-    for (const node of effects) {
-      const color = colorScheme === "pastel" ? "#fff3e0" : "#ffd699";
-      mermaid += `  style ${sanitizeId(node.id)} fill:${color}
-`;
-    }
-  }
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 function causalGraphToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph CausalGraph {\n";
-  dot += "  rankdir=TB;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
+  const builder = new DOTGraphBuilder().setGraphName("CausalGraph").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
   if (!thought.causalGraph || !thought.causalGraph.nodes) {
-    dot += '  NoData [label="No causal graph data"];\n}\n';
-    return dot;
+    builder.addNode({ id: "NoData", label: "No causal graph data" });
+    return builder.render();
   }
   for (const node of thought.causalGraph.nodes) {
     const nodeId = sanitizeId(node.id);
@@ -26811,46 +26966,39 @@ function causalGraphToDOT(thought, includeLabels, includeMetrics) {
         shape = "diamond";
         break;
     }
-    dot += `  ${nodeId} [label="${label}", shape=${shape}];
-`;
+    builder.addNode({ id: nodeId, label, shape });
   }
-  dot += "\n";
   for (const edge of thought.causalGraph.edges) {
     const fromId = sanitizeId(edge.from);
     const toId = sanitizeId(edge.to);
-    if (includeMetrics && edge.strength !== void 0) {
-      dot += `  ${fromId} -> ${toId} [label="${edge.strength.toFixed(2)}"];
-`;
-    } else {
-      dot += `  ${fromId} -> ${toId};
-`;
-    }
+    const label = includeMetrics && edge.strength !== void 0 ? edge.strength.toFixed(2) : void 0;
+    builder.addEdge({ source: fromId, target: toId, label });
   }
-  dot += "}\n";
-  return dot;
+  return builder.render();
 }
 function causalGraphToASCII(thought) {
-  let ascii = "Causal Graph:\n";
-  ascii += "=============\n\n";
+  const builder = new ASCIIDocBuilder().setMaxWidth(60).addHeader("Causal Graph");
   if (!thought.causalGraph || !thought.causalGraph.nodes) {
-    return ascii + "No causal graph data\n";
+    builder.addSection("Status").addText("No causal graph data\n");
+    return builder.render();
   }
-  ascii += "Nodes:\n";
+  builder.addSection("Nodes");
   for (const node of thought.causalGraph.nodes) {
     const nodeType = node.type ? `[${node.type.toUpperCase()}] ` : "";
     const nodeDesc = node.description ? `: ${node.description}` : "";
-    ascii += `  ${nodeType}${node.name}${nodeDesc}
-`;
+    builder.addText(`${nodeType}${node.name}${nodeDesc}
+`);
   }
-  ascii += "\nEdges:\n";
+  builder.addEmptyLine();
+  builder.addSection("Edges");
   for (const edge of thought.causalGraph.edges) {
     const fromNode = thought.causalGraph.nodes.find((n) => n.id === edge.from);
     const toNode = thought.causalGraph.nodes.find((n) => n.id === edge.to);
     const strength = edge.strength !== void 0 ? ` (strength: ${edge.strength.toFixed(2)})` : "";
-    ascii += `  ${fromNode?.name} --> ${toNode?.name}${strength}
-`;
+    builder.addText(`${fromNode?.name} --> ${toNode?.name}${strength}
+`);
   }
-  return ascii;
+  return builder.render();
 }
 function causalGraphToSVG(thought, options) {
   const {
@@ -27342,6 +27490,9 @@ var init_causal = __esm({
   "src/export/visual/modes/causal.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -27384,80 +27535,70 @@ function exportTemporalTimeline(thought, options) {
   }
 }
 function timelineToMermaidGantt(thought, includeLabels) {
-  let gantt = "gantt\n";
-  gantt += `  title ${thought.timeline?.name || "Timeline"}
-`;
-  gantt += "  dateFormat X\n";
-  gantt += "  axisFormat %s\n\n";
+  const builder = new MermaidGanttBuilder().setTitle(thought.timeline?.name || "Timeline").setDateFormat("X").setAxisFormat("%s").addSection("Events");
   if (!thought.events || thought.events.length === 0) {
-    return gantt + "  No events\n";
+    builder.addTask({ id: "empty", label: "No events", start: 0, duration: "0s" });
+    return builder.render();
   }
-  gantt += "  section Events\n";
   for (const event of thought.events) {
     const label = includeLabels ? event.name : event.id;
     if (event.type === "instant") {
-      gantt += `  ${label} :milestone, ${event.timestamp}, 0s
-`;
+      builder.addMilestone({ id: event.id, label, start: event.timestamp });
     } else if (event.type === "interval" && event.duration) {
-      gantt += `  ${label} :${event.timestamp}, ${event.duration}s
-`;
+      builder.addTask({ id: event.id, label, start: event.timestamp, duration: `${event.duration}s` });
     }
   }
-  return gantt;
+  return builder.render();
 }
 function timelineToDOT(thought, includeLabels) {
-  let dot = "digraph Timeline {\n";
-  dot += "  rankdir=LR;\n";
-  dot += "  node [shape=box];\n\n";
+  const builder = new DOTGraphBuilder().setGraphName("Timeline").setRankDir("LR").setNodeDefaults({ shape: "box" });
   if (!thought.events) {
-    dot += "}\n";
-    return dot;
+    return builder.render();
   }
   const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
   for (const event of sortedEvents) {
     const nodeId = sanitizeId(event.id);
     const label = includeLabels ? `${event.name}\\n(t=${event.timestamp})` : nodeId;
     const shape = event.type === "instant" ? "ellipse" : "box";
-    dot += `  ${nodeId} [label="${label}", shape=${shape}];
-`;
+    builder.addNode({ id: nodeId, label, shape });
   }
-  dot += "\n";
   for (let i = 0; i < sortedEvents.length - 1; i++) {
     const from = sanitizeId(sortedEvents[i].id);
     const to = sanitizeId(sortedEvents[i + 1].id);
-    dot += `  ${from} -> ${to};
-`;
+    builder.addEdge({ source: from, target: to });
   }
   if (thought.relations) {
-    dot += "\n  // Causal relations\n";
     for (const rel of thought.relations) {
       const from = sanitizeId(rel.from);
       const to = sanitizeId(rel.to);
-      dot += `  ${from} -> ${to} [style=dashed, label="${rel.relationType}"];
-`;
+      builder.addEdge({
+        source: from,
+        target: to,
+        style: "dashed",
+        label: rel.relationType
+      });
     }
   }
-  dot += "}\n";
-  return dot;
+  return builder.render();
 }
 function timelineToASCII(thought) {
-  let ascii = `Timeline: ${thought.timeline?.name || "Untitled"}
-`;
-  ascii += "=".repeat(40) + "\n\n";
+  const builder = new ASCIIDocBuilder().setMaxWidth(60).addHeader(`Timeline: ${thought.timeline?.name || "Untitled"}`);
   if (!thought.events || thought.events.length === 0) {
-    return ascii + "No events\n";
+    builder.addText("No events\n");
+    return builder.render();
   }
   const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  builder.addSection("Events");
   for (const event of sortedEvents) {
     const marker = event.type === "instant" ? "\u29BF" : "\u2501";
-    ascii += `t=${event.timestamp.toString().padStart(4)} ${marker} ${event.name}
-`;
+    builder.addText(`t=${event.timestamp.toString().padStart(4)} ${marker} ${event.name}
+`);
     if (event.duration) {
-      ascii += `       ${"\u2514".padStart(5)}\u2192 duration: ${event.duration}
-`;
+      builder.addText(`       ${"\u2514".padStart(5)}\u2192 duration: ${event.duration}
+`);
     }
   }
-  return ascii;
+  return builder.render();
 }
 function timelineToGraphML(thought, _options) {
   if (!thought.events || thought.events.length === 0) {
@@ -27814,6 +27955,9 @@ var init_temporal = __esm({
   "src/export/visual/modes/temporal.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_ascii();
+    init_mermaid();
     init_svg();
     init_graphml();
     init_tikz();
@@ -27856,91 +28000,69 @@ function exportCounterfactualScenarios(thought, options) {
   }
 }
 function counterfactualToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph TD\n";
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("TD");
   const interventionId = "intervention";
-  mermaid += `  ${interventionId}["${thought.interventionPoint.description}"]
-`;
+  builder.addNode({ id: interventionId, label: thought.interventionPoint.description, shape: "rectangle" });
   const actualId = sanitizeId(thought.actual.id);
-  const actualLabel = includeLabels ? thought.actual.name : actualId;
-  mermaid += `  ${actualId}["Actual: ${actualLabel}"]
-`;
-  mermaid += `  ${interventionId} -->|no change| ${actualId}
-`;
+  const actualLabel = includeLabels ? `Actual: ${thought.actual.name}` : `Actual: ${actualId}`;
+  builder.addNode({ id: actualId, label: actualLabel, shape: "rectangle" });
+  builder.addEdge({ source: interventionId, target: actualId, label: "no change" });
   for (const scenario of thought.counterfactuals) {
     const scenarioId = sanitizeId(scenario.id);
     const label = includeLabels ? scenario.name : scenarioId;
     const likelihoodLabel = includeMetrics && scenario.likelihood ? ` (${scenario.likelihood.toFixed(2)})` : "";
-    mermaid += `  ${scenarioId}["CF: ${label}${likelihoodLabel}"]
-`;
-    mermaid += `  ${interventionId} -->|intervene| ${scenarioId}
-`;
+    builder.addNode({ id: scenarioId, label: `CF: ${label}${likelihoodLabel}`, shape: "rectangle" });
+    builder.addEdge({ source: interventionId, target: scenarioId, label: "intervene" });
   }
-  if (colorScheme !== "monochrome") {
-    mermaid += "\n";
-    const actualColor = colorScheme === "pastel" ? "#fff3e0" : "#ffd699";
-    mermaid += `  style ${actualId} fill:${actualColor}
-`;
-    const cfColor = colorScheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
-    for (const scenario of thought.counterfactuals) {
-      const scenarioId = sanitizeId(scenario.id);
-      mermaid += `  style ${scenarioId} fill:${cfColor}
-`;
-    }
-  }
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 function counterfactualToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph CounterfactualScenarios {\n";
-  dot += "  rankdir=TD;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
+  const builder = new DOTGraphBuilder().setGraphName("CounterfactualScenarios").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
   const interventionId = "intervention";
-  dot += `  ${interventionId} [label="${thought.interventionPoint.description}", shape=diamond];
-
-`;
+  builder.addNode({ id: interventionId, label: thought.interventionPoint.description, shape: "diamond" });
   const actualId = sanitizeId(thought.actual.id);
   const actualLabel = includeLabels ? thought.actual.name : actualId;
-  dot += `  ${actualId} [label="Actual: ${actualLabel}", style=filled, fillcolor=lightyellow];
-`;
-  dot += `  ${interventionId} -> ${actualId} [label="no change"];
-
-`;
+  const filledStyle = ["filled"];
+  builder.addNode({
+    id: actualId,
+    label: `Actual: ${actualLabel}`,
+    style: filledStyle,
+    fillColor: "lightyellow"
+  });
+  builder.addEdge({ source: interventionId, target: actualId, label: "no change" });
   for (const scenario of thought.counterfactuals) {
     const scenarioId = sanitizeId(scenario.id);
     const label = includeLabels ? scenario.name : scenarioId;
     const likelihoodLabel = includeMetrics && scenario.likelihood ? ` (${scenario.likelihood.toFixed(2)})` : "";
-    dot += `  ${scenarioId} [label="CF: ${label}${likelihoodLabel}", style=filled, fillcolor=lightblue];
-`;
-    dot += `  ${interventionId} -> ${scenarioId} [label="intervene"];
-`;
+    builder.addNode({
+      id: scenarioId,
+      label: `CF: ${label}${likelihoodLabel}`,
+      style: filledStyle,
+      fillColor: "lightblue"
+    });
+    builder.addEdge({ source: interventionId, target: scenarioId, label: "intervene" });
   }
-  dot += "}\n";
-  return dot;
+  return builder.render();
 }
 function counterfactualToASCII(thought) {
-  let ascii = "Counterfactual Scenario Tree:\n";
-  ascii += "=============================\n\n";
-  ascii += `Intervention Point: ${thought.interventionPoint.description}
-`;
-  ascii += `Timing: ${thought.interventionPoint.timing}
-`;
-  ascii += `Feasibility: ${thought.interventionPoint.feasibility.toFixed(2)}
-
-`;
-  ascii += "\u250C\u2500 Actual Scenario:\n";
-  ascii += `\u2502  ${thought.actual.name}
-`;
-  ascii += `\u2502  ${thought.actual.description}
-
-`;
-  ascii += "\u2514\u2500 Counterfactual Scenarios:\n";
+  const builder = new ASCIIDocBuilder().setMaxWidth(60).addHeader("Counterfactual Scenario Tree");
+  builder.addSection("Intervention Point").addText(`Description: ${thought.interventionPoint.description}
+`).addText(`Timing: ${thought.interventionPoint.timing}
+`).addText(`Feasibility: ${thought.interventionPoint.feasibility.toFixed(2)}
+`).addEmptyLine();
+  builder.addSection("Actual Scenario").addText(`\u250C\u2500 ${thought.actual.name}
+`).addText(`\u2502  ${thought.actual.description}
+`).addEmptyLine();
+  builder.addSection("Counterfactual Scenarios");
   for (const scenario of thought.counterfactuals) {
     const likelihoodStr = scenario.likelihood ? ` (likelihood: ${scenario.likelihood.toFixed(2)})` : "";
-    ascii += `   \u251C\u2500 ${scenario.name}${likelihoodStr}
-`;
-    ascii += `   \u2502  ${scenario.description}
-`;
+    builder.addText(`\u251C\u2500 ${scenario.name}${likelihoodStr}
+`);
+    builder.addText(`\u2502  ${scenario.description}
+`);
   }
-  return ascii;
+  return builder.render();
 }
 function counterfactualToSVG(thought, options) {
   const {
@@ -28411,6 +28533,9 @@ var init_counterfactual = __esm({
   "src/export/visual/modes/counterfactual.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -28453,80 +28578,73 @@ function exportBayesianNetwork(thought, options) {
   }
 }
 function bayesianToMermaid(thought, colorScheme, _includeLabels, includeMetrics) {
-  let mermaid = "graph LR\n";
-  mermaid += `  H([Hypothesis])
-`;
-  mermaid += `  Prior[Prior: ${includeMetrics ? thought.prior.probability.toFixed(3) : "?"}]
-`;
-  mermaid += `  Evidence[Evidence]
-`;
-  mermaid += `  Posterior[[Posterior: ${includeMetrics ? thought.posterior.probability.toFixed(3) : "?"}]]
-`;
-  mermaid += "\n";
-  mermaid += "  Prior --> H\n";
-  mermaid += "  Evidence --> H\n";
-  mermaid += "  H --> Posterior\n";
-  if (colorScheme !== "monochrome") {
-    mermaid += "\n";
-    const priorColor = colorScheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
-    const posteriorColor = colorScheme === "pastel" ? "#c8e6c9" : "#81c784";
-    mermaid += `  style Prior fill:${priorColor}
-`;
-    mermaid += `  style Posterior fill:${posteriorColor}
-`;
-  }
-  return mermaid;
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("LR");
+  const priorColor = scheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
+  const posteriorColor = scheme === "pastel" ? "#c8e6c9" : "#81c784";
+  builder.addNode({
+    id: "H",
+    label: "Hypothesis",
+    shape: "stadium"
+  });
+  builder.addNode({
+    id: "Prior",
+    label: `Prior: ${includeMetrics ? thought.prior.probability.toFixed(3) : "?"}`,
+    shape: "rectangle",
+    style: scheme !== "monochrome" ? { fill: priorColor } : void 0
+  });
+  builder.addNode({
+    id: "Evidence",
+    label: "Evidence",
+    shape: "rectangle"
+  });
+  builder.addNode({
+    id: "Posterior",
+    label: `Posterior: ${includeMetrics ? thought.posterior.probability.toFixed(3) : "?"}`,
+    shape: "subroutine",
+    style: scheme !== "monochrome" ? { fill: posteriorColor } : void 0
+  });
+  builder.addEdge({ source: "Prior", target: "H", style: "arrow" });
+  builder.addEdge({ source: "Evidence", target: "H", style: "arrow" });
+  builder.addEdge({ source: "H", target: "Posterior", style: "arrow" });
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 function bayesianToDOT(thought, _includeLabels, includeMetrics) {
-  let dot = "digraph BayesianNetwork {\n";
-  dot += "  rankdir=LR;\n";
-  dot += "  node [shape=ellipse];\n\n";
+  const builder = new DOTGraphBuilder().setGraphName("BayesianNetwork").setRankDir("LR").setNodeDefaults({ shape: "ellipse" });
   const priorProb = includeMetrics ? `: ${thought.prior.probability.toFixed(3)}` : "";
   const posteriorProb = includeMetrics ? `: ${thought.posterior.probability.toFixed(3)}` : "";
-  dot += `  Prior [label="Prior${priorProb}"];
-`;
-  dot += `  Hypothesis [label="Hypothesis", shape=box];
-`;
-  dot += `  Evidence [label="Evidence"];
-`;
-  dot += `  Posterior [label="Posterior${posteriorProb}", shape=doublecircle];
-`;
-  dot += "\n";
-  dot += "  Prior -> Hypothesis;\n";
-  dot += "  Evidence -> Hypothesis;\n";
-  dot += "  Hypothesis -> Posterior;\n";
-  dot += "}\n";
-  return dot;
+  builder.addNode({ id: "Prior", label: `Prior${priorProb}` });
+  builder.addNode({ id: "Hypothesis", label: "Hypothesis", shape: "box" });
+  builder.addNode({ id: "Evidence", label: "Evidence" });
+  builder.addNode({ id: "Posterior", label: `Posterior${posteriorProb}`, shape: "doublecircle" });
+  builder.addEdge({ source: "Prior", target: "Hypothesis" });
+  builder.addEdge({ source: "Evidence", target: "Hypothesis" });
+  builder.addEdge({ source: "Hypothesis", target: "Posterior" });
+  return builder.render();
 }
 function bayesianToASCII(thought) {
-  let ascii = "Bayesian Network:\n";
-  ascii += "=================\n\n";
-  ascii += `Hypothesis: ${thought.hypothesis.statement}
-
-`;
-  ascii += `Prior Probability: ${thought.prior.probability.toFixed(3)}
-`;
-  ascii += `  Justification: ${thought.prior.justification || "-"}
-
-`;
+  const builder = new ASCIIDocBuilder().setMaxWidth(60).addHeader("Bayesian Network");
+  builder.addSection("Hypothesis").addText(`${thought.hypothesis.statement}
+`).addEmptyLine();
+  builder.addSection("Prior Probability").addText(`Value: ${thought.prior.probability.toFixed(3)}
+`).addText(`Justification: ${thought.prior.justification || "-"}
+`).addEmptyLine();
   if (thought.evidence && thought.evidence.length > 0) {
-    ascii += "Evidence:\n";
+    builder.addSection("Evidence");
     for (const ev of thought.evidence) {
-      ascii += `  \u2022 ${ev.description || "-"}
-`;
+      builder.addText(`  \u2022 ${ev.description || "-"}
+`);
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
-  ascii += `Posterior Probability: ${thought.posterior.probability.toFixed(3)}
-`;
-  ascii += `  Calculation: ${thought.posterior.calculation || "-"}
-`;
+  builder.addSection("Posterior Probability").addText(`Value: ${thought.posterior.probability.toFixed(3)}
+`).addText(`Calculation: ${thought.posterior.calculation || "-"}
+`);
   if (thought.bayesFactor !== void 0) {
-    ascii += `
-Bayes Factor: ${thought.bayesFactor.toFixed(2)}
-`;
+    builder.addEmptyLine().addSection("Bayes Factor").addText(`${thought.bayesFactor.toFixed(2)}
+`);
   }
-  return ascii;
+  return builder.render();
 }
 function bayesianToSVG(thought, options) {
   const {
@@ -28871,6 +28989,9 @@ Bayes Factor of ${thought.bayesFactor.toFixed(2)} indicates ${thought.bayesFacto
 var init_bayesian = __esm({
   "src/export/visual/modes/bayesian.ts"() {
     init_esm_shims();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -31438,70 +31559,84 @@ function exportAbductiveHypotheses(thought, options) {
   }
 }
 function abductiveToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph TD\n";
-  mermaid += '  Observations["Observations"]\n';
-  for (const hypothesis of thought.hypotheses) {
-    const hypId = sanitizeId(hypothesis.id);
-    const label = includeLabels ? hypothesis.explanation.substring(0, 50) + "..." : hypId;
-    const scoreLabel = includeMetrics ? ` (${hypothesis.score.toFixed(2)})` : "";
-    mermaid += `  ${hypId}["${label}${scoreLabel}"]
-`;
-    mermaid += `  Observations --> ${hypId}
-`;
-  }
-  if (thought.bestExplanation && colorScheme !== "monochrome") {
-    mermaid += "\n";
-    const bestId = sanitizeId(thought.bestExplanation.id);
-    const color = colorScheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
-    mermaid += `  style ${bestId} fill:${color},stroke:#333,stroke-width:3px
-`;
-  }
-  return mermaid;
-}
-function abductiveToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph AbductiveHypotheses {\n";
-  dot += "  rankdir=TD;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
-  dot += '  Observations [label="Observations", shape=ellipse];\n\n';
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("TD");
+  builder.addNode({
+    id: "Observations",
+    label: "Observations",
+    shape: "rectangle"
+  });
   for (const hypothesis of thought.hypotheses) {
     const hypId = sanitizeId(hypothesis.id);
     const label = includeLabels ? hypothesis.explanation.substring(0, 50) + "..." : hypId;
     const scoreLabel = includeMetrics ? ` (${hypothesis.score.toFixed(2)})` : "";
     const isBest = thought.bestExplanation?.id === hypothesis.id;
-    const style = isBest ? ", style=filled, fillcolor=lightblue" : "";
-    dot += `  ${hypId} [label="${label}${scoreLabel}"${style}];
-`;
-    dot += `  Observations -> ${hypId};
-`;
+    const color = scheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
+    const nodeStyle = isBest && scheme !== "monochrome" ? { fill: color, strokeWidth: "3px" } : void 0;
+    builder.addNode({
+      id: hypId,
+      label: label + scoreLabel,
+      shape: "rectangle",
+      style: nodeStyle
+    });
+    builder.addEdge({
+      source: "Observations",
+      target: hypId,
+      style: "arrow"
+    });
   }
-  dot += "}\n";
-  return dot;
+  return builder.setOptions({ colorScheme: scheme }).render();
+}
+function abductiveToDOT(thought, includeLabels, includeMetrics) {
+  const builder = new DOTGraphBuilder().setGraphName("AbductiveHypotheses").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
+  builder.addNode({
+    id: "Observations",
+    label: "Observations",
+    shape: "ellipse"
+  });
+  for (const hypothesis of thought.hypotheses) {
+    const hypId = sanitizeId(hypothesis.id);
+    const label = includeLabels ? hypothesis.explanation.substring(0, 50) + "..." : hypId;
+    const scoreLabel = includeMetrics ? ` (${hypothesis.score.toFixed(2)})` : "";
+    const isBest = thought.bestExplanation?.id === hypothesis.id;
+    builder.addNode({
+      id: hypId,
+      label: label + scoreLabel,
+      style: isBest ? "filled" : void 0,
+      fillColor: isBest ? "lightblue" : void 0
+    });
+    builder.addEdge({
+      source: "Observations",
+      target: hypId
+    });
+  }
+  return builder.render();
 }
 function abductiveToASCII(thought) {
-  let ascii = "Abductive Hypothesis Comparison:\n";
-  ascii += "================================\n\n";
-  ascii += "Observations:\n";
+  const builder = new ASCIIDocBuilder().setMaxWidth(60).addHeader("Abductive Hypothesis Comparison");
+  builder.addSection("Observations");
   for (const obs of thought.observations) {
-    ascii += `  \u2022 ${obs.description} (confidence: ${obs.confidence.toFixed(2)})
-`;
+    builder.addText(`  \u2022 ${obs.description} (confidence: ${obs.confidence.toFixed(2)})
+`);
   }
-  ascii += "\nHypotheses:\n";
+  builder.addEmptyLine();
+  builder.addSection("Hypotheses");
   for (const hypothesis of thought.hypotheses) {
     const isBest = thought.bestExplanation?.id === hypothesis.id;
     const marker = isBest ? "\u2605" : "\u2022";
-    ascii += `  ${marker} ${hypothesis.explanation}
-`;
-    ascii += `    Score: ${hypothesis.score.toFixed(2)}
-`;
-    ascii += `    Assumptions: ${hypothesis.assumptions.join(", ")}
-`;
-    ascii += "\n";
+    builder.addText(`  ${marker} ${hypothesis.explanation}
+`);
+    builder.addText(`    Score: ${hypothesis.score.toFixed(2)}
+`);
+    builder.addText(`    Assumptions: ${hypothesis.assumptions.join(", ")}
+`);
+    builder.addEmptyLine();
   }
   if (thought.bestExplanation) {
-    ascii += `Best Explanation: ${thought.bestExplanation.explanation}
-`;
+    builder.addSection("Best Explanation").addText(`${thought.bestExplanation.explanation}
+`);
   }
-  return ascii;
+  return builder.render();
 }
 function abductiveToSVG(thought, options) {
   const {
@@ -31882,6 +32017,9 @@ var init_abductive = __esm({
   "src/export/visual/modes/abductive.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -31924,111 +32062,93 @@ function exportAnalogicalMapping(thought, options) {
   }
 }
 function analogicalToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph LR\n";
-  mermaid += '  subgraph Source["Source Domain"]\n';
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("LR");
+  const sourceNodeIds = [];
   for (const entity of thought.sourceDomain.entities) {
     const entityId = sanitizeId("src_" + entity.id);
     const label = includeLabels ? entity.name : entityId;
-    mermaid += `    ${entityId}["${label}"]
-`;
+    builder.addNode({ id: entityId, label, shape: "rectangle" });
+    sourceNodeIds.push(entityId);
   }
-  mermaid += "  end\n\n";
-  mermaid += '  subgraph Target["Target Domain"]\n';
+  const targetNodeIds = [];
   for (const entity of thought.targetDomain.entities) {
     const entityId = sanitizeId("tgt_" + entity.id);
     const label = includeLabels ? entity.name : entityId;
-    mermaid += `    ${entityId}["${label}"]
-`;
+    builder.addNode({ id: entityId, label, shape: "rectangle" });
+    targetNodeIds.push(entityId);
   }
-  mermaid += "  end\n\n";
+  builder.addSubgraph("Source", "Source Domain", sourceNodeIds);
+  builder.addSubgraph("Target", "Target Domain", targetNodeIds);
   for (const mapping of thought.mapping) {
     const srcId = sanitizeId("src_" + mapping.sourceEntityId);
     const tgtId = sanitizeId("tgt_" + mapping.targetEntityId);
-    const confidenceLabel = includeMetrics ? `|${mapping.confidence.toFixed(2)}|` : "";
-    mermaid += `  ${srcId} -.->${confidenceLabel} ${tgtId}
-`;
+    const label = includeMetrics ? mapping.confidence.toFixed(2) : void 0;
+    builder.addEdge({ source: srcId, target: tgtId, label, style: "dotted" });
   }
-  if (colorScheme !== "monochrome") {
-    mermaid += "\n";
-    const srcColor = colorScheme === "pastel" ? "#fff3e0" : "#ffd699";
-    const tgtColor = colorScheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
-    for (const entity of thought.sourceDomain.entities) {
-      const entityId = sanitizeId("src_" + entity.id);
-      mermaid += `  style ${entityId} fill:${srcColor}
-`;
-    }
-    for (const entity of thought.targetDomain.entities) {
-      const entityId = sanitizeId("tgt_" + entity.id);
-      mermaid += `  style ${entityId} fill:${tgtColor}
-`;
-    }
-  }
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 function analogicalToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph AnalogicalMapping {\n";
-  dot += "  rankdir=LR;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
-  dot += "  subgraph cluster_source {\n";
-  dot += '    label="Source Domain";\n';
-  dot += "    style=filled;\n";
-  dot += "    fillcolor=lightyellow;\n\n";
+  const builder = new DOTGraphBuilder().setGraphName("AnalogicalMapping").setRankDir("LR").setNodeDefaults({ shape: "box", style: "rounded" });
+  const sourceNodeIds = [];
   for (const entity of thought.sourceDomain.entities) {
     const entityId = sanitizeId("src_" + entity.id);
     const label = includeLabels ? entity.name : entityId;
-    dot += `    ${entityId} [label="${label}"];
-`;
+    builder.addNode({ id: entityId, label });
+    sourceNodeIds.push(entityId);
   }
-  dot += "  }\n\n";
-  dot += "  subgraph cluster_target {\n";
-  dot += '    label="Target Domain";\n';
-  dot += "    style=filled;\n";
-  dot += "    fillcolor=lightblue;\n\n";
+  const targetNodeIds = [];
   for (const entity of thought.targetDomain.entities) {
     const entityId = sanitizeId("tgt_" + entity.id);
     const label = includeLabels ? entity.name : entityId;
-    dot += `    ${entityId} [label="${label}"];
-`;
+    builder.addNode({ id: entityId, label });
+    targetNodeIds.push(entityId);
   }
-  dot += "  }\n\n";
+  builder.addSubgraph({
+    id: "cluster_source",
+    label: "Source Domain",
+    nodes: sourceNodeIds,
+    style: "filled",
+    fillColor: "lightyellow"
+  });
+  builder.addSubgraph({
+    id: "cluster_target",
+    label: "Target Domain",
+    nodes: targetNodeIds,
+    style: "filled",
+    fillColor: "lightblue"
+  });
   for (const mapping of thought.mapping) {
     const srcId = sanitizeId("src_" + mapping.sourceEntityId);
     const tgtId = sanitizeId("tgt_" + mapping.targetEntityId);
-    const confidenceLabel = includeMetrics ? `, label="${mapping.confidence.toFixed(2)}"` : "";
-    dot += `  ${srcId} -> ${tgtId} [style=dashed${confidenceLabel}];
-`;
+    const label = includeMetrics ? mapping.confidence.toFixed(2) : void 0;
+    builder.addEdge({ source: srcId, target: tgtId, label, style: "dashed" });
   }
-  dot += "}\n";
-  return dot;
+  return builder.render();
 }
 function analogicalToASCII(thought) {
-  let ascii = "Analogical Domain Mapping:\n";
-  ascii += "==========================\n\n";
-  ascii += `Source Domain: ${thought.sourceDomain.name}
-`;
-  ascii += `${thought.sourceDomain.description}
-
-`;
-  ascii += `Target Domain: ${thought.targetDomain.name}
-`;
-  ascii += `${thought.targetDomain.description}
-
-`;
-  ascii += "Mappings:\n";
+  const builder = new ASCIIDocBuilder().setMaxWidth(60).addHeader("Analogical Domain Mapping");
+  builder.addSection("Source Domain").addText(`${thought.sourceDomain.name}
+${thought.sourceDomain.description}
+`).addEmptyLine();
+  builder.addSection("Target Domain").addText(`${thought.targetDomain.name}
+${thought.targetDomain.description}
+`).addEmptyLine();
+  builder.addSection("Mappings");
   for (const mapping of thought.mapping) {
     const srcEntity = thought.sourceDomain.entities.find((e) => e.id === mapping.sourceEntityId);
     const tgtEntity = thought.targetDomain.entities.find((e) => e.id === mapping.targetEntityId);
     if (srcEntity && tgtEntity) {
-      ascii += `  ${srcEntity.name} \u2190\u2192 ${tgtEntity.name} (confidence: ${mapping.confidence.toFixed(2)})
-`;
-      ascii += `    ${mapping.justification}
-`;
+      builder.addText(`${srcEntity.name} \u2190\u2192 ${tgtEntity.name} (confidence: ${mapping.confidence.toFixed(2)})
+`);
+      builder.addText(`  ${mapping.justification}
+`);
     }
   }
-  ascii += `
-Analogy Strength: ${thought.analogyStrength.toFixed(2)}
-`;
-  return ascii;
+  builder.addEmptyLine();
+  builder.addSection("Summary").addText(`Analogy Strength: ${thought.analogyStrength.toFixed(2)}
+`);
+  return builder.render();
 }
 function analogicalToSVG(thought, options) {
   const {
@@ -32583,6 +32703,9 @@ var init_analogical = __esm({
   "src/export/visual/modes/analogical.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -34783,21 +34906,18 @@ function exportSystemsThinkingCausalLoops(thought, options) {
   }
 }
 function systemsThinkingToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
-  let mermaid = "graph TB\n";
+  const scheme = colorScheme;
+  const builder = new MermaidGraphBuilder().setDirection("TB");
   if (thought.system) {
-    mermaid += `  System["${thought.system.name}"]
-
-`;
+    builder.addNode({ id: "System", label: thought.system.name, shape: "rectangle" });
   }
   if (thought.components && thought.components.length > 0) {
     for (const component of thought.components) {
       const compId = sanitizeId(component.id);
       const label = includeLabels ? component.name : compId;
-      const shape = component.type === "stock" ? ["[[", "]]"] : ["[", "]"];
-      mermaid += `  ${compId}${shape[0]}${label}${shape[1]}
-`;
+      const shape = component.type === "stock" ? "subroutine" : "rectangle";
+      builder.addNode({ id: compId, label, shape });
     }
-    mermaid += "\n";
   }
   if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
     for (const loop of thought.feedbackLoops) {
@@ -34805,39 +34925,23 @@ function systemsThinkingToMermaid(thought, colorScheme, includeLabels, includeMe
       for (let i = 0; i < loopComponents.length; i++) {
         const fromId = sanitizeId(loopComponents[i]);
         const toId = sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
-        const edgeLabel = includeMetrics ? `|${loop.type} (${loop.strength.toFixed(2)})| ` : `|${loop.type}| `;
-        const edgeStyle = loop.type === "reinforcing" ? "-->" : "-..->";
-        mermaid += `  ${fromId} ${edgeStyle}${edgeLabel}${toId}
-`;
+        const edgeLabel = includeMetrics ? `${loop.type} (${loop.strength.toFixed(2)})` : loop.type;
+        const edgeStyle = loop.type === "reinforcing" ? "arrow" : "dotted";
+        builder.addEdge({ source: fromId, target: toId, label: edgeLabel, style: edgeStyle });
       }
     }
-    mermaid += "\n";
   }
-  if (colorScheme !== "monochrome" && thought.components) {
-    const stockColor = colorScheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
-    const flowColor = colorScheme === "pastel" ? "#fff3e0" : "#ffd699";
-    for (const component of thought.components) {
-      const compId = sanitizeId(component.id);
-      const color = component.type === "stock" ? stockColor : flowColor;
-      mermaid += `  style ${compId} fill:${color}
-`;
-    }
-  }
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 function systemsThinkingToDOT(thought, includeLabels, includeMetrics) {
-  let dot = "digraph SystemsThinking {\n";
-  dot += "  rankdir=TB;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
+  const builder = new DOTGraphBuilder().setGraphName("SystemsThinking").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
   if (thought.components && thought.components.length > 0) {
     for (const component of thought.components) {
       const compId = sanitizeId(component.id);
       const label = includeLabels ? component.name : compId;
       const shape = component.type === "stock" ? "box" : "ellipse";
-      dot += `  ${compId} [label="${label}", shape=${shape}];
-`;
+      builder.addNode({ id: compId, label, shape });
     }
-    dot += "\n";
   }
   if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
     for (const loop of thought.feedbackLoops) {
@@ -34845,58 +34949,53 @@ function systemsThinkingToDOT(thought, includeLabels, includeMetrics) {
       for (let i = 0; i < loopComponents.length; i++) {
         const fromId = sanitizeId(loopComponents[i]);
         const toId = sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
-        const edgeLabel = includeMetrics ? `, label="${loop.type} (${loop.strength.toFixed(2)})"` : `, label="${loop.type}"`;
+        const edgeLabel = includeMetrics ? `${loop.type} (${loop.strength.toFixed(2)})` : loop.type;
         const edgeStyle = loop.type === "reinforcing" ? "solid" : "dashed";
-        dot += `  ${fromId} -> ${toId} [style=${edgeStyle}${edgeLabel}];
-`;
+        builder.addEdge({ source: fromId, target: toId, label: edgeLabel, style: edgeStyle });
       }
     }
   }
-  dot += "}\n";
-  return dot;
+  return builder.render();
 }
 function systemsThinkingToASCII(thought) {
-  let ascii = "Systems Thinking Model:\n";
-  ascii += "======================\n\n";
+  const builder = new ASCIIDocBuilder().setMaxWidth(60).addHeader("Systems Thinking Model");
   if (thought.system) {
-    ascii += `System: ${thought.system.name}
-`;
-    ascii += `${thought.system.description}
-
-`;
+    builder.addSection("System").addText(`${thought.system.name}
+${thought.system.description}
+`).addEmptyLine();
   }
   if (thought.components && thought.components.length > 0) {
-    ascii += "Components:\n";
+    builder.addSection("Components");
     for (const component of thought.components) {
       const typeIcon = component.type === "stock" ? "[\u25A0]" : "(\u25CB)";
-      ascii += `  ${typeIcon} ${component.name}: ${component.description}
-`;
+      builder.addText(`${typeIcon} ${component.name}: ${component.description}
+`);
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
-    ascii += "Feedback Loops:\n";
+    builder.addSection("Feedback Loops");
     for (const loop of thought.feedbackLoops) {
       const loopIcon = loop.type === "reinforcing" ? "\u2295" : "\u2296";
-      ascii += `  ${loopIcon} ${loop.name} (${loop.type})
-`;
-      ascii += `    Strength: ${loop.strength.toFixed(2)}
-`;
-      ascii += `    Components: ${loop.components.join(" \u2192 ")}
-`;
+      builder.addText(`${loopIcon} ${loop.name} (${loop.type})
+`);
+      builder.addText(`  Strength: ${loop.strength.toFixed(2)}
+`);
+      builder.addText(`  Components: ${loop.components.join(" \u2192 ")}
+`);
     }
-    ascii += "\n";
+    builder.addEmptyLine();
   }
   if (thought.leveragePoints && thought.leveragePoints.length > 0) {
-    ascii += "Leverage Points:\n";
+    builder.addSection("Leverage Points");
     for (const point of thought.leveragePoints) {
-      ascii += `  \u2605 ${point.location} (effectiveness: ${point.effectiveness.toFixed(2)})
-`;
-      ascii += `    ${point.description}
-`;
+      builder.addText(`\u2605 ${point.location} (effectiveness: ${point.effectiveness.toFixed(2)})
+`);
+      builder.addText(`  ${point.description}
+`);
     }
   }
-  return ascii;
+  return builder.render();
 }
 function systemsThinkingToSVG(thought, options) {
   const {
@@ -35433,6 +35532,9 @@ var init_systems_thinking = __esm({
   "src/export/visual/modes/systems-thinking.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
@@ -38789,73 +38891,61 @@ function computabilityToMermaid(thought, options) {
   if (thought.decidabilityProof) {
     return decidabilityProofToMermaid(thought);
   }
-  let mermaid = "graph TD\n";
-  mermaid += `  type["${thought.thoughtType}"]
-`;
+  const builder = new MermaidGraphBuilder().setDirection("TD");
+  builder.addNode({ id: "type", label: thought.thoughtType || "Computability", shape: "rectangle" });
   if (thought.keyInsight) {
-    mermaid += `  insight["${thought.keyInsight.substring(0, 50)}..."]
-`;
-    mermaid += "  type --> insight\n";
+    builder.addNode({ id: "insight", label: `${thought.keyInsight.substring(0, 50)}...`, shape: "rectangle" });
+    builder.addEdge({ source: "type", target: "insight" });
   }
-  return mermaid;
+  return builder.render();
 }
 function turingMachineToMermaid(machine, includeLabels) {
-  let mermaid = "stateDiagram-v2\n";
-  mermaid += `  [*] --> ${sanitizeId(machine.initialState)}
-`;
+  const builder = new MermaidStateDiagramBuilder().setInitialState(machine.initialState);
+  for (const state of machine.states) {
+    builder.addState({ id: state, label: state });
+  }
   for (const t of machine.transitions) {
-    const label = includeLabels ? `${t.readSymbol}/${t.writeSymbol},${t.direction}` : "";
-    mermaid += `  ${sanitizeId(t.fromState)} --> ${sanitizeId(t.toState)}`;
-    if (label) {
-      mermaid += `: ${label}`;
-    }
-    mermaid += "\n";
+    const label = includeLabels ? `${t.readSymbol}/${t.writeSymbol},${t.direction}` : void 0;
+    builder.addTransition({ from: t.fromState, to: t.toState, label });
   }
   for (const acceptState of machine.acceptStates) {
-    mermaid += `  ${sanitizeId(acceptState)} --> [*]
-`;
+    builder.addFinalState(acceptState);
   }
-  return mermaid;
+  return builder.render();
 }
 function reductionChainToMermaid(reductions, chain, includeLabels) {
-  let mermaid = "graph LR\n";
+  const builder = new MermaidGraphBuilder().setDirection("LR");
   if (chain && chain.length > 0) {
     for (let i = 0; i < chain.length - 1; i++) {
       const from = sanitizeId(chain[i]);
       const to = sanitizeId(chain[i + 1]);
       const reduction = reductions.find((r) => r.fromProblem === chain[i] && r.toProblem === chain[i + 1]);
-      const label = includeLabels && reduction ? `\u2264${reduction.type === "polynomial_time" ? "p" : "m"}` : "";
-      mermaid += `  ${from}["${chain[i]}"] -->|${label}| ${to}["${chain[i + 1]}"]
-`;
+      const label = includeLabels && reduction ? `\u2264${reduction.type === "polynomial_time" ? "p" : "m"}` : void 0;
+      builder.addNode({ id: from, label: chain[i], shape: "rectangle" });
+      builder.addNode({ id: to, label: chain[i + 1], shape: "rectangle" });
+      builder.addEdge({ source: from, target: to, label });
     }
   } else {
     for (const r of reductions) {
       const from = sanitizeId(r.fromProblem);
       const to = sanitizeId(r.toProblem);
-      const label = includeLabels ? `\u2264${r.type === "polynomial_time" ? "p" : "m"}` : "";
-      mermaid += `  ${from}["${r.fromProblem}"] -->|${label}| ${to}["${r.toProblem}"]
-`;
+      const label = includeLabels ? `\u2264${r.type === "polynomial_time" ? "p" : "m"}` : void 0;
+      builder.addNode({ id: from, label: r.fromProblem, shape: "rectangle" });
+      builder.addNode({ id: to, label: r.toProblem, shape: "rectangle" });
+      builder.addEdge({ source: from, target: to, label });
     }
   }
-  return mermaid;
+  return builder.render();
 }
 function decidabilityProofToMermaid(thought, _includeLabels) {
   const proof = thought.decidabilityProof;
-  let mermaid = "graph TD\n";
-  mermaid += `  problem["Problem: ${proof.problem}"]
-`;
-  mermaid += `  method["Method: ${proof.method}"]
-`;
-  mermaid += `  conclusion["${proof.conclusion.toUpperCase()}"]
-`;
-  mermaid += "  problem --> method\n";
-  mermaid += "  method --> conclusion\n";
-  if (proof.conclusion === "undecidable") {
-    mermaid += "  style conclusion fill:#ffcccc,stroke:#ff0000\n";
-  } else if (proof.conclusion === "decidable") {
-    mermaid += "  style conclusion fill:#ccffcc,stroke:#00ff00\n";
-  }
-  return mermaid;
+  const builder = new MermaidGraphBuilder().setDirection("TD");
+  builder.addNode({ id: "problem", label: `Problem: ${proof.problem}`, shape: "rectangle" });
+  builder.addNode({ id: "method", label: `Method: ${proof.method}`, shape: "rectangle" });
+  builder.addNode({ id: "conclusion", label: proof.conclusion.toUpperCase(), shape: "rectangle" });
+  builder.addEdge({ source: "problem", target: "method" });
+  builder.addEdge({ source: "method", target: "conclusion" });
+  return builder.render();
 }
 function computabilityToDOT(thought, options) {
   const { includeLabels = true } = options;
@@ -38865,161 +38955,112 @@ function computabilityToDOT(thought, options) {
   if (thought.reductions && thought.reductions.length > 0) {
     return reductionChainToDOT(thought.reductions, thought.reductionChain, includeLabels);
   }
-  let dot = "digraph Computability {\n";
-  dot += "  rankdir=TD;\n";
-  dot += `  type [label="${thought.thoughtType}"];
-`;
-  dot += "}\n";
-  return dot;
+  const builder = new DOTGraphBuilder().setGraphName("Computability").setRankDir("TB");
+  builder.addNode({ id: "type", label: thought.thoughtType || "Computability" });
+  return builder.render();
 }
 function turingMachineToDOT(machine, includeLabels) {
-  let dot = `digraph TuringMachine {
-`;
-  dot += "  rankdir=LR;\n";
-  dot += "  node [shape=circle];\n\n";
-  dot += "  start [shape=point];\n";
-  dot += `  start -> ${sanitizeId(machine.initialState)};
-
-`;
+  const builder = new DOTGraphBuilder().setGraphName("TuringMachine").setRankDir("LR").setNodeDefaults({ shape: "circle" });
+  builder.addNode({ id: "start", shape: "point" });
+  builder.addEdge({ source: "start", target: sanitizeId(machine.initialState) });
   for (const state of machine.states) {
     const isAccept = machine.acceptStates.includes(state);
     const isReject = machine.rejectStates.includes(state);
-    const shape = isAccept ? "doublecircle" : isReject ? "circle, style=filled, fillcolor=lightgray" : "circle";
-    dot += `  ${sanitizeId(state)} [label="${state}", shape=${shape}];
-`;
+    const shape = isAccept ? "doublecircle" : "circle";
+    const style = isReject ? ["filled"] : void 0;
+    const fillColor = isReject ? "lightgray" : void 0;
+    builder.addNode({ id: sanitizeId(state), label: state, shape, style, fillColor });
   }
-  dot += "\n";
   for (const t of machine.transitions) {
-    const label = includeLabels ? `${t.readSymbol}/${t.writeSymbol},${t.direction}` : "";
-    dot += `  ${sanitizeId(t.fromState)} -> ${sanitizeId(t.toState)}`;
-    if (label) {
-      dot += ` [label="${label}"]`;
-    }
-    dot += ";\n";
+    const label = includeLabels ? `${t.readSymbol}/${t.writeSymbol},${t.direction}` : void 0;
+    builder.addEdge({ source: sanitizeId(t.fromState), target: sanitizeId(t.toState), label });
   }
-  dot += "}\n";
-  return dot;
+  return builder.render();
 }
 function reductionChainToDOT(reductions, _chain, includeLabels) {
-  let dot = "digraph ReductionChain {\n";
-  dot += "  rankdir=LR;\n";
-  dot += "  node [shape=box, style=rounded];\n\n";
+  const builder = new DOTGraphBuilder().setGraphName("ReductionChain").setRankDir("LR").setNodeDefaults({ shape: "box", style: "rounded" });
   const problems = /* @__PURE__ */ new Set();
   for (const r of reductions) {
     problems.add(r.fromProblem);
     problems.add(r.toProblem);
   }
   for (const p of problems) {
-    dot += `  ${sanitizeId(p)} [label="${p}"];
-`;
+    builder.addNode({ id: sanitizeId(p), label: p });
   }
-  dot += "\n";
   for (const r of reductions) {
-    const label = includeLabels ? `\u2264${r.type === "polynomial_time" ? "p" : "m"}` : "";
-    dot += `  ${sanitizeId(r.fromProblem)} -> ${sanitizeId(r.toProblem)}`;
-    if (label) {
-      dot += ` [label="${label}"]`;
-    }
-    dot += ";\n";
+    const label = includeLabels ? `\u2264${r.type === "polynomial_time" ? "p" : "m"}` : void 0;
+    builder.addEdge({ source: sanitizeId(r.fromProblem), target: sanitizeId(r.toProblem), label });
   }
-  dot += "}\n";
-  return dot;
+  return builder.render();
 }
 function computabilityToASCII(thought) {
-  let ascii = "COMPUTABILITY ANALYSIS\n";
-  ascii += "=".repeat(50) + "\n\n";
-  ascii += `Type: ${thought.thoughtType}
-`;
+  const builder = new ASCIIDocBuilder().setMaxWidth(50).addHeader("COMPUTABILITY ANALYSIS");
+  builder.addSection("Type").addText(`${thought.thoughtType}
+`).addEmptyLine();
   if (thought.keyInsight) {
-    ascii += `
-Key Insight: ${thought.keyInsight}
-`;
+    builder.addSection("Key Insight").addText(`${thought.keyInsight}
+`).addEmptyLine();
   }
   if (thought.currentMachine) {
     const m = thought.currentMachine;
-    ascii += `
-Turing Machine: ${m.name}
-`;
-    ascii += "-".repeat(30) + "\n";
-    ascii += `States: {${m.states.join(", ")}}
-`;
-    ascii += `Initial: ${m.initialState}
-`;
-    ascii += `Accept: {${m.acceptStates.join(", ")}}
-`;
-    ascii += `Transitions: ${m.transitions.length}
-`;
+    builder.addSection("Turing Machine").addText(`Name: ${m.name}
+`).addText(`States: {${m.states.join(", ")}}
+`).addText(`Initial: ${m.initialState}
+`).addText(`Accept: {${m.acceptStates.join(", ")}}
+`).addText(`Transitions: ${m.transitions.length}
+`).addEmptyLine();
   }
   if (thought.computationTrace) {
     const trace = thought.computationTrace;
-    ascii += `
-Computation Trace:
-`;
-    ascii += "-".repeat(30) + "\n";
-    ascii += `Input: ${trace.input}
-`;
-    ascii += `Steps: ${trace.totalSteps}
-`;
-    ascii += `Result: ${trace.result.toUpperCase()}
-`;
+    builder.addSection("Computation Trace").addText(`Input: ${trace.input}
+`).addText(`Steps: ${trace.totalSteps}
+`).addText(`Result: ${trace.result.toUpperCase()}
+`);
     for (const step of trace.steps.slice(0, 5)) {
       const head = " ".repeat(step.headPosition) + "v";
-      ascii += `  [${step.stepNumber}] ${step.state}: ${step.tapeContents}
-`;
-      ascii += `       ${head}
-`;
+      builder.addText(`[${step.stepNumber}] ${step.state}: ${step.tapeContents}
+`);
+      builder.addText(`     ${head}
+`);
     }
     if (trace.steps.length > 5) {
-      ascii += `  ... (${trace.steps.length - 5} more steps)
-`;
+      builder.addText(`... (${trace.steps.length - 5} more steps)
+`);
     }
+    builder.addEmptyLine();
   }
   if (thought.decidabilityProof) {
     const proof = thought.decidabilityProof;
-    ascii += `
-Decidability Analysis:
-`;
-    ascii += "-".repeat(30) + "\n";
-    ascii += `Problem: ${proof.problem}
-`;
-    ascii += `Method: ${proof.method}
-`;
-    ascii += `Conclusion: ${proof.conclusion.toUpperCase()}
-`;
+    builder.addSection("Decidability Analysis").addText(`Problem: ${proof.problem}
+`).addText(`Method: ${proof.method}
+`).addText(`Conclusion: ${proof.conclusion.toUpperCase()}
+`);
     if (proof.proofSteps.length > 0) {
-      ascii += "\nProof Steps:\n";
+      builder.addEmptyLine().addText("Proof Steps:\n");
       for (let i = 0; i < Math.min(proof.proofSteps.length, 5); i++) {
-        ascii += `  ${i + 1}. ${proof.proofSteps[i]}
-`;
+        builder.addText(`  ${i + 1}. ${proof.proofSteps[i]}
+`);
       }
     }
+    builder.addEmptyLine();
   }
   if (thought.reductions && thought.reductions.length > 0) {
-    ascii += `
-Reductions:
-`;
-    ascii += "-".repeat(30) + "\n";
+    builder.addSection("Reductions");
     for (const r of thought.reductions) {
-      ascii += `  ${r.fromProblem} \u2264${r.type === "polynomial_time" ? "p" : "m"} ${r.toProblem}
-`;
+      builder.addText(`${r.fromProblem} \u2264${r.type === "polynomial_time" ? "p" : "m"} ${r.toProblem}
+`);
     }
+    builder.addEmptyLine();
   }
   if (thought.diagonalization) {
     const diag = thought.diagonalization;
-    ascii += `
-Diagonalization Argument:
-`;
-    ascii += "-".repeat(30) + "\n";
-    ascii += `Pattern: ${diag.pattern}
-`;
-    ascii += `Enumeration: ${diag.enumeration.description}
-`;
-    ascii += `Diagonal: ${diag.diagonalConstruction.description}
-`;
-    ascii += `Contradiction: ${diag.contradiction.impossibility}
-`;
+    builder.addSection("Diagonalization Argument").addText(`Pattern: ${diag.pattern}
+`).addText(`Enumeration: ${diag.enumeration.description}
+`).addText(`Diagonal: ${diag.diagonalConstruction.description}
+`).addText(`Contradiction: ${diag.contradiction.impossibility}
+`);
   }
-  return ascii;
+  return builder.render();
 }
 function computabilityToSVG(thought, options) {
   const {
@@ -39375,6 +39416,9 @@ var init_computability = __esm({
   "src/export/visual/modes/computability.ts"() {
     init_esm_shims();
     init_utils();
+    init_dot();
+    init_mermaid();
+    init_ascii();
     init_svg();
     init_graphml();
     init_tikz();
