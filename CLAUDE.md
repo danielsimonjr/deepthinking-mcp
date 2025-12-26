@@ -477,7 +477,7 @@ const dot = new DOTGraphBuilder()
 
 | Sprint | Focus |
 |--------|-------|
-| 9 | Refactor remaining 5 modes for consistency |
+| 9 | Refactor remaining 5 modes: sequential, abductive, bayesian, temporal, shannon (sequential was incorrectly claimed as compliant) |
 | 10 | File splitting for Sprint 5 files, final verification |
 
 See `docs/planning/PHASE_13_*.json` for detailed sprint breakdowns.

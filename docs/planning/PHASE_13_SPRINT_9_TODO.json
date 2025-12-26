@@ -3,12 +3,31 @@
   "sprint": 9,
   "title": "Remaining Modes Batch 2",
   "week": "Week 5-6",
-  "effort": "5-6 hours",
+  "effort": "6-7 hours",
   "status": "pending",
-  "description": "Refactor final 4 remaining mode exporters (<1000 lines) to use new utility builders, with snapshot verification",
+  "description": "Refactor final 5 remaining mode exporters (<1000 lines) to use new utility builders, with snapshot verification. NOTE: sequential.ts was incorrectly claimed as 'already compliant' - it does NOT use builders.",
   "tasks": [
     {
       "id": "13.9.1",
+      "category": "Sequential Exporter",
+      "description": "Refactor sequential.ts (805 lines) to use builders",
+      "status": "pending",
+      "estimatedHours": 1.5,
+      "priority": "high",
+      "details": [
+        "Import DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder",
+        "Refactor sequentialToDOT() to use DOTGraphBuilder",
+        "Refactor sequentialToMermaid() to use MermaidGraphBuilder",
+        "Refactor sequentialToASCII() to use ASCIIDocBuilder",
+        "Create helpers for sequential step visualization"
+      ],
+      "files": [
+        "src/export/visual/modes/sequential.ts"
+      ],
+      "notes": "CRITICAL FIX: This file was incorrectly claimed as 'already compliant' but does NOT use builders"
+    },
+    {
+      "id": "13.9.2",
       "category": "Abductive Exporter",
       "description": "Refactor abductive.ts (666 lines) to use builders",
       "status": "pending",
@@ -27,7 +46,7 @@
       "notes": "Abductive reasoning hypothesis visualization"
     },
     {
-      "id": "13.9.2",
+      "id": "13.9.3",
       "category": "Bayesian Exporter",
       "description": "Refactor bayesian.ts (631 lines) to use builders",
       "status": "pending",
@@ -46,7 +65,7 @@
       "notes": "Bayesian network visualization"
     },
     {
-      "id": "13.9.3",
+      "id": "13.9.4",
       "category": "Temporal & Shannon",
       "description": "Refactor temporal.ts (623) and shannon.ts (558) to use builders",
       "status": "pending",
@@ -65,60 +84,42 @@
       "notes": "Combined task for two smallest remaining files"
     },
     {
-      "id": "13.9.4",
+      "id": "13.9.5",
       "category": "Snapshot Verification",
       "description": "Verify snapshot tests pass for all refactored exporters",
       "status": "pending",
       "estimatedHours": 1.0,
       "priority": "high",
       "details": [
+        "Run snapshot tests for sequential.ts exports",
         "Run snapshot tests for abductive.ts exports",
         "Run snapshot tests for bayesian.ts exports",
         "Run snapshot tests for temporal.ts exports",
         "Run snapshot tests for shannon.ts exports",
         "Compare DOT, Mermaid, ASCII output against baselines",
-        "All 22 mode exporters now use builders (sequential.ts was already compliant)"
+        "All 22 mode exporters now use builders"
       ],
       "files": [
         "tests/unit/export/visual/modes/snapshot-baseline.test.ts"
       ],
       "notes": "Final snapshot verification - 100% builder adoption complete"
-    },
-    {
-      "id": "13.9.5",
-      "category": "Adoption Verification",
-      "description": "Create adoption verification test",
-      "status": "pending",
-      "estimatedHours": 0.5,
-      "priority": "medium",
-      "details": [
-        "Create tests/unit/export/visual/modes/builder-adoption.test.ts",
-        "Test that all 21 mode exporters import builder classes",
-        "Verify no inline DOT/Mermaid/ASCII string building remains",
-        "Document final adoption metrics"
-      ],
-      "files": [
-        "tests/unit/export/visual/modes/builder-adoption.test.ts"
-      ],
-      "notes": "NEW FILE - Verifies 100% builder adoption across all mode exporters"
     }
   ],
   "successCriteria": [
-    "All 4 files use DOT/Mermaid/ASCII builders",
+    "All 5 files use DOT/Mermaid/ASCII builders",
     "All 22 mode exporters now use builders",
     "All snapshot tests pass (output unchanged)",
     "100% utility adoption achieved",
     "All existing tests pass"
   ],
-  "filesCreated": [
-    "tests/unit/export/visual/modes/builder-adoption.test.ts"
-  ],
+  "filesCreated": [],
   "filesModified": [
+    "src/export/visual/modes/sequential.ts",
     "src/export/visual/modes/abductive.ts",
     "src/export/visual/modes/bayesian.ts",
     "src/export/visual/modes/temporal.ts",
     "src/export/visual/modes/shannon.ts"
   ],
-  "totalEstimatedHours": 5.0,
-  "notes": "Final batch of remaining modes - completes 100% builder adoption across all mode exporters"
+  "totalEstimatedHours": 6.0,
+  "notes": "CORRECTED: Sprint 9 now includes sequential.ts which was incorrectly claimed as 'already compliant'. Sequential.ts does NOT use builders and must be refactored. This sprint completes 100% builder adoption across all 22 mode exporters."
 }
