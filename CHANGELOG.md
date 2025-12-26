@@ -7,6 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.5.0] - 2025-12-26
+
+### Added - Phase 13 Sprint 1: Core Graph Builders
+
+**Fluent API Builder Classes for Visual Export Refactoring**
+
+Added three new builder classes with chainable APIs to simplify visual export code:
+
+- **DOTGraphBuilder** (`src/export/visual/utils/dot.ts`)
+  - Methods: `addNode()`, `addNodes()`, `addEdge()`, `addEdges()`, `addSubgraph()`, `addSubgraphs()`
+  - Options: `setOptions()`, `setGraphName()`, `setRankDir()`, `setDirected()`, `setNodeDefaults()`, `setEdgeDefaults()`
+  - Utilities: `nodeCount`, `edgeCount`, `subgraphCount`, `clear()`, `resetOptions()`, `render()`
+  - Static factory: `DOTGraphBuilder.from(nodes, edges, options)`
+
+- **MermaidGraphBuilder** (`src/export/visual/utils/mermaid.ts`)
+  - Methods: `addNode()`, `addNodes()`, `addEdge()`, `addEdges()`, `addSubgraph()`, `addSubgraphDef()`, `addSubgraphs()`
+  - Options: `setOptions()`, `setDirection()`, `setTitle()`, `setColorScheme()`
+  - Utilities: `nodeCount`, `edgeCount`, `subgraphCount`, `clear()`, `resetOptions()`, `render()`
+  - Alternative renderers: `renderAsStateDiagram()`, `renderAsClassDiagram()`
+  - Static factory: `MermaidGraphBuilder.from(nodes, edges, options)`
+
+- **GraphMLBuilder** (`src/export/visual/utils/graphml.ts`)
+  - Methods: `addNode()`, `addNodeDef()`, `addNodes()`, `addEdge()`, `addEdgeDef()`, `addEdges()`
+  - Custom attributes: `defineNodeAttribute()`, `defineEdgeAttribute()`
+  - Options: `setOptions()`, `setGraphId()`, `setGraphName()`, `setDirected()`, `setIncludeMetadata()`, `setIncludeLabels()`
+  - Utilities: `nodeCount`, `edgeCount`, `clear()`, `resetOptions()`, `render()`
+  - Static factory: `GraphMLBuilder.from(nodes, edges, options)`
+  - New type: `GraphMLAttribute` interface for custom attribute definitions
+
+### Added - Tests
+
+- Created `tests/unit/export/visual/utils/graph-builders.test.ts` with 64 comprehensive unit tests
+- Tests cover: node/edge/subgraph operations, options configuration, rendering, static factories, integration scenarios
+
+### Changed
+
+- Updated utility file version headers to v8.5.0
+- Updated `docs/planning/PHASE_13_INDEX.json` status to "in-progress"
+- Updated `docs/planning/PHASE_13_SPRINT_1_TODO.json` - all 4 tasks marked completed
+- Updated target metrics: `builderClassesAdded` from 0 to 3
+
+### Validation
+
+- **Type Check**: ✅ Passes (`npm run typecheck`)
+- **Test Suite**: ✅ 4,364 tests passing (`npm run test:publish`)
+- **Build**: ✅ Successful (`npm run build`)
+
+---
+
+## [8.4.0] - Previous Release
+
 ### � Critical Bug Fixes (December 24, 2025)
 
 **API Boundary Type Safety Fix** 🚨
