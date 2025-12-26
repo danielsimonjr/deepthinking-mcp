@@ -11,7 +11,7 @@
     {
       "id": "13.9.1",
       "category": "Sequential Exporter",
-      "description": "Refactor sequential.ts (805 lines) to use builders",
+      "description": "Refactor sequential.ts (805 lines → 785 lines) to use builders",
       "status": "completed",
       "estimatedHours": 1.5,
       "priority": "high",
@@ -29,7 +29,7 @@
     {
       "id": "13.9.2",
       "category": "Abductive Exporter",
-      "description": "Refactor abductive.ts (666 lines) to use builders",
+      "description": "Refactor abductive.ts (666 lines → 705 lines) to use builders",
       "status": "completed",
       "estimatedHours": 1.0,
       "priority": "medium",
@@ -47,7 +47,7 @@
     {
       "id": "13.9.3",
       "category": "Bayesian Exporter",
-      "description": "Refactor bayesian.ts (631 lines) to use builders",
+      "description": "Refactor bayesian.ts (631 lines → 669 lines) to use builders",
       "status": "completed",
       "estimatedHours": 1.0,
       "priority": "medium",
@@ -65,7 +65,7 @@
     {
       "id": "13.9.4",
       "category": "Temporal & Shannon",
-      "description": "Refactor temporal.ts (623) and shannon.ts (558) to use builders",
+      "description": "Refactor temporal.ts (623 → 635) and shannon.ts (558 → 607) to use builders",
       "status": "completed",
       "estimatedHours": 1.5,
       "priority": "medium",

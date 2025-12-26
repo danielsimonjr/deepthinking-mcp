@@ -11,7 +11,7 @@
     {
       "id": "13.8.1",
       "category": "Systems Thinking Exporter",
-      "description": "Refactor systems-thinking.ts (909 lines) to use builders",
+      "description": "Refactor systems-thinking.ts (909 lines → 911 lines) to use builders",
       "status": "completed",
       "estimatedHours": 1.5,
       "priority": "medium",
@@ -30,7 +30,7 @@
     {
       "id": "13.8.2",
       "category": "Analogical Exporter",
-      "description": "Refactor analogical.ts (875 lines) to use builders",
+      "description": "Refactor analogical.ts (875 lines → 888 lines) to use builders",
       "status": "completed",
       "estimatedHours": 1.5,
       "priority": "medium",
@@ -49,7 +49,7 @@
     {
       "id": "13.8.3",
       "category": "Causal Exporter",
-      "description": "Refactor causal.ts (866 lines) to use builders",
+      "description": "Refactor causal.ts (866 lines → 870 lines) to use builders",
       "status": "completed",
       "estimatedHours": 1.5,
       "priority": "medium",
@@ -68,7 +68,7 @@
     {
       "id": "13.8.4",
       "category": "Computability & Counterfactual",
-      "description": "Refactor computability.ts (823) and counterfactual.ts (807) to use builders",
+      "description": "Refactor computability.ts (823 → 825) and counterfactual.ts (807 → 825) to use builders",
       "status": "completed",
       "estimatedHours": 1.5,
       "priority": "medium",
