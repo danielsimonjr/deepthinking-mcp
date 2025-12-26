@@ -1,12 +1,17 @@
 /**
- * Scientific Method Visual Exporter (v7.0.3)
+ * Scientific Method Visual Exporter (v8.5.0)
  * Sprint 8 Task 8.1: Scientific method experiment export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support, GraphML, TikZ
+ * Phase 13 Sprint 6: Refactored to use fluent builder classes
  */
 
 import type { ScientificMethodThought } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -101,84 +106,81 @@ function scientificMethodToMermaid(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph TD\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('TD');
 
+  // Research Question
   if (thought.researchQuestion) {
-    mermaid += `  RQ["Research Question: ${thought.researchQuestion.question.substring(0, 60)}..."]\n`;
-    mermaid += '\n';
+    builder.addNode({
+      id: 'RQ',
+      label: `Research Question: ${thought.researchQuestion.question.substring(0, 60)}...`,
+      shape: 'rectangle'
+    });
   }
 
+  // Hypotheses
   if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
     for (const hypothesis of thought.scientificHypotheses) {
       const hypId = sanitizeId(hypothesis.id);
       const label = includeLabels ? hypothesis.statement.substring(0, 50) + '...' : hypId;
-      mermaid += `  ${hypId}["H: ${label}"]\n`;
+      builder.addNode({ id: hypId, label: `H: ${label}`, shape: 'rectangle' });
       if (thought.researchQuestion) {
-        mermaid += `  RQ --> ${hypId}\n`;
+        builder.addEdge({ source: 'RQ', target: hypId });
       }
     }
-    mermaid += '\n';
   }
 
+  // Experiment
   if (thought.experiment) {
-    mermaid += `  Exp["Experiment: ${thought.experiment.design}"]\n`;
+    builder.addNode({
+      id: 'Exp',
+      label: `Experiment: ${thought.experiment.design}`,
+      shape: 'rectangle'
+    });
     if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
       for (const hypothesis of thought.scientificHypotheses) {
         const hypId = sanitizeId(hypothesis.id);
-        mermaid += `  ${hypId} --> Exp\n`;
+        builder.addEdge({ source: hypId, target: 'Exp' });
       }
     }
-    mermaid += '\n';
   }
 
+  // Data
   if (thought.data) {
-    mermaid += `  Data["Data Collection: ${(thought.experiment as any)?.sampleSize || 0} samples"]\n`;
+    builder.addNode({
+      id: 'Data',
+      label: `Data Collection: ${(thought.experiment as any)?.sampleSize || 0} samples`,
+      shape: 'rectangle'
+    });
     if (thought.experiment) {
-      mermaid += `  Exp --> Data\n`;
+      builder.addEdge({ source: 'Exp', target: 'Data' });
     }
-    mermaid += '\n';
   }
 
+  // Analysis
   if (thought.analysis) {
-    mermaid += `  Stats["Statistical Analysis"]\n`;
+    builder.addNode({ id: 'Stats', label: 'Statistical Analysis', shape: 'rectangle' });
     if (thought.data) {
-      mermaid += `  Data --> Stats\n`;
+      builder.addEdge({ source: 'Data', target: 'Stats' });
     }
-    mermaid += '\n';
   }
 
+  // Conclusion
   if (thought.conclusion) {
-    const conclusionId = 'Conclusion';
     const supportLabel = includeMetrics && thought.conclusion.confidence
       ? ` (conf: ${thought.conclusion.confidence.toFixed(2)})`
       : '';
-    mermaid += `  ${conclusionId}["Conclusion: ${thought.conclusion.statement.substring(0, 50)}...${supportLabel}"]\n`;
+    builder.addNode({
+      id: 'Conclusion',
+      label: `Conclusion: ${thought.conclusion.statement.substring(0, 50)}...${supportLabel}`,
+      shape: 'rectangle'
+    });
     if (thought.analysis) {
-      mermaid += `  Stats --> ${conclusionId}\n`;
+      builder.addEdge({ source: 'Stats', target: 'Conclusion' });
     }
   }
 
-  if (colorScheme !== 'monochrome') {
-    mermaid += '\n';
-    const questionColor = colorScheme === 'pastel' ? '#fff3e0' : '#ffd699';
-    const hypothesisColor = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
-    const conclusionColor = colorScheme === 'pastel' ? '#e8f5e9' : '#a5d6a7';
-
-    if (thought.researchQuestion) {
-      mermaid += `  style RQ fill:${questionColor}\n`;
-    }
-    if (thought.scientificHypotheses) {
-      for (const hypothesis of thought.scientificHypotheses) {
-        const hypId = sanitizeId(hypothesis.id);
-        mermaid += `  style ${hypId} fill:${hypothesisColor}\n`;
-      }
-    }
-    if (thought.conclusion) {
-      mermaid += `  style Conclusion fill:${conclusionColor}\n`;
-    }
-  }
-
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function scientificMethodToDOT(
@@ -186,130 +188,143 @@ function scientificMethodToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph ScientificMethod {\n';
-  dot += '  rankdir=TD;\n';
-  dot += '  node [shape=box, style=rounded];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('ScientificMethod')
+    .setRankDir('TB')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
+  // Research Question
   if (thought.researchQuestion) {
     const label = includeLabels ? thought.researchQuestion.question.substring(0, 60) + '...' : 'RQ';
-    dot += `  RQ [label="Research Question:\\n${label}", shape=ellipse];\n\n`;
+    builder.addNode({ id: 'RQ', label: `Research Question:\n${label}`, shape: 'ellipse' });
   }
 
+  // Hypotheses
   if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
     for (const hypothesis of thought.scientificHypotheses) {
       const hypId = sanitizeId(hypothesis.id);
       const label = includeLabels ? hypothesis.statement.substring(0, 50) + '...' : hypId;
-      dot += `  ${hypId} [label="Hypothesis:\\n${label}"];\n`;
+      builder.addNode({ id: hypId, label: `Hypothesis:\n${label}` });
       if (thought.researchQuestion) {
-        dot += `  RQ -> ${hypId};\n`;
+        builder.addEdge({ source: 'RQ', target: hypId });
       }
     }
-    dot += '\n';
   }
 
+  // Experiment
   if (thought.experiment) {
     const label = includeLabels ? thought.experiment.design : 'Exp';
-    dot += `  Exp [label="Experiment:\\n${label}"];\n`;
+    builder.addNode({ id: 'Exp', label: `Experiment:\n${label}` });
     if (thought.scientificHypotheses) {
       for (const hypothesis of thought.scientificHypotheses) {
         const hypId = sanitizeId(hypothesis.id);
-        dot += `  ${hypId} -> Exp;\n`;
+        builder.addEdge({ source: hypId, target: 'Exp' });
       }
     }
-    dot += '\n';
   }
 
+  // Data
   if (thought.data) {
-    const sampleLabel = includeMetrics ? `\\nSamples: ${(thought.experiment as any)?.sampleSize || 0}` : '';
-    dot += `  Data [label="Data Collection${sampleLabel}"];\n`;
+    const sampleLabel = includeMetrics ? `\nSamples: ${(thought.experiment as any)?.sampleSize || 0}` : '';
+    builder.addNode({ id: 'Data', label: `Data Collection${sampleLabel}` });
     if (thought.experiment) {
-      dot += `  Exp -> Data;\n`;
+      builder.addEdge({ source: 'Exp', target: 'Data' });
     }
   }
 
+  // Analysis
   if (thought.analysis) {
-    dot += `  Stats [label="Statistical Analysis"];\n`;
+    builder.addNode({ id: 'Stats', label: 'Statistical Analysis' });
     if (thought.data) {
-      dot += `  Data -> Stats;\n`;
+      builder.addEdge({ source: 'Data', target: 'Stats' });
     }
   }
 
+  // Conclusion
   if (thought.conclusion) {
     const label = includeLabels ? thought.conclusion.statement.substring(0, 50) + '...' : 'Conclusion';
     const confLabel = includeMetrics && thought.conclusion.confidence
-      ? `\\nconf: ${thought.conclusion.confidence.toFixed(2)}`
+      ? `\nconf: ${thought.conclusion.confidence.toFixed(2)}`
       : '';
-    dot += `  Conclusion [label="Conclusion:\\n${label}${confLabel}", shape=doubleoctagon];\n`;
+    builder.addNode({ id: 'Conclusion', label: `Conclusion:\n${label}${confLabel}`, shape: 'doubleoctagon' });
     if (thought.analysis) {
-      dot += `  Stats -> Conclusion;\n`;
+      builder.addEdge({ source: 'Stats', target: 'Conclusion' });
     }
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function scientificMethodToASCII(thought: ScientificMethodThought): string {
-  let ascii = 'Scientific Method Process:\n';
-  ascii += '==========================\n\n';
+  const builder = new ASCIIDocBuilder()
+    .addHeader('Scientific Method Process', 'equals')
+    .addEmptyLine();
 
+  // Research Question
   if (thought.researchQuestion) {
-    ascii += `Research Question: ${thought.researchQuestion.question}\n`;
-    ascii += `Background: ${thought.researchQuestion.background}\n\n`;
+    builder.addText(`Research Question: ${thought.researchQuestion.question}`);
+    builder.addText(`Background: ${thought.researchQuestion.background}`);
+    builder.addEmptyLine();
   }
 
+  // Hypotheses
   if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
-    ascii += 'Hypotheses:\n';
+    builder.addSection('Hypotheses').addEmptyLine();
     for (const hypothesis of thought.scientificHypotheses) {
       const typeIcon = hypothesis.type === 'null' ? 'H₀' : 'H₁';
-      ascii += `  ${typeIcon} ${hypothesis.statement}\n`;
+      builder.addText(`  ${typeIcon} ${hypothesis.statement}`);
       if (hypothesis.prediction) {
-        ascii += `    Prediction: ${hypothesis.prediction}\n`;
+        builder.addText(`    Prediction: ${hypothesis.prediction}`);
       }
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
+  // Experiment
   if (thought.experiment) {
-    ascii += `Experiment: ${thought.experiment.design}\n`;
-    ascii += `Type: ${thought.experiment.type}\n`;
-    ascii += `Design: ${thought.experiment.design}\n\n`;
+    builder.addText(`Experiment: ${thought.experiment.design}`);
+    builder.addText(`Type: ${thought.experiment.type}`);
+    builder.addText(`Design: ${thought.experiment.design}`);
+    builder.addEmptyLine();
   }
 
+  // Data
   if (thought.data) {
-    ascii += 'Data Collection:\n';
-    ascii += `  Sample Size: ${(thought.experiment as any)?.sampleSize || 0}\n`;
-    ascii += `  Method: ${thought.data.method}\n`;
+    builder.addSection('Data Collection').addEmptyLine();
+    builder.addText(`  Sample Size: ${(thought.experiment as any)?.sampleSize || 0}`);
+    builder.addText(`  Method: ${thought.data.method}`);
     if (thought.data.dataQuality) {
-      ascii += `  Quality:\n`;
-      ascii += `    Completeness: ${thought.data.dataQuality.completeness.toFixed(2)}\n`;
-      ascii += `    Reliability: ${thought.data.dataQuality.reliability.toFixed(2)}\n`;
+      builder.addText('  Quality:');
+      builder.addText(`    Completeness: ${thought.data.dataQuality.completeness.toFixed(2)}`);
+      builder.addText(`    Reliability: ${thought.data.dataQuality.reliability.toFixed(2)}`);
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
+  // Statistical Tests
   if (thought.analysis && thought.analysis.tests) {
-    ascii += 'Statistical Tests:\n';
+    builder.addSection('Statistical Tests').addEmptyLine();
     for (const test of thought.analysis.tests) {
-      ascii += `  • ${test.name}\n`;
-      ascii += `    p-value: ${test.pValue.toFixed(4)}, α: ${test.alpha}\n`;
-      ascii += `    Result: ${test.result}\n`;
+      builder.addText(`  • ${test.name}`);
+      builder.addText(`    p-value: ${test.pValue.toFixed(4)}, α: ${test.alpha}`);
+      builder.addText(`    Result: ${test.result}`);
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
+  // Conclusion
   if (thought.conclusion) {
-    ascii += 'Conclusion:\n';
-    ascii += `${thought.conclusion.statement}\n`;
+    builder.addSection('Conclusion').addEmptyLine();
+    builder.addText(thought.conclusion.statement);
     if ((thought.conclusion as any).supportedHypotheses) {
-      ascii += `Supported hypotheses: ${(thought.conclusion as any).supportedHypotheses.join(', ')}\n`;
+      builder.addText(`Supported hypotheses: ${(thought.conclusion as any).supportedHypotheses.join(', ')}`);
     }
     if (thought.conclusion.confidence) {
-      ascii += `Confidence: ${thought.conclusion.confidence.toFixed(2)}\n`;
+      builder.addText(`Confidence: ${thought.conclusion.confidence.toFixed(2)}`);
     }
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**
