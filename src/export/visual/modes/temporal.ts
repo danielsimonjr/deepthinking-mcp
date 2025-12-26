@@ -3,7 +3,7 @@
  * Sprint 8 Task 8.1: Timeline export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
  * Phase 13 Sprint 9: Refactored to use fluent builder classes
- * Note: Mermaid gantt diagrams kept as raw strings (not supported by MermaidGraphBuilder)
+ * Phase 13 Sprint 9 (continued): Now uses MermaidGanttBuilder for gantt diagrams
  */
 
 import type { TemporalThought } from '../../../types/index.js';
@@ -12,6 +12,7 @@ import { sanitizeId } from '../utils.js';
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from '../utils/dot.js';
 import { ASCIIDocBuilder } from '../utils/ascii.js';
+import { MermaidGanttBuilder } from '../utils/mermaid.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -95,28 +96,29 @@ export function exportTemporalTimeline(thought: TemporalThought, options: Visual
 }
 
 function timelineToMermaidGantt(thought: TemporalThought, includeLabels: boolean): string {
-  let gantt = 'gantt\n';
-  gantt += `  title ${thought.timeline?.name || 'Timeline'}\n`;
-  gantt += '  dateFormat X\n';
-  gantt += '  axisFormat %s\n\n';
+  const builder = new MermaidGanttBuilder()
+    .setTitle(thought.timeline?.name || 'Timeline')
+    .setDateFormat('X')
+    .setAxisFormat('%s')
+    .addSection('Events');
 
   if (!thought.events || thought.events.length === 0) {
-    return gantt + '  No events\n';
+    // Add a placeholder task for empty timeline
+    builder.addTask({ id: 'empty', label: 'No events', start: 0, duration: '0s' });
+    return builder.render();
   }
-
-  gantt += '  section Events\n';
 
   for (const event of thought.events) {
     const label = includeLabels ? event.name : event.id;
 
     if (event.type === 'instant') {
-      gantt += `  ${label} :milestone, ${event.timestamp}, 0s\n`;
+      builder.addMilestone({ id: event.id, label, start: event.timestamp });
     } else if (event.type === 'interval' && event.duration) {
-      gantt += `  ${label} :${event.timestamp}, ${event.duration}s\n`;
+      builder.addTask({ id: event.id, label, start: event.timestamp, duration: `${event.duration}s` });
     }
   }
 
-  return gantt;
+  return builder.render();
 }
 
 function timelineToDOT(thought: TemporalThought, includeLabels: boolean): string {

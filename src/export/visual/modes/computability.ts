@@ -2,6 +2,7 @@
  * Computability Visual Exporter (v8.5.0)
  * Phase 11: Turing machine diagrams, reduction chains, computation traces
  * Phase 13 Sprint 8: Refactored to use fluent builder classes
+ * Phase 13 Sprint 9 (continued): Now uses MermaidStateDiagramBuilder for Turing machines
  *
  * Inspired by Alan Turing's foundational work on computability (1936)
  * Exports reasoning about computability theory to visual formats
@@ -12,7 +13,7 @@ import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
 // Builder classes (Phase 13)
 import { DOTGraphBuilder, type DotNodeStyle } from '../utils/dot.js';
-import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { MermaidGraphBuilder, MermaidStateDiagramBuilder } from '../utils/mermaid.js';
 import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
@@ -124,28 +125,29 @@ function computabilityToMermaid(thought: ComputabilityThought, options: VisualEx
 
 /**
  * Turing machine to Mermaid state diagram
- * Note: Uses raw string building as MermaidGraphBuilder doesn't support stateDiagram-v2 syntax
+ * Phase 13 Sprint 9: Now uses MermaidStateDiagramBuilder fluent API
  */
 function turingMachineToMermaid(machine: TuringMachine, includeLabels: boolean): string {
-  let mermaid = 'stateDiagram-v2\n';
-  mermaid += `  [*] --> ${sanitizeId(machine.initialState)}\n`;
+  const builder = new MermaidStateDiagramBuilder()
+    .setInitialState(machine.initialState);
+
+  // Add states
+  for (const state of machine.states) {
+    builder.addState({ id: state, label: state });
+  }
 
   // Add transitions
   for (const t of machine.transitions) {
-    const label = includeLabels ? `${t.readSymbol}/${t.writeSymbol},${t.direction}` : '';
-    mermaid += `  ${sanitizeId(t.fromState)} --> ${sanitizeId(t.toState)}`;
-    if (label) {
-      mermaid += `: ${label}`;
-    }
-    mermaid += '\n';
+    const label = includeLabels ? `${t.readSymbol}/${t.writeSymbol},${t.direction}` : undefined;
+    builder.addTransition({ from: t.fromState, to: t.toState, label });
   }
 
-  // Mark accept states
+  // Mark accept states as final
   for (const acceptState of machine.acceptStates) {
-    mermaid += `  ${sanitizeId(acceptState)} --> [*]\n`;
+    builder.addFinalState(acceptState);
   }
 
-  return mermaid;
+  return builder.render();
 }
 
 /**

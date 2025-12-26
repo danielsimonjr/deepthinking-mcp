@@ -871,3 +871,432 @@ export class MermaidGraphBuilder {
     return builder;
   }
 }
+
+// =============================================================================
+// Gantt Chart Types
+// =============================================================================
+
+/** Gantt task type */
+export type GanttTaskType = 'task' | 'milestone' | 'done' | 'active' | 'crit';
+
+/** Gantt task definition */
+export interface GanttTask {
+  id: string;
+  label: string;
+  type?: GanttTaskType;
+  start: string | number;
+  duration?: string | number;
+  after?: string;
+}
+
+/** Gantt section definition */
+export interface GanttSection {
+  name: string;
+  tasks: GanttTask[];
+}
+
+// =============================================================================
+// MermaidGanttBuilder - Fluent API for Gantt Charts
+// =============================================================================
+
+/**
+ * Fluent API builder for Mermaid Gantt chart diagrams.
+ *
+ * @example
+ * ```typescript
+ * const gantt = new MermaidGanttBuilder()
+ *   .setTitle('Project Timeline')
+ *   .setDateFormat('X')
+ *   .setAxisFormat('%s')
+ *   .addSection('Phase 1')
+ *   .addTask({ id: 'task1', label: 'Task 1', start: 0, duration: '3d' })
+ *   .addMilestone({ id: 'ms1', label: 'Milestone', start: 3 })
+ *   .render();
+ * ```
+ */
+export class MermaidGanttBuilder {
+  private title: string = '';
+  private dateFormat: string = 'YYYY-MM-DD';
+  private axisFormat: string = '%Y-%m-%d';
+  private sections: GanttSection[] = [];
+  private currentSection: GanttSection | null = null;
+  private excludes: string[] = [];
+
+  /**
+   * Set the Gantt chart title
+   * @param title - Chart title
+   */
+  setTitle(title: string): this {
+    this.title = title;
+    return this;
+  }
+
+  /**
+   * Set the date format for parsing task dates
+   * @param format - Date format (e.g., 'YYYY-MM-DD', 'X' for unix timestamp)
+   */
+  setDateFormat(format: string): this {
+    this.dateFormat = format;
+    return this;
+  }
+
+  /**
+   * Set the axis format for displaying dates
+   * @param format - Axis format (e.g., '%Y-%m-%d', '%s' for seconds)
+   */
+  setAxisFormat(format: string): this {
+    this.axisFormat = format;
+    return this;
+  }
+
+  /**
+   * Add excluded days (e.g., weekends)
+   * @param exclusion - Exclusion pattern (e.g., 'weekends', 'saturday', 'sunday')
+   */
+  addExcludes(exclusion: string): this {
+    this.excludes.push(exclusion);
+    return this;
+  }
+
+  /**
+   * Start a new section
+   * @param name - Section name
+   */
+  addSection(name: string): this {
+    this.currentSection = { name, tasks: [] };
+    this.sections.push(this.currentSection);
+    return this;
+  }
+
+  /**
+   * Add a task to the current section
+   * @param task - Task definition
+   */
+  addTask(task: GanttTask): this {
+    if (!this.currentSection) {
+      this.addSection('Tasks');
+    }
+    this.currentSection!.tasks.push({ ...task, type: task.type || 'task' });
+    return this;
+  }
+
+  /**
+   * Add a milestone to the current section
+   * @param milestone - Milestone definition (duration is ignored)
+   */
+  addMilestone(milestone: Omit<GanttTask, 'type' | 'duration'>): this {
+    if (!this.currentSection) {
+      this.addSection('Tasks');
+    }
+    this.currentSection!.tasks.push({ ...milestone, type: 'milestone', duration: '0s' });
+    return this;
+  }
+
+  /**
+   * Add a critical task to the current section
+   * @param task - Task definition
+   */
+  addCriticalTask(task: Omit<GanttTask, 'type'>): this {
+    if (!this.currentSection) {
+      this.addSection('Tasks');
+    }
+    this.currentSection!.tasks.push({ ...task, type: 'crit' });
+    return this;
+  }
+
+  /**
+   * Add a completed task to the current section
+   * @param task - Task definition
+   */
+  addDoneTask(task: Omit<GanttTask, 'type'>): this {
+    if (!this.currentSection) {
+      this.addSection('Tasks');
+    }
+    this.currentSection!.tasks.push({ ...task, type: 'done' });
+    return this;
+  }
+
+  /**
+   * Get the number of sections
+   */
+  getSectionCount(): number {
+    return this.sections.length;
+  }
+
+  /**
+   * Get the total number of tasks across all sections
+   */
+  getTaskCount(): number {
+    return this.sections.reduce((sum, s) => sum + s.tasks.length, 0);
+  }
+
+  /**
+   * Render the Gantt chart to a Mermaid string
+   */
+  render(): string {
+    const lines: string[] = ['gantt'];
+
+    if (this.title) {
+      lines.push(`  title ${this.title}`);
+    }
+
+    lines.push(`  dateFormat ${this.dateFormat}`);
+    lines.push(`  axisFormat ${this.axisFormat}`);
+
+    for (const exclusion of this.excludes) {
+      lines.push(`  excludes ${exclusion}`);
+    }
+
+    lines.push('');
+
+    for (const section of this.sections) {
+      lines.push(`  section ${section.name}`);
+
+      for (const task of section.tasks) {
+        const taskLine = this.renderTask(task);
+        lines.push(`  ${taskLine}`);
+      }
+    }
+
+    return lines.join('\n');
+  }
+
+  private renderTask(task: GanttTask): string {
+    const label = escapeMermaidLabel(task.label);
+
+    // Build the task string based on type
+    // Mermaid gantt format: label :modifier, start, duration
+    let typeModifier = '';
+    if (task.type === 'milestone') {
+      typeModifier = 'milestone';
+    } else if (task.type === 'crit') {
+      typeModifier = 'crit';
+    } else if (task.type === 'done') {
+      typeModifier = 'done';
+    } else if (task.type === 'active') {
+      typeModifier = 'active';
+    }
+
+    // Build the timing part
+    let timing: string;
+    if (task.after) {
+      timing = `after ${sanitizeMermaidId(task.after)}`;
+    } else {
+      timing = String(task.start);
+    }
+
+    // Add duration if specified
+    if (task.duration !== undefined && task.type !== 'milestone') {
+      timing += `, ${task.duration}`;
+    } else if (task.type === 'milestone') {
+      timing += ', 0s';
+    }
+
+    // Combine into final format
+    if (typeModifier) {
+      return `${label} :${typeModifier}, ${timing}`;
+    } else {
+      return `${label} :${timing}`;
+    }
+  }
+}
+
+// =============================================================================
+// State Diagram Types
+// =============================================================================
+
+/** State type in state diagram */
+export type StateType = 'normal' | 'start' | 'end' | 'choice' | 'fork' | 'join';
+
+/** State definition */
+export interface StateDiagramState {
+  id: string;
+  label?: string;
+  type?: StateType;
+  description?: string;
+}
+
+/** State transition definition */
+export interface StateTransition {
+  from: string;
+  to: string;
+  label?: string;
+}
+
+// =============================================================================
+// MermaidStateDiagramBuilder - Fluent API for State Diagrams
+// =============================================================================
+
+/**
+ * Fluent API builder for Mermaid state diagrams (stateDiagram-v2).
+ *
+ * @example
+ * ```typescript
+ * const diagram = new MermaidStateDiagramBuilder()
+ *   .setInitialState('idle')
+ *   .addState({ id: 'idle', label: 'Idle State' })
+ *   .addState({ id: 'running', label: 'Running' })
+ *   .addTransition({ from: 'idle', to: 'running', label: 'start' })
+ *   .addFinalState('done')
+ *   .render();
+ * ```
+ */
+export class MermaidStateDiagramBuilder {
+  private states: StateDiagramState[] = [];
+  private transitions: StateTransition[] = [];
+  private initialState: string | null = null;
+  private finalStates: string[] = [];
+  private direction: MermaidDirection = 'TB';
+  private title: string = '';
+
+  /**
+   * Set the diagram direction
+   * @param direction - Direction (TB, LR, etc.)
+   */
+  setDirection(direction: MermaidDirection): this {
+    this.direction = direction;
+    return this;
+  }
+
+  /**
+   * Set the diagram title
+   * @param title - Title text
+   */
+  setTitle(title: string): this {
+    this.title = title;
+    return this;
+  }
+
+  /**
+   * Set the initial state (adds [*] --> state)
+   * @param stateId - The initial state ID
+   */
+  setInitialState(stateId: string): this {
+    this.initialState = stateId;
+    return this;
+  }
+
+  /**
+   * Add a state to the diagram
+   * @param state - State definition
+   */
+  addState(state: StateDiagramState): this {
+    this.states.push(state);
+    return this;
+  }
+
+  /**
+   * Add multiple states to the diagram
+   * @param states - Array of state definitions
+   */
+  addStates(states: StateDiagramState[]): this {
+    this.states.push(...states);
+    return this;
+  }
+
+  /**
+   * Mark a state as final (adds state --> [*])
+   * @param stateId - The final state ID
+   */
+  addFinalState(stateId: string): this {
+    if (!this.finalStates.includes(stateId)) {
+      this.finalStates.push(stateId);
+    }
+    return this;
+  }
+
+  /**
+   * Add a transition between states
+   * @param transition - Transition definition
+   */
+  addTransition(transition: StateTransition): this {
+    this.transitions.push(transition);
+    return this;
+  }
+
+  /**
+   * Add multiple transitions
+   * @param transitions - Array of transition definitions
+   */
+  addTransitions(transitions: StateTransition[]): this {
+    this.transitions.push(...transitions);
+    return this;
+  }
+
+  /**
+   * Get the number of states
+   */
+  getStateCount(): number {
+    return this.states.length;
+  }
+
+  /**
+   * Get the number of transitions
+   */
+  getTransitionCount(): number {
+    return this.transitions.length;
+  }
+
+  /**
+   * Render the state diagram to a Mermaid string
+   */
+  render(): string {
+    const lines: string[] = ['stateDiagram-v2'];
+
+    // Add direction if not default
+    if (this.direction !== 'TB') {
+      lines.push(`  direction ${this.direction}`);
+    }
+
+    // Add title as a note if provided
+    if (this.title) {
+      lines.push(`  note right of [*] : ${escapeMermaidLabel(this.title)}`);
+    }
+
+    // Add initial state transition
+    if (this.initialState) {
+      lines.push(`  [*] --> ${sanitizeMermaidId(this.initialState)}`);
+    }
+
+    // Define states with labels/descriptions
+    for (const state of this.states) {
+      const stateId = sanitizeMermaidId(state.id);
+
+      if (state.label && state.label !== state.id) {
+        lines.push(`  ${stateId} : ${escapeMermaidLabel(state.label)}`);
+      }
+
+      if (state.description) {
+        lines.push(`  ${stateId} : ${escapeMermaidLabel(state.description)}`);
+      }
+
+      // Handle special state types
+      if (state.type === 'choice') {
+        lines.push(`  state ${stateId} <<choice>>`);
+      } else if (state.type === 'fork') {
+        lines.push(`  state ${stateId} <<fork>>`);
+      } else if (state.type === 'join') {
+        lines.push(`  state ${stateId} <<join>>`);
+      }
+    }
+
+    // Add transitions
+    for (const trans of this.transitions) {
+      const from = sanitizeMermaidId(trans.from);
+      const to = sanitizeMermaidId(trans.to);
+
+      if (trans.label) {
+        lines.push(`  ${from} --> ${to} : ${escapeMermaidLabel(trans.label)}`);
+      } else {
+        lines.push(`  ${from} --> ${to}`);
+      }
+    }
+
+    // Add final state transitions
+    for (const finalState of this.finalStates) {
+      lines.push(`  ${sanitizeMermaidId(finalState)} --> [*]`);
+    }
+
+    return lines.join('\n');
+  }
+}

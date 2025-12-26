@@ -426,7 +426,7 @@ Generate dependency docs: `npm run docs:deps`
 - Created `tests/unit/export/visual/modes/snapshot-baseline.test.ts` with 63 snapshot baseline tests
 - Created 15 mode exporter snapshot tests
 - Added JSDoc documentation to all 11 builder classes
-- Tests cover all 12 builder classes: DOTGraphBuilder, MermaidGraphBuilder, GraphMLBuilder, ASCIIDocBuilder, SVGBuilder, SVGGroupBuilder, TikZBuilder, UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder
+- Tests cover all 14 builder classes: DOTGraphBuilder, MermaidGraphBuilder, MermaidGanttBuilder, MermaidStateDiagramBuilder, GraphMLBuilder, ASCIIDocBuilder, SVGBuilder, SVGGroupBuilder, TikZBuilder, UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder
 
 **Sprint 5 (v8.5.0)**: Critical Files Batch 1
 
@@ -453,7 +453,6 @@ Generate dependency docs: `npm run docs:deps`
 
 - Refactored `systems-thinking.ts`, `analogical.ts`, `causal.ts`, `computability.ts`, `counterfactual.ts` to use builders
 - All 5 files now use DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder fluent APIs
-- Note: Turing machine state diagrams kept as raw strings (stateDiagram-v2 not supported by builder)
 - Updated 13 snapshot baselines to match new builder output formatting
 - Total mode exporters refactored: 17/22 (77%)
 
@@ -462,9 +461,13 @@ Generate dependency docs: `npm run docs:deps`
 - Refactored `sequential.ts`, `abductive.ts`, `bayesian.ts`, `temporal.ts`, `shannon.ts` to use builders
 - All 5 files now use DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder fluent APIs
 - Fixed `computability.ts` default fallback paths (2 undocumented builder bypasses) to use builders
-- Note: Mermaid gantt diagrams in temporal.ts and stateDiagram-v2 in computability.ts kept as raw strings (not supported by MermaidGraphBuilder)
+- Added `MermaidGanttBuilder` fluent API class to `src/export/visual/utils/mermaid.ts`
+- Added `MermaidStateDiagramBuilder` fluent API class to `src/export/visual/utils/mermaid.ts`
+- Refactored `temporal.ts` to use `MermaidGanttBuilder` for gantt chart generation
+- Refactored `computability.ts` to use `MermaidStateDiagramBuilder` for Turing machine state diagrams
 - Updated 14 snapshot baselines to match new builder output formatting
-- **Total mode exporters refactored: 22/22 (100%) - TRUE 100% builder adoption**
+- **Total mode exporters refactored: 22/22 (100%) - TRUE 100% builder adoption (NO exceptions)**
+- **Total builder classes: 14** (11 primary + SVGGroupBuilder + MermaidGanttBuilder + MermaidStateDiagramBuilder)
 
 **Builder Pattern Benefits**:
 

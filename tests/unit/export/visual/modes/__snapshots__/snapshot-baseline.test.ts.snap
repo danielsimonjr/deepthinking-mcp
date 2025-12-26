@@ -1038,6 +1038,6 @@ exports[`Temporal Mode Exporter Snapshots > Mermaid format 1`] = `
   dateFormat X
   axisFormat %s
 
-  No events
-"
+  section Events
+  No events :0, 0s"
 `;

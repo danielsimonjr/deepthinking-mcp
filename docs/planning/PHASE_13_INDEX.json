@@ -105,7 +105,7 @@
       "file": "PHASE_13_SPRINT_9_TODO.json",
       "status": "completed",
       "completedDate": "2025-12-26",
-      "notes": "BUILDER ADOPTION COMPLETE. 5 files refactored, 12 snapshots updated, 4686 tests passing. Temporal gantt diagrams kept as raw strings. 22/22 (100%) mode exporters now use builders."
+      "notes": "BUILDER ADOPTION COMPLETE. Added MermaidGanttBuilder and MermaidStateDiagramBuilder. Refactored temporal.ts to use GanttBuilder, computability.ts to use StateDiagramBuilder. TRUE 100% builder adoption - NO exceptions. 22/22 (100%) mode exporters now use builders."
     },
     {
       "sprint": 10,
@@ -120,7 +120,7 @@
   ],
   "features": {
     "R-1": { "name": "DOT Builder & Adoption", "sprints": [1, 5, 6, 7, 8, 9], "status": "completed", "priority": "high", "notes": "Builder complete, 22/22 modes adopted (100%)" },
-    "R-2": { "name": "Mermaid Builder & Adoption", "sprints": [1, 5, 6, 7, 8, 9], "status": "completed", "priority": "high", "notes": "Builder complete, 22/22 modes adopted (100%). Exceptions: temporal gantt, computability Turing machines" },
+    "R-2": { "name": "Mermaid Builder & Adoption", "sprints": [1, 5, 6, 7, 8, 9], "status": "completed", "priority": "high", "notes": "Builder complete + MermaidGanttBuilder + MermaidStateDiagramBuilder. 22/22 modes adopted (100%). NO exceptions." },
     "R-3": { "name": "ASCII Builder & Adoption", "sprints": [2, 5, 6, 7, 8, 9], "status": "completed", "priority": "high", "notes": "Builder complete, 22/22 modes adopted (100%)" },
     "R-4": { "name": "SVG Builder", "sprints": [2], "status": "completed", "priority": "medium" },
     "R-5": { "name": "GraphML Builder", "sprints": [1], "status": "completed", "priority": "medium" },
@@ -138,7 +138,7 @@
     "asciiUtilityAdoption": { "current": "22/22 (100%)", "target": "22/22 (100%)", "status": "ACHIEVED" },
     "filesOver1000Lines": { "current": 12, "target": 0, "notes": "Sprint 5-9 did not reduce file sizes - files still >1000 lines" },
     "totalModeFileLines": { "current": 23864, "target": "18000-19000", "notes": "Minimal reduction from builder adoption" },
-    "builderClassesAdded": { "current": 12, "target": 11, "notes": "11 primary + SVGGroupBuilder" },
+    "builderClassesAdded": { "current": 14, "target": 11, "notes": "11 primary + SVGGroupBuilder + MermaidGanttBuilder + MermaidStateDiagramBuilder" },
     "modeExportersRefactored": { "current": 22, "target": 22, "status": "ACHIEVED", "notes": "All 22 mode exporters now use builders" }
   },
   "criticalFiles": [
@@ -159,17 +159,17 @@
     { "file": "systems-thinking.ts", "lines": 911, "sprint": 8, "status": "refactored" },
     { "file": "analogical.ts", "lines": 888, "sprint": 8, "status": "refactored" },
     { "file": "causal.ts", "lines": 870, "sprint": 8, "status": "refactored" },
-    { "file": "computability.ts", "lines": 825, "sprint": 8, "status": "refactored", "notes": "Sprint 9 fix: default fallbacks now use builders. Only Turing machine state diagrams kept as raw strings." },
+    { "file": "computability.ts", "lines": 825, "sprint": 8, "status": "refactored", "notes": "Sprint 9 fix: Now uses MermaidStateDiagramBuilder for Turing machines. TRUE 100% builder adoption." },
     { "file": "counterfactual.ts", "lines": 825, "sprint": 8, "status": "refactored" },
     { "file": "sequential.ts", "lines": 785, "sprint": 9, "status": "refactored", "notes": "Fixed incorrect claim - now uses builders" },
     { "file": "abductive.ts", "lines": 705, "sprint": 9, "status": "refactored" },
     { "file": "bayesian.ts", "lines": 669, "sprint": 9, "status": "refactored" },
-    { "file": "temporal.ts", "lines": 635, "sprint": 9, "status": "refactored", "notes": "Gantt diagrams kept as raw strings" },
+    { "file": "temporal.ts", "lines": 635, "sprint": 9, "status": "refactored", "notes": "Now uses MermaidGanttBuilder for timeline gantt charts. TRUE 100% builder adoption." },
     { "file": "shannon.ts", "lines": 607, "sprint": 9, "status": "refactored" }
   ],
   "utilityModules": {
     "dot": { "path": "src/export/visual/utils/dot.ts", "lines": 978, "builder": "DOTGraphBuilder", "sprint": 1, "builderStatus": "completed" },
-    "mermaid": { "path": "src/export/visual/utils/mermaid.ts", "lines": 873, "builder": "MermaidGraphBuilder", "sprint": 1, "builderStatus": "completed" },
+    "mermaid": { "path": "src/export/visual/utils/mermaid.ts", "lines": 1302, "builder": "MermaidGraphBuilder + MermaidGanttBuilder + MermaidStateDiagramBuilder", "sprint": 1, "builderStatus": "completed" },
     "graphml": { "path": "src/export/visual/utils/graphml.ts", "lines": 642, "builder": "GraphMLBuilder", "sprint": 1, "builderStatus": "completed" },
     "ascii": { "path": "src/export/visual/utils/ascii.ts", "lines": 1073, "builder": "ASCIIDocBuilder", "sprint": 2, "builderStatus": "completed" },
     "svg": { "path": "src/export/visual/utils/svg.ts", "lines": 1198, "builder": "SVGBuilder + SVGGroupBuilder", "sprint": 2, "builderStatus": "completed" },

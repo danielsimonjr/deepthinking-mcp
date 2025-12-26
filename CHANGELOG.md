@@ -32,7 +32,7 @@ Refactored the final five mode exporter files to use the fluent builder APIs:
   - Updated version to v8.5.0
 
 - **temporal.ts** (`src/export/visual/modes/temporal.ts`)
-  - Kept `timelineToMermaidGantt()` using raw strings (gantt diagrams not supported by builder)
+  - Refactored `timelineToMermaidGantt()` to use new `MermaidGanttBuilder` fluent API
   - Refactored `timelineToDOT()` to use `DOTGraphBuilder`
   - Refactored `timelineToASCII()` to use `ASCIIDocBuilder`
   - Updated version to v8.5.0
@@ -43,18 +43,40 @@ Refactored the final five mode exporter files to use the fluent builder APIs:
   - Refactored `shannonToASCII()` to use `ASCIIDocBuilder`
   - Updated version to v8.5.0
 
+### Added - Sprint 9 (continued)
+
+**New Fluent API Builders in `src/export/visual/utils/mermaid.ts`**:
+
+- **MermaidGanttBuilder** - Fluent API for Mermaid gantt chart generation
+  - `setTitle()`, `setDateFormat()`, `setAxisFormat()` - Configuration methods
+  - `addSection()` - Create named sections
+  - `addTask()` - Add tasks with id, label, start, duration
+  - `addMilestone()` - Add milestone markers
+  - `render()` - Generate valid Mermaid gantt syntax
+
+- **MermaidStateDiagramBuilder** - Fluent API for Mermaid state diagram generation
+  - `setInitialState()` - Set initial state marker
+  - `addState()` - Add states with id, label, optional description
+  - `addTransition()` - Add transitions with from, to, optional label
+  - `addFinalState()` - Mark states as final (accept states)
+  - `render()` - Generate valid stateDiagram-v2 syntax
+
 ### Fixed - Sprint 9 (continued)
 
-- **computability.ts** - Fixed 2 undocumented builder bypasses discovered during audit:
-  - Refactored default Mermaid fallback (lines 115-122) to use `MermaidGraphBuilder`
-  - Refactored default DOT fallback (lines 214-219) to use `DOTGraphBuilder`
+- **computability.ts** - Refactored to use `MermaidStateDiagramBuilder` for Turing machine visualizations
+  - Replaced raw `stateDiagram-v2` strings with fluent builder API
+  - Refactored default Mermaid fallback to use `MermaidGraphBuilder`
+  - Refactored default DOT fallback to use `DOTGraphBuilder`
   - Added null safety for `thoughtType` with fallback to 'Computability'
+- **temporal.ts** - Refactored to use `MermaidGanttBuilder` for timeline gantt charts
+  - Replaced raw `gantt` strings with fluent builder API
 - Updated 14 snapshot baselines total (12 initial + 2 computability fixes)
 - Updated visual.test.ts assertions to match new Mermaid/ASCII output formats for bayesian exports
 
 ### Validation - Sprint 9
 
-- **Builder Adoption**: ✅ TRUE 100% - All code paths now use builders (only 2 documented exceptions: gantt, stateDiagram-v2)
+- **Builder Adoption**: ✅ TRUE 100% - ALL code paths now use fluent builders (NO exceptions)
+- **New Builders**: `MermaidGanttBuilder`, `MermaidStateDiagramBuilder` (total: 14 builder classes)
 - **Typecheck**: ✅ Clean (`npm run typecheck` - no issues)
 - **Full Test Suite**: ✅ 4686 tests passing across 170 test files
 - **Total Mode Exporters Refactored**: 22/22 (100%)
