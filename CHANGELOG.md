@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Refactored 4 Large Mode Exporters to Use Builder Classes**
 
-Refactored four mode exporter files (each 1600+ lines) to use the fluent builder APIs created in Sprints 1-3:
+Refactored four mode exporter files to use the fluent builder APIs created in Sprints 1-3:
 
 - **physics.ts** (`src/export/visual/modes/physics.ts`)
   - Refactored `physicsToMermaid()` to use `MermaidGraphBuilder`
@@ -42,8 +42,25 @@ Refactored four mode exporter files (each 1600+ lines) to use the fluent builder
 
 - Updated snapshot baselines for physics, engineering, metareasoning, and proof-decomposition modes to match new builder output formatting
 
+### Sprint 5 Retrospective - FILE SIZE TARGETS NOT MET
+
+**⚠️ CRITICAL: File size reduction targets were NOT achieved**
+
+| File | Before | After | Target | Result |
+|------|--------|-------|--------|--------|
+| physics.ts | 1781 | 1724 | <1000 | ❌ FAILED (-3%) |
+| engineering.ts | 1691 | 1706 | <1000 | ❌ FAILED (+1%) |
+| metareasoning.ts | 1628 | 1593 | <1000 | ❌ FAILED (-2%) |
+| proof-decomposition.ts | 1624 | 1513 | <1000 | ❌ FAILED (-7%) |
+
+**Root Cause**: Builder adoption replaces inline string building with builder API calls, but does not eliminate the domain-specific logic that makes up the bulk of each file. The original assumption that builder usage would result in ~55% line reduction was incorrect.
+
+**Recommendation**: Sprint 10 must include aggressive file splitting to achieve <1000 line targets.
+
 ### Validation - Sprint 5
 
+- **Builder Adoption**: ✅ All 4 files use builders
+- **File Size Targets**: ❌ FAILED - All files still >1500 lines
 - **Typecheck**: ✅ Clean (`npm run typecheck`)
 - **Full Test Suite**: ✅ 4686 tests passing across 170 test files
 - **Build**: ✅ Successful
