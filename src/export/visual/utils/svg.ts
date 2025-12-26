@@ -1,6 +1,7 @@
 /**
- * SVG Export Utilities (v7.0.2)
+ * SVG Export Utilities (v8.5.0)
  * Phase 9: Generic SVG export module for all thinking modes
+ * Phase 13: Added SVGBuilder fluent API
  *
  * Provides shared utilities for generating native SVG visualizations
  * across all visual exporters. Supports multiple node shapes, color
@@ -545,4 +546,651 @@ export function calculateSVGHeight(
     maxY = Math.max(maxY, pos.y + pos.height);
   }
   return maxY + padding + extraSpace;
+}
+
+// =============================================================================
+// SVGBuilder - Fluent API Builder Class (Phase 13)
+// =============================================================================
+
+/** Options for SVG shapes */
+export interface SVGShapeOptions {
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+  opacity?: number;
+  rx?: number;
+  ry?: number;
+  className?: string;
+}
+
+/** Options for SVG text */
+export interface SVGTextOptions {
+  fill?: string;
+  fontSize?: number;
+  fontFamily?: string;
+  fontWeight?: 'normal' | 'bold';
+  textAnchor?: 'start' | 'middle' | 'end';
+  dominantBaseline?: 'auto' | 'middle' | 'hanging';
+  className?: string;
+}
+
+/** Options for SVG lines */
+export interface SVGLineOptions {
+  stroke?: string;
+  strokeWidth?: number;
+  strokeDasharray?: string;
+  markerEnd?: string;
+  markerStart?: string;
+}
+
+/** Options for SVG paths */
+export interface SVGPathOptions extends SVGLineOptions {
+  fill?: string;
+  opacity?: number;
+}
+
+/**
+ * SVG Group Builder for creating grouped SVG elements
+ */
+export class SVGGroupBuilder {
+  private elements: string[] = [];
+  private groupId?: string;
+  private transform?: string;
+  private className?: string;
+
+  constructor(id?: string) {
+    this.groupId = id;
+  }
+
+  /**
+   * Set the group transform
+   * @param transform - SVG transform string
+   * @returns this for chaining
+   */
+  setTransform(transform: string): this {
+    this.transform = transform;
+    return this;
+  }
+
+  /**
+   * Set the group class name
+   * @param className - CSS class name
+   * @returns this for chaining
+   */
+  setClassName(className: string): this {
+    this.className = className;
+    return this;
+  }
+
+  /**
+   * Add a rectangle to the group
+   */
+  addRect(x: number, y: number, width: number, height: number, options?: SVGShapeOptions): this {
+    const attrs = [
+      `x="${x}"`,
+      `y="${y}"`,
+      `width="${width}"`,
+      `height="${height}"`,
+    ];
+    if (options?.fill) attrs.push(`fill="${options.fill}"`);
+    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
+    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.opacity !== undefined) attrs.push(`opacity="${options.opacity}"`);
+    if (options?.rx) attrs.push(`rx="${options.rx}"`);
+    if (options?.ry) attrs.push(`ry="${options.ry}"`);
+    if (options?.className) attrs.push(`class="${options.className}"`);
+
+    this.elements.push(`    <rect ${attrs.join(' ')}/>`);
+    return this;
+  }
+
+  /**
+   * Add a circle to the group
+   */
+  addCircle(cx: number, cy: number, r: number, options?: SVGShapeOptions): this {
+    const attrs = [`cx="${cx}"`, `cy="${cy}"`, `r="${r}"`];
+    if (options?.fill) attrs.push(`fill="${options.fill}"`);
+    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
+    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.opacity !== undefined) attrs.push(`opacity="${options.opacity}"`);
+    if (options?.className) attrs.push(`class="${options.className}"`);
+
+    this.elements.push(`    <circle ${attrs.join(' ')}/>`);
+    return this;
+  }
+
+  /**
+   * Add text to the group
+   */
+  addText(x: number, y: number, text: string, options?: SVGTextOptions): this {
+    const attrs = [`x="${x}"`, `y="${y}"`];
+    if (options?.fill) attrs.push(`fill="${options.fill}"`);
+    if (options?.fontSize) attrs.push(`font-size="${options.fontSize}"`);
+    if (options?.fontFamily) attrs.push(`font-family="${options.fontFamily}"`);
+    if (options?.fontWeight) attrs.push(`font-weight="${options.fontWeight}"`);
+    if (options?.textAnchor) attrs.push(`text-anchor="${options.textAnchor}"`);
+    if (options?.dominantBaseline) attrs.push(`dominant-baseline="${options.dominantBaseline}"`);
+    if (options?.className) attrs.push(`class="${options.className}"`);
+
+    this.elements.push(`    <text ${attrs.join(' ')}>${escapeSVGText(text)}</text>`);
+    return this;
+  }
+
+  /**
+   * Add a line to the group
+   */
+  addLine(x1: number, y1: number, x2: number, y2: number, options?: SVGLineOptions): this {
+    const attrs = [
+      `x1="${x1}"`,
+      `y1="${y1}"`,
+      `x2="${x2}"`,
+      `y2="${y2}"`,
+    ];
+    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
+    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.strokeDasharray) attrs.push(`stroke-dasharray="${options.strokeDasharray}"`);
+    if (options?.markerEnd) attrs.push(`marker-end="url(#${options.markerEnd})"`);
+    if (options?.markerStart) attrs.push(`marker-start="url(#${options.markerStart})"`);
+
+    this.elements.push(`    <line ${attrs.join(' ')}/>`);
+    return this;
+  }
+
+  /**
+   * Add raw SVG content to the group
+   */
+  addRaw(svg: string): this {
+    this.elements.push(`    ${svg}`);
+    return this;
+  }
+
+  /**
+   * Render the group as SVG string
+   */
+  render(): string {
+    const attrs: string[] = [];
+    if (this.groupId) attrs.push(`id="${this.groupId}"`);
+    if (this.className) attrs.push(`class="${this.className}"`);
+    if (this.transform) attrs.push(`transform="${this.transform}"`);
+
+    const attrStr = attrs.length > 0 ? ` ${attrs.join(' ')}` : '';
+    return `  <g${attrStr}>\n${this.elements.join('\n')}\n  </g>`;
+  }
+}
+
+/**
+ * Fluent API builder for SVG documents
+ *
+ * Provides a chainable interface for constructing SVG graphics,
+ * wrapping the existing utility functions for easier use.
+ *
+ * @example
+ * ```typescript
+ * const svg = new SVGBuilder()
+ *   .setDimensions(800, 600)
+ *   .setTitle('My Diagram')
+ *   .addRect(10, 10, 100, 50, { fill: '#64b5f6', stroke: '#1976d2' })
+ *   .addText(60, 35, 'Hello', { textAnchor: 'middle' })
+ *   .addLine(110, 35, 200, 35, { stroke: '#333', markerEnd: 'arrowhead' })
+ *   .render();
+ * ```
+ */
+export class SVGBuilder {
+  private width: number = 800;
+  private height: number = 600;
+  private title?: string;
+  private elements: string[] = [];
+  private defs: string[] = [];
+  private styles: string[] = [];
+  private background?: string;
+  private includeDefaultDefs: boolean = true;
+  private includeDefaultStyles: boolean = true;
+
+  /**
+   * Set the SVG dimensions
+   * @param width - Width in pixels
+   * @param height - Height in pixels
+   * @returns this for chaining
+   */
+  setDimensions(width: number, height: number): this {
+    this.width = width;
+    this.height = height;
+    return this;
+  }
+
+  /**
+   * Set the SVG width
+   * @param width - Width in pixels
+   * @returns this for chaining
+   */
+  setWidth(width: number): this {
+    this.width = width;
+    return this;
+  }
+
+  /**
+   * Set the SVG height
+   * @param height - Height in pixels
+   * @returns this for chaining
+   */
+  setHeight(height: number): this {
+    this.height = height;
+    return this;
+  }
+
+  /**
+   * Set the SVG title
+   * @param title - The title text
+   * @returns this for chaining
+   */
+  setTitle(title: string): this {
+    this.title = title;
+    return this;
+  }
+
+  /**
+   * Set the background color
+   * @param color - CSS color value
+   * @returns this for chaining
+   */
+  setBackground(color: string): this {
+    this.background = color;
+    return this;
+  }
+
+  /**
+   * Control whether to include default marker definitions
+   * @param include - true to include defaults
+   * @returns this for chaining
+   */
+  setIncludeDefaultDefs(include: boolean): this {
+    this.includeDefaultDefs = include;
+    return this;
+  }
+
+  /**
+   * Control whether to include default styles
+   * @param include - true to include defaults
+   * @returns this for chaining
+   */
+  setIncludeDefaultStyles(include: boolean): this {
+    this.includeDefaultStyles = include;
+    return this;
+  }
+
+  /**
+   * Add a custom definition (marker, gradient, etc.)
+   * @param def - SVG def content
+   * @returns this for chaining
+   */
+  addDef(def: string): this {
+    this.defs.push(def);
+    return this;
+  }
+
+  /**
+   * Add a custom style rule
+   * @param style - CSS style rule
+   * @returns this for chaining
+   */
+  addStyle(style: string): this {
+    this.styles.push(style);
+    return this;
+  }
+
+  /**
+   * Add a rectangle
+   * @param x - X position
+   * @param y - Y position
+   * @param width - Width
+   * @param height - Height
+   * @param options - Shape options
+   * @returns this for chaining
+   */
+  addRect(x: number, y: number, width: number, height: number, options?: SVGShapeOptions): this {
+    const attrs = [
+      `x="${x}"`,
+      `y="${y}"`,
+      `width="${width}"`,
+      `height="${height}"`,
+    ];
+    if (options?.fill) attrs.push(`fill="${options.fill}"`);
+    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
+    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.opacity !== undefined) attrs.push(`opacity="${options.opacity}"`);
+    if (options?.rx) attrs.push(`rx="${options.rx}"`);
+    if (options?.ry) attrs.push(`ry="${options.ry}"`);
+    if (options?.className) attrs.push(`class="${options.className}"`);
+
+    this.elements.push(`  <rect ${attrs.join(' ')}/>`);
+    return this;
+  }
+
+  /**
+   * Add a circle
+   * @param cx - Center X
+   * @param cy - Center Y
+   * @param r - Radius
+   * @param options - Shape options
+   * @returns this for chaining
+   */
+  addCircle(cx: number, cy: number, r: number, options?: SVGShapeOptions): this {
+    const attrs = [`cx="${cx}"`, `cy="${cy}"`, `r="${r}"`];
+    if (options?.fill) attrs.push(`fill="${options.fill}"`);
+    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
+    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.opacity !== undefined) attrs.push(`opacity="${options.opacity}"`);
+    if (options?.className) attrs.push(`class="${options.className}"`);
+
+    this.elements.push(`  <circle ${attrs.join(' ')}/>`);
+    return this;
+  }
+
+  /**
+   * Add an ellipse
+   * @param cx - Center X
+   * @param cy - Center Y
+   * @param rx - X radius
+   * @param ry - Y radius
+   * @param options - Shape options
+   * @returns this for chaining
+   */
+  addEllipse(cx: number, cy: number, rx: number, ry: number, options?: SVGShapeOptions): this {
+    const attrs = [`cx="${cx}"`, `cy="${cy}"`, `rx="${rx}"`, `ry="${ry}"`];
+    if (options?.fill) attrs.push(`fill="${options.fill}"`);
+    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
+    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.opacity !== undefined) attrs.push(`opacity="${options.opacity}"`);
+    if (options?.className) attrs.push(`class="${options.className}"`);
+
+    this.elements.push(`  <ellipse ${attrs.join(' ')}/>`);
+    return this;
+  }
+
+  /**
+   * Add a line
+   * @param x1 - Start X
+   * @param y1 - Start Y
+   * @param x2 - End X
+   * @param y2 - End Y
+   * @param options - Line options
+   * @returns this for chaining
+   */
+  addLine(x1: number, y1: number, x2: number, y2: number, options?: SVGLineOptions): this {
+    const attrs = [
+      `x1="${x1}"`,
+      `y1="${y1}"`,
+      `x2="${x2}"`,
+      `y2="${y2}"`,
+    ];
+    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
+    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.strokeDasharray) attrs.push(`stroke-dasharray="${options.strokeDasharray}"`);
+    if (options?.markerEnd) attrs.push(`marker-end="url(#${options.markerEnd})"`);
+    if (options?.markerStart) attrs.push(`marker-start="url(#${options.markerStart})"`);
+
+    this.elements.push(`  <line ${attrs.join(' ')}/>`);
+    return this;
+  }
+
+  /**
+   * Add a polyline
+   * @param points - Array of [x, y] coordinate pairs
+   * @param options - Line options
+   * @returns this for chaining
+   */
+  addPolyline(points: Array<[number, number]>, options?: SVGLineOptions): this {
+    const pointsStr = points.map(p => `${p[0]},${p[1]}`).join(' ');
+    const attrs = [`points="${pointsStr}"`, 'fill="none"'];
+    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
+    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.strokeDasharray) attrs.push(`stroke-dasharray="${options.strokeDasharray}"`);
+    if (options?.markerEnd) attrs.push(`marker-end="url(#${options.markerEnd})"`);
+
+    this.elements.push(`  <polyline ${attrs.join(' ')}/>`);
+    return this;
+  }
+
+  /**
+   * Add a polygon
+   * @param points - Array of [x, y] coordinate pairs
+   * @param options - Shape options
+   * @returns this for chaining
+   */
+  addPolygon(points: Array<[number, number]>, options?: SVGShapeOptions): this {
+    const pointsStr = points.map(p => `${p[0]},${p[1]}`).join(' ');
+    const attrs = [`points="${pointsStr}"`];
+    if (options?.fill) attrs.push(`fill="${options.fill}"`);
+    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
+    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.opacity !== undefined) attrs.push(`opacity="${options.opacity}"`);
+    if (options?.className) attrs.push(`class="${options.className}"`);
+
+    this.elements.push(`  <polygon ${attrs.join(' ')}/>`);
+    return this;
+  }
+
+  /**
+   * Add a path
+   * @param d - SVG path data string
+   * @param options - Path options
+   * @returns this for chaining
+   */
+  addPath(d: string, options?: SVGPathOptions): this {
+    const attrs = [`d="${d}"`];
+    if (options?.fill !== undefined) attrs.push(`fill="${options.fill}"`);
+    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
+    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.strokeDasharray) attrs.push(`stroke-dasharray="${options.strokeDasharray}"`);
+    if (options?.opacity !== undefined) attrs.push(`opacity="${options.opacity}"`);
+    if (options?.markerEnd) attrs.push(`marker-end="url(#${options.markerEnd})"`);
+    if (options?.markerStart) attrs.push(`marker-start="url(#${options.markerStart})"`);
+
+    this.elements.push(`  <path ${attrs.join(' ')}/>`);
+    return this;
+  }
+
+  /**
+   * Add text
+   * @param x - X position
+   * @param y - Y position
+   * @param text - Text content
+   * @param options - Text options
+   * @returns this for chaining
+   */
+  addText(x: number, y: number, text: string, options?: SVGTextOptions): this {
+    const attrs = [`x="${x}"`, `y="${y}"`];
+    if (options?.fill) attrs.push(`fill="${options.fill}"`);
+    if (options?.fontSize) attrs.push(`font-size="${options.fontSize}"`);
+    if (options?.fontFamily) attrs.push(`font-family="${options.fontFamily}"`);
+    if (options?.fontWeight) attrs.push(`font-weight="${options.fontWeight}"`);
+    if (options?.textAnchor) attrs.push(`text-anchor="${options.textAnchor}"`);
+    if (options?.dominantBaseline) attrs.push(`dominant-baseline="${options.dominantBaseline}"`);
+    if (options?.className) attrs.push(`class="${options.className}"`);
+
+    this.elements.push(`  <text ${attrs.join(' ')}>${escapeSVGText(text)}</text>`);
+    return this;
+  }
+
+  /**
+   * Add a group of elements
+   * @param id - Optional group ID
+   * @returns An SVGGroupBuilder for the group
+   */
+  addGroup(id?: string): SVGGroupBuilder {
+    const group = new SVGGroupBuilder(id);
+    // We'll add a placeholder that gets replaced when we render
+    this.elements.push(`__GROUP_${this.elements.length}__`);
+    // Store reference for later
+    (this as unknown as { _groups: Map<string, SVGGroupBuilder> })._groups =
+      (this as unknown as { _groups: Map<string, SVGGroupBuilder> })._groups || new Map();
+    (this as unknown as { _groups: Map<string, SVGGroupBuilder> })._groups.set(
+      `__GROUP_${this.elements.length - 1}__`,
+      group
+    );
+    return group;
+  }
+
+  /**
+   * Add a rendered group
+   * @param group - An SVGGroupBuilder that has been configured
+   * @returns this for chaining
+   */
+  addRenderedGroup(group: SVGGroupBuilder): this {
+    this.elements.push(group.render());
+    return this;
+  }
+
+  /**
+   * Add a comment
+   * @param comment - Comment text
+   * @returns this for chaining
+   */
+  addComment(comment: string): this {
+    this.elements.push(`  <!-- ${comment} -->`);
+    return this;
+  }
+
+  /**
+   * Add raw SVG content
+   * @param svg - Raw SVG string
+   * @returns this for chaining
+   */
+  addRaw(svg: string): this {
+    this.elements.push(svg);
+    return this;
+  }
+
+  /**
+   * Get the current element count
+   */
+  get elementCount(): number {
+    return this.elements.length;
+  }
+
+  /**
+   * Clear all elements
+   * @returns this for chaining
+   */
+  clear(): this {
+    this.elements = [];
+    this.defs = [];
+    this.styles = [];
+    return this;
+  }
+
+  /**
+   * Reset to default state
+   * @returns this for chaining
+   */
+  reset(): this {
+    this.width = 800;
+    this.height = 600;
+    this.title = undefined;
+    this.background = undefined;
+    this.includeDefaultDefs = true;
+    this.includeDefaultStyles = true;
+    return this.clear();
+  }
+
+  /**
+   * Render the SVG as a string
+   * @returns Complete SVG document string
+   */
+  render(): string {
+    const lines: string[] = [];
+
+    // XML header and SVG opening tag
+    lines.push('<?xml version="1.0" encoding="UTF-8"?>');
+    lines.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${this.width} ${this.height}" width="${this.width}" height="${this.height}">`);
+
+    // Defs section
+    const allDefs: string[] = [];
+    if (this.includeDefaultDefs) {
+      allDefs.push(`    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>`);
+      allDefs.push(`    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e53935"/>
+    </marker>`);
+      allDefs.push(`    <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#388e3c"/>
+    </marker>`);
+      allDefs.push(`    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1976d2"/>
+    </marker>`);
+    }
+    allDefs.push(...this.defs.map(d => `    ${d}`));
+
+    if (allDefs.length > 0) {
+      lines.push('  <defs>');
+      lines.push(...allDefs);
+      lines.push('  </defs>');
+    }
+
+    // Styles section
+    const allStyles: string[] = [];
+    if (this.includeDefaultStyles) {
+      allStyles.push('    .title { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; }');
+      allStyles.push('    .subtitle { font-family: Arial, sans-serif; font-size: 12px; fill: #666; font-style: italic; }');
+      allStyles.push('    .node-label { font-family: Arial, sans-serif; font-size: 12px; }');
+      allStyles.push('    .edge-label { font-family: Arial, sans-serif; font-size: 10px; fill: #666; }');
+      allStyles.push('    .metrics { font-family: Arial, sans-serif; font-size: 11px; fill: #444; }');
+      allStyles.push('    .legend-text { font-family: Arial, sans-serif; font-size: 10px; }');
+    }
+    allStyles.push(...this.styles.map(s => `    ${s}`));
+
+    if (allStyles.length > 0) {
+      lines.push('');
+      lines.push('  <style>');
+      lines.push(...allStyles);
+      lines.push('  </style>');
+    }
+
+    // Background
+    lines.push('');
+    lines.push(`  <!-- Background -->`);
+    lines.push(`  <rect width="100%" height="100%" fill="${this.background || '#fafafa'}"/>`);
+
+    // Title
+    if (this.title) {
+      lines.push('');
+      lines.push('  <!-- Title -->');
+      lines.push(`  <text x="${this.width / 2}" y="25" text-anchor="middle" class="title">${escapeSVGText(truncateText(this.title, 60))}</text>`);
+    }
+
+    // Elements
+    if (this.elements.length > 0) {
+      lines.push('');
+      lines.push('  <!-- Elements -->');
+
+      // Replace group placeholders with rendered groups
+      const groups = (this as unknown as { _groups?: Map<string, SVGGroupBuilder> })._groups;
+      for (const element of this.elements) {
+        if (element.startsWith('__GROUP_') && groups) {
+          const group = groups.get(element);
+          if (group) {
+            lines.push(group.render());
+          }
+        } else {
+          lines.push(element);
+        }
+      }
+    }
+
+    // Closing tag
+    lines.push('</svg>');
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Create a builder with preset dimensions
+   * @param width - Width in pixels
+   * @param height - Height in pixels
+   * @returns A new SVGBuilder instance
+   */
+  static withDimensions(width: number, height: number): SVGBuilder {
+    return new SVGBuilder().setDimensions(width, height);
+  }
 }

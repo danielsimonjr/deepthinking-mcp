@@ -1,6 +1,7 @@
 /**
- * TikZ Export Utilities (v7.0.3)
+ * TikZ Export Utilities (v8.5.0)
  * Phase 9: Shared TikZ/LaTeX generation utilities for all visual exporters
+ * Phase 13: Added TikZBuilder fluent API
  *
  * TikZ is a LaTeX package for creating high-quality graphics, commonly used in:
  * - Academic papers and publications
@@ -119,7 +120,7 @@ export function getTikZColor(
 /**
  * Escape special LaTeX characters
  */
-function escapeLatex(str: string): string {
+export function escapeLatex(str: string): string {
   return str
     .replace(/\\/g, '\\textbackslash{}')
     .replace(/%/g, '\\%')
@@ -443,4 +444,492 @@ export function createLayeredTikZ(
   }));
 
   return generateTikZ(nodes, edges, options);
+}
+
+// =============================================================================
+// TikZBuilder - Fluent API Builder Class (Phase 13)
+// =============================================================================
+
+/** TikZ node options for builder */
+export interface TikZNodeOptions {
+  shape?: TikZNode['shape'];
+  type?: string;
+  fill?: string;
+  draw?: string;
+  position?: { x: number; y: number };
+  relativePosition?: {
+    direction: 'right' | 'left' | 'above' | 'below';
+    of: string;
+    distance?: string;
+  };
+  style?: string;
+  minimumWidth?: string;
+  minimumHeight?: string;
+}
+
+/** TikZ edge options for builder */
+export interface TikZEdgeOptions {
+  label?: string;
+  style?: TikZEdge['style'];
+  directed?: boolean;
+  bend?: 'left' | 'right' | number;
+  color?: string;
+}
+
+/** TikZ scope options */
+export interface TikZScopeOptions {
+  xshift?: string;
+  yshift?: string;
+  scale?: number;
+  opacity?: number;
+  style?: string;
+}
+
+/**
+ * Fluent API builder for TikZ diagrams
+ *
+ * Provides a chainable interface for constructing TikZ graphics,
+ * wrapping the existing utility functions for easier use.
+ *
+ * @example
+ * ```typescript
+ * const tikz = new TikZBuilder()
+ *   .setOptions({ standalone: true, title: 'My Diagram' })
+ *   .addNode('a', 'Node A', { position: { x: 0, y: 0 } })
+ *   .addNode('b', 'Node B', { relativePosition: { direction: 'right', of: 'a' } })
+ *   .addEdge('a', 'b', { label: 'connects' })
+ *   .render();
+ * ```
+ */
+export class TikZBuilder {
+  private nodes: TikZNode[] = [];
+  private edges: TikZEdge[] = [];
+  private customStyles: Map<string, string> = new Map();
+  private rawContent: string[] = [];
+  private scopeStack: TikZScopeOptions[] = [];
+  private options: TikZOptions = {};
+
+  /**
+   * Set or merge TikZ options
+   * @param options - TikZ options to set/merge
+   * @returns this for chaining
+   */
+  setOptions(options: TikZOptions): this {
+    this.options = { ...this.options, ...options };
+    return this;
+  }
+
+  /**
+   * Set whether to generate standalone document
+   * @param standalone - true for standalone, false for tikzpicture only
+   * @returns this for chaining
+   */
+  setStandalone(standalone: boolean): this {
+    this.options.standalone = standalone;
+    return this;
+  }
+
+  /**
+   * Set the title
+   * @param title - The diagram title
+   * @returns this for chaining
+   */
+  setTitle(title: string): this {
+    this.options.title = title;
+    return this;
+  }
+
+  /**
+   * Set the scale
+   * @param scale - The scale factor
+   * @returns this for chaining
+   */
+  setScale(scale: number): this {
+    this.options.scale = scale;
+    return this;
+  }
+
+  /**
+   * Set the color scheme
+   * @param scheme - Color scheme name
+   * @returns this for chaining
+   */
+  setColorScheme(scheme: 'default' | 'pastel' | 'monochrome'): this {
+    this.options.colorScheme = scheme;
+    return this;
+  }
+
+  /**
+   * Set the node distance for relative positioning
+   * @param distance - Distance value (e.g., '2cm')
+   * @returns this for chaining
+   */
+  setNodeDistance(distance: string): this {
+    this.options.nodeDistance = distance;
+    return this;
+  }
+
+  /**
+   * Set the level distance for hierarchical layouts
+   * @param distance - Distance value (e.g., '1.5cm')
+   * @returns this for chaining
+   */
+  setLevelDistance(distance: string): this {
+    this.options.levelDistance = distance;
+    return this;
+  }
+
+  /**
+   * Add a custom style definition
+   * @param name - Style name
+   * @param style - TikZ style definition
+   * @returns this for chaining
+   */
+  addStyle(name: string, style: string): this {
+    this.customStyles.set(name, style);
+    return this;
+  }
+
+  /**
+   * Add a node to the diagram
+   * @param id - Node ID
+   * @param label - Node label
+   * @param nodeOptions - Node options
+   * @returns this for chaining
+   */
+  addNode(id: string, label: string, nodeOptions?: TikZNodeOptions): this {
+    const node: TikZNode = {
+      id,
+      label,
+      type: nodeOptions?.type || 'neutral',
+      shape: nodeOptions?.shape || 'rectangle',
+    };
+
+    if (nodeOptions?.position) {
+      node.x = nodeOptions.position.x;
+      node.y = nodeOptions.position.y;
+    }
+
+    // Store relative position in metadata for later processing
+    if (nodeOptions?.relativePosition) {
+      node.metadata = {
+        ...node.metadata,
+        relativePosition: nodeOptions.relativePosition,
+      };
+    }
+
+    this.nodes.push(node);
+    return this;
+  }
+
+  /**
+   * Add multiple nodes at once
+   * @param nodes - Array of node definitions
+   * @returns this for chaining
+   */
+  addNodes(nodes: Array<{ id: string; label: string; options?: TikZNodeOptions }>): this {
+    for (const node of nodes) {
+      this.addNode(node.id, node.label, node.options);
+    }
+    return this;
+  }
+
+  /**
+   * Add an edge between two nodes
+   * @param source - Source node ID
+   * @param target - Target node ID
+   * @param edgeOptions - Edge options
+   * @returns this for chaining
+   */
+  addEdge(source: string, target: string, edgeOptions?: TikZEdgeOptions): this {
+    const edge: TikZEdge = {
+      source,
+      target,
+      label: edgeOptions?.label,
+      style: edgeOptions?.style || 'solid',
+      directed: edgeOptions?.directed !== false,
+      bend: edgeOptions?.bend,
+    };
+
+    this.edges.push(edge);
+    return this;
+  }
+
+  /**
+   * Add multiple edges at once
+   * @param edges - Array of edge definitions
+   * @returns this for chaining
+   */
+  addEdges(edges: Array<{ source: string; target: string; options?: TikZEdgeOptions }>): this {
+    for (const edge of edges) {
+      this.addEdge(edge.source, edge.target, edge.options);
+    }
+    return this;
+  }
+
+  /**
+   * Begin a scope with optional options
+   * @param scopeOptions - Scope options
+   * @returns this for chaining
+   */
+  beginScope(scopeOptions?: TikZScopeOptions): this {
+    this.scopeStack.push(scopeOptions || {});
+
+    let scopeStr = '  \\begin{scope}';
+    if (scopeOptions) {
+      const opts: string[] = [];
+      if (scopeOptions.xshift) opts.push(`xshift=${scopeOptions.xshift}`);
+      if (scopeOptions.yshift) opts.push(`yshift=${scopeOptions.yshift}`);
+      if (scopeOptions.scale) opts.push(`scale=${scopeOptions.scale}`);
+      if (scopeOptions.opacity) opts.push(`opacity=${scopeOptions.opacity}`);
+      if (scopeOptions.style) opts.push(scopeOptions.style);
+      if (opts.length > 0) {
+        scopeStr = `  \\begin{scope}[${opts.join(', ')}]`;
+      }
+    }
+
+    this.rawContent.push(scopeStr);
+    return this;
+  }
+
+  /**
+   * End the current scope
+   * @returns this for chaining
+   */
+  endScope(): this {
+    if (this.scopeStack.length > 0) {
+      this.scopeStack.pop();
+      this.rawContent.push('  \\end{scope}');
+    }
+    return this;
+  }
+
+  /**
+   * Add raw TikZ content
+   * @param content - Raw TikZ code
+   * @returns this for chaining
+   */
+  addRaw(content: string): this {
+    this.rawContent.push(content);
+    return this;
+  }
+
+  /**
+   * Add a comment
+   * @param comment - Comment text
+   * @returns this for chaining
+   */
+  addComment(comment: string): this {
+    this.rawContent.push(`  % ${comment}`);
+    return this;
+  }
+
+  /**
+   * Add a coordinate definition
+   * @param name - Coordinate name
+   * @param x - X coordinate
+   * @param y - Y coordinate
+   * @returns this for chaining
+   */
+  addCoordinate(name: string, x: number, y: number): this {
+    this.rawContent.push(`  \\coordinate (${name}) at (${x}, ${y});`);
+    return this;
+  }
+
+  /**
+   * Add a background rectangle
+   * @param x1 - Left X
+   * @param y1 - Bottom Y
+   * @param x2 - Right X
+   * @param y2 - Top Y
+   * @param fill - Fill color
+   * @returns this for chaining
+   */
+  addBackground(x1: number, y1: number, x2: number, y2: number, fill: string = 'gray!10'): this {
+    this.rawContent.push(`  \\fill[${fill}] (${x1}, ${y1}) rectangle (${x2}, ${y2});`);
+    return this;
+  }
+
+  /**
+   * Add a metrics panel
+   * @param x - X position
+   * @param y - Y position
+   * @param metrics - Array of label/value pairs
+   * @returns this for chaining
+   */
+  addMetrics(x: number, y: number, metrics: Array<{ label: string; value: string | number }>): this {
+    this.rawContent.push(renderTikZMetrics(x, y, metrics));
+    return this;
+  }
+
+  /**
+   * Add a legend
+   * @param x - X position
+   * @param y - Y position
+   * @param items - Legend items
+   * @returns this for chaining
+   */
+  addLegend(
+    x: number,
+    y: number,
+    items: Array<{ label: string; color: { fill: string; stroke: string }; shape?: string }>
+  ): this {
+    this.rawContent.push(renderTikZLegend(x, y, items));
+    return this;
+  }
+
+  /**
+   * Get the current node count
+   */
+  get nodeCount(): number {
+    return this.nodes.length;
+  }
+
+  /**
+   * Get the current edge count
+   */
+  get edgeCount(): number {
+    return this.edges.length;
+  }
+
+  /**
+   * Get the current style count
+   */
+  get styleCount(): number {
+    return this.customStyles.size;
+  }
+
+  /**
+   * Clear all nodes, edges, and content
+   * @returns this for chaining
+   */
+  clear(): this {
+    this.nodes = [];
+    this.edges = [];
+    this.customStyles.clear();
+    this.rawContent = [];
+    this.scopeStack = [];
+    return this;
+  }
+
+  /**
+   * Reset options to defaults
+   * @returns this for chaining
+   */
+  resetOptions(): this {
+    this.options = {};
+    return this;
+  }
+
+  /**
+   * Render the TikZ diagram as a string
+   * @returns Complete TikZ diagram string
+   */
+  render(): string {
+    const mergedOptions = { ...DEFAULT_TIKZ_OPTIONS, ...this.options };
+
+    const lines: string[] = [];
+
+    // Standalone header
+    if (mergedOptions.standalone) {
+      lines.push('\\documentclass[tikz,border=10pt]{standalone}');
+      lines.push('\\usepackage{tikz}');
+      lines.push('\\usetikzlibrary{shapes,arrows,positioning,calc,backgrounds,fit}');
+      lines.push('\\begin{document}');
+    }
+
+    // Begin tikzpicture with options
+    const pictureOpts: string[] = [];
+    if (mergedOptions.scale !== 1) {
+      pictureOpts.push(`scale=${mergedOptions.scale}`);
+    }
+    pictureOpts.push('every node/.style={font=\\small}');
+    pictureOpts.push('box/.style={rectangle, draw, rounded corners=3pt, minimum width=2cm, minimum height=0.8cm, text centered}');
+    pictureOpts.push('circle node/.style={circle, draw, minimum size=0.8cm, text centered}');
+    pictureOpts.push('ellipse node/.style={ellipse, draw, minimum width=2cm, minimum height=0.8cm, text centered}');
+    pictureOpts.push('diamond node/.style={diamond, draw, aspect=2, minimum width=1.5cm, text centered}');
+    pictureOpts.push('stadium node/.style={rectangle, draw, rounded corners=0.4cm, minimum width=2cm, minimum height=0.8cm, text centered}');
+    pictureOpts.push('arrow/.style={->, >=stealth, thick}');
+    pictureOpts.push('dashed arrow/.style={->, >=stealth, thick, dashed}');
+    pictureOpts.push('dotted arrow/.style={->, >=stealth, thick, dotted}');
+    pictureOpts.push('edge label/.style={font=\\footnotesize, fill=white, inner sep=1pt}');
+
+    // Add custom styles
+    for (const [name, style] of this.customStyles) {
+      pictureOpts.push(`${name}/.style={${style}}`);
+    }
+
+    lines.push(`\\begin{tikzpicture}[`);
+    lines.push(`  ${pictureOpts.join(',\n  ')}`);
+    lines.push(`]`);
+
+    // Title
+    if (mergedOptions.title) {
+      lines.push('');
+      lines.push(`% Title`);
+      lines.push(`\\node[font=\\large\\bfseries] at (4, 0.5) {${escapeLatex(mergedOptions.title)}};`);
+    }
+
+    // Nodes
+    if (this.nodes.length > 0) {
+      lines.push('');
+      lines.push('  % Nodes');
+      for (const node of this.nodes) {
+        // Check for relative positioning
+        const relPos = node.metadata?.relativePosition as TikZNodeOptions['relativePosition'];
+        if (relPos) {
+          lines.push(renderTikZNodeRelative(
+            node,
+            relPos,
+            mergedOptions
+          ));
+        } else {
+          lines.push(renderTikZNode(node, mergedOptions));
+        }
+      }
+    }
+
+    // Raw content (includes scopes)
+    if (this.rawContent.length > 0) {
+      lines.push('');
+      lines.push('  % Custom content');
+      lines.push(...this.rawContent);
+    }
+
+    // Edges
+    if (this.edges.length > 0) {
+      lines.push('');
+      lines.push('  % Edges');
+      for (const edge of this.edges) {
+        lines.push(renderTikZEdge(edge, mergedOptions));
+      }
+    }
+
+    // End tikzpicture
+    lines.push('\\end{tikzpicture}');
+
+    // Standalone footer
+    if (mergedOptions.standalone) {
+      lines.push('\\end{document}');
+    }
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Create a builder with preset options
+   * @param options - Initial TikZ options
+   * @returns A new TikZBuilder instance
+   */
+  static withOptions(options: TikZOptions): TikZBuilder {
+    return new TikZBuilder().setOptions(options);
+  }
+
+  /**
+   * Create a standalone builder
+   * @returns A new TikZBuilder configured for standalone output
+   */
+  static standalone(): TikZBuilder {
+    return new TikZBuilder().setStandalone(true);
+  }
 }

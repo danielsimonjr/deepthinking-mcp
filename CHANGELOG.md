@@ -9,6 +9,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [8.5.0] - 2025-12-26
 
+### Added - Phase 13 Sprint 2: Visual Format Builders
+
+**Fluent API Builder Classes for Visual Format Generation**
+
+Added three new builder classes for ASCII, SVG, and TikZ visual formats:
+
+- **ASCIIDocBuilder** (`src/export/visual/utils/ascii.ts`)
+  - Content: `addHeader()`, `addSection()`, `addBoxedTitle()`, `addBulletList()`, `addNumberedList()`, `addBox()`, `addTree()`, `addTreeList()`, `addTable()`, `addFlowDiagram()`, `addProgressBar()`, `addMetricsPanel()`, `addGraph()`, `addText()`, `addEmptyLine()`, `addHorizontalRule()`
+  - Options: `setOptions()`, `setBoxStyle()`, `setMaxWidth()`, `setIndent()`
+  - Utilities: `lineCount`, `sectionCount`, `clear()`, `resetOptions()`, `render(separator)`
+  - Static factory: `ASCIIDocBuilder.withOptions(options)`
+
+- **SVGBuilder** (`src/export/visual/utils/svg.ts`)
+  - Shapes: `addRect()`, `addCircle()`, `addEllipse()`, `addLine()`, `addPolyline()`, `addPolygon()`, `addPath()`, `addText()`
+  - Groups: `addGroup()` returns `SVGGroupBuilder`, `addRenderedGroup()`, `addComment()`, `addRaw()`
+  - Options: `setDimensions()`, `setWidth()`, `setHeight()`, `setTitle()`, `setBackground()`, `setIncludeDefaultDefs()`, `setIncludeDefaultStyles()`, `addDef()`, `addStyle()`
+  - Utilities: `elementCount`, `clear()`, `reset()`, `render()`
+  - Static factory: `SVGBuilder.withDimensions(width, height)`
+  - New helper class: `SVGGroupBuilder` for creating grouped SVG elements
+
+- **TikZBuilder** (`src/export/visual/utils/tikz.ts`)
+  - Nodes/Edges: `addNode()`, `addNodes()`, `addEdge()`, `addEdges()`
+  - Styles: `addStyle()`, custom style definitions
+  - Scopes: `beginScope()`, `endScope()` with full TikZ scope options
+  - Content: `addCoordinate()`, `addBackground()`, `addMetrics()`, `addLegend()`, `addComment()`, `addRaw()`
+  - Options: `setOptions()`, `setStandalone()`, `setTitle()`, `setScale()`, `setColorScheme()`, `setNodeDistance()`, `setLevelDistance()`
+  - Utilities: `nodeCount`, `edgeCount`, `styleCount`, `clear()`, `resetOptions()`, `render()`
+  - Static factories: `TikZBuilder.withOptions(options)`, `TikZBuilder.standalone()`
+  - New exported function: `escapeLatex()` for LaTeX character escaping
+  - New types: `TikZNodeOptions`, `TikZEdgeOptions`, `TikZScopeOptions`
+
+### Added - Tests
+
+- Created `tests/unit/export/visual/utils/visual-builders.test.ts` with 89 comprehensive unit tests
+- Tests cover: ASCII headers/lists/boxes/tables/trees/flows, SVG shapes/text/groups/styling, TikZ nodes/edges/scopes/styling
+- Integration tests for complex document generation in each format
+
+### Changed
+
+- Updated utility file version headers to v8.5.0 (ascii.ts, svg.ts, tikz.ts)
+
+### Validation - Sprint 2
+
+- **Test Suite**: ✅ 153 visual builder tests passing (64 Sprint 1 + 89 Sprint 2)
+- **Build**: ✅ Successful (`npm run build`)
+
+---
+
 ### Added - Phase 13 Sprint 1: Core Graph Builders
 
 **Fluent API Builder Classes for Visual Export Refactoring**
