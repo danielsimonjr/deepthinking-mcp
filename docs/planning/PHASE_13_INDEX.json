@@ -49,8 +49,8 @@
       "file": "PHASE_13_SPRINT_4_TODO.json",
       "status": "completed",
       "completedDate": "2025-12-26",
-      "actualTests": 33,
-      "notes": "Integration tests and snapshot baselines created"
+      "actualTests": 113,
+      "notes": "35 integration tests + 63 snapshot baseline tests + 15 mode exporter snapshots = 113 tests created"
     },
     {
       "sprint": 5,

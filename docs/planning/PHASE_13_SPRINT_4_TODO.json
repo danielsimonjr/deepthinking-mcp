@@ -73,7 +73,7 @@
       "files": [
         "tests/integration/export/visual/builders-integration.test.ts"
       ],
-      "notes": "Created with 18 integration tests covering all 11 builders."
+      "notes": "Created with 35 integration tests covering all 11 builders."
     },
     {
       "id": "13.4.4",

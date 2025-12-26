@@ -15,7 +15,7 @@ DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring *
 | TypeScript Files | 222 |
 | Lines of Code | ~92,000 |
 | Total Exports | 1150 (525 re-exports) |
-| Passing Tests | 4573 (168 test files) |
+| Passing Tests | 4686 (170 test files) |
 | Reasoning Modes | 33 (29 with dedicated types + 4 advanced runtime) |
 | MCP Tools | 13 focused (includes deepthinking_analyze) |
 | Export Formats | 8 + native SVG + file export |
@@ -422,9 +422,25 @@ Generate dependency docs: `npm run docs:deps`
 
 **Sprint 4 (v8.5.0)**: Integration Tests & Documentation
 
-- Created `tests/integration/export/visual/builders-integration.test.ts` with 18 real-world usage tests
-- Created `tests/integration/export/visual/mode-exporters-snapshot.test.ts` with 15 snapshot tests
-- Tests cover all 11 builder classes: DOTGraphBuilder, MermaidGraphBuilder, GraphMLBuilder, ASCIIDocBuilder, SVGBuilder, SVGGroupBuilder, TikZBuilder, UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder
+- Created `tests/integration/export/visual/builders-integration.test.ts` with 35 real-world usage tests
+- Created `tests/unit/export/visual/modes/snapshot-baseline.test.ts` with 63 snapshot baseline tests
+- Created 15 mode exporter snapshot tests
+- Added JSDoc documentation to all 11 builder classes
+- Tests cover all 12 builder classes: DOTGraphBuilder, MermaidGraphBuilder, GraphMLBuilder, ASCIIDocBuilder, SVGBuilder, SVGGroupBuilder, TikZBuilder, UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder
+
+**Sprint 5 (v8.5.0)**: Critical Files Batch 1
+
+- Refactored `physics.ts`, `engineering.ts`, `metareasoning.ts`, `proof-decomposition.ts` to use builders
+- All 4 files now use DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder fluent APIs
+- Updated version comments to v8.5.0
+- Note: Files still >1000 lines - file splitting deferred to Sprint 10
+
+**Sprint 6 (v8.5.0)**: Critical Files Batch 2
+
+- Refactored `hybrid.ts`, `formal-logic.ts`, `scientific-method.ts`, `optimization.ts` to use builders
+- All 4 files now use DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder fluent APIs
+- Updated 12 snapshot baselines to match new builder output formatting
+- Total mode exporters refactored: 9/22 (41%)
 
 **Builder Pattern Benefits**:
 
@@ -442,13 +458,13 @@ const dot = new DOTGraphBuilder()
   .render();
 ```
 
-**Remaining Sprints** (6 more planned):
+**Remaining Sprints** (4 more planned):
 
 | Sprint | Focus |
 |--------|-------|
-| 5-7 | Refactor 12 critical files (>1000 lines) |
+| 7 | Refactor 4 critical files (first-principles, mathematics, game-theory, evidential) |
 | 8-9 | Refactor remaining 9 modes for consistency |
-| 10 | File splitting if needed, final verification |
+| 10 | File splitting for Sprint 5 files, final verification |
 
 See `docs/planning/PHASE_13_*.json` for detailed sprint breakdowns.
 
