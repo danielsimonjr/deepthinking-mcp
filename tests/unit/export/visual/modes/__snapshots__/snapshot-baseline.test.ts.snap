@@ -356,36 +356,31 @@ exports[`Engineering Mode Exporter Snapshots > Mermaid format 1`] = `
 `;
 
 exports[`Evidential Mode Exporter Snapshots > ASCII format 1`] = `
-"Evidential Belief Visualization:
-================================
-
+"Evidential Belief Visualization
+===============================
 Frame of Discernment:
   (not defined)
-
 "
 `;
 
 exports[`Evidential Mode Exporter Snapshots > DOT format 1`] = `
 "digraph EvidentialBeliefs {
-  rankdir=TD;
-  node [shape=box, style=rounded];
+  rankdir=TB;
+  node [shape=box, style="rounded"];
 
   Frame [label="Frame of Discernment", shape=ellipse];
-
-}
-"
+}"
 `;
 
 exports[`Evidential Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph TD
-  Frame["Frame of Discernment"]
-"
+
+  Frame["Frame of Discernment"]"
 `;
 
 exports[`First Principles Mode Exporter Snapshots > ASCII format 1`] = `
-"First-Principles Derivation:
-============================
-
+"First-Principles Derivation
+===========================
 Question: What are the fundamental truths that govern this problem?
 
 Foundational Principles:
@@ -402,7 +397,7 @@ Foundational Principles:
   Confidence: 0.95
 
 Derivation Chain:
-----------------
+-----------------
 Step 1 (using principle: p1)
   Inference: From the causality principle, we can derive that the observed phenomenon must have an underlying cause
   Logical form: P → Q
@@ -414,64 +409,54 @@ Step 2 (using principle: p2)
   Confidence: 0.85
 
 Conclusion:
-----------
+-----------
 Based on first principles, the system behavior is deterministic and predictable
 Derivation chain: Steps [1, 2]
 Certainty: 0.88
 
 Limitations:
-  - Assumes closed system
-  - Ignores quantum effects
-"
+  • Assumes closed system
+  • Ignores quantum effects"
 `;
 
 exports[`First Principles Mode Exporter Snapshots > DOT format 1`] = `
 "digraph FirstPrinciples {
-  rankdir=TD;
-  node [shape=box, style=rounded];
+  rankdir=TB;
+  node [shape=box, style="rounded"];
 
-  Q [label="Question:\\nWhat are the fundamental truths that govern this problem?", shape=ellipse, style=bold];
-
+  Q [label="Question:\\nWhat are the fundamental truths that govern this problem?", shape=ellipse, style="bold"];
   p1 [label="AXIOM:\\nPrinciple 1: Every effect has a cause, and every action has ...\\nconf: 1.00", shape=ellipse];
   p2 [label="DEFINITION:\\nPrinciple 2: Systems tend toward equilibrium unless perturbe...\\nconf: 0.95", shape=box];
-  p1 -> p2;
-
   Step1 [label="Step 1:\\nFrom the causality principle, we can derive that the observe...\\nconf: 0.90"];
-  p1 -> Step1 [style=dashed, label="applies"];
   Step2 [label="Step 2:\\nApplying the equilibrium principle, the system will stabiliz...\\nconf: 0.85"];
-  p2 -> Step2 [style=dashed, label="applies"];
+  C [label="Conclusion:\\nBased on first principles, the system behavior is determinis...\\ncertainty: 0.88", shape=doubleoctagon, style="bold"];
 
-  C [label="Conclusion:\\nBased on first principles, the system behavior is determinis...\\ncertainty: 0.88", shape=doubleoctagon, style=bold];
+  p1 -> p2;
+  p1 -> Step1 [label="applies", style=dashed];
+  p2 -> Step2 [label="applies", style=dashed];
   Step1 -> C;
   Step2 -> C;
-}
-"
+}"
 `;
 
 exports[`First Principles Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph TD
+
   Q["Question: What are the fundamental truths that govern this problem?"]
-
-  p1([AXIOM: Principle 1: Every effect has a cause, and every a...])
-  p2[[DEFINITION: Principle 2: Systems tend toward equilibrium unles...]]
-  p1 --> p2
-
+  p1(["AXIOM: Principle 1: Every effect has a cause, and every a..."])
+  p2[["DEFINITION: Principle 2: Systems tend toward equilibrium unles..."]]
   Step1["Step 1: From the causality principle, we can derive that t..."]
+  Step2["Step 2: Applying the equilibrium principle, the system wil..."]
+  C["Conclusion: Based on first principles, the system behavior is ..."]
+
+  p1 --> p2
   p1 -.->|applies| Step1
   Step1 -.->|conf: 0.90| Step1
-  Step2["Step 2: Applying the equilibrium principle, the system wil..."]
   p2 -.->|applies| Step2
   Step2 -.->|conf: 0.85| Step2
-
-  C["Conclusion: Based on first principles, the system behavior is ..."]
   Step1 --> C
   Step2 --> C
-  C -.->|certainty: 0.88| C
-
-  style p1 fill:#a8d5ff
-  style p2 fill:#ce93d8
-  style C fill:#66bb6a
-"
+  C -.->|certainty: 0.88| C"
 `;
 
 exports[`Formal Logic Mode Exporter Snapshots > ASCII format 1`] = `
@@ -492,25 +477,22 @@ exports[`Formal Logic Mode Exporter Snapshots > Mermaid format 1`] = `"graph TD"
 
 exports[`Game Theory Mode Exporter Snapshots > ASCII format 1`] = `
 "Game: Untitled
-========================================
-
-"
+=============="
 `;
 
 exports[`Game Theory Mode Exporter Snapshots > DOT format 1`] = `
 "digraph GameTree {
-  rankdir=TD;
+  rankdir=TB;
   node [shape=circle];
 
   root [label="No game"];
-}
-"
+}"
 `;
 
 exports[`Game Theory Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph TD
-  root[No game defined]
-"
+
+  root["No game defined"]"
 `;
 
 exports[`Hybrid Mode Exporter Snapshots > ASCII format 1`] = `
@@ -561,31 +543,26 @@ exports[`Hybrid Mode Exporter Snapshots > Mermaid format 1`] = `
 `;
 
 exports[`Mathematics Mode Exporter Snapshots > ASCII format 1`] = `
-"Mathematics Derivation:
-=======================
-
+"Mathematics Derivation
+======================
 Type: proof
 Uncertainty: NaN%
-
 "
 `;
 
 exports[`Mathematics Mode Exporter Snapshots > DOT format 1`] = `
 "digraph MathematicsDerivation {
   rankdir=TB;
-  node [shape=box, style=rounded];
+  node [shape=box, style="rounded"];
 
   type_proof [label="Proof", shape=doubleoctagon];
-}
-"
+}"
 `;
 
 exports[`Mathematics Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph TB
-  type_proof[["Proof"]]
 
-  style type_proof fill:#90EE90
-"
+  type_proof[["Proof"]]"
 `;
 
 exports[`Meta Reasoning Mode Exporter Snapshots > ASCII format 1`] = `

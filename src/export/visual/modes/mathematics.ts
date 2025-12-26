@@ -1,12 +1,17 @@
 /**
- * Mathematics Visual Exporter (v7.0.3)
+ * Mathematics Visual Exporter (v8.5.0)
  * Phase 7 Sprint 2: Mathematics reasoning export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support, GraphML, TikZ
+ * Phase 13 Sprint 7: Refactored to use fluent builder classes
  */
 
 import type { MathematicsThought } from '../../../types/modes/mathematics.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -103,27 +108,27 @@ function mathematicsToMermaid(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph TB\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('TB');
 
   // Add thought type node
   const typeId = sanitizeId(`type_${thought.thoughtType || 'proof'}`);
   const typeLabel = includeLabels ? (thought.thoughtType || 'Proof').replace(/_/g, ' ') : typeId;
-  mermaid += `  ${typeId}[["${typeLabel}"]]\n`;
+  builder.addNode({ id: typeId, label: typeLabel, shape: 'subroutine' });
 
   // Add proof strategy if present
   if (thought.proofStrategy) {
     const strategyId = sanitizeId('strategy');
-    const strategyLabel = thought.proofStrategy.type;
-    mermaid += `  ${strategyId}(["${strategyLabel}"])\n`;
-    mermaid += `  ${typeId} --> ${strategyId}\n`;
+    builder.addNode({ id: strategyId, label: thought.proofStrategy.type, shape: 'stadium' });
+    builder.addEdge({ source: typeId, target: strategyId });
 
     // Add proof steps
     let prevStepId = strategyId;
     thought.proofStrategy.steps.forEach((step, index) => {
       const stepId = sanitizeId(`step_${index}`);
       const stepLabel = includeLabels ? step.slice(0, 40) + (step.length > 40 ? '...' : '') : `Step ${index + 1}`;
-      mermaid += `  ${stepId}["${stepLabel}"]\n`;
-      mermaid += `  ${prevStepId} --> ${stepId}\n`;
+      builder.addNode({ id: stepId, label: stepLabel, shape: 'rectangle' });
+      builder.addEdge({ source: prevStepId, target: stepId });
       prevStepId = stepId;
     });
 
@@ -131,8 +136,8 @@ function mathematicsToMermaid(
     if (includeMetrics) {
       const completenessId = sanitizeId('completeness');
       const completenessLabel = `Completeness: ${(thought.proofStrategy.completeness * 100).toFixed(0)}%`;
-      mermaid += `  ${completenessId}{{${completenessLabel}}}\n`;
-      mermaid += `  ${prevStepId} --> ${completenessId}\n`;
+      builder.addNode({ id: completenessId, label: completenessLabel, shape: 'hexagon' });
+      builder.addEdge({ source: prevStepId, target: completenessId });
     }
   }
 
@@ -140,8 +145,8 @@ function mathematicsToMermaid(
   if (thought.mathematicalModel) {
     const modelId = sanitizeId('model');
     const modelLabel = thought.mathematicalModel.symbolic || 'Mathematical Model';
-    mermaid += `  ${modelId}["${modelLabel}"]\n`;
-    mermaid += `  ${typeId} --> ${modelId}\n`;
+    builder.addNode({ id: modelId, label: modelLabel, shape: 'rectangle' });
+    builder.addEdge({ source: typeId, target: modelId });
   }
 
   // Add theorems if present
@@ -149,30 +154,18 @@ function mathematicsToMermaid(
     thought.theorems.forEach((theorem, index) => {
       const theoremId = sanitizeId(`theorem_${index}`);
       const theoremLabel = theorem.name || `Theorem ${index + 1}`;
-      mermaid += `  ${theoremId}[/"${theoremLabel}"/]\n`;
-      mermaid += `  ${typeId} --> ${theoremId}\n`;
+      builder.addNode({ id: theoremId, label: theoremLabel, shape: 'trapezoid' });
+      builder.addEdge({ source: typeId, target: theoremId });
     });
   }
 
   // Add assumptions as notes
   if (thought.assumptions && thought.assumptions.length > 0) {
     const assumptionsId = sanitizeId('assumptions');
-    mermaid += `  ${assumptionsId}>"Assumptions: ${thought.assumptions.length}"]\n`;
+    builder.addNode({ id: assumptionsId, label: `Assumptions: ${thought.assumptions.length}`, shape: 'asymmetric' });
   }
 
-  // Color scheme
-  if (colorScheme !== 'monochrome') {
-    const colors = colorScheme === 'pastel'
-      ? { type: '#e8f4e8', strategy: '#fff3e0', step: '#e3f2fd' }
-      : { type: '#90EE90', strategy: '#FFD700', step: '#87CEEB' };
-
-    mermaid += `\n  style ${typeId} fill:${colors.type}\n`;
-    if (thought.proofStrategy) {
-      mermaid += `  style ${sanitizeId('strategy')} fill:${colors.strategy}\n`;
-    }
-  }
-
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function mathematicsToDOT(
@@ -180,35 +173,36 @@ function mathematicsToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph MathematicsDerivation {\n';
-  dot += '  rankdir=TB;\n';
-  dot += '  node [shape=box, style=rounded];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('MathematicsDerivation')
+    .setRankDir('TB')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
   // Add thought type node
   const typeId = sanitizeId(`type_${thought.thoughtType || 'proof'}`);
   const typeLabel = includeLabels ? (thought.thoughtType || 'Proof').replace(/_/g, ' ') : typeId;
-  dot += `  ${typeId} [label="${typeLabel}", shape=doubleoctagon];\n`;
+  builder.addNode({ id: typeId, label: typeLabel, shape: 'doubleoctagon' });
 
   // Add proof strategy
   if (thought.proofStrategy) {
     const strategyId = sanitizeId('strategy');
-    dot += `  ${strategyId} [label="${thought.proofStrategy.type}", shape=ellipse];\n`;
-    dot += `  ${typeId} -> ${strategyId};\n`;
+    builder.addNode({ id: strategyId, label: thought.proofStrategy.type, shape: 'ellipse' });
+    builder.addEdge({ source: typeId, target: strategyId });
 
     // Add steps
     let prevStepId = strategyId;
     thought.proofStrategy.steps.forEach((step, index) => {
       const stepId = sanitizeId(`step_${index}`);
       const stepLabel = includeLabels ? step.slice(0, 30).replace(/"/g, '\\"') : `Step ${index + 1}`;
-      dot += `  ${stepId} [label="${stepLabel}"];\n`;
-      dot += `  ${prevStepId} -> ${stepId};\n`;
+      builder.addNode({ id: stepId, label: stepLabel });
+      builder.addEdge({ source: prevStepId, target: stepId });
       prevStepId = stepId;
     });
 
     if (includeMetrics) {
       const completenessId = sanitizeId('completeness');
-      dot += `  ${completenessId} [label="${(thought.proofStrategy.completeness * 100).toFixed(0)}%", shape=diamond];\n`;
-      dot += `  ${prevStepId} -> ${completenessId};\n`;
+      builder.addNode({ id: completenessId, label: `${(thought.proofStrategy.completeness * 100).toFixed(0)}%`, shape: 'diamond' });
+      builder.addEdge({ source: prevStepId, target: completenessId });
     }
   }
 
@@ -216,82 +210,77 @@ function mathematicsToDOT(
   if (thought.theorems) {
     thought.theorems.forEach((theorem, index) => {
       const theoremId = sanitizeId(`theorem_${index}`);
-      dot += `  ${theoremId} [label="${theorem.name || `Theorem ${index + 1}`}", shape=parallelogram];\n`;
-      dot += `  ${typeId} -> ${theoremId};\n`;
+      builder.addNode({ id: theoremId, label: theorem.name || `Theorem ${index + 1}`, shape: 'parallelogram' });
+      builder.addEdge({ source: typeId, target: theoremId });
     });
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function mathematicsToASCII(thought: MathematicsThought): string {
-  let ascii = 'Mathematics Derivation:\n';
-  ascii += '=======================\n\n';
+  const builder = new ASCIIDocBuilder();
+
+  builder.addHeader('Mathematics Derivation');
 
   // Thought type
-  ascii += `Type: ${(thought.thoughtType || 'proof').replace(/_/g, ' ')}\n`;
-  ascii += `Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%\n\n`;
+  builder.addText(`Type: ${(thought.thoughtType || 'proof').replace(/_/g, ' ')}`);
+  builder.addText(`Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`);
+  builder.addEmptyLine();
 
   // Mathematical model
   if (thought.mathematicalModel) {
-    ascii += 'Mathematical Model:\n';
-    ascii += `  LaTeX: ${thought.mathematicalModel.latex}\n`;
-    ascii += `  Symbolic: ${thought.mathematicalModel.symbolic}\n`;
+    builder.addText('Mathematical Model:');
+    builder.addText(`  LaTeX: ${thought.mathematicalModel.latex}`);
+    builder.addText(`  Symbolic: ${thought.mathematicalModel.symbolic}`);
     if (thought.mathematicalModel.ascii) {
-      ascii += `  ASCII: ${thought.mathematicalModel.ascii}\n`;
+      builder.addText(`  ASCII: ${thought.mathematicalModel.ascii}`);
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
   // Proof strategy
   if (thought.proofStrategy) {
-    ascii += `Proof Strategy: ${thought.proofStrategy.type}\n`;
-    ascii += `Completeness: ${(thought.proofStrategy.completeness * 100).toFixed(0)}%\n`;
-    ascii += 'Steps:\n';
-    thought.proofStrategy.steps.forEach((step, index) => {
-      ascii += `  ${index + 1}. ${step}\n`;
-    });
+    builder.addText(`Proof Strategy: ${thought.proofStrategy.type}`);
+    builder.addText(`Completeness: ${(thought.proofStrategy.completeness * 100).toFixed(0)}%`);
+    builder.addText('Steps:');
+    builder.addNumberedList(thought.proofStrategy.steps);
     if (thought.proofStrategy.baseCase) {
-      ascii += `Base Case: ${thought.proofStrategy.baseCase}\n`;
+      builder.addText(`Base Case: ${thought.proofStrategy.baseCase}`);
     }
     if (thought.proofStrategy.inductiveStep) {
-      ascii += `Inductive Step: ${thought.proofStrategy.inductiveStep}\n`;
+      builder.addText(`Inductive Step: ${thought.proofStrategy.inductiveStep}`);
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
   // Theorems
   if (thought.theorems && thought.theorems.length > 0) {
-    ascii += 'Theorems:\n';
+    builder.addText('Theorems:');
     thought.theorems.forEach((theorem, index) => {
-      ascii += `  [${index + 1}] ${theorem.name || `Theorem ${index + 1}`}: ${theorem.statement}\n`;
+      builder.addText(`  [${index + 1}] ${theorem.name || `Theorem ${index + 1}`}: ${theorem.statement}`);
       if (theorem.hypotheses.length > 0) {
-        ascii += `      Hypotheses: ${theorem.hypotheses.join(', ')}\n`;
+        builder.addText(`      Hypotheses: ${theorem.hypotheses.join(', ')}`);
       }
-      ascii += `      Conclusion: ${theorem.conclusion}\n`;
+      builder.addText(`      Conclusion: ${theorem.conclusion}`);
     });
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
   // Assumptions
   if (thought.assumptions && thought.assumptions.length > 0) {
-    ascii += 'Assumptions:\n';
-    thought.assumptions.forEach((assumption, index) => {
-      ascii += `  ${index + 1}. ${assumption}\n`;
-    });
-    ascii += '\n';
+    builder.addText('Assumptions:');
+    builder.addNumberedList(thought.assumptions);
+    builder.addEmptyLine();
   }
 
   // Dependencies
   if (thought.dependencies && thought.dependencies.length > 0) {
-    ascii += 'Dependencies:\n';
-    thought.dependencies.forEach((dep, index) => {
-      ascii += `  ${index + 1}. ${dep}\n`;
-    });
+    builder.addText('Dependencies:');
+    builder.addNumberedList(thought.dependencies);
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**

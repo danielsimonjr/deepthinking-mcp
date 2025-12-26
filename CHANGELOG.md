@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed - Phase 13 Sprint 7: Mode Exporter Refactoring (continued)
+
+**Refactored 4 Mode Exporters to Use Builder Classes**
+
+Refactored four mode exporter files to use the fluent builder APIs:
+
+- **first-principles.ts** (`src/export/visual/modes/first-principles.ts`)
+  - Refactored `firstPrinciplesToMermaid()` to use `MermaidGraphBuilder`
+  - Refactored `firstPrinciplesToDOT()` to use `DOTGraphBuilder`
+  - Refactored `firstPrinciplesToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **mathematics.ts** (`src/export/visual/modes/mathematics.ts`)
+  - Refactored `mathematicsToMermaid()` to use `MermaidGraphBuilder`
+  - Refactored `mathematicsToDOT()` to use `DOTGraphBuilder`
+  - Refactored `mathematicsToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **game-theory.ts** (`src/export/visual/modes/game-theory.ts`)
+  - Refactored `gameTreeToMermaid()` to use `MermaidGraphBuilder`
+  - Refactored `gameTreeToDOT()` to use `DOTGraphBuilder`
+  - Refactored `gameTreeToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **evidential.ts** (`src/export/visual/modes/evidential.ts`)
+  - Refactored `evidentialToMermaid()` to use `MermaidGraphBuilder`
+  - Refactored `evidentialToDOT()` to use `DOTGraphBuilder`
+  - Refactored `evidentialToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+### Fixed - Sprint 7
+
+- Updated 12 snapshot baselines for first-principles, mathematics, game-theory, and evidential modes to match new builder output formatting
+- Fixed unit test expectations in visual.test.ts to match new Mermaid format with quoted labels
+
+### Validation - Sprint 7
+
+- **Builder Adoption**: ✅ All 4 files use fluent builder APIs
+- **Typecheck**: ✅ Clean (`npm run typecheck` - no issues in refactored files)
+- **Full Test Suite**: ✅ 4681 tests passing across 168 test files
+- **Total Mode Exporters Refactored**: 12/22 (55%)
+
+---
+
 ### Changed - Phase 13 Sprint 6: Mode Exporter Refactoring (continued)
 
 **Refactored 4 Mode Exporters to Use Builder Classes**

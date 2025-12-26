@@ -1,13 +1,18 @@
 /**
- * Evidential Visual Exporter (v7.0.3)
+ * Evidential Visual Exporter (v8.5.0)
  * Sprint 8 Task 8.1: Evidential belief export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
  * Phase 9: Added GraphML and TikZ export support
+ * Phase 13 Sprint 7: Refactored to use fluent builder classes
  */
 
 import type { EvidentialThought } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -102,39 +107,32 @@ function evidentialToMermaid(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph TD\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('TD');
 
-  mermaid += '  Frame["Frame of Discernment"]\n';
+  // Frame of Discernment node
+  builder.addNode({ id: 'Frame', label: 'Frame of Discernment', shape: 'rectangle' });
 
+  // Hypotheses
   if (thought.frameOfDiscernment) {
     for (const hypothesis of thought.frameOfDiscernment) {
       const hypId = sanitizeId(hypothesis);
       const label = includeLabels ? hypothesis : hypId;
-
-      mermaid += `  ${hypId}["${label}"]\n`;
-      mermaid += `  Frame --> ${hypId}\n`;
+      builder.addNode({ id: hypId, label, shape: 'rectangle' });
+      builder.addEdge({ source: 'Frame', target: hypId });
     }
   }
 
+  // Mass assignments
   if (includeMetrics && (thought as any).massAssignments && (thought as any).massAssignments.length > 0) {
-    mermaid += '\n';
     for (const mass of (thought as any).massAssignments) {
       const massId = sanitizeId(mass.subset.join('_'));
-      const label = `{${mass.subset.join(', ')}}`;
-      mermaid += `  ${massId}["${label}: ${mass.mass.toFixed(3)}"]\n`;
+      const label = `{${mass.subset.join(', ')}}: ${mass.mass.toFixed(3)}`;
+      builder.addNode({ id: massId, label, shape: 'rectangle' });
     }
   }
 
-  if (colorScheme !== 'monochrome' && thought.frameOfDiscernment) {
-    mermaid += '\n';
-    const color = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
-    for (const hypothesis of thought.frameOfDiscernment) {
-      const hypId = sanitizeId(hypothesis);
-      mermaid += `  style ${hypId} fill:${color}\n`;
-    }
-  }
-
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function evidentialToDOT(
@@ -142,63 +140,70 @@ function evidentialToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph EvidentialBeliefs {\n';
-  dot += '  rankdir=TD;\n';
-  dot += '  node [shape=box, style=rounded];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('EvidentialBeliefs')
+    .setRankDir('TB')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
-  dot += '  Frame [label="Frame of Discernment", shape=ellipse];\n\n';
+  // Frame of Discernment node
+  builder.addNode({ id: 'Frame', label: 'Frame of Discernment', shape: 'ellipse' });
 
+  // Hypotheses
   if (thought.frameOfDiscernment) {
     for (const hypothesis of thought.frameOfDiscernment) {
       const hypId = sanitizeId(hypothesis);
       const label = includeLabels ? hypothesis : hypId;
-
-      dot += `  ${hypId} [label="${label}"];\n`;
-      dot += `  Frame -> ${hypId};\n`;
+      builder.addNode({ id: hypId, label });
+      builder.addEdge({ source: 'Frame', target: hypId });
     }
   }
 
+  // Mass assignments
   if (includeMetrics && (thought as any).massAssignments && (thought as any).massAssignments.length > 0) {
-    dot += '\n';
     for (const mass of (thought as any).massAssignments) {
       const massId = sanitizeId(mass.subset.join('_'));
       const label = `{${mass.subset.join(', ')}}: ${mass.mass.toFixed(3)}`;
-      dot += `  ${massId} [label="${label}", shape=note];\n`;
+      builder.addNode({ id: massId, label, shape: 'note' });
     }
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function evidentialToASCII(thought: EvidentialThought): string {
-  let ascii = 'Evidential Belief Visualization:\n';
-  ascii += '================================\n\n';
+  const builder = new ASCIIDocBuilder();
 
-  ascii += 'Frame of Discernment:\n';
+  builder.addHeader('Evidential Belief Visualization');
+
+  // Frame of Discernment
+  builder.addText('Frame of Discernment:');
   if (thought.frameOfDiscernment) {
-    ascii += `  {${thought.frameOfDiscernment.join(', ')}}\n\n`;
+    builder.addText(`  {${thought.frameOfDiscernment.join(', ')}}`);
   } else {
-    ascii += '  (not defined)\n\n';
+    builder.addText('  (not defined)');
   }
+  builder.addEmptyLine();
 
+  // Mass assignments
   if ((thought as any).massAssignments && (thought as any).massAssignments.length > 0) {
-    ascii += 'Mass Assignments:\n';
+    builder.addText('Mass Assignments:');
     for (const mass of (thought as any).massAssignments) {
-      ascii += `  m({${mass.subset.join(', ')}}) = ${mass.mass.toFixed(3)}\n`;
+      builder.addText(`  m({${mass.subset.join(', ')}}) = ${mass.mass.toFixed(3)}`);
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
+  // Belief functions
   if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
-    ascii += `Belief Functions: ${thought.beliefFunctions.length} defined\n`;
+    builder.addText(`Belief Functions: ${thought.beliefFunctions.length} defined`);
   }
 
+  // Plausibility
   if ((thought as any).plausibilityFunction) {
-    ascii += `Plausibility: ${(thought as any).plausibilityFunction.toFixed(3)}\n`;
+    builder.addText(`Plausibility: ${(thought as any).plausibilityFunction.toFixed(3)}`);
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**

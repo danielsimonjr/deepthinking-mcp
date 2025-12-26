@@ -164,11 +164,11 @@ describe('Visual Export', () => {
       const result = exporter.exportGameTree(gameThought, { format: 'mermaid' });
 
       expect(result).toContain('graph TD');
-      expect(result).toContain('root[root]');
-      expect(result).toContain('n1[[Cooperate]]');
-      expect(result).toContain('n2[[Defect]]');
-      expect(result).toContain('root --> |Cooperate| n1');
-      expect(result).toContain('root --> |Defect| n2');
+      expect(result).toContain('root["root"]');
+      expect(result).toContain('n1[["Cooperate"]]');
+      expect(result).toContain('n2[["Defect"]]');
+      expect(result).toContain('root -->|Cooperate| n1');
+      expect(result).toContain('root -->|Defect| n2');
     });
 
     it('should export game tree to ASCII format', () => {

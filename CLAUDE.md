@@ -442,10 +442,17 @@ Generate dependency docs: `npm run docs:deps`
 - Updated 12 snapshot baselines to match new builder output formatting
 - Total mode exporters refactored: 9/22 (41%)
 
+**Sprint 7 (v8.5.0)**: Critical Files Batch 3
+
+- Refactored `first-principles.ts`, `mathematics.ts`, `game-theory.ts`, `evidential.ts` to use builders
+- All 4 files now use DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder fluent APIs
+- Updated 12 snapshot baselines to match new builder output formatting
+- Total mode exporters refactored: 12/22 (55%)
+
 **Builder Pattern Benefits**:
 
 ```typescript
-// Before: Inline string building (duplicated in 21 files)
+// Before: Inline string building (duplicated in 22 files)
 let dot = 'digraph G {\n';
 dot += '  rankdir=TB;\n';
 dot += `  ${id} [label="${label}"];\n`;
@@ -458,12 +465,11 @@ const dot = new DOTGraphBuilder()
   .render();
 ```
 
-**Remaining Sprints** (4 more planned):
+**Remaining Sprints** (3 more planned):
 
 | Sprint | Focus |
 |--------|-------|
-| 7 | Refactor 4 critical files (first-principles, mathematics, game-theory, evidential) |
-| 8-9 | Refactor remaining 9 modes for consistency |
+| 8-9 | Refactor remaining 10 modes for consistency |
 | 10 | File splitting for Sprint 5 files, final verification |
 
 See `docs/planning/PHASE_13_*.json` for detailed sprint breakdowns.

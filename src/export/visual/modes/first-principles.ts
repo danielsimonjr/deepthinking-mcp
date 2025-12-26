@@ -1,12 +1,17 @@
 /**
- * First Principles Visual Exporter (v7.0.3)
+ * First Principles Visual Exporter (v8.5.0)
  * Sprint 8 Task 8.1: First principles derivation export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support, GraphML, TikZ
+ * Phase 13 Sprint 7: Refactored to use fluent builder classes
  */
 
 import type { FirstPrinciplesThought } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -115,50 +120,41 @@ function firstPrinciplesToMermaid(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph TD\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('TD');
 
-  mermaid += `  Q["Question: ${thought.question}"]\n`;
-  mermaid += '\n';
+  // Question node
+  builder.addNode({ id: 'Q', label: `Question: ${thought.question}`, shape: 'rectangle' });
 
+  // Principle shape mapping
+  const getShapeForType = (type: string) => {
+    switch (type) {
+      case 'axiom': return 'stadium' as const;
+      case 'definition': return 'subroutine' as const;
+      case 'observation': return 'cylinder' as const;
+      case 'logical_inference': return 'rectangle' as const;
+      case 'assumption': return 'rhombus' as const;
+      default: return 'rectangle' as const;
+    }
+  };
+
+  // Principles
   for (const principle of thought.principles) {
     const principleId = sanitizeId(principle.id);
     const label = includeLabels
       ? `${principle.type.toUpperCase()}: ${principle.statement.substring(0, 50)}...`
       : principleId;
 
-    let shape: [string, string];
-    switch (principle.type) {
-      case 'axiom':
-        shape = ['([', '])'];
-        break;
-      case 'definition':
-        shape = ['[[', ']]'];
-        break;
-      case 'observation':
-        shape = ['[(', ')]'];
-        break;
-      case 'logical_inference':
-        shape = ['[', ']'];
-        break;
-      case 'assumption':
-        shape = ['{', '}'];
-        break;
-      default:
-        shape = ['[', ']'];
-    }
-
-    mermaid += `  ${principleId}${shape[0]}${label}${shape[1]}\n`;
+    builder.addNode({ id: principleId, label, shape: getShapeForType(principle.type) });
 
     if (principle.dependsOn) {
       for (const depId of principle.dependsOn) {
-        const sanitizedDepId = sanitizeId(depId);
-        mermaid += `  ${sanitizedDepId} --> ${principleId}\n`;
+        builder.addEdge({ source: sanitizeId(depId), target: principleId });
       }
     }
   }
 
-  mermaid += '\n';
-
+  // Derivation steps
   for (const step of thought.derivationSteps) {
     const stepId = `Step${step.stepNumber}`;
     const principleId = sanitizeId(step.principle);
@@ -166,56 +162,29 @@ function firstPrinciplesToMermaid(
       ? `Step ${step.stepNumber}: ${step.inference.substring(0, 50)}...`
       : stepId;
 
-    mermaid += `  ${stepId}["${label}"]\n`;
-    mermaid += `  ${principleId} -.->|applies| ${stepId}\n`;
+    builder.addNode({ id: stepId, label, shape: 'rectangle' });
+    builder.addEdge({ source: principleId, target: stepId, style: 'dotted', label: 'applies' });
 
     if (includeMetrics && step.confidence !== undefined) {
-      mermaid += `  ${stepId} -.->|conf: ${step.confidence.toFixed(2)}| ${stepId}\n`;
+      builder.addEdge({ source: stepId, target: stepId, style: 'dotted', label: `conf: ${step.confidence.toFixed(2)}` });
     }
   }
 
-  mermaid += '\n';
-
+  // Conclusion
   const conclusionLabel = includeLabels
     ? `Conclusion: ${thought.conclusion.statement.substring(0, 50)}...`
     : 'Conclusion';
-  mermaid += `  C["${conclusionLabel}"]\n`;
+  builder.addNode({ id: 'C', label: conclusionLabel, shape: 'rectangle' });
 
   for (const stepNum of thought.conclusion.derivationChain) {
-    mermaid += `  Step${stepNum} --> C\n`;
+    builder.addEdge({ source: `Step${stepNum}`, target: 'C' });
   }
 
   if (includeMetrics) {
-    mermaid += `  C -.->|certainty: ${thought.conclusion.certainty.toFixed(2)}| C\n`;
+    builder.addEdge({ source: 'C', target: 'C', style: 'dotted', label: `certainty: ${thought.conclusion.certainty.toFixed(2)}` });
   }
 
-  if (colorScheme !== 'monochrome') {
-    mermaid += '\n';
-
-    const axiomColor = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
-    const definitionColor = colorScheme === 'pastel' ? '#f3e5f5' : '#ce93d8';
-    const observationColor = colorScheme === 'pastel' ? '#fff3e0' : '#ffd699';
-    const inferenceColor = colorScheme === 'pastel' ? '#e8f5e9' : '#a5d6a7';
-    const assumptionColor = colorScheme === 'pastel' ? '#ffebee' : '#ef9a9a';
-
-    for (const principle of thought.principles) {
-      const principleId = sanitizeId(principle.id);
-      let color = axiomColor;
-      switch (principle.type) {
-        case 'axiom': color = axiomColor; break;
-        case 'definition': color = definitionColor; break;
-        case 'observation': color = observationColor; break;
-        case 'logical_inference': color = inferenceColor; break;
-        case 'assumption': color = assumptionColor; break;
-      }
-      mermaid += `  style ${principleId} fill:${color}\n`;
-    }
-
-    const conclusionColor = colorScheme === 'pastel' ? '#c8e6c9' : '#66bb6a';
-    mermaid += `  style C fill:${conclusionColor}\n`;
-  }
-
-  return mermaid;
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function firstPrinciplesToDOT(
@@ -223,128 +192,143 @@ function firstPrinciplesToDOT(
   includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph FirstPrinciples {\n';
-  dot += '  rankdir=TD;\n';
-  dot += '  node [shape=box, style=rounded];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('FirstPrinciples')
+    .setRankDir('TB')
+    .setNodeDefaults({ shape: 'box', style: 'rounded' });
 
-  dot += `  Q [label="Question:\\n${thought.question}", shape=ellipse, style=bold];\n\n`;
+  // Question node
+  builder.addNode({
+    id: 'Q',
+    label: `Question:\n${thought.question}`,
+    shape: 'ellipse',
+    style: 'bold'
+  });
 
+  // Shape mapping for principle types
+  const getShapeForType = (type: string) => {
+    switch (type) {
+      case 'axiom': return 'ellipse' as const;
+      case 'definition': return 'box' as const;
+      case 'observation': return 'cylinder' as const;
+      case 'logical_inference': return 'box' as const;
+      case 'assumption': return 'diamond' as const;
+      default: return 'box' as const;
+    }
+  };
+
+  // Principles
   for (const principle of thought.principles) {
     const principleId = sanitizeId(principle.id);
     const label = includeLabels
-      ? `${principle.type.toUpperCase()}:\\n${principle.statement.substring(0, 60)}...`
+      ? `${principle.type.toUpperCase()}:\n${principle.statement.substring(0, 60)}...`
       : principleId;
 
-    let shape = 'box';
-    switch (principle.type) {
-      case 'axiom': shape = 'ellipse'; break;
-      case 'definition': shape = 'box'; break;
-      case 'observation': shape = 'cylinder'; break;
-      case 'logical_inference': shape = 'box'; break;
-      case 'assumption': shape = 'diamond'; break;
-    }
-
     const confidenceLabel = includeMetrics && principle.confidence
-      ? `\\nconf: ${principle.confidence.toFixed(2)}`
+      ? `\nconf: ${principle.confidence.toFixed(2)}`
       : '';
-    dot += `  ${principleId} [label="${label}${confidenceLabel}", shape=${shape}];\n`;
+    builder.addNode({
+      id: principleId,
+      label: `${label}${confidenceLabel}`,
+      shape: getShapeForType(principle.type)
+    });
 
     if (principle.dependsOn) {
       for (const depId of principle.dependsOn) {
-        const sanitizedDepId = sanitizeId(depId);
-        dot += `  ${sanitizedDepId} -> ${principleId};\n`;
+        builder.addEdge({ source: sanitizeId(depId), target: principleId });
       }
     }
   }
 
-  dot += '\n';
-
+  // Derivation steps
   for (const step of thought.derivationSteps) {
     const stepId = `Step${step.stepNumber}`;
     const principleId = sanitizeId(step.principle);
     const label = includeLabels
-      ? `Step ${step.stepNumber}:\\n${step.inference.substring(0, 60)}...`
+      ? `Step ${step.stepNumber}:\n${step.inference.substring(0, 60)}...`
       : stepId;
 
     const confidenceLabel = includeMetrics
-      ? `\\nconf: ${step.confidence.toFixed(2)}`
+      ? `\nconf: ${step.confidence.toFixed(2)}`
       : '';
-    dot += `  ${stepId} [label="${label}${confidenceLabel}"];\n`;
-    dot += `  ${principleId} -> ${stepId} [style=dashed, label="applies"];\n`;
+    builder.addNode({ id: stepId, label: `${label}${confidenceLabel}` });
+    builder.addEdge({ source: principleId, target: stepId, style: 'dashed', label: 'applies' });
   }
 
-  dot += '\n';
-
+  // Conclusion
   const conclusionLabel = includeLabels
-    ? `Conclusion:\\n${thought.conclusion.statement.substring(0, 60)}...`
+    ? `Conclusion:\n${thought.conclusion.statement.substring(0, 60)}...`
     : 'Conclusion';
   const certaintyLabel = includeMetrics
-    ? `\\ncertainty: ${thought.conclusion.certainty.toFixed(2)}`
+    ? `\ncertainty: ${thought.conclusion.certainty.toFixed(2)}`
     : '';
-  dot += `  C [label="${conclusionLabel}${certaintyLabel}", shape=doubleoctagon, style=bold];\n`;
+  builder.addNode({
+    id: 'C',
+    label: `${conclusionLabel}${certaintyLabel}`,
+    shape: 'doubleoctagon',
+    style: 'bold'
+  });
 
   for (const stepNum of thought.conclusion.derivationChain) {
-    dot += `  Step${stepNum} -> C;\n`;
+    builder.addEdge({ source: `Step${stepNum}`, target: 'C' });
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function firstPrinciplesToASCII(thought: FirstPrinciplesThought): string {
-  let ascii = 'First-Principles Derivation:\n';
-  ascii += '============================\n\n';
+  const builder = new ASCIIDocBuilder();
 
-  ascii += `Question: ${thought.question}\n\n`;
+  builder.addHeader('First-Principles Derivation');
+  builder.addText(`Question: ${thought.question}`);
+  builder.addEmptyLine();
 
-  ascii += 'Foundational Principles:\n';
-  ascii += '------------------------\n';
+  // Foundational Principles
+  builder.addSection('Foundational Principles');
   for (const principle of thought.principles) {
-    ascii += `[${principle.id}] ${principle.type.toUpperCase()}\n`;
-    ascii += `  Statement: ${principle.statement}\n`;
-    ascii += `  Justification: ${principle.justification || '-'}\n`;
+    builder.addText(`[${principle.id}] ${principle.type.toUpperCase()}`);
+    builder.addText(`  Statement: ${principle.statement}`);
+    builder.addText(`  Justification: ${principle.justification || '-'}`);
     if (principle.dependsOn && principle.dependsOn.length > 0) {
-      ascii += `  Depends on: ${principle.dependsOn.join(', ')}\n`;
+      builder.addText(`  Depends on: ${principle.dependsOn.join(', ')}`);
     }
     if (principle.confidence !== undefined) {
-      ascii += `  Confidence: ${principle.confidence.toFixed(2)}\n`;
+      builder.addText(`  Confidence: ${principle.confidence.toFixed(2)}`);
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
-  ascii += 'Derivation Chain:\n';
-  ascii += '----------------\n';
+  // Derivation Chain
+  builder.addSection('Derivation Chain');
   for (const step of thought.derivationSteps) {
-    ascii += `Step ${step.stepNumber} (using principle: ${step.principle})\n`;
-    ascii += `  Inference: ${step.inference}\n`;
+    builder.addText(`Step ${step.stepNumber} (using principle: ${step.principle})`);
+    builder.addText(`  Inference: ${step.inference}`);
     if (step.logicalForm) {
-      ascii += `  Logical form: ${step.logicalForm}\n`;
+      builder.addText(`  Logical form: ${step.logicalForm}`);
     }
-    ascii += `  Confidence: ${step.confidence.toFixed(2)}\n`;
-    ascii += '\n';
+    builder.addText(`  Confidence: ${step.confidence.toFixed(2)}`);
+    builder.addEmptyLine();
   }
 
-  ascii += 'Conclusion:\n';
-  ascii += '----------\n';
-  ascii += `${thought.conclusion.statement}\n`;
-  ascii += `Derivation chain: Steps [${thought.conclusion.derivationChain.join(', ')}]\n`;
-  ascii += `Certainty: ${thought.conclusion.certainty.toFixed(2)}\n`;
+  // Conclusion
+  builder.addSection('Conclusion');
+  builder.addText(thought.conclusion.statement);
+  builder.addText(`Derivation chain: Steps [${thought.conclusion.derivationChain.join(', ')}]`);
+  builder.addText(`Certainty: ${thought.conclusion.certainty.toFixed(2)}`);
 
   if (thought.conclusion.limitations && thought.conclusion.limitations.length > 0) {
-    ascii += '\nLimitations:\n';
-    for (const limitation of thought.conclusion.limitations) {
-      ascii += `  - ${limitation}\n`;
-    }
+    builder.addEmptyLine();
+    builder.addText('Limitations:');
+    builder.addBulletList(thought.conclusion.limitations);
   }
 
   if (thought.alternativeInterpretations && thought.alternativeInterpretations.length > 0) {
-    ascii += '\nAlternative Interpretations:\n';
-    for (const alt of thought.alternativeInterpretations) {
-      ascii += `  - ${alt}\n`;
-    }
+    builder.addEmptyLine();
+    builder.addText('Alternative Interpretations:');
+    builder.addBulletList(thought.alternativeInterpretations);
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**
