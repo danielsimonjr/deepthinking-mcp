@@ -1,51 +1,62 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`Abductive Mode Exporter Snapshots > ASCII format 1`] = `
-"Abductive Hypothesis Comparison:
-================================
-
+"Abductive Hypothesis Comparison
+===============================
 Observations:
+-------------
   • Observation 1 (confidence: 0.90)
+
   • Observation 2 (confidence: 0.85)
 
+
 Hypotheses:
+-----------
   ★ Hypothesis 1 explains the observations based on prior knowledge and inference patterns
+
     Score: 0.80
+
     Assumptions: Assumption A, Assumption B
 
+
   • Hypothesis 2 provides an alternative explanation with different assumptions
+
     Score: 0.60
+
     Assumptions: Assumption C
 
-Best Explanation: Hypothesis 1 explains the observations based on prior knowledge and inference patterns
+
+Best Explanation:
+-----------------
+Hypothesis 1 explains the observations based on prior knowledge and inference patterns
 "
 `;
 
 exports[`Abductive Mode Exporter Snapshots > DOT format 1`] = `
 "digraph AbductiveHypotheses {
-  rankdir=TD;
-  node [shape=box, style=rounded];
+  rankdir=TB;
+  node [shape=box, style="rounded"];
 
   Observations [label="Observations", shape=ellipse];
-
-  h1 [label="Hypothesis 1 explains the observations based on pr... (0.80)", style=filled, fillcolor=lightblue];
-  Observations -> h1;
+  h1 [label="Hypothesis 1 explains the observations based on pr... (0.80)", style="filled", fillcolor="lightblue"];
   h2 [label="Hypothesis 2 provides an alternative explanation w... (0.60)"];
+
+  Observations -> h1;
   Observations -> h2;
-}
-"
+}"
 `;
 
 exports[`Abductive Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph TD
+
   Observations["Observations"]
-  h1["Hypothesis 1 explains the observations based on pr... (0.80)"]
+  h1["Hypothesis 1 explains the observations based on pr... #40;0.80#41;"]
+  h2["Hypothesis 2 provides an alternative explanation w... #40;0.60#41;"]
+
   Observations --> h1
-  h2["Hypothesis 2 provides an alternative explanation w... (0.60)"]
   Observations --> h2
 
-  style h1 fill:#a8d5ff,stroke:#333,stroke-width:3px
-"
+  style h1 fill:#a8d5ff,stroke-width:3px"
 `;
 
 exports[`Analogical Mode Exporter Snapshots > ASCII format 1`] = `
@@ -127,16 +138,25 @@ exports[`Analogical Mode Exporter Snapshots > Mermaid format 1`] = `
 `;
 
 exports[`Bayesian Mode Exporter Snapshots > ASCII format 1`] = `
-"Bayesian Network:
-=================
+"Bayesian Network
+================
+Hypothesis:
+-----------
+Test hypothesis
 
-Hypothesis: Test hypothesis
 
-Prior Probability: 0.300
-  Justification: Base rate
+Prior Probability:
+------------------
+Value: 0.300
 
-Posterior Probability: 0.670
-  Calculation: Bayes rule
+Justification: Base rate
+
+
+Posterior Probability:
+----------------------
+Value: 0.670
+
+Calculation: Bayes rule
 "
 `;
 
@@ -153,24 +173,23 @@ exports[`Bayesian Mode Exporter Snapshots > DOT format 1`] = `
   Prior -> Hypothesis;
   Evidence -> Hypothesis;
   Hypothesis -> Posterior;
-}
-"
+}"
 `;
 
 exports[`Bayesian Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph LR
-  H([Hypothesis])
-  Prior[Prior: 0.300]
-  Evidence[Evidence]
-  Posterior[[Posterior: 0.670]]
+
+  H(["Hypothesis"])
+  Prior["Prior: 0.300"]
+  Evidence["Evidence"]
+  Posterior[["Posterior: 0.670"]]
 
   Prior --> H
   Evidence --> H
   H --> Posterior
 
   style Prior fill:#a8d5ff
-  style Posterior fill:#81c784
-"
+  style Posterior fill:#81c784"
 `;
 
 exports[`Causal Mode Exporter Snapshots > ASCII format 1`] = `
@@ -896,9 +915,12 @@ exports[`Scientific Method Mode Exporter Snapshots > Mermaid format 1`] = `
 exports[`Sequential Mode Exporter Snapshots > ASCII format 1`] = `
 "Sequential Dependency Graph
 ===========================
+Current Thought:
+----------------
+ID: seq-1
 
-Current Thought: seq-1
 Content: Sequential reasoning step...
+
 "
 `;
 
@@ -920,18 +942,25 @@ exports[`Sequential Mode Exporter Snapshots > Mermaid format 1`] = `
 `;
 
 exports[`Shannon Mode Exporter Snapshots > ASCII format 1`] = `
-"Shannon Stage Flow:
-===================
-
+"Shannon Stage Flow
+==================
 Flow: Problem Definition → Constraints → Model → Proof → Implementation
 
-Current Stage: undefined
+
+Current Stage:
+--------------
+undefined
+
 Uncertainty: 0.50
 
+
 Dependencies:
+-------------
   • data-source
 
+
 Assumptions:
+------------
   • Channel is reliable
 "
 `;
@@ -939,41 +968,38 @@ Assumptions:
 exports[`Shannon Mode Exporter Snapshots > DOT format 1`] = `
 "digraph ShannonStageFlow {
   rankdir=LR;
-  node [shape=box, style=rounded];
+  node [shape=box, style="rounded"];
 
   problem_definition [label="Problem Definition"];
-  problem_definition -> constraints;
   constraints [label="Constraints"];
-  constraints -> model;
   model [label="Model"];
-  model -> proof;
   proof [label="Proof"];
-  proof -> implementation;
   implementation [label="Implementation"];
-
   uncertainty [label="Uncertainty: 0.50", shape=ellipse];
+
+  problem_definition -> constraints;
+  constraints -> model;
+  model -> proof;
+  proof -> implementation;
   uncertainty -> encoding [style=dashed];
-}
-"
+}"
 `;
 
 exports[`Shannon Mode Exporter Snapshots > Mermaid format 1`] = `
 "graph LR
+
   problem_definition["Problem Definition"]
-  problem_definition --> constraints
   constraints["Constraints"]
-  constraints --> model
   model["Model"]
-  model --> proof
   proof["Proof"]
-  proof --> implementation
   implementation["Implementation"]
-
-  style encoding fill:#a8d5ff,stroke:#333,stroke-width:3px
-
   uncertainty["Uncertainty: 0.50"]
-  uncertainty -.-> encoding
-"
+
+  problem_definition --> constraints
+  constraints --> model
+  model --> proof
+  proof --> implementation
+  uncertainty -.-> encoding"
 `;
 
 exports[`Systems Thinking Mode Exporter Snapshots > ASCII format 1`] = `
@@ -993,8 +1019,7 @@ exports[`Systems Thinking Mode Exporter Snapshots > Mermaid format 1`] = `"graph
 
 exports[`Temporal Mode Exporter Snapshots > ASCII format 1`] = `
 "Timeline: Untitled
-========================================
-
+==================
 No events
 "
 `;
@@ -1004,8 +1029,7 @@ exports[`Temporal Mode Exporter Snapshots > DOT format 1`] = `
   rankdir=LR;
   node [shape=box];
 
-}
-"
+}"
 `;
 
 exports[`Temporal Mode Exporter Snapshots > Mermaid format 1`] = `

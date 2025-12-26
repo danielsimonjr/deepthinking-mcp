@@ -98,13 +98,14 @@
     },
     {
       "sprint": 9,
-      "title": "Remaining Modes Batch 2",
-      "focus": "abductive.ts, bayesian.ts, temporal.ts, shannon.ts, sequential.ts + snapshot & adoption verification",
+      "title": "Remaining Modes Batch 2 - COMPLETE",
+      "focus": "sequential.ts, abductive.ts, bayesian.ts, temporal.ts, shannon.ts + snapshot & adoption verification",
       "tasks": 5,
-      "hours": 5,
+      "hours": 5.5,
       "file": "PHASE_13_SPRINT_9_TODO.json",
-      "status": "pending",
-      "notes": "5 remaining mode exporters need builder adoption"
+      "status": "completed",
+      "completedDate": "2025-12-26",
+      "notes": "BUILDER ADOPTION COMPLETE. 5 files refactored, 12 snapshots updated, 4686 tests passing. Temporal gantt diagrams kept as raw strings. 22/22 (100%) mode exporters now use builders."
     },
     {
       "sprint": 10,
@@ -118,9 +119,9 @@
     }
   ],
   "features": {
-    "R-1": { "name": "DOT Builder & Adoption", "sprints": [1, 5, 6, 7, 8, 9], "status": "in-progress", "priority": "high", "notes": "Builder complete, 17/22 modes adopted (77%)" },
-    "R-2": { "name": "Mermaid Builder & Adoption", "sprints": [1, 5, 6, 7, 8, 9], "status": "in-progress", "priority": "high", "notes": "Builder complete, 17/22 modes adopted (77%)" },
-    "R-3": { "name": "ASCII Builder & Adoption", "sprints": [2, 5, 6, 7, 8, 9], "status": "in-progress", "priority": "high", "notes": "Builder complete, 17/22 modes adopted (77%)" },
+    "R-1": { "name": "DOT Builder & Adoption", "sprints": [1, 5, 6, 7, 8, 9], "status": "completed", "priority": "high", "notes": "Builder complete, 22/22 modes adopted (100%)" },
+    "R-2": { "name": "Mermaid Builder & Adoption", "sprints": [1, 5, 6, 7, 8, 9], "status": "completed", "priority": "high", "notes": "Builder complete, 22/22 modes adopted (100%). Exceptions: temporal gantt, computability Turing machines" },
+    "R-3": { "name": "ASCII Builder & Adoption", "sprints": [2, 5, 6, 7, 8, 9], "status": "completed", "priority": "high", "notes": "Builder complete, 22/22 modes adopted (100%)" },
     "R-4": { "name": "SVG Builder", "sprints": [2], "status": "completed", "priority": "medium" },
     "R-5": { "name": "GraphML Builder", "sprints": [1], "status": "completed", "priority": "medium" },
     "R-6": { "name": "TikZ Builder", "sprints": [2], "status": "completed", "priority": "medium" },
@@ -132,13 +133,13 @@
     "R-12": { "name": "File Splitting", "sprints": [10], "status": "pending", "priority": "high", "notes": "CRITICAL - 4 files from Sprint 5 need splitting" }
   },
   "targetMetrics": {
-    "dotUtilityAdoption": { "current": "17/22 (77%)", "target": "22/22 (100%)" },
-    "mermaidUtilityAdoption": { "current": "17/22 (77%)", "target": "22/22 (100%)" },
-    "asciiUtilityAdoption": { "current": "17/22 (77%)", "target": "22/22 (100%)" },
-    "filesOver1000Lines": { "current": 12, "target": 0, "notes": "Sprint 5-8 did not reduce file sizes - files still >1000 lines" },
+    "dotUtilityAdoption": { "current": "22/22 (100%)", "target": "22/22 (100%)", "status": "ACHIEVED" },
+    "mermaidUtilityAdoption": { "current": "22/22 (100%)", "target": "22/22 (100%)", "status": "ACHIEVED" },
+    "asciiUtilityAdoption": { "current": "22/22 (100%)", "target": "22/22 (100%)", "status": "ACHIEVED" },
+    "filesOver1000Lines": { "current": 12, "target": 0, "notes": "Sprint 5-9 did not reduce file sizes - files still >1000 lines" },
     "totalModeFileLines": { "current": 23864, "target": "18000-19000", "notes": "Minimal reduction from builder adoption" },
     "builderClassesAdded": { "current": 12, "target": 11, "notes": "11 primary + SVGGroupBuilder" },
-    "modeExportersRefactored": { "current": 17, "target": 22, "notes": "physics + engineering + metareasoning + proof-decomposition + hybrid + formal-logic + scientific-method + optimization + first-principles + mathematics + game-theory + evidential + systems-thinking + analogical + causal + computability + counterfactual" }
+    "modeExportersRefactored": { "current": 22, "target": 22, "status": "ACHIEVED", "notes": "All 22 mode exporters now use builders" }
   },
   "criticalFiles": [
     { "file": "physics.ts", "lines": 1724, "originalLines": 1781, "target": "<1000", "sprint": 5, "status": "refactored-oversized", "reduction": "3%" },
@@ -158,21 +159,21 @@
     { "file": "systems-thinking.ts", "lines": 911, "sprint": 8, "status": "refactored" },
     { "file": "analogical.ts", "lines": 888, "sprint": 8, "status": "refactored" },
     { "file": "causal.ts", "lines": 870, "sprint": 8, "status": "refactored" },
-    { "file": "computability.ts", "lines": 825, "sprint": 8, "status": "refactored" },
+    { "file": "computability.ts", "lines": 825, "sprint": 8, "status": "refactored", "notes": "Turing machine state diagrams kept as raw strings" },
     { "file": "counterfactual.ts", "lines": 825, "sprint": 8, "status": "refactored" },
-    { "file": "sequential.ts", "lines": 805, "sprint": 9, "status": "pending", "notes": "NOT using builders - needs refactoring" },
-    { "file": "abductive.ts", "lines": 666, "sprint": 9, "status": "pending" },
-    { "file": "bayesian.ts", "lines": 631, "sprint": 9, "status": "pending" },
-    { "file": "temporal.ts", "lines": 623, "sprint": 9, "status": "pending" },
-    { "file": "shannon.ts", "lines": 558, "sprint": 9, "status": "pending" }
+    { "file": "sequential.ts", "lines": 785, "sprint": 9, "status": "refactored", "notes": "Fixed incorrect claim - now uses builders" },
+    { "file": "abductive.ts", "lines": 705, "sprint": 9, "status": "refactored" },
+    { "file": "bayesian.ts", "lines": 669, "sprint": 9, "status": "refactored" },
+    { "file": "temporal.ts", "lines": 635, "sprint": 9, "status": "refactored", "notes": "Gantt diagrams kept as raw strings" },
+    { "file": "shannon.ts", "lines": 607, "sprint": 9, "status": "refactored" }
   ],
   "utilityModules": {
-    "dot": { "path": "src/export/visual/utils/dot.ts", "lines": 944, "builder": "DOTGraphBuilder", "sprint": 1, "builderStatus": "completed" },
-    "mermaid": { "path": "src/export/visual/utils/mermaid.ts", "lines": 850, "builder": "MermaidGraphBuilder", "sprint": 1, "builderStatus": "completed" },
-    "graphml": { "path": "src/export/visual/utils/graphml.ts", "lines": 640, "builder": "GraphMLBuilder", "sprint": 1, "builderStatus": "completed" },
-    "ascii": { "path": "src/export/visual/utils/ascii.ts", "lines": 1071, "builder": "ASCIIDocBuilder", "sprint": 2, "builderStatus": "completed" },
-    "svg": { "path": "src/export/visual/utils/svg.ts", "lines": 1196, "builder": "SVGBuilder + SVGGroupBuilder", "sprint": 2, "builderStatus": "completed" },
-    "tikz": { "path": "src/export/visual/utils/tikz.ts", "lines": 935, "builder": "TikZBuilder", "sprint": 2, "builderStatus": "completed" },
+    "dot": { "path": "src/export/visual/utils/dot.ts", "lines": 978, "builder": "DOTGraphBuilder", "sprint": 1, "builderStatus": "completed" },
+    "mermaid": { "path": "src/export/visual/utils/mermaid.ts", "lines": 873, "builder": "MermaidGraphBuilder", "sprint": 1, "builderStatus": "completed" },
+    "graphml": { "path": "src/export/visual/utils/graphml.ts", "lines": 642, "builder": "GraphMLBuilder", "sprint": 1, "builderStatus": "completed" },
+    "ascii": { "path": "src/export/visual/utils/ascii.ts", "lines": 1073, "builder": "ASCIIDocBuilder", "sprint": 2, "builderStatus": "completed" },
+    "svg": { "path": "src/export/visual/utils/svg.ts", "lines": 1198, "builder": "SVGBuilder + SVGGroupBuilder", "sprint": 2, "builderStatus": "completed" },
+    "tikz": { "path": "src/export/visual/utils/tikz.ts", "lines": 938, "builder": "TikZBuilder", "sprint": 2, "builderStatus": "completed" },
     "uml": { "path": "src/export/visual/utils/uml.ts", "lines": 929, "builder": "UMLBuilder", "sprint": 3, "builderStatus": "completed" },
     "html": { "path": "src/export/visual/utils/html.ts", "lines": 627, "builder": "HTMLDocBuilder", "sprint": 3, "builderStatus": "completed" },
     "markdown": { "path": "src/export/visual/utils/markdown.ts", "lines": 714, "builder": "MarkdownBuilder", "sprint": 3, "builderStatus": "completed" },
@@ -207,5 +208,5 @@
     "src/export/visual/utils/latex.ts changes"
   ],
   "dependencies": [],
-  "notes": "Phase 13 restructured into 10 sprints with 4-5 tasks each. Sprints 1-4 build infrastructure (11 builders). Sprints 5-8 refactor 17 mode exporters. Sprint 9 refactors 5 remaining modes (sequential, abductive, bayesian, temporal, shannon). Sprint 10 handles cleanup and file splitting. POST-SPRINT 8 UPDATE: Builder adoption alone does NOT achieve <1000 line targets. Sprint 10 file splitting is now CRITICAL. Note: sequential.ts was incorrectly claimed as 'already compliant' but does NOT use builders - moved to Sprint 9."
+  "notes": "Phase 13 restructured into 10 sprints with 4-5 tasks each. Sprints 1-4 build infrastructure (11 builders). Sprints 5-8 refactor 17 mode exporters. Sprint 9 COMPLETE: refactored 5 remaining modes (sequential, abductive, bayesian, temporal, shannon). 100% BUILDER ADOPTION ACHIEVED (22/22 mode exporters). Sprint 10 handles cleanup and file splitting. POST-SPRINT 9 UPDATE: Builder adoption complete but file sizes still exceed 1000 lines. Sprint 10 file splitting remains CRITICAL for achieving file size targets."
 }

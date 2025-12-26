@@ -7,6 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed - Phase 13 Sprint 9: Mode Exporter Refactoring (Final Batch)
+
+**Refactored 5 Mode Exporters to Use Builder Classes**
+
+Refactored the final five mode exporter files to use the fluent builder APIs:
+
+- **sequential.ts** (`src/export/visual/modes/sequential.ts`)
+  - Refactored `sequentialToMermaid()` to use `MermaidGraphBuilder`
+  - Refactored `sequentialToDOT()` to use `DOTGraphBuilder`
+  - Refactored `sequentialToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **abductive.ts** (`src/export/visual/modes/abductive.ts`)
+  - Refactored `abductiveToMermaid()` to use `MermaidGraphBuilder` with best hypothesis styling
+  - Refactored `abductiveToDOT()` to use `DOTGraphBuilder`
+  - Refactored `abductiveToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **bayesian.ts** (`src/export/visual/modes/bayesian.ts`)
+  - Refactored `bayesianToMermaid()` to use `MermaidGraphBuilder` with prior/posterior color styling
+  - Refactored `bayesianToDOT()` to use `DOTGraphBuilder`
+  - Refactored `bayesianToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **temporal.ts** (`src/export/visual/modes/temporal.ts`)
+  - Kept `timelineToMermaidGantt()` using raw strings (gantt diagrams not supported by builder)
+  - Refactored `timelineToDOT()` to use `DOTGraphBuilder`
+  - Refactored `timelineToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+- **shannon.ts** (`src/export/visual/modes/shannon.ts`)
+  - Refactored `shannonToMermaid()` to use `MermaidGraphBuilder` with current stage highlighting
+  - Refactored `shannonToDOT()` to use `DOTGraphBuilder`
+  - Refactored `shannonToASCII()` to use `ASCIIDocBuilder`
+  - Updated version to v8.5.0
+
+### Fixed - Sprint 9
+
+- Updated 12 snapshot baselines for sequential, abductive, bayesian, temporal, and shannon modes
+- Updated visual.test.ts assertions to match new Mermaid/ASCII output formats for bayesian exports
+
+### Validation - Sprint 9
+
+- **Builder Adoption**: ✅ All 5 files use fluent builder APIs (except gantt diagrams in temporal.ts)
+- **Typecheck**: ✅ Clean (`npm run typecheck` - no issues in refactored files)
+- **Full Test Suite**: ✅ 4681 tests passing across 168 test files
+- **Total Mode Exporters Refactored**: 22/22 (100%)
+
+---
+
 ### Changed - Phase 13 Sprint 8: Mode Exporter Refactoring (continued)
 
 **Refactored 5 Mode Exporters to Use Builder Classes**

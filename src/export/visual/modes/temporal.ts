@@ -1,12 +1,17 @@
 /**
- * Temporal Visual Exporter (v7.0.3)
+ * Temporal Visual Exporter (v8.5.0)
  * Sprint 8 Task 8.1: Timeline export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
+ * Phase 13 Sprint 9: Refactored to use fluent builder classes
+ * Note: Mermaid gantt diagrams kept as raw strings (not supported by MermaidGraphBuilder)
  */
 
 import type { TemporalThought } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
 import { sanitizeId } from '../utils.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -115,65 +120,72 @@ function timelineToMermaidGantt(thought: TemporalThought, includeLabels: boolean
 }
 
 function timelineToDOT(thought: TemporalThought, includeLabels: boolean): string {
-  let dot = 'digraph Timeline {\n';
-  dot += '  rankdir=LR;\n';
-  dot += '  node [shape=box];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('Timeline')
+    .setRankDir('LR')
+    .setNodeDefaults({ shape: 'box' });
 
   if (!thought.events) {
-    dot += '}\n';
-    return dot;
+    return builder.render();
   }
 
   const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
 
+  // Add event nodes
   for (const event of sortedEvents) {
     const nodeId = sanitizeId(event.id);
     const label = includeLabels ? `${event.name}\\n(t=${event.timestamp})` : nodeId;
     const shape = event.type === 'instant' ? 'ellipse' : 'box';
 
-    dot += `  ${nodeId} [label="${label}", shape=${shape}];\n`;
+    builder.addNode({ id: nodeId, label, shape });
   }
 
-  dot += '\n';
-
+  // Add sequential edges between events
   for (let i = 0; i < sortedEvents.length - 1; i++) {
     const from = sanitizeId(sortedEvents[i].id);
     const to = sanitizeId(sortedEvents[i + 1].id);
-    dot += `  ${from} -> ${to};\n`;
+    builder.addEdge({ source: from, target: to });
   }
 
+  // Add causal relation edges
   if (thought.relations) {
-    dot += '\n  // Causal relations\n';
     for (const rel of thought.relations) {
       const from = sanitizeId(rel.from);
       const to = sanitizeId(rel.to);
-      dot += `  ${from} -> ${to} [style=dashed, label="${rel.relationType}"];\n`;
+      builder.addEdge({
+        source: from,
+        target: to,
+        style: 'dashed',
+        label: rel.relationType,
+      });
     }
   }
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function timelineToASCII(thought: TemporalThought): string {
-  let ascii = `Timeline: ${thought.timeline?.name || 'Untitled'}\n`;
-  ascii += '='.repeat(40) + '\n\n';
+  const builder = new ASCIIDocBuilder()
+    .setMaxWidth(60)
+    .addHeader(`Timeline: ${thought.timeline?.name || 'Untitled'}`);
 
   if (!thought.events || thought.events.length === 0) {
-    return ascii + 'No events\n';
+    builder.addText('No events\n');
+    return builder.render();
   }
 
   const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
 
+  builder.addSection('Events');
   for (const event of sortedEvents) {
     const marker = event.type === 'instant' ? '⦿' : '━';
-    ascii += `t=${event.timestamp.toString().padStart(4)} ${marker} ${event.name}\n`;
+    builder.addText(`t=${event.timestamp.toString().padStart(4)} ${marker} ${event.name}\n`);
     if (event.duration) {
-      ascii += `       ${'└'.padStart(5)}→ duration: ${event.duration}\n`;
+      builder.addText(`       ${'└'.padStart(5)}→ duration: ${event.duration}\n`);
     }
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**

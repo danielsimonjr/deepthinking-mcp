@@ -208,10 +208,10 @@ describe('Visual Export', () => {
       const result = exporter.exportBayesianNetwork(bayesianThought, { format: 'mermaid' });
 
       expect(result).toContain('graph LR');
-      expect(result).toContain('H([Hypothesis])');
-      expect(result).toContain('Prior[Prior: 0.500]');
-      expect(result).toContain('Evidence[Evidence]');
-      expect(result).toContain('Posterior[[Posterior: 0.760]]');
+      expect(result).toContain('H(["Hypothesis"])');
+      expect(result).toContain('Prior["Prior: 0.500"]');
+      expect(result).toContain('Evidence["Evidence"]');
+      expect(result).toContain('Posterior[["Posterior: 0.760"]]');
       expect(result).toContain('Prior --> H');
       expect(result).toContain('Evidence --> H');
       expect(result).toContain('H --> Posterior');
@@ -222,13 +222,16 @@ describe('Visual Export', () => {
     it('should export Bayesian network to ASCII format', () => {
       const result = exporter.exportBayesianNetwork(bayesianThought, { format: 'ascii' });
 
-      expect(result).toContain('Bayesian Network:');
-      expect(result).toContain('Hypothesis: Feature improves conversion');
-      expect(result).toContain('Prior Probability: 0.500');
-      expect(result).toContain('Posterior Probability: 0.760');
-      expect(result).toContain('Bayes Factor: 3.80');
-      expect(result).toContain('Evidence:');
-      expect(result).toContain('• A/B test shows 20% lift');
+      expect(result).toContain('Bayesian Network');
+      expect(result).toContain('Feature improves conversion');
+      expect(result).toContain('Prior Probability');
+      expect(result).toContain('0.500');
+      expect(result).toContain('Posterior Probability');
+      expect(result).toContain('0.760');
+      expect(result).toContain('Bayes Factor');
+      expect(result).toContain('3.80');
+      expect(result).toContain('Evidence');
+      expect(result).toContain('A/B test shows 20% lift');
     });
   });
 

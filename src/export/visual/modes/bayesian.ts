@@ -1,12 +1,17 @@
 /**
- * Bayesian Visual Exporter (v7.0.3)
+ * Bayesian Visual Exporter (v8.5.0)
  * Sprint 8 Task 8.1: Bayesian network export to Mermaid, DOT, ASCII
  * Phase 9: Added native SVG export support
  * Phase 9: Added GraphML and TikZ export support
+ * Phase 13 Sprint 9: Refactored to use fluent builder classes
  */
 
 import type { BayesianThought } from '../../../types/index.js';
 import type { VisualExportOptions } from '../types.js';
+// Builder classes (Phase 13)
+import { DOTGraphBuilder } from '../utils/dot.js';
+import { MermaidGraphBuilder } from '../utils/mermaid.js';
+import { ASCIIDocBuilder } from '../utils/ascii.js';
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -100,28 +105,46 @@ function bayesianToMermaid(
   _includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let mermaid = 'graph LR\n';
+  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
+  const builder = new MermaidGraphBuilder().setDirection('LR');
 
-  mermaid += `  H([Hypothesis])\n`;
-  mermaid += `  Prior[Prior: ${includeMetrics ? thought.prior.probability.toFixed(3) : '?'}]\n`;
-  mermaid += `  Evidence[Evidence]\n`;
-  mermaid += `  Posterior[[Posterior: ${includeMetrics ? thought.posterior.probability.toFixed(3) : '?'}]]\n`;
+  // Determine colors based on scheme
+  const priorColor = scheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
+  const posteriorColor = scheme === 'pastel' ? '#c8e6c9' : '#81c784';
 
-  mermaid += '\n';
-  mermaid += '  Prior --> H\n';
-  mermaid += '  Evidence --> H\n';
-  mermaid += '  H --> Posterior\n';
+  // Add nodes
+  builder.addNode({
+    id: 'H',
+    label: 'Hypothesis',
+    shape: 'stadium',
+  });
 
-  if (colorScheme !== 'monochrome') {
-    mermaid += '\n';
-    const priorColor = colorScheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
-    const posteriorColor = colorScheme === 'pastel' ? '#c8e6c9' : '#81c784';
+  builder.addNode({
+    id: 'Prior',
+    label: `Prior: ${includeMetrics ? thought.prior.probability.toFixed(3) : '?'}`,
+    shape: 'rectangle',
+    style: scheme !== 'monochrome' ? { fill: priorColor } : undefined,
+  });
 
-    mermaid += `  style Prior fill:${priorColor}\n`;
-    mermaid += `  style Posterior fill:${posteriorColor}\n`;
-  }
+  builder.addNode({
+    id: 'Evidence',
+    label: 'Evidence',
+    shape: 'rectangle',
+  });
 
-  return mermaid;
+  builder.addNode({
+    id: 'Posterior',
+    label: `Posterior: ${includeMetrics ? thought.posterior.probability.toFixed(3) : '?'}`,
+    shape: 'subroutine',
+    style: scheme !== 'monochrome' ? { fill: posteriorColor } : undefined,
+  });
+
+  // Add edges
+  builder.addEdge({ source: 'Prior', target: 'H', style: 'arrow' });
+  builder.addEdge({ source: 'Evidence', target: 'H', style: 'arrow' });
+  builder.addEdge({ source: 'H', target: 'Posterior', style: 'arrow' });
+
+  return builder.setOptions({ colorScheme: scheme }).render();
 }
 
 function bayesianToDOT(
@@ -129,51 +152,66 @@ function bayesianToDOT(
   _includeLabels: boolean,
   includeMetrics: boolean
 ): string {
-  let dot = 'digraph BayesianNetwork {\n';
-  dot += '  rankdir=LR;\n';
-  dot += '  node [shape=ellipse];\n\n';
+  const builder = new DOTGraphBuilder()
+    .setGraphName('BayesianNetwork')
+    .setRankDir('LR')
+    .setNodeDefaults({ shape: 'ellipse' });
 
   const priorProb = includeMetrics ? `: ${thought.prior.probability.toFixed(3)}` : '';
   const posteriorProb = includeMetrics ? `: ${thought.posterior.probability.toFixed(3)}` : '';
 
-  dot += `  Prior [label="Prior${priorProb}"];\n`;
-  dot += `  Hypothesis [label="Hypothesis", shape=box];\n`;
-  dot += `  Evidence [label="Evidence"];\n`;
-  dot += `  Posterior [label="Posterior${posteriorProb}", shape=doublecircle];\n`;
+  // Add nodes
+  builder.addNode({ id: 'Prior', label: `Prior${priorProb}` });
+  builder.addNode({ id: 'Hypothesis', label: 'Hypothesis', shape: 'box' });
+  builder.addNode({ id: 'Evidence', label: 'Evidence' });
+  builder.addNode({ id: 'Posterior', label: `Posterior${posteriorProb}`, shape: 'doublecircle' });
 
-  dot += '\n';
-  dot += '  Prior -> Hypothesis;\n';
-  dot += '  Evidence -> Hypothesis;\n';
-  dot += '  Hypothesis -> Posterior;\n';
+  // Add edges
+  builder.addEdge({ source: 'Prior', target: 'Hypothesis' });
+  builder.addEdge({ source: 'Evidence', target: 'Hypothesis' });
+  builder.addEdge({ source: 'Hypothesis', target: 'Posterior' });
 
-  dot += '}\n';
-  return dot;
+  return builder.render();
 }
 
 function bayesianToASCII(thought: BayesianThought): string {
-  let ascii = 'Bayesian Network:\n';
-  ascii += '=================\n\n';
+  const builder = new ASCIIDocBuilder()
+    .setMaxWidth(60)
+    .addHeader('Bayesian Network');
 
-  ascii += `Hypothesis: ${thought.hypothesis.statement}\n\n`;
-  ascii += `Prior Probability: ${thought.prior.probability.toFixed(3)}\n`;
-  ascii += `  Justification: ${thought.prior.justification || '-'}\n\n`;
+  // Hypothesis section
+  builder.addSection('Hypothesis')
+    .addText(`${thought.hypothesis.statement}\n`)
+    .addEmptyLine();
 
+  // Prior section
+  builder.addSection('Prior Probability')
+    .addText(`Value: ${thought.prior.probability.toFixed(3)}\n`)
+    .addText(`Justification: ${thought.prior.justification || '-'}\n`)
+    .addEmptyLine();
+
+  // Evidence section
   if (thought.evidence && thought.evidence.length > 0) {
-    ascii += 'Evidence:\n';
+    builder.addSection('Evidence');
     for (const ev of thought.evidence) {
-      ascii += `  • ${ev.description || '-'}\n`;
+      builder.addText(`  • ${ev.description || '-'}\n`);
     }
-    ascii += '\n';
+    builder.addEmptyLine();
   }
 
-  ascii += `Posterior Probability: ${thought.posterior.probability.toFixed(3)}\n`;
-  ascii += `  Calculation: ${thought.posterior.calculation || '-'}\n`;
+  // Posterior section
+  builder.addSection('Posterior Probability')
+    .addText(`Value: ${thought.posterior.probability.toFixed(3)}\n`)
+    .addText(`Calculation: ${thought.posterior.calculation || '-'}\n`);
 
+  // Bayes Factor
   if (thought.bayesFactor !== undefined) {
-    ascii += `\nBayes Factor: ${thought.bayesFactor.toFixed(2)}\n`;
+    builder.addEmptyLine()
+      .addSection('Bayes Factor')
+      .addText(`${thought.bayesFactor.toFixed(2)}\n`);
   }
 
-  return ascii;
+  return builder.render();
 }
 
 /**
