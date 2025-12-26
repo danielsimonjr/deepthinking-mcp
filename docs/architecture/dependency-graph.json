@@ -1,11 +1,11 @@
 {
   "metadata": {
     "name": "deepthinking-mcp",
-    "version": "8.4.0",
-    "lastUpdated": "2025-12-25",
+    "version": "8.5.0",
+    "lastUpdated": "2025-12-26",
     "totalFiles": 250,
     "totalModules": 16,
-    "totalExports": 1411
+    "totalExports": 1426
   },
   "entryPoints": [
     {
@@ -306,7 +306,7 @@
               "exportScientificMethodExperiment",
               "exportOptimizationSolution",
               "exportFormalLogicProof",
-              "// Phase 8: Proof decomposition\r\n  exportProofDecomposition"
+              "// Phase 8: Proof decomposition\n  exportProofDecomposition"
             ],
             "reExport": true
           },
@@ -373,7 +373,7 @@
           "exportScientificMethodExperiment",
           "exportOptimizationSolution",
           "exportFormalLogicProof",
-          "// Phase 8: Proof decomposition\r\n  exportProofDecomposition",
+          "// Phase 8: Proof decomposition\n  exportProofDecomposition",
           "LaTeXExporter",
           "type LaTeXExportOptions",
           "type ExportFormatType",
@@ -419,7 +419,7 @@
           "exportScientificMethodExperiment",
           "exportOptimizationSolution",
           "exportFormalLogicProof",
-          "// Phase 8: Proof decomposition\r\n  exportProofDecomposition",
+          "// Phase 8: Proof decomposition\n  exportProofDecomposition",
           "LaTeXExporter",
           "type LaTeXExportOptions",
           "type ExportFormatType",
@@ -541,7 +541,7 @@
         ]
       },
       "src/export/visual/modes/abductive.ts": {
-        "description": "Abductive Visual Exporter (v7.0.3)",
+        "description": "Abductive Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -563,6 +563,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -649,7 +667,7 @@
         ]
       },
       "src/export/visual/modes/analogical.ts": {
-        "description": "Analogical Visual Exporter (v7.0.3)",
+        "description": "Analogical Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -671,6 +689,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -765,7 +801,7 @@
         ]
       },
       "src/export/visual/modes/bayesian.ts": {
-        "description": "Bayesian Visual Exporter (v7.0.3)",
+        "description": "Bayesian Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -782,6 +818,24 @@
               "VisualExportOptions"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
+            ]
           },
           {
             "file": "../utils/svg.js",
@@ -868,7 +922,7 @@
         ]
       },
       "src/export/visual/modes/causal.ts": {
-        "description": "Causal Visual Exporter (v7.0.3)",
+        "description": "Causal Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -890,6 +944,25 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder",
+              "DotNodeShape"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -981,7 +1054,7 @@
         ]
       },
       "src/export/visual/modes/computability.ts": {
-        "description": "Computability Visual Exporter (v7.2.0)",
+        "description": "Computability Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1005,6 +1078,26 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder",
+              "DotNodeStyle"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder",
+              "MermaidStateDiagramBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -1082,7 +1175,7 @@
         ]
       },
       "src/export/visual/modes/counterfactual.ts": {
-        "description": "Counterfactual Visual Exporter (v7.0.3)",
+        "description": "Counterfactual Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1104,6 +1197,25 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder",
+              "DotNodeStyle"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -1194,7 +1306,7 @@
         ]
       },
       "src/export/visual/modes/engineering.ts": {
-        "description": "Engineering Visual Exporter (v7.1.0)",
+        "description": "Engineering Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1216,6 +1328,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -1302,7 +1432,7 @@
         ]
       },
       "src/export/visual/modes/evidential.ts": {
-        "description": "Evidential Visual Exporter (v7.0.3)",
+        "description": "Evidential Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1324,6 +1454,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -1412,7 +1560,7 @@
         ]
       },
       "src/export/visual/modes/first-principles.ts": {
-        "description": "First Principles Visual Exporter (v7.0.3)",
+        "description": "First Principles Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1434,6 +1582,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -1536,7 +1702,7 @@
         ]
       },
       "src/export/visual/modes/formal-logic.ts": {
-        "description": "Formal Logic Visual Exporter (v7.0.3)",
+        "description": "Formal Logic Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1558,6 +1724,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -1650,7 +1834,7 @@
         ]
       },
       "src/export/visual/modes/game-theory.ts": {
-        "description": "Game Theory Visual Exporter (v7.0.3)",
+        "description": "Game Theory Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1672,6 +1856,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -1764,7 +1966,7 @@
         ]
       },
       "src/export/visual/modes/hybrid.ts": {
-        "description": "Hybrid Visual Exporter (v7.0.3)",
+        "description": "Hybrid Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -1786,6 +1988,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -2087,7 +2307,7 @@
         ]
       },
       "src/export/visual/modes/mathematics.ts": {
-        "description": "Mathematics Visual Exporter (v7.0.3)",
+        "description": "Mathematics Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -2109,6 +2329,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -2199,7 +2437,7 @@
         ]
       },
       "src/export/visual/modes/metareasoning.ts": {
-        "description": "MetaReasoning Visual Exporter (v7.0.3)",
+        "description": "MetaReasoning Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -2221,6 +2459,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -2316,7 +2572,7 @@
         ]
       },
       "src/export/visual/modes/optimization.ts": {
-        "description": "Optimization Visual Exporter (v7.0.3)",
+        "description": "Optimization Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -2338,6 +2594,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -2429,7 +2703,7 @@
         ]
       },
       "src/export/visual/modes/physics.ts": {
-        "description": "Physics Visual Exporter (v7.0.3)",
+        "description": "Physics Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -2451,6 +2725,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -2545,7 +2837,7 @@
         ]
       },
       "src/export/visual/modes/proof-decomposition.ts": {
-        "description": "Proof Decomposition Visual Exporter (v7.0.0)",
+        "description": "Proof Decomposition Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -2568,6 +2860,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -2627,7 +2937,7 @@
         ]
       },
       "src/export/visual/modes/scientific-method.ts": {
-        "description": "Scientific Method Visual Exporter (v7.0.3)",
+        "description": "Scientific Method Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -2649,6 +2959,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -2737,7 +3065,7 @@
         ]
       },
       "src/export/visual/modes/sequential.ts": {
-        "description": "Sequential Visual Exporter (v7.1.0)",
+        "description": "Sequential Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -2762,30 +3090,21 @@
             ]
           },
           {
-            "file": "../utils/mermaid.js",
+            "file": "../utils/dot.js",
             "imports": [
-              "generateMermaidFlowchart",
-              "truncateLabel",
-              "getMermaidColor",
-              "MermaidNode",
-              "MermaidEdge"
+              "DOTGraphBuilder"
             ]
           },
           {
-            "file": "../utils/dot.js",
+            "file": "../utils/mermaid.js",
             "imports": [
-              "generateDotGraph",
-              "truncateDotLabel",
-              "DotNode",
-              "DotEdge"
+              "MermaidGraphBuilder"
             ]
           },
           {
             "file": "../utils/ascii.js",
             "imports": [
-              "generateAsciiHeader",
-              "generateAsciiSectionHeader",
-              "generateAsciiBulletList"
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -2872,7 +3191,7 @@
         ]
       },
       "src/export/visual/modes/shannon.ts": {
-        "description": "Shannon Visual Exporter (v7.0.3)",
+        "description": "Shannon Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -2894,6 +3213,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -2976,7 +3313,7 @@
         ]
       },
       "src/export/visual/modes/systems-thinking.ts": {
-        "description": "Systems Thinking Visual Exporter (v7.0.3)",
+        "description": "Systems Thinking Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -2998,6 +3335,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
             ]
           },
           {
@@ -3089,7 +3444,7 @@
         ]
       },
       "src/export/visual/modes/temporal.ts": {
-        "description": "Temporal Visual Exporter (v7.0.3)",
+        "description": "Temporal Visual Exporter (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -3111,6 +3466,24 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGanttBuilder"
             ]
           },
           {
@@ -3203,7 +3576,7 @@
         ]
       },
       "src/export/visual/utils/ascii.ts": {
-        "description": "ASCII Art Utilities (v7.1.0)",
+        "description": "ASCII Art Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -3232,7 +3605,11 @@
           "generateAsciiMetricsPanel",
           "generateAsciiGraph",
           "generateLinearFlowAscii",
-          "generateHierarchyAscii"
+          "generateHierarchyAscii",
+          "ASCIIDocBuilder"
+        ],
+        "classes": [
+          "ASCIIDocBuilder"
         ],
         "interfaces": [
           "AsciiNode",
@@ -3240,7 +3617,8 @@
           "AsciiSection",
           "AsciiTableColumn",
           "AsciiOptions",
-          "AsciiTreeNode"
+          "AsciiTreeNode",
+          "ASCIIDocBuilderOptions"
         ],
         "functions": [
           "truncateAscii",
@@ -3273,7 +3651,7 @@
         ]
       },
       "src/export/visual/utils/dot.ts": {
-        "description": "DOT/GraphViz Utilities (v7.1.0)",
+        "description": "DOT/GraphViz Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -3291,7 +3669,11 @@
           "generateDotGraph",
           "generateLinearFlowDot",
           "generateHierarchyDot",
-          "generateNetworkDot"
+          "generateNetworkDot",
+          "DOTGraphBuilder"
+        ],
+        "classes": [
+          "DOTGraphBuilder"
         ],
         "interfaces": [
           "DotNode",
@@ -3319,7 +3701,7 @@
         ]
       },
       "src/export/visual/utils/graphml.ts": {
-        "description": "GraphML Export Utilities (v7.0.3)",
+        "description": "GraphML Export Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -3332,12 +3714,17 @@
           "generateGraphML",
           "createLinearGraphML",
           "createTreeGraphML",
-          "createLayeredGraphML"
+          "createLayeredGraphML",
+          "GraphMLBuilder"
+        ],
+        "classes": [
+          "GraphMLBuilder"
         ],
         "interfaces": [
           "GraphMLNode",
           "GraphMLEdge",
-          "GraphMLOptions"
+          "GraphMLOptions",
+          "GraphMLAttribute"
         ],
         "functions": [
           "generateGraphMLHeader",
@@ -3354,7 +3741,7 @@
         ]
       },
       "src/export/visual/utils/html.ts": {
-        "description": "HTML Export Utilities (v7.1.0)",
+        "description": "HTML Export Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -3368,10 +3755,15 @@
           "renderBadge",
           "renderTable",
           "renderSection",
-          "renderList"
+          "renderList",
+          "HTMLDocBuilder"
+        ],
+        "classes": [
+          "HTMLDocBuilder"
         ],
         "interfaces": [
-          "HTMLThemeColors"
+          "HTMLThemeColors",
+          "HTMLDocBuilderOptions"
         ],
         "functions": [
           "getHTMLThemeColors",
@@ -3501,7 +3893,7 @@
         ]
       },
       "src/export/visual/utils/json.ts": {
-        "description": "JSON Visual Export Utilities (v7.1.0)",
+        "description": "JSON Visual Export Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -3516,13 +3908,19 @@
           "generateHierarchyJson",
           "generateNetworkJson",
           "generateBayesianJson",
-          "generateCausalJson"
+          "generateCausalJson",
+          "JSONExportBuilder"
+        ],
+        "classes": [
+          "JSONExportBuilder"
         ],
         "interfaces": [
           "JsonVisualNode",
           "JsonVisualEdge",
           "JsonVisualGraph",
-          "JsonVisualOptions"
+          "JsonVisualOptions",
+          "JSONSectionDef",
+          "JSONExportBuilderOptions"
         ],
         "functions": [
           "createJsonGraph",
@@ -3621,7 +4019,7 @@
         ]
       },
       "src/export/visual/utils/markdown.ts": {
-        "description": "Markdown Export Utilities (v7.1.0)",
+        "description": "Markdown Export Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -3655,7 +4053,14 @@
           "graphEdge",
           "graph",
           "escapeMarkdown",
-          "truncate"
+          "truncate",
+          "MarkdownBuilder"
+        ],
+        "classes": [
+          "MarkdownBuilder"
+        ],
+        "interfaces": [
+          "MarkdownBuilderOptions"
         ],
         "functions": [
           "heading",
@@ -3691,7 +4096,7 @@
         ]
       },
       "src/export/visual/utils/mermaid.ts": {
-        "description": "Mermaid Utilities (v7.1.0)",
+        "description": "Mermaid Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -3711,13 +4116,25 @@
           "generateLinearFlowMermaid",
           "generateHierarchyMermaid",
           "generateMermaidStateDiagram",
-          "generateMermaidClassDiagram"
+          "generateMermaidClassDiagram",
+          "MermaidGraphBuilder",
+          "MermaidGanttBuilder",
+          "MermaidStateDiagramBuilder"
+        ],
+        "classes": [
+          "MermaidGraphBuilder",
+          "MermaidGanttBuilder",
+          "MermaidStateDiagramBuilder"
         ],
         "interfaces": [
           "MermaidNode",
           "MermaidEdge",
           "MermaidSubgraph",
-          "MermaidOptions"
+          "MermaidOptions",
+          "GanttTask",
+          "GanttSection",
+          "StateDiagramState",
+          "StateTransition"
         ],
         "functions": [
           "sanitizeMermaidId",
@@ -3741,7 +4158,7 @@
         ]
       },
       "src/export/visual/utils/modelica.ts": {
-        "description": "Modelica Export Utilities (v7.1.0)",
+        "description": "Modelica Export Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -3753,12 +4170,21 @@
           "generateModelicaRecord",
           "generateModelicaModel",
           "generateLinearFlowModelica",
-          "generateHierarchyModelica"
+          "generateHierarchyModelica",
+          "ModelicaBuilder"
+        ],
+        "classes": [
+          "ModelicaBuilder"
         ],
         "interfaces": [
           "ModelicaNode",
           "ModelicaEdge",
-          "ModelicaOptions"
+          "ModelicaOptions",
+          "ModelicaParameterDef",
+          "ModelicaVariableDef",
+          "ModelicaEquationDef",
+          "ModelicaConnectionDef",
+          "ModelicaBuilderOptions"
         ],
         "functions": [
           "sanitizeModelicaId",
@@ -3772,7 +4198,7 @@
         ]
       },
       "src/export/visual/utils/svg.ts": {
-        "description": "SVG Export Utilities (v7.0.2)",
+        "description": "SVG Export Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -3797,13 +4223,23 @@
           "renderLegend",
           "layoutNodesInLayers",
           "layoutNodesHorizontally",
-          "calculateSVGHeight"
+          "calculateSVGHeight",
+          "SVGGroupBuilder",
+          "SVGBuilder"
+        ],
+        "classes": [
+          "SVGGroupBuilder",
+          "SVGBuilder"
         ],
         "interfaces": [
           "SVGExportOptions",
           "SVGNodePosition",
           "SVGEdge",
-          "ColorPalette"
+          "ColorPalette",
+          "SVGShapeOptions",
+          "SVGTextOptions",
+          "SVGLineOptions",
+          "SVGPathOptions"
         ],
         "functions": [
           "getNodeColor",
@@ -3832,13 +4268,14 @@
         ]
       },
       "src/export/visual/utils/tikz.ts": {
-        "description": "TikZ Export Utilities (v7.0.3)",
+        "description": "TikZ Export Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
         "exports": [
           "DEFAULT_TIKZ_OPTIONS",
           "getTikZColor",
+          "escapeLatex",
           "generateTikZHeader",
           "generateTikZFooter",
           "renderTikZNode",
@@ -3849,15 +4286,23 @@
           "generateTikZ",
           "createLinearTikZ",
           "createTreeTikZ",
-          "createLayeredTikZ"
+          "createLayeredTikZ",
+          "TikZBuilder"
+        ],
+        "classes": [
+          "TikZBuilder"
         ],
         "interfaces": [
           "TikZNode",
           "TikZEdge",
-          "TikZOptions"
+          "TikZOptions",
+          "TikZNodeOptions",
+          "TikZEdgeOptions",
+          "TikZScopeOptions"
         ],
         "functions": [
           "getTikZColor",
+          "escapeLatex",
           "generateTikZHeader",
           "generateTikZFooter",
           "renderTikZNode",
@@ -3875,7 +4320,7 @@
         ]
       },
       "src/export/visual/utils/uml.ts": {
-        "description": "UML/PlantUML Export Utilities (v7.1.0)",
+        "description": "UML/PlantUML Export Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -3891,12 +4336,21 @@
           "generateComponentDiagram",
           "generateActivityDiagram",
           "generateStateDiagram",
-          "generateUseCaseDiagram"
+          "generateUseCaseDiagram",
+          "UMLBuilder"
+        ],
+        "classes": [
+          "UMLBuilder"
         ],
         "interfaces": [
           "UmlNode",
           "UmlEdge",
-          "UmlOptions"
+          "UmlOptions",
+          "UMLClassDef",
+          "UMLInterfaceDef",
+          "UMLRelationDef",
+          "UMLNoteDef",
+          "UMLBuilderOptions"
         ],
         "functions": [
           "sanitizeUmlId",
@@ -8651,44 +9105,6 @@
           "FileSessionRepository"
         ]
       },
-      "src/repositories/index.ts": {
-        "description": "Repository module exports (v3.4.5)",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./ISessionRepository.js",
-            "imports": [
-              "ISessionRepository"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./FileSessionRepository.js",
-            "imports": [
-              "FileSessionRepository"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./MemorySessionRepository.js",
-            "imports": [
-              "MemorySessionRepository"
-            ],
-            "reExport": true
-          }
-        ],
-        "exports": [
-          "ISessionRepository",
-          "FileSessionRepository",
-          "MemorySessionRepository"
-        ],
-        "reExported": [
-          "ISessionRepository",
-          "FileSessionRepository",
-          "MemorySessionRepository"
-        ]
-      },
       "src/repositories/ISessionRepository.ts": {
         "description": "Session Repository Interface (v3.4.5)",
         "externalDependencies": [],
@@ -8732,6 +9148,44 @@
           "MemorySessionRepository"
         ],
         "classes": [
+          "MemorySessionRepository"
+        ]
+      },
+      "src/repositories/index.ts": {
+        "description": "Repository module exports (v3.4.5)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./ISessionRepository.js",
+            "imports": [
+              "ISessionRepository"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./FileSessionRepository.js",
+            "imports": [
+              "FileSessionRepository"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./MemorySessionRepository.js",
+            "imports": [
+              "MemorySessionRepository"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [
+          "ISessionRepository",
+          "FileSessionRepository",
+          "MemorySessionRepository"
+        ],
+        "reExported": [
+          "ISessionRepository",
+          "FileSessionRepository",
           "MemorySessionRepository"
         ]
       }
@@ -8914,7 +9368,7 @@
               "isAlgorithmicThought",
               "isScientificMethodThought",
               "HybridThought",
-              "// Sprint 1: Visual export integration types\r\n  SequentialThought",
+              "// Sprint 1: Visual export integration types\n  SequentialThought",
               "ShannonThought",
               "AbductiveThought",
               "CounterfactualThought",
@@ -8987,47 +9441,6 @@
         ],
         "classes": [
           "ExportService"
-        ]
-      },
-      "src/services/index.ts": {
-        "description": "Services module exports (v3.4.5)",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./ThoughtFactory.js",
-            "imports": [
-              "ThoughtFactory",
-              "ThoughtFactoryConfig"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./ExportService.js",
-            "imports": [
-              "ExportService"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./ModeRouter.js",
-            "imports": [
-              "ModeRouter"
-            ],
-            "reExport": true
-          }
-        ],
-        "exports": [
-          "ThoughtFactory",
-          "ThoughtFactoryConfig",
-          "ExportService",
-          "ModeRouter"
-        ],
-        "reExported": [
-          "ThoughtFactory",
-          "ThoughtFactoryConfig",
-          "ExportService",
-          "ModeRouter"
         ]
       },
       "src/services/MetaMonitor.ts": {
@@ -9198,9 +9611,85 @@
         "interfaces": [
           "ThoughtFactoryConfig"
         ]
+      },
+      "src/services/index.ts": {
+        "description": "Services module exports (v3.4.5)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./ThoughtFactory.js",
+            "imports": [
+              "ThoughtFactory",
+              "ThoughtFactoryConfig"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ExportService.js",
+            "imports": [
+              "ExportService"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./ModeRouter.js",
+            "imports": [
+              "ModeRouter"
+            ],
+            "reExport": true
+          }
+        ],
+        "exports": [
+          "ThoughtFactory",
+          "ThoughtFactoryConfig",
+          "ExportService",
+          "ModeRouter"
+        ],
+        "reExported": [
+          "ThoughtFactory",
+          "ThoughtFactoryConfig",
+          "ExportService",
+          "ModeRouter"
+        ]
       }
     },
     "session": {
+      "src/session/SessionMetricsCalculator.ts": {
+        "description": "Session Metrics Calculator (v3.4.5)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/index.js",
+            "imports": [
+              "ThinkingSession",
+              "SessionMetrics",
+              "Thought"
+            ]
+          },
+          {
+            "file": "../types/core.js",
+            "imports": [
+              "isTemporalThought",
+              "isGameTheoryThought",
+              "isEvidentialThought"
+            ]
+          },
+          {
+            "file": "../validation/cache.js",
+            "imports": [
+              "validationCache"
+            ]
+          }
+        ],
+        "exports": [
+          "SessionMetricsCalculator"
+        ],
+        "classes": [
+          "SessionMetricsCalculator"
+        ]
+      },
       "src/session/index.ts": {
         "description": "Session module exports (v4.3.0)",
         "externalDependencies": [],
@@ -9315,41 +9804,6 @@
         ],
         "classes": [
           "SessionManager"
-        ]
-      },
-      "src/session/SessionMetricsCalculator.ts": {
-        "description": "Session Metrics Calculator (v3.4.5)",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../types/index.js",
-            "imports": [
-              "ThinkingSession",
-              "SessionMetrics",
-              "Thought"
-            ]
-          },
-          {
-            "file": "../types/core.js",
-            "imports": [
-              "isTemporalThought",
-              "isGameTheoryThought",
-              "isEvidentialThought"
-            ]
-          },
-          {
-            "file": "../validation/cache.js",
-            "imports": [
-              "validationCache"
-            ]
-          }
-        ],
-        "exports": [
-          "SessionMetricsCalculator"
-        ],
-        "classes": [
-          "SessionMetricsCalculator"
         ]
       },
       "src/session/storage/file-store.ts": {
@@ -13082,7 +13536,7 @@
           {
             "file": "./schema-utils.js",
             "imports": [
-              "// Primitive schemas\r\n  probabilitySchema",
+              "// Primitive schemas\n  probabilitySchema",
               "confidenceSchema",
               "progressSchema",
               "weightSchema",
@@ -13091,7 +13545,7 @@
               "nonEmptyStringSchema",
               "uuidSchema",
               "timestampSchema",
-              "// Composite schemas - Hypothesis & Evidence\r\n  hypothesisSchema",
+              "// Composite schemas - Hypothesis & Evidence\n  hypothesisSchema",
               "probabilityWithJustificationSchema",
               "probabilityWithCalculationSchema",
               "evidenceSchema",
@@ -13101,7 +13555,7 @@
               "type ProbabilityWithCalculation",
               "type EvidenceInput",
               "type EvidenceWithSupport",
-              "// Graph schemas\r\n  createNodeSchema",
+              "// Graph schemas\n  createNodeSchema",
               "createEdgeSchema",
               "nodeSchema",
               "weightedNodeSchema",
@@ -13113,48 +13567,48 @@
               "type EdgeInput",
               "type WeightedEdgeInput",
               "type CausalEdgeInput",
-              "// Temporal schemas\r\n  timePointSchema",
+              "// Temporal schemas\n  timePointSchema",
               "timeIntervalSchema",
               "temporalEventSchema",
               "type TimePointInput",
               "type TimeIntervalInput",
               "type TemporalEventInput",
-              "// Mathematical schemas\r\n  mathExpressionSchema",
+              "// Mathematical schemas\n  mathExpressionSchema",
               "valueWithUnitSchema",
               "measurementSchema",
               "type MathExpressionInput",
               "type ValueWithUnitInput",
               "type MeasurementInput",
-              "// Game Theory schemas\r\n  playerSchema",
+              "// Game Theory schemas\n  playerSchema",
               "strategySchema",
               "payoffSchema",
               "type PlayerInput",
               "type StrategyInput",
               "type PayoffInput",
-              "// Reasoning schemas\r\n  reasoningStepSchema",
+              "// Reasoning schemas\n  reasoningStepSchema",
               "propositionSchema",
               "inferenceRuleSchema",
               "type ReasoningStepInput",
               "type PropositionInput",
               "type InferenceRuleInput",
-              "// Optimization schemas\r\n  constraintSchema",
+              "// Optimization schemas\n  constraintSchema",
               "objectiveSchema",
               "solutionSchema",
               "type ConstraintInput",
               "type ObjectiveInput",
               "type SolutionInput",
-              "// Base schemas\r\n  baseThoughtSchema",
+              "// Base schemas\n  baseThoughtSchema",
               "sequentialThoughtExtensionSchema",
               "bayesianThoughtExtensionSchema",
               "type BaseThoughtInput",
-              "// Helpers\r\n  createRangeSchema",
+              "// Helpers\n  createRangeSchema",
               "createEnumSchema",
               "createOptionalStringWithDefault",
               "createOptionalNumberWithDefault",
               "createOptionalBooleanWithDefault",
               "uniqueIdArraySchema",
               "createGraphSchema",
-              "// Namespace export\r\n  SchemaUtils"
+              "// Namespace export\n  SchemaUtils"
             ],
             "reExport": true
           }
@@ -13189,7 +13643,7 @@
           "type BatchOperationInput",
           "validateInput",
           "safeValidateInput",
-          "// Primitive schemas\r\n  probabilitySchema",
+          "// Primitive schemas\n  probabilitySchema",
           "confidenceSchema",
           "progressSchema",
           "weightSchema",
@@ -13198,7 +13652,7 @@
           "nonEmptyStringSchema",
           "uuidSchema",
           "timestampSchema",
-          "// Composite schemas - Hypothesis & Evidence\r\n  hypothesisSchema",
+          "// Composite schemas - Hypothesis & Evidence\n  hypothesisSchema",
           "probabilityWithJustificationSchema",
           "probabilityWithCalculationSchema",
           "evidenceSchema",
@@ -13208,7 +13662,7 @@
           "type ProbabilityWithCalculation",
           "type EvidenceInput",
           "type EvidenceWithSupport",
-          "// Graph schemas\r\n  createNodeSchema",
+          "// Graph schemas\n  createNodeSchema",
           "createEdgeSchema",
           "nodeSchema",
           "weightedNodeSchema",
@@ -13220,48 +13674,48 @@
           "type EdgeInput",
           "type WeightedEdgeInput",
           "type CausalEdgeInput",
-          "// Temporal schemas\r\n  timePointSchema",
+          "// Temporal schemas\n  timePointSchema",
           "timeIntervalSchema",
           "temporalEventSchema",
           "type TimePointInput",
           "type TimeIntervalInput",
           "type TemporalEventInput",
-          "// Mathematical schemas\r\n  mathExpressionSchema",
+          "// Mathematical schemas\n  mathExpressionSchema",
           "valueWithUnitSchema",
           "measurementSchema",
           "type MathExpressionInput",
           "type ValueWithUnitInput",
           "type MeasurementInput",
-          "// Game Theory schemas\r\n  playerSchema",
+          "// Game Theory schemas\n  playerSchema",
           "strategySchema",
           "payoffSchema",
           "type PlayerInput",
           "type StrategyInput",
           "type PayoffInput",
-          "// Reasoning schemas\r\n  reasoningStepSchema",
+          "// Reasoning schemas\n  reasoningStepSchema",
           "propositionSchema",
           "inferenceRuleSchema",
           "type ReasoningStepInput",
           "type PropositionInput",
           "type InferenceRuleInput",
-          "// Optimization schemas\r\n  constraintSchema",
+          "// Optimization schemas\n  constraintSchema",
           "objectiveSchema",
           "solutionSchema",
           "type ConstraintInput",
           "type ObjectiveInput",
           "type SolutionInput",
-          "// Base schemas\r\n  baseThoughtSchema",
+          "// Base schemas\n  baseThoughtSchema",
           "sequentialThoughtExtensionSchema",
           "bayesianThoughtExtensionSchema",
           "type BaseThoughtInput",
-          "// Helpers\r\n  createRangeSchema",
+          "// Helpers\n  createRangeSchema",
           "createEnumSchema",
           "createOptionalStringWithDefault",
           "createOptionalNumberWithDefault",
           "createOptionalBooleanWithDefault",
           "uniqueIdArraySchema",
           "createGraphSchema",
-          "// Namespace export\r\n  SchemaUtils"
+          "// Namespace export\n  SchemaUtils"
         ],
         "reExported": [
           "IssueSeverity",
@@ -13293,7 +13747,7 @@
           "type BatchOperationInput",
           "validateInput",
           "safeValidateInput",
-          "// Primitive schemas\r\n  probabilitySchema",
+          "// Primitive schemas\n  probabilitySchema",
           "confidenceSchema",
           "progressSchema",
           "weightSchema",
@@ -13302,7 +13756,7 @@
           "nonEmptyStringSchema",
           "uuidSchema",
           "timestampSchema",
-          "// Composite schemas - Hypothesis & Evidence\r\n  hypothesisSchema",
+          "// Composite schemas - Hypothesis & Evidence\n  hypothesisSchema",
           "probabilityWithJustificationSchema",
           "probabilityWithCalculationSchema",
           "evidenceSchema",
@@ -13312,7 +13766,7 @@
           "type ProbabilityWithCalculation",
           "type EvidenceInput",
           "type EvidenceWithSupport",
-          "// Graph schemas\r\n  createNodeSchema",
+          "// Graph schemas\n  createNodeSchema",
           "createEdgeSchema",
           "nodeSchema",
           "weightedNodeSchema",
@@ -13324,48 +13778,48 @@
           "type EdgeInput",
           "type WeightedEdgeInput",
           "type CausalEdgeInput",
-          "// Temporal schemas\r\n  timePointSchema",
+          "// Temporal schemas\n  timePointSchema",
           "timeIntervalSchema",
           "temporalEventSchema",
           "type TimePointInput",
           "type TimeIntervalInput",
           "type TemporalEventInput",
-          "// Mathematical schemas\r\n  mathExpressionSchema",
+          "// Mathematical schemas\n  mathExpressionSchema",
           "valueWithUnitSchema",
           "measurementSchema",
           "type MathExpressionInput",
           "type ValueWithUnitInput",
           "type MeasurementInput",
-          "// Game Theory schemas\r\n  playerSchema",
+          "// Game Theory schemas\n  playerSchema",
           "strategySchema",
           "payoffSchema",
           "type PlayerInput",
           "type StrategyInput",
           "type PayoffInput",
-          "// Reasoning schemas\r\n  reasoningStepSchema",
+          "// Reasoning schemas\n  reasoningStepSchema",
           "propositionSchema",
           "inferenceRuleSchema",
           "type ReasoningStepInput",
           "type PropositionInput",
           "type InferenceRuleInput",
-          "// Optimization schemas\r\n  constraintSchema",
+          "// Optimization schemas\n  constraintSchema",
           "objectiveSchema",
           "solutionSchema",
           "type ConstraintInput",
           "type ObjectiveInput",
           "type SolutionInput",
-          "// Base schemas\r\n  baseThoughtSchema",
+          "// Base schemas\n  baseThoughtSchema",
           "sequentialThoughtExtensionSchema",
           "bayesianThoughtExtensionSchema",
           "type BaseThoughtInput",
-          "// Helpers\r\n  createRangeSchema",
+          "// Helpers\n  createRangeSchema",
           "createEnumSchema",
           "createOptionalStringWithDefault",
           "createOptionalNumberWithDefault",
           "createOptionalBooleanWithDefault",
           "uniqueIdArraySchema",
           "createGraphSchema",
-          "// Namespace export\r\n  SchemaUtils"
+          "// Namespace export\n  SchemaUtils"
         ]
       },
       "src/validation/schema-utils.ts": {
@@ -15524,9 +15978,9 @@
         "name": "Repositories",
         "files": [
           "src/repositories/FileSessionRepository.ts",
-          "src/repositories/index.ts",
           "src/repositories/ISessionRepository.ts",
-          "src/repositories/MemorySessionRepository.ts"
+          "src/repositories/MemorySessionRepository.ts",
+          "src/repositories/index.ts"
         ]
       },
       {
@@ -15542,18 +15996,18 @@
         "name": "Services",
         "files": [
           "src/services/ExportService.ts",
-          "src/services/index.ts",
           "src/services/MetaMonitor.ts",
           "src/services/ModeRouter.ts",
-          "src/services/ThoughtFactory.ts"
+          "src/services/ThoughtFactory.ts",
+          "src/services/index.ts"
         ]
       },
       {
         "name": "Session",
         "files": [
+          "src/session/SessionMetricsCalculator.ts",
           "src/session/index.ts",
           "src/session/manager.ts",
-          "src/session/SessionMetricsCalculator.ts",
           "src/session/storage/file-store.ts",
           "src/session/storage/index.ts",
           "src/session/storage/interface.ts"
@@ -15695,11 +16149,11 @@
   "statistics": {
     "totalTypeScriptFiles": 250,
     "totalModules": 16,
-    "totalLinesOfCode": 100542,
-    "totalExports": 1411,
-    "totalClasses": 136,
-    "totalInterfaces": 506,
-    "totalFunctions": 442,
+    "totalLinesOfCode": 105125,
+    "totalExports": 1426,
+    "totalClasses": 150,
+    "totalInterfaces": 533,
+    "totalFunctions": 443,
     "totalTypeGuards": 85,
     "totalEnums": 3,
     "totalConstants": 167,

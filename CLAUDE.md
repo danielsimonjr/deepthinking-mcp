@@ -12,15 +12,16 @@ DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring *
 
 | Metric | Value |
 |--------|-------|
-| TypeScript Files | 222 |
-| Lines of Code | ~92,000 |
-| Total Exports | 1150 (525 re-exports) |
-| Passing Tests | 4686 (170 test files) |
+| TypeScript Files | 250 |
+| Lines of Code | ~105,000 |
+| Total Exports | 1,426 (684 re-exports) |
+| Passing Tests | 4,686 (170 test files) |
 | Reasoning Modes | 33 (29 with dedicated types + 4 advanced runtime) |
 | MCP Tools | 13 focused (includes deepthinking_analyze) |
 | Export Formats | 8 + native SVG + file export |
-| Visual Exporters | 25+ mode-specific files |
-| Specialized Handlers | 36 (33 modes + GenericModeHandler + CustomHandler) |
+| Visual Exporters | 41 files (23 mode-specific) |
+| Specialized Handlers | 36 (33 modes + GenericModeHandler + CustomHandler + utility) |
+| Builder Classes | 14 fluent APIs (Phase 13 complete) |
 | Circular Dependencies | 55 (all type-only, 0 runtime) |
 
 ## Build & Development Commands

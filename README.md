@@ -6,13 +6,13 @@
 
 A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning modes** (29 with dedicated thought types, 4 advanced runtime modes) including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
-> 📋 **Latest Release**: v8.3.2 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
+> 📋 **Latest Release**: v8.5.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
 >
-> 🎉 **New in v8.3.x**: Multi-instance support with file locking, chunker utility for large file management, mode scaffolding templates for v8+ architecture, comprehensive test coverage (3500+ tests).
+> 🎉 **New in v8.5.x**: Phase 13 Visual Exporter Refactoring complete - 14 fluent builder classes (DOTGraphBuilder, MermaidGraphBuilder, MermaidGanttBuilder, MermaidStateDiagramBuilder, ASCIIDocBuilder, SVGBuilder, TikZBuilder, and more). 100% builder adoption across all 22 mode exporters.
 >
-> ✨ **v8.2.x**: Phase 10 ModeHandler Architecture with 7 specialized handlers - Systems Archetypes detection, Socratic question framework, automatic Bayesian posterior calculation, Nash equilibria computation.
+> ✨ **v8.4.0**: Complete ModeHandler coverage - all 33 reasoning modes now have specialized handlers (36 total handlers).
 >
-> ✨ **v8.0.0**: ModeHandler infrastructure with Strategy pattern for mode-specific processing.
+> ✨ **v8.3.x**: Multi-instance support with file locking, chunker utility, mode scaffolding templates, 4600+ tests passing.
 
 ## Table of Contents
 
@@ -30,8 +30,9 @@ A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning mod
 ## Features
 
 - **33 Specialized Reasoning Modes** - From sequential thinking to game theory, formal logic, and meta-reasoning (29 with full thought types, 4 advanced runtime modes)
-- **ModeHandler Architecture (v8.x)** - Strategy pattern with 36 handlers (7 specialized + 29 generic) providing advanced validation and enhancements
+- **ModeHandler Architecture (v8.x)** - Strategy pattern with 36 specialized handlers providing advanced validation and enhancements for all 33 modes
 - **Specialized Handler Enhancements** - Systems Archetypes (8 patterns), Socratic Questions (6 categories), auto Bayesian posteriors, Nash equilibria
+- **Visual Builder APIs (v8.5.0)** - 14 fluent builder classes: DOTGraphBuilder, MermaidGraphBuilder, MermaidGanttBuilder, MermaidStateDiagramBuilder, ASCIIDocBuilder, SVGBuilder, TikZBuilder, UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder, GraphMLBuilder, SVGGroupBuilder
 - **Academic Research Modes** - Synthesis (literature review), Argumentation (Toulmin), Critique (peer review), Analysis (qualitative methods)
 - **Algorithmic Reasoning** - Comprehensive CLRS coverage with 100+ named algorithms, complexity analysis, design patterns
 - **Historical Computing Extensions** - Computability (Turing machines), Cryptanalytic (decibans), extended Game Theory (von Neumann)
@@ -116,7 +117,7 @@ Configure the server with environment variables:
 
 ### MCP Tool Usage
 
-DeepThinking MCP provides 12 focused tools for different reasoning domains:
+DeepThinking MCP provides 13 focused tools for different reasoning domains:
 
 | Tool | Modes | Description |
 |------|-------|-------------|
@@ -132,6 +133,7 @@ DeepThinking MCP provides 12 focused tools for different reasoning domains:
 | `deepthinking_engineering` | engineering, algorithmic | Engineering/algorithmic |
 | `deepthinking_academic` | synthesis, argumentation, critique, analysis | Academic research |
 | `deepthinking_session` | - | Session management |
+| `deepthinking_analyze` | Multi-mode | Analysis with presets and merge strategies |
 
 ### Example: Sequential Reasoning
 
@@ -831,18 +833,19 @@ For architecture details, see [docs/architecture/](docs/architecture/).
 
 | Metric | Value |
 |--------|-------|
-| TypeScript Files | 221 |
-| Lines of Code | ~87,000 |
-| Test Files | 143 |
-| Passing Tests | 3,539 |
+| TypeScript Files | 250 |
+| Lines of Code | ~105,000 |
+| Test Files | 170 |
+| Passing Tests | 4,686 |
 | Thinking Modes | 33 (29 with thought types) |
-| ModeHandlers | 36 (7 specialized + 29 generic) |
-| MCP Tools | 12 focused + 1 legacy |
-| Export Formats | 8 (including native SVG) |
-| Visual Exporters | 41 mode-specific files |
+| ModeHandlers | 36 specialized handlers |
+| MCP Tools | 13 focused tools |
+| Export Formats | 8 + native SVG |
+| Visual Exporters | 41 files (23 mode-specific) |
+| Builder Classes | 14 fluent APIs |
 | Reasoning Types | 69 (110 planned) |
 | Modules | 16 |
-| Total Exports | 1,134 (519 re-exports) |
+| Total Exports | 1,426 (684 re-exports) |
 
 ## Architecture
 
@@ -862,7 +865,7 @@ src/
 │   └── ModeRouter.ts        # Mode switching and recommendations
 ├── session/           # SessionManager, persistence, storage
 ├── modes/             # ModeHandler architecture (v8.x)
-│   ├── handlers/            # 36 handlers (7 specialized + 29 generic)
+│   ├── handlers/            # 36 specialized handlers (all modes covered)
 │   │   ├── CausalHandler.ts        # Graph validation, cycle detection
 │   │   ├── BayesianHandler.ts      # Auto posterior calculation
 │   │   ├── GameTheoryHandler.ts    # Nash equilibria detection
@@ -870,7 +873,7 @@ src/
 │   │   ├── SynthesisHandler.ts     # Source coverage tracking
 │   │   ├── SystemsThinkingHandler.ts # 8 Systems Archetypes
 │   │   ├── CritiqueHandler.ts      # 6 Socratic categories
-│   │   └── [29 GenericModeHandlers] # One per remaining mode
+│   │   └── [+ 29 more specialized handlers]
 │   └── base/                # ModeHandler interface, registry
 ├── proof/             # Proof decomposition system (v7.0.0)
 │   ├── decomposer.ts        # ProofDecomposer class
@@ -883,7 +886,7 @@ src/
 
 ### ModeHandler Architecture (v8.x)
 
-Phase 10 introduced the ModeHandler pattern (Strategy pattern) for mode-specific processing:
+Phase 10 introduced the ModeHandler pattern (Strategy pattern) for mode-specific processing, with **all 33 modes fully covered as of v8.4.0**:
 
 ```typescript
 // Handler interface
@@ -894,16 +897,17 @@ interface ModeHandler {
   getSuggestions(thought: Thought): string[];
 }
 
-// Registry manages all handlers
+// Registry manages all 36 handlers
 const registry = ModeHandlerRegistry.getInstance();
-registry.hasSpecializedHandler('causal'); // true for 7 modes
+registry.hasSpecializedHandler('causal'); // true for ALL 33 modes
 ```
 
 **Benefits:**
-- Specialized validation logic per mode
+- All 33 modes have specialized validation logic
 - Automatic enhancements (posteriors, equilibria, archetypes)
 - Mode-specific suggestions and warnings
 - Clean separation from ThoughtFactory switch statement
+- 36 total handlers (33 modes + GenericModeHandler + CustomHandler + utility handlers)
 
 ### Feature Modules
 

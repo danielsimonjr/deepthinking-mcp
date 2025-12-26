@@ -4,7 +4,7 @@
 
 DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 33 specialized thinking modes (29 with dedicated thought types). The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, meta-reasoning for strategic oversight, enterprise security features, proof decomposition for mathematical reasoning, and comprehensive export capabilities including native SVG generation.
 
-**Version**: 8.3.2 | **Node**: >=18.0.0 | **License**: MIT
+**Version**: 8.5.0 | **Node**: >=18.0.0 | **License**: MIT
 
 ---
 
@@ -12,18 +12,19 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~89,490 |
-| TypeScript Files | 221 |
-| Test Files | 143 |
-| Passing Tests | 3539 |
+| Total Lines of Code | ~105,000 |
+| TypeScript Files | 250 |
+| Test Files | 170 |
+| Passing Tests | 4,686 |
 | Type Suppressions | 0 |
 | Thinking Modes | 33 (29 with thought types) |
-| Specialized Handlers | 7 |
-| MCP Tools | 12 focused + 1 legacy |
-| Export Formats | 8 (including native SVG) |
-| Visual Exporters | 35+ mode-specific |
+| Specialized Handlers | 36 (all modes covered) |
+| MCP Tools | 13 focused |
+| Export Formats | 8 + native SVG |
+| Visual Exporters | 41 files (23 mode-specific) |
+| Builder Classes | 14 fluent APIs |
 | Reasoning Types | 69 (110 planned) |
-| Total Exports | 1117 (515 re-exports) |
+| Total Exports | 1,426 (684 re-exports) |
 | Modules | 16 |
 | Circular Dependencies | 55 (all type-only, 0 runtime) |
 

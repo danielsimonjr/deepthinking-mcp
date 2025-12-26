@@ -4,7 +4,7 @@
 
 DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced reasoning capabilities through 33 thinking modes (29 with dedicated thought types) with meta-reasoning for strategic oversight. The architecture follows a modular, service-oriented design with clear separation of concerns.
 
-**Version**: 8.3.2 | **Node**: >=18.0.0
+**Version**: 8.5.0 | **Node**: >=18.0.0
 
 ## High-Level Architecture
 
@@ -16,13 +16,14 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
 ┌───────────────────┴─────────────────────────────────────────┐
 │                   MCP Server (index.ts)                     │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │              12 Focused Tool Handlers (v7.5.0+)        │ │
+│  │              13 Focused Tool Handlers (v8.5.0)         │ │
 │  │  • deepthinking_core         • deepthinking_standard   │ │
 │  │  • deepthinking_mathematics  • deepthinking_temporal   │ │
 │  │  • deepthinking_probabilistic • deepthinking_causal    │ │
 │  │  • deepthinking_strategic    • deepthinking_analytical │ │
 │  │  • deepthinking_scientific   • deepthinking_engineering│ │
 │  │  • deepthinking_academic     • deepthinking_session    │ │
+│  │  • deepthinking_analyze                                │ │
 │  └────────────────────────────────────────────────────────┘ │
 └───────┬──────────┬──────────┬───────────┬───────────────────┘
         │          │          │           │
@@ -33,7 +34,8 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
         │           │           │            │
         │      ┌────▼───────────▼────┐       │
         │      │ Visual Exporters    │       │
-        │      │ (21 mode-specific)  │       │
+        │      │ (23 mode-specific)  │       │
+        │      │ 14 Builder Classes  │       │
         │      └─────────────────────┘       │
         │                  │                 │
         │           ┌──────▼──────┐          │
@@ -47,7 +49,7 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
         │              │               │
    ┌────▼──────┐  ┌────▼──────┐  ┌────▼─────────┐
    │  Storage  │  │ Validation │  │  Type System │
-   │   Layer   │  │   Layer    │  │  (27 Modes)  │
+   │   Layer   │  │   Layer    │  │  (33 Modes)  │
    └───────────┘  │ (Lazy Load)│  └──────────────┘
                   └────────────┘
 ```

@@ -6,9 +6,10 @@ This document outlines the refactoring of the visual exporter module to adopt ex
 
 The `sequential.ts` file (Phase 11 refactor) demonstrates the target pattern: it imports and uses all utility modules, resulting in cleaner, more maintainable code. Currently, 21 out of 22 mode exporters ignore these utilities and duplicate the same logic inline.
 
-**Status**: Planned
+**Status**: ✅ COMPLETE (v8.5.0, 2025-12-26)
 **Priority**: Medium
-**Estimated Effort**: 67 hours across 10 sprints (see `PHASE_13_*.json` for detailed breakdown)
+**Actual Effort**: Completed across 9 sprints (Sprint 10 - file splitting - deferred)
+**Result**: 22/22 mode exporters refactored, 14 builder classes created, 100% builder adoption
 
 > **Note**: This plan was restructured from the original 3-sprint estimate to 10 granular sprints with 4-5 tasks each for better tracking. See `PHASE_13_INDEX.json` for the current sprint structure.
 

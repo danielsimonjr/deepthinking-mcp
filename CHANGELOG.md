@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+*No unreleased changes*
+
+---
+
+## [8.5.0] - 2025-12-26
+
+### Summary
+
+**Phase 13 Visual Exporter Refactoring COMPLETE** - All 22 mode exporters now use fluent builder APIs. 14 builder classes total.
+
+| Metric | Value |
+|--------|-------|
+| TypeScript Files | 250 |
+| Lines of Code | ~105,000 |
+| Test Files | 170 |
+| Passing Tests | 4,686 |
+| Builder Classes | 14 |
+| Mode Exporters Refactored | 22/22 (100%) |
+
 ### Changed - Phase 13 Sprint 9: Mode Exporter Refactoring (Final Batch)
 
 **Refactored 5 Mode Exporters to Use Builder Classes**
