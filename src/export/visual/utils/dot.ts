@@ -1,6 +1,7 @@
 /**
- * DOT/GraphViz Utilities (v7.1.0)
+ * DOT/GraphViz Utilities (v8.5.0)
  * Shared utility functions for DOT graph generation across all visual exporters
+ * Phase 13: Added DOTGraphBuilder fluent API
  */
 
 // =============================================================================
@@ -590,4 +591,354 @@ export function generateNetworkDot(
     splines: 'spline',
     overlap: 'scale',
   });
+}
+
+// =============================================================================
+// DOTGraphBuilder - Fluent API Builder Class (Phase 13)
+// =============================================================================
+
+/**
+ * Fluent API builder for DOT graphs
+ *
+ * Provides a chainable interface for constructing DOT graphs,
+ * wrapping the existing utility functions for easier use.
+ *
+ * @example
+ * ```typescript
+ * const dot = new DOTGraphBuilder()
+ *   .setOptions({ rankDir: 'LR', graphName: 'MyGraph' })
+ *   .addNode({ id: 'a', label: 'Node A', shape: 'box' })
+ *   .addNode({ id: 'b', label: 'Node B', shape: 'ellipse' })
+ *   .addEdge({ source: 'a', target: 'b', label: 'connects' })
+ *   .render();
+ * ```
+ */
+export class DOTGraphBuilder {
+  private nodes: DotNode[] = [];
+  private edges: DotEdge[] = [];
+  private subgraphs: DotSubgraph[] = [];
+  private options: DotOptions = {};
+
+  /**
+   * Add a node to the graph
+   * @param node - The node definition
+   * @returns this for chaining
+   */
+  addNode(node: DotNode): this {
+    this.nodes.push(node);
+    return this;
+  }
+
+  /**
+   * Add multiple nodes to the graph
+   * @param nodes - Array of node definitions
+   * @returns this for chaining
+   */
+  addNodes(nodes: DotNode[]): this {
+    this.nodes.push(...nodes);
+    return this;
+  }
+
+  /**
+   * Add an edge to the graph
+   * @param edge - The edge definition
+   * @returns this for chaining
+   */
+  addEdge(edge: DotEdge): this {
+    this.edges.push(edge);
+    return this;
+  }
+
+  /**
+   * Add multiple edges to the graph
+   * @param edges - Array of edge definitions
+   * @returns this for chaining
+   */
+  addEdges(edges: DotEdge[]): this {
+    this.edges.push(...edges);
+    return this;
+  }
+
+  /**
+   * Add a subgraph (cluster) to the graph
+   * @param subgraph - The subgraph definition
+   * @returns this for chaining
+   */
+  addSubgraph(subgraph: DotSubgraph): this {
+    this.subgraphs.push(subgraph);
+    return this;
+  }
+
+  /**
+   * Add multiple subgraphs to the graph
+   * @param subgraphs - Array of subgraph definitions
+   * @returns this for chaining
+   */
+  addSubgraphs(subgraphs: DotSubgraph[]): this {
+    this.subgraphs.push(...subgraphs);
+    return this;
+  }
+
+  /**
+   * Set or merge graph options
+   * @param options - Graph options to set/merge
+   * @returns this for chaining
+   */
+  setOptions(options: DotOptions): this {
+    this.options = { ...this.options, ...options };
+    return this;
+  }
+
+  /**
+   * Set the graph name
+   * @param name - The graph name
+   * @returns this for chaining
+   */
+  setGraphName(name: string): this {
+    this.options.graphName = name;
+    return this;
+  }
+
+  /**
+   * Set the rank direction
+   * @param direction - The rank direction (TB, BT, LR, RL)
+   * @returns this for chaining
+   */
+  setRankDir(direction: DotRankDir): this {
+    this.options.rankDir = direction;
+    return this;
+  }
+
+  /**
+   * Set whether the graph is directed
+   * @param directed - true for digraph, false for graph
+   * @returns this for chaining
+   */
+  setDirected(directed: boolean): this {
+    this.options.graphType = directed ? 'digraph' : 'graph';
+    return this;
+  }
+
+  /**
+   * Set default node attributes
+   * @param defaults - Default node attributes
+   * @returns this for chaining
+   */
+  setNodeDefaults(defaults: Partial<DotNode>): this {
+    this.options.nodeDefaults = defaults;
+    return this;
+  }
+
+  /**
+   * Set default edge attributes
+   * @param defaults - Default edge attributes
+   * @returns this for chaining
+   */
+  setEdgeDefaults(defaults: Partial<DotEdge>): this {
+    this.options.edgeDefaults = defaults;
+    return this;
+  }
+
+  /**
+   * Get the current node count
+   */
+  get nodeCount(): number {
+    return this.nodes.length;
+  }
+
+  /**
+   * Get the current edge count
+   */
+  get edgeCount(): number {
+    return this.edges.length;
+  }
+
+  /**
+   * Get the current subgraph count
+   */
+  get subgraphCount(): number {
+    return this.subgraphs.length;
+  }
+
+  /**
+   * Clear all nodes, edges, and subgraphs
+   * @returns this for chaining
+   */
+  clear(): this {
+    this.nodes = [];
+    this.edges = [];
+    this.subgraphs = [];
+    return this;
+  }
+
+  /**
+   * Reset options to defaults
+   * @returns this for chaining
+   */
+  resetOptions(): this {
+    this.options = {};
+    return this;
+  }
+
+  /**
+   * Render the graph as a DOT string
+   *
+   * If subgraphs are present, they are rendered inline within the graph.
+   * Nodes not in subgraphs are rendered first, followed by subgraphs,
+   * then edges.
+   *
+   * @returns The complete DOT graph string
+   */
+  render(): string {
+    const {
+      graphType = 'digraph',
+      graphName = 'G',
+      rankDir = 'TB',
+      splines,
+      overlap,
+      concentrate,
+      compound,
+      bgcolor,
+      fontName,
+      fontSize,
+      nodeDefaults,
+      edgeDefaults,
+    } = this.options;
+
+    const lines: string[] = [];
+    const directed = graphType === 'digraph';
+
+    // Graph header
+    lines.push(`${graphType} ${sanitizeDotId(graphName)} {`);
+
+    // Graph attributes
+    lines.push(`  rankdir=${rankDir};`);
+    if (splines) lines.push(`  splines=${splines};`);
+    if (overlap !== undefined) lines.push(`  overlap=${overlap};`);
+    if (concentrate) lines.push('  concentrate=true;');
+    if (compound) lines.push('  compound=true;');
+    if (bgcolor) lines.push(`  bgcolor="${bgcolor}";`);
+    if (fontName) lines.push(`  fontname="${fontName}";`);
+    if (fontSize) lines.push(`  fontsize=${fontSize};`);
+
+    // Node defaults
+    if (nodeDefaults) {
+      const defaultAttrs: string[] = [];
+      if (nodeDefaults.shape) defaultAttrs.push(`shape=${nodeDefaults.shape}`);
+      if (nodeDefaults.style) {
+        const styleStr = Array.isArray(nodeDefaults.style)
+          ? nodeDefaults.style.join(',')
+          : nodeDefaults.style;
+        defaultAttrs.push(`style="${styleStr}"`);
+      }
+      if (nodeDefaults.fillColor) defaultAttrs.push(`fillcolor="${nodeDefaults.fillColor}"`);
+      if (nodeDefaults.fontName) defaultAttrs.push(`fontname="${nodeDefaults.fontName}"`);
+      if (nodeDefaults.fontSize) defaultAttrs.push(`fontsize=${nodeDefaults.fontSize}`);
+      if (defaultAttrs.length > 0) {
+        lines.push(`  node [${defaultAttrs.join(', ')}];`);
+      }
+    }
+
+    // Edge defaults
+    if (edgeDefaults) {
+      const defaultAttrs: string[] = [];
+      if (edgeDefaults.style) defaultAttrs.push(`style=${edgeDefaults.style}`);
+      if (edgeDefaults.color) defaultAttrs.push(`color="${edgeDefaults.color}"`);
+      if (edgeDefaults.arrowHead) defaultAttrs.push(`arrowhead=${edgeDefaults.arrowHead}`);
+      if (defaultAttrs.length > 0) {
+        lines.push(`  edge [${defaultAttrs.join(', ')}];`);
+      }
+    }
+
+    lines.push('');
+
+    // Collect node IDs that are in subgraphs
+    const nodesInSubgraphs = new Set<string>();
+    for (const subgraph of this.subgraphs) {
+      for (const nodeId of subgraph.nodes) {
+        nodesInSubgraphs.add(nodeId);
+      }
+    }
+
+    // Render nodes not in subgraphs
+    for (const node of this.nodes) {
+      if (!nodesInSubgraphs.has(node.id)) {
+        lines.push(renderDotNode(node));
+      }
+    }
+
+    // Render subgraphs with their nodes
+    if (this.subgraphs.length > 0) {
+      lines.push('');
+      for (const subgraph of this.subgraphs) {
+        // Find full node definitions for nodes in this subgraph
+        const subgraphNodeDefs = this.nodes.filter(n => subgraph.nodes.includes(n.id));
+
+        lines.push(`  subgraph ${sanitizeDotId(`cluster_${subgraph.id}`)} {`);
+        if (subgraph.label) {
+          lines.push(`    label="${escapeDotString(subgraph.label)}";`);
+        }
+        if (subgraph.style) {
+          lines.push(`    style=${subgraph.style};`);
+        }
+        if (subgraph.fillColor) {
+          lines.push(`    fillcolor="${subgraph.fillColor}";`);
+        }
+        if (subgraph.color) {
+          lines.push(`    color="${subgraph.color}";`);
+        }
+        if (subgraph.rank) {
+          lines.push(`    rank=${subgraph.rank};`);
+        }
+
+        // Render node definitions within the subgraph
+        for (const node of subgraphNodeDefs) {
+          const nodeStr = renderDotNode(node);
+          // Adjust indentation for subgraph context
+          lines.push(`  ${nodeStr}`);
+        }
+
+        // Also include any nodes specified by ID only (not in nodes array)
+        for (const nodeId of subgraph.nodes) {
+          if (!subgraphNodeDefs.find(n => n.id === nodeId)) {
+            lines.push(`    ${sanitizeDotId(nodeId)};`);
+          }
+        }
+
+        lines.push('  }');
+      }
+    }
+
+    // Edges
+    if (this.edges.length > 0) {
+      lines.push('');
+      for (const edge of this.edges) {
+        lines.push(renderDotEdge(edge, directed));
+      }
+    }
+
+    lines.push('}');
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Create a builder from existing nodes, edges, and options
+   * Useful for modifying existing graph structures
+   * @param nodes - Initial nodes
+   * @param edges - Initial edges
+   * @param options - Initial options
+   * @returns A new DOTGraphBuilder instance
+   */
+  static from(
+    nodes: DotNode[] = [],
+    edges: DotEdge[] = [],
+    options: DotOptions = {}
+  ): DOTGraphBuilder {
+    const builder = new DOTGraphBuilder();
+    builder.nodes = [...nodes];
+    builder.edges = [...edges];
+    builder.options = { ...options };
+    return builder;
+  }
 }

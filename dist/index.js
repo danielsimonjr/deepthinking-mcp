@@ -2,8 +2,8 @@
 import * as path3 from 'path';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { z } from 'zod';
 import { randomUUID, createHash } from 'crypto';
+import { z } from 'zod';
 import * as fs3 from 'fs';
 import { readFileSync, promises } from 'fs';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -30,786 +30,30 @@ var init_esm_shims = __esm({
   }
 });
 
-// src/tools/thinking.ts
-var thinking_exports = {};
-__export(thinking_exports, {
-  ThinkingToolSchema: () => ThinkingToolSchema,
-  thinkingTool: () => thinkingTool
-});
-var ThinkingToolSchema, thinkingTool;
-var init_thinking = __esm({
-  "src/tools/thinking.ts"() {
+// src/modes/handlers/ModeHandler.ts
+function validationSuccess(warnings = []) {
+  return {
+    valid: true,
+    errors: [],
+    warnings
+  };
+}
+function validationFailure(errors, warnings = []) {
+  return {
+    valid: false,
+    errors,
+    warnings
+  };
+}
+function createValidationError(field, message, code) {
+  return { field, message, code };
+}
+function createValidationWarning(field, message, suggestion) {
+  return { field, message, suggestion };
+}
+var init_ModeHandler = __esm({
+  "src/modes/handlers/ModeHandler.ts"() {
     init_esm_shims();
-    ThinkingToolSchema = z.object({
-      sessionId: z.string().optional(),
-      mode: z.enum(["sequential", "shannon", "mathematics", "physics", "hybrid", "inductive", "deductive", "abductive", "causal", "bayesian", "counterfactual", "analogical", "temporal", "gametheory", "evidential", "firstprinciples", "systemsthinking", "scientificmethod", "optimization", "formallogic"]).default("hybrid"),
-      thought: z.string(),
-      thoughtNumber: z.number().int().positive(),
-      totalThoughts: z.number().int().positive(),
-      nextThoughtNeeded: z.boolean(),
-      isRevision: z.boolean().optional(),
-      revisesThought: z.string().optional(),
-      revisionReason: z.string().optional(),
-      branchFrom: z.string().optional(),
-      branchId: z.string().optional(),
-      stage: z.enum(["problem_definition", "constraints", "model", "proof", "implementation"]).optional(),
-      uncertainty: z.number().min(0).max(1).optional(),
-      dependencies: z.array(z.string()).optional(),
-      assumptions: z.array(z.string()).optional(),
-      thoughtType: z.string().optional(),
-      mathematicalModel: z.object({
-        latex: z.string(),
-        symbolic: z.string(),
-        ascii: z.string().optional()
-      }).optional(),
-      proofStrategy: z.object({
-        type: z.enum(["direct", "contradiction", "induction", "construction", "contrapositive"]),
-        steps: z.array(z.string())
-      }).optional(),
-      tensorProperties: z.object({
-        rank: z.tuple([z.number(), z.number()]),
-        components: z.string(),
-        latex: z.string(),
-        symmetries: z.array(z.string()),
-        invariants: z.array(z.string()),
-        transformation: z.enum(["covariant", "contravariant", "mixed"])
-      }).optional(),
-      physicalInterpretation: z.object({
-        quantity: z.string(),
-        units: z.string(),
-        conservationLaws: z.array(z.string())
-      }).optional(),
-      // Inductive reasoning properties (Phase 5, v5.0.0)
-      pattern: z.string().optional(),
-      generalization: z.string().optional(),
-      confidence: z.number().min(0).max(1).optional(),
-      counterexamples: z.array(z.string()).optional(),
-      sampleSize: z.number().int().min(1).optional(),
-      // Deductive reasoning properties (Phase 5, v5.0.0)
-      premises: z.array(z.string()).optional(),
-      logicForm: z.string().optional(),
-      validityCheck: z.boolean().optional(),
-      soundnessCheck: z.boolean().optional(),
-      // Abductive reasoning properties (v2.0)
-      observations: z.union([
-        z.array(z.string()),
-        // For inductive reasoning - simple strings
-        z.array(z.object({
-          // For abductive reasoning - structured objects
-          id: z.string(),
-          description: z.string(),
-          confidence: z.number().min(0).max(1)
-        }))
-      ]).optional(),
-      hypotheses: z.array(z.object({
-        id: z.string(),
-        // Abductive fields
-        explanation: z.string().optional(),
-        assumptions: z.array(z.string()).optional(),
-        predictions: z.array(z.string()).optional(),
-        score: z.number().optional(),
-        // Evidential fields
-        name: z.string().optional(),
-        description: z.string().optional(),
-        mutuallyExclusive: z.boolean().optional(),
-        subsets: z.array(z.string()).optional()
-      })).optional(),
-      evaluationCriteria: z.object({
-        parsimony: z.number(),
-        explanatoryPower: z.number(),
-        plausibility: z.number(),
-        testability: z.boolean()
-      }).optional(),
-      evidence: z.array(z.object({
-        id: z.string(),
-        description: z.string(),
-        // Abductive fields
-        hypothesisId: z.string().optional(),
-        type: z.enum(["supporting", "contradicting", "neutral"]).optional(),
-        strength: z.number().min(0).max(1).optional(),
-        // Evidential fields
-        source: z.string().optional(),
-        reliability: z.number().min(0).max(1).optional(),
-        timestamp: z.number().optional(),
-        supports: z.array(z.string()).optional(),
-        contradicts: z.array(z.string()).optional()
-      })).optional(),
-      bestExplanation: z.object({
-        id: z.string(),
-        explanation: z.string(),
-        assumptions: z.array(z.string()),
-        predictions: z.array(z.string()),
-        score: z.number()
-      }).optional(),
-      // Causal reasoning properties (v2.0)
-      causalGraph: z.object({
-        nodes: z.array(z.object({
-          id: z.string(),
-          name: z.string(),
-          type: z.enum(["cause", "effect", "mediator", "confounder"]),
-          description: z.string()
-        })),
-        edges: z.array(z.object({
-          from: z.string(),
-          to: z.string(),
-          strength: z.number(),
-          confidence: z.number().min(0).max(1)
-        }))
-      }).optional(),
-      interventions: z.array(z.object({
-        nodeId: z.string(),
-        action: z.string(),
-        expectedEffects: z.array(z.object({
-          nodeId: z.string(),
-          expectedChange: z.string(),
-          confidence: z.number()
-        }))
-      })).optional(),
-      mechanisms: z.array(z.object({
-        from: z.string(),
-        to: z.string(),
-        description: z.string(),
-        type: z.enum(["direct", "indirect", "feedback"])
-      })).optional(),
-      confounders: z.array(z.object({
-        nodeId: z.string(),
-        affects: z.array(z.string()),
-        description: z.string()
-      })).optional(),
-      // Bayesian reasoning properties (v2.0)
-      hypothesis: z.object({
-        id: z.string(),
-        statement: z.string()
-      }).optional(),
-      prior: z.object({
-        probability: z.number().min(0).max(1),
-        justification: z.string()
-      }).optional(),
-      likelihood: z.object({
-        probability: z.number().min(0).max(1),
-        description: z.string()
-      }).optional(),
-      posterior: z.object({
-        probability: z.number().min(0).max(1),
-        calculation: z.string()
-      }).optional(),
-      bayesFactor: z.number().optional(),
-      // Counterfactual reasoning properties (v2.0)
-      actual: z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        conditions: z.array(z.object({
-          factor: z.string(),
-          value: z.string()
-        })),
-        outcomes: z.array(z.object({
-          description: z.string(),
-          impact: z.enum(["positive", "negative", "neutral"]),
-          magnitude: z.number().optional()
-        }))
-      }).optional(),
-      counterfactuals: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        conditions: z.array(z.object({
-          factor: z.string(),
-          value: z.string()
-        })),
-        outcomes: z.array(z.object({
-          description: z.string(),
-          impact: z.enum(["positive", "negative", "neutral"]),
-          magnitude: z.number().optional()
-        }))
-      })).optional(),
-      comparison: z.object({
-        differences: z.array(z.object({
-          aspect: z.string(),
-          actual: z.string(),
-          counterfactual: z.string(),
-          significance: z.enum(["high", "medium", "low"])
-        })),
-        insights: z.array(z.string()),
-        lessons: z.array(z.string())
-      }).optional(),
-      interventionPoint: z.object({
-        description: z.string(),
-        alternatives: z.array(z.string())
-      }).optional(),
-      causalChains: z.array(z.object({
-        intervention: z.string(),
-        steps: z.array(z.string()),
-        finalOutcome: z.string()
-      })).optional(),
-      // Analogical reasoning properties (v2.0)
-      sourceDomain: z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        entities: z.array(z.object({
-          id: z.string(),
-          name: z.string(),
-          type: z.string()
-        })),
-        relations: z.array(z.object({
-          id: z.string(),
-          type: z.string(),
-          from: z.string(),
-          to: z.string()
-        }))
-      }).optional(),
-      targetDomain: z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        entities: z.array(z.object({
-          id: z.string(),
-          name: z.string(),
-          type: z.string()
-        })),
-        relations: z.array(z.object({
-          id: z.string(),
-          type: z.string(),
-          from: z.string(),
-          to: z.string()
-        }))
-      }).optional(),
-      mapping: z.array(z.object({
-        sourceEntityId: z.string(),
-        targetEntityId: z.string(),
-        justification: z.string(),
-        confidence: z.number().min(0).max(1)
-      })).optional(),
-      insights: z.array(z.object({
-        description: z.string(),
-        sourceEvidence: z.string(),
-        targetApplication: z.string()
-      })).optional(),
-      inferences: z.array(z.object({
-        sourcePattern: z.string(),
-        targetPrediction: z.string(),
-        confidence: z.number().min(0).max(1),
-        needsVerification: z.boolean()
-      })).optional(),
-      limitations: z.array(z.string()).optional(),
-      analogyStrength: z.number().min(0).max(1).optional(),
-      // Temporal reasoning properties (Phase 3, v2.1)
-      timeline: z.object({
-        id: z.string(),
-        name: z.string(),
-        timeUnit: z.enum(["milliseconds", "seconds", "minutes", "hours", "days", "months", "years"]),
-        startTime: z.number().optional(),
-        endTime: z.number().optional(),
-        events: z.array(z.string())
-      }).optional(),
-      events: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        timestamp: z.number(),
-        duration: z.number().optional(),
-        type: z.enum(["instant", "interval"]),
-        properties: z.record(z.string(), z.any())
-      })).optional(),
-      intervals: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        start: z.number(),
-        end: z.number(),
-        overlaps: z.array(z.string()).optional(),
-        contains: z.array(z.string()).optional()
-      })).optional(),
-      constraints: z.array(z.object({
-        id: z.string(),
-        type: z.enum(["before", "after", "during", "overlaps", "meets", "starts", "finishes", "equals"]),
-        subject: z.string(),
-        object: z.string(),
-        confidence: z.number().min(0).max(1)
-      })).optional(),
-      relations: z.array(z.object({
-        id: z.string(),
-        from: z.string(),
-        to: z.string(),
-        relationType: z.enum(["causes", "enables", "prevents", "precedes", "follows"]),
-        strength: z.number().min(0).max(1),
-        delay: z.number().optional()
-      })).optional(),
-      // Game theory properties (Phase 3, v2.2)
-      game: z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        type: z.enum(["normal_form", "extensive_form", "cooperative", "non_cooperative"]),
-        numPlayers: z.number().int().min(2),
-        isZeroSum: z.boolean(),
-        isPerfectInformation: z.boolean()
-      }).optional(),
-      players: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        role: z.string().optional(),
-        isRational: z.boolean(),
-        availableStrategies: z.array(z.string())
-      })).optional(),
-      strategies: z.array(z.object({
-        id: z.string(),
-        playerId: z.string(),
-        name: z.string(),
-        description: z.string(),
-        isPure: z.boolean(),
-        probability: z.number().min(0).max(1).optional()
-      })).optional(),
-      payoffMatrix: z.object({
-        players: z.array(z.string()),
-        dimensions: z.array(z.number()),
-        payoffs: z.array(z.object({
-          strategyProfile: z.array(z.string()),
-          payoffs: z.array(z.number())
-        }))
-      }).optional(),
-      nashEquilibria: z.array(z.object({
-        id: z.string(),
-        strategyProfile: z.array(z.string()),
-        payoffs: z.array(z.number()),
-        type: z.enum(["pure", "mixed"]),
-        isStrict: z.boolean(),
-        stability: z.number().min(0).max(1)
-      })).optional(),
-      dominantStrategies: z.array(z.object({
-        playerId: z.string(),
-        strategyId: z.string(),
-        type: z.enum(["strictly_dominant", "weakly_dominant"]),
-        dominatesStrategies: z.array(z.string()),
-        justification: z.string()
-      })).optional(),
-      gameTree: z.object({
-        rootNode: z.string(),
-        nodes: z.array(z.object({
-          id: z.string(),
-          type: z.enum(["decision", "chance", "terminal"]),
-          playerId: z.string().optional(),
-          parentNode: z.string().optional(),
-          childNodes: z.array(z.string()),
-          action: z.string().optional(),
-          probability: z.number().min(0).max(1).optional(),
-          payoffs: z.array(z.number()).optional()
-        })),
-        informationSets: z.array(z.object({
-          id: z.string(),
-          playerId: z.string(),
-          nodes: z.array(z.string()),
-          availableActions: z.array(z.string())
-        })).optional()
-      }).optional(),
-      // Evidential properties (Phase 3, v2.3)
-      frameOfDiscernment: z.array(z.string()).optional(),
-      beliefFunctions: z.array(z.object({
-        id: z.string(),
-        source: z.string(),
-        massAssignments: z.array(z.object({
-          hypothesisSet: z.array(z.string()),
-          mass: z.number().min(0).max(1),
-          justification: z.string()
-        })),
-        conflictMass: z.number().optional()
-      })).optional(),
-      combinedBelief: z.object({
-        id: z.string(),
-        source: z.string(),
-        massAssignments: z.array(z.object({
-          hypothesisSet: z.array(z.string()),
-          mass: z.number().min(0).max(1),
-          justification: z.string()
-        })),
-        conflictMass: z.number().optional()
-      }).optional(),
-      plausibility: z.object({
-        id: z.string(),
-        assignments: z.array(z.object({
-          hypothesisSet: z.array(z.string()),
-          plausibility: z.number().min(0).max(1),
-          belief: z.number().min(0).max(1),
-          uncertaintyInterval: z.tuple([z.number(), z.number()])
-        }))
-      }).optional(),
-      decisions: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        selectedHypothesis: z.array(z.string()),
-        confidence: z.number().min(0).max(1),
-        reasoning: z.string(),
-        alternatives: z.array(z.object({
-          hypothesis: z.array(z.string()),
-          expectedUtility: z.number(),
-          risk: z.number()
-        }))
-      })).optional(),
-      // First-Principles properties (Phase 3, v3.1.0)
-      question: z.string().optional(),
-      principles: z.array(z.object({
-        id: z.string(),
-        type: z.enum(["axiom", "definition", "observation", "logical_inference", "assumption"]),
-        statement: z.string(),
-        justification: z.string(),
-        dependsOn: z.array(z.string()).optional(),
-        confidence: z.number().min(0).max(1).optional()
-      })).optional(),
-      derivationSteps: z.array(z.object({
-        stepNumber: z.number().int().positive(),
-        principle: z.string(),
-        inference: z.string(),
-        logicalForm: z.string().optional(),
-        confidence: z.number().min(0).max(1)
-      })).optional(),
-      conclusion: z.union([
-        z.string(),
-        // For deductive reasoning - simple conclusion
-        z.object({
-          // For first-principles reasoning - structured conclusion
-          statement: z.string(),
-          derivationChain: z.array(z.number()),
-          certainty: z.number().min(0).max(1),
-          limitations: z.array(z.string()).optional()
-        })
-      ]).optional(),
-      alternativeInterpretations: z.array(z.string()).optional(),
-      // Systems Thinking properties (Phase 4, v3.2.0)
-      system: z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        boundary: z.string(),
-        purpose: z.string(),
-        timeHorizon: z.string().optional()
-      }).optional(),
-      components: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        type: z.enum(["stock", "flow", "variable", "parameter", "delay"]),
-        description: z.string(),
-        unit: z.string().optional(),
-        initialValue: z.number().optional(),
-        formula: z.string().optional(),
-        influencedBy: z.array(z.string()).optional()
-      })).optional(),
-      feedbackLoops: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        type: z.enum(["reinforcing", "balancing"]),
-        description: z.string(),
-        components: z.array(z.string()),
-        polarity: z.enum(["+", "-"]),
-        strength: z.number().min(0).max(1),
-        delay: z.number().optional(),
-        dominance: z.enum(["early", "middle", "late"]).optional()
-      })).optional(),
-      leveragePoints: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        location: z.string(),
-        description: z.string(),
-        effectiveness: z.number().min(0).max(1),
-        difficulty: z.number().min(0).max(1),
-        type: z.enum(["parameter", "feedback", "structure", "goal", "paradigm"]),
-        interventionExamples: z.array(z.string())
-      })).optional(),
-      behaviors: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        pattern: z.enum(["growth", "decline", "oscillation", "equilibrium", "chaos", "overshoot_collapse"]),
-        causes: z.array(z.string()),
-        timeframe: z.string(),
-        unintendedConsequences: z.array(z.string()).optional()
-      })).optional(),
-      // Scientific Method properties (Phase 4, v3.2.0)
-      researchQuestion: z.object({
-        id: z.string(),
-        question: z.string(),
-        background: z.string(),
-        rationale: z.string(),
-        significance: z.string(),
-        variables: z.object({
-          independent: z.array(z.string()),
-          dependent: z.array(z.string()),
-          control: z.array(z.string())
-        })
-      }).optional(),
-      scientificHypotheses: z.array(z.object({
-        id: z.string(),
-        type: z.enum(["null", "alternative", "directional", "non_directional"]),
-        statement: z.string(),
-        prediction: z.string(),
-        rationale: z.string(),
-        testable: z.boolean(),
-        falsifiable: z.boolean()
-      })).optional(),
-      experiment: z.object({
-        id: z.string(),
-        type: z.enum(["experimental", "quasi_experimental", "observational", "correlational"]),
-        design: z.string(),
-        sampleSize: z.number().int().positive(),
-        sampleSizeJustification: z.string().optional(),
-        randomization: z.boolean(),
-        blinding: z.enum(["none", "single", "double", "triple"]).optional(),
-        controls: z.array(z.string()),
-        procedure: z.array(z.string()),
-        materials: z.array(z.string()).optional(),
-        duration: z.string().optional(),
-        ethicalConsiderations: z.array(z.string()).optional()
-      }).optional(),
-      dataCollection: z.object({
-        id: z.string(),
-        method: z.array(z.string()),
-        instruments: z.array(z.string()),
-        dataQuality: z.object({
-          completeness: z.number().min(0).max(1),
-          reliability: z.number().min(0).max(1),
-          validity: z.number().min(0).max(1)
-        }),
-        limitations: z.array(z.string()).optional()
-      }).optional(),
-      statisticalAnalysis: z.object({
-        id: z.string(),
-        tests: z.array(z.object({
-          id: z.string(),
-          name: z.string(),
-          hypothesisTested: z.string(),
-          testStatistic: z.number(),
-          pValue: z.number().min(0).max(1),
-          confidenceInterval: z.tuple([z.number(), z.number()]).optional(),
-          alpha: z.number().min(0).max(1),
-          result: z.enum(["reject_null", "fail_to_reject_null"]),
-          interpretation: z.string()
-        })),
-        summary: z.string(),
-        effectSize: z.object({
-          type: z.string(),
-          value: z.number(),
-          interpretation: z.string()
-        }).optional(),
-        powerAnalysis: z.object({
-          power: z.number().min(0).max(1),
-          alpha: z.number().min(0).max(1),
-          interpretation: z.string()
-        }).optional()
-      }).optional(),
-      scientificConclusion: z.object({
-        id: z.string(),
-        statement: z.string(),
-        supportedHypotheses: z.array(z.string()),
-        rejectedHypotheses: z.array(z.string()),
-        confidence: z.number().min(0).max(1),
-        limitations: z.array(z.string()),
-        alternativeExplanations: z.array(z.string()).optional(),
-        futureDirections: z.array(z.string()),
-        replicationConsiderations: z.array(z.string()),
-        practicalImplications: z.array(z.string()).optional(),
-        theoreticalImplications: z.array(z.string()).optional()
-      }).optional(),
-      // Optimization properties (Phase 4, v3.2.0)
-      optimizationProblem: z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        type: z.enum(["linear", "nonlinear", "integer", "mixed_integer", "constraint_satisfaction", "multi_objective"]),
-        approach: z.enum(["exact", "heuristic", "metaheuristic", "approximation"]).optional(),
-        complexity: z.string().optional()
-      }).optional(),
-      decisionVariables: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        type: z.enum(["continuous", "integer", "binary", "categorical"]),
-        unit: z.string().optional(),
-        semantics: z.string()
-      })).optional(),
-      optimizationConstraints: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        type: z.enum(["hard", "soft"]),
-        formula: z.string(),
-        variables: z.array(z.string()),
-        penalty: z.number().optional(),
-        rationale: z.string(),
-        priority: z.number().optional()
-      })).optional(),
-      objectives: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        type: z.enum(["minimize", "maximize"]),
-        formula: z.string(),
-        variables: z.array(z.string()),
-        weight: z.number().min(0).max(1).optional(),
-        units: z.string().optional(),
-        idealValue: z.number().optional(),
-        acceptableRange: z.tuple([z.number(), z.number()]).optional()
-      })).optional(),
-      solution: z.object({
-        id: z.string(),
-        type: z.enum(["optimal", "feasible", "infeasible", "unbounded", "approximate"]),
-        variableValues: z.record(z.string(), z.union([z.number(), z.string()])),
-        objectiveValues: z.record(z.string(), z.number()),
-        quality: z.number().min(0).max(1),
-        computationTime: z.number().optional(),
-        iterations: z.number().optional(),
-        method: z.string().optional(),
-        guarantees: z.array(z.string()).optional()
-      }).optional(),
-      sensitivityAnalysis: z.object({
-        id: z.string(),
-        robustness: z.number().min(0).max(1),
-        criticalConstraints: z.array(z.string()),
-        shadowPrices: z.record(z.string(), z.number()).optional(),
-        recommendations: z.array(z.string())
-      }).optional(),
-      // Formal Logic properties (Phase 4, v3.2.0)
-      propositions: z.array(z.object({
-        id: z.string(),
-        symbol: z.string(),
-        statement: z.string(),
-        truthValue: z.boolean().optional(),
-        type: z.enum(["atomic", "compound"]),
-        formula: z.string().optional()
-      })).optional(),
-      logicalInferences: z.array(z.object({
-        id: z.string(),
-        rule: z.enum(["modus_ponens", "modus_tollens", "hypothetical_syllogism", "disjunctive_syllogism", "conjunction", "simplification", "addition", "resolution", "contradiction", "excluded_middle"]),
-        premises: z.array(z.string()),
-        conclusion: z.string(),
-        justification: z.string(),
-        valid: z.boolean()
-      })).optional(),
-      logicalProof: z.object({
-        id: z.string(),
-        theorem: z.string(),
-        technique: z.enum(["direct", "contradiction", "contrapositive", "cases", "induction", "natural_deduction", "resolution", "semantic_tableaux"]),
-        steps: z.array(z.object({
-          stepNumber: z.number().int().positive(),
-          statement: z.string(),
-          formula: z.string().optional(),
-          justification: z.string(),
-          rule: z.enum(["modus_ponens", "modus_tollens", "hypothetical_syllogism", "disjunctive_syllogism", "conjunction", "simplification", "addition", "resolution", "contradiction", "excluded_middle"]).optional(),
-          referencesSteps: z.array(z.number()).optional(),
-          isAssumption: z.boolean().optional(),
-          dischargesAssumption: z.number().optional()
-        })),
-        conclusion: z.string(),
-        valid: z.boolean(),
-        completeness: z.number().min(0).max(1),
-        assumptions: z.array(z.string()).optional()
-      }).optional(),
-      truthTable: z.object({
-        id: z.string(),
-        propositions: z.array(z.string()),
-        formula: z.string().optional(),
-        rows: z.array(z.object({
-          rowNumber: z.number().int().positive(),
-          assignments: z.record(z.string(), z.boolean()),
-          result: z.boolean()
-        })),
-        isTautology: z.boolean(),
-        isContradiction: z.boolean(),
-        isContingent: z.boolean()
-      }).optional(),
-      satisfiability: z.object({
-        id: z.string(),
-        formula: z.string(),
-        satisfiable: z.boolean(),
-        model: z.record(z.string(), z.boolean()).optional(),
-        method: z.enum(["dpll", "cdcl", "resolution", "truth_table", "other"]),
-        complexity: z.string().optional(),
-        explanation: z.string()
-      }).optional(),
-      action: z.enum(["add_thought", "summarize", "export", "export_all", "switch_mode", "get_session", "recommend_mode", "delete_session"]).default("add_thought"),
-      exportFormat: z.enum(["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"]).optional(),
-      newMode: z.enum(["sequential", "shannon", "mathematics", "physics", "hybrid", "inductive", "deductive", "abductive", "causal", "bayesian", "counterfactual", "analogical", "temporal", "gametheory", "evidential", "firstprinciples", "systemsthinking", "scientificmethod", "optimization", "formallogic"]).optional(),
-      // Mode recommendation parameters (v2.4)
-      problemType: z.string().optional(),
-      problemCharacteristics: z.object({
-        domain: z.string(),
-        complexity: z.enum(["low", "medium", "high"]),
-        uncertainty: z.enum(["low", "medium", "high"]),
-        timeDependent: z.boolean(),
-        multiAgent: z.boolean(),
-        requiresProof: z.boolean(),
-        requiresQuantification: z.boolean(),
-        hasIncompleteInfo: z.boolean(),
-        requiresExplanation: z.boolean(),
-        hasAlternatives: z.boolean()
-      }).optional(),
-      includeCombinations: z.boolean().optional()
-    });
-    thinkingTool = {
-      name: "deepthinking",
-      description: "[DEPRECATED] Use deepthinking_* tools instead. Legacy tool supporting 18 reasoning modes with auto-routing to focused tools.",
-      inputSchema: {
-        type: "object",
-        properties: {
-          sessionId: { type: "string" },
-          mode: {
-            type: "string",
-            enum: ["sequential", "shannon", "mathematics", "physics", "hybrid", "inductive", "deductive", "abductive", "causal", "bayesian", "counterfactual", "analogical", "temporal", "gametheory", "evidential", "firstprinciples", "systemsthinking", "scientificmethod", "optimization", "formallogic"],
-            default: "hybrid"
-          },
-          thought: { type: "string", minLength: 1 },
-          thoughtNumber: { type: "integer", minimum: 1 },
-          totalThoughts: { type: "integer", minimum: 1 },
-          nextThoughtNeeded: { type: "boolean" },
-          isRevision: { type: "boolean" },
-          revisesThought: { type: "string" },
-          revisionReason: { type: "string" },
-          branchFrom: { type: "string" },
-          branchId: { type: "string" },
-          stage: {
-            type: "string",
-            enum: ["problem_definition", "constraints", "model", "proof", "implementation"]
-          },
-          uncertainty: { type: "number", minimum: 0, maximum: 1 },
-          dependencies: { type: "array", items: { type: "string" } },
-          assumptions: { type: "array", items: { type: "string" } },
-          thoughtType: { type: "string" },
-          // Math/Physics properties
-          mathematicalModel: {
-            type: "object",
-            properties: {
-              latex: { type: "string" },
-              symbolic: { type: "string" },
-              ascii: { type: "string" }
-            },
-            additionalProperties: false
-          },
-          proofStrategy: {
-            type: "object",
-            properties: {
-              type: { type: "string", enum: ["direct", "contradiction", "induction", "construction", "contrapositive"] },
-              steps: { type: "array", items: { type: "string" } }
-            },
-            additionalProperties: false
-          },
-          tensorProperties: {
-            type: "object",
-            properties: {
-              rank: { type: "array", items: { type: "number" }, minItems: 2, maxItems: 2 },
-              components: { type: "string" },
-              latex: { type: "string" },
-              symmetries: { type: "array", items: { type: "string" } },
-              invariants: { type: "array", items: { type: "string" } },
-              transformation: { type: "string", enum: ["covariant", "contravariant", "mixed"] }
-            },
-            additionalProperties: false
-          }
-          // All other optional properties from various modes (simplified for legacy compatibility)
-          // Most users should migrate to focused tools for full schema validation
-        },
-        required: ["thought", "thoughtNumber", "totalThoughts", "nextThoughtNeeded"],
-        additionalProperties: true
-        // Allow extra properties for backward compatibility
-      }
-    };
   }
 });
 
@@ -933,1238 +177,6 @@ var init_core = __esm({
       "critique" /* CRITIQUE */,
       "analysis" /* ANALYSIS */
     ];
-  }
-});
-
-// src/types/session.ts
-var init_session = __esm({
-  "src/types/session.ts"() {
-    init_esm_shims();
-  }
-});
-
-// src/modes/handlers/ModeHandler.ts
-function validationSuccess(warnings = []) {
-  return {
-    valid: true,
-    errors: [],
-    warnings
-  };
-}
-function validationFailure(errors, warnings = []) {
-  return {
-    valid: false,
-    errors,
-    warnings
-  };
-}
-function createValidationError(field, message, code) {
-  return { field, message, code };
-}
-function createValidationWarning(field, message, suggestion) {
-  return { field, message, suggestion };
-}
-var init_ModeHandler = __esm({
-  "src/modes/handlers/ModeHandler.ts"() {
-    init_esm_shims();
-  }
-});
-
-// src/types/modes/recommendations.ts
-var ModeRecommender;
-var init_recommendations = __esm({
-  "src/types/modes/recommendations.ts"() {
-    init_esm_shims();
-    ModeRecommender = class {
-      /**
-       * Recommends reasoning modes based on problem characteristics
-       * Returns modes ranked by suitability score
-       */
-      recommendModes(characteristics) {
-        const recommendations = [];
-        const isPhilosophical = characteristics.domain.toLowerCase().includes("metaphysics") || characteristics.domain.toLowerCase().includes("theology") || characteristics.domain.toLowerCase().includes("philosophy") || characteristics.domain.toLowerCase().includes("epistemology") || characteristics.domain.toLowerCase().includes("ethics");
-        if (characteristics.complexity === "high" && (characteristics.requiresExplanation || characteristics.hasAlternatives || isPhilosophical)) {
-          recommendations.push({
-            mode: "hybrid" /* HYBRID */,
-            score: 0.92,
-            reasoning: "Complex problem benefits from multi-modal synthesis combining inductive, deductive, and abductive reasoning",
-            strengths: ["Comprehensive analysis", "Combines empirical and logical approaches", "Maximum evidential strength", "Convergent validation"],
-            limitations: ["Time-intensive", "Requires understanding of multiple reasoning types"],
-            examples: ["Philosophical arguments", "Scientific theories", "Complex decision-making", "Metaphysical questions"]
-          });
-        }
-        if (!characteristics.requiresProof && (characteristics.requiresQuantification || characteristics.hasIncompleteInfo || isPhilosophical)) {
-          recommendations.push({
-            mode: "inductive" /* INDUCTIVE */,
-            score: isPhilosophical ? 0.85 : 0.8,
-            reasoning: "Problem requires pattern recognition and generalization from observations",
-            strengths: ["Empirical grounding", "Pattern detection", "Probabilistic reasoning", "Scientific discovery"],
-            limitations: ["Cannot prove with certainty", "Vulnerable to black swans", "Sample size dependent"],
-            examples: ["Scientific hypotheses", "Trend analysis", "Empirical arguments", "Data-driven insights"]
-          });
-        }
-        if (characteristics.requiresProof || isPhilosophical) {
-          recommendations.push({
-            mode: "deductive" /* DEDUCTIVE */,
-            score: characteristics.requiresProof ? 0.9 : 0.75,
-            reasoning: "Problem requires logical derivation from general principles to specific conclusions",
-            strengths: ["Logical validity", "Rigorous inference", "Exposes contradictions", "Formal reasoning"],
-            limitations: ["Soundness depends on premise truth", "Vulnerable to definitional disputes", "May not handle uncertainty well"],
-            examples: ["Logical proofs", "Mathematical theorems", "Philosophical arguments", "Formal verification"]
-          });
-        }
-        if (characteristics.requiresExplanation || isPhilosophical) {
-          recommendations.push({
-            mode: "abductive" /* ABDUCTIVE */,
-            score: isPhilosophical ? 0.9 : 0.87,
-            reasoning: "Problem requires finding best explanations through comparative hypothesis evaluation",
-            strengths: ["Hypothesis generation", "Comparative evaluation", "Explanatory power assessment", "Handles competing theories"],
-            limitations: ["May miss non-obvious explanations", "Explanatory power is subjective"],
-            examples: ["Scientific explanation", "Debugging", "Diagnosis", "Theory selection", "Metaphysical arguments"]
-          });
-        }
-        if (characteristics.complexity === "high" || characteristics.hasAlternatives && characteristics.uncertainty === "high") {
-          recommendations.push({
-            mode: "metareasoning" /* METAREASONING */,
-            score: characteristics.complexity === "high" ? 0.88 : 0.82,
-            reasoning: "Complex or uncertain problems benefit from strategic monitoring and adaptive reasoning",
-            strengths: ["Strategy evaluation", "Mode switching recommendations", "Quality monitoring", "Resource allocation", "Self-reflection"],
-            limitations: ["Meta-level overhead", "Requires understanding of other modes", "May not directly solve the problem"],
-            examples: ["Strategy selection", "Debugging stuck reasoning", "Quality assessment", "Adaptive problem-solving"]
-          });
-        }
-        if (characteristics.timeDependent) {
-          recommendations.push({
-            mode: "temporal" /* TEMPORAL */,
-            score: 0.9,
-            reasoning: "Problem involves time-dependent events and sequences",
-            strengths: ["Event sequencing", "Temporal causality", "Timeline construction"],
-            limitations: ["Limited strategic reasoning"],
-            examples: ["Process modeling", "Event correlation", "Timeline debugging"]
-          });
-        }
-        if (characteristics.multiAgent) {
-          recommendations.push({
-            mode: "gametheory" /* GAMETHEORY */,
-            score: 0.85,
-            reasoning: "Problem involves strategic interactions between agents",
-            strengths: ["Equilibrium analysis", "Strategic reasoning", "Multi-agent dynamics"],
-            limitations: ["Assumes rationality", "Complex computations"],
-            examples: ["Competitive analysis", "Auction design", "Negotiation"]
-          });
-        }
-        if (characteristics.hasIncompleteInfo && characteristics.uncertainty === "high" && !isPhilosophical) {
-          recommendations.push({
-            mode: "evidential" /* EVIDENTIAL */,
-            score: 0.82,
-            reasoning: "Problem has incomplete information and high uncertainty requiring Dempster-Shafer belief functions",
-            strengths: ["Handles ignorance", "Evidence combination", "Uncertainty intervals"],
-            limitations: ["Computational complexity", "Requires careful mass assignment", "Better for sensor fusion than philosophical reasoning"],
-            examples: ["Sensor fusion", "Diagnostic reasoning", "Intelligence analysis"]
-          });
-        }
-        if (characteristics.timeDependent && characteristics.requiresExplanation) {
-          recommendations.push({
-            mode: "causal" /* CAUSAL */,
-            score: 0.86,
-            reasoning: "Problem requires understanding cause-effect relationships",
-            strengths: ["Intervention analysis", "Causal graphs", "Impact assessment"],
-            limitations: ["Requires domain knowledge", "Difficult to identify confounders"],
-            examples: ["Impact analysis", "System design", "Policy evaluation"]
-          });
-        }
-        if (characteristics.requiresQuantification && characteristics.uncertainty !== "low") {
-          recommendations.push({
-            mode: "bayesian" /* BAYESIAN */,
-            score: 0.84,
-            reasoning: "Problem requires probabilistic reasoning with evidence updates",
-            strengths: ["Principled uncertainty", "Evidence integration", "Prior knowledge"],
-            limitations: ["Requires probability estimates", "Computationally intensive"],
-            examples: ["A/B testing", "Risk assessment", "Predictive modeling"]
-          });
-        }
-        if (characteristics.hasAlternatives) {
-          recommendations.push({
-            mode: "counterfactual" /* COUNTERFACTUAL */,
-            score: 0.82,
-            reasoning: "Problem benefits from analyzing alternative scenarios",
-            strengths: ["What-if analysis", "Post-mortem insights", "Decision comparison"],
-            limitations: ["Speculative", "Difficult to validate"],
-            examples: ["Post-mortems", "Strategic planning", "Architecture decisions"]
-          });
-        }
-        if (characteristics.complexity === "high" && characteristics.requiresExplanation) {
-          recommendations.push({
-            mode: "analogical" /* ANALOGICAL */,
-            score: 0.8,
-            reasoning: "Problem can benefit from cross-domain analogies",
-            strengths: ["Creative insights", "Knowledge transfer", "Pattern recognition"],
-            limitations: ["Analogies may be superficial", "Requires diverse knowledge"],
-            examples: ["Novel problem solving", "Design thinking", "Innovation"]
-          });
-        }
-        if (characteristics.requiresProof) {
-          recommendations.push({
-            mode: "mathematics" /* MATHEMATICS */,
-            score: 0.95,
-            reasoning: "Problem requires formal proofs and symbolic reasoning",
-            strengths: ["Rigorous proofs", "Symbolic computation", "Theorem proving"],
-            limitations: ["Limited to mathematical domains"],
-            examples: ["Algorithm correctness", "Complexity analysis", "Formal verification"]
-          });
-        }
-        if (characteristics.domain === "physics" || characteristics.domain === "engineering") {
-          recommendations.push({
-            mode: "physics" /* PHYSICS */,
-            score: 0.9,
-            reasoning: "Problem involves physical systems or tensor mathematics",
-            strengths: ["Field theory", "Conservation laws", "Tensor analysis"],
-            limitations: ["Specialized to physics domains"],
-            examples: ["Physical modeling", "System dynamics", "Engineering analysis"]
-          });
-        }
-        if (characteristics.complexity === "high" && characteristics.requiresProof) {
-          recommendations.push({
-            mode: "shannon" /* SHANNON */,
-            score: 0.88,
-            reasoning: "Complex problem requiring systematic decomposition",
-            strengths: ["Systematic approach", "Problem decomposition", "Rigorous analysis"],
-            limitations: ["Time-intensive", "Requires discipline"],
-            examples: ["Complex system design", "Research problems", "Novel algorithms"]
-          });
-        }
-        if (characteristics.domain === "engineering" || characteristics.domain === "software" || characteristics.domain === "systems" || characteristics.requiresQuantification && !characteristics.requiresProof) {
-          recommendations.push({
-            mode: "engineering" /* ENGINEERING */,
-            score: characteristics.domain === "engineering" ? 0.92 : 0.85,
-            reasoning: "Problem requires systematic engineering analysis with trade-offs and constraints",
-            strengths: ["Requirements analysis", "Trade-off evaluation", "System design", "Failure mode analysis", "Implementation planning"],
-            limitations: ["May over-engineer simple problems", "Requires domain expertise"],
-            examples: ["System architecture", "Design decisions", "Performance optimization", "Reliability analysis", "Technical debt assessment"]
-          });
-        }
-        if (characteristics.domain === "computer science" || characteristics.domain === "computation" || characteristics.requiresProof && characteristics.domain.includes("algorithm")) {
-          recommendations.push({
-            mode: "computability" /* COMPUTABILITY */,
-            score: 0.88,
-            reasoning: "Problem involves computational complexity, decidability, or algorithmic analysis",
-            strengths: ["Turing machine analysis", "Decidability proofs", "Complexity classification", "Halting problem variants"],
-            limitations: ["Highly theoretical", "Requires formal CS background"],
-            examples: ["Algorithm decidability", "Complexity bounds", "Reduction proofs", "Computational limits"]
-          });
-        }
-        if (characteristics.domain === "security" || characteristics.domain === "cryptography" || characteristics.domain.includes("crypto")) {
-          recommendations.push({
-            mode: "cryptanalytic" /* CRYPTANALYTIC */,
-            score: 0.9,
-            reasoning: "Problem involves cryptographic analysis, security assessment, or information-theoretic reasoning",
-            strengths: ["Statistical analysis", "Pattern detection", "Deciban calculations", "Key space analysis", "Attack surface evaluation"],
-            limitations: ["Specialized domain", "Requires mathematical background"],
-            examples: ["Cipher analysis", "Protocol security", "Key management", "Attack vectors", "Information leakage"]
-          });
-        }
-        if (characteristics.complexity === "high" && (characteristics.hasAlternatives || characteristics.requiresExplanation)) {
-          recommendations.push({
-            mode: "recursive" /* RECURSIVE */,
-            score: 0.82,
-            reasoning: "Problem has recursive structure or can be decomposed into smaller similar subproblems",
-            strengths: ["Problem decomposition", "Self-similar analysis", "Base case identification", "Recursive patterns"],
-            limitations: ["Stack overflow risk in deep recursion", "May miss non-recursive solutions"],
-            examples: ["Divide and conquer", "Tree traversal", "Fractal analysis", "Self-referential problems"]
-          });
-        }
-        if (characteristics.hasAlternatives && characteristics.uncertainty === "high") {
-          recommendations.push({
-            mode: "modal" /* MODAL */,
-            score: 0.8,
-            reasoning: "Problem involves possibility, necessity, or reasoning about alternative scenarios",
-            strengths: ["Possible worlds analysis", "Necessity vs possibility", "Epistemic reasoning", "Deontic analysis"],
-            limitations: ["Abstract and theoretical", "May overcomplicate simple choices"],
-            examples: ["Modal logic proofs", "Necessity analysis", "Epistemic uncertainty", "Deontic obligations"]
-          });
-        }
-        if (characteristics.uncertainty === "high" && characteristics.requiresQuantification) {
-          recommendations.push({
-            mode: "stochastic" /* STOCHASTIC */,
-            score: 0.84,
-            reasoning: "Problem involves random processes, probabilistic transitions, or stochastic modeling",
-            strengths: ["Markov chains", "Random process modeling", "Probabilistic state transitions", "Monte Carlo methods"],
-            limitations: ["Requires probability theory", "Computationally intensive"],
-            examples: ["Queueing systems", "Random walks", "Stochastic optimization", "Process simulation"]
-          });
-        }
-        if (characteristics.hasAlternatives && characteristics.requiresQuantification) {
-          recommendations.push({
-            mode: "constraint" /* CONSTRAINT */,
-            score: 0.83,
-            reasoning: "Problem involves multiple constraints that must be satisfied simultaneously",
-            strengths: ["Constraint propagation", "Feasibility analysis", "SAT solving", "CSP formulation"],
-            limitations: ["NP-hard in general", "May have no solution"],
-            examples: ["Scheduling", "Resource allocation", "Configuration", "Puzzle solving"]
-          });
-        }
-        if (characteristics.requiresQuantification && characteristics.hasAlternatives) {
-          recommendations.push({
-            mode: "optimization" /* OPTIMIZATION */,
-            score: 0.86,
-            reasoning: "Problem requires finding optimal or near-optimal solutions from alternatives",
-            strengths: ["Objective function formulation", "Gradient methods", "Convex optimization", "Meta-heuristics"],
-            limitations: ["Local optima", "Computational complexity", "May require relaxation"],
-            examples: ["Resource optimization", "Parameter tuning", "Portfolio optimization", "Route planning"]
-          });
-        }
-        if (isPhilosophical || characteristics.complexity === "high" && characteristics.requiresExplanation) {
-          recommendations.push({
-            mode: "firstprinciples" /* FIRSTPRINCIPLES */,
-            score: isPhilosophical ? 0.88 : 0.82,
-            reasoning: "Problem benefits from breaking down to fundamental truths and building up from there",
-            strengths: ["Assumption identification", "Foundational analysis", "Novel solutions", "Deep understanding"],
-            limitations: ["Time-intensive", "May rediscover known solutions", "Requires broad knowledge"],
-            examples: ["Innovation challenges", "Paradigm shifts", "Root cause analysis", "Foundational questions"]
-          });
-        }
-        if (characteristics.complexity === "high" && (characteristics.timeDependent || characteristics.multiAgent)) {
-          recommendations.push({
-            mode: "systemsthinking" /* SYSTEMSTHINKING */,
-            score: 0.85,
-            reasoning: "Problem involves complex systems with interconnected components and feedback loops",
-            strengths: ["Holistic view", "Feedback loop analysis", "Emergence detection", "Leverage point identification"],
-            limitations: ["Can be overwhelming", "Requires system boundaries definition"],
-            examples: ["Organizational change", "Ecosystem analysis", "Market dynamics", "Social systems"]
-          });
-        }
-        if (characteristics.hasIncompleteInfo && (characteristics.requiresExplanation || characteristics.requiresQuantification)) {
-          recommendations.push({
-            mode: "scientificmethod" /* SCIENTIFICMETHOD */,
-            score: 0.84,
-            reasoning: "Problem requires systematic empirical investigation and hypothesis testing",
-            strengths: ["Hypothesis formulation", "Experimental design", "Falsification", "Reproducibility"],
-            limitations: ["Requires data collection", "Time for experiments", "May not apply to all domains"],
-            examples: ["Research questions", "A/B testing", "Empirical studies", "Data-driven decisions"]
-          });
-        }
-        if (characteristics.requiresProof && !characteristics.requiresQuantification) {
-          recommendations.push({
-            mode: "formallogic" /* FORMALLOGIC */,
-            score: 0.87,
-            reasoning: "Problem requires rigorous formal logical analysis and proof construction",
-            strengths: ["Propositional logic", "Predicate logic", "Proof systems", "Logical completeness"],
-            limitations: ["May be overly formal", "Limited expressiveness for some domains"],
-            examples: ["Formal verification", "Logical puzzles", "Argument validity", "Theorem proving"]
-          });
-        }
-        if (characteristics.domain === "computer science" || characteristics.domain === "algorithms" || characteristics.domain === "data structures" || characteristics.domain === "software" || characteristics.requiresProof && characteristics.requiresQuantification) {
-          recommendations.push({
-            mode: "algorithmic" /* ALGORITHMIC */,
-            score: characteristics.domain === "algorithms" ? 0.95 : 0.88,
-            reasoning: "Problem involves algorithm design, complexity analysis, or data structure optimization",
-            strengths: [
-              "Algorithm design patterns (divide-and-conquer, DP, greedy)",
-              "Complexity analysis (time, space, amortized)",
-              "Correctness proofs (loop invariants, induction)",
-              "Data structure selection and analysis",
-              "Graph algorithms and optimization"
-            ],
-            limitations: ["Focused on computational problems", "Requires algorithmic thinking"],
-            examples: [
-              "Sorting and searching",
-              "Graph traversal (BFS, DFS)",
-              "Dynamic programming formulation",
-              "Shortest path algorithms",
-              "NP-completeness proofs"
-            ]
-          });
-        }
-        if (characteristics.domain === "research" || characteristics.domain === "academic" || characteristics.domain === "literature" || characteristics.hasIncompleteInfo && characteristics.requiresExplanation && !characteristics.requiresProof) {
-          recommendations.push({
-            mode: "synthesis" /* SYNTHESIS */,
-            score: characteristics.domain === "research" || characteristics.domain === "academic" ? 0.92 : 0.85,
-            reasoning: "Problem requires integrating knowledge from multiple sources and identifying themes",
-            strengths: [
-              "Literature integration",
-              "Theme extraction",
-              "Gap identification",
-              "Cross-source analysis",
-              "Knowledge synthesis"
-            ],
-            limitations: ["Requires access to multiple sources", "Time-intensive", "May miss emerging research"],
-            examples: [
-              "Literature reviews",
-              "Systematic reviews",
-              "Meta-analyses",
-              "Research synthesis",
-              "State-of-the-art surveys"
-            ]
-          });
-        }
-        if (characteristics.requiresExplanation && (characteristics.hasAlternatives || characteristics.domain === "academic" || characteristics.domain === "philosophy")) {
-          recommendations.push({
-            mode: "argumentation" /* ARGUMENTATION */,
-            score: characteristics.domain === "academic" ? 0.9 : 0.84,
-            reasoning: "Problem requires structured argumentation with claims, evidence, and warrants",
-            strengths: [
-              "Toulmin model support",
-              "Claim-evidence structure",
-              "Warrant articulation",
-              "Rebuttal handling",
-              "Qualifier specification"
-            ],
-            limitations: ["Formal structure may feel rigid", "Requires clear claim formulation"],
-            examples: [
-              "Academic papers",
-              "Thesis arguments",
-              "Policy proposals",
-              "Debate preparation",
-              "Position papers"
-            ]
-          });
-        }
-        if (characteristics.requiresExplanation && (characteristics.domain === "academic" || characteristics.domain === "research" || characteristics.domain === "review")) {
-          recommendations.push({
-            mode: "critique" /* CRITIQUE */,
-            score: characteristics.domain === "review" ? 0.92 : 0.86,
-            reasoning: "Problem requires critical evaluation of methodology, validity, and limitations",
-            strengths: [
-              "Methodology assessment",
-              "Validity evaluation",
-              "Limitation identification",
-              "Strength recognition",
-              "Constructive feedback"
-            ],
-            limitations: ["Requires domain expertise", "May seem overly critical"],
-            examples: [
-              "Peer review",
-              "Paper critiques",
-              "Methodology evaluation",
-              "Research assessment",
-              "Quality analysis"
-            ]
-          });
-        }
-        if (characteristics.hasIncompleteInfo && characteristics.requiresExplanation && (characteristics.domain === "research" || characteristics.domain === "qualitative" || characteristics.domain === "social science")) {
-          recommendations.push({
-            mode: "analysis" /* ANALYSIS */,
-            score: characteristics.domain === "qualitative" ? 0.93 : 0.85,
-            reasoning: "Problem requires systematic qualitative analysis using established methods",
-            strengths: [
-              "Thematic analysis",
-              "Grounded theory",
-              "Discourse analysis",
-              "Content analysis",
-              "Code development"
-            ],
-            limitations: ["Subjective interpretation", "Time-intensive coding", "Requires methodological rigor"],
-            examples: [
-              "Interview analysis",
-              "Document analysis",
-              "Ethnographic research",
-              "Case study analysis",
-              "Narrative analysis"
-            ]
-          });
-        }
-        if (recommendations.length === 0) {
-          recommendations.push({
-            mode: "sequential" /* SEQUENTIAL */,
-            score: 0.7,
-            reasoning: "General-purpose iterative reasoning",
-            strengths: ["Flexible", "Adaptable", "Iterative refinement"],
-            limitations: ["May lack structure for complex problems"],
-            examples: ["General problem solving", "Exploration", "Brainstorming"]
-          });
-        }
-        return recommendations.sort((a, b) => b.score - a.score);
-      }
-      /**
-       * Recommends combinations of reasoning modes that work well together
-       */
-      recommendCombinations(characteristics) {
-        const combinations = [];
-        const isPhilosophical = characteristics.domain.toLowerCase().includes("metaphysics") || characteristics.domain.toLowerCase().includes("theology") || characteristics.domain.toLowerCase().includes("philosophy") || characteristics.domain.toLowerCase().includes("epistemology") || characteristics.domain.toLowerCase().includes("ethics");
-        if (isPhilosophical || characteristics.complexity === "high" && characteristics.requiresExplanation && characteristics.hasAlternatives) {
-          combinations.push({
-            modes: ["inductive" /* INDUCTIVE */, "deductive" /* DEDUCTIVE */, "abductive" /* ABDUCTIVE */],
-            sequence: "hybrid",
-            rationale: "Synthesize empirical patterns, logical derivations, and explanatory hypotheses for maximum evidential strength",
-            benefits: ["Convergent validation from three independent methods", "Empirical grounding + logical rigor + explanatory power", "Highest achievable confidence through multi-modal synthesis", "Exposes both empirical patterns and logical contradictions"],
-            synergies: ["Inductive patterns inform abductive hypotheses", "Deductive logic tests hypothesis validity", "Abductive explanations guide inductive search", "All three methods converge on same conclusion"]
-          });
-        }
-        if (characteristics.timeDependent && characteristics.requiresExplanation) {
-          combinations.push({
-            modes: ["temporal" /* TEMPORAL */, "causal" /* CAUSAL */],
-            sequence: "sequential",
-            rationale: "Build timeline first, then analyze causal relationships",
-            benefits: ["Complete temporal-causal model", "Root cause with timeline context"],
-            synergies: ["Temporal events inform causal nodes", "Causal edges explain temporal sequences"]
-          });
-        }
-        if (characteristics.requiresExplanation && characteristics.requiresQuantification) {
-          combinations.push({
-            modes: ["abductive" /* ABDUCTIVE */, "bayesian" /* BAYESIAN */],
-            sequence: "sequential",
-            rationale: "Generate hypotheses, then quantify with probabilities",
-            benefits: ["Systematic hypothesis generation", "Quantified belief updates"],
-            synergies: ["Abductive hypotheses become Bayesian hypotheses", "Bayesian updates refine explanations"]
-          });
-        }
-        if (characteristics.multiAgent && characteristics.hasAlternatives) {
-          combinations.push({
-            modes: ["gametheory" /* GAMETHEORY */, "counterfactual" /* COUNTERFACTUAL */],
-            sequence: "hybrid",
-            rationale: "Analyze equilibria, then explore alternative strategies",
-            benefits: ["Strategic analysis + scenario exploration", "Robustness testing"],
-            synergies: ["Equilibria as actual scenarios", "Strategy changes as interventions"]
-          });
-        }
-        if (characteristics.hasIncompleteInfo && characteristics.timeDependent) {
-          combinations.push({
-            modes: ["evidential" /* EVIDENTIAL */, "causal" /* CAUSAL */],
-            sequence: "parallel",
-            rationale: "Combine uncertain evidence while modeling causal structure",
-            benefits: ["Handles uncertainty and causality", "Evidence fusion with causal reasoning"],
-            synergies: ["Belief functions inform causal strengths", "Causal structure guides evidence combination"]
-          });
-        }
-        if (characteristics.timeDependent && characteristics.multiAgent) {
-          combinations.push({
-            modes: ["temporal" /* TEMPORAL */, "gametheory" /* GAMETHEORY */],
-            sequence: "sequential",
-            rationale: "Model event sequences, then analyze strategic interactions over time",
-            benefits: ["Dynamic game analysis", "Time-dependent strategies"],
-            synergies: ["Temporal events as game stages", "Strategies evolve over timeline"]
-          });
-        }
-        if (characteristics.requiresProof && characteristics.complexity === "high") {
-          combinations.push({
-            modes: ["shannon" /* SHANNON */, "mathematics" /* MATHEMATICS */],
-            sequence: "hybrid",
-            rationale: "Use Shannon methodology to structure complex mathematical proofs",
-            benefits: ["Systematic proof construction", "Clear problem decomposition"],
-            synergies: ["Shannon stages guide proof strategy", "Mathematical rigor validates each stage"]
-          });
-        }
-        if ((characteristics.domain === "engineering" || characteristics.domain === "software") && characteristics.hasAlternatives) {
-          combinations.push({
-            modes: ["engineering" /* ENGINEERING */, "optimization" /* OPTIMIZATION */],
-            sequence: "sequential",
-            rationale: "Design system architecture, then optimize for performance/cost",
-            benefits: ["Structured design", "Optimal trade-offs", "Measurable improvements"],
-            synergies: ["Engineering constraints feed optimization", "Optimization validates design choices"]
-          });
-        }
-        if (characteristics.requiresQuantification && characteristics.hasAlternatives && (characteristics.domain === "engineering" || characteristics.domain === "software")) {
-          combinations.push({
-            modes: ["constraint" /* CONSTRAINT */, "engineering" /* ENGINEERING */],
-            sequence: "sequential",
-            rationale: "Identify constraints first, then design within those boundaries",
-            benefits: ["Feasibility guaranteed", "Requirements satisfaction", "Clear boundaries"],
-            synergies: ["Constraints define engineering solution space", "Engineering validates constraint satisfaction"]
-          });
-        }
-        if (characteristics.complexity === "high" && characteristics.requiresExplanation) {
-          combinations.push({
-            modes: ["firstprinciples" /* FIRSTPRINCIPLES */, "systemsthinking" /* SYSTEMSTHINKING */],
-            sequence: "sequential",
-            rationale: "Build from fundamental truths, then analyze systemic interactions",
-            benefits: ["Deep understanding", "Holistic view", "Novel insights"],
-            synergies: ["First principles reveal core elements", "Systems thinking shows interconnections"]
-          });
-        }
-        if (characteristics.hasIncompleteInfo && characteristics.requiresQuantification) {
-          combinations.push({
-            modes: ["scientificmethod" /* SCIENTIFICMETHOD */, "bayesian" /* BAYESIAN */],
-            sequence: "hybrid",
-            rationale: "Design experiments and update beliefs with Bayesian inference",
-            benefits: ["Rigorous methodology", "Quantified uncertainty", "Evidence integration"],
-            synergies: ["Experiments generate evidence", "Bayesian updates refine hypotheses"]
-          });
-        }
-        if (characteristics.requiresProof && !characteristics.hasIncompleteInfo) {
-          combinations.push({
-            modes: ["formallogic" /* FORMALLOGIC */, "deductive" /* DEDUCTIVE */],
-            sequence: "hybrid",
-            rationale: "Use formal logic systems with deductive derivation",
-            benefits: ["Maximum rigor", "Logically valid conclusions", "Formal verification"],
-            synergies: ["Formal logic provides structure", "Deduction ensures valid inference"]
-          });
-        }
-        if (characteristics.complexity === "high" && characteristics.hasAlternatives) {
-          combinations.push({
-            modes: ["recursive" /* RECURSIVE */, "optimization" /* OPTIMIZATION */],
-            sequence: "hybrid",
-            rationale: "Decompose problem recursively, optimize at each level",
-            benefits: ["Scalable solutions", "Local and global optimization", "Manageable complexity"],
-            synergies: ["Recursion breaks down problem", "Optimization solves subproblems optimally"]
-          });
-        }
-        if (characteristics.uncertainty === "high" && characteristics.requiresQuantification) {
-          combinations.push({
-            modes: ["stochastic" /* STOCHASTIC */, "bayesian" /* BAYESIAN */],
-            sequence: "parallel",
-            rationale: "Model random processes while updating beliefs probabilistically",
-            benefits: ["Complete uncertainty model", "Dynamic belief updates", "Probabilistic predictions"],
-            synergies: ["Stochastic models generate distributions", "Bayesian reasoning integrates evidence"]
-          });
-        }
-        if (characteristics.domain === "computer science" && characteristics.requiresProof) {
-          combinations.push({
-            modes: ["computability" /* COMPUTABILITY */, "formallogic" /* FORMALLOGIC */],
-            sequence: "hybrid",
-            rationale: "Analyze computational limits with formal logical proofs",
-            benefits: ["Decidability analysis", "Rigorous complexity proofs", "Theoretical foundations"],
-            synergies: ["Computability defines limits", "Formal logic proves properties"]
-          });
-        }
-        if (characteristics.domain === "security" && characteristics.uncertainty === "high") {
-          combinations.push({
-            modes: ["cryptanalytic" /* CRYPTANALYTIC */, "stochastic" /* STOCHASTIC */],
-            sequence: "parallel",
-            rationale: "Analyze cryptographic systems with probabilistic attack modeling",
-            benefits: ["Security assessment", "Attack probability estimation", "Key space analysis"],
-            synergies: ["Cryptanalysis identifies vulnerabilities", "Stochastic models attack success rates"]
-          });
-        }
-        if (characteristics.complexity === "high" && (characteristics.multiAgent || characteristics.timeDependent)) {
-          combinations.push({
-            modes: ["systemsthinking" /* SYSTEMSTHINKING */, "engineering" /* ENGINEERING */],
-            sequence: "sequential",
-            rationale: "Understand system dynamics holistically, then engineer solutions",
-            benefits: ["Holistic design", "Feedback-aware engineering", "Emergent behavior consideration"],
-            synergies: ["Systems view informs design", "Engineering implements systemic solutions"]
-          });
-        }
-        if (characteristics.hasAlternatives && characteristics.uncertainty === "high") {
-          combinations.push({
-            modes: ["modal" /* MODAL */, "counterfactual" /* COUNTERFACTUAL */],
-            sequence: "parallel",
-            rationale: "Analyze possible worlds and counterfactual scenarios together",
-            benefits: ["Complete possibility space", "What-if analysis", "Robust decision making"],
-            synergies: ["Modal logic structures possibilities", "Counterfactuals explore specific alternatives"]
-          });
-        }
-        if (characteristics.complexity === "high" && characteristics.hasAlternatives) {
-          combinations.push({
-            modes: ["metareasoning" /* METAREASONING */, "optimization" /* OPTIMIZATION */],
-            sequence: "hybrid",
-            rationale: "Monitor reasoning strategies and optimize approach selection",
-            benefits: ["Adaptive reasoning", "Resource optimization", "Strategy refinement"],
-            synergies: ["Metareasoning evaluates strategies", "Optimization selects best approach"]
-          });
-        }
-        if (characteristics.requiresExplanation && characteristics.hasAlternatives) {
-          combinations.push({
-            modes: ["metareasoning" /* METAREASONING */, "formallogic" /* FORMALLOGIC */, "abductive" /* ABDUCTIVE */],
-            sequence: "sequential",
-            rationale: "Detect cognitive biases through meta-analysis, identify logical fallacies, and generate alternative explanations as counter-arguments",
-            benefits: ["Comprehensive bias detection", "Fallacy identification", "Counter-argument generation", "Critical analysis"],
-            synergies: ["Metareasoning identifies reasoning flaws", "Formal logic validates argument structure", "Abductive generates alternative explanations"]
-          });
-        }
-        if (characteristics.hasAlternatives && characteristics.uncertainty !== "low") {
-          combinations.push({
-            modes: ["metareasoning" /* METAREASONING */, "counterfactual" /* COUNTERFACTUAL */],
-            sequence: "parallel",
-            rationale: "Self-reflect on reasoning while exploring alternative scenarios to counter biases",
-            benefits: ["Bias awareness", "Alternative perspective generation", "Decision robustness"],
-            synergies: ["Metareasoning detects bias patterns", "Counterfactual explores what-if scenarios"]
-          });
-        }
-        if (characteristics.domain === "computer science" && characteristics.requiresProof) {
-          combinations.push({
-            modes: ["algorithmic" /* ALGORITHMIC */, "computability" /* COMPUTABILITY */],
-            sequence: "hybrid",
-            rationale: "Combine algorithm design with computability analysis for theoretical completeness",
-            benefits: ["Algorithm correctness proofs", "Complexity class analysis", "Decidability bounds"],
-            synergies: ["Algorithmic design informs complexity", "Computability proves fundamental limits"]
-          });
-        }
-        if (characteristics.hasAlternatives && characteristics.requiresQuantification) {
-          combinations.push({
-            modes: ["algorithmic" /* ALGORITHMIC */, "optimization" /* OPTIMIZATION */],
-            sequence: "sequential",
-            rationale: "Design algorithm first, then optimize for performance",
-            benefits: ["Correct-by-construction", "Performance optimization", "Trade-off analysis"],
-            synergies: ["Algorithm provides baseline", "Optimization improves constants and bounds"]
-          });
-        }
-        if (characteristics.requiresProof && characteristics.domain !== "philosophy") {
-          combinations.push({
-            modes: ["algorithmic" /* ALGORITHMIC */, "mathematics" /* MATHEMATICS */],
-            sequence: "hybrid",
-            rationale: "Combine algorithm design with mathematical proof techniques",
-            benefits: ["Rigorous correctness proofs", "Loop invariant verification", "Inductive reasoning"],
-            synergies: ["Algorithmic structures guide proof strategy", "Mathematical rigor ensures correctness"]
-          });
-        }
-        if (characteristics.complexity === "high" && characteristics.hasAlternatives) {
-          combinations.push({
-            modes: ["algorithmic" /* ALGORITHMIC */, "recursive" /* RECURSIVE */],
-            sequence: "parallel",
-            rationale: "Apply divide-and-conquer paradigm with recursive decomposition",
-            benefits: ["Natural problem decomposition", "Recurrence solving", "Subproblem identification"],
-            synergies: ["Algorithmic patterns guide recursion", "Recursive structure enables Master Theorem"]
-          });
-        }
-        if (characteristics.uncertainty !== "low" && characteristics.requiresQuantification) {
-          combinations.push({
-            modes: ["algorithmic" /* ALGORITHMIC */, "stochastic" /* STOCHASTIC */],
-            sequence: "parallel",
-            rationale: "Design randomized algorithms with probabilistic analysis",
-            benefits: ["Expected-case analysis", "Monte Carlo methods", "Las Vegas algorithms"],
-            synergies: ["Algorithmic framework structures randomization", "Stochastic analysis proves bounds"]
-          });
-        }
-        if (characteristics.domain === "research" || characteristics.domain === "academic") {
-          combinations.push({
-            modes: ["synthesis" /* SYNTHESIS */, "critique" /* CRITIQUE */],
-            sequence: "sequential",
-            rationale: "Synthesize literature first, then critically evaluate the synthesized findings",
-            benefits: ["Comprehensive review", "Critical evaluation", "Research gap identification"],
-            synergies: ["Synthesis identifies patterns", "Critique validates findings"]
-          });
-        }
-        if (characteristics.hasIncompleteInfo && characteristics.requiresExplanation) {
-          combinations.push({
-            modes: ["synthesis" /* SYNTHESIS */, "analysis" /* ANALYSIS */],
-            sequence: "hybrid",
-            rationale: "Combine literature synthesis with qualitative analysis methods",
-            benefits: ["Multi-source integration", "Thematic consistency", "Methodological rigor"],
-            synergies: ["Synthesis provides sources", "Analysis extracts themes"]
-          });
-        }
-        if (characteristics.requiresExplanation && characteristics.hasAlternatives) {
-          combinations.push({
-            modes: ["argumentation" /* ARGUMENTATION */, "critique" /* CRITIQUE */],
-            sequence: "parallel",
-            rationale: "Build arguments while critically evaluating opposing views",
-            benefits: ["Strong arguments", "Addressed weaknesses", "Robust conclusions"],
-            synergies: ["Argumentation structures claims", "Critique strengthens rebuttals"]
-          });
-        }
-        if (characteristics.requiresProof && characteristics.requiresExplanation) {
-          combinations.push({
-            modes: ["argumentation" /* ARGUMENTATION */, "deductive" /* DEDUCTIVE */],
-            sequence: "hybrid",
-            rationale: "Combine Toulmin argumentation with deductive logical rigor",
-            benefits: ["Structured arguments", "Logical validity", "Academic rigor"],
-            synergies: ["Toulmin provides structure", "Deduction ensures validity"]
-          });
-        }
-        if (characteristics.hasIncompleteInfo && !characteristics.requiresProof) {
-          combinations.push({
-            modes: ["analysis" /* ANALYSIS */, "inductive" /* INDUCTIVE */],
-            sequence: "sequential",
-            rationale: "Apply qualitative analysis then generalize through inductive reasoning",
-            benefits: ["Grounded findings", "Pattern generalization", "Theory building"],
-            synergies: ["Analysis identifies codes", "Induction builds theory"]
-          });
-        }
-        if (characteristics.complexity === "high" && characteristics.requiresExplanation) {
-          combinations.push({
-            modes: ["critique" /* CRITIQUE */, "metareasoning" /* METAREASONING */],
-            sequence: "parallel",
-            rationale: "Critically analyze while monitoring own biases and reasoning quality",
-            benefits: ["Self-aware critique", "Bias mitigation", "Improved objectivity"],
-            synergies: ["Critique evaluates content", "Metareasoning evaluates process"]
-          });
-        }
-        if (characteristics.requiresQuantification && characteristics.hasIncompleteInfo) {
-          combinations.push({
-            modes: ["synthesis" /* SYNTHESIS */, "bayesian" /* BAYESIAN */],
-            sequence: "hybrid",
-            rationale: "Synthesize literature while quantifying evidence strength",
-            benefits: ["Quantified synthesis", "Evidence weighting", "Probabilistic conclusions"],
-            synergies: ["Synthesis gathers evidence", "Bayesian weights findings"]
-          });
-        }
-        return combinations;
-      }
-      /**
-       * Get a simple mode recommendation based on a few key characteristics
-       * Simplified version for quick recommendations
-       * Supports all 28 reasoning modes (v7.2.0)
-       */
-      quickRecommend(problemType) {
-        const typeMap = {
-          // Core reasoning modes
-          "explanation": "abductive" /* ABDUCTIVE */,
-          "hypothesis": "abductive" /* ABDUCTIVE */,
-          "inference": "abductive" /* ABDUCTIVE */,
-          "pattern": "inductive" /* INDUCTIVE */,
-          "generalization": "inductive" /* INDUCTIVE */,
-          "empirical": "inductive" /* INDUCTIVE */,
-          "logic": "deductive" /* DEDUCTIVE */,
-          "proof": "deductive" /* DEDUCTIVE */,
-          "derivation": "deductive" /* DEDUCTIVE */,
-          "complex": "hybrid" /* HYBRID */,
-          "philosophical": "hybrid" /* HYBRID */,
-          "metaphysical": "hybrid" /* HYBRID */,
-          // Meta-reasoning
-          "meta": "metareasoning" /* METAREASONING */,
-          "strategy-selection": "metareasoning" /* METAREASONING */,
-          "quality-assessment": "metareasoning" /* METAREASONING */,
-          "reflection": "metareasoning" /* METAREASONING */,
-          "self-evaluation": "metareasoning" /* METAREASONING */,
-          // Specialized modes
-          "debugging": "abductive" /* ABDUCTIVE */,
-          "mathematical": "mathematics" /* MATHEMATICS */,
-          "timeline": "temporal" /* TEMPORAL */,
-          "strategy": "gametheory" /* GAMETHEORY */,
-          "uncertainty": "evidential" /* EVIDENTIAL */,
-          "causality": "causal" /* CAUSAL */,
-          "probability": "bayesian" /* BAYESIAN */,
-          "bayesian": "bayesian" /* BAYESIAN */,
-          "bayes": "bayesian" /* BAYESIAN */,
-          "posterior": "bayesian" /* BAYESIAN */,
-          "prior": "bayesian" /* BAYESIAN */,
-          "likelihood": "bayesian" /* BAYESIAN */,
-          "evidence-update": "bayesian" /* BAYESIAN */,
-          "belief-update": "bayesian" /* BAYESIAN */,
-          "conditional-probability": "bayesian" /* BAYESIAN */,
-          "hypothesis-testing": "bayesian" /* BAYESIAN */,
-          "probabilistic": "bayesian" /* BAYESIAN */,
-          "what-if": "counterfactual" /* COUNTERFACTUAL */,
-          "analogy": "analogical" /* ANALOGICAL */,
-          "physics": "physics" /* PHYSICS */,
-          "systematic": "shannon" /* SHANNON */,
-          // ===== NEW MODES (v7.2.0) =====
-          // Engineering reasoning
-          "engineering": "engineering" /* ENGINEERING */,
-          "design": "engineering" /* ENGINEERING */,
-          "architecture": "engineering" /* ENGINEERING */,
-          "trade-off": "engineering" /* ENGINEERING */,
-          "tradeoff": "engineering" /* ENGINEERING */,
-          "system-design": "engineering" /* ENGINEERING */,
-          "implementation": "engineering" /* ENGINEERING */,
-          "reliability": "engineering" /* ENGINEERING */,
-          "scalability": "engineering" /* ENGINEERING */,
-          "performance": "engineering" /* ENGINEERING */,
-          // Computability reasoning
-          "computability": "computability" /* COMPUTABILITY */,
-          "decidability": "computability" /* COMPUTABILITY */,
-          "turing": "computability" /* COMPUTABILITY */,
-          "halting": "computability" /* COMPUTABILITY */,
-          "complexity-class": "computability" /* COMPUTABILITY */,
-          "undecidable": "computability" /* COMPUTABILITY */,
-          // Cryptanalytic reasoning
-          "cryptanalysis": "cryptanalytic" /* CRYPTANALYTIC */,
-          "cryptography": "cryptanalytic" /* CRYPTANALYTIC */,
-          "security": "cryptanalytic" /* CRYPTANALYTIC */,
-          "cipher": "cryptanalytic" /* CRYPTANALYTIC */,
-          "encryption": "cryptanalytic" /* CRYPTANALYTIC */,
-          "decryption": "cryptanalytic" /* CRYPTANALYTIC */,
-          "attack-vector": "cryptanalytic" /* CRYPTANALYTIC */,
-          "key-analysis": "cryptanalytic" /* CRYPTANALYTIC */,
-          "protocol-security": "cryptanalytic" /* CRYPTANALYTIC */,
-          // Recursive reasoning
-          "recursive": "recursive" /* RECURSIVE */,
-          "recursion": "recursive" /* RECURSIVE */,
-          "divide-conquer": "recursive" /* RECURSIVE */,
-          "self-similar": "recursive" /* RECURSIVE */,
-          "decomposition": "recursive" /* RECURSIVE */,
-          "fractal": "recursive" /* RECURSIVE */,
-          "tree-traversal": "recursive" /* RECURSIVE */,
-          // Modal reasoning
-          "modal": "modal" /* MODAL */,
-          "possibility": "modal" /* MODAL */,
-          "necessity": "modal" /* MODAL */,
-          "possible-worlds": "modal" /* MODAL */,
-          "epistemic": "modal" /* MODAL */,
-          "deontic": "modal" /* MODAL */,
-          "alethic": "modal" /* MODAL */,
-          // Stochastic reasoning
-          "stochastic": "stochastic" /* STOCHASTIC */,
-          "random-process": "stochastic" /* STOCHASTIC */,
-          "markov": "stochastic" /* STOCHASTIC */,
-          "monte-carlo": "stochastic" /* STOCHASTIC */,
-          "probabilistic-process": "stochastic" /* STOCHASTIC */,
-          "queueing": "stochastic" /* STOCHASTIC */,
-          "random-walk": "stochastic" /* STOCHASTIC */,
-          // Constraint reasoning
-          "constraint": "constraint" /* CONSTRAINT */,
-          "constraints": "constraint" /* CONSTRAINT */,
-          "csp": "constraint" /* CONSTRAINT */,
-          "sat": "constraint" /* CONSTRAINT */,
-          "scheduling": "constraint" /* CONSTRAINT */,
-          "allocation": "constraint" /* CONSTRAINT */,
-          "feasibility": "constraint" /* CONSTRAINT */,
-          "satisfiability": "constraint" /* CONSTRAINT */,
-          // Optimization reasoning
-          "optimization": "optimization" /* OPTIMIZATION */,
-          "optimize": "optimization" /* OPTIMIZATION */,
-          "optimal": "optimization" /* OPTIMIZATION */,
-          "minimize": "optimization" /* OPTIMIZATION */,
-          "maximize": "optimization" /* OPTIMIZATION */,
-          "gradient": "optimization" /* OPTIMIZATION */,
-          "convex": "optimization" /* OPTIMIZATION */,
-          "heuristic": "optimization" /* OPTIMIZATION */,
-          "search": "optimization" /* OPTIMIZATION */,
-          // First Principles reasoning
-          "first-principles": "firstprinciples" /* FIRSTPRINCIPLES */,
-          "fundamental": "firstprinciples" /* FIRSTPRINCIPLES */,
-          "foundational": "firstprinciples" /* FIRSTPRINCIPLES */,
-          "axiom": "firstprinciples" /* FIRSTPRINCIPLES */,
-          "ground-truth": "firstprinciples" /* FIRSTPRINCIPLES */,
-          "from-scratch": "firstprinciples" /* FIRSTPRINCIPLES */,
-          "basic-principles": "firstprinciples" /* FIRSTPRINCIPLES */,
-          "root-cause": "firstprinciples" /* FIRSTPRINCIPLES */,
-          // Systems Thinking reasoning
-          "systems-thinking": "systemsthinking" /* SYSTEMSTHINKING */,
-          "systems": "systemsthinking" /* SYSTEMSTHINKING */,
-          "holistic": "systemsthinking" /* SYSTEMSTHINKING */,
-          "feedback-loop": "systemsthinking" /* SYSTEMSTHINKING */,
-          "emergence": "systemsthinking" /* SYSTEMSTHINKING */,
-          "interconnected": "systemsthinking" /* SYSTEMSTHINKING */,
-          "ecosystem": "systemsthinking" /* SYSTEMSTHINKING */,
-          "leverage-point": "systemsthinking" /* SYSTEMSTHINKING */,
-          // Scientific Method reasoning
-          "scientific": "scientificmethod" /* SCIENTIFICMETHOD */,
-          "experiment": "scientificmethod" /* SCIENTIFICMETHOD */,
-          "research": "scientificmethod" /* SCIENTIFICMETHOD */,
-          "falsification": "scientificmethod" /* SCIENTIFICMETHOD */,
-          "a/b-testing": "scientificmethod" /* SCIENTIFICMETHOD */,
-          "reproducibility": "scientificmethod" /* SCIENTIFICMETHOD */,
-          "control-group": "scientificmethod" /* SCIENTIFICMETHOD */,
-          // Formal Logic reasoning
-          "formal-logic": "formallogic" /* FORMALLOGIC */,
-          "propositional": "formallogic" /* FORMALLOGIC */,
-          "predicate": "formallogic" /* FORMALLOGIC */,
-          "theorem-proving": "formallogic" /* FORMALLOGIC */,
-          "formal-proof": "formallogic" /* FORMALLOGIC */,
-          "validity": "formallogic" /* FORMALLOGIC */,
-          "soundness": "formallogic" /* FORMALLOGIC */,
-          "completeness": "formallogic" /* FORMALLOGIC */,
-          // Bias detection and critical analysis
-          "bias": "metareasoning" /* METAREASONING */,
-          "bias-detection": "metareasoning" /* METAREASONING */,
-          "cognitive-bias": "metareasoning" /* METAREASONING */,
-          "fallacy": "formallogic" /* FORMALLOGIC */,
-          "fallacies": "formallogic" /* FORMALLOGIC */,
-          "logical-fallacy": "formallogic" /* FORMALLOGIC */,
-          "counter-argument": "counterfactual" /* COUNTERFACTUAL */,
-          "counterargument": "counterfactual" /* COUNTERFACTUAL */,
-          "fact-check": "evidential" /* EVIDENTIAL */,
-          "misinformation": "evidential" /* EVIDENTIAL */,
-          "disinformation": "evidential" /* EVIDENTIAL */,
-          "reasoning-flaw": "metareasoning" /* METAREASONING */,
-          "argument-analysis": "formallogic" /* FORMALLOGIC */,
-          // ===== ALGORITHMIC REASONING (v7.3.0) - CLRS Coverage =====
-          // General algorithm terms
-          "algorithm": "algorithmic" /* ALGORITHMIC */,
-          "algorithms": "algorithmic" /* ALGORITHMIC */,
-          "algorithmic": "algorithmic" /* ALGORITHMIC */,
-          "data-structure": "algorithmic" /* ALGORITHMIC */,
-          "data-structures": "algorithmic" /* ALGORITHMIC */,
-          "complexity": "algorithmic" /* ALGORITHMIC */,
-          "time-complexity": "algorithmic" /* ALGORITHMIC */,
-          "space-complexity": "algorithmic" /* ALGORITHMIC */,
-          "big-o": "algorithmic" /* ALGORITHMIC */,
-          "asymptotic": "algorithmic" /* ALGORITHMIC */,
-          "correctness-proof": "algorithmic" /* ALGORITHMIC */,
-          "loop-invariant": "algorithmic" /* ALGORITHMIC */,
-          "invariant": "algorithmic" /* ALGORITHMIC */,
-          // Design patterns
-          "divide-and-conquer": "algorithmic" /* ALGORITHMIC */,
-          "dynamic-programming": "algorithmic" /* ALGORITHMIC */,
-          "dp": "algorithmic" /* ALGORITHMIC */,
-          "memoization": "algorithmic" /* ALGORITHMIC */,
-          "greedy-algorithm": "algorithmic" /* ALGORITHMIC */,
-          "backtracking": "algorithmic" /* ALGORITHMIC */,
-          "branch-and-bound": "algorithmic" /* ALGORITHMIC */,
-          "amortized": "algorithmic" /* ALGORITHMIC */,
-          "amortized-analysis": "algorithmic" /* ALGORITHMIC */,
-          // Sorting algorithms
-          "sorting": "algorithmic" /* ALGORITHMIC */,
-          "sort": "algorithmic" /* ALGORITHMIC */,
-          "insertion-sort": "algorithmic" /* ALGORITHMIC */,
-          "merge-sort": "algorithmic" /* ALGORITHMIC */,
-          "mergesort": "algorithmic" /* ALGORITHMIC */,
-          "quicksort": "algorithmic" /* ALGORITHMIC */,
-          "quick-sort": "algorithmic" /* ALGORITHMIC */,
-          "heapsort": "algorithmic" /* ALGORITHMIC */,
-          "heap-sort": "algorithmic" /* ALGORITHMIC */,
-          "counting-sort": "algorithmic" /* ALGORITHMIC */,
-          "radix-sort": "algorithmic" /* ALGORITHMIC */,
-          "bucket-sort": "algorithmic" /* ALGORITHMIC */,
-          "comparison-sort": "algorithmic" /* ALGORITHMIC */,
-          // Searching and selection
-          "binary-search": "algorithmic" /* ALGORITHMIC */,
-          "linear-search": "algorithmic" /* ALGORITHMIC */,
-          "selection-algorithm": "algorithmic" /* ALGORITHMIC */,
-          "median-of-medians": "algorithmic" /* ALGORITHMIC */,
-          "order-statistics": "algorithmic" /* ALGORITHMIC */,
-          // Data structures
-          "heap": "algorithmic" /* ALGORITHMIC */,
-          "binary-heap": "algorithmic" /* ALGORITHMIC */,
-          "priority-queue": "algorithmic" /* ALGORITHMIC */,
-          "hash-table": "algorithmic" /* ALGORITHMIC */,
-          "hashing": "algorithmic" /* ALGORITHMIC */,
-          "binary-search-tree": "algorithmic" /* ALGORITHMIC */,
-          "bst": "algorithmic" /* ALGORITHMIC */,
-          "red-black-tree": "algorithmic" /* ALGORITHMIC */,
-          "avl-tree": "algorithmic" /* ALGORITHMIC */,
-          "b-tree": "algorithmic" /* ALGORITHMIC */,
-          "fibonacci-heap": "algorithmic" /* ALGORITHMIC */,
-          "union-find": "algorithmic" /* ALGORITHMIC */,
-          "disjoint-set": "algorithmic" /* ALGORITHMIC */,
-          "trie": "algorithmic" /* ALGORITHMIC */,
-          "segment-tree": "algorithmic" /* ALGORITHMIC */,
-          "fenwick-tree": "algorithmic" /* ALGORITHMIC */,
-          // Graph algorithms
-          "graph-algorithm": "algorithmic" /* ALGORITHMIC */,
-          "bfs": "algorithmic" /* ALGORITHMIC */,
-          "breadth-first": "algorithmic" /* ALGORITHMIC */,
-          "dfs": "algorithmic" /* ALGORITHMIC */,
-          "depth-first": "algorithmic" /* ALGORITHMIC */,
-          "topological-sort": "algorithmic" /* ALGORITHMIC */,
-          "strongly-connected": "algorithmic" /* ALGORITHMIC */,
-          "scc": "algorithmic" /* ALGORITHMIC */,
-          "minimum-spanning-tree": "algorithmic" /* ALGORITHMIC */,
-          "mst": "algorithmic" /* ALGORITHMIC */,
-          "kruskal": "algorithmic" /* ALGORITHMIC */,
-          "prim": "algorithmic" /* ALGORITHMIC */,
-          "dijkstra": "algorithmic" /* ALGORITHMIC */,
-          "bellman-ford": "algorithmic" /* ALGORITHMIC */,
-          "floyd-warshall": "algorithmic" /* ALGORITHMIC */,
-          "shortest-path": "algorithmic" /* ALGORITHMIC */,
-          "max-flow": "algorithmic" /* ALGORITHMIC */,
-          "ford-fulkerson": "algorithmic" /* ALGORITHMIC */,
-          "edmonds-karp": "algorithmic" /* ALGORITHMIC */,
-          "bipartite-matching": "algorithmic" /* ALGORITHMIC */,
-          // Dynamic programming problems
-          "lcs": "algorithmic" /* ALGORITHMIC */,
-          "longest-common-subsequence": "algorithmic" /* ALGORITHMIC */,
-          "edit-distance": "algorithmic" /* ALGORITHMIC */,
-          "levenshtein": "algorithmic" /* ALGORITHMIC */,
-          "knapsack": "algorithmic" /* ALGORITHMIC */,
-          "matrix-chain": "algorithmic" /* ALGORITHMIC */,
-          "optimal-bst": "algorithmic" /* ALGORITHMIC */,
-          "rod-cutting": "algorithmic" /* ALGORITHMIC */,
-          "coin-change": "algorithmic" /* ALGORITHMIC */,
-          // String algorithms
-          "string-matching": "algorithmic" /* ALGORITHMIC */,
-          "pattern-matching": "algorithmic" /* ALGORITHMIC */,
-          "kmp": "algorithmic" /* ALGORITHMIC */,
-          "knuth-morris-pratt": "algorithmic" /* ALGORITHMIC */,
-          "rabin-karp": "algorithmic" /* ALGORITHMIC */,
-          "boyer-moore": "algorithmic" /* ALGORITHMIC */,
-          "suffix-array": "algorithmic" /* ALGORITHMIC */,
-          "suffix-tree": "algorithmic" /* ALGORITHMIC */,
-          // Computational geometry
-          "convex-hull": "algorithmic" /* ALGORITHMIC */,
-          "graham-scan": "algorithmic" /* ALGORITHMIC */,
-          "jarvis-march": "algorithmic" /* ALGORITHMIC */,
-          "closest-pair": "algorithmic" /* ALGORITHMIC */,
-          "line-intersection": "algorithmic" /* ALGORITHMIC */,
-          // Number theory algorithms
-          "gcd": "algorithmic" /* ALGORITHMIC */,
-          "euclidean": "algorithmic" /* ALGORITHMIC */,
-          "modular-arithmetic": "algorithmic" /* ALGORITHMIC */,
-          "primality": "algorithmic" /* ALGORITHMIC */,
-          "miller-rabin": "algorithmic" /* ALGORITHMIC */,
-          "rsa": "algorithmic" /* ALGORITHMIC */,
-          // Matrix algorithms
-          "strassen": "algorithmic" /* ALGORITHMIC */,
-          "matrix-multiplication": "algorithmic" /* ALGORITHMIC */,
-          "matrix-exponentiation": "algorithmic" /* ALGORITHMIC */,
-          // Advanced topics
-          "fft": "algorithmic" /* ALGORITHMIC */,
-          "fast-fourier": "algorithmic" /* ALGORITHMIC */,
-          "polynomial-multiplication": "algorithmic" /* ALGORITHMIC */,
-          "linear-programming": "algorithmic" /* ALGORITHMIC */,
-          "simplex": "algorithmic" /* ALGORITHMIC */,
-          "approximation-algorithm": "algorithmic" /* ALGORITHMIC */,
-          "np-hard": "algorithmic" /* ALGORITHMIC */,
-          "np-complete": "algorithmic" /* ALGORITHMIC */,
-          // Recurrences and analysis
-          "recurrence": "algorithmic" /* ALGORITHMIC */,
-          "master-theorem": "algorithmic" /* ALGORITHMIC */,
-          "recursion-tree": "algorithmic" /* ALGORITHMIC */,
-          "substitution-method": "algorithmic" /* ALGORITHMIC */,
-          // ===== ACADEMIC RESEARCH MODES (v7.4.0) =====
-          // Synthesis mode - literature review and knowledge integration
-          "synthesis": "synthesis" /* SYNTHESIS */,
-          "literature-review": "synthesis" /* SYNTHESIS */,
-          "literature-synthesis": "synthesis" /* SYNTHESIS */,
-          "systematic-review": "synthesis" /* SYNTHESIS */,
-          "meta-analysis": "synthesis" /* SYNTHESIS */,
-          "knowledge-integration": "synthesis" /* SYNTHESIS */,
-          "research-synthesis": "synthesis" /* SYNTHESIS */,
-          "state-of-the-art": "synthesis" /* SYNTHESIS */,
-          "survey-paper": "synthesis" /* SYNTHESIS */,
-          "theme-extraction": "synthesis" /* SYNTHESIS */,
-          "gap-analysis": "synthesis" /* SYNTHESIS */,
-          "cross-study": "synthesis" /* SYNTHESIS */,
-          // Argumentation mode - academic argumentation and Toulmin model
-          "argumentation": "argumentation" /* ARGUMENTATION */,
-          "argument": "argumentation" /* ARGUMENTATION */,
-          "toulmin": "argumentation" /* ARGUMENTATION */,
-          "toulmin-model": "argumentation" /* ARGUMENTATION */,
-          "claim-evidence": "argumentation" /* ARGUMENTATION */,
-          "warrant": "argumentation" /* ARGUMENTATION */,
-          "backing": "argumentation" /* ARGUMENTATION */,
-          "qualifier": "argumentation" /* ARGUMENTATION */,
-          "rebuttal": "argumentation" /* ARGUMENTATION */,
-          "thesis-argument": "argumentation" /* ARGUMENTATION */,
-          "position-paper": "argumentation" /* ARGUMENTATION */,
-          "debate": "argumentation" /* ARGUMENTATION */,
-          "persuasion": "argumentation" /* ARGUMENTATION */,
-          "dialectic": "argumentation" /* ARGUMENTATION */,
-          "rhetorical": "argumentation" /* ARGUMENTATION */,
-          // Critique mode - critical analysis and peer review
-          "critique": "critique" /* CRITIQUE */,
-          "critical-analysis": "critique" /* CRITIQUE */,
-          "peer-review": "critique" /* CRITIQUE */,
-          "paper-review": "critique" /* CRITIQUE */,
-          "methodology-critique": "critique" /* CRITIQUE */,
-          "validity-assessment": "critique" /* CRITIQUE */,
-          "limitation-analysis": "critique" /* CRITIQUE */,
-          "strength-weakness": "critique" /* CRITIQUE */,
-          "constructive-feedback": "critique" /* CRITIQUE */,
-          "research-critique": "critique" /* CRITIQUE */,
-          "evaluation": "critique" /* CRITIQUE */,
-          // Analysis mode - qualitative analysis methods
-          "qualitative-analysis": "analysis" /* ANALYSIS */,
-          "thematic-analysis": "analysis" /* ANALYSIS */,
-          "grounded-theory": "analysis" /* ANALYSIS */,
-          "discourse-analysis": "analysis" /* ANALYSIS */,
-          "content-analysis": "analysis" /* ANALYSIS */,
-          "narrative-analysis": "analysis" /* ANALYSIS */,
-          "phenomenological": "analysis" /* ANALYSIS */,
-          "ethnographic": "analysis" /* ANALYSIS */,
-          "coding": "analysis" /* ANALYSIS */,
-          "interview-analysis": "analysis" /* ANALYSIS */,
-          "document-analysis": "analysis" /* ANALYSIS */,
-          "case-study": "analysis" /* ANALYSIS */,
-          "qualitative": "analysis" /* ANALYSIS */
-        };
-        const normalizedInput = problemType.toLowerCase();
-        if (typeMap[normalizedInput]) {
-          return typeMap[normalizedInput];
-        }
-        const prioritizedKeywords = [
-          // High priority - specific technical terms
-          "bayesian",
-          "posterior",
-          "prior",
-          "likelihood",
-          "conditional-probability",
-          "hypothesis-testing",
-          "probabilistic",
-          "probability",
-          "counterfactual",
-          "what-if",
-          "causal",
-          "causality",
-          "game-theory",
-          "nash",
-          "payoff",
-          "temporal",
-          "timeline",
-          "mathematical",
-          "proof",
-          "theorem",
-          // Medium priority - domain terms
-          "optimization",
-          "constraint",
-          "systems",
-          "feedback",
-          "scientific",
-          "experiment",
-          "synthesis",
-          "literature",
-          "argumentation",
-          "toulmin",
-          "critique",
-          "evaluation",
-          "analysis",
-          "qualitative",
-          // Lower priority - general terms
-          "uncertainty",
-          "evidence",
-          "logic",
-          "deductive",
-          "pattern",
-          "inductive",
-          "hypothesis",
-          "explanation",
-          "abductive"
-        ];
-        for (const keyword of prioritizedKeywords) {
-          if (normalizedInput.includes(keyword) && typeMap[keyword]) {
-            return typeMap[keyword];
-          }
-        }
-        for (const [key, mode] of Object.entries(typeMap)) {
-          if (normalizedInput.includes(key)) {
-            return mode;
-          }
-        }
-        return "sequential" /* SEQUENTIAL */;
-      }
-    };
-  }
-});
-
-// src/types/modes/cryptanalytic.ts
-function toDecibans(likelihoodRatio) {
-  return 10 * Math.log10(likelihoodRatio);
-}
-function fromDecibans(decibans) {
-  return Math.pow(10, decibans / 10);
-}
-function decibansToProbability(decibans, priorProbability = 0.5) {
-  const priorOdds = priorProbability / (1 - priorProbability);
-  const posteriorOdds = priorOdds * fromDecibans(decibans);
-  return posteriorOdds / (1 + posteriorOdds);
-}
-var init_cryptanalytic = __esm({
-  "src/types/modes/cryptanalytic.ts"() {
-    init_esm_shims();
-  }
-});
-
-// src/types/modes/synthesis.ts
-function isSynthesisThought(thought) {
-  return thought.mode === "synthesis";
-}
-var init_synthesis = __esm({
-  "src/types/modes/synthesis.ts"() {
-    init_esm_shims();
-  }
-});
-
-// src/types/modes/argumentation.ts
-function isArgumentationThought(thought) {
-  return thought.mode === "argumentation";
-}
-var init_argumentation = __esm({
-  "src/types/modes/argumentation.ts"() {
-    init_esm_shims();
-  }
-});
-
-// src/types/modes/analysis.ts
-function isAnalysisThought(thought) {
-  return thought.mode === "analysis";
-}
-var init_analysis = __esm({
-  "src/types/modes/analysis.ts"() {
-    init_esm_shims();
-  }
-});
-
-// src/types/index.ts
-var init_types = __esm({
-  "src/types/index.ts"() {
-    init_esm_shims();
-    init_core();
-    init_session();
-    init_recommendations();
-    init_synthesis();
-    init_argumentation();
-    init_analysis();
   }
 });
 
@@ -3845,6 +1857,1143 @@ var init_PhysicsHandler = __esm({
           );
         }
         return validationSuccess(warnings);
+      }
+    };
+  }
+});
+
+// src/types/modes/recommendations.ts
+var ModeRecommender;
+var init_recommendations = __esm({
+  "src/types/modes/recommendations.ts"() {
+    init_esm_shims();
+    ModeRecommender = class {
+      /**
+       * Recommends reasoning modes based on problem characteristics
+       * Returns modes ranked by suitability score
+       */
+      recommendModes(characteristics) {
+        const recommendations = [];
+        const isPhilosophical = characteristics.domain.toLowerCase().includes("metaphysics") || characteristics.domain.toLowerCase().includes("theology") || characteristics.domain.toLowerCase().includes("philosophy") || characteristics.domain.toLowerCase().includes("epistemology") || characteristics.domain.toLowerCase().includes("ethics");
+        if (characteristics.complexity === "high" && (characteristics.requiresExplanation || characteristics.hasAlternatives || isPhilosophical)) {
+          recommendations.push({
+            mode: "hybrid" /* HYBRID */,
+            score: 0.92,
+            reasoning: "Complex problem benefits from multi-modal synthesis combining inductive, deductive, and abductive reasoning",
+            strengths: ["Comprehensive analysis", "Combines empirical and logical approaches", "Maximum evidential strength", "Convergent validation"],
+            limitations: ["Time-intensive", "Requires understanding of multiple reasoning types"],
+            examples: ["Philosophical arguments", "Scientific theories", "Complex decision-making", "Metaphysical questions"]
+          });
+        }
+        if (!characteristics.requiresProof && (characteristics.requiresQuantification || characteristics.hasIncompleteInfo || isPhilosophical)) {
+          recommendations.push({
+            mode: "inductive" /* INDUCTIVE */,
+            score: isPhilosophical ? 0.85 : 0.8,
+            reasoning: "Problem requires pattern recognition and generalization from observations",
+            strengths: ["Empirical grounding", "Pattern detection", "Probabilistic reasoning", "Scientific discovery"],
+            limitations: ["Cannot prove with certainty", "Vulnerable to black swans", "Sample size dependent"],
+            examples: ["Scientific hypotheses", "Trend analysis", "Empirical arguments", "Data-driven insights"]
+          });
+        }
+        if (characteristics.requiresProof || isPhilosophical) {
+          recommendations.push({
+            mode: "deductive" /* DEDUCTIVE */,
+            score: characteristics.requiresProof ? 0.9 : 0.75,
+            reasoning: "Problem requires logical derivation from general principles to specific conclusions",
+            strengths: ["Logical validity", "Rigorous inference", "Exposes contradictions", "Formal reasoning"],
+            limitations: ["Soundness depends on premise truth", "Vulnerable to definitional disputes", "May not handle uncertainty well"],
+            examples: ["Logical proofs", "Mathematical theorems", "Philosophical arguments", "Formal verification"]
+          });
+        }
+        if (characteristics.requiresExplanation || isPhilosophical) {
+          recommendations.push({
+            mode: "abductive" /* ABDUCTIVE */,
+            score: isPhilosophical ? 0.9 : 0.87,
+            reasoning: "Problem requires finding best explanations through comparative hypothesis evaluation",
+            strengths: ["Hypothesis generation", "Comparative evaluation", "Explanatory power assessment", "Handles competing theories"],
+            limitations: ["May miss non-obvious explanations", "Explanatory power is subjective"],
+            examples: ["Scientific explanation", "Debugging", "Diagnosis", "Theory selection", "Metaphysical arguments"]
+          });
+        }
+        if (characteristics.complexity === "high" || characteristics.hasAlternatives && characteristics.uncertainty === "high") {
+          recommendations.push({
+            mode: "metareasoning" /* METAREASONING */,
+            score: characteristics.complexity === "high" ? 0.88 : 0.82,
+            reasoning: "Complex or uncertain problems benefit from strategic monitoring and adaptive reasoning",
+            strengths: ["Strategy evaluation", "Mode switching recommendations", "Quality monitoring", "Resource allocation", "Self-reflection"],
+            limitations: ["Meta-level overhead", "Requires understanding of other modes", "May not directly solve the problem"],
+            examples: ["Strategy selection", "Debugging stuck reasoning", "Quality assessment", "Adaptive problem-solving"]
+          });
+        }
+        if (characteristics.timeDependent) {
+          recommendations.push({
+            mode: "temporal" /* TEMPORAL */,
+            score: 0.9,
+            reasoning: "Problem involves time-dependent events and sequences",
+            strengths: ["Event sequencing", "Temporal causality", "Timeline construction"],
+            limitations: ["Limited strategic reasoning"],
+            examples: ["Process modeling", "Event correlation", "Timeline debugging"]
+          });
+        }
+        if (characteristics.multiAgent) {
+          recommendations.push({
+            mode: "gametheory" /* GAMETHEORY */,
+            score: 0.85,
+            reasoning: "Problem involves strategic interactions between agents",
+            strengths: ["Equilibrium analysis", "Strategic reasoning", "Multi-agent dynamics"],
+            limitations: ["Assumes rationality", "Complex computations"],
+            examples: ["Competitive analysis", "Auction design", "Negotiation"]
+          });
+        }
+        if (characteristics.hasIncompleteInfo && characteristics.uncertainty === "high" && !isPhilosophical) {
+          recommendations.push({
+            mode: "evidential" /* EVIDENTIAL */,
+            score: 0.82,
+            reasoning: "Problem has incomplete information and high uncertainty requiring Dempster-Shafer belief functions",
+            strengths: ["Handles ignorance", "Evidence combination", "Uncertainty intervals"],
+            limitations: ["Computational complexity", "Requires careful mass assignment", "Better for sensor fusion than philosophical reasoning"],
+            examples: ["Sensor fusion", "Diagnostic reasoning", "Intelligence analysis"]
+          });
+        }
+        if (characteristics.timeDependent && characteristics.requiresExplanation) {
+          recommendations.push({
+            mode: "causal" /* CAUSAL */,
+            score: 0.86,
+            reasoning: "Problem requires understanding cause-effect relationships",
+            strengths: ["Intervention analysis", "Causal graphs", "Impact assessment"],
+            limitations: ["Requires domain knowledge", "Difficult to identify confounders"],
+            examples: ["Impact analysis", "System design", "Policy evaluation"]
+          });
+        }
+        if (characteristics.requiresQuantification && characteristics.uncertainty !== "low") {
+          recommendations.push({
+            mode: "bayesian" /* BAYESIAN */,
+            score: 0.84,
+            reasoning: "Problem requires probabilistic reasoning with evidence updates",
+            strengths: ["Principled uncertainty", "Evidence integration", "Prior knowledge"],
+            limitations: ["Requires probability estimates", "Computationally intensive"],
+            examples: ["A/B testing", "Risk assessment", "Predictive modeling"]
+          });
+        }
+        if (characteristics.hasAlternatives) {
+          recommendations.push({
+            mode: "counterfactual" /* COUNTERFACTUAL */,
+            score: 0.82,
+            reasoning: "Problem benefits from analyzing alternative scenarios",
+            strengths: ["What-if analysis", "Post-mortem insights", "Decision comparison"],
+            limitations: ["Speculative", "Difficult to validate"],
+            examples: ["Post-mortems", "Strategic planning", "Architecture decisions"]
+          });
+        }
+        if (characteristics.complexity === "high" && characteristics.requiresExplanation) {
+          recommendations.push({
+            mode: "analogical" /* ANALOGICAL */,
+            score: 0.8,
+            reasoning: "Problem can benefit from cross-domain analogies",
+            strengths: ["Creative insights", "Knowledge transfer", "Pattern recognition"],
+            limitations: ["Analogies may be superficial", "Requires diverse knowledge"],
+            examples: ["Novel problem solving", "Design thinking", "Innovation"]
+          });
+        }
+        if (characteristics.requiresProof) {
+          recommendations.push({
+            mode: "mathematics" /* MATHEMATICS */,
+            score: 0.95,
+            reasoning: "Problem requires formal proofs and symbolic reasoning",
+            strengths: ["Rigorous proofs", "Symbolic computation", "Theorem proving"],
+            limitations: ["Limited to mathematical domains"],
+            examples: ["Algorithm correctness", "Complexity analysis", "Formal verification"]
+          });
+        }
+        if (characteristics.domain === "physics" || characteristics.domain === "engineering") {
+          recommendations.push({
+            mode: "physics" /* PHYSICS */,
+            score: 0.9,
+            reasoning: "Problem involves physical systems or tensor mathematics",
+            strengths: ["Field theory", "Conservation laws", "Tensor analysis"],
+            limitations: ["Specialized to physics domains"],
+            examples: ["Physical modeling", "System dynamics", "Engineering analysis"]
+          });
+        }
+        if (characteristics.complexity === "high" && characteristics.requiresProof) {
+          recommendations.push({
+            mode: "shannon" /* SHANNON */,
+            score: 0.88,
+            reasoning: "Complex problem requiring systematic decomposition",
+            strengths: ["Systematic approach", "Problem decomposition", "Rigorous analysis"],
+            limitations: ["Time-intensive", "Requires discipline"],
+            examples: ["Complex system design", "Research problems", "Novel algorithms"]
+          });
+        }
+        if (characteristics.domain === "engineering" || characteristics.domain === "software" || characteristics.domain === "systems" || characteristics.requiresQuantification && !characteristics.requiresProof) {
+          recommendations.push({
+            mode: "engineering" /* ENGINEERING */,
+            score: characteristics.domain === "engineering" ? 0.92 : 0.85,
+            reasoning: "Problem requires systematic engineering analysis with trade-offs and constraints",
+            strengths: ["Requirements analysis", "Trade-off evaluation", "System design", "Failure mode analysis", "Implementation planning"],
+            limitations: ["May over-engineer simple problems", "Requires domain expertise"],
+            examples: ["System architecture", "Design decisions", "Performance optimization", "Reliability analysis", "Technical debt assessment"]
+          });
+        }
+        if (characteristics.domain === "computer science" || characteristics.domain === "computation" || characteristics.requiresProof && characteristics.domain.includes("algorithm")) {
+          recommendations.push({
+            mode: "computability" /* COMPUTABILITY */,
+            score: 0.88,
+            reasoning: "Problem involves computational complexity, decidability, or algorithmic analysis",
+            strengths: ["Turing machine analysis", "Decidability proofs", "Complexity classification", "Halting problem variants"],
+            limitations: ["Highly theoretical", "Requires formal CS background"],
+            examples: ["Algorithm decidability", "Complexity bounds", "Reduction proofs", "Computational limits"]
+          });
+        }
+        if (characteristics.domain === "security" || characteristics.domain === "cryptography" || characteristics.domain.includes("crypto")) {
+          recommendations.push({
+            mode: "cryptanalytic" /* CRYPTANALYTIC */,
+            score: 0.9,
+            reasoning: "Problem involves cryptographic analysis, security assessment, or information-theoretic reasoning",
+            strengths: ["Statistical analysis", "Pattern detection", "Deciban calculations", "Key space analysis", "Attack surface evaluation"],
+            limitations: ["Specialized domain", "Requires mathematical background"],
+            examples: ["Cipher analysis", "Protocol security", "Key management", "Attack vectors", "Information leakage"]
+          });
+        }
+        if (characteristics.complexity === "high" && (characteristics.hasAlternatives || characteristics.requiresExplanation)) {
+          recommendations.push({
+            mode: "recursive" /* RECURSIVE */,
+            score: 0.82,
+            reasoning: "Problem has recursive structure or can be decomposed into smaller similar subproblems",
+            strengths: ["Problem decomposition", "Self-similar analysis", "Base case identification", "Recursive patterns"],
+            limitations: ["Stack overflow risk in deep recursion", "May miss non-recursive solutions"],
+            examples: ["Divide and conquer", "Tree traversal", "Fractal analysis", "Self-referential problems"]
+          });
+        }
+        if (characteristics.hasAlternatives && characteristics.uncertainty === "high") {
+          recommendations.push({
+            mode: "modal" /* MODAL */,
+            score: 0.8,
+            reasoning: "Problem involves possibility, necessity, or reasoning about alternative scenarios",
+            strengths: ["Possible worlds analysis", "Necessity vs possibility", "Epistemic reasoning", "Deontic analysis"],
+            limitations: ["Abstract and theoretical", "May overcomplicate simple choices"],
+            examples: ["Modal logic proofs", "Necessity analysis", "Epistemic uncertainty", "Deontic obligations"]
+          });
+        }
+        if (characteristics.uncertainty === "high" && characteristics.requiresQuantification) {
+          recommendations.push({
+            mode: "stochastic" /* STOCHASTIC */,
+            score: 0.84,
+            reasoning: "Problem involves random processes, probabilistic transitions, or stochastic modeling",
+            strengths: ["Markov chains", "Random process modeling", "Probabilistic state transitions", "Monte Carlo methods"],
+            limitations: ["Requires probability theory", "Computationally intensive"],
+            examples: ["Queueing systems", "Random walks", "Stochastic optimization", "Process simulation"]
+          });
+        }
+        if (characteristics.hasAlternatives && characteristics.requiresQuantification) {
+          recommendations.push({
+            mode: "constraint" /* CONSTRAINT */,
+            score: 0.83,
+            reasoning: "Problem involves multiple constraints that must be satisfied simultaneously",
+            strengths: ["Constraint propagation", "Feasibility analysis", "SAT solving", "CSP formulation"],
+            limitations: ["NP-hard in general", "May have no solution"],
+            examples: ["Scheduling", "Resource allocation", "Configuration", "Puzzle solving"]
+          });
+        }
+        if (characteristics.requiresQuantification && characteristics.hasAlternatives) {
+          recommendations.push({
+            mode: "optimization" /* OPTIMIZATION */,
+            score: 0.86,
+            reasoning: "Problem requires finding optimal or near-optimal solutions from alternatives",
+            strengths: ["Objective function formulation", "Gradient methods", "Convex optimization", "Meta-heuristics"],
+            limitations: ["Local optima", "Computational complexity", "May require relaxation"],
+            examples: ["Resource optimization", "Parameter tuning", "Portfolio optimization", "Route planning"]
+          });
+        }
+        if (isPhilosophical || characteristics.complexity === "high" && characteristics.requiresExplanation) {
+          recommendations.push({
+            mode: "firstprinciples" /* FIRSTPRINCIPLES */,
+            score: isPhilosophical ? 0.88 : 0.82,
+            reasoning: "Problem benefits from breaking down to fundamental truths and building up from there",
+            strengths: ["Assumption identification", "Foundational analysis", "Novel solutions", "Deep understanding"],
+            limitations: ["Time-intensive", "May rediscover known solutions", "Requires broad knowledge"],
+            examples: ["Innovation challenges", "Paradigm shifts", "Root cause analysis", "Foundational questions"]
+          });
+        }
+        if (characteristics.complexity === "high" && (characteristics.timeDependent || characteristics.multiAgent)) {
+          recommendations.push({
+            mode: "systemsthinking" /* SYSTEMSTHINKING */,
+            score: 0.85,
+            reasoning: "Problem involves complex systems with interconnected components and feedback loops",
+            strengths: ["Holistic view", "Feedback loop analysis", "Emergence detection", "Leverage point identification"],
+            limitations: ["Can be overwhelming", "Requires system boundaries definition"],
+            examples: ["Organizational change", "Ecosystem analysis", "Market dynamics", "Social systems"]
+          });
+        }
+        if (characteristics.hasIncompleteInfo && (characteristics.requiresExplanation || characteristics.requiresQuantification)) {
+          recommendations.push({
+            mode: "scientificmethod" /* SCIENTIFICMETHOD */,
+            score: 0.84,
+            reasoning: "Problem requires systematic empirical investigation and hypothesis testing",
+            strengths: ["Hypothesis formulation", "Experimental design", "Falsification", "Reproducibility"],
+            limitations: ["Requires data collection", "Time for experiments", "May not apply to all domains"],
+            examples: ["Research questions", "A/B testing", "Empirical studies", "Data-driven decisions"]
+          });
+        }
+        if (characteristics.requiresProof && !characteristics.requiresQuantification) {
+          recommendations.push({
+            mode: "formallogic" /* FORMALLOGIC */,
+            score: 0.87,
+            reasoning: "Problem requires rigorous formal logical analysis and proof construction",
+            strengths: ["Propositional logic", "Predicate logic", "Proof systems", "Logical completeness"],
+            limitations: ["May be overly formal", "Limited expressiveness for some domains"],
+            examples: ["Formal verification", "Logical puzzles", "Argument validity", "Theorem proving"]
+          });
+        }
+        if (characteristics.domain === "computer science" || characteristics.domain === "algorithms" || characteristics.domain === "data structures" || characteristics.domain === "software" || characteristics.requiresProof && characteristics.requiresQuantification) {
+          recommendations.push({
+            mode: "algorithmic" /* ALGORITHMIC */,
+            score: characteristics.domain === "algorithms" ? 0.95 : 0.88,
+            reasoning: "Problem involves algorithm design, complexity analysis, or data structure optimization",
+            strengths: [
+              "Algorithm design patterns (divide-and-conquer, DP, greedy)",
+              "Complexity analysis (time, space, amortized)",
+              "Correctness proofs (loop invariants, induction)",
+              "Data structure selection and analysis",
+              "Graph algorithms and optimization"
+            ],
+            limitations: ["Focused on computational problems", "Requires algorithmic thinking"],
+            examples: [
+              "Sorting and searching",
+              "Graph traversal (BFS, DFS)",
+              "Dynamic programming formulation",
+              "Shortest path algorithms",
+              "NP-completeness proofs"
+            ]
+          });
+        }
+        if (characteristics.domain === "research" || characteristics.domain === "academic" || characteristics.domain === "literature" || characteristics.hasIncompleteInfo && characteristics.requiresExplanation && !characteristics.requiresProof) {
+          recommendations.push({
+            mode: "synthesis" /* SYNTHESIS */,
+            score: characteristics.domain === "research" || characteristics.domain === "academic" ? 0.92 : 0.85,
+            reasoning: "Problem requires integrating knowledge from multiple sources and identifying themes",
+            strengths: [
+              "Literature integration",
+              "Theme extraction",
+              "Gap identification",
+              "Cross-source analysis",
+              "Knowledge synthesis"
+            ],
+            limitations: ["Requires access to multiple sources", "Time-intensive", "May miss emerging research"],
+            examples: [
+              "Literature reviews",
+              "Systematic reviews",
+              "Meta-analyses",
+              "Research synthesis",
+              "State-of-the-art surveys"
+            ]
+          });
+        }
+        if (characteristics.requiresExplanation && (characteristics.hasAlternatives || characteristics.domain === "academic" || characteristics.domain === "philosophy")) {
+          recommendations.push({
+            mode: "argumentation" /* ARGUMENTATION */,
+            score: characteristics.domain === "academic" ? 0.9 : 0.84,
+            reasoning: "Problem requires structured argumentation with claims, evidence, and warrants",
+            strengths: [
+              "Toulmin model support",
+              "Claim-evidence structure",
+              "Warrant articulation",
+              "Rebuttal handling",
+              "Qualifier specification"
+            ],
+            limitations: ["Formal structure may feel rigid", "Requires clear claim formulation"],
+            examples: [
+              "Academic papers",
+              "Thesis arguments",
+              "Policy proposals",
+              "Debate preparation",
+              "Position papers"
+            ]
+          });
+        }
+        if (characteristics.requiresExplanation && (characteristics.domain === "academic" || characteristics.domain === "research" || characteristics.domain === "review")) {
+          recommendations.push({
+            mode: "critique" /* CRITIQUE */,
+            score: characteristics.domain === "review" ? 0.92 : 0.86,
+            reasoning: "Problem requires critical evaluation of methodology, validity, and limitations",
+            strengths: [
+              "Methodology assessment",
+              "Validity evaluation",
+              "Limitation identification",
+              "Strength recognition",
+              "Constructive feedback"
+            ],
+            limitations: ["Requires domain expertise", "May seem overly critical"],
+            examples: [
+              "Peer review",
+              "Paper critiques",
+              "Methodology evaluation",
+              "Research assessment",
+              "Quality analysis"
+            ]
+          });
+        }
+        if (characteristics.hasIncompleteInfo && characteristics.requiresExplanation && (characteristics.domain === "research" || characteristics.domain === "qualitative" || characteristics.domain === "social science")) {
+          recommendations.push({
+            mode: "analysis" /* ANALYSIS */,
+            score: characteristics.domain === "qualitative" ? 0.93 : 0.85,
+            reasoning: "Problem requires systematic qualitative analysis using established methods",
+            strengths: [
+              "Thematic analysis",
+              "Grounded theory",
+              "Discourse analysis",
+              "Content analysis",
+              "Code development"
+            ],
+            limitations: ["Subjective interpretation", "Time-intensive coding", "Requires methodological rigor"],
+            examples: [
+              "Interview analysis",
+              "Document analysis",
+              "Ethnographic research",
+              "Case study analysis",
+              "Narrative analysis"
+            ]
+          });
+        }
+        if (recommendations.length === 0) {
+          recommendations.push({
+            mode: "sequential" /* SEQUENTIAL */,
+            score: 0.7,
+            reasoning: "General-purpose iterative reasoning",
+            strengths: ["Flexible", "Adaptable", "Iterative refinement"],
+            limitations: ["May lack structure for complex problems"],
+            examples: ["General problem solving", "Exploration", "Brainstorming"]
+          });
+        }
+        return recommendations.sort((a, b) => b.score - a.score);
+      }
+      /**
+       * Recommends combinations of reasoning modes that work well together
+       */
+      recommendCombinations(characteristics) {
+        const combinations = [];
+        const isPhilosophical = characteristics.domain.toLowerCase().includes("metaphysics") || characteristics.domain.toLowerCase().includes("theology") || characteristics.domain.toLowerCase().includes("philosophy") || characteristics.domain.toLowerCase().includes("epistemology") || characteristics.domain.toLowerCase().includes("ethics");
+        if (isPhilosophical || characteristics.complexity === "high" && characteristics.requiresExplanation && characteristics.hasAlternatives) {
+          combinations.push({
+            modes: ["inductive" /* INDUCTIVE */, "deductive" /* DEDUCTIVE */, "abductive" /* ABDUCTIVE */],
+            sequence: "hybrid",
+            rationale: "Synthesize empirical patterns, logical derivations, and explanatory hypotheses for maximum evidential strength",
+            benefits: ["Convergent validation from three independent methods", "Empirical grounding + logical rigor + explanatory power", "Highest achievable confidence through multi-modal synthesis", "Exposes both empirical patterns and logical contradictions"],
+            synergies: ["Inductive patterns inform abductive hypotheses", "Deductive logic tests hypothesis validity", "Abductive explanations guide inductive search", "All three methods converge on same conclusion"]
+          });
+        }
+        if (characteristics.timeDependent && characteristics.requiresExplanation) {
+          combinations.push({
+            modes: ["temporal" /* TEMPORAL */, "causal" /* CAUSAL */],
+            sequence: "sequential",
+            rationale: "Build timeline first, then analyze causal relationships",
+            benefits: ["Complete temporal-causal model", "Root cause with timeline context"],
+            synergies: ["Temporal events inform causal nodes", "Causal edges explain temporal sequences"]
+          });
+        }
+        if (characteristics.requiresExplanation && characteristics.requiresQuantification) {
+          combinations.push({
+            modes: ["abductive" /* ABDUCTIVE */, "bayesian" /* BAYESIAN */],
+            sequence: "sequential",
+            rationale: "Generate hypotheses, then quantify with probabilities",
+            benefits: ["Systematic hypothesis generation", "Quantified belief updates"],
+            synergies: ["Abductive hypotheses become Bayesian hypotheses", "Bayesian updates refine explanations"]
+          });
+        }
+        if (characteristics.multiAgent && characteristics.hasAlternatives) {
+          combinations.push({
+            modes: ["gametheory" /* GAMETHEORY */, "counterfactual" /* COUNTERFACTUAL */],
+            sequence: "hybrid",
+            rationale: "Analyze equilibria, then explore alternative strategies",
+            benefits: ["Strategic analysis + scenario exploration", "Robustness testing"],
+            synergies: ["Equilibria as actual scenarios", "Strategy changes as interventions"]
+          });
+        }
+        if (characteristics.hasIncompleteInfo && characteristics.timeDependent) {
+          combinations.push({
+            modes: ["evidential" /* EVIDENTIAL */, "causal" /* CAUSAL */],
+            sequence: "parallel",
+            rationale: "Combine uncertain evidence while modeling causal structure",
+            benefits: ["Handles uncertainty and causality", "Evidence fusion with causal reasoning"],
+            synergies: ["Belief functions inform causal strengths", "Causal structure guides evidence combination"]
+          });
+        }
+        if (characteristics.timeDependent && characteristics.multiAgent) {
+          combinations.push({
+            modes: ["temporal" /* TEMPORAL */, "gametheory" /* GAMETHEORY */],
+            sequence: "sequential",
+            rationale: "Model event sequences, then analyze strategic interactions over time",
+            benefits: ["Dynamic game analysis", "Time-dependent strategies"],
+            synergies: ["Temporal events as game stages", "Strategies evolve over timeline"]
+          });
+        }
+        if (characteristics.requiresProof && characteristics.complexity === "high") {
+          combinations.push({
+            modes: ["shannon" /* SHANNON */, "mathematics" /* MATHEMATICS */],
+            sequence: "hybrid",
+            rationale: "Use Shannon methodology to structure complex mathematical proofs",
+            benefits: ["Systematic proof construction", "Clear problem decomposition"],
+            synergies: ["Shannon stages guide proof strategy", "Mathematical rigor validates each stage"]
+          });
+        }
+        if ((characteristics.domain === "engineering" || characteristics.domain === "software") && characteristics.hasAlternatives) {
+          combinations.push({
+            modes: ["engineering" /* ENGINEERING */, "optimization" /* OPTIMIZATION */],
+            sequence: "sequential",
+            rationale: "Design system architecture, then optimize for performance/cost",
+            benefits: ["Structured design", "Optimal trade-offs", "Measurable improvements"],
+            synergies: ["Engineering constraints feed optimization", "Optimization validates design choices"]
+          });
+        }
+        if (characteristics.requiresQuantification && characteristics.hasAlternatives && (characteristics.domain === "engineering" || characteristics.domain === "software")) {
+          combinations.push({
+            modes: ["constraint" /* CONSTRAINT */, "engineering" /* ENGINEERING */],
+            sequence: "sequential",
+            rationale: "Identify constraints first, then design within those boundaries",
+            benefits: ["Feasibility guaranteed", "Requirements satisfaction", "Clear boundaries"],
+            synergies: ["Constraints define engineering solution space", "Engineering validates constraint satisfaction"]
+          });
+        }
+        if (characteristics.complexity === "high" && characteristics.requiresExplanation) {
+          combinations.push({
+            modes: ["firstprinciples" /* FIRSTPRINCIPLES */, "systemsthinking" /* SYSTEMSTHINKING */],
+            sequence: "sequential",
+            rationale: "Build from fundamental truths, then analyze systemic interactions",
+            benefits: ["Deep understanding", "Holistic view", "Novel insights"],
+            synergies: ["First principles reveal core elements", "Systems thinking shows interconnections"]
+          });
+        }
+        if (characteristics.hasIncompleteInfo && characteristics.requiresQuantification) {
+          combinations.push({
+            modes: ["scientificmethod" /* SCIENTIFICMETHOD */, "bayesian" /* BAYESIAN */],
+            sequence: "hybrid",
+            rationale: "Design experiments and update beliefs with Bayesian inference",
+            benefits: ["Rigorous methodology", "Quantified uncertainty", "Evidence integration"],
+            synergies: ["Experiments generate evidence", "Bayesian updates refine hypotheses"]
+          });
+        }
+        if (characteristics.requiresProof && !characteristics.hasIncompleteInfo) {
+          combinations.push({
+            modes: ["formallogic" /* FORMALLOGIC */, "deductive" /* DEDUCTIVE */],
+            sequence: "hybrid",
+            rationale: "Use formal logic systems with deductive derivation",
+            benefits: ["Maximum rigor", "Logically valid conclusions", "Formal verification"],
+            synergies: ["Formal logic provides structure", "Deduction ensures valid inference"]
+          });
+        }
+        if (characteristics.complexity === "high" && characteristics.hasAlternatives) {
+          combinations.push({
+            modes: ["recursive" /* RECURSIVE */, "optimization" /* OPTIMIZATION */],
+            sequence: "hybrid",
+            rationale: "Decompose problem recursively, optimize at each level",
+            benefits: ["Scalable solutions", "Local and global optimization", "Manageable complexity"],
+            synergies: ["Recursion breaks down problem", "Optimization solves subproblems optimally"]
+          });
+        }
+        if (characteristics.uncertainty === "high" && characteristics.requiresQuantification) {
+          combinations.push({
+            modes: ["stochastic" /* STOCHASTIC */, "bayesian" /* BAYESIAN */],
+            sequence: "parallel",
+            rationale: "Model random processes while updating beliefs probabilistically",
+            benefits: ["Complete uncertainty model", "Dynamic belief updates", "Probabilistic predictions"],
+            synergies: ["Stochastic models generate distributions", "Bayesian reasoning integrates evidence"]
+          });
+        }
+        if (characteristics.domain === "computer science" && characteristics.requiresProof) {
+          combinations.push({
+            modes: ["computability" /* COMPUTABILITY */, "formallogic" /* FORMALLOGIC */],
+            sequence: "hybrid",
+            rationale: "Analyze computational limits with formal logical proofs",
+            benefits: ["Decidability analysis", "Rigorous complexity proofs", "Theoretical foundations"],
+            synergies: ["Computability defines limits", "Formal logic proves properties"]
+          });
+        }
+        if (characteristics.domain === "security" && characteristics.uncertainty === "high") {
+          combinations.push({
+            modes: ["cryptanalytic" /* CRYPTANALYTIC */, "stochastic" /* STOCHASTIC */],
+            sequence: "parallel",
+            rationale: "Analyze cryptographic systems with probabilistic attack modeling",
+            benefits: ["Security assessment", "Attack probability estimation", "Key space analysis"],
+            synergies: ["Cryptanalysis identifies vulnerabilities", "Stochastic models attack success rates"]
+          });
+        }
+        if (characteristics.complexity === "high" && (characteristics.multiAgent || characteristics.timeDependent)) {
+          combinations.push({
+            modes: ["systemsthinking" /* SYSTEMSTHINKING */, "engineering" /* ENGINEERING */],
+            sequence: "sequential",
+            rationale: "Understand system dynamics holistically, then engineer solutions",
+            benefits: ["Holistic design", "Feedback-aware engineering", "Emergent behavior consideration"],
+            synergies: ["Systems view informs design", "Engineering implements systemic solutions"]
+          });
+        }
+        if (characteristics.hasAlternatives && characteristics.uncertainty === "high") {
+          combinations.push({
+            modes: ["modal" /* MODAL */, "counterfactual" /* COUNTERFACTUAL */],
+            sequence: "parallel",
+            rationale: "Analyze possible worlds and counterfactual scenarios together",
+            benefits: ["Complete possibility space", "What-if analysis", "Robust decision making"],
+            synergies: ["Modal logic structures possibilities", "Counterfactuals explore specific alternatives"]
+          });
+        }
+        if (characteristics.complexity === "high" && characteristics.hasAlternatives) {
+          combinations.push({
+            modes: ["metareasoning" /* METAREASONING */, "optimization" /* OPTIMIZATION */],
+            sequence: "hybrid",
+            rationale: "Monitor reasoning strategies and optimize approach selection",
+            benefits: ["Adaptive reasoning", "Resource optimization", "Strategy refinement"],
+            synergies: ["Metareasoning evaluates strategies", "Optimization selects best approach"]
+          });
+        }
+        if (characteristics.requiresExplanation && characteristics.hasAlternatives) {
+          combinations.push({
+            modes: ["metareasoning" /* METAREASONING */, "formallogic" /* FORMALLOGIC */, "abductive" /* ABDUCTIVE */],
+            sequence: "sequential",
+            rationale: "Detect cognitive biases through meta-analysis, identify logical fallacies, and generate alternative explanations as counter-arguments",
+            benefits: ["Comprehensive bias detection", "Fallacy identification", "Counter-argument generation", "Critical analysis"],
+            synergies: ["Metareasoning identifies reasoning flaws", "Formal logic validates argument structure", "Abductive generates alternative explanations"]
+          });
+        }
+        if (characteristics.hasAlternatives && characteristics.uncertainty !== "low") {
+          combinations.push({
+            modes: ["metareasoning" /* METAREASONING */, "counterfactual" /* COUNTERFACTUAL */],
+            sequence: "parallel",
+            rationale: "Self-reflect on reasoning while exploring alternative scenarios to counter biases",
+            benefits: ["Bias awareness", "Alternative perspective generation", "Decision robustness"],
+            synergies: ["Metareasoning detects bias patterns", "Counterfactual explores what-if scenarios"]
+          });
+        }
+        if (characteristics.domain === "computer science" && characteristics.requiresProof) {
+          combinations.push({
+            modes: ["algorithmic" /* ALGORITHMIC */, "computability" /* COMPUTABILITY */],
+            sequence: "hybrid",
+            rationale: "Combine algorithm design with computability analysis for theoretical completeness",
+            benefits: ["Algorithm correctness proofs", "Complexity class analysis", "Decidability bounds"],
+            synergies: ["Algorithmic design informs complexity", "Computability proves fundamental limits"]
+          });
+        }
+        if (characteristics.hasAlternatives && characteristics.requiresQuantification) {
+          combinations.push({
+            modes: ["algorithmic" /* ALGORITHMIC */, "optimization" /* OPTIMIZATION */],
+            sequence: "sequential",
+            rationale: "Design algorithm first, then optimize for performance",
+            benefits: ["Correct-by-construction", "Performance optimization", "Trade-off analysis"],
+            synergies: ["Algorithm provides baseline", "Optimization improves constants and bounds"]
+          });
+        }
+        if (characteristics.requiresProof && characteristics.domain !== "philosophy") {
+          combinations.push({
+            modes: ["algorithmic" /* ALGORITHMIC */, "mathematics" /* MATHEMATICS */],
+            sequence: "hybrid",
+            rationale: "Combine algorithm design with mathematical proof techniques",
+            benefits: ["Rigorous correctness proofs", "Loop invariant verification", "Inductive reasoning"],
+            synergies: ["Algorithmic structures guide proof strategy", "Mathematical rigor ensures correctness"]
+          });
+        }
+        if (characteristics.complexity === "high" && characteristics.hasAlternatives) {
+          combinations.push({
+            modes: ["algorithmic" /* ALGORITHMIC */, "recursive" /* RECURSIVE */],
+            sequence: "parallel",
+            rationale: "Apply divide-and-conquer paradigm with recursive decomposition",
+            benefits: ["Natural problem decomposition", "Recurrence solving", "Subproblem identification"],
+            synergies: ["Algorithmic patterns guide recursion", "Recursive structure enables Master Theorem"]
+          });
+        }
+        if (characteristics.uncertainty !== "low" && characteristics.requiresQuantification) {
+          combinations.push({
+            modes: ["algorithmic" /* ALGORITHMIC */, "stochastic" /* STOCHASTIC */],
+            sequence: "parallel",
+            rationale: "Design randomized algorithms with probabilistic analysis",
+            benefits: ["Expected-case analysis", "Monte Carlo methods", "Las Vegas algorithms"],
+            synergies: ["Algorithmic framework structures randomization", "Stochastic analysis proves bounds"]
+          });
+        }
+        if (characteristics.domain === "research" || characteristics.domain === "academic") {
+          combinations.push({
+            modes: ["synthesis" /* SYNTHESIS */, "critique" /* CRITIQUE */],
+            sequence: "sequential",
+            rationale: "Synthesize literature first, then critically evaluate the synthesized findings",
+            benefits: ["Comprehensive review", "Critical evaluation", "Research gap identification"],
+            synergies: ["Synthesis identifies patterns", "Critique validates findings"]
+          });
+        }
+        if (characteristics.hasIncompleteInfo && characteristics.requiresExplanation) {
+          combinations.push({
+            modes: ["synthesis" /* SYNTHESIS */, "analysis" /* ANALYSIS */],
+            sequence: "hybrid",
+            rationale: "Combine literature synthesis with qualitative analysis methods",
+            benefits: ["Multi-source integration", "Thematic consistency", "Methodological rigor"],
+            synergies: ["Synthesis provides sources", "Analysis extracts themes"]
+          });
+        }
+        if (characteristics.requiresExplanation && characteristics.hasAlternatives) {
+          combinations.push({
+            modes: ["argumentation" /* ARGUMENTATION */, "critique" /* CRITIQUE */],
+            sequence: "parallel",
+            rationale: "Build arguments while critically evaluating opposing views",
+            benefits: ["Strong arguments", "Addressed weaknesses", "Robust conclusions"],
+            synergies: ["Argumentation structures claims", "Critique strengthens rebuttals"]
+          });
+        }
+        if (characteristics.requiresProof && characteristics.requiresExplanation) {
+          combinations.push({
+            modes: ["argumentation" /* ARGUMENTATION */, "deductive" /* DEDUCTIVE */],
+            sequence: "hybrid",
+            rationale: "Combine Toulmin argumentation with deductive logical rigor",
+            benefits: ["Structured arguments", "Logical validity", "Academic rigor"],
+            synergies: ["Toulmin provides structure", "Deduction ensures validity"]
+          });
+        }
+        if (characteristics.hasIncompleteInfo && !characteristics.requiresProof) {
+          combinations.push({
+            modes: ["analysis" /* ANALYSIS */, "inductive" /* INDUCTIVE */],
+            sequence: "sequential",
+            rationale: "Apply qualitative analysis then generalize through inductive reasoning",
+            benefits: ["Grounded findings", "Pattern generalization", "Theory building"],
+            synergies: ["Analysis identifies codes", "Induction builds theory"]
+          });
+        }
+        if (characteristics.complexity === "high" && characteristics.requiresExplanation) {
+          combinations.push({
+            modes: ["critique" /* CRITIQUE */, "metareasoning" /* METAREASONING */],
+            sequence: "parallel",
+            rationale: "Critically analyze while monitoring own biases and reasoning quality",
+            benefits: ["Self-aware critique", "Bias mitigation", "Improved objectivity"],
+            synergies: ["Critique evaluates content", "Metareasoning evaluates process"]
+          });
+        }
+        if (characteristics.requiresQuantification && characteristics.hasIncompleteInfo) {
+          combinations.push({
+            modes: ["synthesis" /* SYNTHESIS */, "bayesian" /* BAYESIAN */],
+            sequence: "hybrid",
+            rationale: "Synthesize literature while quantifying evidence strength",
+            benefits: ["Quantified synthesis", "Evidence weighting", "Probabilistic conclusions"],
+            synergies: ["Synthesis gathers evidence", "Bayesian weights findings"]
+          });
+        }
+        return combinations;
+      }
+      /**
+       * Get a simple mode recommendation based on a few key characteristics
+       * Simplified version for quick recommendations
+       * Supports all 28 reasoning modes (v7.2.0)
+       */
+      quickRecommend(problemType) {
+        const typeMap = {
+          // Core reasoning modes
+          "explanation": "abductive" /* ABDUCTIVE */,
+          "hypothesis": "abductive" /* ABDUCTIVE */,
+          "inference": "abductive" /* ABDUCTIVE */,
+          "pattern": "inductive" /* INDUCTIVE */,
+          "generalization": "inductive" /* INDUCTIVE */,
+          "empirical": "inductive" /* INDUCTIVE */,
+          "logic": "deductive" /* DEDUCTIVE */,
+          "proof": "deductive" /* DEDUCTIVE */,
+          "derivation": "deductive" /* DEDUCTIVE */,
+          "complex": "hybrid" /* HYBRID */,
+          "philosophical": "hybrid" /* HYBRID */,
+          "metaphysical": "hybrid" /* HYBRID */,
+          // Meta-reasoning
+          "meta": "metareasoning" /* METAREASONING */,
+          "strategy-selection": "metareasoning" /* METAREASONING */,
+          "quality-assessment": "metareasoning" /* METAREASONING */,
+          "reflection": "metareasoning" /* METAREASONING */,
+          "self-evaluation": "metareasoning" /* METAREASONING */,
+          // Specialized modes
+          "debugging": "abductive" /* ABDUCTIVE */,
+          "mathematical": "mathematics" /* MATHEMATICS */,
+          "timeline": "temporal" /* TEMPORAL */,
+          "strategy": "gametheory" /* GAMETHEORY */,
+          "uncertainty": "evidential" /* EVIDENTIAL */,
+          "causality": "causal" /* CAUSAL */,
+          "probability": "bayesian" /* BAYESIAN */,
+          "bayesian": "bayesian" /* BAYESIAN */,
+          "bayes": "bayesian" /* BAYESIAN */,
+          "posterior": "bayesian" /* BAYESIAN */,
+          "prior": "bayesian" /* BAYESIAN */,
+          "likelihood": "bayesian" /* BAYESIAN */,
+          "evidence-update": "bayesian" /* BAYESIAN */,
+          "belief-update": "bayesian" /* BAYESIAN */,
+          "conditional-probability": "bayesian" /* BAYESIAN */,
+          "hypothesis-testing": "bayesian" /* BAYESIAN */,
+          "probabilistic": "bayesian" /* BAYESIAN */,
+          "what-if": "counterfactual" /* COUNTERFACTUAL */,
+          "analogy": "analogical" /* ANALOGICAL */,
+          "physics": "physics" /* PHYSICS */,
+          "systematic": "shannon" /* SHANNON */,
+          // ===== NEW MODES (v7.2.0) =====
+          // Engineering reasoning
+          "engineering": "engineering" /* ENGINEERING */,
+          "design": "engineering" /* ENGINEERING */,
+          "architecture": "engineering" /* ENGINEERING */,
+          "trade-off": "engineering" /* ENGINEERING */,
+          "tradeoff": "engineering" /* ENGINEERING */,
+          "system-design": "engineering" /* ENGINEERING */,
+          "implementation": "engineering" /* ENGINEERING */,
+          "reliability": "engineering" /* ENGINEERING */,
+          "scalability": "engineering" /* ENGINEERING */,
+          "performance": "engineering" /* ENGINEERING */,
+          // Computability reasoning
+          "computability": "computability" /* COMPUTABILITY */,
+          "decidability": "computability" /* COMPUTABILITY */,
+          "turing": "computability" /* COMPUTABILITY */,
+          "halting": "computability" /* COMPUTABILITY */,
+          "complexity-class": "computability" /* COMPUTABILITY */,
+          "undecidable": "computability" /* COMPUTABILITY */,
+          // Cryptanalytic reasoning
+          "cryptanalysis": "cryptanalytic" /* CRYPTANALYTIC */,
+          "cryptography": "cryptanalytic" /* CRYPTANALYTIC */,
+          "security": "cryptanalytic" /* CRYPTANALYTIC */,
+          "cipher": "cryptanalytic" /* CRYPTANALYTIC */,
+          "encryption": "cryptanalytic" /* CRYPTANALYTIC */,
+          "decryption": "cryptanalytic" /* CRYPTANALYTIC */,
+          "attack-vector": "cryptanalytic" /* CRYPTANALYTIC */,
+          "key-analysis": "cryptanalytic" /* CRYPTANALYTIC */,
+          "protocol-security": "cryptanalytic" /* CRYPTANALYTIC */,
+          // Recursive reasoning
+          "recursive": "recursive" /* RECURSIVE */,
+          "recursion": "recursive" /* RECURSIVE */,
+          "divide-conquer": "recursive" /* RECURSIVE */,
+          "self-similar": "recursive" /* RECURSIVE */,
+          "decomposition": "recursive" /* RECURSIVE */,
+          "fractal": "recursive" /* RECURSIVE */,
+          "tree-traversal": "recursive" /* RECURSIVE */,
+          // Modal reasoning
+          "modal": "modal" /* MODAL */,
+          "possibility": "modal" /* MODAL */,
+          "necessity": "modal" /* MODAL */,
+          "possible-worlds": "modal" /* MODAL */,
+          "epistemic": "modal" /* MODAL */,
+          "deontic": "modal" /* MODAL */,
+          "alethic": "modal" /* MODAL */,
+          // Stochastic reasoning
+          "stochastic": "stochastic" /* STOCHASTIC */,
+          "random-process": "stochastic" /* STOCHASTIC */,
+          "markov": "stochastic" /* STOCHASTIC */,
+          "monte-carlo": "stochastic" /* STOCHASTIC */,
+          "probabilistic-process": "stochastic" /* STOCHASTIC */,
+          "queueing": "stochastic" /* STOCHASTIC */,
+          "random-walk": "stochastic" /* STOCHASTIC */,
+          // Constraint reasoning
+          "constraint": "constraint" /* CONSTRAINT */,
+          "constraints": "constraint" /* CONSTRAINT */,
+          "csp": "constraint" /* CONSTRAINT */,
+          "sat": "constraint" /* CONSTRAINT */,
+          "scheduling": "constraint" /* CONSTRAINT */,
+          "allocation": "constraint" /* CONSTRAINT */,
+          "feasibility": "constraint" /* CONSTRAINT */,
+          "satisfiability": "constraint" /* CONSTRAINT */,
+          // Optimization reasoning
+          "optimization": "optimization" /* OPTIMIZATION */,
+          "optimize": "optimization" /* OPTIMIZATION */,
+          "optimal": "optimization" /* OPTIMIZATION */,
+          "minimize": "optimization" /* OPTIMIZATION */,
+          "maximize": "optimization" /* OPTIMIZATION */,
+          "gradient": "optimization" /* OPTIMIZATION */,
+          "convex": "optimization" /* OPTIMIZATION */,
+          "heuristic": "optimization" /* OPTIMIZATION */,
+          "search": "optimization" /* OPTIMIZATION */,
+          // First Principles reasoning
+          "first-principles": "firstprinciples" /* FIRSTPRINCIPLES */,
+          "fundamental": "firstprinciples" /* FIRSTPRINCIPLES */,
+          "foundational": "firstprinciples" /* FIRSTPRINCIPLES */,
+          "axiom": "firstprinciples" /* FIRSTPRINCIPLES */,
+          "ground-truth": "firstprinciples" /* FIRSTPRINCIPLES */,
+          "from-scratch": "firstprinciples" /* FIRSTPRINCIPLES */,
+          "basic-principles": "firstprinciples" /* FIRSTPRINCIPLES */,
+          "root-cause": "firstprinciples" /* FIRSTPRINCIPLES */,
+          // Systems Thinking reasoning
+          "systems-thinking": "systemsthinking" /* SYSTEMSTHINKING */,
+          "systems": "systemsthinking" /* SYSTEMSTHINKING */,
+          "holistic": "systemsthinking" /* SYSTEMSTHINKING */,
+          "feedback-loop": "systemsthinking" /* SYSTEMSTHINKING */,
+          "emergence": "systemsthinking" /* SYSTEMSTHINKING */,
+          "interconnected": "systemsthinking" /* SYSTEMSTHINKING */,
+          "ecosystem": "systemsthinking" /* SYSTEMSTHINKING */,
+          "leverage-point": "systemsthinking" /* SYSTEMSTHINKING */,
+          // Scientific Method reasoning
+          "scientific": "scientificmethod" /* SCIENTIFICMETHOD */,
+          "experiment": "scientificmethod" /* SCIENTIFICMETHOD */,
+          "research": "scientificmethod" /* SCIENTIFICMETHOD */,
+          "falsification": "scientificmethod" /* SCIENTIFICMETHOD */,
+          "a/b-testing": "scientificmethod" /* SCIENTIFICMETHOD */,
+          "reproducibility": "scientificmethod" /* SCIENTIFICMETHOD */,
+          "control-group": "scientificmethod" /* SCIENTIFICMETHOD */,
+          // Formal Logic reasoning
+          "formal-logic": "formallogic" /* FORMALLOGIC */,
+          "propositional": "formallogic" /* FORMALLOGIC */,
+          "predicate": "formallogic" /* FORMALLOGIC */,
+          "theorem-proving": "formallogic" /* FORMALLOGIC */,
+          "formal-proof": "formallogic" /* FORMALLOGIC */,
+          "validity": "formallogic" /* FORMALLOGIC */,
+          "soundness": "formallogic" /* FORMALLOGIC */,
+          "completeness": "formallogic" /* FORMALLOGIC */,
+          // Bias detection and critical analysis
+          "bias": "metareasoning" /* METAREASONING */,
+          "bias-detection": "metareasoning" /* METAREASONING */,
+          "cognitive-bias": "metareasoning" /* METAREASONING */,
+          "fallacy": "formallogic" /* FORMALLOGIC */,
+          "fallacies": "formallogic" /* FORMALLOGIC */,
+          "logical-fallacy": "formallogic" /* FORMALLOGIC */,
+          "counter-argument": "counterfactual" /* COUNTERFACTUAL */,
+          "counterargument": "counterfactual" /* COUNTERFACTUAL */,
+          "fact-check": "evidential" /* EVIDENTIAL */,
+          "misinformation": "evidential" /* EVIDENTIAL */,
+          "disinformation": "evidential" /* EVIDENTIAL */,
+          "reasoning-flaw": "metareasoning" /* METAREASONING */,
+          "argument-analysis": "formallogic" /* FORMALLOGIC */,
+          // ===== ALGORITHMIC REASONING (v7.3.0) - CLRS Coverage =====
+          // General algorithm terms
+          "algorithm": "algorithmic" /* ALGORITHMIC */,
+          "algorithms": "algorithmic" /* ALGORITHMIC */,
+          "algorithmic": "algorithmic" /* ALGORITHMIC */,
+          "data-structure": "algorithmic" /* ALGORITHMIC */,
+          "data-structures": "algorithmic" /* ALGORITHMIC */,
+          "complexity": "algorithmic" /* ALGORITHMIC */,
+          "time-complexity": "algorithmic" /* ALGORITHMIC */,
+          "space-complexity": "algorithmic" /* ALGORITHMIC */,
+          "big-o": "algorithmic" /* ALGORITHMIC */,
+          "asymptotic": "algorithmic" /* ALGORITHMIC */,
+          "correctness-proof": "algorithmic" /* ALGORITHMIC */,
+          "loop-invariant": "algorithmic" /* ALGORITHMIC */,
+          "invariant": "algorithmic" /* ALGORITHMIC */,
+          // Design patterns
+          "divide-and-conquer": "algorithmic" /* ALGORITHMIC */,
+          "dynamic-programming": "algorithmic" /* ALGORITHMIC */,
+          "dp": "algorithmic" /* ALGORITHMIC */,
+          "memoization": "algorithmic" /* ALGORITHMIC */,
+          "greedy-algorithm": "algorithmic" /* ALGORITHMIC */,
+          "backtracking": "algorithmic" /* ALGORITHMIC */,
+          "branch-and-bound": "algorithmic" /* ALGORITHMIC */,
+          "amortized": "algorithmic" /* ALGORITHMIC */,
+          "amortized-analysis": "algorithmic" /* ALGORITHMIC */,
+          // Sorting algorithms
+          "sorting": "algorithmic" /* ALGORITHMIC */,
+          "sort": "algorithmic" /* ALGORITHMIC */,
+          "insertion-sort": "algorithmic" /* ALGORITHMIC */,
+          "merge-sort": "algorithmic" /* ALGORITHMIC */,
+          "mergesort": "algorithmic" /* ALGORITHMIC */,
+          "quicksort": "algorithmic" /* ALGORITHMIC */,
+          "quick-sort": "algorithmic" /* ALGORITHMIC */,
+          "heapsort": "algorithmic" /* ALGORITHMIC */,
+          "heap-sort": "algorithmic" /* ALGORITHMIC */,
+          "counting-sort": "algorithmic" /* ALGORITHMIC */,
+          "radix-sort": "algorithmic" /* ALGORITHMIC */,
+          "bucket-sort": "algorithmic" /* ALGORITHMIC */,
+          "comparison-sort": "algorithmic" /* ALGORITHMIC */,
+          // Searching and selection
+          "binary-search": "algorithmic" /* ALGORITHMIC */,
+          "linear-search": "algorithmic" /* ALGORITHMIC */,
+          "selection-algorithm": "algorithmic" /* ALGORITHMIC */,
+          "median-of-medians": "algorithmic" /* ALGORITHMIC */,
+          "order-statistics": "algorithmic" /* ALGORITHMIC */,
+          // Data structures
+          "heap": "algorithmic" /* ALGORITHMIC */,
+          "binary-heap": "algorithmic" /* ALGORITHMIC */,
+          "priority-queue": "algorithmic" /* ALGORITHMIC */,
+          "hash-table": "algorithmic" /* ALGORITHMIC */,
+          "hashing": "algorithmic" /* ALGORITHMIC */,
+          "binary-search-tree": "algorithmic" /* ALGORITHMIC */,
+          "bst": "algorithmic" /* ALGORITHMIC */,
+          "red-black-tree": "algorithmic" /* ALGORITHMIC */,
+          "avl-tree": "algorithmic" /* ALGORITHMIC */,
+          "b-tree": "algorithmic" /* ALGORITHMIC */,
+          "fibonacci-heap": "algorithmic" /* ALGORITHMIC */,
+          "union-find": "algorithmic" /* ALGORITHMIC */,
+          "disjoint-set": "algorithmic" /* ALGORITHMIC */,
+          "trie": "algorithmic" /* ALGORITHMIC */,
+          "segment-tree": "algorithmic" /* ALGORITHMIC */,
+          "fenwick-tree": "algorithmic" /* ALGORITHMIC */,
+          // Graph algorithms
+          "graph-algorithm": "algorithmic" /* ALGORITHMIC */,
+          "bfs": "algorithmic" /* ALGORITHMIC */,
+          "breadth-first": "algorithmic" /* ALGORITHMIC */,
+          "dfs": "algorithmic" /* ALGORITHMIC */,
+          "depth-first": "algorithmic" /* ALGORITHMIC */,
+          "topological-sort": "algorithmic" /* ALGORITHMIC */,
+          "strongly-connected": "algorithmic" /* ALGORITHMIC */,
+          "scc": "algorithmic" /* ALGORITHMIC */,
+          "minimum-spanning-tree": "algorithmic" /* ALGORITHMIC */,
+          "mst": "algorithmic" /* ALGORITHMIC */,
+          "kruskal": "algorithmic" /* ALGORITHMIC */,
+          "prim": "algorithmic" /* ALGORITHMIC */,
+          "dijkstra": "algorithmic" /* ALGORITHMIC */,
+          "bellman-ford": "algorithmic" /* ALGORITHMIC */,
+          "floyd-warshall": "algorithmic" /* ALGORITHMIC */,
+          "shortest-path": "algorithmic" /* ALGORITHMIC */,
+          "max-flow": "algorithmic" /* ALGORITHMIC */,
+          "ford-fulkerson": "algorithmic" /* ALGORITHMIC */,
+          "edmonds-karp": "algorithmic" /* ALGORITHMIC */,
+          "bipartite-matching": "algorithmic" /* ALGORITHMIC */,
+          // Dynamic programming problems
+          "lcs": "algorithmic" /* ALGORITHMIC */,
+          "longest-common-subsequence": "algorithmic" /* ALGORITHMIC */,
+          "edit-distance": "algorithmic" /* ALGORITHMIC */,
+          "levenshtein": "algorithmic" /* ALGORITHMIC */,
+          "knapsack": "algorithmic" /* ALGORITHMIC */,
+          "matrix-chain": "algorithmic" /* ALGORITHMIC */,
+          "optimal-bst": "algorithmic" /* ALGORITHMIC */,
+          "rod-cutting": "algorithmic" /* ALGORITHMIC */,
+          "coin-change": "algorithmic" /* ALGORITHMIC */,
+          // String algorithms
+          "string-matching": "algorithmic" /* ALGORITHMIC */,
+          "pattern-matching": "algorithmic" /* ALGORITHMIC */,
+          "kmp": "algorithmic" /* ALGORITHMIC */,
+          "knuth-morris-pratt": "algorithmic" /* ALGORITHMIC */,
+          "rabin-karp": "algorithmic" /* ALGORITHMIC */,
+          "boyer-moore": "algorithmic" /* ALGORITHMIC */,
+          "suffix-array": "algorithmic" /* ALGORITHMIC */,
+          "suffix-tree": "algorithmic" /* ALGORITHMIC */,
+          // Computational geometry
+          "convex-hull": "algorithmic" /* ALGORITHMIC */,
+          "graham-scan": "algorithmic" /* ALGORITHMIC */,
+          "jarvis-march": "algorithmic" /* ALGORITHMIC */,
+          "closest-pair": "algorithmic" /* ALGORITHMIC */,
+          "line-intersection": "algorithmic" /* ALGORITHMIC */,
+          // Number theory algorithms
+          "gcd": "algorithmic" /* ALGORITHMIC */,
+          "euclidean": "algorithmic" /* ALGORITHMIC */,
+          "modular-arithmetic": "algorithmic" /* ALGORITHMIC */,
+          "primality": "algorithmic" /* ALGORITHMIC */,
+          "miller-rabin": "algorithmic" /* ALGORITHMIC */,
+          "rsa": "algorithmic" /* ALGORITHMIC */,
+          // Matrix algorithms
+          "strassen": "algorithmic" /* ALGORITHMIC */,
+          "matrix-multiplication": "algorithmic" /* ALGORITHMIC */,
+          "matrix-exponentiation": "algorithmic" /* ALGORITHMIC */,
+          // Advanced topics
+          "fft": "algorithmic" /* ALGORITHMIC */,
+          "fast-fourier": "algorithmic" /* ALGORITHMIC */,
+          "polynomial-multiplication": "algorithmic" /* ALGORITHMIC */,
+          "linear-programming": "algorithmic" /* ALGORITHMIC */,
+          "simplex": "algorithmic" /* ALGORITHMIC */,
+          "approximation-algorithm": "algorithmic" /* ALGORITHMIC */,
+          "np-hard": "algorithmic" /* ALGORITHMIC */,
+          "np-complete": "algorithmic" /* ALGORITHMIC */,
+          // Recurrences and analysis
+          "recurrence": "algorithmic" /* ALGORITHMIC */,
+          "master-theorem": "algorithmic" /* ALGORITHMIC */,
+          "recursion-tree": "algorithmic" /* ALGORITHMIC */,
+          "substitution-method": "algorithmic" /* ALGORITHMIC */,
+          // ===== ACADEMIC RESEARCH MODES (v7.4.0) =====
+          // Synthesis mode - literature review and knowledge integration
+          "synthesis": "synthesis" /* SYNTHESIS */,
+          "literature-review": "synthesis" /* SYNTHESIS */,
+          "literature-synthesis": "synthesis" /* SYNTHESIS */,
+          "systematic-review": "synthesis" /* SYNTHESIS */,
+          "meta-analysis": "synthesis" /* SYNTHESIS */,
+          "knowledge-integration": "synthesis" /* SYNTHESIS */,
+          "research-synthesis": "synthesis" /* SYNTHESIS */,
+          "state-of-the-art": "synthesis" /* SYNTHESIS */,
+          "survey-paper": "synthesis" /* SYNTHESIS */,
+          "theme-extraction": "synthesis" /* SYNTHESIS */,
+          "gap-analysis": "synthesis" /* SYNTHESIS */,
+          "cross-study": "synthesis" /* SYNTHESIS */,
+          // Argumentation mode - academic argumentation and Toulmin model
+          "argumentation": "argumentation" /* ARGUMENTATION */,
+          "argument": "argumentation" /* ARGUMENTATION */,
+          "toulmin": "argumentation" /* ARGUMENTATION */,
+          "toulmin-model": "argumentation" /* ARGUMENTATION */,
+          "claim-evidence": "argumentation" /* ARGUMENTATION */,
+          "warrant": "argumentation" /* ARGUMENTATION */,
+          "backing": "argumentation" /* ARGUMENTATION */,
+          "qualifier": "argumentation" /* ARGUMENTATION */,
+          "rebuttal": "argumentation" /* ARGUMENTATION */,
+          "thesis-argument": "argumentation" /* ARGUMENTATION */,
+          "position-paper": "argumentation" /* ARGUMENTATION */,
+          "debate": "argumentation" /* ARGUMENTATION */,
+          "persuasion": "argumentation" /* ARGUMENTATION */,
+          "dialectic": "argumentation" /* ARGUMENTATION */,
+          "rhetorical": "argumentation" /* ARGUMENTATION */,
+          // Critique mode - critical analysis and peer review
+          "critique": "critique" /* CRITIQUE */,
+          "critical-analysis": "critique" /* CRITIQUE */,
+          "peer-review": "critique" /* CRITIQUE */,
+          "paper-review": "critique" /* CRITIQUE */,
+          "methodology-critique": "critique" /* CRITIQUE */,
+          "validity-assessment": "critique" /* CRITIQUE */,
+          "limitation-analysis": "critique" /* CRITIQUE */,
+          "strength-weakness": "critique" /* CRITIQUE */,
+          "constructive-feedback": "critique" /* CRITIQUE */,
+          "research-critique": "critique" /* CRITIQUE */,
+          "evaluation": "critique" /* CRITIQUE */,
+          // Analysis mode - qualitative analysis methods
+          "qualitative-analysis": "analysis" /* ANALYSIS */,
+          "thematic-analysis": "analysis" /* ANALYSIS */,
+          "grounded-theory": "analysis" /* ANALYSIS */,
+          "discourse-analysis": "analysis" /* ANALYSIS */,
+          "content-analysis": "analysis" /* ANALYSIS */,
+          "narrative-analysis": "analysis" /* ANALYSIS */,
+          "phenomenological": "analysis" /* ANALYSIS */,
+          "ethnographic": "analysis" /* ANALYSIS */,
+          "coding": "analysis" /* ANALYSIS */,
+          "interview-analysis": "analysis" /* ANALYSIS */,
+          "document-analysis": "analysis" /* ANALYSIS */,
+          "case-study": "analysis" /* ANALYSIS */,
+          "qualitative": "analysis" /* ANALYSIS */
+        };
+        const normalizedInput = problemType.toLowerCase();
+        if (typeMap[normalizedInput]) {
+          return typeMap[normalizedInput];
+        }
+        const prioritizedKeywords = [
+          // High priority - specific technical terms
+          "bayesian",
+          "posterior",
+          "prior",
+          "likelihood",
+          "conditional-probability",
+          "hypothesis-testing",
+          "probabilistic",
+          "probability",
+          "counterfactual",
+          "what-if",
+          "causal",
+          "causality",
+          "game-theory",
+          "nash",
+          "payoff",
+          "temporal",
+          "timeline",
+          "mathematical",
+          "proof",
+          "theorem",
+          // Medium priority - domain terms
+          "optimization",
+          "constraint",
+          "systems",
+          "feedback",
+          "scientific",
+          "experiment",
+          "synthesis",
+          "literature",
+          "argumentation",
+          "toulmin",
+          "critique",
+          "evaluation",
+          "analysis",
+          "qualitative",
+          // Lower priority - general terms
+          "uncertainty",
+          "evidence",
+          "logic",
+          "deductive",
+          "pattern",
+          "inductive",
+          "hypothesis",
+          "explanation",
+          "abductive"
+        ];
+        for (const keyword of prioritizedKeywords) {
+          if (normalizedInput.includes(keyword) && typeMap[keyword]) {
+            return typeMap[keyword];
+          }
+        }
+        for (const [key, mode] of Object.entries(typeMap)) {
+          if (normalizedInput.includes(key)) {
+            return mode;
+          }
+        }
+        return "sequential" /* SEQUENTIAL */;
       }
     };
   }
@@ -12164,6 +11313,24 @@ var init_ComputabilityHandler = __esm({
     };
   }
 });
+
+// src/types/modes/cryptanalytic.ts
+function toDecibans(likelihoodRatio) {
+  return 10 * Math.log10(likelihoodRatio);
+}
+function fromDecibans(decibans) {
+  return Math.pow(10, decibans / 10);
+}
+function decibansToProbability(decibans, priorProbability = 0.5) {
+  const priorOdds = priorProbability / (1 - priorProbability);
+  const posteriorOdds = priorOdds * fromDecibans(decibans);
+  return posteriorOdds / (1 + posteriorOdds);
+}
+var init_cryptanalytic = __esm({
+  "src/types/modes/cryptanalytic.ts"() {
+    init_esm_shims();
+  }
+});
 var VALID_THOUGHT_TYPES6, VALID_CIPHER_TYPES, CONFIRMATION_THRESHOLD, REFUTATION_THRESHOLD, CryptanalyticHandler;
 var init_CryptanalyticHandler = __esm({
   "src/modes/handlers/CryptanalyticHandler.ts"() {
@@ -16346,6 +15513,839 @@ var init_modes = __esm({
   }
 });
 
+// src/tools/thinking.ts
+var thinking_exports = {};
+__export(thinking_exports, {
+  ThinkingToolSchema: () => ThinkingToolSchema,
+  thinkingTool: () => thinkingTool
+});
+var ThinkingToolSchema, thinkingTool;
+var init_thinking = __esm({
+  "src/tools/thinking.ts"() {
+    init_esm_shims();
+    ThinkingToolSchema = z.object({
+      sessionId: z.string().optional(),
+      mode: z.enum(["sequential", "shannon", "mathematics", "physics", "hybrid", "inductive", "deductive", "abductive", "causal", "bayesian", "counterfactual", "analogical", "temporal", "gametheory", "evidential", "firstprinciples", "systemsthinking", "scientificmethod", "optimization", "formallogic"]).default("hybrid"),
+      thought: z.string(),
+      thoughtNumber: z.number().int().positive(),
+      totalThoughts: z.number().int().positive(),
+      nextThoughtNeeded: z.boolean(),
+      isRevision: z.boolean().optional(),
+      revisesThought: z.string().optional(),
+      revisionReason: z.string().optional(),
+      branchFrom: z.string().optional(),
+      branchId: z.string().optional(),
+      stage: z.enum(["problem_definition", "constraints", "model", "proof", "implementation"]).optional(),
+      uncertainty: z.number().min(0).max(1).optional(),
+      dependencies: z.array(z.string()).optional(),
+      assumptions: z.array(z.string()).optional(),
+      thoughtType: z.string().optional(),
+      mathematicalModel: z.object({
+        latex: z.string(),
+        symbolic: z.string(),
+        ascii: z.string().optional()
+      }).optional(),
+      proofStrategy: z.object({
+        type: z.enum(["direct", "contradiction", "induction", "construction", "contrapositive"]),
+        steps: z.array(z.string())
+      }).optional(),
+      tensorProperties: z.object({
+        rank: z.tuple([z.number(), z.number()]),
+        components: z.string(),
+        latex: z.string(),
+        symmetries: z.array(z.string()),
+        invariants: z.array(z.string()),
+        transformation: z.enum(["covariant", "contravariant", "mixed"])
+      }).optional(),
+      physicalInterpretation: z.object({
+        quantity: z.string(),
+        units: z.string(),
+        conservationLaws: z.array(z.string())
+      }).optional(),
+      // Inductive reasoning properties (Phase 5, v5.0.0)
+      pattern: z.string().optional(),
+      generalization: z.string().optional(),
+      confidence: z.number().min(0).max(1).optional(),
+      counterexamples: z.array(z.string()).optional(),
+      sampleSize: z.number().int().min(1).optional(),
+      // Deductive reasoning properties (Phase 5, v5.0.0)
+      premises: z.array(z.string()).optional(),
+      logicForm: z.string().optional(),
+      validityCheck: z.boolean().optional(),
+      soundnessCheck: z.boolean().optional(),
+      // Abductive reasoning properties (v2.0)
+      observations: z.union([
+        z.array(z.string()),
+        // For inductive reasoning - simple strings
+        z.array(z.object({
+          // For abductive reasoning - structured objects
+          id: z.string(),
+          description: z.string(),
+          confidence: z.number().min(0).max(1)
+        }))
+      ]).optional(),
+      hypotheses: z.array(z.object({
+        id: z.string(),
+        // Abductive fields
+        explanation: z.string().optional(),
+        assumptions: z.array(z.string()).optional(),
+        predictions: z.array(z.string()).optional(),
+        score: z.number().optional(),
+        // Evidential fields
+        name: z.string().optional(),
+        description: z.string().optional(),
+        mutuallyExclusive: z.boolean().optional(),
+        subsets: z.array(z.string()).optional()
+      })).optional(),
+      evaluationCriteria: z.object({
+        parsimony: z.number(),
+        explanatoryPower: z.number(),
+        plausibility: z.number(),
+        testability: z.boolean()
+      }).optional(),
+      evidence: z.array(z.object({
+        id: z.string(),
+        description: z.string(),
+        // Abductive fields
+        hypothesisId: z.string().optional(),
+        type: z.enum(["supporting", "contradicting", "neutral"]).optional(),
+        strength: z.number().min(0).max(1).optional(),
+        // Evidential fields
+        source: z.string().optional(),
+        reliability: z.number().min(0).max(1).optional(),
+        timestamp: z.number().optional(),
+        supports: z.array(z.string()).optional(),
+        contradicts: z.array(z.string()).optional()
+      })).optional(),
+      bestExplanation: z.object({
+        id: z.string(),
+        explanation: z.string(),
+        assumptions: z.array(z.string()),
+        predictions: z.array(z.string()),
+        score: z.number()
+      }).optional(),
+      // Causal reasoning properties (v2.0)
+      causalGraph: z.object({
+        nodes: z.array(z.object({
+          id: z.string(),
+          name: z.string(),
+          type: z.enum(["cause", "effect", "mediator", "confounder"]),
+          description: z.string()
+        })),
+        edges: z.array(z.object({
+          from: z.string(),
+          to: z.string(),
+          strength: z.number(),
+          confidence: z.number().min(0).max(1)
+        }))
+      }).optional(),
+      interventions: z.array(z.object({
+        nodeId: z.string(),
+        action: z.string(),
+        expectedEffects: z.array(z.object({
+          nodeId: z.string(),
+          expectedChange: z.string(),
+          confidence: z.number()
+        }))
+      })).optional(),
+      mechanisms: z.array(z.object({
+        from: z.string(),
+        to: z.string(),
+        description: z.string(),
+        type: z.enum(["direct", "indirect", "feedback"])
+      })).optional(),
+      confounders: z.array(z.object({
+        nodeId: z.string(),
+        affects: z.array(z.string()),
+        description: z.string()
+      })).optional(),
+      // Bayesian reasoning properties (v2.0)
+      hypothesis: z.object({
+        id: z.string(),
+        statement: z.string()
+      }).optional(),
+      prior: z.object({
+        probability: z.number().min(0).max(1),
+        justification: z.string()
+      }).optional(),
+      likelihood: z.object({
+        probability: z.number().min(0).max(1),
+        description: z.string()
+      }).optional(),
+      posterior: z.object({
+        probability: z.number().min(0).max(1),
+        calculation: z.string()
+      }).optional(),
+      bayesFactor: z.number().optional(),
+      // Counterfactual reasoning properties (v2.0)
+      actual: z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string(),
+        conditions: z.array(z.object({
+          factor: z.string(),
+          value: z.string()
+        })),
+        outcomes: z.array(z.object({
+          description: z.string(),
+          impact: z.enum(["positive", "negative", "neutral"]),
+          magnitude: z.number().optional()
+        }))
+      }).optional(),
+      counterfactuals: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string(),
+        conditions: z.array(z.object({
+          factor: z.string(),
+          value: z.string()
+        })),
+        outcomes: z.array(z.object({
+          description: z.string(),
+          impact: z.enum(["positive", "negative", "neutral"]),
+          magnitude: z.number().optional()
+        }))
+      })).optional(),
+      comparison: z.object({
+        differences: z.array(z.object({
+          aspect: z.string(),
+          actual: z.string(),
+          counterfactual: z.string(),
+          significance: z.enum(["high", "medium", "low"])
+        })),
+        insights: z.array(z.string()),
+        lessons: z.array(z.string())
+      }).optional(),
+      interventionPoint: z.object({
+        description: z.string(),
+        alternatives: z.array(z.string())
+      }).optional(),
+      causalChains: z.array(z.object({
+        intervention: z.string(),
+        steps: z.array(z.string()),
+        finalOutcome: z.string()
+      })).optional(),
+      // Analogical reasoning properties (v2.0)
+      sourceDomain: z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string(),
+        entities: z.array(z.object({
+          id: z.string(),
+          name: z.string(),
+          type: z.string()
+        })),
+        relations: z.array(z.object({
+          id: z.string(),
+          type: z.string(),
+          from: z.string(),
+          to: z.string()
+        }))
+      }).optional(),
+      targetDomain: z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string(),
+        entities: z.array(z.object({
+          id: z.string(),
+          name: z.string(),
+          type: z.string()
+        })),
+        relations: z.array(z.object({
+          id: z.string(),
+          type: z.string(),
+          from: z.string(),
+          to: z.string()
+        }))
+      }).optional(),
+      mapping: z.array(z.object({
+        sourceEntityId: z.string(),
+        targetEntityId: z.string(),
+        justification: z.string(),
+        confidence: z.number().min(0).max(1)
+      })).optional(),
+      insights: z.array(z.object({
+        description: z.string(),
+        sourceEvidence: z.string(),
+        targetApplication: z.string()
+      })).optional(),
+      inferences: z.array(z.object({
+        sourcePattern: z.string(),
+        targetPrediction: z.string(),
+        confidence: z.number().min(0).max(1),
+        needsVerification: z.boolean()
+      })).optional(),
+      limitations: z.array(z.string()).optional(),
+      analogyStrength: z.number().min(0).max(1).optional(),
+      // Temporal reasoning properties (Phase 3, v2.1)
+      timeline: z.object({
+        id: z.string(),
+        name: z.string(),
+        timeUnit: z.enum(["milliseconds", "seconds", "minutes", "hours", "days", "months", "years"]),
+        startTime: z.number().optional(),
+        endTime: z.number().optional(),
+        events: z.array(z.string())
+      }).optional(),
+      events: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string(),
+        timestamp: z.number(),
+        duration: z.number().optional(),
+        type: z.enum(["instant", "interval"]),
+        properties: z.record(z.string(), z.any())
+      })).optional(),
+      intervals: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        start: z.number(),
+        end: z.number(),
+        overlaps: z.array(z.string()).optional(),
+        contains: z.array(z.string()).optional()
+      })).optional(),
+      constraints: z.array(z.object({
+        id: z.string(),
+        type: z.enum(["before", "after", "during", "overlaps", "meets", "starts", "finishes", "equals"]),
+        subject: z.string(),
+        object: z.string(),
+        confidence: z.number().min(0).max(1)
+      })).optional(),
+      relations: z.array(z.object({
+        id: z.string(),
+        from: z.string(),
+        to: z.string(),
+        relationType: z.enum(["causes", "enables", "prevents", "precedes", "follows"]),
+        strength: z.number().min(0).max(1),
+        delay: z.number().optional()
+      })).optional(),
+      // Game theory properties (Phase 3, v2.2)
+      game: z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string(),
+        type: z.enum(["normal_form", "extensive_form", "cooperative", "non_cooperative"]),
+        numPlayers: z.number().int().min(2),
+        isZeroSum: z.boolean(),
+        isPerfectInformation: z.boolean()
+      }).optional(),
+      players: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        role: z.string().optional(),
+        isRational: z.boolean(),
+        availableStrategies: z.array(z.string())
+      })).optional(),
+      strategies: z.array(z.object({
+        id: z.string(),
+        playerId: z.string(),
+        name: z.string(),
+        description: z.string(),
+        isPure: z.boolean(),
+        probability: z.number().min(0).max(1).optional()
+      })).optional(),
+      payoffMatrix: z.object({
+        players: z.array(z.string()),
+        dimensions: z.array(z.number()),
+        payoffs: z.array(z.object({
+          strategyProfile: z.array(z.string()),
+          payoffs: z.array(z.number())
+        }))
+      }).optional(),
+      nashEquilibria: z.array(z.object({
+        id: z.string(),
+        strategyProfile: z.array(z.string()),
+        payoffs: z.array(z.number()),
+        type: z.enum(["pure", "mixed"]),
+        isStrict: z.boolean(),
+        stability: z.number().min(0).max(1)
+      })).optional(),
+      dominantStrategies: z.array(z.object({
+        playerId: z.string(),
+        strategyId: z.string(),
+        type: z.enum(["strictly_dominant", "weakly_dominant"]),
+        dominatesStrategies: z.array(z.string()),
+        justification: z.string()
+      })).optional(),
+      gameTree: z.object({
+        rootNode: z.string(),
+        nodes: z.array(z.object({
+          id: z.string(),
+          type: z.enum(["decision", "chance", "terminal"]),
+          playerId: z.string().optional(),
+          parentNode: z.string().optional(),
+          childNodes: z.array(z.string()),
+          action: z.string().optional(),
+          probability: z.number().min(0).max(1).optional(),
+          payoffs: z.array(z.number()).optional()
+        })),
+        informationSets: z.array(z.object({
+          id: z.string(),
+          playerId: z.string(),
+          nodes: z.array(z.string()),
+          availableActions: z.array(z.string())
+        })).optional()
+      }).optional(),
+      // Evidential properties (Phase 3, v2.3)
+      frameOfDiscernment: z.array(z.string()).optional(),
+      beliefFunctions: z.array(z.object({
+        id: z.string(),
+        source: z.string(),
+        massAssignments: z.array(z.object({
+          hypothesisSet: z.array(z.string()),
+          mass: z.number().min(0).max(1),
+          justification: z.string()
+        })),
+        conflictMass: z.number().optional()
+      })).optional(),
+      combinedBelief: z.object({
+        id: z.string(),
+        source: z.string(),
+        massAssignments: z.array(z.object({
+          hypothesisSet: z.array(z.string()),
+          mass: z.number().min(0).max(1),
+          justification: z.string()
+        })),
+        conflictMass: z.number().optional()
+      }).optional(),
+      plausibility: z.object({
+        id: z.string(),
+        assignments: z.array(z.object({
+          hypothesisSet: z.array(z.string()),
+          plausibility: z.number().min(0).max(1),
+          belief: z.number().min(0).max(1),
+          uncertaintyInterval: z.tuple([z.number(), z.number()])
+        }))
+      }).optional(),
+      decisions: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        selectedHypothesis: z.array(z.string()),
+        confidence: z.number().min(0).max(1),
+        reasoning: z.string(),
+        alternatives: z.array(z.object({
+          hypothesis: z.array(z.string()),
+          expectedUtility: z.number(),
+          risk: z.number()
+        }))
+      })).optional(),
+      // First-Principles properties (Phase 3, v3.1.0)
+      question: z.string().optional(),
+      principles: z.array(z.object({
+        id: z.string(),
+        type: z.enum(["axiom", "definition", "observation", "logical_inference", "assumption"]),
+        statement: z.string(),
+        justification: z.string(),
+        dependsOn: z.array(z.string()).optional(),
+        confidence: z.number().min(0).max(1).optional()
+      })).optional(),
+      derivationSteps: z.array(z.object({
+        stepNumber: z.number().int().positive(),
+        principle: z.string(),
+        inference: z.string(),
+        logicalForm: z.string().optional(),
+        confidence: z.number().min(0).max(1)
+      })).optional(),
+      conclusion: z.union([
+        z.string(),
+        // For deductive reasoning - simple conclusion
+        z.object({
+          // For first-principles reasoning - structured conclusion
+          statement: z.string(),
+          derivationChain: z.array(z.number()),
+          certainty: z.number().min(0).max(1),
+          limitations: z.array(z.string()).optional()
+        })
+      ]).optional(),
+      alternativeInterpretations: z.array(z.string()).optional(),
+      // Systems Thinking properties (Phase 4, v3.2.0)
+      system: z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string(),
+        boundary: z.string(),
+        purpose: z.string(),
+        timeHorizon: z.string().optional()
+      }).optional(),
+      components: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        type: z.enum(["stock", "flow", "variable", "parameter", "delay"]),
+        description: z.string(),
+        unit: z.string().optional(),
+        initialValue: z.number().optional(),
+        formula: z.string().optional(),
+        influencedBy: z.array(z.string()).optional()
+      })).optional(),
+      feedbackLoops: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        type: z.enum(["reinforcing", "balancing"]),
+        description: z.string(),
+        components: z.array(z.string()),
+        polarity: z.enum(["+", "-"]),
+        strength: z.number().min(0).max(1),
+        delay: z.number().optional(),
+        dominance: z.enum(["early", "middle", "late"]).optional()
+      })).optional(),
+      leveragePoints: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        location: z.string(),
+        description: z.string(),
+        effectiveness: z.number().min(0).max(1),
+        difficulty: z.number().min(0).max(1),
+        type: z.enum(["parameter", "feedback", "structure", "goal", "paradigm"]),
+        interventionExamples: z.array(z.string())
+      })).optional(),
+      behaviors: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string(),
+        pattern: z.enum(["growth", "decline", "oscillation", "equilibrium", "chaos", "overshoot_collapse"]),
+        causes: z.array(z.string()),
+        timeframe: z.string(),
+        unintendedConsequences: z.array(z.string()).optional()
+      })).optional(),
+      // Scientific Method properties (Phase 4, v3.2.0)
+      researchQuestion: z.object({
+        id: z.string(),
+        question: z.string(),
+        background: z.string(),
+        rationale: z.string(),
+        significance: z.string(),
+        variables: z.object({
+          independent: z.array(z.string()),
+          dependent: z.array(z.string()),
+          control: z.array(z.string())
+        })
+      }).optional(),
+      scientificHypotheses: z.array(z.object({
+        id: z.string(),
+        type: z.enum(["null", "alternative", "directional", "non_directional"]),
+        statement: z.string(),
+        prediction: z.string(),
+        rationale: z.string(),
+        testable: z.boolean(),
+        falsifiable: z.boolean()
+      })).optional(),
+      experiment: z.object({
+        id: z.string(),
+        type: z.enum(["experimental", "quasi_experimental", "observational", "correlational"]),
+        design: z.string(),
+        sampleSize: z.number().int().positive(),
+        sampleSizeJustification: z.string().optional(),
+        randomization: z.boolean(),
+        blinding: z.enum(["none", "single", "double", "triple"]).optional(),
+        controls: z.array(z.string()),
+        procedure: z.array(z.string()),
+        materials: z.array(z.string()).optional(),
+        duration: z.string().optional(),
+        ethicalConsiderations: z.array(z.string()).optional()
+      }).optional(),
+      dataCollection: z.object({
+        id: z.string(),
+        method: z.array(z.string()),
+        instruments: z.array(z.string()),
+        dataQuality: z.object({
+          completeness: z.number().min(0).max(1),
+          reliability: z.number().min(0).max(1),
+          validity: z.number().min(0).max(1)
+        }),
+        limitations: z.array(z.string()).optional()
+      }).optional(),
+      statisticalAnalysis: z.object({
+        id: z.string(),
+        tests: z.array(z.object({
+          id: z.string(),
+          name: z.string(),
+          hypothesisTested: z.string(),
+          testStatistic: z.number(),
+          pValue: z.number().min(0).max(1),
+          confidenceInterval: z.tuple([z.number(), z.number()]).optional(),
+          alpha: z.number().min(0).max(1),
+          result: z.enum(["reject_null", "fail_to_reject_null"]),
+          interpretation: z.string()
+        })),
+        summary: z.string(),
+        effectSize: z.object({
+          type: z.string(),
+          value: z.number(),
+          interpretation: z.string()
+        }).optional(),
+        powerAnalysis: z.object({
+          power: z.number().min(0).max(1),
+          alpha: z.number().min(0).max(1),
+          interpretation: z.string()
+        }).optional()
+      }).optional(),
+      scientificConclusion: z.object({
+        id: z.string(),
+        statement: z.string(),
+        supportedHypotheses: z.array(z.string()),
+        rejectedHypotheses: z.array(z.string()),
+        confidence: z.number().min(0).max(1),
+        limitations: z.array(z.string()),
+        alternativeExplanations: z.array(z.string()).optional(),
+        futureDirections: z.array(z.string()),
+        replicationConsiderations: z.array(z.string()),
+        practicalImplications: z.array(z.string()).optional(),
+        theoreticalImplications: z.array(z.string()).optional()
+      }).optional(),
+      // Optimization properties (Phase 4, v3.2.0)
+      optimizationProblem: z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string(),
+        type: z.enum(["linear", "nonlinear", "integer", "mixed_integer", "constraint_satisfaction", "multi_objective"]),
+        approach: z.enum(["exact", "heuristic", "metaheuristic", "approximation"]).optional(),
+        complexity: z.string().optional()
+      }).optional(),
+      decisionVariables: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string(),
+        type: z.enum(["continuous", "integer", "binary", "categorical"]),
+        unit: z.string().optional(),
+        semantics: z.string()
+      })).optional(),
+      optimizationConstraints: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string(),
+        type: z.enum(["hard", "soft"]),
+        formula: z.string(),
+        variables: z.array(z.string()),
+        penalty: z.number().optional(),
+        rationale: z.string(),
+        priority: z.number().optional()
+      })).optional(),
+      objectives: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string(),
+        type: z.enum(["minimize", "maximize"]),
+        formula: z.string(),
+        variables: z.array(z.string()),
+        weight: z.number().min(0).max(1).optional(),
+        units: z.string().optional(),
+        idealValue: z.number().optional(),
+        acceptableRange: z.tuple([z.number(), z.number()]).optional()
+      })).optional(),
+      solution: z.object({
+        id: z.string(),
+        type: z.enum(["optimal", "feasible", "infeasible", "unbounded", "approximate"]),
+        variableValues: z.record(z.string(), z.union([z.number(), z.string()])),
+        objectiveValues: z.record(z.string(), z.number()),
+        quality: z.number().min(0).max(1),
+        computationTime: z.number().optional(),
+        iterations: z.number().optional(),
+        method: z.string().optional(),
+        guarantees: z.array(z.string()).optional()
+      }).optional(),
+      sensitivityAnalysis: z.object({
+        id: z.string(),
+        robustness: z.number().min(0).max(1),
+        criticalConstraints: z.array(z.string()),
+        shadowPrices: z.record(z.string(), z.number()).optional(),
+        recommendations: z.array(z.string())
+      }).optional(),
+      // Formal Logic properties (Phase 4, v3.2.0)
+      propositions: z.array(z.object({
+        id: z.string(),
+        symbol: z.string(),
+        statement: z.string(),
+        truthValue: z.boolean().optional(),
+        type: z.enum(["atomic", "compound"]),
+        formula: z.string().optional()
+      })).optional(),
+      logicalInferences: z.array(z.object({
+        id: z.string(),
+        rule: z.enum(["modus_ponens", "modus_tollens", "hypothetical_syllogism", "disjunctive_syllogism", "conjunction", "simplification", "addition", "resolution", "contradiction", "excluded_middle"]),
+        premises: z.array(z.string()),
+        conclusion: z.string(),
+        justification: z.string(),
+        valid: z.boolean()
+      })).optional(),
+      logicalProof: z.object({
+        id: z.string(),
+        theorem: z.string(),
+        technique: z.enum(["direct", "contradiction", "contrapositive", "cases", "induction", "natural_deduction", "resolution", "semantic_tableaux"]),
+        steps: z.array(z.object({
+          stepNumber: z.number().int().positive(),
+          statement: z.string(),
+          formula: z.string().optional(),
+          justification: z.string(),
+          rule: z.enum(["modus_ponens", "modus_tollens", "hypothetical_syllogism", "disjunctive_syllogism", "conjunction", "simplification", "addition", "resolution", "contradiction", "excluded_middle"]).optional(),
+          referencesSteps: z.array(z.number()).optional(),
+          isAssumption: z.boolean().optional(),
+          dischargesAssumption: z.number().optional()
+        })),
+        conclusion: z.string(),
+        valid: z.boolean(),
+        completeness: z.number().min(0).max(1),
+        assumptions: z.array(z.string()).optional()
+      }).optional(),
+      truthTable: z.object({
+        id: z.string(),
+        propositions: z.array(z.string()),
+        formula: z.string().optional(),
+        rows: z.array(z.object({
+          rowNumber: z.number().int().positive(),
+          assignments: z.record(z.string(), z.boolean()),
+          result: z.boolean()
+        })),
+        isTautology: z.boolean(),
+        isContradiction: z.boolean(),
+        isContingent: z.boolean()
+      }).optional(),
+      satisfiability: z.object({
+        id: z.string(),
+        formula: z.string(),
+        satisfiable: z.boolean(),
+        model: z.record(z.string(), z.boolean()).optional(),
+        method: z.enum(["dpll", "cdcl", "resolution", "truth_table", "other"]),
+        complexity: z.string().optional(),
+        explanation: z.string()
+      }).optional(),
+      action: z.enum(["add_thought", "summarize", "export", "export_all", "switch_mode", "get_session", "recommend_mode", "delete_session"]).default("add_thought"),
+      exportFormat: z.enum(["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"]).optional(),
+      newMode: z.enum(["sequential", "shannon", "mathematics", "physics", "hybrid", "inductive", "deductive", "abductive", "causal", "bayesian", "counterfactual", "analogical", "temporal", "gametheory", "evidential", "firstprinciples", "systemsthinking", "scientificmethod", "optimization", "formallogic"]).optional(),
+      // Mode recommendation parameters (v2.4)
+      problemType: z.string().optional(),
+      problemCharacteristics: z.object({
+        domain: z.string(),
+        complexity: z.enum(["low", "medium", "high"]),
+        uncertainty: z.enum(["low", "medium", "high"]),
+        timeDependent: z.boolean(),
+        multiAgent: z.boolean(),
+        requiresProof: z.boolean(),
+        requiresQuantification: z.boolean(),
+        hasIncompleteInfo: z.boolean(),
+        requiresExplanation: z.boolean(),
+        hasAlternatives: z.boolean()
+      }).optional(),
+      includeCombinations: z.boolean().optional()
+    });
+    thinkingTool = {
+      name: "deepthinking",
+      description: "[DEPRECATED] Use deepthinking_* tools instead. Legacy tool supporting 18 reasoning modes with auto-routing to focused tools.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          sessionId: { type: "string" },
+          mode: {
+            type: "string",
+            enum: ["sequential", "shannon", "mathematics", "physics", "hybrid", "inductive", "deductive", "abductive", "causal", "bayesian", "counterfactual", "analogical", "temporal", "gametheory", "evidential", "firstprinciples", "systemsthinking", "scientificmethod", "optimization", "formallogic"],
+            default: "hybrid"
+          },
+          thought: { type: "string", minLength: 1 },
+          thoughtNumber: { type: "integer", minimum: 1 },
+          totalThoughts: { type: "integer", minimum: 1 },
+          nextThoughtNeeded: { type: "boolean" },
+          isRevision: { type: "boolean" },
+          revisesThought: { type: "string" },
+          revisionReason: { type: "string" },
+          branchFrom: { type: "string" },
+          branchId: { type: "string" },
+          stage: {
+            type: "string",
+            enum: ["problem_definition", "constraints", "model", "proof", "implementation"]
+          },
+          uncertainty: { type: "number", minimum: 0, maximum: 1 },
+          dependencies: { type: "array", items: { type: "string" } },
+          assumptions: { type: "array", items: { type: "string" } },
+          thoughtType: { type: "string" },
+          // Math/Physics properties
+          mathematicalModel: {
+            type: "object",
+            properties: {
+              latex: { type: "string" },
+              symbolic: { type: "string" },
+              ascii: { type: "string" }
+            },
+            additionalProperties: false
+          },
+          proofStrategy: {
+            type: "object",
+            properties: {
+              type: { type: "string", enum: ["direct", "contradiction", "induction", "construction", "contrapositive"] },
+              steps: { type: "array", items: { type: "string" } }
+            },
+            additionalProperties: false
+          },
+          tensorProperties: {
+            type: "object",
+            properties: {
+              rank: { type: "array", items: { type: "number" }, minItems: 2, maxItems: 2 },
+              components: { type: "string" },
+              latex: { type: "string" },
+              symmetries: { type: "array", items: { type: "string" } },
+              invariants: { type: "array", items: { type: "string" } },
+              transformation: { type: "string", enum: ["covariant", "contravariant", "mixed"] }
+            },
+            additionalProperties: false
+          }
+          // All other optional properties from various modes (simplified for legacy compatibility)
+          // Most users should migrate to focused tools for full schema validation
+        },
+        required: ["thought", "thoughtNumber", "totalThoughts", "nextThoughtNeeded"],
+        additionalProperties: true
+        // Allow extra properties for backward compatibility
+      }
+    };
+  }
+});
+
+// src/types/session.ts
+var init_session = __esm({
+  "src/types/session.ts"() {
+    init_esm_shims();
+  }
+});
+
+// src/types/modes/synthesis.ts
+function isSynthesisThought(thought) {
+  return thought.mode === "synthesis";
+}
+var init_synthesis = __esm({
+  "src/types/modes/synthesis.ts"() {
+    init_esm_shims();
+  }
+});
+
+// src/types/modes/argumentation.ts
+function isArgumentationThought(thought) {
+  return thought.mode === "argumentation";
+}
+var init_argumentation = __esm({
+  "src/types/modes/argumentation.ts"() {
+    init_esm_shims();
+  }
+});
+
+// src/types/modes/analysis.ts
+function isAnalysisThought(thought) {
+  return thought.mode === "analysis";
+}
+var init_analysis = __esm({
+  "src/types/modes/analysis.ts"() {
+    init_esm_shims();
+  }
+});
+
+// src/types/index.ts
+var init_types = __esm({
+  "src/types/index.ts"() {
+    init_esm_shims();
+    init_core();
+    init_session();
+    init_recommendations();
+    init_synthesis();
+    init_argumentation();
+    init_analysis();
+  }
+});
+
 // src/utils/errors.ts
 var DeepThinkingError, SessionNotFoundError;
 var init_errors = __esm({
@@ -17502,7 +17502,7 @@ var init_manager = __esm({
        * const manager = new SessionManager({}, LogLevel.INFO, storage);
        * ```
        */
-      constructor(config, logger2, storage, monitor) {
+      constructor(config, logger3, storage, monitor) {
         this.activeSessions = new LRUCache({
           maxSize: 1e3,
           enableStats: true,
@@ -17523,11 +17523,11 @@ var init_manager = __esm({
         this.config = config || {};
         this.storage = storage;
         this.monitor = monitor || metaMonitor;
-        if (logger2 && typeof logger2 === "object" && "info" in logger2) {
-          this.logger = logger2;
+        if (logger3 && typeof logger3 === "object" && "info" in logger3) {
+          this.logger = logger3;
         } else {
           this.logger = createLogger({
-            minLevel: logger2 || 1 /* INFO */,
+            minLevel: logger3 || 1 /* INFO */,
             enableConsole: true
           });
         }
@@ -17921,6 +17921,17 @@ var init_interface = __esm({
     };
   }
 });
+function handleUnlinkError(error, filePath, context) {
+  if (error && error.code !== "ENOENT") {
+    logger2.warn(`Failed to cleanup ${context}`, {
+      path: filePath,
+      code: error.code,
+      message: error.message,
+      pid: process.pid,
+      instanceId: INSTANCE_ID
+    });
+  }
+}
 function getLockPath(filePath) {
   return `${filePath}.lock`;
 }
@@ -17955,10 +17966,7 @@ async function writeLockInfo(lockPath, lockInfo) {
     await promises.rename(tempPath, lockPath);
     return true;
   } catch (error) {
-    try {
-      await promises.unlink(tempPath);
-    } catch {
-    }
+    await promises.unlink(tempPath).catch((err) => handleUnlinkError(err, tempPath, "temp lock file"));
     if (error.code === "EEXIST" || error.code === "EPERM" || error.code === "ENOENT") {
       return false;
     }
@@ -17974,13 +17982,11 @@ async function acquireExclusiveLock(filePath, options) {
     if (existingLock) {
       if (existingLock.instanceId === INSTANCE_ID) {
         return async () => {
-          await promises.unlink(lockPath).catch(() => {
-          });
+          await promises.unlink(lockPath).catch((err) => handleUnlinkError(err, lockPath, "exclusive lock"));
         };
       }
       if (isLockStale(existingLock, options.staleThreshold)) {
-        await promises.unlink(lockPath).catch(() => {
-        });
+        await promises.unlink(lockPath).catch((err) => handleUnlinkError(err, lockPath, "stale exclusive lock"));
       } else {
         await sleep(options.retryInterval);
         continue;
@@ -17995,8 +18001,7 @@ async function acquireExclusiveLock(filePath, options) {
         if (sharedLockInfo && !isLockStale(sharedLockInfo, options.staleThreshold)) {
           validSharedLocks.push(sharedLockInfo);
         } else {
-          await promises.unlink(sharedLockPath).catch(() => {
-          });
+          await promises.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, "stale shared lock"));
         }
       }
       if (validSharedLocks.length > 0) {
@@ -18011,8 +18016,7 @@ async function acquireExclusiveLock(filePath, options) {
     const lockInfo = createLockInfo("exclusive");
     if (await writeLockInfo(lockPath, lockInfo)) {
       return async () => {
-        await promises.unlink(lockPath).catch(() => {
-        });
+        await promises.unlink(lockPath).catch((err) => handleUnlinkError(err, lockPath, "exclusive lock"));
       };
     }
     await sleep(options.retryInterval);
@@ -18028,8 +18032,7 @@ async function acquireSharedLock(filePath, options) {
     const exclusiveLock = await readLockInfo(exclusiveLockPath);
     if (exclusiveLock) {
       if (isLockStale(exclusiveLock, options.staleThreshold)) {
-        await promises.unlink(exclusiveLockPath).catch(() => {
-        });
+        await promises.unlink(exclusiveLockPath).catch((err) => handleUnlinkError(err, exclusiveLockPath, "stale exclusive lock"));
       } else {
         await sleep(options.retryInterval);
         continue;
@@ -18041,14 +18044,12 @@ async function acquireSharedLock(filePath, options) {
       await promises.writeFile(sharedLockPath, JSON.stringify(lockInfo), { flag: "wx" });
       const recheck = await readLockInfo(exclusiveLockPath);
       if (recheck && !isLockStale(recheck, options.staleThreshold)) {
-        await promises.unlink(sharedLockPath).catch(() => {
-        });
+        await promises.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, "shared lock rollback"));
         await sleep(options.retryInterval);
         continue;
       }
       return async () => {
-        await promises.unlink(sharedLockPath).catch(() => {
-        });
+        await promises.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, "shared lock"));
         try {
           const remaining = await promises.readdir(sharedLockDir);
           if (remaining.length === 0) {
@@ -18060,8 +18061,7 @@ async function acquireSharedLock(filePath, options) {
     } catch (error) {
       if (error.code === "EEXIST") {
         return async () => {
-          await promises.unlink(sharedLockPath).catch(() => {
-          });
+          await promises.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, "existing shared lock"));
         };
       }
       throw error;
@@ -18095,10 +18095,12 @@ async function withSharedLock(filePath, fn, options) {
     await release();
   }
 }
-var DEFAULT_OPTIONS, INSTANCE_ID;
+var logger2, DEFAULT_OPTIONS, INSTANCE_ID;
 var init_file_lock = __esm({
   "src/utils/file-lock.ts"() {
     init_esm_shims();
+    init_logger();
+    logger2 = createLogger({ minLevel: 2 /* WARN */ });
     DEFAULT_OPTIONS = {
       timeout: 1e4,
       retryInterval: 50,
@@ -40248,9 +40250,9 @@ var init_ExportService = __esm({
     ExportService = class {
       visualExporter;
       logger;
-      constructor(logger2) {
+      constructor(logger3) {
         this.visualExporter = new VisualExporter();
-        this.logger = logger2 || createLogger({ minLevel: 1 /* INFO */, enableConsole: true });
+        this.logger = logger3 || createLogger({ minLevel: 1 /* INFO */, enableConsole: true });
       }
       /**
        * Export a session to the specified format
@@ -41575,10 +41577,10 @@ var init_ModeRouter = __esm({
        * const router = new ModeRouter(sessionManager, customLogger, customMonitor);
        * ```
        */
-      constructor(sessionManager, logger2, monitor) {
+      constructor(sessionManager, logger3, monitor) {
         this.sessionManager = sessionManager;
         this.recommender = new ModeRecommender();
-        this.logger = logger2 || createLogger({ minLevel: 1 /* INFO */, enableConsole: true });
+        this.logger = logger3 || createLogger({ minLevel: 1 /* INFO */, enableConsole: true });
         this.monitor = monitor || metaMonitor;
       }
       /**
@@ -44006,6 +44008,7 @@ var init_combinations = __esm({
 
 // src/index.ts
 init_esm_shims();
+init_modes();
 
 // src/tools/definitions.ts
 init_esm_shims();
@@ -46223,7 +46226,6 @@ function isValidTool(toolName) {
 // src/index.ts
 init_thinking();
 init_types();
-init_modes();
 var __filename2 = fileURLToPath(import.meta.url);
 var __dirname2 = dirname(__filename2);
 var packageJson = JSON.parse(
@@ -46358,7 +46360,7 @@ async function handleAddThought(input, _toolName) {
     });
     sessionId = session2.id;
   }
-  const thought = thoughtFactory.createThought(input, sessionId);
+  const thought = thoughtFactory.createThought({ ...input, action: "add_thought" }, sessionId);
   const session = await sessionManager.addThought(sessionId, thought);
   const registry = ModeHandlerRegistry.getInstance();
   const modeStatus = {
