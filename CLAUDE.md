@@ -166,7 +166,7 @@ Configured in `tsconfig.json`:
 
 | Version | Phase | Key Features |
 |---------|-------|--------------|
-| **v8.5.0** | Phase 13 Sprint 1 | **GRAPH BUILDERS**: DOTGraphBuilder, MermaidGraphBuilder, GraphMLBuilder fluent APIs for visual export refactoring |
+| **v8.5.0** | Phase 13 Sprint 1-2 | **FLUENT BUILDERS**: DOTGraphBuilder, MermaidGraphBuilder, GraphMLBuilder + ASCIIDocBuilder, SVGBuilder, TikZBuilder fluent APIs |
 | **v8.4.0** | Phase 10 Sprint 3 | **ALL 33 MODES SPECIALIZED**: Complete ModeHandler coverage, 36 total handlers, registerAllHandlers() function |
 | **v8.3.2** | Phase 15 | Code quality: Type safety, error handling docs, magic number extraction, deterministic logic |
 | **v8.3.1** | Phase 15 | Version synchronization in visual exporters, Phase 11 documentation |
@@ -404,6 +404,13 @@ Generate dependency docs: `npm run docs:deps`
 - Added `GraphMLBuilder` fluent API class to `src/export/visual/utils/graphml.ts`
 - Created 64 unit tests in `tests/unit/export/visual/utils/graph-builders.test.ts`
 
+**Sprint 2 (v8.5.0)**: Visual Format Builders
+
+- Added `ASCIIDocBuilder` fluent API class to `src/export/visual/utils/ascii.ts`
+- Added `SVGBuilder` and `SVGGroupBuilder` fluent API classes to `src/export/visual/utils/svg.ts`
+- Added `TikZBuilder` fluent API class to `src/export/visual/utils/tikz.ts`
+- Created 89 unit tests in `tests/unit/export/visual/utils/visual-builders.test.ts`
+
 **Builder Pattern Benefits**:
 
 ```typescript
@@ -420,11 +427,10 @@ const dot = new DOTGraphBuilder()
   .render();
 ```
 
-**Remaining Sprints** (9 more planned):
+**Remaining Sprints** (8 more planned):
 
 | Sprint | Focus |
 |--------|-------|
-| 2 | ASCIIDocBuilder, SVGBuilder, TikZBuilder |
 | 3 | UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder |
 | 4 | JSDoc, integration tests, snapshot baselines |
 | 5-7 | Refactor 12 critical files (>1000 lines) |

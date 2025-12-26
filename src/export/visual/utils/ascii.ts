@@ -1,6 +1,7 @@
 /**
- * ASCII Art Utilities (v7.1.0)
+ * ASCII Art Utilities (v8.5.0)
  * Shared utility functions for ASCII diagram generation across all visual exporters
+ * Phase 13: Added ASCIIDocBuilder fluent API
  */
 
 // =============================================================================
@@ -718,4 +719,353 @@ export function generateHierarchyAscii(
   }
 
   return lines.join('\n');
+}
+
+// =============================================================================
+// ASCIIDocBuilder - Fluent API Builder Class (Phase 13)
+// =============================================================================
+
+/** Header style for ASCIIDocBuilder */
+export type ASCIIHeaderStyle = 'single' | 'double' | 'equals' | 'dash';
+
+/** Options for ASCIIDocBuilder */
+export interface ASCIIDocBuilderOptions {
+  boxStyle?: AsciiBoxStyle;
+  maxWidth?: number;
+  indent?: number;
+  includeTimestamp?: boolean;
+}
+
+/**
+ * Fluent API builder for ASCII documents
+ *
+ * Provides a chainable interface for constructing ASCII documents,
+ * wrapping the existing utility functions for easier use.
+ *
+ * @example
+ * ```typescript
+ * const doc = new ASCIIDocBuilder()
+ *   .addHeader('My Document', 'double')
+ *   .addSection('Introduction')
+ *   .addBulletList(['Item 1', 'Item 2', 'Item 3'])
+ *   .addBox('Important Note', { title: 'Note' })
+ *   .render();
+ * ```
+ */
+export class ASCIIDocBuilder {
+  private content: string[] = [];
+  private options: ASCIIDocBuilderOptions = {};
+
+  /**
+   * Set or merge document options
+   * @param options - Document options to set/merge
+   * @returns this for chaining
+   */
+  setOptions(options: ASCIIDocBuilderOptions): this {
+    this.options = { ...this.options, ...options };
+    return this;
+  }
+
+  /**
+   * Set the box style for subsequent boxes
+   * @param style - The box style to use
+   * @returns this for chaining
+   */
+  setBoxStyle(style: AsciiBoxStyle): this {
+    this.options.boxStyle = style;
+    return this;
+  }
+
+  /**
+   * Set the maximum width for content
+   * @param width - Maximum width in characters
+   * @returns this for chaining
+   */
+  setMaxWidth(width: number): this {
+    this.options.maxWidth = width;
+    return this;
+  }
+
+  /**
+   * Set the indent level
+   * @param indent - Number of spaces for indentation
+   * @returns this for chaining
+   */
+  setIndent(indent: number): this {
+    this.options.indent = indent;
+    return this;
+  }
+
+  /**
+   * Add a header with underline
+   * @param title - The header title
+   * @param style - The underline style (default: 'equals')
+   * @returns this for chaining
+   */
+  addHeader(title: string, style: ASCIIHeaderStyle = 'equals'): this {
+    this.content.push(generateAsciiHeader(title, style));
+    return this;
+  }
+
+  /**
+   * Add a section header
+   * @param title - The section title
+   * @param icon - Optional icon prefix
+   * @returns this for chaining
+   */
+  addSection(title: string, icon?: string): this {
+    this.content.push(generateAsciiSectionHeader(title, icon));
+    return this;
+  }
+
+  /**
+   * Add a boxed title
+   * @param title - The title to box
+   * @param style - The box style (uses builder default if not specified)
+   * @returns this for chaining
+   */
+  addBoxedTitle(title: string, style?: AsciiBoxStyle): this {
+    this.content.push(generateAsciiBoxedTitle(title, style || this.options.boxStyle || 'single'));
+    return this;
+  }
+
+  /**
+   * Add a bullet list
+   * @param items - Array of list items
+   * @param bullet - The bullet style (default: 'bullet')
+   * @param indent - Indentation level (uses builder default if not specified)
+   * @returns this for chaining
+   */
+  addBulletList(items: string[], bullet: keyof typeof BULLETS = 'bullet', indent?: number): this {
+    this.content.push(generateAsciiBulletList(items, bullet, indent ?? this.options.indent ?? 2));
+    return this;
+  }
+
+  /**
+   * Add a numbered list
+   * @param items - Array of list items
+   * @param indent - Indentation level (uses builder default if not specified)
+   * @param startNumber - Starting number (default: 1)
+   * @returns this for chaining
+   */
+  addNumberedList(items: string[], indent?: number, startNumber: number = 1): this {
+    this.content.push(generateAsciiNumberedList(items, indent ?? this.options.indent ?? 2, startNumber));
+    return this;
+  }
+
+  /**
+   * Add a box around content
+   * @param content - The content to box (string or array of lines)
+   * @param boxOptions - Box options (title, style, width, padding)
+   * @returns this for chaining
+   */
+  addBox(content: string | string[], boxOptions?: {
+    style?: AsciiBoxStyle;
+    title?: string;
+    width?: number;
+    padding?: number;
+  }): this {
+    const mergedOptions = {
+      style: boxOptions?.style || this.options.boxStyle || 'single',
+      title: boxOptions?.title,
+      width: boxOptions?.width,
+      padding: boxOptions?.padding,
+    };
+    this.content.push(generateAsciiBox(content, mergedOptions));
+    return this;
+  }
+
+  /**
+   * Add a tree/hierarchy structure
+   * @param root - The root node of the tree
+   * @returns this for chaining
+   */
+  addTree(root: AsciiTreeNode): this {
+    this.content.push(generateHierarchyAscii(root));
+    return this;
+  }
+
+  /**
+   * Add a tree list (without root label)
+   * @param items - Array of tree nodes
+   * @returns this for chaining
+   */
+  addTreeList(items: AsciiTreeNode[]): this {
+    this.content.push(generateAsciiTreeList(items));
+    return this;
+  }
+
+  /**
+   * Add a table
+   * @param headers - Array of column headers
+   * @param rows - 2D array of row data
+   * @param tableOptions - Table options (style, columnWidths, alignments)
+   * @returns this for chaining
+   */
+  addTable(headers: string[], rows: string[][], tableOptions?: {
+    style?: AsciiBoxStyle;
+    columnWidths?: number[];
+    alignments?: Array<'left' | 'center' | 'right'>;
+  }): this {
+    const mergedOptions = {
+      style: tableOptions?.style || this.options.boxStyle || 'single',
+      columnWidths: tableOptions?.columnWidths,
+      alignments: tableOptions?.alignments,
+    };
+    this.content.push(generateAsciiTable(headers, rows, mergedOptions));
+    return this;
+  }
+
+  /**
+   * Add a flow diagram
+   * @param steps - Array of step labels
+   * @param direction - Flow direction ('horizontal' or 'vertical')
+   * @returns this for chaining
+   */
+  addFlowDiagram(steps: string[], direction: 'horizontal' | 'vertical' = 'vertical'): this {
+    this.content.push(generateAsciiFlowDiagram(steps, direction, {
+      boxStyle: this.options.boxStyle,
+      maxWidth: this.options.maxWidth,
+    }));
+    return this;
+  }
+
+  /**
+   * Add a progress bar
+   * @param value - Current value
+   * @param max - Maximum value (default: 100)
+   * @param width - Bar width in characters (default: 20)
+   * @param barOptions - Progress bar options
+   * @returns this for chaining
+   */
+  addProgressBar(value: number, max: number = 100, width: number = 20, barOptions?: {
+    filled?: string;
+    empty?: string;
+    showPercent?: boolean;
+  }): this {
+    this.content.push(generateAsciiProgressBar(value, max, width, barOptions));
+    return this;
+  }
+
+  /**
+   * Add a metrics panel
+   * @param metrics - Array of label/value pairs
+   * @param panelOptions - Panel options (style, title)
+   * @returns this for chaining
+   */
+  addMetricsPanel(metrics: Array<{ label: string; value: string | number }>, panelOptions?: {
+    style?: AsciiBoxStyle;
+    title?: string;
+  }): this {
+    const mergedOptions = {
+      style: panelOptions?.style || this.options.boxStyle || 'single',
+      title: panelOptions?.title || 'Metrics',
+    };
+    this.content.push(generateAsciiMetricsPanel(metrics, mergedOptions));
+    return this;
+  }
+
+  /**
+   * Add a graph representation
+   * @param nodes - Array of graph nodes
+   * @param edges - Array of graph edges
+   * @returns this for chaining
+   */
+  addGraph(nodes: AsciiNode[], edges: AsciiEdge[]): this {
+    this.content.push(generateAsciiGraph(nodes, edges));
+    return this;
+  }
+
+  /**
+   * Add raw text content
+   * @param text - The text to add
+   * @returns this for chaining
+   */
+  addText(text: string): this {
+    this.content.push(text);
+    return this;
+  }
+
+  /**
+   * Add an empty line
+   * @param count - Number of empty lines to add (default: 1)
+   * @returns this for chaining
+   */
+  addEmptyLine(count: number = 1): this {
+    for (let i = 0; i < count; i++) {
+      this.content.push('');
+    }
+    return this;
+  }
+
+  /**
+   * Add a horizontal rule
+   * @param width - Width of the rule (default: 40)
+   * @param char - Character to use (default: '-')
+   * @returns this for chaining
+   */
+  addHorizontalRule(width: number = 40, char: string = '-'): this {
+    this.content.push(char.repeat(width));
+    return this;
+  }
+
+  /**
+   * Get the current content line count
+   */
+  get lineCount(): number {
+    return this.content.reduce((count, item) => {
+      return count + (item.split('\n').length);
+    }, 0);
+  }
+
+  /**
+   * Get the current content section count
+   */
+  get sectionCount(): number {
+    return this.content.length;
+  }
+
+  /**
+   * Clear all content
+   * @returns this for chaining
+   */
+  clear(): this {
+    this.content = [];
+    return this;
+  }
+
+  /**
+   * Reset options to defaults
+   * @returns this for chaining
+   */
+  resetOptions(): this {
+    this.options = {};
+    return this;
+  }
+
+  /**
+   * Render the document as a string
+   * @param separator - Separator between content sections (default: '\n')
+   * @returns The complete ASCII document
+   */
+  render(separator: string = '\n'): string {
+    let result = this.content.join(separator);
+
+    if (this.options.includeTimestamp) {
+      result = `Generated: ${new Date().toISOString()}\n\n${result}`;
+    }
+
+    return result;
+  }
+
+  /**
+   * Create a builder with pre-configured options
+   * @param options - Initial options
+   * @returns A new ASCIIDocBuilder instance
+   */
+  static withOptions(options: ASCIIDocBuilderOptions): ASCIIDocBuilder {
+    const builder = new ASCIIDocBuilder();
+    builder.options = { ...options };
+    return builder;
+  }
 }

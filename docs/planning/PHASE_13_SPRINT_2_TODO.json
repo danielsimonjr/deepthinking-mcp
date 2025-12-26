@@ -4,14 +4,15 @@
   "title": "Visual Format Builders",
   "week": "Week 1-2",
   "effort": "5-6 hours",
-  "status": "pending",
+  "status": "completed",
+  "completedDate": "2025-12-26",
   "description": "Add fluent API builder classes for visual formats (ASCII, SVG, TikZ) with unit tests",
   "tasks": [
     {
       "id": "13.2.1",
       "category": "ASCII Builder",
       "description": "Add ASCIIDocBuilder class to utils/ascii.ts",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.5,
       "priority": "high",
       "details": [
@@ -35,7 +36,7 @@
       "id": "13.2.2",
       "category": "SVG Builder",
       "description": "Add SVGBuilder class to utils/svg.ts",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.5,
       "priority": "medium",
       "details": [
@@ -59,7 +60,7 @@
       "id": "13.2.3",
       "category": "TikZ Builder",
       "description": "Add TikZBuilder class to utils/tikz.ts",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.5,
       "priority": "medium",
       "details": [
@@ -82,7 +83,7 @@
       "id": "13.2.4",
       "category": "Unit Tests",
       "description": "Write unit tests for visual format builders",
-      "status": "pending",
+      "status": "completed",
       "estimatedHours": 1.5,
       "priority": "high",
       "details": [
