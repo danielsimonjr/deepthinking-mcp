@@ -2,6 +2,9 @@
 
 A comprehensive taxonomy of 110 reasoning types organized into 18 thematic categories.
 
+**Author:** Daniel Simon Jr.
+**Co-Author:** Claude
+
 ---
 
 ## Table of Contents
