@@ -8,22 +8,23 @@ This guide walks you through adding a new reasoning mode to DeepThinking MCP. Fo
 
 ## Overview
 
-Adding a new mode requires touching **12 locations** across the codebase:
+Adding a new mode requires touching **11 core locations** across the codebase:
 
 | # | Component | Required | File(s) |
 |---|-----------|----------|---------|
 | 1 | Type Definition | ✅ | `src/types/modes/yourmode.ts` |
-| 2 | Core Enum | ✅ | `src/types/core.ts` |
-| 3 | Zod Schema | ✅ | `src/validation/schemas.ts` |
-| 4 | Validator | ✅ | `src/validation/validators/modes/yourmode.ts` |
-| 5 | **ModeHandler** | ✅ | `src/modes/handlers/YourModeHandler.ts` |
-| 6 | **Handler Registration** | ✅ | `src/modes/index.ts` |
-| 7 | ThoughtFactory | ✅ | `src/services/ThoughtFactory.ts` |
-| 8 | MCP Tool Schema | ✅ | `src/tools/json-schemas.ts` |
-| 9 | Visual Exporter | ⚠️ Optional | `src/export/visual/modes/yourmode.ts` |
-| 10 | Export Support | ⚠️ Optional | `src/services/ExportService.ts` |
-| 11 | Mode Documentation | ✅ | `docs/modes/YOURMODE.md` |
-| 12 | Tests | ✅ | `tests/unit/modes/yourmode.test.ts` |
+| 2 | Core Enum & Union | ✅ | `src/types/core.ts` |
+| 3 | Mode Validator | ✅ | `src/validation/validators/modes/yourmode.ts` |
+| 4 | **ModeHandler** | ✅ | `src/modes/handlers/YourModeHandler.ts` |
+| 5 | **Handler Registration** | ✅ | `src/modes/index.ts` |
+| 6 | MCP Tool Schema | ✅ | `src/tools/json-schemas.ts` (add to tool group) |
+| 7 | Visual Exporter | ⚠️ Optional | `src/export/visual/modes/yourmode.ts` |
+| 8 | Mode Documentation | ✅ | `docs/modes/YOURMODE.md` |
+| 9 | Unit Tests - Handler | ✅ | `tests/unit/modes/handlers/YourModeHandler.test.ts` |
+| 10 | Integration Tests | ⚠️ Optional | `tests/integration/modes/yourmode.test.ts` |
+| 11 | Update CHANGELOG | ✅ | `CHANGELOG.md` |
+
+**Note**: ThoughtFactory (v8.4.0+) automatically delegates to your handler via ModeHandlerRegistry - no code changes needed there.
 
 **Estimated Time**: 2-4 hours for basic mode, 6-12 hours for complex mode with visual exports
 
@@ -158,46 +159,7 @@ export { isYourModeThought } from './modes/yourmode.js';
 
 ---
 
-### Step 3: Create Zod Schema
-
-**File**: `src/validation/schemas.ts`
-
-Add your schema near similar mode schemas:
-
-```typescript
-/**
- * YourMode Schema
- */
-export const YourModeSchema = BaseThoughtSchema.extend({
-  mode: z.literal('yourmode'),
-
-  // Optional thought type
-  thoughtType: z.enum(['analysis', 'synthesis', 'evaluation']).optional(),
-
-  // Add mode-specific fields with validation
-  // Use shared schemas from src/tools/schemas/shared.ts where possible
-
-  // Example:
-  // hypotheses: z.array(z.object({
-  //   id: z.string(),
-  //   description: z.string(),
-  //   plausibility: ConfidenceSchema, // 0-1 range
-  // })).optional(),
-});
-
-export type YourModeInput = z.infer<typeof YourModeSchema>;
-```
-
-**Use Shared Schemas** (`src/tools/schemas/shared.ts`):
-- `ConfidenceSchema` - 0-1 range (probability, confidence, strength)
-- `PositiveIntSchema` - Positive integers
-- `LevelEnum` - 'low' | 'medium' | 'high'
-- `TimeUnitEnum` - Time units
-- Many more...
-
----
-
-### Step 4: Create Validator
+### Step 3: Create Mode Validator Class
 
 **File**: `src/validation/validators/modes/yourmode.ts`
 
@@ -207,7 +169,7 @@ export type YourModeInput = z.infer<typeof YourModeSchema>;
  */
 
 import { YourModeThought, ValidationIssue } from '../../../types/index.js';
-import { ValidationContext } from '../../validator.js';
+import type { ValidationContext } from '../../validator.js';
 import { BaseValidator } from '../base.js';
 
 export class YourModeValidator extends BaseValidator<YourModeThought> {
@@ -218,7 +180,7 @@ export class YourModeValidator extends BaseValidator<YourModeThought> {
   validate(thought: YourModeThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    // Always include common validation
+    // Always include common validation (inherited)
     issues.push(...this.validateCommon(thought));
 
     // Add mode-specific validation logic
@@ -229,7 +191,7 @@ export class YourModeValidator extends BaseValidator<YourModeThought> {
     //     thoughtNumber: thought.thoughtNumber,
     //     description: 'No hypotheses provided',
     //     suggestion: 'Add at least one hypothesis to analyze',
-    //     category: 'structural',
+    //     category: 'logical',
     //   });
     // }
 
@@ -238,13 +200,27 @@ export class YourModeValidator extends BaseValidator<YourModeThought> {
 }
 ```
 
-**Validation Categories**: `structural`, `logical`, `semantic`, `reference`
+**ValidationIssue Type**:
+```typescript
+interface ValidationIssue {
+  severity: 'error' | 'warning' | 'info';
+  thoughtNumber: number;
+  description: string;
+  suggestion: string;
+  category: 'structural' | 'logical' | 'semantic' | 'reference';
+}
+```
 
-**Severity Levels**: `error`, `warning`, `info`
+**Notes**:
+- Extend `BaseValidator<YourModeThought>` with your mode's thought type
+- Implement `getMode()` returning the mode string
+- Implement `validate()` returning array of ValidationIssue
+- Call `validateCommon()` for inherited base validation
+- Validators are auto-registered in ThoughtFactory
 
 ---
 
-### Step 5: Create ModeHandler (v8.x CRITICAL)
+### Step 4: Create ModeHandler (v8.x CRITICAL)
 
 **File**: `src/modes/handlers/YourModeHandler.ts`
 
@@ -381,17 +357,17 @@ export class YourModeHandler implements ModeHandler {
 
 ---
 
-### Step 6: Register Handler
+### Step 5: Register Handler
 
 **File**: `src/modes/index.ts`
 
-**6a. Import your handler** (at bottom with other imports):
+**5a. Import your handler** (at bottom with other imports):
 ```typescript
 // Your category handlers
 import { YourModeHandler } from './handlers/YourModeHandler.js';
 ```
 
-**6b. Register in `registerAllHandlers()`** (add to appropriate category):
+**5b. Register in `registerAllHandlers()`** (add to appropriate category):
 ```typescript
 export function registerAllHandlers(): void {
   const registry = getRegistry();
@@ -407,18 +383,18 @@ export function registerAllHandlers(): void {
 
 ---
 
-### Step 7: Update ThoughtFactory
+### Step 6: Update ThoughtFactory
 
 **File**: `src/services/ThoughtFactory.ts`
 
 The ThoughtFactory now delegates to ModeHandlers, but you may need to update fallback logic:
 
-**7a. Import your type** (if not auto-exported via core.ts):
+**6a. Import your type** (if not auto-exported via core.ts):
 ```typescript
 import type { YourModeThought } from '../types/index.js';
 ```
 
-**7b. Verify handler delegation works**:
+**6b. Verify handler delegation works**:
 ```typescript
 // ThoughtFactory.createThought() delegates to:
 // this.registry.createThought(input, sessionId)
@@ -429,7 +405,7 @@ The handler-based approach means minimal changes to ThoughtFactory itself.
 
 ---
 
-### Step 8: Add to MCP Tool Schema
+### Step 7: Add to MCP Tool Schema
 
 **File**: `src/tools/json-schemas.ts`
 
@@ -479,7 +455,7 @@ Find the appropriate existing tool group or create a new one:
 
 ---
 
-### Step 9: Create Visual Exporter (Optional but Recommended)
+### Step 8: Create Visual Exporter (Optional but Recommended)
 
 **File**: `src/export/visual/modes/yourmode.ts`
 
@@ -568,7 +544,7 @@ function toASCII(thought: YourModeThought): string {
 
 ---
 
-### Step 10: Update Export Service (Optional)
+### Step 9: Update Export Service (Optional)
 
 **File**: `src/services/ExportService.ts`
 
@@ -586,7 +562,7 @@ if (thought.mode === 'yourmode') {
 
 ---
 
-### Step 11: Create Mode Documentation
+### Step 10: Create Mode Documentation
 
 **File**: `docs/modes/YOURMODE.md`
 
@@ -658,7 +634,7 @@ Explain the theoretical foundation and key concepts.
 
 ---
 
-### Step 12: Create Tests
+### Step 11: Create Tests
 
 **File**: `tests/unit/modes/handlers/yourmode.test.ts`
 
