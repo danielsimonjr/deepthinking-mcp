@@ -7,7 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-*No unreleased changes*
+### Added - Documentation & Analysis
+
+**Reasoning Types Gap Analysis**
+- Created comprehensive gap analysis comparing 110 documented reasoning types to 33 implemented modes
+- `docs/analysis/reasoning-types-gap-analysis.json` - Machine-readable analysis with priority ratings
+- `docs/analysis/REASONING_TYPES_GAP_ANALYSIS.md` - Human-readable report with executive summary
+- Findings: 22 fully implemented, 12 partially mapped, 73 missing types, 5 entire categories missing
+- Includes 13-phase implementation roadmap for achieving full coverage
+
+**Unified Reasoning Types Reference**
+- Created `docs/reference/Types of Thinking and Reasonings.md` (1379 lines)
+- Consolidated 4 source files into single unified taxonomy
+- 110 reasoning types organized in 18 categories
+- Includes clickable table of contents and alphabetical index
+- Authors: Daniel Simon Jr. and Claude
+
+### Changed - Repository Organization
+
+**Planning Documents Archived**
+- Created `docs/planning/archive/` folder
+- Moved 54 files from Phase 1-11 to archive
+- Kept Phase 12-13 documents in active `docs/planning/` folder
+- Includes archived Improvement subfolder
 
 ---
 

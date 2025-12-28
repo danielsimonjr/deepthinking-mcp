@@ -1,0 +1,632 @@
+{
+  "metadata": {
+    "title": "Reasoning Types Gap Analysis",
+    "version": "1.0.0",
+    "date": "2025-12-27",
+    "authors": ["Daniel Simon Jr.", "Claude"],
+    "description": "Gap analysis between 110 documented reasoning types and current implementations",
+    "summary": {
+      "documentedTypes": 110,
+      "currentModes": 33,
+      "typesWithImplementation": 25,
+      "typesPartiallyMapped": 12,
+      "typesMissing": 73,
+      "newModesRequired": 73
+    }
+  },
+  "currentImplementations": {
+    "modes": [
+      "sequential", "shannon", "mathematics", "physics", "hybrid",
+      "engineering", "computability", "cryptanalytic", "algorithmic",
+      "metareasoning", "recursive", "modal", "stochastic", "constraint", "optimization",
+      "inductive", "deductive", "abductive",
+      "causal", "bayesian", "counterfactual", "temporal", "gametheory", "evidential",
+      "analogical", "firstprinciples",
+      "systemsthinking", "scientificmethod", "formallogic",
+      "synthesis", "argumentation", "critique", "analysis",
+      "custom"
+    ],
+    "typeFiles": 32,
+    "handlerFiles": 36
+  },
+  "mappings": {
+    "implemented": [
+      {
+        "docId": "1.1",
+        "docName": "Deductive Reasoning",
+        "mode": "deductive",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Fundamental Forms"
+      },
+      {
+        "docId": "1.2",
+        "docName": "Inductive Reasoning",
+        "mode": "inductive",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Fundamental Forms"
+      },
+      {
+        "docId": "1.3",
+        "docName": "Abductive Reasoning",
+        "mode": "abductive",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Fundamental Forms"
+      },
+      {
+        "docId": "2.4",
+        "docName": "Modal Reasoning",
+        "mode": "modal",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Logical and Formal"
+      },
+      {
+        "docId": "3.1",
+        "docName": "Mathematical Reasoning",
+        "mode": "mathematics",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Mathematical and Quantitative"
+      },
+      {
+        "docId": "3.7",
+        "docName": "Bayesian Reasoning",
+        "mode": "bayesian",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Mathematical and Quantitative"
+      },
+      {
+        "docId": "4.3",
+        "docName": "Temporal Reasoning",
+        "mode": "temporal",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Temporal and Spatial"
+      },
+      {
+        "docId": "4.4",
+        "docName": "Sequential Reasoning",
+        "mode": "sequential",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Temporal and Spatial"
+      },
+      {
+        "docId": "5.1",
+        "docName": "Causal Reasoning",
+        "mode": "causal",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Causal and Explanatory"
+      },
+      {
+        "docId": "5.4",
+        "docName": "Counterfactual Reasoning",
+        "mode": "counterfactual",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Causal and Explanatory"
+      },
+      {
+        "docId": "6.1",
+        "docName": "Analogical Reasoning",
+        "mode": "analogical",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Analogical and Comparative"
+      },
+      {
+        "docId": "7.2",
+        "docName": "Analytical Reasoning",
+        "mode": "analysis",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Analytical and Critical"
+      },
+      {
+        "docId": "7.5",
+        "docName": "Evidential Reasoning",
+        "mode": "evidential",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Analytical and Critical"
+      },
+      {
+        "docId": "8.3",
+        "docName": "Algorithmic Reasoning",
+        "mode": "algorithmic",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Problem-Solving and Strategic"
+      },
+      {
+        "docId": "8.7",
+        "docName": "Game-Theoretic Reasoning",
+        "mode": "gametheory",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Problem-Solving and Strategic"
+      },
+      {
+        "docId": "10.4",
+        "docName": "Argumentative Reasoning",
+        "mode": "argumentation",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Dialectical and Argumentative"
+      },
+      {
+        "docId": "12.1",
+        "docName": "Meta-Reasoning",
+        "mode": "metareasoning",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Specialized and Advanced"
+      },
+      {
+        "docId": "15.4",
+        "docName": "Systems Reasoning",
+        "mode": "systemsthinking",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Combined and Hybrid"
+      },
+      {
+        "docId": "17.7",
+        "docName": "Constraint-Based Reasoning",
+        "mode": "constraint",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Emerging and Specialized"
+      },
+      {
+        "docId": "17.8",
+        "docName": "Optimization Reasoning",
+        "mode": "optimization",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Emerging and Specialized"
+      },
+      {
+        "docId": "17.9",
+        "docName": "Stochastic Reasoning",
+        "mode": "stochastic",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Emerging and Specialized"
+      },
+      {
+        "docId": "17.10",
+        "docName": "Recursive Reasoning",
+        "mode": "recursive",
+        "hasType": true,
+        "hasHandler": true,
+        "status": "full",
+        "category": "Emerging and Specialized"
+      }
+    ],
+    "partiallyMapped": [
+      {
+        "docId": "2.1",
+        "docName": "Symbolic Reasoning",
+        "relatedMode": "formallogic",
+        "notes": "Could be subsumed under formallogic or needs dedicated mode",
+        "category": "Logical and Formal"
+      },
+      {
+        "docId": "2.2",
+        "docName": "Propositional Reasoning",
+        "relatedMode": "formallogic",
+        "notes": "Subset of formal logic; may need dedicated propositional calculus features",
+        "category": "Logical and Formal"
+      },
+      {
+        "docId": "2.3",
+        "docName": "Predicate Logic Reasoning",
+        "relatedMode": "formallogic",
+        "notes": "Subset of formal logic; may need first-order logic extensions",
+        "category": "Logical and Formal"
+      },
+      {
+        "docId": "2.8",
+        "docName": "Formal Reasoning",
+        "relatedMode": "formallogic",
+        "notes": "Direct match to formallogic mode",
+        "category": "Logical and Formal"
+      },
+      {
+        "docId": "3.6",
+        "docName": "Probabilistic Reasoning",
+        "relatedMode": "bayesian",
+        "notes": "Bayesian is a subset; may need broader probabilistic mode",
+        "category": "Mathematical and Quantitative"
+      },
+      {
+        "docId": "7.1",
+        "docName": "Critical Reasoning",
+        "relatedMode": "critique",
+        "notes": "Critique mode exists but focuses on peer review; critical reasoning is broader",
+        "category": "Analytical and Critical"
+      },
+      {
+        "docId": "7.3",
+        "docName": "Logical Reasoning",
+        "relatedMode": "formallogic",
+        "notes": "Overlaps with formal logic mode",
+        "category": "Analytical and Critical"
+      },
+      {
+        "docId": "8.4",
+        "docName": "Computational Reasoning",
+        "relatedMode": "computability",
+        "notes": "Computability focuses on Turing machines; broader computational thinking needed",
+        "category": "Problem-Solving and Strategic"
+      },
+      {
+        "docId": "12.2",
+        "docName": "Metacognitive Reasoning",
+        "relatedMode": "metareasoning",
+        "notes": "Closely related to metareasoning; may be subsumed",
+        "category": "Specialized and Advanced"
+      },
+      {
+        "docId": "15.3",
+        "docName": "Holistic Reasoning",
+        "relatedMode": "systemsthinking",
+        "notes": "Systems thinking includes holistic aspects",
+        "category": "Combined and Hybrid"
+      },
+      {
+        "docId": "15.5",
+        "docName": "Integrative Reasoning",
+        "relatedMode": "hybrid",
+        "notes": "Hybrid mode does integration; may need dedicated integrative mode",
+        "category": "Combined and Hybrid"
+      },
+      {
+        "docId": "15.6",
+        "docName": "Multi-Modal Reasoning",
+        "relatedMode": "hybrid",
+        "notes": "Hybrid handles multi-mode; may need dedicated multi-modal support",
+        "category": "Combined and Hybrid"
+      }
+    ],
+    "missing": [
+      {"docId": "2.5", "docName": "Monotonic Reasoning", "category": "Logical and Formal", "priority": "medium", "complexity": "medium"},
+      {"docId": "2.6", "docName": "Transitive Reasoning", "category": "Logical and Formal", "priority": "low", "complexity": "low"},
+      {"docId": "2.7", "docName": "Syllogistic Reasoning", "category": "Logical and Formal", "priority": "medium", "complexity": "medium"},
+      {"docId": "2.9", "docName": "Paraconsistent Reasoning", "category": "Logical and Formal", "priority": "low", "complexity": "high"},
+      {"docId": "3.2", "docName": "Arithmetic Reasoning", "category": "Mathematical and Quantitative", "priority": "medium", "complexity": "low"},
+      {"docId": "3.3", "docName": "Algebraic Reasoning", "category": "Mathematical and Quantitative", "priority": "medium", "complexity": "medium"},
+      {"docId": "3.4", "docName": "Geometric Reasoning", "category": "Mathematical and Quantitative", "priority": "medium", "complexity": "medium"},
+      {"docId": "3.5", "docName": "Statistical Reasoning", "category": "Mathematical and Quantitative", "priority": "high", "complexity": "medium"},
+      {"docId": "3.8", "docName": "Quantitative Reasoning", "category": "Mathematical and Quantitative", "priority": "medium", "complexity": "low"},
+      {"docId": "4.1", "docName": "Spatial Reasoning", "category": "Temporal and Spatial", "priority": "high", "complexity": "medium"},
+      {"docId": "4.2", "docName": "Visual Reasoning", "category": "Temporal and Spatial", "priority": "high", "complexity": "high"},
+      {"docId": "4.5", "docName": "Topological Reasoning", "category": "Temporal and Spatial", "priority": "low", "complexity": "high"},
+      {"docId": "5.2", "docName": "Mechanistic Reasoning", "category": "Causal and Explanatory", "priority": "medium", "complexity": "medium"},
+      {"docId": "5.3", "docName": "Teleological Reasoning", "category": "Causal and Explanatory", "priority": "low", "complexity": "medium"},
+      {"docId": "5.5", "docName": "Hypothetical Reasoning", "category": "Causal and Explanatory", "priority": "high", "complexity": "low"},
+      {"docId": "6.2", "docName": "Metaphorical Reasoning", "category": "Analogical and Comparative", "priority": "medium", "complexity": "medium"},
+      {"docId": "6.3", "docName": "Comparative Reasoning", "category": "Analogical and Comparative", "priority": "medium", "complexity": "low"},
+      {"docId": "6.4", "docName": "Relational Reasoning", "category": "Analogical and Comparative", "priority": "medium", "complexity": "medium"},
+      {"docId": "7.4", "docName": "Evaluative Reasoning", "category": "Analytical and Critical", "priority": "medium", "complexity": "low"},
+      {"docId": "8.1", "docName": "Decompositional Reasoning", "category": "Problem-Solving and Strategic", "priority": "high", "complexity": "low"},
+      {"docId": "8.2", "docName": "Systematic Reasoning", "category": "Problem-Solving and Strategic", "priority": "medium", "complexity": "low"},
+      {"docId": "8.5", "docName": "Heuristic Reasoning", "category": "Problem-Solving and Strategic", "priority": "high", "complexity": "medium"},
+      {"docId": "8.6", "docName": "Strategic Reasoning", "category": "Problem-Solving and Strategic", "priority": "high", "complexity": "medium"},
+      {"docId": "8.8", "docName": "Backwards Reasoning", "category": "Problem-Solving and Strategic", "priority": "medium", "complexity": "low"},
+      {"docId": "8.9", "docName": "Forward Reasoning", "category": "Problem-Solving and Strategic", "priority": "medium", "complexity": "low"},
+      {"docId": "8.10", "docName": "Means-End Reasoning", "category": "Problem-Solving and Strategic", "priority": "medium", "complexity": "medium"},
+      {"docId": "9.1", "docName": "Creative Reasoning", "category": "Creative and Divergent", "priority": "high", "complexity": "high"},
+      {"docId": "9.2", "docName": "Lateral Reasoning", "category": "Creative and Divergent", "priority": "high", "complexity": "high"},
+      {"docId": "9.3", "docName": "Divergent Reasoning", "category": "Creative and Divergent", "priority": "high", "complexity": "medium"},
+      {"docId": "9.4", "docName": "Convergent Reasoning", "category": "Creative and Divergent", "priority": "high", "complexity": "medium"},
+      {"docId": "9.5", "docName": "Associative Reasoning", "category": "Creative and Divergent", "priority": "medium", "complexity": "medium"},
+      {"docId": "9.6", "docName": "Intuitive Reasoning", "category": "Creative and Divergent", "priority": "medium", "complexity": "high"},
+      {"docId": "10.1", "docName": "Dialectical Reasoning", "category": "Dialectical and Argumentative", "priority": "high", "complexity": "medium"},
+      {"docId": "10.2", "docName": "Adversarial Reasoning", "category": "Dialectical and Argumentative", "priority": "medium", "complexity": "medium"},
+      {"docId": "10.3", "docName": "Rhetorical Reasoning", "category": "Dialectical and Argumentative", "priority": "medium", "complexity": "medium"},
+      {"docId": "11.1", "docName": "Social Reasoning", "category": "Social and Practical", "priority": "medium", "complexity": "high"},
+      {"docId": "11.2", "docName": "Pragmatic Reasoning", "category": "Social and Practical", "priority": "medium", "complexity": "medium"},
+      {"docId": "11.3", "docName": "Commonsense Reasoning", "category": "Social and Practical", "priority": "high", "complexity": "high"},
+      {"docId": "11.4", "docName": "Practical Reasoning", "category": "Social and Practical", "priority": "medium", "complexity": "medium"},
+      {"docId": "11.5", "docName": "Moral/Ethical Reasoning", "category": "Social and Practical", "priority": "high", "complexity": "high"},
+      {"docId": "11.6", "docName": "Legal Reasoning", "category": "Social and Practical", "priority": "medium", "complexity": "high"},
+      {"docId": "11.7", "docName": "Political Reasoning", "category": "Social and Practical", "priority": "low", "complexity": "high"},
+      {"docId": "11.8", "docName": "Economic Reasoning", "category": "Social and Practical", "priority": "medium", "complexity": "medium"},
+      {"docId": "12.3", "docName": "Reflexive Reasoning", "category": "Specialized and Advanced", "priority": "low", "complexity": "medium"},
+      {"docId": "12.4", "docName": "Categorical Reasoning", "category": "Specialized and Advanced", "priority": "medium", "complexity": "low"},
+      {"docId": "12.5", "docName": "Conceptual Reasoning", "category": "Specialized and Advanced", "priority": "medium", "complexity": "medium"},
+      {"docId": "12.6", "docName": "Taxonomic Reasoning", "category": "Specialized and Advanced", "priority": "medium", "complexity": "low"},
+      {"docId": "12.7", "docName": "Case-Based Reasoning", "category": "Specialized and Advanced", "priority": "high", "complexity": "medium"},
+      {"docId": "12.8", "docName": "Narrative Reasoning", "category": "Specialized and Advanced", "priority": "medium", "complexity": "medium"},
+      {"docId": "12.9", "docName": "Diagnostic Reasoning", "category": "Specialized and Advanced", "priority": "high", "complexity": "medium"},
+      {"docId": "12.10", "docName": "Prognostic Reasoning", "category": "Specialized and Advanced", "priority": "medium", "complexity": "medium"},
+      {"docId": "13.1", "docName": "Epistemic Reasoning", "category": "Epistemic and Normative", "priority": "medium", "complexity": "medium"},
+      {"docId": "13.2", "docName": "Deontic Reasoning", "category": "Epistemic and Normative", "priority": "medium", "complexity": "medium"},
+      {"docId": "13.3", "docName": "Autoepistemic Reasoning", "category": "Epistemic and Normative", "priority": "low", "complexity": "high"},
+      {"docId": "13.4", "docName": "Normative Reasoning", "category": "Epistemic and Normative", "priority": "medium", "complexity": "medium"},
+      {"docId": "13.5", "docName": "Descriptive Reasoning", "category": "Epistemic and Normative", "priority": "low", "complexity": "low"},
+      {"docId": "14.1", "docName": "Fuzzy Logic Reasoning", "category": "Uncertainty and Adaptability", "priority": "medium", "complexity": "medium"},
+      {"docId": "14.2", "docName": "Non-Monotonic Reasoning", "category": "Uncertainty and Adaptability", "priority": "medium", "complexity": "high"},
+      {"docId": "14.3", "docName": "Defeasible Reasoning", "category": "Uncertainty and Adaptability", "priority": "medium", "complexity": "medium"},
+      {"docId": "14.4", "docName": "Provisional Reasoning", "category": "Uncertainty and Adaptability", "priority": "low", "complexity": "low"},
+      {"docId": "14.5", "docName": "Adaptive Reasoning", "category": "Uncertainty and Adaptability", "priority": "medium", "complexity": "medium"},
+      {"docId": "15.1", "docName": "Abductive-Deductive Reasoning", "category": "Combined and Hybrid", "priority": "medium", "complexity": "low"},
+      {"docId": "15.2", "docName": "Inductive-Deductive Reasoning", "category": "Combined and Hybrid", "priority": "medium", "complexity": "low"},
+      {"docId": "16.1", "docName": "Contextual Reasoning", "category": "Contextual and Situated", "priority": "medium", "complexity": "medium"},
+      {"docId": "16.2", "docName": "Situated Reasoning", "category": "Contextual and Situated", "priority": "medium", "complexity": "medium"},
+      {"docId": "16.3", "docName": "Cultural Reasoning", "category": "Contextual and Situated", "priority": "low", "complexity": "high"},
+      {"docId": "16.4", "docName": "Domain-Specific Reasoning", "category": "Contextual and Situated", "priority": "medium", "complexity": "medium"},
+      {"docId": "17.1", "docName": "Subsymbolic Reasoning", "category": "Emerging and Specialized", "priority": "low", "complexity": "high"},
+      {"docId": "17.2", "docName": "Dual-Process Reasoning", "category": "Emerging and Specialized", "priority": "medium", "complexity": "high"},
+      {"docId": "17.3", "docName": "Perceptual Reasoning", "category": "Emerging and Specialized", "priority": "medium", "complexity": "high"},
+      {"docId": "17.4", "docName": "Counterfeit Detection Reasoning", "category": "Emerging and Specialized", "priority": "low", "complexity": "medium"},
+      {"docId": "17.5", "docName": "Reductive Reasoning", "category": "Emerging and Specialized", "priority": "low", "complexity": "medium"},
+      {"docId": "17.6", "docName": "Emergent Reasoning", "category": "Emerging and Specialized", "priority": "low", "complexity": "high"},
+      {"docId": "17.11", "docName": "Parallel Reasoning", "category": "Emerging and Specialized", "priority": "medium", "complexity": "medium"},
+      {"docId": "17.12", "docName": "Distributed Reasoning", "category": "Emerging and Specialized", "priority": "low", "complexity": "high"},
+      {"docId": "17.13", "docName": "Embodied Reasoning", "category": "Emerging and Specialized", "priority": "low", "complexity": "high"}
+    ]
+  },
+  "existingModesNotInDocument": [
+    {
+      "mode": "shannon",
+      "description": "Shannon methodology - 5-stage engineering approach",
+      "notes": "Unique to DeepThinking MCP; not in standard taxonomy"
+    },
+    {
+      "mode": "physics",
+      "description": "Physics reasoning with tensor properties and conservation laws",
+      "notes": "Domain-specific; could map to Mathematical/Mechanistic"
+    },
+    {
+      "mode": "hybrid",
+      "description": "Multi-mode combination reasoning",
+      "notes": "Meta-mode for combining others"
+    },
+    {
+      "mode": "engineering",
+      "description": "Requirements, FMEA, trade studies, ADRs",
+      "notes": "Domain-specific engineering methodology"
+    },
+    {
+      "mode": "computability",
+      "description": "Turing machines, decidability, complexity",
+      "notes": "Specialized subset of computational reasoning"
+    },
+    {
+      "mode": "cryptanalytic",
+      "description": "Deciban evidence system for hypothesis testing",
+      "notes": "Specialized cryptographic reasoning"
+    },
+    {
+      "mode": "firstprinciples",
+      "description": "Breaking down to fundamental truths",
+      "notes": "Could be mapped to Decompositional + Analytical"
+    },
+    {
+      "mode": "scientificmethod",
+      "description": "Hypothesis testing, experiments, predictions",
+      "notes": "Could map to Abductive-Deductive combined"
+    },
+    {
+      "mode": "synthesis",
+      "description": "Literature synthesis and academic integration",
+      "notes": "Specialized academic mode"
+    },
+    {
+      "mode": "critique",
+      "description": "Peer review and critical analysis",
+      "notes": "Specialized academic mode"
+    },
+    {
+      "mode": "custom",
+      "description": "User-defined reasoning modes",
+      "notes": "Meta-mode for extensibility"
+    }
+  ],
+  "implementationPriorities": {
+    "high": [
+      "Statistical Reasoning",
+      "Spatial Reasoning",
+      "Visual Reasoning",
+      "Hypothetical Reasoning",
+      "Decompositional Reasoning",
+      "Heuristic Reasoning",
+      "Strategic Reasoning",
+      "Creative Reasoning",
+      "Lateral Reasoning",
+      "Divergent Reasoning",
+      "Convergent Reasoning",
+      "Dialectical Reasoning",
+      "Commonsense Reasoning",
+      "Moral/Ethical Reasoning",
+      "Case-Based Reasoning",
+      "Diagnostic Reasoning"
+    ],
+    "medium": [
+      "Monotonic Reasoning",
+      "Syllogistic Reasoning",
+      "Arithmetic Reasoning",
+      "Algebraic Reasoning",
+      "Geometric Reasoning",
+      "Quantitative Reasoning",
+      "Mechanistic Reasoning",
+      "Metaphorical Reasoning",
+      "Comparative Reasoning",
+      "Relational Reasoning",
+      "Evaluative Reasoning",
+      "Systematic Reasoning",
+      "Backwards Reasoning",
+      "Forward Reasoning",
+      "Means-End Reasoning",
+      "Associative Reasoning",
+      "Adversarial Reasoning",
+      "Rhetorical Reasoning",
+      "Social Reasoning",
+      "Pragmatic Reasoning",
+      "Practical Reasoning",
+      "Economic Reasoning",
+      "Categorical Reasoning",
+      "Conceptual Reasoning",
+      "Taxonomic Reasoning",
+      "Narrative Reasoning",
+      "Prognostic Reasoning",
+      "Epistemic Reasoning",
+      "Deontic Reasoning",
+      "Normative Reasoning",
+      "Fuzzy Logic Reasoning",
+      "Non-Monotonic Reasoning",
+      "Defeasible Reasoning",
+      "Adaptive Reasoning",
+      "Abductive-Deductive Reasoning",
+      "Inductive-Deductive Reasoning",
+      "Contextual Reasoning",
+      "Situated Reasoning",
+      "Domain-Specific Reasoning",
+      "Dual-Process Reasoning",
+      "Perceptual Reasoning",
+      "Parallel Reasoning"
+    ],
+    "low": [
+      "Transitive Reasoning",
+      "Paraconsistent Reasoning",
+      "Topological Reasoning",
+      "Teleological Reasoning",
+      "Intuitive Reasoning",
+      "Legal Reasoning",
+      "Political Reasoning",
+      "Reflexive Reasoning",
+      "Autoepistemic Reasoning",
+      "Descriptive Reasoning",
+      "Provisional Reasoning",
+      "Cultural Reasoning",
+      "Subsymbolic Reasoning",
+      "Counterfeit Detection Reasoning",
+      "Reductive Reasoning",
+      "Emergent Reasoning",
+      "Distributed Reasoning",
+      "Embodied Reasoning"
+    ]
+  },
+  "suggestedPhases": [
+    {
+      "phase": 1,
+      "name": "Core Reasoning Extensions",
+      "modes": ["statistical", "spatial", "hypothetical", "decompositional", "heuristic"],
+      "estimatedModes": 5,
+      "rationale": "High priority, lower complexity modes that extend existing foundations"
+    },
+    {
+      "phase": 2,
+      "name": "Creative & Divergent Suite",
+      "modes": ["creative", "lateral", "divergent", "convergent", "associative"],
+      "estimatedModes": 5,
+      "rationale": "Complete creative reasoning category - high demand for innovation support"
+    },
+    {
+      "phase": 3,
+      "name": "Strategic & Dialectical",
+      "modes": ["strategic", "dialectical", "adversarial", "rhetorical"],
+      "estimatedModes": 4,
+      "rationale": "Strategic planning and argumentation enhancement"
+    },
+    {
+      "phase": 4,
+      "name": "Practical & Social Reasoning",
+      "modes": ["commonsense", "moral", "practical", "pragmatic", "social"],
+      "estimatedModes": 5,
+      "rationale": "Real-world reasoning and ethical considerations"
+    },
+    {
+      "phase": 5,
+      "name": "Specialized Analytical",
+      "modes": ["casebased", "diagnostic", "prognostic", "narrative", "categorical"],
+      "estimatedModes": 5,
+      "rationale": "Domain-specific analytical capabilities"
+    },
+    {
+      "phase": 6,
+      "name": "Mathematical Extensions",
+      "modes": ["arithmetic", "algebraic", "geometric", "quantitative"],
+      "estimatedModes": 4,
+      "rationale": "Complete mathematical reasoning suite"
+    },
+    {
+      "phase": 7,
+      "name": "Logic Extensions",
+      "modes": ["symbolic", "propositional", "predicate", "syllogistic", "monotonic"],
+      "estimatedModes": 5,
+      "rationale": "Complete formal logic suite"
+    },
+    {
+      "phase": 8,
+      "name": "Uncertainty & Adaptation",
+      "modes": ["fuzzy", "nonmonotonic", "defeasible", "adaptive"],
+      "estimatedModes": 4,
+      "rationale": "Handle uncertainty and dynamic reasoning"
+    },
+    {
+      "phase": 9,
+      "name": "Combined & Hybrid Patterns",
+      "modes": ["abductivedeductive", "inductivedeductive", "integrative", "multimodal"],
+      "estimatedModes": 4,
+      "rationale": "Explicit hybrid reasoning patterns"
+    },
+    {
+      "phase": 10,
+      "name": "Contextual & Situated",
+      "modes": ["contextual", "situated", "cultural", "domainspecific"],
+      "estimatedModes": 4,
+      "rationale": "Context-aware reasoning"
+    },
+    {
+      "phase": 11,
+      "name": "Epistemic & Normative",
+      "modes": ["epistemic", "deontic", "normative", "descriptive"],
+      "estimatedModes": 4,
+      "rationale": "Knowledge and obligation reasoning"
+    },
+    {
+      "phase": 12,
+      "name": "Advanced & Emerging",
+      "modes": ["visual", "perceptual", "dualprocess", "parallel"],
+      "estimatedModes": 4,
+      "rationale": "Cutting-edge reasoning approaches"
+    },
+    {
+      "phase": 13,
+      "name": "Remaining Types",
+      "modes": ["remaining low-priority types"],
+      "estimatedModes": 20,
+      "rationale": "Complete coverage of all 110 types"
+    }
+  ]
+}

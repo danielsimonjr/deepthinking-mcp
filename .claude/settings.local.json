@@ -125,7 +125,8 @@
       "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" --help)",
       "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\":*)",
       "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" split \"C:/mcp-servers/deepthinking-mcp/docs/reference/Types of Thinking and Reasonings - Expanded 2.0.md\" -l 1 --dry-run)",
-      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" split \"C:/mcp-servers/deepthinking-mcp/docs/reference/Types of Thinking and Reasonings - Expanded.md\" -l 1 --dry-run)"
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" split \"C:/mcp-servers/deepthinking-mcp/docs/reference/Types of Thinking and Reasonings - Expanded.md\" -l 1 --dry-run)",
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" split \"C:/mcp-servers/deepthinking-mcp/docs/reference/Types of Thinking and Reasonings.md\" -l 3 --dry-run)"
     ],
     "deny": [],
     "ask": []

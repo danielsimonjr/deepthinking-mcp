@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **33 reasoning modes** (29 with dedicated thought types) with taxonomy-based classification (69 reasoning types across 12 categories, 110 planned), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
+DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **33 reasoning modes** (29 with dedicated thought types) with taxonomy-based classification (69 implemented reasoning types across 12 categories, 110 documented in reference), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
 **Version**: 8.5.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
 
@@ -101,7 +101,7 @@ src/
 │   └── modes/         # One file per reasoning mode (32 files)
 ├── services/          # Business logic layer
 ├── session/           # SessionManager, persistence, storage abstraction
-├── taxonomy/          # 69 reasoning types (110 planned), classifier
+├── taxonomy/          # 69 reasoning types (110 documented in reference), classifier
 ├── export/            # Visual and document exporters
 │   └── visual/        # Per-mode visual exporters (Mermaid, DOT, ASCII, SVG)
 ├── proof/             # Proof decomposition system (6 modules: decomposer, gap-analyzer, assumption-tracker, inconsistency-detector, circular-detector, dependency-graph)
@@ -391,6 +391,15 @@ Mode-specific documentation in `docs/modes/`:
 - `ARGUMENTATION.md` - Academic argumentation documentation
 - `CRITIQUE.md` - Critical analysis mode guide
 - `ANALYSIS.md` - Qualitative analysis documentation
+
+Analysis and planning in `docs/analysis/`:
+
+- `REASONING_TYPES_GAP_ANALYSIS.md` - Gap analysis: 110 documented types vs 33 implemented modes
+- `reasoning-types-gap-analysis.json` - Machine-readable analysis with priority ratings
+
+Reference documentation in `docs/reference/`:
+
+- `Types of Thinking and Reasonings.md` - Unified taxonomy of 110 reasoning types in 18 categories
 
 Generate dependency docs: `npm run docs:deps`
 
