@@ -821,8 +821,9 @@ Before submitting your new mode, verify:
 - [ ] Type guard created and exported
 
 **Validation**
-- [ ] Zod schema created in `src/validation/schemas.ts`
 - [ ] Validator created in `src/validation/validators/modes/yourmode.ts`
+- [ ] Validator implements `BaseValidator<YourModeThought>`
+- [ ] Validator `getMode()` and `validate()` methods implemented
 
 **ModeHandler (v8.x)**
 - [ ] Handler created in `src/modes/handlers/YourModeHandler.ts`
