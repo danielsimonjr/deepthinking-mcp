@@ -1,0 +1,198 @@
+{
+  "phase": 14,
+  "sprint": 3,
+  "title": "Low-Risk + Integration + Coverage Verification",
+  "effort": "5-6 hours",
+  "status": "not-started",
+  "coverageTarget": ">90%",
+  "description": "Add test coverage for remaining validators (130 lines), create comprehensive integration tests for all 10 validators, and perform final coverage verification. Target >90% overall validator coverage.",
+  "tasks": [
+    {
+      "id": "14.3.1",
+      "category": "Stochastic Validator Tests",
+      "description": "Add tests for stochastic.ts (83 lines, ~10 error paths)",
+      "status": "not-started",
+      "estimatedHours": 1.25,
+      "priority": "medium",
+      "risk": "MEDIUM",
+      "privateMethods": [
+        "validateDistribution()",
+        "validateMarkovChain()",
+        "validateStateTransitions()",
+        "validateSimulation()"
+      ],
+      "details": [
+        "Create tests/unit/validation/validators/modes/stochastic.test.ts",
+        "describe('validate') - test main entry point",
+        "describe('validateDistribution') - 8+ tests:",
+        "  - Valid 'normal' distribution with mean/stdDev passes",
+        "  - Valid 'uniform' distribution with min/max passes",
+        "  - Valid 'exponential' distribution with rate passes",
+        "  - Valid 'poisson' distribution with lambda passes",
+        "  - Valid 'binomial' distribution with n/p passes",
+        "  - Invalid distribution type triggers error",
+        "  - Missing required parameters triggers error",
+        "  - Negative standard deviation triggers error",
+        "describe('validateMarkovChain') - 6+ tests:",
+        "  - Valid Markov chain passes",
+        "  - Transition matrix rows not summing to 1 triggers error",
+        "  - Non-square transition matrix triggers error",
+        "  - Missing initial state distribution triggers error",
+        "  - Valid ergodic chain passes",
+        "describe('validateStateTransitions') - 5+ tests:",
+        "  - Valid transition probabilities pass",
+        "  - Probability < 0 triggers error",
+        "  - Probability > 1 triggers error",
+        "  - Transition to unknown state triggers error",
+        "describe('validateSimulation') - 4+ tests:",
+        "  - Valid simulation config passes",
+        "  - Zero iterations triggers error",
+        "  - Negative seed triggers warning"
+      ],
+      "errorPaths": 10,
+      "warningPaths": 2,
+      "files": [
+        "tests/unit/validation/validators/modes/stochastic.test.ts"
+      ],
+      "sourceFile": "src/validation/validators/modes/stochastic.ts",
+      "estimatedTests": 28,
+      "notes": "Validate probability distributions and stochastic process definitions. Probability bounds [0,1] are critical."
+    },
+    {
+      "id": "14.3.2",
+      "category": "Modal Validator Tests",
+      "description": "Add tests for modal.ts (47 lines, ~6 error paths)",
+      "status": "not-started",
+      "estimatedHours": 0.75,
+      "priority": "low",
+      "risk": "LOW",
+      "privateMethods": [
+        "validateModalOperator()",
+        "validatePossibleWorlds()",
+        "validateAccessibility()"
+      ],
+      "details": [
+        "Create tests/unit/validation/validators/modes/modal.test.ts",
+        "describe('validate') - test main entry point",
+        "describe('validateModalOperator') - 5+ tests:",
+        "  - Valid 'box' (necessity) operator passes",
+        "  - Valid 'diamond' (possibility) operator passes",
+        "  - Unknown modal operator triggers error",
+        "  - Nested modal operators pass",
+        "describe('validatePossibleWorlds') - 4+ tests:",
+        "  - Valid possible world passes",
+        "  - Empty world set triggers error",
+        "  - Duplicate world IDs trigger error",
+        "describe('validateAccessibility') - 4+ tests:",
+        "  - Valid accessibility relation passes",
+        "  - Reflexive relation in S5 passes",
+        "  - Accessibility to unknown world triggers error",
+        "  - Empty accessibility (isolated world) triggers warning"
+      ],
+      "errorPaths": 6,
+      "warningPaths": 1,
+      "files": [
+        "tests/unit/validation/validators/modes/modal.test.ts"
+      ],
+      "sourceFile": "src/validation/validators/modes/modal.ts",
+      "estimatedTests": 18,
+      "notes": "Smallest validator. Focus on modal logic operator validation (box/diamond) and possible world accessibility."
+    },
+    {
+      "id": "14.3.3",
+      "category": "Comprehensive Integration Tests",
+      "description": "Add integration tests for all 10 validators with MCP tools and ThoughtFactory",
+      "status": "not-started",
+      "estimatedHours": 2.0,
+      "priority": "high",
+      "risk": "MEDIUM",
+      "details": [
+        "Create tests/integration/validators/mode-validators.test.ts",
+        "describe('Validator Integration with ThoughtFactory') - 10+ tests:",
+        "  - Each of 10 validators integrates with ThoughtFactory.create()",
+        "  - Invalid inputs are caught before thought creation",
+        "  - Valid inputs result in proper thought objects",
+        "describe('Validator Error Message Quality') - 10+ tests:",
+        "  - All error messages include field path",
+        "  - All error messages include expected value hint",
+        "  - All error messages include category (structural/logical)",
+        "  - All warnings are distinct from errors",
+        "describe('Cross-Validator Consistency') - 6+ tests:",
+        "  - All validators use consistent error format",
+        "  - All validators use consistent field naming",
+        "  - All validators return ValidationIssue[] format",
+        "  - All validators call validateCommon()",
+        "describe('Real-World Input Scenarios') - 10+ tests:",
+        "  - Test with actual MCP tool inputs for each validator",
+        "  - Test edge cases from production usage patterns",
+        "  - Test rapid successive validations (no state leakage)",
+        "describe('Boundary Value Analysis') - 8+ tests:",
+        "  - Test all 0/1 boundaries for probability fields",
+        "  - Test empty arrays vs single-element arrays",
+        "  - Test maximum depth/iteration limits"
+      ],
+      "files": [
+        "tests/integration/validators/mode-validators.test.ts"
+      ],
+      "estimatedTests": 45,
+      "notes": "Integration tests verify validators work correctly with ThoughtFactory and MCP tool pipeline. Focus on error message quality and cross-validator consistency."
+    },
+    {
+      "id": "14.3.4",
+      "category": "Coverage Verification & Documentation",
+      "description": "Run coverage report, verify >90% target, update documentation",
+      "status": "not-started",
+      "estimatedHours": 1.0,
+      "priority": "high",
+      "risk": "LOW",
+      "details": [
+        "Run npm run test:coverage",
+        "Verify validation/validators/modes/ statement coverage >= 90%",
+        "Verify validation/validators/modes/ branch coverage >= 90%",
+        "Verify overall project coverage >= 75%",
+        "Identify any remaining uncovered lines",
+        "Add targeted tests for any gaps found",
+        "Update PHASE_14_INDEX.json with final metrics:",
+        "  - Actual test count",
+        "  - Actual coverage percentages",
+        "  - Completion date",
+        "Update CHANGELOG.md with Phase 14 completion",
+        "Update CLAUDE.md if validator coverage metrics mentioned",
+        "Create coverage summary table for all 10 validators"
+      ],
+      "files": [
+        "docs/planning/PHASE_14_INDEX.json",
+        "CHANGELOG.md",
+        "CLAUDE.md"
+      ],
+      "estimatedTests": 0,
+      "coverageVerification": true,
+      "notes": "Final verification step. If coverage < 90% after all tests, identify specific uncovered lines and add targeted tests."
+    }
+  ],
+  "successCriteria": [
+    "All 10 validator test files created and passing",
+    "Integration test file created and passing",
+    "350+ total tests across Phase 14",
+    "validation/validators/modes/ statement coverage >= 90%",
+    "validation/validators/modes/ branch coverage >= 90%",
+    "Overall project coverage >= 75%",
+    "All npm run test:run passes",
+    "Documentation updated with final metrics"
+  ],
+  "filesCreated": [
+    "tests/unit/validation/validators/modes/stochastic.test.ts",
+    "tests/unit/validation/validators/modes/modal.test.ts",
+    "tests/integration/validators/mode-validators.test.ts"
+  ],
+  "filesModified": [
+    "docs/planning/PHASE_14_INDEX.json",
+    "CHANGELOG.md",
+    "CLAUDE.md"
+  ],
+  "totalEstimatedHours": 5.0,
+  "totalEstimatedTests": 91,
+  "totalErrorPaths": 16,
+  "totalWarningPaths": 3,
+  "notes": "Sprint 3 completes the remaining validators (stochastic, modal) and adds comprehensive integration testing. The coverage verification task is critical - if <90% coverage is achieved, additional targeted tests must be added before Sprint 3 can be marked complete."
+}

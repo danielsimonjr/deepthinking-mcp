@@ -1,0 +1,148 @@
+{
+  "phase": 14,
+  "title": "Validator Test Coverage",
+  "description": "Add comprehensive test coverage for 10 zero-coverage validators identified in December 2025 Codebase Analysis. These validators contain 2,093 lines of untested validation logic - a critical gap in the test suite. Target: >90% branch coverage through exhaustive method-level and path testing.",
+  "totalSprints": 3,
+  "totalTasks": 12,
+  "totalEstimatedHours": 18,
+  "status": "not-started",
+  "priority": "CRITICAL",
+  "sourceDocument": "../analysis/December_2025_Codebase_Analysis.md",
+  "coverageTarget": ">90%",
+  "sprints": [
+    {
+      "sprint": 1,
+      "title": "High-Risk Validators",
+      "focus": "computability.ts, metareasoning.ts, optimization.ts, cryptanalytic.ts",
+      "tasks": 4,
+      "hours": 7.25,
+      "file": "PHASE_14_SPRINT_1_TODO.json",
+      "status": "not-started",
+      "estimatedTests": 155,
+      "totalLines": 1608,
+      "errorPaths": 78,
+      "warningPaths": 8,
+      "privateMethods": 23
+    },
+    {
+      "sprint": 2,
+      "title": "Medium-Risk Validators",
+      "focus": "constraint.ts, deductive.ts, inductive.ts, recursive.ts",
+      "tasks": 4,
+      "hours": 5.0,
+      "file": "PHASE_14_SPRINT_2_TODO.json",
+      "status": "not-started",
+      "estimatedTests": 100,
+      "totalLines": 355,
+      "errorPaths": 40,
+      "warningPaths": 9,
+      "privateMethods": 15
+    },
+    {
+      "sprint": 3,
+      "title": "Low-Risk + Integration + Verification",
+      "focus": "stochastic.ts, modal.ts, integration tests, coverage verification",
+      "tasks": 4,
+      "hours": 5.0,
+      "file": "PHASE_14_SPRINT_3_TODO.json",
+      "status": "not-started",
+      "estimatedTests": 91,
+      "totalLines": 130,
+      "errorPaths": 16,
+      "warningPaths": 3,
+      "privateMethods": 7
+    }
+  ],
+  "validators": {
+    "computability": { "lines": 531, "risk": "HIGH", "sprint": 1, "status": "not-started", "estimatedTests": 35 },
+    "metareasoning": { "lines": 370, "risk": "HIGH", "sprint": 1, "status": "not-started", "estimatedTests": 28 },
+    "optimization": { "lines": 351, "risk": "HIGH", "sprint": 1, "status": "not-started", "estimatedTests": 32 },
+    "cryptanalytic": { "lines": 356, "risk": "HIGH", "sprint": 1, "status": "not-started", "estimatedTests": 25 },
+    "constraint": { "lines": 68, "risk": "MEDIUM", "sprint": 2, "status": "not-started", "estimatedTests": 18 },
+    "deductive": { "lines": 104, "risk": "MEDIUM", "sprint": 2, "status": "not-started", "estimatedTests": 22 },
+    "inductive": { "lines": 90, "risk": "MEDIUM", "sprint": 2, "status": "not-started", "estimatedTests": 20 },
+    "recursive": { "lines": 93, "risk": "MEDIUM", "sprint": 2, "status": "not-started", "estimatedTests": 20 },
+    "stochastic": { "lines": 83, "risk": "MEDIUM", "sprint": 3, "status": "not-started", "estimatedTests": 20 },
+    "modal": { "lines": 47, "risk": "LOW", "sprint": 3, "status": "not-started", "estimatedTests": 15 }
+  },
+  "targetMetrics": {
+    "validatorCoverage": { "current": "37.44%", "target": ">90%", "status": "not-started" },
+    "branchCoverage": { "current": "unknown", "target": ">90%", "status": "not-started" },
+    "overallCoverage": { "current": "56.78%", "target": "75%+", "status": "not-started" },
+    "newTests": { "current": 0, "target": 350, "status": "not-started" },
+    "untestedLines": { "current": 2093, "target": 0, "status": "not-started" }
+  },
+  "successCriteria": [
+    "validation/validators/modes/ statement coverage reaches >90%",
+    "validation/validators/modes/ branch coverage reaches >90%",
+    "Overall test coverage reaches 75%+",
+    "350+ new tests pass",
+    "All 10 validators have dedicated test files",
+    "Every private validation method has explicit tests",
+    "Every error/warning path is triggered by at least one test",
+    "Integration tests verify MCP tool compatibility",
+    "Error messages are descriptive and actionable"
+  ],
+  "testFileStructure": [
+    "tests/unit/validation/validators/modes/computability.test.ts",
+    "tests/unit/validation/validators/modes/metareasoning.test.ts",
+    "tests/unit/validation/validators/modes/optimization.test.ts",
+    "tests/unit/validation/validators/modes/cryptanalytic.test.ts",
+    "tests/unit/validation/validators/modes/constraint.test.ts",
+    "tests/unit/validation/validators/modes/deductive.test.ts",
+    "tests/unit/validation/validators/modes/inductive.test.ts",
+    "tests/unit/validation/validators/modes/recursive.test.ts",
+    "tests/unit/validation/validators/modes/stochastic.test.ts",
+    "tests/unit/validation/validators/modes/modal.test.ts",
+    "tests/integration/validators/mode-validators.test.ts"
+  ],
+  "testCategories": [
+    "Valid Inputs - correctly formatted inputs that should pass (5-10 per validator)",
+    "Invalid Inputs - malformed inputs that should fail (5-10 per validator)",
+    "Edge Cases - boundary conditions, empty arrays, etc. (3-5 per validator)",
+    "Type Coercion - string-to-number, null handling (2-3 per validator)",
+    "Optional Fields - missing optional fields should pass (2-3 per validator)",
+    "Required Fields - missing required fields should fail (3-5 per validator)",
+    "Error Messages - verify descriptive error output (2-3 per validator)",
+    "Method Coverage - explicit tests for each private validation method (1-3 per method)",
+    "Branch Coverage - test both true/false paths of every conditional (2-4 per branch)",
+    "Warning Paths - trigger warning-level issues distinct from errors (1-2 per validator)",
+    "Nested Object Validation - test validation of nested structures (3-5 per validator)",
+    "Combination Testing - test valid combinations of optional fields (2-3 per validator)"
+  ],
+  "coverageStrategies": [
+    {
+      "strategy": "Method-Level Testing",
+      "description": "Each private method (validateX) gets dedicated test block",
+      "example": "describe('validateTuringMachine') with 10-15 tests"
+    },
+    {
+      "strategy": "Error Path Enumeration",
+      "description": "Identify every issues.push() call and create test to trigger it",
+      "example": "For computability.ts, count ~25 error paths to cover"
+    },
+    {
+      "strategy": "Branch Coverage Analysis",
+      "description": "Test both paths of if/else, for loop entry/skip, early returns",
+      "example": "if (machine.type === 'deterministic') - test both DTM and NTM"
+    },
+    {
+      "strategy": "Nested Object Drilling",
+      "description": "Test nested structures like TuringMachine.transitions[].fromState",
+      "example": "Invalid transition.readSymbol triggers specific error"
+    },
+    {
+      "strategy": "Warning vs Error Distinction",
+      "description": "Some validators issue warnings (severity: 'warning'), test these separately",
+      "example": "Empty transitions array triggers warning, not error"
+    }
+  ],
+  "risks": [
+    { "risk": "Complex Zod schemas hard to test", "impact": "MEDIUM", "mitigation": "Use .safeParse() for detailed error inspection" },
+    { "risk": "Missing edge cases", "impact": "MEDIUM", "mitigation": "Review validator source code for all branches" },
+    { "risk": "Tests too tightly coupled", "impact": "LOW", "mitigation": "Use realistic but generic test data" },
+    { "risk": "Time overrun", "impact": "MEDIUM", "mitigation": "Prioritize HIGH-risk validators first" }
+  ],
+  "dependencies": [],
+  "notes": "Phase 14 addresses the CRITICAL test coverage gap identified in December 2025 Codebase Analysis. The 10 validators at 0% coverage represent 2,093 lines of untested validation logic. This phase is Priority 1 from the analysis recommendations."
+}
