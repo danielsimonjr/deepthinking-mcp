@@ -15,12 +15,8 @@
       "estimatedHours": 1.25,
       "priority": "medium",
       "risk": "MEDIUM",
-      "privateMethods": [
-        "validateDistribution()",
-        "validateMarkovChain()",
-        "validateStateTransitions()",
-        "validateSimulation()"
-      ],
+      "privateMethods": [],
+      "actualImplementation": "Inline validation only - checks distribution object structure, uncertainty quantification, and stochastic keywords in content",
       "details": [
         "Create tests/unit/validation/validators/modes/stochastic.test.ts",
         "describe('validate') - test main entry point",
@@ -66,11 +62,8 @@
       "estimatedHours": 0.75,
       "priority": "low",
       "risk": "LOW",
-      "privateMethods": [
-        "validateModalOperator()",
-        "validatePossibleWorlds()",
-        "validateAccessibility()"
-      ],
+      "privateMethods": [],
+      "actualImplementation": "Inline validation only - keyword-based checks for modal operators (necessarily, possibly, must, etc.) and world references in content",
       "details": [
         "Create tests/unit/validation/validators/modes/modal.test.ts",
         "describe('validate') - test main entry point",
