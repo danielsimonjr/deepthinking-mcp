@@ -1,0 +1,172 @@
+{
+  "phase": "15D",
+  "sprint": 11,
+  "title": "Add Game Theory Computation",
+  "week": "Week 11",
+  "effort": "6-7 hours",
+  "status": "pending",
+  "version": "9.0.0",
+  "description": "Make Game Theory mode actually solve games. Implement Nash equilibrium finder and dominant strategy elimination.",
+  "tasks": [
+    {
+      "id": "15D.11.1",
+      "category": "Algorithm",
+      "description": "Implement Nash Equilibrium Finder - Support enumeration algorithm for 2-player games.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 3.0,
+      "agent": "sonnet",
+      "files": {
+        "create": [
+          "src/algorithms/game-theory.ts"
+        ],
+        "modify": [
+          "src/modes/createThought.ts"
+        ]
+      },
+      "instructions": [
+        "Create src/algorithms/game-theory.ts",
+        "Implement findPureNashEquilibria(payoffMatrix) for pure strategy equilibria",
+        "Implement findMixedNashEquilibria(payoffMatrix) for 2x2 games",
+        "Add support for n×m matrices using support enumeration",
+        "Integrate with createThought gametheory case",
+        "Add unit tests for equilibrium finding",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "game-theory.ts created",
+        "Pure Nash equilibria found correctly",
+        "Mixed equilibria for 2x2 games",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Delete game-theory.ts, revert createThought changes"
+    },
+    {
+      "id": "15D.11.2",
+      "category": "Algorithm",
+      "description": "Implement Dominant Strategy Elimination - Iterative elimination of dominated strategies.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "haiku",
+      "files": {
+        "modify": [
+          "src/algorithms/game-theory.ts"
+        ]
+      },
+      "instructions": [
+        "Implement findDominantStrategies(payoffMatrix)",
+        "Detect strictly dominated strategies",
+        "Detect weakly dominated strategies",
+        "Implement iterative elimination (IESDS)",
+        "Return eliminated strategies and final game",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "Dominant strategy detection works",
+        "IESDS implemented correctly",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Remove dominant strategy code"
+    },
+    {
+      "id": "15D.11.3",
+      "category": "Algorithm",
+      "description": "Add Simple Game Solvers - Prisoner's Dilemma detection, zero-sum minimax, cooperative solutions.",
+      "status": "pending",
+      "priority": "medium",
+      "estimatedHours": 2.0,
+      "agent": "sonnet",
+      "files": {
+        "modify": [
+          "src/algorithms/game-theory.ts"
+        ]
+      },
+      "instructions": [
+        "Implement detectGameType(payoffMatrix) - Prisoner's Dilemma, Chicken, Coordination, etc.",
+        "Implement solveZeroSum(payoffMatrix) using minimax",
+        "Implement computeShapleyValue(coalition) for cooperative games",
+        "Add game classification heuristics",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "Game type detection implemented",
+        "Minimax for zero-sum games",
+        "Shapley value computation",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Remove game solver code"
+    },
+    {
+      "id": "15D.11.4",
+      "category": "Testing",
+      "description": "Add Game Theory Algorithm Tests - Tests for equilibrium finding and game solving.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "haiku",
+      "files": {
+        "create": [
+          "tests/unit/algorithms/game-theory.test.ts"
+        ]
+      },
+      "instructions": [
+        "Create test file for game-theory.ts",
+        "Test with classic games: Prisoner's Dilemma, Battle of Sexes, Matching Pennies",
+        "Test Nash equilibrium computation",
+        "Test dominant strategy elimination",
+        "Test minimax for zero-sum games",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "game-theory.test.ts created",
+        "Classic games solved correctly",
+        "All algorithms verified",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Delete game-theory.test.ts"
+    },
+    {
+      "id": "15D.11.5",
+      "category": "Verification",
+      "description": "Sprint 11 Verification - Run full test suite, create commit.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "sonnet",
+      "files": {
+        "verify": [
+          "All modified files"
+        ],
+        "modify": [
+          "docs/planning/PHASE_15D_SPRINT_11_TODO.json"
+        ]
+      },
+      "instructions": [
+        "Run npm run typecheck - must pass with 0 errors",
+        "Run npm run test:run - all tests must pass",
+        "Run npm run build - must complete successfully",
+        "Create git commit: 'feat(v9.0.0): Phase 15D Sprint 11 - Add Game Theory Computation'",
+        "Update this TODO file with actual hours and completion status"
+      ],
+      "successCriteria": [
+        "All tasks 15D.11.1-15D.11.4 complete",
+        "Build passes",
+        "All tests pass",
+        "Git commit created"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "Nash equilibrium finder implemented",
+    "Dominant strategy elimination works",
+    "Simple game solvers added",
+    "Comprehensive tests for algorithms"
+  ],
+  "expectedAddition": {
+    "linesOfCode": 400,
+    "algorithms": 5,
+    "testCases": 30
+  },
+  "notes": "Sprint 11 adds REAL computation to Game Theory mode. Previously it just copied payoff matrices. Now it actually finds Nash equilibria and solves games."
+}

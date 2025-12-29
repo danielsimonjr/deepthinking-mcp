@@ -1,0 +1,148 @@
+{
+  "phase": "15B",
+  "sprint": 5,
+  "title": "Clean Up Handler Dependencies",
+  "week": "Week 5",
+  "effort": "5-6 hours",
+  "status": "pending",
+  "version": "9.0.0",
+  "description": "Remove handler-related infrastructure including ModeHandler interface, handler registration, and simplify ThoughtFactory.",
+  "tasks": [
+    {
+      "id": "15B.5.1",
+      "category": "Cleanup",
+      "description": "Remove ModeHandler Interface - Delete interface now that unified createThought exists.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "haiku",
+      "files": {
+        "delete": [
+          "src/modes/handlers/ModeHandler.ts"
+        ],
+        "modify": [
+          "All files importing ModeHandler interface"
+        ]
+      },
+      "instructions": [
+        "Search for all imports of ModeHandler interface",
+        "Remove or replace imports with createThought function",
+        "Delete src/modes/handlers/ModeHandler.ts",
+        "Run npm run typecheck"
+      ],
+      "successCriteria": [
+        "ModeHandler.ts deleted",
+        "No references to ModeHandler interface",
+        "Typecheck passes"
+      ],
+      "rollbackPlan": "Restore ModeHandler.ts from git"
+    },
+    {
+      "id": "15B.5.2",
+      "category": "Cleanup",
+      "description": "Remove Handler Registration - Delete registerAllHandlers and ModeHandlerRegistry singleton.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "haiku",
+      "files": {
+        "read": [
+          "src/modes/handlers/ModeHandlerRegistry.ts"
+        ],
+        "delete": [
+          "src/modes/handlers/ModeHandlerRegistry.ts"
+        ],
+        "modify": [
+          "src/services/ThoughtFactory.ts",
+          "src/index.ts"
+        ]
+      },
+      "instructions": [
+        "Search for all uses of ModeHandlerRegistry",
+        "Replace registry calls with direct createThought calls",
+        "Delete ModeHandlerRegistry.ts",
+        "Update ThoughtFactory to use createThought directly",
+        "Run npm run typecheck"
+      ],
+      "successCriteria": [
+        "ModeHandlerRegistry.ts deleted",
+        "No singleton pattern for handlers",
+        "Typecheck passes"
+      ],
+      "rollbackPlan": "Restore ModeHandlerRegistry.ts from git"
+    },
+    {
+      "id": "15B.5.3",
+      "category": "Simplification",
+      "description": "Simplify ThoughtFactory - Reduce from 873 lines to ~100 lines by delegating to createThought.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 2.0,
+      "agent": "sonnet",
+      "files": {
+        "read": [
+          "src/services/ThoughtFactory.ts"
+        ],
+        "modify": [
+          "src/services/ThoughtFactory.ts"
+        ]
+      },
+      "instructions": [
+        "Remove switch statement for mode dispatch (use createThought)",
+        "Remove registry integration code",
+        "Remove handler instantiation code",
+        "Keep only validation and createThought delegation",
+        "Optionally merge remaining logic into index.ts handlers",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "ThoughtFactory reduced to ~100 lines",
+        "Delegates to createThought function",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Revert ThoughtFactory.ts changes"
+    },
+    {
+      "id": "15B.5.4",
+      "category": "Verification",
+      "description": "Sprint 5 Verification - Run full test suite, create commit.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "sonnet",
+      "files": {
+        "verify": [
+          "All modified files"
+        ],
+        "modify": [
+          "docs/planning/PHASE_15B_SPRINT_5_TODO.json"
+        ]
+      },
+      "instructions": [
+        "Run npm run typecheck - must pass with 0 errors",
+        "Run npm run test:run - all tests must pass",
+        "Run npm run build - must complete successfully",
+        "Create git commit: 'refactor(v9.0.0): Phase 15B Sprint 5 - Clean Up Handler Dependencies'",
+        "Update this TODO file with actual hours and completion status"
+      ],
+      "successCriteria": [
+        "All tasks 15B.5.1-15B.5.3 complete",
+        "Build passes",
+        "All tests pass",
+        "Git commit created"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "ModeHandler interface deleted",
+    "ModeHandlerRegistry deleted",
+    "ThoughtFactory simplified to ~100 lines",
+    "All tests pass"
+  ],
+  "expectedReduction": {
+    "linesOfCode": 1500,
+    "files": 2,
+    "classes": 2
+  },
+  "notes": "Sprint 5 removes the infrastructure that supported the handler pattern. With createThought in place, the registry and interface are no longer needed."
+}

@@ -1,0 +1,120 @@
+{
+  "phase": "15B",
+  "sprint": 6,
+  "title": "Handler Test Migration",
+  "week": "Week 6",
+  "effort": "4-5 hours",
+  "status": "pending",
+  "version": "9.0.0",
+  "description": "Update tests to use new unified handler. Migrate unit and integration tests to test createThought function.",
+  "tasks": [
+    {
+      "id": "15B.6.1",
+      "category": "Testing",
+      "description": "Update Unit Tests - Migrate handler unit tests to test createThought function.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 2.0,
+      "agent": "sonnet",
+      "files": {
+        "read": [
+          "tests/unit/modes/handlers/*.ts"
+        ],
+        "modify": [
+          "tests/unit/modes/handlers/*.ts"
+        ],
+        "delete": [
+          "tests/unit/modes/handlers/*Handler.test.ts"
+        ],
+        "create": [
+          "tests/unit/modes/createThought.test.ts"
+        ]
+      },
+      "instructions": [
+        "Create new test file for createThought function",
+        "Migrate test cases from individual handler tests",
+        "Group tests by mode category (core, probabilistic, academic, etc.)",
+        "Remove obsolete handler-specific test files",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "createThought.test.ts created",
+        "All mode test cases migrated",
+        "Handler test files removed",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Restore handler test files from git"
+    },
+    {
+      "id": "15B.6.2",
+      "category": "Testing",
+      "description": "Update Integration Tests - Update integration tests to use createThought.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.5,
+      "agent": "haiku",
+      "files": {
+        "read": [
+          "tests/integration/*.ts"
+        ],
+        "modify": [
+          "tests/integration/*.ts"
+        ]
+      },
+      "instructions": [
+        "Identify integration tests that reference handlers",
+        "Update imports to use createThought",
+        "Update test assertions if needed",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "Integration tests updated",
+        "No references to deleted handlers",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Revert integration test changes"
+    },
+    {
+      "id": "15B.6.3",
+      "category": "Verification",
+      "description": "Sprint 6 Verification - Run full test suite, create commit.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "sonnet",
+      "files": {
+        "verify": [
+          "All modified files"
+        ],
+        "modify": [
+          "docs/planning/PHASE_15B_SPRINT_6_TODO.json"
+        ]
+      },
+      "instructions": [
+        "Run npm run typecheck - must pass with 0 errors",
+        "Run npm run test:run - all tests must pass",
+        "Run npm run build - must complete successfully",
+        "Create git commit: 'refactor(v9.0.0): Phase 15B Sprint 6 - Handler Test Migration'",
+        "Update this TODO file with actual hours and completion status"
+      ],
+      "successCriteria": [
+        "All tasks 15B.6.1-15B.6.2 complete",
+        "Build passes",
+        "All tests pass",
+        "Git commit created"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "Unit tests migrated to test createThought",
+    "Integration tests updated",
+    "Handler test files removed",
+    "Test count maintained (5,000+)"
+  ],
+  "expectedReduction": {
+    "linesOfCode": 500,
+    "files": 20,
+    "testCount": 0
+  },
+  "notes": "Sprint 6 ensures test coverage is maintained after handler consolidation. Test count should stay roughly the same, but test files are consolidated."
+}

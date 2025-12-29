@@ -1,0 +1,148 @@
+{
+  "phase": "15C",
+  "sprint": 7,
+  "title": "Consolidate Mode Types",
+  "week": "Week 7",
+  "effort": "6-7 hours",
+  "status": "pending",
+  "version": "9.0.0",
+  "description": "Reduce 374 types to ~100 by creating unified Thought type with discriminated union for mode-specific extensions.",
+  "tasks": [
+    {
+      "id": "15C.7.1",
+      "category": "Architecture",
+      "description": "Create Unified Thought Type - Replace 32 type files with single discriminated union type.",
+      "status": "pending",
+      "priority": "critical",
+      "estimatedHours": 2.0,
+      "agent": "sonnet",
+      "files": {
+        "read": [
+          "src/types/modes/*.ts",
+          "src/types/core.ts"
+        ],
+        "create": [
+          "src/types/thought.ts"
+        ]
+      },
+      "instructions": [
+        "Analyze all mode type files to identify common fields",
+        "Create BaseThought interface with common fields (id, mode, thought, etc.)",
+        "Create discriminated union with mode-specific extensions",
+        "Use intersection types: BaseThought & { mode: 'bayesian'; priorProbability?: number }",
+        "Ensure backward compatibility with existing type usage",
+        "Run npm run typecheck"
+      ],
+      "successCriteria": [
+        "thought.ts created with unified type",
+        "All 33 modes represented in union",
+        "Type-safe discriminated union",
+        "Typecheck passes"
+      ],
+      "rollbackPlan": "Delete thought.ts, keep existing type files"
+    },
+    {
+      "id": "15C.7.2",
+      "category": "Consolidation",
+      "description": "Merge Mode Type Files - Delete 32 individual mode type files, create mode-fields.ts.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 2.0,
+      "agent": "sonnet",
+      "files": {
+        "read": [
+          "src/types/modes/*.ts"
+        ],
+        "delete": [
+          "src/types/modes/*.ts"
+        ],
+        "create": [
+          "src/types/mode-fields.ts"
+        ]
+      },
+      "instructions": [
+        "Extract mode-specific field definitions from each type file",
+        "Create mode-fields.ts with field type definitions",
+        "Keep types that are actually complex (CausalNode, ProofStep, etc.)",
+        "Delete simple mode type files",
+        "Update src/types/index.ts exports",
+        "Run npm run typecheck"
+      ],
+      "successCriteria": [
+        "32 mode type files deleted",
+        "mode-fields.ts created",
+        "Complex types preserved",
+        "Typecheck passes"
+      ],
+      "rollbackPlan": "Restore mode type files from git"
+    },
+    {
+      "id": "15C.7.3",
+      "category": "Migration",
+      "description": "Update Type Imports - Update all files importing from src/types/modes/*.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.5,
+      "agent": "haiku",
+      "files": {
+        "modify": [
+          "All files importing from src/types/modes/*"
+        ]
+      },
+      "instructions": [
+        "Search for all imports from src/types/modes/",
+        "Update to import from src/types/thought.ts or src/types/mode-fields.ts",
+        "Update type annotations to use unified Thought type",
+        "Run npm run typecheck after each batch of changes"
+      ],
+      "successCriteria": [
+        "All imports updated",
+        "No references to deleted type files",
+        "Typecheck passes"
+      ],
+      "rollbackPlan": "Revert import changes"
+    },
+    {
+      "id": "15C.7.4",
+      "category": "Verification",
+      "description": "Sprint 7 Verification - Run full test suite, create commit.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "sonnet",
+      "files": {
+        "verify": [
+          "All modified files"
+        ],
+        "modify": [
+          "docs/planning/PHASE_15C_SPRINT_7_TODO.json"
+        ]
+      },
+      "instructions": [
+        "Run npm run typecheck - must pass with 0 errors",
+        "Run npm run test:run - all tests must pass",
+        "Run npm run build - must complete successfully",
+        "Create git commit: 'refactor(v9.0.0): Phase 15C Sprint 7 - Consolidate Mode Types'",
+        "Update this TODO file with actual hours and completion status"
+      ],
+      "successCriteria": [
+        "All tasks 15C.7.1-15C.7.3 complete",
+        "Build passes",
+        "All tests pass",
+        "Git commit created"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "Unified Thought type created",
+    "32 mode type files deleted",
+    "Type count reduced from 374 to ~150",
+    "All tests pass"
+  ],
+  "expectedReduction": {
+    "linesOfCode": 3000,
+    "files": 32,
+    "types": 200
+  },
+  "notes": "Sprint 7 targets the type system bloat. 32 separate type files become 2 consolidated files. The discriminated union pattern maintains type safety while reducing complexity."
+}

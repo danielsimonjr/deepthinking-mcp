@@ -1,0 +1,139 @@
+{
+  "phase": "15C",
+  "sprint": 9,
+  "title": "Type Test Updates",
+  "week": "Week 9",
+  "effort": "4-5 hours",
+  "status": "pending",
+  "version": "9.0.0",
+  "description": "Update tests to use new unified type system. Ensure type safety tests still pass.",
+  "tasks": [
+    {
+      "id": "15C.9.1",
+      "category": "Testing",
+      "description": "Update Type Unit Tests - Migrate type-related tests to use unified Thought type.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.5,
+      "agent": "haiku",
+      "files": {
+        "read": [
+          "tests/unit/types/**/*.ts"
+        ],
+        "modify": [
+          "tests/unit/types/**/*.ts"
+        ]
+      },
+      "instructions": [
+        "Update imports to use new type locations",
+        "Update type assertions to use unified Thought type",
+        "Update type guard tests to use consolidated guards",
+        "Remove tests for deleted types",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "Type tests updated",
+        "No references to deleted types",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Revert type test changes"
+    },
+    {
+      "id": "15C.9.2",
+      "category": "Testing",
+      "description": "Update Type Guard Tests - Ensure type guard tests work with consolidated guards.ts.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "haiku",
+      "files": {
+        "read": [
+          "tests/unit/types/guards.test.ts"
+        ],
+        "modify": [
+          "tests/unit/types/guards.test.ts"
+        ]
+      },
+      "instructions": [
+        "Update imports to use new guards.ts location",
+        "Remove tests for deleted guard functions",
+        "Add tests for any new consolidated guards",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "Guard tests updated",
+        "Coverage maintained for essential guards",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Revert guard test changes"
+    },
+    {
+      "id": "15C.9.3",
+      "category": "Testing",
+      "description": "Validate Type Inference - Ensure TypeScript correctly infers mode-specific fields.",
+      "status": "pending",
+      "priority": "medium",
+      "estimatedHours": 1.0,
+      "agent": "sonnet",
+      "files": {
+        "create": [
+          "tests/unit/types/inference.test.ts"
+        ]
+      },
+      "instructions": [
+        "Create tests that verify discriminated union narrowing works",
+        "Test that mode field properly narrows type to mode-specific fields",
+        "Test type assertions compile correctly",
+        "Verify no type errors in IDE for common patterns"
+      ],
+      "successCriteria": [
+        "Type inference tests created",
+        "Discriminated union narrowing verified",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Delete inference.test.ts"
+    },
+    {
+      "id": "15C.9.4",
+      "category": "Verification",
+      "description": "Sprint 9 Verification - Run full test suite, create commit.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "sonnet",
+      "files": {
+        "verify": [
+          "All modified files"
+        ],
+        "modify": [
+          "docs/planning/PHASE_15C_SPRINT_9_TODO.json"
+        ]
+      },
+      "instructions": [
+        "Run npm run typecheck - must pass with 0 errors",
+        "Run npm run test:run - all tests must pass",
+        "Run npm run build - must complete successfully",
+        "Create git commit: 'refactor(v9.0.0): Phase 15C Sprint 9 - Type Test Updates'",
+        "Update this TODO file with actual hours and completion status"
+      ],
+      "successCriteria": [
+        "All tasks 15C.9.1-15C.9.3 complete",
+        "Build passes",
+        "All tests pass",
+        "Git commit created"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "Type tests updated for unified system",
+    "Type guard tests consolidated",
+    "Type inference verified",
+    "Test count maintained"
+  ],
+  "expectedReduction": {
+    "linesOfCode": 200,
+    "files": 5,
+    "testCount": 0
+  },
+  "notes": "Sprint 9 ensures test coverage is maintained after type system simplification. Focus is on verifying the discriminated union works correctly for all use cases."
+}

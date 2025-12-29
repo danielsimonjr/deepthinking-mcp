@@ -1,0 +1,145 @@
+{
+  "phase": "15A",
+  "sprint": 3,
+  "title": "Clean Up Validation Layer",
+  "week": "Week 3",
+  "effort": "5-6 hours",
+  "status": "pending",
+  "version": "9.0.0",
+  "description": "Consolidate 50 validator files into unified validation approach. Replace inheritance with composition, inline Zod schema validation.",
+  "tasks": [
+    {
+      "id": "15A.3.1",
+      "category": "Architecture",
+      "description": "Create Unified Validator - Replace 35 mode validator files with single validator using mode-specific rules as config objects.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 2.0,
+      "agent": "sonnet",
+      "files": {
+        "read": [
+          "src/validation/validators/modes/*.ts",
+          "src/validation/validators/base.ts"
+        ],
+        "create": [
+          "src/validation/unified-validator.ts"
+        ]
+      },
+      "instructions": [
+        "Read all mode validators to identify common patterns",
+        "Create ValidationRule type for mode-specific checks",
+        "Create UnifiedValidator that applies rules based on mode",
+        "Move complex mode logic (Turing machine validation) to helper functions",
+        "Run npm run typecheck and npm run test:run"
+      ],
+      "successCriteria": [
+        "UnifiedValidator created",
+        "ValidationRule type defined",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Delete unified-validator.ts, keep existing validators"
+    },
+    {
+      "id": "15A.3.2",
+      "category": "Refactoring",
+      "description": "Remove BaseValidator Hierarchy - Replace inheritance with composition. Convert abstract class to utility functions.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "haiku",
+      "files": {
+        "read": [
+          "src/validation/validators/base.ts"
+        ],
+        "modify": [
+          "src/validation/validators/base.ts",
+          "src/validation/validators/modes/*.ts"
+        ]
+      },
+      "instructions": [
+        "Analyze BaseValidator to identify reusable methods",
+        "Convert inheritance to composition patterns",
+        "Update mode validators to use composition instead of extends",
+        "Run npm run typecheck"
+      ],
+      "successCriteria": [
+        "BaseValidator converted to utility functions",
+        "No more class inheritance in validators",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Revert base.ts and mode validator changes"
+    },
+    {
+      "id": "15A.3.3",
+      "category": "Cleanup",
+      "description": "Inline Zod Schema Validation - Use Zod .parse() as the only validation, remove duplicate manual checks.",
+      "status": "pending",
+      "priority": "medium",
+      "estimatedHours": 1.0,
+      "agent": "haiku",
+      "files": {
+        "read": [
+          "src/validation/schemas.ts",
+          "src/validation/schema-utils.ts"
+        ],
+        "modify": [
+          "src/validation/validators/modes/*.ts"
+        ]
+      },
+      "instructions": [
+        "Identify duplicate manual validation that Zod already handles",
+        "Replace manual checks with Zod .parse() calls",
+        "Remove redundant validation code",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "Duplicate validation removed",
+        "Zod is single source of truth for validation",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Revert mode validator changes"
+    },
+    {
+      "id": "15A.3.4",
+      "category": "Verification",
+      "description": "Sprint 3 Verification - Run full test suite, create commit, update documentation.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "sonnet",
+      "files": {
+        "verify": [
+          "All modified files"
+        ],
+        "modify": [
+          "docs/planning/PHASE_15A_SPRINT_3_TODO.json"
+        ]
+      },
+      "instructions": [
+        "Run npm run typecheck - must pass with 0 errors",
+        "Run npm run test:run - all tests must pass",
+        "Run npm run build - must complete successfully",
+        "Create git commit: 'refactor(v9.0.0): Phase 15A Sprint 3 - Clean Up Validation Layer'",
+        "Update this TODO file with actual hours and completion status"
+      ],
+      "successCriteria": [
+        "All tasks 15A.3.1-15A.3.3 complete",
+        "Build passes",
+        "All tests pass",
+        "Git commit created"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "UnifiedValidator replaces mode-specific validators",
+    "BaseValidator hierarchy removed",
+    "Zod is single validation source",
+    "All tests pass"
+  ],
+  "expectedReduction": {
+    "linesOfCode": 2000,
+    "files": 30,
+    "classes": 35
+  },
+  "notes": "Sprint 3 targets the validation layer which has 44 files for validation logic. The goal is to consolidate this into a unified approach using Zod schemas and composition over inheritance."
+}

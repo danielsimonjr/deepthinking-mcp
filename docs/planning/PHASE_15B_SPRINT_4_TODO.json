@@ -1,0 +1,208 @@
+{
+  "phase": "15B",
+  "sprint": 4,
+  "title": "Create Unified Handler Function",
+  "week": "Week 4",
+  "effort": "6-7 hours",
+  "status": "pending",
+  "version": "9.0.0",
+  "description": "Replace 36 handler files with single createThought function. Extract common patterns and mode-specific field helpers.",
+  "tasks": [
+    {
+      "id": "15B.4.1",
+      "category": "Architecture",
+      "description": "Create createThought Function - Single function with switch statement replacing 36 handler classes.",
+      "status": "pending",
+      "priority": "critical",
+      "estimatedHours": 2.0,
+      "agent": "sonnet",
+      "files": {
+        "read": [
+          "src/modes/handlers/*.ts"
+        ],
+        "create": [
+          "src/modes/createThought.ts"
+        ]
+      },
+      "instructions": [
+        "Analyze all 36 handlers to extract common pattern",
+        "Create createThought() function with switch statement for mode dispatch",
+        "Create helper functions for mode-specific field extraction",
+        "Implement base thought creation (id, timestamp, mode, common fields)",
+        "Verify all mode types are handled in switch",
+        "Run npm run typecheck"
+      ],
+      "successCriteria": [
+        "createThought.ts created with ~400 lines",
+        "All 33 modes handled",
+        "Type-safe implementation"
+      ],
+      "rollbackPlan": "Delete createThought.ts, keep existing handlers"
+    },
+    {
+      "id": "15B.4.2",
+      "category": "Migration",
+      "description": "Migrate Sequential/Shannon/Hybrid Handlers - Move standard workflow handler logic to createThought.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 0.75,
+      "agent": "haiku",
+      "files": {
+        "read": [
+          "src/modes/handlers/SequentialHandler.ts",
+          "src/modes/handlers/ShannonHandler.ts",
+          "src/modes/handlers/HybridHandler.ts"
+        ],
+        "modify": [
+          "src/modes/createThought.ts"
+        ]
+      },
+      "instructions": [
+        "Extract mode-specific fields from each handler",
+        "Add switch cases to createThought for sequential, shannon, hybrid",
+        "Create sequentialFields(), shannonFields(), hybridFields() helpers",
+        "Verify behavior matches original handlers",
+        "Run tests for these modes"
+      ],
+      "successCriteria": [
+        "3 handlers migrated",
+        "Tests pass for sequential/shannon/hybrid modes"
+      ],
+      "rollbackPlan": "Remove switch cases from createThought.ts"
+    },
+    {
+      "id": "15B.4.3",
+      "category": "Migration",
+      "description": "Migrate Causal/Bayesian/GameTheory Handlers - Move complex probabilistic handler logic to createThought.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "haiku",
+      "files": {
+        "read": [
+          "src/modes/handlers/CausalHandler.ts",
+          "src/modes/handlers/BayesianHandler.ts",
+          "src/modes/handlers/GameTheoryHandler.ts"
+        ],
+        "modify": [
+          "src/modes/createThought.ts"
+        ]
+      },
+      "instructions": [
+        "Extract mode-specific fields from each handler",
+        "Preserve any computation logic (posterior calculation, equilibrium finding)",
+        "Add switch cases to createThought",
+        "Create causalFields(), bayesianFields(), gameTheoryFields() helpers",
+        "Run tests for these modes"
+      ],
+      "successCriteria": [
+        "3 handlers migrated",
+        "Computation logic preserved",
+        "Tests pass for causal/bayesian/gametheory modes"
+      ],
+      "rollbackPlan": "Remove switch cases from createThought.ts"
+    },
+    {
+      "id": "15B.4.4",
+      "category": "Migration",
+      "description": "Migrate Remaining 30 Handlers - Systematically migrate all remaining mode handlers.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 2.0,
+      "agent": "sonnet",
+      "files": {
+        "read": [
+          "src/modes/handlers/*.ts"
+        ],
+        "modify": [
+          "src/modes/createThought.ts"
+        ]
+      },
+      "instructions": [
+        "Group similar handlers: Academic (4), Engineering (4), Analytical (4), etc.",
+        "Migrate each group systematically",
+        "Extract any real computation into utility functions",
+        "Create field helper functions for each mode",
+        "Run tests after each group migration"
+      ],
+      "successCriteria": [
+        "All 33 modes have switch cases",
+        "All handler logic migrated",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Revert createThought.ts to previous state"
+    },
+    {
+      "id": "15B.4.5",
+      "category": "Cleanup",
+      "description": "Delete Original Handler Files - Remove the 36 handler files after successful migration.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 0.5,
+      "agent": "haiku",
+      "files": {
+        "delete": [
+          "src/modes/handlers/*Handler.ts"
+        ],
+        "modify": [
+          "src/modes/handlers/index.ts"
+        ]
+      },
+      "instructions": [
+        "Verify all tests pass with createThought",
+        "Delete all 36 *Handler.ts files in src/modes/handlers/",
+        "Keep ModeHandler.ts interface (for now)",
+        "Update src/modes/handlers/index.ts to export createThought",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "36 handler files deleted",
+        "createThought exported from index",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Restore handler files from git"
+    },
+    {
+      "id": "15B.4.6",
+      "category": "Verification",
+      "description": "Sprint 4 Verification - Run full test suite, create commit.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "sonnet",
+      "files": {
+        "verify": [
+          "All modified files"
+        ],
+        "modify": [
+          "docs/planning/PHASE_15B_SPRINT_4_TODO.json"
+        ]
+      },
+      "instructions": [
+        "Run npm run typecheck - must pass with 0 errors",
+        "Run npm run test:run - all tests must pass",
+        "Run npm run build - must complete successfully",
+        "Create git commit: 'refactor(v9.0.0): Phase 15B Sprint 4 - Create Unified Handler Function'",
+        "Update this TODO file with actual hours and completion status"
+      ],
+      "successCriteria": [
+        "All tasks 15B.4.1-15B.4.5 complete",
+        "Build passes",
+        "All tests pass",
+        "Git commit created"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "createThought.ts replaces 36 handler files",
+    "All 33 modes handled in single function",
+    "Handler files deleted",
+    "All tests pass"
+  ],
+  "expectedReduction": {
+    "linesOfCode": 14000,
+    "files": 36,
+    "classes": 36
+  },
+  "notes": "Sprint 4 is the largest consolidation - 36 handler files (~400 lines each = 14,400 lines) become one ~400 line function. This is the most impactful sprint for code reduction."
+}

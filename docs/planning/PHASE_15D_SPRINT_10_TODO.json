@@ -1,0 +1,172 @@
+{
+  "phase": "15D",
+  "sprint": 10,
+  "title": "Add Bayesian Computation",
+  "week": "Week 10",
+  "effort": "6-7 hours",
+  "status": "pending",
+  "version": "9.0.0",
+  "description": "Make Bayesian reasoning mode actually compute Bayes' theorem. Add real probability calculations instead of just copying input values.",
+  "tasks": [
+    {
+      "id": "15D.10.1",
+      "category": "Algorithm",
+      "description": "Implement Bayes' Theorem - Create computePosterior and updateBeliefs functions.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 2.0,
+      "agent": "sonnet",
+      "files": {
+        "create": [
+          "src/algorithms/bayesian.ts"
+        ],
+        "modify": [
+          "src/modes/createThought.ts"
+        ]
+      },
+      "instructions": [
+        "Create src/algorithms/bayesian.ts",
+        "Implement computePosterior(prior, likelihood, evidence): P(H|E) = P(E|H) * P(H) / P(E)",
+        "Implement updateBeliefs(hypotheses, evidence) for multi-hypothesis updates",
+        "Add normalizing constant calculation",
+        "Integrate with createThought bayesian case",
+        "Add unit tests for computations",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "bayesian.ts created with real algorithms",
+        "computePosterior function works correctly",
+        "updateBeliefs handles multiple hypotheses",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Delete bayesian.ts, revert createThought changes"
+    },
+    {
+      "id": "15D.10.2",
+      "category": "Validation",
+      "description": "Add Probability Validation - Validate probabilities sum to 1 and are in [0,1] range.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "haiku",
+      "files": {
+        "modify": [
+          "src/algorithms/bayesian.ts",
+          "src/validation/unified-validator.ts"
+        ]
+      },
+      "instructions": [
+        "Add validation for probability values in [0, 1] range",
+        "Add validation that prior probabilities sum to 1",
+        "Add validation for likelihood values",
+        "Return informative error messages for invalid inputs",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "Probability validation added",
+        "Clear error messages for invalid inputs",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Revert validation changes"
+    },
+    {
+      "id": "15D.10.3",
+      "category": "Algorithm",
+      "description": "Implement Bayesian Network Support - Basic conditional probability propagation through a DAG.",
+      "status": "pending",
+      "priority": "medium",
+      "estimatedHours": 2.0,
+      "agent": "sonnet",
+      "files": {
+        "modify": [
+          "src/algorithms/bayesian.ts"
+        ]
+      },
+      "instructions": [
+        "Add BayesianNetwork type with nodes and edges",
+        "Implement propagateBelief(network, evidence) for belief propagation",
+        "Handle simple chain structures",
+        "Handle convergent structures (multiple parents)",
+        "Add tests for network propagation"
+      ],
+      "successCriteria": [
+        "BayesianNetwork type defined",
+        "Belief propagation implemented",
+        "Chain and convergent structures handled",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Remove network propagation code"
+    },
+    {
+      "id": "15D.10.4",
+      "category": "Testing",
+      "description": "Add Bayesian Algorithm Tests - Comprehensive tests for probability computations.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "haiku",
+      "files": {
+        "create": [
+          "tests/unit/algorithms/bayesian.test.ts"
+        ]
+      },
+      "instructions": [
+        "Create test file for bayesian.ts",
+        "Test computePosterior with known examples",
+        "Test updateBeliefs with multiple hypotheses",
+        "Test edge cases (zero probabilities, etc.)",
+        "Test Bayesian network propagation",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "bayesian.test.ts created",
+        "All probability computations verified",
+        "Edge cases tested",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Delete bayesian.test.ts"
+    },
+    {
+      "id": "15D.10.5",
+      "category": "Verification",
+      "description": "Sprint 10 Verification - Run full test suite, create commit.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 1.0,
+      "agent": "sonnet",
+      "files": {
+        "verify": [
+          "All modified files"
+        ],
+        "modify": [
+          "docs/planning/PHASE_15D_SPRINT_10_TODO.json"
+        ]
+      },
+      "instructions": [
+        "Run npm run typecheck - must pass with 0 errors",
+        "Run npm run test:run - all tests must pass",
+        "Run npm run build - must complete successfully",
+        "Create git commit: 'feat(v9.0.0): Phase 15D Sprint 10 - Add Bayesian Computation'",
+        "Update this TODO file with actual hours and completion status"
+      ],
+      "successCriteria": [
+        "All tasks 15D.10.1-15D.10.4 complete",
+        "Build passes",
+        "All tests pass",
+        "Git commit created"
+      ]
+    }
+  ],
+  "successCriteria": [
+    "Bayes' theorem implemented correctly",
+    "Probability validation in place",
+    "Bayesian network support added",
+    "Comprehensive tests for algorithms"
+  ],
+  "expectedAddition": {
+    "linesOfCode": 300,
+    "algorithms": 3,
+    "testCases": 25
+  },
+  "notes": "Sprint 10 adds REAL computation to the Bayesian mode. Previously it just copied input values to output. Now it actually computes posteriors using Bayes' theorem."
+}

@@ -1,0 +1,138 @@
+{
+  "phase": "15D",
+  "sprint": 12,
+  "title": "Add Proof Validation & Finalization",
+  "week": "Week 12",
+  "effort": "6-7 hours",
+  "status": "pending",
+  "version": "9.0.0",
+  "description": "Implement basic proof checker and completeness verification. Finalize v9.0.0 with documentation updates and version bump.",
+  "tasks": [
+    {
+      "id": "15D.12.1",
+      "category": "Algorithm",
+      "description": "Implement Basic Proof Checker - Validate proof steps follow from previous steps via inference rules.",
+      "status": "pending",
+      "priority": "high",
+      "estimatedHours": 2.5,
+      "agent": "sonnet",
+      "files": {
+        "create": [
+          "src/algorithms/proof.ts"
+        ],
+        "modify": [
+          "src/modes/createThought.ts"
+        ]
+      },
+      "instructions": [
+        "Create src/algorithms/proof.ts",
+        "Define InferenceRule type with premises and conclusion patterns",
+        "Implement validateProofStep(step, previousSteps, rules)",
+        "Implement checkProofCompleteness(premises, conclusion, steps)",
+        "Add common inference rules: modus ponens, modus tollens, etc.",
+        "Integrate with createThought mathematics/formallogic cases",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "proof.ts created",
+        "validateProofStep works correctly",
+        "checkProofCompleteness verifies proofs",
+        "Common inference rules defined",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Delete proof.ts, revert createThought changes"
+    },
+    {
+      "id": "15D.12.2",
+      "category": "Algorithm",
+      "description": "Implement Proof Decomposition - Real traversal and decomposition of proof trees.",
+      "status": "pending",
+      "priority": "medium",
+      "estimatedHours": 2.0,
+      "agent": "sonnet",
+      "files": {
+        "modify": [
+          "src/algorithms/proof.ts",
+          "src/proof/decomposer.ts"
+        ]
+      },
+      "instructions": [
+        "Add decomposeProof(proof) to break complex proofs into subgoals",
+        "Implement findProofGaps(proof) to identify missing steps",
+        "Implement suggestNextStep(proof, goal) for proof assistance",
+        "Integrate with existing proof/decomposer.ts if useful",
+        "Run npm run test:run"
+      ],
+      "successCriteria": [
+        "Proof decomposition implemented",
+        "Gap finding works",
+        "Next step suggestions provided",
+        "All tests pass"
+      ],
+      "rollbackPlan": "Revert proof decomposition changes"
+    },
+    {
+      "id": "15D.12.3",
+      "category": "Documentation",
+      "description": "Final Verification & Documentation - Update all documentation for v9.0.0.",
+      "status": "pending",
+      "priority": "critical",
+      "estimatedHours": 2.0,
+      "agent": "sonnet",
+      "files": {
+        "modify": [
+          "CLAUDE.md",
+          "CHANGELOG.md",
+          "README.md",
+          "package.json",
+          "docs/architecture/OVERVIEW.md",
+          "docs/architecture/ARCHITECTURE.md"
+        ],
+        "create": [
+          "docs/migration/V8_TO_V9_MIGRATION.md"
+        ]
+      },
+      "instructions": [
+        "Run npm run typecheck - must pass with 0 errors",
+        "Run npm run test:run - all tests must pass",
+        "Run npm run build - must complete successfully",
+        "Update CLAUDE.md with new architecture (fewer classes, unified types, algorithms)",
+        "Update CHANGELOG.md with v9.0.0 changes",
+        "Create migration guide for v8→v9 internal changes",
+        "Bump version to 9.0.0 in package.json",
+        "Update README with new capabilities",
+        "Create git commit: 'release(v9.0.0): Phase 15 Complete - Radical Simplification'",
+        "Create git tag: v9.0.0"
+      ],
+      "successCriteria": [
+        "All documentation updated",
+        "Migration guide created",
+        "Version bumped to 9.0.0",
+        "Build passes",
+        "All tests pass",
+        "Git commit and tag created"
+      ],
+      "rollbackPlan": "Revert documentation changes, remove tag"
+    }
+  ],
+  "successCriteria": [
+    "Proof checker implemented",
+    "Proof decomposition works",
+    "Documentation fully updated for v9.0.0",
+    "Migration guide available",
+    "Version 9.0.0 tagged and ready"
+  ],
+  "expectedAddition": {
+    "linesOfCode": 300,
+    "algorithms": 3,
+    "testCases": 20
+  },
+  "finalMetrics": {
+    "targetLinesOfCode": 35000,
+    "targetTypeCount": 100,
+    "targetClassCount": 20,
+    "targetAlgorithmCount": 5,
+    "targetTestCount": 5000
+  },
+  "notes": "Sprint 12 is the final sprint. It adds the last algorithm (proof validation) and finalizes the v9.0.0 release with full documentation updates. The codebase should be 67% smaller with actual algorithmic substance."
+}
