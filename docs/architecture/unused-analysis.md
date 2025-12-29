@@ -1,16 +1,20 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2025-12-26
+**Generated**: 2025-12-29
 
 ## Summary
 
-- **Potentially unused files**: 14
-- **Potentially unused exports**: 441
+- **Potentially unused files**: 18
+- **Potentially unused exports**: 506
 
 ## Potentially Unused Files
 
 These files are not imported by any other file in the codebase:
 
+- `src/modes/stochastic/analysis/convergence.ts`
+- `src/modes/stochastic/models/monte-carlo.ts`
+- `src/repositories/FileSessionRepository.ts`
+- `src/repositories/MemorySessionRepository.ts`
 - `src/search/engine.ts`
 - `src/taxonomy/adaptive-selector.ts`
 - `src/taxonomy/taxonomy-latex.ts`
@@ -68,6 +72,48 @@ These exports are not imported by any other file in the codebase:
 
 - `VisualFormat` (type)
 
+### `src/modes/causal/graph/algorithms/centrality.ts`
+
+- `computeBetweennessCentrality` (function)
+- `computeClosenessCentrality` (function)
+- `computePageRank` (function)
+- `computeEigenvectorCentrality` (function)
+- `computeKatzCentrality` (function)
+- `computeAllCentrality` (function)
+
+### `src/modes/causal/graph/algorithms/d-separation.ts`
+
+- `getAncestors` (function)
+- `findAllPaths` (function)
+- `isPathBlocked` (function)
+- `findMinimalSeparator` (function)
+- `computeMarkovBlanket` (function)
+- `getImpliedIndependencies` (function)
+
+### `src/modes/causal/graph/algorithms/intervention.ts`
+
+- `createMutilatedGraph` (function)
+- `createMarginalizedGraph` (function)
+- `generateBackdoorFormula` (function)
+- `checkFrontdoorCriterion` (function)
+- `generateFrontdoorFormula` (function)
+- `findInstrumentalVariable` (function)
+- `generateIVFormula` (function)
+- `applyRule1` (function)
+- `applyRule2` (function)
+- `applyRule3` (function)
+- `analyzeIntervention` (function)
+
+### `src/modes/causal/graph/types.ts`
+
+- `GraphNode` (interface)
+- `ProbabilityDistribution` (interface)
+- `CycleDetectionResult` (interface)
+- `ShortestPathResult` (interface)
+- `ConnectivityResult` (interface)
+- `QueryVariables` (interface)
+- `CausalQuery` (interface)
+
 ### `src/modes/combinations/analyzer.ts`
 
 - `MultiModeAnalyzerConfig` (interface)
@@ -91,26 +137,60 @@ These exports are not imported by any other file in the codebase:
 
 - `HybridThought` (interface)
 
-### `src/modes/stochastic/analysis/convergence.ts`
-
-- `ConvergenceResult` (interface)
-- `TraceStats` (interface)
-- `DiagnosticSummary` (interface)
-
 ### `src/modes/stochastic/analysis/statistics.ts`
 
+- `median` (function)
+- `percentile` (function)
+- `percentiles` (function)
+- `skewness` (function)
+- `kurtosis` (function)
+- `mode` (function)
+- `covariance` (function)
+- `correlation` (function)
+- `correlationMatrix` (function)
+- `covarianceMatrix` (function)
+- `equalTailedInterval` (function)
+- `hpdInterval` (function)
+- `computeSampleStatistics` (function)
+- `mcse` (function)
+- `estimateESS` (function)
+- `summarizePosterior` (function)
+- `summarizeAllPosteriors` (function)
+- `probExceedsThreshold` (function)
+- `probInRange` (function)
+- `probAExceedsB` (function)
+- `histogram` (function)
+- `kde` (function)
 - `CredibleInterval` (interface)
 - `PosteriorSummary` (interface)
 - `HistogramBin` (interface)
 
 ### `src/modes/stochastic/models/distribution.ts`
 
+- `sampleWithStatistics` (function)
+- `NormalSampler` (class)
+- `UniformSampler` (class)
+- `ExponentialSampler` (class)
+- `PoissonSampler` (class)
+- `BinomialSampler` (class)
+- `CategoricalSampler` (class)
+- `BetaSampler` (class)
+- `GammaSampler` (class)
 - `DistributionSampler` (interface)
 
-### `src/modes/stochastic/models/monte-carlo.ts`
+### `src/modes/stochastic/sampling/rng.ts`
 
-- `ProgressCallback` (type)
-- `ModelEvaluator` (type)
+- `createRNG` (function)
+- `createParallelRNGs` (function)
+- `generateSeed` (function)
+
+### `src/modes/stochastic/types.ts`
+
+- `StochasticVariable` (interface)
+- `Dependency` (interface)
+- `Constraint` (interface)
+- `SamplerConfig` (interface)
+- `Domain` (type)
 
 ### `src/proof/branch-analyzer.ts`
 
@@ -181,6 +261,10 @@ These exports are not imported by any other file in the codebase:
 
 - `ModeRecommendation` (interface)
 - `ModeCombinationRecommendation` (interface)
+
+### `src/services/ThoughtFactory.ts`
+
+- `ThoughtFactoryConfig` (interface)
 
 ### `src/taxonomy/classifier.ts`
 

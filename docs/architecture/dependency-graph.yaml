@@ -1,10 +1,10 @@
 metadata:
   name: deepthinking-mcp
   version: 8.5.0
-  lastUpdated: "2025-12-26"
-  totalFiles: 255
+  lastUpdated: "2025-12-29"
+  totalFiles: 246
   totalModules: 16
-  totalExports: 1431
+  totalExports: 1317
 entryPoints:
   - file: src/index.ts
     type: main
@@ -215,9 +215,7 @@ modules:
             - exportScientificMethodExperiment
             - exportOptimizationSolution
             - exportFormalLogicProof
-            - |-
-              // Phase 8: Proof decomposition
-                exportProofDecomposition
+            - "// Phase 8: Proof decomposition\r\n  exportProofDecomposition"
           reExport: true
         - file: ./visual/utils/latex.js
           imports:
@@ -272,9 +270,7 @@ modules:
         - exportScientificMethodExperiment
         - exportOptimizationSolution
         - exportFormalLogicProof
-        - |-
-          // Phase 8: Proof decomposition
-            exportProofDecomposition
+        - "// Phase 8: Proof decomposition\r\n  exportProofDecomposition"
         - LaTeXExporter
         - type LaTeXExportOptions
         - type ExportFormatType
@@ -319,9 +315,7 @@ modules:
         - exportScientificMethodExperiment
         - exportOptimizationSolution
         - exportFormalLogicProof
-        - |-
-          // Phase 8: Proof decomposition
-            exportProofDecomposition
+        - "// Phase 8: Proof decomposition\r\n  exportProofDecomposition"
         - LaTeXExporter
         - type LaTeXExportOptions
         - type ExportFormatType
@@ -3161,19 +3155,21 @@ modules:
           imports:
             - fileURLToPath
       internalDependencies:
-        - file: ./modes/index.js
+        - file: ./services/ThoughtFactory.js
           imports:
-            - ModeHandlerRegistry
-        - file: ./services/index.js
+            - ThoughtFactory
+        - file: ./services/ExportService.js
           imports:
             - ExportService
+        - file: ./services/ModeRouter.js
+          imports:
             - ModeRouter
-            - ThoughtFactory
-          typeOnly: true
-        - file: ./session/index.js
+        - file: ./session/manager.js
           imports:
             - SessionManager
-          typeOnly: true
+        - file: ./session/storage/file-store.js
+          imports:
+            - FileSessionStore
         - file: ./tools/definitions.js
           imports:
             - isValidTool
@@ -3212,37 +3208,6 @@ modules:
       exports: []
       interfaces:
         - ILogger
-    src/interfaces/index.ts:
-      description: Dependency Injection Interfaces (v3.4.5)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./interfaces/index.js
-          imports:
-            - ILogger
-        - file: ./cache/types.js
-          imports:
-            - Cache
-        - file: ./ILogger.js
-          imports:
-            - ILogger
-          reExport: true
-        - file: ../cache/types.js
-          imports:
-            - Cache
-            - CacheConfig
-            - CacheStats
-          reExport: true
-      exports:
-        - ILogger
-        - Cache
-        - CacheConfig
-        - CacheStats
-      reExported:
-        - ILogger
-        - Cache
-        - CacheConfig
-        - CacheStats
   modes:
     src/modes/causal/graph/algorithms/centrality.ts:
       description: Centrality Algorithms - Phase 12 Sprint 6
@@ -3313,115 +3278,6 @@ modules:
         - findBackdoorAdjustmentSet
         - computeMarkovBlanket
         - getImpliedIndependencies
-    src/modes/causal/graph/algorithms/index.ts:
-      description: Causal Graph Algorithms - Phase 12 Sprint 6
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./centrality.js
-          imports:
-            - computeDegreeCentrality
-            - computeBetweennessCentrality
-            - computeClosenessCentrality
-            - computePageRank
-            - computeEigenvectorCentrality
-            - computeKatzCentrality
-            - computeAllCentrality
-            - getMostCentralNode
-          reExport: true
-        - file: ./d-separation.js
-          imports:
-            - findVStructures
-            - findAllPaths
-            - isPathBlocked
-            - checkDSeparation
-            - findMinimalSeparator
-            - isValidBackdoorAdjustment
-            - findBackdoorAdjustmentSet
-            - computeMarkovBlanket
-            - getImpliedIndependencies
-            - getAncestors
-          reExport: true
-        - file: ./intervention.js
-          imports:
-            - createMutilatedGraph
-            - createMarginalizedGraph
-            - isIdentifiable
-            - findAllBackdoorSets
-            - generateBackdoorFormula
-            - checkFrontdoorCriterion
-            - generateFrontdoorFormula
-            - findInstrumentalVariable
-            - generateIVFormula
-            - applyRule1
-            - applyRule2
-            - applyRule3
-            - analyzeIntervention
-          reExport: true
-      exports:
-        - computeDegreeCentrality
-        - computeBetweennessCentrality
-        - computeClosenessCentrality
-        - computePageRank
-        - computeEigenvectorCentrality
-        - computeKatzCentrality
-        - computeAllCentrality
-        - getMostCentralNode
-        - findVStructures
-        - findAllPaths
-        - isPathBlocked
-        - checkDSeparation
-        - findMinimalSeparator
-        - isValidBackdoorAdjustment
-        - findBackdoorAdjustmentSet
-        - computeMarkovBlanket
-        - getImpliedIndependencies
-        - getAncestors
-        - createMutilatedGraph
-        - createMarginalizedGraph
-        - isIdentifiable
-        - findAllBackdoorSets
-        - generateBackdoorFormula
-        - checkFrontdoorCriterion
-        - generateFrontdoorFormula
-        - findInstrumentalVariable
-        - generateIVFormula
-        - applyRule1
-        - applyRule2
-        - applyRule3
-        - analyzeIntervention
-      reExported:
-        - computeDegreeCentrality
-        - computeBetweennessCentrality
-        - computeClosenessCentrality
-        - computePageRank
-        - computeEigenvectorCentrality
-        - computeKatzCentrality
-        - computeAllCentrality
-        - getMostCentralNode
-        - findVStructures
-        - findAllPaths
-        - isPathBlocked
-        - checkDSeparation
-        - findMinimalSeparator
-        - isValidBackdoorAdjustment
-        - findBackdoorAdjustmentSet
-        - computeMarkovBlanket
-        - getImpliedIndependencies
-        - getAncestors
-        - createMutilatedGraph
-        - createMarginalizedGraph
-        - isIdentifiable
-        - findAllBackdoorSets
-        - generateBackdoorFormula
-        - checkFrontdoorCriterion
-        - generateFrontdoorFormula
-        - findInstrumentalVariable
-        - generateIVFormula
-        - applyRule1
-        - applyRule2
-        - applyRule3
-        - analyzeIntervention
     src/modes/causal/graph/algorithms/intervention.ts:
       description: Do-Calculus and Intervention Analysis - Phase 12 Sprint 6
       externalDependencies: []
@@ -3469,23 +3325,6 @@ modules:
         - applyRule2
         - applyRule3
         - analyzeIntervention
-    src/modes/causal/graph/index.ts:
-      description: Causal Graph Analysis Module
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./types.js
-          imports:
-            - "*"
-          reExport: true
-        - file: ./algorithms/index.js
-          imports:
-            - "*"
-          reExport: true
-      exports: []
-      reExported:
-        - "* from ./types.js"
-        - "* from ./algorithms/index.js"
     src/modes/causal/graph/types.ts:
       description: Enhanced Graph Analysis Types for Causal Reasoning
       externalDependencies: []
@@ -5521,158 +5360,6 @@ modules:
         - computeConvergenceDiagnostics
         - traceStatistics
         - generateDiagnosticSummary
-    src/modes/stochastic/analysis/index.ts:
-      description: Stochastic Analysis Module Exports - Phase 12 Sprint 5
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./statistics.js
-          imports:
-            - mean
-            - variance
-            - stdDev
-            - median
-            - percentile
-            - percentiles
-            - skewness
-            - kurtosis
-            - mode
-            - covariance
-            - correlation
-            - correlationMatrix
-            - covarianceMatrix
-            - equalTailedInterval
-            - hpdInterval
-            - computeSampleStatistics
-            - mcse
-            - estimateESS
-            - summarizePosterior
-            - summarizeAllPosteriors
-            - probExceedsThreshold
-            - probInRange
-            - probAExceedsB
-            - histogram
-            - kde
-            - type CredibleInterval
-            - type PosteriorSummary
-            - type HistogramBin
-          reExport: true
-        - file: ./convergence.js
-          imports:
-            - autocorrelation
-            - integratedAutocorrelationTime
-            - effectiveSampleSize
-            - effectiveSampleSizeMultiple
-            - minEffectiveSampleSize
-            - gewekeStatistic
-            - gewekeStatisticMultiple
-            - aggregateGewekeStatistic
-            - rHatSingleChain
-            - rHatMultipleChains
-            - mcse
-            - mcseMultiple
-            - assessConvergence
-            - computeConvergenceDiagnostics
-            - traceStatistics
-            - generateDiagnosticSummary
-            - type ConvergenceResult
-            - type TraceStats
-            - type DiagnosticSummary
-          reExport: true
-      exports:
-        - mean
-        - variance
-        - stdDev
-        - median
-        - percentile
-        - percentiles
-        - skewness
-        - kurtosis
-        - mode
-        - covariance
-        - correlation
-        - correlationMatrix
-        - covarianceMatrix
-        - equalTailedInterval
-        - hpdInterval
-        - computeSampleStatistics
-        - mcse
-        - estimateESS
-        - summarizePosterior
-        - summarizeAllPosteriors
-        - probExceedsThreshold
-        - probInRange
-        - probAExceedsB
-        - histogram
-        - kde
-        - type CredibleInterval
-        - type PosteriorSummary
-        - type HistogramBin
-        - autocorrelation
-        - integratedAutocorrelationTime
-        - effectiveSampleSize
-        - effectiveSampleSizeMultiple
-        - minEffectiveSampleSize
-        - gewekeStatistic
-        - gewekeStatisticMultiple
-        - aggregateGewekeStatistic
-        - rHatSingleChain
-        - rHatMultipleChains
-        - mcseMultiple
-        - assessConvergence
-        - computeConvergenceDiagnostics
-        - traceStatistics
-        - generateDiagnosticSummary
-        - type ConvergenceResult
-        - type TraceStats
-        - type DiagnosticSummary
-      reExported:
-        - mean
-        - variance
-        - stdDev
-        - median
-        - percentile
-        - percentiles
-        - skewness
-        - kurtosis
-        - mode
-        - covariance
-        - correlation
-        - correlationMatrix
-        - covarianceMatrix
-        - equalTailedInterval
-        - hpdInterval
-        - computeSampleStatistics
-        - mcse
-        - estimateESS
-        - summarizePosterior
-        - summarizeAllPosteriors
-        - probExceedsThreshold
-        - probInRange
-        - probAExceedsB
-        - histogram
-        - kde
-        - type CredibleInterval
-        - type PosteriorSummary
-        - type HistogramBin
-        - autocorrelation
-        - integratedAutocorrelationTime
-        - effectiveSampleSize
-        - effectiveSampleSizeMultiple
-        - minEffectiveSampleSize
-        - gewekeStatistic
-        - gewekeStatisticMultiple
-        - aggregateGewekeStatistic
-        - rHatSingleChain
-        - rHatMultipleChains
-        - mcseMultiple
-        - assessConvergence
-        - computeConvergenceDiagnostics
-        - traceStatistics
-        - generateDiagnosticSummary
-        - type ConvergenceResult
-        - type TraceStats
-        - type DiagnosticSummary
     src/modes/stochastic/analysis/statistics.ts:
       description: Statistical Analysis Module - Phase 12 Sprint 5
       externalDependencies: []
@@ -5738,92 +5425,6 @@ modules:
         - probAExceedsB
         - histogram
         - kde
-    src/modes/stochastic/index.ts:
-      description: Stochastic Reasoning Module
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./types.js
-          imports:
-            - "*"
-          reExport: true
-        - file: ./analysis/index.js
-          imports:
-            - "*"
-          reExport: true
-        - file: ./models/distribution.js
-          imports:
-            - createSampler
-            - NormalSampler
-            - UniformSampler
-            - ExponentialSampler
-            - PoissonSampler
-            - BinomialSampler
-            - CategoricalSampler
-            - BetaSampler
-            - GammaSampler
-            - sampleWithStatistics
-            - type DistributionSampler
-          reExport: true
-        - file: ./models/monte-carlo.js
-          imports:
-            - MonteCarloEngine
-            - createMonteCarloEngine
-            - runMonteCarloSimulation
-            - type ProgressCallback
-            - type ModelEvaluator
-          reExport: true
-        - file: ./sampling/rng.js
-          imports:
-            - SeededRNG
-            - createRNG
-            - createParallelRNGs
-            - generateSeed
-          reExport: true
-      exports:
-        - createSampler
-        - NormalSampler
-        - UniformSampler
-        - ExponentialSampler
-        - PoissonSampler
-        - BinomialSampler
-        - CategoricalSampler
-        - BetaSampler
-        - GammaSampler
-        - sampleWithStatistics
-        - type DistributionSampler
-        - MonteCarloEngine
-        - createMonteCarloEngine
-        - runMonteCarloSimulation
-        - type ProgressCallback
-        - type ModelEvaluator
-        - SeededRNG
-        - createRNG
-        - createParallelRNGs
-        - generateSeed
-      reExported:
-        - "* from ./types.js"
-        - "* from ./analysis/index.js"
-        - createSampler
-        - NormalSampler
-        - UniformSampler
-        - ExponentialSampler
-        - PoissonSampler
-        - BinomialSampler
-        - CategoricalSampler
-        - BetaSampler
-        - GammaSampler
-        - sampleWithStatistics
-        - type DistributionSampler
-        - MonteCarloEngine
-        - createMonteCarloEngine
-        - runMonteCarloSimulation
-        - type ProgressCallback
-        - type ModelEvaluator
-        - SeededRNG
-        - createRNG
-        - createParallelRNGs
-        - generateSeed
     src/modes/stochastic/models/distribution.ts:
       description: Distribution Samplers - Phase 12 Sprint 5
       externalDependencies: []
@@ -6381,31 +5982,6 @@ modules:
         - MemorySessionRepository
       classes:
         - MemorySessionRepository
-    src/repositories/index.ts:
-      description: Repository module exports (v3.4.5)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./ISessionRepository.js
-          imports:
-            - ISessionRepository
-          reExport: true
-        - file: ./FileSessionRepository.js
-          imports:
-            - FileSessionRepository
-          reExport: true
-        - file: ./MemorySessionRepository.js
-          imports:
-            - MemorySessionRepository
-          reExport: true
-      exports:
-        - ISessionRepository
-        - FileSessionRepository
-        - MemorySessionRepository
-      reExported:
-        - ISessionRepository
-        - FileSessionRepository
-        - MemorySessionRepository
   search:
     src/search/engine.ts:
       description: Search Engine (v3.5.0)
@@ -6533,9 +6109,7 @@ modules:
             - isAlgorithmicThought
             - isScientificMethodThought
             - HybridThought
-            - |-
-              // Sprint 1: Visual export integration types
-                SequentialThought
+            - "// Sprint 1: Visual export integration types\r\n  SequentialThought"
             - ShannonThought
             - AbductiveThought
             - CounterfactualThought
@@ -6612,7 +6186,7 @@ modules:
             - ThinkingMode
             - ModeRecommender
             - ProblemCharacteristics
-        - file: ../session/index.js
+        - file: ../session/manager.js
           imports:
             - SessionManager
         - file: ../interfaces/ILogger.js
@@ -6634,44 +6208,17 @@ modules:
         - ModeRecommendation
         - ModeCombinationRecommendation
     src/services/ThoughtFactory.ts:
-      description: Thought Factory Service (v8.4.0)
+      description: Thought Factory Service (v9.0.0)
       externalDependencies: []
-      nodeDependencies:
-        - module: crypto
-          imports:
-            - randomUUID
+      nodeDependencies: []
       internalDependencies:
         - file: ../types/index.js
           imports:
             - ThinkingMode
-            - ShannonStage
-            - SequentialThought
-            - ShannonThought
-            - MathematicsThought
-            - PhysicsThought
-            - InductiveThought
-            - DeductiveThought
-            - AbductiveThought
-            - CausalThought
             - Thought
-            - EngineeringThought
-            - ComputabilityThought
-            - CryptanalyticThought
-            - AlgorithmicThought
-            - SystemsThinkingThought
-            - ScientificMethodThought
-            - FormalLogicThought
-            - OptimizationThought
-            - SynthesisThought
-            - ArgumentationThought
-            - CritiqueThought
-            - AnalysisThought
         - file: ../tools/thinking.js
           imports:
             - ThinkingToolInput
-        - file: ../utils/type-guards.js
-          imports:
-            - toExtendedThoughtType
         - file: ../interfaces/ILogger.js
           imports:
             - ILogger
@@ -6691,70 +6238,7 @@ modules:
         - ThoughtFactory
       interfaces:
         - ThoughtFactoryConfig
-    src/services/index.ts:
-      description: Services module exports (v3.4.5)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./ThoughtFactory.js
-          imports:
-            - ThoughtFactory
-            - ThoughtFactoryConfig
-          reExport: true
-        - file: ./ExportService.js
-          imports:
-            - ExportService
-          reExport: true
-        - file: ./ModeRouter.js
-          imports:
-            - ModeRouter
-          reExport: true
-      exports:
-        - ThoughtFactory
-        - ThoughtFactoryConfig
-        - ExportService
-        - ModeRouter
-      reExported:
-        - ThoughtFactory
-        - ThoughtFactoryConfig
-        - ExportService
-        - ModeRouter
   session:
-    src/session/SessionMetricsCalculator.ts:
-      description: Session Metrics Calculator (v3.4.5)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../types/index.js
-          imports:
-            - ThinkingSession
-            - SessionMetrics
-            - Thought
-        - file: ../types/core.js
-          imports:
-            - isTemporalThought
-            - isGameTheoryThought
-            - isEvidentialThought
-        - file: ../validation/cache.js
-          imports:
-            - validationCache
-      exports:
-        - SessionMetricsCalculator
-      classes:
-        - SessionMetricsCalculator
-    src/session/index.ts:
-      description: Session module exports (v4.3.0)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./manager.js
-          imports:
-            - SessionManager
-          reExport: true
-      exports:
-        - SessionManager
-      reExported:
-        - SessionManager
     src/session/manager.ts:
       description: Session Manager for DeepThinking MCP (v6.0.0)
       externalDependencies: []
@@ -6810,6 +6294,28 @@ modules:
         - SessionManager
       classes:
         - SessionManager
+    src/session/SessionMetricsCalculator.ts:
+      description: Session Metrics Calculator (v3.4.5)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/index.js
+          imports:
+            - ThinkingSession
+            - SessionMetrics
+            - Thought
+        - file: ../types/core.js
+          imports:
+            - isTemporalThought
+            - isGameTheoryThought
+            - isEvidentialThought
+        - file: ../validation/cache.js
+          imports:
+            - validationCache
+      exports:
+        - SessionMetricsCalculator
+      classes:
+        - SessionMetricsCalculator
     src/session/storage/file-store.ts:
       description: File-based Session Storage Implementation
       externalDependencies: []
@@ -6842,34 +6348,6 @@ modules:
       exports:
         - FileSessionStore
       classes:
-        - FileSessionStore
-    src/session/storage/index.ts:
-      description: Session Storage Module
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./interface.js
-          imports:
-            - SessionStorage
-            - StorageStats
-            - StorageConfig
-            - DEFAULT_STORAGE_CONFIG
-          reExport: true
-        - file: ./file-store.js
-          imports:
-            - FileSessionStore
-          reExport: true
-      exports:
-        - SessionStorage
-        - StorageStats
-        - StorageConfig
-        - DEFAULT_STORAGE_CONFIG
-        - FileSessionStore
-      reExported:
-        - SessionStorage
-        - StorageStats
-        - StorageConfig
-        - DEFAULT_STORAGE_CONFIG
         - FileSessionStore
     src/session/storage/interface.ts:
       description: Storage Interface for Session Persistence
@@ -9612,9 +9090,7 @@ modules:
           reExport: true
         - file: ./schema-utils.js
           imports:
-            - |-
-              // Primitive schemas
-                probabilitySchema
+            - "// Primitive schemas\r\n  probabilitySchema"
             - confidenceSchema
             - progressSchema
             - weightSchema
@@ -9623,9 +9099,7 @@ modules:
             - nonEmptyStringSchema
             - uuidSchema
             - timestampSchema
-            - |-
-              // Composite schemas - Hypothesis & Evidence
-                hypothesisSchema
+            - "// Composite schemas - Hypothesis & Evidence\r\n  hypothesisSchema"
             - probabilityWithJustificationSchema
             - probabilityWithCalculationSchema
             - evidenceSchema
@@ -9635,9 +9109,7 @@ modules:
             - type ProbabilityWithCalculation
             - type EvidenceInput
             - type EvidenceWithSupport
-            - |-
-              // Graph schemas
-                createNodeSchema
+            - "// Graph schemas\r\n  createNodeSchema"
             - createEdgeSchema
             - nodeSchema
             - weightedNodeSchema
@@ -9649,64 +9121,48 @@ modules:
             - type EdgeInput
             - type WeightedEdgeInput
             - type CausalEdgeInput
-            - |-
-              // Temporal schemas
-                timePointSchema
+            - "// Temporal schemas\r\n  timePointSchema"
             - timeIntervalSchema
             - temporalEventSchema
             - type TimePointInput
             - type TimeIntervalInput
             - type TemporalEventInput
-            - |-
-              // Mathematical schemas
-                mathExpressionSchema
+            - "// Mathematical schemas\r\n  mathExpressionSchema"
             - valueWithUnitSchema
             - measurementSchema
             - type MathExpressionInput
             - type ValueWithUnitInput
             - type MeasurementInput
-            - |-
-              // Game Theory schemas
-                playerSchema
+            - "// Game Theory schemas\r\n  playerSchema"
             - strategySchema
             - payoffSchema
             - type PlayerInput
             - type StrategyInput
             - type PayoffInput
-            - |-
-              // Reasoning schemas
-                reasoningStepSchema
+            - "// Reasoning schemas\r\n  reasoningStepSchema"
             - propositionSchema
             - inferenceRuleSchema
             - type ReasoningStepInput
             - type PropositionInput
             - type InferenceRuleInput
-            - |-
-              // Optimization schemas
-                constraintSchema
+            - "// Optimization schemas\r\n  constraintSchema"
             - objectiveSchema
             - solutionSchema
             - type ConstraintInput
             - type ObjectiveInput
             - type SolutionInput
-            - |-
-              // Base schemas
-                baseThoughtSchema
+            - "// Base schemas\r\n  baseThoughtSchema"
             - sequentialThoughtExtensionSchema
             - bayesianThoughtExtensionSchema
             - type BaseThoughtInput
-            - |-
-              // Helpers
-                createRangeSchema
+            - "// Helpers\r\n  createRangeSchema"
             - createEnumSchema
             - createOptionalStringWithDefault
             - createOptionalNumberWithDefault
             - createOptionalBooleanWithDefault
             - uniqueIdArraySchema
             - createGraphSchema
-            - |-
-              // Namespace export
-                SchemaUtils
+            - "// Namespace export\r\n  SchemaUtils"
           reExport: true
       exports:
         - IssueSeverity
@@ -9738,9 +9194,7 @@ modules:
         - type BatchOperationInput
         - validateInput
         - safeValidateInput
-        - |-
-          // Primitive schemas
-            probabilitySchema
+        - "// Primitive schemas\r\n  probabilitySchema"
         - confidenceSchema
         - progressSchema
         - weightSchema
@@ -9749,9 +9203,7 @@ modules:
         - nonEmptyStringSchema
         - uuidSchema
         - timestampSchema
-        - |-
-          // Composite schemas - Hypothesis & Evidence
-            hypothesisSchema
+        - "// Composite schemas - Hypothesis & Evidence\r\n  hypothesisSchema"
         - probabilityWithJustificationSchema
         - probabilityWithCalculationSchema
         - evidenceSchema
@@ -9761,9 +9213,7 @@ modules:
         - type ProbabilityWithCalculation
         - type EvidenceInput
         - type EvidenceWithSupport
-        - |-
-          // Graph schemas
-            createNodeSchema
+        - "// Graph schemas\r\n  createNodeSchema"
         - createEdgeSchema
         - nodeSchema
         - weightedNodeSchema
@@ -9775,64 +9225,48 @@ modules:
         - type EdgeInput
         - type WeightedEdgeInput
         - type CausalEdgeInput
-        - |-
-          // Temporal schemas
-            timePointSchema
+        - "// Temporal schemas\r\n  timePointSchema"
         - timeIntervalSchema
         - temporalEventSchema
         - type TimePointInput
         - type TimeIntervalInput
         - type TemporalEventInput
-        - |-
-          // Mathematical schemas
-            mathExpressionSchema
+        - "// Mathematical schemas\r\n  mathExpressionSchema"
         - valueWithUnitSchema
         - measurementSchema
         - type MathExpressionInput
         - type ValueWithUnitInput
         - type MeasurementInput
-        - |-
-          // Game Theory schemas
-            playerSchema
+        - "// Game Theory schemas\r\n  playerSchema"
         - strategySchema
         - payoffSchema
         - type PlayerInput
         - type StrategyInput
         - type PayoffInput
-        - |-
-          // Reasoning schemas
-            reasoningStepSchema
+        - "// Reasoning schemas\r\n  reasoningStepSchema"
         - propositionSchema
         - inferenceRuleSchema
         - type ReasoningStepInput
         - type PropositionInput
         - type InferenceRuleInput
-        - |-
-          // Optimization schemas
-            constraintSchema
+        - "// Optimization schemas\r\n  constraintSchema"
         - objectiveSchema
         - solutionSchema
         - type ConstraintInput
         - type ObjectiveInput
         - type SolutionInput
-        - |-
-          // Base schemas
-            baseThoughtSchema
+        - "// Base schemas\r\n  baseThoughtSchema"
         - sequentialThoughtExtensionSchema
         - bayesianThoughtExtensionSchema
         - type BaseThoughtInput
-        - |-
-          // Helpers
-            createRangeSchema
+        - "// Helpers\r\n  createRangeSchema"
         - createEnumSchema
         - createOptionalStringWithDefault
         - createOptionalNumberWithDefault
         - createOptionalBooleanWithDefault
         - uniqueIdArraySchema
         - createGraphSchema
-        - |-
-          // Namespace export
-            SchemaUtils
+        - "// Namespace export\r\n  SchemaUtils"
       reExported:
         - IssueSeverity
         - IssueCategory
@@ -9863,9 +9297,7 @@ modules:
         - type BatchOperationInput
         - validateInput
         - safeValidateInput
-        - |-
-          // Primitive schemas
-            probabilitySchema
+        - "// Primitive schemas\r\n  probabilitySchema"
         - confidenceSchema
         - progressSchema
         - weightSchema
@@ -9874,9 +9306,7 @@ modules:
         - nonEmptyStringSchema
         - uuidSchema
         - timestampSchema
-        - |-
-          // Composite schemas - Hypothesis & Evidence
-            hypothesisSchema
+        - "// Composite schemas - Hypothesis & Evidence\r\n  hypothesisSchema"
         - probabilityWithJustificationSchema
         - probabilityWithCalculationSchema
         - evidenceSchema
@@ -9886,9 +9316,7 @@ modules:
         - type ProbabilityWithCalculation
         - type EvidenceInput
         - type EvidenceWithSupport
-        - |-
-          // Graph schemas
-            createNodeSchema
+        - "// Graph schemas\r\n  createNodeSchema"
         - createEdgeSchema
         - nodeSchema
         - weightedNodeSchema
@@ -9900,64 +9328,48 @@ modules:
         - type EdgeInput
         - type WeightedEdgeInput
         - type CausalEdgeInput
-        - |-
-          // Temporal schemas
-            timePointSchema
+        - "// Temporal schemas\r\n  timePointSchema"
         - timeIntervalSchema
         - temporalEventSchema
         - type TimePointInput
         - type TimeIntervalInput
         - type TemporalEventInput
-        - |-
-          // Mathematical schemas
-            mathExpressionSchema
+        - "// Mathematical schemas\r\n  mathExpressionSchema"
         - valueWithUnitSchema
         - measurementSchema
         - type MathExpressionInput
         - type ValueWithUnitInput
         - type MeasurementInput
-        - |-
-          // Game Theory schemas
-            playerSchema
+        - "// Game Theory schemas\r\n  playerSchema"
         - strategySchema
         - payoffSchema
         - type PlayerInput
         - type StrategyInput
         - type PayoffInput
-        - |-
-          // Reasoning schemas
-            reasoningStepSchema
+        - "// Reasoning schemas\r\n  reasoningStepSchema"
         - propositionSchema
         - inferenceRuleSchema
         - type ReasoningStepInput
         - type PropositionInput
         - type InferenceRuleInput
-        - |-
-          // Optimization schemas
-            constraintSchema
+        - "// Optimization schemas\r\n  constraintSchema"
         - objectiveSchema
         - solutionSchema
         - type ConstraintInput
         - type ObjectiveInput
         - type SolutionInput
-        - |-
-          // Base schemas
-            baseThoughtSchema
+        - "// Base schemas\r\n  baseThoughtSchema"
         - sequentialThoughtExtensionSchema
         - bayesianThoughtExtensionSchema
         - type BaseThoughtInput
-        - |-
-          // Helpers
-            createRangeSchema
+        - "// Helpers\r\n  createRangeSchema"
         - createEnumSchema
         - createOptionalStringWithDefault
         - createOptionalNumberWithDefault
         - createOptionalBooleanWithDefault
         - uniqueIdArraySchema
         - createGraphSchema
-        - |-
-          // Namespace export
-            SchemaUtils
+        - "// Namespace export\r\n  SchemaUtils"
     src/validation/schema-utils.ts:
       description: Schema Utilities (v7.1.0)
       externalDependencies:
@@ -11442,14 +10854,11 @@ dependencyGraph:
     - name: Interfaces
       files:
         - src/interfaces/ILogger.ts
-        - src/interfaces/index.ts
     - name: Modes
       files:
         - src/modes/causal/graph/algorithms/centrality.ts
         - src/modes/causal/graph/algorithms/d-separation.ts
-        - src/modes/causal/graph/algorithms/index.ts
         - src/modes/causal/graph/algorithms/intervention.ts
-        - src/modes/causal/graph/index.ts
         - src/modes/causal/graph/types.ts
         - src/modes/combinations/analyzer.ts
         - src/modes/combinations/combination-types.ts
@@ -11496,9 +10905,7 @@ dependencyGraph:
         - src/modes/index.ts
         - src/modes/registry.ts
         - src/modes/stochastic/analysis/convergence.ts
-        - src/modes/stochastic/analysis/index.ts
         - src/modes/stochastic/analysis/statistics.ts
-        - src/modes/stochastic/index.ts
         - src/modes/stochastic/models/distribution.ts
         - src/modes/stochastic/models/monte-carlo.ts
         - src/modes/stochastic/sampling/rng.ts
@@ -11523,7 +10930,6 @@ dependencyGraph:
         - src/repositories/FileSessionRepository.ts
         - src/repositories/ISessionRepository.ts
         - src/repositories/MemorySessionRepository.ts
-        - src/repositories/index.ts
     - name: Search
       files:
         - src/search/engine.ts
@@ -11536,14 +10942,11 @@ dependencyGraph:
         - src/services/MetaMonitor.ts
         - src/services/ModeRouter.ts
         - src/services/ThoughtFactory.ts
-        - src/services/index.ts
     - name: Session
       files:
-        - src/session/SessionMetricsCalculator.ts
-        - src/session/index.ts
         - src/session/manager.ts
+        - src/session/SessionMetricsCalculator.ts
         - src/session/storage/file-store.ts
-        - src/session/storage/index.ts
         - src/session/storage/interface.ts
     - name: Taxonomy
       files:
@@ -11667,19 +11070,19 @@ dependencyGraph:
         - src/validation/validators/modes/temporal.ts
         - src/validation/validators/registry.ts
 statistics:
-  totalTypeScriptFiles: 255
+  totalTypeScriptFiles: 246
   totalModules: 16
-  totalLinesOfCode: 106197
-  totalExports: 1431
+  totalLinesOfCode: 105312
+  totalExports: 1317
   totalClasses: 155
   totalInterfaces: 533
   totalFunctions: 443
   totalTypeGuards: 85
   totalEnums: 3
   totalConstants: 167
-  totalReExports: 684
-  totalTypeOnlyImports: 246
+  totalReExports: 566
+  totalTypeOnlyImports: 244
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 55
-  unusedFilesCount: 14
-  unusedExportsCount: 441
+  unusedFilesCount: 18
+  unusedExportsCount: 506

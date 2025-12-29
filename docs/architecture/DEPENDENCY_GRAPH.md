@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 8.5.0 | **Last Updated**: 2025-12-26
+**Version**: 8.5.0 | **Last Updated**: 2025-12-29
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -40,13 +40,13 @@ The codebase is organized into the following modules:
 - **config**: 1 file
 - **export**: 44 files
 - **entry**: 1 file
-- **interfaces**: 2 files
-- **modes**: 58 files
+- **interfaces**: 1 file
+- **modes**: 54 files
 - **proof**: 13 files
-- **repositories**: 4 files
+- **repositories**: 3 files
 - **search**: 4 files
-- **services**: 5 files
-- **session**: 6 files
+- **services**: 4 files
+- **session**: 4 files
 - **taxonomy**: 7 files
 - **tools**: 18 files
 - **types**: 36 files
@@ -991,9 +991,11 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./modes/index.js` | `ModeHandlerRegistry` | Import |
-| `./services/index.js` | `ExportService, ModeRouter, ThoughtFactory` | Import (type-only) |
-| `./session/index.js` | `SessionManager` | Import (type-only) |
+| `./services/ThoughtFactory.js` | `ThoughtFactory` | Import |
+| `./services/ExportService.js` | `ExportService` | Import |
+| `./services/ModeRouter.js` | `ModeRouter` | Import |
+| `./session/manager.js` | `SessionManager` | Import |
+| `./session/storage/file-store.js` | `FileSessionStore` | Import |
 | `./tools/definitions.js` | `isValidTool, modeToToolMap, toolList, toolSchemas` | Import |
 | `./tools/thinking.js` | `thinkingTool` | Import |
 | `./types/index.js` | `ThinkingMode, isFullyImplemented, AddThoughtResponse, AnalyzeResponse, MCPResponse, ProblemCharacteristics` | Import |
@@ -1012,21 +1014,6 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../utils/logger-types.js` | `LogLevel, LogEntry` | Import (type-only) |
-
----
-
-### `src/interfaces/index.ts` - Dependency Injection Interfaces (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./interfaces/index.js` | `ILogger` | Import |
-| `./cache/types.js` | `Cache` | Import |
-| `./ILogger.js` | `ILogger` | Re-export |
-| `../cache/types.js` | `Cache, CacheConfig, CacheStats` | Re-export |
-
-**Exports:**
-- Re-exports: `ILogger`, `Cache`, `CacheConfig`, `CacheStats`
 
 ---
 
@@ -1056,20 +1043,6 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/modes/causal/graph/algorithms/index.ts` - Causal Graph Algorithms - Phase 12 Sprint 6
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./centrality.js` | `computeDegreeCentrality, computeBetweennessCentrality, computeClosenessCentrality, computePageRank, computeEigenvectorCentrality, computeKatzCentrality, computeAllCentrality, getMostCentralNode` | Re-export |
-| `./d-separation.js` | `findVStructures, findAllPaths, isPathBlocked, checkDSeparation, findMinimalSeparator, isValidBackdoorAdjustment, findBackdoorAdjustmentSet, computeMarkovBlanket, getImpliedIndependencies, getAncestors` | Re-export |
-| `./intervention.js` | `createMutilatedGraph, createMarginalizedGraph, isIdentifiable, findAllBackdoorSets, generateBackdoorFormula, checkFrontdoorCriterion, generateFrontdoorFormula, findInstrumentalVariable, generateIVFormula, applyRule1, applyRule2, applyRule3, analyzeIntervention` | Re-export |
-
-**Exports:**
-- Re-exports: `computeDegreeCentrality`, `computeBetweennessCentrality`, `computeClosenessCentrality`, `computePageRank`, `computeEigenvectorCentrality`, `computeKatzCentrality`, `computeAllCentrality`, `getMostCentralNode`, `findVStructures`, `findAllPaths`, `isPathBlocked`, `checkDSeparation`, `findMinimalSeparator`, `isValidBackdoorAdjustment`, `findBackdoorAdjustmentSet`, `computeMarkovBlanket`, `getImpliedIndependencies`, `getAncestors`, `createMutilatedGraph`, `createMarginalizedGraph`, `isIdentifiable`, `findAllBackdoorSets`, `generateBackdoorFormula`, `checkFrontdoorCriterion`, `generateFrontdoorFormula`, `findInstrumentalVariable`, `generateIVFormula`, `applyRule1`, `applyRule2`, `applyRule3`, `analyzeIntervention`
-
----
-
 ### `src/modes/causal/graph/algorithms/intervention.ts` - Do-Calculus and Intervention Analysis - Phase 12 Sprint 6
 
 **Internal Dependencies:**
@@ -1080,19 +1053,6 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Functions: `createMutilatedGraph`, `createMarginalizedGraph`, `isIdentifiable`, `findAllBackdoorSets`, `generateBackdoorFormula`, `checkFrontdoorCriterion`, `generateFrontdoorFormula`, `findInstrumentalVariable`, `generateIVFormula`, `applyRule1`, `applyRule2`, `applyRule3`, `analyzeIntervention`
-
----
-
-### `src/modes/causal/graph/index.ts` - Causal Graph Analysis Module
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `*` | Re-export |
-| `./algorithms/index.js` | `*` | Re-export |
-
-**Exports:**
-- Re-exports: `* from ./types.js`, `* from ./algorithms/index.js`
 
 ---
 
@@ -2027,19 +1987,6 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/modes/stochastic/analysis/index.ts` - Stochastic Analysis Module Exports - Phase 12 Sprint 5
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./statistics.js` | `mean, variance, stdDev, median, percentile, percentiles, skewness, kurtosis, mode, covariance, correlation, correlationMatrix, covarianceMatrix, equalTailedInterval, hpdInterval, computeSampleStatistics, mcse, estimateESS, summarizePosterior, summarizeAllPosteriors, probExceedsThreshold, probInRange, probAExceedsB, histogram, kde, type CredibleInterval, type PosteriorSummary, type HistogramBin` | Re-export |
-| `./convergence.js` | `autocorrelation, integratedAutocorrelationTime, effectiveSampleSize, effectiveSampleSizeMultiple, minEffectiveSampleSize, gewekeStatistic, gewekeStatisticMultiple, aggregateGewekeStatistic, rHatSingleChain, rHatMultipleChains, mcse, mcseMultiple, assessConvergence, computeConvergenceDiagnostics, traceStatistics, generateDiagnosticSummary, type ConvergenceResult, type TraceStats, type DiagnosticSummary` | Re-export |
-
-**Exports:**
-- Re-exports: `mean`, `variance`, `stdDev`, `median`, `percentile`, `percentiles`, `skewness`, `kurtosis`, `mode`, `covariance`, `correlation`, `correlationMatrix`, `covarianceMatrix`, `equalTailedInterval`, `hpdInterval`, `computeSampleStatistics`, `mcse`, `estimateESS`, `summarizePosterior`, `summarizeAllPosteriors`, `probExceedsThreshold`, `probInRange`, `probAExceedsB`, `histogram`, `kde`, `type CredibleInterval`, `type PosteriorSummary`, `type HistogramBin`, `autocorrelation`, `integratedAutocorrelationTime`, `effectiveSampleSize`, `effectiveSampleSizeMultiple`, `minEffectiveSampleSize`, `gewekeStatistic`, `gewekeStatisticMultiple`, `aggregateGewekeStatistic`, `rHatSingleChain`, `rHatMultipleChains`, `mcseMultiple`, `assessConvergence`, `computeConvergenceDiagnostics`, `traceStatistics`, `generateDiagnosticSummary`, `type ConvergenceResult`, `type TraceStats`, `type DiagnosticSummary`
-
----
-
 ### `src/modes/stochastic/analysis/statistics.ts` - Statistical Analysis Module - Phase 12 Sprint 5
 
 **Internal Dependencies:**
@@ -2050,22 +1997,6 @@ The codebase is organized into the following modules:
 **Exports:**
 - Interfaces: `CredibleInterval`, `PosteriorSummary`, `HistogramBin`
 - Functions: `mean`, `variance`, `stdDev`, `median`, `percentile`, `percentiles`, `skewness`, `kurtosis`, `mode`, `covariance`, `correlation`, `correlationMatrix`, `covarianceMatrix`, `equalTailedInterval`, `hpdInterval`, `computeSampleStatistics`, `mcse`, `estimateESS`, `summarizePosterior`, `summarizeAllPosteriors`, `probExceedsThreshold`, `probInRange`, `probAExceedsB`, `histogram`, `kde`
-
----
-
-### `src/modes/stochastic/index.ts` - Stochastic Reasoning Module
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `*` | Re-export |
-| `./analysis/index.js` | `*` | Re-export |
-| `./models/distribution.js` | `createSampler, NormalSampler, UniformSampler, ExponentialSampler, PoissonSampler, BinomialSampler, CategoricalSampler, BetaSampler, GammaSampler, sampleWithStatistics, type DistributionSampler` | Re-export |
-| `./models/monte-carlo.js` | `MonteCarloEngine, createMonteCarloEngine, runMonteCarloSimulation, type ProgressCallback, type ModelEvaluator` | Re-export |
-| `./sampling/rng.js` | `SeededRNG, createRNG, createParallelRNGs, generateSeed` | Re-export |
-
-**Exports:**
-- Re-exports: `* from ./types.js`, `* from ./analysis/index.js`, `createSampler`, `NormalSampler`, `UniformSampler`, `ExponentialSampler`, `PoissonSampler`, `BinomialSampler`, `CategoricalSampler`, `BetaSampler`, `GammaSampler`, `sampleWithStatistics`, `type DistributionSampler`, `MonteCarloEngine`, `createMonteCarloEngine`, `runMonteCarloSimulation`, `type ProgressCallback`, `type ModelEvaluator`, `SeededRNG`, `createRNG`, `createParallelRNGs`, `generateSeed`
 
 ---
 
@@ -2349,20 +2280,6 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/repositories/index.ts` - Repository module exports (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./ISessionRepository.js` | `ISessionRepository` | Re-export |
-| `./FileSessionRepository.js` | `FileSessionRepository` | Re-export |
-| `./MemorySessionRepository.js` | `MemorySessionRepository` | Re-export |
-
-**Exports:**
-- Re-exports: `ISessionRepository`, `FileSessionRepository`, `MemorySessionRepository`
-
----
-
 ## Search Dependencies
 
 ### `src/search/engine.ts` - Search Engine (v3.5.0)
@@ -2458,7 +2375,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../types/index.js` | `ThinkingMode, ModeRecommender, ProblemCharacteristics` | Import |
-| `../session/index.js` | `SessionManager` | Import |
+| `../session/manager.js` | `SessionManager` | Import |
 | `../interfaces/ILogger.js` | `ILogger` | Import |
 | `../utils/logger.js` | `createLogger, LogLevel` | Import |
 | `./MetaMonitor.js` | `metaMonitor, MetaMonitor` | Import |
@@ -2469,19 +2386,13 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/services/ThoughtFactory.ts` - Thought Factory Service (v8.4.0)
-
-**Node.js Built-in Dependencies:**
-| Module | Import |
-|--------|--------|
-| `crypto` | `randomUUID` |
+### `src/services/ThoughtFactory.ts` - Thought Factory Service (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingMode, ShannonStage, SequentialThought, ShannonThought, MathematicsThought, PhysicsThought, InductiveThought, DeductiveThought, AbductiveThought, CausalThought, Thought, EngineeringThought, ComputabilityThought, CryptanalyticThought, AlgorithmicThought, SystemsThinkingThought, ScientificMethodThought, FormalLogicThought, OptimizationThought, SynthesisThought, ArgumentationThought, CritiqueThought, AnalysisThought` | Import |
+| `../types/index.js` | `ThinkingMode, Thought` | Import |
 | `../tools/thinking.js` | `ThinkingToolInput` | Import |
-| `../utils/type-guards.js` | `toExtendedThoughtType` | Import |
 | `../interfaces/ILogger.js` | `ILogger` | Import |
 | `../utils/logger.js` | `createLogger, LogLevel` | Import |
 | `../modes/index.js` | `ModeHandlerRegistry, ModeStatus, ValidationResult, registerAllHandlers` | Import |
@@ -2492,47 +2403,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/services/index.ts` - Services module exports (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./ThoughtFactory.js` | `ThoughtFactory, ThoughtFactoryConfig` | Re-export |
-| `./ExportService.js` | `ExportService` | Re-export |
-| `./ModeRouter.js` | `ModeRouter` | Re-export |
-
-**Exports:**
-- Re-exports: `ThoughtFactory`, `ThoughtFactoryConfig`, `ExportService`, `ModeRouter`
-
----
-
 ## Session Dependencies
-
-### `src/session/SessionMetricsCalculator.ts` - Session Metrics Calculator (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `ThinkingSession, SessionMetrics, Thought` | Import |
-| `../types/core.js` | `isTemporalThought, isGameTheoryThought, isEvidentialThought` | Import |
-| `../validation/cache.js` | `validationCache` | Import |
-
-**Exports:**
-- Classes: `SessionMetricsCalculator`
-
----
-
-### `src/session/index.ts` - Session module exports (v4.3.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./manager.js` | `SessionManager` | Re-export |
-
-**Exports:**
-- Re-exports: `SessionManager`
-
----
 
 ### `src/session/manager.ts` - Session Manager for DeepThinking MCP (v6.0.0)
 
@@ -2561,6 +2432,20 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/session/SessionMetricsCalculator.ts` - Session Metrics Calculator (v3.4.5)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `ThinkingSession, SessionMetrics, Thought` | Import |
+| `../types/core.js` | `isTemporalThought, isGameTheoryThought, isEvidentialThought` | Import |
+| `../validation/cache.js` | `validationCache` | Import |
+
+**Exports:**
+- Classes: `SessionMetricsCalculator`
+
+---
+
 ### `src/session/storage/file-store.ts` - File-based Session Storage Implementation
 
 **Node.js Built-in Dependencies:**
@@ -2579,19 +2464,6 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Classes: `FileSessionStore`
-
----
-
-### `src/session/storage/index.ts` - Session Storage Module
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./interface.js` | `SessionStorage, StorageStats, StorageConfig, DEFAULT_STORAGE_CONFIG` | Re-export |
-| `./file-store.js` | `FileSessionStore` | Re-export |
-
-**Exports:**
-- Re-exports: `SessionStorage`, `StorageStats`, `StorageConfig`, `DEFAULT_STORAGE_CONFIG`, `FileSessionStore`
 
 ---
 
@@ -4310,7 +4182,7 @@ The codebase is organized into the following modules:
 | `index` | 4 files | 0 files |
 | `lfu` | 1 files | 2 files |
 | `lru` | 1 files | 3 files |
-| `types` | 0 files | 5 files |
+| `types` | 0 files | 4 files |
 | `index` | 0 files | 2 files |
 | `file-exporter` | 2 files | 1 files |
 | `index` | 4 files | 0 files |
@@ -4395,101 +4267,96 @@ graph TD
 
     subgraph Interfaces
         N14[ILogger]
-        N15[index]
     end
 
     subgraph Modes
-        N16[centrality]
-        N17[d-separation]
-        N18[index]
-        N19[intervention]
-        N20[index]
-        N21[...53 more]
+        N15[centrality]
+        N16[d-separation]
+        N17[intervention]
+        N18[types]
+        N19[analyzer]
+        N20[...49 more]
     end
 
     subgraph Proof
-        N22[assumption-tracker]
-        N23[branch-analyzer]
-        N24[branch-types]
-        N25[circular-detector]
-        N26[decomposer]
-        N27[...8 more]
+        N21[assumption-tracker]
+        N22[branch-analyzer]
+        N23[branch-types]
+        N24[circular-detector]
+        N25[decomposer]
+        N26[...8 more]
     end
 
     subgraph Repositories
-        N28[FileSessionRepository]
-        N29[ISessionRepository]
-        N30[MemorySessionRepository]
-        N31[index]
+        N27[FileSessionRepository]
+        N28[ISessionRepository]
+        N29[MemorySessionRepository]
     end
 
     subgraph Search
-        N32[engine]
-        N33[index]
-        N34[tokenizer]
-        N35[types]
+        N30[engine]
+        N31[index]
+        N32[tokenizer]
+        N33[types]
     end
 
     subgraph Services
-        N36[ExportService]
-        N37[MetaMonitor]
-        N38[ModeRouter]
-        N39[ThoughtFactory]
-        N40[index]
+        N34[ExportService]
+        N35[MetaMonitor]
+        N36[ModeRouter]
+        N37[ThoughtFactory]
     end
 
     subgraph Session
-        N41[SessionMetricsCalculator]
-        N42[index]
-        N43[manager]
-        N44[file-store]
-        N45[index]
-        N46[...1 more]
+        N38[manager]
+        N39[SessionMetricsCalculator]
+        N40[file-store]
+        N41[interface]
     end
 
     subgraph Taxonomy
-        N47[adaptive-selector]
-        N48[classifier]
-        N49[multi-modal-analyzer]
-        N50[navigator]
-        N51[reasoning-types]
-        N52[...2 more]
+        N42[adaptive-selector]
+        N43[classifier]
+        N44[multi-modal-analyzer]
+        N45[navigator]
+        N46[reasoning-types]
+        N47[...2 more]
     end
 
     subgraph Tools
-        N53[definitions]
-        N54[json-schemas]
-        N55[analyze]
-        N56[base]
-        N57[index]
-        N58[...13 more]
+        N48[definitions]
+        N49[json-schemas]
+        N50[analyze]
+        N51[base]
+        N52[index]
+        N53[...13 more]
     end
 
     subgraph Types
-        N59[core]
-        N60[handlers]
-        N61[index]
-        N62[algorithmic]
-        N63[analogical]
-        N64[...31 more]
+        N54[core]
+        N55[handlers]
+        N56[index]
+        N57[algorithmic]
+        N58[analogical]
+        N59[...31 more]
     end
 
     subgraph Utils
-        N65[errors]
-        N66[file-lock]
-        N67[logger-types]
-        N68[logger]
-        N69[sanitization]
-        N70[...1 more]
+        N60[errors]
+        N61[file-lock]
+        N62[logger-types]
+        N63[logger]
+        N64[sanitization]
+        N65[...1 more]
     end
 
     subgraph Validation
-        N71[cache]
-        N72[constants]
-        N73[index]
-        N74[schema-utils]
-        N75[schemas]
-        N76[...39 more]
+        N66[cache]
+        N67[constants]
+        N68[index]
+        N69[schema-utils]
+        N70[schemas]
+        N71[...39 more]
     end
 
     N0 --> N4
@@ -4503,25 +4370,25 @@ graph TD
     N8 --> N10
     N8 --> N9
     N8 --> N7
-    N11 --> N61
+    N11 --> N56
+    N13 --> N37
+    N13 --> N34
+    N13 --> N36
+    N13 --> N38
     N13 --> N40
-    N13 --> N42
-    N13 --> N53
-    N13 --> N61
-    N14 --> N67
-    N15 --> N14
-    N18 --> N16
-    N18 --> N17
-    N18 --> N19
-    N19 --> N17
-    N20 --> N18
-    N23 --> N26
-    N23 --> N24
-    N24 --> N26
-    N28 --> N29
-    N28 --> N61
-    N28 --> N68
-    N28 --> N65
+    N13 --> N48
+    N13 --> N56
+    N14 --> N62
+    N15 --> N18
+    N16 --> N18
+    N17 --> N18
+    N17 --> N16
+    N19 --> N54
+    N22 --> N25
+    N22 --> N23
+    N23 --> N25
+    N27 --> N28
+    N27 --> N41
 ```
 
 ---
@@ -4530,21 +4397,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 255 |
+| Total TypeScript Files | 246 |
 | Total Modules | 16 |
-| Total Lines of Code | 106197 |
-| Total Exports | 1431 |
-| Total Re-exports | 684 |
+| Total Lines of Code | 105312 |
+| Total Exports | 1317 |
+| Total Re-exports | 566 |
 | Total Classes | 155 |
 | Total Interfaces | 533 |
 | Total Functions | 443 |
 | Total Type Guards | 85 |
 | Total Enums | 3 |
-| Type-only Imports | 246 |
+| Type-only Imports | 244 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 55 |
 
 ---
 
-*Last Updated*: 2025-12-26
+*Last Updated*: 2025-12-29
 *Version*: 8.5.0
