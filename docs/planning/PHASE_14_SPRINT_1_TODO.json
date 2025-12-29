@@ -3,15 +3,15 @@
   "sprint": 1,
   "title": "High-Risk Validators",
   "effort": "7-8 hours",
-  "status": "not-started",
+  "status": "completed",
   "coverageTarget": ">90%",
   "description": "Add comprehensive test coverage for the 4 HIGH-risk validators with the most complex logic and highest line counts (1,608 lines total). Target >90% branch coverage through method-level and error-path testing.",
   "tasks": [
     {
       "id": "14.1.1",
       "category": "Computability Validator Tests",
-      "description": "Add tests for computability.ts (531 lines, ~25 error paths)",
-      "status": "not-started",
+      "description": "Add tests for computability.ts (531 lines, ~46 error paths)",
+      "status": "completed",
       "estimatedHours": 2.5,
       "priority": "high",
       "risk": "HIGH",
@@ -65,13 +65,14 @@
       ],
       "sourceFile": "src/validation/validators/modes/computability.ts",
       "estimatedTests": 50,
-      "notes": "Most complex validator - 6 private methods, ~25 error paths, ~3 warning paths. Test each issues.push() call."
+      "actualTests": 57,
+      "notes": "Most complex validator - 6 private methods, ~46 actual error/warning paths. Test each issues.push() call. 97.39% branch coverage achieved."
     },
     {
       "id": "14.1.2",
       "category": "MetaReasoning Validator Tests",
-      "description": "Add tests for metareasoning.ts (370 lines, ~20 error paths)",
-      "status": "not-started",
+      "description": "Add tests for metareasoning.ts (370 lines, ~26 error paths)",
+      "status": "completed",
       "estimatedHours": 1.75,
       "priority": "high",
       "risk": "HIGH",
@@ -116,22 +117,20 @@
       ],
       "sourceFile": "src/validation/validators/modes/metareasoning.ts",
       "estimatedTests": 40,
-      "notes": "7 private methods to cover. Pay attention to 0-1 bounded metrics and the warning for high effectiveness despite issues."
+      "actualTests": 66,
+      "notes": "7 private methods covered. Pay attention to 0-1 bounded metrics and the warning for high effectiveness despite issues. 100% branch coverage achieved."
     },
     {
       "id": "14.1.3",
       "category": "Optimization Validator Tests",
-      "description": "Add tests for optimization.ts (351 lines, ~18 error paths)",
-      "status": "not-started",
+      "description": "Add tests for optimization.ts (351 lines, ~27 error paths)",
+      "status": "completed",
       "estimatedHours": 1.5,
       "priority": "high",
       "risk": "HIGH",
       "privateMethods": [
-        "validateObjectiveFunction()",
-        "validateConstraints()",
-        "validateVariables()",
-        "validateSolution()",
-        "validateMethod()"
+        "(inline validation - no private methods)",
+        "Sections: problem, variables, constraints, objectives, solution, analysis"
       ],
       "details": [
         "Create tests/unit/validation/validators/modes/optimization.test.ts",
@@ -166,22 +165,24 @@
       ],
       "sourceFile": "src/validation/validators/modes/optimization.ts",
       "estimatedTests": 35,
-      "notes": "5 private methods. Focus on constraint type validation and optimization method enumeration."
+      "actualTests": 53,
+      "notes": "No private methods (inline validation). Focus on constraint type validation and all inline sections. 91.36% branch coverage achieved."
     },
     {
       "id": "14.1.4",
       "category": "Cryptanalytic Validator Tests",
-      "description": "Add tests for cryptanalytic.ts (356 lines, ~15 error paths)",
-      "status": "not-started",
+      "description": "Add tests for cryptanalytic.ts (356 lines, ~29 error paths)",
+      "status": "completed",
       "estimatedHours": 1.5,
       "priority": "high",
       "risk": "HIGH",
       "privateMethods": [
-        "validateDecibanScore()",
-        "validateEvidence()",
-        "validateCipherAnalysis()",
-        "validateKeyRecovery()",
-        "validateAttackVector()"
+        "validateEvidenceChain()",
+        "validateDecibanEvidence()",
+        "validateKeySpaceAnalysis()",
+        "validateFrequencyAnalysis()",
+        "validateHypotheses()",
+        "validateCribAnalysis()"
       ],
       "details": [
         "Create tests/unit/validation/validators/modes/cryptanalytic.test.ts",
@@ -212,8 +213,9 @@
         "tests/unit/validation/validators/modes/cryptanalytic.test.ts"
       ],
       "sourceFile": "src/validation/validators/modes/cryptanalytic.ts",
-      "estimatedTests": 30,
-      "notes": "5 private methods. Deciban system requires testing positive, negative, and neutral evidence scenarios."
+      "estimatedTests": 52,
+      "actualTests": 52,
+      "notes": "6 private methods. Deciban system requires testing positive, negative, and neutral evidence scenarios. Tests cover all evidence chains, key space, frequency analysis, hypotheses, and crib analysis."
     }
   ],
   "successCriteria": [
@@ -232,7 +234,15 @@
   ],
   "totalEstimatedHours": 7.25,
   "totalEstimatedTests": 155,
-  "totalErrorPaths": 78,
-  "totalWarningPaths": 8,
-  "notes": "Sprint 1 covers the 4 HIGH-risk validators (1,608 lines, ~78 error paths, ~8 warning paths). Each private method gets its own describe() block. Target >90% branch coverage by testing both paths of every conditional."
+  "totalActualTests": 228,
+  "totalErrorPaths": 128,
+  "totalWarningPaths": "included in totalErrorPaths",
+  "completedDate": "2024-12-28",
+  "coverageResults": {
+    "computability": "97.39% branches",
+    "metareasoning": "100% branches",
+    "optimization": "91.36% branches",
+    "cryptanalytic": "100% branches"
+  },
+  "notes": "Sprint 1 completed. Covers 4 HIGH-risk validators (1,608 lines, 128 actual error/warning paths). 228 tests created (147% of estimate). All validators exceed >90% branch coverage target."
 }

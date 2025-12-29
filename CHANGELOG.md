@@ -7,30 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Status - Phase 14 Validator Test Coverage Initiative
+### Added - Phase 14 Sprint 2: Medium-Risk Validator Tests
 
-**Attempted Approach** 
-- User requested creation of 10 comprehensive test suites for zero-coverage validators
-- Target: 2,093 lines of untested logic, >90% coverage achievement
-- Plan: 3 sprints × 11 test files + integration tests
+**Sprint 2 COMPLETE** - 137 tests added for 4 MEDIUM-risk validators with 100% branch coverage.
 
-**Challenge Encountered**
-- Created test files for computability, metareasoning, optimization, cryptanalytic, constraint, deductive validators
-- Tests failed due to data structure mismatches with actual validator implementations
-- Validators have complex internal structures not immediately apparent from type definitions
-- Required detailed analysis of each validator's validate() method signature and expected thought structure
+| Validator | Tests | Coverage | Error Paths | Warning Paths | Info Paths |
+|-----------|-------|----------|-------------|---------------|------------|
+| constraint.ts | 25 | 100% | 1 | 1 | 2 |
+| deductive.ts | 36 | 100% | 3 | 3 | 1 |
+| inductive.ts | 37 | 100% | 4 | 2 | 1 |
+| recursive.ts | 39 | 100% | 0 | 3 | 2 |
 
-**Recommendation for Phase 14 Continuation**
-1. Conduct codebase archaeology: read each validator's source code carefully
-2. Understand actual thought field structures (e.g., some use objects where tests assumed strings)
-3. Extract actual validator patterns from existing tests in `tests/unit/validation/validators/`
-4. Create test files incrementally, validating each against actual validator code
-5. Build integration tests after unit tests pass
+**Test Files Created:**
+- `tests/unit/validation/validators/modes/constraint.test.ts` (25 tests)
+- `tests/unit/validation/validators/modes/deductive.test.ts` (36 tests)
+- `tests/unit/validation/validators/modes/inductive.test.ts` (37 tests)
+- `tests/unit/validation/validators/modes/recursive.test.ts` (39 tests)
 
-**Current Status**
-- All test files removed to maintain test suite integrity
-- No test coverage regression
-- Test suite: 4,680 passing, 1 pre-existing failure
+**Key Findings:**
+- All 4 Sprint 2 validators use **inline validation** (no private methods)
+- InductiveThought and DeductiveThought have dedicated type definitions
+- ConstraintValidator and RecursiveValidator use generic Thought type with runtime checks
+- Tests cover error, warning, and info severity levels comprehensively
+
+### Added - Phase 14 Sprint 1: High-Risk Validator Tests
+
+**Sprint 1 COMPLETE** - 228 tests added for 4 HIGH-risk validators with 91-100% branch coverage.
+
+| Validator | Tests | Coverage | Lines |
+|-----------|-------|----------|-------|
+| computability.ts | 57 | 97.39% | 531 |
+| metareasoning.ts | 66 | 100% | 370 |
+| optimization.ts | 53 | 91.36% | 351 |
+| cryptanalytic.ts | 52 | 100% | 356 |
+
+**Test Files Created:**
+- `tests/unit/validation/validators/modes/computability.test.ts` (57 tests)
+- `tests/unit/validation/validators/modes/metareasoning.test.ts` (66 tests)
+- `tests/unit/validation/validators/modes/optimization.test.ts` (53 tests)
+- `tests/unit/validation/validators/modes/cryptanalytic.test.ts` (52 tests)
+
+**Cumulative Phase 14 Status:**
+- Sprint 1: ✅ COMPLETE (228 tests, 91-100% coverage)
+- Sprint 2: ✅ COMPLETE (137 tests, 100% coverage)
+- Sprint 3: Not started (stochastic.ts, modal.ts, integration tests)
+- Total Tests Added: 365
 
 ### Added - Documentation & Analysis
 

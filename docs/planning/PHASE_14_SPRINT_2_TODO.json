@@ -3,23 +3,30 @@
   "sprint": 2,
   "title": "Medium-Risk Validators",
   "effort": "5-6 hours",
-  "status": "not-started",
+  "status": "completed",
+  "completedDate": "2025-12-28",
   "coverageTarget": ">90%",
+  "actualCoverage": "100%",
+  "actualTests": 137,
   "description": "Add comprehensive test coverage for the 4 MEDIUM-risk validators with moderate complexity (355 lines total). Target >90% branch coverage through method-level and error-path testing.",
+  "findings": {
+    "noPrivateMethods": "All 4 Sprint 2 validators use inline validation only - no private methods exist",
+    "typeDefinitions": "InductiveThought and DeductiveThought have dedicated types; ConstraintValidator and RecursiveValidator use generic Thought",
+    "validationStyle": "Keyword-based content validation rather than structured data validation"
+  },
   "tasks": [
     {
       "id": "14.2.1",
       "category": "Constraint Validator Tests",
-      "description": "Add tests for constraint.ts (68 lines, ~8 error paths)",
-      "status": "not-started",
+      "description": "Add tests for constraint.ts (84 lines, inline validation)",
+      "status": "completed",
       "estimatedHours": 1.0,
+      "actualTests": 25,
+      "branchCoverage": "100%",
       "priority": "medium",
       "risk": "MEDIUM",
-      "privateMethods": [
-        "validateVariables()",
-        "validateDomains()",
-        "validateConstraints()"
-      ],
+      "privateMethods": [],
+      "actualImplementation": "Inline validation only - validates constraints array, keyword presence, solution satisfaction language",
       "details": [
         "Create tests/unit/validation/validators/modes/constraint.test.ts",
         "describe('validate') - test main entry point",
@@ -53,17 +60,15 @@
     {
       "id": "14.2.2",
       "category": "Deductive Validator Tests",
-      "description": "Add tests for deductive.ts (104 lines, ~12 error paths)",
-      "status": "not-started",
+      "description": "Add tests for deductive.ts (118 lines, inline validation)",
+      "status": "completed",
       "estimatedHours": 1.5,
+      "actualTests": 36,
+      "branchCoverage": "100%",
       "priority": "medium",
       "risk": "MEDIUM",
-      "privateMethods": [
-        "validatePremises()",
-        "validateConclusion()",
-        "validateLogicalForm()",
-        "validateValidity()"
-      ],
+      "privateMethods": [],
+      "actualImplementation": "Inline validation - premises array, conclusion string, validityCheck boolean, logicForm recognition, soundnessCheck",
       "details": [
         "Create tests/unit/validation/validators/modes/deductive.test.ts",
         "describe('validate') - test main entry point",
@@ -101,17 +106,15 @@
     {
       "id": "14.2.3",
       "category": "Inductive Validator Tests",
-      "description": "Add tests for inductive.ts (90 lines, ~10 error paths)",
-      "status": "not-started",
+      "description": "Add tests for inductive.ts (104 lines, inline validation)",
+      "status": "completed",
       "estimatedHours": 1.25,
+      "actualTests": 37,
+      "branchCoverage": "100%",
       "priority": "medium",
       "risk": "MEDIUM",
-      "privateMethods": [
-        "validateObservations()",
-        "validateGeneralization()",
-        "validateStrength()",
-        "validateCounterexamples()"
-      ],
+      "privateMethods": [],
+      "actualImplementation": "Inline validation - observations array, generalization string, confidence (0-1), sampleSize, counterexamples info",
       "details": [
         "Create tests/unit/validation/validators/modes/inductive.test.ts",
         "describe('validate') - test main entry point",
@@ -147,17 +150,15 @@
     {
       "id": "14.2.4",
       "category": "Recursive Validator Tests",
-      "description": "Add tests for recursive.ts (93 lines, ~10 error paths)",
-      "status": "not-started",
+      "description": "Add tests for recursive.ts (110 lines, inline validation)",
+      "status": "completed",
       "estimatedHours": 1.25,
+      "actualTests": 39,
+      "branchCoverage": "100%",
       "priority": "medium",
       "risk": "MEDIUM",
-      "privateMethods": [
-        "validateBaseCase()",
-        "validateRecursiveStep()",
-        "validateDepth()",
-        "validateTermination()"
-      ],
+      "privateMethods": [],
+      "actualImplementation": "Inline validation - keyword-based checks for base case, recursive keywords, dependencies, combination logic, termination",
       "details": [
         "Create tests/unit/validation/validators/modes/recursive.test.ts",
         "describe('validate') - test main entry point",
