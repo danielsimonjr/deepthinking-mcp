@@ -39,10 +39,10 @@ const packageJson = JSON.parse(
   readFileSync(join(__dirname, '../package.json'), 'utf-8')
 );
 
-// Import new tool definitions and schemas
-import { ModeHandlerRegistry } from './modes/index.js';
-import type { ExportService, ModeRouter, ThoughtFactory } from './services/index.js';
-import type { SessionManager } from './session/index.js';
+// Import services - Phase 15A: Static imports replace dynamic imports
+import { ExportService, ModeRouter, ThoughtFactory } from './services/index.js';
+import { SessionManager } from './session/index.js';
+import { FileSessionStore } from './session/storage/file-store.js';
 import { isValidTool, modeToToolMap, toolList, toolSchemas } from './tools/definitions.js';
 import { thinkingTool } from './tools/thinking.js'; // Legacy tool for backward compatibility
 import {
@@ -68,55 +68,53 @@ const server = new Server(
 );
 
 /**
- * Lazy Service Initialization (Sprint 9.1)
- * Services are loaded on first use to reduce startup time
+ * Service Initialization (Phase 15A)
+ * Simplified from lazy async getters to direct instances.
+ * SessionManager still supports SESSION_DIR for multi-instance support.
  */
+
+// Synchronous services - created immediately
+const thoughtFactory = new ThoughtFactory();
+const exportService = new ExportService();
+
+// SessionManager - may need async init for file storage
 let _sessionManager: SessionManager | null = null;
-let _thoughtFactory: ThoughtFactory | null = null;
-let _exportService: ExportService | null = null;
 let _modeRouter: ModeRouter | null = null;
+let _sessionManagerPromise: Promise<SessionManager> | null = null;
 
+/**
+ * Get or create SessionManager with optional file-based storage.
+ * Uses cached promise to prevent multiple initializations.
+ */
 async function getSessionManager(): Promise<SessionManager> {
-  if (!_sessionManager) {
-    const { SessionManager } = await import('./session/index.js');
+  if (_sessionManager) return _sessionManager;
 
-    // Check for SESSION_DIR environment variable for multi-instance support
-    const sessionDir = process.env.SESSION_DIR;
+  if (!_sessionManagerPromise) {
+    _sessionManagerPromise = (async () => {
+      const sessionDir = process.env.SESSION_DIR;
 
-    if (sessionDir) {
-      // Use file-based storage with shared directory for multi-instance support
-      const { FileSessionStore } = await import('./session/storage/file-store.js');
-      const storage = new FileSessionStore(sessionDir);
-      await storage.initialize();
-      _sessionManager = new SessionManager({}, undefined, storage);
-      console.error(`[deepthinking-mcp] Using file-based session storage: ${sessionDir}`);
-    } else {
-      // Default: in-memory only (single instance)
-      _sessionManager = new SessionManager();
-    }
+      if (sessionDir) {
+        // File-based storage for multi-instance support
+        const storage = new FileSessionStore(sessionDir);
+        await storage.initialize();
+        _sessionManager = new SessionManager({}, undefined, storage);
+        console.error(`[deepthinking-mcp] Using file-based session storage: ${sessionDir}`);
+      } else {
+        // Default: in-memory only (single instance)
+        _sessionManager = new SessionManager();
+      }
+      return _sessionManager;
+    })();
   }
-  return _sessionManager;
+
+  return _sessionManagerPromise;
 }
 
-async function getThoughtFactory(): Promise<ThoughtFactory> {
-  if (!_thoughtFactory) {
-    const { ThoughtFactory } = await import('./services/index.js');
-    _thoughtFactory = new ThoughtFactory();
-  }
-  return _thoughtFactory;
-}
-
-async function getExportService(): Promise<ExportService> {
-  if (!_exportService) {
-    const { ExportService } = await import('./services/index.js');
-    _exportService = new ExportService();
-  }
-  return _exportService;
-}
-
+/**
+ * Get or create ModeRouter (depends on SessionManager)
+ */
 async function getModeRouter(): Promise<ModeRouter> {
   if (!_modeRouter) {
-    const { ModeRouter } = await import('./services/index.js');
     const sessionManager = await getSessionManager();
     _modeRouter = new ModeRouter(sessionManager);
   }
@@ -247,7 +245,7 @@ type AnalyzeInputType = Record<string, unknown> & {
  */
 async function handleAddThought(input: ThoughtInput, _toolName: string): Promise<MCPResponse> {
   const sessionManager = await getSessionManager();
-  const thoughtFactory = await getThoughtFactory();
+  // Phase 15A: thoughtFactory is now a module-level constant
 
   let sessionId = input.sessionId;
 
@@ -272,14 +270,15 @@ async function handleAddThought(input: ThoughtInput, _toolName: string): Promise
   const session = await sessionManager.addThought(sessionId, thought);
 
   // Build response with analysis results if present
-  const registry = ModeHandlerRegistry.getInstance();
+  // Phase 15A: Use thoughtFactory directly instead of registry singleton
+  const hasHandler = thoughtFactory.hasSpecializedHandler(thought.mode);
   const modeStatus = {
     mode: thought.mode,
     isFullyImplemented: isFullyImplemented(thought.mode),
-    hasSpecializedHandler: registry.hasSpecializedHandler(thought.mode),
+    hasSpecializedHandler: hasHandler,
     note: !isFullyImplemented(thought.mode)
       ? 'This mode is experimental with limited runtime implementation'
-      : registry.hasSpecializedHandler(thought.mode)
+      : hasHandler
         ? undefined
         : 'Using generic handler - specialized validation not available',
   };
@@ -368,7 +367,7 @@ async function handleExport(input: SessionInput): Promise<MCPResponse> {
   }
 
   const sessionManager = await getSessionManager();
-  const exportService = await getExportService();
+  // Phase 15A: exportService is now a module-level constant
 
   const session = await sessionManager.getSession(input.sessionId);
   if (!session) {
@@ -520,7 +519,7 @@ async function handleExportAll(input: SessionInput): Promise<MCPResponse> {
   }
 
   const sessionManager = await getSessionManager();
-  const exportService = await getExportService();
+  // Phase 15A: exportService is now a module-level constant
 
   const session = await sessionManager.getSession(input.sessionId);
   if (!session) {
