@@ -18,7 +18,7 @@
  */
 
 import { ThinkingMode, ModeRecommender, ProblemCharacteristics } from '../types/index.js';
-import { SessionManager } from '../session/index.js';
+import { SessionManager } from '../session/manager.js';
 import { ILogger } from '../interfaces/ILogger.js';
 import { createLogger, LogLevel } from '../utils/logger.js';
 import { metaMonitor, MetaMonitor } from './MetaMonitor.js';

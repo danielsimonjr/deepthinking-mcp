@@ -40,8 +40,10 @@ const packageJson = JSON.parse(
 );
 
 // Import services - Phase 15A: Static imports replace dynamic imports
-import { ExportService, ModeRouter, ThoughtFactory } from './services/index.js';
-import { SessionManager } from './session/index.js';
+import { ThoughtFactory } from './services/ThoughtFactory.js';
+import { ExportService } from './services/ExportService.js';
+import { ModeRouter } from './services/ModeRouter.js';
+import { SessionManager } from './session/manager.js';
 import { FileSessionStore } from './session/storage/file-store.js';
 import { isValidTool, modeToToolMap, toolList, toolSchemas } from './tools/definitions.js';
 import { thinkingTool } from './tools/thinking.js'; // Legacy tool for backward compatibility

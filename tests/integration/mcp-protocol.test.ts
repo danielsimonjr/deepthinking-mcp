@@ -9,7 +9,7 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
-import { SessionManager } from '../../src/session/index.js';
+import { SessionManager } from '../../src/session/manager.js';
 import { ThinkingToolSchema, thinkingTool } from '../../src/tools/thinking.js';
 import { ThinkingMode } from '../../src/types/index.js';
 

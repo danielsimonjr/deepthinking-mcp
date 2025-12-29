@@ -5,7 +5,7 @@
  * Provides consistent session creation across all test files.
  */
 
-import { SessionManager } from '../../src/session/index.js';
+import { SessionManager } from '../../src/session/manager.js';
 import { ThinkingMode } from '../../src/types/core.js';
 import type { ThinkingSession } from '../../src/types/index.js';
 

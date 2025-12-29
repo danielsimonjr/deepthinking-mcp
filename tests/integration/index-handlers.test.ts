@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { SessionManager } from '../../src/session/index.js';
+import { SessionManager } from '../../src/session/manager.js';
 import {
   ThinkingMode,
   ShannonStage,
