@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [8.6.0] - 2025-12-29
+
+### Changed - Phase 15A Sprint 2: Simplify Service Layer
+
+**Sprint 2 COMPLETE** - Reduced service layer from 4 services to 2 by merging and inlining functionality.
+
+**Service Layer Simplification:**
+| Change | Before | After | Impact |
+|--------|--------|-------|--------|
+| MetaMonitor merged | Separate class | Merged into SessionManager | -310 lines |
+| ModeRouter inlined | Separate class | Inlined into index.ts | -380 lines |
+| Cache strategies removed | LRU + LFU + FIFO + factory | LRU only | -3 files |
+
+**Files Deleted (5 total):**
+- `src/services/MetaMonitor.ts` (310 lines)
+- `src/services/ModeRouter.ts` (380 lines)
+- `src/cache/factory.ts` (112 lines)
+- `src/cache/lfu.ts` (LFU cache - unused)
+- `src/cache/fifo.ts` (FIFO cache - unused)
+
+**Files Modified:**
+- `src/session/manager.ts` - Now includes meta-monitoring methods (evaluateStrategy, suggestAlternatives, calculateQualityMetrics, etc.)
+- `src/index.ts` - Mode recommendation logic inlined, uses ModeRecommender directly
+- `src/cache/index.ts` - Simplified exports (LRU only)
+
+**Architectural Improvements:**
+- SessionManager now owns all session-related functionality including meta-monitoring
+- ModeRecommender used directly without wrapper class
+- Removed dead code (LFU and FIFO cache strategies never used externally)
+
+**Tests Updated:**
+- `tests/integration/tools/session-actions.test.ts` - Uses ModeRecommender directly
+- `tests/edge-cases/regression.test.ts` - Uses ModeRecommender directly
+
 ## [Unreleased]
 
 ### Added - Phase 14 Sprint 3: Low-Risk + Integration Tests (PHASE 14 COMPLETE)

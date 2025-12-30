@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **33 reasoning modes** (29 with dedicated thought types) with taxonomy-based classification (69 implemented reasoning types across 12 categories, 110 documented in reference), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
-**Version**: 8.5.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
+**Version**: 8.6.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
 
 ## Project Metrics
 
@@ -63,8 +63,9 @@ Business logic extracted from `src/index.ts` into focused services:
 |---------|------|------|---------|
 | **ThoughtFactory** | `src/services/ThoughtFactory.ts` | 25KB | Mode-specific thought creation for all 33 modes |
 | **ExportService** | `src/services/ExportService.ts` | 21KB | Multi-format export orchestration |
-| **ModeRouter** | `src/services/ModeRouter.ts` | 12KB | Mode switching and recommendations |
-| **MetaMonitor** | `src/services/MetaMonitor.ts` | 9KB | Session tracking and meta-reasoning insights |
+| **SessionManager** | `src/session/manager.ts` | 30KB | Session lifecycle + meta-monitoring (v8.6.0) |
+
+**Note (v8.6.0):** MetaMonitor merged into SessionManager, ModeRouter inlined to index.ts. Mode recommendations use ModeRecommender directly.
 
 ### ModeHandler Architecture (v8.x)
 

@@ -3164,9 +3164,6 @@ var init_combinations = __esm({
 // src/index.ts
 init_esm_shims();
 
-// src/services/index.ts
-init_esm_shims();
-
 // src/services/ThoughtFactory.ts
 init_esm_shims();
 
@@ -41077,496 +41074,6 @@ ${thoughtsText}`;
   }
 };
 
-// src/services/ModeRouter.ts
-init_esm_shims();
-
-// src/services/MetaMonitor.ts
-init_esm_shims();
-var MetaMonitor = class {
-  sessionHistory = /* @__PURE__ */ new Map();
-  currentStrategies = /* @__PURE__ */ new Map();
-  modeTransitions = /* @__PURE__ */ new Map();
-  /**
-   * Record a thought in session history
-   */
-  recordThought(sessionId, thought) {
-    if (!this.sessionHistory.has(sessionId)) {
-      this.sessionHistory.set(sessionId, []);
-    }
-    const history = this.sessionHistory.get(sessionId);
-    history.push({
-      thoughtId: thought.id,
-      mode: thought.mode,
-      timestamp: thought.timestamp,
-      content: thought.content,
-      uncertainty: "uncertainty" in thought ? thought.uncertainty : void 0
-    });
-    if (!this.modeTransitions.has(sessionId)) {
-      this.modeTransitions.set(sessionId, []);
-    }
-    const transitions = this.modeTransitions.get(sessionId);
-    if (transitions.length === 0 || transitions[transitions.length - 1] !== thought.mode) {
-      transitions.push(thought.mode);
-    }
-  }
-  /**
-   * Start tracking a new strategy
-   */
-  startStrategy(sessionId, mode) {
-    this.currentStrategies.set(sessionId, {
-      mode,
-      thoughtsSpent: 0,
-      startTime: /* @__PURE__ */ new Date(),
-      progressIndicators: [],
-      issuesEncountered: []
-    });
-  }
-  /**
-   * Update current strategy progress
-   */
-  updateStrategyProgress(sessionId, indicator) {
-    const strategy = this.currentStrategies.get(sessionId);
-    if (strategy) {
-      strategy.progressIndicators.push(indicator);
-      strategy.thoughtsSpent++;
-    }
-  }
-  /**
-   * Record an issue with current strategy
-   */
-  recordStrategyIssue(sessionId, issue) {
-    const strategy = this.currentStrategies.get(sessionId);
-    if (strategy) {
-      strategy.issuesEncountered.push(issue);
-    }
-  }
-  /**
-   * Evaluate current strategy effectiveness
-   */
-  evaluateStrategy(sessionId) {
-    const strategy = this.currentStrategies.get(sessionId);
-    if (!strategy) {
-      return {
-        effectiveness: 0.5,
-        efficiency: 0.5,
-        confidence: 0.5,
-        progressRate: 0,
-        qualityScore: 0.5,
-        issues: ["No active strategy being tracked"],
-        strengths: []
-      };
-    }
-    const thoughtsSpent = strategy.thoughtsSpent;
-    const progressMade = strategy.progressIndicators.length;
-    const issuesCount = strategy.issuesEncountered.length;
-    const timeElapsed = (/* @__PURE__ */ new Date()).getTime() - strategy.startTime.getTime();
-    const effectiveness = Math.min(1, progressMade / Math.max(1, thoughtsSpent));
-    const efficiency = timeElapsed > 0 ? Math.min(1, progressMade / (timeElapsed / 6e4)) : 0.5;
-    const confidence = Math.max(0.1, 1 - issuesCount * 0.15);
-    const progressRate = thoughtsSpent > 0 ? progressMade / thoughtsSpent : 0;
-    const qualityScore = effectiveness * 0.4 + efficiency * 0.2 + confidence * 0.4;
-    return {
-      effectiveness,
-      efficiency,
-      confidence,
-      progressRate,
-      qualityScore,
-      issues: [...strategy.issuesEncountered],
-      strengths: strategy.progressIndicators.slice(-3)
-      // Recent progress
-    };
-  }
-  /**
-   * Suggest alternative strategies based on current performance
-   */
-  suggestAlternatives(sessionId, currentMode) {
-    const evaluation = this.evaluateStrategy(sessionId);
-    const alternatives = [];
-    if (evaluation.effectiveness < 0.4) {
-      if (currentMode !== "hybrid" /* HYBRID */) {
-        alternatives.push({
-          mode: "hybrid" /* HYBRID */,
-          reasoning: "Low effectiveness detected - hybrid multi-modal approach may provide better results",
-          expectedBenefit: "Combines multiple reasoning types for comprehensive analysis",
-          switchingCost: 0.3,
-          recommendationScore: 0.85
-        });
-      }
-      if (currentMode !== "inductive" /* INDUCTIVE */) {
-        alternatives.push({
-          mode: "inductive" /* INDUCTIVE */,
-          reasoning: "Consider gathering more empirical observations",
-          expectedBenefit: "Build stronger generalizations from specific cases",
-          switchingCost: 0.2,
-          recommendationScore: 0.7
-        });
-      }
-    }
-    if (evaluation.effectiveness >= 0.4 && evaluation.efficiency < 0.5) {
-      alternatives.push({
-        mode: currentMode,
-        // Same mode, but recommend refinement
-        reasoning: "Progress detected but efficiency is low - consider refining current approach",
-        expectedBenefit: "Improved efficiency while maintaining progress",
-        switchingCost: 0.1,
-        recommendationScore: 0.65
-      });
-    }
-    return alternatives;
-  }
-  /**
-   * Calculate quality metrics for current session
-   */
-  calculateQualityMetrics(sessionId) {
-    const history = this.sessionHistory.get(sessionId) || [];
-    const strategy = this.currentStrategies.get(sessionId);
-    if (history.length === 0) {
-      return {
-        logicalConsistency: 0.5,
-        evidenceQuality: 0.5,
-        completeness: 0.5,
-        originality: 0.5,
-        clarity: 0.5,
-        overallQuality: 0.5
-      };
-    }
-    const issuesCount = strategy?.issuesEncountered.length || 0;
-    const logicalConsistency = Math.max(0.1, 1 - issuesCount * 0.1);
-    const avgUncertainty = history.reduce((sum, entry) => sum + (entry.uncertainty || 0.5), 0) / history.length;
-    const evidenceQuality = 1 - avgUncertainty;
-    const completeness = Math.min(1, history.length / 5);
-    const uniqueModes = new Set(history.map((h) => h.mode)).size;
-    const originality = Math.min(1, uniqueModes / 3);
-    const progressCount = strategy?.progressIndicators.length || 0;
-    const clarity = Math.min(1, progressCount / Math.max(1, history.length));
-    const overallQuality = logicalConsistency * 0.25 + evidenceQuality * 0.2 + completeness * 0.15 + originality * 0.15 + clarity * 0.25;
-    return {
-      logicalConsistency,
-      evidenceQuality,
-      completeness,
-      originality,
-      clarity,
-      overallQuality
-    };
-  }
-  /**
-   * Get session context for meta-reasoning
-   */
-  getSessionContext(sessionId, problemType) {
-    const history = this.sessionHistory.get(sessionId) || [];
-    const transitions = this.modeTransitions.get(sessionId) || [];
-    return {
-      sessionId,
-      totalThoughts: history.length,
-      modesUsed: transitions,
-      modeSwitches: Math.max(0, transitions.length - 1),
-      problemType,
-      historicalEffectiveness: this.getHistoricalEffectiveness(problemType)
-    };
-  }
-  /**
-   * Get historical effectiveness for similar problems (simplified)
-   */
-  getHistoricalEffectiveness(_problemType) {
-    return void 0;
-  }
-  /**
-   * Clear session data (for cleanup)
-   */
-  clearSession(sessionId) {
-    this.sessionHistory.delete(sessionId);
-    this.currentStrategies.delete(sessionId);
-    this.modeTransitions.delete(sessionId);
-  }
-  /**
-   * Get all tracked sessions
-   */
-  getActiveSessions() {
-    return Array.from(this.sessionHistory.keys());
-  }
-};
-var metaMonitor = new MetaMonitor();
-
-// src/services/ModeRouter.ts
-var ModeRouter = class {
-  sessionManager;
-  recommender;
-  logger;
-  monitor;
-  /**
-   * Create a new ModeRouter
-   *
-   * @param sessionManager - Session manager instance for mode switching
-   * @param logger - Optional logger for dependency injection
-   * @param monitor - Optional MetaMonitor instance for dependency injection
-   *
-   * @example
-   * ```typescript
-   * const router = new ModeRouter(sessionManager);
-   * // Or with DI:
-   * const router = new ModeRouter(sessionManager, customLogger, customMonitor);
-   * ```
-   */
-  constructor(sessionManager, logger3, monitor) {
-    this.sessionManager = sessionManager;
-    this.recommender = new ModeRecommender();
-    this.logger = logger3 || createLogger({ minLevel: 1 /* INFO */, enableConsole: true });
-    this.monitor = monitor || metaMonitor;
-  }
-  /**
-   * Switch a session to a new thinking mode
-   *
-   * Changes the thinking mode of an active session while preserving
-   * existing thoughts. Useful when the problem characteristics change
-   * or initial mode selection was suboptimal.
-   *
-   * @param sessionId - ID of the session to switch
-   * @param newMode - The new thinking mode to use
-   * @param reason - Reason for the mode switch (for logging)
-   * @returns The updated session
-   * @throws {Error} If session not found
-   *
-   * @example
-   * ```typescript
-   * const session = await router.switchMode(
-   *   'session-123',
-   *   ThinkingMode.MATHEMATICS,
-   *   'Problem requires mathematical proof'
-   * );
-   * ```
-   */
-  async switchMode(sessionId, newMode, reason) {
-    this.logger.info("Switching mode", {
-      sessionId,
-      newMode,
-      reason
-    });
-    const session = await this.sessionManager.switchMode(sessionId, newMode, reason);
-    this.logger.debug("Mode switch completed", {
-      sessionId,
-      newMode,
-      thoughtCount: session.thoughts.length
-    });
-    return session;
-  }
-  /**
-   * Get quick mode recommendation based on problem type
-   *
-   * Provides a fast, single-mode recommendation based on a simple
-   * problem type string. Useful for quick suggestions without detailed
-   * problem analysis.
-   *
-   * @param problemType - Simple problem type description
-   * @returns Recommended thinking mode
-   *
-   * @example
-   * ```typescript
-   * const mode = router.quickRecommend('mathematical proof');
-   * // Returns: ThinkingMode.MATHEMATICS
-   * ```
-   */
-  quickRecommend(problemType) {
-    this.logger.debug("Quick recommend requested", { problemType });
-    const mode = this.recommender.quickRecommend(problemType);
-    this.logger.debug("Quick recommend result", { problemType, recommendedMode: mode });
-    return mode;
-  }
-  /**
-   * Get comprehensive mode recommendations
-   *
-   * Analyzes problem characteristics and returns ranked recommendations
-   * for individual modes and optionally mode combinations.
-   *
-   * @param characteristics - Detailed problem characteristics
-   * @param includeCombinations - Whether to include mode combinations
-   * @returns Formatted recommendation response
-   *
-   * @example
-   * ```typescript
-   * const response = router.getRecommendations({
-   *   requiresProof: true,
-   *   hasQuantities: true,
-   *   hasUncertainty: false
-   * }, true);
-   * ```
-   */
-  getRecommendations(characteristics, includeCombinations = false) {
-    this.logger.debug("Getting mode recommendations", {
-      characteristics,
-      includeCombinations
-    });
-    const modeRecs = this.recommender.recommendModes(characteristics);
-    const combinationRecs = includeCombinations ? this.recommender.recommendCombinations(characteristics) : [];
-    this.logger.debug("Recommendations generated", {
-      modeCount: modeRecs.length,
-      combinationCount: combinationRecs.length,
-      topMode: modeRecs[0]?.mode,
-      topScore: modeRecs[0]?.score
-    });
-    let response = "# Mode Recommendations\n\n";
-    response += "## Individual Modes\n\n";
-    for (const rec of modeRecs) {
-      response += `### ${rec.mode} (Score: ${rec.score})
-`;
-      response += `**Reasoning**: ${rec.reasoning}
-
-`;
-      response += `**Strengths**:
-`;
-      for (const strength of rec.strengths) {
-        response += `- ${strength}
-`;
-      }
-      response += `
-**Limitations**:
-`;
-      for (const limitation of rec.limitations) {
-        response += `- ${limitation}
-`;
-      }
-      response += `
-**Examples**: ${rec.examples.join(", ")}
-
-`;
-      response += "---\n\n";
-    }
-    if (combinationRecs.length > 0) {
-      response += "## Recommended Mode Combinations\n\n";
-      for (const combo of combinationRecs) {
-        response += `### ${combo.modes.join(" + ")} (${combo.sequence})
-`;
-        response += `**Rationale**: ${combo.rationale}
-
-`;
-        response += `**Benefits**:
-`;
-        for (const benefit of combo.benefits) {
-          response += `- ${benefit}
-`;
-        }
-        response += `
-**Synergies**:
-`;
-        for (const synergy of combo.synergies) {
-          response += `- ${synergy}
-`;
-        }
-        response += "\n---\n\n";
-      }
-    }
-    return response;
-  }
-  /**
-   * Format a quick recommendation response
-   *
-   * Creates a formatted response for quick recommendations.
-   *
-   * @param problemType - The problem type that was analyzed
-   * @param recommendedMode - The recommended mode
-   * @returns Formatted response string
-   */
-  formatQuickRecommendation(problemType, recommendedMode) {
-    return `Quick recommendation for "${problemType}":
-
-**Recommended Mode**: ${recommendedMode}
-
-For more detailed recommendations, provide problemCharacteristics.`;
-  }
-  /**
-   * Evaluate current session and suggest mode switch if beneficial
-   *
-   * Uses meta-reasoning to evaluate the current strategy effectiveness
-   * and suggest alternative modes if the current approach is suboptimal.
-   *
-   * @param sessionId - Session to evaluate
-   * @param problemType - Optional problem type for context
-   * @returns Evaluation result with switch recommendation
-   *
-   * @example
-   * ```typescript
-   * const evaluation = await router.evaluateAndSuggestSwitch('session-123', 'debugging');
-   * if (evaluation.shouldSwitch) {
-   *   await router.switchMode(sessionId, evaluation.suggestedMode!, evaluation.reasoning);
-   * }
-   * ```
-   */
-  async evaluateAndSuggestSwitch(sessionId, problemType = "general") {
-    this.logger.debug("Evaluating session for potential mode switch", { sessionId, problemType });
-    const evaluation = this.monitor.evaluateStrategy(sessionId);
-    const session = await this.sessionManager.getSession(sessionId);
-    const currentMode = session?.mode || "sequential" /* SEQUENTIAL */;
-    const alternatives = this.monitor.suggestAlternatives(sessionId, currentMode);
-    const shouldSwitch = evaluation.effectiveness < 0.4 || evaluation.effectiveness < 0.6 && alternatives.length > 0 && alternatives[0].recommendationScore > 0.75;
-    const suggestedMode = shouldSwitch && alternatives.length > 0 ? alternatives[0].mode : void 0;
-    const reasoning = shouldSwitch ? `Current strategy effectiveness: ${(evaluation.effectiveness * 100).toFixed(1)}%. ${alternatives[0]?.reasoning || "Consider switching modes."}` : `Current strategy performing adequately (effectiveness: ${(evaluation.effectiveness * 100).toFixed(1)}%). Continue with current mode.`;
-    this.logger.debug("Mode switch evaluation completed", {
-      sessionId,
-      shouldSwitch,
-      suggestedMode,
-      currentEffectiveness: evaluation.effectiveness
-    });
-    return {
-      currentEvaluation: evaluation,
-      shouldSwitch,
-      suggestedMode,
-      reasoning,
-      alternatives
-    };
-  }
-  /**
-   * Auto-switch mode if current strategy is failing
-   *
-   * Automatically evaluates and switches modes if the current approach
-   * is demonstrably ineffective (effectiveness < 0.3).
-   *
-   * @param sessionId - Session to evaluate
-   * @param problemType - Optional problem type for context
-   * @returns Switch result with details
-   *
-   * @example
-   * ```typescript
-   * const result = await router.autoSwitchIfNeeded('session-123', 'complex-problem');
-   * console.log(result.switched ? 'Switched to' + result.newMode : 'No switch needed');
-   * ```
-   */
-  async autoSwitchIfNeeded(sessionId, problemType = "general") {
-    this.logger.debug("Auto-switch evaluation", { sessionId, problemType });
-    const evaluation = await this.evaluateAndSuggestSwitch(sessionId, problemType);
-    const autoSwitchThreshold = 0.3;
-    if (evaluation.currentEvaluation.effectiveness < autoSwitchThreshold && evaluation.suggestedMode) {
-      const session = await this.sessionManager.getSession(sessionId);
-      const oldMode = session?.mode || "sequential" /* SEQUENTIAL */;
-      await this.switchMode(sessionId, evaluation.suggestedMode, evaluation.reasoning);
-      this.logger.info("Auto-switched mode due to low effectiveness", {
-        sessionId,
-        oldMode,
-        newMode: evaluation.suggestedMode,
-        effectiveness: evaluation.currentEvaluation.effectiveness
-      });
-      return {
-        switched: true,
-        oldMode,
-        newMode: evaluation.suggestedMode,
-        reasoning: evaluation.reasoning,
-        evaluation: evaluation.currentEvaluation
-      };
-    }
-    this.logger.debug("Auto-switch not needed", {
-      sessionId,
-      effectiveness: evaluation.currentEvaluation.effectiveness,
-      threshold: autoSwitchThreshold
-    });
-    return {
-      switched: false,
-      reasoning: evaluation.reasoning,
-      evaluation: evaluation.currentEvaluation
-    };
-  }
-};
-
-// src/session/index.ts
-init_esm_shims();
-
 // src/session/manager.ts
 init_esm_shims();
 
@@ -42170,14 +41677,16 @@ var SessionManager = class {
   logger;
   storage;
   metricsCalculator;
-  monitor;
+  // Meta-monitoring state (merged from MetaMonitor)
+  sessionHistory = /* @__PURE__ */ new Map();
+  currentStrategies = /* @__PURE__ */ new Map();
+  modeTransitions = /* @__PURE__ */ new Map();
   /**
    * Creates a new SessionManager instance
    *
    * @param config - Optional default configuration applied to all new sessions
    * @param logger - Optional logger instance or log level (default: INFO level logger)
    * @param storage - Optional persistent storage backend for sessions
-   * @param monitor - Optional MetaMonitor instance for dependency injection
    *
    * @example
    * ```typescript
@@ -42199,7 +41708,7 @@ var SessionManager = class {
    * const manager = new SessionManager({}, LogLevel.INFO, storage);
    * ```
    */
-  constructor(config, logger3, storage, monitor) {
+  constructor(config, logger3, storage) {
     this.activeSessions = new LRUCache({
       maxSize: 1e3,
       enableStats: true,
@@ -42212,14 +41721,11 @@ var SessionManager = class {
             this.logger.error("Failed to save evicted session", error, { sessionId: key });
           }
         }
-        if (this.monitor) {
-          this.monitor.clearSession(key);
-        }
+        this.clearMetaSession(key);
       }
     });
     this.config = config || {};
     this.storage = storage;
-    this.monitor = monitor || metaMonitor;
     if (logger3 && typeof logger3 === "object" && "info" in logger3) {
       this.logger = logger3;
     } else {
@@ -42285,7 +41791,7 @@ var SessionManager = class {
         this.logger.error("Failed to persist session", error, { sessionId });
       }
     }
-    this.monitor.startStrategy(sessionId, session.mode);
+    this.startMetaStrategy(sessionId, session.mode);
     this.logger.info("Session created", {
       sessionId,
       title,
@@ -42369,7 +41875,7 @@ var SessionManager = class {
     session.currentThoughtNumber = thought.thoughtNumber;
     session.updatedAt = /* @__PURE__ */ new Date();
     this.metricsCalculator.updateMetrics(session, thought);
-    this.monitor.recordThought(sessionId, thought);
+    this.recordMetaThought(sessionId, thought);
     if (!thought.nextThoughtNeeded) {
       session.isComplete = true;
       this.logger.info("Session completed", {
@@ -42580,6 +42086,224 @@ var SessionManager = class {
       ...this.config,
       ...userConfig
     };
+  }
+  // ============================================
+  // Meta-Monitoring Methods (merged from MetaMonitor)
+  // ============================================
+  /**
+   * Record a thought in session history for meta-monitoring
+   */
+  recordMetaThought(sessionId, thought) {
+    if (!this.sessionHistory.has(sessionId)) {
+      this.sessionHistory.set(sessionId, []);
+    }
+    const history = this.sessionHistory.get(sessionId);
+    history.push({
+      thoughtId: thought.id,
+      mode: thought.mode,
+      timestamp: thought.timestamp,
+      content: thought.content,
+      uncertainty: "uncertainty" in thought ? thought.uncertainty : void 0
+    });
+    if (!this.modeTransitions.has(sessionId)) {
+      this.modeTransitions.set(sessionId, []);
+    }
+    const transitions = this.modeTransitions.get(sessionId);
+    if (transitions.length === 0 || transitions[transitions.length - 1] !== thought.mode) {
+      transitions.push(thought.mode);
+    }
+  }
+  /**
+   * Start tracking a new strategy for meta-monitoring
+   */
+  startMetaStrategy(sessionId, mode) {
+    this.currentStrategies.set(sessionId, {
+      mode,
+      thoughtsSpent: 0,
+      startTime: /* @__PURE__ */ new Date(),
+      progressIndicators: [],
+      issuesEncountered: []
+    });
+  }
+  /**
+   * Update current strategy progress
+   */
+  updateStrategyProgress(sessionId, indicator) {
+    const strategy = this.currentStrategies.get(sessionId);
+    if (strategy) {
+      strategy.progressIndicators.push(indicator);
+      strategy.thoughtsSpent++;
+    }
+  }
+  /**
+   * Record an issue with current strategy
+   */
+  recordStrategyIssue(sessionId, issue) {
+    const strategy = this.currentStrategies.get(sessionId);
+    if (strategy) {
+      strategy.issuesEncountered.push(issue);
+    }
+  }
+  /**
+   * Evaluate current strategy effectiveness
+   */
+  evaluateStrategy(sessionId) {
+    const strategy = this.currentStrategies.get(sessionId);
+    if (!strategy) {
+      return {
+        effectiveness: 0.5,
+        efficiency: 0.5,
+        confidence: 0.5,
+        progressRate: 0,
+        qualityScore: 0.5,
+        issues: ["No active strategy being tracked"],
+        strengths: []
+      };
+    }
+    const thoughtsSpent = strategy.thoughtsSpent;
+    const progressMade = strategy.progressIndicators.length;
+    const issuesCount = strategy.issuesEncountered.length;
+    const timeElapsed = (/* @__PURE__ */ new Date()).getTime() - strategy.startTime.getTime();
+    const effectiveness = Math.min(1, progressMade / Math.max(1, thoughtsSpent));
+    const MILLIS_PER_MINUTE = 6e4;
+    const efficiency = timeElapsed > 0 ? Math.min(1, progressMade / (timeElapsed / MILLIS_PER_MINUTE)) : 0.5;
+    const ISSUE_PENALTY = 0.15;
+    const MIN_CONFIDENCE = 0.1;
+    const confidence = Math.max(MIN_CONFIDENCE, 1 - issuesCount * ISSUE_PENALTY);
+    const progressRate = thoughtsSpent > 0 ? progressMade / thoughtsSpent : 0;
+    const EFFECTIVENESS_WEIGHT = 0.4;
+    const EFFICIENCY_WEIGHT = 0.2;
+    const CONFIDENCE_WEIGHT = 0.4;
+    const qualityScore = effectiveness * EFFECTIVENESS_WEIGHT + efficiency * EFFICIENCY_WEIGHT + confidence * CONFIDENCE_WEIGHT;
+    return {
+      effectiveness,
+      efficiency,
+      confidence,
+      progressRate,
+      qualityScore,
+      issues: [...strategy.issuesEncountered],
+      strengths: strategy.progressIndicators.slice(-3)
+      // Recent progress
+    };
+  }
+  /**
+   * Suggest alternative strategies based on current performance
+   */
+  suggestAlternatives(sessionId, currentMode) {
+    const evaluation = this.evaluateStrategy(sessionId);
+    const alternatives = [];
+    const LOW_EFFECTIVENESS_THRESHOLD = 0.4;
+    const LOW_EFFICIENCY_THRESHOLD = 0.5;
+    if (evaluation.effectiveness < LOW_EFFECTIVENESS_THRESHOLD) {
+      if (currentMode !== "hybrid" /* HYBRID */) {
+        alternatives.push({
+          mode: "hybrid" /* HYBRID */,
+          reasoning: "Low effectiveness detected - hybrid multi-modal approach may provide better results",
+          expectedBenefit: "Combines multiple reasoning types for comprehensive analysis",
+          switchingCost: 0.3,
+          recommendationScore: 0.85
+        });
+      }
+      if (currentMode !== "inductive" /* INDUCTIVE */) {
+        alternatives.push({
+          mode: "inductive" /* INDUCTIVE */,
+          reasoning: "Consider gathering more empirical observations",
+          expectedBenefit: "Build stronger generalizations from specific cases",
+          switchingCost: 0.2,
+          recommendationScore: 0.7
+        });
+      }
+    }
+    if (evaluation.effectiveness >= LOW_EFFECTIVENESS_THRESHOLD && evaluation.efficiency < LOW_EFFICIENCY_THRESHOLD) {
+      alternatives.push({
+        mode: currentMode,
+        // Same mode, but recommend refinement
+        reasoning: "Progress detected but efficiency is low - consider refining current approach",
+        expectedBenefit: "Improved efficiency while maintaining progress",
+        switchingCost: 0.1,
+        recommendationScore: 0.65
+      });
+    }
+    return alternatives;
+  }
+  /**
+   * Calculate quality metrics for current session
+   */
+  calculateQualityMetrics(sessionId) {
+    const history = this.sessionHistory.get(sessionId) || [];
+    const strategy = this.currentStrategies.get(sessionId);
+    if (history.length === 0) {
+      return {
+        logicalConsistency: 0.5,
+        evidenceQuality: 0.5,
+        completeness: 0.5,
+        originality: 0.5,
+        clarity: 0.5,
+        overallQuality: 0.5
+      };
+    }
+    const ISSUE_CONSISTENCY_PENALTY = 0.1;
+    const MIN_CONSISTENCY = 0.1;
+    const issuesCount = strategy?.issuesEncountered.length || 0;
+    const logicalConsistency = Math.max(MIN_CONSISTENCY, 1 - issuesCount * ISSUE_CONSISTENCY_PENALTY);
+    const avgUncertainty = history.reduce((sum, entry) => sum + (entry.uncertainty || 0.5), 0) / history.length;
+    const evidenceQuality = 1 - avgUncertainty;
+    const COMPLETENESS_NORMALIZATION = 5;
+    const completeness = Math.min(1, history.length / COMPLETENESS_NORMALIZATION);
+    const ORIGINALITY_NORMALIZATION = 3;
+    const uniqueModes = new Set(history.map((h) => h.mode)).size;
+    const originality = Math.min(1, uniqueModes / ORIGINALITY_NORMALIZATION);
+    const progressCount = strategy?.progressIndicators.length || 0;
+    const clarity = Math.min(1, progressCount / Math.max(1, history.length));
+    const CONSISTENCY_WEIGHT = 0.25;
+    const EVIDENCE_WEIGHT = 0.2;
+    const COMPLETENESS_WEIGHT = 0.15;
+    const ORIGINALITY_WEIGHT = 0.15;
+    const CLARITY_WEIGHT = 0.25;
+    const overallQuality = logicalConsistency * CONSISTENCY_WEIGHT + evidenceQuality * EVIDENCE_WEIGHT + completeness * COMPLETENESS_WEIGHT + originality * ORIGINALITY_WEIGHT + clarity * CLARITY_WEIGHT;
+    return {
+      logicalConsistency,
+      evidenceQuality,
+      completeness,
+      originality,
+      clarity,
+      overallQuality
+    };
+  }
+  /**
+   * Get session context for meta-reasoning
+   */
+  getMetaSessionContext(sessionId, problemType) {
+    const history = this.sessionHistory.get(sessionId) || [];
+    const transitions = this.modeTransitions.get(sessionId) || [];
+    return {
+      sessionId,
+      totalThoughts: history.length,
+      modesUsed: transitions,
+      modeSwitches: Math.max(0, transitions.length - 1),
+      problemType,
+      historicalEffectiveness: this.getHistoricalEffectiveness(problemType)
+    };
+  }
+  /**
+   * Get historical effectiveness for similar problems (simplified)
+   */
+  getHistoricalEffectiveness(_problemType) {
+    return void 0;
+  }
+  /**
+   * Clear meta-monitoring session data (for cleanup)
+   */
+  clearMetaSession(sessionId) {
+    this.sessionHistory.delete(sessionId);
+    this.currentStrategies.delete(sessionId);
+    this.modeTransitions.delete(sessionId);
+  }
+  /**
+   * Get all tracked meta-monitoring sessions
+   */
+  getActiveMetaSessions() {
+    return Array.from(this.sessionHistory.keys());
   }
 };
 
@@ -45380,8 +45104,8 @@ var server = new Server(
 var thoughtFactory = new ThoughtFactory();
 var exportService = new ExportService();
 var _sessionManager = null;
-var _modeRouter = null;
 var _sessionManagerPromise = null;
+var modeRecommender = new ModeRecommender();
 async function getSessionManager() {
   if (_sessionManager) return _sessionManager;
   if (!_sessionManagerPromise) {
@@ -45399,13 +45123,6 @@ async function getSessionManager() {
     })();
   }
   return _sessionManagerPromise;
-}
-async function getModeRouter() {
-  if (!_modeRouter) {
-    const sessionManager = await getSessionManager();
-    _modeRouter = new ModeRouter(sessionManager);
-  }
-  return _modeRouter;
 }
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
@@ -45776,8 +45493,8 @@ async function handleSwitchMode(input) {
   if (!input.sessionId || !newMode) {
     throw new Error("sessionId and newMode required for switch_mode action");
   }
-  const modeRouter = await getModeRouter();
-  const session = await modeRouter.switchMode(
+  const sessionManager = await getSessionManager();
+  const session = await sessionManager.switchMode(
     input.sessionId,
     newMode,
     "User requested mode switch"
@@ -45821,13 +45538,16 @@ async function handleGetSession(input) {
   };
 }
 async function handleRecommendMode(input) {
-  const modeRouter = await getModeRouter();
   const problemType = input.problemType;
   const problemCharacteristics = input.problemCharacteristics;
   const includeCombinations = input.includeCombinations;
   if (problemType && !problemCharacteristics) {
-    const recommendedMode = modeRouter.quickRecommend(problemType);
-    const response = modeRouter.formatQuickRecommendation(problemType, recommendedMode);
+    const recommendedMode = modeRecommender.quickRecommend(problemType);
+    const response = `Quick recommendation for "${problemType}":
+
+**Recommended Mode**: ${recommendedMode}
+
+For more detailed recommendations, provide problemCharacteristics.`;
     return {
       content: [{
         type: "text",
@@ -45836,10 +45556,59 @@ async function handleRecommendMode(input) {
     };
   }
   if (problemCharacteristics) {
-    const response = modeRouter.getRecommendations(
-      problemCharacteristics,
-      includeCombinations || false
-    );
+    const modeRecs = modeRecommender.recommendModes(problemCharacteristics);
+    const combinationRecs = includeCombinations ? modeRecommender.recommendCombinations(problemCharacteristics) : [];
+    let response = "# Mode Recommendations\n\n";
+    response += "## Individual Modes\n\n";
+    for (const rec of modeRecs) {
+      response += `### ${rec.mode} (Score: ${rec.score})
+`;
+      response += `**Reasoning**: ${rec.reasoning}
+
+`;
+      response += `**Strengths**:
+`;
+      for (const strength of rec.strengths) {
+        response += `- ${strength}
+`;
+      }
+      response += `
+**Limitations**:
+`;
+      for (const limitation of rec.limitations) {
+        response += `- ${limitation}
+`;
+      }
+      response += `
+**Examples**: ${rec.examples.join(", ")}
+
+`;
+      response += "---\n\n";
+    }
+    if (combinationRecs.length > 0) {
+      response += "## Recommended Mode Combinations\n\n";
+      for (const combo of combinationRecs) {
+        response += `### ${combo.modes.join(" + ")} (${combo.sequence})
+`;
+        response += `**Rationale**: ${combo.rationale}
+
+`;
+        response += `**Benefits**:
+`;
+        for (const benefit of combo.benefits) {
+          response += `- ${benefit}
+`;
+        }
+        response += `
+**Synergies**:
+`;
+        for (const synergy of combo.synergies) {
+          response += `- ${synergy}
+`;
+        }
+        response += "\n---\n\n";
+      }
+    }
     return {
       content: [{
         type: "text",

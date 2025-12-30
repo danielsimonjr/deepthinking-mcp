@@ -11,7 +11,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { SessionManager } from '../../../src/session/manager.js';
 import { ThoughtFactory } from '../../../src/services/ThoughtFactory.js';
 import { ExportService } from '../../../src/services/ExportService.js';
-import { ModeRouter } from '../../../src/services/ModeRouter.js';
+import { ModeRecommender } from '../../../src/types/modes/recommendations.js';
 import { ThinkingMode } from '../../../src/types/core.js';
 import type { ThinkingToolInput } from '../../../src/tools/thinking.js';
 
@@ -19,13 +19,13 @@ describe('Session Actions Integration Tests', () => {
   let manager: SessionManager;
   let factory: ThoughtFactory;
   let exportService: ExportService;
-  let modeRouter: ModeRouter;
+  let modeRecommender: ModeRecommender;
 
   beforeEach(() => {
     manager = new SessionManager();
     factory = new ThoughtFactory();
     exportService = new ExportService();
-    modeRouter = new ModeRouter();
+    modeRecommender = new ModeRecommender();
   });
 
   /**
@@ -302,10 +302,11 @@ describe('Session Actions Integration Tests', () => {
 
   // ===========================================================================
   // T-SES-017: recommend_mode action - quick (problemType)
+  // Phase 15A Sprint 2: Updated to use ModeRecommender directly
   // ===========================================================================
   describe('T-SES-017: Recommend Mode Quick', () => {
     it('should recommend mode for proof problem', () => {
-      const recommendation = modeRouter.getRecommendations({
+      const recommendations = modeRecommender.recommendModes({
         domain: 'mathematics',
         complexity: 'high',
         uncertainty: 'low',
@@ -318,13 +319,13 @@ describe('Session Actions Integration Tests', () => {
         hasAlternatives: false,
       });
 
-      expect(recommendation).toBeDefined();
-      expect(typeof recommendation).toBe('string');
-      expect(recommendation.length).toBeGreaterThan(0);
+      expect(recommendations).toBeDefined();
+      expect(Array.isArray(recommendations)).toBe(true);
+      expect(recommendations.length).toBeGreaterThan(0);
     });
 
     it('should recommend mode for optimization problem', () => {
-      const recommendation = modeRouter.getRecommendations({
+      const recommendations = modeRecommender.recommendModes({
         domain: 'optimization',
         complexity: 'medium',
         uncertainty: 'low',
@@ -337,11 +338,12 @@ describe('Session Actions Integration Tests', () => {
         hasAlternatives: true,
       });
 
-      expect(recommendation).toBeDefined();
+      expect(recommendations).toBeDefined();
+      expect(Array.isArray(recommendations)).toBe(true);
     });
 
     it('should recommend mode for analysis problem', () => {
-      const recommendation = modeRouter.getRecommendations({
+      const recommendations = modeRecommender.recommendModes({
         domain: 'analysis',
         complexity: 'medium',
         uncertainty: 'medium',
@@ -354,16 +356,18 @@ describe('Session Actions Integration Tests', () => {
         hasAlternatives: false,
       });
 
-      expect(recommendation).toBeDefined();
+      expect(recommendations).toBeDefined();
+      expect(Array.isArray(recommendations)).toBe(true);
     });
   });
 
   // ===========================================================================
   // T-SES-018: recommend_mode action - detailed (problemCharacteristics)
+  // Phase 15A Sprint 2: Updated to use ModeRecommender directly
   // ===========================================================================
   describe('T-SES-018: Recommend Mode Detailed', () => {
     it('should recommend based on detailed characteristics', () => {
-      const recommendation = modeRouter.getRecommendations({
+      const recommendations = modeRecommender.recommendModes({
         domain: 'mathematics',
         complexity: 'high',
         uncertainty: 'low',
@@ -376,12 +380,13 @@ describe('Session Actions Integration Tests', () => {
         hasAlternatives: false,
       });
 
-      expect(recommendation).toBeDefined();
-      expect(typeof recommendation).toBe('string');
+      expect(recommendations).toBeDefined();
+      expect(Array.isArray(recommendations)).toBe(true);
+      expect(recommendations.length).toBeGreaterThan(0);
     });
 
     it('should handle high uncertainty problems', () => {
-      const recommendation = modeRouter.getRecommendations({
+      const recommendations = modeRecommender.recommendModes({
         domain: 'decision-making',
         complexity: 'medium',
         uncertainty: 'high',
@@ -394,16 +399,18 @@ describe('Session Actions Integration Tests', () => {
         hasAlternatives: true,
       });
 
-      expect(recommendation).toBeDefined();
+      expect(recommendations).toBeDefined();
+      expect(Array.isArray(recommendations)).toBe(true);
     });
   });
 
   // ===========================================================================
   // T-SES-019: recommend_mode action - with combinations
+  // Phase 15A Sprint 2: Updated to use ModeRecommender directly
   // ===========================================================================
   describe('T-SES-019: Recommend Mode Combinations', () => {
     it('should suggest mode combinations', () => {
-      const recommendation = modeRouter.getRecommendations({
+      const recommendations = modeRecommender.recommendModes({
         domain: 'research',
         complexity: 'high',
         uncertainty: 'medium',
@@ -414,9 +421,23 @@ describe('Session Actions Integration Tests', () => {
         hasIncompleteInfo: false,
         requiresExplanation: true,
         hasAlternatives: false,
-      }, true); // includeCombinations = true
+      });
 
-      expect(recommendation).toBeDefined();
+      const combinations = modeRecommender.recommendCombinations({
+        domain: 'research',
+        complexity: 'high',
+        uncertainty: 'medium',
+        requiresProof: true,
+        timeDependent: false,
+        multiAgent: false,
+        requiresQuantification: true,
+        hasIncompleteInfo: false,
+        requiresExplanation: true,
+        hasAlternatives: false,
+      });
+
+      expect(recommendations).toBeDefined();
+      expect(combinations).toBeDefined();
       // May include alternative or complementary modes
     });
   });

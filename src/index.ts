@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * DeepThinking MCP Server (v8.4.0)
+ * DeepThinking MCP Server (v9.0.0)
  *
  * 33 advanced reasoning modes with ModeHandler pattern, meta-reasoning,
  * taxonomy classifier, enterprise security, and visual export capabilities.
@@ -42,8 +42,8 @@ const packageJson = JSON.parse(
 // Import services - Phase 15A: Static imports replace dynamic imports
 import { ThoughtFactory } from './services/ThoughtFactory.js';
 import { ExportService } from './services/ExportService.js';
-import { ModeRouter } from './services/ModeRouter.js';
 import { SessionManager } from './session/manager.js';
+import { ModeRecommender } from './types/modes/recommendations.js';
 import { FileSessionStore } from './session/storage/file-store.js';
 import { isValidTool, modeToToolMap, toolList, toolSchemas } from './tools/definitions.js';
 import { thinkingTool } from './tools/thinking.js'; // Legacy tool for backward compatibility
@@ -81,8 +81,10 @@ const exportService = new ExportService();
 
 // SessionManager - may need async init for file storage
 let _sessionManager: SessionManager | null = null;
-let _modeRouter: ModeRouter | null = null;
 let _sessionManagerPromise: Promise<SessionManager> | null = null;
+
+// ModeRecommender - Phase 15A Sprint 2: Inlined from ModeRouter
+const modeRecommender = new ModeRecommender();
 
 /**
  * Get or create SessionManager with optional file-based storage.
@@ -112,16 +114,6 @@ async function getSessionManager(): Promise<SessionManager> {
   return _sessionManagerPromise;
 }
 
-/**
- * Get or create ModeRouter (depends on SessionManager)
- */
-async function getModeRouter(): Promise<ModeRouter> {
-  if (!_modeRouter) {
-    const sessionManager = await getSessionManager();
-    _modeRouter = new ModeRouter(sessionManager);
-  }
-  return _modeRouter;
-}
 
 // Register tool list handler - now returns all 9 focused tools + legacy
 server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -643,6 +635,7 @@ async function handleExportAll(input: SessionInput): Promise<MCPResponse> {
 
 /**
  * Handle switch_mode action
+ * Phase 15A Sprint 2: Inlined from ModeRouter
  */
 async function handleSwitchMode(input: SessionInput): Promise<MCPResponse> {
   const newMode = input.newMode as string | undefined;
@@ -650,8 +643,8 @@ async function handleSwitchMode(input: SessionInput): Promise<MCPResponse> {
     throw new Error('sessionId and newMode required for switch_mode action');
   }
 
-  const modeRouter = await getModeRouter();
-  const session = await modeRouter.switchMode(
+  const sessionManager = await getSessionManager();
+  const session = await sessionManager.switchMode(
     input.sessionId,
     newMode as ThinkingMode,
     'User requested mode switch'
@@ -706,17 +699,17 @@ async function handleGetSession(input: SessionInput): Promise<MCPResponse> {
 
 /**
  * Handle recommend_mode action
+ * Phase 15A Sprint 2: Inlined from ModeRouter, uses ModeRecommender directly
  */
 async function handleRecommendMode(input: SessionInput): Promise<MCPResponse> {
-  const modeRouter = await getModeRouter();
   const problemType = input.problemType as string | undefined;
   const problemCharacteristics = input.problemCharacteristics as ProblemCharacteristics | undefined;
   const includeCombinations = input.includeCombinations as boolean | undefined;
 
   // Quick recommendation based on problem type
   if (problemType && !problemCharacteristics) {
-    const recommendedMode = modeRouter.quickRecommend(problemType);
-    const response = modeRouter.formatQuickRecommendation(problemType, recommendedMode);
+    const recommendedMode = modeRecommender.quickRecommend(problemType);
+    const response = `Quick recommendation for "${problemType}":\n\n**Recommended Mode**: ${recommendedMode}\n\nFor more detailed recommendations, provide problemCharacteristics.`;
 
     return {
       content: [{
@@ -728,10 +721,47 @@ async function handleRecommendMode(input: SessionInput): Promise<MCPResponse> {
 
   // Comprehensive recommendations based on problem characteristics
   if (problemCharacteristics) {
-    const response = modeRouter.getRecommendations(
-      problemCharacteristics,
-      includeCombinations || false
-    );
+    const modeRecs = modeRecommender.recommendModes(problemCharacteristics);
+    const combinationRecs = includeCombinations
+      ? modeRecommender.recommendCombinations(problemCharacteristics)
+      : [];
+
+    let response = '# Mode Recommendations\n\n';
+
+    // Single mode recommendations
+    response += '## Individual Modes\n\n';
+    for (const rec of modeRecs) {
+      response += `### ${rec.mode} (Score: ${rec.score})\n`;
+      response += `**Reasoning**: ${rec.reasoning}\n\n`;
+      response += `**Strengths**:\n`;
+      for (const strength of rec.strengths) {
+        response += `- ${strength}\n`;
+      }
+      response += `\n**Limitations**:\n`;
+      for (const limitation of rec.limitations) {
+        response += `- ${limitation}\n`;
+      }
+      response += `\n**Examples**: ${rec.examples.join(', ')}\n\n`;
+      response += '---\n\n';
+    }
+
+    // Mode combinations
+    if (combinationRecs.length > 0) {
+      response += '## Recommended Mode Combinations\n\n';
+      for (const combo of combinationRecs) {
+        response += `### ${combo.modes.join(' + ')} (${combo.sequence})\n`;
+        response += `**Rationale**: ${combo.rationale}\n\n`;
+        response += `**Benefits**:\n`;
+        for (const benefit of combo.benefits) {
+          response += `- ${benefit}\n`;
+        }
+        response += `\n**Synergies**:\n`;
+        for (const synergy of combo.synergies) {
+          response += `- ${synergy}\n`;
+        }
+        response += '\n---\n\n';
+      }
+    }
 
     return {
       content: [{

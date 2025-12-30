@@ -1,10 +1,12 @@
 /**
- * Session Manager for DeepThinking MCP (v6.0.0)
+ * Session Manager for DeepThinking MCP (v9.0.0)
  * Sprint 3 Task 3.4: Refactored to use SessionMetricsCalculator
  * Phase 6 Sprint 2: Integrated with MetaMonitor for meta-reasoning tracking
+ * Phase 15A Sprint 2: MetaMonitor merged into SessionManager
  *
  * Manages thinking sessions, persistence, and coordinates with metrics calculator.
  * Tracks session thoughts for meta-reasoning insights and adaptive mode switching.
+ * Now includes integrated meta-monitoring for strategy evaluation.
  */
 
 import { randomUUID } from 'crypto';
@@ -15,6 +17,12 @@ import {
   Thought,
   ThinkingMode
 } from '../types/index.js';
+import {
+  StrategyEvaluation,
+  AlternativeStrategy,
+  QualityMetrics,
+  SessionContext,
+} from '../types/modes/metareasoning.js';
 import { SessionNotFoundError } from '../utils/errors.js';
 import { sanitizeString, sanitizeThoughtContent, validateSessionId, MAX_LENGTHS } from '../utils/sanitization.js';
 import { createLogger, LogLevel } from '../utils/logger.js';
@@ -22,7 +30,29 @@ import { ILogger } from '../interfaces/ILogger.js';
 import { SessionStorage } from './storage/interface.js';
 import { LRUCache } from '../cache/lru.js';
 import { SessionMetricsCalculator } from './SessionMetricsCalculator.js';
-import { metaMonitor, MetaMonitor } from '../services/MetaMonitor.js';
+
+/**
+ * Session history entry for meta-monitoring
+ */
+interface SessionHistoryEntry {
+  thoughtId: string;
+  mode: ThinkingMode;
+  timestamp: Date;
+  content: string;
+  uncertainty?: number;
+}
+
+/**
+ * Strategy performance metrics for meta-monitoring
+ */
+interface StrategyPerformance {
+  mode: ThinkingMode;
+  thoughtsSpent: number;
+  startTime: Date;
+  endTime?: Date;
+  progressIndicators: string[];
+  issuesEncountered: string[];
+}
 
 /**
  * Default session configuration
@@ -71,7 +101,11 @@ export class SessionManager {
   private logger: ILogger;
   private storage?: SessionStorage;
   private metricsCalculator: SessionMetricsCalculator;
-  private monitor: MetaMonitor;
+
+  // Meta-monitoring state (merged from MetaMonitor)
+  private sessionHistory: Map<string, SessionHistoryEntry[]> = new Map();
+  private currentStrategies: Map<string, StrategyPerformance> = new Map();
+  private modeTransitions: Map<string, ThinkingMode[]> = new Map();
 
   /**
    * Creates a new SessionManager instance
@@ -79,7 +113,6 @@ export class SessionManager {
    * @param config - Optional default configuration applied to all new sessions
    * @param logger - Optional logger instance or log level (default: INFO level logger)
    * @param storage - Optional persistent storage backend for sessions
-   * @param monitor - Optional MetaMonitor instance for dependency injection
    *
    * @example
    * ```typescript
@@ -104,8 +137,7 @@ export class SessionManager {
   constructor(
     config?: Partial<SessionConfig>,
     logger?: ILogger | LogLevel,
-    storage?: SessionStorage,
-    monitor?: MetaMonitor
+    storage?: SessionStorage
   ) {
     // Initialize LRU cache for sessions (max 1000 sessions, ~10-50MB)
     this.activeSessions = new LRUCache<ThinkingSession>({
@@ -122,14 +154,11 @@ export class SessionManager {
           }
         }
         // Clear meta-monitoring data for evicted session
-        if (this.monitor) {
-          this.monitor.clearSession(key);
-        }
+        this.clearMetaSession(key);
       }
     });
     this.config = config || {};
     this.storage = storage;
-    this.monitor = monitor || metaMonitor;
 
     // Support both ILogger injection (DI) and LogLevel (backward compatibility)
     if (logger && typeof logger === 'object' && 'info' in logger) {
@@ -221,7 +250,7 @@ export class SessionManager {
     }
 
     // Start meta-monitoring strategy tracking
-    this.monitor.startStrategy(sessionId, session.mode);
+    this.startMetaStrategy(sessionId, session.mode);
 
     this.logger.info('Session created', {
       sessionId,
@@ -326,7 +355,7 @@ export class SessionManager {
     this.metricsCalculator.updateMetrics(session, thought);
 
     // Record thought for meta-reasoning insights
-    this.monitor.recordThought(sessionId, thought);
+    this.recordMetaThought(sessionId, thought);
 
     // Check if session is complete
     if (!thought.nextThoughtNeeded) {
@@ -568,4 +597,281 @@ export class SessionManager {
     } as SessionConfig;
   }
 
+  // ============================================
+  // Meta-Monitoring Methods (merged from MetaMonitor)
+  // ============================================
+
+  /**
+   * Record a thought in session history for meta-monitoring
+   */
+  private recordMetaThought(sessionId: string, thought: Thought): void {
+    if (!this.sessionHistory.has(sessionId)) {
+      this.sessionHistory.set(sessionId, []);
+    }
+
+    const history = this.sessionHistory.get(sessionId)!;
+    history.push({
+      thoughtId: thought.id,
+      mode: thought.mode,
+      timestamp: thought.timestamp,
+      content: thought.content,
+      uncertainty: 'uncertainty' in thought ? (thought as { uncertainty?: number }).uncertainty : undefined,
+    });
+
+    // Track mode transitions
+    if (!this.modeTransitions.has(sessionId)) {
+      this.modeTransitions.set(sessionId, []);
+    }
+    const transitions = this.modeTransitions.get(sessionId)!;
+    if (transitions.length === 0 || transitions[transitions.length - 1] !== thought.mode) {
+      transitions.push(thought.mode);
+    }
+  }
+
+  /**
+   * Start tracking a new strategy for meta-monitoring
+   */
+  private startMetaStrategy(sessionId: string, mode: ThinkingMode): void {
+    this.currentStrategies.set(sessionId, {
+      mode,
+      thoughtsSpent: 0,
+      startTime: new Date(),
+      progressIndicators: [],
+      issuesEncountered: [],
+    });
+  }
+
+  /**
+   * Update current strategy progress
+   */
+  updateStrategyProgress(sessionId: string, indicator: string): void {
+    const strategy = this.currentStrategies.get(sessionId);
+    if (strategy) {
+      strategy.progressIndicators.push(indicator);
+      strategy.thoughtsSpent++;
+    }
+  }
+
+  /**
+   * Record an issue with current strategy
+   */
+  recordStrategyIssue(sessionId: string, issue: string): void {
+    const strategy = this.currentStrategies.get(sessionId);
+    if (strategy) {
+      strategy.issuesEncountered.push(issue);
+    }
+  }
+
+  /**
+   * Evaluate current strategy effectiveness
+   */
+  evaluateStrategy(sessionId: string): StrategyEvaluation {
+    const strategy = this.currentStrategies.get(sessionId);
+
+    if (!strategy) {
+      // No active strategy - return baseline evaluation
+      return {
+        effectiveness: 0.5,
+        efficiency: 0.5,
+        confidence: 0.5,
+        progressRate: 0,
+        qualityScore: 0.5,
+        issues: ['No active strategy being tracked'],
+        strengths: [],
+      };
+    }
+
+    // Calculate metrics
+    const thoughtsSpent = strategy.thoughtsSpent;
+    const progressMade = strategy.progressIndicators.length;
+    const issuesCount = strategy.issuesEncountered.length;
+    const timeElapsed = new Date().getTime() - strategy.startTime.getTime();
+
+    // Effectiveness: progress relative to effort
+    const effectiveness = Math.min(1.0, progressMade / Math.max(1, thoughtsSpent));
+
+    // Efficiency: progress per unit time (minutes)
+    const MILLIS_PER_MINUTE = 60000;
+    const efficiency = timeElapsed > 0 ? Math.min(1.0, progressMade / (timeElapsed / MILLIS_PER_MINUTE)) : 0.5;
+
+    // Confidence: based on issues encountered
+    const ISSUE_PENALTY = 0.15;
+    const MIN_CONFIDENCE = 0.1;
+    const confidence = Math.max(MIN_CONFIDENCE, 1.0 - issuesCount * ISSUE_PENALTY);
+
+    // Progress rate: insights per thought
+    const progressRate = thoughtsSpent > 0 ? progressMade / thoughtsSpent : 0;
+
+    // Quality score: weighted combination
+    const EFFECTIVENESS_WEIGHT = 0.4;
+    const EFFICIENCY_WEIGHT = 0.2;
+    const CONFIDENCE_WEIGHT = 0.4;
+    const qualityScore = effectiveness * EFFECTIVENESS_WEIGHT + efficiency * EFFICIENCY_WEIGHT + confidence * CONFIDENCE_WEIGHT;
+
+    return {
+      effectiveness,
+      efficiency,
+      confidence,
+      progressRate,
+      qualityScore,
+      issues: [...strategy.issuesEncountered],
+      strengths: strategy.progressIndicators.slice(-3), // Recent progress
+    };
+  }
+
+  /**
+   * Suggest alternative strategies based on current performance
+   */
+  suggestAlternatives(sessionId: string, currentMode: ThinkingMode): AlternativeStrategy[] {
+    const evaluation = this.evaluateStrategy(sessionId);
+    const alternatives: AlternativeStrategy[] = [];
+
+    const LOW_EFFECTIVENESS_THRESHOLD = 0.4;
+    const LOW_EFFICIENCY_THRESHOLD = 0.5;
+
+    // If current strategy is failing, suggest fundamental alternatives
+    if (evaluation.effectiveness < LOW_EFFECTIVENESS_THRESHOLD) {
+      // Suggest switching to a different core reasoning mode
+      if (currentMode !== ThinkingMode.HYBRID) {
+        alternatives.push({
+          mode: ThinkingMode.HYBRID,
+          reasoning: 'Low effectiveness detected - hybrid multi-modal approach may provide better results',
+          expectedBenefit: 'Combines multiple reasoning types for comprehensive analysis',
+          switchingCost: 0.3,
+          recommendationScore: 0.85,
+        });
+      }
+
+      if (currentMode !== ThinkingMode.INDUCTIVE) {
+        alternatives.push({
+          mode: ThinkingMode.INDUCTIVE,
+          reasoning: 'Consider gathering more empirical observations',
+          expectedBenefit: 'Build stronger generalizations from specific cases',
+          switchingCost: 0.2,
+          recommendationScore: 0.70,
+        });
+      }
+    }
+
+    // If making progress but slowly, suggest refinements
+    if (evaluation.effectiveness >= LOW_EFFECTIVENESS_THRESHOLD && evaluation.efficiency < LOW_EFFICIENCY_THRESHOLD) {
+      alternatives.push({
+        mode: currentMode, // Same mode, but recommend refinement
+        reasoning: 'Progress detected but efficiency is low - consider refining current approach',
+        expectedBenefit: 'Improved efficiency while maintaining progress',
+        switchingCost: 0.1,
+        recommendationScore: 0.65,
+      });
+    }
+
+    return alternatives;
+  }
+
+  /**
+   * Calculate quality metrics for current session
+   */
+  calculateQualityMetrics(sessionId: string): QualityMetrics {
+    const history = this.sessionHistory.get(sessionId) || [];
+    const strategy = this.currentStrategies.get(sessionId);
+
+    if (history.length === 0) {
+      // No history - return neutral metrics
+      return {
+        logicalConsistency: 0.5,
+        evidenceQuality: 0.5,
+        completeness: 0.5,
+        originality: 0.5,
+        clarity: 0.5,
+        overallQuality: 0.5,
+      };
+    }
+
+    // Logical consistency: fewer contradictions and issues
+    const ISSUE_CONSISTENCY_PENALTY = 0.1;
+    const MIN_CONSISTENCY = 0.1;
+    const issuesCount = strategy?.issuesEncountered.length || 0;
+    const logicalConsistency = Math.max(MIN_CONSISTENCY, 1.0 - issuesCount * ISSUE_CONSISTENCY_PENALTY);
+
+    // Evidence quality: based on uncertainty levels
+    const avgUncertainty =
+      history.reduce((sum, entry) => sum + (entry.uncertainty || 0.5), 0) / history.length;
+    const evidenceQuality = 1.0 - avgUncertainty;
+
+    // Completeness: thoughts addressing multiple aspects
+    const COMPLETENESS_NORMALIZATION = 5; // Normalize to 5 thoughts
+    const completeness = Math.min(1.0, history.length / COMPLETENESS_NORMALIZATION);
+
+    // Originality: mode diversity
+    const ORIGINALITY_NORMALIZATION = 3; // Normalize to 3 unique modes
+    const uniqueModes = new Set(history.map((h) => h.mode)).size;
+    const originality = Math.min(1.0, uniqueModes / ORIGINALITY_NORMALIZATION);
+
+    // Clarity: based on progress indicators
+    const progressCount = strategy?.progressIndicators.length || 0;
+    const clarity = Math.min(1.0, progressCount / Math.max(1, history.length));
+
+    // Overall quality: weighted average
+    const CONSISTENCY_WEIGHT = 0.25;
+    const EVIDENCE_WEIGHT = 0.2;
+    const COMPLETENESS_WEIGHT = 0.15;
+    const ORIGINALITY_WEIGHT = 0.15;
+    const CLARITY_WEIGHT = 0.25;
+    const overallQuality =
+      logicalConsistency * CONSISTENCY_WEIGHT +
+      evidenceQuality * EVIDENCE_WEIGHT +
+      completeness * COMPLETENESS_WEIGHT +
+      originality * ORIGINALITY_WEIGHT +
+      clarity * CLARITY_WEIGHT;
+
+    return {
+      logicalConsistency,
+      evidenceQuality,
+      completeness,
+      originality,
+      clarity,
+      overallQuality,
+    };
+  }
+
+  /**
+   * Get session context for meta-reasoning
+   */
+  getMetaSessionContext(sessionId: string, problemType: string): SessionContext {
+    const history = this.sessionHistory.get(sessionId) || [];
+    const transitions = this.modeTransitions.get(sessionId) || [];
+
+    return {
+      sessionId,
+      totalThoughts: history.length,
+      modesUsed: transitions,
+      modeSwitches: Math.max(0, transitions.length - 1),
+      problemType,
+      historicalEffectiveness: this.getHistoricalEffectiveness(problemType),
+    };
+  }
+
+  /**
+   * Get historical effectiveness for similar problems (simplified)
+   */
+  private getHistoricalEffectiveness(_problemType: string): number | undefined {
+    // In a full implementation, this would query past sessions
+    // For now, return undefined to indicate no historical data
+    return undefined;
+  }
+
+  /**
+   * Clear meta-monitoring session data (for cleanup)
+   */
+  clearMetaSession(sessionId: string): void {
+    this.sessionHistory.delete(sessionId);
+    this.currentStrategies.delete(sessionId);
+    this.modeTransitions.delete(sessionId);
+  }
+
+  /**
+   * Get all tracked meta-monitoring sessions
+   */
+  getActiveMetaSessions(): string[] {
+    return Array.from(this.sessionHistory.keys());
+  }
 }

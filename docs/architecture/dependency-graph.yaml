@@ -2,9 +2,9 @@ metadata:
   name: deepthinking-mcp
   version: 8.5.0
   lastUpdated: "2025-12-29"
-  totalFiles: 246
-  totalModules: 16
-  totalExports: 1317
+  totalFiles: 242
+  totalModules: 15
+  totalExports: 1314
 entryPoints:
   - file: src/index.ts
     type: main
@@ -5925,63 +5925,6 @@ modules:
         - ProofVerifier
       interfaces:
         - ProofVerifierConfig
-  repositories:
-    src/repositories/FileSessionRepository.ts:
-      description: File-based Session Repository Implementation (v3.4.5)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./ISessionRepository.js
-          imports:
-            - ISessionRepository
-        - file: ../session/storage/interface.js
-          imports:
-            - SessionStorage
-        - file: ../types/index.js
-          imports:
-            - ThinkingSession
-            - SessionMetadata
-            - ThinkingMode
-        - file: ../utils/logger.js
-          imports:
-            - logger
-        - file: ../utils/errors.js
-          imports:
-            - StorageError
-      exports:
-        - FileSessionRepository
-      classes:
-        - FileSessionRepository
-    src/repositories/ISessionRepository.ts:
-      description: Session Repository Interface (v3.4.5)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../types/index.js
-          imports:
-            - ThinkingSession
-            - SessionMetadata
-            - ThinkingMode
-      exports: []
-      interfaces:
-        - ISessionRepository
-    src/repositories/MemorySessionRepository.ts:
-      description: In-Memory Session Repository Implementation (v3.4.5)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./ISessionRepository.js
-          imports:
-            - ISessionRepository
-        - file: ../types/index.js
-          imports:
-            - ThinkingSession
-            - SessionMetadata
-            - ThinkingMode
-      exports:
-        - MemorySessionRepository
-      classes:
-        - MemorySessionRepository
   search:
     src/search/engine.ts:
       description: Search Engine (v3.5.0)
@@ -6516,30 +6459,6 @@ modules:
         - ProblemCharacteristics
         - ReasoningSuggestion
         - SessionAnalysis
-    src/taxonomy/taxonomy-latex.ts:
-      description: Taxonomy LaTeX Integration (v3.4.0)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../types/index.js
-          imports:
-            - ThinkingSession
-          typeOnly: true
-        - file: ./reasoning-types.js
-          imports:
-            - getReasoningType
-        - file: ./suggestion-engine.js
-          imports:
-            - SuggestionEngine
-        - file: ./multi-modal-analyzer.js
-          imports:
-            - MultiModalAnalyzer
-      exports:
-        - TaxonomyLatexExporter
-      classes:
-        - TaxonomyLatexExporter
-      interfaces:
-        - TaxonomyLatexOptions
   tools:
     src/tools/definitions.ts:
       description: Focused Tool Definitions (v8.4.0)
@@ -10925,11 +10844,6 @@ dependencyGraph:
         - src/proof/patterns/warnings.ts
         - src/proof/strategy-recommender.ts
         - src/proof/verifier.ts
-    - name: Repositories
-      files:
-        - src/repositories/FileSessionRepository.ts
-        - src/repositories/ISessionRepository.ts
-        - src/repositories/MemorySessionRepository.ts
     - name: Search
       files:
         - src/search/engine.ts
@@ -10956,7 +10870,6 @@ dependencyGraph:
         - src/taxonomy/navigator.ts
         - src/taxonomy/reasoning-types.ts
         - src/taxonomy/suggestion-engine.ts
-        - src/taxonomy/taxonomy-latex.ts
     - name: Tools
       files:
         - src/tools/definitions.ts
@@ -11070,19 +10983,19 @@ dependencyGraph:
         - src/validation/validators/modes/temporal.ts
         - src/validation/validators/registry.ts
 statistics:
-  totalTypeScriptFiles: 246
-  totalModules: 16
-  totalLinesOfCode: 105312
-  totalExports: 1317
-  totalClasses: 155
-  totalInterfaces: 533
+  totalTypeScriptFiles: 242
+  totalModules: 15
+  totalLinesOfCode: 104096
+  totalExports: 1314
+  totalClasses: 152
+  totalInterfaces: 531
   totalFunctions: 443
   totalTypeGuards: 85
   totalEnums: 3
   totalConstants: 167
   totalReExports: 566
-  totalTypeOnlyImports: 244
+  totalTypeOnlyImports: 243
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 55
-  unusedFilesCount: 18
-  unusedExportsCount: 506
+  unusedFilesCount: 15
+  unusedExportsCount: 507

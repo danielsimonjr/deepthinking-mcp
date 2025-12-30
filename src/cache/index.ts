@@ -1,12 +1,9 @@
 /**
- * Cache Module Exports (v3.4.0)
- * Phase 4 Task 9.6: Caching layer with LRU/LFU/FIFO strategies
+ * Cache Module Exports (v9.0.0)
+ * Phase 15A Sprint 2: Simplified to LRU only (removed unused LFU/FIFO/factory)
  */
 
 export { LRUCache } from './lru.js';
-export { LFUCache } from './lfu.js';
-export { FIFOCache } from './fifo.js';
-export { createCache, CacheManager } from './factory.js';
 
 export type {
   Cache,

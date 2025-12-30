@@ -4,8 +4,8 @@
 
 ## Summary
 
-- **Potentially unused files**: 18
-- **Potentially unused exports**: 506
+- **Potentially unused files**: 15
+- **Potentially unused exports**: 507
 
 ## Potentially Unused Files
 
@@ -13,11 +13,8 @@ These files are not imported by any other file in the codebase:
 
 - `src/modes/stochastic/analysis/convergence.ts`
 - `src/modes/stochastic/models/monte-carlo.ts`
-- `src/repositories/FileSessionRepository.ts`
-- `src/repositories/MemorySessionRepository.ts`
 - `src/search/engine.ts`
 - `src/taxonomy/adaptive-selector.ts`
-- `src/taxonomy/taxonomy-latex.ts`
 - `src/validation/validators/modes/algorithmic.ts`
 - `src/validation/validators/modes/analysis.ts`
 - `src/validation/validators/modes/argumentation.ts`
@@ -736,6 +733,7 @@ These exports are not imported by any other file in the codebase:
 - `RateLimitError` (class)
 - `SecurityError` (class)
 - `PathTraversalError` (class)
+- `StorageError` (class)
 - `BackupError` (class)
 
 ### `src/utils/file-lock.ts`

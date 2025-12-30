@@ -16,19 +16,18 @@ This document provides a comprehensive dependency graph of all files, components
 6. [Interfaces Dependencies](#interfaces-dependencies)
 7. [Modes Dependencies](#modes-dependencies)
 8. [Proof Dependencies](#proof-dependencies)
-9. [Repositories Dependencies](#repositories-dependencies)
-10. [Search Dependencies](#search-dependencies)
-11. [Services Dependencies](#services-dependencies)
-12. [Session Dependencies](#session-dependencies)
-13. [Taxonomy Dependencies](#taxonomy-dependencies)
-14. [Tools Dependencies](#tools-dependencies)
-15. [Types Dependencies](#types-dependencies)
-16. [Utils Dependencies](#utils-dependencies)
-17. [Validation Dependencies](#validation-dependencies)
-18. [Dependency Matrix](#dependency-matrix)
-19. [Circular Dependency Analysis](#circular-dependency-analysis)
-20. [Visual Dependency Graph](#visual-dependency-graph)
-21. [Summary Statistics](#summary-statistics)
+9. [Search Dependencies](#search-dependencies)
+10. [Services Dependencies](#services-dependencies)
+11. [Session Dependencies](#session-dependencies)
+12. [Taxonomy Dependencies](#taxonomy-dependencies)
+13. [Tools Dependencies](#tools-dependencies)
+14. [Types Dependencies](#types-dependencies)
+15. [Utils Dependencies](#utils-dependencies)
+16. [Validation Dependencies](#validation-dependencies)
+17. [Dependency Matrix](#dependency-matrix)
+18. [Circular Dependency Analysis](#circular-dependency-analysis)
+19. [Visual Dependency Graph](#visual-dependency-graph)
+20. [Summary Statistics](#summary-statistics)
 
 ---
 
@@ -43,11 +42,10 @@ The codebase is organized into the following modules:
 - **interfaces**: 1 file
 - **modes**: 54 files
 - **proof**: 13 files
-- **repositories**: 3 files
 - **search**: 4 files
 - **services**: 4 files
 - **session**: 4 files
-- **taxonomy**: 7 files
+- **taxonomy**: 6 files
 - **tools**: 18 files
 - **types**: 36 files
 - **utils**: 6 files
@@ -2240,46 +2238,6 @@ The codebase is organized into the following modules:
 
 ---
 
-## Repositories Dependencies
-
-### `src/repositories/FileSessionRepository.ts` - File-based Session Repository Implementation (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./ISessionRepository.js` | `ISessionRepository` | Import |
-| `../session/storage/interface.js` | `SessionStorage` | Import |
-| `../types/index.js` | `ThinkingSession, SessionMetadata, ThinkingMode` | Import |
-| `../utils/logger.js` | `logger` | Import |
-| `../utils/errors.js` | `StorageError` | Import |
-
-**Exports:**
-- Classes: `FileSessionRepository`
-
----
-
-### `src/repositories/ISessionRepository.ts` - Session Repository Interface (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `ThinkingSession, SessionMetadata, ThinkingMode` | Import |
-
----
-
-### `src/repositories/MemorySessionRepository.ts` - In-Memory Session Repository Implementation (v3.4.5)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./ISessionRepository.js` | `ISessionRepository` | Import |
-| `../types/index.js` | `ThinkingSession, SessionMetadata, ThinkingMode` | Import |
-
-**Exports:**
-- Classes: `MemorySessionRepository`
-
----
-
 ## Search Dependencies
 
 ### `src/search/engine.ts` - Search Engine (v3.5.0)
@@ -2561,22 +2519,6 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `SuggestionEngine`
 - Interfaces: `QualityMetrics`, `EnhancedMetadata`, `ProblemCharacteristics`, `ReasoningSuggestion`, `SessionAnalysis`
-
----
-
-### `src/taxonomy/taxonomy-latex.ts` - Taxonomy LaTeX Integration (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `ThinkingSession` | Import (type-only) |
-| `./reasoning-types.js` | `getReasoningType` | Import |
-| `./suggestion-engine.js` | `SuggestionEngine` | Import |
-| `./multi-modal-analyzer.js` | `MultiModalAnalyzer` | Import |
-
-**Exports:**
-- Classes: `TaxonomyLatexExporter`
-- Interfaces: `TaxonomyLatexOptions`
 
 ---
 
@@ -4287,76 +4229,70 @@ graph TD
         N26[...8 more]
     end
 
-    subgraph Repositories
-        N27[FileSessionRepository]
-        N28[ISessionRepository]
-        N29[MemorySessionRepository]
-    end
-
     subgraph Search
-        N30[engine]
-        N31[index]
-        N32[tokenizer]
-        N33[types]
+        N27[engine]
+        N28[index]
+        N29[tokenizer]
+        N30[types]
     end
 
     subgraph Services
-        N34[ExportService]
-        N35[MetaMonitor]
-        N36[ModeRouter]
-        N37[ThoughtFactory]
+        N31[ExportService]
+        N32[MetaMonitor]
+        N33[ModeRouter]
+        N34[ThoughtFactory]
     end
 
     subgraph Session
-        N38[manager]
-        N39[SessionMetricsCalculator]
-        N40[file-store]
-        N41[interface]
+        N35[manager]
+        N36[SessionMetricsCalculator]
+        N37[file-store]
+        N38[interface]
     end
 
     subgraph Taxonomy
-        N42[adaptive-selector]
-        N43[classifier]
-        N44[multi-modal-analyzer]
-        N45[navigator]
-        N46[reasoning-types]
-        N47[...2 more]
+        N39[adaptive-selector]
+        N40[classifier]
+        N41[multi-modal-analyzer]
+        N42[navigator]
+        N43[reasoning-types]
+        N44[...1 more]
     end
 
     subgraph Tools
-        N48[definitions]
-        N49[json-schemas]
-        N50[analyze]
-        N51[base]
-        N52[index]
-        N53[...13 more]
+        N45[definitions]
+        N46[json-schemas]
+        N47[analyze]
+        N48[base]
+        N49[index]
+        N50[...13 more]
     end
 
     subgraph Types
-        N54[core]
-        N55[handlers]
-        N56[index]
-        N57[algorithmic]
-        N58[analogical]
-        N59[...31 more]
+        N51[core]
+        N52[handlers]
+        N53[index]
+        N54[algorithmic]
+        N55[analogical]
+        N56[...31 more]
     end
 
     subgraph Utils
-        N60[errors]
-        N61[file-lock]
-        N62[logger-types]
-        N63[logger]
-        N64[sanitization]
-        N65[...1 more]
+        N57[errors]
+        N58[file-lock]
+        N59[logger-types]
+        N60[logger]
+        N61[sanitization]
+        N62[...1 more]
     end
 
     subgraph Validation
-        N66[cache]
-        N67[constants]
-        N68[index]
-        N69[schema-utils]
-        N70[schemas]
-        N71[...39 more]
+        N63[cache]
+        N64[constants]
+        N65[index]
+        N66[schema-utils]
+        N67[schemas]
+        N68[...39 more]
     end
 
     N0 --> N4
@@ -4370,25 +4306,25 @@ graph TD
     N8 --> N10
     N8 --> N9
     N8 --> N7
-    N11 --> N56
-    N13 --> N37
+    N11 --> N53
     N13 --> N34
-    N13 --> N36
-    N13 --> N38
-    N13 --> N40
-    N13 --> N48
-    N13 --> N56
-    N14 --> N62
+    N13 --> N31
+    N13 --> N33
+    N13 --> N35
+    N13 --> N37
+    N13 --> N45
+    N13 --> N53
+    N14 --> N59
     N15 --> N18
     N16 --> N18
     N17 --> N18
     N17 --> N16
-    N19 --> N54
+    N19 --> N51
     N22 --> N25
     N22 --> N23
     N23 --> N25
-    N27 --> N28
-    N27 --> N41
+    N27 --> N53
+    N27 --> N30
 ```
 
 ---
@@ -4397,17 +4333,17 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 246 |
-| Total Modules | 16 |
-| Total Lines of Code | 105312 |
-| Total Exports | 1317 |
+| Total TypeScript Files | 242 |
+| Total Modules | 15 |
+| Total Lines of Code | 104096 |
+| Total Exports | 1314 |
 | Total Re-exports | 566 |
-| Total Classes | 155 |
-| Total Interfaces | 533 |
+| Total Classes | 152 |
+| Total Interfaces | 531 |
 | Total Functions | 443 |
 | Total Type Guards | 85 |
 | Total Enums | 3 |
-| Type-only Imports | 244 |
+| Type-only Imports | 243 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 55 |
 

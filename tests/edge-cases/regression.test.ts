@@ -11,7 +11,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { SessionManager } from '../../src/session/manager.js';
 import { ThoughtFactory } from '../../src/services/ThoughtFactory.js';
 import { ExportService } from '../../src/services/ExportService.js';
-import { ModeRouter } from '../../src/services/ModeRouter.js';
+import { ModeRecommender } from '../../src/types/modes/recommendations.js';
 import { ModeHandlerRegistry } from '../../src/modes/index.js';
 import { ThinkingMode } from '../../src/types/core.js';
 import type { ThinkingToolInput } from '../../src/tools/thinking.js';
@@ -20,14 +20,14 @@ describe('Regression Tests', () => {
   let manager: SessionManager;
   let factory: ThoughtFactory;
   let exportService: ExportService;
-  let modeRouter: ModeRouter;
+  let modeRecommender: ModeRecommender;
   let registry: ModeHandlerRegistry;
 
   beforeEach(() => {
     manager = new SessionManager();
     factory = new ThoughtFactory();
     exportService = new ExportService();
-    modeRouter = new ModeRouter(manager);
+    modeRecommender = new ModeRecommender();
     registry = ModeHandlerRegistry.getInstance();
   });
 
@@ -228,28 +228,30 @@ describe('Regression Tests', () => {
 
   // ===========================================================================
   // T-REG-007: Mode routing accuracy
+  // Phase 15A Sprint 2: Updated to use ModeRecommender directly
   // ===========================================================================
   describe('T-REG-007: Mode Routing Accuracy', () => {
     it('should recommend appropriate mode for proof problem', () => {
-      // getRecommendations returns a formatted string with mode suggestions
-      // Requires domain to be defined
-      const recommendations = modeRouter.getRecommendations({
+      // recommendModes returns an array of mode recommendations
+      const recommendations = modeRecommender.recommendModes({
         domain: 'mathematics',
         requiresProof: true,
       });
       expect(recommendations).toBeDefined();
-      expect(typeof recommendations).toBe('string');
-      expect(recommendations).toContain('Mode Recommendations');
+      expect(Array.isArray(recommendations)).toBe(true);
+      expect(recommendations.length).toBeGreaterThan(0);
+      expect(recommendations[0].mode).toBeDefined();
     });
 
     it('should recommend appropriate mode for decision problem', () => {
-      const recommendations = modeRouter.getRecommendations({
+      const recommendations = modeRecommender.recommendModes({
         domain: 'strategy',
         multiAgent: true,
       });
       expect(recommendations).toBeDefined();
-      expect(typeof recommendations).toBe('string');
-      expect(recommendations).toContain('Mode Recommendations');
+      expect(Array.isArray(recommendations)).toBe(true);
+      expect(recommendations.length).toBeGreaterThan(0);
+      expect(recommendations[0].mode).toBeDefined();
     });
   });
 
