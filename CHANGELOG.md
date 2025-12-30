@@ -35,63 +35,63 @@ The original Phase 15 plan claimed "Actual Algorithms: 0" in the handlers. Deep 
 | 12 | Add Proof Validation | CANCELLED | **Already exists** in src/proof/ |
 
 **Phase 15 Summary:**
-- **Sprints 1-3 COMPLETED**: Removed 9 unused barrel files, simplified service layer, refactored validation to composition
+- **Sprint 1 COMPLETE**: Removed 9 unused barrel files, simplified ThoughtFactory config
+- **Sprint 2 PARTIAL**: Merged MetaMonitor, inlined ModeRouter, removed cache strategies. **ExportService NOT inlined** (too complex)
+- **Sprint 3 PARTIAL**: Refactored validators to composition. **Unified validator NOT created** (scope changed to composition pattern)
 - **Sprints 4-12 CANCELLED**: Prevented deletion of working algorithms
-- **Net Result**: Cleaner architecture while preserving algorithmic substance
+- **Net Result**: Cleaner architecture while preserving algorithmic substance, but less reduction than originally planned
 
 ### Changed - Phase 15A Sprint 3: Clean Up Validation Layer
 
-**Sprint 3 COMPLETE** - Refactored validation layer from class inheritance to composition pattern.
+**Sprint 3 PARTIAL** - Refactored validation layer from class inheritance to composition pattern.
 
-**Architecture Change: Composition over Inheritance**
+**What Was Done:**
 | Change | Before | After | Impact |
 |--------|--------|-------|--------|
 | BaseValidator | Abstract class with inheritance | Interface + utility functions | Simpler pattern |
 | Mode validators | `extends BaseValidator` | `implements ModeValidator` | No inheritance |
 | Shared validation | Protected methods | Utility functions | Better tree-shaking |
 
+**What Was NOT Done:**
+| Planned Task | Status | Reason |
+|--------------|--------|--------|
+| Task 15A.3.1: Create unified-validator.ts | SCOPE CHANGED | Would create 3000+ line monolith; composition pattern better |
+| Task 15A.3.3: Remove manual validation, use only Zod | SKIPPED | Manual checks provide semantic validation beyond Zod's capabilities |
+
 **New Files Created:**
 - `src/validation/validators/validation-utils.ts` - Standalone validation utility functions
 
 **Files Modified (35 validators):**
 - All 35 mode validators converted from `extends BaseValidator` to `implements ModeValidator`
-- Now import and use utility functions: `validateCommon`, `validateProbability`, `validateNumberRange`, etc.
-- Version comments updated to v9.0.0
-- JSDoc comments added to all validator classes
+- **Note:** All 35 validator files still exist (not consolidated as originally planned)
 
 **BaseValidator Simplified:**
 - `src/validation/validators/base.ts` - Reduced from 261 lines to 34 lines (interface only)
-- BaseValidator abstract class replaced with ModeValidator interface
-- `BaseValidator` kept as deprecated alias for backwards compatibility
 
 **Validation Utilities Exported:**
-- `validateCommon()` - Common thought property validation
-- `validateDependencies()` - Dependency existence checking
-- `validateUncertainty()` - Uncertainty range validation (0-1)
-- `validateNumberRange()` - Generic range validation
-- `validateProbability()` - Probability range validation (0-1)
-- `validateConfidence()` - Confidence range validation (0-1)
-- `validateRequired()` - Required field validation
-- `validateNonEmptyArray()` - Non-empty array validation
+- `validateCommon()`, `validateDependencies()`, `validateUncertainty()`, `validateNumberRange()`, `validateProbability()`, `validateConfidence()`, `validateRequired()`, `validateNonEmptyArray()`
 
-**Benefits:**
-- Simpler architecture (no class hierarchy)
-- Better tree-shaking (utility functions vs class methods)
-- Easier testing (pure functions)
-- Clearer dependencies (explicit imports)
+**Actual vs Expected:**
+- Expected file reduction: 30 files → Actual: 0 files (scope changed)
+- Expected line reduction: 2000 lines → Actual: 227 lines
 
 ## [8.6.0] - 2025-12-29
 
 ### Changed - Phase 15A Sprint 2: Simplify Service Layer
 
-**Sprint 2 COMPLETE** - Reduced service layer from 4 services to 2 by merging and inlining functionality.
+**Sprint 2 PARTIAL** - Reduced service layer from 4 services to 3 by merging and inlining functionality.
 
-**Service Layer Simplification:**
+**What Was Done:**
 | Change | Before | After | Impact |
 |--------|--------|-------|--------|
 | MetaMonitor merged | Separate class | Merged into SessionManager | -310 lines |
 | ModeRouter inlined | Separate class | Inlined into index.ts | -380 lines |
 | Cache strategies removed | LRU + LFU + FIFO + factory | LRU only | -3 files |
+
+**What Was NOT Done:**
+| Planned Task | Status | Reason |
+|--------------|--------|--------|
+| Task 15A.2.3: Inline ExportService dispatch | SKIPPED | ExportService.ts is 49KB (1317 lines) - too complex to inline safely |
 
 **Files Deleted (5 total):**
 - `src/services/MetaMonitor.ts` (310 lines)
@@ -100,15 +100,12 @@ The original Phase 15 plan claimed "Actual Algorithms: 0" in the handlers. Deep 
 - `src/cache/lfu.ts` (LFU cache - unused)
 - `src/cache/fifo.ts` (FIFO cache - unused)
 
-**Files Modified:**
-- `src/session/manager.ts` - Now includes meta-monitoring methods (evaluateStrategy, suggestAlternatives, calculateQualityMetrics, etc.)
-- `src/index.ts` - Mode recommendation logic inlined, uses ModeRecommender directly
-- `src/cache/index.ts` - Simplified exports (LRU only)
+**Files NOT Deleted (as originally planned):**
+- `src/services/ExportService.ts` - Still exists at 49KB
 
-**Architectural Improvements:**
-- SessionManager now owns all session-related functionality including meta-monitoring
-- ModeRecommender used directly without wrapper class
-- Removed dead code (LFU and FIFO cache strategies never used externally)
+**Actual vs Expected:**
+- Expected service reduction: 4→2 services → Actual: 4→3 services (ExportService remains)
+- Expected line reduction: 1500 lines → Actual: 802 lines
 
 **Tests Updated:**
 - `tests/integration/tools/session-actions.test.ts` - Uses ModeRecommender directly
