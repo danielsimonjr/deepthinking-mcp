@@ -4,9 +4,10 @@
   "title": "Remove Unused Types",
   "week": "Week 8",
   "effort": "5-6 hours",
-  "status": "pending",
+  "status": "DEFERRED",
   "version": "9.0.0",
-  "description": "Identify and remove dead types. Consolidate type guards into single file.",
+  "deferralReason": "Removing truly unused types is valid, but needs careful analysis. Type guards are already organized. May be valuable as future cleanup task.",
+  "description": "[DEFERRED] Identify and remove dead types. Consolidate type guards into single file.",
   "tasks": [
     {
       "id": "15C.8.1",
