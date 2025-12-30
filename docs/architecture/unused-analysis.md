@@ -1,20 +1,22 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2025-12-29
+**Generated**: 2025-12-30
 
 ## Summary
 
-- **Potentially unused files**: 15
-- **Potentially unused exports**: 507
+- **Potentially unused files**: 16
+- **Potentially unused exports**: 466
 
 ## Potentially Unused Files
 
 These files are not imported by any other file in the codebase:
 
-- `src/modes/stochastic/analysis/convergence.ts`
-- `src/modes/stochastic/models/monte-carlo.ts`
-- `src/search/engine.ts`
-- `src/taxonomy/adaptive-selector.ts`
+- `src/modes/stochastic/analysis/statistics.ts`
+- `src/modes/stochastic/models/distribution.ts`
+- `src/modes/stochastic/sampling/rng.ts`
+- `src/search/index.ts`
+- `src/taxonomy/multi-modal-analyzer.ts`
+- `src/taxonomy/suggestion-engine.ts`
 - `src/validation/validators/modes/algorithmic.ts`
 - `src/validation/validators/modes/analysis.ts`
 - `src/validation/validators/modes/argumentation.ts`
@@ -22,7 +24,6 @@ These files are not imported by any other file in the codebase:
 - `src/validation/validators/modes/engineering.ts`
 - `src/validation/validators/modes/firstprinciples.ts`
 - `src/validation/validators/modes/formallogic.ts`
-- `src/validation/validators/modes/mathematics-extended.ts`
 - `src/validation/validators/modes/scientificmethod.ts`
 - `src/validation/validators/modes/synthesis.ts`
 - `src/validation/validators/modes/systemsthinking.ts`
@@ -30,10 +31,6 @@ These files are not imported by any other file in the codebase:
 ## Potentially Unused Exports
 
 These exports are not imported by any other file in the codebase:
-
-### `src/cache/factory.ts`
-
-- `CacheFactory` (class)
 
 ### `src/cache/types.ts`
 
@@ -134,58 +131,16 @@ These exports are not imported by any other file in the codebase:
 
 - `HybridThought` (interface)
 
-### `src/modes/stochastic/analysis/statistics.ts`
-
-- `median` (function)
-- `percentile` (function)
-- `percentiles` (function)
-- `skewness` (function)
-- `kurtosis` (function)
-- `mode` (function)
-- `covariance` (function)
-- `correlation` (function)
-- `correlationMatrix` (function)
-- `covarianceMatrix` (function)
-- `equalTailedInterval` (function)
-- `hpdInterval` (function)
-- `computeSampleStatistics` (function)
-- `mcse` (function)
-- `estimateESS` (function)
-- `summarizePosterior` (function)
-- `summarizeAllPosteriors` (function)
-- `probExceedsThreshold` (function)
-- `probInRange` (function)
-- `probAExceedsB` (function)
-- `histogram` (function)
-- `kde` (function)
-- `CredibleInterval` (interface)
-- `PosteriorSummary` (interface)
-- `HistogramBin` (interface)
-
-### `src/modes/stochastic/models/distribution.ts`
-
-- `sampleWithStatistics` (function)
-- `NormalSampler` (class)
-- `UniformSampler` (class)
-- `ExponentialSampler` (class)
-- `PoissonSampler` (class)
-- `BinomialSampler` (class)
-- `CategoricalSampler` (class)
-- `BetaSampler` (class)
-- `GammaSampler` (class)
-- `DistributionSampler` (interface)
-
-### `src/modes/stochastic/sampling/rng.ts`
-
-- `createRNG` (function)
-- `createParallelRNGs` (function)
-- `generateSeed` (function)
-
 ### `src/modes/stochastic/types.ts`
 
 - `StochasticVariable` (interface)
 - `Dependency` (interface)
 - `Constraint` (interface)
+- `StochasticModel` (interface)
+- `MonteCarloConfig` (interface)
+- `SimulationProgress` (interface)
+- `ConvergenceDiagnostics` (interface)
+- `MonteCarloResult` (interface)
 - `SamplerConfig` (interface)
 - `Domain` (type)
 
@@ -249,15 +204,16 @@ These exports are not imported by any other file in the codebase:
 
 ### `src/search/types.ts`
 
+- `SearchQuery` (interface)
 - `SortOptions` (interface)
 - `PaginationOptions` (interface)
+- `SearchResult` (interface)
+- `SearchHighlight` (interface)
+- `SearchResults` (interface)
 - `AdvancedQuery` (interface)
+- `FacetedResults` (interface)
 - `SearchField` (type)
-
-### `src/services/ModeRouter.ts`
-
-- `ModeRecommendation` (interface)
-- `ModeCombinationRecommendation` (interface)
+- `SortField` (type)
 
 ### `src/services/ThoughtFactory.ts`
 
@@ -266,15 +222,6 @@ These exports are not imported by any other file in the codebase:
 ### `src/taxonomy/classifier.ts`
 
 - `ThoughtClassification` (interface)
-
-### `src/taxonomy/multi-modal-analyzer.ts`
-
-- `ModeTransition` (interface)
-- `ModeCombination` (interface)
-- `ReasoningFlow` (interface)
-- `MultiModalPattern` (interface)
-- `ModeSynergy` (interface)
-- `MultiModalRecommendation` (interface)
 
 ### `src/taxonomy/navigator.ts`
 
@@ -287,14 +234,6 @@ These exports are not imported by any other file in the codebase:
 ### `src/taxonomy/reasoning-types.ts`
 
 - `getRelatedTypes` (function)
-
-### `src/taxonomy/suggestion-engine.ts`
-
-- `QualityMetrics` (interface)
-- `ReasoningSuggestion` (interface)
-- `SessionAnalysis` (interface)
-- `CognitiveLoad` (type)
-- `DualProcessType` (type)
 
 ### `src/tools/definitions.ts`
 

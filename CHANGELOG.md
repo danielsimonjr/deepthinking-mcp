@@ -28,7 +28,7 @@ The original Phase 15 plan claimed "Actual Algorithms: 0" in the handlers. Deep 
 | 5 | Delete Handler Files | CANCELLED | Handlers contain real business logic |
 | 6 | Handler Test Updates | CANCELLED | Tests still needed for handlers |
 | 7 | Consolidate Mode Types | CANCELLED | Type system already well-organized |
-| 8 | Remove Unused Types | DEFERRED | May be valuable as future cleanup |
+| 8 | Remove Dead Code | COMPLETE | Removed 5 unused source files + 4 orphan test files |
 | 9 | Type Test Updates | CANCELLED | Depends on Sprint 7 |
 | 10 | Add Bayesian Computation | CANCELLED | **Already implemented** in BayesianHandler |
 | 11 | Add Game Theory Computation | CANCELLED | **Already implemented** in GameTheoryHandler |
@@ -38,8 +38,48 @@ The original Phase 15 plan claimed "Actual Algorithms: 0" in the handlers. Deep 
 - **Sprint 1 COMPLETE**: Removed 9 unused barrel files, simplified ThoughtFactory config
 - **Sprint 2 PARTIAL**: Merged MetaMonitor, inlined ModeRouter, removed cache strategies. **ExportService NOT inlined** (too complex)
 - **Sprint 3 PARTIAL**: Refactored validators to composition. **Unified validator NOT created** (scope changed to composition pattern)
-- **Sprints 4-12 CANCELLED**: Prevented deletion of working algorithms
-- **Net Result**: Cleaner architecture while preserving algorithmic substance, but less reduction than originally planned
+- **Sprints 4-7, 9-12 CANCELLED**: Prevented deletion of working algorithms
+- **Sprint 8 COMPLETE**: Removed 5 truly unused source files + 4 orphan test files using dependency analysis
+- **Net Result**: Cleaner architecture while preserving algorithmic substance
+
+### Changed - Phase 15C Sprint 8: Remove Dead Code
+
+**Sprint 8 COMPLETE** - Identified and removed truly unused code using dependency analysis.
+
+**Analysis Method:**
+Used `create-dependency-graph.exe` tool to generate `unused-analysis.md` report, then cross-referenced with dynamic loading patterns (ValidatorRegistry).
+
+**Key Finding:**
+Of 15 files flagged as "unused", **10 are actually dynamically loaded** via `ValidatorRegistry.loadValidator()`. Only 5 were truly unused.
+
+**Source Files Deleted (5):**
+| File | Reason |
+|------|--------|
+| `src/validation/validators/modes/mathematics-extended.ts` | Not registered in ValidatorRegistry |
+| `src/search/engine.ts` | Only imported by tests, not production code |
+| `src/taxonomy/adaptive-selector.ts` | Only imported by tests, not production code |
+| `src/modes/stochastic/analysis/convergence.ts` | Never imported anywhere |
+| `src/modes/stochastic/models/monte-carlo.ts` | Never imported anywhere |
+
+**Test Files Deleted (4):**
+| File | Reason |
+|------|--------|
+| `tests/unit/search-engine.test.ts` | Tests deleted SearchEngine |
+| `tests/unit/validation/mathematics-extended.test.ts` | Tests deleted validator |
+| `tests/unit/modes/stochastic/convergence.test.ts` | Tests deleted module |
+| `tests/unit/modes/stochastic/monte-carlo.test.ts` | Tests deleted module |
+
+**Test File Modified:**
+- `tests/unit/taxonomy/taxonomy-system.test.ts` - Removed AdaptiveModeSelector tests
+
+**Files NOT Deleted (preserved - dynamically loaded):**
+10 validator files in `src/validation/validators/modes/` are loaded via `ValidatorRegistry.loadValidator(mode)` at runtime.
+
+**Results:**
+- Source files deleted: 5
+- Test files deleted: 4
+- Lines of code removed: ~2000
+- Tests remaining: 5011 (177 test files)
 
 ### Changed - Phase 15A Sprint 3: Clean Up Validation Layer
 

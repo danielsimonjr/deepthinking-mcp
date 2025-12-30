@@ -8,8 +8,7 @@ import { REASONING_TAXONOMY, getReasoningType, searchReasoningTypes } from '../.
 import { TaxonomyNavigator } from '../../../src/taxonomy/navigator.js';
 import { SuggestionEngine } from '../../../src/taxonomy/suggestion-engine.js';
 import { MultiModalAnalyzer } from '../../../src/taxonomy/multi-modal-analyzer.js';
-import { AdaptiveModeSelector } from '../../../src/taxonomy/adaptive-selector.js';
-import type { ThinkingSession, Thought } from '../../../src/types/index.js';
+import type { ThinkingSession } from '../../../src/types/index.js';
 
 describe('Reasoning Taxonomy', () => {
   describe('Taxonomy Database', () => {
@@ -262,95 +261,10 @@ describe('Reasoning Taxonomy', () => {
     });
   });
 
-  describe('Adaptive Mode Selector', () => {
-    let selector: AdaptiveModeSelector;
-
-    beforeEach(() => {
-      selector = new AdaptiveModeSelector();
-    });
-
-    it('should select mode with best_match strategy', () => {
-      const recommendations = selector.selectMode(
-        {
-          problem: 'prove a theorem',
-          characteristics: {
-            domain: 'mathematical',
-            complexity: 'complex',
-          },
-        },
-        'best_match'
-      );
-
-      expect(recommendations.length).toBeGreaterThan(0);
-    });
-
-    it('should select mode with multi_modal strategy', () => {
-      const recommendations = selector.selectMode(
-        {
-          problem: 'analyze a complex system',
-          characteristics: {
-            domain: 'general',
-            complexity: 'complex',
-          },
-        },
-        'multi_modal'
-      );
-
-      expect(recommendations.length).toBeGreaterThan(0);
-    });
-
-    it('should learn from session', () => {
-      const session: ThinkingSession = {
-        id: 'test',
-        title: 'Test',
-        mode: 'sequential',
-        thoughts: [
-          { thoughtNumber: 1, totalThoughts: 1, nextThoughtNeeded: false, content: 'Test', mode: 'sequential' }
-        ],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      const learning = selector.learnFromSession(session);
-      expect(learning).toBeDefined();
-      expect(learning.effectiveModes.length).toBeGreaterThanOrEqual(0);
-    });
-
-    it('should respect constraints', () => {
-      const recommendations = selector.selectMode(
-        {
-          problem: 'quick analysis',
-          constraints: {
-            maxCognitiveLoad: 'moderate',
-          },
-        },
-        'best_match'
-      );
-
-      expect(recommendations.length).toBeGreaterThanOrEqual(0);
-      // All recommendations should respect cognitive load constraint
-    });
-
-    it('should consider user preferences', () => {
-      const recommendations = selector.selectMode(
-        {
-          problem: 'general problem',
-          userPreferences: {
-            preferredModes: ['mathematics' as any],
-          },
-        },
-        'best_match'
-      );
-
-      expect(recommendations.length).toBeGreaterThanOrEqual(0);
-    });
-  });
-
   describe('Integration Tests', () => {
-    it('should work end-to-end: problem -> suggestion -> selection', () => {
+    it('should work end-to-end: problem -> suggestion', () => {
       const navigator = new TaxonomyNavigator();
       const engine = new SuggestionEngine();
-      const selector = new AdaptiveModeSelector();
 
       // Step 1: Get recommendations from taxonomy
       const navRecommendations = navigator.recommend('proving mathematical theorem');
@@ -364,19 +278,6 @@ describe('Reasoning Taxonomy', () => {
         uncertainty: 'low',
       });
       expect(suggestions.length).toBeGreaterThan(0);
-
-      // Step 3: Select mode adaptively
-      const selection = selector.selectMode(
-        {
-          problem: 'proving mathematical theorem',
-          characteristics: {
-            domain: 'mathematical',
-            complexity: 'complex',
-          },
-        },
-        'best_match'
-      );
-      expect(selection.length).toBeGreaterThan(0);
     });
 
     it('should handle session with multiple modes', () => {

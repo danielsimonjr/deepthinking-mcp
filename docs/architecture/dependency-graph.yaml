@@ -1,110 +1,29 @@
 metadata:
   name: deepthinking-mcp
-  version: 8.5.0
-  lastUpdated: "2025-12-29"
-  totalFiles: 242
+  version: 9.0.0
+  lastUpdated: "2025-12-30"
+  totalFiles: 233
   totalModules: 15
-  totalExports: 1314
+  totalExports: 1267
 entryPoints:
   - file: src/index.ts
     type: main
-    description: DeepThinking MCP Server (v8.4.0)
+    description: DeepThinking MCP Server (v9.0.0)
 modules:
   cache:
-    src/cache/factory.ts:
-      description: Cache Factory (v3.4.0)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./types.js
-          imports:
-            - Cache
-            - CacheConfig
-          typeOnly: true
-        - file: ./lru.js
-          imports:
-            - LRUCache
-        - file: ./lfu.js
-          imports:
-            - LFUCache
-        - file: ./fifo.js
-          imports:
-            - FIFOCache
-      exports:
-        - createCache
-        - CacheFactory
-        - CacheManager
-      classes:
-        - CacheFactory
-        - CacheManager
-      functions:
-        - createCache
-    src/cache/fifo.ts:
-      description: FIFO Cache (v3.4.0)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./types.js
-          imports:
-            - Cache
-            - CacheConfig
-            - CacheEntry
-            - CacheStats
-          typeOnly: true
-      exports:
-        - FIFOCache
-      classes:
-        - FIFOCache
     src/cache/index.ts:
-      description: Cache Module Exports (v3.4.0)
+      description: Cache Module Exports (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ./lru.js
           imports:
             - LRUCache
-          reExport: true
-        - file: ./lfu.js
-          imports:
-            - LFUCache
-          reExport: true
-        - file: ./fifo.js
-          imports:
-            - FIFOCache
-          reExport: true
-        - file: ./factory.js
-          imports:
-            - createCache
-            - CacheManager
           reExport: true
       exports:
         - LRUCache
-        - LFUCache
-        - FIFOCache
-        - createCache
-        - CacheManager
       reExported:
         - LRUCache
-        - LFUCache
-        - FIFOCache
-        - createCache
-        - CacheManager
-    src/cache/lfu.ts:
-      description: LFU Cache (v3.4.0)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./types.js
-          imports:
-            - Cache
-            - CacheConfig
-            - CacheEntry
-            - CacheStats
-          typeOnly: true
-      exports:
-        - LFUCache
-      classes:
-        - LFUCache
     src/cache/lru.ts:
       description: LRU Cache (v3.4.0)
       externalDependencies: []
@@ -3131,7 +3050,7 @@ modules:
         - VisualExporter
   entry:
     src/index.ts:
-      description: DeepThinking MCP Server (v8.4.0)
+      description: DeepThinking MCP Server (v9.0.0)
       externalDependencies:
         - package: "@modelcontextprotocol/sdk/server/index.js"
           imports:
@@ -3161,12 +3080,12 @@ modules:
         - file: ./services/ExportService.js
           imports:
             - ExportService
-        - file: ./services/ModeRouter.js
-          imports:
-            - ModeRouter
         - file: ./session/manager.js
           imports:
             - SessionManager
+        - file: ./types/modes/recommendations.js
+          imports:
+            - ModeRecommender
         - file: ./session/storage/file-store.js
           imports:
             - FileSessionStore
@@ -5308,58 +5227,6 @@ modules:
         - getRegistry
         - registerHandler
         - createThought
-    src/modes/stochastic/analysis/convergence.ts:
-      description: Convergence Diagnostics Module - Phase 12 Sprint 5
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../types.js
-          imports:
-            - ConvergenceDiagnostics
-          typeOnly: true
-        - file: ./statistics.js
-          imports:
-            - mean
-            - variance
-            - stdDev
-      exports:
-        - autocorrelation
-        - integratedAutocorrelationTime
-        - effectiveSampleSize
-        - effectiveSampleSizeMultiple
-        - minEffectiveSampleSize
-        - gewekeStatistic
-        - gewekeStatisticMultiple
-        - aggregateGewekeStatistic
-        - rHatSingleChain
-        - rHatMultipleChains
-        - mcse
-        - mcseMultiple
-        - assessConvergence
-        - computeConvergenceDiagnostics
-        - traceStatistics
-        - generateDiagnosticSummary
-      interfaces:
-        - ConvergenceResult
-        - TraceStats
-        - DiagnosticSummary
-      functions:
-        - autocorrelation
-        - integratedAutocorrelationTime
-        - effectiveSampleSize
-        - effectiveSampleSizeMultiple
-        - minEffectiveSampleSize
-        - gewekeStatistic
-        - gewekeStatisticMultiple
-        - aggregateGewekeStatistic
-        - rHatSingleChain
-        - rHatMultipleChains
-        - mcse
-        - mcseMultiple
-        - assessConvergence
-        - computeConvergenceDiagnostics
-        - traceStatistics
-        - generateDiagnosticSummary
     src/modes/stochastic/analysis/statistics.ts:
       description: Statistical Analysis Module - Phase 12 Sprint 5
       externalDependencies: []
@@ -5460,35 +5327,6 @@ modules:
       functions:
         - createSampler
         - sampleWithStatistics
-    src/modes/stochastic/models/monte-carlo.ts:
-      description: Monte Carlo Simulation Engine - Phase 12 Sprint 5
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../types.js
-          imports:
-            - MonteCarloConfig
-            - MonteCarloResult
-            - StochasticModel
-            - SimulationProgress
-            - SampleStatistics
-            - ConvergenceDiagnostics
-          typeOnly: true
-        - file: ../sampling/rng.js
-          imports:
-            - SeededRNG
-        - file: ./distribution.js
-          imports:
-            - createSampler
-      exports:
-        - createMonteCarloEngine
-        - runMonteCarloSimulation
-        - MonteCarloEngine
-      classes:
-        - MonteCarloEngine
-      functions:
-        - createMonteCarloEngine
-        - runMonteCarloSimulation
     src/modes/stochastic/sampling/rng.ts:
       description: Seeded Random Number Generator - Phase 12 Sprint 5
       externalDependencies: []
@@ -5926,42 +5764,6 @@ modules:
       interfaces:
         - ProofVerifierConfig
   search:
-    src/search/engine.ts:
-      description: Search Engine (v3.5.0)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../types/index.js
-          imports:
-            - ThinkingSession
-            - ThinkingMode
-          typeOnly: true
-        - file: ./types.js
-          imports:
-            - SearchQuery
-            - SearchResults
-            - SearchResult
-            - SearchHighlight
-            - FacetedResults
-            - SortField
-          typeOnly: true
-        - file: ./index.js
-          imports:
-            - SearchIndex
-        - file: ./tokenizer.js
-          imports:
-            - Tokenizer
-        - file: ../interfaces/ILogger.js
-          imports:
-            - ILogger
-        - file: ../utils/logger.js
-          imports:
-            - createLogger
-            - LogLevel
-      exports:
-        - SearchEngine
-      classes:
-        - SearchEngine
     src/search/index.ts:
       description: Search Index (v3.4.0)
       externalDependencies: []
@@ -6097,59 +5899,6 @@ modules:
         - ExportService
       classes:
         - ExportService
-    src/services/MetaMonitor.ts:
-      description: Meta-Reasoning Monitor Service (v6.0.0)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../types/core.js
-          imports:
-            - Thought
-            - ThinkingMode
-        - file: ../types/modes/metareasoning.js
-          imports:
-            - StrategyEvaluation
-            - AlternativeStrategy
-            - QualityMetrics
-            - SessionContext
-      exports:
-        - metaMonitor
-        - MetaMonitor
-      classes:
-        - MetaMonitor
-      constants:
-        - metaMonitor
-    src/services/ModeRouter.ts:
-      description: Mode Router Service (v6.0.0)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../types/index.js
-          imports:
-            - ThinkingMode
-            - ModeRecommender
-            - ProblemCharacteristics
-        - file: ../session/manager.js
-          imports:
-            - SessionManager
-        - file: ../interfaces/ILogger.js
-          imports:
-            - ILogger
-        - file: ../utils/logger.js
-          imports:
-            - createLogger
-            - LogLevel
-        - file: ./MetaMonitor.js
-          imports:
-            - metaMonitor
-            - MetaMonitor
-      exports:
-        - ModeRouter
-      classes:
-        - ModeRouter
-      interfaces:
-        - ModeRecommendation
-        - ModeCombinationRecommendation
     src/services/ThoughtFactory.ts:
       description: Thought Factory Service (v9.0.0)
       externalDependencies: []
@@ -6183,7 +5932,7 @@ modules:
         - ThoughtFactoryConfig
   session:
     src/session/manager.ts:
-      description: Session Manager for DeepThinking MCP (v6.0.0)
+      description: Session Manager for DeepThinking MCP (v9.0.0)
       externalDependencies: []
       nodeDependencies:
         - module: crypto
@@ -6197,6 +5946,12 @@ modules:
             - SessionMetadata
             - Thought
             - ThinkingMode
+        - file: ../types/modes/metareasoning.js
+          imports:
+            - StrategyEvaluation
+            - AlternativeStrategy
+            - QualityMetrics
+            - SessionContext
         - file: ../utils/errors.js
           imports:
             - SessionNotFoundError
@@ -6222,10 +5977,6 @@ modules:
         - file: ./SessionMetricsCalculator.js
           imports:
             - SessionMetricsCalculator
-        - file: ../services/MetaMonitor.js
-          imports:
-            - metaMonitor
-            - MetaMonitor
         - file: ./utils/logger.js
           imports:
             - createLogger
@@ -6310,36 +6061,6 @@ modules:
       constants:
         - DEFAULT_STORAGE_CONFIG
   taxonomy:
-    src/taxonomy/adaptive-selector.ts:
-      description: Adaptive Mode Selector with Taxonomy Insights (v3.4.0)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./suggestion-engine.js
-          imports:
-            - SuggestionEngine
-            - ProblemCharacteristics
-            - EnhancedMetadata
-        - file: ./multi-modal-analyzer.js
-          imports:
-            - MultiModalAnalyzer
-        - file: ../types/core.js
-          imports:
-            - ThinkingMode
-        - file: ../types/index.js
-          imports:
-            - ThinkingSession
-            - Thought
-          typeOnly: true
-      exports:
-        - AdaptiveModeSelector
-      classes:
-        - AdaptiveModeSelector
-      interfaces:
-        - SelectionContext
-        - ModeRecommendation
-        - AdaptationTrigger
-        - SessionLearning
     src/taxonomy/classifier.ts:
       description: Taxonomy Classifier (v3.4.0)
       externalDependencies: []
@@ -9466,7 +9187,7 @@ modules:
       classes:
         - ThoughtValidator
     src/validation/validators/base.ts:
-      description: Base Validator Interface and Abstract Class (v4.3.0)
+      description: Mode Validator Interface (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -9474,26 +9195,30 @@ modules:
           imports:
             - Thought
             - ValidationIssue
+          typeOnly: true
         - file: ../constants.js
           imports:
-            - IssueSeverity
-            - IssueCategory
-            - ValidationThresholds
-            - ValidationMessages
-            - isInRange
             - ValidationContext
-      exports: []
+          typeOnly: true
+      exports:
+        - ModeValidator
       interfaces:
         - ModeValidator
     src/validation/validators/index.ts:
-      description: Validator Module Exports
+      description: Validator Module Exports (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./base.js
+        - file: ./validation-utils.js
           imports:
-            - ModeValidator
-            - BaseValidator
+            - validateCommon
+            - validateDependencies
+            - validateUncertainty
+            - validateNumberRange
+            - validateProbability
+            - validateConfidence
+            - validateRequired
+            - validateNonEmptyArray
           reExport: true
         - file: ./modes/sequential.js
           imports:
@@ -9601,8 +9326,14 @@ modules:
             - preloadValidators
           reExport: true
       exports:
-        - ModeValidator
-        - BaseValidator
+        - validateCommon
+        - validateDependencies
+        - validateUncertainty
+        - validateNumberRange
+        - validateProbability
+        - validateConfidence
+        - validateRequired
+        - validateNonEmptyArray
         - SequentialValidator
         - ShannonValidator
         - MathematicsValidator
@@ -9634,8 +9365,14 @@ modules:
         - getSupportedModes
         - preloadValidators
       reExported:
-        - ModeValidator
-        - BaseValidator
+        - validateCommon
+        - validateDependencies
+        - validateUncertainty
+        - validateNumberRange
+        - validateProbability
+        - validateConfidence
+        - validateRequired
+        - validateNonEmptyArray
         - SequentialValidator
         - ShannonValidator
         - MathematicsValidator
@@ -9667,7 +9404,7 @@ modules:
         - getSupportedModes
         - preloadValidators
     src/validation/validators/modes/abductive.ts:
-      description: Abductive Mode Validator (v7.1.0)
+      description: Abductive Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -9675,29 +9412,38 @@ modules:
           imports:
             - AbductiveThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
         - file: ../../constants.js
           imports:
             - IssueCategory
             - IssueSeverity
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
+            - validateConfidence
+            - validateProbability
+            - validateNonEmptyArray
       exports:
         - AbductiveValidator
       classes:
         - AbductiveValidator
     src/validation/validators/modes/algorithmic.ts:
-      description: Algorithmic Mode Validator (v7.3.0)
+      description: Algorithmic Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ../../../types/index.js
           imports:
             - ValidationIssue
+          typeOnly: true
         - file: ../../../types/modes/algorithmic.js
           imports:
             - AlgorithmicThought
@@ -9708,13 +9454,17 @@ modules:
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - AlgorithmicValidator
       classes:
         - AlgorithmicValidator
     src/validation/validators/modes/analogical.ts:
-      description: Analogical Mode Validator (v7.1.0)
+      description: Analogical Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -9722,29 +9472,37 @@ modules:
           imports:
             - AnalogicalThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
         - file: ../../constants.js
           imports:
             - IssueCategory
             - IssueSeverity
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
+            - validateConfidence
+            - validateProbability
       exports:
         - AnalogicalValidator
       classes:
         - AnalogicalValidator
     src/validation/validators/modes/analysis.ts:
-      description: Analysis Mode Validator (v7.4.0)
+      description: Analysis Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ../../../types/index.js
           imports:
             - ValidationIssue
+          typeOnly: true
         - file: ../../../types/modes/analysis.js
           imports:
             - AnalysisThought
@@ -9755,19 +9513,25 @@ modules:
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
+            - validateProbability
       exports:
         - AnalysisValidator
       classes:
         - AnalysisValidator
     src/validation/validators/modes/argumentation.ts:
-      description: Argumentation Mode Validator (v7.4.0)
+      description: Argumentation Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ../../../types/index.js
           imports:
             - ValidationIssue
+          typeOnly: true
         - file: ../../../types/modes/argumentation.js
           imports:
             - ArgumentationThought
@@ -9778,13 +9542,18 @@ modules:
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
+            - validateProbability
       exports:
         - ArgumentationValidator
       classes:
         - ArgumentationValidator
     src/validation/validators/modes/bayesian.ts:
-      description: Bayesian Mode Validator (v7.1.0)
+      description: Bayesian Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -9792,23 +9561,30 @@ modules:
           imports:
             - BayesianThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
         - file: ../../constants.js
           imports:
             - IssueCategory
             - IssueSeverity
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
+            - validateProbability
+            - validateNumberRange
       exports:
         - BayesianValidator
       classes:
         - BayesianValidator
     src/validation/validators/modes/causal.ts:
-      description: Causal Mode Validator (v7.1.0)
+      description: Causal Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -9816,29 +9592,37 @@ modules:
           imports:
             - CausalThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
         - file: ../../constants.js
           imports:
             - IssueCategory
             - IssueSeverity
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
+            - validateConfidence
+            - validateNumberRange
       exports:
         - CausalValidator
       classes:
         - CausalValidator
     src/validation/validators/modes/computability.ts:
-      description: Computability Mode Validator (v7.2.0)
+      description: Computability Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ../../../types/index.js
           imports:
             - ValidationIssue
+          typeOnly: true
         - file: ../../../types/modes/computability.js
           imports:
             - ComputabilityThought
@@ -9853,13 +9637,17 @@ modules:
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - ComputabilityValidator
       classes:
         - ComputabilityValidator
     src/validation/validators/modes/constraint.ts:
-      description: Constraint-Based Reasoning Mode Validator (v3.4.0)
+      description: Constraint-Based Reasoning Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -9867,19 +9655,24 @@ modules:
           imports:
             - Thought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - ConstraintValidator
       classes:
         - ConstraintValidator
     src/validation/validators/modes/counterfactual.ts:
-      description: Counterfactual Mode Validator (v7.1.0)
+      description: Counterfactual Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -9887,29 +9680,36 @@ modules:
           imports:
             - CounterfactualThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
         - file: ../../constants.js
           imports:
             - IssueCategory
             - IssueSeverity
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
+            - validateProbability
       exports:
         - CounterfactualValidator
       classes:
         - CounterfactualValidator
     src/validation/validators/modes/critique.ts:
-      description: Critique Mode Validator (v7.4.0)
+      description: Critique Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ../../../types/index.js
           imports:
             - ValidationIssue
+          typeOnly: true
         - file: ../../../types/modes/critique.js
           imports:
             - CritiqueThought
@@ -9920,19 +9720,25 @@ modules:
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
+            - validateProbability
       exports:
         - CritiqueValidator
       classes:
         - CritiqueValidator
     src/validation/validators/modes/cryptanalytic.ts:
-      description: Cryptanalytic Mode Validator (v7.2.0)
+      description: Cryptanalytic Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ../../../types/index.js
           imports:
             - ValidationIssue
+          typeOnly: true
         - file: ../../../types/modes/cryptanalytic.js
           imports:
             - CryptanalyticThought
@@ -9945,13 +9751,17 @@ modules:
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - CryptanalyticValidator
       classes:
         - CryptanalyticValidator
     src/validation/validators/modes/deductive.ts:
-      description: Deductive Mode Validator
+      description: Deductive Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -9959,25 +9769,31 @@ modules:
           imports:
             - DeductiveThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - DeductiveValidator
       classes:
         - DeductiveValidator
     src/validation/validators/modes/engineering.ts:
-      description: Engineering Mode Validator (v7.1.0)
+      description: Engineering Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ../../../types/index.js
           imports:
             - ValidationIssue
+          typeOnly: true
         - file: ../../../types/modes/engineering.js
           imports:
             - EngineeringThought
@@ -9988,13 +9804,17 @@ modules:
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - EngineeringValidator
       classes:
         - EngineeringValidator
     src/validation/validators/modes/evidential.ts:
-      description: Evidential Mode Validator (v7.5.0)
+      description: Evidential Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10002,23 +9822,28 @@ modules:
           imports:
             - EvidentialThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
         - file: ../../constants.js
           imports:
             - IssueCategory
             - IssueSeverity
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - EvidentialValidator
       classes:
         - EvidentialValidator
     src/validation/validators/modes/firstprinciples.ts:
-      description: First-Principles Mode Validator (v7.1.0)
+      description: First-Principles Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10026,23 +9851,33 @@ modules:
           imports:
             - FirstPrinciplesThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
         - file: ../../constants.js
           imports:
             - IssueCategory
             - IssueSeverity
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
+            - validateRequired
+            - validateNonEmptyArray
+            - validateConfidence
+            - validateNumberRange
+            - validateProbability
       exports:
         - FirstPrinciplesValidator
       classes:
         - FirstPrinciplesValidator
     src/validation/validators/modes/formallogic.ts:
-      description: Formal Logic Mode Validator
+      description: Formal Logic Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10050,19 +9885,24 @@ modules:
           imports:
             - FormalLogicThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - FormalLogicValidator
       classes:
         - FormalLogicValidator
     src/validation/validators/modes/gametheory.ts:
-      description: Game Theory Mode Validator (v7.1.0)
+      description: Game Theory Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10070,23 +9910,30 @@ modules:
           imports:
             - GameTheoryThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
         - file: ../../constants.js
           imports:
             - IssueCategory
             - IssueSeverity
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
+            - validateProbability
+            - validateNonEmptyArray
       exports:
         - GameTheoryValidator
       classes:
         - GameTheoryValidator
     src/validation/validators/modes/hybrid.ts:
-      description: Hybrid Mode Validator
+      description: Hybrid Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10094,19 +9941,24 @@ modules:
           imports:
             - HybridThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - HybridValidator
       classes:
         - HybridValidator
     src/validation/validators/modes/inductive.ts:
-      description: Inductive Mode Validator
+      description: Inductive Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10114,88 +9966,24 @@ modules:
           imports:
             - InductiveThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - InductiveValidator
       classes:
         - InductiveValidator
-    src/validation/validators/modes/mathematics-extended.ts:
-      description: Mathematics Extended Validators (v7.0.0)
-      externalDependencies:
-        - package: zod
-          imports:
-            - z
-      nodeDependencies: []
-      internalDependencies: []
-      exports:
-        - InferenceRuleSchema
-        - AtomicStatementTypeSchema
-        - SourceLocationSchema
-        - AtomicStatementSchema
-        - DependencyEdgeTypeSchema
-        - DependencyEdgeSchema
-        - DependencyGraphSchema
-        - ProofGapTypeSchema
-        - GapSeveritySchema
-        - ProofGapSchema
-        - ImplicitAssumptionTypeSchema
-        - ImplicitAssumptionSchema
-        - AssumptionChainSchema
-        - RigorLevelSchema
-        - ProofDecompositionSchema
-        - InconsistencyTypeSchema
-        - InconsistencySeveritySchema
-        - InconsistencySchema
-        - CircularPathSchema
-        - ConsistencyReportSchema
-        - GapAnalysisSchema
-        - AssumptionAnalysisSchema
-        - validateAtomicStatement
-        - validateProofDecomposition
-        - validateConsistencyReport
-        - validateGapAnalysis
-        - validateAssumptionAnalysis
-        - safeValidateProofDecomposition
-        - safeValidateConsistencyReport
-      functions:
-        - validateAtomicStatement
-        - validateProofDecomposition
-        - validateConsistencyReport
-        - validateGapAnalysis
-        - validateAssumptionAnalysis
-        - safeValidateProofDecomposition
-        - safeValidateConsistencyReport
-      constants:
-        - InferenceRuleSchema
-        - AtomicStatementTypeSchema
-        - SourceLocationSchema
-        - AtomicStatementSchema
-        - DependencyEdgeTypeSchema
-        - DependencyEdgeSchema
-        - DependencyGraphSchema
-        - ProofGapTypeSchema
-        - GapSeveritySchema
-        - ProofGapSchema
-        - ImplicitAssumptionTypeSchema
-        - ImplicitAssumptionSchema
-        - AssumptionChainSchema
-        - RigorLevelSchema
-        - ProofDecompositionSchema
-        - InconsistencyTypeSchema
-        - InconsistencySeveritySchema
-        - InconsistencySchema
-        - CircularPathSchema
-        - ConsistencyReportSchema
-        - GapAnalysisSchema
-        - AssumptionAnalysisSchema
     src/validation/validators/modes/mathematics.ts:
-      description: Mathematics Mode Validator
+      description: Mathematics Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10203,19 +9991,24 @@ modules:
           imports:
             - MathematicsThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - MathematicsValidator
       classes:
         - MathematicsValidator
     src/validation/validators/modes/meta.ts:
-      description: Meta-Reasoning Mode Validator (v3.4.0)
+      description: Meta-Reasoning Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10223,19 +10016,24 @@ modules:
           imports:
             - Thought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - MetaValidator
       classes:
         - MetaValidator
     src/validation/validators/modes/metareasoning.ts:
-      description: Meta-Reasoning Mode Validator
+      description: Meta-Reasoning Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10243,19 +10041,24 @@ modules:
           imports:
             - MetaReasoningThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - MetaReasoningValidator
       classes:
         - MetaReasoningValidator
     src/validation/validators/modes/modal.ts:
-      description: Modal Logic Mode Validator (v3.4.0)
+      description: Modal Logic Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10263,19 +10066,24 @@ modules:
           imports:
             - Thought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - ModalValidator
       classes:
         - ModalValidator
     src/validation/validators/modes/optimization.ts:
-      description: Optimization Mode Validator
+      description: Optimization Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10283,19 +10091,24 @@ modules:
           imports:
             - OptimizationThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - OptimizationValidator
       classes:
         - OptimizationValidator
     src/validation/validators/modes/physics.ts:
-      description: Physics Mode Validator
+      description: Physics Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10303,19 +10116,24 @@ modules:
           imports:
             - PhysicsThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - PhysicsValidator
       classes:
         - PhysicsValidator
     src/validation/validators/modes/recursive.ts:
-      description: Recursive Reasoning Mode Validator (v3.4.0)
+      description: Recursive Reasoning Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10323,19 +10141,24 @@ modules:
           imports:
             - Thought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - RecursiveValidator
       classes:
         - RecursiveValidator
     src/validation/validators/modes/scientificmethod.ts:
-      description: Scientific Method Mode Validator
+      description: Scientific Method Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10343,19 +10166,24 @@ modules:
           imports:
             - ScientificMethodThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - ScientificMethodValidator
       classes:
         - ScientificMethodValidator
     src/validation/validators/modes/sequential.ts:
-      description: Sequential Mode Validator
+      description: Sequential Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10363,19 +10191,24 @@ modules:
           imports:
             - SequentialThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
       exports:
         - SequentialValidator
       classes:
         - SequentialValidator
     src/validation/validators/modes/shannon.ts:
-      description: Shannon Mode Validator (v7.1.0)
+      description: Shannon Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10383,23 +10216,30 @@ modules:
           imports:
             - ShannonThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
         - file: ../../constants.js
           imports:
             - IssueCategory
             - IssueSeverity
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
+            - validateUncertainty
+            - validateDependencies
       exports:
         - ShannonValidator
       classes:
         - ShannonValidator
     src/validation/validators/modes/stochastic.ts:
-      description: Stochastic Reasoning Mode Validator (v3.4.0)
+      description: Stochastic Reasoning Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10407,25 +10247,32 @@ modules:
           imports:
             - Thought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
+            - validateUncertainty
       exports:
         - StochasticValidator
       classes:
         - StochasticValidator
     src/validation/validators/modes/synthesis.ts:
-      description: Synthesis Mode Validator (v7.4.0)
+      description: Synthesis Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ../../../types/index.js
           imports:
             - ValidationIssue
+          typeOnly: true
         - file: ../../../types/modes/synthesis.js
           imports:
             - SynthesisThought
@@ -10436,13 +10283,18 @@ modules:
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
+            - validateProbability
       exports:
         - SynthesisValidator
       classes:
         - SynthesisValidator
     src/validation/validators/modes/systemsthinking.ts:
-      description: Systems Thinking Mode Validator (v7.1.0)
+      description: Systems Thinking Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10450,23 +10302,31 @@ modules:
           imports:
             - SystemsThinkingThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
         - file: ../../constants.js
           imports:
             - IssueCategory
             - IssueSeverity
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
+            - validateRequired
+            - validateProbability
+            - validateNumberRange
       exports:
         - SystemsThinkingValidator
       classes:
         - SystemsThinkingValidator
     src/validation/validators/modes/temporal.ts:
-      description: Temporal Mode Validator (v7.1.0)
+      description: Temporal Mode Validator (v9.0.0)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10474,17 +10334,24 @@ modules:
           imports:
             - TemporalThought
             - ValidationIssue
+          typeOnly: true
         - file: ../../validator.js
           imports:
             - ValidationContext
           typeOnly: true
         - file: ../base.js
           imports:
-            - BaseValidator
+            - ModeValidator
+          typeOnly: true
         - file: ../../constants.js
           imports:
             - IssueCategory
             - IssueSeverity
+        - file: ../validation-utils.js
+          imports:
+            - validateCommon
+            - validateConfidence
+            - validateNumberRange
       exports:
         - TemporalValidator
       classes:
@@ -10513,6 +10380,42 @@ modules:
         - preloadValidators
       constants:
         - validatorRegistry
+    src/validation/validators/validation-utils.ts:
+      description: Validation Utility Functions (v9.0.0)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../types/index.js
+          imports:
+            - Thought
+            - ValidationIssue
+          typeOnly: true
+        - file: ../constants.js
+          imports:
+            - IssueSeverity
+            - IssueCategory
+            - ValidationThresholds
+            - ValidationMessages
+            - isInRange
+            - ValidationContext
+      exports:
+        - validateCommon
+        - validateDependencies
+        - validateUncertainty
+        - validateNumberRange
+        - validateProbability
+        - validateConfidence
+        - validateRequired
+        - validateNonEmptyArray
+      functions:
+        - validateCommon
+        - validateDependencies
+        - validateUncertainty
+        - validateNumberRange
+        - validateProbability
+        - validateConfidence
+        - validateRequired
+        - validateNonEmptyArray
 dependencyGraph:
   circularDependencies:
     runtime: []
@@ -10712,10 +10615,7 @@ dependencyGraph:
   layers:
     - name: Cache
       files:
-        - src/cache/factory.ts
-        - src/cache/fifo.ts
         - src/cache/index.ts
-        - src/cache/lfu.ts
         - src/cache/lru.ts
         - src/cache/types.ts
     - name: Config
@@ -10823,10 +10723,8 @@ dependencyGraph:
         - src/modes/handlers/TemporalHandler.ts
         - src/modes/index.ts
         - src/modes/registry.ts
-        - src/modes/stochastic/analysis/convergence.ts
         - src/modes/stochastic/analysis/statistics.ts
         - src/modes/stochastic/models/distribution.ts
-        - src/modes/stochastic/models/monte-carlo.ts
         - src/modes/stochastic/sampling/rng.ts
         - src/modes/stochastic/types.ts
     - name: Proof
@@ -10846,15 +10744,12 @@ dependencyGraph:
         - src/proof/verifier.ts
     - name: Search
       files:
-        - src/search/engine.ts
         - src/search/index.ts
         - src/search/tokenizer.ts
         - src/search/types.ts
     - name: Services
       files:
         - src/services/ExportService.ts
-        - src/services/MetaMonitor.ts
-        - src/services/ModeRouter.ts
         - src/services/ThoughtFactory.ts
     - name: Session
       files:
@@ -10864,7 +10759,6 @@ dependencyGraph:
         - src/session/storage/interface.ts
     - name: Taxonomy
       files:
-        - src/taxonomy/adaptive-selector.ts
         - src/taxonomy/classifier.ts
         - src/taxonomy/multi-modal-analyzer.ts
         - src/taxonomy/navigator.ts
@@ -10966,7 +10860,6 @@ dependencyGraph:
         - src/validation/validators/modes/gametheory.ts
         - src/validation/validators/modes/hybrid.ts
         - src/validation/validators/modes/inductive.ts
-        - src/validation/validators/modes/mathematics-extended.ts
         - src/validation/validators/modes/mathematics.ts
         - src/validation/validators/modes/meta.ts
         - src/validation/validators/modes/metareasoning.ts
@@ -10982,20 +10875,21 @@ dependencyGraph:
         - src/validation/validators/modes/systemsthinking.ts
         - src/validation/validators/modes/temporal.ts
         - src/validation/validators/registry.ts
+        - src/validation/validators/validation-utils.ts
 statistics:
-  totalTypeScriptFiles: 242
+  totalTypeScriptFiles: 233
   totalModules: 15
-  totalLinesOfCode: 104096
-  totalExports: 1314
-  totalClasses: 152
-  totalInterfaces: 531
-  totalFunctions: 443
+  totalLinesOfCode: 100604
+  totalExports: 1267
+  totalClasses: 143
+  totalInterfaces: 522
+  totalFunctions: 425
   totalTypeGuards: 85
   totalEnums: 3
-  totalConstants: 167
-  totalReExports: 566
-  totalTypeOnlyImports: 243
+  totalConstants: 144
+  totalReExports: 568
+  totalTypeOnlyImports: 306
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 55
-  unusedFilesCount: 15
-  unusedExportsCount: 507
+  unusedFilesCount: 16
+  unusedExportsCount: 466

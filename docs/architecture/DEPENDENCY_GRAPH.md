@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 8.5.0 | **Last Updated**: 2025-12-29
+**Version**: 9.0.0 | **Last Updated**: 2025-12-30
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -35,17 +35,17 @@ This document provides a comprehensive dependency graph of all files, components
 
 The codebase is organized into the following modules:
 
-- **cache**: 6 files
+- **cache**: 3 files
 - **config**: 1 file
 - **export**: 44 files
 - **entry**: 1 file
 - **interfaces**: 1 file
-- **modes**: 54 files
+- **modes**: 52 files
 - **proof**: 13 files
-- **search**: 4 files
-- **services**: 4 files
+- **search**: 3 files
+- **services**: 2 files
 - **session**: 4 files
-- **taxonomy**: 6 files
+- **taxonomy**: 5 files
 - **tools**: 18 files
 - **types**: 36 files
 - **utils**: 6 files
@@ -55,58 +55,15 @@ The codebase is organized into the following modules:
 
 ## Cache Dependencies
 
-### `src/cache/factory.ts` - Cache Factory (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `Cache, CacheConfig` | Import (type-only) |
-| `./lru.js` | `LRUCache` | Import |
-| `./lfu.js` | `LFUCache` | Import |
-| `./fifo.js` | `FIFOCache` | Import |
-
-**Exports:**
-- Classes: `CacheFactory`, `CacheManager`
-- Functions: `createCache`
-
----
-
-### `src/cache/fifo.ts` - FIFO Cache (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `Cache, CacheConfig, CacheEntry, CacheStats` | Import (type-only) |
-
-**Exports:**
-- Classes: `FIFOCache`
-
----
-
-### `src/cache/index.ts` - Cache Module Exports (v3.4.0)
+### `src/cache/index.ts` - Cache Module Exports (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
 | `./lru.js` | `LRUCache` | Re-export |
-| `./lfu.js` | `LFUCache` | Re-export |
-| `./fifo.js` | `FIFOCache` | Re-export |
-| `./factory.js` | `createCache, CacheManager` | Re-export |
 
 **Exports:**
-- Re-exports: `LRUCache`, `LFUCache`, `FIFOCache`, `createCache`, `CacheManager`
-
----
-
-### `src/cache/lfu.ts` - LFU Cache (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./types.js` | `Cache, CacheConfig, CacheEntry, CacheStats` | Import (type-only) |
-
-**Exports:**
-- Classes: `LFUCache`
+- Re-exports: `LRUCache`
 
 ---
 
@@ -970,7 +927,7 @@ The codebase is organized into the following modules:
 
 ## Entry Dependencies
 
-### `src/index.ts` - DeepThinking MCP Server (v8.4.0)
+### `src/index.ts` - DeepThinking MCP Server (v9.0.0)
 
 **External Dependencies:**
 | Package | Import |
@@ -991,8 +948,8 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `./services/ThoughtFactory.js` | `ThoughtFactory` | Import |
 | `./services/ExportService.js` | `ExportService` | Import |
-| `./services/ModeRouter.js` | `ModeRouter` | Import |
 | `./session/manager.js` | `SessionManager` | Import |
+| `./types/modes/recommendations.js` | `ModeRecommender` | Import |
 | `./session/storage/file-store.js` | `FileSessionStore` | Import |
 | `./tools/definitions.js` | `isValidTool, modeToToolMap, toolList, toolSchemas` | Import |
 | `./tools/thinking.js` | `thinkingTool` | Import |
@@ -1971,20 +1928,6 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/modes/stochastic/analysis/convergence.ts` - Convergence Diagnostics Module - Phase 12 Sprint 5
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types.js` | `ConvergenceDiagnostics` | Import (type-only) |
-| `./statistics.js` | `mean, variance, stdDev` | Import |
-
-**Exports:**
-- Interfaces: `ConvergenceResult`, `TraceStats`, `DiagnosticSummary`
-- Functions: `autocorrelation`, `integratedAutocorrelationTime`, `effectiveSampleSize`, `effectiveSampleSizeMultiple`, `minEffectiveSampleSize`, `gewekeStatistic`, `gewekeStatisticMultiple`, `aggregateGewekeStatistic`, `rHatSingleChain`, `rHatMultipleChains`, `mcse`, `mcseMultiple`, `assessConvergence`, `computeConvergenceDiagnostics`, `traceStatistics`, `generateDiagnosticSummary`
-
----
-
 ### `src/modes/stochastic/analysis/statistics.ts` - Statistical Analysis Module - Phase 12 Sprint 5
 
 **Internal Dependencies:**
@@ -2009,21 +1952,6 @@ The codebase is organized into the following modules:
 - Classes: `NormalSampler`, `UniformSampler`, `ExponentialSampler`, `PoissonSampler`, `BinomialSampler`, `CategoricalSampler`, `BetaSampler`, `GammaSampler`
 - Interfaces: `DistributionSampler`
 - Functions: `createSampler`, `sampleWithStatistics`
-
----
-
-### `src/modes/stochastic/models/monte-carlo.ts` - Monte Carlo Simulation Engine - Phase 12 Sprint 5
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types.js` | `MonteCarloConfig, MonteCarloResult, StochasticModel, SimulationProgress, SampleStatistics, ConvergenceDiagnostics` | Import (type-only) |
-| `../sampling/rng.js` | `SeededRNG` | Import |
-| `./distribution.js` | `createSampler` | Import |
-
-**Exports:**
-- Classes: `MonteCarloEngine`
-- Functions: `createMonteCarloEngine`, `runMonteCarloSimulation`
 
 ---
 
@@ -2240,23 +2168,6 @@ The codebase is organized into the following modules:
 
 ## Search Dependencies
 
-### `src/search/engine.ts` - Search Engine (v3.5.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `ThinkingSession, ThinkingMode` | Import (type-only) |
-| `./types.js` | `SearchQuery, SearchResults, SearchResult, SearchHighlight, FacetedResults, SortField` | Import (type-only) |
-| `./index.js` | `SearchIndex` | Import |
-| `./tokenizer.js` | `Tokenizer` | Import |
-| `../interfaces/ILogger.js` | `ILogger` | Import |
-| `../utils/logger.js` | `createLogger, LogLevel` | Import |
-
-**Exports:**
-- Classes: `SearchEngine`
-
----
-
 ### `src/search/index.ts` - Search Index (v3.4.0)
 
 **Internal Dependencies:**
@@ -2313,37 +2224,6 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/services/MetaMonitor.ts` - Meta-Reasoning Monitor Service (v6.0.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/core.js` | `Thought, ThinkingMode` | Import |
-| `../types/modes/metareasoning.js` | `StrategyEvaluation, AlternativeStrategy, QualityMetrics, SessionContext` | Import |
-
-**Exports:**
-- Classes: `MetaMonitor`
-- Constants: `metaMonitor`
-
----
-
-### `src/services/ModeRouter.ts` - Mode Router Service (v6.0.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `ThinkingMode, ModeRecommender, ProblemCharacteristics` | Import |
-| `../session/manager.js` | `SessionManager` | Import |
-| `../interfaces/ILogger.js` | `ILogger` | Import |
-| `../utils/logger.js` | `createLogger, LogLevel` | Import |
-| `./MetaMonitor.js` | `metaMonitor, MetaMonitor` | Import |
-
-**Exports:**
-- Classes: `ModeRouter`
-- Interfaces: `ModeRecommendation`, `ModeCombinationRecommendation`
-
----
-
 ### `src/services/ThoughtFactory.ts` - Thought Factory Service (v9.0.0)
 
 **Internal Dependencies:**
@@ -2363,7 +2243,7 @@ The codebase is organized into the following modules:
 
 ## Session Dependencies
 
-### `src/session/manager.ts` - Session Manager for DeepThinking MCP (v6.0.0)
+### `src/session/manager.ts` - Session Manager for DeepThinking MCP (v9.0.0)
 
 **Node.js Built-in Dependencies:**
 | Module | Import |
@@ -2374,6 +2254,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../types/index.js` | `ThinkingSession, SessionConfig, SessionMetadata, Thought, ThinkingMode` | Import |
+| `../types/modes/metareasoning.js` | `StrategyEvaluation, AlternativeStrategy, QualityMetrics, SessionContext` | Import |
 | `../utils/errors.js` | `SessionNotFoundError` | Import |
 | `../utils/sanitization.js` | `sanitizeString, sanitizeThoughtContent, validateSessionId, MAX_LENGTHS` | Import |
 | `../utils/logger.js` | `createLogger, LogLevel` | Import |
@@ -2381,7 +2262,6 @@ The codebase is organized into the following modules:
 | `./storage/interface.js` | `SessionStorage` | Import |
 | `../cache/lru.js` | `LRUCache` | Import |
 | `./SessionMetricsCalculator.js` | `SessionMetricsCalculator` | Import |
-| `../services/MetaMonitor.js` | `metaMonitor, MetaMonitor` | Import |
 | `./utils/logger.js` | `createLogger, LogLevel` | Import |
 | `./storage/file-store.js` | `FileSessionStore` | Import |
 
@@ -2439,22 +2319,6 @@ The codebase is organized into the following modules:
 ---
 
 ## Taxonomy Dependencies
-
-### `src/taxonomy/adaptive-selector.ts` - Adaptive Mode Selector with Taxonomy Insights (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./suggestion-engine.js` | `SuggestionEngine, ProblemCharacteristics, EnhancedMetadata` | Import |
-| `./multi-modal-analyzer.js` | `MultiModalAnalyzer` | Import |
-| `../types/core.js` | `ThinkingMode` | Import |
-| `../types/index.js` | `ThinkingSession, Thought` | Import (type-only) |
-
-**Exports:**
-- Classes: `AdaptiveModeSelector`
-- Interfaces: `SelectionContext`, `ModeRecommendation`, `AdaptationTrigger`, `SessionLearning`
-
----
 
 ### `src/taxonomy/classifier.ts` - Taxonomy Classifier (v3.4.0)
 
@@ -3545,22 +3409,25 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/validation/validators/base.ts` - Base Validator Interface and Abstract Class (v4.3.0)
+### `src/validation/validators/base.ts` - Mode Validator Interface (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `Thought, ValidationIssue` | Import |
-| `../constants.js` | `IssueSeverity, IssueCategory, ValidationThresholds, ValidationMessages, isInRange, ValidationContext` | Import |
+| `../../types/index.js` | `Thought, ValidationIssue` | Import (type-only) |
+| `../constants.js` | `ValidationContext` | Import (type-only) |
+
+**Exports:**
+- Interfaces: `ModeValidator`
 
 ---
 
-### `src/validation/validators/index.ts` - Validator Module Exports
+### `src/validation/validators/index.ts` - Validator Module Exports (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./base.js` | `ModeValidator, BaseValidator` | Re-export |
+| `./validation-utils.js` | `validateCommon, validateDependencies, validateUncertainty, validateNumberRange, validateProbability, validateConfidence, validateRequired, validateNonEmptyArray` | Re-export |
 | `./modes/sequential.js` | `SequentialValidator` | Re-export |
 | `./modes/shannon.js` | `ShannonValidator` | Re-export |
 | `./modes/mathematics.js` | `MathematicsValidator` | Re-export |
@@ -3588,512 +3455,533 @@ The codebase is organized into the following modules:
 | `./registry.js` | `validatorRegistry, getValidatorForMode, getValidatorForModeSync, hasValidatorForMode, getSupportedModes, preloadValidators` | Re-export |
 
 **Exports:**
-- Re-exports: `ModeValidator`, `BaseValidator`, `SequentialValidator`, `ShannonValidator`, `MathematicsValidator`, `PhysicsValidator`, `HybridValidator`, `InductiveValidator`, `DeductiveValidator`, `AbductiveValidator`, `CausalValidator`, `BayesianValidator`, `CounterfactualValidator`, `AnalogicalValidator`, `TemporalValidator`, `GameTheoryValidator`, `EvidentialValidator`, `MetaValidator`, `ModalValidator`, `ConstraintValidator`, `OptimizationValidator`, `StochasticValidator`, `RecursiveValidator`, `MetaReasoningValidator`, `ComputabilityValidator`, `CryptanalyticValidator`, `validatorRegistry`, `getValidatorForMode`, `getValidatorForModeSync`, `hasValidatorForMode`, `getSupportedModes`, `preloadValidators`
+- Re-exports: `validateCommon`, `validateDependencies`, `validateUncertainty`, `validateNumberRange`, `validateProbability`, `validateConfidence`, `validateRequired`, `validateNonEmptyArray`, `SequentialValidator`, `ShannonValidator`, `MathematicsValidator`, `PhysicsValidator`, `HybridValidator`, `InductiveValidator`, `DeductiveValidator`, `AbductiveValidator`, `CausalValidator`, `BayesianValidator`, `CounterfactualValidator`, `AnalogicalValidator`, `TemporalValidator`, `GameTheoryValidator`, `EvidentialValidator`, `MetaValidator`, `ModalValidator`, `ConstraintValidator`, `OptimizationValidator`, `StochasticValidator`, `RecursiveValidator`, `MetaReasoningValidator`, `ComputabilityValidator`, `CryptanalyticValidator`, `validatorRegistry`, `getValidatorForMode`, `getValidatorForModeSync`, `hasValidatorForMode`, `getSupportedModes`, `preloadValidators`
 
 ---
 
-### `src/validation/validators/modes/abductive.ts` - Abductive Mode Validator (v7.1.0)
+### `src/validation/validators/modes/abductive.ts` - Abductive Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `AbductiveThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `AbductiveThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
 | `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
+| `../validation-utils.js` | `validateCommon, validateConfidence, validateProbability, validateNonEmptyArray` | Import |
 
 **Exports:**
 - Classes: `AbductiveValidator`
 
 ---
 
-### `src/validation/validators/modes/algorithmic.ts` - Algorithmic Mode Validator (v7.3.0)
+### `src/validation/validators/modes/algorithmic.ts` - Algorithmic Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/index.js` | `ValidationIssue` | Import (type-only) |
 | `../../../types/modes/algorithmic.js` | `AlgorithmicThought` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `AlgorithmicValidator`
 
 ---
 
-### `src/validation/validators/modes/analogical.ts` - Analogical Mode Validator (v7.1.0)
+### `src/validation/validators/modes/analogical.ts` - Analogical Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `AnalogicalThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `AnalogicalThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
 | `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
+| `../validation-utils.js` | `validateCommon, validateConfidence, validateProbability` | Import |
 
 **Exports:**
 - Classes: `AnalogicalValidator`
 
 ---
 
-### `src/validation/validators/modes/analysis.ts` - Analysis Mode Validator (v7.4.0)
+### `src/validation/validators/modes/analysis.ts` - Analysis Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/index.js` | `ValidationIssue` | Import (type-only) |
 | `../../../types/modes/analysis.js` | `AnalysisThought` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon, validateProbability` | Import |
 
 **Exports:**
 - Classes: `AnalysisValidator`
 
 ---
 
-### `src/validation/validators/modes/argumentation.ts` - Argumentation Mode Validator (v7.4.0)
+### `src/validation/validators/modes/argumentation.ts` - Argumentation Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/index.js` | `ValidationIssue` | Import (type-only) |
 | `../../../types/modes/argumentation.js` | `ArgumentationThought` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon, validateProbability` | Import |
 
 **Exports:**
 - Classes: `ArgumentationValidator`
 
 ---
 
-### `src/validation/validators/modes/bayesian.ts` - Bayesian Mode Validator (v7.1.0)
+### `src/validation/validators/modes/bayesian.ts` - Bayesian Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `BayesianThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `BayesianThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
 | `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
+| `../validation-utils.js` | `validateCommon, validateProbability, validateNumberRange` | Import |
 
 **Exports:**
 - Classes: `BayesianValidator`
 
 ---
 
-### `src/validation/validators/modes/causal.ts` - Causal Mode Validator (v7.1.0)
+### `src/validation/validators/modes/causal.ts` - Causal Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `CausalThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `CausalThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
 | `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
+| `../validation-utils.js` | `validateCommon, validateConfidence, validateNumberRange` | Import |
 
 **Exports:**
 - Classes: `CausalValidator`
 
 ---
 
-### `src/validation/validators/modes/computability.ts` - Computability Mode Validator (v7.2.0)
+### `src/validation/validators/modes/computability.ts` - Computability Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/index.js` | `ValidationIssue` | Import (type-only) |
 | `../../../types/modes/computability.js` | `ComputabilityThought, TuringMachine, Reduction, DecidabilityProof, DiagonalizationArgument` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `ComputabilityValidator`
 
 ---
 
-### `src/validation/validators/modes/constraint.ts` - Constraint-Based Reasoning Mode Validator (v3.4.0)
+### `src/validation/validators/modes/constraint.ts` - Constraint-Based Reasoning Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `Thought, ValidationIssue` | Import |
+| `../../../types/index.js` | `Thought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `ConstraintValidator`
 
 ---
 
-### `src/validation/validators/modes/counterfactual.ts` - Counterfactual Mode Validator (v7.1.0)
+### `src/validation/validators/modes/counterfactual.ts` - Counterfactual Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `CounterfactualThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `CounterfactualThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
 | `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
+| `../validation-utils.js` | `validateCommon, validateProbability` | Import |
 
 **Exports:**
 - Classes: `CounterfactualValidator`
 
 ---
 
-### `src/validation/validators/modes/critique.ts` - Critique Mode Validator (v7.4.0)
+### `src/validation/validators/modes/critique.ts` - Critique Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/index.js` | `ValidationIssue` | Import (type-only) |
 | `../../../types/modes/critique.js` | `CritiqueThought` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon, validateProbability` | Import |
 
 **Exports:**
 - Classes: `CritiqueValidator`
 
 ---
 
-### `src/validation/validators/modes/cryptanalytic.ts` - Cryptanalytic Mode Validator (v7.2.0)
+### `src/validation/validators/modes/cryptanalytic.ts` - Cryptanalytic Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/index.js` | `ValidationIssue` | Import (type-only) |
 | `../../../types/modes/cryptanalytic.js` | `CryptanalyticThought, EvidenceChain, DecibanEvidence` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `CryptanalyticValidator`
 
 ---
 
-### `src/validation/validators/modes/deductive.ts` - Deductive Mode Validator
+### `src/validation/validators/modes/deductive.ts` - Deductive Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `DeductiveThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `DeductiveThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `DeductiveValidator`
 
 ---
 
-### `src/validation/validators/modes/engineering.ts` - Engineering Mode Validator (v7.1.0)
+### `src/validation/validators/modes/engineering.ts` - Engineering Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/index.js` | `ValidationIssue` | Import (type-only) |
 | `../../../types/modes/engineering.js` | `EngineeringThought` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `EngineeringValidator`
 
 ---
 
-### `src/validation/validators/modes/evidential.ts` - Evidential Mode Validator (v7.5.0)
+### `src/validation/validators/modes/evidential.ts` - Evidential Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `EvidentialThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `EvidentialThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
 | `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `EvidentialValidator`
 
 ---
 
-### `src/validation/validators/modes/firstprinciples.ts` - First-Principles Mode Validator (v7.1.0)
+### `src/validation/validators/modes/firstprinciples.ts` - First-Principles Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `FirstPrinciplesThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `FirstPrinciplesThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
 | `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
+| `../validation-utils.js` | `validateCommon, validateRequired, validateNonEmptyArray, validateConfidence, validateNumberRange, validateProbability` | Import |
 
 **Exports:**
 - Classes: `FirstPrinciplesValidator`
 
 ---
 
-### `src/validation/validators/modes/formallogic.ts` - Formal Logic Mode Validator
+### `src/validation/validators/modes/formallogic.ts` - Formal Logic Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `FormalLogicThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `FormalLogicThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `FormalLogicValidator`
 
 ---
 
-### `src/validation/validators/modes/gametheory.ts` - Game Theory Mode Validator (v7.1.0)
+### `src/validation/validators/modes/gametheory.ts` - Game Theory Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `GameTheoryThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `GameTheoryThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
 | `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
+| `../validation-utils.js` | `validateCommon, validateProbability, validateNonEmptyArray` | Import |
 
 **Exports:**
 - Classes: `GameTheoryValidator`
 
 ---
 
-### `src/validation/validators/modes/hybrid.ts` - Hybrid Mode Validator
+### `src/validation/validators/modes/hybrid.ts` - Hybrid Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `HybridThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `HybridThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `HybridValidator`
 
 ---
 
-### `src/validation/validators/modes/inductive.ts` - Inductive Mode Validator
+### `src/validation/validators/modes/inductive.ts` - Inductive Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `InductiveThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `InductiveThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `InductiveValidator`
 
 ---
 
-### `src/validation/validators/modes/mathematics-extended.ts` - Mathematics Extended Validators (v7.0.0)
-
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `zod` | `z` |
-
-**Exports:**
-- Functions: `validateAtomicStatement`, `validateProofDecomposition`, `validateConsistencyReport`, `validateGapAnalysis`, `validateAssumptionAnalysis`, `safeValidateProofDecomposition`, `safeValidateConsistencyReport`
-- Constants: `InferenceRuleSchema`, `AtomicStatementTypeSchema`, `SourceLocationSchema`, `AtomicStatementSchema`, `DependencyEdgeTypeSchema`, `DependencyEdgeSchema`, `DependencyGraphSchema`, `ProofGapTypeSchema`, `GapSeveritySchema`, `ProofGapSchema`, `ImplicitAssumptionTypeSchema`, `ImplicitAssumptionSchema`, `AssumptionChainSchema`, `RigorLevelSchema`, `ProofDecompositionSchema`, `InconsistencyTypeSchema`, `InconsistencySeveritySchema`, `InconsistencySchema`, `CircularPathSchema`, `ConsistencyReportSchema`, `GapAnalysisSchema`, `AssumptionAnalysisSchema`
-
----
-
-### `src/validation/validators/modes/mathematics.ts` - Mathematics Mode Validator
+### `src/validation/validators/modes/mathematics.ts` - Mathematics Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `MathematicsThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `MathematicsThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `MathematicsValidator`
 
 ---
 
-### `src/validation/validators/modes/meta.ts` - Meta-Reasoning Mode Validator (v3.4.0)
+### `src/validation/validators/modes/meta.ts` - Meta-Reasoning Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `Thought, ValidationIssue` | Import |
+| `../../../types/index.js` | `Thought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `MetaValidator`
 
 ---
 
-### `src/validation/validators/modes/metareasoning.ts` - Meta-Reasoning Mode Validator
+### `src/validation/validators/modes/metareasoning.ts` - Meta-Reasoning Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `MetaReasoningThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `MetaReasoningThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `MetaReasoningValidator`
 
 ---
 
-### `src/validation/validators/modes/modal.ts` - Modal Logic Mode Validator (v3.4.0)
+### `src/validation/validators/modes/modal.ts` - Modal Logic Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `Thought, ValidationIssue` | Import |
+| `../../../types/index.js` | `Thought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `ModalValidator`
 
 ---
 
-### `src/validation/validators/modes/optimization.ts` - Optimization Mode Validator
+### `src/validation/validators/modes/optimization.ts` - Optimization Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `OptimizationThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `OptimizationThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `OptimizationValidator`
 
 ---
 
-### `src/validation/validators/modes/physics.ts` - Physics Mode Validator
+### `src/validation/validators/modes/physics.ts` - Physics Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `PhysicsThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `PhysicsThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `PhysicsValidator`
 
 ---
 
-### `src/validation/validators/modes/recursive.ts` - Recursive Reasoning Mode Validator (v3.4.0)
+### `src/validation/validators/modes/recursive.ts` - Recursive Reasoning Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `Thought, ValidationIssue` | Import |
+| `../../../types/index.js` | `Thought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `RecursiveValidator`
 
 ---
 
-### `src/validation/validators/modes/scientificmethod.ts` - Scientific Method Mode Validator
+### `src/validation/validators/modes/scientificmethod.ts` - Scientific Method Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `ScientificMethodThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `ScientificMethodThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `ScientificMethodValidator`
 
 ---
 
-### `src/validation/validators/modes/sequential.ts` - Sequential Mode Validator
+### `src/validation/validators/modes/sequential.ts` - Sequential Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `SequentialThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `SequentialThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon` | Import |
 
 **Exports:**
 - Classes: `SequentialValidator`
 
 ---
 
-### `src/validation/validators/modes/shannon.ts` - Shannon Mode Validator (v7.1.0)
+### `src/validation/validators/modes/shannon.ts` - Shannon Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `ShannonThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `ShannonThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
 | `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
+| `../validation-utils.js` | `validateCommon, validateUncertainty, validateDependencies` | Import |
 
 **Exports:**
 - Classes: `ShannonValidator`
 
 ---
 
-### `src/validation/validators/modes/stochastic.ts` - Stochastic Reasoning Mode Validator (v3.4.0)
+### `src/validation/validators/modes/stochastic.ts` - Stochastic Reasoning Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `Thought, ValidationIssue` | Import |
+| `../../../types/index.js` | `Thought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon, validateUncertainty` | Import |
 
 **Exports:**
 - Classes: `StochasticValidator`
 
 ---
 
-### `src/validation/validators/modes/synthesis.ts` - Synthesis Mode Validator (v7.4.0)
+### `src/validation/validators/modes/synthesis.ts` - Synthesis Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `ValidationIssue` | Import |
+| `../../../types/index.js` | `ValidationIssue` | Import (type-only) |
 | `../../../types/modes/synthesis.js` | `SynthesisThought` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../validation-utils.js` | `validateCommon, validateProbability` | Import |
 
 **Exports:**
 - Classes: `SynthesisValidator`
 
 ---
 
-### `src/validation/validators/modes/systemsthinking.ts` - Systems Thinking Mode Validator (v7.1.0)
+### `src/validation/validators/modes/systemsthinking.ts` - Systems Thinking Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `SystemsThinkingThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `SystemsThinkingThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
 | `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
+| `../validation-utils.js` | `validateCommon, validateRequired, validateProbability, validateNumberRange` | Import |
 
 **Exports:**
 - Classes: `SystemsThinkingValidator`
 
 ---
 
-### `src/validation/validators/modes/temporal.ts` - Temporal Mode Validator (v7.1.0)
+### `src/validation/validators/modes/temporal.ts` - Temporal Mode Validator (v9.0.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/index.js` | `TemporalThought, ValidationIssue` | Import |
+| `../../../types/index.js` | `TemporalThought, ValidationIssue` | Import (type-only) |
 | `../../validator.js` | `ValidationContext` | Import (type-only) |
-| `../base.js` | `BaseValidator` | Import |
+| `../base.js` | `ModeValidator` | Import (type-only) |
 | `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
+| `../validation-utils.js` | `validateCommon, validateConfidence, validateNumberRange` | Import |
 
 **Exports:**
 - Classes: `TemporalValidator`
@@ -4113,18 +4001,28 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/validation/validators/validation-utils.ts` - Validation Utility Functions (v9.0.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/index.js` | `Thought, ValidationIssue` | Import (type-only) |
+| `../constants.js` | `IssueSeverity, IssueCategory, ValidationThresholds, ValidationMessages, isInRange, ValidationContext` | Import |
+
+**Exports:**
+- Functions: `validateCommon`, `validateDependencies`, `validateUncertainty`, `validateNumberRange`, `validateProbability`, `validateConfidence`, `validateRequired`, `validateNonEmptyArray`
+
+---
+
 ## Dependency Matrix
 
 ### File Import/Export Matrix
 
 | File | Imports From | Exports To |
 |------|--------------|------------|
-| `factory` | 4 files | 1 files |
-| `fifo` | 1 files | 2 files |
-| `index` | 4 files | 0 files |
-| `lfu` | 1 files | 2 files |
-| `lru` | 1 files | 3 files |
-| `types` | 0 files | 4 files |
+| `index` | 1 files | 0 files |
+| `lru` | 1 files | 2 files |
+| `types` | 0 files | 1 files |
 | `index` | 0 files | 2 files |
 | `file-exporter` | 2 files | 1 files |
 | `index` | 4 files | 0 files |
@@ -4149,6 +4047,9 @@ The codebase is organized into the following modules:
 | `physics` | 14 files | 1 files |
 | `proof-decomposition` | 11 files | 1 files |
 | `scientific-method` | 14 files | 1 files |
+| `sequential` | 14 files | 1 files |
+| `shannon` | 14 files | 1 files |
+| `systems-thinking` | 14 files | 1 files |
 
 ---
 
@@ -4182,149 +4083,142 @@ These cycles only involve type imports and are safe (erased at runtime):
 ```mermaid
 graph TD
     subgraph Cache
-        N0[factory]
-        N1[fifo]
-        N2[index]
-        N3[lfu]
-        N4[lru]
-        N5[...1 more]
+        N0[index]
+        N1[lru]
+        N2[types]
     end
 
     subgraph Config
-        N6[index]
+        N3[index]
     end
 
     subgraph Export
-        N7[file-exporter]
-        N8[index]
-        N9[profiles]
-        N10[index]
-        N11[abductive]
-        N12[...39 more]
+        N4[file-exporter]
+        N5[index]
+        N6[profiles]
+        N7[index]
+        N8[abductive]
+        N9[...39 more]
     end
 
     subgraph Entry
-        N13[index]
+        N10[index]
     end
 
     subgraph Interfaces
-        N14[ILogger]
+        N11[ILogger]
     end
 
     subgraph Modes
-        N15[centrality]
-        N16[d-separation]
-        N17[intervention]
-        N18[types]
-        N19[analyzer]
-        N20[...49 more]
+        N12[centrality]
+        N13[d-separation]
+        N14[intervention]
+        N15[types]
+        N16[analyzer]
+        N17[...47 more]
     end
 
     subgraph Proof
-        N21[assumption-tracker]
-        N22[branch-analyzer]
-        N23[branch-types]
-        N24[circular-detector]
-        N25[decomposer]
-        N26[...8 more]
+        N18[assumption-tracker]
+        N19[branch-analyzer]
+        N20[branch-types]
+        N21[circular-detector]
+        N22[decomposer]
+        N23[...8 more]
     end
 
     subgraph Search
-        N27[engine]
-        N28[index]
-        N29[tokenizer]
-        N30[types]
+        N24[index]
+        N25[tokenizer]
+        N26[types]
     end
 
     subgraph Services
-        N31[ExportService]
-        N32[MetaMonitor]
-        N33[ModeRouter]
-        N34[ThoughtFactory]
+        N27[ExportService]
+        N28[ThoughtFactory]
     end
 
     subgraph Session
-        N35[manager]
-        N36[SessionMetricsCalculator]
-        N37[file-store]
-        N38[interface]
+        N29[manager]
+        N30[SessionMetricsCalculator]
+        N31[file-store]
+        N32[interface]
     end
 
     subgraph Taxonomy
-        N39[adaptive-selector]
-        N40[classifier]
-        N41[multi-modal-analyzer]
-        N42[navigator]
-        N43[reasoning-types]
-        N44[...1 more]
+        N33[classifier]
+        N34[multi-modal-analyzer]
+        N35[navigator]
+        N36[reasoning-types]
+        N37[suggestion-engine]
     end
 
     subgraph Tools
-        N45[definitions]
-        N46[json-schemas]
-        N47[analyze]
-        N48[base]
-        N49[index]
-        N50[...13 more]
+        N38[definitions]
+        N39[json-schemas]
+        N40[analyze]
+        N41[base]
+        N42[index]
+        N43[...13 more]
     end
 
     subgraph Types
-        N51[core]
-        N52[handlers]
-        N53[index]
-        N54[algorithmic]
-        N55[analogical]
-        N56[...31 more]
+        N44[core]
+        N45[handlers]
+        N46[index]
+        N47[algorithmic]
+        N48[analogical]
+        N49[...31 more]
     end
 
     subgraph Utils
-        N57[errors]
-        N58[file-lock]
-        N59[logger-types]
-        N60[logger]
-        N61[sanitization]
-        N62[...1 more]
+        N50[errors]
+        N51[file-lock]
+        N52[logger-types]
+        N53[logger]
+        N54[sanitization]
+        N55[...1 more]
     end
 
     subgraph Validation
-        N63[cache]
-        N64[constants]
-        N65[index]
-        N66[schema-utils]
-        N67[schemas]
-        N68[...39 more]
+        N56[cache]
+        N57[constants]
+        N58[index]
+        N59[schema-utils]
+        N60[schemas]
+        N61[...39 more]
     end
 
-    N0 --> N4
-    N0 --> N3
     N0 --> N1
-    N2 --> N4
-    N2 --> N3
-    N2 --> N1
-    N2 --> N0
-    N7 --> N9
-    N8 --> N10
-    N8 --> N9
-    N8 --> N7
-    N11 --> N53
-    N13 --> N34
-    N13 --> N31
-    N13 --> N33
-    N13 --> N35
-    N13 --> N37
-    N13 --> N45
-    N13 --> N53
-    N14 --> N59
-    N15 --> N18
-    N16 --> N18
-    N17 --> N18
-    N17 --> N16
-    N19 --> N51
-    N22 --> N25
-    N22 --> N23
-    N23 --> N25
-    N27 --> N53
-    N27 --> N30
+    N1 --> N2
+    N4 --> N6
+    N5 --> N7
+    N5 --> N6
+    N5 --> N4
+    N8 --> N46
+    N10 --> N28
+    N10 --> N27
+    N10 --> N29
+    N10 --> N31
+    N10 --> N38
+    N10 --> N46
+    N11 --> N52
+    N12 --> N15
+    N13 --> N15
+    N14 --> N15
+    N14 --> N13
+    N16 --> N44
+    N19 --> N22
+    N19 --> N20
+    N20 --> N22
+    N24 --> N46
+    N24 --> N26
+    N24 --> N25
+    N24 --> N33
+    N26 --> N46
+    N27 --> N46
+    N27 --> N7
+    N27 --> N54
 ```
 
 ---
@@ -4333,21 +4227,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 242 |
+| Total TypeScript Files | 233 |
 | Total Modules | 15 |
-| Total Lines of Code | 104096 |
-| Total Exports | 1314 |
-| Total Re-exports | 566 |
-| Total Classes | 152 |
-| Total Interfaces | 531 |
-| Total Functions | 443 |
+| Total Lines of Code | 100604 |
+| Total Exports | 1267 |
+| Total Re-exports | 568 |
+| Total Classes | 143 |
+| Total Interfaces | 522 |
+| Total Functions | 425 |
 | Total Type Guards | 85 |
 | Total Enums | 3 |
-| Type-only Imports | 243 |
+| Type-only Imports | 306 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 55 |
 
 ---
 
-*Last Updated*: 2025-12-29
-*Version*: 8.5.0
+*Last Updated*: 2025-12-30
+*Version*: 9.0.0
