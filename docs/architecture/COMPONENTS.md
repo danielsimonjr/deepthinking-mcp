@@ -1,6 +1,6 @@
 # Component Architecture
 
-**Version**: 8.5.0 | **Last Updated**: 2025-12-26
+**Version**: 9.0.0 | **Last Updated**: 2025-12-30
 
 ## Core Components
 
@@ -27,9 +27,7 @@
 **Dependencies**:
 - ThoughtFactory
 - ExportService
-- ModeRouter
 - SessionManager
-- MetaMonitor (v6.0.0)
 
 **Line Count**: ~350
 
@@ -183,79 +181,11 @@ extractModeSpecificLatex(thought: Thought): string     // v8.3.2
 
 ---
 
-### `src/services/ModeRouter.ts` - Mode Routing Service
-
-**Purpose**: Mode switching, intelligent recommendations, and adaptive switching (v6.0.0)
-
-**Key Methods**:
-```typescript
-switchMode(sessionId: string, newMode: ThinkingMode, reason: string): Promise<ThinkingSession>
-quickRecommend(problemType: string): ThinkingMode  // Uses substring matching with prioritized keywords (v8.3.2)
-getRecommendations(characteristics: ProblemCharacteristics): string
-evaluateAndSuggestSwitch(sessionId: string, problemType?: string): Promise<EvaluationResult>  // v6.0.0
-autoSwitchIfNeeded(sessionId: string, problemType?: string): Promise<SwitchResult>  // v6.0.0
-```
-
-**Features**:
-- Safe mode transitions
-- Problem-based recommendations with substring matching (v8.3.2)
-- Integration with taxonomy system
-- Mode combination suggestions
-- **Adaptive mode switching** based on MetaMonitor evaluation (v6.0.0)
-- **Auto-switching** when effectiveness < 0.3 to prevent thrashing (v6.0.0)
-- **10 Bayesian keywords** for probability-related queries (v8.3.2)
-
-**Line Count**: ~380 lines
-
-**Dependencies**:
-- SessionManager
-- ModeRecommender
-- MetaMonitor (v6.0.0)
-
----
-
-### `src/services/MetaMonitor.ts` - Meta-Reasoning Monitor (v6.0.0)
-
-**Purpose**: Session tracking and strategy evaluation for meta-reasoning insights
-
-**Key Methods**:
-```typescript
-recordThought(sessionId: string, thought: Thought): void
-startStrategy(sessionId: string, mode: ThinkingMode): void
-updateStrategyProgress(sessionId: string, indicator: string): void
-evaluateStrategy(sessionId: string): StrategyEvaluation
-suggestAlternatives(sessionId: string, currentMode: ThinkingMode): AlternativeStrategy[]
-calculateQualityMetrics(sessionId: string): QualityMetrics
-getSessionContext(sessionId: string, problemType: string): SessionContext
-```
-
-**Strategy Evaluation Metrics**:
-- **effectiveness**: Progress relative to effort (0-1)
-- **efficiency**: Progress per unit time (0-1)
-- **confidence**: Based on issues encountered (0-1)
-- **progressRate**: Insights per thought
-- **qualityScore**: Weighted combination
-
-**Quality Metrics** (6 dimensions):
-- logicalConsistency, evidenceQuality, completeness
-- originality, clarity, overallQuality
-
-**Line Count**: 310 lines
-
-**Features**:
-- Session history tracking for meta-level analysis
-- Mode transition tracking across sessions
-- Strategy performance evaluation
-- Alternative strategy suggestions (HYBRID, INDUCTIVE when failing)
-- Global singleton instance (`metaMonitor`)
-
----
-
 ## Session Management Components
 
 ### `src/session/manager.ts` - Session Manager
 
-**Purpose**: Core session lifecycle and state management with meta-reasoning integration (v6.0.0)
+**Purpose**: Core session lifecycle and state management
 
 **Key Methods**:
 ```typescript
@@ -270,11 +200,9 @@ generateSummary(sessionId): Promise<string>
 
 **Key Features**:
 - LRU cache for active sessions (default: 100 sessions)
-- Automatic persistence with SessionStorage
 - Mode transition management
 - Summary generation
 - Metrics tracking delegation
-- **MetaMonitor integration** for thought recording (v6.0.0)
 
 **Line Count**: ~550 lines
 
@@ -285,8 +213,6 @@ generateSummary(sessionId): Promise<string>
 
 **Dependencies**:
 - SessionMetricsCalculator
-- SessionStorage
-- MetaMonitor (v6.0.0)
 
 **Testing**: Unit tests in `tests/unit/session-manager.test.ts`
 
@@ -322,46 +248,34 @@ updateCacheStats(session): void
 
 ---
 
-## Search & Discovery Components
+## Search Components
 
-### `src/search/engine.ts` - Search Engine
+### `src/search/index.ts` - Search Index
 
-**Purpose**: Full-text search and multi-dimensional filtering
+**Purpose**: In-memory search index with TF-IDF scoring
 
 **Key Methods**:
 ```typescript
 indexSession(session): void
-removeSession(sessionId): void
-search(query): SearchResults
+removeSession(sessionId): boolean
+searchByText(query): Map<string, number>
+filterByModes(modes): Set<string>
+filterByTaxonomyCategories(categories): Set<string>
+getStats(): SearchStats
 ```
 
 **Search Capabilities**:
-- **Text Search**: Tokenization, stemming, TF-IDF scoring
-- **Mode Filtering**: Single or multiple modes
+- **Text Search**: Tokenization with TF-IDF scoring
+- **Mode Filtering**: Filter by thinking modes
 - **Taxonomy Filtering**: Categories and types
-- **Author/Domain**: Exact match filtering
+- **Author/Domain**: Substring match filtering
 - **Date Range**: createdAfter/createdBefore
-- **Sorting**: Relevance, date, title
-- **Pagination**: Offset and limit
-- **Facets**: Aggregated counts by mode, author, domain
-
-**Index Structure**:
-- Inverted index for text search
-- Multi-attribute indexes for filters
-- In-memory for fast queries
-
-**Testing**: Comprehensive unit tests in `tests/unit/search-engine.test.ts` (50+ cases)
-
----
-
-### `src/search/index.ts` - Search Index
-
-**Purpose**: Low-level indexing and retrieval
+- **Completion Status**: Filter by completed sessions
 
 **Features**:
-- Inverted index construction
-- TF-IDF scoring
-- Multi-field indexing (title, content, tags)
+- In-memory inverted index for fast queries
+- Title match boosting (1.5x)
+- Minimum score threshold for matches
 
 ---
 
@@ -369,101 +283,17 @@ search(query): SearchResults
 
 **Purpose**: Text processing for search
 
+**Key Methods**:
+```typescript
+tokenize(text): string[]
+getTokenFrequency(text): Map<string, number>
+getUniqueTokens(text): Set<string>
+```
+
 **Features**:
 - Word tokenization
-- Stemming
-- Stop word removal
 - Case normalization
-
----
-
-## Batch Processing Components
-
-### `src/batch/processor.ts` - Batch Processor
-
-**Purpose**: Asynchronous batch job execution and management
-
-**Job Types**:
-1. **Export**: Batch export multiple sessions
-2. **Import**: Batch import from files
-3. **Analyze**: Batch session analysis
-4. **Validate**: Batch session validation
-
-**Key Methods**:
-```typescript
-createJob(type, params): BatchJob
-submitJob(params): Promise<string>
-getJob(jobId): BatchJob | undefined
-getAllJobs(): BatchJob[]
-cancelJob(jobId): boolean
-```
-
-**Configuration**:
-- `maxConcurrentJobs`: Parallel execution limit (default: 3)
-- `maxBatchSize`: Items per batch (default: 100)
-- `retryFailedItems`: Enable retries (default: true)
-- `maxRetries`: Retry attempts (default: 3)
-
-**Queue Management**:
-- FIFO queue processing
-- Automatic job start when capacity available
-- Job status tracking (pending, running, completed, failed, cancelled)
-
-**Testing**: Comprehensive unit tests in `tests/unit/batch-processor.test.ts` (40+ cases)
-
----
-
-## Backup & Recovery Components
-
-### `src/backup/backup-manager.ts` - Backup Manager
-
-**Purpose**: Backup creation and restoration orchestration
-
-**Key Methods**:
-```typescript
-registerProvider(provider, options): void
-create(data, config, providerOptions): Promise<BackupRecord>
-restore(options): Promise<RestoreResult>
-validate(backupId, validationType): Promise<BackupValidation>
-```
-
-**Backup Types**:
-- **Full**: Complete snapshot
-- **Incremental**: Changes since last backup
-- **Differential**: Changes since last full backup
-
-**Compression**:
-- **gzip**: Standard compression (good balance)
-- **brotli**: Better compression (slower)
-- **none**: No compression (fastest)
-
-**Providers**:
-1. **Local**: File system storage
-2. **S3**: AWS S3 buckets
-3. **GCS**: Google Cloud Storage
-4. **Azure**: Azure Blob Storage
-
-**Security**:
-- SHA256 checksums for integrity
-- Optional encryption
-- Provider-specific authentication
-
-**Testing**: Comprehensive unit tests in `tests/unit/backup-manager.test.ts` (35+ cases)
-
----
-
-### `src/backup/providers/` - Storage Providers
-
-Each provider implements the `BackupProvider` interface:
-```typescript
-interface BackupProvider {
-  save(backupId: string, data: Buffer, manifest: BackupManifest): Promise<string>
-  load(backupId: string): Promise<{ data: Buffer; manifest: BackupManifest }>
-  delete(backupId: string): Promise<void>
-  list(): Promise<BackupMetadata[]>
-  exists(backupId: string): Promise<boolean>
-}
-```
+- Configurable options
 
 ---
 
@@ -586,6 +416,20 @@ validateNonEmptyArray(thought, arr, fieldName, category)
 - Practical Reasoning
 - Exploratory Reasoning
 
+### `src/taxonomy/classifier.ts` - Taxonomy Classifier
+
+**Purpose**: Classify thoughts by reasoning type
+
+**Key Methods**:
+```typescript
+classifyThought(thought): ThoughtClassification
+```
+
+**Features**:
+- Primary and secondary type identification
+- Category assignment
+- Confidence scoring
+
 ### `src/taxonomy/navigator.ts` - Taxonomy Navigator
 
 **Purpose**: Navigate reasoning type hierarchy
@@ -603,11 +447,14 @@ validateNonEmptyArray(thought, arr, fieldName, category)
 **Input**: Problem characteristics (uncertainty, complexity, domain, etc.)
 **Output**: Ranked mode recommendations with rationale
 
+### `src/taxonomy/multi-modal.ts` - Multi-Modal Analyzer
+
+**Purpose**: Analyze combined reasoning patterns
+
 **Features**:
-- Quality metrics (rigor, creativity, practicality)
-- Cognitive load estimation
-- Prerequisite knowledge analysis
-- Common pitfalls identification
+- Mode synergy detection
+- Multi-modal pattern analysis
+- Combination recommendations
 
 ---
 
@@ -664,19 +511,7 @@ validateStructure(decomposition: ProofDecomposition): StructureValidation
 
 ---
 
-### `src/modes/mathematics-reasoning.ts` - Mathematics Reasoning Engine
-
-**Purpose**: Advanced mathematical analysis with integrated proof decomposition
-
-**Key Methods**:
-```typescript
-analyzeProof(proof: string | ProofStep[], theorem?: string): ProofAnalysisResult
-suggestImprovements(decomposition: ProofDecomposition): Suggestion[]
-```
-
----
-
-### `src/reasoning/inconsistency-detector.ts` - Inconsistency Detector
+### `src/proof/inconsistency-detector.ts` - Inconsistency Detector
 
 **Purpose**: Detects logical inconsistencies in reasoning chains
 
@@ -689,6 +524,17 @@ detectInconsistencies(decomposition: ProofDecomposition): Inconsistency[]
 - Circular dependencies
 - Contradictory statements
 - Invalid inference chains
+
+---
+
+### `src/proof/circular-detector.ts` - Circular Reasoning Detector
+
+**Purpose**: Detects circular reasoning patterns in proofs
+
+**Key Methods**:
+```typescript
+detectCircularReasoning(decomposition: ProofDecomposition): CircularReasoningResult
+```
 
 ---
 
@@ -743,29 +589,6 @@ class VisualExporter {
 - **Tree-shaking**: Unused exporters eliminated during bundling
 - **Maintainability**: ~100-150 lines per file vs 2,546 line monolith
 - **Backward compatibility**: Unified class preserved for existing consumers
-
----
-
-## Visualization Components
-
-### `src/visualization/mermaid.ts` - Mermaid Generator
-
-**Purpose**: Generate Mermaid diagrams from thinking sessions
-
-**Diagram Types**:
-- Flowcharts (thought flow)
-- Sequence diagrams (Shannon stages)
-- Mind maps (knowledge structures)
-- Gantt charts (temporal reasoning)
-
-### `src/visualization/interactive.ts` - Interactive Features
-
-**Purpose**: Add interactivity to visualizations
-
-**Features**:
-- CSS animations (fadeIn, slideIn, zoomIn, etc.)
-- Event handlers
-- Dynamic updates
 
 ---
 
@@ -902,8 +725,6 @@ SessionManager.createSession()
     ↓
 SessionMetricsCalculator.initializeMetrics()
     ↓
-Repository.save()
-    ↓
 Return ThinkingSession
 ```
 
@@ -919,10 +740,6 @@ ThoughtFactory.createThought()
 SessionManager.addThought()
     ↓
 SessionMetricsCalculator.updateMetrics()
-    ↓
-Repository.save()
-    ↓
-SearchEngine.updateSession()
     ↓
 Return updated ThinkingSession
 ```
@@ -950,61 +767,11 @@ Client Request
     ↓
 index.ts: handleSwitchMode()
     ↓
-ModeRouter.switchMode()
-    ↓
 SessionManager.switchMode()
     ↓
 Update session.mode
     ↓
-Update config.modeConfig
-    ↓
-Repository.save()
-    ↓
 Return updated session
-```
-
-### Batch Processing Flow
-
-```
-Client Request
-    ↓
-BatchProcessor.submitJob()
-    ↓
-BatchProcessor.createJob()
-    ↓
-Queue.push(job)
-    ↓
-BatchProcessor.processQueue()
-    ↓
-BatchProcessor.executeJob()
-    ↓
-Execute operation (export/import/analyze/validate)
-    ↓
-Update progress
-    ↓
-Call onProgress callback
-    ↓
-Mark job complete
-```
-
-### Backup Flow
-
-```
-Client Request
-    ↓
-BackupManager.create()
-    ↓
-Serialize data → JSON
-    ↓
-Compress (gzip/brotli)
-    ↓
-Encrypt (optional)
-    ↓
-Calculate checksum (SHA256)
-    ↓
-Provider.save()
-    ↓
-Return BackupRecord
 ```
 
 ---
@@ -1016,40 +783,27 @@ Return BackupRecord
 ```
 index.ts
 ├── ThoughtFactory
+│   └── ModeHandlerRegistry (36 handlers)
 ├── ExportService
-│   └── VisualExporter
-├── ModeRouter
-│   ├── SessionManager
-│   │   ├── SessionMetricsCalculator
-│   │   └── Repository
-│   └── ModeRecommender
+│   └── VisualExporter (22 mode exporters)
 └── SessionManager
+    └── SessionMetricsCalculator
 
-BatchProcessor (standalone)
-
-BackupManager
-└── BackupProviders
-    ├── LocalBackupProvider
-    ├── S3BackupProvider
-    ├── GCSBackupProvider
-    └── AzureBackupProvider
-
-SearchEngine
-├── SearchIndex
+SearchIndex
 └── Tokenizer
 
 TaxonomySystem
+├── TaxonomyClassifier
 ├── TaxonomyNavigator
 ├── SuggestionEngine
-├── AdaptiveModeSelector
 └── MultiModalAnalyzer
 ```
 
 ### Circular Dependencies
 
-**None** - Architecture maintains unidirectional dependencies
+**55 type-only circular dependencies** (0 runtime)
 
-**Design Principle**: Services depend on managers, managers depend on storage, no upward dependencies.
+**Design Principle**: Services depend on managers, no runtime circular dependencies.
 
 ---
 
@@ -1103,53 +857,29 @@ TaxonomySystem
 
 3. **Add Tests**
 
-### Adding a New Backup Provider
-
-1. **Implement Interface** in `src/backup/providers/new-provider.ts`:
-   ```typescript
-   export class NewBackupProvider implements BackupProvider {
-     async save(backupId, data, manifest): Promise<string> { }
-     async load(backupId): Promise<{ data: Buffer; manifest: BackupManifest }> { }
-     // ... other methods
-   }
-   ```
-
-2. **Register in BackupManager** (`src/backup/backup-manager.ts`):
-   ```typescript
-   case 'new_provider':
-     this.providers.set(provider, new NewBackupProvider(options));
-   ```
-
 ---
 
 ## Performance Optimization
 
 ### Session Management
 - **LRU Cache**: Keep hot sessions in memory
-- **Lazy Loading**: Load from storage only when needed
+- **Lazy Loading**: Validators and exporters loaded on-demand
 - **Incremental Metrics**: O(1) updates instead of O(n) recalculation
 
 ### Search
-- **Inverted Index**: O(log n) search vs O(n) scan
-- **Pagination**: Limit memory usage for large result sets
-- **Facet Caching**: Pre-compute aggregations
-
-### Batch Processing
-- **Concurrency Control**: Prevent resource exhaustion
-- **Progress Streaming**: Real-time feedback
-- **Retry Logic**: Handle transient failures
+- **In-Memory Index**: Fast TF-IDF scoring
+- **Multi-filter Support**: Taxonomy, mode, date filtering
 
 ---
 
 ## Testing Strategy
 
 ### Unit Tests
-- **Service Layer**: ThoughtFactory, ExportService, ModeRouter
+- **Service Layer**: ThoughtFactory, ExportService
 - **Session Management**: SessionManager, SessionMetricsCalculator
-- **Search**: SearchEngine, SearchIndex, Tokenizer
-- **Batch**: BatchProcessor
-- **Backup**: BackupManager
-- **Mode-Specific**: One test file per thinking mode
+- **Search**: SearchIndex, Tokenizer
+- **Validation**: All 35 mode validators
+- **Mode Handlers**: All 36 specialized handlers
 
 ### Integration Tests
 - **MCP Protocol**: Full request/response cycles
@@ -1160,14 +890,14 @@ TaxonomySystem
 
 ### Coverage Targets
 - **Critical Paths**: 80%+ coverage ✅
-- **Tests**: 4,686 passing
-- **Test Files**: 170
+- **Tests**: 5,011 passing
+- **Test Files**: 177
 - **Type Safety**: 100% (0 type suppressions)
-- **Mode Coverage**: All 33 modes have validators (28 total)
+- **Mode Coverage**: All 33 modes have validators (35 total)
 - **Handler Coverage**: All 36 specialized handlers tested
 - **Proof Decomposition**: Full coverage for Phase 8 components
 
 ---
 
-*Last Updated*: 2025-12-26
-*Component Version*: 8.5.0
+*Last Updated*: 2025-12-30
+*Component Version*: 9.0.0

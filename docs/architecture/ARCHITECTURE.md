@@ -4,7 +4,7 @@
 
 DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced reasoning capabilities through 33 thinking modes (29 with dedicated thought types) with meta-reasoning for strategic oversight. The architecture follows a modular, service-oriented design with clear separation of concerns.
 
-**Version**: 8.5.0 | **Node**: >=18.0.0
+**Version**: 9.0.0 | **Node**: >=18.0.0
 
 ## High-Level Architecture
 
@@ -16,7 +16,7 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
 ┌───────────────────┴─────────────────────────────────────────┐
 │                   MCP Server (index.ts)                     │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │              13 Focused Tool Handlers (v8.5.0)         │ │
+│  │              13 Focused Tool Handlers (v9.0.0)         │ │
 │  │  • deepthinking_core         • deepthinking_standard   │ │
 │  │  • deepthinking_mathematics  • deepthinking_temporal   │ │
 │  │  • deepthinking_probabilistic • deepthinking_causal    │ │
@@ -25,31 +25,26 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
 │  │  • deepthinking_academic     • deepthinking_session    │ │
 │  │  • deepthinking_analyze                                │ │
 │  └────────────────────────────────────────────────────────┘ │
-└───────┬──────────┬──────────┬───────────┬───────────────────┘
-        │          │          │           │
-   ┌────▼────┐ ┌───▼──────┐ ┌─▼──────┐ ┌──▼─────────┐
-   │ Thought │ │  Export  │ │  Mode  │ │   Session  │
-   │ Factory │ │ Service  │ │ Router │ │   Manager  │
-   └────┬────┘ └────┬─────┘ └───┬────┘ └─────┬──────┘
-        │           │           │            │
-        │      ┌────▼───────────▼────┐       │
-        │      │ Visual Exporters    │       │
-        │      │ (23 mode-specific)  │       │
-        │      │ 14 Builder Classes  │       │
-        │      └─────────────────────┘       │
-        │                  │                 │
-        │           ┌──────▼──────┐          │
-        │           │ MetaMonitor │◄─────────┤
-        │           │  (v6.0.0)   │          │
-        │           └─────────────┘          │
-        │                                    │
-        └──────────────┬─────────────────────┘
+└───────┬──────────┬──────────────────────┬───────────────────┘
+        │          │                      │
+   ┌────▼────┐ ┌───▼──────┐          ┌────▼─────────┐
+   │ Thought │ │  Export  │          │   Session    │
+   │ Factory │ │ Service  │          │   Manager    │
+   └────┬────┘ └────┬─────┘          └─────┬────────┘
+        │           │                      │
+        │      ┌────▼─────────────────┐    │
+        │      │ Visual Exporters     │    │
+        │      │ (22 mode-specific)   │    │
+        │      │ 14 Builder Classes   │    │
+        │      └──────────────────────┘    │
+        │                                  │
+        └──────────────┬───────────────────┘
                        │
         ┌──────────────┼───────────────┐
         │              │               │
    ┌────▼──────┐  ┌────▼──────┐  ┌────▼─────────┐
-   │  Storage  │  │ Validation │  │  Type System │
-   │   Layer   │  │   Layer    │  │  (33 Modes)  │
+   │  Search   │  │ Validation │  │  Type System │
+   │   Index   │  │   Layer    │  │  (33 Modes)  │
    └───────────┘  │ (Lazy Load)│  └──────────────┘
                   └────────────┘
 ```
@@ -80,28 +75,9 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
 - **Role**: Unified export logic for multiple formats
 - **Responsibilities**:
   - Session export in 8 formats
-  - Visual diagram generation (Mermaid, DOT, ASCII)
+  - Visual diagram generation (Mermaid, DOT, ASCII, SVG)
   - Format-specific transformations
 - **Formats**: JSON, Markdown, LaTeX, HTML, Jupyter, Mermaid, DOT, ASCII
-
-#### ModeRouter (`src/services/ModeRouter.ts`)
-- **Role**: Mode switching, recommendations, and adaptive switching (v6.0.0)
-- **Responsibilities**:
-  - Switches thinking modes mid-session
-  - Provides mode recommendations based on problem characteristics
-  - Integrates with taxonomy system
-  - **Adaptive mode switching** via `evaluateAndSuggestSwitch()` (v6.0.0)
-  - **Auto-switching** at low effectiveness via `autoSwitchIfNeeded()` (v6.0.0)
-
-#### MetaMonitor (`src/services/MetaMonitor.ts`) - v6.0.0
-- **Role**: Session tracking and strategy evaluation for meta-reasoning
-- **Responsibilities**:
-  - Records thoughts in session history for meta-level analysis
-  - Tracks mode transitions across sessions
-  - Evaluates strategy effectiveness (effectiveness, efficiency, confidence, quality)
-  - Suggests alternative strategies when current approach is failing
-  - Calculates quality metrics (logical consistency, evidence quality, completeness)
-  - Provides session context for meta-reasoning insights
 
 ### 3. Visual Export System (`src/export/visual/`) - v7.0.0
 
@@ -193,53 +169,20 @@ Centralized validation enums and helpers:
 - `validateRequired()` - Required field validation
 - `validateNonEmptyArray()` - Array validation
 
-### 6. Storage Layer
+### 6. Search System (`src/search/`)
 
-#### Repository Pattern (`src/repositories/`)
-- **ISessionRepository**: Domain-oriented interface
-- **FileSessionRepository**: Persistent storage implementation
-- **MemorySessionRepository**: In-memory storage for testing
-
-Benefits:
-- Testability through interface abstraction
-- Flexibility to swap storage backends
-- Query methods (findByMode, listMetadata)
-
-### 7. Search & Discovery (`src/search/`)
-
-#### SearchEngine (`src/search/engine.ts`)
-- **Role**: Full-text search and filtering
+#### SearchIndex (`src/search/index.ts`)
+- **Role**: In-memory search index with TF-IDF scoring
 - **Capabilities**:
   - Text search with tokenization
   - Multi-dimensional filtering (mode, author, domain, taxonomy, dates)
-  - Sorting (relevance, date, title)
-  - Pagination
-  - Faceted results
-- **Index**: In-memory inverted index with TF-IDF scoring
+  - Taxonomy-based classification
+  - Relevance scoring with TF-IDF
+- **Components**:
+  - `SearchIndex`: Main index class
+  - `Tokenizer`: Text tokenization and frequency analysis
 
-### 8. Batch Processing (`src/batch/`)
-
-#### BatchProcessor (`src/batch/processor.ts`)
-- **Role**: Asynchronous batch job execution
-- **Features**:
-  - Job types: export, import, analyze, validate, transform, index, backup, cleanup
-  - Concurrency control (configurable max concurrent jobs)
-  - Progress tracking
-  - Retry logic for failed items
-  - Job queue management
-
-### 9. Backup & Recovery (`src/backup/`)
-
-#### BackupManager (`src/backup/backup-manager.ts`)
-- **Role**: Data backup and restoration
-- **Features**:
-  - Multiple providers (Local, S3, GCS, Azure)
-  - Compression (gzip, brotli)
-  - Encryption support
-  - Backup types (full, incremental, differential)
-  - Checksum validation (SHA256)
-
-### 10. Tools & Schema System (`src/tools/`)
+### 7. Tools & Schema System (`src/tools/`)
 
 #### Lazy Schema Loader (`src/tools/lazy-loader.ts`)
 - On-demand schema loading
@@ -257,17 +200,17 @@ src/tools/schemas/
 └── modes/        # Mode-specific schemas (8 files)
 ```
 
-### 11. Taxonomy System (`src/taxonomy/`)
+### 8. Taxonomy System (`src/taxonomy/`)
 
 #### Components:
+- **TaxonomyClassifier**: Classify thoughts by reasoning type
 - **TaxonomyNavigator**: Navigate reasoning type hierarchy
 - **SuggestionEngine**: Problem-based mode recommendations
-- **AdaptiveModeSelector**: Intelligent mode selection
 - **MultiModalAnalyzer**: Combined reasoning analysis
 
 Provides 69 reasoning types (110 planned) organized across 12 categories.
 
-### 12. Type System (`src/types/`)
+### 9. Type System (`src/types/`)
 
 #### Organized by Domain:
 - **core.ts**: Base types, ThinkingMode enum (33 modes), Thought union type (29 types)
@@ -293,37 +236,31 @@ Provides 69 reasoning types (110 planned) organized across 12 categories.
 - Each service has a single, well-defined responsibility
 - Services are reusable and testable in isolation
 
-### 2. Repository Pattern
-- Storage abstraction through interfaces
-- Domain-oriented API
-- Easy to test and swap implementations
-
-### 3. Factory Pattern
+### 2. Factory Pattern
 - ThoughtFactory centralizes thought creation
 - Encapsulates mode-specific logic
 - Ensures consistency across thought types
 
-### 4. Strategy Pattern
-- Different thinking modes as strategies
-- Pluggable reasoning algorithms
-- Mode switching without system restart
+### 3. Strategy Pattern (ModeHandler - v8.x)
+- Different thinking modes as interchangeable handlers
+- ModeHandlerRegistry manages 36 specialized handlers
+- Pluggable reasoning algorithms via `ModeHandler` interface
 
-### 5. Lazy Loading Pattern (v4.3.0)
-- Validators loaded on-demand
+### 4. Lazy Loading Pattern (v4.3.0)
+- Validators loaded on-demand via dynamic imports
 - Schemas loaded when first accessed
 - Visual exporters loaded per-mode
 - Reduces initial bundle execution time
 
-### 6. Observer Pattern (Partial)
+### 5. Observer Pattern
 - Progress callbacks for long-running operations
 - Event handlers for visualization
 - Metrics updates on state changes
 
-### 7. Meta-Reasoning Pattern (v6.0.0)
-- **MetaMonitor** tracks session-level strategy performance
-- **ModeRouter** uses meta-reasoning insights for adaptive switching
-- **SessionManager** integrates with MetaMonitor for thought recording
-- Automatic mode switching when effectiveness < 0.3 to prevent thrashing
+### 6. Registry Pattern (v8.x)
+- ModeHandlerRegistry singleton manages all 36 handlers
+- `hasSpecializedHandler(mode)` for implementation checking
+- `getHandler(mode)` for handler retrieval with fallback
 
 ## Data Flow
 
@@ -331,10 +268,9 @@ Provides 69 reasoning types (110 planned) organized across 12 categories.
 
 1. **Client Request** → MCP Protocol (JSON-RPC)
 2. **Server Handler** → Input validation (Zod schemas)
-3. **Service Layer** → Business logic execution
+3. **Service Layer** → Business logic execution (ThoughtFactory, ExportService)
 4. **Session Manager** → State management
-5. **Storage Layer** → Persistence
-6. **Response** → Formatted result back to client
+5. **Response** → Formatted result back to client
 
 ### Thought Addition Flow:
 
@@ -350,8 +286,6 @@ SessionManager.addThought()
 ThoughtValidator.validate() [async - lazy loads validator]
   ↓
 SessionMetricsCalculator.updateMetrics()
-  ↓
-Repository.save()
   ↓
 Response with updated session
 ```
@@ -370,25 +304,20 @@ Response with updated session
 
 ### Search
 - **Indexing**: O(n) where n = number of thoughts
-- **Search**: O(log n) with inverted index
-- **Pagination**: O(1) offset-based
-
-### Batch Processing
-- **Concurrency**: Configurable (default: 3 concurrent jobs)
-- **Queue**: FIFO with priority support
-- **Retry**: Exponential backoff
+- **Search**: TF-IDF scoring with O(n) complexity
+- **Filtering**: Multi-dimensional filtering by mode, taxonomy, dates
 
 ## Scalability Considerations
 
 ### Current Limitations
 - In-memory session cache (limited by RAM)
-- File-based storage (not suitable for millions of sessions)
+- In-memory search index
 - Single-process architecture
 
 ### Future Enhancements
 - Database backend (PostgreSQL, MongoDB)
 - Distributed caching (Redis)
-- Horizontal scaling with job queues
+- File-based session persistence
 - WebSocket support for real-time updates
 
 ## Security
@@ -430,9 +359,9 @@ tests/
 └── utils/                      # 5 test utilities
 ```
 
-### Coverage (v8.5.0)
-- **Test Files**: 170 total
-- **Passing Tests**: 4,686
+### Coverage (v9.0.0)
+- **Test Files**: 177 total
+- **Passing Tests**: 5,011
 - **Test Categories**: 19 (COR, STD, PAR, MTH, TMP, PRB, CSL, STR, ANL, SCI, ENG, ACD, SES, EXP, HDL, EDG, REG, INT, PRF)
 - **TypeScript**: 100% type coverage (0 errors)
 
@@ -440,43 +369,41 @@ tests/
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~105,000 |
-| TypeScript Files | 255 |
+| Total Lines of Code | ~100,600 |
+| TypeScript Files | 233 |
 | Type Suppressions | 0 |
-| Test Files | 170 |
-| Passing Tests | 4,686 |
+| Test Files | 177 |
+| Passing Tests | 5,011 |
 | Thinking Modes | 33 (29 with thought types) |
 | Specialized Handlers | 36 (all modes covered) |
 | MCP Tools | 13 focused |
 | Export Formats | 8 (including native SVG) |
-| Visual Exporters | 41 files (23 mode-specific) |
+| Visual Exporters | 41 files (22 mode-specific) |
 | Builder Classes | 14 fluent APIs |
-| Backup Providers | 4 |
 | Reasoning Types | 69 (110 planned) |
-| Mode Validators | 28 |
-| Modules | 16 |
-| Total Exports | 1,431 (684 re-exports) |
+| Mode Validators | 35 |
+| Modules | 15 |
+| Total Exports | 1,267 (568 re-exports) |
 | Circular Dependencies | 55 (all type-only, 0 runtime) |
 
 ## Version History
 
-- **v8.3.2** (Current): Phase 11 complete, mode recommendation fix, export improvements
-- **v8.3.1**: Codebase cleanup, dependency graph enhancements
-- **v8.2.1**: Phase 10 ModeHandler integration fix in ThoughtFactory
-- **v8.2.0**: Phase 10 Sprint 2B - Additional mode handlers (Counterfactual, Synthesis, SystemsThinking, Critique)
-- **v8.1.0**: Phase 10 Sprint 2 - Core mode handlers (Causal, Bayesian, GameTheory)
+- **v9.0.0** (Current): Phase 15 Radical Simplification - removed ModeRouter, MetaMonitor, backup, batch processing; dead code cleanup
+- **v8.5.0**: Phase 13 Visual Exporter Refactoring - 14 fluent builder classes
+- **v8.4.0**: Phase 10 Sprint 3 - All 33 modes with specialized handlers
+- **v8.3.2**: Phase 11 complete, mode recommendation fix, export improvements
 - **v8.0.0**: Phase 10 Sprint 1 - ModeHandler infrastructure and registry
 - **v7.5.0**: Phase 14 accessible reasoning modes - 12 focused MCP tools
 - **v7.4.0**: Phase 13 academic research modes (Synthesis, Argumentation, Critique, Analysis)
 - **v7.3.0**: Phase 12 algorithmic reasoning mode with CLRS coverage
 - **v7.2.0**: Phase 11 historical computing (Computability, Cryptanalytic, von Neumann Game Theory)
 - **v7.0.0**: Phase 8 proof decomposition system, native SVG export
-- **v6.0.0**: Meta-reasoning mode, MetaMonitor service, adaptive mode switching
+- **v6.0.0**: Meta-reasoning mode (later simplified in v9.0.0)
 - **v5.0.0**: Fundamental reasoning modes (Inductive, Deductive)
 - **v4.3.0**: Visual export modularization, lazy validator loading
 - **v3.0.0**: MCP integration
 
 ---
 
-*Last Updated*: 2025-12-26
-*Architecture Version*: 8.5.0
+*Last Updated*: 2025-12-30
+*Architecture Version*: 9.0.0

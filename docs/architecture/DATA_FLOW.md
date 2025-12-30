@@ -1,6 +1,6 @@
 # Data Flow Architecture
 
-**Version**: 8.5.0 | **Last Updated**: 2025-12-26
+**Version**: 9.0.0 | **Last Updated**: 2025-12-30
 
 ## Overview
 
@@ -46,11 +46,9 @@ This document describes how data flows through the DeepThinking MCP system, from
    ↓
 8. State Management (SessionManager)
    ↓
-9. Persistence (Repository)
+9. Response Formation
    ↓
-10. Response Formation
-   ↓
-11. JSON-RPC Response
+10. JSON-RPC Response
 ```
 
 ---
@@ -79,12 +77,6 @@ Client                    Server                    Storage
   │                         │   │   .initialize()     │
   │                         │   └─ Build session      │
   │                         │                         │
-  │                         ├─────────────────────────►
-  │                         │   Repository.save()     │
-  │                         │                         │
-  │                         │◄─────────────────────────
-  │                         │   Saved successfully    │
-  │                         │                         │
   │◄────────────────────────┤                         │
   │  {                      │                         │
   │    id: "uuid-1234",     │                         │
@@ -100,8 +92,7 @@ Client                    Server                    Storage
 2. Server validates input with CreateSessionSchema
 3. SessionManager generates UUID and initializes session
 4. SessionMetricsCalculator creates initial metrics
-5. Repository persists session to storage
-6. Response contains complete session object
+5. Response contains complete session object
 
 **Data Transformations**:
 - Input: Simple request parameters
@@ -143,13 +134,8 @@ Client                    Server                    Storage
   │                         │   └─ MetricsCalculator  │
   │                         │       .update()         │
   │                         │                         │
-  │                         ├─────────────────────────►
-  │                         │   Repository.save()     │
-  │                         │                         │
-  │                         │◄─────────────────────────
-  │                         │                         │
-  │                         ├─ SearchEngine          │
-  │                         │   .updateSession()      │
+  │                         ├─ SearchIndex           │
+  │                         │   .index()              │
   │                         │   (update index)        │
   │                         │                         │
   │◄────────────────────────┤                         │
@@ -171,25 +157,21 @@ Client                    Server                    Storage
    - If handler exists: delegates to handler for validation and enhancement
    - Otherwise: falls back to switch statement
 4. SessionManager adds thought to session
-5. **MetaMonitor records thought for meta-reasoning analysis (v6.0.0)**
-6. SessionMetricsCalculator updates metrics incrementally (O(1))
-7. Repository persists updated session
-8. SearchEngine reindexes session for search
-9. Response contains updated session
+5. SessionMetricsCalculator updates metrics incrementally (O(1))
+6. SearchIndex updates index for search
+7. Response contains updated session
 
 **Data Transformations**:
 - Input: Flat thought parameters
 - ModeHandler (v8.x): Validates, enhances with auto-calculations (posteriors, archetypes, etc.)
 - ThoughtFactory: Rich Thought object with mode-specific fields
 - SessionManager: Updated session state
-- MetaMonitor: Session history and mode transitions (v6.0.0)
 - Metrics: Incremental calculations (avg uncertainty, etc.)
 - Output: Complete updated session with `hasSpecializedHandler` flag
 
 **Performance**:
 - O(1) thought addition
 - O(1) metrics update (incremental)
-- O(1) MetaMonitor recording (v6.0.0)
 - O(n) search reindexing (n = thoughts in session)
 
 ---
@@ -197,121 +179,45 @@ Client                    Server                    Storage
 ### 3. Mode Switching
 
 ```
-Client                    Server                    Storage
-  │                         │                         │
-  ├─ switch_mode ───────────►                        │
-  │   {                     │                         │
-  │     sessionId: "uuid",  │                         │
-  │     newMode: "shannon", │                         │
-  │     reason: "need      │                         │
-  │       systematic"       │                         │
-  │   }                     │                         │
-  │                         │                         │
-  │                         ├─ ModeRouter            │
-  │                         │   .switchMode()         │
-  │                         │   │                     │
-  │                         │   └─ SessionManager     │
-  │                         │       .switchMode()     │
-  │                         │       │                 │
-  │                         │       ├─ Validate       │
-  │                         │       │   transition    │
-  │                         │       ├─ Update mode    │
-  │                         │       ├─ Update config  │
-  │                         │       └─ Record reason  │
-  │                         │                         │
-  │                         ├─────────────────────────►
-  │                         │   Repository.save()     │
-  │                         │                         │
-  │◄────────────────────────┤                         │
-  │  {                      │                         │
-  │    id: "uuid",          │                         │
-  │    mode: "shannon",     │                         │
-  │    config: {            │                         │
-  │      modeConfig: {      │                         │
-  │        mode: "shannon"  │                         │
-  │      }                  │                         │
-  │    }                    │                         │
-  │  }                      │                         │
+Client                    Server
+  │                         │
+  ├─ switch_mode ───────────►
+  │   {                     │
+  │     sessionId: "uuid",  │
+  │     newMode: "shannon", │
+  │     reason: "need       │
+  │       systematic"       │
+  │   }                     │
+  │                         │
+  │                         ├─ SessionManager
+  │                         │   .switchMode()
+  │                         │   │
+  │                         │   ├─ Validate transition
+  │                         │   ├─ Update mode
+  │                         │   ├─ Update config
+  │                         │   └─ Record reason
+  │                         │
+  │◄────────────────────────┤
+  │  {                      │
+  │    id: "uuid",          │
+  │    mode: "shannon",     │
+  │    config: {            │
+  │      modeConfig: {      │
+  │        mode: "shannon"  │
+  │      }                  │
+  │    }                    │
+  │  }                      │
 ```
 
 **Key Steps**:
 1. Client requests mode switch
-2. ModeRouter validates transition
+2. SessionManager validates transition
 3. SessionManager updates mode and config
 4. Mode switch reason recorded in session history
-5. Repository persists changes
-6. Response confirms new mode
+5. Response confirms new mode
 
 **Data Transformations**:
 - session.mode: old → new mode
-
----
-
-### 3.1 Adaptive Mode Switching (v6.0.0)
-
-```
-Client/System                ModeRouter                MetaMonitor
-  │                             │                          │
-  ├─ evaluateAndSuggestSwitch ──►                         │
-  │   {                         │                          │
-  │     sessionId: "uuid",      │                          │
-  │     problemType: "complex"  │                          │
-  │   }                         │                          │
-  │                             │                          │
-  │                             ├─────────────────────────►│
-  │                             │   evaluateStrategy()     │
-  │                             │                          │
-  │                             │◄─────────────────────────┤
-  │                             │   {                      │
-  │                             │     effectiveness: 0.25, │
-  │                             │     efficiency: 0.40,    │
-  │                             │     confidence: 0.60,    │
-  │                             │     qualityScore: 0.35   │
-  │                             │   }                      │
-  │                             │                          │
-  │                             ├─────────────────────────►│
-  │                             │   suggestAlternatives()  │
-  │                             │                          │
-  │                             │◄─────────────────────────┤
-  │                             │   [                      │
-  │                             │     { mode: HYBRID,      │
-  │                             │       score: 0.85 },     │
-  │                             │     { mode: INDUCTIVE,   │
-  │                             │       score: 0.70 }      │
-  │                             │   ]                      │
-  │                             │                          │
-  │                             ├─ determine shouldSwitch  │
-  │                             │   (effectiveness < 0.4)  │
-  │                             │                          │
-  │◄────────────────────────────┤                          │
-  │  {                          │                          │
-  │    shouldSwitch: true,      │                          │
-  │    suggestedMode: HYBRID,   │                          │
-  │    reasoning: "Current      │                          │
-  │      effectiveness: 25%...",│                          │
-  │    alternatives: [...]      │                          │
-  │  }                          │                          │
-```
-
-**Auto-Switch Flow** (effectiveness < 0.3):
-```
-ModeRouter.autoSwitchIfNeeded()
-    ↓
-evaluateAndSuggestSwitch()
-    ↓
-if effectiveness < 0.3 AND suggestedMode exists
-    ↓
-ModeRouter.switchMode(sessionId, suggestedMode)
-    ↓
-Log: "Auto-switched mode due to low effectiveness"
-    ↓
-Return { switched: true, oldMode, newMode, reasoning }
-```
-
-**Decision Thresholds**:
-- `effectiveness < 0.4`: Suggest mode switch
-- `effectiveness < 0.3`: Auto-switch to prevent thrashing
-- `alternatives[0].score > 0.75`: Strong recommendation
 
 ---
 
@@ -396,7 +302,7 @@ Client                    Server                    Memory
   │     limit: 10           │                         │
   │   }                     │                         │
   │                         │                         │
-  │                         ├─ SearchEngine          │
+  │                         ├─ SearchIndex           │
   │                         │   .search()             │
   │                         │   │                     │
   │                         │   ├─ Normalize query    │
@@ -440,208 +346,6 @@ Client                    Server                    Memory
 
 ---
 
-### 6. Batch Processing
-
-```
-Client                    Server                    Jobs Queue
-  │                         │                         │
-  ├─ (submit batch) ────────►                        │
-  │   {                     │                         │
-  │     type: "export",     │                         │
-  │     sessionIds: [       │                         │
-  │       "s1", "s2", "s3"  │                         │
-  │     ],                  │                         │
-  │     format: "json"      │                         │
-  │   }                     │                         │
-  │                         │                         │
-  │                         ├─ BatchProcessor        │
-  │                         │   .createJob()          │
-  │                         │   │                     │
-  │                         │   ├─ Generate job ID    │
-  │                         │   ├─ Create BatchJob    │
-  │                         │   │   {status:pending}  │
-  │                         │   └─ Queue job          │
-  │                         │                         │
-  │                         ├─────────────────────────►
-  │                         │   queue.push(jobId)     │
-  │                         │                         │
-  │◄────────────────────────┤                         │
-  │  {                      │                         │
-  │    jobId: "job-123"     │                         │
-  │  }                      │                         │
-  │                         │                         │
-  │                         ├─ processQueue()        │
-  │                         │   (async background)    │
-  │                         │   │                     │
-  │                         │   ├─ Check capacity     │
-  │                         │   ├─ Start job          │
-  │                         │   │   status: running   │
-  │                         │   ├─ Execute operations │
-  │                         │   ├─ Update progress    │
-  │                         │   │   (onProgress)      │
-  │                         │   └─ Complete job       │
-  │                         │       status: completed │
-  │                         │                         │
-  ├─ (poll status) ─────────►                        │
-  │   { jobId: "job-123" }  │                         │
-  │                         │                         │
-  │                         ├─ BatchProcessor        │
-  │                         │   .getJob()             │
-  │                         │                         │
-  │◄────────────────────────┤                         │
-  │  {                      │                         │
-  │    id: "job-123",       │                         │
-  │    status: "running",   │                         │
-  │    progress: 66,        │                         │
-  │    processedItems: 2,   │                         │
-  │    totalItems: 3        │                         │
-  │  }                      │                         │
-```
-
-**Batch Job Lifecycle**:
-1. **Creation**: Job created with status="pending"
-2. **Queuing**: Added to FIFO queue
-3. **Scheduling**: Auto-start if capacity available
-4. **Execution**: Status="running", process items sequentially
-5. **Progress**: Update after each item, call progress callback
-6. **Completion**: Status="completed" or "failed"
-
-**Concurrency Control**:
-- Max concurrent jobs (default: 3)
-- Queue depth unlimited
-- Fair scheduling (FIFO)
-
-**Progress Tracking**:
-```typescript
-{
-  processedItems: 2,
-  totalItems: 10,
-  progress: 20, // percentage
-  failedItems: 0,
-  errors: []
-}
-```
-
----
-
-### 7. Backup & Restore
-
-#### Backup Creation
-
-```
-Client              Server              Backup Manager        Storage Provider
-  │                   │                       │                      │
-  ├─ create_backup ───►                      │                      │
-  │  {                │                       │                      │
-  │    sessions: [...],                      │                      │
-  │    compression: "gzip",                  │                      │
-  │    provider: "s3"                        │                      │
-  │  }                │                       │                      │
-  │                   │                       │                      │
-  │                   ├─ BackupManager       │                      │
-  │                   │   .create()           │                      │
-  │                   │   │                   │                      │
-  │                   │   ├─ Serialize        │                      │
-  │                   │   │   JSON.stringify  │                      │
-  │                   │   │                   │                      │
-  │                   │   ├─ Compress         │                      │
-  │                   │   │   gzip(data)      │                      │
-  │                   │   │   60% reduction   │                      │
-  │                   │   │                   │                      │
-  │                   │   ├─ Encrypt          │                      │
-  │                   │   │   (optional)      │                      │
-  │                   │   │                   │                      │
-  │                   │   ├─ Checksum         │                      │
-  │                   │   │   SHA256          │                      │
-  │                   │   │                   │                      │
-  │                   │   ├─ Create manifest  │                      │
-  │                   │   │   {version,       │                      │
-  │                   │   │    checksum,      │                      │
-  │                   │   │    metadata}      │                      │
-  │                   │   │                   │                      │
-  │                   │   └─────────────────────────────────►        │
-  │                   │       Provider.save()                        │
-  │                   │       (backupId, compressed, manifest)       │
-  │                   │                                               │
-  │                   │   ◄─────────────────────────────────────────┤
-  │                   │       location: "s3://bucket/backup-123"     │
-  │                   │                       │                      │
-  │◄──────────────────┤                       │                      │
-  │  {                │                       │                      │
-  │    backupId: "...",                       │                      │
-  │    location: "...",                       │                      │
-  │    size: 1024KB,                          │                      │
-  │    compressedSize: 400KB,                 │                      │
-  │    checksum: "abc123...",                 │                      │
-  │    sessionCount: 10                       │                      │
-  │  }                │                       │                      │
-```
-
-#### Restore
-
-```
-Client              Server              Backup Manager        Storage Provider
-  │                   │                       │                      │
-  ├─ restore_backup ──►                      │                      │
-  │  {                │                       │                      │
-  │    backupId: "...",                      │                      │
-  │    provider: "s3",                       │                      │
-  │    validation: {                         │                      │
-  │      verifyChecksum: true                │                      │
-  │    }               │                       │                      │
-  │  }                │                       │                      │
-  │                   │                       │                      │
-  │                   ├─ BackupManager       │                      │
-  │                   │   .restore()          │                      │
-  │                   │   │                   │                      │
-  │                   │   ├─────────────────────────────────►        │
-  │                   │   │   Provider.load()                        │
-  │                   │   │                   │                      │
-  │                   │   ◄─────────────────────────────────────────┤
-  │                   │   │   {data, manifest}                       │
-  │                   │   │                   │                      │
-  │                   │   ├─ Verify checksum  │                      │
-  │                   │   │   SHA256(data)    │                      │
-  │                   │   │   == manifest.checksum                   │
-  │                   │   │                   │                      │
-  │                   │   ├─ Decrypt          │                      │
-  │                   │   │   (if encrypted)  │                      │
-  │                   │   │                   │                      │
-  │                   │   ├─ Decompress       │                      │
-  │                   │   │   gunzip(data)    │                      │
-  │                   │   │                   │                      │
-  │                   │   ├─ Parse JSON       │                      │
-  │                   │   │   sessions[]      │                      │
-  │                   │   │                   │                      │
-  │                   │   └─ Apply filters    │                      │
-  │                   │       (optional)      │                      │
-  │                   │                       │                      │
-  │◄──────────────────┤                       │                      │
-  │  {                │                       │                      │
-  │    restoreId: "...",                      │                      │
-  │    status: "success",                     │                      │
-  │    sessionsRestored: 10,                  │                      │
-  │    thoughtsRestored: 50                   │                      │
-  │  }                │                       │                      │
-```
-
-**Data Transformations**:
-
-**Backup Path**:
-1. Sessions[] → JSON string
-2. JSON → Compressed buffer (60-80% reduction)
-3. Buffer → Encrypted buffer (optional)
-4. Buffer + Manifest → Stored backup
-
-**Restore Path**:
-1. Stored backup → Encrypted buffer
-2. Buffer → Decompressed buffer
-3. Buffer → JSON string
-4. JSON → Sessions[]
-5. Sessions[] → Filtered (if specified)
-
----
-
 ## State Management
 
 ### Session State Lifecycle
@@ -663,7 +367,7 @@ Client              Server              Backup Manager        Storage Provider
 │   Complete   │ ← isComplete: true
 │  (finished)  │
 └──────┬───────┘
-       │ Optional: reopen, export, backup
+       │ Optional: reopen, export
        ▼
 ┌──────────────┐
 │   Archived   │ ← Removed from active cache
@@ -788,11 +492,8 @@ Memory (Fast)                      Storage (Slow)
 │   ├── session-uuid-1.json
 │   ├── session-uuid-2.json
 │   └── session-uuid-3.json
-├── metadata/
-│   └── sessions.json  (index of all sessions)
-└── backups/
-    ├── backup-2025-11-25.tar.gz
-    └── backup-2025-11-24.tar.gz
+└── metadata/
+    └── sessions.json  (index of all sessions)
 ```
 
 ### Session File Format
@@ -867,7 +568,7 @@ SessionManager.getSession("invalid-id")
     ↓
 Session not in cache
     ↓
-Repository.findById("invalid-id")
+FileSessionStore.load("invalid-id")
     ↓
 File not found
     ↓
@@ -905,7 +606,6 @@ Return error response to client
 3. **Inverted Index**: O(log n) search vs O(n) scan
 4. **Async Persistence**: Non-blocking saves
 5. **Lazy Loading**: Only load what's needed
-6. **Batch Processing**: Amortize overhead across items
 
 ### Bottlenecks & Solutions
 
@@ -1016,5 +716,5 @@ Storage
 
 ---
 
-*Last Updated*: 2025-12-26
-*Data Flow Version*: 8.5.0
+*Last Updated*: 2025-12-30
+*Data Flow Version*: 9.0.0

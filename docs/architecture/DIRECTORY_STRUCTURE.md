@@ -1,6 +1,6 @@
 # Directory Structure Guide
 
-**Version**: 8.5.0 | **Last Updated**: 2025-12-26
+**Version**: 9.0.0 | **Last Updated**: 2025-12-30
 
 This document describes the purpose and organization of each directory in the DeepThinking MCP codebase.
 
@@ -8,29 +8,29 @@ This document describes the purpose and organization of each directory in the De
 
 ## Overview
 
-The codebase is organized into **16 modules** with **255 TypeScript files** totaling approximately **105,000 lines of code**.
+The codebase is organized into **15 modules** with **233 TypeScript files** totaling approximately **100,600 lines of code**.
 
 ```
 src/
-├── cache/             # Caching strategies (6 files)
+├── cache/             # Caching strategies (3 files)
 ├── config/            # Centralized configuration (1 file)
-├── export/            # Export services (27 files)
+├── export/            # Export services (44 files)
 │   └── visual/        # Per-mode visual exporters
-├── interfaces/        # Dependency injection interfaces (2 files)
-├── modes/             # Advanced reasoning implementations (7 files)
-├── proof/             # Proof decomposition & analysis (8 files)
-├── repositories/      # Data access layer (4 files)
-├── search/            # Full-text search engine (5 files)
-├── services/          # Business logic layer (5 files)
-├── session/           # Session management (7 files)
+├── interfaces/        # Dependency injection interfaces (1 file)
+├── modes/             # Advanced reasoning implementations (52 files)
+│   └── handlers/      # Mode-specific handlers (36 files)
+├── proof/             # Proof decomposition & analysis (13 files)
+├── search/            # Full-text search engine (3 files)
+├── services/          # Business logic layer (2 files)
+├── session/           # Session management (4 files)
 │   └── storage/       # Storage adapters
-├── taxonomy/          # Reasoning type classification (7 files)
-├── tools/             # MCP tool definitions (16 files)
+├── taxonomy/          # Reasoning type classification (5 files)
+├── tools/             # MCP tool definitions (18 files)
 │   └── schemas/       # Zod validation schemas
-├── types/             # Type definitions (21 files)
+├── types/             # Type definitions (36 files)
 │   └── modes/         # Per-mode type definitions
 ├── utils/             # Utility functions (6 files)
-├── validation/        # Input validation (35 files)
+├── validation/        # Input validation (44 files)
 │   └── validators/    # Mode-specific validators
 └── index.ts           # Entry point
 ```
@@ -40,13 +40,11 @@ src/
 ## Directory Descriptions
 
 ### `cache/` - Caching Strategies
-**Files**: 6 | **Purpose**: In-memory caching with multiple eviction strategies
+**Files**: 3 | **Purpose**: In-memory caching with multiple eviction strategies
 
-- `lru.ts` - Least Recently Used cache implementation
+- `lru.ts` - Least Recently Used cache implementation (exports `LRUCache`)
 - `lfu.ts` - Least Frequently Used cache implementation
 - `fifo.ts` - First-In-First-Out cache implementation
-- `types.ts` - Cache interfaces and configuration types
-- `index.ts` - Barrel export
 
 **Used by**: Session management, validation caching
 
@@ -84,24 +82,18 @@ One file per reasoning mode providing Mermaid, DOT, and ASCII diagram generation
 ---
 
 ### `interfaces/` - Dependency Injection
-**Files**: 2 | **Purpose**: Interface definitions for loose coupling
+**Files**: 1 | **Purpose**: Interface definitions for loose coupling
 
 - `ILogger.ts` - Logger interface for DI
-- `index.ts` - Barrel export with cache interface re-export
 
 ---
 
 ### `modes/` - Advanced Reasoning Implementations
-**Files**: 18+ | **Purpose**: Runtime logic for complex reasoning modes and specialized handlers
+**Files**: 52 | **Purpose**: Runtime logic for complex reasoning modes and specialized handlers
 
-#### Reasoning Engines
-- `meta-reasoning.ts` - Self-reflection and strategy selection
-- `recursive-reasoning.ts` - Recursive problem decomposition
-- `modal-reasoning.ts` - Possibility and necessity reasoning
-- `stochastic-reasoning.ts` - Probabilistic state transitions
-- `constraint-reasoning.ts` - Constraint satisfaction
-- `optimization-reasoning.ts` - Optimization strategies
-- `mathematics-reasoning.ts` - Mathematical proof analysis
+#### Root Files
+- `index.ts` - Barrel exports
+- `registry.ts` - Mode handler registry exports
 
 #### `modes/handlers/` - Specialized Mode Handlers (v8.x)
 36 handlers implementing the ModeHandler pattern (all 33 modes covered):
@@ -120,7 +112,7 @@ One file per reasoning mode providing Mermaid, DOT, and ASCII diagram generation
 ---
 
 ### `proof/` - Proof Decomposition
-**Files**: 8 | **Purpose**: Mathematical proof analysis and validation
+**Files**: 13 | **Purpose**: Mathematical proof analysis and validation
 
 - `decomposer.ts` - Breaks proofs into atomic statements
 - `dependency-graph.ts` - Builds statement dependency DAGs
@@ -128,64 +120,51 @@ One file per reasoning mode providing Mermaid, DOT, and ASCII diagram generation
 - `assumption-tracker.ts` - Tracks explicit/implicit assumptions
 - `inconsistency-detector.ts` - Finds logical contradictions
 - `circular-detector.ts` - Detects circular reasoning
+- `branch-analyzer.ts` - Analyzes proof branches
+- `hierarchical-proof.ts` - Hierarchical proof management
+- `strategy-recommender.ts` - Recommends proof strategies
+- `verifier.ts` - Proof verification
+- `index.ts` - Barrel exports
+- `types.ts` - Proof-specific types
 - `patterns/warnings.ts` - Common proof anti-patterns
 
 ---
 
-### `repositories/` - Data Access Layer
-**Files**: 4 | **Purpose**: Repository pattern for session storage
-
-- `ISessionRepository.ts` - Repository interface
-- `MemorySessionRepository.ts` - In-memory implementation
-- `FileSessionRepository.ts` - File system implementation
-- `index.ts` - Barrel export
-
----
-
 ### `search/` - Full-Text Search
-**Files**: 5 | **Purpose**: Session and thought search with faceted filtering
+**Files**: 3 | **Purpose**: Session and thought search with faceted filtering
 
-- `engine.ts` - Main search engine implementation
+- `index.ts` - SearchIndex class with TF-IDF scoring
 - `tokenizer.ts` - Text tokenization and normalization
 - `types.ts` - Search query and result types
-- `index.ts` - Barrel export
-- `index.export.ts` - Public API exports
 
 ---
 
 ### `services/` - Business Logic Layer
-**Files**: 5 | **Purpose**: Core application services
+**Files**: 2 | **Purpose**: Core application services
 
-- `ThoughtFactory.ts` - Creates mode-specific thought objects
-- `ExportService.ts` - Coordinates all export formats
-- `ModeRouter.ts` - Mode switching and recommendations
-- `MetaMonitor.ts` - Performance monitoring
-- `SessionMetricsCalculator.ts` - Session analytics
+- `ThoughtFactory.ts` - Creates mode-specific thought objects with ModeHandler integration
+- `ExportService.ts` - Coordinates all export formats (8 formats + file export)
 
 ---
 
 ### `session/` - Session Management
-**Files**: 7 | **Purpose**: Thinking session lifecycle management
+**Files**: 4 | **Purpose**: Thinking session lifecycle management
 
 - `manager.ts` - SessionManager class (main API)
-- `persistence.ts` - Session save/load operations
-- `types.ts` - Session-specific types
-
-#### `session/storage/` - Storage Adapters
-- `interface.ts` - Storage interface
-- `file-store.ts` - File system storage
+- `SessionMetricsCalculator.ts` - Session analytics and incremental metrics
+- `FileSessionStore.ts` - File system storage with cross-process locking
+- `storage.ts` - Storage interface and configuration
 
 ---
 
 ### `taxonomy/` - Reasoning Classification
-**Files**: 7 | **Purpose**: 69 reasoning types across 12 categories
+**Files**: 5 | **Purpose**: 69 reasoning types across 12 categories
 
 - `reasoning-types.ts` - All reasoning type definitions
-- `classifier.ts` - Classifies thoughts by reasoning type
-- `suggestion-engine.ts` - Suggests appropriate reasoning types
-- `adaptive-selector.ts` - Context-aware type selection
-- `navigator.ts` - Taxonomy navigation utilities
-- `multi-modal-analyzer.ts` - Cross-mode analysis
+- `classifier.ts` - TaxonomyClassifier for thought classification
+- `suggestion-engine.ts` - SuggestionEngine for mode recommendations
+- `navigator.ts` - TaxonomyNavigator for taxonomy exploration
+- `multi-modal-analyzer.ts` - MultiModalAnalyzer for cross-mode analysis
 
 ---
 
@@ -264,10 +243,11 @@ Several directories have many files following a "one file per mode" pattern:
 
 | Directory | Files | Reason |
 |-----------|-------|--------|
-| `types/modes/` | 18 | Type-only imports prevent runtime overhead |
-| `export/visual/` | 23 | Tree-shakeable mode-specific exporters |
-| `validation/validators/modes/` | 27 | Mode-specific validation complexity |
-| `tools/schemas/modes/` | 9 | Grouped by reasoning category |
+| `types/modes/` | 26 | Type-only imports prevent runtime overhead |
+| `export/visual/` | 22 | Tree-shakeable mode-specific exporters |
+| `validation/validators/modes/` | 35 | Mode-specific validation complexity |
+| `tools/schemas/modes/` | 8 | Grouped by reasoning category |
+| `modes/handlers/` | 36 | Specialized handler per mode |
 
 **Benefits**:
 1. **Easy navigation**: Find mode → find file
@@ -308,7 +288,6 @@ graph TD
     end
 
     subgraph "Infrastructure"
-        REPOS[repositories/]
         CACHE[cache/]
         UTILS[utils/]
         CONFIG[config/]
@@ -325,7 +304,6 @@ graph TD
     SERVICES --> EXPORT
     SERVICES --> MODES
 
-    SESSION --> REPOS
     SESSION --> CACHE
 
     EXPORT --> TYPES
@@ -335,7 +313,6 @@ graph TD
     MODES --> TYPES
 
     VALIDATION --> TYPES
-    REPOS --> TYPES
 ```
 
 ---
@@ -344,18 +321,18 @@ graph TD
 
 | Metric | Value |
 |--------|-------|
-| Total TypeScript files | 255 |
-| Total modules | 16 |
-| Lines of code | ~105,000 |
-| Reasoning modes | 33 |
+| Total TypeScript files | 233 |
+| Total modules | 15 |
+| Lines of code | ~100,600 |
+| Reasoning modes | 33 (29 with thought types) |
 | Specialized handlers | 36 (all modes covered) |
-| Visual exporters | 41 files (23 mode-specific) |
+| Visual exporters | 41 files (22 mode-specific) |
 | Builder classes | 14 fluent APIs |
-| Mode validators | 28 |
-| Total exports | 1,431 (684 re-exports) |
+| Mode validators | 35 |
+| Total exports | 1,267 (568 re-exports) |
 | Runtime circular deps | 0 |
 | Type-only circular deps | 55 (safe) |
 
 ---
 
-*Updated for Phase 13 Builder Classes & v8.5.0 Architecture*
+*Updated for Phase 15 Radical Simplification & v9.0.0 Architecture*

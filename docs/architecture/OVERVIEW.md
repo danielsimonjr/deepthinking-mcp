@@ -4,7 +4,7 @@
 
 DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 33 specialized thinking modes (29 with dedicated thought types). The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, meta-reasoning for strategic oversight, enterprise security features, proof decomposition for mathematical reasoning, and comprehensive export capabilities including native SVG generation.
 
-**Version**: 8.5.0 | **Node**: >=18.0.0 | **License**: MIT
+**Version**: 9.0.0 | **Node**: >=18.0.0 | **License**: MIT
 
 ---
 
@@ -12,10 +12,10 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~105,000 |
-| TypeScript Files | 255 |
-| Test Files | 170 |
-| Passing Tests | 4,686 |
+| Total Lines of Code | ~100,600 |
+| TypeScript Files | 233 |
+| Test Files | 177 |
+| Passing Tests | 5,011 |
 | Type Suppressions | 0 |
 | Thinking Modes | 33 (29 with thought types) |
 | Specialized Handlers | 36 (all modes covered) |
@@ -24,10 +24,10 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 | Visual Exporters | 41 files (23 mode-specific) |
 | Builder Classes | 14 fluent APIs |
 | Reasoning Types | 69 (110 planned) |
-| Total Exports | 1,431 (684 re-exports) |
-| Modules | 16 |
+| Total Exports | 1,267 (568 re-exports) |
+| Modules | 15 |
 | Circular Dependencies | 55 (all type-only, 0 runtime) |
-| Mode Validators | 28 |
+| Mode Validators | 35 |
 
 ---
 
@@ -35,23 +35,23 @@ DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** t
 
 ```
 deepthinking-mcp/
-├── src/                    # Source code (~48,800 lines)
+├── src/                    # Source code (~100,600 lines)
 │   ├── index.ts            # MCP server entry point
-│   ├── types/              # Type definitions (18 modes)
-│   ├── services/           # Business logic layer
+│   ├── types/              # Type definitions (33 modes)
+│   ├── services/           # Business logic layer (ThoughtFactory, ExportService)
 │   ├── session/            # Session management
-│   ├── validation/         # Zod schemas & validators
+│   ├── validation/         # Zod schemas & validators (35 mode validators)
 │   ├── export/             # Export system (8 formats)
-│   ├── taxonomy/           # 110+ reasoning types
-│   ├── search/             # Full-text search engine
-│   ├── batch/              # Batch processing
-│   ├── backup/             # Backup & recovery
-│   ├── cache/              # Caching strategies
-│   ├── rate-limit/         # Rate limiting
-│   ├── repositories/       # Storage abstraction
-│   ├── modes/              # Mode implementations
-│   └── tools/              # MCP tool definitions
-├── tests/                  # Test suite (170 files, 4,686 tests)
+│   ├── taxonomy/           # 69 reasoning types (110 planned)
+│   ├── search/             # Full-text search engine (SearchIndex, Tokenizer)
+│   ├── cache/              # LRU caching
+│   ├── config/             # Server configuration
+│   ├── modes/              # Mode implementations & handlers (36 handlers)
+│   ├── proof/              # Proof decomposition system
+│   ├── tools/              # MCP tool definitions (13 tools)
+│   ├── interfaces/         # Core interfaces
+│   └── utils/              # Utility functions (errors, logger)
+├── tests/                  # Test suite (177 files, 5,011 tests)
 │   ├── unit/               # Unit tests
 │   └── integration/        # Integration tests
 ├── docs/                   # Documentation
@@ -101,8 +101,6 @@ Core services extracted from the entry point:
 |---------|------|----------------|
 | **ThoughtFactory** | `ThoughtFactory.ts` | Mode-specific thought creation for all 33 modes with handler integration (v8.x) |
 | **ExportService** | `ExportService.ts` | Multi-format export (8 formats) |
-| **ModeRouter** | `ModeRouter.ts` | Mode switching, recommendations, and adaptive switching |
-| **MetaMonitor** | `MetaMonitor.ts` | Session tracking, strategy evaluation, meta-reasoning insights |
 
 ### `src/modes/handlers/` - Specialized Mode Handlers (v8.4.0)
 
@@ -125,9 +123,7 @@ Core services extracted from the entry point:
 ```
 src/session/
 ├── manager.ts                    # SessionManager - lifecycle management
-├── SessionMetricsCalculator.ts   # O(1) incremental metrics
-├── storage.ts                    # Storage abstraction
-└── persistence.ts                # Persistence layer
+└── SessionMetricsCalculator.ts   # O(1) incremental metrics
 ```
 
 ### `src/validation/` - Validation System (v4.3.0)
@@ -169,8 +165,8 @@ src/taxonomy/
 ├── reasoning-types.ts       # 69 reasoning type definitions (110 planned)
 ├── navigator.ts             # Hierarchy navigation (TaxonomyNavigator)
 ├── suggestion-engine.ts     # Mode recommendations
-├── adaptive-mode.ts         # Intelligent mode selection
-└── multi-modal.ts           # Combined reasoning analysis
+├── classifier.ts            # TaxonomyClassifier for mode analysis
+└── multi-modal.ts           # Combined reasoning analysis (MultiModalAnalyzer)
 ```
 
 ---
@@ -274,9 +270,8 @@ The server supports 33 reasoning modes organized into categories:
 ### Services
 | File | Purpose |
 |------|---------|
-| `src/services/ThoughtFactory.ts` | Thought creation for all 27 modes |
+| `src/services/ThoughtFactory.ts` | Thought creation for all 33 modes |
 | `src/services/ExportService.ts` | Export orchestration |
-| `src/services/ModeRouter.ts` | Mode switching logic |
 
 ### Session
 | File | Purpose |
@@ -291,18 +286,11 @@ The server supports 33 reasoning modes organized into categories:
 | `src/validation/validators/base.ts` | Reusable validation methods |
 | `src/validation/validators/registry.ts` | Lazy-loading validator registry |
 
-### Search & Batch
+### Search
 | File | Purpose |
 |------|---------|
-| `src/search/engine.ts` | Full-text search with TF-IDF |
-| `src/batch/processor.ts` | Batch job execution |
-
-### Storage
-| File | Purpose |
-|------|---------|
-| `src/repositories/session.ts` | ISessionRepository interface |
-| `src/repositories/file-session.ts` | File-based implementation |
-| `src/repositories/memory-session.ts` | In-memory implementation |
+| `src/search/index.ts` | SearchIndex with TF-IDF scoring |
+| `src/search/tokenizer.ts` | Tokenizer for text processing |
 
 ---
 
@@ -311,27 +299,24 @@ The server supports 33 reasoning modes organized into categories:
 ### 1. Service-Oriented Architecture
 Business logic extracted into focused service classes with single responsibilities.
 
-### 2. Repository Pattern
-Storage abstraction through `ISessionRepository` interface enables swappable backends.
-
-### 3. Factory Pattern
+### 2. Factory Pattern
 `ThoughtFactory` centralizes mode-specific thought creation with handler delegation.
 
-### 4. Strategy Pattern (ModeHandler - v8.x)
+### 3. Strategy Pattern (ModeHandler - v8.x)
 Different thinking modes implemented as interchangeable handlers via `ModeHandler` interface:
 - `validate()` - Mode-specific input validation
 - `enhance()` - Automatic thought enhancements (posteriors, equilibria, archetypes)
 - `getSuggestions()` - Context-aware suggestions and warnings
 
-### 5. Lazy Loading Pattern (v4.3.0)
+### 4. Lazy Loading Pattern (v4.3.0)
 - Validators loaded on-demand via dynamic imports
 - Schemas loaded when first accessed
 - Visual exporters loaded per-mode
 
-### 6. Observer Pattern
+### 5. Observer Pattern
 Progress callbacks and event handlers for async operations.
 
-### 7. Registry Pattern (v8.x)
+### 6. Registry Pattern (v8.x)
 `ModeHandlerRegistry` manages specialized handlers with singleton access.
 
 ---
@@ -455,9 +440,9 @@ tests/
 └── utils/                      # 5 test utility files
 ```
 
-### Coverage (v8.5.0)
-- **Test Files**: 170 total
-- **Passing Tests**: 4,686
+### Coverage (v9.0.0)
+- **Test Files**: 177 total
+- **Passing Tests**: 5,011
 - **Test Categories**: 19 (COR, STD, PAR, MTH, TMP, PRB, CSL, STR, ANL, SCI, ENG, ACD, SES, EXP, HDL, EDG, REG, INT, PRF)
 - **Phase 11**: Comprehensive coverage across all tools, modes, handlers, and exports
 
@@ -474,5 +459,5 @@ tests/
 
 ---
 
-*Last Updated*: 2025-12-26
-*Version*: 8.5.0
+*Last Updated*: 2025-12-30
+*Version*: 9.0.0

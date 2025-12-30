@@ -6,13 +6,11 @@
 
 A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning modes** (29 with dedicated thought types, 4 advanced runtime modes) including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
-> 📋 **Latest Release**: v8.5.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
+> 📋 **Latest Release**: v9.0.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
 >
-> 🎉 **New in v8.5.x**: Phase 13 Visual Exporter Refactoring complete - 14 fluent builder classes (DOTGraphBuilder, MermaidGraphBuilder, MermaidGanttBuilder, MermaidStateDiagramBuilder, ASCIIDocBuilder, SVGBuilder, TikZBuilder, and more). 100% builder adoption across all 22 mode exporters.
+> 🎉 **New in v9.0.0**: Phase 15 "Radical Simplification" - Streamlined architecture removing deprecated subsystems while retaining all 33 reasoning modes with 38 specialized handlers.
 >
-> ✨ **v8.4.0**: Complete ModeHandler coverage - all 33 reasoning modes now have specialized handlers (36 total handlers).
->
-> ✨ **v8.3.x**: Multi-instance support with file locking, chunker utility, mode scaffolding templates, 4600+ tests passing.
+> ✨ **Codebase**: 233 TypeScript files | 100,600 LOC | 15 modules | 5,011+ tests passing
 
 ## Table of Contents
 
@@ -30,25 +28,23 @@ A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning mod
 ## Features
 
 - **33 Specialized Reasoning Modes** - From sequential thinking to game theory, formal logic, and meta-reasoning (29 with full thought types, 4 advanced runtime modes)
-- **ModeHandler Architecture (v8.x)** - Strategy pattern with 36 specialized handlers providing advanced validation and enhancements for all 33 modes
+- **ModeHandler Architecture (v9.x)** - Strategy pattern with 38 specialized handlers providing advanced validation and enhancements for all 33 modes
 - **Specialized Handler Enhancements** - Systems Archetypes (8 patterns), Socratic Questions (6 categories), auto Bayesian posteriors, Nash equilibria
-- **Visual Builder APIs (v8.5.0)** - 14 fluent builder classes: DOTGraphBuilder, MermaidGraphBuilder, MermaidGanttBuilder, MermaidStateDiagramBuilder, ASCIIDocBuilder, SVGBuilder, TikZBuilder, UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder, GraphMLBuilder, SVGGroupBuilder
+- **Visual Builder APIs** - 14 fluent builder classes: DOTGraphBuilder, MermaidGraphBuilder, MermaidGanttBuilder, MermaidStateDiagramBuilder, ASCIIDocBuilder, SVGBuilder, TikZBuilder, UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder, GraphMLBuilder, SVGGroupBuilder
 - **Academic Research Modes** - Synthesis (literature review), Argumentation (Toulmin), Critique (peer review), Analysis (qualitative methods)
 - **Algorithmic Reasoning** - Comprehensive CLRS coverage with 100+ named algorithms, complexity analysis, design patterns
 - **Historical Computing Extensions** - Computability (Turing machines), Cryptanalytic (decibans), extended Game Theory (von Neumann)
 - **Proof Decomposition** - Break proofs into atomic statements, detect gaps, track assumption chains
 - **Native SVG Export** - Direct SVG generation without external tools for proof visualizations
 - **Meta-Reasoning** - Strategic oversight that monitors effectiveness, recommends mode switches, and assesses quality
-- **Adaptive Mode Switching** - Automatic evaluation-based mode switching when effectiveness drops below thresholds
 - **Intelligent Mode Recommendation** - Automatic mode selection based on problem characteristics
 - **Taxonomy Classifier** - 69 reasoning types across 12 categories for intelligent task classification (110 planned)
 - **Visual Exports** - Generate Mermaid diagrams, DOT graphs, ASCII art, SVG graphics, and LaTeX documents
-- **File Export System** - Export sessions to files with configurable output directory, profiles, and batch support
-- **Production-Ready** - Search engine, templates, batch processing, caching, backup/restore
-- **Enterprise Security** - Input validation (Zod), rate limiting, path sanitization, PII redaction
-- **High Performance** - LRU caching with auto-eviction, async I/O, 4-5x validation speedups
-- **Type-Safe** - 100% TypeScript with 1 suppression (down from 231 baseline)
-- **Repository Pattern** - Clean architecture with dependency injection
+- **File Export System** - Export sessions to files with configurable output directory and profiles
+- **Production-Ready** - Search engine, session management, caching, multi-instance support
+- **Enterprise Security** - Input validation (Zod), path sanitization, PII redaction
+- **High Performance** - LRU caching with auto-eviction, async I/O
+- **Type-Safe** - 100% TypeScript with comprehensive type coverage
 - **Extensible** - Plugin architecture for custom reasoning modes
 - **MCP Compatible** - Full integration with Model Context Protocol
 
@@ -498,9 +494,9 @@ mode: 'analysis'
 // Features: Multiple qualitative analysis frameworks, coding support
 ```
 
-### Specialized Mode Handlers (v8.x)
+### Specialized Mode Handlers (v9.x)
 
-Phase 10 introduced 7 specialized handlers with advanced validation and enhancements:
+The ModeHandler system provides 38 specialized handlers with advanced validation and enhancements. Key examples:
 
 | Handler | Mode | Key Enhancements |
 |---------|------|------------------|
@@ -731,7 +727,7 @@ Full-text search with faceted filtering and relevance ranking. Used internally t
 
 Pre-built templates for common reasoning patterns, accessible through session creation.
 
-### File Export System (v8.4.0)
+### File Export System
 
 Export reasoning sessions directly to files with automatic directory organization:
 
@@ -751,27 +747,6 @@ Export reasoning sessions directly to files with automatic directory organizatio
 // Export all 8 formats
 { "action": "export_all", "sessionId": "..." }
 ```
-
-### Batch Processing
-
-Process multiple sessions concurrently with 8 operation types:
-
-- **export** - Batch export sessions to various formats
-- **import** - Batch import sessions from files
-- **analyze** - Batch taxonomy/quality/pattern analysis
-- **validate** - Batch session validation
-- **transform** - Batch mode switching, merging, splitting
-- **index** - Batch search/analytics indexing
-- **backup** - Batch backup with compression
-- **cleanup** - Batch cleanup of old/incomplete sessions
-
-### Backup & Restore
-
-Automated backup with compression and local storage, with support for multiple providers (Local, S3, GCS, Azure).
-
-### Session Comparison
-
-Compare reasoning sessions to analyze differences and similarities with quantitative metrics.
 
 ### Security & Validation
 
@@ -833,39 +808,38 @@ For architecture details, see [docs/architecture/](docs/architecture/).
 
 | Metric | Value |
 |--------|-------|
-| TypeScript Files | 250 |
-| Lines of Code | ~105,000 |
-| Test Files | 170 |
-| Passing Tests | 4,686 |
+| TypeScript Files | 233 |
+| Lines of Code | ~100,600 |
+| Test Files | 177 |
+| Passing Tests | 5,011 |
 | Thinking Modes | 33 (29 with thought types) |
-| ModeHandlers | 36 specialized handlers |
+| ModeHandlers | 38 specialized handlers |
 | MCP Tools | 13 focused tools |
 | Export Formats | 8 + native SVG |
-| Visual Exporters | 41 files (23 mode-specific) |
+| Visual Exporters | 44 files (22 mode-specific) |
 | Builder Classes | 14 fluent APIs |
 | Reasoning Types | 69 (110 planned) |
-| Modules | 16 |
-| Total Exports | 1,426 (684 re-exports) |
+| Modules | 15 |
+| Total Exports | 1,267 (568 re-exports) |
 
 ## Architecture
 
-The codebase is organized into 16 modules with clean separation of concerns. See [docs/architecture/DEPENDENCY_GRAPH.md](docs/architecture/DEPENDENCY_GRAPH.md) for the complete dependency graph.
+The codebase is organized into 15 modules with clean separation of concerns. See [docs/architecture/DEPENDENCY_GRAPH.md](docs/architecture/DEPENDENCY_GRAPH.md) for the complete dependency graph.
 
 ### Core Structure
 
 ```
 src/
 ├── index.ts           # MCP server entry point (tool handlers)
-├── types/             # Type definitions including 33 mode types
+├── types/             # Type definitions including 33 mode types (36 files)
 │   ├── core.ts        # ThinkingMode enum, Thought union type
-│   └── modes/         # One file per reasoning mode (26 files)
-├── services/          # Business logic layer
+│   └── modes/         # One file per reasoning mode
+├── services/          # Business logic layer (2 files)
 │   ├── ThoughtFactory.ts    # Thought creation with handler integration
-│   ├── ExportService.ts     # Multi-format export handling
-│   └── ModeRouter.ts        # Mode switching and recommendations
-├── session/           # SessionManager, persistence, storage
-├── modes/             # ModeHandler architecture (v8.x)
-│   ├── handlers/            # 36 specialized handlers (all modes covered)
+│   └── ExportService.ts     # Multi-format export handling
+├── session/           # SessionManager, persistence, storage (4 files)
+├── modes/             # ModeHandler architecture (v9.x) - 52 files
+│   ├── handlers/            # 38 specialized handlers (all modes covered)
 │   │   ├── CausalHandler.ts        # Graph validation, cycle detection
 │   │   ├── BayesianHandler.ts      # Auto posterior calculation
 │   │   ├── GameTheoryHandler.ts    # Nash equilibria detection
@@ -873,20 +847,18 @@ src/
 │   │   ├── SynthesisHandler.ts     # Source coverage tracking
 │   │   ├── SystemsThinkingHandler.ts # 8 Systems Archetypes
 │   │   ├── CritiqueHandler.ts      # 6 Socratic categories
-│   │   └── [+ 29 more specialized handlers]
-│   └── base/                # ModeHandler interface, registry
-├── proof/             # Proof decomposition system (v7.0.0)
+│   │   └── [+ 31 more specialized handlers]
+│   └── registry.ts          # ModeHandlerRegistry singleton
+├── proof/             # Proof decomposition system (13 files)
 │   ├── decomposer.ts        # ProofDecomposer class
 │   ├── gap-analyzer.ts      # GapAnalyzer class
 │   └── assumption-tracker.ts # AssumptionTracker class
-├── reasoning/         # Reasoning engines (v7.0.0)
-│   └── inconsistency-detector.ts  # InconsistencyDetector class
-└── tools/             # MCP tool definitions and schemas
+└── tools/             # MCP tool definitions and schemas (18 files)
 ```
 
-### ModeHandler Architecture (v8.x)
+### ModeHandler Architecture (v9.x)
 
-Phase 10 introduced the ModeHandler pattern (Strategy pattern) for mode-specific processing, with **all 33 modes fully covered as of v8.4.0**:
+The ModeHandler pattern (Strategy pattern) provides mode-specific processing, with **all 33 modes fully covered**:
 
 ```typescript
 // Handler interface
@@ -897,7 +869,7 @@ interface ModeHandler {
   getSuggestions(thought: Thought): string[];
 }
 
-// Registry manages all 36 handlers
+// Registry manages all 38 handlers
 const registry = ModeHandlerRegistry.getInstance();
 registry.hasSpecializedHandler('causal'); // true for ALL 33 modes
 ```
@@ -906,44 +878,36 @@ registry.hasSpecializedHandler('causal'); // true for ALL 33 modes
 - All 33 modes have specialized validation logic
 - Automatic enhancements (posteriors, equilibria, archetypes)
 - Mode-specific suggestions and warnings
-- Clean separation from ThoughtFactory switch statement
-- 36 total handlers (33 modes + GenericModeHandler + CustomHandler + utility handlers)
+- Clean separation from ThoughtFactory
+- 38 total handlers (33 modes + GenericModeHandler + CustomHandler + utilities)
 
 ### Feature Modules
 
 ```
 src/
-├── taxonomy/          # 69 reasoning types, classifier, suggestion engine
+├── taxonomy/          # 69 reasoning types, classifier, suggestion engine (5 files)
 │   ├── reasoning-types.ts   # Full taxonomy definitions
 │   ├── classifier.ts        # Task classification
 │   └── suggestion-engine.ts # Mode recommendations
-├── export/            # Visual and document exporters
-│   ├── visual/        # 41 mode-specific visual exporters + native SVG
-│   │   ├── proof-decomposition.ts  # Proof visualization (v7.0.0)
-│   │   └── modes/                  # 23 mode-specific exporters
+├── export/            # Visual and document exporters (44 files)
+│   ├── visual/        # Mode-specific visual exporters + native SVG
+│   │   ├── proof-decomposition.ts  # Proof visualization
+│   │   ├── utils/                  # 14 builder classes
+│   │   └── modes/                  # 22 mode-specific exporters
 │   └── latex.ts       # LaTeX document generation
-├── search/            # Full-text search with faceted filtering
-├── batch/             # Batch processing (8 operations)
-├── backup/            # Backup manager with provider abstraction
-├── cache/             # LRU/LFU/FIFO caching strategies
-├── rate-limit/        # Sliding window rate limiter
-├── validation/        # Zod schemas (39 validators)
-├── comparison/        # Session comparison & diff generation
-├── templates/         # Session templates with usage tracking
-├── analytics/         # Analytics engine and dashboard
-├── webhooks/          # Event-driven webhook system
-├── collaboration/     # Annotations and conflict resolution
-└── ml/                # Pattern recognition & recommendations
+├── search/            # Full-text search with TF-IDF (3 files)
+├── cache/             # LRU caching strategies (3 files)
+├── validation/        # Zod schemas (44 files, 35 validators)
+└── utils/             # Utility functions (6 files)
 ```
 
 ### Security Features
 
 Security is built into multiple modules:
 
-- **validation/** - Input validation with Zod schemas for all 33 modes
+- **validation/** - Input validation with Zod schemas for all 33 modes (35 validators)
 - **utils/sanitization.ts** - Path sanitization & traversal prevention
 - **utils/log-sanitizer.ts** - PII redaction for GDPR compliance
-- **rate-limit/** - Per-key rate limiting with sliding windows
 - **utils/errors.ts** - Standardized error hierarchy with context
 
 ## Contributing

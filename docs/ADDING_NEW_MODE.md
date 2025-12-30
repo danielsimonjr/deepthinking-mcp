@@ -1,40 +1,41 @@
 # Adding a New Reasoning Mode
 
-**Version**: v8.5.0 | **Architecture**: ModeHandler Pattern (Strategy)
+**Version**: v9.0.0 | **Architecture**: ModeHandler Pattern (Strategy)
 
-This guide walks you through adding a new reasoning mode to DeepThinking MCP. Follow these steps to ensure consistency, quality, and full integration with the v8.x architecture.
+This guide walks you through adding a new reasoning mode to DeepThinking MCP. Follow these steps to ensure consistency, quality, and full integration with the v9.x architecture.
+
+> **Codebase Stats** (from dependency graph analysis):
+> - 233 TypeScript files | 100,600 LOC | 15 modules
+> - 1,267 exports (568 re-exports) | 55 type-only circular deps (0 runtime)
 
 ---
 
 ## Overview
 
-Adding a new mode requires touching **11 core locations** across the codebase:
+Adding a new mode requires touching **10 core locations** across the codebase:
 
-| # | Component | Required | File(s) |
-|---|-----------|----------|---------|
-| 1 | Type Definition | ✅ | `src/types/modes/yourmode.ts` |
-| 2 | Core Enum & Union | ✅ | `src/types/core.ts` |
-| 3 | Mode Validator | ✅ | `src/validation/validators/modes/yourmode.ts` |
-| 4 | **ModeHandler** | ✅ | `src/modes/handlers/YourModeHandler.ts` |
-| 5 | **Handler Registration** | ✅ | `src/modes/index.ts` |
-| 6 | MCP Tool Schema | ✅ | `src/tools/json-schemas.ts` (add to tool group) |
-| 7 | Visual Exporter | ⚠️ Optional | `src/export/visual/modes/yourmode.ts` |
-| 8 | Mode Documentation | ✅ | `docs/modes/YOURMODE.md` |
-| 9 | Unit Tests - Handler | ✅ | `tests/unit/modes/handlers/YourModeHandler.test.ts` |
-| 10 | Integration Tests | ⚠️ Optional | `tests/integration/modes/yourmode.test.ts` |
-| 11 | Update CHANGELOG | ✅ | `CHANGELOG.md` |
+| # | Component | Required | File(s) | Module Stats |
+|---|-----------|----------|---------|--------------|
+| 1 | Type Definition | ✅ | `src/types/modes/yourmode.ts` | types: 36 files |
+| 2 | Core Enum & Union | ✅ | `src/types/core.ts` | 82 exports, 31 imports |
+| 3 | Mode Validator | ✅ | `src/validation/validators/modes/yourmode.ts` | validation: 44 files, 35 validators |
+| 4 | **ModeHandler** | ✅ | `src/modes/handlers/YourModeHandler.ts` | modes: 52 files, 38 handlers |
+| 5 | **Handler Registration** | ✅ | `src/modes/index.ts` | 72 imports, re-exports all handlers |
+| 6 | MCP Tool Schema | ✅ | `src/tools/schemas/modes/*.ts` | tools: 18 files |
+| 7 | Visual Exporter | ⚠️ Optional | `src/export/visual/modes/yourmode.ts` | export: 44 files, 14 builder classes |
+| 8 | Mode Documentation | ✅ | `docs/modes/YOURMODE.md` | - |
+| 9 | Unit Tests - Handler | ✅ | `tests/unit/modes/handlers/YourModeHandler.test.ts` | 177 test files, 5,011 tests |
+| 10 | Update CHANGELOG | ✅ | `CHANGELOG.md` | - |
 
-**Note**: ThoughtFactory (v8.4.0+) automatically delegates to your handler via ModeHandlerRegistry - no code changes needed there.
-
-**Estimated Time**: 2-4 hours for basic mode, 6-12 hours for complex mode with visual exports
+**Note**: ThoughtFactory (v9.0.0) automatically delegates to your handler via ModeHandlerRegistry - no code changes needed there. Services module now contains only 2 files: `ThoughtFactory.ts` and `ExportService.ts`.
 
 ---
 
 ## Architecture Background
 
-### v8.x ModeHandler Architecture (Strategy Pattern)
+### v9.x ModeHandler Architecture (Strategy Pattern)
 
-DeepThinking MCP v8.x uses a **Strategy Pattern** for mode handling:
+DeepThinking MCP v9.x uses a **Strategy Pattern** for mode handling:
 
 ```
 ┌─────────────────┐     ┌──────────────────────┐     ┌─────────────────────┐
@@ -49,11 +50,25 @@ DeepThinking MCP v8.x uses a **Strategy Pattern** for mode handling:
                         └──────────────────────┘
 ```
 
+**Key Module Statistics** (from dependency graph):
+
+| Module | Files | Key Exports |
+|--------|-------|-------------|
+| modes | 52 | 38 handler classes (ModeHandlerRegistry, all mode handlers) |
+| types | 36 | ThinkingMode enum, Thought union, 26 mode type files |
+| validation | 44 | 35 validator classes (ThoughtValidator, mode validators) |
+| export | 44 | VisualExporter, 14 builder classes, 22 mode exporters |
+| services | 2 | ThoughtFactory, ExportService |
+| session | 4 | SessionManager, SessionMetricsCalculator, FileSessionStore |
+| tools | 18 | 13 tool schemas + definitions |
+
 Key concepts:
 - **ModeHandler Interface**: Contract for mode-specific thought creation and validation
-- **ModeHandlerRegistry**: Singleton that manages all 33+ handlers
+- **ModeHandlerRegistry**: Singleton that manages all 38 handlers (33 modes + GenericModeHandler + CustomHandler + utilities)
 - **registerAllHandlers()**: Function that registers all handlers at startup
 - **Grouped MCP Tools**: 13 tools group related modes (not one tool per mode)
+
+**v9.0.0 Simplification**: Phase 15 removed ModeRouter, MetaMonitor, backup, and batch processing. Services now contain only ThoughtFactory and ExportService.
 
 ---
 
@@ -220,15 +235,15 @@ interface ValidationIssue {
 
 ---
 
-### Step 4: Create ModeHandler (v8.x CRITICAL)
+### Step 4: Create ModeHandler (v9.x CRITICAL)
 
 **File**: `src/modes/handlers/YourModeHandler.ts`
 
-This is the **core of v8.x architecture**. Each mode has a specialized handler.
+This is the **core of v9.x architecture**. Each mode has a specialized handler.
 
 ```typescript
 /**
- * YourModeHandler - Phase 10 (v8.x)
+ * YourModeHandler - v9.0.0
  *
  * Specialized handler for YourMode reasoning with:
  * - Mode-specific thought creation
@@ -409,7 +424,7 @@ The handler-based approach means minimal changes to ThoughtFactory itself.
 
 **File**: `src/tools/json-schemas.ts`
 
-**Important**: v8.x uses **13 grouped tools**, not individual tools per mode.
+**Important**: v9.x uses **13 grouped tools**, not individual tools per mode.
 
 Find the appropriate existing tool group or create a new one:
 
@@ -463,8 +478,8 @@ Visual exporters generate diagrams in multiple formats (Mermaid, DOT, ASCII, SVG
 
 ```typescript
 /**
- * YourMode Visual Exporter (v8.5.0)
- * Phase 13: Uses fluent builder classes
+ * YourMode Visual Exporter (v9.0.0)
+ * Uses fluent builder classes
  */
 
 import type { YourModeThought } from '../../../types/index.js';
@@ -575,7 +590,7 @@ Brief description of the reasoning approach and when to use it.
 
 **MCP Tool**: `deepthinking_analytical` (or appropriate tool group)
 
-**Handler**: v8.5.0 (Specialized)
+**Handler**: v9.0.0 (Specialized)
 
 ## Key Concepts
 
@@ -825,7 +840,7 @@ Before submitting your new mode, verify:
 - [ ] Validator implements `BaseValidator<YourModeThought>`
 - [ ] Validator `getMode()` and `validate()` methods implemented
 
-**ModeHandler (v8.x)**
+**ModeHandler (v9.x)**
 - [ ] Handler created in `src/modes/handlers/YourModeHandler.ts`
 - [ ] Handler implements `ModeHandler` interface
 - [ ] Handler registered in `src/modes/index.ts` via `registerAllHandlers()`
