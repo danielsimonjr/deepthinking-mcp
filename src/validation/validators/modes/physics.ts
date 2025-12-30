@@ -1,12 +1,17 @@
 /**
- * Physics Mode Validator
+ * Physics Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  */
 
-import { PhysicsThought, ValidationIssue } from '../../../types/index.js';
+import type { PhysicsThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class PhysicsValidator extends BaseValidator<PhysicsThought> {
+/**
+ * Physics mode validator using composition pattern
+ */
+export class PhysicsValidator implements ModeValidator<PhysicsThought> {
   getMode(): string {
     return 'physics';
   }
@@ -14,8 +19,8 @@ export class PhysicsValidator extends BaseValidator<PhysicsThought> {
   validate(thought: PhysicsThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    // Common validation
-    issues.push(...this.validateCommon(thought));
+    // Common validation via utility function
+    issues.push(...validateCommon(thought));
 
     // Validate tensor properties
     if (thought.tensorProperties) {

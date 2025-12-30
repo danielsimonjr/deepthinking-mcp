@@ -1,6 +1,6 @@
 /**
- * Argumentation Mode Validator (v7.4.0)
- * Phase 13: Validates Toulmin model and dialectical argumentation thoughts
+ * Argumentation Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  *
  * Validates:
  * - Toulmin argument structure completeness
@@ -9,12 +9,16 @@
  * - Rhetorical strategy appropriateness
  */
 
-import { ValidationIssue } from '../../../types/index.js';
+import type { ValidationIssue } from '../../../types/index.js';
 import type { ArgumentationThought } from '../../../types/modes/argumentation.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon, validateProbability } from '../validation-utils.js';
 
-export class ArgumentationValidator extends BaseValidator<ArgumentationThought> {
+/**
+ * Validator for argumentation reasoning mode
+ */
+export class ArgumentationValidator implements ModeValidator<ArgumentationThought> {
   getMode(): string {
     return 'argumentation';
   }
@@ -23,7 +27,7 @@ export class ArgumentationValidator extends BaseValidator<ArgumentationThought> 
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate thought type if specified
     const validThoughtTypes = [
@@ -100,12 +104,12 @@ export class ArgumentationValidator extends BaseValidator<ArgumentationThought> 
 
         // Validate reliability is 0-1
         if (ground.reliability !== undefined) {
-          issues.push(...this.validateProbability(thought, ground.reliability, 'ground reliability'));
+          issues.push(...validateProbability(thought, ground.reliability, 'ground reliability'));
         }
 
         // Validate relevance is 0-1
         if (ground.relevance !== undefined) {
-          issues.push(...this.validateProbability(thought, ground.relevance, 'ground relevance'));
+          issues.push(...validateProbability(thought, ground.relevance, 'ground relevance'));
         }
 
         if (ground.sufficiency && !validSufficiencyLevels.includes(ground.sufficiency)) {
@@ -137,7 +141,7 @@ export class ArgumentationValidator extends BaseValidator<ArgumentationThought> 
 
         // Validate strength is 0-1
         if (warrant.strength !== undefined) {
-          issues.push(...this.validateProbability(thought, warrant.strength, 'warrant strength'));
+          issues.push(...validateProbability(thought, warrant.strength, 'warrant strength'));
         }
       }
     }
@@ -159,7 +163,7 @@ export class ArgumentationValidator extends BaseValidator<ArgumentationThought> 
 
         // Validate credibility is 0-1
         if (backing.credibility !== undefined) {
-          issues.push(...this.validateProbability(thought, backing.credibility, 'backing credibility'));
+          issues.push(...validateProbability(thought, backing.credibility, 'backing credibility'));
         }
       }
     }
@@ -169,7 +173,7 @@ export class ArgumentationValidator extends BaseValidator<ArgumentationThought> 
       for (const qualifier of thought.qualifiers) {
         // Validate certainty is 0-1
         if (qualifier.certainty !== undefined) {
-          issues.push(...this.validateProbability(thought, qualifier.certainty, 'qualifier certainty'));
+          issues.push(...validateProbability(thought, qualifier.certainty, 'qualifier certainty'));
         }
       }
     }
@@ -213,7 +217,7 @@ export class ArgumentationValidator extends BaseValidator<ArgumentationThought> 
 
         // Validate response effectiveness if present
         if (rebuttal.response?.effectiveness !== undefined) {
-          issues.push(...this.validateProbability(thought, rebuttal.response.effectiveness, 'rebuttal response effectiveness'));
+          issues.push(...validateProbability(thought, rebuttal.response.effectiveness, 'rebuttal response effectiveness'));
         }
       }
     }
@@ -260,7 +264,7 @@ export class ArgumentationValidator extends BaseValidator<ArgumentationThought> 
 
         // Validate effectiveness is 0-1
         if (strategy.effectiveness !== undefined) {
-          issues.push(...this.validateProbability(thought, strategy.effectiveness, 'rhetorical strategy effectiveness'));
+          issues.push(...validateProbability(thought, strategy.effectiveness, 'rhetorical strategy effectiveness'));
         }
       }
     }
@@ -295,7 +299,7 @@ export class ArgumentationValidator extends BaseValidator<ArgumentationThought> 
 
     // Validate argument strength is 0-1
     if (thought.argumentStrength !== undefined) {
-      issues.push(...this.validateProbability(thought, thought.argumentStrength, 'argument strength'));
+      issues.push(...validateProbability(thought, thought.argumentStrength, 'argument strength'));
     }
 
     // Validate arguments if present
@@ -303,7 +307,7 @@ export class ArgumentationValidator extends BaseValidator<ArgumentationThought> 
       for (const arg of thought.arguments) {
         // Validate overall strength
         if (arg.overallStrength !== undefined) {
-          issues.push(...this.validateProbability(thought, arg.overallStrength, `argument "${arg.id}" overall strength`));
+          issues.push(...validateProbability(thought, arg.overallStrength, `argument "${arg.id}" overall strength`));
         }
       }
     }
@@ -311,7 +315,7 @@ export class ArgumentationValidator extends BaseValidator<ArgumentationThought> 
     // Validate current argument if present
     if (thought.currentArgument) {
       if (thought.currentArgument.overallStrength !== undefined) {
-        issues.push(...this.validateProbability(thought, thought.currentArgument.overallStrength, 'current argument strength'));
+        issues.push(...validateProbability(thought, thought.currentArgument.overallStrength, 'current argument strength'));
       }
     }
 

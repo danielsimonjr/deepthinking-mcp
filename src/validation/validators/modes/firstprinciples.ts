@@ -1,14 +1,18 @@
 /**
- * First-Principles Mode Validator (v7.1.0)
- * Refactored to use BaseValidator shared methods
+ * First-Principles Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  */
 
-import { FirstPrinciplesThought, ValidationIssue } from '../../../types/index.js';
+import type { FirstPrinciplesThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
 import { IssueCategory, IssueSeverity } from '../../constants.js';
+import { validateCommon, validateRequired, validateNonEmptyArray, validateConfidence, validateNumberRange, validateProbability } from '../validation-utils.js';
 
-export class FirstPrinciplesValidator extends BaseValidator<FirstPrinciplesThought> {
+/**
+ * Validator for First-Principles reasoning mode
+ */
+export class FirstPrinciplesValidator implements ModeValidator<FirstPrinciplesThought> {
   getMode(): string {
     return 'firstprinciples';
   }
@@ -17,14 +21,14 @@ export class FirstPrinciplesValidator extends BaseValidator<FirstPrinciplesThoug
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate question using shared method
-    issues.push(...this.validateRequired(thought, thought.question?.trim(), 'Question', IssueCategory.STRUCTURAL));
+    issues.push(...validateRequired(thought, thought.question?.trim(), 'Question', IssueCategory.STRUCTURAL));
 
     // Validate principles using shared method (ERROR severity)
     issues.push(
-      ...this.validateNonEmptyArray(thought, thought.principles, 'Foundational principles', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
+      ...validateNonEmptyArray(thought, thought.principles, 'Foundational principles', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
     );
 
     if (thought.principles && thought.principles.length > 0) {
@@ -45,15 +49,15 @@ export class FirstPrinciplesValidator extends BaseValidator<FirstPrinciplesThoug
 
         // Validate required fields
         issues.push(
-          ...this.validateRequired(thought, principle.statement?.trim(), `Principle ${principle.id} statement`, IssueCategory.STRUCTURAL)
+          ...validateRequired(thought, principle.statement?.trim(), `Principle ${principle.id} statement`, IssueCategory.STRUCTURAL)
         );
         issues.push(
-          ...this.validateRequired(thought, principle.justification?.trim(), `Principle ${principle.id} justification`, IssueCategory.STRUCTURAL)
+          ...validateRequired(thought, principle.justification?.trim(), `Principle ${principle.id} justification`, IssueCategory.STRUCTURAL)
         );
 
         // Validate confidence range using shared method
         issues.push(
-          ...this.validateConfidence(thought, principle.confidence, `Principle ${principle.id} confidence`)
+          ...validateConfidence(thought, principle.confidence, `Principle ${principle.id} confidence`)
         );
 
         // Validate dependencies exist
@@ -75,7 +79,7 @@ export class FirstPrinciplesValidator extends BaseValidator<FirstPrinciplesThoug
 
     // Validate derivation steps using shared method (ERROR severity)
     issues.push(
-      ...this.validateNonEmptyArray(thought, thought.derivationSteps, 'Derivation steps', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
+      ...validateNonEmptyArray(thought, thought.derivationSteps, 'Derivation steps', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
     );
 
     if (thought.derivationSteps && thought.derivationSteps.length > 0) {
@@ -97,7 +101,7 @@ export class FirstPrinciplesValidator extends BaseValidator<FirstPrinciplesThoug
 
         // Validate step number is positive using shared method
         issues.push(
-          ...this.validateNumberRange(
+          ...validateNumberRange(
             thought,
             step.stepNumber,
             `Step number`,
@@ -121,28 +125,28 @@ export class FirstPrinciplesValidator extends BaseValidator<FirstPrinciplesThoug
 
         // Validate inference
         issues.push(
-          ...this.validateRequired(thought, step.inference?.trim(), `Step ${step.stepNumber} inference`, IssueCategory.STRUCTURAL)
+          ...validateRequired(thought, step.inference?.trim(), `Step ${step.stepNumber} inference`, IssueCategory.STRUCTURAL)
         );
 
         // Validate confidence range using shared method
         issues.push(
-          ...this.validateConfidence(thought, step.confidence, `Step ${step.stepNumber} confidence`)
+          ...validateConfidence(thought, step.confidence, `Step ${step.stepNumber} confidence`)
         );
       }
     }
 
     // Validate conclusion using shared method
-    issues.push(...this.validateRequired(thought, thought.conclusion, 'Conclusion', IssueCategory.STRUCTURAL));
+    issues.push(...validateRequired(thought, thought.conclusion, 'Conclusion', IssueCategory.STRUCTURAL));
 
     if (thought.conclusion) {
       // Validate conclusion statement
       issues.push(
-        ...this.validateRequired(thought, thought.conclusion.statement?.trim(), 'Conclusion statement', IssueCategory.STRUCTURAL)
+        ...validateRequired(thought, thought.conclusion.statement?.trim(), 'Conclusion statement', IssueCategory.STRUCTURAL)
       );
 
       // Validate derivation chain (ERROR severity)
       issues.push(
-        ...this.validateNonEmptyArray(thought, thought.conclusion.derivationChain, 'Derivation chain', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
+        ...validateNonEmptyArray(thought, thought.conclusion.derivationChain, 'Derivation chain', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
       );
 
       if (thought.conclusion.derivationChain && thought.conclusion.derivationChain.length > 0) {
@@ -163,7 +167,7 @@ export class FirstPrinciplesValidator extends BaseValidator<FirstPrinciplesThoug
 
       // Validate certainty range using shared method
       issues.push(
-        ...this.validateProbability(thought, thought.conclusion.certainty, 'Conclusion certainty')
+        ...validateProbability(thought, thought.conclusion.certainty, 'Conclusion certainty')
       );
     }
 

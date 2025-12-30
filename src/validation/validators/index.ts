@@ -1,9 +1,22 @@
 /**
- * Validator Module Exports
+ * Validator Module Exports (v9.0.0)
+ * Phase 15A Sprint 3: Composition over inheritance
  */
 
-// Base interfaces and classes
-export { ModeValidator, BaseValidator } from './base.js';
+// Base interface (BaseValidator is deprecated alias for ModeValidator)
+export type { ModeValidator, BaseValidator } from './base.js';
+
+// Validation utility functions (composition pattern)
+export {
+  validateCommon,
+  validateDependencies,
+  validateUncertainty,
+  validateNumberRange,
+  validateProbability,
+  validateConfidence,
+  validateRequired,
+  validateNonEmptyArray,
+} from './validation-utils.js';
 
 // Mode-specific validators
 export { SequentialValidator } from './modes/sequential.js';

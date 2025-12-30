@@ -1,6 +1,6 @@
 /**
- * Algorithmic Mode Validator (v7.3.0)
- * Phase 12: Validates algorithm design and analysis thoughts
+ * Algorithmic Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  *
  * Validates:
  * - Algorithm design pattern appropriateness
@@ -9,12 +9,16 @@
  * - CLRS algorithm classification
  */
 
-import { ValidationIssue } from '../../../types/index.js';
+import type { ValidationIssue } from '../../../types/index.js';
 import type { AlgorithmicThought } from '../../../types/modes/algorithmic.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class AlgorithmicValidator extends BaseValidator<AlgorithmicThought> {
+/**
+ * Validator for algorithmic reasoning mode
+ */
+export class AlgorithmicValidator implements ModeValidator<AlgorithmicThought> {
   getMode(): string {
     return 'algorithmic';
   }
@@ -23,7 +27,7 @@ export class AlgorithmicValidator extends BaseValidator<AlgorithmicThought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate thought type if specified
     const validThoughtTypes = [

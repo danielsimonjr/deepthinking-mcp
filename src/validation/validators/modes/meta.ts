@@ -1,16 +1,20 @@
 /**
- * Meta-Reasoning Mode Validator (v3.4.0)
- * Phase 4E Task 8.8: Validator for meta-reasoning mode
+ * Meta-Reasoning Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  *
  * Meta-reasoning involves thinking about thinking - analyzing and
  * monitoring one's own reasoning processes
  */
 
-import { Thought, ValidationIssue } from '../../../types/index.js';
+import type { Thought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class MetaValidator extends BaseValidator<Thought> {
+/**
+ * Validator for meta reasoning mode
+ */
+export class MetaValidator implements ModeValidator<Thought> {
   getMode(): string {
     return 'meta';
   }
@@ -19,7 +23,7 @@ export class MetaValidator extends BaseValidator<Thought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Meta-reasoning should reference other thoughts or reasoning processes
     if ('dependencies' in thought && Array.isArray(thought.dependencies)) {

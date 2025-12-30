@@ -1,6 +1,6 @@
 /**
- * Mathematics Extended Validators (v7.0.0)
- * Phase 8 Sprint 4: Zod validators for proof decomposition types
+ * Mathematics Extended Validators (v9.0.0)
+ * Phase 15A Sprint 3: Zod validators for proof decomposition types
  *
  * Validates output structures from MathematicsReasoningEngine:
  * - AtomicStatement

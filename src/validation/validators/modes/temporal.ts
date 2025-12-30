@@ -1,14 +1,21 @@
 /**
- * Temporal Mode Validator (v7.1.0)
- * Refactored to use BaseValidator shared methods
+ * Temporal Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
+ *
+ * Validates temporal reasoning (timelines, events, intervals)
  */
 
-import { TemporalThought, ValidationIssue } from '../../../types/index.js';
+import type { TemporalThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
 import { IssueCategory, IssueSeverity } from '../../constants.js';
+import { validateCommon, validateConfidence, validateNumberRange } from '../validation-utils.js';
 
-export class TemporalValidator extends BaseValidator<TemporalThought> {
+/**
+ * Validator for temporal reasoning mode
+ * Validates timelines, events, intervals, and temporal relations
+ */
+export class TemporalValidator implements ModeValidator<TemporalThought> {
   getMode(): string {
     return 'temporal';
   }
@@ -17,7 +24,7 @@ export class TemporalValidator extends BaseValidator<TemporalThought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate timeline
     if (thought.timeline) {
@@ -61,7 +68,7 @@ export class TemporalValidator extends BaseValidator<TemporalThought> {
 
         // Validate timestamp is non-negative using shared method
         issues.push(
-          ...this.validateNumberRange(
+          ...validateNumberRange(
             thought,
             event.timestamp,
             `Event ${event.id} timestamp`,
@@ -116,7 +123,7 @@ export class TemporalValidator extends BaseValidator<TemporalThought> {
         }
 
         // Validate confidence using shared method
-        issues.push(...this.validateConfidence(thought, constraint.confidence, `Constraint ${constraint.id} confidence`));
+        issues.push(...validateConfidence(thought, constraint.confidence, `Constraint ${constraint.id} confidence`));
       }
     }
 

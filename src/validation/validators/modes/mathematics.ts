@@ -1,12 +1,17 @@
 /**
- * Mathematics Mode Validator
+ * Mathematics Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  */
 
-import { MathematicsThought, ValidationIssue } from '../../../types/index.js';
+import type { MathematicsThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class MathematicsValidator extends BaseValidator<MathematicsThought> {
+/**
+ * Mathematics mode validator using composition pattern
+ */
+export class MathematicsValidator implements ModeValidator<MathematicsThought> {
   getMode(): string {
     return 'mathematics';
   }
@@ -14,8 +19,8 @@ export class MathematicsValidator extends BaseValidator<MathematicsThought> {
   validate(thought: MathematicsThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    // Common validation
-    issues.push(...this.validateCommon(thought));
+    // Common validation via utility function
+    issues.push(...validateCommon(thought));
 
     // Check proof strategy completeness
     if (thought.proofStrategy) {

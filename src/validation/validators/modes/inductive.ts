@@ -1,13 +1,20 @@
 /**
- * Inductive Mode Validator
+ * Inductive Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
+ *
  * Validates inductive reasoning from specific observations to general principles
  */
 
-import { InductiveThought, ValidationIssue } from '../../../types/index.js';
+import type { InductiveThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class InductiveValidator extends BaseValidator<InductiveThought> {
+/**
+ * Validator for inductive reasoning mode
+ * Validates observation-to-generalization reasoning patterns
+ */
+export class InductiveValidator implements ModeValidator<InductiveThought> {
   getMode(): string {
     return 'inductive';
   }
@@ -16,7 +23,7 @@ export class InductiveValidator extends BaseValidator<InductiveThought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // At least one observation required
     if (!thought.observations || thought.observations.length === 0) {

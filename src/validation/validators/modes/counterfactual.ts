@@ -1,14 +1,21 @@
 /**
- * Counterfactual Mode Validator (v7.1.0)
- * Refactored to use BaseValidator shared methods
+ * Counterfactual Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
+ *
+ * Validates counterfactual reasoning (what-if scenarios)
  */
 
-import { CounterfactualThought, ValidationIssue } from '../../../types/index.js';
+import type { CounterfactualThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
 import { IssueCategory, IssueSeverity } from '../../constants.js';
+import { validateCommon, validateProbability } from '../validation-utils.js';
 
-export class CounterfactualValidator extends BaseValidator<CounterfactualThought> {
+/**
+ * Validator for counterfactual reasoning mode
+ * Validates actual vs counterfactual scenario comparisons
+ */
+export class CounterfactualValidator implements ModeValidator<CounterfactualThought> {
   getMode(): string {
     return 'counterfactual';
   }
@@ -17,7 +24,7 @@ export class CounterfactualValidator extends BaseValidator<CounterfactualThought
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Require actual scenario
     if (!thought.actual) {
@@ -110,13 +117,13 @@ export class CounterfactualValidator extends BaseValidator<CounterfactualThought
     if (thought.counterfactuals) {
       for (const scenario of thought.counterfactuals) {
         issues.push(
-          ...this.validateProbability(thought, scenario.likelihood, `Counterfactual scenario "${scenario.name}" likelihood`)
+          ...validateProbability(thought, scenario.likelihood, `Counterfactual scenario "${scenario.name}" likelihood`)
         );
         // Validate outcome magnitude
         if (scenario.outcomes) {
           for (const outcome of scenario.outcomes) {
             issues.push(
-              ...this.validateProbability(
+              ...validateProbability(
                 thought,
                 outcome.magnitude,
                 `Counterfactual scenario "${scenario.name}" outcome magnitude`

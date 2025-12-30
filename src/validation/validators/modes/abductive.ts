@@ -1,14 +1,21 @@
 /**
- * Abductive Mode Validator (v7.1.0)
- * Refactored to use BaseValidator shared methods
+ * Abductive Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
+ *
+ * Validates abductive reasoning (inference to best explanation)
  */
 
-import { AbductiveThought, ValidationIssue } from '../../../types/index.js';
+import type { AbductiveThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
 import { IssueCategory, IssueSeverity } from '../../constants.js';
+import { validateCommon, validateConfidence, validateProbability, validateNonEmptyArray } from '../validation-utils.js';
 
-export class AbductiveValidator extends BaseValidator<AbductiveThought> {
+/**
+ * Validator for abductive reasoning mode
+ * Validates hypothesis generation from observations
+ */
+export class AbductiveValidator implements ModeValidator<AbductiveThought> {
   getMode(): string {
     return 'abductive';
   }
@@ -17,18 +24,18 @@ export class AbductiveValidator extends BaseValidator<AbductiveThought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // At least one observation required using shared method (ERROR severity for required array)
     issues.push(
-      ...this.validateNonEmptyArray(thought, thought.observations, 'observations', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
+      ...validateNonEmptyArray(thought, thought.observations, 'observations', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
     );
 
     // Validate observation confidence values using shared method
     if (thought.observations) {
       for (const obs of thought.observations) {
         issues.push(
-          ...this.validateConfidence(thought, obs.confidence, `Observation "${obs.description}" confidence`)
+          ...validateConfidence(thought, obs.confidence, `Observation "${obs.description}" confidence`)
         );
       }
     }
@@ -54,9 +61,9 @@ export class AbductiveValidator extends BaseValidator<AbductiveThought> {
     if (thought.evaluationCriteria) {
       const { parsimony, explanatoryPower, plausibility } = thought.evaluationCriteria;
 
-      issues.push(...this.validateProbability(thought, parsimony, 'Parsimony score'));
-      issues.push(...this.validateProbability(thought, explanatoryPower, 'Explanatory power'));
-      issues.push(...this.validateProbability(thought, plausibility, 'Plausibility'));
+      issues.push(...validateProbability(thought, parsimony, 'Parsimony score'));
+      issues.push(...validateProbability(thought, explanatoryPower, 'Explanatory power'));
+      issues.push(...validateProbability(thought, plausibility, 'Plausibility'));
     }
 
     // Validate best explanation references existing hypothesis

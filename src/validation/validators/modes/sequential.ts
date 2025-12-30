@@ -1,12 +1,17 @@
 /**
- * Sequential Mode Validator
+ * Sequential Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  */
 
-import { SequentialThought, ValidationIssue } from '../../../types/index.js';
+import type { SequentialThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class SequentialValidator extends BaseValidator<SequentialThought> {
+/**
+ * Sequential mode validator using composition pattern
+ */
+export class SequentialValidator implements ModeValidator<SequentialThought> {
   getMode(): string {
     return 'sequential';
   }
@@ -14,8 +19,8 @@ export class SequentialValidator extends BaseValidator<SequentialThought> {
   validate(thought: SequentialThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    // Common validation
-    issues.push(...this.validateCommon(thought));
+    // Common validation via utility function
+    issues.push(...validateCommon(thought));
 
     // Check revision logic
     if (thought.isRevision && !thought.revisesThought) {

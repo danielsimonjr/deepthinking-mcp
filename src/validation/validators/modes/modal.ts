@@ -1,16 +1,20 @@
 /**
- * Modal Logic Mode Validator (v3.4.0)
- * Phase 4E Task 8.8: Validator for modal logic mode
+ * Modal Logic Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  *
  * Modal logic deals with modalities: necessity, possibility,
  * impossibility, contingency
  */
 
-import { Thought, ValidationIssue } from '../../../types/index.js';
+import type { Thought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class ModalValidator extends BaseValidator<Thought> {
+/**
+ * Validator for modal logic reasoning mode
+ */
+export class ModalValidator implements ModeValidator<Thought> {
   getMode(): string {
     return 'modal';
   }
@@ -19,7 +23,7 @@ export class ModalValidator extends BaseValidator<Thought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Modal reasoning should use modal operators
     const modalOperators = [

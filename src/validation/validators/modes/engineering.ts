@@ -1,6 +1,6 @@
 /**
- * Engineering Mode Validator (v7.1.0)
- * Phase 10: Validates engineering analysis thoughts
+ * Engineering Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  *
  * Validates:
  * - Requirements traceability completeness
@@ -9,12 +9,16 @@
  * - Design decision completeness
  */
 
-import { ValidationIssue } from '../../../types/index.js';
+import type { ValidationIssue } from '../../../types/index.js';
 import type { EngineeringThought } from '../../../types/modes/engineering.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class EngineeringValidator extends BaseValidator<EngineeringThought> {
+/**
+ * Validator for Engineering reasoning mode
+ */
+export class EngineeringValidator implements ModeValidator<EngineeringThought> {
   getMode(): string {
     return 'engineering';
   }
@@ -23,7 +27,7 @@ export class EngineeringValidator extends BaseValidator<EngineeringThought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate design challenge is specified
     if (!thought.designChallenge || thought.designChallenge.trim() === '') {
@@ -50,22 +54,22 @@ export class EngineeringValidator extends BaseValidator<EngineeringThought> {
 
     // Validate requirements traceability
     if (thought.requirements) {
-      issues.push(...this.validateRequirements(thought));
+      issues.push(...validateRequirements(thought));
     }
 
     // Validate trade study
     if (thought.tradeStudy) {
-      issues.push(...this.validateTradeStudy(thought));
+      issues.push(...validateTradeStudy(thought));
     }
 
     // Validate FMEA
     if (thought.fmea) {
-      issues.push(...this.validateFMEA(thought));
+      issues.push(...validateFMEA(thought));
     }
 
     // Validate design decisions
     if (thought.designDecisions) {
-      issues.push(...this.validateDesignDecisions(thought));
+      issues.push(...validateDesignDecisions(thought));
     }
 
     // Check that at least one analysis type is present for comprehensive mode
@@ -84,8 +88,9 @@ export class EngineeringValidator extends BaseValidator<EngineeringThought> {
 
     return issues;
   }
+}
 
-  private validateRequirements(thought: EngineeringThought): ValidationIssue[] {
+function validateRequirements(thought: EngineeringThought): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
     const reqs = thought.requirements!;
 
@@ -143,9 +148,9 @@ export class EngineeringValidator extends BaseValidator<EngineeringThought> {
     }
 
     return issues;
-  }
+}
 
-  private validateTradeStudy(thought: EngineeringThought): ValidationIssue[] {
+function validateTradeStudy(thought: EngineeringThought): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
     const study = thought.tradeStudy!;
 
@@ -203,9 +208,9 @@ export class EngineeringValidator extends BaseValidator<EngineeringThought> {
     }
 
     return issues;
-  }
+}
 
-  private validateFMEA(thought: EngineeringThought): ValidationIssue[] {
+function validateFMEA(thought: EngineeringThought): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
     const fmea = thought.fmea!;
 
@@ -291,9 +296,9 @@ export class EngineeringValidator extends BaseValidator<EngineeringThought> {
     }
 
     return issues;
-  }
+}
 
-  private validateDesignDecisions(thought: EngineeringThought): ValidationIssue[] {
+function validateDesignDecisions(thought: EngineeringThought): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
     const log = thought.designDecisions!;
 
@@ -347,5 +352,4 @@ export class EngineeringValidator extends BaseValidator<EngineeringThought> {
     }
 
     return issues;
-  }
 }

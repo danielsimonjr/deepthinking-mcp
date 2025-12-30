@@ -1,14 +1,21 @@
 /**
- * Game Theory Mode Validator (v7.1.0)
- * Refactored to use BaseValidator shared methods
+ * Game Theory Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
+ *
+ * Validates game theory reasoning (players, strategies, payoffs)
  */
 
-import { GameTheoryThought, ValidationIssue } from '../../../types/index.js';
+import type { GameTheoryThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
 import { IssueCategory, IssueSeverity } from '../../constants.js';
+import { validateCommon, validateProbability, validateNonEmptyArray } from '../validation-utils.js';
 
-export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
+/**
+ * Validator for game theory reasoning mode
+ * Validates game structures, strategies, and equilibria
+ */
+export class GameTheoryValidator implements ModeValidator<GameTheoryThought> {
   getMode(): string {
     return 'gametheory';
   }
@@ -17,7 +24,7 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate game definition requires at least 2 players
     if (thought.game && thought.game.numPlayers < 2) {
@@ -45,7 +52,7 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
       // Validate players have strategies using shared method (ERROR severity)
       for (const player of thought.players) {
         issues.push(
-          ...this.validateNonEmptyArray(
+          ...validateNonEmptyArray(
             thought,
             player.availableStrategies,
             `Player "${player.name}" available strategies`,
@@ -200,7 +207,7 @@ export class GameTheoryValidator extends BaseValidator<GameTheoryThought> {
         }
 
         // Validate probability range using shared method
-        issues.push(...this.validateProbability(thought, node.probability, `Node ${node.id} probability`));
+        issues.push(...validateProbability(thought, node.probability, `Node ${node.id} probability`));
       }
     }
 

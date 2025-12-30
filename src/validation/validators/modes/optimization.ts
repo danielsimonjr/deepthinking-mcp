@@ -1,12 +1,17 @@
 /**
- * Optimization Mode Validator
+ * Optimization Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  */
 
-import { OptimizationThought, ValidationIssue } from '../../../types/index.js';
+import type { OptimizationThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class OptimizationValidator extends BaseValidator<OptimizationThought> {
+/**
+ * Validator for Optimization reasoning mode
+ */
+export class OptimizationValidator implements ModeValidator<OptimizationThought> {
   getMode(): string {
     return 'optimization';
   }
@@ -15,7 +20,7 @@ export class OptimizationValidator extends BaseValidator<OptimizationThought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate problem definition
     if (thought.problem) {

@@ -1,12 +1,17 @@
 /**
- * Formal Logic Mode Validator
+ * Formal Logic Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  */
 
-import { FormalLogicThought, ValidationIssue } from '../../../types/index.js';
+import type { FormalLogicThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class FormalLogicValidator extends BaseValidator<FormalLogicThought> {
+/**
+ * Validator for Formal Logic reasoning mode
+ */
+export class FormalLogicValidator implements ModeValidator<FormalLogicThought> {
   getMode(): string {
     return 'formallogic';
   }
@@ -15,7 +20,7 @@ export class FormalLogicValidator extends BaseValidator<FormalLogicThought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate propositions
     if (thought.propositions && thought.propositions.length > 0) {

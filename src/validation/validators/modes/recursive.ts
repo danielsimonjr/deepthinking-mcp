@@ -1,16 +1,20 @@
 /**
- * Recursive Reasoning Mode Validator (v3.4.0)
- * Phase 4E Task 8.8: Validator for recursive reasoning mode
+ * Recursive Reasoning Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  *
  * Recursive reasoning involves breaking problems into smaller self-similar
  * subproblems and building solutions from base cases
  */
 
-import { Thought, ValidationIssue } from '../../../types/index.js';
+import type { Thought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class RecursiveValidator extends BaseValidator<Thought> {
+/**
+ * Validator for recursive reasoning mode
+ */
+export class RecursiveValidator implements ModeValidator<Thought> {
   getMode(): string {
     return 'recursive';
   }
@@ -19,7 +23,7 @@ export class RecursiveValidator extends BaseValidator<Thought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Check for base case definition (should appear early)
     if (thought.thoughtNumber <= 2) {

@@ -1,15 +1,18 @@
 /**
- * Evidential Mode Validator (v7.5.0)
- * Refactored to use BaseValidator shared methods
- * Fixed: Removed duplicate code and undefined variable references
+ * Evidential Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  */
 
-import { EvidentialThought, ValidationIssue } from '../../../types/index.js';
+import type { EvidentialThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
 import { IssueCategory, IssueSeverity } from '../../constants.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class EvidentialValidator extends BaseValidator<EvidentialThought> {
+/**
+ * Validator for Evidential reasoning mode using Dempster-Shafer theory
+ */
+export class EvidentialValidator implements ModeValidator<EvidentialThought> {
   getMode(): string {
     return 'evidential';
   }
@@ -18,7 +21,7 @@ export class EvidentialValidator extends BaseValidator<EvidentialThought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Collect hypothesis IDs for reference validation
     const hypothesisIds = new Set(thought.hypotheses?.map(h => h.id) || []);

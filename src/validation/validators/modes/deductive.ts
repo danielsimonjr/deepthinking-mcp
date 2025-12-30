@@ -1,13 +1,20 @@
 /**
- * Deductive Mode Validator
+ * Deductive Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
+ *
  * Validates deductive reasoning from general principles to specific conclusions
  */
 
-import { DeductiveThought, ValidationIssue } from '../../../types/index.js';
+import type { DeductiveThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class DeductiveValidator extends BaseValidator<DeductiveThought> {
+/**
+ * Validator for deductive reasoning mode
+ * Validates premises-to-conclusion reasoning patterns
+ */
+export class DeductiveValidator implements ModeValidator<DeductiveThought> {
   getMode(): string {
     return 'deductive';
   }
@@ -16,7 +23,7 @@ export class DeductiveValidator extends BaseValidator<DeductiveThought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // At least one premise required
     if (!thought.premises || thought.premises.length === 0) {

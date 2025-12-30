@@ -1,6 +1,6 @@
 /**
- * Critique Mode Validator (v7.4.0)
- * Phase 13: Validates critical analysis and peer review thoughts
+ * Critique Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  *
  * Validates:
  * - Work characterization completeness
@@ -9,12 +9,16 @@
  * - Balance between strengths and weaknesses
  */
 
-import { ValidationIssue } from '../../../types/index.js';
+import type { ValidationIssue } from '../../../types/index.js';
 import type { CritiqueThought } from '../../../types/modes/critique.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon, validateProbability } from '../validation-utils.js';
 
-export class CritiqueValidator extends BaseValidator<CritiqueThought> {
+/**
+ * Validator for critique reasoning mode
+ */
+export class CritiqueValidator implements ModeValidator<CritiqueThought> {
   getMode(): string {
     return 'critique';
   }
@@ -23,7 +27,7 @@ export class CritiqueValidator extends BaseValidator<CritiqueThought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate thought type if specified
     const validThoughtTypes = [
@@ -66,22 +70,22 @@ export class CritiqueValidator extends BaseValidator<CritiqueThought> {
 
       // Validate overall rating is 0-1
       if (evaluation.overallRating !== undefined) {
-        issues.push(...this.validateProbability(thought, evaluation.overallRating, 'methodology overall rating'));
+        issues.push(...validateProbability(thought, evaluation.overallRating, 'methodology overall rating'));
       }
 
       // Validate design assessment rating
       if (evaluation.design?.rating !== undefined) {
-        issues.push(...this.validateProbability(thought, evaluation.design.rating, 'design assessment rating'));
+        issues.push(...validateProbability(thought, evaluation.design.rating, 'design assessment rating'));
       }
 
       // Validate sample assessment rating
       if (evaluation.sample?.rating !== undefined) {
-        issues.push(...this.validateProbability(thought, evaluation.sample.rating, 'sample assessment rating'));
+        issues.push(...validateProbability(thought, evaluation.sample.rating, 'sample assessment rating'));
       }
 
       // Validate analysis assessment rating
       if (evaluation.analysis?.rating !== undefined) {
-        issues.push(...this.validateProbability(thought, evaluation.analysis.rating, 'analysis assessment rating'));
+        issues.push(...validateProbability(thought, evaluation.analysis.rating, 'analysis assessment rating'));
       }
     }
 
@@ -139,13 +143,13 @@ export class CritiqueValidator extends BaseValidator<CritiqueThought> {
 
       // Validate confidence is 0-1
       if (thought.verdict.confidence !== undefined) {
-        issues.push(...this.validateProbability(thought, thought.verdict.confidence, 'verdict confidence'));
+        issues.push(...validateProbability(thought, thought.verdict.confidence, 'verdict confidence'));
       }
     }
 
     // Validate balance ratio is 0-1
     if (thought.balanceRatio !== undefined) {
-      issues.push(...this.validateProbability(thought, thought.balanceRatio, 'balance ratio'));
+      issues.push(...validateProbability(thought, thought.balanceRatio, 'balance ratio'));
     }
 
     // Validate strengths/weaknesses identified are non-negative

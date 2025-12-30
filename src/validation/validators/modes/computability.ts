@@ -1,6 +1,6 @@
 /**
- * Computability Mode Validator (v7.2.0)
- * Phase 11: Validates computability theory thoughts
+ * Computability Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  *
  * Validates:
  * - Turing machine well-formedness
@@ -11,12 +11,16 @@
  * Inspired by Alan Turing's foundational work on computability (1936)
  */
 
-import { ValidationIssue } from '../../../types/index.js';
+import type { ValidationIssue } from '../../../types/index.js';
 import type { ComputabilityThought, TuringMachine, Reduction, DecidabilityProof, DiagonalizationArgument } from '../../../types/modes/computability.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class ComputabilityValidator extends BaseValidator<ComputabilityThought> {
+/**
+ * Computability mode validator using composition pattern
+ */
+export class ComputabilityValidator implements ModeValidator<ComputabilityThought> {
   getMode(): string {
     return 'computability';
   }
@@ -24,8 +28,8 @@ export class ComputabilityValidator extends BaseValidator<ComputabilityThought> 
   validate(thought: ComputabilityThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    // Common validation
-    issues.push(...this.validateCommon(thought));
+    // Common validation via utility function
+    issues.push(...validateCommon(thought));
 
     // Validate thought type
     const validTypes = [

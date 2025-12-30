@@ -1,14 +1,21 @@
 /**
- * Analogical Mode Validator (v7.1.0)
- * Refactored to use BaseValidator shared methods
+ * Analogical Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
+ *
+ * Validates analogical reasoning (domain mapping)
  */
 
-import { AnalogicalThought, ValidationIssue } from '../../../types/index.js';
+import type { AnalogicalThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
 import { IssueCategory, IssueSeverity } from '../../constants.js';
+import { validateCommon, validateConfidence, validateProbability } from '../validation-utils.js';
 
-export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {
+/**
+ * Validator for analogical reasoning mode
+ * Validates mappings between source and target domains
+ */
+export class AnalogicalValidator implements ModeValidator<AnalogicalThought> {
   getMode(): string {
     return 'analogical';
   }
@@ -17,7 +24,7 @@ export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Require source domain
     if (!thought.sourceDomain) {
@@ -42,7 +49,7 @@ export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {
     }
 
     // Validate analogy strength range using shared method
-    issues.push(...this.validateProbability(thought, thought.analogyStrength, 'Analogy strength'));
+    issues.push(...validateProbability(thought, thought.analogyStrength, 'Analogy strength'));
 
     // Validate mapping completeness
     if (thought.mapping && thought.mapping.length === 0) {
@@ -85,7 +92,7 @@ export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {
 
         // Validate confidence range using shared method
         issues.push(
-          ...this.validateConfidence(
+          ...validateConfidence(
             thought,
             map.confidence,
             `Mapping confidence (${map.sourceEntityId} -> ${map.targetEntityId})`
@@ -108,14 +115,14 @@ export class AnalogicalValidator extends BaseValidator<AnalogicalThought> {
     // Validate insight novelty ranges using shared method
     if (thought.insights) {
       for (const insight of thought.insights) {
-        issues.push(...this.validateProbability(thought, insight.novelty, 'Insight novelty'));
+        issues.push(...validateProbability(thought, insight.novelty, 'Insight novelty'));
       }
     }
 
     // Validate inference confidence ranges using shared method
     if (thought.inferences) {
       for (const inference of thought.inferences) {
-        issues.push(...this.validateConfidence(thought, inference.confidence, 'Inference confidence'));
+        issues.push(...validateConfidence(thought, inference.confidence, 'Inference confidence'));
       }
     }
 

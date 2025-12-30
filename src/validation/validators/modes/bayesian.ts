@@ -1,14 +1,18 @@
 /**
- * Bayesian Mode Validator (v7.1.0)
- * Refactored to use BaseValidator shared methods
+ * Bayesian Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  */
 
-import { BayesianThought, ValidationIssue } from '../../../types/index.js';
+import type { BayesianThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
 import { IssueCategory, IssueSeverity } from '../../constants.js';
+import { validateCommon, validateProbability, validateNumberRange } from '../validation-utils.js';
 
-export class BayesianValidator extends BaseValidator<BayesianThought> {
+/**
+ * Bayesian mode validator using composition pattern
+ */
+export class BayesianValidator implements ModeValidator<BayesianThought> {
   getMode(): string {
     return 'bayesian';
   }
@@ -16,15 +20,15 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
   validate(thought: BayesianThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    // Common validation
-    issues.push(...this.validateCommon(thought));
+    // Common validation via utility function
+    issues.push(...validateCommon(thought));
 
-    // Validate prior probability using shared method
+    // Validate prior probability using utility function
     if (thought.prior !== undefined) {
-      issues.push(...this.validateProbability(thought, thought.prior.probability, 'Prior probability'));
+      issues.push(...validateProbability(thought, thought.prior.probability, 'Prior probability'));
     }
 
-    // Validate likelihood using shared method
+    // Validate likelihood
     if (thought.likelihood !== undefined) {
       if (thought.likelihood.probability < 0 || thought.likelihood.probability > 1) {
         issues.push({
@@ -39,7 +43,7 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
 
     // Validate posterior probability
     if (thought.posterior !== undefined) {
-      issues.push(...this.validateProbability(thought, thought.posterior.probability, 'Posterior probability'));
+      issues.push(...validateProbability(thought, thought.posterior.probability, 'Posterior probability'));
 
       // Warn if posterior calculation is missing
       if (!thought.posterior.calculation || thought.posterior.calculation.trim() === '') {
@@ -53,7 +57,7 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
       }
     }
 
-    // Validate evidence likelihoods using shared method
+    // Validate evidence likelihoods
     if (thought.evidence) {
       for (const evidence of thought.evidence) {
         if (evidence.likelihoodGivenHypothesis < 0 || evidence.likelihoodGivenHypothesis > 1) {
@@ -77,9 +81,9 @@ export class BayesianValidator extends BaseValidator<BayesianThought> {
       }
     }
 
-    // Validate Bayes factor using shared method (non-negative)
+    // Validate Bayes factor using utility function (non-negative)
     issues.push(
-      ...this.validateNumberRange(
+      ...validateNumberRange(
         thought,
         thought.bayesFactor,
         'Bayes factor',

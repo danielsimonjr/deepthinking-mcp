@@ -1,16 +1,20 @@
 /**
- * Stochastic Reasoning Mode Validator (v3.4.0)
- * Phase 4E Task 8.8: Validator for stochastic reasoning mode
+ * Stochastic Reasoning Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  *
  * Stochastic reasoning involves random processes, probability distributions,
  * and uncertainty modeling
  */
 
-import { Thought, ValidationIssue } from '../../../types/index.js';
+import type { Thought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon, validateUncertainty } from '../validation-utils.js';
 
-export class StochasticValidator extends BaseValidator<Thought> {
+/**
+ * Validator for stochastic reasoning mode
+ */
+export class StochasticValidator implements ModeValidator<Thought> {
   getMode(): string {
     return 'stochastic';
   }
@@ -19,7 +23,7 @@ export class StochasticValidator extends BaseValidator<Thought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Check for probability distributions
     if ('distribution' in thought) {
@@ -53,7 +57,7 @@ export class StochasticValidator extends BaseValidator<Thought> {
 
     // Check for uncertainty quantification
     if ('uncertainty' in thought && typeof thought.uncertainty === 'number') {
-      issues.push(...this.validateUncertainty(thought, thought.uncertainty));
+      issues.push(...validateUncertainty(thought, thought.uncertainty));
 
       // Stochastic reasoning should typically have uncertainty
       if (thought.uncertainty === 0) {

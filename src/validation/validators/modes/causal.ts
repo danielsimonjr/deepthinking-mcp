@@ -1,14 +1,21 @@
 /**
- * Causal Mode Validator (v7.1.0)
- * Refactored to use BaseValidator shared methods
+ * Causal Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
+ *
+ * Validates causal reasoning with graph structures
  */
 
-import { CausalThought, ValidationIssue } from '../../../types/index.js';
+import type { CausalThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
 import { IssueCategory, IssueSeverity } from '../../constants.js';
+import { validateCommon, validateConfidence, validateNumberRange } from '../validation-utils.js';
 
-export class CausalValidator extends BaseValidator<CausalThought> {
+/**
+ * Validator for causal reasoning mode
+ * Validates causal graphs, interventions, and mechanisms
+ */
+export class CausalValidator implements ModeValidator<CausalThought> {
   getMode(): string {
     return 'causal';
   }
@@ -17,7 +24,7 @@ export class CausalValidator extends BaseValidator<CausalThought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate causal graph structure
     if (thought.causalGraph) {
@@ -49,7 +56,7 @@ export class CausalValidator extends BaseValidator<CausalThought> {
 
         // Validate strength is in range (-1 to 1) using shared method
         issues.push(
-          ...this.validateNumberRange(
+          ...validateNumberRange(
             thought,
             edge.strength,
             `Edge strength (${edge.from} -> ${edge.to})`,
@@ -62,7 +69,7 @@ export class CausalValidator extends BaseValidator<CausalThought> {
 
         // Validate confidence is in range (0 to 1) using shared method
         issues.push(
-          ...this.validateConfidence(thought, edge.confidence, `Edge confidence (${edge.from} -> ${edge.to})`)
+          ...validateConfidence(thought, edge.confidence, `Edge confidence (${edge.from} -> ${edge.to})`)
         );
       }
 
@@ -132,7 +139,7 @@ export class CausalValidator extends BaseValidator<CausalThought> {
 
           // Validate confidence range using shared method
           issues.push(
-            ...this.validateConfidence(thought, effect.confidence, 'Intervention effect confidence')
+            ...validateConfidence(thought, effect.confidence, 'Intervention effect confidence')
           );
         }
       }

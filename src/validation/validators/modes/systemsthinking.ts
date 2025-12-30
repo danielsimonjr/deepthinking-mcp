@@ -1,14 +1,18 @@
 /**
- * Systems Thinking Mode Validator (v7.1.0)
- * Refactored to use BaseValidator shared methods
+ * Systems Thinking Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  */
 
-import { SystemsThinkingThought, ValidationIssue } from '../../../types/index.js';
+import type { SystemsThinkingThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
 import { IssueCategory, IssueSeverity } from '../../constants.js';
+import { validateCommon, validateRequired, validateProbability, validateNumberRange } from '../validation-utils.js';
 
-export class SystemsThinkingValidator extends BaseValidator<SystemsThinkingThought> {
+/**
+ * Validator for Systems Thinking reasoning mode
+ */
+export class SystemsThinkingValidator implements ModeValidator<SystemsThinkingThought> {
   getMode(): string {
     return 'systemsthinking';
   }
@@ -17,12 +21,12 @@ export class SystemsThinkingValidator extends BaseValidator<SystemsThinkingThoug
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate system definition using shared methods
     if (thought.system) {
       issues.push(
-        ...this.validateRequired(thought, thought.system.name?.trim(), 'System name', IssueCategory.STRUCTURAL)
+        ...validateRequired(thought, thought.system.name?.trim(), 'System name', IssueCategory.STRUCTURAL)
       );
 
       if (!thought.system.boundary || thought.system.boundary.trim() === '') {
@@ -54,7 +58,7 @@ export class SystemsThinkingValidator extends BaseValidator<SystemsThinkingThoug
 
         // Validate component fields using shared method
         issues.push(
-          ...this.validateRequired(thought, component.name?.trim(), `Component ${component.id} name`, IssueCategory.STRUCTURAL)
+          ...validateRequired(thought, component.name?.trim(), `Component ${component.id} name`, IssueCategory.STRUCTURAL)
         );
 
         // Validate influences reference existing components
@@ -106,11 +110,11 @@ export class SystemsThinkingValidator extends BaseValidator<SystemsThinkingThoug
         }
 
         // Validate strength range using shared method
-        issues.push(...this.validateProbability(thought, loop.strength, `Loop ${loop.id} strength`));
+        issues.push(...validateProbability(thought, loop.strength, `Loop ${loop.id} strength`));
 
         // Validate delay is non-negative using shared method
         issues.push(
-          ...this.validateNumberRange(
+          ...validateNumberRange(
             thought,
             loop.delay,
             `Loop ${loop.id} delay`,
@@ -144,12 +148,12 @@ export class SystemsThinkingValidator extends BaseValidator<SystemsThinkingThoug
 
         // Validate effectiveness range using shared method
         issues.push(
-          ...this.validateProbability(thought, leveragePoint.effectiveness, `Leverage point ${leveragePoint.id} effectiveness`)
+          ...validateProbability(thought, leveragePoint.effectiveness, `Leverage point ${leveragePoint.id} effectiveness`)
         );
 
         // Validate difficulty range using shared method
         issues.push(
-          ...this.validateProbability(thought, leveragePoint.difficulty, `Leverage point ${leveragePoint.id} difficulty`)
+          ...validateProbability(thought, leveragePoint.difficulty, `Leverage point ${leveragePoint.id} difficulty`)
         );
       }
     }

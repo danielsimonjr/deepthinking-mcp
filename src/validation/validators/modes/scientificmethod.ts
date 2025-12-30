@@ -1,12 +1,17 @@
 /**
- * Scientific Method Mode Validator
+ * Scientific Method Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  */
 
-import { ScientificMethodThought, ValidationIssue } from '../../../types/index.js';
+import type { ScientificMethodThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class ScientificMethodValidator extends BaseValidator<ScientificMethodThought> {
+/**
+ * Validator for Scientific Method reasoning mode
+ */
+export class ScientificMethodValidator implements ModeValidator<ScientificMethodThought> {
   getMode(): string {
     return 'scientificmethod';
   }
@@ -15,7 +20,7 @@ export class ScientificMethodValidator extends BaseValidator<ScientificMethodTho
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate research question
     if (thought.researchQuestion) {

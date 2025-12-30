@@ -1,6 +1,6 @@
 /**
- * Synthesis Mode Validator (v7.4.0)
- * Phase 13: Validates literature synthesis and knowledge integration thoughts
+ * Synthesis Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  *
  * Validates:
  * - Source quality assessment completeness
@@ -9,12 +9,16 @@
  * - Framework development coherence
  */
 
-import { ValidationIssue } from '../../../types/index.js';
+import type { ValidationIssue } from '../../../types/index.js';
 import type { SynthesisThought } from '../../../types/modes/synthesis.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon, validateProbability } from '../validation-utils.js';
 
-export class SynthesisValidator extends BaseValidator<SynthesisThought> {
+/**
+ * Validator for synthesis reasoning mode
+ */
+export class SynthesisValidator implements ModeValidator<SynthesisThought> {
   getMode(): string {
     return 'synthesis';
   }
@@ -23,7 +27,7 @@ export class SynthesisValidator extends BaseValidator<SynthesisThought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate thought type if specified
     const validThoughtTypes = [
@@ -64,19 +68,19 @@ export class SynthesisValidator extends BaseValidator<SynthesisThought> {
         // Validate quality metrics are 0-1
         if (source.quality) {
           if (source.quality.methodologicalRigor !== undefined) {
-            issues.push(...this.validateProbability(thought, source.quality.methodologicalRigor, `source "${source.id}" methodological rigor`));
+            issues.push(...validateProbability(thought, source.quality.methodologicalRigor, `source "${source.id}" methodological rigor`));
           }
           if (source.quality.relevance !== undefined) {
-            issues.push(...this.validateProbability(thought, source.quality.relevance, `source "${source.id}" relevance`));
+            issues.push(...validateProbability(thought, source.quality.relevance, `source "${source.id}" relevance`));
           }
           if (source.quality.recency !== undefined) {
-            issues.push(...this.validateProbability(thought, source.quality.recency, `source "${source.id}" recency`));
+            issues.push(...validateProbability(thought, source.quality.recency, `source "${source.id}" recency`));
           }
           if (source.quality.authorCredibility !== undefined) {
-            issues.push(...this.validateProbability(thought, source.quality.authorCredibility, `source "${source.id}" author credibility`));
+            issues.push(...validateProbability(thought, source.quality.authorCredibility, `source "${source.id}" author credibility`));
           }
           if (source.quality.overallQuality !== undefined) {
-            issues.push(...this.validateProbability(thought, source.quality.overallQuality, `source "${source.id}" overall quality`));
+            issues.push(...validateProbability(thought, source.quality.overallQuality, `source "${source.id}" overall quality`));
           }
         }
       }
@@ -87,7 +91,7 @@ export class SynthesisValidator extends BaseValidator<SynthesisThought> {
       for (const concept of thought.concepts) {
         // Validate importance is 0-1
         if (concept.importance !== undefined) {
-          issues.push(...this.validateProbability(thought, concept.importance, `concept "${concept.term}" importance`));
+          issues.push(...validateProbability(thought, concept.importance, `concept "${concept.term}" importance`));
         }
 
         // Validate frequency is non-negative
@@ -110,7 +114,7 @@ export class SynthesisValidator extends BaseValidator<SynthesisThought> {
       for (const theme of thought.themes) {
         // Validate strength is 0-1
         if (theme.strength !== undefined) {
-          issues.push(...this.validateProbability(thought, theme.strength, `theme "${theme.name}" strength`));
+          issues.push(...validateProbability(thought, theme.strength, `theme "${theme.name}" strength`));
         }
 
         if (theme.consensus && !validConsensusLevels.includes(theme.consensus)) {
@@ -170,7 +174,7 @@ export class SynthesisValidator extends BaseValidator<SynthesisThought> {
 
         // Validate confidence is 0-1
         if (pattern.confidence !== undefined) {
-          issues.push(...this.validateProbability(thought, pattern.confidence, `pattern "${pattern.name}" confidence`));
+          issues.push(...validateProbability(thought, pattern.confidence, `pattern "${pattern.name}" confidence`));
         }
       }
     }
@@ -192,7 +196,7 @@ export class SynthesisValidator extends BaseValidator<SynthesisThought> {
 
         // Validate strength is 0-1
         if (relation.strength !== undefined) {
-          issues.push(...this.validateProbability(thought, relation.strength, `relation "${relation.id}" strength`));
+          issues.push(...validateProbability(thought, relation.strength, `relation "${relation.id}" strength`));
         }
       }
     }
@@ -243,7 +247,7 @@ export class SynthesisValidator extends BaseValidator<SynthesisThought> {
 
           // Validate strength is 0-1
           if (rel.strength !== undefined) {
-            issues.push(...this.validateProbability(thought, rel.strength, 'framework relation strength'));
+            issues.push(...validateProbability(thought, rel.strength, 'framework relation strength'));
           }
         }
       }
@@ -254,7 +258,7 @@ export class SynthesisValidator extends BaseValidator<SynthesisThought> {
       for (const conclusion of thought.conclusions) {
         // Validate confidence is 0-1
         if (conclusion.confidence !== undefined) {
-          issues.push(...this.validateProbability(thought, conclusion.confidence, 'conclusion confidence'));
+          issues.push(...validateProbability(thought, conclusion.confidence, 'conclusion confidence'));
         }
       }
     }

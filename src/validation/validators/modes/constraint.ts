@@ -1,15 +1,19 @@
 /**
- * Constraint-Based Reasoning Mode Validator (v3.4.0)
- * Phase 4E Task 8.8: Validator for constraint-based reasoning mode
+ * Constraint-Based Reasoning Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  *
  * Constraint-based reasoning involves defining and satisfying constraints
  */
 
-import { Thought, ValidationIssue } from '../../../types/index.js';
+import type { Thought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class ConstraintValidator extends BaseValidator<Thought> {
+/**
+ * Validator for constraint-based reasoning mode
+ */
+export class ConstraintValidator implements ModeValidator<Thought> {
   getMode(): string {
     return 'constraint';
   }
@@ -18,7 +22,7 @@ export class ConstraintValidator extends BaseValidator<Thought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Check for constraint specification
     if ('constraints' in thought && Array.isArray(thought.constraints)) {

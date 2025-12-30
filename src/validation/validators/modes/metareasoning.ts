@@ -1,13 +1,19 @@
 /**
- * Meta-Reasoning Mode Validator
+ * Meta-Reasoning Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
+ *
  * Validates reasoning about reasoning - strategy monitoring, evaluation, and recommendations
  */
 
-import { MetaReasoningThought, ValidationIssue } from '../../../types/index.js';
+import type { MetaReasoningThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class MetaReasoningValidator extends BaseValidator<MetaReasoningThought> {
+/**
+ * Validator for meta-reasoning mode
+ */
+export class MetaReasoningValidator implements ModeValidator<MetaReasoningThought> {
   getMode(): string {
     return 'metareasoning';
   }
@@ -16,7 +22,7 @@ export class MetaReasoningValidator extends BaseValidator<MetaReasoningThought> 
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate current strategy
     this.validateCurrentStrategy(thought, issues);

@@ -1,6 +1,6 @@
 /**
- * Cryptanalytic Mode Validator (v7.2.0)
- * Phase 11: Validates cryptanalysis thoughts with Turing's deciban system
+ * Cryptanalytic Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  *
  * Validates:
  * - Evidence chain consistency
@@ -11,12 +11,16 @@
  * Inspired by Alan Turing's work at Bletchley Park (1939-1945)
  */
 
-import { ValidationIssue } from '../../../types/index.js';
+import type { ValidationIssue } from '../../../types/index.js';
 import type { CryptanalyticThought, EvidenceChain, DecibanEvidence } from '../../../types/modes/cryptanalytic.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon } from '../validation-utils.js';
 
-export class CryptanalyticValidator extends BaseValidator<CryptanalyticThought> {
+/**
+ * Validator for Cryptanalytic reasoning mode using Turing's deciban system
+ */
+export class CryptanalyticValidator implements ModeValidator<CryptanalyticThought> {
   getMode(): string {
     return 'cryptanalytic';
   }
@@ -25,7 +29,7 @@ export class CryptanalyticValidator extends BaseValidator<CryptanalyticThought> 
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate thought type
     const validTypes = [
@@ -50,34 +54,35 @@ export class CryptanalyticValidator extends BaseValidator<CryptanalyticThought> 
     // Validate evidence chains
     if (thought.evidenceChains) {
       for (const chain of thought.evidenceChains) {
-        issues.push(...this.validateEvidenceChain(thought, chain));
+        issues.push(...validateEvidenceChain(thought, chain));
       }
     }
 
     // Validate key space analysis
     if (thought.keySpaceAnalysis) {
-      issues.push(...this.validateKeySpaceAnalysis(thought));
+      issues.push(...validateKeySpaceAnalysis(thought));
     }
 
     // Validate frequency analysis
     if (thought.frequencyAnalysis) {
-      issues.push(...this.validateFrequencyAnalysis(thought));
+      issues.push(...validateFrequencyAnalysis(thought));
     }
 
     // Validate hypotheses
     if (thought.hypotheses) {
-      issues.push(...this.validateHypotheses(thought));
+      issues.push(...validateHypotheses(thought));
     }
 
     // Validate crib analysis
     if (thought.cribAnalysis) {
-      issues.push(...this.validateCribAnalysis(thought));
+      issues.push(...validateCribAnalysis(thought));
     }
 
     return issues;
   }
+}
 
-  private validateEvidenceChain(thought: CryptanalyticThought, chain: EvidenceChain): ValidationIssue[] {
+function validateEvidenceChain(thought: CryptanalyticThought, chain: EvidenceChain): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Check hypothesis is specified
@@ -134,13 +139,13 @@ export class CryptanalyticValidator extends BaseValidator<CryptanalyticThought> 
 
     // Validate individual observations
     for (const obs of chain.observations) {
-      issues.push(...this.validateDecibanEvidence(thought, obs));
+      issues.push(...validateDecibanEvidence(thought, obs));
     }
 
     return issues;
-  }
+}
 
-  private validateDecibanEvidence(thought: CryptanalyticThought, evidence: DecibanEvidence): ValidationIssue[] {
+function validateDecibanEvidence(thought: CryptanalyticThought, evidence: DecibanEvidence): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Check likelihood ratio and decibans consistency
@@ -191,9 +196,9 @@ export class CryptanalyticValidator extends BaseValidator<CryptanalyticThought> 
     }
 
     return issues;
-  }
+}
 
-  private validateKeySpaceAnalysis(thought: CryptanalyticThought): ValidationIssue[] {
+function validateKeySpaceAnalysis(thought: CryptanalyticThought): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
     const analysis = thought.keySpaceAnalysis!;
 
@@ -237,9 +242,9 @@ export class CryptanalyticValidator extends BaseValidator<CryptanalyticThought> 
     }
 
     return issues;
-  }
+}
 
-  private validateFrequencyAnalysis(thought: CryptanalyticThought): ValidationIssue[] {
+function validateFrequencyAnalysis(thought: CryptanalyticThought): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
     const analysis = thought.frequencyAnalysis!;
 
@@ -277,9 +282,9 @@ export class CryptanalyticValidator extends BaseValidator<CryptanalyticThought> 
     }
 
     return issues;
-  }
+}
 
-  private validateHypotheses(thought: CryptanalyticThought): ValidationIssue[] {
+function validateHypotheses(thought: CryptanalyticThought): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
     const hypotheses = thought.hypotheses!;
 
@@ -333,9 +338,9 @@ export class CryptanalyticValidator extends BaseValidator<CryptanalyticThought> 
     }
 
     return issues;
-  }
+}
 
-  private validateCribAnalysis(thought: CryptanalyticThought): ValidationIssue[] {
+function validateCribAnalysis(thought: CryptanalyticThought): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
     const cribAnalyses = thought.cribAnalysis!;
 
@@ -375,5 +380,4 @@ export class CryptanalyticValidator extends BaseValidator<CryptanalyticThought> 
     }
 
     return issues;
-  }
 }

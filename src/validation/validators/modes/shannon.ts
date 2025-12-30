@@ -1,14 +1,18 @@
 /**
- * Shannon Mode Validator (v7.1.0)
- * Already using BaseValidator shared methods
+ * Shannon Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  */
 
-import { ShannonThought, ValidationIssue } from '../../../types/index.js';
+import type { ShannonThought, ValidationIssue } from '../../../types/index.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
 import { IssueCategory, IssueSeverity } from '../../constants.js';
+import { validateCommon, validateUncertainty, validateDependencies } from '../validation-utils.js';
 
-export class ShannonValidator extends BaseValidator<ShannonThought> {
+/**
+ * Shannon mode validator using composition pattern
+ */
+export class ShannonValidator implements ModeValidator<ShannonThought> {
   getMode(): string {
     return 'shannon';
   }
@@ -16,14 +20,14 @@ export class ShannonValidator extends BaseValidator<ShannonThought> {
   validate(thought: ShannonThought, _context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    // Common validation
-    issues.push(...this.validateCommon(thought));
+    // Common validation via utility function
+    issues.push(...validateCommon(thought));
 
-    // Validate uncertainty is in range using shared method
-    issues.push(...this.validateUncertainty(thought, thought.uncertainty));
+    // Validate uncertainty is in range using utility function
+    issues.push(...validateUncertainty(thought, thought.uncertainty));
 
-    // Validate dependencies exist using shared method
-    issues.push(...this.validateDependencies(thought, thought.dependencies, _context));
+    // Validate dependencies exist using utility function
+    issues.push(...validateDependencies(thought, thought.dependencies, _context));
 
     // Warn if model stage has no assumptions
     if (thought.stage === 'model' && thought.assumptions.length === 0) {

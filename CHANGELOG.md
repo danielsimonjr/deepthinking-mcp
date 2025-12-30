@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.0.0] - 2025-12-30
+
+### Changed - Phase 15A Sprint 3: Clean Up Validation Layer
+
+**Sprint 3 COMPLETE** - Refactored validation layer from class inheritance to composition pattern.
+
+**Architecture Change: Composition over Inheritance**
+| Change | Before | After | Impact |
+|--------|--------|-------|--------|
+| BaseValidator | Abstract class with inheritance | Interface + utility functions | Simpler pattern |
+| Mode validators | `extends BaseValidator` | `implements ModeValidator` | No inheritance |
+| Shared validation | Protected methods | Utility functions | Better tree-shaking |
+
+**New Files Created:**
+- `src/validation/validators/validation-utils.ts` - Standalone validation utility functions
+
+**Files Modified (35 validators):**
+- All 35 mode validators converted from `extends BaseValidator` to `implements ModeValidator`
+- Now import and use utility functions: `validateCommon`, `validateProbability`, `validateNumberRange`, etc.
+- Version comments updated to v9.0.0
+- JSDoc comments added to all validator classes
+
+**BaseValidator Simplified:**
+- `src/validation/validators/base.ts` - Reduced from 261 lines to 34 lines (interface only)
+- BaseValidator abstract class replaced with ModeValidator interface
+- `BaseValidator` kept as deprecated alias for backwards compatibility
+
+**Validation Utilities Exported:**
+- `validateCommon()` - Common thought property validation
+- `validateDependencies()` - Dependency existence checking
+- `validateUncertainty()` - Uncertainty range validation (0-1)
+- `validateNumberRange()` - Generic range validation
+- `validateProbability()` - Probability range validation (0-1)
+- `validateConfidence()` - Confidence range validation (0-1)
+- `validateRequired()` - Required field validation
+- `validateNonEmptyArray()` - Non-empty array validation
+
+**Benefits:**
+- Simpler architecture (no class hierarchy)
+- Better tree-shaking (utility functions vs class methods)
+- Easier testing (pure functions)
+- Clearer dependencies (explicit imports)
+
 ## [8.6.0] - 2025-12-29
 
 ### Changed - Phase 15A Sprint 2: Simplify Service Layer

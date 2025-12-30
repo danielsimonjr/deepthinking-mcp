@@ -1,6 +1,6 @@
 /**
- * Analysis Mode Validator (v7.4.0)
- * Phase 13: Validates qualitative analysis thoughts
+ * Analysis Mode Validator (v9.0.0)
+ * Phase 15A Sprint 3: Uses composition with utility functions
  *
  * Validates:
  * - Analysis methodology appropriateness
@@ -9,12 +9,16 @@
  * - Qualitative analysis framework adherence
  */
 
-import { ValidationIssue } from '../../../types/index.js';
+import type { ValidationIssue } from '../../../types/index.js';
 import type { AnalysisThought } from '../../../types/modes/analysis.js';
 import type { ValidationContext } from '../../validator.js';
-import { BaseValidator } from '../base.js';
+import type { ModeValidator } from '../base.js';
+import { validateCommon, validateProbability } from '../validation-utils.js';
 
-export class AnalysisValidator extends BaseValidator<AnalysisThought> {
+/**
+ * Validator for analysis reasoning mode
+ */
+export class AnalysisValidator implements ModeValidator<AnalysisThought> {
   getMode(): string {
     return 'analysis';
   }
@@ -23,7 +27,7 @@ export class AnalysisValidator extends BaseValidator<AnalysisThought> {
     const issues: ValidationIssue[] = [];
 
     // Common validation
-    issues.push(...this.validateCommon(thought));
+    issues.push(...validateCommon(thought));
 
     // Validate thought type if specified
     const validThoughtTypes = [
@@ -124,12 +128,12 @@ export class AnalysisValidator extends BaseValidator<AnalysisThought> {
 
         // Validate prevalence is 0-1
         if (theme.prevalence !== undefined) {
-          issues.push(...this.validateProbability(thought, theme.prevalence, `theme "${theme.name}" prevalence`));
+          issues.push(...validateProbability(thought, theme.prevalence, `theme "${theme.name}" prevalence`));
         }
 
         // Validate richness is 0-1
         if (theme.richness !== undefined) {
-          issues.push(...this.validateProbability(thought, theme.richness, `theme "${theme.name}" richness`));
+          issues.push(...validateProbability(thought, theme.richness, `theme "${theme.name}" richness`));
         }
       }
     }
@@ -181,7 +185,7 @@ export class AnalysisValidator extends BaseValidator<AnalysisThought> {
       for (const source of thought.dataSources) {
         // Validate quality is 0-1
         if (source.quality !== undefined) {
-          issues.push(...this.validateProbability(thought, source.quality, `data source "${source.id}" quality`));
+          issues.push(...validateProbability(thought, source.quality, `data source "${source.id}" quality`));
         }
       }
     }
@@ -190,16 +194,16 @@ export class AnalysisValidator extends BaseValidator<AnalysisThought> {
     if (thought.rigorAssessment) {
       const rigor = thought.rigorAssessment;
       if (rigor.credibility?.rating !== undefined) {
-        issues.push(...this.validateProbability(thought, rigor.credibility.rating, 'credibility rating'));
+        issues.push(...validateProbability(thought, rigor.credibility.rating, 'credibility rating'));
       }
       if (rigor.transferability?.rating !== undefined) {
-        issues.push(...this.validateProbability(thought, rigor.transferability.rating, 'transferability rating'));
+        issues.push(...validateProbability(thought, rigor.transferability.rating, 'transferability rating'));
       }
       if (rigor.dependability?.rating !== undefined) {
-        issues.push(...this.validateProbability(thought, rigor.dependability.rating, 'dependability rating'));
+        issues.push(...validateProbability(thought, rigor.dependability.rating, 'dependability rating'));
       }
       if (rigor.confirmability?.rating !== undefined) {
-        issues.push(...this.validateProbability(thought, rigor.confirmability.rating, 'confirmability rating'));
+        issues.push(...validateProbability(thought, rigor.confirmability.rating, 'confirmability rating'));
       }
     }
 
