@@ -4,7 +4,7 @@
 
 This document provides a comprehensive test plan for verifying Phase 12 features through the MCP client interface. All tests should be executed manually through Claude Code or another MCP-compatible client.
 
-**Total Test Cases**: 104
+**Total Test Cases**: 88
 **Estimated Execution Time**: 5-7 hours
 **Prerequisites**: deepthinking-mcp server running and connected
 
@@ -13,7 +13,7 @@ This document provides a comprehensive test plan for verifying Phase 12 features
 ## Test Environment Setup
 
 ### Prerequisites
-1. deepthinking-mcp v8.3.2+ installed and configured
+1. deepthinking-mcp v9.1.0+ installed and configured (v9.1.0 required for Historical mode)
 2. MCP client (Claude Code) connected to the server
 3. Access to all 13 MCP tools:
    - `deepthinking_core`
@@ -1383,7 +1383,7 @@ Historical mode provides comprehensive historical analysis with source evaluatio
 }
 ```
 **Expected**: Methodology recognized and documented.
-**Pass Criteria**: Approach validated as one of 8 schools.
+**Pass Criteria**: Approach validated as one of 8 types: empiricist, interpretive, critical, postmodern, marxist, annales, microhistory, quantitative.
 
 ### T-S7-012: Empty Events Handling
 **Tool**: `deepthinking_temporal`
@@ -1832,7 +1832,7 @@ Historical mode provides comprehensive historical analysis with source evaluatio
 
 ### What This Test Plan Covers
 - All 13 MCP tools functionality
-- Phase 12 features (Sprints 1-6)
+- Phase 12 features (Sprints 1-7, including Historical mode v9.1.0)
 - Input validation and error handling
 - Basic integration scenarios
 - Edge cases for common operations

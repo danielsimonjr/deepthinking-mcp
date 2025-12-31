@@ -83,7 +83,7 @@
         "Actors have id, name, type (individual/group/institution/nation/movement)",
         "Actor relationships track alliances, conflicts, influences",
         "Historiographical school field (e.g., Marxist, Annales, postcolonial)",
-        "Methodology tracks approach used (comparative, quantitative, etc.)"
+        "Methodology approach field validates as one of 8 types: empiricist, interpretive, critical, postmodern, marxist, annales, microhistory, quantitative"
       ]
     },
     {

@@ -162,11 +162,11 @@
       "name": "Sprint 7: Historical Reasoning Mode",
       "tests": [
         {"id": "T-S7-001", "name": "Event Analysis Basic", "tool": "deepthinking_temporal", "status": "pending"},
-        {"id": "T-S7-002", "name": "Source Evaluation Primary", "tool": "deepthinking_temporal", "status": "pending"},
+        {"id": "T-S7-002", "name": "Source Evaluation", "tool": "deepthinking_temporal", "status": "pending"},
         {"id": "T-S7-003", "name": "Source Type Weighting", "tool": "deepthinking_temporal", "status": "pending"},
         {"id": "T-S7-004", "name": "Source Corroboration Bonus", "tool": "deepthinking_temporal", "status": "pending"},
         {"id": "T-S7-005", "name": "Causal Chain Analysis", "tool": "deepthinking_temporal", "status": "pending"},
-        {"id": "T-S7-006", "name": "Causal Chain Continuity Validation", "tool": "deepthinking_temporal", "status": "pending"},
+        {"id": "T-S7-006", "name": "Causal Chain Continuity Check", "tool": "deepthinking_temporal", "status": "pending"},
         {"id": "T-S7-007", "name": "Periodization Analysis", "tool": "deepthinking_temporal", "status": "pending"},
         {"id": "T-S7-008", "name": "Pattern Identification", "tool": "deepthinking_temporal", "status": "pending"},
         {"id": "T-S7-009", "name": "Auto-Detect Revolutionary Period", "tool": "deepthinking_temporal", "status": "pending"},
