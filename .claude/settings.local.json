@@ -136,7 +136,11 @@
       "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" split \"C:/mcp-servers/deepthinking-mcp/docs/ADDING_NEW_MODE.md\" -l 2 --dry-run)",
       "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" split \"C:/mcp-servers/deepthinking-mcp/README.md\" -l 2 --dry-run)",
       "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" split \"C:/mcp-servers/deepthinking-mcp/README.md\" -l 2)",
-      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" merge \"C:/mcp-servers/deepthinking-mcp/README_chunks/manifest.json\")"
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" merge \"C:/mcp-servers/deepthinking-mcp/README_chunks/manifest.json\")",
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" split \"C:/mcp-servers/deepthinking-mcp/docs/ADDING_NEW_MODE.md\" -l 3)",
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" merge \"C:/mcp-servers/deepthinking-mcp/docs/ADDING_NEW_MODE_chunks/manifest.json\" --dry-run)",
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" merge \"C:/mcp-servers/deepthinking-mcp/docs/ADDING_NEW_MODE_chunks/manifest.json\")",
+      "mcp__memory-mcp__open_nodes"
     ],
     "deny": [],
     "ask": []
