@@ -9653,8 +9653,8 @@ var HistoricalHandler = class {
       revisesThought: input.revisesThought,
       mode: "historical" /* HISTORICAL */,
       thoughtType,
-      events: inputAny.events || [],
-      sources: inputAny.sources || [],
+      events: inputAny.historicalEvents || inputAny.events || [],
+      sources: inputAny.historicalSources || inputAny.sources || [],
       periods: inputAny.periods || [],
       causalChains: inputAny.causalChains || [],
       actors: inputAny.actors || [],
@@ -9681,11 +9681,13 @@ var HistoricalHandler = class {
     const errors = [];
     const warnings = [];
     const inputAny = input;
-    const eventIds = new Set((inputAny.events || []).map((e) => e.id));
-    const sourceIds = new Set((inputAny.sources || []).map((s) => s.id));
+    const events = inputAny.historicalEvents || inputAny.events || [];
+    const sources = inputAny.historicalSources || inputAny.sources || [];
+    const eventIds = new Set(events.map((e) => e.id));
+    const sourceIds = new Set(sources.map((s) => s.id));
     const actorIds = new Set((inputAny.actors || []).map((a) => a.id));
-    if (inputAny.events) {
-      for (const event of inputAny.events) {
+    if (events.length > 0) {
+      for (const event of events) {
         if (event.causes) {
           for (const causeId of event.causes) {
             if (!eventIds.has(causeId)) {
@@ -9766,7 +9768,7 @@ var HistoricalHandler = class {
         }
       }
     }
-    if (inputAny.events && inputAny.events.length > 0 && (!inputAny.sources || inputAny.sources.length === 0)) {
+    if (events.length > 0 && sources.length === 0) {
       warnings.push(
         createValidationWarning(
           "sources",
@@ -9775,8 +9777,8 @@ var HistoricalHandler = class {
         )
       );
     }
-    if (inputAny.sources) {
-      const lowReliabilitySources = inputAny.sources.filter((s) => s.reliability < 0.5);
+    if (sources.length > 0) {
+      const lowReliabilitySources = sources.filter((s) => s.reliability < 0.5);
       if (lowReliabilitySources.length > 0) {
         warnings.push(
           createValidationWarning(

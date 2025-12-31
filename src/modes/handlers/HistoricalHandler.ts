@@ -70,8 +70,8 @@ export class HistoricalHandler implements ModeHandler {
       revisesThought: input.revisesThought,
       mode: ThinkingMode.HISTORICAL,
       thoughtType,
-      events: inputAny.events || [],
-      sources: inputAny.sources || [],
+      events: inputAny.historicalEvents || inputAny.events || [],
+      sources: inputAny.historicalSources || inputAny.sources || [],
       periods: inputAny.periods || [],
       causalChains: inputAny.causalChains || [],
       actors: inputAny.actors || [],
@@ -108,13 +108,15 @@ export class HistoricalHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Collect IDs for reference validation
-    const eventIds = new Set((inputAny.events || []).map((e: any) => e.id));
-    const sourceIds = new Set((inputAny.sources || []).map((s: any) => s.id));
+    const events = inputAny.historicalEvents || inputAny.events || [];
+    const sources = inputAny.historicalSources || inputAny.sources || [];
+    const eventIds = new Set(events.map((e: any) => e.id));
+    const sourceIds = new Set(sources.map((s: any) => s.id));
     const actorIds = new Set((inputAny.actors || []).map((a: any) => a.id));
 
     // Validate event references
-    if (inputAny.events) {
-      for (const event of inputAny.events) {
+    if (events.length > 0) {
+      for (const event of events) {
         // Check cause references
         if (event.causes) {
           for (const causeId of event.causes) {
@@ -206,7 +208,7 @@ export class HistoricalHandler implements ModeHandler {
     }
 
     // Warn if no sources for events
-    if (inputAny.events && inputAny.events.length > 0 && (!inputAny.sources || inputAny.sources.length === 0)) {
+    if (events.length > 0 && sources.length === 0) {
       warnings.push(
         createValidationWarning(
           'sources',
@@ -217,8 +219,8 @@ export class HistoricalHandler implements ModeHandler {
     }
 
     // Warn about low reliability sources
-    if (inputAny.sources) {
-      const lowReliabilitySources = inputAny.sources.filter((s: any) => s.reliability < 0.5);
+    if (sources.length > 0) {
+      const lowReliabilitySources = sources.filter((s: any) => s.reliability < 0.5);
       if (lowReliabilitySources.length > 0) {
         warnings.push(
           createValidationWarning(
