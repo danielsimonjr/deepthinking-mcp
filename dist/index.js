@@ -19399,7 +19399,7 @@ function sanitizeMermaidId(id) {
   return id.replace(/[^a-zA-Z0-9_]/g, "_").replace(/^(\d)/, "_$1").replace(/__+/g, "_").replace(/^_+|_+$/g, "") || "node";
 }
 function escapeMermaidLabel(label) {
-  return label.replace(/"/g, "#quot;").replace(/</g, "#lt;").replace(/>/g, "#gt;").replace(/\[/g, "#91;").replace(/\]/g, "#93;").replace(/\{/g, "#123;").replace(/\}/g, "#125;").replace(/\(/g, "#40;").replace(/\)/g, "#41;").replace(/\|/g, "#124;").replace(/\n/g, "<br/>");
+  return label.replace(/"/g, "#quot;").replace(/</g, "#lt;").replace(/>/g, "#gt;").replace(/\[/g, "#91;").replace(/\]/g, "#93;").replace(/\{/g, "#123;").replace(/\}/g, "#125;").replace(/\|/g, "#124;").replace(/\n/g, "<br/>").replace(/#lt;br\/?#gt;/gi, "<br/>");
 }
 function getNodeShapeBrackets(shape) {
   switch (shape) {
@@ -27690,7 +27690,7 @@ function causalChainsToMermaid(thought, includeLabels) {
   const events = thought.events || [];
   const eventMap = new Map(events.map((e) => [e.id, e]));
   for (const event of events) {
-    const label = includeLabels ? event.name : event.id;
+    const label = includeLabels ? `${event.name}<br/>(${formatDate(event.date)})` : event.id;
     const shape = getSignificanceShape(event.significance);
     builder.addNode({ id: sanitizeId(event.id), label, shape });
   }

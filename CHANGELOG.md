@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.1.1] - 2025-12-31
+
+### Enhanced - Historical Mermaid Export with Dates
+
+Added date display to historical causal chain Mermaid exports for better timeline visualization.
+
+**Before:**
+```mermaid
+ev1{"Command in French and Indian War"}
+ev2{{"Appointed Commander-in-Chief"}}
+```
+
+**After:**
+```mermaid
+ev1{"Command in French and Indian War<br/>(1754-07-03)"}
+ev2{{"Appointed Commander-in-Chief<br/>(1775-06-15)"}}
+```
+
+**Changes:**
+- `src/export/visual/modes/historical.ts` - Added date formatting to causal chain node labels
+- `src/export/visual/utils/mermaid.ts` - Updated `escapeMermaidLabel()` to preserve `<br/>` tags and not escape parentheses in quoted labels
+
+**Technical Details:**
+- Node labels now include event name + line break + date in parentheses
+- `<br/>` HTML tags preserved after escaping for proper Mermaid rendering
+- Parentheses `()` no longer escaped (safe within quoted Mermaid labels)
+
 ## [9.1.0] - 2025-12-30
 
 ### Added - Historical Reasoning Mode

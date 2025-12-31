@@ -92,9 +92,11 @@ function causalChainsToMermaid(thought: HistoricalThought, includeLabels: boolea
   const events = thought.events || [];
   const eventMap = new Map(events.map(e => [e.id, e]));
 
-  // Add event nodes
+  // Add event nodes with dates
   for (const event of events) {
-    const label = includeLabels ? event.name : event.id;
+    const label = includeLabels
+      ? `${event.name}<br/>(${formatDate(event.date)})`
+      : event.id;
     const shape = getSignificanceShape(event.significance);
     builder.addNode({ id: sanitizeId(event.id), label, shape });
   }

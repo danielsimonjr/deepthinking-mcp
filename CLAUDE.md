@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **34 reasoning modes** (30 with dedicated thought types) with taxonomy-based classification (69 implemented reasoning types across 12 categories, 110 documented in reference), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
-**Version**: 9.1.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
+**Version**: 9.1.1 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
 
 ## Project Metrics
 
@@ -168,6 +168,7 @@ Configured in `tsconfig.json`:
 
 | Version | Phase | Key Features |
 |---------|-------|--------------|
+| **v9.1.1** | Historical Export | **ENHANCED**: Historical Mermaid causal chain exports now include dates in node labels with `<br/>` line breaks. |
 | **v9.1.0** | Historical Mode | **NEW MODE**: Historical reasoning for events, sources, periods, causal chains, actors. 5 thought types, visual exports, 42 handler tests. |
 | **v9.0.0** | Phase 15 Complete | **RADICAL SIMPLIFICATION**: Sprints 1-3 complete (barrel removal, service simplification, composition pattern). Sprints 4-12 cancelled after discovering handlers contain real algorithms. |
 | **v8.5.0** | Phase 13 Sprint 1-2 | **FLUENT BUILDERS**: DOTGraphBuilder, MermaidGraphBuilder, GraphMLBuilder + ASCIIDocBuilder, SVGBuilder, TikZBuilder fluent APIs |

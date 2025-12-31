@@ -94,6 +94,8 @@ export function sanitizeMermaidId(id: string): string {
 /**
  * Escape special characters in Mermaid labels
  * Handles quotes and special markdown characters
+ * Preserves <br/> tags for line breaks
+ * Note: Parentheses () are safe in quoted labels and don't need escaping
  */
 export function escapeMermaidLabel(label: string): string {
   return label
@@ -104,10 +106,9 @@ export function escapeMermaidLabel(label: string): string {
     .replace(/\]/g, '#93;')
     .replace(/\{/g, '#123;')
     .replace(/\}/g, '#125;')
-    .replace(/\(/g, '#40;')
-    .replace(/\)/g, '#41;')
     .replace(/\|/g, '#124;')
-    .replace(/\n/g, '<br/>');
+    .replace(/\n/g, '<br/>')
+    .replace(/#lt;br\/?#gt;/gi, '<br/>');  // Restore <br> tags after escaping
 }
 
 /**
