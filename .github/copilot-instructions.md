@@ -36,15 +36,44 @@ npm run lint        # ESLint validation
 ```
 src/
 ├── index.ts              # MCP server entry + tool handlers
-├── types/                # 33 reasoning mode types (32 mode files + core.ts)
-├── services/             # ThoughtFactory, ExportService, ModeRouter
-├── modes/handlers/       # Strategy pattern handlers (36 total)
+├── types/                # 34 reasoning mode types (33 mode files + core.ts)
+│   ├── core.ts
+│   ├── modes/            # One file per mode
+│   └── ...
+├── services/             # ThoughtFactory, ExportService
+│   ├── ThoughtFactory.ts
+│   ├── ExportService.ts
+│   └── ...
+├── modes/                # Mode implementations + handler registry
+│   ├── handlers/         # Strategy pattern handlers (37 total)
+│   ├── combinations/     # Mode combination logic
+│   ├── causal/           # Causal reasoning
+│   ├── stochastic/       # Stochastic reasoning
+│   ├── registry.ts
+│   └── index.ts
 ├── session/              # SessionManager + storage abstraction
-├── export/visual/        # Mode-specific visual exporters
-└── tools/                # MCP tool schemas & validators
+│   ├── manager.ts
+│   ├── storage/
+│   └── locks/
+├── validation/           # Validators for all modes
+│   ├── validators/
+│   │   └── modes/        # Per-mode validators
+│   └── index.ts
+├── export/               # Visual and document exporters
+│   ├── visual/           # Per-mode exporters (Mermaid, DOT, ASCII, SVG)
+│   └── utilities
+├── proof/                # Proof decomposition system
+├── search/               # Full-text search engine
+├── cache/                # Caching strategies (LRU/LFU/FIFO)
+├── taxonomy/             # Reasoning types classifier
+├── tools/                # MCP tool schemas & validators
+├── interfaces/           # TypeScript interfaces
+├── config/               # Configuration
+├── utils/                # Utilities (errors, logger, sanitization)
+└── repositories/         # Repository pattern (ISessionRepository)
 ```
 
-**Path Aliases**: `@/*` (src), `@types/*`, `@modes/*`, `@session/*`, `@export/*`
+**Path Aliases**: `@/*` (src), `@types/*`, `@modes/*`, `@session/*`, `@export/*`, `@validation/*`, etc.
 
 ## Architecture Patterns
 

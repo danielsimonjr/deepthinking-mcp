@@ -101,18 +101,45 @@ src/
 │   ├── core.ts        # ThinkingMode enum, Thought union type
 │   └── modes/         # One file per reasoning mode (33 files)
 ├── services/          # Business logic layer
+│   ├── ThoughtFactory.ts
+│   ├── ExportService.ts
+│   └── Other service modules
 ├── session/           # SessionManager, persistence, storage abstraction
+│   ├── manager.ts
+│   ├── storage/
+│   └── locks/
 ├── taxonomy/          # 69 reasoning types (110 documented in reference), classifier
 ├── export/            # Visual and document exporters
-│   └── visual/        # Per-mode visual exporters (Mermaid, DOT, ASCII, SVG)
-├── proof/             # Proof decomposition system (6 modules: decomposer, gap-analyzer, assumption-tracker, inconsistency-detector, circular-detector, dependency-graph)
+│   ├── visual/        # Per-mode visual exporters (Mermaid, DOT, ASCII, SVG)
+│   └── utilities
+├── proof/             # Proof decomposition system (6 modules)
+│   ├── decomposer.ts
+│   ├── gap-analyzer.ts
+│   ├── assumption-tracker.ts
+│   ├── inconsistency-detector.ts
+│   ├── circular-detector.ts
+│   └── dependency-graph.ts
 ├── search/            # Full-text search engine with faceted filtering
 ├── cache/             # LRU/LFU/FIFO caching strategies
-├── repositories/      # Repository pattern (ISessionRepository interface)
 ├── modes/             # Advanced reasoning mode implementations
+│   ├── handlers/      # Strategy pattern handlers (37 total)
+│   ├── combinations/  # Mode combination logic
+│   ├── causal/        # Causal reasoning implementations
+│   ├── stochastic/    # Stochastic reasoning implementations
+│   ├── registry.ts    # Handler registry
+│   └── index.ts
 ├── tools/             # MCP tool definitions and schemas
+│   ├── schemas/       # Tool schemas (JSON)
+│   └── validators/    # Tool validators
+├── validation/        # Zod schemas and validators for input validation
+│   ├── validators/    # Per-mode and cross-mode validators
+│   └── index.ts
+├── interfaces/        # TypeScript interfaces
+│   └── ILogger.ts
+├── config/            # Configuration management
+│   └── index.ts
 ├── utils/             # Utility functions (errors, logger, sanitization)
-└── validation/        # Zod schemas for input validation
+└── repositories/      # Repository pattern implementations (ISessionRepository)
 ```
 
 ### Type System
