@@ -74,3 +74,4 @@ add-to-config.cjs
 # Compiled executables (Bun compiled, ~114MB each)
 *.exe
 /output
+/.claude
