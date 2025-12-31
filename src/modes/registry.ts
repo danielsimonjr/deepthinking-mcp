@@ -277,6 +277,7 @@ export class ModeHandlerRegistry {
       causal: ['problem_definition', 'graph_construction', 'intervention_analysis', 'mechanism_identification'],
       bayesian: ['prior_definition', 'likelihood_assessment', 'posterior_calculation', 'sensitivity_analysis'],
       temporal: ['event_definition', 'interval_analysis', 'constraint_checking', 'timeline_construction'],
+      historical: ['event_analysis', 'source_evaluation', 'pattern_identification', 'causal_chain', 'periodization'],
       gametheory: ['game_definition', 'strategy_analysis', 'equilibrium_finding', 'payoff_calculation'],
       synthesis: ['source_identification', 'theme_extraction', 'gap_analysis', 'framework_construction'],
       argumentation: ['claim_formulation', 'grounds_development', 'warrant_construction', 'rebuttal_analysis'],

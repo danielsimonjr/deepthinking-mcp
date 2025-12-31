@@ -49,6 +49,9 @@ function isBayesianThought(thought) {
 function isTemporalThought(thought) {
   return thought.mode === "temporal" /* TEMPORAL */;
 }
+function isHistoricalThought(thought) {
+  return thought.mode === "historical" /* HISTORICAL */;
+}
 function isGameTheoryThought(thought) {
   return thought.mode === "gametheory" /* GAMETHEORY */;
 }
@@ -91,6 +94,7 @@ var init_core = __esm({
       ThinkingMode2["BAYESIAN"] = "bayesian";
       ThinkingMode2["COUNTERFACTUAL"] = "counterfactual";
       ThinkingMode2["TEMPORAL"] = "temporal";
+      ThinkingMode2["HISTORICAL"] = "historical";
       ThinkingMode2["GAMETHEORY"] = "gametheory";
       ThinkingMode2["EVIDENTIAL"] = "evidential";
       ThinkingMode2["ANALOGICAL"] = "analogical";
@@ -132,6 +136,7 @@ var init_core = __esm({
       "causal" /* CAUSAL */,
       "counterfactual" /* COUNTERFACTUAL */,
       "temporal" /* TEMPORAL */,
+      "historical" /* HISTORICAL */,
       // Probabilistic modes
       "bayesian" /* BAYESIAN */,
       "evidential" /* EVIDENTIAL */,
@@ -4794,6 +4799,7 @@ var GenericModeHandler = class {
       ["counterfactual" /* COUNTERFACTUAL */]: ["causal" /* CAUSAL */, "gametheory" /* GAMETHEORY */],
       ["analogical" /* ANALOGICAL */]: ["inductive" /* INDUCTIVE */, "firstprinciples" /* FIRSTPRINCIPLES */],
       ["temporal" /* TEMPORAL */]: ["causal" /* CAUSAL */, "sequential" /* SEQUENTIAL */],
+      ["historical" /* HISTORICAL */]: ["temporal" /* TEMPORAL */, "causal" /* CAUSAL */, "synthesis" /* SYNTHESIS */],
       ["gametheory" /* GAMETHEORY */]: ["optimization" /* OPTIMIZATION */, "counterfactual" /* COUNTERFACTUAL */],
       ["evidential" /* EVIDENTIAL */]: ["bayesian" /* BAYESIAN */, "scientificmethod" /* SCIENTIFICMETHOD */],
       ["firstprinciples" /* FIRSTPRINCIPLES */]: ["deductive" /* DEDUCTIVE */, "analogical" /* ANALOGICAL */],
@@ -4836,6 +4842,7 @@ var GenericModeHandler = class {
       ["counterfactual" /* COUNTERFACTUAL */]: "Counterfactual Reasoning",
       ["analogical" /* ANALOGICAL */]: "Analogical Reasoning",
       ["temporal" /* TEMPORAL */]: "Temporal Reasoning",
+      ["historical" /* HISTORICAL */]: "Historical Reasoning",
       ["gametheory" /* GAMETHEORY */]: "Game Theory",
       ["evidential" /* EVIDENTIAL */]: "Evidential Reasoning",
       ["firstprinciples" /* FIRSTPRINCIPLES */]: "First Principles",
@@ -4878,6 +4885,7 @@ var GenericModeHandler = class {
       ["counterfactual" /* COUNTERFACTUAL */]: "What-if scenario analysis",
       ["analogical" /* ANALOGICAL */]: "Reasoning by structural similarity",
       ["temporal" /* TEMPORAL */]: "Temporal logic and event sequencing",
+      ["historical" /* HISTORICAL */]: "Historical event analysis with source evaluation",
       ["gametheory" /* GAMETHEORY */]: "Strategic interaction and Nash equilibria",
       ["evidential" /* EVIDENTIAL */]: "Dempster-Shafer evidence theory",
       ["firstprinciples" /* FIRSTPRINCIPLES */]: "Reasoning from fundamental truths",
@@ -9611,6 +9619,381 @@ var TemporalHandler = class {
       }
     }
     return inconsistencies;
+  }
+};
+
+// src/modes/handlers/HistoricalHandler.ts
+init_esm_shims();
+var HistoricalHandler = class {
+  mode = "historical" /* HISTORICAL */;
+  modeName = "Historical Reasoning";
+  description = "Historical analysis with source evaluation, pattern recognition, and causal chain analysis";
+  supportedThoughtTypes = [
+    "event_analysis",
+    "source_evaluation",
+    "pattern_identification",
+    "causal_chain",
+    "periodization"
+  ];
+  /**
+   * Create a historical thought from input
+   */
+  createThought(input, sessionId) {
+    const inputAny = input;
+    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thought = {
+      id: randomUUID(),
+      sessionId,
+      thoughtNumber: input.thoughtNumber,
+      totalThoughts: input.totalThoughts,
+      content: input.thought,
+      timestamp: /* @__PURE__ */ new Date(),
+      nextThoughtNeeded: input.nextThoughtNeeded,
+      isRevision: input.isRevision,
+      revisesThought: input.revisesThought,
+      mode: "historical" /* HISTORICAL */,
+      thoughtType,
+      events: inputAny.events || [],
+      sources: inputAny.sources || [],
+      periods: inputAny.periods || [],
+      causalChains: inputAny.causalChains || [],
+      actors: inputAny.actors || [],
+      patterns: inputAny.patterns || [],
+      interpretations: inputAny.interpretations || [],
+      historiographicalSchool: inputAny.historiographicalSchool,
+      methodology: inputAny.methodology
+    };
+    if (thought.sources && thought.sources.length > 0) {
+      thought.aggregateReliability = this.calculateAggregateReliability(thought.sources);
+    }
+    if (thought.events && thought.events.length > 0) {
+      thought.temporalSpan = this.calculateTemporalSpan(thought.events);
+    }
+    if (thought.events && thought.events.length >= 3 && (!thought.patterns || thought.patterns.length === 0)) {
+      thought.patterns = this.detectPatterns(thought.events);
+    }
+    return thought;
+  }
+  /**
+   * Validate historical-specific input
+   */
+  validate(input) {
+    const errors = [];
+    const warnings = [];
+    const inputAny = input;
+    const eventIds = new Set((inputAny.events || []).map((e) => e.id));
+    const sourceIds = new Set((inputAny.sources || []).map((s) => s.id));
+    const actorIds = new Set((inputAny.actors || []).map((a) => a.id));
+    if (inputAny.events) {
+      for (const event of inputAny.events) {
+        if (event.causes) {
+          for (const causeId of event.causes) {
+            if (!eventIds.has(causeId)) {
+              errors.push(
+                createValidationError(
+                  "events",
+                  `Event ${event.id} references unknown cause: ${causeId}`,
+                  "INVALID_CAUSE_REF"
+                )
+              );
+            }
+          }
+        }
+        if (event.sources) {
+          for (const srcId of event.sources) {
+            if (!sourceIds.has(srcId)) {
+              warnings.push(
+                createValidationWarning(
+                  "events",
+                  `Event ${event.id} references unknown source: ${srcId}`,
+                  "Add the source or remove the reference"
+                )
+              );
+            }
+          }
+        }
+        if (event.actors) {
+          for (const actorId of event.actors) {
+            if (!actorIds.has(actorId)) {
+              warnings.push(
+                createValidationWarning(
+                  "events",
+                  `Event ${event.id} references unknown actor: ${actorId}`,
+                  "Add the actor or remove the reference"
+                )
+              );
+            }
+          }
+        }
+      }
+    }
+    if (inputAny.causalChains) {
+      for (const chain of inputAny.causalChains) {
+        if (chain.links && chain.links.length > 1) {
+          for (let i = 0; i < chain.links.length - 1; i++) {
+            if (chain.links[i].effect !== chain.links[i + 1].cause) {
+              warnings.push(
+                createValidationWarning(
+                  "causalChains",
+                  `Chain ${chain.id} has discontinuity between links ${i} and ${i + 1}`,
+                  "Ensure each link effect is the cause of the next link"
+                )
+              );
+            }
+          }
+        }
+        if (chain.links) {
+          for (const link of chain.links) {
+            if (!eventIds.has(link.cause)) {
+              errors.push(
+                createValidationError(
+                  "causalChains",
+                  `Chain ${chain.id} references unknown cause event: ${link.cause}`,
+                  "INVALID_CHAIN_CAUSE"
+                )
+              );
+            }
+            if (!eventIds.has(link.effect)) {
+              errors.push(
+                createValidationError(
+                  "causalChains",
+                  `Chain ${chain.id} references unknown effect event: ${link.effect}`,
+                  "INVALID_CHAIN_EFFECT"
+                )
+              );
+            }
+          }
+        }
+      }
+    }
+    if (inputAny.events && inputAny.events.length > 0 && (!inputAny.sources || inputAny.sources.length === 0)) {
+      warnings.push(
+        createValidationWarning(
+          "sources",
+          "No sources defined for historical analysis",
+          "Add primary or secondary sources to support your analysis"
+        )
+      );
+    }
+    if (inputAny.sources) {
+      const lowReliabilitySources = inputAny.sources.filter((s) => s.reliability < 0.5);
+      if (lowReliabilitySources.length > 0) {
+        warnings.push(
+          createValidationWarning(
+            "sources",
+            `${lowReliabilitySources.length} source(s) have low reliability (<0.5)`,
+            "Consider corroborating with additional sources"
+          )
+        );
+      }
+    }
+    if (errors.length > 0) {
+      return validationFailure(errors, warnings);
+    }
+    return validationSuccess(warnings);
+  }
+  /**
+   * Get mode-specific enhancements
+   */
+  getEnhancements(thought) {
+    const enhancements = {
+      suggestions: [],
+      relatedModes: ["temporal" /* TEMPORAL */, "causal" /* CAUSAL */, "synthesis" /* SYNTHESIS */],
+      metrics: {},
+      guidingQuestions: [],
+      mentalModels: [
+        "Source Criticism",
+        "Historiographical Schools",
+        "Causal Analysis",
+        "Periodization",
+        "Counterfactual History",
+        "Longue Dur\xE9e",
+        "Microhistory"
+      ]
+    };
+    const events = thought.events || [];
+    const sources = thought.sources || [];
+    const periods = thought.periods || [];
+    const causalChains = thought.causalChains || [];
+    const actors = thought.actors || [];
+    enhancements.metrics = {
+      eventCount: events.length,
+      sourceCount: sources.length,
+      periodCount: periods.length,
+      causalChainCount: causalChains.length,
+      actorCount: actors.length,
+      primarySourceRatio: sources.length > 0 ? sources.filter((s) => s.type === "primary").length / sources.length : 0,
+      averageSourceReliability: thought.aggregateReliability || 0,
+      transformativeEventCount: events.filter((e) => e.significance === "transformative").length
+    };
+    if (sources.length === 0) {
+      enhancements.suggestions.push("Add historical sources to support your analysis");
+    }
+    if (sources.length > 0 && sources.filter((s) => s.type === "primary").length === 0) {
+      enhancements.suggestions.push("Consider adding primary sources for more direct evidence");
+    }
+    if (events.length > 3 && causalChains.length === 0) {
+      enhancements.suggestions.push("Consider tracing causal chains between major events");
+    }
+    if (events.length > 5 && periods.length === 0) {
+      enhancements.suggestions.push("Consider organizing events into historical periods");
+    }
+    if (actors.length === 0 && events.length > 0) {
+      enhancements.suggestions.push("Identify key historical actors involved in these events");
+    }
+    const uncorroboratedSources = sources.filter(
+      (s) => (!s.corroboratedBy || s.corroboratedBy.length === 0) && s.type === "primary"
+    );
+    if (uncorroboratedSources.length > 0) {
+      enhancements.suggestions.push(`${uncorroboratedSources.length} primary source(s) lack corroboration`);
+    }
+    enhancements.guidingQuestions = this.getGuidingQuestions(thought.thoughtType);
+    return enhancements;
+  }
+  supportsThoughtType(thoughtType) {
+    return this.supportedThoughtTypes.includes(thoughtType);
+  }
+  /**
+   * Resolve thought type to valid HistoricalThoughtType
+   */
+  resolveThoughtType(inputType) {
+    if (inputType && this.supportedThoughtTypes.includes(inputType)) {
+      return inputType;
+    }
+    return "event_analysis";
+  }
+  /**
+   * Calculate aggregate reliability from sources
+   */
+  calculateAggregateReliability(sources) {
+    if (sources.length === 0) return 0;
+    let totalWeight = 0;
+    let weightedSum = 0;
+    for (const source of sources) {
+      const weight = source.type === "primary" ? 2 : source.type === "secondary" ? 1.5 : 1;
+      weightedSum += source.reliability * weight;
+      totalWeight += weight;
+    }
+    const corroboratedCount = sources.filter(
+      (s) => s.corroboratedBy && s.corroboratedBy.length > 0
+    ).length;
+    const corroborationBonus = Math.min(0.1, corroboratedCount / sources.length * 0.1);
+    return Math.min(1, weightedSum / totalWeight + corroborationBonus);
+  }
+  /**
+   * Calculate temporal span from events
+   */
+  calculateTemporalSpan(events) {
+    if (events.length === 0) return void 0;
+    const dates = [];
+    for (const event of events) {
+      if (typeof event.date === "string") {
+        dates.push(event.date);
+      } else if (event.date) {
+        dates.push(event.date.start);
+        dates.push(event.date.end);
+      }
+    }
+    if (dates.length === 0) return void 0;
+    dates.sort();
+    return {
+      start: dates[0],
+      end: dates[dates.length - 1]
+    };
+  }
+  /**
+   * Auto-detect patterns from events
+   */
+  detectPatterns(events) {
+    const patterns = [];
+    const significanceCounts = {
+      minor: [],
+      moderate: [],
+      major: [],
+      transformative: []
+    };
+    for (const event of events) {
+      significanceCounts[event.significance].push(event.id);
+    }
+    if (significanceCounts.transformative.length >= events.length * 0.4) {
+      patterns.push({
+        id: randomUUID(),
+        name: "Revolutionary Period",
+        type: "structural",
+        instances: significanceCounts.transformative,
+        description: "High concentration of transformative events indicates a period of significant change",
+        confidence: 0.7
+      });
+    }
+    const highlyConnected = events.filter(
+      (e) => (e.causes?.length || 0) + (e.effects?.length || 0) > 3
+    );
+    if (highlyConnected.length >= 2) {
+      patterns.push({
+        id: randomUUID(),
+        name: "Causal Nexus",
+        type: "contingent",
+        instances: highlyConnected.map((e) => e.id),
+        description: "Events with multiple causal connections form a nexus of historical change",
+        confidence: 0.6
+      });
+    }
+    return patterns;
+  }
+  /**
+   * Get guiding questions based on thought type
+   */
+  getGuidingQuestions(thoughtType) {
+    switch (thoughtType) {
+      case "event_analysis":
+        return [
+          "What were the immediate causes of this event?",
+          "What were the long-term consequences?",
+          "Who were the key actors involved?",
+          "How does this event fit into broader historical trends?",
+          "What sources document this event?"
+        ];
+      case "source_evaluation":
+        return [
+          "Is this a primary or secondary source?",
+          "What biases might the author have?",
+          "Can this source be corroborated by others?",
+          "What is the provenance of this source?",
+          "What limitations does this source have?"
+        ];
+      case "pattern_identification":
+        return [
+          "What recurring patterns emerge across events?",
+          "Are these patterns cyclical, linear, or dialectical?",
+          "What exceptions exist to the identified patterns?",
+          "How do structural factors influence these patterns?",
+          "What contingent factors disrupted expected patterns?"
+        ];
+      case "causal_chain":
+        return [
+          "What evidence supports this causal link?",
+          "Are there alternative explanations?",
+          "What mechanisms connect cause to effect?",
+          "What counterfactuals help test this causal claim?",
+          "How confident are we in this causal chain?"
+        ];
+      case "periodization":
+        return [
+          "What characteristics define this period?",
+          "What events mark the beginning and end?",
+          "How does this periodization compare to others?",
+          "What continuities span period boundaries?",
+          "Is this periodization Eurocentric or universal?"
+        ];
+      default:
+        return [
+          "What sources support this historical claim?",
+          "What alternative interpretations exist?",
+          "How does context shape our understanding?",
+          "What biases might affect this analysis?",
+          "What further evidence is needed?"
+        ];
+    }
   }
 };
 
@@ -18410,6 +18793,7 @@ var ModeHandlerRegistry = class _ModeHandlerRegistry {
       causal: ["problem_definition", "graph_construction", "intervention_analysis", "mechanism_identification"],
       bayesian: ["prior_definition", "likelihood_assessment", "posterior_calculation", "sensitivity_analysis"],
       temporal: ["event_definition", "interval_analysis", "constraint_checking", "timeline_construction"],
+      historical: ["event_analysis", "source_evaluation", "pattern_identification", "causal_chain", "periodization"],
       gametheory: ["game_definition", "strategy_analysis", "equilibrium_finding", "payoff_calculation"],
       synthesis: ["source_identification", "theme_extraction", "gap_analysis", "framework_construction"],
       argumentation: ["claim_formulation", "grounds_development", "warrant_construction", "rebuttal_analysis"],
@@ -18445,6 +18829,7 @@ function registerAllHandlers() {
   registry.replace(new BayesianHandler());
   registry.replace(new CounterfactualHandler());
   registry.replace(new TemporalHandler());
+  registry.replace(new HistoricalHandler());
   registry.replace(new GameTheoryHandler());
   registry.replace(new EvidentialHandler());
   registry.replace(new AnalogicalHandler());
@@ -27245,6 +27630,289 @@ function temporalToMarkdown(thought, options) {
       eventCount: sortedEvents.length
     }
   });
+}
+
+// src/export/visual/modes/historical.ts
+init_esm_shims();
+function exportHistoricalTimeline(thought, options) {
+  const { format, includeLabels = true } = options;
+  switch (format) {
+    case "mermaid":
+      return historicalToMermaid(thought, includeLabels);
+    case "dot":
+      return historicalToDOT(thought, includeLabels);
+    case "ascii":
+      return historicalToASCII(thought);
+    default:
+      return historicalToMermaid(thought, includeLabels);
+  }
+}
+function historicalToMermaid(thought, includeLabels) {
+  if (thought.causalChains && thought.causalChains.length > 0) {
+    return causalChainsToMermaid(thought, includeLabels);
+  }
+  if (thought.events && thought.events.length > 0) {
+    return eventsToMermaidGantt(thought, includeLabels);
+  }
+  if (thought.actors && thought.actors.length > 0) {
+    return actorsToMermaid(thought, includeLabels);
+  }
+  return new MermaidGraphBuilder().setDirection("TB").addNode({ id: "empty", label: "No historical data to visualize" }).render();
+}
+function eventsToMermaidGantt(thought, includeLabels) {
+  const builder = new MermaidGanttBuilder().setTitle("Historical Timeline").setDateFormat("YYYY-MM-DD").setAxisFormat("%Y");
+  if (thought.periods && thought.periods.length > 0) {
+    for (const period of thought.periods) {
+      builder.addSection(period.name);
+      const periodEvents = thought.events?.filter(
+        (e) => period.keyEvents?.includes(e.id)
+      ) || [];
+      for (const event of periodEvents) {
+        const label = includeLabels ? event.name : event.id;
+        const startDate = typeof event.date === "string" ? event.date : event.date.start;
+        builder.addTask({ id: event.id, label, start: startDate, duration: "1d" });
+      }
+    }
+  } else {
+    builder.addSection("Events");
+    for (const event of thought.events || []) {
+      const label = includeLabels ? event.name : event.id;
+      const startDate = typeof event.date === "string" ? event.date : event.date.start;
+      builder.addTask({ id: event.id, label, start: startDate, duration: "1d" });
+    }
+  }
+  return builder.render();
+}
+function causalChainsToMermaid(thought, includeLabels) {
+  const builder = new MermaidGraphBuilder().setDirection("LR");
+  const events = thought.events || [];
+  const eventMap = new Map(events.map((e) => [e.id, e]));
+  for (const event of events) {
+    const label = includeLabels ? event.name : event.id;
+    const shape = getSignificanceShape(event.significance);
+    builder.addNode({ id: sanitizeId(event.id), label, shape });
+  }
+  for (const chain of thought.causalChains || []) {
+    for (const link of chain.links) {
+      const fromEvent = eventMap.get(link.cause);
+      const toEvent = eventMap.get(link.effect);
+      if (fromEvent && toEvent) {
+        builder.addEdge({
+          source: sanitizeId(link.cause),
+          target: sanitizeId(link.effect),
+          label: link.mechanism || `${Math.round(link.confidence * 100)}%`
+        });
+      }
+    }
+  }
+  return builder.render();
+}
+function actorsToMermaid(thought, includeLabels) {
+  const builder = new MermaidGraphBuilder().setDirection("TB");
+  const actors = thought.actors || [];
+  for (const actor of actors) {
+    const label = includeLabels ? `${actor.name}\\n(${actor.type})` : actor.id;
+    builder.addNode({ id: sanitizeId(actor.id), label, shape: "rounded" });
+  }
+  for (const actor of actors) {
+    for (const rel of actor.relationships || []) {
+      builder.addEdge({
+        source: sanitizeId(actor.id),
+        target: sanitizeId(rel.actorId),
+        label: rel.type
+      });
+    }
+  }
+  return builder.render();
+}
+function historicalToDOT(thought, includeLabels) {
+  const builder = new DOTGraphBuilder().setGraphName("HistoricalAnalysis").setRankDir("LR").setNodeDefaults({ shape: "box", style: "filled", fillColor: "lightblue" });
+  for (const event of thought.events || []) {
+    const nodeId = sanitizeId(event.id);
+    const label = includeLabels ? `${event.name}\\n${formatDate(event.date)}\\n[${event.significance}]` : nodeId;
+    const fillColor = getSignificanceColor(event.significance);
+    builder.addNode({ id: nodeId, label, fillColor, shape: "box" });
+  }
+  for (const chain of thought.causalChains || []) {
+    for (const link of chain.links) {
+      builder.addEdge({
+        source: sanitizeId(link.cause),
+        target: sanitizeId(link.effect),
+        label: link.mechanism || void 0,
+        style: link.confidence < 0.5 ? "dashed" : "solid"
+      });
+    }
+  }
+  if (thought.actors && thought.actors.length > 0) {
+    const actorNodeIds = [];
+    for (const actor of thought.actors) {
+      const nodeId = sanitizeId(`actor_${actor.id}`);
+      actorNodeIds.push(nodeId);
+      builder.addNode({
+        id: nodeId,
+        label: `${actor.name}\\n(${actor.type})`,
+        shape: "ellipse",
+        fillColor: "lightyellow"
+      });
+    }
+    builder.addSubgraph({
+      id: "actors",
+      label: "Historical Actors",
+      nodes: actorNodeIds
+    });
+  }
+  if (thought.sources && thought.sources.length > 0) {
+    const sourceNodeIds = [];
+    for (const source of thought.sources) {
+      const nodeId = sanitizeId(`source_${source.id}`);
+      const reliability = Math.round(source.reliability * 100);
+      sourceNodeIds.push(nodeId);
+      builder.addNode({
+        id: nodeId,
+        label: `${source.title}\\n[${source.type}]\\n${reliability}% reliable`,
+        shape: "note",
+        fillColor: getReliabilityColor(source.reliability)
+      });
+    }
+    builder.addSubgraph({
+      id: "sources",
+      label: "Sources",
+      nodes: sourceNodeIds
+    });
+  }
+  return builder.render();
+}
+function historicalToASCII(thought) {
+  const builder = new ASCIIDocBuilder().addHeader("Historical Analysis").addHorizontalRule();
+  const metadata = [];
+  if (thought.thoughtType) {
+    metadata.push(`Analysis Type: ${thought.thoughtType}`);
+  }
+  if (thought.historiographicalSchool) {
+    metadata.push(`Historiographical School: ${thought.historiographicalSchool}`);
+  }
+  if (thought.methodology) {
+    metadata.push(`Methodology: ${thought.methodology.approach}`);
+  }
+  if (metadata.length > 0) {
+    builder.addBulletList(metadata);
+  }
+  if (thought.events && thought.events.length > 0) {
+    builder.addEmptyLine().addSection("HISTORICAL EVENTS");
+    const eventItems = thought.events.map((event) => {
+      const dateStr = formatDate(event.date);
+      let text = `[${event.significance.toUpperCase()}] ${event.name} (${dateStr})`;
+      if (event.location) {
+        text += ` - ${event.location}`;
+      }
+      if (event.actors && event.actors.length > 0) {
+        text += ` | Actors: ${event.actors.join(", ")}`;
+      }
+      return text;
+    });
+    builder.addBulletList(eventItems);
+  }
+  if (thought.causalChains && thought.causalChains.length > 0) {
+    builder.addEmptyLine().addSection("CAUSAL CHAINS");
+    for (const chain of thought.causalChains) {
+      builder.addText(`${chain.name} (Confidence: ${Math.round(chain.confidence * 100)}%)`);
+      const chainSteps = chain.links.map((link) => {
+        let step = `${link.cause} \u2192 ${link.effect}`;
+        if (link.mechanism) {
+          step += ` (${link.mechanism})`;
+        }
+        return step;
+      });
+      builder.addFlowDiagram(chainSteps, "vertical");
+    }
+  }
+  if (thought.sources && thought.sources.length > 0) {
+    builder.addEmptyLine().addSection("SOURCES");
+    const sourceItems = thought.sources.map((source) => {
+      const reliability = Math.round(source.reliability * 100);
+      let text = `[${source.type.toUpperCase()}] ${source.title} (${reliability}% reliable)`;
+      if (source.author) {
+        text += ` by ${source.author}`;
+      }
+      if (source.bias) {
+        text += ` | Bias: ${source.bias.type}`;
+      }
+      return text;
+    });
+    builder.addBulletList(sourceItems);
+  }
+  if (thought.periods && thought.periods.length > 0) {
+    builder.addEmptyLine().addSection("HISTORICAL PERIODS");
+    for (const period of thought.periods) {
+      builder.addText(`${period.name}: ${period.startDate} - ${period.endDate}`);
+      if (period.characteristics.length > 0) {
+        builder.addBulletList(period.characteristics);
+      }
+    }
+  }
+  if (thought.actors && thought.actors.length > 0) {
+    builder.addEmptyLine().addSection("HISTORICAL ACTORS");
+    const actorItems = thought.actors.map((actor) => {
+      let text = `${actor.name} (${actor.type})`;
+      if (actor.roles && actor.roles.length > 0) {
+        text += ` | Roles: ${actor.roles.join(", ")}`;
+      }
+      return text;
+    });
+    builder.addBulletList(actorItems);
+  }
+  if (thought.patterns && thought.patterns.length > 0) {
+    builder.addEmptyLine().addSection("DETECTED PATTERNS");
+    const patternItems = thought.patterns.map((pattern) => {
+      let text = `${pattern.name} [${pattern.type}] - ${Math.round(pattern.confidence * 100)}% confidence`;
+      if (pattern.description) {
+        text += `: ${pattern.description}`;
+      }
+      return text;
+    });
+    builder.addBulletList(patternItems);
+  }
+  if (thought.aggregateReliability !== void 0) {
+    builder.addEmptyLine().addText(`Aggregate Source Reliability: ${Math.round(thought.aggregateReliability * 100)}%`);
+  }
+  return builder.render();
+}
+function formatDate(date) {
+  if (typeof date === "string") {
+    return date;
+  }
+  return `${date.start} - ${date.end}`;
+}
+function getSignificanceColor(significance) {
+  switch (significance) {
+    case "minor":
+      return "#d4edda";
+    case "moderate":
+      return "#fff3cd";
+    case "major":
+      return "#f8d7da";
+    case "transformative":
+      return "#d1ecf1";
+    default:
+      return "#e2e3e5";
+  }
+}
+function getReliabilityColor(reliability) {
+  if (reliability >= 0.8) return "#d4edda";
+  if (reliability >= 0.5) return "#fff3cd";
+  return "#f8d7da";
+}
+function getSignificanceShape(significance) {
+  switch (significance) {
+    case "transformative":
+      return "hexagon";
+    case "major":
+      return "rhombus";
+    case "moderate":
+      return "stadium";
+    default:
+      return "rounded";
+  }
 }
 
 // src/export/visual/modes/counterfactual.ts
@@ -39647,6 +40315,9 @@ var VisualExporter = class {
   exportTemporalTimeline(thought, options) {
     return exportTemporalTimeline(thought, options);
   }
+  exportHistoricalTimeline(thought, options) {
+    return exportHistoricalTimeline(thought, options);
+  }
   exportGameTree(thought, options) {
     return exportGameTree(thought, options);
   }
@@ -39872,6 +40543,14 @@ var ExportService = class {
       return this.visualExporter.exportTemporalTimeline(lastThought, {
         format,
         includeLabels: true
+      });
+    }
+    if (isHistoricalThought(lastThought)) {
+      return this.visualExporter.exportHistoricalTimeline(lastThought, {
+        format,
+        colorScheme: "default",
+        includeLabels: true,
+        includeMetrics: true
       });
     }
     if (lastThought.mode === "gametheory" && "game" in lastThought) {
@@ -43201,15 +43880,161 @@ var deepthinking_mathematics_schema = {
 };
 var deepthinking_temporal_schema = {
   name: "deepthinking_temporal",
-  description: "Temporal: timelines, Allen intervals, event sequencing",
+  description: "Temporal: timelines, Allen intervals, event sequencing, historical analysis",
   inputSchema: {
     type: "object",
     properties: {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["temporal"],
-        description: "Temporal reasoning mode"
+        enum: ["temporal", "historical"],
+        description: "Temporal or historical reasoning mode"
+      },
+      // Historical-specific properties
+      thoughtType: {
+        type: "string",
+        enum: ["event_analysis", "source_evaluation", "pattern_identification", "causal_chain", "periodization"],
+        description: "Type of historical analysis (historical mode only)"
+      },
+      historicalEvents: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            date: {
+              oneOf: [
+                { type: "string" },
+                {
+                  type: "object",
+                  properties: {
+                    start: { type: "string" },
+                    end: { type: "string" },
+                    precision: { type: "string", enum: ["exact", "approximate", "century", "decade", "year", "month", "day"] }
+                  },
+                  required: ["start", "end"]
+                }
+              ]
+            },
+            location: { type: "string" },
+            description: { type: "string" },
+            actors: { type: "array", items: { type: "string" }, description: "Actor IDs involved" },
+            causes: { type: "array", items: { type: "string" }, description: "Cause event IDs" },
+            effects: { type: "array", items: { type: "string" }, description: "Effect event IDs" },
+            significance: { type: "string", enum: ["minor", "moderate", "major", "transformative"] },
+            sources: { type: "array", items: { type: "string" }, description: "Source IDs" },
+            tags: { type: "array", items: { type: "string" } }
+          },
+          required: ["id", "name", "date", "significance"]
+        },
+        description: "Historical events for analysis (historical mode)"
+      },
+      historicalSources: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            title: { type: "string" },
+            type: { type: "string", enum: ["primary", "secondary", "tertiary"] },
+            subtype: { type: "string", enum: ["document", "artifact", "oral", "visual", "archaeological", "statistical"] },
+            author: { type: "string" },
+            date: { type: "string" },
+            reliability: { type: "number", minimum: 0, maximum: 1, description: "Reliability score 0-1" },
+            bias: {
+              type: "object",
+              properties: {
+                type: { type: "string", enum: ["political", "religious", "cultural", "economic", "nationalistic", "ideological", "personal"] },
+                direction: { type: "string" },
+                severity: { type: "number", minimum: 0, maximum: 1 }
+              }
+            },
+            corroboratedBy: { type: "array", items: { type: "string" }, description: "Corroborating source IDs" },
+            contradictedBy: { type: "array", items: { type: "string" }, description: "Contradicting source IDs" }
+          },
+          required: ["id", "title", "type", "reliability"]
+        },
+        description: "Historical sources for evaluation (historical mode)"
+      },
+      periods: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            startDate: { type: "string" },
+            endDate: { type: "string" },
+            characteristics: { type: "array", items: { type: "string" } },
+            keyEvents: { type: "array", items: { type: "string" }, description: "Key event IDs" },
+            keyActors: { type: "array", items: { type: "string" }, description: "Key actor IDs" },
+            themes: { type: "array", items: { type: "string" } }
+          },
+          required: ["id", "name", "startDate", "endDate", "characteristics"]
+        },
+        description: "Historical periods for periodization (historical mode)"
+      },
+      causalChains: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            links: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  cause: { type: "string", description: "Cause event ID" },
+                  effect: { type: "string", description: "Effect event ID" },
+                  mechanism: { type: "string" },
+                  confidence: { type: "number", minimum: 0, maximum: 1 },
+                  evidence: { type: "array", items: { type: "string" }, description: "Evidence source IDs" }
+                },
+                required: ["cause", "effect", "confidence"]
+              }
+            },
+            confidence: { type: "number", minimum: 0, maximum: 1, description: "Aggregate chain confidence" },
+            alternativeExplanations: { type: "array", items: { type: "string" } }
+          },
+          required: ["id", "name", "links", "confidence"]
+        },
+        description: "Causal chains for historical analysis (historical mode)"
+      },
+      actors: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            type: { type: "string", enum: ["individual", "group", "institution", "nation", "movement", "class"] },
+            period: { type: "string", description: "Period ID" },
+            roles: { type: "array", items: { type: "string" } },
+            motivations: { type: "array", items: { type: "string" } },
+            relationships: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  actorId: { type: "string" },
+                  type: { type: "string", enum: ["ally", "rival", "subordinate", "superior", "colleague", "influenced_by", "mentor", "successor"] },
+                  description: { type: "string" }
+                },
+                required: ["actorId", "type"]
+              }
+            },
+            significance: { type: "string", enum: ["minor", "moderate", "major", "transformative"] }
+          },
+          required: ["id", "name", "type"]
+        },
+        description: "Historical actors (historical mode)"
+      },
+      historiographicalSchool: {
+        type: "string",
+        description: "Historiographical school of thought (e.g., Annales, Marxist, Postmodern)"
       },
       timeline: {
         type: "object",
@@ -44517,6 +45342,87 @@ var MathSchema = BaseThoughtSchema.extend({
 
 // src/tools/schemas/modes/temporal.ts
 init_esm_shims();
+var DateRangeSchema = z.object({
+  start: z.string(),
+  end: z.string(),
+  precision: z.enum(["exact", "approximate", "century", "decade", "year", "month", "day"]).optional()
+});
+var HistoricalEventSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  date: z.union([z.string(), DateRangeSchema]),
+  location: z.string().optional(),
+  description: z.string().optional(),
+  actors: z.array(z.string()).optional(),
+  causes: z.array(z.string()).optional(),
+  effects: z.array(z.string()).optional(),
+  significance: z.enum(["minor", "moderate", "major", "transformative"]),
+  sources: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional()
+});
+var SourceBiasSchema = z.object({
+  type: z.enum(["political", "religious", "cultural", "economic", "nationalistic", "ideological", "personal"]),
+  direction: z.string().optional(),
+  severity: z.number().min(0).max(1).optional()
+});
+var HistoricalSourceSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  type: z.enum(["primary", "secondary", "tertiary"]),
+  subtype: z.enum(["document", "artifact", "oral", "visual", "archaeological", "statistical"]).optional(),
+  author: z.string().optional(),
+  date: z.string().optional(),
+  reliability: z.number().min(0).max(1),
+  bias: SourceBiasSchema.optional(),
+  corroboratedBy: z.array(z.string()).optional(),
+  contradictedBy: z.array(z.string()).optional()
+});
+var HistoricalPeriodSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  startDate: z.string(),
+  endDate: z.string(),
+  characteristics: z.array(z.string()),
+  keyEvents: z.array(z.string()).optional(),
+  keyActors: z.array(z.string()).optional(),
+  themes: z.array(z.string()).optional()
+});
+var CausalLinkSchema = z.object({
+  cause: z.string(),
+  effect: z.string(),
+  mechanism: z.string().optional(),
+  confidence: z.number().min(0).max(1),
+  evidence: z.array(z.string()).optional()
+});
+var CausalChainSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  links: z.array(CausalLinkSchema),
+  confidence: z.number().min(0).max(1),
+  alternativeExplanations: z.array(z.string()).optional()
+});
+var ActorRelationshipSchema = z.object({
+  actorId: z.string(),
+  type: z.enum(["ally", "rival", "subordinate", "superior", "colleague", "influenced_by", "mentor", "successor"]),
+  description: z.string().optional()
+});
+var HistoricalActorSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  type: z.enum(["individual", "group", "institution", "nation", "movement", "class"]),
+  period: z.string().optional(),
+  roles: z.array(z.string()).optional(),
+  motivations: z.array(z.string()).optional(),
+  relationships: z.array(ActorRelationshipSchema).optional(),
+  significance: z.enum(["minor", "moderate", "major", "transformative"]).optional()
+});
+var HistoricalThoughtTypeSchema = z.enum([
+  "event_analysis",
+  "source_evaluation",
+  "pattern_identification",
+  "causal_chain",
+  "periodization"
+]);
 var TimelineSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -44558,12 +45464,21 @@ var TemporalRelationSchema = z.object({
   delay: z.number().optional()
 });
 var TemporalSchema = BaseThoughtSchema.extend({
-  mode: z.literal("temporal"),
+  mode: z.enum(["temporal", "historical"]),
+  // Temporal-specific properties
   timeline: TimelineSchema.optional(),
   events: z.array(TemporalEventSchema).optional(),
   constraints: z.array(TemporalConstraintSchema).optional(),
   intervals: z.array(TemporalIntervalSchema).optional(),
-  relations: z.array(TemporalRelationSchema).optional()
+  relations: z.array(TemporalRelationSchema).optional(),
+  // Historical-specific properties (v9.1.0)
+  thoughtType: HistoricalThoughtTypeSchema.optional(),
+  historicalEvents: z.array(HistoricalEventSchema).optional(),
+  historicalSources: z.array(HistoricalSourceSchema).optional(),
+  periods: z.array(HistoricalPeriodSchema).optional(),
+  causalChains: z.array(CausalChainSchema).optional(),
+  actors: z.array(HistoricalActorSchema).optional(),
+  historiographicalSchool: z.string().optional()
 });
 
 // src/tools/schemas/modes/probabilistic.ts
@@ -45050,8 +45965,9 @@ var modeToToolMap = {
   mathematics: "deepthinking_mathematics",
   physics: "deepthinking_mathematics",
   computability: "deepthinking_mathematics",
-  // Temporal mode
+  // Temporal/Historical modes
   temporal: "deepthinking_temporal",
+  historical: "deepthinking_temporal",
   // Probabilistic modes
   bayesian: "deepthinking_probabilistic",
   evidential: "deepthinking_probabilistic",

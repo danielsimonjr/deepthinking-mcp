@@ -1,14 +1,14 @@
 /**
- * Mode Handlers Index - Phase 10 Sprint 3 (v8.4.0)
+ * Mode Handlers Index - v9.1.0
  *
  * Exports for the ModeHandler pattern implementation.
  * Part of the Strategy Pattern to replace ThoughtFactory's switch statement.
- * All 33 reasoning modes now have fully implemented handlers.
+ * All 34 reasoning modes now have fully implemented handlers.
  *
  * Handler Categories:
  * - Core (5): Sequential, Shannon, Mathematics, Physics, Hybrid
  * - Fundamental Triad (3): Inductive, Deductive, Abductive
- * - Causal/Probabilistic (6): Causal, Bayesian, Counterfactual, Temporal, GameTheory, Evidential
+ * - Causal/Probabilistic (7): Causal, Bayesian, Counterfactual, Temporal, Historical, GameTheory, Evidential
  * - Analogical/First Principles (2): Analogical, FirstPrinciples
  * - Systems/Scientific (3): SystemsThinking, ScientificMethod, FormalLogic
  * - Academic (4): Synthesis, Argumentation, Critique, Analysis
@@ -47,11 +47,12 @@ export { InductiveHandler } from './handlers/InductiveHandler.js';
 export { DeductiveHandler } from './handlers/DeductiveHandler.js';
 export { AbductiveHandler } from './handlers/AbductiveHandler.js';
 
-// ===== CAUSAL/PROBABILISTIC HANDLERS (6) =====
+// ===== CAUSAL/PROBABILISTIC HANDLERS (7) =====
 export { CausalHandler } from './handlers/CausalHandler.js';
 export { BayesianHandler } from './handlers/BayesianHandler.js';
 export { CounterfactualHandler } from './handlers/CounterfactualHandler.js';
 export { TemporalHandler } from './handlers/TemporalHandler.js';
+export { HistoricalHandler } from './handlers/HistoricalHandler.js';
 export { GameTheoryHandler } from './handlers/GameTheoryHandler.js';
 export { EvidentialHandler } from './handlers/EvidentialHandler.js';
 
@@ -118,11 +119,12 @@ export function registerAllHandlers(): void {
   registry.replace(new DeductiveHandler());
   registry.replace(new AbductiveHandler());
 
-  // ===== CAUSAL/PROBABILISTIC HANDLERS (6) =====
+  // ===== CAUSAL/PROBABILISTIC HANDLERS (7) =====
   registry.replace(new CausalHandler());
   registry.replace(new BayesianHandler());
   registry.replace(new CounterfactualHandler());
   registry.replace(new TemporalHandler());
+  registry.replace(new HistoricalHandler());
   registry.replace(new GameTheoryHandler());
   registry.replace(new EvidentialHandler());
 
@@ -177,6 +179,7 @@ import { CausalHandler } from './handlers/CausalHandler.js';
 import { BayesianHandler } from './handlers/BayesianHandler.js';
 import { CounterfactualHandler } from './handlers/CounterfactualHandler.js';
 import { TemporalHandler } from './handlers/TemporalHandler.js';
+import { HistoricalHandler } from './handlers/HistoricalHandler.js';
 import { GameTheoryHandler } from './handlers/GameTheoryHandler.js';
 import { EvidentialHandler } from './handlers/EvidentialHandler.js';
 

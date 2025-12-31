@@ -1,8 +1,8 @@
 /**
- * Core type definitions for the DeepThinking MCP server v8.5.0
+ * Core type definitions for the DeepThinking MCP server v9.1.0
  *
  * This file contains ONLY:
- * - ThinkingMode enum (all 33 mode identifiers)
+ * - ThinkingMode enum (all 34 mode identifiers)
  * - Base types shared by all modes (BaseThought, ShannonStage, ExtendedThoughtType)
  * - The fundamental reasoning triad: Inductive, Deductive, Abductive
  * - Thought union type (importing from mode-specific files)
@@ -37,6 +37,7 @@ import type { CausalThought } from './modes/causal.js';
 import type { BayesianThought } from './modes/bayesian.js';
 import type { CounterfactualThought } from './modes/counterfactual.js';
 import type { TemporalThought } from './modes/temporal.js';
+import type { HistoricalThought } from './modes/historical.js';
 import type { GameTheoryThought } from './modes/gametheory.js';
 import type { EvidentialThought } from './modes/evidential.js';
 
@@ -103,6 +104,7 @@ export enum ThinkingMode {
   BAYESIAN = 'bayesian',
   COUNTERFACTUAL = 'counterfactual',
   TEMPORAL = 'temporal',
+  HISTORICAL = 'historical',
   GAMETHEORY = 'gametheory',
   EVIDENTIAL = 'evidential',
 
@@ -158,6 +160,7 @@ export const FULLY_IMPLEMENTED_MODES: ReadonlyArray<ThinkingMode> = [
   ThinkingMode.CAUSAL,
   ThinkingMode.COUNTERFACTUAL,
   ThinkingMode.TEMPORAL,
+  ThinkingMode.HISTORICAL,
   // Probabilistic modes
   ThinkingMode.BAYESIAN,
   ThinkingMode.EVIDENTIAL,
@@ -399,6 +402,7 @@ export type Thought =
   | BayesianThought
   | CounterfactualThought
   | TemporalThought
+  | HistoricalThought
   | GameTheoryThought
   | EvidentialThought
   // Analytical
@@ -510,6 +514,10 @@ export function isTemporalThought(thought: Thought): thought is TemporalThought 
   return thought.mode === ThinkingMode.TEMPORAL;
 }
 
+export function isHistoricalThought(thought: Thought): thought is HistoricalThought {
+  return thought.mode === ThinkingMode.HISTORICAL;
+}
+
 export function isGameTheoryThought(thought: Thought): thought is GameTheoryThought {
   return thought.mode === ThinkingMode.GAMETHEORY;
 }
@@ -606,6 +614,7 @@ export type {
   BayesianThought,
   CounterfactualThought,
   TemporalThought,
+  HistoricalThought,
   GameTheoryThought,
   EvidentialThought,
   AnalogicalThought,

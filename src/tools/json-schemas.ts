@@ -351,19 +351,166 @@ export const deepthinking_mathematics_schema = {
 } as const;
 
 /**
- * deepthinking_temporal - Temporal reasoning
+ * deepthinking_temporal - Temporal and Historical reasoning
+ * v9.1.0: Added historical mode for historical analysis
  */
 export const deepthinking_temporal_schema = {
   name: "deepthinking_temporal",
-  description: "Temporal: timelines, Allen intervals, event sequencing",
+  description: "Temporal: timelines, Allen intervals, event sequencing, historical analysis",
   inputSchema: {
     type: "object",
     properties: {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["temporal"],
-        description: "Temporal reasoning mode"
+        enum: ["temporal", "historical"],
+        description: "Temporal or historical reasoning mode"
+      },
+      // Historical-specific properties
+      thoughtType: {
+        type: "string",
+        enum: ["event_analysis", "source_evaluation", "pattern_identification", "causal_chain", "periodization"],
+        description: "Type of historical analysis (historical mode only)"
+      },
+      historicalEvents: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            date: {
+              oneOf: [
+                { type: "string" },
+                {
+                  type: "object",
+                  properties: {
+                    start: { type: "string" },
+                    end: { type: "string" },
+                    precision: { type: "string", enum: ["exact", "approximate", "century", "decade", "year", "month", "day"] }
+                  },
+                  required: ["start", "end"]
+                }
+              ]
+            },
+            location: { type: "string" },
+            description: { type: "string" },
+            actors: { type: "array", items: { type: "string" }, description: "Actor IDs involved" },
+            causes: { type: "array", items: { type: "string" }, description: "Cause event IDs" },
+            effects: { type: "array", items: { type: "string" }, description: "Effect event IDs" },
+            significance: { type: "string", enum: ["minor", "moderate", "major", "transformative"] },
+            sources: { type: "array", items: { type: "string" }, description: "Source IDs" },
+            tags: { type: "array", items: { type: "string" } }
+          },
+          required: ["id", "name", "date", "significance"]
+        },
+        description: "Historical events for analysis (historical mode)"
+      },
+      historicalSources: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            title: { type: "string" },
+            type: { type: "string", enum: ["primary", "secondary", "tertiary"] },
+            subtype: { type: "string", enum: ["document", "artifact", "oral", "visual", "archaeological", "statistical"] },
+            author: { type: "string" },
+            date: { type: "string" },
+            reliability: { type: "number", minimum: 0, maximum: 1, description: "Reliability score 0-1" },
+            bias: {
+              type: "object",
+              properties: {
+                type: { type: "string", enum: ["political", "religious", "cultural", "economic", "nationalistic", "ideological", "personal"] },
+                direction: { type: "string" },
+                severity: { type: "number", minimum: 0, maximum: 1 }
+              }
+            },
+            corroboratedBy: { type: "array", items: { type: "string" }, description: "Corroborating source IDs" },
+            contradictedBy: { type: "array", items: { type: "string" }, description: "Contradicting source IDs" }
+          },
+          required: ["id", "title", "type", "reliability"]
+        },
+        description: "Historical sources for evaluation (historical mode)"
+      },
+      periods: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            startDate: { type: "string" },
+            endDate: { type: "string" },
+            characteristics: { type: "array", items: { type: "string" } },
+            keyEvents: { type: "array", items: { type: "string" }, description: "Key event IDs" },
+            keyActors: { type: "array", items: { type: "string" }, description: "Key actor IDs" },
+            themes: { type: "array", items: { type: "string" } }
+          },
+          required: ["id", "name", "startDate", "endDate", "characteristics"]
+        },
+        description: "Historical periods for periodization (historical mode)"
+      },
+      causalChains: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            links: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  cause: { type: "string", description: "Cause event ID" },
+                  effect: { type: "string", description: "Effect event ID" },
+                  mechanism: { type: "string" },
+                  confidence: { type: "number", minimum: 0, maximum: 1 },
+                  evidence: { type: "array", items: { type: "string" }, description: "Evidence source IDs" }
+                },
+                required: ["cause", "effect", "confidence"]
+              }
+            },
+            confidence: { type: "number", minimum: 0, maximum: 1, description: "Aggregate chain confidence" },
+            alternativeExplanations: { type: "array", items: { type: "string" } }
+          },
+          required: ["id", "name", "links", "confidence"]
+        },
+        description: "Causal chains for historical analysis (historical mode)"
+      },
+      actors: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            type: { type: "string", enum: ["individual", "group", "institution", "nation", "movement", "class"] },
+            period: { type: "string", description: "Period ID" },
+            roles: { type: "array", items: { type: "string" } },
+            motivations: { type: "array", items: { type: "string" } },
+            relationships: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  actorId: { type: "string" },
+                  type: { type: "string", enum: ["ally", "rival", "subordinate", "superior", "colleague", "influenced_by", "mentor", "successor"] },
+                  description: { type: "string" }
+                },
+                required: ["actorId", "type"]
+              }
+            },
+            significance: { type: "string", enum: ["minor", "moderate", "major", "transformative"] }
+          },
+          required: ["id", "name", "type"]
+        },
+        description: "Historical actors (historical mode)"
+      },
+      historiographicalSchool: {
+        type: "string",
+        description: "Historiographical school of thought (e.g., Annales, Marxist, Postmodern)"
       },
       timeline: {
         type: "object",

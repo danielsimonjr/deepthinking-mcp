@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **33 reasoning modes** (29 with dedicated thought types) with taxonomy-based classification (69 implemented reasoning types across 12 categories, 110 documented in reference), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
+DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **34 reasoning modes** (30 with dedicated thought types) with taxonomy-based classification (69 implemented reasoning types across 12 categories, 110 documented in reference), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
-**Version**: 9.0.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
+**Version**: 9.1.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
 
 ## Project Metrics
 
@@ -16,11 +16,11 @@ DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring *
 | Lines of Code | ~105,000 |
 | Total Exports | 1,426 (684 re-exports) |
 | Passing Tests | 5,148 (181 test files) |
-| Reasoning Modes | 33 (29 with dedicated types + 4 advanced runtime) |
+| Reasoning Modes | 34 (30 with dedicated types + 4 advanced runtime) |
 | MCP Tools | 13 focused (includes deepthinking_analyze) |
 | Export Formats | 8 + native SVG + file export |
-| Visual Exporters | 41 files (23 mode-specific, 14 utils, 4 root) |
-| Specialized Handlers | 36 (33 modes + GenericModeHandler + CustomHandler + utility) |
+| Visual Exporters | 42 files (24 mode-specific, 14 utils, 4 root) |
+| Specialized Handlers | 37 (34 modes + GenericModeHandler + CustomHandler + utility) |
 | Builder Classes | 14 fluent APIs (Phase 13 complete) |
 | Circular Dependencies | 55 (all type-only, 0 runtime) |
 
@@ -61,7 +61,7 @@ Business logic extracted from `src/index.ts` into focused services:
 
 | Service | File | Size | Purpose |
 |---------|------|------|---------|
-| **ThoughtFactory** | `src/services/ThoughtFactory.ts` | 25KB | Mode-specific thought creation for all 33 modes |
+| **ThoughtFactory** | `src/services/ThoughtFactory.ts` | 25KB | Mode-specific thought creation for all 34 modes |
 | **ExportService** | `src/services/ExportService.ts` | 21KB | Multi-format export orchestration |
 | **SessionManager** | `src/session/manager.ts` | 30KB | Session lifecycle + meta-monitoring (v8.6.0) |
 
@@ -69,15 +69,15 @@ Business logic extracted from `src/index.ts` into focused services:
 
 ### ModeHandler Architecture (v8.x)
 
-**Phase 10 Sprint 3 (v8.4.0)**: All 33 reasoning modes now have fully implemented specialized handlers.
+**Phase 10 Sprint 3 (v8.4.0)**: All 34 reasoning modes now have fully implemented specialized handlers.
 
-The Strategy Pattern-based ModeHandler system in `src/modes/handlers/` provides 36 total handlers:
+The Strategy Pattern-based ModeHandler system in `src/modes/handlers/` provides 37 total handlers:
 
 | Category | Handlers | Key Features |
 |----------|----------|--------------|
 | **Core (5)** | Sequential, Shannon, Mathematics, Physics, Hybrid | Mode-specific validation and thought creation |
 | **Fundamental (3)** | Inductive, Deductive, Abductive | Reasoning triad implementation |
-| **Causal/Probabilistic (6)** | Causal, Bayesian, Counterfactual, Temporal, GameTheory, Evidential | Auto computation (posteriors, equilibria), validation |
+| **Causal/Probabilistic (7)** | Causal, Bayesian, Counterfactual, Temporal, Historical, GameTheory, Evidential | Auto computation (posteriors, equilibria), source reliability, validation |
 | **Analogical (2)** | Analogical, FirstPrinciples | Mapping and decomposition logic |
 | **Systems/Scientific (3)** | SystemsThinking, ScientificMethod, FormalLogic | 8 Archetypes detection, proof logic |
 | **Academic (4)** | Synthesis, Argumentation, Critique, Analysis | Coverage tracking, Socratic questions |
@@ -90,16 +90,16 @@ The Strategy Pattern-based ModeHandler system in `src/modes/handlers/` provides 
 - `hasSpecializedHandler(mode)` - Check implementation status
 - `getHandler(mode)` - Get handler (specialized or generic fallback)
 - `createThought(input, sessionId)` - Delegate to appropriate handler
-- `registerAllHandlers()` - Initialize all 33 handlers at startup
+- `registerAllHandlers()` - Initialize all 34 handlers at startup
 
 ### Key Directories
 
 ```
 src/
 ├── index.ts           # MCP server entry point (tool handlers)
-├── types/             # Type definitions for 33 modes
+├── types/             # Type definitions for 34 modes
 │   ├── core.ts        # ThinkingMode enum, Thought union type
-│   └── modes/         # One file per reasoning mode (32 files)
+│   └── modes/         # One file per reasoning mode (33 files)
 ├── services/          # Business logic layer
 ├── session/           # SessionManager, persistence, storage abstraction
 ├── taxonomy/          # 69 reasoning types (110 documented in reference), classifier
@@ -137,15 +137,15 @@ Configured in `tsconfig.json`:
 - `@validation/*` → `src/validation/*`
 - `@modes/*`, `@session/*`, `@search/*`, `@cache/*`, `@export/*`, `@taxonomy/*`
 
-## The 33 Reasoning Modes
+## The 34 Reasoning Modes
 
-### Fully Implemented (29 modes with dedicated thought types)
+### Fully Implemented (30 modes with dedicated thought types)
 
 | Category | Modes | Status |
 |----------|-------|--------|
 | **Core (5)** | Sequential, Shannon, Mathematics, Physics, Hybrid | ✅ Full implementation |
 | **Fundamental (3)** | Inductive, Deductive, Abductive | ✅ Full implementation |
-| **Causal/Probabilistic (6)** | Causal, Bayesian, Counterfactual, Temporal, GameTheory, Evidential | ✅ Full implementation |
+| **Causal/Probabilistic (7)** | Causal, Bayesian, Counterfactual, Temporal, Historical, GameTheory, Evidential | ✅ Full implementation |
 | **Analogical (2)** | Analogical, FirstPrinciples | ✅ Full implementation |
 | **Systems/Scientific (3)** | SystemsThinking, ScientificMethod, FormalLogic | ✅ Full implementation |
 | **Academic (4)** | Synthesis, Argumentation, Critique, Analysis | ✅ Full implementation |
@@ -162,12 +162,13 @@ Configured in `tsconfig.json`:
 | **Constraint** | ⚠️ Validator only | Constraint satisfaction |
 | **Optimization** | ✅ Handler v8.4.0 | Constraint optimization |
 
-**Note**: All 33 modes have specialized handlers as of v8.4.0. Advanced runtime modes have limited business logic but full ModeHandler support.
+**Note**: All 34 modes have specialized handlers as of v9.1.0. Advanced runtime modes have limited business logic but full ModeHandler support.
 
 ## Recent Version History
 
 | Version | Phase | Key Features |
 |---------|-------|--------------|
+| **v9.1.0** | Historical Mode | **NEW MODE**: Historical reasoning for events, sources, periods, causal chains, actors. 5 thought types, visual exports, 42 handler tests. |
 | **v9.0.0** | Phase 15 Complete | **RADICAL SIMPLIFICATION**: Sprints 1-3 complete (barrel removal, service simplification, composition pattern). Sprints 4-12 cancelled after discovering handlers contain real algorithms. |
 | **v8.5.0** | Phase 13 Sprint 1-2 | **FLUENT BUILDERS**: DOTGraphBuilder, MermaidGraphBuilder, GraphMLBuilder + ASCIIDocBuilder, SVGBuilder, TikZBuilder fluent APIs |
 | **v8.4.0** | Phase 10 Sprint 3 | **ALL 33 MODES SPECIALIZED**: Complete ModeHandler coverage, 36 total handlers, registerAllHandlers() function |
@@ -181,7 +182,7 @@ Configured in `tsconfig.json`:
 | **v7.5.2** | Phase 14 | Bug fix: All 11 experimental modes now return correct mode type |
 | **v7.5.0** | Phase 14 | Accessible Reasoning Modes - 12 focused MCP tools |
 
-## MCP Tools (v8.4.0)
+## MCP Tools (v9.1.0)
 
 The server provides 13 focused tools + 1 legacy tool with hand-written JSON schemas:
 
@@ -190,7 +191,7 @@ The server provides 13 focused tools + 1 legacy tool with hand-written JSON sche
 | `deepthinking_core` | inductive, deductive, abductive | ✅ v8.4.0 |
 | `deepthinking_standard` | sequential, shannon, hybrid | ✅ v8.4.0 |
 | `deepthinking_mathematics` | mathematics, physics, computability | ✅ v8.4.0 |
-| `deepthinking_temporal` | temporal | ✅ v8.4.0 |
+| `deepthinking_temporal` | temporal, historical | ✅ v9.1.0 |
 | `deepthinking_probabilistic` | bayesian, evidential | ✅ v8.4.0 |
 | `deepthinking_causal` | causal, counterfactual | ✅ v8.4.0 |
 | `deepthinking_strategic` | gametheory, optimization | ✅ v8.4.0 |
@@ -308,9 +309,11 @@ For parallel reasoning or handling multiple concurrent sessions, you can run mul
 | `src/types/modes/argumentation.ts` | Toulmin model argumentation types |
 | `src/types/modes/critique.ts` | Critical analysis types |
 | `src/types/modes/analysis.ts` | Qualitative analysis types |
+| `src/types/modes/historical.ts` | Historical reasoning types (events, sources, periods, chains) |
 | `src/modes/handlers/ModeHandler.ts` | Handler interface definition |
 | `src/modes/handlers/ModeHandlerRegistry.ts` | Singleton registry for handlers |
 | `src/modes/handlers/SystemsThinkingHandler.ts` | 8 Systems Archetypes detection |
+| `src/modes/handlers/HistoricalHandler.ts` | Historical source evaluation, pattern detection |
 
 ## Development Best Practices
 

@@ -129,7 +129,14 @@
       "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" split \"C:/mcp-servers/deepthinking-mcp/docs/reference/Types of Thinking and Reasonings.md\" -l 3 --dry-run)",
       "Bash(for f in tests/integration/index-handlers.test.ts tests/integration/mcp-protocol.test.ts tests/integration/multi-session.test.ts tests/utils/session-factory.ts)",
       "Bash(do sed -i \"s|session/index\\\\.js|session/manager.js|g\" \"$f\")",
-      "Bash(git status:*)"
+      "Bash(git status:*)",
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/create-dependency-graph/create-dependency-graph.exe\" --help)",
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/compress-for-context/compress-for-context.exe\" \"C:/mcp-servers/deepthinking-mcp/docs/architecture/OVERVIEW.md\" -l moderate)",
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/compress-for-context/compress-for-context.exe\" \"C:/mcp-servers/deepthinking-mcp/docs/architecture/ARCHITECTURE.md\" -l moderate --dry-run)",
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" split \"C:/mcp-servers/deepthinking-mcp/docs/ADDING_NEW_MODE.md\" -l 2 --dry-run)",
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" split \"C:/mcp-servers/deepthinking-mcp/README.md\" -l 2 --dry-run)",
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" split \"C:/mcp-servers/deepthinking-mcp/README.md\" -l 2)",
+      "Bash(\"C:/mcp-servers/deepthinking-mcp/tools/chunking-for-files/chunking-for-files.exe\" merge \"C:/mcp-servers/deepthinking-mcp/README_chunks/manifest.json\")"
     ],
     "deny": [],
     "ask": []

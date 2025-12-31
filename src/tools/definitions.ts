@@ -75,6 +75,7 @@ export const toolSchemas = {
 /**
  * Mode to tool name mapping for routing
  * Phase 14: All 29 modes with dedicated thought types are now accessible
+ * v9.1.0: Added historical mode to temporal tool
  */
 export const modeToToolMap: Record<string, string> = {
   // Core reasoning modes (fundamental)
@@ -92,8 +93,9 @@ export const modeToToolMap: Record<string, string> = {
   physics: 'deepthinking_mathematics',
   computability: 'deepthinking_mathematics',
 
-  // Temporal mode
+  // Temporal/Historical modes
   temporal: 'deepthinking_temporal',
+  historical: 'deepthinking_temporal',
 
   // Probabilistic modes
   bayesian: 'deepthinking_probabilistic',

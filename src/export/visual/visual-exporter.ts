@@ -1,7 +1,8 @@
 /**
- * Visual Exporter Class (v8.3.0)
+ * Visual Exporter Class (v9.1.0)
  * Unified Visual Exporter that delegates to mode-specific exporters
  * Separated to break circular dependency with utils/latex.ts
+ * v9.1.0: Added historical mode support
  */
 
 import type {
@@ -21,6 +22,7 @@ import type {
   OptimizationThought,
   FormalLogicThought,
   HybridThought,
+  HistoricalThought,
 } from '../../types/index.js';
 import type { MathematicsThought, ProofDecomposition } from '../../types/modes/mathematics.js';
 import type { PhysicsThought } from '../../types/modes/physics.js';
@@ -33,6 +35,7 @@ import type { VisualExportOptions } from './types.js';
 import {
   exportCausalGraph,
   exportTemporalTimeline,
+  exportHistoricalTimeline,
   exportGameTree,
   exportBayesianNetwork,
   exportSequentialDependencyGraph,
@@ -66,6 +69,10 @@ export class VisualExporter {
 
   exportTemporalTimeline(thought: TemporalThought, options: VisualExportOptions): string {
     return exportTemporalTimeline(thought, options);
+  }
+
+  exportHistoricalTimeline(thought: HistoricalThought, options: VisualExportOptions): string {
+    return exportHistoricalTimeline(thought, options);
   }
 
   exportGameTree(thought: GameTheoryThought, options: VisualExportOptions): string {

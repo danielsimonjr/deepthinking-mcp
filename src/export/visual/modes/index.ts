@@ -10,9 +10,10 @@ export { exportMathematicsDerivation } from './mathematics.js';
 export { exportPhysicsVisualization } from './physics.js';
 export { exportHybridOrchestration } from './hybrid.js';
 
-// Causal/Temporal modes
+// Causal/Temporal/Historical modes
 export { exportCausalGraph } from './causal.js';
 export { exportTemporalTimeline } from './temporal.js';
+export { exportHistoricalTimeline } from './historical.js';
 export { exportCounterfactualScenarios } from './counterfactual.js';
 
 // Probabilistic modes

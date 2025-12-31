@@ -4,13 +4,14 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
 
-A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning modes** (29 with dedicated thought types, 4 advanced runtime modes) including meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
+A comprehensive Model Context Protocol (MCP) server featuring **34 reasoning modes** (30 with dedicated thought types, 4 advanced runtime modes) including historical reasoning, meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
-> 📋 **Latest Release**: v9.0.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
+> 📋 **Latest Release**: v9.1.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
 >
-> 🎉 **New in v9.0.0**: Phase 15 "Radical Simplification" - Streamlined architecture removing deprecated subsystems while retaining all 33 reasoning modes with 38 specialized handlers.
+> 🎉 **New in v9.1.0**: Historical Reasoning Mode - Analyze historical events, evaluate sources, identify patterns, trace causal chains, and define periods with 5 thought types.
 >
-> ✨ **Codebase**: 233 TypeScript files | 100,600 LOC | 15 modules | 5,011+ tests passing
+> ✨ **Codebase**: 237 TypeScript files | 102,500 LOC | 15 modules | 5,048+ tests passing
+
 
 ## Table of Contents
 
@@ -27,9 +28,10 @@ A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning mod
 
 ## Features
 
-- **33 Specialized Reasoning Modes** - From sequential thinking to game theory, formal logic, and meta-reasoning (29 with full thought types, 4 advanced runtime modes)
-- **ModeHandler Architecture (v9.x)** - Strategy pattern with 38 specialized handlers providing advanced validation and enhancements for all 33 modes
-- **Specialized Handler Enhancements** - Systems Archetypes (8 patterns), Socratic Questions (6 categories), auto Bayesian posteriors, Nash equilibria
+- **34 Specialized Reasoning Modes** - From sequential thinking to historical analysis, game theory, formal logic, and meta-reasoning (30 with full thought types, 4 advanced runtime modes)
+- **ModeHandler Architecture (v9.x)** - Strategy pattern with 37 specialized handlers providing advanced validation and enhancements for all 34 modes
+- **Historical Reasoning (v9.1.0)** - Event analysis, source evaluation, pattern identification, causal chains, periodization with 5 thought types
+- **Specialized Handler Enhancements** - Systems Archetypes (8 patterns), Socratic Questions (6 categories), auto Bayesian posteriors, Nash equilibria, source reliability scoring
 - **Visual Builder APIs** - 14 fluent builder classes: DOTGraphBuilder, MermaidGraphBuilder, MermaidGanttBuilder, MermaidStateDiagramBuilder, ASCIIDocBuilder, SVGBuilder, TikZBuilder, UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder, GraphMLBuilder, SVGGroupBuilder
 - **Academic Research Modes** - Synthesis (literature review), Argumentation (Toulmin), Critique (peer review), Analysis (qualitative methods)
 - **Algorithmic Reasoning** - Comprehensive CLRS coverage with 100+ named algorithms, complexity analysis, design patterns
@@ -47,6 +49,7 @@ A comprehensive Model Context Protocol (MCP) server featuring **33 reasoning mod
 - **Type-Safe** - 100% TypeScript with comprehensive type coverage
 - **Extensible** - Plugin architecture for custom reasoning modes
 - **MCP Compatible** - Full integration with Model Context Protocol
+
 
 ## Installation
 
@@ -187,15 +190,18 @@ DeepThinking MCP provides 13 focused tools for different reasoning domains:
 
 ## Reasoning Modes
 
-The server supports 33 reasoning modes organized into categories:
+The server supports 34 reasoning modes organized into categories:
 
 - **Core Modes (5)**: Sequential, Shannon, Mathematics, Physics, Hybrid
+- **Causal/Probabilistic (7)**: Causal, Bayesian, Counterfactual, Temporal, Historical, GameTheory, Evidential
 - **Historical Computing (2)**: Computability (Turing), Cryptanalytic (Turing) - *v7.2.0*
 - **Algorithmic (1)**: Algorithmic (CLRS) - *v7.3.0*
 - **Academic Research (4)**: Synthesis, Argumentation, Critique, Analysis - *v7.4.0*
 - **Advanced Runtime Modes (6)**: Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
 - **Fundamental Modes (3)**: Inductive, Deductive, Abductive
-- **Experimental Modes (12)**: Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory (+ von Neumann extensions), Evidential, First Principles, Systems Thinking, Scientific Method, Formal Logic, Engineering
+- **Systems/Scientific (3)**: SystemsThinking, ScientificMethod, FormalLogic
+- **Analogical (2)**: Analogical, FirstPrinciples
+- **Engineering (1)**: Engineering
 
 ### Core Modes
 
@@ -238,6 +244,38 @@ Intelligently combines multiple reasoning modes based on problem characteristics
 mode: 'hybrid'
 // Use for: Complex multi-faceted problems requiring diverse approaches
 ```
+
+### Historical Reasoning (v9.1.0)
+
+#### Historical
+Comprehensive historical analysis with source evaluation, pattern recognition, and causal chain analysis.
+
+```typescript
+mode: 'historical'
+// Use for: Historical research, source criticism, event analysis, periodization
+// Features: 5 thought types, aggregate reliability scoring, pattern detection
+```
+
+**5 Thought Types:**
+- `event_analysis` - Analyze historical events with significance ratings
+- `source_evaluation` - Evaluate primary/secondary/tertiary sources with reliability scoring
+- `pattern_identification` - Identify recurring patterns across time (cyclical, structural, contingent)
+- `causal_chain` - Trace cause-effect relationships with confidence scores
+- `periodization` - Define and analyze historical periods with characteristics
+
+**Data Structures:**
+- `HistoricalEvent` - Events with dates, actors, causes/effects, significance levels
+- `HistoricalSource` - Sources with type, reliability (0-1), bias analysis, corroboration
+- `HistoricalPeriod` - Time periods with characteristics, key events, transitions
+- `CausalChain` - Linked causal relationships with evidence and confidence
+- `HistoricalActor` - Individuals, groups, institutions, nations, movements
+
+**Handler Features:**
+- Aggregate reliability calculation (weighted by source type with corroboration bonus)
+- Causal chain continuity validation
+- Automatic pattern detection from events
+- Temporal span calculation
+- Cross-reference validation (events ↔ sources ↔ actors)
 
 ### Advanced Modes
 
@@ -496,10 +534,11 @@ mode: 'analysis'
 
 ### Specialized Mode Handlers (v9.x)
 
-The ModeHandler system provides 38 specialized handlers with advanced validation and enhancements. Key examples:
+The ModeHandler system provides 37 specialized handlers with advanced validation and enhancements. Key examples:
 
 | Handler | Mode | Key Enhancements |
 |---------|------|------------------|
+| **HistoricalHandler** | historical | Aggregate reliability scoring, causal chain validation, pattern detection |
 | **CausalHandler** | causal | Validates graph structure, detects cycles, propagates interventions |
 | **BayesianHandler** | bayesian | Auto-calculates posteriors from prior × likelihood, validates probability sums |
 | **GameTheoryHandler** | gametheory | Validates payoff matrix dimensions, computes Nash equilibria |
@@ -531,6 +570,7 @@ CritiqueHandler uses Richard Paul's 6 categories:
 - **Perspectives** - "Are there alternative viewpoints?"
 - **Implications** - "What are the consequences?"
 - **Meta** - "Why is this question important?"
+
 
 ## Proof Decomposition
 
@@ -808,19 +848,20 @@ For architecture details, see [docs/architecture/](docs/architecture/).
 
 | Metric | Value |
 |--------|-------|
-| TypeScript Files | 233 |
-| Lines of Code | ~100,600 |
-| Test Files | 177 |
-| Passing Tests | 5,011 |
-| Thinking Modes | 33 (29 with thought types) |
-| ModeHandlers | 38 specialized handlers |
+| TypeScript Files | 237 |
+| Lines of Code | ~102,500 |
+| Test Files | 181 |
+| Passing Tests | 5,048 |
+| Thinking Modes | 34 (30 with thought types) |
+| ModeHandlers | 37 specialized handlers |
 | MCP Tools | 13 focused tools |
 | Export Formats | 8 + native SVG |
-| Visual Exporters | 44 files (22 mode-specific) |
+| Visual Exporters | 42 files (24 mode-specific) |
 | Builder Classes | 14 fluent APIs |
 | Reasoning Types | 69 (110 planned) |
 | Modules | 15 |
-| Total Exports | 1,267 (568 re-exports) |
+| Total Exports | 1,275 (571 re-exports) |
+
 
 ## Architecture
 

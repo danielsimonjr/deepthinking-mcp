@@ -51,6 +51,7 @@ const VALIDATOR_REGISTRY: Record<string, ValidatorConfig> = {
   argumentation: { module: './modes/argumentation.js', className: 'ArgumentationValidator' },
   critique: { module: './modes/critique.js', className: 'CritiqueValidator' },
   analysis: { module: './modes/analysis.js', className: 'AnalysisValidator' },
+  historical: { module: './modes/historical.js', className: 'HistoricalValidator' }, // v9.1.0
 };
 
 /**

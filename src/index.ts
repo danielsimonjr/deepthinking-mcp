@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 
 /**
- * DeepThinking MCP Server (v9.0.0)
+ * DeepThinking MCP Server (v9.1.0)
  *
- * 33 advanced reasoning modes with ModeHandler pattern, meta-reasoning,
+ * 34 advanced reasoning modes with ModeHandler pattern, meta-reasoning,
  * taxonomy classifier, enterprise security, and visual export capabilities.
  *
  * Tools (13 total):
  * - deepthinking_core: inductive, deductive, abductive modes
  * - deepthinking_standard: sequential, shannon, hybrid modes
  * - deepthinking_mathematics: mathematics, physics, computability modes
- * - deepthinking_temporal: temporal reasoning
+ * - deepthinking_temporal: temporal, historical reasoning
  * - deepthinking_probabilistic: bayesian, evidential modes
  * - deepthinking_causal: causal, counterfactual modes
  * - deepthinking_strategic: gametheory, optimization modes

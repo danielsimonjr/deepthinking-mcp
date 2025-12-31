@@ -1,11 +1,11 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2025-12-30
+**Generated**: 2025-12-31
 
 ## Summary
 
 - **Potentially unused files**: 16
-- **Potentially unused exports**: 466
+- **Potentially unused exports**: 478
 
 ## Potentially Unused Files
 
@@ -310,6 +310,7 @@ These exports are not imported by any other file in the codebase:
 ### `src/tools/schemas/modes/temporal.ts`
 
 - `TemporalInput` (type)
+- `HistoricalInput` (type)
 
 ### `src/tools/schemas/shared.ts`
 
@@ -541,6 +542,20 @@ These exports are not imported by any other file in the codebase:
 - `CoreAllocation` (interface)
 - `CoalitionAnalysis` (interface)
 - `ShapleyValueDetails` (interface)
+
+### `src/types/modes/historical.ts`
+
+- `isHistoricalThought` (function)
+- `DateRange` (interface)
+- `SourceBias` (interface)
+- `PeriodTransition` (interface)
+- `HistoricalPeriod` (interface)
+- `CausalLink` (interface)
+- `CausalChain` (interface)
+- `ActorRelationship` (interface)
+- `HistoricalActor` (interface)
+- `HistoricalInterpretation` (interface)
+- `HistoricalMethodology` (interface)
 
 ### `src/types/modes/hybrid.ts`
 

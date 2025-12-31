@@ -1,8 +1,9 @@
 /**
- * Export Service (v7.0.3)
+ * Export Service (v9.1.0)
  * Sprint 3 Task 3.3: Extract export logic from index.ts
  * Sprint 3 Task 3.2: Added dependency injection support
  * Phase 9: Added native SVG, GraphML, and TikZ export support
+ * v9.1.0: Added historical mode visual export support
  *
  * Centralizes session export logic for multiple formats.
  * Handles conversion between internal session format and export formats.
@@ -36,6 +37,7 @@ import {
   isAnalysisThought,
   isAlgorithmicThought,
   isScientificMethodThought,
+  isHistoricalThought,
   HybridThought,
   // Sprint 1: Visual export integration types
   SequentialThought,
@@ -193,6 +195,15 @@ export class ExportService {
       return this.visualExporter.exportTemporalTimeline(lastThought as TemporalThought, {
         format,
         includeLabels: true,
+      });
+    }
+
+    if (isHistoricalThought(lastThought)) {
+      return this.visualExporter.exportHistoricalTimeline(lastThought, {
+        format,
+        colorScheme: 'default',
+        includeLabels: true,
+        includeMetrics: true,
       });
     }
 

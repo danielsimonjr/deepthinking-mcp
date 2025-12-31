@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 9.0.0 | **Last Updated**: 2025-12-30
+**Version**: 9.1.0 | **Last Updated**: 2025-12-31
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -37,19 +37,19 @@ The codebase is organized into the following modules:
 
 - **cache**: 3 files
 - **config**: 1 file
-- **export**: 44 files
+- **export**: 45 files
 - **entry**: 1 file
 - **interfaces**: 1 file
-- **modes**: 52 files
+- **modes**: 53 files
 - **proof**: 13 files
 - **search**: 3 files
 - **services**: 2 files
 - **session**: 4 files
 - **taxonomy**: 5 files
 - **tools**: 18 files
-- **types**: 36 files
+- **types**: 37 files
 - **utils**: 6 files
-- **validation**: 44 files
+- **validation**: 45 files
 
 ---
 
@@ -431,6 +431,23 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/export/visual/modes/historical.ts` - Historical Visual Exporter (v9.1.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../../types/index.js` | `HistoricalThought` | Import (type-only) |
+| `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils.js` | `sanitizeId` | Import |
+| `../utils/dot.js` | `DOTGraphBuilder` | Import |
+| `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
+| `../utils/mermaid.js` | `MermaidGraphBuilder, MermaidGanttBuilder` | Import |
+
+**Exports:**
+- Functions: `exportHistoricalTimeline`
+
+---
+
 ### `src/export/visual/modes/hybrid.ts` - Hybrid Visual Exporter (v8.5.0)
 
 **Internal Dependencies:**
@@ -468,6 +485,7 @@ The codebase is organized into the following modules:
 | `./hybrid.js` | `exportHybridOrchestration` | Re-export |
 | `./causal.js` | `exportCausalGraph` | Re-export |
 | `./temporal.js` | `exportTemporalTimeline` | Re-export |
+| `./historical.js` | `exportHistoricalTimeline` | Re-export |
 | `./counterfactual.js` | `exportCounterfactualScenarios` | Re-export |
 | `./bayesian.js` | `exportBayesianNetwork` | Re-export |
 | `./evidential.js` | `exportEvidentialBeliefs` | Re-export |
@@ -485,7 +503,7 @@ The codebase is organized into the following modules:
 | `./proof-decomposition.js` | `exportProofDecomposition` | Re-export |
 
 **Exports:**
-- Re-exports: `exportSequentialDependencyGraph`, `exportShannonStageFlow`, `exportMathematicsDerivation`, `exportPhysicsVisualization`, `exportHybridOrchestration`, `exportCausalGraph`, `exportTemporalTimeline`, `exportCounterfactualScenarios`, `exportBayesianNetwork`, `exportEvidentialBeliefs`, `exportGameTree`, `exportOptimizationSolution`, `exportAbductiveHypotheses`, `exportAnalogicalMapping`, `exportFirstPrinciplesDerivation`, `exportMetaReasoningVisualization`, `exportSystemsThinkingCausalLoops`, `exportScientificMethodExperiment`, `exportFormalLogicProof`, `exportEngineeringAnalysis`, `exportComputability`, `exportProofDecomposition`
+- Re-exports: `exportSequentialDependencyGraph`, `exportShannonStageFlow`, `exportMathematicsDerivation`, `exportPhysicsVisualization`, `exportHybridOrchestration`, `exportCausalGraph`, `exportTemporalTimeline`, `exportHistoricalTimeline`, `exportCounterfactualScenarios`, `exportBayesianNetwork`, `exportEvidentialBeliefs`, `exportGameTree`, `exportOptimizationSolution`, `exportAbductiveHypotheses`, `exportAnalogicalMapping`, `exportFirstPrinciplesDerivation`, `exportMetaReasoningVisualization`, `exportSystemsThinkingCausalLoops`, `exportScientificMethodExperiment`, `exportFormalLogicProof`, `exportEngineeringAnalysis`, `exportComputability`, `exportProofDecomposition`
 
 ---
 
@@ -906,19 +924,19 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/export/visual/visual-exporter.ts` - Visual Exporter Class (v8.3.0)
+### `src/export/visual/visual-exporter.ts` - Visual Exporter Class (v9.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/index.js` | `CausalThought, TemporalThought, GameTheoryThought, BayesianThought, SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, FirstPrinciplesThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought, HybridThought` | Import (type-only) |
+| `../../types/index.js` | `CausalThought, TemporalThought, GameTheoryThought, BayesianThought, SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, FirstPrinciplesThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought, HybridThought, HistoricalThought` | Import (type-only) |
 | `../../types/modes/mathematics.js` | `MathematicsThought, ProofDecomposition` | Import (type-only) |
 | `../../types/modes/physics.js` | `PhysicsThought` | Import (type-only) |
 | `../../types/modes/metareasoning.js` | `MetaReasoningThought` | Import (type-only) |
 | `../../types/modes/engineering.js` | `EngineeringThought` | Import (type-only) |
 | `../../types/modes/computability.js` | `ComputabilityThought` | Import (type-only) |
 | `./types.js` | `VisualExportOptions` | Import (type-only) |
-| `./modes/index.js` | `exportCausalGraph, exportTemporalTimeline, exportGameTree, exportBayesianNetwork, exportSequentialDependencyGraph, exportShannonStageFlow, exportAbductiveHypotheses, exportCounterfactualScenarios, exportAnalogicalMapping, exportEvidentialBeliefs, exportFirstPrinciplesDerivation, exportSystemsThinkingCausalLoops, exportScientificMethodExperiment, exportOptimizationSolution, exportFormalLogicProof, exportMathematicsDerivation, exportPhysicsVisualization, exportHybridOrchestration, exportMetaReasoningVisualization, exportProofDecomposition, exportEngineeringAnalysis, exportComputability` | Import |
+| `./modes/index.js` | `exportCausalGraph, exportTemporalTimeline, exportHistoricalTimeline, exportGameTree, exportBayesianNetwork, exportSequentialDependencyGraph, exportShannonStageFlow, exportAbductiveHypotheses, exportCounterfactualScenarios, exportAnalogicalMapping, exportEvidentialBeliefs, exportFirstPrinciplesDerivation, exportSystemsThinkingCausalLoops, exportScientificMethodExperiment, exportOptimizationSolution, exportFormalLogicProof, exportMathematicsDerivation, exportPhysicsVisualization, exportHybridOrchestration, exportMetaReasoningVisualization, exportProofDecomposition, exportEngineeringAnalysis, exportComputability` | Import |
 
 **Exports:**
 - Classes: `VisualExporter`
@@ -927,7 +945,7 @@ The codebase is organized into the following modules:
 
 ## Entry Dependencies
 
-### `src/index.ts` - DeepThinking MCP Server (v9.0.0)
+### `src/index.ts` - DeepThinking MCP Server (v9.1.0)
 
 **External Dependencies:**
 | Package | Import |
@@ -1516,6 +1534,26 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/modes/handlers/HistoricalHandler.ts` - HistoricalHandler - v9.1.0
+
+**Node.js Built-in Dependencies:**
+| Module | Import |
+|--------|--------|
+| `crypto` | `randomUUID` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode` | Import |
+| `../../types/modes/historical.js` | `HistoricalThought, HistoricalThoughtType, HistoricalEvent, HistoricalSource, HistoricalPattern` | Import (type-only) |
+| `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ValidationError, ValidationWarning, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+
+**Exports:**
+- Classes: `HistoricalHandler`
+
+---
+
 ### `src/modes/handlers/HybridHandler.ts` - HybridHandler - Phase 10 Sprint 3 (v8.4.0)
 
 **Node.js Built-in Dependencies:**
@@ -1827,7 +1865,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/modes/index.ts` - Mode Handlers Index - Phase 10 Sprint 3 (v8.4.0)
+### `src/modes/index.ts` - Mode Handlers Index - v9.1.0
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -1844,6 +1882,7 @@ The codebase is organized into the following modules:
 | `./handlers/BayesianHandler.js` | `BayesianHandler` | Import |
 | `./handlers/CounterfactualHandler.js` | `CounterfactualHandler` | Import |
 | `./handlers/TemporalHandler.js` | `TemporalHandler` | Import |
+| `./handlers/HistoricalHandler.js` | `HistoricalHandler` | Import |
 | `./handlers/GameTheoryHandler.js` | `GameTheoryHandler` | Import |
 | `./handlers/EvidentialHandler.js` | `EvidentialHandler` | Import |
 | `./handlers/AnalogicalHandler.js` | `AnalogicalHandler` | Import |
@@ -1881,6 +1920,7 @@ The codebase is organized into the following modules:
 | `./handlers/BayesianHandler.js` | `BayesianHandler` | Re-export |
 | `./handlers/CounterfactualHandler.js` | `CounterfactualHandler` | Re-export |
 | `./handlers/TemporalHandler.js` | `TemporalHandler` | Re-export |
+| `./handlers/HistoricalHandler.js` | `HistoricalHandler` | Re-export |
 | `./handlers/GameTheoryHandler.js` | `GameTheoryHandler` | Re-export |
 | `./handlers/EvidentialHandler.js` | `EvidentialHandler` | Re-export |
 | `./handlers/AnalogicalHandler.js` | `AnalogicalHandler` | Re-export |
@@ -1907,7 +1947,7 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Functions: `registerAllHandlers`
-- Re-exports: `ModeHandler`, `ValidationResult`, `ValidationError`, `ValidationWarning`, `ModeEnhancements`, `ModeStatus`, `DetectedArchetype`, `validationSuccess`, `validationFailure`, `createValidationError`, `createValidationWarning`, `GenericModeHandler`, `SequentialHandler`, `ShannonHandler`, `MathematicsHandler`, `PhysicsHandler`, `HybridHandler`, `InductiveHandler`, `DeductiveHandler`, `AbductiveHandler`, `CausalHandler`, `BayesianHandler`, `CounterfactualHandler`, `TemporalHandler`, `GameTheoryHandler`, `EvidentialHandler`, `AnalogicalHandler`, `FirstPrinciplesHandler`, `SystemsThinkingHandler`, `ScientificMethodHandler`, `FormalLogicHandler`, `SynthesisHandler`, `ArgumentationHandler`, `CritiqueHandler`, `AnalysisHandler`, `EngineeringHandler`, `ComputabilityHandler`, `CryptanalyticHandler`, `AlgorithmicHandler`, `MetaReasoningHandler`, `RecursiveHandler`, `ModalHandler`, `StochasticHandler`, `ConstraintHandler`, `OptimizationHandler`, `CustomHandler`, `ModeHandlerRegistry`, `RegistryStats`, `getRegistry`, `registerHandler`, `createThought`
+- Re-exports: `ModeHandler`, `ValidationResult`, `ValidationError`, `ValidationWarning`, `ModeEnhancements`, `ModeStatus`, `DetectedArchetype`, `validationSuccess`, `validationFailure`, `createValidationError`, `createValidationWarning`, `GenericModeHandler`, `SequentialHandler`, `ShannonHandler`, `MathematicsHandler`, `PhysicsHandler`, `HybridHandler`, `InductiveHandler`, `DeductiveHandler`, `AbductiveHandler`, `CausalHandler`, `BayesianHandler`, `CounterfactualHandler`, `TemporalHandler`, `HistoricalHandler`, `GameTheoryHandler`, `EvidentialHandler`, `AnalogicalHandler`, `FirstPrinciplesHandler`, `SystemsThinkingHandler`, `ScientificMethodHandler`, `FormalLogicHandler`, `SynthesisHandler`, `ArgumentationHandler`, `CritiqueHandler`, `AnalysisHandler`, `EngineeringHandler`, `ComputabilityHandler`, `CryptanalyticHandler`, `AlgorithmicHandler`, `MetaReasoningHandler`, `RecursiveHandler`, `ModalHandler`, `StochasticHandler`, `ConstraintHandler`, `OptimizationHandler`, `CustomHandler`, `ModeHandlerRegistry`, `RegistryStats`, `getRegistry`, `registerHandler`, `createThought`
 
 ---
 
@@ -2203,12 +2243,12 @@ The codebase is organized into the following modules:
 
 ## Services Dependencies
 
-### `src/services/ExportService.ts` - Export Service (v7.0.3)
+### `src/services/ExportService.ts` - Export Service (v9.1.0)
 
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingSession, ThinkingMode, Thought, CausalThought, TemporalThought, GameTheoryThought, BayesianThought, FirstPrinciplesThought, isMetaReasoningThought, isCausalThought, isBayesianThought, isTemporalThought, isGameTheoryThought, isFirstPrinciplesThought, isSystemsThinkingThought, isSynthesisThought, isArgumentationThought, isAnalysisThought, isAlgorithmicThought, isScientificMethodThought, HybridThought, // Sprint 1: Visual export integration types
+| `../types/index.js` | `ThinkingSession, ThinkingMode, Thought, CausalThought, TemporalThought, GameTheoryThought, BayesianThought, FirstPrinciplesThought, isMetaReasoningThought, isCausalThought, isBayesianThought, isTemporalThought, isGameTheoryThought, isFirstPrinciplesThought, isSystemsThinkingThought, isSynthesisThought, isArgumentationThought, isAnalysisThought, isAlgorithmicThought, isScientificMethodThought, isHistoricalThought, HybridThought, // Sprint 1: Visual export integration types
   SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought` | Import |
 | `../types/modes/mathematics.js` | `MathematicsThought` | Import (type-only) |
 | `../types/modes/physics.js` | `PhysicsThought` | Import (type-only) |
@@ -2650,7 +2690,7 @@ The codebase is organized into the following modules:
 
 ---
 
-### `src/tools/schemas/modes/temporal.ts` - Temporal Mode Schema (v4.1.0)
+### `src/tools/schemas/modes/temporal.ts` - Temporal Mode Schema (v9.1.0)
 
 **External Dependencies:**
 | Package | Import |
@@ -2694,7 +2734,7 @@ The codebase is organized into the following modules:
 
 ## Types Dependencies
 
-### `src/types/core.ts` - Core type definitions for the DeepThinking MCP server v8.5.0
+### `src/types/core.ts` - Core type definitions for the DeepThinking MCP server v9.1.0
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -2714,6 +2754,7 @@ The codebase is organized into the following modules:
 | `./modes/bayesian.js` | `BayesianThought` | Import (type-only) |
 | `./modes/counterfactual.js` | `CounterfactualThought` | Import (type-only) |
 | `./modes/temporal.js` | `TemporalThought` | Import (type-only) |
+| `./modes/historical.js` | `HistoricalThought` | Import (type-only) |
 | `./modes/gametheory.js` | `GameTheoryThought` | Import (type-only) |
 | `./modes/evidential.js` | `EvidentialThought` | Import (type-only) |
 | `./modes/analogical.js` | `AnalogicalThought` | Import (type-only) |
@@ -2734,7 +2775,7 @@ The codebase is organized into the following modules:
 **Exports:**
 - Interfaces: `BaseThought`, `InductiveThought`, `DeductiveThought`, `Observation`, `Hypothesis`, `Evidence`, `EvaluationCriteria`, `AbductiveThought`
 - Enums: `ThinkingMode`, `ShannonStage`
-- Functions: `isFullyImplemented`, `isInductiveThought`, `isDeductiveThought`, `isAbductiveThought`, `isSequentialThought`, `isShannonThought`, `isMathematicsThought`, `isPhysicsThought`, `isHybridThought`, `isEngineeringThought`, `isComputabilityThought`, `isCryptanalyticThought`, `isAlgorithmicThought`, `isMetaReasoningThought`, `isOptimizationThought`, `isCausalThought`, `isBayesianThought`, `isCounterfactualThought`, `isTemporalThought`, `isGameTheoryThought`, `isEvidentialThought`, `isAnalogicalThought`, `isFirstPrinciplesThought`, `isSystemsThinkingThought`, `isScientificMethodThought`, `isFormalLogicThought`, `isSynthesisThought`, `isArgumentationThought`, `isCritiqueThought`, `isAnalysisThought`, `isRecursiveThought`, `isModalThought`, `isStochasticThought`, `isConstraintThought`, `isCustomThought`
+- Functions: `isFullyImplemented`, `isInductiveThought`, `isDeductiveThought`, `isAbductiveThought`, `isSequentialThought`, `isShannonThought`, `isMathematicsThought`, `isPhysicsThought`, `isHybridThought`, `isEngineeringThought`, `isComputabilityThought`, `isCryptanalyticThought`, `isAlgorithmicThought`, `isMetaReasoningThought`, `isOptimizationThought`, `isCausalThought`, `isBayesianThought`, `isCounterfactualThought`, `isTemporalThought`, `isHistoricalThought`, `isGameTheoryThought`, `isEvidentialThought`, `isAnalogicalThought`, `isFirstPrinciplesThought`, `isSystemsThinkingThought`, `isScientificMethodThought`, `isFormalLogicThought`, `isSynthesisThought`, `isArgumentationThought`, `isCritiqueThought`, `isAnalysisThought`, `isRecursiveThought`, `isModalThought`, `isStochasticThought`, `isConstraintThought`, `isCustomThought`
 - Constants: `FULLY_IMPLEMENTED_MODES`, `EXPERIMENTAL_MODES`
 
 ---
@@ -3003,6 +3044,19 @@ The codebase is organized into the following modules:
 **Exports:**
 - Interfaces: `GameTheoryThought`, `Game`, `Player`, `Strategy`, `PayoffMatrix`, `PayoffEntry`, `NashEquilibrium`, `DominantStrategy`, `GameTree`, `GameNode`, `InformationSet`, `BackwardInduction`, `MinimaxAnalysis`, `CooperativeGame`, `CoalitionValue`, `CoreAllocation`, `CoalitionAnalysis`, `ShapleyValueDetails`
 - Functions: `isGameTheoryThought`, `createCharacteristicFunction`, `checkSuperadditivity`, `calculateShapleyValue`
+
+---
+
+### `src/types/modes/historical.ts` - Historical Reasoning Mode - Type Definitions
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../core.js` | `BaseThought, ThinkingMode` | Import |
+
+**Exports:**
+- Interfaces: `DateRange`, `SourceBias`, `HistoricalEvent`, `HistoricalSource`, `PeriodTransition`, `HistoricalPeriod`, `CausalLink`, `CausalChain`, `ActorRelationship`, `HistoricalActor`, `HistoricalPattern`, `HistoricalInterpretation`, `HistoricalMethodology`, `HistoricalThought`
+- Functions: `isHistoricalThought`
 
 ---
 
@@ -3441,6 +3495,7 @@ The codebase is organized into the following modules:
 | `./modes/counterfactual.js` | `CounterfactualValidator` | Re-export |
 | `./modes/analogical.js` | `AnalogicalValidator` | Re-export |
 | `./modes/temporal.js` | `TemporalValidator` | Re-export |
+| `./modes/historical.js` | `HistoricalValidator` | Re-export |
 | `./modes/gametheory.js` | `GameTheoryValidator` | Re-export |
 | `./modes/evidential.js` | `EvidentialValidator` | Re-export |
 | `./modes/meta.js` | `MetaValidator` | Re-export |
@@ -3455,7 +3510,7 @@ The codebase is organized into the following modules:
 | `./registry.js` | `validatorRegistry, getValidatorForMode, getValidatorForModeSync, hasValidatorForMode, getSupportedModes, preloadValidators` | Re-export |
 
 **Exports:**
-- Re-exports: `validateCommon`, `validateDependencies`, `validateUncertainty`, `validateNumberRange`, `validateProbability`, `validateConfidence`, `validateRequired`, `validateNonEmptyArray`, `SequentialValidator`, `ShannonValidator`, `MathematicsValidator`, `PhysicsValidator`, `HybridValidator`, `InductiveValidator`, `DeductiveValidator`, `AbductiveValidator`, `CausalValidator`, `BayesianValidator`, `CounterfactualValidator`, `AnalogicalValidator`, `TemporalValidator`, `GameTheoryValidator`, `EvidentialValidator`, `MetaValidator`, `ModalValidator`, `ConstraintValidator`, `OptimizationValidator`, `StochasticValidator`, `RecursiveValidator`, `MetaReasoningValidator`, `ComputabilityValidator`, `CryptanalyticValidator`, `validatorRegistry`, `getValidatorForMode`, `getValidatorForModeSync`, `hasValidatorForMode`, `getSupportedModes`, `preloadValidators`
+- Re-exports: `validateCommon`, `validateDependencies`, `validateUncertainty`, `validateNumberRange`, `validateProbability`, `validateConfidence`, `validateRequired`, `validateNonEmptyArray`, `SequentialValidator`, `ShannonValidator`, `MathematicsValidator`, `PhysicsValidator`, `HybridValidator`, `InductiveValidator`, `DeductiveValidator`, `AbductiveValidator`, `CausalValidator`, `BayesianValidator`, `CounterfactualValidator`, `AnalogicalValidator`, `TemporalValidator`, `HistoricalValidator`, `GameTheoryValidator`, `EvidentialValidator`, `MetaValidator`, `ModalValidator`, `ConstraintValidator`, `OptimizationValidator`, `StochasticValidator`, `RecursiveValidator`, `MetaReasoningValidator`, `ComputabilityValidator`, `CryptanalyticValidator`, `validatorRegistry`, `getValidatorForMode`, `getValidatorForModeSync`, `hasValidatorForMode`, `getSupportedModes`, `preloadValidators`
 
 ---
 
@@ -3741,6 +3796,23 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Classes: `GameTheoryValidator`
+
+---
+
+### `src/validation/validators/modes/historical.ts` - Historical Mode Validator (v9.1.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../../types/modes/historical.js` | `HistoricalThought` | Import (type-only) |
+| `../../../types/index.js` | `ValidationIssue` | Import (type-only) |
+| `../../validator.js` | `ValidationContext` | Import (type-only) |
+| `../base.js` | `ModeValidator` | Import (type-only) |
+| `../../constants.js` | `IssueCategory, IssueSeverity` | Import |
+| `../validation-utils.js` | `validateCommon, validateConfidence` | Import |
+
+**Exports:**
+- Classes: `HistoricalValidator`
 
 ---
 
@@ -4039,8 +4111,9 @@ The codebase is organized into the following modules:
 | `first-principles` | 14 files | 1 files |
 | `formal-logic` | 14 files | 1 files |
 | `game-theory` | 14 files | 1 files |
+| `historical` | 6 files | 1 files |
 | `hybrid` | 14 files | 1 files |
-| `index` | 22 files | 2 files |
+| `index` | 23 files | 2 files |
 | `mathematics` | 14 files | 1 files |
 | `metareasoning` | 14 files | 1 files |
 | `optimization` | 14 files | 1 files |
@@ -4049,16 +4122,15 @@ The codebase is organized into the following modules:
 | `scientific-method` | 14 files | 1 files |
 | `sequential` | 14 files | 1 files |
 | `shannon` | 14 files | 1 files |
-| `systems-thinking` | 14 files | 1 files |
 
 ---
 
 ## Circular Dependency Analysis
 
-**55 circular dependencies detected:**
+**57 circular dependencies detected:**
 
 - **Runtime cycles**: 0 (require attention)
-- **Type-only cycles**: 55 (safe, no runtime impact)
+- **Type-only cycles**: 57 (safe, no runtime impact)
 
 ### Type-Only Circular Dependencies
 
@@ -4074,7 +4146,7 @@ These cycles only involve type imports and are safe (erased at runtime):
 - src/types/core.ts -> src/types/modes/cryptanalytic.ts -> src/types/core.ts
 - src/types/core.ts -> src/types/modes/algorithmic.ts -> src/types/core.ts
 - src/types/core.ts -> src/types/modes/metareasoning.ts -> src/types/core.ts
-- ... and 45 more
+- ... and 47 more
 
 ---
 
@@ -4098,7 +4170,7 @@ graph TD
         N6[profiles]
         N7[index]
         N8[abductive]
-        N9[...39 more]
+        N9[...40 more]
     end
 
     subgraph Entry
@@ -4115,7 +4187,7 @@ graph TD
         N14[intervention]
         N15[types]
         N16[analyzer]
-        N17[...47 more]
+        N17[...48 more]
     end
 
     subgraph Proof
@@ -4168,7 +4240,7 @@ graph TD
         N46[index]
         N47[algorithmic]
         N48[analogical]
-        N49[...31 more]
+        N49[...32 more]
     end
 
     subgraph Utils
@@ -4186,7 +4258,7 @@ graph TD
         N58[index]
         N59[schema-utils]
         N60[schemas]
-        N61[...39 more]
+        N61[...40 more]
     end
 
     N0 --> N1
@@ -4227,21 +4299,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 233 |
+| Total TypeScript Files | 237 |
 | Total Modules | 15 |
-| Total Lines of Code | 100604 |
-| Total Exports | 1267 |
-| Total Re-exports | 568 |
-| Total Classes | 143 |
-| Total Interfaces | 522 |
-| Total Functions | 425 |
-| Total Type Guards | 85 |
+| Total Lines of Code | 102467 |
+| Total Exports | 1275 |
+| Total Re-exports | 571 |
+| Total Classes | 145 |
+| Total Interfaces | 536 |
+| Total Functions | 428 |
+| Total Type Guards | 87 |
 | Total Enums | 3 |
-| Type-only Imports | 306 |
+| Type-only Imports | 315 |
 | Runtime Circular Deps | 0 |
-| Type-only Circular Deps | 55 |
+| Type-only Circular Deps | 57 |
 
 ---
 
-*Last Updated*: 2025-12-30
-*Version*: 9.0.0
+*Last Updated*: 2025-12-31
+*Version*: 9.1.0

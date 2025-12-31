@@ -32,6 +32,7 @@ export { BayesianValidator } from './modes/bayesian.js';
 export { CounterfactualValidator } from './modes/counterfactual.js';
 export { AnalogicalValidator } from './modes/analogical.js';
 export { TemporalValidator } from './modes/temporal.js';
+export { HistoricalValidator } from './modes/historical.js';
 export { GameTheoryValidator } from './modes/gametheory.js';
 export { EvidentialValidator } from './modes/evidential.js';
 export { MetaValidator } from './modes/meta.js';

@@ -1,17 +1,17 @@
 {
   "metadata": {
     "name": "deepthinking-mcp",
-    "version": "9.0.0",
-    "lastUpdated": "2025-12-30",
-    "totalFiles": 233,
+    "version": "9.1.0",
+    "lastUpdated": "2025-12-31",
+    "totalFiles": 237,
     "totalModules": 15,
-    "totalExports": 1267
+    "totalExports": 1275
   },
   "entryPoints": [
     {
       "file": "src/index.ts",
       "type": "main",
-      "description": "DeepThinking MCP Server (v9.0.0)"
+      "description": "DeepThinking MCP Server (v9.1.0)"
     }
   ],
   "modules": {
@@ -1844,6 +1844,58 @@
           "exportGameTree"
         ]
       },
+      "src/export/visual/modes/historical.ts": {
+        "description": "Historical Visual Exporter (v9.1.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../../types/index.js",
+            "imports": [
+              "HistoricalThought"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../types.js",
+            "imports": [
+              "VisualExportOptions"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../utils.js",
+            "imports": [
+              "sanitizeId"
+            ]
+          },
+          {
+            "file": "../utils/dot.js",
+            "imports": [
+              "DOTGraphBuilder"
+            ]
+          },
+          {
+            "file": "../utils/ascii.js",
+            "imports": [
+              "ASCIIDocBuilder"
+            ]
+          },
+          {
+            "file": "../utils/mermaid.js",
+            "imports": [
+              "MermaidGraphBuilder",
+              "MermaidGanttBuilder"
+            ]
+          }
+        ],
+        "exports": [
+          "exportHistoricalTimeline"
+        ],
+        "functions": [
+          "exportHistoricalTimeline"
+        ]
+      },
       "src/export/visual/modes/hybrid.ts": {
         "description": "Hybrid Visual Exporter (v8.5.0)",
         "externalDependencies": [],
@@ -2031,6 +2083,13 @@
             "reExport": true
           },
           {
+            "file": "./historical.js",
+            "imports": [
+              "exportHistoricalTimeline"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./counterfactual.js",
             "imports": [
               "exportCounterfactualScenarios"
@@ -2144,6 +2203,7 @@
           "exportHybridOrchestration",
           "exportCausalGraph",
           "exportTemporalTimeline",
+          "exportHistoricalTimeline",
           "exportCounterfactualScenarios",
           "exportBayesianNetwork",
           "exportEvidentialBeliefs",
@@ -2168,6 +2228,7 @@
           "exportHybridOrchestration",
           "exportCausalGraph",
           "exportTemporalTimeline",
+          "exportHistoricalTimeline",
           "exportCounterfactualScenarios",
           "exportBayesianNetwork",
           "exportEvidentialBeliefs",
@@ -4259,7 +4320,7 @@
         ]
       },
       "src/export/visual/visual-exporter.ts": {
-        "description": "Visual Exporter Class (v8.3.0)",
+        "description": "Visual Exporter Class (v9.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -4281,7 +4342,8 @@
               "ScientificMethodThought",
               "OptimizationThought",
               "FormalLogicThought",
-              "HybridThought"
+              "HybridThought",
+              "HistoricalThought"
             ],
             "typeOnly": true
           },
@@ -4333,6 +4395,7 @@
             "imports": [
               "exportCausalGraph",
               "exportTemporalTimeline",
+              "exportHistoricalTimeline",
               "exportGameTree",
               "exportBayesianNetwork",
               "exportSequentialDependencyGraph",
@@ -4366,7 +4429,7 @@
     },
     "entry": {
       "src/index.ts": {
-        "description": "DeepThinking MCP Server (v9.0.0)",
+        "description": "DeepThinking MCP Server (v9.1.0)",
         "externalDependencies": [
           {
             "package": "@modelcontextprotocol/sdk/server/index.js",
@@ -6152,6 +6215,64 @@
           "GenericModeHandler"
         ]
       },
+      "src/modes/handlers/HistoricalHandler.ts": {
+        "description": "HistoricalHandler - v9.1.0",
+        "externalDependencies": [],
+        "nodeDependencies": [
+          {
+            "module": "crypto",
+            "imports": [
+              "randomUUID"
+            ]
+          }
+        ],
+        "internalDependencies": [
+          {
+            "file": "../../types/core.js",
+            "imports": [
+              "ThinkingMode"
+            ]
+          },
+          {
+            "file": "../../types/modes/historical.js",
+            "imports": [
+              "HistoricalThought",
+              "HistoricalThoughtType",
+              "HistoricalEvent",
+              "HistoricalSource",
+              "HistoricalPattern"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../../tools/thinking.js",
+            "imports": [
+              "ThinkingToolInput"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./ModeHandler.js",
+            "imports": [
+              "ModeHandler",
+              "ValidationResult",
+              "ValidationError",
+              "ValidationWarning",
+              "ModeEnhancements",
+              "validationSuccess",
+              "validationFailure",
+              "createValidationError",
+              "createValidationWarning"
+            ]
+          }
+        ],
+        "exports": [
+          "HistoricalHandler"
+        ],
+        "classes": [
+          "HistoricalHandler"
+        ]
+      },
       "src/modes/handlers/HybridHandler.ts": {
         "description": "HybridHandler - Phase 10 Sprint 3 (v8.4.0)",
         "externalDependencies": [],
@@ -7005,7 +7126,7 @@
         ]
       },
       "src/modes/index.ts": {
-        "description": "Mode Handlers Index - Phase 10 Sprint 3 (v8.4.0)",
+        "description": "Mode Handlers Index - v9.1.0",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -7079,6 +7200,12 @@
             "file": "./handlers/TemporalHandler.js",
             "imports": [
               "TemporalHandler"
+            ]
+          },
+          {
+            "file": "./handlers/HistoricalHandler.js",
+            "imports": [
+              "HistoricalHandler"
             ]
           },
           {
@@ -7328,6 +7455,13 @@
             "reExport": true
           },
           {
+            "file": "./handlers/HistoricalHandler.js",
+            "imports": [
+              "HistoricalHandler"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./handlers/GameTheoryHandler.js",
             "imports": [
               "GameTheoryHandler"
@@ -7518,6 +7652,7 @@
           "BayesianHandler",
           "CounterfactualHandler",
           "TemporalHandler",
+          "HistoricalHandler",
           "GameTheoryHandler",
           "EvidentialHandler",
           "AnalogicalHandler",
@@ -7572,6 +7707,7 @@
           "BayesianHandler",
           "CounterfactualHandler",
           "TemporalHandler",
+          "HistoricalHandler",
           "GameTheoryHandler",
           "EvidentialHandler",
           "AnalogicalHandler",
@@ -8470,7 +8606,7 @@
     },
     "services": {
       "src/services/ExportService.ts": {
-        "description": "Export Service (v7.0.3)",
+        "description": "Export Service (v9.1.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -8497,6 +8633,7 @@
               "isAnalysisThought",
               "isAlgorithmicThought",
               "isScientificMethodThought",
+              "isHistoricalThought",
               "HybridThought",
               "// Sprint 1: Visual export integration types\r\n  SequentialThought",
               "ShannonThought",
@@ -9753,7 +9890,7 @@
         ]
       },
       "src/tools/schemas/modes/temporal.ts": {
-        "description": "Temporal Mode Schema (v4.1.0)",
+        "description": "Temporal Mode Schema (v9.1.0)",
         "externalDependencies": [
           {
             "package": "zod",
@@ -9861,7 +9998,7 @@
     },
     "types": {
       "src/types/core.ts": {
-        "description": "Core type definitions for the DeepThinking MCP server v8.5.0",
+        "description": "Core type definitions for the DeepThinking MCP server v9.1.0",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -9967,6 +10104,13 @@
             "file": "./modes/temporal.js",
             "imports": [
               "TemporalThought"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./modes/historical.js",
+            "imports": [
+              "HistoricalThought"
             ],
             "typeOnly": true
           },
@@ -10105,6 +10249,7 @@
           "isBayesianThought",
           "isCounterfactualThought",
           "isTemporalThought",
+          "isHistoricalThought",
           "isGameTheoryThought",
           "isEvidentialThought",
           "isAnalogicalThought",
@@ -10154,6 +10299,7 @@
           "isBayesianThought",
           "isCounterfactualThought",
           "isTemporalThought",
+          "isHistoricalThought",
           "isGameTheoryThought",
           "isEvidentialThought",
           "isAnalogicalThought",
@@ -11535,6 +11681,42 @@
           "createCharacteristicFunction",
           "checkSuperadditivity",
           "calculateShapleyValue"
+        ]
+      },
+      "src/types/modes/historical.ts": {
+        "description": "Historical Reasoning Mode - Type Definitions",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../core.js",
+            "imports": [
+              "BaseThought",
+              "ThinkingMode"
+            ]
+          }
+        ],
+        "exports": [
+          "isHistoricalThought"
+        ],
+        "interfaces": [
+          "DateRange",
+          "SourceBias",
+          "HistoricalEvent",
+          "HistoricalSource",
+          "PeriodTransition",
+          "HistoricalPeriod",
+          "CausalLink",
+          "CausalChain",
+          "ActorRelationship",
+          "HistoricalActor",
+          "HistoricalPattern",
+          "HistoricalInterpretation",
+          "HistoricalMethodology",
+          "HistoricalThought"
+        ],
+        "functions": [
+          "isHistoricalThought"
         ]
       },
       "src/types/modes/hybrid.ts": {
@@ -13010,6 +13192,13 @@
             "reExport": true
           },
           {
+            "file": "./modes/historical.js",
+            "imports": [
+              "HistoricalValidator"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./modes/gametheory.js",
             "imports": [
               "GameTheoryValidator"
@@ -13121,6 +13310,7 @@
           "CounterfactualValidator",
           "AnalogicalValidator",
           "TemporalValidator",
+          "HistoricalValidator",
           "GameTheoryValidator",
           "EvidentialValidator",
           "MetaValidator",
@@ -13161,6 +13351,7 @@
           "CounterfactualValidator",
           "AnalogicalValidator",
           "TemporalValidator",
+          "HistoricalValidator",
           "GameTheoryValidator",
           "EvidentialValidator",
           "MetaValidator",
@@ -14042,6 +14233,61 @@
           "GameTheoryValidator"
         ]
       },
+      "src/validation/validators/modes/historical.ts": {
+        "description": "Historical Mode Validator (v9.1.0)",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../../types/modes/historical.js",
+            "imports": [
+              "HistoricalThought"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../../../types/index.js",
+            "imports": [
+              "ValidationIssue"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../../validator.js",
+            "imports": [
+              "ValidationContext"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../base.js",
+            "imports": [
+              "ModeValidator"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../../constants.js",
+            "imports": [
+              "IssueCategory",
+              "IssueSeverity"
+            ]
+          },
+          {
+            "file": "../validation-utils.js",
+            "imports": [
+              "validateCommon",
+              "validateConfidence"
+            ]
+          }
+        ],
+        "exports": [
+          "HistoricalValidator"
+        ],
+        "classes": [
+          "HistoricalValidator"
+        ]
+      },
       "src/validation/validators/modes/hybrid.ts": {
         "description": "Hybrid Mode Validator (v9.0.0)",
         "externalDependencies": [],
@@ -14895,6 +15141,11 @@
         ],
         [
           "src/types/core.ts",
+          "src/types/modes/historical.ts",
+          "src/types/core.ts"
+        ],
+        [
+          "src/types/core.ts",
           "src/types/modes/gametheory.ts",
           "src/types/core.ts"
         ],
@@ -15054,6 +15305,12 @@
         [
           "src/validation/validator.ts",
           "src/validation/validators/index.ts",
+          "src/validation/validators/modes/historical.ts",
+          "src/validation/validator.ts"
+        ],
+        [
+          "src/validation/validator.ts",
+          "src/validation/validators/index.ts",
           "src/validation/validators/modes/gametheory.ts",
           "src/validation/validator.ts"
         ],
@@ -15118,9 +15375,9 @@
           "src/validation/validator.ts"
         ]
       ],
-      "total": 55,
+      "total": 57,
       "runtimeCount": 0,
-      "typeOnlyCount": 55
+      "typeOnlyCount": 57
     },
     "layers": [
       {
@@ -15155,6 +15412,7 @@
           "src/export/visual/modes/first-principles.ts",
           "src/export/visual/modes/formal-logic.ts",
           "src/export/visual/modes/game-theory.ts",
+          "src/export/visual/modes/historical.ts",
           "src/export/visual/modes/hybrid.ts",
           "src/export/visual/modes/index.ts",
           "src/export/visual/modes/mathematics.ts",
@@ -15231,6 +15489,7 @@
           "src/modes/handlers/FormalLogicHandler.ts",
           "src/modes/handlers/GameTheoryHandler.ts",
           "src/modes/handlers/GenericModeHandler.ts",
+          "src/modes/handlers/HistoricalHandler.ts",
           "src/modes/handlers/HybridHandler.ts",
           "src/modes/handlers/InductiveHandler.ts",
           "src/modes/handlers/MathematicsHandler.ts",
@@ -15353,6 +15612,7 @@
           "src/types/modes/firstprinciples.ts",
           "src/types/modes/formallogic.ts",
           "src/types/modes/gametheory.ts",
+          "src/types/modes/historical.ts",
           "src/types/modes/hybrid.ts",
           "src/types/modes/mathematics.ts",
           "src/types/modes/metareasoning.ts",
@@ -15411,6 +15671,7 @@
           "src/validation/validators/modes/firstprinciples.ts",
           "src/validation/validators/modes/formallogic.ts",
           "src/validation/validators/modes/gametheory.ts",
+          "src/validation/validators/modes/historical.ts",
           "src/validation/validators/modes/hybrid.ts",
           "src/validation/validators/modes/inductive.ts",
           "src/validation/validators/modes/mathematics.ts",
@@ -15434,21 +15695,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 233,
+    "totalTypeScriptFiles": 237,
     "totalModules": 15,
-    "totalLinesOfCode": 100604,
-    "totalExports": 1267,
-    "totalClasses": 143,
-    "totalInterfaces": 522,
-    "totalFunctions": 425,
-    "totalTypeGuards": 85,
+    "totalLinesOfCode": 102467,
+    "totalExports": 1275,
+    "totalClasses": 145,
+    "totalInterfaces": 536,
+    "totalFunctions": 428,
+    "totalTypeGuards": 87,
     "totalEnums": 3,
     "totalConstants": 144,
-    "totalReExports": 568,
-    "totalTypeOnlyImports": 306,
+    "totalReExports": 571,
+    "totalTypeOnlyImports": 315,
     "runtimeCircularDeps": 0,
-    "typeOnlyCircularDeps": 55,
+    "typeOnlyCircularDeps": 57,
     "unusedFilesCount": 16,
-    "unusedExportsCount": 466
+    "unusedExportsCount": 478
   }
 }

@@ -5,6 +5,67 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.1.0] - 2025-12-30
+
+### Added - Historical Reasoning Mode
+
+New **historical** reasoning mode added to the `deepthinking_temporal` tool for comprehensive historical analysis.
+
+**Mode Details:**
+| Property | Value |
+|----------|-------|
+| Mode ID | `historical` |
+| Tool | `deepthinking_temporal` |
+| Thought Types | 5 |
+| Total Modes | 34 (was 33) |
+| Handler | `HistoricalHandler` |
+| Tests | 42 new handler tests |
+
+**5 Thought Types:**
+| Type | Purpose |
+|------|---------|
+| `event_analysis` | Analyze historical events with significance ratings |
+| `source_evaluation` | Evaluate primary/secondary/tertiary sources |
+| `pattern_identification` | Identify recurring patterns across time |
+| `causal_chain` | Trace cause-effect relationships with confidence |
+| `periodization` | Define and analyze historical periods |
+
+**Data Structures:**
+| Structure | Purpose |
+|-----------|---------|
+| `HistoricalEvent` | Events with dates, actors, causes/effects, significance |
+| `HistoricalSource` | Sources with reliability (0-1), bias analysis, corroboration |
+| `HistoricalPeriod` | Time periods with characteristics and key events |
+| `CausalChain` | Linked causal relationships with confidence scores |
+| `HistoricalActor` | Individuals, groups, institutions involved in events |
+| `HistoricalPattern` | Detected patterns (cyclical, structural, contingent) |
+
+**Handler Features:**
+- Aggregate reliability calculation (weighted by source type, corroboration bonus)
+- Causal chain continuity validation
+- Automatic pattern detection from events
+- Temporal span calculation
+- Reference validation (events ↔ sources ↔ actors)
+
+**Visual Export:**
+- Mermaid: Gantt timelines, causal flowcharts, actor networks
+- DOT: Event graphs with significance colors, source subgraphs
+- ASCII: Structured document with events, chains, sources, periods
+
+**Files Created:**
+- `src/types/modes/historical.ts` - Type definitions
+- `src/modes/handlers/HistoricalHandler.ts` - Mode handler (481 lines)
+- `src/validation/validators/modes/historical.ts` - Validator (466 lines)
+- `src/export/visual/modes/historical.ts` - Visual exporter (380 lines)
+- `tests/unit/modes/handlers/HistoricalHandler.test.ts` - Handler tests (42 tests)
+
+**Files Modified:**
+- `src/types/core.ts` - Added ThinkingMode.HISTORICAL, type guard
+- `src/modes/handlers/index.ts` - Registered HistoricalHandler
+- `src/tools/json-schemas.ts` - Updated deepthinking_temporal schema
+- `src/index.ts` - Added historical mode handling
+- `src/services/ExportService.ts` - Added historical visual export
+
 ## [9.0.0] - 2025-12-30
 
 ### Changed - Phase 15 Reassessment: Sprints 4-12 Cancelled
