@@ -3,12 +3,12 @@
   "title": "Client-Side Test Index",
   "description": "Manual test execution tracking for Phase 12 features through MCP client",
   "testPlanDocument": "PHASE_12_CLIENT_TEST_PLAN.md",
-  "totalTests": 73,
-  "estimatedTime": "4-6 hours",
-  "status": "completed",
+  "totalTests": 88,
+  "estimatedTime": "5-7 hours",
+  "status": "in-progress",
   "executedAt": "2025-12-24T17:00:00.000Z",
   "summary": {
-    "pending": 0,
+    "pending": 15,
     "passed": 72,
     "partial": 0,
     "skipped": 1,
@@ -158,6 +158,27 @@
       ]
     },
     {
+      "id": "S7",
+      "name": "Sprint 7: Historical Reasoning Mode",
+      "tests": [
+        {"id": "T-S7-001", "name": "Event Analysis Basic", "tool": "deepthinking_temporal", "status": "pending"},
+        {"id": "T-S7-002", "name": "Source Evaluation Primary", "tool": "deepthinking_temporal", "status": "pending"},
+        {"id": "T-S7-003", "name": "Source Type Weighting", "tool": "deepthinking_temporal", "status": "pending"},
+        {"id": "T-S7-004", "name": "Source Corroboration Bonus", "tool": "deepthinking_temporal", "status": "pending"},
+        {"id": "T-S7-005", "name": "Causal Chain Analysis", "tool": "deepthinking_temporal", "status": "pending"},
+        {"id": "T-S7-006", "name": "Causal Chain Continuity Validation", "tool": "deepthinking_temporal", "status": "pending"},
+        {"id": "T-S7-007", "name": "Periodization Analysis", "tool": "deepthinking_temporal", "status": "pending"},
+        {"id": "T-S7-008", "name": "Pattern Identification", "tool": "deepthinking_temporal", "status": "pending"},
+        {"id": "T-S7-009", "name": "Auto-Detect Revolutionary Period", "tool": "deepthinking_temporal", "status": "pending"},
+        {"id": "T-S7-010", "name": "Historical Actor Analysis", "tool": "deepthinking_temporal", "status": "pending"},
+        {"id": "T-S7-011", "name": "Historiographical Methodology", "tool": "deepthinking_temporal", "status": "pending"},
+        {"id": "T-S7-012", "name": "Empty Events Handling", "tool": "deepthinking_temporal", "status": "pending"},
+        {"id": "T-S7-013", "name": "Low Reliability Warning", "tool": "deepthinking_temporal", "status": "pending"},
+        {"id": "T-S7-014", "name": "Export to Mermaid", "tool": "deepthinking_session", "status": "pending"},
+        {"id": "T-S7-015", "name": "Historical + Causal Integration", "tool": "multiple", "status": "pending"}
+      ]
+    },
+    {
       "id": "INT",
       "name": "Integration Tests",
       "tests": [
@@ -193,6 +214,6 @@
       ]
     }
   ],
-  "lastUpdated": "2025-12-24T18:35:00.000Z",
-  "notes": "PHASE 12 COMPLETE. All issues verified and fixed. 72 passed, 0 partial, 1 skipped (by design). 6 issues resolved: ISSUE-001 (export profiles API), ISSUE-002 (Bayesian hypotheses), ISSUE-003 (evidential massFunction), ISSUE-004 (multi-mode export session), ISSUE-005 (ThoughtFactory mathematics fields), ISSUE-006 (handleExportAll profile support). All fixes verified after client reload on 2025-12-24."
+  "lastUpdated": "2025-12-31T12:00:00.000Z",
+  "notes": "Sprint 7 added for Historical Reasoning Mode (v9.1.0). 15 new tests for Historical mode features: event analysis, source evaluation, source weighting, corroboration, causal chains, periodization, pattern detection, actor analysis, historiographical methodology, edge cases, and export. Previous 72 tests passed, 1 skipped (by design). 6 issues resolved in Sprints 1-6."
 }

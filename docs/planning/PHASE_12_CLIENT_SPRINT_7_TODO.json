@@ -1,0 +1,160 @@
+{
+  "phase": 12,
+  "sprint": 7,
+  "title": "Historical Reasoning Mode",
+  "version": "9.1.0",
+  "effort": "2-3 hours",
+  "status": "pending",
+  "description": "Client-side testing of Historical reasoning mode features including event analysis, source evaluation with reliability weighting, causal chain analysis, periodization, and pattern detection",
+  "tasks": [
+    {
+      "id": "12.7.1",
+      "category": "Event Analysis",
+      "description": "Test historical event analysis with causes, effects, and significance",
+      "status": "pending",
+      "tests": ["T-S7-001"],
+      "expectedBehavior": [
+        "Events with id, name, date, location, significance are accepted",
+        "Causes and effects reference other event IDs",
+        "Significance levels: minor, moderate, major, transformative",
+        "Sources field references source IDs for traceability"
+      ]
+    },
+    {
+      "id": "12.7.2",
+      "category": "Source Evaluation",
+      "description": "Test source evaluation with type classification and reliability calculation",
+      "status": "pending",
+      "tests": ["T-S7-002", "T-S7-003", "T-S7-004"],
+      "expectedBehavior": [
+        "Source types: primary (2.0x weight), secondary (1.5x weight), tertiary (1.0x weight)",
+        "Reliability is 0-1 scale",
+        "Corroboration bonus: 10% added when corroboratedBy is populated",
+        "Aggregate reliability calculated across all sources"
+      ]
+    },
+    {
+      "id": "12.7.3",
+      "category": "Causal Chain Analysis",
+      "description": "Test causal chain creation and continuity validation",
+      "status": "pending",
+      "tests": ["T-S7-005", "T-S7-006"],
+      "expectedBehavior": [
+        "Causal chains have id, name, links array",
+        "Each link has cause, effect, confidence (0-1)",
+        "Chain confidence calculated as product of link confidences",
+        "Continuity validation: each link's effect must match next link's cause",
+        "Warnings generated for broken chains"
+      ]
+    },
+    {
+      "id": "12.7.4",
+      "category": "Periodization",
+      "description": "Test historical period definition and analysis",
+      "status": "pending",
+      "tests": ["T-S7-007"],
+      "expectedBehavior": [
+        "Periods have id, name, startDate, endDate, characteristics",
+        "keyEvents references event IDs within the period",
+        "Period transitions describe changes between periods"
+      ]
+    },
+    {
+      "id": "12.7.5",
+      "category": "Pattern Identification",
+      "description": "Test pattern detection including auto-detected patterns",
+      "status": "pending",
+      "tests": ["T-S7-008", "T-S7-009"],
+      "expectedBehavior": [
+        "Manual patterns with id, name, description, eventIds",
+        "Auto-detection triggers when 3+ events provided",
+        "Revolutionary Period detected for events with transformative significance",
+        "Causal Nexus detected when events share causes/effects",
+        "Pattern confidence calculated from supporting events"
+      ]
+    },
+    {
+      "id": "12.7.6",
+      "category": "Actors & Methodology",
+      "description": "Test historical actor analysis and historiographical methodology",
+      "status": "pending",
+      "tests": ["T-S7-010", "T-S7-011"],
+      "expectedBehavior": [
+        "Actors have id, name, type (individual/group/institution/nation/movement)",
+        "Actor relationships track alliances, conflicts, influences",
+        "Historiographical school field (e.g., Marxist, Annales, postcolonial)",
+        "Methodology tracks approach used (comparative, quantitative, etc.)"
+      ]
+    },
+    {
+      "id": "12.7.7",
+      "category": "Edge Cases",
+      "description": "Test edge cases and error handling",
+      "status": "pending",
+      "tests": ["T-S7-012", "T-S7-013"],
+      "expectedBehavior": [
+        "Empty events array handled gracefully",
+        "Low reliability warning when aggregate reliability < 0.5",
+        "Invalid date formats rejected with clear error",
+        "Missing required fields rejected at validation"
+      ]
+    },
+    {
+      "id": "12.7.8",
+      "category": "Export & Integration",
+      "description": "Test export functionality and cross-mode integration",
+      "status": "pending",
+      "tests": ["T-S7-014", "T-S7-015"],
+      "expectedBehavior": [
+        "Mermaid export produces timeline/gantt format",
+        "Events appear as nodes with dates as labels",
+        "Causal relationships shown as directed edges",
+        "Historical + Causal mode integration produces unified analysis"
+      ]
+    }
+  ],
+  "testCoverage": {
+    "thoughtTypes": [
+      "event_analysis",
+      "source_evaluation",
+      "pattern_identification",
+      "causal_chain",
+      "periodization"
+    ],
+    "dataStructures": [
+      "HistoricalEvent",
+      "HistoricalSource",
+      "HistoricalPeriod",
+      "CausalChain",
+      "HistoricalActor",
+      "HistoricalPattern"
+    ],
+    "algorithms": [
+      "Source reliability weighting (primary 2x, secondary 1.5x, tertiary 1x)",
+      "Corroboration bonus (10% for corroborated sources)",
+      "Aggregate reliability calculation",
+      "Causal chain continuity validation",
+      "Auto-detect revolutionary patterns",
+      "Auto-detect causal nexus patterns"
+    ]
+  },
+  "successCriteria": [
+    "All 5 thought types return correct mode and thoughtType",
+    "Source reliability weights applied correctly (2.0x, 1.5x, 1.0x)",
+    "Corroboration bonus adds 10% to reliability",
+    "Causal chain continuity validated with warnings for breaks",
+    "Auto-detected patterns generated when 3+ events provided",
+    "Mermaid export produces valid timeline visualization",
+    "Cross-mode integration with causal mode works correctly"
+  ],
+  "totalTests": 15,
+  "relatedFiles": [
+    "src/types/modes/historical.ts",
+    "src/modes/handlers/HistoricalHandler.ts",
+    "src/validation/validators/modes/historical-validator.ts",
+    "src/export/visual/modes/historical.ts",
+    "tests/unit/modes/handlers/HistoricalHandler.test.ts",
+    "docs/modes/HISTORICAL.md"
+  ],
+  "notes": "Historical mode added in v9.1.0. Extends temporal tool with historical reasoning capabilities. Tests focus on reliability calculations, causal chain analysis, and pattern detection."
+}

@@ -4,8 +4,8 @@
 
 This document provides a comprehensive test plan for verifying Phase 12 features through the MCP client interface. All tests should be executed manually through Claude Code or another MCP-compatible client.
 
-**Total Test Cases**: 89
-**Estimated Execution Time**: 4-6 hours
+**Total Test Cases**: 104
+**Estimated Execution Time**: 5-7 hours
 **Prerequisites**: deepthinking-mcp server running and connected
 
 ---
@@ -1036,6 +1036,440 @@ Sprint 1 implemented foundational types. Client-side testing verifies these type
 
 ---
 
+## Sprint 7: Historical Reasoning Mode (v9.1.0)
+
+Historical mode provides comprehensive historical analysis with source evaluation, pattern recognition, causal chain analysis, and historiographical reasoning.
+
+### T-S7-001: Event Analysis Basic
+**Tool**: `deepthinking_temporal`
+**Input**:
+```json
+{
+  "mode": "historical",
+  "thought": "Analyzing the causes and effects of the Industrial Revolution",
+  "thoughtNumber": 1,
+  "totalThoughts": 3,
+  "nextThoughtNeeded": true,
+  "thoughtType": "event_analysis",
+  "events": [
+    {
+      "id": "evt-1",
+      "name": "Agricultural Revolution",
+      "date": {"start": "1700", "end": "1850"},
+      "significance": "transformative",
+      "effects": ["evt-2"],
+      "sources": ["src-1"]
+    },
+    {
+      "id": "evt-2",
+      "name": "Urbanization",
+      "date": {"start": "1750", "end": "1900"},
+      "significance": "major",
+      "causes": ["evt-1"]
+    }
+  ]
+}
+```
+**Expected**: Response includes event analysis with cause-effect relationships.
+**Pass Criteria**: Events accepted, temporal span calculated.
+
+### T-S7-002: Source Evaluation
+**Tool**: `deepthinking_temporal`
+**Input**:
+```json
+{
+  "mode": "historical",
+  "thought": "Evaluating sources on the French Revolution",
+  "thoughtNumber": 1,
+  "totalThoughts": 2,
+  "nextThoughtNeeded": true,
+  "thoughtType": "source_evaluation",
+  "sources": [
+    {
+      "id": "src-1",
+      "title": "Memoirs of Madame Roland",
+      "type": "primary",
+      "subtype": "document",
+      "author": "Madame Roland",
+      "date": "1793",
+      "reliability": 0.7,
+      "bias": {
+        "type": "political",
+        "direction": "Girondin",
+        "severity": 0.6
+      },
+      "limitations": ["Written while imprisoned", "Retrospective justification"]
+    },
+    {
+      "id": "src-2",
+      "title": "Citizens: A Chronicle of the French Revolution",
+      "type": "secondary",
+      "author": "Simon Schama",
+      "date": "1989",
+      "reliability": 0.85,
+      "corroboratedBy": ["src-3"]
+    }
+  ]
+}
+```
+**Expected**: Aggregate reliability calculated with source type weighting.
+**Pass Criteria**: Sources evaluated, bias documented, reliability aggregated.
+
+### T-S7-003: Source Type Weighting
+**Tool**: `deepthinking_temporal`
+**Input**:
+```json
+{
+  "mode": "historical",
+  "thought": "Testing source reliability weighting",
+  "thoughtNumber": 1,
+  "totalThoughts": 1,
+  "nextThoughtNeeded": false,
+  "thoughtType": "source_evaluation",
+  "sources": [
+    {"id": "s1", "title": "Primary Source", "type": "primary", "reliability": 0.8},
+    {"id": "s2", "title": "Secondary Source", "type": "secondary", "reliability": 0.8},
+    {"id": "s3", "title": "Tertiary Source", "type": "tertiary", "reliability": 0.8}
+  ]
+}
+```
+**Expected**: Primary sources weighted 2x, secondary 1.5x.
+**Pass Criteria**: Aggregate reliability reflects weighting.
+
+### T-S7-004: Corroboration Bonus
+**Tool**: `deepthinking_temporal`
+**Input**:
+```json
+{
+  "mode": "historical",
+  "thought": "Testing corroboration bonus calculation",
+  "thoughtNumber": 1,
+  "totalThoughts": 1,
+  "nextThoughtNeeded": false,
+  "thoughtType": "source_evaluation",
+  "sources": [
+    {"id": "s1", "title": "Source 1", "type": "primary", "reliability": 0.7, "corroboratedBy": ["s2", "s3"]},
+    {"id": "s2", "title": "Source 2", "type": "secondary", "reliability": 0.8, "corroboratedBy": ["s1"]},
+    {"id": "s3", "title": "Source 3", "type": "secondary", "reliability": 0.75}
+  ]
+}
+```
+**Expected**: Corroboration bonus (up to 0.1) applied.
+**Pass Criteria**: Aggregate reliability higher than raw average.
+
+### T-S7-005: Causal Chain Analysis
+**Tool**: `deepthinking_temporal`
+**Input**:
+```json
+{
+  "mode": "historical",
+  "thought": "Tracing causes of World War I",
+  "thoughtNumber": 1,
+  "totalThoughts": 3,
+  "nextThoughtNeeded": true,
+  "thoughtType": "causal_chain",
+  "events": [
+    {"id": "evt-1", "name": "Assassination of Franz Ferdinand", "date": "1914-06-28", "significance": "transformative"},
+    {"id": "evt-2", "name": "Austrian Ultimatum", "date": "1914-07-23", "significance": "major"},
+    {"id": "evt-3", "name": "Declaration of War", "date": "1914-07-28", "significance": "transformative"}
+  ],
+  "causalChains": [
+    {
+      "id": "chain-1",
+      "name": "July Crisis Escalation",
+      "confidence": 0.9,
+      "links": [
+        {"cause": "evt-1", "effect": "evt-2", "mechanism": "diplomatic pressure", "confidence": 0.95},
+        {"cause": "evt-2", "effect": "evt-3", "mechanism": "alliance obligations", "confidence": 0.9}
+      ]
+    }
+  ]
+}
+```
+**Expected**: Causal chain validated for continuity.
+**Pass Criteria**: Chain links validated, mechanism documented.
+
+### T-S7-006: Causal Chain Continuity Check
+**Tool**: `deepthinking_temporal`
+**Input**:
+```json
+{
+  "mode": "historical",
+  "thought": "Testing broken causal chain",
+  "thoughtNumber": 1,
+  "totalThoughts": 1,
+  "nextThoughtNeeded": false,
+  "thoughtType": "causal_chain",
+  "events": [
+    {"id": "A", "name": "Event A", "date": "1900", "significance": "major"},
+    {"id": "B", "name": "Event B", "date": "1910", "significance": "major"},
+    {"id": "C", "name": "Event C", "date": "1920", "significance": "major"}
+  ],
+  "causalChains": [
+    {
+      "id": "broken",
+      "name": "Broken Chain",
+      "confidence": 0.8,
+      "links": [
+        {"cause": "A", "effect": "B", "confidence": 0.9},
+        {"cause": "C", "effect": "A", "confidence": 0.7}
+      ]
+    }
+  ]
+}
+```
+**Expected**: Warning about chain discontinuity (effect B not cause of next link).
+**Pass Criteria**: Validation identifies broken chain.
+
+### T-S7-007: Periodization
+**Tool**: `deepthinking_temporal`
+**Input**:
+```json
+{
+  "mode": "historical",
+  "thought": "Defining periods of Roman history",
+  "thoughtNumber": 1,
+  "totalThoughts": 2,
+  "nextThoughtNeeded": true,
+  "thoughtType": "periodization",
+  "periods": [
+    {
+      "id": "period-1",
+      "name": "Roman Republic",
+      "startDate": "-509",
+      "endDate": "-27",
+      "characteristics": ["Senate rule", "Expansion", "Civil conflicts"],
+      "keyEvents": ["evt-punic-wars", "evt-caesar-assassination"]
+    },
+    {
+      "id": "period-2",
+      "name": "Roman Empire",
+      "startDate": "-27",
+      "endDate": "476",
+      "characteristics": ["Imperial rule", "Pax Romana", "Decline"],
+      "transitions": [{
+        "fromPeriod": "period-1",
+        "toPeriod": "period-2",
+        "transitionType": "revolutionary",
+        "catalysts": ["Civil wars", "Augustus consolidation"]
+      }]
+    }
+  ]
+}
+```
+**Expected**: Periods defined with transitions.
+**Pass Criteria**: Period chronology validated.
+
+### T-S7-008: Pattern Identification
+**Tool**: `deepthinking_temporal`
+**Input**:
+```json
+{
+  "mode": "historical",
+  "thought": "Identifying cyclical patterns in economic history",
+  "thoughtNumber": 1,
+  "totalThoughts": 2,
+  "nextThoughtNeeded": true,
+  "thoughtType": "pattern_identification",
+  "events": [
+    {"id": "panic-1873", "name": "Panic of 1873", "date": "1873", "significance": "major"},
+    {"id": "panic-1893", "name": "Panic of 1893", "date": "1893", "significance": "major"},
+    {"id": "panic-1907", "name": "Panic of 1907", "date": "1907", "significance": "major"},
+    {"id": "crash-1929", "name": "Wall Street Crash", "date": "1929", "significance": "transformative"}
+  ],
+  "patterns": [
+    {
+      "id": "pat-1",
+      "name": "Financial Panic Cycle",
+      "type": "cyclical",
+      "instances": ["panic-1873", "panic-1893", "panic-1907", "crash-1929"],
+      "description": "Recurring financial crises approximately every 15-20 years",
+      "confidence": 0.75
+    }
+  ]
+}
+```
+**Expected**: Pattern recognized with instances.
+**Pass Criteria**: Pattern type and instances validated.
+
+### T-S7-009: Auto-Detect Revolutionary Period
+**Tool**: `deepthinking_temporal`
+**Input**:
+```json
+{
+  "mode": "historical",
+  "thought": "Analyzing the French Revolutionary period",
+  "thoughtNumber": 1,
+  "totalThoughts": 2,
+  "nextThoughtNeeded": true,
+  "thoughtType": "event_analysis",
+  "events": [
+    {"id": "e1", "name": "Storming of Bastille", "date": "1789-07-14", "significance": "transformative"},
+    {"id": "e2", "name": "Declaration of Rights of Man", "date": "1789-08-26", "significance": "transformative"},
+    {"id": "e3", "name": "Execution of Louis XVI", "date": "1793-01-21", "significance": "transformative"},
+    {"id": "e4", "name": "Reign of Terror Begins", "date": "1793-09", "significance": "transformative"},
+    {"id": "e5", "name": "Fall of Robespierre", "date": "1794-07-27", "significance": "transformative"}
+  ]
+}
+```
+**Expected**: Auto-detects "Revolutionary Period" pattern (40%+ transformative events).
+**Pass Criteria**: Pattern auto-detected and added.
+
+### T-S7-010: Historical Actor Analysis
+**Tool**: `deepthinking_temporal`
+**Input**:
+```json
+{
+  "mode": "historical",
+  "thought": "Analyzing key actors in the American Revolution",
+  "thoughtNumber": 1,
+  "totalThoughts": 2,
+  "nextThoughtNeeded": true,
+  "thoughtType": "event_analysis",
+  "actors": [
+    {
+      "id": "actor-1",
+      "name": "George Washington",
+      "type": "individual",
+      "roles": ["Military Commander", "Political Leader"],
+      "significance": "transformative"
+    },
+    {
+      "id": "actor-2",
+      "name": "Continental Congress",
+      "type": "institution",
+      "roles": ["Legislative Body"],
+      "significance": "major"
+    },
+    {
+      "id": "actor-3",
+      "name": "Sons of Liberty",
+      "type": "movement",
+      "roles": ["Protest Movement"],
+      "significance": "major"
+    }
+  ],
+  "events": [
+    {
+      "id": "evt-1",
+      "name": "Declaration of Independence",
+      "date": "1776-07-04",
+      "significance": "transformative",
+      "actors": ["actor-1", "actor-2"]
+    }
+  ]
+}
+```
+**Expected**: Actors linked to events.
+**Pass Criteria**: Actor-event relationships validated.
+
+### T-S7-011: Historiographical Methodology
+**Tool**: `deepthinking_temporal`
+**Input**:
+```json
+{
+  "mode": "historical",
+  "thought": "Applying Annales school methodology to analyze medieval economy",
+  "thoughtNumber": 1,
+  "totalThoughts": 2,
+  "nextThoughtNeeded": true,
+  "thoughtType": "pattern_identification",
+  "methodology": {
+    "approach": "annales",
+    "techniques": ["Long-term structural analysis", "Mentalities study", "Geographic factors"],
+    "limitations": ["May underemphasize individual agency"],
+    "strengths": ["Reveals long-term trends", "Interdisciplinary approach"]
+  }
+}
+```
+**Expected**: Methodology recognized and documented.
+**Pass Criteria**: Approach validated as one of 8 schools.
+
+### T-S7-012: Empty Events Handling
+**Tool**: `deepthinking_temporal`
+**Input**:
+```json
+{
+  "mode": "historical",
+  "thought": "Testing with no events",
+  "thoughtNumber": 1,
+  "totalThoughts": 1,
+  "nextThoughtNeeded": false,
+  "thoughtType": "event_analysis",
+  "events": []
+}
+```
+**Expected**: Graceful handling of empty events.
+**Pass Criteria**: No crash, appropriate response.
+
+### T-S7-013: Low Reliability Warning
+**Tool**: `deepthinking_temporal`
+**Input**:
+```json
+{
+  "mode": "historical",
+  "thought": "Testing low reliability source warning",
+  "thoughtNumber": 1,
+  "totalThoughts": 1,
+  "nextThoughtNeeded": false,
+  "thoughtType": "source_evaluation",
+  "sources": [
+    {"id": "s1", "title": "Dubious Source", "type": "tertiary", "reliability": 0.3}
+  ]
+}
+```
+**Expected**: Warning about low reliability source.
+**Pass Criteria**: Warning issued for reliability < 0.5.
+
+### T-S7-014: Export Historical to Mermaid
+**Setup**: Create session with historical thought.
+**Tool**: `deepthinking_session`
+**Input**:
+```json
+{
+  "action": "export",
+  "sessionId": "<historical_session>",
+  "exportFormat": "mermaid"
+}
+```
+**Expected**: Gantt timeline or flowchart output.
+**Pass Criteria**: Valid Mermaid syntax with events/periods.
+
+### T-S7-015: Historical Integration with Causal Mode
+**Tool**: `deepthinking_temporal`
+**Input**:
+```json
+{
+  "mode": "historical",
+  "thought": "Combining historical events with causal analysis",
+  "thoughtNumber": 1,
+  "totalThoughts": 2,
+  "nextThoughtNeeded": true,
+  "thoughtType": "causal_chain",
+  "events": [
+    {"id": "e1", "name": "Treaty of Versailles", "date": "1919", "significance": "transformative", "effects": ["e2"]},
+    {"id": "e2", "name": "German Economic Crisis", "date": "1923", "significance": "major", "causes": ["e1"], "effects": ["e3"]},
+    {"id": "e3", "name": "Rise of Nazism", "date": "1933", "significance": "transformative", "causes": ["e2"]}
+  ],
+  "causalChains": [
+    {
+      "id": "chain-1",
+      "name": "Versailles to WWII",
+      "confidence": 0.85,
+      "links": [
+        {"cause": "e1", "effect": "e2", "mechanism": "war reparations", "confidence": 0.9},
+        {"cause": "e2", "effect": "e3", "mechanism": "economic desperation", "confidence": 0.8}
+      ],
+      "alternativeExplanations": ["Political instability", "Weimar weakness"]
+    }
+  ]
+}
+```
+**Expected**: Historical causal chain with alternative explanations.
+**Pass Criteria**: Chain validated, alternatives documented.
+
+---
+
 ## Integration Tests
 
 ### T-INT-001: Full Session Workflow
@@ -1355,6 +1789,22 @@ Sprint 1 implemented foundational types. Client-side testing verifies these type
 | T-S6-009 | Multiple Paths | [ ] | |
 | T-S6-010 | Empty Graph | [ ] | |
 | T-S6-011 | Cycle Detection | [ ] | |
+| **Sprint 7 - Historical** |
+| T-S7-001 | Event Analysis Basic | [ ] | |
+| T-S7-002 | Source Evaluation | [ ] | |
+| T-S7-003 | Source Type Weighting | [ ] | |
+| T-S7-004 | Corroboration Bonus | [ ] | |
+| T-S7-005 | Causal Chain Analysis | [ ] | |
+| T-S7-006 | Causal Chain Continuity | [ ] | |
+| T-S7-007 | Periodization | [ ] | |
+| T-S7-008 | Pattern Identification | [ ] | |
+| T-S7-009 | Auto-Detect Revolutionary | [ ] | |
+| T-S7-010 | Historical Actor Analysis | [ ] | |
+| T-S7-011 | Historiographical Methodology | [ ] | |
+| T-S7-012 | Empty Events Handling | [ ] | |
+| T-S7-013 | Low Reliability Warning | [ ] | |
+| T-S7-014 | Export Historical Mermaid | [ ] | |
+| T-S7-015 | Historical + Causal Integration | [ ] | |
 | **Integration** |
 | T-INT-001 | Full Workflow | [ ] | |
 | T-INT-002 | Multi-Mode Export | [ ] | |
