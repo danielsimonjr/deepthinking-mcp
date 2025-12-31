@@ -12,6 +12,7 @@ dist/
 # Testing
 coverage/
 .vitest/
+tests/test-results/*.json
 
 # Environment
 .env

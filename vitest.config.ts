@@ -7,6 +7,11 @@ export default defineConfig({
     exclude: process.env.SKIP_BENCHMARKS
       ? ['**/node_modules/**', '**/benchmarks/**']
       : ['**/node_modules/**'],
+    // Configure reporters: default console output + custom per-file reporter
+    reporters: [
+      'default',
+      './tests/test-results/per-file-reporter.js',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
