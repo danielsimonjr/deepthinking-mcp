@@ -28,7 +28,7 @@ coverage/
 
 # Claude Code settings (local only)
 .claude/
-.claude
+.mcp.json
 
 # OS
 .DS_Store
