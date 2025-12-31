@@ -1,35 +1,39 @@
 # Adding a New Reasoning Mode
 
-**Version**: v9.0.0 | **Architecture**: ModeHandler Pattern (Strategy)
+**Version**: v9.1.0 | **Architecture**: ModeHandler Pattern (Strategy)
 
 This guide walks you through adding a new reasoning mode to DeepThinking MCP. Follow these steps to ensure consistency, quality, and full integration with the v9.x architecture.
 
 > **Codebase Stats** (from dependency graph analysis):
-> - 233 TypeScript files | 100,600 LOC | 15 modules
-> - 1,267 exports (568 re-exports) | 55 type-only circular deps (0 runtime)
+> - 237 TypeScript files | 102,467 LOC | 15 modules
+> - 1,275 exports (571 re-exports) | 57 type-only circular deps (0 runtime)
 
 ---
 
+
 ## Overview
 
-Adding a new mode requires touching **10 core locations** across the codebase:
+Adding a new mode requires touching **12 core locations** across the codebase:
 
 | # | Component | Required | File(s) | Module Stats |
 |---|-----------|----------|---------|--------------|
-| 1 | Type Definition | ✅ | `src/types/modes/yourmode.ts` | types: 36 files |
-| 2 | Core Enum & Union | ✅ | `src/types/core.ts` | 82 exports, 31 imports |
-| 3 | Mode Validator | ✅ | `src/validation/validators/modes/yourmode.ts` | validation: 44 files, 35 validators |
-| 4 | **ModeHandler** | ✅ | `src/modes/handlers/YourModeHandler.ts` | modes: 52 files, 38 handlers |
-| 5 | **Handler Registration** | ✅ | `src/modes/index.ts` | 72 imports, re-exports all handlers |
-| 6 | MCP Tool Schema | ✅ | `src/tools/schemas/modes/*.ts` | tools: 18 files |
-| 7 | Visual Exporter | ⚠️ Optional | `src/export/visual/modes/yourmode.ts` | export: 44 files, 14 builder classes |
-| 8 | Mode Documentation | ✅ | `docs/modes/YOURMODE.md` | - |
-| 9 | Unit Tests - Handler | ✅ | `tests/unit/modes/handlers/YourModeHandler.test.ts` | 177 test files, 5,011 tests |
+| 1 | Type Definition | ✅ | `src/types/modes/yourmode.ts` | types: 37 files |
+| 2 | Core Enum & Union | ✅ | `src/types/core.ts` | 84 exports, 33 imports |
+| 3 | Mode Validator | ✅ | `src/validation/validators/modes/yourmode.ts` | validation: 44 files, 36 validators |
+| 4 | **ModeHandler** | ✅ | `src/modes/handlers/YourModeHandler.ts` | modes: 53 files, 37 handlers |
+| 5 | **Handler Registration** | ✅ | `src/modes/index.ts` | 74 imports, re-exports all handlers |
+| 6 | MCP Tool Schema | ✅ | `src/tools/json-schemas.ts` | tools: 18 files |
+| 7 | Visual Exporter | ⚠️ Optional | `src/export/visual/modes/yourmode.ts` | export: 45 files, 14 builder classes |
+| 8 | Mode Documentation | ✅ | `docs/modes/YOURMODE.md` | 34 mode docs |
+| 9 | Unit Tests - Handler | ✅ | `tests/unit/modes/handlers/YourModeHandler.test.ts` | 181 test files, 5,148 tests |
 | 10 | Update CHANGELOG | ✅ | `CHANGELOG.md` | - |
+| 11 | Update CLAUDE.md | ✅ | `CLAUDE.md` | Project guidelines |
+| 12 | Update README.md | ⚠️ If Major | `README.md` | For significant features |
 
 **Note**: ThoughtFactory (v9.0.0) automatically delegates to your handler via ModeHandlerRegistry - no code changes needed there. Services module now contains only 2 files: `ThoughtFactory.ts` and `ExportService.ts`.
 
 ---
+
 
 ## Architecture Background
 
@@ -42,35 +46,36 @@ DeepThinking MCP v9.x uses a **Strategy Pattern** for mode handling:
 │  MCP Tool Call  │ ──► │  ModeHandlerRegistry │ ──► │   YourModeHandler   │
 │  (13 tools)     │     │    (Singleton)       │     │ implements ModeHandler
 └─────────────────┘     └──────────────────────┘     └─────────────────────┘
-                                  │
-                                  ▼
-                        ┌──────────────────────┐
-                        │    ThoughtFactory    │
-                        │ (delegates to handler)│
-                        └──────────────────────┘
+                                 │
+                                 ▼
+                       ┌──────────────────────┐
+                       │    ThoughtFactory    │
+                       │ (delegates to handler)│
+                       └──────────────────────┘
 ```
 
 **Key Module Statistics** (from dependency graph):
 
 | Module | Files | Key Exports |
 |--------|-------|-------------|
-| modes | 52 | 38 handler classes (ModeHandlerRegistry, all mode handlers) |
-| types | 36 | ThinkingMode enum, Thought union, 26 mode type files |
-| validation | 44 | 35 validator classes (ThoughtValidator, mode validators) |
-| export | 44 | VisualExporter, 14 builder classes, 22 mode exporters |
+| modes | 53 | 37 handler classes (ModeHandlerRegistry, all mode handlers) |
+| types | 37 | ThinkingMode enum, Thought union, 34 mode type files |
+| validation | 44 | 36 validator classes (ThoughtValidator, mode validators) |
+| export | 45 | VisualExporter, 14 builder classes, 23 mode exporters |
 | services | 2 | ThoughtFactory, ExportService |
 | session | 4 | SessionManager, SessionMetricsCalculator, FileSessionStore |
 | tools | 18 | 13 tool schemas + definitions |
 
 Key concepts:
 - **ModeHandler Interface**: Contract for mode-specific thought creation and validation
-- **ModeHandlerRegistry**: Singleton that manages all 38 handlers (33 modes + GenericModeHandler + CustomHandler + utilities)
+- **ModeHandlerRegistry**: Singleton that manages all 37 handlers (34 modes + GenericModeHandler + CustomHandler + utility)
 - **registerAllHandlers()**: Function that registers all handlers at startup
 - **Grouped MCP Tools**: 13 tools group related modes (not one tool per mode)
 
 **v9.0.0 Simplification**: Phase 15 removed ModeRouter, MetaMonitor, backup, and batch processing. Services now contain only ThoughtFactory and ExportService.
 
 ---
+
 
 ## Step-by-Step Guide
 
@@ -771,6 +776,62 @@ describe('YourModeHandler', () => {
 
 ---
 
+### Step 12: Update Project Documentation
+
+Update the project documentation files to reflect your new mode.
+
+**12a. Update CLAUDE.md**
+
+The `CLAUDE.md` file contains project guidelines and metrics that need updating:
+
+1. **Version number**: Increment patch or minor version
+2. **Mode counts**: Update "Reasoning Modes" count (e.g., 33 → 34)
+3. **Handler counts**: Update "Specialized Handlers" count (e.g., 36 → 37)
+4. **Mode category table**: Add your mode to the appropriate category
+5. **MCP Tools table**: Add your mode to the relevant tool row
+
+Example updates in CLAUDE.md:
+
+```markdown
+## Project Metrics
+
+| Metric | Value |
+|--------|-------|
+| Reasoning Modes | 34 (30 with dedicated types + 4 advanced runtime) |  <!-- Update -->
+| Specialized Handlers | 37 (34 modes + GenericModeHandler + CustomHandler + utility) |  <!-- Update -->
+
+## The 34 Reasoning Modes  <!-- Update heading -->
+
+### Fully Implemented (30 modes with dedicated thought types)  <!-- Update count -->
+
+| Category | Modes | Status |
+|----------|-------|--------|
+| **Your Category** | ..., YourMode | ✅ Full implementation |  <!-- Add your mode -->
+```
+
+**12b. Update README.md (For Significant Features)**
+
+If your mode adds significant new capabilities:
+
+1. Update the feature list in the introduction
+2. Add a section describing the new mode
+3. Update any mode count references
+4. Add usage examples if appropriate
+
+**12c. Update package.json Version**
+
+```bash
+# For new mode additions (minor version bump)
+npm version minor --no-git-tag-version
+
+# Or manually edit package.json version field
+```
+
+**Note**: Always run `npm run typecheck` and `npm run test:run` after documentation updates to ensure nothing broke.
+
+---
+
+
 ## Testing Your New Mode
 
 ### 1. Type Checking
@@ -822,7 +883,12 @@ Test your mode through an MCP client to verify end-to-end functionality.
 **Symptom**: Users don't know how to use the mode
 **Fix**: Create `docs/modes/YOURMODE.md` with examples
 
+### ❌ Mistake 7: Forgetting CLAUDE.md updates
+**Symptom**: Outdated mode counts and metrics in project guidelines
+**Fix**: Update mode counts, handler counts, and category tables in `CLAUDE.md`
+
 ---
+
 
 ## Checklist
 
@@ -858,7 +924,8 @@ Before submitting your new mode, verify:
 **Documentation**
 - [ ] Mode documentation created at `docs/modes/YOURMODE.md`
 - [ ] CHANGELOG.md updated with new mode
-- [ ] README.md updated if appropriate
+- [ ] CLAUDE.md updated with mode counts, version, and handler info
+- [ ] README.md updated (if significant feature)
 
 **Testing**
 - [ ] Unit tests created in `tests/unit/modes/handlers/yourmode.test.ts`
@@ -868,6 +935,7 @@ Before submitting your new mode, verify:
 - [ ] Manual MCP testing completed
 
 ---
+
 
 ## Reference Files
 
