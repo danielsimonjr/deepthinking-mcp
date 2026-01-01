@@ -95,7 +95,7 @@ jobs:
           echo "PACKAGE_SIZE=$SIZE" >> $GITHUB_ENV
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: dist
           path: dist/
