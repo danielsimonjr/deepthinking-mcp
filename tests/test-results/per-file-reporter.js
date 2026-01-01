@@ -14,6 +14,8 @@ const path = require('path');
  *   ├── json/           # Per-file JSON reports
  *   ├── html/           # Per-file HTML reports
  *   └── summary/        # Summary files (JSON + HTML)
+ *
+ * Coverage data is read from ./coverage/coverage-summary.json when available.
  */
 class PerFileReporter {
   constructor() {
@@ -21,7 +23,91 @@ class PerFileReporter {
     this.jsonDir = path.join(this.baseDir, 'json');
     this.htmlDir = path.join(this.baseDir, 'html');
     this.summaryDir = path.join(this.baseDir, 'summary');
+    this.coverageDir = 'coverage';
     this.mode = process.env.VITEST_REPORT_MODE || 'all';
+  }
+
+  /**
+   * Read coverage data from coverage-summary.json
+   * Returns { percentage, untestedFiles } or null if not available
+   */
+  readCoverageData() {
+    const coverageSummaryPath = path.join(this.coverageDir, 'coverage-summary.json');
+
+    try {
+      if (!fs.existsSync(coverageSummaryPath)) {
+        return null;
+      }
+
+      const coverageData = JSON.parse(fs.readFileSync(coverageSummaryPath, 'utf8'));
+
+      // Extract overall coverage percentage (using lines as primary metric)
+      const total = coverageData.total;
+      const overallPercentage = total?.lines?.pct ?? total?.statements?.pct ?? 0;
+
+      // Find files with 0% coverage or very low coverage
+      const untestedFiles = [];
+      const lowCoverageFiles = [];
+
+      for (const [filePath, data] of Object.entries(coverageData)) {
+        if (filePath === 'total') continue;
+
+        const linePct = data?.lines?.pct ?? 0;
+        const stmtPct = data?.statements?.pct ?? 0;
+        const avgPct = (linePct + stmtPct) / 2;
+
+        // Normalize the file path for display (remove project root)
+        const displayPath = filePath.replace(/^.*[/\\]src[/\\]/, 'src/').replace(/\\/g, '/');
+
+        if (avgPct === 0) {
+          untestedFiles.push({
+            file: displayPath,
+            lines: linePct,
+            statements: stmtPct,
+          });
+        } else if (avgPct < 50) {
+          lowCoverageFiles.push({
+            file: displayPath,
+            lines: linePct,
+            statements: stmtPct,
+          });
+        }
+      }
+
+      // Sort by coverage percentage (ascending)
+      untestedFiles.sort((a, b) => a.lines - b.lines);
+      lowCoverageFiles.sort((a, b) => a.lines - b.lines);
+
+      return {
+        percentage: overallPercentage,
+        lines: {
+          total: total?.lines?.total ?? 0,
+          covered: total?.lines?.covered ?? 0,
+          pct: total?.lines?.pct ?? 0,
+        },
+        statements: {
+          total: total?.statements?.total ?? 0,
+          covered: total?.statements?.covered ?? 0,
+          pct: total?.statements?.pct ?? 0,
+        },
+        functions: {
+          total: total?.functions?.total ?? 0,
+          covered: total?.functions?.covered ?? 0,
+          pct: total?.functions?.pct ?? 0,
+        },
+        branches: {
+          total: total?.branches?.total ?? 0,
+          covered: total?.branches?.covered ?? 0,
+          pct: total?.branches?.pct ?? 0,
+        },
+        untestedFiles,
+        lowCoverageFiles,
+        totalSourceFiles: Object.keys(coverageData).filter(k => k !== 'total').length,
+      };
+    } catch (err) {
+      // Coverage data not available or malformed
+      return null;
+    }
   }
 
   onInit(ctx) {
@@ -31,6 +117,10 @@ class PerFileReporter {
         fs.mkdirSync(dir, { recursive: true });
       }
     });
+
+    // Store context for later use
+    this.ctx = ctx;
+    this.pendingSummaryData = null;
   }
 
   /**
@@ -117,7 +207,12 @@ class PerFileReporter {
     const skippedTests = allTests.filter(t => t.state === 'skipped').length;
     const overallStatus = failedTests > 0 || (unhandledErrors?.length > 0) ? 'FAIL' : 'PASS';
 
-    const summary = {
+    const baseName = `test-summary-${timestamp}-${overallStatus}`;
+    const jsonPath = path.join(this.summaryDir, `${baseName}.json`);
+    const htmlPath = path.join(this.summaryDir, `${baseName}.html`);
+
+    // Create summary object (without coverage initially)
+    const createSummary = (coverageData) => ({
       timestamp: new Date().toISOString(),
       status: overallStatus,
       mode: this.mode,
@@ -130,6 +225,16 @@ class PerFileReporter {
       },
       passRate: totalTests > 0 ? ((passedTests / totalTests) * 100).toFixed(1) + '%' : '0%',
       unhandledErrors: unhandledErrors?.length ?? 0,
+      coverage: coverageData ? {
+        percentage: coverageData.percentage,
+        lines: coverageData.lines,
+        statements: coverageData.statements,
+        functions: coverageData.functions,
+        branches: coverageData.branches,
+        totalSourceFiles: coverageData.totalSourceFiles,
+        untestedFiles: coverageData.untestedFiles,
+        lowCoverageFiles: coverageData.lowCoverageFiles,
+      } : null,
       files: fileReports.map(r => ({
         name: r.testName,
         file: path.basename(r.name),
@@ -139,17 +244,37 @@ class PerFileReporter {
         failed: r.summary.failed,
         skipped: r.summary.skipped,
       }))
-    };
+    });
 
-    const baseName = `test-summary-${timestamp}-${overallStatus}`;
-
-    // Write JSON summary
-    const jsonPath = path.join(this.summaryDir, `${baseName}.json`);
+    // Write initial summary (may not have coverage yet)
+    const initialCoverage = this.readCoverageData();
+    const summary = createSummary(initialCoverage);
     fs.writeFileSync(jsonPath, JSON.stringify(summary, null, 2));
-
-    // Write HTML summary
-    const htmlPath = path.join(this.summaryDir, `${baseName}.html`);
     fs.writeFileSync(htmlPath, this.generateSummaryHtml(summary, fileReports));
+
+    // Register a handler to update summary with coverage after vitest finishes
+    // Coverage is written after reporters complete, so we use beforeExit
+    if (!initialCoverage) {
+      const self = this;
+      const updateWithCoverage = () => {
+        try {
+          const coverageData = self.readCoverageData();
+          if (coverageData) {
+            const updatedSummary = createSummary(coverageData);
+            fs.writeFileSync(jsonPath, JSON.stringify(updatedSummary, null, 2));
+            fs.writeFileSync(htmlPath, self.generateSummaryHtml(updatedSummary, fileReports));
+          }
+        } catch (e) {
+          // Coverage update failed, keep original summary
+        }
+      };
+
+      // Try to update after a short delay (coverage should be written by then)
+      setTimeout(updateWithCoverage, 100);
+
+      // Also try on beforeExit as a fallback
+      process.once('beforeExit', updateWithCoverage);
+    }
   }
 
   /**
@@ -313,6 +438,106 @@ class PerFileReporter {
         </tr>`;
     }).join('');
 
+    // Generate coverage section HTML
+    let coverageHtml = '';
+    if (summary.coverage) {
+      const cov = summary.coverage;
+      const covColor = cov.percentage >= 80 ? '#22c55e' : cov.percentage >= 50 ? '#f59e0b' : '#ef4444';
+
+      // Generate untested files list
+      let untestedFilesHtml = '';
+      if (cov.untestedFiles && cov.untestedFiles.length > 0) {
+        const untestedRows = cov.untestedFiles.map(f => `
+          <tr>
+            <td style="padding: 8px 16px; font-family: monospace; font-size: 13px;">${this.escapeHtml(f.file)}</td>
+            <td style="padding: 8px 16px; text-align: center; color: #ef4444;">0%</td>
+          </tr>`).join('');
+
+        untestedFilesHtml = `
+          <div class="section" style="margin-top: 24px;">
+            <h2 style="font-size: 18px; margin-bottom: 16px; color: #ef4444;">⚠ Untested Files (0% Coverage)</h2>
+            <div class="files-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>File</th>
+                    <th style="width: 100px; text-align: center;">Coverage</th>
+                  </tr>
+                </thead>
+                <tbody>${untestedRows}</tbody>
+              </table>
+            </div>
+          </div>`;
+      }
+
+      // Generate low coverage files list
+      let lowCoverageHtml = '';
+      if (cov.lowCoverageFiles && cov.lowCoverageFiles.length > 0) {
+        const lowCovRows = cov.lowCoverageFiles.slice(0, 20).map(f => `
+          <tr>
+            <td style="padding: 8px 16px; font-family: monospace; font-size: 13px;">${this.escapeHtml(f.file)}</td>
+            <td style="padding: 8px 16px; text-align: center; color: #f59e0b;">${f.lines.toFixed(1)}%</td>
+          </tr>`).join('');
+
+        lowCoverageHtml = `
+          <div class="section" style="margin-top: 24px;">
+            <h2 style="font-size: 18px; margin-bottom: 16px; color: #f59e0b;">⚡ Low Coverage Files (&lt;50%)</h2>
+            <div class="files-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>File</th>
+                    <th style="width: 100px; text-align: center;">Lines</th>
+                  </tr>
+                </thead>
+                <tbody>${lowCovRows}</tbody>
+              </table>
+            </div>
+            ${cov.lowCoverageFiles.length > 20 ? `<p class="meta" style="margin-top: 8px;">... and ${cov.lowCoverageFiles.length - 20} more files</p>` : ''}
+          </div>`;
+      }
+
+      coverageHtml = `
+        <div class="coverage-section" style="background: white; border-radius: 8px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <h2 style="font-size: 20px; margin-bottom: 16px;">📊 Code Coverage</h2>
+
+          <div class="summary-grid">
+            <div class="summary-card" style="background: linear-gradient(135deg, ${covColor}22, ${covColor}11);">
+              <div class="summary-value" style="color: ${covColor};">${cov.percentage.toFixed(1)}%</div>
+              <div class="summary-label">Overall</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value">${cov.lines.pct.toFixed(1)}%</div>
+              <div class="summary-label">Lines (${cov.lines.covered}/${cov.lines.total})</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value">${cov.statements.pct.toFixed(1)}%</div>
+              <div class="summary-label">Statements</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value">${cov.functions.pct.toFixed(1)}%</div>
+              <div class="summary-label">Functions</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value">${cov.branches.pct.toFixed(1)}%</div>
+              <div class="summary-label">Branches</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value">${cov.totalSourceFiles}</div>
+              <div class="summary-label">Source Files</div>
+            </div>
+          </div>
+
+          <p class="meta" style="margin-top: 16px;">
+            Untested files: <strong style="color: #ef4444;">${cov.untestedFiles?.length ?? 0}</strong> |
+            Low coverage (&lt;50%): <strong style="color: #f59e0b;">${cov.lowCoverageFiles?.length ?? 0}</strong>
+          </p>
+
+          ${untestedFilesHtml}
+          ${lowCoverageHtml}
+        </div>`;
+    }
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -345,7 +570,7 @@ class PerFileReporter {
         <span class="status-badge">${summary.status}</span>
       </div>
       <p class="meta">Generated: ${summary.timestamp}</p>
-      <p class="meta">Pass Rate: <strong>${summary.passRate}</strong></p>
+      <p class="meta">Pass Rate: <strong>${summary.passRate}</strong>${summary.coverage ? ` | Coverage: <strong>${summary.coverage.percentage.toFixed(1)}%</strong>` : ''}</p>
 
       <div class="summary-grid">
         <div class="summary-card">
@@ -370,6 +595,8 @@ class PerFileReporter {
         </div>
       </div>
     </div>
+
+    ${coverageHtml}
 
     <div class="files-table">
       <table>

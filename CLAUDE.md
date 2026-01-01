@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **34 reasoning modes** (30 with dedicated thought types) with taxonomy-based classification (69 implemented reasoning types across 12 categories, 110 documented in reference), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
-**Version**: 9.1.1 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
+**Version**: 9.1.2 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
 
 ## Project Metrics
 
@@ -40,9 +40,11 @@ npm run docs:deps    # Generate dependency graph documentation
 
 ```bash
 npm test             # Run tests in watch mode
-npm run test:run     # Run all tests once (CI mode)
+npm run test:run     # Run all tests once with coverage (summary mode)
+npm run test:debug   # Run tests with coverage (failed files with details)
+npm run test:all     # Run tests with coverage (all files - audit mode)
 npm run test:publish # Run tests for publishing (skips benchmarks)
-npm run test:coverage # Generate coverage reports
+npm run test:coverage # Generate coverage reports only
 
 # Run a single test file
 npm test -- tests/unit/session/manager.test.ts
@@ -52,6 +54,8 @@ npm test -- -t "SessionManager"
 ```
 
 Test framework: Vitest with V8 coverage provider.
+
+**Test Reports:** Generated in `tests/test-results/` with JSON and HTML formats. Reports include code coverage percentage and list of untested files.
 
 ## Architecture
 
@@ -195,6 +199,7 @@ Configured in `tsconfig.json`:
 
 | Version | Phase | Key Features |
 |---------|-------|--------------|
+| **v9.1.2** | Test Reporting | **NEW**: Multi-mode test reporting (summary/debug/all) with coverage integration, HTML reports, untested files list. |
 | **v9.1.1** | Historical Export | **ENHANCED**: Historical Mermaid causal chain exports now include dates in node labels with `<br/>` line breaks. |
 | **v9.1.0** | Historical Mode | **NEW MODE**: Historical reasoning for events, sources, periods, causal chains, actors. 5 thought types, visual exports, 42 handler tests. |
 | **v9.0.0** | Phase 15 Complete | **RADICAL SIMPLIFICATION**: Sprints 1-3 complete (barrel removal, service simplification, composition pattern). Sprints 4-12 cancelled after discovering handlers contain real algorithms. |

@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.1.2] - 2025-12-31
+
+### Added - Multi-Mode Test Reporting with Coverage
+
+Added comprehensive test reporting system with code coverage integration.
+
+**Test Modes:**
+| Mode | Command | Description |
+|------|---------|-------------|
+| `summary` | `npm run test:run` | Summary reports only (JSON + HTML) |
+| `debug` | `npm run test:debug` | Failed files with test case details |
+| `all` | `npm run test:all` | All files with full details (audit mode) |
+
+**Coverage Integration:**
+- Overall coverage percentage with color-coded thresholds (green ≥80%, yellow ≥50%, red <50%)
+- Breakdown by Lines, Statements, Functions, and Branches
+- List of untested files (0% coverage)
+- List of low coverage files (<50%)
+- Total source files tracked
+
+**Report Output Structure:**
+```
+tests/test-results/
+├── json/           # Per-file JSON reports
+├── html/           # Per-file HTML reports (modern UI)
+└── summary/        # Summary files (JSON + HTML with coverage)
+```
+
+**HTML Report Features:**
+- Modern responsive UI with clean typography
+- Color-coded status badges and coverage indicators
+- Summary cards with test counts and pass rates
+- Horizontal table layout for individual tests
+- Coverage section with untested/low-coverage file tables
+
+**Files Created/Modified:**
+- `tests/test-results/per-file-reporter.js` - Custom Vitest 4.x reporter with coverage integration
+- `vitest.config.ts` - Added json-summary coverage reporter
+- `package.json` - Updated test scripts with `--coverage` flag
+- `.gitignore` - Added test result directories
+
 ## [9.1.1] - 2025-12-31
 
 ### Enhanced - Historical Mermaid Export with Dates
