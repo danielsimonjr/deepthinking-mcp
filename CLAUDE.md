@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **34 reasoning modes** (30 with dedicated thought types) with taxonomy-based classification (69 implemented reasoning types across 12 categories, 110 documented in reference), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
+DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **34 reasoning modes** (30 with dedicated thought types + 4 advanced runtime) with taxonomy-based classification (69 implemented reasoning types across 12 categories), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
 **Version**: 9.1.2 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
 
@@ -21,7 +21,7 @@ DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring *
 | Export Formats | 8 + native SVG + file export |
 | Visual Exporters | 42 files (24 mode-specific, 14 utils, 4 root) |
 | Specialized Handlers | 37 (34 modes + GenericModeHandler + CustomHandler + utility) |
-| Builder Classes | 14 fluent APIs (Phase 13 complete) |
+| Builder Classes | 14 fluent APIs |
 | Circular Dependencies | 55 (all type-only, 0 runtime) |
 
 ## Build & Development Commands
@@ -57,23 +57,30 @@ Test framework: Vitest with V8 coverage provider.
 
 **Test Reports:** Generated in `tests/test-results/` with JSON and HTML formats. Reports include code coverage percentage and list of untested files.
 
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SESSION_DIR` | Shared session storage for multi-instance | `` (in-memory) |
+| `MCP_EXPORT_PATH` | Default directory for file exports | `` (returns content) |
+| `MCP_EXPORT_OVERWRITE` | Overwrite existing files | `false` |
+| `MCP_LOG_LEVEL` | Log level (debug/info/warn/error) | `info` |
+| `MCP_MAX_SESSIONS` | Maximum active sessions | `100` |
+| `MCP_SESSION_TIMEOUT_MS` | Session timeout (0 = none) | `0` |
+
 ## Architecture
 
 ### Service Layer Pattern
 
 Business logic extracted from `src/index.ts` into focused services:
 
-| Service | File | Size | Purpose |
-|---------|------|------|---------|
-| **ThoughtFactory** | `src/services/ThoughtFactory.ts` | 25KB | Mode-specific thought creation for all 34 modes |
-| **ExportService** | `src/services/ExportService.ts` | 21KB | Multi-format export orchestration |
-| **SessionManager** | `src/session/manager.ts` | 30KB | Session lifecycle + meta-monitoring (v8.6.0) |
+| Service | File | Purpose |
+|---------|------|---------|
+| **ThoughtFactory** | `src/services/ThoughtFactory.ts` | Mode-specific thought creation for all 34 modes |
+| **ExportService** | `src/services/ExportService.ts` | Multi-format export orchestration |
+| **SessionManager** | `src/session/manager.ts` | Session lifecycle + meta-monitoring |
 
-**Note (v8.6.0):** MetaMonitor merged into SessionManager, ModeRouter inlined to index.ts. Mode recommendations use ModeRecommender directly.
-
-### ModeHandler Architecture (v8.x)
-
-**Phase 10 Sprint 3 (v8.4.0)**: All 34 reasoning modes now have fully implemented specialized handlers.
+### ModeHandler Architecture
 
 The Strategy Pattern-based ModeHandler system in `src/modes/handlers/` provides 37 total handlers:
 
@@ -86,15 +93,17 @@ The Strategy Pattern-based ModeHandler system in `src/modes/handlers/` provides 
 | **Systems/Scientific (3)** | SystemsThinking, ScientificMethod, FormalLogic | 8 Archetypes detection, proof logic |
 | **Academic (4)** | Synthesis, Argumentation, Critique, Analysis | Coverage tracking, Socratic questions |
 | **Engineering (4)** | Engineering, Computability, Cryptanalytic, Algorithmic | CLRS coverage, Turing machines, Decibans |
-| **Advanced Runtime (6)** | MetaReasoning, Recursive, Modal, Stochastic, Constraint, Optimization | Strategic oversight, constraint solving |
+| **Advanced Runtime (4)** | MetaReasoning, Recursive, Modal, Stochastic | Strategic oversight, constraint solving |
 | **Fallback (2)** | GenericModeHandler, CustomHandler | Default behavior, user-defined modes |
+
+**Note**: Constraint and Optimization modes use validators + generic handler support.
 
 **ModeHandlerRegistry** singleton manages all handlers via Strategy pattern:
 
 - `hasSpecializedHandler(mode)` - Check implementation status
 - `getHandler(mode)` - Get handler (specialized or generic fallback)
 - `createThought(input, sessionId)` - Delegate to appropriate handler
-- `registerAllHandlers()` - Initialize all 34 handlers at startup
+- `registerAllHandlers()` - Initialize all handlers at startup
 
 ### Key Directories
 
@@ -103,16 +112,15 @@ src/
 ├── index.ts           # MCP server entry point (tool handlers)
 ├── types/             # Type definitions for 34 modes
 │   ├── core.ts        # ThinkingMode enum, Thought union type
-│   └── modes/         # One file per reasoning mode (33 files)
+│   └── modes/         # One file per reasoning mode
 ├── services/          # Business logic layer
 │   ├── ThoughtFactory.ts
-│   ├── ExportService.ts
-│   └── Other service modules
+│   └── ExportService.ts
 ├── session/           # SessionManager, persistence, storage abstraction
 │   ├── manager.ts
 │   ├── storage/
 │   └── locks/
-├── taxonomy/          # 69 reasoning types (110 documented in reference), classifier
+├── taxonomy/          # 69 reasoning types, classifier
 ├── export/            # Visual and document exporters
 │   ├── visual/        # Per-mode visual exporters (Mermaid, DOT, ASCII, SVG)
 │   └── utilities
@@ -139,21 +147,19 @@ src/
 │   ├── validators/    # Per-mode and cross-mode validators
 │   └── index.ts
 ├── interfaces/        # TypeScript interfaces
-│   └── ILogger.ts
 ├── config/            # Configuration management
-│   └── index.ts
 ├── utils/             # Utility functions (errors, logger, sanitization)
 └── repositories/      # Repository pattern implementations (ISessionRepository)
 ```
 
 ### Type System
 
-All 33 reasoning modes defined in `src/types/core.ts`:
+All 34 reasoning modes defined in `src/types/core.ts`:
 
 - `ThinkingMode` enum - Mode identifiers
 - `Thought` union type - Discriminated union of all thought types
-- `FULLY_IMPLEMENTED_MODES` - 21 modes with complete runtime logic
-- `EXPERIMENTAL_MODES` - 12 modes with validators but limited runtime
+- `FULLY_IMPLEMENTED_MODES` - Modes with complete runtime logic
+- `EXPERIMENTAL_MODES` - Modes with validators but limited runtime
 - Type guards: `isSequentialThought()`, `isAlgorithmicThought()`, `isSynthesisThought()`, etc.
 
 Mode-specific types in `src/types/modes/` (one file per mode).
@@ -170,70 +176,38 @@ Configured in `tsconfig.json`:
 
 ## The 34 Reasoning Modes
 
-### Fully Implemented (30 modes with dedicated thought types)
+| Category | Modes | Description |
+|----------|-------|-------------|
+| **Core (5)** | Sequential, Shannon, Mathematics, Physics, Hybrid | Standard workflows, math/physics reasoning |
+| **Fundamental (3)** | Inductive, Deductive, Abductive | Basic reasoning triad |
+| **Causal/Probabilistic (7)** | Causal, Bayesian, Counterfactual, Temporal, Historical, GameTheory, Evidential | Cause-effect, probability, time, strategy |
+| **Analogical (2)** | Analogical, FirstPrinciples | Knowledge transfer, axiom derivation |
+| **Systems/Scientific (3)** | SystemsThinking, ScientificMethod, FormalLogic | Holistic analysis, experimentation, proofs |
+| **Academic (4)** | Synthesis, Argumentation, Critique, Analysis | Literature review, Toulmin model, peer review |
+| **Engineering (4)** | Engineering, Computability, Cryptanalytic, Algorithmic | CLRS algorithms, Turing machines, Decibans |
+| **Advanced Runtime (6)** | MetaReasoning, Recursive, Modal, Stochastic, Constraint, Optimization | Strategic oversight, recursive decomposition |
 
-| Category | Modes | Status |
-|----------|-------|--------|
-| **Core (5)** | Sequential, Shannon, Mathematics, Physics, Hybrid | ✅ Full implementation |
-| **Fundamental (3)** | Inductive, Deductive, Abductive | ✅ Full implementation |
-| **Causal/Probabilistic (7)** | Causal, Bayesian, Counterfactual, Temporal, Historical, GameTheory, Evidential | ✅ Full implementation |
-| **Analogical (2)** | Analogical, FirstPrinciples | ✅ Full implementation |
-| **Systems/Scientific (3)** | SystemsThinking, ScientificMethod, FormalLogic | ✅ Full implementation |
-| **Academic (4)** | Synthesis, Argumentation, Critique, Analysis | ✅ Full implementation |
-| **Engineering (4)** | Engineering, Computability, Cryptanalytic, Algorithmic | ✅ Full implementation |
+**Note**: 30 modes have dedicated thought types. 4 advanced runtime modes (Constraint, Optimization, Recursive, Modal) have validators and handler support but limited dedicated business logic.
 
-### Advanced Runtime Modes (4 modes - validators + handlers)
+## MCP Tools
 
-| Mode | Status | Purpose |
-|------|--------|---------|
-| **MetaReasoning** | ✅ Handler v8.4.0 | Strategic oversight of reasoning |
-| **Recursive** | ✅ Handler v8.4.0 | Self-referential analysis |
-| **Modal** | ✅ Handler v8.4.0 | Possibility/necessity logic |
-| **Stochastic** | ✅ Handler v8.4.0 | Probabilistic state transitions |
-| **Constraint** | ⚠️ Validator only | Constraint satisfaction |
-| **Optimization** | ✅ Handler v8.4.0 | Constraint optimization |
+The server provides 13 focused tools:
 
-**Note**: All 34 modes have specialized handlers as of v9.1.0. Advanced runtime modes have limited business logic but full ModeHandler support.
-
-## Recent Version History
-
-| Version | Phase | Key Features |
-|---------|-------|--------------|
-| **v9.1.2** | Test Reporting | **NEW**: Multi-mode test reporting (summary/debug/all) with coverage integration, HTML reports, untested files list. |
-| **v9.1.1** | Historical Export | **ENHANCED**: Historical Mermaid causal chain exports now include dates in node labels with `<br/>` line breaks. |
-| **v9.1.0** | Historical Mode | **NEW MODE**: Historical reasoning for events, sources, periods, causal chains, actors. 5 thought types, visual exports, 42 handler tests. |
-| **v9.0.0** | Phase 15 Complete | **RADICAL SIMPLIFICATION**: Sprints 1-3 complete (barrel removal, service simplification, composition pattern). Sprints 4-12 cancelled after discovering handlers contain real algorithms. |
-| **v8.5.0** | Phase 13 Sprint 1-2 | **FLUENT BUILDERS**: DOTGraphBuilder, MermaidGraphBuilder, GraphMLBuilder + ASCIIDocBuilder, SVGBuilder, TikZBuilder fluent APIs |
-| **v8.4.0** | Phase 10 Sprint 3 | **ALL 33 MODES SPECIALIZED**: Complete ModeHandler coverage, 36 total handlers, registerAllHandlers() function |
-| **v8.3.2** | Phase 15 | Code quality: Type safety, error handling docs, magic number extraction, deterministic logic |
-| **v8.3.1** | Phase 15 | Version synchronization in visual exporters, Phase 11 documentation |
-| **v8.3.0** | Phase 15 | Mode scaffolding templates for v8+ architecture, chunker utility for file management |
-| **v8.2.1** | Phase 10 Sprint 2B | ThoughtFactory handler integration fix, documentation updates |
-| **v8.2.0** | Phase 10 Sprint 2B | Advanced ModeHandlers: Synthesis, SystemsThinking (8 archetypes), Critique (6 Socratic categories) |
-| **v8.1.0** | Phase 10 Sprint 2 | Core ModeHandlers: Causal, Bayesian, GameTheory, Counterfactual |
-| **v8.0.0** | Phase 10 Sprint 1 | ModeHandler Infrastructure - Strategy Pattern architecture, Registry singleton |
-| **v7.5.2** | Phase 14 | Bug fix: All 11 experimental modes now return correct mode type |
-| **v7.5.0** | Phase 14 | Accessible Reasoning Modes - 12 focused MCP tools |
-
-## MCP Tools (v9.1.0)
-
-The server provides 13 focused tools + 1 legacy tool with hand-written JSON schemas:
-
-| Tool | Modes/Functions | Version |
-|------|--------|---------|
-| `deepthinking_core` | inductive, deductive, abductive | ✅ v8.4.0 |
-| `deepthinking_standard` | sequential, shannon, hybrid | ✅ v8.4.0 |
-| `deepthinking_mathematics` | mathematics, physics, computability | ✅ v8.4.0 |
-| `deepthinking_temporal` | temporal, historical | ✅ v9.1.0 |
-| `deepthinking_probabilistic` | bayesian, evidential | ✅ v8.4.0 |
-| `deepthinking_causal` | causal, counterfactual | ✅ v8.4.0 |
-| `deepthinking_strategic` | gametheory, optimization | ✅ v8.4.0 |
-| `deepthinking_analytical` | analogical, firstprinciples, metareasoning, cryptanalytic | ✅ v8.4.0 |
-| `deepthinking_scientific` | scientificmethod, systemsthinking, formallogic | ✅ v8.4.0 |
-| `deepthinking_engineering` | engineering, algorithmic | ✅ v8.4.0 |
-| `deepthinking_academic` | synthesis, argumentation, critique, analysis | ✅ v8.4.0 |
-| `deepthinking_session` | Session management (create, list, delete, export, get_session, switch_mode, recommend_mode) | ✅ v8.4.0 |
-| `deepthinking_analyze` | Multi-mode analysis with presets and merge strategies | ✅ Phase 12 Sprint 3 |
+| Tool | Modes/Functions |
+|------|-----------------|
+| `deepthinking_core` | inductive, deductive, abductive |
+| `deepthinking_standard` | sequential, shannon, hybrid |
+| `deepthinking_mathematics` | mathematics, physics, computability |
+| `deepthinking_temporal` | temporal, historical |
+| `deepthinking_probabilistic` | bayesian, evidential |
+| `deepthinking_causal` | causal, counterfactual |
+| `deepthinking_strategic` | gametheory, optimization |
+| `deepthinking_analytical` | analogical, firstprinciples, metareasoning, cryptanalytic |
+| `deepthinking_scientific` | scientificmethod, systemsthinking, formallogic |
+| `deepthinking_engineering` | engineering, algorithmic |
+| `deepthinking_academic` | synthesis, argumentation, critique, analysis |
+| `deepthinking_session` | Session management (create, list, delete, export, get_session, switch_mode, recommend_mode) |
+| `deepthinking_analyze` | Multi-mode analysis with presets and merge strategies |
 
 ## Adding New Features
 
@@ -242,10 +216,13 @@ The server provides 13 focused tools + 1 legacy tool with hand-written JSON sche
 1. Create type definition: `src/types/modes/newmode.ts`
 2. Add to `ThinkingMode` enum in `src/types/core.ts`
 3. Add to `Thought` union type and appropriate mode array
-4. Create handler: `src/modes/newmode-reasoning.ts`
-5. Update `ThoughtFactory` to handle the mode
-6. Add Zod validator in `src/validation/validators/modes/`
-7. Create visual exporter in `src/export/visual/`
+4. Create handler: `src/modes/handlers/NewModeHandler.ts`
+5. Register in `src/modes/handlers/ModeHandlerRegistry.ts`
+6. Update `ThoughtFactory` to handle the mode
+7. Add Zod validator in `src/validation/validators/modes/`
+8. Create visual exporter in `src/export/visual/`
+
+See `docs/ADDING_NEW_MODE.md` for complete guide with templates.
 
 ### New Export Format
 
@@ -274,7 +251,7 @@ The server provides 13 focused tools + 1 legacy tool with hand-written JSON sche
 
 ### Multi-Instance Configuration
 
-For parallel reasoning or handling multiple concurrent sessions, you can run multiple instances that share a common session directory:
+For parallel reasoning or handling multiple concurrent sessions:
 
 ```json
 {
@@ -282,47 +259,22 @@ For parallel reasoning or handling multiple concurrent sessions, you can run mul
     "deepthinking-1": {
       "command": "node",
       "args": ["C:/path/to/deepthinking-mcp/dist/index.js"],
-      "env": {
-        "SESSION_DIR": "C:/shared/deepthinking-sessions"
-      }
+      "env": { "SESSION_DIR": "C:/shared/deepthinking-sessions" }
     },
     "deepthinking-2": {
       "command": "node",
       "args": ["C:/path/to/deepthinking-mcp/dist/index.js"],
-      "env": {
-        "SESSION_DIR": "C:/shared/deepthinking-sessions"
-      }
-    },
-    "deepthinking-3": {
-      "command": "node",
-      "args": ["C:/path/to/deepthinking-mcp/dist/index.js"],
-      "env": {
-        "SESSION_DIR": "C:/shared/deepthinking-sessions"
-      }
+      "env": { "SESSION_DIR": "C:/shared/deepthinking-sessions" }
     }
   }
 }
 ```
 
 **Features:**
-
 - **Shared Sessions**: All instances share sessions via file-based storage
 - **File Locking**: Automatic cross-process file locking prevents race conditions
-- **Concurrent Reads**: Multiple instances can read sessions simultaneously (shared locks)
+- **Concurrent Reads**: Multiple instances can read sessions simultaneously
 - **Safe Writes**: Exclusive locks ensure atomic writes
-- **Stale Lock Detection**: Automatic cleanup of locks from crashed processes
-
-**Environment Variables:**
-
-- `SESSION_DIR` - Path to shared session directory (enables file-based storage)
-  - If not set: Uses in-memory storage (single instance mode)
-  - If set: Uses FileSessionStore with cross-process file locking
-
-**Use Cases:**
-
-- Run different reasoning modes in parallel
-- Handle multiple conversations simultaneously
-- Distribute complex analysis across multiple instances
 
 ## Key Files
 
@@ -335,44 +287,14 @@ For parallel reasoning or handling multiple concurrent sessions, you can run mul
 | `src/taxonomy/reasoning-types.ts` | All 69 reasoning type definitions |
 | `src/search/engine.ts` | Full-text search implementation |
 | `src/proof/decomposer.ts` | Proof decomposition engine |
-| `src/types/modes/algorithmic.ts` | CLRS algorithm analysis types |
-| `src/types/modes/computability.ts` | Turing machine types |
-| `src/types/modes/cryptanalytic.ts` | Deciban evidence system types |
-| `src/types/modes/synthesis.ts` | Literature synthesis types |
-| `src/types/modes/argumentation.ts` | Toulmin model argumentation types |
-| `src/types/modes/critique.ts` | Critical analysis types |
-| `src/types/modes/analysis.ts` | Qualitative analysis types |
-| `src/types/modes/historical.ts` | Historical reasoning types (events, sources, periods, chains) |
 | `src/modes/handlers/ModeHandler.ts` | Handler interface definition |
 | `src/modes/handlers/ModeHandlerRegistry.ts` | Singleton registry for handlers |
-| `src/modes/handlers/SystemsThinkingHandler.ts` | 8 Systems Archetypes detection |
 | `src/modes/handlers/HistoricalHandler.ts` | Historical source evaluation, pattern detection |
+| `src/modes/handlers/SystemsThinkingHandler.ts` | 8 Systems Archetypes detection |
+| `src/modes/handlers/BayesianHandler.ts` | Auto posterior calculation |
+| `src/modes/handlers/GameTheoryHandler.ts` | Nash equilibria detection |
 
 ## Development Best Practices
-
-### Cleanup Before Committing/Publishing
-
-**CRITICAL**: Always remove temporary debug/test artifacts before committing or publishing:
-
-```bash
-# Before git commit - check for junk files
-git status
-
-# Common temporary files to remove:
-rm test-*.mjs test-*.js debug-*.js temp-*.js .error.txt
-
-# Verify only intended files are staged
-git diff --cached
-```
-
-**Cleanup Checklist:**
-
-- Remove temporary test scripts (e.g., `test-mcp-server.mjs`, `test-schema-output.js`)
-- Delete debug files created during troubleshooting
-- Check for `.error.txt` or other runtime artifacts
-- Review `git status` output before committing
-- Verify `dist/` doesn't contain test artifacts before publishing
-- Run tests to ensure nothing broke after cleanup
 
 ### Build & Publish Workflow
 
@@ -389,19 +311,28 @@ git diff --cached
 7. git push origin master     # Push to GitHub
 ```
 
-**Why This Order Matters:**
+### Cleanup Before Committing
 
-- Typecheck catches errors before wasting time on builds
-- Tests verify correctness before building
-- Building only when code is verified saves time
-- Never commit broken code
+**CRITICAL**: Remove temporary debug/test artifacts before committing:
 
-**Common Mistakes:**
+```bash
+# Before git commit - check for junk files
+git status
 
-- Building before typechecking (wastes time if types are wrong)
-- Building before testing (wastes time if tests fail)
-- Committing source without rebuilding dist/
-- Publishing with outdated dist/ files
+# Common temporary files to remove:
+rm test-*.mjs test-*.js debug-*.js temp-*.js .error.txt
+
+# Verify only intended files are staged
+git diff --cached
+```
+
+### Key Conventions
+
+1. **No mode logic in index.ts** → Use handlers in `src/modes/handlers/`
+2. **Use ModeHandlerRegistry** → For all mode-specific operations
+3. **Lazy service initialization** → Use getter functions in `src/index.ts`
+4. **Sync schemas** → Update both hand-written JSON and Zod schemas in `src/tools/`
+5. **Type safety first** → Run `typecheck` before building
 
 ## Memory Usage Reminder
 
@@ -411,325 +342,77 @@ git diff --cached
 2. **During work**: Add observations for significant changes with `mcp__memory-mcp__add_observations`
 3. **At session end**: Update memory with session summary and any new findings
 
-This ensures continuity across sessions and prevents loss of important project context.
-
 ## Documentation
 
-Additional documentation in `docs/architecture/`:
-
-- `OVERVIEW.md` - Comprehensive project overview
-- `ARCHITECTURE.md` - Detailed system architecture
-- `COMPONENTS.md` - Component deep-dive
-- `DATA_FLOW.md` - Data flow diagrams
-- `DEPENDENCY_GRAPH.md` - Module dependency analysis (auto-generated)
-
-Mode-specific documentation in `docs/modes/`:
-
-- `SYNTHESIS.md` - Literature synthesis mode guide
-- `ARGUMENTATION.md` - Academic argumentation documentation
-- `CRITIQUE.md` - Critical analysis mode guide
-- `ANALYSIS.md` - Qualitative analysis documentation
-
-Analysis and planning in `docs/analysis/`:
-
-- `REASONING_TYPES_GAP_ANALYSIS.md` - Gap analysis: 110 documented types vs 33 implemented modes
-- `reasoning-types-gap-analysis.json` - Machine-readable analysis with priority ratings
-
-Reference documentation in `docs/reference/`:
-
-- `Types of Thinking and Reasonings.md` - Unified taxonomy of 110 reasoning types in 18 categories
+| Location | Contents |
+|----------|----------|
+| `docs/architecture/` | OVERVIEW.md, ARCHITECTURE.md, COMPONENTS.md, DATA_FLOW.md, DEPENDENCY_GRAPH.md |
+| `docs/modes/` | SYNTHESIS.md, ARGUMENTATION.md, CRITIQUE.md, ANALYSIS.md |
+| `docs/planning/` | TEST_PLAN.md, PHASE_11-16 sprint documents |
+| `docs/reference/` | Types of Thinking and Reasonings.md (110 reasoning types taxonomy) |
+| `docs/analysis/` | REASONING_TYPES_GAP_ANALYSIS.md |
 
 Generate dependency docs: `npm run docs:deps`
-
-## Phase 13: Visual Exporter Refactoring
-
-**Goal**: Adopt shared utility modules (DOT, Mermaid, ASCII) across all 22 visual mode exporters to reduce code duplication and file sizes.
-
-**Sprint 1 (v8.5.0)**: Core Graph Builders
-
-- Added `DOTGraphBuilder` fluent API class to `src/export/visual/utils/dot.ts`
-- Added `MermaidGraphBuilder` fluent API class to `src/export/visual/utils/mermaid.ts`
-- Added `GraphMLBuilder` fluent API class to `src/export/visual/utils/graphml.ts`
-- Created 64 unit tests in `tests/unit/export/visual/utils/graph-builders.test.ts`
-
-**Sprint 2 (v8.5.0)**: Visual Format Builders
-
-- Added `ASCIIDocBuilder` fluent API class to `src/export/visual/utils/ascii.ts`
-- Added `SVGBuilder` and `SVGGroupBuilder` fluent API classes to `src/export/visual/utils/svg.ts`
-- Added `TikZBuilder` fluent API class to `src/export/visual/utils/tikz.ts`
-- Created 89 unit tests in `tests/unit/export/visual/utils/visual-builders.test.ts`
-
-**Sprint 3 (v8.5.0)**: Document Format Builders
-
-- Added `UMLBuilder` fluent API class to `src/export/visual/utils/uml.ts`
-- Added `HTMLDocBuilder` fluent API class to `src/export/visual/utils/html.ts`
-- Added `MarkdownBuilder` fluent API class to `src/export/visual/utils/markdown.ts`
-- Added `ModelicaBuilder` fluent API class to `src/export/visual/utils/modelica.ts`
-- Added `JSONExportBuilder` fluent API class to `src/export/visual/utils/json.ts`
-- Created 115 unit tests in `tests/unit/export/visual/utils/document-builders.test.ts`
-
-**Sprint 4 (v8.5.0)**: Integration Tests & Documentation
-
-- Created `tests/integration/export/visual/builders-integration.test.ts` with 35 real-world usage tests
-- Created `tests/unit/export/visual/modes/snapshot-baseline.test.ts` with 63 snapshot baseline tests
-- Created 15 mode exporter snapshot tests
-- Added JSDoc documentation to all 11 builder classes
-- Tests cover all 14 builder classes: DOTGraphBuilder, MermaidGraphBuilder, MermaidGanttBuilder, MermaidStateDiagramBuilder, GraphMLBuilder, ASCIIDocBuilder, SVGBuilder, SVGGroupBuilder, TikZBuilder, UMLBuilder, HTMLDocBuilder, MarkdownBuilder, ModelicaBuilder, JSONExportBuilder
-
-**Sprint 5 (v8.5.0)**: Critical Files Batch 1
-
-- Refactored `physics.ts`, `engineering.ts`, `metareasoning.ts`, `proof-decomposition.ts` to use builders
-- All 4 files now use DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder fluent APIs
-- Updated version comments to v8.5.0
-- Note: Files still >1000 lines - file splitting deferred to Sprint 10
-
-**Sprint 6 (v8.5.0)**: Critical Files Batch 2
-
-- Refactored `hybrid.ts`, `formal-logic.ts`, `scientific-method.ts`, `optimization.ts` to use builders
-- All 4 files now use DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder fluent APIs
-- Updated 12 snapshot baselines to match new builder output formatting
-- Total mode exporters refactored: 9/22 (41%)
-
-**Sprint 7 (v8.5.0)**: Critical Files Batch 3
-
-- Refactored `first-principles.ts`, `mathematics.ts`, `game-theory.ts`, `evidential.ts` to use builders
-- All 4 files now use DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder fluent APIs
-- Updated 12 snapshot baselines to match new builder output formatting
-- Total mode exporters refactored: 12/22 (55%)
-
-**Sprint 8 (v8.5.0)**: Critical Files Batch 4
-
-- Refactored `systems-thinking.ts`, `analogical.ts`, `causal.ts`, `computability.ts`, `counterfactual.ts` to use builders
-- All 5 files now use DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder fluent APIs
-- Updated 13 snapshot baselines to match new builder output formatting
-- Total mode exporters refactored: 17/22 (77%)
-
-**Sprint 9 (v8.5.0)**: Final Batch - Mode Exporter Refactoring Complete
-
-- Refactored `sequential.ts`, `abductive.ts`, `bayesian.ts`, `temporal.ts`, `shannon.ts` to use builders
-- All 5 files now use DOTGraphBuilder, MermaidGraphBuilder, ASCIIDocBuilder fluent APIs
-- Fixed `computability.ts` default fallback paths (2 undocumented builder bypasses) to use builders
-- Added `MermaidGanttBuilder` fluent API class to `src/export/visual/utils/mermaid.ts`
-- Added `MermaidStateDiagramBuilder` fluent API class to `src/export/visual/utils/mermaid.ts`
-- Refactored `temporal.ts` to use `MermaidGanttBuilder` for gantt chart generation
-- Refactored `computability.ts` to use `MermaidStateDiagramBuilder` for Turing machine state diagrams
-- Updated 14 snapshot baselines to match new builder output formatting
-- **Total mode exporters refactored: 22/22 (100%) - TRUE 100% builder adoption (NO exceptions)**
-- **Total builder classes: 14** (11 primary + SVGGroupBuilder + MermaidGanttBuilder + MermaidStateDiagramBuilder)
-
-**Builder Pattern Benefits**:
-
-```typescript
-// Before: Inline string building (duplicated in 22 files)
-let dot = 'digraph G {\n';
-dot += '  rankdir=TB;\n';
-dot += `  ${id} [label="${label}"];\n`;
-dot += '}\n';
-
-// After: Fluent API builder
-const dot = new DOTGraphBuilder()
-  .setRankDir('TB')
-  .addNode({ id, label })
-  .render();
-```
-
-**Remaining Sprints** (1 more planned):
-
-| Sprint | Focus |
-|--------|-------|
-| 10 | File splitting for Sprint 5 files (>1000 lines), final verification |
-
-See `docs/planning/PHASE_13_*.json` for detailed sprint breakdowns.
-
-## Phase 15: Code Quality & Tooling
-
-**Type Safety Initiative (v8.3.2)**
-
-- Added proper TypeScript types to all 10 MCP handler functions in `src/index.ts`
-- Created handler input types: `ThoughtInput`, `SessionInput`, `AnalyzeInputType`
-- Made `MCPResponse` interface extensible with index signature for SDK compatibility
-- Fixed type assertions for Zod schema compatibility
-
-**Error Handling Documentation**
-Improved 16 empty catch blocks across 7 files with explanatory comments:
-
-- Cache modules (LRU, LFU, FIFO) - Non-serializable value handling in estimateSize()
-- CausalHandler - Optional centrality computation failures
-- CustomHandler - Validation rule evaluation errors
-- FileSessionStore (5 blocks) - File access and existence checks
-- FileLock (3 blocks) - Lock file operations and cleanup
-- ValidatorRegistry - Module loading failures
-
-**Magic Number Extraction**
-
-- Created `ANALYZER_CONSTANTS` object in `src/modes/combinations/analyzer.ts`:
-  - `DEFAULT_TIMEOUT_MS: 30000`
-  - `MAX_PARALLEL_MODES: 5`
-  - `MIN_CONFIDENCE_THRESHOLD: 0.3`
-  - `BASE_INSIGHT_CONFIDENCE: 0.8`
-- Added `MAX_INT32` constant (2^31 - 1) in stochastic RNG
-- Replaced `Math.random()` with deterministic `BASE_INSIGHT_CONFIDENCE` where appropriate
-
-**Phase 15 Radical Simplification (v9.0.0)**
-
-Phase 15 originally planned 12 sprints to "radically simplify" the codebase. After completing Sprints 1-3, deep analysis revealed Sprints 4-12 were based on incorrect assumptions.
-
-| Sprint | Status | Changes |
-|--------|--------|---------|
-| **1** | ✅ COMPLETE | Removed 9 unused barrel files |
-| **2** | ✅ COMPLETE | Merged MetaMonitor into SessionManager, inlined ModeRouter, removed unused cache strategies |
-| **3** | ✅ COMPLETE | Refactored validators from inheritance to composition |
-| **4-6** | ❌ CANCELLED | Would have deleted handlers with real algorithms |
-| **7-9** | ❌ CANCELLED | Type system already well-organized |
-| **10-12** | ❌ CANCELLED | Algorithms already exist in handlers |
-
-**Critical Discovery**: The original plan claimed "Actual Algorithms: 0" but handlers contain sophisticated algorithms:
-- **BayesianHandler**: `calculatePosterior()`, `calculateBayesFactor()`, `estimatePosteriorConfidence()`
-- **GameTheoryHandler**: `findPureStrategyNashEquilibria()`, `findDominantStrategies()`, `checkParetoOptimality()`
-- **CausalHandler**: `detectCycles()`, `performAdvancedGraphAnalysis()` (PageRank, centrality, d-separation)
-
-**Phase 16: File Export System (Unreleased)**
-
-- **Environment Configuration**
-  - `MCP_EXPORT_PATH` - Set default export directory
-  - `MCP_EXPORT_OVERWRITE` - Control file overwrite (default: false)
-- **Export Profiles**: academic, presentation, documentation, archive, minimal
-- **File Organization**: `{exportDir}/{sessionId}/{sessionId}_{mode}_{format}.{ext}`
-
-## Phase 11: Comprehensive Test Coverage Initiative
-
-Phase 11 is a dedicated testing phase targeting 95%+ coverage (700 tests across 19 categories) for all deepthinking-mcp tools, modes, and features.
-
-**Planning Documents** in `docs/planning/`:
-
-- `TEST_PLAN.md` - Master test plan with 700 enumerated test cases
-- `PHASE_11_INDEX.json` - Sprint index and category breakdown
-- `PHASE_11_SPRINT_1_TODO.json` through `PHASE_11_SPRINT_11_TODO.json` - Individual sprint tasks
-
-**Test Categories (19 total, 700 tests)**:
-
-| Category | Tests | Focus |
-|----------|-------|-------|
-| COR | 45 | Core reasoning (inductive, deductive, abductive) |
-| STD | 38 | Standard workflows + runtime-only modes |
-| PAR | 32 | Common parameters validation |
-| MTH | 54 | Mathematics, physics, computability |
-| TMP | 40 | Temporal reasoning |
-| PRB | 25 | Probabilistic (Bayesian, evidential) |
-| CSL | 30 | Causal and counterfactual |
-| STR | 30 | Strategic (game theory, optimization) |
-| ANL | 34 | Analytical modes |
-| SCI | 38 | Scientific modes |
-| ENG | 36 | Engineering and algorithmic |
-| ACD | 83 | Academic research modes |
-| SES | 26 | Session management |
-| EXP | 61 | Export formats |
-| HDL | 43 | ModeHandler specialized tests |
-| EDG | 35 | Edge cases |
-| REG | 10 | Regression tests |
-| INT | 20 | Integration scenarios |
-| PRF | 20 | Performance tests |
-
-**Sprint Overview** (66.5 hours total):
-
-1. Test Infrastructure & Core (45 tests)
-2. Standard Workflows & Parameters (70 tests)
-3. Mathematics/Physics/Computability (54 tests)
-4. Temporal & Probabilistic (65 tests)
-5. Causal & Strategic (60 tests)
-6. Analytical & Scientific (72 tests)
-7. Engineering & Academic (119 tests) - largest sprint
-8. Session & Exports (87 tests)
-9. ModeHandler Specialized (43 tests)
-10. Edge Cases & Regression (45 tests)
-11. Integration & Performance (40 tests)
 
 ## Standalone Tools
 
 The `tools/` directory contains standalone utilities compiled to executables with Bun:
 
-| Tool | Location | Purpose |
-|------|----------|---------|
-| **chunker.exe** | `tools/chunker/` | Split large files into editable sections, then merge back |
-| **compress-for-context.exe** | `tools/compress-for-context/` | CTON context compression for LLM context windows |
-| **create-dependency-graph.exe** | `tools/create-dependency-graph/` | Generates dependency graph documentation |
-
-### Chunker - Supported File Types
-
-| File Type | Extensions | Split Strategy |
-|-----------|------------|----------------|
-| **Markdown** | `.md` | By heading levels (`##`, `###`, etc.) |
-| **JSON** | `.json` | By top-level object keys |
-| **TypeScript** | `.ts`, `.tsx`, `.js`, `.jsx` | By declarations (imports, functions, classes, types) |
+| Tool | Purpose |
+|------|---------|
+| `tools/chunking-for-files/chunking-for-files.exe` | Split large files into editable sections, merge back |
+| `tools/compress-for-context/compress-for-context.exe` | CTON context compression for LLM context windows |
+| `tools/create-dependency-graph/create-dependency-graph.exe` | Generates dependency graph documentation |
 
 ### Usage
 
 ```bash
 # Split markdown by ## headings
-tools/chunker/chunker.exe split docs/ARCHITECTURE.md
-
-# Split TypeScript by declarations (functions, classes, types)
-tools/chunker/chunker.exe split src/index.ts
-
-# Split JSON by top-level keys
-tools/chunker/chunker.exe split package.json
+tools/chunking-for-files/chunking-for-files.exe split docs/ARCHITECTURE.md -l 2
 
 # Check status and merge
-tools/chunker/chunker.exe status docs/ARCHITECTURE_chunks/manifest.json
-tools/chunker/chunker.exe merge docs/ARCHITECTURE_chunks/manifest.json
+tools/chunking-for-files/chunking-for-files.exe status docs/ARCHITECTURE_chunks/manifest.json
+tools/chunking-for-files/chunking-for-files.exe merge docs/ARCHITECTURE_chunks/manifest.json
 
 # Compress files for LLM context
 tools/compress-for-context/compress-for-context.exe README.md -l aggressive
-tools/compress-for-context/compress-for-context.exe -b -r -p "*.md" ./docs
 
-# Generate dependency graph (run from any TypeScript project)
+# Generate dependency graph
 tools/create-dependency-graph/create-dependency-graph.exe C:\path\to\project
 ```
 
-All tools are self-contained (~114MB each, includes Bun runtime) and require no Node.js installation.
-
 ### Recommended Workflow for Large Files
-
-When working with large documentation files that exceed context limits:
 
 | Phase | Tool | Purpose |
 |-------|------|---------|
-| **Reading/Understanding** | compress-for-context | Reduce large file to fit context window |
-| **Editing** | chunker | Split into sections, edit, merge back |
+| **Reading** | compress-for-context | Reduce large file to fit context window |
+| **Editing** | chunking-for-files | Split into sections, edit, merge back |
 
-**Step-by-step workflow:**
+## Visual Builder APIs
 
-```
-1. Encounter large file (e.g., ARCHITECTURE.md - 500+ lines)
-     ↓
-2. compress-for-context → Read compressed version to understand structure
-     ↓
-3. Identify which sections need editing
-     ↓
-4. chunker split → Creates individual section files
-     ↓
-5. Edit only the relevant chunk files (smaller context per edit)
-     ↓
-6. chunker status → Verify what changed
-     ↓
-7. chunker merge → Reassemble with automatic backup
-```
+14 fluent builder classes for visual/document export:
 
-**Example session:**
+| Builder | Format | Location |
+|---------|--------|----------|
+| DOTGraphBuilder | GraphViz DOT | `src/export/visual/utils/dot.ts` |
+| MermaidGraphBuilder | Mermaid diagrams | `src/export/visual/utils/mermaid.ts` |
+| MermaidGanttBuilder | Mermaid Gantt | `src/export/visual/utils/mermaid.ts` |
+| MermaidStateDiagramBuilder | Mermaid state | `src/export/visual/utils/mermaid.ts` |
+| GraphMLBuilder | GraphML | `src/export/visual/utils/graphml.ts` |
+| ASCIIDocBuilder | ASCII art | `src/export/visual/utils/ascii.ts` |
+| SVGBuilder | Native SVG | `src/export/visual/utils/svg.ts` |
+| TikZBuilder | LaTeX TikZ | `src/export/visual/utils/tikz.ts` |
+| UMLBuilder | UML diagrams | `src/export/visual/utils/uml.ts` |
+| HTMLDocBuilder | HTML docs | `src/export/visual/utils/html.ts` |
+| MarkdownBuilder | Markdown | `src/export/visual/utils/markdown.ts` |
+| ModelicaBuilder | Modelica | `src/export/visual/utils/modelica.ts` |
+| JSONExportBuilder | JSON export | `src/export/visual/utils/json.ts` |
 
-```bash
-# 1. Understand the large file structure
-tools/compress-for-context/compress-for-context.exe docs/ARCHITECTURE.md -l moderate
-
-# 2. Split into editable chunks
-tools/chunker/chunker.exe split docs/ARCHITECTURE.md
-
-# 3. Edit specific sections (e.g., 008-core-components.md)
-# ... make edits to individual chunk files ...
-
-# 4. Check what changed
-tools/chunker/chunker.exe status docs/ARCHITECTURE_chunks/manifest.json
-
-# 5. Merge back with backup
-tools/chunker/chunker.exe merge docs/ARCHITECTURE_chunks/manifest.json
+**Usage Pattern:**
+```typescript
+const dot = new DOTGraphBuilder()
+  .setRankDir('TB')
+  .addNode({ id: 'n1', label: 'Node 1' })
+  .addEdge({ from: 'n1', to: 'n2' })
+  .render();
 ```
