@@ -242,14 +242,20 @@ describe('Session Actions Integration Tests', () => {
   // T-SES-014: get_session action - non-existent session
   // ===========================================================================
   describe('T-SES-014: Get Non-Existent Session', () => {
-    it('should return null for non-existent session', async () => {
-      const session = await manager.getSession('non-existent-id');
+    it('should return null for non-existent valid UUID session', async () => {
+      // Use a valid UUID v4 format that doesn't exist
+      const session = await manager.getSession('12345678-1234-4234-8234-123456789abc');
       expect(session).toBeNull();
     });
 
-    it('should handle empty session ID gracefully', async () => {
-      const session = await manager.getSession('');
-      expect(session).toBeNull();
+    it('should throw validation error for invalid session ID format', async () => {
+      // Security: Invalid session IDs now throw validation errors to prevent path traversal
+      await expect(manager.getSession('non-existent-id')).rejects.toThrow('Invalid session ID format');
+    });
+
+    it('should throw validation error for empty session ID', async () => {
+      // Security: Empty session IDs throw validation errors
+      await expect(manager.getSession('')).rejects.toThrow('Invalid session ID format');
     });
   });
 
@@ -478,9 +484,15 @@ describe('Session Actions Integration Tests', () => {
   // T-SES-021: delete_session action - non-existent session
   // ===========================================================================
   describe('T-SES-021: Delete Non-Existent Session', () => {
-    it('should handle deleting non-existent session', async () => {
+    it('should handle deleting non-existent valid UUID session', async () => {
+      // Use a valid UUID v4 format that doesn't exist in storage
       // deleteSession returns void but doesn't throw for non-existent sessions
-      await expect(manager.deleteSession('non-existent-id')).resolves.toBeUndefined();
+      await expect(manager.deleteSession('12345678-1234-4234-8234-123456789abc')).resolves.toBeUndefined();
+    });
+
+    it('should throw validation error for invalid session ID format on delete', async () => {
+      // Security: Invalid session IDs throw validation errors to prevent path traversal
+      await expect(manager.deleteSession('non-existent-id')).rejects.toThrow('Invalid session ID format');
     });
 
     it('should handle deleting already deleted session', async () => {

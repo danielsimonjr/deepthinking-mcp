@@ -59,9 +59,15 @@ describe('SessionManager', () => {
       expect(retrieved?.title).toBe('Test Session');
     });
 
-    it('should return null for non-existent session', async () => {
-      const session = await manager.getSession('non-existent-id');
+    it('should return null for non-existent valid UUID session', async () => {
+      // Use a valid UUID v4 format that doesn't exist in storage
+      const session = await manager.getSession('12345678-1234-4234-8234-123456789abc');
       expect(session).toBeNull();
+    });
+
+    it('should throw validation error for invalid session ID format', async () => {
+      // Security: Invalid session IDs throw validation errors to prevent path traversal
+      await expect(manager.getSession('non-existent-id')).rejects.toThrow('Invalid session ID format');
     });
   });
 

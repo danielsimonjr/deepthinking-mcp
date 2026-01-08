@@ -46,12 +46,14 @@ describe('Error Handling and Edge Cases', () => {
       ).rejects.toThrow();
     });
 
-    it('should handle empty session ID gracefully', async () => {
-      await expect(manager.getSession('')).resolves.toBeNull();
+    it('should throw validation error for empty session ID', async () => {
+      // Security: Empty session IDs throw validation errors to prevent path traversal
+      await expect(manager.getSession('')).rejects.toThrow('Invalid session ID format');
     });
 
-    it('should reject invalid UUID format', async () => {
-      await expect(manager.getSession('not-a-uuid')).resolves.toBeNull();
+    it('should throw validation error for invalid UUID format', async () => {
+      // Security: Invalid session IDs throw validation errors to prevent path traversal
+      await expect(manager.getSession('not-a-uuid')).rejects.toThrow('Invalid session ID format');
     });
 
     it('should handle session deletion idempotently', async () => {

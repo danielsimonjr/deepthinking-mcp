@@ -40,19 +40,26 @@ describe('Session Edge Case Tests', () => {
   // T-EDG-025: Resume non-existent session
   // ===========================================================================
   describe('T-EDG-025: Resume Non-Existent Session', () => {
-    it('should return null for non-existent session', async () => {
-      const session = await manager.getSession('non-existent-session-id');
+    it('should return null for non-existent valid UUID session', async () => {
+      // Use a valid UUID v4 format that doesn't exist in storage
+      const session = await manager.getSession('12345678-1234-4234-8234-123456789012');
       expect(session).toBeNull();
     });
 
     it('should handle random UUID that does not exist', async () => {
-      const session = await manager.getSession('12345678-1234-1234-1234-123456789012');
+      // Valid UUID v4 format (third group starts with 4, fourth starts with 8-b)
+      const session = await manager.getSession('a1234567-1234-4567-a123-123456789012');
       expect(session).toBeNull();
     });
 
-    it('should handle empty string session ID', async () => {
-      const session = await manager.getSession('');
-      expect(session).toBeNull();
+    it('should throw validation error for invalid session ID format', async () => {
+      // Security: Invalid session IDs now throw validation errors to prevent path traversal
+      await expect(manager.getSession('invalid-session-id')).rejects.toThrow('Invalid session ID format');
+    });
+
+    it('should throw validation error for empty string session ID', async () => {
+      // Security: Empty session IDs throw validation errors
+      await expect(manager.getSession('')).rejects.toThrow('Invalid session ID format');
     });
   });
 

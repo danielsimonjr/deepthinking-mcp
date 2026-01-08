@@ -282,6 +282,9 @@ export class SessionManager {
    * ```
    */
   async getSession(sessionId: string): Promise<ThinkingSession | null> {
+    // Security: Validate session ID format to prevent path traversal attacks
+    validateSessionId(sessionId);
+
     // Check memory first
     let session = this.activeSessions.get(sessionId);
 
@@ -513,6 +516,9 @@ export class SessionManager {
    * ```
    */
   async deleteSession(sessionId: string): Promise<void> {
+    // Security: Validate session ID format to prevent path traversal attacks
+    validateSessionId(sessionId);
+
     const session = this.activeSessions.get(sessionId);
     const deletedFromMemory = this.activeSessions.delete(sessionId);
 

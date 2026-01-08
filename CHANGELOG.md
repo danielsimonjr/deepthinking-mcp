@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.1.3] - 2026-01-08
+
+### Security - Path Traversal Prevention and Dependency Updates
+
+**Critical security fixes** addressing path traversal vulnerabilities and dependency vulnerabilities.
+
+**Path Traversal Prevention:**
+| Component | Fix |
+|-----------|-----|
+| `SessionManager.getSession()` | Added `validateSessionId()` call to prevent path traversal |
+| `SessionManager.deleteSession()` | Added `validateSessionId()` call to prevent path traversal |
+| `FileSessionStore.saveSession()` | Added defense-in-depth validation |
+| `FileSessionStore.loadSession()` | Added defense-in-depth validation |
+| `FileSessionStore.deleteSession()` | Added defense-in-depth validation |
+| `FileSessionStore.exists()` | Added defense-in-depth validation |
+
+**Session ID Validation:**
+- All session operations now require valid UUID v4 format
+- Invalid session IDs throw `Error: Invalid session ID format: {id}` instead of returning null
+- Prevents attackers from using `../../../etc/passwd` style IDs to access arbitrary files
+
+**Dependency Vulnerability Fixes:**
+| Vulnerability | Package | Severity | Fix |
+|--------------|---------|----------|-----|
+| ReDoS | `@modelcontextprotocol/sdk <1.25.2` | HIGH | Updated to 1.25.2 |
+| DoS via URL encoding | `body-parser 2.2.0` | MODERATE | Updated |
+| Command injection | `glob 10.2.0-10.4.5` | HIGH | Updated |
+| DoS via memory exhaustion | `qs <6.14.1` | HIGH | Updated to 6.14.1 |
+
+**Files Modified:**
+- `src/session/manager.ts` - Added security validation to `getSession()` and `deleteSession()`
+- `src/session/storage/file-store.ts` - Added defense-in-depth validation to all public methods
+- `package-lock.json` - Updated vulnerable dependencies
+
+**Test Updates:**
+- Updated 8 test files to expect validation errors for invalid session IDs
+- Added 10 new test cases for security validation behavior
+- All 5059 tests pass
+
 ## [9.1.2] - 2025-12-31
 
 ### Added - Multi-Mode Test Reporting with Coverage
