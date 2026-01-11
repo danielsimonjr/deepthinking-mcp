@@ -740,9 +740,15 @@ describe('MCP Protocol Compliance', () => {
       expect(session.mode).toBe(ThinkingMode.SEQUENTIAL);
     });
 
-    it('should return null for non-existent session', async () => {
-      const result = await sessionManager.getSession('non-existent-session');
+    it('should return null for non-existent valid UUID session', async () => {
+      // Use a valid UUID v4 format that doesn't exist
+      const result = await sessionManager.getSession('12345678-1234-4234-8234-123456789def');
       expect(result).toBeNull();
+    });
+
+    it('should throw validation error for invalid session ID format', async () => {
+      // Security: Invalid session IDs now throw validation errors to prevent path traversal
+      await expect(sessionManager.getSession('non-existent-session')).rejects.toThrow('Invalid session ID format');
     });
   });
 });

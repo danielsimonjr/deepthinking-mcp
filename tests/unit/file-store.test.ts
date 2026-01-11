@@ -160,10 +160,16 @@ describe('FileSessionStore', () => {
       expect(loaded?.mode).toBe(session.mode);
     });
 
-    it('should return null for non-existent session', async () => {
-      const loaded = await store.loadSession('non-existent-id');
+    it('should return null for non-existent valid UUID session', async () => {
+      // Use a valid UUID v4 format that doesn't exist
+      const loaded = await store.loadSession('12345678-1234-4234-8234-123456789abc');
 
       expect(loaded).toBeNull();
+    });
+
+    it('should throw validation error for invalid session ID format', async () => {
+      // Security: Invalid session IDs now throw validation errors to prevent path traversal
+      await expect(store.loadSession('non-existent-id')).rejects.toThrow('Invalid session ID format');
     });
 
     it('should preserve Date objects', async () => {
@@ -207,10 +213,16 @@ describe('FileSessionStore', () => {
       await expect(fs.access(sessionPath)).rejects.toThrow();
     });
 
-    it('should return false for non-existent session', async () => {
-      const deleted = await store.deleteSession('non-existent-id');
+    it('should return false for non-existent valid UUID session', async () => {
+      // Use a valid UUID v4 format that doesn't exist
+      const deleted = await store.deleteSession('12345678-1234-4234-8234-123456789abc');
 
       expect(deleted).toBe(false);
+    });
+
+    it('should throw validation error for invalid session ID format on delete', async () => {
+      // Security: Invalid session IDs throw validation errors to prevent path traversal
+      await expect(store.deleteSession('non-existent-id')).rejects.toThrow('Invalid session ID format');
     });
 
     it('should update metadata index after deletion', async () => {
@@ -291,10 +303,16 @@ describe('FileSessionStore', () => {
       expect(exists).toBe(true);
     });
 
-    it('should return false for non-existent session', async () => {
-      const exists = await store.exists('non-existent-id');
+    it('should return false for non-existent valid UUID session', async () => {
+      // Use a valid UUID v4 format that doesn't exist
+      const exists = await store.exists('12345678-1234-4234-8234-123456789abc');
 
       expect(exists).toBe(false);
+    });
+
+    it('should throw validation error for invalid session ID format on exists', async () => {
+      // Security: Invalid session IDs throw validation errors to prevent path traversal
+      await expect(store.exists('non-existent-id')).rejects.toThrow('Invalid session ID format');
     });
   });
 

@@ -42501,6 +42501,7 @@ var SessionManager = class {
    * ```
    */
   async getSession(sessionId) {
+    validateSessionId(sessionId);
     let session = this.activeSessions.get(sessionId);
     if (!session && this.storage) {
       try {
@@ -42686,6 +42687,7 @@ var SessionManager = class {
    * ```
    */
   async deleteSession(sessionId) {
+    validateSessionId(sessionId);
     const session = this.activeSessions.get(sessionId);
     const deletedFromMemory = this.activeSessions.delete(sessionId);
     if (this.storage) {
@@ -43249,9 +43251,11 @@ var FileSessionStore = class {
   }
   /**
    * Save a session to disk (with exclusive lock)
+   * Security: Validates session ID to prevent path traversal attacks
    */
   async saveSession(session) {
     await this.ensureInitialized();
+    validateSessionId(session.id);
     const sessionPath = this.getSessionPath(session.id);
     try {
       await withLock(sessionPath, async () => {
@@ -43270,9 +43274,11 @@ var FileSessionStore = class {
   }
   /**
    * Load a session from disk (with shared lock)
+   * Security: Validates session ID to prevent path traversal attacks
    */
   async loadSession(sessionId) {
     await this.ensureInitialized();
+    validateSessionId(sessionId);
     const sessionPath = this.getSessionPath(sessionId);
     try {
       try {
@@ -43294,9 +43300,11 @@ var FileSessionStore = class {
   }
   /**
    * Delete a session from disk (with exclusive lock)
+   * Security: Validates session ID to prevent path traversal attacks
    */
   async deleteSession(sessionId) {
     await this.ensureInitialized();
+    validateSessionId(sessionId);
     const sessionPath = this.getSessionPath(sessionId);
     try {
       try {
@@ -43327,9 +43335,11 @@ var FileSessionStore = class {
   }
   /**
    * Check if a session exists
+   * Security: Validates session ID to prevent path traversal attacks
    */
   async exists(sessionId) {
     await this.ensureInitialized();
+    validateSessionId(sessionId);
     await this.loadMetadataIndex();
     return this.metadataCache.has(sessionId);
   }

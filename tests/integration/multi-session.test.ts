@@ -504,8 +504,9 @@ describe('Multi-Session and Concurrent Scenarios', () => {
   });
 
   describe('Error Handling in Concurrent Scenarios', () => {
-    it('should handle concurrent operations on non-existent session gracefully', async () => {
-      const fakeId = 'non-existent-session-id';
+    it('should handle concurrent operations on non-existent valid UUID session gracefully', async () => {
+      // Use a valid UUID v4 format that doesn't exist in storage
+      const fakeId = '12345678-1234-4234-8234-123456789abc';
 
       // Try concurrent operations on non-existent session
       const results = await Promise.allSettled([
@@ -521,26 +522,50 @@ describe('Multi-Session and Concurrent Scenarios', () => {
       expect(results[2].status).toBe('rejected');
     });
 
+    it('should handle concurrent operations on invalid session ID gracefully', async () => {
+      const invalidId = 'invalid-session-id';
+
+      // Try concurrent operations on invalid session ID
+      const results = await Promise.allSettled([
+        sessionManager.getSession(invalidId),
+        sessionManager.generateSummary(invalidId),
+        sessionManager.switchMode(invalidId, ThinkingMode.MATHEMATICS, 'Switch'),
+      ]);
+
+      // Security: All should reject with validation error for invalid session ID format
+      expect(results[0].status).toBe('rejected');
+      expect(results[1].status).toBe('rejected');
+      expect(results[2].status).toBe('rejected');
+    });
+
     it('should handle mixed success/failure scenarios gracefully', async () => {
       const session = await sessionManager.createSession({
         mode: ThinkingMode.SEQUENTIAL,
         title: 'Mixed Test',
       });
 
-      // Mix valid and invalid operations
+      // Use a valid UUID v4 format that doesn't exist in storage
+      const nonExistentValidId = '12345678-1234-4234-8234-123456789abc';
+
+      // Mix valid operations and operations on non-existent (but valid format) session IDs
       const results = await Promise.allSettled([
         sessionManager.getSession(session.id), // Valid
-        sessionManager.getSession('invalid-id'), // Invalid
+        sessionManager.getSession(nonExistentValidId), // Non-existent but valid format
         sessionManager.generateSummary(session.id), // Valid
-        sessionManager.switchMode('invalid-id', ThinkingMode.PHYSICS, 'Switch'), // Invalid
+        sessionManager.switchMode(nonExistentValidId, ThinkingMode.PHYSICS, 'Switch'), // Non-existent but valid format
       ]);
 
       // Check results
       expect(results[0].status).toBe('fulfilled'); // Valid session retrieval
-      expect(results[1].status).toBe('fulfilled'); // Should return null
+      expect(results[1].status).toBe('fulfilled'); // Should return null for non-existent valid UUID
       expect((results[1] as any).value).toBeNull();
       expect(results[2].status).toBe('fulfilled'); // Valid summary
-      expect(results[3].status).toBe('rejected'); // Invalid switch
+      expect(results[3].status).toBe('rejected'); // Non-existent session switch fails
+    });
+
+    it('should throw validation error for invalid session ID format', async () => {
+      // Security: Invalid session IDs throw validation errors to prevent path traversal
+      await expect(sessionManager.getSession('invalid-id')).rejects.toThrow('Invalid session ID format');
     });
   });
 });

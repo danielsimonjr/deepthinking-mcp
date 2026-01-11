@@ -22,6 +22,7 @@ import {
 } from './interface.js';
 import { logger } from '../../utils/logger.js';
 import { withLock, withSharedLock, type LockOptions } from '../../utils/file-lock.js';
+import { validateSessionId } from '../../utils/sanitization.js';
 
 /**
  * Default lock options for file operations
@@ -90,9 +91,13 @@ export class FileSessionStore implements SessionStorage {
 
   /**
    * Save a session to disk (with exclusive lock)
+   * Security: Validates session ID to prevent path traversal attacks
    */
   async saveSession(session: ThinkingSession): Promise<void> {
     await this.ensureInitialized();
+
+    // Security: Validate session ID format (defense-in-depth)
+    validateSessionId(session.id);
 
     const sessionPath = this.getSessionPath(session.id);
 
@@ -125,9 +130,13 @@ export class FileSessionStore implements SessionStorage {
 
   /**
    * Load a session from disk (with shared lock)
+   * Security: Validates session ID to prevent path traversal attacks
    */
   async loadSession(sessionId: string): Promise<ThinkingSession | null> {
     await this.ensureInitialized();
+
+    // Security: Validate session ID format (defense-in-depth)
+    validateSessionId(sessionId);
 
     const sessionPath = this.getSessionPath(sessionId);
 
@@ -161,9 +170,13 @@ export class FileSessionStore implements SessionStorage {
 
   /**
    * Delete a session from disk (with exclusive lock)
+   * Security: Validates session ID to prevent path traversal attacks
    */
   async deleteSession(sessionId: string): Promise<boolean> {
     await this.ensureInitialized();
+
+    // Security: Validate session ID format (defense-in-depth)
+    validateSessionId(sessionId);
 
     const sessionPath = this.getSessionPath(sessionId);
 
@@ -210,9 +223,13 @@ export class FileSessionStore implements SessionStorage {
 
   /**
    * Check if a session exists
+   * Security: Validates session ID to prevent path traversal attacks
    */
   async exists(sessionId: string): Promise<boolean> {
     await this.ensureInitialized();
+
+    // Security: Validate session ID format (defense-in-depth)
+    validateSessionId(sessionId);
 
     // Refresh metadata to check for updates from other instances
     await this.loadMetadataIndex();
