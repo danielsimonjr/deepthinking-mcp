@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [DEPRECATED] - 2026-04-12
+
+**`deepthinking-mcp` is no longer under active development.** v9.1.3 is the final feature release.
+
+This project has been replaced by **[deepthinking-plugin](https://github.com/danielsimonjr/deepthinking-plugin)**, a Claude Code plugin that ships the same 34 reasoning modes as native prompt-based skills with no Node.js runtime.
+
+### Timeline
+
+- **2026-04-12**: Deprecation announced. v9.1.3 is frozen at feature-complete.
+- **2026-04-12 → 2026-10-12**: Security-only window. CVE-tracked bugs will be fixed; no new features.
+- **After 2026-10-12**: Maintenance-only. Issues may be redirected to `deepthinking-plugin`.
+- **Indefinitely**: npm package stays published; existing installs keep working.
+
+### Migration
+
+See [`DEPRECATED.md`](DEPRECATED.md) for the full migration guide (~10 minutes). Short version:
+
+1. Remove the `deepthinking` entry from your MCP config
+2. Clone https://github.com/danielsimonjr/deepthinking-plugin and point Claude Code at it with `--plugin-dir`
+3. Change `deepthinking_bayesian { ... }` tool calls to `/think bayesian "..."` slash-command invocations
+4. Done. All 34 modes + 11 output formats + new interactive HTML dashboard now available.
+
+### Why it was replaced
+
+- **No runtime dependency**: Plugin has zero Node.js dependencies; MCP required ~400 transitive deps
+- **Solves context pollution**: Plugin loads only the relevant category skill (2-4 modes) per invocation instead of all 34 always visible
+- **End-to-end smoke testing**: Plugin validates against real Claude output; MCP unit tests couldn't catch schema/output drift
+- **Easier contributions**: Adding a mode to the plugin means dropping a few markdown files; adding to the MCP required TypeScript changes across ~10 files
+- **New formats**: Plugin adds an interactive HTML dashboard format that the MCP never shipped
+
+See [`DEPRECATED.md`](DEPRECATED.md) for the full comparison table.
+
 ## [9.1.3] - 2026-01-08
 
 ### Security - Path Traversal Prevention and Dependency Updates

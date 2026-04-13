@@ -1,16 +1,36 @@
 # DeepThinking MCP
 
+[![DEPRECATED](https://img.shields.io/badge/STATUS-DEPRECATED-red.svg?style=for-the-badge)](DEPRECATED.md)
+[![Successor](https://img.shields.io/badge/Replaced%20by-deepthinking--plugin-brightgreen.svg?style=for-the-badge)](https://github.com/danielsimonjr/deepthinking-plugin)
+
+> ## ⚠️ DEPRECATED as of 2026-04-12
+>
+> **`deepthinking-mcp` is no longer under active development.** It has been replaced by **[deepthinking-plugin](https://github.com/danielsimonjr/deepthinking-plugin)** — a Claude Code plugin that delivers the same 34 reasoning modes as native prompt-based skills, with no Node.js server, no dependency footprint, and no context pollution.
+>
+> **New users: skip this repo and [install the plugin](https://github.com/danielsimonjr/deepthinking-plugin).**
+>
+> **Existing users: v9.1.3 keeps working indefinitely.** Security fixes land through 2026-10-12; after that, maintenance-only. See **[DEPRECATED.md](DEPRECATED.md)** for the full migration guide (~10 minutes), rationale, and timeline.
+>
+> | Quick links | |
+> |---|---|
+> | New plugin repo | https://github.com/danielsimonjr/deepthinking-plugin |
+> | Migration guide | [DEPRECATED.md#migration-guide](DEPRECATED.md#migration-guide) |
+> | Why it was replaced | [DEPRECATED.md#why-it-was-replaced](DEPRECATED.md#why-it-was-replaced) |
+> | Latest plugin release | [v0.4.1](https://github.com/danielsimonjr/deepthinking-plugin/releases/tag/v0.4.1) |
+
+---
+
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
 
 A comprehensive Model Context Protocol (MCP) server featuring **34 reasoning modes** (30 with dedicated thought types, 4 advanced runtime modes) including historical reasoning, meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
-> 📋 **Latest Release**: v9.1.0 - See [CHANGELOG](CHANGELOG.md) for updates and improvements.
+> 📋 **Final feature release**: v9.1.3 — see [DEPRECATED.md](DEPRECATED.md) for the migration path to `deepthinking-plugin`. Security fixes through 2026-10-12.
 >
-> 🎉 **New in v9.1.0**: Historical Reasoning Mode - Analyze historical events, evaluate sources, identify patterns, trace causal chains, and define periods with 5 thought types.
+> 🎉 **v9.1.0 added**: Historical Reasoning Mode — analyze historical events, evaluate sources, identify patterns, trace causal chains, and define periods with 5 thought types.
 >
-> ✨ **Codebase**: 237 TypeScript files | 102,500 LOC | 15 modules | 5,048+ tests passing
+> ✨ **Codebase**: 237 TypeScript files | ~102,500 LOC | 15 modules | 5,148+ tests passing
 
 
 ## Table of Contents
