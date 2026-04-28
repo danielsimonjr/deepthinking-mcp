@@ -1,0 +1,85 @@
+# Git internals — keeps Dropbox out of .git so git operations don't get blocked
+.git/
+
+# Dependencies
+node_modules/
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+*.tsbuildinfo
+
+# Testing
+coverage/
+.vitest/
+tests/test-results/json/
+tests/test-results/html/
+tests/test-results/summary/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.code-workspace
+
+# Claude Code settings (local only)
+.claude/
+.mcp.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.log
+.tmp/
+temp/
+
+# Test files
+test-server.js
+test-tool-call.js
+restore-mcps.cjs
+
+# Temporary debug/test scripts (Claude-created)
+test-*.js
+test-*.mjs
+debug-*.js
+debug-*.mjs
+temp-*.js
+temp-*.mjs
+
+# Note files for user/Claude communication (local only, never commit)
+.error.txt
+.note.txt
+
+# Test output files (auto-generated)
+test-output.txt
+test-results.txt
+test-final.txt
+*-output.txt
+*-results.txt
+
+# Backup files
+*.backup
+*.bak
+add-to-config.cjs
+
+# Archives (don't track zip files)
+*.zip
+
+# Compiled executables (Bun compiled, ~114MB each)
+*.exe
+/output
+/.claude
+.claude/settings.local.json
+
