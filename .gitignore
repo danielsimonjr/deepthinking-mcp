@@ -79,3 +79,9 @@ add-to-config.cjs
 /output
 /.claude
 .claude/settings.local.json
+# Added by post-migration audit (2026-05-01)
+.venv/
+venv/
+__pycache__/
+memory.db
+memory.db.backup.*
