@@ -371,7 +371,14 @@ async function handleExport(input: SessionInput): Promise<MCPResponse> {
   // Phase 16: File export support - use config defaults if not specified in request
   const { getConfig } = await import('./config/index.js');
   const config = getConfig();
-  const outputDir = (input.outputDir as string | undefined) || config.exportDir || undefined;
+  const requestedOutputDir = input.outputDir as string | undefined;
+  // Security: when the caller is allowed to specify an outputDir, sandbox it
+  // against MCP_EXPORT_PATH (or a per-user default). Reject paths that escape.
+  let outputDir: string | undefined;
+  if (requestedOutputDir || config.exportDir) {
+    const { resolveSandboxedOutputDir } = await import('./export/file-exporter.js');
+    outputDir = resolveSandboxedOutputDir(requestedOutputDir, config.exportDir);
+  }
   const overwrite = (input.overwrite as boolean) ?? config.exportOverwrite;
 
   // Phase 12: Support export profiles
@@ -523,7 +530,14 @@ async function handleExportAll(input: SessionInput): Promise<MCPResponse> {
   // Phase 16: File export support - use config defaults if not specified in request
   const { getConfig } = await import('./config/index.js');
   const config = getConfig();
-  const outputDir = (input.outputDir as string | undefined) || config.exportDir || undefined;
+  const requestedOutputDir = input.outputDir as string | undefined;
+  // Security: sandbox caller-supplied outputDir under MCP_EXPORT_PATH (or
+  // a per-user default) to prevent arbitrary FS writes via prompt injection.
+  let outputDir: string | undefined;
+  if (requestedOutputDir || config.exportDir) {
+    const { resolveSandboxedOutputDir } = await import('./export/file-exporter.js');
+    outputDir = resolveSandboxedOutputDir(requestedOutputDir, config.exportDir);
+  }
   const overwrite = (input.overwrite as boolean) ?? config.exportOverwrite;
 
   // Phase 12: Support export profiles in export_all

@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Security
+
+Two security-only fixes shipped under the post-deprecation security window
+(deprecation announced 2026-04-12, security window through 2026-10-12).
+
+- **Sandboxed file export `outputDir`** (`src/export/file-exporter.ts`,
+  `src/index.ts` `handleExport` / `handleExportAll`): The MCP `export` and
+  `export_all` actions previously accepted a caller-supplied `outputDir` and
+  passed it straight into `path.join` + `fs.mkdir({ recursive: true })`,
+  letting an attacker who controls tool arguments (realistic via prompt
+  injection) write arbitrary `.md/.html/.json/.svg` files anywhere the Node
+  process could write. A new `resolveSandboxedOutputDir()` helper now treats
+  `MCP_EXPORT_PATH` (or, when unset, `~/.claude/deepthinking-exports/`) as
+  the sole writable sandbox root. Any `outputDir` whose `path.resolve()`
+  does not live inside the sandbox is rejected with an explicit error.
+  Relative `outputDir` values are resolved against the sandbox root, never
+  cwd, so no escape via `..` or absolute paths.
+- **Prototype-pollution hardening of session restore**
+  (`src/session/storage/file-store.ts:restoreFromSerialization`): When
+  multi-instance mode is enabled (`SESSION_DIR` set), session JSON is read
+  from disk and walked recursively. The walker now (1) builds the result
+  object with `Object.create(null)` so it has no prototype to pollute, (2)
+  explicitly skips `__proto__`, `constructor`, and `prototype` keys during
+  the recursive copy, and (3) rejects unknown `_type` markers (only `Date`
+  and `Map` are produced by `prepareForSerialization` — anything else is
+  treated as tampered input and throws). This blocks the
+  another-process-drops-malicious-JSON vector against `Object.prototype`.
+
 ## [DEPRECATED] - 2026-04-12
 
 **`deepthinking-mcp` is no longer under active development.** v9.1.3 is the final feature release.

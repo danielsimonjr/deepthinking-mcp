@@ -6,10 +6,66 @@
  */
 
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import type { ThinkingSession } from '../types/session.js';
 import type { ExportFormatType, ExportProfileId } from './profiles.js';
 import { getExportProfile } from './profiles.js';
+
+// ============================================================================
+// SANDBOX RESOLUTION (Security)
+// ============================================================================
+
+/**
+ * Default sandbox root used when MCP_EXPORT_PATH is unset.
+ * We deliberately pin to a per-user directory under ~/.claude rather than
+ * letting a caller-supplied outputDir escape into the OS at large.
+ */
+const DEFAULT_EXPORT_SANDBOX = path.join(os.homedir(), '.claude', 'deepthinking-exports');
+
+/**
+ * Resolve a caller-supplied outputDir against a sandbox root and reject any
+ * path that escapes the sandbox.
+ *
+ * Security model:
+ *   - If `sandboxRoot` (typically `config.exportDir` from `MCP_EXPORT_PATH`)
+ *     is non-empty, it is the only writable root.
+ *   - If unset, we fall back to `~/.claude/deepthinking-exports/` so a
+ *     caller can never write to arbitrary FS locations.
+ *   - `requestedDir` (from the MCP tool argument) is resolved and required
+ *     to live inside the sandbox; otherwise we throw.
+ *
+ * This blocks the prompt-injection vector where an attacker convinces the
+ * model to call the export tool with `outputDir: 'C:/Windows/...'` or
+ * `'/etc/...'`.
+ */
+export function resolveSandboxedOutputDir(
+  requestedDir: string | undefined,
+  sandboxRoot: string | undefined
+): string {
+  const root = path.resolve(sandboxRoot && sandboxRoot.length > 0 ? sandboxRoot : DEFAULT_EXPORT_SANDBOX);
+
+  // No requested dir → use the sandbox root itself.
+  if (!requestedDir || requestedDir.length === 0) {
+    return root;
+  }
+
+  // Resolve relative paths against the sandbox root, not cwd, so a request
+  // like `"reports"` lands inside the sandbox instead of escaping via cwd.
+  const resolved = path.isAbsolute(requestedDir)
+    ? path.resolve(requestedDir)
+    : path.resolve(root, requestedDir);
+
+  const rootWithSep = root.endsWith(path.sep) ? root : root + path.sep;
+  if (resolved !== root && !resolved.startsWith(rootWithSep)) {
+    throw new Error(
+      `outputDir ${JSON.stringify(requestedDir)} is outside the export sandbox ${JSON.stringify(root)}. ` +
+        `Set MCP_EXPORT_PATH to a writable directory and pass an outputDir under it, or omit outputDir.`
+    );
+  }
+
+  return resolved;
+}
 
 // ============================================================================
 // TYPES

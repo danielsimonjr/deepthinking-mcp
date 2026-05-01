@@ -483,6 +483,17 @@ export class FileSessionStore implements SessionStorage {
   /**
    * Restore an object from serialization by reconstructing special types
    * Recursively processes the object tree to restore Date and Map objects
+   *
+   * Security: hardened against prototype pollution. In multi-instance mode,
+   * session JSON is read from disk and another process (or attacker with FS
+   * access) could drop a JSON file containing `__proto__`, `constructor`, or
+   * `prototype` keys. This walker:
+   *   1. Builds the result with `Object.create(null)` so it has no prototype
+   *      to pollute.
+   *   2. Skips dangerous key names entirely.
+   *   3. Rejects unknown `_type` markers (only `'Date'` and `'Map'` are
+   *      currently emitted by `prepareForSerialization`); anything else is
+   *      treated as a tampered file and rejected.
    */
   private restoreFromSerialization(obj: any): any {
     if (obj === null || obj === undefined) {
@@ -490,13 +501,18 @@ export class FileSessionStore implements SessionStorage {
     }
 
     // Check for special type markers
-    if (typeof obj === 'object' && obj._type) {
-      if (obj._type === 'Date') {
+    if (typeof obj === 'object' && !Array.isArray(obj) && Object.prototype.hasOwnProperty.call(obj, '_type')) {
+      const marker = obj._type;
+      if (marker === 'Date') {
         return new Date(obj.value);
       }
-      if (obj._type === 'Map') {
+      if (marker === 'Map') {
         return new Map(obj.value);
       }
+      // Unknown marker — refuse to recurse, this is likely tampered input
+      throw new Error(
+        `restoreFromSerialization: unknown _type marker ${JSON.stringify(marker)} (only 'Date' and 'Map' are allowed)`
+      );
     }
 
     // Handle arrays
@@ -504,10 +520,15 @@ export class FileSessionStore implements SessionStorage {
       return obj.map((item) => this.restoreFromSerialization(item));
     }
 
-    // Handle plain objects
+    // Handle plain objects — use a null-prototype object so an injected
+    // `__proto__` cannot pollute Object.prototype, and skip the three
+    // dangerous key names defensively.
     if (typeof obj === 'object') {
-      const result: any = {};
+      const result: any = Object.create(null);
       for (const [key, value] of Object.entries(obj)) {
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+          continue;
+        }
         result[key] = this.restoreFromSerialization(value);
       }
       return result;

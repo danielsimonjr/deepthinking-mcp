@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-import * as path3 from 'path';
+import * as path4 from 'path';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { z } from 'zod';
 import * as fs3 from 'fs';
 import { readFileSync, promises } from 'fs';
+import * as os from 'os';
 import { createHash, randomUUID } from 'crypto';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -1219,16 +1220,32 @@ var init_profiles = __esm({
 var file_exporter_exports = {};
 __export(file_exporter_exports, {
   FileExporter: () => FileExporter,
-  createFileExporter: () => createFileExporter
+  createFileExporter: () => createFileExporter,
+  resolveSandboxedOutputDir: () => resolveSandboxedOutputDir
 });
+function resolveSandboxedOutputDir(requestedDir, sandboxRoot) {
+  const root = path4.resolve(sandboxRoot && sandboxRoot.length > 0 ? sandboxRoot : DEFAULT_EXPORT_SANDBOX);
+  if (!requestedDir || requestedDir.length === 0) {
+    return root;
+  }
+  const resolved = path4.isAbsolute(requestedDir) ? path4.resolve(requestedDir) : path4.resolve(root, requestedDir);
+  const rootWithSep = root.endsWith(path4.sep) ? root : root + path4.sep;
+  if (resolved !== root && !resolved.startsWith(rootWithSep)) {
+    throw new Error(
+      `outputDir ${JSON.stringify(requestedDir)} is outside the export sandbox ${JSON.stringify(root)}. Set MCP_EXPORT_PATH to a writable directory and pass an outputDir under it, or omit outputDir.`
+    );
+  }
+  return resolved;
+}
 function createFileExporter(config, exportFunction) {
   return new FileExporter(config, exportFunction);
 }
-var FORMAT_EXTENSIONS, FileExporter;
+var DEFAULT_EXPORT_SANDBOX, FORMAT_EXTENSIONS, FileExporter;
 var init_file_exporter = __esm({
   "src/export/file-exporter.ts"() {
     init_esm_shims();
     init_profiles();
+    DEFAULT_EXPORT_SANDBOX = path4.join(os.homedir(), ".claude", "deepthinking-exports");
     FORMAT_EXTENSIONS = {
       markdown: ".md",
       latex: ".tex",
@@ -1265,7 +1282,7 @@ var init_file_exporter = __esm({
             await this.ensureDir(outputDir);
           }
           const filename = this.generateFilename(session, format);
-          const filePath = path3.join(outputDir, filename);
+          const filePath = path4.join(outputDir, filename);
           if (!this.config.overwrite && fs3.existsSync(filePath)) {
             return {
               format,
@@ -1374,10 +1391,10 @@ var init_file_exporter = __esm({
         let dir = this.config.outputDir;
         if (this.config.createDateSubdir) {
           const date = this.formatDate(/* @__PURE__ */ new Date(), "short");
-          dir = path3.join(dir, date);
+          dir = path4.join(dir, date);
         }
         if (this.config.createSessionSubdir) {
-          dir = path3.join(dir, session.id);
+          dir = path4.join(dir, session.id);
         }
         return dir;
       }
@@ -43095,7 +43112,7 @@ async function acquireExclusiveLock(filePath, options) {
       const sharedLocks = await promises.readdir(sharedLockDir);
       const validSharedLocks = [];
       for (const lockFile of sharedLocks) {
-        const sharedLockPath = path3.join(sharedLockDir, lockFile);
+        const sharedLockPath = path4.join(sharedLockDir, lockFile);
         const sharedLockInfo = await readLockInfo(sharedLockPath);
         if (sharedLockInfo && !isLockStale(sharedLockInfo, options.staleThreshold)) {
           validSharedLocks.push(sharedLockInfo);
@@ -43125,7 +43142,7 @@ async function acquireExclusiveLock(filePath, options) {
 async function acquireSharedLock(filePath, options) {
   const exclusiveLockPath = getLockPath(filePath);
   const sharedLockDir = getSharedLockDir(filePath);
-  const sharedLockPath = path3.join(sharedLockDir, `${INSTANCE_ID}.lock`);
+  const sharedLockPath = path4.join(sharedLockDir, `${INSTANCE_ID}.lock`);
   const startTime = Date.now();
   while (Date.now() - startTime < options.timeout) {
     const exclusiveLock = await readLockInfo(exclusiveLockPath);
@@ -43169,7 +43186,7 @@ async function acquireSharedLock(filePath, options) {
   throw new Error(`Timeout acquiring shared lock on ${filePath} after ${options.timeout}ms`);
 }
 function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve2) => setTimeout(resolve2, ms));
 }
 async function acquireLock(filePath, options) {
   const opts = { ...DEFAULT_OPTIONS, ...options };
@@ -43220,8 +43237,8 @@ var FileSessionStore = class {
    */
   constructor(baseDir, config) {
     this.baseDir = baseDir;
-    this.sessionsDir = path3.join(baseDir, "sessions");
-    this.metadataFile = path3.join(baseDir, "metadata", "index.json");
+    this.sessionsDir = path4.join(baseDir, "sessions");
+    this.metadataFile = path4.join(baseDir, "metadata", "index.json");
     this.config = { ...DEFAULT_STORAGE_CONFIG, ...config };
     this.metadataCache = /* @__PURE__ */ new Map();
     this.lockOptions = { ...DEFAULT_LOCK_OPTIONS };
@@ -43235,7 +43252,7 @@ var FileSessionStore = class {
     }
     try {
       await promises.mkdir(this.sessionsDir, { recursive: true });
-      await promises.mkdir(path3.dirname(this.metadataFile), { recursive: true });
+      await promises.mkdir(path4.dirname(this.metadataFile), { recursive: true });
       await this.loadMetadataIndex();
       this.initialized = true;
       logger.info("FileSessionStore initialized", {
@@ -43357,7 +43374,7 @@ var FileSessionStore = class {
       const files = await promises.readdir(this.sessionsDir);
       for (const file of files) {
         if (file.endsWith(".json")) {
-          const filePath = path3.join(this.sessionsDir, file);
+          const filePath = path4.join(this.sessionsDir, file);
           const stats = await promises.stat(filePath);
           storageSize += stats.size;
         }
@@ -43419,7 +43436,7 @@ var FileSessionStore = class {
    * Get file path for a session
    */
   getSessionPath(sessionId) {
-    return path3.join(this.sessionsDir, `${sessionId}.json`);
+    return path4.join(this.sessionsDir, `${sessionId}.json`);
   }
   /**
    * Update metadata cache and index (with exclusive lock)
@@ -43534,25 +43551,43 @@ var FileSessionStore = class {
   /**
    * Restore an object from serialization by reconstructing special types
    * Recursively processes the object tree to restore Date and Map objects
+   *
+   * Security: hardened against prototype pollution. In multi-instance mode,
+   * session JSON is read from disk and another process (or attacker with FS
+   * access) could drop a JSON file containing `__proto__`, `constructor`, or
+   * `prototype` keys. This walker:
+   *   1. Builds the result with `Object.create(null)` so it has no prototype
+   *      to pollute.
+   *   2. Skips dangerous key names entirely.
+   *   3. Rejects unknown `_type` markers (only `'Date'` and `'Map'` are
+   *      currently emitted by `prepareForSerialization`); anything else is
+   *      treated as a tampered file and rejected.
    */
   restoreFromSerialization(obj) {
     if (obj === null || obj === void 0) {
       return obj;
     }
-    if (typeof obj === "object" && obj._type) {
-      if (obj._type === "Date") {
+    if (typeof obj === "object" && !Array.isArray(obj) && Object.prototype.hasOwnProperty.call(obj, "_type")) {
+      const marker = obj._type;
+      if (marker === "Date") {
         return new Date(obj.value);
       }
-      if (obj._type === "Map") {
+      if (marker === "Map") {
         return new Map(obj.value);
       }
+      throw new Error(
+        `restoreFromSerialization: unknown _type marker ${JSON.stringify(marker)} (only 'Date' and 'Map' are allowed)`
+      );
     }
     if (Array.isArray(obj)) {
       return obj.map((item) => this.restoreFromSerialization(item));
     }
     if (typeof obj === "object") {
-      const result = {};
+      const result = /* @__PURE__ */ Object.create(null);
       for (const [key, value] of Object.entries(obj)) {
+        if (key === "__proto__" || key === "constructor" || key === "prototype") {
+          continue;
+        }
         result[key] = this.restoreFromSerialization(value);
       }
       return result;
@@ -46208,7 +46243,12 @@ async function handleExport(input) {
   }
   const { getConfig: getConfig2 } = await Promise.resolve().then(() => (init_config(), config_exports));
   const config = getConfig2();
-  const outputDir = input.outputDir || config.exportDir || void 0;
+  const requestedOutputDir = input.outputDir;
+  let outputDir;
+  if (requestedOutputDir || config.exportDir) {
+    const { resolveSandboxedOutputDir: resolveSandboxedOutputDir2 } = await Promise.resolve().then(() => (init_file_exporter(), file_exporter_exports));
+    outputDir = resolveSandboxedOutputDir2(requestedOutputDir, config.exportDir);
+  }
   const overwrite = input.overwrite ?? config.exportOverwrite;
   const exportProfile = input.exportProfile;
   if (exportProfile) {
@@ -46327,7 +46367,12 @@ async function handleExportAll(input) {
   }
   const { getConfig: getConfig2 } = await Promise.resolve().then(() => (init_config(), config_exports));
   const config = getConfig2();
-  const outputDir = input.outputDir || config.exportDir || void 0;
+  const requestedOutputDir = input.outputDir;
+  let outputDir;
+  if (requestedOutputDir || config.exportDir) {
+    const { resolveSandboxedOutputDir: resolveSandboxedOutputDir2 } = await Promise.resolve().then(() => (init_file_exporter(), file_exporter_exports));
+    outputDir = resolveSandboxedOutputDir2(requestedOutputDir, config.exportDir);
+  }
   const overwrite = input.overwrite ?? config.exportOverwrite;
   let formats = ["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"];
   const exportAllProfile = input.exportProfile;
