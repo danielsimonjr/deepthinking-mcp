@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+- Add CycloneDX SBOM (sbom.json).
+
 ### Security
 
 Two security-only fixes shipped under the post-deprecation security window
