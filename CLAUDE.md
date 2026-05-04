@@ -6,25 +6,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **34 reasoning modes** (30 with dedicated thought types + 4 advanced runtime) with taxonomy-based classification (69 implemented reasoning types across 12 categories), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
-**Version**: 9.1.2 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js`
+**Version**: 9.1.3 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js` | **Module**: ESM-only
 
 ## Project Metrics
 
 | Metric | Value |
 |--------|-------|
-| TypeScript Files | 250 |
-| Lines of Code | ~105,000 |
+| TypeScript Files | ~237 |
+| Lines of Code | ~102,000 |
 | Total Exports | 1,426 (684 re-exports) |
-| Passing Tests | 5,148 (181 test files) |
+| Passing Tests | 5,148 (~178 test files) |
 | Reasoning Modes | 34 (30 with dedicated types + 4 advanced runtime) |
 | MCP Tools | 13 focused (includes deepthinking_analyze) |
 | Export Formats | 8 + native SVG + file export |
-| Visual Exporters | 42 files (24 mode-specific, 14 utils, 4 root) |
+| Visual Exporters | 42 files (24 mode-specific, 15 utils, 3 root) |
 | Specialized Handlers | 37 (34 modes + GenericModeHandler + CustomHandler + utility) |
 | Builder Classes | 14 fluent APIs |
 | Circular Dependencies | 55 (all type-only, 0 runtime) |
 
 ## Build & Development Commands
+
+Build uses **tsup** (ESM output, tree-shaking enabled, sourcemaps, single-file bundle to `dist/`). Only runtime dependencies are `@modelcontextprotocol/sdk` and `zod` v4.
 
 ```bash
 npm run build        # Compile with tsup → dist/
@@ -53,9 +55,9 @@ npm test -- tests/unit/session/manager.test.ts
 npm test -- -t "SessionManager"
 ```
 
-Test framework: Vitest with V8 coverage provider.
+Test framework: Vitest with V8 coverage provider. Tests are organized as `tests/{unit,integration,edge-cases,performance}/` mirroring `src/` structure. Benchmarks in `performance/` are skipped during `test:publish` via `SKIP_BENCHMARKS=1`.
 
-**Test Reports:** Generated in `tests/test-results/` with JSON and HTML formats. Reports include code coverage percentage and list of untested files.
+**Test Reports:** Generated in `tests/test-results/` with JSON and HTML formats (custom per-file reporter). Coverage reports go to `./coverage/`.
 
 ## Environment Variables
 
@@ -105,6 +107,12 @@ The Strategy Pattern-based ModeHandler system in `src/modes/handlers/` provides 
 - `createThought(input, sessionId)` - Delegate to appropriate handler
 - `registerAllHandlers()` - Initialize all handlers at startup
 
+### Request Flow (Big Picture)
+
+A tool call flows through: `src/index.ts` (MCP handler) → validates via `src/tools/definitions.ts` → `ThoughtFactory.createThought()` → `ModeHandlerRegistry.getHandler(mode)` → specific handler in `src/modes/handlers/` → returns typed thought → `SessionManager.addThought()`. Exports follow a parallel path through `ExportService` which delegates to format-specific exporters in `src/export/`.
+
+Key architectural constraint: `SessionManager` uses lazy async initialization (cached promise pattern) to support both in-memory (default) and file-based storage (`SESSION_DIR` env var). All tool handlers must `await getSessionManager()`.
+
 ### Key Directories
 
 ```
@@ -124,13 +132,18 @@ src/
 ├── export/            # Visual and document exporters
 │   ├── visual/        # Per-mode visual exporters (Mermaid, DOT, ASCII, SVG)
 │   └── utilities
-├── proof/             # Proof decomposition system (6 modules)
+├── proof/             # Proof decomposition system (13 modules)
 │   ├── decomposer.ts
 │   ├── gap-analyzer.ts
 │   ├── assumption-tracker.ts
 │   ├── inconsistency-detector.ts
 │   ├── circular-detector.ts
-│   └── dependency-graph.ts
+│   ├── dependency-graph.ts
+│   ├── hierarchical-proof.ts
+│   ├── branch-analyzer.ts
+│   ├── verifier.ts
+│   ├── strategy-recommender.ts
+│   └── warnings.ts
 ├── search/            # Full-text search engine with faceted filtering
 ├── cache/             # LRU/LFU/FIFO caching strategies
 ├── modes/             # Advanced reasoning mode implementations
@@ -148,8 +161,7 @@ src/
 │   └── index.ts
 ├── interfaces/        # TypeScript interfaces
 ├── config/            # Configuration management
-├── utils/             # Utility functions (errors, logger, sanitization)
-└── repositories/      # Repository pattern implementations (ISessionRepository)
+└── utils/             # Utility functions (errors, logger, sanitization)
 ```
 
 ### Type System
@@ -173,21 +185,6 @@ Configured in `tsconfig.json`:
 - `@utils/*` → `src/utils/*`
 - `@validation/*` → `src/validation/*`
 - `@modes/*`, `@session/*`, `@search/*`, `@cache/*`, `@export/*`, `@taxonomy/*`
-
-## The 34 Reasoning Modes
-
-| Category | Modes | Description |
-|----------|-------|-------------|
-| **Core (5)** | Sequential, Shannon, Mathematics, Physics, Hybrid | Standard workflows, math/physics reasoning |
-| **Fundamental (3)** | Inductive, Deductive, Abductive | Basic reasoning triad |
-| **Causal/Probabilistic (7)** | Causal, Bayesian, Counterfactual, Temporal, Historical, GameTheory, Evidential | Cause-effect, probability, time, strategy |
-| **Analogical (2)** | Analogical, FirstPrinciples | Knowledge transfer, axiom derivation |
-| **Systems/Scientific (3)** | SystemsThinking, ScientificMethod, FormalLogic | Holistic analysis, experimentation, proofs |
-| **Academic (4)** | Synthesis, Argumentation, Critique, Analysis | Literature review, Toulmin model, peer review |
-| **Engineering (4)** | Engineering, Computability, Cryptanalytic, Algorithmic | CLRS algorithms, Turing machines, Decibans |
-| **Advanced Runtime (6)** | MetaReasoning, Recursive, Modal, Stochastic, Constraint, Optimization | Strategic oversight, recursive decomposition |
-
-**Note**: 30 modes have dedicated thought types. 4 advanced runtime modes (Constraint, Optimization, Recursive, Modal) have validators and handler support but limited dedicated business logic.
 
 ## MCP Tools
 
@@ -217,12 +214,10 @@ The server provides 13 focused tools:
 2. Add to `ThinkingMode` enum in `src/types/core.ts`
 3. Add to `Thought` union type and appropriate mode array
 4. Create handler: `src/modes/handlers/NewModeHandler.ts`
-5. Register in `src/modes/handlers/ModeHandlerRegistry.ts`
+5. Register in `src/modes/registry.ts`
 6. Update `ThoughtFactory` to handle the mode
 7. Add Zod validator in `src/validation/validators/modes/`
 8. Create visual exporter in `src/export/visual/`
-
-See `docs/ADDING_NEW_MODE.md` for complete guide with templates.
 
 ### New Export Format
 
@@ -285,10 +280,10 @@ For parallel reasoning or handling multiple concurrent sessions:
 | `src/session/manager.ts` | SessionManager lifecycle management |
 | `src/services/ThoughtFactory.ts` | Thought creation and validation |
 | `src/taxonomy/reasoning-types.ts` | All 69 reasoning type definitions |
-| `src/search/engine.ts` | Full-text search implementation |
+| `src/search/index.ts` | Full-text search (SearchIndex class) |
 | `src/proof/decomposer.ts` | Proof decomposition engine |
 | `src/modes/handlers/ModeHandler.ts` | Handler interface definition |
-| `src/modes/handlers/ModeHandlerRegistry.ts` | Singleton registry for handlers |
+| `src/modes/registry.ts` | ModeHandlerRegistry singleton |
 | `src/modes/handlers/HistoricalHandler.ts` | Historical source evaluation, pattern detection |
 | `src/modes/handlers/SystemsThinkingHandler.ts` | 8 Systems Archetypes detection |
 | `src/modes/handlers/BayesianHandler.ts` | Auto posterior calculation |
@@ -347,10 +342,11 @@ git diff --cached
 | Location | Contents |
 |----------|----------|
 | `docs/architecture/` | OVERVIEW.md, ARCHITECTURE.md, COMPONENTS.md, DATA_FLOW.md, DEPENDENCY_GRAPH.md |
-| `docs/modes/` | SYNTHESIS.md, ARGUMENTATION.md, CRITIQUE.md, ANALYSIS.md |
-| `docs/planning/` | TEST_PLAN.md, PHASE_11-16 sprint documents |
+| `docs/modes/` | Per-mode docs for all 34 modes (SYNTHESIS.md, BAYESIAN.md, etc.) |
+| `docs/planning/` | PHASE_14-16 plans; older phases archived in `archive/` |
 | `docs/reference/` | Types of Thinking and Reasonings.md (110 reasoning types taxonomy) |
-| `docs/analysis/` | REASONING_TYPES_GAP_ANALYSIS.md |
+| `docs/analysis/` | REASONING_TYPES_GAP_ANALYSIS.md, codebase reviews |
+| `docs/setup/` | ADDING_NEW_MODE.md (complete guide with templates), CLAUDE_CODE_SETUP.md |
 
 Generate dependency docs: `npm run docs:deps`
 

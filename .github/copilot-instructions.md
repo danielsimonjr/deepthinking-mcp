@@ -1,6 +1,6 @@
 # VS Code Copilot Instructions - DeepThinking MCP
 
-**Version**: 8.5.0 | **TypeScript MCP Server** | **Node**: >=18.0.0
+**Version**: 9.1.3 | **TypeScript MCP Server** | **Node**: >=18.0.0 | **Module**: ESM-only
 
 ## Quick Start
 
@@ -82,22 +82,22 @@ src/
 - **Repository Pattern**: `SessionManager` with pluggable storage (in-memory/file-based)
 - **Builder Pattern**: 14 fluent APIs for visual/document export
 
-## The 33 Reasoning Modes
+## The 34 Reasoning Modes
 
-33 modes across 8 categories. See [CLAUDE.md](../CLAUDE.md) for full documentation.
+34 modes across 8 categories (30 with dedicated thought types + 4 advanced runtime). See [CLAUDE.md](../CLAUDE.md) for full documentation.
 
 **Quick Reference**: All modes have specialized handlers in `src/modes/handlers/`
 
-| Category                 | Modes                                                                 |
-| ------------------------ | --------------------------------------------------------------------- |
-| **Core**                 | Sequential, Shannon, Mathematics, Physics, Hybrid                     |
-| **Fundamental**          | Inductive, Deductive, Abductive                                       |
-| **Causal/Probabilistic** | Causal, Bayesian, Counterfactual, Temporal, GameTheory, Evidential    |
-| **Analogical**           | Analogical, FirstPrinciples                                           |
-| **Systems/Scientific**   | SystemsThinking, ScientificMethod, FormalLogic                        |
-| **Academic**             | Synthesis, Argumentation, Critique, Analysis                          |
-| **Engineering**          | Engineering, Computability, Cryptanalytic, Algorithmic                |
-| **Advanced Runtime**     | MetaReasoning, Recursive, Modal, Stochastic, Constraint, Optimization |
+| Category                 | Modes                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| **Core**                 | Sequential, Shannon, Mathematics, Physics, Hybrid                                |
+| **Fundamental**          | Inductive, Deductive, Abductive                                                  |
+| **Causal/Probabilistic** | Causal, Bayesian, Counterfactual, Temporal, Historical, GameTheory, Evidential   |
+| **Analogical**           | Analogical, FirstPrinciples                                                      |
+| **Systems/Scientific**   | SystemsThinking, ScientificMethod, FormalLogic                                   |
+| **Academic**             | Synthesis, Argumentation, Critique, Analysis                                     |
+| **Engineering**          | Engineering, Computability, Cryptanalytic, Algorithmic                           |
+| **Advanced Runtime**     | MetaReasoning, Recursive, Modal, Stochastic, Constraint, Optimization            |
 
 ## Common Development Tasks
 
