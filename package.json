@@ -52,7 +52,7 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.60.1",
-    "vitest": "^4.0.17"
+    "vitest": "^4.1.8"
   },
   "keywords": [
     "mcp",
