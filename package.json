@@ -34,7 +34,7 @@
     "docs:deps": "npx tsx tools/create-dependency-graph.ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.25.2",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
