@@ -14,7 +14,9 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: [18.x, 20.x, 22.x]
+        # Node 18 reached EOL 2026-04 and the test toolchain uses node:util
+        # styleText (Node 20.12+ only), so the 18.x leg cannot pass.
+        node-version: [20.x, 22.x]
 
     steps:
       - name: Checkout code
