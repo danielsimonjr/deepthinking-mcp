@@ -42,7 +42,7 @@
     "@types/node": "^25.9.3",
     "@typescript-eslint/eslint-plugin": "^8.60.1",
     "@typescript-eslint/parser": "^8.60.1",
-    "@vitest/coverage-v8": "^4.1.8",
+    "@vitest/coverage-v8": "^4.1.9",
     "cross-env": "^10.1.0",
     "eslint": "^10.4.1",
     "globals": "^17.6.0",
