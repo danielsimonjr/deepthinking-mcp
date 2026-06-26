@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * DeepThinking MCP Server (v9.1.0)
+ * DeepThinking MCP Server
  *
  * 34 advanced reasoning modes with ModeHandler pattern, meta-reasoning,
  * taxonomy classifier, enterprise security, and visual export capabilities.

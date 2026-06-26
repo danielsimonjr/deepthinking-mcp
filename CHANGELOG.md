@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **`npm run typecheck` now passes.** It had been failing: `tsc --noEmit` errored on `TS5101` (deprecated `baseUrl`), and once that halting error was silenced it surfaced pre-existing `TS2591` ("Cannot find name 'process'") errors because `@types/node` was not being included. Added `"ignoreDeprecations": "6.0"` and `"types": ["node"]` to `tsconfig.json`. The `tsup` build was unaffected (esbuild does not type-check), which is why this went unnoticed. Build output (`dist/index.js`) is unchanged.
+- Removed a stale hardcoded version string (`v9.1.0`) from the `src/index.ts` header comment; the runtime version is read from `package.json` (currently 9.1.3), so the comment only drifted.
+
 ### Documentation
 - Add CycloneDX SBOM (sbom.json).
 
