@@ -54,6 +54,9 @@
     "typescript-eslint": "^8.62.0",
     "vitest": "^4.1.8"
   },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  },
   "keywords": [
     "mcp",
     "model-context-protocol",
