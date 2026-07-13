@@ -8,9 +8,13 @@
  * - Alternative approach suggestions
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode, ShannonStage, ShannonThought } from '../../types/core.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+import { randomUUID } from "crypto";
+import {
+  ThinkingMode,
+  ShannonStage,
+  ShannonThought,
+} from "../../types/core.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -19,7 +23,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 /**
  * Stage order for validation and progression tracking
@@ -44,20 +48,21 @@ const STAGE_ORDER: ShannonStage[] = [
  */
 export class ShannonHandler implements ModeHandler {
   readonly mode = ThinkingMode.SHANNON;
-  readonly modeName = 'Shannon Problem-Solving';
-  readonly description = "Claude Shannon's 5-stage systematic problem-solving methodology";
+  readonly modeName = "Shannon Problem-Solving";
+  readonly description =
+    "Claude Shannon's 5-stage systematic problem-solving methodology";
 
   /**
    * Supported thought types for Shannon mode
    */
   private readonly supportedThoughtTypes = [
-    'problem_definition',
-    'constraint_identification',
-    'model_construction',
-    'proof_development',
-    'implementation_planning',
-    'recheck',
-    'refinement',
+    "problem_definition",
+    "constraint_identification",
+    "model_construction",
+    "proof_development",
+    "implementation_planning",
+    "recheck",
+    "refinement",
   ];
 
   /**
@@ -70,7 +75,8 @@ export class ShannonHandler implements ModeHandler {
     const stage = this.resolveStage(input.stage);
 
     // Calculate confidence if factors provided
-    const confidenceFactors = inputAny.confidenceFactors || this.calculateConfidenceFactors(inputAny);
+    const confidenceFactors =
+      inputAny.confidenceFactors || this.calculateConfidenceFactors(inputAny);
 
     return {
       id: randomUUID(),
@@ -111,16 +117,20 @@ export class ShannonHandler implements ModeHandler {
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
@@ -130,19 +140,19 @@ export class ShannonHandler implements ModeHandler {
       if (!STAGE_ORDER.includes(input.stage as ShannonStage)) {
         errors.push(
           createValidationError(
-            'stage',
-            `Invalid Shannon stage: ${input.stage}. Valid stages: ${STAGE_ORDER.join(', ')}`,
-            'INVALID_SHANNON_STAGE'
-          )
+            "stage",
+            `Invalid Shannon stage: ${input.stage}. Valid stages: ${STAGE_ORDER.join(", ")}`,
+            "INVALID_SHANNON_STAGE",
+          ),
         );
       }
     } else {
       warnings.push(
         createValidationWarning(
-          'stage',
-          'No stage specified - defaulting to problem_definition',
-          'Specify a stage to track methodology progression'
-        )
+          "stage",
+          "No stage specified - defaulting to problem_definition",
+          "Specify a stage to track methodology progression",
+        ),
       );
     }
 
@@ -151,10 +161,10 @@ export class ShannonHandler implements ModeHandler {
       if (input.uncertainty < 0 || input.uncertainty > 1) {
         errors.push(
           createValidationError(
-            'uncertainty',
+            "uncertainty",
             `Uncertainty (${input.uncertainty}) must be between 0 and 1`,
-            'UNCERTAINTY_OUT_OF_RANGE'
-          )
+            "UNCERTAINTY_OUT_OF_RANGE",
+          ),
         );
       }
     }
@@ -162,15 +172,19 @@ export class ShannonHandler implements ModeHandler {
     // Validate confidence factors if provided
     if (inputAny.confidenceFactors) {
       const cf = inputAny.confidenceFactors;
-      const cfFields = ['dataQuality', 'methodologyRobustness', 'assumptionValidity'];
+      const cfFields = [
+        "dataQuality",
+        "methodologyRobustness",
+        "assumptionValidity",
+      ];
       for (const field of cfFields) {
         if (cf[field] !== undefined && (cf[field] < 0 || cf[field] > 1)) {
           warnings.push(
             createValidationWarning(
               `confidenceFactors.${field}`,
               `${field} (${cf[field]}) should be between 0 and 1`,
-              'Normalize confidence factors to [0, 1] range'
-            )
+              "Normalize confidence factors to [0, 1] range",
+            ),
           );
         }
       }
@@ -179,13 +193,16 @@ export class ShannonHandler implements ModeHandler {
     // Suggest assumptions for early stages
     if (!input.assumptions || input.assumptions.length === 0) {
       const stage = input.stage as ShannonStage;
-      if (stage === ShannonStage.PROBLEM_DEFINITION || stage === ShannonStage.CONSTRAINTS) {
+      if (
+        stage === ShannonStage.PROBLEM_DEFINITION ||
+        stage === ShannonStage.CONSTRAINTS
+      ) {
         warnings.push(
           createValidationWarning(
-            'assumptions',
-            'No assumptions stated in early stage',
-            'Document assumptions early to improve clarity and validation'
-          )
+            "assumptions",
+            "No assumptions stated in early stage",
+            "Document assumptions early to improve clarity and validation",
+          ),
         );
       }
     }
@@ -195,10 +212,10 @@ export class ShannonHandler implements ModeHandler {
       if (!inputAny.recheckStep.stepToRecheck || !inputAny.recheckStep.reason) {
         warnings.push(
           createValidationWarning(
-            'recheckStep',
-            'Recheck step missing required fields',
-            'Include stepToRecheck and reason for proper tracking'
-          )
+            "recheckStep",
+            "Recheck step missing required fields",
+            "Include stepToRecheck and reason for proper tracking",
+          ),
         );
       }
     }
@@ -216,7 +233,11 @@ export class ShannonHandler implements ModeHandler {
   getEnhancements(thought: ShannonThought): ModeEnhancements {
     const enhancements: ModeEnhancements = {
       suggestions: [],
-      relatedModes: [ThinkingMode.SEQUENTIAL, ThinkingMode.MATHEMATICS, ThinkingMode.ENGINEERING],
+      relatedModes: [
+        ThinkingMode.SEQUENTIAL,
+        ThinkingMode.MATHEMATICS,
+        ThinkingMode.ENGINEERING,
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -227,9 +248,9 @@ export class ShannonHandler implements ModeHandler {
       },
       mentalModels: [
         "Shannon's Problem-Solving",
-        'Systematic Decomposition',
-        'Constraint-Based Design',
-        'Proof-First Development',
+        "Systematic Decomposition",
+        "Constraint-Based Design",
+        "Proof-First Development",
       ],
     };
 
@@ -237,70 +258,77 @@ export class ShannonHandler implements ModeHandler {
     switch (thought.stage) {
       case ShannonStage.PROBLEM_DEFINITION:
         enhancements.guidingQuestions!.push(
-          'What is the essential problem we are trying to solve?',
-          'What would a solution look like?',
-          'What are the inputs and outputs?'
+          "What is the essential problem we are trying to solve?",
+          "What would a solution look like?",
+          "What are the inputs and outputs?",
         );
         enhancements.suggestions!.push(
-          'Focus on clearly stating what success looks like before moving to constraints'
+          "Focus on clearly stating what success looks like before moving to constraints",
         );
         break;
 
       case ShannonStage.CONSTRAINTS:
         enhancements.guidingQuestions!.push(
-          'What are the hard constraints that cannot be violated?',
-          'What are the soft constraints we should optimize for?',
-          'Are there any hidden constraints we might be missing?'
+          "What are the hard constraints that cannot be violated?",
+          "What are the soft constraints we should optimize for?",
+          "Are there any hidden constraints we might be missing?",
         );
         enhancements.suggestions!.push(
-          'Document all constraints explicitly - implicit constraints often cause problems later'
+          "Document all constraints explicitly - implicit constraints often cause problems later",
         );
         break;
 
       case ShannonStage.MODEL:
         enhancements.guidingQuestions!.push(
-          'Does the model capture all essential aspects of the problem?',
-          'Is the model simple enough to reason about formally?',
-          'What assumptions does the model make?'
+          "Does the model capture all essential aspects of the problem?",
+          "Is the model simple enough to reason about formally?",
+          "What assumptions does the model make?",
         );
         enhancements.suggestions!.push(
-          'Consider creating multiple models and comparing their trade-offs'
+          "Consider creating multiple models and comparing their trade-offs",
         );
         break;
 
       case ShannonStage.PROOF:
         enhancements.guidingQuestions!.push(
-          'What property are we trying to prove?',
-          'What technique is most appropriate for this proof?',
-          'Are there edge cases we need to handle?'
+          "What property are we trying to prove?",
+          "What technique is most appropriate for this proof?",
+          "Are there edge cases we need to handle?",
         );
         enhancements.suggestions!.push(
-          'Start with the simplest case and build up to the general proof'
+          "Start with the simplest case and build up to the general proof",
         );
-        enhancements.relatedModes = [ThinkingMode.MATHEMATICS, ThinkingMode.FORMALLOGIC, ThinkingMode.DEDUCTIVE];
+        enhancements.relatedModes = [
+          ThinkingMode.MATHEMATICS,
+          ThinkingMode.FORMALLOGIC,
+          ThinkingMode.DEDUCTIVE,
+        ];
         break;
 
       case ShannonStage.IMPLEMENTATION:
         enhancements.guidingQuestions!.push(
-          'How does the implementation map to the formal model?',
-          'What practical constraints affect the implementation?',
-          'How will we verify the implementation matches the proof?'
+          "How does the implementation map to the formal model?",
+          "What practical constraints affect the implementation?",
+          "How will we verify the implementation matches the proof?",
         );
         enhancements.suggestions!.push(
-          'Create a clear mapping between model elements and implementation components'
+          "Create a clear mapping between model elements and implementation components",
         );
-        enhancements.relatedModes = [ThinkingMode.ENGINEERING, ThinkingMode.ALGORITHMIC];
+        enhancements.relatedModes = [
+          ThinkingMode.ENGINEERING,
+          ThinkingMode.ALGORITHMIC,
+        ];
         break;
     }
 
     // Uncertainty-based suggestions
     if (thought.uncertainty > 0.7) {
       enhancements.warnings!.push(
-        'High uncertainty detected - consider revisiting assumptions or gathering more information'
+        "High uncertainty detected - consider revisiting assumptions or gathering more information",
       );
     } else if (thought.uncertainty < 0.2) {
       enhancements.suggestions!.push(
-        'Low uncertainty suggests good progress - consider moving to the next stage'
+        "Low uncertainty suggests good progress - consider moving to the next stage",
       );
     }
 
@@ -311,22 +339,27 @@ export class ShannonHandler implements ModeHandler {
       enhancements.metrics!.methodologyRobustness = cf.methodologyRobustness;
       enhancements.metrics!.assumptionValidity = cf.assumptionValidity;
 
-      const avgConfidence = (cf.dataQuality + cf.methodologyRobustness + cf.assumptionValidity) / 3;
+      const avgConfidence =
+        (cf.dataQuality + cf.methodologyRobustness + cf.assumptionValidity) / 3;
       enhancements.metrics!.overallConfidence = avgConfidence;
 
       if (cf.assumptionValidity < 0.5) {
         enhancements.warnings!.push(
-          'Low assumption validity - validate assumptions before proceeding'
+          "Low assumption validity - validate assumptions before proceeding",
         );
       }
     }
 
     // Alternative approaches
-    if (thought.alternativeApproaches && thought.alternativeApproaches.length > 0) {
-      enhancements.metrics!.alternativeCount = thought.alternativeApproaches.length;
+    if (
+      thought.alternativeApproaches &&
+      thought.alternativeApproaches.length > 0
+    ) {
+      enhancements.metrics!.alternativeCount =
+        thought.alternativeApproaches.length;
     } else if (thought.stage !== ShannonStage.IMPLEMENTATION) {
       enhancements.suggestions!.push(
-        'Consider documenting alternative approaches for comparison'
+        "Consider documenting alternative approaches for comparison",
       );
     }
 
@@ -362,7 +395,13 @@ export class ShannonHandler implements ModeHandler {
   /**
    * Calculate confidence factors from input if not provided
    */
-  private calculateConfidenceFactors(input: any): { dataQuality: number; methodologyRobustness: number; assumptionValidity: number } | undefined {
+  private calculateConfidenceFactors(input: any):
+    | {
+        dataQuality: number;
+        methodologyRobustness: number;
+        assumptionValidity: number;
+      }
+    | undefined {
     // Only calculate if we have relevant data
     if (!input.assumptions && !input.dependencies) {
       return undefined;
@@ -374,7 +413,7 @@ export class ShannonHandler implements ModeHandler {
 
     return {
       dataQuality: Math.max(0.3, 1 - (input.uncertainty || 0.5)),
-      methodologyRobustness: Math.min(0.9, 0.5 + (dependencyCount * 0.1)),
+      methodologyRobustness: Math.min(0.9, 0.5 + dependencyCount * 0.1),
       assumptionValidity: assumptionCount > 0 ? 0.7 : 0.5,
     };
   }

@@ -8,11 +8,15 @@
  * - Dynamic mode switching based on problem evolution
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode } from '../../types/core.js';
-import type { HybridThought as BaseHybridThought } from '../../types/modes/hybrid.js';
-import { ModeRecommender, ProblemCharacteristics, ModeRecommendation } from '../../types/modes/recommendations.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode } from "../../types/core.js";
+import type { HybridThought as BaseHybridThought } from "../../types/modes/hybrid.js";
+import {
+  ModeRecommender,
+  ProblemCharacteristics,
+  ModeRecommendation,
+} from "../../types/modes/recommendations.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -21,7 +25,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 /**
  * Mode contribution tracking
@@ -60,7 +64,7 @@ export interface HybridThought extends BaseHybridThought {
   selectedRecommendations?: ModeRecommendation[];
 
   // Synthesis tracking
-  synthesisStrategy: 'parallel' | 'sequential' | 'weighted';
+  synthesisStrategy: "parallel" | "sequential" | "weighted";
   overallConfidence: number;
 }
 
@@ -68,13 +72,13 @@ export interface HybridThought extends BaseHybridThought {
  * Valid thought types for hybrid mode
  */
 const VALID_THOUGHT_TYPES = [
-  'mode_selection',
-  'parallel_analysis',
-  'sequential_analysis',
-  'convergence_check',
-  'synthesis',
-  'confidence_assessment',
-  'mode_switching',
+  "mode_selection",
+  "parallel_analysis",
+  "sequential_analysis",
+  "convergence_check",
+  "synthesis",
+  "confidence_assessment",
+  "mode_switching",
 ] as const;
 
 type HybridThoughtType = (typeof VALID_THOUGHT_TYPES)[number];
@@ -82,7 +86,7 @@ type HybridThoughtType = (typeof VALID_THOUGHT_TYPES)[number];
 /**
  * Valid synthesis strategies
  */
-const VALID_STRATEGIES = ['parallel', 'sequential', 'weighted'] as const;
+const VALID_STRATEGIES = ["parallel", "sequential", "weighted"] as const;
 
 /**
  * Target confidence for hybrid mode
@@ -104,9 +108,9 @@ const TARGET_CONFIDENCE = 0.97;
  */
 export class HybridHandler implements ModeHandler {
   readonly mode = ThinkingMode.HYBRID;
-  readonly modeName = 'Hybrid Multi-Mode Reasoning';
+  readonly modeName = "Hybrid Multi-Mode Reasoning";
   readonly description =
-    'Combines top 3 recommended modes for 97% confidence through multi-modal synthesis';
+    "Combines top 3 recommended modes for 97% confidence through multi-modal synthesis";
 
   private recommender: ModeRecommender;
 
@@ -131,7 +135,9 @@ export class HybridHandler implements ModeHandler {
       : this.inferCharacteristics(input);
 
     // Get mode recommendations
-    const recommendations = this.recommender.recommendModes(problemCharacteristics);
+    const recommendations = this.recommender.recommendModes(
+      problemCharacteristics,
+    );
     const topModes = recommendations.slice(0, 3);
 
     // Determine active modes
@@ -141,27 +147,35 @@ export class HybridHandler implements ModeHandler {
 
     // Process mode contributions
     const modeContributions = inputAny.modeContributions
-      ? inputAny.modeContributions.map((c: any) => this.normalizeContribution(c))
+      ? inputAny.modeContributions.map((c: any) =>
+          this.normalizeContribution(c),
+        )
       : this.initializeContributions(activeModes);
 
     // Calculate convergence status
-    const convergenceStatus = this.calculateConvergence(modeContributions, inputAny.convergenceStatus);
+    const convergenceStatus = this.calculateConvergence(
+      modeContributions,
+      inputAny.convergenceStatus,
+    );
 
     // Determine synthesis strategy
-    const synthesisStrategy = this.resolveSynthesisStrategy(inputAny.synthesisStrategy);
+    const synthesisStrategy = this.resolveSynthesisStrategy(
+      inputAny.synthesisStrategy,
+    );
 
     // Calculate overall confidence
     const overallConfidence = this.calculateOverallConfidence(
       modeContributions,
       convergenceStatus,
-      inputAny.overallConfidence
+      inputAny.overallConfidence,
     );
 
     // Resolve primary mode (highest contribution)
     const primaryMode = this.resolvePrimaryMode(modeContributions, activeModes);
 
     // Extract secondary features
-    const secondaryFeatures = inputAny.secondaryFeatures ||
+    const secondaryFeatures =
+      inputAny.secondaryFeatures ||
       activeModes
         .filter((m: ThinkingMode) => m !== primaryMode)
         .map((m: ThinkingMode) => `${m} reasoning`);
@@ -182,7 +196,7 @@ export class HybridHandler implements ModeHandler {
       switchReason: inputAny.switchReason,
       thoughtType: inputAny.thoughtType,
       stage: inputAny.stage,
-      uncertainty: inputAny.uncertainty ?? (1 - overallConfidence),
+      uncertainty: inputAny.uncertainty ?? 1 - overallConfidence,
       dependencies: inputAny.dependencies,
       assumptions: inputAny.assumptions,
       mathematicalModel: inputAny.mathematicalModel,
@@ -215,39 +229,49 @@ export class HybridHandler implements ModeHandler {
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
 
     // Validate thought type
-    if (inputAny.thoughtType && !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)) {
+    if (
+      inputAny.thoughtType &&
+      !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)
+    ) {
       warnings.push(
         createValidationWarning(
-          'thoughtType',
+          "thoughtType",
           `Unknown thought type: ${inputAny.thoughtType}`,
-          `Valid types: ${VALID_THOUGHT_TYPES.join(', ')}`
-        )
+          `Valid types: ${VALID_THOUGHT_TYPES.join(", ")}`,
+        ),
       );
     }
 
     // Validate synthesis strategy
-    if (inputAny.synthesisStrategy && !VALID_STRATEGIES.includes(inputAny.synthesisStrategy)) {
+    if (
+      inputAny.synthesisStrategy &&
+      !VALID_STRATEGIES.includes(inputAny.synthesisStrategy)
+    ) {
       warnings.push(
         createValidationWarning(
-          'synthesisStrategy',
+          "synthesisStrategy",
           `Unknown strategy: ${inputAny.synthesisStrategy}`,
-          `Valid strategies: ${VALID_STRATEGIES.join(', ')}`
-        )
+          `Valid strategies: ${VALID_STRATEGIES.join(", ")}`,
+        ),
       );
     }
 
@@ -256,19 +280,19 @@ export class HybridHandler implements ModeHandler {
       if (inputAny.activeModes.length < 2) {
         warnings.push(
           createValidationWarning(
-            'activeModes',
-            'Hybrid mode typically uses 2+ modes',
-            'Add more modes for multi-modal synthesis'
-          )
+            "activeModes",
+            "Hybrid mode typically uses 2+ modes",
+            "Add more modes for multi-modal synthesis",
+          ),
         );
       }
       if (inputAny.activeModes.length > 5) {
         warnings.push(
           createValidationWarning(
-            'activeModes',
+            "activeModes",
             `Many active modes (${inputAny.activeModes.length})`,
-            'Consider focusing on 3-4 most relevant modes'
-          )
+            "Consider focusing on 3-4 most relevant modes",
+          ),
         );
       }
     }
@@ -277,13 +301,16 @@ export class HybridHandler implements ModeHandler {
     if (inputAny.modeContributions) {
       for (let i = 0; i < inputAny.modeContributions.length; i++) {
         const c = inputAny.modeContributions[i];
-        if (c.confidence !== undefined && (c.confidence < 0 || c.confidence > 1)) {
+        if (
+          c.confidence !== undefined &&
+          (c.confidence < 0 || c.confidence > 1)
+        ) {
           warnings.push(
             createValidationWarning(
               `modeContributions[${i}].confidence`,
               `Confidence ${c.confidence} out of range`,
-              'Confidence should be between 0 and 1'
-            )
+              "Confidence should be between 0 and 1",
+            ),
           );
         }
       }
@@ -291,14 +318,16 @@ export class HybridHandler implements ModeHandler {
 
     // Check for convergence
     if (inputAny.convergenceStatus) {
-      if (inputAny.convergenceStatus.currentConfidence < TARGET_CONFIDENCE &&
-          inputAny.convergenceStatus.modesAgreeing < 2) {
+      if (
+        inputAny.convergenceStatus.currentConfidence < TARGET_CONFIDENCE &&
+        inputAny.convergenceStatus.modesAgreeing < 2
+      ) {
         warnings.push(
           createValidationWarning(
-            'convergenceStatus',
-            'Low convergence - modes are not agreeing',
-            'Review insights from each mode for consistency'
-          )
+            "convergenceStatus",
+            "Low convergence - modes are not agreeing",
+            "Review insights from each mode for consistency",
+          ),
         );
       }
     }
@@ -316,7 +345,9 @@ export class HybridHandler implements ModeHandler {
   getEnhancements(thought: HybridThought): ModeEnhancements {
     const enhancements: ModeEnhancements = {
       suggestions: [],
-      relatedModes: thought.activeModes.filter((m) => m !== ThinkingMode.HYBRID),
+      relatedModes: thought.activeModes.filter(
+        (m) => m !== ThinkingMode.HYBRID,
+      ),
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -327,37 +358,35 @@ export class HybridHandler implements ModeHandler {
         modesAgreeing: thought.convergenceStatus.modesAgreeing,
       },
       mentalModels: [
-        'Convergent Validation',
-        'Multi-Modal Synthesis',
-        'Triangulation',
-        'Complementary Reasoning',
-        'Confidence Aggregation',
+        "Convergent Validation",
+        "Multi-Modal Synthesis",
+        "Triangulation",
+        "Complementary Reasoning",
+        "Confidence Aggregation",
       ],
     };
 
     // Active modes info
     enhancements.suggestions!.push(
-      `Active modes: ${thought.activeModes.join(', ')}`
+      `Active modes: ${thought.activeModes.join(", ")}`,
     );
-    enhancements.suggestions!.push(
-      `Strategy: ${thought.synthesisStrategy}`
-    );
+    enhancements.suggestions!.push(`Strategy: ${thought.synthesisStrategy}`);
 
     // Confidence progress
     const confidencePercent = (thought.overallConfidence * 100).toFixed(1);
     const targetPercent = (TARGET_CONFIDENCE * 100).toFixed(0);
     enhancements.suggestions!.push(
-      `Confidence: ${confidencePercent}% / ${targetPercent}% target`
+      `Confidence: ${confidencePercent}% / ${targetPercent}% target`,
     );
 
     // Convergence status
     if (thought.convergenceStatus.achieved) {
       enhancements.suggestions!.push(
-        `Convergence achieved (${thought.convergenceStatus.modesAgreeing}/${thought.convergenceStatus.totalModes} modes agree)`
+        `Convergence achieved (${thought.convergenceStatus.modesAgreeing}/${thought.convergenceStatus.totalModes} modes agree)`,
       );
     } else {
       enhancements.warnings!.push(
-        `Convergence not yet achieved (${thought.convergenceStatus.modesAgreeing}/${thought.convergenceStatus.totalModes} modes agree)`
+        `Convergence not yet achieved (${thought.convergenceStatus.modesAgreeing}/${thought.convergenceStatus.totalModes} modes agree)`,
       );
     }
 
@@ -365,99 +394,103 @@ export class HybridHandler implements ModeHandler {
     for (const contrib of thought.modeContributions) {
       if (contrib.confidence > 0.7) {
         enhancements.suggestions!.push(
-          `${contrib.mode}: high confidence (${(contrib.confidence * 100).toFixed(0)}%)`
+          `${contrib.mode}: high confidence (${(contrib.confidence * 100).toFixed(0)}%)`,
         );
       } else if (contrib.confidence < 0.4) {
         enhancements.warnings!.push(
-          `${contrib.mode}: low confidence (${(contrib.confidence * 100).toFixed(0)}%)`
+          `${contrib.mode}: low confidence (${(contrib.confidence * 100).toFixed(0)}%)`,
         );
       }
     }
 
     // Thought type-specific guidance
     switch (thought.thoughtType) {
-      case 'mode_selection':
+      case "mode_selection":
         enhancements.guidingQuestions!.push(
-          'Which modes are most relevant for this problem?',
-          'Are there complementary reasoning approaches to combine?',
-          'What are the problem characteristics?'
+          "Which modes are most relevant for this problem?",
+          "Are there complementary reasoning approaches to combine?",
+          "What are the problem characteristics?",
         );
         if (thought.selectedRecommendations) {
           for (const rec of thought.selectedRecommendations.slice(0, 3)) {
             enhancements.suggestions!.push(
-              `Recommended: ${rec.mode} (score: ${(rec.score * 100).toFixed(0)}%)`
+              `Recommended: ${rec.mode} (score: ${(rec.score * 100).toFixed(0)}%)`,
             );
           }
         }
         break;
 
-      case 'parallel_analysis':
+      case "parallel_analysis":
         enhancements.guidingQuestions!.push(
-          'What does each mode contribute?',
-          'Are there conflicting conclusions?',
-          'Which mode has the strongest evidence?'
+          "What does each mode contribute?",
+          "Are there conflicting conclusions?",
+          "Which mode has the strongest evidence?",
         );
         break;
 
-      case 'sequential_analysis':
+      case "sequential_analysis":
         enhancements.guidingQuestions!.push(
-          'What order should modes be applied?',
-          'How does each mode build on previous insights?',
-          'Are there dependencies between modes?'
+          "What order should modes be applied?",
+          "How does each mode build on previous insights?",
+          "Are there dependencies between modes?",
         );
         break;
 
-      case 'convergence_check':
+      case "convergence_check":
         enhancements.guidingQuestions!.push(
-          'Do multiple modes reach the same conclusion?',
-          'Where do the modes disagree?',
-          'What would increase confidence?'
+          "Do multiple modes reach the same conclusion?",
+          "Where do the modes disagree?",
+          "What would increase confidence?",
         );
         break;
 
-      case 'synthesis':
+      case "synthesis":
         enhancements.guidingQuestions!.push(
-          'How can insights be combined?',
-          'What is the synthesized conclusion?',
-          'Does the synthesis preserve key insights from each mode?'
+          "How can insights be combined?",
+          "What is the synthesized conclusion?",
+          "Does the synthesis preserve key insights from each mode?",
         );
         break;
 
-      case 'confidence_assessment':
+      case "confidence_assessment":
         enhancements.guidingQuestions!.push(
-          'What is the overall confidence level?',
-          'Which mode contributes most to confidence?',
-          'Are there gaps that reduce confidence?'
+          "What is the overall confidence level?",
+          "Which mode contributes most to confidence?",
+          "Are there gaps that reduce confidence?",
         );
         break;
 
-      case 'mode_switching':
+      case "mode_switching":
         enhancements.guidingQuestions!.push(
-          'Should we add or remove a mode?',
-          'Is the current combination optimal?',
-          'What would improve the analysis?'
+          "Should we add or remove a mode?",
+          "Is the current combination optimal?",
+          "What would improve the analysis?",
         );
         break;
     }
 
     // Strategy-specific guidance
-    if (thought.synthesisStrategy === 'parallel') {
-      enhancements.mentalModels!.push('Independence', 'Ensemble Methods');
-    } else if (thought.synthesisStrategy === 'sequential') {
-      enhancements.mentalModels!.push('Bayesian Updating', 'Evidence Chain');
-    } else if (thought.synthesisStrategy === 'weighted') {
-      enhancements.mentalModels!.push('Expert Aggregation', 'Delphi Method');
+    if (thought.synthesisStrategy === "parallel") {
+      enhancements.mentalModels!.push("Independence", "Ensemble Methods");
+    } else if (thought.synthesisStrategy === "sequential") {
+      enhancements.mentalModels!.push("Bayesian Updating", "Evidence Chain");
+    } else if (thought.synthesisStrategy === "weighted") {
+      enhancements.mentalModels!.push("Expert Aggregation", "Delphi Method");
     }
 
     // Recommendations for improving confidence
     if (thought.overallConfidence < TARGET_CONFIDENCE) {
       const gap = TARGET_CONFIDENCE - thought.overallConfidence;
       if (gap > 0.2) {
-        enhancements.suggestions!.push('Consider adding another complementary mode');
+        enhancements.suggestions!.push(
+          "Consider adding another complementary mode",
+        );
       } else if (gap > 0.1) {
-        enhancements.suggestions!.push('Focus on resolving mode disagreements');
+        enhancements.suggestions!.push("Focus on resolving mode disagreements");
       } else {
-        enhancements.suggestions!.push('Strengthen evidence in highest-contributing mode');
+        enhancements.suggestions!.push(
+          "Strengthen evidence in highest-contributing mode",
+        );
       }
     }
 
@@ -468,7 +501,9 @@ export class HybridHandler implements ModeHandler {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType: string): boolean {
-    return this.supportedThoughtTypes.includes(thoughtType as HybridThoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType as HybridThoughtType,
+    );
   }
 
   /**
@@ -476,9 +511,9 @@ export class HybridHandler implements ModeHandler {
    */
   private normalizeProblemCharacteristics(chars: any): ProblemCharacteristics {
     return {
-      domain: chars.domain || 'general',
-      complexity: chars.complexity || 'medium',
-      uncertainty: chars.uncertainty || 'medium',
+      domain: chars.domain || "general",
+      complexity: chars.complexity || "medium",
+      uncertainty: chars.uncertainty || "medium",
       timeDependent: chars.timeDependent ?? false,
       multiAgent: chars.multiAgent ?? false,
       requiresProof: chars.requiresProof ?? false,
@@ -492,18 +527,22 @@ export class HybridHandler implements ModeHandler {
   /**
    * Infer problem characteristics from input
    */
-  private inferCharacteristics(input: ThinkingToolInput): ProblemCharacteristics {
+  private inferCharacteristics(
+    input: ThinkingToolInput,
+  ): ProblemCharacteristics {
     const content = input.thought.toLowerCase();
 
     return {
-      domain: 'general',
-      complexity: input.totalThoughts > 5 ? 'high' : 'medium',
-      uncertainty: 'medium',
-      timeDependent: content.includes('time') || content.includes('sequence'),
-      multiAgent: content.includes('agent') || content.includes('player'),
-      requiresProof: content.includes('proof') || content.includes('prove'),
-      requiresQuantification: content.includes('number') || content.includes('calculate'),
-      hasIncompleteInfo: content.includes('unknown') || content.includes('unclear'),
+      domain: "general",
+      complexity: input.totalThoughts > 5 ? "high" : "medium",
+      uncertainty: "medium",
+      timeDependent: content.includes("time") || content.includes("sequence"),
+      multiAgent: content.includes("agent") || content.includes("player"),
+      requiresProof: content.includes("proof") || content.includes("prove"),
+      requiresQuantification:
+        content.includes("number") || content.includes("calculate"),
+      hasIncompleteInfo:
+        content.includes("unknown") || content.includes("unclear"),
       requiresExplanation: true,
       hasAlternatives: true,
     };
@@ -553,18 +592,23 @@ export class HybridHandler implements ModeHandler {
    */
   private normalizeContribution(contrib: any): ModeContribution {
     return {
-      mode: this.resolveMode(contrib.mode || 'sequential'),
+      mode: this.resolveMode(contrib.mode || "sequential"),
       confidence: Math.max(0, Math.min(1, contrib.confidence ?? 0.5)),
       insights: contrib.insights || [],
       evidence: contrib.evidence || [],
-      agreementWithOthers: Math.max(0, Math.min(1, contrib.agreementWithOthers ?? 0.5)),
+      agreementWithOthers: Math.max(
+        0,
+        Math.min(1, contrib.agreementWithOthers ?? 0.5),
+      ),
     };
   }
 
   /**
    * Initialize contributions for active modes
    */
-  private initializeContributions(activeModes: ThinkingMode[]): ModeContribution[] {
+  private initializeContributions(
+    activeModes: ThinkingMode[],
+  ): ModeContribution[] {
     return activeModes.map((mode) => ({
       mode,
       confidence: 0.5,
@@ -579,29 +623,35 @@ export class HybridHandler implements ModeHandler {
    */
   private calculateConvergence(
     contributions: ModeContribution[],
-    explicit?: Partial<ConvergenceStatus>
+    explicit?: Partial<ConvergenceStatus>,
   ): ConvergenceStatus {
     // Calculate agreement between modes
     const agreementScores = contributions.map((c) => c.agreementWithOthers);
-    const avgAgreement = agreementScores.length > 0
-      ? agreementScores.reduce((a, b) => a + b, 0) / agreementScores.length
-      : 0;
+    const avgAgreement =
+      agreementScores.length > 0
+        ? agreementScores.reduce((a, b) => a + b, 0) / agreementScores.length
+        : 0;
 
     // Count modes with high agreement
-    const modesAgreeing = contributions.filter((c) => c.agreementWithOthers > 0.7).length;
+    const modesAgreeing = contributions.filter(
+      (c) => c.agreementWithOthers > 0.7,
+    ).length;
 
     // Calculate current confidence from convergence
     const confidenceFromAgreement = Math.min(
       avgAgreement * 0.5 + (modesAgreeing / contributions.length) * 0.5,
-      1
+      1,
     );
 
     // Combine with individual mode confidences
-    const avgConfidence = contributions.length > 0
-      ? contributions.reduce((a, b) => a + b.confidence, 0) / contributions.length
-      : 0;
+    const avgConfidence =
+      contributions.length > 0
+        ? contributions.reduce((a, b) => a + b.confidence, 0) /
+          contributions.length
+        : 0;
 
-    const currentConfidence = explicit?.currentConfidence ??
+    const currentConfidence =
+      explicit?.currentConfidence ??
       Math.min(confidenceFromAgreement * 0.6 + avgConfidence * 0.4, 1);
 
     return {
@@ -620,7 +670,7 @@ export class HybridHandler implements ModeHandler {
   private calculateOverallConfidence(
     contributions: ModeContribution[],
     convergence: ConvergenceStatus,
-    explicit?: number
+    explicit?: number,
   ): number {
     if (explicit !== undefined) {
       return Math.max(0, Math.min(1, explicit));
@@ -652,7 +702,7 @@ export class HybridHandler implements ModeHandler {
    */
   private resolvePrimaryMode(
     contributions: ModeContribution[],
-    activeModes: ThinkingMode[]
+    activeModes: ThinkingMode[],
   ): ThinkingMode {
     if (contributions.length === 0) {
       return activeModes[0] || ThinkingMode.SEQUENTIAL;
@@ -663,7 +713,8 @@ export class HybridHandler implements ModeHandler {
     let bestScore = 0;
 
     for (const contrib of contributions) {
-      const score = contrib.confidence * (0.5 + contrib.agreementWithOthers * 0.5);
+      const score =
+        contrib.confidence * (0.5 + contrib.agreementWithOthers * 0.5);
       if (score > bestScore) {
         bestScore = score;
         bestMode = contrib.mode;
@@ -677,17 +728,17 @@ export class HybridHandler implements ModeHandler {
    * Map to base hybrid primary mode type
    */
   private mapToPrimaryMode(
-    mode: ThinkingMode
-  ): 'sequential' | 'shannon' | 'mathematics' | 'physics' {
+    mode: ThinkingMode,
+  ): "sequential" | "shannon" | "mathematics" | "physics" {
     switch (mode) {
       case ThinkingMode.SHANNON:
-        return 'shannon';
+        return "shannon";
       case ThinkingMode.MATHEMATICS:
-        return 'mathematics';
+        return "mathematics";
       case ThinkingMode.PHYSICS:
-        return 'physics';
+        return "physics";
       default:
-        return 'sequential';
+        return "sequential";
     }
   }
 
@@ -695,11 +746,11 @@ export class HybridHandler implements ModeHandler {
    * Resolve synthesis strategy
    */
   private resolveSynthesisStrategy(
-    strategy: string | undefined
-  ): 'parallel' | 'sequential' | 'weighted' {
+    strategy: string | undefined,
+  ): "parallel" | "sequential" | "weighted" {
     if (strategy && VALID_STRATEGIES.includes(strategy as any)) {
-      return strategy as 'parallel' | 'sequential' | 'weighted';
+      return strategy as "parallel" | "sequential" | "weighted";
     }
-    return 'parallel';
+    return "parallel";
   }
 }

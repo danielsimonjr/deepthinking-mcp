@@ -10,7 +10,7 @@
  * - Serves as a base class for specialized handlers
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 import {
   ThinkingMode,
   Thought,
@@ -25,8 +25,8 @@ import {
   AbductiveThought,
   CausalThought,
   isFullyImplemented,
-} from '../../types/core.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+} from "../../types/core.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -36,8 +36,8 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
-import { toExtendedThoughtType } from '../../utils/type-guards.js';
+} from "./ModeHandler.js";
+import { toExtendedThoughtType } from "../../utils/type-guards.js";
 
 /**
  * GenericModeHandler - Default implementation for all modes
@@ -114,7 +114,7 @@ export class GenericModeHandler implements ModeHandler {
    */
   protected createModeSpecificThought(
     input: ThinkingToolInput,
-    baseThought: ReturnType<typeof this.createBaseThought>
+    baseThought: ReturnType<typeof this.createBaseThought>,
   ): Thought {
     const mode = (input.mode as ThinkingMode) || this.mode;
 
@@ -132,7 +132,8 @@ export class GenericModeHandler implements ModeHandler {
         return {
           ...baseThought,
           mode: ThinkingMode.SHANNON,
-          stage: (input.stage as ShannonStage) || ShannonStage.PROBLEM_DEFINITION,
+          stage:
+            (input.stage as ShannonStage) || ShannonStage.PROBLEM_DEFINITION,
           uncertainty: input.uncertainty || 0.5,
           dependencies: input.dependencies || [],
           assumptions: input.assumptions || [],
@@ -142,7 +143,7 @@ export class GenericModeHandler implements ModeHandler {
         return {
           ...baseThought,
           mode: ThinkingMode.MATHEMATICS,
-          thoughtType: toExtendedThoughtType(input.thoughtType, 'model'),
+          thoughtType: toExtendedThoughtType(input.thoughtType, "model"),
           mathematicalModel: input.mathematicalModel,
           proofStrategy: input.proofStrategy,
           dependencies: input.dependencies || [],
@@ -154,7 +155,7 @@ export class GenericModeHandler implements ModeHandler {
         return {
           ...baseThought,
           mode: ThinkingMode.PHYSICS,
-          thoughtType: toExtendedThoughtType(input.thoughtType, 'model'),
+          thoughtType: toExtendedThoughtType(input.thoughtType, "model"),
           tensorProperties: input.tensorProperties,
           physicalInterpretation: input.physicalInterpretation,
           dependencies: input.dependencies || [],
@@ -168,7 +169,7 @@ export class GenericModeHandler implements ModeHandler {
           mode: ThinkingMode.INDUCTIVE,
           observations: (input.observations as string[]) || [],
           pattern: input.pattern,
-          generalization: input.generalization || '',
+          generalization: input.generalization || "",
           confidence: input.confidence ?? 0.5,
           counterexamples: input.counterexamples || [],
           sampleSize: input.sampleSize,
@@ -179,7 +180,7 @@ export class GenericModeHandler implements ModeHandler {
           ...baseThought,
           mode: ThinkingMode.DEDUCTIVE,
           premises: input.premises || [],
-          conclusion: (input.conclusion as string) || '',
+          conclusion: (input.conclusion as string) || "",
           logicForm: input.logicForm,
           validityCheck: input.validityCheck ?? false,
           soundnessCheck: input.soundnessCheck,
@@ -189,7 +190,10 @@ export class GenericModeHandler implements ModeHandler {
         return {
           ...baseThought,
           mode: ThinkingMode.ABDUCTIVE,
-          thoughtType: toExtendedThoughtType(input.thoughtType, 'problem_definition'),
+          thoughtType: toExtendedThoughtType(
+            input.thoughtType,
+            "problem_definition",
+          ),
           observations: (input.observations as any[]) || [],
           hypotheses: input.hypotheses || [],
           evaluationCriteria: input.evaluationCriteria,
@@ -211,7 +215,7 @@ export class GenericModeHandler implements ModeHandler {
    */
   protected createCausalThought(
     input: ThinkingToolInput,
-    baseThought: ReturnType<typeof this.createBaseThought>
+    baseThought: ReturnType<typeof this.createBaseThought>,
   ): CausalThought {
     const inputAny = input as any;
     const causalGraph = input.causalGraph || {
@@ -222,7 +226,10 @@ export class GenericModeHandler implements ModeHandler {
     return {
       ...baseThought,
       mode: ThinkingMode.CAUSAL,
-      thoughtType: toExtendedThoughtType(input.thoughtType, 'problem_definition'),
+      thoughtType: toExtendedThoughtType(
+        input.thoughtType,
+        "problem_definition",
+      ),
       causalGraph,
       interventions: input.interventions || [],
       mechanisms: input.mechanisms || [],
@@ -235,12 +242,12 @@ export class GenericModeHandler implements ModeHandler {
    */
   protected createHybridThought(
     input: ThinkingToolInput,
-    baseThought: ReturnType<typeof this.createBaseThought>
+    baseThought: ReturnType<typeof this.createBaseThought>,
   ): HybridThought {
     return {
       ...baseThought,
       mode: ThinkingMode.HYBRID,
-      thoughtType: toExtendedThoughtType(input.thoughtType, 'synthesis'),
+      thoughtType: toExtendedThoughtType(input.thoughtType, "synthesis"),
       stage: input.stage as ShannonStage,
       uncertainty: input.uncertainty,
       dependencies: input.dependencies,
@@ -265,7 +272,11 @@ export class GenericModeHandler implements ModeHandler {
     // Basic validation - check thought content
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
@@ -273,9 +284,9 @@ export class GenericModeHandler implements ModeHandler {
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
@@ -285,10 +296,10 @@ export class GenericModeHandler implements ModeHandler {
     if (!isFullyImplemented(mode)) {
       warnings.push(
         createValidationWarning(
-          'mode',
+          "mode",
           `Mode '${mode}' is experimental with limited runtime implementation`,
-          'Consider using a fully implemented mode for production use'
-        )
+          "Consider using a fully implemented mode for production use",
+        ),
       );
     }
 
@@ -318,7 +329,7 @@ export class GenericModeHandler implements ModeHandler {
       hasSpecializedHandler: false, // GenericHandler is not specialized
       note: isFullyImplemented(this.mode)
         ? undefined
-        : 'This mode is experimental with limited runtime implementation',
+        : "This mode is experimental with limited runtime implementation",
     };
   }
 
@@ -328,39 +339,127 @@ export class GenericModeHandler implements ModeHandler {
   protected getRelatedModes(mode: ThinkingMode): ThinkingMode[] {
     const relatedModes: Record<ThinkingMode, ThinkingMode[]> = {
       [ThinkingMode.SEQUENTIAL]: [ThinkingMode.HYBRID, ThinkingMode.SHANNON],
-      [ThinkingMode.SHANNON]: [ThinkingMode.SEQUENTIAL, ThinkingMode.MATHEMATICS],
-      [ThinkingMode.MATHEMATICS]: [ThinkingMode.PHYSICS, ThinkingMode.ALGORITHMIC],
-      [ThinkingMode.PHYSICS]: [ThinkingMode.MATHEMATICS, ThinkingMode.ENGINEERING],
-      [ThinkingMode.HYBRID]: [ThinkingMode.SEQUENTIAL, ThinkingMode.METAREASONING],
-      [ThinkingMode.CAUSAL]: [ThinkingMode.BAYESIAN, ThinkingMode.COUNTERFACTUAL],
+      [ThinkingMode.SHANNON]: [
+        ThinkingMode.SEQUENTIAL,
+        ThinkingMode.MATHEMATICS,
+      ],
+      [ThinkingMode.MATHEMATICS]: [
+        ThinkingMode.PHYSICS,
+        ThinkingMode.ALGORITHMIC,
+      ],
+      [ThinkingMode.PHYSICS]: [
+        ThinkingMode.MATHEMATICS,
+        ThinkingMode.ENGINEERING,
+      ],
+      [ThinkingMode.HYBRID]: [
+        ThinkingMode.SEQUENTIAL,
+        ThinkingMode.METAREASONING,
+      ],
+      [ThinkingMode.CAUSAL]: [
+        ThinkingMode.BAYESIAN,
+        ThinkingMode.COUNTERFACTUAL,
+      ],
       [ThinkingMode.BAYESIAN]: [ThinkingMode.CAUSAL, ThinkingMode.EVIDENTIAL],
-      [ThinkingMode.INDUCTIVE]: [ThinkingMode.DEDUCTIVE, ThinkingMode.ABDUCTIVE],
-      [ThinkingMode.DEDUCTIVE]: [ThinkingMode.INDUCTIVE, ThinkingMode.FORMALLOGIC],
+      [ThinkingMode.INDUCTIVE]: [
+        ThinkingMode.DEDUCTIVE,
+        ThinkingMode.ABDUCTIVE,
+      ],
+      [ThinkingMode.DEDUCTIVE]: [
+        ThinkingMode.INDUCTIVE,
+        ThinkingMode.FORMALLOGIC,
+      ],
       [ThinkingMode.ABDUCTIVE]: [ThinkingMode.INDUCTIVE, ThinkingMode.CAUSAL],
-      [ThinkingMode.COUNTERFACTUAL]: [ThinkingMode.CAUSAL, ThinkingMode.GAMETHEORY],
-      [ThinkingMode.ANALOGICAL]: [ThinkingMode.INDUCTIVE, ThinkingMode.FIRSTPRINCIPLES],
+      [ThinkingMode.COUNTERFACTUAL]: [
+        ThinkingMode.CAUSAL,
+        ThinkingMode.GAMETHEORY,
+      ],
+      [ThinkingMode.ANALOGICAL]: [
+        ThinkingMode.INDUCTIVE,
+        ThinkingMode.FIRSTPRINCIPLES,
+      ],
       [ThinkingMode.TEMPORAL]: [ThinkingMode.CAUSAL, ThinkingMode.SEQUENTIAL],
-      [ThinkingMode.HISTORICAL]: [ThinkingMode.TEMPORAL, ThinkingMode.CAUSAL, ThinkingMode.SYNTHESIS],
-      [ThinkingMode.GAMETHEORY]: [ThinkingMode.OPTIMIZATION, ThinkingMode.COUNTERFACTUAL],
-      [ThinkingMode.EVIDENTIAL]: [ThinkingMode.BAYESIAN, ThinkingMode.SCIENTIFICMETHOD],
-      [ThinkingMode.FIRSTPRINCIPLES]: [ThinkingMode.DEDUCTIVE, ThinkingMode.ANALOGICAL],
-      [ThinkingMode.SYSTEMSTHINKING]: [ThinkingMode.CAUSAL, ThinkingMode.OPTIMIZATION],
-      [ThinkingMode.SCIENTIFICMETHOD]: [ThinkingMode.EVIDENTIAL, ThinkingMode.SYNTHESIS],
-      [ThinkingMode.FORMALLOGIC]: [ThinkingMode.DEDUCTIVE, ThinkingMode.MATHEMATICS],
-      [ThinkingMode.METAREASONING]: [ThinkingMode.HYBRID, ThinkingMode.CRITIQUE],
-      [ThinkingMode.RECURSIVE]: [ThinkingMode.ALGORITHMIC, ThinkingMode.MATHEMATICS],
-      [ThinkingMode.MODAL]: [ThinkingMode.FORMALLOGIC, ThinkingMode.COUNTERFACTUAL],
-      [ThinkingMode.STOCHASTIC]: [ThinkingMode.BAYESIAN, ThinkingMode.OPTIMIZATION],
-      [ThinkingMode.CONSTRAINT]: [ThinkingMode.OPTIMIZATION, ThinkingMode.FORMALLOGIC],
-      [ThinkingMode.OPTIMIZATION]: [ThinkingMode.CONSTRAINT, ThinkingMode.GAMETHEORY],
-      [ThinkingMode.ENGINEERING]: [ThinkingMode.OPTIMIZATION, ThinkingMode.SYSTEMSTHINKING],
-      [ThinkingMode.COMPUTABILITY]: [ThinkingMode.ALGORITHMIC, ThinkingMode.FORMALLOGIC],
-      [ThinkingMode.CRYPTANALYTIC]: [ThinkingMode.BAYESIAN, ThinkingMode.ALGORITHMIC],
-      [ThinkingMode.ALGORITHMIC]: [ThinkingMode.MATHEMATICS, ThinkingMode.OPTIMIZATION],
+      [ThinkingMode.HISTORICAL]: [
+        ThinkingMode.TEMPORAL,
+        ThinkingMode.CAUSAL,
+        ThinkingMode.SYNTHESIS,
+      ],
+      [ThinkingMode.GAMETHEORY]: [
+        ThinkingMode.OPTIMIZATION,
+        ThinkingMode.COUNTERFACTUAL,
+      ],
+      [ThinkingMode.EVIDENTIAL]: [
+        ThinkingMode.BAYESIAN,
+        ThinkingMode.SCIENTIFICMETHOD,
+      ],
+      [ThinkingMode.FIRSTPRINCIPLES]: [
+        ThinkingMode.DEDUCTIVE,
+        ThinkingMode.ANALOGICAL,
+      ],
+      [ThinkingMode.SYSTEMSTHINKING]: [
+        ThinkingMode.CAUSAL,
+        ThinkingMode.OPTIMIZATION,
+      ],
+      [ThinkingMode.SCIENTIFICMETHOD]: [
+        ThinkingMode.EVIDENTIAL,
+        ThinkingMode.SYNTHESIS,
+      ],
+      [ThinkingMode.FORMALLOGIC]: [
+        ThinkingMode.DEDUCTIVE,
+        ThinkingMode.MATHEMATICS,
+      ],
+      [ThinkingMode.METAREASONING]: [
+        ThinkingMode.HYBRID,
+        ThinkingMode.CRITIQUE,
+      ],
+      [ThinkingMode.RECURSIVE]: [
+        ThinkingMode.ALGORITHMIC,
+        ThinkingMode.MATHEMATICS,
+      ],
+      [ThinkingMode.MODAL]: [
+        ThinkingMode.FORMALLOGIC,
+        ThinkingMode.COUNTERFACTUAL,
+      ],
+      [ThinkingMode.STOCHASTIC]: [
+        ThinkingMode.BAYESIAN,
+        ThinkingMode.OPTIMIZATION,
+      ],
+      [ThinkingMode.CONSTRAINT]: [
+        ThinkingMode.OPTIMIZATION,
+        ThinkingMode.FORMALLOGIC,
+      ],
+      [ThinkingMode.OPTIMIZATION]: [
+        ThinkingMode.CONSTRAINT,
+        ThinkingMode.GAMETHEORY,
+      ],
+      [ThinkingMode.ENGINEERING]: [
+        ThinkingMode.OPTIMIZATION,
+        ThinkingMode.SYSTEMSTHINKING,
+      ],
+      [ThinkingMode.COMPUTABILITY]: [
+        ThinkingMode.ALGORITHMIC,
+        ThinkingMode.FORMALLOGIC,
+      ],
+      [ThinkingMode.CRYPTANALYTIC]: [
+        ThinkingMode.BAYESIAN,
+        ThinkingMode.ALGORITHMIC,
+      ],
+      [ThinkingMode.ALGORITHMIC]: [
+        ThinkingMode.MATHEMATICS,
+        ThinkingMode.OPTIMIZATION,
+      ],
       [ThinkingMode.SYNTHESIS]: [ThinkingMode.CRITIQUE, ThinkingMode.ANALYSIS],
-      [ThinkingMode.ARGUMENTATION]: [ThinkingMode.CRITIQUE, ThinkingMode.FORMALLOGIC],
-      [ThinkingMode.CRITIQUE]: [ThinkingMode.ARGUMENTATION, ThinkingMode.SYNTHESIS],
-      [ThinkingMode.ANALYSIS]: [ThinkingMode.SYNTHESIS, ThinkingMode.SCIENTIFICMETHOD],
+      [ThinkingMode.ARGUMENTATION]: [
+        ThinkingMode.CRITIQUE,
+        ThinkingMode.FORMALLOGIC,
+      ],
+      [ThinkingMode.CRITIQUE]: [
+        ThinkingMode.ARGUMENTATION,
+        ThinkingMode.SYNTHESIS,
+      ],
+      [ThinkingMode.ANALYSIS]: [
+        ThinkingMode.SYNTHESIS,
+        ThinkingMode.SCIENTIFICMETHOD,
+      ],
       [ThinkingMode.CUSTOM]: [ThinkingMode.HYBRID],
     };
 
@@ -372,44 +471,44 @@ export class GenericModeHandler implements ModeHandler {
    */
   private getDefaultModeName(mode: ThinkingMode): string {
     const names: Record<ThinkingMode, string> = {
-      [ThinkingMode.SEQUENTIAL]: 'Sequential Thinking',
-      [ThinkingMode.SHANNON]: 'Shannon Problem-Solving',
-      [ThinkingMode.MATHEMATICS]: 'Mathematical Reasoning',
-      [ThinkingMode.PHYSICS]: 'Physics Modeling',
-      [ThinkingMode.HYBRID]: 'Hybrid Mode',
-      [ThinkingMode.INDUCTIVE]: 'Inductive Reasoning',
-      [ThinkingMode.DEDUCTIVE]: 'Deductive Reasoning',
-      [ThinkingMode.ABDUCTIVE]: 'Abductive Reasoning',
-      [ThinkingMode.CAUSAL]: 'Causal Analysis',
-      [ThinkingMode.BAYESIAN]: 'Bayesian Inference',
-      [ThinkingMode.COUNTERFACTUAL]: 'Counterfactual Reasoning',
-      [ThinkingMode.ANALOGICAL]: 'Analogical Reasoning',
-      [ThinkingMode.TEMPORAL]: 'Temporal Reasoning',
-      [ThinkingMode.HISTORICAL]: 'Historical Reasoning',
-      [ThinkingMode.GAMETHEORY]: 'Game Theory',
-      [ThinkingMode.EVIDENTIAL]: 'Evidential Reasoning',
-      [ThinkingMode.FIRSTPRINCIPLES]: 'First Principles',
-      [ThinkingMode.SYSTEMSTHINKING]: 'Systems Thinking',
-      [ThinkingMode.SCIENTIFICMETHOD]: 'Scientific Method',
-      [ThinkingMode.FORMALLOGIC]: 'Formal Logic',
-      [ThinkingMode.METAREASONING]: 'Meta-Reasoning',
-      [ThinkingMode.RECURSIVE]: 'Recursive Reasoning',
-      [ThinkingMode.MODAL]: 'Modal Logic',
-      [ThinkingMode.STOCHASTIC]: 'Stochastic Reasoning',
-      [ThinkingMode.CONSTRAINT]: 'Constraint Satisfaction',
-      [ThinkingMode.OPTIMIZATION]: 'Optimization',
-      [ThinkingMode.ENGINEERING]: 'Engineering Analysis',
-      [ThinkingMode.COMPUTABILITY]: 'Computability Theory',
-      [ThinkingMode.CRYPTANALYTIC]: 'Cryptanalysis',
-      [ThinkingMode.ALGORITHMIC]: 'Algorithm Design',
-      [ThinkingMode.SYNTHESIS]: 'Literature Synthesis',
-      [ThinkingMode.ARGUMENTATION]: 'Academic Argumentation',
-      [ThinkingMode.CRITIQUE]: 'Critical Analysis',
-      [ThinkingMode.ANALYSIS]: 'Qualitative Analysis',
-      [ThinkingMode.CUSTOM]: 'Custom Mode',
+      [ThinkingMode.SEQUENTIAL]: "Sequential Thinking",
+      [ThinkingMode.SHANNON]: "Shannon Problem-Solving",
+      [ThinkingMode.MATHEMATICS]: "Mathematical Reasoning",
+      [ThinkingMode.PHYSICS]: "Physics Modeling",
+      [ThinkingMode.HYBRID]: "Hybrid Mode",
+      [ThinkingMode.INDUCTIVE]: "Inductive Reasoning",
+      [ThinkingMode.DEDUCTIVE]: "Deductive Reasoning",
+      [ThinkingMode.ABDUCTIVE]: "Abductive Reasoning",
+      [ThinkingMode.CAUSAL]: "Causal Analysis",
+      [ThinkingMode.BAYESIAN]: "Bayesian Inference",
+      [ThinkingMode.COUNTERFACTUAL]: "Counterfactual Reasoning",
+      [ThinkingMode.ANALOGICAL]: "Analogical Reasoning",
+      [ThinkingMode.TEMPORAL]: "Temporal Reasoning",
+      [ThinkingMode.HISTORICAL]: "Historical Reasoning",
+      [ThinkingMode.GAMETHEORY]: "Game Theory",
+      [ThinkingMode.EVIDENTIAL]: "Evidential Reasoning",
+      [ThinkingMode.FIRSTPRINCIPLES]: "First Principles",
+      [ThinkingMode.SYSTEMSTHINKING]: "Systems Thinking",
+      [ThinkingMode.SCIENTIFICMETHOD]: "Scientific Method",
+      [ThinkingMode.FORMALLOGIC]: "Formal Logic",
+      [ThinkingMode.METAREASONING]: "Meta-Reasoning",
+      [ThinkingMode.RECURSIVE]: "Recursive Reasoning",
+      [ThinkingMode.MODAL]: "Modal Logic",
+      [ThinkingMode.STOCHASTIC]: "Stochastic Reasoning",
+      [ThinkingMode.CONSTRAINT]: "Constraint Satisfaction",
+      [ThinkingMode.OPTIMIZATION]: "Optimization",
+      [ThinkingMode.ENGINEERING]: "Engineering Analysis",
+      [ThinkingMode.COMPUTABILITY]: "Computability Theory",
+      [ThinkingMode.CRYPTANALYTIC]: "Cryptanalysis",
+      [ThinkingMode.ALGORITHMIC]: "Algorithm Design",
+      [ThinkingMode.SYNTHESIS]: "Literature Synthesis",
+      [ThinkingMode.ARGUMENTATION]: "Academic Argumentation",
+      [ThinkingMode.CRITIQUE]: "Critical Analysis",
+      [ThinkingMode.ANALYSIS]: "Qualitative Analysis",
+      [ThinkingMode.CUSTOM]: "Custom Mode",
     };
 
-    return names[mode] || 'Unknown Mode';
+    return names[mode] || "Unknown Mode";
   }
 
   /**
@@ -417,43 +516,48 @@ export class GenericModeHandler implements ModeHandler {
    */
   private getDefaultDescription(mode: ThinkingMode): string {
     const descriptions: Record<ThinkingMode, string> = {
-      [ThinkingMode.SEQUENTIAL]: 'Step-by-step logical reasoning',
-      [ThinkingMode.SHANNON]: 'Claude Shannon\'s 5-stage problem-solving methodology',
-      [ThinkingMode.MATHEMATICS]: 'Mathematical proofs and formal reasoning',
-      [ThinkingMode.PHYSICS]: 'Physical modeling with tensors and conservation laws',
-      [ThinkingMode.HYBRID]: 'Flexible combination of multiple reasoning modes',
-      [ThinkingMode.INDUCTIVE]: 'Reasoning from specific cases to general principles',
-      [ThinkingMode.DEDUCTIVE]: 'Reasoning from general principles to specific conclusions',
-      [ThinkingMode.ABDUCTIVE]: 'Inference to the best explanation',
-      [ThinkingMode.CAUSAL]: 'Causal graph analysis and intervention reasoning',
-      [ThinkingMode.BAYESIAN]: 'Probabilistic reasoning with prior updates',
-      [ThinkingMode.COUNTERFACTUAL]: 'What-if scenario analysis',
-      [ThinkingMode.ANALOGICAL]: 'Reasoning by structural similarity',
-      [ThinkingMode.TEMPORAL]: 'Temporal logic and event sequencing',
-      [ThinkingMode.HISTORICAL]: 'Historical event analysis with source evaluation',
-      [ThinkingMode.GAMETHEORY]: 'Strategic interaction and Nash equilibria',
-      [ThinkingMode.EVIDENTIAL]: 'Dempster-Shafer evidence theory',
-      [ThinkingMode.FIRSTPRINCIPLES]: 'Reasoning from fundamental truths',
-      [ThinkingMode.SYSTEMSTHINKING]: 'Feedback loops and system dynamics',
-      [ThinkingMode.SCIENTIFICMETHOD]: 'Hypothesis testing and experimentation',
-      [ThinkingMode.FORMALLOGIC]: 'Propositional and predicate logic',
-      [ThinkingMode.METAREASONING]: 'Reasoning about reasoning strategies',
-      [ThinkingMode.RECURSIVE]: 'Self-similar problem decomposition',
-      [ThinkingMode.MODAL]: 'Possibility and necessity reasoning',
-      [ThinkingMode.STOCHASTIC]: 'Probabilistic state transitions',
-      [ThinkingMode.CONSTRAINT]: 'Constraint satisfaction problems',
-      [ThinkingMode.OPTIMIZATION]: 'Objective function optimization',
-      [ThinkingMode.ENGINEERING]: 'Requirements, trade studies, and FMEA',
-      [ThinkingMode.COMPUTABILITY]: 'Turing machines and decidability',
-      [ThinkingMode.CRYPTANALYTIC]: 'Cryptanalysis with deciban evidence',
-      [ThinkingMode.ALGORITHMIC]: 'CLRS algorithm design and analysis',
-      [ThinkingMode.SYNTHESIS]: 'Literature review and integration',
-      [ThinkingMode.ARGUMENTATION]: 'Toulmin model academic arguments',
-      [ThinkingMode.CRITIQUE]: 'Critical evaluation of scholarly work',
-      [ThinkingMode.ANALYSIS]: 'Qualitative data analysis methods',
-      [ThinkingMode.CUSTOM]: 'User-defined reasoning mode',
+      [ThinkingMode.SEQUENTIAL]: "Step-by-step logical reasoning",
+      [ThinkingMode.SHANNON]:
+        "Claude Shannon's 5-stage problem-solving methodology",
+      [ThinkingMode.MATHEMATICS]: "Mathematical proofs and formal reasoning",
+      [ThinkingMode.PHYSICS]:
+        "Physical modeling with tensors and conservation laws",
+      [ThinkingMode.HYBRID]: "Flexible combination of multiple reasoning modes",
+      [ThinkingMode.INDUCTIVE]:
+        "Reasoning from specific cases to general principles",
+      [ThinkingMode.DEDUCTIVE]:
+        "Reasoning from general principles to specific conclusions",
+      [ThinkingMode.ABDUCTIVE]: "Inference to the best explanation",
+      [ThinkingMode.CAUSAL]: "Causal graph analysis and intervention reasoning",
+      [ThinkingMode.BAYESIAN]: "Probabilistic reasoning with prior updates",
+      [ThinkingMode.COUNTERFACTUAL]: "What-if scenario analysis",
+      [ThinkingMode.ANALOGICAL]: "Reasoning by structural similarity",
+      [ThinkingMode.TEMPORAL]: "Temporal logic and event sequencing",
+      [ThinkingMode.HISTORICAL]:
+        "Historical event analysis with source evaluation",
+      [ThinkingMode.GAMETHEORY]: "Strategic interaction and Nash equilibria",
+      [ThinkingMode.EVIDENTIAL]: "Dempster-Shafer evidence theory",
+      [ThinkingMode.FIRSTPRINCIPLES]: "Reasoning from fundamental truths",
+      [ThinkingMode.SYSTEMSTHINKING]: "Feedback loops and system dynamics",
+      [ThinkingMode.SCIENTIFICMETHOD]: "Hypothesis testing and experimentation",
+      [ThinkingMode.FORMALLOGIC]: "Propositional and predicate logic",
+      [ThinkingMode.METAREASONING]: "Reasoning about reasoning strategies",
+      [ThinkingMode.RECURSIVE]: "Self-similar problem decomposition",
+      [ThinkingMode.MODAL]: "Possibility and necessity reasoning",
+      [ThinkingMode.STOCHASTIC]: "Probabilistic state transitions",
+      [ThinkingMode.CONSTRAINT]: "Constraint satisfaction problems",
+      [ThinkingMode.OPTIMIZATION]: "Objective function optimization",
+      [ThinkingMode.ENGINEERING]: "Requirements, trade studies, and FMEA",
+      [ThinkingMode.COMPUTABILITY]: "Turing machines and decidability",
+      [ThinkingMode.CRYPTANALYTIC]: "Cryptanalysis with deciban evidence",
+      [ThinkingMode.ALGORITHMIC]: "CLRS algorithm design and analysis",
+      [ThinkingMode.SYNTHESIS]: "Literature review and integration",
+      [ThinkingMode.ARGUMENTATION]: "Toulmin model academic arguments",
+      [ThinkingMode.CRITIQUE]: "Critical evaluation of scholarly work",
+      [ThinkingMode.ANALYSIS]: "Qualitative data analysis methods",
+      [ThinkingMode.CUSTOM]: "User-defined reasoning mode",
     };
 
-    return descriptions[mode] || 'Unknown reasoning mode';
+    return descriptions[mode] || "Unknown reasoning mode";
   }
 }

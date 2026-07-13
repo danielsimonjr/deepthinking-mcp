@@ -11,7 +11,7 @@ import type {
   AssumptionAnalysis,
   ImplicitAssumption,
   ProofDecomposition,
-} from '../types/modes/mathematics.js';
+} from "../types/modes/mathematics.js";
 
 /**
  * Assumption discharge status
@@ -34,7 +34,10 @@ export class AssumptionTracker {
    * @param graph - The dependency graph
    * @returns AssumptionChain with full derivation path
    */
-  traceToAssumptions(conclusionId: string, graph: DependencyGraph): AssumptionChain {
+  traceToAssumptions(
+    conclusionId: string,
+    graph: DependencyGraph,
+  ): AssumptionChain {
     const assumptions: string[] = [];
     const path: string[] = [];
     const implicitAssumptions: ImplicitAssumption[] = [];
@@ -51,7 +54,11 @@ export class AssumptionTracker {
       path.push(id);
 
       // Check if this is a foundational statement
-      if (node.type === 'axiom' || node.type === 'definition' || node.type === 'hypothesis') {
+      if (
+        node.type === "axiom" ||
+        node.type === "definition" ||
+        node.type === "hypothesis"
+      ) {
         assumptions.push(id);
         return;
       }
@@ -66,7 +73,7 @@ export class AssumptionTracker {
         implicitAssumptions.push({
           id: `impl-trace-${id}`,
           statement: node.statement,
-          type: 'existence_assumption',
+          type: "existence_assumption",
           usedInStep: id,
           shouldBeExplicit: true,
           suggestedFormulation: `Make explicit: "${node.statement.substring(0, 50)}..."`,
@@ -99,7 +106,10 @@ export class AssumptionTracker {
 
     // Categorize explicit assumptions
     const explicitAssumptions = atoms.filter(
-      (a) => a.type === 'axiom' || a.type === 'definition' || a.type === 'hypothesis'
+      (a) =>
+        a.type === "axiom" ||
+        a.type === "definition" ||
+        a.type === "hypothesis",
     );
 
     // Collect all implicit assumptions from assumption chains
@@ -107,7 +117,7 @@ export class AssumptionTracker {
     const conclusionDependencies = new Map<string, string[]>();
 
     // Find conclusions and trace their dependencies
-    const conclusions = atoms.filter((a) => a.type === 'conclusion');
+    const conclusions = atoms.filter((a) => a.type === "conclusion");
     for (const conclusion of conclusions) {
       const chain = this.traceToAssumptions(conclusion.id, dependencies);
       conclusionDependencies.set(conclusion.id, chain.assumptions);
@@ -136,7 +146,10 @@ export class AssumptionTracker {
       .map((a) => a.id);
 
     // Compute minimal assumption sets
-    const minimalSets = this.findMinimalAssumptions(conclusionDependencies, dependencies);
+    const minimalSets = this.findMinimalAssumptions(
+      conclusionDependencies,
+      dependencies,
+    );
 
     // Deduplicate implicit assumptions
     const uniqueImplicit = this.deduplicateImplicit(allImplicitAssumptions);
@@ -158,7 +171,7 @@ export class AssumptionTracker {
    */
   findMinimalAssumptions(
     conclusionDependencies: Map<string, string[]>,
-    graph: DependencyGraph
+    graph: DependencyGraph,
   ): Map<string, string[]> {
     const minimalSets = new Map<string, string[]>();
 
@@ -180,7 +193,7 @@ export class AssumptionTracker {
   private computeMinimalSet(
     conclusion: string,
     assumptions: string[],
-    graph: DependencyGraph
+    graph: DependencyGraph,
   ): string[] {
     if (assumptions.length <= 1) return [...assumptions];
 
@@ -204,7 +217,11 @@ export class AssumptionTracker {
   /**
    * Check if a conclusion is reachable from a set of assumptions
    */
-  private isReachable(assumptions: string[], conclusion: string, graph: DependencyGraph): boolean {
+  private isReachable(
+    assumptions: string[],
+    conclusion: string,
+    graph: DependencyGraph,
+  ): boolean {
     const reachable = new Set<string>(assumptions);
     let changed = true;
 
@@ -215,7 +232,9 @@ export class AssumptionTracker {
 
         // Check if all dependencies are reachable
         if (node.derivedFrom && node.derivedFrom.length > 0) {
-          const allDepsReachable = node.derivedFrom.every((d) => reachable.has(d));
+          const allDepsReachable = node.derivedFrom.every((d) =>
+            reachable.has(d),
+          );
           if (allDepsReachable) {
             reachable.add(id);
             changed = true;
@@ -238,8 +257,13 @@ export class AssumptionTracker {
     // Find all assumption IDs
     const assumptionIds = new Set(
       atoms
-        .filter((a) => a.type === 'axiom' || a.type === 'definition' || a.type === 'hypothesis')
-        .map((a) => a.id)
+        .filter(
+          (a) =>
+            a.type === "axiom" ||
+            a.type === "definition" ||
+            a.type === "hypothesis",
+        )
+        .map((a) => a.id),
     );
 
     // Find all referenced assumptions
@@ -267,25 +291,29 @@ export class AssumptionTracker {
    * In proof by contradiction, we assume ¬P to derive a contradiction,
    * then discharge ¬P to conclude P.
    */
-  checkAssumptionDischarge(decomposition: ProofDecomposition): DischargeStatus[] {
+  checkAssumptionDischarge(
+    decomposition: ProofDecomposition,
+  ): DischargeStatus[] {
     const { atoms } = decomposition;
     const statuses: DischargeStatus[] = [];
 
     // Find hypothetical assumptions (those that should be discharged)
-    const hypotheticals = atoms.filter((a) => a.type === 'hypothesis');
+    const hypotheticals = atoms.filter((a) => a.type === "hypothesis");
 
     // Find contradiction statements
     const contradictions = atoms.filter(
       (a) =>
-        a.statement.toLowerCase().includes('contradiction') ||
-        a.statement.includes('⊥') ||
-        a.usedInferenceRule === 'contradiction'
+        a.statement.toLowerCase().includes("contradiction") ||
+        a.statement.includes("⊥") ||
+        a.usedInferenceRule === "contradiction",
     );
 
     for (const hyp of hypotheticals) {
       // Check if this hypothesis is involved in a contradiction
-      const isDischargedByContradiction = contradictions.some(
-        (c) => c.derivedFrom?.some((d) => this.dependsOn(d, hyp.id, decomposition.dependencies))
+      const isDischargedByContradiction = contradictions.some((c) =>
+        c.derivedFrom?.some((d) =>
+          this.dependsOn(d, hyp.id, decomposition.dependencies),
+        ),
       );
 
       if (isDischargedByContradiction) {
@@ -293,16 +321,16 @@ export class AssumptionTracker {
           assumptionId: hyp.id,
           isDischarged: true,
           dischargedAt: contradictions[0]?.id,
-          dischargeReason: 'Used in proof by contradiction',
+          dischargeReason: "Used in proof by contradiction",
         });
       } else {
         // Check if discharged by implication introduction
-        const conclusions = atoms.filter((a) => a.type === 'conclusion');
+        const conclusions = atoms.filter((a) => a.type === "conclusion");
         const impliesDischarged = conclusions.some(
           (c) =>
-            c.statement.toLowerCase().includes('implies') ||
-            c.statement.includes('⇒') ||
-            c.statement.includes('→')
+            c.statement.toLowerCase().includes("implies") ||
+            c.statement.includes("⇒") ||
+            c.statement.includes("→"),
         );
 
         if (impliesDischarged) {
@@ -310,13 +338,13 @@ export class AssumptionTracker {
             assumptionId: hyp.id,
             isDischarged: true,
             dischargedAt: conclusions[0]?.id,
-            dischargeReason: 'Used in implication introduction',
+            dischargeReason: "Used in implication introduction",
           });
         } else {
           statuses.push({
             assumptionId: hyp.id,
             isDischarged: false,
-            dischargeReason: 'Hypothesis not discharged - may need attention',
+            dischargeReason: "Hypothesis not discharged - may need attention",
           });
         }
       }
@@ -377,7 +405,9 @@ export class AssumptionTracker {
   /**
    * Deduplicate implicit assumptions based on content similarity
    */
-  private deduplicateImplicit(assumptions: ImplicitAssumption[]): ImplicitAssumption[] {
+  private deduplicateImplicit(
+    assumptions: ImplicitAssumption[],
+  ): ImplicitAssumption[] {
     const seen = new Map<string, ImplicitAssumption>();
 
     for (const assumption of assumptions) {
@@ -400,15 +430,17 @@ export class AssumptionTracker {
     // Unused assumptions
     if (analysis.unusedAssumptions.length > 0) {
       suggestions.push(
-        `Consider removing ${analysis.unusedAssumptions.length} unused assumption(s): ${analysis.unusedAssumptions.join(', ')}`
+        `Consider removing ${analysis.unusedAssumptions.length} unused assumption(s): ${analysis.unusedAssumptions.join(", ")}`,
       );
     }
 
     // Implicit assumptions that should be explicit
-    const criticalImplicit = analysis.implicitAssumptions.filter((a) => a.shouldBeExplicit);
+    const criticalImplicit = analysis.implicitAssumptions.filter(
+      (a) => a.shouldBeExplicit,
+    );
     if (criticalImplicit.length > 0) {
       suggestions.push(
-        `Make ${criticalImplicit.length} implicit assumption(s) explicit for improved rigor`
+        `Make ${criticalImplicit.length} implicit assumption(s) explicit for improved rigor`,
       );
       for (const imp of criticalImplicit.slice(0, 3)) {
         suggestions.push(`  - ${imp.suggestedFormulation}`);
@@ -422,14 +454,14 @@ export class AssumptionTracker {
         const redundant = full.filter((a) => !minimal.includes(a));
         if (redundant.length > 0) {
           suggestions.push(
-            `For conclusion ${conclusion}: ${redundant.length} assumption(s) may be redundant`
+            `For conclusion ${conclusion}: ${redundant.length} assumption(s) may be redundant`,
           );
         }
       }
     }
 
     if (suggestions.length === 0) {
-      suggestions.push('Assumption structure appears sound');
+      suggestions.push("Assumption structure appears sound");
     }
 
     return suggestions;
@@ -452,10 +484,15 @@ export class AssumptionTracker {
 
     // Check for foundational assumptions
     const foundations = atoms.filter(
-      (a) => a.type === 'axiom' || a.type === 'definition' || a.type === 'hypothesis'
+      (a) =>
+        a.type === "axiom" ||
+        a.type === "definition" ||
+        a.type === "hypothesis",
     );
     if (foundations.length === 0) {
-      issues.push('No foundational assumptions (axioms, definitions, or hypotheses) found');
+      issues.push(
+        "No foundational assumptions (axioms, definitions, or hypotheses) found",
+      );
     }
 
     // Check if roots match foundations
@@ -463,12 +500,12 @@ export class AssumptionTracker {
       const root = dependencies.nodes.get(rootId);
       if (
         root &&
-        root.type !== 'axiom' &&
-        root.type !== 'definition' &&
-        root.type !== 'hypothesis'
+        root.type !== "axiom" &&
+        root.type !== "definition" &&
+        root.type !== "hypothesis"
       ) {
         issues.push(
-          `Root statement "${root.statement.substring(0, 30)}..." is not a foundational type`
+          `Root statement "${root.statement.substring(0, 30)}..." is not a foundational type`,
         );
       }
     }
@@ -479,25 +516,25 @@ export class AssumptionTracker {
       const cycleNodes = new Set(
         (dependencies.stronglyConnectedComponents || [])
           .filter((scc) => scc.length > 1)
-          .flat()
+          .flat(),
       );
 
       for (const foundation of foundations) {
         if (cycleNodes.has(foundation.id)) {
           issues.push(
-            `Assumption "${foundation.statement.substring(0, 30)}..." is involved in circular reasoning`
+            `Assumption "${foundation.statement.substring(0, 30)}..." is involved in circular reasoning`,
           );
         }
       }
     }
 
     // Check if conclusions are reachable from assumptions
-    const conclusions = atoms.filter((a) => a.type === 'conclusion');
+    const conclusions = atoms.filter((a) => a.type === "conclusion");
     for (const conclusion of conclusions) {
       const chain = this.traceToAssumptions(conclusion.id, dependencies);
       if (chain.assumptions.length === 0 && !chain.allAssumptionsExplicit) {
         issues.push(
-          `Conclusion "${conclusion.statement.substring(0, 30)}..." cannot be traced to any assumption`
+          `Conclusion "${conclusion.statement.substring(0, 30)}..." cannot be traced to any assumption`,
         );
       }
     }

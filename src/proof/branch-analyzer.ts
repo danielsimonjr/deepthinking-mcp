@@ -5,12 +5,9 @@
  * can potentially be verified in parallel.
  */
 
-import { randomUUID } from 'crypto';
-import type { ProofStep } from './decomposer.js';
-import type {
-  ProofBranch,
-  BranchAnalysisResult,
-} from './branch-types.js';
+import { randomUUID } from "crypto";
+import type { ProofStep } from "./decomposer.js";
+import type { ProofBranch, BranchAnalysisResult } from "./branch-types.js";
 
 /**
  * Options for branch analysis
@@ -92,14 +89,19 @@ export class BranchAnalyzer {
     }
 
     const independentCount = branches.filter((b) => b.isIndependent).length;
-    const totalComplexity = branches.reduce((sum, b) => sum + b.estimatedComplexity, 0);
+    const totalComplexity = branches.reduce(
+      (sum, b) => sum + b.estimatedComplexity,
+      0,
+    );
 
     return {
       branches,
       executionLevels,
       independentCount,
       totalComplexity,
-      canParallelize: independentCount > 1 || executionLevels.some((level) => level.length > 1),
+      canParallelize:
+        independentCount > 1 ||
+        executionLevels.some((level) => level.length > 1),
     };
   }
 
@@ -138,9 +140,13 @@ export class BranchAnalyzer {
   /**
    * Parse step justification to find dependencies
    */
-  private parseDependencies(step: ProofStep, currentIdx: number, allSteps: ProofStep[]): number[] {
+  private parseDependencies(
+    step: ProofStep,
+    currentIdx: number,
+    allSteps: ProofStep[],
+  ): number[] {
     const deps: number[] = [];
-    const justification = step.justification?.toLowerCase() || '';
+    const justification = step.justification?.toLowerCase() || "";
     const content = step.content.toLowerCase();
 
     // Check for explicit step references (e.g., "by step 1", "from (1) and (2)")
@@ -168,11 +174,11 @@ export class BranchAnalyzer {
 
     // Check for implicit dependencies (by previous step patterns)
     if (
-      justification.includes('previous') ||
-      justification.includes('above') ||
-      content.includes('therefore') ||
-      content.includes('thus') ||
-      content.includes('hence')
+      justification.includes("previous") ||
+      justification.includes("above") ||
+      content.includes("therefore") ||
+      content.includes("thus") ||
+      content.includes("hence")
     ) {
       if (currentIdx > 0 && deps.length === 0) {
         deps.push(currentIdx - 1);
@@ -180,13 +186,17 @@ export class BranchAnalyzer {
     }
 
     // Check for "by definition of" or "by axiom" patterns
-    if (justification.includes('definition') || justification.includes('axiom')) {
+    if (
+      justification.includes("definition") ||
+      justification.includes("axiom")
+    ) {
       // Find matching definitions/axioms
       for (let i = 0; i < currentIdx; i++) {
         const stepContent = allSteps[i].content.toLowerCase();
         if (
-          (justification.includes('definition') && stepContent.includes('definition')) ||
-          (justification.includes('axiom') && stepContent.includes('axiom'))
+          (justification.includes("definition") &&
+            stepContent.includes("definition")) ||
+          (justification.includes("axiom") && stepContent.includes("axiom"))
         ) {
           deps.push(i);
         }
@@ -197,12 +207,12 @@ export class BranchAnalyzer {
     if (deps.length === 0 && currentIdx > 0) {
       const contentLower = step.content.toLowerCase();
       if (
-        !contentLower.startsWith('axiom') &&
-        !contentLower.startsWith('definition') &&
-        !contentLower.startsWith('assume') &&
-        !contentLower.startsWith('suppose') &&
-        !contentLower.startsWith('given') &&
-        !contentLower.startsWith('let')
+        !contentLower.startsWith("axiom") &&
+        !contentLower.startsWith("definition") &&
+        !contentLower.startsWith("assume") &&
+        !contentLower.startsWith("suppose") &&
+        !contentLower.startsWith("given") &&
+        !contentLower.startsWith("let")
       ) {
         deps.push(currentIdx - 1);
       }
@@ -216,7 +226,7 @@ export class BranchAnalyzer {
    */
   partitionIntoBranches(
     graph: Map<number, DependencyNode>,
-    steps: ProofStep[]
+    steps: ProofStep[],
   ): ProofBranch[] {
     const visited = new Set<number>();
     const branches: ProofBranch[] = [];
@@ -297,7 +307,7 @@ export class BranchAnalyzer {
   private resolveBranchDependencies(
     branches: ProofBranch[],
     graph: Map<number, DependencyNode>,
-    steps: ProofStep[]
+    steps: ProofStep[],
   ): void {
     // Build step-to-branch map
     const stepToBranch = new Map<number, string>();
@@ -370,7 +380,9 @@ export class BranchAnalyzer {
         if (assigned.has(branch.id)) continue;
 
         // Check if all dependencies are already assigned
-        const depsAssigned = branch.dependencies.every((depId) => assigned.has(depId));
+        const depsAssigned = branch.dependencies.every((depId) =>
+          assigned.has(depId),
+        );
         if (depsAssigned) {
           currentLevel.push(branch);
         }
@@ -418,13 +430,13 @@ export class BranchAnalyzer {
 
       // Add complexity for certain keywords
       const content = step.content.toLowerCase();
-      if (content.includes('induction')) complexity += 3;
-      if (content.includes('contradiction')) complexity += 2;
-      if (content.includes('cases')) complexity += 2;
-      if (content.includes('limit')) complexity += 2;
-      if (content.includes('integral')) complexity += 3;
-      if (content.includes('derivative')) complexity += 2;
-      if (content.includes('converge')) complexity += 2;
+      if (content.includes("induction")) complexity += 3;
+      if (content.includes("contradiction")) complexity += 2;
+      if (content.includes("cases")) complexity += 2;
+      if (content.includes("limit")) complexity += 2;
+      if (content.includes("integral")) complexity += 3;
+      if (content.includes("derivative")) complexity += 2;
+      if (content.includes("converge")) complexity += 2;
     }
 
     return Math.round(complexity * 10) / 10;
@@ -433,31 +445,34 @@ export class BranchAnalyzer {
   /**
    * Extract metadata from a branch
    */
-  private extractBranchMetadata(branch: ProofBranch): ProofBranch['metadata'] {
+  private extractBranchMetadata(branch: ProofBranch): ProofBranch["metadata"] {
     const assumptions: string[] = [];
-    let reasoningType = 'direct';
+    let reasoningType = "direct";
 
     for (const step of branch.steps) {
       const content = step.content.toLowerCase();
 
       // Extract assumptions
       if (
-        content.startsWith('assume') ||
-        content.startsWith('suppose') ||
-        content.startsWith('given')
+        content.startsWith("assume") ||
+        content.startsWith("suppose") ||
+        content.startsWith("given")
       ) {
         assumptions.push(step.content);
       }
 
       // Detect reasoning type
-      if (content.includes('induction')) {
-        reasoningType = 'induction';
-      } else if (content.includes('contradiction') || content.includes('absurd')) {
-        reasoningType = 'contradiction';
-      } else if (content.includes('case') && content.includes(':')) {
-        reasoningType = 'case_analysis';
-      } else if (content.includes('contrapositive')) {
-        reasoningType = 'contrapositive';
+      if (content.includes("induction")) {
+        reasoningType = "induction";
+      } else if (
+        content.includes("contradiction") ||
+        content.includes("absurd")
+      ) {
+        reasoningType = "contradiction";
+      } else if (content.includes("case") && content.includes(":")) {
+        reasoningType = "case_analysis";
+      } else if (content.includes("contrapositive")) {
+        reasoningType = "contrapositive";
       }
     }
 
@@ -479,17 +494,26 @@ export class BranchAnalyzer {
     avgBranchSize: number;
     avgComplexity: number;
   } {
-    const totalSteps = result.branches.reduce((sum, b) => sum + b.steps.length, 0);
-    const maxParallelism = Math.max(...result.executionLevels.map((l) => l.length), 0);
+    const totalSteps = result.branches.reduce(
+      (sum, b) => sum + b.steps.length,
+      0,
+    );
+    const maxParallelism = Math.max(
+      ...result.executionLevels.map((l) => l.length),
+      0,
+    );
     const avgComplexity =
-      result.branches.length > 0 ? result.totalComplexity / result.branches.length : 0;
+      result.branches.length > 0
+        ? result.totalComplexity / result.branches.length
+        : 0;
 
     return {
       totalBranches: result.branches.length,
       independentBranches: result.independentCount,
       maxParallelism,
       totalSteps,
-      avgBranchSize: result.branches.length > 0 ? totalSteps / result.branches.length : 0,
+      avgBranchSize:
+        result.branches.length > 0 ? totalSteps / result.branches.length : 0,
       avgComplexity: Math.round(avgComplexity * 10) / 10,
     };
   }

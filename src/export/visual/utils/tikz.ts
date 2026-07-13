@@ -16,7 +16,8 @@ export interface TikZNode {
   x?: number;
   y?: number;
   type?: string;
-  shape?: 'rectangle' | 'circle' | 'ellipse' | 'diamond' | 'rounded' | 'stadium';
+  shape?:
+    "rectangle" | "circle" | "ellipse" | "diamond" | "rounded" | "stadium";
   metadata?: Record<string, unknown>;
 }
 
@@ -24,16 +25,16 @@ export interface TikZEdge {
   source: string;
   target: string;
   label?: string;
-  style?: 'solid' | 'dashed' | 'dotted';
+  style?: "solid" | "dashed" | "dotted";
   directed?: boolean;
-  bend?: 'left' | 'right' | number;
+  bend?: "left" | "right" | number;
 }
 
 export interface TikZOptions {
   standalone?: boolean;
   includeLabels?: boolean;
   includeMetrics?: boolean;
-  colorScheme?: 'default' | 'pastel' | 'monochrome';
+  colorScheme?: "default" | "pastel" | "monochrome";
   title?: string;
   scale?: number;
   nodeDistance?: string;
@@ -44,43 +45,43 @@ export const DEFAULT_TIKZ_OPTIONS: TikZOptions = {
   standalone: false,
   includeLabels: true,
   includeMetrics: true,
-  colorScheme: 'default',
+  colorScheme: "default",
   scale: 1,
-  nodeDistance: '2cm',
-  levelDistance: '1.5cm',
+  nodeDistance: "2cm",
+  levelDistance: "1.5cm",
 };
 
 // Color palettes for TikZ
 const COLOR_PALETTES = {
   default: {
-    primary: { fill: 'blue!20', stroke: 'blue!60' },
-    secondary: { fill: 'green!20', stroke: 'green!60' },
-    tertiary: { fill: 'orange!20', stroke: 'orange!60' },
-    neutral: { fill: 'gray!20', stroke: 'gray!60' },
-    success: { fill: 'green!30', stroke: 'green!70' },
-    warning: { fill: 'yellow!30', stroke: 'yellow!70' },
-    danger: { fill: 'red!20', stroke: 'red!60' },
-    info: { fill: 'cyan!20', stroke: 'cyan!60' },
+    primary: { fill: "blue!20", stroke: "blue!60" },
+    secondary: { fill: "green!20", stroke: "green!60" },
+    tertiary: { fill: "orange!20", stroke: "orange!60" },
+    neutral: { fill: "gray!20", stroke: "gray!60" },
+    success: { fill: "green!30", stroke: "green!70" },
+    warning: { fill: "yellow!30", stroke: "yellow!70" },
+    danger: { fill: "red!20", stroke: "red!60" },
+    info: { fill: "cyan!20", stroke: "cyan!60" },
   },
   pastel: {
-    primary: { fill: 'blue!10', stroke: 'blue!40' },
-    secondary: { fill: 'green!10', stroke: 'green!40' },
-    tertiary: { fill: 'orange!10', stroke: 'orange!40' },
-    neutral: { fill: 'gray!10', stroke: 'gray!40' },
-    success: { fill: 'green!15', stroke: 'green!50' },
-    warning: { fill: 'yellow!15', stroke: 'yellow!50' },
-    danger: { fill: 'red!10', stroke: 'red!40' },
-    info: { fill: 'cyan!10', stroke: 'cyan!40' },
+    primary: { fill: "blue!10", stroke: "blue!40" },
+    secondary: { fill: "green!10", stroke: "green!40" },
+    tertiary: { fill: "orange!10", stroke: "orange!40" },
+    neutral: { fill: "gray!10", stroke: "gray!40" },
+    success: { fill: "green!15", stroke: "green!50" },
+    warning: { fill: "yellow!15", stroke: "yellow!50" },
+    danger: { fill: "red!10", stroke: "red!40" },
+    info: { fill: "cyan!10", stroke: "cyan!40" },
   },
   monochrome: {
-    primary: { fill: 'black!10', stroke: 'black!60' },
-    secondary: { fill: 'black!15', stroke: 'black!70' },
-    tertiary: { fill: 'black!20', stroke: 'black!80' },
-    neutral: { fill: 'black!5', stroke: 'black!50' },
-    success: { fill: 'black!10', stroke: 'black!60' },
-    warning: { fill: 'black!15', stroke: 'black!70' },
-    danger: { fill: 'black!20', stroke: 'black!80' },
-    info: { fill: 'black!10', stroke: 'black!60' },
+    primary: { fill: "black!10", stroke: "black!60" },
+    secondary: { fill: "black!15", stroke: "black!70" },
+    tertiary: { fill: "black!20", stroke: "black!80" },
+    neutral: { fill: "black!5", stroke: "black!50" },
+    success: { fill: "black!10", stroke: "black!60" },
+    warning: { fill: "black!15", stroke: "black!70" },
+    danger: { fill: "black!20", stroke: "black!80" },
+    info: { fill: "black!10", stroke: "black!60" },
   },
 };
 
@@ -89,31 +90,31 @@ const COLOR_PALETTES = {
  */
 export function getTikZColor(
   nodeType: string,
-  colorScheme: 'default' | 'pastel' | 'monochrome' = 'default'
+  colorScheme: "default" | "pastel" | "monochrome" = "default",
 ): { fill: string; stroke: string } {
   const palette = COLOR_PALETTES[colorScheme] || COLOR_PALETTES.default;
   const colorMap: Record<string, keyof typeof palette> = {
-    primary: 'primary',
-    secondary: 'secondary',
-    tertiary: 'tertiary',
-    neutral: 'neutral',
-    success: 'success',
-    warning: 'warning',
-    danger: 'danger',
-    info: 'info',
-    cause: 'primary',
-    effect: 'tertiary',
-    mediator: 'secondary',
-    confounder: 'warning',
-    root: 'primary',
-    current: 'primary',
-    terminal: 'success',
-    hypothesis: 'info',
-    evidence: 'secondary',
-    conclusion: 'success',
+    primary: "primary",
+    secondary: "secondary",
+    tertiary: "tertiary",
+    neutral: "neutral",
+    success: "success",
+    warning: "warning",
+    danger: "danger",
+    info: "info",
+    cause: "primary",
+    effect: "tertiary",
+    mediator: "secondary",
+    confounder: "warning",
+    root: "primary",
+    current: "primary",
+    terminal: "success",
+    hypothesis: "info",
+    evidence: "secondary",
+    conclusion: "success",
   };
 
-  const key = colorMap[nodeType] || 'neutral';
+  const key = colorMap[nodeType] || "neutral";
   return palette[key];
 }
 
@@ -122,16 +123,16 @@ export function getTikZColor(
  */
 export function escapeLatex(str: string): string {
   return str
-    .replace(/\\/g, '\\textbackslash{}')
-    .replace(/%/g, '\\%')
-    .replace(/\$/g, '\\$')
-    .replace(/&/g, '\\&')
-    .replace(/#/g, '\\#')
-    .replace(/_/g, '\\_')
-    .replace(/{/g, '\\{')
-    .replace(/}/g, '\\}')
-    .replace(/\^/g, '\\textasciicircum{}')
-    .replace(/~/g, '\\textasciitilde{}');
+    .replace(/\\/g, "\\textbackslash{}")
+    .replace(/%/g, "\\%")
+    .replace(/\$/g, "\\$")
+    .replace(/&/g, "\\&")
+    .replace(/#/g, "\\#")
+    .replace(/_/g, "\\_")
+    .replace(/{/g, "\\{")
+    .replace(/}/g, "\\}")
+    .replace(/\^/g, "\\textasciicircum{}")
+    .replace(/~/g, "\\textasciitilde{}");
 }
 
 /**
@@ -140,7 +141,7 @@ export function escapeLatex(str: string): string {
 export function generateTikZHeader(options: TikZOptions = {}): string {
   const { standalone = false, title, scale = 1 } = options;
 
-  let header = '';
+  let header = "";
 
   if (standalone) {
     header += `\\documentclass[tikz,border=10pt]{standalone}
@@ -177,10 +178,10 @@ export function generateTikZHeader(options: TikZOptions = {}): string {
 export function generateTikZFooter(options: TikZOptions = {}): string {
   const { standalone = false } = options;
 
-  let footer = '\n\\end{tikzpicture}';
+  let footer = "\n\\end{tikzpicture}";
 
   if (standalone) {
-    footer += '\n\\end{document}';
+    footer += "\n\\end{document}";
   }
 
   return footer;
@@ -191,31 +192,37 @@ export function generateTikZFooter(options: TikZOptions = {}): string {
  */
 function getShapeStyle(shape?: string): string {
   switch (shape) {
-    case 'circle':
-      return 'circle node';
-    case 'ellipse':
-      return 'ellipse node';
-    case 'diamond':
-      return 'diamond node';
-    case 'stadium':
-    case 'rounded':
-      return 'stadium node';
-    case 'rectangle':
+    case "circle":
+      return "circle node";
+    case "ellipse":
+      return "ellipse node";
+    case "diamond":
+      return "diamond node";
+    case "stadium":
+    case "rounded":
+      return "stadium node";
+    case "rectangle":
     default:
-      return 'box';
+      return "box";
   }
 }
 
 /**
  * Render a node in TikZ format
  */
-export function renderTikZNode(node: TikZNode, options: TikZOptions = {}): string {
-  const { colorScheme = 'default', includeLabels = true } = options;
-  const colors = getTikZColor(node.type || 'neutral', colorScheme);
+export function renderTikZNode(
+  node: TikZNode,
+  options: TikZOptions = {},
+): string {
+  const { colorScheme = "default", includeLabels = true } = options;
+  const colors = getTikZColor(node.type || "neutral", colorScheme);
   const shapeStyle = getShapeStyle(node.shape);
   const label = includeLabels ? escapeLatex(node.label) : escapeLatex(node.id);
 
-  const position = node.x !== undefined && node.y !== undefined ? `at (${node.x}, ${node.y})` : '';
+  const position =
+    node.x !== undefined && node.y !== undefined
+      ? `at (${node.x}, ${node.y})`
+      : "";
 
   return `\n  \\node[${shapeStyle}, fill=${colors.fill}, draw=${colors.stroke}] (${node.id}) ${position} {${label}};`;
 }
@@ -225,11 +232,19 @@ export function renderTikZNode(node: TikZNode, options: TikZOptions = {}): strin
  */
 export function renderTikZNodeRelative(
   node: TikZNode,
-  position: { direction: 'right' | 'left' | 'above' | 'below'; of: string; distance?: string },
-  options: TikZOptions = {}
+  position: {
+    direction: "right" | "left" | "above" | "below";
+    of: string;
+    distance?: string;
+  },
+  options: TikZOptions = {},
 ): string {
-  const { colorScheme = 'default', includeLabels = true, nodeDistance = '2cm' } = options;
-  const colors = getTikZColor(node.type || 'neutral', colorScheme);
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    nodeDistance = "2cm",
+  } = options;
+  const colors = getTikZColor(node.type || "neutral", colorScheme);
   const shapeStyle = getShapeStyle(node.shape);
   const label = includeLabels ? escapeLatex(node.label) : escapeLatex(node.id);
   const distance = position.distance || nodeDistance;
@@ -240,24 +255,27 @@ export function renderTikZNodeRelative(
 /**
  * Render an edge in TikZ format
  */
-export function renderTikZEdge(edge: TikZEdge, options: TikZOptions = {}): string {
+export function renderTikZEdge(
+  edge: TikZEdge,
+  options: TikZOptions = {},
+): string {
   const { includeLabels = true } = options;
 
-  let style = 'arrow';
-  if (edge.style === 'dashed') style = 'dashed arrow';
-  if (edge.style === 'dotted') style = 'dotted arrow';
-  if (edge.directed === false) style = style.replace('->', '-');
+  let style = "arrow";
+  if (edge.style === "dashed") style = "dashed arrow";
+  if (edge.style === "dotted") style = "dotted arrow";
+  if (edge.directed === false) style = style.replace("->", "-");
 
-  let bendOption = '';
+  let bendOption = "";
   if (edge.bend) {
-    if (typeof edge.bend === 'number') {
-      bendOption = `, bend ${edge.bend > 0 ? 'left' : 'right'}=${Math.abs(edge.bend)}`;
+    if (typeof edge.bend === "number") {
+      bendOption = `, bend ${edge.bend > 0 ? "left" : "right"}=${Math.abs(edge.bend)}`;
     } else {
       bendOption = `, bend ${edge.bend}`;
     }
   }
 
-  let labelOption = '';
+  let labelOption = "";
   if (includeLabels && edge.label) {
     labelOption = ` node[edge label, midway] {${escapeLatex(edge.label)}}`;
   }
@@ -271,13 +289,15 @@ export function renderTikZEdge(edge: TikZEdge, options: TikZOptions = {}): strin
 export function renderTikZMetrics(
   x: number,
   y: number,
-  metrics: Array<{ label: string; value: string | number }>
+  metrics: Array<{ label: string; value: string | number }>,
 ): string {
   let tikz = `\n\n  % Metrics Panel\n  \\node[draw, fill=white, rounded corners, align=left, font=\\footnotesize] at (${x}, ${y}) {`;
 
-  const lines = metrics.map(m => `${escapeLatex(m.label)}: ${escapeLatex(String(m.value))}`);
-  tikz += lines.join(' \\\\ ');
-  tikz += '};';
+  const lines = metrics.map(
+    (m) => `${escapeLatex(m.label)}: ${escapeLatex(String(m.value))}`,
+  );
+  tikz += lines.join(" \\\\ ");
+  tikz += "};";
 
   return tikz;
 }
@@ -288,9 +308,13 @@ export function renderTikZMetrics(
 export function renderTikZLegend(
   x: number,
   y: number,
-  items: Array<{ label: string; color: { fill: string; stroke: string }; shape?: string }>
+  items: Array<{
+    label: string;
+    color: { fill: string; stroke: string };
+    shape?: string;
+  }>,
 ): string {
-  let tikz = '\n\n  % Legend';
+  let tikz = "\n\n  % Legend";
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
@@ -310,20 +334,20 @@ export function renderTikZLegend(
 export function generateTikZ(
   nodes: TikZNode[],
   edges: TikZEdge[],
-  options: TikZOptions = {}
+  options: TikZOptions = {},
 ): string {
   const mergedOptions = { ...DEFAULT_TIKZ_OPTIONS, ...options };
 
   let tikz = generateTikZHeader(mergedOptions);
 
   // Add nodes
-  tikz += '\n\n  % Nodes';
+  tikz += "\n\n  % Nodes";
   for (const node of nodes) {
     tikz += renderTikZNode(node, mergedOptions);
   }
 
   // Add edges
-  tikz += '\n\n  % Edges';
+  tikz += "\n\n  % Edges";
   for (const edge of edges) {
     tikz += renderTikZEdge(edge, mergedOptions);
   }
@@ -337,15 +361,16 @@ export function generateTikZ(
  */
 export function createLinearTikZ(
   nodeLabels: string[],
-  options: TikZOptions = {}
+  options: TikZOptions = {},
 ): string {
   const nodes: TikZNode[] = nodeLabels.map((label, i) => ({
     id: `n${i}`,
     label,
     x: i * 3,
     y: 0,
-    type: i === 0 ? 'primary' : i === nodeLabels.length - 1 ? 'success' : 'neutral',
-    shape: 'rectangle',
+    type:
+      i === 0 ? "primary" : i === nodeLabels.length - 1 ? "success" : "neutral",
+    shape: "rectangle",
   }));
 
   const edges: TikZEdge[] = [];
@@ -364,8 +389,12 @@ export function createLinearTikZ(
  * Create a hierarchical tree diagram
  */
 export function createTreeTikZ(
-  root: { id: string; label: string; children?: Array<{ id: string; label: string; children?: unknown[] }> },
-  options: TikZOptions = {}
+  root: {
+    id: string;
+    label: string;
+    children?: Array<{ id: string; label: string; children?: unknown[] }>;
+  },
+  options: TikZOptions = {},
 ): string {
   const nodes: TikZNode[] = [];
   const edges: TikZEdge[] = [];
@@ -374,19 +403,23 @@ export function createTreeTikZ(
     node: { id: string; label: string; children?: unknown[] },
     x: number,
     y: number,
-    width: number
+    width: number,
   ): void {
     nodes.push({
       id: node.id,
       label: node.label,
       x,
       y,
-      type: y === 0 ? 'primary' : 'neutral',
-      shape: 'rectangle',
+      type: y === 0 ? "primary" : "neutral",
+      shape: "rectangle",
     });
 
     if (node.children && Array.isArray(node.children)) {
-      const children = node.children as Array<{ id: string; label: string; children?: unknown[] }>;
+      const children = node.children as Array<{
+        id: string;
+        label: string;
+        children?: unknown[];
+      }>;
       const childWidth = width / children.length;
 
       for (let i = 0; i < children.length; i++) {
@@ -411,9 +444,21 @@ export function createTreeTikZ(
  * Create a layered graph diagram (for causal/bayesian networks)
  */
 export function createLayeredTikZ(
-  layers: Array<Array<{ id: string; label: string; type?: string; shape?: TikZNode['shape'] }>>,
-  connections: Array<{ from: string; to: string; label?: string; style?: TikZEdge['style'] }>,
-  options: TikZOptions = {}
+  layers: Array<
+    Array<{
+      id: string;
+      label: string;
+      type?: string;
+      shape?: TikZNode["shape"];
+    }>
+  >,
+  connections: Array<{
+    from: string;
+    to: string;
+    label?: string;
+    style?: TikZEdge["style"];
+  }>,
+  options: TikZOptions = {},
 ): string {
   const nodes: TikZNode[] = [];
 
@@ -429,13 +474,13 @@ export function createLayeredTikZ(
         label: node.label,
         x: startX + nodeIdx * 3,
         y: -layerIdx * 2,
-        type: node.type || 'neutral',
-        shape: node.shape || 'rectangle',
+        type: node.type || "neutral",
+        shape: node.shape || "rectangle",
       });
     }
   }
 
-  const edges: TikZEdge[] = connections.map(conn => ({
+  const edges: TikZEdge[] = connections.map((conn) => ({
     source: conn.from,
     target: conn.to,
     label: conn.label,
@@ -452,13 +497,13 @@ export function createLayeredTikZ(
 
 /** TikZ node options for builder */
 export interface TikZNodeOptions {
-  shape?: TikZNode['shape'];
+  shape?: TikZNode["shape"];
   type?: string;
   fill?: string;
   draw?: string;
   position?: { x: number; y: number };
   relativePosition?: {
-    direction: 'right' | 'left' | 'above' | 'below';
+    direction: "right" | "left" | "above" | "below";
     of: string;
     distance?: string;
   };
@@ -470,9 +515,9 @@ export interface TikZNodeOptions {
 /** TikZ edge options for builder */
 export interface TikZEdgeOptions {
   label?: string;
-  style?: TikZEdge['style'];
+  style?: TikZEdge["style"];
   directed?: boolean;
-  bend?: 'left' | 'right' | number;
+  bend?: "left" | "right" | number;
   color?: string;
 }
 
@@ -554,7 +599,7 @@ export class TikZBuilder {
    * @param scheme - Color scheme name
    * @returns this for chaining
    */
-  setColorScheme(scheme: 'default' | 'pastel' | 'monochrome'): this {
+  setColorScheme(scheme: "default" | "pastel" | "monochrome"): this {
     this.options.colorScheme = scheme;
     return this;
   }
@@ -601,8 +646,8 @@ export class TikZBuilder {
     const node: TikZNode = {
       id,
       label,
-      type: nodeOptions?.type || 'neutral',
-      shape: nodeOptions?.shape || 'rectangle',
+      type: nodeOptions?.type || "neutral",
+      shape: nodeOptions?.shape || "rectangle",
     };
 
     if (nodeOptions?.position) {
@@ -627,7 +672,9 @@ export class TikZBuilder {
    * @param nodes - Array of node definitions
    * @returns this for chaining
    */
-  addNodes(nodes: Array<{ id: string; label: string; options?: TikZNodeOptions }>): this {
+  addNodes(
+    nodes: Array<{ id: string; label: string; options?: TikZNodeOptions }>,
+  ): this {
     for (const node of nodes) {
       this.addNode(node.id, node.label, node.options);
     }
@@ -646,7 +693,7 @@ export class TikZBuilder {
       source,
       target,
       label: edgeOptions?.label,
-      style: edgeOptions?.style || 'solid',
+      style: edgeOptions?.style || "solid",
       directed: edgeOptions?.directed !== false,
       bend: edgeOptions?.bend,
     };
@@ -660,7 +707,9 @@ export class TikZBuilder {
    * @param edges - Array of edge definitions
    * @returns this for chaining
    */
-  addEdges(edges: Array<{ source: string; target: string; options?: TikZEdgeOptions }>): this {
+  addEdges(
+    edges: Array<{ source: string; target: string; options?: TikZEdgeOptions }>,
+  ): this {
     for (const edge of edges) {
       this.addEdge(edge.source, edge.target, edge.options);
     }
@@ -675,7 +724,7 @@ export class TikZBuilder {
   beginScope(scopeOptions?: TikZScopeOptions): this {
     this.scopeStack.push(scopeOptions || {});
 
-    let scopeStr = '  \\begin{scope}';
+    let scopeStr = "  \\begin{scope}";
     if (scopeOptions) {
       const opts: string[] = [];
       if (scopeOptions.xshift) opts.push(`xshift=${scopeOptions.xshift}`);
@@ -684,7 +733,7 @@ export class TikZBuilder {
       if (scopeOptions.opacity) opts.push(`opacity=${scopeOptions.opacity}`);
       if (scopeOptions.style) opts.push(scopeOptions.style);
       if (opts.length > 0) {
-        scopeStr = `  \\begin{scope}[${opts.join(', ')}]`;
+        scopeStr = `  \\begin{scope}[${opts.join(", ")}]`;
       }
     }
 
@@ -699,7 +748,7 @@ export class TikZBuilder {
   endScope(): this {
     if (this.scopeStack.length > 0) {
       this.scopeStack.pop();
-      this.rawContent.push('  \\end{scope}');
+      this.rawContent.push("  \\end{scope}");
     }
     return this;
   }
@@ -745,8 +794,16 @@ export class TikZBuilder {
    * @param fill - Fill color
    * @returns this for chaining
    */
-  addBackground(x1: number, y1: number, x2: number, y2: number, fill: string = 'gray!10'): this {
-    this.rawContent.push(`  \\fill[${fill}] (${x1}, ${y1}) rectangle (${x2}, ${y2});`);
+  addBackground(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    fill: string = "gray!10",
+  ): this {
+    this.rawContent.push(
+      `  \\fill[${fill}] (${x1}, ${y1}) rectangle (${x2}, ${y2});`,
+    );
     return this;
   }
 
@@ -757,7 +814,11 @@ export class TikZBuilder {
    * @param metrics - Array of label/value pairs
    * @returns this for chaining
    */
-  addMetrics(x: number, y: number, metrics: Array<{ label: string; value: string | number }>): this {
+  addMetrics(
+    x: number,
+    y: number,
+    metrics: Array<{ label: string; value: string | number }>,
+  ): this {
     this.rawContent.push(renderTikZMetrics(x, y, metrics));
     return this;
   }
@@ -772,7 +833,11 @@ export class TikZBuilder {
   addLegend(
     x: number,
     y: number,
-    items: Array<{ label: string; color: { fill: string; stroke: string }; shape?: string }>
+    items: Array<{
+      label: string;
+      color: { fill: string; stroke: string };
+      shape?: string;
+    }>,
   ): this {
     this.rawContent.push(renderTikZLegend(x, y, items));
     return this;
@@ -835,10 +900,12 @@ export class TikZBuilder {
 
     // Standalone header
     if (mergedOptions.standalone) {
-      lines.push('\\documentclass[tikz,border=10pt]{standalone}');
-      lines.push('\\usepackage{tikz}');
-      lines.push('\\usetikzlibrary{shapes,arrows,positioning,calc,backgrounds,fit}');
-      lines.push('\\begin{document}');
+      lines.push("\\documentclass[tikz,border=10pt]{standalone}");
+      lines.push("\\usepackage{tikz}");
+      lines.push(
+        "\\usetikzlibrary{shapes,arrows,positioning,calc,backgrounds,fit}",
+      );
+      lines.push("\\begin{document}");
     }
 
     // Begin tikzpicture with options
@@ -846,16 +913,28 @@ export class TikZBuilder {
     if (mergedOptions.scale !== 1) {
       pictureOpts.push(`scale=${mergedOptions.scale}`);
     }
-    pictureOpts.push('every node/.style={font=\\small}');
-    pictureOpts.push('box/.style={rectangle, draw, rounded corners=3pt, minimum width=2cm, minimum height=0.8cm, text centered}');
-    pictureOpts.push('circle node/.style={circle, draw, minimum size=0.8cm, text centered}');
-    pictureOpts.push('ellipse node/.style={ellipse, draw, minimum width=2cm, minimum height=0.8cm, text centered}');
-    pictureOpts.push('diamond node/.style={diamond, draw, aspect=2, minimum width=1.5cm, text centered}');
-    pictureOpts.push('stadium node/.style={rectangle, draw, rounded corners=0.4cm, minimum width=2cm, minimum height=0.8cm, text centered}');
-    pictureOpts.push('arrow/.style={->, >=stealth, thick}');
-    pictureOpts.push('dashed arrow/.style={->, >=stealth, thick, dashed}');
-    pictureOpts.push('dotted arrow/.style={->, >=stealth, thick, dotted}');
-    pictureOpts.push('edge label/.style={font=\\footnotesize, fill=white, inner sep=1pt}');
+    pictureOpts.push("every node/.style={font=\\small}");
+    pictureOpts.push(
+      "box/.style={rectangle, draw, rounded corners=3pt, minimum width=2cm, minimum height=0.8cm, text centered}",
+    );
+    pictureOpts.push(
+      "circle node/.style={circle, draw, minimum size=0.8cm, text centered}",
+    );
+    pictureOpts.push(
+      "ellipse node/.style={ellipse, draw, minimum width=2cm, minimum height=0.8cm, text centered}",
+    );
+    pictureOpts.push(
+      "diamond node/.style={diamond, draw, aspect=2, minimum width=1.5cm, text centered}",
+    );
+    pictureOpts.push(
+      "stadium node/.style={rectangle, draw, rounded corners=0.4cm, minimum width=2cm, minimum height=0.8cm, text centered}",
+    );
+    pictureOpts.push("arrow/.style={->, >=stealth, thick}");
+    pictureOpts.push("dashed arrow/.style={->, >=stealth, thick, dashed}");
+    pictureOpts.push("dotted arrow/.style={->, >=stealth, thick, dotted}");
+    pictureOpts.push(
+      "edge label/.style={font=\\footnotesize, fill=white, inner sep=1pt}",
+    );
 
     // Add custom styles
     for (const [name, style] of this.customStyles) {
@@ -863,29 +942,28 @@ export class TikZBuilder {
     }
 
     lines.push(`\\begin{tikzpicture}[`);
-    lines.push(`  ${pictureOpts.join(',\n  ')}`);
+    lines.push(`  ${pictureOpts.join(",\n  ")}`);
     lines.push(`]`);
 
     // Title
     if (mergedOptions.title) {
-      lines.push('');
+      lines.push("");
       lines.push(`% Title`);
-      lines.push(`\\node[font=\\large\\bfseries] at (4, 0.5) {${escapeLatex(mergedOptions.title)}};`);
+      lines.push(
+        `\\node[font=\\large\\bfseries] at (4, 0.5) {${escapeLatex(mergedOptions.title)}};`,
+      );
     }
 
     // Nodes
     if (this.nodes.length > 0) {
-      lines.push('');
-      lines.push('  % Nodes');
+      lines.push("");
+      lines.push("  % Nodes");
       for (const node of this.nodes) {
         // Check for relative positioning
-        const relPos = node.metadata?.relativePosition as TikZNodeOptions['relativePosition'];
+        const relPos = node.metadata
+          ?.relativePosition as TikZNodeOptions["relativePosition"];
         if (relPos) {
-          lines.push(renderTikZNodeRelative(
-            node,
-            relPos,
-            mergedOptions
-          ));
+          lines.push(renderTikZNodeRelative(node, relPos, mergedOptions));
         } else {
           lines.push(renderTikZNode(node, mergedOptions));
         }
@@ -894,29 +972,29 @@ export class TikZBuilder {
 
     // Raw content (includes scopes)
     if (this.rawContent.length > 0) {
-      lines.push('');
-      lines.push('  % Custom content');
+      lines.push("");
+      lines.push("  % Custom content");
       lines.push(...this.rawContent);
     }
 
     // Edges
     if (this.edges.length > 0) {
-      lines.push('');
-      lines.push('  % Edges');
+      lines.push("");
+      lines.push("  % Edges");
       for (const edge of this.edges) {
         lines.push(renderTikZEdge(edge, mergedOptions));
       }
     }
 
     // End tikzpicture
-    lines.push('\\end{tikzpicture}');
+    lines.push("\\end{tikzpicture}");
 
     // Standalone footer
     if (mergedOptions.standalone) {
-      lines.push('\\end{document}');
+      lines.push("\\end{document}");
     }
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   /**

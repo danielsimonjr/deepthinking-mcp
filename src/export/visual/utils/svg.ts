@@ -19,7 +19,7 @@ export interface SVGExportOptions {
   nodeSpacing?: number;
   layerSpacing?: number;
   padding?: number;
-  colorScheme?: 'default' | 'monochrome' | 'pastel';
+  colorScheme?: "default" | "monochrome" | "pastel";
   includeLabels?: boolean;
   includeMetrics?: boolean;
   title?: string;
@@ -36,10 +36,10 @@ export const DEFAULT_SVG_OPTIONS: Required<SVGExportOptions> = {
   nodeSpacing: 20,
   layerSpacing: 100,
   padding: 40,
-  colorScheme: 'default',
+  colorScheme: "default",
   includeLabels: true,
   includeMetrics: true,
-  title: '',
+  title: "",
 };
 
 /**
@@ -63,7 +63,7 @@ export interface SVGEdge {
   from: string;
   to: string;
   label?: string;
-  style?: 'solid' | 'dashed' | 'dotted';
+  style?: "solid" | "dashed" | "dotted";
   color?: string;
   bidirectional?: boolean;
 }
@@ -80,40 +80,40 @@ export interface ColorPalette {
  */
 export const COLOR_PALETTES: Record<string, ColorPalette> = {
   default: {
-    primary: { fill: '#64b5f6', stroke: '#1976d2' },
-    secondary: { fill: '#81c784', stroke: '#388e3c' },
-    tertiary: { fill: '#ffb74d', stroke: '#f57c00' },
-    quaternary: { fill: '#ba68c8', stroke: '#7b1fa2' },
-    neutral: { fill: '#bdbdbd', stroke: '#616161' },
-    success: { fill: '#81c784', stroke: '#388e3c' },
-    warning: { fill: '#ffb74d', stroke: '#f57c00' },
-    error: { fill: '#e57373', stroke: '#d32f2f' },
-    info: { fill: '#64b5f6', stroke: '#1976d2' },
-    highlight: { fill: '#fff176', stroke: '#fbc02d' },
+    primary: { fill: "#64b5f6", stroke: "#1976d2" },
+    secondary: { fill: "#81c784", stroke: "#388e3c" },
+    tertiary: { fill: "#ffb74d", stroke: "#f57c00" },
+    quaternary: { fill: "#ba68c8", stroke: "#7b1fa2" },
+    neutral: { fill: "#bdbdbd", stroke: "#616161" },
+    success: { fill: "#81c784", stroke: "#388e3c" },
+    warning: { fill: "#ffb74d", stroke: "#f57c00" },
+    error: { fill: "#e57373", stroke: "#d32f2f" },
+    info: { fill: "#64b5f6", stroke: "#1976d2" },
+    highlight: { fill: "#fff176", stroke: "#fbc02d" },
   },
   pastel: {
-    primary: { fill: '#bbdefb', stroke: '#2196f3' },
-    secondary: { fill: '#c8e6c9', stroke: '#4caf50' },
-    tertiary: { fill: '#ffe0b2', stroke: '#ff9800' },
-    quaternary: { fill: '#e1bee7', stroke: '#9c27b0' },
-    neutral: { fill: '#e0e0e0', stroke: '#757575' },
-    success: { fill: '#c8e6c9', stroke: '#4caf50' },
-    warning: { fill: '#fff9c4', stroke: '#ffc107' },
-    error: { fill: '#ffcdd2', stroke: '#e53935' },
-    info: { fill: '#bbdefb', stroke: '#2196f3' },
-    highlight: { fill: '#fff9c4', stroke: '#fbc02d' },
+    primary: { fill: "#bbdefb", stroke: "#2196f3" },
+    secondary: { fill: "#c8e6c9", stroke: "#4caf50" },
+    tertiary: { fill: "#ffe0b2", stroke: "#ff9800" },
+    quaternary: { fill: "#e1bee7", stroke: "#9c27b0" },
+    neutral: { fill: "#e0e0e0", stroke: "#757575" },
+    success: { fill: "#c8e6c9", stroke: "#4caf50" },
+    warning: { fill: "#fff9c4", stroke: "#ffc107" },
+    error: { fill: "#ffcdd2", stroke: "#e53935" },
+    info: { fill: "#bbdefb", stroke: "#2196f3" },
+    highlight: { fill: "#fff9c4", stroke: "#fbc02d" },
   },
   monochrome: {
-    primary: { fill: '#ffffff', stroke: '#333333' },
-    secondary: { fill: '#f5f5f5', stroke: '#333333' },
-    tertiary: { fill: '#eeeeee', stroke: '#333333' },
-    quaternary: { fill: '#e0e0e0', stroke: '#333333' },
-    neutral: { fill: '#fafafa', stroke: '#333333' },
-    success: { fill: '#ffffff', stroke: '#333333' },
-    warning: { fill: '#f5f5f5', stroke: '#333333' },
-    error: { fill: '#eeeeee', stroke: '#333333' },
-    info: { fill: '#ffffff', stroke: '#333333' },
-    highlight: { fill: '#e0e0e0', stroke: '#333333' },
+    primary: { fill: "#ffffff", stroke: "#333333" },
+    secondary: { fill: "#f5f5f5", stroke: "#333333" },
+    tertiary: { fill: "#eeeeee", stroke: "#333333" },
+    quaternary: { fill: "#e0e0e0", stroke: "#333333" },
+    neutral: { fill: "#fafafa", stroke: "#333333" },
+    success: { fill: "#ffffff", stroke: "#333333" },
+    warning: { fill: "#f5f5f5", stroke: "#333333" },
+    error: { fill: "#eeeeee", stroke: "#333333" },
+    info: { fill: "#ffffff", stroke: "#333333" },
+    highlight: { fill: "#e0e0e0", stroke: "#333333" },
   },
 };
 
@@ -122,7 +122,7 @@ export const COLOR_PALETTES: Record<string, ColorPalette> = {
  */
 export function getNodeColor(
   type: string,
-  colorScheme: 'default' | 'monochrome' | 'pastel' = 'default'
+  colorScheme: "default" | "monochrome" | "pastel" = "default",
 ): { fill: string; stroke: string } {
   const palette = COLOR_PALETTES[colorScheme] || COLOR_PALETTES.default;
   return palette[type] || palette.neutral;
@@ -133,11 +133,11 @@ export function getNodeColor(
  */
 export function escapeSVGText(text: string): string {
   return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 /**
@@ -145,7 +145,7 @@ export function escapeSVGText(text: string): string {
  */
 export function truncateText(text: string, maxChars: number = 30): string {
   if (text.length <= maxChars) return text;
-  return text.substring(0, maxChars - 3) + '...';
+  return text.substring(0, maxChars - 3) + "...";
 }
 
 /**
@@ -154,7 +154,7 @@ export function truncateText(text: string, maxChars: number = 30): string {
 export function generateSVGHeader(
   width: number,
   height: number,
-  title?: string
+  title?: string,
 ): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">
@@ -184,14 +184,14 @@ export function generateSVGHeader(
 
   <!-- Background -->
   <rect width="100%" height="100%" fill="#fafafa"/>
-${title ? `\n  <!-- Title -->\n  <text x="${width / 2}" y="25" text-anchor="middle" class="title">${escapeSVGText(truncateText(title, 60))}</text>\n` : ''}`;
+${title ? `\n  <!-- Title -->\n  <text x="${width / 2}" y="25" text-anchor="middle" class="title">${escapeSVGText(truncateText(title, 60))}</text>\n` : ""}`;
 }
 
 /**
  * Generate SVG footer
  */
 export function generateSVGFooter(): string {
-  return '</svg>';
+  return "</svg>";
 }
 
 /**
@@ -200,7 +200,7 @@ export function generateSVGFooter(): string {
 export function renderRectNode(
   pos: SVGNodePosition,
   colors: { fill: string; stroke: string },
-  rx: number = 8
+  rx: number = 8,
 ): string {
   const escapedLabel = escapeSVGText(truncateText(pos.label, 25));
   return `
@@ -217,7 +217,7 @@ export function renderRectNode(
  */
 export function renderStadiumNode(
   pos: SVGNodePosition,
-  colors: { fill: string; stroke: string }
+  colors: { fill: string; stroke: string },
 ): string {
   const escapedLabel = escapeSVGText(truncateText(pos.label, 25));
   return `
@@ -234,7 +234,7 @@ export function renderStadiumNode(
  */
 export function renderDiamondNode(
   pos: SVGNodePosition,
-  colors: { fill: string; stroke: string }
+  colors: { fill: string; stroke: string },
 ): string {
   const cx = pos.x + pos.width / 2;
   const cy = pos.y + pos.height / 2;
@@ -253,7 +253,7 @@ export function renderDiamondNode(
  */
 export function renderHexagonNode(
   pos: SVGNodePosition,
-  colors: { fill: string; stroke: string }
+  colors: { fill: string; stroke: string },
 ): string {
   const cx = pos.x + pos.width / 2;
   const cy = pos.y + pos.height / 2;
@@ -274,7 +274,7 @@ export function renderHexagonNode(
  */
 export function renderEllipseNode(
   pos: SVGNodePosition,
-  colors: { fill: string; stroke: string }
+  colors: { fill: string; stroke: string },
 ): string {
   const cx = pos.x + pos.width / 2;
   const cy = pos.y + pos.height / 2;
@@ -293,7 +293,7 @@ export function renderEllipseNode(
  */
 export function renderParallelogramNode(
   pos: SVGNodePosition,
-  colors: { fill: string; stroke: string }
+  colors: { fill: string; stroke: string },
 ): string {
   const skew = 15;
   const escapedLabel = escapeSVGText(truncateText(pos.label, 20));
@@ -311,7 +311,7 @@ export function renderParallelogramNode(
  */
 export function renderSubroutineNode(
   pos: SVGNodePosition,
-  colors: { fill: string; stroke: string }
+  colors: { fill: string; stroke: string },
 ): string {
   const escapedLabel = escapeSVGText(truncateText(pos.label, 22));
   return `
@@ -333,12 +333,17 @@ export function renderEdge(
   toPos: SVGNodePosition,
   options: {
     label?: string;
-    style?: 'solid' | 'dashed' | 'dotted';
+    style?: "solid" | "dashed" | "dotted";
     color?: string;
     markerEnd?: string;
-  } = {}
+  } = {},
 ): string {
-  const { label, style = 'solid', color = '#333333', markerEnd = 'arrowhead' } = options;
+  const {
+    label,
+    style = "solid",
+    color = "#333333",
+    markerEnd = "arrowhead",
+  } = options;
 
   // Calculate edge points (from bottom of source to top of target)
   const fromX = fromPos.x + fromPos.width / 2;
@@ -351,15 +356,15 @@ export function renderEdge(
   const path = `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY - 8}`;
 
   const dashStyle =
-    style === 'dashed'
+    style === "dashed"
       ? 'stroke-dasharray="8,4"'
-      : style === 'dotted'
+      : style === "dotted"
         ? 'stroke-dasharray="2,2"'
-        : '';
+        : "";
 
   const labelElement = label
     ? `<text x="${(fromX + toX) / 2}" y="${midY - 5}" text-anchor="middle" class="edge-label">${escapeSVGText(label)}</text>`
-    : '';
+    : "";
 
   return `
     <g class="edge">
@@ -376,11 +381,11 @@ export function renderHorizontalEdge(
   toPos: SVGNodePosition,
   options: {
     label?: string;
-    style?: 'solid' | 'dashed' | 'dotted';
+    style?: "solid" | "dashed" | "dotted";
     color?: string;
-  } = {}
+  } = {},
 ): string {
-  const { label, style = 'solid', color = '#333333' } = options;
+  const { label, style = "solid", color = "#333333" } = options;
 
   // From right of source to left of target
   const fromX = fromPos.x + fromPos.width;
@@ -389,15 +394,15 @@ export function renderHorizontalEdge(
   const toY = toPos.y + toPos.height / 2;
 
   const dashStyle =
-    style === 'dashed'
+    style === "dashed"
       ? 'stroke-dasharray="8,4"'
-      : style === 'dotted'
+      : style === "dotted"
         ? 'stroke-dasharray="2,2"'
-        : '';
+        : "";
 
   const labelElement = label
     ? `<text x="${(fromX + toX) / 2}" y="${(fromY + toY) / 2 - 8}" text-anchor="middle" class="edge-label">${escapeSVGText(label)}</text>`
-    : '';
+    : "";
 
   return `
     <g class="edge">
@@ -413,7 +418,7 @@ export function renderHorizontalEdge(
 export function renderMetricsPanel(
   x: number,
   y: number,
-  metrics: Array<{ label: string; value: string | number }>
+  metrics: Array<{ label: string; value: string | number }>,
 ): string {
   const panelHeight = 30 + metrics.length * 16;
   let svg = `
@@ -425,7 +430,7 @@ export function renderMetricsPanel(
     svg += `\n    <text x="${x + 10}" y="${y + 38 + i * 16}" class="metrics">${escapeSVGText(metric.label)}: ${escapeSVGText(String(metric.value))}</text>`;
   });
 
-  svg += '\n  </g>';
+  svg += "\n  </g>";
   return svg;
 }
 
@@ -435,7 +440,11 @@ export function renderMetricsPanel(
 export function renderLegend(
   x: number,
   y: number,
-  items: Array<{ label: string; color: { fill: string; stroke: string }; shape?: 'rect' | 'diamond' | 'ellipse' | 'stadium' }>
+  items: Array<{
+    label: string;
+    color: { fill: string; stroke: string };
+    shape?: "rect" | "diamond" | "ellipse" | "stadium";
+  }>,
 ): string {
   let svg = `
   <g class="legend" transform="translate(${x}, ${y})">
@@ -445,13 +454,13 @@ export function renderLegend(
     const itemY = 12 + i * 18;
     let shapeEl: string;
     switch (item.shape) {
-      case 'diamond':
+      case "diamond":
         shapeEl = `<polygon points="10,${itemY} 20,${itemY + 6} 10,${itemY + 12} 0,${itemY + 6}" fill="${item.color.fill}" stroke="${item.color.stroke}"/>`;
         break;
-      case 'ellipse':
+      case "ellipse":
         shapeEl = `<ellipse cx="10" cy="${itemY + 6}" rx="10" ry="6" fill="${item.color.fill}" stroke="${item.color.stroke}"/>`;
         break;
-      case 'stadium':
+      case "stadium":
         shapeEl = `<rect x="0" y="${itemY}" width="20" height="12" rx="6" ry="6" fill="${item.color.fill}" stroke="${item.color.stroke}"/>`;
         break;
       default:
@@ -462,7 +471,7 @@ export function renderLegend(
     <text x="25" y="${itemY + 10}" class="legend-text">${escapeSVGText(item.label)}</text>`;
   });
 
-  svg += '\n  </g>';
+  svg += "\n  </g>";
   return svg;
 }
 
@@ -471,7 +480,7 @@ export function renderLegend(
  */
 export function layoutNodesInLayers(
   layers: Array<Array<{ id: string; label: string; type?: string }>>,
-  options: SVGExportOptions = {}
+  options: SVGExportOptions = {},
 ): Map<string, SVGNodePosition> {
   const opts = { ...DEFAULT_SVG_OPTIONS, ...options };
   const positions = new Map<string, SVGNodePosition>();
@@ -481,7 +490,8 @@ export function layoutNodesInLayers(
   for (const layer of layers) {
     if (layer.length === 0) continue;
 
-    const layerWidth = layer.length * (opts.nodeWidth + opts.nodeSpacing) - opts.nodeSpacing;
+    const layerWidth =
+      layer.length * (opts.nodeWidth + opts.nodeSpacing) - opts.nodeSpacing;
     let startX = (opts.width - layerWidth) / 2;
 
     for (const node of layer) {
@@ -508,12 +518,13 @@ export function layoutNodesInLayers(
  */
 export function layoutNodesHorizontally(
   nodes: Array<{ id: string; label: string; type?: string }>,
-  options: SVGExportOptions = {}
+  options: SVGExportOptions = {},
 ): Map<string, SVGNodePosition> {
   const opts = { ...DEFAULT_SVG_OPTIONS, ...options };
   const positions = new Map<string, SVGNodePosition>();
 
-  const totalWidth = nodes.length * (opts.nodeWidth + opts.nodeSpacing) - opts.nodeSpacing;
+  const totalWidth =
+    nodes.length * (opts.nodeWidth + opts.nodeSpacing) - opts.nodeSpacing;
   let startX = Math.max(opts.padding, (opts.width - totalWidth) / 2);
   const y = opts.height / 2 - opts.nodeHeight / 2;
 
@@ -539,7 +550,7 @@ export function layoutNodesHorizontally(
 export function calculateSVGHeight(
   positions: Map<string, SVGNodePosition>,
   padding: number = 40,
-  extraSpace: number = 120
+  extraSpace: number = 120,
 ): number {
   let maxY = 0;
   for (const pos of positions.values()) {
@@ -568,9 +579,9 @@ export interface SVGTextOptions {
   fill?: string;
   fontSize?: number;
   fontFamily?: string;
-  fontWeight?: 'normal' | 'bold';
-  textAnchor?: 'start' | 'middle' | 'end';
-  dominantBaseline?: 'auto' | 'middle' | 'hanging';
+  fontWeight?: "normal" | "bold";
+  textAnchor?: "start" | "middle" | "end";
+  dominantBaseline?: "auto" | "middle" | "hanging";
   className?: string;
 }
 
@@ -625,7 +636,13 @@ export class SVGGroupBuilder {
   /**
    * Add a rectangle to the group
    */
-  addRect(x: number, y: number, width: number, height: number, options?: SVGShapeOptions): this {
+  addRect(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    options?: SVGShapeOptions,
+  ): this {
     const attrs = [
       `x="${x}"`,
       `y="${y}"`,
@@ -634,28 +651,37 @@ export class SVGGroupBuilder {
     ];
     if (options?.fill) attrs.push(`fill="${options.fill}"`);
     if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.opacity !== undefined) attrs.push(`opacity="${options.opacity}"`);
+    if (options?.strokeWidth)
+      attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.opacity !== undefined)
+      attrs.push(`opacity="${options.opacity}"`);
     if (options?.rx) attrs.push(`rx="${options.rx}"`);
     if (options?.ry) attrs.push(`ry="${options.ry}"`);
     if (options?.className) attrs.push(`class="${options.className}"`);
 
-    this.elements.push(`    <rect ${attrs.join(' ')}/>`);
+    this.elements.push(`    <rect ${attrs.join(" ")}/>`);
     return this;
   }
 
   /**
    * Add a circle to the group
    */
-  addCircle(cx: number, cy: number, r: number, options?: SVGShapeOptions): this {
+  addCircle(
+    cx: number,
+    cy: number,
+    r: number,
+    options?: SVGShapeOptions,
+  ): this {
     const attrs = [`cx="${cx}"`, `cy="${cy}"`, `r="${r}"`];
     if (options?.fill) attrs.push(`fill="${options.fill}"`);
     if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.opacity !== undefined) attrs.push(`opacity="${options.opacity}"`);
+    if (options?.strokeWidth)
+      attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.opacity !== undefined)
+      attrs.push(`opacity="${options.opacity}"`);
     if (options?.className) attrs.push(`class="${options.className}"`);
 
-    this.elements.push(`    <circle ${attrs.join(' ')}/>`);
+    this.elements.push(`    <circle ${attrs.join(" ")}/>`);
     return this;
   }
 
@@ -669,30 +695,38 @@ export class SVGGroupBuilder {
     if (options?.fontFamily) attrs.push(`font-family="${options.fontFamily}"`);
     if (options?.fontWeight) attrs.push(`font-weight="${options.fontWeight}"`);
     if (options?.textAnchor) attrs.push(`text-anchor="${options.textAnchor}"`);
-    if (options?.dominantBaseline) attrs.push(`dominant-baseline="${options.dominantBaseline}"`);
+    if (options?.dominantBaseline)
+      attrs.push(`dominant-baseline="${options.dominantBaseline}"`);
     if (options?.className) attrs.push(`class="${options.className}"`);
 
-    this.elements.push(`    <text ${attrs.join(' ')}>${escapeSVGText(text)}</text>`);
+    this.elements.push(
+      `    <text ${attrs.join(" ")}>${escapeSVGText(text)}</text>`,
+    );
     return this;
   }
 
   /**
    * Add a line to the group
    */
-  addLine(x1: number, y1: number, x2: number, y2: number, options?: SVGLineOptions): this {
-    const attrs = [
-      `x1="${x1}"`,
-      `y1="${y1}"`,
-      `x2="${x2}"`,
-      `y2="${y2}"`,
-    ];
+  addLine(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    options?: SVGLineOptions,
+  ): this {
+    const attrs = [`x1="${x1}"`, `y1="${y1}"`, `x2="${x2}"`, `y2="${y2}"`];
     if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.strokeDasharray) attrs.push(`stroke-dasharray="${options.strokeDasharray}"`);
-    if (options?.markerEnd) attrs.push(`marker-end="url(#${options.markerEnd})"`);
-    if (options?.markerStart) attrs.push(`marker-start="url(#${options.markerStart})"`);
+    if (options?.strokeWidth)
+      attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.strokeDasharray)
+      attrs.push(`stroke-dasharray="${options.strokeDasharray}"`);
+    if (options?.markerEnd)
+      attrs.push(`marker-end="url(#${options.markerEnd})"`);
+    if (options?.markerStart)
+      attrs.push(`marker-start="url(#${options.markerStart})"`);
 
-    this.elements.push(`    <line ${attrs.join(' ')}/>`);
+    this.elements.push(`    <line ${attrs.join(" ")}/>`);
     return this;
   }
 
@@ -714,8 +748,8 @@ export class SVGGroupBuilder {
     if (this.className) attrs.push(`class="${this.className}"`);
     if (this.transform) attrs.push(`transform="${this.transform}"`);
 
-    const attrStr = attrs.length > 0 ? ` ${attrs.join(' ')}` : '';
-    return `  <g${attrStr}>\n${this.elements.join('\n')}\n  </g>`;
+    const attrStr = attrs.length > 0 ? ` ${attrs.join(" ")}` : "";
+    return `  <g${attrStr}>\n${this.elements.join("\n")}\n  </g>`;
   }
 }
 
@@ -848,7 +882,13 @@ export class SVGBuilder {
    * @param options - Shape options
    * @returns this for chaining
    */
-  addRect(x: number, y: number, width: number, height: number, options?: SVGShapeOptions): this {
+  addRect(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    options?: SVGShapeOptions,
+  ): this {
     const attrs = [
       `x="${x}"`,
       `y="${y}"`,
@@ -857,13 +897,15 @@ export class SVGBuilder {
     ];
     if (options?.fill) attrs.push(`fill="${options.fill}"`);
     if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.opacity !== undefined) attrs.push(`opacity="${options.opacity}"`);
+    if (options?.strokeWidth)
+      attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.opacity !== undefined)
+      attrs.push(`opacity="${options.opacity}"`);
     if (options?.rx) attrs.push(`rx="${options.rx}"`);
     if (options?.ry) attrs.push(`ry="${options.ry}"`);
     if (options?.className) attrs.push(`class="${options.className}"`);
 
-    this.elements.push(`  <rect ${attrs.join(' ')}/>`);
+    this.elements.push(`  <rect ${attrs.join(" ")}/>`);
     return this;
   }
 
@@ -875,15 +917,22 @@ export class SVGBuilder {
    * @param options - Shape options
    * @returns this for chaining
    */
-  addCircle(cx: number, cy: number, r: number, options?: SVGShapeOptions): this {
+  addCircle(
+    cx: number,
+    cy: number,
+    r: number,
+    options?: SVGShapeOptions,
+  ): this {
     const attrs = [`cx="${cx}"`, `cy="${cy}"`, `r="${r}"`];
     if (options?.fill) attrs.push(`fill="${options.fill}"`);
     if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.opacity !== undefined) attrs.push(`opacity="${options.opacity}"`);
+    if (options?.strokeWidth)
+      attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.opacity !== undefined)
+      attrs.push(`opacity="${options.opacity}"`);
     if (options?.className) attrs.push(`class="${options.className}"`);
 
-    this.elements.push(`  <circle ${attrs.join(' ')}/>`);
+    this.elements.push(`  <circle ${attrs.join(" ")}/>`);
     return this;
   }
 
@@ -896,15 +945,23 @@ export class SVGBuilder {
    * @param options - Shape options
    * @returns this for chaining
    */
-  addEllipse(cx: number, cy: number, rx: number, ry: number, options?: SVGShapeOptions): this {
+  addEllipse(
+    cx: number,
+    cy: number,
+    rx: number,
+    ry: number,
+    options?: SVGShapeOptions,
+  ): this {
     const attrs = [`cx="${cx}"`, `cy="${cy}"`, `rx="${rx}"`, `ry="${ry}"`];
     if (options?.fill) attrs.push(`fill="${options.fill}"`);
     if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.opacity !== undefined) attrs.push(`opacity="${options.opacity}"`);
+    if (options?.strokeWidth)
+      attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.opacity !== undefined)
+      attrs.push(`opacity="${options.opacity}"`);
     if (options?.className) attrs.push(`class="${options.className}"`);
 
-    this.elements.push(`  <ellipse ${attrs.join(' ')}/>`);
+    this.elements.push(`  <ellipse ${attrs.join(" ")}/>`);
     return this;
   }
 
@@ -917,20 +974,25 @@ export class SVGBuilder {
    * @param options - Line options
    * @returns this for chaining
    */
-  addLine(x1: number, y1: number, x2: number, y2: number, options?: SVGLineOptions): this {
-    const attrs = [
-      `x1="${x1}"`,
-      `y1="${y1}"`,
-      `x2="${x2}"`,
-      `y2="${y2}"`,
-    ];
+  addLine(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    options?: SVGLineOptions,
+  ): this {
+    const attrs = [`x1="${x1}"`, `y1="${y1}"`, `x2="${x2}"`, `y2="${y2}"`];
     if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.strokeDasharray) attrs.push(`stroke-dasharray="${options.strokeDasharray}"`);
-    if (options?.markerEnd) attrs.push(`marker-end="url(#${options.markerEnd})"`);
-    if (options?.markerStart) attrs.push(`marker-start="url(#${options.markerStart})"`);
+    if (options?.strokeWidth)
+      attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.strokeDasharray)
+      attrs.push(`stroke-dasharray="${options.strokeDasharray}"`);
+    if (options?.markerEnd)
+      attrs.push(`marker-end="url(#${options.markerEnd})"`);
+    if (options?.markerStart)
+      attrs.push(`marker-start="url(#${options.markerStart})"`);
 
-    this.elements.push(`  <line ${attrs.join(' ')}/>`);
+    this.elements.push(`  <line ${attrs.join(" ")}/>`);
     return this;
   }
 
@@ -941,14 +1003,17 @@ export class SVGBuilder {
    * @returns this for chaining
    */
   addPolyline(points: Array<[number, number]>, options?: SVGLineOptions): this {
-    const pointsStr = points.map(p => `${p[0]},${p[1]}`).join(' ');
+    const pointsStr = points.map((p) => `${p[0]},${p[1]}`).join(" ");
     const attrs = [`points="${pointsStr}"`, 'fill="none"'];
     if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.strokeDasharray) attrs.push(`stroke-dasharray="${options.strokeDasharray}"`);
-    if (options?.markerEnd) attrs.push(`marker-end="url(#${options.markerEnd})"`);
+    if (options?.strokeWidth)
+      attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.strokeDasharray)
+      attrs.push(`stroke-dasharray="${options.strokeDasharray}"`);
+    if (options?.markerEnd)
+      attrs.push(`marker-end="url(#${options.markerEnd})"`);
 
-    this.elements.push(`  <polyline ${attrs.join(' ')}/>`);
+    this.elements.push(`  <polyline ${attrs.join(" ")}/>`);
     return this;
   }
 
@@ -959,15 +1024,17 @@ export class SVGBuilder {
    * @returns this for chaining
    */
   addPolygon(points: Array<[number, number]>, options?: SVGShapeOptions): this {
-    const pointsStr = points.map(p => `${p[0]},${p[1]}`).join(' ');
+    const pointsStr = points.map((p) => `${p[0]},${p[1]}`).join(" ");
     const attrs = [`points="${pointsStr}"`];
     if (options?.fill) attrs.push(`fill="${options.fill}"`);
     if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.opacity !== undefined) attrs.push(`opacity="${options.opacity}"`);
+    if (options?.strokeWidth)
+      attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.opacity !== undefined)
+      attrs.push(`opacity="${options.opacity}"`);
     if (options?.className) attrs.push(`class="${options.className}"`);
 
-    this.elements.push(`  <polygon ${attrs.join(' ')}/>`);
+    this.elements.push(`  <polygon ${attrs.join(" ")}/>`);
     return this;
   }
 
@@ -981,13 +1048,18 @@ export class SVGBuilder {
     const attrs = [`d="${d}"`];
     if (options?.fill !== undefined) attrs.push(`fill="${options.fill}"`);
     if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.strokeDasharray) attrs.push(`stroke-dasharray="${options.strokeDasharray}"`);
-    if (options?.opacity !== undefined) attrs.push(`opacity="${options.opacity}"`);
-    if (options?.markerEnd) attrs.push(`marker-end="url(#${options.markerEnd})"`);
-    if (options?.markerStart) attrs.push(`marker-start="url(#${options.markerStart})"`);
+    if (options?.strokeWidth)
+      attrs.push(`stroke-width="${options.strokeWidth}"`);
+    if (options?.strokeDasharray)
+      attrs.push(`stroke-dasharray="${options.strokeDasharray}"`);
+    if (options?.opacity !== undefined)
+      attrs.push(`opacity="${options.opacity}"`);
+    if (options?.markerEnd)
+      attrs.push(`marker-end="url(#${options.markerEnd})"`);
+    if (options?.markerStart)
+      attrs.push(`marker-start="url(#${options.markerStart})"`);
 
-    this.elements.push(`  <path ${attrs.join(' ')}/>`);
+    this.elements.push(`  <path ${attrs.join(" ")}/>`);
     return this;
   }
 
@@ -1006,10 +1078,13 @@ export class SVGBuilder {
     if (options?.fontFamily) attrs.push(`font-family="${options.fontFamily}"`);
     if (options?.fontWeight) attrs.push(`font-weight="${options.fontWeight}"`);
     if (options?.textAnchor) attrs.push(`text-anchor="${options.textAnchor}"`);
-    if (options?.dominantBaseline) attrs.push(`dominant-baseline="${options.dominantBaseline}"`);
+    if (options?.dominantBaseline)
+      attrs.push(`dominant-baseline="${options.dominantBaseline}"`);
     if (options?.className) attrs.push(`class="${options.className}"`);
 
-    this.elements.push(`  <text ${attrs.join(' ')}>${escapeSVGText(text)}</text>`);
+    this.elements.push(
+      `  <text ${attrs.join(" ")}>${escapeSVGText(text)}</text>`,
+    );
     return this;
   }
 
@@ -1024,10 +1099,11 @@ export class SVGBuilder {
     this.elements.push(`__GROUP_${this.elements.length}__`);
     // Store reference for later
     (this as unknown as { _groups: Map<string, SVGGroupBuilder> })._groups =
-      (this as unknown as { _groups: Map<string, SVGGroupBuilder> })._groups || new Map();
+      (this as unknown as { _groups: Map<string, SVGGroupBuilder> })._groups ||
+      new Map();
     (this as unknown as { _groups: Map<string, SVGGroupBuilder> })._groups.set(
       `__GROUP_${this.elements.length - 1}__`,
-      group
+      group,
     );
     return group;
   }
@@ -1104,7 +1180,9 @@ export class SVGBuilder {
 
     // XML header and SVG opening tag
     lines.push('<?xml version="1.0" encoding="UTF-8"?>');
-    lines.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${this.width} ${this.height}" width="${this.width}" height="${this.height}">`);
+    lines.push(
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${this.width} ${this.height}" width="${this.width}" height="${this.height}">`,
+    );
 
     // Defs section
     const allDefs: string[] = [];
@@ -1122,54 +1200,72 @@ export class SVGBuilder {
       <polygon points="0 0, 10 3.5, 0 7" fill="#1976d2"/>
     </marker>`);
     }
-    allDefs.push(...this.defs.map(d => `    ${d}`));
+    allDefs.push(...this.defs.map((d) => `    ${d}`));
 
     if (allDefs.length > 0) {
-      lines.push('  <defs>');
+      lines.push("  <defs>");
       lines.push(...allDefs);
-      lines.push('  </defs>');
+      lines.push("  </defs>");
     }
 
     // Styles section
     const allStyles: string[] = [];
     if (this.includeDefaultStyles) {
-      allStyles.push('    .title { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; }');
-      allStyles.push('    .subtitle { font-family: Arial, sans-serif; font-size: 12px; fill: #666; font-style: italic; }');
-      allStyles.push('    .node-label { font-family: Arial, sans-serif; font-size: 12px; }');
-      allStyles.push('    .edge-label { font-family: Arial, sans-serif; font-size: 10px; fill: #666; }');
-      allStyles.push('    .metrics { font-family: Arial, sans-serif; font-size: 11px; fill: #444; }');
-      allStyles.push('    .legend-text { font-family: Arial, sans-serif; font-size: 10px; }');
+      allStyles.push(
+        "    .title { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; }",
+      );
+      allStyles.push(
+        "    .subtitle { font-family: Arial, sans-serif; font-size: 12px; fill: #666; font-style: italic; }",
+      );
+      allStyles.push(
+        "    .node-label { font-family: Arial, sans-serif; font-size: 12px; }",
+      );
+      allStyles.push(
+        "    .edge-label { font-family: Arial, sans-serif; font-size: 10px; fill: #666; }",
+      );
+      allStyles.push(
+        "    .metrics { font-family: Arial, sans-serif; font-size: 11px; fill: #444; }",
+      );
+      allStyles.push(
+        "    .legend-text { font-family: Arial, sans-serif; font-size: 10px; }",
+      );
     }
-    allStyles.push(...this.styles.map(s => `    ${s}`));
+    allStyles.push(...this.styles.map((s) => `    ${s}`));
 
     if (allStyles.length > 0) {
-      lines.push('');
-      lines.push('  <style>');
+      lines.push("");
+      lines.push("  <style>");
       lines.push(...allStyles);
-      lines.push('  </style>');
+      lines.push("  </style>");
     }
 
     // Background
-    lines.push('');
+    lines.push("");
     lines.push(`  <!-- Background -->`);
-    lines.push(`  <rect width="100%" height="100%" fill="${this.background || '#fafafa'}"/>`);
+    lines.push(
+      `  <rect width="100%" height="100%" fill="${this.background || "#fafafa"}"/>`,
+    );
 
     // Title
     if (this.title) {
-      lines.push('');
-      lines.push('  <!-- Title -->');
-      lines.push(`  <text x="${this.width / 2}" y="25" text-anchor="middle" class="title">${escapeSVGText(truncateText(this.title, 60))}</text>`);
+      lines.push("");
+      lines.push("  <!-- Title -->");
+      lines.push(
+        `  <text x="${this.width / 2}" y="25" text-anchor="middle" class="title">${escapeSVGText(truncateText(this.title, 60))}</text>`,
+      );
     }
 
     // Elements
     if (this.elements.length > 0) {
-      lines.push('');
-      lines.push('  <!-- Elements -->');
+      lines.push("");
+      lines.push("  <!-- Elements -->");
 
       // Replace group placeholders with rendered groups
-      const groups = (this as unknown as { _groups?: Map<string, SVGGroupBuilder> })._groups;
+      const groups = (
+        this as unknown as { _groups?: Map<string, SVGGroupBuilder> }
+      )._groups;
       for (const element of this.elements) {
-        if (element.startsWith('__GROUP_') && groups) {
+        if (element.startsWith("__GROUP_") && groups) {
           const group = groups.get(element);
           if (group) {
             lines.push(group.render());
@@ -1181,9 +1277,9 @@ export class SVGBuilder {
     }
 
     // Closing tag
-    lines.push('</svg>');
+    lines.push("</svg>");
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   /**

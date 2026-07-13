@@ -3,20 +3,26 @@
  * Phase 15A Sprint 3: Uses composition with utility functions
  */
 
-import type { SequentialThought, ValidationIssue } from '../../../types/index.js';
-import type { ValidationContext } from '../../validator.js';
-import type { ModeValidator } from '../base.js';
-import { validateCommon } from '../validation-utils.js';
+import type {
+  SequentialThought,
+  ValidationIssue,
+} from "../../../types/index.js";
+import type { ValidationContext } from "../../validator.js";
+import type { ModeValidator } from "../base.js";
+import { validateCommon } from "../validation-utils.js";
 
 /**
  * Sequential mode validator using composition pattern
  */
 export class SequentialValidator implements ModeValidator<SequentialThought> {
   getMode(): string {
-    return 'sequential';
+    return "sequential";
   }
 
-  validate(thought: SequentialThought, _context: ValidationContext): ValidationIssue[] {
+  validate(
+    thought: SequentialThought,
+    _context: ValidationContext,
+  ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation via utility function
@@ -25,23 +31,25 @@ export class SequentialValidator implements ModeValidator<SequentialThought> {
     // Check revision logic
     if (thought.isRevision && !thought.revisesThought) {
       issues.push({
-        severity: 'warning',
+        severity: "warning",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Revision thought should specify which thought it revises',
-        suggestion: 'Provide revisesThought ID',
-        category: 'logical',
+        description: "Revision thought should specify which thought it revises",
+        suggestion: "Provide revisesThought ID",
+        category: "logical",
       });
     }
 
     if (thought.isRevision && _context.existingThoughts) {
-      const revisedThought = _context.existingThoughts.get(thought.revisesThought || '');
+      const revisedThought = _context.existingThoughts.get(
+        thought.revisesThought || "",
+      );
       if (!revisedThought) {
         issues.push({
-          severity: 'error',
+          severity: "error",
           thoughtNumber: thought.thoughtNumber,
           description: `Cannot revise non-existent thought: ${thought.revisesThought}`,
-          suggestion: 'Verify the thought ID being revised exists',
-          category: 'logical',
+          suggestion: "Verify the thought ID being revised exists",
+          category: "logical",
         });
       }
     }

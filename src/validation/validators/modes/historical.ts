@@ -5,12 +5,12 @@
  * Validates historical reasoning (events, sources, periods, causal chains, actors)
  */
 
-import type { HistoricalThought } from '../../../types/modes/historical.js';
-import type { ValidationIssue } from '../../../types/index.js';
-import type { ValidationContext } from '../../validator.js';
-import type { ModeValidator } from '../base.js';
-import { IssueCategory, IssueSeverity } from '../../constants.js';
-import { validateCommon, validateConfidence } from '../validation-utils.js';
+import type { HistoricalThought } from "../../../types/modes/historical.js";
+import type { ValidationIssue } from "../../../types/index.js";
+import type { ValidationContext } from "../../validator.js";
+import type { ModeValidator } from "../base.js";
+import { IssueCategory, IssueSeverity } from "../../constants.js";
+import { validateCommon, validateConfidence } from "../validation-utils.js";
 
 /**
  * Validator for historical reasoning mode
@@ -18,24 +18,29 @@ import { validateCommon, validateConfidence } from '../validation-utils.js';
  */
 export class HistoricalValidator implements ModeValidator<HistoricalThought> {
   getMode(): string {
-    return 'historical';
+    return "historical";
   }
 
-  validate(thought: HistoricalThought, _context: ValidationContext): ValidationIssue[] {
+  validate(
+    thought: HistoricalThought,
+    _context: ValidationContext,
+  ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation
     issues.push(...validateCommon(thought));
 
     // Collect all IDs for reference validation
-    const eventIds = new Set(thought.events?.map(e => e.id) || []);
-    const sourceIds = new Set(thought.sources?.map(s => s.id) || []);
-    const periodIds = new Set(thought.periods?.map(p => p.id) || []);
-    const actorIds = new Set(thought.actors?.map(a => a.id) || []);
+    const eventIds = new Set(thought.events?.map((e) => e.id) || []);
+    const sourceIds = new Set(thought.sources?.map((s) => s.id) || []);
+    const periodIds = new Set(thought.periods?.map((p) => p.id) || []);
+    const actorIds = new Set(thought.actors?.map((a) => a.id) || []);
 
     // Validate events
     if (thought.events) {
-      issues.push(...this.validateEvents(thought, eventIds, sourceIds, actorIds));
+      issues.push(
+        ...this.validateEvents(thought, eventIds, sourceIds, actorIds),
+      );
     }
 
     // Validate sources
@@ -60,7 +65,13 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
 
     // Validate aggregate reliability
     if (thought.aggregateReliability !== undefined) {
-      issues.push(...validateConfidence(thought, thought.aggregateReliability, 'Aggregate reliability'));
+      issues.push(
+        ...validateConfidence(
+          thought,
+          thought.aggregateReliability,
+          "Aggregate reliability",
+        ),
+      );
     }
 
     return issues;
@@ -73,7 +84,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
     thought: HistoricalThought,
     eventIds: Set<string>,
     sourceIds: Set<string>,
-    actorIds: Set<string>
+    actorIds: Set<string>,
   ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
@@ -84,7 +95,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
           severity: IssueSeverity.ERROR,
           thoughtNumber: thought.thoughtNumber,
           description: `Event ${event.id} must have a name`,
-          suggestion: 'Add a descriptive name for the event',
+          suggestion: "Add a descriptive name for the event",
           category: IssueCategory.STRUCTURAL,
         });
       }
@@ -94,19 +105,23 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
           severity: IssueSeverity.ERROR,
           thoughtNumber: thought.thoughtNumber,
           description: `Event ${event.id} must have a date`,
-          suggestion: 'Add date as string or DateRange object',
+          suggestion: "Add date as string or DateRange object",
           category: IssueCategory.STRUCTURAL,
         });
       }
 
       // Validate date range if provided
-      if (typeof event.date === 'object' && event.date.start && event.date.end) {
+      if (
+        typeof event.date === "object" &&
+        event.date.start &&
+        event.date.end
+      ) {
         if (event.date.start > event.date.end) {
           issues.push({
             severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Event ${event.id} date range is invalid (start > end)`,
-            suggestion: 'Ensure date range start is before end',
+            suggestion: "Ensure date range start is before end",
             category: IssueCategory.LOGICAL,
           });
         }
@@ -120,7 +135,8 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
               severity: IssueSeverity.WARNING,
               thoughtNumber: thought.thoughtNumber,
               description: `Event ${event.id} references unknown cause event ${causeId}`,
-              suggestion: 'Add the referenced cause event or remove the reference',
+              suggestion:
+                "Add the referenced cause event or remove the reference",
               category: IssueCategory.STRUCTURAL,
             });
           }
@@ -134,7 +150,8 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
               severity: IssueSeverity.WARNING,
               thoughtNumber: thought.thoughtNumber,
               description: `Event ${event.id} references unknown effect event ${effectId}`,
-              suggestion: 'Add the referenced effect event or remove the reference',
+              suggestion:
+                "Add the referenced effect event or remove the reference",
               category: IssueCategory.STRUCTURAL,
             });
           }
@@ -149,7 +166,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
               severity: IssueSeverity.WARNING,
               thoughtNumber: thought.thoughtNumber,
               description: `Event ${event.id} references unknown source ${srcId}`,
-              suggestion: 'Add the referenced source or remove the reference',
+              suggestion: "Add the referenced source or remove the reference",
               category: IssueCategory.STRUCTURAL,
             });
           }
@@ -164,7 +181,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
               severity: IssueSeverity.WARNING,
               thoughtNumber: thought.thoughtNumber,
               description: `Event ${event.id} references unknown actor ${actorId}`,
-              suggestion: 'Add the referenced actor or remove the reference',
+              suggestion: "Add the referenced actor or remove the reference",
               category: IssueCategory.STRUCTURAL,
             });
           }
@@ -178,7 +195,10 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
   /**
    * Validate historical sources
    */
-  private validateSources(thought: HistoricalThought, sourceIds: Set<string>): ValidationIssue[] {
+  private validateSources(
+    thought: HistoricalThought,
+    sourceIds: Set<string>,
+  ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     for (const source of thought.sources!) {
@@ -188,17 +208,29 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
           severity: IssueSeverity.ERROR,
           thoughtNumber: thought.thoughtNumber,
           description: `Source ${source.id} must have a title`,
-          suggestion: 'Add a title for the source',
+          suggestion: "Add a title for the source",
           category: IssueCategory.STRUCTURAL,
         });
       }
 
       // Validate reliability range
-      issues.push(...validateConfidence(thought, source.reliability, `Source ${source.id} reliability`));
+      issues.push(
+        ...validateConfidence(
+          thought,
+          source.reliability,
+          `Source ${source.id} reliability`,
+        ),
+      );
 
       // Validate bias severity if present
       if (source.bias?.severity !== undefined) {
-        issues.push(...validateConfidence(thought, source.bias.severity, `Source ${source.id} bias severity`));
+        issues.push(
+          ...validateConfidence(
+            thought,
+            source.bias.severity,
+            `Source ${source.id} bias severity`,
+          ),
+        );
       }
 
       // Validate corroboration references
@@ -209,7 +241,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
               severity: IssueSeverity.WARNING,
               thoughtNumber: thought.thoughtNumber,
               description: `Source ${source.id} corroboratedBy references unknown source ${srcId}`,
-              suggestion: 'Add the referenced source or remove the reference',
+              suggestion: "Add the referenced source or remove the reference",
               category: IssueCategory.STRUCTURAL,
             });
           }
@@ -223,7 +255,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
               severity: IssueSeverity.WARNING,
               thoughtNumber: thought.thoughtNumber,
               description: `Source ${source.id} contradictedBy references unknown source ${srcId}`,
-              suggestion: 'Add the referenced source or remove the reference',
+              suggestion: "Add the referenced source or remove the reference",
               category: IssueCategory.STRUCTURAL,
             });
           }
@@ -240,7 +272,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
   private validatePeriods(
     thought: HistoricalThought,
     eventIds: Set<string>,
-    actorIds: Set<string>
+    actorIds: Set<string>,
   ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
@@ -251,18 +283,22 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
           severity: IssueSeverity.ERROR,
           thoughtNumber: thought.thoughtNumber,
           description: `Period ${period.id} must have a name`,
-          suggestion: 'Add a descriptive name for the period',
+          suggestion: "Add a descriptive name for the period",
           category: IssueCategory.STRUCTURAL,
         });
       }
 
       // Validate date order
-      if (period.startDate && period.endDate && period.startDate > period.endDate) {
+      if (
+        period.startDate &&
+        period.endDate &&
+        period.startDate > period.endDate
+      ) {
         issues.push({
           severity: IssueSeverity.ERROR,
           thoughtNumber: thought.thoughtNumber,
           description: `Period ${period.id} startDate must be before endDate`,
-          suggestion: 'Ensure chronological order: startDate < endDate',
+          suggestion: "Ensure chronological order: startDate < endDate",
           category: IssueCategory.LOGICAL,
         });
       }
@@ -275,7 +311,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
               severity: IssueSeverity.WARNING,
               thoughtNumber: thought.thoughtNumber,
               description: `Period ${period.id} references unknown event ${eventId}`,
-              suggestion: 'Add the referenced event or remove the reference',
+              suggestion: "Add the referenced event or remove the reference",
               category: IssueCategory.STRUCTURAL,
             });
           }
@@ -290,7 +326,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
               severity: IssueSeverity.WARNING,
               thoughtNumber: thought.thoughtNumber,
               description: `Period ${period.id} references unknown actor ${actorId}`,
-              suggestion: 'Add the referenced actor or remove the reference',
+              suggestion: "Add the referenced actor or remove the reference",
               category: IssueCategory.STRUCTURAL,
             });
           }
@@ -303,7 +339,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
           severity: IssueSeverity.WARNING,
           thoughtNumber: thought.thoughtNumber,
           description: `Period ${period.id} should have at least one characteristic`,
-          suggestion: 'Add characteristics that define this historical period',
+          suggestion: "Add characteristics that define this historical period",
           category: IssueCategory.LOGICAL,
         });
       }
@@ -318,7 +354,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
   private validateCausalChains(
     thought: HistoricalThought,
     eventIds: Set<string>,
-    sourceIds: Set<string>
+    sourceIds: Set<string>,
   ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
@@ -329,7 +365,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
           severity: IssueSeverity.ERROR,
           thoughtNumber: thought.thoughtNumber,
           description: `CausalChain ${chain.id} must have a name`,
-          suggestion: 'Add a descriptive name for the causal chain',
+          suggestion: "Add a descriptive name for the causal chain",
           category: IssueCategory.STRUCTURAL,
         });
       }
@@ -340,13 +376,19 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
           severity: IssueSeverity.ERROR,
           thoughtNumber: thought.thoughtNumber,
           description: `CausalChain ${chain.id} must have at least one link`,
-          suggestion: 'Add causal links to the chain',
+          suggestion: "Add causal links to the chain",
           category: IssueCategory.STRUCTURAL,
         });
       }
 
       // Validate chain confidence
-      issues.push(...validateConfidence(thought, chain.confidence, `CausalChain ${chain.id} confidence`));
+      issues.push(
+        ...validateConfidence(
+          thought,
+          chain.confidence,
+          `CausalChain ${chain.id} confidence`,
+        ),
+      );
 
       // Validate each link
       if (chain.links) {
@@ -359,7 +401,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
               severity: IssueSeverity.ERROR,
               thoughtNumber: thought.thoughtNumber,
               description: `CausalChain ${chain.id} link ${i} references unknown cause event ${link.cause}`,
-              suggestion: 'Add the referenced cause event',
+              suggestion: "Add the referenced cause event",
               category: IssueCategory.STRUCTURAL,
             });
           }
@@ -370,13 +412,19 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
               severity: IssueSeverity.ERROR,
               thoughtNumber: thought.thoughtNumber,
               description: `CausalChain ${chain.id} link ${i} references unknown effect event ${link.effect}`,
-              suggestion: 'Add the referenced effect event',
+              suggestion: "Add the referenced effect event",
               category: IssueCategory.STRUCTURAL,
             });
           }
 
           // Validate link confidence
-          issues.push(...validateConfidence(thought, link.confidence, `CausalChain ${chain.id} link ${i} confidence`));
+          issues.push(
+            ...validateConfidence(
+              thought,
+              link.confidence,
+              `CausalChain ${chain.id} link ${i} confidence`,
+            ),
+          );
 
           // Validate evidence references
           if (link.evidence) {
@@ -386,7 +434,8 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
                   severity: IssueSeverity.WARNING,
                   thoughtNumber: thought.thoughtNumber,
                   description: `CausalChain ${chain.id} link ${i} references unknown source ${srcId}`,
-                  suggestion: 'Add the referenced source or remove the reference',
+                  suggestion:
+                    "Add the referenced source or remove the reference",
                   category: IssueCategory.STRUCTURAL,
                 });
               }
@@ -401,7 +450,8 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
               severity: IssueSeverity.WARNING,
               thoughtNumber: thought.thoughtNumber,
               description: `CausalChain ${chain.id} has discontinuity between links ${i} and ${i + 1}`,
-              suggestion: 'Ensure each link effect is the cause of the next link for chain continuity',
+              suggestion:
+                "Ensure each link effect is the cause of the next link for chain continuity",
               category: IssueCategory.LOGICAL,
             });
           }
@@ -418,7 +468,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
   private validateActors(
     thought: HistoricalThought,
     periodIds: Set<string>,
-    actorIds: Set<string>
+    actorIds: Set<string>,
   ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
@@ -429,7 +479,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
           severity: IssueSeverity.ERROR,
           thoughtNumber: thought.thoughtNumber,
           description: `Actor ${actor.id} must have a name`,
-          suggestion: 'Add a name for the actor',
+          suggestion: "Add a name for the actor",
           category: IssueCategory.STRUCTURAL,
         });
       }
@@ -440,7 +490,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
           severity: IssueSeverity.WARNING,
           thoughtNumber: thought.thoughtNumber,
           description: `Actor ${actor.id} references unknown period ${actor.period}`,
-          suggestion: 'Add the referenced period or remove the reference',
+          suggestion: "Add the referenced period or remove the reference",
           category: IssueCategory.STRUCTURAL,
         });
       }
@@ -453,7 +503,7 @@ export class HistoricalValidator implements ModeValidator<HistoricalThought> {
               severity: IssueSeverity.WARNING,
               thoughtNumber: thought.thoughtNumber,
               description: `Actor ${actor.id} has relationship with unknown actor ${rel.actorId}`,
-              suggestion: 'Add the referenced actor or remove the relationship',
+              suggestion: "Add the referenced actor or remove the relationship",
               category: IssueCategory.STRUCTURAL,
             });
           }

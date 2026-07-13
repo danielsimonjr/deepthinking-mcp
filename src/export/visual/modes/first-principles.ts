@@ -5,13 +5,13 @@
  * Phase 13 Sprint 7: Refactored to use fluent builder classes
  */
 
-import type { FirstPrinciplesThought } from '../../../types/index.js';
-import type { VisualExportOptions } from '../types.js';
-import { sanitizeId } from '../utils.js';
+import type { FirstPrinciplesThought } from "../../../types/index.js";
+import type { VisualExportOptions } from "../types.js";
+import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
-import { DOTGraphBuilder } from '../utils/dot.js';
-import { MermaidGraphBuilder } from '../utils/mermaid.js';
-import { ASCIIDocBuilder } from '../utils/ascii.js';
+import { DOTGraphBuilder } from "../utils/dot.js";
+import { MermaidGraphBuilder } from "../utils/mermaid.js";
+import { ASCIIDocBuilder } from "../utils/ascii.js";
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -25,17 +25,13 @@ import {
   calculateSVGHeight,
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
-} from '../utils/svg.js';
+} from "../utils/svg.js";
 import {
   generateGraphML,
   type GraphMLNode,
   type GraphMLEdge,
-} from '../utils/graphml.js';
-import {
-  generateTikZ,
-  type TikZNode,
-  type TikZEdge,
-} from '../utils/tikz.js';
+} from "../utils/graphml.js";
+import { generateTikZ, type TikZNode, type TikZEdge } from "../utils/tikz.js";
 import {
   generateHTMLHeader,
   generateHTMLFooter,
@@ -45,14 +41,14 @@ import {
   renderTable,
   renderBadge,
   renderList,
-} from '../utils/html.js';
+} from "../utils/html.js";
 import {
   sanitizeModelicaId,
   escapeModelicaString,
   generateModelicaPackageHeader,
   generateModelicaPackageFooter,
   generateModelicaRecord,
-} from '../utils/modelica.js';
+} from "../utils/modelica.js";
 import {
   generateUmlHeader,
   generateUmlFooter,
@@ -62,7 +58,7 @@ import {
   escapeUml,
   type UmlNode,
   type UmlEdge,
-} from '../utils/uml.js';
+} from "../utils/uml.js";
 import {
   createJsonGraph,
   addNode,
@@ -70,7 +66,7 @@ import {
   addMetric,
   addLegendItem,
   serializeGraph,
-} from '../utils/json.js';
+} from "../utils/json.js";
 import {
   section,
   table,
@@ -78,36 +74,49 @@ import {
   keyValueSection,
   mermaidBlock,
   document as mdDocument,
-} from '../utils/markdown.js';
+} from "../utils/markdown.js";
 
 /**
  * Export first-principles derivation chain to visual format
  */
-export function exportFirstPrinciplesDerivation(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
-  const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+export function exportFirstPrinciplesDerivation(
+  thought: FirstPrinciplesThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+  } = options;
 
   switch (format) {
-    case 'mermaid':
-      return firstPrinciplesToMermaid(thought, colorScheme, includeLabels, includeMetrics);
-    case 'dot':
+    case "mermaid":
+      return firstPrinciplesToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics,
+      );
+    case "dot":
       return firstPrinciplesToDOT(thought, includeLabels, includeMetrics);
-    case 'ascii':
+    case "ascii":
       return firstPrinciplesToASCII(thought);
-    case 'svg':
+    case "svg":
       return firstPrinciplesToSVG(thought, options);
-    case 'graphml':
+    case "graphml":
       return firstPrinciplesToGraphML(thought, options);
-    case 'tikz':
+    case "tikz":
       return firstPrinciplesToTikZ(thought, options);
-    case 'html':
+    case "html":
       return firstPrinciplesToHTML(thought, options);
-    case 'modelica':
+    case "modelica":
       return firstPrinciplesToModelica(thought, options);
-    case 'uml':
+    case "uml":
       return firstPrinciplesToUML(thought, options);
-    case 'json':
+    case "json":
       return firstPrinciplesToJSON(thought, options);
-    case 'markdown':
+    case "markdown":
       return firstPrinciplesToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
@@ -118,23 +127,33 @@ function firstPrinciplesToMermaid(
   thought: FirstPrinciplesThought,
   colorScheme: string,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
-  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
-  const builder = new MermaidGraphBuilder().setDirection('TD');
+  const scheme = colorScheme as "default" | "pastel" | "monochrome";
+  const builder = new MermaidGraphBuilder().setDirection("TD");
 
   // Question node
-  builder.addNode({ id: 'Q', label: `Question: ${thought.question}`, shape: 'rectangle' });
+  builder.addNode({
+    id: "Q",
+    label: `Question: ${thought.question}`,
+    shape: "rectangle",
+  });
 
   // Principle shape mapping
   const getShapeForType = (type: string) => {
     switch (type) {
-      case 'axiom': return 'stadium' as const;
-      case 'definition': return 'subroutine' as const;
-      case 'observation': return 'cylinder' as const;
-      case 'logical_inference': return 'rectangle' as const;
-      case 'assumption': return 'rhombus' as const;
-      default: return 'rectangle' as const;
+      case "axiom":
+        return "stadium" as const;
+      case "definition":
+        return "subroutine" as const;
+      case "observation":
+        return "cylinder" as const;
+      case "logical_inference":
+        return "rectangle" as const;
+      case "assumption":
+        return "rhombus" as const;
+      default:
+        return "rectangle" as const;
     }
   };
 
@@ -145,7 +164,11 @@ function firstPrinciplesToMermaid(
       ? `${principle.type.toUpperCase()}: ${principle.statement.substring(0, 50)}...`
       : principleId;
 
-    builder.addNode({ id: principleId, label, shape: getShapeForType(principle.type) });
+    builder.addNode({
+      id: principleId,
+      label,
+      shape: getShapeForType(principle.type),
+    });
 
     if (principle.dependsOn) {
       for (const depId of principle.dependsOn) {
@@ -162,26 +185,41 @@ function firstPrinciplesToMermaid(
       ? `Step ${step.stepNumber}: ${step.inference.substring(0, 50)}...`
       : stepId;
 
-    builder.addNode({ id: stepId, label, shape: 'rectangle' });
-    builder.addEdge({ source: principleId, target: stepId, style: 'dotted', label: 'applies' });
+    builder.addNode({ id: stepId, label, shape: "rectangle" });
+    builder.addEdge({
+      source: principleId,
+      target: stepId,
+      style: "dotted",
+      label: "applies",
+    });
 
     if (includeMetrics && step.confidence !== undefined) {
-      builder.addEdge({ source: stepId, target: stepId, style: 'dotted', label: `conf: ${step.confidence.toFixed(2)}` });
+      builder.addEdge({
+        source: stepId,
+        target: stepId,
+        style: "dotted",
+        label: `conf: ${step.confidence.toFixed(2)}`,
+      });
     }
   }
 
   // Conclusion
   const conclusionLabel = includeLabels
     ? `Conclusion: ${thought.conclusion.statement.substring(0, 50)}...`
-    : 'Conclusion';
-  builder.addNode({ id: 'C', label: conclusionLabel, shape: 'rectangle' });
+    : "Conclusion";
+  builder.addNode({ id: "C", label: conclusionLabel, shape: "rectangle" });
 
   for (const stepNum of thought.conclusion.derivationChain) {
-    builder.addEdge({ source: `Step${stepNum}`, target: 'C' });
+    builder.addEdge({ source: `Step${stepNum}`, target: "C" });
   }
 
   if (includeMetrics) {
-    builder.addEdge({ source: 'C', target: 'C', style: 'dotted', label: `certainty: ${thought.conclusion.certainty.toFixed(2)}` });
+    builder.addEdge({
+      source: "C",
+      target: "C",
+      style: "dotted",
+      label: `certainty: ${thought.conclusion.certainty.toFixed(2)}`,
+    });
   }
 
   return builder.setOptions({ colorScheme: scheme }).render();
@@ -190,30 +228,36 @@ function firstPrinciplesToMermaid(
 function firstPrinciplesToDOT(
   thought: FirstPrinciplesThought,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
   const builder = new DOTGraphBuilder()
-    .setGraphName('FirstPrinciples')
-    .setRankDir('TB')
-    .setNodeDefaults({ shape: 'box', style: 'rounded' });
+    .setGraphName("FirstPrinciples")
+    .setRankDir("TB")
+    .setNodeDefaults({ shape: "box", style: "rounded" });
 
   // Question node
   builder.addNode({
-    id: 'Q',
+    id: "Q",
     label: `Question:\n${thought.question}`,
-    shape: 'ellipse',
-    style: 'bold'
+    shape: "ellipse",
+    style: "bold",
   });
 
   // Shape mapping for principle types
   const getShapeForType = (type: string) => {
     switch (type) {
-      case 'axiom': return 'ellipse' as const;
-      case 'definition': return 'box' as const;
-      case 'observation': return 'cylinder' as const;
-      case 'logical_inference': return 'box' as const;
-      case 'assumption': return 'diamond' as const;
-      default: return 'box' as const;
+      case "axiom":
+        return "ellipse" as const;
+      case "definition":
+        return "box" as const;
+      case "observation":
+        return "cylinder" as const;
+      case "logical_inference":
+        return "box" as const;
+      case "assumption":
+        return "diamond" as const;
+      default:
+        return "box" as const;
     }
   };
 
@@ -224,13 +268,14 @@ function firstPrinciplesToDOT(
       ? `${principle.type.toUpperCase()}:\n${principle.statement.substring(0, 60)}...`
       : principleId;
 
-    const confidenceLabel = includeMetrics && principle.confidence
-      ? `\nconf: ${principle.confidence.toFixed(2)}`
-      : '';
+    const confidenceLabel =
+      includeMetrics && principle.confidence
+        ? `\nconf: ${principle.confidence.toFixed(2)}`
+        : "";
     builder.addNode({
       id: principleId,
       label: `${label}${confidenceLabel}`,
-      shape: getShapeForType(principle.type)
+      shape: getShapeForType(principle.type),
     });
 
     if (principle.dependsOn) {
@@ -250,27 +295,32 @@ function firstPrinciplesToDOT(
 
     const confidenceLabel = includeMetrics
       ? `\nconf: ${step.confidence.toFixed(2)}`
-      : '';
+      : "";
     builder.addNode({ id: stepId, label: `${label}${confidenceLabel}` });
-    builder.addEdge({ source: principleId, target: stepId, style: 'dashed', label: 'applies' });
+    builder.addEdge({
+      source: principleId,
+      target: stepId,
+      style: "dashed",
+      label: "applies",
+    });
   }
 
   // Conclusion
   const conclusionLabel = includeLabels
     ? `Conclusion:\n${thought.conclusion.statement.substring(0, 60)}...`
-    : 'Conclusion';
+    : "Conclusion";
   const certaintyLabel = includeMetrics
     ? `\ncertainty: ${thought.conclusion.certainty.toFixed(2)}`
-    : '';
+    : "";
   builder.addNode({
-    id: 'C',
+    id: "C",
     label: `${conclusionLabel}${certaintyLabel}`,
-    shape: 'doubleoctagon',
-    style: 'bold'
+    shape: "doubleoctagon",
+    style: "bold",
   });
 
   for (const stepNum of thought.conclusion.derivationChain) {
-    builder.addEdge({ source: `Step${stepNum}`, target: 'C' });
+    builder.addEdge({ source: `Step${stepNum}`, target: "C" });
   }
 
   return builder.render();
@@ -279,18 +329,18 @@ function firstPrinciplesToDOT(
 function firstPrinciplesToASCII(thought: FirstPrinciplesThought): string {
   const builder = new ASCIIDocBuilder();
 
-  builder.addHeader('First-Principles Derivation');
+  builder.addHeader("First-Principles Derivation");
   builder.addText(`Question: ${thought.question}`);
   builder.addEmptyLine();
 
   // Foundational Principles
-  builder.addSection('Foundational Principles');
+  builder.addSection("Foundational Principles");
   for (const principle of thought.principles) {
     builder.addText(`[${principle.id}] ${principle.type.toUpperCase()}`);
     builder.addText(`  Statement: ${principle.statement}`);
-    builder.addText(`  Justification: ${principle.justification || '-'}`);
+    builder.addText(`  Justification: ${principle.justification || "-"}`);
     if (principle.dependsOn && principle.dependsOn.length > 0) {
-      builder.addText(`  Depends on: ${principle.dependsOn.join(', ')}`);
+      builder.addText(`  Depends on: ${principle.dependsOn.join(", ")}`);
     }
     if (principle.confidence !== undefined) {
       builder.addText(`  Confidence: ${principle.confidence.toFixed(2)}`);
@@ -299,9 +349,11 @@ function firstPrinciplesToASCII(thought: FirstPrinciplesThought): string {
   }
 
   // Derivation Chain
-  builder.addSection('Derivation Chain');
+  builder.addSection("Derivation Chain");
   for (const step of thought.derivationSteps) {
-    builder.addText(`Step ${step.stepNumber} (using principle: ${step.principle})`);
+    builder.addText(
+      `Step ${step.stepNumber} (using principle: ${step.principle})`,
+    );
     builder.addText(`  Inference: ${step.inference}`);
     if (step.logicalForm) {
       builder.addText(`  Logical form: ${step.logicalForm}`);
@@ -311,20 +363,28 @@ function firstPrinciplesToASCII(thought: FirstPrinciplesThought): string {
   }
 
   // Conclusion
-  builder.addSection('Conclusion');
+  builder.addSection("Conclusion");
   builder.addText(thought.conclusion.statement);
-  builder.addText(`Derivation chain: Steps [${thought.conclusion.derivationChain.join(', ')}]`);
+  builder.addText(
+    `Derivation chain: Steps [${thought.conclusion.derivationChain.join(", ")}]`,
+  );
   builder.addText(`Certainty: ${thought.conclusion.certainty.toFixed(2)}`);
 
-  if (thought.conclusion.limitations && thought.conclusion.limitations.length > 0) {
+  if (
+    thought.conclusion.limitations &&
+    thought.conclusion.limitations.length > 0
+  ) {
     builder.addEmptyLine();
-    builder.addText('Limitations:');
+    builder.addText("Limitations:");
     builder.addBulletList(thought.conclusion.limitations);
   }
 
-  if (thought.alternativeInterpretations && thought.alternativeInterpretations.length > 0) {
+  if (
+    thought.alternativeInterpretations &&
+    thought.alternativeInterpretations.length > 0
+  ) {
     builder.addEmptyLine();
-    builder.addText('Alternative Interpretations:');
+    builder.addText("Alternative Interpretations:");
     builder.addBulletList(thought.alternativeInterpretations);
   }
 
@@ -334,9 +394,12 @@ function firstPrinciplesToASCII(thought: FirstPrinciplesThought): string {
 /**
  * Export first-principles derivation chain to native SVG format
  */
-function firstPrinciplesToSVG(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
+function firstPrinciplesToSVG(
+  thought: FirstPrinciplesThought,
+  options: VisualExportOptions,
+): string {
   const {
-    colorScheme = 'default',
+    colorScheme = "default",
     includeLabels = true,
     includeMetrics = true,
     svgWidth = DEFAULT_SVG_OPTIONS.width,
@@ -348,12 +411,18 @@ function firstPrinciplesToSVG(thought: FirstPrinciplesThought, options: VisualEx
 
   // Position principles at the top
   const principleY = 100;
-  const principleSpacing = Math.min(180, svgWidth / (thought.principles.length + 1));
-  const principleStartX = (svgWidth - (thought.principles.length - 1) * principleSpacing) / 2;
+  const principleSpacing = Math.min(
+    180,
+    svgWidth / (thought.principles.length + 1),
+  );
+  const principleStartX =
+    (svgWidth - (thought.principles.length - 1) * principleSpacing) / 2;
   thought.principles.forEach((p, index) => {
     positions.set(p.id, {
       id: p.id,
-      label: includeLabels ? `${p.type}: ${p.statement.substring(0, 30)}...` : p.id,
+      label: includeLabels
+        ? `${p.type}: ${p.statement.substring(0, 30)}...`
+        : p.id,
       x: principleStartX + index * principleSpacing,
       y: principleY,
       width: nodeWidth,
@@ -373,24 +442,30 @@ function firstPrinciplesToSVG(thought: FirstPrinciplesThought, options: VisualEx
       y: stepY,
       width: nodeWidth,
       height: nodeHeight,
-      type: 'step',
+      type: "step",
     });
   });
 
   // Add conclusion
-  positions.set('conclusion', {
-    id: 'conclusion',
-    label: includeLabels ? `Conclusion: ${thought.conclusion.statement.substring(0, 30)}...` : 'Conclusion',
+  positions.set("conclusion", {
+    id: "conclusion",
+    label: includeLabels
+      ? `Conclusion: ${thought.conclusion.statement.substring(0, 30)}...`
+      : "Conclusion",
     x: svgWidth / 2,
     y: stepY + 150,
     width: nodeWidth,
     height: nodeHeight,
-    type: 'conclusion',
+    type: "conclusion",
   });
 
   const actualHeight = calculateSVGHeight(positions);
 
-  let svg = generateSVGHeader(svgWidth, actualHeight, 'First Principles Derivation');
+  let svg = generateSVGHeader(
+    svgWidth,
+    actualHeight,
+    "First Principles Derivation",
+  );
 
   // Render edges
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
@@ -400,12 +475,15 @@ function firstPrinciplesToSVG(thought: FirstPrinciplesThought, options: VisualEx
     const principlePos = positions.get(step.principle);
     const stepPos = positions.get(`Step${step.stepNumber}`);
     if (principlePos && stepPos) {
-      svg += renderEdge(principlePos, stepPos, { style: 'dashed', label: 'applies' });
+      svg += renderEdge(principlePos, stepPos, {
+        style: "dashed",
+        label: "applies",
+      });
     }
   }
 
   // Edges from steps to conclusion
-  const conclusionPos = positions.get('conclusion')!;
+  const conclusionPos = positions.get("conclusion")!;
   for (const stepNum of thought.conclusion.derivationChain) {
     const stepPos = positions.get(`Step${stepNum}`);
     if (stepPos) {
@@ -413,52 +491,55 @@ function firstPrinciplesToSVG(thought: FirstPrinciplesThought, options: VisualEx
     }
   }
 
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render nodes
   svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
 
-  const axiomColors = getNodeColor('primary', colorScheme);
-  const stepColors = getNodeColor('neutral', colorScheme);
-  const conclusionColors = getNodeColor('success', colorScheme);
+  const axiomColors = getNodeColor("primary", colorScheme);
+  const stepColors = getNodeColor("neutral", colorScheme);
+  const conclusionColors = getNodeColor("success", colorScheme);
 
   for (const [id, pos] of positions) {
-    if (id === 'conclusion') {
+    if (id === "conclusion") {
       svg += renderStadiumNode(pos, conclusionColors);
-    } else if (id.startsWith('Step')) {
+    } else if (id.startsWith("Step")) {
       svg += renderRectNode(pos, stepColors);
     } else {
       svg += renderEllipseNode(pos, axiomColors);
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render metrics panel
   if (includeMetrics) {
     const metrics = [
-      { label: 'Principles', value: thought.principles.length },
-      { label: 'Steps', value: thought.derivationSteps.length },
-      { label: 'Certainty', value: thought.conclusion.certainty.toFixed(2) },
+      { label: "Principles", value: thought.principles.length },
+      { label: "Steps", value: thought.derivationSteps.length },
+      { label: "Certainty", value: thought.conclusion.certainty.toFixed(2) },
     ];
     svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
   }
 
   // Render legend
   const legendItems = [
-    { label: 'Principle', color: axiomColors, shape: 'ellipse' as const },
-    { label: 'Derivation Step', color: stepColors },
-    { label: 'Conclusion', color: conclusionColors, shape: 'stadium' as const },
+    { label: "Principle", color: axiomColors, shape: "ellipse" as const },
+    { label: "Derivation Step", color: stepColors },
+    { label: "Conclusion", color: conclusionColors, shape: "stadium" as const },
   ];
   svg += renderLegend(20, actualHeight - 100, legendItems);
 
-  svg += '\n' + generateSVGFooter();
+  svg += "\n" + generateSVGFooter();
   return svg;
 }
 
 /**
  * Export first-principles derivation chain to GraphML format
  */
-function firstPrinciplesToGraphML(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
+function firstPrinciplesToGraphML(
+  thought: FirstPrinciplesThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true } = options;
 
   const nodes: GraphMLNode[] = [];
@@ -467,9 +548,9 @@ function firstPrinciplesToGraphML(thought: FirstPrinciplesThought, options: Visu
 
   // Add question node
   nodes.push({
-    id: 'question',
-    label: includeLabels ? `Question: ${thought.question}` : 'Question',
-    type: 'question',
+    id: "question",
+    label: includeLabels ? `Question: ${thought.question}` : "Question",
+    type: "question",
   });
 
   // Add principle nodes
@@ -495,7 +576,7 @@ function firstPrinciplesToGraphML(thought: FirstPrinciplesThought, options: Visu
           id: `e${edgeCount++}`,
           source: sanitizedDepId,
           target: principleId,
-          label: 'depends on',
+          label: "depends on",
           directed: true,
         });
       }
@@ -510,7 +591,7 @@ function firstPrinciplesToGraphML(thought: FirstPrinciplesThought, options: Visu
       label: includeLabels
         ? `Step ${step.stepNumber}: ${step.inference.substring(0, 60)}...`
         : stepId,
-      type: 'derivation_step',
+      type: "derivation_step",
       metadata: {
         logicalForm: step.logicalForm,
         confidence: step.confidence,
@@ -523,18 +604,18 @@ function firstPrinciplesToGraphML(thought: FirstPrinciplesThought, options: Visu
       id: `e${edgeCount++}`,
       source: principleId,
       target: stepId,
-      label: 'applies',
+      label: "applies",
       directed: true,
     });
   }
 
   // Add conclusion node
   nodes.push({
-    id: 'conclusion',
+    id: "conclusion",
     label: includeLabels
       ? `Conclusion: ${thought.conclusion.statement.substring(0, 60)}...`
-      : 'Conclusion',
-    type: 'conclusion',
+      : "Conclusion",
+    type: "conclusion",
     metadata: {
       certainty: thought.conclusion.certainty,
       limitations: thought.conclusion.limitations,
@@ -546,13 +627,13 @@ function firstPrinciplesToGraphML(thought: FirstPrinciplesThought, options: Visu
     edges.push({
       id: `e${edgeCount++}`,
       source: `Step${stepNum}`,
-      target: 'conclusion',
+      target: "conclusion",
       directed: true,
     });
   }
 
   return generateGraphML(nodes, edges, {
-    graphName: 'First Principles Derivation',
+    graphName: "First Principles Derivation",
     directed: true,
     includeLabels,
   });
@@ -561,8 +642,11 @@ function firstPrinciplesToGraphML(thought: FirstPrinciplesThought, options: Visu
 /**
  * Export first-principles derivation chain to TikZ format
  */
-function firstPrinciplesToTikZ(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
-  const { includeLabels = true, colorScheme = 'default' } = options;
+function firstPrinciplesToTikZ(
+  thought: FirstPrinciplesThought,
+  options: VisualExportOptions,
+): string {
+  const { includeLabels = true, colorScheme = "default" } = options;
 
   const nodes: TikZNode[] = [];
   const edges: TikZEdge[] = [];
@@ -578,8 +662,8 @@ function firstPrinciplesToTikZ(thought: FirstPrinciplesThought, options: VisualE
         : principleId,
       x: index * 3,
       y: 0,
-      type: principle.type === 'axiom' ? 'primary' : 'secondary',
-      shape: 'stadium',
+      type: principle.type === "axiom" ? "primary" : "secondary",
+      shape: "stadium",
     });
 
     // Add edges for dependencies between principles
@@ -590,7 +674,7 @@ function firstPrinciplesToTikZ(thought: FirstPrinciplesThought, options: VisualE
           source: sanitizedDepId,
           target: principleId,
           directed: true,
-          style: 'dashed',
+          style: "dashed",
         });
       }
     }
@@ -607,42 +691,42 @@ function firstPrinciplesToTikZ(thought: FirstPrinciplesThought, options: VisualE
       label: includeLabels ? `Step ${step.stepNumber}` : stepId,
       x: index * 3,
       y: stepY,
-      type: 'neutral',
-      shape: 'rectangle',
+      type: "neutral",
+      shape: "rectangle",
     });
 
     // Edge from principle to step
     edges.push({
       source: principleId,
       target: stepId,
-      label: 'applies',
+      label: "applies",
       directed: true,
-      style: 'dashed',
+      style: "dashed",
     });
   });
 
   // Position conclusion at the bottom
-  const conclusionX = (principleCount - 1) * 3 / 2; // Center it
+  const conclusionX = ((principleCount - 1) * 3) / 2; // Center it
   nodes.push({
-    id: 'conclusion',
-    label: includeLabels ? 'Conclusion' : 'C',
+    id: "conclusion",
+    label: includeLabels ? "Conclusion" : "C",
     x: conclusionX,
     y: -4,
-    type: 'success',
-    shape: 'stadium',
+    type: "success",
+    shape: "stadium",
   });
 
   // Edges from derivation steps to conclusion
   for (const stepNum of thought.conclusion.derivationChain) {
     edges.push({
       source: `Step${stepNum}`,
-      target: 'conclusion',
+      target: "conclusion",
       directed: true,
     });
   }
 
   return generateTikZ(nodes, edges, {
-    title: 'First Principles Derivation',
+    title: "First Principles Derivation",
     colorScheme,
     includeLabels,
   });
@@ -651,68 +735,119 @@ function firstPrinciplesToTikZ(thought: FirstPrinciplesThought, options: VisualE
 /**
  * Export first-principles derivation to HTML format
  */
-function firstPrinciplesToHTML(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
+function firstPrinciplesToHTML(
+  thought: FirstPrinciplesThought,
+  options: VisualExportOptions,
+): string {
   const {
     htmlStandalone = true,
-    htmlTitle = 'First Principles Analysis',
-    htmlTheme = 'light',
+    htmlTitle = "First Principles Analysis",
+    htmlTheme = "light",
     includeMetrics = true,
   } = options;
 
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme,
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
 
   // Question
-  html += renderSection('Question', `<p class="text-primary"><strong>${escapeHTML(thought.question)}</strong></p>`, '❓');
+  html += renderSection(
+    "Question",
+    `<p class="text-primary"><strong>${escapeHTML(thought.question)}</strong></p>`,
+    "❓",
+  );
 
   // Metrics
   if (includeMetrics) {
     html += '<div class="metrics-grid">';
-    html += renderMetricCard('Principles', thought.principles.length, 'primary');
-    html += renderMetricCard('Derivation Steps', thought.derivationSteps.length, 'info');
-    html += renderMetricCard('Certainty', (thought.conclusion.certainty * 100).toFixed(0) + '%', 'success');
-    html += '</div>\n';
+    html += renderMetricCard(
+      "Principles",
+      thought.principles.length,
+      "primary",
+    );
+    html += renderMetricCard(
+      "Derivation Steps",
+      thought.derivationSteps.length,
+      "info",
+    );
+    html += renderMetricCard(
+      "Certainty",
+      (thought.conclusion.certainty * 100).toFixed(0) + "%",
+      "success",
+    );
+    html += "</div>\n";
   }
 
   // Principles table
-  const principleRows = thought.principles.map(p => {
-    const typeBadge = renderBadge(p.type, p.type === 'axiom' ? 'primary' : p.type === 'observation' ? 'info' : 'secondary');
+  const principleRows = thought.principles.map((p) => {
+    const typeBadge = renderBadge(
+      p.type,
+      p.type === "axiom"
+        ? "primary"
+        : p.type === "observation"
+          ? "info"
+          : "secondary",
+    );
     return [
       p.id,
       typeBadge,
       p.statement,
-      p.confidence !== undefined ? (p.confidence * 100).toFixed(0) + '%' : 'N/A',
+      p.confidence !== undefined
+        ? (p.confidence * 100).toFixed(0) + "%"
+        : "N/A",
     ];
   });
-  html += renderSection('First Principles', renderTable(
-    ['ID', 'Type', 'Statement', 'Confidence'],
-    principleRows.map(row => row.map(cell => typeof cell === 'string' && cell.startsWith('<') ? cell : escapeHTML(String(cell))))
-  ), '🏛️');
+  html += renderSection(
+    "First Principles",
+    renderTable(
+      ["ID", "Type", "Statement", "Confidence"],
+      principleRows.map((row) =>
+        row.map((cell) =>
+          typeof cell === "string" && cell.startsWith("<")
+            ? cell
+            : escapeHTML(String(cell)),
+        ),
+      ),
+    ),
+    "🏛️",
+  );
 
   // Derivation steps
-  const stepRows = thought.derivationSteps.map(s => [
+  const stepRows = thought.derivationSteps.map((s) => [
     s.stepNumber.toString(),
     s.principle,
     s.inference,
-    s.logicalForm || '-',
+    s.logicalForm || "-",
   ]);
-  html += renderSection('Derivation Chain', renderTable(
-    ['Step', 'Principle', 'Inference', 'Logical Form'],
-    stepRows
-  ), '🔗');
+  html += renderSection(
+    "Derivation Chain",
+    renderTable(["Step", "Principle", "Inference", "Logical Form"], stepRows),
+    "🔗",
+  );
 
   // Conclusion
-  html += renderSection('Conclusion', `
+  html += renderSection(
+    "Conclusion",
+    `
     <div class="card">
       <div class="card-header">${escapeHTML(thought.conclusion.statement)}</div>
       <p><strong>Certainty:</strong> ${(thought.conclusion.certainty * 100).toFixed(0)}%</p>
-      <p><strong>Derivation Chain:</strong> Steps ${thought.conclusion.derivationChain.join(' → ')}</p>
-      ${thought.conclusion.limitations && thought.conclusion.limitations.length > 0 ? `
+      <p><strong>Derivation Chain:</strong> Steps ${thought.conclusion.derivationChain.join(" → ")}</p>
+      ${
+        thought.conclusion.limitations &&
+        thought.conclusion.limitations.length > 0
+          ? `
         <p><strong>Limitations:</strong></p>
         ${renderList(thought.conclusion.limitations)}
-      ` : ''}
+      `
+          : ""
+      }
     </div>
-  `, '✓');
+  `,
+    "✓",
+  );
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
@@ -721,57 +856,81 @@ function firstPrinciplesToHTML(thought: FirstPrinciplesThought, options: VisualE
 /**
  * Export first-principles derivation to Modelica format
  */
-function firstPrinciplesToModelica(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
+function firstPrinciplesToModelica(
+  thought: FirstPrinciplesThought,
+  options: VisualExportOptions,
+): string {
   const { includeMetrics = true } = options;
-  const packageName = 'FirstPrinciplesDerivation';
+  const packageName = "FirstPrinciplesDerivation";
 
   let modelica = generateModelicaPackageHeader(
     packageName,
-    `First principles derivation: ${thought.question}`
+    `First principles derivation: ${thought.question}`,
   );
 
   // Create records for each fundamental principle
-  modelica += '  // Fundamental Principles\n';
+  modelica += "  // Fundamental Principles\n";
   for (const principle of thought.principles) {
-    const fields: Array<{ name: string; type: string; value: string; description?: string }> = [
-      { name: 'id', type: 'String', value: `"${escapeModelicaString(principle.id)}"` },
-      { name: 'principleType', type: 'String', value: `"${escapeModelicaString(principle.type)}"` },
-      { name: 'statement', type: 'String', value: `"${escapeModelicaString(principle.statement)}"` },
-      { name: 'justification', type: 'String', value: `"${principle.justification ? escapeModelicaString(principle.justification) : ''}"` },
+    const fields: Array<{
+      name: string;
+      type: string;
+      value: string;
+      description?: string;
+    }> = [
+      {
+        name: "id",
+        type: "String",
+        value: `"${escapeModelicaString(principle.id)}"`,
+      },
+      {
+        name: "principleType",
+        type: "String",
+        value: `"${escapeModelicaString(principle.type)}"`,
+      },
+      {
+        name: "statement",
+        type: "String",
+        value: `"${escapeModelicaString(principle.statement)}"`,
+      },
+      {
+        name: "justification",
+        type: "String",
+        value: `"${principle.justification ? escapeModelicaString(principle.justification) : ""}"`,
+      },
     ];
 
     if (includeMetrics && principle.confidence !== undefined) {
       fields.push({
-        name: 'confidence',
-        type: 'Real',
+        name: "confidence",
+        type: "Real",
         value: principle.confidence.toFixed(3),
-        description: 'Confidence level in this principle',
+        description: "Confidence level in this principle",
       });
     }
 
     modelica += generateModelicaRecord(
       sanitizeModelicaId(principle.id),
       `${principle.type}: ${principle.statement.substring(0, 60)}`,
-      fields
+      fields,
     );
   }
 
   // Create model for derivation process
-  modelica += '  // Derivation Process\n';
-  modelica += '  model Derivation\n';
+  modelica += "  // Derivation Process\n";
+  modelica += "  model Derivation\n";
   modelica += `    "Derivation chain from principles to conclusion"\n`;
-  modelica += '\n';
+  modelica += "\n";
 
   // Principle instantiations
-  modelica += '    // Principle instances\n';
+  modelica += "    // Principle instances\n";
   for (const principle of thought.principles) {
     const safeId = sanitizeModelicaId(principle.id);
     modelica += `    ${safeId} ${safeId}_instance;\n`;
   }
-  modelica += '\n';
+  modelica += "\n";
 
   // Derivation steps as parameters
-  modelica += '    // Derivation steps\n';
+  modelica += "    // Derivation steps\n";
   for (const step of thought.derivationSteps) {
     const stepId = `step_${step.stepNumber}`;
     modelica += `    parameter String ${stepId}_principle = "${escapeModelicaString(step.principle)}";\n`;
@@ -783,18 +942,18 @@ function firstPrinciplesToModelica(thought: FirstPrinciplesThought, options: Vis
       modelica += `    parameter Real ${stepId}_confidence = ${step.confidence.toFixed(3)};\n`;
     }
   }
-  modelica += '\n';
+  modelica += "\n";
 
   // Conclusion
-  modelica += '    // Conclusion\n';
+  modelica += "    // Conclusion\n";
   modelica += `    parameter String conclusion = "${escapeModelicaString(thought.conclusion.statement)}";\n`;
   if (includeMetrics) {
     modelica += `    parameter Real certainty = ${thought.conclusion.certainty.toFixed(3)};\n`;
   }
   modelica += `    parameter Integer derivationChainLength = ${thought.conclusion.derivationChain.length};\n`;
-  modelica += '\n';
+  modelica += "\n";
 
-  modelica += '    annotation(\n';
+  modelica += "    annotation(\n";
   modelica += '      Documentation(info="<html>\n';
   modelica += `        <h3>Question</h3>\n`;
   modelica += `        <p>${escapeModelicaString(thought.question)}</p>\n`;
@@ -808,11 +967,14 @@ function firstPrinciplesToModelica(thought: FirstPrinciplesThought, options: Vis
     modelica += `        <p>Certainty: ${(thought.conclusion.certainty * 100).toFixed(1)}%</p>\n`;
   }
   modelica += '      </html>")\n';
-  modelica += '    );\n';
-  modelica += '  end Derivation;\n';
-  modelica += '\n';
+  modelica += "    );\n";
+  modelica += "  end Derivation;\n";
+  modelica += "\n";
 
-  modelica += generateModelicaPackageFooter(packageName, { includeAnnotations: true, version: '7.1.0' });
+  modelica += generateModelicaPackageFooter(packageName, {
+    includeAnnotations: true,
+    version: "7.1.0",
+  });
 
   return modelica;
 }
@@ -820,7 +982,10 @@ function firstPrinciplesToModelica(thought: FirstPrinciplesThought, options: Vis
 /**
  * Export first-principles derivation to UML format
  */
-function firstPrinciplesToUML(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
+function firstPrinciplesToUML(
+  thought: FirstPrinciplesThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
 
   const nodes: UmlNode[] = [];
@@ -841,7 +1006,7 @@ function firstPrinciplesToUML(thought: FirstPrinciplesThought, options: VisualEx
     nodes.push({
       id: sanitizeUmlId(principle.id),
       label: includeLabels ? principle.id : sanitizeUmlId(principle.id),
-      shape: principle.type === 'axiom' ? 'class' : 'rectangle',
+      shape: principle.type === "axiom" ? "class" : "rectangle",
       stereotype: principle.type,
       attributes: attributes,
     });
@@ -852,8 +1017,8 @@ function firstPrinciplesToUML(thought: FirstPrinciplesThought, options: VisualEx
         edges.push({
           source: sanitizeUmlId(depId),
           target: sanitizeUmlId(principle.id),
-          type: 'dependency',
-          label: 'depends on',
+          type: "dependency",
+          label: "depends on",
         });
       }
     }
@@ -877,7 +1042,7 @@ function firstPrinciplesToUML(thought: FirstPrinciplesThought, options: VisualEx
     nodes.push({
       id: stepId,
       label: includeLabels ? `Step ${step.stepNumber}` : stepId,
-      shape: 'component',
+      shape: "component",
       attributes: attributes,
     });
 
@@ -885,30 +1050,37 @@ function firstPrinciplesToUML(thought: FirstPrinciplesThought, options: VisualEx
     edges.push({
       source: sanitizeUmlId(step.principle),
       target: stepId,
-      type: 'dashed',
-      label: 'applies',
+      type: "dashed",
+      label: "applies",
     });
   }
 
   // Add conclusion as a class
   const conclusionAttributes: string[] = [
     `statement: "${thought.conclusion.statement.substring(0, 40)}..."`,
-    `derivationChain: [${thought.conclusion.derivationChain.join(', ')}]`,
+    `derivationChain: [${thought.conclusion.derivationChain.join(", ")}]`,
   ];
 
   if (includeMetrics) {
-    conclusionAttributes.push(`certainty: ${thought.conclusion.certainty.toFixed(2)}`);
+    conclusionAttributes.push(
+      `certainty: ${thought.conclusion.certainty.toFixed(2)}`,
+    );
   }
 
-  if (thought.conclusion.limitations && thought.conclusion.limitations.length > 0) {
-    conclusionAttributes.push(`limitations: ${thought.conclusion.limitations.length} items`);
+  if (
+    thought.conclusion.limitations &&
+    thought.conclusion.limitations.length > 0
+  ) {
+    conclusionAttributes.push(
+      `limitations: ${thought.conclusion.limitations.length} items`,
+    );
   }
 
   nodes.push({
-    id: 'Conclusion',
-    label: 'Conclusion',
-    shape: 'class',
-    stereotype: 'conclusion',
+    id: "Conclusion",
+    label: "Conclusion",
+    shape: "class",
+    stereotype: "conclusion",
     attributes: conclusionAttributes,
   });
 
@@ -916,43 +1088,45 @@ function firstPrinciplesToUML(thought: FirstPrinciplesThought, options: VisualEx
   for (const stepNum of thought.conclusion.derivationChain) {
     edges.push({
       source: `Step${stepNum}`,
-      target: 'Conclusion',
-      type: 'arrow',
+      target: "Conclusion",
+      type: "arrow",
     });
   }
 
   // Generate the UML diagram
   let uml = generateUmlHeader({
-    title: 'First Principles Derivation',
-    direction: 'top to bottom',
+    title: "First Principles Derivation",
+    direction: "top to bottom",
   });
 
   uml += `' Question: ${escapeUml(thought.question)}\n\n`;
 
   // Render nodes
   uml += "' Principles\n";
-  for (const node of nodes.filter(n => !n.id.startsWith('Step') && n.id !== 'Conclusion')) {
-    uml += renderUmlNode(node) + '\n';
+  for (const node of nodes.filter(
+    (n) => !n.id.startsWith("Step") && n.id !== "Conclusion",
+  )) {
+    uml += renderUmlNode(node) + "\n";
   }
 
   uml += "\n' Derivation Steps\n";
-  for (const node of nodes.filter(n => n.id.startsWith('Step'))) {
-    uml += renderUmlNode(node) + '\n';
+  for (const node of nodes.filter((n) => n.id.startsWith("Step"))) {
+    uml += renderUmlNode(node) + "\n";
   }
 
   uml += "\n' Conclusion\n";
-  const conclusionNode = nodes.find(n => n.id === 'Conclusion');
+  const conclusionNode = nodes.find((n) => n.id === "Conclusion");
   if (conclusionNode) {
-    uml += renderUmlNode(conclusionNode) + '\n';
+    uml += renderUmlNode(conclusionNode) + "\n";
   }
 
   // Render edges
   uml += "\n' Relationships\n";
   for (const edge of edges) {
-    uml += renderUmlEdge(edge) + '\n';
+    uml += renderUmlEdge(edge) + "\n";
   }
 
-  uml += '\n' + generateUmlFooter();
+  uml += "\n" + generateUmlFooter();
 
   return uml;
 }
@@ -960,19 +1134,22 @@ function firstPrinciplesToUML(thought: FirstPrinciplesThought, options: VisualEx
 /**
  * Export first-principles derivation to JSON format
  */
-function firstPrinciplesToJSON(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
+function firstPrinciplesToJSON(
+  thought: FirstPrinciplesThought,
+  options: VisualExportOptions,
+): string {
   const { includeMetrics = true, includeLabels = true } = options;
 
   const graph = createJsonGraph(
-    'First Principles Derivation',
-    'first-principles',
-    { includeMetrics, includeLayout: true, includeLegend: true }
+    "First Principles Derivation",
+    "first-principles",
+    { includeMetrics, includeLayout: true, includeLegend: true },
   );
 
   // Set hierarchical layout
   if (graph.layout) {
-    graph.layout.type = 'hierarchical';
-    graph.layout.direction = 'TB';
+    graph.layout.type = "hierarchical";
+    graph.layout.direction = "TB";
   }
 
   // Add question metadata
@@ -980,32 +1157,45 @@ function firstPrinciplesToJSON(thought: FirstPrinciplesThought, options: VisualE
 
   // Add principle nodes at the top level
   const principleSpacing = 150;
-  const principleStartX = -((thought.principles.length - 1) * principleSpacing) / 2;
+  const principleStartX =
+    -((thought.principles.length - 1) * principleSpacing) / 2;
 
   for (let i = 0; i < thought.principles.length; i++) {
     const principle = thought.principles[i];
     const principleId = sanitizeId(principle.id);
 
     // Determine color based on type
-    let color = '#e0e0e0';
+    let color = "#e0e0e0";
     switch (principle.type) {
-      case 'axiom': color = '#a8d5ff'; break;
-      case 'definition': color = '#ce93d8'; break;
-      case 'observation': color = '#ffd699'; break;
-      case 'logical_inference': color = '#a5d6a7'; break;
-      case 'assumption': color = '#ef9a9a'; break;
+      case "axiom":
+        color = "#a8d5ff";
+        break;
+      case "definition":
+        color = "#ce93d8";
+        break;
+      case "observation":
+        color = "#ffd699";
+        break;
+      case "logical_inference":
+        color = "#a5d6a7";
+        break;
+      case "assumption":
+        color = "#ef9a9a";
+        break;
     }
 
     addNode(graph, {
       id: principleId,
-      label: includeLabels ? `${principle.type}: ${principle.statement.substring(0, 30)}...` : principleId,
+      label: includeLabels
+        ? `${principle.type}: ${principle.statement.substring(0, 30)}...`
+        : principleId,
       type: principle.type,
       x: principleStartX + i * principleSpacing,
       y: 0,
       width: 140,
       height: 60,
       color: color,
-      shape: principle.type === 'axiom' ? 'ellipse' : 'rectangle',
+      shape: principle.type === "axiom" ? "ellipse" : "rectangle",
       metadata: {
         statement: principle.statement,
         justification: principle.justification,
@@ -1021,9 +1211,9 @@ function firstPrinciplesToJSON(thought: FirstPrinciplesThought, options: VisualE
           id: `edge_${sanitizeId(depId)}_${principleId}`,
           source: sanitizeId(depId),
           target: principleId,
-          label: 'depends on',
+          label: "depends on",
           directed: true,
-          style: 'dashed',
+          style: "dashed",
         });
       }
     }
@@ -1040,14 +1230,16 @@ function firstPrinciplesToJSON(thought: FirstPrinciplesThought, options: VisualE
 
     addNode(graph, {
       id: stepId,
-      label: includeLabels ? `Step ${step.stepNumber}: ${step.inference.substring(0, 30)}...` : `Step ${step.stepNumber}`,
-      type: 'derivation_step',
+      label: includeLabels
+        ? `Step ${step.stepNumber}: ${step.inference.substring(0, 30)}...`
+        : `Step ${step.stepNumber}`,
+      type: "derivation_step",
       x: stepStartX + i * stepSpacing,
       y: stepY,
       width: 180,
       height: 50,
-      color: '#81c784',
-      shape: 'rectangle',
+      color: "#81c784",
+      shape: "rectangle",
       metadata: {
         inference: step.inference,
         logicalForm: step.logicalForm,
@@ -1061,23 +1253,25 @@ function firstPrinciplesToJSON(thought: FirstPrinciplesThought, options: VisualE
       id: `edge_${sanitizeId(step.principle)}_${stepId}`,
       source: sanitizeId(step.principle),
       target: stepId,
-      label: 'applies',
+      label: "applies",
       directed: true,
-      style: 'dashed',
+      style: "dashed",
     });
   }
 
   // Add conclusion node at the bottom
   addNode(graph, {
-    id: 'conclusion',
-    label: includeLabels ? `Conclusion: ${thought.conclusion.statement.substring(0, 40)}...` : 'Conclusion',
-    type: 'conclusion',
+    id: "conclusion",
+    label: includeLabels
+      ? `Conclusion: ${thought.conclusion.statement.substring(0, 40)}...`
+      : "Conclusion",
+    type: "conclusion",
     x: 0,
     y: stepY + 150,
     width: 200,
     height: 60,
-    color: '#66bb6a',
-    shape: 'stadium',
+    color: "#66bb6a",
+    shape: "stadium",
     metadata: {
       statement: thought.conclusion.statement,
       certainty: thought.conclusion.certainty,
@@ -1091,31 +1285,43 @@ function firstPrinciplesToJSON(thought: FirstPrinciplesThought, options: VisualE
     addEdge(graph, {
       id: `edge_step${stepNum}_conclusion`,
       source: `step_${stepNum}`,
-      target: 'conclusion',
+      target: "conclusion",
       directed: true,
-      style: 'solid',
+      style: "solid",
     });
   }
 
   // Add metrics
   if (includeMetrics && graph.metrics) {
-    addMetric(graph, 'principleCount', thought.principles.length);
-    addMetric(graph, 'derivationStepCount', thought.derivationSteps.length);
-    addMetric(graph, 'certainty', thought.conclusion.certainty);
-    addMetric(graph, 'axiomCount', thought.principles.filter(p => p.type === 'axiom').length);
-    addMetric(graph, 'definitionCount', thought.principles.filter(p => p.type === 'definition').length);
-    addMetric(graph, 'observationCount', thought.principles.filter(p => p.type === 'observation').length);
+    addMetric(graph, "principleCount", thought.principles.length);
+    addMetric(graph, "derivationStepCount", thought.derivationSteps.length);
+    addMetric(graph, "certainty", thought.conclusion.certainty);
+    addMetric(
+      graph,
+      "axiomCount",
+      thought.principles.filter((p) => p.type === "axiom").length,
+    );
+    addMetric(
+      graph,
+      "definitionCount",
+      thought.principles.filter((p) => p.type === "definition").length,
+    );
+    addMetric(
+      graph,
+      "observationCount",
+      thought.principles.filter((p) => p.type === "observation").length,
+    );
   }
 
   // Add legend
   if (graph.legend) {
-    addLegendItem(graph, 'Axiom', '#a8d5ff', 'ellipse');
-    addLegendItem(graph, 'Definition', '#ce93d8', 'rectangle');
-    addLegendItem(graph, 'Observation', '#ffd699', 'rectangle');
-    addLegendItem(graph, 'Logical Inference', '#a5d6a7', 'rectangle');
-    addLegendItem(graph, 'Assumption', '#ef9a9a', 'rectangle');
-    addLegendItem(graph, 'Derivation Step', '#81c784', 'rectangle');
-    addLegendItem(graph, 'Conclusion', '#66bb6a', 'stadium');
+    addLegendItem(graph, "Axiom", "#a8d5ff", "ellipse");
+    addLegendItem(graph, "Definition", "#ce93d8", "rectangle");
+    addLegendItem(graph, "Observation", "#ffd699", "rectangle");
+    addLegendItem(graph, "Logical Inference", "#a5d6a7", "rectangle");
+    addLegendItem(graph, "Assumption", "#ef9a9a", "rectangle");
+    addLegendItem(graph, "Derivation Step", "#81c784", "rectangle");
+    addLegendItem(graph, "Conclusion", "#66bb6a", "stadium");
   }
 
   return serializeGraph(graph, { prettyPrint: true, indent: 2 });
@@ -1124,7 +1330,10 @@ function firstPrinciplesToJSON(thought: FirstPrinciplesThought, options: VisualE
 /**
  * Export first-principles derivation to Markdown format
  */
-function firstPrinciplesToMarkdown(thought: FirstPrinciplesThought, options: VisualExportOptions): string {
+function firstPrinciplesToMarkdown(
+  thought: FirstPrinciplesThought,
+  options: VisualExportOptions,
+): string {
   const {
     markdownIncludeFrontmatter = false,
     markdownIncludeToc = false,
@@ -1135,72 +1344,106 @@ function firstPrinciplesToMarkdown(thought: FirstPrinciplesThought, options: Vis
   const parts: string[] = [];
 
   // Question
-  parts.push(section('Question', thought.question));
+  parts.push(section("Question", thought.question));
 
   // Metrics
   if (includeMetrics) {
-    parts.push(section('Metrics', keyValueSection({
-      'Principles': thought.principles.length,
-      'Derivation Steps': thought.derivationSteps.length,
-      'Certainty': (thought.conclusion.certainty * 100).toFixed(0) + '%',
-      'Axioms': thought.principles.filter(p => p.type === 'axiom').length,
-      'Definitions': thought.principles.filter(p => p.type === 'definition').length,
-      'Observations': thought.principles.filter(p => p.type === 'observation').length,
-    })));
+    parts.push(
+      section(
+        "Metrics",
+        keyValueSection({
+          Principles: thought.principles.length,
+          "Derivation Steps": thought.derivationSteps.length,
+          Certainty: (thought.conclusion.certainty * 100).toFixed(0) + "%",
+          Axioms: thought.principles.filter((p) => p.type === "axiom").length,
+          Definitions: thought.principles.filter((p) => p.type === "definition")
+            .length,
+          Observations: thought.principles.filter(
+            (p) => p.type === "observation",
+          ).length,
+        }),
+      ),
+    );
   }
 
   // Foundational principles
-  const principleRows = thought.principles.map(p => [
+  const principleRows = thought.principles.map((p) => [
     p.id,
     p.type,
-    p.statement.substring(0, 60) + (p.statement.length > 60 ? '...' : ''),
-    p.dependsOn?.join(', ') || '-',
-    p.confidence !== undefined ? (p.confidence * 100).toFixed(0) + '%' : 'N/A',
+    p.statement.substring(0, 60) + (p.statement.length > 60 ? "..." : ""),
+    p.dependsOn?.join(", ") || "-",
+    p.confidence !== undefined ? (p.confidence * 100).toFixed(0) + "%" : "N/A",
   ]);
-  parts.push(section('Foundational Principles', table(
-    ['ID', 'Type', 'Statement', 'Depends On', 'Confidence'],
-    principleRows
-  )));
+  parts.push(
+    section(
+      "Foundational Principles",
+      table(
+        ["ID", "Type", "Statement", "Depends On", "Confidence"],
+        principleRows,
+      ),
+    ),
+  );
 
   // Derivation steps
-  const stepRows = thought.derivationSteps.map(s => [
+  const stepRows = thought.derivationSteps.map((s) => [
     s.stepNumber.toString(),
     s.principle,
-    s.inference.substring(0, 60) + (s.inference.length > 60 ? '...' : ''),
-    s.logicalForm || '-',
-    (s.confidence * 100).toFixed(0) + '%',
+    s.inference.substring(0, 60) + (s.inference.length > 60 ? "..." : ""),
+    s.logicalForm || "-",
+    (s.confidence * 100).toFixed(0) + "%",
   ]);
-  parts.push(section('Derivation Chain', table(
-    ['Step', 'Principle', 'Inference', 'Logical Form', 'Confidence'],
-    stepRows
-  )));
+  parts.push(
+    section(
+      "Derivation Chain",
+      table(
+        ["Step", "Principle", "Inference", "Logical Form", "Confidence"],
+        stepRows,
+      ),
+    ),
+  );
 
   // Conclusion
   let conclusionContent = `**Statement:** ${thought.conclusion.statement}\n\n`;
   conclusionContent += `**Certainty:** ${(thought.conclusion.certainty * 100).toFixed(0)}%\n\n`;
-  conclusionContent += `**Derivation Chain:** Steps ${thought.conclusion.derivationChain.join(' → ')}\n`;
+  conclusionContent += `**Derivation Chain:** Steps ${thought.conclusion.derivationChain.join(" → ")}\n`;
 
-  if (thought.conclusion.limitations && thought.conclusion.limitations.length > 0) {
+  if (
+    thought.conclusion.limitations &&
+    thought.conclusion.limitations.length > 0
+  ) {
     conclusionContent += `\n**Limitations:**\n${list(thought.conclusion.limitations)}`;
   }
-  parts.push(section('Conclusion', conclusionContent));
+  parts.push(section("Conclusion", conclusionContent));
 
   // Alternative interpretations
-  if (thought.alternativeInterpretations && thought.alternativeInterpretations.length > 0) {
-    parts.push(section('Alternative Interpretations', list(thought.alternativeInterpretations)));
+  if (
+    thought.alternativeInterpretations &&
+    thought.alternativeInterpretations.length > 0
+  ) {
+    parts.push(
+      section(
+        "Alternative Interpretations",
+        list(thought.alternativeInterpretations),
+      ),
+    );
   }
 
   // Mermaid diagram
   if (markdownIncludeMermaid) {
-    const mermaid = firstPrinciplesToMermaid(thought, 'default', true, includeMetrics);
-    parts.push(section('Visualization', mermaidBlock(mermaid)));
+    const mermaid = firstPrinciplesToMermaid(
+      thought,
+      "default",
+      true,
+      includeMetrics,
+    );
+    parts.push(section("Visualization", mermaidBlock(mermaid)));
   }
 
-  return mdDocument('First Principles Analysis', parts.join('\n'), {
+  return mdDocument("First Principles Analysis", parts.join("\n"), {
     includeFrontmatter: markdownIncludeFrontmatter,
     includeTableOfContents: markdownIncludeToc,
     metadata: {
-      mode: 'first-principles',
+      mode: "first-principles",
       principles: thought.principles.length,
       certainty: thought.conclusion.certainty.toFixed(2),
     },

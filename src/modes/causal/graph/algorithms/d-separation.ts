@@ -17,7 +17,7 @@ import type {
   DSeparationRequest,
   DSeparationConfig,
   VStructure,
-} from '../types.js';
+} from "../types.js";
 
 // ============================================================================
 // GRAPH UTILITIES
@@ -26,10 +26,22 @@ import type {
 /**
  * Build bidirectional adjacency map from graph
  */
-function buildBidirectionalAdjacency(
-  graph: CausalGraph
-): Map<string, Array<{ neighbor: string; edge: GraphEdge; direction: 'forward' | 'backward' }>> {
-  const adj = new Map<string, Array<{ neighbor: string; edge: GraphEdge; direction: 'forward' | 'backward' }>>();
+function buildBidirectionalAdjacency(graph: CausalGraph): Map<
+  string,
+  Array<{
+    neighbor: string;
+    edge: GraphEdge;
+    direction: "forward" | "backward";
+  }>
+> {
+  const adj = new Map<
+    string,
+    Array<{
+      neighbor: string;
+      edge: GraphEdge;
+      direction: "forward" | "backward";
+    }>
+  >();
 
   for (const node of graph.nodes) {
     adj.set(node.id, []);
@@ -37,10 +49,12 @@ function buildBidirectionalAdjacency(
 
   for (const edge of graph.edges) {
     // Forward direction
-    adj.get(edge.from)?.push({ neighbor: edge.to, edge, direction: 'forward' });
+    adj.get(edge.from)?.push({ neighbor: edge.to, edge, direction: "forward" });
 
     // Backward direction (for path finding, not causality)
-    adj.get(edge.to)?.push({ neighbor: edge.from, edge, direction: 'backward' });
+    adj
+      .get(edge.to)
+      ?.push({ neighbor: edge.from, edge, direction: "backward" });
   }
 
   return adj;
@@ -51,7 +65,7 @@ function buildBidirectionalAdjacency(
  */
 function getParents(graph: CausalGraph, nodeId: string): string[] {
   return graph.edges
-    .filter((e) => e.to === nodeId && e.type !== 'bidirected')
+    .filter((e) => e.to === nodeId && e.type !== "bidirected")
     .map((e) => e.from);
 }
 
@@ -117,7 +131,7 @@ export function findVStructures(graph: CausalGraph): VStructure[] {
           const connected = graph.edges.some(
             (e) =>
               (e.from === parents[i] && e.to === parents[j]) ||
-              (e.from === parents[j] && e.to === parents[i])
+              (e.from === parents[j] && e.to === parents[i]),
           );
 
           if (!connected) {
@@ -149,7 +163,10 @@ function isColliderOnPath(pathEdges: PathEdge[], nodeIndex: number): boolean {
   const outgoingEdge = pathEdges[nodeIndex];
 
   // Check if both edges point to this node (the node is at the "head" of both arrows)
-  return incomingEdge.direction === 'forward' && outgoingEdge.direction === 'backward';
+  return (
+    incomingEdge.direction === "forward" &&
+    outgoingEdge.direction === "backward"
+  );
 }
 
 // ============================================================================
@@ -163,7 +180,7 @@ export function findAllPaths(
   graph: CausalGraph,
   sourceNodes: string[],
   targetNodes: string[],
-  maxLength = 10
+  maxLength = 10,
 ): Path[] {
   const adj = buildBidirectionalAdjacency(graph);
   const targetSet = new Set(targetNodes);
@@ -173,7 +190,7 @@ export function findAllPaths(
     current: string,
     visited: Set<string>,
     pathNodes: string[],
-    pathEdges: PathEdge[]
+    pathEdges: PathEdge[],
   ): void {
     if (pathNodes.length > maxLength) return;
 
@@ -191,10 +208,10 @@ export function findAllPaths(
         visited.add(neighbor);
         pathNodes.push(neighbor);
         pathEdges.push({
-          from: direction === 'forward' ? edge.from : edge.to,
-          to: direction === 'forward' ? edge.to : edge.from,
+          from: direction === "forward" ? edge.from : edge.to,
+          to: direction === "forward" ? edge.to : edge.from,
           direction,
-          edgeType: edge.type || 'directed',
+          edgeType: edge.type || "directed",
         });
 
         dfs(neighbor, visited, pathNodes, pathEdges);
@@ -224,17 +241,20 @@ export function findAllPaths(
 export function isPathBlocked(
   graph: CausalGraph,
   path: Path,
-  conditioningSet: Set<string>
+  conditioningSet: Set<string>,
 ): { blocked: boolean; reason: string } {
   const nodes = path.nodes;
   const edges = path.edges;
 
   if (nodes.length < 3) {
     // Path with only 2 nodes is blocked if either is conditioned
-    if (conditioningSet.has(nodes[0]) || conditioningSet.has(nodes[nodes.length - 1])) {
-      return { blocked: true, reason: 'Source or target is conditioned' };
+    if (
+      conditioningSet.has(nodes[0]) ||
+      conditioningSet.has(nodes[nodes.length - 1])
+    ) {
+      return { blocked: true, reason: "Source or target is conditioned" };
     }
-    return { blocked: false, reason: '' };
+    return { blocked: false, reason: "" };
   }
 
   // Check each intermediate node
@@ -260,7 +280,7 @@ export function isPathBlocked(
     }
   }
 
-  return { blocked: false, reason: '' };
+  return { blocked: false, reason: "" };
 }
 
 /**
@@ -269,7 +289,7 @@ export function isPathBlocked(
 export function checkDSeparation(
   graph: CausalGraph,
   request: DSeparationRequest,
-  config: DSeparationConfig = {}
+  config: DSeparationConfig = {},
 ): DSeparationResult {
   const maxPathLength = config.maxPathLength ?? 10;
   const conditioningSet = new Set(request.z);
@@ -297,12 +317,12 @@ export function checkDSeparation(
   let explanation: string;
   if (separated) {
     if (allPaths.length === 0) {
-      explanation = `No paths exist between {${request.x.join(', ')}} and {${request.y.join(', ')}}`;
+      explanation = `No paths exist between {${request.x.join(", ")}} and {${request.y.join(", ")}}`;
     } else {
-      explanation = `All ${allPaths.length} path(s) are blocked by conditioning on {${request.z.join(', ')}}`;
+      explanation = `All ${allPaths.length} path(s) are blocked by conditioning on {${request.z.join(", ")}}`;
     }
   } else {
-    explanation = `${openPaths.length} of ${allPaths.length} path(s) remain open after conditioning on {${request.z.join(', ')}}`;
+    explanation = `${openPaths.length} of ${allPaths.length} path(s) remain open after conditioning on {${request.z.join(", ")}}`;
   }
 
   return {
@@ -325,7 +345,7 @@ export function findMinimalSeparator(
   graph: CausalGraph,
   x: string[],
   y: string[],
-  maxSetSize = 5
+  maxSetSize = 5,
 ): string[] | null {
   const nodeIds = graph.nodes
     .map((n) => n.id)
@@ -350,7 +370,7 @@ function findSeparatorOfSize(
   x: string[],
   y: string[],
   candidates: string[],
-  size: number
+  size: number,
 ): string[] | null {
   if (size === 0) {
     const result = checkDSeparation(graph, { x, y, z: [] });
@@ -390,7 +410,7 @@ export function isValidBackdoorAdjustment(
   graph: CausalGraph,
   treatment: string,
   outcome: string,
-  adjustmentSet: string[]
+  adjustmentSet: string[],
 ): boolean {
   // 1. No node in Z is a descendant of treatment
   const treatmentDescendants = getDescendants(graph, treatment);
@@ -422,7 +442,7 @@ function findBackdoorPaths(
   graph: CausalGraph,
   treatment: string,
   outcome: string,
-  maxLength = 10
+  maxLength = 10,
 ): Path[] {
   const adj = buildBidirectionalAdjacency(graph);
   const paths: Path[] = [];
@@ -432,7 +452,7 @@ function findBackdoorPaths(
     visited: Set<string>,
     pathNodes: string[],
     pathEdges: PathEdge[],
-    _startedBackward: boolean
+    _startedBackward: boolean,
   ): void {
     if (pathNodes.length > maxLength) return;
 
@@ -448,17 +468,17 @@ function findBackdoorPaths(
     for (const { neighbor, edge, direction } of adj.get(current) || []) {
       if (!visited.has(neighbor)) {
         // For backdoor paths, first step must be backward (into treatment)
-        if (pathNodes.length === 1 && direction !== 'backward') {
+        if (pathNodes.length === 1 && direction !== "backward") {
           continue;
         }
 
         visited.add(neighbor);
         pathNodes.push(neighbor);
         pathEdges.push({
-          from: direction === 'forward' ? edge.from : edge.to,
-          to: direction === 'forward' ? edge.to : edge.from,
+          from: direction === "forward" ? edge.from : edge.to,
+          to: direction === "forward" ? edge.to : edge.from,
           direction,
-          edgeType: edge.type || 'directed',
+          edgeType: edge.type || "directed",
         });
 
         dfs(neighbor, visited, pathNodes, pathEdges, true);
@@ -482,17 +502,26 @@ function findBackdoorPaths(
 export function findBackdoorAdjustmentSet(
   graph: CausalGraph,
   treatment: string,
-  outcome: string
+  outcome: string,
 ): string[] | null {
   // Get candidates: non-descendants of treatment, not treatment or outcome
   const treatmentDescendants = getDescendants(graph, treatment);
   const candidates = graph.nodes
     .map((n) => n.id)
-    .filter((id) => id !== treatment && id !== outcome && !treatmentDescendants.has(id));
+    .filter(
+      (id) =>
+        id !== treatment && id !== outcome && !treatmentDescendants.has(id),
+    );
 
   // Try to find minimal set
   for (let size = 0; size <= candidates.length; size++) {
-    const result = findBackdoorSetOfSize(graph, treatment, outcome, candidates, size);
+    const result = findBackdoorSetOfSize(
+      graph,
+      treatment,
+      outcome,
+      candidates,
+      size,
+    );
     if (result !== null) {
       return result;
     }
@@ -509,7 +538,7 @@ function findBackdoorSetOfSize(
   treatment: string,
   outcome: string,
   candidates: string[],
-  size: number
+  size: number,
 ): string[] | null {
   function* combinations(arr: string[], k: number): Generator<string[]> {
     if (k === 0) {
@@ -540,23 +569,30 @@ function findBackdoorSetOfSize(
  * Compute the Markov blanket of a node
  * (parents + children + parents of children)
  */
-export function computeMarkovBlanket(graph: CausalGraph, nodeId: string): string[] {
+export function computeMarkovBlanket(
+  graph: CausalGraph,
+  nodeId: string,
+): string[] {
   const parents = new Set<string>();
   const children = new Set<string>();
   const parentsOfChildren = new Set<string>();
 
   for (const edge of graph.edges) {
-    if (edge.to === nodeId && edge.type !== 'bidirected') {
+    if (edge.to === nodeId && edge.type !== "bidirected") {
       parents.add(edge.from);
     }
-    if (edge.from === nodeId && edge.type !== 'bidirected') {
+    if (edge.from === nodeId && edge.type !== "bidirected") {
       children.add(edge.to);
     }
   }
 
   for (const child of children) {
     for (const edge of graph.edges) {
-      if (edge.to === child && edge.from !== nodeId && edge.type !== 'bidirected') {
+      if (
+        edge.to === child &&
+        edge.from !== nodeId &&
+        edge.type !== "bidirected"
+      ) {
         parentsOfChildren.add(edge.from);
       }
     }
@@ -574,9 +610,14 @@ export function computeMarkovBlanket(graph: CausalGraph, nodeId: string): string
  */
 export function getImpliedIndependencies(
   graph: CausalGraph,
-  maxConditioningSize = 3
+  maxConditioningSize = 3,
 ): Array<{ x: string; y: string; z: string[]; separated: boolean }> {
-  const independencies: Array<{ x: string; y: string; z: string[]; separated: boolean }> = [];
+  const independencies: Array<{
+    x: string;
+    y: string;
+    z: string[];
+    separated: boolean;
+  }> = [];
   const nodeIds = graph.nodes.map((n) => n.id);
 
   for (let i = 0; i < nodeIds.length; i++) {
@@ -592,7 +633,11 @@ export function getImpliedIndependencies(
       }
 
       // Check conditional independence for various conditioning sets
-      for (let size = 1; size <= Math.min(maxConditioningSize, others.length); size++) {
+      for (
+        let size = 1;
+        size <= Math.min(maxConditioningSize, others.length);
+        size++
+      ) {
         for (const z of getCombinations(others, size)) {
           const result = checkDSeparation(graph, { x: [x], y: [y], z });
           if (result.separated) {

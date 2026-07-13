@@ -5,9 +5,9 @@
  * Phase 15: Aligned with JSON schema for complete validation
  */
 
-import { z } from 'zod';
-import { BaseThoughtSchema } from '../base.js';
-import { ConfidenceSchema } from '../shared.js';
+import { z } from "zod";
+import { BaseThoughtSchema } from "../base.js";
+import { ConfidenceSchema } from "../shared.js";
 
 /**
  * Domain schema for analogical reasoning
@@ -31,7 +31,12 @@ const MappingSchema = z.object({
  * Analytical reasoning schema
  */
 export const AnalyticalSchema = BaseThoughtSchema.extend({
-  mode: z.enum(['analogical', 'firstprinciples', 'metareasoning', 'cryptanalytic']),
+  mode: z.enum([
+    "analogical",
+    "firstprinciples",
+    "metareasoning",
+    "cryptanalytic",
+  ]),
 
   // Analogical reasoning
   sourceAnalogy: DomainSchema.optional(),

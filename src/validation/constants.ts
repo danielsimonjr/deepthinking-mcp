@@ -5,15 +5,15 @@
  * Eliminates ~300 hardcoded string literals across validators
  */
 
-import type { Thought } from '../types/core.js';
+import type { Thought } from "../types/core.js";
 
 /**
  * Issue severity levels (matches ValidationIssue type)
  */
 export const IssueSeverity = {
-  ERROR: 'error',
-  WARNING: 'warning',
-  INFO: 'info',
+  ERROR: "error",
+  WARNING: "warning",
+  INFO: "info",
 } as const;
 
 export type IssueSeverity = (typeof IssueSeverity)[keyof typeof IssueSeverity];
@@ -22,12 +22,12 @@ export type IssueSeverity = (typeof IssueSeverity)[keyof typeof IssueSeverity];
  * Issue categories (matches ValidationIssue type)
  */
 export const IssueCategory = {
-  STRUCTURAL: 'structural',
-  LOGICAL: 'logical',
-  MATHEMATICAL: 'mathematical',
-  PHYSICAL: 'physical',
-  COMPLETENESS: 'completeness',
-  INTERPRETATION: 'interpretation',
+  STRUCTURAL: "structural",
+  LOGICAL: "logical",
+  MATHEMATICAL: "mathematical",
+  PHYSICAL: "physical",
+  COMPLETENESS: "completeness",
+  INTERPRETATION: "interpretation",
 } as const;
 
 export type IssueCategory = (typeof IssueCategory)[keyof typeof IssueCategory];
@@ -51,10 +51,13 @@ export const ValidationThresholds = {
  */
 export const ValidationMessages = {
   REQUIRED_FIELD: (field: string) => `${field} is required`,
-  INVALID_RANGE: (field: string, min: number, max: number) => `${field} must be between ${min} and ${max}`,
-  INVALID_TYPE: (field: string, expected: string) => `${field} must be of type ${expected}`,
+  INVALID_RANGE: (field: string, min: number, max: number) =>
+    `${field} must be between ${min} and ${max}`,
+  INVALID_TYPE: (field: string, expected: string) =>
+    `${field} must be of type ${expected}`,
   EMPTY_ARRAY: (field: string) => `${field} must not be empty`,
-  MISSING_DEPENDENCY: (field: string, dependency: string) => `${field} requires ${dependency} to be defined`,
+  MISSING_DEPENDENCY: (field: string, dependency: string) =>
+    `${field} requires ${dependency} to be defined`,
 } as const;
 
 /**
@@ -68,14 +71,22 @@ export function isInRange(value: number, min: number, max: number): boolean {
  * Probability validation (0-1)
  */
 export function isValidProbability(value: number): boolean {
-  return isInRange(value, ValidationThresholds.MIN_PROBABILITY, ValidationThresholds.MAX_PROBABILITY);
+  return isInRange(
+    value,
+    ValidationThresholds.MIN_PROBABILITY,
+    ValidationThresholds.MAX_PROBABILITY,
+  );
 }
 
 /**
  * Confidence validation (0-1)
  */
 export function isValidConfidence(value: number): boolean {
-  return isInRange(value, ValidationThresholds.MIN_CONFIDENCE, ValidationThresholds.MAX_CONFIDENCE);
+  return isInRange(
+    value,
+    ValidationThresholds.MIN_CONFIDENCE,
+    ValidationThresholds.MAX_CONFIDENCE,
+  );
 }
 
 /**

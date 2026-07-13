@@ -12,7 +12,7 @@ import type {
   ImplicitAssumption,
   GapAnalysis,
   ProofDecomposition,
-} from '../types/modes/mathematics.js';
+} from "../types/modes/mathematics.js";
 
 /**
  * Transition validity result
@@ -29,7 +29,7 @@ interface TransitionValidation {
  */
 export interface GapAnalyzerConfig {
   /** Strictness level for gap detection */
-  strictness: 'lenient' | 'standard' | 'strict';
+  strictness: "lenient" | "standard" | "strict";
   /** Whether to detect implicit domain assumptions */
   checkDomainAssumptions: boolean;
   /** Whether to verify inference rule applications */
@@ -39,7 +39,7 @@ export interface GapAnalyzerConfig {
 }
 
 const DEFAULT_CONFIG: GapAnalyzerConfig = {
-  strictness: 'standard',
+  strictness: "standard",
   checkDomainAssumptions: true,
   verifyInferenceRules: true,
   maxLeapDistance: 2,
@@ -68,7 +68,12 @@ export class GapAnalyzer {
     const undefinedTerms = this.findUndefinedTerms(atoms);
 
     // Combine all gaps
-    const gaps = [...unjustifiedLeaps, ...missingSteps, ...scopeErrors, ...undefinedTerms];
+    const gaps = [
+      ...unjustifiedLeaps,
+      ...missingSteps,
+      ...scopeErrors,
+      ...undefinedTerms,
+    ];
 
     // Find implicit assumptions
     const implicitAssumptions = this.findImplicitAssumptions(atoms, gaps);
@@ -77,10 +82,18 @@ export class GapAnalyzer {
     const unjustifiedSteps = this.findUnjustifiedSteps(atoms);
 
     // Generate suggestions
-    const suggestions = this.generateSuggestions(gaps, implicitAssumptions, unjustifiedSteps);
+    const suggestions = this.generateSuggestions(
+      gaps,
+      implicitAssumptions,
+      unjustifiedSteps,
+    );
 
     // Compute completeness score
-    const completeness = this.computeCompleteness(atoms, gaps, implicitAssumptions);
+    const completeness = this.computeCompleteness(
+      atoms,
+      gaps,
+      implicitAssumptions,
+    );
 
     return {
       completeness,
@@ -94,9 +107,16 @@ export class GapAnalyzer {
   /**
    * Check if a transition between two statements is valid
    */
-  isValidTransition(from: AtomicStatement, to: AtomicStatement): TransitionValidation {
+  isValidTransition(
+    from: AtomicStatement,
+    to: AtomicStatement,
+  ): TransitionValidation {
     // Axioms, definitions, and hypotheses need no justification
-    if (to.type === 'axiom' || to.type === 'definition' || to.type === 'hypothesis') {
+    if (
+      to.type === "axiom" ||
+      to.type === "definition" ||
+      to.type === "hypothesis"
+    ) {
       return { isValid: true };
     }
 
@@ -121,7 +141,7 @@ export class GapAnalyzer {
     return {
       isValid: false,
       reason: `No clear logical connection from "${from.statement.substring(0, 30)}..." to "${to.statement.substring(0, 30)}..."`,
-      suggestedFix: 'Add explicit derivation step or justification',
+      suggestedFix: "Add explicit derivation step or justification",
     };
   }
 
@@ -130,7 +150,7 @@ export class GapAnalyzer {
    */
   private verifyInferenceRule(
     from: AtomicStatement,
-    to: AtomicStatement
+    to: AtomicStatement,
   ): TransitionValidation {
     const rule = to.usedInferenceRule;
     if (!rule) return { isValid: true };
@@ -140,64 +160,68 @@ export class GapAnalyzer {
     const toText = to.statement.toLowerCase();
 
     switch (rule) {
-      case 'modus_ponens':
+      case "modus_ponens":
         // Check for "if X then Y" pattern followed by X → Y
-        if (fromText.includes('if') && fromText.includes('then')) {
+        if (fromText.includes("if") && fromText.includes("then")) {
           return { isValid: true };
         }
-        if (fromText.includes('implies') || fromText.includes('⇒')) {
+        if (fromText.includes("implies") || fromText.includes("⇒")) {
           return { isValid: true };
         }
         break;
 
-      case 'modus_tollens':
+      case "modus_tollens":
         // Check for negation in conclusion
-        if (toText.includes('not') || toText.includes('¬') || toText.includes('false')) {
+        if (
+          toText.includes("not") ||
+          toText.includes("¬") ||
+          toText.includes("false")
+        ) {
           return { isValid: true };
         }
         break;
 
-      case 'contradiction':
+      case "contradiction":
         // Check for contradiction keywords
         if (
-          toText.includes('contradiction') ||
-          toText.includes('impossible') ||
-          toText.includes('false')
+          toText.includes("contradiction") ||
+          toText.includes("impossible") ||
+          toText.includes("false")
         ) {
           return { isValid: true };
         }
         break;
 
-      case 'substitution':
+      case "substitution":
         // Substitution is usually valid if there's equality involved
-        if (fromText.includes('=') || fromText.includes('equals')) {
+        if (fromText.includes("=") || fromText.includes("equals")) {
           return { isValid: true };
         }
         break;
 
-      case 'universal_instantiation':
+      case "universal_instantiation":
         // Check for universal quantifier in premise
         if (
-          fromText.includes('for all') ||
-          fromText.includes('∀') ||
-          fromText.includes('every')
+          fromText.includes("for all") ||
+          fromText.includes("∀") ||
+          fromText.includes("every")
         ) {
           return { isValid: true };
         }
         break;
 
-      case 'existential_generalization':
+      case "existential_generalization":
         // Check for existential quantifier in conclusion
         if (
-          toText.includes('exists') ||
-          toText.includes('∃') ||
-          toText.includes('there is')
+          toText.includes("exists") ||
+          toText.includes("∃") ||
+          toText.includes("there is")
         ) {
           return { isValid: true };
         }
         break;
 
-      case 'mathematical_induction':
+      case "mathematical_induction":
         // Induction requires base case and inductive step
         // This is a complex check, defer to specialized analyzer
         return { isValid: true };
@@ -219,26 +243,29 @@ export class GapAnalyzer {
    */
   private checkImpliedConnection(
     from: AtomicStatement,
-    to: AtomicStatement
+    to: AtomicStatement,
   ): TransitionValidation {
     const fromWords = new Set(from.statement.toLowerCase().split(/\s+/));
     const toWords = new Set(to.statement.toLowerCase().split(/\s+/));
 
     // Count meaningful word overlap
     const meaningfulWords = [...fromWords].filter(
-      (w) => w.length > 3 && toWords.has(w)
+      (w) => w.length > 3 && toWords.has(w),
     );
 
     // High overlap suggests related statements
     if (meaningfulWords.length >= 2) {
       return {
         isValid: true,
-        reason: 'Implied connection through shared concepts',
+        reason: "Implied connection through shared concepts",
       };
     }
 
     // Check for explicit reference
-    if (to.justification && to.justification.toLowerCase().includes(from.id.toLowerCase())) {
+    if (
+      to.justification &&
+      to.justification.toLowerCase().includes(from.id.toLowerCase())
+    ) {
       return { isValid: true };
     }
 
@@ -248,24 +275,35 @@ export class GapAnalyzer {
   /**
    * Find unjustified leaps in reasoning
    */
-  findUnjustifiedLeaps(atoms: AtomicStatement[], graph: DependencyGraph): ProofGap[] {
+  findUnjustifiedLeaps(
+    atoms: AtomicStatement[],
+    graph: DependencyGraph,
+  ): ProofGap[] {
     const gaps: ProofGap[] = [];
     let gapId = 0;
 
     for (const atom of atoms) {
       // Skip foundational statements
-      if (atom.type === 'axiom' || atom.type === 'definition' || atom.type === 'hypothesis') {
+      if (
+        atom.type === "axiom" ||
+        atom.type === "definition" ||
+        atom.type === "hypothesis"
+      ) {
         continue;
       }
 
       // Check if derived statement has proper justification
-      if (atom.type === 'derived' || atom.type === 'conclusion' || atom.type === 'lemma') {
+      if (
+        atom.type === "derived" ||
+        atom.type === "conclusion" ||
+        atom.type === "lemma"
+      ) {
         // Must have at least one dependency
         if (!atom.derivedFrom || atom.derivedFrom.length === 0) {
           gaps.push({
             id: `gap-leap-${++gapId}`,
-            type: 'unjustified_leap',
-            location: { from: 'unknown', to: atom.id },
+            type: "unjustified_leap",
+            location: { from: "unknown", to: atom.id },
             description: `Statement "${atom.statement.substring(0, 50)}..." appears without justification`,
             severity: this.assessGapSeverity(atom),
             suggestedFix: this.suggestJustification(atom, atoms),
@@ -274,19 +312,19 @@ export class GapAnalyzer {
         }
 
         // Check if dependencies are too distant
-        if (this.config.strictness !== 'lenient') {
+        if (this.config.strictness !== "lenient") {
           const leapDistance = this.computeLeapDistance(atom, graph);
           if (leapDistance > this.config.maxLeapDistance) {
             gaps.push({
               id: `gap-leap-${++gapId}`,
-              type: 'unjustified_leap',
+              type: "unjustified_leap",
               location: {
                 from: atom.derivedFrom[0],
                 to: atom.id,
               },
               description: `Large logical leap (distance ${leapDistance}) to reach this statement`,
-              severity: 'significant',
-              suggestedFix: 'Add intermediate steps to bridge the logical gap',
+              severity: "significant",
+              suggestedFix: "Add intermediate steps to bridge the logical gap",
             });
           }
         }
@@ -299,17 +337,24 @@ export class GapAnalyzer {
   /**
    * Compute the "leap distance" - how many implicit steps are skipped
    */
-  private computeLeapDistance(atom: AtomicStatement, graph: DependencyGraph): number {
+  private computeLeapDistance(
+    atom: AtomicStatement,
+    graph: DependencyGraph,
+  ): number {
     if (!atom.derivedFrom || atom.derivedFrom.length === 0) return 0;
 
     // Estimate based on statement complexity difference
-    const deps = atom.derivedFrom.map((id) => graph.nodes.get(id)).filter(Boolean);
+    const deps = atom.derivedFrom
+      .map((id) => graph.nodes.get(id))
+      .filter(Boolean);
     if (deps.length === 0) return 0;
 
     const atomComplexity = this.estimateStatementComplexity(atom.statement);
     const avgDepComplexity =
-      deps.reduce((sum, d) => sum + this.estimateStatementComplexity(d!.statement), 0) /
-      deps.length;
+      deps.reduce(
+        (sum, d) => sum + this.estimateStatementComplexity(d!.statement),
+        0,
+      ) / deps.length;
 
     // Higher complexity jump suggests larger leap
     return Math.max(0, Math.floor((atomComplexity - avgDepComplexity) / 10));
@@ -336,7 +381,10 @@ export class GapAnalyzer {
   /**
    * Find missing intermediate steps
    */
-  findMissingSteps(atoms: AtomicStatement[], graph: DependencyGraph): ProofGap[] {
+  findMissingSteps(
+    atoms: AtomicStatement[],
+    graph: DependencyGraph,
+  ): ProofGap[] {
     const gaps: ProofGap[] = [];
     let gapId = 0;
 
@@ -353,10 +401,10 @@ export class GapAnalyzer {
         if (!validation.isValid) {
           gaps.push({
             id: `gap-step-${++gapId}`,
-            type: 'missing_step',
+            type: "missing_step",
             location: { from: depId, to: atom.id },
-            description: validation.reason || 'Missing intermediate step',
-            severity: 'minor',
+            description: validation.reason || "Missing intermediate step",
+            severity: "minor",
             suggestedFix: validation.suggestedFix,
           });
         }
@@ -374,11 +422,11 @@ export class GapAnalyzer {
           if (this.needsIntermediateStep(prev, curr)) {
             gaps.push({
               id: `gap-step-${++gapId}`,
-              type: 'missing_step',
+              type: "missing_step",
               location: { from: prev.id, to: curr.id },
               description: `Step from "${prev.statement.substring(0, 30)}..." to "${curr.statement.substring(0, 30)}..." may need clarification`,
-              severity: 'minor',
-              suggestedFix: 'Consider adding an intermediate derivation step',
+              severity: "minor",
+              suggestedFix: "Consider adding an intermediate derivation step",
             });
           }
         }
@@ -391,8 +439,11 @@ export class GapAnalyzer {
   /**
    * Check if an intermediate step is needed between two statements
    */
-  private needsIntermediateStep(from: AtomicStatement, to: AtomicStatement): boolean {
-    if (this.config.strictness === 'lenient') return false;
+  private needsIntermediateStep(
+    from: AtomicStatement,
+    to: AtomicStatement,
+  ): boolean {
+    if (this.config.strictness === "lenient") return false;
 
     // Check if there's a significant change in the mathematical objects
     const fromSymbols = this.extractMathSymbols(from.statement);
@@ -400,13 +451,18 @@ export class GapAnalyzer {
 
     // If completely different symbols, might need intermediate step
     const commonSymbols = fromSymbols.filter((s) => toSymbols.includes(s));
-    if (commonSymbols.length === 0 && fromSymbols.length > 0 && toSymbols.length > 0) {
+    if (
+      commonSymbols.length === 0 &&
+      fromSymbols.length > 0 &&
+      toSymbols.length > 0
+    ) {
       return true;
     }
 
     // If strict mode, check for large statement length difference
-    if (this.config.strictness === 'strict') {
-      const lengthRatio = to.statement.length / Math.max(1, from.statement.length);
+    if (this.config.strictness === "strict") {
+      const lengthRatio =
+        to.statement.length / Math.max(1, from.statement.length);
       if (lengthRatio > 2 || lengthRatio < 0.5) {
         return true;
       }
@@ -445,7 +501,7 @@ export class GapAnalyzer {
     for (const atom of atoms) {
       // Extract "let X" or "for all X" introductions
       const introMatch = atom.statement.match(
-        /(?:let|for\s+(?:all|any|every)|∀)\s+([a-zA-Z](?:_\d+)?)/i
+        /(?:let|for\s+(?:all|any|every)|∀)\s+([a-zA-Z](?:_\d+)?)/i,
       );
       if (introMatch) {
         variableScope.set(introMatch[1], atom.id);
@@ -456,27 +512,44 @@ export class GapAnalyzer {
       if (varMatches) {
         for (const v of varMatches) {
           // Skip common words
-          if (['a', 'an', 'the', 'if', 'is', 'or', 'be', 'to', 'in', 'of'].includes(v.toLowerCase())) {
+          if (
+            [
+              "a",
+              "an",
+              "the",
+              "if",
+              "is",
+              "or",
+              "be",
+              "to",
+              "in",
+              "of",
+            ].includes(v.toLowerCase())
+          ) {
             continue;
           }
 
           // Check if this is a mathematical variable not in scope
           // This is a simplified check - real implementation would need type info
-          if (v.length === 1 && !variableScope.has(v) && atom.type === 'derived') {
+          if (
+            v.length === 1 &&
+            !variableScope.has(v) &&
+            atom.type === "derived"
+          ) {
             // Only flag if it looks like an unintroduced variable
             const previouslyUsed = atoms.some(
               (a) =>
                 a.id !== atom.id &&
                 atoms.indexOf(a) < atoms.indexOf(atom) &&
-                a.statement.includes(v)
+                a.statement.includes(v),
             );
             if (!previouslyUsed) {
               gaps.push({
                 id: `gap-scope-${++gapId}`,
-                type: 'scope_error',
-                location: { from: 'introduction', to: atom.id },
+                type: "scope_error",
+                location: { from: "introduction", to: atom.id },
                 description: `Variable "${v}" appears without explicit introduction`,
-                severity: 'minor',
+                severity: "minor",
                 suggestedFix: `Introduce ${v} with "Let ${v}..." or specify its domain`,
               });
             }
@@ -499,10 +572,10 @@ export class GapAnalyzer {
     const definedTerms = new Set<string>();
 
     for (const atom of atoms) {
-      if (atom.type === 'definition') {
+      if (atom.type === "definition") {
         // Extract the term being defined
         const defMatch = atom.statement.match(
-          /(?:define|let)\s+(\w+)|(\w+)\s+(?:is|are|be)\s+defined/i
+          /(?:define|let)\s+(\w+)|(\w+)\s+(?:is|are|be)\s+defined/i,
         );
         if (defMatch) {
           definedTerms.add((defMatch[1] || defMatch[2]).toLowerCase());
@@ -513,16 +586,18 @@ export class GapAnalyzer {
     // Check for usage of undefined custom terms
     for (const atom of atoms) {
       // Look for "by definition of X" where X is not defined
-      const byDefMatch = atom.statement.match(/by\s+(?:the\s+)?definition\s+of\s+(\w+)/i);
+      const byDefMatch = atom.statement.match(
+        /by\s+(?:the\s+)?definition\s+of\s+(\w+)/i,
+      );
       if (byDefMatch) {
         const term = byDefMatch[1].toLowerCase();
         if (!definedTerms.has(term) && !this.isStandardMathTerm(term)) {
           gaps.push({
             id: `gap-undef-${++gapId}`,
-            type: 'undefined_term',
-            location: { from: 'definition', to: atom.id },
+            type: "undefined_term",
+            location: { from: "definition", to: atom.id },
             description: `Term "${byDefMatch[1]}" is used but not defined`,
-            severity: 'significant',
+            severity: "significant",
             suggestedFix: `Add a definition for "${byDefMatch[1]}"`,
           });
         }
@@ -537,44 +612,44 @@ export class GapAnalyzer {
    */
   private isStandardMathTerm(term: string): boolean {
     const standardTerms = new Set([
-      'integer',
-      'integers',
-      'real',
-      'reals',
-      'natural',
-      'naturals',
-      'rational',
-      'rationals',
-      'complex',
-      'prime',
-      'even',
-      'odd',
-      'positive',
-      'negative',
-      'zero',
-      'function',
-      'continuous',
-      'differentiable',
-      'derivative',
-      'integral',
-      'limit',
-      'sequence',
-      'series',
-      'set',
-      'subset',
-      'superset',
-      'union',
-      'intersection',
-      'element',
-      'member',
-      'domain',
-      'range',
-      'codomain',
-      'bijection',
-      'injection',
-      'surjection',
-      'isomorphism',
-      'homomorphism',
+      "integer",
+      "integers",
+      "real",
+      "reals",
+      "natural",
+      "naturals",
+      "rational",
+      "rationals",
+      "complex",
+      "prime",
+      "even",
+      "odd",
+      "positive",
+      "negative",
+      "zero",
+      "function",
+      "continuous",
+      "differentiable",
+      "derivative",
+      "integral",
+      "limit",
+      "sequence",
+      "series",
+      "set",
+      "subset",
+      "superset",
+      "union",
+      "intersection",
+      "element",
+      "member",
+      "domain",
+      "range",
+      "codomain",
+      "bijection",
+      "injection",
+      "surjection",
+      "isomorphism",
+      "homomorphism",
     ]);
 
     return standardTerms.has(term);
@@ -583,20 +658,23 @@ export class GapAnalyzer {
   /**
    * Find implicit assumptions
    */
-  findImplicitAssumptions(atoms: AtomicStatement[], gaps: ProofGap[]): ImplicitAssumption[] {
+  findImplicitAssumptions(
+    atoms: AtomicStatement[],
+    gaps: ProofGap[],
+  ): ImplicitAssumption[] {
     const implicitAssumptions: ImplicitAssumption[] = [];
     let count = 0;
 
     // Implicit assumptions from gaps
     for (const gap of gaps) {
-      if (gap.type === 'implicit_assumption') {
+      if (gap.type === "implicit_assumption") {
         implicitAssumptions.push({
           id: `impl-${++count}`,
           statement: gap.description,
-          type: 'existence_assumption',
+          type: "existence_assumption",
           usedInStep: gap.location.to,
-          shouldBeExplicit: gap.severity !== 'minor',
-          suggestedFormulation: gap.suggestedFix || 'Make assumption explicit',
+          shouldBeExplicit: gap.severity !== "minor",
+          suggestedFormulation: gap.suggestedFix || "Make assumption explicit",
         });
       }
     }
@@ -607,11 +685,11 @@ export class GapAnalyzer {
       if (/\/\s*([a-zA-Z_]\w*|\([^)]+\))/.test(atom.statement)) {
         implicitAssumptions.push({
           id: `impl-${++count}`,
-          statement: 'Division operation implies non-zero divisor',
-          type: 'domain_assumption',
+          statement: "Division operation implies non-zero divisor",
+          type: "domain_assumption",
           usedInStep: atom.id,
           shouldBeExplicit: true,
-          suggestedFormulation: 'State that the divisor is non-zero',
+          suggestedFormulation: "State that the divisor is non-zero",
         });
       }
 
@@ -619,11 +697,11 @@ export class GapAnalyzer {
       if (/√|\\sqrt/.test(atom.statement)) {
         implicitAssumptions.push({
           id: `impl-${++count}`,
-          statement: 'Square root implies non-negative argument',
-          type: 'domain_assumption',
+          statement: "Square root implies non-negative argument",
+          type: "domain_assumption",
           usedInStep: atom.id,
           shouldBeExplicit: true,
-          suggestedFormulation: 'State that the argument is non-negative',
+          suggestedFormulation: "State that the argument is non-negative",
         });
       }
 
@@ -631,11 +709,11 @@ export class GapAnalyzer {
       if (/log|ln|\\log/.test(atom.statement)) {
         implicitAssumptions.push({
           id: `impl-${++count}`,
-          statement: 'Logarithm implies positive argument',
-          type: 'domain_assumption',
+          statement: "Logarithm implies positive argument",
+          type: "domain_assumption",
           usedInStep: atom.id,
           shouldBeExplicit: true,
-          suggestedFormulation: 'State that the argument is positive',
+          suggestedFormulation: "State that the argument is positive",
         });
       }
     }
@@ -650,9 +728,9 @@ export class GapAnalyzer {
     return atoms
       .filter(
         (a) =>
-          (a.type === 'derived' || a.type === 'conclusion') &&
+          (a.type === "derived" || a.type === "conclusion") &&
           (!a.derivedFrom || a.derivedFrom.length === 0) &&
-          !a.justification
+          !a.justification,
       )
       .map((a) => a.id);
   }
@@ -660,16 +738,19 @@ export class GapAnalyzer {
   /**
    * Assess severity of a gap
    */
-  private assessGapSeverity(atom: AtomicStatement): ProofGap['severity'] {
-    if (atom.type === 'conclusion') return 'critical';
-    if (atom.type === 'lemma') return 'significant';
-    return 'minor';
+  private assessGapSeverity(atom: AtomicStatement): ProofGap["severity"] {
+    if (atom.type === "conclusion") return "critical";
+    if (atom.type === "lemma") return "significant";
+    return "minor";
   }
 
   /**
    * Suggest justification for an unjustified statement
    */
-  private suggestJustification(atom: AtomicStatement, allAtoms: AtomicStatement[]): string {
+  private suggestJustification(
+    atom: AtomicStatement,
+    allAtoms: AtomicStatement[],
+  ): string {
     // Find potentially related statements
     const related = allAtoms.filter((a) => {
       if (a.id === atom.id) return false;
@@ -678,11 +759,11 @@ export class GapAnalyzer {
     });
 
     if (related.length > 0) {
-      const relatedIds = related.map((r) => r.id).join(', ');
+      const relatedIds = related.map((r) => r.id).join(", ");
       return `Consider deriving from: ${relatedIds}`;
     }
 
-    return 'Add explicit justification or reference to supporting statements';
+    return "Add explicit justification or reference to supporting statements";
   }
 
   /**
@@ -693,13 +774,13 @@ export class GapAnalyzer {
       a
         .toLowerCase()
         .split(/\s+/)
-        .filter((w) => w.length > 2)
+        .filter((w) => w.length > 2),
     );
     const wordsB = new Set(
       b
         .toLowerCase()
         .split(/\s+/)
-        .filter((w) => w.length > 2)
+        .filter((w) => w.length > 2),
     );
 
     if (wordsA.size === 0 || wordsB.size === 0) return 0;
@@ -718,45 +799,49 @@ export class GapAnalyzer {
   generateSuggestions(
     gaps: ProofGap[],
     implicitAssumptions: ImplicitAssumption[],
-    unjustifiedSteps: string[]
+    unjustifiedSteps: string[],
   ): string[] {
     const suggestions: string[] = [];
 
     // Prioritize by severity
-    const criticalGaps = gaps.filter((g) => g.severity === 'critical');
-    const significantGaps = gaps.filter((g) => g.severity === 'significant');
-    const minorGaps = gaps.filter((g) => g.severity === 'minor');
+    const criticalGaps = gaps.filter((g) => g.severity === "critical");
+    const significantGaps = gaps.filter((g) => g.severity === "significant");
+    const minorGaps = gaps.filter((g) => g.severity === "minor");
 
     if (criticalGaps.length > 0) {
       suggestions.push(
-        `CRITICAL: Address ${criticalGaps.length} critical gap(s) in the proof - conclusions lack proper justification`
+        `CRITICAL: Address ${criticalGaps.length} critical gap(s) in the proof - conclusions lack proper justification`,
       );
     }
 
     if (significantGaps.length > 0) {
       suggestions.push(
-        `Add intermediate steps to bridge ${significantGaps.length} significant logical gap(s)`
+        `Add intermediate steps to bridge ${significantGaps.length} significant logical gap(s)`,
       );
     }
 
     if (implicitAssumptions.filter((a) => a.shouldBeExplicit).length > 0) {
       suggestions.push(
-        `Make ${implicitAssumptions.filter((a) => a.shouldBeExplicit).length} implicit assumption(s) explicit`
+        `Make ${implicitAssumptions.filter((a) => a.shouldBeExplicit).length} implicit assumption(s) explicit`,
       );
     }
 
     if (unjustifiedSteps.length > 0) {
-      suggestions.push(`Provide justification for ${unjustifiedSteps.length} unjustified step(s)`);
+      suggestions.push(
+        `Provide justification for ${unjustifiedSteps.length} unjustified step(s)`,
+      );
     }
 
-    if (minorGaps.length > 0 && this.config.strictness !== 'lenient') {
+    if (minorGaps.length > 0 && this.config.strictness !== "lenient") {
       suggestions.push(
-        `Consider clarifying ${minorGaps.length} minor gap(s) for improved rigor`
+        `Consider clarifying ${minorGaps.length} minor gap(s) for improved rigor`,
       );
     }
 
     if (suggestions.length === 0) {
-      suggestions.push('The proof appears complete with no significant gaps identified');
+      suggestions.push(
+        "The proof appears complete with no significant gaps identified",
+      );
     }
 
     return suggestions;
@@ -768,7 +853,7 @@ export class GapAnalyzer {
   computeCompleteness(
     atoms: AtomicStatement[],
     gaps: ProofGap[],
-    implicitAssumptions: ImplicitAssumption[]
+    implicitAssumptions: ImplicitAssumption[],
   ): number {
     if (atoms.length === 0) return 0;
 
@@ -777,20 +862,22 @@ export class GapAnalyzer {
     // Deduct for gaps
     for (const gap of gaps) {
       switch (gap.severity) {
-        case 'critical':
+        case "critical":
           score -= 0.25;
           break;
-        case 'significant':
+        case "significant":
           score -= 0.1;
           break;
-        case 'minor':
+        case "minor":
           score -= 0.02;
           break;
       }
     }
 
     // Deduct for important implicit assumptions
-    const criticalImplicit = implicitAssumptions.filter((a) => a.shouldBeExplicit).length;
+    const criticalImplicit = implicitAssumptions.filter(
+      (a) => a.shouldBeExplicit,
+    ).length;
     score -= criticalImplicit * 0.05;
 
     // Ensure score is in valid range

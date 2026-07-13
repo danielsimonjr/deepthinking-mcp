@@ -5,7 +5,7 @@
  * Provides reproducible random sequences for Monte Carlo simulation.
  */
 
-import type { RNGState, SeededRNGInterface } from '../types.js';
+import type { RNGState, SeededRNGInterface } from "../types.js";
 
 // ============================================================================
 // CONSTANTS
@@ -113,7 +113,7 @@ export class SeededRNG implements SeededRNGInterface {
       s = u * u + v * v;
     } while (s >= 1 || s === 0);
 
-    const mul = Math.sqrt(-2 * Math.log(s) / s);
+    const mul = Math.sqrt((-2 * Math.log(s)) / s);
     return mean + stdDev * u * mul;
   }
 
@@ -237,7 +237,7 @@ export class SeededRNG implements SeededRNGInterface {
    */
   restoreState(state: RNGState): void {
     if (state.state.length !== 4) {
-      throw new Error('Invalid state: must have 4 elements');
+      throw new Error("Invalid state: must have 4 elements");
     }
     this.state = state.state as [number, number, number, number];
     this.initialSeed = state.seed;
@@ -299,7 +299,10 @@ export function createRNG(seed?: number): SeededRNG {
 /**
  * Create multiple independent RNGs for parallel simulations
  */
-export function createParallelRNGs(count: number, baseSeed: number = Date.now()): SeededRNG[] {
+export function createParallelRNGs(
+  count: number,
+  baseSeed: number = Date.now(),
+): SeededRNG[] {
   const rngs: SeededRNG[] = [];
   const baseRNG = new SeededRNG(baseSeed);
 

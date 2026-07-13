@@ -8,10 +8,13 @@
  * - Design decision record tracking (ADR-style)
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode } from '../../types/core.js';
-import type { EngineeringThought, EngineeringAnalysisType } from '../../types/modes/engineering.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode } from "../../types/core.js";
+import type {
+  EngineeringThought,
+  EngineeringAnalysisType,
+} from "../../types/modes/engineering.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -20,17 +23,17 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 /**
  * Valid engineering analysis types
  */
 const VALID_ANALYSIS_TYPES: EngineeringAnalysisType[] = [
-  'requirements',
-  'trade-study',
-  'fmea',
-  'design-decision',
-  'comprehensive',
+  "requirements",
+  "trade-study",
+  "fmea",
+  "design-decision",
+  "comprehensive",
 ];
 
 /**
@@ -44,26 +47,30 @@ const VALID_ANALYSIS_TYPES: EngineeringAnalysisType[] = [
  */
 export class EngineeringHandler implements ModeHandler {
   readonly mode = ThinkingMode.ENGINEERING;
-  readonly modeName = 'Engineering Analysis';
-  readonly description = 'Structured engineering analysis with requirements, trade studies, FMEA, and ADRs';
+  readonly modeName = "Engineering Analysis";
+  readonly description =
+    "Structured engineering analysis with requirements, trade studies, FMEA, and ADRs";
 
   /**
    * Supported thought types for engineering mode
    */
   private readonly supportedThoughtTypes = [
-    'requirements_analysis',
-    'trade_study',
-    'fmea_analysis',
-    'design_decision',
-    'risk_assessment',
-    'traceability',
-    'verification',
+    "requirements_analysis",
+    "trade_study",
+    "fmea_analysis",
+    "design_decision",
+    "risk_assessment",
+    "traceability",
+    "verification",
   ];
 
   /**
    * Create an engineering thought from input
    */
-  createThought(input: ThinkingToolInput, sessionId: string): EngineeringThought {
+  createThought(
+    input: ThinkingToolInput,
+    sessionId: string,
+  ): EngineeringThought {
     const inputAny = input as any;
 
     // Resolve analysis type
@@ -80,9 +87,7 @@ export class EngineeringHandler implements ModeHandler {
       : undefined;
 
     // Process FMEA
-    const fmea = inputAny.fmea
-      ? this.processFMEA(inputAny.fmea)
-      : undefined;
+    const fmea = inputAny.fmea ? this.processFMEA(inputAny.fmea) : undefined;
 
     // Process design decisions
     const designDecisions = inputAny.designDecisions
@@ -101,7 +106,7 @@ export class EngineeringHandler implements ModeHandler {
 
       // Core engineering fields
       analysisType,
-      designChallenge: inputAny.designChallenge || '',
+      designChallenge: inputAny.designChallenge || "",
       requirements,
       tradeStudy,
       fmea,
@@ -125,39 +130,49 @@ export class EngineeringHandler implements ModeHandler {
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
 
     // Validate analysis type
-    if (inputAny.analysisType && !VALID_ANALYSIS_TYPES.includes(inputAny.analysisType)) {
+    if (
+      inputAny.analysisType &&
+      !VALID_ANALYSIS_TYPES.includes(inputAny.analysisType)
+    ) {
       warnings.push(
         createValidationWarning(
-          'analysisType',
+          "analysisType",
           `Unknown analysis type: ${inputAny.analysisType}`,
-          `Valid types: ${VALID_ANALYSIS_TYPES.join(', ')}`
-        )
+          `Valid types: ${VALID_ANALYSIS_TYPES.join(", ")}`,
+        ),
       );
     }
 
     // Validate design challenge is specified
-    if (!inputAny.designChallenge || inputAny.designChallenge.trim().length === 0) {
+    if (
+      !inputAny.designChallenge ||
+      inputAny.designChallenge.trim().length === 0
+    ) {
       warnings.push(
         createValidationWarning(
-          'designChallenge',
-          'No design challenge specified',
-          'Describe the problem or design challenge being addressed'
-        )
+          "designChallenge",
+          "No design challenge specified",
+          "Describe the problem or design challenge being addressed",
+        ),
       );
     }
 
@@ -174,13 +189,18 @@ export class EngineeringHandler implements ModeHandler {
     }
 
     // Suggest appropriate analysis based on content
-    if (!inputAny.tradeStudy && !inputAny.fmea && !inputAny.requirements && !inputAny.designDecisions) {
+    if (
+      !inputAny.tradeStudy &&
+      !inputAny.fmea &&
+      !inputAny.requirements &&
+      !inputAny.designDecisions
+    ) {
       warnings.push(
         createValidationWarning(
-          'analysis',
-          'No structured analysis provided',
-          'Include requirements, trade study, FMEA, or design decisions for comprehensive engineering analysis'
-        )
+          "analysis",
+          "No structured analysis provided",
+          "Include requirements, trade study, FMEA, or design decisions for comprehensive engineering analysis",
+        ),
       );
     }
 
@@ -197,29 +217,34 @@ export class EngineeringHandler implements ModeHandler {
   getEnhancements(thought: EngineeringThought): ModeEnhancements {
     const enhancements: ModeEnhancements = {
       suggestions: [],
-      relatedModes: [ThinkingMode.ALGORITHMIC, ThinkingMode.SYSTEMSTHINKING, ThinkingMode.OPTIMIZATION],
+      relatedModes: [
+        ThinkingMode.ALGORITHMIC,
+        ThinkingMode.SYSTEMSTHINKING,
+        ThinkingMode.OPTIMIZATION,
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {},
       mentalModels: [
-        'Systems Engineering V-Model',
-        'Trade Study Matrix',
-        'FMEA Risk Priority',
-        'Architecture Decision Records',
-        'Requirements Traceability',
+        "Systems Engineering V-Model",
+        "Trade Study Matrix",
+        "FMEA Risk Priority",
+        "Architecture Decision Records",
+        "Requirements Traceability",
       ],
     };
 
     // Analysis type-specific guidance
     switch (thought.analysisType) {
-      case 'requirements':
+      case "requirements":
         enhancements.guidingQuestions!.push(
-          'Are all requirements traceable to source?',
-          'What verification method will be used for each requirement?',
-          'Are there any conflicting requirements?'
+          "Are all requirements traceable to source?",
+          "What verification method will be used for each requirement?",
+          "Are there any conflicting requirements?",
         );
         if (thought.requirements) {
-          enhancements.metrics!.totalRequirements = thought.requirements.requirements.length;
+          enhancements.metrics!.totalRequirements =
+            thought.requirements.requirements.length;
           const coverage = thought.requirements.coverage;
           if (coverage) {
             enhancements.metrics!.coverageTotal = coverage.total;
@@ -228,26 +253,28 @@ export class EngineeringHandler implements ModeHandler {
         }
         break;
 
-      case 'trade-study':
+      case "trade-study":
         enhancements.guidingQuestions!.push(
-          'Do criteria weights sum to 1.0?',
-          'Are all alternatives fairly scored?',
-          'Is sensitivity analysis needed?'
+          "Do criteria weights sum to 1.0?",
+          "Are all alternatives fairly scored?",
+          "Is sensitivity analysis needed?",
         );
         if (thought.tradeStudy) {
-          enhancements.metrics!.alternativeCount = thought.tradeStudy.alternatives.length;
-          enhancements.metrics!.criteriaCount = thought.tradeStudy.criteria.length;
+          enhancements.metrics!.alternativeCount =
+            thought.tradeStudy.alternatives.length;
+          enhancements.metrics!.criteriaCount =
+            thought.tradeStudy.criteria.length;
           enhancements.suggestions!.push(
-            `Recommendation: ${thought.tradeStudy.recommendation}`
+            `Recommendation: ${thought.tradeStudy.recommendation}`,
           );
         }
         break;
 
-      case 'fmea':
+      case "fmea":
         enhancements.guidingQuestions!.push(
-          'Are all failure modes identified?',
-          'Are RPN values accurately calculated?',
-          'Do high-RPN items have mitigation plans?'
+          "Are all failure modes identified?",
+          "Are RPN values accurately calculated?",
+          "Do high-RPN items have mitigation plans?",
         );
         if (thought.fmea) {
           const fmea = thought.fmea;
@@ -258,32 +285,35 @@ export class EngineeringHandler implements ModeHandler {
 
           if (fmea.summary.criticalModes > 0) {
             enhancements.warnings!.push(
-              `${fmea.summary.criticalModes} failure mode(s) exceed RPN threshold of ${fmea.rpnThreshold}`
+              `${fmea.summary.criticalModes} failure mode(s) exceed RPN threshold of ${fmea.rpnThreshold}`,
             );
           }
         }
         break;
 
-      case 'design-decision':
+      case "design-decision":
         enhancements.guidingQuestions!.push(
-          'Have all alternatives been considered?',
-          'Are consequences documented?',
-          'Who are the stakeholders affected?'
+          "Have all alternatives been considered?",
+          "Are consequences documented?",
+          "Who are the stakeholders affected?",
         );
         if (thought.designDecisions) {
-          enhancements.metrics!.decisionCount = thought.designDecisions.decisions.length;
-          const accepted = thought.designDecisions.decisions.filter(d => d.status === 'accepted').length;
+          enhancements.metrics!.decisionCount =
+            thought.designDecisions.decisions.length;
+          const accepted = thought.designDecisions.decisions.filter(
+            (d) => d.status === "accepted",
+          ).length;
           enhancements.metrics!.acceptedDecisions = accepted;
         }
         break;
 
-      case 'comprehensive':
+      case "comprehensive":
         enhancements.suggestions!.push(
-          'Comprehensive analysis covers all engineering artifacts'
+          "Comprehensive analysis covers all engineering artifacts",
         );
         enhancements.guidingQuestions!.push(
-          'Are all analysis types appropriately addressed?',
-          'Is the design challenge fully characterized?'
+          "Are all analysis types appropriately addressed?",
+          "Is the design challenge fully characterized?",
         );
         break;
     }
@@ -296,13 +326,13 @@ export class EngineeringHandler implements ModeHandler {
 
       if (thought.assessment.confidence < 0.6) {
         enhancements.warnings!.push(
-          'Low confidence - consider gathering more data or conducting additional analysis'
+          "Low confidence - consider gathering more data or conducting additional analysis",
         );
       }
 
       if (thought.assessment.keyRisks.length > 0) {
         enhancements.suggestions!.push(
-          `Key risks identified: ${thought.assessment.keyRisks.length}`
+          `Key risks identified: ${thought.assessment.keyRisks.length}`,
         );
       }
     }
@@ -320,11 +350,16 @@ export class EngineeringHandler implements ModeHandler {
   /**
    * Resolve analysis type from input
    */
-  private resolveAnalysisType(inputType: string | undefined): EngineeringAnalysisType {
-    if (inputType && VALID_ANALYSIS_TYPES.includes(inputType as EngineeringAnalysisType)) {
+  private resolveAnalysisType(
+    inputType: string | undefined,
+  ): EngineeringAnalysisType {
+    if (
+      inputType &&
+      VALID_ANALYSIS_TYPES.includes(inputType as EngineeringAnalysisType)
+    ) {
       return inputType as EngineeringAnalysisType;
     }
-    return 'comprehensive';
+    return "comprehensive";
   }
 
   /**
@@ -332,16 +367,24 @@ export class EngineeringHandler implements ModeHandler {
    */
   private processRequirements(raw: any): any {
     if (!raw.requirements) {
-      return { requirements: [], coverage: { total: 0, verified: 0, tracedToSource: 0, allocatedToDesign: 0 } };
+      return {
+        requirements: [],
+        coverage: {
+          total: 0,
+          verified: 0,
+          tracedToSource: 0,
+          allocatedToDesign: 0,
+        },
+      };
     }
 
     const requirements = raw.requirements.map((req: any) => ({
       id: req.id || `REQ-${randomUUID().slice(0, 8)}`,
-      title: req.title || '',
-      description: req.description || '',
-      source: req.source || 'derived',
-      priority: req.priority || 'should',
-      status: req.status || 'draft',
+      title: req.title || "",
+      description: req.description || "",
+      source: req.source || "derived",
+      priority: req.priority || "should",
+      status: req.status || "draft",
       rationale: req.rationale,
       verificationMethod: req.verificationMethod,
       verificationCriteria: req.verificationCriteria || [],
@@ -362,8 +405,12 @@ export class EngineeringHandler implements ModeHandler {
     return {
       total: requirements.length,
       verified: requirements.filter((r: any) => r.verificationMethod).length,
-      tracedToSource: requirements.filter((r: any) => r.tracesTo && r.tracesTo.length > 0).length,
-      allocatedToDesign: requirements.filter((r: any) => r.satisfiedBy && r.satisfiedBy.length > 0).length,
+      tracedToSource: requirements.filter(
+        (r: any) => r.tracesTo && r.tracesTo.length > 0,
+      ).length,
+      allocatedToDesign: requirements.filter(
+        (r: any) => r.satisfiedBy && r.satisfiedBy.length > 0,
+      ).length,
     };
   }
 
@@ -385,13 +432,13 @@ export class EngineeringHandler implements ModeHandler {
     }));
 
     return {
-      title: raw.title || '',
-      objective: raw.objective || '',
+      title: raw.title || "",
+      objective: raw.objective || "",
       alternatives: raw.alternatives || [],
       criteria: raw.criteria || [],
       scores: enhancedScores,
-      recommendation: raw.recommendation || '',
-      justification: raw.justification || '',
+      recommendation: raw.recommendation || "",
+      justification: raw.justification || "",
       sensitivityNotes: raw.sensitivityNotes,
     };
   }
@@ -409,14 +456,19 @@ export class EngineeringHandler implements ModeHandler {
     const rpnValues = failureModes.map((fm: any) => fm.rpn);
 
     return {
-      title: raw.title || '',
-      system: raw.system || '',
+      title: raw.title || "",
+      system: raw.system || "",
       failureModes,
       rpnThreshold,
       summary: {
         totalModes: failureModes.length,
-        criticalModes: failureModes.filter((fm: any) => fm.rpn > rpnThreshold).length,
-        averageRpn: rpnValues.length > 0 ? rpnValues.reduce((a: number, b: number) => a + b, 0) / rpnValues.length : 0,
+        criticalModes: failureModes.filter((fm: any) => fm.rpn > rpnThreshold)
+          .length,
+        averageRpn:
+          rpnValues.length > 0
+            ? rpnValues.reduce((a: number, b: number) => a + b, 0) /
+              rpnValues.length
+            : 0,
         maxRpn: rpnValues.length > 0 ? Math.max(...rpnValues) : 0,
       },
     };
@@ -429,13 +481,13 @@ export class EngineeringHandler implements ModeHandler {
     return {
       decisions: (raw.decisions || []).map((d: any) => ({
         id: d.id || `ADR-${randomUUID().slice(0, 8)}`,
-        title: d.title || '',
+        title: d.title || "",
         date: d.date,
-        status: d.status || 'proposed',
-        context: d.context || '',
-        decision: d.decision || '',
+        status: d.status || "proposed",
+        context: d.context || "",
+        decision: d.decision || "",
         alternatives: d.alternatives || [],
-        rationale: d.rationale || '',
+        rationale: d.rationale || "",
         consequences: d.consequences || [],
         supersededBy: d.supersededBy,
         relatedDecisions: d.relatedDecisions || [],
@@ -457,10 +509,10 @@ export class EngineeringHandler implements ModeHandler {
     if (Math.abs(totalWeight - 1.0) > 0.01) {
       warnings.push(
         createValidationWarning(
-          'tradeStudy.criteria',
+          "tradeStudy.criteria",
           `Criteria weights sum to ${totalWeight.toFixed(2)}, should be 1.0`,
-          'Adjust weights to sum to 1.0 for proper weighted scoring'
-        )
+          "Adjust weights to sum to 1.0 for proper weighted scoring",
+        ),
       );
     }
 
@@ -468,21 +520,23 @@ export class EngineeringHandler implements ModeHandler {
     const altIds = (tradeStudy.alternatives || []).map((a: any) => a.id);
     const critIds = (tradeStudy.criteria || []).map((c: any) => c.id);
     const scoreKeys = (tradeStudy.scores || []).map(
-      (s: any) => `${s.alternativeId}-${s.criteriaId}`
+      (s: any) => `${s.alternativeId}-${s.criteriaId}`,
     );
 
     const expectedScores = altIds.flatMap((altId: string) =>
-      critIds.map((critId: string) => `${altId}-${critId}`)
+      critIds.map((critId: string) => `${altId}-${critId}`),
     );
 
-    const missingScores = expectedScores.filter((key: string) => !scoreKeys.includes(key));
+    const missingScores = expectedScores.filter(
+      (key: string) => !scoreKeys.includes(key),
+    );
     if (missingScores.length > 0) {
       warnings.push(
         createValidationWarning(
-          'tradeStudy.scores',
+          "tradeStudy.scores",
           `${missingScores.length} score(s) missing`,
-          'Ensure all alternative-criterion pairs are scored'
-        )
+          "Ensure all alternative-criterion pairs are scored",
+        ),
       );
     }
 
@@ -500,34 +554,37 @@ export class EngineeringHandler implements ModeHandler {
     // Check for high-RPN items without mitigation
     const rpnThreshold = fmea.rpnThreshold || 100;
     const highRpnNoMitigation = failureModes.filter(
-      (fm: any) => fm.rpn > rpnThreshold && !fm.mitigation
+      (fm: any) => fm.rpn > rpnThreshold && !fm.mitigation,
     );
 
     if (highRpnNoMitigation.length > 0) {
       warnings.push(
         createValidationWarning(
-          'fmea.failureModes',
+          "fmea.failureModes",
           `${highRpnNoMitigation.length} high-RPN failure mode(s) lack mitigation plans`,
-          'Document mitigation actions for all critical failure modes'
-        )
+          "Document mitigation actions for all critical failure modes",
+        ),
       );
     }
 
     // Check for invalid S/O/D ratings
     const invalidRatings = failureModes.filter(
       (fm: any) =>
-        fm.severity < 1 || fm.severity > 10 ||
-        fm.occurrence < 1 || fm.occurrence > 10 ||
-        fm.detection < 1 || fm.detection > 10
+        fm.severity < 1 ||
+        fm.severity > 10 ||
+        fm.occurrence < 1 ||
+        fm.occurrence > 10 ||
+        fm.detection < 1 ||
+        fm.detection > 10,
     );
 
     if (invalidRatings.length > 0) {
       warnings.push(
         createValidationWarning(
-          'fmea.failureModes',
+          "fmea.failureModes",
           `${invalidRatings.length} failure mode(s) have invalid S/O/D ratings`,
-          'Severity, Occurrence, and Detection must be 1-10'
-        )
+          "Severity, Occurrence, and Detection must be 1-10",
+        ),
       );
     }
 

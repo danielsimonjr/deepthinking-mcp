@@ -7,8 +7,8 @@
  * This is the main entry point for multi-mode analysis workflows.
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode } from '../../types/core.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode } from "../../types/core.js";
 import type {
   MultiModeAnalysisRequest,
   MultiModeAnalysisResponse,
@@ -17,11 +17,11 @@ import type {
   Insight,
   ModeError,
   MergeStatistics,
-} from './combination-types.js';
-import { InsightMerger, MergeResult } from './merger.js';
-import { ConflictResolver } from './conflict-resolver.js';
-import { getPreset, isValidPresetId, PresetId } from './presets.js';
-import type { ModeCombination } from './combination-types.js';
+} from "./combination-types.js";
+import { InsightMerger, MergeResult } from "./merger.js";
+import { ConflictResolver } from "./conflict-resolver.js";
+import { getPreset, isValidPresetId, PresetId } from "./presets.js";
+import type { ModeCombination } from "./combination-types.js";
 
 /**
  * Configuration for MultiModeAnalyzer
@@ -78,7 +78,13 @@ export type ProgressCallback = (progress: AnalysisProgress) => void;
  */
 export interface AnalysisProgress {
   /** Current phase of analysis */
-  phase: 'initializing' | 'executing_modes' | 'collecting_insights' | 'resolving_conflicts' | 'merging' | 'complete';
+  phase:
+    | "initializing"
+    | "executing_modes"
+    | "collecting_insights"
+    | "resolving_conflicts"
+    | "merging"
+    | "complete";
 
   /** Overall progress (0-100) */
   percentage: number;
@@ -141,32 +147,35 @@ export class MultiModeAnalyzer {
    */
   async analyze(
     request: MultiModeAnalysisRequest,
-    onProgress?: ProgressCallback
+    onProgress?: ProgressCallback,
   ): Promise<MultiModeAnalysisResponse> {
     const startTime = Date.now();
     const errors: ModeError[] = [];
 
     // Phase 1: Initialize
     this.reportProgress(onProgress, {
-      phase: 'initializing',
+      phase: "initializing",
       percentage: 0,
       modesCompleted: 0,
       totalModes: 0,
-      message: 'Initializing multi-mode analysis...',
+      message: "Initializing multi-mode analysis...",
     });
 
     // Resolve which modes to use
     const { modes, combination } = this.resolveModes(request);
 
     if (modes.length === 0) {
-      return this.createEmptyResponse(startTime, 'No modes specified or preset not found');
+      return this.createEmptyResponse(
+        startTime,
+        "No modes specified or preset not found",
+      );
     }
 
     const totalModes = modes.length;
 
     // Phase 2: Execute modes
     this.reportProgress(onProgress, {
-      phase: 'executing_modes',
+      phase: "executing_modes",
       percentage: 10,
       modesCompleted: 0,
       totalModes,
@@ -180,23 +189,23 @@ export class MultiModeAnalyzer {
       (completed, current) => {
         const percentage = 10 + Math.floor((completed / totalModes) * 50);
         this.reportProgress(onProgress, {
-          phase: 'executing_modes',
+          phase: "executing_modes",
           percentage,
           modesCompleted: completed,
           totalModes,
           currentMode: current,
           message: `Executing ${current} (${completed}/${totalModes})...`,
         });
-      }
+      },
     );
 
     // Phase 3: Collect insights
     this.reportProgress(onProgress, {
-      phase: 'collecting_insights',
+      phase: "collecting_insights",
       percentage: 60,
       modesCompleted: totalModes,
       totalModes,
-      message: 'Collecting insights from all modes...',
+      message: "Collecting insights from all modes...",
     });
 
     const insightsByMode = this.collectInsights(modeResults);
@@ -204,40 +213,48 @@ export class MultiModeAnalyzer {
 
     // Phase 4: Detect and resolve conflicts
     this.reportProgress(onProgress, {
-      phase: 'resolving_conflicts',
+      phase: "resolving_conflicts",
       percentage: 70,
       modesCompleted: totalModes,
       totalModes,
-      message: 'Detecting and resolving conflicts...',
+      message: "Detecting and resolving conflicts...",
     });
 
     const conflicts = this.conflictResolver.detectConflicts(allInsights);
     const resolutions = this.conflictResolver.resolveAll(conflicts);
-    const resolvedInsights = this.conflictResolver.applyResolutions(allInsights, resolutions);
+    const resolvedInsights = this.conflictResolver.applyResolutions(
+      allInsights,
+      resolutions,
+    );
 
     // Phase 5: Merge insights
     this.reportProgress(onProgress, {
-      phase: 'merging',
+      phase: "merging",
       percentage: 85,
       modesCompleted: totalModes,
       totalModes,
-      message: 'Merging insights using selected strategy...',
+      message: "Merging insights using selected strategy...",
     });
 
-    const mergeStrategy = request.mergeStrategy || combination?.mergeStrategy || 'union';
+    const mergeStrategy =
+      request.mergeStrategy || combination?.mergeStrategy || "union";
     const mergeConfig = combination?.mergeConfig;
 
     // Rebuild insights by mode after conflict resolution
     const resolvedByMode = this.groupInsightsByMode(resolvedInsights);
-    const mergeResult = this.merger.merge(resolvedByMode, mergeStrategy, mergeConfig);
+    const mergeResult = this.merger.merge(
+      resolvedByMode,
+      mergeStrategy,
+      mergeConfig,
+    );
 
     // Phase 6: Create final analysis
     this.reportProgress(onProgress, {
-      phase: 'complete',
+      phase: "complete",
       percentage: 100,
       modesCompleted: totalModes,
       totalModes,
-      message: 'Analysis complete',
+      message: "Analysis complete",
     });
 
     const analysis = this.createMergedAnalysis(
@@ -245,7 +262,7 @@ export class MultiModeAnalyzer {
       conflicts,
       modes,
       mergeStrategy,
-      startTime
+      startTime,
     );
 
     return {
@@ -267,7 +284,7 @@ export class MultiModeAnalyzer {
   async analyzeWithPreset(
     thought: string,
     presetId: PresetId,
-    onProgress?: ProgressCallback
+    onProgress?: ProgressCallback,
   ): Promise<MultiModeAnalysisResponse> {
     return this.analyze({ thought, preset: presetId }, onProgress);
   }
@@ -283,17 +300,31 @@ export class MultiModeAnalyzer {
   async analyzeWithModes(
     thought: string,
     modes: ThinkingMode[],
-    mergeStrategy: 'union' | 'intersection' | 'weighted' | 'hierarchical' | 'dialectical' = 'union',
-    onProgress?: ProgressCallback
+    mergeStrategy:
+      | "union"
+      | "intersection"
+      | "weighted"
+      | "hierarchical"
+      | "dialectical" = "union",
+    onProgress?: ProgressCallback,
   ): Promise<MultiModeAnalysisResponse> {
-    return this.analyze({ thought, customModes: modes, mergeStrategy }, onProgress);
+    return this.analyze(
+      { thought, customModes: modes, mergeStrategy },
+      onProgress,
+    );
   }
 
   /**
    * Get available presets for analysis
    */
   getAvailablePresets(): string[] {
-    return ['comprehensive_analysis', 'hypothesis_testing', 'decision_making', 'root_cause', 'future_planning'];
+    return [
+      "comprehensive_analysis",
+      "hypothesis_testing",
+      "decision_making",
+      "root_cause",
+      "future_planning",
+    ];
   }
 
   /**
@@ -358,9 +389,12 @@ export class MultiModeAnalyzer {
     }
 
     // Default: comprehensive analysis
-    const defaultCombination = getPreset('comprehensive_analysis');
+    const defaultCombination = getPreset("comprehensive_analysis");
     return {
-      modes: defaultCombination?.modes || [ThinkingMode.DEDUCTIVE, ThinkingMode.INDUCTIVE],
+      modes: defaultCombination?.modes || [
+        ThinkingMode.DEDUCTIVE,
+        ThinkingMode.INDUCTIVE,
+      ],
       combination: defaultCombination,
     };
   }
@@ -372,7 +406,7 @@ export class MultiModeAnalyzer {
     modes: ThinkingMode[],
     request: MultiModeAnalysisRequest,
     errors: ModeError[],
-    onModeComplete?: (completed: number, current: ThinkingMode) => void
+    onModeComplete?: (completed: number, current: ThinkingMode) => void,
   ): Promise<Map<ThinkingMode, ModeAnalysisResult>> {
     const results = new Map<ThinkingMode, ModeAnalysisResult>();
     let completed = 0;
@@ -389,7 +423,11 @@ export class MultiModeAnalyzer {
 
           // Simulate mode execution - in real implementation, this would call ThoughtFactory
           // For now, we generate representative insights for each mode
-          const insights = this.generateModeInsights(mode, request.thought, request.context);
+          const insights = this.generateModeInsights(
+            mode,
+            request.thought,
+            request.context,
+          );
 
           const result: ModeAnalysisResult = {
             mode,
@@ -401,7 +439,8 @@ export class MultiModeAnalyzer {
           results.set(mode, result);
           completed++;
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
 
           errors.push({
             mode,
@@ -435,7 +474,11 @@ export class MultiModeAnalyzer {
    * Generate representative insights for a mode
    * This is a placeholder - in production, this would integrate with ThoughtFactory
    */
-  private generateModeInsights(mode: ThinkingMode, thought: string, context?: string): Insight[] {
+  private generateModeInsights(
+    mode: ThinkingMode,
+    thought: string,
+    context?: string,
+  ): Insight[] {
     // Use deterministic confidence based on mode characteristics
     // TODO: Replace with actual ThoughtFactory integration for real confidence scoring
     const baseConfidence = ANALYZER_CONSTANTS.BASE_INSIGHT_CONFIDENCE;
@@ -451,9 +494,9 @@ export class MultiModeAnalyzer {
           content: `Logical deduction from premises: ${thought.substring(0, 50)}...`,
           sourceMode: mode,
           confidence: baseConfidence,
-          evidence: ['Premise analysis', 'Logical inference'],
+          evidence: ["Premise analysis", "Logical inference"],
           timestamp,
-          category: 'deductive_conclusion',
+          category: "deductive_conclusion",
           priority: 8,
         });
         break;
@@ -464,9 +507,9 @@ export class MultiModeAnalyzer {
           content: `Pattern identified from analysis: Generalizing observations about ${thought.substring(0, 30)}...`,
           sourceMode: mode,
           confidence: baseConfidence * 0.9,
-          evidence: ['Pattern recognition', 'Statistical inference'],
+          evidence: ["Pattern recognition", "Statistical inference"],
           timestamp,
-          category: 'inductive_generalization',
+          category: "inductive_generalization",
           priority: 7,
         });
         break;
@@ -477,9 +520,9 @@ export class MultiModeAnalyzer {
           content: `Best explanation hypothesis: Most likely cause for ${thought.substring(0, 30)}...`,
           sourceMode: mode,
           confidence: baseConfidence * 0.85,
-          evidence: ['Inference to best explanation'],
+          evidence: ["Inference to best explanation"],
           timestamp,
-          category: 'abductive_hypothesis',
+          category: "abductive_hypothesis",
           priority: 6,
         });
         break;
@@ -490,9 +533,9 @@ export class MultiModeAnalyzer {
           content: `Causal relationship identified: Factors influencing ${thought.substring(0, 30)}...`,
           sourceMode: mode,
           confidence: baseConfidence,
-          evidence: ['Causal graph analysis', 'Intervention analysis'],
+          evidence: ["Causal graph analysis", "Intervention analysis"],
           timestamp,
-          category: 'causal_mechanism',
+          category: "causal_mechanism",
           priority: 8,
         });
         break;
@@ -503,9 +546,13 @@ export class MultiModeAnalyzer {
           content: `Probability assessment: Updated belief about ${thought.substring(0, 30)}...`,
           sourceMode: mode,
           confidence: baseConfidence,
-          evidence: ['Prior probability', 'Evidence likelihood', 'Posterior calculation'],
+          evidence: [
+            "Prior probability",
+            "Evidence likelihood",
+            "Posterior calculation",
+          ],
           timestamp,
-          category: 'probabilistic_assessment',
+          category: "probabilistic_assessment",
           priority: 7,
         });
         break;
@@ -516,9 +563,9 @@ export class MultiModeAnalyzer {
           content: `System dynamics: Feedback loops and interactions in ${thought.substring(0, 30)}...`,
           sourceMode: mode,
           confidence: baseConfidence * 0.9,
-          evidence: ['Feedback loop analysis', 'Stock-flow modeling'],
+          evidence: ["Feedback loop analysis", "Stock-flow modeling"],
           timestamp,
-          category: 'systems_insight',
+          category: "systems_insight",
           priority: 7,
         });
         break;
@@ -529,9 +576,9 @@ export class MultiModeAnalyzer {
           content: `First principles analysis: Core assumptions about ${thought.substring(0, 30)}...`,
           sourceMode: mode,
           confidence: baseConfidence,
-          evidence: ['Fundamental axioms', 'Deconstruction analysis'],
+          evidence: ["Fundamental axioms", "Deconstruction analysis"],
           timestamp,
-          category: 'foundational_insight',
+          category: "foundational_insight",
           priority: 9,
         });
         break;
@@ -542,9 +589,9 @@ export class MultiModeAnalyzer {
           content: `Strategic analysis: Nash equilibrium considerations for ${thought.substring(0, 30)}...`,
           sourceMode: mode,
           confidence: baseConfidence * 0.95,
-          evidence: ['Payoff matrix', 'Equilibrium analysis'],
+          evidence: ["Payoff matrix", "Equilibrium analysis"],
           timestamp,
-          category: 'strategic_insight',
+          category: "strategic_insight",
           priority: 7,
         });
         break;
@@ -555,9 +602,9 @@ export class MultiModeAnalyzer {
           content: `Counterfactual scenario: Alternative outcomes if ${thought.substring(0, 30)}...`,
           sourceMode: mode,
           confidence: baseConfidence * 0.8,
-          evidence: ['World state modeling', 'Alternative history analysis'],
+          evidence: ["World state modeling", "Alternative history analysis"],
           timestamp,
-          category: 'counterfactual_scenario',
+          category: "counterfactual_scenario",
           priority: 6,
         });
         break;
@@ -568,9 +615,9 @@ export class MultiModeAnalyzer {
           content: `Temporal analysis: Timeline and sequencing for ${thought.substring(0, 30)}...`,
           sourceMode: mode,
           confidence: baseConfidence,
-          evidence: ['Event sequencing', 'Allen interval analysis'],
+          evidence: ["Event sequencing", "Allen interval analysis"],
           timestamp,
-          category: 'temporal_insight',
+          category: "temporal_insight",
           priority: 7,
         });
         break;
@@ -581,9 +628,9 @@ export class MultiModeAnalyzer {
           content: `Optimization insight: Optimal approach for ${thought.substring(0, 30)}...`,
           sourceMode: mode,
           confidence: baseConfidence,
-          evidence: ['Constraint satisfaction', 'Objective optimization'],
+          evidence: ["Constraint satisfaction", "Objective optimization"],
           timestamp,
-          category: 'optimization_result',
+          category: "optimization_result",
           priority: 8,
         });
         break;
@@ -597,7 +644,7 @@ export class MultiModeAnalyzer {
           confidence: baseConfidence * 0.85,
           evidence: [`${mode} methodology`],
           timestamp,
-          category: 'general_insight',
+          category: "general_insight",
           priority: 5,
         });
     }
@@ -609,9 +656,9 @@ export class MultiModeAnalyzer {
         content: `Context-aware insight: Considering ${context.substring(0, 30)} in relation to the problem...`,
         sourceMode: mode,
         confidence: baseConfidence * 0.9,
-        evidence: ['Contextual analysis'],
+        evidence: ["Contextual analysis"],
         timestamp,
-        category: 'contextual_insight',
+        category: "contextual_insight",
         priority: 6,
       });
     }
@@ -622,7 +669,9 @@ export class MultiModeAnalyzer {
   /**
    * Collect insights from mode results into a map
    */
-  private collectInsights(results: Map<ThinkingMode, ModeAnalysisResult>): Map<ThinkingMode, Insight[]> {
+  private collectInsights(
+    results: Map<ThinkingMode, ModeAnalysisResult>,
+  ): Map<ThinkingMode, Insight[]> {
     const insightsByMode = new Map<ThinkingMode, Insight[]>();
 
     for (const [mode, result] of results) {
@@ -637,7 +686,9 @@ export class MultiModeAnalyzer {
   /**
    * Flatten insights map to array
    */
-  private flattenInsights(insightsByMode: Map<ThinkingMode, Insight[]>): Insight[] {
+  private flattenInsights(
+    insightsByMode: Map<ThinkingMode, Insight[]>,
+  ): Insight[] {
     const allInsights: Insight[] = [];
     for (const insights of insightsByMode.values()) {
       allInsights.push(...insights);
@@ -648,7 +699,9 @@ export class MultiModeAnalyzer {
   /**
    * Group insights by their source mode
    */
-  private groupInsightsByMode(insights: Insight[]): Map<ThinkingMode, Insight[]> {
+  private groupInsightsByMode(
+    insights: Insight[],
+  ): Map<ThinkingMode, Insight[]> {
     const grouped = new Map<ThinkingMode, Insight[]>();
 
     for (const insight of insights) {
@@ -665,15 +718,17 @@ export class MultiModeAnalyzer {
    */
   private createMergedAnalysis(
     mergeResult: MergeResult,
-    conflicts: ReturnType<ConflictResolver['detectConflicts']>,
+    conflicts: ReturnType<ConflictResolver["detectConflicts"]>,
     modes: ThinkingMode[],
-    mergeStrategy: 'union' | 'intersection' | 'weighted' | 'hierarchical' | 'dialectical',
-    _startTime: number
+    mergeStrategy:
+      "union" | "intersection" | "weighted" | "hierarchical" | "dialectical",
+    _startTime: number,
   ): MergedAnalysis {
     const statistics: MergeStatistics = {
       ...mergeResult.statistics,
       conflictsDetected: conflicts.length,
-      conflictsResolved: conflicts.filter((c) => c.resolution !== undefined).length,
+      conflictsResolved: conflicts.filter((c) => c.resolution !== undefined)
+        .length,
     };
 
     // Build supporting evidence map
@@ -685,7 +740,10 @@ export class MultiModeAnalyzer {
     }
 
     // Create synthesized conclusion
-    const synthesizedConclusion = this.synthesizeConclusion(mergeResult.insights, conflicts);
+    const synthesizedConclusion = this.synthesizeConclusion(
+      mergeResult.insights,
+      conflicts,
+    );
 
     return {
       id: randomUUID(),
@@ -693,7 +751,9 @@ export class MultiModeAnalyzer {
       supportingEvidence,
       conflicts,
       synthesizedConclusion,
-      confidenceScore: mergeResult.insights.reduce((acc, i) => acc + i.confidence, 0) / Math.max(mergeResult.insights.length, 1),
+      confidenceScore:
+        mergeResult.insights.reduce((acc, i) => acc + i.confidence, 0) /
+        Math.max(mergeResult.insights.length, 1),
       contributingModes: modes,
       mergeStrategy,
       statistics,
@@ -706,10 +766,10 @@ export class MultiModeAnalyzer {
    */
   private synthesizeConclusion(
     insights: Insight[],
-    conflicts: ReturnType<ConflictResolver['detectConflicts']>
+    conflicts: ReturnType<ConflictResolver["detectConflicts"]>,
   ): string {
     if (insights.length === 0) {
-      return 'No insights generated from the analysis.';
+      return "No insights generated from the analysis.";
     }
 
     // Sort by priority and confidence
@@ -723,8 +783,8 @@ export class MultiModeAnalyzer {
     const topInsights = sortedInsights.slice(0, 3);
 
     // Build synthesis
-    let conclusion = 'Multi-mode analysis reveals: ';
-    conclusion += topInsights.map((i) => i.content).join(' Furthermore, ');
+    let conclusion = "Multi-mode analysis reveals: ";
+    conclusion += topInsights.map((i) => i.content).join(" Furthermore, ");
 
     if (conflicts.length > 0) {
       conclusion += ` Note: ${conflicts.length} conflict(s) were detected and resolved during synthesis.`;
@@ -747,20 +807,28 @@ export class MultiModeAnalyzer {
   /**
    * Report progress to callback
    */
-  private reportProgress(callback: ProgressCallback | undefined, progress: AnalysisProgress): void {
+  private reportProgress(
+    callback: ProgressCallback | undefined,
+    progress: AnalysisProgress,
+  ): void {
     if (callback) {
       callback(progress);
     }
 
     if (this.config.verbose) {
-      console.log(`[MultiModeAnalyzer] ${progress.phase}: ${progress.message} (${progress.percentage}%)`);
+      console.log(
+        `[MultiModeAnalyzer] ${progress.phase}: ${progress.message} (${progress.percentage}%)`,
+      );
     }
   }
 
   /**
    * Create empty response for error cases
    */
-  private createEmptyResponse(startTime: number, errorMessage: string): MultiModeAnalysisResponse {
+  private createEmptyResponse(
+    startTime: number,
+    errorMessage: string,
+  ): MultiModeAnalysisResponse {
     return {
       analysis: {
         id: randomUUID(),
@@ -770,7 +838,7 @@ export class MultiModeAnalyzer {
         synthesizedConclusion: errorMessage,
         confidenceScore: 0,
         contributingModes: [],
-        mergeStrategy: 'union',
+        mergeStrategy: "union",
         statistics: {
           totalInsightsBefore: 0,
           totalInsightsAfter: 0,
@@ -784,7 +852,13 @@ export class MultiModeAnalyzer {
       },
       modeResults: new Map(),
       success: false,
-      errors: [{ mode: ThinkingMode.HYBRID, message: errorMessage, recoverable: false }],
+      errors: [
+        {
+          mode: ThinkingMode.HYBRID,
+          message: errorMessage,
+          recoverable: false,
+        },
+      ],
       executionTime: Date.now() - startTime,
     };
   }
@@ -795,7 +869,7 @@ export class MultiModeAnalyzer {
  */
 export async function analyzeMultiMode(
   request: MultiModeAnalysisRequest,
-  config?: MultiModeAnalyzerConfig
+  config?: MultiModeAnalyzerConfig,
 ): Promise<MultiModeAnalysisResponse> {
   const analyzer = new MultiModeAnalyzer(config);
   return analyzer.analyze(request);

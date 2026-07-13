@@ -3,7 +3,7 @@
  * Phase 15A Sprint 2: Simplified to LRU only (removed unused LFU/FIFO/factory)
  */
 
-export { LRUCache } from './lru.js';
+export { LRUCache } from "./lru.js";
 
 export type {
   Cache,
@@ -11,4 +11,4 @@ export type {
   CacheEntry,
   CacheStats,
   CacheStrategy,
-} from './types.js';
+} from "./types.js";

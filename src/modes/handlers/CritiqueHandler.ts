@@ -8,8 +8,8 @@
  * - Argument structure analysis
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode, CritiqueThought } from '../../types/core.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode, CritiqueThought } from "../../types/core.js";
 import type {
   CritiqueThoughtType,
   CritiquedWork,
@@ -17,8 +17,8 @@ import type {
   MethodologyEvaluation,
   ArgumentCritique,
   CritiqueVerdict,
-} from '../../types/modes/critique.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+} from "../../types/modes/critique.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -29,7 +29,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 /**
  * Socratic Question Categories
@@ -44,75 +44,75 @@ interface SocraticCategory {
 
 const SOCRATIC_CATEGORIES: SocraticCategory[] = [
   {
-    name: 'Clarification',
-    description: 'Questions that probe for clarity and understanding',
-    purpose: 'Ensure clear understanding before critique',
+    name: "Clarification",
+    description: "Questions that probe for clarity and understanding",
+    purpose: "Ensure clear understanding before critique",
     exampleQuestions: [
-      'What do you mean by...?',
-      'Could you put that another way?',
-      'What is your main point?',
-      'Could you give me an example?',
-      'Can you explain that term?',
+      "What do you mean by...?",
+      "Could you put that another way?",
+      "What is your main point?",
+      "Could you give me an example?",
+      "Can you explain that term?",
     ],
   },
   {
-    name: 'Assumptions',
-    description: 'Questions that probe underlying assumptions',
-    purpose: 'Uncover hidden assumptions that may be flawed',
+    name: "Assumptions",
+    description: "Questions that probe underlying assumptions",
+    purpose: "Uncover hidden assumptions that may be flawed",
     exampleQuestions: [
-      'What are you assuming here?',
-      'Is that always the case?',
-      'Why would you assume that?',
-      'What could we assume instead?',
-      'What if the opposite were true?',
+      "What are you assuming here?",
+      "Is that always the case?",
+      "Why would you assume that?",
+      "What could we assume instead?",
+      "What if the opposite were true?",
     ],
   },
   {
-    name: 'Evidence',
-    description: 'Questions that probe reasons and evidence',
-    purpose: 'Evaluate the quality and relevance of evidence',
+    name: "Evidence",
+    description: "Questions that probe reasons and evidence",
+    purpose: "Evaluate the quality and relevance of evidence",
     exampleQuestions: [
-      'What evidence supports this?',
-      'How do you know this is true?',
-      'What would change your mind?',
-      'Is there counter-evidence?',
-      'How reliable is this source?',
+      "What evidence supports this?",
+      "How do you know this is true?",
+      "What would change your mind?",
+      "Is there counter-evidence?",
+      "How reliable is this source?",
     ],
   },
   {
-    name: 'Perspectives',
-    description: 'Questions that probe viewpoints and perspectives',
-    purpose: 'Consider alternative viewpoints',
+    name: "Perspectives",
+    description: "Questions that probe viewpoints and perspectives",
+    purpose: "Consider alternative viewpoints",
     exampleQuestions: [
-      'What would X say about this?',
-      'How might others view this?',
-      'What is an alternative interpretation?',
-      'Who benefits from this view?',
-      'What perspective is missing?',
+      "What would X say about this?",
+      "How might others view this?",
+      "What is an alternative interpretation?",
+      "Who benefits from this view?",
+      "What perspective is missing?",
     ],
   },
   {
-    name: 'Implications',
-    description: 'Questions that probe implications and consequences',
-    purpose: 'Explore logical consequences of claims',
+    name: "Implications",
+    description: "Questions that probe implications and consequences",
+    purpose: "Explore logical consequences of claims",
     exampleQuestions: [
-      'What follows from this?',
-      'What are the consequences?',
-      'How does this affect...?',
-      'If this is true, what else must be true?',
-      'What are the risks?',
+      "What follows from this?",
+      "What are the consequences?",
+      "How does this affect...?",
+      "If this is true, what else must be true?",
+      "What are the risks?",
     ],
   },
   {
-    name: 'Meta',
-    description: 'Questions about the question itself',
-    purpose: 'Examine the reasoning process',
+    name: "Meta",
+    description: "Questions about the question itself",
+    purpose: "Examine the reasoning process",
     exampleQuestions: [
-      'Why is this question important?',
-      'What makes this hard to answer?',
-      'What do we need to know to answer this?',
-      'How can we find out?',
-      'What assumptions underlie this question?',
+      "Why is this question important?",
+      "What makes this hard to answer?",
+      "What do we need to know to answer this?",
+      "How can we find out?",
+      "What assumptions underlie this question?",
     ],
   },
 ];
@@ -128,21 +128,22 @@ const SOCRATIC_CATEGORIES: SocraticCategory[] = [
  */
 export class CritiqueHandler implements ModeHandler {
   readonly mode = ThinkingMode.CRITIQUE;
-  readonly modeName = 'Critical Analysis';
-  readonly description = 'Scholarly critique with Socratic questioning, balanced evaluation, and methodology assessment';
+  readonly modeName = "Critical Analysis";
+  readonly description =
+    "Scholarly critique with Socratic questioning, balanced evaluation, and methodology assessment";
 
   /**
    * Supported thought types for critique mode
    */
   private readonly supportedThoughtTypes: CritiqueThoughtType[] = [
-    'work_characterization',
-    'methodology_evaluation',
-    'argument_analysis',
-    'evidence_assessment',
-    'contribution_evaluation',
-    'limitation_identification',
-    'strength_recognition',
-    'improvement_suggestion',
+    "work_characterization",
+    "methodology_evaluation",
+    "argument_analysis",
+    "evidence_assessment",
+    "contribution_evaluation",
+    "limitation_identification",
+    "strength_recognition",
+    "improvement_suggestion",
   ];
 
   /**
@@ -157,23 +158,26 @@ export class CritiqueHandler implements ModeHandler {
     // Build work being critiqued
     const work: CritiquedWork = inputAny.work || {
       id: randomUUID().slice(0, 8),
-      title: 'Untitled Work',
+      title: "Untitled Work",
       authors: [],
       year: new Date().getFullYear(),
-      type: 'empirical_study',
-      field: 'Unknown',
-      claimedContribution: '',
+      type: "empirical_study",
+      field: "Unknown",
+      claimedContribution: "",
     };
 
     // Calculate balance metrics
     const critiquePoints = inputAny.critiquePoints || [];
     const strengthsIdentified = critiquePoints.filter(
-      (p: CritiquePoint) => p.type === 'strength'
+      (p: CritiquePoint) => p.type === "strength",
     ).length;
     const weaknessesIdentified = critiquePoints.filter(
-      (p: CritiquePoint) => p.type === 'weakness' || p.type === 'concern'
+      (p: CritiquePoint) => p.type === "weakness" || p.type === "concern",
     ).length;
-    const balanceRatio = this.calculateBalanceRatio(strengthsIdentified, weaknessesIdentified);
+    const balanceRatio = this.calculateBalanceRatio(
+      strengthsIdentified,
+      weaknessesIdentified,
+    );
 
     return {
       id: randomUUID(),
@@ -216,16 +220,20 @@ export class CritiqueHandler implements ModeHandler {
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
@@ -238,14 +246,18 @@ export class CritiqueHandler implements ModeHandler {
 
     // Validate methodology evaluation
     if (inputAny.methodologyEvaluation) {
-      const methValidation = this.validateMethodologyEvaluation(inputAny.methodologyEvaluation);
+      const methValidation = this.validateMethodologyEvaluation(
+        inputAny.methodologyEvaluation,
+      );
       errors.push(...methValidation.errors);
       warnings.push(...methValidation.warnings);
     }
 
     // Validate argument critique
     if (inputAny.argumentCritique) {
-      const argValidation = this.validateArgumentCritique(inputAny.argumentCritique);
+      const argValidation = this.validateArgumentCritique(
+        inputAny.argumentCritique,
+      );
       warnings.push(...argValidation.warnings);
     }
 
@@ -259,28 +271,28 @@ export class CritiqueHandler implements ModeHandler {
 
       // Check balance
       const strengths = inputAny.critiquePoints.filter(
-        (p: CritiquePoint) => p.type === 'strength'
+        (p: CritiquePoint) => p.type === "strength",
       ).length;
       const weaknesses = inputAny.critiquePoints.filter(
-        (p: CritiquePoint) => p.type === 'weakness' || p.type === 'concern'
+        (p: CritiquePoint) => p.type === "weakness" || p.type === "concern",
       ).length;
 
       if (inputAny.critiquePoints.length >= 3) {
         if (strengths === 0) {
           warnings.push(
             createValidationWarning(
-              'critiquePoints',
-              'No strengths identified in critique',
-              'A balanced critique should acknowledge strengths as well as weaknesses'
-            )
+              "critiquePoints",
+              "No strengths identified in critique",
+              "A balanced critique should acknowledge strengths as well as weaknesses",
+            ),
           );
         } else if (weaknesses === 0) {
           warnings.push(
             createValidationWarning(
-              'critiquePoints',
-              'No weaknesses or concerns identified',
-              'A thorough critique should identify areas for improvement'
-            )
+              "critiquePoints",
+              "No weaknesses or concerns identified",
+              "A thorough critique should identify areas for improvement",
+            ),
           );
         }
       }
@@ -305,14 +317,18 @@ export class CritiqueHandler implements ModeHandler {
   getEnhancements(thought: CritiqueThought): ModeEnhancements {
     const enhancements: ModeEnhancements = {
       suggestions: [],
-      relatedModes: [ThinkingMode.ARGUMENTATION, ThinkingMode.SYNTHESIS, ThinkingMode.ANALYSIS],
+      relatedModes: [
+        ThinkingMode.ARGUMENTATION,
+        ThinkingMode.SYNTHESIS,
+        ThinkingMode.ANALYSIS,
+      ],
       guidingQuestions: [],
       warnings: [],
       mentalModels: [
-        'Socratic Questioning',
-        'Peer Review Framework',
-        'Toulmin Model',
-        'Critical Thinking',
+        "Socratic Questioning",
+        "Peer Review Framework",
+        "Toulmin Model",
+        "Critical Thinking",
       ],
     };
 
@@ -345,44 +361,53 @@ export class CritiqueHandler implements ModeHandler {
     // Balance warnings
     if (thought.balanceRatio < 0.2) {
       enhancements.warnings!.push(
-        'Critique appears heavily weighted toward weaknesses. Consider identifying strengths.'
+        "Critique appears heavily weighted toward weaknesses. Consider identifying strengths.",
       );
     } else if (thought.balanceRatio > 0.8) {
       enhancements.warnings!.push(
-        'Critique appears heavily weighted toward strengths. Consider identifying limitations.'
+        "Critique appears heavily weighted toward strengths. Consider identifying limitations.",
       );
     }
 
     // Suggestions based on content
-    if (!thought.methodologyEvaluation && thought.work?.type === 'empirical_study') {
+    if (
+      !thought.methodologyEvaluation &&
+      thought.work?.type === "empirical_study"
+    ) {
       enhancements.suggestions!.push(
-        'Consider adding methodology evaluation for empirical work'
+        "Consider adding methodology evaluation for empirical work",
       );
     }
 
-    if (!thought.argumentCritique && thought.work?.type === 'theoretical_paper') {
+    if (
+      !thought.argumentCritique &&
+      thought.work?.type === "theoretical_paper"
+    ) {
       enhancements.suggestions!.push(
-        'Consider adding argument structure analysis for theoretical work'
+        "Consider adding argument structure analysis for theoretical work",
       );
     }
 
     if (critiquePointCount >= 5 && !thought.verdict) {
       enhancements.suggestions!.push(
-        'Consider providing an overall verdict summarizing the critique'
+        "Consider providing an overall verdict summarizing the critique",
       );
     }
 
     if (thought.weaknessesIdentified > 0 && improvementCount === 0) {
       enhancements.suggestions!.push(
-        'Consider adding constructive improvement suggestions for identified weaknesses'
+        "Consider adding constructive improvement suggestions for identified weaknesses",
       );
     }
 
     // Check for common critique completeness
     if (thought.work) {
-      if (!thought.work.researchQuestion && thought.work.type === 'empirical_study') {
+      if (
+        !thought.work.researchQuestion &&
+        thought.work.type === "empirical_study"
+      ) {
         enhancements.guidingQuestions!.push(
-          'What is the research question being addressed?'
+          "What is the research question being addressed?",
         );
       }
     }
@@ -390,21 +415,25 @@ export class CritiqueHandler implements ModeHandler {
     // Severity distribution analysis
     if (thought.critiquePoints && thought.critiquePoints.length > 0) {
       const criticalCount = thought.critiquePoints.filter(
-        p => p.severity === 'critical'
+        (p) => p.severity === "critical",
       ).length;
       const majorCount = thought.critiquePoints.filter(
-        p => p.severity === 'major'
+        (p) => p.severity === "major",
       ).length;
 
-      if (criticalCount > 0 && thought.verdict?.recommendation === 'accept') {
+      if (criticalCount > 0 && thought.verdict?.recommendation === "accept") {
         enhancements.warnings!.push(
-          'Accept recommendation despite critical issues. Verify this is intentional.'
+          "Accept recommendation despite critical issues. Verify this is intentional.",
         );
       }
 
-      if (criticalCount === 0 && majorCount === 0 && thought.verdict?.recommendation === 'reject') {
+      if (
+        criticalCount === 0 &&
+        majorCount === 0 &&
+        thought.verdict?.recommendation === "reject"
+      ) {
         enhancements.warnings!.push(
-          'Reject recommendation with no critical/major issues. Consider revising verdict.'
+          "Reject recommendation with no critical/major issues. Consider revising verdict.",
         );
       }
     }
@@ -416,17 +445,24 @@ export class CritiqueHandler implements ModeHandler {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType: string): boolean {
-    return this.supportedThoughtTypes.includes(thoughtType as CritiqueThoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType as CritiqueThoughtType,
+    );
   }
 
   /**
    * Resolve thought type to valid CritiqueThoughtType
    */
-  private resolveThoughtType(inputType: string | undefined): CritiqueThoughtType {
-    if (inputType && this.supportedThoughtTypes.includes(inputType as CritiqueThoughtType)) {
+  private resolveThoughtType(
+    inputType: string | undefined,
+  ): CritiqueThoughtType {
+    if (
+      inputType &&
+      this.supportedThoughtTypes.includes(inputType as CritiqueThoughtType)
+    ) {
       return inputType as CritiqueThoughtType;
     }
-    return 'work_characterization';
+    return "work_characterization";
   }
 
   /**
@@ -447,30 +483,33 @@ export class CritiqueHandler implements ModeHandler {
     if (!work.title || work.title.trim().length === 0) {
       warnings.push(
         createValidationWarning(
-          'work.title',
-          'Work has no title',
-          'Add a title to identify the work being critiqued'
-        )
+          "work.title",
+          "Work has no title",
+          "Add a title to identify the work being critiqued",
+        ),
       );
     }
 
     if (!work.authors || work.authors.length === 0) {
       warnings.push(
         createValidationWarning(
-          'work.authors',
-          'No authors specified',
-          'Add author information for proper attribution'
-        )
+          "work.authors",
+          "No authors specified",
+          "Add author information for proper attribution",
+        ),
       );
     }
 
-    if (!work.claimedContribution || work.claimedContribution.trim().length === 0) {
+    if (
+      !work.claimedContribution ||
+      work.claimedContribution.trim().length === 0
+    ) {
       warnings.push(
         createValidationWarning(
-          'work.claimedContribution',
-          'No claimed contribution specified',
-          'Identify what contribution the work claims to make'
-        )
+          "work.claimedContribution",
+          "No claimed contribution specified",
+          "Identify what contribution the work claims to make",
+        ),
       );
     }
 
@@ -480,25 +519,30 @@ export class CritiqueHandler implements ModeHandler {
   /**
    * Validate methodology evaluation
    */
-  private validateMethodologyEvaluation(meth: MethodologyEvaluation): ValidationResult {
+  private validateMethodologyEvaluation(
+    meth: MethodologyEvaluation,
+  ): ValidationResult {
     const errors: ValidationError[] = [];
     const warnings: ValidationWarning[] = [];
 
     // Validate rating ranges
-    if (meth.overallRating !== undefined && (meth.overallRating < 0 || meth.overallRating > 1)) {
+    if (
+      meth.overallRating !== undefined &&
+      (meth.overallRating < 0 || meth.overallRating > 1)
+    ) {
       warnings.push(
         createValidationWarning(
-          'methodologyEvaluation.overallRating',
+          "methodologyEvaluation.overallRating",
           `overallRating (${meth.overallRating}) is outside [0, 1] range`,
-          'Ratings should be normalized to [0, 1]'
-        )
+          "Ratings should be normalized to [0, 1]",
+        ),
       );
     }
 
     // Validate sub-ratings
-    const subRatings = ['design.rating', 'sample.rating', 'analysis.rating'];
+    const subRatings = ["design.rating", "sample.rating", "analysis.rating"];
     for (const path of subRatings) {
-      const [parent, child] = path.split('.');
+      const [parent, child] = path.split(".");
       const parentObj = (meth as any)[parent];
       if (parentObj && parentObj[child] !== undefined) {
         const value = parentObj[child];
@@ -507,14 +551,16 @@ export class CritiqueHandler implements ModeHandler {
             createValidationWarning(
               `methodologyEvaluation.${path}`,
               `${path} (${value}) is outside [0, 1] range`,
-              'Ratings should be normalized to [0, 1]'
-            )
+              "Ratings should be normalized to [0, 1]",
+            ),
           );
         }
       }
     }
 
-    return errors.length > 0 ? validationFailure(errors, warnings) : validationSuccess(warnings);
+    return errors.length > 0
+      ? validationFailure(errors, warnings)
+      : validationSuccess(warnings);
   }
 
   /**
@@ -526,22 +572,25 @@ export class CritiqueHandler implements ModeHandler {
     if (arg.rating !== undefined && (arg.rating < 0 || arg.rating > 1)) {
       warnings.push(
         createValidationWarning(
-          'argumentCritique.rating',
+          "argumentCritique.rating",
           `Argument rating (${arg.rating}) is outside [0, 1] range`,
-          'Rating should be normalized to [0, 1]'
-        )
+          "Rating should be normalized to [0, 1]",
+        ),
       );
     }
 
     if (arg.logicalStructure) {
       if (arg.logicalStructure.overallCoherence !== undefined) {
-        if (arg.logicalStructure.overallCoherence < 0 || arg.logicalStructure.overallCoherence > 1) {
+        if (
+          arg.logicalStructure.overallCoherence < 0 ||
+          arg.logicalStructure.overallCoherence > 1
+        ) {
           warnings.push(
             createValidationWarning(
-              'argumentCritique.logicalStructure.overallCoherence',
+              "argumentCritique.logicalStructure.overallCoherence",
               `Coherence (${arg.logicalStructure.overallCoherence}) is outside [0, 1] range`,
-              'Coherence should be normalized to [0, 1]'
-            )
+              "Coherence should be normalized to [0, 1]",
+            ),
           );
         }
       }
@@ -549,10 +598,10 @@ export class CritiqueHandler implements ModeHandler {
       if (arg.logicalStructure.circularReasoning) {
         warnings.push(
           createValidationWarning(
-            'argumentCritique.logicalStructure',
-            'Circular reasoning detected in the argument',
-            'This is a significant logical flaw that should be addressed'
-          )
+            "argumentCritique.logicalStructure",
+            "Circular reasoning detected in the argument",
+            "This is a significant logical flaw that should be addressed",
+          ),
         );
       }
     }
@@ -563,27 +612,30 @@ export class CritiqueHandler implements ModeHandler {
   /**
    * Validate a critique point
    */
-  private validateCritiquePoint(point: CritiquePoint, index: number): ValidationResult {
+  private validateCritiquePoint(
+    point: CritiquePoint,
+    index: number,
+  ): ValidationResult {
     const warnings = [];
 
     if (!point.description || point.description.trim().length === 0) {
       warnings.push(
         createValidationWarning(
           `critiquePoints[${index}].description`,
-          'Critique point has no description',
-          'Add a detailed description of the critique'
-        )
+          "Critique point has no description",
+          "Add a detailed description of the critique",
+        ),
       );
     }
 
-    if (point.type === 'weakness' || point.type === 'concern') {
+    if (point.type === "weakness" || point.type === "concern") {
       if (!point.recommendation) {
         warnings.push(
           createValidationWarning(
             `critiquePoints[${index}].recommendation`,
-            'Weakness has no recommendation for improvement',
-            'Consider adding a constructive suggestion'
-          )
+            "Weakness has no recommendation for improvement",
+            "Consider adding a constructive suggestion",
+          ),
         );
       }
     }
@@ -597,23 +649,26 @@ export class CritiqueHandler implements ModeHandler {
   private validateVerdict(verdict: CritiqueVerdict): ValidationResult {
     const warnings = [];
 
-    if (verdict.confidence !== undefined && (verdict.confidence < 0 || verdict.confidence > 1)) {
+    if (
+      verdict.confidence !== undefined &&
+      (verdict.confidence < 0 || verdict.confidence > 1)
+    ) {
       warnings.push(
         createValidationWarning(
-          'verdict.confidence',
+          "verdict.confidence",
           `Verdict confidence (${verdict.confidence}) is outside [0, 1] range`,
-          'Confidence should be between 0 and 1'
-        )
+          "Confidence should be between 0 and 1",
+        ),
       );
     }
 
     if (!verdict.summary || verdict.summary.trim().length === 0) {
       warnings.push(
         createValidationWarning(
-          'verdict.summary',
-          'Verdict has no summary',
-          'Add a summary explaining the recommendation'
-        )
+          "verdict.summary",
+          "Verdict has no summary",
+          "Add a summary explaining the recommendation",
+        ),
       );
     }
 
@@ -623,20 +678,25 @@ export class CritiqueHandler implements ModeHandler {
   /**
    * Get Socratic questions based on thought type
    */
-  private getSocraticQuestions(thoughtType: CritiqueThoughtType): SocraticCategory[] {
+  private getSocraticQuestions(
+    thoughtType: CritiqueThoughtType,
+  ): SocraticCategory[] {
     // Map thought types to most relevant Socratic categories
     const typeToCategories: Record<CritiqueThoughtType, string[]> = {
-      work_characterization: ['Clarification', 'Meta'],
-      methodology_evaluation: ['Evidence', 'Assumptions'],
-      argument_analysis: ['Assumptions', 'Implications'],
-      evidence_assessment: ['Evidence', 'Perspectives'],
-      contribution_evaluation: ['Implications', 'Perspectives'],
-      limitation_identification: ['Assumptions', 'Evidence'],
-      strength_recognition: ['Clarification', 'Implications'],
-      improvement_suggestion: ['Perspectives', 'Meta'],
+      work_characterization: ["Clarification", "Meta"],
+      methodology_evaluation: ["Evidence", "Assumptions"],
+      argument_analysis: ["Assumptions", "Implications"],
+      evidence_assessment: ["Evidence", "Perspectives"],
+      contribution_evaluation: ["Implications", "Perspectives"],
+      limitation_identification: ["Assumptions", "Evidence"],
+      strength_recognition: ["Clarification", "Implications"],
+      improvement_suggestion: ["Perspectives", "Meta"],
     };
 
-    const categoryNames = typeToCategories[thoughtType] || ['Clarification', 'Evidence'];
-    return SOCRATIC_CATEGORIES.filter(c => categoryNames.includes(c.name));
+    const categoryNames = typeToCategories[thoughtType] || [
+      "Clarification",
+      "Evidence",
+    ];
+    return SOCRATIC_CATEGORIES.filter((c) => categoryNames.includes(c.name));
   }
 }

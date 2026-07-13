@@ -16,7 +16,7 @@ export interface JsonVisualNode {
   width?: number;
   height?: number;
   color?: string;
-  shape?: 'rectangle' | 'ellipse' | 'diamond' | 'stadium' | 'circle';
+  shape?: "rectangle" | "ellipse" | "diamond" | "stadium" | "circle";
   metadata?: Record<string, unknown>;
   children?: JsonVisualNode[];
 }
@@ -31,7 +31,7 @@ export interface JsonVisualEdge {
   label?: string;
   type?: string;
   weight?: number;
-  style?: 'solid' | 'dashed' | 'dotted';
+  style?: "solid" | "dashed" | "dotted";
   directed?: boolean;
   metadata?: Record<string, unknown>;
 }
@@ -53,8 +53,8 @@ export interface JsonVisualGraph {
   nodes: JsonVisualNode[];
   edges: JsonVisualEdge[];
   layout?: {
-    type: 'hierarchical' | 'force' | 'circular' | 'tree' | 'linear';
-    direction?: 'TB' | 'BT' | 'LR' | 'RL';
+    type: "hierarchical" | "force" | "circular" | "tree" | "linear";
+    direction?: "TB" | "BT" | "LR" | "RL";
   };
   metrics?: Record<string, unknown>;
   legend?: Array<{ label: string; color: string; shape?: string }>;
@@ -78,20 +78,23 @@ export interface JsonVisualOptions {
 export function createJsonGraph(
   title: string,
   mode: string,
-  options: JsonVisualOptions = {}
+  options: JsonVisualOptions = {},
 ): JsonVisualGraph {
   return {
-    type: 'deepthinking-visual-graph',
-    version: '1.0.0',
+    type: "deepthinking-visual-graph",
+    version: "1.0.0",
     metadata: {
       title,
       mode,
       exportedAt: new Date().toISOString(),
-      generator: 'DeepThinking MCP v8.3.1',
+      generator: "DeepThinking MCP v8.3.1",
     },
     nodes: [],
     edges: [],
-    layout: options.includeLayout !== false ? { type: 'hierarchical', direction: 'TB' } : undefined,
+    layout:
+      options.includeLayout !== false
+        ? { type: "hierarchical", direction: "TB" }
+        : undefined,
     metrics: options.includeMetrics !== false ? {} : undefined,
     legend: options.includeLegend !== false ? [] : undefined,
   };
@@ -100,20 +103,14 @@ export function createJsonGraph(
 /**
  * Add a node to the graph
  */
-export function addNode(
-  graph: JsonVisualGraph,
-  node: JsonVisualNode
-): void {
+export function addNode(graph: JsonVisualGraph, node: JsonVisualNode): void {
   graph.nodes.push(node);
 }
 
 /**
  * Add an edge to the graph
  */
-export function addEdge(
-  graph: JsonVisualGraph,
-  edge: JsonVisualEdge
-): void {
+export function addEdge(graph: JsonVisualGraph, edge: JsonVisualEdge): void {
   graph.edges.push(edge);
 }
 
@@ -123,7 +120,7 @@ export function addEdge(
 export function addMetric(
   graph: JsonVisualGraph,
   key: string,
-  value: unknown
+  value: unknown,
 ): void {
   if (graph.metrics) {
     graph.metrics[key] = value;
@@ -137,7 +134,7 @@ export function addLegendItem(
   graph: JsonVisualGraph,
   label: string,
   color: string,
-  shape?: string
+  shape?: string,
 ): void {
   if (graph.legend) {
     graph.legend.push({ label, color, shape });
@@ -149,9 +146,9 @@ export function addLegendItem(
  */
 export function serializeGraph(
   graph: JsonVisualGraph,
-  options: JsonVisualOptions = {}
+  options: JsonVisualOptions = {},
 ): string {
-  const indent = options.prettyPrint !== false ? (options.indent || 2) : 0;
+  const indent = options.prettyPrint !== false ? options.indent || 2 : 0;
   return JSON.stringify(graph, null, indent);
 }
 
@@ -163,14 +160,14 @@ export function generateLinearFlowJson(
   mode: string,
   stages: string[],
   currentStage: string,
-  options: JsonVisualOptions = {}
+  options: JsonVisualOptions = {},
 ): string {
   const graph = createJsonGraph(title, mode, options);
 
   // Set layout for linear flow
   if (graph.layout) {
-    graph.layout.type = 'linear';
-    graph.layout.direction = 'LR';
+    graph.layout.type = "linear";
+    graph.layout.direction = "LR";
   }
 
   // Add stage nodes
@@ -180,11 +177,11 @@ export function generateLinearFlowJson(
     addNode(graph, {
       id: `stage_${i}`,
       label: stage,
-      type: isCurrent ? 'current' : 'stage',
+      type: isCurrent ? "current" : "stage",
       x: i * 150,
       y: 0,
-      color: isCurrent ? '#a8d5ff' : '#e0e0e0',
-      shape: isCurrent ? 'stadium' : 'rectangle',
+      color: isCurrent ? "#a8d5ff" : "#e0e0e0",
+      shape: isCurrent ? "stadium" : "rectangle",
     });
 
     // Add edges between consecutive stages
@@ -194,7 +191,7 @@ export function generateLinearFlowJson(
         source: `stage_${i - 1}`,
         target: `stage_${i}`,
         directed: true,
-        style: 'solid',
+        style: "solid",
       });
     }
   }
@@ -208,8 +205,8 @@ export function generateLinearFlowJson(
 
   // Add legend
   if (graph.legend) {
-    addLegendItem(graph, 'Current Stage', '#a8d5ff', 'stadium');
-    addLegendItem(graph, 'Stage', '#e0e0e0', 'rectangle');
+    addLegendItem(graph, "Current Stage", "#a8d5ff", "stadium");
+    addLegendItem(graph, "Stage", "#e0e0e0", "rectangle");
   }
 
   return serializeGraph(graph, options);
@@ -222,26 +219,31 @@ export function generateHierarchyJson(
   title: string,
   mode: string,
   root: { label: string; metadata?: Record<string, unknown> },
-  children: Array<{ id: string; label: string; score?: number; metadata?: Record<string, unknown> }>,
-  options: JsonVisualOptions = {}
+  children: Array<{
+    id: string;
+    label: string;
+    score?: number;
+    metadata?: Record<string, unknown>;
+  }>,
+  options: JsonVisualOptions = {},
 ): string {
   const graph = createJsonGraph(title, mode, options);
 
   // Set layout for hierarchy
   if (graph.layout) {
-    graph.layout.type = 'tree';
-    graph.layout.direction = 'TB';
+    graph.layout.type = "tree";
+    graph.layout.direction = "TB";
   }
 
   // Add root node
   addNode(graph, {
-    id: 'root',
+    id: "root",
     label: root.label,
-    type: 'root',
+    type: "root",
     x: 0,
     y: 0,
-    color: '#a8d5ff',
-    shape: 'ellipse',
+    color: "#a8d5ff",
+    shape: "ellipse",
     metadata: root.metadata,
   });
 
@@ -255,11 +257,11 @@ export function generateHierarchyJson(
     addNode(graph, {
       id: child.id,
       label: child.label,
-      type: 'child',
+      type: "child",
       x: startX + i * spacing,
       y: 100,
-      color: '#e0e0e0',
-      shape: 'rectangle',
+      color: "#e0e0e0",
+      shape: "rectangle",
       metadata: {
         ...child.metadata,
         score: child.score,
@@ -268,19 +270,20 @@ export function generateHierarchyJson(
 
     addEdge(graph, {
       id: `edge_root_${child.id}`,
-      source: 'root',
+      source: "root",
       target: child.id,
       directed: true,
-      style: 'solid',
+      style: "solid",
     });
   }
 
   // Add metrics
   if (graph.metrics) {
     graph.metrics.childCount = children.length;
-    if (children.some(c => c.score !== undefined)) {
-      graph.metrics.averageScore = children.reduce((sum, c) => sum + (c.score || 0), 0) / children.length;
-      graph.metrics.maxScore = Math.max(...children.map(c => c.score || 0));
+    if (children.some((c) => c.score !== undefined)) {
+      graph.metrics.averageScore =
+        children.reduce((sum, c) => sum + (c.score || 0), 0) / children.length;
+      graph.metrics.maxScore = Math.max(...children.map((c) => c.score || 0));
     }
   }
 
@@ -293,15 +296,25 @@ export function generateHierarchyJson(
 export function generateNetworkJson(
   title: string,
   mode: string,
-  nodes: Array<{ id: string; label: string; type?: string; metadata?: Record<string, unknown> }>,
-  edges: Array<{ source: string; target: string; label?: string; weight?: number }>,
-  options: JsonVisualOptions = {}
+  nodes: Array<{
+    id: string;
+    label: string;
+    type?: string;
+    metadata?: Record<string, unknown>;
+  }>,
+  edges: Array<{
+    source: string;
+    target: string;
+    label?: string;
+    weight?: number;
+  }>,
+  options: JsonVisualOptions = {},
 ): string {
   const graph = createJsonGraph(title, mode, options);
 
   // Set layout for network
   if (graph.layout) {
-    graph.layout.type = 'force';
+    graph.layout.type = "force";
   }
 
   // Add nodes
@@ -309,9 +322,9 @@ export function generateNetworkJson(
     addNode(graph, {
       id: node.id,
       label: node.label,
-      type: node.type || 'node',
-      color: node.type === 'primary' ? '#a8d5ff' : '#e0e0e0',
-      shape: 'ellipse',
+      type: node.type || "node",
+      color: node.type === "primary" ? "#a8d5ff" : "#e0e0e0",
+      shape: "ellipse",
       metadata: node.metadata,
     });
   }
@@ -326,7 +339,7 @@ export function generateNetworkJson(
       label: edge.label,
       weight: edge.weight,
       directed: true,
-      style: 'solid',
+      style: "solid",
     });
   }
 
@@ -334,9 +347,8 @@ export function generateNetworkJson(
   if (graph.metrics) {
     graph.metrics.nodeCount = nodes.length;
     graph.metrics.edgeCount = edges.length;
-    graph.metrics.density = nodes.length > 1
-      ? edges.length / (nodes.length * (nodes.length - 1))
-      : 0;
+    graph.metrics.density =
+      nodes.length > 1 ? edges.length / (nodes.length * (nodes.length - 1)) : 0;
   }
 
   return serializeGraph(graph, options);
@@ -352,76 +364,76 @@ export function generateBayesianJson(
   bayesFactor: number | undefined,
   hypothesis: string,
   evidence: string[],
-  options: JsonVisualOptions = {}
+  options: JsonVisualOptions = {},
 ): string {
-  const graph = createJsonGraph(title, 'bayesian', options);
+  const graph = createJsonGraph(title, "bayesian", options);
 
   if (graph.layout) {
-    graph.layout.type = 'hierarchical';
-    graph.layout.direction = 'TB';
+    graph.layout.type = "hierarchical";
+    graph.layout.direction = "TB";
   }
 
   // Add nodes
   addNode(graph, {
-    id: 'prior',
+    id: "prior",
     label: `Prior: ${prior.toFixed(3)}`,
-    type: 'prior',
+    type: "prior",
     x: 0,
     y: 0,
-    color: '#a8d5ff',
-    shape: 'stadium',
+    color: "#a8d5ff",
+    shape: "stadium",
   });
 
   addNode(graph, {
-    id: 'evidence',
-    label: 'Evidence',
-    type: 'evidence',
+    id: "evidence",
+    label: "Evidence",
+    type: "evidence",
     x: 200,
     y: 0,
-    color: '#81c784',
-    shape: 'rectangle',
+    color: "#81c784",
+    shape: "rectangle",
     metadata: { items: evidence },
   });
 
   addNode(graph, {
-    id: 'hypothesis',
+    id: "hypothesis",
     label: hypothesis,
-    type: 'hypothesis',
+    type: "hypothesis",
     x: 100,
     y: 100,
-    color: '#e0e0e0',
-    shape: 'ellipse',
+    color: "#e0e0e0",
+    shape: "ellipse",
   });
 
   addNode(graph, {
-    id: 'posterior',
+    id: "posterior",
     label: `Posterior: ${posterior.toFixed(3)}`,
-    type: 'posterior',
+    type: "posterior",
     x: 100,
     y: 200,
-    color: '#4caf50',
-    shape: 'stadium',
+    color: "#4caf50",
+    shape: "stadium",
   });
 
   // Add edges
   addEdge(graph, {
-    id: 'edge_prior_hyp',
-    source: 'prior',
-    target: 'hypothesis',
+    id: "edge_prior_hyp",
+    source: "prior",
+    target: "hypothesis",
     directed: true,
   });
 
   addEdge(graph, {
-    id: 'edge_evidence_hyp',
-    source: 'evidence',
-    target: 'hypothesis',
+    id: "edge_evidence_hyp",
+    source: "evidence",
+    target: "hypothesis",
     directed: true,
   });
 
   addEdge(graph, {
-    id: 'edge_hyp_post',
-    source: 'hypothesis',
-    target: 'posterior',
+    id: "edge_hyp_post",
+    source: "hypothesis",
+    target: "posterior",
     directed: true,
   });
 
@@ -436,10 +448,10 @@ export function generateBayesianJson(
 
   // Add legend
   if (graph.legend) {
-    addLegendItem(graph, 'Prior', '#a8d5ff', 'stadium');
-    addLegendItem(graph, 'Evidence', '#81c784', 'rectangle');
-    addLegendItem(graph, 'Hypothesis', '#e0e0e0', 'ellipse');
-    addLegendItem(graph, 'Posterior', '#4caf50', 'stadium');
+    addLegendItem(graph, "Prior", "#a8d5ff", "stadium");
+    addLegendItem(graph, "Evidence", "#81c784", "rectangle");
+    addLegendItem(graph, "Hypothesis", "#e0e0e0", "ellipse");
+    addLegendItem(graph, "Posterior", "#4caf50", "stadium");
   }
 
   return serializeGraph(graph, options);
@@ -454,13 +466,13 @@ export function generateCausalJson(
   causes: Array<{ id: string; label: string; strength?: number }>,
   effects: Array<{ id: string; label: string }>,
   links: Array<{ cause: string; effect: string; strength?: number }>,
-  options: JsonVisualOptions = {}
+  options: JsonVisualOptions = {},
 ): string {
   const graph = createJsonGraph(title, mode, options);
 
   if (graph.layout) {
-    graph.layout.type = 'hierarchical';
-    graph.layout.direction = 'LR';
+    graph.layout.type = "hierarchical";
+    graph.layout.direction = "LR";
   }
 
   // Add cause nodes
@@ -469,11 +481,11 @@ export function generateCausalJson(
     addNode(graph, {
       id: cause.id,
       label: cause.label,
-      type: 'cause',
+      type: "cause",
       x: 0,
       y: i * 80,
-      color: '#ffb74d',
-      shape: 'rectangle',
+      color: "#ffb74d",
+      shape: "rectangle",
       metadata: { strength: cause.strength },
     });
   }
@@ -484,11 +496,11 @@ export function generateCausalJson(
     addNode(graph, {
       id: effect.id,
       label: effect.label,
-      type: 'effect',
+      type: "effect",
       x: 250,
       y: i * 80,
-      color: '#4fc3f7',
-      shape: 'rectangle',
+      color: "#4fc3f7",
+      shape: "rectangle",
     });
   }
 
@@ -501,7 +513,7 @@ export function generateCausalJson(
       target: link.effect,
       weight: link.strength,
       directed: true,
-      style: 'solid',
+      style: "solid",
     });
   }
 
@@ -514,8 +526,8 @@ export function generateCausalJson(
 
   // Add legend
   if (graph.legend) {
-    addLegendItem(graph, 'Cause', '#ffb74d', 'rectangle');
-    addLegendItem(graph, 'Effect', '#4fc3f7', 'rectangle');
+    addLegendItem(graph, "Cause", "#ffb74d", "rectangle");
+    addLegendItem(graph, "Effect", "#4fc3f7", "rectangle");
   }
 
   return serializeGraph(graph, options);
@@ -595,7 +607,7 @@ export class JSONExportBuilder {
       ...((this.data.metadata as Record<string, unknown>) || {}),
       ...metadata,
       exportedAt: new Date().toISOString(),
-      generator: 'DeepThinking MCP v8.5.0',
+      generator: "DeepThinking MCP v8.5.0",
     };
     return this;
   }
@@ -652,12 +664,12 @@ export class JSONExportBuilder {
    * @returns this for chaining
    */
   setPath(path: string, value: unknown): this {
-    const parts = path.split('.');
+    const parts = path.split(".");
     let current: Record<string, unknown> = this.data;
 
     for (let i = 0; i < parts.length - 1; i++) {
       const part = parts[i];
-      if (!(part in current) || typeof current[part] !== 'object') {
+      if (!(part in current) || typeof current[part] !== "object") {
         current[part] = {};
       }
       current = current[part] as Record<string, unknown>;
@@ -684,9 +696,10 @@ export class JSONExportBuilder {
    * @param layout - Layout configuration
    * @returns this for chaining
    */
-  addLayout(
-    layout: { type: 'hierarchical' | 'force' | 'circular' | 'tree' | 'linear'; direction?: 'TB' | 'BT' | 'LR' | 'RL' }
-  ): this {
+  addLayout(layout: {
+    type: "hierarchical" | "force" | "circular" | "tree" | "linear";
+    direction?: "TB" | "BT" | "LR" | "RL";
+  }): this {
     this.data.layout = layout;
     return this;
   }
@@ -709,7 +722,9 @@ export class JSONExportBuilder {
    * @param legend - Array of legend items
    * @returns this for chaining
    */
-  addLegend(legend: Array<{ label: string; color: string; shape?: string }>): this {
+  addLegend(
+    legend: Array<{ label: string; color: string; shape?: string }>,
+  ): this {
     this.data.legend = legend;
     return this;
   }
@@ -772,7 +787,7 @@ export class JSONExportBuilder {
       if (value === null || value === undefined) {
         continue;
       }
-      if (typeof value === 'object' && !Array.isArray(value)) {
+      if (typeof value === "object" && !Array.isArray(value)) {
         result[key] = this.removeNulls(value as Record<string, unknown>);
       } else {
         result[key] = value;
@@ -784,12 +799,18 @@ export class JSONExportBuilder {
   /**
    * Sort object keys recursively
    */
-  private sortKeysRecursive(obj: Record<string, unknown>): Record<string, unknown> {
+  private sortKeysRecursive(
+    obj: Record<string, unknown>,
+  ): Record<string, unknown> {
     const result: Record<string, unknown> = {};
     const sortedKeys = Object.keys(obj).sort();
     for (const key of sortedKeys) {
       const value = obj[key];
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      if (
+        typeof value === "object" &&
+        value !== null &&
+        !Array.isArray(value)
+      ) {
         result[key] = this.sortKeysRecursive(value as Record<string, unknown>);
       } else {
         result[key] = value;

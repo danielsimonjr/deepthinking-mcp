@@ -17,9 +17,13 @@
  * EXTRACTED FROM: src/session/manager.ts (metrics methods)
  */
 
-import { ThinkingSession, SessionMetrics, Thought } from '../types/index.js';
-import { isTemporalThought, isGameTheoryThought, isEvidentialThought } from '../types/core.js';
-import { validationCache } from '../validation/cache.js';
+import { ThinkingSession, SessionMetrics, Thought } from "../types/index.js";
+import {
+  isTemporalThought,
+  isGameTheoryThought,
+  isEvidentialThought,
+} from "../types/core.js";
+import { validationCache } from "../validation/cache.js";
 
 /**
  * Session Metrics Calculator - Handles all metrics computations
@@ -99,8 +103,9 @@ export class SessionMetricsCalculator {
     metrics.totalThoughts = session.thoughts.length;
 
     // Update thoughtsByType incrementally (O(1) instead of recalculating)
-    const thoughtType = thought.mode || 'unknown';
-    metrics.thoughtsByType[thoughtType] = (metrics.thoughtsByType[thoughtType] || 0) + 1;
+    const thoughtType = thought.mode || "unknown";
+    metrics.thoughtsByType[thoughtType] =
+      (metrics.thoughtsByType[thoughtType] || 0) + 1;
 
     // Update revision count
     if (thought.isRevision) {
@@ -108,10 +113,14 @@ export class SessionMetricsCalculator {
     }
 
     // Update time spent (in milliseconds)
-    metrics.timeSpent = session.updatedAt.getTime() - session.createdAt.getTime();
+    metrics.timeSpent =
+      session.updatedAt.getTime() - session.createdAt.getTime();
 
     // Update average uncertainty incrementally (O(1) instead of O(n))
-    if ('uncertainty' in thought && typeof (thought as any).uncertainty === 'number') {
+    if (
+      "uncertainty" in thought &&
+      typeof (thought as any).uncertainty === "number"
+    ) {
       const uncertaintyValue = (thought as any).uncertainty;
       const currentSum = metrics._uncertaintySum || 0;
       const currentCount = metrics._uncertaintyCount || 0;
@@ -125,7 +134,7 @@ export class SessionMetricsCalculator {
     }
 
     // Update dependency depth
-    if ('dependencies' in thought && thought.dependencies) {
+    if ("dependencies" in thought && thought.dependencies) {
       const deps = (thought as any).dependencies as string[];
       if (deps && deps.length > metrics.dependencyDepth) {
         metrics.dependencyDepth = deps.length;
@@ -150,72 +159,96 @@ export class SessionMetricsCalculator {
    * @param metrics - Session metrics to update
    * @param thought - Thought to analyze
    */
-  private updateModeSpecificMetrics(metrics: SessionMetrics, thought: Thought): void {
+  private updateModeSpecificMetrics(
+    metrics: SessionMetrics,
+    thought: Thought,
+  ): void {
     // Temporal-specific metrics (Phase 3, v2.1)
     if (isTemporalThought(thought)) {
       if (thought.events) {
-        metrics.customMetrics.set('totalEvents', thought.events.length);
+        metrics.customMetrics.set("totalEvents", thought.events.length);
       }
       if (thought.timeline) {
-        metrics.customMetrics.set('timelineUnit', thought.timeline.timeUnit);
+        metrics.customMetrics.set("timelineUnit", thought.timeline.timeUnit);
       }
       if (thought.relations) {
-        const causalRelations = thought.relations.filter(r => r.relationType === 'causes');
-        metrics.customMetrics.set('causalRelations', causalRelations.length);
+        const causalRelations = thought.relations.filter(
+          (r) => r.relationType === "causes",
+        );
+        metrics.customMetrics.set("causalRelations", causalRelations.length);
       }
       if (thought.constraints) {
-        metrics.customMetrics.set('temporalConstraints', thought.constraints.length);
+        metrics.customMetrics.set(
+          "temporalConstraints",
+          thought.constraints.length,
+        );
       }
       if (thought.intervals) {
-        metrics.customMetrics.set('timeIntervals', thought.intervals.length);
+        metrics.customMetrics.set("timeIntervals", thought.intervals.length);
       }
     }
 
     // Game theory-specific metrics (Phase 3, v2.2)
     if (isGameTheoryThought(thought)) {
       if (thought.players) {
-        metrics.customMetrics.set('numPlayers', thought.players.length);
+        metrics.customMetrics.set("numPlayers", thought.players.length);
       }
       if (thought.strategies) {
-        metrics.customMetrics.set('totalStrategies', thought.strategies.length);
-        const mixedStrategies = thought.strategies.filter(s => !s.isPure);
-        metrics.customMetrics.set('mixedStrategies', mixedStrategies.length);
+        metrics.customMetrics.set("totalStrategies", thought.strategies.length);
+        const mixedStrategies = thought.strategies.filter((s) => !s.isPure);
+        metrics.customMetrics.set("mixedStrategies", mixedStrategies.length);
       }
       if (thought.nashEquilibria) {
-        metrics.customMetrics.set('nashEquilibria', thought.nashEquilibria.length);
-        const pureEquilibria = thought.nashEquilibria.filter(e => e.type === 'pure');
-        metrics.customMetrics.set('pureNashEquilibria', pureEquilibria.length);
+        metrics.customMetrics.set(
+          "nashEquilibria",
+          thought.nashEquilibria.length,
+        );
+        const pureEquilibria = thought.nashEquilibria.filter(
+          (e) => e.type === "pure",
+        );
+        metrics.customMetrics.set("pureNashEquilibria", pureEquilibria.length);
       }
       if (thought.dominantStrategies) {
-        metrics.customMetrics.set('dominantStrategies', thought.dominantStrategies.length);
+        metrics.customMetrics.set(
+          "dominantStrategies",
+          thought.dominantStrategies.length,
+        );
       }
       if (thought.game) {
-        metrics.customMetrics.set('gameType', thought.game.type);
-        metrics.customMetrics.set('isZeroSum', thought.game.isZeroSum);
+        metrics.customMetrics.set("gameType", thought.game.type);
+        metrics.customMetrics.set("isZeroSum", thought.game.isZeroSum);
       }
     }
 
     // Evidential-specific metrics (Phase 3, v2.3)
     if (isEvidentialThought(thought)) {
       if (thought.hypotheses) {
-        metrics.customMetrics.set('totalHypotheses', thought.hypotheses.length);
+        metrics.customMetrics.set("totalHypotheses", thought.hypotheses.length);
       }
       if (thought.evidence) {
-        metrics.customMetrics.set('totalEvidence', thought.evidence.length);
-        const avgReliability = thought.evidence.reduce((sum, e) => sum + e.reliability, 0) / thought.evidence.length;
-        metrics.customMetrics.set('avgEvidenceReliability', avgReliability);
+        metrics.customMetrics.set("totalEvidence", thought.evidence.length);
+        const avgReliability =
+          thought.evidence.reduce((sum, e) => sum + e.reliability, 0) /
+          thought.evidence.length;
+        metrics.customMetrics.set("avgEvidenceReliability", avgReliability);
       }
       if (thought.beliefFunctions) {
-        metrics.customMetrics.set('beliefFunctions', thought.beliefFunctions.length);
+        metrics.customMetrics.set(
+          "beliefFunctions",
+          thought.beliefFunctions.length,
+        );
       }
       if (thought.combinedBelief) {
-        metrics.customMetrics.set('hasCombinedBelief', true);
+        metrics.customMetrics.set("hasCombinedBelief", true);
         if (thought.combinedBelief.conflictMass !== undefined) {
-          metrics.customMetrics.set('conflictMass', thought.combinedBelief.conflictMass);
+          metrics.customMetrics.set(
+            "conflictMass",
+            thought.combinedBelief.conflictMass,
+          );
         }
       }
       if (thought.decisions) {
-        metrics.customMetrics.set('decisions', thought.decisions.length);
+        metrics.customMetrics.set("decisions", thought.decisions.length);
       }
     }
   }

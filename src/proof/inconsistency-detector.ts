@@ -10,7 +10,7 @@ import type {
   DependencyGraph,
   Inconsistency,
   ProofDecomposition,
-} from '../types/modes/mathematics.js';
+} from "../types/modes/mathematics.js";
 
 /**
  * Contradiction pattern for syntactic matching
@@ -63,50 +63,50 @@ export class InconsistencyDetector {
       {
         positive: /(\w+)\s*>\s*0/,
         negative: /(\w+)\s*(?:<=|≤)\s*0/,
-        description: 'Positive and non-positive contradiction',
+        description: "Positive and non-positive contradiction",
       },
       {
         positive: /(\w+)\s*<\s*0/,
         negative: /(\w+)\s*(?:>=|≥)\s*0/,
-        description: 'Negative and non-negative contradiction',
+        description: "Negative and non-negative contradiction",
       },
       {
         positive: /(\w+)\s*=\s*0/,
         negative: /(\w+)\s*(?:!=|≠|<>)\s*0/,
-        description: 'Zero and non-zero contradiction',
+        description: "Zero and non-zero contradiction",
       },
       // Boolean contradictions
       {
         positive: /(\w+)\s+is\s+true/i,
         negative: /(\w+)\s+is\s+false/i,
-        description: 'True and false contradiction',
+        description: "True and false contradiction",
       },
       // Property contradictions
       {
         positive: /(\w+)\s+is\s+even/i,
         negative: /(\w+)\s+is\s+odd/i,
-        description: 'Even and odd contradiction',
+        description: "Even and odd contradiction",
       },
       {
         positive: /(\w+)\s+is\s+positive/i,
         negative: /(\w+)\s+is\s+(?:negative|non-positive)/i,
-        description: 'Positive property contradiction',
+        description: "Positive property contradiction",
       },
       {
         positive: /(\w+)\s+is\s+rational/i,
         negative: /(\w+)\s+is\s+irrational/i,
-        description: 'Rational and irrational contradiction',
+        description: "Rational and irrational contradiction",
       },
       {
         positive: /(\w+)\s+is\s+finite/i,
         negative: /(\w+)\s+is\s+infinite/i,
-        description: 'Finite and infinite contradiction',
+        description: "Finite and infinite contradiction",
       },
       // Existence contradictions
       {
         positive: /(?:there\s+)?exists?\s+(\w+)/i,
         negative: /(?:no|does\s+not\s+exist|cannot\s+exist)\s+(\w+)/i,
-        description: 'Existence contradiction',
+        description: "Existence contradiction",
       },
     ];
   }
@@ -125,7 +125,7 @@ export class InconsistencyDetector {
       ...contradictions.map((c) => ({
         ...c,
         id: `inc-${++inconsistencyCount}`,
-      }))
+      })),
     );
 
     // Type mismatches
@@ -135,7 +135,7 @@ export class InconsistencyDetector {
         ...typeMismatches.map((t) => ({
           ...t,
           id: `inc-${++inconsistencyCount}`,
-        }))
+        })),
       );
     }
 
@@ -146,7 +146,7 @@ export class InconsistencyDetector {
         ...domainViolations.map((d) => ({
           ...d,
           id: `inc-${++inconsistencyCount}`,
-        }))
+        })),
       );
     }
 
@@ -156,7 +156,7 @@ export class InconsistencyDetector {
       ...undefinedOps.map((u) => ({
         ...u,
         id: `inc-${++inconsistencyCount}`,
-      }))
+      })),
     );
 
     // Axiom conflicts
@@ -165,7 +165,7 @@ export class InconsistencyDetector {
       ...axiomConflicts.map((a) => ({
         ...a,
         id: `inc-${++inconsistencyCount}`,
-      }))
+      })),
     );
 
     // Quantifier errors
@@ -175,7 +175,7 @@ export class InconsistencyDetector {
         ...quantifierErrors.map((q) => ({
           ...q,
           id: `inc-${++inconsistencyCount}`,
-        }))
+        })),
       );
     }
 
@@ -185,11 +185,14 @@ export class InconsistencyDetector {
   /**
    * Detect direct contradictions (P and ¬P)
    */
-  detectContradictions(atoms: AtomicStatement[]): Omit<Inconsistency, 'id'>[] {
-    const contradictions: Omit<Inconsistency, 'id'>[] = [];
+  detectContradictions(atoms: AtomicStatement[]): Omit<Inconsistency, "id">[] {
+    const contradictions: Omit<Inconsistency, "id">[] = [];
 
     // Limit pairwise comparisons
-    const limit = Math.min(atoms.length, Math.sqrt(this.config.maxPairwiseComparisons));
+    const limit = Math.min(
+      atoms.length,
+      Math.sqrt(this.config.maxPairwiseComparisons),
+    );
 
     for (let i = 0; i < Math.min(atoms.length, limit); i++) {
       for (let j = i + 1; j < Math.min(atoms.length, limit); j++) {
@@ -199,11 +202,12 @@ export class InconsistencyDetector {
         // Check syntactic negation
         if (this.isSyntacticNegation(stmtA.statement, stmtB.statement)) {
           contradictions.push({
-            type: 'direct_contradiction',
+            type: "direct_contradiction",
             involvedStatements: [stmtA.id, stmtB.id],
             explanation: `Statement "${stmtA.statement.substring(0, 40)}..." directly contradicts "${stmtB.statement.substring(0, 40)}..."`,
-            severity: 'critical',
-            suggestedResolution: 'Review the derivation of both statements to find the error',
+            severity: "critical",
+            suggestedResolution:
+              "Review the derivation of both statements to find the error",
           });
         }
 
@@ -214,11 +218,11 @@ export class InconsistencyDetector {
 
           if (matchA && matchB && matchA[1] === matchB[1]) {
             contradictions.push({
-              type: 'direct_contradiction',
+              type: "direct_contradiction",
               involvedStatements: [stmtA.id, stmtB.id],
               explanation: `${pattern.description}: "${matchA[1]}" has conflicting properties`,
-              severity: 'critical',
-              suggestedResolution: 'Check the assumptions about the variable',
+              severity: "critical",
+              suggestedResolution: "Check the assumptions about the variable",
             });
           }
 
@@ -228,11 +232,11 @@ export class InconsistencyDetector {
 
           if (matchA2 && matchB2 && matchA2[1] === matchB2[1]) {
             contradictions.push({
-              type: 'direct_contradiction',
+              type: "direct_contradiction",
               involvedStatements: [stmtA.id, stmtB.id],
               explanation: `${pattern.description}: "${matchA2[1]}" has conflicting properties`,
-              severity: 'critical',
-              suggestedResolution: 'Check the assumptions about the variable',
+              severity: "critical",
+              suggestedResolution: "Check the assumptions about the variable",
             });
           }
         }
@@ -296,8 +300,8 @@ export class InconsistencyDetector {
   /**
    * Detect type mismatches
    */
-  detectTypeMismatches(atoms: AtomicStatement[]): Omit<Inconsistency, 'id'>[] {
-    const mismatches: Omit<Inconsistency, 'id'>[] = [];
+  detectTypeMismatches(atoms: AtomicStatement[]): Omit<Inconsistency, "id">[] {
+    const mismatches: Omit<Inconsistency, "id">[] = [];
 
     // Track variable types
     const variableTypes = new Map<string, { type: string; sourceId: string }>();
@@ -305,10 +309,22 @@ export class InconsistencyDetector {
     for (const atom of atoms) {
       // Extract type declarations
       const typePatterns = [
-        { pattern: /let\s+(\w+)\s+be\s+an?\s+(\w+)/i, extractor: (m: RegExpMatchArray) => ({ var: m[1], type: m[2] }) },
-        { pattern: /(\w+)\s+is\s+an?\s+(\w+)/i, extractor: (m: RegExpMatchArray) => ({ var: m[1], type: m[2] }) },
-        { pattern: /for\s+(?:all|any|every)\s+(\w+)\s+in\s+(\w+)/i, extractor: (m: RegExpMatchArray) => ({ var: m[1], type: m[2] }) },
-        { pattern: /(\w+)\s*∈\s*(\w+)/i, extractor: (m: RegExpMatchArray) => ({ var: m[1], type: m[2] }) },
+        {
+          pattern: /let\s+(\w+)\s+be\s+an?\s+(\w+)/i,
+          extractor: (m: RegExpMatchArray) => ({ var: m[1], type: m[2] }),
+        },
+        {
+          pattern: /(\w+)\s+is\s+an?\s+(\w+)/i,
+          extractor: (m: RegExpMatchArray) => ({ var: m[1], type: m[2] }),
+        },
+        {
+          pattern: /for\s+(?:all|any|every)\s+(\w+)\s+in\s+(\w+)/i,
+          extractor: (m: RegExpMatchArray) => ({ var: m[1], type: m[2] }),
+        },
+        {
+          pattern: /(\w+)\s*∈\s*(\w+)/i,
+          extractor: (m: RegExpMatchArray) => ({ var: m[1], type: m[2] }),
+        },
       ];
 
       for (const { pattern, extractor } of typePatterns) {
@@ -319,10 +335,10 @@ export class InconsistencyDetector {
 
           if (existing && !this.areTypesCompatible(existing.type, varType)) {
             mismatches.push({
-              type: 'type_mismatch',
+              type: "type_mismatch",
               involvedStatements: [existing.sourceId, atom.id],
               explanation: `Variable "${varName}" is declared as both "${existing.type}" and "${varType}"`,
-              severity: 'error',
+              severity: "error",
               suggestedResolution: `Clarify the type of "${varName}"`,
             });
           } else {
@@ -346,12 +362,12 @@ export class InconsistencyDetector {
 
     // Subtype relationships
     const subtypes: Record<string, string[]> = {
-      natural: ['integer', 'real', 'complex'],
-      integer: ['real', 'complex'],
-      rational: ['real', 'complex'],
-      real: ['complex'],
-      positive: ['real', 'integer'],
-      negative: ['real', 'integer'],
+      natural: ["integer", "real", "complex"],
+      integer: ["real", "complex"],
+      rational: ["real", "complex"],
+      real: ["complex"],
+      positive: ["real", "integer"],
+      negative: ["real", "integer"],
     };
 
     return subtypes[t1]?.includes(t2) || subtypes[t2]?.includes(t1);
@@ -360,25 +376,27 @@ export class InconsistencyDetector {
   /**
    * Detect domain violations
    */
-  detectDomainViolations(atoms: AtomicStatement[]): Omit<Inconsistency, 'id'>[] {
-    const violations: Omit<Inconsistency, 'id'>[] = [];
+  detectDomainViolations(
+    atoms: AtomicStatement[],
+  ): Omit<Inconsistency, "id">[] {
+    const violations: Omit<Inconsistency, "id">[] = [];
 
     // Common domain violations
     const domainPatterns = [
       {
         pattern: /sqrt\s*\(\s*(-[\d.]+|negative)/i,
-        violation: 'Square root of negative number',
-        domain: 'real numbers',
+        violation: "Square root of negative number",
+        domain: "real numbers",
       },
       {
         pattern: /log\s*\(\s*(-[\d.]+|0|zero|non-?positive)/i,
-        violation: 'Logarithm of non-positive number',
-        domain: 'positive real numbers',
+        violation: "Logarithm of non-positive number",
+        domain: "positive real numbers",
       },
       {
         pattern: /arcsin\s*\(\s*([\d.]+)/,
-        violation: 'Arcsin of value outside [-1, 1]',
-        domain: '[-1, 1]',
+        violation: "Arcsin of value outside [-1, 1]",
+        domain: "[-1, 1]",
         validator: (match: RegExpMatchArray) => {
           const val = parseFloat(match[1]);
           return Math.abs(val) > 1;
@@ -386,8 +404,8 @@ export class InconsistencyDetector {
       },
       {
         pattern: /(\w+)\s*\/\s*0(?![.\d])/,
-        violation: 'Division by zero',
-        domain: 'non-zero divisor',
+        violation: "Division by zero",
+        domain: "non-zero divisor",
       },
     ];
 
@@ -396,10 +414,10 @@ export class InconsistencyDetector {
         const match = atom.statement.match(pattern);
         if (match && (!validator || validator(match))) {
           violations.push({
-            type: 'domain_violation',
+            type: "domain_violation",
             involvedStatements: [atom.id],
             explanation: `${violation} in "${atom.statement.substring(0, 50)}..."`,
-            severity: 'error',
+            severity: "error",
             suggestedResolution: `Ensure the argument is in the valid domain: ${domain}`,
           });
         }
@@ -412,29 +430,31 @@ export class InconsistencyDetector {
   /**
    * Detect undefined operations
    */
-  detectUndefinedOperations(atoms: AtomicStatement[]): Omit<Inconsistency, 'id'>[] {
-    const undefined: Omit<Inconsistency, 'id'>[] = [];
+  detectUndefinedOperations(
+    atoms: AtomicStatement[],
+  ): Omit<Inconsistency, "id">[] {
+    const undefined: Omit<Inconsistency, "id">[] = [];
 
     const undefinedPatterns = [
       {
         pattern: /0\s*\/\s*0/,
-        operation: '0/0 - indeterminate form',
+        operation: "0/0 - indeterminate form",
       },
       {
         pattern: /∞\s*[-/]\s*∞/,
-        operation: '∞ - ∞ or ∞/∞ - indeterminate form',
+        operation: "∞ - ∞ or ∞/∞ - indeterminate form",
       },
       {
         pattern: /0\s*\*\s*∞|∞\s*\*\s*0/,
-        operation: '0 × ∞ - indeterminate form',
+        operation: "0 × ∞ - indeterminate form",
       },
       {
         pattern: /0\s*\^\s*0/,
-        operation: '0^0 - undefined/context-dependent',
+        operation: "0^0 - undefined/context-dependent",
       },
       {
         pattern: /(\w+)\s*\^\s*\(?\s*-\d+\s*\)?.*\1\s*=\s*0/i,
-        operation: 'Negative power of zero',
+        operation: "Negative power of zero",
       },
     ];
 
@@ -442,11 +462,12 @@ export class InconsistencyDetector {
       for (const { pattern, operation } of undefinedPatterns) {
         if (pattern.test(atom.statement)) {
           undefined.push({
-            type: 'undefined_operation',
+            type: "undefined_operation",
             involvedStatements: [atom.id],
             explanation: `Undefined operation: ${operation}`,
-            severity: 'critical',
-            suggestedResolution: 'This operation is mathematically undefined or indeterminate',
+            severity: "critical",
+            suggestedResolution:
+              "This operation is mathematically undefined or indeterminate",
           });
         }
       }
@@ -458,9 +479,9 @@ export class InconsistencyDetector {
   /**
    * Detect axiom conflicts
    */
-  detectAxiomConflicts(atoms: AtomicStatement[]): Omit<Inconsistency, 'id'>[] {
-    const conflicts: Omit<Inconsistency, 'id'>[] = [];
-    const axioms = atoms.filter((a) => a.type === 'axiom');
+  detectAxiomConflicts(atoms: AtomicStatement[]): Omit<Inconsistency, "id">[] {
+    const conflicts: Omit<Inconsistency, "id">[] = [];
+    const axioms = atoms.filter((a) => a.type === "axiom");
 
     // Check for potentially conflicting axioms
     for (let i = 0; i < axioms.length; i++) {
@@ -468,11 +489,12 @@ export class InconsistencyDetector {
         // Check for obvious conflicts in axioms
         if (this.axiomsMayConflict(axioms[i], axioms[j])) {
           conflicts.push({
-            type: 'axiom_conflict',
+            type: "axiom_conflict",
             involvedStatements: [axioms[i].id, axioms[j].id],
             explanation: `Axioms may be in conflict: "${axioms[i].statement.substring(0, 30)}..." and "${axioms[j].statement.substring(0, 30)}..."`,
-            severity: 'warning',
-            suggestedResolution: 'Verify that these axioms are consistent in the intended model',
+            severity: "warning",
+            suggestedResolution:
+              "Verify that these axioms are consistent in the intended model",
           });
         }
       }
@@ -491,10 +513,18 @@ export class InconsistencyDetector {
     }
 
     // Check for conflicting universal statements
-    const universalA = /(?:for\s+all|∀)\s+(\w+).*?(\w+)\s+is\s+(\w+)/i.exec(a.statement);
-    const universalB = /(?:for\s+all|∀)\s+(\w+).*?(\w+)\s+is\s+not\s+(\w+)/i.exec(b.statement);
+    const universalA = /(?:for\s+all|∀)\s+(\w+).*?(\w+)\s+is\s+(\w+)/i.exec(
+      a.statement,
+    );
+    const universalB =
+      /(?:for\s+all|∀)\s+(\w+).*?(\w+)\s+is\s+not\s+(\w+)/i.exec(b.statement);
 
-    if (universalA && universalB && universalA[2] === universalB[2] && universalA[3] === universalB[3]) {
+    if (
+      universalA &&
+      universalB &&
+      universalA[2] === universalB[2] &&
+      universalA[3] === universalB[3]
+    ) {
       return true;
     }
 
@@ -506,24 +536,35 @@ export class InconsistencyDetector {
    */
   detectQuantifierErrors(
     atoms: AtomicStatement[],
-    graph: DependencyGraph
-  ): Omit<Inconsistency, 'id'>[] {
-    const errors: Omit<Inconsistency, 'id'>[] = [];
+    graph: DependencyGraph,
+  ): Omit<Inconsistency, "id">[] {
+    const errors: Omit<Inconsistency, "id">[] = [];
 
     // Track quantifier scopes
-    const scopedVariables = new Map<string, { quantifier: string; scope: string }>();
+    const scopedVariables = new Map<
+      string,
+      { quantifier: string; scope: string }
+    >();
 
     for (const atom of atoms) {
       // Universal quantifier introduction
       const universalMatch = atom.statement.match(/(?:for\s+all|∀)\s+(\w+)/i);
       if (universalMatch) {
-        scopedVariables.set(universalMatch[1], { quantifier: 'universal', scope: atom.id });
+        scopedVariables.set(universalMatch[1], {
+          quantifier: "universal",
+          scope: atom.id,
+        });
       }
 
       // Existential quantifier introduction
-      const existentialMatch = atom.statement.match(/(?:there\s+exists?|∃)\s+(\w+)/i);
+      const existentialMatch = atom.statement.match(
+        /(?:there\s+exists?|∃)\s+(\w+)/i,
+      );
       if (existentialMatch) {
-        scopedVariables.set(existentialMatch[1], { quantifier: 'existential', scope: atom.id });
+        scopedVariables.set(existentialMatch[1], {
+          quantifier: "existential",
+          scope: atom.id,
+        });
       }
 
       // Check for scope violations
@@ -536,10 +577,10 @@ export class InconsistencyDetector {
             const inScope = this.isInScope(atom.id, scopeInfo.scope, graph);
             if (!inScope) {
               errors.push({
-                type: 'quantifier_error',
+                type: "quantifier_error",
                 involvedStatements: [scopeInfo.scope, atom.id],
                 explanation: `Variable "${varName}" used outside its quantifier scope`,
-                severity: 'error',
+                severity: "error",
                 suggestedResolution: `Ensure "${varName}" is properly bound in the current context`,
               });
             }
@@ -556,11 +597,13 @@ export class InconsistencyDetector {
       if (uniExiMatch && exiUniMatch) {
         // Both patterns matched - possible order confusion
         errors.push({
-          type: 'quantifier_error',
+          type: "quantifier_error",
           involvedStatements: [atom.id],
-          explanation: 'Ambiguous quantifier order may lead to different meanings',
-          severity: 'warning',
-          suggestedResolution: 'Clarify the intended quantifier order (∀∃ vs ∃∀ has different meaning)',
+          explanation:
+            "Ambiguous quantifier order may lead to different meanings",
+          severity: "warning",
+          suggestedResolution:
+            "Clarify the intended quantifier order (∀∃ vs ∃∀ has different meaning)",
         });
       }
     }
@@ -571,7 +614,11 @@ export class InconsistencyDetector {
   /**
    * Check if a statement is in the scope of another
    */
-  private isInScope(stmtId: string, scopeId: string, graph: DependencyGraph): boolean {
+  private isInScope(
+    stmtId: string,
+    scopeId: string,
+    graph: DependencyGraph,
+  ): boolean {
     // A statement is in scope if there's a path from the scope to the statement
     const visited = new Set<string>();
     const queue = [scopeId];
@@ -603,9 +650,15 @@ export class InconsistencyDetector {
     warningCount: number;
     summary: string;
   } {
-    const criticalCount = inconsistencies.filter((i) => i.severity === 'critical').length;
-    const errorCount = inconsistencies.filter((i) => i.severity === 'error').length;
-    const warningCount = inconsistencies.filter((i) => i.severity === 'warning').length;
+    const criticalCount = inconsistencies.filter(
+      (i) => i.severity === "critical",
+    ).length;
+    const errorCount = inconsistencies.filter(
+      (i) => i.severity === "error",
+    ).length;
+    const warningCount = inconsistencies.filter(
+      (i) => i.severity === "warning",
+    ).length;
 
     let summary: string;
     if (criticalCount > 0) {
@@ -615,7 +668,8 @@ export class InconsistencyDetector {
     } else if (warningCount > 0) {
       summary = `WARNING: ${warningCount} potential issues found. Review recommended.`;
     } else {
-      summary = 'No inconsistencies detected. The proof appears to be consistent.';
+      summary =
+        "No inconsistencies detected. The proof appears to be consistent.";
     }
 
     return {

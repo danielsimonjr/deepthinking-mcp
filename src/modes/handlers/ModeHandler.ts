@@ -10,8 +10,8 @@
  * - Optional enhancements (suggestions, warnings, etc.)
  */
 
-import type { ThinkingMode, Thought } from '../../types/core.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+import type { ThinkingMode, Thought } from "../../types/core.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 
 /**
  * Result of mode-specific validation
@@ -184,7 +184,9 @@ export interface ModeStatus {
 /**
  * Create a successful validation result
  */
-export function validationSuccess(warnings: ValidationWarning[] = []): ValidationResult {
+export function validationSuccess(
+  warnings: ValidationWarning[] = [],
+): ValidationResult {
   return {
     valid: true,
     errors: [],
@@ -197,7 +199,7 @@ export function validationSuccess(warnings: ValidationWarning[] = []): Validatio
  */
 export function validationFailure(
   errors: ValidationError[],
-  warnings: ValidationWarning[] = []
+  warnings: ValidationWarning[] = [],
 ): ValidationResult {
   return {
     valid: false,
@@ -212,7 +214,7 @@ export function validationFailure(
 export function createValidationError(
   field: string,
   message: string,
-  code: string
+  code: string,
 ): ValidationError {
   return { field, message, code };
 }
@@ -223,7 +225,7 @@ export function createValidationError(
 export function createValidationWarning(
   field: string,
   message: string,
-  suggestion?: string
+  suggestion?: string,
 ): ValidationWarning {
   return { field, message, suggestion };
 }

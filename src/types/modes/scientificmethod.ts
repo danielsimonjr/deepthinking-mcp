@@ -3,7 +3,7 @@
  * Phase 4 (v3.2.0) - Hypothesis-driven experimentation and analysis
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Scientific Method thought extends base thought with experimental design
@@ -11,12 +11,12 @@ import { BaseThought, ThinkingMode } from '../core.js';
 export interface ScientificMethodThought extends BaseThought {
   mode: ThinkingMode.SCIENTIFICMETHOD;
   thoughtType:
-    | 'question_formulation'
-    | 'hypothesis_generation'
-    | 'experiment_design'
-    | 'data_collection'
-    | 'analysis'
-    | 'conclusion';
+    | "question_formulation"
+    | "hypothesis_generation"
+    | "experiment_design"
+    | "data_collection"
+    | "analysis"
+    | "conclusion";
 
   researchQuestion?: ResearchQuestion;
   scientificHypotheses?: Hypothesis[];
@@ -47,7 +47,7 @@ export interface ResearchQuestion {
  */
 export interface Hypothesis {
   id: string;
-  type: 'null' | 'alternative' | 'directional' | 'non_directional';
+  type: "null" | "alternative" | "directional" | "non_directional";
   statement: string;
   prediction: string;
   rationale: string;
@@ -61,7 +61,8 @@ export interface Hypothesis {
  */
 export interface ExperimentDesign {
   id: string;
-  type: 'experimental' | 'quasi_experimental' | 'observational' | 'correlational';
+  type:
+    "experimental" | "quasi_experimental" | "observational" | "correlational";
   design: string; // e.g., "randomized controlled trial", "within-subjects"
   independentVariables: Variable[];
   dependentVariables: Variable[];
@@ -69,7 +70,7 @@ export interface ExperimentDesign {
   sampleSize: number;
   sampleSizeJustification?: string;
   randomization: boolean;
-  blinding?: 'none' | 'single' | 'double' | 'triple';
+  blinding?: "none" | "single" | "double" | "triple";
   controls: string[];
   procedure: string[];
   materials?: string[];
@@ -83,9 +84,9 @@ export interface ExperimentDesign {
 export interface Variable {
   id: string;
   name: string;
-  type: 'independent' | 'dependent' | 'control' | 'confounding';
+  type: "independent" | "dependent" | "control" | "confounding";
   description: string;
-  measurementScale: 'nominal' | 'ordinal' | 'interval' | 'ratio';
+  measurementScale: "nominal" | "ordinal" | "interval" | "ratio";
   unit?: string;
   operationalDefinition: string;
   range?: [number, number];
@@ -174,7 +175,7 @@ export interface StatisticalTest {
   pValue: number;
   confidenceInterval?: [number, number];
   alpha: number; // significance level, typically 0.05
-  result: 'reject_null' | 'fail_to_reject_null';
+  result: "reject_null" | "fail_to_reject_null";
   interpretation: string;
   latex?: string; // Statistical formula
 }
@@ -199,6 +200,8 @@ export interface ScientificConclusion {
 /**
  * Type guard for Scientific Method thoughts
  */
-export function isScientificMethodThought(thought: BaseThought): thought is ScientificMethodThought {
-  return thought.mode === 'scientificmethod';
+export function isScientificMethodThought(
+  thought: BaseThought,
+): thought is ScientificMethodThought {
+  return thought.mode === "scientificmethod";
 }

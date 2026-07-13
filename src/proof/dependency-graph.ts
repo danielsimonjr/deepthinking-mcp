@@ -5,13 +5,13 @@
  * Includes Tarjan's algorithm for cycle detection (circular reasoning).
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 import type {
   AtomicStatement,
   DependencyEdge,
   DependencyGraph,
   InferenceRule,
-} from '../types/modes/mathematics.js';
+} from "../types/modes/mathematics.js";
 
 /**
  * Builder for creating and analyzing dependency graphs
@@ -47,8 +47,8 @@ export class DependencyGraphBuilder {
    */
   createStatement(
     statement: string,
-    type: AtomicStatement['type'],
-    options?: Partial<Omit<AtomicStatement, 'id' | 'statement' | 'type'>>
+    type: AtomicStatement["type"],
+    options?: Partial<Omit<AtomicStatement, "id" | "statement" | "type">>,
   ): AtomicStatement {
     const newStatement: AtomicStatement = {
       id: randomUUID(),
@@ -73,8 +73,8 @@ export class DependencyGraphBuilder {
   addDependency(
     from: string,
     to: string,
-    type: DependencyEdge['type'] = 'logical',
-    options?: { strength?: number; inferenceRule?: InferenceRule }
+    type: DependencyEdge["type"] = "logical",
+    options?: { strength?: number; inferenceRule?: InferenceRule },
   ): void {
     if (!this.nodes.has(from)) {
       throw new Error(`Source node '${from}' not found in graph`);
@@ -277,10 +277,16 @@ export class DependencyGraphBuilder {
         if (!index.has(neighbor)) {
           // Neighbor hasn't been visited
           strongConnect(neighbor);
-          lowlink.set(nodeId, Math.min(lowlink.get(nodeId)!, lowlink.get(neighbor)!));
+          lowlink.set(
+            nodeId,
+            Math.min(lowlink.get(nodeId)!, lowlink.get(neighbor)!),
+          );
         } else if (onStack.has(neighbor)) {
           // Neighbor is on stack, so it's part of current SCC
-          lowlink.set(nodeId, Math.min(lowlink.get(nodeId)!, index.get(neighbor)!));
+          lowlink.set(
+            nodeId,
+            Math.min(lowlink.get(nodeId)!, index.get(neighbor)!),
+          );
         }
       }
 
@@ -419,7 +425,11 @@ export class DependencyGraphBuilder {
 
     const paths: string[][] = [];
 
-    const dfs = (current: string, path: string[], visited: Set<string>): void => {
+    const dfs = (
+      current: string,
+      path: string[],
+      visited: Set<string>,
+    ): void => {
       if (paths.length >= maxPaths) return;
 
       if (current === to) {
@@ -451,7 +461,9 @@ export class DependencyGraphBuilder {
   build(): DependencyGraph {
     const cycles = this.detectCycles();
     const hasCycles = cycles.length > 0;
-    const topologicalOrder = hasCycles ? undefined : (this.getTopologicalOrder() ?? undefined);
+    const topologicalOrder = hasCycles
+      ? undefined
+      : (this.getTopologicalOrder() ?? undefined);
 
     return {
       nodes: new Map(this.nodes),

@@ -9,27 +9,33 @@
  * Now includes integrated meta-monitoring for strategy evaluation.
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 import {
   ThinkingSession,
   SessionConfig,
   SessionMetadata,
   Thought,
-  ThinkingMode
-} from '../types/index.js';
+  ThinkingMode,
+} from "../types/index.js";
 import {
   StrategyEvaluation,
   AlternativeStrategy,
   QualityMetrics,
   SessionContext,
-} from '../types/modes/metareasoning.js';
-import { SessionNotFoundError } from '../utils/errors.js';
-import { sanitizeString, sanitizeThoughtContent, validateSessionId, MAX_LENGTHS } from '../utils/sanitization.js';
-import { createLogger, LogLevel } from '../utils/logger.js';
-import { ILogger } from '../interfaces/ILogger.js';
-import { SessionStorage } from './storage/interface.js';
-import { LRUCache } from '../cache/lru.js';
-import { SessionMetricsCalculator } from './SessionMetricsCalculator.js';
+} from "../types/modes/metareasoning.js";
+import { SessionNotFoundError } from "../utils/errors.js";
+import {
+  sanitizeString,
+  sanitizeThoughtContent,
+  validateSessionId,
+  MAX_LENGTHS,
+} from "../utils/sanitization.js";
+import { createLogger, LogLevel } from "../utils/logger.js";
+import { ILogger } from "../interfaces/ILogger.js";
+import { SessionStorage } from "./storage/interface.js";
+import { LRUCache } from "../cache/lru.js";
+import type { CacheStats } from "../cache/types.js";
+import { SessionMetricsCalculator } from "./SessionMetricsCalculator.js";
 
 /**
  * Session history entry for meta-monitoring
@@ -61,16 +67,16 @@ const DEFAULT_CONFIG: SessionConfig = {
   modeConfig: {
     mode: ThinkingMode.HYBRID,
     strictValidation: false,
-    allowModeSwitch: true
+    allowModeSwitch: true,
   },
   enableAutoSave: true,
   enableValidation: true,
   enableVisualization: true,
   integrations: {},
-  exportFormats: ['markdown', 'latex', 'json'],
+  exportFormats: ["markdown", "latex", "json"],
   autoExportOnComplete: false,
   maxThoughtsInMemory: 1000,
-  compressionThreshold: 500
+  compressionThreshold: 500,
 };
 
 /**
@@ -137,7 +143,7 @@ export class SessionManager {
   constructor(
     config?: Partial<SessionConfig>,
     logger?: ILogger | LogLevel,
-    storage?: SessionStorage
+    storage?: SessionStorage,
   ) {
     // Initialize LRU cache for sessions (max 1000 sessions, ~10-50MB)
     this.activeSessions = new LRUCache<ThinkingSession>({
@@ -148,25 +154,31 @@ export class SessionManager {
         if (this.storage && session.config.enableAutoSave) {
           try {
             await this.storage.saveSession(session);
-            this.logger.debug('Evicted session saved to storage', { sessionId: key });
+            this.logger.debug("Evicted session saved to storage", {
+              sessionId: key,
+            });
           } catch (error) {
-            this.logger.error('Failed to save evicted session', error as Error, { sessionId: key });
+            this.logger.error(
+              "Failed to save evicted session",
+              error as Error,
+              { sessionId: key },
+            );
           }
         }
         // Clear meta-monitoring data for evicted session
         this.clearMetaSession(key);
-      }
+      },
     });
     this.config = config || {};
     this.storage = storage;
 
     // Support both ILogger injection (DI) and LogLevel (backward compatibility)
-    if (logger && typeof logger === 'object' && 'info' in logger) {
+    if (logger && typeof logger === "object" && "info" in logger) {
       this.logger = logger;
     } else {
       this.logger = createLogger({
         minLevel: (logger as LogLevel) || LogLevel.INFO,
-        enableConsole: true
+        enableConsole: true,
       });
     }
     this.metricsCalculator = new SessionMetricsCalculator();
@@ -196,24 +208,26 @@ export class SessionManager {
    * });
    * ```
    */
-  async createSession(options: {
-    title?: string;
-    mode?: ThinkingMode;
-    domain?: string;
-    author?: string;
-    config?: Partial<SessionConfig>;
-  } = {}): Promise<ThinkingSession> {
+  async createSession(
+    options: {
+      title?: string;
+      mode?: ThinkingMode;
+      domain?: string;
+      author?: string;
+      config?: Partial<SessionConfig>;
+    } = {},
+  ): Promise<ThinkingSession> {
     // Validate inputs
     const title = options.title
-      ? sanitizeString(options.title, MAX_LENGTHS.TITLE, 'title')
-      : 'Untitled Session';
+      ? sanitizeString(options.title, MAX_LENGTHS.TITLE, "title")
+      : "Untitled Session";
 
     const domain = options.domain
-      ? sanitizeString(options.domain, MAX_LENGTHS.DOMAIN, 'domain')
+      ? sanitizeString(options.domain, MAX_LENGTHS.DOMAIN, "domain")
       : undefined;
 
     const author = options.author
-      ? sanitizeString(options.author, MAX_LENGTHS.AUTHOR, 'author')
+      ? sanitizeString(options.author, MAX_LENGTHS.AUTHOR, "author")
       : undefined;
 
     const sessionId = randomUUID();
@@ -233,7 +247,7 @@ export class SessionManager {
       isComplete: false,
       metrics: this.metricsCalculator.initializeMetrics(),
       tags: [],
-      collaborators: author ? [author] : []
+      collaborators: author ? [author] : [],
     };
 
     this.activeSessions.set(sessionId, session);
@@ -242,9 +256,11 @@ export class SessionManager {
     if (this.storage && session.config.enableAutoSave) {
       try {
         await this.storage.saveSession(session);
-        this.logger.debug('Session persisted to storage', { sessionId });
+        this.logger.debug("Session persisted to storage", { sessionId });
       } catch (error) {
-        this.logger.error('Failed to persist session', error as Error, { sessionId });
+        this.logger.error("Failed to persist session", error as Error, {
+          sessionId,
+        });
         // Don't throw - session is still created in memory
       }
     }
@@ -252,12 +268,12 @@ export class SessionManager {
     // Start meta-monitoring strategy tracking
     this.startMetaStrategy(sessionId, session.mode);
 
-    this.logger.info('Session created', {
+    this.logger.info("Session created", {
       sessionId,
       title,
       mode: session.mode,
       domain,
-      author
+      author,
     });
 
     return session;
@@ -295,10 +311,14 @@ export class SessionManager {
         if (session) {
           // Add to active sessions cache
           this.activeSessions.set(sessionId, session);
-          this.logger.debug('Session loaded from storage', { sessionId });
+          this.logger.debug("Session loaded from storage", { sessionId });
         }
       } catch (error) {
-        this.logger.error('Failed to load session from storage', error as Error, { sessionId });
+        this.logger.error(
+          "Failed to load session from storage",
+          error as Error,
+          { sessionId },
+        );
       }
     }
 
@@ -330,13 +350,16 @@ export class SessionManager {
    * });
    * ```
    */
-  async addThought(sessionId: string, thought: Thought): Promise<ThinkingSession> {
+  async addThought(
+    sessionId: string,
+    thought: Thought,
+  ): Promise<ThinkingSession> {
     // Validate session ID
     validateSessionId(sessionId);
 
     const session = this.activeSessions.get(sessionId);
     if (!session) {
-      this.logger.error('Session not found', undefined, { sessionId });
+      this.logger.error("Session not found", undefined, { sessionId });
       throw new SessionNotFoundError(sessionId);
     }
 
@@ -363,10 +386,10 @@ export class SessionManager {
     // Check if session is complete
     if (!thought.nextThoughtNeeded) {
       session.isComplete = true;
-      this.logger.info('Session completed', {
+      this.logger.info("Session completed", {
         sessionId,
         title: session.title,
-        totalThoughts: session.thoughts.length
+        totalThoughts: session.thoughts.length,
       });
     }
 
@@ -374,17 +397,21 @@ export class SessionManager {
     if (this.storage && session.config.enableAutoSave) {
       try {
         await this.storage.saveSession(session);
-        this.logger.debug('Session persisted after thought added', { sessionId });
+        this.logger.debug("Session persisted after thought added", {
+          sessionId,
+        });
       } catch (error) {
-        this.logger.error('Failed to persist session', error as Error, { sessionId });
+        this.logger.error("Failed to persist session", error as Error, {
+          sessionId,
+        });
         // Don't throw - thought is still added in memory
       }
     }
 
-    this.logger.debug('Thought added', {
+    this.logger.debug("Thought added", {
       sessionId,
       thoughtNumber: thought.thoughtNumber,
-      totalThoughts: session.thoughts.length
+      totalThoughts: session.thoughts.length,
     });
 
     return session;
@@ -414,14 +441,14 @@ export class SessionManager {
   async switchMode(
     sessionId: string,
     newMode: ThinkingMode,
-    reason?: string
+    reason?: string,
   ): Promise<ThinkingSession> {
     // Validate session ID
     validateSessionId(sessionId);
 
     const session = this.activeSessions.get(sessionId);
     if (!session) {
-      this.logger.error('Session not found', undefined, { sessionId });
+      this.logger.error("Session not found", undefined, { sessionId });
       throw new SessionNotFoundError(sessionId);
     }
 
@@ -434,17 +461,19 @@ export class SessionManager {
     if (this.storage && session.config.enableAutoSave) {
       try {
         await this.storage.saveSession(session);
-        this.logger.debug('Session persisted after mode switch', { sessionId });
+        this.logger.debug("Session persisted after mode switch", { sessionId });
       } catch (error) {
-        this.logger.error('Failed to persist session', error as Error, { sessionId });
+        this.logger.error("Failed to persist session", error as Error, {
+          sessionId,
+        });
       }
     }
 
-    this.logger.info('Session mode switched', {
+    this.logger.info("Session mode switched", {
       sessionId,
       oldMode,
       newMode,
-      reason
+      reason,
     });
 
     return session;
@@ -467,16 +496,20 @@ export class SessionManager {
    * });
    * ```
    */
-  async listSessions(includeStoredSessions: boolean = true): Promise<SessionMetadata[]> {
-    const memoryMetadata = Array.from(this.activeSessions.values()).map(session => ({
-      id: session.id,
-      title: session.title,
-      createdAt: session.createdAt,
-      updatedAt: session.updatedAt,
-      thoughtCount: session.thoughts.length,
-      mode: session.mode,
-      isComplete: session.isComplete
-    }));
+  async listSessions(
+    includeStoredSessions: boolean = true,
+  ): Promise<SessionMetadata[]> {
+    const memoryMetadata = Array.from(this.activeSessions.values()).map(
+      (session) => ({
+        id: session.id,
+        title: session.title,
+        createdAt: session.createdAt,
+        updatedAt: session.updatedAt,
+        thoughtCount: session.thoughts.length,
+        mode: session.mode,
+        isComplete: session.isComplete,
+      }),
+    );
 
     // If no storage or not including stored sessions, return memory sessions only
     if (!this.storage || !includeStoredSessions) {
@@ -486,17 +519,17 @@ export class SessionManager {
     // Get stored sessions and merge with memory sessions
     try {
       const storedMetadata = await this.storage.listSessions();
-      const memoryIds = new Set(memoryMetadata.map(s => s.id));
+      const memoryIds = new Set(memoryMetadata.map((s) => s.id));
 
       // Combine memory sessions with stored sessions (avoiding duplicates)
       const combined = [
         ...memoryMetadata,
-        ...storedMetadata.filter(s => !memoryIds.has(s.id))
+        ...storedMetadata.filter((s) => !memoryIds.has(s.id)),
       ];
 
       return combined;
     } catch (error) {
-      this.logger.error('Failed to list stored sessions', error as Error);
+      this.logger.error("Failed to list stored sessions", error as Error);
       return memoryMetadata; // Return memory sessions if storage fails
     }
   }
@@ -526,20 +559,26 @@ export class SessionManager {
     if (this.storage) {
       try {
         await this.storage.deleteSession(sessionId);
-        this.logger.debug('Session deleted from storage', { sessionId });
+        this.logger.debug("Session deleted from storage", { sessionId });
       } catch (error) {
-        this.logger.error('Failed to delete session from storage', error as Error, { sessionId });
+        this.logger.error(
+          "Failed to delete session from storage",
+          error as Error,
+          { sessionId },
+        );
       }
     }
 
     if (deletedFromMemory && session) {
-      this.logger.info('Session deleted', {
+      this.logger.info("Session deleted", {
         sessionId,
         title: session.title,
-        thoughtCount: session.thoughts.length
+        thoughtCount: session.thoughts.length,
       });
     } else {
-      this.logger.warn('Attempted to delete non-existent session from memory', { sessionId });
+      this.logger.warn("Attempted to delete non-existent session from memory", {
+        sessionId,
+      });
     }
   }
 
@@ -579,7 +618,7 @@ export class SessionManager {
     let summary = `# ${session.title}\n\n`;
     summary += `Mode: ${session.mode}\n`;
     summary += `Total Thoughts: ${session.thoughts.length}\n`;
-    summary += `Status: ${session.isComplete ? 'Complete' : 'In Progress'}\n\n`;
+    summary += `Status: ${session.isComplete ? "Complete" : "In Progress"}\n\n`;
 
     summary += `## Key Thoughts:\n\n`;
     for (const thought of session.thoughts) {
@@ -599,7 +638,7 @@ export class SessionManager {
     return {
       ...DEFAULT_CONFIG,
       ...this.config,
-      ...userConfig
+      ...userConfig,
     } as SessionConfig;
   }
 
@@ -621,7 +660,10 @@ export class SessionManager {
       mode: thought.mode,
       timestamp: thought.timestamp,
       content: thought.content,
-      uncertainty: 'uncertainty' in thought ? (thought as { uncertainty?: number }).uncertainty : undefined,
+      uncertainty:
+        "uncertainty" in thought
+          ? (thought as { uncertainty?: number }).uncertainty
+          : undefined,
     });
 
     // Track mode transitions
@@ -629,7 +671,10 @@ export class SessionManager {
       this.modeTransitions.set(sessionId, []);
     }
     const transitions = this.modeTransitions.get(sessionId)!;
-    if (transitions.length === 0 || transitions[transitions.length - 1] !== thought.mode) {
+    if (
+      transitions.length === 0 ||
+      transitions[transitions.length - 1] !== thought.mode
+    ) {
       transitions.push(thought.mode);
     }
   }
@@ -682,7 +727,7 @@ export class SessionManager {
         confidence: 0.5,
         progressRate: 0,
         qualityScore: 0.5,
-        issues: ['No active strategy being tracked'],
+        issues: ["No active strategy being tracked"],
         strengths: [],
       };
     }
@@ -694,16 +739,25 @@ export class SessionManager {
     const timeElapsed = new Date().getTime() - strategy.startTime.getTime();
 
     // Effectiveness: progress relative to effort
-    const effectiveness = Math.min(1.0, progressMade / Math.max(1, thoughtsSpent));
+    const effectiveness = Math.min(
+      1.0,
+      progressMade / Math.max(1, thoughtsSpent),
+    );
 
     // Efficiency: progress per unit time (minutes)
     const MILLIS_PER_MINUTE = 60000;
-    const efficiency = timeElapsed > 0 ? Math.min(1.0, progressMade / (timeElapsed / MILLIS_PER_MINUTE)) : 0.5;
+    const efficiency =
+      timeElapsed > 0
+        ? Math.min(1.0, progressMade / (timeElapsed / MILLIS_PER_MINUTE))
+        : 0.5;
 
     // Confidence: based on issues encountered
     const ISSUE_PENALTY = 0.15;
     const MIN_CONFIDENCE = 0.1;
-    const confidence = Math.max(MIN_CONFIDENCE, 1.0 - issuesCount * ISSUE_PENALTY);
+    const confidence = Math.max(
+      MIN_CONFIDENCE,
+      1.0 - issuesCount * ISSUE_PENALTY,
+    );
 
     // Progress rate: insights per thought
     const progressRate = thoughtsSpent > 0 ? progressMade / thoughtsSpent : 0;
@@ -712,7 +766,10 @@ export class SessionManager {
     const EFFECTIVENESS_WEIGHT = 0.4;
     const EFFICIENCY_WEIGHT = 0.2;
     const CONFIDENCE_WEIGHT = 0.4;
-    const qualityScore = effectiveness * EFFECTIVENESS_WEIGHT + efficiency * EFFICIENCY_WEIGHT + confidence * CONFIDENCE_WEIGHT;
+    const qualityScore =
+      effectiveness * EFFECTIVENESS_WEIGHT +
+      efficiency * EFFICIENCY_WEIGHT +
+      confidence * CONFIDENCE_WEIGHT;
 
     return {
       effectiveness,
@@ -728,7 +785,10 @@ export class SessionManager {
   /**
    * Suggest alternative strategies based on current performance
    */
-  suggestAlternatives(sessionId: string, currentMode: ThinkingMode): AlternativeStrategy[] {
+  suggestAlternatives(
+    sessionId: string,
+    currentMode: ThinkingMode,
+  ): AlternativeStrategy[] {
     const evaluation = this.evaluateStrategy(sessionId);
     const alternatives: AlternativeStrategy[] = [];
 
@@ -741,8 +801,10 @@ export class SessionManager {
       if (currentMode !== ThinkingMode.HYBRID) {
         alternatives.push({
           mode: ThinkingMode.HYBRID,
-          reasoning: 'Low effectiveness detected - hybrid multi-modal approach may provide better results',
-          expectedBenefit: 'Combines multiple reasoning types for comprehensive analysis',
+          reasoning:
+            "Low effectiveness detected - hybrid multi-modal approach may provide better results",
+          expectedBenefit:
+            "Combines multiple reasoning types for comprehensive analysis",
           switchingCost: 0.3,
           recommendationScore: 0.85,
         });
@@ -751,20 +813,24 @@ export class SessionManager {
       if (currentMode !== ThinkingMode.INDUCTIVE) {
         alternatives.push({
           mode: ThinkingMode.INDUCTIVE,
-          reasoning: 'Consider gathering more empirical observations',
-          expectedBenefit: 'Build stronger generalizations from specific cases',
+          reasoning: "Consider gathering more empirical observations",
+          expectedBenefit: "Build stronger generalizations from specific cases",
           switchingCost: 0.2,
-          recommendationScore: 0.70,
+          recommendationScore: 0.7,
         });
       }
     }
 
     // If making progress but slowly, suggest refinements
-    if (evaluation.effectiveness >= LOW_EFFECTIVENESS_THRESHOLD && evaluation.efficiency < LOW_EFFICIENCY_THRESHOLD) {
+    if (
+      evaluation.effectiveness >= LOW_EFFECTIVENESS_THRESHOLD &&
+      evaluation.efficiency < LOW_EFFICIENCY_THRESHOLD
+    ) {
       alternatives.push({
         mode: currentMode, // Same mode, but recommend refinement
-        reasoning: 'Progress detected but efficiency is low - consider refining current approach',
-        expectedBenefit: 'Improved efficiency while maintaining progress',
+        reasoning:
+          "Progress detected but efficiency is low - consider refining current approach",
+        expectedBenefit: "Improved efficiency while maintaining progress",
         switchingCost: 0.1,
         recommendationScore: 0.65,
       });
@@ -796,16 +862,23 @@ export class SessionManager {
     const ISSUE_CONSISTENCY_PENALTY = 0.1;
     const MIN_CONSISTENCY = 0.1;
     const issuesCount = strategy?.issuesEncountered.length || 0;
-    const logicalConsistency = Math.max(MIN_CONSISTENCY, 1.0 - issuesCount * ISSUE_CONSISTENCY_PENALTY);
+    const logicalConsistency = Math.max(
+      MIN_CONSISTENCY,
+      1.0 - issuesCount * ISSUE_CONSISTENCY_PENALTY,
+    );
 
     // Evidence quality: based on uncertainty levels
     const avgUncertainty =
-      history.reduce((sum, entry) => sum + (entry.uncertainty || 0.5), 0) / history.length;
+      history.reduce((sum, entry) => sum + (entry.uncertainty || 0.5), 0) /
+      history.length;
     const evidenceQuality = 1.0 - avgUncertainty;
 
     // Completeness: thoughts addressing multiple aspects
     const COMPLETENESS_NORMALIZATION = 5; // Normalize to 5 thoughts
-    const completeness = Math.min(1.0, history.length / COMPLETENESS_NORMALIZATION);
+    const completeness = Math.min(
+      1.0,
+      history.length / COMPLETENESS_NORMALIZATION,
+    );
 
     // Originality: mode diversity
     const ORIGINALITY_NORMALIZATION = 3; // Normalize to 3 unique modes
@@ -842,7 +915,10 @@ export class SessionManager {
   /**
    * Get session context for meta-reasoning
    */
-  getMetaSessionContext(sessionId: string, problemType: string): SessionContext {
+  getMetaSessionContext(
+    sessionId: string,
+    problemType: string,
+  ): SessionContext {
     const history = this.sessionHistory.get(sessionId) || [];
     const transitions = this.modeTransitions.get(sessionId) || [];
 
@@ -879,5 +955,19 @@ export class SessionManager {
    */
   getActiveMetaSessions(): string[] {
     return Array.from(this.sessionHistory.keys());
+  }
+
+  /**
+   * Get statistics for the in-memory active-sessions LRU cache
+   * (hits, misses, hit rate, evictions, etc).
+   *
+   * Exposes {@link LRUCache.getStats} so callers/tests can assert on
+   * observable cache behavior (e.g. hit count) instead of wall-clock
+   * timing, which is unreliable on shared/loaded machines.
+   *
+   * @returns Current cache statistics snapshot
+   */
+  getSessionCacheStats(): CacheStats {
+    return this.activeSessions.getStats();
   }
 }

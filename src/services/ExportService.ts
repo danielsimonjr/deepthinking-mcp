@@ -50,15 +50,15 @@ import {
   ScientificMethodThought,
   OptimizationThought,
   FormalLogicThought,
-} from '../types/index.js';
-import type { MathematicsThought } from '../types/modes/mathematics.js';
-import type { PhysicsThought } from '../types/modes/physics.js';
-import type { MetaReasoningThought } from '../types/modes/metareasoning.js';
-import type { EngineeringThought } from '../types/modes/engineering.js';
-import { VisualExporter, type VisualFormat } from '../export/visual/index.js';
-import { escapeHtml, escapeLatex } from '../utils/sanitization.js';
-import { ILogger } from '../interfaces/ILogger.js';
-import { createLogger, LogLevel } from '../utils/logger.js';
+} from "../types/index.js";
+import type { MathematicsThought } from "../types/modes/mathematics.js";
+import type { PhysicsThought } from "../types/modes/physics.js";
+import type { MetaReasoningThought } from "../types/modes/metareasoning.js";
+import type { EngineeringThought } from "../types/modes/engineering.js";
+import { VisualExporter, type VisualFormat } from "../export/visual/index.js";
+import { escapeHtml, escapeLatex } from "../utils/sanitization.js";
+import { ILogger } from "../interfaces/ILogger.js";
+import { createLogger, LogLevel } from "../utils/logger.js";
 
 /**
  * Export Service - Handles session exports to multiple formats
@@ -80,7 +80,8 @@ export class ExportService {
 
   constructor(logger?: ILogger) {
     this.visualExporter = new VisualExporter();
-    this.logger = logger || createLogger({ minLevel: LogLevel.INFO, enableConsole: true });
+    this.logger =
+      logger || createLogger({ minLevel: LogLevel.INFO, enableConsole: true });
   }
 
   /**
@@ -103,17 +104,53 @@ export class ExportService {
    */
   exportSession(
     session: ThinkingSession,
-    format: 'json' | 'markdown' | 'latex' | 'html' | 'jupyter' | 'mermaid' | 'dot' | 'ascii' | 'svg' | 'graphml' | 'tikz' | 'modelica' | 'uml' | 'visual-json' | 'visual-markdown'
+    format:
+      | "json"
+      | "markdown"
+      | "latex"
+      | "html"
+      | "jupyter"
+      | "mermaid"
+      | "dot"
+      | "ascii"
+      | "svg"
+      | "graphml"
+      | "tikz"
+      | "modelica"
+      | "uml"
+      | "visual-json"
+      | "visual-markdown",
   ): string {
     const startTime = Date.now();
-    this.logger.debug('Export started', { sessionId: session.id, format, thoughtCount: session.thoughts.length });
+    this.logger.debug("Export started", {
+      sessionId: session.id,
+      format,
+      thoughtCount: session.thoughts.length,
+    });
 
     // Handle visual formats (including SVG, GraphML, TikZ, Modelica, HTML, UML, JSON graph, Markdown)
-    if (format === 'mermaid' || format === 'dot' || format === 'ascii' || format === 'svg' || format === 'graphml' || format === 'tikz' || format === 'modelica' || format === 'html' || format === 'uml' || format === 'visual-json' || format === 'visual-markdown') {
+    if (
+      format === "mermaid" ||
+      format === "dot" ||
+      format === "ascii" ||
+      format === "svg" ||
+      format === "graphml" ||
+      format === "tikz" ||
+      format === "modelica" ||
+      format === "html" ||
+      format === "uml" ||
+      format === "visual-json" ||
+      format === "visual-markdown"
+    ) {
       // Map 'visual-json' and 'visual-markdown' to their VisualFormat equivalents
-      const visualFormat = format === 'visual-json' ? 'json' : format === 'visual-markdown' ? 'markdown' : format;
+      const visualFormat =
+        format === "visual-json"
+          ? "json"
+          : format === "visual-markdown"
+            ? "markdown"
+            : format;
       const result = this.exportVisual(session, visualFormat as VisualFormat);
-      this.logger.debug('Export completed', {
+      this.logger.debug("Export completed", {
         sessionId: session.id,
         format,
         duration: Date.now() - startTime,
@@ -125,16 +162,16 @@ export class ExportService {
     // Handle standard formats
     let result: string;
     switch (format) {
-      case 'json':
+      case "json":
         result = this.exportToJSON(session);
         break;
-      case 'markdown':
+      case "markdown":
         result = this.exportToMarkdown(session);
         break;
-      case 'latex':
+      case "latex":
         result = this.exportToLatex(session);
         break;
-      case 'jupyter':
+      case "jupyter":
         result = this.exportToJupyter(session);
         break;
       default:
@@ -142,7 +179,7 @@ export class ExportService {
         result = this.exportToJSON(session);
     }
 
-    this.logger.debug('Export completed', {
+    this.logger.debug("Export completed", {
       sessionId: session.id,
       format,
       duration: Date.now() - startTime,
@@ -171,7 +208,7 @@ export class ExportService {
     const lastThought = thoughts[thoughts.length - 1];
 
     if (!lastThought) {
-      throw new Error('No thoughts in session to export');
+      throw new Error("No thoughts in session to export");
     }
 
     // For multi-thought sessions, always use session-level visualization
@@ -182,194 +219,299 @@ export class ExportService {
 
     // For single-thought sessions, use mode-specific visualization if available
     // Determine which visual export method to use based on mode
-    if (lastThought.mode === 'causal' && 'causalGraph' in lastThought) {
-      return this.visualExporter.exportCausalGraph(lastThought as CausalThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (lastThought.mode === "causal" && "causalGraph" in lastThought) {
+      return this.visualExporter.exportCausalGraph(
+        lastThought as CausalThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
-    if (lastThought.mode === 'temporal' && 'timeline' in lastThought) {
-      return this.visualExporter.exportTemporalTimeline(lastThought as TemporalThought, {
-        format,
-        includeLabels: true,
-      });
+    if (lastThought.mode === "temporal" && "timeline" in lastThought) {
+      return this.visualExporter.exportTemporalTimeline(
+        lastThought as TemporalThought,
+        {
+          format,
+          includeLabels: true,
+        },
+      );
     }
 
     if (isHistoricalThought(lastThought)) {
       return this.visualExporter.exportHistoricalTimeline(lastThought, {
         format,
-        colorScheme: 'default',
+        colorScheme: "default",
         includeLabels: true,
         includeMetrics: true,
       });
     }
 
-    if (lastThought.mode === 'gametheory' && 'game' in lastThought) {
-      return this.visualExporter.exportGameTree(lastThought as GameTheoryThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (lastThought.mode === "gametheory" && "game" in lastThought) {
+      return this.visualExporter.exportGameTree(
+        lastThought as GameTheoryThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
-    if (lastThought.mode === 'bayesian' && 'hypothesis' in lastThought) {
-      return this.visualExporter.exportBayesianNetwork(lastThought as BayesianThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (lastThought.mode === "bayesian" && "hypothesis" in lastThought) {
+      return this.visualExporter.exportBayesianNetwork(
+        lastThought as BayesianThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
-    if (lastThought.mode === ThinkingMode.FIRSTPRINCIPLES && 'question' in lastThought) {
-      return this.visualExporter.exportFirstPrinciplesDerivation(lastThought as FirstPrinciplesThought, {
-        format,
-        colorScheme: 'default',
-      });
+    if (
+      lastThought.mode === ThinkingMode.FIRSTPRINCIPLES &&
+      "question" in lastThought
+    ) {
+      return this.visualExporter.exportFirstPrinciplesDerivation(
+        lastThought as FirstPrinciplesThought,
+        {
+          format,
+          colorScheme: "default",
+        },
+      );
     }
 
     // Sprint 1: Integration of 10 existing visual exporters
 
-    if (lastThought.mode === ThinkingMode.SEQUENTIAL && 'buildUpon' in lastThought) {
-      return this.visualExporter.exportSequentialDependencyGraph(lastThought as SequentialThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (
+      lastThought.mode === ThinkingMode.SEQUENTIAL &&
+      "buildUpon" in lastThought
+    ) {
+      return this.visualExporter.exportSequentialDependencyGraph(
+        lastThought as SequentialThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
-    if (lastThought.mode === ThinkingMode.SHANNON && 'stage' in lastThought) {
-      return this.visualExporter.exportShannonStageFlow(lastThought as ShannonThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (lastThought.mode === ThinkingMode.SHANNON && "stage" in lastThought) {
+      return this.visualExporter.exportShannonStageFlow(
+        lastThought as ShannonThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
-    if (lastThought.mode === ThinkingMode.ABDUCTIVE && 'hypotheses' in lastThought) {
-      return this.visualExporter.exportAbductiveHypotheses(lastThought as AbductiveThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (
+      lastThought.mode === ThinkingMode.ABDUCTIVE &&
+      "hypotheses" in lastThought
+    ) {
+      return this.visualExporter.exportAbductiveHypotheses(
+        lastThought as AbductiveThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
-    if (lastThought.mode === ThinkingMode.COUNTERFACTUAL && 'scenarios' in lastThought) {
-      return this.visualExporter.exportCounterfactualScenarios(lastThought as CounterfactualThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (
+      lastThought.mode === ThinkingMode.COUNTERFACTUAL &&
+      "scenarios" in lastThought
+    ) {
+      return this.visualExporter.exportCounterfactualScenarios(
+        lastThought as CounterfactualThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
-    if (lastThought.mode === ThinkingMode.ANALOGICAL && 'sourceAnalogy' in lastThought) {
-      return this.visualExporter.exportAnalogicalMapping(lastThought as AnalogicalThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (
+      lastThought.mode === ThinkingMode.ANALOGICAL &&
+      "sourceAnalogy" in lastThought
+    ) {
+      return this.visualExporter.exportAnalogicalMapping(
+        lastThought as AnalogicalThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
-    if (lastThought.mode === ThinkingMode.EVIDENTIAL && 'frameOfDiscernment' in lastThought) {
-      return this.visualExporter.exportEvidentialBeliefs(lastThought as EvidentialThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (
+      lastThought.mode === ThinkingMode.EVIDENTIAL &&
+      "frameOfDiscernment" in lastThought
+    ) {
+      return this.visualExporter.exportEvidentialBeliefs(
+        lastThought as EvidentialThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
-    if (lastThought.mode === ThinkingMode.SYSTEMSTHINKING && 'systemComponents' in lastThought) {
-      return this.visualExporter.exportSystemsThinkingCausalLoops(lastThought as SystemsThinkingThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (
+      lastThought.mode === ThinkingMode.SYSTEMSTHINKING &&
+      "systemComponents" in lastThought
+    ) {
+      return this.visualExporter.exportSystemsThinkingCausalLoops(
+        lastThought as SystemsThinkingThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
-    if (lastThought.mode === ThinkingMode.SCIENTIFICMETHOD && 'hypothesis' in lastThought) {
-      return this.visualExporter.exportScientificMethodExperiment(lastThought as ScientificMethodThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (
+      lastThought.mode === ThinkingMode.SCIENTIFICMETHOD &&
+      "hypothesis" in lastThought
+    ) {
+      return this.visualExporter.exportScientificMethodExperiment(
+        lastThought as ScientificMethodThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
-    if (lastThought.mode === ThinkingMode.OPTIMIZATION && 'objectiveFunction' in lastThought) {
-      return this.visualExporter.exportOptimizationSolution(lastThought as OptimizationThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (
+      lastThought.mode === ThinkingMode.OPTIMIZATION &&
+      "objectiveFunction" in lastThought
+    ) {
+      return this.visualExporter.exportOptimizationSolution(
+        lastThought as OptimizationThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
-    if (lastThought.mode === ThinkingMode.FORMALLOGIC && 'premises' in lastThought) {
-      return this.visualExporter.exportFormalLogicProof(lastThought as FormalLogicThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (
+      lastThought.mode === ThinkingMode.FORMALLOGIC &&
+      "premises" in lastThought
+    ) {
+      return this.visualExporter.exportFormalLogicProof(
+        lastThought as FormalLogicThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
     // Sprint 2: Integration of 4 new visual exporters
 
-    if (lastThought.mode === ThinkingMode.MATHEMATICS && 'proofStrategy' in lastThought) {
-      return this.visualExporter.exportMathematicsDerivation(lastThought as MathematicsThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (
+      lastThought.mode === ThinkingMode.MATHEMATICS &&
+      "proofStrategy" in lastThought
+    ) {
+      return this.visualExporter.exportMathematicsDerivation(
+        lastThought as MathematicsThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
-    if (lastThought.mode === ThinkingMode.PHYSICS && 'tensorProperties' in lastThought) {
-      return this.visualExporter.exportPhysicsVisualization(lastThought as PhysicsThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (
+      lastThought.mode === ThinkingMode.PHYSICS &&
+      "tensorProperties" in lastThought
+    ) {
+      return this.visualExporter.exportPhysicsVisualization(
+        lastThought as PhysicsThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
-    if (lastThought.mode === ThinkingMode.HYBRID && 'primaryMode' in lastThought) {
-      return this.visualExporter.exportHybridOrchestration(lastThought as HybridThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (
+      lastThought.mode === ThinkingMode.HYBRID &&
+      "primaryMode" in lastThought
+    ) {
+      return this.visualExporter.exportHybridOrchestration(
+        lastThought as HybridThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
-    if (lastThought.mode === ThinkingMode.METAREASONING && 'currentStrategy' in lastThought) {
-      return this.visualExporter.exportMetaReasoningVisualization(lastThought as MetaReasoningThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (
+      lastThought.mode === ThinkingMode.METAREASONING &&
+      "currentStrategy" in lastThought
+    ) {
+      return this.visualExporter.exportMetaReasoningVisualization(
+        lastThought as MetaReasoningThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
     // Phase 10: Engineering analysis visual export
-    if (lastThought.mode === ThinkingMode.ENGINEERING && 'analysisType' in lastThought) {
-      return this.visualExporter.exportEngineeringAnalysis(lastThought as EngineeringThought, {
-        format,
-        colorScheme: 'default',
-        includeLabels: true,
-        includeMetrics: true,
-      });
+    if (
+      lastThought.mode === ThinkingMode.ENGINEERING &&
+      "analysisType" in lastThought
+    ) {
+      return this.visualExporter.exportEngineeringAnalysis(
+        lastThought as EngineeringThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true,
+        },
+      );
     }
 
     // Generic thought sequence export for modes without specific visual exporters
@@ -380,27 +522,34 @@ export class ExportService {
    * Export a generic thought sequence diagram for any mode
    * Creates a flowchart showing the thought progression
    */
-  private exportGenericThoughtSequence(session: ThinkingSession, format: VisualFormat): string {
+  private exportGenericThoughtSequence(
+    session: ThinkingSession,
+    format: VisualFormat,
+  ): string {
     const thoughts = session.thoughts;
-    const title = (session.title || 'Thinking Session').replace(/"/g, "'");
+    const title = (session.title || "Thinking Session").replace(/"/g, "'");
     const mode = session.mode;
 
-    if (format === 'mermaid') {
-      let diagram = 'flowchart TD\n';
+    if (format === "mermaid") {
+      let diagram = "flowchart TD\n";
       diagram += `    subgraph "${title}"\n`;
-      diagram += '    direction TB\n';
+      diagram += "    direction TB\n";
       diagram += `    SESSION["Session: ${mode}<br/>${thoughts.length} thoughts"]\n`;
 
       for (let i = 0; i < thoughts.length; i++) {
         const t = thoughts[i];
-        const truncated = t.content.length > 50
-          ? t.content.substring(0, 47).replace(/"/g, "'").replace(/\n/g, ' ') + '...'
-          : t.content.replace(/"/g, "'").replace(/\n/g, ' ');
-        const status = t.nextThoughtNeeded ? '...' : 'Done';
+        const truncated =
+          t.content.length > 50
+            ? t.content
+                .substring(0, 47)
+                .replace(/"/g, "'")
+                .replace(/\n/g, " ") + "..."
+            : t.content.replace(/"/g, "'").replace(/\n/g, " ");
+        const status = t.nextThoughtNeeded ? "..." : "Done";
         diagram += `    T${i + 1}["Thought ${i + 1} [${status}]<br/>${truncated}"]\n`;
       }
 
-      diagram += '    SESSION --> T1\n';
+      diagram += "    SESSION --> T1\n";
       for (let i = 1; i < thoughts.length; i++) {
         diagram += `    T${i} --> T${i + 1}\n`;
       }
@@ -410,21 +559,25 @@ export class ExportService {
         diagram += `    T${thoughts.length} --> COMPLETE["Complete"]\n`;
       }
 
-      diagram += '    end\n';
+      diagram += "    end\n";
       return diagram;
     }
 
-    if (format === 'dot') {
-      let dot = 'digraph ThinkingSession {\n';
-      dot += '    rankdir=TB;\n';
-      dot += '    node [shape=box, style=rounded];\n';
+    if (format === "dot") {
+      let dot = "digraph ThinkingSession {\n";
+      dot += "    rankdir=TB;\n";
+      dot += "    node [shape=box, style=rounded];\n";
       dot += `    label="${title} (${mode})";\n\n`;
 
       for (let i = 0; i < thoughts.length; i++) {
         const t = thoughts[i];
-        const truncated = t.content.length > 40
-          ? t.content.substring(0, 37).replace(/"/g, '\\"').replace(/\n/g, ' ') + '...'
-          : t.content.replace(/"/g, '\\"').replace(/\n/g, ' ');
+        const truncated =
+          t.content.length > 40
+            ? t.content
+                .substring(0, 37)
+                .replace(/"/g, '\\"')
+                .replace(/\n/g, " ") + "..."
+            : t.content.replace(/"/g, '\\"').replace(/\n/g, " ");
         dot += `    T${i + 1} [label="Thought ${i + 1}\\n${truncated}"];\n`;
       }
 
@@ -432,12 +585,12 @@ export class ExportService {
         dot += `    T${i} -> T${i + 1};\n`;
       }
 
-      dot += '}\n';
+      dot += "}\n";
       return dot;
     }
 
-    if (format === 'ascii') {
-      const bar = '═'.repeat(50);
+    if (format === "ascii") {
+      const bar = "═".repeat(50);
       let ascii = `╔${bar}╗\n`;
       ascii += `║ ${title.substring(0, 48).padEnd(48)} ║\n`;
       ascii += `║ Mode: ${mode.padEnd(42)} ║\n`;
@@ -445,12 +598,12 @@ export class ExportService {
 
       for (let i = 0; i < thoughts.length; i++) {
         const t = thoughts[i];
-        const status = t.nextThoughtNeeded ? '[→]' : '[✓]';
-        const truncated = t.content.substring(0, 35).replace(/\n/g, ' ');
+        const status = t.nextThoughtNeeded ? "[→]" : "[✓]";
+        const truncated = t.content.substring(0, 35).replace(/\n/g, " ");
         ascii += `║ ${status} Thought ${i + 1}: ${truncated.padEnd(35)} ║\n`;
         if (i < thoughts.length - 1) {
-          ascii += '║     │                                              ║\n';
-          ascii += '║     ▼                                              ║\n';
+          ascii += "║     │                                              ║\n";
+          ascii += "║     ▼                                              ║\n";
         }
       }
 
@@ -459,9 +612,9 @@ export class ExportService {
     }
 
     // Fallback for other visual formats
-    const thoughtsText = thoughts.map((t, i) =>
-      `Thought ${i + 1} (${t.mode}):\n${t.content}\n`
-    ).join('\n');
+    const thoughtsText = thoughts
+      .map((t, i) => `Thought ${i + 1} (${t.mode}):\n${t.content}\n`)
+      .join("\n");
 
     return `Session: ${title}\nMode: ${mode}\n\n${thoughtsText}`;
   }
@@ -470,9 +623,12 @@ export class ExportService {
    * Export session with full thought details including branches, revisions, and dependencies
    * This method properly handles multi-thought sessions showing all relationships
    */
-  private exportSessionWithThoughtDetails(session: ThinkingSession, format: VisualFormat): string {
+  private exportSessionWithThoughtDetails(
+    session: ThinkingSession,
+    format: VisualFormat,
+  ): string {
     const thoughts = session.thoughts;
-    const title = (session.title || 'Thinking Session').replace(/"/g, "'");
+    const title = (session.title || "Thinking Session").replace(/"/g, "'");
     const mode = session.mode;
 
     // Build a map of thought IDs/numbers for reference
@@ -519,41 +675,54 @@ export class ExportService {
       }
     });
 
-    if (format === 'mermaid') {
-      let diagram = 'flowchart TD\n';
+    if (format === "mermaid") {
+      let diagram = "flowchart TD\n";
       diagram += `    subgraph session["${title}"]\n`;
-      diagram += '    direction TB\n';
+      diagram += "    direction TB\n";
 
       // Session info node
-      const branchInfo = branches.size > 0 ? `<br/>${branches.size} branch(es)` : '';
-      const revisionInfo = revisions.length > 0 ? `<br/>${revisions.length} revision(s)` : '';
+      const branchInfo =
+        branches.size > 0 ? `<br/>${branches.size} branch(es)` : "";
+      const revisionInfo =
+        revisions.length > 0 ? `<br/>${revisions.length} revision(s)` : "";
       diagram += `    SESSION["📊 Session: ${mode}<br/>${thoughts.length} thoughts${branchInfo}${revisionInfo}"]\n`;
 
       // Thought nodes with status indicators
       for (let i = 0; i < thoughts.length; i++) {
         const t = thoughts[i];
-        const truncated = t.content.length > 40
-          ? t.content.substring(0, 37).replace(/"/g, "'").replace(/\n/g, ' ').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '...'
-          : t.content.replace(/"/g, "'").replace(/\n/g, ' ').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const truncated =
+          t.content.length > 40
+            ? t.content
+                .substring(0, 37)
+                .replace(/"/g, "'")
+                .replace(/\n/g, " ")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;") + "..."
+            : t.content
+                .replace(/"/g, "'")
+                .replace(/\n/g, " ")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
 
         // Status indicators
         const isComplete = !t.nextThoughtNeeded;
         const isRev = t.isRevision;
         const hasBranch = t.branchId;
-        const statusIcon = isComplete ? '✓' : '→';
-        const revIcon = isRev ? '🔄' : '';
-        const branchIcon = hasBranch ? '🌿' : '';
+        const statusIcon = isComplete ? "✓" : "→";
+        const revIcon = isRev ? "🔄" : "";
+        const branchIcon = hasBranch ? "🌿" : "";
 
         diagram += `    T${i + 1}["${statusIcon}${revIcon}${branchIcon} Thought ${i + 1}<br/>${truncated}"]\n`;
       }
 
       // Basic thought sequence (linear flow)
-      diagram += '\n    %% Linear flow\n';
-      diagram += '    SESSION --> T1\n';
+      diagram += "\n    %% Linear flow\n";
+      diagram += "    SESSION --> T1\n";
       for (let i = 1; i < thoughts.length; i++) {
         // Only add linear edge if not already connected by revision/dependency
-        const hasSpecialEdge = revisions.some(r => r.from === i && r.to === i + 1) ||
-                              dependencies.some(d => d.from === i && d.to === i + 1);
+        const hasSpecialEdge =
+          revisions.some((r) => r.from === i && r.to === i + 1) ||
+          dependencies.some((d) => d.from === i && d.to === i + 1);
         if (!hasSpecialEdge) {
           diagram += `    T${i} --> T${i + 1}\n`;
         }
@@ -561,7 +730,7 @@ export class ExportService {
 
       // Add revision edges (dashed)
       if (revisions.length > 0) {
-        diagram += '\n    %% Revisions\n';
+        diagram += "\n    %% Revisions\n";
         for (const rev of revisions) {
           diagram += `    T${rev.from} -.->|revises| T${rev.to}\n`;
         }
@@ -569,7 +738,7 @@ export class ExportService {
 
       // Add dependency edges (dotted)
       if (dependencies.length > 0) {
-        diagram += '\n    %% Dependencies\n';
+        diagram += "\n    %% Dependencies\n";
         for (const dep of dependencies) {
           diagram += `    T${dep.from} ==>|depends| T${dep.to}\n`;
         }
@@ -581,39 +750,39 @@ export class ExportService {
         diagram += `\n    T${thoughts.length} --> COMPLETE["✅ Complete"]\n`;
       }
 
-      diagram += '    end\n';
+      diagram += "    end\n";
 
       // Style definitions
-      diagram += '\n    %% Styles\n';
-      diagram += '    classDef revision fill:#ffe6cc,stroke:#d79b00\n';
-      diagram += '    classDef branch fill:#dae8fc,stroke:#6c8ebf\n';
-      diagram += '    classDef complete fill:#d5e8d4,stroke:#82b366\n';
+      diagram += "\n    %% Styles\n";
+      diagram += "    classDef revision fill:#ffe6cc,stroke:#d79b00\n";
+      diagram += "    classDef branch fill:#dae8fc,stroke:#6c8ebf\n";
+      diagram += "    classDef complete fill:#d5e8d4,stroke:#82b366\n";
 
       // Apply styles to revision nodes
       const revisionNodes = thoughts
-        .map((t, i) => t.isRevision ? `T${i + 1}` : null)
+        .map((t, i) => (t.isRevision ? `T${i + 1}` : null))
         .filter(Boolean);
       if (revisionNodes.length > 0) {
-        diagram += `    class ${revisionNodes.join(',')} revision\n`;
+        diagram += `    class ${revisionNodes.join(",")} revision\n`;
       }
 
       // Apply styles to branch nodes
       const branchNodes = thoughts
-        .map((t, i) => t.branchId ? `T${i + 1}` : null)
+        .map((t, i) => (t.branchId ? `T${i + 1}` : null))
         .filter(Boolean);
       if (branchNodes.length > 0) {
-        diagram += `    class ${branchNodes.join(',')} branch\n`;
+        diagram += `    class ${branchNodes.join(",")} branch\n`;
       }
 
       return diagram;
     }
 
-    if (format === 'dot') {
-      let dot = 'digraph ThinkingSession {\n';
-      dot += '    rankdir=TB;\n';
+    if (format === "dot") {
+      let dot = "digraph ThinkingSession {\n";
+      dot += "    rankdir=TB;\n";
       dot += '    node [shape=box, style="rounded,filled", fillcolor=white];\n';
       dot += `    label="${title} (${mode})";\n`;
-      dot += '    labelloc=t;\n\n';
+      dot += "    labelloc=t;\n\n";
 
       // Session start node
       dot += `    SESSION [label="Session\\n${thoughts.length} thoughts", shape=ellipse, fillcolor="#f5f5f5"];\n\n`;
@@ -621,29 +790,33 @@ export class ExportService {
       // Thought nodes
       for (let i = 0; i < thoughts.length; i++) {
         const t = thoughts[i];
-        const truncated = t.content.length > 35
-          ? t.content.substring(0, 32).replace(/"/g, '\\"').replace(/\n/g, ' ') + '...'
-          : t.content.replace(/"/g, '\\"').replace(/\n/g, ' ');
+        const truncated =
+          t.content.length > 35
+            ? t.content
+                .substring(0, 32)
+                .replace(/"/g, '\\"')
+                .replace(/\n/g, " ") + "..."
+            : t.content.replace(/"/g, '\\"').replace(/\n/g, " ");
 
-        let fillcolor = 'white';
-        if (t.isRevision) fillcolor = '#ffe6cc';
-        else if (t.branchId) fillcolor = '#dae8fc';
-        else if (!t.nextThoughtNeeded) fillcolor = '#d5e8d4';
+        let fillcolor = "white";
+        if (t.isRevision) fillcolor = "#ffe6cc";
+        else if (t.branchId) fillcolor = "#dae8fc";
+        else if (!t.nextThoughtNeeded) fillcolor = "#d5e8d4";
 
-        const statusMark = t.isRevision ? '🔄 ' : (t.branchId ? '🌿 ' : '');
+        const statusMark = t.isRevision ? "🔄 " : t.branchId ? "🌿 " : "";
         dot += `    T${i + 1} [label="${statusMark}Thought ${i + 1}\\n${truncated}", fillcolor="${fillcolor}"];\n`;
       }
 
       // Edges
-      dot += '\n    // Linear flow\n';
-      dot += '    SESSION -> T1;\n';
+      dot += "\n    // Linear flow\n";
+      dot += "    SESSION -> T1;\n";
       for (let i = 1; i < thoughts.length; i++) {
         dot += `    T${i} -> T${i + 1};\n`;
       }
 
       // Revision edges
       if (revisions.length > 0) {
-        dot += '\n    // Revisions\n';
+        dot += "\n    // Revisions\n";
         for (const rev of revisions) {
           dot += `    T${rev.from} -> T${rev.to} [style=dashed, color="#d79b00", label="revises"];\n`;
         }
@@ -651,18 +824,18 @@ export class ExportService {
 
       // Dependency edges
       if (dependencies.length > 0) {
-        dot += '\n    // Dependencies\n';
+        dot += "\n    // Dependencies\n";
         for (const dep of dependencies) {
           dot += `    T${dep.from} -> T${dep.to} [style=bold, color="#6c8ebf", label="depends"];\n`;
         }
       }
 
-      dot += '}\n';
+      dot += "}\n";
       return dot;
     }
 
-    if (format === 'ascii') {
-      const bar = '═'.repeat(60);
+    if (format === "ascii") {
+      const bar = "═".repeat(60);
       let ascii = `╔${bar}╗\n`;
       ascii += `║ ${title.substring(0, 58).padEnd(58)} ║\n`;
       ascii += `║ Mode: ${mode.padEnd(52)} ║\n`;
@@ -677,23 +850,35 @@ export class ExportService {
 
       for (let i = 0; i < thoughts.length; i++) {
         const t = thoughts[i];
-        const statusIcon = t.nextThoughtNeeded ? '[→]' : '[✓]';
-        const revMark = t.isRevision ? ' 🔄' : '';
-        const branchMark = t.branchId ? ' 🌿' : '';
-        const truncated = t.content.substring(0, 40).replace(/\n/g, ' ');
+        const statusIcon = t.nextThoughtNeeded ? "[→]" : "[✓]";
+        const revMark = t.isRevision ? " 🔄" : "";
+        const branchMark = t.branchId ? " 🌿" : "";
+        const truncated = t.content.substring(0, 40).replace(/\n/g, " ");
         ascii += `║ ${statusIcon} T${(i + 1).toString().padStart(2)}${revMark}${branchMark}: ${truncated.padEnd(45 - revMark.length - branchMark.length)} ║\n`;
 
         // Show revision connection
         if (t.isRevision && t.revisesThought) {
           const revisedNum = thoughtMap.get(t.revisesThought);
           if (revisedNum) {
-            ascii += `║      ↳ revises T${revisedNum}                                         ║\n`.substring(0, 64) + '║\n';
+            ascii +=
+              `║      ↳ revises T${revisedNum}                                         ║\n`.substring(
+                0,
+                64,
+              ) + "║\n";
           }
         }
 
         if (i < thoughts.length - 1) {
-          ascii += '║     │                                                            ║\n'.substring(0, 64) + '║\n';
-          ascii += '║     ▼                                                            ║\n'.substring(0, 64) + '║\n';
+          ascii +=
+            "║     │                                                            ║\n".substring(
+              0,
+              64,
+            ) + "║\n";
+          ascii +=
+            "║     ▼                                                            ║\n".substring(
+              0,
+              64,
+            ) + "║\n";
         }
       }
 
@@ -704,7 +889,6 @@ export class ExportService {
     // Fallback: use generic sequence
     return this.exportGenericThoughtSequence(session, format);
   }
-
 
   /**
    * Export session to JSON format
@@ -737,7 +921,7 @@ export class ExportService {
    * @returns Markdown-formatted string
    */
   private exportToMarkdown(session: ThinkingSession): string {
-    const status = session.isComplete ? 'Complete' : 'In Progress';
+    const status = session.isComplete ? "Complete" : "In Progress";
     let md = `# Thinking Session: ${session.title}\n\n`;
     md += `**Mode**: ${session.mode}\n`;
     md += `**Created**: ${session.createdAt.toISOString()}\n`;
@@ -761,7 +945,7 @@ export class ExportService {
         md += `- Approach: ${thought.currentStrategy.approach}\n`;
         md += `- Thoughts Spent: ${thought.currentStrategy.thoughtsSpent}\n`;
         if (thought.currentStrategy.progressIndicators.length > 0) {
-          md += `- Progress: ${thought.currentStrategy.progressIndicators.join(', ')}\n`;
+          md += `- Progress: ${thought.currentStrategy.progressIndicators.join(", ")}\n`;
         }
         md += `\n`;
 
@@ -772,10 +956,10 @@ export class ExportService {
         md += `- Confidence: ${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%\n`;
         md += `- Quality Score: ${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%\n`;
         if (thought.strategyEvaluation.issues.length > 0) {
-          md += `- Issues: ${thought.strategyEvaluation.issues.join('; ')}\n`;
+          md += `- Issues: ${thought.strategyEvaluation.issues.join("; ")}\n`;
         }
         if (thought.strategyEvaluation.strengths.length > 0) {
-          md += `- Strengths: ${thought.strategyEvaluation.strengths.join('; ')}\n`;
+          md += `- Strengths: ${thought.strategyEvaluation.strengths.join("; ")}\n`;
         }
         md += `\n`;
 
@@ -818,7 +1002,7 @@ export class ExportService {
    * @returns LaTeX document as string
    */
   private exportToLatex(session: ThinkingSession): string {
-    const status = session.isComplete ? 'Complete' : 'In Progress';
+    const status = session.isComplete ? "Complete" : "In Progress";
     const safeTitle = escapeLatex(session.title);
     const safeMode = escapeLatex(session.mode);
     const safeStatus = escapeLatex(status);
@@ -858,7 +1042,7 @@ export class ExportService {
    */
   // @ts-expect-error - Unused method kept for future use
   private exportToHTML(session: ThinkingSession): string {
-    const status = session.isComplete ? 'Complete' : 'In Progress';
+    const status = session.isComplete ? "Complete" : "In Progress";
     const safeTitle = escapeHtml(session.title);
     const safeMode = escapeHtml(session.mode);
     const safeStatus = escapeHtml(status);
@@ -895,10 +1079,10 @@ export class ExportService {
    * @returns JSON string representing Jupyter notebook
    */
   private exportToJupyter(session: ThinkingSession): string {
-    const status = session.isComplete ? 'Complete' : 'In Progress';
+    const status = session.isComplete ? "Complete" : "In Progress";
 
     interface JupyterCell {
-      cell_type: 'markdown' | 'code';
+      cell_type: "markdown" | "code";
       metadata: Record<string, unknown>;
       source: string[];
     }
@@ -919,7 +1103,7 @@ export class ExportService {
 
     // Add title cell
     notebook.cells.push({
-      cell_type: 'markdown',
+      cell_type: "markdown",
       metadata: {},
       source: [
         `# Thinking Session: ${session.title}\n`,
@@ -933,7 +1117,7 @@ export class ExportService {
     for (const thought of session.thoughts) {
       // Main thought content
       notebook.cells.push({
-        cell_type: 'markdown',
+        cell_type: "markdown",
         metadata: {},
         source: [
           `## Thought ${thought.thoughtNumber}/${session.thoughts.length}\n`,
@@ -946,9 +1130,9 @@ export class ExportService {
       const modeSpecificContent = this.extractModeSpecificMarkdown(thought);
       if (modeSpecificContent.trim()) {
         notebook.cells.push({
-          cell_type: 'markdown',
+          cell_type: "markdown",
           metadata: {},
-          source: modeSpecificContent.split('\n').map(line => line + '\n'),
+          source: modeSpecificContent.split("\n").map((line) => line + "\n"),
         });
       }
     }
@@ -961,7 +1145,7 @@ export class ExportService {
    * Provides rich output for various thought types beyond just the content text
    */
   private extractModeSpecificMarkdown(thought: Thought): string {
-    let md = '';
+    let md = "";
 
     // Causal thoughts - include graph structure
     if (isCausalThought(thought)) {
@@ -969,15 +1153,21 @@ export class ExportService {
         md += `#### Causal Graph\n\n`;
         md += `**Nodes:**\n`;
         for (const node of thought.causalGraph.nodes) {
-          md += `- **${node.name}** (${node.id})${node.description ? `: ${node.description}` : ''}\n`;
+          md += `- **${node.name}** (${node.id})${node.description ? `: ${node.description}` : ""}\n`;
         }
         md += `\n`;
       }
       if (thought.causalGraph?.edges?.length) {
         md += `**Causal Relationships:**\n`;
         for (const edge of thought.causalGraph.edges) {
-          const strengthVal = typeof edge.strength === 'number' ? edge.strength : Number(edge.strength);
-          const strength = edge.strength !== undefined && !isNaN(strengthVal) ? ` (strength: ${strengthVal.toFixed(2)})` : '';
+          const strengthVal =
+            typeof edge.strength === "number"
+              ? edge.strength
+              : Number(edge.strength);
+          const strength =
+            edge.strength !== undefined && !isNaN(strengthVal)
+              ? ` (strength: ${strengthVal.toFixed(2)})`
+              : "";
           md += `- ${edge.from} → ${edge.to}${strength}\n`;
         }
         md += `\n`;
@@ -986,8 +1176,8 @@ export class ExportService {
         md += `**Interventions:**\n`;
         for (const intervention of thought.interventions) {
           const effectsText = intervention.expectedEffects?.length
-            ? ` → ${intervention.expectedEffects.map(e => e.expectedChange).join(', ')}`
-            : '';
+            ? ` → ${intervention.expectedEffects.map((e) => e.expectedChange).join(", ")}`
+            : "";
           md += `- ${intervention.nodeId}: ${intervention.action}${effectsText}\n`;
         }
         md += `\n`;
@@ -998,15 +1188,24 @@ export class ExportService {
     if (isBayesianThought(thought)) {
       md += `#### Bayesian Analysis\n\n`;
       if (thought.prior?.probability !== undefined) {
-        const prior = typeof thought.prior.probability === 'number' ? thought.prior.probability : Number(thought.prior.probability);
+        const prior =
+          typeof thought.prior.probability === "number"
+            ? thought.prior.probability
+            : Number(thought.prior.probability);
         md += `- **Prior Probability:** ${(prior * 100).toFixed(1)}%\n`;
       }
       if (thought.likelihood?.probability !== undefined) {
-        const likelihood = typeof thought.likelihood.probability === 'number' ? thought.likelihood.probability : Number(thought.likelihood.probability);
+        const likelihood =
+          typeof thought.likelihood.probability === "number"
+            ? thought.likelihood.probability
+            : Number(thought.likelihood.probability);
         md += `- **Likelihood:** ${(likelihood * 100).toFixed(1)}%\n`;
       }
       if (thought.posterior?.probability !== undefined) {
-        const posterior = typeof thought.posterior.probability === 'number' ? thought.posterior.probability : Number(thought.posterior.probability);
+        const posterior =
+          typeof thought.posterior.probability === "number"
+            ? thought.posterior.probability
+            : Number(thought.posterior.probability);
         md += `- **Posterior Probability:** ${(posterior * 100).toFixed(1)}%\n`;
       }
       if (thought.evidence?.length) {
@@ -1060,7 +1259,7 @@ export class ExportService {
       if (thought.players?.length) {
         md += `**Players:**\n`;
         for (const player of thought.players) {
-          md += `- **${player.name}** (${player.id})${player.isRational ? ' - rational' : ''}\n`;
+          md += `- **${player.name}** (${player.id})${player.isRational ? " - rational" : ""}\n`;
         }
         md += `\n`;
       }
@@ -1072,7 +1271,7 @@ export class ExportService {
         md += `\n`;
       }
       if (thought.payoffMatrix) {
-        md += `**Payoff Matrix:** ${thought.payoffMatrix.dimensions?.join('x') || 'defined'}\n\n`;
+        md += `**Payoff Matrix:** ${thought.payoffMatrix.dimensions?.join("x") || "defined"}\n\n`;
       }
     }
 
@@ -1089,7 +1288,7 @@ export class ExportService {
       if (thought.feedbackLoops?.length) {
         md += `**Feedback Loops:**\n`;
         for (const loop of thought.feedbackLoops) {
-          md += `- ${loop.type}: ${loop.components?.join(' → ') || 'defined'}\n`;
+          md += `- ${loop.type}: ${loop.components?.join(" → ") || "defined"}\n`;
         }
         md += `\n`;
       }
@@ -1101,8 +1300,8 @@ export class ExportService {
       if (thought.sources?.length) {
         md += `**Sources (${thought.sources.length}):**\n`;
         for (const source of thought.sources.slice(0, 5)) {
-          const authors = source.authors?.join(', ') || 'Unknown';
-          md += `- ${source.title} (${authors}, ${source.year || 'n.d.'})\n`;
+          const authors = source.authors?.join(", ") || "Unknown";
+          md += `- ${source.title} (${authors}, ${source.year || "n.d."})\n`;
         }
         if (thought.sources.length > 5) {
           md += `- ... and ${thought.sources.length - 5} more\n`;
@@ -1112,15 +1311,15 @@ export class ExportService {
       if (thought.themes?.length) {
         md += `**Themes:**\n`;
         for (const theme of thought.themes) {
-          const consensus = theme.consensus ? ` [${theme.consensus}]` : '';
-          md += `- **${theme.name}**${consensus}: ${theme.description || ''}\n`;
+          const consensus = theme.consensus ? ` [${theme.consensus}]` : "";
+          md += `- **${theme.name}**${consensus}: ${theme.description || ""}\n`;
         }
         md += `\n`;
       }
       if (thought.gaps?.length) {
         md += `**Research Gaps:**\n`;
         for (const gap of thought.gaps) {
-          md += `- ${gap.description} (${gap.type || 'general'})\n`;
+          md += `- ${gap.description} (${gap.type || "general"})\n`;
         }
         md += `\n`;
       }
@@ -1132,21 +1331,21 @@ export class ExportService {
       if (thought.claims?.length) {
         md += `**Claims:**\n`;
         for (const claim of thought.claims) {
-          md += `- ${claim.statement} [${claim.type || 'claim'}]\n`;
+          md += `- ${claim.statement} [${claim.type || "claim"}]\n`;
         }
         md += `\n`;
       }
       if (thought.grounds?.length) {
         md += `**Grounds/Evidence:**\n`;
         for (const ground of thought.grounds) {
-          md += `- ${ground.content} (${ground.type || 'evidence'})\n`;
+          md += `- ${ground.content} (${ground.type || "evidence"})\n`;
         }
         md += `\n`;
       }
       if (thought.rebuttals?.length) {
         md += `**Rebuttals:**\n`;
         for (const rebuttal of thought.rebuttals) {
-          md += `- ${rebuttal.objection}${rebuttal.response ? ` → ${rebuttal.response}` : ''}\n`;
+          md += `- ${rebuttal.objection}${rebuttal.response ? ` → ${rebuttal.response}` : ""}\n`;
         }
         md += `\n`;
       }
@@ -1161,8 +1360,8 @@ export class ExportService {
       if (thought.currentCodes?.length) {
         md += `**Codes:**\n`;
         for (const code of thought.currentCodes.slice(0, 10)) {
-          const freq = code.frequency ? ` (n=${code.frequency})` : '';
-          md += `- **${code.label}**${freq}: ${code.definition || ''}\n`;
+          const freq = code.frequency ? ` (n=${code.frequency})` : "";
+          md += `- **${code.label}**${freq}: ${code.definition || ""}\n`;
         }
         if (thought.currentCodes.length > 10) {
           md += `- ... and ${thought.currentCodes.length - 10} more codes\n`;
@@ -1170,7 +1369,7 @@ export class ExportService {
         md += `\n`;
       }
       if (thought.gtCategories?.length) {
-        md += `**Categories:** ${thought.gtCategories.map(c => c.name).join(', ')}\n\n`;
+        md += `**Categories:** ${thought.gtCategories.map((c) => c.name).join(", ")}\n\n`;
       }
       if (thought.keyInsight) {
         md += `**Key Insight:** ${thought.keyInsight}\n\n`;
@@ -1198,7 +1397,7 @@ export class ExportService {
       if (thought.correctnessProof) {
         md += `\n**Correctness Proof:**\n`;
         if (thought.correctnessProof.invariants?.length) {
-          md += `- Invariants: ${thought.correctnessProof.invariants.map(i => i.description).join('; ')}\n`;
+          md += `- Invariants: ${thought.correctnessProof.invariants.map((i) => i.description).join("; ")}\n`;
         }
         if (thought.correctnessProof.terminationArgument) {
           md += `- Termination: ${thought.correctnessProof.terminationArgument.proof}\n`;
@@ -1257,7 +1456,7 @@ export class ExportService {
    * Extract mode-specific structured data as LaTeX
    */
   private extractModeSpecificLatex(thought: Thought): string {
-    let latex = '';
+    let latex = "";
 
     if (isCausalThought(thought)) {
       if (thought.causalGraph?.nodes?.length) {
@@ -1273,8 +1472,14 @@ export class ExportService {
       if (thought.causalGraph?.edges?.length) {
         latex += `\\textbf{Causal Relationships:}\n\\begin{itemize}\n`;
         for (const edge of thought.causalGraph.edges) {
-          const strengthVal = typeof edge.strength === 'number' ? edge.strength : Number(edge.strength);
-          const strength = edge.strength !== undefined && !isNaN(strengthVal) ? ` (strength: ${strengthVal.toFixed(2)})` : '';
+          const strengthVal =
+            typeof edge.strength === "number"
+              ? edge.strength
+              : Number(edge.strength);
+          const strength =
+            edge.strength !== undefined && !isNaN(strengthVal)
+              ? ` (strength: ${strengthVal.toFixed(2)})`
+              : "";
           latex += `  \\item ${escapeLatex(edge.from)} $\\rightarrow$ ${escapeLatex(edge.to)}${strength}\n`;
         }
         latex += `\\end{itemize}\n\n`;
@@ -1284,15 +1489,24 @@ export class ExportService {
     if (isBayesianThought(thought)) {
       latex += `\\subsubsection{Bayesian Analysis}\n`;
       if (thought.prior?.probability !== undefined) {
-        const prior = typeof thought.prior.probability === 'number' ? thought.prior.probability : Number(thought.prior.probability);
+        const prior =
+          typeof thought.prior.probability === "number"
+            ? thought.prior.probability
+            : Number(thought.prior.probability);
         latex += `Prior: $P(H) = ${prior.toFixed(3)}$\\\\\n`;
       }
       if (thought.likelihood?.probability !== undefined) {
-        const likelihood = typeof thought.likelihood.probability === 'number' ? thought.likelihood.probability : Number(thought.likelihood.probability);
+        const likelihood =
+          typeof thought.likelihood.probability === "number"
+            ? thought.likelihood.probability
+            : Number(thought.likelihood.probability);
         latex += `Likelihood: $P(E|H) = ${likelihood.toFixed(3)}$\\\\\n`;
       }
       if (thought.posterior?.probability !== undefined) {
-        const posterior = typeof thought.posterior.probability === 'number' ? thought.posterior.probability : Number(thought.posterior.probability);
+        const posterior =
+          typeof thought.posterior.probability === "number"
+            ? thought.posterior.probability
+            : Number(thought.posterior.probability);
         latex += `Posterior: $P(H|E) = ${posterior.toFixed(3)}$\\\\\n`;
       }
       latex += `\n`;
@@ -1300,9 +1514,9 @@ export class ExportService {
 
     if (isGameTheoryThought(thought) && thought.players?.length) {
       latex += `\\subsubsection{Game Theory Analysis}\n`;
-      latex += `\\textbf{Players:} ${thought.players.map(p => escapeLatex(p.name)).join(', ')}\\\\\n`;
+      latex += `\\textbf{Players:} ${thought.players.map((p) => escapeLatex(p.name)).join(", ")}\\\\\n`;
       if (thought.payoffMatrix) {
-        latex += `\\textbf{Payoff Matrix:} ${thought.payoffMatrix.dimensions?.join('$\\times$') || 'defined'}\\\\\n`;
+        latex += `\\textbf{Payoff Matrix:} ${thought.payoffMatrix.dimensions?.join("$\\times$") || "defined"}\\\\\n`;
       }
       latex += `\n`;
     }

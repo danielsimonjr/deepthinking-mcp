@@ -3,18 +3,29 @@
  * Exports thinking sessions to LaTeX format for professional documentation
  */
 
-import type { ThinkingSession } from '../../../types/session.js';
-import type { Thought, MathematicsThought, PhysicsThought, CausalThought, BayesianThought, AnalogicalThought, TemporalThought, GameTheoryThought, EvidentialThought, FirstPrinciplesThought } from '../../../types/index.js';
-import { VisualExporter } from '../visual-exporter.js';
+import type { ThinkingSession } from "../../../types/session.js";
+import type {
+  Thought,
+  MathematicsThought,
+  PhysicsThought,
+  CausalThought,
+  BayesianThought,
+  AnalogicalThought,
+  TemporalThought,
+  GameTheoryThought,
+  EvidentialThought,
+  FirstPrinciplesThought,
+} from "../../../types/index.js";
+import { VisualExporter } from "../visual-exporter.js";
 
 /**
  * LaTeX export options
  */
 export interface LaTeXExportOptions {
   // Document configuration
-  documentClass?: 'article' | 'report' | 'book' | 'memoir';
-  fontSize?: '10pt' | '11pt' | '12pt';
-  paperSize?: 'letter' | 'a4' | 'legal';
+  documentClass?: "article" | "report" | "book" | "memoir";
+  fontSize?: "10pt" | "11pt" | "12pt";
+  paperSize?: "letter" | "a4" | "legal";
 
   // Content options
   includeMetadata?: boolean;
@@ -24,7 +35,7 @@ export interface LaTeXExportOptions {
 
   // Formatting options
   syntaxHighlighting?: boolean;
-  colorScheme?: 'default' | 'monochrome' | 'vibrant';
+  colorScheme?: "default" | "monochrome" | "vibrant";
 
   // Package options
   packages?: string[];
@@ -45,17 +56,17 @@ export class LaTeXExporter {
   constructor(options: LaTeXExportOptions = {}) {
     // Set defaults
     this.options = {
-      documentClass: options.documentClass || 'article',
-      fontSize: options.fontSize || '11pt',
-      paperSize: options.paperSize || 'letter',
+      documentClass: options.documentClass || "article",
+      fontSize: options.fontSize || "11pt",
+      paperSize: options.paperSize || "letter",
       includeMetadata: options.includeMetadata !== false,
       includeTOC: options.includeTOC !== false,
       includeTimestamps: options.includeTimestamps !== false,
       includeMetrics: options.includeMetrics !== false,
       syntaxHighlighting: options.syntaxHighlighting !== false,
-      colorScheme: options.colorScheme || 'default',
+      colorScheme: options.colorScheme || "default",
       packages: options.packages || [],
-      customPreamble: options.customPreamble || '',
+      customPreamble: options.customPreamble || "",
       renderDiagrams: options.renderDiagrams !== false,
       inlineMath: options.inlineMath === true,
     };
@@ -72,7 +83,7 @@ export class LaTeXExporter {
     return `\\documentclass[${this.options.fontSize},${this.options.paperSize}paper]{${this.options.documentClass}}
 
 % Core packages
-${packages.join('\n')}
+${packages.join("\n")}
 
 % Color scheme setup
 ${colorSetup}
@@ -123,34 +134,34 @@ ${this.options.customPreamble}
    */
   private getRequiredPackages(): string[] {
     const packages = [
-      '\\usepackage[utf8]{inputenc}',
-      '\\usepackage[T1]{fontenc}',
-      '\\usepackage{amsmath}',
-      '\\usepackage{amssymb}',
-      '\\usepackage{amsthm}',
-      '\\usepackage{graphicx}',
-      '\\usepackage{xcolor}',
-      '\\usepackage{listings}',
-      '\\usepackage{geometry}',
-      '\\usepackage{enumitem}',
-      '\\usepackage{tikz}',
-      '\\usepackage{booktabs}',
-      '\\usepackage{longtable}',
-      '\\usepackage{multirow}',
+      "\\usepackage[utf8]{inputenc}",
+      "\\usepackage[T1]{fontenc}",
+      "\\usepackage{amsmath}",
+      "\\usepackage{amssymb}",
+      "\\usepackage{amsthm}",
+      "\\usepackage{graphicx}",
+      "\\usepackage{xcolor}",
+      "\\usepackage{listings}",
+      "\\usepackage{geometry}",
+      "\\usepackage{enumitem}",
+      "\\usepackage{tikz}",
+      "\\usepackage{booktabs}",
+      "\\usepackage{longtable}",
+      "\\usepackage{multirow}",
     ];
 
     // Add TikZ libraries for diagrams
     if (this.options.renderDiagrams) {
-      packages.push('\\usetikzlibrary{shapes,arrows,positioning,graphs,calc}');
+      packages.push("\\usetikzlibrary{shapes,arrows,positioning,graphs,calc}");
     }
 
     // Add syntax highlighting
     if (this.options.syntaxHighlighting) {
-      packages.push('\\usepackage{minted}');
+      packages.push("\\usepackage{minted}");
     }
 
     // Add custom packages
-    this.options.packages.forEach(pkg => {
+    this.options.packages.forEach((pkg) => {
       packages.push(`\\usepackage{${pkg}}`);
     });
 
@@ -195,8 +206,10 @@ ${this.options.customPreamble}
    */
   export(session: ThinkingSession): string {
     const preamble = this.preamble();
-    const metadata = this.options.includeMetadata ? this.formatMetadata(session) : '';
-    const toc = this.options.includeTOC ? '\\tableofcontents\n\\newpage\n' : '';
+    const metadata = this.options.includeMetadata
+      ? this.formatMetadata(session)
+      : "";
+    const toc = this.options.includeTOC ? "\\tableofcontents\n\\newpage\n" : "";
     const content = this.formatSession(session);
 
     return `${preamble}
@@ -204,7 +217,7 @@ ${this.options.customPreamble}
 \\begin{document}
 
 \\title{${this.escapeLatex(session.title)}}
-${session.author ? `\\author{${this.escapeLatex(session.author)}}` : ''}
+${session.author ? `\\author{${this.escapeLatex(session.author)}}` : ""}
 \\date{${this.formatDate(session.createdAt)}}
 \\maketitle
 
@@ -223,8 +236,8 @@ ${content}
   private formatMetadata(session: ThinkingSession): string {
     const meta: string[] = [];
 
-    meta.push('\\section*{Session Metadata}');
-    meta.push('\\begin{description}[leftmargin=3cm,style=nextline]');
+    meta.push("\\section*{Session Metadata}");
+    meta.push("\\begin{description}[leftmargin=3cm,style=nextline]");
     meta.push(`  \\item[Session ID] \\texttt{${this.escapeLatex(session.id)}}`);
     meta.push(`  \\item[Mode] \\texttt{${this.escapeLatex(session.mode)}}`);
 
@@ -240,20 +253,26 @@ ${content}
     if (this.options.includeMetrics && session.metrics) {
       meta.push(`  \\item[Total Thoughts] ${session.metrics.totalThoughts}`);
       meta.push(`  \\item[Revisions] ${session.metrics.revisionCount}`);
-      meta.push(`  \\item[Average Uncertainty] ${session.metrics.averageUncertainty.toFixed(3)}`);
+      meta.push(
+        `  \\item[Average Uncertainty] ${session.metrics.averageUncertainty.toFixed(3)}`,
+      );
       if (session.metrics.timeSpent > 0) {
-        meta.push(`  \\item[Time Spent] ${this.formatDuration(session.metrics.timeSpent)}`);
+        meta.push(
+          `  \\item[Time Spent] ${this.formatDuration(session.metrics.timeSpent)}`,
+        );
       }
     }
 
     if (session.tags && session.tags.length > 0) {
-      meta.push(`  \\item[Tags] ${session.tags.map(t => this.escapeLatex(t)).join(', ')}`);
+      meta.push(
+        `  \\item[Tags] ${session.tags.map((t) => this.escapeLatex(t)).join(", ")}`,
+      );
     }
 
-    meta.push('\\end{description}');
-    meta.push('\\newpage\n');
+    meta.push("\\end{description}");
+    meta.push("\\newpage\n");
 
-    return meta.join('\n');
+    return meta.join("\n");
   }
 
   /**
@@ -262,12 +281,12 @@ ${content}
   private formatSession(session: ThinkingSession): string {
     const sections: string[] = [];
 
-    sections.push('\\section{Reasoning Process}');
-    sections.push('');
+    sections.push("\\section{Reasoning Process}");
+    sections.push("");
 
     session.thoughts.forEach((thought, index) => {
       sections.push(this.formatThought(thought, index + 1));
-      sections.push(''); // Add spacing between thoughts
+      sections.push(""); // Add spacing between thoughts
     });
 
     // Add summary if session is complete
@@ -275,7 +294,7 @@ ${content}
       sections.push(this.formatSummary(session));
     }
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
@@ -285,41 +304,51 @@ ${content}
     const sections: string[] = [];
 
     // Thought header
-    const thoughtLabel = thought.isRevision ? 'Revision' : 'Thought';
+    const thoughtLabel = thought.isRevision ? "Revision" : "Thought";
     sections.push(`\\thoughtsection{${number}}{${thoughtLabel}}`);
 
     // Thought content
     sections.push(`\\noindent ${this.escapeLatex(thought.content)}`);
-    sections.push('');
+    sections.push("");
 
     // Mode-specific formatting
     switch (thought.mode) {
-      case 'mathematics':
-        sections.push(this.formatMathematicsThought(thought as MathematicsThought));
+      case "mathematics":
+        sections.push(
+          this.formatMathematicsThought(thought as MathematicsThought),
+        );
         break;
-      case 'physics':
+      case "physics":
         sections.push(this.formatPhysicsThought(thought as PhysicsThought));
         break;
-      case 'causal':
+      case "causal":
         sections.push(this.formatCausalThought(thought as CausalThought));
         break;
-      case 'bayesian':
+      case "bayesian":
         sections.push(this.formatBayesianThought(thought as BayesianThought));
         break;
-      case 'analogical':
-        sections.push(this.formatAnalogicalThought(thought as AnalogicalThought));
+      case "analogical":
+        sections.push(
+          this.formatAnalogicalThought(thought as AnalogicalThought),
+        );
         break;
-      case 'temporal':
+      case "temporal":
         sections.push(this.formatTemporalThought(thought as TemporalThought));
         break;
-      case 'gametheory':
-        sections.push(this.formatGameTheoryThought(thought as GameTheoryThought));
+      case "gametheory":
+        sections.push(
+          this.formatGameTheoryThought(thought as GameTheoryThought),
+        );
         break;
-      case 'evidential':
-        sections.push(this.formatEvidentialThought(thought as EvidentialThought));
+      case "evidential":
+        sections.push(
+          this.formatEvidentialThought(thought as EvidentialThought),
+        );
         break;
-      case 'firstprinciples':
-        sections.push(this.formatFirstPrinciplesThought(thought as FirstPrinciplesThought));
+      case "firstprinciples":
+        sections.push(
+          this.formatFirstPrinciplesThought(thought as FirstPrinciplesThought),
+        );
         break;
       default:
         // Generic formatting for other modes
@@ -327,39 +356,38 @@ ${content}
         break;
     }
 
-
     // Embed Mermaid diagrams for visual modes
     if (this.shouldIncludeDiagram(thought)) {
       try {
-        let mermaid: string = '';
-        let caption: string = '';
+        let mermaid: string = "";
+        let caption: string = "";
 
         switch (thought.mode) {
-          case 'causal':
+          case "causal":
             mermaid = this.visualExporter.exportCausalGraph(
               thought as CausalThought,
-              { format: 'mermaid', includeLabels: true, includeMetrics: true }
+              { format: "mermaid", includeLabels: true, includeMetrics: true },
             );
             caption = `Causal Graph for Thought ${number}`;
             break;
-          case 'temporal':
+          case "temporal":
             mermaid = this.visualExporter.exportTemporalTimeline(
               thought as TemporalThought,
-              { format: 'mermaid', includeLabels: true }
+              { format: "mermaid", includeLabels: true },
             );
             caption = `Temporal Timeline for Thought ${number}`;
             break;
-          case 'gametheory':
+          case "gametheory":
             mermaid = this.visualExporter.exportGameTree(
               thought as GameTheoryThought,
-              { format: 'mermaid', includeLabels: true, includeMetrics: true }
+              { format: "mermaid", includeLabels: true, includeMetrics: true },
             );
             caption = `Game Tree for Thought ${number}`;
             break;
-          case 'bayesian':
+          case "bayesian":
             mermaid = this.visualExporter.exportBayesianNetwork(
               thought as BayesianThought,
-              { format: 'mermaid', includeLabels: true, includeMetrics: true }
+              { format: "mermaid", includeLabels: true, includeMetrics: true },
             );
             caption = `Bayesian Network for Thought ${number}`;
             break;
@@ -370,10 +398,13 @@ ${content}
         }
       } catch (error) {
         // Silently skip diagram generation if it fails
-        console.warn(`Failed to generate diagram for thought ${number}:`, error);
+        console.warn(
+          `Failed to generate diagram for thought ${number}:`,
+          error,
+        );
       }
     }
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
@@ -385,57 +416,69 @@ ${content}
     // Handle simple equation property (for tests/legacy)
     const thoughtAny = thought as any;
     if (thoughtAny.equation && !thought.mathematicalModel) {
-      const mathDelim = this.options.inlineMath ? '$' : '\\[';
-      const mathEndDelim = this.options.inlineMath ? '$' : '\\]';
+      const mathDelim = this.options.inlineMath ? "$" : "\\[";
+      const mathEndDelim = this.options.inlineMath ? "$" : "\\]";
       sections.push(`${mathDelim}${thoughtAny.equation}${mathEndDelim}`);
-      sections.push('');
+      sections.push("");
     }
 
     // Assumptions
     if (thought.assumptions && thought.assumptions.length > 0) {
-      sections.push('\\paragraph{Assumptions}');
-      sections.push('\\begin{itemize}');
-      thought.assumptions.forEach(assumption => {
+      sections.push("\\paragraph{Assumptions}");
+      sections.push("\\begin{itemize}");
+      thought.assumptions.forEach((assumption) => {
         sections.push(`  \\item ${this.escapeLatex(assumption)}`);
       });
-      sections.push('\\end{itemize}');
-      sections.push('');
+      sections.push("\\end{itemize}");
+      sections.push("");
     }
 
     // Mathematical model with equation numbering
     if (thought.mathematicalModel) {
-      sections.push('\\paragraph{Mathematical Model}');
-      sections.push('\\begin{equation}');
+      sections.push("\\paragraph{Mathematical Model}");
+      sections.push("\\begin{equation}");
       sections.push(`  \\label{eq:thought${thought.thoughtNumber}}`);
       sections.push(`  ${thought.mathematicalModel.latex}`);
-      sections.push('\\end{equation}');
+      sections.push("\\end{equation}");
 
       // Add symbolic representation if different
-      if (thought.mathematicalModel.symbolic && thought.mathematicalModel.symbolic !== thought.mathematicalModel.latex) {
-        sections.push(`\\textit{Symbolic form:} \\texttt{${this.escapeLatex(thought.mathematicalModel.symbolic)}}`);
+      if (
+        thought.mathematicalModel.symbolic &&
+        thought.mathematicalModel.symbolic !== thought.mathematicalModel.latex
+      ) {
+        sections.push(
+          `\\textit{Symbolic form:} \\texttt{${this.escapeLatex(thought.mathematicalModel.symbolic)}}`,
+        );
       }
 
       // Add complexity and invariants if present
       if (thought.mathematicalModel.complexity) {
-        sections.push(`\\textit{Complexity:} ${this.escapeLatex(thought.mathematicalModel.complexity)}`);
+        sections.push(
+          `\\textit{Complexity:} ${this.escapeLatex(thought.mathematicalModel.complexity)}`,
+        );
       }
 
-      if (thought.mathematicalModel.invariants && thought.mathematicalModel.invariants.length > 0) {
-        sections.push('\\textit{Invariants:}');
-        sections.push('\\begin{itemize}');
-        thought.mathematicalModel.invariants.forEach(inv => {
+      if (
+        thought.mathematicalModel.invariants &&
+        thought.mathematicalModel.invariants.length > 0
+      ) {
+        sections.push("\\textit{Invariants:}");
+        sections.push("\\begin{itemize}");
+        thought.mathematicalModel.invariants.forEach((inv) => {
           sections.push(`  \\item ${this.escapeLatex(inv)}`);
         });
-        sections.push('\\end{itemize}');
+        sections.push("\\end{itemize}");
       }
 
-      sections.push('');
+      sections.push("");
     }
 
     // Theorems
     if (thought.theorems && thought.theorems.length > 0) {
       thought.theorems.forEach((theorem, index) => {
-        sections.push(this.formatTheorem(theorem, thought.thoughtNumber, index));
+        sections.push(
+          this.formatTheorem(theorem, thought.thoughtNumber, index),
+        );
       });
     }
 
@@ -451,24 +494,30 @@ ${content}
 
     // Dependencies
     if (thought.dependencies && thought.dependencies.length > 0) {
-      sections.push('\\paragraph{Dependencies}');
-      sections.push('References thoughts: ' + thought.dependencies.join(', '));
-      sections.push('');
+      sections.push("\\paragraph{Dependencies}");
+      sections.push("References thoughts: " + thought.dependencies.join(", "));
+      sections.push("");
     }
 
     // Uncertainty
     if (thought.uncertainty !== undefined) {
-      sections.push(`\\uncertainty{${(thought.uncertainty * 100).toFixed(1)}\\%}`);
-      sections.push('');
+      sections.push(
+        `\\uncertainty{${(thought.uncertainty * 100).toFixed(1)}\\%}`,
+      );
+      sections.push("");
     }
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
    * Format a theorem
    */
-  private formatTheorem(theorem: any, thoughtNum: number, index: number): string {
+  private formatTheorem(
+    theorem: any,
+    thoughtNum: number,
+    index: number,
+  ): string {
     const sections: string[] = [];
 
     sections.push(`\\begin{theorem}[${this.escapeLatex(theorem.name)}]`);
@@ -476,25 +525,25 @@ ${content}
     sections.push(this.escapeLatex(theorem.statement));
 
     if (theorem.hypotheses && theorem.hypotheses.length > 0) {
-      sections.push('\\\\\\textbf{Hypotheses:}');
-      sections.push('\\begin{enumerate}');
+      sections.push("\\\\\\textbf{Hypotheses:}");
+      sections.push("\\begin{enumerate}");
       theorem.hypotheses.forEach((hyp: string) => {
         sections.push(`  \\item ${this.escapeLatex(hyp)}`);
       });
-      sections.push('\\end{enumerate}');
+      sections.push("\\end{enumerate}");
     }
 
-    sections.push('\\end{theorem}');
+    sections.push("\\end{theorem}");
 
     if (theorem.proof) {
-      sections.push('\\begin{proof}');
+      sections.push("\\begin{proof}");
       sections.push(this.escapeLatex(theorem.proof));
-      sections.push('\\end{proof}');
+      sections.push("\\end{proof}");
     }
 
-    sections.push('');
+    sections.push("");
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
@@ -503,35 +552,39 @@ ${content}
   private formatProof(proof: any): string {
     const sections: string[] = [];
 
-    sections.push('\\begin{proof}');
+    sections.push("\\begin{proof}");
     sections.push(`\\textbf{Strategy:} ${proof.type}`);
-    sections.push('');
+    sections.push("");
 
     if (proof.steps && proof.steps.length > 0) {
       proof.steps.forEach((step: string, i: number) => {
         sections.push(`\\textbf{Step ${i + 1}:} ${this.escapeLatex(step)}`);
-        sections.push('');
+        sections.push("");
       });
     }
 
     if (proof.baseCase) {
       sections.push(`\\textbf{Base Case:} ${this.escapeLatex(proof.baseCase)}`);
-      sections.push('');
+      sections.push("");
     }
 
     if (proof.inductiveStep) {
-      sections.push(`\\textbf{Inductive Step:} ${this.escapeLatex(proof.inductiveStep)}`);
-      sections.push('');
+      sections.push(
+        `\\textbf{Inductive Step:} ${this.escapeLatex(proof.inductiveStep)}`,
+      );
+      sections.push("");
     }
 
     if (proof.completeness !== undefined) {
-      sections.push(`\\textit{Completeness: ${(proof.completeness * 100).toFixed(0)}\\%}`);
+      sections.push(
+        `\\textit{Completeness: ${(proof.completeness * 100).toFixed(0)}\\%}`,
+      );
     }
 
-    sections.push('\\end{proof}');
-    sections.push('');
+    sections.push("\\end{proof}");
+    sections.push("");
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
@@ -540,34 +593,36 @@ ${content}
   private formatLogicalForm(logic: any): string {
     const sections: string[] = [];
 
-    sections.push('\\paragraph{Logical Form}');
+    sections.push("\\paragraph{Logical Form}");
 
     if (logic.premises && logic.premises.length > 0) {
-      sections.push('\\textbf{Premises:}');
-      sections.push('\\begin{enumerate}');
+      sections.push("\\textbf{Premises:}");
+      sections.push("\\begin{enumerate}");
       logic.premises.forEach((premise: string) => {
         sections.push(`  \\item ${this.escapeLatex(premise)}`);
       });
-      sections.push('\\end{enumerate}');
+      sections.push("\\end{enumerate}");
     }
 
     if (logic.conclusion) {
-      sections.push(`\\textbf{Conclusion:} ${this.escapeLatex(logic.conclusion)}`);
-      sections.push('');
+      sections.push(
+        `\\textbf{Conclusion:} ${this.escapeLatex(logic.conclusion)}`,
+      );
+      sections.push("");
     }
 
     if (logic.rules && logic.rules.length > 0) {
-      sections.push('\\textbf{Inference Rules:}');
-      sections.push('\\begin{itemize}');
+      sections.push("\\textbf{Inference Rules:}");
+      sections.push("\\begin{itemize}");
       logic.rules.forEach((rule: string) => {
         sections.push(`  \\item ${this.escapeLatex(rule)}`);
       });
-      sections.push('\\end{itemize}');
+      sections.push("\\end{itemize}");
     }
 
-    sections.push('');
+    sections.push("");
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
@@ -577,32 +632,38 @@ ${content}
     const sections: string[] = [];
 
     if (thought.tensorProperties) {
-      sections.push('\\paragraph{Tensor Properties}');
-      sections.push(`\\textbf{Rank:} $(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})$`);
-      sections.push('');
-      sections.push('\\begin{equation}');
+      sections.push("\\paragraph{Tensor Properties}");
+      sections.push(
+        `\\textbf{Rank:} $(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})$`,
+      );
+      sections.push("");
+      sections.push("\\begin{equation}");
       sections.push(thought.tensorProperties.latex);
-      sections.push('\\end{equation}');
-      sections.push('');
+      sections.push("\\end{equation}");
+      sections.push("");
     }
 
     if (thought.physicalInterpretation) {
-      sections.push('\\paragraph{Physical Interpretation}');
-      sections.push(`\\textbf{Quantity:} ${this.escapeLatex(thought.physicalInterpretation.quantity)}`);
-      sections.push(`\\textbf{Units:} ${this.escapeLatex(thought.physicalInterpretation.units)}`);
+      sections.push("\\paragraph{Physical Interpretation}");
+      sections.push(
+        `\\textbf{Quantity:} ${this.escapeLatex(thought.physicalInterpretation.quantity)}`,
+      );
+      sections.push(
+        `\\textbf{Units:} ${this.escapeLatex(thought.physicalInterpretation.units)}`,
+      );
 
       if (thought.physicalInterpretation.conservationLaws.length > 0) {
-        sections.push('\\textbf{Conservation Laws:}');
-        sections.push('\\begin{itemize}');
-        thought.physicalInterpretation.conservationLaws.forEach(law => {
+        sections.push("\\textbf{Conservation Laws:}");
+        sections.push("\\begin{itemize}");
+        thought.physicalInterpretation.conservationLaws.forEach((law) => {
           sections.push(`  \\item ${this.escapeLatex(law)}`);
         });
-        sections.push('\\end{itemize}');
+        sections.push("\\end{itemize}");
       }
-      sections.push('');
+      sections.push("");
     }
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
@@ -613,20 +674,28 @@ ${content}
 
     // Causal graph visualization (TikZ is native LaTeX, always render)
     if (thought.causalGraph) {
-      sections.push(this.formatCausalGraph(thought.causalGraph, thought.thoughtNumber));
+      sections.push(
+        this.formatCausalGraph(thought.causalGraph, thought.thoughtNumber),
+      );
     }
 
     // Causal mechanisms
     if (thought.mechanisms && thought.mechanisms.length > 0) {
-      sections.push('\\paragraph{Causal Mechanisms}');
-      sections.push('\\begin{itemize}');
-      thought.mechanisms.forEach(mechanism => {
-        const typeLabel = mechanism.type === 'direct' ? 'Direct' :
-                         mechanism.type === 'indirect' ? 'Indirect' : 'Feedback';
-        sections.push(`  \\item \\textbf{[${typeLabel}]} ${this.escapeLatex(mechanism.from)} $\\rightarrow$ ${this.escapeLatex(mechanism.to)}: ${this.escapeLatex(mechanism.description)}`);
+      sections.push("\\paragraph{Causal Mechanisms}");
+      sections.push("\\begin{itemize}");
+      thought.mechanisms.forEach((mechanism) => {
+        const typeLabel =
+          mechanism.type === "direct"
+            ? "Direct"
+            : mechanism.type === "indirect"
+              ? "Indirect"
+              : "Feedback";
+        sections.push(
+          `  \\item \\textbf{[${typeLabel}]} ${this.escapeLatex(mechanism.from)} $\\rightarrow$ ${this.escapeLatex(mechanism.to)}: ${this.escapeLatex(mechanism.description)}`,
+        );
       });
-      sections.push('\\end{itemize}');
-      sections.push('');
+      sections.push("\\end{itemize}");
+      sections.push("");
     }
 
     // Interventions
@@ -636,29 +705,35 @@ ${content}
 
     // Confounders
     if (thought.confounders && thought.confounders.length > 0) {
-      sections.push('\\paragraph{Confounding Variables}');
-      sections.push('\\begin{itemize}');
-      thought.confounders.forEach(confounder => {
-        sections.push(`  \\item \\textbf{${this.escapeLatex(confounder.nodeId)}}: ${this.escapeLatex(confounder.description)}`);
+      sections.push("\\paragraph{Confounding Variables}");
+      sections.push("\\begin{itemize}");
+      thought.confounders.forEach((confounder) => {
+        sections.push(
+          `  \\item \\textbf{${this.escapeLatex(confounder.nodeId)}}: ${this.escapeLatex(confounder.description)}`,
+        );
         if (confounder.affects && confounder.affects.length > 0) {
-          sections.push(`        \\\\\\textit{Affects:} ${confounder.affects.join(', ')}`);
+          sections.push(
+            `        \\\\\\textit{Affects:} ${confounder.affects.join(", ")}`,
+          );
         }
       });
-      sections.push('\\end{itemize}');
-      sections.push('');
+      sections.push("\\end{itemize}");
+      sections.push("");
     }
 
     // Counterfactuals
     if (thought.counterfactuals && thought.counterfactuals.length > 0) {
-      sections.push('\\paragraph{Counterfactual Scenarios}');
-      thought.counterfactuals.forEach(cf => {
+      sections.push("\\paragraph{Counterfactual Scenarios}");
+      thought.counterfactuals.forEach((cf) => {
         sections.push(`\\textbf{${this.escapeLatex(cf.description)}}`);
-        sections.push(`\\\\\\textit{Predicted outcome:} ${this.escapeLatex(cf.predictedOutcome)}`);
-        sections.push('');
+        sections.push(
+          `\\\\\\textit{Predicted outcome:} ${this.escapeLatex(cf.predictedOutcome)}`,
+        );
+        sections.push("");
       });
     }
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
@@ -667,15 +742,17 @@ ${content}
   private formatCausalGraph(graph: any, thoughtNum: number): string {
     const sections: string[] = [];
 
-    sections.push('\\begin{figure}[h]');
-    sections.push('\\centering');
-    sections.push('\\begin{tikzpicture}[');
-    sections.push('  node distance=2.5cm,');
-    sections.push('  auto,');
-    sections.push('  thick,');
-    sections.push('  main node/.style={circle,draw,font=\\sffamily\\small,minimum size=1cm}');
-    sections.push(']');
-    sections.push('');
+    sections.push("\\begin{figure}[h]");
+    sections.push("\\centering");
+    sections.push("\\begin{tikzpicture}[");
+    sections.push("  node distance=2.5cm,");
+    sections.push("  auto,");
+    sections.push("  thick,");
+    sections.push(
+      "  main node/.style={circle,draw,font=\\sffamily\\small,minimum size=1cm}",
+    );
+    sections.push("]");
+    sections.push("");
 
     // Calculate positions for nodes
     const positions = this.calculateNodePositions(graph.nodes);
@@ -685,42 +762,49 @@ ${content}
       const pos = positions[i];
       const style = this.getNodeStyle(node.type);
       const label = this.escapeLatex(node.name).substring(0, 15); // Truncate long names
-      sections.push(`\\node[main node,${style}] (${node.id}) at (${pos.x},${pos.y}) {${label}};`);
+      sections.push(
+        `\\node[main node,${style}] (${node.id}) at (${pos.x},${pos.y}) {${label}};`,
+      );
     });
 
-    sections.push('');
+    sections.push("");
 
     // Draw edges
     graph.edges.forEach((edge: any) => {
       const edgeStyle = this.getEdgeStyle(edge.strength);
-      const label = edge.strength >= 0
-        ? `${edge.strength.toFixed(2)}`
-        : `${edge.strength.toFixed(2)}`;
+      const label =
+        edge.strength >= 0
+          ? `${edge.strength.toFixed(2)}`
+          : `${edge.strength.toFixed(2)}`;
 
-      sections.push(`\\draw[${edgeStyle}] (${edge.from}) -- node[midway,above,sloped,font=\\tiny] {${label}} (${edge.to});`);
+      sections.push(
+        `\\draw[${edgeStyle}] (${edge.from}) -- node[midway,above,sloped,font=\\tiny] {${label}} (${edge.to});`,
+      );
     });
 
-    sections.push('');
-    sections.push('\\end{tikzpicture}');
+    sections.push("");
+    sections.push("\\end{tikzpicture}");
     sections.push(`\\caption{Causal Graph (Thought ${thoughtNum})}`);
     sections.push(`\\label{fig:causal${thoughtNum}}`);
-    sections.push('\\end{figure}');
-    sections.push('');
+    sections.push("\\end{figure}");
+    sections.push("");
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
    * Calculate node positions using a layered layout
    */
-  private calculateNodePositions(nodes: any[]): Array<{x: number, y: number}> {
+  private calculateNodePositions(
+    nodes: any[],
+  ): Array<{ x: number; y: number }> {
     // Group nodes by type
-    const causes = nodes.filter(n => n.type === 'cause');
-    const mediators = nodes.filter(n => n.type === 'mediator');
-    const effects = nodes.filter(n => n.type === 'effect');
-    const confounders = nodes.filter(n => n.type === 'confounder');
+    const causes = nodes.filter((n) => n.type === "cause");
+    const mediators = nodes.filter((n) => n.type === "mediator");
+    const effects = nodes.filter((n) => n.type === "effect");
+    const confounders = nodes.filter((n) => n.type === "confounder");
 
-    const positions: Array<{x: number, y: number}> = [];
+    const positions: Array<{ x: number; y: number }> = [];
     const spacing = 3; // horizontal spacing between nodes
 
     // Layout causes on the left (x=0)
@@ -755,12 +839,12 @@ ${content}
    */
   private getNodeStyle(type: string): string {
     const styles: Record<string, string> = {
-      cause: 'fill=blue!20',
-      effect: 'fill=red!20',
-      mediator: 'fill=green!20',
-      confounder: 'fill=yellow!20,dashed'
+      cause: "fill=blue!20",
+      effect: "fill=red!20",
+      mediator: "fill=green!20",
+      confounder: "fill=yellow!20,dashed",
     };
-    return styles[type] || 'fill=gray!20';
+    return styles[type] || "fill=gray!20";
   }
 
   /**
@@ -768,7 +852,7 @@ ${content}
    */
   private getEdgeStyle(strength: number): string {
     const absStrength = Math.abs(strength);
-    const direction = strength >= 0 ? '->' : '->,red';
+    const direction = strength >= 0 ? "->" : "->,red";
 
     if (absStrength > 0.7) {
       return `${direction},very thick`;
@@ -785,26 +869,33 @@ ${content}
   private formatInterventions(interventions: any[]): string {
     const sections: string[] = [];
 
-    sections.push('\\paragraph{Interventions}');
-    sections.push('\\begin{enumerate}');
+    sections.push("\\paragraph{Interventions}");
+    sections.push("\\begin{enumerate}");
 
-    interventions.forEach(intervention => {
-      sections.push(`  \\item \\textbf{Action on ${this.escapeLatex(intervention.nodeId)}:} ${this.escapeLatex(intervention.action)}`);
+    interventions.forEach((intervention) => {
+      sections.push(
+        `  \\item \\textbf{Action on ${this.escapeLatex(intervention.nodeId)}:} ${this.escapeLatex(intervention.action)}`,
+      );
 
-      if (intervention.expectedEffects && intervention.expectedEffects.length > 0) {
-        sections.push('        \\\\\\textit{Expected effects:}');
-        sections.push('        \\begin{itemize}');
+      if (
+        intervention.expectedEffects &&
+        intervention.expectedEffects.length > 0
+      ) {
+        sections.push("        \\\\\\textit{Expected effects:}");
+        sections.push("        \\begin{itemize}");
         intervention.expectedEffects.forEach((effect: any) => {
-          sections.push(`          \\item ${this.escapeLatex(effect.nodeId)}: ${this.escapeLatex(effect.expectedChange)} (confidence: ${(effect.confidence * 100).toFixed(0)}\\%)`);
+          sections.push(
+            `          \\item ${this.escapeLatex(effect.nodeId)}: ${this.escapeLatex(effect.expectedChange)} (confidence: ${(effect.confidence * 100).toFixed(0)}\\%)`,
+          );
         });
-        sections.push('        \\end{itemize}');
+        sections.push("        \\end{itemize}");
       }
     });
 
-    sections.push('\\end{enumerate}');
-    sections.push('');
+    sections.push("\\end{enumerate}");
+    sections.push("");
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
@@ -814,86 +905,101 @@ ${content}
     const sections: string[] = [];
 
     // Hypothesis
-    sections.push('\\paragraph{Hypothesis}');
+    sections.push("\\paragraph{Hypothesis}");
     sections.push(this.escapeLatex(thought.hypothesis.statement));
-    if (thought.hypothesis.alternatives && thought.hypothesis.alternatives.length > 0) {
-      sections.push('\\\\\\textit{Alternatives:}');
-      sections.push('\\begin{itemize}');
-      thought.hypothesis.alternatives.forEach(alt => {
+    if (
+      thought.hypothesis.alternatives &&
+      thought.hypothesis.alternatives.length > 0
+    ) {
+      sections.push("\\\\\\textit{Alternatives:}");
+      sections.push("\\begin{itemize}");
+      thought.hypothesis.alternatives.forEach((alt) => {
         sections.push(`  \\item ${this.escapeLatex(alt)}`);
       });
-      sections.push('\\end{itemize}');
+      sections.push("\\end{itemize}");
     }
-    sections.push('');
+    sections.push("");
 
     // Prior probability
-    sections.push('\\paragraph{Prior Probability}');
-    sections.push('\\begin{equation}');
+    sections.push("\\paragraph{Prior Probability}");
+    sections.push("\\begin{equation}");
     sections.push(`  P(H) = ${thought.prior.probability.toFixed(4)}`);
-    sections.push('\\end{equation}');
-    sections.push(`\\textit{Justification:} ${this.escapeLatex(thought.prior.justification)}`);
-    sections.push('');
+    sections.push("\\end{equation}");
+    sections.push(
+      `\\textit{Justification:} ${this.escapeLatex(thought.prior.justification)}`,
+    );
+    sections.push("");
 
     // Evidence with likelihoods
     if (thought.evidence && thought.evidence.length > 0) {
-      sections.push('\\paragraph{Evidence}');
-      sections.push('\\begin{itemize}');
-      thought.evidence.forEach(ev => {
+      sections.push("\\paragraph{Evidence}");
+      sections.push("\\begin{itemize}");
+      thought.evidence.forEach((ev) => {
         sections.push(`  \\item \\textbf{${this.escapeLatex(ev.description)}}`);
-        sections.push('        \\begin{align*}');
-        sections.push(`          P(E|H) &= ${ev.likelihoodGivenHypothesis.toFixed(4)} \\\\`);
-        sections.push(`          P(E|\\neg H) &= ${ev.likelihoodGivenNotHypothesis.toFixed(4)}`);
-        sections.push('        \\end{align*}');
+        sections.push("        \\begin{align*}");
+        sections.push(
+          `          P(E|H) &= ${ev.likelihoodGivenHypothesis.toFixed(4)} \\\\`,
+        );
+        sections.push(
+          `          P(E|\\neg H) &= ${ev.likelihoodGivenNotHypothesis.toFixed(4)}`,
+        );
+        sections.push("        \\end{align*}");
       });
-      sections.push('\\end{itemize}');
-      sections.push('');
+      sections.push("\\end{itemize}");
+      sections.push("");
     }
 
     // Posterior probability
-    sections.push('\\paragraph{Posterior Probability}');
-    sections.push('\\begin{equation}');
+    sections.push("\\paragraph{Posterior Probability}");
+    sections.push("\\begin{equation}");
     sections.push(`  P(H|E) = ${thought.posterior.probability.toFixed(4)}`);
-    sections.push('\\end{equation}');
-    sections.push(`\\textit{Calculation:} ${this.escapeLatex(thought.posterior.calculation)}`);
+    sections.push("\\end{equation}");
+    sections.push(
+      `\\textit{Calculation:} ${this.escapeLatex(thought.posterior.calculation)}`,
+    );
     if ((thought.posterior as any).confidence !== undefined) {
-      sections.push(`\\\\\\textit{Confidence:} ${((thought.posterior as any).confidence * 100).toFixed(1)}\\%`);
+      sections.push(
+        `\\\\\\textit{Confidence:} ${((thought.posterior as any).confidence * 100).toFixed(1)}\\%`,
+      );
     }
-    sections.push('');
+    sections.push("");
 
     // Bayes factor
     if (thought.bayesFactor !== undefined) {
-      sections.push('\\paragraph{Bayes Factor}');
+      sections.push("\\paragraph{Bayes Factor}");
       const interpretation = this.interpretBayesFactor(thought.bayesFactor);
       sections.push(`\\textbf{BF} = ${thought.bayesFactor.toFixed(2)}`);
       sections.push(`\\\\\\textit{Interpretation:} ${interpretation}`);
-      sections.push('');
+      sections.push("");
     }
 
     // Sensitivity analysis
     if (thought.sensitivity) {
-      sections.push('\\paragraph{Sensitivity Analysis}');
-      sections.push(`Prior range: [${thought.sensitivity.priorRange[0].toFixed(2)}, ${thought.sensitivity.priorRange[1].toFixed(2)}]`);
-      sections.push('');
+      sections.push("\\paragraph{Sensitivity Analysis}");
+      sections.push(
+        `Prior range: [${thought.sensitivity.priorRange[0].toFixed(2)}, ${thought.sensitivity.priorRange[1].toFixed(2)}]`,
+      );
+      sections.push("");
     }
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
    * Interpret Bayes factor strength
    */
   private interpretBayesFactor(bf: number): string {
-    if (bf > 100) return 'Extreme evidence for hypothesis';
-    if (bf > 30) return 'Very strong evidence for hypothesis';
-    if (bf > 10) return 'Strong evidence for hypothesis';
-    if (bf > 3) return 'Moderate evidence for hypothesis';
-    if (bf > 1) return 'Weak evidence for hypothesis';
-    if (bf === 1) return 'No evidence';
-    if (bf > 1/3) return 'Weak evidence against hypothesis';
-    if (bf > 1/10) return 'Moderate evidence against hypothesis';
-    if (bf > 1/30) return 'Strong evidence against hypothesis';
-    if (bf > 1/100) return 'Very strong evidence against hypothesis';
-    return 'Extreme evidence against hypothesis';
+    if (bf > 100) return "Extreme evidence for hypothesis";
+    if (bf > 30) return "Very strong evidence for hypothesis";
+    if (bf > 10) return "Strong evidence for hypothesis";
+    if (bf > 3) return "Moderate evidence for hypothesis";
+    if (bf > 1) return "Weak evidence for hypothesis";
+    if (bf === 1) return "No evidence";
+    if (bf > 1 / 3) return "Weak evidence against hypothesis";
+    if (bf > 1 / 10) return "Moderate evidence against hypothesis";
+    if (bf > 1 / 30) return "Strong evidence against hypothesis";
+    if (bf > 1 / 100) return "Very strong evidence against hypothesis";
+    return "Extreme evidence against hypothesis";
   }
 
   /**
@@ -903,78 +1009,100 @@ ${content}
     const sections: string[] = [];
 
     // Source domain
-    sections.push('\\paragraph{Source Domain}');
+    sections.push("\\paragraph{Source Domain}");
     sections.push(`\\textbf{${this.escapeLatex(thought.sourceDomain.name)}}`);
     sections.push(`\\\\${this.escapeLatex(thought.sourceDomain.description)}`);
-    sections.push('');
+    sections.push("");
 
     // Target domain
-    sections.push('\\paragraph{Target Domain}');
+    sections.push("\\paragraph{Target Domain}");
     sections.push(`\\textbf{${this.escapeLatex(thought.targetDomain.name)}}`);
     sections.push(`\\\\${this.escapeLatex(thought.targetDomain.description)}`);
-    sections.push('');
+    sections.push("");
 
     // Mappings
     if (thought.mapping && thought.mapping.length > 0) {
-      sections.push('\\paragraph{Mappings}');
-      sections.push('\\begin{itemize}');
+      sections.push("\\paragraph{Mappings}");
+      sections.push("\\begin{itemize}");
       thought.mapping.forEach((m: any) => {
-        sections.push(`  \\item ${this.escapeLatex(m.sourceEntityId)} $\\mapsto$ ${this.escapeLatex(m.targetEntityId)}`);
-        sections.push(`        \\\\\\textit{Confidence:} ${(m.confidence * 100).toFixed(0)}\\%`);
-        sections.push(`        \\\\\\textit{Justification:} ${this.escapeLatex(m.justification)}`);
+        sections.push(
+          `  \\item ${this.escapeLatex(m.sourceEntityId)} $\\mapsto$ ${this.escapeLatex(m.targetEntityId)}`,
+        );
+        sections.push(
+          `        \\\\\\textit{Confidence:} ${(m.confidence * 100).toFixed(0)}\\%`,
+        );
+        sections.push(
+          `        \\\\\\textit{Justification:} ${this.escapeLatex(m.justification)}`,
+        );
       });
-      sections.push('\\end{itemize}');
-      sections.push('');
+      sections.push("\\end{itemize}");
+      sections.push("");
     }
 
     // Insights
     if (thought.insights && thought.insights.length > 0) {
-      sections.push('\\paragraph{Insights}');
-      sections.push('\\begin{enumerate}');
+      sections.push("\\paragraph{Insights}");
+      sections.push("\\begin{enumerate}");
       thought.insights.forEach((insight: any) => {
         sections.push(`  \\item ${this.escapeLatex(insight.description)}`);
-        sections.push(`        \\\\\\textit{Source evidence:} ${this.escapeLatex(insight.sourceEvidence)}`);
-        sections.push(`        \\\\\\textit{Target application:} ${this.escapeLatex(insight.targetApplication)}`);
-        sections.push(`        \\\\\\textit{Novelty:} ${(insight.novelty * 100).toFixed(0)}\\%`);
+        sections.push(
+          `        \\\\\\textit{Source evidence:} ${this.escapeLatex(insight.sourceEvidence)}`,
+        );
+        sections.push(
+          `        \\\\\\textit{Target application:} ${this.escapeLatex(insight.targetApplication)}`,
+        );
+        sections.push(
+          `        \\\\\\textit{Novelty:} ${(insight.novelty * 100).toFixed(0)}\\%`,
+        );
       });
-      sections.push('\\end{enumerate}');
-      sections.push('');
+      sections.push("\\end{enumerate}");
+      sections.push("");
     }
 
     // Inferences
     if (thought.inferences && thought.inferences.length > 0) {
-      sections.push('\\paragraph{Inferences}');
-      sections.push('\\begin{enumerate}');
+      sections.push("\\paragraph{Inferences}");
+      sections.push("\\begin{enumerate}");
       thought.inferences.forEach((inference: any) => {
         sections.push(`  \\item ${this.escapeLatex(inference.description)}`);
-        sections.push(`        \\\\\\textit{Based on:} ${this.escapeLatex(inference.basedOn)}`);
-        sections.push(`        \\\\\\textit{Confidence:} ${(inference.confidence * 100).toFixed(0)}\\%`);
-        sections.push(`        \\\\\\textit{Testability:} ${this.escapeLatex(inference.testability)}`);
+        sections.push(
+          `        \\\\\\textit{Based on:} ${this.escapeLatex(inference.basedOn)}`,
+        );
+        sections.push(
+          `        \\\\\\textit{Confidence:} ${(inference.confidence * 100).toFixed(0)}\\%`,
+        );
+        sections.push(
+          `        \\\\\\textit{Testability:} ${this.escapeLatex(inference.testability)}`,
+        );
       });
-      sections.push('\\end{enumerate}');
-      sections.push('');
+      sections.push("\\end{enumerate}");
+      sections.push("");
     }
 
     // Analogy strength
-    sections.push('\\paragraph{Analogy Strength}');
+    sections.push("\\paragraph{Analogy Strength}");
     const strengthPercent = (thought.analogyStrength * 100).toFixed(1);
-    const strengthLabel = thought.analogyStrength > 0.7 ? 'Strong' :
-                          thought.analogyStrength > 0.4 ? 'Moderate' : 'Weak';
+    const strengthLabel =
+      thought.analogyStrength > 0.7
+        ? "Strong"
+        : thought.analogyStrength > 0.4
+          ? "Moderate"
+          : "Weak";
     sections.push(`${strengthPercent}\\% (${strengthLabel})`);
-    sections.push('');
+    sections.push("");
 
     // Limitations
     if (thought.limitations && thought.limitations.length > 0) {
-      sections.push('\\paragraph{Limitations}');
-      sections.push('\\begin{itemize}');
+      sections.push("\\paragraph{Limitations}");
+      sections.push("\\begin{itemize}");
       thought.limitations.forEach((lim: string) => {
         sections.push(`  \\item ${this.escapeLatex(lim)}`);
       });
-      sections.push('\\end{itemize}');
-      sections.push('');
+      sections.push("\\end{itemize}");
+      sections.push("");
     }
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
@@ -985,48 +1113,56 @@ ${content}
 
     // Timeline information
     if (thought.timeline) {
-      sections.push('\\paragraph{Timeline}');
+      sections.push("\\paragraph{Timeline}");
       sections.push(`\\textbf{${this.escapeLatex(thought.timeline.name)}}`);
-      sections.push(`\\\\Time Unit: ${this.escapeLatex(thought.timeline.timeUnit)}`);
+      sections.push(
+        `\\\\Time Unit: ${this.escapeLatex(thought.timeline.timeUnit)}`,
+      );
       if (thought.timeline.startTime !== undefined) {
         sections.push(`\\\\Start: ${thought.timeline.startTime}`);
       }
       if (thought.timeline.endTime !== undefined) {
         sections.push(`\\\\End: ${thought.timeline.endTime}`);
       }
-      sections.push('');
+      sections.push("");
     }
 
     // Events
     if (thought.events && thought.events.length > 0) {
-      sections.push('\\paragraph{Events}');
-      sections.push('\\begin{itemize}');
-      thought.events.forEach(event => {
-        const eventType = event.type === 'instant' ? 'Instant' : 'Interval';
-        sections.push(`  \\item \\textbf{[${eventType}] ${this.escapeLatex(event.name)}} (t=${event.timestamp})`);
+      sections.push("\\paragraph{Events}");
+      sections.push("\\begin{itemize}");
+      thought.events.forEach((event) => {
+        const eventType = event.type === "instant" ? "Instant" : "Interval";
+        sections.push(
+          `  \\item \\textbf{[${eventType}] ${this.escapeLatex(event.name)}} (t=${event.timestamp})`,
+        );
         sections.push(`        \\\\${this.escapeLatex(event.description)}`);
       });
-      sections.push('\\end{itemize}');
-      sections.push('');
+      sections.push("\\end{itemize}");
+      sections.push("");
     }
 
     // Temporal relations
     if (thought.relations && thought.relations.length > 0) {
-      sections.push('\\paragraph{Temporal Relations}');
-      sections.push('\\begin{itemize}');
-      thought.relations.forEach(rel => {
-        const relType = rel.relationType.replace(/_/g, ' ');
-        sections.push(`  \\item ${this.escapeLatex(rel.from)} \\textit{${relType}} ${this.escapeLatex(rel.to)}`);
+      sections.push("\\paragraph{Temporal Relations}");
+      sections.push("\\begin{itemize}");
+      thought.relations.forEach((rel) => {
+        const relType = rel.relationType.replace(/_/g, " ");
+        sections.push(
+          `  \\item ${this.escapeLatex(rel.from)} \\textit{${relType}} ${this.escapeLatex(rel.to)}`,
+        );
         if (rel.delay) {
           sections.push(`        \\\\Delay: ${rel.delay}`);
         }
-        sections.push(`        \\\\Strength: ${(rel.strength * 100).toFixed(0)}\\%`);
+        sections.push(
+          `        \\\\Strength: ${(rel.strength * 100).toFixed(0)}\\%`,
+        );
       });
-      sections.push('\\end{itemize}');
-      sections.push('');
+      sections.push("\\end{itemize}");
+      sections.push("");
     }
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
@@ -1037,55 +1173,63 @@ ${content}
 
     // Game description
     if (thought.game) {
-      sections.push('\\paragraph{Game}');
-      sections.push(`\\textbf{${this.escapeLatex(thought.game.name)}} (${thought.game.type})`);
+      sections.push("\\paragraph{Game}");
+      sections.push(
+        `\\textbf{${this.escapeLatex(thought.game.name)}} (${thought.game.type})`,
+      );
       sections.push(`\\\\Players: ${thought.game.numPlayers}`);
-      sections.push('');
+      sections.push("");
     }
 
     // Players
     if (thought.players && thought.players.length > 0) {
-      sections.push('\\paragraph{Players}');
-      sections.push('\\begin{itemize}');
-      thought.players.forEach(player => {
+      sections.push("\\paragraph{Players}");
+      sections.push("\\begin{itemize}");
+      thought.players.forEach((player) => {
         sections.push(`  \\item \\textbf{${this.escapeLatex(player.name)}}`);
         if (player.role) {
           sections.push(`        \\\\Role: ${this.escapeLatex(player.role)}`);
         }
-        sections.push(`        \\\\Rational: ${player.isRational ? 'Yes' : 'No'}`);
+        sections.push(
+          `        \\\\Rational: ${player.isRational ? "Yes" : "No"}`,
+        );
       });
-      sections.push('\\end{itemize}');
-      sections.push('');
+      sections.push("\\end{itemize}");
+      sections.push("");
     }
 
     // Strategies
     if (thought.strategies && thought.strategies.length > 0) {
-      sections.push('\\paragraph{Strategies}');
-      sections.push('\\begin{itemize}');
-      thought.strategies.forEach(strategy => {
-        const stratType = strategy.isPure ? 'Pure' : 'Mixed';
-        sections.push(`  \\item \\textbf{[${stratType}] ${this.escapeLatex(strategy.name)}}`);
+      sections.push("\\paragraph{Strategies}");
+      sections.push("\\begin{itemize}");
+      thought.strategies.forEach((strategy) => {
+        const stratType = strategy.isPure ? "Pure" : "Mixed";
+        sections.push(
+          `  \\item \\textbf{[${stratType}] ${this.escapeLatex(strategy.name)}}`,
+        );
         sections.push(`        \\\\${this.escapeLatex(strategy.description)}`);
       });
-      sections.push('\\end{itemize}');
-      sections.push('');
+      sections.push("\\end{itemize}");
+      sections.push("");
     }
 
     // Nash equilibria
     if (thought.nashEquilibria && thought.nashEquilibria.length > 0) {
-      sections.push('\\paragraph{Nash Equilibria}');
-      sections.push('\\begin{enumerate}');
-      thought.nashEquilibria.forEach(eq => {
-        const eqType = eq.type || 'Unknown';
-        sections.push(`  \\item \\textbf{[${eqType}]} ${eq.strategyProfile.join(', ')}`);
-        sections.push(`        \\\\Payoffs: (${eq.payoffs.join(', ')})`);
+      sections.push("\\paragraph{Nash Equilibria}");
+      sections.push("\\begin{enumerate}");
+      thought.nashEquilibria.forEach((eq) => {
+        const eqType = eq.type || "Unknown";
+        sections.push(
+          `  \\item \\textbf{[${eqType}]} ${eq.strategyProfile.join(", ")}`,
+        );
+        sections.push(`        \\\\Payoffs: (${eq.payoffs.join(", ")})`);
         sections.push(`        \\\\Stability: ${eq.stability}`);
       });
-      sections.push('\\end{enumerate}');
-      sections.push('');
+      sections.push("\\end{enumerate}");
+      sections.push("");
     }
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
@@ -1096,84 +1240,102 @@ ${content}
 
     // Frame of discernment
     if (thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
-      sections.push('\\paragraph{Frame of Discernment}');
-      sections.push(`$\\Theta = \\{${thought.frameOfDiscernment.map(h => this.escapeLatex(h)).join(', ')}\\}$`);
-      sections.push('');
+      sections.push("\\paragraph{Frame of Discernment}");
+      sections.push(
+        `$\\Theta = \\{${thought.frameOfDiscernment.map((h) => this.escapeLatex(h)).join(", ")}\\}$`,
+      );
+      sections.push("");
     }
 
     // Hypotheses
     if (thought.hypotheses && thought.hypotheses.length > 0) {
-      sections.push('\\paragraph{Hypotheses}');
-      sections.push('\\begin{itemize}');
-      thought.hypotheses.forEach(hyp => {
-        sections.push(`  \\item \\textbf{${this.escapeLatex(hyp.name)}}: ${this.escapeLatex(hyp.description)}`);
+      sections.push("\\paragraph{Hypotheses}");
+      sections.push("\\begin{itemize}");
+      thought.hypotheses.forEach((hyp) => {
+        sections.push(
+          `  \\item \\textbf{${this.escapeLatex(hyp.name)}}: ${this.escapeLatex(hyp.description)}`,
+        );
       });
-      sections.push('\\end{itemize}');
-      sections.push('');
+      sections.push("\\end{itemize}");
+      sections.push("");
     }
 
     // Evidence
     if (thought.evidence && thought.evidence.length > 0) {
-      sections.push('\\paragraph{Evidence}');
-      sections.push('\\begin{enumerate}');
-      thought.evidence.forEach(ev => {
+      sections.push("\\paragraph{Evidence}");
+      sections.push("\\begin{enumerate}");
+      thought.evidence.forEach((ev) => {
         sections.push(`  \\item \\textbf{${this.escapeLatex(ev.description)}}`);
         sections.push(`        \\\\Source: ${this.escapeLatex(ev.source)}`);
-        sections.push(`        \\\\Reliability: ${(ev.reliability * 100).toFixed(0)}\\%`);
+        sections.push(
+          `        \\\\Reliability: ${(ev.reliability * 100).toFixed(0)}\\%`,
+        );
       });
-      sections.push('\\end{enumerate}');
-      sections.push('');
+      sections.push("\\end{enumerate}");
+      sections.push("");
     }
 
     // Belief functions
     if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
-      sections.push('\\paragraph{Belief Functions}');
-      sections.push('\\begin{itemize}');
-      thought.beliefFunctions.forEach(bf => {
-        sections.push(`  \\item \\textbf{Source:} ${this.escapeLatex(bf.source)}`);
-        bf.massAssignments.forEach(ma => {
-          sections.push(`    - $m(\\{${ma.hypothesisSet.join(', ')}\\}) = ${ma.mass.toFixed(4)}$`);
-          sections.push(`      \\\\\\textit{${this.escapeLatex(ma.justification)}}`);
+      sections.push("\\paragraph{Belief Functions}");
+      sections.push("\\begin{itemize}");
+      thought.beliefFunctions.forEach((bf) => {
+        sections.push(
+          `  \\item \\textbf{Source:} ${this.escapeLatex(bf.source)}`,
+        );
+        bf.massAssignments.forEach((ma) => {
+          sections.push(
+            `    - $m(\\{${ma.hypothesisSet.join(", ")}\\}) = ${ma.mass.toFixed(4)}$`,
+          );
+          sections.push(
+            `      \\\\\\textit{${this.escapeLatex(ma.justification)}}`,
+          );
         });
       });
-      sections.push('\\end{itemize}');
-      sections.push('');
+      sections.push("\\end{itemize}");
+      sections.push("");
     }
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
    * Format First-Principles mode thought
    */
-  private formatFirstPrinciplesThought(thought: FirstPrinciplesThought): string {
+  private formatFirstPrinciplesThought(
+    thought: FirstPrinciplesThought,
+  ): string {
     const sections: string[] = [];
 
     if (thought.question) {
-      sections.push('\\paragraph{Question}');
+      sections.push("\\paragraph{Question}");
       sections.push(`\\textit{${this.escapeLatex(thought.question)}}`);
-      sections.push('');
+      sections.push("");
     }
 
     if (thought.principles && thought.principles.length > 0) {
-      sections.push('\\paragraph{Foundational Principles}');
-      sections.push('\\begin{enumerate}');
-      thought.principles.forEach(principle => {
-        sections.push(`  \\item \\textbf{[${principle.type}]} ${this.escapeLatex(principle.statement)}`);
-        sections.push(`        \\\\\\textit{Justification:} ${this.escapeLatex(principle.justification)}`);
+      sections.push("\\paragraph{Foundational Principles}");
+      sections.push("\\begin{enumerate}");
+      thought.principles.forEach((principle) => {
+        sections.push(
+          `  \\item \\textbf{[${principle.type}]} ${this.escapeLatex(principle.statement)}`,
+        );
+        sections.push(
+          `        \\\\\\textit{Justification:} ${this.escapeLatex(principle.justification)}`,
+        );
       });
-      sections.push('\\end{enumerate}');
-      sections.push('');
+      sections.push("\\end{enumerate}");
+      sections.push("");
     }
 
     if (thought.conclusion) {
-      sections.push('\\paragraph{Conclusion}');
+      sections.push("\\paragraph{Conclusion}");
       sections.push(this.escapeLatex(thought.conclusion.statement));
       sections.push(`\\\\\\textit{Certainty:} ${thought.conclusion.certainty}`);
-      sections.push('');
+      sections.push("");
     }
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
@@ -1183,11 +1345,13 @@ ${content}
     const sections: string[] = [];
 
     if (this.options.includeTimestamps) {
-      sections.push(`\\textit{Timestamp:} ${this.formatDate(thought.timestamp)}`);
-      sections.push('');
+      sections.push(
+        `\\textit{Timestamp:} ${this.formatDate(thought.timestamp)}`,
+      );
+      sections.push("");
     }
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
@@ -1196,31 +1360,35 @@ ${content}
   private formatSummary(session: ThinkingSession): string {
     const sections: string[] = [];
 
-    sections.push('\\section{Summary}');
-    sections.push('');
-    sections.push(`This ${session.mode} reasoning session completed with ${session.thoughts.length} thoughts.`);
+    sections.push("\\section{Summary}");
+    sections.push("");
+    sections.push(
+      `This ${session.mode} reasoning session completed with ${session.thoughts.length} thoughts.`,
+    );
 
     if (session.metrics.revisionCount > 0) {
-      sections.push(`The reasoning process included ${session.metrics.revisionCount} revisions, `);
+      sections.push(
+        `The reasoning process included ${session.metrics.revisionCount} revisions, `,
+      );
       sections.push(`demonstrating iterative refinement.`);
     }
 
-    sections.push('');
+    sections.push("");
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
    * Escape special LaTeX characters
    */
   private escapeLatex(text: string): string {
-    if (!text) return '';
+    if (!text) return "";
 
     return text
-      .replace(/\\/g, '\\textbackslash{}')
-      .replace(/[&%$#_{}]/g, '\\$&')
-      .replace(/~/g, '\\textasciitilde{}')
-      .replace(/\^/g, '\\textasciicircum{}');
+      .replace(/\\/g, "\\textbackslash{}")
+      .replace(/[&%$#_{}]/g, "\\$&")
+      .replace(/~/g, "\\textasciitilde{}")
+      .replace(/\^/g, "\\textasciicircum{}");
   }
 
   /**
@@ -1228,9 +1396,9 @@ ${content}
    */
   private formatDate(date: Date | undefined): string {
     if (!date) {
-      return new Date().toISOString().split('T')[0];
+      return new Date().toISOString().split("T")[0];
     }
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   }
 
   /**
@@ -1246,7 +1414,7 @@ ${content}
     if (minutes > 0) parts.push(`${minutes}m`);
     if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
 
-    return parts.join(' ');
+    return parts.join(" ");
   }
 
   /**
@@ -1258,10 +1426,12 @@ ${content}
     }
 
     // Include diagrams for modes with rich visual representations
-    return thought.mode === 'causal' ||
-           thought.mode === 'temporal' ||
-           thought.mode === 'gametheory' ||
-           thought.mode === 'bayesian';
+    return (
+      thought.mode === "causal" ||
+      thought.mode === "temporal" ||
+      thought.mode === "gametheory" ||
+      thought.mode === "bayesian"
+    );
   }
 
   /**
@@ -1270,15 +1440,15 @@ ${content}
   private embedMermaidDiagram(mermaid: string, caption: string): string {
     const sections: string[] = [];
 
-    sections.push('\\begin{figure}[h]');
-    sections.push('\\centering');
-    sections.push('\\begin{verbatim}');
+    sections.push("\\begin{figure}[h]");
+    sections.push("\\centering");
+    sections.push("\\begin{verbatim}");
     sections.push(mermaid);
-    sections.push('\\end{verbatim}');
+    sections.push("\\end{verbatim}");
     sections.push(`\\caption{${this.escapeLatex(caption)}}`);
-    sections.push('\\end{figure}');
-    sections.push('');
+    sections.push("\\end{figure}");
+    sections.push("");
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 }

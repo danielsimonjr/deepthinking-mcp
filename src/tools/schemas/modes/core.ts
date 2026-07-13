@@ -5,16 +5,16 @@
  * - CoreModeSchema: Inductive, Deductive, Abductive modes (NEW)
  */
 
-import { z } from 'zod';
-import { BaseThoughtSchema } from '../base.js';
-import { ShannonStageEnum } from '../shared.js';
+import { z } from "zod";
+import { BaseThoughtSchema } from "../base.js";
+import { ShannonStageEnum } from "../shared.js";
 
 /**
  * Standard workflow modes (sequential, shannon, hybrid)
  * Renamed from CoreSchema in v5.0.0
  */
 export const StandardSchema = BaseThoughtSchema.extend({
-  mode: z.enum(['sequential', 'shannon', 'hybrid']),
+  mode: z.enum(["sequential", "shannon", "hybrid"]),
   stage: ShannonStageEnum.optional(),
   activeModes: z.array(z.string()).optional(),
 });
@@ -24,7 +24,7 @@ export const StandardSchema = BaseThoughtSchema.extend({
  * NEW in v5.0.0
  */
 export const CoreModeSchema = BaseThoughtSchema.extend({
-  mode: z.enum(['inductive', 'deductive', 'abductive']),
+  mode: z.enum(["inductive", "deductive", "abductive"]),
   // Inductive properties
   observations: z.array(z.string()).optional(),
   pattern: z.string().optional(),
@@ -39,16 +39,22 @@ export const CoreModeSchema = BaseThoughtSchema.extend({
   validityCheck: z.boolean().optional(),
   soundnessCheck: z.boolean().optional(),
   // Abductive properties
-  hypotheses: z.array(z.object({
-    id: z.string(),
-    explanation: z.string(),
-    score: z.number().optional(),
-  })).optional(),
-  bestExplanation: z.object({
-    id: z.string(),
-    explanation: z.string(),
-    score: z.number().optional(),
-  }).optional(),
+  hypotheses: z
+    .array(
+      z.object({
+        id: z.string(),
+        explanation: z.string(),
+        score: z.number().optional(),
+      }),
+    )
+    .optional(),
+  bestExplanation: z
+    .object({
+      id: z.string(),
+      explanation: z.string(),
+      score: z.number().optional(),
+    })
+    .optional(),
 });
 
 // Backward compatibility export

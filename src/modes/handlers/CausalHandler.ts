@@ -11,10 +11,10 @@
  * - Do-calculus identifiability checking
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode, CausalThought } from '../../types/core.js';
-import type { CausalGraph, Intervention } from '../../types/modes/causal.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode, CausalThought } from "../../types/core.js";
+import type { CausalGraph, Intervention } from "../../types/modes/causal.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -23,20 +23,18 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
-import { toExtendedThoughtType } from '../../utils/type-guards.js';
+} from "./ModeHandler.js";
+import { toExtendedThoughtType } from "../../utils/type-guards.js";
 import {
   computeDegreeCentrality,
   getMostCentralNode,
-} from '../causal/graph/algorithms/centrality.js';
-import {
-  findVStructures,
-} from '../causal/graph/algorithms/d-separation.js';
+} from "../causal/graph/algorithms/centrality.js";
+import { findVStructures } from "../causal/graph/algorithms/d-separation.js";
 import {
   isIdentifiable,
   findAllBackdoorSets,
-} from '../causal/graph/algorithms/intervention.js';
-import type { CausalGraph as GraphCausalGraph } from '../causal/graph/types.js';
+} from "../causal/graph/algorithms/intervention.js";
+import type { CausalGraph as GraphCausalGraph } from "../causal/graph/types.js";
 
 /**
  * CausalHandler - Specialized handler for causal reasoning
@@ -49,19 +47,20 @@ import type { CausalGraph as GraphCausalGraph } from '../causal/graph/types.js';
  */
 export class CausalHandler implements ModeHandler {
   readonly mode = ThinkingMode.CAUSAL;
-  readonly modeName = 'Causal Analysis';
-  readonly description = 'Causal graph analysis with intervention reasoning and cycle detection';
+  readonly modeName = "Causal Analysis";
+  readonly description =
+    "Causal graph analysis with intervention reasoning and cycle detection";
 
   /**
    * Supported thought types for causal mode
    */
   private readonly supportedThoughtTypes = [
-    'problem_definition',
-    'causal_graph_construction',
-    'intervention_analysis',
-    'counterfactual_analysis',
-    'confounder_identification',
-    'mechanism_discovery',
+    "problem_definition",
+    "causal_graph_construction",
+    "intervention_analysis",
+    "counterfactual_analysis",
+    "confounder_identification",
+    "mechanism_discovery",
   ];
 
   /**
@@ -87,7 +86,10 @@ export class CausalHandler implements ModeHandler {
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
       mode: ThinkingMode.CAUSAL,
-      thoughtType: toExtendedThoughtType(input.thoughtType, 'problem_definition'),
+      thoughtType: toExtendedThoughtType(
+        input.thoughtType,
+        "problem_definition",
+      ),
       causalGraph,
       interventions: input.interventions || [],
       mechanisms: input.mechanisms || [],
@@ -112,16 +114,20 @@ export class CausalHandler implements ModeHandler {
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
@@ -143,7 +149,7 @@ export class CausalHandler implements ModeHandler {
     if (input.interventions && input.interventions.length > 0) {
       const interventionValidation = this.validateInterventions(
         input.interventions,
-        causalGraph
+        causalGraph,
       );
       errors.push(...interventionValidation.errors);
       warnings.push(...interventionValidation.warnings);
@@ -155,22 +161,25 @@ export class CausalHandler implements ModeHandler {
       if (cycles.length > 0) {
         warnings.push(
           createValidationWarning(
-            'causalGraph',
-            `Detected ${cycles.length} cycle(s) in causal graph: ${cycles.map(c => c.join(' -> ')).join('; ')}`,
-            'Cycles may indicate feedback loops. Verify this is intentional.'
-          )
+            "causalGraph",
+            `Detected ${cycles.length} cycle(s) in causal graph: ${cycles.map((c) => c.join(" -> ")).join("; ")}`,
+            "Cycles may indicate feedback loops. Verify this is intentional.",
+          ),
         );
       }
     }
 
     // Suggest confounders if not provided
-    if ((!input.confounders || input.confounders.length === 0) && causalGraph.nodes.length >= 3) {
+    if (
+      (!input.confounders || input.confounders.length === 0) &&
+      causalGraph.nodes.length >= 3
+    ) {
       warnings.push(
         createValidationWarning(
-          'confounders',
-          'No confounders specified in the causal model',
-          'Consider identifying potential confounders that might affect multiple nodes'
-        )
+          "confounders",
+          "No confounders specified in the causal model",
+          "Consider identifying potential confounders that might affect multiple nodes",
+        ),
       );
     }
 
@@ -190,7 +199,11 @@ export class CausalHandler implements ModeHandler {
       relatedModes: [ThinkingMode.BAYESIAN, ThinkingMode.COUNTERFACTUAL],
       guidingQuestions: [],
       warnings: [],
-      mentalModels: ['Causal Diagrams', 'Do-Calculus', 'Structural Equation Models'],
+      mentalModels: [
+        "Causal Diagrams",
+        "Do-Calculus",
+        "Structural Equation Models",
+      ],
     };
 
     // Suggest based on graph complexity
@@ -200,13 +213,13 @@ export class CausalHandler implements ModeHandler {
 
       if (nodeCount > 0 && edgeCount === 0) {
         enhancements.suggestions!.push(
-          'Add causal edges to connect your nodes and establish causal relationships'
+          "Add causal edges to connect your nodes and establish causal relationships",
         );
       }
 
       if (edgeCount > nodeCount * 2) {
         enhancements.suggestions!.push(
-          'Graph is densely connected. Consider identifying the most significant causal paths'
+          "Graph is densely connected. Consider identifying the most significant causal paths",
         );
       }
 
@@ -223,50 +236,60 @@ export class CausalHandler implements ModeHandler {
 
       if (entryNodes.length > 0) {
         enhancements.guidingQuestions!.push(
-          `What external factors influence the root causes: ${entryNodes.join(', ')}?`
+          `What external factors influence the root causes: ${entryNodes.join(", ")}?`,
         );
       }
 
       if (exitNodes.length > 0) {
         enhancements.guidingQuestions!.push(
-          `What are the downstream consequences of ${exitNodes.join(', ')}?`
+          `What are the downstream consequences of ${exitNodes.join(", ")}?`,
         );
       }
 
       // Enhanced analysis using Sprint 6 algorithms
       if (nodeCount >= 2 && edgeCount >= 1) {
-        const advancedAnalysis = this.performAdvancedGraphAnalysis(thought.causalGraph);
+        const advancedAnalysis = this.performAdvancedGraphAnalysis(
+          thought.causalGraph,
+        );
 
         if (advancedAnalysis.centralNode) {
           enhancements.suggestions!.push(
-            `Node "${advancedAnalysis.centralNode}" is most central (highest PageRank). Consider its importance in causal pathways.`
+            `Node "${advancedAnalysis.centralNode}" is most central (highest PageRank). Consider its importance in causal pathways.`,
           );
         }
 
         if (advancedAnalysis.vStructures.length > 0) {
           enhancements.warnings!.push(
-            `Detected ${advancedAnalysis.vStructures.length} v-structure(s)/collider(s) that affect d-separation analysis.`
+            `Detected ${advancedAnalysis.vStructures.length} v-structure(s)/collider(s) that affect d-separation analysis.`,
           );
         }
 
-        if (advancedAnalysis.identifiability && entryNodes.length > 0 && exitNodes.length > 0) {
+        if (
+          advancedAnalysis.identifiability &&
+          entryNodes.length > 0 &&
+          exitNodes.length > 0
+        ) {
           if (advancedAnalysis.identifiability.identifiable) {
             enhancements.suggestions!.push(
-              `Causal effect is identifiable via ${advancedAnalysis.identifiability.method || 'standard methods'}.`
+              `Causal effect is identifiable via ${advancedAnalysis.identifiability.method || "standard methods"}.`,
             );
           } else {
             enhancements.warnings!.push(
-              `Causal effect may not be identifiable: ${advancedAnalysis.identifiability.reason}`
+              `Causal effect may not be identifiable: ${advancedAnalysis.identifiability.reason}`,
             );
           }
         }
 
-        if (advancedAnalysis.backdoorSets && advancedAnalysis.backdoorSets.length > 0) {
-          const setDescription = advancedAnalysis.backdoorSets[0].length === 0
-            ? 'No adjustment needed'
-            : `Adjust for: ${advancedAnalysis.backdoorSets[0].join(', ')}`;
+        if (
+          advancedAnalysis.backdoorSets &&
+          advancedAnalysis.backdoorSets.length > 0
+        ) {
+          const setDescription =
+            advancedAnalysis.backdoorSets[0].length === 0
+              ? "No adjustment needed"
+              : `Adjust for: ${advancedAnalysis.backdoorSets[0].join(", ")}`;
           enhancements.suggestions!.push(
-            `Valid backdoor adjustment set found. ${setDescription}`
+            `Valid backdoor adjustment set found. ${setDescription}`,
           );
         }
 
@@ -283,14 +306,14 @@ export class CausalHandler implements ModeHandler {
     // Suggest interventions if none provided
     if (!thought.interventions || thought.interventions.length === 0) {
       enhancements.guidingQuestions!.push(
-        'What interventions could be tested to verify causal relationships?'
+        "What interventions could be tested to verify causal relationships?",
       );
     }
 
     // Add confounders suggestion
     if (!thought.confounders || thought.confounders.length === 0) {
       enhancements.guidingQuestions!.push(
-        'Are there any hidden common causes (confounders) that might affect multiple variables?'
+        "Are there any hidden common causes (confounders) that might affect multiple variables?",
       );
     }
 
@@ -303,7 +326,11 @@ export class CausalHandler implements ModeHandler {
   private performAdvancedGraphAnalysis(graph: CausalGraph): {
     centralNode: string | null;
     vStructures: Array<{ parent1: string; collider: string; parent2: string }>;
-    identifiability: { identifiable: boolean; reason: string; method?: string } | null;
+    identifiability: {
+      identifiable: boolean;
+      reason: string;
+      method?: string;
+    } | null;
     backdoorSets: string[][] | null;
     centralityMetrics: Record<string, number> | null;
   } {
@@ -315,7 +342,7 @@ export class CausalHandler implements ModeHandler {
     let centralityMetrics: Record<string, number> | null = null;
 
     try {
-      const mostCentral = getMostCentralNode(graphForAnalysis, 'pagerank');
+      const mostCentral = getMostCentralNode(graphForAnalysis, "pagerank");
       if (mostCentral) {
         centralNode = mostCentral.nodeId;
 
@@ -325,7 +352,9 @@ export class CausalHandler implements ModeHandler {
         centralityMetrics = {
           maxDegree: Math.max(...Array.from(degree.values())),
           maxPageRank: mostCentral.score,
-          avgDegree: Array.from(degree.values()).reduce((a, b) => a + b, 0) / degree.size,
+          avgDegree:
+            Array.from(degree.values()).reduce((a, b) => a + b, 0) /
+            degree.size,
         };
       }
     } catch {
@@ -334,7 +363,11 @@ export class CausalHandler implements ModeHandler {
     }
 
     // Find v-structures (colliders)
-    let vStructures: Array<{ parent1: string; collider: string; parent2: string }> = [];
+    let vStructures: Array<{
+      parent1: string;
+      collider: string;
+      parent2: string;
+    }> = [];
     try {
       vStructures = findVStructures(graphForAnalysis);
     } catch {
@@ -342,20 +375,37 @@ export class CausalHandler implements ModeHandler {
     }
 
     // Check identifiability if we have clear treatment and outcome
-    let identifiability: { identifiable: boolean; reason: string; method?: string } | null = null;
+    let identifiability: {
+      identifiable: boolean;
+      reason: string;
+      method?: string;
+    } | null = null;
     let backdoorSets: string[][] | null = null;
 
     const entryNodes = this.findEntryNodes(graph);
     const exitNodes = this.findExitNodes(graph);
 
     if (entryNodes.length > 0 && exitNodes.length > 0) {
-      const treatment = graph.nodes.find(n => n.name === entryNodes[0] || n.id === entryNodes[0])?.id;
-      const outcome = graph.nodes.find(n => n.name === exitNodes[0] || n.id === exitNodes[0])?.id;
+      const treatment = graph.nodes.find(
+        (n) => n.name === entryNodes[0] || n.id === entryNodes[0],
+      )?.id;
+      const outcome = graph.nodes.find(
+        (n) => n.name === exitNodes[0] || n.id === exitNodes[0],
+      )?.id;
 
       if (treatment && outcome) {
         try {
-          identifiability = isIdentifiable(graphForAnalysis, treatment, outcome);
-          backdoorSets = findAllBackdoorSets(graphForAnalysis, treatment, outcome, 3);
+          identifiability = isIdentifiable(
+            graphForAnalysis,
+            treatment,
+            outcome,
+          );
+          backdoorSets = findAllBackdoorSets(
+            graphForAnalysis,
+            treatment,
+            outcome,
+            3,
+          );
         } catch {
           // Identifiability analysis is optional - may fail for complex/cyclic graphs
         }
@@ -376,18 +426,18 @@ export class CausalHandler implements ModeHandler {
    */
   private toGraphAnalysisFormat(graph: CausalGraph): GraphCausalGraph {
     return {
-      id: 'analysis-graph',
-      nodes: graph.nodes.map(n => ({
+      id: "analysis-graph",
+      nodes: graph.nodes.map((n) => ({
         id: n.id,
         name: n.name || n.id,
         description: n.description,
         // Map internal type to graph analysis type
         type: this.mapNodeType(n.type),
       })),
-      edges: graph.edges.map(e => ({
+      edges: graph.edges.map((e) => ({
         from: e.from,
         to: e.to,
-        type: 'directed' as const, // CausalEdge doesn't have type, assume directed
+        type: "directed" as const, // CausalEdge doesn't have type, assume directed
         weight: e.strength,
       })),
     };
@@ -396,16 +446,18 @@ export class CausalHandler implements ModeHandler {
   /**
    * Map internal node type to graph analysis type
    */
-  private mapNodeType(type: string): 'observed' | 'latent' | 'intervention' | 'outcome' | undefined {
+  private mapNodeType(
+    type: string,
+  ): "observed" | "latent" | "intervention" | "outcome" | undefined {
     switch (type) {
-      case 'cause':
-        return 'observed';
-      case 'effect':
-        return 'outcome';
-      case 'mediator':
-        return 'observed';
-      case 'confounder':
-        return 'latent';
+      case "cause":
+        return "observed";
+      case "effect":
+        return "outcome";
+      case "mediator":
+        return "observed";
+      case "confounder":
+        return "latent";
       default:
         return undefined;
     }
@@ -424,16 +476,16 @@ export class CausalHandler implements ModeHandler {
   private validateCausalGraph(graph: CausalGraph): ValidationResult {
     const errors = [];
     const warnings = [];
-    const nodeIds = new Set(graph.nodes.map(n => n.id));
+    const nodeIds = new Set(graph.nodes.map((n) => n.id));
 
     // Check for duplicate node IDs
     if (nodeIds.size !== graph.nodes.length) {
       errors.push(
         createValidationError(
-          'causalGraph.nodes',
-          'Duplicate node IDs detected in causal graph',
-          'DUPLICATE_NODE_IDS'
-        )
+          "causalGraph.nodes",
+          "Duplicate node IDs detected in causal graph",
+          "DUPLICATE_NODE_IDS",
+        ),
       );
     }
 
@@ -442,54 +494,60 @@ export class CausalHandler implements ModeHandler {
       if (!nodeIds.has(edge.from)) {
         errors.push(
           createValidationError(
-            'causalGraph.edges',
+            "causalGraph.edges",
             `Edge references non-existent source node: ${edge.from}`,
-            'INVALID_EDGE_SOURCE'
-          )
+            "INVALID_EDGE_SOURCE",
+          ),
         );
       }
 
       if (!nodeIds.has(edge.to)) {
         errors.push(
           createValidationError(
-            'causalGraph.edges',
+            "causalGraph.edges",
             `Edge references non-existent target node: ${edge.to}`,
-            'INVALID_EDGE_TARGET'
-          )
+            "INVALID_EDGE_TARGET",
+          ),
         );
       }
 
       // Validate edge strength and confidence
-      if (edge.strength !== undefined && (edge.strength < -1 || edge.strength > 1)) {
+      if (
+        edge.strength !== undefined &&
+        (edge.strength < -1 || edge.strength > 1)
+      ) {
         warnings.push(
           createValidationWarning(
-            'causalGraph.edges',
+            "causalGraph.edges",
             `Edge strength ${edge.strength} is outside [-1, 1] range`,
-            'Normalize edge strength to [-1, 1] where negative indicates inhibitory effects'
-          )
+            "Normalize edge strength to [-1, 1] where negative indicates inhibitory effects",
+          ),
         );
       }
 
-      if (edge.confidence !== undefined && (edge.confidence < 0 || edge.confidence > 1)) {
+      if (
+        edge.confidence !== undefined &&
+        (edge.confidence < 0 || edge.confidence > 1)
+      ) {
         warnings.push(
           createValidationWarning(
-            'causalGraph.edges',
+            "causalGraph.edges",
             `Edge confidence ${edge.confidence} is outside [0, 1] range`,
-            'Confidence should be a probability between 0 and 1'
-          )
+            "Confidence should be a probability between 0 and 1",
+          ),
         );
       }
     }
 
     // Check for self-loops
-    const selfLoops = graph.edges.filter(e => e.from === e.to);
+    const selfLoops = graph.edges.filter((e) => e.from === e.to);
     if (selfLoops.length > 0) {
       warnings.push(
         createValidationWarning(
-          'causalGraph.edges',
-          `${selfLoops.length} self-loop(s) detected: ${selfLoops.map(e => e.from).join(', ')}`,
-          'Self-loops may indicate self-reinforcing effects. Verify this is intentional.'
-        )
+          "causalGraph.edges",
+          `${selfLoops.length} self-loop(s) detected: ${selfLoops.map((e) => e.from).join(", ")}`,
+          "Self-loops may indicate self-reinforcing effects. Verify this is intentional.",
+        ),
       );
     }
 
@@ -505,21 +563,21 @@ export class CausalHandler implements ModeHandler {
    */
   private validateInterventions(
     interventions: Intervention[],
-    graph: CausalGraph
+    graph: CausalGraph,
   ): ValidationResult {
     const errors = [];
     const warnings = [];
-    const nodeIds = new Set(graph.nodes.map(n => n.id));
+    const nodeIds = new Set(graph.nodes.map((n) => n.id));
 
     for (const intervention of interventions) {
       // Check intervention target exists
       if (!nodeIds.has(intervention.nodeId)) {
         errors.push(
           createValidationError(
-            'interventions',
+            "interventions",
             `Intervention targets non-existent node: ${intervention.nodeId}`,
-            'INVALID_INTERVENTION_TARGET'
-          )
+            "INVALID_INTERVENTION_TARGET",
+          ),
         );
       }
 
@@ -529,21 +587,24 @@ export class CausalHandler implements ModeHandler {
           if (!nodeIds.has(effect.nodeId)) {
             warnings.push(
               createValidationWarning(
-                'interventions.expectedEffects',
+                "interventions.expectedEffects",
                 `Expected effect references non-existent node: ${effect.nodeId}`,
-                'Ensure all expected effect nodes are in the causal graph'
-              )
+                "Ensure all expected effect nodes are in the causal graph",
+              ),
             );
           }
 
           // Validate effect confidence
-          if (effect.confidence !== undefined && (effect.confidence < 0 || effect.confidence > 1)) {
+          if (
+            effect.confidence !== undefined &&
+            (effect.confidence < 0 || effect.confidence > 1)
+          ) {
             warnings.push(
               createValidationWarning(
-                'interventions.expectedEffects',
+                "interventions.expectedEffects",
                 `Effect confidence ${effect.confidence} is outside [0, 1] range`,
-                'Confidence should be a probability between 0 and 1'
-              )
+                "Confidence should be a probability between 0 and 1",
+              ),
             );
           }
         }
@@ -617,19 +678,19 @@ export class CausalHandler implements ModeHandler {
    * Find entry nodes (nodes with no incoming edges)
    */
   private findEntryNodes(graph: CausalGraph): string[] {
-    const hasIncoming = new Set(graph.edges.map(e => e.to));
+    const hasIncoming = new Set(graph.edges.map((e) => e.to));
     return graph.nodes
-      .filter(n => !hasIncoming.has(n.id))
-      .map(n => n.name || n.id);
+      .filter((n) => !hasIncoming.has(n.id))
+      .map((n) => n.name || n.id);
   }
 
   /**
    * Find exit nodes (nodes with no outgoing edges)
    */
   private findExitNodes(graph: CausalGraph): string[] {
-    const hasOutgoing = new Set(graph.edges.map(e => e.from));
+    const hasOutgoing = new Set(graph.edges.map((e) => e.from));
     return graph.nodes
-      .filter(n => !hasOutgoing.has(n.id))
-      .map(n => n.name || n.id);
+      .filter((n) => !hasOutgoing.has(n.id))
+      .map((n) => n.name || n.id);
   }
 }

@@ -6,8 +6,8 @@
  * Mode-specific types are imported by core.ts and re-exported from there.
  */
 
-export * from './core.js';
-export * from './session.js';
+export * from "./core.js";
+export * from "./session.js";
 
 // Export ModeHandler types (Phase 10 v8.0.0)
 export {
@@ -21,10 +21,10 @@ export {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from '../modes/handlers/ModeHandler.js';
+} from "../modes/handlers/ModeHandler.js";
 
 // Export mode recommendation types (doesn't conflict with core exports)
-export * from './modes/recommendations.js';
+export * from "./modes/recommendations.js";
 
 // Export engineering-specific types (sub-interfaces not in core)
 export {
@@ -48,7 +48,7 @@ export {
   type DesignDecisionLog,
   type EngineeringAnalysisType,
   isEngineeringThought,
-} from './modes/engineering.js';
+} from "./modes/engineering.js";
 
 // Export computability-specific types (Phase 11 v7.2.0 - Turing's legacy)
 export {
@@ -68,7 +68,7 @@ export {
   createSimpleMachine,
   reductionPreservesDecidability,
   isPolynomialReduction,
-} from './modes/computability.js';
+} from "./modes/computability.js";
 
 // Export game theory extensions (Phase 11 v7.2.0 - von Neumann's legacy)
 export {
@@ -81,7 +81,7 @@ export {
   createCharacteristicFunction,
   checkSuperadditivity,
   calculateShapleyValue,
-} from './modes/gametheory.js';
+} from "./modes/gametheory.js";
 
 // Export cryptanalytic-specific types (Phase 11 v7.2.0 - Turing's Bletchley Park work)
 export {
@@ -104,7 +104,7 @@ export {
   calculateIndexOfCoincidence,
   LANGUAGE_IC,
   ENGLISH_FREQUENCIES,
-} from './modes/cryptanalytic.js';
+} from "./modes/cryptanalytic.js";
 
 // Export synthesis-specific types (Phase 13 v7.4.0 - Academic Research)
 export {
@@ -123,7 +123,7 @@ export {
   type SynthesisConclusion,
   type ReviewMetadata,
   isSynthesisThought,
-} from './modes/synthesis.js';
+} from "./modes/synthesis.js";
 
 // Export argumentation-specific types (Phase 13 v7.4.0 - Academic Research)
 export {
@@ -144,7 +144,7 @@ export {
   type AudienceConsideration,
   type LogicalFallacy,
   isArgumentationThought,
-} from './modes/argumentation.js';
+} from "./modes/argumentation.js";
 
 // Export critique-specific types (Phase 13 v7.4.0 - Academic Research)
 export {
@@ -167,7 +167,7 @@ export {
   type ImprovementSuggestion,
   type CritiqueVerdict,
   isCritiqueThought,
-} from './modes/critique.js';
+} from "./modes/critique.js";
 
 // Export analysis-specific types (Phase 13 v7.4.0 - Academic Research)
 export {
@@ -189,7 +189,7 @@ export {
   type DiscoursePattern,
   type QualitativeRigor,
   isAnalysisThought,
-} from './modes/analysis.js';
+} from "./modes/analysis.js";
 
 // Export recursive-specific types (Phase 10 Sprint 3 v8.4.0)
 export {
@@ -200,7 +200,7 @@ export {
   type RecursiveCall,
   type MemoizationState,
   isRecursiveThought,
-} from './modes/recursive.js';
+} from "./modes/recursive.js";
 
 // Export modal-specific types (Phase 10 Sprint 3 v8.4.0)
 export {
@@ -213,7 +213,7 @@ export {
   type KripkeFrame,
   type KripkeProperty,
   isModalThought,
-} from './modes/modal.js';
+} from "./modes/modal.js";
 
 // Export stochastic-specific types (Phase 10 Sprint 3 v8.4.0)
 export {
@@ -226,7 +226,7 @@ export {
   type SimulationResult,
   type SimulationStatistics,
   isStochasticThought,
-} from './modes/stochastic.js';
+} from "./modes/stochastic.js";
 
 // Export constraint-specific types (Phase 10 Sprint 3 v8.4.0)
 export {
@@ -239,7 +239,7 @@ export {
   type ConsistencyLevel,
   type Assignment,
   isConstraintThought,
-} from './modes/constraint.js';
+} from "./modes/constraint.js";
 
 // Export custom-specific types (Phase 10 Sprint 3 v8.4.0)
 export {
@@ -248,7 +248,7 @@ export {
   type CustomStage,
   type CustomValidationRule,
   isCustomThought,
-} from './modes/custom.js';
+} from "./modes/custom.js";
 
 // Export handler types (Phase 15 Type Safety Initiative)
 export {
@@ -268,4 +268,4 @@ export {
   isAddThoughtInput,
   isSessionActionInput,
   isAnalyzeInput,
-} from './handlers.js';
+} from "./handlers.js";

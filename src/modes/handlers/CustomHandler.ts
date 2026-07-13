@@ -8,9 +8,9 @@
  * - Extensible thought types
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode, BaseThought } from '../../types/core.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode, BaseThought } from "../../types/core.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -19,14 +19,14 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 /**
  * Custom field definition
  */
 interface CustomField {
   name: string;
-  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+  type: "string" | "number" | "boolean" | "array" | "object";
   value: unknown;
   description?: string;
   required?: boolean;
@@ -91,9 +91,9 @@ export interface CustomThought extends BaseThought {
  */
 export class CustomHandler implements ModeHandler {
   readonly mode = ThinkingMode.CUSTOM;
-  readonly modeName = 'Custom Reasoning';
+  readonly modeName = "Custom Reasoning";
   readonly description =
-    'User-defined reasoning patterns with flexible structure and custom validation';
+    "User-defined reasoning patterns with flexible structure and custom validation";
 
   /**
    * Create a custom thought from input
@@ -108,12 +108,16 @@ export class CustomHandler implements ModeHandler {
 
     // Process stages
     const stages = inputAny.stages
-      ? inputAny.stages.map((s: any, idx: number) => this.normalizeStage(s, idx))
+      ? inputAny.stages.map((s: any, idx: number) =>
+          this.normalizeStage(s, idx),
+        )
       : undefined;
 
     // Process validation rules
     const validationRules = inputAny.validationRules
-      ? inputAny.validationRules.map((r: any) => this.normalizeValidationRule(r))
+      ? inputAny.validationRules.map((r: any) =>
+          this.normalizeValidationRule(r),
+        )
       : undefined;
 
     // Process based-on modes
@@ -132,8 +136,8 @@ export class CustomHandler implements ModeHandler {
       mode: ThinkingMode.CUSTOM,
 
       // Custom configuration
-      thoughtType: inputAny.thoughtType || 'custom_analysis',
-      customModeName: inputAny.customModeName || 'Custom Mode',
+      thoughtType: inputAny.thoughtType || "custom_analysis",
+      customModeName: inputAny.customModeName || "Custom Mode",
       customModeDescription: inputAny.customModeDescription,
 
       // User-defined fields
@@ -169,16 +173,20 @@ export class CustomHandler implements ModeHandler {
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
@@ -187,10 +195,10 @@ export class CustomHandler implements ModeHandler {
     if (!inputAny.customModeName) {
       warnings.push(
         createValidationWarning(
-          'customModeName',
-          'No custom mode name provided',
-          'Define a name for your custom reasoning mode'
-        )
+          "customModeName",
+          "No custom mode name provided",
+          "Define a name for your custom reasoning mode",
+        ),
       );
     }
 
@@ -200,26 +208,31 @@ export class CustomHandler implements ModeHandler {
         const field = inputAny.customFields[i];
 
         // Check required fields have values
-        if (field.required && (field.value === undefined || field.value === null)) {
+        if (
+          field.required &&
+          (field.value === undefined || field.value === null)
+        ) {
           warnings.push(
             createValidationWarning(
               `customFields[${i}]`,
               `Required field "${field.name}" has no value`,
-              'Provide a value for required fields'
-            )
+              "Provide a value for required fields",
+            ),
           );
         }
 
         // Type validation
         if (field.type && field.value !== undefined) {
-          const actualType = Array.isArray(field.value) ? 'array' : typeof field.value;
-          if (actualType !== field.type && field.type !== 'object') {
+          const actualType = Array.isArray(field.value)
+            ? "array"
+            : typeof field.value;
+          if (actualType !== field.type && field.type !== "object") {
             warnings.push(
               createValidationWarning(
                 `customFields[${i}].value`,
                 `Field "${field.name}" type mismatch: expected ${field.type}, got ${actualType}`,
-                'Ensure field value matches declared type'
-              )
+                "Ensure field value matches declared type",
+              ),
             );
           }
         }
@@ -236,8 +249,8 @@ export class CustomHandler implements ModeHandler {
             createValidationWarning(
               `stages[${i}].id`,
               `Duplicate stage ID: ${stage.id}`,
-              'Each stage should have a unique ID'
-            )
+              "Each stage should have a unique ID",
+            ),
           );
         }
         stageIds.add(stage.id);
@@ -247,10 +260,10 @@ export class CustomHandler implements ModeHandler {
       if (inputAny.currentStage && !stageIds.has(inputAny.currentStage)) {
         warnings.push(
           createValidationWarning(
-            'currentStage',
+            "currentStage",
             `Current stage "${inputAny.currentStage}" not found in stages`,
-            'Set currentStage to a valid stage ID'
-          )
+            "Set currentStage to a valid stage ID",
+          ),
         );
       }
     }
@@ -258,7 +271,7 @@ export class CustomHandler implements ModeHandler {
     // Run custom validation rules
     if (inputAny.validationRules && inputAny.customFields) {
       const fieldMap = new Map<string, unknown>(
-        inputAny.customFields.map((f: any) => [f.name, f.value])
+        inputAny.customFields.map((f: any) => [f.name, f.value]),
       );
 
       for (const rule of inputAny.validationRules) {
@@ -268,8 +281,8 @@ export class CustomHandler implements ModeHandler {
             createValidationWarning(
               rule.field,
               rule.message || `Validation failed: ${rule.rule}`,
-              'Check field value against rule'
-            )
+              "Check field value against rule",
+            ),
           );
         }
       }
@@ -298,17 +311,19 @@ export class CustomHandler implements ModeHandler {
         metadataKeys: Object.keys(thought.metadata).length,
       },
       mentalModels: [
-        'Domain-Specific Reasoning',
-        'Custom Frameworks',
-        'Flexible Analysis',
-        'User-Defined Logic',
+        "Domain-Specific Reasoning",
+        "Custom Frameworks",
+        "Flexible Analysis",
+        "User-Defined Logic",
       ],
     };
 
     // Mode info
     enhancements.suggestions!.push(`Custom mode: ${thought.customModeName}`);
     if (thought.customModeDescription) {
-      enhancements.suggestions!.push(`Description: ${thought.customModeDescription}`);
+      enhancements.suggestions!.push(
+        `Description: ${thought.customModeDescription}`,
+      );
     }
 
     // Stage progress
@@ -316,14 +331,20 @@ export class CustomHandler implements ModeHandler {
       const completed = thought.stages.filter((s) => s.completed).length;
       const total = thought.stages.length;
       const progress = ((completed / total) * 100).toFixed(0);
-      enhancements.suggestions!.push(`Stage progress: ${completed}/${total} (${progress}%)`);
+      enhancements.suggestions!.push(
+        `Stage progress: ${completed}/${total} (${progress}%)`,
+      );
 
       // Current stage info
       if (thought.currentStage) {
-        const current = thought.stages.find((s) => s.id === thought.currentStage);
+        const current = thought.stages.find(
+          (s) => s.id === thought.currentStage,
+        );
         if (current) {
           enhancements.suggestions!.push(`Current stage: ${current.name}`);
-          enhancements.guidingQuestions!.push(`What is needed to complete "${current.name}"?`);
+          enhancements.guidingQuestions!.push(
+            `What is needed to complete "${current.name}"?`,
+          );
         }
       }
 
@@ -337,34 +358,36 @@ export class CustomHandler implements ModeHandler {
     // Custom field summary
     if (thought.customFields.length > 0) {
       const filledFields = thought.customFields.filter(
-        (f) => f.value !== undefined && f.value !== null
+        (f) => f.value !== undefined && f.value !== null,
       ).length;
-      enhancements.suggestions!.push(`Fields: ${filledFields}/${thought.customFields.length} populated`);
+      enhancements.suggestions!.push(
+        `Fields: ${filledFields}/${thought.customFields.length} populated`,
+      );
 
       // Warn about required fields without values
       const missingRequired = thought.customFields.filter(
-        (f) => f.required && (f.value === undefined || f.value === null)
+        (f) => f.required && (f.value === undefined || f.value === null),
       );
       if (missingRequired.length > 0) {
         enhancements.warnings!.push(
-          `Missing required fields: ${missingRequired.map((f) => f.name).join(', ')}`
+          `Missing required fields: ${missingRequired.map((f) => f.name).join(", ")}`,
         );
       }
     }
 
     // Guiding questions for custom mode
     enhancements.guidingQuestions!.push(
-      'Are all necessary fields defined?',
-      'Does the custom structure fit the problem?',
-      'Would predefined modes work better?'
+      "Are all necessary fields defined?",
+      "Does the custom structure fit the problem?",
+      "Would predefined modes work better?",
     );
 
     // Based-on modes suggestions
     if (thought.basedOnModes && thought.basedOnModes.length > 0) {
       enhancements.suggestions!.push(
-        `Based on: ${thought.basedOnModes.join(', ')}`
+        `Based on: ${thought.basedOnModes.join(", ")}`,
       );
-      enhancements.mentalModels!.push('Mode Composition');
+      enhancements.mentalModels!.push("Mode Composition");
     }
 
     // Metadata info
@@ -388,7 +411,7 @@ export class CustomHandler implements ModeHandler {
    */
   private normalizeField(field: any): CustomField {
     return {
-      name: field.name || 'unnamed',
+      name: field.name || "unnamed",
       type: this.resolveFieldType(field.type),
       value: field.value,
       description: field.description,
@@ -399,12 +422,12 @@ export class CustomHandler implements ModeHandler {
   /**
    * Resolve field type
    */
-  private resolveFieldType(type: string | undefined): CustomField['type'] {
-    const validTypes = ['string', 'number', 'boolean', 'array', 'object'];
+  private resolveFieldType(type: string | undefined): CustomField["type"] {
+    const validTypes = ["string", "number", "boolean", "array", "object"];
     if (type && validTypes.includes(type)) {
-      return type as CustomField['type'];
+      return type as CustomField["type"];
     }
-    return 'string';
+    return "string";
   }
 
   /**
@@ -414,7 +437,7 @@ export class CustomHandler implements ModeHandler {
     return {
       id: stage.id || randomUUID(),
       name: stage.name || `Stage ${defaultOrder + 1}`,
-      description: stage.description || '',
+      description: stage.description || "",
       order: stage.order ?? defaultOrder,
       completed: stage.completed ?? false,
     };
@@ -425,9 +448,9 @@ export class CustomHandler implements ModeHandler {
    */
   private normalizeValidationRule(rule: any): CustomValidationRule {
     return {
-      field: rule.field || '',
-      rule: rule.rule || '',
-      message: rule.message || 'Validation failed',
+      field: rule.field || "",
+      rule: rule.rule || "",
+      message: rule.message || "Validation failed",
     };
   }
 
@@ -477,54 +500,54 @@ export class CustomHandler implements ModeHandler {
   private evaluateRule(
     rule: string,
     value: unknown,
-    _allFields: Map<string, unknown>
+    _allFields: Map<string, unknown>,
   ): boolean {
     try {
       // Simple rule evaluation (for safety, only support basic operations)
-      if (rule === 'required') {
-        return value !== undefined && value !== null && value !== '';
+      if (rule === "required") {
+        return value !== undefined && value !== null && value !== "";
       }
 
-      if (rule.startsWith('min:')) {
+      if (rule.startsWith("min:")) {
         const min = parseFloat(rule.substring(4));
-        return typeof value === 'number' && value >= min;
+        return typeof value === "number" && value >= min;
       }
 
-      if (rule.startsWith('max:')) {
+      if (rule.startsWith("max:")) {
         const max = parseFloat(rule.substring(4));
-        return typeof value === 'number' && value <= max;
+        return typeof value === "number" && value <= max;
       }
 
-      if (rule.startsWith('minLength:')) {
+      if (rule.startsWith("minLength:")) {
         const min = parseInt(rule.substring(10));
-        return typeof value === 'string' && value.length >= min;
+        return typeof value === "string" && value.length >= min;
       }
 
-      if (rule.startsWith('maxLength:')) {
+      if (rule.startsWith("maxLength:")) {
         const max = parseInt(rule.substring(10));
-        return typeof value === 'string' && value.length <= max;
+        return typeof value === "string" && value.length <= max;
       }
 
-      if (rule.startsWith('pattern:')) {
+      if (rule.startsWith("pattern:")) {
         const pattern = rule.substring(8);
-        return typeof value === 'string' && new RegExp(pattern).test(value);
+        return typeof value === "string" && new RegExp(pattern).test(value);
       }
 
-      if (rule.startsWith('in:')) {
-        const options = rule.substring(3).split(',');
+      if (rule.startsWith("in:")) {
+        const options = rule.substring(3).split(",");
         return options.includes(String(value));
       }
 
-      if (rule === 'positive') {
-        return typeof value === 'number' && value > 0;
+      if (rule === "positive") {
+        return typeof value === "number" && value > 0;
       }
 
-      if (rule === 'negative') {
-        return typeof value === 'number' && value < 0;
+      if (rule === "negative") {
+        return typeof value === "number" && value < 0;
       }
 
-      if (rule === 'integer') {
-        return typeof value === 'number' && Number.isInteger(value);
+      if (rule === "integer") {
+        return typeof value === "number" && Number.isInteger(value);
       }
 
       // Default to true for unknown rules

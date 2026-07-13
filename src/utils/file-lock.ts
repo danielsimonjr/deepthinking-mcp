@@ -12,9 +12,9 @@
  * - Cross-platform (Windows/Linux/Mac)
  */
 
-import { promises as fs } from 'fs';
-import * as path from 'path';
-import { createLogger, LogLevel } from './logger.js';
+import { promises as fs } from "fs";
+import * as path from "path";
+import { createLogger, LogLevel } from "./logger.js";
 
 // Logger for file-lock operations
 const logger = createLogger({ minLevel: LogLevel.WARN });
@@ -24,8 +24,12 @@ const logger = createLogger({ minLevel: LogLevel.WARN });
  * ENOENT is expected when: lock already released, file cleaned by another process, or lock never existed
  * Other errors (EPERM, EACCES, etc.) indicate real problems that should be logged
  */
-function handleUnlinkError(error: any, filePath: string, context: string): void {
-  if (error && error.code !== 'ENOENT') {
+function handleUnlinkError(
+  error: any,
+  filePath: string,
+  context: string,
+): void {
+  if (error && error.code !== "ENOENT") {
     logger.warn(`Failed to cleanup ${context}`, {
       path: filePath,
       code: error.code,
@@ -43,7 +47,7 @@ interface LockInfo {
   pid: number;
   hostname: string;
   timestamp: number;
-  type: 'exclusive' | 'shared';
+  type: "exclusive" | "shared";
   instanceId: string;
 }
 
@@ -58,14 +62,14 @@ export interface LockOptions {
   /** Maximum age before lock is considered stale (ms). Default: 30000 */
   staleThreshold?: number;
   /** Lock type: 'exclusive' for writes, 'shared' for reads. Default: 'exclusive' */
-  type?: 'exclusive' | 'shared';
+  type?: "exclusive" | "shared";
 }
 
 const DEFAULT_OPTIONS: Required<LockOptions> = {
   timeout: 10000,
   retryInterval: 50,
   staleThreshold: 30000,
-  type: 'exclusive',
+  type: "exclusive",
 };
 
 // Unique instance ID for this process
@@ -88,10 +92,10 @@ function getSharedLockDir(filePath: string): string {
 /**
  * Create lock info object
  */
-function createLockInfo(type: 'exclusive' | 'shared'): LockInfo {
+function createLockInfo(type: "exclusive" | "shared"): LockInfo {
   return {
     pid: process.pid,
-    hostname: require('os').hostname(),
+    hostname: require("os").hostname(),
     timestamp: Date.now(),
     type,
     instanceId: INSTANCE_ID,
@@ -111,7 +115,7 @@ function isLockStale(lockInfo: LockInfo, staleThreshold: number): boolean {
  */
 async function readLockInfo(lockPath: string): Promise<LockInfo | null> {
   try {
-    const content = await fs.readFile(lockPath, 'utf-8');
+    const content = await fs.readFile(lockPath, "utf-8");
     return JSON.parse(content) as LockInfo;
   } catch {
     // Lock file doesn't exist or is unreadable - treat as unlocked
@@ -123,23 +127,32 @@ async function readLockInfo(lockPath: string): Promise<LockInfo | null> {
 /**
  * Write lock info to a lock file atomically
  */
-async function writeLockInfo(lockPath: string, lockInfo: LockInfo): Promise<boolean> {
+async function writeLockInfo(
+  lockPath: string,
+  lockInfo: LockInfo,
+): Promise<boolean> {
   const tempPath = `${lockPath}.${INSTANCE_ID}.tmp`;
   try {
     // Write to temp file first
-    await fs.writeFile(tempPath, JSON.stringify(lockInfo), { flag: 'wx' });
+    await fs.writeFile(tempPath, JSON.stringify(lockInfo), { flag: "wx" });
 
     // Atomic rename
     await fs.rename(tempPath, lockPath);
     return true;
   } catch (error: any) {
     // Clean up temp file if it exists
-    await fs.unlink(tempPath).catch((err) => handleUnlinkError(err, tempPath, 'temp lock file'));
+    await fs
+      .unlink(tempPath)
+      .catch((err) => handleUnlinkError(err, tempPath, "temp lock file"));
 
     // EEXIST means another process created the lock
     // EPERM can happen on Windows during concurrent renames
     // ENOENT can happen if temp file was cleaned up by concurrent process
-    if (error.code === 'EEXIST' || error.code === 'EPERM' || error.code === 'ENOENT') {
+    if (
+      error.code === "EEXIST" ||
+      error.code === "EPERM" ||
+      error.code === "ENOENT"
+    ) {
       return false;
     }
     throw error;
@@ -151,7 +164,7 @@ async function writeLockInfo(lockPath: string, lockInfo: LockInfo): Promise<bool
  */
 async function acquireExclusiveLock(
   filePath: string,
-  options: Required<LockOptions>
+  options: Required<LockOptions>,
 ): Promise<() => Promise<void>> {
   const lockPath = getLockPath(filePath);
   const sharedLockDir = getSharedLockDir(filePath);
@@ -166,14 +179,20 @@ async function acquireExclusiveLock(
       if (existingLock.instanceId === INSTANCE_ID) {
         // Already hold the lock
         return async () => {
-          await fs.unlink(lockPath).catch((err) => handleUnlinkError(err, lockPath, 'exclusive lock'));
+          await fs
+            .unlink(lockPath)
+            .catch((err) => handleUnlinkError(err, lockPath, "exclusive lock"));
         };
       }
 
       // Check if stale
       if (isLockStale(existingLock, options.staleThreshold)) {
         // Remove stale lock
-        await fs.unlink(lockPath).catch((err) => handleUnlinkError(err, lockPath, 'stale exclusive lock'));
+        await fs
+          .unlink(lockPath)
+          .catch((err) =>
+            handleUnlinkError(err, lockPath, "stale exclusive lock"),
+          );
       } else {
         // Lock is held by another process, wait and retry
         await sleep(options.retryInterval);
@@ -190,11 +209,18 @@ async function acquireExclusiveLock(
         const sharedLockPath = path.join(sharedLockDir, lockFile);
         const sharedLockInfo = await readLockInfo(sharedLockPath);
 
-        if (sharedLockInfo && !isLockStale(sharedLockInfo, options.staleThreshold)) {
+        if (
+          sharedLockInfo &&
+          !isLockStale(sharedLockInfo, options.staleThreshold)
+        ) {
           validSharedLocks.push(sharedLockInfo);
         } else {
           // Clean up stale shared lock
-          await fs.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, 'stale shared lock'));
+          await fs
+            .unlink(sharedLockPath)
+            .catch((err) =>
+              handleUnlinkError(err, sharedLockPath, "stale shared lock"),
+            );
         }
       }
 
@@ -205,17 +231,19 @@ async function acquireExclusiveLock(
       }
     } catch (error: any) {
       // Directory doesn't exist = no shared locks
-      if (error.code !== 'ENOENT') {
+      if (error.code !== "ENOENT") {
         throw error;
       }
     }
 
     // Try to acquire exclusive lock
-    const lockInfo = createLockInfo('exclusive');
+    const lockInfo = createLockInfo("exclusive");
     if (await writeLockInfo(lockPath, lockInfo)) {
       // Successfully acquired lock
       return async () => {
-        await fs.unlink(lockPath).catch((err) => handleUnlinkError(err, lockPath, 'exclusive lock'));
+        await fs
+          .unlink(lockPath)
+          .catch((err) => handleUnlinkError(err, lockPath, "exclusive lock"));
       };
     }
 
@@ -223,7 +251,9 @@ async function acquireExclusiveLock(
     await sleep(options.retryInterval);
   }
 
-  throw new Error(`Timeout acquiring exclusive lock on ${filePath} after ${options.timeout}ms`);
+  throw new Error(
+    `Timeout acquiring exclusive lock on ${filePath} after ${options.timeout}ms`,
+  );
 }
 
 /**
@@ -231,7 +261,7 @@ async function acquireExclusiveLock(
  */
 async function acquireSharedLock(
   filePath: string,
-  options: Required<LockOptions>
+  options: Required<LockOptions>,
 ): Promise<() => Promise<void>> {
   const exclusiveLockPath = getLockPath(filePath);
   const sharedLockDir = getSharedLockDir(filePath);
@@ -245,7 +275,11 @@ async function acquireSharedLock(
     if (exclusiveLock) {
       if (isLockStale(exclusiveLock, options.staleThreshold)) {
         // Remove stale exclusive lock
-        await fs.unlink(exclusiveLockPath).catch((err) => handleUnlinkError(err, exclusiveLockPath, 'stale exclusive lock'));
+        await fs
+          .unlink(exclusiveLockPath)
+          .catch((err) =>
+            handleUnlinkError(err, exclusiveLockPath, "stale exclusive lock"),
+          );
       } else {
         // Exclusive lock is held, wait
         await sleep(options.retryInterval);
@@ -257,22 +291,32 @@ async function acquireSharedLock(
     await fs.mkdir(sharedLockDir, { recursive: true });
 
     // Create our shared lock
-    const lockInfo = createLockInfo('shared');
+    const lockInfo = createLockInfo("shared");
     try {
-      await fs.writeFile(sharedLockPath, JSON.stringify(lockInfo), { flag: 'wx' });
+      await fs.writeFile(sharedLockPath, JSON.stringify(lockInfo), {
+        flag: "wx",
+      });
 
       // Double-check no exclusive lock was acquired while we were creating ours
       const recheck = await readLockInfo(exclusiveLockPath);
       if (recheck && !isLockStale(recheck, options.staleThreshold)) {
         // Exclusive lock appeared, release our shared lock and retry
-        await fs.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, 'shared lock rollback'));
+        await fs
+          .unlink(sharedLockPath)
+          .catch((err) =>
+            handleUnlinkError(err, sharedLockPath, "shared lock rollback"),
+          );
         await sleep(options.retryInterval);
         continue;
       }
 
       // Successfully acquired shared lock
       return async () => {
-        await fs.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, 'shared lock'));
+        await fs
+          .unlink(sharedLockPath)
+          .catch((err) =>
+            handleUnlinkError(err, sharedLockPath, "shared lock"),
+          );
         // Clean up empty shared lock directory
         try {
           const remaining = await fs.readdir(sharedLockDir);
@@ -285,24 +329,30 @@ async function acquireSharedLock(
         }
       };
     } catch (error: any) {
-      if (error.code === 'EEXIST') {
+      if (error.code === "EEXIST") {
         // Our lock already exists (shouldn't happen but handle it)
         return async () => {
-          await fs.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, 'existing shared lock'));
+          await fs
+            .unlink(sharedLockPath)
+            .catch((err) =>
+              handleUnlinkError(err, sharedLockPath, "existing shared lock"),
+            );
         };
       }
       throw error;
     }
   }
 
-  throw new Error(`Timeout acquiring shared lock on ${filePath} after ${options.timeout}ms`);
+  throw new Error(
+    `Timeout acquiring shared lock on ${filePath} after ${options.timeout}ms`,
+  );
 }
 
 /**
  * Sleep utility
  */
 function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -333,11 +383,11 @@ function sleep(ms: number): Promise<void> {
  */
 export async function acquireLock(
   filePath: string,
-  options?: LockOptions
+  options?: LockOptions,
 ): Promise<() => Promise<void>> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
 
-  if (opts.type === 'shared') {
+  if (opts.type === "shared") {
     return acquireSharedLock(filePath, opts);
   }
   return acquireExclusiveLock(filePath, opts);
@@ -354,9 +404,12 @@ export async function acquireLock(
 export async function withLock<T>(
   filePath: string,
   fn: () => Promise<T>,
-  options?: Omit<LockOptions, 'type'>
+  options?: Omit<LockOptions, "type">,
 ): Promise<T> {
-  const release = await acquireLock(filePath, { ...options, type: 'exclusive' });
+  const release = await acquireLock(filePath, {
+    ...options,
+    type: "exclusive",
+  });
   try {
     return await fn();
   } finally {
@@ -375,9 +428,9 @@ export async function withLock<T>(
 export async function withSharedLock<T>(
   filePath: string,
   fn: () => Promise<T>,
-  options?: Omit<LockOptions, 'type'>
+  options?: Omit<LockOptions, "type">,
 ): Promise<T> {
-  const release = await acquireLock(filePath, { ...options, type: 'shared' });
+  const release = await acquireLock(filePath, { ...options, type: "shared" });
   try {
     return await fn();
   } finally {
@@ -394,15 +447,19 @@ export async function withSharedLock<T>(
  */
 export async function isLocked(
   filePath: string,
-  staleThreshold: number = DEFAULT_OPTIONS.staleThreshold
-): Promise<{ locked: boolean; type?: 'exclusive' | 'shared'; holders?: number }> {
+  staleThreshold: number = DEFAULT_OPTIONS.staleThreshold,
+): Promise<{
+  locked: boolean;
+  type?: "exclusive" | "shared";
+  holders?: number;
+}> {
   const exclusiveLockPath = getLockPath(filePath);
   const sharedLockDir = getSharedLockDir(filePath);
 
   // Check exclusive lock
   const exclusiveLock = await readLockInfo(exclusiveLockPath);
   if (exclusiveLock && !isLockStale(exclusiveLock, staleThreshold)) {
-    return { locked: true, type: 'exclusive', holders: 1 };
+    return { locked: true, type: "exclusive", holders: 1 };
   }
 
   // Check shared locks
@@ -420,10 +477,10 @@ export async function isLocked(
     }
 
     if (validCount > 0) {
-      return { locked: true, type: 'shared', holders: validCount };
+      return { locked: true, type: "shared", holders: validCount };
     }
   } catch (error: any) {
-    if (error.code !== 'ENOENT') {
+    if (error.code !== "ENOENT") {
       throw error;
     }
   }
@@ -441,19 +498,33 @@ export async function forceUnlock(filePath: string): Promise<void> {
   const sharedLockDir = getSharedLockDir(filePath);
 
   // Remove exclusive lock
-  await fs.unlink(exclusiveLockPath).catch((err) => handleUnlinkError(err, exclusiveLockPath, 'force unlock exclusive'));
+  await fs
+    .unlink(exclusiveLockPath)
+    .catch((err) =>
+      handleUnlinkError(err, exclusiveLockPath, "force unlock exclusive"),
+    );
 
   // Remove all shared locks
   try {
     const sharedLocks = await fs.readdir(sharedLockDir);
     for (const lockFile of sharedLocks) {
-      await fs.unlink(path.join(sharedLockDir, lockFile)).catch((err) =>
-        handleUnlinkError(err, path.join(sharedLockDir, lockFile), 'force unlock shared lock')
-      );
+      await fs
+        .unlink(path.join(sharedLockDir, lockFile))
+        .catch((err) =>
+          handleUnlinkError(
+            err,
+            path.join(sharedLockDir, lockFile),
+            "force unlock shared lock",
+          ),
+        );
     }
-    await fs.rmdir(sharedLockDir).catch((err) => handleUnlinkError(err, sharedLockDir, 'force unlock shared dir'));
+    await fs
+      .rmdir(sharedLockDir)
+      .catch((err) =>
+        handleUnlinkError(err, sharedLockDir, "force unlock shared dir"),
+      );
   } catch (error: any) {
-    if (error.code !== 'ENOENT') {
+    if (error.code !== "ENOENT") {
       throw error;
     }
   }

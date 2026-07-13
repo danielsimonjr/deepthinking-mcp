@@ -10,7 +10,7 @@ import type {
   DependencyGraph,
   CircularPath,
   ProofDecomposition,
-} from '../types/modes/mathematics.js';
+} from "../types/modes/mathematics.js";
 
 /**
  * Circular reasoning result
@@ -31,7 +31,9 @@ export class CircularReasoningDetector {
   /**
    * Detect all forms of circular reasoning in a proof
    */
-  detectCircularReasoning(decomposition: ProofDecomposition): CircularReasoningResult {
+  detectCircularReasoning(
+    decomposition: ProofDecomposition,
+  ): CircularReasoningResult {
     const { atoms, dependencies } = decomposition;
 
     // Find dependency cycles
@@ -47,9 +49,7 @@ export class CircularReasoningDetector {
     const tautologies = this.findTautologies(atoms);
 
     const hasCircularReasoning =
-      cycles.length > 0 ||
-      selfReferential.length > 0 ||
-      begging.length > 0;
+      cycles.length > 0 || selfReferential.length > 0 || begging.length > 0;
 
     return {
       hasCircularReasoning,
@@ -57,7 +57,12 @@ export class CircularReasoningDetector {
       selfReferentialStatements: selfReferential,
       beggingTheQuestion: begging,
       tautologies,
-      summary: this.generateSummary(cycles, selfReferential, begging, tautologies),
+      summary: this.generateSummary(
+        cycles,
+        selfReferential,
+        begging,
+        tautologies,
+      ),
     };
   }
 
@@ -122,7 +127,7 @@ export class CircularReasoningDetector {
     visited: Set<string>,
     recStack: Set<string>,
     parent: Map<string, string>,
-    cycles: CircularPath[]
+    cycles: CircularPath[],
   ): void {
     visited.add(nodeId);
     recStack.add(nodeId);
@@ -152,7 +157,7 @@ export class CircularReasoningDetector {
   private extractCyclePath(
     cycleStart: string,
     cycleEnd: string,
-    parent: Map<string, string>
+    parent: Map<string, string>,
   ): string[] {
     const path: string[] = [cycleEnd];
     let current = cycleEnd;
@@ -169,33 +174,38 @@ export class CircularReasoningDetector {
   /**
    * Create a CircularPath object from a list of statement IDs
    */
-  private createCircularPath(statementIds: string[], graph: DependencyGraph): CircularPath {
-    const statements = statementIds.map((id) => graph.nodes.get(id)?.statement || id);
+  private createCircularPath(
+    statementIds: string[],
+    graph: DependencyGraph,
+  ): CircularPath {
+    const statements = statementIds.map(
+      (id) => graph.nodes.get(id)?.statement || id,
+    );
 
     // Create visual path representation
-    const visualPath = statementIds.join(' → ') + ' → ' + statementIds[0];
+    const visualPath = statementIds.join(" → ") + " → " + statementIds[0];
 
     // Assess severity based on cycle length and types
-    let severity: CircularPath['severity'] = 'minor';
+    let severity: CircularPath["severity"] = "minor";
     const conclusionInCycle = statementIds.some((id) => {
       const node = graph.nodes.get(id);
-      return node?.type === 'conclusion';
+      return node?.type === "conclusion";
     });
     const hypothesisInCycle = statementIds.some((id) => {
       const node = graph.nodes.get(id);
-      return node?.type === 'hypothesis';
+      return node?.type === "hypothesis";
     });
 
     if (conclusionInCycle) {
-      severity = 'critical';
+      severity = "critical";
     } else if (hypothesisInCycle || statementIds.length > 3) {
-      severity = 'significant';
+      severity = "significant";
     }
 
     return {
       statements: statementIds,
       cycleLength: statementIds.length,
-      explanation: `Circular reasoning detected: ${statements.map((s) => s.substring(0, 20) + '...').join(' depends on ')} which depends on the first statement`,
+      explanation: `Circular reasoning detected: ${statements.map((s) => s.substring(0, 20) + "...").join(" depends on ")} which depends on the first statement`,
       visualPath,
       severity,
     };
@@ -214,16 +224,18 @@ export class CircularReasoningDetector {
    */
   findBeggingTheQuestion(
     atoms: AtomicStatement[],
-    graph: DependencyGraph
+    graph: DependencyGraph,
   ): string[] {
     const begging: string[] = [];
-    const conclusions = atoms.filter((a) => a.type === 'conclusion');
-    const hypotheses = atoms.filter((a) => a.type === 'hypothesis');
+    const conclusions = atoms.filter((a) => a.type === "conclusion");
+    const hypotheses = atoms.filter((a) => a.type === "hypothesis");
 
     for (const conclusion of conclusions) {
       // Check if the conclusion appears as an assumption
       for (const hypothesis of hypotheses) {
-        if (this.statementsEquivalent(conclusion.statement, hypothesis.statement)) {
+        if (
+          this.statementsEquivalent(conclusion.statement, hypothesis.statement)
+        ) {
           begging.push(conclusion.id);
           break;
         }
@@ -233,7 +245,10 @@ export class CircularReasoningDetector {
       if (conclusion.derivedFrom) {
         for (const depId of conclusion.derivedFrom) {
           const dep = graph.nodes.get(depId);
-          if (dep && this.statementsEquivalent(conclusion.statement, dep.statement)) {
+          if (
+            dep &&
+            this.statementsEquivalent(conclusion.statement, dep.statement)
+          ) {
             begging.push(conclusion.id);
             break;
           }
@@ -251,8 +266,8 @@ export class CircularReasoningDetector {
     const normalizeStatement = (s: string) => {
       return s
         .toLowerCase()
-        .replace(/\s+/g, ' ')
-        .replace(/[.,;:!?]/g, '')
+        .replace(/\s+/g, " ")
+        .replace(/[.,;:!?]/g, "")
         .trim();
     };
 
@@ -266,7 +281,8 @@ export class CircularReasoningDetector {
       // "therefore X" vs "thus X"
       const thereforeMatch = a.match(/therefore\s+(.+)/);
       const thusMatch = b.match(/thus\s+(.+)/);
-      if (thereforeMatch && thusMatch && thereforeMatch[1] === thusMatch[1]) return true;
+      if (thereforeMatch && thusMatch && thereforeMatch[1] === thusMatch[1])
+        return true;
 
       // "X is true" vs "X"
       const isTrueMatch = a.match(/(.+)\s+is\s+true/);
@@ -279,7 +295,8 @@ export class CircularReasoningDetector {
       return false;
     };
 
-    if (checkEquivalence(normA, normB) || checkEquivalence(normB, normA)) return true;
+    if (checkEquivalence(normA, normB) || checkEquivalence(normB, normA))
+      return true;
 
     // Check word overlap for near-equivalence
     const wordsA = new Set(normA.split(/\s+/).filter((w) => w.length > 3));
@@ -358,14 +375,18 @@ export class CircularReasoningDetector {
     cycles: CircularPath[],
     selfReferential: string[],
     begging: string[],
-    tautologies: string[]
+    tautologies: string[],
   ): string {
     const parts: string[] = [];
 
     if (cycles.length > 0) {
-      const criticalCycles = cycles.filter((c) => c.severity === 'critical').length;
+      const criticalCycles = cycles.filter(
+        (c) => c.severity === "critical",
+      ).length;
       if (criticalCycles > 0) {
-        parts.push(`CRITICAL: ${criticalCycles} circular reasoning cycle(s) involving conclusions`);
+        parts.push(
+          `CRITICAL: ${criticalCycles} circular reasoning cycle(s) involving conclusions`,
+        );
       } else {
         parts.push(`${cycles.length} circular reasoning cycle(s) detected`);
       }
@@ -380,20 +401,25 @@ export class CircularReasoningDetector {
     }
 
     if (tautologies.length > 0) {
-      parts.push(`${tautologies.length} tautological statement(s) (may be intentional)`);
+      parts.push(
+        `${tautologies.length} tautological statement(s) (may be intentional)`,
+      );
     }
 
     if (parts.length === 0) {
-      return 'No circular reasoning detected. The proof structure appears sound.';
+      return "No circular reasoning detected. The proof structure appears sound.";
     }
 
-    return parts.join('. ') + '.';
+    return parts.join(". ") + ".";
   }
 
   /**
    * Get detailed analysis of a specific cycle
    */
-  analyzeCycle(cycle: CircularPath, graph: DependencyGraph): {
+  analyzeCycle(
+    cycle: CircularPath,
+    graph: DependencyGraph,
+  ): {
     involvedStatements: AtomicStatement[];
     breakPoints: string[];
     suggestedFix: string;
@@ -407,7 +433,11 @@ export class CircularReasoningDetector {
         involvedStatements.push(node);
 
         // A break point is a derived statement that could be independently justified
-        if (node.type === 'derived' && node.derivedFrom && node.derivedFrom.length > 1) {
+        if (
+          node.type === "derived" &&
+          node.derivedFrom &&
+          node.derivedFrom.length > 1
+        ) {
           breakPoints.push(id);
         }
       }
@@ -415,11 +445,13 @@ export class CircularReasoningDetector {
 
     let suggestedFix: string;
     if (breakPoints.length > 0) {
-      suggestedFix = `Consider independently justifying statement(s) ${breakPoints.join(', ')} to break the cycle`;
-    } else if (involvedStatements.some((s) => s.type === 'hypothesis')) {
-      suggestedFix = 'Review the hypothesis - it may be assuming what needs to be proved';
+      suggestedFix = `Consider independently justifying statement(s) ${breakPoints.join(", ")} to break the cycle`;
+    } else if (involvedStatements.some((s) => s.type === "hypothesis")) {
+      suggestedFix =
+        "Review the hypothesis - it may be assuming what needs to be proved";
     } else {
-      suggestedFix = 'Add independent justification for one of the statements in the cycle';
+      suggestedFix =
+        "Add independent justification for one of the statements in the cycle";
     }
 
     return {
@@ -434,7 +466,7 @@ export class CircularReasoningDetector {
    */
   conclusionDependsOnItself(
     conclusionId: string,
-    graph: DependencyGraph
+    graph: DependencyGraph,
   ): boolean {
     const conclusion = graph.nodes.get(conclusionId);
     if (!conclusion) return false;

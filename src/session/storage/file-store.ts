@@ -11,25 +11,29 @@
  * - Automatic stale lock detection and cleanup
  */
 
-import { promises as fs } from 'fs';
-import * as path from 'path';
-import { ThinkingSession, SessionMetadata } from '../../types/index.js';
+import { promises as fs } from "fs";
+import * as path from "path";
+import { ThinkingSession, SessionMetadata } from "../../types/index.js";
 import {
   SessionStorage,
   StorageStats,
   StorageConfig,
   DEFAULT_STORAGE_CONFIG,
-} from './interface.js';
-import { logger } from '../../utils/logger.js';
-import { withLock, withSharedLock, type LockOptions } from '../../utils/file-lock.js';
-import { validateSessionId } from '../../utils/sanitization.js';
+} from "./interface.js";
+import { logger } from "../../utils/logger.js";
+import {
+  withLock,
+  withSharedLock,
+  type LockOptions,
+} from "../../utils/file-lock.js";
+import { validateSessionId } from "../../utils/sanitization.js";
 
 /**
  * Default lock options for file operations
  */
 const DEFAULT_LOCK_OPTIONS: LockOptions = {
-  timeout: 10000,      // 10 seconds
-  retryInterval: 50,   // 50ms between retries
+  timeout: 10000, // 10 seconds
+  retryInterval: 50, // 50ms between retries
   staleThreshold: 30000, // 30 seconds before lock is considered stale
 };
 
@@ -53,8 +57,8 @@ export class FileSessionStore implements SessionStorage {
    */
   constructor(baseDir: string, config?: Partial<StorageConfig>) {
     this.baseDir = baseDir;
-    this.sessionsDir = path.join(baseDir, 'sessions');
-    this.metadataFile = path.join(baseDir, 'metadata', 'index.json');
+    this.sessionsDir = path.join(baseDir, "sessions");
+    this.metadataFile = path.join(baseDir, "metadata", "index.json");
     this.config = { ...DEFAULT_STORAGE_CONFIG, ...config };
     this.metadataCache = new Map();
     this.lockOptions = { ...DEFAULT_LOCK_OPTIONS };
@@ -77,14 +81,18 @@ export class FileSessionStore implements SessionStorage {
       await this.loadMetadataIndex();
 
       this.initialized = true;
-      logger.info('FileSessionStore initialized', {
+      logger.info("FileSessionStore initialized", {
         baseDir: this.baseDir,
         config: this.config,
       });
     } catch (error) {
-      logger.error('Failed to initialize FileSessionStore', error instanceof Error ? error : new Error(String(error)), {
-        baseDir: this.baseDir,
-      });
+      logger.error(
+        "Failed to initialize FileSessionStore",
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          baseDir: this.baseDir,
+        },
+      );
       throw error;
     }
   }
@@ -103,27 +111,38 @@ export class FileSessionStore implements SessionStorage {
 
     try {
       // Use exclusive lock for writing session file
-      await withLock(sessionPath, async () => {
-        // Prepare session for serialization (convert special types)
-        const serializable = this.prepareForSerialization(session);
+      await withLock(
+        sessionPath,
+        async () => {
+          // Prepare session for serialization (convert special types)
+          const serializable = this.prepareForSerialization(session);
 
-        // Serialize session
-        const json = this.config.serialization?.prettyPrint
-          ? JSON.stringify(serializable, null, 2)
-          : JSON.stringify(serializable);
+          // Serialize session
+          const json = this.config.serialization?.prettyPrint
+            ? JSON.stringify(serializable, null, 2)
+            : JSON.stringify(serializable);
 
-        // Write session file
-        await fs.writeFile(sessionPath, json, 'utf-8');
-      }, this.lockOptions);
+          // Write session file
+          await fs.writeFile(sessionPath, json, "utf-8");
+        },
+        this.lockOptions,
+      );
 
       // Update metadata (with exclusive lock on metadata file)
       await this.updateMetadata(session);
 
-      logger.debug('Session saved', { sessionId: session.id, path: sessionPath });
-    } catch (error) {
-      logger.error('Failed to save session', error instanceof Error ? error : new Error(String(error)), {
+      logger.debug("Session saved", {
         sessionId: session.id,
+        path: sessionPath,
       });
+    } catch (error) {
+      logger.error(
+        "Failed to save session",
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          sessionId: session.id,
+        },
+      );
       throw error;
     }
   }
@@ -151,19 +170,27 @@ export class FileSessionStore implements SessionStorage {
       }
 
       // Use shared lock for reading (allows concurrent reads)
-      const session = await withSharedLock(sessionPath, async () => {
-        // Read and parse session
-        const json = await fs.readFile(sessionPath, 'utf-8');
-        const parsed = JSON.parse(json);
+      const session = await withSharedLock(
+        sessionPath,
+        async () => {
+          // Read and parse session
+          const json = await fs.readFile(sessionPath, "utf-8");
+          const parsed = JSON.parse(json);
 
-        // Restore special types
-        return this.restoreFromSerialization(parsed) as ThinkingSession;
-      }, this.lockOptions);
+          // Restore special types
+          return this.restoreFromSerialization(parsed) as ThinkingSession;
+        },
+        this.lockOptions,
+      );
 
-      logger.debug('Session loaded', { sessionId });
+      logger.debug("Session loaded", { sessionId });
       return session;
     } catch (error) {
-      logger.error('Failed to load session', error instanceof Error ? error : new Error(String(error)), { sessionId });
+      logger.error(
+        "Failed to load session",
+        error instanceof Error ? error : new Error(String(error)),
+        { sessionId },
+      );
       return null;
     }
   }
@@ -191,19 +218,27 @@ export class FileSessionStore implements SessionStorage {
       }
 
       // Use exclusive lock for deleting
-      await withLock(sessionPath, async () => {
-        // Delete session file
-        await fs.unlink(sessionPath);
-      }, this.lockOptions);
+      await withLock(
+        sessionPath,
+        async () => {
+          // Delete session file
+          await fs.unlink(sessionPath);
+        },
+        this.lockOptions,
+      );
 
       // Remove from metadata (with exclusive lock on metadata file)
       this.metadataCache.delete(sessionId);
       await this.saveMetadataIndex();
 
-      logger.info('Session deleted', { sessionId });
+      logger.info("Session deleted", { sessionId });
       return true;
     } catch (error) {
-      logger.error('Failed to delete session', error instanceof Error ? error : new Error(String(error)), { sessionId });
+      logger.error(
+        "Failed to delete session",
+        error instanceof Error ? error : new Error(String(error)),
+        { sessionId },
+      );
       return false;
     }
   }
@@ -255,28 +290,29 @@ export class FileSessionStore implements SessionStorage {
     try {
       const files = await fs.readdir(this.sessionsDir);
       for (const file of files) {
-        if (file.endsWith('.json')) {
+        if (file.endsWith(".json")) {
           const filePath = path.join(this.sessionsDir, file);
           const stats = await fs.stat(filePath);
           storageSize += stats.size;
         }
       }
     } catch (error) {
-      logger.warn('Failed to calculate storage size', { error });
+      logger.warn("Failed to calculate storage size", { error });
     }
 
     const dates = sessions
       .map((s) => new Date(s.createdAt))
       .sort((a, b) => a.getTime() - b.getTime());
 
-    const averageSessionSize = totalSessions > 0 ? storageSize / totalSessions : 0;
+    const averageSessionSize =
+      totalSessions > 0 ? storageSize / totalSessions : 0;
 
     // Determine storage health
-    let storageHealth: 'healthy' | 'warning' | 'critical' = 'healthy';
+    let storageHealth: "healthy" | "warning" | "critical" = "healthy";
     if (totalSessions > this.config.maxSessions * 0.9) {
-      storageHealth = 'critical';
+      storageHealth = "critical";
     } else if (totalSessions > this.config.maxSessions * 0.7) {
-      storageHealth = 'warning';
+      storageHealth = "warning";
     }
 
     return {
@@ -312,7 +348,7 @@ export class FileSessionStore implements SessionStorage {
     }
 
     if (cleanedCount > 0) {
-      logger.info('Cleanup completed', {
+      logger.info("Cleanup completed", {
         cleanedCount,
         maxAgeMs,
         remaining: sessions.length - cleanedCount,
@@ -326,7 +362,7 @@ export class FileSessionStore implements SessionStorage {
    * Close storage (no-op for file storage)
    */
   async close(): Promise<void> {
-    logger.info('FileSessionStore closed');
+    logger.info("FileSessionStore closed");
     this.initialized = false;
   }
 
@@ -363,20 +399,24 @@ export class FileSessionStore implements SessionStorage {
       await fs.access(this.metadataFile);
 
       // Use shared lock for reading metadata
-      const metadata = await withSharedLock(this.metadataFile, async () => {
-        const json = await fs.readFile(this.metadataFile, 'utf-8');
-        const parsed = JSON.parse(json) as any[];
-        return parsed.map((item) =>
-          this.restoreFromSerialization(item)
-        ) as SessionMetadata[];
-      }, this.lockOptions);
+      const metadata = await withSharedLock(
+        this.metadataFile,
+        async () => {
+          const json = await fs.readFile(this.metadataFile, "utf-8");
+          const parsed = JSON.parse(json) as any[];
+          return parsed.map((item) =>
+            this.restoreFromSerialization(item),
+          ) as SessionMetadata[];
+        },
+        this.lockOptions,
+      );
 
       this.metadataCache.clear();
       for (const meta of metadata) {
         this.metadataCache.set(meta.id, meta);
       }
 
-      logger.debug('Metadata index loaded', {
+      logger.debug("Metadata index loaded", {
         sessionCount: metadata.length,
       });
     } catch {
@@ -393,10 +433,10 @@ export class FileSessionStore implements SessionStorage {
     // First, reload to merge with any changes from other instances
     try {
       await fs.access(this.metadataFile);
-      const existingJson = await fs.readFile(this.metadataFile, 'utf-8');
+      const existingJson = await fs.readFile(this.metadataFile, "utf-8");
       const existingParsed = JSON.parse(existingJson) as any[];
       const existingMetadata = existingParsed.map((item) =>
-        this.restoreFromSerialization(item)
+        this.restoreFromSerialization(item),
       ) as SessionMetadata[];
 
       // Merge: our cache takes precedence, but include items we don't have
@@ -419,13 +459,19 @@ export class FileSessionStore implements SessionStorage {
     }
 
     // Now save with exclusive lock
-    await withLock(this.metadataFile, async () => {
-      const metadata = Array.from(this.metadataCache.values());
-      const serializable = metadata.map((item) => this.prepareForSerialization(item));
-      const json = JSON.stringify(serializable, null, 2);
+    await withLock(
+      this.metadataFile,
+      async () => {
+        const metadata = Array.from(this.metadataCache.values());
+        const serializable = metadata.map((item) =>
+          this.prepareForSerialization(item),
+        );
+        const json = JSON.stringify(serializable, null, 2);
 
-      await fs.writeFile(this.metadataFile, json, 'utf-8');
-    }, this.lockOptions);
+        await fs.writeFile(this.metadataFile, json, "utf-8");
+      },
+      this.lockOptions,
+    );
   }
 
   /**
@@ -449,7 +495,7 @@ export class FileSessionStore implements SessionStorage {
     // Handle Date objects
     if (obj instanceof Date) {
       return {
-        _type: 'Date',
+        _type: "Date",
         value: obj.toISOString(),
       };
     }
@@ -457,7 +503,7 @@ export class FileSessionStore implements SessionStorage {
     // Handle Map objects
     if (obj instanceof Map) {
       return {
-        _type: 'Map',
+        _type: "Map",
         value: Array.from(obj.entries()),
       };
     }
@@ -468,7 +514,7 @@ export class FileSessionStore implements SessionStorage {
     }
 
     // Handle plain objects
-    if (typeof obj === 'object') {
+    if (typeof obj === "object") {
       const result: any = {};
       for (const [key, value] of Object.entries(obj)) {
         result[key] = this.prepareForSerialization(value);
@@ -501,17 +547,21 @@ export class FileSessionStore implements SessionStorage {
     }
 
     // Check for special type markers
-    if (typeof obj === 'object' && !Array.isArray(obj) && Object.prototype.hasOwnProperty.call(obj, '_type')) {
+    if (
+      typeof obj === "object" &&
+      !Array.isArray(obj) &&
+      Object.prototype.hasOwnProperty.call(obj, "_type")
+    ) {
       const marker = obj._type;
-      if (marker === 'Date') {
+      if (marker === "Date") {
         return new Date(obj.value);
       }
-      if (marker === 'Map') {
+      if (marker === "Map") {
         return new Map(obj.value);
       }
       // Unknown marker — refuse to recurse, this is likely tampered input
       throw new Error(
-        `restoreFromSerialization: unknown _type marker ${JSON.stringify(marker)} (only 'Date' and 'Map' are allowed)`
+        `restoreFromSerialization: unknown _type marker ${JSON.stringify(marker)} (only 'Date' and 'Map' are allowed)`,
       );
     }
 
@@ -523,10 +573,14 @@ export class FileSessionStore implements SessionStorage {
     // Handle plain objects — use a null-prototype object so an injected
     // `__proto__` cannot pollute Object.prototype, and skip the three
     // dangerous key names defensively.
-    if (typeof obj === 'object') {
+    if (typeof obj === "object") {
       const result: any = Object.create(null);
       for (const [key, value] of Object.entries(obj)) {
-        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        if (
+          key === "__proto__" ||
+          key === "constructor" ||
+          key === "prototype"
+        ) {
           continue;
         }
         result[key] = this.restoreFromSerialization(value);

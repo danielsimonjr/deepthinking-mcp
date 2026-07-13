@@ -34,7 +34,11 @@ export class DeepThinkingError extends Error {
   public readonly context?: Record<string, unknown>;
   public readonly timestamp: Date;
 
-  constructor(message: string, code: string, context?: Record<string, unknown>) {
+  constructor(
+    message: string,
+    code: string,
+    context?: Record<string, unknown>,
+  ) {
     super(message);
     this.name = this.constructor.name;
     this.code = code;
@@ -67,7 +71,7 @@ export class DeepThinkingError extends Error {
  */
 export class SessionError extends DeepThinkingError {
   constructor(message: string, context?: Record<string, unknown>) {
-    super(message, 'SESSION_ERROR', context);
+    super(message, "SESSION_ERROR", context);
   }
 }
 
@@ -76,7 +80,9 @@ export class SessionError extends DeepThinkingError {
  */
 export class SessionNotFoundError extends DeepThinkingError {
   constructor(sessionId: string) {
-    super(`Session not found: ${sessionId}`, 'SESSION_NOT_FOUND', { sessionId });
+    super(`Session not found: ${sessionId}`, "SESSION_NOT_FOUND", {
+      sessionId,
+    });
   }
 }
 
@@ -85,7 +91,9 @@ export class SessionNotFoundError extends DeepThinkingError {
  */
 export class SessionAlreadyExistsError extends DeepThinkingError {
   constructor(sessionId: string) {
-    super(`Session already exists: ${sessionId}`, 'SESSION_ALREADY_EXISTS', { sessionId });
+    super(`Session already exists: ${sessionId}`, "SESSION_ALREADY_EXISTS", {
+      sessionId,
+    });
   }
 }
 
@@ -94,7 +102,7 @@ export class SessionAlreadyExistsError extends DeepThinkingError {
  */
 export class ValidationError extends DeepThinkingError {
   constructor(message: string, context?: Record<string, unknown>) {
-    super(message, 'VALIDATION_ERROR', context);
+    super(message, "VALIDATION_ERROR", context);
   }
 }
 
@@ -103,10 +111,10 @@ export class ValidationError extends DeepThinkingError {
  */
 export class InputValidationError extends DeepThinkingError {
   constructor(fieldName: string, reason: string, value?: unknown) {
-    super(`Invalid ${fieldName}: ${reason}`, 'INPUT_VALIDATION_ERROR', {
+    super(`Invalid ${fieldName}: ${reason}`, "INPUT_VALIDATION_ERROR", {
       fieldName,
       reason,
-      value: typeof value === 'object' ? '[object]' : value,
+      value: typeof value === "object" ? "[object]" : value,
     });
   }
 }
@@ -116,7 +124,7 @@ export class InputValidationError extends DeepThinkingError {
  */
 export class ConfigurationError extends DeepThinkingError {
   constructor(message: string, context?: Record<string, unknown>) {
-    super(message, 'CONFIGURATION_ERROR', context);
+    super(message, "CONFIGURATION_ERROR", context);
   }
 }
 
@@ -125,7 +133,10 @@ export class ConfigurationError extends DeepThinkingError {
  */
 export class InvalidModeError extends DeepThinkingError {
   constructor(mode: string, validModes: string[]) {
-    super(`Invalid thinking mode: ${mode}`, 'INVALID_MODE', { mode, validModes });
+    super(`Invalid thinking mode: ${mode}`, "INVALID_MODE", {
+      mode,
+      validModes,
+    });
   }
 }
 
@@ -134,7 +145,7 @@ export class InvalidModeError extends DeepThinkingError {
  */
 export class ThoughtProcessingError extends DeepThinkingError {
   constructor(message: string, context?: Record<string, unknown>) {
-    super(message, 'THOUGHT_PROCESSING_ERROR', context);
+    super(message, "THOUGHT_PROCESSING_ERROR", context);
   }
 }
 
@@ -142,8 +153,12 @@ export class ThoughtProcessingError extends DeepThinkingError {
  * Export errors
  */
 export class ExportError extends DeepThinkingError {
-  constructor(message: string, format: string, context?: Record<string, unknown>) {
-    super(message, 'EXPORT_ERROR', { ...context, format });
+  constructor(
+    message: string,
+    format: string,
+    context?: Record<string, unknown>,
+  ) {
+    super(message, "EXPORT_ERROR", { ...context, format });
   }
 }
 
@@ -154,8 +169,8 @@ export class ResourceLimitError extends DeepThinkingError {
   constructor(resource: string, limit: number, actual: number) {
     super(
       `Resource limit exceeded for ${resource}: ${actual} > ${limit}`,
-      'RESOURCE_LIMIT_EXCEEDED',
-      { resource, limit, actual }
+      "RESOURCE_LIMIT_EXCEEDED",
+      { resource, limit, actual },
     );
   }
 }
@@ -168,7 +183,11 @@ export class ErrorFactory {
     return new SessionNotFoundError(sessionId);
   }
 
-  static invalidInput(fieldName: string, reason: string, value?: unknown): InputValidationError {
+  static invalidInput(
+    fieldName: string,
+    reason: string,
+    value?: unknown,
+  ): InputValidationError {
     return new InputValidationError(fieldName, reason, value);
   }
 
@@ -176,7 +195,11 @@ export class ErrorFactory {
     return new InvalidModeError(mode, validModes);
   }
 
-  static resourceLimit(resource: string, limit: number, actual: number): ResourceLimitError {
+  static resourceLimit(
+    resource: string,
+    limit: number,
+    actual: number,
+  ): ResourceLimitError {
     return new ResourceLimitError(resource, limit, actual);
   }
 
@@ -194,7 +217,7 @@ export class RateLimitError extends DeepThinkingError {
       ? `Rate limit exceeded for ${operation}: ${limit} requests per ${windowMs}ms`
       : `Rate limit exceeded for ${operation}`;
 
-    super(message, 'RATE_LIMIT_EXCEEDED', { operation, limit, windowMs });
+    super(message, "RATE_LIMIT_EXCEEDED", { operation, limit, windowMs });
   }
 }
 
@@ -203,7 +226,7 @@ export class RateLimitError extends DeepThinkingError {
  */
 export class SecurityError extends DeepThinkingError {
   constructor(message: string, context?: Record<string, unknown>) {
-    super(message, 'SECURITY_ERROR', context);
+    super(message, "SECURITY_ERROR", context);
   }
 }
 
@@ -212,7 +235,9 @@ export class SecurityError extends DeepThinkingError {
  */
 export class PathTraversalError extends DeepThinkingError {
   constructor(attemptedPath: string) {
-    super('Path traversal attempt detected', 'PATH_TRAVERSAL_DETECTED', { attemptedPath });
+    super("Path traversal attempt detected", "PATH_TRAVERSAL_DETECTED", {
+      attemptedPath,
+    });
   }
 }
 
@@ -221,7 +246,7 @@ export class PathTraversalError extends DeepThinkingError {
  */
 export class StorageError extends DeepThinkingError {
   constructor(message: string, context?: Record<string, unknown>) {
-    super(message, 'STORAGE_ERROR', context);
+    super(message, "STORAGE_ERROR", context);
   }
 }
 
@@ -229,7 +254,11 @@ export class StorageError extends DeepThinkingError {
  * Backup operation errors
  */
 export class BackupError extends DeepThinkingError {
-  constructor(message: string, backupId?: string, context?: Record<string, unknown>) {
-    super(message, 'BACKUP_ERROR', { ...context, backupId });
+  constructor(
+    message: string,
+    backupId?: string,
+    context?: Record<string, unknown>,
+  ) {
+    super(message, "BACKUP_ERROR", { ...context, backupId });
   }
 }

@@ -4,7 +4,7 @@
  * Designed for constructing and analyzing scholarly arguments
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 // ===== ARGUMENTATION THOUGHT TYPES =====
 
@@ -12,14 +12,14 @@ import { BaseThought, ThinkingMode } from '../core.js';
  * Types of argumentation reasoning steps
  */
 export type ArgumentationThoughtType =
-  | 'claim_formulation'         // Formulate the central claim/thesis
-  | 'grounds_identification'    // Identify supporting evidence/data
-  | 'warrant_construction'      // Construct warrants linking grounds to claim
-  | 'backing_provision'         // Provide backing for warrants
-  | 'rebuttal_anticipation'     // Anticipate counterarguments
-  | 'qualifier_specification'   // Specify qualifications/limitations
-  | 'argument_assembly'         // Assemble complete argument structure
-  | 'dialectic_analysis';       // Analyze thesis-antithesis-synthesis
+  | "claim_formulation" // Formulate the central claim/thesis
+  | "grounds_identification" // Identify supporting evidence/data
+  | "warrant_construction" // Construct warrants linking grounds to claim
+  | "backing_provision" // Provide backing for warrants
+  | "rebuttal_anticipation" // Anticipate counterarguments
+  | "qualifier_specification" // Specify qualifications/limitations
+  | "argument_assembly" // Assemble complete argument structure
+  | "dialectic_analysis"; // Analyze thesis-antithesis-synthesis
 
 // ===== TOULMIN MODEL INTERFACES =====
 
@@ -29,9 +29,9 @@ export type ArgumentationThoughtType =
 export interface Claim {
   id: string;
   statement: string;
-  type: 'fact' | 'value' | 'policy' | 'definition' | 'cause';
-  scope: 'universal' | 'general' | 'particular';
-  strength: 'strong' | 'moderate' | 'tentative';
+  type: "fact" | "value" | "policy" | "definition" | "cause";
+  scope: "universal" | "general" | "particular";
+  strength: "strong" | "moderate" | "tentative";
   contested: boolean;
   latex?: string;
 }
@@ -41,12 +41,18 @@ export interface Claim {
  */
 export interface Grounds {
   id: string;
-  type: 'empirical' | 'statistical' | 'testimonial' | 'analogical' | 'logical' | 'textual';
+  type:
+    | "empirical"
+    | "statistical"
+    | "testimonial"
+    | "analogical"
+    | "logical"
+    | "textual";
   content: string;
   source?: string;
-  reliability: number;           // 0-1
-  relevance: number;             // 0-1
-  sufficiency: 'sufficient' | 'partial' | 'insufficient';
+  reliability: number; // 0-1
+  relevance: number; // 0-1
+  sufficiency: "sufficient" | "partial" | "insufficient";
   verifiable: boolean;
 }
 
@@ -56,12 +62,18 @@ export interface Grounds {
 export interface Warrant {
   id: string;
   statement: string;
-  type: 'generalization' | 'analogy' | 'causal' | 'authority' | 'principle' | 'definition';
-  implicit: boolean;             // Was it unstated?
-  strength: number;              // 0-1
+  type:
+    | "generalization"
+    | "analogy"
+    | "causal"
+    | "authority"
+    | "principle"
+    | "definition";
+  implicit: boolean; // Was it unstated?
+  strength: number; // 0-1
   assumptions: string[];
-  groundsIds: string[];          // Which grounds this warrant connects
-  claimId: string;               // Which claim this warrant supports
+  groundsIds: string[]; // Which grounds this warrant connects
+  claimId: string; // Which claim this warrant supports
 }
 
 /**
@@ -70,10 +82,15 @@ export interface Warrant {
 export interface Backing {
   id: string;
   content: string;
-  type: 'theoretical' | 'empirical' | 'authoritative' | 'definitional' | 'precedent';
+  type:
+    | "theoretical"
+    | "empirical"
+    | "authoritative"
+    | "definitional"
+    | "precedent";
   source?: string;
-  warrantId: string;             // Which warrant this backs
-  credibility: number;           // 0-1
+  warrantId: string; // Which warrant this backs
+  credibility: number; // 0-1
 }
 
 /**
@@ -81,10 +98,10 @@ export interface Backing {
  */
 export interface Qualifier {
   id: string;
-  term: string;                  // "probably", "likely", "certainly", etc.
-  certainty: number;             // 0-1 (0 = possible, 1 = certain)
-  conditions?: string[];         // Conditions under which claim holds
-  scope?: string;                // Scope of applicability
+  term: string; // "probably", "likely", "certainly", etc.
+  certainty: number; // 0-1 (0 = possible, 1 = certain)
+  conditions?: string[]; // Conditions under which claim holds
+  scope?: string; // Scope of applicability
 }
 
 /**
@@ -93,9 +110,9 @@ export interface Qualifier {
 export interface Rebuttal {
   id: string;
   objection: string;
-  type: 'factual' | 'logical' | 'ethical' | 'practical' | 'definitional';
-  strength: 'strong' | 'moderate' | 'weak';
-  targetElement: 'claim' | 'grounds' | 'warrant' | 'backing';
+  type: "factual" | "logical" | "ethical" | "practical" | "definitional";
+  strength: "strong" | "moderate" | "weak";
+  targetElement: "claim" | "grounds" | "warrant" | "backing";
   targetId: string;
   response?: RebuttalResponse;
 }
@@ -104,9 +121,9 @@ export interface Rebuttal {
  * Response to a rebuttal
  */
 export interface RebuttalResponse {
-  strategy: 'refute' | 'concede' | 'qualify' | 'reframe' | 'outweigh';
+  strategy: "refute" | "concede" | "qualify" | "reframe" | "outweigh";
   content: string;
-  effectiveness: number;         // 0-1
+  effectiveness: number; // 0-1
 }
 
 // ===== ARGUMENT STRUCTURE INTERFACES =====
@@ -123,9 +140,9 @@ export interface ToulminArgument {
   backings: Backing[];
   qualifiers: Qualifier[];
   rebuttals: Rebuttal[];
-  overallStrength: number;       // 0-1
-  validity: 'valid' | 'invalid' | 'questionable';
-  soundness: 'sound' | 'unsound' | 'questionable';
+  overallStrength: number; // 0-1
+  validity: "valid" | "invalid" | "questionable";
+  soundness: "sound" | "unsound" | "questionable";
 }
 
 /**
@@ -133,10 +150,10 @@ export interface ToulminArgument {
  */
 export interface ArgumentChain {
   id: string;
-  arguments: ToulminArgument[];  // Ordered sequence
+  arguments: ToulminArgument[]; // Ordered sequence
   finalClaim: Claim;
-  chainStrength: number;         // 0-1
-  weakestLink?: string;          // ID of weakest argument
+  chainStrength: number; // 0-1
+  weakestLink?: string; // ID of weakest argument
 }
 
 // ===== DIALECTIC INTERFACES =====
@@ -146,9 +163,9 @@ export interface ArgumentChain {
  */
 export interface DialecticPosition {
   id: string;
-  role: 'thesis' | 'antithesis' | 'synthesis';
+  role: "thesis" | "antithesis" | "synthesis";
   statement: string;
-  proponents?: string[];         // Scholars/sources advocating this
+  proponents?: string[]; // Scholars/sources advocating this
   arguments: ToulminArgument[];
   strengths: string[];
   weaknesses: string[];
@@ -163,7 +180,11 @@ export interface DialecticAnalysis {
   thesis: DialecticPosition;
   antithesis: DialecticPosition;
   synthesis?: DialecticPosition;
-  resolution: 'thesis_prevails' | 'antithesis_prevails' | 'synthesis_achieved' | 'unresolved';
+  resolution:
+    | "thesis_prevails"
+    | "antithesis_prevails"
+    | "synthesis_achieved"
+    | "unresolved";
   resolutionReasoning: string;
 }
 
@@ -172,7 +193,7 @@ export interface DialecticAnalysis {
 /**
  * Rhetorical appeal types (Aristotelian)
  */
-export type RhetoricalAppeal = 'ethos' | 'pathos' | 'logos';
+export type RhetoricalAppeal = "ethos" | "pathos" | "logos";
 
 /**
  * Rhetorical strategy employed
@@ -180,10 +201,10 @@ export type RhetoricalAppeal = 'ethos' | 'pathos' | 'logos';
 export interface RhetoricalStrategy {
   id: string;
   appeal: RhetoricalAppeal;
-  technique: string;             // e.g., "appeal to authority", "emotional narrative"
+  technique: string; // e.g., "appeal to authority", "emotional narrative"
   content: string;
-  effectiveness: number;         // 0-1
-  appropriateness: 'appropriate' | 'questionable' | 'inappropriate';
+  effectiveness: number; // 0-1
+  appropriateness: "appropriate" | "questionable" | "inappropriate";
   context: string;
 }
 
@@ -204,11 +225,11 @@ export interface AudienceConsideration {
  */
 export interface LogicalFallacy {
   id: string;
-  name: string;                  // e.g., "ad hominem", "straw man"
-  category: 'formal' | 'informal';
+  name: string; // e.g., "ad hominem", "straw man"
+  category: "formal" | "informal";
   description: string;
-  location: string;              // Where in the argument
-  severity: 'critical' | 'significant' | 'minor';
+  location: string; // Where in the argument
+  severity: "critical" | "significant" | "minor";
   correction?: string;
 }
 
@@ -244,7 +265,7 @@ export interface ArgumentationThought extends BaseThought {
 
   // Quality checks
   fallacies?: LogicalFallacy[];
-  argumentStrength: number;      // 0-1
+  argumentStrength: number; // 0-1
 
   // Standard fields
   dependencies: string[];
@@ -258,6 +279,8 @@ export interface ArgumentationThought extends BaseThought {
 /**
  * Type guard for ArgumentationThought
  */
-export function isArgumentationThought(thought: BaseThought): thought is ArgumentationThought {
-  return thought.mode === 'argumentation';
+export function isArgumentationThought(
+  thought: BaseThought,
+): thought is ArgumentationThought {
+  return thought.mode === "argumentation";
 }

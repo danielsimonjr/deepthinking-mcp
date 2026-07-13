@@ -4,8 +4,8 @@
  * Phase 15: Aligned with JSON schema for complete validation
  */
 
-import { z } from 'zod';
-import { BaseThoughtSchema } from '../base.js';
+import { z } from "zod";
+import { BaseThoughtSchema } from "../base.js";
 
 /**
  * Experiment schema for scientific method
@@ -38,7 +38,7 @@ const InteractionSchema = z.object({
  * Feedback loop schema for systems thinking
  */
 const FeedbackLoopSchema = z.object({
-  type: z.enum(['positive', 'negative', 'neutral']),
+  type: z.enum(["positive", "negative", "neutral"]),
   components: z.array(z.string()),
 });
 
@@ -46,7 +46,7 @@ const FeedbackLoopSchema = z.object({
  * Scientific reasoning schema
  */
 export const ScientificSchema = BaseThoughtSchema.extend({
-  mode: z.enum(['scientificmethod', 'systemsthinking', 'formallogic']),
+  mode: z.enum(["scientificmethod", "systemsthinking", "formallogic"]),
 
   // Scientific method
   hypothesis: z.string().optional(),

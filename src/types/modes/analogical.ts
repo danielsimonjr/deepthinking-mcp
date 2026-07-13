@@ -3,7 +3,7 @@
  * Cross-domain analogies, mapping, and knowledge transfer
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Entity in a domain
@@ -88,6 +88,8 @@ export interface AnalogicalThought extends BaseThought {
   analogyStrength: number; // 0-1
 }
 
-export function isAnalogicalThought(thought: BaseThought): thought is AnalogicalThought {
-  return thought.mode === 'analogical';
+export function isAnalogicalThought(
+  thought: BaseThought,
+): thought is AnalogicalThought {
+  return thought.mode === "analogical";
 }

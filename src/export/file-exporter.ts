@@ -5,12 +5,12 @@
  * filename templating, and batch export support.
  */
 
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
-import type { ThinkingSession } from '../types/session.js';
-import type { ExportFormatType, ExportProfileId } from './profiles.js';
-import { getExportProfile } from './profiles.js';
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
+import type { ThinkingSession } from "../types/session.js";
+import type { ExportFormatType, ExportProfileId } from "./profiles.js";
+import { getExportProfile } from "./profiles.js";
 
 // ============================================================================
 // SANDBOX RESOLUTION (Security)
@@ -21,7 +21,11 @@ import { getExportProfile } from './profiles.js';
  * We deliberately pin to a per-user directory under ~/.claude rather than
  * letting a caller-supplied outputDir escape into the OS at large.
  */
-const DEFAULT_EXPORT_SANDBOX = path.join(os.homedir(), '.claude', 'deepthinking-exports');
+const DEFAULT_EXPORT_SANDBOX = path.join(
+  os.homedir(),
+  ".claude",
+  "deepthinking-exports",
+);
 
 /**
  * Resolve a caller-supplied outputDir against a sandbox root and reject any
@@ -41,9 +45,13 @@ const DEFAULT_EXPORT_SANDBOX = path.join(os.homedir(), '.claude', 'deepthinking-
  */
 export function resolveSandboxedOutputDir(
   requestedDir: string | undefined,
-  sandboxRoot: string | undefined
+  sandboxRoot: string | undefined,
 ): string {
-  const root = path.resolve(sandboxRoot && sandboxRoot.length > 0 ? sandboxRoot : DEFAULT_EXPORT_SANDBOX);
+  const root = path.resolve(
+    sandboxRoot && sandboxRoot.length > 0
+      ? sandboxRoot
+      : DEFAULT_EXPORT_SANDBOX,
+  );
 
   // No requested dir → use the sandbox root itself.
   if (!requestedDir || requestedDir.length === 0) {
@@ -60,7 +68,7 @@ export function resolveSandboxedOutputDir(
   if (resolved !== root && !resolved.startsWith(rootWithSep)) {
     throw new Error(
       `outputDir ${JSON.stringify(requestedDir)} is outside the export sandbox ${JSON.stringify(root)}. ` +
-        `Set MCP_EXPORT_PATH to a writable directory and pass an outputDir under it, or omit outputDir.`
+        `Set MCP_EXPORT_PATH to a writable directory and pass an outputDir under it, or omit outputDir.`,
     );
   }
 
@@ -94,7 +102,7 @@ export interface FileExportConfig {
   createDir?: boolean;
 
   /** Date format for filenames */
-  dateFormat?: 'iso' | 'short' | 'timestamp';
+  dateFormat?: "iso" | "short" | "timestamp";
 }
 
 /**
@@ -157,7 +165,7 @@ export interface ExportProgress {
   percentage: number;
 
   /** Phase of export */
-  phase: 'started' | 'exporting' | 'writing' | 'completed' | 'failed';
+  phase: "started" | "exporting" | "writing" | "completed" | "failed";
 }
 
 export type ExportProgressCallback = (progress: ExportProgress) => void;
@@ -170,15 +178,15 @@ export type ExportProgressCallback = (progress: ExportProgress) => void;
  * Map format types to file extensions
  */
 const FORMAT_EXTENSIONS: Record<ExportFormatType, string> = {
-  markdown: '.md',
-  latex: '.tex',
-  json: '.json',
-  html: '.html',
-  jupyter: '.ipynb',
-  mermaid: '.mmd',
-  dot: '.dot',
-  ascii: '.txt',
-  svg: '.svg',
+  markdown: ".md",
+  latex: ".tex",
+  json: ".json",
+  html: ".html",
+  jupyter: ".ipynb",
+  mermaid: ".mmd",
+  dot: ".dot",
+  ascii: ".txt",
+  svg: ".svg",
 };
 
 // ============================================================================
@@ -192,21 +200,24 @@ export class FileExporter {
   private config: FileExportConfig;
   private exportFunction: (
     session: ThinkingSession,
-    format: ExportFormatType
+    format: ExportFormatType,
   ) => string;
 
   constructor(
     config: Partial<FileExportConfig>,
-    exportFunction: (session: ThinkingSession, format: ExportFormatType) => string
+    exportFunction: (
+      session: ThinkingSession,
+      format: ExportFormatType,
+    ) => string,
   ) {
     this.config = {
-      outputDir: config.outputDir || './exports',
+      outputDir: config.outputDir || "./exports",
       createSessionSubdir: config.createSessionSubdir ?? true,
       createDateSubdir: config.createDateSubdir ?? false,
-      filenamePattern: config.filenamePattern || '{session}_{mode}_{format}',
+      filenamePattern: config.filenamePattern || "{session}_{mode}_{format}",
       overwrite: config.overwrite ?? false,
       createDir: config.createDir ?? true,
-      dateFormat: config.dateFormat || 'iso',
+      dateFormat: config.dateFormat || "iso",
     };
     this.exportFunction = exportFunction;
   }
@@ -216,7 +227,7 @@ export class FileExporter {
    */
   async exportToFile(
     session: ThinkingSession,
-    format: ExportFormatType
+    format: ExportFormatType,
   ): Promise<FileExportResult> {
     try {
       // Get output directory
@@ -237,7 +248,7 @@ export class FileExporter {
           format,
           filePath,
           success: false,
-          error: 'File already exists and overwrite is disabled',
+          error: "File already exists and overwrite is disabled",
         };
       }
 
@@ -245,7 +256,7 @@ export class FileExporter {
       const content = this.exportFunction(session, format);
 
       // Write to file
-      await fs.promises.writeFile(filePath, content, 'utf-8');
+      await fs.promises.writeFile(filePath, content, "utf-8");
 
       // Get file size
       const stats = await fs.promises.stat(filePath);
@@ -259,7 +270,7 @@ export class FileExporter {
     } catch (error) {
       return {
         format,
-        filePath: '',
+        filePath: "",
         success: false,
         error: error instanceof Error ? error.message : String(error),
       };
@@ -272,7 +283,7 @@ export class FileExporter {
   async exportToFiles(
     session: ThinkingSession,
     formats: ExportFormatType[],
-    onProgress?: ExportProgressCallback
+    onProgress?: ExportProgressCallback,
   ): Promise<BatchExportResult> {
     const results: FileExportResult[] = [];
     const outputDir = this.resolveOutputDir(session);
@@ -288,7 +299,7 @@ export class FileExporter {
           currentIndex: i + 1,
           totalExports: formats.length,
           percentage: Math.round((i / formats.length) * 100),
-          phase: 'exporting',
+          phase: "exporting",
         });
       }
 
@@ -302,7 +313,7 @@ export class FileExporter {
           currentIndex: i + 1,
           totalExports: formats.length,
           percentage: Math.round(((i + 1) / formats.length) * 100),
-          phase: result.success ? 'completed' : 'failed',
+          phase: result.success ? "completed" : "failed",
         });
       }
     }
@@ -327,7 +338,7 @@ export class FileExporter {
   async exportWithProfile(
     session: ThinkingSession,
     profileId: ExportProfileId,
-    onProgress?: ExportProgressCallback
+    onProgress?: ExportProgressCallback,
   ): Promise<BatchExportResult> {
     const profile = getExportProfile(profileId);
     if (!profile) {
@@ -349,17 +360,17 @@ export class FileExporter {
    */
   async exportAll(
     session: ThinkingSession,
-    onProgress?: ExportProgressCallback
+    onProgress?: ExportProgressCallback,
   ): Promise<BatchExportResult> {
     const allFormats: ExportFormatType[] = [
-      'markdown',
-      'latex',
-      'json',
-      'html',
-      'jupyter',
-      'mermaid',
-      'dot',
-      'ascii',
+      "markdown",
+      "latex",
+      "json",
+      "html",
+      "jupyter",
+      "mermaid",
+      "dot",
+      "ascii",
     ];
     return this.exportToFiles(session, allFormats, onProgress);
   }
@@ -371,7 +382,7 @@ export class FileExporter {
     let dir = this.config.outputDir;
 
     if (this.config.createDateSubdir) {
-      const date = this.formatDate(new Date(), 'short');
+      const date = this.formatDate(new Date(), "short");
       dir = path.join(dir, date);
     }
 
@@ -387,19 +398,19 @@ export class FileExporter {
    */
   private generateFilename(
     session: ThinkingSession,
-    format: ExportFormatType
+    format: ExportFormatType,
   ): string {
-    const pattern = this.config.filenamePattern || '{session}_{format}';
+    const pattern = this.config.filenamePattern || "{session}_{format}";
     const extension = FORMAT_EXTENSIONS[format];
 
-    const date = this.formatDate(new Date(), this.config.dateFormat || 'iso');
-    const mode = session.mode || 'unknown';
+    const date = this.formatDate(new Date(), this.config.dateFormat || "iso");
+    const mode = session.mode || "unknown";
 
     let filename = pattern
-      .replace('{session}', this.sanitizeFilename(session.id))
-      .replace('{mode}', this.sanitizeFilename(mode))
-      .replace('{format}', format)
-      .replace('{date}', date);
+      .replace("{session}", this.sanitizeFilename(session.id))
+      .replace("{mode}", this.sanitizeFilename(mode))
+      .replace("{format}", format)
+      .replace("{date}", date);
 
     return filename + extension;
   }
@@ -409,17 +420,17 @@ export class FileExporter {
    */
   private formatDate(
     date: Date,
-    format: 'iso' | 'short' | 'timestamp'
+    format: "iso" | "short" | "timestamp",
   ): string {
     switch (format) {
-      case 'iso':
-        return date.toISOString().split('T')[0];
-      case 'short':
-        return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
-      case 'timestamp':
+      case "iso":
+        return date.toISOString().split("T")[0];
+      case "short":
+        return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
+      case "timestamp":
         return String(date.getTime());
       default:
-        return date.toISOString().split('T')[0];
+        return date.toISOString().split("T")[0];
     }
   }
 
@@ -427,7 +438,7 @@ export class FileExporter {
    * Sanitize a string for use in filenames
    */
   private sanitizeFilename(str: string): string {
-    return str.replace(/[<>:"/\\|?*]/g, '_').replace(/\s+/g, '-');
+    return str.replace(/[<>:"/\\|?*]/g, "_").replace(/\s+/g, "-");
   }
 
   /**
@@ -438,7 +449,7 @@ export class FileExporter {
       await fs.promises.mkdir(dir, { recursive: true });
     } catch (error) {
       // Directory might already exist
-      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
         throw error;
       }
     }
@@ -468,7 +479,10 @@ export class FileExporter {
  */
 export function createFileExporter(
   config: Partial<FileExportConfig>,
-  exportFunction: (session: ThinkingSession, format: ExportFormatType) => string
+  exportFunction: (
+    session: ThinkingSession,
+    format: ExportFormatType,
+  ) => string,
 ): FileExporter {
   return new FileExporter(config, exportFunction);
 }

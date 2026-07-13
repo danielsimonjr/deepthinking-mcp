@@ -9,7 +9,7 @@
  * - Design Decision Records: Document decisions with rationale
  */
 
-import { ThinkingMode, type BaseThought } from '../core.js';
+import { ThinkingMode, type BaseThought } from "../core.js";
 
 // =============================================================================
 // Requirements Traceability
@@ -18,29 +18,24 @@ import { ThinkingMode, type BaseThought } from '../core.js';
 /**
  * Requirement priority levels (MoSCoW method)
  */
-export type RequirementPriority = 'must' | 'should' | 'could' | 'wont';
+export type RequirementPriority = "must" | "should" | "could" | "wont";
 
 /**
  * Requirement source types
  */
 export type RequirementSource =
-  | 'stakeholder'
-  | 'regulatory'
-  | 'standard'
-  | 'derived'
-  | 'assumption'
-  | 'constraint';
+  | "stakeholder"
+  | "regulatory"
+  | "standard"
+  | "derived"
+  | "assumption"
+  | "constraint";
 
 /**
  * Requirement status
  */
 export type RequirementStatus =
-  | 'draft'
-  | 'approved'
-  | 'implemented'
-  | 'verified'
-  | 'deferred'
-  | 'rejected';
+  "draft" | "approved" | "implemented" | "verified" | "deferred" | "rejected";
 
 /**
  * A single requirement with traceability information
@@ -61,7 +56,7 @@ export interface Requirement {
   /** Rationale for the requirement */
   rationale?: string;
   /** How the requirement will be verified */
-  verificationMethod?: 'inspection' | 'analysis' | 'demonstration' | 'test';
+  verificationMethod?: "inspection" | "analysis" | "demonstration" | "test";
   /** Specific verification criteria */
   verificationCriteria?: string[];
   /** Parent requirement IDs (traces to) */
@@ -112,7 +107,7 @@ export interface TradeAlternative {
   /** Cost estimate (optional) */
   estimatedCost?: number;
   /** Risk level */
-  riskLevel?: 'low' | 'medium' | 'high';
+  riskLevel?: "low" | "medium" | "high";
 }
 
 /**
@@ -240,7 +235,7 @@ export interface FailureMode {
   /** Target completion date */
   targetDate?: string;
   /** Status of mitigation */
-  mitigationStatus?: 'open' | 'in-progress' | 'completed' | 'verified';
+  mitigationStatus?: "open" | "in-progress" | "completed" | "verified";
 }
 
 /**
@@ -276,11 +271,7 @@ export interface FailureModeAnalysis {
  * Status of a design decision
  */
 export type DecisionStatus =
-  | 'proposed'
-  | 'accepted'
-  | 'rejected'
-  | 'deprecated'
-  | 'superseded';
+  "proposed" | "accepted" | "rejected" | "deprecated" | "superseded";
 
 /**
  * An alternative considered in the decision
@@ -344,11 +335,7 @@ export interface DesignDecisionLog {
  * Engineering analysis type being performed
  */
 export type EngineeringAnalysisType =
-  | 'requirements'
-  | 'trade-study'
-  | 'fmea'
-  | 'design-decision'
-  | 'comprehensive';
+  "requirements" | "trade-study" | "fmea" | "design-decision" | "comprehensive";
 
 /**
  * Engineering Thought - combines all engineering analysis patterns
@@ -394,13 +381,15 @@ export interface EngineeringThought extends BaseThought {
 /**
  * Type guard for EngineeringThought
  */
-export function isEngineeringThought(thought: unknown): thought is EngineeringThought {
+export function isEngineeringThought(
+  thought: unknown,
+): thought is EngineeringThought {
   return (
-    typeof thought === 'object' &&
+    typeof thought === "object" &&
     thought !== null &&
-    'mode' in thought &&
+    "mode" in thought &&
     (thought as EngineeringThought).mode === ThinkingMode.ENGINEERING &&
-    'analysisType' in thought &&
-    'designChallenge' in thought
+    "analysisType" in thought &&
+    "designChallenge" in thought
   );
 }

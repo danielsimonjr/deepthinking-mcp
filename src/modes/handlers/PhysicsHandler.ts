@@ -8,15 +8,15 @@
  * - Dimensional analysis support
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode, PhysicsThought } from '../../types/core.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode, PhysicsThought } from "../../types/core.js";
 import type {
   PhysicsThoughtType,
   TensorProperties,
   PhysicalInterpretation,
   FieldTheoryContext,
-} from '../../types/modes/physics.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+} from "../../types/modes/physics.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -25,27 +25,27 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 /**
  * Valid physics thought types
  */
 const VALID_THOUGHT_TYPES: PhysicsThoughtType[] = [
-  'symmetry_analysis',
-  'gauge_theory',
-  'field_equations',
-  'lagrangian',
-  'hamiltonian',
-  'conservation_law',
-  'dimensional_analysis',
-  'tensor_formulation',
-  'differential_geometry',
+  "symmetry_analysis",
+  "gauge_theory",
+  "field_equations",
+  "lagrangian",
+  "hamiltonian",
+  "conservation_law",
+  "dimensional_analysis",
+  "tensor_formulation",
+  "differential_geometry",
 ];
 
 /**
  * Valid tensor transformation types
  */
-const VALID_TRANSFORMATIONS = ['covariant', 'contravariant', 'mixed'];
+const VALID_TRANSFORMATIONS = ["covariant", "contravariant", "mixed"];
 
 /**
  * PhysicsHandler - Specialized handler for physics reasoning
@@ -58,8 +58,9 @@ const VALID_TRANSFORMATIONS = ['covariant', 'contravariant', 'mixed'];
  */
 export class PhysicsHandler implements ModeHandler {
   readonly mode = ThinkingMode.PHYSICS;
-  readonly modeName = 'Physics Modeling';
-  readonly description = 'Physical modeling with tensor mathematics, conservation laws, and field theory';
+  readonly modeName = "Physics Modeling";
+  readonly description =
+    "Physical modeling with tensor mathematics, conservation laws, and field theory";
 
   /**
    * Create a physics thought from input
@@ -74,7 +75,9 @@ export class PhysicsHandler implements ModeHandler {
     const tensorProperties = this.normalizeTensor(input.tensorProperties);
 
     // Normalize physical interpretation
-    const physicalInterpretation = this.normalizeInterpretation(input.physicalInterpretation);
+    const physicalInterpretation = this.normalizeInterpretation(
+      input.physicalInterpretation,
+    );
 
     return {
       id: randomUUID(),
@@ -114,28 +117,35 @@ export class PhysicsHandler implements ModeHandler {
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
 
     // Validate thought type
-    if (inputAny.thoughtType && !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)) {
+    if (
+      inputAny.thoughtType &&
+      !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)
+    ) {
       warnings.push(
         createValidationWarning(
-          'thoughtType',
+          "thoughtType",
           `Unknown thought type: ${inputAny.thoughtType}`,
-          `Valid types: ${VALID_THOUGHT_TYPES.join(', ')}`
-        )
+          `Valid types: ${VALID_THOUGHT_TYPES.join(", ")}`,
+        ),
       );
     }
 
@@ -144,10 +154,10 @@ export class PhysicsHandler implements ModeHandler {
       if (input.uncertainty < 0 || input.uncertainty > 1) {
         errors.push(
           createValidationError(
-            'uncertainty',
+            "uncertainty",
             `Uncertainty (${input.uncertainty}) must be between 0 and 1`,
-            'UNCERTAINTY_OUT_OF_RANGE'
-          )
+            "UNCERTAINTY_OUT_OF_RANGE",
+          ),
         );
       }
     }
@@ -161,42 +171,52 @@ export class PhysicsHandler implements ModeHandler {
 
     // Validate physical interpretation
     if (input.physicalInterpretation) {
-      const interpValidation = this.validateInterpretation(input.physicalInterpretation);
+      const interpValidation = this.validateInterpretation(
+        input.physicalInterpretation,
+      );
       errors.push(...interpValidation.errors);
       warnings.push(...interpValidation.warnings);
     }
 
     // Validate field theory context
     if (inputAny.fieldTheoryContext) {
-      const fieldValidation = this.validateFieldTheory(inputAny.fieldTheoryContext);
+      const fieldValidation = this.validateFieldTheory(
+        inputAny.fieldTheoryContext,
+      );
       errors.push(...fieldValidation.errors);
       warnings.push(...fieldValidation.warnings);
     }
 
     // Suggest tensor for appropriate thought types
     if (!input.tensorProperties) {
-      const tensorTypes: PhysicsThoughtType[] = ['tensor_formulation', 'gauge_theory', 'differential_geometry'];
+      const tensorTypes: PhysicsThoughtType[] = [
+        "tensor_formulation",
+        "gauge_theory",
+        "differential_geometry",
+      ];
       if (tensorTypes.includes(inputAny.thoughtType)) {
         warnings.push(
           createValidationWarning(
-            'tensorProperties',
+            "tensorProperties",
             `${inputAny.thoughtType} typically involves tensor mathematics`,
-            'Consider adding tensorProperties for formal representation'
-          )
+            "Consider adding tensorProperties for formal representation",
+          ),
         );
       }
     }
 
     // Suggest conservation laws for physical interpretation
-    if (input.physicalInterpretation &&
-        (!input.physicalInterpretation.conservationLaws ||
-         input.physicalInterpretation.conservationLaws.length === 0)) {
+    if (
+      input.physicalInterpretation &&
+      (!input.physicalInterpretation.conservationLaws ||
+        input.physicalInterpretation.conservationLaws.length === 0)
+    ) {
       warnings.push(
         createValidationWarning(
-          'physicalInterpretation.conservationLaws',
-          'No conservation laws specified',
-          'Document relevant conservation laws (energy, momentum, charge, etc.)'
-        )
+          "physicalInterpretation.conservationLaws",
+          "No conservation laws specified",
+          "Document relevant conservation laws (energy, momentum, charge, etc.)",
+        ),
       );
     }
 
@@ -213,7 +233,11 @@ export class PhysicsHandler implements ModeHandler {
   getEnhancements(thought: PhysicsThought): ModeEnhancements {
     const enhancements: ModeEnhancements = {
       suggestions: [],
-      relatedModes: [ThinkingMode.MATHEMATICS, ThinkingMode.ENGINEERING, ThinkingMode.SYSTEMSTHINKING],
+      relatedModes: [
+        ThinkingMode.MATHEMATICS,
+        ThinkingMode.ENGINEERING,
+        ThinkingMode.SYSTEMSTHINKING,
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -222,89 +246,92 @@ export class PhysicsHandler implements ModeHandler {
         uncertainty: thought.uncertainty,
       },
       mentalModels: [
-        'Tensor Analysis',
-        'Conservation Principles',
-        'Symmetry and Invariance',
-        'Dimensional Analysis',
-        'Lagrangian Mechanics',
+        "Tensor Analysis",
+        "Conservation Principles",
+        "Symmetry and Invariance",
+        "Dimensional Analysis",
+        "Lagrangian Mechanics",
       ],
     };
 
     // Thought type-specific guidance
     switch (thought.thoughtType) {
-      case 'symmetry_analysis':
+      case "symmetry_analysis":
         enhancements.guidingQuestions!.push(
-          'What symmetries are present in the system?',
-          'What conservation laws follow from these symmetries (Noether)?'
+          "What symmetries are present in the system?",
+          "What conservation laws follow from these symmetries (Noether)?",
         );
         enhancements.suggestions!.push(
-          "Apply Noether's theorem to derive conservation laws from symmetries"
+          "Apply Noether's theorem to derive conservation laws from symmetries",
         );
         break;
 
-      case 'gauge_theory':
+      case "gauge_theory":
         enhancements.guidingQuestions!.push(
-          'What is the gauge group?',
-          'What are the gauge fields and their transformations?'
+          "What is the gauge group?",
+          "What are the gauge fields and their transformations?",
         );
-        enhancements.relatedModes = [ThinkingMode.MATHEMATICS, ThinkingMode.FORMALLOGIC];
+        enhancements.relatedModes = [
+          ThinkingMode.MATHEMATICS,
+          ThinkingMode.FORMALLOGIC,
+        ];
         break;
 
-      case 'field_equations':
+      case "field_equations":
         enhancements.guidingQuestions!.push(
-          'What are the sources in these field equations?',
-          'Are the equations linear or nonlinear?'
+          "What are the sources in these field equations?",
+          "Are the equations linear or nonlinear?",
         );
         break;
 
-      case 'lagrangian':
+      case "lagrangian":
         enhancements.guidingQuestions!.push(
-          'What are the generalized coordinates?',
-          'Are there any constraints on the system?'
+          "What are the generalized coordinates?",
+          "Are there any constraints on the system?",
         );
         enhancements.suggestions!.push(
-          'Derive equations of motion using Euler-Lagrange equations'
+          "Derive equations of motion using Euler-Lagrange equations",
         );
         break;
 
-      case 'hamiltonian':
+      case "hamiltonian":
         enhancements.guidingQuestions!.push(
-          'What are the canonical coordinates and momenta?',
-          'Is the Hamiltonian time-independent (energy conserved)?'
+          "What are the canonical coordinates and momenta?",
+          "Is the Hamiltonian time-independent (energy conserved)?",
         );
         break;
 
-      case 'conservation_law':
+      case "conservation_law":
         enhancements.guidingQuestions!.push(
-          'What quantity is conserved?',
-          'What symmetry gives rise to this conservation law?'
+          "What quantity is conserved?",
+          "What symmetry gives rise to this conservation law?",
         );
         enhancements.suggestions!.push(
-          'Express the conservation law in both differential and integral forms'
+          "Express the conservation law in both differential and integral forms",
         );
         break;
 
-      case 'dimensional_analysis':
+      case "dimensional_analysis":
         enhancements.guidingQuestions!.push(
-          'What are the fundamental dimensions involved?',
-          'Are all terms dimensionally consistent?'
+          "What are the fundamental dimensions involved?",
+          "Are all terms dimensionally consistent?",
         );
         enhancements.suggestions!.push(
-          'Use the Buckingham π theorem for non-dimensionalization'
+          "Use the Buckingham π theorem for non-dimensionalization",
         );
         break;
 
-      case 'tensor_formulation':
+      case "tensor_formulation":
         enhancements.guidingQuestions!.push(
-          'What is the tensor rank and index structure?',
-          'Is the tensor covariant under the required transformations?'
+          "What is the tensor rank and index structure?",
+          "Is the tensor covariant under the required transformations?",
         );
         break;
 
-      case 'differential_geometry':
+      case "differential_geometry":
         enhancements.guidingQuestions!.push(
-          'What is the manifold structure?',
-          'What are the relevant curvature invariants?'
+          "What is the manifold structure?",
+          "What are the relevant curvature invariants?",
         );
         enhancements.relatedModes = [ThinkingMode.MATHEMATICS];
         break;
@@ -319,7 +346,7 @@ export class PhysicsHandler implements ModeHandler {
 
       if (tp.symmetries && tp.symmetries.length > 0) {
         enhancements.suggestions!.push(
-          `Tensor has ${tp.symmetries.length} symmetr${tp.symmetries.length > 1 ? 'ies' : 'y'}: ${tp.symmetries.slice(0, 3).join(', ')}`
+          `Tensor has ${tp.symmetries.length} symmetr${tp.symmetries.length > 1 ? "ies" : "y"}: ${tp.symmetries.slice(0, 3).join(", ")}`,
         );
       }
     }
@@ -327,11 +354,12 @@ export class PhysicsHandler implements ModeHandler {
     // Physical interpretation analysis
     if (thought.physicalInterpretation) {
       const pi = thought.physicalInterpretation;
-      enhancements.metrics!.conservationLawCount = pi.conservationLaws?.length || 0;
+      enhancements.metrics!.conservationLawCount =
+        pi.conservationLaws?.length || 0;
 
       if (pi.conservationLaws && pi.conservationLaws.length > 0) {
         enhancements.suggestions!.push(
-          `Conservation laws: ${pi.conservationLaws.join(', ')}`
+          `Conservation laws: ${pi.conservationLaws.join(", ")}`,
         );
       }
 
@@ -354,7 +382,7 @@ export class PhysicsHandler implements ModeHandler {
     // High uncertainty warning
     if (thought.uncertainty > 0.7) {
       enhancements.warnings!.push(
-        'High uncertainty - consider reviewing assumptions or adding constraints'
+        "High uncertainty - consider reviewing assumptions or adding constraints",
       );
     }
 
@@ -371,28 +399,35 @@ export class PhysicsHandler implements ModeHandler {
   /**
    * Resolve thought type
    */
-  private resolveThoughtType(inputType: string | undefined): PhysicsThoughtType {
-    if (inputType && VALID_THOUGHT_TYPES.includes(inputType as PhysicsThoughtType)) {
+  private resolveThoughtType(
+    inputType: string | undefined,
+  ): PhysicsThoughtType {
+    if (
+      inputType &&
+      VALID_THOUGHT_TYPES.includes(inputType as PhysicsThoughtType)
+    ) {
       return inputType as PhysicsThoughtType;
     }
-    return 'symmetry_analysis';
+    return "symmetry_analysis";
   }
 
   /**
    * Normalize tensor properties
    */
-  private normalizeTensor(tensor: TensorProperties | undefined): TensorProperties | undefined {
+  private normalizeTensor(
+    tensor: TensorProperties | undefined,
+  ): TensorProperties | undefined {
     if (!tensor) return undefined;
 
     return {
       rank: tensor.rank || [0, 0],
-      components: tensor.components || '',
-      latex: tensor.latex || '',
+      components: tensor.components || "",
+      latex: tensor.latex || "",
       symmetries: tensor.symmetries || [],
       invariants: tensor.invariants || [],
       transformation: VALID_TRANSFORMATIONS.includes(tensor.transformation)
         ? tensor.transformation
-        : 'mixed',
+        : "mixed",
       indexStructure: tensor.indexStructure,
       coordinateSystem: tensor.coordinateSystem,
     };
@@ -401,12 +436,14 @@ export class PhysicsHandler implements ModeHandler {
   /**
    * Normalize physical interpretation
    */
-  private normalizeInterpretation(interp: PhysicalInterpretation | undefined): PhysicalInterpretation | undefined {
+  private normalizeInterpretation(
+    interp: PhysicalInterpretation | undefined,
+  ): PhysicalInterpretation | undefined {
     if (!interp) return undefined;
 
     return {
-      quantity: interp.quantity || '',
-      units: interp.units || '',
+      quantity: interp.quantity || "",
+      units: interp.units || "",
       conservationLaws: interp.conservationLaws || [],
       constraints: interp.constraints,
       observables: interp.observables,
@@ -421,34 +458,41 @@ export class PhysicsHandler implements ModeHandler {
     const warnings = [];
 
     // Validate rank
-    if (!tensor.rank || !Array.isArray(tensor.rank) || tensor.rank.length !== 2) {
+    if (
+      !tensor.rank ||
+      !Array.isArray(tensor.rank) ||
+      tensor.rank.length !== 2
+    ) {
       errors.push(
         createValidationError(
-          'tensorProperties.rank',
-          'Tensor rank must be a tuple [contravariant, covariant]',
-          'INVALID_TENSOR_RANK'
-        )
+          "tensorProperties.rank",
+          "Tensor rank must be a tuple [contravariant, covariant]",
+          "INVALID_TENSOR_RANK",
+        ),
       );
     } else {
       if (tensor.rank[0] < 0 || tensor.rank[1] < 0) {
         errors.push(
           createValidationError(
-            'tensorProperties.rank',
-            'Tensor rank indices must be non-negative',
-            'NEGATIVE_TENSOR_RANK'
-          )
+            "tensorProperties.rank",
+            "Tensor rank indices must be non-negative",
+            "NEGATIVE_TENSOR_RANK",
+          ),
         );
       }
     }
 
     // Validate transformation type
-    if (tensor.transformation && !VALID_TRANSFORMATIONS.includes(tensor.transformation)) {
+    if (
+      tensor.transformation &&
+      !VALID_TRANSFORMATIONS.includes(tensor.transformation)
+    ) {
       warnings.push(
         createValidationWarning(
-          'tensorProperties.transformation',
+          "tensorProperties.transformation",
           `Unknown transformation type: ${tensor.transformation}`,
-          `Valid types: ${VALID_TRANSFORMATIONS.join(', ')}`
-        )
+          `Valid types: ${VALID_TRANSFORMATIONS.join(", ")}`,
+        ),
       );
     }
 
@@ -456,10 +500,10 @@ export class PhysicsHandler implements ModeHandler {
     if (!tensor.latex) {
       warnings.push(
         createValidationWarning(
-          'tensorProperties.latex',
-          'No LaTeX representation provided',
-          'Add LaTeX for clear mathematical presentation'
-        )
+          "tensorProperties.latex",
+          "No LaTeX representation provided",
+          "Add LaTeX for clear mathematical presentation",
+        ),
       );
     }
 
@@ -473,26 +517,28 @@ export class PhysicsHandler implements ModeHandler {
   /**
    * Validate physical interpretation
    */
-  private validateInterpretation(interp: PhysicalInterpretation): ValidationResult {
+  private validateInterpretation(
+    interp: PhysicalInterpretation,
+  ): ValidationResult {
     const warnings = [];
 
     if (!interp.quantity) {
       warnings.push(
         createValidationWarning(
-          'physicalInterpretation.quantity',
-          'No physical quantity specified',
-          'Identify what physical quantity this represents'
-        )
+          "physicalInterpretation.quantity",
+          "No physical quantity specified",
+          "Identify what physical quantity this represents",
+        ),
       );
     }
 
     if (!interp.units) {
       warnings.push(
         createValidationWarning(
-          'physicalInterpretation.units',
-          'No units specified',
-          'Specify units for dimensional consistency'
-        )
+          "physicalInterpretation.units",
+          "No units specified",
+          "Specify units for dimensional consistency",
+        ),
       );
     }
 
@@ -508,20 +554,20 @@ export class PhysicsHandler implements ModeHandler {
     if (!context.fields || context.fields.length === 0) {
       warnings.push(
         createValidationWarning(
-          'fieldTheoryContext.fields',
-          'No fields specified',
-          'List the fields involved in the theory'
-        )
+          "fieldTheoryContext.fields",
+          "No fields specified",
+          "List the fields involved in the theory",
+        ),
       );
     }
 
     if (!context.symmetryGroup) {
       warnings.push(
         createValidationWarning(
-          'fieldTheoryContext.symmetryGroup',
-          'No symmetry group specified',
-          'Identify the symmetry group (e.g., U(1), SU(2), etc.)'
-        )
+          "fieldTheoryContext.symmetryGroup",
+          "No symmetry group specified",
+          "Identify the symmetry group (e.g., U(1), SU(2), etc.)",
+        ),
       );
     }
 

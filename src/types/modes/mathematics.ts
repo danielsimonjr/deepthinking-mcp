@@ -5,7 +5,7 @@
  * Phase 8 (v7.0.0) - Extended with proof decomposition and inconsistency detection
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Mathematical thought types
@@ -15,38 +15,38 @@ import { BaseThought, ThinkingMode } from '../core.js';
  */
 export type MathematicsThoughtType =
   // Original thought types
-  | 'axiom_definition'
-  | 'theorem_statement'
-  | 'proof_construction'
-  | 'lemma_derivation'
-  | 'corollary'
-  | 'counterexample'
-  | 'algebraic_manipulation'
-  | 'symbolic_computation'
-  | 'numerical_analysis'
+  | "axiom_definition"
+  | "theorem_statement"
+  | "proof_construction"
+  | "lemma_derivation"
+  | "corollary"
+  | "counterexample"
+  | "algebraic_manipulation"
+  | "symbolic_computation"
+  | "numerical_analysis"
   // Phase 8: Proof Decomposition Types
-  | 'proof_decomposition' // Breaking proof into atomic components
-  | 'dependency_analysis' // Analyzing statement dependencies
-  | 'consistency_check' // Checking for contradictions
-  | 'gap_identification' // Finding missing steps
-  | 'assumption_trace'; // Tracing back to axioms
+  | "proof_decomposition" // Breaking proof into atomic components
+  | "dependency_analysis" // Analyzing statement dependencies
+  | "consistency_check" // Checking for contradictions
+  | "gap_identification" // Finding missing steps
+  | "assumption_trace"; // Tracing back to axioms
 
 /**
  * Inference rules for mathematical reasoning
  */
 export type InferenceRule =
-  | 'modus_ponens' // P, P→Q ⊢ Q
-  | 'modus_tollens' // ¬Q, P→Q ⊢ ¬P
-  | 'hypothetical_syllogism' // P→Q, Q→R ⊢ P→R
-  | 'disjunctive_syllogism' // P∨Q, ¬P ⊢ Q
-  | 'universal_instantiation' // ∀x.P(x) ⊢ P(a)
-  | 'existential_generalization' // P(a) ⊢ ∃x.P(x)
-  | 'mathematical_induction' // P(0), P(n)→P(n+1) ⊢ ∀n.P(n)
-  | 'contradiction' // P, ¬P ⊢ ⊥
-  | 'direct_implication' // Γ ⊢ Q from Γ ⊢ P, P→Q
-  | 'substitution' // P(a), a=b ⊢ P(b)
-  | 'algebraic_manipulation' // Algebraic transformation
-  | 'definition_expansion'; // Expanding a definition
+  | "modus_ponens" // P, P→Q ⊢ Q
+  | "modus_tollens" // ¬Q, P→Q ⊢ ¬P
+  | "hypothetical_syllogism" // P→Q, Q→R ⊢ P→R
+  | "disjunctive_syllogism" // P∨Q, ¬P ⊢ Q
+  | "universal_instantiation" // ∀x.P(x) ⊢ P(a)
+  | "existential_generalization" // P(a) ⊢ ∃x.P(x)
+  | "mathematical_induction" // P(0), P(n)→P(n+1) ⊢ ∀n.P(n)
+  | "contradiction" // P, ¬P ⊢ ⊥
+  | "direct_implication" // Γ ⊢ Q from Γ ⊢ P, P→Q
+  | "substitution" // P(a), a=b ⊢ P(b)
+  | "algebraic_manipulation" // Algebraic transformation
+  | "definition_expansion"; // Expanding a definition
 
 /**
  * Atomic statement - the smallest unit of a proof
@@ -55,7 +55,8 @@ export interface AtomicStatement {
   id: string;
   statement: string;
   latex?: string;
-  type: 'axiom' | 'definition' | 'hypothesis' | 'lemma' | 'derived' | 'conclusion';
+  type:
+    "axiom" | "definition" | "hypothesis" | "lemma" | "derived" | "conclusion";
 
   // Provenance
   justification?: string;
@@ -77,7 +78,7 @@ export interface AtomicStatement {
 export interface DependencyEdge {
   from: string; // Source statement ID
   to: string; // Target statement ID (depends on source)
-  type: 'logical' | 'definitional' | 'computational' | 'implicit';
+  type: "logical" | "definitional" | "computational" | "implicit";
   strength: number; // 0-1, how strong is the dependency
   inferenceRule?: InferenceRule;
 }
@@ -109,17 +110,17 @@ export interface DependencyGraph {
 export interface ProofGap {
   id: string;
   type:
-    | 'missing_step'
-    | 'unjustified_leap'
-    | 'implicit_assumption'
-    | 'undefined_term'
-    | 'scope_error';
+    | "missing_step"
+    | "unjustified_leap"
+    | "implicit_assumption"
+    | "undefined_term"
+    | "scope_error";
   location: {
     from: string; // Statement ID before gap
     to: string; // Statement ID after gap
   };
   description: string;
-  severity: 'minor' | 'significant' | 'critical';
+  severity: "minor" | "significant" | "critical";
   suggestedFix?: string;
 }
 
@@ -130,12 +131,12 @@ export interface ImplicitAssumption {
   id: string;
   statement: string;
   type:
-    | 'domain_assumption'
-    | 'existence_assumption'
-    | 'uniqueness_assumption'
-    | 'continuity_assumption'
-    | 'finiteness_assumption'
-    | 'well_ordering';
+    | "domain_assumption"
+    | "existence_assumption"
+    | "uniqueness_assumption"
+    | "continuity_assumption"
+    | "finiteness_assumption"
+    | "well_ordering";
   usedInStep: string; // Where this assumption is needed
   shouldBeExplicit: boolean;
   suggestedFormulation: string;
@@ -171,7 +172,7 @@ export interface ProofDecomposition {
 
   // Metrics
   completeness: number; // 0-1
-  rigorLevel: 'informal' | 'textbook' | 'rigorous' | 'formal';
+  rigorLevel: "informal" | "textbook" | "rigorous" | "formal";
   atomCount: number;
   maxDependencyDepth: number;
 }
@@ -180,15 +181,15 @@ export interface ProofDecomposition {
  * Types of inconsistencies
  */
 export type InconsistencyType =
-  | 'direct_contradiction' // P and ¬P both derived
-  | 'circular_reasoning' // Conclusion used in own proof
-  | 'type_mismatch' // Applying operation to wrong type
-  | 'domain_violation' // Using value outside defined domain
-  | 'undefined_operation' // Division by zero, sqrt of negative
-  | 'axiom_conflict' // Axioms that cannot coexist
-  | 'hidden_assumption' // Unstated assumption required
-  | 'quantifier_error' // ∀/∃ scope or binding issues
-  | 'equivalence_failure'; // Claimed equivalence that doesn't hold
+  | "direct_contradiction" // P and ¬P both derived
+  | "circular_reasoning" // Conclusion used in own proof
+  | "type_mismatch" // Applying operation to wrong type
+  | "domain_violation" // Using value outside defined domain
+  | "undefined_operation" // Division by zero, sqrt of negative
+  | "axiom_conflict" // Axioms that cannot coexist
+  | "hidden_assumption" // Unstated assumption required
+  | "quantifier_error" // ∀/∃ scope or binding issues
+  | "equivalence_failure"; // Claimed equivalence that doesn't hold
 
 /**
  * Detected inconsistency in reasoning
@@ -199,7 +200,7 @@ export interface Inconsistency {
   involvedStatements: string[];
   explanation: string;
   derivationPath?: string[];
-  severity: 'warning' | 'error' | 'critical';
+  severity: "warning" | "error" | "critical";
   suggestedResolution?: string;
 }
 
@@ -211,7 +212,7 @@ export interface CircularPath {
   cycleLength: number;
   explanation: string;
   visualPath: string; // A → B → C → A
-  severity: 'minor' | 'significant' | 'critical';
+  severity: "minor" | "significant" | "critical";
 }
 
 /**
@@ -269,7 +270,12 @@ export interface MathematicalModel {
  * Proof strategy for mathematical reasoning
  */
 export interface ProofStrategy {
-  type: 'direct' | 'contradiction' | 'induction' | 'construction' | 'contrapositive';
+  type:
+    | "direct"
+    | "contradiction"
+    | "induction"
+    | "construction"
+    | "contrapositive";
   steps: string[];
   baseCase?: string;
   inductiveStep?: string;
@@ -292,7 +298,7 @@ export interface Theorem {
  * Reference to external sources
  */
 export interface Reference {
-  type: 'paper' | 'book' | 'arxiv' | 'url' | 'theorem';
+  type: "paper" | "book" | "arxiv" | "url" | "theorem";
   citation: string;
   relevance: string;
   url?: string;
@@ -327,6 +333,8 @@ export interface MathematicsThought extends BaseThought {
   assumptionAnalysis?: AssumptionAnalysis;
 }
 
-export function isMathematicsThought(thought: BaseThought): thought is MathematicsThought {
-  return thought.mode === 'mathematics';
+export function isMathematicsThought(
+  thought: BaseThought,
+): thought is MathematicsThought {
+  return thought.mode === "mathematics";
 }

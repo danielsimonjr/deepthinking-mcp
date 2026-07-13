@@ -9,19 +9,19 @@
  * - Zod schemas kept for runtime validation only
  */
 
-import { jsonSchemas } from './json-schemas.js';
-import { SessionActionSchema } from './schemas/base.js';
-import { CoreModeSchema, StandardSchema } from './schemas/modes/core.js';
-import { MathSchema } from './schemas/modes/mathematics.js';
-import { TemporalSchema } from './schemas/modes/temporal.js';
-import { ProbabilisticSchema } from './schemas/modes/probabilistic.js';
-import { CausalSchema } from './schemas/modes/causal.js';
-import { StrategicSchema } from './schemas/modes/strategic.js';
-import { AnalyticalSchema } from './schemas/modes/analytical.js';
-import { ScientificSchema } from './schemas/modes/scientific.js';
-import { EngineeringSchema } from './schemas/modes/engineering.js';
-import { AcademicSchema } from './schemas/modes/academic.js';
-import { analyzeInputSchema } from './schemas/analyze.js';
+import { jsonSchemas } from "./json-schemas.js";
+import { SessionActionSchema } from "./schemas/base.js";
+import { CoreModeSchema, StandardSchema } from "./schemas/modes/core.js";
+import { MathSchema } from "./schemas/modes/mathematics.js";
+import { TemporalSchema } from "./schemas/modes/temporal.js";
+import { ProbabilisticSchema } from "./schemas/modes/probabilistic.js";
+import { CausalSchema } from "./schemas/modes/causal.js";
+import { StrategicSchema } from "./schemas/modes/strategic.js";
+import { AnalyticalSchema } from "./schemas/modes/analytical.js";
+import { ScientificSchema } from "./schemas/modes/scientific.js";
+import { EngineeringSchema } from "./schemas/modes/engineering.js";
+import { AcademicSchema } from "./schemas/modes/academic.js";
+import { analyzeInputSchema } from "./schemas/analyze.js";
 
 /**
  * 13 focused tools with hand-written JSON schemas (v8.4.0)
@@ -79,56 +79,56 @@ export const toolSchemas = {
  */
 export const modeToToolMap: Record<string, string> = {
   // Core reasoning modes (fundamental)
-  inductive: 'deepthinking_core',
-  deductive: 'deepthinking_core',
-  abductive: 'deepthinking_core',
+  inductive: "deepthinking_core",
+  deductive: "deepthinking_core",
+  abductive: "deepthinking_core",
 
   // Standard workflow modes
-  sequential: 'deepthinking_standard',
-  shannon: 'deepthinking_standard',
-  hybrid: 'deepthinking_standard',
+  sequential: "deepthinking_standard",
+  shannon: "deepthinking_standard",
+  hybrid: "deepthinking_standard",
 
   // Math/Physics/Computability modes
-  mathematics: 'deepthinking_mathematics',
-  physics: 'deepthinking_mathematics',
-  computability: 'deepthinking_mathematics',
+  mathematics: "deepthinking_mathematics",
+  physics: "deepthinking_mathematics",
+  computability: "deepthinking_mathematics",
 
   // Temporal/Historical modes
-  temporal: 'deepthinking_temporal',
-  historical: 'deepthinking_temporal',
+  temporal: "deepthinking_temporal",
+  historical: "deepthinking_temporal",
 
   // Probabilistic modes
-  bayesian: 'deepthinking_probabilistic',
-  evidential: 'deepthinking_probabilistic',
+  bayesian: "deepthinking_probabilistic",
+  evidential: "deepthinking_probabilistic",
 
   // Causal modes
-  causal: 'deepthinking_causal',
-  counterfactual: 'deepthinking_causal',
+  causal: "deepthinking_causal",
+  counterfactual: "deepthinking_causal",
 
   // Strategic modes
-  gametheory: 'deepthinking_strategic',
-  optimization: 'deepthinking_strategic',
+  gametheory: "deepthinking_strategic",
+  optimization: "deepthinking_strategic",
 
   // Analytical modes (includes cryptanalytic)
-  analogical: 'deepthinking_analytical',
-  firstprinciples: 'deepthinking_analytical',
-  metareasoning: 'deepthinking_analytical',
-  cryptanalytic: 'deepthinking_analytical',
+  analogical: "deepthinking_analytical",
+  firstprinciples: "deepthinking_analytical",
+  metareasoning: "deepthinking_analytical",
+  cryptanalytic: "deepthinking_analytical",
 
   // Scientific modes
-  scientificmethod: 'deepthinking_scientific',
-  systemsthinking: 'deepthinking_scientific',
-  formallogic: 'deepthinking_scientific',
+  scientificmethod: "deepthinking_scientific",
+  systemsthinking: "deepthinking_scientific",
+  formallogic: "deepthinking_scientific",
 
   // Engineering modes (Phase 14)
-  engineering: 'deepthinking_engineering',
-  algorithmic: 'deepthinking_engineering',
+  engineering: "deepthinking_engineering",
+  algorithmic: "deepthinking_engineering",
 
   // Academic research modes (Phase 14)
-  synthesis: 'deepthinking_academic',
-  argumentation: 'deepthinking_academic',
-  critique: 'deepthinking_academic',
-  analysis: 'deepthinking_academic',
+  synthesis: "deepthinking_academic",
+  argumentation: "deepthinking_academic",
+  critique: "deepthinking_academic",
+  analysis: "deepthinking_academic",
 };
 
 /**
@@ -138,7 +138,7 @@ export function getToolForMode(mode: string): string {
   const tool = modeToToolMap[mode];
   if (!tool) {
     // Default to standard for unknown modes
-    return 'deepthinking_standard';
+    return "deepthinking_standard";
   }
   return tool;
 }

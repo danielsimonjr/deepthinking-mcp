@@ -4,7 +4,7 @@
  * Designed for peer review, literature critique, and scholarly evaluation
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 // ===== CRITIQUE THOUGHT TYPES =====
 
@@ -12,14 +12,14 @@ import { BaseThought, ThinkingMode } from '../core.js';
  * Types of critique reasoning steps
  */
 export type CritiqueThoughtType =
-  | 'work_characterization'      // Characterize the work being critiqued
-  | 'methodology_evaluation'     // Evaluate research methodology
-  | 'argument_analysis'          // Analyze logical structure of arguments
-  | 'evidence_assessment'        // Assess quality and use of evidence
-  | 'contribution_evaluation'    // Evaluate scholarly contribution
-  | 'limitation_identification'  // Identify limitations and weaknesses
-  | 'strength_recognition'       // Recognize strengths and merits
-  | 'improvement_suggestion';    // Suggest improvements
+  | "work_characterization" // Characterize the work being critiqued
+  | "methodology_evaluation" // Evaluate research methodology
+  | "argument_analysis" // Analyze logical structure of arguments
+  | "evidence_assessment" // Assess quality and use of evidence
+  | "contribution_evaluation" // Evaluate scholarly contribution
+  | "limitation_identification" // Identify limitations and weaknesses
+  | "strength_recognition" // Recognize strengths and merits
+  | "improvement_suggestion"; // Suggest improvements
 
 // ===== WORK CHARACTERIZATION =====
 
@@ -27,18 +27,18 @@ export type CritiqueThoughtType =
  * Type of academic work being critiqued
  */
 export type WorkType =
-  | 'empirical_study'
-  | 'theoretical_paper'
-  | 'review_article'
-  | 'meta_analysis'
-  | 'case_study'
-  | 'methodology_paper'
-  | 'position_paper'
-  | 'commentary'
-  | 'replication_study'
-  | 'mixed_methods'
-  | 'book'
-  | 'thesis';
+  | "empirical_study"
+  | "theoretical_paper"
+  | "review_article"
+  | "meta_analysis"
+  | "case_study"
+  | "methodology_paper"
+  | "position_paper"
+  | "commentary"
+  | "replication_study"
+  | "mixed_methods"
+  | "book"
+  | "thesis";
 
 /**
  * Work being critiqued
@@ -63,11 +63,11 @@ export interface CritiquedWork {
  * Research design assessment
  */
 export interface DesignAssessment {
-  designType: string;            // e.g., "randomized controlled trial", "case study"
-  appropriateness: 'appropriate' | 'somewhat_appropriate' | 'inappropriate';
+  designType: string; // e.g., "randomized controlled trial", "case study"
+  appropriateness: "appropriate" | "somewhat_appropriate" | "inappropriate";
   justification: string;
   alternatives?: string[];
-  rating: number;                // 0-1
+  rating: number; // 0-1
 }
 
 /**
@@ -76,11 +76,11 @@ export interface DesignAssessment {
 export interface SampleAssessment {
   sampleSize?: number;
   sampleType: string;
-  representativeness: 'representative' | 'limited' | 'biased' | 'unclear';
+  representativeness: "representative" | "limited" | "biased" | "unclear";
   selectionMethod?: string;
-  adequacy: 'adequate' | 'marginal' | 'inadequate';
+  adequacy: "adequate" | "marginal" | "inadequate";
   concerns: string[];
-  rating: number;                // 0-1
+  rating: number; // 0-1
 }
 
 /**
@@ -88,12 +88,12 @@ export interface SampleAssessment {
  */
 export interface AnalysisAssessment {
   methods: string[];
-  appropriateness: 'appropriate' | 'somewhat_appropriate' | 'inappropriate';
-  rigor: 'rigorous' | 'adequate' | 'inadequate';
-  transparency: 'transparent' | 'partial' | 'opaque';
-  reproducibility: 'reproducible' | 'partially' | 'not_reproducible';
+  appropriateness: "appropriate" | "somewhat_appropriate" | "inappropriate";
+  rigor: "rigorous" | "adequate" | "inadequate";
+  transparency: "transparent" | "partial" | "opaque";
+  reproducibility: "reproducible" | "partially" | "not_reproducible";
   concerns: string[];
-  rating: number;                // 0-1
+  rating: number; // 0-1
 }
 
 /**
@@ -105,7 +105,7 @@ export interface MethodologyEvaluation {
   sample: SampleAssessment;
   analysis: AnalysisAssessment;
   validity: ValidityAssessment;
-  overallRating: number;         // 0-1
+  overallRating: number; // 0-1
   majorConcerns: string[];
   minorConcerns: string[];
 }
@@ -117,7 +117,7 @@ export interface MethodologyEvaluation {
  */
 export interface ValidityAssessment {
   internal: {
-    rating: number;              // 0-1
+    rating: number; // 0-1
     threats: string[];
     mitigations: string[];
   };
@@ -157,7 +157,7 @@ export interface LogicalStructure {
   };
   inferentialGaps: string[];
   circularReasoning: boolean;
-  overallCoherence: number;      // 0-1
+  overallCoherence: number; // 0-1
 }
 
 /**
@@ -169,12 +169,12 @@ export interface ArgumentCritique {
   fallaciesIdentified: {
     name: string;
     location: string;
-    severity: 'critical' | 'significant' | 'minor';
+    severity: "critical" | "significant" | "minor";
   }[];
   unsupportedClaims: string[];
   overinterpretations: string[];
   strengths: string[];
-  rating: number;                // 0-1
+  rating: number; // 0-1
 }
 
 // ===== EVIDENCE CRITIQUE =====
@@ -183,11 +183,11 @@ export interface ArgumentCritique {
  * Evidence quality assessment
  */
 export interface EvidenceQuality {
-  type: 'primary' | 'secondary' | 'tertiary';
-  reliability: number;           // 0-1
-  validity: number;              // 0-1
-  relevance: number;             // 0-1
-  sufficiency: number;           // 0-1
+  type: "primary" | "secondary" | "tertiary";
+  reliability: number; // 0-1
+  validity: number; // 0-1
+  relevance: number; // 0-1
+  sufficiency: number; // 0-1
   concerns: string[];
 }
 
@@ -204,7 +204,7 @@ export interface EvidenceUseCritique {
   cherryPicking: boolean;
   misrepresentation: string[];
   appropriateCitations: boolean;
-  overallRating: number;         // 0-1
+  overallRating: number; // 0-1
 }
 
 // ===== CONTRIBUTION ASSESSMENT =====
@@ -213,19 +213,19 @@ export interface EvidenceUseCritique {
  * Novelty assessment
  */
 export interface NoveltyAssessment {
-  theoreticalNovelty: number;    // 0-1
+  theoreticalNovelty: number; // 0-1
   methodologicalNovelty: number;
   empiricalNovelty: number;
   overallNovelty: number;
   comparisonToExisting: string;
-  incrementalOrTransformative: 'incremental' | 'significant' | 'transformative';
+  incrementalOrTransformative: "incremental" | "significant" | "transformative";
 }
 
 /**
  * Impact assessment
  */
 export interface ImpactAssessment {
-  potentialImpact: 'high' | 'moderate' | 'low';
+  potentialImpact: "high" | "moderate" | "low";
   targetAudience: string[];
   practicalImplications: string[];
   theoreticalImplications: string[];
@@ -239,8 +239,8 @@ export interface ContributionEvaluation {
   id: string;
   novelty: NoveltyAssessment;
   impact: ImpactAssessment;
-  clarity: number;               // 0-1 how clearly contribution is stated
-  significance: 'major' | 'moderate' | 'minor' | 'unclear';
+  clarity: number; // 0-1 how clearly contribution is stated
+  significance: "major" | "moderate" | "minor" | "unclear";
   positionInLiterature: string;
 }
 
@@ -251,11 +251,17 @@ export interface ContributionEvaluation {
  */
 export interface CritiquePoint {
   id: string;
-  type: 'strength' | 'weakness' | 'concern' | 'suggestion';
-  category: 'methodology' | 'argument' | 'evidence' | 'contribution' | 'writing' | 'ethics';
-  severity: 'critical' | 'major' | 'minor' | 'neutral';
+  type: "strength" | "weakness" | "concern" | "suggestion";
+  category:
+    | "methodology"
+    | "argument"
+    | "evidence"
+    | "contribution"
+    | "writing"
+    | "ethics";
+  severity: "critical" | "major" | "minor" | "neutral";
   description: string;
-  location?: string;             // Where in the work
+  location?: string; // Where in the work
   recommendation?: string;
   evidence?: string;
 }
@@ -269,16 +275,16 @@ export interface ImprovementSuggestion {
   current: string;
   suggested: string;
   rationale: string;
-  priority: 'essential' | 'recommended' | 'optional';
-  feasibility: 'easy' | 'moderate' | 'difficult';
+  priority: "essential" | "recommended" | "optional";
+  feasibility: "easy" | "moderate" | "difficult";
 }
 
 /**
  * Overall critique verdict
  */
 export interface CritiqueVerdict {
-  recommendation: 'accept' | 'minor_revision' | 'major_revision' | 'reject';
-  confidence: number;            // 0-1
+  recommendation: "accept" | "minor_revision" | "major_revision" | "reject";
+  confidence: number; // 0-1
   summary: string;
   majorStrengths: string[];
   majorWeaknesses: string[];
@@ -311,7 +317,7 @@ export interface CritiqueThought extends BaseThought {
   // Balance indicators
   strengthsIdentified: number;
   weaknessesIdentified: number;
-  balanceRatio: number;          // Aim for balanced critique
+  balanceRatio: number; // Aim for balanced critique
 
   // Standard fields
   dependencies: string[];
@@ -325,6 +331,8 @@ export interface CritiqueThought extends BaseThought {
 /**
  * Type guard for CritiqueThought
  */
-export function isCritiqueThought(thought: BaseThought): thought is CritiqueThought {
-  return thought.mode === 'critique';
+export function isCritiqueThought(
+  thought: BaseThought,
+): thought is CritiqueThought {
+  return thought.mode === "critique";
 }

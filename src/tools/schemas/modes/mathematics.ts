@@ -5,9 +5,9 @@
  * Phase 8 Sprint 4: Proof decomposition fields
  */
 
-import { z } from 'zod';
-import { BaseThoughtSchema } from '../base.js';
-import { ProofTypeEnum, TransformationEnum } from '../shared.js';
+import { z } from "zod";
+import { BaseThoughtSchema } from "../base.js";
+import { ProofTypeEnum, TransformationEnum } from "../shared.js";
 
 const ProofStrategySchema = z.object({
   type: ProofTypeEnum,
@@ -47,7 +47,7 @@ const ProofStepInputSchema = z.object({
 });
 
 export const MathSchema = BaseThoughtSchema.extend({
-  mode: z.enum(['mathematics', 'physics', 'computability']),
+  mode: z.enum(["mathematics", "physics", "computability"]),
   thoughtType: z.string().optional(),
   proofStrategy: ProofStrategySchema.optional(),
   mathematicalModel: MathematicalModelSchema.optional(),
@@ -58,7 +58,7 @@ export const MathSchema = BaseThoughtSchema.extend({
   proofSteps: z.array(ProofStepInputSchema).optional(),
   theorem: z.string().optional(),
   hypotheses: z.array(z.string()).optional(),
-  analysisDepth: z.enum(['shallow', 'standard', 'deep']).optional(),
+  analysisDepth: z.enum(["shallow", "standard", "deep"]).optional(),
   includeConsistencyCheck: z.boolean().optional(),
   traceAssumptions: z.boolean().optional(),
 });

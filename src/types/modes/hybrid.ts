@@ -3,7 +3,12 @@
  * Combines multiple reasoning modes with dynamic switching
  */
 
-import { BaseThought, ThinkingMode, ShannonStage, ExtendedThoughtType } from '../core.js';
+import {
+  BaseThought,
+  ThinkingMode,
+  ShannonStage,
+  ExtendedThoughtType,
+} from "../core.js";
 
 /**
  * Mathematical model representation (used in hybrid mode)
@@ -31,7 +36,7 @@ export interface TensorProperties {
   latex: string;
   symmetries: string[];
   invariants: string[];
-  transformation: 'covariant' | 'contravariant' | 'mixed';
+  transformation: "covariant" | "contravariant" | "mixed";
   indexStructure?: string;
   coordinateSystem?: string;
 }
@@ -62,11 +67,13 @@ export interface HybridThought extends BaseThought {
   mathematicalModel?: MathematicalModel;
   tensorProperties?: TensorProperties;
   physicalInterpretation?: PhysicalInterpretation;
-  primaryMode: 'sequential' | 'shannon' | 'mathematics' | 'physics';
+  primaryMode: "sequential" | "shannon" | "mathematics" | "physics";
   secondaryFeatures: string[];
   switchReason?: string;
 }
 
-export function isHybridThought(thought: BaseThought): thought is HybridThought {
-  return thought.mode === 'hybrid';
+export function isHybridThought(
+  thought: BaseThought,
+): thought is HybridThought {
+  return thought.mode === "hybrid";
 }

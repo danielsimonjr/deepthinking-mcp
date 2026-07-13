@@ -48,11 +48,49 @@ export const DEFAULT_TOKENIZER_OPTIONS: TokenizerOptions = {
  * Common English stop words
  */
 const STOP_WORDS = new Set([
-  'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from',
-  'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'that', 'the',
-  'to', 'was', 'will', 'with', 'but', 'or', 'not', 'this', 'can',
-  'have', 'had', 'been', 'were', 'what', 'when', 'where', 'who',
-  'which', 'their', 'would', 'there', 'could', 'should'
+  "a",
+  "an",
+  "and",
+  "are",
+  "as",
+  "at",
+  "be",
+  "by",
+  "for",
+  "from",
+  "has",
+  "he",
+  "in",
+  "is",
+  "it",
+  "its",
+  "of",
+  "on",
+  "that",
+  "the",
+  "to",
+  "was",
+  "will",
+  "with",
+  "but",
+  "or",
+  "not",
+  "this",
+  "can",
+  "have",
+  "had",
+  "been",
+  "were",
+  "what",
+  "when",
+  "where",
+  "who",
+  "which",
+  "their",
+  "would",
+  "there",
+  "could",
+  "should",
 ]);
 
 /**
@@ -69,7 +107,7 @@ export class Tokenizer {
    * Tokenize text into words
    */
   tokenize(text: string): string[] {
-    if (!text || text.trim() === '') {
+    if (!text || text.trim() === "") {
       return [];
     }
 
@@ -81,9 +119,12 @@ export class Tokenizer {
 
     // Apply filters
     return tokens
-      .filter(token => {
+      .filter((token) => {
         // Length filter
-        if (token.length < this.options.minLength || token.length > this.options.maxLength) {
+        if (
+          token.length < this.options.minLength ||
+          token.length > this.options.maxLength
+        ) {
           return false;
         }
 
@@ -94,7 +135,7 @@ export class Tokenizer {
 
         return true;
       })
-      .map(token => {
+      .map((token) => {
         // Apply stemming if enabled
         return this.options.enableStemming ? this.stem(token) : token;
       });
@@ -108,17 +149,21 @@ export class Tokenizer {
     let stemmed = word;
 
     // Remove common suffixes
-    if (stemmed.endsWith('ing') && stemmed.length > 5) {
+    if (stemmed.endsWith("ing") && stemmed.length > 5) {
       stemmed = stemmed.slice(0, -3);
-    } else if (stemmed.endsWith('ed') && stemmed.length > 4) {
+    } else if (stemmed.endsWith("ed") && stemmed.length > 4) {
       stemmed = stemmed.slice(0, -2);
-    } else if (stemmed.endsWith('ly') && stemmed.length > 4) {
+    } else if (stemmed.endsWith("ly") && stemmed.length > 4) {
       stemmed = stemmed.slice(0, -2);
-    } else if (stemmed.endsWith('ies') && stemmed.length > 5) {
-      stemmed = stemmed.slice(0, -3) + 'y';
-    } else if (stemmed.endsWith('es') && stemmed.length > 4) {
+    } else if (stemmed.endsWith("ies") && stemmed.length > 5) {
+      stemmed = stemmed.slice(0, -3) + "y";
+    } else if (stemmed.endsWith("es") && stemmed.length > 4) {
       stemmed = stemmed.slice(0, -2);
-    } else if (stemmed.endsWith('s') && stemmed.length > 3 && !stemmed.endsWith('ss')) {
+    } else if (
+      stemmed.endsWith("s") &&
+      stemmed.length > 3 &&
+      !stemmed.endsWith("ss")
+    ) {
       stemmed = stemmed.slice(0, -1);
     }
 

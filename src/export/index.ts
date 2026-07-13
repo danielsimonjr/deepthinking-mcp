@@ -29,10 +29,13 @@ export {
   exportFormalLogicProof,
   // Phase 8: Proof decomposition
   exportProofDecomposition,
-} from './visual/index.js';
+} from "./visual/index.js";
 
 // LaTeX exports
-export { LaTeXExporter, type LaTeXExportOptions } from './visual/utils/latex.js';
+export {
+  LaTeXExporter,
+  type LaTeXExportOptions,
+} from "./visual/utils/latex.js";
 
 // Phase 12 Sprint 4: Export profiles
 export {
@@ -51,7 +54,7 @@ export {
   getExportProfileMetadata,
   combineExportProfiles,
   recommendExportProfile,
-} from './profiles.js';
+} from "./profiles.js";
 
 // Phase 12 Sprint 4: File exporter
 export {
@@ -62,4 +65,4 @@ export {
   type ExportProgressCallback,
   FileExporter,
   createFileExporter,
-} from './file-exporter.js';
+} from "./file-exporter.js";

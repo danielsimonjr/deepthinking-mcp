@@ -3,7 +3,7 @@
  * v9.1.0 - Historical analysis, source evaluation, pattern recognition, and historiographical reasoning
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 // ============================================================================
 // THOUGHT TYPES
@@ -13,11 +13,11 @@ import { BaseThought, ThinkingMode } from '../core.js';
  * Historical thought types for different analysis approaches
  */
 export type HistoricalThoughtType =
-  | 'event_analysis'         // Analyze historical events and their context
-  | 'source_evaluation'      // Evaluate primary/secondary sources
-  | 'pattern_identification' // Identify patterns across time periods
-  | 'causal_chain'           // Trace cause-effect relationships
-  | 'periodization';         // Define and analyze historical periods
+  | "event_analysis" // Analyze historical events and their context
+  | "source_evaluation" // Evaluate primary/secondary sources
+  | "pattern_identification" // Identify patterns across time periods
+  | "causal_chain" // Trace cause-effect relationships
+  | "periodization"; // Define and analyze historical periods
 
 // ============================================================================
 // CORE DATA STRUCTURES
@@ -29,14 +29,22 @@ export type HistoricalThoughtType =
 export interface DateRange {
   start: string;
   end: string;
-  precision?: 'exact' | 'approximate' | 'century' | 'decade' | 'year' | 'month' | 'day';
+  precision?:
+    "exact" | "approximate" | "century" | "decade" | "year" | "month" | "day";
 }
 
 /**
  * Source bias characterization
  */
 export interface SourceBias {
-  type: 'political' | 'religious' | 'cultural' | 'economic' | 'nationalistic' | 'ideological' | 'personal';
+  type:
+    | "political"
+    | "religious"
+    | "cultural"
+    | "economic"
+    | "nationalistic"
+    | "ideological"
+    | "personal";
   direction?: string;
   severity: number; // 0-1 scale
   evidence?: string[];
@@ -51,11 +59,11 @@ export interface HistoricalEvent {
   date: string | DateRange;
   location?: string;
   description?: string;
-  actors?: string[];        // References to HistoricalActor.id
-  causes?: string[];        // References to other event IDs
-  effects?: string[];       // References to other event IDs
-  significance: 'minor' | 'moderate' | 'major' | 'transformative';
-  sources?: string[];       // References to HistoricalSource.id
+  actors?: string[]; // References to HistoricalActor.id
+  causes?: string[]; // References to other event IDs
+  effects?: string[]; // References to other event IDs
+  significance: "minor" | "moderate" | "major" | "transformative";
+  sources?: string[]; // References to HistoricalSource.id
   tags?: string[];
   context?: string;
 }
@@ -66,12 +74,18 @@ export interface HistoricalEvent {
 export interface HistoricalSource {
   id: string;
   title: string;
-  type: 'primary' | 'secondary' | 'tertiary';
-  subtype?: 'document' | 'artifact' | 'oral' | 'visual' | 'archaeological' | 'statistical';
+  type: "primary" | "secondary" | "tertiary";
+  subtype?:
+    | "document"
+    | "artifact"
+    | "oral"
+    | "visual"
+    | "archaeological"
+    | "statistical";
   author?: string;
   date?: string;
   location?: string;
-  reliability: number;      // 0-1 scale
+  reliability: number; // 0-1 scale
   bias?: SourceBias;
   corroboratedBy?: string[]; // Other source IDs
   contradictedBy?: string[];
@@ -85,7 +99,7 @@ export interface HistoricalSource {
 export interface PeriodTransition {
   fromPeriod: string;
   toPeriod: string;
-  transitionType: 'gradual' | 'abrupt' | 'revolutionary' | 'evolutionary';
+  transitionType: "gradual" | "abrupt" | "revolutionary" | "evolutionary";
   catalysts?: string[];
   duration?: string;
 }
@@ -99,8 +113,8 @@ export interface HistoricalPeriod {
   startDate: string;
   endDate: string;
   characteristics: string[];
-  keyEvents?: string[];     // Event IDs
-  keyActors?: string[];     // Actor IDs
+  keyEvents?: string[]; // Event IDs
+  keyActors?: string[]; // Actor IDs
   transitions?: PeriodTransition[];
   themes?: string[];
 }
@@ -109,12 +123,12 @@ export interface HistoricalPeriod {
  * Causal link in a chain
  */
 export interface CausalLink {
-  cause: string;            // Event ID
-  effect: string;           // Event ID
+  cause: string; // Event ID
+  effect: string; // Event ID
   mechanism?: string;
-  confidence: number;       // 0-1 scale
+  confidence: number; // 0-1 scale
   timelag?: string;
-  evidence?: string[];      // Source IDs
+  evidence?: string[]; // Source IDs
 }
 
 /**
@@ -124,7 +138,7 @@ export interface CausalChain {
   id: string;
   name: string;
   links: CausalLink[];
-  confidence: number;       // 0-1 scale (aggregate)
+  confidence: number; // 0-1 scale (aggregate)
   alternativeExplanations?: string[];
   historiographicalDebate?: string;
 }
@@ -134,7 +148,15 @@ export interface CausalChain {
  */
 export interface ActorRelationship {
   actorId: string;
-  type: 'ally' | 'rival' | 'subordinate' | 'superior' | 'colleague' | 'influenced_by' | 'mentor' | 'successor';
+  type:
+    | "ally"
+    | "rival"
+    | "subordinate"
+    | "superior"
+    | "colleague"
+    | "influenced_by"
+    | "mentor"
+    | "successor";
   period?: string;
   description?: string;
 }
@@ -145,13 +167,14 @@ export interface ActorRelationship {
 export interface HistoricalActor {
   id: string;
   name: string;
-  type: 'individual' | 'group' | 'institution' | 'nation' | 'movement' | 'class';
-  period?: string;          // Period ID
+  type:
+    "individual" | "group" | "institution" | "nation" | "movement" | "class";
+  period?: string; // Period ID
   dates?: DateRange;
   roles?: string[];
   motivations?: string[];
   relationships?: ActorRelationship[];
-  significance?: 'minor' | 'moderate' | 'major' | 'transformative';
+  significance?: "minor" | "moderate" | "major" | "transformative";
 }
 
 // ============================================================================
@@ -164,8 +187,8 @@ export interface HistoricalActor {
 export interface HistoricalPattern {
   id: string;
   name: string;
-  type: 'cyclical' | 'linear' | 'dialectical' | 'contingent' | 'structural';
-  instances: string[];      // Event IDs
+  type: "cyclical" | "linear" | "dialectical" | "contingent" | "structural";
+  instances: string[]; // Event IDs
   description: string;
   confidence: number;
   counterexamples?: string[];
@@ -177,8 +200,8 @@ export interface HistoricalPattern {
 export interface HistoricalInterpretation {
   id: string;
   claim: string;
-  school?: string;          // Historiographical school
-  evidence: string[];       // Source IDs
+  school?: string; // Historiographical school
+  evidence: string[]; // Source IDs
   counterarguments?: string[];
   confidence: number;
   methodology?: string;
@@ -188,7 +211,15 @@ export interface HistoricalInterpretation {
  * Historiographical methodology approach
  */
 export interface HistoricalMethodology {
-  approach: 'empiricist' | 'interpretive' | 'critical' | 'postmodern' | 'marxist' | 'annales' | 'microhistory' | 'quantitative';
+  approach:
+    | "empiricist"
+    | "interpretive"
+    | "critical"
+    | "postmodern"
+    | "marxist"
+    | "annales"
+    | "microhistory"
+    | "quantitative";
   techniques: string[];
   limitations: string[];
   strengths: string[];
@@ -233,6 +264,8 @@ export interface HistoricalThought extends BaseThought {
 /**
  * Type guard for historical thoughts
  */
-export function isHistoricalThought(thought: BaseThought): thought is HistoricalThought {
-  return thought.mode === 'historical';
+export function isHistoricalThought(
+  thought: BaseThought,
+): thought is HistoricalThought {
+  return thought.mode === "historical";
 }

@@ -8,16 +8,16 @@
  * - Evidence strength assessment
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode, BayesianThought } from '../../types/core.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode, BayesianThought } from "../../types/core.js";
 import type {
   BayesianHypothesis,
   PriorProbability,
   Likelihood,
   BayesianEvidence,
   PosteriorProbability,
-} from '../../types/modes/bayesian.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+} from "../../types/modes/bayesian.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -26,7 +26,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 /**
  * BayesianHandler - Specialized handler for Bayesian inference
@@ -39,19 +39,20 @@ import {
  */
 export class BayesianHandler implements ModeHandler {
   readonly mode = ThinkingMode.BAYESIAN;
-  readonly modeName = 'Bayesian Inference';
-  readonly description = 'Probabilistic reasoning with Bayes theorem and evidence updates';
+  readonly modeName = "Bayesian Inference";
+  readonly description =
+    "Probabilistic reasoning with Bayes theorem and evidence updates";
 
   /**
    * Supported thought types for Bayesian mode
    */
   private readonly supportedThoughtTypes = [
-    'prior_elicitation',
-    'likelihood_assessment',
-    'posterior_update',
-    'evidence_evaluation',
-    'sensitivity_analysis',
-    'hypothesis_comparison',
+    "prior_elicitation",
+    "likelihood_assessment",
+    "posterior_update",
+    "evidence_evaluation",
+    "sensitivity_analysis",
+    "hypothesis_comparison",
   ];
 
   /**
@@ -68,7 +69,7 @@ export class BayesianHandler implements ModeHandler {
     if (inputAny.hypotheses && Array.isArray(inputAny.hypotheses)) {
       alternatives = inputAny.hypotheses.map((h: any) => ({
         id: h.id || randomUUID(),
-        statement: h.description || h.explanation || h.statement || '',
+        statement: h.description || h.explanation || h.statement || "",
         probability: h.probability,
       }));
     }
@@ -82,18 +83,23 @@ export class BayesianHandler implements ModeHandler {
 
     const prior: PriorProbability = {
       probability: inputAny.priorProbability ?? 0.5,
-      justification: inputAny.priorJustification || 'Default prior',
+      justification: inputAny.priorJustification || "Default prior",
     };
 
     const likelihood: Likelihood = {
       probability: inputAny.likelihood ?? 0.5,
-      description: inputAny.likelihoodDescription || 'Default likelihood',
+      description: inputAny.likelihoodDescription || "Default likelihood",
     };
 
     const evidence: BayesianEvidence[] = inputAny.evidence || [];
 
     // Calculate posterior using Bayes' theorem if components provided
-    const posterior = this.calculatePosterior(prior, likelihood, evidence, inputAny);
+    const posterior = this.calculatePosterior(
+      prior,
+      likelihood,
+      evidence,
+      inputAny,
+    );
 
     // Calculate Bayes factor if evidence provided
     const bayesFactor = this.calculateBayesFactor(evidence);
@@ -136,16 +142,20 @@ export class BayesianHandler implements ModeHandler {
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
@@ -153,7 +163,10 @@ export class BayesianHandler implements ModeHandler {
     // Validate prior probability
     const priorProb = inputAny.priorProbability;
     if (priorProb !== undefined) {
-      const priorValidation = this.validateProbability(priorProb, 'priorProbability');
+      const priorValidation = this.validateProbability(
+        priorProb,
+        "priorProbability",
+      );
       if (!priorValidation.valid) {
         errors.push(...priorValidation.errors);
       }
@@ -163,7 +176,10 @@ export class BayesianHandler implements ModeHandler {
     // Validate likelihood
     const likelihoodProb = inputAny.likelihood;
     if (likelihoodProb !== undefined) {
-      const likelihoodValidation = this.validateProbability(likelihoodProb, 'likelihood');
+      const likelihoodValidation = this.validateProbability(
+        likelihoodProb,
+        "likelihood",
+      );
       if (!likelihoodValidation.valid) {
         errors.push(...likelihoodValidation.errors);
       }
@@ -173,7 +189,10 @@ export class BayesianHandler implements ModeHandler {
     // Validate posterior if provided
     const posteriorProb = inputAny.posteriorProbability;
     if (posteriorProb !== undefined) {
-      const posteriorValidation = this.validateProbability(posteriorProb, 'posteriorProbability');
+      const posteriorValidation = this.validateProbability(
+        posteriorProb,
+        "posteriorProbability",
+      );
       if (!posteriorValidation.valid) {
         errors.push(...posteriorValidation.errors);
       }
@@ -200,10 +219,10 @@ export class BayesianHandler implements ModeHandler {
         if (priorProb > 0.9 && numAlternatives > 2) {
           warnings.push(
             createValidationWarning(
-              'priorProbability',
+              "priorProbability",
               `High prior probability (${priorProb}) with ${numAlternatives} alternatives`,
-              'Consider whether prior properly reflects uncertainty across alternatives'
-            )
+              "Consider whether prior properly reflects uncertainty across alternatives",
+            ),
           );
         }
       }
@@ -213,10 +232,10 @@ export class BayesianHandler implements ModeHandler {
     if (!inputAny.evidence || inputAny.evidence.length === 0) {
       warnings.push(
         createValidationWarning(
-          'evidence',
-          'No evidence provided for Bayesian update',
-          'Add evidence with likelihood ratios to update the posterior'
-        )
+          "evidence",
+          "No evidence provided for Bayesian update",
+          "Add evidence with likelihood ratios to update the posterior",
+        ),
       );
     }
 
@@ -237,7 +256,12 @@ export class BayesianHandler implements ModeHandler {
       guidingQuestions: [],
       warnings: [],
       metrics: {},
-      mentalModels: ['Bayes Theorem', 'Prior Updating', 'Likelihood Ratio', 'Base Rate Fallacy'],
+      mentalModels: [
+        "Bayes Theorem",
+        "Prior Updating",
+        "Likelihood Ratio",
+        "Base Rate Fallacy",
+      ],
     };
 
     // Add probability metrics
@@ -255,45 +279,59 @@ export class BayesianHandler implements ModeHandler {
       const bf = thought.bayesFactor;
       let strength: string;
       if (bf < 1) {
-        strength = bf < 0.1 ? 'Strong evidence against' : bf < 0.33 ? 'Moderate evidence against' : 'Weak evidence against';
+        strength =
+          bf < 0.1
+            ? "Strong evidence against"
+            : bf < 0.33
+              ? "Moderate evidence against"
+              : "Weak evidence against";
       } else {
-        strength = bf > 10 ? 'Strong evidence for' : bf > 3 ? 'Moderate evidence for' : 'Weak evidence for';
+        strength =
+          bf > 10
+            ? "Strong evidence for"
+            : bf > 3
+              ? "Moderate evidence for"
+              : "Weak evidence for";
       }
 
-      enhancements.suggestions!.push(`Bayes factor (${bf.toFixed(2)}) indicates: ${strength} the hypothesis`);
+      enhancements.suggestions!.push(
+        `Bayes factor (${bf.toFixed(2)}) indicates: ${strength} the hypothesis`,
+      );
     }
 
     // Analyze prior-posterior shift
-    const shift = Math.abs(thought.posterior.probability - thought.prior.probability);
+    const shift = Math.abs(
+      thought.posterior.probability - thought.prior.probability,
+    );
     if (shift < 0.05) {
       enhancements.suggestions!.push(
-        'Small prior-to-posterior shift. Consider seeking more diagnostic evidence.'
+        "Small prior-to-posterior shift. Consider seeking more diagnostic evidence.",
       );
     } else if (shift > 0.4) {
       enhancements.warnings!.push(
-        'Large belief update. Verify evidence quality and likelihood estimates.'
+        "Large belief update. Verify evidence quality and likelihood estimates.",
       );
     }
 
     // Guide questions based on posterior
     if (thought.posterior.probability > 0.9) {
       enhancements.guidingQuestions!.push(
-        'What evidence could potentially disconfirm this high-confidence belief?'
+        "What evidence could potentially disconfirm this high-confidence belief?",
       );
     } else if (thought.posterior.probability < 0.1) {
       enhancements.guidingQuestions!.push(
-        'What new evidence would be needed to revive this hypothesis?'
+        "What new evidence would be needed to revive this hypothesis?",
       );
     } else {
       enhancements.guidingQuestions!.push(
-        'What additional evidence could help resolve the remaining uncertainty?'
+        "What additional evidence could help resolve the remaining uncertainty?",
       );
     }
 
     // Suggest sensitivity analysis if not provided
     if (!thought.sensitivity) {
       enhancements.guidingQuestions!.push(
-        'How sensitive is the posterior to changes in the prior probability?'
+        "How sensitive is the posterior to changes in the prior probability?",
       );
     }
 
@@ -317,13 +355,13 @@ export class BayesianHandler implements ModeHandler {
     prior: PriorProbability,
     likelihood: Likelihood,
     evidence: BayesianEvidence[],
-    inputAny: any
+    inputAny: any,
   ): PosteriorProbability {
     // If posterior explicitly provided, use it
     if (inputAny.posteriorProbability !== undefined) {
       return {
         probability: inputAny.posteriorProbability,
-        calculation: 'Provided directly',
+        calculation: "Provided directly",
         confidence: inputAny.posteriorConfidence ?? 0.8,
       };
     }
@@ -338,7 +376,8 @@ export class BayesianHandler implements ModeHandler {
         const pEgivenNotH = ev.likelihoodGivenNotHypothesis;
 
         // Calculate P(E)
-        const pE = pEgivenH * currentPosterior + pEgivenNotH * (1 - currentPosterior);
+        const pE =
+          pEgivenH * currentPosterior + pEgivenNotH * (1 - currentPosterior);
 
         // Apply Bayes' theorem
         if (pE > 0) {
@@ -349,7 +388,8 @@ export class BayesianHandler implements ModeHandler {
       // Use simple likelihood if no structured evidence
       const pEgivenH = likelihood.probability;
       const pEgivenNotH = 1 - likelihood.probability; // Simplified assumption
-      const pE = pEgivenH * prior.probability + pEgivenNotH * (1 - prior.probability);
+      const pE =
+        pEgivenH * prior.probability + pEgivenNotH * (1 - prior.probability);
 
       if (pE > 0) {
         currentPosterior = (pEgivenH * prior.probability) / pE;
@@ -357,9 +397,10 @@ export class BayesianHandler implements ModeHandler {
     }
 
     // Build calculation string
-    const calculation = evidence.length > 0
-      ? `Updated through ${evidence.length} evidence items using Bayes theorem`
-      : `P(H|E) = P(E|H)P(H) / [P(E|H)P(H) + P(E|~H)P(~H)]`;
+    const calculation =
+      evidence.length > 0
+        ? `Updated through ${evidence.length} evidence items using Bayes theorem`
+        : `P(H|E) = P(E|H)P(H) / [P(E|H)P(H) + P(E|~H)P(~H)]`;
 
     return {
       probability: Math.max(0, Math.min(1, currentPosterior)), // Clamp to [0, 1]
@@ -373,7 +414,9 @@ export class BayesianHandler implements ModeHandler {
    *
    * BF = ∏ P(E_i|H) / P(E_i|~H)
    */
-  private calculateBayesFactor(evidence: BayesianEvidence[]): number | undefined {
+  private calculateBayesFactor(
+    evidence: BayesianEvidence[],
+  ): number | undefined {
     if (evidence.length === 0) {
       return undefined;
     }
@@ -381,7 +424,8 @@ export class BayesianHandler implements ModeHandler {
     let bayesFactor = 1;
     for (const ev of evidence) {
       if (ev.likelihoodGivenNotHypothesis > 0) {
-        bayesFactor *= ev.likelihoodGivenHypothesis / ev.likelihoodGivenNotHypothesis;
+        bayesFactor *=
+          ev.likelihoodGivenHypothesis / ev.likelihoodGivenNotHypothesis;
       }
     }
 
@@ -402,7 +446,9 @@ export class BayesianHandler implements ModeHandler {
     // Quality of evidence (avoid extreme likelihood ratios)
     let qualityScore = 0;
     for (const ev of evidence) {
-      const ratio = ev.likelihoodGivenHypothesis / (ev.likelihoodGivenNotHypothesis || 0.01);
+      const ratio =
+        ev.likelihoodGivenHypothesis /
+        (ev.likelihoodGivenNotHypothesis || 0.01);
       // Penalize extremely confident evidence (might be overconfident)
       if (ratio > 100 || ratio < 0.01) {
         qualityScore += 0.05;
@@ -418,36 +464,33 @@ export class BayesianHandler implements ModeHandler {
   /**
    * Validate a probability value
    */
-  private validateProbability(
-    value: number,
-    field: string
-  ): ValidationResult {
+  private validateProbability(value: number, field: string): ValidationResult {
     const errors = [];
     const warnings = [];
 
-    if (typeof value !== 'number' || isNaN(value)) {
+    if (typeof value !== "number" || isNaN(value)) {
       errors.push(
         createValidationError(
           field,
           `${field} must be a valid number`,
-          'INVALID_PROBABILITY_TYPE'
-        )
+          "INVALID_PROBABILITY_TYPE",
+        ),
       );
     } else if (value < 0 || value > 1) {
       errors.push(
         createValidationError(
           field,
           `${field} (${value}) must be between 0 and 1`,
-          'PROBABILITY_OUT_OF_RANGE'
-        )
+          "PROBABILITY_OUT_OF_RANGE",
+        ),
       );
     } else if (value === 0 || value === 1) {
       warnings.push(
         createValidationWarning(
           field,
           `Extreme probability value (${value}) leaves no room for updating`,
-          'Consider using values slightly away from 0 and 1 (e.g., 0.01 or 0.99)'
-        )
+          "Consider using values slightly away from 0 and 1 (e.g., 0.01 or 0.99)",
+        ),
       );
     }
 
@@ -461,7 +504,10 @@ export class BayesianHandler implements ModeHandler {
   /**
    * Validate an evidence item
    */
-  private validateEvidence(evidence: BayesianEvidence, index: number): ValidationResult {
+  private validateEvidence(
+    evidence: BayesianEvidence,
+    index: number,
+  ): ValidationResult {
     const errors = [];
     const warnings = [];
     const prefix = `evidence[${index}]`;
@@ -470,30 +516,30 @@ export class BayesianHandler implements ModeHandler {
       warnings.push(
         createValidationWarning(
           prefix,
-          'Evidence item missing id or description',
-          'Add descriptive id and description for better tracking'
-        )
+          "Evidence item missing id or description",
+          "Add descriptive id and description for better tracking",
+        ),
       );
     }
 
     // Validate likelihood given hypothesis
     const pEH = evidence.likelihoodGivenHypothesis;
     if (pEH !== undefined) {
-      if (typeof pEH !== 'number' || isNaN(pEH)) {
+      if (typeof pEH !== "number" || isNaN(pEH)) {
         errors.push(
           createValidationError(
             `${prefix}.likelihoodGivenHypothesis`,
-            'Likelihood given hypothesis must be a valid number',
-            'INVALID_LIKELIHOOD_TYPE'
-          )
+            "Likelihood given hypothesis must be a valid number",
+            "INVALID_LIKELIHOOD_TYPE",
+          ),
         );
       } else if (pEH < 0 || pEH > 1) {
         errors.push(
           createValidationError(
             `${prefix}.likelihoodGivenHypothesis`,
             `Likelihood given hypothesis (${pEH}) must be between 0 and 1`,
-            'LIKELIHOOD_OUT_OF_RANGE'
-          )
+            "LIKELIHOOD_OUT_OF_RANGE",
+          ),
         );
       }
     }
@@ -501,21 +547,21 @@ export class BayesianHandler implements ModeHandler {
     // Validate likelihood given not hypothesis
     const pEnH = evidence.likelihoodGivenNotHypothesis;
     if (pEnH !== undefined) {
-      if (typeof pEnH !== 'number' || isNaN(pEnH)) {
+      if (typeof pEnH !== "number" || isNaN(pEnH)) {
         errors.push(
           createValidationError(
             `${prefix}.likelihoodGivenNotHypothesis`,
-            'Likelihood given not hypothesis must be a valid number',
-            'INVALID_LIKELIHOOD_TYPE'
-          )
+            "Likelihood given not hypothesis must be a valid number",
+            "INVALID_LIKELIHOOD_TYPE",
+          ),
         );
       } else if (pEnH < 0 || pEnH > 1) {
         errors.push(
           createValidationError(
             `${prefix}.likelihoodGivenNotHypothesis`,
             `Likelihood given not hypothesis (${pEnH}) must be between 0 and 1`,
-            'LIKELIHOOD_OUT_OF_RANGE'
-          )
+            "LIKELIHOOD_OUT_OF_RANGE",
+          ),
         );
       }
     }
@@ -526,8 +572,8 @@ export class BayesianHandler implements ModeHandler {
         createValidationWarning(
           prefix,
           `Evidence has low diagnostic value (P(E|H)=${pEH}, P(E|~H)=${pEnH})`,
-          'Evidence is more useful when likelihood ratios differ significantly'
-        )
+          "Evidence is more useful when likelihood ratios differ significantly",
+        ),
       );
     }
 
