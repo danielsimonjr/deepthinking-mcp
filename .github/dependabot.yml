@@ -20,6 +20,13 @@ updates:
       - "dependencies"
       - "automated"
     versioning-strategy: increase
+    ignore:
+      # TypeScript 7 is un-adoptable until the lint toolchain supports it:
+      # @typescript-eslint/eslint-plugin@8.63.0 (latest) declares
+      # `peer typescript: >=4.8.4 <6.1.0`, so `npm ci` fails with ERESOLVE.
+      # Remove this ignore once @typescript-eslint ships TS 7 support.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
