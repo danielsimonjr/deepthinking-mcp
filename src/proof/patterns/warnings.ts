@@ -14,7 +14,7 @@ export interface WarningPattern {
   category: WarningCategory;
   description: string;
   pattern: RegExp;
-  severity: 'info' | 'warning' | 'error' | 'critical';
+  severity: "info" | "warning" | "error" | "critical";
   suggestion: string;
   examples: string[];
 }
@@ -23,14 +23,14 @@ export interface WarningPattern {
  * Warning categories
  */
 export type WarningCategory =
-  | 'division_error'
-  | 'logical_fallacy'
-  | 'scope_error'
-  | 'infinity_error'
-  | 'assumption_error'
-  | 'quantifier_error'
-  | 'type_error'
-  | 'limit_error';
+  | "division_error"
+  | "logical_fallacy"
+  | "scope_error"
+  | "infinity_error"
+  | "assumption_error"
+  | "quantifier_error"
+  | "type_error"
+  | "limit_error";
 
 /**
  * Division by Hidden Zero
@@ -39,17 +39,16 @@ export type WarningCategory =
  * Often leads to proving false statements like 1 = 2.
  */
 export const DIVISION_BY_HIDDEN_ZERO: WarningPattern = {
-  id: 'division_by_hidden_zero',
-  name: 'Division by Hidden Zero',
-  category: 'division_error',
-  description: 'Division by an expression that could equal zero without explicit check',
-  pattern: /(?:divid(?:e|ing)|\/)\s*(?:by\s+)?(?:\(\s*)?([a-zA-Z](?:\s*[-+]\s*[a-zA-Z])?)(?:\s*\))?/i,
-  severity: 'error',
-  suggestion: 'Verify that the divisor is non-zero before dividing',
-  examples: [
-    'dividing by (a - b) when a = b',
-    'x/y where y could be 0',
-  ],
+  id: "division_by_hidden_zero",
+  name: "Division by Hidden Zero",
+  category: "division_error",
+  description:
+    "Division by an expression that could equal zero without explicit check",
+  pattern:
+    /(?:divid(?:e|ing)|\/)\s*(?:by\s+)?(?:\(\s*)?([a-zA-Z](?:\s*[-+]\s*[a-zA-Z])?)(?:\s*\))?/i,
+  severity: "error",
+  suggestion: "Verify that the divisor is non-zero before dividing",
+  examples: ["dividing by (a - b) when a = b", "x/y where y could be 0"],
 };
 
 /**
@@ -58,16 +57,17 @@ export const DIVISION_BY_HIDDEN_ZERO: WarningPattern = {
  * Using the conclusion as a premise in its own proof.
  */
 export const ASSUMING_CONCLUSION: WarningPattern = {
-  id: 'assuming_conclusion',
-  name: 'Assuming What Is to Be Proved',
-  category: 'logical_fallacy',
-  description: 'The conclusion appears as an assumption in the proof',
-  pattern: /(?:assume|suppose|let)\s+(?:that\s+)?(.{10,50}).*(?:therefore|thus|hence)\s+\1/is,
-  severity: 'critical',
-  suggestion: 'Derive the conclusion from independent premises',
+  id: "assuming_conclusion",
+  name: "Assuming What Is to Be Proved",
+  category: "logical_fallacy",
+  description: "The conclusion appears as an assumption in the proof",
+  pattern:
+    /(?:assume|suppose|let)\s+(?:that\s+)?(.{10,50}).*(?:therefore|thus|hence)\s+\1/is,
+  severity: "critical",
+  suggestion: "Derive the conclusion from independent premises",
   examples: [
-    'Assume P. ... Therefore P.',
-    'Suppose the result holds. ... Hence the result holds.',
+    "Assume P. ... Therefore P.",
+    "Suppose the result holds. ... Hence the result holds.",
   ],
 };
 
@@ -77,16 +77,16 @@ export const ASSUMING_CONCLUSION: WarningPattern = {
  * Invalid reasoning: "If P then Q. Q. Therefore P."
  */
 export const AFFIRMING_CONSEQUENT: WarningPattern = {
-  id: 'affirming_consequent',
-  name: 'Affirming the Consequent',
-  category: 'logical_fallacy',
+  id: "affirming_consequent",
+  name: "Affirming the Consequent",
+  category: "logical_fallacy",
   description: 'Invalid inference: concluding P from "P implies Q" and Q',
   pattern: /if\s+(.+?)\s+then\s+(.+?)[\.\,].*\2.*therefore\s+\1/is,
-  severity: 'error',
-  suggestion: 'This inference is invalid. P→Q and Q does not entail P.',
+  severity: "error",
+  suggestion: "This inference is invalid. P→Q and Q does not entail P.",
   examples: [
-    'If it rains, the ground is wet. The ground is wet. Therefore it rained.',
-    'If x > 0, then x² > 0. x² > 0. Therefore x > 0.',
+    "If it rains, the ground is wet. The ground is wet. Therefore it rained.",
+    "If x > 0, then x² > 0. x² > 0. Therefore x > 0.",
   ],
 };
 
@@ -96,15 +96,16 @@ export const AFFIRMING_CONSEQUENT: WarningPattern = {
  * Invalid reasoning: "If P then Q. Not P. Therefore not Q."
  */
 export const DENYING_ANTECEDENT: WarningPattern = {
-  id: 'denying_antecedent',
-  name: 'Denying the Antecedent',
-  category: 'logical_fallacy',
-  description: 'Invalid inference: concluding not-Q from "P implies Q" and not-P',
+  id: "denying_antecedent",
+  name: "Denying the Antecedent",
+  category: "logical_fallacy",
+  description:
+    'Invalid inference: concluding not-Q from "P implies Q" and not-P',
   pattern: /if\s+(.+?)\s+then\s+(.+?)[\.\,].*not\s+\1.*therefore\s+not\s+\2/is,
-  severity: 'error',
-  suggestion: 'This inference is invalid. P→Q and ¬P does not entail ¬Q.',
+  severity: "error",
+  suggestion: "This inference is invalid. P→Q and ¬P does not entail ¬Q.",
   examples: [
-    'If it rains, the ground is wet. It did not rain. Therefore the ground is not wet.',
+    "If it rains, the ground is wet. It did not rain. Therefore the ground is not wet.",
   ],
 };
 
@@ -114,15 +115,16 @@ export const DENYING_ANTECEDENT: WarningPattern = {
  * Generalizing from too few cases.
  */
 export const HASTY_GENERALIZATION: WarningPattern = {
-  id: 'hasty_generalization',
-  name: 'Hasty Generalization',
-  category: 'logical_fallacy',
-  description: 'Generalizing to all cases from only a few examples',
-  pattern: /(?:for\s+)?(?:n\s*=\s*)?[123](?:\s*(?:,|and)\s*[123])*\s*(?:,|\.)\s*(?:therefore|thus|hence|so)\s+(?:for\s+all|∀)/i,
-  severity: 'warning',
-  suggestion: 'Provide a general proof or use mathematical induction',
+  id: "hasty_generalization",
+  name: "Hasty Generalization",
+  category: "logical_fallacy",
+  description: "Generalizing to all cases from only a few examples",
+  pattern:
+    /(?:for\s+)?(?:n\s*=\s*)?[123](?:\s*(?:,|and)\s*[123])*\s*(?:,|\.)\s*(?:therefore|thus|hence|so)\s+(?:for\s+all|∀)/i,
+  severity: "warning",
+  suggestion: "Provide a general proof or use mathematical induction",
   examples: [
-    'For n = 1, 2, 3, the formula works. Therefore it works for all n.',
+    "For n = 1, 2, 3, the formula works. Therefore it works for all n.",
   ],
 };
 
@@ -132,13 +134,13 @@ export const HASTY_GENERALIZATION: WarningPattern = {
  * Using a term with different meanings in the same argument.
  */
 export const AMBIGUOUS_MIDDLE: WarningPattern = {
-  id: 'ambiguous_middle',
-  name: 'Ambiguous Middle Term',
-  category: 'logical_fallacy',
-  description: 'A term is used with different meanings in the same argument',
+  id: "ambiguous_middle",
+  name: "Ambiguous Middle Term",
+  category: "logical_fallacy",
+  description: "A term is used with different meanings in the same argument",
   pattern: /(\b\w{3,}\b).*\1.*\1/i, // Same word appearing 3+ times - needs manual review
-  severity: 'info',
-  suggestion: 'Ensure each term has a consistent meaning throughout the proof',
+  severity: "info",
+  suggestion: "Ensure each term has a consistent meaning throughout the proof",
   examples: [
     'Using "continuous" to mean both pointwise and uniform continuity.',
   ],
@@ -150,16 +152,14 @@ export const AMBIGUOUS_MIDDLE: WarningPattern = {
  * Cancelling terms incorrectly.
  */
 export const ILLEGAL_CANCELLATION: WarningPattern = {
-  id: 'illegal_cancellation',
-  name: 'Illegal Cancellation',
-  category: 'division_error',
-  description: 'Cancelling terms without verifying they are non-zero',
+  id: "illegal_cancellation",
+  name: "Illegal Cancellation",
+  category: "division_error",
+  description: "Cancelling terms without verifying they are non-zero",
   pattern: /cancel(?:l?ing|l?ed)?\s+(?:the\s+)?(?:common\s+)?(?:term|factor)/i,
-  severity: 'warning',
-  suggestion: 'Verify the cancelled term is non-zero',
-  examples: [
-    'Cancelling x from both sides when x = 0 is possible.',
-  ],
+  severity: "warning",
+  suggestion: "Verify the cancelled term is non-zero",
+  examples: ["Cancelling x from both sides when x = 0 is possible."],
 };
 
 /**
@@ -168,18 +168,14 @@ export const ILLEGAL_CANCELLATION: WarningPattern = {
  * Treating infinity as a regular number.
  */
 export const INFINITY_ARITHMETIC: WarningPattern = {
-  id: 'infinity_arithmetic',
-  name: 'Infinity Arithmetic Error',
-  category: 'infinity_error',
-  description: 'Performing undefined arithmetic operations with infinity',
+  id: "infinity_arithmetic",
+  name: "Infinity Arithmetic Error",
+  category: "infinity_error",
+  description: "Performing undefined arithmetic operations with infinity",
   pattern: /∞\s*[-+*/]\s*∞|∞\s*[*/]\s*0|0\s*[*/]\s*∞/,
-  severity: 'critical',
-  suggestion: 'Use proper limit analysis instead of infinity arithmetic',
-  examples: [
-    '∞ - ∞ = 0',
-    '∞ / ∞ = 1',
-    '0 × ∞',
-  ],
+  severity: "critical",
+  suggestion: "Use proper limit analysis instead of infinity arithmetic",
+  examples: ["∞ - ∞ = 0", "∞ / ∞ = 1", "0 × ∞"],
 };
 
 /**
@@ -188,15 +184,15 @@ export const INFINITY_ARITHMETIC: WarningPattern = {
  * Mixing up necessary and sufficient conditions.
  */
 export const NECESSARY_SUFFICIENT_CONFUSION: WarningPattern = {
-  id: 'necessary_sufficient_confusion',
-  name: 'Necessary/Sufficient Condition Confusion',
-  category: 'logical_fallacy',
-  description: 'Confusing necessary conditions with sufficient conditions',
+  id: "necessary_sufficient_confusion",
+  name: "Necessary/Sufficient Condition Confusion",
+  category: "logical_fallacy",
+  description: "Confusing necessary conditions with sufficient conditions",
   pattern: /(?:necessary|sufficient)\s+(?:and\s+)?(?:necessary|sufficient)/i,
-  severity: 'warning',
-  suggestion: 'Clarify whether the condition is necessary, sufficient, or both',
+  severity: "warning",
+  suggestion: "Clarify whether the condition is necessary, sufficient, or both",
   examples: [
-    'Being a square is sufficient for being a rectangle, but not necessary.',
+    "Being a square is sufficient for being a rectangle, but not necessary.",
   ],
 };
 
@@ -206,16 +202,14 @@ export const NECESSARY_SUFFICIENT_CONFUSION: WarningPattern = {
  * Using an existentially quantified variable as if it were universal.
  */
 export const EXISTENTIAL_INSTANTIATION_ERROR: WarningPattern = {
-  id: 'existential_instantiation_error',
-  name: 'Existential Instantiation Error',
-  category: 'quantifier_error',
-  description: 'Treating an existentially quantified variable as universal',
+  id: "existential_instantiation_error",
+  name: "Existential Instantiation Error",
+  category: "quantifier_error",
+  description: "Treating an existentially quantified variable as universal",
   pattern: /(?:there\s+exists?|∃)\s+(\w+).*(?:for\s+all|∀|any|every)\s+\1/is,
-  severity: 'error',
-  suggestion: 'The existential variable cannot be used universally',
-  examples: [
-    'There exists x such that P(x). For all x, Q(x).',
-  ],
+  severity: "error",
+  suggestion: "The existential variable cannot be used universally",
+  examples: ["There exists x such that P(x). For all x, Q(x)."],
 };
 
 /**
@@ -224,16 +218,15 @@ export const EXISTENTIAL_INSTANTIATION_ERROR: WarningPattern = {
  * Ignoring the positive root convention.
  */
 export const SQRT_SIGN_ERROR: WarningPattern = {
-  id: 'sqrt_sign_error',
-  name: 'Square Root Sign Error',
-  category: 'type_error',
-  description: 'Ignoring that √x denotes the principal (non-negative) square root',
+  id: "sqrt_sign_error",
+  name: "Square Root Sign Error",
+  category: "type_error",
+  description:
+    "Ignoring that √x denotes the principal (non-negative) square root",
   pattern: /√\s*\(?([^)]+)\)?.*=.*-/,
-  severity: 'warning',
-  suggestion: 'Remember that √x ≥ 0 by convention',
-  examples: [
-    '√4 = ±2 (incorrect: √4 = 2)',
-  ],
+  severity: "warning",
+  suggestion: "Remember that √x ≥ 0 by convention",
+  examples: ["√4 = ±2 (incorrect: √4 = 2)"],
 };
 
 /**
@@ -242,16 +235,15 @@ export const SQRT_SIGN_ERROR: WarningPattern = {
  * Incorrectly exchanging limits.
  */
 export const LIMIT_EXCHANGE_ERROR: WarningPattern = {
-  id: 'limit_exchange_error',
-  name: 'Limit Exchange Error',
-  category: 'limit_error',
-  description: 'Exchanging limits without justification',
+  id: "limit_exchange_error",
+  name: "Limit Exchange Error",
+  category: "limit_error",
+  description: "Exchanging limits without justification",
   pattern: /lim\s*lim|limit\s+(?:of\s+)?(?:the\s+)?limit/i,
-  severity: 'warning',
-  suggestion: 'Verify conditions for exchanging limits (uniform convergence, etc.)',
-  examples: [
-    'lim(n→∞) lim(m→∞) ≠ lim(m→∞) lim(n→∞) in general',
-  ],
+  severity: "warning",
+  suggestion:
+    "Verify conditions for exchanging limits (uniform convergence, etc.)",
+  examples: ["lim(n→∞) lim(m→∞) ≠ lim(m→∞) lim(n→∞) in general"],
 };
 
 /**
@@ -275,14 +267,18 @@ export const ALL_WARNING_PATTERNS: WarningPattern[] = [
 /**
  * Get patterns by category
  */
-export function getPatternsByCategory(category: WarningCategory): WarningPattern[] {
+export function getPatternsByCategory(
+  category: WarningCategory,
+): WarningPattern[] {
   return ALL_WARNING_PATTERNS.filter((p) => p.category === category);
 }
 
 /**
  * Get patterns by severity
  */
-export function getPatternsBySeverity(severity: WarningPattern['severity']): WarningPattern[] {
+export function getPatternsBySeverity(
+  severity: WarningPattern["severity"],
+): WarningPattern[] {
   return ALL_WARNING_PATTERNS.filter((p) => p.severity === severity);
 }
 
@@ -290,7 +286,7 @@ export function getPatternsBySeverity(severity: WarningPattern['severity']): War
  * Check a statement against all warning patterns
  */
 export function checkStatement(
-  statement: string
+  statement: string,
 ): { pattern: WarningPattern; match: RegExpMatchArray }[] {
   const warnings: { pattern: WarningPattern; match: RegExpMatchArray }[] = [];
 
@@ -308,9 +304,12 @@ export function checkStatement(
  * Check all statements in a proof
  */
 export function checkProof(
-  statements: string[]
+  statements: string[],
 ): Map<number, { pattern: WarningPattern; match: RegExpMatchArray }[]> {
-  const results = new Map<number, { pattern: WarningPattern; match: RegExpMatchArray }[]>();
+  const results = new Map<
+    number,
+    { pattern: WarningPattern; match: RegExpMatchArray }[]
+  >();
 
   for (let i = 0; i < statements.length; i++) {
     const warnings = checkStatement(statements[i]);

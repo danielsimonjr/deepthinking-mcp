@@ -6,7 +6,7 @@
  * Manages mode-specific validators with lazy instantiation
  */
 
-import type { ModeValidator } from './base.js';
+import type { ModeValidator } from "./base.js";
 
 /**
  * Validator configuration entry
@@ -21,37 +21,103 @@ interface ValidatorConfig {
  * Format: mode -> { module path, class name }
  */
 const VALIDATOR_REGISTRY: Record<string, ValidatorConfig> = {
-  sequential: { module: './modes/sequential.js', className: 'SequentialValidator' },
-  shannon: { module: './modes/shannon.js', className: 'ShannonValidator' },
-  mathematics: { module: './modes/mathematics.js', className: 'MathematicsValidator' },
-  physics: { module: './modes/physics.js', className: 'PhysicsValidator' },
-  hybrid: { module: './modes/hybrid.js', className: 'HybridValidator' },
-  engineering: { module: './modes/engineering.js', className: 'EngineeringValidator' }, // Phase 10 v7.1.0
-  computability: { module: './modes/computability.js', className: 'ComputabilityValidator' }, // Phase 11 v7.2.0
-  cryptanalytic: { module: './modes/cryptanalytic.js', className: 'CryptanalyticValidator' }, // Phase 11 v7.2.0
-  inductive: { module: './modes/inductive.js', className: 'InductiveValidator' },
-  deductive: { module: './modes/deductive.js', className: 'DeductiveValidator' },
-  abductive: { module: './modes/abductive.js', className: 'AbductiveValidator' },
-  causal: { module: './modes/causal.js', className: 'CausalValidator' },
-  bayesian: { module: './modes/bayesian.js', className: 'BayesianValidator' },
-  counterfactual: { module: './modes/counterfactual.js', className: 'CounterfactualValidator' },
-  analogical: { module: './modes/analogical.js', className: 'AnalogicalValidator' },
-  temporal: { module: './modes/temporal.js', className: 'TemporalValidator' },
-  gametheory: { module: './modes/gametheory.js', className: 'GameTheoryValidator' },
-  evidential: { module: './modes/evidential.js', className: 'EvidentialValidator' },
-  firstprinciples: { module: './modes/firstprinciples.js', className: 'FirstPrinciplesValidator' },
-  systemsthinking: { module: './modes/systemsthinking.js', className: 'SystemsThinkingValidator' },
-  scientificmethod: { module: './modes/scientificmethod.js', className: 'ScientificMethodValidator' },
-  optimization: { module: './modes/optimization.js', className: 'OptimizationValidator' },
-  formallogic: { module: './modes/formallogic.js', className: 'FormalLogicValidator' },
-  metareasoning: { module: './modes/metareasoning.js', className: 'MetaReasoningValidator' },
+  sequential: {
+    module: "./modes/sequential.js",
+    className: "SequentialValidator",
+  },
+  shannon: { module: "./modes/shannon.js", className: "ShannonValidator" },
+  mathematics: {
+    module: "./modes/mathematics.js",
+    className: "MathematicsValidator",
+  },
+  physics: { module: "./modes/physics.js", className: "PhysicsValidator" },
+  hybrid: { module: "./modes/hybrid.js", className: "HybridValidator" },
+  engineering: {
+    module: "./modes/engineering.js",
+    className: "EngineeringValidator",
+  }, // Phase 10 v7.1.0
+  computability: {
+    module: "./modes/computability.js",
+    className: "ComputabilityValidator",
+  }, // Phase 11 v7.2.0
+  cryptanalytic: {
+    module: "./modes/cryptanalytic.js",
+    className: "CryptanalyticValidator",
+  }, // Phase 11 v7.2.0
+  inductive: {
+    module: "./modes/inductive.js",
+    className: "InductiveValidator",
+  },
+  deductive: {
+    module: "./modes/deductive.js",
+    className: "DeductiveValidator",
+  },
+  abductive: {
+    module: "./modes/abductive.js",
+    className: "AbductiveValidator",
+  },
+  causal: { module: "./modes/causal.js", className: "CausalValidator" },
+  bayesian: { module: "./modes/bayesian.js", className: "BayesianValidator" },
+  counterfactual: {
+    module: "./modes/counterfactual.js",
+    className: "CounterfactualValidator",
+  },
+  analogical: {
+    module: "./modes/analogical.js",
+    className: "AnalogicalValidator",
+  },
+  temporal: { module: "./modes/temporal.js", className: "TemporalValidator" },
+  gametheory: {
+    module: "./modes/gametheory.js",
+    className: "GameTheoryValidator",
+  },
+  evidential: {
+    module: "./modes/evidential.js",
+    className: "EvidentialValidator",
+  },
+  firstprinciples: {
+    module: "./modes/firstprinciples.js",
+    className: "FirstPrinciplesValidator",
+  },
+  systemsthinking: {
+    module: "./modes/systemsthinking.js",
+    className: "SystemsThinkingValidator",
+  },
+  scientificmethod: {
+    module: "./modes/scientificmethod.js",
+    className: "ScientificMethodValidator",
+  },
+  optimization: {
+    module: "./modes/optimization.js",
+    className: "OptimizationValidator",
+  },
+  formallogic: {
+    module: "./modes/formallogic.js",
+    className: "FormalLogicValidator",
+  },
+  metareasoning: {
+    module: "./modes/metareasoning.js",
+    className: "MetaReasoningValidator",
+  },
   // Phase 14: Academic and algorithmic validators (cherry-picked from PR #166)
-  algorithmic: { module: './modes/algorithmic.js', className: 'AlgorithmicValidator' },
-  synthesis: { module: './modes/synthesis.js', className: 'SynthesisValidator' },
-  argumentation: { module: './modes/argumentation.js', className: 'ArgumentationValidator' },
-  critique: { module: './modes/critique.js', className: 'CritiqueValidator' },
-  analysis: { module: './modes/analysis.js', className: 'AnalysisValidator' },
-  historical: { module: './modes/historical.js', className: 'HistoricalValidator' }, // v9.1.0
+  algorithmic: {
+    module: "./modes/algorithmic.js",
+    className: "AlgorithmicValidator",
+  },
+  synthesis: {
+    module: "./modes/synthesis.js",
+    className: "SynthesisValidator",
+  },
+  argumentation: {
+    module: "./modes/argumentation.js",
+    className: "ArgumentationValidator",
+  },
+  critique: { module: "./modes/critique.js", className: "CritiqueValidator" },
+  analysis: { module: "./modes/analysis.js", className: "AnalysisValidator" },
+  historical: {
+    module: "./modes/historical.js",
+    className: "HistoricalValidator",
+  }, // v9.1.0
 };
 
 /**
@@ -60,7 +126,8 @@ const VALIDATOR_REGISTRY: Record<string, ValidatorConfig> = {
  */
 class ValidatorRegistry {
   private validators: Map<string, ModeValidator> = new Map();
-  private loadPromises: Map<string, Promise<ModeValidator | undefined>> = new Map();
+  private loadPromises: Map<string, Promise<ModeValidator | undefined>> =
+    new Map();
 
   /**
    * Register a custom validator (for testing or extensions)
@@ -106,7 +173,9 @@ class ValidatorRegistry {
   /**
    * Load and instantiate a validator
    */
-  private async loadValidator(mode: string): Promise<ModeValidator | undefined> {
+  private async loadValidator(
+    mode: string,
+  ): Promise<ModeValidator | undefined> {
     try {
       const config = VALIDATOR_REGISTRY[mode];
 
@@ -186,14 +255,18 @@ export const validatorRegistry = new ValidatorRegistry();
 /**
  * Factory function to get validator for a mode (async)
  */
-export async function getValidatorForMode(mode: string): Promise<ModeValidator | undefined> {
+export async function getValidatorForMode(
+  mode: string,
+): Promise<ModeValidator | undefined> {
   return validatorRegistry.getAsync(mode);
 }
 
 /**
  * Synchronous factory - returns cached validator only
  */
-export function getValidatorForModeSync(mode: string): ModeValidator | undefined {
+export function getValidatorForModeSync(
+  mode: string,
+): ModeValidator | undefined {
   return validatorRegistry.get(mode);
 }
 

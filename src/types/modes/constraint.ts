@@ -3,7 +3,7 @@
  * Phase 10 Sprint 3 (v8.4.0) - CSP formulation, constraint propagation, search
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Constraint thought extends base thought with CSP structures
@@ -11,16 +11,16 @@ import { BaseThought, ThinkingMode } from '../core.js';
 export interface ConstraintThought extends BaseThought {
   mode: ThinkingMode.CONSTRAINT;
   thoughtType:
-    | 'problem_formulation'
-    | 'variable_definition'
-    | 'constraint_definition'
-    | 'domain_reduction'
-    | 'arc_consistency'
-    | 'propagation'
-    | 'solution_search'
-    | 'backtracking'
-    | 'feasibility_check'
-    | 'consistency_check';
+    | "problem_formulation"
+    | "variable_definition"
+    | "constraint_definition"
+    | "domain_reduction"
+    | "arc_consistency"
+    | "propagation"
+    | "solution_search"
+    | "backtracking"
+    | "feasibility_check"
+    | "consistency_check";
 
   /** Variables in the CSP */
   variables: CSPVariable[];
@@ -56,7 +56,7 @@ export interface ConstraintThought extends BaseThought {
   consistencyLevel?: ConsistencyLevel;
 
   /** Solution status */
-  solutionStatus?: 'searching' | 'found' | 'infeasible' | 'timeout';
+  solutionStatus?: "searching" | "found" | "infeasible" | "timeout";
 
   /** Number of solutions found */
   solutionCount?: number;
@@ -90,7 +90,7 @@ export interface CSPConstraint {
   expression: string;
   isSatisfied?: boolean;
   satisfied?: boolean;
-  priority?: 'required' | 'soft' | 'preference';
+  priority?: "required" | "soft" | "preference";
   weight?: number;
 }
 
@@ -98,13 +98,7 @@ export interface CSPConstraint {
  * Constraint types
  */
 export type ConstraintType =
-  | 'unary'
-  | 'binary'
-  | 'n_ary'
-  | 'global'
-  | 'alldifferent'
-  | 'sum'
-  | 'element';
+  "unary" | "binary" | "n_ary" | "global" | "alldifferent" | "sum" | "element";
 
 /**
  * An arc in the constraint graph
@@ -121,31 +115,31 @@ export interface Arc {
  * Propagation methods
  */
 export type PropagationMethod =
-  | 'none'
-  | 'forward_checking'
-  | 'arc_consistency'
-  | 'path_consistency'
-  | 'generalized_arc_consistency';
+  | "none"
+  | "forward_checking"
+  | "arc_consistency"
+  | "path_consistency"
+  | "generalized_arc_consistency";
 
 /**
  * Search strategies
  */
 export type SearchStrategy =
-  | 'backtracking'
-  | 'backjumping'
-  | 'conflict_directed'
-  | 'dynamic_backtracking'
-  | 'local_search';
+  | "backtracking"
+  | "backjumping"
+  | "conflict_directed"
+  | "dynamic_backtracking"
+  | "local_search";
 
 /**
  * Consistency levels
  */
 export type ConsistencyLevel =
-  | 'node_consistent'
-  | 'arc_consistent'
-  | 'path_consistent'
-  | 'k_consistent'
-  | 'globally_consistent';
+  | "node_consistent"
+  | "arc_consistent"
+  | "path_consistent"
+  | "k_consistent"
+  | "globally_consistent";
 
 /**
  * Assignment history entry
@@ -171,6 +165,8 @@ export interface Assignment {
 /**
  * Type guard for Constraint thoughts
  */
-export function isConstraintThought(thought: BaseThought): thought is ConstraintThought {
+export function isConstraintThought(
+  thought: BaseThought,
+): thought is ConstraintThought {
   return thought.mode === ThinkingMode.CONSTRAINT;
 }

@@ -6,7 +6,7 @@
  * Import these shared components instead of redefining.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================
 // NUMERIC SCHEMAS
@@ -31,38 +31,38 @@ export const PositiveIntSchema = z.number().int().min(1);
  * Three-level scale (low/medium/high)
  * Used for: complexity, uncertainty, priority
  */
-export const LevelEnum = z.enum(['low', 'medium', 'high']);
+export const LevelEnum = z.enum(["low", "medium", "high"]);
 
 /**
  * Impact assessment
  */
-export const ImpactEnum = z.enum(['positive', 'negative', 'neutral']);
+export const ImpactEnum = z.enum(["positive", "negative", "neutral"]);
 
 /**
  * Export formats supported by DeepThinking MCP
  */
 export const ExportFormatEnum = z.enum([
-  'markdown',
-  'latex',
-  'json',
-  'html',
-  'jupyter',
-  'mermaid',
-  'dot',
-  'ascii',
+  "markdown",
+  "latex",
+  "json",
+  "html",
+  "jupyter",
+  "mermaid",
+  "dot",
+  "ascii",
 ]);
 
 /**
  * Session actions
  */
 export const SessionActionEnum = z.enum([
-  'summarize',
-  'export',
-  'export_all',
-  'get_session',
-  'switch_mode',
-  'recommend_mode',
-  'delete_session',
+  "summarize",
+  "export",
+  "export_all",
+  "get_session",
+  "switch_mode",
+  "recommend_mode",
+  "delete_session",
 ]);
 
 /**
@@ -70,85 +70,89 @@ export const SessionActionEnum = z.enum([
  * Defines pre-configured export bundles for common use cases
  */
 export const ExportProfileEnum = z.enum([
-  'academic',
-  'presentation',
-  'documentation',
-  'archive',
-  'minimal',
+  "academic",
+  "presentation",
+  "documentation",
+  "archive",
+  "minimal",
 ]);
 
 /**
  * Proof strategy types (mathematics mode)
  */
 export const ProofTypeEnum = z.enum([
-  'direct',
-  'contradiction',
-  'induction',
-  'construction',
-  'contrapositive',
+  "direct",
+  "contradiction",
+  "induction",
+  "construction",
+  "contrapositive",
 ]);
 
 /**
  * Time units
  */
 export const TimeUnitEnum = z.enum([
-  'milliseconds',
-  'seconds',
-  'minutes',
-  'hours',
-  'days',
-  'months',
-  'years',
+  "milliseconds",
+  "seconds",
+  "minutes",
+  "hours",
+  "days",
+  "months",
+  "years",
 ]);
 
 /**
  * Temporal constraint types (Allen's interval algebra)
  */
 export const TemporalConstraintEnum = z.enum([
-  'before',
-  'after',
-  'during',
-  'overlaps',
-  'meets',
-  'starts',
-  'finishes',
-  'equals',
+  "before",
+  "after",
+  "during",
+  "overlaps",
+  "meets",
+  "starts",
+  "finishes",
+  "equals",
 ]);
 
 /**
  * Temporal relation types
  */
 export const TemporalRelationEnum = z.enum([
-  'before',
-  'after',
-  'during',
-  'overlaps',
-  'meets',
-  'starts',
-  'finishes',
-  'equals',
-  'causes',
+  "before",
+  "after",
+  "during",
+  "overlaps",
+  "meets",
+  "starts",
+  "finishes",
+  "equals",
+  "causes",
 ]);
 
 /**
  * Event types
  */
-export const EventTypeEnum = z.enum(['instant', 'interval']);
+export const EventTypeEnum = z.enum(["instant", "interval"]);
 
 /**
  * Tensor transformation types
  */
-export const TransformationEnum = z.enum(['covariant', 'contravariant', 'mixed']);
+export const TransformationEnum = z.enum([
+  "covariant",
+  "contravariant",
+  "mixed",
+]);
 
 /**
  * Shannon methodology stages
  */
 export const ShannonStageEnum = z.enum([
-  'problem_definition',
-  'constraints',
-  'model',
-  'proof',
-  'implementation',
+  "problem_definition",
+  "constraints",
+  "model",
+  "proof",
+  "implementation",
 ]);
 
 // ============================================================

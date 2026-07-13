@@ -5,20 +5,26 @@
  * Validates reasoning about reasoning - strategy monitoring, evaluation, and recommendations
  */
 
-import type { MetaReasoningThought, ValidationIssue } from '../../../types/index.js';
-import type { ValidationContext } from '../../validator.js';
-import type { ModeValidator } from '../base.js';
-import { validateCommon } from '../validation-utils.js';
+import type {
+  MetaReasoningThought,
+  ValidationIssue,
+} from "../../../types/index.js";
+import type { ValidationContext } from "../../validator.js";
+import type { ModeValidator } from "../base.js";
+import { validateCommon } from "../validation-utils.js";
 
 /**
  * Validator for meta-reasoning mode
  */
 export class MetaReasoningValidator implements ModeValidator<MetaReasoningThought> {
   getMode(): string {
-    return 'metareasoning';
+    return "metareasoning";
   }
 
-  validate(thought: MetaReasoningThought, _context: ValidationContext): ValidationIssue[] {
+  validate(
+    thought: MetaReasoningThought,
+    _context: ValidationContext,
+  ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation
@@ -50,86 +56,90 @@ export class MetaReasoningValidator implements ModeValidator<MetaReasoningThough
 
   private validateCurrentStrategy(
     thought: MetaReasoningThought,
-    issues: ValidationIssue[]
+    issues: ValidationIssue[],
   ): void {
     const { currentStrategy } = thought;
 
     if (!currentStrategy) {
       issues.push({
-        severity: 'error',
+        severity: "error",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Current strategy is required for meta-reasoning',
-        suggestion: 'Provide details about the current reasoning strategy being used',
-        category: 'structural',
+        description: "Current strategy is required for meta-reasoning",
+        suggestion:
+          "Provide details about the current reasoning strategy being used",
+        category: "structural",
       });
       return;
     }
 
-    if (!currentStrategy.approach || currentStrategy.approach.trim().length === 0) {
+    if (
+      !currentStrategy.approach ||
+      currentStrategy.approach.trim().length === 0
+    ) {
       issues.push({
-        severity: 'error',
+        severity: "error",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Current strategy must describe the approach being used',
-        suggestion: 'Describe what reasoning strategy is currently employed',
-        category: 'structural',
+        description: "Current strategy must describe the approach being used",
+        suggestion: "Describe what reasoning strategy is currently employed",
+        category: "structural",
       });
     }
 
     if (currentStrategy.thoughtsSpent < 0) {
       issues.push({
-        severity: 'error',
+        severity: "error",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Thoughts spent cannot be negative',
-        suggestion: 'Provide valid count of thoughts used for current strategy',
-        category: 'structural',
+        description: "Thoughts spent cannot be negative",
+        suggestion: "Provide valid count of thoughts used for current strategy",
+        category: "structural",
       });
     }
   }
 
   private validateStrategyEvaluation(
     thought: MetaReasoningThought,
-    issues: ValidationIssue[]
+    issues: ValidationIssue[],
   ): void {
     const { strategyEvaluation } = thought;
 
     if (!strategyEvaluation) {
       issues.push({
-        severity: 'error',
+        severity: "error",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Strategy evaluation is required for meta-reasoning',
-        suggestion: 'Provide assessment of current strategy effectiveness',
-        category: 'structural',
+        description: "Strategy evaluation is required for meta-reasoning",
+        suggestion: "Provide assessment of current strategy effectiveness",
+        category: "structural",
       });
       return;
     }
 
     // Validate metric ranges (all should be 0-1)
     const metrics = [
-      { name: 'effectiveness', value: strategyEvaluation.effectiveness },
-      { name: 'efficiency', value: strategyEvaluation.efficiency },
-      { name: 'confidence', value: strategyEvaluation.confidence },
-      { name: 'qualityScore', value: strategyEvaluation.qualityScore },
+      { name: "effectiveness", value: strategyEvaluation.effectiveness },
+      { name: "efficiency", value: strategyEvaluation.efficiency },
+      { name: "confidence", value: strategyEvaluation.confidence },
+      { name: "qualityScore", value: strategyEvaluation.qualityScore },
     ];
 
     for (const metric of metrics) {
       if (metric.value < 0 || metric.value > 1) {
         issues.push({
-          severity: 'error',
+          severity: "error",
           thoughtNumber: thought.thoughtNumber,
           description: `Invalid ${metric.name}: ${metric.value}`,
           suggestion: `${metric.name} must be between 0 and 1`,
-          category: 'structural',
+          category: "structural",
         });
       }
     }
 
     if (strategyEvaluation.progressRate < 0) {
       issues.push({
-        severity: 'error',
+        severity: "error",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Progress rate cannot be negative',
-        suggestion: 'Provide valid progress rate (insights per thought)',
-        category: 'structural',
+        description: "Progress rate cannot be negative",
+        suggestion: "Provide valid progress rate (insights per thought)",
+        category: "structural",
       });
     }
 
@@ -140,28 +150,30 @@ export class MetaReasoningValidator implements ModeValidator<MetaReasoningThough
       strategyEvaluation.effectiveness > 0.8
     ) {
       issues.push({
-        severity: 'warning',
+        severity: "warning",
         thoughtNumber: thought.thoughtNumber,
-        description: 'High effectiveness rating despite identified issues',
-        suggestion: 'Consider whether effectiveness rating accounts for all identified problems',
-        category: 'logical',
+        description: "High effectiveness rating despite identified issues",
+        suggestion:
+          "Consider whether effectiveness rating accounts for all identified problems",
+        category: "logical",
       });
     }
   }
 
   private validateAlternativeStrategies(
     thought: MetaReasoningThought,
-    issues: ValidationIssue[]
+    issues: ValidationIssue[],
   ): void {
     const { alternativeStrategies } = thought;
 
     if (!alternativeStrategies || alternativeStrategies.length === 0) {
       issues.push({
-        severity: 'warning',
+        severity: "warning",
         thoughtNumber: thought.thoughtNumber,
-        description: 'No alternative strategies identified',
-        suggestion: 'Consider identifying alternative approaches even if current strategy is working',
-        category: 'structural',
+        description: "No alternative strategies identified",
+        suggestion:
+          "Consider identifying alternative approaches even if current strategy is working",
+        category: "structural",
       });
       return;
     }
@@ -169,21 +181,21 @@ export class MetaReasoningValidator implements ModeValidator<MetaReasoningThough
     for (const alt of alternativeStrategies) {
       if (alt.switchingCost < 0 || alt.switchingCost > 1) {
         issues.push({
-          severity: 'error',
+          severity: "error",
           thoughtNumber: thought.thoughtNumber,
           description: `Invalid switching cost: ${alt.switchingCost}`,
-          suggestion: 'Switching cost must be between 0 and 1',
-          category: 'structural',
+          suggestion: "Switching cost must be between 0 and 1",
+          category: "structural",
         });
       }
 
       if (alt.recommendationScore < 0 || alt.recommendationScore > 1) {
         issues.push({
-          severity: 'error',
+          severity: "error",
           thoughtNumber: thought.thoughtNumber,
           description: `Invalid recommendation score: ${alt.recommendationScore}`,
-          suggestion: 'Recommendation score must be between 0 and 1',
-          category: 'structural',
+          suggestion: "Recommendation score must be between 0 and 1",
+          category: "structural",
         });
       }
     }
@@ -191,135 +203,139 @@ export class MetaReasoningValidator implements ModeValidator<MetaReasoningThough
 
   private validateRecommendation(
     thought: MetaReasoningThought,
-    issues: ValidationIssue[]
+    issues: ValidationIssue[],
   ): void {
     const { recommendation } = thought;
 
     if (!recommendation) {
       issues.push({
-        severity: 'error',
+        severity: "error",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Strategy recommendation is required',
-        suggestion: 'Provide actionable recommendation (CONTINUE, SWITCH, REFINE, or COMBINE)',
-        category: 'structural',
+        description: "Strategy recommendation is required",
+        suggestion:
+          "Provide actionable recommendation (CONTINUE, SWITCH, REFINE, or COMBINE)",
+        category: "structural",
       });
       return;
     }
 
-    const validActions = ['CONTINUE', 'SWITCH', 'REFINE', 'COMBINE'];
+    const validActions = ["CONTINUE", "SWITCH", "REFINE", "COMBINE"];
     if (!validActions.includes(recommendation.action)) {
       issues.push({
-        severity: 'error',
+        severity: "error",
         thoughtNumber: thought.thoughtNumber,
         description: `Invalid recommendation action: ${recommendation.action}`,
-        suggestion: 'Action must be one of: CONTINUE, SWITCH, REFINE, COMBINE',
-        category: 'structural',
+        suggestion: "Action must be one of: CONTINUE, SWITCH, REFINE, COMBINE",
+        category: "structural",
       });
     }
 
-    if (recommendation.action === 'SWITCH' && !recommendation.targetMode) {
+    if (recommendation.action === "SWITCH" && !recommendation.targetMode) {
       issues.push({
-        severity: 'error',
+        severity: "error",
         thoughtNumber: thought.thoughtNumber,
-        description: 'SWITCH action requires targetMode',
-        suggestion: 'Specify which mode to switch to',
-        category: 'structural',
+        description: "SWITCH action requires targetMode",
+        suggestion: "Specify which mode to switch to",
+        category: "structural",
       });
     }
 
     if (recommendation.confidence < 0 || recommendation.confidence > 1) {
       issues.push({
-        severity: 'error',
+        severity: "error",
         thoughtNumber: thought.thoughtNumber,
         description: `Invalid recommendation confidence: ${recommendation.confidence}`,
-        suggestion: 'Confidence must be between 0 and 1',
-        category: 'structural',
+        suggestion: "Confidence must be between 0 and 1",
+        category: "structural",
       });
     }
 
-    if (!recommendation.justification || recommendation.justification.trim().length === 0) {
+    if (
+      !recommendation.justification ||
+      recommendation.justification.trim().length === 0
+    ) {
       issues.push({
-        severity: 'warning',
+        severity: "warning",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Recommendation lacks justification',
-        suggestion: 'Provide reasoning for the recommended action',
-        category: 'structural',
+        description: "Recommendation lacks justification",
+        suggestion: "Provide reasoning for the recommended action",
+        category: "structural",
       });
     }
   }
 
   private validateResourceAllocation(
     thought: MetaReasoningThought,
-    issues: ValidationIssue[]
+    issues: ValidationIssue[],
   ): void {
     const { resourceAllocation } = thought;
 
     if (!resourceAllocation) {
       issues.push({
-        severity: 'warning',
+        severity: "warning",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Resource allocation assessment missing',
-        suggestion: 'Consider adding resource allocation guidance',
-        category: 'structural',
+        description: "Resource allocation assessment missing",
+        suggestion: "Consider adding resource allocation guidance",
+        category: "structural",
       });
       return;
     }
 
     if (resourceAllocation.timeSpent < 0) {
       issues.push({
-        severity: 'error',
+        severity: "error",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Time spent cannot be negative',
-        suggestion: 'Provide valid time spent in milliseconds',
-        category: 'structural',
+        description: "Time spent cannot be negative",
+        suggestion: "Provide valid time spent in milliseconds",
+        category: "structural",
       });
     }
 
     if (resourceAllocation.thoughtsRemaining < 0) {
       issues.push({
-        severity: 'warning',
+        severity: "warning",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Thoughts remaining estimate is negative',
-        suggestion: 'Provide reasonable estimate of thoughts remaining',
-        category: 'logical',
+        description: "Thoughts remaining estimate is negative",
+        suggestion: "Provide reasonable estimate of thoughts remaining",
+        category: "logical",
       });
     }
   }
 
   private validateQualityMetrics(
     thought: MetaReasoningThought,
-    issues: ValidationIssue[]
+    issues: ValidationIssue[],
   ): void {
     const { qualityMetrics } = thought;
 
     if (!qualityMetrics) {
       issues.push({
-        severity: 'warning',
+        severity: "warning",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Quality metrics missing',
-        suggestion: 'Consider assessing reasoning quality metrics',
-        category: 'structural',
+        description: "Quality metrics missing",
+        suggestion: "Consider assessing reasoning quality metrics",
+        category: "structural",
       });
       return;
     }
 
     const metrics = [
-      { name: 'logicalConsistency', value: qualityMetrics.logicalConsistency },
-      { name: 'evidenceQuality', value: qualityMetrics.evidenceQuality },
-      { name: 'completeness', value: qualityMetrics.completeness },
-      { name: 'originality', value: qualityMetrics.originality },
-      { name: 'clarity', value: qualityMetrics.clarity },
-      { name: 'overallQuality', value: qualityMetrics.overallQuality },
+      { name: "logicalConsistency", value: qualityMetrics.logicalConsistency },
+      { name: "evidenceQuality", value: qualityMetrics.evidenceQuality },
+      { name: "completeness", value: qualityMetrics.completeness },
+      { name: "originality", value: qualityMetrics.originality },
+      { name: "clarity", value: qualityMetrics.clarity },
+      { name: "overallQuality", value: qualityMetrics.overallQuality },
     ];
 
     for (const metric of metrics) {
       if (metric.value < 0 || metric.value > 1) {
         issues.push({
-          severity: 'error',
+          severity: "error",
           thoughtNumber: thought.thoughtNumber,
           description: `Invalid quality metric ${metric.name}: ${metric.value}`,
           suggestion: `${metric.name} must be between 0 and 1`,
-          category: 'structural',
+          category: "structural",
         });
       }
     }
@@ -335,62 +351,65 @@ export class MetaReasoningValidator implements ModeValidator<MetaReasoningThough
 
     if (Math.abs(qualityMetrics.overallQuality - componentAvg) > 0.3) {
       issues.push({
-        severity: 'info',
+        severity: "info",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Overall quality differs significantly from component average',
-        suggestion: 'Ensure overall quality reflects all component metrics appropriately',
-        category: 'logical',
+        description:
+          "Overall quality differs significantly from component average",
+        suggestion:
+          "Ensure overall quality reflects all component metrics appropriately",
+        category: "logical",
       });
     }
   }
 
   private validateSessionContext(
     thought: MetaReasoningThought,
-    issues: ValidationIssue[]
+    issues: ValidationIssue[],
   ): void {
     const { sessionContext } = thought;
 
     if (!sessionContext) {
       issues.push({
-        severity: 'error',
+        severity: "error",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Session context is required',
-        suggestion: 'Provide session context for meta-reasoning',
-        category: 'structural',
+        description: "Session context is required",
+        suggestion: "Provide session context for meta-reasoning",
+        category: "structural",
       });
       return;
     }
 
     if (sessionContext.totalThoughts < 0) {
       issues.push({
-        severity: 'error',
+        severity: "error",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Total thoughts cannot be negative',
-        suggestion: 'Provide valid count of total thoughts in session',
-        category: 'structural',
+        description: "Total thoughts cannot be negative",
+        suggestion: "Provide valid count of total thoughts in session",
+        category: "structural",
       });
     }
 
     if (sessionContext.modeSwitches < 0) {
       issues.push({
-        severity: 'error',
+        severity: "error",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Mode switches cannot be negative',
-        suggestion: 'Provide valid count of mode switches',
-        category: 'structural',
+        description: "Mode switches cannot be negative",
+        suggestion: "Provide valid count of mode switches",
+        category: "structural",
       });
     }
 
     if (
       sessionContext.historicalEffectiveness !== undefined &&
-      (sessionContext.historicalEffectiveness < 0 || sessionContext.historicalEffectiveness > 1)
+      (sessionContext.historicalEffectiveness < 0 ||
+        sessionContext.historicalEffectiveness > 1)
     ) {
       issues.push({
-        severity: 'error',
+        severity: "error",
         thoughtNumber: thought.thoughtNumber,
-        description: 'Historical effectiveness must be between 0 and 1',
-        suggestion: 'Provide valid historical effectiveness score',
-        category: 'structural',
+        description: "Historical effectiveness must be between 0 and 1",
+        suggestion: "Provide valid historical effectiveness score",
+        category: "structural",
       });
     }
   }

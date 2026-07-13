@@ -28,9 +28,9 @@ export const MAX_LENGTHS = {
 export function sanitizeString(
   input: string,
   maxLength: number = MAX_LENGTHS.STRING_FIELD,
-  fieldName: string = 'input'
+  fieldName: string = "input",
 ): string {
-  if (typeof input !== 'string') {
+  if (typeof input !== "string") {
     throw new Error(`${fieldName} must be a string`);
   }
 
@@ -43,11 +43,13 @@ export function sanitizeString(
   }
 
   if (trimmed.length > maxLength) {
-    throw new Error(`${fieldName} exceeds maximum length of ${maxLength} characters`);
+    throw new Error(
+      `${fieldName} exceeds maximum length of ${maxLength} characters`,
+    );
   }
 
   // Check for null bytes (potential injection)
-  if (trimmed.includes('\0')) {
+  if (trimmed.includes("\0")) {
     throw new Error(`${fieldName} contains invalid null bytes`);
   }
 
@@ -60,9 +62,9 @@ export function sanitizeString(
 export function sanitizeOptionalString(
   input: string | undefined,
   maxLength: number = MAX_LENGTHS.STRING_FIELD,
-  fieldName: string = 'input'
+  fieldName: string = "input",
 ): string | undefined {
-  if (input === undefined || input === null || input === '') {
+  if (input === undefined || input === null || input === "") {
     return undefined;
   }
   return sanitizeString(input, maxLength, fieldName);
@@ -72,7 +74,8 @@ export function sanitizeOptionalString(
  * Validate a session ID (should be a valid UUID v4)
  */
 export function validateSessionId(sessionId: string): string {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
   if (!uuidRegex.test(sessionId)) {
     throw new Error(`Invalid session ID format: ${sessionId}`);
@@ -88,9 +91,9 @@ export function sanitizeNumber(
   input: number,
   min: number = -Infinity,
   max: number = Infinity,
-  fieldName: string = 'number'
+  fieldName: string = "number",
 ): number {
-  if (typeof input !== 'number' || isNaN(input)) {
+  if (typeof input !== "number" || isNaN(input)) {
     throw new Error(`${fieldName} must be a valid number`);
   }
 
@@ -112,7 +115,7 @@ export function sanitizeStringArray(
   input: string[],
   maxLength: number = MAX_LENGTHS.STRING_FIELD,
   maxItems: number = 1000,
-  fieldName: string = 'array'
+  fieldName: string = "array",
 ): string[] {
   if (!Array.isArray(input)) {
     throw new Error(`${fieldName} must be an array`);
@@ -123,7 +126,7 @@ export function sanitizeStringArray(
   }
 
   return input.map((item, index) =>
-    sanitizeString(item, maxLength, `${fieldName}[${index}]`)
+    sanitizeString(item, maxLength, `${fieldName}[${index}]`),
   );
 }
 
@@ -131,7 +134,11 @@ export function sanitizeStringArray(
  * Sanitize thought content (allows larger size)
  */
 export function sanitizeThoughtContent(content: string): string {
-  return sanitizeString(content, MAX_LENGTHS.THOUGHT_CONTENT, 'thought content');
+  return sanitizeString(
+    content,
+    MAX_LENGTHS.THOUGHT_CONTENT,
+    "thought content",
+  );
 }
 
 /**
@@ -139,23 +146,23 @@ export function sanitizeThoughtContent(content: string): string {
  */
 export function sanitizeTitle(title: string | undefined): string {
   if (!title) {
-    return 'Untitled Session';
+    return "Untitled Session";
   }
-  return sanitizeString(title, MAX_LENGTHS.TITLE, 'title');
+  return sanitizeString(title, MAX_LENGTHS.TITLE, "title");
 }
 
 /**
  * Sanitize domain name
  */
 export function sanitizeDomain(domain: string | undefined): string | undefined {
-  return sanitizeOptionalString(domain, MAX_LENGTHS.DOMAIN, 'domain');
+  return sanitizeOptionalString(domain, MAX_LENGTHS.DOMAIN, "domain");
 }
 
 /**
  * Sanitize author name
  */
 export function sanitizeAuthor(author: string | undefined): string | undefined {
-  return sanitizeOptionalString(author, MAX_LENGTHS.AUTHOR, 'author');
+  return sanitizeOptionalString(author, MAX_LENGTHS.AUTHOR, "author");
 }
 
 /**
@@ -165,12 +172,12 @@ export function sanitizeAuthor(author: string | undefined): string | undefined {
  */
 export function escapeHtml(text: string): string {
   const htmlEscapeMap: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-    '/': '&#x2F;',
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+    "/": "&#x2F;",
   };
 
   return text.replace(/[&<>"'\/]/g, (char) => htmlEscapeMap[char] || char);
@@ -183,16 +190,16 @@ export function escapeHtml(text: string): string {
  */
 export function escapeLatex(text: string): string {
   const latexEscapeMap: Record<string, string> = {
-    '\\': '\\textbackslash{}',
-    '{': '\\{',
-    '}': '\\}',
-    '$': '\\$',
-    '&': '\\&',
-    '%': '\\%',
-    '#': '\\#',
-    '_': '\\_',
-    '~': '\\textasciitilde{}',
-    '^': '\\textasciicircum{}',
+    "\\": "\\textbackslash{}",
+    "{": "\\{",
+    "}": "\\}",
+    $: "\\$",
+    "&": "\\&",
+    "%": "\\%",
+    "#": "\\#",
+    _: "\\_",
+    "~": "\\textasciitilde{}",
+    "^": "\\textasciicircum{}",
   };
 
   return text.replace(/[\\{}$&%#_~^]/g, (char) => latexEscapeMap[char] || char);

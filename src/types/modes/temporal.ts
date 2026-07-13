@@ -3,7 +3,7 @@
  * Phase 3 (v2.1) - Temporal reasoning with events, intervals, constraints, and causal relations
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Temporal thought extends base thought with time-dependent reasoning
@@ -11,11 +11,11 @@ import { BaseThought, ThinkingMode } from '../core.js';
 export interface TemporalThought extends BaseThought {
   mode: ThinkingMode.TEMPORAL;
   thoughtType:
-    | 'event_definition'
-    | 'interval_analysis'
-    | 'temporal_constraint'
-    | 'sequence_construction'
-    | 'causality_timeline';
+    | "event_definition"
+    | "interval_analysis"
+    | "temporal_constraint"
+    | "sequence_construction"
+    | "causality_timeline";
 
   timeline?: Timeline;
   events?: TemporalEvent[];
@@ -30,7 +30,14 @@ export interface TemporalThought extends BaseThought {
 export interface Timeline {
   id: string;
   name: string;
-  timeUnit: 'milliseconds' | 'seconds' | 'minutes' | 'hours' | 'days' | 'months' | 'years';
+  timeUnit:
+    | "milliseconds"
+    | "seconds"
+    | "minutes"
+    | "hours"
+    | "days"
+    | "months"
+    | "years";
   startTime?: number;
   endTime?: number;
   events: string[]; // Event IDs
@@ -45,7 +52,7 @@ export interface TemporalEvent {
   description: string;
   timestamp: number;
   duration?: number; // For interval events
-  type: 'instant' | 'interval';
+  type: "instant" | "interval";
   properties: Record<string, any>;
 }
 
@@ -66,7 +73,15 @@ export interface TimeInterval {
  */
 export interface TemporalConstraint {
   id: string;
-  type: 'before' | 'after' | 'during' | 'overlaps' | 'meets' | 'starts' | 'finishes' | 'equals';
+  type:
+    | "before"
+    | "after"
+    | "during"
+    | "overlaps"
+    | "meets"
+    | "starts"
+    | "finishes"
+    | "equals";
   subject: string; // Event/Interval ID
   object: string; // Event/Interval ID
   confidence: number; // 0-1
@@ -80,7 +95,7 @@ export interface TemporalRelation {
   id: string;
   from: string; // Event ID
   to: string; // Event ID
-  relationType: 'causes' | 'enables' | 'prevents' | 'precedes' | 'follows';
+  relationType: "causes" | "enables" | "prevents" | "precedes" | "follows";
   strength: number; // 0-1
   delay?: number; // Time delay between events
   formula?: string; // LaTeX formula for relationship dynamics
@@ -89,6 +104,8 @@ export interface TemporalRelation {
 /**
  * Type guard for temporal thoughts
  */
-export function isTemporalThought(thought: BaseThought): thought is TemporalThought {
-  return thought.mode === 'temporal';
+export function isTemporalThought(
+  thought: BaseThought,
+): thought is TemporalThought {
+  return thought.mode === "temporal";
 }

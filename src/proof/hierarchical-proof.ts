@@ -5,13 +5,13 @@
  * dependency tracking between proof elements.
  */
 
-import { randomUUID } from 'crypto';
-import type { ProofStep } from './decomposer.js';
+import { randomUUID } from "crypto";
+import type { ProofStep } from "./decomposer.js";
 import type {
   HierarchicalProof,
   HierarchicalProofType,
   ProofTree,
-} from './branch-types.js';
+} from "./branch-types.js";
 
 /**
  * Options for hierarchical proof parsing
@@ -72,7 +72,7 @@ export class HierarchicalProofManager {
   createProof(
     statement: string,
     steps: ProofStep[],
-    name?: string
+    name?: string,
   ): HierarchicalProof {
     const id = randomUUID();
 
@@ -89,7 +89,7 @@ export class HierarchicalProofManager {
 
     const proof: HierarchicalProof = {
       id,
-      type: 'theorem',
+      type: "theorem",
       statement,
       name,
       proof: steps,
@@ -149,7 +149,7 @@ export class HierarchicalProofManager {
       }
 
       allElements.push(proof);
-      if (proof.type !== 'theorem') {
+      if (proof.type !== "theorem") {
         lemmas.set(proof.id, proof);
       }
 
@@ -217,7 +217,9 @@ export class HierarchicalProofManager {
       const content = step.content.toLowerCase();
 
       // Check for lemma/claim start
-      const lemmaMatch = step.content.match(/^(?:Lemma|Claim|Sublemma)\s*(\d+)?[:\.]?\s*(.+)$/i);
+      const lemmaMatch = step.content.match(
+        /^(?:Lemma|Claim|Sublemma)\s*(\d+)?[:\.]?\s*(.+)$/i,
+      );
       if (lemmaMatch) {
         // End previous lemma if exists
         if (currentLemma) {
@@ -229,17 +231,21 @@ export class HierarchicalProofManager {
 
         lemmaCount++;
         currentLemma = {
-          name: lemmaMatch[1] ? `Lemma ${lemmaMatch[1]}` : `Lemma ${lemmaCount}`,
+          name: lemmaMatch[1]
+            ? `Lemma ${lemmaMatch[1]}`
+            : `Lemma ${lemmaCount}`,
           statement: lemmaMatch[2].trim(),
           startIndex: i,
           endIndex: steps.length - 1, // Will be updated
-          type: content.startsWith('claim') ? 'claim' : 'lemma',
+          type: content.startsWith("claim") ? "claim" : "lemma",
         };
         continue;
       }
 
       // Check for corollary
-      const corollaryMatch = step.content.match(/^Corollary\s*(\d+)?[:\.]?\s*(.+)$/i);
+      const corollaryMatch = step.content.match(
+        /^Corollary\s*(\d+)?[:\.]?\s*(.+)$/i,
+      );
       if (corollaryMatch) {
         if (currentLemma) {
           currentLemma.endIndex = i - 1;
@@ -250,17 +256,21 @@ export class HierarchicalProofManager {
 
         lemmaCount++;
         currentLemma = {
-          name: corollaryMatch[1] ? `Corollary ${corollaryMatch[1]}` : `Corollary ${lemmaCount}`,
+          name: corollaryMatch[1]
+            ? `Corollary ${corollaryMatch[1]}`
+            : `Corollary ${lemmaCount}`,
           statement: corollaryMatch[2].trim(),
           startIndex: i,
           endIndex: steps.length - 1,
-          type: 'corollary',
+          type: "corollary",
         };
         continue;
       }
 
       // Check for proposition
-      const propMatch = step.content.match(/^Proposition\s*(\d+)?[:\.]?\s*(.+)$/i);
+      const propMatch = step.content.match(
+        /^Proposition\s*(\d+)?[:\.]?\s*(.+)$/i,
+      );
       if (propMatch) {
         if (currentLemma) {
           currentLemma.endIndex = i - 1;
@@ -271,11 +281,13 @@ export class HierarchicalProofManager {
 
         lemmaCount++;
         currentLemma = {
-          name: propMatch[1] ? `Proposition ${propMatch[1]}` : `Proposition ${lemmaCount}`,
+          name: propMatch[1]
+            ? `Proposition ${propMatch[1]}`
+            : `Proposition ${lemmaCount}`,
           statement: propMatch[2].trim(),
           startIndex: i,
           endIndex: steps.length - 1,
-          type: 'proposition',
+          type: "proposition",
         };
         continue;
       }
@@ -283,9 +295,11 @@ export class HierarchicalProofManager {
       // Check for lemma end (QED, □, "this completes", etc.)
       if (
         currentLemma &&
-        (/(?:QED|□|∎|this\s+(?:completes|proves)\s+(?:the\s+)?(?:lemma|claim))/i.test(content) ||
-          content.includes('end of lemma') ||
-          content.includes('end of proof'))
+        (/(?:QED|□|∎|this\s+(?:completes|proves)\s+(?:the\s+)?(?:lemma|claim))/i.test(
+          content,
+        ) ||
+          content.includes("end of lemma") ||
+          content.includes("end of proof"))
       ) {
         currentLemma.endIndex = i;
         lemmas.push(currentLemma);
@@ -308,7 +322,7 @@ export class HierarchicalProofManager {
     const deps = new Set<string>();
 
     for (const step of steps) {
-      const text = `${step.content} ${step.justification || ''}`;
+      const text = `${step.content} ${step.justification || ""}`;
 
       // Match "by Lemma X", "from Theorem Y", etc.
       const refPatterns = [
@@ -319,7 +333,7 @@ export class HierarchicalProofManager {
       for (const pattern of refPatterns) {
         let match;
         while ((match = pattern.exec(text)) !== null) {
-          const ref = match[0].replace(/^(?:by|from|using)\s+/i, '').trim();
+          const ref = match[0].replace(/^(?:by|from|using)\s+/i, "").trim();
           if (ref && ref.length > 0) {
             deps.add(ref);
           }
@@ -335,21 +349,21 @@ export class HierarchicalProofManager {
    */
   private checkCompleteness(
     steps: ProofStep[],
-    subProofs: HierarchicalProof[]
+    subProofs: HierarchicalProof[],
   ): boolean {
     // Check main proof
     if (steps.length === 0) return false;
 
     const lastStep = steps[steps.length - 1].content.toLowerCase();
     const hasConclusion =
-      lastStep.includes('therefore') ||
-      lastStep.includes('thus') ||
-      lastStep.includes('hence') ||
-      lastStep.includes('qed') ||
-      lastStep.includes('□') ||
-      lastStep.includes('∎') ||
-      lastStep.includes('proven') ||
-      lastStep.includes('completed');
+      lastStep.includes("therefore") ||
+      lastStep.includes("thus") ||
+      lastStep.includes("hence") ||
+      lastStep.includes("qed") ||
+      lastStep.includes("□") ||
+      lastStep.includes("∎") ||
+      lastStep.includes("proven") ||
+      lastStep.includes("completed");
 
     // Check all sub-proofs are complete
     const allSubProofsComplete = subProofs.every((sp) => sp.isComplete);
@@ -365,12 +379,12 @@ export class HierarchicalProofManager {
 
     const lastContent = steps[steps.length - 1].content.toLowerCase();
     return (
-      lastContent.includes('qed') ||
-      lastContent.includes('□') ||
-      lastContent.includes('∎') ||
-      lastContent.includes('therefore') ||
-      lastContent.includes('this proves') ||
-      lastContent.includes('this completes')
+      lastContent.includes("qed") ||
+      lastContent.includes("□") ||
+      lastContent.includes("∎") ||
+      lastContent.includes("therefore") ||
+      lastContent.includes("this proves") ||
+      lastContent.includes("this completes")
     );
   }
 
@@ -416,7 +430,9 @@ export class HierarchicalProofManager {
   /**
    * Calculate statistics for a proof tree
    */
-  private calculateStatistics(root: HierarchicalProof): ProofTree['statistics'] {
+  private calculateStatistics(
+    root: HierarchicalProof,
+  ): ProofTree["statistics"] {
     let totalElements = 0;
     let maxDepth = 0;
     let totalSteps = 0;
@@ -445,21 +461,21 @@ export class HierarchicalProofManager {
    */
   private extractMetadata(
     statement: string,
-    steps: ProofStep[]
-  ): HierarchicalProof['metadata'] {
+    steps: ProofStep[],
+  ): HierarchicalProof["metadata"] {
     const tags: string[] = [];
 
     // Extract tags from content
-    const fullText = `${statement} ${steps.map((s) => s.content).join(' ')}`;
+    const fullText = `${statement} ${steps.map((s) => s.content).join(" ")}`;
 
-    if (/induction/i.test(fullText)) tags.push('induction');
-    if (/contradiction/i.test(fullText)) tags.push('contradiction');
-    if (/cases?/i.test(fullText)) tags.push('case-analysis');
-    if (/continuous|continuous/i.test(fullText)) tags.push('analysis');
-    if (/prime|divisible/i.test(fullText)) tags.push('number-theory');
-    if (/group|ring|field/i.test(fullText)) tags.push('algebra');
-    if (/graph|vertex|edge/i.test(fullText)) tags.push('graph-theory');
-    if (/probability|random/i.test(fullText)) tags.push('probability');
+    if (/induction/i.test(fullText)) tags.push("induction");
+    if (/contradiction/i.test(fullText)) tags.push("contradiction");
+    if (/cases?/i.test(fullText)) tags.push("case-analysis");
+    if (/continuous|continuous/i.test(fullText)) tags.push("analysis");
+    if (/prime|divisible/i.test(fullText)) tags.push("number-theory");
+    if (/group|ring|field/i.test(fullText)) tags.push("algebra");
+    if (/graph|vertex|edge/i.test(fullText)) tags.push("graph-theory");
+    if (/probability|random/i.test(fullText)) tags.push("probability");
 
     return {
       tags: tags.length > 0 ? tags : undefined,
@@ -472,11 +488,11 @@ export class HierarchicalProofManager {
    */
   addLemma(
     proof: HierarchicalProof,
-    lemma: ProofElementInput
+    lemma: ProofElementInput,
   ): HierarchicalProof {
     const newLemma = this.createElement({
       ...lemma,
-      type: 'lemma',
+      type: "lemma",
     });
 
     return {
@@ -490,11 +506,11 @@ export class HierarchicalProofManager {
    */
   addCorollary(
     proof: HierarchicalProof,
-    corollary: ProofElementInput
+    corollary: ProofElementInput,
   ): HierarchicalProof {
     const newCorollary = this.createElement({
       ...corollary,
-      type: 'corollary',
+      type: "corollary",
     });
 
     return {
@@ -514,7 +530,10 @@ export class HierarchicalProofManager {
   /**
    * Find proof elements by type
    */
-  findByType(tree: ProofTree, type: HierarchicalProofType): HierarchicalProof[] {
+  findByType(
+    tree: ProofTree,
+    type: HierarchicalProofType,
+  ): HierarchicalProof[] {
     const results: HierarchicalProof[] = [];
 
     const traverse = (proof: HierarchicalProof) => {
@@ -556,12 +575,12 @@ export class HierarchicalProofManager {
     const lines: string[] = [];
 
     const traverse = (proof: HierarchicalProof, indent: number) => {
-      const prefix = '  '.repeat(indent);
-      const status = proof.isComplete ? '✓' : '○';
+      const prefix = "  ".repeat(indent);
+      const status = proof.isComplete ? "✓" : "○";
       const name = proof.name || proof.type;
       const statement =
         proof.statement.length > 50
-          ? proof.statement.substring(0, 50) + '...'
+          ? proof.statement.substring(0, 50) + "..."
           : proof.statement;
 
       lines.push(`${prefix}${status} ${name}: ${statement}`);
@@ -573,20 +592,20 @@ export class HierarchicalProofManager {
 
     traverse(tree.root, 0);
 
-    lines.push('');
+    lines.push("");
     lines.push(`Statistics:`);
     lines.push(`  Total elements: ${tree.statistics.totalElements}`);
     lines.push(`  Max depth: ${tree.statistics.maxDepth}`);
     lines.push(`  Total steps: ${tree.statistics.totalSteps}`);
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   /**
    * Export proof tree to Mermaid diagram
    */
   toMermaid(tree: ProofTree): string {
-    const lines: string[] = ['graph TD'];
+    const lines: string[] = ["graph TD"];
     let nodeId = 0;
     const idMap = new Map<string, string>();
 
@@ -595,7 +614,7 @@ export class HierarchicalProofManager {
       idMap.set(proof.id, mermaidId);
 
       const label = proof.name || `${proof.type}`;
-      const shape = proof.type === 'theorem' ? `((${label}))` : `[${label}]`;
+      const shape = proof.type === "theorem" ? `((${label}))` : `[${label}]`;
       lines.push(`  ${mermaidId}${shape}`);
 
       if (parentMermaidId) {
@@ -634,6 +653,6 @@ export class HierarchicalProofManager {
 
     addDependencies(tree.root);
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 }

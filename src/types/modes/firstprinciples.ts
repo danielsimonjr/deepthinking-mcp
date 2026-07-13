@@ -3,7 +3,7 @@
  * Phase 3 (v3.1.0) - Building understanding from foundational principles
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * First-Principles thought extends base thought with foundational reasoning
@@ -21,11 +21,11 @@ export interface FirstPrinciplesThought extends BaseThought {
  * Type of foundational principle
  */
 export type PrincipleType =
-  | 'axiom'              // Self-evident truth
-  | 'definition'         // Definition of a concept
-  | 'observation'        // Empirical observation
-  | 'logical_inference'  // Derived through logic
-  | 'assumption';        // Stated assumption
+  | "axiom" // Self-evident truth
+  | "definition" // Definition of a concept
+  | "observation" // Empirical observation
+  | "logical_inference" // Derived through logic
+  | "assumption"; // Stated assumption
 
 /**
  * Foundational principle - the building blocks of reasoning
@@ -66,6 +66,8 @@ export interface Conclusion {
 /**
  * Type guard for First-Principles thoughts
  */
-export function isFirstPrinciplesThought(thought: BaseThought): thought is FirstPrinciplesThought {
-  return thought.mode === 'firstprinciples';
+export function isFirstPrinciplesThought(
+  thought: BaseThought,
+): thought is FirstPrinciplesThought {
+  return thought.mode === "firstprinciples";
 }

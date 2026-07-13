@@ -8,16 +8,16 @@
  * - Multi-modal logic support (epistemic, deontic, alethic, temporal)
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode, Thought } from '../../types/core.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode, Thought } from "../../types/core.js";
 import type {
   ModalThought,
   PossibleWorld,
   ModalProposition,
   AccessibilityRelation,
   ModalInference,
-} from '../../types/modes/modal.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+} from "../../types/modes/modal.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -27,7 +27,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 // Re-export for backwards compatibility
 export type { ModalThought };
@@ -36,13 +36,13 @@ export type { ModalThought };
  * Valid thought types for modal mode
  */
 const VALID_THOUGHT_TYPES = [
-  'world_definition',
-  'proposition_analysis',
-  'accessibility_analysis',
-  'necessity_proof',
-  'possibility_proof',
-  'modal_inference',
-  'countermodel',
+  "world_definition",
+  "proposition_analysis",
+  "accessibility_analysis",
+  "necessity_proof",
+  "possibility_proof",
+  "modal_inference",
+  "countermodel",
 ] as const;
 
 type ModalThoughtType = (typeof VALID_THOUGHT_TYPES)[number];
@@ -50,12 +50,17 @@ type ModalThoughtType = (typeof VALID_THOUGHT_TYPES)[number];
 /**
  * Valid modal logic systems
  */
-const VALID_LOGIC_SYSTEMS = ['K', 'T', 'S4', 'S5', 'D', 'B', 'custom'] as const;
+const VALID_LOGIC_SYSTEMS = ["K", "T", "S4", "S5", "D", "B", "custom"] as const;
 
 /**
  * Valid modal domains
  */
-const VALID_MODAL_DOMAINS = ['alethic', 'epistemic', 'deontic', 'temporal'] as const;
+const VALID_MODAL_DOMAINS = [
+  "alethic",
+  "epistemic",
+  "deontic",
+  "temporal",
+] as const;
 
 /**
  * ModalHandler - Specialized handler for modal reasoning
@@ -68,9 +73,9 @@ const VALID_MODAL_DOMAINS = ['alethic', 'epistemic', 'deontic', 'temporal'] as c
  */
 export class ModalHandler implements ModeHandler {
   readonly mode = ThinkingMode.MODAL;
-  readonly modeName = 'Modal Reasoning';
+  readonly modeName = "Modal Reasoning";
   readonly description =
-    'Reasoning about necessity, possibility, and possible worlds semantics';
+    "Reasoning about necessity, possibility, and possible worlds semantics";
 
   /**
    * Supported thought types for modal mode
@@ -87,7 +92,9 @@ export class ModalHandler implements ModeHandler {
     const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
 
     // Process worlds
-    const worlds = (inputAny.worlds || []).map((w: any) => this.normalizeWorld(w));
+    const worlds = (inputAny.worlds || []).map((w: any) =>
+      this.normalizeWorld(w),
+    );
 
     // Ensure at least one world exists
     if (worlds.length === 0) {
@@ -95,16 +102,23 @@ export class ModalHandler implements ModeHandler {
     }
 
     // Determine actual world
-    const actualWorld = inputAny.actualWorld || worlds.find((w: PossibleWorld) => w.isActual)?.id || worlds[0].id;
+    const actualWorld =
+      inputAny.actualWorld ||
+      worlds.find((w: PossibleWorld) => w.isActual)?.id ||
+      worlds[0].id;
 
     // Process propositions
     const propositions = (inputAny.propositions || []).map((p: any) =>
-      this.normalizeProposition(p, worlds)
+      this.normalizeProposition(p, worlds),
     );
 
     // Process accessibility relations
-    const accessibilityRelations = (inputAny.accessibilityRelations || []).map((r: any) =>
-      this.normalizeAccessibilityRelation(r, inputAny.modalDomain || 'alethic')
+    const accessibilityRelations = (inputAny.accessibilityRelations || []).map(
+      (r: any) =>
+        this.normalizeAccessibilityRelation(
+          r,
+          inputAny.modalDomain || "alethic",
+        ),
     );
 
     // Process inferences
@@ -153,65 +167,78 @@ export class ModalHandler implements ModeHandler {
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
 
     // Validate thought type
-    if (inputAny.thoughtType && !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)) {
+    if (
+      inputAny.thoughtType &&
+      !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)
+    ) {
       warnings.push(
         createValidationWarning(
-          'thoughtType',
+          "thoughtType",
           `Unknown thought type: ${inputAny.thoughtType}`,
-          `Valid types: ${VALID_THOUGHT_TYPES.join(', ')}`
-        )
+          `Valid types: ${VALID_THOUGHT_TYPES.join(", ")}`,
+        ),
       );
     }
 
     // Validate logic system
-    if (inputAny.modalLogicType && !VALID_LOGIC_SYSTEMS.includes(inputAny.modalLogicType)) {
+    if (
+      inputAny.modalLogicType &&
+      !VALID_LOGIC_SYSTEMS.includes(inputAny.modalLogicType)
+    ) {
       warnings.push(
         createValidationWarning(
-          'modalLogicType',
+          "modalLogicType",
           `Unknown logic system: ${inputAny.modalLogicType}`,
-          `Valid systems: ${VALID_LOGIC_SYSTEMS.join(', ')}`
-        )
+          `Valid systems: ${VALID_LOGIC_SYSTEMS.join(", ")}`,
+        ),
       );
     }
 
     // Validate modal domain
-    if (inputAny.modalDomain && !VALID_MODAL_DOMAINS.includes(inputAny.modalDomain)) {
+    if (
+      inputAny.modalDomain &&
+      !VALID_MODAL_DOMAINS.includes(inputAny.modalDomain)
+    ) {
       warnings.push(
         createValidationWarning(
-          'modalDomain',
+          "modalDomain",
           `Unknown modal domain: ${inputAny.modalDomain}`,
-          `Valid domains: ${VALID_MODAL_DOMAINS.join(', ')}`
-        )
+          `Valid domains: ${VALID_MODAL_DOMAINS.join(", ")}`,
+        ),
       );
     }
 
     // Check for worlds in proof types
     if (
-      (inputAny.thoughtType === 'necessity_proof' ||
-        inputAny.thoughtType === 'possibility_proof') &&
+      (inputAny.thoughtType === "necessity_proof" ||
+        inputAny.thoughtType === "possibility_proof") &&
       (!inputAny.worlds || inputAny.worlds.length === 0)
     ) {
       warnings.push(
         createValidationWarning(
-          'worlds',
-          'Modal proof without defined worlds',
-          'Define possible worlds for modal evaluation'
-        )
+          "worlds",
+          "Modal proof without defined worlds",
+          "Define possible worlds for modal evaluation",
+        ),
       );
     }
 
@@ -222,33 +249,40 @@ export class ModalHandler implements ModeHandler {
         if (rel.fromWorld && !worldIds.has(rel.fromWorld)) {
           warnings.push(
             createValidationWarning(
-              'accessibilityRelations',
+              "accessibilityRelations",
               `Relation references unknown world: ${rel.fromWorld}`,
-              'Ensure all relation endpoints reference defined worlds'
-            )
+              "Ensure all relation endpoints reference defined worlds",
+            ),
           );
         }
         if (rel.toWorld && !worldIds.has(rel.toWorld)) {
           warnings.push(
             createValidationWarning(
-              'accessibilityRelations',
+              "accessibilityRelations",
               `Relation references unknown world: ${rel.toWorld}`,
-              'Ensure all relation endpoints reference defined worlds'
-            )
+              "Ensure all relation endpoints reference defined worlds",
+            ),
           );
         }
       }
     }
 
     // Validate S5 requires all worlds to be mutually accessible
-    if (inputAny.modalLogicType === 'S5' && inputAny.worlds && inputAny.worlds.length > 1) {
-      if (!inputAny.accessibilityRelations || inputAny.accessibilityRelations.length === 0) {
+    if (
+      inputAny.modalLogicType === "S5" &&
+      inputAny.worlds &&
+      inputAny.worlds.length > 1
+    ) {
+      if (
+        !inputAny.accessibilityRelations ||
+        inputAny.accessibilityRelations.length === 0
+      ) {
         warnings.push(
           createValidationWarning(
-            'accessibilityRelations',
-            'S5 logic requires universal accessibility',
-            'All worlds should be mutually accessible in S5'
-          )
+            "accessibilityRelations",
+            "S5 logic requires universal accessibility",
+            "All worlds should be mutually accessible in S5",
+          ),
         );
       }
     }
@@ -271,7 +305,11 @@ export class ModalHandler implements ModeHandler {
 
     const enhancements: ModeEnhancements = {
       suggestions: [],
-      relatedModes: [ThinkingMode.FORMALLOGIC, ThinkingMode.COUNTERFACTUAL, ThinkingMode.DEDUCTIVE],
+      relatedModes: [
+        ThinkingMode.FORMALLOGIC,
+        ThinkingMode.COUNTERFACTUAL,
+        ThinkingMode.DEDUCTIVE,
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -281,133 +319,154 @@ export class ModalHandler implements ModeHandler {
         inferenceCount: modalThought.inferences?.length || 0,
       },
       mentalModels: [
-        'Possible Worlds Semantics',
-        'Kripke Frames',
-        'Necessity vs Possibility',
-        'Accessibility Relations',
-        'Modal Validity',
+        "Possible Worlds Semantics",
+        "Kripke Frames",
+        "Necessity vs Possibility",
+        "Accessibility Relations",
+        "Modal Validity",
       ],
     };
 
     // Logic system info
-    const logicType = modalThought.modalLogicType || modalThought.logicSystem || 'K';
+    const logicType =
+      modalThought.modalLogicType || modalThought.logicSystem || "K";
     enhancements.suggestions!.push(
-      `Logic system: ${logicType} (${modalThought.modalDomain})`
+      `Logic system: ${logicType} (${modalThought.modalDomain})`,
     );
 
     // Add logic system properties
     const systemProperties = this.getLogicSystemProperties(logicType);
     if (systemProperties.length > 0) {
-      enhancements.suggestions!.push(`Properties: ${systemProperties.join(', ')}`);
+      enhancements.suggestions!.push(
+        `Properties: ${systemProperties.join(", ")}`,
+      );
     }
 
     // Thought type-specific guidance
     switch (modalThought.thoughtType) {
-      case 'world_definition':
+      case "world_definition":
         enhancements.guidingQuestions!.push(
-          'What propositions are true in each world?',
-          'Which world represents the actual state of affairs?',
-          'How are the worlds related (accessibility)?'
+          "What propositions are true in each world?",
+          "Which world represents the actual state of affairs?",
+          "How are the worlds related (accessibility)?",
         );
-        enhancements.suggestions!.push(`Defined ${worlds.length} possible world(s)`);
+        enhancements.suggestions!.push(
+          `Defined ${worlds.length} possible world(s)`,
+        );
         break;
 
-      case 'proposition_analysis':
+      case "proposition_analysis":
         enhancements.guidingQuestions!.push(
-          'Is the proposition necessarily true (true in all accessible worlds)?',
-          'Is the proposition possibly true (true in some accessible world)?',
-          'Is the proposition contingent (could be true or false)?'
+          "Is the proposition necessarily true (true in all accessible worlds)?",
+          "Is the proposition possibly true (true in some accessible world)?",
+          "Is the proposition contingent (could be true or false)?",
         );
         const necessaryCount = propositions.filter(
-          (p) => p.operator === 'necessary'
+          (p) => p.operator === "necessary",
         ).length;
         const possibleCount = propositions.filter(
-          (p) => p.operator === 'possible'
+          (p) => p.operator === "possible",
         ).length;
         enhancements.suggestions!.push(
-          `Propositions: ${necessaryCount} necessary, ${possibleCount} possible`
+          `Propositions: ${necessaryCount} necessary, ${possibleCount} possible`,
         );
         break;
 
-      case 'accessibility_analysis':
+      case "accessibility_analysis":
         enhancements.guidingQuestions!.push(
-          'Is the accessibility relation reflexive (every world accesses itself)?',
-          'Is the relation symmetric (if w1 accesses w2, does w2 access w1)?',
-          'Is the relation transitive (if w1→w2→w3, does w1→w3)?'
+          "Is the accessibility relation reflexive (every world accesses itself)?",
+          "Is the relation symmetric (if w1 accesses w2, does w2 access w1)?",
+          "Is the relation transitive (if w1→w2→w3, does w1→w3)?",
         );
         break;
 
-      case 'necessity_proof':
+      case "necessity_proof":
         enhancements.guidingQuestions!.push(
-          'Is the proposition true in ALL accessible worlds?',
-          'Are there any counterexample worlds?',
-          'Does necessity hold under the current logic system?'
+          "Is the proposition true in ALL accessible worlds?",
+          "Are there any counterexample worlds?",
+          "Does necessity hold under the current logic system?",
         );
         break;
 
-      case 'possibility_proof':
+      case "possibility_proof":
         enhancements.guidingQuestions!.push(
-          'Is the proposition true in AT LEAST ONE accessible world?',
-          'Can we construct a world where it holds?',
-          'What makes this possibility genuine vs. merely apparent?'
+          "Is the proposition true in AT LEAST ONE accessible world?",
+          "Can we construct a world where it holds?",
+          "What makes this possibility genuine vs. merely apparent?",
         );
         break;
 
-      case 'modal_inference':
+      case "modal_inference":
         enhancements.guidingQuestions!.push(
-          'Is the inference valid in the current modal logic?',
-          'Does the rule preserve truth across all frames?',
-          'Are there countermodels to this inference?'
+          "Is the inference valid in the current modal logic?",
+          "Does the rule preserve truth across all frames?",
+          "Are there countermodels to this inference?",
         );
         if (modalThought.inferences) {
-          const validCount = modalThought.inferences.filter((i) => i.valid).length;
+          const validCount = modalThought.inferences.filter(
+            (i) => i.valid,
+          ).length;
           enhancements.suggestions!.push(
-            `Inferences: ${validCount}/${modalThought.inferences.length} valid`
+            `Inferences: ${validCount}/${modalThought.inferences.length} valid`,
           );
         }
         break;
 
-      case 'countermodel':
+      case "countermodel":
         enhancements.guidingQuestions!.push(
-          'What world/truth-value assignment falsifies the claim?',
-          'Are the accessibility relations satisfied?',
-          'Is this a minimal countermodel?'
+          "What world/truth-value assignment falsifies the claim?",
+          "Are the accessibility relations satisfied?",
+          "Is this a minimal countermodel?",
         );
         break;
     }
 
     // Domain-specific guidance
     switch (modalThought.modalDomain) {
-      case 'epistemic':
-        enhancements.suggestions!.push('Epistemic: □p = agent knows p, ◇p = p is compatible with knowledge');
-        enhancements.mentalModels!.push('Knowledge States', 'Belief Revision');
+      case "epistemic":
+        enhancements.suggestions!.push(
+          "Epistemic: □p = agent knows p, ◇p = p is compatible with knowledge",
+        );
+        enhancements.mentalModels!.push("Knowledge States", "Belief Revision");
         break;
-      case 'deontic':
-        enhancements.suggestions!.push('Deontic: □p = p is obligatory, ◇p = p is permissible');
-        enhancements.mentalModels!.push('Moral Obligations', 'Permission Logic');
+      case "deontic":
+        enhancements.suggestions!.push(
+          "Deontic: □p = p is obligatory, ◇p = p is permissible",
+        );
+        enhancements.mentalModels!.push(
+          "Moral Obligations",
+          "Permission Logic",
+        );
         break;
-      case 'temporal':
-        enhancements.suggestions!.push('Temporal: □p = always p, ◇p = eventually p');
-        enhancements.mentalModels!.push('Temporal Ordering', 'Future Possibilities');
+      case "temporal":
+        enhancements.suggestions!.push(
+          "Temporal: □p = always p, ◇p = eventually p",
+        );
+        enhancements.mentalModels!.push(
+          "Temporal Ordering",
+          "Future Possibilities",
+        );
         break;
-      case 'alethic':
-        enhancements.suggestions!.push('Alethic: □p = necessarily p, ◇p = possibly p');
+      case "alethic":
+        enhancements.suggestions!.push(
+          "Alethic: □p = necessarily p, ◇p = possibly p",
+        );
         break;
     }
 
     // Check for common issues
     if (worlds.length === 1) {
       enhancements.warnings!.push(
-        'Only one world defined - modal distinctions may collapse'
+        "Only one world defined - modal distinctions may collapse",
       );
     }
 
     // Validate accessibility matches logic system
-    if (logicType === 'S5' && accessibilityRelations.length > 0) {
+    if (logicType === "S5" && accessibilityRelations.length > 0) {
       const hasUniversalAccess = this.checkUniversalAccessibility(modalThought);
       if (!hasUniversalAccess) {
         enhancements.warnings!.push(
-          'S5 requires universal accessibility - not all worlds are connected'
+          "S5 requires universal accessibility - not all worlds are connected",
         );
       }
     }
@@ -426,30 +485,37 @@ export class ModalHandler implements ModeHandler {
    * Resolve thought type from input
    */
   private resolveThoughtType(inputType: string | undefined): ModalThoughtType {
-    if (inputType && VALID_THOUGHT_TYPES.includes(inputType as ModalThoughtType)) {
+    if (
+      inputType &&
+      VALID_THOUGHT_TYPES.includes(inputType as ModalThoughtType)
+    ) {
       return inputType as ModalThoughtType;
     }
-    return 'proposition_analysis';
+    return "proposition_analysis";
   }
 
   /**
    * Resolve logic system
    */
-  private resolveLogicSystem(system: string | undefined): ModalThought['modalLogicType'] {
+  private resolveLogicSystem(
+    system: string | undefined,
+  ): ModalThought["modalLogicType"] {
     if (system && VALID_LOGIC_SYSTEMS.includes(system as any)) {
-      return system as ModalThought['modalLogicType'];
+      return system as ModalThought["modalLogicType"];
     }
-    return 'K';
+    return "K";
   }
 
   /**
    * Resolve modal domain
    */
-  private resolveModalDomain(domain: string | undefined): ModalThought['modalDomain'] {
+  private resolveModalDomain(
+    domain: string | undefined,
+  ): ModalThought["modalDomain"] {
     if (domain && VALID_MODAL_DOMAINS.includes(domain as any)) {
-      return domain as ModalThought['modalDomain'];
+      return domain as ModalThought["modalDomain"];
     }
-    return 'alethic';
+    return "alethic";
   }
 
   /**
@@ -457,13 +523,13 @@ export class ModalHandler implements ModeHandler {
    */
   private getLogicSystemProperties(system: string): string[] {
     const properties: Record<string, string[]> = {
-      K: ['basic modal logic'],
-      T: ['reflexive'],
-      S4: ['reflexive', 'transitive'],
-      S5: ['reflexive', 'symmetric', 'transitive'],
-      D: ['serial'],
-      B: ['reflexive', 'symmetric'],
-      custom: ['user-defined'],
+      K: ["basic modal logic"],
+      T: ["reflexive"],
+      S4: ["reflexive", "transitive"],
+      S5: ["reflexive", "symmetric", "transitive"],
+      D: ["serial"],
+      B: ["reflexive", "symmetric"],
+      custom: ["user-defined"],
     };
     return properties[system] || [];
   }
@@ -474,8 +540,8 @@ export class ModalHandler implements ModeHandler {
   private createDefaultWorld(): PossibleWorld {
     return {
       id: randomUUID(),
-      name: 'w0',
-      description: 'Actual world',
+      name: "w0",
+      description: "Actual world",
       propositions: {},
       isActual: true,
       accessibility: [],
@@ -488,8 +554,8 @@ export class ModalHandler implements ModeHandler {
   private normalizeWorld(world: any): PossibleWorld {
     return {
       id: world.id || randomUUID(),
-      name: world.name || '',
-      description: world.description || '',
+      name: world.name || "",
+      description: world.description || "",
       propositions: world.propositions || {},
       isActual: world.isActual ?? false,
       accessibility: world.accessibility || [],
@@ -499,7 +565,10 @@ export class ModalHandler implements ModeHandler {
   /**
    * Normalize proposition
    */
-  private normalizeProposition(prop: any, worlds: PossibleWorld[]): ModalProposition {
+  private normalizeProposition(
+    prop: any,
+    worlds: PossibleWorld[],
+  ): ModalProposition {
     // Determine which worlds the proposition is true/false in
     const worldsTrue: string[] = [];
     const worldsFalse: string[] = [];
@@ -514,8 +583,8 @@ export class ModalHandler implements ModeHandler {
 
     return {
       id: prop.id || randomUUID(),
-      content: prop.content || '',
-      operator: prop.operator || 'contingent',
+      content: prop.content || "",
+      operator: prop.operator || "contingent",
       truthValue: prop.truthValue,
       worldsTrue: prop.worldsTrue || worldsTrue,
       worldsFalse: prop.worldsFalse || worldsFalse,
@@ -525,12 +594,15 @@ export class ModalHandler implements ModeHandler {
   /**
    * Normalize accessibility relation
    */
-  private normalizeAccessibilityRelation(rel: any, defaultModalType: string): AccessibilityRelation {
+  private normalizeAccessibilityRelation(
+    rel: any,
+    defaultModalType: string,
+  ): AccessibilityRelation {
     return {
       id: rel.id || randomUUID(),
-      fromWorld: rel.fromWorld || '',
-      toWorld: rel.toWorld || '',
-      type: rel.type || 'reflexive',
+      fromWorld: rel.fromWorld || "",
+      toWorld: rel.toWorld || "",
+      type: rel.type || "reflexive",
       modalType: rel.modalType || defaultModalType,
     };
   }
@@ -542,10 +614,10 @@ export class ModalHandler implements ModeHandler {
     return {
       id: inf.id || randomUUID(),
       premises: inf.premises || [],
-      conclusion: inf.conclusion || '',
-      rule: inf.rule || '',
+      conclusion: inf.conclusion || "",
+      rule: inf.rule || "",
       valid: inf.valid ?? false,
-      justification: inf.justification || '',
+      justification: inf.justification || "",
     };
   }
 
@@ -566,8 +638,8 @@ export class ModalHandler implements ModeHandler {
 
     // Add explicit relations
     for (const rel of relations) {
-      const fromWorld = rel.fromWorld || '';
-      const toWorld = rel.toWorld || '';
+      const fromWorld = rel.fromWorld || "";
+      const toWorld = rel.toWorld || "";
       if (fromWorld && accessMap.has(fromWorld)) {
         accessMap.get(fromWorld)!.add(toWorld);
       }

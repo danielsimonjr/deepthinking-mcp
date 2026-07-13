@@ -8,14 +8,14 @@
  * - Feasibility analysis
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode, Thought } from '../../types/core.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode, Thought } from "../../types/core.js";
 import type {
   ConstraintThought,
   CSPVariable,
   CSPConstraint,
   Arc,
-} from '../../types/modes/constraint.js';
+} from "../../types/modes/constraint.js";
 
 /**
  * Assignment history entry (local type for handler)
@@ -26,7 +26,7 @@ interface Assignment {
   step: number;
   backtracked: boolean;
 }
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -36,7 +36,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 // Re-export for backwards compatibility
 export type { ConstraintThought };
@@ -45,15 +45,15 @@ export type { ConstraintThought };
  * Valid thought types for constraint mode
  */
 const VALID_THOUGHT_TYPES = [
-  'problem_formulation',
-  'variable_definition',
-  'constraint_definition',
-  'domain_reduction',
-  'arc_consistency',
-  'propagation',
-  'solution_search',
-  'backtracking',
-  'feasibility_check',
+  "problem_formulation",
+  "variable_definition",
+  "constraint_definition",
+  "domain_reduction",
+  "arc_consistency",
+  "propagation",
+  "solution_search",
+  "backtracking",
+  "feasibility_check",
 ] as const;
 
 type ConstraintThoughtType = (typeof VALID_THOUGHT_TYPES)[number];
@@ -61,12 +61,12 @@ type ConstraintThoughtType = (typeof VALID_THOUGHT_TYPES)[number];
 /**
  * Valid constraint types
  */
-const VALID_CONSTRAINT_TYPES = ['unary', 'binary', 'n_ary', 'global'] as const;
+const VALID_CONSTRAINT_TYPES = ["unary", "binary", "n_ary", "global"] as const;
 
 /**
  * Valid constraint priorities
  */
-const VALID_PRIORITIES = ['required', 'soft', 'preference'] as const;
+const VALID_PRIORITIES = ["required", "soft", "preference"] as const;
 
 /**
  * ConstraintHandler - Specialized handler for constraint reasoning
@@ -79,9 +79,9 @@ const VALID_PRIORITIES = ['required', 'soft', 'preference'] as const;
  */
 export class ConstraintHandler implements ModeHandler {
   readonly mode = ThinkingMode.CONSTRAINT;
-  readonly modeName = 'Constraint Reasoning';
+  readonly modeName = "Constraint Reasoning";
   readonly description =
-    'Constraint satisfaction, domain reduction, propagation, and feasibility analysis';
+    "Constraint satisfaction, domain reduction, propagation, and feasibility analysis";
 
   /**
    * Supported thought types for constraint mode
@@ -91,19 +91,26 @@ export class ConstraintHandler implements ModeHandler {
   /**
    * Create a constraint thought from input
    */
-  createThought(input: ThinkingToolInput, sessionId: string): ConstraintThought {
+  createThought(
+    input: ThinkingToolInput,
+    sessionId: string,
+  ): ConstraintThought {
     const inputAny = input as any;
 
     // Resolve thought type
     const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
 
     // Process variables
-    const variables = (inputAny.variables || []).map((v: any) => this.normalizeVariable(v));
+    const variables = (inputAny.variables || []).map((v: any) =>
+      this.normalizeVariable(v),
+    );
 
     // Process constraints
-    const constraints = (inputAny.constraints || inputAny.cspConstraints || []).map((c: any) =>
-      this.normalizeConstraint(c)
-    );
+    const constraints = (
+      inputAny.constraints ||
+      inputAny.cspConstraints ||
+      []
+    ).map((c: any) => this.normalizeConstraint(c));
 
     // Process arcs
     const arcs = inputAny.arcs
@@ -113,18 +120,20 @@ export class ConstraintHandler implements ModeHandler {
     // Process assignments
     const currentAssignments = inputAny.currentAssignments || {};
     const assignmentHistory = (inputAny.assignmentHistory || []).map((a: any) =>
-      this.normalizeAssignment(a)
+      this.normalizeAssignment(a),
     );
 
     // Check arc consistency
-    const isArcConsistent = inputAny.isArcConsistent ?? this.checkArcConsistency(variables, constraints);
+    const isArcConsistent =
+      inputAny.isArcConsistent ??
+      this.checkArcConsistency(variables, constraints);
 
     // Determine solution status
     const solutionStatus = this.determineSolutionStatus(
       inputAny.solutionStatus,
       variables,
       constraints,
-      currentAssignments
+      currentAssignments,
     );
 
     return {
@@ -144,7 +153,9 @@ export class ConstraintHandler implements ModeHandler {
       currentAssignments,
       assignmentHistory,
       searchStep: inputAny.searchStep ?? assignmentHistory.length,
-      backtracks: inputAny.backtracks ?? assignmentHistory.filter((a: Assignment) => a.backtracked).length,
+      backtracks:
+        inputAny.backtracks ??
+        assignmentHistory.filter((a: Assignment) => a.backtracked).length,
       arcs,
       isArcConsistent,
       solutionStatus,
@@ -167,28 +178,35 @@ export class ConstraintHandler implements ModeHandler {
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
 
     // Validate thought type
-    if (inputAny.thoughtType && !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)) {
+    if (
+      inputAny.thoughtType &&
+      !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)
+    ) {
       warnings.push(
         createValidationWarning(
-          'thoughtType',
+          "thoughtType",
           `Unknown thought type: ${inputAny.thoughtType}`,
-          `Valid types: ${VALID_THOUGHT_TYPES.join(', ')}`
-        )
+          `Valid types: ${VALID_THOUGHT_TYPES.join(", ")}`,
+        ),
       );
     }
 
@@ -201,16 +219,19 @@ export class ConstraintHandler implements ModeHandler {
             createValidationWarning(
               `variables[${i}].domain`,
               `Variable "${v.name || v.id}" has empty domain`,
-              'Empty domains indicate infeasibility'
-            )
+              "Empty domains indicate infeasibility",
+            ),
           );
         }
       }
     }
 
     // Validate constraints reference valid variables
-    const varIds = new Set((inputAny.variables || []).map((v: any) => v.id || v.name));
-    const cspConstraints = inputAny.constraints || inputAny.cspConstraints || [];
+    const varIds = new Set(
+      (inputAny.variables || []).map((v: any) => v.id || v.name),
+    );
+    const cspConstraints =
+      inputAny.constraints || inputAny.cspConstraints || [];
 
     for (let i = 0; i < cspConstraints.length; i++) {
       const c = cspConstraints[i];
@@ -221,8 +242,8 @@ export class ConstraintHandler implements ModeHandler {
               createValidationWarning(
                 `constraints[${i}].variables`,
                 `Constraint references unknown variable: ${varRef}`,
-                'Ensure all constraint variables are defined'
-              )
+                "Ensure all constraint variables are defined",
+              ),
             );
           }
         }
@@ -234,8 +255,8 @@ export class ConstraintHandler implements ModeHandler {
           createValidationWarning(
             `constraints[${i}].type`,
             `Unknown constraint type: ${c.type}`,
-            `Valid types: ${VALID_CONSTRAINT_TYPES.join(', ')}`
-          )
+            `Valid types: ${VALID_CONSTRAINT_TYPES.join(", ")}`,
+          ),
         );
       }
 
@@ -245,8 +266,8 @@ export class ConstraintHandler implements ModeHandler {
           createValidationWarning(
             `constraints[${i}].priority`,
             `Unknown priority: ${c.priority}`,
-            `Valid priorities: ${VALID_PRIORITIES.join(', ')}`
-          )
+            `Valid priorities: ${VALID_PRIORITIES.join(", ")}`,
+          ),
         );
       }
 
@@ -255,24 +276,28 @@ export class ConstraintHandler implements ModeHandler {
         warnings.push(
           createValidationWarning(
             `constraints[${i}].expression`,
-            'Constraint lacks expression',
-            'Define the constraint condition'
-          )
+            "Constraint lacks expression",
+            "Define the constraint condition",
+          ),
         );
       }
     }
 
     // Check for conflicting assignments
     if (inputAny.currentAssignments && inputAny.variables) {
-      for (const [varId, value] of Object.entries(inputAny.currentAssignments)) {
-        const variable = inputAny.variables.find((v: any) => (v.id || v.name) === varId);
+      for (const [varId, value] of Object.entries(
+        inputAny.currentAssignments,
+      )) {
+        const variable = inputAny.variables.find(
+          (v: any) => (v.id || v.name) === varId,
+        );
         if (variable && variable.domain && !variable.domain.includes(value)) {
           warnings.push(
             createValidationWarning(
               `currentAssignments[${varId}]`,
               `Assigned value ${value} not in domain`,
-              'Assignment violates domain constraint'
-            )
+              "Assignment violates domain constraint",
+            ),
           );
         }
       }
@@ -292,7 +317,11 @@ export class ConstraintHandler implements ModeHandler {
     const cspThought = thought as ConstraintThought;
     const enhancements: ModeEnhancements = {
       suggestions: [],
-      relatedModes: [ThinkingMode.OPTIMIZATION, ThinkingMode.ALGORITHMIC, ThinkingMode.FORMALLOGIC],
+      relatedModes: [
+        ThinkingMode.OPTIMIZATION,
+        ThinkingMode.ALGORITHMIC,
+        ThinkingMode.FORMALLOGIC,
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -304,122 +333,148 @@ export class ConstraintHandler implements ModeHandler {
         solutionCount: cspThought.solutionCount || 0,
       },
       mentalModels: [
-        'Constraint Propagation',
-        'Arc Consistency',
-        'Backtracking Search',
-        'Domain Reduction',
-        'Conflict-Directed Backjumping',
+        "Constraint Propagation",
+        "Arc Consistency",
+        "Backtracking Search",
+        "Domain Reduction",
+        "Conflict-Directed Backjumping",
       ],
     };
 
     // Solution status
-    enhancements.suggestions!.push(`Status: ${cspThought.solutionStatus || 'unknown'}`);
+    enhancements.suggestions!.push(
+      `Status: ${cspThought.solutionStatus || "unknown"}`,
+    );
 
     // Arc consistency info
     if (cspThought.isArcConsistent) {
-      enhancements.suggestions!.push('Problem is arc-consistent');
+      enhancements.suggestions!.push("Problem is arc-consistent");
     } else {
-      enhancements.warnings!.push('Problem is not arc-consistent - consider propagation');
+      enhancements.warnings!.push(
+        "Problem is not arc-consistent - consider propagation",
+      );
     }
 
     // Thought type-specific guidance
     switch (cspThought.thoughtType) {
-      case 'problem_formulation':
+      case "problem_formulation":
         enhancements.guidingQuestions!.push(
-          'What are the decision variables?',
-          'What constraints must be satisfied?',
-          'Are there any global constraints?'
+          "What are the decision variables?",
+          "What constraints must be satisfied?",
+          "Are there any global constraints?",
         );
         break;
 
-      case 'variable_definition':
+      case "variable_definition":
         enhancements.guidingQuestions!.push(
-          'What is the domain of each variable?',
-          'Are domains finite and discrete?',
-          'Can domains be reduced initially?'
+          "What is the domain of each variable?",
+          "Are domains finite and discrete?",
+          "Can domains be reduced initially?",
         );
         const avgDomainSize =
           cspThought.variables.length > 0
-            ? cspThought.variables.reduce((sum, v) => sum + v.domain.length, 0) / cspThought.variables.length
+            ? cspThought.variables.reduce(
+                (sum, v) => sum + v.domain.length,
+                0,
+              ) / cspThought.variables.length
             : 0;
-        enhancements.suggestions!.push(`Average domain size: ${avgDomainSize.toFixed(1)}`);
+        enhancements.suggestions!.push(
+          `Average domain size: ${avgDomainSize.toFixed(1)}`,
+        );
         break;
 
-      case 'constraint_definition':
+      case "constraint_definition":
         enhancements.guidingQuestions!.push(
-          'Are all constraints necessary?',
-          'Are there redundant constraints?',
-          'Can constraints be tightened?'
+          "Are all constraints necessary?",
+          "Are there redundant constraints?",
+          "Can constraints be tightened?",
         );
-        const requiredCount = cspThought.constraints.filter((c) => c.priority === 'required').length;
+        const requiredCount = cspThought.constraints.filter(
+          (c) => c.priority === "required",
+        ).length;
         const softCount = cspThought.constraints.length - requiredCount;
-        enhancements.suggestions!.push(`Constraints: ${requiredCount} required, ${softCount} soft`);
-        break;
-
-      case 'domain_reduction':
-        enhancements.guidingQuestions!.push(
-          'Which values can be pruned?',
-          'Are there singleton domains?',
-          'Has propagation been exhausted?'
+        enhancements.suggestions!.push(
+          `Constraints: ${requiredCount} required, ${softCount} soft`,
         );
-        const reducedCount = cspThought.variables.filter((v) => v.domainReduced).length;
-        enhancements.suggestions!.push(`Variables with reduced domains: ${reducedCount}`);
         break;
 
-      case 'arc_consistency':
+      case "domain_reduction":
         enhancements.guidingQuestions!.push(
-          'Are all arcs consistent?',
-          'Which arcs need revision?',
-          'Has a fixpoint been reached?'
+          "Which values can be pruned?",
+          "Are there singleton domains?",
+          "Has propagation been exhausted?",
+        );
+        const reducedCount = cspThought.variables.filter(
+          (v) => v.domainReduced,
+        ).length;
+        enhancements.suggestions!.push(
+          `Variables with reduced domains: ${reducedCount}`,
+        );
+        break;
+
+      case "arc_consistency":
+        enhancements.guidingQuestions!.push(
+          "Are all arcs consistent?",
+          "Which arcs need revision?",
+          "Has a fixpoint been reached?",
         );
         if (cspThought.arcs) {
           enhancements.suggestions!.push(`Arcs: ${cspThought.arcs.length}`);
         }
         break;
 
-      case 'propagation':
+      case "propagation":
         enhancements.guidingQuestions!.push(
-          'What can be inferred from current assignments?',
-          'Are there forced assignments?',
-          'Can we detect early failure?'
+          "What can be inferred from current assignments?",
+          "Are there forced assignments?",
+          "Can we detect early failure?",
         );
         break;
 
-      case 'solution_search':
+      case "solution_search":
         enhancements.guidingQuestions!.push(
-          'Which variable should be assigned next?',
-          'What value should be tried first?',
-          'Is the current partial solution extensible?'
+          "Which variable should be assigned next?",
+          "What value should be tried first?",
+          "Is the current partial solution extensible?",
         );
-        const progress = cspThought.variables.length > 0
-          ? (Object.keys(cspThought.currentAssignments).length / cspThought.variables.length) * 100
-          : 0;
-        enhancements.suggestions!.push(`Search progress: ${progress.toFixed(1)}%`);
+        const progress =
+          cspThought.variables.length > 0
+            ? (Object.keys(cspThought.currentAssignments).length /
+                cspThought.variables.length) *
+              100
+            : 0;
+        enhancements.suggestions!.push(
+          `Search progress: ${progress.toFixed(1)}%`,
+        );
         break;
 
-      case 'backtracking':
+      case "backtracking":
         enhancements.guidingQuestions!.push(
-          'Why did the current assignment fail?',
-          'What is the most recent decision point?',
-          'Can we learn from this failure (nogood)?'
+          "Why did the current assignment fail?",
+          "What is the most recent decision point?",
+          "Can we learn from this failure (nogood)?",
         );
-        enhancements.suggestions!.push(`Backtracks so far: ${cspThought.backtracks}`);
+        enhancements.suggestions!.push(
+          `Backtracks so far: ${cspThought.backtracks}`,
+        );
         break;
 
-      case 'feasibility_check':
+      case "feasibility_check":
         enhancements.guidingQuestions!.push(
-          'Is the problem satisfiable?',
-          'Are there inconsistent constraints?',
-          'What is the minimal unsatisfiable subset?'
+          "Is the problem satisfiable?",
+          "Are there inconsistent constraints?",
+          "What is the minimal unsatisfiable subset?",
         );
         break;
     }
 
     // Check for empty domains
-    const emptyDomainVars = cspThought.variables.filter((v) => v.domain.length === 0);
+    const emptyDomainVars = cspThought.variables.filter(
+      (v) => v.domain.length === 0,
+    );
     if (emptyDomainVars.length > 0) {
       enhancements.warnings!.push(
-        `${emptyDomainVars.length} variable(s) have empty domains - problem is infeasible`
+        `${emptyDomainVars.length} variable(s) have empty domains - problem is infeasible`,
       );
     }
 
@@ -427,16 +482,16 @@ export class ConstraintHandler implements ModeHandler {
     const searchStep = cspThought.searchStep || 0;
     if (searchStep > 0 && cspThought.backtracks / searchStep > 0.5) {
       enhancements.warnings!.push(
-        'High backtrack rate - consider better variable/value ordering'
+        "High backtrack rate - consider better variable/value ordering",
       );
     }
 
     // Suggest heuristics
-    if (cspThought.thoughtType === 'solution_search') {
+    if (cspThought.thoughtType === "solution_search") {
       enhancements.mentalModels!.push(
-        'MRV (Minimum Remaining Values)',
-        'Degree Heuristic',
-        'LCV (Least Constraining Value)'
+        "MRV (Minimum Remaining Values)",
+        "Degree Heuristic",
+        "LCV (Least Constraining Value)",
       );
     }
 
@@ -447,17 +502,24 @@ export class ConstraintHandler implements ModeHandler {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType: string): boolean {
-    return this.supportedThoughtTypes.includes(thoughtType as ConstraintThoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType as ConstraintThoughtType,
+    );
   }
 
   /**
    * Resolve thought type from input
    */
-  private resolveThoughtType(inputType: string | undefined): ConstraintThoughtType {
-    if (inputType && VALID_THOUGHT_TYPES.includes(inputType as ConstraintThoughtType)) {
+  private resolveThoughtType(
+    inputType: string | undefined,
+  ): ConstraintThoughtType {
+    if (
+      inputType &&
+      VALID_THOUGHT_TYPES.includes(inputType as ConstraintThoughtType)
+    ) {
       return inputType as ConstraintThoughtType;
     }
-    return 'problem_formulation';
+    return "problem_formulation";
   }
 
   /**
@@ -466,7 +528,7 @@ export class ConstraintHandler implements ModeHandler {
   private normalizeVariable(variable: any): CSPVariable {
     return {
       id: variable.id || randomUUID(),
-      name: variable.name || '',
+      name: variable.name || "",
       domain: variable.domain || [],
       currentValue: variable.currentValue,
       domainReduced: variable.domainReduced ?? false,
@@ -482,19 +544,21 @@ export class ConstraintHandler implements ModeHandler {
     let type = constraint.type;
     if (!type && constraint.variables) {
       const arity = constraint.variables.length;
-      if (arity === 1) type = 'unary';
-      else if (arity === 2) type = 'binary';
-      else type = 'n_ary';
+      if (arity === 1) type = "unary";
+      else if (arity === 2) type = "binary";
+      else type = "n_ary";
     }
 
     return {
       id: constraint.id || randomUUID(),
-      name: constraint.name || '',
-      type: VALID_CONSTRAINT_TYPES.includes(type) ? type : 'binary',
+      name: constraint.name || "",
+      type: VALID_CONSTRAINT_TYPES.includes(type) ? type : "binary",
       variables: constraint.variables || [],
-      expression: constraint.expression || '',
+      expression: constraint.expression || "",
       satisfied: constraint.satisfied,
-      priority: VALID_PRIORITIES.includes(constraint.priority) ? constraint.priority : 'required',
+      priority: VALID_PRIORITIES.includes(constraint.priority)
+        ? constraint.priority
+        : "required",
       weight: constraint.weight,
     };
   }
@@ -504,9 +568,9 @@ export class ConstraintHandler implements ModeHandler {
    */
   private normalizeArc(arc: any): Arc {
     return {
-      from: arc.from || '',
-      to: arc.to || '',
-      constraintId: arc.constraintId || '',
+      from: arc.from || "",
+      to: arc.to || "",
+      constraintId: arc.constraintId || "",
     };
   }
 
@@ -515,7 +579,7 @@ export class ConstraintHandler implements ModeHandler {
    */
   private normalizeAssignment(assignment: any): Assignment {
     return {
-      variableId: assignment.variableId || '',
+      variableId: assignment.variableId || "",
       value: assignment.value,
       step: assignment.step || 0,
       backtracked: assignment.backtracked ?? false,
@@ -525,11 +589,14 @@ export class ConstraintHandler implements ModeHandler {
   /**
    * Generate arcs from binary constraints
    */
-  private generateArcs(_variables: CSPVariable[], constraints: CSPConstraint[]): Arc[] {
+  private generateArcs(
+    _variables: CSPVariable[],
+    constraints: CSPConstraint[],
+  ): Arc[] {
     const arcs: Arc[] = [];
 
     for (const constraint of constraints) {
-      if (constraint.type === 'binary' && constraint.variables.length === 2) {
+      if (constraint.type === "binary" && constraint.variables.length === 2) {
         const [v1, v2] = constraint.variables;
         arcs.push({ from: v1, to: v2, constraintId: constraint.id });
         arcs.push({ from: v2, to: v1, constraintId: constraint.id });
@@ -542,7 +609,10 @@ export class ConstraintHandler implements ModeHandler {
   /**
    * Check basic arc consistency (simplified)
    */
-  private checkArcConsistency(variables: CSPVariable[], constraints: CSPConstraint[]): boolean {
+  private checkArcConsistency(
+    variables: CSPVariable[],
+    constraints: CSPConstraint[],
+  ): boolean {
     // Simplified check - if any variable has empty domain, not consistent
     for (const v of variables) {
       if (v.domain.length === 0) {
@@ -552,7 +622,7 @@ export class ConstraintHandler implements ModeHandler {
 
     // Check if any constraint is definitely unsatisfied
     for (const c of constraints) {
-      if (c.satisfied === false && c.priority === 'required') {
+      if (c.satisfied === false && c.priority === "required") {
         return false;
       }
     }
@@ -567,31 +637,39 @@ export class ConstraintHandler implements ModeHandler {
     explicit: string | undefined,
     variables: CSPVariable[],
     constraints: CSPConstraint[],
-    assignments: Record<string, string | number>
-  ): ConstraintThought['solutionStatus'] {
+    assignments: Record<string, string | number>,
+  ): ConstraintThought["solutionStatus"] {
     // Use explicit status if provided and valid
-    const validStatuses = ['searching', 'found', 'infeasible', 'timeout'] as const;
+    const validStatuses = [
+      "searching",
+      "found",
+      "infeasible",
+      "timeout",
+    ] as const;
     if (explicit && validStatuses.includes(explicit as any)) {
-      return explicit as ConstraintThought['solutionStatus'];
+      return explicit as ConstraintThought["solutionStatus"];
     }
 
     // Check for empty domains (infeasible)
     if (variables.some((v) => v.domain.length === 0)) {
-      return 'infeasible';
+      return "infeasible";
     }
 
     // Check if all variables are assigned
-    const allAssigned = variables.every((v) => assignments[v.id] !== undefined || assignments[v.name] !== undefined);
+    const allAssigned = variables.every(
+      (v) =>
+        assignments[v.id] !== undefined || assignments[v.name] !== undefined,
+    );
     if (allAssigned && variables.length > 0) {
       // Check if all required constraints are satisfied
       const allSatisfied = constraints
-        .filter((c) => c.priority === 'required')
+        .filter((c) => c.priority === "required")
         .every((c) => c.satisfied !== false);
       if (allSatisfied) {
-        return 'found';
+        return "found";
       }
     }
 
-    return 'searching';
+    return "searching";
   }
 }

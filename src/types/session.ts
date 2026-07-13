@@ -2,7 +2,7 @@
  * Session types for managing thinking sessions
  */
 
-import { Thought, ThinkingMode } from './core.js';
+import { Thought, ThinkingMode } from "./core.js";
 
 /**
  * Thinking session
@@ -11,27 +11,27 @@ export interface ThinkingSession {
   // Identification
   id: string;
   title: string;
-  
+
   // Configuration
   mode: ThinkingMode;
   domain?: string;
   config: SessionConfig;
-  
+
   // Content
   thoughts: Thought[];
-  
+
   // Metadata
   createdAt: Date;
   updatedAt: Date;
   author?: string;
-  
+
   // State
   currentThoughtNumber: number;
   isComplete: boolean;
-  
+
   // Analytics
   metrics: SessionMetrics;
-  
+
   // Optional features
   collaborators?: string[];
   tags?: string[];
@@ -44,23 +44,23 @@ export interface ThinkingSession {
 export interface SessionConfig {
   // Mode-specific settings
   modeConfig: ModeConfig;
-  
+
   // Feature flags
   enableAutoSave: boolean;
   enableValidation: boolean;
   enableVisualization: boolean;
-  
+
   // Integration settings
   integrations: {
     mathMcp?: { url: string; enabled: boolean };
     wolfram?: { appId: string; enabled: boolean };
     arxiv?: { enabled: boolean };
   };
-  
+
   // Export preferences
   exportFormats: ExportFormat[];
   autoExportOnComplete: boolean;
-  
+
   // Performance settings
   maxThoughtsInMemory: number;
   compressionThreshold: number;
@@ -119,7 +119,8 @@ export interface SessionMetadata {
 /**
  * Export formats
  */
-export type ExportFormat = 'markdown' | 'latex' | 'json' | 'html' | 'jupyter' | 'mermaid';
+export type ExportFormat =
+  "markdown" | "latex" | "json" | "html" | "jupyter" | "mermaid";
 
 /**
  * Attachment
@@ -139,23 +140,23 @@ export interface Attachment {
 export interface ValidationResult {
   isValid: boolean;
   confidence: number;
-  
+
   issues: ValidationIssue[];
-  
+
   strengthMetrics: {
     logicalSoundness: number;
     empiricalSupport: number;
     mathematicalRigor: number;
     physicalConsistency?: number;
   };
-  
+
   tensorValidation?: {
     rankCorrect: boolean;
     symmetriesVerified: boolean;
     invariantsChecked: boolean;
     dimensionsConsistent: boolean;
   };
-  
+
   suggestions?: string[];
 }
 
@@ -163,9 +164,15 @@ export interface ValidationResult {
  * Validation issue
  */
 export interface ValidationIssue {
-  severity: 'error' | 'warning' | 'info';
+  severity: "error" | "warning" | "info";
   thoughtNumber: number;
   description: string;
   suggestion: string;
-  category: 'logical' | 'mathematical' | 'physical' | 'structural' | 'completeness' | 'interpretation';
+  category:
+    | "logical"
+    | "mathematical"
+    | "physical"
+    | "structural"
+    | "completeness"
+    | "interpretation";
 }

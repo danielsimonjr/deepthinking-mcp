@@ -39,8 +39,8 @@ export const DEFAULT_GRAPHML_OPTIONS: GraphMLOptions = {
   directed: true,
   includeMetadata: true,
   includeLabels: true,
-  graphId: 'G',
-  graphName: 'Graph',
+  graphId: "G",
+  graphName: "Graph",
 };
 
 /**
@@ -48,18 +48,18 @@ export const DEFAULT_GRAPHML_OPTIONS: GraphMLOptions = {
  */
 function escapeXML(str: string): string {
   return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
 /**
  * Generate GraphML document header with schema definitions
  */
 export function generateGraphMLHeader(options: GraphMLOptions = {}): string {
-  const { graphId = 'G', directed = true, graphName } = options;
+  const { graphId = "G", directed = true, graphName } = options;
 
   let header = `<?xml version="1.0" encoding="UTF-8"?>
 <graphml xmlns="http://graphml.graphdrawing.org/xmlns"
@@ -80,7 +80,7 @@ export function generateGraphMLHeader(options: GraphMLOptions = {}): string {
   <!-- Graph attributes -->
   <key id="graphName" for="graph" attr.name="name" attr.type="string"/>
 
-  <graph id="${escapeXML(graphId)}" edgedefault="${directed ? 'directed' : 'undirected'}">`;
+  <graph id="${escapeXML(graphId)}" edgedefault="${directed ? "directed" : "undirected"}">`;
 
   if (graphName) {
     header += `\n    <data key="graphName">${escapeXML(graphName)}</data>`;
@@ -101,7 +101,10 @@ export function generateGraphMLFooter(): string {
 /**
  * Render a node in GraphML format
  */
-export function renderGraphMLNode(node: GraphMLNode, options: GraphMLOptions = {}): string {
+export function renderGraphMLNode(
+  node: GraphMLNode,
+  options: GraphMLOptions = {},
+): string {
   const { includeLabels = true, includeMetadata = true } = options;
 
   let nodeXML = `\n    <node id="${escapeXML(node.id)}">`;
@@ -127,7 +130,10 @@ export function renderGraphMLNode(node: GraphMLNode, options: GraphMLOptions = {
 /**
  * Render an edge in GraphML format
  */
-export function renderGraphMLEdge(edge: GraphMLEdge, options: GraphMLOptions = {}): string {
+export function renderGraphMLEdge(
+  edge: GraphMLEdge,
+  options: GraphMLOptions = {},
+): string {
   const { includeLabels = true, includeMetadata = true } = options;
 
   let edgeXML = `\n    <edge id="${escapeXML(edge.id)}" source="${escapeXML(edge.source)}" target="${escapeXML(edge.target)}">`;
@@ -155,20 +161,20 @@ export function renderGraphMLEdge(edge: GraphMLEdge, options: GraphMLOptions = {
 export function generateGraphML(
   nodes: GraphMLNode[],
   edges: GraphMLEdge[],
-  options: GraphMLOptions = {}
+  options: GraphMLOptions = {},
 ): string {
   const mergedOptions = { ...DEFAULT_GRAPHML_OPTIONS, ...options };
 
   let graphml = generateGraphMLHeader(mergedOptions);
 
   // Add nodes
-  graphml += '\n\n    <!-- Nodes -->';
+  graphml += "\n\n    <!-- Nodes -->";
   for (const node of nodes) {
     graphml += renderGraphMLNode(node, mergedOptions);
   }
 
   // Add edges
-  graphml += '\n\n    <!-- Edges -->';
+  graphml += "\n\n    <!-- Edges -->";
   for (const edge of edges) {
     graphml += renderGraphMLEdge(edge, mergedOptions);
   }
@@ -182,12 +188,12 @@ export function generateGraphML(
  */
 export function createLinearGraphML(
   nodeLabels: string[],
-  options: GraphMLOptions = {}
+  options: GraphMLOptions = {},
 ): string {
   const nodes: GraphMLNode[] = nodeLabels.map((label, i) => ({
     id: `n${i}`,
     label,
-    type: 'step',
+    type: "step",
   }));
 
   const edges: GraphMLEdge[] = [];
@@ -206,23 +212,34 @@ export function createLinearGraphML(
  * Create a hierarchical tree graph
  */
 export function createTreeGraphML(
-  root: { id: string; label: string; children?: Array<{ id: string; label: string; children?: unknown[] }> },
-  options: GraphMLOptions = {}
+  root: {
+    id: string;
+    label: string;
+    children?: Array<{ id: string; label: string; children?: unknown[] }>;
+  },
+  options: GraphMLOptions = {},
 ): string {
   const nodes: GraphMLNode[] = [];
   const edges: GraphMLEdge[] = [];
   let edgeCount = 0;
 
-  function traverse(node: { id: string; label: string; children?: unknown[] }, depth: number = 0): void {
+  function traverse(
+    node: { id: string; label: string; children?: unknown[] },
+    depth: number = 0,
+  ): void {
     nodes.push({
       id: node.id,
       label: node.label,
-      type: depth === 0 ? 'root' : 'node',
+      type: depth === 0 ? "root" : "node",
       metadata: { depth },
     });
 
     if (node.children && Array.isArray(node.children)) {
-      for (const child of node.children as Array<{ id: string; label: string; children?: unknown[] }>) {
+      for (const child of node.children as Array<{
+        id: string;
+        label: string;
+        children?: unknown[];
+      }>) {
         edges.push({
           id: `e${edgeCount++}`,
           source: node.id,
@@ -242,8 +259,13 @@ export function createTreeGraphML(
  */
 export function createLayeredGraphML(
   layers: Array<Array<{ id: string; label: string; type?: string }>>,
-  connections: Array<{ from: string; to: string; label?: string; weight?: number }>,
-  options: GraphMLOptions = {}
+  connections: Array<{
+    from: string;
+    to: string;
+    label?: string;
+    weight?: number;
+  }>,
+  options: GraphMLOptions = {},
 ): string {
   const nodes: GraphMLNode[] = [];
 
@@ -279,8 +301,8 @@ export function createLayeredGraphML(
 export interface GraphMLAttribute {
   id: string;
   name: string;
-  type: 'string' | 'double' | 'int' | 'boolean';
-  for: 'node' | 'edge' | 'graph';
+  type: "string" | "double" | "int" | "boolean";
+  for: "node" | "edge" | "graph";
   defaultValue?: string;
 }
 
@@ -318,7 +340,7 @@ export class GraphMLBuilder {
   addNode(
     id: string,
     label: string,
-    attributes?: { type?: string; metadata?: Record<string, unknown> }
+    attributes?: { type?: string; metadata?: Record<string, unknown> },
   ): this {
     this.nodes.push({
       id,
@@ -359,7 +381,7 @@ export class GraphMLBuilder {
   addEdge(
     source: string,
     target: string,
-    attributes?: { label?: string; metadata?: Record<string, unknown> }
+    attributes?: { label?: string; metadata?: Record<string, unknown> },
   ): this {
     this.edges.push({
       id: `e${this.edgeCounter++}`,
@@ -400,14 +422,14 @@ export class GraphMLBuilder {
    */
   defineNodeAttribute(
     name: string,
-    type: 'string' | 'double' | 'int' | 'boolean',
-    defaultValue?: string
+    type: "string" | "double" | "int" | "boolean",
+    defaultValue?: string,
   ): this {
     this.customAttributes.push({
       id: `node_${name}`,
       name,
       type,
-      for: 'node',
+      for: "node",
       defaultValue,
     });
     return this;
@@ -422,14 +444,14 @@ export class GraphMLBuilder {
    */
   defineEdgeAttribute(
     name: string,
-    type: 'string' | 'double' | 'int' | 'boolean',
-    defaultValue?: string
+    type: "string" | "double" | "int" | "boolean",
+    defaultValue?: string,
   ): this {
     this.customAttributes.push({
       id: `edge_${name}`,
       name,
       type,
-      for: 'edge',
+      for: "edge",
       defaultValue,
     });
     return this;
@@ -554,7 +576,13 @@ export class GraphMLBuilder {
    * Render with custom attribute definitions
    */
   private renderWithCustomAttributes(): string {
-    const { graphId = 'G', directed = true, graphName, includeLabels = true, includeMetadata = true } = this.options;
+    const {
+      graphId = "G",
+      directed = true,
+      graphName,
+      includeLabels = true,
+      includeMetadata = true,
+    } = this.options;
 
     let graphml = `<?xml version="1.0" encoding="UTF-8"?>
 <graphml xmlns="http://graphml.graphdrawing.org/xmlns"
@@ -585,20 +613,20 @@ export class GraphMLBuilder {
       }
     }
 
-    graphml += `\n\n  <graph id="${escapeXMLInternal(graphId)}" edgedefault="${directed ? 'directed' : 'undirected'}">`;
+    graphml += `\n\n  <graph id="${escapeXMLInternal(graphId)}" edgedefault="${directed ? "directed" : "undirected"}">`;
 
     if (graphName) {
       graphml += `\n    <data key="graphName">${escapeXMLInternal(graphName)}</data>`;
     }
 
     // Add nodes
-    graphml += '\n\n    <!-- Nodes -->';
+    graphml += "\n\n    <!-- Nodes -->";
     for (const node of this.nodes) {
       graphml += renderGraphMLNode(node, { includeLabels, includeMetadata });
     }
 
     // Add edges
-    graphml += '\n\n    <!-- Edges -->';
+    graphml += "\n\n    <!-- Edges -->";
     for (const edge of this.edges) {
       graphml += renderGraphMLEdge(edge, { includeLabels, includeMetadata });
     }
@@ -617,7 +645,7 @@ export class GraphMLBuilder {
   static from(
     nodes: GraphMLNode[] = [],
     edges: GraphMLEdge[] = [],
-    options: GraphMLOptions = {}
+    options: GraphMLOptions = {},
   ): GraphMLBuilder {
     const builder = new GraphMLBuilder();
     builder.nodes = [...nodes];
@@ -634,9 +662,9 @@ export class GraphMLBuilder {
  */
 function escapeXMLInternal(str: string): string {
   return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }

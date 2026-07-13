@@ -8,16 +8,16 @@
  * - Dialectic analysis
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode, ArgumentationThought } from '../../types/core.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode, ArgumentationThought } from "../../types/core.js";
 import type {
   ArgumentationThoughtType,
   ToulminArgument,
   Warrant,
   LogicalFallacy,
   DialecticAnalysis,
-} from '../../types/modes/argumentation.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+} from "../../types/modes/argumentation.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -28,22 +28,66 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 /**
  * Common logical fallacies to detect
  */
-const COMMON_FALLACIES: { name: string; category: 'formal' | 'informal'; patterns: string[] }[] = [
-  { name: 'Ad Hominem', category: 'informal', patterns: ['attacks the person', 'character of'] },
-  { name: 'Straw Man', category: 'informal', patterns: ['misrepresents', 'exaggerated version'] },
-  { name: 'False Dilemma', category: 'informal', patterns: ['either/or', 'only two options'] },
-  { name: 'Circular Reasoning', category: 'formal', patterns: ['because it is', 'self-evident'] },
-  { name: 'Appeal to Authority', category: 'informal', patterns: ['expert says', 'authority claims'] },
-  { name: 'Hasty Generalization', category: 'informal', patterns: ['always', 'never', 'all', 'none'] },
-  { name: 'Red Herring', category: 'informal', patterns: ['but what about', 'changing subject'] },
-  { name: 'Slippery Slope', category: 'informal', patterns: ['will lead to', 'eventually'] },
-  { name: 'Appeal to Emotion', category: 'informal', patterns: ['feel', 'fear', 'outrage'] },
-  { name: 'False Cause', category: 'formal', patterns: ['caused by', 'therefore'] },
+const COMMON_FALLACIES: {
+  name: string;
+  category: "formal" | "informal";
+  patterns: string[];
+}[] = [
+  {
+    name: "Ad Hominem",
+    category: "informal",
+    patterns: ["attacks the person", "character of"],
+  },
+  {
+    name: "Straw Man",
+    category: "informal",
+    patterns: ["misrepresents", "exaggerated version"],
+  },
+  {
+    name: "False Dilemma",
+    category: "informal",
+    patterns: ["either/or", "only two options"],
+  },
+  {
+    name: "Circular Reasoning",
+    category: "formal",
+    patterns: ["because it is", "self-evident"],
+  },
+  {
+    name: "Appeal to Authority",
+    category: "informal",
+    patterns: ["expert says", "authority claims"],
+  },
+  {
+    name: "Hasty Generalization",
+    category: "informal",
+    patterns: ["always", "never", "all", "none"],
+  },
+  {
+    name: "Red Herring",
+    category: "informal",
+    patterns: ["but what about", "changing subject"],
+  },
+  {
+    name: "Slippery Slope",
+    category: "informal",
+    patterns: ["will lead to", "eventually"],
+  },
+  {
+    name: "Appeal to Emotion",
+    category: "informal",
+    patterns: ["feel", "fear", "outrage"],
+  },
+  {
+    name: "False Cause",
+    category: "formal",
+    patterns: ["caused by", "therefore"],
+  },
 ];
 
 /**
@@ -57,24 +101,28 @@ const COMMON_FALLACIES: { name: string; category: 'formal' | 'informal'; pattern
  */
 export class ArgumentationHandler implements ModeHandler {
   readonly mode = ThinkingMode.ARGUMENTATION;
-  readonly modeName = 'Academic Argumentation';
-  readonly description = 'Toulmin model argumentation with dialectic analysis and fallacy detection';
+  readonly modeName = "Academic Argumentation";
+  readonly description =
+    "Toulmin model argumentation with dialectic analysis and fallacy detection";
 
   private readonly supportedThoughtTypes: ArgumentationThoughtType[] = [
-    'claim_formulation',
-    'grounds_identification',
-    'warrant_construction',
-    'backing_provision',
-    'rebuttal_anticipation',
-    'qualifier_specification',
-    'argument_assembly',
-    'dialectic_analysis',
+    "claim_formulation",
+    "grounds_identification",
+    "warrant_construction",
+    "backing_provision",
+    "rebuttal_anticipation",
+    "qualifier_specification",
+    "argument_assembly",
+    "dialectic_analysis",
   ];
 
   /**
    * Create an argumentation thought from input
    */
-  createThought(input: ThinkingToolInput, sessionId: string): ArgumentationThought {
+  createThought(
+    input: ThinkingToolInput,
+    sessionId: string,
+  ): ArgumentationThought {
     const inputAny = input as any;
 
     // Resolve thought type
@@ -82,10 +130,14 @@ export class ArgumentationHandler implements ModeHandler {
 
     // Process arguments and calculate strength
     const arguments_ = this.processArguments(inputAny.arguments || []);
-    const argumentStrength = this.calculateOverallStrength(arguments_, inputAny);
+    const argumentStrength = this.calculateOverallStrength(
+      arguments_,
+      inputAny,
+    );
 
     // Detect fallacies
-    const detectedFallacies = inputAny.fallacies || this.detectFallacies(inputAny);
+    const detectedFallacies =
+      inputAny.fallacies || this.detectFallacies(inputAny);
 
     return {
       id: randomUUID(),
@@ -130,18 +182,24 @@ export class ArgumentationHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Check for claims
-    if ((!inputAny.claims || inputAny.claims.length === 0) && !inputAny.currentClaim) {
+    if (
+      (!inputAny.claims || inputAny.claims.length === 0) &&
+      !inputAny.currentClaim
+    ) {
       warnings.push(
         createValidationWarning(
-          'claims',
-          'No claims specified',
-          'Formulate a clear claim or thesis for your argument'
-        )
+          "claims",
+          "No claims specified",
+          "Formulate a clear claim or thesis for your argument",
+        ),
       );
     }
 
     // Validate Toulmin structure completeness
-    if (inputAny.currentArgument || (inputAny.arguments && inputAny.arguments.length > 0)) {
+    if (
+      inputAny.currentArgument ||
+      (inputAny.arguments && inputAny.arguments.length > 0)
+    ) {
       const args = inputAny.arguments || [inputAny.currentArgument];
       for (let i = 0; i < args.length; i++) {
         const arg = args[i];
@@ -153,50 +211,59 @@ export class ArgumentationHandler implements ModeHandler {
 
     // Check grounds-to-claim ratio
     const groundsCount = inputAny.grounds?.length || 0;
-    const claimsCount = inputAny.claims?.length || (inputAny.currentClaim ? 1 : 0);
+    const claimsCount =
+      inputAny.claims?.length || (inputAny.currentClaim ? 1 : 0);
     if (claimsCount > 0 && groundsCount === 0) {
       warnings.push(
         createValidationWarning(
-          'grounds',
-          'Claims lack supporting grounds/evidence',
-          'Provide evidence or data to support your claims'
-        )
+          "grounds",
+          "Claims lack supporting grounds/evidence",
+          "Provide evidence or data to support your claims",
+        ),
       );
     }
 
     // Check for warrants
-    if (groundsCount > 0 && (!inputAny.warrants || inputAny.warrants.length === 0)) {
+    if (
+      groundsCount > 0 &&
+      (!inputAny.warrants || inputAny.warrants.length === 0)
+    ) {
       warnings.push(
         createValidationWarning(
-          'warrants',
-          'No warrants connecting grounds to claims',
-          'Explain how your evidence supports your claim'
-        )
+          "warrants",
+          "No warrants connecting grounds to claims",
+          "Explain how your evidence supports your claim",
+        ),
       );
     }
 
     // Check warrant strength
     if (inputAny.warrants) {
-      const weakWarrants = inputAny.warrants.filter((w: Warrant) => w.strength < 0.5);
+      const weakWarrants = inputAny.warrants.filter(
+        (w: Warrant) => w.strength < 0.5,
+      );
       if (weakWarrants.length > inputAny.warrants.length / 2) {
         warnings.push(
           createValidationWarning(
-            'warrants',
-            'Many warrants have low strength',
-            'Consider strengthening warrants with additional backing'
-          )
+            "warrants",
+            "Many warrants have low strength",
+            "Consider strengthening warrants with additional backing",
+          ),
         );
       }
     }
 
     // Check for rebuttals (thorough argumentation considers counter-arguments)
-    if (inputAny.arguments?.length > 0 && (!inputAny.rebuttals || inputAny.rebuttals.length === 0)) {
+    if (
+      inputAny.arguments?.length > 0 &&
+      (!inputAny.rebuttals || inputAny.rebuttals.length === 0)
+    ) {
       warnings.push(
         createValidationWarning(
-          'rebuttals',
-          'No counter-arguments addressed',
-          'Anticipate and address potential rebuttals for stronger argumentation'
-        )
+          "rebuttals",
+          "No counter-arguments addressed",
+          "Anticipate and address potential rebuttals for stronger argumentation",
+        ),
       );
     }
 
@@ -208,14 +275,16 @@ export class ArgumentationHandler implements ModeHandler {
 
     // Check for detected fallacies
     if (inputAny.fallacies && inputAny.fallacies.length > 0) {
-      const criticalFallacies = inputAny.fallacies.filter((f: LogicalFallacy) => f.severity === 'critical');
+      const criticalFallacies = inputAny.fallacies.filter(
+        (f: LogicalFallacy) => f.severity === "critical",
+      );
       if (criticalFallacies.length > 0) {
         warnings.push(
           createValidationWarning(
-            'fallacies',
+            "fallacies",
             `${criticalFallacies.length} critical fallacies detected`,
-            'Address critical logical fallacies before finalizing argument'
-          )
+            "Address critical logical fallacies before finalizing argument",
+          ),
         );
       }
     }
@@ -232,15 +301,19 @@ export class ArgumentationHandler implements ModeHandler {
   getEnhancements(thought: ArgumentationThought): ModeEnhancements {
     const enhancements: ModeEnhancements = {
       suggestions: [],
-      relatedModes: [ThinkingMode.FORMALLOGIC, ThinkingMode.DEDUCTIVE, ThinkingMode.CRITIQUE],
+      relatedModes: [
+        ThinkingMode.FORMALLOGIC,
+        ThinkingMode.DEDUCTIVE,
+        ThinkingMode.CRITIQUE,
+      ],
       metrics: {},
       guidingQuestions: [],
       mentalModels: [
-        'Toulmin Model',
-        'Dialectic Method',
-        'Rhetorical Triangle (Ethos, Pathos, Logos)',
-        'Logical Validity',
-        'Counter-argument Analysis',
+        "Toulmin Model",
+        "Dialectic Method",
+        "Rhetorical Triangle (Ethos, Pathos, Logos)",
+        "Logical Validity",
+        "Counter-argument Analysis",
       ],
     };
 
@@ -252,12 +325,17 @@ export class ArgumentationHandler implements ModeHandler {
     const fallacies = thought.fallacies || [];
 
     // Calculate metrics
-    const groundsToClaimRatio = claims.length > 0 ? grounds.length / claims.length : 0;
-    const warrantsPerClaim = claims.length > 0 ? warrants.length / claims.length : 0;
-    const rebuttalCoverage = arguments_.length > 0 ? rebuttals.length / arguments_.length : 0;
-    const avgGroundsReliability = grounds.length > 0
-      ? grounds.reduce((sum, g) => sum + (g.reliability || 0), 0) / grounds.length
-      : 0;
+    const groundsToClaimRatio =
+      claims.length > 0 ? grounds.length / claims.length : 0;
+    const warrantsPerClaim =
+      claims.length > 0 ? warrants.length / claims.length : 0;
+    const rebuttalCoverage =
+      arguments_.length > 0 ? rebuttals.length / arguments_.length : 0;
+    const avgGroundsReliability =
+      grounds.length > 0
+        ? grounds.reduce((sum, g) => sum + (g.reliability || 0), 0) /
+          grounds.length
+        : 0;
 
     enhancements.metrics = {
       claimCount: claims.length,
@@ -276,33 +354,49 @@ export class ArgumentationHandler implements ModeHandler {
     // Stage-specific suggestions
     const thoughtType = thought.thoughtType;
 
-    if (thoughtType === 'claim_formulation') {
-      enhancements.suggestions!.push('Ensure claim is specific, debatable, and significant');
-      enhancements.guidingQuestions!.push('Is this claim falsifiable and not self-evident?');
+    if (thoughtType === "claim_formulation") {
+      enhancements.suggestions!.push(
+        "Ensure claim is specific, debatable, and significant",
+      );
+      enhancements.guidingQuestions!.push(
+        "Is this claim falsifiable and not self-evident?",
+      );
     }
 
-    if (thoughtType === 'grounds_identification') {
-      enhancements.suggestions!.push('Gather diverse types of evidence: empirical, statistical, testimonial');
+    if (thoughtType === "grounds_identification") {
+      enhancements.suggestions!.push(
+        "Gather diverse types of evidence: empirical, statistical, testimonial",
+      );
       if (avgGroundsReliability < 0.6) {
-        enhancements.suggestions!.push('Consider strengthening evidence reliability');
+        enhancements.suggestions!.push(
+          "Consider strengthening evidence reliability",
+        );
       }
     }
 
-    if (thoughtType === 'warrant_construction') {
+    if (thoughtType === "warrant_construction") {
       const implicitWarrants = warrants.filter((w) => w.implicit);
       if (implicitWarrants.length > warrants.length * 0.5) {
-        enhancements.suggestions!.push('Many warrants are implicit - consider making them explicit');
+        enhancements.suggestions!.push(
+          "Many warrants are implicit - consider making them explicit",
+        );
       }
     }
 
-    if (thoughtType === 'rebuttal_anticipation') {
-      enhancements.suggestions!.push('Consider rebuttals targeting each Toulmin element');
-      enhancements.guidingQuestions!.push('What would a skeptic say about this argument?');
+    if (thoughtType === "rebuttal_anticipation") {
+      enhancements.suggestions!.push(
+        "Consider rebuttals targeting each Toulmin element",
+      );
+      enhancements.guidingQuestions!.push(
+        "What would a skeptic say about this argument?",
+      );
     }
 
-    if (thoughtType === 'dialectic_analysis' && thought.dialectic) {
+    if (thoughtType === "dialectic_analysis" && thought.dialectic) {
       if (!thought.dialectic.synthesis) {
-        enhancements.suggestions!.push('Develop a synthesis that transcends thesis and antithesis');
+        enhancements.suggestions!.push(
+          "Develop a synthesis that transcends thesis and antithesis",
+        );
       }
     }
 
@@ -310,40 +404,53 @@ export class ArgumentationHandler implements ModeHandler {
     if (fallacies.length > 0) {
       enhancements.warnings = enhancements.warnings || [];
       for (const fallacy of fallacies) {
-        enhancements.warnings.push(`${fallacy.severity} fallacy: ${fallacy.name} - ${fallacy.description}`);
+        enhancements.warnings.push(
+          `${fallacy.severity} fallacy: ${fallacy.name} - ${fallacy.description}`,
+        );
       }
     }
 
     // Argument strength assessment
     if (thought.argumentStrength < 0.5) {
-      enhancements.suggestions!.push('Argument strength is low - consider adding more grounds or strengthening warrants');
+      enhancements.suggestions!.push(
+        "Argument strength is low - consider adding more grounds or strengthening warrants",
+      );
     } else if (thought.argumentStrength > 0.8) {
-      enhancements.suggestions!.push('Strong argument - consider addressing potential rebuttals');
+      enhancements.suggestions!.push(
+        "Strong argument - consider addressing potential rebuttals",
+      );
     }
 
     // Guiding questions
     enhancements.guidingQuestions!.push(
-      'Is the evidence sufficient and relevant to the claim?',
-      'Are there unstated assumptions in the warrants?',
-      'What are the strongest counter-arguments?',
-      'Does the qualifier appropriately limit the claim\'s scope?'
+      "Is the evidence sufficient and relevant to the claim?",
+      "Are there unstated assumptions in the warrants?",
+      "What are the strongest counter-arguments?",
+      "Does the qualifier appropriately limit the claim's scope?",
     );
 
     return enhancements;
   }
 
   supportsThoughtType(thoughtType: string): boolean {
-    return this.supportedThoughtTypes.includes(thoughtType as ArgumentationThoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType as ArgumentationThoughtType,
+    );
   }
 
   /**
    * Resolve thought type to valid ArgumentationThoughtType
    */
-  private resolveThoughtType(inputType: string | undefined): ArgumentationThoughtType {
-    if (inputType && this.supportedThoughtTypes.includes(inputType as ArgumentationThoughtType)) {
+  private resolveThoughtType(
+    inputType: string | undefined,
+  ): ArgumentationThoughtType {
+    if (
+      inputType &&
+      this.supportedThoughtTypes.includes(inputType as ArgumentationThoughtType)
+    ) {
       return inputType as ArgumentationThoughtType;
     }
-    return 'claim_formulation';
+    return "claim_formulation";
   }
 
   /**
@@ -359,9 +466,10 @@ export class ArgumentationHandler implements ModeHandler {
       backings: arg.backings || [],
       qualifiers: arg.qualifiers || [],
       rebuttals: arg.rebuttals || [],
-      overallStrength: arg.overallStrength ?? this.calculateArgumentStrength(arg),
-      validity: arg.validity || 'questionable',
-      soundness: arg.soundness || 'questionable',
+      overallStrength:
+        arg.overallStrength ?? this.calculateArgumentStrength(arg),
+      validity: arg.validity || "questionable",
+      soundness: arg.soundness || "questionable",
     }));
   }
 
@@ -373,14 +481,20 @@ export class ArgumentationHandler implements ModeHandler {
 
     // Grounds contribution
     if (arg.grounds && arg.grounds.length > 0) {
-      const avgReliability = arg.grounds.reduce((sum, g) => sum + (g.reliability || 0.5), 0) / arg.grounds.length;
-      const avgRelevance = arg.grounds.reduce((sum, g) => sum + (g.relevance || 0.5), 0) / arg.grounds.length;
+      const avgReliability =
+        arg.grounds.reduce((sum, g) => sum + (g.reliability || 0.5), 0) /
+        arg.grounds.length;
+      const avgRelevance =
+        arg.grounds.reduce((sum, g) => sum + (g.relevance || 0.5), 0) /
+        arg.grounds.length;
       strength += (avgReliability + avgRelevance) * 0.15;
     }
 
     // Warrants contribution
     if (arg.warrants && arg.warrants.length > 0) {
-      const avgWarrantStrength = arg.warrants.reduce((sum, w) => sum + (w.strength || 0.5), 0) / arg.warrants.length;
+      const avgWarrantStrength =
+        arg.warrants.reduce((sum, w) => sum + (w.strength || 0.5), 0) /
+        arg.warrants.length;
       strength += avgWarrantStrength * 0.15;
     }
 
@@ -401,9 +515,15 @@ export class ArgumentationHandler implements ModeHandler {
   /**
    * Calculate overall argument strength for the thought
    */
-  private calculateOverallStrength(arguments_: ToulminArgument[], input: any): number {
+  private calculateOverallStrength(
+    arguments_: ToulminArgument[],
+    input: any,
+  ): number {
     if (arguments_.length > 0) {
-      return arguments_.reduce((sum, arg) => sum + arg.overallStrength, 0) / arguments_.length;
+      return (
+        arguments_.reduce((sum, arg) => sum + arg.overallStrength, 0) /
+        arguments_.length
+      );
     }
 
     // Calculate from individual components if no complete arguments
@@ -423,7 +543,7 @@ export class ArgumentationHandler implements ModeHandler {
    */
   private detectFallacies(input: any): LogicalFallacy[] {
     const fallacies: LogicalFallacy[] = [];
-    const content = input.thought?.toLowerCase() || '';
+    const content = input.thought?.toLowerCase() || "";
 
     // Simple pattern-based fallacy detection
     for (const fallacy of COMMON_FALLACIES) {
@@ -434,8 +554,8 @@ export class ArgumentationHandler implements ModeHandler {
             name: fallacy.name,
             category: fallacy.category,
             description: `Potential ${fallacy.name} detected based on language patterns`,
-            location: 'thought content',
-            severity: 'minor',
+            location: "thought content",
+            severity: "minor",
           });
           break;
         }
@@ -446,14 +566,18 @@ export class ArgumentationHandler implements ModeHandler {
     if (input.warrants && input.claims) {
       for (const warrant of input.warrants) {
         for (const claim of input.claims) {
-          if (warrant.statement?.toLowerCase().includes(claim.statement?.toLowerCase().slice(0, 20))) {
+          if (
+            warrant.statement
+              ?.toLowerCase()
+              .includes(claim.statement?.toLowerCase().slice(0, 20))
+          ) {
             fallacies.push({
               id: randomUUID(),
-              name: 'Circular Reasoning',
-              category: 'formal',
-              description: 'Warrant appears to restate the claim',
+              name: "Circular Reasoning",
+              category: "formal",
+              description: "Warrant appears to restate the claim",
               location: `warrant ${warrant.id}`,
-              severity: 'significant',
+              severity: "significant",
             });
           }
         }
@@ -466,7 +590,10 @@ export class ArgumentationHandler implements ModeHandler {
   /**
    * Validate Toulmin argument structure
    */
-  private validateToulminArgument(arg: ToulminArgument, index: number): ValidationResult {
+  private validateToulminArgument(
+    arg: ToulminArgument,
+    index: number,
+  ): ValidationResult {
     const errors: ValidationError[] = [];
     const warnings: ValidationWarning[] = [];
 
@@ -474,9 +601,9 @@ export class ArgumentationHandler implements ModeHandler {
       errors.push(
         createValidationError(
           `arguments[${index}].claim`,
-          'Argument has no claim',
-          'MISSING_CLAIM'
-        )
+          "Argument has no claim",
+          "MISSING_CLAIM",
+        ),
       );
     }
 
@@ -484,9 +611,9 @@ export class ArgumentationHandler implements ModeHandler {
       warnings.push(
         createValidationWarning(
           `arguments[${index}].grounds`,
-          'Argument has no grounds/evidence',
-          'Add supporting evidence for the claim'
-        )
+          "Argument has no grounds/evidence",
+          "Add supporting evidence for the claim",
+        ),
       );
     }
 
@@ -494,29 +621,32 @@ export class ArgumentationHandler implements ModeHandler {
       warnings.push(
         createValidationWarning(
           `arguments[${index}].warrants`,
-          'Argument has no warrants',
-          'Explain the reasoning connecting evidence to claim'
-        )
+          "Argument has no warrants",
+          "Explain the reasoning connecting evidence to claim",
+        ),
       );
     }
 
     // Check for weak warrants without backing
     if (arg.warrants) {
       const weakWithoutBacking = arg.warrants.filter(
-        (w) => w.strength < 0.6 && !arg.backings?.some((b) => b.warrantId === w.id)
+        (w) =>
+          w.strength < 0.6 && !arg.backings?.some((b) => b.warrantId === w.id),
       );
       if (weakWithoutBacking.length > 0) {
         warnings.push(
           createValidationWarning(
             `arguments[${index}].warrants`,
-            'Some weak warrants lack backing',
-            'Strengthen weak warrants with additional support'
-          )
+            "Some weak warrants lack backing",
+            "Strengthen weak warrants with additional support",
+          ),
         );
       }
     }
 
-    return errors.length > 0 ? validationFailure(errors, warnings) : validationSuccess(warnings);
+    return errors.length > 0
+      ? validationFailure(errors, warnings)
+      : validationSuccess(warnings);
   }
 
   /**
@@ -528,30 +658,30 @@ export class ArgumentationHandler implements ModeHandler {
     if (!dialectic.thesis) {
       warnings.push(
         createValidationWarning(
-          'dialectic.thesis',
-          'No thesis position defined',
-          'Define the initial thesis position'
-        )
+          "dialectic.thesis",
+          "No thesis position defined",
+          "Define the initial thesis position",
+        ),
       );
     }
 
     if (!dialectic.antithesis) {
       warnings.push(
         createValidationWarning(
-          'dialectic.antithesis',
-          'No antithesis position defined',
-          'Define the opposing antithesis position'
-        )
+          "dialectic.antithesis",
+          "No antithesis position defined",
+          "Define the opposing antithesis position",
+        ),
       );
     }
 
-    if (dialectic.resolution === 'synthesis_achieved' && !dialectic.synthesis) {
+    if (dialectic.resolution === "synthesis_achieved" && !dialectic.synthesis) {
       warnings.push(
         createValidationWarning(
-          'dialectic.synthesis',
-          'Resolution claims synthesis but no synthesis defined',
-          'Provide the synthesis that transcends both positions'
-        )
+          "dialectic.synthesis",
+          "Resolution claims synthesis but no synthesis defined",
+          "Provide the synthesis that transcends both positions",
+        ),
       );
     }
 

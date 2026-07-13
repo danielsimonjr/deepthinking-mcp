@@ -10,15 +10,15 @@ import {
   getTaxonomyStats,
   type ReasoningType,
   type ReasoningCategory,
-} from './reasoning-types.js';
+} from "./reasoning-types.js";
 
 /**
  * Query filter for reasoning types
  */
 export interface TaxonomyQuery {
   categories?: ReasoningCategory[];
-  difficulties?: Array<'beginner' | 'intermediate' | 'advanced' | 'expert'>;
-  frequencies?: Array<'rare' | 'uncommon' | 'common' | 'very_common'>;
+  difficulties?: Array<"beginner" | "intermediate" | "advanced" | "expert">;
+  frequencies?: Array<"rare" | "uncommon" | "common" | "very_common">;
   keywords?: string[];
   applications?: string[];
   hasPrerequisites?: boolean;
@@ -49,7 +49,8 @@ export interface NavigationPath {
 export interface NavigationStep {
   from: ReasoningType;
   to: ReasoningType;
-  relationship: 'prerequisite' | 'related' | 'same_category' | 'application_overlap';
+  relationship:
+    "prerequisite" | "related" | "same_category" | "application_overlap";
   distance: number;
 }
 
@@ -128,46 +129,61 @@ export class TaxonomyNavigator {
 
     // Apply filters
     if (filters.categories && filters.categories.length > 0) {
-      candidates = candidates.filter(t => filters.categories!.includes(t.category));
+      candidates = candidates.filter((t) =>
+        filters.categories!.includes(t.category),
+      );
     }
 
     if (filters.difficulties && filters.difficulties.length > 0) {
-      candidates = candidates.filter(t => filters.difficulties!.includes(t.difficulty));
+      candidates = candidates.filter((t) =>
+        filters.difficulties!.includes(t.difficulty),
+      );
     }
 
     if (filters.frequencies && filters.frequencies.length > 0) {
-      candidates = candidates.filter(t => filters.frequencies!.includes(t.usageFrequency));
+      candidates = candidates.filter((t) =>
+        filters.frequencies!.includes(t.usageFrequency),
+      );
     }
 
     if (filters.hasPrerequisites !== undefined) {
-      candidates = candidates.filter(t => (t.prerequisites.length > 0) === filters.hasPrerequisites);
+      candidates = candidates.filter(
+        (t) => t.prerequisites.length > 0 === filters.hasPrerequisites,
+      );
     }
 
     if (filters.hasFormalDefinition !== undefined) {
-      candidates = candidates.filter(t => (t.formalDefinition !== undefined) === filters.hasFormalDefinition);
+      candidates = candidates.filter(
+        (t) =>
+          (t.formalDefinition !== undefined) === filters.hasFormalDefinition,
+      );
     }
 
     // Keyword filter
     if (filters.keywords && filters.keywords.length > 0) {
-      candidates = candidates.filter(t => filters.keywords!.some(k => t.keywords.includes(k.toLowerCase())));
+      candidates = candidates.filter((t) =>
+        filters.keywords!.some((k) => t.keywords.includes(k.toLowerCase())),
+      );
     }
 
     // Application filter
     if (filters.applications && filters.applications.length > 0) {
-      candidates = candidates.filter(t =>
-        filters.applications!.some(app =>
-          t.applications.some(tApp => tApp.toLowerCase().includes(app.toLowerCase()))
-        )
+      candidates = candidates.filter((t) =>
+        filters.applications!.some((app) =>
+          t.applications.some((tApp) =>
+            tApp.toLowerCase().includes(app.toLowerCase()),
+          ),
+        ),
       );
     }
 
     // Text search - only filter if we find matches, otherwise use for scoring
     if (filters.searchText) {
       const searchResults = searchReasoningTypes(filters.searchText);
-      const searchMatchIds = new Set(searchResults.map(r => r.id));
+      const searchMatchIds = new Set(searchResults.map((r) => r.id));
       // Only filter down if search found matches
       if (searchMatchIds.size > 0) {
-        candidates = candidates.filter(t => searchMatchIds.has(t.id));
+        candidates = candidates.filter((t) => searchMatchIds.has(t.id));
       }
       // If search found nothing, still keep all candidates for scoring
     }
@@ -193,22 +209,26 @@ export class TaxonomyNavigator {
       }
 
       if (filters.keywords) {
-        const matchedKeywords = filters.keywords.filter(k =>
-          type.keywords.some(tk => tk.toLowerCase().includes(k.toLowerCase()))
+        const matchedKeywords = filters.keywords.filter((k) =>
+          type.keywords.some((tk) =>
+            tk.toLowerCase().includes(k.toLowerCase()),
+          ),
         );
         score += matchedKeywords.length * 7;
         if (matchedKeywords.length > 0) {
-          matchReasons.push(`Keywords: ${matchedKeywords.join(', ')}`);
+          matchReasons.push(`Keywords: ${matchedKeywords.join(", ")}`);
         }
       }
 
       if (filters.applications) {
-        const matchedApps = filters.applications.filter(app =>
-          type.applications.some(tApp => tApp.toLowerCase().includes(app.toLowerCase()))
+        const matchedApps = filters.applications.filter((app) =>
+          type.applications.some((tApp) =>
+            tApp.toLowerCase().includes(app.toLowerCase()),
+          ),
         );
         score += matchedApps.length * 8;
         if (matchedApps.length > 0) {
-          matchReasons.push(`Applications: ${matchedApps.join(', ')}`);
+          matchReasons.push(`Applications: ${matchedApps.join(", ")}`);
         }
       }
 
@@ -216,10 +236,10 @@ export class TaxonomyNavigator {
         const lowerSearch = filters.searchText.toLowerCase();
         if (type.name.toLowerCase().includes(lowerSearch)) {
           score += 20;
-          matchReasons.push('Name match');
+          matchReasons.push("Name match");
         } else if (type.description.toLowerCase().includes(lowerSearch)) {
           score += 10;
-          matchReasons.push('Description match');
+          matchReasons.push("Description match");
         }
       }
 
@@ -246,7 +266,7 @@ export class TaxonomyNavigator {
     if (!typeIds) return [];
 
     return Array.from(typeIds)
-      .map(id => this.index.get(id))
+      .map((id) => this.index.get(id))
       .filter(Boolean) as ReasoningType[];
   }
 
@@ -278,27 +298,32 @@ export class TaxonomyNavigator {
 
     // Prerequisites
     const prerequisites = startType.prerequisites
-      .map(id => this.index.get(id))
+      .map((id) => this.index.get(id))
       .filter(Boolean) as ReasoningType[];
 
     // Related types
     const related = startType.relatedTypes
-      .map(id => this.index.get(id))
+      .map((id) => this.index.get(id))
       .filter(Boolean) as ReasoningType[];
 
     // Same category
-    const categoryTypeIds = this.categoryIndex.get(startType.category) || new Set();
+    const categoryTypeIds =
+      this.categoryIndex.get(startType.category) || new Set();
     const sameCategory = Array.from(categoryTypeIds)
-      .filter(id => id !== typeId)
-      .map(id => this.index.get(id))
+      .filter((id) => id !== typeId)
+      .map((id) => this.index.get(id))
       .filter(Boolean) as ReasoningType[];
 
     // Similar applications
-    const startApps = new Set(startType.applications.map(a => a.toLowerCase()));
+    const startApps = new Set(
+      startType.applications.map((a) => a.toLowerCase()),
+    );
     const similarApplications = Array.from(this.index.values())
-      .filter(t => {
+      .filter((t) => {
         if (t.id === typeId) return false;
-        const overlap = t.applications.filter(app => startApps.has(app.toLowerCase()));
+        const overlap = t.applications.filter((app) =>
+          startApps.has(app.toLowerCase()),
+        );
         return overlap.length > 0;
       })
       .slice(0, 10); // Limit to top 10
@@ -351,7 +376,10 @@ export class TaxonomyNavigator {
   /**
    * Build dependency graph around a reasoning type
    */
-  private buildDependencyGraph(startId: string, depth: number = 2): Map<string, string[]> {
+  private buildDependencyGraph(
+    startId: string,
+    depth: number = 2,
+  ): Map<string, string[]> {
     const graph = new Map<string, string[]>();
     const visited = new Set<string>();
 
@@ -382,21 +410,30 @@ export class TaxonomyNavigator {
   /**
    * Find path between two reasoning types
    */
-  findPath(fromId: string, toId: string, maxDepth: number = 6): NavigationPath | null {
+  findPath(
+    fromId: string,
+    toId: string,
+    maxDepth: number = 6,
+  ): NavigationPath | null {
     const fromType = this.index.get(fromId);
     const toType = this.index.get(toId);
 
     if (!fromType || !toType) return null;
 
     // BFS to find shortest path
-    const queue: Array<{ id: string; path: NavigationStep[] }> = [{ id: fromId, path: [] }];
+    const queue: Array<{ id: string; path: NavigationStep[] }> = [
+      { id: fromId, path: [] },
+    ];
     const visited = new Set<string>([fromId]);
 
     while (queue.length > 0) {
       const { id, path } = queue.shift()!;
 
       if (id === toId) {
-        const totalDistance = path.reduce((sum, step) => sum + step.distance, 0);
+        const totalDistance = path.reduce(
+          (sum, step) => sum + step.distance,
+          0,
+        );
         return { steps: path, totalDistance };
       }
 
@@ -409,27 +446,44 @@ export class TaxonomyNavigator {
       if (!current) continue; // Skip if type not found
 
       // Explore neighbors
-      const neighbors: Array<{ id: string; relationship: NavigationStep['relationship']; distance: number }> = [];
+      const neighbors: Array<{
+        id: string;
+        relationship: NavigationStep["relationship"];
+        distance: number;
+      }> = [];
 
       // Prerequisites
       for (const prereqId of current.prerequisites) {
         if (!visited.has(prereqId) && this.index.has(prereqId)) {
-          neighbors.push({ id: prereqId, relationship: 'prerequisite', distance: 1 });
+          neighbors.push({
+            id: prereqId,
+            relationship: "prerequisite",
+            distance: 1,
+          });
         }
       }
 
       // Related types
       for (const relatedId of current.relatedTypes) {
         if (!visited.has(relatedId) && this.index.has(relatedId)) {
-          neighbors.push({ id: relatedId, relationship: 'related', distance: 2 });
+          neighbors.push({
+            id: relatedId,
+            relationship: "related",
+            distance: 2,
+          });
         }
       }
 
       // Same category
-      const categoryTypeIds = this.categoryIndex.get(current.category) || new Set();
+      const categoryTypeIds =
+        this.categoryIndex.get(current.category) || new Set();
       for (const catId of categoryTypeIds) {
         if (!visited.has(catId) && catId !== id) {
-          neighbors.push({ id: catId, relationship: 'same_category', distance: 3 });
+          neighbors.push({
+            id: catId,
+            relationship: "same_category",
+            distance: 3,
+          });
         }
       }
 
@@ -462,11 +516,14 @@ export class TaxonomyNavigator {
   /**
    * Get recommended reasoning types for a problem
    */
-  recommend(problemDescription: string, context?: {
-    difficulty?: 'beginner' | 'intermediate' | 'advanced' | 'expert';
-    domain?: string;
-    constraints?: string[];
-  }): QueryResult[] {
+  recommend(
+    problemDescription: string,
+    context?: {
+      difficulty?: "beginner" | "intermediate" | "advanced" | "expert";
+      domain?: string;
+      constraints?: string[];
+    },
+  ): QueryResult[] {
     // Extract keywords from problem description
     const words = problemDescription.toLowerCase().split(/\s+/);
     const keywords: string[] = [];
@@ -503,7 +560,10 @@ export class TaxonomyNavigator {
   /**
    * Compare two reasoning types
    */
-  compare(id1: string, id2: string): {
+  compare(
+    id1: string,
+    id2: string,
+  ): {
     type1: ReasoningType;
     type2: ReasoningType;
     commonalities: string[];
@@ -522,31 +582,39 @@ export class TaxonomyNavigator {
     if (type1.category === type2.category) {
       commonalities.push(`Both are ${type1.category} reasoning`);
     } else {
-      differences.push(`Different categories: ${type1.category} vs ${type2.category}`);
+      differences.push(
+        `Different categories: ${type1.category} vs ${type2.category}`,
+      );
     }
 
     // Difficulty
     if (type1.difficulty === type2.difficulty) {
       commonalities.push(`Same difficulty: ${type1.difficulty}`);
     } else {
-      differences.push(`Different difficulty: ${type1.difficulty} vs ${type2.difficulty}`);
+      differences.push(
+        `Different difficulty: ${type1.difficulty} vs ${type2.difficulty}`,
+      );
     }
 
     // Shared applications
-    const sharedApps = type1.applications.filter(app => type2.applications.includes(app));
+    const sharedApps = type1.applications.filter((app) =>
+      type2.applications.includes(app),
+    );
     if (sharedApps.length > 0) {
-      commonalities.push(`Shared applications: ${sharedApps.join(', ')}`);
+      commonalities.push(`Shared applications: ${sharedApps.join(", ")}`);
     }
 
     // Shared keywords
-    const sharedKeywords = type1.keywords.filter(kw => type2.keywords.includes(kw));
+    const sharedKeywords = type1.keywords.filter((kw) =>
+      type2.keywords.includes(kw),
+    );
     if (sharedKeywords.length > 0) {
-      commonalities.push(`Shared keywords: ${sharedKeywords.join(', ')}`);
+      commonalities.push(`Shared keywords: ${sharedKeywords.join(", ")}`);
     }
 
     // Related?
     if (type1.relatedTypes.includes(id2) || type2.relatedTypes.includes(id1)) {
-      commonalities.push('Directly related types');
+      commonalities.push("Directly related types");
     }
 
     // Find path
@@ -566,7 +634,11 @@ export class TaxonomyNavigator {
    */
   getOverview(): {
     total: number;
-    categories: Array<{ name: ReasoningCategory; count: number; types: string[] }>;
+    categories: Array<{
+      name: ReasoningCategory;
+      count: number;
+      types: string[];
+    }>;
     difficulties: Map<string, number>;
     popularTypes: ReasoningType[];
   } {
@@ -574,13 +646,13 @@ export class TaxonomyNavigator {
 
     const categories = Array.from(stats.byCategory.entries())
       .map(([category, count]) => {
-        const types = getReasoningTypesByCategory(category).map(t => t.name);
+        const types = getReasoningTypesByCategory(category).map((t) => t.name);
         return { name: category, count, types };
       })
       .sort((a, b) => b.count - a.count);
 
     const popularTypes = Array.from(this.index.values())
-      .filter(t => t.usageFrequency === 'very_common')
+      .filter((t) => t.usageFrequency === "very_common")
       .slice(0, 20);
 
     return {
@@ -597,10 +669,10 @@ export class TaxonomyNavigator {
   generateQueryReport(results: QueryResult[]): string {
     const report: string[] = [];
 
-    report.push('# Taxonomy Query Results');
-    report.push('');
+    report.push("# Taxonomy Query Results");
+    report.push("");
     report.push(`Found ${results.length} matching reasoning types`);
-    report.push('');
+    report.push("");
 
     for (let i = 0; i < Math.min(results.length, 20); i++) {
       const result = results[i];
@@ -610,28 +682,28 @@ export class TaxonomyNavigator {
       report.push(`**Category:** ${type.category}`);
       report.push(`**Difficulty:** ${type.difficulty}`);
       report.push(`**Relevance Score:** ${result.relevanceScore}`);
-      report.push('');
+      report.push("");
       report.push(`**Description:** ${type.description}`);
-      report.push('');
+      report.push("");
 
       if (result.matchReasons.length > 0) {
-        report.push('**Match Reasons:**');
+        report.push("**Match Reasons:**");
         for (const reason of result.matchReasons) {
           report.push(`- ${reason}`);
         }
-        report.push('');
+        report.push("");
       }
 
-      report.push(`**Applications:** ${type.applications.join(', ')}`);
-      report.push('');
+      report.push(`**Applications:** ${type.applications.join(", ")}`);
+      report.push("");
 
       if (type.examples.length > 0) {
-        report.push('**Example:**');
+        report.push("**Example:**");
         report.push(`> ${type.examples[0]}`);
-        report.push('');
+        report.push("");
       }
     }
 
-    return report.join('\n');
+    return report.join("\n");
   }
 }

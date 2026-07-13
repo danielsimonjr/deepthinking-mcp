@@ -6,7 +6,7 @@
  * Mode validators use these via composition rather than inheritance.
  */
 
-import type { Thought, ValidationIssue } from '../../types/index.js';
+import type { Thought, ValidationIssue } from "../../types/index.js";
 import {
   IssueSeverity,
   IssueCategory,
@@ -14,7 +14,7 @@ import {
   ValidationMessages,
   isInRange,
   type ValidationContext,
-} from '../constants.js';
+} from "../constants.js";
 
 /**
  * Validate common thought properties (thoughtNumber, totalThoughts, content)
@@ -25,44 +25,48 @@ export function validateCommon(thought: Thought): ValidationIssue[] {
   // Validate thoughtNumber is positive
   if (thought.thoughtNumber <= 0) {
     issues.push({
-      severity: 'error',
+      severity: "error",
       thoughtNumber: thought.thoughtNumber,
-      description: 'Thought number must be positive',
-      suggestion: 'Use sequential numbering starting from 1',
-      category: 'structural',
+      description: "Thought number must be positive",
+      suggestion: "Use sequential numbering starting from 1",
+      category: "structural",
     });
   }
 
   // Validate totalThoughts is positive
   if (thought.totalThoughts <= 0) {
     issues.push({
-      severity: 'error',
+      severity: "error",
       thoughtNumber: thought.thoughtNumber,
-      description: 'Total thoughts must be positive',
-      suggestion: 'Specify expected total number of thoughts',
-      category: 'structural',
+      description: "Total thoughts must be positive",
+      suggestion: "Specify expected total number of thoughts",
+      category: "structural",
     });
   }
 
   // Validate thoughtNumber doesn't exceed totalThoughts
   if (thought.thoughtNumber > thought.totalThoughts) {
     issues.push({
-      severity: 'error',
+      severity: "error",
       thoughtNumber: thought.thoughtNumber,
       description: `Thought number ${thought.thoughtNumber} exceeds total ${thought.totalThoughts}`,
-      suggestion: 'Ensure thought number is within the declared total',
-      category: 'logical',
+      suggestion: "Ensure thought number is within the declared total",
+      category: "logical",
     });
   }
 
   // Validate content exists (if present)
-  if ('content' in thought && typeof thought.content === 'string' && thought.content.trim() === '') {
+  if (
+    "content" in thought &&
+    typeof thought.content === "string" &&
+    thought.content.trim() === ""
+  ) {
     issues.push({
-      severity: 'info',
+      severity: "info",
       thoughtNumber: thought.thoughtNumber,
-      description: 'Thought content is empty',
-      suggestion: 'Provide meaningful content for the thought',
-      category: 'structural',
+      description: "Thought content is empty",
+      suggestion: "Provide meaningful content for the thought",
+      category: "structural",
     });
   }
 
@@ -75,7 +79,7 @@ export function validateCommon(thought: Thought): ValidationIssue[] {
 export function validateDependencies(
   thought: Thought,
   dependencies: string[],
-  context: ValidationContext
+  context: ValidationContext,
 ): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
 
@@ -83,11 +87,11 @@ export function validateDependencies(
     for (const depId of dependencies) {
       if (!context.existingThoughts.has(depId)) {
         issues.push({
-          severity: 'error',
+          severity: "error",
           thoughtNumber: thought.thoughtNumber,
           description: `Dependency on non-existent thought: ${depId}`,
-          suggestion: 'Verify all dependency IDs exist',
-          category: 'logical',
+          suggestion: "Verify all dependency IDs exist",
+          category: "logical",
         });
       }
     }
@@ -99,16 +103,19 @@ export function validateDependencies(
 /**
  * Validate uncertainty is in valid range [0, 1]
  */
-export function validateUncertainty(thought: Thought, uncertainty: number): ValidationIssue[] {
+export function validateUncertainty(
+  thought: Thought,
+  uncertainty: number,
+): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
 
   if (uncertainty < 0 || uncertainty > 1) {
     issues.push({
-      severity: 'error',
+      severity: "error",
       thoughtNumber: thought.thoughtNumber,
-      description: 'Uncertainty must be between 0 and 1',
-      suggestion: 'Provide uncertainty as a decimal (e.g., 0.2 for 20%)',
-      category: 'structural',
+      description: "Uncertainty must be between 0 and 1",
+      suggestion: "Provide uncertainty as a decimal (e.g., 0.2 for 20%)",
+      category: "structural",
     });
   }
 
@@ -125,7 +132,7 @@ export function validateNumberRange(
   min: number = 0,
   max: number = 1,
   severity: IssueSeverity = IssueSeverity.ERROR,
-  category: IssueCategory = IssueCategory.STRUCTURAL
+  category: IssueCategory = IssueCategory.STRUCTURAL,
 ): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
 
@@ -148,7 +155,7 @@ export function validateNumberRange(
 export function validateProbability(
   thought: Thought,
   value: number | undefined,
-  fieldName: string = 'Probability'
+  fieldName: string = "Probability",
 ): ValidationIssue[] {
   return validateNumberRange(
     thought,
@@ -157,7 +164,7 @@ export function validateProbability(
     ValidationThresholds.MIN_PROBABILITY,
     ValidationThresholds.MAX_PROBABILITY,
     IssueSeverity.ERROR,
-    IssueCategory.MATHEMATICAL
+    IssueCategory.MATHEMATICAL,
   );
 }
 
@@ -167,7 +174,7 @@ export function validateProbability(
 export function validateConfidence(
   thought: Thought,
   value: number | undefined,
-  fieldName: string = 'Confidence'
+  fieldName: string = "Confidence",
 ): ValidationIssue[] {
   return validateNumberRange(
     thought,
@@ -176,7 +183,7 @@ export function validateConfidence(
     ValidationThresholds.MIN_CONFIDENCE,
     ValidationThresholds.MAX_CONFIDENCE,
     IssueSeverity.ERROR,
-    IssueCategory.STRUCTURAL
+    IssueCategory.STRUCTURAL,
   );
 }
 
@@ -187,7 +194,7 @@ export function validateRequired(
   thought: Thought,
   value: unknown,
   fieldName: string,
-  category: IssueCategory = IssueCategory.STRUCTURAL
+  category: IssueCategory = IssueCategory.STRUCTURAL,
 ): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
 
@@ -213,7 +220,7 @@ export function validateNonEmptyArray(
   arr: unknown[] | undefined,
   fieldName: string,
   category: IssueCategory = IssueCategory.STRUCTURAL,
-  severity: IssueSeverity = IssueSeverity.WARNING
+  severity: IssueSeverity = IssueSeverity.WARNING,
 ): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
 

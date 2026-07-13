@@ -8,16 +8,16 @@
  * monolithic ThoughtFactory switch statement.
  */
 
-import { ThinkingMode, Thought, isFullyImplemented } from '../types/core.js';
-import type { ThinkingToolInput } from '../tools/thinking.js';
+import { ThinkingMode, Thought, isFullyImplemented } from "../types/core.js";
+import type { ThinkingToolInput } from "../tools/thinking.js";
 import {
   ModeHandler,
   ModeStatus,
   ValidationResult,
   validationFailure,
   createValidationError,
-} from './handlers/ModeHandler.js';
-import { GenericModeHandler } from './handlers/GenericModeHandler.js';
+} from "./handlers/ModeHandler.js";
+import { GenericModeHandler } from "./handlers/GenericModeHandler.js";
 
 /**
  * Registry statistics
@@ -93,7 +93,7 @@ export class ModeHandlerRegistry {
     if (this.handlers.has(handler.mode)) {
       throw new Error(
         `Handler for mode '${handler.mode}' is already registered. ` +
-          'Use replace() to override an existing handler.'
+          "Use replace() to override an existing handler.",
       );
     }
     this.handlers.set(handler.mode, handler);
@@ -179,7 +179,11 @@ export class ModeHandlerRegistry {
     // Basic validation first
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
@@ -213,12 +217,12 @@ export class ModeHandlerRegistry {
    */
   getStats(): RegistryStats {
     const allModes = Object.values(ThinkingMode).filter(
-      (v) => typeof v === 'string'
+      (v) => typeof v === "string",
     ) as ThinkingMode[];
 
     const modesWithHandlers = this.getRegisteredModes();
     const modesWithGenericHandler = allModes.filter(
-      (mode) => !this.handlers.has(mode)
+      (mode) => !this.handlers.has(mode),
     );
 
     return {
@@ -239,12 +243,15 @@ export class ModeHandlerRegistry {
   /**
    * Get appropriate note for mode status
    */
-  private getModeNote(mode: ThinkingMode, hasSpecialized: boolean): string | undefined {
+  private getModeNote(
+    mode: ThinkingMode,
+    hasSpecialized: boolean,
+  ): string | undefined {
     if (!isFullyImplemented(mode)) {
-      return 'This mode is experimental with limited runtime implementation';
+      return "This mode is experimental with limited runtime implementation";
     }
     if (!hasSpecialized) {
-      return 'Using generic handler - specialized validation not available';
+      return "Using generic handler - specialized validation not available";
     }
     return undefined;
   }
@@ -252,41 +259,90 @@ export class ModeHandlerRegistry {
   /**
    * Get supported thought types for a mode
    */
-  private getSupportedThoughtTypes(_handler: ModeHandler, mode: ThinkingMode): string[] {
+  private getSupportedThoughtTypes(
+    _handler: ModeHandler,
+    mode: ThinkingMode,
+  ): string[] {
     // Default thought types by mode category
     const thoughtTypes: Record<string, string[]> = {
       mathematics: [
-        'problem_definition',
-        'constraints',
-        'model',
-        'proof',
-        'implementation',
-        'proof_decomposition',
-        'dependency_analysis',
-        'consistency_check',
-        'gap_identification',
-        'assumption_trace',
+        "problem_definition",
+        "constraints",
+        "model",
+        "proof",
+        "implementation",
+        "proof_decomposition",
+        "dependency_analysis",
+        "consistency_check",
+        "gap_identification",
+        "assumption_trace",
       ],
       physics: [
-        'problem_definition',
-        'model',
-        'tensor_formulation',
-        'conservation_law',
-        'dimensional_analysis',
+        "problem_definition",
+        "model",
+        "tensor_formulation",
+        "conservation_law",
+        "dimensional_analysis",
       ],
-      causal: ['problem_definition', 'graph_construction', 'intervention_analysis', 'mechanism_identification'],
-      bayesian: ['prior_definition', 'likelihood_assessment', 'posterior_calculation', 'sensitivity_analysis'],
-      temporal: ['event_definition', 'interval_analysis', 'constraint_checking', 'timeline_construction'],
-      historical: ['event_analysis', 'source_evaluation', 'pattern_identification', 'causal_chain', 'periodization'],
-      gametheory: ['game_definition', 'strategy_analysis', 'equilibrium_finding', 'payoff_calculation'],
-      synthesis: ['source_identification', 'theme_extraction', 'gap_analysis', 'framework_construction'],
-      argumentation: ['claim_formulation', 'grounds_development', 'warrant_construction', 'rebuttal_analysis'],
-      critique: ['work_characterization', 'methodology_evaluation', 'argument_critique', 'contribution_assessment'],
-      analysis: ['data_familiarization', 'coding', 'theme_development', 'pattern_analysis'],
+      causal: [
+        "problem_definition",
+        "graph_construction",
+        "intervention_analysis",
+        "mechanism_identification",
+      ],
+      bayesian: [
+        "prior_definition",
+        "likelihood_assessment",
+        "posterior_calculation",
+        "sensitivity_analysis",
+      ],
+      temporal: [
+        "event_definition",
+        "interval_analysis",
+        "constraint_checking",
+        "timeline_construction",
+      ],
+      historical: [
+        "event_analysis",
+        "source_evaluation",
+        "pattern_identification",
+        "causal_chain",
+        "periodization",
+      ],
+      gametheory: [
+        "game_definition",
+        "strategy_analysis",
+        "equilibrium_finding",
+        "payoff_calculation",
+      ],
+      synthesis: [
+        "source_identification",
+        "theme_extraction",
+        "gap_analysis",
+        "framework_construction",
+      ],
+      argumentation: [
+        "claim_formulation",
+        "grounds_development",
+        "warrant_construction",
+        "rebuttal_analysis",
+      ],
+      critique: [
+        "work_characterization",
+        "methodology_evaluation",
+        "argument_critique",
+        "contribution_assessment",
+      ],
+      analysis: [
+        "data_familiarization",
+        "coding",
+        "theme_development",
+        "pattern_analysis",
+      ],
     };
 
     const modeKey = mode.toLowerCase();
-    return thoughtTypes[modeKey] || ['general'];
+    return thoughtTypes[modeKey] || ["general"];
   }
 
   /**
@@ -314,6 +370,9 @@ export function registerHandler(handler: ModeHandler): void {
 /**
  * Create a thought using the global registry
  */
-export function createThought(input: ThinkingToolInput, sessionId: string): Thought {
+export function createThought(
+  input: ThinkingToolInput,
+  sessionId: string,
+): Thought {
   return getRegistry().createThought(input, sessionId);
 }

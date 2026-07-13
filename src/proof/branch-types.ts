@@ -6,7 +6,7 @@
  * strategy recommendations, and proof verification.
  */
 
-import type { ProofStep } from './decomposer.js';
+import type { ProofStep } from "./decomposer.js";
 
 // ============================================================================
 // PROOF BRANCH TYPES
@@ -75,7 +75,8 @@ export interface BranchAnalysisResult {
 /**
  * Type of hierarchical proof element
  */
-export type HierarchicalProofType = 'theorem' | 'lemma' | 'corollary' | 'claim' | 'proposition';
+export type HierarchicalProofType =
+  "theorem" | "lemma" | "corollary" | "claim" | "proposition";
 
 /**
  * Represents a hierarchical proof structure supporting nested proofs
@@ -148,18 +149,18 @@ export interface ProofTree {
  * Available proof strategies
  */
 export type ProofStrategyType =
-  | 'direct'
-  | 'contradiction'
-  | 'induction'
-  | 'strong_induction'
-  | 'structural_induction'
-  | 'case_analysis'
-  | 'contrapositive'
-  | 'construction'
-  | 'pigeonhole'
-  | 'diagonalization'
-  | 'well_ordering'
-  | 'infinite_descent';
+  | "direct"
+  | "contradiction"
+  | "induction"
+  | "strong_induction"
+  | "structural_induction"
+  | "case_analysis"
+  | "contrapositive"
+  | "construction"
+  | "pigeonhole"
+  | "diagonalization"
+  | "well_ordering"
+  | "infinite_descent";
 
 /**
  * Template for structuring a proof using a specific strategy
@@ -257,19 +258,19 @@ export interface TheoremFeatures {
 /**
  * Severity level for verification issues
  */
-export type VerificationSeverity = 'error' | 'warning' | 'info';
+export type VerificationSeverity = "error" | "warning" | "info";
 
 /**
  * Types of verification errors
  */
 export type VerificationErrorType =
-  | 'invalid_justification'
-  | 'missing_step'
-  | 'circular_reference'
-  | 'undefined_term'
-  | 'type_mismatch'
-  | 'invalid_inference'
-  | 'unsupported_rule';
+  | "invalid_justification"
+  | "missing_step"
+  | "circular_reference"
+  | "undefined_term"
+  | "type_mismatch"
+  | "invalid_inference"
+  | "unsupported_rule";
 
 /**
  * An error found during proof verification
@@ -359,26 +360,26 @@ export interface VerificationResult {
  * Types of justifications for proof steps
  */
 export type JustificationType =
-  | 'axiom'
-  | 'definition'
-  | 'hypothesis'
-  | 'previous_step'
-  | 'lemma'
-  | 'theorem'
-  | 'modus_ponens'
-  | 'modus_tollens'
-  | 'universal_instantiation'
-  | 'existential_instantiation'
-  | 'universal_generalization'
-  | 'existential_generalization'
-  | 'conjunction'
-  | 'disjunction'
-  | 'substitution'
-  | 'algebraic'
-  | 'by_cases'
-  | 'contradiction'
-  | 'induction_base'
-  | 'induction_step';
+  | "axiom"
+  | "definition"
+  | "hypothesis"
+  | "previous_step"
+  | "lemma"
+  | "theorem"
+  | "modus_ponens"
+  | "modus_tollens"
+  | "universal_instantiation"
+  | "existential_instantiation"
+  | "universal_generalization"
+  | "existential_generalization"
+  | "conjunction"
+  | "disjunction"
+  | "substitution"
+  | "algebraic"
+  | "by_cases"
+  | "contradiction"
+  | "induction_base"
+  | "induction_step";
 
 /**
  * A justification for a proof step

@@ -15,12 +15,12 @@ import type {
   InterventionResult,
   InterventionRequest,
   AdjustmentFormula,
-} from '../types.js';
+} from "../types.js";
 import {
   checkDSeparation,
   findBackdoorAdjustmentSet,
   isValidBackdoorAdjustment,
-} from './d-separation.js';
+} from "./d-separation.js";
 
 // ============================================================================
 // GRAPH MANIPULATION
@@ -31,7 +31,7 @@ import {
  */
 export function createMutilatedGraph(
   graph: CausalGraph,
-  interventions: Intervention[]
+  interventions: Intervention[],
 ): CausalGraph {
   const intervenedVars = new Set(interventions.map((i) => i.variable));
 
@@ -44,7 +44,7 @@ export function createMutilatedGraph(
     edges: newEdges,
     metadata: {
       ...graph.metadata,
-      description: `Mutilated graph with interventions on: ${Array.from(intervenedVars).join(', ')}`,
+      description: `Mutilated graph with interventions on: ${Array.from(intervenedVars).join(", ")}`,
     },
   };
 }
@@ -54,7 +54,7 @@ export function createMutilatedGraph(
  */
 export function createMarginalizedGraph(
   graph: CausalGraph,
-  variableToRemove: string
+  variableToRemove: string,
 ): CausalGraph {
   const newNodes = graph.nodes.filter((n) => n.id !== variableToRemove);
   const newEdges: GraphEdge[] = [];
@@ -82,7 +82,7 @@ export function createMarginalizedGraph(
         newEdges.push({
           from: parent,
           to: child,
-          type: 'directed',
+          type: "directed",
         });
       }
     }
@@ -106,15 +106,15 @@ export function createMarginalizedGraph(
 export function isIdentifiable(
   graph: CausalGraph,
   treatment: string,
-  outcome: string
+  outcome: string,
 ): { identifiable: boolean; reason: string; method?: string } {
   // Check for backdoor criterion
   const backdoorSet = findBackdoorAdjustmentSet(graph, treatment, outcome);
   if (backdoorSet !== null) {
     return {
       identifiable: true,
-      reason: 'Backdoor criterion satisfied',
-      method: 'backdoor',
+      reason: "Backdoor criterion satisfied",
+      method: "backdoor",
     };
   }
 
@@ -123,18 +123,22 @@ export function isIdentifiable(
   if (frontdoorResult.satisfied) {
     return {
       identifiable: true,
-      reason: 'Frontdoor criterion satisfied',
-      method: 'frontdoor',
+      reason: "Frontdoor criterion satisfied",
+      method: "frontdoor",
     };
   }
 
   // Check for instrumental variables
-  const instrumentalResult = findInstrumentalVariable(graph, treatment, outcome);
+  const instrumentalResult = findInstrumentalVariable(
+    graph,
+    treatment,
+    outcome,
+  );
   if (instrumentalResult !== null) {
     return {
       identifiable: true,
-      reason: 'Instrumental variable available',
-      method: 'instrumental',
+      reason: "Instrumental variable available",
+      method: "instrumental",
     };
   }
 
@@ -144,14 +148,15 @@ export function isIdentifiable(
   if (generalResult.identifiable) {
     return {
       identifiable: true,
-      reason: 'Identifiable via do-calculus',
-      method: 'general',
+      reason: "Identifiable via do-calculus",
+      method: "general",
     };
   }
 
   return {
     identifiable: false,
-    reason: 'No valid adjustment set found and frontdoor criterion not satisfied',
+    reason:
+      "No valid adjustment set found and frontdoor criterion not satisfied",
   };
 }
 
@@ -166,12 +171,15 @@ export function findAllBackdoorSets(
   graph: CausalGraph,
   treatment: string,
   outcome: string,
-  maxSize = 5
+  maxSize = 5,
 ): string[][] {
   const treatmentDescendants = getDescendants(graph, treatment);
   const candidates = graph.nodes
     .map((n) => n.id)
-    .filter((id) => id !== treatment && id !== outcome && !treatmentDescendants.has(id));
+    .filter(
+      (id) =>
+        id !== treatment && id !== outcome && !treatmentDescendants.has(id),
+    );
 
   const validSets: string[][] = [];
 
@@ -193,10 +201,10 @@ export function findAllBackdoorSets(
 export function generateBackdoorFormula(
   treatment: string,
   outcome: string,
-  adjustmentSet: string[]
+  adjustmentSet: string[],
 ): AdjustmentFormula {
-  const zList = adjustmentSet.length > 0 ? adjustmentSet.join(', ') : '';
-  const sumOver = adjustmentSet.length > 0 ? `\\sum_{${zList}}` : '';
+  const zList = adjustmentSet.length > 0 ? adjustmentSet.join(", ") : "";
+  const sumOver = adjustmentSet.length > 0 ? `\\sum_{${zList}}` : "";
 
   let latex: string;
   let plainText: string;
@@ -213,7 +221,7 @@ export function generateBackdoorFormula(
     adjustmentSet,
     latex,
     plainText,
-    type: 'backdoor',
+    type: "backdoor",
     isValid: true,
   };
 }
@@ -228,7 +236,7 @@ export function generateBackdoorFormula(
 export function checkFrontdoorCriterion(
   graph: CausalGraph,
   treatment: string,
-  outcome: string
+  outcome: string,
 ): { satisfied: boolean; mediators: string[] } {
   // Find potential mediators (variables on directed path from X to Y)
   const mediators = findMediators(graph, treatment, outcome);
@@ -246,12 +254,18 @@ export function checkFrontdoorCriterion(
 
     // Condition 2: No unblocked backdoor path from X to M
     // Check that X -> M path is unconfounded when we intervene on X
-    const mutilatedForXM = createMutilatedGraph(graph, [{ variable: treatment, value: 0, type: 'atomic' }]);
+    const mutilatedForXM = createMutilatedGraph(graph, [
+      { variable: treatment, value: 0, type: "atomic" },
+    ]);
     checkDSeparation(graph, { x: [treatment], y: [m], z: [] }); // Validates path exists
     checkDSeparation(mutilatedForXM, { x: [treatment], y: [m], z: [] }); // Validates no backdoor after intervention
 
     // Condition 3: All backdoor paths from M to Y are blocked by X
-    const backdoorMY = checkDSeparation(graph, { x: [m], y: [outcome], z: [treatment] });
+    const backdoorMY = checkDSeparation(graph, {
+      x: [m],
+      y: [outcome],
+      z: [treatment],
+    });
 
     if (backdoorMY.separated) {
       return { satisfied: true, mediators: [m] };
@@ -264,7 +278,11 @@ export function checkFrontdoorCriterion(
 /**
  * Find potential mediators between treatment and outcome
  */
-function findMediators(graph: CausalGraph, treatment: string, outcome: string): string[] {
+function findMediators(
+  graph: CausalGraph,
+  treatment: string,
+  outcome: string,
+): string[] {
   const mediators: string[] = [];
   const descendants = getDescendants(graph, treatment);
   const ancestors = getAncestors(graph, outcome);
@@ -285,7 +303,7 @@ function interceptsAllDirectedPaths(
   graph: CausalGraph,
   treatment: string,
   outcome: string,
-  mediators: string[]
+  mediators: string[],
 ): boolean {
   const mediatorSet = new Set(mediators);
 
@@ -319,7 +337,7 @@ function interceptsAllDirectedPaths(
 export function generateFrontdoorFormula(
   treatment: string,
   outcome: string,
-  mediator: string
+  mediator: string,
 ): AdjustmentFormula {
   const latex = `P(${outcome} | do(${treatment})) = \\sum_{${mediator}} P(${mediator} | ${treatment}) \\sum_{${treatment}'} P(${outcome} | ${mediator}, ${treatment}') P(${treatment}')`;
   const plainText = `P(${outcome}|do(${treatment})) = Σ_${mediator} P(${mediator}|${treatment}) Σ_{${treatment}'} P(${outcome}|${mediator},${treatment}') P(${treatment}')`;
@@ -328,7 +346,7 @@ export function generateFrontdoorFormula(
     adjustmentSet: [mediator],
     latex,
     plainText,
-    type: 'frontdoor',
+    type: "frontdoor",
     isValid: true,
   };
 }
@@ -343,24 +361,34 @@ export function generateFrontdoorFormula(
 export function findInstrumentalVariable(
   graph: CausalGraph,
   treatment: string,
-  outcome: string
+  outcome: string,
 ): string | null {
   for (const node of graph.nodes) {
     if (node.id === treatment || node.id === outcome) continue;
 
     // Check IV conditions:
     // 1. Z affects X (relevance)
-    const affectsX = graph.edges.some((e) => e.from === node.id && e.to === treatment);
+    const affectsX = graph.edges.some(
+      (e) => e.from === node.id && e.to === treatment,
+    );
     if (!affectsX) continue;
 
     // 2. Z does not directly affect Y (exclusion)
-    const affectsYDirectly = graph.edges.some((e) => e.from === node.id && e.to === outcome);
+    const affectsYDirectly = graph.edges.some(
+      (e) => e.from === node.id && e.to === outcome,
+    );
     if (affectsYDirectly) continue;
 
     // 3. Z is independent of confounders (exogeneity)
     // Simplified check: Z has no common ancestors with Y except through X
-    const mutilated = createMutilatedGraph(graph, [{ variable: treatment, value: 0, type: 'atomic' }]);
-    const independentOfY = checkDSeparation(mutilated, { x: [node.id], y: [outcome], z: [] });
+    const mutilated = createMutilatedGraph(graph, [
+      { variable: treatment, value: 0, type: "atomic" },
+    ]);
+    const independentOfY = checkDSeparation(mutilated, {
+      x: [node.id],
+      y: [outcome],
+      z: [],
+    });
     if (independentOfY.separated) {
       return node.id;
     }
@@ -375,7 +403,7 @@ export function findInstrumentalVariable(
 export function generateIVFormula(
   treatment: string,
   outcome: string,
-  instrument: string
+  instrument: string,
 ): AdjustmentFormula {
   const latex = `\\beta_{${treatment} \\to ${outcome}} = \\frac{Cov(${outcome}, ${instrument})}{Cov(${treatment}, ${instrument})}`;
   const plainText = `β_${treatment}→${outcome} = Cov(${outcome},${instrument}) / Cov(${treatment},${instrument})`;
@@ -384,7 +412,7 @@ export function generateIVFormula(
     adjustmentSet: [instrument],
     latex,
     plainText,
-    type: 'instrumental',
+    type: "instrumental",
     isValid: true,
   };
 }
@@ -402,11 +430,11 @@ export function applyRule1(
   y: string[],
   x: string[],
   z: string[],
-  w: string[]
+  w: string[],
 ): { applicable: boolean; result?: string } {
   const mutilated = createMutilatedGraph(
     graph,
-    x.map((v) => ({ variable: v, value: 0, type: 'atomic' as const }))
+    x.map((v) => ({ variable: v, value: 0, type: "atomic" as const })),
   );
 
   const separation = checkDSeparation(mutilated, {
@@ -418,7 +446,7 @@ export function applyRule1(
   if (separation.separated) {
     return {
       applicable: true,
-      result: `P(${y.join(',')}|do(${x.join(',')}),${[...w].join(',')})`,
+      result: `P(${y.join(",")}|do(${x.join(",")}),${[...w].join(",")})`,
     };
   }
 
@@ -434,12 +462,12 @@ export function applyRule2(
   y: string[],
   x: string[],
   z: string[],
-  w: string[]
+  w: string[],
 ): { applicable: boolean; result?: string } {
   // Create graph with incoming edges to X removed and outgoing edges from Z removed
   let modified = createMutilatedGraph(
     graph,
-    x.map((v) => ({ variable: v, value: 0, type: 'atomic' as const }))
+    x.map((v) => ({ variable: v, value: 0, type: "atomic" as const })),
   );
 
   // Also remove outgoing edges from Z
@@ -458,7 +486,7 @@ export function applyRule2(
   if (separation.separated) {
     return {
       applicable: true,
-      result: `P(${y.join(',')}|do(${x.join(',')}),${z.join(',')},${w.join(',')})`,
+      result: `P(${y.join(",")}|do(${x.join(",")}),${z.join(",")},${w.join(",")})`,
     };
   }
 
@@ -474,12 +502,16 @@ export function applyRule3(
   y: string[],
   x: string[],
   z: string[],
-  w: string[]
+  w: string[],
 ): { applicable: boolean; result?: string } {
   // Remove incoming edges to X and to Z (where Z has no descendants in W)
   let modified = createMutilatedGraph(
     graph,
-    [...x, ...z].map((v) => ({ variable: v, value: 0, type: 'atomic' as const }))
+    [...x, ...z].map((v) => ({
+      variable: v,
+      value: 0,
+      type: "atomic" as const,
+    })),
   );
 
   const separation = checkDSeparation(modified, {
@@ -491,7 +523,7 @@ export function applyRule3(
   if (separation.separated) {
     return {
       applicable: true,
-      result: `P(${y.join(',')}|do(${x.join(',')}),${w.join(',')})`,
+      result: `P(${y.join(",")}|do(${x.join(",")}),${w.join(",")})`,
     };
   }
 
@@ -505,10 +537,10 @@ export function applyRule3(
 function checkGeneralIdentifiability(
   graph: CausalGraph,
   treatment: string,
-  outcome: string
+  outcome: string,
 ): { identifiable: boolean; formula?: string } {
   // Check if there are any bidirected edges (latent confounders)
-  const hasBidirected = graph.edges.some((e) => e.type === 'bidirected');
+  const hasBidirected = graph.edges.some((e) => e.type === "bidirected");
 
   if (!hasBidirected) {
     // Without latent confounders, effect is always identifiable
@@ -538,7 +570,7 @@ function checkGeneralIdentifiability(
 function areBidirectedConnected(
   graph: CausalGraph,
   node1: string,
-  node2: string
+  node2: string,
 ): boolean {
   const bidirectedAdj = new Map<string, string[]>();
 
@@ -547,7 +579,7 @@ function areBidirectedConnected(
   }
 
   for (const edge of graph.edges) {
-    if (edge.type === 'bidirected') {
+    if (edge.type === "bidirected") {
       bidirectedAdj.get(edge.from)?.push(edge.to);
       bidirectedAdj.get(edge.to)?.push(edge.from);
     }
@@ -581,17 +613,17 @@ function areBidirectedConnected(
  */
 export function analyzeIntervention(
   graph: CausalGraph,
-  request: InterventionRequest
+  request: InterventionRequest,
 ): InterventionResult {
   const treatment = request.interventions[0]?.variable;
   const outcome = request.outcomes[0];
 
   if (!treatment || !outcome) {
     return {
-      originalDistribution: { type: 'continuous' },
+      originalDistribution: { type: "continuous" },
       interventionDistribution: null,
       identifiable: false,
-      nonIdentifiableReason: 'Missing treatment or outcome variable',
+      nonIdentifiableReason: "Missing treatment or outcome variable",
     };
   }
 
@@ -600,7 +632,7 @@ export function analyzeIntervention(
 
   if (!identResult.identifiable) {
     return {
-      originalDistribution: { type: 'continuous' },
+      originalDistribution: { type: "continuous" },
       interventionDistribution: null,
       identifiable: false,
       nonIdentifiableReason: identResult.reason,
@@ -610,17 +642,21 @@ export function analyzeIntervention(
   // Generate adjustment formula based on method
   let adjustment: AdjustmentFormula | undefined;
 
-  if (identResult.method === 'backdoor') {
+  if (identResult.method === "backdoor") {
     const backdoorSet = findBackdoorAdjustmentSet(graph, treatment, outcome);
     if (backdoorSet) {
       adjustment = generateBackdoorFormula(treatment, outcome, backdoorSet);
     }
-  } else if (identResult.method === 'frontdoor') {
+  } else if (identResult.method === "frontdoor") {
     const frontdoorResult = checkFrontdoorCriterion(graph, treatment, outcome);
     if (frontdoorResult.satisfied && frontdoorResult.mediators.length > 0) {
-      adjustment = generateFrontdoorFormula(treatment, outcome, frontdoorResult.mediators[0]);
+      adjustment = generateFrontdoorFormula(
+        treatment,
+        outcome,
+        frontdoorResult.mediators[0],
+      );
     }
-  } else if (identResult.method === 'instrumental') {
+  } else if (identResult.method === "instrumental") {
     const iv = findInstrumentalVariable(graph, treatment, outcome);
     if (iv) {
       adjustment = generateIVFormula(treatment, outcome, iv);
@@ -628,8 +664,8 @@ export function analyzeIntervention(
   }
 
   return {
-    originalDistribution: { type: 'continuous' },
-    interventionDistribution: { type: 'continuous' },
+    originalDistribution: { type: "continuous" },
+    interventionDistribution: { type: "continuous" },
     identifiable: true,
     estimand: adjustment?.latex,
     adjustment,

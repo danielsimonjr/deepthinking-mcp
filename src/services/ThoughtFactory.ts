@@ -15,16 +15,16 @@
  * - Phase 15A: Removed 600+ lines of dead legacy switch statement
  */
 
-import { ThinkingMode, Thought } from '../types/index.js';
-import { ThinkingToolInput } from '../tools/thinking.js';
-import { ILogger } from '../interfaces/ILogger.js';
-import { createLogger, LogLevel } from '../utils/logger.js';
+import { ThinkingMode, Thought } from "../types/index.js";
+import { ThinkingToolInput } from "../tools/thinking.js";
+import { ILogger } from "../interfaces/ILogger.js";
+import { createLogger, LogLevel } from "../utils/logger.js";
 import {
   ModeHandlerRegistry,
   ModeStatus,
   ValidationResult,
   registerAllHandlers,
-} from '../modes/index.js';
+} from "../modes/index.js";
 
 /**
  * Configuration for ThoughtFactory
@@ -72,7 +72,9 @@ export class ThoughtFactory {
   private registry: ModeHandlerRegistry;
 
   constructor(config: ThoughtFactoryConfig = {}) {
-    this.logger = config.logger || createLogger({ minLevel: LogLevel.INFO, enableConsole: true });
+    this.logger =
+      config.logger ||
+      createLogger({ minLevel: LogLevel.INFO, enableConsole: true });
     this.registry = ModeHandlerRegistry.getInstance();
     // Phase 15A: Removed useRegistryForAll - always use registry (legacy switch removed)
 
@@ -101,18 +103,18 @@ export class ThoughtFactory {
     registerAllHandlers();
 
     const stats = this.registry.getStats();
-    this.logger.debug('All mode handlers registered', {
+    this.logger.debug("All mode handlers registered", {
       count: stats.specializedHandlers,
       categories: [
-        'Core (5)',
-        'Fundamental Triad (3)',
-        'Causal/Probabilistic (6)',
-        'Analogical/First Principles (2)',
-        'Systems/Scientific (3)',
-        'Academic (4)',
-        'Engineering (4)',
-        'Advanced Runtime (6)',
-        'User-Defined (1)',
+        "Core (5)",
+        "Fundamental Triad (3)",
+        "Causal/Probabilistic (6)",
+        "Analogical/First Principles (2)",
+        "Systems/Scientific (3)",
+        "Academic (4)",
+        "Engineering (4)",
+        "Advanced Runtime (6)",
+        "User-Defined (1)",
       ],
     });
   }
@@ -129,7 +131,10 @@ export class ThoughtFactory {
   /**
    * Get stats about registered handlers
    */
-  getStats(): { specializedHandlers: number; modesWithHandlers: ThinkingMode[] } {
+  getStats(): {
+    specializedHandlers: number;
+    modesWithHandlers: ThinkingMode[];
+  } {
     const stats = this.registry.getStats();
     return {
       specializedHandlers: stats.specializedHandlers,
@@ -202,7 +207,7 @@ export class ThoughtFactory {
   createThought(input: ThinkingToolInput, sessionId: string): Thought {
     const mode = (input.mode as ThinkingMode) || ThinkingMode.HYBRID;
 
-    this.logger.debug('Creating thought', {
+    this.logger.debug("Creating thought", {
       sessionId,
       mode,
       thoughtNumber: input.thoughtNumber,
@@ -213,7 +218,7 @@ export class ThoughtFactory {
 
     // Use registry handler if appropriate (Phase 10 Sprint 2/2B)
     if (this.shouldUseRegistry(mode)) {
-      this.logger.debug('Using registry handler', { mode });
+      this.logger.debug("Using registry handler", { mode });
       return this.registry.createThought(input, sessionId);
     }
 
@@ -221,8 +226,7 @@ export class ThoughtFactory {
     // If we reach here, it means shouldUseRegistry() returned false unexpectedly
     throw new Error(
       `No handler available for mode "${mode}". This should never happen - ` +
-      `all 33 modes have specialized handlers. Check registry initialization.`
+        `all 33 modes have specialized handlers. Check registry initialization.`,
     );
   }
 }
-

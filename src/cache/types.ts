@@ -6,7 +6,7 @@
 /**
  * Cache strategy
  */
-export type CacheStrategy = 'lru' | 'lfu' | 'fifo';
+export type CacheStrategy = "lru" | "lfu" | "fifo";
 
 /**
  * Cache configuration

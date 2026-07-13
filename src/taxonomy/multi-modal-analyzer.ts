@@ -3,9 +3,9 @@
  * Phase 4D Task 7.4 (File Task 21): Analyze combined reasoning approaches
  */
 
-import type { ThinkingSession } from '../types/index.js';
-import { ThinkingMode, type Thought } from '../types/core.js';
-import { type ReasoningCategory } from './reasoning-types.js';
+import type { ThinkingSession } from "../types/index.js";
+import { ThinkingMode, type Thought } from "../types/core.js";
+import { type ReasoningCategory } from "./reasoning-types.js";
 
 /**
  * Mode transition
@@ -91,92 +91,100 @@ export interface MultiModalRecommendation {
  */
 const MULTI_MODAL_PATTERNS: MultiModalPattern[] = [
   {
-    id: 'hypothesis_testing',
-    name: 'Hypothesis Testing Pattern',
-    description: 'Generate hypotheses abductively, test deductively, update bayesian',
-    modeSequence: ['abductive', 'deductive', 'bayesian'],
-    useCases: ['Scientific research', 'Debugging', 'Medical diagnosis'],
+    id: "hypothesis_testing",
+    name: "Hypothesis Testing Pattern",
+    description:
+      "Generate hypotheses abductively, test deductively, update bayesian",
+    modeSequence: ["abductive", "deductive", "bayesian"],
+    useCases: ["Scientific research", "Debugging", "Medical diagnosis"],
     effectiveness: 0.9,
     examples: [],
-    prerequisites: ['Domain knowledge', 'Data availability'],
-    alternatives: ['pure_experimental', 'pure_theoretical'],
+    prerequisites: ["Domain knowledge", "Data availability"],
+    alternatives: ["pure_experimental", "pure_theoretical"],
   },
   {
-    id: 'design_thinking',
-    name: 'Design Thinking Pattern',
-    description: 'Diverge creatively, converge critically, implement practically',
-    modeSequence: ['creative', 'critical', 'practical'],
-    useCases: ['Product design', 'Innovation', 'Problem-solving'],
+    id: "design_thinking",
+    name: "Design Thinking Pattern",
+    description:
+      "Diverge creatively, converge critically, implement practically",
+    modeSequence: ["creative", "critical", "practical"],
+    useCases: ["Product design", "Innovation", "Problem-solving"],
     effectiveness: 0.85,
     examples: [],
-    prerequisites: ['Open-mindedness', 'Stakeholder input'],
-    alternatives: ['pure_creative', 'pure_analytical'],
+    prerequisites: ["Open-mindedness", "Stakeholder input"],
+    alternatives: ["pure_creative", "pure_analytical"],
   },
   {
-    id: 'mathematical_discovery',
-    name: 'Mathematical Discovery Pattern',
-    description: 'Conjecture inductively, prove deductively, generalize mathematically',
-    modeSequence: ['inductive', 'deductive', 'mathematical'],
-    useCases: ['Mathematics research', 'Theory development', 'Pattern discovery'],
+    id: "mathematical_discovery",
+    name: "Mathematical Discovery Pattern",
+    description:
+      "Conjecture inductively, prove deductively, generalize mathematically",
+    modeSequence: ["inductive", "deductive", "mathematical"],
+    useCases: [
+      "Mathematics research",
+      "Theory development",
+      "Pattern discovery",
+    ],
     effectiveness: 0.88,
     examples: [],
-    prerequisites: ['Mathematical background', 'Pattern recognition'],
-    alternatives: ['pure_deductive', 'computational'],
+    prerequisites: ["Mathematical background", "Pattern recognition"],
+    alternatives: ["pure_deductive", "computational"],
   },
   {
-    id: 'causal_discovery',
-    name: 'Causal Discovery Pattern',
-    description: 'Correlate inductively, hypothesize causally, test experimentally',
-    modeSequence: ['inductive', 'causal', 'scientific'],
-    useCases: ['Epidemiology', 'Social science', 'Economics'],
+    id: "causal_discovery",
+    name: "Causal Discovery Pattern",
+    description:
+      "Correlate inductively, hypothesize causally, test experimentally",
+    modeSequence: ["inductive", "causal", "scientific"],
+    useCases: ["Epidemiology", "Social science", "Economics"],
     effectiveness: 0.82,
     examples: [],
-    prerequisites: ['Data collection', 'Experimental capability'],
-    alternatives: ['pure_observational', 'pure_experimental'],
+    prerequisites: ["Data collection", "Experimental capability"],
+    alternatives: ["pure_observational", "pure_experimental"],
   },
   {
-    id: 'analogical_transfer',
-    name: 'Analogical Transfer Pattern',
-    description: 'Find analogy, map structure, adapt practically',
-    modeSequence: ['analogical', 'deductive', 'practical'],
-    useCases: ['Problem-solving', 'Learning', 'Innovation'],
+    id: "analogical_transfer",
+    name: "Analogical Transfer Pattern",
+    description: "Find analogy, map structure, adapt practically",
+    modeSequence: ["analogical", "deductive", "practical"],
+    useCases: ["Problem-solving", "Learning", "Innovation"],
     effectiveness: 0.78,
     examples: [],
-    prerequisites: ['Broad knowledge', 'Pattern recognition'],
-    alternatives: ['direct_solution', 'trial_error'],
+    prerequisites: ["Broad knowledge", "Pattern recognition"],
+    alternatives: ["direct_solution", "trial_error"],
   },
   {
-    id: 'dialectical_synthesis',
-    name: 'Dialectical Synthesis Pattern',
-    description: 'Present thesis, develop antithesis, synthesize dialectically',
-    modeSequence: ['deductive', 'critical', 'dialectical'],
-    useCases: ['Philosophy', 'Conflict resolution', 'Theory integration'],
+    id: "dialectical_synthesis",
+    name: "Dialectical Synthesis Pattern",
+    description: "Present thesis, develop antithesis, synthesize dialectically",
+    modeSequence: ["deductive", "critical", "dialectical"],
+    useCases: ["Philosophy", "Conflict resolution", "Theory integration"],
     effectiveness: 0.75,
     examples: [],
-    prerequisites: ['Multiple perspectives', 'Logical reasoning'],
-    alternatives: ['pure_logical', 'pure_rhetorical'],
+    prerequisites: ["Multiple perspectives", "Logical reasoning"],
+    alternatives: ["pure_logical", "pure_rhetorical"],
   },
   {
-    id: 'strategic_planning',
-    name: 'Strategic Planning Pattern',
-    description: 'Analyze situation, generate options, decide practically',
-    modeSequence: ['causal', 'creative', 'practical'],
-    useCases: ['Business strategy', 'Military planning', 'Policy-making'],
+    id: "strategic_planning",
+    name: "Strategic Planning Pattern",
+    description: "Analyze situation, generate options, decide practically",
+    modeSequence: ["causal", "creative", "practical"],
+    useCases: ["Business strategy", "Military planning", "Policy-making"],
     effectiveness: 0.83,
     examples: [],
-    prerequisites: ['Situational awareness', 'Resources'],
-    alternatives: ['intuitive', 'algorithmic'],
+    prerequisites: ["Situational awareness", "Resources"],
+    alternatives: ["intuitive", "algorithmic"],
   },
   {
-    id: 'probabilistic_decision',
-    name: 'Probabilistic Decision Pattern',
-    description: 'Assess probabilities, model uncertainly, decide rationally',
-    modeSequence: ['probabilistic', 'bayesian', 'practical'],
-    useCases: ['Risk management', 'Investment', 'Medical decisions'],
+    id: "probabilistic_decision",
+    name: "Probabilistic Decision Pattern",
+    description: "Assess probabilities, model uncertainly, decide rationally",
+    modeSequence: ["probabilistic", "bayesian", "practical"],
+    useCases: ["Risk management", "Investment", "Medical decisions"],
     effectiveness: 0.87,
     examples: [],
-    prerequisites: ['Probability knowledge', 'Decision criteria'],
-    alternatives: ['heuristic', 'deterministic'],
+    prerequisites: ["Probability knowledge", "Decision criteria"],
+    alternatives: ["heuristic", "deterministic"],
   },
 ];
 
@@ -185,73 +193,81 @@ const MULTI_MODAL_PATTERNS: MultiModalPattern[] = [
  */
 const MODE_SYNERGIES: ModeSynergy[] = [
   {
-    mode1: 'abductive',
-    mode2: 'bayesian',
+    mode1: "abductive",
+    mode2: "bayesian",
     synergyScore: 0.9,
     complementarity: [
-      'Abduction generates hypotheses',
-      'Bayesian quantifies belief',
-      'Natural progression from generation to evaluation',
+      "Abduction generates hypotheses",
+      "Bayesian quantifies belief",
+      "Natural progression from generation to evaluation",
     ],
     conflicts: [],
-    optimalTransition: 'After generating explanations, use Bayesian to assign probabilities',
+    optimalTransition:
+      "After generating explanations, use Bayesian to assign probabilities",
     examples: [],
   },
   {
-    mode1: 'inductive',
-    mode2: 'deductive',
+    mode1: "inductive",
+    mode2: "deductive",
     synergyScore: 0.85,
     complementarity: [
-      'Induction discovers patterns',
-      'Deduction tests them rigorously',
-      'Complements discovery with verification',
+      "Induction discovers patterns",
+      "Deduction tests them rigorously",
+      "Complements discovery with verification",
     ],
-    conflicts: ['Different certainty levels'],
-    optimalTransition: 'After pattern discovery, switch to deductive testing',
+    conflicts: ["Different certainty levels"],
+    optimalTransition: "After pattern discovery, switch to deductive testing",
     examples: [],
   },
   {
-    mode1: 'creative',
-    mode2: 'critical',
+    mode1: "creative",
+    mode2: "critical",
     synergyScore: 0.95,
     complementarity: [
-      'Creative generates options',
-      'Critical evaluates them',
-      'Classic divergent-convergent pattern',
+      "Creative generates options",
+      "Critical evaluates them",
+      "Classic divergent-convergent pattern",
     ],
-    conflicts: ['Can inhibit each other if applied simultaneously'],
-    optimalTransition: 'After creative phase completes, switch to critical evaluation',
+    conflicts: ["Can inhibit each other if applied simultaneously"],
+    optimalTransition:
+      "After creative phase completes, switch to critical evaluation",
     examples: [],
   },
   {
-    mode1: 'analogical',
-    mode2: 'deductive',
+    mode1: "analogical",
+    mode2: "deductive",
     synergyScore: 0.75,
-    complementarity: ['Analogy suggests structure', 'Deduction verifies mapping', 'Tests analogical inferences'],
-    conflicts: ['Analogy imprecise, deduction precise'],
-    optimalTransition: 'After finding analogy, use deduction to check validity',
+    complementarity: [
+      "Analogy suggests structure",
+      "Deduction verifies mapping",
+      "Tests analogical inferences",
+    ],
+    conflicts: ["Analogy imprecise, deduction precise"],
+    optimalTransition: "After finding analogy, use deduction to check validity",
     examples: [],
   },
   {
-    mode1: 'causal',
-    mode2: 'counterfactual',
+    mode1: "causal",
+    mode2: "counterfactual",
     synergyScore: 0.88,
     complementarity: [
-      'Causal identifies mechanisms',
-      'Counterfactual tests necessity',
-      'Both work with causal structures',
+      "Causal identifies mechanisms",
+      "Counterfactual tests necessity",
+      "Both work with causal structures",
     ],
     conflicts: [],
-    optimalTransition: 'After causal model, use counterfactuals to test interventions',
+    optimalTransition:
+      "After causal model, use counterfactuals to test interventions",
     examples: [],
   },
   {
-    mode1: 'mathematical',
-    mode2: 'practical',
+    mode1: "mathematical",
+    mode2: "practical",
     synergyScore: 0.65,
-    complementarity: ['Math provides rigor', 'Practical enables application'],
-    conflicts: ['Abstract vs concrete', 'Precision vs approximation'],
-    optimalTransition: 'After mathematical solution, apply practically with approximations',
+    complementarity: ["Math provides rigor", "Practical enables application"],
+    conflicts: ["Abstract vs concrete", "Precision vs approximation"],
+    optimalTransition:
+      "After mathematical solution, apply practically with approximations",
     examples: [],
   },
 ];
@@ -279,7 +295,10 @@ export class MultiModalAnalyzer {
           from: prevThought.mode,
           to: currThought.mode,
           thoughtNumber: currThought.thoughtNumber,
-          effectiveness: this.estimateTransitionEffectiveness(prevThought, currThought),
+          effectiveness: this.estimateTransitionEffectiveness(
+            prevThought,
+            currThought,
+          ),
         });
       }
     }
@@ -289,12 +308,18 @@ export class MultiModalAnalyzer {
     const categoryDistribution = new Map<ReasoningCategory, number>();
 
     for (const thought of session.thoughts) {
-      modeDistribution.set(thought.mode, (modeDistribution.get(thought.mode) || 0) + 1);
+      modeDistribution.set(
+        thought.mode,
+        (modeDistribution.get(thought.mode) || 0) + 1,
+      );
 
       // Map mode to category
       const category = this.mapModeToCategory(thought.mode);
       if (category) {
-        categoryDistribution.set(category, (categoryDistribution.get(category) || 0) + 1);
+        categoryDistribution.set(
+          category,
+          (categoryDistribution.get(category) || 0) + 1,
+        );
       }
     }
 
@@ -312,7 +337,10 @@ export class MultiModalAnalyzer {
     const combinations = this.detectCombinations(session);
 
     // Calculate metrics
-    const flowComplexity = this.calculateFlowComplexity(transitions, session.thoughts.length);
+    const flowComplexity = this.calculateFlowComplexity(
+      transitions,
+      session.thoughts.length,
+    );
     const coherence = this.calculateCoherence(transitions, combinations);
     const adaptability = this.calculateAdaptability(transitions, session);
 
@@ -332,9 +360,14 @@ export class MultiModalAnalyzer {
   /**
    * Estimate transition effectiveness
    */
-  private estimateTransitionEffectiveness(prevThought: Thought, currThought: Thought): number {
+  private estimateTransitionEffectiveness(
+    prevThought: Thought,
+    currThought: Thought,
+  ): number {
     // Check if transition is in known synergies
-    const synergy = MODE_SYNERGIES.find(s => s.mode1 === prevThought.mode && s.mode2 === currThought.mode);
+    const synergy = MODE_SYNERGIES.find(
+      (s) => s.mode1 === prevThought.mode && s.mode2 === currThought.mode,
+    );
 
     if (synergy) {
       return synergy.synergyScore;
@@ -361,18 +394,18 @@ export class MultiModalAnalyzer {
    */
   private mapModeToCategory(mode: ThinkingMode): ReasoningCategory | null {
     const mapping: Partial<Record<ThinkingMode, ReasoningCategory>> = {
-      sequential: 'deductive',
-      shannon: 'deductive',
-      mathematics: 'mathematical',
-      physics: 'mathematical',
-      causal: 'causal',
-      bayesian: 'probabilistic',
-      abductive: 'abductive',
-      analogical: 'analogical',
-      temporal: 'causal',
-      gametheory: 'practical',
-      evidential: 'probabilistic',
-      counterfactual: 'causal',
+      sequential: "deductive",
+      shannon: "deductive",
+      mathematics: "mathematical",
+      physics: "mathematical",
+      causal: "causal",
+      bayesian: "probabilistic",
+      abductive: "abductive",
+      analogical: "analogical",
+      temporal: "causal",
+      gametheory: "practical",
+      evidential: "probabilistic",
+      counterfactual: "causal",
     };
     return mapping[mode] || null;
   }
@@ -387,8 +420,8 @@ export class MultiModalAnalyzer {
     const windowSize = 3;
     for (let i = 0; i <= session.thoughts.length - windowSize; i++) {
       const window = session.thoughts.slice(i, i + windowSize);
-      const modes = window.map(t => t.mode);
-      const key = modes.join('->');
+      const modes = window.map((t) => t.mode);
+      const key = modes.join("->");
 
       if (!combinations.has(key)) {
         const synergy = this.calculateCombinationSynergy(modes);
@@ -407,7 +440,9 @@ export class MultiModalAnalyzer {
       }
     }
 
-    return Array.from(combinations.values()).sort((a, b) => b.frequency - a.frequency);
+    return Array.from(combinations.values()).sort(
+      (a, b) => b.frequency - a.frequency,
+    );
   }
 
   /**
@@ -419,7 +454,9 @@ export class MultiModalAnalyzer {
     let count = 0;
 
     for (let i = 0; i < modes.length - 1; i++) {
-      const synergy = MODE_SYNERGIES.find(s => s.mode1 === modes[i] && s.mode2 === modes[i + 1]);
+      const synergy = MODE_SYNERGIES.find(
+        (s) => s.mode1 === modes[i] && s.mode2 === modes[i + 1],
+      );
       if (synergy) {
         totalSynergy += synergy.synergyScore;
         count++;
@@ -432,31 +469,40 @@ export class MultiModalAnalyzer {
   /**
    * Calculate flow complexity
    */
-  private calculateFlowComplexity(transitions: ModeTransition[], totalThoughts: number): number {
+  private calculateFlowComplexity(
+    transitions: ModeTransition[],
+    totalThoughts: number,
+  ): number {
     if (totalThoughts === 0) return 0;
 
     // More transitions = higher complexity
     const transitionRatio = transitions.length / totalThoughts;
 
     // Unique modes = higher complexity
-    const uniqueModes = new Set(transitions.flatMap(t => [t.from, t.to])).size;
+    const uniqueModes = new Set(transitions.flatMap((t) => [t.from, t.to]))
+      .size;
 
-    return Math.min((transitionRatio * 0.5 + uniqueModes * 0.05), 1.0);
+    return Math.min(transitionRatio * 0.5 + uniqueModes * 0.05, 1.0);
   }
 
   /**
    * Calculate coherence
    */
-  private calculateCoherence(transitions: ModeTransition[], combinations: ModeCombination[]): number {
+  private calculateCoherence(
+    transitions: ModeTransition[],
+    combinations: ModeCombination[],
+  ): number {
     if (transitions.length === 0) return 1.0;
 
     // Average transition effectiveness
     const avgEffectiveness =
-      transitions.reduce((sum, t) => sum + t.effectiveness, 0) / transitions.length;
+      transitions.reduce((sum, t) => sum + t.effectiveness, 0) /
+      transitions.length;
 
     // High-frequency combinations suggest coherent patterns
-    const maxFreq = Math.max(...combinations.map(c => c.frequency), 1);
-    const patternStrength = combinations.length > 0 ? combinations[0].frequency / maxFreq : 0.5;
+    const maxFreq = Math.max(...combinations.map((c) => c.frequency), 1);
+    const patternStrength =
+      combinations.length > 0 ? combinations[0].frequency / maxFreq : 0.5;
 
     return avgEffectiveness * 0.7 + patternStrength * 0.3;
   }
@@ -464,16 +510,22 @@ export class MultiModalAnalyzer {
   /**
    * Calculate adaptability
    */
-  private calculateAdaptability(transitions: ModeTransition[], session: ThinkingSession): number {
+  private calculateAdaptability(
+    transitions: ModeTransition[],
+    session: ThinkingSession,
+  ): number {
     if (transitions.length === 0) return 0.5;
 
     // More diverse modes = higher adaptability
-    const uniqueModes = new Set(session.thoughts.map(t => t.mode)).size;
+    const uniqueModes = new Set(session.thoughts.map((t) => t.mode)).size;
     const modeDiversity = uniqueModes / 14; // 14 total modes available
 
     // Effective transitions = good adaptability
-    const effectiveTransitions = transitions.filter(t => t.effectiveness > 0.7).length;
-    const transitionQuality = transitions.length > 0 ? effectiveTransitions / transitions.length : 0.5;
+    const effectiveTransitions = transitions.filter(
+      (t) => t.effectiveness > 0.7,
+    ).length;
+    const transitionQuality =
+      transitions.length > 0 ? effectiveTransitions / transitions.length : 0.5;
 
     return modeDiversity * 0.5 + transitionQuality * 0.5;
   }
@@ -481,15 +533,25 @@ export class MultiModalAnalyzer {
   /**
    * Recommend multi-modal patterns
    */
-  recommendPatterns(problemDescription: string, currentModes: ThinkingMode[]): MultiModalRecommendation[] {
+  recommendPatterns(
+    problemDescription: string,
+    currentModes: ThinkingMode[],
+  ): MultiModalRecommendation[] {
     const recommendations: MultiModalRecommendation[] = [];
 
     for (const pattern of MULTI_MODAL_PATTERNS) {
-      const relevance = this.calculatePatternRelevance(pattern, problemDescription, currentModes);
+      const relevance = this.calculatePatternRelevance(
+        pattern,
+        problemDescription,
+        currentModes,
+      );
 
       if (relevance > 0.3) {
         const rationale = this.buildPatternRationale(pattern, currentModes);
-        const adaptations = this.suggestPatternAdaptations(pattern, currentModes);
+        const adaptations = this.suggestPatternAdaptations(
+          pattern,
+          currentModes,
+        );
         const benefit = this.estimatePatternBenefit(pattern, currentModes);
 
         recommendations.push({
@@ -512,12 +574,12 @@ export class MultiModalAnalyzer {
   private calculatePatternRelevance(
     pattern: MultiModalPattern,
     problemDescription: string,
-    currentModes: ThinkingMode[]
+    currentModes: ThinkingMode[],
   ): number {
     let relevance = pattern.effectiveness * 0.3; // Base from pattern effectiveness
 
     // Check use case match
-    const lowerProblem = (problemDescription || '').toLowerCase();
+    const lowerProblem = (problemDescription || "").toLowerCase();
     for (const useCase of pattern.useCases) {
       if (lowerProblem.includes(useCase.toLowerCase())) {
         relevance += 0.3;
@@ -526,7 +588,9 @@ export class MultiModalAnalyzer {
     }
 
     // Check mode overlap
-    const overlap = pattern.modeSequence.filter(m => currentModes.includes(m as ThinkingMode)).length;
+    const overlap = pattern.modeSequence.filter((m) =>
+      currentModes.includes(m as ThinkingMode),
+    ).length;
     const overlapRatio = overlap / pattern.modeSequence.length;
     relevance += overlapRatio * 0.4;
 
@@ -536,15 +600,22 @@ export class MultiModalAnalyzer {
   /**
    * Build pattern rationale
    */
-  private buildPatternRationale(pattern: MultiModalPattern, currentModes: ThinkingMode[]): string[] {
+  private buildPatternRationale(
+    pattern: MultiModalPattern,
+    currentModes: ThinkingMode[],
+  ): string[] {
     const rationale: string[] = [];
 
     rationale.push(`${pattern.name}: ${pattern.description}`);
-    rationale.push(`Effectiveness: ${(pattern.effectiveness * 100).toFixed(0)}%`);
+    rationale.push(
+      `Effectiveness: ${(pattern.effectiveness * 100).toFixed(0)}%`,
+    );
 
-    const overlap = pattern.modeSequence.filter(m => currentModes.includes(m as ThinkingMode));
+    const overlap = pattern.modeSequence.filter((m) =>
+      currentModes.includes(m as ThinkingMode),
+    );
     if (overlap.length > 0) {
-      rationale.push(`Already using: ${overlap.join(', ')}`);
+      rationale.push(`Already using: ${overlap.join(", ")}`);
     }
 
     return rationale;
@@ -553,17 +624,22 @@ export class MultiModalAnalyzer {
   /**
    * Suggest pattern adaptations
    */
-  private suggestPatternAdaptations(pattern: MultiModalPattern, currentModes: ThinkingMode[]): string[] {
+  private suggestPatternAdaptations(
+    pattern: MultiModalPattern,
+    currentModes: ThinkingMode[],
+  ): string[] {
     const adaptations: string[] = [];
 
-    const missing = pattern.modeSequence.filter(m => !currentModes.includes(m as ThinkingMode));
+    const missing = pattern.modeSequence.filter(
+      (m) => !currentModes.includes(m as ThinkingMode),
+    );
     if (missing.length > 0) {
-      adaptations.push(`Add missing modes: ${missing.join(', ')}`);
+      adaptations.push(`Add missing modes: ${missing.join(", ")}`);
     }
 
-    const extra = currentModes.filter(m => !pattern.modeSequence.includes(m));
+    const extra = currentModes.filter((m) => !pattern.modeSequence.includes(m));
     if (extra.length > 0) {
-      adaptations.push(`Consider removing: ${extra.join(', ')}`);
+      adaptations.push(`Consider removing: ${extra.join(", ")}`);
     }
 
     return adaptations;
@@ -572,9 +648,14 @@ export class MultiModalAnalyzer {
   /**
    * Estimate pattern benefit
    */
-  private estimatePatternBenefit(pattern: MultiModalPattern, currentModes: ThinkingMode[]): number {
+  private estimatePatternBenefit(
+    pattern: MultiModalPattern,
+    currentModes: ThinkingMode[],
+  ): number {
     const currentSynergy = this.calculateCombinationSynergy(currentModes);
-    const patternSynergy = this.calculateCombinationSynergy(pattern.modeSequence);
+    const patternSynergy = this.calculateCombinationSynergy(
+      pattern.modeSequence,
+    );
 
     const improvement = patternSynergy - currentSynergy;
     return Math.max(0, Math.min(improvement, 1.0));
@@ -585,7 +666,9 @@ export class MultiModalAnalyzer {
    * Note: Accepts mode names as strings (can be ThinkingMode values or conceptual names)
    */
   findSynergy(mode1: string, mode2: string): ModeSynergy | null {
-    return MODE_SYNERGIES.find(s => s.mode1 === mode1 && s.mode2 === mode2) || null;
+    return (
+      MODE_SYNERGIES.find((s) => s.mode1 === mode1 && s.mode2 === mode2) || null
+    );
   }
 
   /**
@@ -594,40 +677,44 @@ export class MultiModalAnalyzer {
   generateFlowReport(flow: ReasoningFlow): string {
     const report: string[] = [];
 
-    report.push('# Multi-Modal Reasoning Flow Analysis');
-    report.push('');
+    report.push("# Multi-Modal Reasoning Flow Analysis");
+    report.push("");
     report.push(`**Session:** ${flow.session.title}`);
     report.push(`**Total Thoughts:** ${flow.session.thoughts.length}`);
     report.push(`**Dominant Mode:** ${flow.dominantMode}`);
-    report.push('');
+    report.push("");
 
-    report.push('## Flow Metrics');
+    report.push("## Flow Metrics");
     report.push(`- **Complexity:** ${(flow.flowComplexity * 100).toFixed(1)}%`);
     report.push(`- **Coherence:** ${(flow.coherence * 100).toFixed(1)}%`);
     report.push(`- **Adaptability:** ${(flow.adaptability * 100).toFixed(1)}%`);
-    report.push('');
+    report.push("");
 
-    report.push('## Mode Distribution');
+    report.push("## Mode Distribution");
     for (const [mode, count] of flow.modeDistribution) {
-      const percentage = ((count / flow.session.thoughts.length) * 100).toFixed(1);
+      const percentage = ((count / flow.session.thoughts.length) * 100).toFixed(
+        1,
+      );
       report.push(`- **${mode}:** ${count} thoughts (${percentage}%)`);
     }
-    report.push('');
+    report.push("");
 
-    report.push('## Mode Transitions');
+    report.push("## Mode Transitions");
     report.push(`Total transitions: ${flow.transitions.length}`);
     for (const transition of flow.transitions.slice(0, 10)) {
       report.push(
-        `- T${transition.thoughtNumber}: ${transition.from} → ${transition.to} (effectiveness: ${(transition.effectiveness * 100).toFixed(0)}%)`
+        `- T${transition.thoughtNumber}: ${transition.from} → ${transition.to} (effectiveness: ${(transition.effectiveness * 100).toFixed(0)}%)`,
       );
     }
-    report.push('');
+    report.push("");
 
-    report.push('## Detected Patterns');
+    report.push("## Detected Patterns");
     for (const combo of flow.combinations.slice(0, 5)) {
-      report.push(`- **${combo.modes.join(' → ')}** (frequency: ${combo.frequency}, synergy: ${(combo.synergy * 100).toFixed(0)}%)`);
+      report.push(
+        `- **${combo.modes.join(" → ")}** (frequency: ${combo.frequency}, synergy: ${(combo.synergy * 100).toFixed(0)}%)`,
+      );
     }
 
-    return report.join('\n');
+    return report.join("\n");
   }
 }

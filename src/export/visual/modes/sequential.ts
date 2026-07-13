@@ -6,13 +6,13 @@
  * Phase 13 Sprint 9: Refactored to use fluent builder classes
  */
 
-import type { SequentialThought } from '../../../types/index.js';
-import type { VisualExportOptions } from '../types.js';
-import { sanitizeId } from '../utils.js';
+import type { SequentialThought } from "../../../types/index.js";
+import type { VisualExportOptions } from "../types.js";
+import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
-import { DOTGraphBuilder } from '../utils/dot.js';
-import { MermaidGraphBuilder } from '../utils/mermaid.js';
-import { ASCIIDocBuilder } from '../utils/ascii.js';
+import { DOTGraphBuilder } from "../utils/dot.js";
+import { MermaidGraphBuilder } from "../utils/mermaid.js";
+import { ASCIIDocBuilder } from "../utils/ascii.js";
 // SVG utilities
 import {
   generateSVGHeader,
@@ -24,17 +24,13 @@ import {
   getNodeColor,
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
-} from '../utils/svg.js';
+} from "../utils/svg.js";
 import {
   generateGraphML,
   type GraphMLNode,
   type GraphMLEdge,
-} from '../utils/graphml.js';
-import {
-  generateTikZ,
-  type TikZNode,
-  type TikZEdge,
-} from '../utils/tikz.js';
+} from "../utils/graphml.js";
+import { generateTikZ, type TikZNode, type TikZEdge } from "../utils/tikz.js";
 import {
   generateHTMLHeader,
   generateHTMLFooter,
@@ -43,57 +39,55 @@ import {
   renderSection,
   renderBadge,
   renderList,
-} from '../utils/html.js';
-import {
-  sanitizeModelicaId,
-  escapeModelicaString,
-} from '../utils/modelica.js';
-import {
-  generateActivityDiagram,
-} from '../utils/uml.js';
+} from "../utils/html.js";
+import { sanitizeModelicaId, escapeModelicaString } from "../utils/modelica.js";
+import { generateActivityDiagram } from "../utils/uml.js";
 import {
   createJsonGraph,
   addNode,
   addEdge,
   addMetric,
   serializeGraph,
-} from '../utils/json.js';
+} from "../utils/json.js";
 import {
   section,
   list,
   keyValueSection,
   mermaidBlock,
   document as mdDocument,
-} from '../utils/markdown.js';
+} from "../utils/markdown.js";
 
 /**
  * Export sequential dependency graph to visual format
  */
-export function exportSequentialDependencyGraph(thought: SequentialThought, options: VisualExportOptions): string {
-  const { format, colorScheme = 'default', includeLabels = true } = options;
+export function exportSequentialDependencyGraph(
+  thought: SequentialThought,
+  options: VisualExportOptions,
+): string {
+  const { format, colorScheme = "default", includeLabels = true } = options;
 
   switch (format) {
-    case 'mermaid':
+    case "mermaid":
       return sequentialToMermaid(thought, colorScheme, includeLabels);
-    case 'dot':
+    case "dot":
       return sequentialToDOT(thought, includeLabels);
-    case 'ascii':
+    case "ascii":
       return sequentialToASCII(thought);
-    case 'svg':
+    case "svg":
       return sequentialToSVG(thought, options);
-    case 'graphml':
+    case "graphml":
       return sequentialToGraphML(thought, options);
-    case 'tikz':
+    case "tikz":
       return sequentialToTikZ(thought, options);
-    case 'html':
+    case "html":
       return sequentialToHTML(thought, options);
-    case 'modelica':
+    case "modelica":
       return sequentialToModelica(thought, options);
-    case 'uml':
+    case "uml":
       return sequentialToUML(thought, options);
-    case 'json':
+    case "json":
       return sequentialToJSON(thought, options);
-    case 'markdown':
+    case "markdown":
       return sequentialToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
@@ -103,26 +97,32 @@ export function exportSequentialDependencyGraph(thought: SequentialThought, opti
 function sequentialToMermaid(
   thought: SequentialThought,
   colorScheme: string,
-  includeLabels: boolean
+  includeLabels: boolean,
 ): string {
-  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
-  const builder = new MermaidGraphBuilder().setDirection('TD');
+  const scheme = colorScheme as "default" | "pastel" | "monochrome";
+  const builder = new MermaidGraphBuilder().setDirection("TD");
 
   // Current thought node
   const nodeId = sanitizeId(thought.id);
-  const label = includeLabels ? thought.content.substring(0, 50) + (thought.content.length > 50 ? '...' : '') : nodeId;
+  const label = includeLabels
+    ? thought.content.substring(0, 50) +
+      (thought.content.length > 50 ? "..." : "")
+    : nodeId;
 
   // Determine color based on scheme
-  const primaryColor = scheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
-  const warningColor = scheme === 'pastel' ? '#fff3e0' : '#ffd699';
+  const primaryColor = scheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
+  const warningColor = scheme === "pastel" ? "#fff3e0" : "#ffd699";
 
   builder.addNode({
     id: nodeId,
     label,
-    shape: thought.isRevision ? 'hexagon' : 'stadium',
-    style: scheme !== 'monochrome' ? {
-      fill: thought.isRevision ? warningColor : primaryColor,
-    } : undefined,
+    shape: thought.isRevision ? "hexagon" : "stadium",
+    style:
+      scheme !== "monochrome"
+        ? {
+            fill: thought.isRevision ? warningColor : primaryColor,
+          }
+        : undefined,
   });
 
   // Dependencies
@@ -132,12 +132,12 @@ function sequentialToMermaid(
       builder.addNode({
         id: depNodeId,
         label: depNodeId,
-        shape: 'rectangle',
+        shape: "rectangle",
       });
       builder.addEdge({
         source: depNodeId,
         target: nodeId,
-        style: 'arrow',
+        style: "arrow",
       });
     }
   }
@@ -148,8 +148,8 @@ function sequentialToMermaid(
     builder.addEdge({
       source: branchId,
       target: nodeId,
-      style: 'dotted',
-      label: 'branch',
+      style: "dotted",
+      label: "branch",
     });
   }
 
@@ -159,30 +159,36 @@ function sequentialToMermaid(
     builder.addEdge({
       source: revisedId,
       target: nodeId,
-      style: 'thick',
-      label: 'revises',
+      style: "thick",
+      label: "revises",
     });
   }
 
   return builder.setOptions({ colorScheme: scheme }).render();
 }
 
-function sequentialToDOT(thought: SequentialThought, includeLabels: boolean): string {
+function sequentialToDOT(
+  thought: SequentialThought,
+  includeLabels: boolean,
+): string {
   const builder = new DOTGraphBuilder()
-    .setGraphName('SequentialDependency')
-    .setRankDir('TB')
-    .setNodeDefaults({ shape: 'box', style: 'rounded' });
+    .setGraphName("SequentialDependency")
+    .setRankDir("TB")
+    .setNodeDefaults({ shape: "box", style: "rounded" });
 
   // Current thought node
   const nodeId = sanitizeId(thought.id);
-  const label = includeLabels ? thought.content.substring(0, 50) + (thought.content.length > 50 ? '...' : '') : nodeId;
+  const label = includeLabels
+    ? thought.content.substring(0, 50) +
+      (thought.content.length > 50 ? "..." : "")
+    : nodeId;
 
   builder.addNode({
     id: nodeId,
     label,
-    shape: thought.isRevision ? 'hexagon' : 'box',
-    style: ['rounded', 'filled'],
-    fillColor: thought.isRevision ? '#ffd699' : '#a8d5ff',
+    shape: thought.isRevision ? "hexagon" : "box",
+    style: ["rounded", "filled"],
+    fillColor: thought.isRevision ? "#ffd699" : "#a8d5ff",
   });
 
   // Dependencies
@@ -192,8 +198,8 @@ function sequentialToDOT(thought: SequentialThought, includeLabels: boolean): st
       builder.addNode({
         id: depNodeId,
         label: depNodeId,
-        shape: 'box',
-        style: 'rounded',
+        shape: "box",
+        style: "rounded",
       });
       builder.addEdge({
         source: depNodeId,
@@ -208,8 +214,8 @@ function sequentialToDOT(thought: SequentialThought, includeLabels: boolean): st
     builder.addEdge({
       source: branchId,
       target: nodeId,
-      style: 'dashed',
-      label: 'branch',
+      style: "dashed",
+      label: "branch",
     });
   }
 
@@ -219,8 +225,8 @@ function sequentialToDOT(thought: SequentialThought, includeLabels: boolean): st
     builder.addEdge({
       source: revisedId,
       target: nodeId,
-      style: 'bold',
-      label: 'revises',
+      style: "bold",
+      label: "revises",
     });
   }
 
@@ -230,17 +236,18 @@ function sequentialToDOT(thought: SequentialThought, includeLabels: boolean): st
 function sequentialToASCII(thought: SequentialThought): string {
   const builder = new ASCIIDocBuilder()
     .setMaxWidth(60)
-    .addHeader('Sequential Dependency Graph');
+    .addHeader("Sequential Dependency Graph");
 
   // Current thought
-  builder.addSection('Current Thought')
+  builder
+    .addSection("Current Thought")
     .addText(`ID: ${thought.id}\n`)
     .addText(`Content: ${thought.content.substring(0, 100)}...\n`)
     .addEmptyLine();
 
   // Dependencies
   if (thought.buildUpon && thought.buildUpon.length > 0) {
-    builder.addSection('Builds Upon');
+    builder.addSection("Builds Upon");
     for (const depId of thought.buildUpon) {
       builder.addText(`  ↓ ${depId}\n`);
     }
@@ -249,7 +256,8 @@ function sequentialToASCII(thought: SequentialThought): string {
 
   // Branch info
   if (thought.branchFrom) {
-    builder.addSection('Branch Information')
+    builder
+      .addSection("Branch Information")
       .addText(`  Branches From: ${thought.branchFrom}\n`);
     if (thought.branchId) {
       builder.addText(`  Branch ID: ${thought.branchId}\n`);
@@ -259,7 +267,8 @@ function sequentialToASCII(thought: SequentialThought): string {
 
   // Revision info
   if (thought.revisesThought) {
-    builder.addSection('Revision Information')
+    builder
+      .addSection("Revision Information")
       .addText(`  Revises: ${thought.revisesThought}\n`);
     if (thought.revisionReason) {
       builder.addText(`  Reason: ${thought.revisionReason}\n`);
@@ -273,9 +282,12 @@ function sequentialToASCII(thought: SequentialThought): string {
 /**
  * Export sequential dependency graph to native SVG format
  */
-function sequentialToSVG(thought: SequentialThought, options: VisualExportOptions): string {
+function sequentialToSVG(
+  thought: SequentialThought,
+  options: VisualExportOptions,
+): string {
   const {
-    colorScheme = 'default',
+    colorScheme = "default",
     includeLabels = true,
     svgWidth = DEFAULT_SVG_OPTIONS.width,
   } = options;
@@ -291,7 +303,9 @@ function sequentialToSVG(thought: SequentialThought, options: VisualExportOption
 
   // Main thought node
   const mainNodeId = sanitizeId(thought.id);
-  const mainLabel = includeLabels ? thought.content.substring(0, 40) + '...' : mainNodeId;
+  const mainLabel = includeLabels
+    ? thought.content.substring(0, 40) + "..."
+    : mainNodeId;
 
   // Position dependencies first
   if (thought.buildUpon && thought.buildUpon.length > 0) {
@@ -307,7 +321,7 @@ function sequentialToSVG(thought: SequentialThought, options: VisualExportOption
         width: nodeWidth,
         height: nodeHeight,
         label: depNodeId,
-        type: 'dependency',
+        type: "dependency",
       });
       startX += nodeWidth + 20;
     }
@@ -322,13 +336,17 @@ function sequentialToSVG(thought: SequentialThought, options: VisualExportOption
     width: nodeWidth,
     height: nodeHeight,
     label: mainLabel,
-    type: thought.isRevision ? 'revision' : 'main',
+    type: thought.isRevision ? "revision" : "main",
   });
   currentY += nodeHeight + padding;
 
   const actualHeight = currentY + 80;
 
-  let svg = generateSVGHeader(svgWidth, actualHeight, 'Sequential Dependency Graph');
+  let svg = generateSVGHeader(
+    svgWidth,
+    actualHeight,
+    "Sequential Dependency Graph",
+  );
 
   // Render edges
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
@@ -342,44 +360,48 @@ function sequentialToSVG(thought: SequentialThought, options: VisualExportOption
     }
   }
   if (thought.branchFrom) {
-    const branchLabel = 'branch';
+    const branchLabel = "branch";
     svg += `\n    <text x="${svgWidth / 2 - 100}" y="${padding + 20}" class="edge-label">${branchLabel} from: ${thought.branchFrom}</text>`;
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render nodes
   svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
   for (const [, pos] of positions) {
-    const colors = pos.type === 'revision'
-      ? getNodeColor('warning', colorScheme)
-      : pos.type === 'main'
-        ? getNodeColor('primary', colorScheme)
-        : getNodeColor('neutral', colorScheme);
+    const colors =
+      pos.type === "revision"
+        ? getNodeColor("warning", colorScheme)
+        : pos.type === "main"
+          ? getNodeColor("primary", colorScheme)
+          : getNodeColor("neutral", colorScheme);
 
-    if (pos.type === 'main' || pos.type === 'revision') {
+    if (pos.type === "main" || pos.type === "revision") {
       svg += renderStadiumNode(pos, colors);
     } else {
       svg += renderRectNode(pos, colors);
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render legend
   const legendItems = [
-    { label: 'Current', color: getNodeColor('primary', colorScheme) },
-    { label: 'Revision', color: getNodeColor('warning', colorScheme) },
-    { label: 'Dependency', color: getNodeColor('neutral', colorScheme) },
+    { label: "Current", color: getNodeColor("primary", colorScheme) },
+    { label: "Revision", color: getNodeColor("warning", colorScheme) },
+    { label: "Dependency", color: getNodeColor("neutral", colorScheme) },
   ];
   svg += renderLegend(20, actualHeight - 80, legendItems);
 
-  svg += '\n' + generateSVGFooter();
+  svg += "\n" + generateSVGFooter();
   return svg;
 }
 
 /**
  * Export sequential dependency graph to GraphML format
  */
-function sequentialToGraphML(thought: SequentialThought, options: VisualExportOptions): string {
+function sequentialToGraphML(
+  thought: SequentialThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true } = options;
 
   // Build nodes from thought dependencies (buildUpon) and current thought
@@ -392,24 +414,29 @@ function sequentialToGraphML(thought: SequentialThought, options: VisualExportOp
     thought.buildUpon.forEach((depId, index) => {
       nodes.push({
         id: sanitizeId(depId),
-        label: includeLabels ? `Step ${index + 1}: ${depId}` : sanitizeId(depId),
-        type: 'dependency',
+        label: includeLabels
+          ? `Step ${index + 1}: ${depId}`
+          : sanitizeId(depId),
+        type: "dependency",
       });
     });
 
     // Add current thought as final node
     nodes.push({
       id: sanitizeId(thought.id),
-      label: includeLabels ? `Step ${nodes.length + 1}: ${thought.content.substring(0, 50)}...` : sanitizeId(thought.id),
-      type: 'current',
+      label: includeLabels
+        ? `Step ${nodes.length + 1}: ${thought.content.substring(0, 50)}...`
+        : sanitizeId(thought.id),
+      type: "current",
     });
 
     // Create edges linking sequential steps
     thought.buildUpon.forEach((depId, index) => {
       const sourceId = sanitizeId(depId);
-      const targetId = index < thought.buildUpon!.length - 1
-        ? sanitizeId(thought.buildUpon![index + 1])
-        : sanitizeId(thought.id);
+      const targetId =
+        index < thought.buildUpon!.length - 1
+          ? sanitizeId(thought.buildUpon![index + 1])
+          : sanitizeId(thought.id);
 
       edges.push({
         id: `e${index}`,
@@ -422,13 +449,15 @@ function sequentialToGraphML(thought: SequentialThought, options: VisualExportOp
     // Handle empty case - just show the current thought
     nodes.push({
       id: sanitizeId(thought.id),
-      label: includeLabels ? thought.content.substring(0, 100) : sanitizeId(thought.id),
-      type: 'current',
+      label: includeLabels
+        ? thought.content.substring(0, 100)
+        : sanitizeId(thought.id),
+      type: "current",
     });
   }
 
   return generateGraphML(nodes, edges, {
-    graphName: 'Sequential Dependency Graph',
+    graphName: "Sequential Dependency Graph",
     directed: true,
     includeLabels,
   });
@@ -437,8 +466,11 @@ function sequentialToGraphML(thought: SequentialThought, options: VisualExportOp
 /**
  * Export sequential dependency graph to TikZ format
  */
-function sequentialToTikZ(thought: SequentialThought, options: VisualExportOptions): string {
-  const { includeLabels = true, colorScheme = 'default' } = options;
+function sequentialToTikZ(
+  thought: SequentialThought,
+  options: VisualExportOptions,
+): string {
+  const { includeLabels = true, colorScheme = "default" } = options;
 
   // Build nodes from thought dependencies (buildUpon) and current thought
   const nodes: TikZNode[] = [];
@@ -453,27 +485,30 @@ function sequentialToTikZ(thought: SequentialThought, options: VisualExportOptio
         label: includeLabels ? `Step ${index + 1}` : sanitizeId(depId),
         x: index * 3,
         y: 0,
-        type: 'success', // Completed steps
-        shape: 'rectangle',
+        type: "success", // Completed steps
+        shape: "rectangle",
       });
     });
 
     // Add current thought as final node (current step)
     nodes.push({
       id: sanitizeId(thought.id),
-      label: includeLabels ? `Step ${nodes.length + 1}` : sanitizeId(thought.id),
+      label: includeLabels
+        ? `Step ${nodes.length + 1}`
+        : sanitizeId(thought.id),
       x: nodes.length * 3,
       y: 0,
-      type: 'primary', // Current step
-      shape: 'rectangle',
+      type: "primary", // Current step
+      shape: "rectangle",
     });
 
     // Create edges between consecutive steps
     thought.buildUpon.forEach((depId, index) => {
       const sourceId = sanitizeId(depId);
-      const targetId = index < thought.buildUpon!.length - 1
-        ? sanitizeId(thought.buildUpon![index + 1])
-        : sanitizeId(thought.id);
+      const targetId =
+        index < thought.buildUpon!.length - 1
+          ? sanitizeId(thought.buildUpon![index + 1])
+          : sanitizeId(thought.id);
 
       edges.push({
         source: sourceId,
@@ -485,16 +520,16 @@ function sequentialToTikZ(thought: SequentialThought, options: VisualExportOptio
     // Handle empty case - just show the current thought
     nodes.push({
       id: sanitizeId(thought.id),
-      label: includeLabels ? 'Current' : sanitizeId(thought.id),
+      label: includeLabels ? "Current" : sanitizeId(thought.id),
       x: 0,
       y: 0,
-      type: 'primary',
-      shape: 'rectangle',
+      type: "primary",
+      shape: "rectangle",
     });
   }
 
   return generateTikZ(nodes, edges, {
-    title: 'Sequential Dependency Graph',
+    title: "Sequential Dependency Graph",
     colorScheme,
     includeLabels,
   });
@@ -503,55 +538,77 @@ function sequentialToTikZ(thought: SequentialThought, options: VisualExportOptio
 /**
  * Export sequential dependency graph to HTML format
  */
-function sequentialToHTML(thought: SequentialThought, options: VisualExportOptions): string {
+function sequentialToHTML(
+  thought: SequentialThought,
+  options: VisualExportOptions,
+): string {
   const {
     htmlStandalone = true,
-    htmlTitle = 'Sequential Thinking Analysis',
-    htmlTheme = 'light',
+    htmlTitle = "Sequential Thinking Analysis",
+    htmlTheme = "light",
   } = options;
 
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme,
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
 
   // Metrics
   html += '<div class="metrics-grid">';
-  html += renderMetricCard('Thought #', thought.thoughtNumber, 'primary');
-  html += renderMetricCard('Total', thought.totalThoughts, 'info');
+  html += renderMetricCard("Thought #", thought.thoughtNumber, "primary");
+  html += renderMetricCard("Total", thought.totalThoughts, "info");
   if (thought.buildUpon && thought.buildUpon.length > 0) {
-    html += renderMetricCard('Dependencies', thought.buildUpon.length, 'secondary');
+    html += renderMetricCard(
+      "Dependencies",
+      thought.buildUpon.length,
+      "secondary",
+    );
   }
-  html += '</div>\n';
+  html += "</div>\n";
 
   // Current thought
   const badges = [];
-  if (thought.isRevision) badges.push(renderBadge('Revision', 'warning'));
-  if (thought.branchFrom) badges.push(renderBadge('Branched', 'info'));
+  if (thought.isRevision) badges.push(renderBadge("Revision", "warning"));
+  if (thought.branchFrom) badges.push(renderBadge("Branched", "info"));
 
-  html += renderSection('Current Thought', `
-    <div class="flex gap-1" style="margin-bottom: 0.5rem">${badges.join(' ')}</div>
+  html += renderSection(
+    "Current Thought",
+    `
+    <div class="flex gap-1" style="margin-bottom: 0.5rem">${badges.join(" ")}</div>
     <p>${escapeHTML(thought.content)}</p>
     ${thought.nextThoughtNeeded ? '<p class="text-info">More thoughts needed...</p>' : '<p class="text-success">Reasoning complete.</p>'}
-  `, '💭');
+  `,
+    "💭",
+  );
 
   // Dependencies
   if (thought.buildUpon && thought.buildUpon.length > 0) {
-    html += renderSection('Builds Upon', renderList(thought.buildUpon), '🔗');
+    html += renderSection("Builds Upon", renderList(thought.buildUpon), "🔗");
   }
 
   // Branch info
   if (thought.branchFrom) {
-    html += renderSection('Branch Information', `
+    html += renderSection(
+      "Branch Information",
+      `
       <p><strong>Branched from:</strong> ${escapeHTML(thought.branchFrom)}</p>
-      ${thought.branchId ? `<p><strong>Branch ID:</strong> ${escapeHTML(thought.branchId)}</p>` : ''}
-    `, '🌿');
+      ${thought.branchId ? `<p><strong>Branch ID:</strong> ${escapeHTML(thought.branchId)}</p>` : ""}
+    `,
+      "🌿",
+    );
   }
 
   // Revision info
   if (thought.isRevision && thought.revisesThought) {
-    html += renderSection('Revision Information', `
+    html += renderSection(
+      "Revision Information",
+      `
       <p><strong>Revises:</strong> ${escapeHTML(thought.revisesThought)}</p>
-      ${thought.revisionReason ? `<p><strong>Reason:</strong> ${escapeHTML(thought.revisionReason)}</p>` : ''}
-    `, '✏️');
+      ${thought.revisionReason ? `<p><strong>Reason:</strong> ${escapeHTML(thought.revisionReason)}</p>` : ""}
+    `,
+      "✏️",
+    );
   }
 
   html += generateHTMLFooter(htmlStandalone);
@@ -561,77 +618,99 @@ function sequentialToHTML(thought: SequentialThought, options: VisualExportOptio
 /**
  * Export sequential dependency graph to Modelica format
  */
-function sequentialToModelica(thought: SequentialThought, options: VisualExportOptions): string {
+function sequentialToModelica(
+  thought: SequentialThought,
+  options: VisualExportOptions,
+): string {
   const { modelicaPackageName, modelicaIncludeAnnotations = true } = options;
-  const packageName = modelicaPackageName || 'SequentialDependency';
+  const packageName = modelicaPackageName || "SequentialDependency";
   const lines: string[] = [];
 
   lines.push(`package ${sanitizeModelicaId(packageName)}`);
-  lines.push(`  "Sequential dependency graph for thought ${sanitizeId(thought.id)}"`);
-  lines.push('');
+  lines.push(
+    `  "Sequential dependency graph for thought ${sanitizeId(thought.id)}"`,
+  );
+  lines.push("");
 
   // Current thought
-  lines.push('  record CurrentThought');
+  lines.push("  record CurrentThought");
   lines.push(`    constant String id = "${sanitizeModelicaId(thought.id)}";`);
   lines.push(`    constant Integer thoughtNumber = ${thought.thoughtNumber};`);
   lines.push(`    constant Integer totalThoughts = ${thought.totalThoughts};`);
-  lines.push(`    constant Boolean isRevision = ${thought.isRevision || false};`);
-  lines.push(`    constant Boolean nextThoughtNeeded = ${thought.nextThoughtNeeded};`);
-  lines.push('  end CurrentThought;');
-  lines.push('');
+  lines.push(
+    `    constant Boolean isRevision = ${thought.isRevision || false};`,
+  );
+  lines.push(
+    `    constant Boolean nextThoughtNeeded = ${thought.nextThoughtNeeded};`,
+  );
+  lines.push("  end CurrentThought;");
+  lines.push("");
 
   // Dependencies
   if (thought.buildUpon && thought.buildUpon.length > 0) {
-    lines.push('  // Dependencies');
-    lines.push('  type Dependency = enumeration(');
+    lines.push("  // Dependencies");
+    lines.push("  type Dependency = enumeration(");
     for (let i = 0; i < thought.buildUpon.length; i++) {
       const dep = thought.buildUpon[i];
-      const comma = i < thought.buildUpon.length - 1 ? ',' : '';
-      lines.push(`    ${sanitizeModelicaId(dep)} "${escapeModelicaString(dep)}"${comma}`);
+      const comma = i < thought.buildUpon.length - 1 ? "," : "";
+      lines.push(
+        `    ${sanitizeModelicaId(dep)} "${escapeModelicaString(dep)}"${comma}`,
+      );
     }
-    lines.push('  );');
-    lines.push('');
+    lines.push("  );");
+    lines.push("");
   }
 
   // Branch info
   if (thought.branchFrom) {
-    lines.push('  record BranchInfo');
-    lines.push(`    constant String branchFrom = "${sanitizeModelicaId(thought.branchFrom)}";`);
+    lines.push("  record BranchInfo");
+    lines.push(
+      `    constant String branchFrom = "${sanitizeModelicaId(thought.branchFrom)}";`,
+    );
     if (thought.branchId) {
-      lines.push(`    constant String branchId = "${sanitizeModelicaId(thought.branchId)}";`);
+      lines.push(
+        `    constant String branchId = "${sanitizeModelicaId(thought.branchId)}";`,
+      );
     }
-    lines.push('  end BranchInfo;');
-    lines.push('');
+    lines.push("  end BranchInfo;");
+    lines.push("");
   }
 
   // Revision info
   if (thought.revisesThought) {
-    lines.push('  record RevisionInfo');
-    lines.push(`    constant String revisesThought = "${sanitizeModelicaId(thought.revisesThought)}";`);
+    lines.push("  record RevisionInfo");
+    lines.push(
+      `    constant String revisesThought = "${sanitizeModelicaId(thought.revisesThought)}";`,
+    );
     if (thought.revisionReason) {
-      lines.push(`    constant String revisionReason = "${escapeModelicaString(thought.revisionReason)}";`);
+      lines.push(
+        `    constant String revisionReason = "${escapeModelicaString(thought.revisionReason)}";`,
+      );
     }
-    lines.push('  end RevisionInfo;');
-    lines.push('');
+    lines.push("  end RevisionInfo;");
+    lines.push("");
   }
 
   if (modelicaIncludeAnnotations) {
-    lines.push('  annotation(');
+    lines.push("  annotation(");
     lines.push('    Documentation(info="<html>');
-    lines.push('      <p>Generated by DeepThinking MCP v8.3.1</p>');
+    lines.push("      <p>Generated by DeepThinking MCP v8.3.1</p>");
     lines.push('    </html>")');
-    lines.push('  );');
+    lines.push("  );");
   }
 
   lines.push(`end ${sanitizeModelicaId(packageName)};`);
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
  * Export sequential dependency graph to UML/PlantUML format
  */
-function sequentialToUML(thought: SequentialThought, options: VisualExportOptions): string {
+function sequentialToUML(
+  thought: SequentialThought,
+  options: VisualExportOptions,
+): string {
   const { umlTheme, umlDirection } = options;
 
   // Build activity list from dependencies + current thought
@@ -641,22 +720,33 @@ function sequentialToUML(thought: SequentialThought, options: VisualExportOption
       activities.push(dep);
     }
   }
-  activities.push(thought.content.substring(0, 50) + '...');
+  activities.push(thought.content.substring(0, 50) + "...");
 
-  return generateActivityDiagram(activities, thought.content.substring(0, 50) + '...', {
-    title: 'Sequential Dependency Graph',
-    theme: umlTheme,
-    direction: umlDirection,
-  });
+  return generateActivityDiagram(
+    activities,
+    thought.content.substring(0, 50) + "...",
+    {
+      title: "Sequential Dependency Graph",
+      theme: umlTheme,
+      direction: umlDirection,
+    },
+  );
 }
 
 /**
  * Export sequential dependency graph to JSON format
  */
-function sequentialToJSON(thought: SequentialThought, options: VisualExportOptions): string {
-  const { jsonPrettyPrint = true, jsonIndent = 2, includeMetrics = true } = options;
+function sequentialToJSON(
+  thought: SequentialThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    jsonPrettyPrint = true,
+    jsonIndent = 2,
+    includeMetrics = true,
+  } = options;
 
-  const graph = createJsonGraph('Sequential Dependency Graph', 'sequential', {
+  const graph = createJsonGraph("Sequential Dependency Graph", "sequential", {
     prettyPrint: jsonPrettyPrint,
     indent: jsonIndent,
     includeMetrics,
@@ -669,11 +759,11 @@ function sequentialToJSON(thought: SequentialThought, options: VisualExportOptio
       addNode(graph, {
         id: sanitizeId(dep),
         label: dep,
-        type: 'dependency',
+        type: "dependency",
         x: i * 150,
         y: 0,
-        color: '#e0e0e0',
-        shape: 'rectangle',
+        color: "#e0e0e0",
+        shape: "rectangle",
       });
     }
   }
@@ -681,12 +771,12 @@ function sequentialToJSON(thought: SequentialThought, options: VisualExportOptio
   // Add current thought node
   addNode(graph, {
     id: sanitizeId(thought.id),
-    label: thought.content.substring(0, 50) + '...',
-    type: thought.isRevision ? 'revision' : 'current',
+    label: thought.content.substring(0, 50) + "...",
+    type: thought.isRevision ? "revision" : "current",
     x: (thought.buildUpon?.length || 0) * 75,
     y: 100,
-    color: thought.isRevision ? '#ffd699' : '#a8d5ff',
-    shape: 'stadium',
+    color: thought.isRevision ? "#ffd699" : "#a8d5ff",
+    shape: "stadium",
     metadata: {
       thoughtNumber: thought.thoughtNumber,
       totalThoughts: thought.totalThoughts,
@@ -704,27 +794,33 @@ function sequentialToJSON(thought: SequentialThought, options: VisualExportOptio
         source: sanitizeId(dep),
         target: sanitizeId(thought.id),
         directed: true,
-        style: 'solid',
+        style: "solid",
       });
     }
   }
 
   // Add metrics
   if (includeMetrics && graph.metrics) {
-    addMetric(graph, 'thoughtNumber', thought.thoughtNumber);
-    addMetric(graph, 'totalThoughts', thought.totalThoughts);
-    addMetric(graph, 'dependencyCount', thought.buildUpon?.length || 0);
-    addMetric(graph, 'isRevision', thought.isRevision || false);
-    addMetric(graph, 'nextThoughtNeeded', thought.nextThoughtNeeded);
+    addMetric(graph, "thoughtNumber", thought.thoughtNumber);
+    addMetric(graph, "totalThoughts", thought.totalThoughts);
+    addMetric(graph, "dependencyCount", thought.buildUpon?.length || 0);
+    addMetric(graph, "isRevision", thought.isRevision || false);
+    addMetric(graph, "nextThoughtNeeded", thought.nextThoughtNeeded);
   }
 
-  return serializeGraph(graph, { prettyPrint: jsonPrettyPrint, indent: jsonIndent });
+  return serializeGraph(graph, {
+    prettyPrint: jsonPrettyPrint,
+    indent: jsonIndent,
+  });
 }
 
 /**
  * Export sequential dependency graph to Markdown format
  */
-function sequentialToMarkdown(thought: SequentialThought, options: VisualExportOptions): string {
+function sequentialToMarkdown(
+  thought: SequentialThought,
+  options: VisualExportOptions,
+): string {
   const {
     markdownIncludeFrontmatter = false,
     markdownIncludeToc = false,
@@ -735,49 +831,49 @@ function sequentialToMarkdown(thought: SequentialThought, options: VisualExportO
 
   // Overview section
   const overviewContent = keyValueSection({
-    'Thought Number': `${thought.thoughtNumber} of ${thought.totalThoughts}`,
-    'Status': thought.nextThoughtNeeded ? 'In Progress' : 'Complete',
-    'Revision': thought.isRevision ? 'Yes' : 'No',
+    "Thought Number": `${thought.thoughtNumber} of ${thought.totalThoughts}`,
+    Status: thought.nextThoughtNeeded ? "In Progress" : "Complete",
+    Revision: thought.isRevision ? "Yes" : "No",
   });
-  parts.push(section('Overview', overviewContent));
+  parts.push(section("Overview", overviewContent));
 
   // Current thought content
-  parts.push(section('Current Thought', thought.content));
+  parts.push(section("Current Thought", thought.content));
 
   // Dependencies
   if (thought.buildUpon && thought.buildUpon.length > 0) {
-    parts.push(section('Dependencies (Builds Upon)', list(thought.buildUpon)));
+    parts.push(section("Dependencies (Builds Upon)", list(thought.buildUpon)));
   }
 
   // Branch information
   if (thought.branchFrom) {
     const branchContent = keyValueSection({
-      'Branched From': thought.branchFrom,
-      ...(thought.branchId ? { 'Branch ID': thought.branchId } : {}),
+      "Branched From": thought.branchFrom,
+      ...(thought.branchId ? { "Branch ID": thought.branchId } : {}),
     });
-    parts.push(section('Branch Information', branchContent));
+    parts.push(section("Branch Information", branchContent));
   }
 
   // Revision information
   if (thought.isRevision && thought.revisesThought) {
     const revisionContent = keyValueSection({
-      'Revises': thought.revisesThought,
-      ...(thought.revisionReason ? { 'Reason': thought.revisionReason } : {}),
+      Revises: thought.revisesThought,
+      ...(thought.revisionReason ? { Reason: thought.revisionReason } : {}),
     });
-    parts.push(section('Revision Information', revisionContent));
+    parts.push(section("Revision Information", revisionContent));
   }
 
   // Mermaid diagram
   if (markdownIncludeMermaid) {
-    const mermaidDiagram = sequentialToMermaid(thought, 'default', true);
-    parts.push(section('Dependency Graph', mermaidBlock(mermaidDiagram)));
+    const mermaidDiagram = sequentialToMermaid(thought, "default", true);
+    parts.push(section("Dependency Graph", mermaidBlock(mermaidDiagram)));
   }
 
-  return mdDocument('Sequential Dependency Analysis', parts.join('\n'), {
+  return mdDocument("Sequential Dependency Analysis", parts.join("\n"), {
     includeFrontmatter: markdownIncludeFrontmatter,
     includeTableOfContents: markdownIncludeToc,
     metadata: {
-      mode: 'sequential',
+      mode: "sequential",
       thoughtNumber: thought.thoughtNumber,
       totalThoughts: thought.totalThoughts,
     },

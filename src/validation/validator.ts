@@ -6,12 +6,12 @@
  * Sprint 9.3: Updated for async lazy-loaded validators
  */
 
-import { Thought } from '../types/core.js';
-import { ValidationResult, ValidationIssue } from '../types/session.js';
-import { validationCache } from './cache.js';
-import { getConfig } from '../config/index.js';
-import { getValidatorForMode } from './validators/index.js';
-import type { ValidationContext } from './constants.js';
+import { Thought } from "../types/core.js";
+import { ValidationResult, ValidationIssue } from "../types/session.js";
+import { validationCache } from "./cache.js";
+import { getConfig } from "../config/index.js";
+import { getValidatorForMode } from "./validators/index.js";
+import type { ValidationContext } from "./constants.js";
 
 /**
  * Validation confidence penalty constants
@@ -37,7 +37,10 @@ export class ThoughtValidator {
   /**
    * Validate a thought based on its mode
    */
-  async validate(thought: Thought, context: ValidationContext = {}): Promise<ValidationResult> {
+  async validate(
+    thought: Thought,
+    context: ValidationContext = {},
+  ): Promise<ValidationResult> {
     const config = getConfig();
 
     // Check cache if enabled
@@ -63,7 +66,10 @@ export class ThoughtValidator {
   /**
    * Perform actual validation (extracted for caching)
    */
-  private async performValidation(thought: Thought, context: ValidationContext = {}): Promise<ValidationResult> {
+  private async performValidation(
+    thought: Thought,
+    context: ValidationContext = {},
+  ): Promise<ValidationResult> {
     const issues: ValidationIssue[] = [];
 
     // Get validator for this mode (async lazy loading)
@@ -75,16 +81,17 @@ export class ThoughtValidator {
     } else {
       // Unknown mode - add warning
       issues.push({
-        severity: 'warning',
+        severity: "warning",
         thoughtNumber: thought.thoughtNumber,
         description: `Unknown thinking mode: ${thought.mode}`,
-        suggestion: 'Use a supported mode (sequential, shannon, mathematics, physics, hybrid, abductive, causal, bayesian, counterfactual, analogical, temporal, gametheory, evidential, firstprinciple, meta, modal, constraint, optimization, stochastic, recursive)',
-        category: 'structural',
+        suggestion:
+          "Use a supported mode (sequential, shannon, mathematics, physics, hybrid, abductive, causal, bayesian, counterfactual, analogical, temporal, gametheory, evidential, firstprinciple, meta, modal, constraint, optimization, stochastic, recursive)",
+        category: "structural",
       });
     }
 
     // Calculate validation result
-    const errors = issues.filter(i => i.severity === 'error');
+    const errors = issues.filter((i) => i.severity === "error");
 
     return {
       isValid: errors.length === 0,
@@ -102,25 +109,28 @@ export class ThoughtValidator {
    * @param issues - Array of validation issues found
    * @returns Confidence score between 0 and 1
    */
-  private calculateConfidence(thought: Thought, issues: ValidationIssue[]): number {
+  private calculateConfidence(
+    thought: Thought,
+    issues: ValidationIssue[],
+  ): number {
     let confidence = 1.0;
 
     // Reduce confidence for each issue based on severity
     for (const issue of issues) {
-      if (issue.severity === 'error') {
+      if (issue.severity === "error") {
         confidence -= CONFIDENCE_PENALTY.ERROR;
-      } else if (issue.severity === 'warning') {
+      } else if (issue.severity === "warning") {
         confidence -= CONFIDENCE_PENALTY.WARNING;
-      } else if (issue.severity === 'info') {
+      } else if (issue.severity === "info") {
         confidence -= CONFIDENCE_PENALTY.INFO;
       }
     }
 
     // Adjust for thought-specific uncertainty if present
-    if ('uncertainty' in thought) {
+    if ("uncertainty" in thought) {
       const uncertainty = (thought as { uncertainty?: number }).uncertainty;
-      if (typeof uncertainty === 'number') {
-        confidence *= (1 - uncertainty);
+      if (typeof uncertainty === "number") {
+        confidence *= 1 - uncertainty;
       }
     }
 
@@ -134,16 +144,28 @@ export class ThoughtValidator {
    * @param issues - Array of validation issues categorized by type
    * @returns Strength metrics object with scores between 0 and 1
    */
-  private calculateStrengthMetrics(_thought: Thought, issues: ValidationIssue[]) {
-    const logicalIssues = issues.filter(i => i.category === 'logical');
-    const mathIssues = issues.filter(i => i.category === 'mathematical');
-    const physicalIssues = issues.filter(i => i.category === 'physical');
+  private calculateStrengthMetrics(
+    _thought: Thought,
+    issues: ValidationIssue[],
+  ) {
+    const logicalIssues = issues.filter((i) => i.category === "logical");
+    const mathIssues = issues.filter((i) => i.category === "mathematical");
+    const physicalIssues = issues.filter((i) => i.category === "physical");
 
     return {
-      logicalSoundness: Math.max(0, 1 - (logicalIssues.length * STRENGTH_PENALTY.PER_ISSUE)),
+      logicalSoundness: Math.max(
+        0,
+        1 - logicalIssues.length * STRENGTH_PENALTY.PER_ISSUE,
+      ),
       empiricalSupport: STRENGTH_PENALTY.EMPIRICAL_BASELINE, // Baseline - would need actual evidence checking
-      mathematicalRigor: Math.max(0, 1 - (mathIssues.length * STRENGTH_PENALTY.PER_ISSUE)),
-      physicalConsistency: Math.max(0, 1 - (physicalIssues.length * STRENGTH_PENALTY.PER_ISSUE)),
+      mathematicalRigor: Math.max(
+        0,
+        1 - mathIssues.length * STRENGTH_PENALTY.PER_ISSUE,
+      ),
+      physicalConsistency: Math.max(
+        0,
+        1 - physicalIssues.length * STRENGTH_PENALTY.PER_ISSUE,
+      ),
     };
   }
 
@@ -152,8 +174,8 @@ export class ThoughtValidator {
    */
   private generateSuggestions(issues: ValidationIssue[]): string[] {
     return issues
-      .filter(i => i.severity === 'error' || i.severity === 'warning')
-      .map(i => i.suggestion);
+      .filter((i) => i.severity === "error" || i.severity === "warning")
+      .map((i) => i.suggestion);
   }
 }
 
@@ -161,4 +183,4 @@ export class ThoughtValidator {
  * Re-export ValidationContext from constants for backwards compatibility
  * Moved to constants.ts in v6.1.0 to break circular dependency
  */
-export type { ValidationContext } from './constants.js';
+export type { ValidationContext } from "./constants.js";

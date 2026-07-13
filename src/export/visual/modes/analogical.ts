@@ -6,13 +6,13 @@
  * Phase 13 Sprint 8: Refactored to use fluent builder classes
  */
 
-import type { AnalogicalThought } from '../../../types/index.js';
-import type { VisualExportOptions } from '../types.js';
-import { sanitizeId } from '../utils.js';
+import type { AnalogicalThought } from "../../../types/index.js";
+import type { VisualExportOptions } from "../types.js";
+import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
-import { DOTGraphBuilder } from '../utils/dot.js';
-import { MermaidGraphBuilder } from '../utils/mermaid.js';
-import { ASCIIDocBuilder } from '../utils/ascii.js';
+import { DOTGraphBuilder } from "../utils/dot.js";
+import { MermaidGraphBuilder } from "../utils/mermaid.js";
+import { ASCIIDocBuilder } from "../utils/ascii.js";
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -23,13 +23,13 @@ import {
   getNodeColor,
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
-} from '../utils/svg.js';
+} from "../utils/svg.js";
 import {
   generateGraphML,
   type GraphMLNode,
   type GraphMLEdge,
   type GraphMLOptions,
-} from '../utils/graphml.js';
+} from "../utils/graphml.js";
 import {
   generateTikZ,
   getTikZColor,
@@ -38,7 +38,7 @@ import {
   type TikZNode,
   type TikZEdge,
   type TikZOptions,
-} from '../utils/tikz.js';
+} from "../utils/tikz.js";
 import {
   generateHTMLHeader,
   generateHTMLFooter,
@@ -47,23 +47,20 @@ import {
   renderSection,
   renderTable,
   renderProgressBar,
-} from '../utils/html.js';
-import {
-  sanitizeModelicaId,
-  escapeModelicaString,
-} from '../utils/modelica.js';
+} from "../utils/html.js";
+import { sanitizeModelicaId, escapeModelicaString } from "../utils/modelica.js";
 import {
   generateUmlDiagram,
   type UmlNode,
   type UmlEdge,
-} from '../utils/uml.js';
+} from "../utils/uml.js";
 import {
   createJsonGraph,
   addNode,
   addEdge,
   addMetric,
   serializeGraph,
-} from '../utils/json.js';
+} from "../utils/json.js";
 import {
   section,
   table,
@@ -71,36 +68,49 @@ import {
   keyValueSection,
   mermaidBlock,
   document as mdDocument,
-} from '../utils/markdown.js';
+} from "../utils/markdown.js";
 
 /**
  * Export analogical domain mapping to visual format
  */
-export function exportAnalogicalMapping(thought: AnalogicalThought, options: VisualExportOptions): string {
-  const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+export function exportAnalogicalMapping(
+  thought: AnalogicalThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+  } = options;
 
   switch (format) {
-    case 'mermaid':
-      return analogicalToMermaid(thought, colorScheme, includeLabels, includeMetrics);
-    case 'dot':
+    case "mermaid":
+      return analogicalToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics,
+      );
+    case "dot":
       return analogicalToDOT(thought, includeLabels, includeMetrics);
-    case 'ascii':
+    case "ascii":
       return analogicalToASCII(thought);
-    case 'svg':
+    case "svg":
       return analogicalToSVG(thought, options);
-    case 'graphml':
+    case "graphml":
       return analogicalToGraphML(thought, options);
-    case 'tikz':
+    case "tikz":
       return analogicalToTikZ(thought, options);
-    case 'html':
+    case "html":
       return analogicalToHTML(thought, options);
-    case 'modelica':
+    case "modelica":
       return analogicalToModelica(thought, options);
-    case 'uml':
+    case "uml":
       return analogicalToUML(thought, options);
-    case 'json':
+    case "json":
       return analogicalToJSON(thought, options);
-    case 'markdown':
+    case "markdown":
       return analogicalToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
@@ -111,39 +121,39 @@ function analogicalToMermaid(
   thought: AnalogicalThought,
   colorScheme: string,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
-  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
-  const builder = new MermaidGraphBuilder().setDirection('LR');
+  const scheme = colorScheme as "default" | "pastel" | "monochrome";
+  const builder = new MermaidGraphBuilder().setDirection("LR");
 
   // Collect source domain node IDs
   const sourceNodeIds: string[] = [];
   for (const entity of thought.sourceDomain.entities) {
-    const entityId = sanitizeId('src_' + entity.id);
+    const entityId = sanitizeId("src_" + entity.id);
     const label = includeLabels ? entity.name : entityId;
-    builder.addNode({ id: entityId, label, shape: 'rectangle' });
+    builder.addNode({ id: entityId, label, shape: "rectangle" });
     sourceNodeIds.push(entityId);
   }
 
   // Collect target domain node IDs
   const targetNodeIds: string[] = [];
   for (const entity of thought.targetDomain.entities) {
-    const entityId = sanitizeId('tgt_' + entity.id);
+    const entityId = sanitizeId("tgt_" + entity.id);
     const label = includeLabels ? entity.name : entityId;
-    builder.addNode({ id: entityId, label, shape: 'rectangle' });
+    builder.addNode({ id: entityId, label, shape: "rectangle" });
     targetNodeIds.push(entityId);
   }
 
   // Add subgraphs
-  builder.addSubgraph('Source', 'Source Domain', sourceNodeIds);
-  builder.addSubgraph('Target', 'Target Domain', targetNodeIds);
+  builder.addSubgraph("Source", "Source Domain", sourceNodeIds);
+  builder.addSubgraph("Target", "Target Domain", targetNodeIds);
 
   // Add mapping edges
   for (const mapping of thought.mapping) {
-    const srcId = sanitizeId('src_' + mapping.sourceEntityId);
-    const tgtId = sanitizeId('tgt_' + mapping.targetEntityId);
+    const srcId = sanitizeId("src_" + mapping.sourceEntityId);
+    const tgtId = sanitizeId("tgt_" + mapping.targetEntityId);
     const label = includeMetrics ? mapping.confidence.toFixed(2) : undefined;
-    builder.addEdge({ source: srcId, target: tgtId, label, style: 'dotted' });
+    builder.addEdge({ source: srcId, target: tgtId, label, style: "dotted" });
   }
 
   return builder.setOptions({ colorScheme: scheme }).render();
@@ -152,17 +162,17 @@ function analogicalToMermaid(
 function analogicalToDOT(
   thought: AnalogicalThought,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
   const builder = new DOTGraphBuilder()
-    .setGraphName('AnalogicalMapping')
-    .setRankDir('LR')
-    .setNodeDefaults({ shape: 'box', style: 'rounded' });
+    .setGraphName("AnalogicalMapping")
+    .setRankDir("LR")
+    .setNodeDefaults({ shape: "box", style: "rounded" });
 
   // Collect source domain node IDs
   const sourceNodeIds: string[] = [];
   for (const entity of thought.sourceDomain.entities) {
-    const entityId = sanitizeId('src_' + entity.id);
+    const entityId = sanitizeId("src_" + entity.id);
     const label = includeLabels ? entity.name : entityId;
     builder.addNode({ id: entityId, label });
     sourceNodeIds.push(entityId);
@@ -171,7 +181,7 @@ function analogicalToDOT(
   // Collect target domain node IDs
   const targetNodeIds: string[] = [];
   for (const entity of thought.targetDomain.entities) {
-    const entityId = sanitizeId('tgt_' + entity.id);
+    const entityId = sanitizeId("tgt_" + entity.id);
     const label = includeLabels ? entity.name : entityId;
     builder.addNode({ id: entityId, label });
     targetNodeIds.push(entityId);
@@ -179,26 +189,26 @@ function analogicalToDOT(
 
   // Add subgraphs (clusters)
   builder.addSubgraph({
-    id: 'cluster_source',
-    label: 'Source Domain',
+    id: "cluster_source",
+    label: "Source Domain",
     nodes: sourceNodeIds,
-    style: 'filled',
-    fillColor: 'lightyellow',
+    style: "filled",
+    fillColor: "lightyellow",
   });
   builder.addSubgraph({
-    id: 'cluster_target',
-    label: 'Target Domain',
+    id: "cluster_target",
+    label: "Target Domain",
     nodes: targetNodeIds,
-    style: 'filled',
-    fillColor: 'lightblue',
+    style: "filled",
+    fillColor: "lightblue",
   });
 
   // Mapping edges
   for (const mapping of thought.mapping) {
-    const srcId = sanitizeId('src_' + mapping.sourceEntityId);
-    const tgtId = sanitizeId('tgt_' + mapping.targetEntityId);
+    const srcId = sanitizeId("src_" + mapping.sourceEntityId);
+    const tgtId = sanitizeId("tgt_" + mapping.targetEntityId);
     const label = includeMetrics ? mapping.confidence.toFixed(2) : undefined;
-    builder.addEdge({ source: srcId, target: tgtId, label, style: 'dashed' });
+    builder.addEdge({ source: srcId, target: tgtId, label, style: "dashed" });
   }
 
   return builder.render();
@@ -207,33 +217,46 @@ function analogicalToDOT(
 function analogicalToASCII(thought: AnalogicalThought): string {
   const builder = new ASCIIDocBuilder()
     .setMaxWidth(60)
-    .addHeader('Analogical Domain Mapping');
+    .addHeader("Analogical Domain Mapping");
 
   // Source domain
-  builder.addSection('Source Domain')
-    .addText(`${thought.sourceDomain.name}\n${thought.sourceDomain.description}\n`)
+  builder
+    .addSection("Source Domain")
+    .addText(
+      `${thought.sourceDomain.name}\n${thought.sourceDomain.description}\n`,
+    )
     .addEmptyLine();
 
   // Target domain
-  builder.addSection('Target Domain')
-    .addText(`${thought.targetDomain.name}\n${thought.targetDomain.description}\n`)
+  builder
+    .addSection("Target Domain")
+    .addText(
+      `${thought.targetDomain.name}\n${thought.targetDomain.description}\n`,
+    )
     .addEmptyLine();
 
   // Mappings
-  builder.addSection('Mappings');
+  builder.addSection("Mappings");
   for (const mapping of thought.mapping) {
-    const srcEntity = thought.sourceDomain.entities.find(e => e.id === mapping.sourceEntityId);
-    const tgtEntity = thought.targetDomain.entities.find(e => e.id === mapping.targetEntityId);
+    const srcEntity = thought.sourceDomain.entities.find(
+      (e) => e.id === mapping.sourceEntityId,
+    );
+    const tgtEntity = thought.targetDomain.entities.find(
+      (e) => e.id === mapping.targetEntityId,
+    );
 
     if (srcEntity && tgtEntity) {
-      builder.addText(`${srcEntity.name} ←→ ${tgtEntity.name} (confidence: ${mapping.confidence.toFixed(2)})\n`);
+      builder.addText(
+        `${srcEntity.name} ←→ ${tgtEntity.name} (confidence: ${mapping.confidence.toFixed(2)})\n`,
+      );
       builder.addText(`  ${mapping.justification}\n`);
     }
   }
   builder.addEmptyLine();
 
   // Summary
-  builder.addSection('Summary')
+  builder
+    .addSection("Summary")
     .addText(`Analogy Strength: ${thought.analogyStrength.toFixed(2)}\n`);
 
   return builder.render();
@@ -242,9 +265,12 @@ function analogicalToASCII(thought: AnalogicalThought): string {
 /**
  * Export analogical domain mapping to native SVG format
  */
-function analogicalToSVG(thought: AnalogicalThought, options: VisualExportOptions): string {
+function analogicalToSVG(
+  thought: AnalogicalThought,
+  options: VisualExportOptions,
+): string {
   const {
-    colorScheme = 'default',
+    colorScheme = "default",
     includeLabels = true,
     includeMetrics = true,
     svgWidth = DEFAULT_SVG_OPTIONS.width,
@@ -258,7 +284,7 @@ function analogicalToSVG(thought: AnalogicalThought, options: VisualExportOption
   const nodeWidth = 150;
   const nodeHeight = 40;
   thought.sourceDomain.entities.forEach((entity, index) => {
-    const srcId = 'src_' + entity.id;
+    const srcId = "src_" + entity.id;
     positions.set(srcId, {
       id: srcId,
       label: includeLabels ? entity.name : srcId,
@@ -266,14 +292,14 @@ function analogicalToSVG(thought: AnalogicalThought, options: VisualExportOption
       y: sourceY + index * entitySpacing,
       width: nodeWidth,
       height: nodeHeight,
-      type: 'source',
+      type: "source",
     });
   });
 
   // Target domain entities on the right
   const targetY = 100;
   thought.targetDomain.entities.forEach((entity, index) => {
-    const tgtId = 'tgt_' + entity.id;
+    const tgtId = "tgt_" + entity.id;
     positions.set(tgtId, {
       id: tgtId,
       label: includeLabels ? entity.name : tgtId,
@@ -281,79 +307,91 @@ function analogicalToSVG(thought: AnalogicalThought, options: VisualExportOption
       y: targetY + index * entitySpacing,
       width: nodeWidth,
       height: nodeHeight,
-      type: 'target',
+      type: "target",
     });
   });
 
   const actualHeight = Math.max(
     DEFAULT_SVG_OPTIONS.height,
-    Math.max(thought.sourceDomain.entities.length, thought.targetDomain.entities.length) * entitySpacing + 150
+    Math.max(
+      thought.sourceDomain.entities.length,
+      thought.targetDomain.entities.length,
+    ) *
+      entitySpacing +
+      150,
   );
 
-  let svg = generateSVGHeader(svgWidth, actualHeight, 'Analogical Domain Mapping');
+  let svg = generateSVGHeader(
+    svgWidth,
+    actualHeight,
+    "Analogical Domain Mapping",
+  );
 
   // Render edges first (mapping connections)
   svg += '\n  <!-- Mappings -->\n  <g class="edges">';
   for (const mapping of thought.mapping) {
-    const srcPos = positions.get('src_' + mapping.sourceEntityId);
-    const tgtPos = positions.get('tgt_' + mapping.targetEntityId);
+    const srcPos = positions.get("src_" + mapping.sourceEntityId);
+    const tgtPos = positions.get("tgt_" + mapping.targetEntityId);
     if (srcPos && tgtPos) {
       const label = includeMetrics ? mapping.confidence.toFixed(2) : undefined;
-      svg += renderEdge(srcPos, tgtPos, { label, style: 'dashed' });
+      svg += renderEdge(srcPos, tgtPos, { label, style: "dashed" });
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render nodes
   svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
 
-  const sourceColors = getNodeColor('tertiary', colorScheme);
-  const targetColors = getNodeColor('primary', colorScheme);
+  const sourceColors = getNodeColor("tertiary", colorScheme);
+  const targetColors = getNodeColor("primary", colorScheme);
 
   for (const [, pos] of positions) {
-    if (pos.type === 'source') {
+    if (pos.type === "source") {
       svg += renderRectNode(pos, sourceColors);
     } else {
       svg += renderRectNode(pos, targetColors);
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render metrics panel
   if (includeMetrics) {
     const metrics = [
-      { label: 'Analogy Strength', value: thought.analogyStrength.toFixed(2) },
-      { label: 'Mappings', value: thought.mapping.length },
-      { label: 'Source Entities', value: thought.sourceDomain.entities.length },
-      { label: 'Target Entities', value: thought.targetDomain.entities.length },
+      { label: "Analogy Strength", value: thought.analogyStrength.toFixed(2) },
+      { label: "Mappings", value: thought.mapping.length },
+      { label: "Source Entities", value: thought.sourceDomain.entities.length },
+      { label: "Target Entities", value: thought.targetDomain.entities.length },
     ];
     svg += renderMetricsPanel(svgWidth - 180, actualHeight - 140, metrics);
   }
 
   // Render legend
   const legendItems = [
-    { label: 'Source Domain', color: sourceColors },
-    { label: 'Target Domain', color: targetColors },
+    { label: "Source Domain", color: sourceColors },
+    { label: "Target Domain", color: targetColors },
   ];
   svg += renderLegend(20, actualHeight - 80, legendItems);
 
-  svg += '\n' + generateSVGFooter();
+  svg += "\n" + generateSVGFooter();
   return svg;
 }
 
 /**
  * Export analogical domain mapping to GraphML format
  */
-function analogicalToGraphML(thought: AnalogicalThought, options: VisualExportOptions): string {
+function analogicalToGraphML(
+  thought: AnalogicalThought,
+  options: VisualExportOptions,
+): string {
   const { includeMetrics = true } = options;
 
   // Create nodes for source domain entities
   const nodes: GraphMLNode[] = [];
   for (const entity of thought.sourceDomain.entities) {
     nodes.push({
-      id: 'src_' + entity.id,
+      id: "src_" + entity.id,
       label: entity.name,
-      type: 'source',
+      type: "source",
       metadata: {
         description: entity.description,
         domain: thought.sourceDomain.name,
@@ -364,9 +402,9 @@ function analogicalToGraphML(thought: AnalogicalThought, options: VisualExportOp
   // Create nodes for target domain entities
   for (const entity of thought.targetDomain.entities) {
     nodes.push({
-      id: 'tgt_' + entity.id,
+      id: "tgt_" + entity.id,
       label: entity.name,
-      type: 'target',
+      type: "target",
       metadata: {
         description: entity.description,
         domain: thought.targetDomain.name,
@@ -378,14 +416,14 @@ function analogicalToGraphML(thought: AnalogicalThought, options: VisualExportOp
   const edges: GraphMLEdge[] = thought.mapping.map((mapping, index) => {
     const edge: GraphMLEdge = {
       id: `mapping_${index}`,
-      source: 'src_' + mapping.sourceEntityId,
-      target: 'tgt_' + mapping.targetEntityId,
+      source: "src_" + mapping.sourceEntityId,
+      target: "tgt_" + mapping.targetEntityId,
     };
 
     if (includeMetrics) {
       edge.metadata = {
         weight: mapping.confidence,
-        type: 'mapping',
+        type: "mapping",
       };
       edge.label = mapping.confidence.toFixed(2);
     }
@@ -394,7 +432,7 @@ function analogicalToGraphML(thought: AnalogicalThought, options: VisualExportOp
   });
 
   const graphmlOptions: GraphMLOptions = {
-    graphName: 'Analogical Mapping',
+    graphName: "Analogical Mapping",
   };
 
   return generateGraphML(nodes, edges, graphmlOptions);
@@ -403,41 +441,48 @@ function analogicalToGraphML(thought: AnalogicalThought, options: VisualExportOp
 /**
  * Export analogical domain mapping to TikZ format
  */
-function analogicalToTikZ(thought: AnalogicalThought, options: VisualExportOptions): string {
-  const { includeLabels = true, includeMetrics = true, colorScheme = 'default' } = options;
+function analogicalToTikZ(
+  thought: AnalogicalThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    includeLabels = true,
+    includeMetrics = true,
+    colorScheme = "default",
+  } = options;
 
   const nodes: TikZNode[] = [];
 
   // Source domain entities on the left (x = -3)
   thought.sourceDomain.entities.forEach((entity, index) => {
     nodes.push({
-      id: 'src_' + entity.id,
+      id: "src_" + entity.id,
       x: -3,
       y: -index * 1.5,
       label: includeLabels ? entity.name : entity.id,
-      shape: 'rectangle',
-      type: 'tertiary',
+      shape: "rectangle",
+      type: "tertiary",
     });
   });
 
   // Target domain entities on the right (x = 3)
   thought.targetDomain.entities.forEach((entity, index) => {
     nodes.push({
-      id: 'tgt_' + entity.id,
+      id: "tgt_" + entity.id,
       x: 3,
       y: -index * 1.5,
       label: includeLabels ? entity.name : entity.id,
-      shape: 'rectangle',
-      type: 'primary',
+      shape: "rectangle",
+      type: "primary",
     });
   });
 
   // Create dashed edges for mappings
-  const edges: TikZEdge[] = thought.mapping.map(mapping => {
+  const edges: TikZEdge[] = thought.mapping.map((mapping) => {
     const edge: TikZEdge = {
-      source: 'src_' + mapping.sourceEntityId,
-      target: 'tgt_' + mapping.targetEntityId,
-      style: 'dashed',
+      source: "src_" + mapping.sourceEntityId,
+      target: "tgt_" + mapping.targetEntityId,
+      style: "dashed",
     };
 
     if (includeMetrics) {
@@ -448,7 +493,7 @@ function analogicalToTikZ(thought: AnalogicalThought, options: VisualExportOptio
   });
 
   const tikzOptions: TikZOptions = {
-    title: 'Analogical Mapping',
+    title: "Analogical Mapping",
     colorScheme,
     includeLabels,
     includeMetrics,
@@ -459,27 +504,33 @@ function analogicalToTikZ(thought: AnalogicalThought, options: VisualExportOptio
   // Add metrics panel if requested
   if (includeMetrics) {
     const metrics = [
-      { label: 'Analogy Strength', value: thought.analogyStrength.toFixed(2) },
-      { label: 'Mappings', value: thought.mapping.length.toString() },
-      { label: 'Source Entities', value: thought.sourceDomain.entities.length.toString() },
-      { label: 'Target Entities', value: thought.targetDomain.entities.length.toString() },
+      { label: "Analogy Strength", value: thought.analogyStrength.toFixed(2) },
+      { label: "Mappings", value: thought.mapping.length.toString() },
+      {
+        label: "Source Entities",
+        value: thought.sourceDomain.entities.length.toString(),
+      },
+      {
+        label: "Target Entities",
+        value: thought.targetDomain.entities.length.toString(),
+      },
     ];
     tikz = tikz.replace(
       /\\end\{tikzpicture\}/,
-      renderTikZMetrics(6, -6, metrics) + '\n\\end{tikzpicture}'
+      renderTikZMetrics(6, -6, metrics) + "\n\\end{tikzpicture}",
     );
   }
 
   // Add legend
-  const sourceColors = getTikZColor('tertiary', colorScheme);
-  const targetColors = getTikZColor('primary', colorScheme);
+  const sourceColors = getTikZColor("tertiary", colorScheme);
+  const targetColors = getTikZColor("primary", colorScheme);
   const legendItems = [
-    { label: 'Source Domain', color: sourceColors },
-    { label: 'Target Domain', color: targetColors },
+    { label: "Source Domain", color: sourceColors },
+    { label: "Target Domain", color: targetColors },
   ];
   tikz = tikz.replace(
     /\\end\{tikzpicture\}/,
-    renderTikZLegend(-3, -6, legendItems) + '\n\\end{tikzpicture}'
+    renderTikZLegend(-3, -6, legendItems) + "\n\\end{tikzpicture}",
   );
 
   return tikz;
@@ -488,54 +539,88 @@ function analogicalToTikZ(thought: AnalogicalThought, options: VisualExportOptio
 /**
  * Export analogical mapping to HTML format
  */
-function analogicalToHTML(thought: AnalogicalThought, options: VisualExportOptions): string {
+function analogicalToHTML(
+  thought: AnalogicalThought,
+  options: VisualExportOptions,
+): string {
   const {
     htmlStandalone = true,
-    htmlTitle = 'Analogical Reasoning Analysis',
-    htmlTheme = 'light',
+    htmlTitle = "Analogical Reasoning Analysis",
+    htmlTheme = "light",
     includeMetrics = true,
   } = options;
 
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme,
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
 
   // Metrics
   if (includeMetrics) {
     html += '<div class="metrics-grid">';
-    html += renderMetricCard('Analogy Strength', (thought.analogyStrength * 100).toFixed(0) + '%', 'primary');
-    html += renderMetricCard('Mappings', thought.mapping.length, 'info');
-    html += renderMetricCard('Source Entities', thought.sourceDomain.entities.length, 'success');
-    html += renderMetricCard('Target Entities', thought.targetDomain.entities.length, 'warning');
-    html += '</div>\n';
-    html += renderProgressBar(thought.analogyStrength * 100, 'primary');
+    html += renderMetricCard(
+      "Analogy Strength",
+      (thought.analogyStrength * 100).toFixed(0) + "%",
+      "primary",
+    );
+    html += renderMetricCard("Mappings", thought.mapping.length, "info");
+    html += renderMetricCard(
+      "Source Entities",
+      thought.sourceDomain.entities.length,
+      "success",
+    );
+    html += renderMetricCard(
+      "Target Entities",
+      thought.targetDomain.entities.length,
+      "warning",
+    );
+    html += "</div>\n";
+    html += renderProgressBar(thought.analogyStrength * 100, "primary");
   }
 
   // Source domain
-  const srcRows = thought.sourceDomain.entities.map(e => [e.id, e.name, e.type || '-', e.description || '-']);
-  html += renderSection('Source Domain: ' + thought.sourceDomain.name, renderTable(
-    ['ID', 'Name', 'Type', 'Description'],
-    srcRows
-  ), '📘');
+  const srcRows = thought.sourceDomain.entities.map((e) => [
+    e.id,
+    e.name,
+    e.type || "-",
+    e.description || "-",
+  ]);
+  html += renderSection(
+    "Source Domain: " + thought.sourceDomain.name,
+    renderTable(["ID", "Name", "Type", "Description"], srcRows),
+    "📘",
+  );
 
   // Target domain
-  const tgtRows = thought.targetDomain.entities.map(e => [e.id, e.name, e.type || '-', e.description || '-']);
-  html += renderSection('Target Domain: ' + thought.targetDomain.name, renderTable(
-    ['ID', 'Name', 'Type', 'Description'],
-    tgtRows
-  ), '📗');
+  const tgtRows = thought.targetDomain.entities.map((e) => [
+    e.id,
+    e.name,
+    e.type || "-",
+    e.description || "-",
+  ]);
+  html += renderSection(
+    "Target Domain: " + thought.targetDomain.name,
+    renderTable(["ID", "Name", "Type", "Description"], tgtRows),
+    "📗",
+  );
 
   // Mappings
-  const mapRows = thought.mapping.map(m => [
+  const mapRows = thought.mapping.map((m) => [
     m.sourceEntityId,
-    '→',
+    "→",
     m.targetEntityId,
-    (m.confidence * 100).toFixed(0) + '%',
-    m.justification || '-',
+    (m.confidence * 100).toFixed(0) + "%",
+    m.justification || "-",
   ]);
-  html += renderSection('Entity Mappings', renderTable(
-    ['Source', '', 'Target', 'Confidence', 'Justification'],
-    mapRows
-  ), '🔗');
+  html += renderSection(
+    "Entity Mappings",
+    renderTable(
+      ["Source", "", "Target", "Confidence", "Justification"],
+      mapRows,
+    ),
+    "🔗",
+  );
 
   // Inferences
   if (thought.inferences && thought.inferences.length > 0) {
@@ -543,12 +628,16 @@ function analogicalToHTML(thought: AnalogicalThought, options: VisualExportOptio
       (i + 1).toString(),
       inf.sourcePattern,
       inf.targetPrediction,
-      (inf.confidence * 100).toFixed(0) + '%',
+      (inf.confidence * 100).toFixed(0) + "%",
     ]);
-    html += renderSection('Inferences', renderTable(
-      ['#', 'Source Pattern', 'Target Prediction', 'Confidence'],
-      infRows
-    ), '💡');
+    html += renderSection(
+      "Inferences",
+      renderTable(
+        ["#", "Source Pattern", "Target Prediction", "Confidence"],
+        infRows,
+      ),
+      "💡",
+    );
   }
 
   html += generateHTMLFooter(htmlStandalone);
@@ -558,24 +647,27 @@ function analogicalToHTML(thought: AnalogicalThought, options: VisualExportOptio
 /**
  * Export analogical mapping to Modelica format
  */
-function analogicalToModelica(thought: AnalogicalThought, options: VisualExportOptions): string {
+function analogicalToModelica(
+  thought: AnalogicalThought,
+  options: VisualExportOptions,
+): string {
   const { includeMetrics = true } = options;
 
-  const pkgName = sanitizeModelicaId('AnalogicalMapping');
-  const sourceName = thought.sourceDomain.name || 'Source';
-  const targetName = thought.targetDomain.name || 'Target';
+  const pkgName = sanitizeModelicaId("AnalogicalMapping");
+  const sourceName = thought.sourceDomain.name || "Source";
+  const targetName = thought.targetDomain.name || "Target";
   let modelica = `package ${pkgName}\n`;
-  modelica += `  "${escapeModelicaString('Analogical domain mapping: ' + sourceName + ' → ' + targetName)}"\n\n`;
+  modelica += `  "${escapeModelicaString("Analogical domain mapping: " + sourceName + " → " + targetName)}"\n\n`;
 
   // Source domain record
   modelica += `  record SourceDomain "${escapeModelicaString(sourceName)}"\n`;
   modelica += `    String name = "${escapeModelicaString(sourceName)}";\n`;
-  modelica += `    String description = "${escapeModelicaString(thought.sourceDomain.description || '')}";\n`;
+  modelica += `    String description = "${escapeModelicaString(thought.sourceDomain.description || "")}";\n`;
 
   // Add source entities as parameters
-  thought.sourceDomain.entities.forEach(entity => {
+  thought.sourceDomain.entities.forEach((entity) => {
     const entityId = sanitizeModelicaId(entity.id);
-    modelica += `    parameter String entity_${entityId} = "${entity.name ? escapeModelicaString(entity.name) : ''}";\n`;
+    modelica += `    parameter String entity_${entityId} = "${entity.name ? escapeModelicaString(entity.name) : ""}";\n`;
     if (entity.description) {
       modelica += `    parameter String entity_${entityId}_desc = "${escapeModelicaString(entity.description)}";\n`;
     }
@@ -585,12 +677,12 @@ function analogicalToModelica(thought: AnalogicalThought, options: VisualExportO
   // Target domain record
   modelica += `  record TargetDomain "${escapeModelicaString(targetName)}"\n`;
   modelica += `    String name = "${escapeModelicaString(targetName)}";\n`;
-  modelica += `    String description = "${escapeModelicaString(thought.targetDomain.description || '')}";\n`;
+  modelica += `    String description = "${escapeModelicaString(thought.targetDomain.description || "")}";\n`;
 
   // Add target entities as parameters
-  thought.targetDomain.entities.forEach(entity => {
+  thought.targetDomain.entities.forEach((entity) => {
     const entityId = sanitizeModelicaId(entity.id);
-    modelica += `    parameter String entity_${entityId} = "${entity.name ? escapeModelicaString(entity.name) : ''}";\n`;
+    modelica += `    parameter String entity_${entityId} = "${entity.name ? escapeModelicaString(entity.name) : ""}";\n`;
     if (entity.description) {
       modelica += `    parameter String entity_${entityId}_desc = "${escapeModelicaString(entity.description)}";\n`;
     }
@@ -643,7 +735,10 @@ function analogicalToModelica(thought: AnalogicalThought, options: VisualExportO
 /**
  * Export analogical mapping to UML format
  */
-function analogicalToUML(thought: AnalogicalThought, options: VisualExportOptions): string {
+function analogicalToUML(
+  thought: AnalogicalThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
 
   const nodes: UmlNode[] = [];
@@ -651,53 +746,53 @@ function analogicalToUML(thought: AnalogicalThought, options: VisualExportOption
 
   // Create package for source domain
   nodes.push({
-    id: 'source_domain',
+    id: "source_domain",
     label: thought.sourceDomain.name,
-    shape: 'package',
-    stereotype: 'source',
+    shape: "package",
+    stereotype: "source",
   });
 
   // Create entities for source domain
-  thought.sourceDomain.entities.forEach(entity => {
-    const nodeId = 'src_' + entity.id;
+  thought.sourceDomain.entities.forEach((entity) => {
+    const nodeId = "src_" + entity.id;
     nodes.push({
       id: nodeId,
       label: includeLabels ? entity.name : entity.id,
-      shape: 'rectangle',
-      color: 'FFE0B2',
+      shape: "rectangle",
+      color: "FFE0B2",
       attributes: entity.description ? [entity.description] : [],
     });
   });
 
   // Create package for target domain
   nodes.push({
-    id: 'target_domain',
+    id: "target_domain",
     label: thought.targetDomain.name,
-    shape: 'package',
-    stereotype: 'target',
+    shape: "package",
+    stereotype: "target",
   });
 
   // Create entities for target domain
-  thought.targetDomain.entities.forEach(entity => {
-    const nodeId = 'tgt_' + entity.id;
+  thought.targetDomain.entities.forEach((entity) => {
+    const nodeId = "tgt_" + entity.id;
     nodes.push({
       id: nodeId,
       label: includeLabels ? entity.name : entity.id,
-      shape: 'rectangle',
-      color: 'B3E5FC',
+      shape: "rectangle",
+      color: "B3E5FC",
       attributes: entity.description ? [entity.description] : [],
     });
   });
 
   // Create dependency relationships for mappings
-  thought.mapping.forEach(mapping => {
-    const srcId = 'src_' + mapping.sourceEntityId;
-    const tgtId = 'tgt_' + mapping.targetEntityId;
+  thought.mapping.forEach((mapping) => {
+    const srcId = "src_" + mapping.sourceEntityId;
+    const tgtId = "tgt_" + mapping.targetEntityId;
 
     edges.push({
       source: srcId,
       target: tgtId,
-      type: 'dependency',
+      type: "dependency",
       label: includeMetrics ? `${mapping.confidence.toFixed(2)}` : undefined,
     });
   });
@@ -705,27 +800,30 @@ function analogicalToUML(thought: AnalogicalThought, options: VisualExportOption
   // Add metrics info if requested
   if (includeMetrics) {
     nodes.push({
-      id: 'metrics_info',
+      id: "metrics_info",
       label: `Metrics\nAnalogy Strength: ${(thought.analogyStrength * 100).toFixed(1)}%\nMappings: ${thought.mapping.length}`,
-      shape: 'rectangle',
-      color: 'E8EAF6',
+      shape: "rectangle",
+      color: "E8EAF6",
     });
   }
 
   return generateUmlDiagram(nodes, edges, {
-    title: 'Analogical Domain Mapping',
-    diagramType: 'component',
+    title: "Analogical Domain Mapping",
+    diagramType: "component",
   });
 }
 
 /**
  * Export analogical mapping to JSON format
  */
-function analogicalToJSON(thought: AnalogicalThought, options: VisualExportOptions): string {
+function analogicalToJSON(
+  thought: AnalogicalThought,
+  options: VisualExportOptions,
+): string {
   const { includeMetrics = true } = options;
 
   // Create graph
-  const graph = createJsonGraph('Analogical Domain Mapping', 'analogical');
+  const graph = createJsonGraph("Analogical Domain Mapping", "analogical");
 
   // Add additional metadata
   graph.metadata.sourceDomainName = thought.sourceDomain.name;
@@ -734,31 +832,31 @@ function analogicalToJSON(thought: AnalogicalThought, options: VisualExportOptio
   graph.metadata.targetDomainDescription = thought.targetDomain.description;
 
   // Add source domain entities as nodes
-  thought.sourceDomain.entities.forEach(entity => {
+  thought.sourceDomain.entities.forEach((entity) => {
     addNode(graph, {
-      id: 'src_' + entity.id,
+      id: "src_" + entity.id,
       label: entity.name,
-      type: 'source_entity',
+      type: "source_entity",
       metadata: {
         originalId: entity.id,
         description: entity.description,
         entityType: entity.type,
-        domain: 'source',
+        domain: "source",
       },
     });
   });
 
   // Add target domain entities as nodes
-  thought.targetDomain.entities.forEach(entity => {
+  thought.targetDomain.entities.forEach((entity) => {
     addNode(graph, {
-      id: 'tgt_' + entity.id,
+      id: "tgt_" + entity.id,
       label: entity.name,
-      type: 'target_entity',
+      type: "target_entity",
       metadata: {
         originalId: entity.id,
         description: entity.description,
         entityType: entity.type,
-        domain: 'target',
+        domain: "target",
       },
     });
   });
@@ -767,10 +865,10 @@ function analogicalToJSON(thought: AnalogicalThought, options: VisualExportOptio
   thought.mapping.forEach((mapping, index) => {
     addEdge(graph, {
       id: `mapping_${index}`,
-      source: 'src_' + mapping.sourceEntityId,
-      target: 'tgt_' + mapping.targetEntityId,
+      source: "src_" + mapping.sourceEntityId,
+      target: "tgt_" + mapping.targetEntityId,
       label: `confidence: ${mapping.confidence.toFixed(2)}`,
-      type: 'mapping',
+      type: "mapping",
       metadata: {
         confidence: mapping.confidence,
         justification: mapping.justification,
@@ -780,27 +878,29 @@ function analogicalToJSON(thought: AnalogicalThought, options: VisualExportOptio
 
   // Add metrics
   if (includeMetrics) {
-    addMetric(graph, 'analogyStrength', thought.analogyStrength);
-    addMetric(graph, 'mappingCount', thought.mapping.length);
-    addMetric(graph, 'sourceEntityCount', thought.sourceDomain.entities.length);
-    addMetric(graph, 'targetEntityCount', thought.targetDomain.entities.length);
+    addMetric(graph, "analogyStrength", thought.analogyStrength);
+    addMetric(graph, "mappingCount", thought.mapping.length);
+    addMetric(graph, "sourceEntityCount", thought.sourceDomain.entities.length);
+    addMetric(graph, "targetEntityCount", thought.targetDomain.entities.length);
 
     // Add average mapping confidence
     if (thought.mapping.length > 0) {
-      const avgConfidence = thought.mapping.reduce((sum, m) => sum + m.confidence, 0) / thought.mapping.length;
-      addMetric(graph, 'averageMappingConfidence', avgConfidence);
+      const avgConfidence =
+        thought.mapping.reduce((sum, m) => sum + m.confidence, 0) /
+        thought.mapping.length;
+      addMetric(graph, "averageMappingConfidence", avgConfidence);
     }
   }
 
   // Add inferences if present
   if (thought.inferences && thought.inferences.length > 0) {
-    graph.metadata.inferences = thought.inferences.map(inf => ({
+    graph.metadata.inferences = thought.inferences.map((inf) => ({
       sourcePattern: inf.sourcePattern,
       targetPrediction: inf.targetPrediction,
       confidence: inf.confidence,
     }));
     if (includeMetrics) {
-      addMetric(graph, 'inferenceCount', thought.inferences.length);
+      addMetric(graph, "inferenceCount", thought.inferences.length);
     }
   }
 
@@ -810,7 +910,10 @@ function analogicalToJSON(thought: AnalogicalThought, options: VisualExportOptio
 /**
  * Export analogical mapping to Markdown format
  */
-function analogicalToMarkdown(thought: AnalogicalThought, options: VisualExportOptions): string {
+function analogicalToMarkdown(
+  thought: AnalogicalThought,
+  options: VisualExportOptions,
+): string {
   const {
     markdownIncludeFrontmatter = false,
     markdownIncludeToc = false,
@@ -822,65 +925,85 @@ function analogicalToMarkdown(thought: AnalogicalThought, options: VisualExportO
 
   // Metrics
   if (includeMetrics) {
-    parts.push(section('Metrics', keyValueSection({
-      'Analogy Strength': (thought.analogyStrength * 100).toFixed(0) + '%',
-      'Mappings': thought.mapping.length,
-      'Source Entities': thought.sourceDomain.entities.length,
-      'Target Entities': thought.targetDomain.entities.length,
-    })));
+    parts.push(
+      section(
+        "Metrics",
+        keyValueSection({
+          "Analogy Strength": (thought.analogyStrength * 100).toFixed(0) + "%",
+          Mappings: thought.mapping.length,
+          "Source Entities": thought.sourceDomain.entities.length,
+          "Target Entities": thought.targetDomain.entities.length,
+        }),
+      ),
+    );
   }
 
   // Source domain
-  parts.push(section('Source Domain',
-    `**Name:** ${thought.sourceDomain.name}\n\n` +
-    `**Description:** ${thought.sourceDomain.description || 'N/A'}\n\n` +
-    `**Entities:**\n${list(thought.sourceDomain.entities.map(e => `${e.name}: ${e.description || 'N/A'}`))}`
-  ));
+  parts.push(
+    section(
+      "Source Domain",
+      `**Name:** ${thought.sourceDomain.name}\n\n` +
+        `**Description:** ${thought.sourceDomain.description || "N/A"}\n\n` +
+        `**Entities:**\n${list(thought.sourceDomain.entities.map((e) => `${e.name}: ${e.description || "N/A"}`))}`,
+    ),
+  );
 
   // Target domain
-  parts.push(section('Target Domain',
-    `**Name:** ${thought.targetDomain.name}\n\n` +
-    `**Description:** ${thought.targetDomain.description || 'N/A'}\n\n` +
-    `**Entities:**\n${list(thought.targetDomain.entities.map(e => `${e.name}: ${e.description || 'N/A'}`))}`
-  ));
+  parts.push(
+    section(
+      "Target Domain",
+      `**Name:** ${thought.targetDomain.name}\n\n` +
+        `**Description:** ${thought.targetDomain.description || "N/A"}\n\n` +
+        `**Entities:**\n${list(thought.targetDomain.entities.map((e) => `${e.name}: ${e.description || "N/A"}`))}`,
+    ),
+  );
 
   // Mappings
-  const mapRows = thought.mapping.map(m => [
+  const mapRows = thought.mapping.map((m) => [
     m.sourceEntityId,
-    '→',
+    "→",
     m.targetEntityId,
-    (m.confidence * 100).toFixed(0) + '%',
-    m.justification || '-',
+    (m.confidence * 100).toFixed(0) + "%",
+    m.justification || "-",
   ]);
-  parts.push(section('Entity Mappings', table(
-    ['Source', '', 'Target', 'Confidence', 'Justification'],
-    mapRows
-  )));
+  parts.push(
+    section(
+      "Entity Mappings",
+      table(["Source", "", "Target", "Confidence", "Justification"], mapRows),
+    ),
+  );
 
   // Inferences
   if (thought.inferences && thought.inferences.length > 0) {
-    const infRows = thought.inferences.map(inf => [
+    const infRows = thought.inferences.map((inf) => [
       inf.sourcePattern,
       inf.targetPrediction,
-      (inf.confidence * 100).toFixed(0) + '%',
+      (inf.confidence * 100).toFixed(0) + "%",
     ]);
-    parts.push(section('Inferences', table(
-      ['Source Pattern', 'Target Prediction', 'Confidence'],
-      infRows
-    )));
+    parts.push(
+      section(
+        "Inferences",
+        table(["Source Pattern", "Target Prediction", "Confidence"], infRows),
+      ),
+    );
   }
 
   // Mermaid diagram
   if (markdownIncludeMermaid) {
-    const mermaid = analogicalToMermaid(thought, 'default', true, includeMetrics);
-    parts.push(section('Visualization', mermaidBlock(mermaid)));
+    const mermaid = analogicalToMermaid(
+      thought,
+      "default",
+      true,
+      includeMetrics,
+    );
+    parts.push(section("Visualization", mermaidBlock(mermaid)));
   }
 
-  return mdDocument('Analogical Reasoning Analysis', parts.join('\n'), {
+  return mdDocument("Analogical Reasoning Analysis", parts.join("\n"), {
     includeFrontmatter: markdownIncludeFrontmatter,
     includeTableOfContents: markdownIncludeToc,
     metadata: {
-      mode: 'analogical',
+      mode: "analogical",
       mappings: thought.mapping.length,
       analogyStrength: thought.analogyStrength.toFixed(2),
     },

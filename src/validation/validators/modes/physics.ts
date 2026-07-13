@@ -3,20 +3,23 @@
  * Phase 15A Sprint 3: Uses composition with utility functions
  */
 
-import type { PhysicsThought, ValidationIssue } from '../../../types/index.js';
-import type { ValidationContext } from '../../validator.js';
-import type { ModeValidator } from '../base.js';
-import { validateCommon } from '../validation-utils.js';
+import type { PhysicsThought, ValidationIssue } from "../../../types/index.js";
+import type { ValidationContext } from "../../validator.js";
+import type { ModeValidator } from "../base.js";
+import { validateCommon } from "../validation-utils.js";
 
 /**
  * Physics mode validator using composition pattern
  */
 export class PhysicsValidator implements ModeValidator<PhysicsThought> {
   getMode(): string {
-    return 'physics';
+    return "physics";
   }
 
-  validate(thought: PhysicsThought, _context: ValidationContext): ValidationIssue[] {
+  validate(
+    thought: PhysicsThought,
+    _context: ValidationContext,
+  ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation via utility function
@@ -28,23 +31,26 @@ export class PhysicsValidator implements ModeValidator<PhysicsThought> {
 
       if (contravariant < 0 || covariant < 0) {
         issues.push({
-          severity: 'error',
+          severity: "error",
           thoughtNumber: thought.thoughtNumber,
-          description: 'Tensor rank components must be non-negative',
-          suggestion: 'Provide valid tensor rank [contravariant, covariant]',
-          category: 'physical',
+          description: "Tensor rank components must be non-negative",
+          suggestion: "Provide valid tensor rank [contravariant, covariant]",
+          category: "physical",
         });
       }
 
       // Check symmetries are appropriate for rank
       const totalRank = contravariant + covariant;
-      if (thought.tensorProperties.symmetries.includes('antisymmetric') && totalRank < 2) {
+      if (
+        thought.tensorProperties.symmetries.includes("antisymmetric") &&
+        totalRank < 2
+      ) {
         issues.push({
-          severity: 'error',
+          severity: "error",
           thoughtNumber: thought.thoughtNumber,
-          description: 'Antisymmetric tensors must have rank ≥ 2',
-          suggestion: 'Verify tensor rank and symmetry properties',
-          category: 'physical',
+          description: "Antisymmetric tensors must have rank ≥ 2",
+          suggestion: "Verify tensor rank and symmetry properties",
+          category: "physical",
         });
       }
     }
@@ -53,21 +59,21 @@ export class PhysicsValidator implements ModeValidator<PhysicsThought> {
     if (thought.physicalInterpretation) {
       if (!thought.physicalInterpretation.units) {
         issues.push({
-          severity: 'warning',
+          severity: "warning",
           thoughtNumber: thought.thoughtNumber,
-          description: 'Physical quantity should have units specified',
+          description: "Physical quantity should have units specified",
           suggestion: 'Specify physical units (e.g., "m/s²")',
-          category: 'physical',
+          category: "physical",
         });
       }
 
       if (thought.physicalInterpretation.conservationLaws.length === 0) {
         issues.push({
-          severity: 'info',
+          severity: "info",
           thoughtNumber: thought.thoughtNumber,
-          description: 'No conservation laws specified',
-          suggestion: 'Consider noting relevant conservation laws',
-          category: 'physical',
+          description: "No conservation laws specified",
+          suggestion: "Consider noting relevant conservation laws",
+          category: "physical",
         });
       }
     }

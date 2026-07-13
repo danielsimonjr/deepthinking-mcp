@@ -3,7 +3,7 @@
  * Phase 4 (v3.2.0) - Formal logical reasoning with propositions, inference, and proofs
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Formal Logic thought extends base thought with logical reasoning
@@ -11,11 +11,11 @@ import { BaseThought, ThinkingMode } from '../core.js';
 export interface FormalLogicThought extends BaseThought {
   mode: ThinkingMode.FORMALLOGIC;
   thoughtType:
-    | 'proposition_definition'
-    | 'inference_derivation'
-    | 'proof_construction'
-    | 'satisfiability_check'
-    | 'validity_verification';
+    | "proposition_definition"
+    | "inference_derivation"
+    | "proof_construction"
+    | "satisfiability_check"
+    | "validity_verification";
 
   propositions?: Proposition[];
   logicalInferences?: Inference[];
@@ -32,7 +32,7 @@ export interface Proposition {
   symbol: string; // e.g., "P", "Q", "R"
   statement: string;
   truthValue?: boolean;
-  type: 'atomic' | 'compound';
+  type: "atomic" | "compound";
   formula?: string; // Logical formula if compound
   latex?: string;
 }
@@ -41,14 +41,14 @@ export interface Proposition {
  * Logical operator
  */
 export type LogicalOperator =
-  | 'AND' // ∧
-  | 'OR' // ∨
-  | 'NOT' // ¬
-  | 'IMPLIES' // →
-  | 'IFF' // ↔
-  | 'XOR' // ⊕
-  | 'NAND' // ⊼
-  | 'NOR'; // ⊽
+  | "AND" // ∧
+  | "OR" // ∨
+  | "NOT" // ¬
+  | "IMPLIES" // →
+  | "IFF" // ↔
+  | "XOR" // ⊕
+  | "NAND" // ⊼
+  | "NOR"; // ⊽
 
 /**
  * Compound logical formula
@@ -66,16 +66,16 @@ export interface LogicalFormula {
  * Inference rule
  */
 export type InferenceRule =
-  | 'modus_ponens' // P, P→Q ⊢ Q
-  | 'modus_tollens' // ¬Q, P→Q ⊢ ¬P
-  | 'hypothetical_syllogism' // P→Q, Q→R ⊢ P→R
-  | 'disjunctive_syllogism' // P∨Q, ¬P ⊢ Q
-  | 'conjunction' // P, Q ⊢ P∧Q
-  | 'simplification' // P∧Q ⊢ P
-  | 'addition' // P ⊢ P∨Q
-  | 'resolution' // P∨Q, ¬P∨R ⊢ Q∨R
-  | 'contradiction' // P, ¬P ⊢ ⊥
-  | 'excluded_middle'; // ⊢ P∨¬P
+  | "modus_ponens" // P, P→Q ⊢ Q
+  | "modus_tollens" // ¬Q, P→Q ⊢ ¬P
+  | "hypothetical_syllogism" // P→Q, Q→R ⊢ P→R
+  | "disjunctive_syllogism" // P∨Q, ¬P ⊢ Q
+  | "conjunction" // P, Q ⊢ P∧Q
+  | "simplification" // P∧Q ⊢ P
+  | "addition" // P ⊢ P∨Q
+  | "resolution" // P∨Q, ¬P∨R ⊢ Q∨R
+  | "contradiction" // P, ¬P ⊢ ⊥
+  | "excluded_middle"; // ⊢ P∨¬P
 
 /**
  * Logical inference step
@@ -94,14 +94,14 @@ export interface Inference {
  * Proof technique
  */
 export type ProofTechnique =
-  | 'direct' // Direct proof
-  | 'contradiction' // Proof by contradiction
-  | 'contrapositive' // Proof by contrapositive
-  | 'cases' // Proof by cases
-  | 'induction' // Mathematical induction
-  | 'natural_deduction' // Natural deduction
-  | 'resolution' // Resolution refutation
-  | 'semantic_tableaux'; // Tableau method
+  | "direct" // Direct proof
+  | "contradiction" // Proof by contradiction
+  | "contrapositive" // Proof by contrapositive
+  | "cases" // Proof by cases
+  | "induction" // Mathematical induction
+  | "natural_deduction" // Natural deduction
+  | "resolution" // Resolution refutation
+  | "semantic_tableaux"; // Tableau method
 
 /**
  * Logical proof
@@ -163,7 +163,7 @@ export interface SatisfiabilityResult {
   latex?: string;
   satisfiable: boolean;
   model?: Record<string, boolean>; // Satisfying assignment if SAT
-  method: 'dpll' | 'cdcl' | 'resolution' | 'truth_table' | 'other';
+  method: "dpll" | "cdcl" | "resolution" | "truth_table" | "other";
   complexity?: string;
   explanation: string;
 }
@@ -233,6 +233,8 @@ export interface NormalForm {
 /**
  * Type guard for Formal Logic thoughts
  */
-export function isFormalLogicThought(thought: BaseThought): thought is FormalLogicThought {
-  return thought.mode === 'formallogic';
+export function isFormalLogicThought(
+  thought: BaseThought,
+): thought is FormalLogicThought {
+  return thought.mode === "formallogic";
 }

@@ -6,7 +6,7 @@
  * merging insights, and resolving conflicts.
  */
 
-import type { ThinkingMode } from '../../types/core.js';
+import type { ThinkingMode } from "../../types/core.js";
 
 // ============================================================================
 // MERGE STRATEGY TYPES
@@ -16,11 +16,11 @@ import type { ThinkingMode } from '../../types/core.js';
  * Available strategies for merging insights from multiple modes
  */
 export type MergeStrategy =
-  | 'union' // Combine all insights, deduplicate
-  | 'intersection' // Only insights agreed by all modes
-  | 'weighted' // Weight insights by mode confidence
-  | 'hierarchical' // Primary mode with supporting modes
-  | 'dialectical'; // Thesis/antithesis/synthesis approach
+  | "union" // Combine all insights, deduplicate
+  | "intersection" // Only insights agreed by all modes
+  | "weighted" // Weight insights by mode confidence
+  | "hierarchical" // Primary mode with supporting modes
+  | "dialectical"; // Thesis/antithesis/synthesis approach
 
 /**
  * Configuration for weighted merge strategy
@@ -98,9 +98,7 @@ export interface ModeCombination {
 
   /** Optional configuration for the merge strategy */
   mergeConfig?:
-    | WeightedMergeConfig
-    | HierarchicalMergeConfig
-    | DialecticalMergeConfig;
+    WeightedMergeConfig | HierarchicalMergeConfig | DialecticalMergeConfig;
 
   /** Tags for categorization */
   tags?: string[];
@@ -146,11 +144,11 @@ export interface Insight {
  * Types of conflicts between insights
  */
 export type ConflictType =
-  | 'direct_contradiction' // Insights directly contradict each other
-  | 'partial_overlap' // Insights overlap but have differences
-  | 'scope_difference' // Same topic, different scope/granularity
-  | 'confidence_mismatch' // Same conclusion, very different confidence
-  | 'evidence_conflict'; // Different evidence for same conclusion
+  | "direct_contradiction" // Insights directly contradict each other
+  | "partial_overlap" // Insights overlap but have differences
+  | "scope_difference" // Same topic, different scope/granularity
+  | "confidence_mismatch" // Same conclusion, very different confidence
+  | "evidence_conflict"; // Different evidence for same conclusion
 
 /**
  * Represents a conflict between insights from different modes
@@ -196,7 +194,8 @@ export interface ConflictResolution {
   preservedFrom: ThinkingMode[];
 
   /** Strategy used to resolve */
-  resolutionStrategy: 'favor_higher_confidence' | 'synthesize' | 'preserve_both' | 'defer';
+  resolutionStrategy:
+    "favor_higher_confidence" | "synthesize" | "preserve_both" | "defer";
 
   /** Confidence in the resolution */
   confidence: number;

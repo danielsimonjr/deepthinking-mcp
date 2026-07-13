@@ -8,10 +8,10 @@
  * - Monte Carlo methods support
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode, Thought } from '../../types/core.js';
-import type { StochasticThought } from '../../types/modes/stochastic.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode, Thought } from "../../types/core.js";
+import type { StochasticThought } from "../../types/modes/stochastic.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -21,7 +21,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 // Re-export for backwards compatibility
 export type { StochasticThought };
@@ -48,7 +48,6 @@ interface StateTransition {
   probability: number;
   condition?: string;
 }
-
 
 /**
  * Random variable definition
@@ -92,13 +91,13 @@ interface HandlerMarkovChain {
  * Valid thought types for stochastic mode
  */
 const VALID_THOUGHT_TYPES = [
-  'process_definition',
-  'transition_analysis',
-  'steady_state_analysis',
-  'random_variable_definition',
-  'monte_carlo_simulation',
-  'convergence_analysis',
-  'hitting_time_analysis',
+  "process_definition",
+  "transition_analysis",
+  "steady_state_analysis",
+  "random_variable_definition",
+  "monte_carlo_simulation",
+  "convergence_analysis",
+  "hitting_time_analysis",
 ] as const;
 
 type StochasticThoughtType = (typeof VALID_THOUGHT_TYPES)[number];
@@ -107,11 +106,11 @@ type StochasticThoughtType = (typeof VALID_THOUGHT_TYPES)[number];
  * Valid process types
  */
 const VALID_PROCESS_TYPES = [
-  'discrete_time',
-  'continuous_time',
-  'random_walk',
-  'birth_death',
-  'queueing',
+  "discrete_time",
+  "continuous_time",
+  "random_walk",
+  "birth_death",
+  "queueing",
 ] as const;
 
 type ProcessType = (typeof VALID_PROCESS_TYPES)[number];
@@ -127,9 +126,9 @@ type ProcessType = (typeof VALID_PROCESS_TYPES)[number];
  */
 export class StochasticHandler implements ModeHandler {
   readonly mode = ThinkingMode.STOCHASTIC;
-  readonly modeName = 'Stochastic Reasoning';
+  readonly modeName = "Stochastic Reasoning";
   readonly description =
-    'Markov chains, random processes, probabilistic state transitions, and Monte Carlo methods';
+    "Markov chains, random processes, probabilistic state transitions, and Monte Carlo methods";
 
   /**
    * Supported thought types for stochastic mode
@@ -139,7 +138,10 @@ export class StochasticHandler implements ModeHandler {
   /**
    * Create a stochastic thought from input
    */
-  createThought(input: ThinkingToolInput, sessionId: string): StochasticThought {
+  createThought(
+    input: ThinkingToolInput,
+    sessionId: string,
+  ): StochasticThought {
     const inputAny = input as any;
 
     // Resolve thought type
@@ -152,13 +154,18 @@ export class StochasticHandler implements ModeHandler {
 
     // Process random variables
     const randomVariables = inputAny.randomVariables
-      ? inputAny.randomVariables.map((rv: any) => this.normalizeRandomVariable(rv))
+      ? inputAny.randomVariables.map((rv: any) =>
+          this.normalizeRandomVariable(rv),
+        )
       : undefined;
 
     // Process simulation results
-    const simulations = inputAny.simulations || inputAny.simulationResults
-      ? (inputAny.simulations || inputAny.simulationResults).map((sr: any) => this.normalizeSimulationResult(sr))
-      : undefined;
+    const simulations =
+      inputAny.simulations || inputAny.simulationResults
+        ? (inputAny.simulations || inputAny.simulationResults).map((sr: any) =>
+            this.normalizeSimulationResult(sr),
+          )
+        : undefined;
 
     // Resolve process type
     const processType = this.resolveProcessType(inputAny.processType);
@@ -200,39 +207,49 @@ export class StochasticHandler implements ModeHandler {
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
 
     // Validate thought type
-    if (inputAny.thoughtType && !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)) {
+    if (
+      inputAny.thoughtType &&
+      !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)
+    ) {
       warnings.push(
         createValidationWarning(
-          'thoughtType',
+          "thoughtType",
           `Unknown thought type: ${inputAny.thoughtType}`,
-          `Valid types: ${VALID_THOUGHT_TYPES.join(', ')}`
-        )
+          `Valid types: ${VALID_THOUGHT_TYPES.join(", ")}`,
+        ),
       );
     }
 
     // Validate process type
-    if (inputAny.processType && !VALID_PROCESS_TYPES.includes(inputAny.processType)) {
+    if (
+      inputAny.processType &&
+      !VALID_PROCESS_TYPES.includes(inputAny.processType)
+    ) {
       warnings.push(
         createValidationWarning(
-          'processType',
+          "processType",
           `Unknown process type: ${inputAny.processType}`,
-          `Valid types: ${VALID_PROCESS_TYPES.join(', ')}`
-        )
+          `Valid types: ${VALID_PROCESS_TYPES.join(", ")}`,
+        ),
       );
     }
 
@@ -253,8 +270,8 @@ export class StochasticHandler implements ModeHandler {
               createValidationWarning(
                 `markovChain.transitions[${state}]`,
                 `Transition probabilities from state "${state}" sum to ${sum.toFixed(3)}, should be 1.0`,
-                'Ensure outgoing transition probabilities sum to 1'
-              )
+                "Ensure outgoing transition probabilities sum to 1",
+              ),
             );
           }
         }
@@ -262,17 +279,16 @@ export class StochasticHandler implements ModeHandler {
 
       // Validate initial distribution sums to 1
       if (mc.initialDistribution) {
-        const sum = Object.values(mc.initialDistribution as Record<string, number>).reduce(
-          (a: number, b: number) => a + b,
-          0
-        );
+        const sum = Object.values(
+          mc.initialDistribution as Record<string, number>,
+        ).reduce((a: number, b: number) => a + b, 0);
         if (Math.abs(sum - 1) > 0.01) {
           warnings.push(
             createValidationWarning(
-              'markovChain.initialDistribution',
+              "markovChain.initialDistribution",
               `Initial distribution sums to ${sum.toFixed(3)}, should be 1.0`,
-              'Normalize initial state probabilities'
-            )
+              "Normalize initial state probabilities",
+            ),
           );
         }
       }
@@ -282,10 +298,17 @@ export class StochasticHandler implements ModeHandler {
     if (inputAny.randomVariables) {
       for (let i = 0; i < inputAny.randomVariables.length; i++) {
         const rv = inputAny.randomVariables[i];
-        const issues = this.validateDistributionParameters(rv.distribution, rv.parameters);
+        const issues = this.validateDistributionParameters(
+          rv.distribution,
+          rv.parameters,
+        );
         for (const issue of issues) {
           warnings.push(
-            createValidationWarning(`randomVariables[${i}]`, issue, 'Check distribution parameters')
+            createValidationWarning(
+              `randomVariables[${i}]`,
+              issue,
+              "Check distribution parameters",
+            ),
           );
         }
       }
@@ -300,8 +323,8 @@ export class StochasticHandler implements ModeHandler {
             createValidationWarning(
               `simulationResults[${i}].iterations`,
               `Low iteration count (${sr.iterations})`,
-              'Use at least 1000 iterations for reliable Monte Carlo estimates'
-            )
+              "Use at least 1000 iterations for reliable Monte Carlo estimates",
+            ),
           );
         }
       }
@@ -321,10 +344,15 @@ export class StochasticHandler implements ModeHandler {
     const stochThought = thought as StochasticThought;
     // Access markov chain from any input structure
     const thoughtAny = thought as any;
-    const markovChain = thoughtAny.markovChain as HandlerMarkovChain | undefined;
+    const markovChain = thoughtAny.markovChain as
+      HandlerMarkovChain | undefined;
     const enhancements: ModeEnhancements = {
       suggestions: [],
-      relatedModes: [ThinkingMode.BAYESIAN, ThinkingMode.OPTIMIZATION, ThinkingMode.TEMPORAL],
+      relatedModes: [
+        ThinkingMode.BAYESIAN,
+        ThinkingMode.OPTIMIZATION,
+        ThinkingMode.TEMPORAL,
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -334,140 +362,170 @@ export class StochasticHandler implements ModeHandler {
         stepCount: stochThought.stepCount,
       },
       mentalModels: [
-        'Markov Property',
-        'Law of Large Numbers',
-        'Central Limit Theorem',
-        'Ergodic Theory',
-        'Queuing Theory',
+        "Markov Property",
+        "Law of Large Numbers",
+        "Central Limit Theorem",
+        "Ergodic Theory",
+        "Queuing Theory",
       ],
     };
 
     // Process type info
-    enhancements.suggestions!.push(`Process type: ${stochThought.processType.replace(/_/g, ' ')}`);
+    enhancements.suggestions!.push(
+      `Process type: ${stochThought.processType.replace(/_/g, " ")}`,
+    );
 
     // Thought type-specific guidance
     switch (stochThought.thoughtType) {
-      case 'process_definition':
+      case "process_definition":
         enhancements.guidingQuestions!.push(
-          'What are the states of the process?',
-          'Are transitions time-homogeneous?',
-          'Does the process satisfy the Markov property?'
+          "What are the states of the process?",
+          "Are transitions time-homogeneous?",
+          "Does the process satisfy the Markov property?",
         );
         if (markovChain) {
           enhancements.suggestions!.push(
-            `States: ${markovChain.states.length}, Transitions: ${markovChain.transitions.length}`
+            `States: ${markovChain.states.length}, Transitions: ${markovChain.transitions.length}`,
           );
         }
         break;
 
-      case 'transition_analysis':
+      case "transition_analysis":
         enhancements.guidingQuestions!.push(
-          'What is the probability of transitioning from state A to state B?',
-          'Are there absorbing states?',
-          'What is the expected number of steps to reach a target state?'
+          "What is the probability of transitioning from state A to state B?",
+          "Are there absorbing states?",
+          "What is the expected number of steps to reach a target state?",
         );
         if (markovChain) {
-          const absorbingCount = markovChain.states.filter((s) => s.isAbsorbing).length;
+          const absorbingCount = markovChain.states.filter(
+            (s) => s.isAbsorbing,
+          ).length;
           if (absorbingCount > 0) {
-            enhancements.suggestions!.push(`Absorbing states: ${absorbingCount}`);
-          }
-        }
-        break;
-
-      case 'steady_state_analysis':
-        enhancements.guidingQuestions!.push(
-          'Does a stationary distribution exist?',
-          'Is the chain irreducible and aperiodic?',
-          'What are the long-run probabilities?'
-        );
-        if (markovChain) {
-          if (markovChain.isErgodic) {
-            enhancements.suggestions!.push('Chain is ergodic - unique stationary distribution exists');
-          } else if (markovChain.isIrreducible === false) {
-            enhancements.warnings!.push('Chain is reducible - multiple stationary distributions possible');
-          }
-          if (markovChain.period && markovChain.period > 1) {
-            enhancements.warnings!.push(
-              `Chain is periodic (period=${markovChain.period}) - no stationary distribution`
+            enhancements.suggestions!.push(
+              `Absorbing states: ${absorbingCount}`,
             );
           }
         }
         break;
 
-      case 'random_variable_definition':
+      case "steady_state_analysis":
         enhancements.guidingQuestions!.push(
-          'What is the expected value of the random variable?',
-          'What is the variance?',
-          'Are there any constraints on the variable?'
+          "Does a stationary distribution exist?",
+          "Is the chain irreducible and aperiodic?",
+          "What are the long-run probabilities?",
+        );
+        if (markovChain) {
+          if (markovChain.isErgodic) {
+            enhancements.suggestions!.push(
+              "Chain is ergodic - unique stationary distribution exists",
+            );
+          } else if (markovChain.isIrreducible === false) {
+            enhancements.warnings!.push(
+              "Chain is reducible - multiple stationary distributions possible",
+            );
+          }
+          if (markovChain.period && markovChain.period > 1) {
+            enhancements.warnings!.push(
+              `Chain is periodic (period=${markovChain.period}) - no stationary distribution`,
+            );
+          }
+        }
+        break;
+
+      case "random_variable_definition":
+        enhancements.guidingQuestions!.push(
+          "What is the expected value of the random variable?",
+          "What is the variance?",
+          "Are there any constraints on the variable?",
         );
         if (thoughtAny.randomVariables) {
           for (const rv of thoughtAny.randomVariables) {
             if (rv.expectedValue !== undefined) {
               enhancements.suggestions!.push(
-                `${rv.name}: E[X] = ${rv.expectedValue.toFixed(4)}, Var[X] = ${rv.variance?.toFixed(4) || 'unknown'}`
+                `${rv.name}: E[X] = ${rv.expectedValue.toFixed(4)}, Var[X] = ${rv.variance?.toFixed(4) || "unknown"}`,
               );
             }
           }
         }
         break;
 
-      case 'monte_carlo_simulation':
+      case "monte_carlo_simulation":
         enhancements.guidingQuestions!.push(
-          'How many iterations are sufficient?',
-          'What is the confidence interval?',
-          'Has the simulation converged?'
+          "How many iterations are sufficient?",
+          "What is the confidence interval?",
+          "Has the simulation converged?",
         );
         if (thoughtAny.simulationResults) {
           for (const sr of thoughtAny.simulationResults) {
             enhancements.suggestions!.push(
-              `Simulation (n=${sr.iterations}): mean=${sr.mean.toFixed(4)}, var=${sr.variance.toFixed(4)}`
+              `Simulation (n=${sr.iterations}): mean=${sr.mean.toFixed(4)}, var=${sr.variance.toFixed(4)}`,
             );
             if (sr.confidenceInterval) {
               enhancements.suggestions!.push(
-                `95% CI: [${sr.confidenceInterval[0].toFixed(4)}, ${sr.confidenceInterval[1].toFixed(4)}]`
+                `95% CI: [${sr.confidenceInterval[0].toFixed(4)}, ${sr.confidenceInterval[1].toFixed(4)}]`,
               );
             }
           }
         }
         break;
 
-      case 'convergence_analysis':
+      case "convergence_analysis":
         enhancements.guidingQuestions!.push(
-          'At what rate does the process converge?',
-          'Is convergence guaranteed?',
-          'What is the mixing time?'
+          "At what rate does the process converge?",
+          "Is convergence guaranteed?",
+          "What is the mixing time?",
         );
         if (thoughtAny.convergenceRate !== undefined) {
-          enhancements.suggestions!.push(`Convergence rate: ${thoughtAny.convergenceRate.toFixed(4)}`);
+          enhancements.suggestions!.push(
+            `Convergence rate: ${thoughtAny.convergenceRate.toFixed(4)}`,
+          );
         }
         break;
 
-      case 'hitting_time_analysis':
+      case "hitting_time_analysis":
         enhancements.guidingQuestions!.push(
-          'What is the expected time to reach a target state?',
-          'What is the probability of reaching the target before returning to start?',
-          'Are there multiple paths to consider?'
+          "What is the expected time to reach a target state?",
+          "What is the probability of reaching the target before returning to start?",
+          "Are there multiple paths to consider?",
         );
         break;
     }
 
     // Process-specific suggestions
     switch (stochThought.processType) {
-      case 'queueing':
-        enhancements.mentalModels!.push("Little's Law", 'M/M/1 Queue', 'Birth-Death Process');
-        enhancements.suggestions!.push('Consider arrival rate λ and service rate μ');
+      case "queueing":
+        enhancements.mentalModels!.push(
+          "Little's Law",
+          "M/M/1 Queue",
+          "Birth-Death Process",
+        );
+        enhancements.suggestions!.push(
+          "Consider arrival rate λ and service rate μ",
+        );
         break;
-      case 'random_walk':
-        enhancements.mentalModels!.push('Gambler\'s Ruin', 'Recurrence', 'Transience');
+      case "random_walk":
+        enhancements.mentalModels!.push(
+          "Gambler's Ruin",
+          "Recurrence",
+          "Transience",
+        );
         break;
-      case 'birth_death':
-        enhancements.mentalModels!.push('Population Dynamics', 'Balance Equations');
+      case "birth_death":
+        enhancements.mentalModels!.push(
+          "Population Dynamics",
+          "Balance Equations",
+        );
         break;
     }
 
     // Warn about low step counts
-    if (stochThought.stepCount < 10 && stochThought.thoughtType === 'convergence_analysis') {
-      enhancements.warnings!.push('Low step count - convergence analysis may be unreliable');
+    if (
+      stochThought.stepCount < 10 &&
+      stochThought.thoughtType === "convergence_analysis"
+    ) {
+      enhancements.warnings!.push(
+        "Low step count - convergence analysis may be unreliable",
+      );
     }
 
     return enhancements;
@@ -477,17 +535,24 @@ export class StochasticHandler implements ModeHandler {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType: string): boolean {
-    return this.supportedThoughtTypes.includes(thoughtType as StochasticThoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType as StochasticThoughtType,
+    );
   }
 
   /**
    * Resolve thought type from input
    */
-  private resolveThoughtType(inputType: string | undefined): StochasticThoughtType {
-    if (inputType && VALID_THOUGHT_TYPES.includes(inputType as StochasticThoughtType)) {
+  private resolveThoughtType(
+    inputType: string | undefined,
+  ): StochasticThoughtType {
+    if (
+      inputType &&
+      VALID_THOUGHT_TYPES.includes(inputType as StochasticThoughtType)
+    ) {
       return inputType as StochasticThoughtType;
     }
-    return 'process_definition';
+    return "process_definition";
   }
 
   /**
@@ -497,7 +562,7 @@ export class StochasticHandler implements ModeHandler {
     if (inputType && VALID_PROCESS_TYPES.includes(inputType as ProcessType)) {
       return inputType as ProcessType;
     }
-    return 'discrete_time';
+    return "discrete_time";
   }
 
   /**
@@ -505,16 +570,19 @@ export class StochasticHandler implements ModeHandler {
    */
   private normalizeMarkovChain(mc: any): HandlerMarkovChain {
     const states = (mc.states || []).map((s: any) => this.normalizeState(s));
-    const transitions = (mc.transitions || []).map((t: any) => this.normalizeTransition(t));
+    const transitions = (mc.transitions || []).map((t: any) =>
+      this.normalizeTransition(t),
+    );
 
     // Determine chain properties
-    const isIrreducible = mc.isIrreducible ?? this.checkIrreducibility(states, transitions);
+    const isIrreducible =
+      mc.isIrreducible ?? this.checkIrreducibility(states, transitions);
     const period = mc.period ?? 1;
     const isErgodic = mc.isErgodic ?? (isIrreducible && period === 1);
 
     return {
       id: mc.id || randomUUID(),
-      name: mc.name || '',
+      name: mc.name || "",
       states,
       transitions,
       initialDistribution: mc.initialDistribution || {},
@@ -530,7 +598,7 @@ export class StochasticHandler implements ModeHandler {
   private normalizeState(state: any): StochasticState {
     return {
       id: state.id || randomUUID(),
-      name: state.name || '',
+      name: state.name || "",
       description: state.description,
       probability: state.probability,
       isAbsorbing: state.isAbsorbing ?? false,
@@ -544,8 +612,8 @@ export class StochasticHandler implements ModeHandler {
   private normalizeTransition(transition: any): StateTransition {
     return {
       id: transition.id || randomUUID(),
-      fromState: transition.fromState || '',
-      toState: transition.toState || '',
+      fromState: transition.fromState || "",
+      toState: transition.toState || "",
       probability: Math.max(0, Math.min(1, transition.probability ?? 0)),
       condition: transition.condition,
     };
@@ -557,18 +625,26 @@ export class StochasticHandler implements ModeHandler {
   private normalizeRandomVariable(rv: any): RandomVariable {
     const normalized: RandomVariable = {
       id: rv.id || randomUUID(),
-      name: rv.name || '',
-      distribution: rv.distribution || 'uniform',
+      name: rv.name || "",
+      distribution: rv.distribution || "uniform",
       parameters: rv.parameters || {},
       expectedValue: rv.expectedValue,
       variance: rv.variance,
     };
 
     // Calculate expected value and variance if not provided
-    if (normalized.expectedValue === undefined || normalized.variance === undefined) {
-      const stats = this.calculateDistributionStats(normalized.distribution, normalized.parameters);
-      if (normalized.expectedValue === undefined) normalized.expectedValue = stats.mean;
-      if (normalized.variance === undefined) normalized.variance = stats.variance;
+    if (
+      normalized.expectedValue === undefined ||
+      normalized.variance === undefined
+    ) {
+      const stats = this.calculateDistributionStats(
+        normalized.distribution,
+        normalized.parameters,
+      );
+      if (normalized.expectedValue === undefined)
+        normalized.expectedValue = stats.mean;
+      if (normalized.variance === undefined)
+        normalized.variance = stats.variance;
     }
 
     return normalized;
@@ -591,7 +667,10 @@ export class StochasticHandler implements ModeHandler {
   /**
    * Check if chain is irreducible (simplified check)
    */
-  private checkIrreducibility(states: StochasticState[], transitions: StateTransition[]): boolean {
+  private checkIrreducibility(
+    states: StochasticState[],
+    transitions: StateTransition[],
+  ): boolean {
     if (states.length === 0) return true;
     if (states.length === 1) return true;
 
@@ -627,37 +706,44 @@ export class StochasticHandler implements ModeHandler {
   /**
    * Validate distribution parameters
    */
-  private validateDistributionParameters(distribution: string, params: Record<string, number>): string[] {
+  private validateDistributionParameters(
+    distribution: string,
+    params: Record<string, number>,
+  ): string[] {
     const issues: string[] = [];
 
     switch (distribution) {
-      case 'normal':
-      case 'gaussian':
+      case "normal":
+      case "gaussian":
         if (params.variance !== undefined && params.variance < 0) {
-          issues.push('Normal distribution variance must be non-negative');
+          issues.push("Normal distribution variance must be non-negative");
         }
         break;
-      case 'exponential':
+      case "exponential":
         if (params.lambda !== undefined && params.lambda <= 0) {
-          issues.push('Exponential distribution lambda must be positive');
+          issues.push("Exponential distribution lambda must be positive");
         }
         break;
-      case 'poisson':
+      case "poisson":
         if (params.lambda !== undefined && params.lambda < 0) {
-          issues.push('Poisson distribution lambda must be non-negative');
+          issues.push("Poisson distribution lambda must be non-negative");
         }
         break;
-      case 'uniform':
-        if (params.a !== undefined && params.b !== undefined && params.a >= params.b) {
-          issues.push('Uniform distribution requires a < b');
+      case "uniform":
+        if (
+          params.a !== undefined &&
+          params.b !== undefined &&
+          params.a >= params.b
+        ) {
+          issues.push("Uniform distribution requires a < b");
         }
         break;
-      case 'binomial':
+      case "binomial":
         if (params.n !== undefined && params.n < 0) {
-          issues.push('Binomial n must be non-negative');
+          issues.push("Binomial n must be non-negative");
         }
         if (params.p !== undefined && (params.p < 0 || params.p > 1)) {
-          issues.push('Binomial p must be in [0, 1]');
+          issues.push("Binomial p must be in [0, 1]");
         }
         break;
     }
@@ -670,23 +756,26 @@ export class StochasticHandler implements ModeHandler {
    */
   private calculateDistributionStats(
     distribution: string,
-    params: Record<string, number>
+    params: Record<string, number>,
   ): { mean?: number; variance?: number } {
     switch (distribution) {
-      case 'normal':
-      case 'gaussian':
-        return { mean: params.mu || params.mean || 0, variance: params.variance || params.sigma2 || 1 };
-      case 'exponential':
+      case "normal":
+      case "gaussian":
+        return {
+          mean: params.mu || params.mean || 0,
+          variance: params.variance || params.sigma2 || 1,
+        };
+      case "exponential":
         const lambda = params.lambda || params.rate || 1;
         return { mean: 1 / lambda, variance: 1 / (lambda * lambda) };
-      case 'poisson':
+      case "poisson":
         const poissonLambda = params.lambda || 1;
         return { mean: poissonLambda, variance: poissonLambda };
-      case 'uniform':
+      case "uniform":
         const a = params.a ?? params.min ?? 0;
         const b = params.b ?? params.max ?? 1;
-        return { mean: (a + b) / 2, variance: ((b - a) ** 2) / 12 };
-      case 'binomial':
+        return { mean: (a + b) / 2, variance: (b - a) ** 2 / 12 };
+      case "binomial":
         const n = params.n || 1;
         const p = params.p || 0.5;
         return { mean: n * p, variance: n * p * (1 - p) };

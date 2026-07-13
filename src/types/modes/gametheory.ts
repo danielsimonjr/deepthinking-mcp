@@ -7,22 +7,22 @@
  * co-founded cooperative game theory with Oskar Morgenstern in 1944.
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 export interface GameTheoryThought extends BaseThought {
   mode: ThinkingMode.GAMETHEORY;
   thoughtType:
-    | 'game_definition'
-    | 'strategy_analysis'
-    | 'equilibrium_finding'
-    | 'payoff_computation'
-    | 'dominance_analysis'
+    | "game_definition"
+    | "strategy_analysis"
+    | "equilibrium_finding"
+    | "payoff_computation"
+    | "dominance_analysis"
     // Phase 11: Von Neumann extensions
-    | 'minimax_analysis'        // Von Neumann's minimax theorem
-    | 'cooperative_analysis'    // Cooperative game theory
-    | 'coalition_formation'     // Coalition analysis
-    | 'shapley_value'          // Fair allocation computation
-    | 'core_analysis';         // Core stability analysis
+    | "minimax_analysis" // Von Neumann's minimax theorem
+    | "cooperative_analysis" // Cooperative game theory
+    | "coalition_formation" // Coalition analysis
+    | "shapley_value" // Fair allocation computation
+    | "core_analysis"; // Core stability analysis
 
   game?: Game;
   players?: Player[];
@@ -45,7 +45,7 @@ export interface Game {
   id: string;
   name: string;
   description: string;
-  type: 'normal_form' | 'extensive_form' | 'cooperative' | 'non_cooperative';
+  type: "normal_form" | "extensive_form" | "cooperative" | "non_cooperative";
   numPlayers: number;
   isZeroSum: boolean;
   isPerfectInformation: boolean;
@@ -99,7 +99,7 @@ export interface NashEquilibrium {
   id: string;
   strategyProfile: string[]; // Strategy IDs for each player
   payoffs: number[]; // Resulting payoffs
-  type: 'pure' | 'mixed';
+  type: "pure" | "mixed";
   isStrict: boolean; // No player wants to deviate
   stability: number; // 0-1, how stable is this equilibrium
   formula?: string; // LaTeX formula showing equilibrium conditions
@@ -111,7 +111,7 @@ export interface NashEquilibrium {
 export interface DominantStrategy {
   playerId: string;
   strategyId: string;
-  type: 'strictly_dominant' | 'weakly_dominant';
+  type: "strictly_dominant" | "weakly_dominant";
   dominatesStrategies: string[]; // Other strategy IDs this dominates
   justification: string;
   formula?: string; // LaTeX formula showing dominance relationship
@@ -131,7 +131,7 @@ export interface GameTree {
  */
 export interface GameNode {
   id: string;
-  type: 'decision' | 'chance' | 'terminal';
+  type: "decision" | "chance" | "terminal";
   playerId?: string; // Which player moves (for decision nodes)
   parentNode?: string; // Parent node ID
   childNodes: string[]; // Child node IDs
@@ -159,8 +159,10 @@ export interface BackwardInduction {
   expectedPayoffs: number[];
 }
 
-export function isGameTheoryThought(thought: BaseThought): thought is GameTheoryThought {
-  return thought.mode === 'gametheory';
+export function isGameTheoryThought(
+  thought: BaseThought,
+): thought is GameTheoryThought {
+  return thought.mode === "gametheory";
 }
 
 // ============================================================================
@@ -198,7 +200,8 @@ export interface MinimaxAnalysis {
   optimalColumnStrategy: number[];
 
   /** Method used to compute the solution */
-  solutionMethod: 'linear_programming' | 'lemke_howson' | 'iterative' | 'analytical';
+  solutionMethod:
+    "linear_programming" | "lemke_howson" | "iterative" | "analytical";
 
   /** Proof structure for the minimax theorem application */
   proofStructure?: {
@@ -209,7 +212,7 @@ export interface MinimaxAnalysis {
     steps: string[];
 
     /** Reference to von Neumann's 1928 theorem */
-    theorem: 'von_neumann_1928';
+    theorem: "von_neumann_1928";
   };
 
   /** Security levels for each player */
@@ -354,9 +357,9 @@ export interface ShapleyValueDetails {
  * Helper: Create a characteristic function from a list of coalition values
  */
 export function createCharacteristicFunction(
-  coalitionValues: Array<{ players: string[]; value: number }>
+  coalitionValues: Array<{ players: string[]; value: number }>,
 ): CoalitionValue[] {
-  return coalitionValues.map(cv => ({
+  return coalitionValues.map((cv) => ({
     coalition: cv.players,
     value: cv.value,
   }));
@@ -366,16 +369,18 @@ export function createCharacteristicFunction(
  * Helper: Check if a game is superadditive
  * A game is superadditive if v(S ∪ T) ≥ v(S) + v(T) for disjoint S, T
  */
-export function checkSuperadditivity(characteristicFunction: CoalitionValue[]): boolean {
+export function checkSuperadditivity(
+  characteristicFunction: CoalitionValue[],
+): boolean {
   const valueMap = new Map<string, number>();
 
   for (const cv of characteristicFunction) {
-    const key = [...cv.coalition].sort().join(',');
+    const key = [...cv.coalition].sort().join(",");
     valueMap.set(key, cv.value);
   }
 
   // Get all coalitions
-  const coalitions = characteristicFunction.map(cv => cv.coalition);
+  const coalitions = characteristicFunction.map((cv) => cv.coalition);
 
   // Check all pairs of disjoint coalitions
   for (let i = 0; i < coalitions.length; i++) {
@@ -384,14 +389,14 @@ export function checkSuperadditivity(characteristicFunction: CoalitionValue[]): 
       const T = coalitions[j];
 
       // Check if disjoint
-      const isDisjoint = !S.some(p => T.includes(p));
+      const isDisjoint = !S.some((p) => T.includes(p));
       if (!isDisjoint) continue;
 
       // Check superadditivity condition
       const union = [...new Set([...S, ...T])];
-      const unionKey = [...union].sort().join(',');
-      const sKey = [...S].sort().join(',');
-      const tKey = [...T].sort().join(',');
+      const unionKey = [...union].sort().join(",");
+      const sKey = [...S].sort().join(",");
+      const tKey = [...T].sort().join(",");
 
       const vUnion = valueMap.get(unionKey) ?? 0;
       const vS = valueMap.get(sKey) ?? 0;
@@ -412,30 +417,30 @@ export function checkSuperadditivity(characteristicFunction: CoalitionValue[]): 
 export function calculateShapleyValue(
   playerId: string,
   players: string[],
-  characteristicFunction: CoalitionValue[]
+  characteristicFunction: CoalitionValue[],
 ): number {
   const n = players.length;
   const valueMap = new Map<string, number>();
 
   for (const cv of characteristicFunction) {
-    const key = [...cv.coalition].sort().join(',');
+    const key = [...cv.coalition].sort().join(",");
     valueMap.set(key, cv.value);
   }
 
   // Empty coalition has value 0
-  valueMap.set('', 0);
+  valueMap.set("", 0);
 
   let shapleyValue = 0;
 
   // Get all subsets of N \ {i}
-  const otherPlayers = players.filter(p => p !== playerId);
+  const otherPlayers = players.filter((p) => p !== playerId);
   const subsets = getAllSubsets(otherPlayers);
 
   for (const S of subsets) {
     const sSize = S.length;
-    const sKey = [...S].sort().join(',');
+    const sKey = [...S].sort().join(",");
     const sUnionI = [...S, playerId];
-    const sUnionIKey = [...sUnionI].sort().join(',');
+    const sUnionIKey = [...sUnionI].sort().join(",");
 
     const vS = valueMap.get(sKey) ?? 0;
     const vSUnionI = valueMap.get(sUnionIKey) ?? 0;

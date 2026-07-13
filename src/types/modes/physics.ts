@@ -3,21 +3,21 @@
  * Physical modeling with tensor mathematics and field theory
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Physics thought types
  */
 export type PhysicsThoughtType =
-  | 'symmetry_analysis'
-  | 'gauge_theory'
-  | 'field_equations'
-  | 'lagrangian'
-  | 'hamiltonian'
-  | 'conservation_law'
-  | 'dimensional_analysis'
-  | 'tensor_formulation'
-  | 'differential_geometry';
+  | "symmetry_analysis"
+  | "gauge_theory"
+  | "field_equations"
+  | "lagrangian"
+  | "hamiltonian"
+  | "conservation_law"
+  | "dimensional_analysis"
+  | "tensor_formulation"
+  | "differential_geometry";
 
 /**
  * Tensor properties for physics modeling
@@ -28,7 +28,7 @@ export interface TensorProperties {
   latex: string;
   symmetries: string[];
   invariants: string[];
-  transformation: 'covariant' | 'contravariant' | 'mixed';
+  transformation: "covariant" | "contravariant" | "mixed";
   indexStructure?: string;
   coordinateSystem?: string;
 }
@@ -65,6 +65,8 @@ export interface PhysicsThought extends BaseThought {
   fieldTheoryContext?: FieldTheoryContext;
 }
 
-export function isPhysicsThought(thought: BaseThought): thought is PhysicsThought {
-  return thought.mode === 'physics';
+export function isPhysicsThought(
+  thought: BaseThought,
+): thought is PhysicsThought {
+  return thought.mode === "physics";
 }

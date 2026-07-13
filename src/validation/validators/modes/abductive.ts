@@ -5,11 +5,19 @@
  * Validates abductive reasoning (inference to best explanation)
  */
 
-import type { AbductiveThought, ValidationIssue } from '../../../types/index.js';
-import type { ValidationContext } from '../../validator.js';
-import type { ModeValidator } from '../base.js';
-import { IssueCategory, IssueSeverity } from '../../constants.js';
-import { validateCommon, validateConfidence, validateProbability, validateNonEmptyArray } from '../validation-utils.js';
+import type {
+  AbductiveThought,
+  ValidationIssue,
+} from "../../../types/index.js";
+import type { ValidationContext } from "../../validator.js";
+import type { ModeValidator } from "../base.js";
+import { IssueCategory, IssueSeverity } from "../../constants.js";
+import {
+  validateCommon,
+  validateConfidence,
+  validateProbability,
+  validateNonEmptyArray,
+} from "../validation-utils.js";
 
 /**
  * Validator for abductive reasoning mode
@@ -17,10 +25,13 @@ import { validateCommon, validateConfidence, validateProbability, validateNonEmp
  */
 export class AbductiveValidator implements ModeValidator<AbductiveThought> {
   getMode(): string {
-    return 'abductive';
+    return "abductive";
   }
 
-  validate(thought: AbductiveThought, _context: ValidationContext): ValidationIssue[] {
+  validate(
+    thought: AbductiveThought,
+    _context: ValidationContext,
+  ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation
@@ -28,14 +39,24 @@ export class AbductiveValidator implements ModeValidator<AbductiveThought> {
 
     // At least one observation required using shared method (ERROR severity for required array)
     issues.push(
-      ...validateNonEmptyArray(thought, thought.observations, 'observations', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
+      ...validateNonEmptyArray(
+        thought,
+        thought.observations,
+        "observations",
+        IssueCategory.STRUCTURAL,
+        IssueSeverity.ERROR,
+      ),
     );
 
     // Validate observation confidence values using shared method
     if (thought.observations) {
       for (const obs of thought.observations) {
         issues.push(
-          ...validateConfidence(thought, obs.confidence, `Observation "${obs.description}" confidence`)
+          ...validateConfidence(
+            thought,
+            obs.confidence,
+            `Observation "${obs.description}" confidence`,
+          ),
         );
       }
     }
@@ -49,7 +70,7 @@ export class AbductiveValidator implements ModeValidator<AbductiveThought> {
             severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Duplicate hypothesis ID: ${hyp.id}`,
-            suggestion: 'Each hypothesis must have a unique ID',
+            suggestion: "Each hypothesis must have a unique ID",
             category: IssueCategory.LOGICAL,
           });
         }
@@ -59,11 +80,18 @@ export class AbductiveValidator implements ModeValidator<AbductiveThought> {
 
     // Validate evaluation criteria using shared methods
     if (thought.evaluationCriteria) {
-      const { parsimony, explanatoryPower, plausibility } = thought.evaluationCriteria;
+      const { parsimony, explanatoryPower, plausibility } =
+        thought.evaluationCriteria;
 
-      issues.push(...validateProbability(thought, parsimony, 'Parsimony score'));
-      issues.push(...validateProbability(thought, explanatoryPower, 'Explanatory power'));
-      issues.push(...validateProbability(thought, plausibility, 'Plausibility'));
+      issues.push(
+        ...validateProbability(thought, parsimony, "Parsimony score"),
+      );
+      issues.push(
+        ...validateProbability(thought, explanatoryPower, "Explanatory power"),
+      );
+      issues.push(
+        ...validateProbability(thought, plausibility, "Plausibility"),
+      );
     }
 
     // Validate best explanation references existing hypothesis
@@ -73,8 +101,9 @@ export class AbductiveValidator implements ModeValidator<AbductiveThought> {
         issues.push({
           severity: IssueSeverity.ERROR,
           thoughtNumber: thought.thoughtNumber,
-          description: 'Best explanation must be from the hypotheses list',
-          suggestion: 'Ensure bestExplanation references an existing hypothesis',
+          description: "Best explanation must be from the hypotheses list",
+          suggestion:
+            "Ensure bestExplanation references an existing hypothesis",
           category: IssueCategory.LOGICAL,
         });
       }

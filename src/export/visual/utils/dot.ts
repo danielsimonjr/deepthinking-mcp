@@ -9,75 +9,75 @@
 // =============================================================================
 
 /** DOT rank direction */
-export type DotRankDir = 'TB' | 'BT' | 'LR' | 'RL';
+export type DotRankDir = "TB" | "BT" | "LR" | "RL";
 
 /** DOT node shapes */
 export type DotNodeShape =
-  | 'box'
-  | 'ellipse'
-  | 'circle'
-  | 'oval'
-  | 'diamond'
-  | 'trapezium'
-  | 'parallelogram'
-  | 'house'
-  | 'pentagon'
-  | 'hexagon'
-  | 'septagon'
-  | 'octagon'
-  | 'doublecircle'
-  | 'doubleoctagon'
-  | 'tripleoctagon'
-  | 'invtriangle'
-  | 'triangle'
-  | 'star'
-  | 'cylinder'
-  | 'note'
-  | 'tab'
-  | 'folder'
-  | 'component'
-  | 'plaintext'
-  | 'plain'
-  | 'point'
-  | 'record'
-  | 'Mrecord';
+  | "box"
+  | "ellipse"
+  | "circle"
+  | "oval"
+  | "diamond"
+  | "trapezium"
+  | "parallelogram"
+  | "house"
+  | "pentagon"
+  | "hexagon"
+  | "septagon"
+  | "octagon"
+  | "doublecircle"
+  | "doubleoctagon"
+  | "tripleoctagon"
+  | "invtriangle"
+  | "triangle"
+  | "star"
+  | "cylinder"
+  | "note"
+  | "tab"
+  | "folder"
+  | "component"
+  | "plaintext"
+  | "plain"
+  | "point"
+  | "record"
+  | "Mrecord";
 
 /** DOT edge arrow shapes */
 export type DotArrowHead =
-  | 'normal'
-  | 'inv'
-  | 'dot'
-  | 'invdot'
-  | 'odot'
-  | 'invodot'
-  | 'none'
-  | 'tee'
-  | 'empty'
-  | 'invempty'
-  | 'diamond'
-  | 'odiamond'
-  | 'ediamond'
-  | 'crow'
-  | 'box'
-  | 'obox'
-  | 'open'
-  | 'halfopen'
-  | 'vee';
+  | "normal"
+  | "inv"
+  | "dot"
+  | "invdot"
+  | "odot"
+  | "invodot"
+  | "none"
+  | "tee"
+  | "empty"
+  | "invempty"
+  | "diamond"
+  | "odiamond"
+  | "ediamond"
+  | "crow"
+  | "box"
+  | "obox"
+  | "open"
+  | "halfopen"
+  | "vee";
 
 /** DOT edge style */
-export type DotEdgeStyle = 'solid' | 'dashed' | 'dotted' | 'bold' | 'invis';
+export type DotEdgeStyle = "solid" | "dashed" | "dotted" | "bold" | "invis";
 
 /** DOT node style */
 export type DotNodeStyle =
-  | 'solid'
-  | 'dashed'
-  | 'dotted'
-  | 'bold'
-  | 'rounded'
-  | 'diagonals'
-  | 'filled'
-  | 'striped'
-  | 'wedged';
+  | "solid"
+  | "dashed"
+  | "dotted"
+  | "bold"
+  | "rounded"
+  | "diagonals"
+  | "filled"
+  | "striped"
+  | "wedged";
 
 /** DOT node definition */
 export interface DotNode {
@@ -118,19 +118,20 @@ export interface DotSubgraph {
   id: string;
   label?: string;
   nodes: string[];
-  style?: 'filled' | 'rounded' | 'dashed';
+  style?: "filled" | "rounded" | "dashed";
   fillColor?: string;
   color?: string;
-  rank?: 'same' | 'min' | 'max' | 'source' | 'sink';
+  rank?: "same" | "min" | "max" | "source" | "sink";
 }
 
 /** DOT graph options */
 export interface DotOptions {
-  graphType?: 'digraph' | 'graph';
+  graphType?: "digraph" | "graph";
   graphName?: string;
   rankDir?: DotRankDir;
-  splines?: 'ortho' | 'polyline' | 'curved' | 'line' | 'spline' | 'true' | 'false';
-  overlap?: boolean | 'scale' | 'false' | 'true' | 'compress';
+  splines?:
+    "ortho" | "polyline" | "curved" | "line" | "spline" | "true" | "false";
+  overlap?: boolean | "scale" | "false" | "true" | "compress";
   concentrate?: boolean;
   compound?: boolean;
   bgcolor?: string;
@@ -163,19 +164,22 @@ export function sanitizeDotId(id: string): string {
  */
 export function escapeDotString(str: string): string {
   return str
-    .replace(/\\/g, '\\\\')
+    .replace(/\\/g, "\\\\")
     .replace(/"/g, '\\"')
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r')
-    .replace(/\t/g, '\\t');
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r")
+    .replace(/\t/g, "\\t");
 }
 
 /**
  * Truncate a label to a maximum length
  */
-export function truncateDotLabel(label: string, maxLength: number = 50): string {
+export function truncateDotLabel(
+  label: string,
+  maxLength: number = 50,
+): string {
   if (label.length <= maxLength) return label;
-  return label.substring(0, maxLength - 3) + '...';
+  return label.substring(0, maxLength - 3) + "...";
 }
 
 // =============================================================================
@@ -195,7 +199,9 @@ export function renderDotNodeAttrs(node: DotNode): string {
     attrs.push(`shape=${node.shape}`);
   }
   if (node.style) {
-    const styleStr = Array.isArray(node.style) ? node.style.join(',') : node.style;
+    const styleStr = Array.isArray(node.style)
+      ? node.style.join(",")
+      : node.style;
     attrs.push(`style="${styleStr}"`);
   }
   if (node.fillColor) {
@@ -226,7 +232,7 @@ export function renderDotNodeAttrs(node: DotNode): string {
     attrs.push(`URL="${escapeDotString(node.url)}"`);
   }
 
-  return attrs.length > 0 ? ` [${attrs.join(', ')}]` : '';
+  return attrs.length > 0 ? ` [${attrs.join(", ")}]` : "";
 }
 
 /**
@@ -254,7 +260,7 @@ export function renderDotEdgeAttrs(edge: DotEdge): string {
     attrs.push(`arrowtail=${edge.arrowTail}`);
   }
   if (edge.constraint === false) {
-    attrs.push('constraint=false');
+    attrs.push("constraint=false");
   }
   if (edge.weight !== undefined) {
     attrs.push(`weight=${edge.weight}`);
@@ -266,7 +272,7 @@ export function renderDotEdgeAttrs(edge: DotEdge): string {
     attrs.push(`tooltip="${escapeDotString(edge.tooltip)}"`);
   }
 
-  return attrs.length > 0 ? ` [${attrs.join(', ')}]` : '';
+  return attrs.length > 0 ? ` [${attrs.join(", ")}]` : "";
 }
 
 // =============================================================================
@@ -292,7 +298,7 @@ export function renderDotNode(node: DotNode): string {
 export function renderDotEdge(edge: DotEdge, directed: boolean = true): string {
   const source = sanitizeDotId(edge.source);
   const target = sanitizeDotId(edge.target);
-  const arrow = directed ? '->' : '--';
+  const arrow = directed ? "->" : "--";
   const attrs = renderDotEdgeAttrs(edge);
   return `  ${source} ${arrow} ${target}${attrs};`;
 }
@@ -330,9 +336,9 @@ export function renderDotSubgraph(subgraph: DotSubgraph): string {
     lines.push(`    ${sanitizeDotId(nodeId)};`);
   }
 
-  lines.push('  }');
+  lines.push("  }");
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 // =============================================================================
@@ -342,31 +348,31 @@ export function renderDotSubgraph(subgraph: DotSubgraph): string {
 /** DOT color palette */
 export const DOT_COLORS = {
   default: {
-    primary: '#a8d5ff',
-    secondary: '#ffd699',
-    success: '#81c784',
-    warning: '#ffb74d',
-    danger: '#e57373',
-    info: '#4fc3f7',
-    neutral: '#e0e0e0',
+    primary: "#a8d5ff",
+    secondary: "#ffd699",
+    success: "#81c784",
+    warning: "#ffb74d",
+    danger: "#e57373",
+    info: "#4fc3f7",
+    neutral: "#e0e0e0",
   },
   pastel: {
-    primary: '#e1f5ff',
-    secondary: '#fff3e0',
-    success: '#c8e6c9',
-    warning: '#ffecb3',
-    danger: '#ffcdd2',
-    info: '#b3e5fc',
-    neutral: '#f5f5f5',
+    primary: "#e1f5ff",
+    secondary: "#fff3e0",
+    success: "#c8e6c9",
+    warning: "#ffecb3",
+    danger: "#ffcdd2",
+    info: "#b3e5fc",
+    neutral: "#f5f5f5",
   },
   monochrome: {
-    primary: '#b0b0b0',
-    secondary: '#909090',
-    success: '#707070',
-    warning: '#606060',
-    danger: '#505050',
-    info: '#404040',
-    neutral: '#d0d0d0',
+    primary: "#b0b0b0",
+    secondary: "#909090",
+    success: "#707070",
+    warning: "#606060",
+    danger: "#505050",
+    info: "#404040",
+    neutral: "#d0d0d0",
   },
 };
 
@@ -375,7 +381,7 @@ export const DOT_COLORS = {
  */
 export function getDotColor(
   type: keyof typeof DOT_COLORS.default,
-  scheme: 'default' | 'pastel' | 'monochrome' = 'default'
+  scheme: "default" | "pastel" | "monochrome" = "default",
 ): string {
   return DOT_COLORS[scheme][type];
 }
@@ -390,12 +396,12 @@ export function getDotColor(
 export function generateDotGraph(
   nodes: DotNode[],
   edges: DotEdge[],
-  options: DotOptions = {}
+  options: DotOptions = {},
 ): string {
   const {
-    graphType = 'digraph',
-    graphName = 'G',
-    rankDir = 'TB',
+    graphType = "digraph",
+    graphName = "G",
+    rankDir = "TB",
     splines,
     overlap,
     concentrate,
@@ -408,7 +414,7 @@ export function generateDotGraph(
   } = options;
 
   const lines: string[] = [];
-  const directed = graphType === 'digraph';
+  const directed = graphType === "digraph";
 
   // Graph header
   lines.push(`${graphType} ${sanitizeDotId(graphName)} {`);
@@ -417,8 +423,8 @@ export function generateDotGraph(
   lines.push(`  rankdir=${rankDir};`);
   if (splines) lines.push(`  splines=${splines};`);
   if (overlap !== undefined) lines.push(`  overlap=${overlap};`);
-  if (concentrate) lines.push('  concentrate=true;');
-  if (compound) lines.push('  compound=true;');
+  if (concentrate) lines.push("  concentrate=true;");
+  if (compound) lines.push("  compound=true;");
   if (bgcolor) lines.push(`  bgcolor="${bgcolor}";`);
   if (fontName) lines.push(`  fontname="${fontName}";`);
   if (fontSize) lines.push(`  fontsize=${fontSize};`);
@@ -429,15 +435,18 @@ export function generateDotGraph(
     if (nodeDefaults.shape) defaultAttrs.push(`shape=${nodeDefaults.shape}`);
     if (nodeDefaults.style) {
       const styleStr = Array.isArray(nodeDefaults.style)
-        ? nodeDefaults.style.join(',')
+        ? nodeDefaults.style.join(",")
         : nodeDefaults.style;
       defaultAttrs.push(`style="${styleStr}"`);
     }
-    if (nodeDefaults.fillColor) defaultAttrs.push(`fillcolor="${nodeDefaults.fillColor}"`);
-    if (nodeDefaults.fontName) defaultAttrs.push(`fontname="${nodeDefaults.fontName}"`);
-    if (nodeDefaults.fontSize) defaultAttrs.push(`fontsize=${nodeDefaults.fontSize}`);
+    if (nodeDefaults.fillColor)
+      defaultAttrs.push(`fillcolor="${nodeDefaults.fillColor}"`);
+    if (nodeDefaults.fontName)
+      defaultAttrs.push(`fontname="${nodeDefaults.fontName}"`);
+    if (nodeDefaults.fontSize)
+      defaultAttrs.push(`fontsize=${nodeDefaults.fontSize}`);
     if (defaultAttrs.length > 0) {
-      lines.push(`  node [${defaultAttrs.join(', ')}];`);
+      lines.push(`  node [${defaultAttrs.join(", ")}];`);
     }
   }
 
@@ -446,13 +455,14 @@ export function generateDotGraph(
     const defaultAttrs: string[] = [];
     if (edgeDefaults.style) defaultAttrs.push(`style=${edgeDefaults.style}`);
     if (edgeDefaults.color) defaultAttrs.push(`color="${edgeDefaults.color}"`);
-    if (edgeDefaults.arrowHead) defaultAttrs.push(`arrowhead=${edgeDefaults.arrowHead}`);
+    if (edgeDefaults.arrowHead)
+      defaultAttrs.push(`arrowhead=${edgeDefaults.arrowHead}`);
     if (defaultAttrs.length > 0) {
-      lines.push(`  edge [${defaultAttrs.join(', ')}];`);
+      lines.push(`  edge [${defaultAttrs.join(", ")}];`);
     }
   }
 
-  lines.push('');
+  lines.push("");
 
   // Nodes
   for (const node of nodes) {
@@ -461,15 +471,15 @@ export function generateDotGraph(
 
   // Edges
   if (edges.length > 0) {
-    lines.push('');
+    lines.push("");
     for (const edge of edges) {
       lines.push(renderDotEdge(edge, directed));
     }
   }
 
-  lines.push('}');
+  lines.push("}");
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -477,28 +487,29 @@ export function generateDotGraph(
  */
 export function generateLinearFlowDot(
   steps: string[],
-  options: DotOptions = {}
+  options: DotOptions = {},
 ): string {
-  const { rankDir = 'TB' } = options;
+  const { rankDir = "TB" } = options;
 
   if (steps.length === 0) {
     return generateDotGraph(
-      [{ id: 'empty', label: 'No steps', shape: 'box' }],
+      [{ id: "empty", label: "No steps", shape: "box" }],
       [],
-      { ...options, graphName: 'LinearFlow' }
+      { ...options, graphName: "LinearFlow" },
     );
   }
 
   const nodes: DotNode[] = steps.map((step, index) => ({
     id: `step_${index}`,
     label: truncateDotLabel(step),
-    shape: 'box',
-    style: 'rounded',
-    fillColor: index === 0
-      ? DOT_COLORS.default.primary
-      : index === steps.length - 1
-        ? DOT_COLORS.default.success
-        : DOT_COLORS.default.neutral,
+    shape: "box",
+    style: "rounded",
+    fillColor:
+      index === 0
+        ? DOT_COLORS.default.primary
+        : index === steps.length - 1
+          ? DOT_COLORS.default.success
+          : DOT_COLORS.default.neutral,
   }));
 
   const edges: DotEdge[] = [];
@@ -511,9 +522,9 @@ export function generateLinearFlowDot(
 
   return generateDotGraph(nodes, edges, {
     ...options,
-    graphName: 'LinearFlow',
+    graphName: "LinearFlow",
     rankDir,
-    nodeDefaults: { style: ['rounded', 'filled'] },
+    nodeDefaults: { style: ["rounded", "filled"] },
   });
 }
 
@@ -521,8 +532,12 @@ export function generateLinearFlowDot(
  * Generate a hierarchical/tree DOT graph
  */
 export function generateHierarchyDot(
-  root: { id: string; label: string; children?: Array<{ id: string; label: string; children?: unknown[] }> },
-  options: DotOptions = {}
+  root: {
+    id: string;
+    label: string;
+    children?: Array<{ id: string; label: string; children?: unknown[] }>;
+  },
+  options: DotOptions = {},
 ): string {
   const nodes: DotNode[] = [];
   const edges: DotEdge[] = [];
@@ -530,13 +545,13 @@ export function generateHierarchyDot(
   function traverse(
     node: { id: string; label: string; children?: unknown[] },
     parentId?: string,
-    depth: number = 0
+    depth: number = 0,
   ): void {
     nodes.push({
       id: node.id,
       label: truncateDotLabel(node.label),
-      shape: depth === 0 ? 'ellipse' : 'box',
-      style: 'rounded',
+      shape: depth === 0 ? "ellipse" : "box",
+      style: "rounded",
     });
 
     if (parentId) {
@@ -547,7 +562,11 @@ export function generateHierarchyDot(
     }
 
     if (node.children && Array.isArray(node.children)) {
-      for (const child of node.children as Array<{ id: string; label: string; children?: unknown[] }>) {
+      for (const child of node.children as Array<{
+        id: string;
+        label: string;
+        children?: unknown[];
+      }>) {
         traverse(child, node.id, depth + 1);
       }
     }
@@ -557,8 +576,11 @@ export function generateHierarchyDot(
 
   return generateDotGraph(nodes, edges, {
     ...options,
-    graphName: 'Hierarchy',
-    nodeDefaults: { style: ['rounded', 'filled'], fillColor: DOT_COLORS.default.neutral },
+    graphName: "Hierarchy",
+    nodeDefaults: {
+      style: ["rounded", "filled"],
+      fillColor: DOT_COLORS.default.neutral,
+    },
   });
 }
 
@@ -568,28 +590,29 @@ export function generateHierarchyDot(
 export function generateNetworkDot(
   nodes: Array<{ id: string; label: string; group?: string }>,
   connections: Array<{ from: string; to: string; weight?: number }>,
-  options: DotOptions = {}
+  options: DotOptions = {},
 ): string {
-  const dotNodes: DotNode[] = nodes.map(node => ({
+  const dotNodes: DotNode[] = nodes.map((node) => ({
     id: node.id,
     label: truncateDotLabel(node.label),
-    shape: 'ellipse',
-    style: 'filled',
-    fillColor: node.group ? getDotColor('primary') : getDotColor('neutral'),
+    shape: "ellipse",
+    style: "filled",
+    fillColor: node.group ? getDotColor("primary") : getDotColor("neutral"),
   }));
 
-  const dotEdges: DotEdge[] = connections.map(conn => ({
+  const dotEdges: DotEdge[] = connections.map((conn) => ({
     source: conn.from,
     target: conn.to,
     label: conn.weight !== undefined ? conn.weight.toFixed(2) : undefined,
-    penWidth: conn.weight !== undefined ? Math.max(1, conn.weight * 3) : undefined,
+    penWidth:
+      conn.weight !== undefined ? Math.max(1, conn.weight * 3) : undefined,
   }));
 
   return generateDotGraph(dotNodes, dotEdges, {
     ...options,
-    graphName: 'Network',
-    splines: 'spline',
-    overlap: 'scale',
+    graphName: "Network",
+    splines: "spline",
+    overlap: "scale",
   });
 }
 
@@ -746,7 +769,7 @@ export class DOTGraphBuilder {
    * @returns this for chaining
    */
   setDirected(directed: boolean): this {
-    this.options.graphType = directed ? 'digraph' : 'graph';
+    this.options.graphType = directed ? "digraph" : "graph";
     return this;
   }
 
@@ -825,9 +848,9 @@ export class DOTGraphBuilder {
    */
   render(): string {
     const {
-      graphType = 'digraph',
-      graphName = 'G',
-      rankDir = 'TB',
+      graphType = "digraph",
+      graphName = "G",
+      rankDir = "TB",
       splines,
       overlap,
       concentrate,
@@ -840,7 +863,7 @@ export class DOTGraphBuilder {
     } = this.options;
 
     const lines: string[] = [];
-    const directed = graphType === 'digraph';
+    const directed = graphType === "digraph";
 
     // Graph header
     lines.push(`${graphType} ${sanitizeDotId(graphName)} {`);
@@ -849,8 +872,8 @@ export class DOTGraphBuilder {
     lines.push(`  rankdir=${rankDir};`);
     if (splines) lines.push(`  splines=${splines};`);
     if (overlap !== undefined) lines.push(`  overlap=${overlap};`);
-    if (concentrate) lines.push('  concentrate=true;');
-    if (compound) lines.push('  compound=true;');
+    if (concentrate) lines.push("  concentrate=true;");
+    if (compound) lines.push("  compound=true;");
     if (bgcolor) lines.push(`  bgcolor="${bgcolor}";`);
     if (fontName) lines.push(`  fontname="${fontName}";`);
     if (fontSize) lines.push(`  fontsize=${fontSize};`);
@@ -861,15 +884,18 @@ export class DOTGraphBuilder {
       if (nodeDefaults.shape) defaultAttrs.push(`shape=${nodeDefaults.shape}`);
       if (nodeDefaults.style) {
         const styleStr = Array.isArray(nodeDefaults.style)
-          ? nodeDefaults.style.join(',')
+          ? nodeDefaults.style.join(",")
           : nodeDefaults.style;
         defaultAttrs.push(`style="${styleStr}"`);
       }
-      if (nodeDefaults.fillColor) defaultAttrs.push(`fillcolor="${nodeDefaults.fillColor}"`);
-      if (nodeDefaults.fontName) defaultAttrs.push(`fontname="${nodeDefaults.fontName}"`);
-      if (nodeDefaults.fontSize) defaultAttrs.push(`fontsize=${nodeDefaults.fontSize}`);
+      if (nodeDefaults.fillColor)
+        defaultAttrs.push(`fillcolor="${nodeDefaults.fillColor}"`);
+      if (nodeDefaults.fontName)
+        defaultAttrs.push(`fontname="${nodeDefaults.fontName}"`);
+      if (nodeDefaults.fontSize)
+        defaultAttrs.push(`fontsize=${nodeDefaults.fontSize}`);
       if (defaultAttrs.length > 0) {
-        lines.push(`  node [${defaultAttrs.join(', ')}];`);
+        lines.push(`  node [${defaultAttrs.join(", ")}];`);
       }
     }
 
@@ -877,14 +903,16 @@ export class DOTGraphBuilder {
     if (edgeDefaults) {
       const defaultAttrs: string[] = [];
       if (edgeDefaults.style) defaultAttrs.push(`style=${edgeDefaults.style}`);
-      if (edgeDefaults.color) defaultAttrs.push(`color="${edgeDefaults.color}"`);
-      if (edgeDefaults.arrowHead) defaultAttrs.push(`arrowhead=${edgeDefaults.arrowHead}`);
+      if (edgeDefaults.color)
+        defaultAttrs.push(`color="${edgeDefaults.color}"`);
+      if (edgeDefaults.arrowHead)
+        defaultAttrs.push(`arrowhead=${edgeDefaults.arrowHead}`);
       if (defaultAttrs.length > 0) {
-        lines.push(`  edge [${defaultAttrs.join(', ')}];`);
+        lines.push(`  edge [${defaultAttrs.join(", ")}];`);
       }
     }
 
-    lines.push('');
+    lines.push("");
 
     // Collect node IDs that are in subgraphs
     const nodesInSubgraphs = new Set<string>();
@@ -903,10 +931,12 @@ export class DOTGraphBuilder {
 
     // Render subgraphs with their nodes
     if (this.subgraphs.length > 0) {
-      lines.push('');
+      lines.push("");
       for (const subgraph of this.subgraphs) {
         // Find full node definitions for nodes in this subgraph
-        const subgraphNodeDefs = this.nodes.filter(n => subgraph.nodes.includes(n.id));
+        const subgraphNodeDefs = this.nodes.filter((n) =>
+          subgraph.nodes.includes(n.id),
+        );
 
         lines.push(`  subgraph ${sanitizeDotId(`cluster_${subgraph.id}`)} {`);
         if (subgraph.label) {
@@ -934,26 +964,26 @@ export class DOTGraphBuilder {
 
         // Also include any nodes specified by ID only (not in nodes array)
         for (const nodeId of subgraph.nodes) {
-          if (!subgraphNodeDefs.find(n => n.id === nodeId)) {
+          if (!subgraphNodeDefs.find((n) => n.id === nodeId)) {
             lines.push(`    ${sanitizeDotId(nodeId)};`);
           }
         }
 
-        lines.push('  }');
+        lines.push("  }");
       }
     }
 
     // Edges
     if (this.edges.length > 0) {
-      lines.push('');
+      lines.push("");
       for (const edge of this.edges) {
         lines.push(renderDotEdge(edge, directed));
       }
     }
 
-    lines.push('}');
+    lines.push("}");
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   /**
@@ -967,7 +997,7 @@ export class DOTGraphBuilder {
   static from(
     nodes: DotNode[] = [],
     edges: DotEdge[] = [],
-    options: DotOptions = {}
+    options: DotOptions = {},
   ): DOTGraphBuilder {
     const builder = new DOTGraphBuilder();
     builder.nodes = [...nodes];

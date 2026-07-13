@@ -4,26 +4,26 @@
  * Detects and resolves conflicts between insights from different reasoning modes.
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 import type {
   Insight,
   ConflictingInsight,
   ConflictResolution,
   ConflictType,
-} from './combination-types.js';
+} from "./combination-types.js";
 
 /**
  * Configuration for conflict resolution
  */
 export interface ConflictResolverConfig {
   /** Default resolution strategy */
-  defaultStrategy?: ConflictResolution['resolutionStrategy'];
+  defaultStrategy?: ConflictResolution["resolutionStrategy"];
   /** Minimum confidence difference to favor one insight */
   confidenceThreshold?: number;
   /** Whether to always preserve both conflicting insights */
   alwaysPreserveBoth?: boolean;
   /** Custom resolution rules by conflict type */
-  customRules?: Map<ConflictType, ConflictResolution['resolutionStrategy']>;
+  customRules?: Map<ConflictType, ConflictResolution["resolutionStrategy"]>;
 }
 
 /**
@@ -46,7 +46,7 @@ export class ConflictResolver {
 
   constructor(config: ConflictResolverConfig = {}) {
     this.config = {
-      defaultStrategy: config.defaultStrategy ?? 'favor_higher_confidence',
+      defaultStrategy: config.defaultStrategy ?? "favor_higher_confidence",
       confidenceThreshold: config.confidenceThreshold ?? 0.2,
       alwaysPreserveBoth: config.alwaysPreserveBoth ?? false,
       customRules: config.customRules ?? new Map(),
@@ -83,31 +83,31 @@ export class ConflictResolver {
     // Check for direct contradiction
     const contradiction = this.checkDirectContradiction(a, b);
     if (contradiction) {
-      return this.createConflict(a, b, 'direct_contradiction', 0.9);
+      return this.createConflict(a, b, "direct_contradiction", 0.9);
     }
 
     // Check for partial overlap
     const overlap = this.checkPartialOverlap(a, b);
     if (overlap) {
-      return this.createConflict(a, b, 'partial_overlap', 0.5);
+      return this.createConflict(a, b, "partial_overlap", 0.5);
     }
 
     // Check for scope difference
     const scopeDiff = this.checkScopeDifference(a, b);
     if (scopeDiff) {
-      return this.createConflict(a, b, 'scope_difference', 0.3);
+      return this.createConflict(a, b, "scope_difference", 0.3);
     }
 
     // Check for confidence mismatch
     const confMismatch = this.checkConfidenceMismatch(a, b);
     if (confMismatch) {
-      return this.createConflict(a, b, 'confidence_mismatch', 0.4);
+      return this.createConflict(a, b, "confidence_mismatch", 0.4);
     }
 
     // Check for evidence conflict
     const evidenceConflict = this.checkEvidenceConflict(a, b);
     if (evidenceConflict) {
-      return this.createConflict(a, b, 'evidence_conflict', 0.6);
+      return this.createConflict(a, b, "evidence_conflict", 0.6);
     }
 
     return null;
@@ -125,20 +125,20 @@ export class ConflictResolver {
     const newInsights: Insight[] = [];
 
     switch (strategy) {
-      case 'favor_higher_confidence':
+      case "favor_higher_confidence":
         resolution = this.resolveByConfidence(conflict);
         break;
-      case 'synthesize':
+      case "synthesize":
         const { resolved, synthesized } = this.resolveBySynthesis(conflict);
         resolution = resolved;
         if (synthesized) {
           newInsights.push(synthesized);
         }
         break;
-      case 'preserve_both':
+      case "preserve_both":
         resolution = this.resolveByPreservingBoth(conflict);
         break;
-      case 'defer':
+      case "defer":
         resolution = this.resolveByDefer(conflict);
         break;
       default:
@@ -167,7 +167,7 @@ export class ConflictResolver {
    */
   applyResolutions(
     insights: Insight[],
-    resolutions: ResolutionResult[]
+    resolutions: ResolutionResult[],
   ): Insight[] {
     const toRemove = new Set<string>();
     const toAdd: Insight[] = [];
@@ -175,15 +175,16 @@ export class ConflictResolver {
     for (const result of resolutions) {
       const strategy = result.resolution.resolutionStrategy;
 
-      if (strategy === 'favor_higher_confidence') {
+      if (strategy === "favor_higher_confidence") {
         // Remove the lower confidence insight
         const conf1 = result.conflict.insight1.confidence;
         const conf2 = result.conflict.insight2.confidence;
-        const loser = conf1 < conf2
-          ? result.conflict.insight1.insightId
-          : result.conflict.insight2.insightId;
+        const loser =
+          conf1 < conf2
+            ? result.conflict.insight1.insightId
+            : result.conflict.insight2.insightId;
         toRemove.add(loser);
-      } else if (strategy === 'synthesize') {
+      } else if (strategy === "synthesize") {
         // Remove both, add synthesized
         toRemove.add(result.conflict.insight1.insightId);
         toRemove.add(result.conflict.insight2.insightId);
@@ -258,7 +259,10 @@ export class ConflictResolver {
       const conclusionB = this.extractConclusion(b.content);
 
       if (conclusionA && conclusionB) {
-        const conclusionSim = this.calculateSimilarity(conclusionA, conclusionB);
+        const conclusionSim = this.calculateSimilarity(
+          conclusionA,
+          conclusionB,
+        );
         return conclusionSim < 0.5;
       }
     }
@@ -274,8 +278,10 @@ export class ConflictResolver {
     const contentB = b.content.toLowerCase();
 
     // Scope indicators
-    const broadIndicators = /\bin general\b|\boverall\b|\btypically\b|\busually\b|\bmost\b|\ball\b/;
-    const narrowIndicators = /\bspecifically\b|\bin this case\b|\bfor this\b|\bhere\b|\bsome\b|\bfew\b/;
+    const broadIndicators =
+      /\bin general\b|\boverall\b|\btypically\b|\busually\b|\bmost\b|\ball\b/;
+    const narrowIndicators =
+      /\bspecifically\b|\bin this case\b|\bfor this\b|\bhere\b|\bsome\b|\bfew\b/;
 
     const aIsBroad = broadIndicators.test(contentA);
     const aIsNarrow = narrowIndicators.test(contentA);
@@ -323,14 +329,16 @@ export class ConflictResolver {
 
         // Simple contradiction check in evidence
         if (
-          (evALower.includes('because') && evBLower.includes('because')) ||
-          (evALower.includes('due to') && evBLower.includes('due to'))
+          (evALower.includes("because") && evBLower.includes("because")) ||
+          (evALower.includes("due to") && evBLower.includes("due to"))
         ) {
           // Both have causal explanations - check if they conflict
-          if (this.checkDirectContradiction(
-            { ...a, content: evA },
-            { ...b, content: evB }
-          )) {
+          if (
+            this.checkDirectContradiction(
+              { ...a, content: evA },
+              { ...b, content: evB },
+            )
+          ) {
             return true;
           }
         }
@@ -348,8 +356,8 @@ export class ConflictResolver {
    * Determine resolution strategy for a conflict
    */
   private determineStrategy(
-    conflict: ConflictingInsight
-  ): ConflictResolution['resolutionStrategy'] {
+    conflict: ConflictingInsight,
+  ): ConflictResolution["resolutionStrategy"] {
     // Check custom rules first
     const customRule = this.config.customRules.get(conflict.conflictType);
     if (customRule) {
@@ -358,30 +366,30 @@ export class ConflictResolver {
 
     // Always preserve both if configured
     if (this.config.alwaysPreserveBoth) {
-      return 'preserve_both';
+      return "preserve_both";
     }
 
     // Strategy based on conflict type
     switch (conflict.conflictType) {
-      case 'direct_contradiction':
+      case "direct_contradiction":
         // For direct contradictions, synthesize if possible
-        return 'synthesize';
+        return "synthesize";
 
-      case 'confidence_mismatch':
+      case "confidence_mismatch":
         // Favor higher confidence
-        return 'favor_higher_confidence';
+        return "favor_higher_confidence";
 
-      case 'partial_overlap':
+      case "partial_overlap":
         // Try to synthesize
-        return 'synthesize';
+        return "synthesize";
 
-      case 'scope_difference':
+      case "scope_difference":
         // Preserve both as they cover different aspects
-        return 'preserve_both';
+        return "preserve_both";
 
-      case 'evidence_conflict':
+      case "evidence_conflict":
         // Need human review
-        return 'defer';
+        return "defer";
 
       default:
         return this.config.defaultStrategy;
@@ -391,7 +399,9 @@ export class ConflictResolver {
   /**
    * Resolve by favoring higher confidence
    */
-  private resolveByConfidence(conflict: ConflictingInsight): ConflictResolution {
+  private resolveByConfidence(
+    conflict: ConflictingInsight,
+  ): ConflictResolution {
     const conf1 = conflict.insight1.confidence;
     const conf2 = conflict.insight2.confidence;
 
@@ -402,7 +412,7 @@ export class ConflictResolver {
       resolvedInsight: winner.content,
       explanation: `Favored insight from ${winner.mode} (confidence: ${winner.confidence.toFixed(2)}) over ${loser.mode} (confidence: ${loser.confidence.toFixed(2)})`,
       preservedFrom: [winner.mode],
-      resolutionStrategy: 'favor_higher_confidence',
+      resolutionStrategy: "favor_higher_confidence",
       confidence: winner.confidence,
     };
   }
@@ -416,20 +426,21 @@ export class ConflictResolver {
   } {
     const synthesis = this.generateSynthesis(
       conflict.insight1.content,
-      conflict.insight2.content
+      conflict.insight2.content,
     );
 
     const synthesizedInsight: Insight = {
       id: randomUUID(),
       content: synthesis,
       sourceMode: conflict.insight1.mode, // Primary attribution
-      confidence: (conflict.insight1.confidence + conflict.insight2.confidence) / 2,
+      confidence:
+        (conflict.insight1.confidence + conflict.insight2.confidence) / 2,
       evidence: [
         `Synthesized from ${conflict.insight1.mode}: "${conflict.insight1.content.substring(0, 50)}..."`,
         `And ${conflict.insight2.mode}: "${conflict.insight2.content.substring(0, 50)}..."`,
       ],
       timestamp: new Date(),
-      category: 'synthesis',
+      category: "synthesis",
     };
 
     return {
@@ -437,7 +448,7 @@ export class ConflictResolver {
         resolvedInsight: synthesis,
         explanation: `Synthesized insights from ${conflict.insight1.mode} and ${conflict.insight2.mode} to create a unified perspective`,
         preservedFrom: [conflict.insight1.mode, conflict.insight2.mode],
-        resolutionStrategy: 'synthesize',
+        resolutionStrategy: "synthesize",
         confidence: synthesizedInsight.confidence,
       },
       synthesized: synthesizedInsight,
@@ -464,7 +475,7 @@ export class ConflictResolver {
     const sentences = content.split(/[.!?]+/).filter((s) => s.trim());
     if (sentences.length > 0) {
       const main = sentences[0].trim();
-      return main.length > 100 ? main.substring(0, 100) + '...' : main;
+      return main.length > 100 ? main.substring(0, 100) + "..." : main;
     }
     return content.substring(0, 100);
   }
@@ -472,13 +483,18 @@ export class ConflictResolver {
   /**
    * Resolve by preserving both insights
    */
-  private resolveByPreservingBoth(conflict: ConflictingInsight): ConflictResolution {
+  private resolveByPreservingBoth(
+    conflict: ConflictingInsight,
+  ): ConflictResolution {
     return {
       resolvedInsight: `Two perspectives: (1) ${conflict.insight1.content.substring(0, 50)}... (2) ${conflict.insight2.content.substring(0, 50)}...`,
       explanation: `Preserved both insights as they represent different valid perspectives from ${conflict.insight1.mode} and ${conflict.insight2.mode}`,
       preservedFrom: [conflict.insight1.mode, conflict.insight2.mode],
-      resolutionStrategy: 'preserve_both',
-      confidence: Math.max(conflict.insight1.confidence, conflict.insight2.confidence),
+      resolutionStrategy: "preserve_both",
+      confidence: Math.max(
+        conflict.insight1.confidence,
+        conflict.insight2.confidence,
+      ),
     };
   }
 
@@ -490,7 +506,7 @@ export class ConflictResolver {
       resolvedInsight: `[UNRESOLVED] Conflict between ${conflict.insight1.mode} and ${conflict.insight2.mode} requires manual review`,
       explanation: `The conflict between these insights requires human judgment to resolve`,
       preservedFrom: [],
-      resolutionStrategy: 'defer',
+      resolutionStrategy: "defer",
       confidence: 0,
     };
   }
@@ -506,7 +522,7 @@ export class ConflictResolver {
     a: Insight,
     b: Insight,
     type: ConflictType,
-    severity: number
+    severity: number,
   ): ConflictingInsight {
     return {
       insight1: {
@@ -594,7 +610,8 @@ export class ConflictResolver {
     return {
       total: conflicts.length,
       byType,
-      averageSeverity: conflicts.length > 0 ? totalSeverity / conflicts.length : 0,
+      averageSeverity:
+        conflicts.length > 0 ? totalSeverity / conflicts.length : 0,
       resolved,
     };
   }

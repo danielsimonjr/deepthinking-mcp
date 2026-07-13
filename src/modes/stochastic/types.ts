@@ -20,26 +20,26 @@
  * More detailed than the base DistributionType to support actual sampling.
  */
 export type Distribution =
-  | { type: 'normal'; mean: number; stdDev: number }
-  | { type: 'uniform'; min: number; max: number }
-  | { type: 'exponential'; rate: number }
-  | { type: 'poisson'; lambda: number }
-  | { type: 'binomial'; n: number; p: number }
-  | { type: 'categorical'; probabilities: Record<string, number> }
-  | { type: 'beta'; alpha: number; beta: number }
-  | { type: 'gamma'; shape: number; scale: number }
-  | { type: 'lognormal'; mu: number; sigma: number }
-  | { type: 'triangular'; min: number; mode: number; max: number }
-  | { type: 'custom'; sampler: () => number };
+  | { type: "normal"; mean: number; stdDev: number }
+  | { type: "uniform"; min: number; max: number }
+  | { type: "exponential"; rate: number }
+  | { type: "poisson"; lambda: number }
+  | { type: "binomial"; n: number; p: number }
+  | { type: "categorical"; probabilities: Record<string, number> }
+  | { type: "beta"; alpha: number; beta: number }
+  | { type: "gamma"; shape: number; scale: number }
+  | { type: "lognormal"; mu: number; sigma: number }
+  | { type: "triangular"; min: number; mode: number; max: number }
+  | { type: "custom"; sampler: () => number };
 
 /**
  * Domain specification for a stochastic variable
  */
 export type Domain =
-  | { type: 'continuous'; min?: number; max?: number }
-  | { type: 'discrete'; values: number[] }
-  | { type: 'integer'; min: number; max: number }
-  | { type: 'categorical'; categories: string[] };
+  | { type: "continuous"; min?: number; max?: number }
+  | { type: "discrete"; values: number[] }
+  | { type: "integer"; min: number; max: number }
+  | { type: "categorical"; categories: string[] };
 
 /**
  * A stochastic variable with distribution and domain
@@ -72,7 +72,7 @@ export interface Dependency {
   to: string;
 
   /** Type of dependency */
-  type: 'causal' | 'correlation' | 'conditional';
+  type: "causal" | "correlation" | "conditional";
 
   /** Strength of dependency (-1 to 1) */
   strength?: number;
@@ -83,7 +83,7 @@ export interface Dependency {
  */
 export interface Constraint {
   /** Constraint type */
-  type: 'equality' | 'inequality' | 'range' | 'sum_to_one';
+  type: "equality" | "inequality" | "range" | "sum_to_one";
 
   /** Variables involved */
   variables: string[];
@@ -103,7 +103,7 @@ export interface StochasticModel {
   id: string;
 
   /** Model type */
-  type: 'discrete' | 'continuous' | 'mixed';
+  type: "discrete" | "continuous" | "mixed";
 
   /** Variables in the model */
   variables: StochasticVariable[];

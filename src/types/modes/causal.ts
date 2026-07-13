@@ -3,7 +3,7 @@
  * Causal graph modeling, interventions, and counterfactual analysis
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Node in causal graph
@@ -11,7 +11,7 @@ import { BaseThought, ThinkingMode } from '../core.js';
 export interface CausalNode {
   id: string;
   name: string;
-  type: 'cause' | 'effect' | 'mediator' | 'confounder';
+  type: "cause" | "effect" | "mediator" | "confounder";
   description: string;
 }
 
@@ -54,7 +54,7 @@ export interface CausalMechanism {
   from: string;
   to: string;
   description: string;
-  type: 'direct' | 'indirect' | 'feedback';
+  type: "direct" | "indirect" | "feedback";
 }
 
 /**
@@ -84,6 +84,8 @@ export interface CausalThought extends BaseThought {
   confounders?: Confounder[];
 }
 
-export function isCausalThought(thought: BaseThought): thought is CausalThought {
-  return thought.mode === 'causal';
+export function isCausalThought(
+  thought: BaseThought,
+): thought is CausalThought {
+  return thought.mode === "causal";
 }

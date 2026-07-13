@@ -4,8 +4,8 @@
  * Phase 15: Aligned with JSON schema for complete validation
  */
 
-import { z } from 'zod';
-import { BaseThoughtSchema } from '../base.js';
+import { z } from "zod";
+import { BaseThoughtSchema } from "../base.js";
 
 /**
  * Trade study schema
@@ -51,20 +51,20 @@ const CorrectnessProofSchema = z.object({
  * Design pattern enum
  */
 const DesignPatternEnum = z.enum([
-  'divide-and-conquer',
-  'dynamic-programming',
-  'greedy',
-  'backtracking',
-  'branch-and-bound',
-  'randomized',
-  'approximation',
+  "divide-and-conquer",
+  "dynamic-programming",
+  "greedy",
+  "backtracking",
+  "branch-and-bound",
+  "randomized",
+  "approximation",
 ]);
 
 /**
  * Engineering reasoning schema
  */
 export const EngineeringSchema = BaseThoughtSchema.extend({
-  mode: z.enum(['engineering', 'algorithmic']),
+  mode: z.enum(["engineering", "algorithmic"]),
 
   // Engineering mode
   requirementId: z.string().optional(),

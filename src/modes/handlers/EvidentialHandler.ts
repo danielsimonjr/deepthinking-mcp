@@ -8,9 +8,9 @@
  * - Uncertainty quantification
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode, EvidentialThought } from '../../types/core.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode, EvidentialThought } from "../../types/core.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -21,9 +21,14 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
-type EvidentialThoughtType = 'hypothesis_definition' | 'evidence_collection' | 'belief_assignment' | 'evidence_combination' | 'decision_analysis';
+type EvidentialThoughtType =
+  | "hypothesis_definition"
+  | "evidence_collection"
+  | "belief_assignment"
+  | "evidence_combination"
+  | "decision_analysis";
 
 /**
  * EvidentialHandler - Specialized handler for Dempster-Shafer theory
@@ -36,21 +41,25 @@ type EvidentialThoughtType = 'hypothesis_definition' | 'evidence_collection' | '
  */
 export class EvidentialHandler implements ModeHandler {
   readonly mode = ThinkingMode.EVIDENTIAL;
-  readonly modeName = 'Evidential Reasoning';
-  readonly description = 'Dempster-Shafer belief functions with uncertainty quantification';
+  readonly modeName = "Evidential Reasoning";
+  readonly description =
+    "Dempster-Shafer belief functions with uncertainty quantification";
 
   private readonly supportedThoughtTypes: EvidentialThoughtType[] = [
-    'hypothesis_definition',
-    'evidence_collection',
-    'belief_assignment',
-    'evidence_combination',
-    'decision_analysis',
+    "hypothesis_definition",
+    "evidence_collection",
+    "belief_assignment",
+    "evidence_combination",
+    "decision_analysis",
   ];
 
   /**
    * Create an evidential thought from input
    */
-  createThought(input: ThinkingToolInput, sessionId: string): EvidentialThought {
+  createThought(
+    input: ThinkingToolInput,
+    sessionId: string,
+  ): EvidentialThought {
     const inputAny = input as any;
 
     // Resolve thought type
@@ -58,21 +67,27 @@ export class EvidentialHandler implements ModeHandler {
 
     // Phase 12 fix: Map massFunction from API to beliefFunctions format
     let beliefFunctions = inputAny.beliefFunctions || [];
-    if (inputAny.massFunction && typeof inputAny.massFunction === 'object' && beliefFunctions.length === 0) {
+    if (
+      inputAny.massFunction &&
+      typeof inputAny.massFunction === "object" &&
+      beliefFunctions.length === 0
+    ) {
       // Convert Record<string, number> massFunction to BeliefFunction[]
-      const massAssignments = Object.entries(inputAny.massFunction as Record<string, number>).map(
-        ([key, mass]) => ({
-          hypothesisSet: key.split(',').map((s: string) => s.trim()),
-          mass: mass as number,
-          justification: 'From mass function input',
-        })
-      );
-      beliefFunctions = [{
-        id: 'bf-from-mass-function',
-        source: 'input',
-        massAssignments,
-        conflictMass: 0,
-      }];
+      const massAssignments = Object.entries(
+        inputAny.massFunction as Record<string, number>,
+      ).map(([key, mass]) => ({
+        hypothesisSet: key.split(",").map((s: string) => s.trim()),
+        mass: mass as number,
+        justification: "From mass function input",
+      }));
+      beliefFunctions = [
+        {
+          id: "bf-from-mass-function",
+          source: "input",
+          massAssignments,
+          conflictMass: 0,
+        },
+      ];
     }
 
     return {
@@ -109,14 +124,17 @@ export class EvidentialHandler implements ModeHandler {
     if (inputAny.beliefFunctions) {
       for (const bf of inputAny.beliefFunctions) {
         if (bf.massAssignments) {
-          const sum = bf.massAssignments.reduce((acc: number, ma: any) => acc + (ma.mass || 0), 0);
+          const sum = bf.massAssignments.reduce(
+            (acc: number, ma: any) => acc + (ma.mass || 0),
+            0,
+          );
           if (Math.abs(sum - 1) > 0.001) {
             errors.push(
               createValidationError(
-                'beliefFunctions',
+                "beliefFunctions",
                 `Mass function must sum to 1 (currently ${sum.toFixed(3)})`,
-                'INVALID_MASS_SUM'
-              )
+                "INVALID_MASS_SUM",
+              ),
             );
           }
         }
@@ -124,26 +142,31 @@ export class EvidentialHandler implements ModeHandler {
     }
 
     // Warn if frame is empty
-    if (!inputAny.frameOfDiscernment || inputAny.frameOfDiscernment.length === 0) {
+    if (
+      !inputAny.frameOfDiscernment ||
+      inputAny.frameOfDiscernment.length === 0
+    ) {
       warnings.push(
         createValidationWarning(
-          'frameOfDiscernment',
-          'Frame of discernment is empty',
-          'Define the possible hypotheses in the frame'
-        )
+          "frameOfDiscernment",
+          "Frame of discernment is empty",
+          "Define the possible hypotheses in the frame",
+        ),
       );
     }
 
     // Check for evidence without reliability scores
     if (inputAny.evidence) {
-      const unreliableEvidence = inputAny.evidence.filter((e: any) => e.reliability === undefined);
+      const unreliableEvidence = inputAny.evidence.filter(
+        (e: any) => e.reliability === undefined,
+      );
       if (unreliableEvidence.length > 0) {
         warnings.push(
           createValidationWarning(
-            'evidence',
+            "evidence",
             `${unreliableEvidence.length} evidence items lack reliability scores`,
-            'Assign reliability scores for proper belief combination'
-          )
+            "Assign reliability scores for proper belief combination",
+          ),
         );
       }
     }
@@ -164,11 +187,11 @@ export class EvidentialHandler implements ModeHandler {
       metrics: {},
       guidingQuestions: [],
       mentalModels: [
-        'Dempster-Shafer Theory',
-        'Belief vs. Plausibility',
-        'Mass Function Assignment',
-        'Evidence Combination',
-        'Uncertainty Intervals [Bel, Pls]',
+        "Dempster-Shafer Theory",
+        "Belief vs. Plausibility",
+        "Mass Function Assignment",
+        "Evidence Combination",
+        "Uncertainty Intervals [Bel, Pls]",
       ],
     };
 
@@ -188,44 +211,59 @@ export class EvidentialHandler implements ModeHandler {
 
     // Suggestions
     if (hypotheses.length === 0) {
-      enhancements.suggestions!.push('Define hypotheses in the frame of discernment');
+      enhancements.suggestions!.push(
+        "Define hypotheses in the frame of discernment",
+      );
     }
 
     if (evidence.length === 0) {
-      enhancements.suggestions!.push('Collect evidence supporting or contradicting hypotheses');
+      enhancements.suggestions!.push(
+        "Collect evidence supporting or contradicting hypotheses",
+      );
     }
 
     if (evidence.length > 0 && beliefFunctions.length === 0) {
-      enhancements.suggestions!.push('Assign belief functions based on evidence');
+      enhancements.suggestions!.push(
+        "Assign belief functions based on evidence",
+      );
     }
 
     if (beliefFunctions.length > 1 && !thought.combinedBelief) {
-      enhancements.suggestions!.push("Combine belief functions using Dempster's rule");
+      enhancements.suggestions!.push(
+        "Combine belief functions using Dempster's rule",
+      );
     }
 
     // Guiding questions
     enhancements.guidingQuestions = [
-      'What evidence supports each hypothesis?',
-      'How reliable is each piece of evidence?',
+      "What evidence supports each hypothesis?",
+      "How reliable is each piece of evidence?",
       "Can evidence from different sources be combined using Dempster's rule?",
-      'What is the uncertainty interval [Bel(H), Pls(H)] for each hypothesis?',
-      'Is the conflict between evidence sources acceptable?',
+      "What is the uncertainty interval [Bel(H), Pls(H)] for each hypothesis?",
+      "Is the conflict between evidence sources acceptable?",
     ];
 
     return enhancements;
   }
 
   supportsThoughtType(thoughtType: string): boolean {
-    return this.supportedThoughtTypes.includes(thoughtType as EvidentialThoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType as EvidentialThoughtType,
+    );
   }
 
   /**
    * Resolve thought type to valid EvidentialThoughtType
    */
-  private resolveThoughtType(inputType: string | undefined): EvidentialThoughtType {
-    if (inputType && this.supportedThoughtTypes.includes(inputType as EvidentialThoughtType)) {
+  private resolveThoughtType(
+    inputType: string | undefined,
+  ): EvidentialThoughtType {
+    if (
+      inputType &&
+      this.supportedThoughtTypes.includes(inputType as EvidentialThoughtType)
+    ) {
       return inputType as EvidentialThoughtType;
     }
-    return 'hypothesis_definition';
+    return "hypothesis_definition";
   }
 }

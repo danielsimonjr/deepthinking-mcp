@@ -8,7 +8,7 @@
  * - Occam's razor evaluation
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 import {
   ThinkingMode,
   AbductiveThought,
@@ -16,8 +16,8 @@ import {
   Hypothesis,
   Evidence,
   EvaluationCriteria,
-} from '../../types/core.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+} from "../../types/core.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -25,7 +25,7 @@ import {
   ModeEnhancements,
   validationSuccess,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 /**
  * AbductiveHandler - Specialized handler for abductive reasoning
@@ -38,8 +38,9 @@ import {
  */
 export class AbductiveHandler implements ModeHandler {
   readonly mode = ThinkingMode.ABDUCTIVE;
-  readonly modeName = 'Abductive Reasoning';
-  readonly description = 'Inference to best explanation with hypothesis evaluation and evidence coverage';
+  readonly modeName = "Abductive Reasoning";
+  readonly description =
+    "Inference to best explanation with hypothesis evaluation and evidence coverage";
 
   /**
    * Create an abductive thought from input
@@ -102,25 +103,25 @@ export class AbductiveHandler implements ModeHandler {
     if (!inputAny.observations || inputAny.observations.length === 0) {
       warnings.push(
         createValidationWarning(
-          'observations',
-          'No observations provided',
-          'Add observations to ground hypothesis generation'
-        )
+          "observations",
+          "No observations provided",
+          "Add observations to ground hypothesis generation",
+        ),
       );
     }
 
     // Warn if hypotheses lack explanations
     if (inputAny.hypotheses) {
       const incompleteHypotheses = inputAny.hypotheses.filter(
-        (h: any) => !h.explanation || h.explanation.trim() === ''
+        (h: any) => !h.explanation || h.explanation.trim() === "",
       );
       if (incompleteHypotheses.length > 0) {
         warnings.push(
           createValidationWarning(
-            'hypotheses',
+            "hypotheses",
             `${incompleteHypotheses.length} hypothesis/hypotheses lack explanations`,
-            'Provide clear explanations for each hypothesis'
-          )
+            "Provide clear explanations for each hypothesis",
+          ),
         );
       }
     }
@@ -129,10 +130,10 @@ export class AbductiveHandler implements ModeHandler {
     if (inputAny.hypotheses && inputAny.hypotheses.length === 1) {
       warnings.push(
         createValidationWarning(
-          'hypotheses',
-          'Only one hypothesis provided',
-          'Consider alternative explanations for robust abductive reasoning'
-        )
+          "hypotheses",
+          "Only one hypothesis provided",
+          "Consider alternative explanations for robust abductive reasoning",
+        ),
       );
     }
 
@@ -145,14 +146,18 @@ export class AbductiveHandler implements ModeHandler {
   getEnhancements(thought: AbductiveThought): ModeEnhancements {
     const enhancements: ModeEnhancements = {
       suggestions: [],
-      relatedModes: [ThinkingMode.INDUCTIVE, ThinkingMode.BAYESIAN, ThinkingMode.CAUSAL],
+      relatedModes: [
+        ThinkingMode.INDUCTIVE,
+        ThinkingMode.BAYESIAN,
+        ThinkingMode.CAUSAL,
+      ],
       metrics: {},
       guidingQuestions: [],
       mentalModels: [
         "Occam's Razor - prefer simpler explanations",
-        'Inference to Best Explanation (IBE)',
+        "Inference to Best Explanation (IBE)",
         "Peirce's abductive logic",
-        'Consilience of inductions',
+        "Consilience of inductions",
       ],
     };
 
@@ -172,24 +177,30 @@ export class AbductiveHandler implements ModeHandler {
 
     // Generate suggestions
     if (hypotheses.length < 2) {
-      enhancements.suggestions!.push('Generate alternative hypotheses to compare explanatory power');
+      enhancements.suggestions!.push(
+        "Generate alternative hypotheses to compare explanatory power",
+      );
     }
 
     if (observations.length < 3) {
-      enhancements.suggestions!.push('Gather more observations to differentiate between hypotheses');
+      enhancements.suggestions!.push(
+        "Gather more observations to differentiate between hypotheses",
+      );
     }
 
     if (evidence.length === 0) {
-      enhancements.suggestions!.push('Collect evidence to support or refute hypotheses');
+      enhancements.suggestions!.push(
+        "Collect evidence to support or refute hypotheses",
+      );
     }
 
     // Guiding questions
     enhancements.guidingQuestions = [
-      'Which hypothesis best explains ALL observations?',
-      'Are there observations that rule out any hypothesis?',
-      'What additional evidence would differentiate the hypotheses?',
-      'Is the simplest explanation sufficient, or is complexity warranted?',
-      'Could multiple hypotheses be combined into a unified explanation?',
+      "Which hypothesis best explains ALL observations?",
+      "Are there observations that rule out any hypothesis?",
+      "What additional evidence would differentiate the hypotheses?",
+      "Is the simplest explanation sufficient, or is complexity warranted?",
+      "Could multiple hypotheses be combined into a unified explanation?",
     ];
 
     return enhancements;
@@ -200,7 +211,7 @@ export class AbductiveHandler implements ModeHandler {
    */
   private processObservations(raw: any[]): Observation[] {
     return raw.map((obs, index) => {
-      if (typeof obs === 'string') {
+      if (typeof obs === "string") {
         return {
           id: `obs-${index}`,
           description: obs,
@@ -222,7 +233,7 @@ export class AbductiveHandler implements ModeHandler {
   private processHypothesis(raw: any): Hypothesis {
     return {
       id: raw.id || randomUUID(),
-      explanation: raw.explanation || raw.description || '',
+      explanation: raw.explanation || raw.description || "",
       assumptions: raw.assumptions || [],
       predictions: raw.predictions || [],
       score: raw.score ?? raw.plausibility ?? 0.5,
@@ -241,9 +252,9 @@ export class AbductiveHandler implements ModeHandler {
    */
   private processEvidence(raw: any[]): Evidence[] {
     return raw.map((e) => ({
-      hypothesisId: e.hypothesisId || e.hypothesis || '',
-      type: e.type || 'neutral',
-      description: e.description || e.content || '',
+      hypothesisId: e.hypothesisId || e.hypothesis || "",
+      type: e.type || "neutral",
+      description: e.description || e.content || "",
       strength: e.strength ?? 0.5,
     }));
   }
@@ -267,7 +278,10 @@ export class AbductiveHandler implements ModeHandler {
   /**
    * Score hypotheses based on observations
    */
-  private scoreHypotheses(hypotheses: Hypothesis[], observations: Observation[]): void {
+  private scoreHypotheses(
+    hypotheses: Hypothesis[],
+    observations: Observation[],
+  ): void {
     for (const h of hypotheses) {
       const coverage = this.calculateCoverage(h, observations);
       const complexity = this.estimateComplexity(h);
@@ -279,7 +293,10 @@ export class AbductiveHandler implements ModeHandler {
   /**
    * Calculate how well a hypothesis covers observations
    */
-  private calculateCoverage(hypothesis: Hypothesis, observations: Observation[]): number {
+  private calculateCoverage(
+    hypothesis: Hypothesis,
+    observations: Observation[],
+  ): number {
     if (observations.length === 0) return 0;
     const explanation = hypothesis.explanation.toLowerCase();
     let covered = 0;
@@ -298,13 +315,15 @@ export class AbductiveHandler implements ModeHandler {
   private estimateComplexity(hypothesis: Hypothesis): number {
     const wordCount = hypothesis.explanation.split(/\s+/).length;
     const assumptionCount = hypothesis.assumptions.length;
-    return Math.min((wordCount / 100) + (assumptionCount * 0.1), 1);
+    return Math.min(wordCount / 100 + assumptionCount * 0.1, 1);
   }
 
   /**
    * Select the best explanation based on scores
    */
-  private selectBestExplanation(hypotheses: Hypothesis[]): Hypothesis | undefined {
+  private selectBestExplanation(
+    hypotheses: Hypothesis[],
+  ): Hypothesis | undefined {
     if (hypotheses.length === 0) return undefined;
     return hypotheses.reduce((a, b) => (a.score > b.score ? a : b));
   }

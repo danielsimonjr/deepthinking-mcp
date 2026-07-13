@@ -4,9 +4,9 @@
  * Phase 15: Aligned with JSON schema for complete validation
  */
 
-import { z } from 'zod';
-import { BaseThoughtSchema } from '../base.js';
-import { ConfidenceSchema } from '../shared.js';
+import { z } from "zod";
+import { BaseThoughtSchema } from "../base.js";
+import { ConfidenceSchema } from "../shared.js";
 
 /**
  * Hypothesis schema for Bayesian reasoning
@@ -30,7 +30,7 @@ const BeliefMassSchema = z.object({
  * Probabilistic reasoning schema (Bayesian + Evidential)
  */
 export const ProbabilisticSchema = BaseThoughtSchema.extend({
-  mode: z.enum(['bayesian', 'evidential']),
+  mode: z.enum(["bayesian", "evidential"]),
 
   // Bayesian reasoning
   hypotheses: z.array(HypothesisSchema).optional(),

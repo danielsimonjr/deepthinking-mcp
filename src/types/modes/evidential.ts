@@ -3,16 +3,16 @@
  * Phase 3C (v2.3) - Dempster-Shafer theory, belief functions, evidence combination
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 export interface EvidentialThought extends BaseThought {
   mode: ThinkingMode.EVIDENTIAL;
   thoughtType:
-    | 'hypothesis_definition'
-    | 'evidence_collection'
-    | 'belief_assignment'
-    | 'evidence_combination'
-    | 'decision_analysis';
+    | "hypothesis_definition"
+    | "evidence_collection"
+    | "belief_assignment"
+    | "evidence_combination"
+    | "decision_analysis";
 
   frameOfDiscernment?: string[]; // All possible hypotheses
   hypotheses?: Hypothesis[];
@@ -81,6 +81,8 @@ export interface Alternative {
   risk: number;
 }
 
-export function isEvidentialThought(thought: BaseThought): thought is EvidentialThought {
-  return thought.mode === 'evidential';
+export function isEvidentialThought(
+  thought: BaseThought,
+): thought is EvidentialThought {
+  return thought.mode === "evidential";
 }

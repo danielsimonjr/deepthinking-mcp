@@ -8,8 +8,8 @@
  * - Key space elimination tracking
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode } from '../../types/core.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode } from "../../types/core.js";
 import type {
   CryptanalyticThought,
   CryptanalyticThoughtType,
@@ -17,9 +17,13 @@ import type {
   EvidenceChain,
   CryptographicHypothesis,
   CipherType,
-} from '../../types/modes/cryptanalytic.js';
-import { toDecibans, fromDecibans, decibansToProbability } from '../../types/modes/cryptanalytic.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+} from "../../types/modes/cryptanalytic.js";
+import {
+  toDecibans,
+  fromDecibans,
+  decibansToProbability,
+} from "../../types/modes/cryptanalytic.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -28,33 +32,33 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 /**
  * Valid cryptanalytic thought types
  */
 const VALID_THOUGHT_TYPES: CryptanalyticThoughtType[] = [
-  'hypothesis_formation',
-  'evidence_accumulation',
-  'frequency_analysis',
-  'key_elimination',
-  'banburismus',
-  'crib_analysis',
-  'isomorphism_detection',
+  "hypothesis_formation",
+  "evidence_accumulation",
+  "frequency_analysis",
+  "key_elimination",
+  "banburismus",
+  "crib_analysis",
+  "isomorphism_detection",
 ];
 
 /**
  * Valid cipher types
  */
 const VALID_CIPHER_TYPES: CipherType[] = [
-  'substitution_simple',
-  'substitution_polyalphabetic',
-  'substitution_polygraphic',
-  'transposition',
-  'rotor',
-  'stream',
-  'block',
-  'unknown',
+  "substitution_simple",
+  "substitution_polyalphabetic",
+  "substitution_polygraphic",
+  "transposition",
+  "rotor",
+  "stream",
+  "block",
+  "unknown",
 ];
 
 /**
@@ -75,26 +79,30 @@ const REFUTATION_THRESHOLD = -20;
  */
 export class CryptanalyticHandler implements ModeHandler {
   readonly mode = ThinkingMode.CRYPTANALYTIC;
-  readonly modeName = 'Cryptanalytic Reasoning';
-  readonly description = "Bayesian cryptanalysis with Turing's deciban evidence system";
+  readonly modeName = "Cryptanalytic Reasoning";
+  readonly description =
+    "Bayesian cryptanalysis with Turing's deciban evidence system";
 
   /**
    * Supported thought types for cryptanalytic mode
    */
   private readonly supportedThoughtTypes = [
-    'hypothesis_formation',
-    'evidence_accumulation',
-    'frequency_analysis',
-    'key_elimination',
-    'banburismus',
-    'crib_analysis',
-    'isomorphism_detection',
+    "hypothesis_formation",
+    "evidence_accumulation",
+    "frequency_analysis",
+    "key_elimination",
+    "banburismus",
+    "crib_analysis",
+    "isomorphism_detection",
   ];
 
   /**
    * Create a cryptanalytic thought from input
    */
-  createThought(input: ThinkingToolInput, sessionId: string): CryptanalyticThought {
+  createThought(
+    input: ThinkingToolInput,
+    sessionId: string,
+  ): CryptanalyticThought {
     const inputAny = input as any;
 
     // Resolve thought type
@@ -162,39 +170,49 @@ export class CryptanalyticHandler implements ModeHandler {
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
 
     // Validate thought type
-    if (inputAny.thoughtType && !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)) {
+    if (
+      inputAny.thoughtType &&
+      !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)
+    ) {
       warnings.push(
         createValidationWarning(
-          'thoughtType',
+          "thoughtType",
           `Unknown thought type: ${inputAny.thoughtType}`,
-          `Valid types: ${VALID_THOUGHT_TYPES.join(', ')}`
-        )
+          `Valid types: ${VALID_THOUGHT_TYPES.join(", ")}`,
+        ),
       );
     }
 
     // Validate cipher type
-    if (inputAny.cipherType && !VALID_CIPHER_TYPES.includes(inputAny.cipherType)) {
+    if (
+      inputAny.cipherType &&
+      !VALID_CIPHER_TYPES.includes(inputAny.cipherType)
+    ) {
       warnings.push(
         createValidationWarning(
-          'cipherType',
+          "cipherType",
           `Unknown cipher type: ${inputAny.cipherType}`,
-          `Valid types: ${VALID_CIPHER_TYPES.join(', ')}`
-        )
+          `Valid types: ${VALID_CIPHER_TYPES.join(", ")}`,
+        ),
       );
     }
 
@@ -203,10 +221,10 @@ export class CryptanalyticHandler implements ModeHandler {
       if (input.uncertainty < 0 || input.uncertainty > 1) {
         errors.push(
           createValidationError(
-            'uncertainty',
+            "uncertainty",
             `Uncertainty (${input.uncertainty}) must be between 0 and 1`,
-            'UNCERTAINTY_OUT_OF_RANGE'
-          )
+            "UNCERTAINTY_OUT_OF_RANGE",
+          ),
         );
       }
     }
@@ -222,19 +240,25 @@ export class CryptanalyticHandler implements ModeHandler {
     // Validate evidence chains
     if (inputAny.evidenceChains) {
       for (let i = 0; i < inputAny.evidenceChains.length; i++) {
-        const chainWarnings = this.validateEvidenceChain(inputAny.evidenceChains[i], i);
+        const chainWarnings = this.validateEvidenceChain(
+          inputAny.evidenceChains[i],
+          i,
+        );
         warnings.push(...chainWarnings);
       }
     }
 
     // Suggest ciphertext for analysis
-    if (!inputAny.ciphertext && inputAny.thoughtType !== 'hypothesis_formation') {
+    if (
+      !inputAny.ciphertext &&
+      inputAny.thoughtType !== "hypothesis_formation"
+    ) {
       warnings.push(
         createValidationWarning(
-          'ciphertext',
-          'No ciphertext provided',
-          'Include ciphertext for cryptanalysis'
-        )
+          "ciphertext",
+          "No ciphertext provided",
+          "Include ciphertext for cryptanalysis",
+        ),
       );
     }
 
@@ -251,7 +275,11 @@ export class CryptanalyticHandler implements ModeHandler {
   getEnhancements(thought: CryptanalyticThought): ModeEnhancements {
     const enhancements: ModeEnhancements = {
       suggestions: [],
-      relatedModes: [ThinkingMode.BAYESIAN, ThinkingMode.EVIDENTIAL, ThinkingMode.INDUCTIVE],
+      relatedModes: [
+        ThinkingMode.BAYESIAN,
+        ThinkingMode.EVIDENTIAL,
+        ThinkingMode.INDUCTIVE,
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -261,91 +289,96 @@ export class CryptanalyticHandler implements ModeHandler {
       },
       mentalModels: [
         "Turing's Deciban System",
-        'Bayesian Hypothesis Testing',
-        'Index of Coincidence',
-        'Banburismus',
-        'Frequency Analysis',
-        'Known-Plaintext Attack',
+        "Bayesian Hypothesis Testing",
+        "Index of Coincidence",
+        "Banburismus",
+        "Frequency Analysis",
+        "Known-Plaintext Attack",
       ],
     };
 
     // Thought type-specific guidance
     switch (thought.thoughtType) {
-      case 'hypothesis_formation':
+      case "hypothesis_formation":
         enhancements.guidingQuestions!.push(
-          'What cipher system is most likely?',
-          'What are the prior probabilities for each hypothesis?',
-          'What evidence would confirm or refute each hypothesis?'
+          "What cipher system is most likely?",
+          "What are the prior probabilities for each hypothesis?",
+          "What evidence would confirm or refute each hypothesis?",
         );
         break;
 
-      case 'evidence_accumulation':
+      case "evidence_accumulation":
         enhancements.guidingQuestions!.push(
-          'What is the likelihood ratio for this evidence?',
-          'How many decibans does this evidence contribute?',
-          'Have we reached the confirmation threshold?'
+          "What is the likelihood ratio for this evidence?",
+          "How many decibans does this evidence contribute?",
+          "Have we reached the confirmation threshold?",
         );
         if (thought.evidenceChains) {
           for (const chain of thought.evidenceChains) {
-            enhancements.metrics![`${chain.hypothesis}_decibans`] = chain.totalDecibans;
-            if (chain.conclusion !== 'inconclusive') {
+            enhancements.metrics![`${chain.hypothesis}_decibans`] =
+              chain.totalDecibans;
+            if (chain.conclusion !== "inconclusive") {
               enhancements.suggestions!.push(
-                `Hypothesis "${chain.hypothesis}": ${chain.conclusion} (${chain.totalDecibans.toFixed(1)} db)`
+                `Hypothesis "${chain.hypothesis}": ${chain.conclusion} (${chain.totalDecibans.toFixed(1)} db)`,
               );
             }
           }
         }
         break;
 
-      case 'frequency_analysis':
+      case "frequency_analysis":
         enhancements.guidingQuestions!.push(
-          'Does the frequency distribution match any known language?',
-          'What is the index of coincidence?',
-          'Are there significant deviations from expected frequencies?'
+          "Does the frequency distribution match any known language?",
+          "What is the index of coincidence?",
+          "Are there significant deviations from expected frequencies?",
         );
         if (thought.frequencyAnalysis) {
-          enhancements.metrics!.indexOfCoincidence = thought.frequencyAnalysis.indexOfCoincidence;
-          enhancements.metrics!.chiSquared = thought.frequencyAnalysis.chiSquared;
+          enhancements.metrics!.indexOfCoincidence =
+            thought.frequencyAnalysis.indexOfCoincidence;
+          enhancements.metrics!.chiSquared =
+            thought.frequencyAnalysis.chiSquared;
         }
         break;
 
-      case 'key_elimination':
+      case "key_elimination":
         enhancements.guidingQuestions!.push(
-          'What portion of the key space has been eliminated?',
-          'What methods were used for elimination?',
-          'How many candidate keys remain?'
+          "What portion of the key space has been eliminated?",
+          "What methods were used for elimination?",
+          "How many candidate keys remain?",
         );
         if (thought.keySpaceAnalysis) {
           const ks = thought.keySpaceAnalysis;
           enhancements.metrics!.reductionFactor = ks.reductionFactor;
           enhancements.suggestions!.push(
-            `Key space reduced by factor of ${ks.reductionFactor.toFixed(2)}`
+            `Key space reduced by factor of ${ks.reductionFactor.toFixed(2)}`,
           );
         }
         break;
 
-      case 'banburismus':
+      case "banburismus":
         enhancements.guidingQuestions!.push(
-          'Are there significant coincidences at any offset?',
-          'What does this suggest about the wheel order?',
-          'Can we chain multiple Banburismus results?'
+          "Are there significant coincidences at any offset?",
+          "What does this suggest about the wheel order?",
+          "Can we chain multiple Banburismus results?",
         );
         if (thought.banburismusAnalysis) {
-          const significant = thought.banburismusAnalysis.filter((b) => b.isSignificant);
+          const significant = thought.banburismusAnalysis.filter(
+            (b) => b.isSignificant,
+          );
           enhancements.metrics!.significantOffsets = significant.length;
           for (const b of significant) {
             enhancements.suggestions!.push(
-              `Significant at offset ${b.offset}: ${b.decibanScore.toFixed(1)} db`
+              `Significant at offset ${b.offset}: ${b.decibanScore.toFixed(1)} db`,
             );
           }
         }
         break;
 
-      case 'crib_analysis':
+      case "crib_analysis":
         enhancements.guidingQuestions!.push(
-          'Is the crib position viable?',
-          'Are there any contradictions?',
-          'What constraints does this crib impose?'
+          "Is the crib position viable?",
+          "Are there any contradictions?",
+          "What constraints does this crib impose?",
         );
         if (thought.cribAnalysis) {
           const viable = thought.cribAnalysis.filter((c) => c.isViable);
@@ -353,11 +386,11 @@ export class CryptanalyticHandler implements ModeHandler {
         }
         break;
 
-      case 'isomorphism_detection':
+      case "isomorphism_detection":
         enhancements.guidingQuestions!.push(
-          'What patterns have been detected?',
-          'Do patterns suggest repeated words?',
-          'What deciban contribution do patterns provide?'
+          "What patterns have been detected?",
+          "Do patterns suggest repeated words?",
+          "What deciban contribution do patterns provide?",
         );
         if (thought.patterns) {
           enhancements.metrics!.patternCount = thought.patterns.length;
@@ -373,15 +406,15 @@ export class CryptanalyticHandler implements ModeHandler {
 
       if (h.decibanScore >= CONFIRMATION_THRESHOLD) {
         enhancements.suggestions!.push(
-          `✓ Hypothesis "${h.description}" CONFIRMED (${h.decibanScore.toFixed(1)} db)`
+          `✓ Hypothesis "${h.description}" CONFIRMED (${h.decibanScore.toFixed(1)} db)`,
         );
       } else if (h.decibanScore <= REFUTATION_THRESHOLD) {
         enhancements.warnings!.push(
-          `✗ Hypothesis "${h.description}" REFUTED (${h.decibanScore.toFixed(1)} db)`
+          `✗ Hypothesis "${h.description}" REFUTED (${h.decibanScore.toFixed(1)} db)`,
         );
       } else {
         enhancements.suggestions!.push(
-          `Hypothesis "${h.description}": ${h.decibanScore.toFixed(1)} db (inconclusive, need ±${CONFIRMATION_THRESHOLD} db)`
+          `Hypothesis "${h.description}": ${h.decibanScore.toFixed(1)} db (inconclusive, need ±${CONFIRMATION_THRESHOLD} db)`,
         );
       }
     }
@@ -398,9 +431,7 @@ export class CryptanalyticHandler implements ModeHandler {
 
     // High uncertainty warning
     if (thought.uncertainty > 0.7) {
-      enhancements.warnings!.push(
-        'High uncertainty - gather more evidence'
-      );
+      enhancements.warnings!.push("High uncertainty - gather more evidence");
     }
 
     return enhancements;
@@ -416,24 +447,34 @@ export class CryptanalyticHandler implements ModeHandler {
   /**
    * Resolve thought type from input
    */
-  private resolveThoughtType(inputType: string | undefined): CryptanalyticThoughtType {
-    if (inputType && VALID_THOUGHT_TYPES.includes(inputType as CryptanalyticThoughtType)) {
+  private resolveThoughtType(
+    inputType: string | undefined,
+  ): CryptanalyticThoughtType {
+    if (
+      inputType &&
+      VALID_THOUGHT_TYPES.includes(inputType as CryptanalyticThoughtType)
+    ) {
       return inputType as CryptanalyticThoughtType;
     }
-    return 'hypothesis_formation';
+    return "hypothesis_formation";
   }
 
   /**
    * Normalize hypothesis
    */
   private normalizeHypothesis(h: any): CryptographicHypothesis {
-    const evidence: DecibanEvidence[] = (h.evidence || []).map((e: any) => this.normalizeEvidence(e));
+    const evidence: DecibanEvidence[] = (h.evidence || []).map((e: any) =>
+      this.normalizeEvidence(e),
+    );
     const totalDecibans = evidence.reduce((sum, e) => sum + e.decibans, 0);
-    const posteriorProbability = decibansToProbability(totalDecibans, h.priorProbability || 0.5);
+    const posteriorProbability = decibansToProbability(
+      totalDecibans,
+      h.priorProbability || 0.5,
+    );
 
     return {
       id: h.id || randomUUID(),
-      description: h.description || '',
+      description: h.description || "",
       cipherType: h.cipherType,
       parameters: h.parameters,
       priorProbability: h.priorProbability ?? 0.5,
@@ -448,14 +489,15 @@ export class CryptanalyticHandler implements ModeHandler {
    * Normalize evidence
    */
   private normalizeEvidence(e: any): DecibanEvidence {
-    const likelihoodRatio = e.likelihoodRatio ?? (e.decibans ? fromDecibans(e.decibans) : 1);
+    const likelihoodRatio =
+      e.likelihoodRatio ?? (e.decibans ? fromDecibans(e.decibans) : 1);
     const decibans = e.decibans ?? toDecibans(likelihoodRatio);
 
     return {
-      observation: e.observation || '',
+      observation: e.observation || "",
       decibans,
       likelihoodRatio,
-      source: e.source || 'statistical',
+      source: e.source || "statistical",
       confidence: e.confidence ?? 1.0,
       explanation: e.explanation,
     };
@@ -465,24 +507,26 @@ export class CryptanalyticHandler implements ModeHandler {
    * Normalize evidence chain
    */
   private normalizeEvidenceChain(chain: any): EvidenceChain {
-    const observations: DecibanEvidence[] = (chain.observations || []).map((o: any) =>
-      this.normalizeEvidence(o)
+    const observations: DecibanEvidence[] = (chain.observations || []).map(
+      (o: any) => this.normalizeEvidence(o),
     );
     const totalDecibans = observations.reduce((sum, o) => sum + o.decibans, 0);
-    const confirmationThreshold = chain.confirmationThreshold ?? CONFIRMATION_THRESHOLD;
-    const refutationThreshold = chain.refutationThreshold ?? REFUTATION_THRESHOLD;
+    const confirmationThreshold =
+      chain.confirmationThreshold ?? CONFIRMATION_THRESHOLD;
+    const refutationThreshold =
+      chain.refutationThreshold ?? REFUTATION_THRESHOLD;
 
-    let conclusion: 'confirmed' | 'refuted' | 'inconclusive';
+    let conclusion: "confirmed" | "refuted" | "inconclusive";
     if (totalDecibans >= confirmationThreshold) {
-      conclusion = 'confirmed';
+      conclusion = "confirmed";
     } else if (totalDecibans <= refutationThreshold) {
-      conclusion = 'refuted';
+      conclusion = "refuted";
     } else {
-      conclusion = 'inconclusive';
+      conclusion = "inconclusive";
     }
 
     return {
-      hypothesis: chain.hypothesis || '',
+      hypothesis: chain.hypothesis || "",
       observations,
       totalDecibans,
       oddsRatio: fromDecibans(totalDecibans),
@@ -495,13 +539,15 @@ export class CryptanalyticHandler implements ModeHandler {
   /**
    * Determine hypothesis status based on deciban score
    */
-  private determineHypothesisStatus(decibans: number): 'active' | 'confirmed' | 'refuted' | 'superseded' {
+  private determineHypothesisStatus(
+    decibans: number,
+  ): "active" | "confirmed" | "refuted" | "superseded" {
     if (decibans >= CONFIRMATION_THRESHOLD) {
-      return 'confirmed';
+      return "confirmed";
     } else if (decibans <= REFUTATION_THRESHOLD) {
-      return 'refuted';
+      return "refuted";
     }
-    return 'active';
+    return "active";
   }
 
   /**
@@ -514,19 +560,22 @@ export class CryptanalyticHandler implements ModeHandler {
       warnings.push(
         createValidationWarning(
           `hypotheses[${index}].description`,
-          'Hypothesis lacks description',
-          'Describe what the hypothesis proposes'
-        )
+          "Hypothesis lacks description",
+          "Describe what the hypothesis proposes",
+        ),
       );
     }
 
-    if (h.priorProbability !== undefined && (h.priorProbability < 0 || h.priorProbability > 1)) {
+    if (
+      h.priorProbability !== undefined &&
+      (h.priorProbability < 0 || h.priorProbability > 1)
+    ) {
       warnings.push(
         createValidationWarning(
           `hypotheses[${index}].priorProbability`,
           `Prior probability (${h.priorProbability}) out of range`,
-          'Prior probability must be between 0 and 1'
-        )
+          "Prior probability must be between 0 and 1",
+        ),
       );
     }
 
@@ -543,9 +592,9 @@ export class CryptanalyticHandler implements ModeHandler {
       warnings.push(
         createValidationWarning(
           `evidenceChains[${index}].hypothesis`,
-          'Evidence chain lacks hypothesis reference',
-          'Link evidence chain to a hypothesis'
-        )
+          "Evidence chain lacks hypothesis reference",
+          "Link evidence chain to a hypothesis",
+        ),
       );
     }
 
@@ -553,9 +602,9 @@ export class CryptanalyticHandler implements ModeHandler {
       warnings.push(
         createValidationWarning(
           `evidenceChains[${index}].observations`,
-          'Evidence chain has no observations',
-          'Add deciban evidence observations'
-        )
+          "Evidence chain has no observations",
+          "Add deciban evidence observations",
+        ),
       );
     }
 

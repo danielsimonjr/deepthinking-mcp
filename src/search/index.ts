@@ -3,10 +3,10 @@
  * Phase 4 Task 9.1: In-memory search index with full-text and metadata indexing
  */
 
-import type { ThinkingSession, ThinkingMode } from '../types/index.js';
-import type { SearchIndexEntry, SearchStats } from './types.js';
-import { Tokenizer } from './tokenizer.js';
-import { TaxonomyClassifier } from '../taxonomy/classifier.js';
+import type { ThinkingSession, ThinkingMode } from "../types/index.js";
+import type { SearchIndexEntry, SearchStats } from "./types.js";
+import { Tokenizer } from "./tokenizer.js";
+import { TaxonomyClassifier } from "../taxonomy/classifier.js";
 
 /**
  * In-memory search index
@@ -29,8 +29,8 @@ export class SearchIndex {
    */
   indexSession(session: ThinkingSession): void {
     // Extract all thought texts
-    const thoughtTexts = session.thoughts.map(t => t.content);
-    const allText = [session.title || '', ...thoughtTexts].join(' ');
+    const thoughtTexts = session.thoughts.map((t) => t.content);
+    const allText = [session.title || "", ...thoughtTexts].join(" ");
 
     // Tokenize
     const tokens = this.tokenizer.getTokenFrequency(allText);
@@ -70,13 +70,15 @@ export class SearchIndex {
     // Create index entry
     const entry: SearchIndexEntry = {
       sessionId: session.id,
-      title: session.title || 'Untitled',
+      title: session.title || "Untitled",
       mode: session.mode,
       author: session.author,
       domain: session.domain,
       tags: session.tags || [],
       thoughtCount: session.thoughts.length,
-      completed: session.thoughts.length > 0 && !session.thoughts[session.thoughts.length - 1].nextThoughtNeeded,
+      completed:
+        session.thoughts.length > 0 &&
+        !session.thoughts[session.thoughts.length - 1].nextThoughtNeeded,
       createdAt: session.createdAt,
       updatedAt: session.updatedAt,
       taxonomyCategories,
@@ -264,11 +266,11 @@ export class SearchIndex {
    */
   filterByTags(tags: string[]): Set<string> {
     const results = new Set<string>();
-    const tagSet = new Set(tags.map(t => t.toLowerCase()));
+    const tagSet = new Set(tags.map((t) => t.toLowerCase()));
 
     for (const [sessionId, entry] of this.index) {
-      const entryTags = entry.tags.map(t => t.toLowerCase());
-      const hasMatch = entryTags.some(t => tagSet.has(t));
+      const entryTags = entry.tags.map((t) => t.toLowerCase());
+      const hasMatch = entryTags.some((t) => tagSet.has(t));
 
       if (hasMatch) {
         results.add(sessionId);
@@ -373,10 +375,11 @@ export class SearchIndex {
       totalSessions: this.index.size,
       indexedSessions: this.index.size,
       totalTokens,
-      averageTokensPerSession: this.index.size > 0 ? totalTokens / this.index.size : 0,
+      averageTokensPerSession:
+        this.index.size > 0 ? totalTokens / this.index.size : 0,
       indexSize: estimatedSize,
       lastIndexed: this.lastIndexed,
-      indexHealth: this.index.size === 0 ? 'empty' : 'healthy',
+      indexHealth: this.index.size === 0 ? "empty" : "healthy",
     };
   }
 

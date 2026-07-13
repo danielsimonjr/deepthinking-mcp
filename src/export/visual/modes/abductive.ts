@@ -6,13 +6,13 @@
  * Phase 13 Sprint 9: Refactored to use fluent builder classes
  */
 
-import type { AbductiveThought } from '../../../types/index.js';
-import type { VisualExportOptions } from '../types.js';
-import { sanitizeId } from '../utils.js';
+import type { AbductiveThought } from "../../../types/index.js";
+import type { VisualExportOptions } from "../types.js";
+import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
-import { DOTGraphBuilder } from '../utils/dot.js';
-import { MermaidGraphBuilder } from '../utils/mermaid.js';
-import { ASCIIDocBuilder } from '../utils/ascii.js';
+import { DOTGraphBuilder } from "../utils/dot.js";
+import { MermaidGraphBuilder } from "../utils/mermaid.js";
+import { ASCIIDocBuilder } from "../utils/ascii.js";
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -25,17 +25,13 @@ import {
   getNodeColor,
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
-} from '../utils/svg.js';
+} from "../utils/svg.js";
 import {
   generateGraphML,
   type GraphMLNode,
   type GraphMLEdge,
-} from '../utils/graphml.js';
-import {
-  generateTikZ,
-  type TikZNode,
-  type TikZEdge,
-} from '../utils/tikz.js';
+} from "../utils/graphml.js";
+import { generateTikZ, type TikZNode, type TikZEdge } from "../utils/tikz.js";
 import {
   generateHTMLHeader,
   generateHTMLFooter,
@@ -44,18 +40,14 @@ import {
   renderSection,
   renderTable,
   renderBadge,
-} from '../utils/html.js';
-import {
-  generateHierarchyModelica,
-} from '../utils/modelica.js';
+} from "../utils/html.js";
+import { generateHierarchyModelica } from "../utils/modelica.js";
 import {
   generateUmlDiagram,
   type UmlNode,
   type UmlEdge,
-} from '../utils/uml.js';
-import {
-  generateHierarchyJson,
-} from '../utils/json.js';
+} from "../utils/uml.js";
+import { generateHierarchyJson } from "../utils/json.js";
 import {
   section,
   table,
@@ -63,36 +55,49 @@ import {
   keyValueSection,
   mermaidBlock,
   document as mdDocument,
-} from '../utils/markdown.js';
+} from "../utils/markdown.js";
 
 /**
  * Export abductive hypothesis comparison to visual format
  */
-export function exportAbductiveHypotheses(thought: AbductiveThought, options: VisualExportOptions): string {
-  const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+export function exportAbductiveHypotheses(
+  thought: AbductiveThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+  } = options;
 
   switch (format) {
-    case 'mermaid':
-      return abductiveToMermaid(thought, colorScheme, includeLabels, includeMetrics);
-    case 'dot':
+    case "mermaid":
+      return abductiveToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics,
+      );
+    case "dot":
       return abductiveToDOT(thought, includeLabels, includeMetrics);
-    case 'ascii':
+    case "ascii":
       return abductiveToASCII(thought);
-    case 'svg':
+    case "svg":
       return abductiveToSVG(thought, options);
-    case 'graphml':
+    case "graphml":
       return abductiveToGraphML(thought, options);
-    case 'tikz':
+    case "tikz":
       return abductiveToTikZ(thought, options);
-    case 'html':
+    case "html":
       return abductiveToHTML(thought, options);
-    case 'modelica':
+    case "modelica":
       return abductiveToModelica(thought, options);
-    case 'uml':
+    case "uml":
       return abductiveToUML(thought, options);
-    case 'json':
+    case "json":
       return abductiveToJSON(thought, options);
-    case 'markdown':
+    case "markdown":
       return abductiveToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
@@ -103,40 +108,47 @@ function abductiveToMermaid(
   thought: AbductiveThought,
   colorScheme: string,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
-  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
-  const builder = new MermaidGraphBuilder().setDirection('TD');
+  const scheme = colorScheme as "default" | "pastel" | "monochrome";
+  const builder = new MermaidGraphBuilder().setDirection("TD");
 
   // Observations node
   builder.addNode({
-    id: 'Observations',
-    label: 'Observations',
-    shape: 'rectangle',
+    id: "Observations",
+    label: "Observations",
+    shape: "rectangle",
   });
 
   // Add hypothesis nodes
   for (const hypothesis of thought.hypotheses) {
     const hypId = sanitizeId(hypothesis.id);
-    const label = includeLabels ? hypothesis.explanation.substring(0, 50) + '...' : hypId;
-    const scoreLabel = includeMetrics ? ` (${hypothesis.score.toFixed(2)})` : '';
+    const label = includeLabels
+      ? hypothesis.explanation.substring(0, 50) + "..."
+      : hypId;
+    const scoreLabel = includeMetrics
+      ? ` (${hypothesis.score.toFixed(2)})`
+      : "";
     const isBest = thought.bestExplanation?.id === hypothesis.id;
 
     // Style for best hypothesis
-    const color = scheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
-    const nodeStyle = isBest && scheme !== 'monochrome' ? { fill: color, strokeWidth: '3px' } : undefined;
+    const color = scheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
+    const nodeStyle =
+      isBest && scheme !== "monochrome"
+        ? { fill: color, strokeWidth: "3px" }
+        : undefined;
 
     builder.addNode({
       id: hypId,
       label: label + scoreLabel,
-      shape: 'rectangle',
+      shape: "rectangle",
       style: nodeStyle,
     });
 
     builder.addEdge({
-      source: 'Observations',
+      source: "Observations",
       target: hypId,
-      style: 'arrow',
+      style: "arrow",
     });
   }
 
@@ -146,36 +158,40 @@ function abductiveToMermaid(
 function abductiveToDOT(
   thought: AbductiveThought,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
   const builder = new DOTGraphBuilder()
-    .setGraphName('AbductiveHypotheses')
-    .setRankDir('TB')
-    .setNodeDefaults({ shape: 'box', style: 'rounded' });
+    .setGraphName("AbductiveHypotheses")
+    .setRankDir("TB")
+    .setNodeDefaults({ shape: "box", style: "rounded" });
 
   // Observations node
   builder.addNode({
-    id: 'Observations',
-    label: 'Observations',
-    shape: 'ellipse',
+    id: "Observations",
+    label: "Observations",
+    shape: "ellipse",
   });
 
   // Add hypothesis nodes
   for (const hypothesis of thought.hypotheses) {
     const hypId = sanitizeId(hypothesis.id);
-    const label = includeLabels ? hypothesis.explanation.substring(0, 50) + '...' : hypId;
-    const scoreLabel = includeMetrics ? ` (${hypothesis.score.toFixed(2)})` : '';
+    const label = includeLabels
+      ? hypothesis.explanation.substring(0, 50) + "..."
+      : hypId;
+    const scoreLabel = includeMetrics
+      ? ` (${hypothesis.score.toFixed(2)})`
+      : "";
     const isBest = thought.bestExplanation?.id === hypothesis.id;
 
     builder.addNode({
       id: hypId,
       label: label + scoreLabel,
-      style: isBest ? 'filled' : undefined,
-      fillColor: isBest ? 'lightblue' : undefined,
+      style: isBest ? "filled" : undefined,
+      fillColor: isBest ? "lightblue" : undefined,
     });
 
     builder.addEdge({
-      source: 'Observations',
+      source: "Observations",
       target: hypId,
     });
   }
@@ -186,30 +202,33 @@ function abductiveToDOT(
 function abductiveToASCII(thought: AbductiveThought): string {
   const builder = new ASCIIDocBuilder()
     .setMaxWidth(60)
-    .addHeader('Abductive Hypothesis Comparison');
+    .addHeader("Abductive Hypothesis Comparison");
 
   // Observations section
-  builder.addSection('Observations');
+  builder.addSection("Observations");
   for (const obs of thought.observations) {
-    builder.addText(`  • ${obs.description} (confidence: ${obs.confidence.toFixed(2)})\n`);
+    builder.addText(
+      `  • ${obs.description} (confidence: ${obs.confidence.toFixed(2)})\n`,
+    );
   }
   builder.addEmptyLine();
 
   // Hypotheses section
-  builder.addSection('Hypotheses');
+  builder.addSection("Hypotheses");
   for (const hypothesis of thought.hypotheses) {
     const isBest = thought.bestExplanation?.id === hypothesis.id;
-    const marker = isBest ? '★' : '•';
+    const marker = isBest ? "★" : "•";
 
     builder.addText(`  ${marker} ${hypothesis.explanation}\n`);
     builder.addText(`    Score: ${hypothesis.score.toFixed(2)}\n`);
-    builder.addText(`    Assumptions: ${hypothesis.assumptions.join(', ')}\n`);
+    builder.addText(`    Assumptions: ${hypothesis.assumptions.join(", ")}\n`);
     builder.addEmptyLine();
   }
 
   // Best explanation
   if (thought.bestExplanation) {
-    builder.addSection('Best Explanation')
+    builder
+      .addSection("Best Explanation")
       .addText(`${thought.bestExplanation.explanation}\n`);
   }
 
@@ -219,9 +238,12 @@ function abductiveToASCII(thought: AbductiveThought): string {
 /**
  * Export abductive hypotheses to native SVG format
  */
-function abductiveToSVG(thought: AbductiveThought, options: VisualExportOptions): string {
+function abductiveToSVG(
+  thought: AbductiveThought,
+  options: VisualExportOptions,
+): string {
   const {
-    colorScheme = 'default',
+    colorScheme = "default",
     includeLabels = true,
     includeMetrics = true,
     svgWidth = DEFAULT_SVG_OPTIONS.width,
@@ -234,14 +256,14 @@ function abductiveToSVG(thought: AbductiveThought, options: VisualExportOptions)
   const centerX = svgWidth / 2;
 
   // Observations node at top
-  positions.set('observations', {
-    id: 'observations',
+  positions.set("observations", {
+    id: "observations",
     x: centerX - nodeWidth / 2,
     y: 60,
     width: nodeWidth,
     height: nodeHeight,
-    label: 'Observations',
-    type: 'observations',
+    label: "Observations",
+    type: "observations",
   });
 
   // Hypothesis nodes below
@@ -252,9 +274,11 @@ function abductiveToSVG(thought: AbductiveThought, options: VisualExportOptions)
   for (const hypothesis of thought.hypotheses) {
     const hypId = sanitizeId(hypothesis.id);
     const label = includeLabels
-      ? hypothesis.explanation.substring(0, 30) + '...'
+      ? hypothesis.explanation.substring(0, 30) + "..."
       : hypId;
-    const scoreLabel = includeMetrics ? ` (${hypothesis.score.toFixed(2)})` : '';
+    const scoreLabel = includeMetrics
+      ? ` (${hypothesis.score.toFixed(2)})`
+      : "";
 
     positions.set(hypothesis.id, {
       id: hypothesis.id,
@@ -263,37 +287,41 @@ function abductiveToSVG(thought: AbductiveThought, options: VisualExportOptions)
       width: nodeWidth,
       height: nodeHeight,
       label: label + scoreLabel,
-      type: thought.bestExplanation?.id === hypothesis.id ? 'best' : 'hypothesis',
+      type:
+        thought.bestExplanation?.id === hypothesis.id ? "best" : "hypothesis",
     });
     startX += nodeWidth + 20;
   }
 
-  let svg = generateSVGHeader(svgWidth, svgHeight, 'Abductive Hypotheses');
+  let svg = generateSVGHeader(svgWidth, svgHeight, "Abductive Hypotheses");
 
   // Render edges from observations to hypotheses
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
-  const obsPos = positions.get('observations');
+  const obsPos = positions.get("observations");
   for (const hypothesis of thought.hypotheses) {
     const hypPos = positions.get(hypothesis.id);
     if (obsPos && hypPos) {
       svg += renderEdge(obsPos, hypPos, {});
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render nodes
   svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
 
   // Observations
-  svg += renderEllipseNode(positions.get('observations')!, getNodeColor('info', colorScheme));
+  svg += renderEllipseNode(
+    positions.get("observations")!,
+    getNodeColor("info", colorScheme),
+  );
 
   // Hypotheses
   for (const hypothesis of thought.hypotheses) {
     const pos = positions.get(hypothesis.id)!;
     const isBest = thought.bestExplanation?.id === hypothesis.id;
     const colors = isBest
-      ? getNodeColor('success', colorScheme)
-      : getNodeColor('neutral', colorScheme);
+      ? getNodeColor("success", colorScheme)
+      : getNodeColor("neutral", colorScheme);
 
     if (isBest) {
       svg += renderStadiumNode(pos, colors);
@@ -301,46 +329,60 @@ function abductiveToSVG(thought: AbductiveThought, options: VisualExportOptions)
       svg += renderRectNode(pos, colors);
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render metrics
   if (includeMetrics) {
     const metrics = [
-      { label: 'Hypotheses', value: thought.hypotheses.length },
-      { label: 'Observations', value: thought.observations.length },
-      { label: 'Best Score', value: thought.bestExplanation?.score.toFixed(2) || 'N/A' },
+      { label: "Hypotheses", value: thought.hypotheses.length },
+      { label: "Observations", value: thought.observations.length },
+      {
+        label: "Best Score",
+        value: thought.bestExplanation?.score.toFixed(2) || "N/A",
+      },
     ];
     svg += renderMetricsPanel(svgWidth - 180, svgHeight - 100, metrics);
   }
 
   // Render legend
   const legendItems = [
-    { label: 'Observations', color: getNodeColor('info', colorScheme), shape: 'ellipse' as const },
-    { label: 'Hypothesis', color: getNodeColor('neutral', colorScheme) },
-    { label: 'Best', color: getNodeColor('success', colorScheme) },
+    {
+      label: "Observations",
+      color: getNodeColor("info", colorScheme),
+      shape: "ellipse" as const,
+    },
+    { label: "Hypothesis", color: getNodeColor("neutral", colorScheme) },
+    { label: "Best", color: getNodeColor("success", colorScheme) },
   ];
   svg += renderLegend(20, svgHeight - 80, legendItems);
 
-  svg += '\n' + generateSVGFooter();
+  svg += "\n" + generateSVGFooter();
   return svg;
 }
 
 /**
  * Export abductive hypotheses to GraphML format
  */
-function abductiveToGraphML(thought: AbductiveThought, options: VisualExportOptions): string {
+function abductiveToGraphML(
+  thought: AbductiveThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
 
   // Create nodes from hypotheses
-  const nodes: GraphMLNode[] = thought.hypotheses.map(hypothesis => ({
+  const nodes: GraphMLNode[] = thought.hypotheses.map((hypothesis) => ({
     id: sanitizeId(hypothesis.id),
-    label: includeLabels ? hypothesis.explanation.substring(0, 50) + '...' : hypothesis.id,
-    type: 'hypothesis',
-    metadata: includeMetrics ? {
-      description: hypothesis.explanation,
-      score: hypothesis.score,
-      assumptions: hypothesis.assumptions.join(', '),
-    } : undefined,
+    label: includeLabels
+      ? hypothesis.explanation.substring(0, 50) + "..."
+      : hypothesis.id,
+    type: "hypothesis",
+    metadata: includeMetrics
+      ? {
+          description: hypothesis.explanation,
+          score: hypothesis.score,
+          assumptions: hypothesis.assumptions.join(", "),
+        }
+      : undefined,
   }));
 
   // Add observation nodes if available
@@ -349,11 +391,13 @@ function abductiveToGraphML(thought: AbductiveThought, options: VisualExportOpti
       nodes.push({
         id: sanitizeId(`obs_${obs.id}`),
         label: includeLabels ? obs.description : `obs_${obs.id}`,
-        type: 'observation',
-        metadata: includeMetrics ? {
-          description: obs.description,
-          confidence: obs.confidence,
-        } : undefined,
+        type: "observation",
+        metadata: includeMetrics
+          ? {
+              description: obs.description,
+              confidence: obs.confidence,
+            }
+          : undefined,
       });
     }
   }
@@ -376,7 +420,7 @@ function abductiveToGraphML(thought: AbductiveThought, options: VisualExportOpti
   }
 
   return generateGraphML(nodes, edges, {
-    graphName: 'Abductive Hypotheses',
+    graphName: "Abductive Hypotheses",
     includeLabels,
     includeMetadata: includeMetrics,
   });
@@ -385,8 +429,15 @@ function abductiveToGraphML(thought: AbductiveThought, options: VisualExportOpti
 /**
  * Export abductive hypotheses to TikZ/LaTeX format
  */
-function abductiveToTikZ(thought: AbductiveThought, options: VisualExportOptions): string {
-  const { includeLabels = true, includeMetrics = true, colorScheme = 'default' } = options;
+function abductiveToTikZ(
+  thought: AbductiveThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    includeLabels = true,
+    includeMetrics = true,
+    colorScheme = "default",
+  } = options;
 
   const nodes: TikZNode[] = [];
   const edges: TikZEdge[] = [];
@@ -401,35 +452,42 @@ function abductiveToTikZ(thought: AbductiveThought, options: VisualExportOptions
     const hypothesis = thought.hypotheses[i];
     const isBest = thought.bestExplanation?.id === hypothesis.id;
     const label = includeLabels
-      ? hypothesis.explanation.substring(0, 30) + '...'
+      ? hypothesis.explanation.substring(0, 30) + "..."
       : hypothesis.id;
-    const scoreLabel = includeMetrics ? ` (${hypothesis.score.toFixed(2)})` : '';
+    const scoreLabel = includeMetrics
+      ? ` (${hypothesis.score.toFixed(2)})`
+      : "";
 
     nodes.push({
       id: sanitizeId(hypothesis.id),
       label: label + scoreLabel,
       x: startX + i * spacing,
       y: -2,
-      type: isBest ? 'success' : 'hypothesis',
-      shape: 'ellipse',
+      type: isBest ? "success" : "hypothesis",
+      shape: "ellipse",
     });
   }
 
   // Add observation nodes above if available
   if (thought.observations && thought.observations.length > 0) {
     const obsCount = thought.observations.length;
-    const obsSpacing = Math.min(spacing, totalWidth / Math.max(1, obsCount - 1));
+    const obsSpacing = Math.min(
+      spacing,
+      totalWidth / Math.max(1, obsCount - 1),
+    );
     const obsStartX = 4 - ((obsCount - 1) * obsSpacing) / 2;
 
     for (let i = 0; i < thought.observations.length; i++) {
       const obs = thought.observations[i];
       nodes.push({
         id: sanitizeId(`obs_${obs.id}`),
-        label: includeLabels ? obs.description.substring(0, 30) + '...' : `obs_${obs.id}`,
+        label: includeLabels
+          ? obs.description.substring(0, 30) + "..."
+          : `obs_${obs.id}`,
         x: obsStartX + i * obsSpacing,
         y: 0,
-        type: 'info',
-        shape: 'rectangle',
+        type: "info",
+        shape: "rectangle",
       });
 
       // Create edges from observations to hypotheses
@@ -444,7 +502,7 @@ function abductiveToTikZ(thought: AbductiveThought, options: VisualExportOptions
   }
 
   return generateTikZ(nodes, edges, {
-    title: 'Abductive Hypotheses',
+    title: "Abductive Hypotheses",
     includeLabels,
     includeMetrics,
     colorScheme,
@@ -454,26 +512,44 @@ function abductiveToTikZ(thought: AbductiveThought, options: VisualExportOptions
 /**
  * Export abductive hypotheses to HTML format
  */
-function abductiveToHTML(thought: AbductiveThought, options: VisualExportOptions): string {
+function abductiveToHTML(
+  thought: AbductiveThought,
+  options: VisualExportOptions,
+): string {
   const {
     htmlStandalone = true,
-    htmlTitle = 'Abductive Reasoning Analysis',
-    htmlTheme = 'light',
+    htmlTitle = "Abductive Reasoning Analysis",
+    htmlTheme = "light",
     includeMetrics = true,
   } = options;
 
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme,
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
 
   // Metrics
   if (includeMetrics) {
     html += '<div class="metrics-grid">';
-    html += renderMetricCard('Observations', thought.observations.length, 'info');
-    html += renderMetricCard('Hypotheses', thought.hypotheses.length, 'primary');
+    html += renderMetricCard(
+      "Observations",
+      thought.observations.length,
+      "info",
+    );
+    html += renderMetricCard(
+      "Hypotheses",
+      thought.hypotheses.length,
+      "primary",
+    );
     if (thought.bestExplanation) {
-      html += renderMetricCard('Best Score', thought.bestExplanation.score.toFixed(2), 'success');
+      html += renderMetricCard(
+        "Best Score",
+        thought.bestExplanation.score.toFixed(2),
+        "success",
+      );
     }
-    html += '</div>\n';
+    html += "</div>\n";
   }
 
   // Observations table
@@ -481,41 +557,58 @@ function abductiveToHTML(thought: AbductiveThought, options: VisualExportOptions
     (i + 1).toString(),
     obs.description,
     obs.confidence.toFixed(2),
-    obs.timestamp || '-',
+    obs.timestamp || "-",
   ]);
-  html += renderSection('Observations', renderTable(
-    ['#', 'Description', 'Confidence', 'Time'],
-    obsRows
-  ), '👁️');
+  html += renderSection(
+    "Observations",
+    renderTable(["#", "Description", "Confidence", "Time"], obsRows),
+    "👁️",
+  );
 
   // Hypotheses table
-  const hypRows = thought.hypotheses.map(hyp => {
+  const hypRows = thought.hypotheses.map((hyp) => {
     const isBest = thought.bestExplanation?.id === hyp.id;
-    const badge = isBest ? renderBadge('Best', 'success') : '';
+    const badge = isBest ? renderBadge("Best", "success") : "";
     return [
-      hyp.explanation.substring(0, 60) + (hyp.explanation.length > 60 ? '...' : ''),
+      hyp.explanation.substring(0, 60) +
+        (hyp.explanation.length > 60 ? "..." : ""),
       hyp.score.toFixed(2),
       badge,
-      hyp.assumptions.slice(0, 3).join(', ') + (hyp.assumptions.length > 3 ? '...' : ''),
+      hyp.assumptions.slice(0, 3).join(", ") +
+        (hyp.assumptions.length > 3 ? "..." : ""),
     ];
   });
-  html += renderSection('Hypotheses', renderTable(
-    ['Explanation', 'Score', 'Status', 'Key Assumptions'],
-    hypRows.map(row => row.map(cell => typeof cell === 'string' && cell.startsWith('<') ? cell : escapeHTML(String(cell))))
-  ), '💡');
+  html += renderSection(
+    "Hypotheses",
+    renderTable(
+      ["Explanation", "Score", "Status", "Key Assumptions"],
+      hypRows.map((row) =>
+        row.map((cell) =>
+          typeof cell === "string" && cell.startsWith("<")
+            ? cell
+            : escapeHTML(String(cell)),
+        ),
+      ),
+    ),
+    "💡",
+  );
 
   // Best explanation highlight
   if (thought.bestExplanation) {
-    html += renderSection('Best Explanation', `
+    html += renderSection(
+      "Best Explanation",
+      `
       <div class="card">
         <div class="card-header">${escapeHTML(thought.bestExplanation.explanation)}</div>
         <p><strong>Score:</strong> ${thought.bestExplanation.score.toFixed(2)}</p>
         <p><strong>Assumptions:</strong></p>
         <ul class="list-styled">
-          ${thought.bestExplanation.assumptions.map(a => `<li>${escapeHTML(a)}</li>`).join('\n')}
+          ${thought.bestExplanation.assumptions.map((a) => `<li>${escapeHTML(a)}</li>`).join("\n")}
         </ul>
       </div>
-    `, '⭐');
+    `,
+      "⭐",
+    );
   }
 
   html += generateHTMLFooter(htmlStandalone);
@@ -525,38 +618,49 @@ function abductiveToHTML(thought: AbductiveThought, options: VisualExportOptions
 /**
  * Export abductive hypotheses to Modelica format
  */
-function abductiveToModelica(thought: AbductiveThought, options: VisualExportOptions): string {
+function abductiveToModelica(
+  thought: AbductiveThought,
+  options: VisualExportOptions,
+): string {
   const { modelicaPackageName, includeMetrics = true } = options;
 
   // Map hypotheses to the format expected by generateHierarchyModelica
-  const children = thought.hypotheses.map(h => ({
+  const children = thought.hypotheses.map((h) => ({
     name: sanitizeId(h.id),
     description: h.explanation.substring(0, 100),
     score: includeMetrics ? h.score : undefined,
   }));
 
   return generateHierarchyModelica(
-    'Observations',
+    "Observations",
     `Abductive reasoning with ${thought.observations.length} observations`,
     children,
     {
-      packageName: modelicaPackageName || 'AbductiveHypotheses',
+      packageName: modelicaPackageName || "AbductiveHypotheses",
       includeMetrics,
-    }
+    },
   );
 }
 
 /**
  * Export abductive hypotheses to UML/PlantUML format
  */
-function abductiveToUML(thought: AbductiveThought, options: VisualExportOptions): string {
-  const { umlTheme, umlDirection, includeLabels = true, includeMetrics = true } = options;
+function abductiveToUML(
+  thought: AbductiveThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    umlTheme,
+    umlDirection,
+    includeLabels = true,
+    includeMetrics = true,
+  } = options;
 
   const nodes: UmlNode[] = [
     {
-      id: 'observations',
-      label: 'Observations',
-      shape: 'database',
+      id: "observations",
+      label: "Observations",
+      shape: "database",
     },
   ];
 
@@ -566,27 +670,28 @@ function abductiveToUML(thought: AbductiveThought, options: VisualExportOptions)
   for (const hyp of thought.hypotheses) {
     const isBest = thought.bestExplanation?.id === hyp.id;
     const label = includeLabels
-      ? hyp.explanation.substring(0, 40) + (hyp.explanation.length > 40 ? '...' : '')
+      ? hyp.explanation.substring(0, 40) +
+        (hyp.explanation.length > 40 ? "..." : "")
       : hyp.id;
-    const scoreLabel = includeMetrics ? ` (${hyp.score.toFixed(2)})` : '';
+    const scoreLabel = includeMetrics ? ` (${hyp.score.toFixed(2)})` : "";
 
     nodes.push({
       id: sanitizeId(hyp.id),
       label: label + scoreLabel,
-      shape: 'class',
-      color: isBest ? '90EE90' : undefined,
-      stereotype: isBest ? 'best' : undefined,
+      shape: "class",
+      color: isBest ? "90EE90" : undefined,
+      stereotype: isBest ? "best" : undefined,
     });
 
     edges.push({
-      source: 'observations',
+      source: "observations",
       target: sanitizeId(hyp.id),
-      type: 'arrow',
+      type: "arrow",
     });
   }
 
   return generateUmlDiagram(nodes, edges, {
-    title: 'Abductive Hypotheses',
+    title: "Abductive Hypotheses",
     theme: umlTheme,
     direction: umlDirection,
   });
@@ -595,10 +700,17 @@ function abductiveToUML(thought: AbductiveThought, options: VisualExportOptions)
 /**
  * Export abductive hypotheses to JSON format
  */
-function abductiveToJSON(thought: AbductiveThought, options: VisualExportOptions): string {
-  const { jsonPrettyPrint = true, jsonIndent = 2, includeMetrics = true } = options;
+function abductiveToJSON(
+  thought: AbductiveThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    jsonPrettyPrint = true,
+    jsonIndent = 2,
+    includeMetrics = true,
+  } = options;
 
-  const children = thought.hypotheses.map(h => ({
+  const children = thought.hypotheses.map((h) => ({
     id: sanitizeId(h.id),
     label: h.explanation.substring(0, 60),
     score: h.score,
@@ -609,15 +721,15 @@ function abductiveToJSON(thought: AbductiveThought, options: VisualExportOptions
   }));
 
   let json = generateHierarchyJson(
-    'Abductive Hypotheses',
-    'abductive',
-    { label: 'Observations', metadata: { count: thought.observations.length } },
+    "Abductive Hypotheses",
+    "abductive",
+    { label: "Observations", metadata: { count: thought.observations.length } },
     children,
     {
       prettyPrint: jsonPrettyPrint,
       indent: jsonIndent,
       includeMetrics,
-    }
+    },
   );
 
   // Add observation details
@@ -629,7 +741,11 @@ function abductiveToJSON(thought: AbductiveThought, options: VisualExportOptions
       graph.metadata.bestHypothesisId = thought.bestExplanation.id;
       graph.metadata.bestScore = thought.bestExplanation.score;
     }
-    json = JSON.stringify(graph, null, jsonPrettyPrint !== false ? jsonIndent : 0);
+    json = JSON.stringify(
+      graph,
+      null,
+      jsonPrettyPrint !== false ? jsonIndent : 0,
+    );
   }
 
   return json;
@@ -638,7 +754,10 @@ function abductiveToJSON(thought: AbductiveThought, options: VisualExportOptions
 /**
  * Export abductive hypotheses to Markdown format
  */
-function abductiveToMarkdown(thought: AbductiveThought, options: VisualExportOptions): string {
+function abductiveToMarkdown(
+  thought: AbductiveThought,
+  options: VisualExportOptions,
+): string {
   const {
     markdownIncludeFrontmatter = false,
     markdownIncludeToc = false,
@@ -650,56 +769,75 @@ function abductiveToMarkdown(thought: AbductiveThought, options: VisualExportOpt
 
   // Metrics
   if (includeMetrics) {
-    parts.push(section('Metrics', keyValueSection({
-      'Total Hypotheses': thought.hypotheses.length,
-      'Total Observations': thought.observations.length,
-      'Best Hypothesis Score': thought.bestExplanation?.score.toFixed(2) || 'N/A',
-    })));
+    parts.push(
+      section(
+        "Metrics",
+        keyValueSection({
+          "Total Hypotheses": thought.hypotheses.length,
+          "Total Observations": thought.observations.length,
+          "Best Hypothesis Score":
+            thought.bestExplanation?.score.toFixed(2) || "N/A",
+        }),
+      ),
+    );
   }
 
   // Observations
-  const obsRows = thought.observations.map(obs => [
+  const obsRows = thought.observations.map((obs) => [
     obs.id,
     obs.description,
     obs.confidence.toFixed(2),
-    obs.timestamp || '-',
+    obs.timestamp || "-",
   ]);
-  parts.push(section('Observations', table(
-    ['ID', 'Description', 'Confidence', 'Timestamp'],
-    obsRows
-  )));
+  parts.push(
+    section(
+      "Observations",
+      table(["ID", "Description", "Confidence", "Timestamp"], obsRows),
+    ),
+  );
 
   // Hypotheses
-  const hypRows = thought.hypotheses.map(hyp => [
+  const hypRows = thought.hypotheses.map((hyp) => [
     hyp.id,
-    hyp.explanation.substring(0, 60) + (hyp.explanation.length > 60 ? '...' : ''),
+    hyp.explanation.substring(0, 60) +
+      (hyp.explanation.length > 60 ? "..." : ""),
     hyp.score.toFixed(2),
-    thought.bestExplanation?.id === hyp.id ? '★ Best' : '',
+    thought.bestExplanation?.id === hyp.id ? "★ Best" : "",
   ]);
-  parts.push(section('Hypotheses', table(
-    ['ID', 'Explanation', 'Score', 'Status'],
-    hypRows
-  )));
+  parts.push(
+    section(
+      "Hypotheses",
+      table(["ID", "Explanation", "Score", "Status"], hypRows),
+    ),
+  );
 
   // Best explanation details
   if (thought.bestExplanation) {
     const assumptions = list(thought.bestExplanation.assumptions);
-    parts.push(section('Best Explanation',
-      `**Score:** ${thought.bestExplanation.score.toFixed(2)}\n\n` +
-      `**Explanation:** ${thought.bestExplanation.explanation}\n\n` +
-      `**Assumptions:**\n${assumptions}`
-    ));
+    parts.push(
+      section(
+        "Best Explanation",
+        `**Score:** ${thought.bestExplanation.score.toFixed(2)}\n\n` +
+          `**Explanation:** ${thought.bestExplanation.explanation}\n\n` +
+          `**Assumptions:**\n${assumptions}`,
+      ),
+    );
   }
 
   // Mermaid diagram
   if (markdownIncludeMermaid) {
-    const mermaid = abductiveToMermaid(thought, 'default', true, includeMetrics);
-    parts.push(section('Visualization', mermaidBlock(mermaid)));
+    const mermaid = abductiveToMermaid(
+      thought,
+      "default",
+      true,
+      includeMetrics,
+    );
+    parts.push(section("Visualization", mermaidBlock(mermaid)));
   }
 
-  return mdDocument('Abductive Reasoning Analysis', parts.join('\n'), {
+  return mdDocument("Abductive Reasoning Analysis", parts.join("\n"), {
     includeFrontmatter: markdownIncludeFrontmatter,
     includeTableOfContents: markdownIncludeToc,
-    metadata: { mode: 'abductive', hypotheses: thought.hypotheses.length },
+    metadata: { mode: "abductive", hypotheses: thought.hypotheses.length },
   });
 }

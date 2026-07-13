@@ -27,37 +27,39 @@ export interface HTMLThemeColors {
 /**
  * Get theme colors based on theme name
  */
-export function getHTMLThemeColors(theme: 'light' | 'dark' | 'auto' = 'light'): HTMLThemeColors {
-  if (theme === 'dark') {
+export function getHTMLThemeColors(
+  theme: "light" | "dark" | "auto" = "light",
+): HTMLThemeColors {
+  if (theme === "dark") {
     return {
-      background: '#1a1a2e',
-      text: '#eaeaea',
-      primary: '#4a90d9',
-      secondary: '#6c757d',
-      success: '#28a745',
-      warning: '#ffc107',
-      danger: '#dc3545',
-      info: '#17a2b8',
-      border: '#444',
-      tableHeader: '#2d2d44',
-      tableRow: '#1a1a2e',
-      tableRowAlt: '#252538',
+      background: "#1a1a2e",
+      text: "#eaeaea",
+      primary: "#4a90d9",
+      secondary: "#6c757d",
+      success: "#28a745",
+      warning: "#ffc107",
+      danger: "#dc3545",
+      info: "#17a2b8",
+      border: "#444",
+      tableHeader: "#2d2d44",
+      tableRow: "#1a1a2e",
+      tableRowAlt: "#252538",
     };
   }
   // Light theme (default)
   return {
-    background: '#ffffff',
-    text: '#333333',
-    primary: '#2563eb',
-    secondary: '#6b7280',
-    success: '#16a34a',
-    warning: '#ca8a04',
-    danger: '#dc2626',
-    info: '#0891b2',
-    border: '#e5e7eb',
-    tableHeader: '#f3f4f6',
-    tableRow: '#ffffff',
-    tableRowAlt: '#f9fafb',
+    background: "#ffffff",
+    text: "#333333",
+    primary: "#2563eb",
+    secondary: "#6b7280",
+    success: "#16a34a",
+    warning: "#ca8a04",
+    danger: "#dc2626",
+    info: "#0891b2",
+    border: "#e5e7eb",
+    tableHeader: "#f3f4f6",
+    tableRow: "#ffffff",
+    tableRowAlt: "#f9fafb",
   };
 }
 
@@ -68,11 +70,11 @@ export function generateHTMLHeader(
   title: string,
   options: {
     standalone?: boolean;
-    theme?: 'light' | 'dark' | 'auto';
+    theme?: "light" | "dark" | "auto";
     customStyles?: string;
-  } = {}
+  } = {},
 ): string {
-  const { standalone = true, theme = 'light', customStyles = '' } = options;
+  const { standalone = true, theme = "light", customStyles = "" } = options;
   const colors = getHTMLThemeColors(theme);
 
   if (!standalone) {
@@ -266,7 +268,7 @@ export function generateHTMLHeader(
  */
 export function generateHTMLFooter(standalone: boolean = true): string {
   if (!standalone) {
-    return '</div>\n';
+    return "</div>\n";
   }
   return `
   <div class="footer">
@@ -281,18 +283,22 @@ export function generateHTMLFooter(standalone: boolean = true): string {
  */
 export function escapeHTML(str: string): string {
   return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 /**
  * Generate a metric card
  */
-export function renderMetricCard(label: string, value: string | number, color?: string): string {
-  const colorClass = color ? ` style="color: var(--${color}-color)"` : '';
+export function renderMetricCard(
+  label: string,
+  value: string | number,
+  color?: string,
+): string {
+  const colorClass = color ? ` style="color: var(--${color}-color)"` : "";
   return `
     <div class="metric-card">
       <div class="metric-value"${colorClass}>${escapeHTML(String(value))}</div>
@@ -303,7 +309,10 @@ export function renderMetricCard(label: string, value: string | number, color?: 
 /**
  * Generate a progress bar
  */
-export function renderProgressBar(percent: number, color: string = 'primary'): string {
+export function renderProgressBar(
+  percent: number,
+  color: string = "primary",
+): string {
   const clampedPercent = Math.max(0, Math.min(100, percent));
   return `
     <div class="progress-bar">
@@ -314,7 +323,16 @@ export function renderProgressBar(percent: number, color: string = 'primary'): s
 /**
  * Generate a badge
  */
-export function renderBadge(text: string, type: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'secondary' = 'primary'): string {
+export function renderBadge(
+  text: string,
+  type:
+    | "primary"
+    | "success"
+    | "warning"
+    | "danger"
+    | "info"
+    | "secondary" = "primary",
+): string {
   return `<span class="badge badge-${type}">${escapeHTML(text)}</span>`;
 }
 
@@ -324,29 +342,37 @@ export function renderBadge(text: string, type: 'primary' | 'success' | 'warning
 export function renderTable(
   headers: string[],
   rows: (string | number)[][],
-  options: { caption?: string } = {}
+  options: { caption?: string } = {},
 ): string {
-  const headerCells = headers.map(h => `<th>${escapeHTML(h)}</th>`).join('');
-  const bodyRows = rows.map(row => {
-    const cells = row.map(cell => `<td>${escapeHTML(String(cell))}</td>`).join('');
-    return `<tr>${cells}</tr>`;
-  }).join('\n');
+  const headerCells = headers.map((h) => `<th>${escapeHTML(h)}</th>`).join("");
+  const bodyRows = rows
+    .map((row) => {
+      const cells = row
+        .map((cell) => `<td>${escapeHTML(String(cell))}</td>`)
+        .join("");
+      return `<tr>${cells}</tr>`;
+    })
+    .join("\n");
 
-  let html = '<table>';
+  let html = "<table>";
   if (options.caption) {
     html += `<caption>${escapeHTML(options.caption)}</caption>`;
   }
   html += `<thead><tr>${headerCells}</tr></thead>`;
   html += `<tbody>${bodyRows}</tbody>`;
-  html += '</table>';
+  html += "</table>";
   return html;
 }
 
 /**
  * Generate a section with header
  */
-export function renderSection(title: string, content: string, icon?: string): string {
-  const iconHtml = icon ? `<span class="icon">${icon}</span>` : '';
+export function renderSection(
+  title: string,
+  content: string,
+  icon?: string,
+): string {
+  const iconHtml = icon ? `<span class="icon">${icon}</span>` : "";
   return `
     <div class="section">
       <div class="section-header">
@@ -360,8 +386,10 @@ export function renderSection(title: string, content: string, icon?: string): st
  * Generate a list
  */
 export function renderList(items: string[], ordered: boolean = false): string {
-  const tag = ordered ? 'ol' : 'ul';
-  const listItems = items.map(item => `<li>${escapeHTML(item)}</li>`).join('\n');
+  const tag = ordered ? "ol" : "ul";
+  const listItems = items
+    .map((item) => `<li>${escapeHTML(item)}</li>`)
+    .join("\n");
   return `<${tag} class="list-styled">${listItems}</${tag}>`;
 }
 
@@ -374,7 +402,7 @@ export function renderList(items: string[], ordered: boolean = false): string {
  */
 export interface HTMLDocBuilderOptions {
   standalone?: boolean;
-  theme?: 'light' | 'dark' | 'auto';
+  theme?: "light" | "dark" | "auto";
   customStyles?: string;
 }
 
@@ -393,9 +421,9 @@ export interface HTMLDocBuilderOptions {
  * ```
  */
 export class HTMLDocBuilder {
-  private title: string = 'Document';
+  private title: string = "Document";
   private sections: string[] = [];
-  private options: HTMLDocBuilderOptions = { standalone: true, theme: 'light' };
+  private options: HTMLDocBuilderOptions = { standalone: true, theme: "light" };
   private styles: string[] = [];
 
   /**
@@ -423,7 +451,7 @@ export class HTMLDocBuilder {
    * @param theme - The theme ('light', 'dark', or 'auto')
    * @returns this for chaining
    */
-  setTheme(theme: 'light' | 'dark' | 'auto'): this {
+  setTheme(theme: "light" | "dark" | "auto"): this {
     this.options.theme = theme;
     return this;
   }
@@ -466,7 +494,7 @@ export class HTMLDocBuilder {
    * @returns this for chaining
    */
   addParagraph(text: string, className?: string): this {
-    const classAttr = className ? ` class="${className}"` : '';
+    const classAttr = className ? ` class="${className}"` : "";
     this.sections.push(`<p${classAttr}>${escapeHTML(text)}</p>`);
     return this;
   }
@@ -499,7 +527,11 @@ export class HTMLDocBuilder {
    * @param caption - Optional table caption
    * @returns this for chaining
    */
-  addTable(headers: string[], rows: (string | number)[][], caption?: string): this {
+  addTable(
+    headers: string[],
+    rows: (string | number)[][],
+    caption?: string,
+  ): this {
     this.sections.push(renderTable(headers, rows, { caption }));
     return this;
   }
@@ -511,7 +543,7 @@ export class HTMLDocBuilder {
    * @returns this for chaining
    */
   addDiv(content: string, className?: string): this {
-    const classAttr = className ? ` class="${className}"` : '';
+    const classAttr = className ? ` class="${className}"` : "";
     this.sections.push(`<div${classAttr}>${content}</div>`);
     return this;
   }
@@ -546,7 +578,7 @@ export class HTMLDocBuilder {
    * @param color - Optional color
    * @returns this for chaining
    */
-  addProgressBar(percent: number, color: string = 'primary'): this {
+  addProgressBar(percent: number, color: string = "primary"): this {
     this.sections.push(renderProgressBar(percent, color));
     return this;
   }
@@ -557,7 +589,16 @@ export class HTMLDocBuilder {
    * @param type - Badge type
    * @returns this for chaining
    */
-  addBadge(text: string, type: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'secondary' = 'primary'): this {
+  addBadge(
+    text: string,
+    type:
+      | "primary"
+      | "success"
+      | "warning"
+      | "danger"
+      | "info"
+      | "secondary" = "primary",
+  ): this {
     this.sections.push(renderBadge(text, type));
     return this;
   }
@@ -576,7 +617,7 @@ export class HTMLDocBuilder {
    * @returns this for chaining
    */
   endMetricsGrid(): this {
-    this.sections.push('</div>');
+    this.sections.push("</div>");
     return this;
   }
 
@@ -600,10 +641,10 @@ export class HTMLDocBuilder {
    * @returns this for chaining
    */
   reset(): this {
-    this.title = 'Document';
+    this.title = "Document";
     this.sections = [];
     this.styles = [];
-    this.options = { standalone: true, theme: 'light' };
+    this.options = { standalone: true, theme: "light" };
     return this;
   }
 
@@ -612,14 +653,14 @@ export class HTMLDocBuilder {
    * @returns The complete HTML document or fragment
    */
   render(): string {
-    const customStyles = this.styles.join('\n');
+    const customStyles = this.styles.join("\n");
     const header = generateHTMLHeader(this.title, {
       standalone: this.options.standalone,
       theme: this.options.theme,
       customStyles,
     });
 
-    const content = this.sections.join('\n');
+    const content = this.sections.join("\n");
     const footer = generateHTMLFooter(this.options.standalone);
 
     return header + content + footer;

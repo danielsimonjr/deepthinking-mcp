@@ -3,11 +3,11 @@
  * Provides structured logging with levels and context
  */
 
-import type { ILogger } from '../interfaces/ILogger.js';
-import { LogLevel, type LogEntry, type LoggerConfig } from './logger-types.js';
+import type { ILogger } from "../interfaces/ILogger.js";
+import { LogLevel, type LogEntry, type LoggerConfig } from "./logger-types.js";
 
 // Re-export types for backwards compatibility
-export { LogLevel, type LogEntry, type LoggerConfig } from './logger-types.js';
+export { LogLevel, type LogEntry, type LoggerConfig } from "./logger-types.js";
 
 /**
  * Default logger configuration
@@ -54,7 +54,11 @@ export class Logger implements ILogger {
   /**
    * Log an error message
    */
-  error(message: string, error?: Error, context?: Record<string, unknown>): void {
+  error(
+    message: string,
+    error?: Error,
+    context?: Record<string, unknown>,
+  ): void {
     this.log(LogLevel.ERROR, message, context, error);
   }
 
@@ -65,7 +69,7 @@ export class Logger implements ILogger {
     level: LogLevel,
     message: string,
     context?: Record<string, unknown>,
-    error?: Error
+    error?: Error,
   ): void {
     if (level < this.config.minLevel) {
       return;
@@ -93,7 +97,7 @@ export class Logger implements ILogger {
     const levelName = LogLevel[entry.level];
     const timestamp = this.config.enableTimestamps
       ? `[${entry.timestamp.toISOString()}] `
-      : '';
+      : "";
 
     let message = `${timestamp}${levelName}: ${entry.message}`;
 
@@ -127,7 +131,7 @@ export class Logger implements ILogger {
    */
   getLogs(minLevel?: LogLevel): LogEntry[] {
     if (minLevel !== undefined) {
-      return this.logs.filter(log => log.level >= minLevel);
+      return this.logs.filter((log) => log.level >= minLevel);
     }
     return [...this.logs];
   }
@@ -150,11 +154,15 @@ export class Logger implements ILogger {
    * Export logs as JSON
    */
   exportLogs(): string {
-    return JSON.stringify(this.logs.map(log => ({
-      ...log,
-      level: LogLevel[log.level],
-      timestamp: log.timestamp.toISOString(),
-    })), null, 2);
+    return JSON.stringify(
+      this.logs.map((log) => ({
+        ...log,
+        level: LogLevel[log.level],
+        timestamp: log.timestamp.toISOString(),
+      })),
+      null,
+      2,
+    );
   }
 }
 

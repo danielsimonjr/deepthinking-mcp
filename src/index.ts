@@ -22,39 +22,44 @@
  * - deepthinking_analyze: multi-mode analysis with presets and merge strategies (Phase 12 Sprint 3)
  */
 
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
-    CallToolRequestSchema,
-    ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
-import { readFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
+import { readFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
 // Import package.json for version sync
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const packageJson = JSON.parse(
-  readFileSync(join(__dirname, '../package.json'), 'utf-8')
+  readFileSync(join(__dirname, "../package.json"), "utf-8"),
 );
 
 // Import services - Phase 15A: Static imports replace dynamic imports
-import { ThoughtFactory } from './services/ThoughtFactory.js';
-import { ExportService } from './services/ExportService.js';
-import { SessionManager } from './session/manager.js';
-import { ModeRecommender } from './types/modes/recommendations.js';
-import { FileSessionStore } from './session/storage/file-store.js';
-import { isValidTool, modeToToolMap, toolList, toolSchemas } from './tools/definitions.js';
-import { thinkingTool } from './tools/thinking.js'; // Legacy tool for backward compatibility
+import { ThoughtFactory } from "./services/ThoughtFactory.js";
+import { ExportService } from "./services/ExportService.js";
+import { SessionManager } from "./session/manager.js";
+import { ModeRecommender } from "./types/modes/recommendations.js";
+import { FileSessionStore } from "./session/storage/file-store.js";
 import {
-    ThinkingMode,
-    isFullyImplemented,
-    type AddThoughtResponse,
-    type AnalyzeResponse,
-    type MCPResponse,
-    type ProblemCharacteristics,
-} from './types/index.js';
+  isValidTool,
+  modeToToolMap,
+  toolList,
+  toolSchemas,
+} from "./tools/definitions.js";
+import { thinkingTool } from "./tools/thinking.js"; // Legacy tool for backward compatibility
+import {
+  ThinkingMode,
+  isFullyImplemented,
+  type AddThoughtResponse,
+  type AnalyzeResponse,
+  type MCPResponse,
+  type ProblemCharacteristics,
+} from "./types/index.js";
 
 // Initialize server
 const server = new Server(
@@ -66,7 +71,7 @@ const server = new Server(
     capabilities: {
       tools: {},
     },
-  }
+  },
 );
 
 /**
@@ -102,7 +107,9 @@ async function getSessionManager(): Promise<SessionManager> {
         const storage = new FileSessionStore(sessionDir);
         await storage.initialize();
         _sessionManager = new SessionManager({}, undefined, storage);
-        console.error(`[deepthinking-mcp] Using file-based session storage: ${sessionDir}`);
+        console.error(
+          `[deepthinking-mcp] Using file-based session storage: ${sessionDir}`,
+        );
       } else {
         // Default: in-memory only (single instance)
         _sessionManager = new SessionManager();
@@ -114,13 +121,12 @@ async function getSessionManager(): Promise<SessionManager> {
   return _sessionManagerPromise;
 }
 
-
 // Register tool list handler - now returns all 9 focused tools + legacy
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
-      ...toolList,      // 9 new focused tools
-      thinkingTool,     // Legacy tool for backward compatibility
+      ...toolList, // 9 new focused tools
+      thinkingTool, // Legacy tool for backward compatibility
     ],
   };
 });
@@ -136,12 +142,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const input = schema.parse(args);
 
       // Session action tool
-      if (name === 'deepthinking_session') {
+      if (name === "deepthinking_session") {
         return await handleSessionAction(input as SessionInput);
       }
 
       // Multi-mode analyze tool (Phase 12 Sprint 3)
-      if (name === 'deepthinking_analyze') {
+      if (name === "deepthinking_analyze") {
         return await handleAnalyze(input as AnalyzeInputType);
       }
 
@@ -150,27 +156,31 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     // Handle legacy tool (backward compatibility)
-    if (name === 'deepthinking') {
-      const { ThinkingToolSchema } = await import('./tools/thinking.js');
+    if (name === "deepthinking") {
+      const { ThinkingToolSchema } = await import("./tools/thinking.js");
       const input = ThinkingToolSchema.parse(args);
 
       // Add deprecation warning
-      const deprecationWarning = '⚠️ DEPRECATED: The "deepthinking" tool is deprecated. ' +
-        'Use the focused tools instead: deepthinking_core, deepthinking_mathematics, ' +
-        'deepthinking_temporal, deepthinking_probabilistic, deepthinking_causal, ' +
-        'deepthinking_strategic, deepthinking_analytical, deepthinking_scientific, ' +
-        'deepthinking_session. See docs/migration/v4.0-tool-splitting.md for details.\n\n';
+      const deprecationWarning =
+        '⚠️ DEPRECATED: The "deepthinking" tool is deprecated. ' +
+        "Use the focused tools instead: deepthinking_core, deepthinking_mathematics, " +
+        "deepthinking_temporal, deepthinking_probabilistic, deepthinking_causal, " +
+        "deepthinking_strategic, deepthinking_analytical, deepthinking_scientific, " +
+        "deepthinking_session. See docs/migration/v4.0-tool-splitting.md for details.\n\n";
 
       switch (input.action) {
-        case 'add_thought': {
-          const result = await handleAddThought(input, modeToToolMap[input.mode || 'hybrid'] || 'deepthinking_core');
+        case "add_thought": {
+          const result = await handleAddThought(
+            input,
+            modeToToolMap[input.mode || "hybrid"] || "deepthinking_core",
+          );
           return prependWarning(result, deprecationWarning);
         }
-        case 'summarize':
-        case 'export':
-        case 'switch_mode':
-        case 'get_session':
-        case 'recommend_mode': {
+        case "summarize":
+        case "export":
+        case "switch_mode":
+        case "get_session":
+        case "recommend_mode": {
           const result = await handleSessionAction(input);
           return prependWarning(result, deprecationWarning);
         }
@@ -184,7 +194,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     return {
       content: [
         {
-          type: 'text',
+          type: "text",
           text: `Error: ${error instanceof Error ? error.message : String(error)}`,
         },
       ],
@@ -197,16 +207,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
  * Prepend a warning message to a tool result
  */
 function prependWarning(result: MCPResponse, warning: string): MCPResponse {
-  if (result.content && result.content[0] && result.content[0].type === 'text') {
+  if (
+    result.content &&
+    result.content[0] &&
+    result.content[0].type === "text"
+  ) {
     result.content[0].text = warning + result.content[0].text;
   }
   return result;
 }
 
-import { ThinkingToolInput } from './tools/thinking.js';
+import { ThinkingToolInput } from "./tools/thinking.js";
 
 /** Input type for thought handlers - validated by Zod schemas */
-type ThoughtInput = Omit<ThinkingToolInput, 'action' | 'exportFormat' | 'newMode' | 'problemType' | 'problemCharacteristics' | 'includeCombinations'> & {
+type ThoughtInput = Omit<
+  ThinkingToolInput,
+  | "action"
+  | "exportFormat"
+  | "newMode"
+  | "problemType"
+  | "problemCharacteristics"
+  | "includeCombinations"
+> & {
   // Override sessionId to be properly typed
   sessionId?: string;
   // Index signature to support all mode-specific properties (e.g., mathematicalModel, proofStrategy, etc.)
@@ -237,7 +259,10 @@ type AnalyzeInputType = Record<string, unknown> & {
  * @param _toolName - Name of the tool that invoked this handler (for debugging)
  * @returns MCP response with created thought and session data
  */
-async function handleAddThought(input: ThoughtInput, _toolName: string): Promise<MCPResponse> {
+async function handleAddThought(
+  input: ThoughtInput,
+  _toolName: string,
+): Promise<MCPResponse> {
   const sessionManager = await getSessionManager();
   // Phase 15A: thoughtFactory is now a module-level constant
 
@@ -259,7 +284,10 @@ async function handleAddThought(input: ThoughtInput, _toolName: string): Promise
   // Input is already validated by Zod and properly typed with index signature
   // The factory internally handles mode conversion from string to ThinkingMode
   // Add action='add_thought' to satisfy ThinkingToolInput interface (legacy compatibility)
-  const thought = thoughtFactory.createThought({ ...input, action: 'add_thought' as const }, sessionId);
+  const thought = thoughtFactory.createThought(
+    { ...input, action: "add_thought" as const },
+    sessionId,
+  );
 
   const session = await sessionManager.addThought(sessionId, thought);
 
@@ -271,10 +299,10 @@ async function handleAddThought(input: ThoughtInput, _toolName: string): Promise
     isFullyImplemented: isFullyImplemented(thought.mode),
     hasSpecializedHandler: hasHandler,
     note: !isFullyImplemented(thought.mode)
-      ? 'This mode is experimental with limited runtime implementation'
+      ? "This mode is experimental with limited runtime implementation"
       : hasHandler
         ? undefined
-        : 'Using generic handler - specialized validation not available',
+        : "Using generic handler - specialized validation not available",
   };
 
   // Type-safe response building
@@ -297,7 +325,7 @@ async function handleAddThought(input: ThoughtInput, _toolName: string): Promise
   return {
     content: [
       {
-        type: 'text',
+        type: "text",
         text: JSON.stringify(response, null, 2),
       },
     ],
@@ -311,19 +339,19 @@ async function handleSessionAction(input: SessionInput): Promise<MCPResponse> {
   const action = input.action;
 
   switch (action) {
-    case 'summarize':
+    case "summarize":
       return await handleSummarize(input);
-    case 'export':
+    case "export":
       return await handleExport(input);
-    case 'export_all':
+    case "export_all":
       return await handleExportAll(input);
-    case 'switch_mode':
+    case "switch_mode":
       return await handleSwitchMode(input);
-    case 'get_session':
+    case "get_session":
       return await handleGetSession(input);
-    case 'recommend_mode':
+    case "recommend_mode":
       return await handleRecommendMode(input);
-    case 'delete_session':
+    case "delete_session":
       return await handleDeleteSession(input);
     default:
       throw new Error(`Unknown session action: ${action}`);
@@ -335,7 +363,7 @@ async function handleSessionAction(input: SessionInput): Promise<MCPResponse> {
  */
 async function handleSummarize(input: SessionInput): Promise<MCPResponse> {
   if (!input.sessionId) {
-    throw new Error('sessionId required for summarize action');
+    throw new Error("sessionId required for summarize action");
   }
 
   const sessionManager = await getSessionManager();
@@ -344,7 +372,7 @@ async function handleSummarize(input: SessionInput): Promise<MCPResponse> {
   return {
     content: [
       {
-        type: 'text',
+        type: "text",
         text: summary,
       },
     ],
@@ -357,7 +385,7 @@ async function handleSummarize(input: SessionInput): Promise<MCPResponse> {
  */
 async function handleExport(input: SessionInput): Promise<MCPResponse> {
   if (!input.sessionId) {
-    throw new Error('sessionId required for export action');
+    throw new Error("sessionId required for export action");
   }
 
   const sessionManager = await getSessionManager();
@@ -369,14 +397,15 @@ async function handleExport(input: SessionInput): Promise<MCPResponse> {
   }
 
   // Phase 16: File export support - use config defaults if not specified in request
-  const { getConfig } = await import('./config/index.js');
+  const { getConfig } = await import("./config/index.js");
   const config = getConfig();
   const requestedOutputDir = input.outputDir as string | undefined;
   // Security: when the caller is allowed to specify an outputDir, sandbox it
   // against MCP_EXPORT_PATH (or a per-user default). Reject paths that escape.
   let outputDir: string | undefined;
   if (requestedOutputDir || config.exportDir) {
-    const { resolveSandboxedOutputDir } = await import('./export/file-exporter.js');
+    const { resolveSandboxedOutputDir } =
+      await import("./export/file-exporter.js");
     outputDir = resolveSandboxedOutputDir(requestedOutputDir, config.exportDir);
   }
   const overwrite = (input.overwrite as boolean) ?? config.exportOverwrite;
@@ -384,54 +413,68 @@ async function handleExport(input: SessionInput): Promise<MCPResponse> {
   // Phase 12: Support export profiles
   const exportProfile = input.exportProfile as string | undefined;
   if (exportProfile) {
-    const { getExportProfile } = await import('./export/profiles.js');
-    type ExportProfileId = 'academic' | 'presentation' | 'documentation' | 'archive' | 'minimal';
+    const { getExportProfile } = await import("./export/profiles.js");
+    type ExportProfileId =
+      "academic" | "presentation" | "documentation" | "archive" | "minimal";
     const profile = getExportProfile(exportProfile as ExportProfileId);
 
     if (!profile) {
-      throw new Error(`Unknown export profile: ${exportProfile}. Valid profiles: academic, presentation, documentation, archive, minimal`);
+      throw new Error(
+        `Unknown export profile: ${exportProfile}. Valid profiles: academic, presentation, documentation, archive, minimal`,
+      );
     }
 
     // Phase 16: If outputDir provided, use FileExporter
     if (outputDir) {
-      const { createFileExporter } = await import('./export/file-exporter.js');
+      const { createFileExporter } = await import("./export/file-exporter.js");
       const fileExporter = createFileExporter(
         { outputDir, overwrite, createDir: true },
-        (s, f) => exportService.exportSession(s, f as any)
+        (s, f) => exportService.exportSession(s, f as any),
       );
 
-      const formats = profile.formats.filter((f: string) => f !== 'svg');
+      const formats = profile.formats.filter((f: string) => f !== "svg");
       const batchResult = await fileExporter.exportToFiles(session, formats);
 
       return {
-        content: [{
-          type: 'text' as const,
-          text: JSON.stringify({
-            mode: 'file',
-            profile: { id: profile.id, name: profile.name },
-            outputDir: batchResult.outputDir,
-            successCount: batchResult.successCount,
-            failureCount: batchResult.failureCount,
-            totalSize: batchResult.totalSize,
-            files: batchResult.results.map(r => ({
-              format: r.format,
-              path: r.filePath,
-              success: r.success,
-              size: r.size,
-              error: r.error,
-            })),
-          }, null, 2),
-        }],
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(
+              {
+                mode: "file",
+                profile: { id: profile.id, name: profile.name },
+                outputDir: batchResult.outputDir,
+                successCount: batchResult.successCount,
+                failureCount: batchResult.failureCount,
+                totalSize: batchResult.totalSize,
+                files: batchResult.results.map((r) => ({
+                  format: r.format,
+                  path: r.filePath,
+                  success: r.success,
+                  size: r.size,
+                  error: r.error,
+                })),
+              },
+              null,
+              2,
+            ),
+          },
+        ],
       };
     }
 
     // Export all formats defined in the profile (return as content)
-    const results: { format: string; success: boolean; content?: string; error?: string }[] = [];
+    const results: {
+      format: string;
+      success: boolean;
+      content?: string;
+      error?: string;
+    }[] = [];
 
     for (const format of profile.formats) {
       try {
         // Skip SVG for now as it may not be in all exporters
-        if (format === 'svg') continue;
+        if (format === "svg") continue;
         const exported = exportService.exportSession(session, format as any);
         results.push({ format, success: true, content: exported });
       } catch (error) {
@@ -443,7 +486,7 @@ async function handleExport(input: SessionInput): Promise<MCPResponse> {
       }
     }
 
-    const successCount = results.filter(r => r.success).length;
+    const successCount = results.filter((r) => r.success).length;
     const output = {
       profile: {
         id: profile.id,
@@ -456,7 +499,7 @@ async function handleExport(input: SessionInput): Promise<MCPResponse> {
         successful: successCount,
         failed: results.length - successCount,
       },
-      exports: results.map(r => ({
+      exports: results.map((r) => ({
         format: r.format,
         success: r.success,
         ...(r.success ? { content: r.content } : { error: r.error }),
@@ -464,38 +507,46 @@ async function handleExport(input: SessionInput): Promise<MCPResponse> {
     };
 
     return {
-      content: [{
-        type: 'text' as const,
-        text: JSON.stringify(output, null, 2),
-      }],
+      content: [
+        {
+          type: "text" as const,
+          text: JSON.stringify(output, null, 2),
+        },
+      ],
     };
   }
 
   // Standard single-format export
-  const format = input.exportFormat || 'json';
+  const format = input.exportFormat || "json";
 
   // Phase 16: If outputDir provided, write to file
   if (outputDir) {
-    const { createFileExporter } = await import('./export/file-exporter.js');
+    const { createFileExporter } = await import("./export/file-exporter.js");
     const fileExporter = createFileExporter(
       { outputDir, overwrite, createDir: true },
-      (s, f) => exportService.exportSession(s, f as any)
+      (s, f) => exportService.exportSession(s, f as any),
     );
 
     const result = await fileExporter.exportToFile(session, format as any);
 
     return {
-      content: [{
-        type: 'text' as const,
-        text: JSON.stringify({
-          mode: 'file',
-          format: result.format,
-          path: result.filePath,
-          success: result.success,
-          size: result.size,
-          error: result.error,
-        }, null, 2),
-      }],
+      content: [
+        {
+          type: "text" as const,
+          text: JSON.stringify(
+            {
+              mode: "file",
+              format: result.format,
+              path: result.filePath,
+              success: result.success,
+              size: result.size,
+              error: result.error,
+            },
+            null,
+            2,
+          ),
+        },
+      ],
     };
   }
 
@@ -503,10 +554,12 @@ async function handleExport(input: SessionInput): Promise<MCPResponse> {
   const exported = exportService.exportSession(session, format as any);
 
   return {
-    content: [{
-      type: 'text' as const,
-      text: exported,
-    }],
+    content: [
+      {
+        type: "text" as const,
+        text: exported,
+      },
+    ],
   };
 }
 
@@ -516,7 +569,7 @@ async function handleExport(input: SessionInput): Promise<MCPResponse> {
  */
 async function handleExportAll(input: SessionInput): Promise<MCPResponse> {
   if (!input.sessionId) {
-    throw new Error('sessionId required for export_all action');
+    throw new Error("sessionId required for export_all action");
   }
 
   const sessionManager = await getSessionManager();
@@ -528,70 +581,97 @@ async function handleExportAll(input: SessionInput): Promise<MCPResponse> {
   }
 
   // Phase 16: File export support - use config defaults if not specified in request
-  const { getConfig } = await import('./config/index.js');
+  const { getConfig } = await import("./config/index.js");
   const config = getConfig();
   const requestedOutputDir = input.outputDir as string | undefined;
   // Security: sandbox caller-supplied outputDir under MCP_EXPORT_PATH (or
   // a per-user default) to prevent arbitrary FS writes via prompt injection.
   let outputDir: string | undefined;
   if (requestedOutputDir || config.exportDir) {
-    const { resolveSandboxedOutputDir } = await import('./export/file-exporter.js');
+    const { resolveSandboxedOutputDir } =
+      await import("./export/file-exporter.js");
     outputDir = resolveSandboxedOutputDir(requestedOutputDir, config.exportDir);
   }
   const overwrite = (input.overwrite as boolean) ?? config.exportOverwrite;
 
   // Phase 12: Support export profiles in export_all
-  let formats: readonly string[] = ['markdown', 'latex', 'json', 'html', 'jupyter', 'mermaid', 'dot', 'ascii'];
+  let formats: readonly string[] = [
+    "markdown",
+    "latex",
+    "json",
+    "html",
+    "jupyter",
+    "mermaid",
+    "dot",
+    "ascii",
+  ];
 
   const exportAllProfile = input.exportProfile as string | undefined;
   if (exportAllProfile) {
-    const { getExportProfile } = await import('./export/profiles.js');
-    type ExportProfileId = 'academic' | 'presentation' | 'documentation' | 'archive' | 'minimal';
+    const { getExportProfile } = await import("./export/profiles.js");
+    type ExportProfileId =
+      "academic" | "presentation" | "documentation" | "archive" | "minimal";
     const profile = getExportProfile(exportAllProfile as ExportProfileId);
 
     if (!profile) {
-      throw new Error(`Unknown export profile: ${exportAllProfile}. Valid profiles: academic, presentation, documentation, archive, minimal`);
+      throw new Error(
+        `Unknown export profile: ${exportAllProfile}. Valid profiles: academic, presentation, documentation, archive, minimal`,
+      );
     }
 
     // Use only the formats defined in the profile (excluding svg which isn't widely supported)
-    formats = profile.formats.filter((f: string) => f !== 'svg');
+    formats = profile.formats.filter((f: string) => f !== "svg");
   }
 
   // Phase 16: If outputDir provided, use FileExporter
   if (outputDir) {
-    const { createFileExporter } = await import('./export/file-exporter.js');
+    const { createFileExporter } = await import("./export/file-exporter.js");
     const fileExporter = createFileExporter(
       { outputDir, overwrite, createDir: true },
-      (s, f) => exportService.exportSession(s, f as any)
+      (s, f) => exportService.exportSession(s, f as any),
     );
 
-    const batchResult = await fileExporter.exportToFiles(session, formats as any);
+    const batchResult = await fileExporter.exportToFiles(
+      session,
+      formats as any,
+    );
 
     return {
-      content: [{
-        type: 'text' as const,
-        text: JSON.stringify({
-          mode: 'file',
-          sessionId: input.sessionId,
-          outputDir: batchResult.outputDir,
-          successCount: batchResult.successCount,
-          failureCount: batchResult.failureCount,
-          totalSize: batchResult.totalSize,
-          exportedAt: batchResult.exportedAt.toISOString(),
-          files: batchResult.results.map(r => ({
-            format: r.format,
-            path: r.filePath,
-            success: r.success,
-            size: r.size,
-            error: r.error,
-          })),
-        }, null, 2),
-      }],
+      content: [
+        {
+          type: "text" as const,
+          text: JSON.stringify(
+            {
+              mode: "file",
+              sessionId: input.sessionId,
+              outputDir: batchResult.outputDir,
+              successCount: batchResult.successCount,
+              failureCount: batchResult.failureCount,
+              totalSize: batchResult.totalSize,
+              exportedAt: batchResult.exportedAt.toISOString(),
+              files: batchResult.results.map((r) => ({
+                format: r.format,
+                path: r.filePath,
+                success: r.success,
+                size: r.size,
+                error: r.error,
+              })),
+            },
+            null,
+            2,
+          ),
+        },
+      ],
     };
   }
 
   // Original behavior: generate content in memory
-  const results: { format: string; success: boolean; content?: string; error?: string }[] = [];
+  const results: {
+    format: string;
+    success: boolean;
+    content?: string;
+    error?: string;
+  }[] = [];
 
   for (const format of formats) {
     try {
@@ -606,8 +686,8 @@ async function handleExportAll(input: SessionInput): Promise<MCPResponse> {
     }
   }
 
-  const successCount = results.filter(r => r.success).length;
-  const failureCount = results.filter(r => !r.success).length;
+  const successCount = results.filter((r) => r.success).length;
+  const failureCount = results.filter((r) => !r.success).length;
 
   // Build summary
   const summary = {
@@ -615,7 +695,7 @@ async function handleExportAll(input: SessionInput): Promise<MCPResponse> {
     totalFormats: formats.length,
     successCount,
     failureCount,
-    results: results.map(r => ({
+    results: results.map((r) => ({
       format: r.format,
       success: r.success,
       size: r.content?.length || 0,
@@ -632,18 +712,22 @@ async function handleExportAll(input: SessionInput): Promise<MCPResponse> {
       }
     }
     return {
-      content: [{
-        type: 'text' as const,
-        text: JSON.stringify({ ...summary, exports: contentMap }, null, 2),
-      }],
+      content: [
+        {
+          type: "text" as const,
+          text: JSON.stringify({ ...summary, exports: contentMap }, null, 2),
+        },
+      ],
     };
   }
 
   return {
-    content: [{
-      type: 'text' as const,
-      text: JSON.stringify(summary, null, 2),
-    }],
+    content: [
+      {
+        type: "text" as const,
+        text: JSON.stringify(summary, null, 2),
+      },
+    ],
   };
 }
 
@@ -654,20 +738,20 @@ async function handleExportAll(input: SessionInput): Promise<MCPResponse> {
 async function handleSwitchMode(input: SessionInput): Promise<MCPResponse> {
   const newMode = input.newMode as string | undefined;
   if (!input.sessionId || !newMode) {
-    throw new Error('sessionId and newMode required for switch_mode action');
+    throw new Error("sessionId and newMode required for switch_mode action");
   }
 
   const sessionManager = await getSessionManager();
   const session = await sessionManager.switchMode(
     input.sessionId,
     newMode as ThinkingMode,
-    'User requested mode switch'
+    "User requested mode switch",
   );
 
   return {
     content: [
       {
-        type: 'text',
+        type: "text",
         text: `Switched session ${session.id} to ${session.mode} mode`,
       },
     ],
@@ -679,7 +763,7 @@ async function handleSwitchMode(input: SessionInput): Promise<MCPResponse> {
  */
 async function handleGetSession(input: SessionInput): Promise<MCPResponse> {
   if (!input.sessionId) {
-    throw new Error('sessionId required for get_session action');
+    throw new Error("sessionId required for get_session action");
   }
 
   const sessionManager = await getSessionManager();
@@ -697,15 +781,19 @@ async function handleGetSession(input: SessionInput): Promise<MCPResponse> {
   return {
     content: [
       {
-        type: 'text',
-        text: JSON.stringify({
-          id: session.id,
-          title: session.title,
-          mode: session.mode,
-          thoughtCount: session.thoughts.length,
-          isComplete: session.isComplete,
-          metrics: metricsWithCustom,
-        }, null, 2),
+        type: "text",
+        text: JSON.stringify(
+          {
+            id: session.id,
+            title: session.title,
+            mode: session.mode,
+            thoughtCount: session.thoughts.length,
+            isComplete: session.isComplete,
+            metrics: metricsWithCustom,
+          },
+          null,
+          2,
+        ),
       },
     ],
   };
@@ -717,7 +805,8 @@ async function handleGetSession(input: SessionInput): Promise<MCPResponse> {
  */
 async function handleRecommendMode(input: SessionInput): Promise<MCPResponse> {
   const problemType = input.problemType as string | undefined;
-  const problemCharacteristics = input.problemCharacteristics as ProblemCharacteristics | undefined;
+  const problemCharacteristics = input.problemCharacteristics as
+    ProblemCharacteristics | undefined;
   const includeCombinations = input.includeCombinations as boolean | undefined;
 
   // Quick recommendation based on problem type
@@ -726,10 +815,12 @@ async function handleRecommendMode(input: SessionInput): Promise<MCPResponse> {
     const response = `Quick recommendation for "${problemType}":\n\n**Recommended Mode**: ${recommendedMode}\n\nFor more detailed recommendations, provide problemCharacteristics.`;
 
     return {
-      content: [{
-        type: 'text' as const,
-        text: response
-      }],
+      content: [
+        {
+          type: "text" as const,
+          text: response,
+        },
+      ],
     };
   }
 
@@ -740,10 +831,10 @@ async function handleRecommendMode(input: SessionInput): Promise<MCPResponse> {
       ? modeRecommender.recommendCombinations(problemCharacteristics)
       : [];
 
-    let response = '# Mode Recommendations\n\n';
+    let response = "# Mode Recommendations\n\n";
 
     // Single mode recommendations
-    response += '## Individual Modes\n\n';
+    response += "## Individual Modes\n\n";
     for (const rec of modeRecs) {
       response += `### ${rec.mode} (Score: ${rec.score})\n`;
       response += `**Reasoning**: ${rec.reasoning}\n\n`;
@@ -755,15 +846,15 @@ async function handleRecommendMode(input: SessionInput): Promise<MCPResponse> {
       for (const limitation of rec.limitations) {
         response += `- ${limitation}\n`;
       }
-      response += `\n**Examples**: ${rec.examples.join(', ')}\n\n`;
-      response += '---\n\n';
+      response += `\n**Examples**: ${rec.examples.join(", ")}\n\n`;
+      response += "---\n\n";
     }
 
     // Mode combinations
     if (combinationRecs.length > 0) {
-      response += '## Recommended Mode Combinations\n\n';
+      response += "## Recommended Mode Combinations\n\n";
       for (const combo of combinationRecs) {
-        response += `### ${combo.modes.join(' + ')} (${combo.sequence})\n`;
+        response += `### ${combo.modes.join(" + ")} (${combo.sequence})\n`;
         response += `**Rationale**: ${combo.rationale}\n\n`;
         response += `**Benefits**:\n`;
         for (const benefit of combo.benefits) {
@@ -773,27 +864,31 @@ async function handleRecommendMode(input: SessionInput): Promise<MCPResponse> {
         for (const synergy of combo.synergies) {
           response += `- ${synergy}\n`;
         }
-        response += '\n---\n\n';
+        response += "\n---\n\n";
       }
     }
 
     return {
-      content: [{
-        type: 'text' as const,
-        text: response
-      }],
+      content: [
+        {
+          type: "text" as const,
+          text: response,
+        },
+      ],
     };
   }
 
   // No valid input provided - throw error for consistent error handling
-  throw new Error('Please provide either problemType or problemCharacteristics for mode recommendations.');
+  throw new Error(
+    "Please provide either problemType or problemCharacteristics for mode recommendations.",
+  );
 }
 /**
  * Handle delete_session action
  */
 async function handleDeleteSession(input: SessionInput): Promise<MCPResponse> {
   if (!input.sessionId) {
-    throw new Error('sessionId required for delete_session action');
+    throw new Error("sessionId required for delete_session action");
   }
 
   const sessionManager = await getSessionManager();
@@ -808,7 +903,7 @@ async function handleDeleteSession(input: SessionInput): Promise<MCPResponse> {
   return {
     content: [
       {
-        type: 'text',
+        type: "text",
         text: `Session ${input.sessionId} deleted successfully`,
       },
     ],
@@ -820,7 +915,7 @@ async function handleDeleteSession(input: SessionInput): Promise<MCPResponse> {
  * Phase 12 fix: Now creates an exportable session for the analysis results
  */
 async function handleAnalyze(input: AnalyzeInputType): Promise<MCPResponse> {
-  const { MultiModeAnalyzer } = await import('./modes/combinations/index.js');
+  const { MultiModeAnalyzer } = await import("./modes/combinations/index.js");
 
   const DEFAULT_TIMEOUT_PER_MODE = 30000;
   const analyzer = new MultiModeAnalyzer({
@@ -835,12 +930,13 @@ async function handleAnalyze(input: AnalyzeInputType): Promise<MCPResponse> {
     customModes = input.customModes.map((mode: string) => mode as ThinkingMode);
   }
 
-  type MergeStrategy = 'union' | 'intersection' | 'weighted' | 'hierarchical' | 'dialectical';
+  type MergeStrategy =
+    "union" | "intersection" | "weighted" | "hierarchical" | "dialectical";
   const response = await analyzer.analyze({
     thought: input.thought,
     preset: input.preset,
     customModes,
-    mergeStrategy: (input.mergeStrategy || 'union') as MergeStrategy,
+    mergeStrategy: (input.mergeStrategy || "union") as MergeStrategy,
     sessionId: input.sessionId,
     context: input.context,
     timeoutPerMode: input.timeoutPerMode,
@@ -852,12 +948,12 @@ async function handleAnalyze(input: AnalyzeInputType): Promise<MCPResponse> {
   const TITLE_MAX_LENGTH = 50;
   // Create a session for the analysis
   const session = await sessionManager.createSession({
-    title: `Multi-mode Analysis: ${input.thought.substring(0, TITLE_MAX_LENGTH)}${input.thought.length > TITLE_MAX_LENGTH ? '...' : ''}`,
+    title: `Multi-mode Analysis: ${input.thought.substring(0, TITLE_MAX_LENGTH)}${input.thought.length > TITLE_MAX_LENGTH ? "..." : ""}`,
     mode: ThinkingMode.HYBRID,
   });
 
   // Add a hybrid thought summarizing the multi-mode analysis
-  const analysisContent = `Multi-mode analysis: ${input.thought}\n\nConclusion: ${response.analysis.synthesizedConclusion}\n\nInsights:\n${response.analysis.primaryInsights.map((i) => `- [${i.sourceMode}] ${i.content}`).join('\n')}`;
+  const analysisContent = `Multi-mode analysis: ${input.thought}\n\nConclusion: ${response.analysis.synthesizedConclusion}\n\nInsights:\n${response.analysis.primaryInsights.map((i) => `- [${i.sourceMode}] ${i.content}`).join("\n")}`;
   const hybridThought = {
     id: response.analysis.id,
     sessionId: session.id,
@@ -868,7 +964,10 @@ async function handleAnalyze(input: AnalyzeInputType): Promise<MCPResponse> {
     nextThoughtNeeded: false,
     mode: ThinkingMode.HYBRID,
   };
-  await sessionManager.addThought(session.id, hybridThought as unknown as Parameters<typeof sessionManager.addThought>[1]);
+  await sessionManager.addThought(
+    session.id,
+    hybridThought as unknown as Parameters<typeof sessionManager.addThought>[1],
+  );
 
   const sessionId = session.id;
 
@@ -908,7 +1007,7 @@ async function handleAnalyze(input: AnalyzeInputType): Promise<MCPResponse> {
   return {
     content: [
       {
-        type: 'text',
+        type: "text",
         text: JSON.stringify(result, null, 2),
       },
     ],
@@ -921,10 +1020,10 @@ async function handleAnalyze(input: AnalyzeInputType): Promise<MCPResponse> {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('DeepThinking MCP server running on stdio');
+  console.error("DeepThinking MCP server running on stdio");
 }
 
 main().catch((error) => {
-  console.error('Fatal error:', error);
+  console.error("Fatal error:", error);
   process.exit(1);
 });

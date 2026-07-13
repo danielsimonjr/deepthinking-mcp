@@ -5,13 +5,13 @@
  * Phase 13 Sprint 7: Refactored to use fluent builder classes
  */
 
-import type { MathematicsThought } from '../../../types/modes/mathematics.js';
-import type { VisualExportOptions } from '../types.js';
-import { sanitizeId } from '../utils.js';
+import type { MathematicsThought } from "../../../types/modes/mathematics.js";
+import type { VisualExportOptions } from "../types.js";
+import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
-import { DOTGraphBuilder } from '../utils/dot.js';
-import { MermaidGraphBuilder } from '../utils/mermaid.js';
-import { ASCIIDocBuilder } from '../utils/ascii.js';
+import { DOTGraphBuilder } from "../utils/dot.js";
+import { MermaidGraphBuilder } from "../utils/mermaid.js";
+import { ASCIIDocBuilder } from "../utils/ascii.js";
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -24,17 +24,13 @@ import {
   getNodeColor,
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
-} from '../utils/svg.js';
+} from "../utils/svg.js";
 import {
   generateGraphML,
   type GraphMLNode,
   type GraphMLEdge,
-} from '../utils/graphml.js';
-import {
-  generateTikZ,
-  type TikZNode,
-  type TikZEdge,
-} from '../utils/tikz.js';
+} from "../utils/graphml.js";
+import { generateTikZ, type TikZNode, type TikZEdge } from "../utils/tikz.js";
 import {
   generateHTMLHeader,
   generateHTMLFooter,
@@ -43,59 +39,69 @@ import {
   renderSection,
   renderBadge,
   renderProgressBar,
-} from '../utils/html.js';
-import {
-  sanitizeModelicaId,
-  escapeModelicaString,
-} from '../utils/modelica.js';
+} from "../utils/html.js";
+import { sanitizeModelicaId, escapeModelicaString } from "../utils/modelica.js";
 import {
   generateUmlDiagram,
   type UmlNode,
   type UmlEdge,
-} from '../utils/uml.js';
+} from "../utils/uml.js";
 import {
   createJsonGraph,
   addNode,
   addEdge,
   addMetric,
   serializeGraph,
-} from '../utils/json.js';
+} from "../utils/json.js";
 import {
   section,
   list,
   keyValueSection,
   mermaidBlock,
   document as mdDocument,
-} from '../utils/markdown.js';
+} from "../utils/markdown.js";
 
 /**
  * Export mathematics reasoning to visual format
  */
-export function exportMathematicsDerivation(thought: MathematicsThought, options: VisualExportOptions): string {
-  const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+export function exportMathematicsDerivation(
+  thought: MathematicsThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+  } = options;
 
   switch (format) {
-    case 'mermaid':
-      return mathematicsToMermaid(thought, colorScheme, includeLabels, includeMetrics);
-    case 'dot':
+    case "mermaid":
+      return mathematicsToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics,
+      );
+    case "dot":
       return mathematicsToDOT(thought, includeLabels, includeMetrics);
-    case 'ascii':
+    case "ascii":
       return mathematicsToASCII(thought);
-    case 'svg':
+    case "svg":
       return mathematicsToSVG(thought, options);
-    case 'graphml':
+    case "graphml":
       return mathematicsToGraphML(thought, options);
-    case 'tikz':
+    case "tikz":
       return mathematicsToTikZ(thought, options);
-    case 'html':
+    case "html":
       return mathematicsToHTML(thought, options);
-    case 'modelica':
+    case "modelica":
       return mathematicsToModelica(thought, options);
-    case 'uml':
+    case "uml":
       return mathematicsToUML(thought, options);
-    case 'json':
+    case "json":
       return mathematicsToJSON(thought, options);
-    case 'markdown':
+    case "markdown":
       return mathematicsToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
@@ -106,46 +112,59 @@ function mathematicsToMermaid(
   thought: MathematicsThought,
   colorScheme: string,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
-  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
-  const builder = new MermaidGraphBuilder().setDirection('TB');
+  const scheme = colorScheme as "default" | "pastel" | "monochrome";
+  const builder = new MermaidGraphBuilder().setDirection("TB");
 
   // Add thought type node
-  const typeId = sanitizeId(`type_${thought.thoughtType || 'proof'}`);
-  const typeLabel = includeLabels ? (thought.thoughtType || 'Proof').replace(/_/g, ' ') : typeId;
-  builder.addNode({ id: typeId, label: typeLabel, shape: 'subroutine' });
+  const typeId = sanitizeId(`type_${thought.thoughtType || "proof"}`);
+  const typeLabel = includeLabels
+    ? (thought.thoughtType || "Proof").replace(/_/g, " ")
+    : typeId;
+  builder.addNode({ id: typeId, label: typeLabel, shape: "subroutine" });
 
   // Add proof strategy if present
   if (thought.proofStrategy) {
-    const strategyId = sanitizeId('strategy');
-    builder.addNode({ id: strategyId, label: thought.proofStrategy.type, shape: 'stadium' });
+    const strategyId = sanitizeId("strategy");
+    builder.addNode({
+      id: strategyId,
+      label: thought.proofStrategy.type,
+      shape: "stadium",
+    });
     builder.addEdge({ source: typeId, target: strategyId });
 
     // Add proof steps
     let prevStepId = strategyId;
     thought.proofStrategy.steps.forEach((step, index) => {
       const stepId = sanitizeId(`step_${index}`);
-      const stepLabel = includeLabels ? step.slice(0, 40) + (step.length > 40 ? '...' : '') : `Step ${index + 1}`;
-      builder.addNode({ id: stepId, label: stepLabel, shape: 'rectangle' });
+      const stepLabel = includeLabels
+        ? step.slice(0, 40) + (step.length > 40 ? "..." : "")
+        : `Step ${index + 1}`;
+      builder.addNode({ id: stepId, label: stepLabel, shape: "rectangle" });
       builder.addEdge({ source: prevStepId, target: stepId });
       prevStepId = stepId;
     });
 
     // Add completeness metric
     if (includeMetrics) {
-      const completenessId = sanitizeId('completeness');
+      const completenessId = sanitizeId("completeness");
       const completenessLabel = `Completeness: ${(thought.proofStrategy.completeness * 100).toFixed(0)}%`;
-      builder.addNode({ id: completenessId, label: completenessLabel, shape: 'hexagon' });
+      builder.addNode({
+        id: completenessId,
+        label: completenessLabel,
+        shape: "hexagon",
+      });
       builder.addEdge({ source: prevStepId, target: completenessId });
     }
   }
 
   // Add mathematical model if present
   if (thought.mathematicalModel) {
-    const modelId = sanitizeId('model');
-    const modelLabel = thought.mathematicalModel.symbolic || 'Mathematical Model';
-    builder.addNode({ id: modelId, label: modelLabel, shape: 'rectangle' });
+    const modelId = sanitizeId("model");
+    const modelLabel =
+      thought.mathematicalModel.symbolic || "Mathematical Model";
+    builder.addNode({ id: modelId, label: modelLabel, shape: "rectangle" });
     builder.addEdge({ source: typeId, target: modelId });
   }
 
@@ -154,15 +173,23 @@ function mathematicsToMermaid(
     thought.theorems.forEach((theorem, index) => {
       const theoremId = sanitizeId(`theorem_${index}`);
       const theoremLabel = theorem.name || `Theorem ${index + 1}`;
-      builder.addNode({ id: theoremId, label: theoremLabel, shape: 'trapezoid' });
+      builder.addNode({
+        id: theoremId,
+        label: theoremLabel,
+        shape: "trapezoid",
+      });
       builder.addEdge({ source: typeId, target: theoremId });
     });
   }
 
   // Add assumptions as notes
   if (thought.assumptions && thought.assumptions.length > 0) {
-    const assumptionsId = sanitizeId('assumptions');
-    builder.addNode({ id: assumptionsId, label: `Assumptions: ${thought.assumptions.length}`, shape: 'asymmetric' });
+    const assumptionsId = sanitizeId("assumptions");
+    builder.addNode({
+      id: assumptionsId,
+      label: `Assumptions: ${thought.assumptions.length}`,
+      shape: "asymmetric",
+    });
   }
 
   return builder.setOptions({ colorScheme: scheme }).render();
@@ -171,37 +198,49 @@ function mathematicsToMermaid(
 function mathematicsToDOT(
   thought: MathematicsThought,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
   const builder = new DOTGraphBuilder()
-    .setGraphName('MathematicsDerivation')
-    .setRankDir('TB')
-    .setNodeDefaults({ shape: 'box', style: 'rounded' });
+    .setGraphName("MathematicsDerivation")
+    .setRankDir("TB")
+    .setNodeDefaults({ shape: "box", style: "rounded" });
 
   // Add thought type node
-  const typeId = sanitizeId(`type_${thought.thoughtType || 'proof'}`);
-  const typeLabel = includeLabels ? (thought.thoughtType || 'Proof').replace(/_/g, ' ') : typeId;
-  builder.addNode({ id: typeId, label: typeLabel, shape: 'doubleoctagon' });
+  const typeId = sanitizeId(`type_${thought.thoughtType || "proof"}`);
+  const typeLabel = includeLabels
+    ? (thought.thoughtType || "Proof").replace(/_/g, " ")
+    : typeId;
+  builder.addNode({ id: typeId, label: typeLabel, shape: "doubleoctagon" });
 
   // Add proof strategy
   if (thought.proofStrategy) {
-    const strategyId = sanitizeId('strategy');
-    builder.addNode({ id: strategyId, label: thought.proofStrategy.type, shape: 'ellipse' });
+    const strategyId = sanitizeId("strategy");
+    builder.addNode({
+      id: strategyId,
+      label: thought.proofStrategy.type,
+      shape: "ellipse",
+    });
     builder.addEdge({ source: typeId, target: strategyId });
 
     // Add steps
     let prevStepId = strategyId;
     thought.proofStrategy.steps.forEach((step, index) => {
       const stepId = sanitizeId(`step_${index}`);
-      const stepLabel = includeLabels ? step.slice(0, 30).replace(/"/g, '\\"') : `Step ${index + 1}`;
+      const stepLabel = includeLabels
+        ? step.slice(0, 30).replace(/"/g, '\\"')
+        : `Step ${index + 1}`;
       builder.addNode({ id: stepId, label: stepLabel });
       builder.addEdge({ source: prevStepId, target: stepId });
       prevStepId = stepId;
     });
 
     if (includeMetrics) {
-      const completenessId = sanitizeId('completeness');
-      builder.addNode({ id: completenessId, label: `${(thought.proofStrategy.completeness * 100).toFixed(0)}%`, shape: 'diamond' });
+      const completenessId = sanitizeId("completeness");
+      builder.addNode({
+        id: completenessId,
+        label: `${(thought.proofStrategy.completeness * 100).toFixed(0)}%`,
+        shape: "diamond",
+      });
       builder.addEdge({ source: prevStepId, target: completenessId });
     }
   }
@@ -210,7 +249,11 @@ function mathematicsToDOT(
   if (thought.theorems) {
     thought.theorems.forEach((theorem, index) => {
       const theoremId = sanitizeId(`theorem_${index}`);
-      builder.addNode({ id: theoremId, label: theorem.name || `Theorem ${index + 1}`, shape: 'parallelogram' });
+      builder.addNode({
+        id: theoremId,
+        label: theorem.name || `Theorem ${index + 1}`,
+        shape: "parallelogram",
+      });
       builder.addEdge({ source: typeId, target: theoremId });
     });
   }
@@ -221,16 +264,18 @@ function mathematicsToDOT(
 function mathematicsToASCII(thought: MathematicsThought): string {
   const builder = new ASCIIDocBuilder();
 
-  builder.addHeader('Mathematics Derivation');
+  builder.addHeader("Mathematics Derivation");
 
   // Thought type
-  builder.addText(`Type: ${(thought.thoughtType || 'proof').replace(/_/g, ' ')}`);
+  builder.addText(
+    `Type: ${(thought.thoughtType || "proof").replace(/_/g, " ")}`,
+  );
   builder.addText(`Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`);
   builder.addEmptyLine();
 
   // Mathematical model
   if (thought.mathematicalModel) {
-    builder.addText('Mathematical Model:');
+    builder.addText("Mathematical Model:");
     builder.addText(`  LaTeX: ${thought.mathematicalModel.latex}`);
     builder.addText(`  Symbolic: ${thought.mathematicalModel.symbolic}`);
     if (thought.mathematicalModel.ascii) {
@@ -242,8 +287,10 @@ function mathematicsToASCII(thought: MathematicsThought): string {
   // Proof strategy
   if (thought.proofStrategy) {
     builder.addText(`Proof Strategy: ${thought.proofStrategy.type}`);
-    builder.addText(`Completeness: ${(thought.proofStrategy.completeness * 100).toFixed(0)}%`);
-    builder.addText('Steps:');
+    builder.addText(
+      `Completeness: ${(thought.proofStrategy.completeness * 100).toFixed(0)}%`,
+    );
+    builder.addText("Steps:");
     builder.addNumberedList(thought.proofStrategy.steps);
     if (thought.proofStrategy.baseCase) {
       builder.addText(`Base Case: ${thought.proofStrategy.baseCase}`);
@@ -256,11 +303,13 @@ function mathematicsToASCII(thought: MathematicsThought): string {
 
   // Theorems
   if (thought.theorems && thought.theorems.length > 0) {
-    builder.addText('Theorems:');
+    builder.addText("Theorems:");
     thought.theorems.forEach((theorem, index) => {
-      builder.addText(`  [${index + 1}] ${theorem.name || `Theorem ${index + 1}`}: ${theorem.statement}`);
+      builder.addText(
+        `  [${index + 1}] ${theorem.name || `Theorem ${index + 1}`}: ${theorem.statement}`,
+      );
       if (theorem.hypotheses.length > 0) {
-        builder.addText(`      Hypotheses: ${theorem.hypotheses.join(', ')}`);
+        builder.addText(`      Hypotheses: ${theorem.hypotheses.join(", ")}`);
       }
       builder.addText(`      Conclusion: ${theorem.conclusion}`);
     });
@@ -269,14 +318,14 @@ function mathematicsToASCII(thought: MathematicsThought): string {
 
   // Assumptions
   if (thought.assumptions && thought.assumptions.length > 0) {
-    builder.addText('Assumptions:');
+    builder.addText("Assumptions:");
     builder.addNumberedList(thought.assumptions);
     builder.addEmptyLine();
   }
 
   // Dependencies
   if (thought.dependencies && thought.dependencies.length > 0) {
-    builder.addText('Dependencies:');
+    builder.addText("Dependencies:");
     builder.addNumberedList(thought.dependencies);
   }
 
@@ -286,9 +335,12 @@ function mathematicsToASCII(thought: MathematicsThought): string {
 /**
  * Export mathematics reasoning to native SVG format
  */
-function mathematicsToSVG(thought: MathematicsThought, options: VisualExportOptions): string {
+function mathematicsToSVG(
+  thought: MathematicsThought,
+  options: VisualExportOptions,
+): string {
   const {
-    colorScheme = 'default',
+    colorScheme = "default",
     includeLabels = true,
     includeMetrics = true,
     svgWidth = DEFAULT_SVG_OPTIONS.width,
@@ -300,28 +352,30 @@ function mathematicsToSVG(thought: MathematicsThought, options: VisualExportOpti
   let currentY = 80;
 
   // Thought type at the top
-  const typeId = 'type';
+  const typeId = "type";
   positions.set(typeId, {
     id: typeId,
-    label: includeLabels ? (thought.thoughtType || 'Proof').replace(/_/g, ' ') : typeId,
+    label: includeLabels
+      ? (thought.thoughtType || "Proof").replace(/_/g, " ")
+      : typeId,
     x: svgWidth / 2,
     y: currentY,
     width: nodeWidth,
     height: nodeHeight,
-    type: 'type',
+    type: "type",
   });
   currentY += 120;
 
   // Proof strategy if present
   if (thought.proofStrategy) {
-    positions.set('strategy', {
-      id: 'strategy',
+    positions.set("strategy", {
+      id: "strategy",
       label: thought.proofStrategy.type,
       x: svgWidth / 2,
       y: currentY,
       width: nodeWidth,
       height: nodeHeight,
-      type: 'strategy',
+      type: "strategy",
     });
     currentY += 100;
 
@@ -330,12 +384,14 @@ function mathematicsToSVG(thought: MathematicsThought, options: VisualExportOpti
       const stepId = `step_${index}`;
       positions.set(stepId, {
         id: stepId,
-        label: includeLabels ? `${index + 1}. ${step.substring(0, 25)}...` : `Step ${index + 1}`,
+        label: includeLabels
+          ? `${index + 1}. ${step.substring(0, 25)}...`
+          : `Step ${index + 1}`,
         x: 150 + (index % 3) * 200,
         y: currentY + Math.floor(index / 3) * 80,
         width: nodeWidth,
         height: nodeHeight,
-        type: 'step',
+        type: "step",
       });
     });
     currentY += Math.ceil(thought.proofStrategy.steps.length / 3) * 80 + 40;
@@ -352,7 +408,7 @@ function mathematicsToSVG(thought: MathematicsThought, options: VisualExportOpti
         y: currentY,
         width: nodeWidth,
         height: nodeHeight,
-        type: 'theorem',
+        type: "theorem",
       });
       currentY += 80;
     });
@@ -360,21 +416,21 @@ function mathematicsToSVG(thought: MathematicsThought, options: VisualExportOpti
 
   const actualHeight = Math.max(DEFAULT_SVG_OPTIONS.height, currentY + 100);
 
-  let svg = generateSVGHeader(svgWidth, actualHeight, 'Mathematics Derivation');
+  let svg = generateSVGHeader(svgWidth, actualHeight, "Mathematics Derivation");
 
   // Render edges
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
 
   // Edge from type to strategy
   if (thought.proofStrategy) {
-    const typePos = positions.get('type');
-    const strategyPos = positions.get('strategy');
+    const typePos = positions.get("type");
+    const strategyPos = positions.get("strategy");
     if (typePos && strategyPos) {
       svg += renderEdge(typePos, strategyPos);
     }
 
     // Edges from strategy to steps
-    const stratPos = positions.get('strategy');
+    const stratPos = positions.get("strategy");
     thought.proofStrategy.steps.forEach((_, index) => {
       const stepPos = positions.get(`step_${index}`);
       if (stratPos && stepPos) {
@@ -385,7 +441,7 @@ function mathematicsToSVG(thought: MathematicsThought, options: VisualExportOpti
 
   // Edges from type to theorems
   if (thought.theorems) {
-    const typePos = positions.get('type');
+    const typePos = positions.get("type");
     thought.theorems.forEach((_, index) => {
       const theoremPos = positions.get(`theorem_${index}`);
       if (typePos && theoremPos) {
@@ -393,56 +449,62 @@ function mathematicsToSVG(thought: MathematicsThought, options: VisualExportOpti
       }
     });
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render nodes
   svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
 
-  const typeColors = getNodeColor('primary', colorScheme);
-  const strategyColors = getNodeColor('secondary', colorScheme);
-  const stepColors = getNodeColor('neutral', colorScheme);
-  const theoremColors = getNodeColor('tertiary', colorScheme);
+  const typeColors = getNodeColor("primary", colorScheme);
+  const strategyColors = getNodeColor("secondary", colorScheme);
+  const stepColors = getNodeColor("neutral", colorScheme);
+  const theoremColors = getNodeColor("tertiary", colorScheme);
 
   for (const [, pos] of positions) {
-    if (pos.type === 'type') {
+    if (pos.type === "type") {
       svg += renderStadiumNode(pos, typeColors);
-    } else if (pos.type === 'strategy') {
+    } else if (pos.type === "strategy") {
       svg += renderEllipseNode(pos, strategyColors);
-    } else if (pos.type === 'step') {
+    } else if (pos.type === "step") {
       svg += renderRectNode(pos, stepColors);
-    } else if (pos.type === 'theorem') {
+    } else if (pos.type === "theorem") {
       svg += renderRectNode(pos, theoremColors);
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render metrics panel
   if (includeMetrics) {
     const metrics = [
-      { label: 'Uncertainty', value: `${(thought.uncertainty * 100).toFixed(1)}%` },
-      { label: 'Theorems', value: thought.theorems?.length || 0 },
-      { label: 'Assumptions', value: thought.assumptions?.length || 0 },
+      {
+        label: "Uncertainty",
+        value: `${(thought.uncertainty * 100).toFixed(1)}%`,
+      },
+      { label: "Theorems", value: thought.theorems?.length || 0 },
+      { label: "Assumptions", value: thought.assumptions?.length || 0 },
     ];
     svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
   }
 
   // Render legend
   const legendItems = [
-    { label: 'Type', color: typeColors, shape: 'stadium' as const },
-    { label: 'Strategy', color: strategyColors, shape: 'ellipse' as const },
-    { label: 'Step', color: stepColors },
-    { label: 'Theorem', color: theoremColors },
+    { label: "Type", color: typeColors, shape: "stadium" as const },
+    { label: "Strategy", color: strategyColors, shape: "ellipse" as const },
+    { label: "Step", color: stepColors },
+    { label: "Theorem", color: theoremColors },
   ];
   svg += renderLegend(20, actualHeight - 130, legendItems);
 
-  svg += '\n' + generateSVGFooter();
+  svg += "\n" + generateSVGFooter();
   return svg;
 }
 
 /**
  * Export mathematics reasoning to GraphML format
  */
-function mathematicsToGraphML(thought: MathematicsThought, options: VisualExportOptions): string {
+function mathematicsToGraphML(
+  thought: MathematicsThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true } = options;
 
   const nodes: GraphMLNode[] = [];
@@ -450,11 +512,13 @@ function mathematicsToGraphML(thought: MathematicsThought, options: VisualExport
   let edgeCount = 0;
 
   // Add thought type as root node
-  const typeId = sanitizeId(`type_${thought.thoughtType || 'proof'}`);
+  const typeId = sanitizeId(`type_${thought.thoughtType || "proof"}`);
   nodes.push({
     id: typeId,
-    label: includeLabels ? (thought.thoughtType || 'Proof').replace(/_/g, ' ') : typeId,
-    type: 'type',
+    label: includeLabels
+      ? (thought.thoughtType || "Proof").replace(/_/g, " ")
+      : typeId,
+    type: "type",
   });
 
   // Add theorems/axioms if present
@@ -464,7 +528,7 @@ function mathematicsToGraphML(thought: MathematicsThought, options: VisualExport
       nodes.push({
         id: theoremId,
         label: theorem.name || `Theorem ${index + 1}`,
-        type: 'axiom',
+        type: "axiom",
         metadata: {
           description: theorem.statement,
         },
@@ -482,11 +546,11 @@ function mathematicsToGraphML(thought: MathematicsThought, options: VisualExport
 
   // Add proof strategy with derivation steps
   if (thought.proofStrategy) {
-    const strategyId = sanitizeId('strategy');
+    const strategyId = sanitizeId("strategy");
     nodes.push({
       id: strategyId,
       label: thought.proofStrategy.type,
-      type: 'strategy',
+      type: "strategy",
     });
 
     edges.push({
@@ -502,8 +566,10 @@ function mathematicsToGraphML(thought: MathematicsThought, options: VisualExport
       const stepId = sanitizeId(`step_${index}`);
       nodes.push({
         id: stepId,
-        label: includeLabels ? step.slice(0, 40) + (step.length > 40 ? '...' : '') : `Step ${index + 1}`,
-        type: 'step',
+        label: includeLabels
+          ? step.slice(0, 40) + (step.length > 40 ? "..." : "")
+          : `Step ${index + 1}`,
+        type: "step",
         metadata: {
           description: step,
         },
@@ -522,11 +588,11 @@ function mathematicsToGraphML(thought: MathematicsThought, options: VisualExport
 
   // Add mathematical model if present
   if (thought.mathematicalModel) {
-    const modelId = sanitizeId('model');
+    const modelId = sanitizeId("model");
     nodes.push({
       id: modelId,
-      label: thought.mathematicalModel.symbolic || 'Mathematical Model',
-      type: 'model',
+      label: thought.mathematicalModel.symbolic || "Mathematical Model",
+      type: "model",
       metadata: {
         description: thought.mathematicalModel.latex,
       },
@@ -541,7 +607,7 @@ function mathematicsToGraphML(thought: MathematicsThought, options: VisualExport
   }
 
   return generateGraphML(nodes, edges, {
-    graphName: 'Mathematics Derivation',
+    graphName: "Mathematics Derivation",
     directed: true,
     includeLabels,
   });
@@ -550,22 +616,27 @@ function mathematicsToGraphML(thought: MathematicsThought, options: VisualExport
 /**
  * Export mathematics reasoning to TikZ format
  */
-function mathematicsToTikZ(thought: MathematicsThought, options: VisualExportOptions): string {
-  const { includeLabels = true, colorScheme = 'default' } = options;
+function mathematicsToTikZ(
+  thought: MathematicsThought,
+  options: VisualExportOptions,
+): string {
+  const { includeLabels = true, colorScheme = "default" } = options;
 
   const nodes: TikZNode[] = [];
   const edges: TikZEdge[] = [];
   let yPos = 0;
 
   // Add thought type as root node (stadium shape for axioms/theorems)
-  const typeId = sanitizeId(`type_${thought.thoughtType || 'proof'}`);
+  const typeId = sanitizeId(`type_${thought.thoughtType || "proof"}`);
   nodes.push({
     id: typeId,
-    label: includeLabels ? (thought.thoughtType || 'Proof').replace(/_/g, ' ') : typeId,
+    label: includeLabels
+      ? (thought.thoughtType || "Proof").replace(/_/g, " ")
+      : typeId,
     x: 4,
     y: yPos,
-    type: 'primary',
-    shape: 'stadium',
+    type: "primary",
+    shape: "stadium",
   });
   yPos -= 2;
 
@@ -579,8 +650,8 @@ function mathematicsToTikZ(thought: MathematicsThought, options: VisualExportOpt
         label: theorem.name || `Theorem ${index + 1}`,
         x: xPos,
         y: yPos,
-        type: 'secondary',
-        shape: 'stadium',
+        type: "secondary",
+        shape: "stadium",
       });
 
       edges.push({
@@ -594,14 +665,14 @@ function mathematicsToTikZ(thought: MathematicsThought, options: VisualExportOpt
 
   // Add proof strategy with derivation steps (rectangles for steps)
   if (thought.proofStrategy) {
-    const strategyId = sanitizeId('strategy');
+    const strategyId = sanitizeId("strategy");
     nodes.push({
       id: strategyId,
       label: thought.proofStrategy.type,
       x: 4,
       y: yPos,
-      type: 'secondary',
-      shape: 'ellipse',
+      type: "secondary",
+      shape: "ellipse",
     });
 
     edges.push({
@@ -621,11 +692,13 @@ function mathematicsToTikZ(thought: MathematicsThought, options: VisualExportOpt
 
       nodes.push({
         id: stepId,
-        label: includeLabels ? `${index + 1}. ${step.substring(0, 20)}...` : `Step ${index + 1}`,
+        label: includeLabels
+          ? `${index + 1}. ${step.substring(0, 20)}...`
+          : `Step ${index + 1}`,
         x: xPos,
         y: stepYPos,
-        type: 'neutral',
-        shape: 'rectangle',
+        type: "neutral",
+        shape: "rectangle",
       });
 
       edges.push({
@@ -639,7 +712,7 @@ function mathematicsToTikZ(thought: MathematicsThought, options: VisualExportOpt
   }
 
   return generateTikZ(nodes, edges, {
-    title: 'Mathematics Derivation',
+    title: "Mathematics Derivation",
     colorScheme,
     includeLabels,
   });
@@ -648,38 +721,52 @@ function mathematicsToTikZ(thought: MathematicsThought, options: VisualExportOpt
 /**
  * Export mathematics reasoning to HTML format
  */
-function mathematicsToHTML(thought: MathematicsThought, options: VisualExportOptions): string {
+function mathematicsToHTML(
+  thought: MathematicsThought,
+  options: VisualExportOptions,
+): string {
   const {
     htmlStandalone = true,
-    htmlTitle = 'Mathematics Derivation Analysis',
-    htmlTheme = 'light',
+    htmlTitle = "Mathematics Derivation Analysis",
+    htmlTheme = "light",
   } = options;
 
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme,
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
 
   // Metrics
   html += '<div class="metrics-grid">';
-  html += renderMetricCard('Uncertainty', `${(thought.uncertainty * 100).toFixed(1)}%`, 'warning');
+  html += renderMetricCard(
+    "Uncertainty",
+    `${(thought.uncertainty * 100).toFixed(1)}%`,
+    "warning",
+  );
   if (thought.theorems) {
-    html += renderMetricCard('Theorems', thought.theorems.length, 'primary');
+    html += renderMetricCard("Theorems", thought.theorems.length, "primary");
   }
   if (thought.assumptions) {
-    html += renderMetricCard('Assumptions', thought.assumptions.length, 'info');
+    html += renderMetricCard("Assumptions", thought.assumptions.length, "info");
   }
   if (thought.proofStrategy) {
-    html += renderMetricCard('Completeness', `${(thought.proofStrategy.completeness * 100).toFixed(0)}%`, 'success');
+    html += renderMetricCard(
+      "Completeness",
+      `${(thought.proofStrategy.completeness * 100).toFixed(0)}%`,
+      "success",
+    );
   }
-  html += '</div>\n';
+  html += "</div>\n";
 
   // Thought type badge
   const badges = [];
   if (thought.thoughtType) {
-    badges.push(renderBadge(thought.thoughtType.replace(/_/g, ' '), 'primary'));
+    badges.push(renderBadge(thought.thoughtType.replace(/_/g, " "), "primary"));
   }
 
   if (badges.length > 0) {
-    html += `<div class="flex gap-1" style="margin: 1rem 0">${badges.join(' ')}</div>\n`;
+    html += `<div class="flex gap-1" style="margin: 1rem 0">${badges.join(" ")}</div>\n`;
   }
 
   // Mathematical model
@@ -687,58 +774,70 @@ function mathematicsToHTML(thought: MathematicsThought, options: VisualExportOpt
     const modelContent = `
       <p><strong>LaTeX:</strong> <code>${escapeHTML(thought.mathematicalModel.latex)}</code></p>
       <p><strong>Symbolic:</strong> <code>${escapeHTML(thought.mathematicalModel.symbolic)}</code></p>
-      ${thought.mathematicalModel.ascii ? `<p><strong>ASCII:</strong> <code>${escapeHTML(thought.mathematicalModel.ascii)}</code></p>` : ''}
+      ${thought.mathematicalModel.ascii ? `<p><strong>ASCII:</strong> <code>${escapeHTML(thought.mathematicalModel.ascii)}</code></p>` : ""}
     `;
-    html += renderSection('Mathematical Model', modelContent, '📐');
+    html += renderSection("Mathematical Model", modelContent, "📐");
   }
 
   // Proof strategy
   if (thought.proofStrategy) {
     const proofContent = `
-      <p><strong>Type:</strong> ${renderBadge(thought.proofStrategy.type, 'info')}</p>
+      <p><strong>Type:</strong> ${renderBadge(thought.proofStrategy.type, "info")}</p>
       <p><strong>Completeness:</strong></p>
-      ${renderProgressBar(thought.proofStrategy.completeness * 100, 'success')}
+      ${renderProgressBar(thought.proofStrategy.completeness * 100, "success")}
       <p style="margin-top: 1rem"><strong>Steps:</strong></p>
       <ol class="list-styled">
-        ${thought.proofStrategy.steps.map(step => `<li>${escapeHTML(step)}</li>`).join('')}
+        ${thought.proofStrategy.steps.map((step) => `<li>${escapeHTML(step)}</li>`).join("")}
       </ol>
-      ${thought.proofStrategy.baseCase ? `<p><strong>Base Case:</strong> ${escapeHTML(thought.proofStrategy.baseCase)}</p>` : ''}
-      ${thought.proofStrategy.inductiveStep ? `<p><strong>Inductive Step:</strong> ${escapeHTML(thought.proofStrategy.inductiveStep)}</p>` : ''}
+      ${thought.proofStrategy.baseCase ? `<p><strong>Base Case:</strong> ${escapeHTML(thought.proofStrategy.baseCase)}</p>` : ""}
+      ${thought.proofStrategy.inductiveStep ? `<p><strong>Inductive Step:</strong> ${escapeHTML(thought.proofStrategy.inductiveStep)}</p>` : ""}
     `;
-    html += renderSection('Proof Strategy', proofContent, '🔍');
+    html += renderSection("Proof Strategy", proofContent, "🔍");
   }
 
   // Theorems
   if (thought.theorems && thought.theorems.length > 0) {
-    const theoremsContent = thought.theorems.map((theorem, index) => `
+    const theoremsContent = thought.theorems
+      .map(
+        (theorem, index) => `
       <div class="card">
         <div class="card-header">${escapeHTML(theorem.name || `Theorem ${index + 1}`)}</div>
         <p><strong>Statement:</strong> ${escapeHTML(theorem.statement)}</p>
-        ${theorem.hypotheses.length > 0 ? `<p><strong>Hypotheses:</strong> ${escapeHTML(theorem.hypotheses.join(', '))}</p>` : ''}
+        ${theorem.hypotheses.length > 0 ? `<p><strong>Hypotheses:</strong> ${escapeHTML(theorem.hypotheses.join(", "))}</p>` : ""}
         <p><strong>Conclusion:</strong> ${escapeHTML(theorem.conclusion)}</p>
       </div>
-    `).join('');
-    html += renderSection('Theorems', theoremsContent, '📜');
+    `,
+      )
+      .join("");
+    html += renderSection("Theorems", theoremsContent, "📜");
   }
 
   // Assumptions
   if (thought.assumptions && thought.assumptions.length > 0) {
-    const assumptionsList = thought.assumptions.map(a => escapeHTML(a));
-    html += renderSection('Assumptions', `
+    const assumptionsList = thought.assumptions.map((a) => escapeHTML(a));
+    html += renderSection(
+      "Assumptions",
+      `
       <ul class="list-styled">
-        ${assumptionsList.map(a => `<li>${a}</li>`).join('')}
+        ${assumptionsList.map((a) => `<li>${a}</li>`).join("")}
       </ul>
-    `, '⚠️');
+    `,
+      "⚠️",
+    );
   }
 
   // Dependencies
   if (thought.dependencies && thought.dependencies.length > 0) {
-    const depsList = thought.dependencies.map(d => escapeHTML(d));
-    html += renderSection('Dependencies', `
+    const depsList = thought.dependencies.map((d) => escapeHTML(d));
+    html += renderSection(
+      "Dependencies",
+      `
       <ul class="list-styled">
-        ${depsList.map(d => `<li>${d}</li>`).join('')}
+        ${depsList.map((d) => `<li>${d}</li>`).join("")}
       </ul>
-    `, '🔗');
+    `,
+      "🔗",
+    );
   }
 
   html += generateHTMLFooter(htmlStandalone);
@@ -748,17 +847,20 @@ function mathematicsToHTML(thought: MathematicsThought, options: VisualExportOpt
 /**
  * Export mathematics reasoning to Modelica format
  */
-function mathematicsToModelica(thought: MathematicsThought, options: VisualExportOptions): string {
+function mathematicsToModelica(
+  thought: MathematicsThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true } = options;
 
-  let modelica = '// Mathematics Derivation Model\n';
-  modelica += `package MathematicsDerivation "${thought.thoughtType || 'Proof'}"\n`;
+  let modelica = "// Mathematics Derivation Model\n";
+  modelica += `package MathematicsDerivation "${thought.thoughtType || "Proof"}"\n`;
   modelica += '  "Mathematical derivation and proof structure"\n\n';
 
   // Add mathematical constants and parameters
-  modelica += '  // Mathematical Model\n';
+  modelica += "  // Mathematical Model\n";
   if (thought.mathematicalModel) {
-    const modelName = sanitizeModelicaId('MathModel');
+    const modelName = sanitizeModelicaId("MathModel");
     modelica += `  model ${modelName} "Mathematical Expression"\n`;
     modelica += `    parameter String latex = "${escapeModelicaString(thought.mathematicalModel.latex)}";\n`;
     modelica += `    parameter String symbolic = "${escapeModelicaString(thought.mathematicalModel.symbolic)}";\n`;
@@ -770,9 +872,11 @@ function mathematicsToModelica(thought: MathematicsThought, options: VisualExpor
 
   // Add theorems as models
   if (thought.theorems && thought.theorems.length > 0) {
-    modelica += '  // Theorems\n';
+    modelica += "  // Theorems\n";
     thought.theorems.forEach((theorem, index) => {
-      const theoremName = sanitizeModelicaId(theorem.name || `Theorem${index + 1}`);
+      const theoremName = sanitizeModelicaId(
+        theorem.name || `Theorem${index + 1}`,
+      );
       modelica += `  model ${theoremName} "Theorem ${index + 1}"\n`;
       modelica += `    parameter String statement = "${escapeModelicaString(theorem.statement)}";\n`;
       if (theorem.hypotheses.length > 0) {
@@ -787,8 +891,10 @@ function mathematicsToModelica(thought: MathematicsThought, options: VisualExpor
 
   // Add proof strategy as a model with derivation steps
   if (thought.proofStrategy) {
-    const strategyName = sanitizeModelicaId(thought.proofStrategy.type.replace(/\s+/g, '_'));
-    modelica += '  // Proof Strategy\n';
+    const strategyName = sanitizeModelicaId(
+      thought.proofStrategy.type.replace(/\s+/g, "_"),
+    );
+    modelica += "  // Proof Strategy\n";
     modelica += `  model ${strategyName} "Proof Strategy"\n`;
     modelica += `    parameter String proofType = "${escapeModelicaString(thought.proofStrategy.type)}";\n`;
     modelica += `    parameter Real completeness = ${thought.proofStrategy.completeness};\n`;
@@ -811,55 +917,58 @@ function mathematicsToModelica(thought: MathematicsThought, options: VisualExpor
 
   // Add assumptions
   if (thought.assumptions && thought.assumptions.length > 0) {
-    modelica += '  // Assumptions\n';
+    modelica += "  // Assumptions\n";
     modelica += '  model Assumptions "Proof Assumptions"\n';
     thought.assumptions.forEach((assumption, index) => {
       modelica += `    parameter String assumption${index + 1} = "${escapeModelicaString(assumption)}";\n`;
     });
-    modelica += '  end Assumptions;\n\n';
+    modelica += "  end Assumptions;\n\n";
   }
 
   // Add metadata
-  modelica += '  // Metadata\n';
+  modelica += "  // Metadata\n";
   modelica += '  model Metadata "Derivation Metadata"\n';
   modelica += `    parameter Real uncertainty = ${thought.uncertainty};\n`;
   modelica += `    parameter Integer theoremCount = ${thought.theorems?.length || 0};\n`;
   modelica += `    parameter Integer assumptionCount = ${thought.assumptions?.length || 0};\n`;
-  modelica += '  end Metadata;\n\n';
+  modelica += "  end Metadata;\n\n";
 
-  modelica += 'end MathematicsDerivation;\n';
+  modelica += "end MathematicsDerivation;\n";
   return modelica;
 }
 
 /**
  * Export mathematics reasoning to UML format
  */
-function mathematicsToUML(thought: MathematicsThought, options: VisualExportOptions): string {
+function mathematicsToUML(
+  thought: MathematicsThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true } = options;
 
   const nodes: UmlNode[] = [];
   const edges: UmlEdge[] = [];
 
   // Add thought type as root class
-  const typeId = sanitizeId(`type_${thought.thoughtType || 'proof'}`);
+  const typeId = sanitizeId(`type_${thought.thoughtType || "proof"}`);
   nodes.push({
     id: typeId,
-    label: includeLabels ? (thought.thoughtType || 'Proof').replace(/_/g, ' ') : typeId,
-    shape: 'class',
-    stereotype: 'mathematical',
-    attributes: [
-      `uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`,
-    ],
+    label: includeLabels
+      ? (thought.thoughtType || "Proof").replace(/_/g, " ")
+      : typeId,
+    shape: "class",
+    stereotype: "mathematical",
+    attributes: [`uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`],
   });
 
   // Add mathematical model as class
   if (thought.mathematicalModel) {
-    const modelId = sanitizeId('model');
+    const modelId = sanitizeId("model");
     nodes.push({
       id: modelId,
-      label: 'Mathematical Model',
-      shape: 'class',
-      stereotype: 'model',
+      label: "Mathematical Model",
+      shape: "class",
+      stereotype: "model",
       attributes: [
         `latex: ${thought.mathematicalModel.latex.substring(0, 40)}...`,
         `symbolic: ${thought.mathematicalModel.symbolic}`,
@@ -869,8 +978,8 @@ function mathematicsToUML(thought: MathematicsThought, options: VisualExportOpti
     edges.push({
       source: typeId,
       target: modelId,
-      type: 'composition',
-      label: 'contains',
+      type: "composition",
+      label: "contains",
     });
   }
 
@@ -887,32 +996,34 @@ function mathematicsToUML(thought: MathematicsThought, options: VisualExportOpti
       nodes.push({
         id: theoremId,
         label: theorem.name || `Theorem ${index + 1}`,
-        shape: 'class',
-        stereotype: 'theorem',
+        shape: "class",
+        stereotype: "theorem",
         attributes,
       });
 
       edges.push({
         source: typeId,
         target: theoremId,
-        type: 'association',
-        label: 'uses',
+        type: "association",
+        label: "uses",
       });
     });
   }
 
   // Add proof strategy as class with methods
   if (thought.proofStrategy) {
-    const strategyId = sanitizeId('strategy');
+    const strategyId = sanitizeId("strategy");
     const methods = thought.proofStrategy.steps.map((step, index) => {
-      return includeLabels ? `step${index + 1}(): ${step.substring(0, 30)}...` : `step${index + 1}()`;
+      return includeLabels
+        ? `step${index + 1}(): ${step.substring(0, 30)}...`
+        : `step${index + 1}()`;
     });
 
     nodes.push({
       id: strategyId,
       label: thought.proofStrategy.type,
-      shape: 'class',
-      stereotype: 'strategy',
+      shape: "class",
+      stereotype: "strategy",
       attributes: [
         `completeness: ${(thought.proofStrategy.completeness * 100).toFixed(0)}%`,
       ],
@@ -922,31 +1033,33 @@ function mathematicsToUML(thought: MathematicsThought, options: VisualExportOpti
     edges.push({
       source: typeId,
       target: strategyId,
-      type: 'dependency',
-      label: 'applies',
+      type: "dependency",
+      label: "applies",
     });
   }
 
   // Add assumptions as interface
   if (thought.assumptions && thought.assumptions.length > 0) {
-    const assumptionsId = sanitizeId('assumptions');
+    const assumptionsId = sanitizeId("assumptions");
     nodes.push({
       id: assumptionsId,
-      label: 'Assumptions',
-      shape: 'interface',
-      attributes: thought.assumptions.slice(0, 5).map((a, i) => `${i + 1}. ${a.substring(0, 30)}...`),
+      label: "Assumptions",
+      shape: "interface",
+      attributes: thought.assumptions
+        .slice(0, 5)
+        .map((a, i) => `${i + 1}. ${a.substring(0, 30)}...`),
     });
 
     edges.push({
       source: typeId,
       target: assumptionsId,
-      type: 'implementation',
-      label: 'assumes',
+      type: "implementation",
+      label: "assumes",
     });
   }
 
   return generateUmlDiagram(nodes, edges, {
-    title: 'Mathematics Derivation Structure',
+    title: "Mathematics Derivation Structure",
     includeLabels,
   });
 }
@@ -954,30 +1067,35 @@ function mathematicsToUML(thought: MathematicsThought, options: VisualExportOpti
 /**
  * Export mathematics reasoning to JSON format
  */
-function mathematicsToJSON(thought: MathematicsThought, options: VisualExportOptions): string {
+function mathematicsToJSON(
+  thought: MathematicsThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
 
-  const graph = createJsonGraph('Mathematics Derivation', 'mathematics');
+  const graph = createJsonGraph("Mathematics Derivation", "mathematics");
 
   // Add thought type as root node
-  const typeId = sanitizeId(`type_${thought.thoughtType || 'proof'}`);
+  const typeId = sanitizeId(`type_${thought.thoughtType || "proof"}`);
   addNode(graph, {
     id: typeId,
-    label: includeLabels ? (thought.thoughtType || 'Proof').replace(/_/g, ' ') : typeId,
-    type: 'type',
+    label: includeLabels
+      ? (thought.thoughtType || "Proof").replace(/_/g, " ")
+      : typeId,
+    type: "type",
     metadata: {
-      thoughtType: thought.thoughtType || 'proof',
+      thoughtType: thought.thoughtType || "proof",
       uncertainty: thought.uncertainty,
     },
   });
 
   // Add mathematical model
   if (thought.mathematicalModel) {
-    const modelId = sanitizeId('model');
+    const modelId = sanitizeId("model");
     addNode(graph, {
       id: modelId,
-      label: thought.mathematicalModel.symbolic || 'Mathematical Model',
-      type: 'model',
+      label: thought.mathematicalModel.symbolic || "Mathematical Model",
+      type: "model",
       metadata: {
         latex: thought.mathematicalModel.latex,
         symbolic: thought.mathematicalModel.symbolic,
@@ -989,8 +1107,8 @@ function mathematicsToJSON(thought: MathematicsThought, options: VisualExportOpt
       id: `edge_${typeId}_${modelId}`,
       source: typeId,
       target: modelId,
-      label: 'contains',
-      type: 'composition',
+      label: "contains",
+      type: "composition",
     });
   }
 
@@ -1001,7 +1119,7 @@ function mathematicsToJSON(thought: MathematicsThought, options: VisualExportOpt
       addNode(graph, {
         id: theoremId,
         label: theorem.name || `Theorem ${index + 1}`,
-        type: 'theorem',
+        type: "theorem",
         metadata: {
           statement: theorem.statement,
           hypotheses: theorem.hypotheses,
@@ -1013,19 +1131,19 @@ function mathematicsToJSON(thought: MathematicsThought, options: VisualExportOpt
         id: `edge_${typeId}_${theoremId}`,
         source: typeId,
         target: theoremId,
-        label: 'uses',
-        type: 'association',
+        label: "uses",
+        type: "association",
       });
     });
   }
 
   // Add proof strategy with derivation steps
   if (thought.proofStrategy) {
-    const strategyId = sanitizeId('strategy');
+    const strategyId = sanitizeId("strategy");
     addNode(graph, {
       id: strategyId,
       label: thought.proofStrategy.type,
-      type: 'strategy',
+      type: "strategy",
       metadata: {
         proofType: thought.proofStrategy.type,
         completeness: thought.proofStrategy.completeness,
@@ -1038,8 +1156,8 @@ function mathematicsToJSON(thought: MathematicsThought, options: VisualExportOpt
       id: `edge_${typeId}_${strategyId}`,
       source: typeId,
       target: strategyId,
-      label: 'applies',
-      type: 'dependency',
+      label: "applies",
+      type: "dependency",
     });
 
     // Add proof steps as nodes
@@ -1049,7 +1167,7 @@ function mathematicsToJSON(thought: MathematicsThought, options: VisualExportOpt
       addNode(graph, {
         id: stepId,
         label: includeLabels ? `Step ${index + 1}` : stepId,
-        type: 'step',
+        type: "step",
         metadata: {
           stepNumber: index + 1,
           description: step,
@@ -1060,8 +1178,8 @@ function mathematicsToJSON(thought: MathematicsThought, options: VisualExportOpt
         id: `edge_${prevStepId}_${stepId}`,
         source: prevStepId,
         target: stepId,
-        label: 'leads_to',
-        type: 'sequence',
+        label: "leads_to",
+        type: "sequence",
       });
 
       prevStepId = stepId;
@@ -1075,7 +1193,7 @@ function mathematicsToJSON(thought: MathematicsThought, options: VisualExportOpt
       addNode(graph, {
         id: assumptionId,
         label: includeLabels ? `Assumption ${index + 1}` : assumptionId,
-        type: 'assumption',
+        type: "assumption",
         metadata: {
           description: assumption,
         },
@@ -1085,21 +1203,25 @@ function mathematicsToJSON(thought: MathematicsThought, options: VisualExportOpt
         id: `edge_${typeId}_${assumptionId}`,
         source: typeId,
         target: assumptionId,
-        label: 'assumes',
-        type: 'dependency',
+        label: "assumes",
+        type: "dependency",
       });
     });
   }
 
   // Add metrics
   if (includeMetrics) {
-    addMetric(graph, 'uncertainty', thought.uncertainty);
-    addMetric(graph, 'theorem_count', thought.theorems?.length || 0);
-    addMetric(graph, 'assumption_count', thought.assumptions?.length || 0);
-    addMetric(graph, 'dependency_count', thought.dependencies?.length || 0);
+    addMetric(graph, "uncertainty", thought.uncertainty);
+    addMetric(graph, "theorem_count", thought.theorems?.length || 0);
+    addMetric(graph, "assumption_count", thought.assumptions?.length || 0);
+    addMetric(graph, "dependency_count", thought.dependencies?.length || 0);
     if (thought.proofStrategy) {
-      addMetric(graph, 'proof_completeness', thought.proofStrategy.completeness);
-      addMetric(graph, 'proof_step_count', thought.proofStrategy.steps.length);
+      addMetric(
+        graph,
+        "proof_completeness",
+        thought.proofStrategy.completeness,
+      );
+      addMetric(graph, "proof_step_count", thought.proofStrategy.steps.length);
     }
   }
 
@@ -1109,7 +1231,10 @@ function mathematicsToJSON(thought: MathematicsThought, options: VisualExportOpt
 /**
  * Export mathematics reasoning to Markdown format
  */
-function mathematicsToMarkdown(thought: MathematicsThought, options: VisualExportOptions): string {
+function mathematicsToMarkdown(
+  thought: MathematicsThought,
+  options: VisualExportOptions,
+): string {
   const {
     markdownIncludeFrontmatter = false,
     markdownIncludeToc = false,
@@ -1121,42 +1246,46 @@ function mathematicsToMarkdown(thought: MathematicsThought, options: VisualExpor
 
   // Type and Uncertainty
   const typeContent = keyValueSection({
-    'Type': (thought.thoughtType || 'proof').replace(/_/g, ' '),
-    'Uncertainty': `${(thought.uncertainty * 100).toFixed(1)}%`,
+    Type: (thought.thoughtType || "proof").replace(/_/g, " "),
+    Uncertainty: `${(thought.uncertainty * 100).toFixed(1)}%`,
   });
-  parts.push(section('Overview', typeContent));
+  parts.push(section("Overview", typeContent));
 
   // Mathematical Model
   if (thought.mathematicalModel) {
     const modelContent = keyValueSection({
-      'LaTeX': `\`${thought.mathematicalModel.latex}\``,
-      'Symbolic': `\`${thought.mathematicalModel.symbolic}\``,
-      'ASCII': thought.mathematicalModel.ascii ? `\`${thought.mathematicalModel.ascii}\`` : 'N/A',
+      LaTeX: `\`${thought.mathematicalModel.latex}\``,
+      Symbolic: `\`${thought.mathematicalModel.symbolic}\``,
+      ASCII: thought.mathematicalModel.ascii
+        ? `\`${thought.mathematicalModel.ascii}\``
+        : "N/A",
     });
-    parts.push(section('Mathematical Model', modelContent));
+    parts.push(section("Mathematical Model", modelContent));
   }
 
   // Metrics
   if (includeMetrics) {
     const metricsContent = keyValueSection({
-      'Uncertainty': `${(thought.uncertainty * 100).toFixed(1)}%`,
-      'Theorems': thought.theorems?.length || 0,
-      'Assumptions': thought.assumptions?.length || 0,
-      'Proof Completeness': thought.proofStrategy ? `${(thought.proofStrategy.completeness * 100).toFixed(0)}%` : 'N/A',
+      Uncertainty: `${(thought.uncertainty * 100).toFixed(1)}%`,
+      Theorems: thought.theorems?.length || 0,
+      Assumptions: thought.assumptions?.length || 0,
+      "Proof Completeness": thought.proofStrategy
+        ? `${(thought.proofStrategy.completeness * 100).toFixed(0)}%`
+        : "N/A",
     });
-    parts.push(section('Metrics', metricsContent));
+    parts.push(section("Metrics", metricsContent));
   }
 
   // Proof Strategy
   if (thought.proofStrategy) {
     let proofContent = `**Type:** ${thought.proofStrategy.type}\n\n`;
     proofContent += `**Completeness:** ${(thought.proofStrategy.completeness * 100).toFixed(0)}%\n\n`;
-    proofContent += '**Steps:**\n\n';
+    proofContent += "**Steps:**\n\n";
 
-    const stepItems = thought.proofStrategy.steps.map((step, index) =>
-      `${index + 1}. ${step}`
+    const stepItems = thought.proofStrategy.steps.map(
+      (step, index) => `${index + 1}. ${step}`,
     );
-    proofContent += list(stepItems, 'numbered');
+    proofContent += list(stepItems, "numbered");
 
     if (thought.proofStrategy.baseCase) {
       proofContent += `\n**Base Case:** ${thought.proofStrategy.baseCase}\n`;
@@ -1165,36 +1294,37 @@ function mathematicsToMarkdown(thought: MathematicsThought, options: VisualExpor
       proofContent += `\n**Inductive Step:** ${thought.proofStrategy.inductiveStep}\n`;
     }
 
-    parts.push(section('Proof Strategy', proofContent));
+    parts.push(section("Proof Strategy", proofContent));
   }
 
   // Theorems
   if (thought.theorems && thought.theorems.length > 0) {
-    const theoremItems = thought.theorems.map(theorem =>
-      `**${theorem.name}**: ${theorem.statement}\n  - Hypotheses: ${theorem.hypotheses.join(', ')}\n  - Conclusion: ${theorem.conclusion}`
+    const theoremItems = thought.theorems.map(
+      (theorem) =>
+        `**${theorem.name}**: ${theorem.statement}\n  - Hypotheses: ${theorem.hypotheses.join(", ")}\n  - Conclusion: ${theorem.conclusion}`,
     );
-    parts.push(section('Theorems', list(theoremItems)));
+    parts.push(section("Theorems", list(theoremItems)));
   }
 
   // Assumptions
   if (thought.assumptions && thought.assumptions.length > 0) {
-    parts.push(section('Assumptions', list(thought.assumptions)));
+    parts.push(section("Assumptions", list(thought.assumptions)));
   }
 
   // Dependencies
   if (thought.dependencies && thought.dependencies.length > 0) {
-    parts.push(section('Dependencies', list(thought.dependencies)));
+    parts.push(section("Dependencies", list(thought.dependencies)));
   }
 
   // Mermaid diagram
   if (markdownIncludeMermaid) {
-    const mermaidDiagram = mathematicsToMermaid(thought, 'default', true, true);
-    parts.push(section('Derivation Diagram', mermaidBlock(mermaidDiagram)));
+    const mermaidDiagram = mathematicsToMermaid(thought, "default", true, true);
+    parts.push(section("Derivation Diagram", mermaidBlock(mermaidDiagram)));
   }
 
-  return mdDocument('Mathematics Analysis', parts.join('\n'), {
+  return mdDocument("Mathematics Analysis", parts.join("\n"), {
     includeFrontmatter: markdownIncludeFrontmatter,
     includeTableOfContents: markdownIncludeToc,
-    metadata: { mode: 'mathematics' },
+    metadata: { mode: "mathematics" },
   });
 }

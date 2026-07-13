@@ -5,9 +5,9 @@
  * eliminating the use of `any` in the API layer.
  */
 
-import { ThinkingMode } from './core.js';
-import type { SessionActionInput } from '../tools/schemas/base.js';
-import type { AnalyzeInput } from '../tools/schemas/analyze.js';
+import { ThinkingMode } from "./core.js";
+import type { SessionActionInput } from "../tools/schemas/base.js";
+import type { AnalyzeInput } from "../tools/schemas/analyze.js";
 
 // ============================================================================
 // MCP Response Types
@@ -17,7 +17,7 @@ import type { AnalyzeInput } from '../tools/schemas/analyze.js';
  * Standard MCP content block
  */
 export interface MCPTextContent {
-  type: 'text';
+  type: "text";
   text: string;
 }
 
@@ -61,7 +61,7 @@ export interface AddThoughtInput {
  */
 export interface SummarizeInput {
   sessionId: string;
-  action: 'summarize';
+  action: "summarize";
 }
 
 /**
@@ -69,9 +69,18 @@ export interface SummarizeInput {
  */
 export interface ExportInput {
   sessionId: string;
-  action: 'export';
-  exportFormat?: 'markdown' | 'latex' | 'json' | 'html' | 'jupyter' | 'mermaid' | 'dot' | 'ascii';
-  exportProfile?: 'academic' | 'presentation' | 'documentation' | 'archive' | 'minimal';
+  action: "export";
+  exportFormat?:
+    | "markdown"
+    | "latex"
+    | "json"
+    | "html"
+    | "jupyter"
+    | "mermaid"
+    | "dot"
+    | "ascii";
+  exportProfile?:
+    "academic" | "presentation" | "documentation" | "archive" | "minimal";
 }
 
 /**
@@ -79,8 +88,9 @@ export interface ExportInput {
  */
 export interface ExportAllInput {
   sessionId: string;
-  action: 'export_all';
-  exportProfile?: 'academic' | 'presentation' | 'documentation' | 'archive' | 'minimal';
+  action: "export_all";
+  exportProfile?:
+    "academic" | "presentation" | "documentation" | "archive" | "minimal";
   includeContent?: boolean;
 }
 
@@ -89,7 +99,7 @@ export interface ExportAllInput {
  */
 export interface SwitchModeInput {
   sessionId: string;
-  action: 'switch_mode';
+  action: "switch_mode";
   newMode: string;
 }
 
@@ -98,19 +108,19 @@ export interface SwitchModeInput {
  */
 export interface GetSessionInput {
   sessionId: string;
-  action: 'get_session';
+  action: "get_session";
 }
 
 /**
  * Input for handleRecommendMode
  */
 export interface RecommendModeInput {
-  action: 'recommend_mode';
+  action: "recommend_mode";
   problemType?: string;
   problemCharacteristics?: {
     domain: string;
-    complexity: 'low' | 'medium' | 'high';
-    uncertainty: 'low' | 'medium' | 'high';
+    complexity: "low" | "medium" | "high";
+    uncertainty: "low" | "medium" | "high";
     timeDependent: boolean;
     multiAgent: boolean;
     requiresProof: boolean;
@@ -127,7 +137,7 @@ export interface RecommendModeInput {
  */
 export interface DeleteSessionInput {
   sessionId: string;
-  action: 'delete_session';
+  action: "delete_session";
 }
 
 // ============================================================================
@@ -204,37 +214,39 @@ export interface AnalyzeResponse {
  * Type guard for AddThoughtInput
  */
 export function isAddThoughtInput(input: unknown): input is AddThoughtInput {
-  if (typeof input !== 'object' || input === null) return false;
+  if (typeof input !== "object" || input === null) return false;
   const obj = input as Record<string, unknown>;
   return (
-    typeof obj.thought === 'string' &&
-    typeof obj.thoughtNumber === 'number' &&
-    typeof obj.totalThoughts === 'number' &&
-    typeof obj.nextThoughtNeeded === 'boolean'
+    typeof obj.thought === "string" &&
+    typeof obj.thoughtNumber === "number" &&
+    typeof obj.totalThoughts === "number" &&
+    typeof obj.nextThoughtNeeded === "boolean"
   );
 }
 
 /**
  * Type guard for session action inputs
  */
-export function isSessionActionInput(input: unknown): input is SessionActionInput {
-  if (typeof input !== 'object' || input === null) return false;
+export function isSessionActionInput(
+  input: unknown,
+): input is SessionActionInput {
+  if (typeof input !== "object" || input === null) return false;
   const obj = input as Record<string, unknown>;
-  return typeof obj.action === 'string';
+  return typeof obj.action === "string";
 }
 
 /**
  * Type guard for analyze inputs
  */
 export function isAnalyzeInput(input: unknown): input is AnalyzeInput {
-  if (typeof input !== 'object' || input === null) return false;
+  if (typeof input !== "object" || input === null) return false;
   const obj = input as Record<string, unknown>;
-  return typeof obj.thought === 'string';
+  return typeof obj.thought === "string";
 }
 
 // ============================================================================
 // Re-exports for convenience
 // ============================================================================
 
-export type { SessionActionInput } from '../tools/schemas/base.js';
-export type { AnalyzeInput } from '../tools/schemas/analyze.js';
+export type { SessionActionInput } from "../tools/schemas/base.js";
+export type { AnalyzeInput } from "../tools/schemas/analyze.js";

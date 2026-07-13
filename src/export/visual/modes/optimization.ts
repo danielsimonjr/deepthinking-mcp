@@ -6,13 +6,13 @@
  * Phase 13 Sprint 6: Refactored to use fluent builder classes
  */
 
-import type { OptimizationThought } from '../../../types/index.js';
-import type { VisualExportOptions } from '../types.js';
-import { sanitizeId } from '../utils.js';
+import type { OptimizationThought } from "../../../types/index.js";
+import type { VisualExportOptions } from "../types.js";
+import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
-import { DOTGraphBuilder } from '../utils/dot.js';
-import { MermaidGraphBuilder } from '../utils/mermaid.js';
-import { ASCIIDocBuilder } from '../utils/ascii.js';
+import { DOTGraphBuilder } from "../utils/dot.js";
+import { MermaidGraphBuilder } from "../utils/mermaid.js";
+import { ASCIIDocBuilder } from "../utils/ascii.js";
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -25,17 +25,13 @@ import {
   getNodeColor,
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
-} from '../utils/svg.js';
+} from "../utils/svg.js";
 import {
   generateGraphML,
   type GraphMLNode,
   type GraphMLEdge,
-} from '../utils/graphml.js';
-import {
-  generateTikZ,
-  type TikZNode,
-  type TikZEdge,
-} from '../utils/tikz.js';
+} from "../utils/graphml.js";
+import { generateTikZ, type TikZNode, type TikZEdge } from "../utils/tikz.js";
 import {
   generateHTMLHeader,
   generateHTMLFooter,
@@ -44,23 +40,20 @@ import {
   renderSection,
   renderTable,
   renderBadge,
-} from '../utils/html.js';
-import {
-  sanitizeModelicaId,
-  escapeModelicaString,
-} from '../utils/modelica.js';
+} from "../utils/html.js";
+import { sanitizeModelicaId, escapeModelicaString } from "../utils/modelica.js";
 import {
   generateUmlDiagram,
   type UmlNode,
   type UmlEdge,
-} from '../utils/uml.js';
+} from "../utils/uml.js";
 import {
   createJsonGraph,
   addNode,
   addEdge,
   addMetric,
   serializeGraph,
-} from '../utils/json.js';
+} from "../utils/json.js";
 import {
   section,
   table,
@@ -68,36 +61,49 @@ import {
   keyValueSection,
   mermaidBlock,
   document as mdDocument,
-} from '../utils/markdown.js';
+} from "../utils/markdown.js";
 
 /**
  * Export optimization problem constraint graph to visual format
  */
-export function exportOptimizationSolution(thought: OptimizationThought, options: VisualExportOptions): string {
-  const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+export function exportOptimizationSolution(
+  thought: OptimizationThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+  } = options;
 
   switch (format) {
-    case 'mermaid':
-      return optimizationToMermaid(thought, colorScheme, includeLabels, includeMetrics);
-    case 'dot':
+    case "mermaid":
+      return optimizationToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics,
+      );
+    case "dot":
       return optimizationToDOT(thought, includeLabels, includeMetrics);
-    case 'ascii':
+    case "ascii":
       return optimizationToASCII(thought);
-    case 'svg':
+    case "svg":
       return optimizationToSVG(thought, options);
-    case 'graphml':
+    case "graphml":
       return optimizationToGraphML(thought, options);
-    case 'tikz':
+    case "tikz":
       return optimizationToTikZ(thought, options);
-    case 'html':
+    case "html":
       return optimizationToHTML(thought, options);
-    case 'modelica':
+    case "modelica":
       return optimizationToModelica(thought, options);
-    case 'uml':
+    case "uml":
       return optimizationToUML(thought, options);
-    case 'json':
+    case "json":
       return optimizationToJSON(thought, options);
-    case 'markdown':
+    case "markdown":
       return optimizationToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
@@ -108,17 +114,17 @@ function optimizationToMermaid(
   thought: OptimizationThought,
   colorScheme: string,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
-  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
-  const builder = new MermaidGraphBuilder().setDirection('TD');
+  const scheme = colorScheme as "default" | "pastel" | "monochrome";
+  const builder = new MermaidGraphBuilder().setDirection("TD");
 
   // Problem
   if (thought.problem) {
     const problemLabel = includeLabels
       ? `Problem: ${thought.problem.name}`
-      : 'Problem';
-    builder.addNode({ id: 'Problem', label: problemLabel, shape: 'rectangle' });
+      : "Problem";
+    builder.addNode({ id: "Problem", label: problemLabel, shape: "rectangle" });
   }
 
   // Variables
@@ -128,24 +134,32 @@ function optimizationToMermaid(
       const varId = sanitizeId(variable.id);
       varNodeIds.push(varId);
       const label = includeLabels ? variable.name : varId;
-      const domainLabel = includeMetrics && variable.domain
-        ? ` [${(variable.domain as any).lowerBound},${(variable.domain as any).upperBound}]`
-        : '';
-      builder.addNode({ id: varId, label: `${label}${domainLabel}`, shape: 'rectangle' });
+      const domainLabel =
+        includeMetrics && variable.domain
+          ? ` [${(variable.domain as any).lowerBound},${(variable.domain as any).upperBound}]`
+          : "";
+      builder.addNode({
+        id: varId,
+        label: `${label}${domainLabel}`,
+        shape: "rectangle",
+      });
     }
-    builder.addSubgraph('Variables', 'Decision Variables', varNodeIds);
+    builder.addSubgraph("Variables", "Decision Variables", varNodeIds);
   }
 
   // Constraints
-  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+  if (
+    thought.optimizationConstraints &&
+    thought.optimizationConstraints.length > 0
+  ) {
     const constNodeIds: string[] = [];
     for (const constraint of thought.optimizationConstraints) {
       const constId = sanitizeId(constraint.id);
       constNodeIds.push(constId);
       const label = includeLabels ? constraint.name : constId;
-      builder.addNode({ id: constId, label, shape: 'rectangle' });
+      builder.addNode({ id: constId, label, shape: "rectangle" });
     }
-    builder.addSubgraph('Constraints', 'Constraints', constNodeIds);
+    builder.addSubgraph("Constraints", "Constraints", constNodeIds);
   }
 
   // Objectives
@@ -155,20 +169,25 @@ function optimizationToMermaid(
       const label = includeLabels
         ? `${objective.type}: ${objective.name}`
         : objId;
-      builder.addNode({ id: objId, label, shape: 'rectangle' });
+      builder.addNode({ id: objId, label, shape: "rectangle" });
     }
   }
 
   // Solution
   if (thought.solution) {
-    const qualityLabel = includeMetrics && thought.solution.quality
-      ? ` (quality: ${thought.solution.quality.toFixed(2)})`
-      : '';
-    builder.addNode({ id: 'Solution', label: `Solution${qualityLabel}`, shape: 'rectangle' });
+    const qualityLabel =
+      includeMetrics && thought.solution.quality
+        ? ` (quality: ${thought.solution.quality.toFixed(2)})`
+        : "";
+    builder.addNode({
+      id: "Solution",
+      label: `Solution${qualityLabel}`,
+      shape: "rectangle",
+    });
     if (thought.objectives) {
       for (const objective of thought.objectives) {
         const objId = sanitizeId(objective.id);
-        builder.addEdge({ source: objId, target: 'Solution' });
+        builder.addEdge({ source: objId, target: "Solution" });
       }
     }
   }
@@ -179,17 +198,21 @@ function optimizationToMermaid(
 function optimizationToDOT(
   thought: OptimizationThought,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
   const builder = new DOTGraphBuilder()
-    .setGraphName('Optimization')
-    .setRankDir('TB')
-    .setNodeDefaults({ shape: 'box', style: 'rounded' });
+    .setGraphName("Optimization")
+    .setRankDir("TB")
+    .setNodeDefaults({ shape: "box", style: "rounded" });
 
   // Problem
   if (thought.problem) {
-    const label = includeLabels ? thought.problem.name : 'Problem';
-    builder.addNode({ id: 'Problem', label: `Problem:\n${label}`, shape: 'ellipse' });
+    const label = includeLabels ? thought.problem.name : "Problem";
+    builder.addNode({
+      id: "Problem",
+      label: `Problem:\n${label}`,
+      shape: "ellipse",
+    });
   }
 
   // Variables
@@ -197,19 +220,23 @@ function optimizationToDOT(
     for (const variable of thought.variables) {
       const varId = sanitizeId(variable.id);
       const label = includeLabels ? variable.name : varId;
-      const domainLabel = includeMetrics && variable.domain
-        ? `\n[${(variable.domain as any).lowerBound}, ${(variable.domain as any).upperBound}]`
-        : '';
+      const domainLabel =
+        includeMetrics && variable.domain
+          ? `\n[${(variable.domain as any).lowerBound}, ${(variable.domain as any).upperBound}]`
+          : "";
       builder.addNode({ id: varId, label: `${label}${domainLabel}` });
     }
   }
 
   // Constraints
-  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+  if (
+    thought.optimizationConstraints &&
+    thought.optimizationConstraints.length > 0
+  ) {
     for (const constraint of thought.optimizationConstraints) {
       const constId = sanitizeId(constraint.id);
       const label = includeLabels ? constraint.name : constId;
-      builder.addNode({ id: constId, label, shape: 'diamond' });
+      builder.addNode({ id: constId, label, shape: "diamond" });
     }
   }
 
@@ -217,27 +244,30 @@ function optimizationToDOT(
   if (thought.objectives) {
     for (const objective of thought.objectives) {
       const objId = sanitizeId(objective.id);
-      const label = includeLabels ? `${objective.type}:\n${objective.name}` : objId;
+      const label = includeLabels
+        ? `${objective.type}:\n${objective.name}`
+        : objId;
       builder.addNode({ id: objId, label });
     }
   }
 
   // Solution
   if (thought.solution) {
-    const qualityLabel = includeMetrics && thought.solution.quality
-      ? `\nquality: ${thought.solution.quality.toFixed(2)}`
-      : '';
+    const qualityLabel =
+      includeMetrics && thought.solution.quality
+        ? `\nquality: ${thought.solution.quality.toFixed(2)}`
+        : "";
     builder.addNode({
-      id: 'Solution',
+      id: "Solution",
       label: `Solution${qualityLabel}`,
-      shape: 'doubleoctagon',
-      style: ['filled'],
-      fillColor: 'lightgreen'
+      shape: "doubleoctagon",
+      style: ["filled"],
+      fillColor: "lightgreen",
     });
     if (thought.objectives) {
       for (const objective of thought.objectives) {
         const objId = sanitizeId(objective.id);
-        builder.addEdge({ source: objId, target: 'Solution' });
+        builder.addEdge({ source: objId, target: "Solution" });
       }
     }
   }
@@ -247,33 +277,38 @@ function optimizationToDOT(
 
 function optimizationToASCII(thought: OptimizationThought): string {
   const builder = new ASCIIDocBuilder()
-    .addHeader('Optimization Problem', 'equals')
+    .addHeader("Optimization Problem", "equals")
     .addEmptyLine();
 
   // Problem
   if (thought.problem) {
     builder.addText(`Problem: ${thought.problem.name}`);
     builder.addText(`Type: ${thought.problem.type}`);
-    builder.addText(`${thought.problem.description || '-'}`);
+    builder.addText(`${thought.problem.description || "-"}`);
     builder.addEmptyLine();
   }
 
   // Variables
   if (thought.variables && thought.variables.length > 0) {
-    builder.addSection('Decision Variables').addEmptyLine();
+    builder.addSection("Decision Variables").addEmptyLine();
     for (const variable of thought.variables) {
-      const varType = (variable as any).type || 'unknown';
+      const varType = (variable as any).type || "unknown";
       builder.addText(`  ${variable.name} (${varType})`);
       if (variable.domain) {
-        builder.addText(`    Domain: [${(variable.domain as any).lowerBound}, ${(variable.domain as any).upperBound}]`);
+        builder.addText(
+          `    Domain: [${(variable.domain as any).lowerBound}, ${(variable.domain as any).upperBound}]`,
+        );
       }
     }
     builder.addEmptyLine();
   }
 
   // Constraints
-  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
-    builder.addSection('Constraints').addEmptyLine();
+  if (
+    thought.optimizationConstraints &&
+    thought.optimizationConstraints.length > 0
+  ) {
+    builder.addSection("Constraints").addEmptyLine();
     for (const constraint of thought.optimizationConstraints) {
       builder.addText(`  ${constraint.name} (${constraint.type})`);
       builder.addText(`    ${constraint.formula}`);
@@ -283,7 +318,7 @@ function optimizationToASCII(thought: OptimizationThought): string {
 
   // Objectives
   if (thought.objectives && thought.objectives.length > 0) {
-    builder.addSection('Objectives').addEmptyLine();
+    builder.addSection("Objectives").addEmptyLine();
     for (const objective of thought.objectives) {
       builder.addText(`  ${objective.type.toUpperCase()}: ${objective.name}`);
       builder.addText(`    ${objective.formula}`);
@@ -293,7 +328,7 @@ function optimizationToASCII(thought: OptimizationThought): string {
 
   // Solution
   if (thought.solution) {
-    builder.addSection('Solution').addEmptyLine();
+    builder.addSection("Solution").addEmptyLine();
     const solution = thought.solution as any;
     if (solution.status) {
       builder.addText(`  Status: ${solution.status}`);
@@ -305,7 +340,7 @@ function optimizationToASCII(thought: OptimizationThought): string {
       builder.addText(`  Quality: ${solution.quality.toFixed(2)}`);
     }
     if (solution.assignments) {
-      builder.addText('  Assignments:');
+      builder.addText("  Assignments:");
       for (const [varId, value] of Object.entries(solution.assignments)) {
         builder.addText(`    ${varId} = ${value}`);
       }
@@ -318,9 +353,12 @@ function optimizationToASCII(thought: OptimizationThought): string {
 /**
  * Export optimization problem constraint graph to native SVG format
  */
-function optimizationToSVG(thought: OptimizationThought, options: VisualExportOptions): string {
+function optimizationToSVG(
+  thought: OptimizationThought,
+  options: VisualExportOptions,
+): string {
   const {
-    colorScheme = 'default',
+    colorScheme = "default",
     includeLabels = true,
     includeMetrics = true,
     svgWidth = DEFAULT_SVG_OPTIONS.width,
@@ -333,14 +371,14 @@ function optimizationToSVG(thought: OptimizationThought, options: VisualExportOp
 
   // Problem at the top
   if (thought.problem) {
-    positions.set('Problem', {
-      id: 'Problem',
-      label: includeLabels ? thought.problem.name : 'Problem',
+    positions.set("Problem", {
+      id: "Problem",
+      label: includeLabels ? thought.problem.name : "Problem",
       x: svgWidth / 2,
       y: 80,
       width: nodeWidth,
       height: nodeHeight,
-      type: 'problem',
+      type: "problem",
     });
   }
 
@@ -354,7 +392,7 @@ function optimizationToSVG(thought: OptimizationThought, options: VisualExportOp
         y: 200 + index * 80,
         width: nodeWidth,
         height: nodeHeight,
-        type: 'variable',
+        type: "variable",
       });
     });
   }
@@ -364,30 +402,32 @@ function optimizationToSVG(thought: OptimizationThought, options: VisualExportOp
     thought.objectives.forEach((objective, index) => {
       positions.set(objective.id, {
         id: objective.id,
-        label: includeLabels ? `${objective.type}: ${objective.name}` : objective.id,
+        label: includeLabels
+          ? `${objective.type}: ${objective.name}`
+          : objective.id,
         x: svgWidth - 150,
         y: 200 + index * 80,
         width: nodeWidth,
         height: nodeHeight,
-        type: 'objective',
+        type: "objective",
       });
     });
   }
 
   // Solution at the bottom
   if (thought.solution) {
-    positions.set('Solution', {
-      id: 'Solution',
-      label: 'Solution',
+    positions.set("Solution", {
+      id: "Solution",
+      label: "Solution",
       x: svgWidth / 2,
       y: svgHeight - 100,
       width: nodeWidth,
       height: nodeHeight,
-      type: 'solution',
+      type: "solution",
     });
   }
 
-  let svg = generateSVGHeader(svgWidth, svgHeight, 'Optimization Problem');
+  let svg = generateSVGHeader(svgWidth, svgHeight, "Optimization Problem");
 
   // Render edges
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
@@ -396,63 +436,72 @@ function optimizationToSVG(thought: OptimizationThought, options: VisualExportOp
   if (thought.objectives && thought.solution) {
     for (const objective of thought.objectives) {
       const objPos = positions.get(objective.id);
-      const solPos = positions.get('Solution');
+      const solPos = positions.get("Solution");
       if (objPos && solPos) {
         svg += renderEdge(objPos, solPos);
       }
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render nodes
   svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
 
-  const problemColors = getNodeColor('warning', colorScheme);
-  const variableColors = getNodeColor('neutral', colorScheme);
-  const objectiveColors = getNodeColor('primary', colorScheme);
-  const solutionColors = getNodeColor('success', colorScheme);
+  const problemColors = getNodeColor("warning", colorScheme);
+  const variableColors = getNodeColor("neutral", colorScheme);
+  const objectiveColors = getNodeColor("primary", colorScheme);
+  const solutionColors = getNodeColor("success", colorScheme);
 
   for (const [, pos] of positions) {
-    if (pos.type === 'problem') {
+    if (pos.type === "problem") {
       svg += renderEllipseNode(pos, problemColors);
-    } else if (pos.type === 'variable') {
+    } else if (pos.type === "variable") {
       svg += renderRectNode(pos, variableColors);
-    } else if (pos.type === 'objective') {
+    } else if (pos.type === "objective") {
       svg += renderRectNode(pos, objectiveColors);
-    } else if (pos.type === 'solution') {
+    } else if (pos.type === "solution") {
       svg += renderStadiumNode(pos, solutionColors);
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render metrics panel
   if (includeMetrics) {
     const metrics = [
-      { label: 'Variables', value: thought.variables?.length || 0 },
-      { label: 'Constraints', value: thought.optimizationConstraints?.length || 0 },
-      { label: 'Objectives', value: thought.objectives?.length || 0 },
-      { label: 'Quality', value: thought.solution?.quality?.toFixed(2) || 'N/A' },
+      { label: "Variables", value: thought.variables?.length || 0 },
+      {
+        label: "Constraints",
+        value: thought.optimizationConstraints?.length || 0,
+      },
+      { label: "Objectives", value: thought.objectives?.length || 0 },
+      {
+        label: "Quality",
+        value: thought.solution?.quality?.toFixed(2) || "N/A",
+      },
     ];
     svg += renderMetricsPanel(svgWidth - 180, svgHeight - 150, metrics);
   }
 
   // Render legend
   const legendItems = [
-    { label: 'Problem', color: problemColors, shape: 'ellipse' as const },
-    { label: 'Variable', color: variableColors },
-    { label: 'Objective', color: objectiveColors },
-    { label: 'Solution', color: solutionColors, shape: 'stadium' as const },
+    { label: "Problem", color: problemColors, shape: "ellipse" as const },
+    { label: "Variable", color: variableColors },
+    { label: "Objective", color: objectiveColors },
+    { label: "Solution", color: solutionColors, shape: "stadium" as const },
   ];
   svg += renderLegend(20, svgHeight - 140, legendItems);
 
-  svg += '\n' + generateSVGFooter();
+  svg += "\n" + generateSVGFooter();
   return svg;
 }
 
 /**
  * Export optimization problem to GraphML format
  */
-function optimizationToGraphML(thought: OptimizationThought, options: VisualExportOptions): string {
+function optimizationToGraphML(
+  thought: OptimizationThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
   const nodes: GraphMLNode[] = [];
   const edges: GraphMLEdge[] = [];
@@ -463,8 +512,10 @@ function optimizationToGraphML(thought: OptimizationThought, options: VisualExpo
     for (const objective of thought.objectives) {
       nodes.push({
         id: sanitizeId(objective.id),
-        label: includeLabels ? `${objective.type}: ${objective.name}` : objective.id,
-        type: 'objective',
+        label: includeLabels
+          ? `${objective.type}: ${objective.name}`
+          : objective.id,
+        type: "objective",
         metadata: {
           description: objective.formula,
           objectiveType: objective.type,
@@ -474,12 +525,15 @@ function optimizationToGraphML(thought: OptimizationThought, options: VisualExpo
   }
 
   // Add constraint nodes
-  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+  if (
+    thought.optimizationConstraints &&
+    thought.optimizationConstraints.length > 0
+  ) {
     for (const constraint of thought.optimizationConstraints) {
       nodes.push({
         id: sanitizeId(constraint.id),
         label: includeLabels ? constraint.name : constraint.id,
-        type: 'constraint',
+        type: "constraint",
         metadata: {
           description: constraint.formula,
           constraintType: constraint.type,
@@ -493,7 +547,7 @@ function optimizationToGraphML(thought: OptimizationThought, options: VisualExpo
             id: `e${edgeCount++}`,
             source: sanitizeId(constraint.id),
             target: sanitizeId(objective.id),
-            label: 'constrains',
+            label: "constrains",
           });
         }
       }
@@ -503,11 +557,12 @@ function optimizationToGraphML(thought: OptimizationThought, options: VisualExpo
   // Add solution/optimum node
   if (thought.solution) {
     nodes.push({
-      id: 'solution',
-      label: includeMetrics && thought.solution.quality
-        ? `Solution (quality: ${thought.solution.quality.toFixed(2)})`
-        : 'Solution',
-      type: 'solution',
+      id: "solution",
+      label:
+        includeMetrics && thought.solution.quality
+          ? `Solution (quality: ${thought.solution.quality.toFixed(2)})`
+          : "Solution",
+      type: "solution",
       metadata: {
         status: (thought.solution as any).status,
         optimalValue: (thought.solution as any).optimalValue,
@@ -521,15 +576,15 @@ function optimizationToGraphML(thought: OptimizationThought, options: VisualExpo
         edges.push({
           id: `e${edgeCount++}`,
           source: sanitizeId(objective.id),
-          target: 'solution',
-          label: 'optimizes',
+          target: "solution",
+          label: "optimizes",
         });
       }
     }
   }
 
   return generateGraphML(nodes, edges, {
-    graphName: 'Optimization Solution',
+    graphName: "Optimization Solution",
     includeLabels,
     includeMetadata: includeMetrics,
   });
@@ -538,8 +593,15 @@ function optimizationToGraphML(thought: OptimizationThought, options: VisualExpo
 /**
  * Export optimization problem to TikZ format
  */
-function optimizationToTikZ(thought: OptimizationThought, options: VisualExportOptions): string {
-  const { colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+function optimizationToTikZ(
+  thought: OptimizationThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+  } = options;
   const nodes: TikZNode[] = [];
   const edges: TikZEdge[] = [];
   let yOffset = 0;
@@ -547,32 +609,47 @@ function optimizationToTikZ(thought: OptimizationThought, options: VisualExportO
   // Objective functions at the top
   if (thought.objectives && thought.objectives.length > 0) {
     const startX = thought.objectives.length > 1 ? 0 : 4;
-    const spacing = thought.objectives.length > 1 ? 8 / thought.objectives.length : 0;
+    const spacing =
+      thought.objectives.length > 1 ? 8 / thought.objectives.length : 0;
 
     for (let i = 0; i < thought.objectives.length; i++) {
       const objective = thought.objectives[i];
-      const x = thought.objectives.length === 1 ? startX : startX + i * spacing + spacing / 2;
+      const x =
+        thought.objectives.length === 1
+          ? startX
+          : startX + i * spacing + spacing / 2;
 
       nodes.push({
         id: sanitizeId(objective.id),
-        label: includeLabels ? `${objective.type}: ${objective.name}` : objective.id,
+        label: includeLabels
+          ? `${objective.type}: ${objective.name}`
+          : objective.id,
         x,
         y: yOffset,
-        type: 'primary',
-        shape: 'rectangle',
+        type: "primary",
+        shape: "rectangle",
       });
     }
     yOffset -= 2;
   }
 
   // Constraints in the middle
-  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+  if (
+    thought.optimizationConstraints &&
+    thought.optimizationConstraints.length > 0
+  ) {
     const startX = thought.optimizationConstraints.length > 1 ? 0 : 4;
-    const spacing = thought.optimizationConstraints.length > 1 ? 8 / thought.optimizationConstraints.length : 0;
+    const spacing =
+      thought.optimizationConstraints.length > 1
+        ? 8 / thought.optimizationConstraints.length
+        : 0;
 
     for (let i = 0; i < thought.optimizationConstraints.length; i++) {
       const constraint = thought.optimizationConstraints[i];
-      const x = thought.optimizationConstraints.length === 1 ? startX : startX + i * spacing + spacing / 2;
+      const x =
+        thought.optimizationConstraints.length === 1
+          ? startX
+          : startX + i * spacing + spacing / 2;
       const constraintId = sanitizeId(constraint.id);
 
       nodes.push({
@@ -580,8 +657,8 @@ function optimizationToTikZ(thought: OptimizationThought, options: VisualExportO
         label: includeLabels ? constraint.name : constraint.id,
         x,
         y: yOffset,
-        type: 'warning',
-        shape: 'diamond',
+        type: "warning",
+        shape: "diamond",
       });
 
       // Create edges from constraints to objectives
@@ -600,17 +677,18 @@ function optimizationToTikZ(thought: OptimizationThought, options: VisualExportO
 
   // Solution at the bottom
   if (thought.solution) {
-    const solutionLabel = includeMetrics && thought.solution.quality
-      ? `Solution (${thought.solution.quality.toFixed(2)})`
-      : 'Solution';
+    const solutionLabel =
+      includeMetrics && thought.solution.quality
+        ? `Solution (${thought.solution.quality.toFixed(2)})`
+        : "Solution";
 
     nodes.push({
-      id: 'solution',
+      id: "solution",
       label: solutionLabel,
       x: 4,
       y: yOffset,
-      type: 'success',
-      shape: 'ellipse',
+      type: "success",
+      shape: "ellipse",
     });
 
     // Create edges from objectives to solution
@@ -618,7 +696,7 @@ function optimizationToTikZ(thought: OptimizationThought, options: VisualExportO
       for (const objective of thought.objectives) {
         edges.push({
           source: sanitizeId(objective.id),
-          target: 'solution',
+          target: "solution",
           directed: true,
         });
       }
@@ -626,7 +704,7 @@ function optimizationToTikZ(thought: OptimizationThought, options: VisualExportO
   }
 
   return generateTikZ(nodes, edges, {
-    title: 'Optimization Solution',
+    title: "Optimization Solution",
     colorScheme,
     includeLabels,
     includeMetrics,
@@ -636,59 +714,84 @@ function optimizationToTikZ(thought: OptimizationThought, options: VisualExportO
 /**
  * Export optimization problem to HTML format
  */
-function optimizationToHTML(thought: OptimizationThought, options: VisualExportOptions): string {
+function optimizationToHTML(
+  thought: OptimizationThought,
+  options: VisualExportOptions,
+): string {
   const {
     htmlStandalone = true,
-    htmlTitle = 'Optimization Analysis',
-    htmlTheme = 'light',
+    htmlTitle = "Optimization Analysis",
+    htmlTheme = "light",
     includeMetrics = true,
   } = options;
 
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme,
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
 
   // Problem Overview
   if (thought.problem) {
     const problemContent = `
       <p><strong>Name:</strong> ${escapeHTML(thought.problem.name)}</p>
-      <p><strong>Type:</strong> ${renderBadge(thought.problem.type.toUpperCase(), 'info')}</p>
+      <p><strong>Type:</strong> ${renderBadge(thought.problem.type.toUpperCase(), "info")}</p>
       <p>${escapeHTML(thought.problem.description)}</p>
     `;
-    html += renderSection('Problem', problemContent, '🎯');
+    html += renderSection("Problem", problemContent, "🎯");
   }
 
   // Metrics
   if (includeMetrics) {
     html += '<div class="metrics-grid">\n';
-    html += renderMetricCard('Variables', thought.variables?.length || 0, 'primary');
-    html += renderMetricCard('Constraints', thought.optimizationConstraints?.length || 0, 'warning');
-    html += renderMetricCard('Objectives', thought.objectives?.length || 0, 'info');
-    html += renderMetricCard('Quality', thought.solution?.quality?.toFixed(2) || 'N/A', 'success');
-    html += '</div>\n';
+    html += renderMetricCard(
+      "Variables",
+      thought.variables?.length || 0,
+      "primary",
+    );
+    html += renderMetricCard(
+      "Constraints",
+      thought.optimizationConstraints?.length || 0,
+      "warning",
+    );
+    html += renderMetricCard(
+      "Objectives",
+      thought.objectives?.length || 0,
+      "info",
+    );
+    html += renderMetricCard(
+      "Quality",
+      thought.solution?.quality?.toFixed(2) || "N/A",
+      "success",
+    );
+    html += "</div>\n";
   }
 
   // Decision Variables
   if (thought.variables && thought.variables.length > 0) {
-    const variableRows = thought.variables.map(v => {
-      const varType = (v as any).type || 'unknown';
+    const variableRows = thought.variables.map((v) => {
+      const varType = (v as any).type || "unknown";
       const domain = v.domain
         ? `[${(v.domain as any).lowerBound}, ${(v.domain as any).upperBound}]`
-        : 'N/A';
-      return [v.name, varType, domain, v.description || '-'];
+        : "N/A";
+      return [v.name, varType, domain, v.description || "-"];
     });
     const variablesTable = renderTable(
-      ['Name', 'Type', 'Domain', 'Description'],
+      ["Name", "Type", "Domain", "Description"],
       variableRows,
-      { caption: 'Decision Variables' }
+      { caption: "Decision Variables" },
     );
-    html += renderSection('Decision Variables', variablesTable, '🔢');
+    html += renderSection("Decision Variables", variablesTable, "🔢");
   }
 
   // Constraints
-  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
-    let constraintsContent = '';
+  if (
+    thought.optimizationConstraints &&
+    thought.optimizationConstraints.length > 0
+  ) {
+    let constraintsContent = "";
     for (const constraint of thought.optimizationConstraints) {
-      const badge = renderBadge(constraint.type.toUpperCase(), 'warning');
+      const badge = renderBadge(constraint.type.toUpperCase(), "warning");
       constraintsContent += `
         <div class="card">
           <div class="card-header">${escapeHTML(constraint.name)} ${badge}</div>
@@ -696,14 +799,14 @@ function optimizationToHTML(thought: OptimizationThought, options: VisualExportO
         </div>
       `;
     }
-    html += renderSection('Constraints', constraintsContent, '⚠️');
+    html += renderSection("Constraints", constraintsContent, "⚠️");
   }
 
   // Objectives
   if (thought.objectives && thought.objectives.length > 0) {
-    let objectivesContent = '';
+    let objectivesContent = "";
     for (const objective of thought.objectives) {
-      const typeColor = objective.type === 'maximize' ? 'success' : 'info';
+      const typeColor = objective.type === "maximize" ? "success" : "info";
       const badge = renderBadge(objective.type.toUpperCase(), typeColor as any);
       objectivesContent += `
         <div class="card">
@@ -712,18 +815,21 @@ function optimizationToHTML(thought: OptimizationThought, options: VisualExportO
         </div>
       `;
     }
-    html += renderSection('Objectives', objectivesContent, '🎯');
+    html += renderSection("Objectives", objectivesContent, "🎯");
   }
 
   // Solution
   if (thought.solution) {
     const solution = thought.solution as any;
-    let solutionContent = '';
+    let solutionContent = "";
 
     if (solution.status) {
-      const statusBadge = solution.status === 'optimal' ? renderBadge('OPTIMAL', 'success')
-        : solution.status === 'feasible' ? renderBadge('FEASIBLE', 'info')
-          : renderBadge('INFEASIBLE', 'danger');
+      const statusBadge =
+        solution.status === "optimal"
+          ? renderBadge("OPTIMAL", "success")
+          : solution.status === "feasible"
+            ? renderBadge("FEASIBLE", "info")
+            : renderBadge("INFEASIBLE", "danger");
       solutionContent += `<p><strong>Status:</strong> ${statusBadge}</p>`;
     }
 
@@ -736,14 +842,14 @@ function optimizationToHTML(thought: OptimizationThought, options: VisualExportO
     }
 
     if (solution.assignments) {
-      solutionContent += '<h4>Variable Assignments</h4><ul>';
+      solutionContent += "<h4>Variable Assignments</h4><ul>";
       for (const [varId, value] of Object.entries(solution.assignments)) {
         solutionContent += `<li><strong>${escapeHTML(varId)}:</strong> ${value}</li>`;
       }
-      solutionContent += '</ul>';
+      solutionContent += "</ul>";
     }
 
-    html += renderSection('Solution', solutionContent, '✅');
+    html += renderSection("Solution", solutionContent, "✅");
   }
 
   html += generateHTMLFooter(htmlStandalone);
@@ -753,13 +859,16 @@ function optimizationToHTML(thought: OptimizationThought, options: VisualExportO
 /**
  * Export optimization problem to Modelica format
  */
-function optimizationToModelica(thought: OptimizationThought, options: VisualExportOptions): string {
+function optimizationToModelica(
+  thought: OptimizationThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
-  let modelica = '// Optimization Problem Model\n';
+  let modelica = "// Optimization Problem Model\n";
 
   const packageName = thought.problem
     ? sanitizeModelicaId(thought.problem.name)
-    : 'OptimizationProblem';
+    : "OptimizationProblem";
 
   modelica += `package ${packageName}\n`;
 
@@ -769,53 +878,57 @@ function optimizationToModelica(thought: OptimizationThought, options: VisualExp
 
   // Decision Variables
   if (thought.variables && thought.variables.length > 0) {
-    modelica += '  // Decision Variables\n';
+    modelica += "  // Decision Variables\n";
     for (const variable of thought.variables) {
       const varId = sanitizeModelicaId(variable.id);
-      const varType = (variable as any).type || 'Real';
+      const varType = (variable as any).type || "Real";
       const domain = variable.domain
         ? `(min=${(variable.domain as any).lowerBound}, max=${(variable.domain as any).upperBound})`
-        : '';
-      const comment = includeLabels && variable.description
-        ? ` "${escapeModelicaString(variable.description)}"`
-        : '';
+        : "";
+      const comment =
+        includeLabels && variable.description
+          ? ` "${escapeModelicaString(variable.description)}"`
+          : "";
       modelica += `  ${varType} ${varId}${domain}${comment};\n`;
     }
-    modelica += '\n';
+    modelica += "\n";
   }
 
   // Objectives as optimization parameters
   if (thought.objectives && thought.objectives.length > 0) {
-    modelica += '  // Objective Functions\n';
+    modelica += "  // Objective Functions\n";
     for (const objective of thought.objectives) {
       const objId = sanitizeModelicaId(objective.id);
       const comment = includeLabels
         ? ` "${objective.type}: ${escapeModelicaString(objective.name)}"`
-        : '';
+        : "";
       modelica += `  Real ${objId}${comment};\n`;
       modelica += `  equation\n`;
       modelica += `    ${objId} = ${escapeModelicaString(objective.formula)};\n`;
     }
-    modelica += '\n';
+    modelica += "\n";
   }
 
   // Constraints
-  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
-    modelica += '  // Constraints\n';
-    modelica += '  equation\n';
+  if (
+    thought.optimizationConstraints &&
+    thought.optimizationConstraints.length > 0
+  ) {
+    modelica += "  // Constraints\n";
+    modelica += "  equation\n";
     for (const constraint of thought.optimizationConstraints) {
       const comment = includeLabels
         ? ` // ${constraint.name} (${constraint.type})`
-        : '';
+        : "";
       modelica += `    ${escapeModelicaString(constraint.formula)};${comment}\n`;
     }
-    modelica += '\n';
+    modelica += "\n";
   }
 
   // Solution record
   if (thought.solution) {
-    modelica += '  // Solution\n';
-    modelica += '  record Solution\n';
+    modelica += "  // Solution\n";
+    modelica += "  record Solution\n";
 
     const solution = thought.solution as any;
     if (solution.status) {
@@ -829,14 +942,14 @@ function optimizationToModelica(thought: OptimizationThought, options: VisualExp
     }
 
     if (solution.assignments) {
-      modelica += '    // Variable Assignments\n';
+      modelica += "    // Variable Assignments\n";
       for (const [varId, value] of Object.entries(solution.assignments)) {
         const safeVarId = sanitizeModelicaId(varId);
         modelica += `    Real ${safeVarId}_value = ${value};\n`;
       }
     }
 
-    modelica += '  end Solution;\n';
+    modelica += "  end Solution;\n";
   }
 
   modelica += `end ${packageName};\n`;
@@ -846,7 +959,10 @@ function optimizationToModelica(thought: OptimizationThought, options: VisualExp
 /**
  * Export optimization problem to UML format
  */
-function optimizationToUML(thought: OptimizationThought, options: VisualExportOptions): string {
+function optimizationToUML(
+  thought: OptimizationThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
   const nodes: UmlNode[] = [];
   const edges: UmlEdge[] = [];
@@ -854,107 +970,110 @@ function optimizationToUML(thought: OptimizationThought, options: VisualExportOp
   // Problem as main package
   if (thought.problem) {
     nodes.push({
-      id: 'Problem',
-      label: includeLabels ? thought.problem.name : 'Problem',
-      shape: 'package',
+      id: "Problem",
+      label: includeLabels ? thought.problem.name : "Problem",
+      shape: "package",
       attributes: [
         `type: ${thought.problem.type}`,
-        `description: ${thought.problem.description || '-'}`,
+        `description: ${thought.problem.description || "-"}`,
       ],
     });
   }
 
   // Variables as a class with attributes
   if (thought.variables && thought.variables.length > 0) {
-    const attributes = thought.variables.map(v => {
-      const varType = (v as any).type || 'Real';
+    const attributes = thought.variables.map((v) => {
+      const varType = (v as any).type || "Real";
       const domain = v.domain
         ? ` [${(v.domain as any).lowerBound}..${(v.domain as any).upperBound}]`
-        : '';
+        : "";
       return `${v.name}: ${varType}${domain}`;
     });
 
     nodes.push({
-      id: 'Variables',
-      label: 'Decision Variables',
-      shape: 'class',
+      id: "Variables",
+      label: "Decision Variables",
+      shape: "class",
       attributes,
     });
 
     if (thought.problem) {
       edges.push({
-        source: 'Problem',
-        target: 'Variables',
-        type: 'composition',
-        label: 'contains',
+        source: "Problem",
+        target: "Variables",
+        type: "composition",
+        label: "contains",
       });
     }
   }
 
   // Constraints as a class
-  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
-    const methods = thought.optimizationConstraints.map(c =>
-      `${c.name}(): ${c.type} = ${c.formula}`
+  if (
+    thought.optimizationConstraints &&
+    thought.optimizationConstraints.length > 0
+  ) {
+    const methods = thought.optimizationConstraints.map(
+      (c) => `${c.name}(): ${c.type} = ${c.formula}`,
     );
 
     nodes.push({
-      id: 'Constraints',
-      label: 'Constraints',
-      shape: 'class',
-      stereotype: 'constraint',
+      id: "Constraints",
+      label: "Constraints",
+      shape: "class",
+      stereotype: "constraint",
       methods,
     });
 
     if (thought.problem) {
       edges.push({
-        source: 'Problem',
-        target: 'Constraints',
-        type: 'composition',
-        label: 'enforces',
+        source: "Problem",
+        target: "Constraints",
+        type: "composition",
+        label: "enforces",
       });
     }
 
     // Constraints constrain variables
     if (thought.variables) {
       edges.push({
-        source: 'Constraints',
-        target: 'Variables',
-        type: 'dependency',
-        label: 'constrains',
+        source: "Constraints",
+        target: "Variables",
+        type: "dependency",
+        label: "constrains",
       });
     }
   }
 
   // Objectives as a class
   if (thought.objectives && thought.objectives.length > 0) {
-    const methods = thought.objectives.map(o =>
-      `${o.name}(): ${o.type} = ${o.formula}`
+    const methods = thought.objectives.map(
+      (o) => `${o.name}(): ${o.type} = ${o.formula}`,
     );
 
     nodes.push({
-      id: 'Objectives',
-      label: 'Objective Functions',
-      shape: 'interface',
-      stereotype: 'interface',
+      id: "Objectives",
+      label: "Objective Functions",
+      shape: "interface",
+      stereotype: "interface",
       methods,
     });
 
     if (thought.problem) {
       edges.push({
-        source: 'Problem',
-        target: 'Objectives',
-        type: 'composition',
-        label: 'optimizes',
+        source: "Problem",
+        target: "Objectives",
+        type: "composition",
+        label: "optimizes",
       });
     }
 
     // Objectives use variables
     if (thought.variables) {
       edges.push({
-        source: 'Objectives',
-        target: 'Variables',
-        type: 'dependency',
-        label: 'uses',
+        source: "Objectives",
+        target: "Variables",
+        type: "dependency",
+        label: "uses",
       });
     }
   }
@@ -981,26 +1100,26 @@ function optimizationToUML(thought: OptimizationThought, options: VisualExportOp
     }
 
     nodes.push({
-      id: 'Solution',
-      label: 'Solution',
-      shape: 'class',
-      stereotype: 'result',
+      id: "Solution",
+      label: "Solution",
+      shape: "class",
+      stereotype: "result",
       attributes,
     });
 
     // Solution realizes objectives
     if (thought.objectives) {
       edges.push({
-        source: 'Solution',
-        target: 'Objectives',
-        type: 'implementation',
-        label: 'satisfies',
+        source: "Solution",
+        target: "Objectives",
+        type: "implementation",
+        label: "satisfies",
       });
     }
   }
 
   return generateUmlDiagram(nodes, edges, {
-    title: 'Optimization Problem Structure',
+    title: "Optimization Problem Structure",
     includeLabels,
   });
 }
@@ -1008,17 +1127,20 @@ function optimizationToUML(thought: OptimizationThought, options: VisualExportOp
 /**
  * Export optimization problem to JSON format
  */
-function optimizationToJSON(thought: OptimizationThought, options: VisualExportOptions): string {
+function optimizationToJSON(
+  thought: OptimizationThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
-  const graph = createJsonGraph('Optimization Problem Graph', 'optimization');
+  const graph = createJsonGraph("Optimization Problem Graph", "optimization");
   let edgeIdCounter = 0;
 
   // Add problem node
   if (thought.problem) {
     addNode(graph, {
-      id: 'problem',
-      label: includeLabels ? thought.problem.name : 'Problem',
-      type: 'problem',
+      id: "problem",
+      label: includeLabels ? thought.problem.name : "Problem",
+      type: "problem",
       metadata: {
         problemType: thought.problem.type,
         description: thought.problem.description,
@@ -1032,9 +1154,9 @@ function optimizationToJSON(thought: OptimizationThought, options: VisualExportO
       addNode(graph, {
         id: variable.id,
         label: includeLabels ? variable.name : variable.id,
-        type: 'variable',
+        type: "variable",
         metadata: {
-          variableType: (variable as any).type || 'Real',
+          variableType: (variable as any).type || "Real",
           domain: variable.domain,
           description: variable.description,
         },
@@ -1044,21 +1166,24 @@ function optimizationToJSON(thought: OptimizationThought, options: VisualExportO
       if (thought.problem) {
         addEdge(graph, {
           id: `e${edgeIdCounter++}`,
-          source: 'problem',
+          source: "problem",
           target: variable.id,
-          label: 'has_variable',
+          label: "has_variable",
         });
       }
     }
   }
 
   // Add constraint nodes
-  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+  if (
+    thought.optimizationConstraints &&
+    thought.optimizationConstraints.length > 0
+  ) {
     for (const constraint of thought.optimizationConstraints) {
       addNode(graph, {
         id: constraint.id,
         label: includeLabels ? constraint.name : constraint.id,
-        type: 'constraint',
+        type: "constraint",
         metadata: {
           constraintType: constraint.type,
           formula: constraint.formula,
@@ -1069,9 +1194,9 @@ function optimizationToJSON(thought: OptimizationThought, options: VisualExportO
       if (thought.problem) {
         addEdge(graph, {
           id: `e${edgeIdCounter++}`,
-          source: 'problem',
+          source: "problem",
           target: constraint.id,
-          label: 'enforces',
+          label: "enforces",
         });
       }
     }
@@ -1083,7 +1208,7 @@ function optimizationToJSON(thought: OptimizationThought, options: VisualExportO
       addNode(graph, {
         id: objective.id,
         label: includeLabels ? objective.name : objective.id,
-        type: 'objective',
+        type: "objective",
         metadata: {
           objectiveType: objective.type,
           formula: objective.formula,
@@ -1094,9 +1219,9 @@ function optimizationToJSON(thought: OptimizationThought, options: VisualExportO
       if (thought.problem) {
         addEdge(graph, {
           id: `e${edgeIdCounter++}`,
-          source: 'problem',
+          source: "problem",
           target: objective.id,
-          label: 'optimizes',
+          label: "optimizes",
         });
       }
 
@@ -1105,8 +1230,8 @@ function optimizationToJSON(thought: OptimizationThought, options: VisualExportO
         addEdge(graph, {
           id: `e${edgeIdCounter++}`,
           source: objective.id,
-          target: 'solution',
-          label: 'achieved_by',
+          target: "solution",
+          label: "achieved_by",
         });
       }
     }
@@ -1116,9 +1241,9 @@ function optimizationToJSON(thought: OptimizationThought, options: VisualExportO
   if (thought.solution) {
     const solution = thought.solution as any;
     addNode(graph, {
-      id: 'solution',
-      label: 'Solution',
-      type: 'solution',
+      id: "solution",
+      label: "Solution",
+      type: "solution",
       metadata: {
         status: solution.status,
         optimalValue: solution.optimalValue,
@@ -1130,11 +1255,15 @@ function optimizationToJSON(thought: OptimizationThought, options: VisualExportO
 
   // Add metrics
   if (includeMetrics) {
-    addMetric(graph, 'variable_count', thought.variables?.length || 0);
-    addMetric(graph, 'constraint_count', thought.optimizationConstraints?.length || 0);
-    addMetric(graph, 'objective_count', thought.objectives?.length || 0);
+    addMetric(graph, "variable_count", thought.variables?.length || 0);
+    addMetric(
+      graph,
+      "constraint_count",
+      thought.optimizationConstraints?.length || 0,
+    );
+    addMetric(graph, "objective_count", thought.objectives?.length || 0);
     if (thought.solution?.quality !== undefined) {
-      addMetric(graph, 'solution_quality', thought.solution.quality);
+      addMetric(graph, "solution_quality", thought.solution.quality);
     }
   }
 
@@ -1144,7 +1273,10 @@ function optimizationToJSON(thought: OptimizationThought, options: VisualExportO
 /**
  * Export optimization problem constraint graph to Markdown format
  */
-function optimizationToMarkdown(thought: OptimizationThought, options: VisualExportOptions): string {
+function optimizationToMarkdown(
+  thought: OptimizationThought,
+  options: VisualExportOptions,
+): string {
   const {
     markdownIncludeFrontmatter = false,
     markdownIncludeToc = false,
@@ -1157,60 +1289,64 @@ function optimizationToMarkdown(thought: OptimizationThought, options: VisualExp
   // Problem Overview
   if (thought.problem) {
     const problemContent = keyValueSection({
-      'Name': thought.problem.name,
-      'Type': thought.problem.type,
-      'Description': thought.problem.description,
+      Name: thought.problem.name,
+      Type: thought.problem.type,
+      Description: thought.problem.description,
     });
-    parts.push(section('Problem', problemContent));
+    parts.push(section("Problem", problemContent));
   }
 
   // Metrics
   if (includeMetrics) {
     const metricsContent = keyValueSection({
-      'Variables': thought.variables?.length || 0,
-      'Constraints': thought.optimizationConstraints?.length || 0,
-      'Objectives': thought.objectives?.length || 0,
-      'Quality': thought.solution?.quality?.toFixed(2) || 'N/A',
+      Variables: thought.variables?.length || 0,
+      Constraints: thought.optimizationConstraints?.length || 0,
+      Objectives: thought.objectives?.length || 0,
+      Quality: thought.solution?.quality?.toFixed(2) || "N/A",
     });
-    parts.push(section('Metrics', metricsContent));
+    parts.push(section("Metrics", metricsContent));
   }
 
   // Decision Variables
   if (thought.variables && thought.variables.length > 0) {
-    const variableRows = thought.variables.map(v => {
-      const varType = (v as any).type || 'unknown';
+    const variableRows = thought.variables.map((v) => {
+      const varType = (v as any).type || "unknown";
       const domain = v.domain
         ? `[${(v.domain as any).lowerBound}, ${(v.domain as any).upperBound}]`
-        : 'N/A';
-      return [v.name, varType, domain, v.description || '-'];
+        : "N/A";
+      return [v.name, varType, domain, v.description || "-"];
     });
     const variablesTable = table(
-      ['Name', 'Type', 'Domain', 'Description'],
-      variableRows
+      ["Name", "Type", "Domain", "Description"],
+      variableRows,
     );
-    parts.push(section('Decision Variables', variablesTable));
+    parts.push(section("Decision Variables", variablesTable));
   }
 
   // Constraints
-  if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
-    const constraintItems = thought.optimizationConstraints.map(c =>
-      `**${c.name}** (${c.type})\n  - Formula: \`${c.formula}\``
+  if (
+    thought.optimizationConstraints &&
+    thought.optimizationConstraints.length > 0
+  ) {
+    const constraintItems = thought.optimizationConstraints.map(
+      (c) => `**${c.name}** (${c.type})\n  - Formula: \`${c.formula}\``,
     );
-    parts.push(section('Constraints', list(constraintItems)));
+    parts.push(section("Constraints", list(constraintItems)));
   }
 
   // Objectives
   if (thought.objectives && thought.objectives.length > 0) {
-    const objectiveItems = thought.objectives.map(o =>
-      `**${o.type.toUpperCase()}: ${o.name}**\n  - Formula: \`${o.formula}\``
+    const objectiveItems = thought.objectives.map(
+      (o) =>
+        `**${o.type.toUpperCase()}: ${o.name}**\n  - Formula: \`${o.formula}\``,
     );
-    parts.push(section('Objectives', list(objectiveItems)));
+    parts.push(section("Objectives", list(objectiveItems)));
   }
 
   // Solution
   if (thought.solution) {
     const solution = thought.solution as any;
-    let solutionContent = '';
+    let solutionContent = "";
 
     if (solution.status) {
       solutionContent += `**Status:** ${solution.status}\n\n`;
@@ -1218,10 +1354,10 @@ function optimizationToMarkdown(thought: OptimizationThought, options: VisualExp
 
     const solutionMetrics: Record<string, string | number> = {};
     if (solution.optimalValue !== undefined) {
-      solutionMetrics['Optimal Value'] = solution.optimalValue;
+      solutionMetrics["Optimal Value"] = solution.optimalValue;
     }
     if (solution.quality !== undefined) {
-      solutionMetrics['Quality'] = `${(solution.quality * 100).toFixed(0)}%`;
+      solutionMetrics["Quality"] = `${(solution.quality * 100).toFixed(0)}%`;
     }
 
     if (Object.keys(solutionMetrics).length > 0) {
@@ -1229,22 +1365,27 @@ function optimizationToMarkdown(thought: OptimizationThought, options: VisualExp
     }
 
     if (solution.assignments) {
-      solutionContent += '\n**Variable Assignments:**\n\n';
+      solutionContent += "\n**Variable Assignments:**\n\n";
       solutionContent += keyValueSection(solution.assignments);
     }
 
-    parts.push(section('Solution', solutionContent));
+    parts.push(section("Solution", solutionContent));
   }
 
   // Mermaid diagram
   if (markdownIncludeMermaid) {
-    const mermaidDiagram = optimizationToMermaid(thought, 'default', true, true);
-    parts.push(section('Optimization Diagram', mermaidBlock(mermaidDiagram)));
+    const mermaidDiagram = optimizationToMermaid(
+      thought,
+      "default",
+      true,
+      true,
+    );
+    parts.push(section("Optimization Diagram", mermaidBlock(mermaidDiagram)));
   }
 
-  return mdDocument('Optimization Analysis', parts.join('\n'), {
+  return mdDocument("Optimization Analysis", parts.join("\n"), {
     includeFrontmatter: markdownIncludeFrontmatter,
     includeTableOfContents: markdownIncludeToc,
-    metadata: { mode: 'optimization' },
+    metadata: { mode: "optimization" },
   });
 }

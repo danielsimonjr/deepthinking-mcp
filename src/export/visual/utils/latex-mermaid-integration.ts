@@ -5,20 +5,20 @@
  * Embeds Mermaid diagrams into LaTeX documents using the mermaid-tikz package
  */
 
-import type { ThinkingSession, Thought } from '../../../types/index.js';
-import type { VisualExportOptions } from '../types.js';
-import { VisualExporter } from '../visual-exporter.js';
+import type { ThinkingSession, Thought } from "../../../types/index.js";
+import type { VisualExportOptions } from "../types.js";
+import { VisualExporter } from "../visual-exporter.js";
 
 /**
  * Mermaid-LaTeX integration options
  */
 export interface MermaidLatexOptions {
-  engine: 'mermaid-tikz' | 'external-svg' | 'inline-code';
+  engine: "mermaid-tikz" | "external-svg" | "inline-code";
   width?: string; // e.g., '\\textwidth', '0.8\\linewidth'
   caption?: boolean;
   label?: boolean;
-  floatPlacement?: 'h' | 't' | 'b' | 'p' | 'H';
-  colorScheme?: 'default' | 'monochrome' | 'pastel';
+  floatPlacement?: "h" | "t" | "b" | "p" | "H";
+  colorScheme?: "default" | "monochrome" | "pastel";
 }
 
 /**
@@ -34,8 +34,10 @@ export class LatexMermaidIntegrator {
   /**
    * Generate LaTeX preamble for Mermaid support
    */
-  generateMermaidPreamble(engine: 'mermaid-tikz' | 'external-svg' | 'inline-code'): string {
-    if (engine === 'mermaid-tikz') {
+  generateMermaidPreamble(
+    engine: "mermaid-tikz" | "external-svg" | "inline-code",
+  ): string {
+    if (engine === "mermaid-tikz") {
       return `
 % Mermaid diagram support via TikZ
 \\usepackage{tikz}
@@ -58,7 +60,7 @@ export class LatexMermaidIntegrator {
   \\end{figure}
 }
 `;
-    } else if (engine === 'external-svg') {
+    } else if (engine === "external-svg") {
       return `
 % Mermaid diagram support via external SVG
 \\usepackage{graphicx}
@@ -118,42 +120,42 @@ export class LatexMermaidIntegrator {
     mermaidCode: string,
     caption: string,
     label: string,
-    options: MermaidLatexOptions
+    options: MermaidLatexOptions,
   ): string {
     const {
-      engine = 'mermaid-tikz',
-      width = '\\textwidth',
+      engine = "mermaid-tikz",
+      width = "\\textwidth",
       caption: showCaption = true,
       label: showLabel = true,
-      floatPlacement = 'h',
+      floatPlacement = "h",
     } = options;
 
-    let content = '';
+    let content = "";
 
-    if (engine === 'inline-code') {
+    if (engine === "inline-code") {
       // Just show the Mermaid code
       content = `\\begin{mermaiddiagram}[${floatPlacement}]
 \\begin{mermaidcode}
 ${mermaidCode}
 \\end{mermaidcode}
-${showCaption ? `\\caption{${caption}}` : ''}
-${showLabel ? `\\label{${label}}` : ''}
+${showCaption ? `\\caption{${caption}}` : ""}
+${showLabel ? `\\label{${label}}` : ""}
 \\end{mermaiddiagram}`;
-    } else if (engine === 'external-svg') {
+    } else if (engine === "external-svg") {
       // Reference external SVG (assumes SVG file exists)
-      const filename = label.replace(/:/g, '-');
+      const filename = label.replace(/:/g, "-");
       content = `\\begin{mermaiddiagram}[${floatPlacement}]
 \\mermaidsvg[width=${width}]{diagrams/${filename}.svg}
-${showCaption ? `\\caption{${caption}}` : ''}
-${showLabel ? `\\label{${label}}` : ''}
+${showCaption ? `\\caption{${caption}}` : ""}
+${showLabel ? `\\label{${label}}` : ""}
 \\end{mermaiddiagram}`;
     } else {
       // Convert to TikZ (simplified - real implementation would parse Mermaid)
       const tikzCode = this.convertMermaidToTikZ(mermaidCode);
       content = `\\begin{mermaiddiagram}[${floatPlacement}]
 ${tikzCode}
-${showCaption ? `\\caption{${caption}}` : ''}
-${showLabel ? `\\label{${label}}` : ''}
+${showCaption ? `\\caption{${caption}}` : ""}
+${showLabel ? `\\label{${label}}` : ""}
 \\end{mermaiddiagram}`;
     }
 
@@ -169,7 +171,10 @@ ${showLabel ? `\\label{${label}}` : ''}
 
     return `% Mermaid diagram (requires manual conversion or mermaid-cli)
 % Original Mermaid code:
-${mermaidCode.split('\n').map(line => `% ${line}`).join('\n')}
+${mermaidCode
+  .split("\n")
+  .map((line) => `% ${line}`)
+  .join("\n")}
 
 % Placeholder TikZ diagram
 \\begin{tikzpicture}[node distance=2cm, auto]
@@ -183,37 +188,52 @@ ${mermaidCode.split('\n').map(line => `% ${line}`).join('\n')}
   /**
    * Generate diagram for thought and embed in LaTeX
    */
-  generateThoughtDiagram(thought: Thought, options: MermaidLatexOptions): string {
+  generateThoughtDiagram(
+    thought: Thought,
+    options: MermaidLatexOptions,
+  ): string {
     const visualOptions: VisualExportOptions = {
-      format: 'mermaid',
-      colorScheme: options.colorScheme || 'default',
+      format: "mermaid",
+      colorScheme: options.colorScheme || "default",
       includeLabels: true,
       includeMetrics: true,
     };
 
-    let mermaidCode = '';
-    let caption = '';
-    let label = '';
+    let mermaidCode = "";
+    let caption = "";
+    let label = "";
 
     // Generate appropriate diagram based on thought type
-    if (thought.mode === 'causal' && 'graph' in thought) {
-      mermaidCode = this.visualExporter.exportCausalGraph(thought as any, visualOptions);
-      caption = 'Causal Graph';
+    if (thought.mode === "causal" && "graph" in thought) {
+      mermaidCode = this.visualExporter.exportCausalGraph(
+        thought as any,
+        visualOptions,
+      );
+      caption = "Causal Graph";
       label = `fig:causal-${thought.thoughtNumber}`;
-    } else if (thought.mode === 'temporal' && 'timeline' in thought) {
-      mermaidCode = this.visualExporter.exportTemporalTimeline(thought as any, visualOptions);
-      caption = 'Temporal Timeline';
+    } else if (thought.mode === "temporal" && "timeline" in thought) {
+      mermaidCode = this.visualExporter.exportTemporalTimeline(
+        thought as any,
+        visualOptions,
+      );
+      caption = "Temporal Timeline";
       label = `fig:temporal-${thought.thoughtNumber}`;
-    } else if (thought.mode === 'gametheory' && 'gameTree' in thought) {
-      mermaidCode = this.visualExporter.exportGameTree(thought as any, visualOptions);
-      caption = 'Game Theory Tree';
+    } else if (thought.mode === "gametheory" && "gameTree" in thought) {
+      mermaidCode = this.visualExporter.exportGameTree(
+        thought as any,
+        visualOptions,
+      );
+      caption = "Game Theory Tree";
       label = `fig:gametheory-${thought.thoughtNumber}`;
-    } else if (thought.mode === 'bayesian' && 'network' in thought) {
-      mermaidCode = this.visualExporter.exportBayesianNetwork(thought as any, visualOptions);
-      caption = 'Bayesian Network';
+    } else if (thought.mode === "bayesian" && "network" in thought) {
+      mermaidCode = this.visualExporter.exportBayesianNetwork(
+        thought as any,
+        visualOptions,
+      );
+      caption = "Bayesian Network";
       label = `fig:bayesian-${thought.thoughtNumber}`;
     } else {
-      return ''; // No diagram for this thought type
+      return ""; // No diagram for this thought type
     }
 
     return this.embedMermaidDiagram(mermaidCode, caption, label, options);
@@ -222,18 +242,21 @@ ${mermaidCode.split('\n').map(line => `% ${line}`).join('\n')}
   /**
    * Generate all diagrams for session
    */
-  generateSessionDiagrams(session: ThinkingSession, options: MermaidLatexOptions): string {
+  generateSessionDiagrams(
+    session: ThinkingSession,
+    options: MermaidLatexOptions,
+  ): string {
     const diagrams: string[] = [];
 
     for (const thought of session.thoughts) {
       const diagram = this.generateThoughtDiagram(thought, options);
       if (diagram) {
         diagrams.push(diagram);
-        diagrams.push(''); // Blank line
+        diagrams.push(""); // Blank line
       }
     }
 
-    return diagrams.join('\n');
+    return diagrams.join("\n");
   }
 
   /**
@@ -242,45 +265,71 @@ ${mermaidCode.split('\n').map(line => `% ${line}`).join('\n')}
   generateMermaidAppendix(session: ThinkingSession): string {
     const sections: string[] = [];
 
-    sections.push('\\section*{Appendix: Mermaid Diagrams Source Code}');
-    sections.push('\\addcontentsline{toc}{section}{Appendix: Mermaid Diagrams Source Code}');
-    sections.push('');
-    sections.push('This appendix contains the Mermaid source code for all diagrams in this document.');
-    sections.push('');
+    sections.push("\\section*{Appendix: Mermaid Diagrams Source Code}");
+    sections.push(
+      "\\addcontentsline{toc}{section}{Appendix: Mermaid Diagrams Source Code}",
+    );
+    sections.push("");
+    sections.push(
+      "This appendix contains the Mermaid source code for all diagrams in this document.",
+    );
+    sections.push("");
 
     for (const thought of session.thoughts) {
       const visualOptions: VisualExportOptions = {
-        format: 'mermaid',
+        format: "mermaid",
         includeLabels: true,
         includeMetrics: true,
       };
 
-      let mermaidCode = '';
+      let mermaidCode = "";
 
-      if (thought.mode === 'causal' && 'graph' in thought) {
-        mermaidCode = this.visualExporter.exportCausalGraph(thought as any, visualOptions);
-        sections.push(`\\subsection*{Thought ${thought.thoughtNumber}: Causal Graph}`);
-      } else if (thought.mode === 'temporal' && 'timeline' in thought) {
-        mermaidCode = this.visualExporter.exportTemporalTimeline(thought as any, visualOptions);
-        sections.push(`\\subsection*{Thought ${thought.thoughtNumber}: Temporal Timeline}`);
-      } else if (thought.mode === 'gametheory' && 'gameTree' in thought) {
-        mermaidCode = this.visualExporter.exportGameTree(thought as any, visualOptions);
-        sections.push(`\\subsection*{Thought ${thought.thoughtNumber}: Game Theory Tree}`);
-      } else if (thought.mode === 'bayesian' && 'network' in thought) {
-        mermaidCode = this.visualExporter.exportBayesianNetwork(thought as any, visualOptions);
-        sections.push(`\\subsection*{Thought ${thought.thoughtNumber}: Bayesian Network}`);
+      if (thought.mode === "causal" && "graph" in thought) {
+        mermaidCode = this.visualExporter.exportCausalGraph(
+          thought as any,
+          visualOptions,
+        );
+        sections.push(
+          `\\subsection*{Thought ${thought.thoughtNumber}: Causal Graph}`,
+        );
+      } else if (thought.mode === "temporal" && "timeline" in thought) {
+        mermaidCode = this.visualExporter.exportTemporalTimeline(
+          thought as any,
+          visualOptions,
+        );
+        sections.push(
+          `\\subsection*{Thought ${thought.thoughtNumber}: Temporal Timeline}`,
+        );
+      } else if (thought.mode === "gametheory" && "gameTree" in thought) {
+        mermaidCode = this.visualExporter.exportGameTree(
+          thought as any,
+          visualOptions,
+        );
+        sections.push(
+          `\\subsection*{Thought ${thought.thoughtNumber}: Game Theory Tree}`,
+        );
+      } else if (thought.mode === "bayesian" && "network" in thought) {
+        mermaidCode = this.visualExporter.exportBayesianNetwork(
+          thought as any,
+          visualOptions,
+        );
+        sections.push(
+          `\\subsection*{Thought ${thought.thoughtNumber}: Bayesian Network}`,
+        );
       }
 
       if (mermaidCode) {
-        sections.push('');
-        sections.push('\\begin{lstlisting}[language=mermaid, caption={Mermaid source code}]');
+        sections.push("");
+        sections.push(
+          "\\begin{lstlisting}[language=mermaid, caption={Mermaid source code}]",
+        );
         sections.push(mermaidCode);
-        sections.push('\\end{lstlisting}');
-        sections.push('');
+        sections.push("\\end{lstlisting}");
+        sections.push("");
       }
     }
 
-    return sections.join('\n');
+    return sections.join("\n");
   }
 
   /**
@@ -288,60 +337,60 @@ ${mermaidCode.split('\n').map(line => `% ${line}`).join('\n')}
    */
   generateIntegratedDocument(
     session: ThinkingSession,
-    options: MermaidLatexOptions & { includeAppendix?: boolean }
+    options: MermaidLatexOptions & { includeAppendix?: boolean },
   ): string {
-    const { engine = 'inline-code', includeAppendix = true } = options;
+    const { engine = "inline-code", includeAppendix = true } = options;
 
     const doc: string[] = [];
 
     // Document class
-    doc.push('\\documentclass[11pt]{article}');
-    doc.push('');
+    doc.push("\\documentclass[11pt]{article}");
+    doc.push("");
 
     // Preamble
     doc.push(this.generateMermaidPreamble(engine));
-    doc.push('');
+    doc.push("");
 
     // Title
-    doc.push(`\\title{${session.title || 'Thinking Session'}}`);
-    doc.push('\\author{DeepThinking MCP}');
-    doc.push('\\date{\\today}');
-    doc.push('');
+    doc.push(`\\title{${session.title || "Thinking Session"}}`);
+    doc.push("\\author{DeepThinking MCP}");
+    doc.push("\\date{\\today}");
+    doc.push("");
 
     // Document body
-    doc.push('\\begin{document}');
-    doc.push('\\maketitle');
-    doc.push('\\tableofcontents');
-    doc.push('\\newpage');
-    doc.push('');
+    doc.push("\\begin{document}");
+    doc.push("\\maketitle");
+    doc.push("\\tableofcontents");
+    doc.push("\\newpage");
+    doc.push("");
 
     // Thoughts with diagrams
-    doc.push('\\section{Reasoning Session}');
-    doc.push('');
+    doc.push("\\section{Reasoning Session}");
+    doc.push("");
 
     for (const thought of session.thoughts) {
       doc.push(`\\subsection{Thought ${thought.thoughtNumber}}`);
-      doc.push('');
+      doc.push("");
       doc.push(thought.content);
-      doc.push('');
+      doc.push("");
 
       // Add diagram if applicable
       const diagram = this.generateThoughtDiagram(thought, options);
       if (diagram) {
         doc.push(diagram);
-        doc.push('');
+        doc.push("");
       }
     }
 
     // Appendix with Mermaid source
-    if (includeAppendix && engine !== 'inline-code') {
-      doc.push('\\newpage');
+    if (includeAppendix && engine !== "inline-code") {
+      doc.push("\\newpage");
       doc.push(this.generateMermaidAppendix(session));
     }
 
-    doc.push('');
-    doc.push('\\end{document}');
+    doc.push("");
+    doc.push("\\end{document}");
 
-    return doc.join('\n');
+    return doc.join("\n");
   }
 }

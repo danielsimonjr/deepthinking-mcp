@@ -3,7 +3,7 @@
  * Systematic 5-stage problem-solving approach inspired by Claude Shannon
  */
 
-import { BaseThought, ThinkingMode, ShannonStage } from '../core.js';
+import { BaseThought, ThinkingMode, ShannonStage } from "../core.js";
 
 // Re-export for convenience
 export { ShannonStage };
@@ -34,6 +34,8 @@ export interface ShannonThought extends BaseThought {
   knownLimitations?: string[];
 }
 
-export function isShannonThought(thought: BaseThought): thought is ShannonThought {
-  return thought.mode === 'shannon';
+export function isShannonThought(
+  thought: BaseThought,
+): thought is ShannonThought {
+  return thought.mode === "shannon";
 }

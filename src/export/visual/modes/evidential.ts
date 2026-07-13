@@ -6,13 +6,13 @@
  * Phase 13 Sprint 7: Refactored to use fluent builder classes
  */
 
-import type { EvidentialThought } from '../../../types/index.js';
-import type { VisualExportOptions } from '../types.js';
-import { sanitizeId } from '../utils.js';
+import type { EvidentialThought } from "../../../types/index.js";
+import type { VisualExportOptions } from "../types.js";
+import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
-import { DOTGraphBuilder } from '../utils/dot.js';
-import { MermaidGraphBuilder } from '../utils/mermaid.js';
-import { ASCIIDocBuilder } from '../utils/ascii.js';
+import { DOTGraphBuilder } from "../utils/dot.js";
+import { MermaidGraphBuilder } from "../utils/mermaid.js";
+import { ASCIIDocBuilder } from "../utils/ascii.js";
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -24,40 +24,33 @@ import {
   getNodeColor,
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
-} from '../utils/svg.js';
+} from "../utils/svg.js";
 import {
   generateGraphML,
   type GraphMLNode,
   type GraphMLEdge,
-} from '../utils/graphml.js';
-import {
-  generateTikZ,
-  type TikZNode,
-  type TikZEdge,
-} from '../utils/tikz.js';
+} from "../utils/graphml.js";
+import { generateTikZ, type TikZNode, type TikZEdge } from "../utils/tikz.js";
 import {
   generateHTMLHeader,
   generateHTMLFooter,
   escapeHTML,
   renderSection,
   renderTable,
-} from '../utils/html.js';
-import {
-  sanitizeModelicaId,
-  escapeModelicaString,
-} from '../utils/modelica.js';
+} from "../utils/html.js";
+import { sanitizeModelicaId, escapeModelicaString } from "../utils/modelica.js";
 import {
   generateUmlDiagram,
   type UmlNode,
   type UmlEdge,
-} from '../utils/uml.js';
+} from "../utils/uml.js";
 import {
   createJsonGraph,
   addNode,
   addEdge,
   addMetric,
   serializeGraph,
-} from '../utils/json.js';
+} from "../utils/json.js";
 import {
   section,
   table,
@@ -65,36 +58,49 @@ import {
   keyValueSection,
   mermaidBlock,
   document as mdDocument,
-} from '../utils/markdown.js';
+} from "../utils/markdown.js";
 
 /**
  * Export evidential belief visualization to visual format
  */
-export function exportEvidentialBeliefs(thought: EvidentialThought, options: VisualExportOptions): string {
-  const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+export function exportEvidentialBeliefs(
+  thought: EvidentialThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+  } = options;
 
   switch (format) {
-    case 'mermaid':
-      return evidentialToMermaid(thought, colorScheme, includeLabels, includeMetrics);
-    case 'dot':
+    case "mermaid":
+      return evidentialToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics,
+      );
+    case "dot":
       return evidentialToDOT(thought, includeLabels, includeMetrics);
-    case 'ascii':
+    case "ascii":
       return evidentialToASCII(thought);
-    case 'svg':
+    case "svg":
       return evidentialToSVG(thought, options);
-    case 'graphml':
+    case "graphml":
       return evidentialToGraphML(thought, options);
-    case 'tikz':
+    case "tikz":
       return evidentialToTikZ(thought, options);
-    case 'html':
+    case "html":
       return evidentialToHTML(thought, options);
-    case 'modelica':
+    case "modelica":
       return evidentialToModelica(thought, options);
-    case 'uml':
+    case "uml":
       return evidentialToUML(thought, options);
-    case 'json':
+    case "json":
       return evidentialToJSON(thought, options);
-    case 'markdown':
+    case "markdown":
       return evidentialToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
@@ -105,30 +111,38 @@ function evidentialToMermaid(
   thought: EvidentialThought,
   colorScheme: string,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
-  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
-  const builder = new MermaidGraphBuilder().setDirection('TD');
+  const scheme = colorScheme as "default" | "pastel" | "monochrome";
+  const builder = new MermaidGraphBuilder().setDirection("TD");
 
   // Frame of Discernment node
-  builder.addNode({ id: 'Frame', label: 'Frame of Discernment', shape: 'rectangle' });
+  builder.addNode({
+    id: "Frame",
+    label: "Frame of Discernment",
+    shape: "rectangle",
+  });
 
   // Hypotheses
   if (thought.frameOfDiscernment) {
     for (const hypothesis of thought.frameOfDiscernment) {
       const hypId = sanitizeId(hypothesis);
       const label = includeLabels ? hypothesis : hypId;
-      builder.addNode({ id: hypId, label, shape: 'rectangle' });
-      builder.addEdge({ source: 'Frame', target: hypId });
+      builder.addNode({ id: hypId, label, shape: "rectangle" });
+      builder.addEdge({ source: "Frame", target: hypId });
     }
   }
 
   // Mass assignments
-  if (includeMetrics && (thought as any).massAssignments && (thought as any).massAssignments.length > 0) {
+  if (
+    includeMetrics &&
+    (thought as any).massAssignments &&
+    (thought as any).massAssignments.length > 0
+  ) {
     for (const mass of (thought as any).massAssignments) {
-      const massId = sanitizeId(mass.subset.join('_'));
-      const label = `{${mass.subset.join(', ')}}: ${mass.mass.toFixed(3)}`;
-      builder.addNode({ id: massId, label, shape: 'rectangle' });
+      const massId = sanitizeId(mass.subset.join("_"));
+      const label = `{${mass.subset.join(", ")}}: ${mass.mass.toFixed(3)}`;
+      builder.addNode({ id: massId, label, shape: "rectangle" });
     }
   }
 
@@ -138,15 +152,19 @@ function evidentialToMermaid(
 function evidentialToDOT(
   thought: EvidentialThought,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
   const builder = new DOTGraphBuilder()
-    .setGraphName('EvidentialBeliefs')
-    .setRankDir('TB')
-    .setNodeDefaults({ shape: 'box', style: 'rounded' });
+    .setGraphName("EvidentialBeliefs")
+    .setRankDir("TB")
+    .setNodeDefaults({ shape: "box", style: "rounded" });
 
   // Frame of Discernment node
-  builder.addNode({ id: 'Frame', label: 'Frame of Discernment', shape: 'ellipse' });
+  builder.addNode({
+    id: "Frame",
+    label: "Frame of Discernment",
+    shape: "ellipse",
+  });
 
   // Hypotheses
   if (thought.frameOfDiscernment) {
@@ -154,16 +172,20 @@ function evidentialToDOT(
       const hypId = sanitizeId(hypothesis);
       const label = includeLabels ? hypothesis : hypId;
       builder.addNode({ id: hypId, label });
-      builder.addEdge({ source: 'Frame', target: hypId });
+      builder.addEdge({ source: "Frame", target: hypId });
     }
   }
 
   // Mass assignments
-  if (includeMetrics && (thought as any).massAssignments && (thought as any).massAssignments.length > 0) {
+  if (
+    includeMetrics &&
+    (thought as any).massAssignments &&
+    (thought as any).massAssignments.length > 0
+  ) {
     for (const mass of (thought as any).massAssignments) {
-      const massId = sanitizeId(mass.subset.join('_'));
-      const label = `{${mass.subset.join(', ')}}: ${mass.mass.toFixed(3)}`;
-      builder.addNode({ id: massId, label, shape: 'note' });
+      const massId = sanitizeId(mass.subset.join("_"));
+      const label = `{${mass.subset.join(", ")}}: ${mass.mass.toFixed(3)}`;
+      builder.addNode({ id: massId, label, shape: "note" });
     }
   }
 
@@ -173,34 +195,43 @@ function evidentialToDOT(
 function evidentialToASCII(thought: EvidentialThought): string {
   const builder = new ASCIIDocBuilder();
 
-  builder.addHeader('Evidential Belief Visualization');
+  builder.addHeader("Evidential Belief Visualization");
 
   // Frame of Discernment
-  builder.addText('Frame of Discernment:');
+  builder.addText("Frame of Discernment:");
   if (thought.frameOfDiscernment) {
-    builder.addText(`  {${thought.frameOfDiscernment.join(', ')}}`);
+    builder.addText(`  {${thought.frameOfDiscernment.join(", ")}}`);
   } else {
-    builder.addText('  (not defined)');
+    builder.addText("  (not defined)");
   }
   builder.addEmptyLine();
 
   // Mass assignments
-  if ((thought as any).massAssignments && (thought as any).massAssignments.length > 0) {
-    builder.addText('Mass Assignments:');
+  if (
+    (thought as any).massAssignments &&
+    (thought as any).massAssignments.length > 0
+  ) {
+    builder.addText("Mass Assignments:");
     for (const mass of (thought as any).massAssignments) {
-      builder.addText(`  m({${mass.subset.join(', ')}}) = ${mass.mass.toFixed(3)}`);
+      builder.addText(
+        `  m({${mass.subset.join(", ")}}) = ${mass.mass.toFixed(3)}`,
+      );
     }
     builder.addEmptyLine();
   }
 
   // Belief functions
   if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
-    builder.addText(`Belief Functions: ${thought.beliefFunctions.length} defined`);
+    builder.addText(
+      `Belief Functions: ${thought.beliefFunctions.length} defined`,
+    );
   }
 
   // Plausibility
   if ((thought as any).plausibilityFunction) {
-    builder.addText(`Plausibility: ${(thought as any).plausibilityFunction.toFixed(3)}`);
+    builder.addText(
+      `Plausibility: ${(thought as any).plausibilityFunction.toFixed(3)}`,
+    );
   }
 
   return builder.render();
@@ -209,18 +240,23 @@ function evidentialToASCII(thought: EvidentialThought): string {
 /**
  * Export evidential belief visualization to native SVG format
  */
-function evidentialToSVG(thought: EvidentialThought, options: VisualExportOptions): string {
+function evidentialToSVG(
+  thought: EvidentialThought,
+  options: VisualExportOptions,
+): string {
   const {
-    colorScheme = 'default',
+    colorScheme = "default",
     includeLabels = true,
     includeMetrics = true,
     svgWidth = DEFAULT_SVG_OPTIONS.width,
   } = options;
 
   if (!thought.frameOfDiscernment || thought.frameOfDiscernment.length === 0) {
-    return generateSVGHeader(svgWidth, 200, 'Evidential Beliefs') +
+    return (
+      generateSVGHeader(svgWidth, 200, "Evidential Beliefs") +
       '\n  <text x="400" y="100" text-anchor="middle" class="subtitle">No frame of discernment defined</text>\n' +
-      generateSVGFooter();
+      generateSVGFooter()
+    );
   }
 
   const positions = new Map<string, SVGNodePosition>();
@@ -228,19 +264,23 @@ function evidentialToSVG(thought: EvidentialThought, options: VisualExportOption
   const nodeHeight = 40;
 
   // Frame of discernment at the top center
-  positions.set('frame', {
-    id: 'frame',
-    label: 'Frame of Discernment',
+  positions.set("frame", {
+    id: "frame",
+    label: "Frame of Discernment",
     x: svgWidth / 2,
     y: 80,
     width: nodeWidth,
     height: nodeHeight,
-    type: 'frame',
+    type: "frame",
   });
 
   // Hypotheses below the frame
-  const hypSpacing = Math.min(200, svgWidth / (thought.frameOfDiscernment.length + 1));
-  const hypStartX = (svgWidth - (thought.frameOfDiscernment.length - 1) * hypSpacing) / 2;
+  const hypSpacing = Math.min(
+    200,
+    svgWidth / (thought.frameOfDiscernment.length + 1),
+  );
+  const hypStartX =
+    (svgWidth - (thought.frameOfDiscernment.length - 1) * hypSpacing) / 2;
   thought.frameOfDiscernment.forEach((hypothesis, index) => {
     const hypId = sanitizeId(hypothesis);
     positions.set(hypId, {
@@ -250,64 +290,70 @@ function evidentialToSVG(thought: EvidentialThought, options: VisualExportOption
       y: 200,
       width: nodeWidth,
       height: nodeHeight,
-      type: 'hypothesis',
+      type: "hypothesis",
     });
   });
 
   const actualHeight = 400;
 
-  let svg = generateSVGHeader(svgWidth, actualHeight, 'Evidential Beliefs');
+  let svg = generateSVGHeader(svgWidth, actualHeight, "Evidential Beliefs");
 
   // Render edges from frame to hypotheses
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
-  const framePos = positions.get('frame')!;
+  const framePos = positions.get("frame")!;
   for (const hypothesis of thought.frameOfDiscernment) {
     const hypPos = positions.get(sanitizeId(hypothesis));
     if (hypPos) {
       svg += renderEdge(framePos, hypPos);
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render nodes
   svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
 
-  const frameColors = getNodeColor('warning', colorScheme);
-  const hypColors = getNodeColor('primary', colorScheme);
+  const frameColors = getNodeColor("warning", colorScheme);
+  const hypColors = getNodeColor("primary", colorScheme);
 
   svg += renderEllipseNode(framePos, frameColors);
 
   for (const [id, pos] of positions) {
-    if (id !== 'frame') {
+    if (id !== "frame") {
       svg += renderRectNode(pos, hypColors);
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render metrics panel
   if (includeMetrics) {
     const metrics = [
-      { label: 'Hypotheses', value: thought.frameOfDiscernment.length },
-      { label: 'Belief Functions', value: thought.beliefFunctions?.length || 0 },
+      { label: "Hypotheses", value: thought.frameOfDiscernment.length },
+      {
+        label: "Belief Functions",
+        value: thought.beliefFunctions?.length || 0,
+      },
     ];
     svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
   }
 
   // Render legend
   const legendItems = [
-    { label: 'Frame', color: frameColors, shape: 'ellipse' as const },
-    { label: 'Hypothesis', color: hypColors },
+    { label: "Frame", color: frameColors, shape: "ellipse" as const },
+    { label: "Hypothesis", color: hypColors },
   ];
   svg += renderLegend(20, actualHeight - 80, legendItems);
 
-  svg += '\n' + generateSVGFooter();
+  svg += "\n" + generateSVGFooter();
   return svg;
 }
 
 /**
  * Export evidential belief visualization to GraphML format
  */
-function evidentialToGraphML(thought: EvidentialThought, options: VisualExportOptions): string {
+function evidentialToGraphML(
+  thought: EvidentialThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
 
   const nodes: GraphMLNode[] = [];
@@ -320,7 +366,7 @@ function evidentialToGraphML(thought: EvidentialThought, options: VisualExportOp
       nodes.push({
         id: evidence.id,
         label: includeLabels ? evidence.description : evidence.id,
-        type: 'evidence',
+        type: "evidence",
         metadata: {
           source: evidence.source,
           reliability: evidence.reliability,
@@ -333,29 +379,34 @@ function evidentialToGraphML(thought: EvidentialThought, options: VisualExportOp
   // Create nodes for belief functions
   if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
     for (const belief of thought.beliefFunctions) {
-      const label = includeLabels
-        ? `Belief: ${belief.source}`
-        : belief.id;
+      const label = includeLabels ? `Belief: ${belief.source}` : belief.id;
 
       nodes.push({
         id: belief.id,
         label,
-        type: 'belief',
-        metadata: belief.conflictMass !== undefined
-          ? { conflictMass: belief.conflictMass }
-          : undefined,
+        type: "belief",
+        metadata:
+          belief.conflictMass !== undefined
+            ? { conflictMass: belief.conflictMass }
+            : undefined,
       });
 
       // Create edges from evidence to beliefs
       if (thought.evidence && thought.evidence.length > 0) {
-        const sourceEvidence = thought.evidence.find(e => e.id === belief.source);
+        const sourceEvidence = thought.evidence.find(
+          (e) => e.id === belief.source,
+        );
         if (sourceEvidence) {
           edges.push({
             id: `e${edgeId++}`,
             source: sourceEvidence.id,
             target: belief.id,
-            label: includeMetrics ? `strength: ${sourceEvidence.reliability.toFixed(3)}` : undefined,
-            metadata: includeMetrics ? { weight: sourceEvidence.reliability } : undefined,
+            label: includeMetrics
+              ? `strength: ${sourceEvidence.reliability.toFixed(3)}`
+              : undefined,
+            metadata: includeMetrics
+              ? { weight: sourceEvidence.reliability }
+              : undefined,
           });
         }
       }
@@ -363,11 +414,15 @@ function evidentialToGraphML(thought: EvidentialThought, options: VisualExportOp
   }
 
   // If no evidence or beliefs, create frame of discernment nodes
-  if (nodes.length === 0 && thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
+  if (
+    nodes.length === 0 &&
+    thought.frameOfDiscernment &&
+    thought.frameOfDiscernment.length > 0
+  ) {
     nodes.push({
-      id: 'frame',
-      label: 'Frame of Discernment',
-      type: 'frame',
+      id: "frame",
+      label: "Frame of Discernment",
+      type: "frame",
     });
 
     for (const hypothesis of thought.frameOfDiscernment) {
@@ -375,19 +430,19 @@ function evidentialToGraphML(thought: EvidentialThought, options: VisualExportOp
       nodes.push({
         id: hypId,
         label: includeLabels ? hypothesis : hypId,
-        type: 'hypothesis',
+        type: "hypothesis",
       });
 
       edges.push({
         id: `e${edgeId++}`,
-        source: 'frame',
+        source: "frame",
         target: hypId,
       });
     }
   }
 
   return generateGraphML(nodes, edges, {
-    graphName: 'Evidential Beliefs',
+    graphName: "Evidential Beliefs",
     includeLabels,
     includeMetadata: includeMetrics,
   });
@@ -396,8 +451,15 @@ function evidentialToGraphML(thought: EvidentialThought, options: VisualExportOp
 /**
  * Export evidential belief visualization to TikZ/LaTeX format
  */
-function evidentialToTikZ(thought: EvidentialThought, options: VisualExportOptions): string {
-  const { includeLabels = true, includeMetrics = true, colorScheme = 'default' } = options;
+function evidentialToTikZ(
+  thought: EvidentialThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    includeLabels = true,
+    includeMetrics = true,
+    colorScheme = "default",
+  } = options;
 
   const nodes: TikZNode[] = [];
   const edges: TikZEdge[] = [];
@@ -411,7 +473,7 @@ function evidentialToTikZ(thought: EvidentialThought, options: VisualExportOptio
     for (let i = 0; i < thought.evidence.length; i++) {
       const evidence = thought.evidence[i];
       const label = includeLabels
-        ? `${evidence.description.substring(0, 20)}${evidence.description.length > 20 ? '...' : ''}`
+        ? `${evidence.description.substring(0, 20)}${evidence.description.length > 20 ? "..." : ""}`
         : evidence.id;
 
       nodes.push({
@@ -419,8 +481,8 @@ function evidentialToTikZ(thought: EvidentialThought, options: VisualExportOptio
         label,
         x: startX + i * evidenceSpacing,
         y: 0,
-        type: 'evidence',
-        shape: 'rectangle',
+        type: "evidence",
+        shape: "rectangle",
       });
     }
   }
@@ -433,27 +495,29 @@ function evidentialToTikZ(thought: EvidentialThought, options: VisualExportOptio
 
     for (let i = 0; i < thought.beliefFunctions.length; i++) {
       const belief = thought.beliefFunctions[i];
-      const label = includeLabels
-        ? `Belief: ${belief.source}`
-        : belief.id;
+      const label = includeLabels ? `Belief: ${belief.source}` : belief.id;
 
       nodes.push({
         id: belief.id,
         label,
         x: startX + i * beliefSpacing,
         y: -3,
-        type: 'primary',
-        shape: 'ellipse',
+        type: "primary",
+        shape: "ellipse",
       });
 
       // Create edges from evidence to beliefs with strength labels
       if (thought.evidence && thought.evidence.length > 0) {
-        const sourceEvidence = thought.evidence.find(e => e.id === belief.source);
+        const sourceEvidence = thought.evidence.find(
+          (e) => e.id === belief.source,
+        );
         if (sourceEvidence) {
           edges.push({
             source: sourceEvidence.id,
             target: belief.id,
-            label: includeMetrics ? sourceEvidence.reliability.toFixed(3) : undefined,
+            label: includeMetrics
+              ? sourceEvidence.reliability.toFixed(3)
+              : undefined,
             directed: true,
           });
         }
@@ -462,14 +526,18 @@ function evidentialToTikZ(thought: EvidentialThought, options: VisualExportOptio
   }
 
   // If no evidence or beliefs, create frame of discernment structure
-  if (nodes.length === 0 && thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
+  if (
+    nodes.length === 0 &&
+    thought.frameOfDiscernment &&
+    thought.frameOfDiscernment.length > 0
+  ) {
     nodes.push({
-      id: 'frame',
-      label: 'Frame of Discernment',
+      id: "frame",
+      label: "Frame of Discernment",
       x: 4,
       y: 0,
-      type: 'warning',
-      shape: 'ellipse',
+      type: "warning",
+      shape: "ellipse",
     });
 
     const hypCount = thought.frameOfDiscernment.length;
@@ -485,12 +553,12 @@ function evidentialToTikZ(thought: EvidentialThought, options: VisualExportOptio
         label: includeLabels ? hypothesis : hypId,
         x: startX + i * hypSpacing,
         y: -2.5,
-        type: 'info',
-        shape: 'rectangle',
+        type: "info",
+        shape: "rectangle",
       });
 
       edges.push({
-        source: 'frame',
+        source: "frame",
         target: hypId,
         directed: true,
       });
@@ -498,7 +566,7 @@ function evidentialToTikZ(thought: EvidentialThought, options: VisualExportOptio
   }
 
   return generateTikZ(nodes, edges, {
-    title: 'Evidential Beliefs',
+    title: "Evidential Beliefs",
     includeLabels,
     includeMetrics,
     colorScheme,
@@ -508,72 +576,95 @@ function evidentialToTikZ(thought: EvidentialThought, options: VisualExportOptio
 /**
  * Export evidential beliefs to HTML format
  */
-function evidentialToHTML(thought: EvidentialThought, options: VisualExportOptions): string {
+function evidentialToHTML(
+  thought: EvidentialThought,
+  options: VisualExportOptions,
+): string {
   const {
     htmlStandalone = true,
-    htmlTitle = 'Evidential Reasoning Analysis',
-    htmlTheme = 'light',
+    htmlTitle = "Evidential Reasoning Analysis",
+    htmlTheme = "light",
   } = options;
 
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme,
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
 
   // Frame of discernment
   if (thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
-    html += renderSection('Frame of Discernment', `
+    html += renderSection(
+      "Frame of Discernment",
+      `
       <p>Hypotheses under consideration:</p>
       <ul class="list-styled">
-        ${thought.frameOfDiscernment.map(h => `<li>${escapeHTML(h)}</li>`).join('\n')}
+        ${thought.frameOfDiscernment.map((h) => `<li>${escapeHTML(h)}</li>`).join("\n")}
       </ul>
-    `, '🎯');
+    `,
+      "🎯",
+    );
   }
 
   // Evidence table
   if (thought.evidence && thought.evidence.length > 0) {
-    const evRows = thought.evidence.map(ev => [
+    const evRows = thought.evidence.map((ev) => [
       ev.id,
       ev.description,
       ev.reliability.toFixed(2),
-      ev.source || '-',
+      ev.source || "-",
     ]);
-    html += renderSection('Evidence', renderTable(
-      ['ID', 'Description', 'Reliability', 'Source'],
-      evRows
-    ), '📊');
+    html += renderSection(
+      "Evidence",
+      renderTable(["ID", "Description", "Reliability", "Source"], evRows),
+      "📊",
+    );
   }
 
   // Belief functions
   if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
-    const bfContent = thought.beliefFunctions.map(bf => {
-      const massRows = bf.massAssignments.map(ma =>
-        `<tr><td>{${ma.hypothesisSet.join(', ')}}</td><td>${ma.mass.toFixed(3)}</td><td>${ma.justification ? escapeHTML(ma.justification) : '-'}</td></tr>`
-      ).join('\n');
-      return `
+    const bfContent = thought.beliefFunctions
+      .map((bf) => {
+        const massRows = bf.massAssignments
+          .map(
+            (ma) =>
+              `<tr><td>{${ma.hypothesisSet.join(", ")}}</td><td>${ma.mass.toFixed(3)}</td><td>${ma.justification ? escapeHTML(ma.justification) : "-"}</td></tr>`,
+          )
+          .join("\n");
+        return `
         <div class="card">
-          <div class="card-header">Belief from: ${bf.source ? escapeHTML(bf.source) : '-'}</div>
-          ${bf.conflictMass ? `<p><strong>Conflict Mass:</strong> ${bf.conflictMass.toFixed(3)}</p>` : ''}
+          <div class="card-header">Belief from: ${bf.source ? escapeHTML(bf.source) : "-"}</div>
+          ${bf.conflictMass ? `<p><strong>Conflict Mass:</strong> ${bf.conflictMass.toFixed(3)}</p>` : ""}
           <table class="table">
             <thead><tr><th>Hypothesis Set</th><th>Mass</th><th>Justification</th></tr></thead>
             <tbody>${massRows}</tbody>
           </table>
         </div>
       `;
-    }).join('\n');
-    html += renderSection('Belief Functions', bfContent, '📈');
+      })
+      .join("\n");
+    html += renderSection("Belief Functions", bfContent, "📈");
   }
 
   // Combined belief if available
   if (thought.combinedBelief) {
-    const massRows = thought.combinedBelief.massAssignments.map(ma =>
-      `<tr><td>{${ma.hypothesisSet.join(', ')}}</td><td>${ma.mass.toFixed(3)}</td><td>${ma.justification ? escapeHTML(ma.justification) : '-'}</td></tr>`
-    ).join('\n');
-    html += renderSection('Combined Belief', `
+    const massRows = thought.combinedBelief.massAssignments
+      .map(
+        (ma) =>
+          `<tr><td>{${ma.hypothesisSet.join(", ")}}</td><td>${ma.mass.toFixed(3)}</td><td>${ma.justification ? escapeHTML(ma.justification) : "-"}</td></tr>`,
+      )
+      .join("\n");
+    html += renderSection(
+      "Combined Belief",
+      `
       <table class="table">
         <thead><tr><th>Hypothesis Set</th><th>Mass</th><th>Justification</th></tr></thead>
         <tbody>${massRows}</tbody>
       </table>
-      ${thought.combinedBelief.conflictMass ? `<p><strong>Conflict Mass:</strong> ${thought.combinedBelief.conflictMass.toFixed(3)}</p>` : ''}
-    `, '🔮');
+      ${thought.combinedBelief.conflictMass ? `<p><strong>Conflict Mass:</strong> ${thought.combinedBelief.conflictMass.toFixed(3)}</p>` : ""}
+    `,
+      "🔮",
+    );
   }
 
   html += generateHTMLFooter(htmlStandalone);
@@ -583,18 +674,24 @@ function evidentialToHTML(thought: EvidentialThought, options: VisualExportOptio
 /**
  * Export evidential beliefs to Modelica format
  */
-function evidentialToModelica(thought: EvidentialThought, options: VisualExportOptions): string {
+function evidentialToModelica(
+  thought: EvidentialThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
 
-  let modelica = 'package EvidentialBeliefs\n';
+  let modelica = "package EvidentialBeliefs\n";
   modelica += '  "Evidential reasoning with belief degrees and evidence"\n\n';
 
   // Define evidence records
   if (thought.evidence && thought.evidence.length > 0) {
-    modelica += '  // Evidence Items\n';
+    modelica += "  // Evidence Items\n";
     for (const evidence of thought.evidence) {
       const evId = sanitizeModelicaId(evidence.id);
-      const desc = includeLabels && evidence.description ? escapeModelicaString(evidence.description) : '';
+      const desc =
+        includeLabels && evidence.description
+          ? escapeModelicaString(evidence.description)
+          : "";
 
       modelica += `  record ${evId}\n`;
       modelica += `    "Evidence: ${desc}"\n`;
@@ -609,18 +706,20 @@ function evidentialToModelica(thought: EvidentialThought, options: VisualExportO
 
   // Define belief function records
   if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
-    modelica += '  // Belief Functions\n';
+    modelica += "  // Belief Functions\n";
     for (const belief of thought.beliefFunctions) {
       const bfId = sanitizeModelicaId(belief.id);
 
       modelica += `  record ${bfId}\n`;
-      modelica += `    "Belief function from ${belief.source ? escapeModelicaString(belief.source) : ''}"\n`;
+      modelica += `    "Belief function from ${belief.source ? escapeModelicaString(belief.source) : ""}"\n`;
 
       // Mass assignments as parameters
       if (belief.massAssignments && belief.massAssignments.length > 0) {
         for (let i = 0; i < belief.massAssignments.length; i++) {
           const ma = belief.massAssignments[i];
-          const hypSet = ma.hypothesisSet.map(h => sanitizeModelicaId(h)).join('_');
+          const hypSet = ma.hypothesisSet
+            .map((h) => sanitizeModelicaId(h))
+            .join("_");
           modelica += `    parameter Real mass_${hypSet} = ${ma.mass};\n`;
         }
       }
@@ -635,14 +734,16 @@ function evidentialToModelica(thought: EvidentialThought, options: VisualExportO
 
   // Combined belief if available
   if (thought.combinedBelief && includeMetrics) {
-    modelica += '  // Combined Belief\n';
-    modelica += '  record CombinedBelief\n';
+    modelica += "  // Combined Belief\n";
+    modelica += "  record CombinedBelief\n";
     modelica += '    "Result of combining all evidence"\n';
 
     if (thought.combinedBelief.massAssignments) {
       for (let i = 0; i < thought.combinedBelief.massAssignments.length; i++) {
         const ma = thought.combinedBelief.massAssignments[i];
-        const hypSet = ma.hypothesisSet.map(h => sanitizeModelicaId(h)).join('_');
+        const hypSet = ma.hypothesisSet
+          .map((h) => sanitizeModelicaId(h))
+          .join("_");
         modelica += `    parameter Real mass_${hypSet} = ${ma.mass};\n`;
       }
     }
@@ -651,26 +752,31 @@ function evidentialToModelica(thought: EvidentialThought, options: VisualExportO
       modelica += `    parameter Real conflictMass = ${thought.combinedBelief.conflictMass};\n`;
     }
 
-    modelica += '  end CombinedBelief;\n\n';
+    modelica += "  end CombinedBelief;\n\n";
   }
 
   // Frame of discernment as enumeration
   if (thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
-    modelica += '  // Frame of Discernment\n';
-    modelica += '  type Hypothesis = enumeration(\n';
-    const hypEnums = thought.frameOfDiscernment.map(h => `    ${sanitizeModelicaId(h)}`);
-    modelica += hypEnums.join(',\n');
-    modelica += '\n  );\n\n';
+    modelica += "  // Frame of Discernment\n";
+    modelica += "  type Hypothesis = enumeration(\n";
+    const hypEnums = thought.frameOfDiscernment.map(
+      (h) => `    ${sanitizeModelicaId(h)}`,
+    );
+    modelica += hypEnums.join(",\n");
+    modelica += "\n  );\n\n";
   }
 
-  modelica += 'end EvidentialBeliefs;\n';
+  modelica += "end EvidentialBeliefs;\n";
   return modelica;
 }
 
 /**
  * Export evidential beliefs to UML format
  */
-function evidentialToUML(thought: EvidentialThought, options: VisualExportOptions): string {
+function evidentialToUML(
+  thought: EvidentialThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
 
   const nodes: UmlNode[] = [];
@@ -679,12 +785,12 @@ function evidentialToUML(thought: EvidentialThought, options: VisualExportOption
   // Create evidence nodes (classes with attributes)
   if (thought.evidence && thought.evidence.length > 0) {
     for (const evidence of thought.evidence) {
-      const attributes = [
-        `reliability: Real = ${evidence.reliability}`,
-      ];
+      const attributes = [`reliability: Real = ${evidence.reliability}`];
 
       if (includeLabels) {
-        attributes.unshift(`description: String = "${evidence.description.substring(0, 30)}${evidence.description.length > 30 ? '...' : ''}"`);
+        attributes.unshift(
+          `description: String = "${evidence.description.substring(0, 30)}${evidence.description.length > 30 ? "..." : ""}"`,
+        );
       }
 
       if (evidence.source) {
@@ -694,8 +800,8 @@ function evidentialToUML(thought: EvidentialThought, options: VisualExportOption
       nodes.push({
         id: evidence.id,
         label: evidence.id,
-        shape: 'class',
-        stereotype: '<<evidence>>',
+        shape: "class",
+        stereotype: "<<evidence>>",
         attributes,
       });
     }
@@ -707,34 +813,44 @@ function evidentialToUML(thought: EvidentialThought, options: VisualExportOption
       const attributes: string[] = [];
 
       // Add mass assignments as attributes
-      if (includeMetrics && belief.massAssignments && belief.massAssignments.length > 0) {
+      if (
+        includeMetrics &&
+        belief.massAssignments &&
+        belief.massAssignments.length > 0
+      ) {
         for (const ma of belief.massAssignments) {
-          const hypSet = ma.hypothesisSet.join(', ');
+          const hypSet = ma.hypothesisSet.join(", ");
           attributes.push(`m({${hypSet}}): Real = ${ma.mass.toFixed(3)}`);
         }
       }
 
       if (belief.conflictMass !== undefined && includeMetrics) {
-        attributes.push(`conflictMass: Real = ${belief.conflictMass.toFixed(3)}`);
+        attributes.push(
+          `conflictMass: Real = ${belief.conflictMass.toFixed(3)}`,
+        );
       }
 
       nodes.push({
         id: belief.id,
         label: includeLabels ? `Belief from ${belief.source}` : belief.id,
-        shape: 'class',
-        stereotype: '<<belief>>',
+        shape: "class",
+        stereotype: "<<belief>>",
         attributes,
       });
 
       // Create edges from evidence to beliefs
       if (thought.evidence && thought.evidence.length > 0) {
-        const sourceEvidence = thought.evidence.find(e => e.id === belief.source);
+        const sourceEvidence = thought.evidence.find(
+          (e) => e.id === belief.source,
+        );
         if (sourceEvidence) {
           edges.push({
             source: sourceEvidence.id,
             target: belief.id,
-            type: 'association',
-            label: includeMetrics ? `[${sourceEvidence.reliability.toFixed(3)}]` : 'supports',
+            type: "association",
+            label: includeMetrics
+              ? `[${sourceEvidence.reliability.toFixed(3)}]`
+              : "supports",
           });
         }
       }
@@ -747,20 +863,22 @@ function evidentialToUML(thought: EvidentialThought, options: VisualExportOption
 
     if (thought.combinedBelief.massAssignments) {
       for (const ma of thought.combinedBelief.massAssignments) {
-        const hypSet = ma.hypothesisSet.join(', ');
+        const hypSet = ma.hypothesisSet.join(", ");
         attributes.push(`m({${hypSet}}): Real = ${ma.mass.toFixed(3)}`);
       }
     }
 
     if (thought.combinedBelief.conflictMass !== undefined) {
-      attributes.push(`conflictMass: Real = ${thought.combinedBelief.conflictMass.toFixed(3)}`);
+      attributes.push(
+        `conflictMass: Real = ${thought.combinedBelief.conflictMass.toFixed(3)}`,
+      );
     }
 
     nodes.push({
-      id: 'combined_belief',
-      label: 'Combined Belief',
-      shape: 'class',
-      stereotype: '<<conclusion>>',
+      id: "combined_belief",
+      label: "Combined Belief",
+      shape: "class",
+      stereotype: "<<conclusion>>",
       attributes,
     });
 
@@ -769,27 +887,31 @@ function evidentialToUML(thought: EvidentialThought, options: VisualExportOption
       for (const belief of thought.beliefFunctions) {
         edges.push({
           source: belief.id,
-          target: 'combined_belief',
-          type: 'dependency',
-          label: 'combines',
+          target: "combined_belief",
+          type: "dependency",
+          label: "combines",
         });
       }
     }
   }
 
   // If no evidence or beliefs, show frame of discernment
-  if (nodes.length === 0 && thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
+  if (
+    nodes.length === 0 &&
+    thought.frameOfDiscernment &&
+    thought.frameOfDiscernment.length > 0
+  ) {
     nodes.push({
-      id: 'frame',
-      label: 'Frame of Discernment',
-      shape: 'class',
-      stereotype: '<<enumeration>>',
-      attributes: thought.frameOfDiscernment.map(h => `${sanitizeId(h)}`),
+      id: "frame",
+      label: "Frame of Discernment",
+      shape: "class",
+      stereotype: "<<enumeration>>",
+      attributes: thought.frameOfDiscernment.map((h) => `${sanitizeId(h)}`),
     });
   }
 
   return generateUmlDiagram(nodes, edges, {
-    title: 'Evidential Reasoning',
+    title: "Evidential Reasoning",
     includeLabels,
   });
 }
@@ -797,10 +919,13 @@ function evidentialToUML(thought: EvidentialThought, options: VisualExportOption
 /**
  * Export evidential beliefs to JSON format
  */
-function evidentialToJSON(thought: EvidentialThought, options: VisualExportOptions): string {
+function evidentialToJSON(
+  thought: EvidentialThought,
+  options: VisualExportOptions,
+): string {
   const { includeMetrics = true } = options;
 
-  const graph = createJsonGraph('evidential', 'Evidential Beliefs');
+  const graph = createJsonGraph("evidential", "Evidential Beliefs");
 
   // Add evidence nodes
   if (thought.evidence && thought.evidence.length > 0) {
@@ -808,7 +933,7 @@ function evidentialToJSON(thought: EvidentialThought, options: VisualExportOptio
       addNode(graph, {
         id: evidence.id,
         label: evidence.description,
-        type: 'evidence',
+        type: "evidence",
         metadata: {
           reliability: evidence.reliability,
           source: evidence.source,
@@ -825,7 +950,7 @@ function evidentialToJSON(thought: EvidentialThought, options: VisualExportOptio
       };
 
       if (includeMetrics && belief.massAssignments) {
-        metadata.massAssignments = belief.massAssignments.map(ma => ({
+        metadata.massAssignments = belief.massAssignments.map((ma) => ({
           hypothesisSet: ma.hypothesisSet,
           mass: ma.mass,
           justification: ma.justification,
@@ -839,23 +964,27 @@ function evidentialToJSON(thought: EvidentialThought, options: VisualExportOptio
       addNode(graph, {
         id: belief.id,
         label: `Belief: ${belief.source}`,
-        type: 'belief',
+        type: "belief",
         metadata,
       });
 
       // Create edges from evidence to beliefs
       if (thought.evidence && thought.evidence.length > 0) {
-        const sourceEvidence = thought.evidence.find(e => e.id === belief.source);
+        const sourceEvidence = thought.evidence.find(
+          (e) => e.id === belief.source,
+        );
         if (sourceEvidence) {
           addEdge(graph, {
             id: `edge_${sourceEvidence.id}_${belief.id}`,
             source: sourceEvidence.id,
             target: belief.id,
-            label: 'supports',
+            label: "supports",
             weight: sourceEvidence.reliability,
-            metadata: includeMetrics ? {
-              reliability: sourceEvidence.reliability,
-            } : undefined,
+            metadata: includeMetrics
+              ? {
+                  reliability: sourceEvidence.reliability,
+                }
+              : undefined,
           });
         }
       }
@@ -867,11 +996,13 @@ function evidentialToJSON(thought: EvidentialThought, options: VisualExportOptio
     const metadata: Record<string, any> = {};
 
     if (includeMetrics && thought.combinedBelief.massAssignments) {
-      metadata.massAssignments = thought.combinedBelief.massAssignments.map(ma => ({
-        hypothesisSet: ma.hypothesisSet,
-        mass: ma.mass,
-        justification: ma.justification,
-      }));
+      metadata.massAssignments = thought.combinedBelief.massAssignments.map(
+        (ma) => ({
+          hypothesisSet: ma.hypothesisSet,
+          mass: ma.mass,
+          justification: ma.justification,
+        }),
+      );
     }
 
     if (thought.combinedBelief.conflictMass !== undefined) {
@@ -879,9 +1010,9 @@ function evidentialToJSON(thought: EvidentialThought, options: VisualExportOptio
     }
 
     addNode(graph, {
-      id: 'combined_belief',
-      label: 'Combined Belief',
-      type: 'conclusion',
+      id: "combined_belief",
+      label: "Combined Belief",
+      type: "conclusion",
       metadata,
     });
 
@@ -891,19 +1022,23 @@ function evidentialToJSON(thought: EvidentialThought, options: VisualExportOptio
         addEdge(graph, {
           id: `edge_${belief.id}_combined`,
           source: belief.id,
-          target: 'combined_belief',
-          label: 'combines',
+          target: "combined_belief",
+          label: "combines",
         });
       }
     }
   }
 
   // Add frame of discernment as metadata if no evidence/beliefs
-  if (graph.nodes.length === 0 && thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
+  if (
+    graph.nodes.length === 0 &&
+    thought.frameOfDiscernment &&
+    thought.frameOfDiscernment.length > 0
+  ) {
     addNode(graph, {
-      id: 'frame',
-      label: 'Frame of Discernment',
-      type: 'frame',
+      id: "frame",
+      label: "Frame of Discernment",
+      type: "frame",
       metadata: {
         hypotheses: thought.frameOfDiscernment,
       },
@@ -913,16 +1048,16 @@ function evidentialToJSON(thought: EvidentialThought, options: VisualExportOptio
   // Add metrics
   if (includeMetrics) {
     if (thought.frameOfDiscernment) {
-      addMetric(graph, 'hypotheses', thought.frameOfDiscernment.length);
+      addMetric(graph, "hypotheses", thought.frameOfDiscernment.length);
     }
     if (thought.evidence) {
-      addMetric(graph, 'evidenceCount', thought.evidence.length);
+      addMetric(graph, "evidenceCount", thought.evidence.length);
     }
     if (thought.beliefFunctions) {
-      addMetric(graph, 'beliefFunctions', thought.beliefFunctions.length);
+      addMetric(graph, "beliefFunctions", thought.beliefFunctions.length);
     }
     if (thought.combinedBelief) {
-      addMetric(graph, 'hasCombinedBelief', true);
+      addMetric(graph, "hasCombinedBelief", true);
     }
   }
 
@@ -932,7 +1067,10 @@ function evidentialToJSON(thought: EvidentialThought, options: VisualExportOptio
 /**
  * Export evidential beliefs to Markdown format
  */
-function evidentialToMarkdown(thought: EvidentialThought, options: VisualExportOptions): string {
+function evidentialToMarkdown(
+  thought: EvidentialThought,
+  options: VisualExportOptions,
+): string {
   const {
     markdownIncludeFrontmatter = false,
     markdownIncludeToc = false,
@@ -944,32 +1082,39 @@ function evidentialToMarkdown(thought: EvidentialThought, options: VisualExportO
 
   // Metrics
   if (includeMetrics) {
-    parts.push(section('Metrics', keyValueSection({
-      'Hypotheses': thought.frameOfDiscernment?.length || 0,
-      'Evidence Items': thought.evidence?.length || 0,
-      'Belief Functions': thought.beliefFunctions?.length || 0,
-    })));
+    parts.push(
+      section(
+        "Metrics",
+        keyValueSection({
+          Hypotheses: thought.frameOfDiscernment?.length || 0,
+          "Evidence Items": thought.evidence?.length || 0,
+          "Belief Functions": thought.beliefFunctions?.length || 0,
+        }),
+      ),
+    );
   }
 
   // Frame of discernment
   if (thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
-    parts.push(section('Frame of Discernment',
-      list(thought.frameOfDiscernment)
-    ));
+    parts.push(
+      section("Frame of Discernment", list(thought.frameOfDiscernment)),
+    );
   }
 
   // Evidence
   if (thought.evidence && thought.evidence.length > 0) {
-    const evRows = thought.evidence.map(ev => [
+    const evRows = thought.evidence.map((ev) => [
       ev.id,
       ev.description,
       ev.reliability.toFixed(2),
-      ev.source || '-',
+      ev.source || "-",
     ]);
-    parts.push(section('Evidence', table(
-      ['ID', 'Description', 'Reliability', 'Source'],
-      evRows
-    )));
+    parts.push(
+      section(
+        "Evidence",
+        table(["ID", "Description", "Reliability", "Source"], evRows),
+      ),
+    );
   }
 
   // Belief functions
@@ -978,50 +1123,56 @@ function evidentialToMarkdown(thought: EvidentialThought, options: VisualExportO
     for (const bf of thought.beliefFunctions) {
       beliefContent.push(`**Source:** ${bf.source}\n`);
       if (bf.conflictMass !== undefined) {
-        beliefContent.push(`**Conflict Mass:** ${bf.conflictMass.toFixed(3)}\n`);
+        beliefContent.push(
+          `**Conflict Mass:** ${bf.conflictMass.toFixed(3)}\n`,
+        );
       }
-      const massRows = bf.massAssignments.map(ma => [
-        `{${ma.hypothesisSet.join(', ')}}`,
+      const massRows = bf.massAssignments.map((ma) => [
+        `{${ma.hypothesisSet.join(", ")}}`,
         ma.mass.toFixed(3),
         ma.justification,
       ]);
-      beliefContent.push(table(
-        ['Hypothesis Set', 'Mass', 'Justification'],
-        massRows
-      ));
-      beliefContent.push('\n');
+      beliefContent.push(
+        table(["Hypothesis Set", "Mass", "Justification"], massRows),
+      );
+      beliefContent.push("\n");
     }
-    parts.push(section('Belief Functions', beliefContent.join('')));
+    parts.push(section("Belief Functions", beliefContent.join("")));
   }
 
   // Combined belief
   if (thought.combinedBelief) {
-    const massRows = thought.combinedBelief.massAssignments.map(ma => [
-      `{${ma.hypothesisSet.join(', ')}}`,
+    const massRows = thought.combinedBelief.massAssignments.map((ma) => [
+      `{${ma.hypothesisSet.join(", ")}}`,
       ma.mass.toFixed(3),
       ma.justification,
     ]);
     let combinedContent = table(
-      ['Hypothesis Set', 'Mass', 'Justification'],
-      massRows
+      ["Hypothesis Set", "Mass", "Justification"],
+      massRows,
     );
     if (thought.combinedBelief.conflictMass !== undefined) {
       combinedContent += `\n**Conflict Mass:** ${thought.combinedBelief.conflictMass.toFixed(3)}\n`;
     }
-    parts.push(section('Combined Belief', combinedContent));
+    parts.push(section("Combined Belief", combinedContent));
   }
 
   // Mermaid diagram
   if (markdownIncludeMermaid) {
-    const mermaid = evidentialToMermaid(thought, 'default', true, includeMetrics);
-    parts.push(section('Visualization', mermaidBlock(mermaid)));
+    const mermaid = evidentialToMermaid(
+      thought,
+      "default",
+      true,
+      includeMetrics,
+    );
+    parts.push(section("Visualization", mermaidBlock(mermaid)));
   }
 
-  return mdDocument('Evidential Reasoning Analysis', parts.join('\n'), {
+  return mdDocument("Evidential Reasoning Analysis", parts.join("\n"), {
     includeFrontmatter: markdownIncludeFrontmatter,
     includeTableOfContents: markdownIncludeToc,
     metadata: {
-      mode: 'evidential',
+      mode: "evidential",
       hypotheses: thought.frameOfDiscernment?.length || 0,
     },
   });

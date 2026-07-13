@@ -6,16 +6,16 @@
  * Ensures data integrity and prevents invalid inputs from reaching core logic.
  */
 
-import { z } from 'zod';
-import { ThinkingMode } from '../types/index.js';
+import { z } from "zod";
+import { ThinkingMode } from "../types/index.js";
 
 /**
  * UUID v4 validation pattern
  */
 const uuidSchema = z
   .string()
-  .uuid('Invalid UUID format')
-  .describe('UUID v4 identifier');
+  .uuid("Invalid UUID format")
+  .describe("UUID v4 identifier");
 
 /**
  * Session ID validation (UUID v4)
@@ -27,7 +27,7 @@ export const SessionIdSchema = uuidSchema;
  */
 export const ThinkingModeSchema = z
   .nativeEnum(ThinkingMode)
-  .describe('Valid thinking mode from ThinkingMode enum');
+  .describe("Valid thinking mode from ThinkingMode enum");
 
 /**
  * Create Session Input Schema
@@ -36,25 +36,25 @@ export const ThinkingModeSchema = z
 export const CreateSessionSchema = z.object({
   title: z
     .string()
-    .min(1, 'Title cannot be empty')
-    .max(200, 'Title must be 200 characters or less')
-    .describe('Session title'),
+    .min(1, "Title cannot be empty")
+    .max(200, "Title must be 200 characters or less")
+    .describe("Session title"),
   mode: ThinkingModeSchema,
   author: z
     .string()
-    .max(100, 'Author name must be 100 characters or less')
+    .max(100, "Author name must be 100 characters or less")
     .optional()
-    .describe('Optional author name'),
+    .describe("Optional author name"),
   domain: z
     .string()
-    .max(100, 'Domain must be 100 characters or less')
+    .max(100, "Domain must be 100 characters or less")
     .optional()
-    .describe('Optional problem domain'),
+    .describe("Optional problem domain"),
   tags: z
-    .array(z.string().max(50, 'Tag must be 50 characters or less'))
-    .max(20, 'Maximum 20 tags allowed')
+    .array(z.string().max(50, "Tag must be 50 characters or less"))
+    .max(20, "Maximum 20 tags allowed")
     .optional()
-    .describe('Optional tags for categorization'),
+    .describe("Optional tags for categorization"),
 });
 
 export type CreateSessionInput = z.infer<typeof CreateSessionSchema>;
@@ -65,29 +65,27 @@ export type CreateSessionInput = z.infer<typeof CreateSessionSchema>;
  */
 export const AddThoughtSchema = z.object({
   sessionId: SessionIdSchema.optional().describe(
-    'Session ID (optional - creates new session if not provided)'
+    "Session ID (optional - creates new session if not provided)",
   ),
   thought: z
     .string()
-    .min(1, 'Thought cannot be empty')
-    .max(10000, 'Thought must be 10000 characters or less')
-    .describe('Thought content'),
+    .min(1, "Thought cannot be empty")
+    .max(10000, "Thought must be 10000 characters or less")
+    .describe("Thought content"),
   thoughtNumber: z
     .number()
-    .int('Thought number must be an integer')
-    .min(1, 'Thought number must be at least 1')
-    .max(1000, 'Thought number cannot exceed 1000')
-    .describe('Current thought number in sequence'),
+    .int("Thought number must be an integer")
+    .min(1, "Thought number must be at least 1")
+    .max(1000, "Thought number cannot exceed 1000")
+    .describe("Current thought number in sequence"),
   totalThoughts: z
     .number()
-    .int('Total thoughts must be an integer')
-    .min(1, 'Total thoughts must be at least 1')
-    .max(1000, 'Total thoughts cannot exceed 1000')
-    .describe('Expected total number of thoughts'),
+    .int("Total thoughts must be an integer")
+    .min(1, "Total thoughts must be at least 1")
+    .max(1000, "Total thoughts cannot exceed 1000")
+    .describe("Expected total number of thoughts"),
   mode: ThinkingModeSchema,
-  nextThoughtNeeded: z
-    .boolean()
-    .describe('Whether another thought is needed'),
+  nextThoughtNeeded: z.boolean().describe("Whether another thought is needed"),
 });
 
 export type AddThoughtInput = z.infer<typeof AddThoughtSchema>;
@@ -100,9 +98,9 @@ export const CompleteSessionSchema = z.object({
   sessionId: SessionIdSchema,
   summary: z
     .string()
-    .max(1000, 'Summary must be 1000 characters or less')
+    .max(1000, "Summary must be 1000 characters or less")
     .optional()
-    .describe('Optional session summary'),
+    .describe("Optional session summary"),
 });
 
 export type CompleteSessionInput = z.infer<typeof CompleteSessionSchema>;
@@ -122,20 +120,20 @@ export type GetSessionInput = z.infer<typeof GetSessionSchema>;
  * Validates inputs for list_sessions MCP tool
  */
 export const ListSessionsSchema = z.object({
-  mode: ThinkingModeSchema.optional().describe('Filter by thinking mode'),
+  mode: ThinkingModeSchema.optional().describe("Filter by thinking mode"),
   limit: z
     .number()
-    .int('Limit must be an integer')
-    .min(1, 'Limit must be at least 1')
-    .max(1000, 'Limit cannot exceed 1000')
+    .int("Limit must be an integer")
+    .min(1, "Limit must be at least 1")
+    .max(1000, "Limit cannot exceed 1000")
     .default(50)
-    .describe('Maximum number of sessions to return'),
+    .describe("Maximum number of sessions to return"),
   offset: z
     .number()
-    .int('Offset must be an integer')
-    .min(0, 'Offset cannot be negative')
+    .int("Offset must be an integer")
+    .min(0, "Offset cannot be negative")
     .default(0)
-    .describe('Number of sessions to skip'),
+    .describe("Number of sessions to skip"),
 });
 
 export type ListSessionsInput = z.infer<typeof ListSessionsSchema>;
@@ -147,10 +145,10 @@ export type ListSessionsInput = z.infer<typeof ListSessionsSchema>;
 export const ExportSessionSchema = z.object({
   sessionId: SessionIdSchema,
   format: z
-    .enum(['json', 'markdown', 'latex'], {
-      message: 'Format must be json, markdown, or latex',
+    .enum(["json", "markdown", "latex"], {
+      message: "Format must be json, markdown, or latex",
     })
-    .describe('Export format'),
+    .describe("Export format"),
 });
 
 export type ExportSessionInput = z.infer<typeof ExportSessionSchema>;
@@ -162,17 +160,17 @@ export type ExportSessionInput = z.infer<typeof ExportSessionSchema>;
 export const SearchSessionsSchema = z.object({
   query: z
     .string()
-    .min(1, 'Search query cannot be empty')
-    .max(500, 'Search query must be 500 characters or less')
-    .describe('Search query string'),
-  mode: ThinkingModeSchema.optional().describe('Filter by thinking mode'),
+    .min(1, "Search query cannot be empty")
+    .max(500, "Search query must be 500 characters or less")
+    .describe("Search query string"),
+  mode: ThinkingModeSchema.optional().describe("Filter by thinking mode"),
   limit: z
     .number()
-    .int('Limit must be an integer')
-    .min(1, 'Limit must be at least 1')
-    .max(100, 'Limit cannot exceed 100')
+    .int("Limit must be an integer")
+    .min(1, "Limit must be at least 1")
+    .max(100, "Limit cannot exceed 100")
     .default(20)
-    .describe('Maximum number of results'),
+    .describe("Maximum number of results"),
 });
 
 export type SearchSessionsInput = z.infer<typeof SearchSessionsSchema>;
@@ -182,8 +180,19 @@ export type SearchSessionsInput = z.infer<typeof SearchSessionsSchema>;
  * Validates inputs for batch operations
  */
 export const BatchOperationSchema = z.object({
-  type: z.enum(['export', 'import', 'analyze', 'validate', 'transform', 'index', 'backup', 'cleanup']),
-  params: z.record(z.string(), z.unknown()).describe('Operation-specific parameters'),
+  type: z.enum([
+    "export",
+    "import",
+    "analyze",
+    "validate",
+    "transform",
+    "index",
+    "backup",
+    "cleanup",
+  ]),
+  params: z
+    .record(z.string(), z.unknown())
+    .describe("Operation-specific parameters"),
 });
 
 export type BatchOperationInput = z.infer<typeof BatchOperationSchema>;
@@ -202,7 +211,7 @@ export function validateInput<T>(schema: z.ZodSchema<T>, input: unknown): T {
  */
 export function safeValidateInput<T>(
   schema: z.ZodSchema<T>,
-  input: unknown
+  input: unknown,
 ): { success: true; data: T } | { success: false; error: z.ZodError } {
   const result = schema.safeParse(input);
   return result.success

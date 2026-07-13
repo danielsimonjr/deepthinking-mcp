@@ -5,7 +5,7 @@
  * Designed for rigorous qualitative research methodology
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 // ===== ANALYSIS THOUGHT TYPES =====
 
@@ -13,28 +13,28 @@ import { BaseThought, ThinkingMode } from '../core.js';
  * Types of qualitative analysis reasoning steps
  */
 export type AnalysisThoughtType =
-  | 'data_familiarization'       // Initial engagement with data
-  | 'initial_coding'             // Generate initial codes
-  | 'focused_coding'             // Develop focused/selective codes
-  | 'theme_development'          // Develop themes from codes
-  | 'theme_refinement'           // Refine and review themes
-  | 'theoretical_integration'    // Integrate into theoretical framework
-  | 'memo_writing'               // Analytical memo documentation
-  | 'saturation_assessment';     // Assess theoretical saturation
+  | "data_familiarization" // Initial engagement with data
+  | "initial_coding" // Generate initial codes
+  | "focused_coding" // Develop focused/selective codes
+  | "theme_development" // Develop themes from codes
+  | "theme_refinement" // Refine and review themes
+  | "theoretical_integration" // Integrate into theoretical framework
+  | "memo_writing" // Analytical memo documentation
+  | "saturation_assessment"; // Assess theoretical saturation
 
 /**
  * Qualitative analysis methodology
  */
 export type AnalysisMethodology =
-  | 'thematic_analysis'          // Braun & Clarke
-  | 'grounded_theory'            // Glaser & Strauss, Charmaz
-  | 'discourse_analysis'         // Foucauldian, Critical
-  | 'content_analysis'           // Qualitative content analysis
-  | 'phenomenological'           // IPA, Descriptive
-  | 'narrative_analysis'         // Narrative inquiry
-  | 'framework_analysis'         // Ritchie & Spencer
-  | 'template_analysis'          // King
-  | 'mixed_qualitative';         // Combined approaches
+  | "thematic_analysis" // Braun & Clarke
+  | "grounded_theory" // Glaser & Strauss, Charmaz
+  | "discourse_analysis" // Foucauldian, Critical
+  | "content_analysis" // Qualitative content analysis
+  | "phenomenological" // IPA, Descriptive
+  | "narrative_analysis" // Narrative inquiry
+  | "framework_analysis" // Ritchie & Spencer
+  | "template_analysis" // King
+  | "mixed_qualitative"; // Combined approaches
 
 // ===== DATA INTERFACES =====
 
@@ -43,14 +43,23 @@ export type AnalysisMethodology =
  */
 export interface DataSource {
   id: string;
-  type: 'interview' | 'focus_group' | 'observation' | 'document' | 'artifact' | 'field_notes' | 'survey_open_ended' | 'social_media' | 'other';
+  type:
+    | "interview"
+    | "focus_group"
+    | "observation"
+    | "document"
+    | "artifact"
+    | "field_notes"
+    | "survey_open_ended"
+    | "social_media"
+    | "other";
   description: string;
   participantId?: string;
   dateCollected?: Date;
-  duration?: number;             // minutes
+  duration?: number; // minutes
   wordCount?: number;
   context: string;
-  quality: number;               // 0-1 data quality assessment
+  quality: number; // 0-1 data quality assessment
 }
 
 /**
@@ -62,10 +71,10 @@ export interface DataSegment {
   text: string;
   startPosition?: number;
   endPosition?: number;
-  context?: string;              // Surrounding context
+  context?: string; // Surrounding context
   participantId?: string;
-  codes: string[];               // Code IDs applied
-  memos?: string[];              // Memo IDs attached
+  codes: string[]; // Code IDs applied
+  memos?: string[]; // Memo IDs attached
 }
 
 // ===== CODING INTERFACES =====
@@ -74,17 +83,17 @@ export interface DataSegment {
  * Code type classification
  */
 export type CodeType =
-  | 'descriptive'                // Describes content
-  | 'in_vivo'                    // Participant's own words
-  | 'process'                    // Actions/processes
-  | 'initial'                    // Open/initial coding
-  | 'focused'                    // Selective/focused
-  | 'axial'                      // Grounded theory axial
-  | 'theoretical'                // Theoretical coding
-  | 'emotion'                    // Emotional expressions
-  | 'value'                      // Values/beliefs
-  | 'versus'                     // Comparisons
-  | 'evaluation';                // Evaluative statements
+  | "descriptive" // Describes content
+  | "in_vivo" // Participant's own words
+  | "process" // Actions/processes
+  | "initial" // Open/initial coding
+  | "focused" // Selective/focused
+  | "axial" // Grounded theory axial
+  | "theoretical" // Theoretical coding
+  | "emotion" // Emotional expressions
+  | "value" // Values/beliefs
+  | "versus" // Comparisons
+  | "evaluation"; // Evaluative statements
 
 /**
  * Qualitative code
@@ -94,10 +103,10 @@ export interface Code {
   label: string;
   definition: string;
   type: CodeType;
-  examples: string[];            // Example quotes
-  dataSegmentIds: string[];      // Segments coded with this
-  frequency: number;             // How many times applied
-  parentCodeId?: string;         // For hierarchical coding
+  examples: string[]; // Example quotes
+  dataSegmentIds: string[]; // Segments coded with this
+  frequency: number; // How many times applied
+  parentCodeId?: string; // For hierarchical coding
   childCodeIds?: string[];
   relatedCodeIds?: string[];
   createdAt: Date;
@@ -112,8 +121,8 @@ export interface CodeCooccurrence {
   codeId1: string;
   codeId2: string;
   frequency: number;
-  segmentIds: string[];          // Where they co-occur
-  relationship?: string;         // Nature of relationship
+  segmentIds: string[]; // Where they co-occur
+  relationship?: string; // Nature of relationship
 }
 
 /**
@@ -138,7 +147,7 @@ export interface Codebook {
 /**
  * Theme level
  */
-export type ThemeLevel = 'initial' | 'candidate' | 'refined' | 'final';
+export type ThemeLevel = "initial" | "candidate" | "refined" | "final";
 
 /**
  * Qualitative theme
@@ -148,18 +157,18 @@ export interface QualitativeTheme {
   name: string;
   definition: string;
   level: ThemeLevel;
-  codeIds: string[];             // Codes contributing to theme
-  dataSegmentIds: string[];      // Supporting data
+  codeIds: string[]; // Codes contributing to theme
+  dataSegmentIds: string[]; // Supporting data
   subthemeIds?: string[];
   parentThemeId?: string;
-  prevalence: number;            // 0-1 how prevalent in data
-  richness: number;              // 0-1 depth of data
+  prevalence: number; // 0-1 how prevalent in data
+  richness: number; // 0-1 depth of data
   keyQuotes: {
     quote: string;
     sourceId: string;
     significance: string;
   }[];
-  narrative: string;             // Thematic narrative/description
+  narrative: string; // Thematic narrative/description
   boundaryConditions?: string[]; // When theme applies/doesn't
   memoIds?: string[];
 }
@@ -174,11 +183,11 @@ export interface ThematicMap {
   relationships: {
     themeId1: string;
     themeId2: string;
-    type: 'hierarchical' | 'associative' | 'causal' | 'temporal' | 'contrast';
+    type: "hierarchical" | "associative" | "causal" | "temporal" | "contrast";
     description: string;
   }[];
   overarchingNarrative: string;
-  diagramNotation?: string;      // Mermaid/visual representation
+  diagramNotation?: string; // Mermaid/visual representation
 }
 
 // ===== MEMO INTERFACES =====
@@ -187,11 +196,11 @@ export interface ThematicMap {
  * Memo type
  */
 export type MemoType =
-  | 'code_memo'                  // About specific code
-  | 'theoretical_memo'           // Theoretical ideas
-  | 'operational_memo'           // Methodological decisions
-  | 'analytical_memo'            // Analytical insights
-  | 'reflective_memo';           // Researcher reflexivity
+  | "code_memo" // About specific code
+  | "theoretical_memo" // Theoretical ideas
+  | "operational_memo" // Methodological decisions
+  | "analytical_memo" // Analytical insights
+  | "reflective_memo"; // Researcher reflexivity
 
 /**
  * Analytical memo
@@ -205,9 +214,9 @@ export interface AnalyticalMemo {
   linkedThemes?: string[];
   linkedSegments?: string[];
   date: Date;
-  stage: AnalysisThoughtType;    // Analysis stage when written
+  stage: AnalysisThoughtType; // Analysis stage when written
   insights: string[];
-  questions: string[];           // Questions raised
+  questions: string[]; // Questions raised
   nextSteps?: string[];
 }
 
@@ -225,11 +234,11 @@ export interface GTCategory {
     dimensions: [string, string]; // Dimensional range
   }[];
   codes: string[];
-  isCore: boolean;               // Core category?
-  saturation: 'saturated' | 'developing' | 'sparse';
+  isCore: boolean; // Core category?
+  saturation: "saturated" | "developing" | "sparse";
   relationships: {
     categoryId: string;
-    type: 'causal' | 'contextual' | 'consequential' | 'strategy';
+    type: "causal" | "contextual" | "consequential" | "strategy";
     description: string;
   }[];
 }
@@ -256,10 +265,15 @@ export interface DiscoursePattern {
   id: string;
   name: string;
   description: string;
-  type: 'interpretive_repertoire' | 'subject_position' | 'ideological_dilemma' | 'rhetorical_device' | 'power_relation';
+  type:
+    | "interpretive_repertoire"
+    | "subject_position"
+    | "ideological_dilemma"
+    | "rhetorical_device"
+    | "power_relation";
   examples: DataSegment[];
-  function: string;              // What it accomplishes
-  effects: string[];             // Social/political effects
+  function: string; // What it accomplishes
+  effects: string[]; // Social/political effects
 }
 
 // ===== QUALITY INDICATORS =====
@@ -269,8 +283,8 @@ export interface DiscoursePattern {
  */
 export interface QualitativeRigor {
   credibility: {
-    rating: number;              // 0-1
-    strategies: string[];        // Member checking, triangulation, etc.
+    rating: number; // 0-1
+    strategies: string[]; // Member checking, triangulation, etc.
   };
   transferability: {
     rating: number;
@@ -290,7 +304,7 @@ export interface QualitativeRigor {
   saturation: {
     achieved: boolean;
     evidence: string;
-    newCodesLastN: number;       // New codes in last N segments
+    newCodesLastN: number; // New codes in last N segments
   };
 }
 
@@ -345,6 +359,8 @@ export interface AnalysisThought extends BaseThought {
 /**
  * Type guard for AnalysisThought
  */
-export function isAnalysisThought(thought: BaseThought): thought is AnalysisThought {
-  return thought.mode === 'analysis';
+export function isAnalysisThought(
+  thought: BaseThought,
+): thought is AnalysisThought {
+  return thought.mode === "analysis";
 }

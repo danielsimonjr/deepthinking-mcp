@@ -8,8 +8,8 @@
  * Validators now implement this interface directly and use utility functions.
  */
 
-import type { Thought, ValidationIssue } from '../../types/index.js';
-import type { ValidationContext } from '../constants.js';
+import type { Thought, ValidationIssue } from "../../types/index.js";
+import type { ValidationContext } from "../constants.js";
 
 /**
  * Interface for mode-specific validators

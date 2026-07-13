@@ -5,7 +5,7 @@
  * extracts their logical dependencies.
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 import type {
   AtomicStatement,
   InferenceRule,
@@ -14,8 +14,8 @@ import type {
   ProofGap,
   ImplicitAssumption,
   AssumptionChain,
-} from '../types/modes/mathematics.js';
-import { DependencyGraphBuilder } from './dependency-graph.js';
+} from "../types/modes/mathematics.js";
+import { DependencyGraphBuilder } from "./dependency-graph.js";
 
 /**
  * Proof step input format
@@ -31,7 +31,7 @@ export interface ProofStep {
  */
 interface StatementPattern {
   pattern: RegExp;
-  type: AtomicStatement['type'];
+  type: AtomicStatement["type"];
   extractStatement: (match: RegExpMatchArray) => string;
   extractJustification?: (match: RegExpMatchArray) => string | undefined;
 }
@@ -42,7 +42,10 @@ interface StatementPattern {
 interface DependencyPattern {
   pattern: RegExp;
   inferenceRule: InferenceRule;
-  extractDependencies: (match: RegExpMatchArray, statementIds: Map<string, string>) => string[];
+  extractDependencies: (
+    match: RegExpMatchArray,
+    statementIds: Map<string, string>,
+  ) => string[];
 }
 
 /**
@@ -65,54 +68,58 @@ export class ProofDecomposer {
       // Axiom patterns
       {
         pattern: /^(?:Axiom|Postulate)\s*(?:\d+)?[:\.]?\s*(.+)$/i,
-        type: 'axiom',
+        type: "axiom",
         extractStatement: (m) => m[1].trim(),
       },
       // Definition patterns
       {
         pattern: /^(?:Definition|Def\.?)\s*(?:\d+)?[:\.]?\s*(.+)$/i,
-        type: 'definition',
+        type: "definition",
         extractStatement: (m) => m[1].trim(),
       },
       {
         pattern: /^(?:Let|Define)\s+(.+?)(?:\s+be\s+|\s*:=\s*|\s*=\s*)(.+)$/i,
-        type: 'definition',
+        type: "definition",
         extractStatement: (m) => `${m[1]} be ${m[2]}`.trim(),
       },
       // Hypothesis/Assumption patterns
       {
-        pattern: /^(?:Assume|Suppose|Given|Hypothesis|Let)\s+(?:that\s+)?(.+)$/i,
-        type: 'hypothesis',
+        pattern:
+          /^(?:Assume|Suppose|Given|Hypothesis|Let)\s+(?:that\s+)?(.+)$/i,
+        type: "hypothesis",
         extractStatement: (m) => m[1].trim(),
       },
       // Lemma patterns
       {
         pattern: /^(?:Lemma|Claim)\s*(?:\d+)?[:\.]?\s*(.+)$/i,
-        type: 'lemma',
+        type: "lemma",
         extractStatement: (m) => m[1].trim(),
       },
       // Conclusion patterns
       {
-        pattern: /^(?:Therefore|Thus|Hence|So|Consequently|It follows that|We conclude|QED|∴)\s*[,:]?\s*(.+)$/i,
-        type: 'conclusion',
+        pattern:
+          /^(?:Therefore|Thus|Hence|So|Consequently|It follows that|We conclude|QED|∴)\s*[,:]?\s*(.+)$/i,
+        type: "conclusion",
         extractStatement: (m) => m[1].trim(),
       },
       // Derived statement patterns
       {
-        pattern: /^(?:By|From|Using|Since)\s+(.+?)[,\s]+(?:we have|we get|we obtain|it follows|this gives)\s+(.+)$/i,
-        type: 'derived',
+        pattern:
+          /^(?:By|From|Using|Since)\s+(.+?)[,\s]+(?:we have|we get|we obtain|it follows|this gives)\s+(.+)$/i,
+        type: "derived",
         extractStatement: (m) => m[2].trim(),
         extractJustification: (m) => m[1].trim(),
       },
       {
-        pattern: /^(?:This|Which)\s+(?:implies|gives|yields|means|shows)\s+(?:that\s+)?(.+)$/i,
-        type: 'derived',
+        pattern:
+          /^(?:This|Which)\s+(?:implies|gives|yields|means|shows)\s+(?:that\s+)?(.+)$/i,
+        type: "derived",
         extractStatement: (m) => m[1].trim(),
       },
       // General derived (fallback)
       {
         pattern: /^(.+)$/,
-        type: 'derived',
+        type: "derived",
         extractStatement: (m) => m[1].trim(),
       },
     ];
@@ -125,8 +132,9 @@ export class ProofDecomposer {
     return [
       // Modus ponens: "By X, we have Y" or "From X, Y"
       {
-        pattern: /(?:by|from|using)\s+(.+?)(?:,\s*(?:we have|we get|it follows|we obtain)|$)/i,
-        inferenceRule: 'modus_ponens',
+        pattern:
+          /(?:by|from|using)\s+(.+?)(?:,\s*(?:we have|we get|it follows|we obtain)|$)/i,
+        inferenceRule: "modus_ponens",
         extractDependencies: (match, statementIds) => {
           const referenced = match[1];
           return this.findMatchingStatements(referenced, statementIds);
@@ -135,7 +143,7 @@ export class ProofDecomposer {
       // Substitution: "Substituting X into Y"
       {
         pattern: /substitut(?:e|ing)\s+(.+?)\s+(?:into|in)\s+(.+)/i,
-        inferenceRule: 'substitution',
+        inferenceRule: "substitution",
         extractDependencies: (match, statementIds) => {
           const deps = [
             ...this.findMatchingStatements(match[1], statementIds),
@@ -147,7 +155,7 @@ export class ProofDecomposer {
       // Definition expansion: "By definition of X"
       {
         pattern: /(?:by\s+)?(?:the\s+)?definition\s+(?:of\s+)?(.+)/i,
-        inferenceRule: 'definition_expansion',
+        inferenceRule: "definition_expansion",
         extractDependencies: (match, statementIds) => {
           return this.findMatchingStatements(match[1], statementIds);
         },
@@ -155,7 +163,7 @@ export class ProofDecomposer {
       // Contradiction: "contradicts" or "contradiction"
       {
         pattern: /(?:this\s+)?contradicts?\s+(.+)/i,
-        inferenceRule: 'contradiction',
+        inferenceRule: "contradiction",
         extractDependencies: (match, statementIds) => {
           return this.findMatchingStatements(match[1], statementIds);
         },
@@ -163,13 +171,14 @@ export class ProofDecomposer {
       // Mathematical induction
       {
         pattern: /by\s+(?:mathematical\s+)?induction/i,
-        inferenceRule: 'mathematical_induction',
+        inferenceRule: "mathematical_induction",
         extractDependencies: () => [],
       },
       // Hypothetical syllogism: "Since X implies Y, and Y implies Z"
       {
-        pattern: /since\s+(.+?)\s+implies\s+(.+?),\s+and\s+(.+?)\s+implies\s+(.+)/i,
-        inferenceRule: 'hypothetical_syllogism',
+        pattern:
+          /since\s+(.+?)\s+implies\s+(.+?),\s+and\s+(.+?)\s+implies\s+(.+)/i,
+        inferenceRule: "hypothetical_syllogism",
         extractDependencies: (match, statementIds) => {
           const deps = [
             ...this.findMatchingStatements(match[1], statementIds),
@@ -184,7 +193,10 @@ export class ProofDecomposer {
   /**
    * Find statements that match a reference
    */
-  private findMatchingStatements(reference: string, statementIds: Map<string, string>): string[] {
+  private findMatchingStatements(
+    reference: string,
+    statementIds: Map<string, string>,
+  ): string[] {
     const matches: string[] = [];
     const refLower = reference.toLowerCase().trim();
 
@@ -229,8 +241,12 @@ export class ProofDecomposer {
    */
   decompose(proof: string | ProofStep[], theorem?: string): ProofDecomposition {
     const id = randomUUID();
-    const steps = typeof proof === 'string' ? this.parseProofText(proof) : proof;
-    const originalProof = typeof proof === 'string' ? proof : steps.map((s) => s.content).join('\n');
+    const steps =
+      typeof proof === "string" ? this.parseProofText(proof) : proof;
+    const originalProof =
+      typeof proof === "string"
+        ? proof
+        : steps.map((s) => s.content).join("\n");
 
     // Extract atomic statements
     const atoms = this.extractStatements(steps);
@@ -309,7 +325,10 @@ export class ProofDecomposer {
   /**
    * Classify a proof step into an atomic statement
    */
-  classifyStatement(step: ProofStep, stepNumber: number): AtomicStatement | null {
+  classifyStatement(
+    step: ProofStep,
+    stepNumber: number,
+  ): AtomicStatement | null {
     const content = step.content.trim();
     if (!content) return null;
 
@@ -317,7 +336,8 @@ export class ProofDecomposer {
       const match = content.match(pattern.pattern);
       if (match) {
         const statement = pattern.extractStatement(match);
-        const justification = pattern.extractJustification?.(match) || step.justification;
+        const justification =
+          pattern.extractJustification?.(match) || step.justification;
 
         return {
           id: `stmt-${stepNumber + 1}`,
@@ -337,7 +357,7 @@ export class ProofDecomposer {
       id: `stmt-${stepNumber + 1}`,
       statement: content,
       latex: step.latex,
-      type: 'derived',
+      type: "derived",
       justification: step.justification,
       confidence: 0.7,
       isExplicit: true,
@@ -348,8 +368,11 @@ export class ProofDecomposer {
   /**
    * Compute confidence based on statement type and justification
    */
-  private computeConfidence(type: AtomicStatement['type'], justification?: string): number {
-    const baseConfidence: Record<AtomicStatement['type'], number> = {
+  private computeConfidence(
+    type: AtomicStatement["type"],
+    justification?: string,
+  ): number {
+    const baseConfidence: Record<AtomicStatement["type"], number> = {
       axiom: 1.0,
       definition: 1.0,
       hypothesis: 1.0,
@@ -374,19 +397,23 @@ export class ProofDecomposer {
   inferDependencies(
     atoms: AtomicStatement[],
     steps: ProofStep[],
-    statementIds: Map<string, string>
+    statementIds: Map<string, string>,
   ): void {
     for (let i = 0; i < atoms.length; i++) {
       const atom = atoms[i];
       const step = steps[i];
 
-      if (atom.type === 'axiom' || atom.type === 'definition' || atom.type === 'hypothesis') {
+      if (
+        atom.type === "axiom" ||
+        atom.type === "definition" ||
+        atom.type === "hypothesis"
+      ) {
         // These are roots, no dependencies
         continue;
       }
 
       // Try to infer dependencies from the step content
-      const fullText = `${step.content} ${step.justification || ''}`;
+      const fullText = `${step.content} ${step.justification || ""}`;
       const dependencies: string[] = [];
       let inferenceRule: InferenceRule | undefined;
 
@@ -405,7 +432,7 @@ export class ProofDecomposer {
       if (dependencies.length === 0 && i > 0) {
         // Find the most recent non-conclusion statement
         for (let j = i - 1; j >= 0; j--) {
-          if (atoms[j].type !== 'conclusion') {
+          if (atoms[j].type !== "conclusion") {
             dependencies.push(atoms[j].id);
             break;
           }
@@ -414,7 +441,7 @@ export class ProofDecomposer {
 
       if (dependencies.length > 0) {
         atom.derivedFrom = [...new Set(dependencies)];
-        atom.usedInferenceRule = inferenceRule || 'direct_implication';
+        atom.usedInferenceRule = inferenceRule || "direct_implication";
       }
     }
   }
@@ -434,7 +461,7 @@ export class ProofDecomposer {
     for (const atom of atoms) {
       if (atom.derivedFrom) {
         for (const depId of atom.derivedFrom) {
-          builder.addDependency(depId, atom.id, 'logical', {
+          builder.addDependency(depId, atom.id, "logical", {
             inferenceRule: atom.usedInferenceRule,
           });
         }
@@ -449,10 +476,10 @@ export class ProofDecomposer {
    */
   private traceAssumptionChains(
     atoms: AtomicStatement[],
-    graph: DependencyGraph
+    graph: DependencyGraph,
   ): AssumptionChain[] {
     const chains: AssumptionChain[] = [];
-    const conclusions = atoms.filter((a) => a.type === 'conclusion');
+    const conclusions = atoms.filter((a) => a.type === "conclusion");
 
     for (const conclusion of conclusions) {
       const assumptions: string[] = [];
@@ -469,7 +496,11 @@ export class ProofDecomposer {
 
         path.push(id);
 
-        if (atom.type === 'axiom' || atom.type === 'definition' || atom.type === 'hypothesis') {
+        if (
+          atom.type === "axiom" ||
+          atom.type === "definition" ||
+          atom.type === "hypothesis"
+        ) {
           assumptions.push(id);
           return;
         }
@@ -498,26 +529,30 @@ export class ProofDecomposer {
   /**
    * Detect basic gaps in the proof
    */
-  private detectBasicGaps(atoms: AtomicStatement[], graph: DependencyGraph): ProofGap[] {
+  private detectBasicGaps(
+    atoms: AtomicStatement[],
+    graph: DependencyGraph,
+  ): ProofGap[] {
     const gaps: ProofGap[] = [];
     let gapCount = 0;
 
     // Check for unjustified derived statements
     for (const atom of atoms) {
       if (
-        (atom.type === 'derived' || atom.type === 'conclusion') &&
+        (atom.type === "derived" || atom.type === "conclusion") &&
         (!atom.derivedFrom || atom.derivedFrom.length === 0)
       ) {
         gaps.push({
           id: `gap-${++gapCount}`,
-          type: 'unjustified_leap',
+          type: "unjustified_leap",
           location: {
-            from: 'unknown',
+            from: "unknown",
             to: atom.id,
           },
           description: `Statement "${atom.statement.substring(0, 50)}..." lacks explicit justification`,
-          severity: atom.type === 'conclusion' ? 'significant' : 'minor',
-          suggestedFix: 'Add explicit derivation steps or reference to supporting statements',
+          severity: atom.type === "conclusion" ? "significant" : "minor",
+          suggestedFix:
+            "Add explicit derivation steps or reference to supporting statements",
         });
       }
     }
@@ -540,20 +575,20 @@ export class ProofDecomposer {
     for (const atom of atoms) {
       if (
         !reachable.has(atom.id) &&
-        atom.type !== 'axiom' &&
-        atom.type !== 'definition' &&
-        atom.type !== 'hypothesis'
+        atom.type !== "axiom" &&
+        atom.type !== "definition" &&
+        atom.type !== "hypothesis"
       ) {
         gaps.push({
           id: `gap-${++gapCount}`,
-          type: 'missing_step',
+          type: "missing_step",
           location: {
-            from: 'root',
+            from: "root",
             to: atom.id,
           },
           description: `Statement "${atom.statement.substring(0, 50)}..." is disconnected from the proof structure`,
-          severity: 'significant',
-          suggestedFix: 'Connect this statement to the main proof chain',
+          severity: "significant",
+          suggestedFix: "Connect this statement to the main proof chain",
         });
       }
     }
@@ -566,7 +601,7 @@ export class ProofDecomposer {
    */
   private findImplicitAssumptions(
     atoms: AtomicStatement[],
-    steps: ProofStep[]
+    steps: ProofStep[],
   ): ImplicitAssumption[] {
     const implicitAssumptions: ImplicitAssumption[] = [];
     let count = 0;
@@ -574,36 +609,39 @@ export class ProofDecomposer {
     const implicitPatterns = [
       {
         pattern: /(?:clearly|obviously|trivially|it is clear that)/i,
-        type: 'existence_assumption' as const,
+        type: "existence_assumption" as const,
         suggestedFormulation: (text: string) =>
           `Explicitly state and justify: "${text.substring(0, 50)}..."`,
       },
       {
         pattern: /(?:for\s+(?:all|any|every)|∀)\s+([a-zA-Z_]\w*)/i,
-        type: 'domain_assumption' as const,
+        type: "domain_assumption" as const,
         suggestedFormulation: (_text: string, match: RegExpMatchArray) =>
           `Specify the domain of ${match[1]}`,
       },
       {
         pattern: /(?:there\s+exists?|∃)\s+([a-zA-Z_]\w*)/i,
-        type: 'existence_assumption' as const,
+        type: "existence_assumption" as const,
         suggestedFormulation: (_text: string, match: RegExpMatchArray) =>
           `Prove existence of ${match[1]} or cite a theorem`,
       },
       {
         pattern: /(?:unique|the\s+only)/i,
-        type: 'uniqueness_assumption' as const,
-        suggestedFormulation: () => 'Prove uniqueness or cite a uniqueness theorem',
+        type: "uniqueness_assumption" as const,
+        suggestedFormulation: () =>
+          "Prove uniqueness or cite a uniqueness theorem",
       },
       {
         pattern: /(?:continuous|differentiable|integrable)/i,
-        type: 'continuity_assumption' as const,
-        suggestedFormulation: () => 'State continuity/differentiability assumptions explicitly',
+        type: "continuity_assumption" as const,
+        suggestedFormulation: () =>
+          "State continuity/differentiability assumptions explicitly",
       },
       {
         pattern: /(?:finite|bounded)/i,
-        type: 'finiteness_assumption' as const,
-        suggestedFormulation: () => 'State finiteness/boundedness assumptions explicitly',
+        type: "finiteness_assumption" as const,
+        suggestedFormulation: () =>
+          "State finiteness/boundedness assumptions explicitly",
       },
     ];
 
@@ -642,13 +680,13 @@ export class ProofDecomposer {
 
     for (const gap of gaps) {
       switch (gap.severity) {
-        case 'critical':
+        case "critical":
           score -= 0.25;
           break;
-        case 'significant':
+        case "significant":
           score -= 0.1;
           break;
-        case 'minor':
+        case "minor":
           score -= 0.03;
           break;
       }
@@ -657,10 +695,10 @@ export class ProofDecomposer {
     // Also consider justification coverage
     const justifiedCount = atoms.filter(
       (a) =>
-        a.type === 'axiom' ||
-        a.type === 'definition' ||
-        a.type === 'hypothesis' ||
-        (a.derivedFrom && a.derivedFrom.length > 0)
+        a.type === "axiom" ||
+        a.type === "definition" ||
+        a.type === "hypothesis" ||
+        (a.derivedFrom && a.derivedFrom.length > 0),
     ).length;
 
     const justificationScore = justifiedCount / atoms.length;
@@ -675,38 +713,43 @@ export class ProofDecomposer {
   private assessRigorLevel(
     atoms: AtomicStatement[],
     gaps: ProofGap[],
-    implicitAssumptions: ImplicitAssumption[]
-  ): 'informal' | 'textbook' | 'rigorous' | 'formal' {
-    const criticalGaps = gaps.filter((g) => g.severity === 'critical').length;
-    const significantGaps = gaps.filter((g) => g.severity === 'significant').length;
-    const implicitCount = implicitAssumptions.filter((a) => a.shouldBeExplicit).length;
+    implicitAssumptions: ImplicitAssumption[],
+  ): "informal" | "textbook" | "rigorous" | "formal" {
+    const criticalGaps = gaps.filter((g) => g.severity === "critical").length;
+    const significantGaps = gaps.filter(
+      (g) => g.severity === "significant",
+    ).length;
+    const implicitCount = implicitAssumptions.filter(
+      (a) => a.shouldBeExplicit,
+    ).length;
 
     // All statements have justification and no gaps
     const allJustified = atoms.every(
       (a) =>
-        a.type === 'axiom' ||
-        a.type === 'definition' ||
-        a.type === 'hypothesis' ||
-        (a.derivedFrom && a.derivedFrom.length > 0 && a.usedInferenceRule)
+        a.type === "axiom" ||
+        a.type === "definition" ||
+        a.type === "hypothesis" ||
+        (a.derivedFrom && a.derivedFrom.length > 0 && a.usedInferenceRule),
     );
 
-    if (criticalGaps > 0) return 'informal';
-    if (significantGaps > 2 || implicitCount > 3) return 'informal';
-    if (significantGaps > 0 || implicitCount > 1) return 'textbook';
-    if (!allJustified || implicitCount > 0) return 'textbook';
-    if (allJustified && implicitCount === 0 && gaps.length === 0) return 'rigorous';
+    if (criticalGaps > 0) return "informal";
+    if (significantGaps > 2 || implicitCount > 3) return "informal";
+    if (significantGaps > 0 || implicitCount > 1) return "textbook";
+    if (!allJustified || implicitCount > 0) return "textbook";
+    if (allJustified && implicitCount === 0 && gaps.length === 0)
+      return "rigorous";
 
     // Check for formal logic notation
     const hasFormalNotation = atoms.some(
       (a) =>
         a.latex &&
-        (a.latex.includes('\\forall') ||
-          a.latex.includes('\\exists') ||
-          a.latex.includes('\\vdash') ||
-          a.latex.includes('\\Rightarrow'))
+        (a.latex.includes("\\forall") ||
+          a.latex.includes("\\exists") ||
+          a.latex.includes("\\vdash") ||
+          a.latex.includes("\\Rightarrow")),
     );
 
-    return hasFormalNotation ? 'formal' : 'rigorous';
+    return hasFormalNotation ? "formal" : "rigorous";
   }
 
   /**
@@ -722,9 +765,13 @@ export class ProofDecomposer {
     gapCount: number;
     implicitAssumptionCount: number;
   } {
-    const { atoms, dependencies, gaps, implicitAssumptions, completeness } = decomposition;
+    const { atoms, dependencies, gaps, implicitAssumptions, completeness } =
+      decomposition;
 
-    const totalDeps = atoms.reduce((sum, a) => sum + (a.derivedFrom?.length || 0), 0);
+    const totalDeps = atoms.reduce(
+      (sum, a) => sum + (a.derivedFrom?.length || 0),
+      0,
+    );
     const avgDependencies = atoms.length > 0 ? totalDeps / atoms.length : 0;
 
     return {

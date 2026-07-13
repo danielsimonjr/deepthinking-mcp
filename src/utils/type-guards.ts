@@ -4,46 +4,46 @@
  * Provides safe type narrowing without using 'as any' assertions
  */
 
-import { ExtendedThoughtType } from '../types/core.js';
+import { ExtendedThoughtType } from "../types/core.js";
 
 /**
  * Valid ExtendedThoughtType values
  */
 const VALID_THOUGHT_TYPES: readonly ExtendedThoughtType[] = [
-  'problem_definition',
-  'constraints',
-  'model',
-  'proof',
-  'implementation',
-  'axiom_definition',
-  'theorem_statement',
-  'proof_construction',
-  'lemma_derivation',
-  'corollary',
-  'counterexample',
-  'algebraic_manipulation',
-  'symbolic_computation',
-  'numerical_analysis',
-  'symmetry_analysis',
-  'gauge_theory',
-  'field_equations',
-  'lagrangian',
-  'hamiltonian',
-  'conservation_law',
-  'dimensional_analysis',
-  'tensor_formulation',
-  'differential_geometry',
-  'decomposition',
-  'synthesis',
-  'abstraction',
-  'analogy',
-  'metacognition',
+  "problem_definition",
+  "constraints",
+  "model",
+  "proof",
+  "implementation",
+  "axiom_definition",
+  "theorem_statement",
+  "proof_construction",
+  "lemma_derivation",
+  "corollary",
+  "counterexample",
+  "algebraic_manipulation",
+  "symbolic_computation",
+  "numerical_analysis",
+  "symmetry_analysis",
+  "gauge_theory",
+  "field_equations",
+  "lagrangian",
+  "hamiltonian",
+  "conservation_law",
+  "dimensional_analysis",
+  "tensor_formulation",
+  "differential_geometry",
+  "decomposition",
+  "synthesis",
+  "abstraction",
+  "analogy",
+  "metacognition",
   // Phase 8: Proof Decomposition Types
-  'proof_decomposition',
-  'dependency_analysis',
-  'consistency_check',
-  'gap_identification',
-  'assumption_trace',
+  "proof_decomposition",
+  "dependency_analysis",
+  "consistency_check",
+  "gap_identification",
+  "assumption_trace",
 ] as const;
 
 /**
@@ -52,8 +52,13 @@ const VALID_THOUGHT_TYPES: readonly ExtendedThoughtType[] = [
  * @param value - Value to check
  * @returns true if value is a valid ExtendedThoughtType
  */
-export function isExtendedThoughtType(value: unknown): value is ExtendedThoughtType {
-  return typeof value === 'string' && VALID_THOUGHT_TYPES.includes(value as ExtendedThoughtType);
+export function isExtendedThoughtType(
+  value: unknown,
+): value is ExtendedThoughtType {
+  return (
+    typeof value === "string" &&
+    VALID_THOUGHT_TYPES.includes(value as ExtendedThoughtType)
+  );
 }
 
 /**
@@ -66,7 +71,7 @@ export function isExtendedThoughtType(value: unknown): value is ExtendedThoughtT
  */
 export function toExtendedThoughtType(
   value: unknown,
-  fallback?: ExtendedThoughtType
+  fallback?: ExtendedThoughtType,
 ): ExtendedThoughtType {
   if (isExtendedThoughtType(value)) {
     return value;
@@ -77,7 +82,7 @@ export function toExtendedThoughtType(
   }
 
   throw new Error(
-    `Invalid ExtendedThoughtType: ${value}. Must be one of: ${VALID_THOUGHT_TYPES.join(', ')}`
+    `Invalid ExtendedThoughtType: ${value}. Must be one of: ${VALID_THOUGHT_TYPES.join(", ")}`,
   );
 }
 
@@ -85,20 +90,23 @@ export function toExtendedThoughtType(
  * Type guard for checking if value is a number
  */
 export function isNumber(value: unknown): value is number {
-  return typeof value === 'number' && !isNaN(value) && isFinite(value);
+  return typeof value === "number" && !isNaN(value) && isFinite(value);
 }
 
 /**
  * Type guard for checking if value is a non-empty string
  */
 export function isNonEmptyString(value: unknown): value is string {
-  return typeof value === 'string' && value.length > 0;
+  return typeof value === "string" && value.length > 0;
 }
 
 /**
  * Type guard for checking if value is an array
  */
-export function isArray<T>(value: unknown, itemGuard?: (item: unknown) => item is T): value is T[] {
+export function isArray<T>(
+  value: unknown,
+  itemGuard?: (item: unknown) => item is T,
+): value is T[] {
   if (!Array.isArray(value)) {
     return false;
   }
@@ -113,8 +121,10 @@ export function isArray<T>(value: unknown, itemGuard?: (item: unknown) => item i
 /**
  * Type guard for checking if value is a plain object
  */
-export function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+export function isPlainObject(
+  value: unknown,
+): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 /**
@@ -129,7 +139,7 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
 export function safeCast<T>(
   value: unknown,
   guard: (value: unknown) => value is T,
-  errorMessage: string
+  errorMessage: string,
 ): T {
   if (guard(value)) {
     return value;
