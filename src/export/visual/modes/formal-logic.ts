@@ -611,9 +611,10 @@ function formalLogicToGraphML(
     });
 
     // Connect last step to theorem
+    // (final use of edgeCount in this function - no increment needed)
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
     edges.push({
-      id: `e${edgeCount++}`,
+      id: `e${edgeCount}`,
       source: `Step${lastStep.stepNumber}`,
       target: "Theorem",
       directed: true,
@@ -1278,9 +1279,10 @@ function formalLogicToJSON(
     });
 
     // Connect last step to theorem
+    // (final use of edgeId in this function - no increment needed)
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
     addEdge(graph, {
-      id: `edge_${edgeId++}`,
+      id: `edge_${edgeId}`,
       source: `Step${lastStep.stepNumber}`,
       target: "Theorem",
       label: "proves",

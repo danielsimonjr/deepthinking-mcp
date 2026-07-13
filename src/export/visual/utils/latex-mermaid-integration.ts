@@ -130,7 +130,9 @@ export class LatexMermaidIntegrator {
       floatPlacement = "h",
     } = options;
 
-    let content = "";
+    // (the if/else-if/else chain below is exhaustive over `engine`, so
+    // `content` is always assigned before use - no initializer needed)
+    let content: string;
 
     if (engine === "inline-code") {
       // Just show the Mermaid code
@@ -199,9 +201,12 @@ ${mermaidCode
       includeMetrics: true,
     };
 
-    let mermaidCode = "";
-    let caption = "";
-    let label = "";
+    // (every branch that reaches the `return this.embedMermaidDiagram(...)`
+    // below assigns all three; the one branch that doesn't returns early,
+    // so no initializer is needed here)
+    let mermaidCode: string;
+    let caption: string;
+    let label: string;
 
     // Generate appropriate diagram based on thought type
     if (thought.mode === "causal" && "graph" in thought) {

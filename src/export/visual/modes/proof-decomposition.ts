@@ -1424,7 +1424,9 @@ function proofDecompositionToUML(
       : atom.id;
 
     // Determine stereotype based on type
-    let stereotype = "";
+    // (every branch below - including default - assigns a value, so no
+    // initializer is needed here)
+    let stereotype: string;
     switch (atom.type) {
       case "axiom":
         stereotype = "«axiom»";
