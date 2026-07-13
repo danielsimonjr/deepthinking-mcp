@@ -128,13 +128,14 @@ export class ConflictResolver {
       case "favor_higher_confidence":
         resolution = this.resolveByConfidence(conflict);
         break;
-      case "synthesize":
+      case "synthesize": {
         const { resolved, synthesized } = this.resolveBySynthesis(conflict);
         resolution = resolved;
         if (synthesized) {
           newInsights.push(synthesized);
         }
         break;
+      }
       case "preserve_both":
         resolution = this.resolveByPreservingBoth(conflict);
         break;

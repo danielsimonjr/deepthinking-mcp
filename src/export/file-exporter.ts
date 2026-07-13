@@ -406,7 +406,7 @@ export class FileExporter {
     const date = this.formatDate(new Date(), this.config.dateFormat || "iso");
     const mode = session.mode || "unknown";
 
-    let filename = pattern
+    const filename = pattern
       .replace("{session}", this.sanitizeFilename(session.id))
       .replace("{mode}", this.sanitizeFilename(mode))
       .replace("{format}", format)

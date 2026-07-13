@@ -23,10 +23,10 @@ export function sanitizeUmlId(id: string): string {
 export function escapeUml(str: string): string {
   return str
     .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\"')
+    .replace(/"/g, '"')
     .replace(/\n/g, "\\n")
-    .replace(/<(?![\/#])/g, "&lt;")
-    .replace(/(?<![\/#])>/g, "&gt;");
+    .replace(/<(?![/#])/g, "&lt;")
+    .replace(/(?<![/#])>/g, "&gt;");
 }
 
 /**

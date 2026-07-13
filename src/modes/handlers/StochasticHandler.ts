@@ -765,20 +765,24 @@ export class StochasticHandler implements ModeHandler {
           mean: params.mu || params.mean || 0,
           variance: params.variance || params.sigma2 || 1,
         };
-      case "exponential":
+      case "exponential": {
         const lambda = params.lambda || params.rate || 1;
         return { mean: 1 / lambda, variance: 1 / (lambda * lambda) };
-      case "poisson":
+      }
+      case "poisson": {
         const poissonLambda = params.lambda || 1;
         return { mean: poissonLambda, variance: poissonLambda };
-      case "uniform":
+      }
+      case "uniform": {
         const a = params.a ?? params.min ?? 0;
         const b = params.b ?? params.max ?? 1;
         return { mean: (a + b) / 2, variance: (b - a) ** 2 / 12 };
-      case "binomial":
+      }
+      case "binomial": {
         const n = params.n || 1;
         const p = params.p || 0.5;
         return { mean: n * p, variance: n * p * (1 - p) };
+      }
       default:
         return {};
     }

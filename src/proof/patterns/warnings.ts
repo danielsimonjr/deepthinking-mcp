@@ -81,7 +81,7 @@ export const AFFIRMING_CONSEQUENT: WarningPattern = {
   name: "Affirming the Consequent",
   category: "logical_fallacy",
   description: 'Invalid inference: concluding P from "P implies Q" and Q',
-  pattern: /if\s+(.+?)\s+then\s+(.+?)[\.\,].*\2.*therefore\s+\1/is,
+  pattern: /if\s+(.+?)\s+then\s+(.+?)[.,].*\2.*therefore\s+\1/is,
   severity: "error",
   suggestion: "This inference is invalid. P→Q and Q does not entail P.",
   examples: [
@@ -101,7 +101,7 @@ export const DENYING_ANTECEDENT: WarningPattern = {
   category: "logical_fallacy",
   description:
     'Invalid inference: concluding not-Q from "P implies Q" and not-P',
-  pattern: /if\s+(.+?)\s+then\s+(.+?)[\.\,].*not\s+\1.*therefore\s+not\s+\2/is,
+  pattern: /if\s+(.+?)\s+then\s+(.+?)[.,].*not\s+\1.*therefore\s+not\s+\2/is,
   severity: "error",
   suggestion: "This inference is invalid. P→Q and ¬P does not entail ¬Q.",
   examples: [

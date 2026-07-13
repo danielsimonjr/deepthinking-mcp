@@ -365,7 +365,7 @@ export class ConstraintHandler implements ModeHandler {
         );
         break;
 
-      case "variable_definition":
+      case "variable_definition": {
         enhancements.guidingQuestions!.push(
           "What is the domain of each variable?",
           "Are domains finite and discrete?",
@@ -382,8 +382,9 @@ export class ConstraintHandler implements ModeHandler {
           `Average domain size: ${avgDomainSize.toFixed(1)}`,
         );
         break;
+      }
 
-      case "constraint_definition":
+      case "constraint_definition": {
         enhancements.guidingQuestions!.push(
           "Are all constraints necessary?",
           "Are there redundant constraints?",
@@ -397,8 +398,9 @@ export class ConstraintHandler implements ModeHandler {
           `Constraints: ${requiredCount} required, ${softCount} soft`,
         );
         break;
+      }
 
-      case "domain_reduction":
+      case "domain_reduction": {
         enhancements.guidingQuestions!.push(
           "Which values can be pruned?",
           "Are there singleton domains?",
@@ -411,6 +413,7 @@ export class ConstraintHandler implements ModeHandler {
           `Variables with reduced domains: ${reducedCount}`,
         );
         break;
+      }
 
       case "arc_consistency":
         enhancements.guidingQuestions!.push(
@@ -431,7 +434,7 @@ export class ConstraintHandler implements ModeHandler {
         );
         break;
 
-      case "solution_search":
+      case "solution_search": {
         enhancements.guidingQuestions!.push(
           "Which variable should be assigned next?",
           "What value should be tried first?",
@@ -447,6 +450,7 @@ export class ConstraintHandler implements ModeHandler {
           `Search progress: ${progress.toFixed(1)}%`,
         );
         break;
+      }
 
       case "backtracking":
         enhancements.guidingQuestions!.push(

@@ -556,7 +556,7 @@ export function createSampler(
       return new BetaSampler(dist.alpha, dist.beta, rng);
     case "gamma":
       return new GammaSampler(dist.shape, dist.scale, rng);
-    case "lognormal":
+    case "lognormal": {
       // LogNormal: exp(Normal(mu, sigma))
       const normalSampler = new NormalSampler(dist.mu, dist.sigma, rng);
       return {
@@ -571,6 +571,7 @@ export function createSampler(
         getParameters: () => ({ mu: dist.mu, sigma: dist.sigma }),
         getType: () => "lognormal",
       };
+    }
     case "triangular":
       return {
         sample: () => sampleTriangular(dist.min, dist.mode, dist.max, rng),

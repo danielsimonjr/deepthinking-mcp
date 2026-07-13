@@ -180,7 +180,7 @@ export function escapeHtml(text: string): string {
     "/": "&#x2F;",
   };
 
-  return text.replace(/[&<>"'\/]/g, (char) => htmlEscapeMap[char] || char);
+  return text.replace(/[&<>"'/]/g, (char) => htmlEscapeMap[char] || char);
 }
 
 /**
