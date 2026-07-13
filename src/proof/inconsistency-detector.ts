@@ -433,7 +433,7 @@ export class InconsistencyDetector {
   detectUndefinedOperations(
     atoms: AtomicStatement[],
   ): Omit<Inconsistency, "id">[] {
-    const undefined: Omit<Inconsistency, "id">[] = [];
+    const undefinedOps: Omit<Inconsistency, "id">[] = [];
 
     const undefinedPatterns = [
       {
@@ -461,7 +461,7 @@ export class InconsistencyDetector {
     for (const atom of atoms) {
       for (const { pattern, operation } of undefinedPatterns) {
         if (pattern.test(atom.statement)) {
-          undefined.push({
+          undefinedOps.push({
             type: "undefined_operation",
             involvedStatements: [atom.id],
             explanation: `Undefined operation: ${operation}`,
@@ -473,7 +473,7 @@ export class InconsistencyDetector {
       }
     }
 
-    return undefined;
+    return undefinedOps;
   }
 
   /**

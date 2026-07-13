@@ -355,7 +355,7 @@ export class ModalHandler implements ModeHandler {
         );
         break;
 
-      case "proposition_analysis":
+      case "proposition_analysis": {
         enhancements.guidingQuestions!.push(
           "Is the proposition necessarily true (true in all accessible worlds)?",
           "Is the proposition possibly true (true in some accessible world)?",
@@ -371,6 +371,7 @@ export class ModalHandler implements ModeHandler {
           `Propositions: ${necessaryCount} necessary, ${possibleCount} possible`,
         );
         break;
+      }
 
       case "accessibility_analysis":
         enhancements.guidingQuestions!.push(

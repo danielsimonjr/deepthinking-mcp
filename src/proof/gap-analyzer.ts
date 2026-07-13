@@ -372,7 +372,7 @@ export class GapAnalyzer {
     if (matches) complexity += matches.length * 5;
 
     // Nested structures add complexity
-    const nestingLevel = (statement.match(/[\(\[\{]/g) || []).length;
+    const nestingLevel = (statement.match(/[([{]/g) || []).length;
     complexity += nestingLevel * 3;
 
     return complexity;

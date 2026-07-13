@@ -218,7 +218,7 @@ export class HierarchicalProofManager {
 
       // Check for lemma/claim start
       const lemmaMatch = step.content.match(
-        /^(?:Lemma|Claim|Sublemma)\s*(\d+)?[:\.]?\s*(.+)$/i,
+        /^(?:Lemma|Claim|Sublemma)\s*(\d+)?[:.]?\s*(.+)$/i,
       );
       if (lemmaMatch) {
         // End previous lemma if exists
@@ -244,7 +244,7 @@ export class HierarchicalProofManager {
 
       // Check for corollary
       const corollaryMatch = step.content.match(
-        /^Corollary\s*(\d+)?[:\.]?\s*(.+)$/i,
+        /^Corollary\s*(\d+)?[:.]?\s*(.+)$/i,
       );
       if (corollaryMatch) {
         if (currentLemma) {
@@ -269,7 +269,7 @@ export class HierarchicalProofManager {
 
       // Check for proposition
       const propMatch = step.content.match(
-        /^Proposition\s*(\d+)?[:\.]?\s*(.+)$/i,
+        /^Proposition\s*(\d+)?[:.]?\s*(.+)$/i,
       );
       if (propMatch) {
         if (currentLemma) {

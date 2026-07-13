@@ -197,10 +197,11 @@ export function padAscii(
   switch (align) {
     case "right":
       return padChar.repeat(padding) + str;
-    case "center":
+    case "center": {
       const leftPad = Math.floor(padding / 2);
       const rightPad = padding - leftPad;
       return padChar.repeat(leftPad) + str + padChar.repeat(rightPad);
+    }
     case "left":
     default:
       return str + padChar.repeat(padding);

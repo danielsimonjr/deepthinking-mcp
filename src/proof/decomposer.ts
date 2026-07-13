@@ -67,13 +67,13 @@ export class ProofDecomposer {
     return [
       // Axiom patterns
       {
-        pattern: /^(?:Axiom|Postulate)\s*(?:\d+)?[:\.]?\s*(.+)$/i,
+        pattern: /^(?:Axiom|Postulate)\s*(?:\d+)?[:.]?\s*(.+)$/i,
         type: "axiom",
         extractStatement: (m) => m[1].trim(),
       },
       // Definition patterns
       {
-        pattern: /^(?:Definition|Def\.?)\s*(?:\d+)?[:\.]?\s*(.+)$/i,
+        pattern: /^(?:Definition|Def\.?)\s*(?:\d+)?[:.]?\s*(.+)$/i,
         type: "definition",
         extractStatement: (m) => m[1].trim(),
       },
@@ -91,7 +91,7 @@ export class ProofDecomposer {
       },
       // Lemma patterns
       {
-        pattern: /^(?:Lemma|Claim)\s*(?:\d+)?[:\.]?\s*(.+)$/i,
+        pattern: /^(?:Lemma|Claim)\s*(?:\d+)?[:.]?\s*(.+)$/i,
         type: "lemma",
         extractStatement: (m) => m[1].trim(),
       },

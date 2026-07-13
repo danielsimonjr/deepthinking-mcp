@@ -14,6 +14,7 @@
 
 import { promises as fs } from "fs";
 import * as path from "path";
+import * as os from "os";
 import { createLogger, LogLevel } from "./logger.js";
 
 // Logger for file-lock operations
@@ -95,7 +96,7 @@ function getSharedLockDir(filePath: string): string {
 function createLockInfo(type: "exclusive" | "shared"): LockInfo {
   return {
     pid: process.pid,
-    hostname: require("os").hostname(),
+    hostname: os.hostname(),
     timestamp: Date.now(),
     type,
     instanceId: INSTANCE_ID,

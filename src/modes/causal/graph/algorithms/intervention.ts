@@ -505,7 +505,7 @@ export function applyRule3(
   w: string[],
 ): { applicable: boolean; result?: string } {
   // Remove incoming edges to X and to Z (where Z has no descendants in W)
-  let modified = createMutilatedGraph(
+  const modified = createMutilatedGraph(
     graph,
     [...x, ...z].map((v) => ({
       variable: v,

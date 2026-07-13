@@ -208,7 +208,7 @@ export function computeClosenessCentrality(
     // Sum of distances
     let totalDist = 0;
     let reachable = 0;
-    for (const [_, d] of dist) {
+    for (const d of dist.values()) {
       if (d !== Infinity && d > 0) {
         totalDist += d;
         reachable++;
@@ -564,7 +564,7 @@ export function getMostCentralNode(
   switch (measure) {
     case "degree":
     case "in_degree":
-    case "out_degree":
+    case "out_degree": {
       const { degree, inDegree, outDegree } = computeDegreeCentrality(graph);
       centralityMap =
         measure === "in_degree"
@@ -573,6 +573,7 @@ export function getMostCentralNode(
             ? outDegree
             : degree;
       break;
+    }
     case "betweenness":
       centralityMap = computeBetweennessCentrality(graph);
       break;
