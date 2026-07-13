@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### CI
+- **Pinned Dependabot off TypeScript major-version bumps.** Dependabot kept opening an un-mergeable TypeScript 6→7 PR: `@typescript-eslint/eslint-plugin@8.63.0` (latest published) declares `peer typescript: >=4.8.4 <6.1.0`, so `npm ci` fails with `ERESOLVE` before the PR can ever compile — no published `@typescript-eslint` release supports TypeScript 7. Added an `ignore:` rule for `typescript` `semver-major` updates to `.github/dependabot.yml`; remove it once `@typescript-eslint` ships TS 7 support.
+- **Hardened `dependabot-auto-merge.yml`**: SHA-pinned `dependabot/fetch-metadata` (`25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0`), previously referenced by the floating tag `@v3`. Audited against the fleet security standard: `on: pull_request` trigger (not `pull_request_target`), `secrets.GITHUB_TOKEN`-only auth, least-privilege `permissions: {contents: write, pull-requests: write}`, patch/minor-only auto-merge, and `gh pr merge --auto --squash` were already compliant and left unchanged.
+
 ### Fixed
 - **`npm run typecheck` now passes.** It had been failing: `tsc --noEmit` errored on `TS5101` (deprecated `baseUrl`), and once that halting error was silenced it surfaced pre-existing `TS2591` ("Cannot find name 'process'") errors because `@types/node` was not being included. Added `"ignoreDeprecations": "6.0"` and `"types": ["node"]` to `tsconfig.json`. The `tsup` build was unaffected (esbuild does not type-check), which is why this went unnoticed. Build output (`dist/index.js`) is unchanged.
 - Removed a stale hardcoded version string (`v9.1.0`) from the `src/index.ts` header comment; the runtime version is read from `package.json` (currently 9.1.3), so the comment only drifted.
