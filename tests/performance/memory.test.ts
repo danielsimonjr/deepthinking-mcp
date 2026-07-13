@@ -283,18 +283,30 @@ describe('Memory Performance Tests', () => {
   // ===========================================================================
   describe('T-PRF-014: Cache Effectiveness', () => {
     it('should reuse cached resources efficiently', async () => {
+      // Regression note: this test used to compare average wall-clock
+      // duration of a "first pass" vs a "second pass" of addThought()
+      // calls and assert the second pass was not much slower than the
+      // first. That measures runner load, not code correctness - it is
+      // flaky by construction on shared CI runners (observed failure:
+      // `expected 0.2533 to be less than or equal to 0.1984`, then a
+      // clean pass on an immediate re-run with zero code changes).
+      //
+      // The actual thing "cache effectiveness" needs to guarantee is
+      // that repeated session lookups are served from the in-memory LRU
+      // cache (SessionManager.activeSessions) rather than falling back to
+      // reloading the session - i.e. every addThought() resolves as a
+      // cache hit, never a miss. That is directly observable via
+      // SessionManager.getSessionCacheStats(), so assert on that instead
+      // of timing.
       const session = await manager.createSession();
+      const statsBefore = manager.getSessionCacheStats();
 
       // Create thoughts that might benefit from caching
       const modes = ['sequential', 'hybrid', 'mathematics'] as const;
 
-      const firstPassTimes: number[] = [];
-      const secondPassTimes: number[] = [];
-
       // First pass
       for (let i = 0; i < 30; i++) {
         const mode = modes[i % modes.length];
-        const start = performance.now();
         const thought = factory.createThought(createValidInput({
           mode,
           thought: `First pass ${i}`,
@@ -302,13 +314,11 @@ describe('Memory Performance Tests', () => {
           totalThoughts: 60,
         }), session.id);
         await manager.addThought(session.id, thought);
-        firstPassTimes.push(performance.now() - start);
       }
 
       // Second pass with same modes
       for (let i = 0; i < 30; i++) {
         const mode = modes[i % modes.length];
-        const start = performance.now();
         const thought = factory.createThought(createValidInput({
           mode,
           thought: `Second pass ${i}`,
@@ -316,14 +326,18 @@ describe('Memory Performance Tests', () => {
           totalThoughts: 60,
         }), session.id);
         await manager.addThought(session.id, thought);
-        secondPassTimes.push(performance.now() - start);
       }
 
-      const avgFirst = firstPassTimes.reduce((a, b) => a + b, 0) / firstPassTimes.length;
-      const avgSecond = secondPassTimes.reduce((a, b) => a + b, 0) / secondPassTimes.length;
+      const statsAfter = manager.getSessionCacheStats();
+      const hitsDuringTest = statsAfter.hits - statsBefore.hits;
+      const missesDuringTest = statsAfter.misses - statsBefore.misses;
 
-      // Second pass should be at least as fast (caching helps or doesn't hurt)
-      expect(avgSecond).toBeLessThanOrEqual(avgFirst * 1.5);
+      // 60 addThought() calls against the same session => 60 cache
+      // lookups, all of which must be served from cache (the session was
+      // created once and never evicted: cache maxSize is 1000, well above
+      // the single session used here).
+      expect(hitsDuringTest).toBe(60);
+      expect(missesDuringTest).toBe(0);
     });
 
     it('should maintain cache under memory pressure', async () => {

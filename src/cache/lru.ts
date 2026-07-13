@@ -3,7 +3,7 @@
  * Phase 4 Task 9.6: Least Recently Used cache implementation
  */
 
-import type { Cache, CacheConfig, CacheEntry, CacheStats } from './types.js';
+import type { Cache, CacheConfig, CacheEntry, CacheStats } from "./types.js";
 
 /**
  * LRU (Least Recently Used) cache
@@ -27,7 +27,7 @@ export class LRUCache<T> implements Cache<T> {
        * - Can be overridden via config parameter for high-traffic scenarios
        */
       maxSize: config.maxSize || 100,
-      strategy: 'lru',
+      strategy: "lru",
       ttl: config.ttl || 0,
       enableStats: config.enableStats !== false,
       onEvict: config.onEvict || (() => {}),
@@ -109,7 +109,9 @@ export class LRUCache<T> implements Cache<T> {
       createdAt: now,
       lastAccessedAt: now,
       accessCount: 0,
-      expiresAt: effectiveTtl ? new Date(now.getTime() + effectiveTtl) : undefined,
+      expiresAt: effectiveTtl
+        ? new Date(now.getTime() + effectiveTtl)
+        : undefined,
       size: this.estimateSize(value),
     };
 
@@ -193,7 +195,7 @@ export class LRUCache<T> implements Cache<T> {
    * Get all values
    */
   values(): T[] {
-    return Array.from(this.cache.values()).map(e => e.value);
+    return Array.from(this.cache.values()).map((e) => e.value);
   }
 
   /**

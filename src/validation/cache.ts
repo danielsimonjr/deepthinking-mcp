@@ -5,9 +5,9 @@
  * Uses content-based hashing for cache keys to ensure correctness.
  */
 
-import { getConfig } from '../config/index.js';
-import { ValidationResult } from '../types/session.js';
-import { createHash } from 'crypto';
+import { getConfig } from "../config/index.js";
+import { ValidationResult } from "../types/session.js";
+import { createHash } from "crypto";
 
 /**
  * Validation result entry
@@ -48,7 +48,7 @@ export class ValidationCache {
    */
   private generateKey(content: unknown): string {
     const json = JSON.stringify(content);
-    return createHash('sha256').update(json).digest('hex');
+    return createHash("sha256").update(json).digest("hex");
   }
 
   /**
@@ -164,7 +164,9 @@ export class ValidationCache {
   /**
    * Get entries sorted by hit count (most used first)
    */
-  getTopEntries(limit: number = 10): Array<{ key: string; entry: ValidationCacheEntry }> {
+  getTopEntries(
+    limit: number = 10,
+  ): Array<{ key: string; entry: ValidationCacheEntry }> {
     const entries = Array.from(this.cache.entries())
       .map(([key, entry]) => ({ key, entry }))
       .sort((a, b) => b.entry.hitCount - a.entry.hitCount);

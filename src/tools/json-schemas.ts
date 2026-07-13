@@ -13,66 +13,72 @@
 const baseThoughtProperties = {
   sessionId: {
     type: "string",
-    description: "Optional session ID. If not provided, a new session will be created."
+    description:
+      "Optional session ID. If not provided, a new session will be created.",
   },
   thought: {
     type: "string",
     description: "The current thought or reasoning step",
-    minLength: 1
+    minLength: 1,
   },
   thoughtNumber: {
     type: "integer",
     description: "Current thought number in sequence",
-    minimum: 1
+    minimum: 1,
   },
   totalThoughts: {
     type: "integer",
     description: "Estimated total number of thoughts needed",
-    minimum: 1
+    minimum: 1,
   },
   nextThoughtNeeded: {
     type: "boolean",
-    description: "Whether another thought step is needed"
+    description: "Whether another thought step is needed",
   },
   isRevision: {
     type: "boolean",
-    description: "Whether this thought revises previous thinking"
+    description: "Whether this thought revises previous thinking",
   },
   revisesThought: {
     type: "string",
-    description: "ID of the thought being revised"
+    description: "ID of the thought being revised",
   },
   revisionReason: {
     type: "string",
-    description: "Explanation for why revision is needed"
+    description: "Explanation for why revision is needed",
   },
   branchFrom: {
     type: "string",
-    description: "ID of thought to branch from for alternative reasoning path"
+    description: "ID of thought to branch from for alternative reasoning path",
   },
   branchId: {
     type: "string",
-    description: "Identifier for this reasoning branch"
+    description: "Identifier for this reasoning branch",
   },
   uncertainty: {
     type: "number",
     description: "Confidence level (0-1, where 1 is highest confidence)",
     minimum: 0,
-    maximum: 1
+    maximum: 1,
   },
   dependencies: {
     type: "array",
     items: { type: "string" },
-    description: "IDs of thoughts this one depends on"
+    description: "IDs of thoughts this one depends on",
   },
   assumptions: {
     type: "array",
     items: { type: "string" },
-    description: "Key assumptions made in this thought"
-  }
+    description: "Key assumptions made in this thought",
+  },
 } as const;
 
-const baseThoughtRequired = ["thought", "thoughtNumber", "totalThoughts", "nextThoughtNeeded"] as const;
+const baseThoughtRequired = [
+  "thought",
+  "thoughtNumber",
+  "totalThoughts",
+  "nextThoughtNeeded",
+] as const;
 
 /**
  * deepthinking_core - Fundamental reasoning modes
@@ -87,59 +93,60 @@ export const deepthinking_core_schema = {
       mode: {
         type: "string",
         enum: ["inductive", "deductive", "abductive"],
-        description: "Core reasoning mode"
+        description: "Core reasoning mode",
       },
       // Inductive properties
       observations: {
         type: "array",
         items: { type: "string" },
-        description: "Specific cases observed (inductive/abductive)"
+        description: "Specific cases observed (inductive/abductive)",
       },
       pattern: {
         type: "string",
-        description: "Identified pattern (inductive)"
+        description: "Identified pattern (inductive)",
       },
       generalization: {
         type: "string",
-        description: "General principle formed (inductive)"
+        description: "General principle formed (inductive)",
       },
       confidence: {
         type: "number",
         minimum: 0,
         maximum: 1,
-        description: "Strength of inference (inductive)"
+        description: "Strength of inference (inductive)",
       },
       counterexamples: {
         type: "array",
         items: { type: "string" },
-        description: "Known exceptions (inductive)"
+        description: "Known exceptions (inductive)",
       },
       sampleSize: {
         type: "integer",
         minimum: 1,
-        description: "Number of observations (inductive)"
+        description: "Number of observations (inductive)",
       },
       // Deductive properties
       premises: {
         type: "array",
         items: { type: "string" },
-        description: "General principles (deductive)"
+        description: "General principles (deductive)",
       },
       conclusion: {
         type: "string",
-        description: "Specific conclusion (deductive)"
+        description: "Specific conclusion (deductive)",
       },
       logicForm: {
         type: "string",
-        description: "Logic form: modus ponens, modus tollens, etc. (deductive)"
+        description:
+          "Logic form: modus ponens, modus tollens, etc. (deductive)",
       },
       validityCheck: {
         type: "boolean",
-        description: "Is the deduction logically valid? (deductive)"
+        description: "Is the deduction logically valid? (deductive)",
       },
       soundnessCheck: {
         type: "boolean",
-        description: "Are the premises true? (deductive)"
+        description: "Are the premises true? (deductive)",
       },
       // Abductive properties
       hypotheses: {
@@ -149,28 +156,28 @@ export const deepthinking_core_schema = {
           properties: {
             id: { type: "string" },
             explanation: { type: "string" },
-            score: { type: "number" }
+            score: { type: "number" },
           },
           required: ["id", "explanation"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Candidate explanations (abductive)"
+        description: "Candidate explanations (abductive)",
       },
       bestExplanation: {
         type: "object",
         properties: {
           id: { type: "string" },
           explanation: { type: "string" },
-          score: { type: "number" }
+          score: { type: "number" },
         },
         required: ["id", "explanation"],
         additionalProperties: false,
-        description: "Best explanation chosen (abductive)"
-      }
+        description: "Best explanation chosen (abductive)",
+      },
     },
     required: [...baseThoughtRequired],
-    additionalProperties: false
-  }
+    additionalProperties: false,
+  },
 } as const;
 
 /**
@@ -186,22 +193,28 @@ export const deepthinking_standard_schema = {
       mode: {
         type: "string",
         enum: ["sequential", "shannon", "hybrid"],
-        description: "Thinking mode to use"
+        description: "Thinking mode to use",
       },
       stage: {
         type: "string",
-        enum: ["problem_definition", "constraints", "model", "proof", "implementation"],
-        description: "Shannon methodology stage (only for shannon mode)"
+        enum: [
+          "problem_definition",
+          "constraints",
+          "model",
+          "proof",
+          "implementation",
+        ],
+        description: "Shannon methodology stage (only for shannon mode)",
       },
       activeModes: {
         type: "array",
         items: { type: "string" },
-        description: "Active sub-modes for hybrid mode"
-      }
+        description: "Active sub-modes for hybrid mode",
+      },
     },
     required: [...baseThoughtRequired],
-    additionalProperties: false
-  }
+    additionalProperties: false,
+  },
 } as const;
 
 /**
@@ -211,7 +224,8 @@ export const deepthinking_standard_schema = {
  */
 export const deepthinking_mathematics_schema = {
   name: "deepthinking_mathematics",
-  description: "Math/physics/computability: proofs, Turing machines, decidability, tensors, LaTeX, conservation laws",
+  description:
+    "Math/physics/computability: proofs, Turing machines, decidability, tensors, LaTeX, conservation laws",
   inputSchema: {
     type: "object",
     properties: {
@@ -219,40 +233,47 @@ export const deepthinking_mathematics_schema = {
       mode: {
         type: "string",
         enum: ["mathematics", "physics", "computability"],
-        description: "Mathematical reasoning mode"
+        description: "Mathematical reasoning mode",
       },
       thoughtType: {
         type: "string",
-        description: "Specific thought type for mathematics mode. Use 'proof_decomposition', 'dependency_analysis', 'consistency_check', 'gap_identification', or 'assumption_trace' for proof analysis."
+        description:
+          "Specific thought type for mathematics mode. Use 'proof_decomposition', 'dependency_analysis', 'consistency_check', 'gap_identification', or 'assumption_trace' for proof analysis.",
       },
       mathematicalModel: {
         type: "object",
         properties: {
           latex: { type: "string", description: "LaTeX representation" },
           symbolic: { type: "string", description: "Symbolic notation" },
-          ascii: { type: "string", description: "ASCII math representation" }
+          ascii: { type: "string", description: "ASCII math representation" },
         },
         required: ["latex", "symbolic"],
         additionalProperties: false,
-        description: "Mathematical model representation"
+        description: "Mathematical model representation",
       },
       proofStrategy: {
         type: "object",
         properties: {
           type: {
             type: "string",
-            enum: ["direct", "contradiction", "induction", "construction", "contrapositive"],
-            description: "Type of mathematical proof"
+            enum: [
+              "direct",
+              "contradiction",
+              "induction",
+              "construction",
+              "contrapositive",
+            ],
+            description: "Type of mathematical proof",
           },
           steps: {
             type: "array",
             items: { type: "string" },
-            description: "Proof steps"
-          }
+            description: "Proof steps",
+          },
         },
         required: ["type", "steps"],
         additionalProperties: false,
-        description: "Proof strategy being used"
+        description: "Proof strategy being used",
       },
       tensorProperties: {
         type: "object",
@@ -262,44 +283,47 @@ export const deepthinking_mathematics_schema = {
             items: { type: "integer" },
             minItems: 2,
             maxItems: 2,
-            description: "Tensor rank as [contravariant, covariant]"
+            description: "Tensor rank as [contravariant, covariant]",
           },
           components: { type: "string", description: "Tensor components" },
           latex: { type: "string", description: "LaTeX representation" },
           symmetries: {
             type: "array",
             items: { type: "string" },
-            description: "Symmetry properties"
+            description: "Symmetry properties",
           },
           invariants: {
             type: "array",
             items: { type: "string" },
-            description: "Invariant quantities"
+            description: "Invariant quantities",
           },
           transformation: {
             type: "string",
             enum: ["covariant", "contravariant", "mixed"],
-            description: "Transformation type"
-          }
+            description: "Transformation type",
+          },
         },
         required: ["rank", "components", "latex", "transformation"],
         additionalProperties: false,
-        description: "Tensor properties for physics calculations"
+        description: "Tensor properties for physics calculations",
       },
       physicalInterpretation: {
         type: "object",
         properties: {
-          quantity: { type: "string", description: "Physical quantity being described" },
+          quantity: {
+            type: "string",
+            description: "Physical quantity being described",
+          },
           units: { type: "string", description: "Units of the quantity" },
           conservationLaws: {
             type: "array",
             items: { type: "string" },
-            description: "Conservation laws applicable"
-          }
+            description: "Conservation laws applicable",
+          },
         },
         required: ["quantity", "units", "conservationLaws"],
         additionalProperties: false,
-        description: "Physical interpretation of the model"
+        description: "Physical interpretation of the model",
       },
       // Phase 8: Proof decomposition fields
       proofSteps: {
@@ -308,46 +332,59 @@ export const deepthinking_mathematics_schema = {
         items: {
           type: "object",
           properties: {
-            stepNumber: { type: "integer", minimum: 1, description: "Step number in the proof" },
-            statement: { type: "string", description: "The statement being made" },
-            justification: { type: "string", description: "Justification for this step" },
-            latex: { type: "string", description: "LaTeX representation of the statement" },
+            stepNumber: {
+              type: "integer",
+              minimum: 1,
+              description: "Step number in the proof",
+            },
+            statement: {
+              type: "string",
+              description: "The statement being made",
+            },
+            justification: {
+              type: "string",
+              description: "Justification for this step",
+            },
+            latex: {
+              type: "string",
+              description: "LaTeX representation of the statement",
+            },
             referencesSteps: {
               type: "array",
               items: { type: "integer" },
-              description: "Step numbers this step references"
-            }
+              description: "Step numbers this step references",
+            },
           },
           required: ["stepNumber", "statement"],
-          additionalProperties: false
-        }
+          additionalProperties: false,
+        },
       },
       theorem: {
         type: "string",
-        description: "The theorem being proved (for proof decomposition)"
+        description: "The theorem being proved (for proof decomposition)",
       },
       hypotheses: {
         type: "array",
         items: { type: "string" },
-        description: "Starting hypotheses for the proof"
+        description: "Starting hypotheses for the proof",
       },
       analysisDepth: {
         type: "string",
         enum: ["shallow", "standard", "deep"],
-        description: "Depth of proof analysis"
+        description: "Depth of proof analysis",
       },
       includeConsistencyCheck: {
         type: "boolean",
-        description: "Whether to run inconsistency detection"
+        description: "Whether to run inconsistency detection",
       },
       traceAssumptions: {
         type: "boolean",
-        description: "Whether to include assumption chain analysis"
-      }
+        description: "Whether to include assumption chain analysis",
+      },
     },
     required: [...baseThoughtRequired],
-    additionalProperties: false
-  }
+    additionalProperties: false,
+  },
 } as const;
 
 /**
@@ -356,7 +393,8 @@ export const deepthinking_mathematics_schema = {
  */
 export const deepthinking_temporal_schema = {
   name: "deepthinking_temporal",
-  description: "Temporal: timelines, Allen intervals, event sequencing, historical analysis",
+  description:
+    "Temporal: timelines, Allen intervals, event sequencing, historical analysis",
   inputSchema: {
     type: "object",
     properties: {
@@ -364,13 +402,19 @@ export const deepthinking_temporal_schema = {
       mode: {
         type: "string",
         enum: ["temporal", "historical"],
-        description: "Temporal or historical reasoning mode"
+        description: "Temporal or historical reasoning mode",
       },
       // Historical-specific properties
       thoughtType: {
         type: "string",
-        enum: ["event_analysis", "source_evaluation", "pattern_identification", "causal_chain", "periodization"],
-        description: "Type of historical analysis (historical mode only)"
+        enum: [
+          "event_analysis",
+          "source_evaluation",
+          "pattern_identification",
+          "causal_chain",
+          "periodization",
+        ],
+        description: "Type of historical analysis (historical mode only)",
       },
       historicalEvents: {
         type: "array",
@@ -387,24 +431,54 @@ export const deepthinking_temporal_schema = {
                   properties: {
                     start: { type: "string" },
                     end: { type: "string" },
-                    precision: { type: "string", enum: ["exact", "approximate", "century", "decade", "year", "month", "day"] }
+                    precision: {
+                      type: "string",
+                      enum: [
+                        "exact",
+                        "approximate",
+                        "century",
+                        "decade",
+                        "year",
+                        "month",
+                        "day",
+                      ],
+                    },
                   },
-                  required: ["start", "end"]
-                }
-              ]
+                  required: ["start", "end"],
+                },
+              ],
             },
             location: { type: "string" },
             description: { type: "string" },
-            actors: { type: "array", items: { type: "string" }, description: "Actor IDs involved" },
-            causes: { type: "array", items: { type: "string" }, description: "Cause event IDs" },
-            effects: { type: "array", items: { type: "string" }, description: "Effect event IDs" },
-            significance: { type: "string", enum: ["minor", "moderate", "major", "transformative"] },
-            sources: { type: "array", items: { type: "string" }, description: "Source IDs" },
-            tags: { type: "array", items: { type: "string" } }
+            actors: {
+              type: "array",
+              items: { type: "string" },
+              description: "Actor IDs involved",
+            },
+            causes: {
+              type: "array",
+              items: { type: "string" },
+              description: "Cause event IDs",
+            },
+            effects: {
+              type: "array",
+              items: { type: "string" },
+              description: "Effect event IDs",
+            },
+            significance: {
+              type: "string",
+              enum: ["minor", "moderate", "major", "transformative"],
+            },
+            sources: {
+              type: "array",
+              items: { type: "string" },
+              description: "Source IDs",
+            },
+            tags: { type: "array", items: { type: "string" } },
           },
-          required: ["id", "name", "date", "significance"]
+          required: ["id", "name", "date", "significance"],
         },
-        description: "Historical events for analysis (historical mode)"
+        description: "Historical events for analysis (historical mode)",
       },
       historicalSources: {
         type: "array",
@@ -413,25 +487,62 @@ export const deepthinking_temporal_schema = {
           properties: {
             id: { type: "string" },
             title: { type: "string" },
-            type: { type: "string", enum: ["primary", "secondary", "tertiary"] },
-            subtype: { type: "string", enum: ["document", "artifact", "oral", "visual", "archaeological", "statistical"] },
+            type: {
+              type: "string",
+              enum: ["primary", "secondary", "tertiary"],
+            },
+            subtype: {
+              type: "string",
+              enum: [
+                "document",
+                "artifact",
+                "oral",
+                "visual",
+                "archaeological",
+                "statistical",
+              ],
+            },
             author: { type: "string" },
             date: { type: "string" },
-            reliability: { type: "number", minimum: 0, maximum: 1, description: "Reliability score 0-1" },
+            reliability: {
+              type: "number",
+              minimum: 0,
+              maximum: 1,
+              description: "Reliability score 0-1",
+            },
             bias: {
               type: "object",
               properties: {
-                type: { type: "string", enum: ["political", "religious", "cultural", "economic", "nationalistic", "ideological", "personal"] },
+                type: {
+                  type: "string",
+                  enum: [
+                    "political",
+                    "religious",
+                    "cultural",
+                    "economic",
+                    "nationalistic",
+                    "ideological",
+                    "personal",
+                  ],
+                },
                 direction: { type: "string" },
-                severity: { type: "number", minimum: 0, maximum: 1 }
-              }
+                severity: { type: "number", minimum: 0, maximum: 1 },
+              },
             },
-            corroboratedBy: { type: "array", items: { type: "string" }, description: "Corroborating source IDs" },
-            contradictedBy: { type: "array", items: { type: "string" }, description: "Contradicting source IDs" }
+            corroboratedBy: {
+              type: "array",
+              items: { type: "string" },
+              description: "Corroborating source IDs",
+            },
+            contradictedBy: {
+              type: "array",
+              items: { type: "string" },
+              description: "Contradicting source IDs",
+            },
           },
-          required: ["id", "title", "type", "reliability"]
+          required: ["id", "title", "type", "reliability"],
         },
-        description: "Historical sources for evaluation (historical mode)"
+        description: "Historical sources for evaluation (historical mode)",
       },
       periods: {
         type: "array",
@@ -443,13 +554,21 @@ export const deepthinking_temporal_schema = {
             startDate: { type: "string" },
             endDate: { type: "string" },
             characteristics: { type: "array", items: { type: "string" } },
-            keyEvents: { type: "array", items: { type: "string" }, description: "Key event IDs" },
-            keyActors: { type: "array", items: { type: "string" }, description: "Key actor IDs" },
-            themes: { type: "array", items: { type: "string" } }
+            keyEvents: {
+              type: "array",
+              items: { type: "string" },
+              description: "Key event IDs",
+            },
+            keyActors: {
+              type: "array",
+              items: { type: "string" },
+              description: "Key actor IDs",
+            },
+            themes: { type: "array", items: { type: "string" } },
           },
-          required: ["id", "name", "startDate", "endDate", "characteristics"]
+          required: ["id", "name", "startDate", "endDate", "characteristics"],
         },
-        description: "Historical periods for periodization (historical mode)"
+        description: "Historical periods for periodization (historical mode)",
       },
       causalChains: {
         type: "array",
@@ -467,17 +586,29 @@ export const deepthinking_temporal_schema = {
                   effect: { type: "string", description: "Effect event ID" },
                   mechanism: { type: "string" },
                   confidence: { type: "number", minimum: 0, maximum: 1 },
-                  evidence: { type: "array", items: { type: "string" }, description: "Evidence source IDs" }
+                  evidence: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Evidence source IDs",
+                  },
                 },
-                required: ["cause", "effect", "confidence"]
-              }
+                required: ["cause", "effect", "confidence"],
+              },
             },
-            confidence: { type: "number", minimum: 0, maximum: 1, description: "Aggregate chain confidence" },
-            alternativeExplanations: { type: "array", items: { type: "string" } }
+            confidence: {
+              type: "number",
+              minimum: 0,
+              maximum: 1,
+              description: "Aggregate chain confidence",
+            },
+            alternativeExplanations: {
+              type: "array",
+              items: { type: "string" },
+            },
           },
-          required: ["id", "name", "links", "confidence"]
+          required: ["id", "name", "links", "confidence"],
         },
-        description: "Causal chains for historical analysis (historical mode)"
+        description: "Causal chains for historical analysis (historical mode)",
       },
       actors: {
         type: "array",
@@ -486,7 +617,17 @@ export const deepthinking_temporal_schema = {
           properties: {
             id: { type: "string" },
             name: { type: "string" },
-            type: { type: "string", enum: ["individual", "group", "institution", "nation", "movement", "class"] },
+            type: {
+              type: "string",
+              enum: [
+                "individual",
+                "group",
+                "institution",
+                "nation",
+                "movement",
+                "class",
+              ],
+            },
             period: { type: "string", description: "Period ID" },
             roles: { type: "array", items: { type: "string" } },
             motivations: { type: "array", items: { type: "string" } },
@@ -496,21 +637,37 @@ export const deepthinking_temporal_schema = {
                 type: "object",
                 properties: {
                   actorId: { type: "string" },
-                  type: { type: "string", enum: ["ally", "rival", "subordinate", "superior", "colleague", "influenced_by", "mentor", "successor"] },
-                  description: { type: "string" }
+                  type: {
+                    type: "string",
+                    enum: [
+                      "ally",
+                      "rival",
+                      "subordinate",
+                      "superior",
+                      "colleague",
+                      "influenced_by",
+                      "mentor",
+                      "successor",
+                    ],
+                  },
+                  description: { type: "string" },
                 },
-                required: ["actorId", "type"]
-              }
+                required: ["actorId", "type"],
+              },
             },
-            significance: { type: "string", enum: ["minor", "moderate", "major", "transformative"] }
+            significance: {
+              type: "string",
+              enum: ["minor", "moderate", "major", "transformative"],
+            },
           },
-          required: ["id", "name", "type"]
+          required: ["id", "name", "type"],
         },
-        description: "Historical actors (historical mode)"
+        description: "Historical actors (historical mode)",
       },
       historiographicalSchool: {
         type: "string",
-        description: "Historiographical school of thought (e.g., Annales, Marxist, Postmodern)"
+        description:
+          "Historiographical school of thought (e.g., Annales, Marxist, Postmodern)",
       },
       timeline: {
         type: "object",
@@ -519,20 +676,34 @@ export const deepthinking_temporal_schema = {
           name: { type: "string", description: "Timeline name" },
           timeUnit: {
             type: "string",
-            enum: ["milliseconds", "seconds", "minutes", "hours", "days", "months", "years"],
-            description: "Time unit"
+            enum: [
+              "milliseconds",
+              "seconds",
+              "minutes",
+              "hours",
+              "days",
+              "months",
+              "years",
+            ],
+            description: "Time unit",
           },
           events: {
             type: "array",
             items: { type: "string" },
-            description: "Event IDs in this timeline"
+            description: "Event IDs in this timeline",
           },
-          startTime: { type: "number", description: "Timeline start time (optional)" },
-          endTime: { type: "number", description: "Timeline end time (optional)" }
+          startTime: {
+            type: "number",
+            description: "Timeline start time (optional)",
+          },
+          endTime: {
+            type: "number",
+            description: "Timeline end time (optional)",
+          },
         },
         required: ["id", "name", "timeUnit", "events"],
         additionalProperties: false,
-        description: "Timeline definition"
+        description: "Timeline definition",
       },
       events: {
         type: "array",
@@ -542,23 +713,29 @@ export const deepthinking_temporal_schema = {
             id: { type: "string" },
             name: { type: "string" },
             description: { type: "string" },
-            timestamp: { type: "number", description: "Event timestamp as number" },
+            timestamp: {
+              type: "number",
+              description: "Event timestamp as number",
+            },
             type: {
               type: "string",
               enum: ["instant", "interval"],
-              description: "Event type"
+              description: "Event type",
             },
-            duration: { type: "number", description: "Event duration (optional)" },
+            duration: {
+              type: "number",
+              description: "Event duration (optional)",
+            },
             properties: {
               type: "object",
               additionalProperties: true,
-              description: "Additional event properties"
-            }
+              description: "Additional event properties",
+            },
           },
           required: ["id", "name", "description", "timestamp", "type"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Temporal events"
+        description: "Temporal events",
       },
       constraints: {
         type: "array",
@@ -569,16 +746,21 @@ export const deepthinking_temporal_schema = {
             type: {
               type: "string",
               enum: ["before", "after", "during", "simultaneous"],
-              description: "Constraint type"
+              description: "Constraint type",
             },
             subject: { type: "string", description: "Subject event ID" },
             object: { type: "string", description: "Object event ID" },
-            confidence: { type: "number", minimum: 0, maximum: 1, description: "Confidence in constraint" }
+            confidence: {
+              type: "number",
+              minimum: 0,
+              maximum: 1,
+              description: "Confidence in constraint",
+            },
           },
           required: ["id", "type", "subject", "object", "confidence"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Temporal constraints"
+        description: "Temporal constraints",
       },
       intervals: {
         type: "array",
@@ -592,18 +774,18 @@ export const deepthinking_temporal_schema = {
             contains: {
               type: "array",
               items: { type: "string" },
-              description: "Event IDs contained in this interval"
+              description: "Event IDs contained in this interval",
             },
             overlaps: {
               type: "array",
               items: { type: "string" },
-              description: "Interval IDs that overlap"
-            }
+              description: "Interval IDs that overlap",
+            },
           },
           required: ["id", "name", "start", "end"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Temporal intervals"
+        description: "Temporal intervals",
       },
       relations: {
         type: "array",
@@ -615,21 +797,36 @@ export const deepthinking_temporal_schema = {
             to: { type: "string", description: "Target event ID" },
             relationType: {
               type: "string",
-              enum: ["before", "after", "during", "overlaps", "meets", "starts", "finishes", "equals", "causes"],
-              description: "Relation type (Allen's interval algebra)"
+              enum: [
+                "before",
+                "after",
+                "during",
+                "overlaps",
+                "meets",
+                "starts",
+                "finishes",
+                "equals",
+                "causes",
+              ],
+              description: "Relation type (Allen's interval algebra)",
             },
-            strength: { type: "number", minimum: 0, maximum: 1, description: "Relation strength" },
-            delay: { type: "number", description: "Temporal delay (optional)" }
+            strength: {
+              type: "number",
+              minimum: 0,
+              maximum: 1,
+              description: "Relation strength",
+            },
+            delay: { type: "number", description: "Temporal delay (optional)" },
           },
           required: ["id", "from", "to", "relationType", "strength"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Temporal relations between events"
-      }
+        description: "Temporal relations between events",
+      },
     },
     required: [...baseThoughtRequired],
-    additionalProperties: false
-  }
+    additionalProperties: false,
+  },
 } as const;
 
 /**
@@ -645,30 +842,30 @@ export const deepthinking_probabilistic_schema = {
       mode: {
         type: "string",
         enum: ["bayesian", "evidential"],
-        description: "Probabilistic reasoning mode"
+        description: "Probabilistic reasoning mode",
       },
       priorProbability: {
         type: "number",
         minimum: 0,
         maximum: 1,
-        description: "Prior probability before evidence"
+        description: "Prior probability before evidence",
       },
       likelihood: {
         type: "number",
         minimum: 0,
         maximum: 1,
-        description: "Likelihood of evidence given hypothesis"
+        description: "Likelihood of evidence given hypothesis",
       },
       posteriorProbability: {
         type: "number",
         minimum: 0,
         maximum: 1,
-        description: "Posterior probability after evidence"
+        description: "Posterior probability after evidence",
       },
       evidence: {
         type: "array",
         items: { type: "string" },
-        description: "Evidence considered"
+        description: "Evidence considered",
       },
       hypotheses: {
         type: "array",
@@ -677,37 +874,37 @@ export const deepthinking_probabilistic_schema = {
           properties: {
             id: { type: "string" },
             description: { type: "string" },
-            probability: { type: "number", minimum: 0, maximum: 1 }
+            probability: { type: "number", minimum: 0, maximum: 1 },
           },
           required: ["id", "description"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Hypotheses under consideration"
+        description: "Hypotheses under consideration",
       },
       frameOfDiscernment: {
         type: "array",
         items: { type: "string" },
-        description: "Frame of discernment for Dempster-Shafer theory"
+        description: "Frame of discernment for Dempster-Shafer theory",
       },
       massFunction: {
         type: "object",
         additionalProperties: { type: "number", minimum: 0, maximum: 1 },
-        description: "Mass function assignments"
+        description: "Mass function assignments",
       },
       beliefFunction: {
         type: "object",
         additionalProperties: { type: "number", minimum: 0, maximum: 1 },
-        description: "Belief function values"
+        description: "Belief function values",
       },
       plausibilityFunction: {
         type: "object",
         additionalProperties: { type: "number", minimum: 0, maximum: 1 },
-        description: "Plausibility function values"
-      }
+        description: "Plausibility function values",
+      },
     },
     required: [...baseThoughtRequired],
-    additionalProperties: false
-  }
+    additionalProperties: false,
+  },
 } as const;
 
 /**
@@ -723,7 +920,7 @@ export const deepthinking_causal_schema = {
       mode: {
         type: "string",
         enum: ["causal", "counterfactual"],
-        description: "Causal reasoning mode"
+        description: "Causal reasoning mode",
       },
       nodes: {
         type: "array",
@@ -732,12 +929,12 @@ export const deepthinking_causal_schema = {
           properties: {
             id: { type: "string" },
             name: { type: "string" },
-            description: { type: "string" }
+            description: { type: "string" },
           },
           required: ["id", "name"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Nodes in the causal graph"
+        description: "Nodes in the causal graph",
       },
       edges: {
         type: "array",
@@ -747,12 +944,12 @@ export const deepthinking_causal_schema = {
             from: { type: "string" },
             to: { type: "string" },
             strength: { type: "number", minimum: 0, maximum: 1 },
-            type: { type: "string" }
+            type: { type: "string" },
           },
           required: ["from", "to"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Causal edges in the graph"
+        description: "Causal edges in the graph",
       },
       interventions: {
         type: "array",
@@ -761,27 +958,27 @@ export const deepthinking_causal_schema = {
           properties: {
             node: { type: "string" },
             value: { type: "string" },
-            effect: { type: "string" }
+            effect: { type: "string" },
           },
           required: ["node"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Interventions applied to the causal graph"
+        description: "Interventions applied to the causal graph",
       },
       counterfactual: {
         type: "object",
         properties: {
           actual: { type: "string" },
           hypothetical: { type: "string" },
-          consequence: { type: "string" }
+          consequence: { type: "string" },
         },
         additionalProperties: false,
-        description: "Counterfactual scenario"
+        description: "Counterfactual scenario",
       },
       observations: {
         type: "array",
         items: { type: "string" },
-        description: "Observed phenomena for abductive reasoning"
+        description: "Observed phenomena for abductive reasoning",
       },
       explanations: {
         type: "array",
@@ -789,17 +986,17 @@ export const deepthinking_causal_schema = {
           type: "object",
           properties: {
             hypothesis: { type: "string" },
-            plausibility: { type: "number", minimum: 0, maximum: 1 }
+            plausibility: { type: "number", minimum: 0, maximum: 1 },
           },
           required: ["hypothesis"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Candidate explanations"
-      }
+        description: "Candidate explanations",
+      },
     },
     required: [...baseThoughtRequired],
-    additionalProperties: false
-  }
+    additionalProperties: false,
+  },
 } as const;
 
 /**
@@ -815,7 +1012,7 @@ export const deepthinking_strategic_schema = {
       mode: {
         type: "string",
         enum: ["gametheory", "optimization"],
-        description: "Strategic reasoning mode"
+        description: "Strategic reasoning mode",
       },
       players: {
         type: "array",
@@ -824,18 +1021,21 @@ export const deepthinking_strategic_schema = {
           properties: {
             id: { type: "string" },
             name: { type: "string" },
-            isRational: { type: "boolean", description: "Whether player is rational" },
+            isRational: {
+              type: "boolean",
+              description: "Whether player is rational",
+            },
             availableStrategies: {
               type: "array",
               items: { type: "string" },
-              description: "Strategy IDs available to this player"
+              description: "Strategy IDs available to this player",
             },
-            role: { type: "string", description: "Player's role in the game" }
+            role: { type: "string", description: "Player's role in the game" },
           },
           required: ["id", "name", "isRational", "availableStrategies"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Players in the game"
+        description: "Players in the game",
       },
       strategies: {
         type: "array",
@@ -843,16 +1043,30 @@ export const deepthinking_strategic_schema = {
           type: "object",
           properties: {
             id: { type: "string" },
-            playerId: { type: "string", description: "ID of the player using this strategy" },
+            playerId: {
+              type: "string",
+              description: "ID of the player using this strategy",
+            },
             name: { type: "string", description: "Strategy name" },
-            description: { type: "string", description: "Strategy description" },
-            isPure: { type: "boolean", description: "Whether this is a pure strategy" },
-            probability: { type: "number", minimum: 0, maximum: 1, description: "Probability for mixed strategies" }
+            description: {
+              type: "string",
+              description: "Strategy description",
+            },
+            isPure: {
+              type: "boolean",
+              description: "Whether this is a pure strategy",
+            },
+            probability: {
+              type: "number",
+              minimum: 0,
+              maximum: 1,
+              description: "Probability for mixed strategies",
+            },
           },
           required: ["id", "playerId", "name", "description", "isPure"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Available strategies"
+        description: "Available strategies",
       },
       payoffMatrix: {
         type: "object",
@@ -860,12 +1074,12 @@ export const deepthinking_strategic_schema = {
           players: {
             type: "array",
             items: { type: "string" },
-            description: "Player IDs in the matrix"
+            description: "Player IDs in the matrix",
           },
           dimensions: {
             type: "array",
             items: { type: "number" },
-            description: "Dimensions of the payoff matrix"
+            description: "Dimensions of the payoff matrix",
           },
           payoffs: {
             type: "array",
@@ -875,36 +1089,36 @@ export const deepthinking_strategic_schema = {
                 strategyProfile: {
                   type: "array",
                   items: { type: "string" },
-                  description: "Strategy IDs for this profile"
+                  description: "Strategy IDs for this profile",
                 },
                 payoffs: {
                   type: "array",
                   items: { type: "number" },
-                  description: "Payoff values for each player"
-                }
+                  description: "Payoff values for each player",
+                },
               },
               required: ["strategyProfile", "payoffs"],
-              additionalProperties: false
+              additionalProperties: false,
             },
-            description: "Payoff entries"
-          }
+            description: "Payoff entries",
+          },
         },
         required: ["players", "dimensions", "payoffs"],
         additionalProperties: false,
-        description: "Payoff matrix for the game"
+        description: "Payoff matrix for the game",
       },
       objectiveFunction: {
         type: "string",
-        description: "Function to optimize"
+        description: "Function to optimize",
       },
       constraints: {
         type: "array",
         items: { type: "string" },
-        description: "Optimization constraints"
+        description: "Optimization constraints",
       },
       optimizationMethod: {
         type: "string",
-        description: "Method used for optimization"
+        description: "Method used for optimization",
       },
       solution: {
         type: "object",
@@ -912,16 +1126,16 @@ export const deepthinking_strategic_schema = {
           value: { type: "string" },
           variables: {
             type: "object",
-            additionalProperties: { type: "number" }
-          }
+            additionalProperties: { type: "number" },
+          },
         },
         additionalProperties: false,
-        description: "Optimization solution"
-      }
+        description: "Optimization solution",
+      },
     },
     required: [...baseThoughtRequired],
-    additionalProperties: false
-  }
+    additionalProperties: false,
+  },
 } as const;
 
 /**
@@ -930,15 +1144,21 @@ export const deepthinking_strategic_schema = {
  */
 export const deepthinking_analytical_schema = {
   name: "deepthinking_analytical",
-  description: "Analytical: analogical mapping, first principles, meta-reasoning, cryptanalytic (decibans)",
+  description:
+    "Analytical: analogical mapping, first principles, meta-reasoning, cryptanalytic (decibans)",
   inputSchema: {
     type: "object",
     properties: {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["analogical", "firstprinciples", "metareasoning", "cryptanalytic"],
-        description: "Analytical reasoning mode"
+        enum: [
+          "analogical",
+          "firstprinciples",
+          "metareasoning",
+          "cryptanalytic",
+        ],
+        description: "Analytical reasoning mode",
       },
       sourceAnalogy: {
         type: "object",
@@ -946,15 +1166,15 @@ export const deepthinking_analytical_schema = {
           domain: { type: "string" },
           elements: {
             type: "array",
-            items: { type: "string" }
+            items: { type: "string" },
           },
           relations: {
             type: "array",
-            items: { type: "string" }
-          }
+            items: { type: "string" },
+          },
         },
         additionalProperties: false,
-        description: "Source domain for analogy"
+        description: "Source domain for analogy",
       },
       targetAnalogy: {
         type: "object",
@@ -962,15 +1182,15 @@ export const deepthinking_analytical_schema = {
           domain: { type: "string" },
           elements: {
             type: "array",
-            items: { type: "string" }
+            items: { type: "string" },
           },
           relations: {
             type: "array",
-            items: { type: "string" }
-          }
+            items: { type: "string" },
+          },
         },
         additionalProperties: false,
-        description: "Target domain for analogy"
+        description: "Target domain for analogy",
       },
       mappings: {
         type: "array",
@@ -979,27 +1199,27 @@ export const deepthinking_analytical_schema = {
           properties: {
             source: { type: "string" },
             target: { type: "string" },
-            confidence: { type: "number", minimum: 0, maximum: 1 }
+            confidence: { type: "number", minimum: 0, maximum: 1 },
           },
           required: ["source", "target"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Mappings between domains"
+        description: "Mappings between domains",
       },
       fundamentals: {
         type: "array",
         items: { type: "string" },
-        description: "Fundamental truths or axioms"
+        description: "Fundamental truths or axioms",
       },
       derivedInsights: {
         type: "array",
         items: { type: "string" },
-        description: "Insights derived from first principles"
-      }
+        description: "Insights derived from first principles",
+      },
     },
     required: [...baseThoughtRequired],
-    additionalProperties: false
-  }
+    additionalProperties: false,
+  },
 } as const;
 
 /**
@@ -1015,16 +1235,16 @@ export const deepthinking_scientific_schema = {
       mode: {
         type: "string",
         enum: ["scientificmethod", "systemsthinking", "formallogic"],
-        description: "Scientific reasoning mode"
+        description: "Scientific reasoning mode",
       },
       hypothesis: {
         type: "string",
-        description: "Scientific hypothesis"
+        description: "Scientific hypothesis",
       },
       predictions: {
         type: "array",
         items: { type: "string" },
-        description: "Testable predictions"
+        description: "Testable predictions",
       },
       experiments: {
         type: "array",
@@ -1033,12 +1253,12 @@ export const deepthinking_scientific_schema = {
           properties: {
             id: { type: "string" },
             description: { type: "string" },
-            result: { type: "string" }
+            result: { type: "string" },
           },
           required: ["id", "description"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Experiments conducted"
+        description: "Experiments conducted",
       },
       systemComponents: {
         type: "array",
@@ -1047,12 +1267,12 @@ export const deepthinking_scientific_schema = {
           properties: {
             id: { type: "string" },
             name: { type: "string" },
-            role: { type: "string" }
+            role: { type: "string" },
           },
           required: ["id", "name"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Components of the system"
+        description: "Components of the system",
       },
       interactions: {
         type: "array",
@@ -1061,12 +1281,12 @@ export const deepthinking_scientific_schema = {
           properties: {
             from: { type: "string" },
             to: { type: "string" },
-            type: { type: "string" }
+            type: { type: "string" },
           },
           required: ["from", "to", "type"],
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Interactions between components"
+        description: "Interactions between components",
       },
       feedbackLoops: {
         type: "array",
@@ -1075,34 +1295,34 @@ export const deepthinking_scientific_schema = {
           properties: {
             type: {
               type: "string",
-              enum: ["positive", "negative", "neutral"]
+              enum: ["positive", "negative", "neutral"],
             },
             components: {
               type: "array",
-              items: { type: "string" }
-            }
+              items: { type: "string" },
+            },
           },
-          additionalProperties: false
+          additionalProperties: false,
         },
-        description: "Feedback loops in the system"
+        description: "Feedback loops in the system",
       },
       premises: {
         type: "array",
         items: { type: "string" },
-        description: "Logical premises"
+        description: "Logical premises",
       },
       conclusion: {
         type: "string",
-        description: "Logical conclusion"
+        description: "Logical conclusion",
       },
       inference: {
         type: "string",
-        description: "Type of logical inference used"
-      }
+        description: "Type of logical inference used",
+      },
     },
     required: [...baseThoughtRequired],
-    additionalProperties: false
-  }
+    additionalProperties: false,
+  },
 } as const;
 
 /**
@@ -1111,7 +1331,8 @@ export const deepthinking_scientific_schema = {
  */
 export const deepthinking_engineering_schema = {
   name: "deepthinking_engineering",
-  description: "Engineering: requirements, trade studies, FMEA, ADRs, algorithm design (CLRS)",
+  description:
+    "Engineering: requirements, trade studies, FMEA, ADRs, algorithm design (CLRS)",
   inputSchema: {
     type: "object",
     properties: {
@@ -1119,12 +1340,12 @@ export const deepthinking_engineering_schema = {
       mode: {
         type: "string",
         enum: ["engineering", "algorithmic"],
-        description: "Engineering reasoning mode"
+        description: "Engineering reasoning mode",
       },
       // Engineering-specific properties
       requirementId: {
         type: "string",
-        description: "Requirement ID being analyzed"
+        description: "Requirement ID being analyzed",
       },
       tradeStudy: {
         type: "object",
@@ -1132,21 +1353,21 @@ export const deepthinking_engineering_schema = {
           options: {
             type: "array",
             items: { type: "string" },
-            description: "Options being compared"
+            description: "Options being compared",
           },
           criteria: {
             type: "array",
             items: { type: "string" },
-            description: "Evaluation criteria"
+            description: "Evaluation criteria",
           },
           weights: {
             type: "object",
             additionalProperties: { type: "number" },
-            description: "Criteria weights"
-          }
+            description: "Criteria weights",
+          },
         },
         additionalProperties: false,
-        description: "Trade study configuration"
+        description: "Trade study configuration",
       },
       fmeaEntry: {
         type: "object",
@@ -1155,47 +1376,64 @@ export const deepthinking_engineering_schema = {
           severity: { type: "integer", minimum: 1, maximum: 10 },
           occurrence: { type: "integer", minimum: 1, maximum: 10 },
           detection: { type: "integer", minimum: 1, maximum: 10 },
-          rpn: { type: "integer", description: "Risk Priority Number = S * O * D" }
+          rpn: {
+            type: "integer",
+            description: "Risk Priority Number = S * O * D",
+          },
         },
         additionalProperties: false,
-        description: "FMEA analysis entry"
+        description: "FMEA analysis entry",
       },
       // Algorithmic-specific properties
       algorithmName: {
         type: "string",
-        description: "Name of the algorithm being analyzed"
+        description: "Name of the algorithm being analyzed",
       },
       designPattern: {
         type: "string",
-        enum: ["divide-and-conquer", "dynamic-programming", "greedy", "backtracking", "branch-and-bound", "randomized", "approximation"],
-        description: "Algorithm design pattern"
+        enum: [
+          "divide-and-conquer",
+          "dynamic-programming",
+          "greedy",
+          "backtracking",
+          "branch-and-bound",
+          "randomized",
+          "approximation",
+        ],
+        description: "Algorithm design pattern",
       },
       complexityAnalysis: {
         type: "object",
         properties: {
-          timeComplexity: { type: "string", description: "Time complexity (e.g., O(n log n))" },
-          spaceComplexity: { type: "string", description: "Space complexity (e.g., O(n))" },
+          timeComplexity: {
+            type: "string",
+            description: "Time complexity (e.g., O(n log n))",
+          },
+          spaceComplexity: {
+            type: "string",
+            description: "Space complexity (e.g., O(n))",
+          },
           bestCase: { type: "string" },
           averageCase: { type: "string" },
-          worstCase: { type: "string" }
+          worstCase: { type: "string" },
         },
         additionalProperties: false,
-        description: "Complexity analysis"
+        description: "Complexity analysis",
       },
       correctnessProof: {
         type: "object",
         properties: {
           invariant: { type: "string", description: "Loop invariant" },
           termination: { type: "string", description: "Termination argument" },
-          correctness: { type: "string", description: "Correctness proof" }
+          correctness: { type: "string", description: "Correctness proof" },
         },
         additionalProperties: false,
-        description: "Algorithm correctness proof"
-      }
+        description: "Algorithm correctness proof",
+      },
     },
     required: [...baseThoughtRequired],
-    additionalProperties: false
-  }
+    additionalProperties: false,
+  },
 } as const;
 
 /**
@@ -1205,7 +1443,8 @@ export const deepthinking_engineering_schema = {
  */
 export const deepthinking_academic_schema = {
   name: "deepthinking_academic",
-  description: "Academic: synthesis (literature review), argumentation (Toulmin), critique (peer review), analysis (qualitative)",
+  description:
+    "Academic: synthesis (literature review), argumentation (Toulmin), critique (peer review), analysis (qualitative)",
   inputSchema: {
     type: "object",
     properties: {
@@ -1213,7 +1452,7 @@ export const deepthinking_academic_schema = {
       mode: {
         type: "string",
         enum: ["synthesis", "argumentation", "critique", "analysis"],
-        description: "Academic research reasoning mode"
+        description: "Academic research reasoning mode",
       },
       // Synthesis-specific properties
       sources: {
@@ -1228,11 +1467,11 @@ export const deepthinking_academic_schema = {
             year: { type: "integer" },
             venue: { type: "string" },
             doi: { type: "string" },
-            relevance: { type: "number", minimum: 0, maximum: 1 }
+            relevance: { type: "number", minimum: 0, maximum: 1 },
           },
-          required: ["id", "title"]
+          required: ["id", "title"],
         },
-        description: "Literature sources being synthesized"
+        description: "Literature sources being synthesized",
       },
       themes: {
         type: "array",
@@ -1244,16 +1483,19 @@ export const deepthinking_academic_schema = {
             description: { type: "string" },
             sourceIds: { type: "array", items: { type: "string" } },
             strength: { type: "number", minimum: 0, maximum: 1 },
-            consensus: { type: "string", enum: ["strong", "moderate", "weak", "contested"] }
+            consensus: {
+              type: "string",
+              enum: ["strong", "moderate", "weak", "contested"],
+            },
           },
-          required: ["id", "name"]
+          required: ["id", "name"],
         },
-        description: "Identified themes across sources"
+        description: "Identified themes across sources",
       },
       researchGaps: {
         type: "array",
         items: { type: "string" },
-        description: "Identified gaps in the literature"
+        description: "Identified gaps in the literature",
       },
       gaps: {
         type: "array",
@@ -1262,12 +1504,24 @@ export const deepthinking_academic_schema = {
           properties: {
             id: { type: "string" },
             description: { type: "string" },
-            type: { type: "string", enum: ["empirical", "theoretical", "methodological", "population", "contextual"] },
-            importance: { type: "string", enum: ["critical", "significant", "moderate", "minor"] }
+            type: {
+              type: "string",
+              enum: [
+                "empirical",
+                "theoretical",
+                "methodological",
+                "population",
+                "contextual",
+              ],
+            },
+            importance: {
+              type: "string",
+              enum: ["critical", "significant", "moderate", "minor"],
+            },
           },
-          required: ["id", "description"]
+          required: ["id", "description"],
         },
-        description: "Identified gaps in the literature (structured)"
+        description: "Identified gaps in the literature (structured)",
       },
       // Argumentation-specific properties (Toulmin model)
       claims: {
@@ -1277,12 +1531,18 @@ export const deepthinking_academic_schema = {
           properties: {
             id: { type: "string" },
             statement: { type: "string" },
-            type: { type: "string", enum: ["fact", "value", "policy", "definition", "cause"] },
-            strength: { type: "string", enum: ["strong", "moderate", "tentative"] }
+            type: {
+              type: "string",
+              enum: ["fact", "value", "policy", "definition", "cause"],
+            },
+            strength: {
+              type: "string",
+              enum: ["strong", "moderate", "tentative"],
+            },
           },
-          required: ["id", "statement"]
+          required: ["id", "statement"],
         },
-        description: "Claims in the argument"
+        description: "Claims in the argument",
       },
       grounds: {
         type: "array",
@@ -1290,14 +1550,24 @@ export const deepthinking_academic_schema = {
           type: "object",
           properties: {
             id: { type: "string" },
-            type: { type: "string", enum: ["empirical", "statistical", "testimonial", "analogical", "logical", "textual"] },
+            type: {
+              type: "string",
+              enum: [
+                "empirical",
+                "statistical",
+                "testimonial",
+                "analogical",
+                "logical",
+                "textual",
+              ],
+            },
             content: { type: "string" },
             source: { type: "string" },
-            reliability: { type: "number", minimum: 0, maximum: 1 }
+            reliability: { type: "number", minimum: 0, maximum: 1 },
           },
-          required: ["id", "content"]
+          required: ["id", "content"],
         },
-        description: "Grounds/evidence supporting claims"
+        description: "Grounds/evidence supporting claims",
       },
       warrants: {
         type: "array",
@@ -1306,13 +1576,23 @@ export const deepthinking_academic_schema = {
           properties: {
             id: { type: "string" },
             statement: { type: "string" },
-            type: { type: "string", enum: ["generalization", "analogy", "causal", "authority", "principle", "definition"] },
+            type: {
+              type: "string",
+              enum: [
+                "generalization",
+                "analogy",
+                "causal",
+                "authority",
+                "principle",
+                "definition",
+              ],
+            },
             groundsIds: { type: "array", items: { type: "string" } },
-            claimId: { type: "string" }
+            claimId: { type: "string" },
           },
-          required: ["id", "statement"]
+          required: ["id", "statement"],
         },
-        description: "Warrants connecting grounds to claims"
+        description: "Warrants connecting grounds to claims",
       },
       rebuttals: {
         type: "array",
@@ -1321,19 +1601,28 @@ export const deepthinking_academic_schema = {
           properties: {
             id: { type: "string" },
             objection: { type: "string" },
-            type: { type: "string", enum: ["factual", "logical", "ethical", "practical", "definitional"] },
+            type: {
+              type: "string",
+              enum: [
+                "factual",
+                "logical",
+                "ethical",
+                "practical",
+                "definitional",
+              ],
+            },
             strength: { type: "string", enum: ["strong", "moderate", "weak"] },
-            response: { type: "string" }
+            response: { type: "string" },
           },
-          required: ["id", "objection"]
+          required: ["id", "objection"],
         },
-        description: "Potential rebuttals and counter-arguments"
+        description: "Potential rebuttals and counter-arguments",
       },
       argumentStrength: {
         type: "number",
         minimum: 0,
         maximum: 1,
-        description: "Overall argument strength (0-1)"
+        description: "Overall argument strength (0-1)",
       },
       // Critique-specific properties
       critiquedWork: {
@@ -1344,36 +1633,53 @@ export const deepthinking_academic_schema = {
           authors: { type: "array", items: { type: "string" } },
           year: { type: "integer" },
           type: { type: "string" },
-          field: { type: "string" }
+          field: { type: "string" },
         },
         required: ["title"],
-        description: "Work being critiqued"
+        description: "Work being critiqued",
       },
       strengths: {
         type: "array",
         items: { type: "string" },
-        description: "Identified strengths"
+        description: "Identified strengths",
       },
       weaknesses: {
         type: "array",
         items: { type: "string" },
-        description: "Identified weaknesses"
+        description: "Identified weaknesses",
       },
       suggestions: {
         type: "array",
         items: { type: "string" },
-        description: "Improvement suggestions"
+        description: "Improvement suggestions",
       },
       // Analysis-specific properties
       analysisMethod: {
         type: "string",
-        enum: ["thematic", "grounded-theory", "discourse", "content", "narrative", "phenomenological"],
-        description: "Qualitative analysis method (simplified)"
+        enum: [
+          "thematic",
+          "grounded-theory",
+          "discourse",
+          "content",
+          "narrative",
+          "phenomenological",
+        ],
+        description: "Qualitative analysis method (simplified)",
       },
       methodology: {
         type: "string",
-        enum: ["thematic_analysis", "grounded_theory", "discourse_analysis", "content_analysis", "phenomenological", "narrative_analysis", "framework_analysis", "template_analysis", "mixed_qualitative"],
-        description: "Qualitative analysis methodology"
+        enum: [
+          "thematic_analysis",
+          "grounded_theory",
+          "discourse_analysis",
+          "content_analysis",
+          "phenomenological",
+          "narrative_analysis",
+          "framework_analysis",
+          "template_analysis",
+          "mixed_qualitative",
+        ],
+        description: "Qualitative analysis methodology",
       },
       dataSources: {
         type: "array",
@@ -1383,11 +1689,11 @@ export const deepthinking_academic_schema = {
             id: { type: "string" },
             type: { type: "string" },
             description: { type: "string" },
-            participantId: { type: "string" }
+            participantId: { type: "string" },
           },
-          required: ["id", "type"]
+          required: ["id", "type"],
         },
-        description: "Data sources for analysis"
+        description: "Data sources for analysis",
       },
       codes: {
         type: "array",
@@ -1397,13 +1703,26 @@ export const deepthinking_academic_schema = {
             id: { type: "string" },
             label: { type: "string" },
             definition: { type: "string" },
-            type: { type: "string", enum: ["descriptive", "in_vivo", "process", "initial", "focused", "axial", "theoretical", "emotion", "value"] },
+            type: {
+              type: "string",
+              enum: [
+                "descriptive",
+                "in_vivo",
+                "process",
+                "initial",
+                "focused",
+                "axial",
+                "theoretical",
+                "emotion",
+                "value",
+              ],
+            },
             frequency: { type: "integer" },
-            examples: { type: "array", items: { type: "string" } }
+            examples: { type: "array", items: { type: "string" } },
           },
-          required: ["id", "label"]
+          required: ["id", "label"],
         },
-        description: "Coding scheme for analysis"
+        description: "Coding scheme for analysis",
       },
       memos: {
         type: "array",
@@ -1411,31 +1730,41 @@ export const deepthinking_academic_schema = {
           type: "object",
           properties: {
             id: { type: "string" },
-            type: { type: "string", enum: ["analytical", "theoretical", "methodological", "reflexive", "code", "operational"] },
+            type: {
+              type: "string",
+              enum: [
+                "analytical",
+                "theoretical",
+                "methodological",
+                "reflexive",
+                "code",
+                "operational",
+              ],
+            },
             content: { type: "string" },
-            relatedCodes: { type: "array", items: { type: "string" } }
+            relatedCodes: { type: "array", items: { type: "string" } },
           },
-          required: ["id", "content"]
+          required: ["id", "content"],
         },
-        description: "Analytical memos"
+        description: "Analytical memos",
       },
       categories: {
         type: "array",
         items: { type: "string" },
-        description: "Categories derived from codes"
+        description: "Categories derived from codes",
       },
       saturationReached: {
         type: "boolean",
-        description: "Whether theoretical saturation has been reached"
+        description: "Whether theoretical saturation has been reached",
       },
       keyInsight: {
         type: "string",
-        description: "Key insight from the analysis"
-      }
+        description: "Key insight from the analysis",
+      },
     },
     required: [...baseThoughtRequired],
-    additionalProperties: false
-  }
+    additionalProperties: false,
+  },
 } as const;
 
 /**
@@ -1443,48 +1772,77 @@ export const deepthinking_academic_schema = {
  */
 export const deepthinking_session_schema = {
   name: "deepthinking_session",
-  description: "Session: summarize, export, export_all, get, switch_mode, recommend, delete",
+  description:
+    "Session: summarize, export, export_all, get, switch_mode, recommend, delete",
   inputSchema: {
     type: "object",
     properties: {
       sessionId: {
         type: "string",
-        description: "Session ID (required for most actions except recommend_mode)"
+        description:
+          "Session ID (required for most actions except recommend_mode)",
       },
       action: {
         type: "string",
-        enum: ["summarize", "export", "export_all", "get_session", "switch_mode", "recommend_mode", "delete_session"],
-        description: "Session action to perform"
+        enum: [
+          "summarize",
+          "export",
+          "export_all",
+          "get_session",
+          "switch_mode",
+          "recommend_mode",
+          "delete_session",
+        ],
+        description: "Session action to perform",
       },
       exportFormat: {
         type: "string",
-        enum: ["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"],
-        description: "Export format (for export action)"
+        enum: [
+          "markdown",
+          "latex",
+          "json",
+          "html",
+          "jupyter",
+          "mermaid",
+          "dot",
+          "ascii",
+        ],
+        description: "Export format (for export action)",
       },
       exportProfile: {
         type: "string",
-        enum: ["academic", "presentation", "documentation", "archive", "minimal"],
-        description: "Pre-configured export bundle. academic: LaTeX+Mermaid+JSON, presentation: Mermaid+HTML+ASCII, documentation: Markdown+HTML+JSON, archive: all formats, minimal: Markdown+JSON"
+        enum: [
+          "academic",
+          "presentation",
+          "documentation",
+          "archive",
+          "minimal",
+        ],
+        description:
+          "Pre-configured export bundle. academic: LaTeX+Mermaid+JSON, presentation: Mermaid+HTML+ASCII, documentation: Markdown+HTML+JSON, archive: all formats, minimal: Markdown+JSON",
       },
       includeContent: {
         type: "boolean",
-        description: "Include full export content in response (for export_all action)"
+        description:
+          "Include full export content in response (for export_all action)",
       },
       outputDir: {
         type: "string",
-        description: "Output directory path for file export. When provided, exports write to files instead of returning content. Creates session subdirectory automatically."
+        description:
+          "Output directory path for file export. When provided, exports write to files instead of returning content. Creates session subdirectory automatically.",
       },
       overwrite: {
         type: "boolean",
-        description: "Overwrite existing files when exporting to outputDir (default: false)"
+        description:
+          "Overwrite existing files when exporting to outputDir (default: false)",
       },
       newMode: {
         type: "string",
-        description: "New thinking mode (for switch_mode action)"
+        description: "New thinking mode (for switch_mode action)",
       },
       problemType: {
         type: "string",
-        description: "Quick problem type for mode recommendation"
+        description: "Quick problem type for mode recommendation",
       },
       problemCharacteristics: {
         type: "object",
@@ -1493,33 +1851,66 @@ export const deepthinking_session_schema = {
           complexity: {
             type: "string",
             enum: ["low", "medium", "high"],
-            description: "Problem complexity level"
+            description: "Problem complexity level",
           },
           uncertainty: {
             type: "string",
             enum: ["low", "medium", "high"],
-            description: "Uncertainty level"
+            description: "Uncertainty level",
           },
-          timeDependent: { type: "boolean", description: "Whether problem involves time" },
-          multiAgent: { type: "boolean", description: "Whether problem involves multiple agents" },
-          requiresProof: { type: "boolean", description: "Whether formal proof is needed" },
-          requiresQuantification: { type: "boolean", description: "Whether quantitative analysis is needed" },
-          hasIncompleteInfo: { type: "boolean", description: "Whether information is incomplete" },
-          requiresExplanation: { type: "boolean", description: "Whether explanation is needed" },
-          hasAlternatives: { type: "boolean", description: "Whether alternative scenarios exist" }
+          timeDependent: {
+            type: "boolean",
+            description: "Whether problem involves time",
+          },
+          multiAgent: {
+            type: "boolean",
+            description: "Whether problem involves multiple agents",
+          },
+          requiresProof: {
+            type: "boolean",
+            description: "Whether formal proof is needed",
+          },
+          requiresQuantification: {
+            type: "boolean",
+            description: "Whether quantitative analysis is needed",
+          },
+          hasIncompleteInfo: {
+            type: "boolean",
+            description: "Whether information is incomplete",
+          },
+          requiresExplanation: {
+            type: "boolean",
+            description: "Whether explanation is needed",
+          },
+          hasAlternatives: {
+            type: "boolean",
+            description: "Whether alternative scenarios exist",
+          },
         },
-        required: ["domain", "complexity", "uncertainty", "timeDependent", "multiAgent", "requiresProof", "requiresQuantification", "hasIncompleteInfo", "requiresExplanation", "hasAlternatives"],
+        required: [
+          "domain",
+          "complexity",
+          "uncertainty",
+          "timeDependent",
+          "multiAgent",
+          "requiresProof",
+          "requiresQuantification",
+          "hasIncompleteInfo",
+          "requiresExplanation",
+          "hasAlternatives",
+        ],
         additionalProperties: false,
-        description: "Detailed problem characteristics for comprehensive recommendation"
+        description:
+          "Detailed problem characteristics for comprehensive recommendation",
       },
       includeCombinations: {
         type: "boolean",
-        description: "Include mode combinations in recommendations"
-      }
+        description: "Include mode combinations in recommendations",
+      },
     },
     required: ["action"],
-    additionalProperties: false
-  }
+    additionalProperties: false,
+  },
 } as const;
 
 /**
@@ -1551,57 +1942,94 @@ handles conflicts between perspectives, and produces a synthesized conclusion.
     properties: {
       thought: {
         type: "string",
-        description: "The thought, problem, or question to analyze using multiple reasoning modes",
-        minLength: 1
+        description:
+          "The thought, problem, or question to analyze using multiple reasoning modes",
+        minLength: 1,
       },
       preset: {
         type: "string",
-        enum: ["comprehensive_analysis", "hypothesis_testing", "decision_making", "root_cause", "future_planning"],
-        description: "Pre-defined mode combination preset"
+        enum: [
+          "comprehensive_analysis",
+          "hypothesis_testing",
+          "decision_making",
+          "root_cause",
+          "future_planning",
+        ],
+        description: "Pre-defined mode combination preset",
       },
       customModes: {
         type: "array",
         items: {
           type: "string",
           enum: [
-            "sequential", "shannon", "mathematics", "physics", "hybrid",
-            "inductive", "deductive", "abductive", "causal", "bayesian",
-            "counterfactual", "temporal", "gametheory", "evidential",
-            "analogical", "firstprinciples", "systemsthinking", "scientificmethod",
-            "formallogic", "optimization", "engineering", "computability",
-            "cryptanalytic", "algorithmic", "synthesis", "argumentation",
-            "critique", "analysis", "metareasoning"
-          ]
+            "sequential",
+            "shannon",
+            "mathematics",
+            "physics",
+            "hybrid",
+            "inductive",
+            "deductive",
+            "abductive",
+            "causal",
+            "bayesian",
+            "counterfactual",
+            "temporal",
+            "gametheory",
+            "evidential",
+            "analogical",
+            "firstprinciples",
+            "systemsthinking",
+            "scientificmethod",
+            "formallogic",
+            "optimization",
+            "engineering",
+            "computability",
+            "cryptanalytic",
+            "algorithmic",
+            "synthesis",
+            "argumentation",
+            "critique",
+            "analysis",
+            "metareasoning",
+          ],
         },
         minItems: 2,
         maxItems: 10,
-        description: "Custom selection of modes (overrides preset). Minimum 2, maximum 10 modes."
+        description:
+          "Custom selection of modes (overrides preset). Minimum 2, maximum 10 modes.",
       },
       mergeStrategy: {
         type: "string",
-        enum: ["union", "intersection", "weighted", "hierarchical", "dialectical"],
+        enum: [
+          "union",
+          "intersection",
+          "weighted",
+          "hierarchical",
+          "dialectical",
+        ],
         default: "union",
-        description: "Strategy for merging insights from different modes"
+        description: "Strategy for merging insights from different modes",
       },
       sessionId: {
         type: "string",
-        description: "Optional session ID to associate analysis with"
+        description: "Optional session ID to associate analysis with",
       },
       context: {
         type: "string",
-        description: "Additional context or background information for the analysis"
+        description:
+          "Additional context or background information for the analysis",
       },
       timeoutPerMode: {
         type: "integer",
         minimum: 1000,
         maximum: 120000,
         default: 30000,
-        description: "Maximum time in milliseconds per mode (default: 30000)"
-      }
+        description: "Maximum time in milliseconds per mode (default: 30000)",
+      },
     },
     required: ["thought"],
-    additionalProperties: false
-  }
+    additionalProperties: false,
+  },
 } as const;
 
 /**

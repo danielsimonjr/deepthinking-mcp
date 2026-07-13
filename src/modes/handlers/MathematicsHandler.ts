@@ -8,14 +8,14 @@
  * - Consistency checking
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode, MathematicsThought } from '../../types/core.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode, MathematicsThought } from "../../types/core.js";
 import type {
   MathematicsThoughtType,
   MathematicalModel,
   ProofStrategy,
-} from '../../types/modes/mathematics.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+} from "../../types/modes/mathematics.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -24,32 +24,38 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 /**
  * Valid mathematics thought types
  */
 const VALID_THOUGHT_TYPES: MathematicsThoughtType[] = [
-  'axiom_definition',
-  'theorem_statement',
-  'proof_construction',
-  'lemma_derivation',
-  'corollary',
-  'counterexample',
-  'algebraic_manipulation',
-  'symbolic_computation',
-  'numerical_analysis',
-  'proof_decomposition',
-  'dependency_analysis',
-  'consistency_check',
-  'gap_identification',
-  'assumption_trace',
+  "axiom_definition",
+  "theorem_statement",
+  "proof_construction",
+  "lemma_derivation",
+  "corollary",
+  "counterexample",
+  "algebraic_manipulation",
+  "symbolic_computation",
+  "numerical_analysis",
+  "proof_decomposition",
+  "dependency_analysis",
+  "consistency_check",
+  "gap_identification",
+  "assumption_trace",
 ];
 
 /**
  * Valid proof strategy types
  */
-const VALID_PROOF_TYPES = ['direct', 'contradiction', 'induction', 'construction', 'contrapositive'];
+const VALID_PROOF_TYPES = [
+  "direct",
+  "contradiction",
+  "induction",
+  "construction",
+  "contrapositive",
+];
 
 /**
  * MathematicsHandler - Specialized handler for mathematical reasoning
@@ -62,13 +68,17 @@ const VALID_PROOF_TYPES = ['direct', 'contradiction', 'induction', 'construction
  */
 export class MathematicsHandler implements ModeHandler {
   readonly mode = ThinkingMode.MATHEMATICS;
-  readonly modeName = 'Mathematical Reasoning';
-  readonly description = 'Formal mathematical proofs, theorems, and symbolic computation';
+  readonly modeName = "Mathematical Reasoning";
+  readonly description =
+    "Formal mathematical proofs, theorems, and symbolic computation";
 
   /**
    * Create a mathematics thought from input
    */
-  createThought(input: ThinkingToolInput, sessionId: string): MathematicsThought {
+  createThought(
+    input: ThinkingToolInput,
+    sessionId: string,
+  ): MathematicsThought {
     const inputAny = input as any;
 
     // Resolve thought type
@@ -126,28 +136,35 @@ export class MathematicsHandler implements ModeHandler {
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
 
     // Validate thought type
-    if (inputAny.thoughtType && !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)) {
+    if (
+      inputAny.thoughtType &&
+      !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)
+    ) {
       warnings.push(
         createValidationWarning(
-          'thoughtType',
+          "thoughtType",
           `Unknown thought type: ${inputAny.thoughtType}`,
-          `Valid types: ${VALID_THOUGHT_TYPES.join(', ')}`
-        )
+          `Valid types: ${VALID_THOUGHT_TYPES.join(", ")}`,
+        ),
       );
     }
 
@@ -156,10 +173,10 @@ export class MathematicsHandler implements ModeHandler {
       if (input.uncertainty < 0 || input.uncertainty > 1) {
         errors.push(
           createValidationError(
-            'uncertainty',
+            "uncertainty",
             `Uncertainty (${input.uncertainty}) must be between 0 and 1`,
-            'UNCERTAINTY_OUT_OF_RANGE'
-          )
+            "UNCERTAINTY_OUT_OF_RANGE",
+          ),
         );
       }
     }
@@ -173,31 +190,35 @@ export class MathematicsHandler implements ModeHandler {
 
     // Validate proof strategy
     if (input.proofStrategy) {
-      const strategyValidation = this.validateProofStrategy(input.proofStrategy);
+      const strategyValidation = this.validateProofStrategy(
+        input.proofStrategy,
+      );
       errors.push(...strategyValidation.errors);
       warnings.push(...strategyValidation.warnings);
     }
 
     // Suggest assumptions for theorem statements
-    if (inputAny.thoughtType === 'theorem_statement' &&
-        (!input.assumptions || input.assumptions.length === 0)) {
+    if (
+      inputAny.thoughtType === "theorem_statement" &&
+      (!input.assumptions || input.assumptions.length === 0)
+    ) {
       warnings.push(
         createValidationWarning(
-          'assumptions',
-          'Theorem stated without explicit assumptions',
-          'Document assumptions to ensure the theorem is well-defined'
-        )
+          "assumptions",
+          "Theorem stated without explicit assumptions",
+          "Document assumptions to ensure the theorem is well-defined",
+        ),
       );
     }
 
     // Suggest proof strategy for proof construction
-    if (inputAny.thoughtType === 'proof_construction' && !input.proofStrategy) {
+    if (inputAny.thoughtType === "proof_construction" && !input.proofStrategy) {
       warnings.push(
         createValidationWarning(
-          'proofStrategy',
-          'Proof construction without explicit strategy',
-          'Specify the proof approach (direct, contradiction, induction, etc.)'
-        )
+          "proofStrategy",
+          "Proof construction without explicit strategy",
+          "Specify the proof approach (direct, contradiction, induction, etc.)",
+        ),
       );
     }
 
@@ -214,7 +235,11 @@ export class MathematicsHandler implements ModeHandler {
   getEnhancements(thought: MathematicsThought): ModeEnhancements {
     const enhancements: ModeEnhancements = {
       suggestions: [],
-      relatedModes: [ThinkingMode.PHYSICS, ThinkingMode.FORMALLOGIC, ThinkingMode.DEDUCTIVE],
+      relatedModes: [
+        ThinkingMode.PHYSICS,
+        ThinkingMode.FORMALLOGIC,
+        ThinkingMode.DEDUCTIVE,
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -223,82 +248,85 @@ export class MathematicsHandler implements ModeHandler {
         uncertainty: thought.uncertainty,
       },
       mentalModels: [
-        'Axiomatic Reasoning',
-        'Proof by Induction',
-        'Proof by Contradiction',
-        'Constructive Proof',
-        'Symbolic Manipulation',
+        "Axiomatic Reasoning",
+        "Proof by Induction",
+        "Proof by Contradiction",
+        "Constructive Proof",
+        "Symbolic Manipulation",
       ],
     };
 
     // Thought type-specific guidance
     switch (thought.thoughtType) {
-      case 'axiom_definition':
+      case "axiom_definition":
         enhancements.guidingQuestions!.push(
-          'Is this axiom consistent with existing axioms?',
-          'Is this axiom independent from other axioms?'
+          "Is this axiom consistent with existing axioms?",
+          "Is this axiom independent from other axioms?",
         );
         break;
 
-      case 'theorem_statement':
+      case "theorem_statement":
         enhancements.guidingQuestions!.push(
-          'What is the simplest case of this theorem?',
-          'Are there known counterexamples to consider?'
+          "What is the simplest case of this theorem?",
+          "Are there known counterexamples to consider?",
         );
         enhancements.suggestions!.push(
-          'State the theorem precisely with all quantifiers explicit'
+          "State the theorem precisely with all quantifiers explicit",
         );
         break;
 
-      case 'proof_construction':
+      case "proof_construction":
         if (thought.proofStrategy) {
           enhancements.suggestions!.push(
-            `Using ${thought.proofStrategy.type} proof strategy`
+            `Using ${thought.proofStrategy.type} proof strategy`,
           );
           if (thought.proofStrategy.completeness < 0.5) {
             enhancements.warnings!.push(
-              'Proof is less than 50% complete - continue developing steps'
+              "Proof is less than 50% complete - continue developing steps",
             );
           }
         }
         enhancements.guidingQuestions!.push(
-          'What is the key insight that makes this proof work?'
+          "What is the key insight that makes this proof work?",
         );
         break;
 
-      case 'lemma_derivation':
+      case "lemma_derivation":
         enhancements.suggestions!.push(
-          'Ensure the lemma is general enough to be reusable'
+          "Ensure the lemma is general enough to be reusable",
         );
         enhancements.guidingQuestions!.push(
-          'Is this lemma necessary, or can it be simplified?'
+          "Is this lemma necessary, or can it be simplified?",
         );
         break;
 
-      case 'counterexample':
+      case "counterexample":
         enhancements.guidingQuestions!.push(
-          'Does this counterexample apply to the general case?',
-          'What conditions would make the original statement true?'
+          "Does this counterexample apply to the general case?",
+          "What conditions would make the original statement true?",
         );
         break;
 
-      case 'proof_decomposition':
-        enhancements.relatedModes = [ThinkingMode.ALGORITHMIC, ThinkingMode.FORMALLOGIC];
+      case "proof_decomposition":
+        enhancements.relatedModes = [
+          ThinkingMode.ALGORITHMIC,
+          ThinkingMode.FORMALLOGIC,
+        ];
         enhancements.suggestions!.push(
-          'Break the proof into atomic, independently verifiable steps'
+          "Break the proof into atomic, independently verifiable steps",
         );
         break;
 
-      case 'consistency_check':
+      case "consistency_check":
         enhancements.guidingQuestions!.push(
-          'Are there any hidden assumptions?',
-          'Do all definitions agree with standard usage?'
+          "Are there any hidden assumptions?",
+          "Do all definitions agree with standard usage?",
         );
         break;
 
-      case 'gap_identification':
+      case "gap_identification":
         enhancements.suggestions!.push(
-          'Document each gap with its severity and suggested fix'
+          "Document each gap with its severity and suggested fix",
         );
         break;
     }
@@ -310,7 +338,7 @@ export class MathematicsHandler implements ModeHandler {
         enhancements.metrics!.modelValidated = 1;
       } else {
         enhancements.suggestions!.push(
-          'Consider validating the mathematical model'
+          "Consider validating the mathematical model",
         );
       }
     }
@@ -318,14 +346,15 @@ export class MathematicsHandler implements ModeHandler {
     // Proof strategy analysis
     if (thought.proofStrategy) {
       enhancements.metrics!.proofType = thought.proofStrategy.type;
-      enhancements.metrics!.proofCompleteness = thought.proofStrategy.completeness;
+      enhancements.metrics!.proofCompleteness =
+        thought.proofStrategy.completeness;
 
-      if (thought.proofStrategy.type === 'induction') {
+      if (thought.proofStrategy.type === "induction") {
         if (!thought.proofStrategy.baseCase) {
-          enhancements.warnings!.push('Induction proof missing base case');
+          enhancements.warnings!.push("Induction proof missing base case");
         }
         if (!thought.proofStrategy.inductiveStep) {
-          enhancements.warnings!.push('Induction proof missing inductive step');
+          enhancements.warnings!.push("Induction proof missing inductive step");
         }
       }
     }
@@ -341,17 +370,18 @@ export class MathematicsHandler implements ModeHandler {
     if (thought.consistencyReport) {
       if (!thought.consistencyReport.isConsistent) {
         enhancements.warnings!.push(
-          `Inconsistency detected: ${thought.consistencyReport.inconsistencies.length} issue(s)`
+          `Inconsistency detected: ${thought.consistencyReport.inconsistencies.length} issue(s)`,
         );
       }
-      enhancements.metrics!.consistencyScore = thought.consistencyReport.overallScore;
+      enhancements.metrics!.consistencyScore =
+        thought.consistencyReport.overallScore;
     }
 
     // Gap analysis
     if (thought.gapAnalysis) {
       if (thought.gapAnalysis.gaps.length > 0) {
         enhancements.warnings!.push(
-          `${thought.gapAnalysis.gaps.length} gap(s) identified in reasoning`
+          `${thought.gapAnalysis.gaps.length} gap(s) identified in reasoning`,
         );
       }
       enhancements.metrics!.gapCount = thought.gapAnalysis.gaps.length;
@@ -370,22 +400,29 @@ export class MathematicsHandler implements ModeHandler {
   /**
    * Resolve thought type
    */
-  private resolveThoughtType(inputType: string | undefined): MathematicsThoughtType {
-    if (inputType && VALID_THOUGHT_TYPES.includes(inputType as MathematicsThoughtType)) {
+  private resolveThoughtType(
+    inputType: string | undefined,
+  ): MathematicsThoughtType {
+    if (
+      inputType &&
+      VALID_THOUGHT_TYPES.includes(inputType as MathematicsThoughtType)
+    ) {
       return inputType as MathematicsThoughtType;
     }
-    return 'axiom_definition';
+    return "axiom_definition";
   }
 
   /**
    * Normalize mathematical model
    */
-  private normalizeModel(model: MathematicalModel | undefined): MathematicalModel | undefined {
+  private normalizeModel(
+    model: MathematicalModel | undefined,
+  ): MathematicalModel | undefined {
     if (!model) return undefined;
 
     return {
-      latex: model.latex || '',
-      symbolic: model.symbolic || '',
+      latex: model.latex || "",
+      symbolic: model.symbolic || "",
       ascii: model.ascii,
       tensorRank: model.tensorRank,
       dimensions: model.dimensions,
@@ -401,11 +438,15 @@ export class MathematicsHandler implements ModeHandler {
   /**
    * Normalize proof strategy
    */
-  private normalizeProofStrategy(strategy: Partial<ProofStrategy> | undefined): ProofStrategy | undefined {
+  private normalizeProofStrategy(
+    strategy: Partial<ProofStrategy> | undefined,
+  ): ProofStrategy | undefined {
     if (!strategy || !strategy.type) return undefined;
 
     return {
-      type: VALID_PROOF_TYPES.includes(strategy.type) ? strategy.type : 'direct',
+      type: VALID_PROOF_TYPES.includes(strategy.type)
+        ? strategy.type
+        : "direct",
       steps: strategy.steps || [],
       baseCase: strategy.baseCase,
       inductiveStep: strategy.inductiveStep,
@@ -422,10 +463,10 @@ export class MathematicsHandler implements ModeHandler {
     if (!model.latex && !model.symbolic) {
       warnings.push(
         createValidationWarning(
-          'mathematicalModel',
-          'Model has no LaTeX or symbolic representation',
-          'Provide at least one formal representation'
-        )
+          "mathematicalModel",
+          "Model has no LaTeX or symbolic representation",
+          "Provide at least one formal representation",
+        ),
       );
     }
 
@@ -435,48 +476,53 @@ export class MathematicsHandler implements ModeHandler {
   /**
    * Validate proof strategy
    */
-  private validateProofStrategy(strategy: Partial<ProofStrategy> & { type: string; steps?: string[] }): ValidationResult {
+  private validateProofStrategy(
+    strategy: Partial<ProofStrategy> & { type: string; steps?: string[] },
+  ): ValidationResult {
     const errors: ReturnType<typeof createValidationError>[] = [];
     const warnings: ReturnType<typeof createValidationWarning>[] = [];
 
     if (!VALID_PROOF_TYPES.includes(strategy.type)) {
       errors.push(
         createValidationError(
-          'proofStrategy.type',
-          `Invalid proof type: ${strategy.type}. Valid types: ${VALID_PROOF_TYPES.join(', ')}`,
-          'INVALID_PROOF_TYPE'
-        )
+          "proofStrategy.type",
+          `Invalid proof type: ${strategy.type}. Valid types: ${VALID_PROOF_TYPES.join(", ")}`,
+          "INVALID_PROOF_TYPE",
+        ),
       );
     }
 
-    if (strategy.type === 'induction') {
+    if (strategy.type === "induction") {
       if (!strategy.baseCase) {
         warnings.push(
           createValidationWarning(
-            'proofStrategy.baseCase',
-            'Induction proof should specify base case',
-            'Add baseCase field for clarity'
-          )
+            "proofStrategy.baseCase",
+            "Induction proof should specify base case",
+            "Add baseCase field for clarity",
+          ),
         );
       }
       if (!strategy.inductiveStep) {
         warnings.push(
           createValidationWarning(
-            'proofStrategy.inductiveStep',
-            'Induction proof should specify inductive step',
-            'Add inductiveStep field for clarity'
-          )
+            "proofStrategy.inductiveStep",
+            "Induction proof should specify inductive step",
+            "Add inductiveStep field for clarity",
+          ),
         );
       }
     }
 
-    if (strategy.completeness !== undefined && (strategy.completeness < 0 || strategy.completeness > 1)) {
+    if (
+      strategy.completeness !== undefined &&
+      (strategy.completeness < 0 || strategy.completeness > 1)
+    ) {
       warnings.push(
         createValidationWarning(
-          'proofStrategy.completeness',
+          "proofStrategy.completeness",
           `Completeness (${strategy.completeness}) should be between 0 and 1`,
-          'Normalize completeness to [0, 1] range'
-        )
+          "Normalize completeness to [0, 1] range",
+        ),
       );
     }
 

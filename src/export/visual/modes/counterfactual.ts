@@ -6,13 +6,13 @@
  * Phase 13 Sprint 8: Refactored to use fluent builder classes
  */
 
-import type { CounterfactualThought } from '../../../types/index.js';
-import type { VisualExportOptions } from '../types.js';
-import { sanitizeId } from '../utils.js';
+import type { CounterfactualThought } from "../../../types/index.js";
+import type { VisualExportOptions } from "../types.js";
+import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
-import { DOTGraphBuilder, type DotNodeStyle } from '../utils/dot.js';
-import { MermaidGraphBuilder } from '../utils/mermaid.js';
-import { ASCIIDocBuilder } from '../utils/ascii.js';
+import { DOTGraphBuilder, type DotNodeStyle } from "../utils/dot.js";
+import { MermaidGraphBuilder } from "../utils/mermaid.js";
+import { ASCIIDocBuilder } from "../utils/ascii.js";
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -24,19 +24,19 @@ import {
   getNodeColor,
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
-} from '../utils/svg.js';
+} from "../utils/svg.js";
 import {
   generateGraphML,
   type GraphMLNode,
   type GraphMLEdge,
   type GraphMLOptions,
-} from '../utils/graphml.js';
+} from "../utils/graphml.js";
 import {
   generateTikZ,
   type TikZNode,
   type TikZEdge,
   type TikZOptions,
-} from '../utils/tikz.js';
+} from "../utils/tikz.js";
 import {
   generateHTMLHeader,
   generateHTMLFooter,
@@ -44,59 +44,69 @@ import {
   renderMetricCard,
   renderSection,
   renderTable,
-} from '../utils/html.js';
-import {
-  sanitizeModelicaId,
-  escapeModelicaString,
-} from '../utils/modelica.js';
+} from "../utils/html.js";
+import { sanitizeModelicaId, escapeModelicaString } from "../utils/modelica.js";
 import {
   generateUmlDiagram,
   type UmlNode,
   type UmlEdge,
-} from '../utils/uml.js';
+} from "../utils/uml.js";
 import {
   createJsonGraph,
   addNode,
   addEdge,
   addMetric,
   serializeGraph,
-} from '../utils/json.js';
+} from "../utils/json.js";
 import {
   section,
   table,
   keyValueSection,
   mermaidBlock,
   document as mdDocument,
-} from '../utils/markdown.js';
+} from "../utils/markdown.js";
 
 /**
  * Export counterfactual scenario tree to visual format
  */
-export function exportCounterfactualScenarios(thought: CounterfactualThought, options: VisualExportOptions): string {
-  const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+export function exportCounterfactualScenarios(
+  thought: CounterfactualThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+  } = options;
 
   switch (format) {
-    case 'mermaid':
-      return counterfactualToMermaid(thought, colorScheme, includeLabels, includeMetrics);
-    case 'dot':
+    case "mermaid":
+      return counterfactualToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics,
+      );
+    case "dot":
       return counterfactualToDOT(thought, includeLabels, includeMetrics);
-    case 'ascii':
+    case "ascii":
       return counterfactualToASCII(thought);
-    case 'svg':
+    case "svg":
       return counterfactualToSVG(thought, options);
-    case 'graphml':
+    case "graphml":
       return counterfactualToGraphML(thought, options);
-    case 'tikz':
+    case "tikz":
       return counterfactualToTikZ(thought, options);
-    case 'html':
+    case "html":
       return counterfactualToHTML(thought, options);
-    case 'modelica':
+    case "modelica":
       return counterfactualToModelica(thought, options);
-    case 'uml':
+    case "uml":
       return counterfactualToUML(thought, options);
-    case 'json':
+    case "json":
       return counterfactualToJSON(thought, options);
-    case 'markdown':
+    case "markdown":
       return counterfactualToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
@@ -107,31 +117,50 @@ function counterfactualToMermaid(
   thought: CounterfactualThought,
   colorScheme: string,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
-  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
-  const builder = new MermaidGraphBuilder().setDirection('TD');
+  const scheme = colorScheme as "default" | "pastel" | "monochrome";
+  const builder = new MermaidGraphBuilder().setDirection("TD");
 
   // Intervention point node
-  const interventionId = 'intervention';
-  builder.addNode({ id: interventionId, label: thought.interventionPoint.description, shape: 'rectangle' });
+  const interventionId = "intervention";
+  builder.addNode({
+    id: interventionId,
+    label: thought.interventionPoint.description,
+    shape: "rectangle",
+  });
 
   // Actual scenario node
   const actualId = sanitizeId(thought.actual.id);
-  const actualLabel = includeLabels ? `Actual: ${thought.actual.name}` : `Actual: ${actualId}`;
-  builder.addNode({ id: actualId, label: actualLabel, shape: 'rectangle' });
-  builder.addEdge({ source: interventionId, target: actualId, label: 'no change' });
+  const actualLabel = includeLabels
+    ? `Actual: ${thought.actual.name}`
+    : `Actual: ${actualId}`;
+  builder.addNode({ id: actualId, label: actualLabel, shape: "rectangle" });
+  builder.addEdge({
+    source: interventionId,
+    target: actualId,
+    label: "no change",
+  });
 
   // Counterfactual scenario nodes
   for (const scenario of thought.counterfactuals) {
     const scenarioId = sanitizeId(scenario.id);
     const label = includeLabels ? scenario.name : scenarioId;
-    const likelihoodLabel = includeMetrics && scenario.likelihood
-      ? ` (${scenario.likelihood.toFixed(2)})`
-      : '';
+    const likelihoodLabel =
+      includeMetrics && scenario.likelihood
+        ? ` (${scenario.likelihood.toFixed(2)})`
+        : "";
 
-    builder.addNode({ id: scenarioId, label: `CF: ${label}${likelihoodLabel}`, shape: 'rectangle' });
-    builder.addEdge({ source: interventionId, target: scenarioId, label: 'intervene' });
+    builder.addNode({
+      id: scenarioId,
+      label: `CF: ${label}${likelihoodLabel}`,
+      shape: "rectangle",
+    });
+    builder.addEdge({
+      source: interventionId,
+      target: scenarioId,
+      label: "intervene",
+    });
   }
 
   return builder.setOptions({ colorScheme: scheme }).render();
@@ -140,44 +169,57 @@ function counterfactualToMermaid(
 function counterfactualToDOT(
   thought: CounterfactualThought,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
   const builder = new DOTGraphBuilder()
-    .setGraphName('CounterfactualScenarios')
-    .setRankDir('TB')
-    .setNodeDefaults({ shape: 'box', style: 'rounded' });
+    .setGraphName("CounterfactualScenarios")
+    .setRankDir("TB")
+    .setNodeDefaults({ shape: "box", style: "rounded" });
 
   // Intervention point node (diamond shape)
-  const interventionId = 'intervention';
-  builder.addNode({ id: interventionId, label: thought.interventionPoint.description, shape: 'diamond' });
+  const interventionId = "intervention";
+  builder.addNode({
+    id: interventionId,
+    label: thought.interventionPoint.description,
+    shape: "diamond",
+  });
 
   // Actual scenario node
   const actualId = sanitizeId(thought.actual.id);
   const actualLabel = includeLabels ? thought.actual.name : actualId;
-  const filledStyle: DotNodeStyle[] = ['filled'];
+  const filledStyle: DotNodeStyle[] = ["filled"];
   builder.addNode({
     id: actualId,
     label: `Actual: ${actualLabel}`,
     style: filledStyle,
-    fillColor: 'lightyellow',
+    fillColor: "lightyellow",
   });
-  builder.addEdge({ source: interventionId, target: actualId, label: 'no change' });
+  builder.addEdge({
+    source: interventionId,
+    target: actualId,
+    label: "no change",
+  });
 
   // Counterfactual scenario nodes
   for (const scenario of thought.counterfactuals) {
     const scenarioId = sanitizeId(scenario.id);
     const label = includeLabels ? scenario.name : scenarioId;
-    const likelihoodLabel = includeMetrics && scenario.likelihood
-      ? ` (${scenario.likelihood.toFixed(2)})`
-      : '';
+    const likelihoodLabel =
+      includeMetrics && scenario.likelihood
+        ? ` (${scenario.likelihood.toFixed(2)})`
+        : "";
 
     builder.addNode({
       id: scenarioId,
       label: `CF: ${label}${likelihoodLabel}`,
       style: filledStyle,
-      fillColor: 'lightblue',
+      fillColor: "lightblue",
     });
-    builder.addEdge({ source: interventionId, target: scenarioId, label: 'intervene' });
+    builder.addEdge({
+      source: interventionId,
+      target: scenarioId,
+      label: "intervene",
+    });
   }
 
   return builder.render();
@@ -186,25 +228,31 @@ function counterfactualToDOT(
 function counterfactualToASCII(thought: CounterfactualThought): string {
   const builder = new ASCIIDocBuilder()
     .setMaxWidth(60)
-    .addHeader('Counterfactual Scenario Tree');
+    .addHeader("Counterfactual Scenario Tree");
 
   // Intervention point
-  builder.addSection('Intervention Point')
+  builder
+    .addSection("Intervention Point")
     .addText(`Description: ${thought.interventionPoint.description}\n`)
     .addText(`Timing: ${thought.interventionPoint.timing}\n`)
-    .addText(`Feasibility: ${thought.interventionPoint.feasibility.toFixed(2)}\n`)
+    .addText(
+      `Feasibility: ${thought.interventionPoint.feasibility.toFixed(2)}\n`,
+    )
     .addEmptyLine();
 
   // Actual scenario
-  builder.addSection('Actual Scenario')
+  builder
+    .addSection("Actual Scenario")
     .addText(`┌─ ${thought.actual.name}\n`)
     .addText(`│  ${thought.actual.description}\n`)
     .addEmptyLine();
 
   // Counterfactual scenarios
-  builder.addSection('Counterfactual Scenarios');
+  builder.addSection("Counterfactual Scenarios");
   for (const scenario of thought.counterfactuals) {
-    const likelihoodStr = scenario.likelihood ? ` (likelihood: ${scenario.likelihood.toFixed(2)})` : '';
+    const likelihoodStr = scenario.likelihood
+      ? ` (likelihood: ${scenario.likelihood.toFixed(2)})`
+      : "";
     builder.addText(`├─ ${scenario.name}${likelihoodStr}\n`);
     builder.addText(`│  ${scenario.description}\n`);
   }
@@ -215,9 +263,12 @@ function counterfactualToASCII(thought: CounterfactualThought): string {
 /**
  * Export counterfactual scenario tree to native SVG format
  */
-function counterfactualToSVG(thought: CounterfactualThought, options: VisualExportOptions): string {
+function counterfactualToSVG(
+  thought: CounterfactualThought,
+  options: VisualExportOptions,
+): string {
   const {
-    colorScheme = 'default',
+    colorScheme = "default",
     includeLabels = true,
     includeMetrics = true,
     svgWidth = DEFAULT_SVG_OPTIONS.width,
@@ -228,20 +279,24 @@ function counterfactualToSVG(thought: CounterfactualThought, options: VisualExpo
   const nodeHeight = 40;
 
   // Intervention point at the top
-  const interventionId = 'intervention';
+  const interventionId = "intervention";
   positions.set(interventionId, {
     id: interventionId,
-    label: includeLabels ? thought.interventionPoint.description : interventionId,
+    label: includeLabels
+      ? thought.interventionPoint.description
+      : interventionId,
     x: svgWidth / 2,
     y: 80,
     width: nodeWidth,
     height: nodeHeight,
-    type: 'intervention',
+    type: "intervention",
   });
 
   // Actual scenario on the left
   const actualId = thought.actual.id;
-  const actualLabel = includeLabels ? `Actual: ${thought.actual.name}` : actualId;
+  const actualLabel = includeLabels
+    ? `Actual: ${thought.actual.name}`
+    : actualId;
   positions.set(actualId, {
     id: actualId,
     label: actualLabel,
@@ -249,7 +304,7 @@ function counterfactualToSVG(thought: CounterfactualThought, options: VisualExpo
     y: 200,
     width: nodeWidth,
     height: nodeHeight,
-    type: 'actual',
+    type: "actual",
   });
 
   // Counterfactual scenarios on the right
@@ -265,13 +320,20 @@ function counterfactualToSVG(thought: CounterfactualThought, options: VisualExpo
       y: cfStartY + index * cfSpacing,
       width: nodeWidth,
       height: nodeHeight,
-      type: 'counterfactual',
+      type: "counterfactual",
     });
   });
 
-  const actualHeight = Math.max(DEFAULT_SVG_OPTIONS.height, cfStartY + (cfCount - 1) * cfSpacing + 150);
+  const actualHeight = Math.max(
+    DEFAULT_SVG_OPTIONS.height,
+    cfStartY + (cfCount - 1) * cfSpacing + 150,
+  );
 
-  let svg = generateSVGHeader(svgWidth, actualHeight, 'Counterfactual Scenarios');
+  let svg = generateSVGHeader(
+    svgWidth,
+    actualHeight,
+    "Counterfactual Scenarios",
+  );
 
   // Render edges first (behind nodes)
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
@@ -279,66 +341,77 @@ function counterfactualToSVG(thought: CounterfactualThought, options: VisualExpo
   // Edge from intervention to actual
   const interventionPos = positions.get(interventionId)!;
   const actualPos = positions.get(actualId)!;
-  svg += renderEdge(interventionPos, actualPos, { label: 'no change' });
+  svg += renderEdge(interventionPos, actualPos, { label: "no change" });
 
   // Edges from intervention to counterfactuals
   for (const scenario of thought.counterfactuals) {
     const cfPos = positions.get(scenario.id);
     if (cfPos) {
-      const label = includeMetrics && scenario.likelihood
-        ? `${scenario.likelihood.toFixed(2)}`
-        : 'intervene';
+      const label =
+        includeMetrics && scenario.likelihood
+          ? `${scenario.likelihood.toFixed(2)}`
+          : "intervene";
       svg += renderEdge(interventionPos, cfPos, { label });
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render nodes
   svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
 
   // Render intervention point (diamond)
-  const interventionColors = getNodeColor('warning', colorScheme);
+  const interventionColors = getNodeColor("warning", colorScheme);
   svg += `\n    <polygon points="${interventionPos.x},${interventionPos.y - 30} ${interventionPos.x + 40},${interventionPos.y} ${interventionPos.x},${interventionPos.y + 30} ${interventionPos.x - 40},${interventionPos.y}" fill="${interventionColors.fill}" stroke="${interventionColors.stroke}" stroke-width="2"/>`;
   svg += `\n    <text x="${interventionPos.x}" y="${interventionPos.y + 5}" text-anchor="middle" class="node-label">${interventionPos.label}</text>`;
 
   // Render actual scenario
-  const actualColors = getNodeColor('tertiary', colorScheme);
+  const actualColors = getNodeColor("tertiary", colorScheme);
   svg += renderRectNode(actualPos, actualColors);
 
   // Render counterfactual scenarios
-  const cfColors = getNodeColor('primary', colorScheme);
+  const cfColors = getNodeColor("primary", colorScheme);
   for (const [id, pos] of positions) {
     if (id !== interventionId && id !== actualId) {
       svg += renderStadiumNode(pos, cfColors);
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render metrics panel
   if (includeMetrics) {
     const metrics = [
-      { label: 'Counterfactuals', value: thought.counterfactuals.length },
-      { label: 'Feasibility', value: thought.interventionPoint.feasibility.toFixed(2) },
+      { label: "Counterfactuals", value: thought.counterfactuals.length },
+      {
+        label: "Feasibility",
+        value: thought.interventionPoint.feasibility.toFixed(2),
+      },
     ];
     svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
   }
 
   // Render legend
   const legendItems = [
-    { label: 'Intervention', color: interventionColors, shape: 'diamond' as const },
-    { label: 'Actual', color: actualColors },
-    { label: 'Counterfactual', color: cfColors, shape: 'stadium' as const },
+    {
+      label: "Intervention",
+      color: interventionColors,
+      shape: "diamond" as const,
+    },
+    { label: "Actual", color: actualColors },
+    { label: "Counterfactual", color: cfColors, shape: "stadium" as const },
   ];
   svg += renderLegend(20, actualHeight - 110, legendItems);
 
-  svg += '\n' + generateSVGFooter();
+  svg += "\n" + generateSVGFooter();
   return svg;
 }
 
 /**
  * Export counterfactual scenario tree to GraphML format
  */
-function counterfactualToGraphML(thought: CounterfactualThought, options: VisualExportOptions): string {
+function counterfactualToGraphML(
+  thought: CounterfactualThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
 
   // Create nodes: intervention point, actual scenario, and counterfactual scenarios
@@ -346,9 +419,11 @@ function counterfactualToGraphML(thought: CounterfactualThought, options: Visual
 
   // Intervention point node
   nodes.push({
-    id: 'intervention',
-    label: includeLabels ? thought.interventionPoint.description : 'intervention',
-    type: 'intervention',
+    id: "intervention",
+    label: includeLabels
+      ? thought.interventionPoint.description
+      : "intervention",
+    type: "intervention",
     metadata: {
       timing: thought.interventionPoint.timing,
       feasibility: thought.interventionPoint.feasibility,
@@ -359,7 +434,7 @@ function counterfactualToGraphML(thought: CounterfactualThought, options: Visual
   nodes.push({
     id: thought.actual.id,
     label: includeLabels ? `Actual: ${thought.actual.name}` : thought.actual.id,
-    type: 'actual',
+    type: "actual",
     metadata: {
       description: thought.actual.description,
     },
@@ -370,7 +445,7 @@ function counterfactualToGraphML(thought: CounterfactualThought, options: Visual
     nodes.push({
       id: scenario.id,
       label: includeLabels ? `CF: ${scenario.name}` : scenario.id,
-      type: 'counterfactual',
+      type: "counterfactual",
       metadata: {
         description: scenario.description,
         likelihood: scenario.likelihood,
@@ -383,10 +458,10 @@ function counterfactualToGraphML(thought: CounterfactualThought, options: Visual
 
   // Edge from intervention to actual
   edges.push({
-    id: 'e_intervention_actual',
-    source: 'intervention',
+    id: "e_intervention_actual",
+    source: "intervention",
     target: thought.actual.id,
-    label: 'no change',
+    label: "no change",
   });
 
   // Edges from intervention to counterfactuals
@@ -394,17 +469,18 @@ function counterfactualToGraphML(thought: CounterfactualThought, options: Visual
     const scenario = thought.counterfactuals[i];
     edges.push({
       id: `e_intervention_cf${i}`,
-      source: 'intervention',
+      source: "intervention",
       target: scenario.id,
-      label: 'intervene',
-      metadata: includeMetrics && scenario.likelihood !== undefined
-        ? { weight: scenario.likelihood }
-        : undefined,
+      label: "intervene",
+      metadata:
+        includeMetrics && scenario.likelihood !== undefined
+          ? { weight: scenario.likelihood }
+          : undefined,
     });
   }
 
   const graphmlOptions: GraphMLOptions = {
-    graphName: 'Counterfactual Scenarios',
+    graphName: "Counterfactual Scenarios",
   };
 
   return generateGraphML(nodes, edges, graphmlOptions);
@@ -413,19 +489,24 @@ function counterfactualToGraphML(thought: CounterfactualThought, options: Visual
 /**
  * Export counterfactual scenario tree to TikZ format
  */
-function counterfactualToTikZ(thought: CounterfactualThought, options: VisualExportOptions): string {
+function counterfactualToTikZ(
+  thought: CounterfactualThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
 
   const nodes: TikZNode[] = [];
 
   // Intervention point at the top center
   nodes.push({
-    id: 'intervention',
-    label: includeLabels ? thought.interventionPoint.description : 'intervention',
+    id: "intervention",
+    label: includeLabels
+      ? thought.interventionPoint.description
+      : "intervention",
     x: 4,
     y: 0,
-    type: 'intervention',
-    shape: 'diamond',
+    type: "intervention",
+    shape: "diamond",
   });
 
   // Actual scenario on the left
@@ -434,8 +515,8 @@ function counterfactualToTikZ(thought: CounterfactualThought, options: VisualExp
     label: includeLabels ? `Actual: ${thought.actual.name}` : thought.actual.id,
     x: 2,
     y: -2,
-    type: 'actual',
-    shape: 'rectangle',
+    type: "actual",
+    shape: "rectangle",
   });
 
   // Counterfactual scenarios on the right
@@ -444,14 +525,14 @@ function counterfactualToTikZ(thought: CounterfactualThought, options: VisualExp
   const cfStartY = -2;
 
   thought.counterfactuals.forEach((scenario, index) => {
-    const yOffset = (cfCount - 1) * cfSpacing / 2;
+    const yOffset = ((cfCount - 1) * cfSpacing) / 2;
     nodes.push({
       id: scenario.id,
       label: includeLabels ? `CF: ${scenario.name}` : scenario.id,
       x: 6,
       y: cfStartY - index * cfSpacing + yOffset,
-      type: 'counterfactual',
-      shape: 'ellipse',
+      type: "counterfactual",
+      shape: "ellipse",
     });
   });
 
@@ -460,26 +541,27 @@ function counterfactualToTikZ(thought: CounterfactualThought, options: VisualExp
 
   // Edge from intervention to actual
   edges.push({
-    source: 'intervention',
+    source: "intervention",
     target: thought.actual.id,
-    label: 'no change',
+    label: "no change",
     directed: true,
   });
 
   // Edges from intervention to counterfactuals
   for (const scenario of thought.counterfactuals) {
     edges.push({
-      source: 'intervention',
+      source: "intervention",
       target: scenario.id,
-      label: includeMetrics && scenario.likelihood !== undefined
-        ? scenario.likelihood.toFixed(2)
-        : 'intervene',
+      label:
+        includeMetrics && scenario.likelihood !== undefined
+          ? scenario.likelihood.toFixed(2)
+          : "intervene",
       directed: true,
     });
   }
 
   const tikzOptions: TikZOptions = {
-    title: 'Counterfactual Scenarios',
+    title: "Counterfactual Scenarios",
   };
 
   return generateTikZ(nodes, edges, tikzOptions);
@@ -488,56 +570,86 @@ function counterfactualToTikZ(thought: CounterfactualThought, options: VisualExp
 /**
  * Export counterfactual scenarios to HTML format
  */
-function counterfactualToHTML(thought: CounterfactualThought, options: VisualExportOptions): string {
+function counterfactualToHTML(
+  thought: CounterfactualThought,
+  options: VisualExportOptions,
+): string {
   const {
     htmlStandalone = true,
-    htmlTitle = 'Counterfactual Analysis',
-    htmlTheme = 'light',
+    htmlTitle = "Counterfactual Analysis",
+    htmlTheme = "light",
     includeMetrics = true,
   } = options;
 
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme,
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
 
   // Metrics
   if (includeMetrics) {
     html += '<div class="metrics-grid">';
-    html += renderMetricCard('Counterfactuals', thought.counterfactuals.length, 'primary');
-    html += renderMetricCard('Feasibility', (thought.interventionPoint.feasibility * 100).toFixed(0) + '%', 'info');
-    html += renderMetricCard('Expected Impact', (thought.interventionPoint.expectedImpact * 100).toFixed(0) + '%', 'success');
-    html += '</div>\n';
+    html += renderMetricCard(
+      "Counterfactuals",
+      thought.counterfactuals.length,
+      "primary",
+    );
+    html += renderMetricCard(
+      "Feasibility",
+      (thought.interventionPoint.feasibility * 100).toFixed(0) + "%",
+      "info",
+    );
+    html += renderMetricCard(
+      "Expected Impact",
+      (thought.interventionPoint.expectedImpact * 100).toFixed(0) + "%",
+      "success",
+    );
+    html += "</div>\n";
   }
 
   // Intervention point
-  html += renderSection('Intervention Point', `
+  html += renderSection(
+    "Intervention Point",
+    `
     <p><strong>Description:</strong> ${escapeHTML(thought.interventionPoint.description)}</p>
     <p><strong>Timing:</strong> ${escapeHTML(thought.interventionPoint.timing)}</p>
     <p><strong>Feasibility:</strong> ${(thought.interventionPoint.feasibility * 100).toFixed(0)}%</p>
     <p><strong>Expected Impact:</strong> ${(thought.interventionPoint.expectedImpact * 100).toFixed(0)}%</p>
-  `, '🔀');
+  `,
+    "🔀",
+  );
 
   // Actual outcome
-  html += renderSection('Actual Outcome', `
+  html += renderSection(
+    "Actual Outcome",
+    `
     <div class="card">
       <div class="card-header">${escapeHTML(thought.actual.name)}</div>
       <p>${escapeHTML(thought.actual.description)}</p>
     </div>
-  `, '✓');
+  `,
+    "✓",
+  );
 
   // Counterfactual scenarios
-  const cfRows = thought.counterfactuals.map(cf => {
+  const cfRows = thought.counterfactuals.map((cf) => {
     const primaryOutcome = cf.outcomes[0];
     return [
       cf.name,
-      primaryOutcome ? primaryOutcome.description.substring(0, 60) + (primaryOutcome.description.length > 60 ? '...' : '') : '-',
-      cf.likelihood !== undefined ? cf.likelihood.toFixed(2) : '-',
-      primaryOutcome?.impact || '-',
+      primaryOutcome
+        ? primaryOutcome.description.substring(0, 60) +
+          (primaryOutcome.description.length > 60 ? "..." : "")
+        : "-",
+      cf.likelihood !== undefined ? cf.likelihood.toFixed(2) : "-",
+      primaryOutcome?.impact || "-",
     ];
   });
-  html += renderSection('Counterfactual Scenarios', renderTable(
-    ['Scenario', 'Outcome', 'Likelihood', 'Impact'],
-    cfRows
-  ), '🔮');
+  html += renderSection(
+    "Counterfactual Scenarios",
+    renderTable(["Scenario", "Outcome", "Likelihood", "Impact"], cfRows),
+    "🔮",
+  );
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
@@ -546,28 +658,33 @@ function counterfactualToHTML(thought: CounterfactualThought, options: VisualExp
 /**
  * Export counterfactual scenarios to Modelica format
  */
-function counterfactualToModelica(thought: CounterfactualThought, options: VisualExportOptions): string {
+function counterfactualToModelica(
+  thought: CounterfactualThought,
+  options: VisualExportOptions,
+): string {
   const { includeMetrics = true } = options;
 
-  let modelica = 'package CounterfactualScenarios\n';
-  modelica += '  "Counterfactual scenario analysis with original vs. alternative outcomes"\n\n';
+  let modelica = "package CounterfactualScenarios\n";
+  modelica +=
+    '  "Counterfactual scenario analysis with original vs. alternative outcomes"\n\n';
 
   // Intervention point record
-  modelica += '  record InterventionPoint\n';
-  modelica += '    "The point at which the counterfactual diverges from the actual"\n';
+  modelica += "  record InterventionPoint\n";
+  modelica +=
+    '    "The point at which the counterfactual diverges from the actual"\n';
   modelica += `    String description = "${escapeModelicaString(thought.interventionPoint.description)}";\n`;
   modelica += `    String timing = "${escapeModelicaString(thought.interventionPoint.timing)}";\n`;
   modelica += `    Real feasibility = ${thought.interventionPoint.feasibility};\n`;
   modelica += `    Real expectedImpact = ${thought.interventionPoint.expectedImpact};\n`;
-  modelica += '  end InterventionPoint;\n\n';
+  modelica += "  end InterventionPoint;\n\n";
 
   // Actual scenario record
-  modelica += '  record ActualScenario\n';
+  modelica += "  record ActualScenario\n";
   modelica += '    "The actual outcome that occurred"\n';
   modelica += `    String id = "${sanitizeModelicaId(thought.actual.id)}";\n`;
   modelica += `    String name = "${escapeModelicaString(thought.actual.name)}";\n`;
   modelica += `    String description = "${escapeModelicaString(thought.actual.description)}";\n`;
-  modelica += '  end ActualScenario;\n\n';
+  modelica += "  end ActualScenario;\n\n";
 
   // Counterfactual scenario records
   for (let i = 0; i < thought.counterfactuals.length; i++) {
@@ -575,10 +692,10 @@ function counterfactualToModelica(thought: CounterfactualThought, options: Visua
     const recordName = sanitizeModelicaId(`CF_${scenario.id}`);
 
     modelica += `  record ${recordName}\n`;
-    modelica += `    "Counterfactual: ${scenario.name ? escapeModelicaString(scenario.name) : ''}"\n`;
+    modelica += `    "Counterfactual: ${scenario.name ? escapeModelicaString(scenario.name) : ""}"\n`;
     modelica += `    String id = "${sanitizeModelicaId(scenario.id)}";\n`;
-    modelica += `    String name = "${scenario.name ? escapeModelicaString(scenario.name) : ''}";\n`;
-    modelica += `    String description = "${scenario.description ? escapeModelicaString(scenario.description) : ''}";\n`;
+    modelica += `    String name = "${scenario.name ? escapeModelicaString(scenario.name) : ""}";\n`;
+    modelica += `    String description = "${scenario.description ? escapeModelicaString(scenario.description) : ""}";\n`;
 
     if (includeMetrics && scenario.likelihood !== undefined) {
       modelica += `    Real likelihood = ${scenario.likelihood};\n`;
@@ -587,18 +704,24 @@ function counterfactualToModelica(thought: CounterfactualThought, options: Visua
     // Add outcomes if present
     if (scenario.outcomes && scenario.outcomes.length > 0) {
       modelica += `    String outcomes[${scenario.outcomes.length}] = {`;
-      modelica += scenario.outcomes.map(o => `"${o.description ? escapeModelicaString(o.description) : ''}"`).join(', ');
-      modelica += '};\n';
+      modelica += scenario.outcomes
+        .map(
+          (o) =>
+            `"${o.description ? escapeModelicaString(o.description) : ""}"`,
+        )
+        .join(", ");
+      modelica += "};\n";
     }
 
     modelica += `  end ${recordName};\n\n`;
   }
 
   // Model showing the divergence
-  modelica += '  model ScenarioDivergence\n';
-  modelica += '    "Model showing the branching from intervention point to outcomes"\n';
-  modelica += '    InterventionPoint intervention;\n';
-  modelica += '    ActualScenario actual;\n';
+  modelica += "  model ScenarioDivergence\n";
+  modelica +=
+    '    "Model showing the branching from intervention point to outcomes"\n';
+  modelica += "    InterventionPoint intervention;\n";
+  modelica += "    ActualScenario actual;\n";
 
   for (let i = 0; i < thought.counterfactuals.length; i++) {
     const scenario = thought.counterfactuals[i];
@@ -614,8 +737,8 @@ function counterfactualToModelica(thought: CounterfactualThought, options: Visua
     modelica += '    </html>"));\n';
   }
 
-  modelica += '  end ScenarioDivergence;\n';
-  modelica += 'end CounterfactualScenarios;\n';
+  modelica += "  end ScenarioDivergence;\n";
+  modelica += "end CounterfactualScenarios;\n";
 
   return modelica;
 }
@@ -623,7 +746,10 @@ function counterfactualToModelica(thought: CounterfactualThought, options: Visua
 /**
  * Export counterfactual scenarios to UML format
  */
-function counterfactualToUML(thought: CounterfactualThought, options: VisualExportOptions): string {
+function counterfactualToUML(
+  thought: CounterfactualThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
 
   const nodes: UmlNode[] = [];
@@ -631,25 +757,27 @@ function counterfactualToUML(thought: CounterfactualThought, options: VisualExpo
 
   // Intervention point node (decision node)
   nodes.push({
-    id: 'intervention',
-    label: includeLabels ? thought.interventionPoint.description : 'Intervention',
-    shape: 'state',
-    stereotype: 'decision',
+    id: "intervention",
+    label: includeLabels
+      ? thought.interventionPoint.description
+      : "Intervention",
+    shape: "state",
+    stereotype: "decision",
   });
 
   // Actual scenario node
   nodes.push({
     id: thought.actual.id,
-    label: includeLabels ? `Actual: ${thought.actual.name}` : 'Actual',
-    shape: 'state',
+    label: includeLabels ? `Actual: ${thought.actual.name}` : "Actual",
+    shape: "state",
   });
 
   // Edge from intervention to actual (no intervention taken)
   edges.push({
-    source: 'intervention',
+    source: "intervention",
     target: thought.actual.id,
-    label: 'no change',
-    type: 'arrow',
+    label: "no change",
+    type: "arrow",
   });
 
   // Counterfactual scenario nodes and edges
@@ -657,24 +785,25 @@ function counterfactualToUML(thought: CounterfactualThought, options: VisualExpo
     nodes.push({
       id: scenario.id,
       label: includeLabels ? `CF: ${scenario.name}` : scenario.id,
-      shape: 'state',
+      shape: "state",
     });
 
-    const edgeLabel = includeMetrics && scenario.likelihood !== undefined
-      ? `intervene (${scenario.likelihood.toFixed(2)})`
-      : 'intervene';
+    const edgeLabel =
+      includeMetrics && scenario.likelihood !== undefined
+        ? `intervene (${scenario.likelihood.toFixed(2)})`
+        : "intervene";
 
     edges.push({
-      source: 'intervention',
+      source: "intervention",
       target: scenario.id,
       label: edgeLabel,
-      type: 'arrow',
+      type: "arrow",
     });
   }
 
   return generateUmlDiagram(nodes, edges, {
-    diagramType: 'state',
-    title: 'Counterfactual Scenarios',
+    diagramType: "state",
+    title: "Counterfactual Scenarios",
     includeMetrics,
   });
 }
@@ -682,16 +811,21 @@ function counterfactualToUML(thought: CounterfactualThought, options: VisualExpo
 /**
  * Export counterfactual scenarios to JSON format
  */
-function counterfactualToJSON(thought: CounterfactualThought, options: VisualExportOptions): string {
+function counterfactualToJSON(
+  thought: CounterfactualThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
 
-  const graph = createJsonGraph('counterfactual', 'Counterfactual Scenarios');
+  const graph = createJsonGraph("counterfactual", "Counterfactual Scenarios");
 
   // Add intervention point node
   addNode(graph, {
-    id: 'intervention',
-    label: includeLabels ? thought.interventionPoint.description : 'Intervention',
-    type: 'intervention',
+    id: "intervention",
+    label: includeLabels
+      ? thought.interventionPoint.description
+      : "Intervention",
+    type: "intervention",
     metadata: {
       timing: thought.interventionPoint.timing,
       feasibility: thought.interventionPoint.feasibility,
@@ -703,7 +837,7 @@ function counterfactualToJSON(thought: CounterfactualThought, options: VisualExp
   addNode(graph, {
     id: thought.actual.id,
     label: includeLabels ? `Actual: ${thought.actual.name}` : thought.actual.id,
-    type: 'actual',
+    type: "actual",
     metadata: {
       name: thought.actual.name,
       description: thought.actual.description,
@@ -712,11 +846,11 @@ function counterfactualToJSON(thought: CounterfactualThought, options: VisualExp
 
   // Add edge from intervention to actual
   addEdge(graph, {
-    id: 'e_intervention_actual',
-    source: 'intervention',
+    id: "e_intervention_actual",
+    source: "intervention",
     target: thought.actual.id,
-    label: 'no change',
-    type: 'no_intervention',
+    label: "no change",
+    type: "no_intervention",
   });
 
   // Add counterfactual scenario nodes and edges
@@ -726,12 +860,12 @@ function counterfactualToJSON(thought: CounterfactualThought, options: VisualExp
     addNode(graph, {
       id: scenario.id,
       label: includeLabels ? `CF: ${scenario.name}` : scenario.id,
-      type: 'counterfactual',
+      type: "counterfactual",
       metadata: {
         name: scenario.name,
         description: scenario.description,
         likelihood: scenario.likelihood,
-        outcomes: scenario.outcomes?.map(o => ({
+        outcomes: scenario.outcomes?.map((o) => ({
           description: o.description,
           impact: o.impact,
         })),
@@ -740,21 +874,26 @@ function counterfactualToJSON(thought: CounterfactualThought, options: VisualExp
 
     addEdge(graph, {
       id: `e_intervention_cf${i}`,
-      source: 'intervention',
+      source: "intervention",
       target: scenario.id,
-      label: 'intervene',
-      type: 'intervention',
-      metadata: includeMetrics && scenario.likelihood !== undefined
-        ? { likelihood: scenario.likelihood }
-        : undefined,
+      label: "intervene",
+      type: "intervention",
+      metadata:
+        includeMetrics && scenario.likelihood !== undefined
+          ? { likelihood: scenario.likelihood }
+          : undefined,
     });
   }
 
   // Add metrics
   if (includeMetrics) {
-    addMetric(graph, 'counterfactualCount', thought.counterfactuals.length);
-    addMetric(graph, 'feasibility', thought.interventionPoint.feasibility);
-    addMetric(graph, 'expectedImpact', thought.interventionPoint.expectedImpact);
+    addMetric(graph, "counterfactualCount", thought.counterfactuals.length);
+    addMetric(graph, "feasibility", thought.interventionPoint.feasibility);
+    addMetric(
+      graph,
+      "expectedImpact",
+      thought.interventionPoint.expectedImpact,
+    );
   }
 
   return serializeGraph(graph);
@@ -763,7 +902,10 @@ function counterfactualToJSON(thought: CounterfactualThought, options: VisualExp
 /**
  * Export counterfactual scenarios to Markdown format
  */
-function counterfactualToMarkdown(thought: CounterfactualThought, options: VisualExportOptions): string {
+function counterfactualToMarkdown(
+  thought: CounterfactualThought,
+  options: VisualExportOptions,
+): string {
   const {
     markdownIncludeFrontmatter = false,
     markdownIncludeToc = false,
@@ -775,51 +917,79 @@ function counterfactualToMarkdown(thought: CounterfactualThought, options: Visua
 
   // Metrics
   if (includeMetrics) {
-    parts.push(section('Metrics', keyValueSection({
-      'Counterfactual Scenarios': thought.counterfactuals.length,
-      'Intervention Feasibility': (thought.interventionPoint.feasibility * 100).toFixed(0) + '%',
-      'Expected Impact': (thought.interventionPoint.expectedImpact * 100).toFixed(0) + '%',
-    })));
+    parts.push(
+      section(
+        "Metrics",
+        keyValueSection({
+          "Counterfactual Scenarios": thought.counterfactuals.length,
+          "Intervention Feasibility":
+            (thought.interventionPoint.feasibility * 100).toFixed(0) + "%",
+          "Expected Impact":
+            (thought.interventionPoint.expectedImpact * 100).toFixed(0) + "%",
+        }),
+      ),
+    );
   }
 
   // Intervention point
-  parts.push(section('Intervention Point', keyValueSection({
-    'Description': thought.interventionPoint.description,
-    'Timing': thought.interventionPoint.timing,
-    'Feasibility': (thought.interventionPoint.feasibility * 100).toFixed(0) + '%',
-    'Expected Impact': (thought.interventionPoint.expectedImpact * 100).toFixed(0) + '%',
-  })));
+  parts.push(
+    section(
+      "Intervention Point",
+      keyValueSection({
+        Description: thought.interventionPoint.description,
+        Timing: thought.interventionPoint.timing,
+        Feasibility:
+          (thought.interventionPoint.feasibility * 100).toFixed(0) + "%",
+        "Expected Impact":
+          (thought.interventionPoint.expectedImpact * 100).toFixed(0) + "%",
+      }),
+    ),
+  );
 
   // Actual scenario
-  parts.push(section('Actual Scenario',
-    `**Name:** ${thought.actual.name}\n\n` +
-    `**Description:** ${thought.actual.description}`
-  ));
+  parts.push(
+    section(
+      "Actual Scenario",
+      `**Name:** ${thought.actual.name}\n\n` +
+        `**Description:** ${thought.actual.description}`,
+    ),
+  );
 
   // Counterfactual scenarios
-  const cfRows = thought.counterfactuals.map(cf => {
+  const cfRows = thought.counterfactuals.map((cf) => {
     const primaryOutcome = cf.outcomes[0];
     return [
       cf.name,
-      cf.description.substring(0, 50) + (cf.description.length > 50 ? '...' : ''),
-      cf.likelihood !== undefined ? cf.likelihood.toFixed(2) : 'N/A',
-      primaryOutcome?.impact || '-',
+      cf.description.substring(0, 50) +
+        (cf.description.length > 50 ? "..." : ""),
+      cf.likelihood !== undefined ? cf.likelihood.toFixed(2) : "N/A",
+      primaryOutcome?.impact || "-",
     ];
   });
-  parts.push(section('Counterfactual Scenarios', table(
-    ['Name', 'Description', 'Likelihood', 'Impact'],
-    cfRows
-  )));
+  parts.push(
+    section(
+      "Counterfactual Scenarios",
+      table(["Name", "Description", "Likelihood", "Impact"], cfRows),
+    ),
+  );
 
   // Mermaid diagram
   if (markdownIncludeMermaid) {
-    const mermaid = counterfactualToMermaid(thought, 'default', true, includeMetrics);
-    parts.push(section('Visualization', mermaidBlock(mermaid)));
+    const mermaid = counterfactualToMermaid(
+      thought,
+      "default",
+      true,
+      includeMetrics,
+    );
+    parts.push(section("Visualization", mermaidBlock(mermaid)));
   }
 
-  return mdDocument('Counterfactual Analysis', parts.join('\n'), {
+  return mdDocument("Counterfactual Analysis", parts.join("\n"), {
     includeFrontmatter: markdownIncludeFrontmatter,
     includeTableOfContents: markdownIncludeToc,
-    metadata: { mode: 'counterfactual', scenarios: thought.counterfactuals.length },
+    metadata: {
+      mode: "counterfactual",
+      scenarios: thought.counterfactuals.length,
+    },
   });
 }

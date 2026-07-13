@@ -9,10 +9,16 @@
  * - Periodization and historiographical analysis
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode } from '../../types/core.js';
-import type { HistoricalThought, HistoricalThoughtType, HistoricalEvent, HistoricalSource, HistoricalPattern } from '../../types/modes/historical.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode } from "../../types/core.js";
+import type {
+  HistoricalThought,
+  HistoricalThoughtType,
+  HistoricalEvent,
+  HistoricalSource,
+  HistoricalPattern,
+} from "../../types/modes/historical.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -23,7 +29,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 /**
  * HistoricalHandler - Specialized handler for historical reasoning
@@ -37,21 +43,25 @@ import {
  */
 export class HistoricalHandler implements ModeHandler {
   readonly mode = ThinkingMode.HISTORICAL;
-  readonly modeName = 'Historical Reasoning';
-  readonly description = 'Historical analysis with source evaluation, pattern recognition, and causal chain analysis';
+  readonly modeName = "Historical Reasoning";
+  readonly description =
+    "Historical analysis with source evaluation, pattern recognition, and causal chain analysis";
 
   private readonly supportedThoughtTypes: HistoricalThoughtType[] = [
-    'event_analysis',
-    'source_evaluation',
-    'pattern_identification',
-    'causal_chain',
-    'periodization',
+    "event_analysis",
+    "source_evaluation",
+    "pattern_identification",
+    "causal_chain",
+    "periodization",
   ];
 
   /**
    * Create a historical thought from input
    */
-  createThought(input: ThinkingToolInput, sessionId: string): HistoricalThought {
+  createThought(
+    input: ThinkingToolInput,
+    sessionId: string,
+  ): HistoricalThought {
     const inputAny = input as any;
 
     // Resolve thought type
@@ -83,7 +93,9 @@ export class HistoricalHandler implements ModeHandler {
 
     // Calculate aggregate reliability from sources
     if (thought.sources && thought.sources.length > 0) {
-      thought.aggregateReliability = this.calculateAggregateReliability(thought.sources);
+      thought.aggregateReliability = this.calculateAggregateReliability(
+        thought.sources,
+      );
     }
 
     // Calculate temporal span from events
@@ -92,7 +104,11 @@ export class HistoricalHandler implements ModeHandler {
     }
 
     // Auto-detect patterns if not provided
-    if (thought.events && thought.events.length >= 3 && (!thought.patterns || thought.patterns.length === 0)) {
+    if (
+      thought.events &&
+      thought.events.length >= 3 &&
+      (!thought.patterns || thought.patterns.length === 0)
+    ) {
       thought.patterns = this.detectPatterns(thought.events);
     }
 
@@ -123,10 +139,10 @@ export class HistoricalHandler implements ModeHandler {
             if (!eventIds.has(causeId)) {
               errors.push(
                 createValidationError(
-                  'events',
+                  "events",
                   `Event ${event.id} references unknown cause: ${causeId}`,
-                  'INVALID_CAUSE_REF'
-                )
+                  "INVALID_CAUSE_REF",
+                ),
               );
             }
           }
@@ -138,10 +154,10 @@ export class HistoricalHandler implements ModeHandler {
             if (!sourceIds.has(srcId)) {
               warnings.push(
                 createValidationWarning(
-                  'events',
+                  "events",
                   `Event ${event.id} references unknown source: ${srcId}`,
-                  'Add the source or remove the reference'
-                )
+                  "Add the source or remove the reference",
+                ),
               );
             }
           }
@@ -153,10 +169,10 @@ export class HistoricalHandler implements ModeHandler {
             if (!actorIds.has(actorId)) {
               warnings.push(
                 createValidationWarning(
-                  'events',
+                  "events",
                   `Event ${event.id} references unknown actor: ${actorId}`,
-                  'Add the actor or remove the reference'
-                )
+                  "Add the actor or remove the reference",
+                ),
               );
             }
           }
@@ -172,10 +188,10 @@ export class HistoricalHandler implements ModeHandler {
             if (chain.links[i].effect !== chain.links[i + 1].cause) {
               warnings.push(
                 createValidationWarning(
-                  'causalChains',
+                  "causalChains",
                   `Chain ${chain.id} has discontinuity between links ${i} and ${i + 1}`,
-                  'Ensure each link effect is the cause of the next link'
-                )
+                  "Ensure each link effect is the cause of the next link",
+                ),
               );
             }
           }
@@ -187,19 +203,19 @@ export class HistoricalHandler implements ModeHandler {
             if (!eventIds.has(link.cause)) {
               errors.push(
                 createValidationError(
-                  'causalChains',
+                  "causalChains",
                   `Chain ${chain.id} references unknown cause event: ${link.cause}`,
-                  'INVALID_CHAIN_CAUSE'
-                )
+                  "INVALID_CHAIN_CAUSE",
+                ),
               );
             }
             if (!eventIds.has(link.effect)) {
               errors.push(
                 createValidationError(
-                  'causalChains',
+                  "causalChains",
                   `Chain ${chain.id} references unknown effect event: ${link.effect}`,
-                  'INVALID_CHAIN_EFFECT'
-                )
+                  "INVALID_CHAIN_EFFECT",
+                ),
               );
             }
           }
@@ -211,23 +227,25 @@ export class HistoricalHandler implements ModeHandler {
     if (events.length > 0 && sources.length === 0) {
       warnings.push(
         createValidationWarning(
-          'sources',
-          'No sources defined for historical analysis',
-          'Add primary or secondary sources to support your analysis'
-        )
+          "sources",
+          "No sources defined for historical analysis",
+          "Add primary or secondary sources to support your analysis",
+        ),
       );
     }
 
     // Warn about low reliability sources
     if (sources.length > 0) {
-      const lowReliabilitySources = sources.filter((s: any) => s.reliability < 0.5);
+      const lowReliabilitySources = sources.filter(
+        (s: any) => s.reliability < 0.5,
+      );
       if (lowReliabilitySources.length > 0) {
         warnings.push(
           createValidationWarning(
-            'sources',
+            "sources",
             `${lowReliabilitySources.length} source(s) have low reliability (<0.5)`,
-            'Consider corroborating with additional sources'
-          )
+            "Consider corroborating with additional sources",
+          ),
         );
       }
     }
@@ -244,17 +262,21 @@ export class HistoricalHandler implements ModeHandler {
   getEnhancements(thought: HistoricalThought): ModeEnhancements {
     const enhancements: ModeEnhancements = {
       suggestions: [],
-      relatedModes: [ThinkingMode.TEMPORAL, ThinkingMode.CAUSAL, ThinkingMode.SYNTHESIS],
+      relatedModes: [
+        ThinkingMode.TEMPORAL,
+        ThinkingMode.CAUSAL,
+        ThinkingMode.SYNTHESIS,
+      ],
       metrics: {},
       guidingQuestions: [],
       mentalModels: [
-        'Source Criticism',
-        'Historiographical Schools',
-        'Causal Analysis',
-        'Periodization',
-        'Counterfactual History',
-        'Longue Durée',
-        'Microhistory',
+        "Source Criticism",
+        "Historiographical Schools",
+        "Causal Analysis",
+        "Periodization",
+        "Counterfactual History",
+        "Longue Durée",
+        "Microhistory",
       ],
     };
 
@@ -271,60 +293,89 @@ export class HistoricalHandler implements ModeHandler {
       periodCount: periods.length,
       causalChainCount: causalChains.length,
       actorCount: actors.length,
-      primarySourceRatio: sources.length > 0
-        ? sources.filter(s => s.type === 'primary').length / sources.length
-        : 0,
+      primarySourceRatio:
+        sources.length > 0
+          ? sources.filter((s) => s.type === "primary").length / sources.length
+          : 0,
       averageSourceReliability: thought.aggregateReliability || 0,
-      transformativeEventCount: events.filter(e => e.significance === 'transformative').length,
+      transformativeEventCount: events.filter(
+        (e) => e.significance === "transformative",
+      ).length,
     };
 
     // Generate suggestions
     if (sources.length === 0) {
-      enhancements.suggestions!.push('Add historical sources to support your analysis');
+      enhancements.suggestions!.push(
+        "Add historical sources to support your analysis",
+      );
     }
 
-    if (sources.length > 0 && sources.filter(s => s.type === 'primary').length === 0) {
-      enhancements.suggestions!.push('Consider adding primary sources for more direct evidence');
+    if (
+      sources.length > 0 &&
+      sources.filter((s) => s.type === "primary").length === 0
+    ) {
+      enhancements.suggestions!.push(
+        "Consider adding primary sources for more direct evidence",
+      );
     }
 
     if (events.length > 3 && causalChains.length === 0) {
-      enhancements.suggestions!.push('Consider tracing causal chains between major events');
+      enhancements.suggestions!.push(
+        "Consider tracing causal chains between major events",
+      );
     }
 
     if (events.length > 5 && periods.length === 0) {
-      enhancements.suggestions!.push('Consider organizing events into historical periods');
+      enhancements.suggestions!.push(
+        "Consider organizing events into historical periods",
+      );
     }
 
     if (actors.length === 0 && events.length > 0) {
-      enhancements.suggestions!.push('Identify key historical actors involved in these events');
+      enhancements.suggestions!.push(
+        "Identify key historical actors involved in these events",
+      );
     }
 
     // Source corroboration check
     const uncorroboratedSources = sources.filter(
-      s => (!s.corroboratedBy || s.corroboratedBy.length === 0) && s.type === 'primary'
+      (s) =>
+        (!s.corroboratedBy || s.corroboratedBy.length === 0) &&
+        s.type === "primary",
     );
     if (uncorroboratedSources.length > 0) {
-      enhancements.suggestions!.push(`${uncorroboratedSources.length} primary source(s) lack corroboration`);
+      enhancements.suggestions!.push(
+        `${uncorroboratedSources.length} primary source(s) lack corroboration`,
+      );
     }
 
     // Guiding questions based on thought type
-    enhancements.guidingQuestions = this.getGuidingQuestions(thought.thoughtType);
+    enhancements.guidingQuestions = this.getGuidingQuestions(
+      thought.thoughtType,
+    );
 
     return enhancements;
   }
 
   supportsThoughtType(thoughtType: string): boolean {
-    return this.supportedThoughtTypes.includes(thoughtType as HistoricalThoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType as HistoricalThoughtType,
+    );
   }
 
   /**
    * Resolve thought type to valid HistoricalThoughtType
    */
-  private resolveThoughtType(inputType: string | undefined): HistoricalThoughtType {
-    if (inputType && this.supportedThoughtTypes.includes(inputType as HistoricalThoughtType)) {
+  private resolveThoughtType(
+    inputType: string | undefined,
+  ): HistoricalThoughtType {
+    if (
+      inputType &&
+      this.supportedThoughtTypes.includes(inputType as HistoricalThoughtType)
+    ) {
       return inputType as HistoricalThoughtType;
     }
-    return 'event_analysis';
+    return "event_analysis";
   }
 
   /**
@@ -338,29 +389,35 @@ export class HistoricalHandler implements ModeHandler {
     let weightedSum = 0;
 
     for (const source of sources) {
-      const weight = source.type === 'primary' ? 2 : source.type === 'secondary' ? 1.5 : 1;
+      const weight =
+        source.type === "primary" ? 2 : source.type === "secondary" ? 1.5 : 1;
       weightedSum += source.reliability * weight;
       totalWeight += weight;
     }
 
     // Bonus for corroboration
     const corroboratedCount = sources.filter(
-      s => s.corroboratedBy && s.corroboratedBy.length > 0
+      (s) => s.corroboratedBy && s.corroboratedBy.length > 0,
     ).length;
-    const corroborationBonus = Math.min(0.1, (corroboratedCount / sources.length) * 0.1);
+    const corroborationBonus = Math.min(
+      0.1,
+      (corroboratedCount / sources.length) * 0.1,
+    );
 
-    return Math.min(1, (weightedSum / totalWeight) + corroborationBonus);
+    return Math.min(1, weightedSum / totalWeight + corroborationBonus);
   }
 
   /**
    * Calculate temporal span from events
    */
-  private calculateTemporalSpan(events: HistoricalEvent[]): { start: string; end: string } | undefined {
+  private calculateTemporalSpan(
+    events: HistoricalEvent[],
+  ): { start: string; end: string } | undefined {
     if (events.length === 0) return undefined;
 
     const dates: string[] = [];
     for (const event of events) {
-      if (typeof event.date === 'string') {
+      if (typeof event.date === "string") {
         dates.push(event.date);
       } else if (event.date) {
         dates.push(event.date.start);
@@ -399,25 +456,27 @@ export class HistoricalHandler implements ModeHandler {
     if (significanceCounts.transformative.length >= events.length * 0.4) {
       patterns.push({
         id: randomUUID(),
-        name: 'Revolutionary Period',
-        type: 'structural',
+        name: "Revolutionary Period",
+        type: "structural",
         instances: significanceCounts.transformative,
-        description: 'High concentration of transformative events indicates a period of significant change',
+        description:
+          "High concentration of transformative events indicates a period of significant change",
         confidence: 0.7,
       });
     }
 
     // Detect causal clusters (events with many causes/effects)
     const highlyConnected = events.filter(
-      e => ((e.causes?.length || 0) + (e.effects?.length || 0)) > 3
+      (e) => (e.causes?.length || 0) + (e.effects?.length || 0) > 3,
     );
     if (highlyConnected.length >= 2) {
       patterns.push({
         id: randomUUID(),
-        name: 'Causal Nexus',
-        type: 'contingent',
-        instances: highlyConnected.map(e => e.id),
-        description: 'Events with multiple causal connections form a nexus of historical change',
+        name: "Causal Nexus",
+        type: "contingent",
+        instances: highlyConnected.map((e) => e.id),
+        description:
+          "Events with multiple causal connections form a nexus of historical change",
         confidence: 0.6,
       });
     }
@@ -430,53 +489,53 @@ export class HistoricalHandler implements ModeHandler {
    */
   private getGuidingQuestions(thoughtType?: HistoricalThoughtType): string[] {
     switch (thoughtType) {
-      case 'event_analysis':
+      case "event_analysis":
         return [
-          'What were the immediate causes of this event?',
-          'What were the long-term consequences?',
-          'Who were the key actors involved?',
-          'How does this event fit into broader historical trends?',
-          'What sources document this event?',
+          "What were the immediate causes of this event?",
+          "What were the long-term consequences?",
+          "Who were the key actors involved?",
+          "How does this event fit into broader historical trends?",
+          "What sources document this event?",
         ];
-      case 'source_evaluation':
+      case "source_evaluation":
         return [
-          'Is this a primary or secondary source?',
-          'What biases might the author have?',
-          'Can this source be corroborated by others?',
-          'What is the provenance of this source?',
-          'What limitations does this source have?',
+          "Is this a primary or secondary source?",
+          "What biases might the author have?",
+          "Can this source be corroborated by others?",
+          "What is the provenance of this source?",
+          "What limitations does this source have?",
         ];
-      case 'pattern_identification':
+      case "pattern_identification":
         return [
-          'What recurring patterns emerge across events?',
-          'Are these patterns cyclical, linear, or dialectical?',
-          'What exceptions exist to the identified patterns?',
-          'How do structural factors influence these patterns?',
-          'What contingent factors disrupted expected patterns?',
+          "What recurring patterns emerge across events?",
+          "Are these patterns cyclical, linear, or dialectical?",
+          "What exceptions exist to the identified patterns?",
+          "How do structural factors influence these patterns?",
+          "What contingent factors disrupted expected patterns?",
         ];
-      case 'causal_chain':
+      case "causal_chain":
         return [
-          'What evidence supports this causal link?',
-          'Are there alternative explanations?',
-          'What mechanisms connect cause to effect?',
-          'What counterfactuals help test this causal claim?',
-          'How confident are we in this causal chain?',
+          "What evidence supports this causal link?",
+          "Are there alternative explanations?",
+          "What mechanisms connect cause to effect?",
+          "What counterfactuals help test this causal claim?",
+          "How confident are we in this causal chain?",
         ];
-      case 'periodization':
+      case "periodization":
         return [
-          'What characteristics define this period?',
-          'What events mark the beginning and end?',
-          'How does this periodization compare to others?',
-          'What continuities span period boundaries?',
-          'Is this periodization Eurocentric or universal?',
+          "What characteristics define this period?",
+          "What events mark the beginning and end?",
+          "How does this periodization compare to others?",
+          "What continuities span period boundaries?",
+          "Is this periodization Eurocentric or universal?",
         ];
       default:
         return [
-          'What sources support this historical claim?',
-          'What alternative interpretations exist?',
-          'How does context shape our understanding?',
-          'What biases might affect this analysis?',
-          'What further evidence is needed?',
+          "What sources support this historical claim?",
+          "What alternative interpretations exist?",
+          "How does context shape our understanding?",
+          "What biases might affect this analysis?",
+          "What further evidence is needed?",
         ];
     }
   }

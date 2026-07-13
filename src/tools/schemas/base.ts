@@ -4,7 +4,7 @@
  * Sprint 7 Task 7.5: Use shared enums
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 import {
   ConfidenceSchema,
   PositiveIntSchema,
@@ -12,7 +12,7 @@ import {
   ExportFormatEnum,
   ExportProfileEnum,
   LevelEnum,
-} from './shared.js';
+} from "./shared.js";
 
 /**
  * Base schema with properties common to all thought types
@@ -48,18 +48,20 @@ export const SessionActionSchema = z.object({
   overwrite: z.boolean().optional(), // Phase 16: File export - overwrite existing files (default: false)
   newMode: z.string().optional(),
   problemType: z.string().optional(),
-  problemCharacteristics: z.object({
-    domain: z.string(),
-    complexity: LevelEnum,
-    uncertainty: LevelEnum,
-    timeDependent: z.boolean(),
-    multiAgent: z.boolean(),
-    requiresProof: z.boolean(),
-    requiresQuantification: z.boolean(),
-    hasIncompleteInfo: z.boolean(),
-    requiresExplanation: z.boolean(),
-    hasAlternatives: z.boolean(),
-  }).optional(),
+  problemCharacteristics: z
+    .object({
+      domain: z.string(),
+      complexity: LevelEnum,
+      uncertainty: LevelEnum,
+      timeDependent: z.boolean(),
+      multiAgent: z.boolean(),
+      requiresProof: z.boolean(),
+      requiresQuantification: z.boolean(),
+      hasIncompleteInfo: z.boolean(),
+      requiresExplanation: z.boolean(),
+      hasAlternatives: z.boolean(),
+    })
+    .optional(),
   includeCombinations: z.boolean().optional(),
 });
 

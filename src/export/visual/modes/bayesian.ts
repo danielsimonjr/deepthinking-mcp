@@ -6,12 +6,12 @@
  * Phase 13 Sprint 9: Refactored to use fluent builder classes
  */
 
-import type { BayesianThought } from '../../../types/index.js';
-import type { VisualExportOptions } from '../types.js';
+import type { BayesianThought } from "../../../types/index.js";
+import type { VisualExportOptions } from "../types.js";
 // Builder classes (Phase 13)
-import { DOTGraphBuilder } from '../utils/dot.js';
-import { MermaidGraphBuilder } from '../utils/mermaid.js';
-import { ASCIIDocBuilder } from '../utils/ascii.js';
+import { DOTGraphBuilder } from "../utils/dot.js";
+import { MermaidGraphBuilder } from "../utils/mermaid.js";
+import { ASCIIDocBuilder } from "../utils/ascii.js";
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -24,17 +24,13 @@ import {
   getNodeColor,
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
-} from '../utils/svg.js';
+} from "../utils/svg.js";
 import {
   generateGraphML,
   type GraphMLNode,
   type GraphMLEdge,
-} from '../utils/graphml.js';
-import {
-  generateTikZ,
-  type TikZNode,
-  type TikZEdge,
-} from '../utils/tikz.js';
+} from "../utils/graphml.js";
+import { generateTikZ, type TikZNode, type TikZEdge } from "../utils/tikz.js";
 import {
   generateHTMLHeader,
   generateHTMLFooter,
@@ -43,19 +39,14 @@ import {
   renderSection,
   renderTable,
   renderProgressBar,
-} from '../utils/html.js';
-import {
-  sanitizeModelicaId,
-  escapeModelicaString,
-} from '../utils/modelica.js';
+} from "../utils/html.js";
+import { sanitizeModelicaId, escapeModelicaString } from "../utils/modelica.js";
 import {
   generateUmlDiagram,
   type UmlNode,
   type UmlEdge,
-} from '../utils/uml.js';
-import {
-  generateBayesianJson,
-} from '../utils/json.js';
+} from "../utils/uml.js";
+import { generateBayesianJson } from "../utils/json.js";
 import {
   section,
   table,
@@ -63,36 +54,49 @@ import {
   progressBar,
   mermaidBlock,
   document as mdDocument,
-} from '../utils/markdown.js';
+} from "../utils/markdown.js";
 
 /**
  * Export Bayesian network to visual format
  */
-export function exportBayesianNetwork(thought: BayesianThought, options: VisualExportOptions): string {
-  const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+export function exportBayesianNetwork(
+  thought: BayesianThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+  } = options;
 
   switch (format) {
-    case 'mermaid':
-      return bayesianToMermaid(thought, colorScheme, includeLabels, includeMetrics);
-    case 'dot':
+    case "mermaid":
+      return bayesianToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics,
+      );
+    case "dot":
       return bayesianToDOT(thought, includeLabels, includeMetrics);
-    case 'ascii':
+    case "ascii":
       return bayesianToASCII(thought);
-    case 'svg':
+    case "svg":
       return bayesianToSVG(thought, options);
-    case 'graphml':
+    case "graphml":
       return bayesianToGraphML(thought, options);
-    case 'tikz':
+    case "tikz":
       return bayesianToTikZ(thought, options);
-    case 'html':
+    case "html":
       return bayesianToHTML(thought, options);
-    case 'modelica':
+    case "modelica":
       return bayesianToModelica(thought, options);
-    case 'uml':
+    case "uml":
       return bayesianToUML(thought, options);
-    case 'json':
+    case "json":
       return bayesianToJSON(thought, options);
-    case 'markdown':
+    case "markdown":
       return bayesianToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
@@ -103,46 +107,46 @@ function bayesianToMermaid(
   thought: BayesianThought,
   colorScheme: string,
   _includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
-  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
-  const builder = new MermaidGraphBuilder().setDirection('LR');
+  const scheme = colorScheme as "default" | "pastel" | "monochrome";
+  const builder = new MermaidGraphBuilder().setDirection("LR");
 
   // Determine colors based on scheme
-  const priorColor = scheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
-  const posteriorColor = scheme === 'pastel' ? '#c8e6c9' : '#81c784';
+  const priorColor = scheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
+  const posteriorColor = scheme === "pastel" ? "#c8e6c9" : "#81c784";
 
   // Add nodes
   builder.addNode({
-    id: 'H',
-    label: 'Hypothesis',
-    shape: 'stadium',
+    id: "H",
+    label: "Hypothesis",
+    shape: "stadium",
   });
 
   builder.addNode({
-    id: 'Prior',
-    label: `Prior: ${includeMetrics ? thought.prior.probability.toFixed(3) : '?'}`,
-    shape: 'rectangle',
-    style: scheme !== 'monochrome' ? { fill: priorColor } : undefined,
+    id: "Prior",
+    label: `Prior: ${includeMetrics ? thought.prior.probability.toFixed(3) : "?"}`,
+    shape: "rectangle",
+    style: scheme !== "monochrome" ? { fill: priorColor } : undefined,
   });
 
   builder.addNode({
-    id: 'Evidence',
-    label: 'Evidence',
-    shape: 'rectangle',
+    id: "Evidence",
+    label: "Evidence",
+    shape: "rectangle",
   });
 
   builder.addNode({
-    id: 'Posterior',
-    label: `Posterior: ${includeMetrics ? thought.posterior.probability.toFixed(3) : '?'}`,
-    shape: 'subroutine',
-    style: scheme !== 'monochrome' ? { fill: posteriorColor } : undefined,
+    id: "Posterior",
+    label: `Posterior: ${includeMetrics ? thought.posterior.probability.toFixed(3) : "?"}`,
+    shape: "subroutine",
+    style: scheme !== "monochrome" ? { fill: posteriorColor } : undefined,
   });
 
   // Add edges
-  builder.addEdge({ source: 'Prior', target: 'H', style: 'arrow' });
-  builder.addEdge({ source: 'Evidence', target: 'H', style: 'arrow' });
-  builder.addEdge({ source: 'H', target: 'Posterior', style: 'arrow' });
+  builder.addEdge({ source: "Prior", target: "H", style: "arrow" });
+  builder.addEdge({ source: "Evidence", target: "H", style: "arrow" });
+  builder.addEdge({ source: "H", target: "Posterior", style: "arrow" });
 
   return builder.setOptions({ colorScheme: scheme }).render();
 }
@@ -150,26 +154,34 @@ function bayesianToMermaid(
 function bayesianToDOT(
   thought: BayesianThought,
   _includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
   const builder = new DOTGraphBuilder()
-    .setGraphName('BayesianNetwork')
-    .setRankDir('LR')
-    .setNodeDefaults({ shape: 'ellipse' });
+    .setGraphName("BayesianNetwork")
+    .setRankDir("LR")
+    .setNodeDefaults({ shape: "ellipse" });
 
-  const priorProb = includeMetrics ? `: ${thought.prior.probability.toFixed(3)}` : '';
-  const posteriorProb = includeMetrics ? `: ${thought.posterior.probability.toFixed(3)}` : '';
+  const priorProb = includeMetrics
+    ? `: ${thought.prior.probability.toFixed(3)}`
+    : "";
+  const posteriorProb = includeMetrics
+    ? `: ${thought.posterior.probability.toFixed(3)}`
+    : "";
 
   // Add nodes
-  builder.addNode({ id: 'Prior', label: `Prior${priorProb}` });
-  builder.addNode({ id: 'Hypothesis', label: 'Hypothesis', shape: 'box' });
-  builder.addNode({ id: 'Evidence', label: 'Evidence' });
-  builder.addNode({ id: 'Posterior', label: `Posterior${posteriorProb}`, shape: 'doublecircle' });
+  builder.addNode({ id: "Prior", label: `Prior${priorProb}` });
+  builder.addNode({ id: "Hypothesis", label: "Hypothesis", shape: "box" });
+  builder.addNode({ id: "Evidence", label: "Evidence" });
+  builder.addNode({
+    id: "Posterior",
+    label: `Posterior${posteriorProb}`,
+    shape: "doublecircle",
+  });
 
   // Add edges
-  builder.addEdge({ source: 'Prior', target: 'Hypothesis' });
-  builder.addEdge({ source: 'Evidence', target: 'Hypothesis' });
-  builder.addEdge({ source: 'Hypothesis', target: 'Posterior' });
+  builder.addEdge({ source: "Prior", target: "Hypothesis" });
+  builder.addEdge({ source: "Evidence", target: "Hypothesis" });
+  builder.addEdge({ source: "Hypothesis", target: "Posterior" });
 
   return builder.render();
 }
@@ -177,37 +189,41 @@ function bayesianToDOT(
 function bayesianToASCII(thought: BayesianThought): string {
   const builder = new ASCIIDocBuilder()
     .setMaxWidth(60)
-    .addHeader('Bayesian Network');
+    .addHeader("Bayesian Network");
 
   // Hypothesis section
-  builder.addSection('Hypothesis')
+  builder
+    .addSection("Hypothesis")
     .addText(`${thought.hypothesis.statement}\n`)
     .addEmptyLine();
 
   // Prior section
-  builder.addSection('Prior Probability')
+  builder
+    .addSection("Prior Probability")
     .addText(`Value: ${thought.prior.probability.toFixed(3)}\n`)
-    .addText(`Justification: ${thought.prior.justification || '-'}\n`)
+    .addText(`Justification: ${thought.prior.justification || "-"}\n`)
     .addEmptyLine();
 
   // Evidence section
   if (thought.evidence && thought.evidence.length > 0) {
-    builder.addSection('Evidence');
+    builder.addSection("Evidence");
     for (const ev of thought.evidence) {
-      builder.addText(`  • ${ev.description || '-'}\n`);
+      builder.addText(`  • ${ev.description || "-"}\n`);
     }
     builder.addEmptyLine();
   }
 
   // Posterior section
-  builder.addSection('Posterior Probability')
+  builder
+    .addSection("Posterior Probability")
     .addText(`Value: ${thought.posterior.probability.toFixed(3)}\n`)
-    .addText(`Calculation: ${thought.posterior.calculation || '-'}\n`);
+    .addText(`Calculation: ${thought.posterior.calculation || "-"}\n`);
 
   // Bayes Factor
   if (thought.bayesFactor !== undefined) {
-    builder.addEmptyLine()
-      .addSection('Bayes Factor')
+    builder
+      .addEmptyLine()
+      .addSection("Bayes Factor")
       .addText(`${thought.bayesFactor.toFixed(2)}\n`);
   }
 
@@ -217,9 +233,12 @@ function bayesianToASCII(thought: BayesianThought): string {
 /**
  * Export Bayesian network to native SVG format
  */
-function bayesianToSVG(thought: BayesianThought, options: VisualExportOptions): string {
+function bayesianToSVG(
+  thought: BayesianThought,
+  options: VisualExportOptions,
+): string {
   const {
-    colorScheme = 'default',
+    colorScheme = "default",
     includeMetrics = true,
     svgWidth = DEFAULT_SVG_OPTIONS.width,
     svgHeight = 400,
@@ -233,120 +252,162 @@ function bayesianToSVG(thought: BayesianThought, options: VisualExportOptions): 
   const positions = new Map<string, SVGNodePosition>();
 
   // Prior at top left
-  positions.set('prior', {
-    id: 'prior',
+  positions.set("prior", {
+    id: "prior",
     x: centerX - 200,
     y: 80,
     width: nodeWidth,
     height: nodeHeight,
-    label: `Prior: ${includeMetrics ? thought.prior.probability.toFixed(3) : '?'}`,
-    type: 'prior',
+    label: `Prior: ${includeMetrics ? thought.prior.probability.toFixed(3) : "?"}`,
+    type: "prior",
   });
 
   // Evidence at top right
-  positions.set('evidence', {
-    id: 'evidence',
+  positions.set("evidence", {
+    id: "evidence",
     x: centerX + 60,
     y: 80,
     width: nodeWidth,
     height: nodeHeight,
-    label: 'Evidence',
-    type: 'evidence',
+    label: "Evidence",
+    type: "evidence",
   });
 
   // Hypothesis in center
-  positions.set('hypothesis', {
-    id: 'hypothesis',
+  positions.set("hypothesis", {
+    id: "hypothesis",
     x: centerX - nodeWidth / 2,
     y: 180,
     width: nodeWidth,
     height: nodeHeight,
-    label: 'Hypothesis',
-    type: 'hypothesis',
+    label: "Hypothesis",
+    type: "hypothesis",
   });
 
   // Posterior at bottom
-  positions.set('posterior', {
-    id: 'posterior',
+  positions.set("posterior", {
+    id: "posterior",
     x: centerX - nodeWidth / 2,
     y: 280,
     width: nodeWidth,
     height: nodeHeight,
-    label: `Posterior: ${includeMetrics ? thought.posterior.probability.toFixed(3) : '?'}`,
-    type: 'posterior',
+    label: `Posterior: ${includeMetrics ? thought.posterior.probability.toFixed(3) : "?"}`,
+    type: "posterior",
   });
 
-  let svg = generateSVGHeader(svgWidth, svgHeight, 'Bayesian Network');
+  let svg = generateSVGHeader(svgWidth, svgHeight, "Bayesian Network");
 
   // Render edges
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
-  svg += renderEdge(positions.get('prior')!, positions.get('hypothesis')!, {});
-  svg += renderEdge(positions.get('evidence')!, positions.get('hypothesis')!, {});
-  svg += renderEdge(positions.get('hypothesis')!, positions.get('posterior')!, {});
-  svg += '\n  </g>';
+  svg += renderEdge(positions.get("prior")!, positions.get("hypothesis")!, {});
+  svg += renderEdge(
+    positions.get("evidence")!,
+    positions.get("hypothesis")!,
+    {},
+  );
+  svg += renderEdge(
+    positions.get("hypothesis")!,
+    positions.get("posterior")!,
+    {},
+  );
+  svg += "\n  </g>";
 
   // Render nodes
   svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
 
   // Prior - stadium shape
-  svg += renderStadiumNode(positions.get('prior')!, getNodeColor('primary', colorScheme));
+  svg += renderStadiumNode(
+    positions.get("prior")!,
+    getNodeColor("primary", colorScheme),
+  );
 
   // Evidence - rectangle
-  svg += renderRectNode(positions.get('evidence')!, getNodeColor('info', colorScheme));
+  svg += renderRectNode(
+    positions.get("evidence")!,
+    getNodeColor("info", colorScheme),
+  );
 
   // Hypothesis - ellipse
-  svg += renderEllipseNode(positions.get('hypothesis')!, getNodeColor('neutral', colorScheme));
+  svg += renderEllipseNode(
+    positions.get("hypothesis")!,
+    getNodeColor("neutral", colorScheme),
+  );
 
   // Posterior - stadium (result)
-  svg += renderStadiumNode(positions.get('posterior')!, getNodeColor('success', colorScheme));
+  svg += renderStadiumNode(
+    positions.get("posterior")!,
+    getNodeColor("success", colorScheme),
+  );
 
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render metrics panel
   if (includeMetrics) {
     const metrics = [
-      { label: 'Prior', value: thought.prior.probability.toFixed(3) },
-      { label: 'Posterior', value: thought.posterior.probability.toFixed(3) },
-      { label: 'Bayes Factor', value: thought.bayesFactor?.toFixed(2) || 'N/A' },
+      { label: "Prior", value: thought.prior.probability.toFixed(3) },
+      { label: "Posterior", value: thought.posterior.probability.toFixed(3) },
+      {
+        label: "Bayes Factor",
+        value: thought.bayesFactor?.toFixed(2) || "N/A",
+      },
     ];
     svg += renderMetricsPanel(svgWidth - 180, svgHeight - 100, metrics);
   }
 
   // Render legend
   const legendItems = [
-    { label: 'Prior', color: getNodeColor('primary', colorScheme) },
-    { label: 'Evidence', color: getNodeColor('info', colorScheme) },
-    { label: 'Hypothesis', color: getNodeColor('neutral', colorScheme), shape: 'ellipse' as const },
-    { label: 'Posterior', color: getNodeColor('success', colorScheme) },
+    { label: "Prior", color: getNodeColor("primary", colorScheme) },
+    { label: "Evidence", color: getNodeColor("info", colorScheme) },
+    {
+      label: "Hypothesis",
+      color: getNodeColor("neutral", colorScheme),
+      shape: "ellipse" as const,
+    },
+    { label: "Posterior", color: getNodeColor("success", colorScheme) },
   ];
   svg += renderLegend(20, svgHeight - 100, legendItems);
 
-  svg += '\n' + generateSVGFooter();
+  svg += "\n" + generateSVGFooter();
   return svg;
 }
 
 /**
  * Export Bayesian network to GraphML format
  */
-function bayesianToGraphML(thought: BayesianThought, options: VisualExportOptions): string {
+function bayesianToGraphML(
+  thought: BayesianThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
 
   // Simple structure with Prior, Hypothesis, Evidence, Posterior
   const nodes: GraphMLNode[] = [
-    { id: 'prior', label: includeLabels ? `Prior: ${thought.prior.probability.toFixed(3)}` : 'Prior', type: 'prior' },
-    { id: 'hypothesis', label: 'Hypothesis', type: 'hypothesis' },
-    { id: 'evidence', label: 'Evidence', type: 'evidence' },
-    { id: 'posterior', label: includeLabels ? `Posterior: ${thought.posterior.probability.toFixed(3)}` : 'Posterior', type: 'posterior' },
+    {
+      id: "prior",
+      label: includeLabels
+        ? `Prior: ${thought.prior.probability.toFixed(3)}`
+        : "Prior",
+      type: "prior",
+    },
+    { id: "hypothesis", label: "Hypothesis", type: "hypothesis" },
+    { id: "evidence", label: "Evidence", type: "evidence" },
+    {
+      id: "posterior",
+      label: includeLabels
+        ? `Posterior: ${thought.posterior.probability.toFixed(3)}`
+        : "Posterior",
+      type: "posterior",
+    },
   ];
 
   const edges: GraphMLEdge[] = [
-    { id: 'e1', source: 'prior', target: 'hypothesis' },
-    { id: 'e2', source: 'evidence', target: 'hypothesis' },
-    { id: 'e3', source: 'hypothesis', target: 'posterior' },
+    { id: "e1", source: "prior", target: "hypothesis" },
+    { id: "e2", source: "evidence", target: "hypothesis" },
+    { id: "e3", source: "hypothesis", target: "posterior" },
   ];
 
   return generateGraphML(nodes, edges, {
-    graphName: 'Bayesian Network',
+    graphName: "Bayesian Network",
     includeLabels,
     includeMetadata: includeMetrics,
   });
@@ -355,25 +416,64 @@ function bayesianToGraphML(thought: BayesianThought, options: VisualExportOption
 /**
  * Export Bayesian network to TikZ/LaTeX format
  */
-function bayesianToTikZ(thought: BayesianThought, options: VisualExportOptions): string {
-  const { includeLabels = true, includeMetrics = true, colorScheme = 'default' } = options;
+function bayesianToTikZ(
+  thought: BayesianThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    includeLabels = true,
+    includeMetrics = true,
+    colorScheme = "default",
+  } = options;
 
   // Simple structure with Prior, Hypothesis, Evidence, Posterior
   const nodes: TikZNode[] = [
-    { id: 'prior', label: includeLabels ? `Prior: ${thought.prior.probability.toFixed(3)}` : 'Prior', x: 0, y: 0, type: 'primary', shape: 'stadium' },
-    { id: 'evidence', label: 'Evidence', x: 4, y: 0, type: 'info', shape: 'rectangle' },
-    { id: 'hypothesis', label: 'Hypothesis', x: 2, y: -2, type: 'neutral', shape: 'ellipse' },
-    { id: 'posterior', label: includeLabels ? `Posterior: ${thought.posterior.probability.toFixed(3)}` : 'Posterior', x: 2, y: -4, type: 'success', shape: 'stadium' },
+    {
+      id: "prior",
+      label: includeLabels
+        ? `Prior: ${thought.prior.probability.toFixed(3)}`
+        : "Prior",
+      x: 0,
+      y: 0,
+      type: "primary",
+      shape: "stadium",
+    },
+    {
+      id: "evidence",
+      label: "Evidence",
+      x: 4,
+      y: 0,
+      type: "info",
+      shape: "rectangle",
+    },
+    {
+      id: "hypothesis",
+      label: "Hypothesis",
+      x: 2,
+      y: -2,
+      type: "neutral",
+      shape: "ellipse",
+    },
+    {
+      id: "posterior",
+      label: includeLabels
+        ? `Posterior: ${thought.posterior.probability.toFixed(3)}`
+        : "Posterior",
+      x: 2,
+      y: -4,
+      type: "success",
+      shape: "stadium",
+    },
   ];
 
   const edges: TikZEdge[] = [
-    { source: 'prior', target: 'hypothesis', directed: true },
-    { source: 'evidence', target: 'hypothesis', directed: true },
-    { source: 'hypothesis', target: 'posterior', directed: true },
+    { source: "prior", target: "hypothesis", directed: true },
+    { source: "evidence", target: "hypothesis", directed: true },
+    { source: "hypothesis", target: "posterior", directed: true },
   ];
 
   return generateTikZ(nodes, edges, {
-    title: 'Bayesian Network',
+    title: "Bayesian Network",
     includeLabels,
     includeMetrics,
     colorScheme,
@@ -383,76 +483,109 @@ function bayesianToTikZ(thought: BayesianThought, options: VisualExportOptions):
 /**
  * Export Bayesian network to HTML format
  */
-function bayesianToHTML(thought: BayesianThought, options: VisualExportOptions): string {
+function bayesianToHTML(
+  thought: BayesianThought,
+  options: VisualExportOptions,
+): string {
   const {
     htmlStandalone = true,
-    htmlTitle = 'Bayesian Analysis',
-    htmlTheme = 'light',
+    htmlTitle = "Bayesian Analysis",
+    htmlTheme = "light",
     includeMetrics = true,
   } = options;
 
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme,
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
 
   // Hypothesis section
-  html += renderSection('Hypothesis', `
+  html += renderSection(
+    "Hypothesis",
+    `
     <p><strong>${escapeHTML(thought.hypothesis.statement)}</strong></p>
-    ${thought.hypothesis.alternatives && thought.hypothesis.alternatives.length > 0 ? `<p class="text-secondary">Alternatives: ${thought.hypothesis.alternatives.join(', ')}</p>` : ''}
-  `, '🎯');
+    ${thought.hypothesis.alternatives && thought.hypothesis.alternatives.length > 0 ? `<p class="text-secondary">Alternatives: ${thought.hypothesis.alternatives.join(", ")}</p>` : ""}
+  `,
+    "🎯",
+  );
 
   // Probabilities section
   if (includeMetrics) {
     html += '<div class="metrics-grid">';
-    html += renderMetricCard('Prior', (thought.prior.probability * 100).toFixed(1) + '%', 'primary');
-    html += renderMetricCard('Posterior', (thought.posterior.probability * 100).toFixed(1) + '%', 'success');
+    html += renderMetricCard(
+      "Prior",
+      (thought.prior.probability * 100).toFixed(1) + "%",
+      "primary",
+    );
+    html += renderMetricCard(
+      "Posterior",
+      (thought.posterior.probability * 100).toFixed(1) + "%",
+      "success",
+    );
     if (thought.bayesFactor !== undefined) {
-      html += renderMetricCard('Bayes Factor', thought.bayesFactor.toFixed(2), 'info');
+      html += renderMetricCard(
+        "Bayes Factor",
+        thought.bayesFactor.toFixed(2),
+        "info",
+      );
     }
-    html += '</div>\n';
+    html += "</div>\n";
 
     // Prior probability bar
     html += '<div class="card">';
     html += '<div class="card-header">Prior Probability</div>';
-    html += renderProgressBar(thought.prior.probability * 100, 'primary');
-    html += `<p class="text-secondary" style="margin-top: 0.5rem">${thought.prior.justification ? escapeHTML(thought.prior.justification) : '-'}</p>`;
-    html += '</div>\n';
+    html += renderProgressBar(thought.prior.probability * 100, "primary");
+    html += `<p class="text-secondary" style="margin-top: 0.5rem">${thought.prior.justification ? escapeHTML(thought.prior.justification) : "-"}</p>`;
+    html += "</div>\n";
 
     // Posterior probability bar
     html += '<div class="card">';
     html += '<div class="card-header">Posterior Probability</div>';
-    html += renderProgressBar(thought.posterior.probability * 100, 'success');
-    html += `<p class="text-secondary" style="margin-top: 0.5rem">${thought.posterior.calculation ? escapeHTML(thought.posterior.calculation) : '-'}</p>`;
-    html += '</div>\n';
+    html += renderProgressBar(thought.posterior.probability * 100, "success");
+    html += `<p class="text-secondary" style="margin-top: 0.5rem">${thought.posterior.calculation ? escapeHTML(thought.posterior.calculation) : "-"}</p>`;
+    html += "</div>\n";
   }
 
   // Evidence section
   if (thought.evidence && thought.evidence.length > 0) {
     const evidenceRows = thought.evidence.map((ev, i) => [
       (i + 1).toString(),
-      ev.description || '-',
-      ev.likelihoodGivenHypothesis?.toFixed(3) || '-',
-      ev.likelihoodGivenNotHypothesis?.toFixed(3) || '-',
+      ev.description || "-",
+      ev.likelihoodGivenHypothesis?.toFixed(3) || "-",
+      ev.likelihoodGivenNotHypothesis?.toFixed(3) || "-",
     ]);
-    html += renderSection('Evidence', renderTable(
-      ['#', 'Description', 'P(E|H)', 'P(E|¬H)'],
-      evidenceRows
-    ), '📊');
+    html += renderSection(
+      "Evidence",
+      renderTable(["#", "Description", "P(E|H)", "P(E|¬H)"], evidenceRows),
+      "📊",
+    );
   }
 
   // Interpretation
   const change = thought.posterior.probability - thought.prior.probability;
-  const changeDirection = change > 0 ? 'increased' : change < 0 ? 'decreased' : 'unchanged';
-  const changeClass = change > 0 ? 'text-success' : change < 0 ? 'text-danger' : 'text-secondary';
+  const changeDirection =
+    change > 0 ? "increased" : change < 0 ? "decreased" : "unchanged";
+  const changeClass =
+    change > 0 ? "text-success" : change < 0 ? "text-danger" : "text-secondary";
 
-  html += renderSection('Interpretation', `
+  html += renderSection(
+    "Interpretation",
+    `
     <p>The posterior probability has <span class="${changeClass}"><strong>${changeDirection}</strong></span>
     by ${Math.abs(change * 100).toFixed(1)} percentage points from the prior.</p>
-    ${thought.bayesFactor !== undefined ? `
+    ${
+      thought.bayesFactor !== undefined
+        ? `
       <p>Bayes Factor of ${thought.bayesFactor.toFixed(2)} indicates
-      ${thought.bayesFactor > 3 ? 'substantial' : thought.bayesFactor > 1 ? 'weak' : 'evidence against'}
+      ${thought.bayesFactor > 3 ? "substantial" : thought.bayesFactor > 1 ? "weak" : "evidence against"}
       support for the hypothesis.</p>
-    ` : ''}
-  `, '💡');
+    `
+        : ""
+    }
+  `,
+    "💡",
+  );
 
   html += generateHTMLFooter(htmlStandalone);
   return html;
@@ -461,112 +594,151 @@ function bayesianToHTML(thought: BayesianThought, options: VisualExportOptions):
 /**
  * Export Bayesian network to Modelica format
  */
-function bayesianToModelica(thought: BayesianThought, options: VisualExportOptions): string {
-  const { modelicaPackageName, modelicaIncludeAnnotations = true, includeMetrics = true } = options;
-  const packageName = modelicaPackageName || 'BayesianNetwork';
+function bayesianToModelica(
+  thought: BayesianThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    modelicaPackageName,
+    modelicaIncludeAnnotations = true,
+    includeMetrics = true,
+  } = options;
+  const packageName = modelicaPackageName || "BayesianNetwork";
   const lines: string[] = [];
 
   lines.push(`package ${sanitizeModelicaId(packageName)}`);
   lines.push(`  "Bayesian network analysis"`);
-  lines.push('');
+  lines.push("");
 
   // Hypothesis record
-  lines.push('  record Hypothesis');
-  lines.push(`    constant String statement = "${escapeModelicaString(thought.hypothesis.statement)}";`);
-  if (thought.hypothesis.alternatives && thought.hypothesis.alternatives.length > 0) {
-    lines.push(`    constant Integer alternativeCount = ${thought.hypothesis.alternatives.length};`);
+  lines.push("  record Hypothesis");
+  lines.push(
+    `    constant String statement = "${escapeModelicaString(thought.hypothesis.statement)}";`,
+  );
+  if (
+    thought.hypothesis.alternatives &&
+    thought.hypothesis.alternatives.length > 0
+  ) {
+    lines.push(
+      `    constant Integer alternativeCount = ${thought.hypothesis.alternatives.length};`,
+    );
   }
-  lines.push('  end Hypothesis;');
-  lines.push('');
+  lines.push("  end Hypothesis;");
+  lines.push("");
 
   // Probability parameters
-  lines.push('  // Probability parameters');
-  lines.push(`  parameter Real prior = ${thought.prior.probability.toFixed(6)} "Prior probability";`);
-  lines.push(`  parameter Real posterior = ${thought.posterior.probability.toFixed(6)} "Posterior probability";`);
+  lines.push("  // Probability parameters");
+  lines.push(
+    `  parameter Real prior = ${thought.prior.probability.toFixed(6)} "Prior probability";`,
+  );
+  lines.push(
+    `  parameter Real posterior = ${thought.posterior.probability.toFixed(6)} "Posterior probability";`,
+  );
   if (thought.bayesFactor !== undefined) {
-    lines.push(`  parameter Real bayesFactor = ${thought.bayesFactor.toFixed(6)} "Bayes factor";`);
+    lines.push(
+      `  parameter Real bayesFactor = ${thought.bayesFactor.toFixed(6)} "Bayes factor";`,
+    );
   }
-  lines.push('');
+  lines.push("");
 
   // Computed values
   if (includeMetrics) {
-    lines.push('  // Computed metrics');
+    lines.push("  // Computed metrics");
     lines.push(`  final parameter Real probabilityChange = posterior - prior;`);
-    lines.push(`  final parameter Real updateRatio = posterior / max(prior, 1e-10);`);
-    lines.push('');
+    lines.push(
+      `  final parameter Real updateRatio = posterior / max(prior, 1e-10);`,
+    );
+    lines.push("");
   }
 
   // Evidence
   if (thought.evidence && thought.evidence.length > 0) {
-    lines.push('  // Evidence');
+    lines.push("  // Evidence");
     for (let i = 0; i < thought.evidence.length; i++) {
       const ev = thought.evidence[i];
       lines.push(`  record Evidence_${i + 1}`);
-      lines.push(`    constant String description = "${ev.description ? escapeModelicaString(ev.description) : ''}";`);
+      lines.push(
+        `    constant String description = "${ev.description ? escapeModelicaString(ev.description) : ""}";`,
+      );
       if (ev.likelihoodGivenHypothesis !== undefined) {
-        lines.push(`    constant Real likelihoodGivenH = ${ev.likelihoodGivenHypothesis.toFixed(6)};`);
+        lines.push(
+          `    constant Real likelihoodGivenH = ${ev.likelihoodGivenHypothesis.toFixed(6)};`,
+        );
       }
       if (ev.likelihoodGivenNotHypothesis !== undefined) {
-        lines.push(`    constant Real likelihoodGivenNotH = ${ev.likelihoodGivenNotHypothesis.toFixed(6)};`);
+        lines.push(
+          `    constant Real likelihoodGivenNotH = ${ev.likelihoodGivenNotHypothesis.toFixed(6)};`,
+        );
       }
       lines.push(`  end Evidence_${i + 1};`);
-      lines.push('');
+      lines.push("");
     }
   }
 
   if (modelicaIncludeAnnotations) {
-    lines.push('  annotation(');
+    lines.push("  annotation(");
     lines.push('    Documentation(info="<html>');
-    lines.push(`      <p><b>Prior:</b> ${(thought.prior.probability * 100).toFixed(1)}%</p>`);
-    lines.push(`      <p><b>Posterior:</b> ${(thought.posterior.probability * 100).toFixed(1)}%</p>`);
-    lines.push('      <p>Generated by DeepThinking MCP v8.3.1</p>');
+    lines.push(
+      `      <p><b>Prior:</b> ${(thought.prior.probability * 100).toFixed(1)}%</p>`,
+    );
+    lines.push(
+      `      <p><b>Posterior:</b> ${(thought.posterior.probability * 100).toFixed(1)}%</p>`,
+    );
+    lines.push("      <p>Generated by DeepThinking MCP v8.3.1</p>");
     lines.push('    </html>")');
-    lines.push('  );');
+    lines.push("  );");
   }
 
   lines.push(`end ${sanitizeModelicaId(packageName)};`);
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
  * Export Bayesian network to UML/PlantUML format
  */
-function bayesianToUML(thought: BayesianThought, options: VisualExportOptions): string {
+function bayesianToUML(
+  thought: BayesianThought,
+  options: VisualExportOptions,
+): string {
   const { umlTheme, umlDirection, includeMetrics = true } = options;
 
   const nodes: UmlNode[] = [
     {
-      id: 'prior',
-      label: includeMetrics ? `Prior: ${thought.prior.probability.toFixed(3)}` : 'Prior',
-      shape: 'entity',
+      id: "prior",
+      label: includeMetrics
+        ? `Prior: ${thought.prior.probability.toFixed(3)}`
+        : "Prior",
+      shape: "entity",
     },
     {
-      id: 'evidence',
-      label: 'Evidence',
-      shape: 'rectangle',
+      id: "evidence",
+      label: "Evidence",
+      shape: "rectangle",
     },
     {
-      id: 'hypothesis',
-      label: 'Hypothesis',
-      shape: 'usecase',
+      id: "hypothesis",
+      label: "Hypothesis",
+      shape: "usecase",
     },
     {
-      id: 'posterior',
-      label: includeMetrics ? `Posterior: ${thought.posterior.probability.toFixed(3)}` : 'Posterior',
-      shape: 'entity',
-      color: '90EE90',
+      id: "posterior",
+      label: includeMetrics
+        ? `Posterior: ${thought.posterior.probability.toFixed(3)}`
+        : "Posterior",
+      shape: "entity",
+      color: "90EE90",
     },
   ];
 
   const edges: UmlEdge[] = [
-    { source: 'prior', target: 'hypothesis', type: 'arrow' },
-    { source: 'evidence', target: 'hypothesis', type: 'arrow' },
-    { source: 'hypothesis', target: 'posterior', type: 'arrow' },
+    { source: "prior", target: "hypothesis", type: "arrow" },
+    { source: "evidence", target: "hypothesis", type: "arrow" },
+    { source: "hypothesis", target: "posterior", type: "arrow" },
   ];
 
   return generateUmlDiagram(nodes, edges, {
-    title: 'Bayesian Network',
+    title: "Bayesian Network",
     theme: umlTheme,
     direction: umlDirection,
   });
@@ -575,13 +747,17 @@ function bayesianToUML(thought: BayesianThought, options: VisualExportOptions): 
 /**
  * Export Bayesian network to JSON format
  */
-function bayesianToJSON(thought: BayesianThought, options: VisualExportOptions): string {
+function bayesianToJSON(
+  thought: BayesianThought,
+  options: VisualExportOptions,
+): string {
   const { jsonPrettyPrint = true, jsonIndent = 2 } = options;
 
-  const evidenceDescriptions = thought.evidence?.map(e => e.description) || [];
+  const evidenceDescriptions =
+    thought.evidence?.map((e) => e.description) || [];
 
   return generateBayesianJson(
-    'Bayesian Network',
+    "Bayesian Network",
     thought.prior.probability,
     thought.posterior.probability,
     thought.bayesFactor,
@@ -590,14 +766,17 @@ function bayesianToJSON(thought: BayesianThought, options: VisualExportOptions):
     {
       prettyPrint: jsonPrettyPrint,
       indent: jsonIndent,
-    }
+    },
   );
 }
 
 /**
  * Export Bayesian network to Markdown format
  */
-function bayesianToMarkdown(thought: BayesianThought, options: VisualExportOptions): string {
+function bayesianToMarkdown(
+  thought: BayesianThought,
+  options: VisualExportOptions,
+): string {
   const {
     markdownIncludeFrontmatter = false,
     markdownIncludeToc = false,
@@ -608,11 +787,13 @@ function bayesianToMarkdown(thought: BayesianThought, options: VisualExportOptio
   const parts: string[] = [];
 
   // Hypothesis section
-  const hypothesisContent = `**${thought.hypothesis.statement}**\n\n` +
-    (thought.hypothesis.alternatives && thought.hypothesis.alternatives.length > 0
-      ? `Alternatives: ${thought.hypothesis.alternatives.join(', ')}`
-      : '');
-  parts.push(section('Hypothesis', hypothesisContent));
+  const hypothesisContent =
+    `**${thought.hypothesis.statement}**\n\n` +
+    (thought.hypothesis.alternatives &&
+    thought.hypothesis.alternatives.length > 0
+      ? `Alternatives: ${thought.hypothesis.alternatives.join(", ")}`
+      : "");
+  parts.push(section("Hypothesis", hypothesisContent));
 
   // Probabilities section
   if (includeMetrics) {
@@ -620,48 +801,69 @@ function bayesianToMarkdown(thought: BayesianThought, options: VisualExportOptio
     const posteriorPct = (thought.posterior.probability * 100).toFixed(1);
 
     const metricsContent = keyValueSection({
-      'Prior Probability': `${priorPct}%`,
-      'Posterior Probability': `${posteriorPct}%`,
-      ...(thought.bayesFactor !== undefined ? { 'Bayes Factor': thought.bayesFactor.toFixed(2) } : {}),
+      "Prior Probability": `${priorPct}%`,
+      "Posterior Probability": `${posteriorPct}%`,
+      ...(thought.bayesFactor !== undefined
+        ? { "Bayes Factor": thought.bayesFactor.toFixed(2) }
+        : {}),
     });
-    parts.push(section('Probabilities', metricsContent));
+    parts.push(section("Probabilities", metricsContent));
 
     // Progress bars
-    parts.push(section('Prior', `${progressBar(thought.prior.probability * 100)}\n\n${thought.prior.justification || '-'}`));
-    parts.push(section('Posterior', `${progressBar(thought.posterior.probability * 100)}\n\n${thought.posterior.calculation || '-'}`));
+    parts.push(
+      section(
+        "Prior",
+        `${progressBar(thought.prior.probability * 100)}\n\n${thought.prior.justification || "-"}`,
+      ),
+    );
+    parts.push(
+      section(
+        "Posterior",
+        `${progressBar(thought.posterior.probability * 100)}\n\n${thought.posterior.calculation || "-"}`,
+      ),
+    );
   }
 
   // Evidence section
   if (thought.evidence && thought.evidence.length > 0) {
     const evidenceRows = thought.evidence.map((ev, i) => [
       (i + 1).toString(),
-      ev.description || '-',
-      ev.likelihoodGivenHypothesis?.toFixed(3) || '-',
-      ev.likelihoodGivenNotHypothesis?.toFixed(3) || '-',
+      ev.description || "-",
+      ev.likelihoodGivenHypothesis?.toFixed(3) || "-",
+      ev.likelihoodGivenNotHypothesis?.toFixed(3) || "-",
     ]);
-    parts.push(section('Evidence', table(['#', 'Description', 'P(E|H)', 'P(E|¬H)'], evidenceRows)));
+    parts.push(
+      section(
+        "Evidence",
+        table(["#", "Description", "P(E|H)", "P(E|¬H)"], evidenceRows),
+      ),
+    );
   }
 
   // Interpretation
   const change = thought.posterior.probability - thought.prior.probability;
-  const changeDirection = change > 0 ? 'increased' : change < 0 ? 'decreased' : 'unchanged';
-  const interpretation = `The posterior probability has **${changeDirection}** by ${Math.abs(change * 100).toFixed(1)} percentage points from the prior.` +
+  const changeDirection =
+    change > 0 ? "increased" : change < 0 ? "decreased" : "unchanged";
+  const interpretation =
+    `The posterior probability has **${changeDirection}** by ${Math.abs(change * 100).toFixed(1)} percentage points from the prior.` +
     (thought.bayesFactor !== undefined
-      ? `\n\nBayes Factor of ${thought.bayesFactor.toFixed(2)} indicates ${thought.bayesFactor > 3 ? 'substantial' : thought.bayesFactor > 1 ? 'weak' : 'evidence against'} support for the hypothesis.`
-      : '');
-  parts.push(section('Interpretation', interpretation));
+      ? `\n\nBayes Factor of ${thought.bayesFactor.toFixed(2)} indicates ${thought.bayesFactor > 3 ? "substantial" : thought.bayesFactor > 1 ? "weak" : "evidence against"} support for the hypothesis.`
+      : "");
+  parts.push(section("Interpretation", interpretation));
 
   // Mermaid diagram
   if (markdownIncludeMermaid) {
-    const mermaidDiagram = bayesianToMermaid(thought, 'default', true, true);
-    parts.push(section('Bayesian Network Diagram', mermaidBlock(mermaidDiagram)));
+    const mermaidDiagram = bayesianToMermaid(thought, "default", true, true);
+    parts.push(
+      section("Bayesian Network Diagram", mermaidBlock(mermaidDiagram)),
+    );
   }
 
-  return mdDocument('Bayesian Analysis', parts.join('\n'), {
+  return mdDocument("Bayesian Analysis", parts.join("\n"), {
     includeFrontmatter: markdownIncludeFrontmatter,
     includeTableOfContents: markdownIncludeToc,
     metadata: {
-      mode: 'bayesian',
+      mode: "bayesian",
       prior: thought.prior.probability,
       posterior: thought.posterior.probability,
     },

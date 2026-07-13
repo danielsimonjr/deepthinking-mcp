@@ -43,16 +43,22 @@ jobs:
 
       - name: Run linter
         run: npm run lint
-        continue-on-error: true
 
       - name: Run format check
         run: npm run format:check
-        continue-on-error: true
 
       - name: Run tests
         run: npm test
         env:
           NODE_ENV: test
+          # Exclude tests/unit/benchmarks/**: pure wall-clock Big-O/speedup
+          # budget tests (e.g. "should maintain O(1) lookup complexity") that
+          # measure shared-runner load, not correctness - flaky by
+          # construction on CI. Same exclusion the project already applies
+          # for `npm run test:publish` (see vitest.config.ts); required
+          # status-check jobs must not depend on runner-load-sensitive
+          # timing assertions.
+          SKIP_BENCHMARKS: '1'
 
       - name: Upload test results
         uses: actions/upload-artifact@v7

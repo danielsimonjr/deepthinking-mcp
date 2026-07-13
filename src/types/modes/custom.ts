@@ -3,7 +3,7 @@
  * Phase 10 Sprint 3 (v8.4.0) - User-defined reasoning patterns
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Custom thought extends base thought with flexible user-defined structures
@@ -51,7 +51,8 @@ export interface CustomField {
 /**
  * Custom field types
  */
-export type CustomFieldType = 'string' | 'number' | 'boolean' | 'array' | 'object';
+export type CustomFieldType =
+  "string" | "number" | "boolean" | "array" | "object";
 
 /**
  * A custom stage in the reasoning process
@@ -76,6 +77,8 @@ export interface CustomValidationRule {
 /**
  * Type guard for Custom thoughts
  */
-export function isCustomThought(thought: BaseThought): thought is CustomThought {
+export function isCustomThought(
+  thought: BaseThought,
+): thought is CustomThought {
   return thought.mode === ThinkingMode.CUSTOM;
 }

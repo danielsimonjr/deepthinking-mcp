@@ -7,11 +7,22 @@
  * Phase 12: Added Markdown format support
  */
 
-export type VisualFormat = 'mermaid' | 'dot' | 'ascii' | 'svg' | 'graphml' | 'tikz' | 'modelica' | 'html' | 'uml' | 'json' | 'markdown';
+export type VisualFormat =
+  | "mermaid"
+  | "dot"
+  | "ascii"
+  | "svg"
+  | "graphml"
+  | "tikz"
+  | "modelica"
+  | "html"
+  | "uml"
+  | "json"
+  | "markdown";
 
 export interface VisualExportOptions {
   format: VisualFormat;
-  colorScheme?: 'default' | 'monochrome' | 'pastel';
+  colorScheme?: "default" | "monochrome" | "pastel";
   includeLabels?: boolean;
   includeMetrics?: boolean;
   // SVG-specific options
@@ -29,11 +40,18 @@ export interface VisualExportOptions {
   // HTML-specific options
   htmlStandalone?: boolean;
   htmlTitle?: string;
-  htmlTheme?: 'light' | 'dark' | 'auto';
+  htmlTheme?: "light" | "dark" | "auto";
   // UML-specific options
-  umlDiagramType?: 'class' | 'component' | 'usecase' | 'activity' | 'state' | 'sequence' | 'object';
-  umlTheme?: 'default' | 'sketchy' | 'blueprint' | 'plain';
-  umlDirection?: 'left to right' | 'top to bottom';
+  umlDiagramType?:
+    | "class"
+    | "component"
+    | "usecase"
+    | "activity"
+    | "state"
+    | "sequence"
+    | "object";
+  umlTheme?: "default" | "sketchy" | "blueprint" | "plain";
+  umlDirection?: "left to right" | "top to bottom";
   // JSON-specific options
   jsonPrettyPrint?: boolean;
   jsonIndent?: number;

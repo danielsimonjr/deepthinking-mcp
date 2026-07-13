@@ -3,7 +3,7 @@
  * General-purpose iterative reasoning with revision and branching support
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 export interface SequentialThought extends BaseThought {
   mode: ThinkingMode.SEQUENTIAL;
@@ -25,6 +25,8 @@ export interface SequentialThought extends BaseThought {
   needsMoreThoughts?: boolean; // Whether more iteration is needed
 }
 
-export function isSequentialThought(thought: BaseThought): thought is SequentialThought {
-  return thought.mode === 'sequential';
+export function isSequentialThought(
+  thought: BaseThought,
+): thought is SequentialThought {
+  return thought.mode === "sequential";
 }

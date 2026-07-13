@@ -3,7 +3,7 @@
  * Phase 4 (v3.2.0) - Optimization problems with constraints, objectives, and solution spaces
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Optimization thought extends base thought with constraint satisfaction
@@ -11,12 +11,12 @@ import { BaseThought, ThinkingMode } from '../core.js';
 export interface OptimizationThought extends BaseThought {
   mode: ThinkingMode.OPTIMIZATION;
   thoughtType:
-    | 'problem_formulation'
-    | 'variable_definition'
-    | 'constraint_identification'
-    | 'objective_setting'
-    | 'solution_search'
-    | 'sensitivity_analysis';
+    | "problem_formulation"
+    | "variable_definition"
+    | "constraint_identification"
+    | "objective_setting"
+    | "solution_search"
+    | "sensitivity_analysis";
 
   problem?: OptimizationProblem;
   variables?: DecisionVariable[];
@@ -33,8 +33,14 @@ export interface OptimizationProblem {
   id: string;
   name: string;
   description: string;
-  type: 'linear' | 'nonlinear' | 'integer' | 'mixed_integer' | 'constraint_satisfaction' | 'multi_objective';
-  approach?: 'exact' | 'heuristic' | 'metaheuristic' | 'approximation';
+  type:
+    | "linear"
+    | "nonlinear"
+    | "integer"
+    | "mixed_integer"
+    | "constraint_satisfaction"
+    | "multi_objective";
+  approach?: "exact" | "heuristic" | "metaheuristic" | "approximation";
   complexity?: string; // e.g., "NP-hard", "P", "polynomial"
 }
 
@@ -45,7 +51,7 @@ export interface DecisionVariable {
   id: string;
   name: string;
   description: string;
-  type: 'continuous' | 'integer' | 'binary' | 'categorical';
+  type: "continuous" | "integer" | "binary" | "categorical";
   domain: Domain;
   unit?: string;
   semantics: string; // What this variable represents
@@ -55,16 +61,16 @@ export interface DecisionVariable {
  * Variable domain
  */
 export type Domain =
-  | { type: 'continuous'; lowerBound: number; upperBound: number }
-  | { type: 'discrete'; values: number[] }
-  | { type: 'integer'; lowerBound: number; upperBound: number }
-  | { type: 'binary' }
-  | { type: 'categorical'; categories: string[] };
+  | { type: "continuous"; lowerBound: number; upperBound: number }
+  | { type: "discrete"; values: number[] }
+  | { type: "integer"; lowerBound: number; upperBound: number }
+  | { type: "binary" }
+  | { type: "categorical"; categories: string[] };
 
 /**
  * Constraint type
  */
-export type ConstraintType = 'hard' | 'soft';
+export type ConstraintType = "hard" | "soft";
 
 /**
  * Constraint on variables
@@ -89,7 +95,7 @@ export interface Objective {
   id: string;
   name: string;
   description: string;
-  type: 'minimize' | 'maximize';
+  type: "minimize" | "maximize";
   formula: string;
   latex?: string;
   variables: string[]; // Variable IDs
@@ -104,7 +110,7 @@ export interface Objective {
  */
 export interface Solution {
   id: string;
-  type: 'optimal' | 'feasible' | 'infeasible' | 'unbounded' | 'approximate';
+  type: "optimal" | "feasible" | "infeasible" | "unbounded" | "approximate";
   variableValues: Record<string, number | string>;
   objectiveValues: Record<string, number>; // Objective ID -> value
   constraintSatisfaction: {
@@ -164,11 +170,11 @@ export interface SensitivityAnalysis {
  */
 export interface ParameterSensitivity {
   parameterId: string; // Variable or constraint ID
-  type: 'variable' | 'constraint' | 'objective_coefficient';
+  type: "variable" | "constraint" | "objective_coefficient";
   currentValue: number;
   allowableIncrease?: number;
   allowableDecrease?: number;
-  impact: 'high' | 'medium' | 'low';
+  impact: "high" | "medium" | "low";
   analysis: string;
 }
 
@@ -202,6 +208,8 @@ export interface TradeoffAnalysis {
 /**
  * Type guard for Optimization thoughts
  */
-export function isOptimizationThought(thought: BaseThought): thought is OptimizationThought {
-  return thought.mode === 'optimization';
+export function isOptimizationThought(
+  thought: BaseThought,
+): thought is OptimizationThought {
+  return thought.mode === "optimization";
 }

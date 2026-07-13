@@ -13,15 +13,15 @@
  * Available export format types
  */
 export type ExportFormatType =
-  | 'markdown'
-  | 'latex'
-  | 'json'
-  | 'html'
-  | 'jupyter'
-  | 'mermaid'
-  | 'dot'
-  | 'ascii'
-  | 'svg';
+  | "markdown"
+  | "latex"
+  | "json"
+  | "html"
+  | "jupyter"
+  | "mermaid"
+  | "dot"
+  | "ascii"
+  | "svg";
 
 /**
  * Profile-specific export options
@@ -52,7 +52,7 @@ export interface ProfileExportOptions {
   includeTableOfContents?: boolean;
 
   /** LaTeX document class */
-  latexDocumentClass?: 'article' | 'report' | 'book';
+  latexDocumentClass?: "article" | "report" | "book";
 
   /** Jupyter notebook kernel */
   jupyterKernel?: string;
@@ -88,11 +88,7 @@ export interface ExportProfile {
  * Valid profile identifiers
  */
 export type ExportProfileId =
-  | 'academic'
-  | 'presentation'
-  | 'documentation'
-  | 'archive'
-  | 'minimal';
+  "academic" | "presentation" | "documentation" | "archive" | "minimal";
 
 // ============================================================================
 // PROFILE DEFINITIONS
@@ -102,31 +98,31 @@ export type ExportProfileId =
  * Academic profile - optimized for papers and publications
  */
 const ACADEMIC_PROFILE: ExportProfile = {
-  id: 'academic',
-  name: 'Academic',
-  description: 'Optimized for academic papers, theses, and publications',
-  formats: ['latex', 'markdown', 'json'],
+  id: "academic",
+  name: "Academic",
+  description: "Optimized for academic papers, theses, and publications",
+  formats: ["latex", "markdown", "json"],
   options: {
     includeCitations: true,
     includeMetadata: true,
     includeTimestamps: true,
     includeStatistics: true,
     includeTableOfContents: true,
-    latexDocumentClass: 'article',
+    latexDocumentClass: "article",
   },
   useCase:
-    'Use for generating content for academic papers, research documentation, or formal publications.',
-  tags: ['academic', 'formal', 'citations', 'latex'],
+    "Use for generating content for academic papers, research documentation, or formal publications.",
+  tags: ["academic", "formal", "citations", "latex"],
 };
 
 /**
  * Presentation profile - optimized for slides and visual presentations
  */
 const PRESENTATION_PROFILE: ExportProfile = {
-  id: 'presentation',
-  name: 'Presentation',
-  description: 'Optimized for slides, visual presentations, and diagrams',
-  formats: ['mermaid', 'svg', 'markdown'],
+  id: "presentation",
+  name: "Presentation",
+  description: "Optimized for slides, visual presentations, and diagrams",
+  formats: ["mermaid", "svg", "markdown"],
   options: {
     simplifyDiagrams: true,
     abbreviateModeNames: true,
@@ -135,18 +131,18 @@ const PRESENTATION_PROFILE: ExportProfile = {
     includeStatistics: false,
   },
   useCase:
-    'Use for creating visual content for presentations, slides, or dashboards.',
-  tags: ['presentation', 'visual', 'diagrams', 'slides'],
+    "Use for creating visual content for presentations, slides, or dashboards.",
+  tags: ["presentation", "visual", "diagrams", "slides"],
 };
 
 /**
  * Documentation profile - optimized for technical documentation
  */
 const DOCUMENTATION_PROFILE: ExportProfile = {
-  id: 'documentation',
-  name: 'Documentation',
-  description: 'Optimized for technical documentation and READMEs',
-  formats: ['markdown', 'mermaid', 'ascii'],
+  id: "documentation",
+  name: "Documentation",
+  description: "Optimized for technical documentation and READMEs",
+  formats: ["markdown", "mermaid", "ascii"],
   options: {
     includeMetadata: true,
     includeTimestamps: true,
@@ -155,39 +151,39 @@ const DOCUMENTATION_PROFILE: ExportProfile = {
     simplifyDiagrams: false,
   },
   useCase:
-    'Use for creating technical documentation, README files, or knowledge base articles.',
-  tags: ['documentation', 'technical', 'readme', 'markdown'],
+    "Use for creating technical documentation, README files, or knowledge base articles.",
+  tags: ["documentation", "technical", "readme", "markdown"],
 };
 
 /**
  * Archive profile - comprehensive export for long-term storage
  */
 const ARCHIVE_PROFILE: ExportProfile = {
-  id: 'archive',
-  name: 'Archive',
-  description: 'Comprehensive export for long-term storage and backup',
-  formats: ['json', 'markdown', 'latex', 'jupyter'],
+  id: "archive",
+  name: "Archive",
+  description: "Comprehensive export for long-term storage and backup",
+  formats: ["json", "markdown", "latex", "jupyter"],
   options: {
     includeCitations: true,
     includeMetadata: true,
     includeTimestamps: true,
     includeStatistics: true,
     includeTableOfContents: true,
-    jupyterKernel: 'python3',
+    jupyterKernel: "python3",
   },
   useCase:
-    'Use for creating comprehensive backups or archiving reasoning sessions.',
-  tags: ['archive', 'backup', 'comprehensive', 'storage'],
+    "Use for creating comprehensive backups or archiving reasoning sessions.",
+  tags: ["archive", "backup", "comprehensive", "storage"],
 };
 
 /**
  * Minimal profile - lightweight export with essential content only
  */
 const MINIMAL_PROFILE: ExportProfile = {
-  id: 'minimal',
-  name: 'Minimal',
-  description: 'Lightweight export with essential content only',
-  formats: ['json', 'markdown'],
+  id: "minimal",
+  name: "Minimal",
+  description: "Lightweight export with essential content only",
+  formats: ["json", "markdown"],
   options: {
     includeMetadata: false,
     includeTimestamps: false,
@@ -195,8 +191,8 @@ const MINIMAL_PROFILE: ExportProfile = {
     simplifyDiagrams: true,
     abbreviateModeNames: true,
   },
-  useCase: 'Use for quick exports or when storage/bandwidth is limited.',
-  tags: ['minimal', 'lightweight', 'quick'],
+  useCase: "Use for quick exports or when storage/bandwidth is limited.",
+  tags: ["minimal", "lightweight", "quick"],
 };
 
 // ============================================================================
@@ -221,7 +217,9 @@ export const EXPORT_PROFILES: Record<ExportProfileId, ExportProfile> = {
 /**
  * Get an export profile by ID
  */
-export function getExportProfile(id: ExportProfileId): ExportProfile | undefined {
+export function getExportProfile(
+  id: ExportProfileId,
+): ExportProfile | undefined {
   return EXPORT_PROFILES[id];
 }
 
@@ -238,14 +236,16 @@ export function getAllExportProfiles(): ExportProfile[] {
 export function getExportProfilesByTag(tag: string): ExportProfile[] {
   const lowerTag = tag.toLowerCase();
   return getAllExportProfiles().filter((p) =>
-    p.tags.some((t) => t.toLowerCase() === lowerTag)
+    p.tags.some((t) => t.toLowerCase() === lowerTag),
   );
 }
 
 /**
  * Get profiles that include a specific format
  */
-export function getExportProfilesByFormat(format: ExportFormatType): ExportProfile[] {
+export function getExportProfilesByFormat(
+  format: ExportFormatType,
+): ExportProfile[] {
   return getAllExportProfiles().filter((p) => p.formats.includes(format));
 }
 
@@ -276,7 +276,7 @@ export interface ExportProfileMetadata {
 }
 
 export function getExportProfileMetadata(
-  id: ExportProfileId
+  id: ExportProfileId,
 ): ExportProfileMetadata | undefined {
   const profile = EXPORT_PROFILES[id];
   if (!profile) return undefined;
@@ -297,7 +297,7 @@ export function getExportProfileMetadata(
 export function combineExportProfiles(
   profileIds: ExportProfileId[],
   name: string,
-  mergeOptions: 'union' | 'intersection' = 'union'
+  mergeOptions: "union" | "intersection" = "union",
 ): ExportProfile {
   const profiles = profileIds
     .map((id) => EXPORT_PROFILES[id])
@@ -305,29 +305,29 @@ export function combineExportProfiles(
 
   if (profiles.length === 0) {
     return {
-      id: 'minimal' as ExportProfileId,
+      id: "minimal" as ExportProfileId,
       name,
-      description: 'Custom combined profile',
-      formats: ['json', 'markdown'],
+      description: "Custom combined profile",
+      formats: ["json", "markdown"],
       options: {},
-      useCase: 'Custom profile',
-      tags: ['custom'],
+      useCase: "Custom profile",
+      tags: ["custom"],
     };
   }
 
   // Merge formats
   let formats: ExportFormatType[];
-  if (mergeOptions === 'union') {
+  if (mergeOptions === "union") {
     const formatSet = new Set<ExportFormatType>();
     profiles.forEach((p) => p.formats.forEach((f) => formatSet.add(f)));
     formats = Array.from(formatSet);
   } else {
     // Intersection - only formats present in all profiles
     formats = profiles[0].formats.filter((f) =>
-      profiles.every((p) => p.formats.includes(f))
+      profiles.every((p) => p.formats.includes(f)),
     );
     if (formats.length === 0) {
-      formats = ['json', 'markdown']; // Default fallback
+      formats = ["json", "markdown"]; // Default fallback
     }
   }
 
@@ -338,15 +338,15 @@ export function combineExportProfiles(
   // Merge tags
   const tagSet = new Set<string>();
   profiles.forEach((p) => p.tags.forEach((t) => tagSet.add(t)));
-  tagSet.add('custom');
+  tagSet.add("custom");
 
   return {
     id: `custom_${Date.now()}` as ExportProfileId,
     name,
-    description: `Combined profile from: ${profileIds.join(', ')}`,
+    description: `Combined profile from: ${profileIds.join(", ")}`,
     formats,
     options: mergedOptions,
-    useCase: 'Custom combined profile',
+    useCase: "Custom combined profile",
     tags: Array.from(tagSet),
   };
 }
@@ -360,39 +360,47 @@ export function recommendExportProfile(keywords: string[]): ExportProfileId {
   // Check for academic keywords
   if (
     lowerKeywords.some((k) =>
-      ['paper', 'thesis', 'publication', 'academic', 'research', 'latex', 'citation'].includes(k)
+      [
+        "paper",
+        "thesis",
+        "publication",
+        "academic",
+        "research",
+        "latex",
+        "citation",
+      ].includes(k),
     )
   ) {
-    return 'academic';
+    return "academic";
   }
 
   // Check for presentation keywords
   if (
     lowerKeywords.some((k) =>
-      ['slide', 'presentation', 'visual', 'diagram', 'dashboard'].includes(k)
+      ["slide", "presentation", "visual", "diagram", "dashboard"].includes(k),
     )
   ) {
-    return 'presentation';
+    return "presentation";
   }
 
   // Check for documentation keywords
   if (
     lowerKeywords.some((k) =>
-      ['documentation', 'readme', 'technical', 'doc', 'wiki'].includes(k)
+      ["documentation", "readme", "technical", "doc", "wiki"].includes(k),
     )
   ) {
-    return 'documentation';
+    return "documentation";
   }
 
   // Check for archive keywords
   if (
     lowerKeywords.some((k) =>
-      ['archive', 'backup', 'storage', 'comprehensive', 'full'].includes(k)
+      ["archive", "backup", "storage", "comprehensive", "full"].includes(k),
     )
   ) {
-    return 'archive';
+    return "archive";
   }
 
   // Default to minimal
-  return 'minimal';
+  return "minimal";
 }

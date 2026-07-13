@@ -5,7 +5,7 @@
  * Uses pure mathematical algorithms without external dependencies.
  */
 
-import type { Distribution, SamplingResult } from '../types.js';
+import type { Distribution, SamplingResult } from "../types.js";
 
 // ============================================================================
 // SAMPLER INTERFACE
@@ -44,7 +44,7 @@ export class NormalSampler implements DistributionSampler {
 
   constructor(mean: number, stdDev: number, rng: () => number = Math.random) {
     if (stdDev <= 0) {
-      throw new Error('Standard deviation must be positive');
+      throw new Error("Standard deviation must be positive");
     }
     this.mean = mean;
     this.stdDev = stdDev;
@@ -65,7 +65,7 @@ export class NormalSampler implements DistributionSampler {
       s = u * u + v * v;
     } while (s >= 1 || s === 0);
 
-    const mul = Math.sqrt(-2 * Math.log(s) / s);
+    const mul = Math.sqrt((-2 * Math.log(s)) / s);
     this.spare = v * mul;
     this.hasSpare = true;
 
@@ -85,7 +85,7 @@ export class NormalSampler implements DistributionSampler {
   }
 
   getType(): string {
-    return 'normal';
+    return "normal";
   }
 }
 
@@ -103,7 +103,7 @@ export class UniformSampler implements DistributionSampler {
 
   constructor(min: number, max: number, rng: () => number = Math.random) {
     if (min >= max) {
-      throw new Error('min must be less than max');
+      throw new Error("min must be less than max");
     }
     this.min = min;
     this.max = max;
@@ -127,7 +127,7 @@ export class UniformSampler implements DistributionSampler {
   }
 
   getType(): string {
-    return 'uniform';
+    return "uniform";
   }
 }
 
@@ -144,7 +144,7 @@ export class ExponentialSampler implements DistributionSampler {
 
   constructor(rate: number, rng: () => number = Math.random) {
     if (rate <= 0) {
-      throw new Error('Rate must be positive');
+      throw new Error("Rate must be positive");
     }
     this.rate = rate;
     this.rng = rng;
@@ -168,7 +168,7 @@ export class ExponentialSampler implements DistributionSampler {
   }
 
   getType(): string {
-    return 'exponential';
+    return "exponential";
   }
 }
 
@@ -186,7 +186,7 @@ export class PoissonSampler implements DistributionSampler {
 
   constructor(lambda: number, rng: () => number = Math.random) {
     if (lambda <= 0) {
-      throw new Error('Lambda must be positive');
+      throw new Error("Lambda must be positive");
     }
     this.lambda = lambda;
     this.rng = rng;
@@ -217,7 +217,11 @@ export class PoissonSampler implements DistributionSampler {
 
   private sampleNormalApprox(): number {
     // Use normal approximation for large lambda
-    const normalSampler = new NormalSampler(this.lambda, Math.sqrt(this.lambda), this.rng);
+    const normalSampler = new NormalSampler(
+      this.lambda,
+      Math.sqrt(this.lambda),
+      this.rng,
+    );
     return Math.max(0, Math.round(normalSampler.sample()));
   }
 
@@ -234,7 +238,7 @@ export class PoissonSampler implements DistributionSampler {
   }
 
   getType(): string {
-    return 'poisson';
+    return "poisson";
   }
 }
 
@@ -252,10 +256,10 @@ export class BinomialSampler implements DistributionSampler {
 
   constructor(n: number, p: number, rng: () => number = Math.random) {
     if (n <= 0 || !Number.isInteger(n)) {
-      throw new Error('n must be a positive integer');
+      throw new Error("n must be a positive integer");
     }
     if (p < 0 || p > 1) {
-      throw new Error('p must be between 0 and 1');
+      throw new Error("p must be between 0 and 1");
     }
     this.n = n;
     this.p = p;
@@ -301,7 +305,7 @@ export class BinomialSampler implements DistributionSampler {
   }
 
   getType(): string {
-    return 'binomial';
+    return "binomial";
   }
 }
 
@@ -318,7 +322,10 @@ export class CategoricalSampler implements DistributionSampler {
   private cumulativeProbs: number[];
   private rng: () => number;
 
-  constructor(probabilities: Record<string, number>, rng: () => number = Math.random) {
+  constructor(
+    probabilities: Record<string, number>,
+    rng: () => number = Math.random,
+  ) {
     this.probabilities = new Map(Object.entries(probabilities));
     this.categories = Object.keys(probabilities);
     this.rng = rng;
@@ -326,7 +333,7 @@ export class CategoricalSampler implements DistributionSampler {
     // Validate probabilities sum to 1
     const sum = Object.values(probabilities).reduce((a, b) => a + b, 0);
     if (Math.abs(sum - 1) > 0.001) {
-      throw new Error('Probabilities must sum to 1');
+      throw new Error("Probabilities must sum to 1");
     }
 
     // Compute cumulative probabilities
@@ -361,7 +368,7 @@ export class CategoricalSampler implements DistributionSampler {
   }
 
   sampleManyCategories(count: number): string[] {
-    return this.sampleMany(count).map(i => this.categories[i]);
+    return this.sampleMany(count).map((i) => this.categories[i]);
   }
 
   getParameters(): Record<string, number> {
@@ -369,7 +376,7 @@ export class CategoricalSampler implements DistributionSampler {
   }
 
   getType(): string {
-    return 'categorical';
+    return "categorical";
   }
 }
 
@@ -387,7 +394,7 @@ export class BetaSampler implements DistributionSampler {
 
   constructor(alpha: number, beta: number, rng: () => number = Math.random) {
     if (alpha <= 0 || beta <= 0) {
-      throw new Error('Alpha and beta must be positive');
+      throw new Error("Alpha and beta must be positive");
     }
     this.alpha = alpha;
     this.beta = beta;
@@ -446,7 +453,7 @@ export class BetaSampler implements DistributionSampler {
   }
 
   getType(): string {
-    return 'beta';
+    return "beta";
   }
 }
 
@@ -464,7 +471,7 @@ export class GammaSampler implements DistributionSampler {
 
   constructor(shape: number, scale: number, rng: () => number = Math.random) {
     if (shape <= 0 || scale <= 0) {
-      throw new Error('Shape and scale must be positive');
+      throw new Error("Shape and scale must be positive");
     }
     this.shape = shape;
     this.scale = scale;
@@ -517,7 +524,7 @@ export class GammaSampler implements DistributionSampler {
   }
 
   getType(): string {
-    return 'gamma';
+    return "gamma";
   }
 }
 
@@ -528,25 +535,28 @@ export class GammaSampler implements DistributionSampler {
 /**
  * Create a distribution sampler from a distribution specification
  */
-export function createSampler(dist: Distribution, rng: () => number = Math.random): DistributionSampler {
+export function createSampler(
+  dist: Distribution,
+  rng: () => number = Math.random,
+): DistributionSampler {
   switch (dist.type) {
-    case 'normal':
+    case "normal":
       return new NormalSampler(dist.mean, dist.stdDev, rng);
-    case 'uniform':
+    case "uniform":
       return new UniformSampler(dist.min, dist.max, rng);
-    case 'exponential':
+    case "exponential":
       return new ExponentialSampler(dist.rate, rng);
-    case 'poisson':
+    case "poisson":
       return new PoissonSampler(dist.lambda, rng);
-    case 'binomial':
+    case "binomial":
       return new BinomialSampler(dist.n, dist.p, rng);
-    case 'categorical':
+    case "categorical":
       return new CategoricalSampler(dist.probabilities, rng);
-    case 'beta':
+    case "beta":
       return new BetaSampler(dist.alpha, dist.beta, rng);
-    case 'gamma':
+    case "gamma":
       return new GammaSampler(dist.shape, dist.scale, rng);
-    case 'lognormal':
+    case "lognormal":
       // LogNormal: exp(Normal(mu, sigma))
       const normalSampler = new NormalSampler(dist.mu, dist.sigma, rng);
       return {
@@ -559,9 +569,9 @@ export function createSampler(dist: Distribution, rng: () => number = Math.rando
           return samples;
         },
         getParameters: () => ({ mu: dist.mu, sigma: dist.sigma }),
-        getType: () => 'lognormal',
+        getType: () => "lognormal",
       };
-    case 'triangular':
+    case "triangular":
       return {
         sample: () => sampleTriangular(dist.min, dist.mode, dist.max, rng),
         sampleMany: (count: number) => {
@@ -571,10 +581,14 @@ export function createSampler(dist: Distribution, rng: () => number = Math.rando
           }
           return samples;
         },
-        getParameters: () => ({ min: dist.min, mode: dist.mode, max: dist.max }),
-        getType: () => 'triangular',
+        getParameters: () => ({
+          min: dist.min,
+          mode: dist.mode,
+          max: dist.max,
+        }),
+        getType: () => "triangular",
       };
-    case 'custom':
+    case "custom":
       return {
         sample: dist.sampler,
         sampleMany: (count: number) => {
@@ -585,7 +599,7 @@ export function createSampler(dist: Distribution, rng: () => number = Math.rando
           return samples;
         },
         getParameters: () => ({}),
-        getType: () => 'custom',
+        getType: () => "custom",
       };
     default:
       throw new Error(`Unknown distribution type: ${(dist as any).type}`);
@@ -595,7 +609,12 @@ export function createSampler(dist: Distribution, rng: () => number = Math.rando
 /**
  * Sample from triangular distribution
  */
-function sampleTriangular(min: number, mode: number, max: number, rng: () => number): number {
+function sampleTriangular(
+  min: number,
+  mode: number,
+  max: number,
+  rng: () => number,
+): number {
   const u = rng();
   const fc = (mode - min) / (max - min);
 
@@ -612,7 +631,7 @@ function sampleTriangular(min: number, mode: number, max: number, rng: () => num
 export function sampleWithStatistics(
   dist: Distribution,
   count: number,
-  rng: () => number = Math.random
+  rng: () => number = Math.random,
 ): SamplingResult {
   const startTime = Date.now();
   const sampler = createSampler(dist, rng);

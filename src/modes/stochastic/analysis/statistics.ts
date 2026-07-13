@@ -5,7 +5,7 @@
  * Includes descriptive statistics, credible intervals, and posterior analysis.
  */
 
-import type { SampleStatistics } from '../types.js';
+import type { SampleStatistics } from "../types.js";
 
 // ============================================================================
 // DESCRIPTIVE STATISTICS
@@ -43,7 +43,9 @@ export function median(values: number[]): number {
   if (values.length === 0) return 0;
   const sorted = [...values].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  return sorted.length % 2 !== 0
+    ? sorted[mid]
+    : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
 /**
@@ -51,7 +53,7 @@ export function median(values: number[]): number {
  */
 export function percentile(values: number[], p: number): number {
   if (values.length === 0) return 0;
-  if (p < 0 || p > 100) throw new Error('Percentile must be between 0 and 100');
+  if (p < 0 || p > 100) throw new Error("Percentile must be between 0 and 100");
 
   const sorted = [...values].sort((a, b) => a - b);
   const idx = (p / 100) * (sorted.length - 1);
@@ -65,7 +67,10 @@ export function percentile(values: number[], p: number): number {
 /**
  * Compute multiple percentiles
  */
-export function percentiles(values: number[], ps: number[]): Record<number, number> {
+export function percentiles(
+  values: number[],
+  ps: number[],
+): Record<number, number> {
   const result: Record<number, number> = {};
   for (const p of ps) {
     result[p] = percentile(values, p);
@@ -98,7 +103,7 @@ export function kurtosis(values: number[]): number {
   if (s === 0) return 0;
 
   const sum = values.reduce((acc, v) => acc + ((v - m) / s) ** 4, 0);
-  const rawKurtosis = (n * (n + 1) / ((n - 1) * (n - 2) * (n - 3))) * sum;
+  const rawKurtosis = ((n * (n + 1)) / ((n - 1) * (n - 2) * (n - 3))) * sum;
   const correction = (3 * (n - 1) ** 2) / ((n - 2) * (n - 3));
   return rawKurtosis - correction;
 }
@@ -231,26 +236,32 @@ export interface CredibleInterval {
   /** Probability mass */
   probability: number;
   /** Interval type */
-  type: 'equal-tailed' | 'hpd';
+  type: "equal-tailed" | "hpd";
 }
 
 /**
  * Compute equal-tailed credible interval
  */
-export function equalTailedInterval(values: number[], probability = 0.95): CredibleInterval {
+export function equalTailedInterval(
+  values: number[],
+  probability = 0.95,
+): CredibleInterval {
   const alpha = 1 - probability;
   const lower = percentile(values, (alpha / 2) * 100);
   const upper = percentile(values, (1 - alpha / 2) * 100);
-  return { lower, upper, probability, type: 'equal-tailed' };
+  return { lower, upper, probability, type: "equal-tailed" };
 }
 
 /**
  * Compute highest posterior density (HPD) interval
  * Uses a simple algorithm that finds the narrowest interval
  */
-export function hpdInterval(values: number[], probability = 0.95): CredibleInterval {
+export function hpdInterval(
+  values: number[],
+  probability = 0.95,
+): CredibleInterval {
   if (values.length === 0) {
-    return { lower: 0, upper: 0, probability, type: 'hpd' };
+    return { lower: 0, upper: 0, probability, type: "hpd" };
   }
 
   const sorted = [...values].sort((a, b) => a - b);
@@ -272,7 +283,7 @@ export function hpdInterval(values: number[], probability = 0.95): CredibleInter
     }
   }
 
-  return { lower: bestLower, upper: bestUpper, probability, type: 'hpd' };
+  return { lower: bestLower, upper: bestUpper, probability, type: "hpd" };
 }
 
 // ============================================================================
@@ -284,7 +295,7 @@ export function hpdInterval(values: number[], probability = 0.95): CredibleInter
  */
 export function computeSampleStatistics(
   samples: number[][],
-  percentilePoints: number[] = [2.5, 25, 50, 75, 97.5]
+  percentilePoints: number[] = [2.5, 25, 50, 75, 97.5],
 ): SampleStatistics {
   if (samples.length === 0) {
     return {
@@ -392,7 +403,10 @@ export function estimateESS(values: number[]): number {
 /**
  * Summarize a posterior distribution from samples
  */
-export function summarizePosterior(values: number[], name: string): PosteriorSummary {
+export function summarizePosterior(
+  values: number[],
+  name: string,
+): PosteriorSummary {
   const ess = estimateESS(values);
   const m = mean(values);
   const sd = stdDev(values, m);
@@ -414,7 +428,7 @@ export function summarizePosterior(values: number[], name: string): PosteriorSum
  */
 export function summarizeAllPosteriors(
   samples: number[][],
-  variableNames: string[]
+  variableNames: string[],
 ): PosteriorSummary[] {
   if (samples.length === 0) return [];
 
@@ -437,7 +451,10 @@ export function summarizeAllPosteriors(
 /**
  * Estimate probability that a variable exceeds a threshold
  */
-export function probExceedsThreshold(values: number[], threshold: number): number {
+export function probExceedsThreshold(
+  values: number[],
+  threshold: number,
+): number {
   if (values.length === 0) return 0;
   const count = values.filter((v) => v > threshold).length;
   return count / values.length;
@@ -446,7 +463,11 @@ export function probExceedsThreshold(values: number[], threshold: number): numbe
 /**
  * Estimate probability that a variable is in a range
  */
-export function probInRange(values: number[], lower: number, upper: number): number {
+export function probInRange(
+  values: number[],
+  lower: number,
+  upper: number,
+): number {
   if (values.length === 0) return 0;
   const count = values.filter((v) => v >= lower && v <= upper).length;
   return count / values.length;
@@ -522,7 +543,11 @@ export function histogram(values: number[], numBins = 30): HistogramBin[] {
 /**
  * Kernel density estimate using Gaussian kernel
  */
-export function kde(values: number[], numPoints = 100, bandwidth?: number): Array<{ x: number; density: number }> {
+export function kde(
+  values: number[],
+  numPoints = 100,
+  bandwidth?: number,
+): Array<{ x: number; density: number }> {
   if (values.length === 0) return [];
 
   const n = values.length;

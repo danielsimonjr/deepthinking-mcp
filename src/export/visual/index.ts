@@ -6,15 +6,15 @@
  */
 
 // Re-export types
-export { type VisualFormat, type VisualExportOptions } from './types.js';
-export { sanitizeId } from './utils.js';
+export { type VisualFormat, type VisualExportOptions } from "./types.js";
+export { sanitizeId } from "./utils.js";
 
 // Re-export VisualExporter class (separated to break circular dependency)
-export { VisualExporter } from './visual-exporter.js';
+export { VisualExporter } from "./visual-exporter.js";
 
 // Re-export all mode-specific exporters from modes/
-export * from './modes/index.js';
+export * from "./modes/index.js";
 
 // Re-export all utilities from utils/ (AFTER modes to avoid circular deps)
 // Note: latex.ts and latex-mermaid-integration.ts import VisualExporter from visual-exporter.ts directly
-export * from './utils/index.js';
+export * from "./utils/index.js";

@@ -8,8 +8,8 @@
  * - Zero-sum game detection
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode, GameTheoryThought } from '../../types/core.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode, GameTheoryThought } from "../../types/core.js";
 import type {
   Game,
   Player,
@@ -18,8 +18,8 @@ import type {
   PayoffEntry,
   NashEquilibrium,
   DominantStrategy,
-} from '../../types/modes/gametheory.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+} from "../../types/modes/gametheory.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -28,20 +28,20 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 /** Valid thought types for GameTheory mode */
 type GameTheoryThoughtType =
-  | 'game_definition'
-  | 'strategy_analysis'
-  | 'equilibrium_finding'
-  | 'payoff_computation'
-  | 'dominance_analysis'
-  | 'minimax_analysis'
-  | 'cooperative_analysis'
-  | 'coalition_formation'
-  | 'shapley_value'
-  | 'core_analysis';
+  | "game_definition"
+  | "strategy_analysis"
+  | "equilibrium_finding"
+  | "payoff_computation"
+  | "dominance_analysis"
+  | "minimax_analysis"
+  | "cooperative_analysis"
+  | "coalition_formation"
+  | "shapley_value"
+  | "core_analysis";
 
 /**
  * GameTheoryHandler - Specialized handler for game-theoretic reasoning
@@ -55,29 +55,33 @@ type GameTheoryThoughtType =
  */
 export class GameTheoryHandler implements ModeHandler {
   readonly mode = ThinkingMode.GAMETHEORY;
-  readonly modeName = 'Game Theory';
-  readonly description = 'Strategic interaction analysis with Nash equilibria and payoff matrices';
+  readonly modeName = "Game Theory";
+  readonly description =
+    "Strategic interaction analysis with Nash equilibria and payoff matrices";
 
   /**
    * Supported thought types for game theory mode
    */
   private readonly supportedThoughtTypes = [
-    'game_definition',
-    'strategy_analysis',
-    'equilibrium_finding',
-    'payoff_computation',
-    'dominance_analysis',
-    'minimax_analysis',
-    'cooperative_analysis',
-    'coalition_formation',
-    'shapley_value',
-    'core_analysis',
+    "game_definition",
+    "strategy_analysis",
+    "equilibrium_finding",
+    "payoff_computation",
+    "dominance_analysis",
+    "minimax_analysis",
+    "cooperative_analysis",
+    "coalition_formation",
+    "shapley_value",
+    "core_analysis",
   ];
 
   /**
    * Create a game theory thought from input
    */
-  createThought(input: ThinkingToolInput, sessionId: string): GameTheoryThought {
+  createThought(
+    input: ThinkingToolInput,
+    sessionId: string,
+  ): GameTheoryThought {
     const inputAny = input as any;
 
     // Extract game theory components
@@ -89,13 +93,22 @@ export class GameTheoryHandler implements ModeHandler {
     // Try to find Nash equilibria if payoff matrix is provided
     let nashEquilibria: NashEquilibrium[] | undefined = inputAny.nashEquilibria;
     if (!nashEquilibria && payoffMatrix && players.length > 0) {
-      nashEquilibria = this.findPureStrategyNashEquilibria(payoffMatrix, players, strategies);
+      nashEquilibria = this.findPureStrategyNashEquilibria(
+        payoffMatrix,
+        players,
+        strategies,
+      );
     }
 
     // Find dominant strategies
-    let dominantStrategies: DominantStrategy[] | undefined = inputAny.dominantStrategies;
+    let dominantStrategies: DominantStrategy[] | undefined =
+      inputAny.dominantStrategies;
     if (!dominantStrategies && payoffMatrix && players.length > 0) {
-      dominantStrategies = this.findDominantStrategies(payoffMatrix, players, strategies);
+      dominantStrategies = this.findDominantStrategies(
+        payoffMatrix,
+        players,
+        strategies,
+      );
     }
 
     return {
@@ -140,16 +153,20 @@ export class GameTheoryHandler implements ModeHandler {
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
@@ -178,7 +195,11 @@ export class GameTheoryHandler implements ModeHandler {
 
     // Validate payoff matrix
     if (payoffMatrix) {
-      const matrixValidation = this.validatePayoffMatrix(payoffMatrix, players, strategies);
+      const matrixValidation = this.validatePayoffMatrix(
+        payoffMatrix,
+        players,
+        strategies,
+      );
       if (!matrixValidation.valid) {
         errors.push(...matrixValidation.errors);
       }
@@ -189,10 +210,10 @@ export class GameTheoryHandler implements ModeHandler {
     if (players.length === 0 && !payoffMatrix) {
       warnings.push(
         createValidationWarning(
-          'players',
-          'No players or payoff matrix defined',
-          'Define players and their strategies for game theory analysis'
-        )
+          "players",
+          "No players or payoff matrix defined",
+          "Define players and their strategies for game theory analysis",
+        ),
       );
     }
 
@@ -201,10 +222,10 @@ export class GameTheoryHandler implements ModeHandler {
     if (!game && players.length > 0) {
       warnings.push(
         createValidationWarning(
-          'game',
-          'No formal game definition provided',
-          'Consider adding a Game object with type, name, and properties'
-        )
+          "game",
+          "No formal game definition provided",
+          "Consider adding a Game object with type, name, and properties",
+        ),
       );
     }
 
@@ -252,7 +273,7 @@ export class GameTheoryHandler implements ModeHandler {
 
       if (isZeroSum) {
         enhancements.suggestions!.push(
-          'This is a zero-sum game. Consider minimax strategies.'
+          "This is a zero-sum game. Consider minimax strategies.",
         );
         enhancements.relatedModes!.unshift(ThinkingMode.OPTIMIZATION);
       }
@@ -264,52 +285,63 @@ export class GameTheoryHandler implements ModeHandler {
 
       if (thought.nashEquilibria.length > 1) {
         enhancements.suggestions!.push(
-          `Multiple Nash equilibria found (${thought.nashEquilibria.length}). Consider coordination mechanisms or focal points.`
+          `Multiple Nash equilibria found (${thought.nashEquilibria.length}). Consider coordination mechanisms or focal points.`,
         );
         enhancements.guidingQuestions!.push(
-          'Which equilibrium is most likely to emerge? Are there Schelling focal points?'
+          "Which equilibrium is most likely to emerge? Are there Schelling focal points?",
         );
       }
 
       // Check for Pareto efficiency of equilibria
-      const paretoOptimal = this.checkParetoOptimality(thought.nashEquilibria, thought.payoffMatrix);
+      const paretoOptimal = this.checkParetoOptimality(
+        thought.nashEquilibria,
+        thought.payoffMatrix,
+      );
       if (!paretoOptimal) {
         enhancements.warnings!.push(
-          "Nash equilibrium may not be Pareto optimal (like in Prisoner's Dilemma)"
+          "Nash equilibrium may not be Pareto optimal (like in Prisoner's Dilemma)",
         );
         enhancements.guidingQuestions!.push(
-          'Is there a mechanism to achieve a Pareto-superior outcome through cooperation?'
+          "Is there a mechanism to achieve a Pareto-superior outcome through cooperation?",
         );
       }
     } else if (thought.payoffMatrix) {
       enhancements.suggestions!.push(
-        'No pure strategy Nash equilibria found. Consider mixed strategies.'
+        "No pure strategy Nash equilibria found. Consider mixed strategies.",
       );
       enhancements.guidingQuestions!.push(
-        'What are the optimal mixed strategy probabilities for each player?'
+        "What are the optimal mixed strategy probabilities for each player?",
       );
     }
 
     // Dominant strategy analysis
     if (thought.dominantStrategies && thought.dominantStrategies.length > 0) {
-      enhancements.metrics!.dominantStrategyCount = thought.dominantStrategies.length;
+      enhancements.metrics!.dominantStrategyCount =
+        thought.dominantStrategies.length;
       enhancements.suggestions!.push(
-        `${thought.dominantStrategies.length} dominant strategy(ies) identified. These simplify equilibrium analysis.`
+        `${thought.dominantStrategies.length} dominant strategy(ies) identified. These simplify equilibrium analysis.`,
       );
     }
 
     // Guide questions based on game type
     if (thought.game) {
-      if (thought.game.type === 'cooperative') {
+      if (thought.game.type === "cooperative") {
         enhancements.guidingQuestions!.push(
-          'What coalitions might form? How should payoffs be divided fairly?'
+          "What coalitions might form? How should payoffs be divided fairly?",
         );
-        enhancements.mentalModels!.push('Shapley Value', 'Core', 'Coalition Formation');
-      } else if (thought.game.type === 'extensive_form') {
+        enhancements.mentalModels!.push(
+          "Shapley Value",
+          "Core",
+          "Coalition Formation",
+        );
+      } else if (thought.game.type === "extensive_form") {
         enhancements.guidingQuestions!.push(
-          'What is the subgame perfect equilibrium? Use backward induction.'
+          "What is the subgame perfect equilibrium? Use backward induction.",
         );
-        enhancements.mentalModels!.push('Backward Induction', 'Subgame Perfect Equilibrium');
+        enhancements.mentalModels!.push(
+          "Backward Induction",
+          "Subgame Perfect Equilibrium",
+        );
       }
     }
 
@@ -326,17 +358,22 @@ export class GameTheoryHandler implements ModeHandler {
   /**
    * Resolve input thought type to valid GameTheory thought type
    */
-  private resolveThoughtType(inputType: string | undefined): GameTheoryThoughtType {
+  private resolveThoughtType(
+    inputType: string | undefined,
+  ): GameTheoryThoughtType {
     if (inputType && this.supportedThoughtTypes.includes(inputType)) {
       return inputType as GameTheoryThoughtType;
     }
-    return 'game_definition';
+    return "game_definition";
   }
 
   /**
    * Validate players array
    */
-  private validatePlayers(players: Player[], strategies: Strategy[]): ValidationResult {
+  private validatePlayers(
+    players: Player[],
+    strategies: Strategy[],
+  ): ValidationResult {
     const errors = [];
     const warnings = [];
     const playerIds = new Set<string>();
@@ -346,34 +383,37 @@ export class GameTheoryHandler implements ModeHandler {
       if (playerIds.has(player.id)) {
         errors.push(
           createValidationError(
-            'players',
+            "players",
             `Duplicate player ID: ${player.id}`,
-            'DUPLICATE_PLAYER_ID'
-          )
+            "DUPLICATE_PLAYER_ID",
+          ),
         );
       }
       playerIds.add(player.id);
 
       // Check player has strategies
-      if (!player.availableStrategies || player.availableStrategies.length === 0) {
+      if (
+        !player.availableStrategies ||
+        player.availableStrategies.length === 0
+      ) {
         warnings.push(
           createValidationWarning(
             `players.${player.id}`,
             `Player ${player.name || player.id} has no available strategies`,
-            'Define available strategies for meaningful game analysis'
-          )
+            "Define available strategies for meaningful game analysis",
+          ),
         );
       } else {
         // Validate strategy references
         for (const stratId of player.availableStrategies) {
-          const strategyExists = strategies.some(s => s.id === stratId);
+          const strategyExists = strategies.some((s) => s.id === stratId);
           if (!strategyExists && strategies.length > 0) {
             errors.push(
               createValidationError(
                 `players.${player.id}.availableStrategies`,
                 `Player references non-existent strategy: ${stratId}`,
-                'INVALID_STRATEGY_REFERENCE'
-              )
+                "INVALID_STRATEGY_REFERENCE",
+              ),
             );
           }
         }
@@ -390,33 +430,40 @@ export class GameTheoryHandler implements ModeHandler {
   /**
    * Validate strategies array
    */
-  private validateStrategies(strategies: Strategy[], players: Player[]): ValidationResult {
+  private validateStrategies(
+    strategies: Strategy[],
+    players: Player[],
+  ): ValidationResult {
     const errors = [];
     const warnings = [];
     const strategyIds = new Set<string>();
-    const playerIds = new Set(players.map(p => p.id));
+    const playerIds = new Set(players.map((p) => p.id));
 
     for (const strategy of strategies) {
       // Check for duplicate IDs
       if (strategyIds.has(strategy.id)) {
         errors.push(
           createValidationError(
-            'strategies',
+            "strategies",
             `Duplicate strategy ID: ${strategy.id}`,
-            'DUPLICATE_STRATEGY_ID'
-          )
+            "DUPLICATE_STRATEGY_ID",
+          ),
         );
       }
       strategyIds.add(strategy.id);
 
       // Validate player reference
-      if (strategy.playerId && !playerIds.has(strategy.playerId) && players.length > 0) {
+      if (
+        strategy.playerId &&
+        !playerIds.has(strategy.playerId) &&
+        players.length > 0
+      ) {
         errors.push(
           createValidationError(
             `strategies.${strategy.id}`,
             `Strategy references non-existent player: ${strategy.playerId}`,
-            'INVALID_PLAYER_REFERENCE'
-          )
+            "INVALID_PLAYER_REFERENCE",
+          ),
         );
       }
 
@@ -427,8 +474,8 @@ export class GameTheoryHandler implements ModeHandler {
             createValidationError(
               `strategies.${strategy.id}.probability`,
               `Mixed strategy probability (${strategy.probability}) must be between 0 and 1`,
-              'INVALID_PROBABILITY'
-            )
+              "INVALID_PROBABILITY",
+            ),
           );
         }
       }
@@ -436,16 +483,21 @@ export class GameTheoryHandler implements ModeHandler {
 
     // Check mixed strategy probabilities sum to 1 per player
     for (const player of players) {
-      const playerStrategies = strategies.filter(s => s.playerId === player.id && !s.isPure);
+      const playerStrategies = strategies.filter(
+        (s) => s.playerId === player.id && !s.isPure,
+      );
       if (playerStrategies.length > 0) {
-        const probSum = playerStrategies.reduce((sum, s) => sum + (s.probability || 0), 0);
+        const probSum = playerStrategies.reduce(
+          (sum, s) => sum + (s.probability || 0),
+          0,
+        );
         if (Math.abs(probSum - 1) > 0.001) {
           warnings.push(
             createValidationWarning(
               `strategies`,
               `Mixed strategy probabilities for player ${player.id} sum to ${probSum.toFixed(3)}, not 1`,
-              'Ensure mixed strategy probabilities sum to exactly 1'
-            )
+              "Ensure mixed strategy probabilities sum to exactly 1",
+            ),
           );
         }
       }
@@ -464,7 +516,7 @@ export class GameTheoryHandler implements ModeHandler {
   private validatePayoffMatrix(
     matrix: PayoffMatrix,
     _players: Player[],
-    strategies: Strategy[]
+    strategies: Strategy[],
   ): ValidationResult {
     const errors = [];
     const warnings = [];
@@ -473,10 +525,10 @@ export class GameTheoryHandler implements ModeHandler {
     if (matrix.players.length !== matrix.dimensions.length) {
       errors.push(
         createValidationError(
-          'payoffMatrix',
+          "payoffMatrix",
           `Player count (${matrix.players.length}) doesn't match dimension count (${matrix.dimensions.length})`,
-          'DIMENSION_MISMATCH'
-        )
+          "DIMENSION_MISMATCH",
+        ),
       );
     }
 
@@ -485,10 +537,10 @@ export class GameTheoryHandler implements ModeHandler {
     if (matrix.payoffs.length !== expectedEntries) {
       warnings.push(
         createValidationWarning(
-          'payoffMatrix.payoffs',
+          "payoffMatrix.payoffs",
           `Expected ${expectedEntries} payoff entries based on dimensions, got ${matrix.payoffs.length}`,
-          'Ensure all strategy combinations have payoff entries'
-        )
+          "Ensure all strategy combinations have payoff entries",
+        ),
       );
     }
 
@@ -502,8 +554,8 @@ export class GameTheoryHandler implements ModeHandler {
           createValidationError(
             `payoffMatrix.payoffs[${i}]`,
             `Strategy profile has ${entry.strategyProfile.length} strategies, expected ${matrix.players.length}`,
-            'INVALID_STRATEGY_PROFILE'
-          )
+            "INVALID_STRATEGY_PROFILE",
+          ),
         );
       }
 
@@ -513,21 +565,21 @@ export class GameTheoryHandler implements ModeHandler {
           createValidationError(
             `payoffMatrix.payoffs[${i}]`,
             `Payoff entry has ${entry.payoffs.length} values, expected ${matrix.players.length}`,
-            'INVALID_PAYOFF_COUNT'
-          )
+            "INVALID_PAYOFF_COUNT",
+          ),
         );
       }
 
       // Validate strategy references
       for (const stratId of entry.strategyProfile) {
-        const strategyExists = strategies.some(s => s.id === stratId);
+        const strategyExists = strategies.some((s) => s.id === stratId);
         if (!strategyExists && strategies.length > 0) {
           errors.push(
             createValidationError(
               `payoffMatrix.payoffs[${i}].strategyProfile`,
               `Payoff entry references non-existent strategy: ${stratId}`,
-              'INVALID_STRATEGY_REFERENCE'
-            )
+              "INVALID_STRATEGY_REFERENCE",
+            ),
           );
         }
       }
@@ -549,7 +601,7 @@ export class GameTheoryHandler implements ModeHandler {
   private findPureStrategyNashEquilibria(
     matrix: PayoffMatrix,
     players: Player[],
-    strategies: Strategy[]
+    strategies: Strategy[],
   ): NashEquilibrium[] {
     const equilibria: NashEquilibrium[] = [];
 
@@ -565,9 +617,19 @@ export class GameTheoryHandler implements ModeHandler {
           id: randomUUID(),
           strategyProfile: entry.strategyProfile,
           payoffs: entry.payoffs,
-          type: 'pure',
-          isStrict: this.isStrictEquilibrium(entry, matrix, players, strategies),
-          stability: this.calculateEquilibriumStability(entry, matrix, players, strategies),
+          type: "pure",
+          isStrict: this.isStrictEquilibrium(
+            entry,
+            matrix,
+            players,
+            strategies,
+          ),
+          stability: this.calculateEquilibriumStability(
+            entry,
+            matrix,
+            players,
+            strategies,
+          ),
         });
       }
     }
@@ -582,7 +644,7 @@ export class GameTheoryHandler implements ModeHandler {
     entry: PayoffEntry,
     matrix: PayoffMatrix,
     _players: Player[],
-    _strategies: Strategy[]
+    _strategies: Strategy[],
   ): boolean {
     // For each player, check if they can improve by deviating
     for (let playerIdx = 0; playerIdx < matrix.players.length; playerIdx++) {
@@ -609,7 +671,10 @@ export class GameTheoryHandler implements ModeHandler {
         }
 
         // If only this player differs and they get a better payoff, not an equilibrium
-        if (onlyThisPlayerDiffers && altEntry.payoffs[playerIdx] > currentPayoff) {
+        if (
+          onlyThisPlayerDiffers &&
+          altEntry.payoffs[playerIdx] > currentPayoff
+        ) {
           return false;
         }
       }
@@ -625,7 +690,7 @@ export class GameTheoryHandler implements ModeHandler {
     entry: PayoffEntry,
     matrix: PayoffMatrix,
     _players: Player[],
-    _strategies: Strategy[]
+    _strategies: Strategy[],
   ): boolean {
     for (let playerIdx = 0; playerIdx < matrix.players.length; playerIdx++) {
       const currentPayoff = entry.payoffs[playerIdx];
@@ -647,7 +712,10 @@ export class GameTheoryHandler implements ModeHandler {
         }
 
         // If deviation gives same payoff, not strict
-        if (onlyThisPlayerDiffers && altEntry.payoffs[playerIdx] >= currentPayoff) {
+        if (
+          onlyThisPlayerDiffers &&
+          altEntry.payoffs[playerIdx] >= currentPayoff
+        ) {
           return false;
         }
       }
@@ -663,7 +731,7 @@ export class GameTheoryHandler implements ModeHandler {
     entry: PayoffEntry,
     matrix: PayoffMatrix,
     _players: Player[],
-    _strategies: Strategy[]
+    _strategies: Strategy[],
   ): number {
     // Calculate average deviation penalty
     let totalPenalty = 0;
@@ -708,7 +776,7 @@ export class GameTheoryHandler implements ModeHandler {
   private findDominantStrategies(
     matrix: PayoffMatrix,
     players: Player[],
-    strategies: Strategy[]
+    strategies: Strategy[],
   ): DominantStrategy[] {
     const dominantStrategies: DominantStrategy[] = [];
 
@@ -719,17 +787,27 @@ export class GameTheoryHandler implements ModeHandler {
 
     for (let playerIdx = 0; playerIdx < players.length; playerIdx++) {
       const player = players[playerIdx];
-      const playerStrategies = strategies.filter(s => s.playerId === player.id);
+      const playerStrategies = strategies.filter(
+        (s) => s.playerId === player.id,
+      );
 
       for (const strategy of playerStrategies) {
-        const dominates = this.checkDominance(strategy, playerIdx, matrix, playerStrategies);
+        const dominates = this.checkDominance(
+          strategy,
+          playerIdx,
+          matrix,
+          playerStrategies,
+        );
         if (dominates.length > 0) {
           dominantStrategies.push({
             playerId: player.id,
             strategyId: strategy.id,
-            type: dominates.length === playerStrategies.length - 1 ? 'strictly_dominant' : 'weakly_dominant',
+            type:
+              dominates.length === playerStrategies.length - 1
+                ? "strictly_dominant"
+                : "weakly_dominant",
             dominatesStrategies: dominates,
-            justification: `Strategy ${strategy.name || strategy.id} dominates: ${dominates.join(', ')}`,
+            justification: `Strategy ${strategy.name || strategy.id} dominates: ${dominates.join(", ")}`,
           });
         }
       }
@@ -745,7 +823,7 @@ export class GameTheoryHandler implements ModeHandler {
     strategy: Strategy,
     playerIdx: number,
     matrix: PayoffMatrix,
-    playerStrategies: Strategy[]
+    playerStrategies: Strategy[],
   ): string[] {
     const dominates: string[] = [];
 
@@ -760,7 +838,9 @@ export class GameTheoryHandler implements ModeHandler {
       const otherPayoffs = new Map<string, number>();
 
       for (const entry of matrix.payoffs) {
-        const key = entry.strategyProfile.filter((_, i) => i !== playerIdx).join('-');
+        const key = entry.strategyProfile
+          .filter((_, i) => i !== playerIdx)
+          .join("-");
 
         if (entry.strategyProfile[playerIdx] === strategy.id) {
           strategyPayoffs.set(key, entry.payoffs[playerIdx]);
@@ -810,7 +890,7 @@ export class GameTheoryHandler implements ModeHandler {
    */
   private checkParetoOptimality(
     equilibria: NashEquilibrium[],
-    matrix: PayoffMatrix | undefined
+    matrix: PayoffMatrix | undefined,
   ): boolean {
     if (!matrix || equilibria.length === 0) {
       return true; // Assume optimal if no data

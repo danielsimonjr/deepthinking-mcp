@@ -3,7 +3,7 @@
  * What-if analysis and alternative scenario exploration
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Condition in a scenario
@@ -19,7 +19,7 @@ export interface Condition {
  */
 export interface Outcome {
   description: string;
-  impact: 'positive' | 'negative' | 'neutral';
+  impact: "positive" | "negative" | "neutral";
   magnitude?: number; // 0-1
 }
 
@@ -82,6 +82,8 @@ export interface CounterfactualThought extends BaseThought {
   causalChains?: CausalChain[];
 }
 
-export function isCounterfactualThought(thought: BaseThought): thought is CounterfactualThought {
-  return thought.mode === 'counterfactual';
+export function isCounterfactualThought(
+  thought: BaseThought,
+): thought is CounterfactualThought {
+  return thought.mode === "counterfactual";
 }

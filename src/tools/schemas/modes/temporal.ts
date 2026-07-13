@@ -5,22 +5,24 @@
  * v9.1.0: Added historical mode support
  */
 
-import { z } from 'zod';
-import { BaseThoughtSchema } from '../base.js';
+import { z } from "zod";
+import { BaseThoughtSchema } from "../base.js";
 import {
   ConfidenceSchema,
   TimeUnitEnum,
   TemporalConstraintEnum,
   TemporalRelationEnum,
   EventTypeEnum,
-} from '../shared.js';
+} from "../shared.js";
 
 // ===== HISTORICAL MODE SCHEMAS (v9.1.0) =====
 
 const DateRangeSchema = z.object({
   start: z.string(),
   end: z.string(),
-  precision: z.enum(['exact', 'approximate', 'century', 'decade', 'year', 'month', 'day']).optional(),
+  precision: z
+    .enum(["exact", "approximate", "century", "decade", "year", "month", "day"])
+    .optional(),
 });
 
 const HistoricalEventSchema = z.object({
@@ -32,13 +34,21 @@ const HistoricalEventSchema = z.object({
   actors: z.array(z.string()).optional(),
   causes: z.array(z.string()).optional(),
   effects: z.array(z.string()).optional(),
-  significance: z.enum(['minor', 'moderate', 'major', 'transformative']),
+  significance: z.enum(["minor", "moderate", "major", "transformative"]),
   sources: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
 });
 
 const SourceBiasSchema = z.object({
-  type: z.enum(['political', 'religious', 'cultural', 'economic', 'nationalistic', 'ideological', 'personal']),
+  type: z.enum([
+    "political",
+    "religious",
+    "cultural",
+    "economic",
+    "nationalistic",
+    "ideological",
+    "personal",
+  ]),
   direction: z.string().optional(),
   severity: z.number().min(0).max(1).optional(),
 });
@@ -46,8 +56,17 @@ const SourceBiasSchema = z.object({
 const HistoricalSourceSchema = z.object({
   id: z.string(),
   title: z.string(),
-  type: z.enum(['primary', 'secondary', 'tertiary']),
-  subtype: z.enum(['document', 'artifact', 'oral', 'visual', 'archaeological', 'statistical']).optional(),
+  type: z.enum(["primary", "secondary", "tertiary"]),
+  subtype: z
+    .enum([
+      "document",
+      "artifact",
+      "oral",
+      "visual",
+      "archaeological",
+      "statistical",
+    ])
+    .optional(),
   author: z.string().optional(),
   date: z.string().optional(),
   reliability: z.number().min(0).max(1),
@@ -85,27 +104,45 @@ const CausalChainSchema = z.object({
 
 const ActorRelationshipSchema = z.object({
   actorId: z.string(),
-  type: z.enum(['ally', 'rival', 'subordinate', 'superior', 'colleague', 'influenced_by', 'mentor', 'successor']),
+  type: z.enum([
+    "ally",
+    "rival",
+    "subordinate",
+    "superior",
+    "colleague",
+    "influenced_by",
+    "mentor",
+    "successor",
+  ]),
   description: z.string().optional(),
 });
 
 const HistoricalActorSchema = z.object({
   id: z.string(),
   name: z.string(),
-  type: z.enum(['individual', 'group', 'institution', 'nation', 'movement', 'class']),
+  type: z.enum([
+    "individual",
+    "group",
+    "institution",
+    "nation",
+    "movement",
+    "class",
+  ]),
   period: z.string().optional(),
   roles: z.array(z.string()).optional(),
   motivations: z.array(z.string()).optional(),
   relationships: z.array(ActorRelationshipSchema).optional(),
-  significance: z.enum(['minor', 'moderate', 'major', 'transformative']).optional(),
+  significance: z
+    .enum(["minor", "moderate", "major", "transformative"])
+    .optional(),
 });
 
 const HistoricalThoughtTypeSchema = z.enum([
-  'event_analysis',
-  'source_evaluation',
-  'pattern_identification',
-  'causal_chain',
-  'periodization',
+  "event_analysis",
+  "source_evaluation",
+  "pattern_identification",
+  "causal_chain",
+  "periodization",
 ]);
 
 const TimelineSchema = z.object({
@@ -160,7 +197,7 @@ const TemporalRelationSchema = z.object({
  * Now supports both temporal and historical modes
  */
 export const TemporalSchema = BaseThoughtSchema.extend({
-  mode: z.enum(['temporal', 'historical']),
+  mode: z.enum(["temporal", "historical"]),
 
   // Temporal-specific properties
   timeline: TimelineSchema.optional(),

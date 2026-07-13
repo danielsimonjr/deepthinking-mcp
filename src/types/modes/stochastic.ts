@@ -3,7 +3,7 @@
  * Phase 10 Sprint 3 (v8.4.0) - Markov chains, random processes, Monte Carlo
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Stochastic thought extends base thought with probabilistic process structures
@@ -11,19 +11,19 @@ import { BaseThought, ThinkingMode } from '../core.js';
 export interface StochasticThought extends BaseThought {
   mode: ThinkingMode.STOCHASTIC;
   thoughtType:
-    | 'process_definition'
-    | 'state_analysis'
-    | 'transition_modeling'
-    | 'simulation_run'
-    | 'stationary_analysis'
-    | 'convergence_check'
+    | "process_definition"
+    | "state_analysis"
+    | "transition_modeling"
+    | "simulation_run"
+    | "stationary_analysis"
+    | "convergence_check"
     // Handler-added types
-    | 'transition_analysis'
-    | 'steady_state_analysis'
-    | 'random_variable_definition'
-    | 'monte_carlo_simulation'
-    | 'convergence_analysis'
-    | 'hitting_time_analysis';
+    | "transition_analysis"
+    | "steady_state_analysis"
+    | "random_variable_definition"
+    | "monte_carlo_simulation"
+    | "convergence_analysis"
+    | "hitting_time_analysis";
 
   /** Type of stochastic process */
   processType: StochasticProcessType;
@@ -57,12 +57,12 @@ export interface StochasticThought extends BaseThought {
  * Types of stochastic processes
  */
 export type StochasticProcessType =
-  | 'discrete_time'
-  | 'continuous_time'
-  | 'random_walk'
-  | 'birth_death'
-  | 'queueing'
-  | 'branching';
+  | "discrete_time"
+  | "continuous_time"
+  | "random_walk"
+  | "birth_death"
+  | "queueing"
+  | "branching";
 
 /**
  * A state in the stochastic process
@@ -119,14 +119,14 @@ export interface RandomVariable {
  * Common distribution types
  */
 export type DistributionType =
-  | 'uniform'
-  | 'normal'
-  | 'exponential'
-  | 'poisson'
-  | 'binomial'
-  | 'geometric'
-  | 'bernoulli'
-  | 'custom';
+  | "uniform"
+  | "normal"
+  | "exponential"
+  | "poisson"
+  | "binomial"
+  | "geometric"
+  | "bernoulli"
+  | "custom";
 
 /**
  * Simulation result
@@ -153,6 +153,8 @@ export interface SimulationStatistics {
 /**
  * Type guard for Stochastic thoughts
  */
-export function isStochasticThought(thought: BaseThought): thought is StochasticThought {
+export function isStochasticThought(
+  thought: BaseThought,
+): thought is StochasticThought {
   return thought.mode === ThinkingMode.STOCHASTIC;
 }

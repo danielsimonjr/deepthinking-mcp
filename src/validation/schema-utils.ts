@@ -6,8 +6,8 @@
  * mode-specific validators, reducing duplication and ensuring consistency.
  */
 
-import { z } from 'zod';
-import { ValidationThresholds, ValidationMessages } from './constants.js';
+import { z } from "zod";
+import { ValidationThresholds, ValidationMessages } from "./constants.js";
 
 // =============================================================================
 // Primitive Schemas
@@ -19,8 +19,14 @@ import { ValidationThresholds, ValidationMessages } from './constants.js';
  */
 export const probabilitySchema = z
   .number()
-  .min(ValidationThresholds.MIN_PROBABILITY, ValidationMessages.INVALID_RANGE('Probability', 0, 1))
-  .max(ValidationThresholds.MAX_PROBABILITY, ValidationMessages.INVALID_RANGE('Probability', 0, 1));
+  .min(
+    ValidationThresholds.MIN_PROBABILITY,
+    ValidationMessages.INVALID_RANGE("Probability", 0, 1),
+  )
+  .max(
+    ValidationThresholds.MAX_PROBABILITY,
+    ValidationMessages.INVALID_RANGE("Probability", 0, 1),
+  );
 
 /**
  * Confidence schema (0-1 range)
@@ -28,59 +34,71 @@ export const probabilitySchema = z
  */
 export const confidenceSchema = z
   .number()
-  .min(ValidationThresholds.MIN_CONFIDENCE, ValidationMessages.INVALID_RANGE('Confidence', 0, 1))
-  .max(ValidationThresholds.MAX_CONFIDENCE, ValidationMessages.INVALID_RANGE('Confidence', 0, 1));
+  .min(
+    ValidationThresholds.MIN_CONFIDENCE,
+    ValidationMessages.INVALID_RANGE("Confidence", 0, 1),
+  )
+  .max(
+    ValidationThresholds.MAX_CONFIDENCE,
+    ValidationMessages.INVALID_RANGE("Confidence", 0, 1),
+  );
 
 /**
  * Progress schema (0-100 range)
  */
 export const progressSchema = z
   .number()
-  .min(ValidationThresholds.MIN_PROGRESS, ValidationMessages.INVALID_RANGE('Progress', 0, 100))
-  .max(ValidationThresholds.MAX_PROGRESS, ValidationMessages.INVALID_RANGE('Progress', 0, 100));
+  .min(
+    ValidationThresholds.MIN_PROGRESS,
+    ValidationMessages.INVALID_RANGE("Progress", 0, 100),
+  )
+  .max(
+    ValidationThresholds.MAX_PROGRESS,
+    ValidationMessages.INVALID_RANGE("Progress", 0, 100),
+  );
 
 /**
  * Weight schema (0-1 range for edge weights, strengths, etc.)
  */
 export const weightSchema = z
   .number()
-  .min(ValidationThresholds.MIN_WEIGHT, ValidationMessages.INVALID_RANGE('Weight', 0, 1))
-  .max(ValidationThresholds.MAX_WEIGHT, ValidationMessages.INVALID_RANGE('Weight', 0, 1));
+  .min(
+    ValidationThresholds.MIN_WEIGHT,
+    ValidationMessages.INVALID_RANGE("Weight", 0, 1),
+  )
+  .max(
+    ValidationThresholds.MAX_WEIGHT,
+    ValidationMessages.INVALID_RANGE("Weight", 0, 1),
+  );
 
 /**
  * Non-negative number schema
  */
 export const nonNegativeSchema = z
   .number()
-  .min(0, 'Value must be non-negative');
+  .min(0, "Value must be non-negative");
 
 /**
  * Positive number schema
  */
-export const positiveSchema = z
-  .number()
-  .positive('Value must be positive');
+export const positiveSchema = z.number().positive("Value must be positive");
 
 /**
  * Non-empty string schema
  */
-export const nonEmptyStringSchema = z
-  .string()
-  .min(1, 'Value cannot be empty');
+export const nonEmptyStringSchema = z.string().min(1, "Value cannot be empty");
 
 /**
  * UUID schema
  */
-export const uuidSchema = z
-  .string()
-  .uuid('Invalid UUID format');
+export const uuidSchema = z.string().uuid("Invalid UUID format");
 
 /**
  * ISO timestamp schema
  */
 export const timestampSchema = z
   .string()
-  .datetime({ message: 'Invalid ISO datetime format' });
+  .datetime({ message: "Invalid ISO datetime format" });
 
 // =============================================================================
 // Composite Schemas - Hypothesis & Evidence
@@ -90,9 +108,14 @@ export const timestampSchema = z
  * Hypothesis schema - used in Bayesian, Abductive, Scientific Method
  */
 export const hypothesisSchema = z.object({
-  statement: nonEmptyStringSchema.describe('The hypothesis statement'),
-  confidence: confidenceSchema.optional().describe('Confidence in the hypothesis'),
-  alternatives: z.array(z.string()).optional().describe('Alternative hypotheses'),
+  statement: nonEmptyStringSchema.describe("The hypothesis statement"),
+  confidence: confidenceSchema
+    .optional()
+    .describe("Confidence in the hypothesis"),
+  alternatives: z
+    .array(z.string())
+    .optional()
+    .describe("Alternative hypotheses"),
 });
 
 export type HypothesisInput = z.infer<typeof hypothesisSchema>;
@@ -102,28 +125,40 @@ export type HypothesisInput = z.infer<typeof hypothesisSchema>;
  */
 export const probabilityWithJustificationSchema = z.object({
   probability: probabilitySchema,
-  justification: nonEmptyStringSchema.describe('Justification for the probability'),
+  justification: nonEmptyStringSchema.describe(
+    "Justification for the probability",
+  ),
 });
 
-export type ProbabilityWithJustification = z.infer<typeof probabilityWithJustificationSchema>;
+export type ProbabilityWithJustification = z.infer<
+  typeof probabilityWithJustificationSchema
+>;
 
 /**
  * Probability with calculation schema - used for posterior probabilities
  */
 export const probabilityWithCalculationSchema = z.object({
   probability: probabilitySchema,
-  calculation: nonEmptyStringSchema.describe('Calculation showing how probability was derived'),
+  calculation: nonEmptyStringSchema.describe(
+    "Calculation showing how probability was derived",
+  ),
 });
 
-export type ProbabilityWithCalculation = z.infer<typeof probabilityWithCalculationSchema>;
+export type ProbabilityWithCalculation = z.infer<
+  typeof probabilityWithCalculationSchema
+>;
 
 /**
  * Evidence schema - used in Bayesian, Evidential
  */
 export const evidenceSchema = z.object({
-  description: nonEmptyStringSchema.describe('Description of the evidence'),
-  likelihoodGivenHypothesis: probabilitySchema.describe('P(E|H) - probability of evidence given hypothesis'),
-  likelihoodGivenNotHypothesis: probabilitySchema.describe('P(E|¬H) - probability of evidence given not hypothesis'),
+  description: nonEmptyStringSchema.describe("Description of the evidence"),
+  likelihoodGivenHypothesis: probabilitySchema.describe(
+    "P(E|H) - probability of evidence given hypothesis",
+  ),
+  likelihoodGivenNotHypothesis: probabilitySchema.describe(
+    "P(E|¬H) - probability of evidence given not hypothesis",
+  ),
 });
 
 export type EvidenceInput = z.infer<typeof evidenceSchema>;
@@ -132,7 +167,7 @@ export type EvidenceInput = z.infer<typeof evidenceSchema>;
  * Extended evidence schema with support level
  */
 export const evidenceWithSupportSchema = evidenceSchema.extend({
-  supportLevel: z.enum(['strong', 'moderate', 'weak']).optional(),
+  supportLevel: z.enum(["strong", "moderate", "weak"]).optional(),
   source: z.string().optional(),
 });
 
@@ -148,8 +183,8 @@ export type EvidenceWithSupport = z.infer<typeof evidenceWithSupportSchema>;
  */
 export function createNodeSchema<T extends z.ZodRawShape>(extraFields?: T) {
   const base = z.object({
-    id: nonEmptyStringSchema.describe('Unique node identifier'),
-    label: nonEmptyStringSchema.describe('Display label for the node'),
+    id: nonEmptyStringSchema.describe("Unique node identifier"),
+    label: nonEmptyStringSchema.describe("Display label for the node"),
   });
 
   return extraFields ? base.extend(extraFields) : base;
@@ -161,8 +196,8 @@ export function createNodeSchema<T extends z.ZodRawShape>(extraFields?: T) {
  */
 export function createEdgeSchema<T extends z.ZodRawShape>(extraFields?: T) {
   const base = z.object({
-    source: nonEmptyStringSchema.describe('Source node ID'),
-    target: nonEmptyStringSchema.describe('Target node ID'),
+    source: nonEmptyStringSchema.describe("Source node ID"),
+    target: nonEmptyStringSchema.describe("Target node ID"),
   });
 
   return extraFields ? base.extend(extraFields) : base;
@@ -202,7 +237,13 @@ export type WeightedEdgeInput = z.infer<typeof weightedEdgeSchema>;
  * Causal edge schema - with relationship type and strength
  */
 export const causalEdgeSchema = createEdgeSchema({
-  relationship: z.enum(['causes', 'correlates', 'prevents', 'enables', 'inhibits']),
+  relationship: z.enum([
+    "causes",
+    "correlates",
+    "prevents",
+    "enables",
+    "inhibits",
+  ]),
   strength: weightSchema.optional(),
   confidence: confidenceSchema.optional(),
 });
@@ -216,8 +257,10 @@ export type CausalEdgeInput = z.infer<typeof causalEdgeSchema>;
  * Time point schema
  */
 export const timePointSchema = z.object({
-  timestamp: z.union([timestampSchema, z.number()]).describe('Time point (ISO string or epoch)'),
-  label: z.string().optional().describe('Label for the time point'),
+  timestamp: z
+    .union([timestampSchema, z.number()])
+    .describe("Time point (ISO string or epoch)"),
+  label: z.string().optional().describe("Label for the time point"),
 });
 
 export type TimePointInput = z.infer<typeof timePointSchema>;
@@ -241,8 +284,14 @@ export const temporalEventSchema = z.object({
   description: nonEmptyStringSchema,
   timestamp: z.union([timestampSchema, z.number()]).optional(),
   duration: z.number().optional(),
-  precedents: z.array(z.string()).optional().describe('IDs of events that must happen before'),
-  consequences: z.array(z.string()).optional().describe('IDs of events that happen after'),
+  precedents: z
+    .array(z.string())
+    .optional()
+    .describe("IDs of events that must happen before"),
+  consequences: z
+    .array(z.string())
+    .optional()
+    .describe("IDs of events that happen after"),
 });
 
 export type TemporalEventInput = z.infer<typeof temporalEventSchema>;
@@ -255,9 +304,14 @@ export type TemporalEventInput = z.infer<typeof temporalEventSchema>;
  * Mathematical expression schema
  */
 export const mathExpressionSchema = z.object({
-  expression: nonEmptyStringSchema.describe('Mathematical expression (LaTeX or plain text)'),
-  format: z.enum(['latex', 'plaintext', 'mathml']).default('latex'),
-  variables: z.record(z.string(), z.number()).optional().describe('Variable bindings'),
+  expression: nonEmptyStringSchema.describe(
+    "Mathematical expression (LaTeX or plain text)",
+  ),
+  format: z.enum(["latex", "plaintext", "mathml"]).default("latex"),
+  variables: z
+    .record(z.string(), z.number())
+    .optional()
+    .describe("Variable bindings"),
 });
 
 export type MathExpressionInput = z.infer<typeof mathExpressionSchema>;
@@ -268,7 +322,7 @@ export type MathExpressionInput = z.infer<typeof mathExpressionSchema>;
 export const valueWithUnitSchema = z.object({
   value: z.number(),
   unit: nonEmptyStringSchema,
-  uncertainty: nonNegativeSchema.optional().describe('Measurement uncertainty'),
+  uncertainty: nonNegativeSchema.optional().describe("Measurement uncertainty"),
 });
 
 export type ValueWithUnitInput = z.infer<typeof valueWithUnitSchema>;
@@ -277,11 +331,11 @@ export type ValueWithUnitInput = z.infer<typeof valueWithUnitSchema>;
  * Scientific measurement schema
  */
 export const measurementSchema = z.object({
-  quantity: nonEmptyStringSchema.describe('Physical quantity being measured'),
+  quantity: nonEmptyStringSchema.describe("Physical quantity being measured"),
   value: z.number(),
   unit: nonEmptyStringSchema,
   uncertainty: nonNegativeSchema.optional(),
-  method: z.string().optional().describe('Measurement method'),
+  method: z.string().optional().describe("Measurement method"),
 });
 
 export type MeasurementInput = z.infer<typeof measurementSchema>;
@@ -296,7 +350,7 @@ export type MeasurementInput = z.infer<typeof measurementSchema>;
 export const playerSchema = z.object({
   id: nonEmptyStringSchema,
   name: nonEmptyStringSchema,
-  type: z.enum(['human', 'ai', 'nature']).optional(),
+  type: z.enum(["human", "ai", "nature"]).optional(),
 });
 
 export type PlayerInput = z.infer<typeof playerSchema>;
@@ -308,7 +362,9 @@ export const strategySchema = z.object({
   id: nonEmptyStringSchema,
   name: nonEmptyStringSchema,
   description: z.string().optional(),
-  probability: probabilitySchema.optional().describe('Probability of playing this strategy'),
+  probability: probabilitySchema
+    .optional()
+    .describe("Probability of playing this strategy"),
 });
 
 export type StrategyInput = z.infer<typeof strategySchema>;
@@ -319,7 +375,10 @@ export type StrategyInput = z.infer<typeof strategySchema>;
 export const payoffSchema = z.object({
   playerId: nonEmptyStringSchema,
   value: z.number(),
-  utility: z.number().optional().describe('Utility value if different from raw payoff'),
+  utility: z
+    .number()
+    .optional()
+    .describe("Utility value if different from raw payoff"),
 });
 
 export type PayoffInput = z.infer<typeof payoffSchema>;
@@ -334,9 +393,14 @@ export type PayoffInput = z.infer<typeof payoffSchema>;
 export const reasoningStepSchema = z.object({
   id: nonEmptyStringSchema,
   description: nonEmptyStringSchema,
-  type: z.enum(['premise', 'inference', 'conclusion', 'assumption', 'observation']).optional(),
+  type: z
+    .enum(["premise", "inference", "conclusion", "assumption", "observation"])
+    .optional(),
   confidence: confidenceSchema.optional(),
-  dependencies: z.array(z.string()).optional().describe('IDs of steps this depends on'),
+  dependencies: z
+    .array(z.string())
+    .optional()
+    .describe("IDs of steps this depends on"),
 });
 
 export type ReasoningStepInput = z.infer<typeof reasoningStepSchema>;
@@ -348,7 +412,9 @@ export const propositionSchema = z.object({
   id: nonEmptyStringSchema,
   statement: nonEmptyStringSchema,
   truthValue: z.boolean().optional(),
-  type: z.enum(['axiom', 'premise', 'theorem', 'lemma', 'corollary', 'hypothesis']).optional(),
+  type: z
+    .enum(["axiom", "premise", "theorem", "lemma", "corollary", "hypothesis"])
+    .optional(),
 });
 
 export type PropositionInput = z.infer<typeof propositionSchema>;
@@ -358,9 +424,9 @@ export type PropositionInput = z.infer<typeof propositionSchema>;
  */
 export const inferenceRuleSchema = z.object({
   name: nonEmptyStringSchema,
-  premises: z.array(z.string()).describe('Required premise patterns'),
-  conclusion: nonEmptyStringSchema.describe('Conclusion pattern'),
-  type: z.enum(['deductive', 'inductive', 'abductive']).optional(),
+  premises: z.array(z.string()).describe("Required premise patterns"),
+  conclusion: nonEmptyStringSchema.describe("Conclusion pattern"),
+  type: z.enum(["deductive", "inductive", "abductive"]).optional(),
 });
 
 export type InferenceRuleInput = z.infer<typeof inferenceRuleSchema>;
@@ -375,9 +441,9 @@ export type InferenceRuleInput = z.infer<typeof inferenceRuleSchema>;
 export const constraintSchema = z.object({
   id: nonEmptyStringSchema,
   description: nonEmptyStringSchema,
-  type: z.enum(['hard', 'soft']),
-  priority: z.number().optional().describe('Priority for soft constraints'),
-  expression: z.string().optional().describe('Mathematical expression'),
+  type: z.enum(["hard", "soft"]),
+  priority: z.number().optional().describe("Priority for soft constraints"),
+  expression: z.string().optional().describe("Mathematical expression"),
 });
 
 export type ConstraintInput = z.infer<typeof constraintSchema>;
@@ -387,9 +453,11 @@ export type ConstraintInput = z.infer<typeof constraintSchema>;
  */
 export const objectiveSchema = z.object({
   description: nonEmptyStringSchema,
-  type: z.enum(['minimize', 'maximize']),
+  type: z.enum(["minimize", "maximize"]),
   expression: z.string().optional(),
-  weight: weightSchema.optional().describe('Weight in multi-objective optimization'),
+  weight: weightSchema
+    .optional()
+    .describe("Weight in multi-objective optimization"),
 });
 
 export type ObjectiveInput = z.infer<typeof objectiveSchema>;
@@ -399,7 +467,7 @@ export type ObjectiveInput = z.infer<typeof objectiveSchema>;
  */
 export const solutionSchema = z.object({
   id: nonEmptyStringSchema,
-  values: z.record(z.string(), z.number()).describe('Variable values'),
+  values: z.record(z.string(), z.number()).describe("Variable values"),
   objectiveValue: z.number().optional(),
   feasible: z.boolean().optional(),
 });
@@ -414,8 +482,8 @@ export type SolutionInput = z.infer<typeof solutionSchema>;
  * Base thought fields - common to all thought types
  */
 export const baseThoughtSchema = z.object({
-  thoughtNumber: z.number().int().positive('Thought number must be positive'),
-  totalThoughts: z.number().int().positive('Total thoughts must be positive'),
+  thoughtNumber: z.number().int().positive("Thought number must be positive"),
+  totalThoughts: z.number().int().positive("Total thoughts must be positive"),
   nextThoughtNeeded: z.boolean(),
 });
 
@@ -453,7 +521,11 @@ export const bayesianThoughtExtensionSchema = z.object({
 /**
  * Create a range schema with custom min/max
  */
-export function createRangeSchema(min: number, max: number, fieldName: string = 'Value') {
+export function createRangeSchema(
+  min: number,
+  max: number,
+  fieldName: string = "Value",
+) {
   return z
     .number()
     .min(min, ValidationMessages.INVALID_RANGE(fieldName, min, max))
@@ -463,9 +535,12 @@ export function createRangeSchema(min: number, max: number, fieldName: string = 
 /**
  * Create an enum schema from string array
  */
-export function createEnumSchema<T extends string>(values: readonly T[], fieldName: string = 'Value') {
+export function createEnumSchema<T extends string>(
+  values: readonly T[],
+  fieldName: string = "Value",
+) {
   return z.enum(values as [T, ...T[]], {
-    message: `${fieldName} must be one of: ${values.join(', ')}`,
+    message: `${fieldName} must be one of: ${values.join(", ")}`,
   });
 }
 
@@ -493,36 +568,42 @@ export function createOptionalBooleanWithDefault(defaultValue: boolean) {
 /**
  * Validate array has unique IDs
  */
-export function uniqueIdArraySchema<T extends z.ZodRawShape>(itemSchema: z.ZodObject<T>) {
+export function uniqueIdArraySchema<T extends z.ZodRawShape>(
+  itemSchema: z.ZodObject<T>,
+) {
   return z.array(itemSchema).refine(
     (items) => {
       const ids = items.map((item) => (item as { id: string }).id);
       return new Set(ids).size === ids.length;
     },
-    { message: 'Array must contain unique IDs' }
+    { message: "Array must contain unique IDs" },
   );
 }
 
 /**
  * Validate graph edges reference existing nodes
  */
-export function createGraphSchema<N extends z.ZodRawShape, E extends z.ZodRawShape>(
-  nodeSchema: z.ZodObject<N>,
-  edgeSchema: z.ZodObject<E>
-) {
-  return z.object({
-    nodes: z.array(nodeSchema),
-    edges: z.array(edgeSchema),
-  }).refine(
-    (graph) => {
-      const nodeIds = new Set(graph.nodes.map((n) => (n as { id: string }).id));
-      return graph.edges.every((e) => {
-        const edge = e as { source: string; target: string };
-        return nodeIds.has(edge.source) && nodeIds.has(edge.target);
-      });
-    },
-    { message: 'All edge sources and targets must reference existing nodes' }
-  );
+export function createGraphSchema<
+  N extends z.ZodRawShape,
+  E extends z.ZodRawShape,
+>(nodeSchema: z.ZodObject<N>, edgeSchema: z.ZodObject<E>) {
+  return z
+    .object({
+      nodes: z.array(nodeSchema),
+      edges: z.array(edgeSchema),
+    })
+    .refine(
+      (graph) => {
+        const nodeIds = new Set(
+          graph.nodes.map((n) => (n as { id: string }).id),
+        );
+        return graph.edges.every((e) => {
+          const edge = e as { source: string; target: string };
+          return nodeIds.has(edge.source) && nodeIds.has(edge.target);
+        });
+      },
+      { message: "All edge sources and targets must reference existing nodes" },
+    );
 }
 
 // =============================================================================

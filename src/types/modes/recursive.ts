@@ -3,7 +3,7 @@
  * Phase 10 Sprint 3 (v8.4.0) - Problem decomposition, base cases, recurrence relations
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Recursive thought extends base thought with decomposition structures
@@ -11,14 +11,14 @@ import { BaseThought, ThinkingMode } from '../core.js';
 export interface RecursiveThought extends BaseThought {
   mode: ThinkingMode.RECURSIVE;
   thoughtType:
-    | 'problem_decomposition'
-    | 'base_case_identification'
-    | 'recursive_case_definition'
-    | 'recurrence_formulation'
-    | 'solution_combination'
-    | 'recursive_step'
-    | 'subproblem_solution'
-    | 'termination_analysis';
+    | "problem_decomposition"
+    | "base_case_identification"
+    | "recursive_case_definition"
+    | "recurrence_formulation"
+    | "solution_combination"
+    | "recursive_step"
+    | "subproblem_solution"
+    | "termination_analysis";
 
   /** Current recursion depth */
   currentDepth: number;
@@ -55,10 +55,10 @@ export interface RecursiveThought extends BaseThought {
  * Decomposition strategy types
  */
 export type RecursiveStrategy =
-  | 'divide_and_conquer'
-  | 'decrease_and_conquer'
-  | 'transform_and_conquer'
-  | 'dynamic_programming';
+  | "divide_and_conquer"
+  | "decrease_and_conquer"
+  | "transform_and_conquer"
+  | "dynamic_programming";
 
 /**
  * A subproblem in the decomposition
@@ -71,7 +71,7 @@ export interface Subproblem {
   depth?: number;
   parent?: string;
   parentId?: string;
-  status: 'pending' | 'in_progress' | 'solving' | 'solved';
+  status: "pending" | "in_progress" | "solving" | "solved";
   solution?: unknown;
   result?: string;
 }
@@ -124,6 +124,8 @@ export interface MemoizationState {
 /**
  * Type guard for Recursive thoughts
  */
-export function isRecursiveThought(thought: BaseThought): thought is RecursiveThought {
+export function isRecursiveThought(
+  thought: BaseThought,
+): thought is RecursiveThought {
   return thought.mode === ThinkingMode.RECURSIVE;
 }

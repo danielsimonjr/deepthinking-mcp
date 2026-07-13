@@ -4,7 +4,7 @@
  * Designed for academic research and comprehensive knowledge synthesis
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 // ===== SYNTHESIS THOUGHT TYPES =====
 
@@ -12,13 +12,13 @@ import { BaseThought, ThinkingMode } from '../core.js';
  * Types of synthesis reasoning steps
  */
 export type SynthesisThoughtType =
-  | 'source_identification'     // Identify relevant sources
-  | 'source_evaluation'         // Evaluate source quality and relevance
-  | 'theme_extraction'          // Extract key themes across sources
-  | 'pattern_integration'       // Integrate patterns across sources
-  | 'gap_identification'        // Identify gaps in existing knowledge
-  | 'synthesis_construction'    // Construct synthesized understanding
-  | 'framework_development';    // Develop conceptual framework
+  | "source_identification" // Identify relevant sources
+  | "source_evaluation" // Evaluate source quality and relevance
+  | "theme_extraction" // Extract key themes across sources
+  | "pattern_integration" // Integrate patterns across sources
+  | "gap_identification" // Identify gaps in existing knowledge
+  | "synthesis_construction" // Construct synthesized understanding
+  | "framework_development"; // Develop conceptual framework
 
 // ===== SOURCE INTERFACES =====
 
@@ -26,18 +26,18 @@ export type SynthesisThoughtType =
  * Type of academic source
  */
 export type SourceType =
-  | 'journal_article'
-  | 'conference_paper'
-  | 'book'
-  | 'book_chapter'
-  | 'thesis'
-  | 'preprint'
-  | 'technical_report'
-  | 'review_article'
-  | 'meta_analysis'
-  | 'grey_literature'
-  | 'dataset'
-  | 'other';
+  | "journal_article"
+  | "conference_paper"
+  | "book"
+  | "book_chapter"
+  | "thesis"
+  | "preprint"
+  | "technical_report"
+  | "review_article"
+  | "meta_analysis"
+  | "grey_literature"
+  | "dataset"
+  | "other";
 
 /**
  * Quality assessment criteria for sources
@@ -46,11 +46,11 @@ export interface SourceQuality {
   peerReviewed: boolean;
   impactFactor?: number;
   citationCount?: number;
-  methodologicalRigor: number;      // 0-1
-  relevance: number;                 // 0-1
-  recency: number;                   // 0-1 (based on publication date)
-  authorCredibility: number;         // 0-1
-  overallQuality: number;            // 0-1 weighted average
+  methodologicalRigor: number; // 0-1
+  relevance: number; // 0-1
+  recency: number; // 0-1 (based on publication date)
+  authorCredibility: number; // 0-1
+  overallQuality: number; // 0-1 weighted average
 }
 
 /**
@@ -62,7 +62,7 @@ export interface Source {
   title: string;
   authors: string[];
   year: number;
-  venue?: string;                    // Journal, conference, publisher
+  venue?: string; // Journal, conference, publisher
   doi?: string;
   url?: string;
   abstract?: string;
@@ -80,11 +80,11 @@ export interface Concept {
   id: string;
   term: string;
   definition: string;
-  sourceIds: string[];               // Which sources define/use this
-  frequency: number;                 // How often mentioned
-  importance: number;                // 0-1 centrality to the topic
-  relatedConcepts?: string[];        // IDs of related concepts
-  variations?: string[];             // Alternative terms/synonyms
+  sourceIds: string[]; // Which sources define/use this
+  frequency: number; // How often mentioned
+  importance: number; // 0-1 centrality to the topic
+  relatedConcepts?: string[]; // IDs of related concepts
+  variations?: string[]; // Alternative terms/synonyms
 }
 
 /**
@@ -94,12 +94,12 @@ export interface Theme {
   id: string;
   name: string;
   description: string;
-  sourceIds: string[];               // Sources contributing to this theme
-  concepts: string[];                // Concept IDs within this theme
-  strength: number;                  // 0-1 how well-supported
-  consensus: 'strong' | 'moderate' | 'weak' | 'contested';
-  evolution?: string;                // How theme developed over time
-  subthemes?: Theme[];               // Nested themes
+  sourceIds: string[]; // Sources contributing to this theme
+  concepts: string[]; // Concept IDs within this theme
+  strength: number; // 0-1 how well-supported
+  consensus: "strong" | "moderate" | "weak" | "contested";
+  evolution?: string; // How theme developed over time
+  subthemes?: Theme[]; // Nested themes
 }
 
 /**
@@ -109,11 +109,11 @@ export interface Finding {
   id: string;
   statement: string;
   sourceIds: string[];
-  evidenceStrength: 'strong' | 'moderate' | 'weak' | 'conflicting';
-  methodology?: string;              // How finding was derived
+  evidenceStrength: "strong" | "moderate" | "weak" | "conflicting";
+  methodology?: string; // How finding was derived
   limitations?: string[];
   implications?: string[];
-  replicationStatus?: 'replicated' | 'partial' | 'not_replicated' | 'unknown';
+  replicationStatus?: "replicated" | "partial" | "not_replicated" | "unknown";
 }
 
 // ===== PATTERN AND RELATIONSHIP INTERFACES =====
@@ -125,11 +125,11 @@ export interface Pattern {
   id: string;
   name: string;
   description: string;
-  type: 'trend' | 'correlation' | 'causal' | 'methodological' | 'theoretical';
+  type: "trend" | "correlation" | "causal" | "methodological" | "theoretical";
   sourceIds: string[];
-  confidence: number;                // 0-1
-  exceptions?: string[];             // Cases where pattern doesn't hold
-  conditions?: string[];             // Conditions under which pattern holds
+  confidence: number; // 0-1
+  exceptions?: string[]; // Cases where pattern doesn't hold
+  conditions?: string[]; // Conditions under which pattern holds
 }
 
 /**
@@ -137,11 +137,18 @@ export interface Pattern {
  */
 export interface ConceptRelation {
   id: string;
-  fromId: string;                    // Concept or Theme ID
-  toId: string;                      // Concept or Theme ID
-  type: 'causes' | 'correlates' | 'contradicts' | 'supports' | 'extends' | 'refines' | 'subsumes';
-  strength: number;                  // 0-1
-  evidence: string[];                // Source IDs supporting this relation
+  fromId: string; // Concept or Theme ID
+  toId: string; // Concept or Theme ID
+  type:
+    | "causes"
+    | "correlates"
+    | "contradicts"
+    | "supports"
+    | "extends"
+    | "refines"
+    | "subsumes";
+  strength: number; // 0-1
+  evidence: string[]; // Source IDs supporting this relation
   description?: string;
 }
 
@@ -153,11 +160,16 @@ export interface ConceptRelation {
 export interface LiteratureGap {
   id: string;
   description: string;
-  type: 'empirical' | 'theoretical' | 'methodological' | 'population' | 'contextual';
-  importance: 'critical' | 'significant' | 'moderate' | 'minor';
-  relatedThemes: string[];           // Theme IDs
-  suggestedResearch?: string[];      // Potential research directions
-  barriers?: string[];               // Why gap exists
+  type:
+    | "empirical"
+    | "theoretical"
+    | "methodological"
+    | "population"
+    | "contextual";
+  importance: "critical" | "significant" | "moderate" | "minor";
+  relatedThemes: string[]; // Theme IDs
+  suggestedResearch?: string[]; // Potential research directions
+  barriers?: string[]; // Why gap exists
 }
 
 /**
@@ -195,8 +207,8 @@ export interface ConceptualFramework {
   assumptions: string[];
   scope: string;
   limitations: string[];
-  applicability: string[];           // Contexts where framework applies
-  diagram?: string;                  // Mermaid or other diagram format
+  applicability: string[]; // Contexts where framework applies
+  diagram?: string; // Mermaid or other diagram format
 }
 
 /**
@@ -204,9 +216,9 @@ export interface ConceptualFramework {
  */
 export interface SynthesisConclusion {
   statement: string;
-  confidence: number;                // 0-1
+  confidence: number; // 0-1
   supportingSources: string[];
-  qualifications?: string[];         // Conditions/limitations
+  qualifications?: string[]; // Conditions/limitations
   implications: string[];
   futureDirections?: string[];
 }
@@ -215,7 +227,7 @@ export interface SynthesisConclusion {
  * Literature review metadata
  */
 export interface ReviewMetadata {
-  searchStrategy: string[];          // Databases, keywords, filters
+  searchStrategy: string[]; // Databases, keywords, filters
   inclusionCriteria: string[];
   exclusionCriteria: string[];
   dateRange?: { from: number; to: number };
@@ -265,6 +277,8 @@ export interface SynthesisThought extends BaseThought {
 /**
  * Type guard for SynthesisThought
  */
-export function isSynthesisThought(thought: BaseThought): thought is SynthesisThought {
-  return thought.mode === 'synthesis';
+export function isSynthesisThought(
+  thought: BaseThought,
+): thought is SynthesisThought {
+  return thought.mode === "synthesis";
 }

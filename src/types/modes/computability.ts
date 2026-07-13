@@ -6,19 +6,19 @@
  * Supports reasoning about what can and cannot be computed
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Computability thought types
  */
 export type ComputabilityThoughtType =
-  | 'machine_definition'      // Define a Turing machine
-  | 'computation_trace'       // Trace execution steps
-  | 'decidability_proof'      // Prove (un)decidability
-  | 'reduction_construction'  // Build a reduction between problems
-  | 'complexity_analysis'     // Classify time/space complexity
-  | 'oracle_reasoning'        // Relativized computation
-  | 'diagonalization';        // Diagonal argument construction
+  | "machine_definition" // Define a Turing machine
+  | "computation_trace" // Trace execution steps
+  | "decidability_proof" // Prove (un)decidability
+  | "reduction_construction" // Build a reduction between problems
+  | "complexity_analysis" // Classify time/space complexity
+  | "oracle_reasoning" // Relativized computation
+  | "diagonalization"; // Diagonal argument construction
 
 /**
  * Turing machine transition
@@ -28,7 +28,7 @@ export interface TuringTransition {
   readSymbol: string;
   toState: string;
   writeSymbol: string;
-  direction: 'L' | 'R' | 'S';  // Left, Right, Stay
+  direction: "L" | "R" | "S"; // Left, Right, Stay
 }
 
 /**
@@ -41,19 +41,19 @@ export interface TuringMachine {
 
   // Formal components
   states: string[];
-  inputAlphabet: string[];      // Σ
-  tapeAlphabet: string[];       // Γ (includes blank)
-  blankSymbol: string;          // Usually '_' or 'B'
+  inputAlphabet: string[]; // Σ
+  tapeAlphabet: string[]; // Γ (includes blank)
+  blankSymbol: string; // Usually '_' or 'B'
   transitions: TuringTransition[];
   initialState: string;
   acceptStates: string[];
   rejectStates: string[];
 
   // Classification
-  type: 'deterministic' | 'nondeterministic' | 'multi_tape' | 'oracle';
+  type: "deterministic" | "nondeterministic" | "multi_tape" | "oracle";
 
   // For oracle machines
-  oracle?: string;              // Problem the oracle solves
+  oracle?: string; // Problem the oracle solves
 }
 
 /**
@@ -71,12 +71,12 @@ export interface ComputationStep {
  * Complete computation trace
  */
 export interface ComputationTrace {
-  machine: string;              // Machine ID
+  machine: string; // Machine ID
   input: string;
   steps: ComputationStep[];
-  result: 'accept' | 'reject' | 'loop' | 'running';
+  result: "accept" | "reject" | "loop" | "running";
   totalSteps: number;
-  spaceUsed: number;            // Maximum tape cells used
+  spaceUsed: number; // Maximum tape cells used
 
   // For analysis
   isTerminating: boolean;
@@ -92,20 +92,21 @@ export interface DecisionProblem {
   description: string;
 
   // Formal specification
-  inputFormat: string;          // What inputs look like
-  question: string;             // Yes/no question being asked
+  inputFormat: string; // What inputs look like
+  question: string; // Yes/no question being asked
 
   // Examples
   yesInstances: string[];
   noInstances: string[];
 
   // Classification
-  decidabilityStatus: 'decidable' | 'semi_decidable' | 'undecidable' | 'unknown';
-  complexityClass?: string;     // P, NP, PSPACE, etc.
+  decidabilityStatus:
+    "decidable" | "semi_decidable" | "undecidable" | "unknown";
+  complexityClass?: string; // P, NP, PSPACE, etc.
 
   // Relations to other problems
-  reducesTo?: string[];         // Problems this reduces to
-  reducesFrom?: string[];       // Problems that reduce to this
+  reducesTo?: string[]; // Problems this reduces to
+  reducesFrom?: string[]; // Problems that reduce to this
 }
 
 /**
@@ -113,28 +114,28 @@ export interface DecisionProblem {
  */
 export interface Reduction {
   id: string;
-  fromProblem: string;          // Source problem ID
-  toProblem: string;            // Target problem ID
+  fromProblem: string; // Source problem ID
+  toProblem: string; // Target problem ID
 
   // Reduction type
-  type: 'many_one' | 'turing' | 'polynomial_time' | 'log_space';
+  type: "many_one" | "turing" | "polynomial_time" | "log_space";
 
   // The reduction function
   reductionFunction: {
     description: string;
-    inputTransformation: string;   // How to transform input
-    outputInterpretation: string;  // How to interpret output
-    preserves: string;             // What property is preserved
+    inputTransformation: string; // How to transform input
+    outputInterpretation: string; // How to interpret output
+    preserves: string; // What property is preserved
   };
 
   // Proof of correctness
   correctnessProof: {
-    forwardDirection: string;      // If x ∈ A then f(x) ∈ B
-    backwardDirection: string;     // If f(x) ∈ B then x ∈ A
+    forwardDirection: string; // If x ∈ A then f(x) ∈ B
+    backwardDirection: string; // If f(x) ∈ B then x ∈ A
   };
 
   // Complexity
-  reductionComplexity?: string;    // Time/space to compute reduction
+  reductionComplexity?: string; // Time/space to compute reduction
 }
 
 /**
@@ -145,27 +146,27 @@ export interface DiagonalizationArgument {
 
   // The enumeration being diagonalized against
   enumeration: {
-    description: string;           // What we're enumerating
-    indexSet: string;              // Usually natural numbers
-    enumeratedObjects: string;     // What type of objects
+    description: string; // What we're enumerating
+    indexSet: string; // Usually natural numbers
+    enumeratedObjects: string; // What type of objects
   };
 
   // The diagonal construction
   diagonalConstruction: {
     description: string;
-    rule: string;                  // How diagonal element differs at each position
-    resultingObject: string;       // The constructed diagonal object
+    rule: string; // How diagonal element differs at each position
+    resultingObject: string; // The constructed diagonal object
   };
 
   // The contradiction
   contradiction: {
-    assumption: string;            // What we assumed
-    consequence: string;           // What follows
-    impossibility: string;         // Why it's impossible
+    assumption: string; // What we assumed
+    consequence: string; // What follows
+    impossibility: string; // Why it's impossible
   };
 
   // Pattern classification
-  pattern: 'cantor' | 'turing' | 'godel' | 'rice' | 'custom';
+  pattern: "cantor" | "turing" | "godel" | "rice" | "custom";
 
   // Historical connection
   historicalNote?: string;
@@ -176,11 +177,16 @@ export interface DiagonalizationArgument {
  */
 export interface DecidabilityProof {
   id: string;
-  problem: string;               // Problem being analyzed
-  conclusion: 'decidable' | 'semi_decidable' | 'undecidable';
+  problem: string; // Problem being analyzed
+  conclusion: "decidable" | "semi_decidable" | "undecidable";
 
   // Proof method
-  method: 'direct_machine' | 'reduction' | 'diagonalization' | 'rice_theorem' | 'oracle';
+  method:
+    | "direct_machine"
+    | "reduction"
+    | "diagonalization"
+    | "rice_theorem"
+    | "oracle";
 
   // For direct proofs (showing decidability)
   decidingMachine?: TuringMachine;
@@ -194,9 +200,9 @@ export interface DecidabilityProof {
 
   // For Rice's theorem applications
   riceApplication?: {
-    property: string;              // The property of languages
-    isNontrivial: boolean;         // Some TMs have it, some don't
-    isSemantic: boolean;           // About the language, not the machine
+    property: string; // The property of languages
+    isNontrivial: boolean; // Some TMs have it, some don't
+    isSemantic: boolean; // About the language, not the machine
   };
 
   // Proof steps
@@ -215,9 +221,9 @@ export interface ComplexityAnalysis {
 
   // Time complexity
   timeComplexity?: {
-    upperBound: string;            // O(...)
-    lowerBound?: string;           // Ω(...)
-    tightBound?: string;           // Θ(...)
+    upperBound: string; // O(...)
+    lowerBound?: string; // Ω(...)
+    tightBound?: string; // Θ(...)
     worstCase: string;
     averageCase?: string;
     bestCase?: string;
@@ -231,13 +237,13 @@ export interface ComplexityAnalysis {
   };
 
   // Complexity class membership
-  complexityClass: string;         // P, NP, PSPACE, EXPTIME, etc.
+  complexityClass: string; // P, NP, PSPACE, EXPTIME, etc.
   classJustification: string;
 
   // Hardness/completeness
   hardnessResults?: {
-    hardFor: string;               // NP-hard, PSPACE-hard, etc.
-    completeFor?: string;          // NP-complete, etc.
+    hardFor: string; // NP-hard, PSPACE-hard, etc.
+    completeFor?: string; // NP-complete, etc.
     reductionUsed?: string;
   };
 
@@ -250,34 +256,34 @@ export interface ComplexityAnalysis {
  */
 export interface OracleAnalysis {
   id: string;
-  baseClass: string;              // e.g., "P"
-  oracle: string;                 // e.g., "SAT"
-  resultingClass: string;         // e.g., "P^SAT"
+  baseClass: string; // e.g., "P"
+  oracle: string; // e.g., "SAT"
+  resultingClass: string; // e.g., "P^SAT"
 
   // Relativization
   relativizedResults: {
     statement: string;
-    holdsRelativeTo: string[];    // Oracles where it holds
-    failsRelativeTo: string[];    // Oracles where it fails
+    holdsRelativeTo: string[]; // Oracles where it holds
+    failsRelativeTo: string[]; // Oracles where it fails
   }[];
 
   // Baker-Gill-Solovay style results
-  separationOracles?: string[];   // Oracles that separate classes
-  collapseOracles?: string[];     // Oracles that collapse classes
+  separationOracles?: string[]; // Oracles that separate classes
+  collapseOracles?: string[]; // Oracles that collapse classes
 }
 
 /**
  * Famous undecidable problems (for reference/reduction)
  */
 export type ClassicUndecidableProblem =
-  | 'halting_problem'             // Does M halt on w?
-  | 'acceptance_problem'          // Does M accept w?
-  | 'emptiness_problem'           // Is L(M) = ∅?
-  | 'equivalence_problem'         // Is L(M1) = L(M2)?
-  | 'regularity_problem'          // Is L(M) regular?
-  | 'ambiguity_problem'           // Is grammar G ambiguous?
-  | 'post_correspondence'         // PCP
-  | 'hilberts_tenth';             // Diophantine equations
+  | "halting_problem" // Does M halt on w?
+  | "acceptance_problem" // Does M accept w?
+  | "emptiness_problem" // Is L(M) = ∅?
+  | "equivalence_problem" // Is L(M1) = L(M2)?
+  | "regularity_problem" // Is L(M) regular?
+  | "ambiguity_problem" // Is grammar G ambiguous?
+  | "post_correspondence" // PCP
+  | "hilberts_tenth"; // Diophantine equations
 
 /**
  * Computability thought extends base thought
@@ -299,7 +305,7 @@ export interface ComputabilityThought extends BaseThought {
 
   // Reductions
   reductions?: Reduction[];
-  reductionChain?: string[];      // Chain of reductions
+  reductionChain?: string[]; // Chain of reductions
 
   // Decidability analysis
   decidabilityProof?: DecidabilityProof;
@@ -330,7 +336,9 @@ export interface ComputabilityThought extends BaseThought {
 /**
  * Type guard for Computability thoughts
  */
-export function isComputabilityThought(thought: BaseThought): thought is ComputabilityThought {
+export function isComputabilityThought(
+  thought: BaseThought,
+): thought is ComputabilityThought {
   return thought.mode === ThinkingMode.COMPUTABILITY;
 }
 
@@ -341,20 +349,20 @@ export function createSimpleMachine(
   name: string,
   states: string[],
   transitions: TuringTransition[],
-  acceptStates: string[]
+  acceptStates: string[],
 ): TuringMachine {
   return {
     id: `tm_${Date.now()}`,
     name,
     states,
-    inputAlphabet: ['0', '1'],
-    tapeAlphabet: ['0', '1', '_'],
-    blankSymbol: '_',
+    inputAlphabet: ["0", "1"],
+    tapeAlphabet: ["0", "1", "_"],
+    blankSymbol: "_",
     transitions,
     initialState: states[0],
     acceptStates,
     rejectStates: [],
-    type: 'deterministic',
+    type: "deterministic",
   };
 }
 
@@ -362,12 +370,12 @@ export function createSimpleMachine(
  * Helper: Check if a reduction preserves decidability
  */
 export function reductionPreservesDecidability(reduction: Reduction): boolean {
-  return reduction.type === 'many_one' || reduction.type === 'turing';
+  return reduction.type === "many_one" || reduction.type === "turing";
 }
 
 /**
  * Helper: Check if a reduction is polynomial-time
  */
 export function isPolynomialReduction(reduction: Reduction): boolean {
-  return reduction.type === 'polynomial_time' || reduction.type === 'log_space';
+  return reduction.type === "polynomial_time" || reduction.type === "log_space";
 }

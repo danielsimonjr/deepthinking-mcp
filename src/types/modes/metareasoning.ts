@@ -3,7 +3,7 @@
  * Reasoning about reasoning itself - monitoring, evaluation, and strategic oversight
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Current reasoning strategy being employed
@@ -43,7 +43,7 @@ export interface AlternativeStrategy {
 /**
  * Action recommendation for meta-reasoning
  */
-export type MetaAction = 'CONTINUE' | 'SWITCH' | 'REFINE' | 'COMBINE';
+export type MetaAction = "CONTINUE" | "SWITCH" | "REFINE" | "COMBINE";
 
 /**
  * Strategic recommendation from meta-reasoning
@@ -62,8 +62,8 @@ export interface StrategyRecommendation {
 export interface ResourceAllocation {
   timeSpent: number; // milliseconds
   thoughtsRemaining: number; // estimated
-  complexityLevel: 'low' | 'medium' | 'high';
-  urgency: 'low' | 'medium' | 'high';
+  complexityLevel: "low" | "medium" | "high";
+  urgency: "low" | "medium" | "high";
   recommendation: string; // how to allocate cognitive effort
 }
 
@@ -112,6 +112,8 @@ export interface MetaReasoningThought extends BaseThought {
 /**
  * Type guard for MetaReasoningThought
  */
-export function isMetaReasoningThought(thought: BaseThought): thought is MetaReasoningThought {
-  return thought.mode === 'metareasoning';
+export function isMetaReasoningThought(
+  thought: BaseThought,
+): thought is MetaReasoningThought {
+  return thought.mode === "metareasoning";
 }

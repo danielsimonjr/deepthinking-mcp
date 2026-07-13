@@ -4,8 +4,8 @@
  * v6.1.2: Added nodes/edges for causal graph support
  */
 
-import { z } from 'zod';
-import { BaseThoughtSchema } from '../base.js';
+import { z } from "zod";
+import { BaseThoughtSchema } from "../base.js";
 
 /**
  * Causal node schema
@@ -14,7 +14,7 @@ const CausalNodeSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().optional(),
-  type: z.enum(['cause', 'effect', 'mediator', 'confounder']).optional(),
+  type: z.enum(["cause", "effect", "mediator", "confounder"]).optional(),
 });
 
 /**
@@ -46,25 +46,31 @@ const InterventionSchema = z.object({
 });
 
 export const CausalSchema = BaseThoughtSchema.extend({
-  mode: z.enum(['causal', 'counterfactual', 'abductive']),
+  mode: z.enum(["causal", "counterfactual", "abductive"]),
   // Causal graph properties (top-level for JSON schema compatibility)
   nodes: z.array(CausalNodeSchema).optional(),
   edges: z.array(CausalEdgeSchema).optional(),
   // Nested causalGraph for backwards compatibility
-  causalGraph: z.object({
-    nodes: z.array(CausalNodeSchema),
-    edges: z.array(CausalEdgeSchema),
-  }).optional(),
+  causalGraph: z
+    .object({
+      nodes: z.array(CausalNodeSchema),
+      edges: z.array(CausalEdgeSchema),
+    })
+    .optional(),
   // Counterfactual properties
   counterfactual: CounterfactualSchema.optional(),
   // Intervention properties
   interventions: z.array(InterventionSchema).optional(),
   // Observations for abductive reasoning
   observations: z.array(z.string()).optional(),
-  explanations: z.array(z.object({
-    hypothesis: z.string(),
-    plausibility: z.number().min(0).max(1).optional(),
-  })).optional(),
+  explanations: z
+    .array(
+      z.object({
+        hypothesis: z.string(),
+        plausibility: z.number().min(0).max(1).optional(),
+      }),
+    )
+    .optional(),
 });
 
 export type CausalInput = z.infer<typeof CausalSchema>;

@@ -6,13 +6,13 @@
  * Phase 13 Sprint 9: Refactored to use fluent builder classes
  */
 
-import type { ShannonThought } from '../../../types/index.js';
-import type { VisualExportOptions } from '../types.js';
-import { sanitizeId } from '../utils.js';
+import type { ShannonThought } from "../../../types/index.js";
+import type { VisualExportOptions } from "../types.js";
+import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
-import { DOTGraphBuilder } from '../utils/dot.js';
-import { MermaidGraphBuilder } from '../utils/mermaid.js';
-import { ASCIIDocBuilder } from '../utils/ascii.js';
+import { DOTGraphBuilder } from "../utils/dot.js";
+import { MermaidGraphBuilder } from "../utils/mermaid.js";
+import { ASCIIDocBuilder } from "../utils/ascii.js";
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -24,15 +24,9 @@ import {
   getNodeColor,
   layoutNodesHorizontally,
   DEFAULT_SVG_OPTIONS,
-} from '../utils/svg.js';
-import {
-  createLinearGraphML,
-} from '../utils/graphml.js';
-import {
-  type TikZNode,
-  type TikZEdge,
-  generateTikZ,
-} from '../utils/tikz.js';
+} from "../utils/svg.js";
+import { createLinearGraphML } from "../utils/graphml.js";
+import { type TikZNode, type TikZEdge, generateTikZ } from "../utils/tikz.js";
 import {
   generateHTMLHeader,
   generateHTMLFooter,
@@ -42,16 +36,10 @@ import {
   renderList,
   renderProgressBar,
   renderBadge,
-} from '../utils/html.js';
-import {
-  generateLinearFlowModelica,
-} from '../utils/modelica.js';
-import {
-  generateActivityDiagram,
-} from '../utils/uml.js';
-import {
-  generateLinearFlowJson,
-} from '../utils/json.js';
+} from "../utils/html.js";
+import { generateLinearFlowModelica } from "../utils/modelica.js";
+import { generateActivityDiagram } from "../utils/uml.js";
+import { generateLinearFlowJson } from "../utils/json.js";
 import {
   section,
   list,
@@ -59,36 +47,49 @@ import {
   progressBar,
   mermaidBlock,
   document as mdDocument,
-} from '../utils/markdown.js';
+} from "../utils/markdown.js";
 
 /**
  * Export Shannon stage flow diagram to visual format
  */
-export function exportShannonStageFlow(thought: ShannonThought, options: VisualExportOptions): string {
-  const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+export function exportShannonStageFlow(
+  thought: ShannonThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+  } = options;
 
   switch (format) {
-    case 'mermaid':
-      return shannonToMermaid(thought, colorScheme, includeLabels, includeMetrics);
-    case 'dot':
+    case "mermaid":
+      return shannonToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics,
+      );
+    case "dot":
       return shannonToDOT(thought, includeLabels, includeMetrics);
-    case 'ascii':
+    case "ascii":
       return shannonToASCII(thought);
-    case 'svg':
+    case "svg":
       return shannonToSVG(thought, options);
-    case 'graphml':
+    case "graphml":
       return shannonToGraphML(thought, options);
-    case 'tikz':
+    case "tikz":
       return shannonToTikZ(thought, options);
-    case 'html':
+    case "html":
       return shannonToHTML(thought, options);
-    case 'modelica':
+    case "modelica":
       return shannonToModelica(thought, options);
-    case 'uml':
+    case "uml":
       return shannonToUML(thought, options);
-    case 'json':
+    case "json":
       return shannonToJSON(thought, options);
-    case 'markdown':
+    case "markdown":
       return shannonToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
@@ -96,32 +97,32 @@ export function exportShannonStageFlow(thought: ShannonThought, options: VisualE
 }
 
 const stages = [
-  'problem_definition',
-  'constraints',
-  'model',
-  'proof',
-  'implementation'
+  "problem_definition",
+  "constraints",
+  "model",
+  "proof",
+  "implementation",
 ];
 
 const stageLabels: Record<string, string> = {
-  problem_definition: 'Problem Definition',
-  constraints: 'Constraints',
-  model: 'Model',
-  proof: 'Proof',
-  implementation: 'Implementation'
+  problem_definition: "Problem Definition",
+  constraints: "Constraints",
+  model: "Model",
+  proof: "Proof",
+  implementation: "Implementation",
 };
 
 function shannonToMermaid(
   thought: ShannonThought,
   colorScheme: string,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
-  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
-  const builder = new MermaidGraphBuilder().setDirection('LR');
+  const scheme = colorScheme as "default" | "pastel" | "monochrome";
+  const builder = new MermaidGraphBuilder().setDirection("LR");
 
   // Determine color based on scheme
-  const currentColor = scheme === 'pastel' ? '#e1f5ff' : '#a8d5ff';
+  const currentColor = scheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
 
   // Add stage nodes
   for (let i = 0; i < stages.length; i++) {
@@ -133,8 +134,11 @@ function shannonToMermaid(
     builder.addNode({
       id: stageId,
       label,
-      shape: 'rectangle',
-      style: isCurrent && scheme !== 'monochrome' ? { fill: currentColor, strokeWidth: '3px' } : undefined,
+      shape: "rectangle",
+      style:
+        isCurrent && scheme !== "monochrome"
+          ? { fill: currentColor, strokeWidth: "3px" }
+          : undefined,
     });
 
     // Add edge to next stage
@@ -143,7 +147,7 @@ function shannonToMermaid(
       builder.addEdge({
         source: stageId,
         target: nextStageId,
-        style: 'arrow',
+        style: "arrow",
       });
     }
   }
@@ -151,14 +155,14 @@ function shannonToMermaid(
   // Add uncertainty node if metrics enabled
   if (includeMetrics && thought.uncertainty !== undefined) {
     builder.addNode({
-      id: 'uncertainty',
+      id: "uncertainty",
       label: `Uncertainty: ${thought.uncertainty.toFixed(2)}`,
-      shape: 'rectangle',
+      shape: "rectangle",
     });
     builder.addEdge({
-      source: 'uncertainty',
+      source: "uncertainty",
       target: sanitizeId(thought.stage),
-      style: 'dotted',
+      style: "dotted",
     });
   }
 
@@ -168,12 +172,12 @@ function shannonToMermaid(
 function shannonToDOT(
   thought: ShannonThought,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
   const builder = new DOTGraphBuilder()
-    .setGraphName('ShannonStageFlow')
-    .setRankDir('LR')
-    .setNodeDefaults({ shape: 'box', style: 'rounded' });
+    .setGraphName("ShannonStageFlow")
+    .setRankDir("LR")
+    .setNodeDefaults({ shape: "box", style: "rounded" });
 
   // Add stage nodes
   for (let i = 0; i < stages.length; i++) {
@@ -185,8 +189,8 @@ function shannonToDOT(
     builder.addNode({
       id: stageId,
       label,
-      style: isCurrent ? 'filled' : undefined,
-      fillColor: isCurrent ? 'lightblue' : undefined,
+      style: isCurrent ? "filled" : undefined,
+      fillColor: isCurrent ? "lightblue" : undefined,
     });
 
     // Add edge to next stage
@@ -202,14 +206,14 @@ function shannonToDOT(
   // Add uncertainty node if metrics enabled
   if (includeMetrics && thought.uncertainty !== undefined) {
     builder.addNode({
-      id: 'uncertainty',
+      id: "uncertainty",
       label: `Uncertainty: ${thought.uncertainty.toFixed(2)}`,
-      shape: 'ellipse',
+      shape: "ellipse",
     });
     builder.addEdge({
-      source: 'uncertainty',
+      source: "uncertainty",
       target: sanitizeId(thought.stage),
-      style: 'dashed',
+      style: "dashed",
     });
   }
 
@@ -219,10 +223,10 @@ function shannonToDOT(
 function shannonToASCII(thought: ShannonThought): string {
   const builder = new ASCIIDocBuilder()
     .setMaxWidth(60)
-    .addHeader('Shannon Stage Flow');
+    .addHeader("Shannon Stage Flow");
 
   // Stage flow visualization
-  let flowLine = 'Flow: ';
+  let flowLine = "Flow: ";
   for (let i = 0; i < stages.length; i++) {
     const stage = stages[i];
     const isCurrent = stage === thought.stage;
@@ -234,21 +238,22 @@ function shannonToASCII(thought: ShannonThought): string {
     }
 
     if (i < stages.length - 1) {
-      flowLine += ' → ';
+      flowLine += " → ";
     }
   }
   builder.addText(`${flowLine}\n`);
   builder.addEmptyLine();
 
   // Current stage info
-  builder.addSection('Current Stage')
+  builder
+    .addSection("Current Stage")
     .addText(`${stageLabels[thought.stage]}\n`)
     .addText(`Uncertainty: ${thought.uncertainty.toFixed(2)}\n`)
     .addEmptyLine();
 
   // Dependencies
   if (thought.dependencies && thought.dependencies.length > 0) {
-    builder.addSection('Dependencies');
+    builder.addSection("Dependencies");
     for (const dep of thought.dependencies) {
       builder.addText(`  • ${dep}\n`);
     }
@@ -257,7 +262,7 @@ function shannonToASCII(thought: ShannonThought): string {
 
   // Assumptions
   if (thought.assumptions && thought.assumptions.length > 0) {
-    builder.addSection('Assumptions');
+    builder.addSection("Assumptions");
     for (const assumption of thought.assumptions) {
       builder.addText(`  • ${assumption}\n`);
     }
@@ -269,9 +274,12 @@ function shannonToASCII(thought: ShannonThought): string {
 /**
  * Export Shannon stage flow to native SVG format
  */
-function shannonToSVG(thought: ShannonThought, options: VisualExportOptions): string {
+function shannonToSVG(
+  thought: ShannonThought,
+  options: VisualExportOptions,
+): string {
   const {
-    colorScheme = 'default',
+    colorScheme = "default",
     includeLabels = true,
     includeMetrics = true,
     svgWidth = DEFAULT_SVG_OPTIONS.width,
@@ -279,10 +287,10 @@ function shannonToSVG(thought: ShannonThought, options: VisualExportOptions): st
   } = options;
 
   // Create nodes from stages
-  const nodes = stages.map(stage => ({
+  const nodes = stages.map((stage) => ({
     id: sanitizeId(stage),
     label: includeLabels ? stageLabels[stage] : sanitizeId(stage),
-    type: stage === thought.stage ? 'current' : 'stage',
+    type: stage === thought.stage ? "current" : "stage",
   }));
 
   const positions = layoutNodesHorizontally(nodes, {
@@ -293,7 +301,7 @@ function shannonToSVG(thought: ShannonThought, options: VisualExportOptions): st
     nodeSpacing: 25,
   });
 
-  let svg = generateSVGHeader(svgWidth, svgHeight, 'Shannon Stage Flow');
+  let svg = generateSVGHeader(svgWidth, svgHeight, "Shannon Stage Flow");
 
   // Render edges between consecutive stages
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
@@ -304,7 +312,7 @@ function shannonToSVG(thought: ShannonThought, options: VisualExportOptions): st
       svg += renderHorizontalEdge(fromPos, toPos, {});
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render nodes
   svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
@@ -314,8 +322,8 @@ function shannonToSVG(thought: ShannonThought, options: VisualExportOptions): st
     if (pos) {
       const isCurrent = stage === thought.stage;
       const colors = isCurrent
-        ? getNodeColor('primary', colorScheme)
-        : getNodeColor('neutral', colorScheme);
+        ? getNodeColor("primary", colorScheme)
+        : getNodeColor("neutral", colorScheme);
 
       if (isCurrent) {
         svg += renderStadiumNode(pos, colors);
@@ -324,49 +332,55 @@ function shannonToSVG(thought: ShannonThought, options: VisualExportOptions): st
       }
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render metrics
   if (includeMetrics && thought.uncertainty !== undefined) {
     const metrics = [
-      { label: 'Stage', value: stageLabels[thought.stage] },
-      { label: 'Uncertainty', value: thought.uncertainty.toFixed(2) },
+      { label: "Stage", value: stageLabels[thought.stage] },
+      { label: "Uncertainty", value: thought.uncertainty.toFixed(2) },
     ];
     svg += renderMetricsPanel(svgWidth - 180, svgHeight - 80, metrics);
   }
 
   // Render legend
   const legendItems = [
-    { label: 'Current', color: getNodeColor('primary', colorScheme) },
-    { label: 'Stage', color: getNodeColor('neutral', colorScheme) },
+    { label: "Current", color: getNodeColor("primary", colorScheme) },
+    { label: "Stage", color: getNodeColor("neutral", colorScheme) },
   ];
   svg += renderLegend(20, svgHeight - 60, legendItems);
 
-  svg += '\n' + generateSVGFooter();
+  svg += "\n" + generateSVGFooter();
   return svg;
 }
 
 /**
  * Export Shannon stage flow to GraphML format
  */
-function shannonToGraphML(_thought: ShannonThought, options: VisualExportOptions): string {
+function shannonToGraphML(
+  _thought: ShannonThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true } = options;
 
   // Create labels from stageLabels
-  const labels = stages.map(stage =>
-    includeLabels ? stageLabels[stage] : sanitizeId(stage)
+  const labels = stages.map((stage) =>
+    includeLabels ? stageLabels[stage] : sanitizeId(stage),
   );
 
   return createLinearGraphML(labels, {
-    graphName: 'Shannon Stage Flow',
-    directed: true
+    graphName: "Shannon Stage Flow",
+    directed: true,
   });
 }
 
 /**
  * Export Shannon stage flow to TikZ format
  */
-function shannonToTikZ(thought: ShannonThought, options: VisualExportOptions): string {
+function shannonToTikZ(
+  thought: ShannonThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
 
   // Create TikZ nodes with horizontal spacing
@@ -375,8 +389,8 @@ function shannonToTikZ(thought: ShannonThought, options: VisualExportOptions): s
     label: includeLabels ? stageLabels[stage] : sanitizeId(stage),
     x: i * 3,
     y: 0,
-    shape: stage === thought.stage ? 'stadium' : 'rectangle',
-    type: stage === thought.stage ? 'primary' : 'neutral',
+    shape: stage === thought.stage ? "stadium" : "rectangle",
+    type: stage === thought.stage ? "primary" : "neutral",
   }));
 
   // Create edges between consecutive stages
@@ -385,12 +399,12 @@ function shannonToTikZ(thought: ShannonThought, options: VisualExportOptions): s
     edges.push({
       source: sanitizeId(stages[i]),
       target: sanitizeId(stages[i + 1]),
-      label: '',
+      label: "",
     });
   }
 
   return generateTikZ(nodes, edges, {
-    title: 'Shannon Stage Flow',
+    title: "Shannon Stage Flow",
     includeLabels,
     includeMetrics,
   });
@@ -399,15 +413,21 @@ function shannonToTikZ(thought: ShannonThought, options: VisualExportOptions): s
 /**
  * Export Shannon stage flow to HTML format
  */
-function shannonToHTML(thought: ShannonThought, options: VisualExportOptions): string {
+function shannonToHTML(
+  thought: ShannonThought,
+  options: VisualExportOptions,
+): string {
   const {
     htmlStandalone = true,
-    htmlTitle = 'Shannon Problem-Solving Analysis',
-    htmlTheme = 'light',
+    htmlTitle = "Shannon Problem-Solving Analysis",
+    htmlTheme = "light",
     includeMetrics = true,
   } = options;
 
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme,
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
 
   // Metrics
@@ -416,43 +436,72 @@ function shannonToHTML(thought: ShannonThought, options: VisualExportOptions): s
     const progress = ((stageIndex + 1) / stages.length) * 100;
 
     html += '<div class="metrics-grid">';
-    html += renderMetricCard('Current Stage', stageLabels[thought.stage], 'primary');
-    html += renderMetricCard('Uncertainty', thought.uncertainty.toFixed(2), 'info');
-    html += renderMetricCard('Progress', `${progress.toFixed(0)}%`, 'success');
-    html += '</div>\n';
+    html += renderMetricCard(
+      "Current Stage",
+      stageLabels[thought.stage],
+      "primary",
+    );
+    html += renderMetricCard(
+      "Uncertainty",
+      thought.uncertainty.toFixed(2),
+      "info",
+    );
+    html += renderMetricCard("Progress", `${progress.toFixed(0)}%`, "success");
+    html += "</div>\n";
   }
 
   // Stage flow visualization
-  html += renderSection('Stage Flow', `
+  html += renderSection(
+    "Stage Flow",
+    `
     <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0;">
-      ${stages.map(stage => {
-        const isCurrent = stage === thought.stage;
-        const badge = renderBadge(stageLabels[stage], isCurrent ? 'primary' : 'secondary');
-        return badge;
-      }).join(' → ')}
+      ${stages
+        .map((stage) => {
+          const isCurrent = stage === thought.stage;
+          const badge = renderBadge(
+            stageLabels[stage],
+            isCurrent ? "primary" : "secondary",
+          );
+          return badge;
+        })
+        .join(" → ")}
     </div>
-    ${renderProgressBar((stages.indexOf(thought.stage) + 1) / stages.length * 100, 'primary')}
-  `, '🔄');
+    ${renderProgressBar(((stages.indexOf(thought.stage) + 1) / stages.length) * 100, "primary")}
+  `,
+    "🔄",
+  );
 
   // Current stage
-  html += renderSection('Current Stage', `
+  html += renderSection(
+    "Current Stage",
+    `
     <p><strong>${stageLabels[thought.stage]}</strong></p>
     <p class="text-secondary">Uncertainty: ${(thought.uncertainty * 100).toFixed(0)}%</p>
-  `, '📍');
+  `,
+    "📍",
+  );
 
   // Dependencies
   if (thought.dependencies && thought.dependencies.length > 0) {
-    html += renderSection('Dependencies', renderList(thought.dependencies), '🔗');
+    html += renderSection(
+      "Dependencies",
+      renderList(thought.dependencies),
+      "🔗",
+    );
   }
 
   // Assumptions
   if (thought.assumptions && thought.assumptions.length > 0) {
-    html += renderSection('Assumptions', renderList(thought.assumptions), '💡');
+    html += renderSection("Assumptions", renderList(thought.assumptions), "💡");
   }
 
   // Known limitations
   if (thought.knownLimitations && thought.knownLimitations.length > 0) {
-    html += renderSection('Known Limitations', renderList(thought.knownLimitations), '⚠️');
+    html += renderSection(
+      "Known Limitations",
+      renderList(thought.knownLimitations),
+      "⚠️",
+    );
   }
 
   html += generateHTMLFooter(htmlStandalone);
@@ -462,27 +511,41 @@ function shannonToHTML(thought: ShannonThought, options: VisualExportOptions): s
 /**
  * Export Shannon stage flow to Modelica format
  */
-function shannonToModelica(thought: ShannonThought, options: VisualExportOptions): string {
-  const { modelicaPackageName, modelicaIncludeAnnotations = true, includeMetrics = true } = options;
-  const stageLabelsArray = stages.map(s => stageLabels[s]);
+function shannonToModelica(
+  thought: ShannonThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    modelicaPackageName,
+    modelicaIncludeAnnotations = true,
+    includeMetrics = true,
+  } = options;
+  const stageLabelsArray = stages.map((s) => stageLabels[s]);
 
   // Use the shared linear flow generator
-  let modelica = generateLinearFlowModelica(stageLabelsArray, stageLabels[thought.stage], {
-    packageName: modelicaPackageName || 'ShannonStageFlow',
-    includeAnnotations: modelicaIncludeAnnotations,
-    includeMetrics,
-  });
+  let modelica = generateLinearFlowModelica(
+    stageLabelsArray,
+    stageLabels[thought.stage],
+    {
+      packageName: modelicaPackageName || "ShannonStageFlow",
+      includeAnnotations: modelicaIncludeAnnotations,
+      includeMetrics,
+    },
+  );
 
   // Add uncertainty metric if available
   if (includeMetrics && thought.uncertainty !== undefined) {
     // Insert before package footer
-    const insertPoint = modelica.lastIndexOf('end ');
+    const insertPoint = modelica.lastIndexOf("end ");
     const metricsSection = `
   // Shannon-specific metrics
   parameter Real uncertainty = ${thought.uncertainty.toFixed(3)} "Current uncertainty level";
 
 `;
-    modelica = modelica.slice(0, insertPoint) + metricsSection + modelica.slice(insertPoint);
+    modelica =
+      modelica.slice(0, insertPoint) +
+      metricsSection +
+      modelica.slice(insertPoint);
   }
 
   return modelica;
@@ -491,12 +554,15 @@ function shannonToModelica(thought: ShannonThought, options: VisualExportOptions
 /**
  * Export Shannon stage flow to UML/PlantUML format
  */
-function shannonToUML(thought: ShannonThought, options: VisualExportOptions): string {
+function shannonToUML(
+  thought: ShannonThought,
+  options: VisualExportOptions,
+): string {
   const { umlTheme, umlDirection } = options;
-  const stageLabelsArray = stages.map(s => stageLabels[s]);
+  const stageLabelsArray = stages.map((s) => stageLabels[s]);
 
   return generateActivityDiagram(stageLabelsArray, stageLabels[thought.stage], {
-    title: 'Shannon Stage Flow',
+    title: "Shannon Stage Flow",
     theme: umlTheme,
     direction: umlDirection,
   });
@@ -505,20 +571,33 @@ function shannonToUML(thought: ShannonThought, options: VisualExportOptions): st
 /**
  * Export Shannon stage flow to JSON format
  */
-function shannonToJSON(thought: ShannonThought, options: VisualExportOptions): string {
-  const { jsonPrettyPrint = true, jsonIndent = 2, includeMetrics = true } = options;
-  const stageLabelsArray = stages.map(s => stageLabels[s]);
+function shannonToJSON(
+  thought: ShannonThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    jsonPrettyPrint = true,
+    jsonIndent = 2,
+    includeMetrics = true,
+  } = options;
+  const stageLabelsArray = stages.map((s) => stageLabels[s]);
 
-  let json = generateLinearFlowJson('Shannon Stage Flow', 'shannon', stageLabelsArray, stageLabels[thought.stage], {
-    prettyPrint: jsonPrettyPrint,
-    indent: jsonIndent,
-    includeMetrics,
-  });
+  let json = generateLinearFlowJson(
+    "Shannon Stage Flow",
+    "shannon",
+    stageLabelsArray,
+    stageLabels[thought.stage],
+    {
+      prettyPrint: jsonPrettyPrint,
+      indent: jsonIndent,
+      includeMetrics,
+    },
+  );
 
   // Parse, add custom fields, and re-serialize
   if (includeMetrics) {
     const graph = JSON.parse(json);
-    graph.metadata.mode = 'shannon';
+    graph.metadata.mode = "shannon";
     graph.metrics = graph.metrics || {};
     graph.metrics.uncertainty = thought.uncertainty;
     graph.metrics.stage = thought.stage;
@@ -528,7 +607,11 @@ function shannonToJSON(thought: ShannonThought, options: VisualExportOptions): s
     if (thought.assumptions) {
       graph.metrics.assumptionCount = thought.assumptions.length;
     }
-    json = JSON.stringify(graph, null, jsonPrettyPrint !== false ? jsonIndent : 0);
+    json = JSON.stringify(
+      graph,
+      null,
+      jsonPrettyPrint !== false ? jsonIndent : 0,
+    );
   }
 
   return json;
@@ -537,7 +620,10 @@ function shannonToJSON(thought: ShannonThought, options: VisualExportOptions): s
 /**
  * Export Shannon stage flow to Markdown format
  */
-function shannonToMarkdown(thought: ShannonThought, options: VisualExportOptions): string {
+function shannonToMarkdown(
+  thought: ShannonThought,
+  options: VisualExportOptions,
+): string {
   const {
     markdownIncludeFrontmatter = false,
     markdownIncludeToc = false,
@@ -553,53 +639,62 @@ function shannonToMarkdown(thought: ShannonThought, options: VisualExportOptions
     const progress = ((stageIndex + 1) / stages.length) * 100;
 
     const metricsContent = keyValueSection({
-      'Current Stage': stageLabels[thought.stage],
-      'Uncertainty': thought.uncertainty.toFixed(2),
-      'Progress': `${progress.toFixed(0)}%`,
+      "Current Stage": stageLabels[thought.stage],
+      Uncertainty: thought.uncertainty.toFixed(2),
+      Progress: `${progress.toFixed(0)}%`,
     });
-    parts.push(section('Metrics', metricsContent));
+    parts.push(section("Metrics", metricsContent));
   }
 
   // Stage flow
-  const stageFlow = stages.map(stage => {
-    const isCurrent = stage === thought.stage;
-    return isCurrent ? `**[${stageLabels[stage]}]**` : stageLabels[stage];
-  }).join(' → ');
+  const stageFlow = stages
+    .map((stage) => {
+      const isCurrent = stage === thought.stage;
+      return isCurrent ? `**[${stageLabels[stage]}]**` : stageLabels[stage];
+    })
+    .join(" → ");
 
   const stageIndex = stages.indexOf(thought.stage);
   const progressPct = ((stageIndex + 1) / stages.length) * 100;
 
-  parts.push(section('Stage Flow', `${stageFlow}\n\n${progressBar(progressPct)}`));
+  parts.push(
+    section("Stage Flow", `${stageFlow}\n\n${progressBar(progressPct)}`),
+  );
 
   // Current stage details
-  parts.push(section('Current Stage', `**${stageLabels[thought.stage]}**\n\nUncertainty: ${(thought.uncertainty * 100).toFixed(0)}%`));
+  parts.push(
+    section(
+      "Current Stage",
+      `**${stageLabels[thought.stage]}**\n\nUncertainty: ${(thought.uncertainty * 100).toFixed(0)}%`,
+    ),
+  );
 
   // Dependencies
   if (thought.dependencies && thought.dependencies.length > 0) {
-    parts.push(section('Dependencies', list(thought.dependencies)));
+    parts.push(section("Dependencies", list(thought.dependencies)));
   }
 
   // Assumptions
   if (thought.assumptions && thought.assumptions.length > 0) {
-    parts.push(section('Assumptions', list(thought.assumptions)));
+    parts.push(section("Assumptions", list(thought.assumptions)));
   }
 
   // Known limitations
   if (thought.knownLimitations && thought.knownLimitations.length > 0) {
-    parts.push(section('Known Limitations', list(thought.knownLimitations)));
+    parts.push(section("Known Limitations", list(thought.knownLimitations)));
   }
 
   // Mermaid diagram
   if (markdownIncludeMermaid) {
-    const mermaidDiagram = shannonToMermaid(thought, 'default', true, true);
-    parts.push(section('Stage Flow Diagram', mermaidBlock(mermaidDiagram)));
+    const mermaidDiagram = shannonToMermaid(thought, "default", true, true);
+    parts.push(section("Stage Flow Diagram", mermaidBlock(mermaidDiagram)));
   }
 
-  return mdDocument('Shannon Problem-Solving Analysis', parts.join('\n'), {
+  return mdDocument("Shannon Problem-Solving Analysis", parts.join("\n"), {
     includeFrontmatter: markdownIncludeFrontmatter,
     includeTableOfContents: markdownIncludeToc,
     metadata: {
-      mode: 'shannon',
+      mode: "shannon",
       stage: thought.stage,
       uncertainty: thought.uncertainty,
     },

@@ -3,7 +3,7 @@
  * Phase 10 Sprint 3 (v8.4.0) - Possible worlds semantics, necessity, possibility
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Modal thought extends base thought with possible worlds structures
@@ -11,17 +11,17 @@ import { BaseThought, ThinkingMode } from '../core.js';
 export interface ModalThought extends BaseThought {
   mode: ThinkingMode.MODAL;
   thoughtType:
-    | 'world_definition'
-    | 'proposition_analysis'
-    | 'accessibility_relation'
-    | 'accessibility_analysis'
-    | 'necessity_check'
-    | 'necessity_proof'
-    | 'possibility_check'
-    | 'possibility_proof'
-    | 'kripke_frame_construction'
-    | 'modal_inference'
-    | 'countermodel';
+    | "world_definition"
+    | "proposition_analysis"
+    | "accessibility_relation"
+    | "accessibility_analysis"
+    | "necessity_check"
+    | "necessity_proof"
+    | "possibility_check"
+    | "possibility_proof"
+    | "kripke_frame_construction"
+    | "modal_inference"
+    | "countermodel";
 
   /** Modal logic system being used */
   logicSystem?: ModalLogicSystem;
@@ -69,17 +69,17 @@ export interface ModalInference {
 /**
  * Modal logic systems
  */
-export type ModalLogicSystem = 'K' | 'T' | 'S4' | 'S5' | 'D' | 'B';
+export type ModalLogicSystem = "K" | "T" | "S4" | "S5" | "D" | "B";
 
 /**
  * Extended modal logic types (includes custom)
  */
-export type ModalLogicType = 'K' | 'T' | 'S4' | 'S5' | 'D' | 'B' | 'custom';
+export type ModalLogicType = "K" | "T" | "S4" | "S5" | "D" | "B" | "custom";
 
 /**
  * Modal domains
  */
-export type ModalDomain = 'alethic' | 'epistemic' | 'deontic' | 'temporal';
+export type ModalDomain = "alethic" | "epistemic" | "deontic" | "temporal";
 
 /**
  * A possible world in the Kripke model
@@ -103,7 +103,7 @@ export interface AccessibilityRelation {
   fromWorld?: string;
   to?: string;
   toWorld?: string;
-  type: 'reflexive' | 'symmetric' | 'transitive' | 'euclidean' | 'serial';
+  type: "reflexive" | "symmetric" | "transitive" | "euclidean" | "serial";
   modalType?: ModalDomain;
 }
 
@@ -125,16 +125,16 @@ export interface ModalProposition {
  * Modal operators
  */
 export type ModalOperator =
-  | 'necessary'     // Box: necessarily true
-  | 'possible'      // Diamond: possibly true
-  | 'contingent'    // Could be either
-  | 'impossible'    // Cannot be true
-  | 'known'         // Epistemic: known to be true
-  | 'believed'      // Doxastic: believed to be true
-  | 'obligatory'    // Deontic: ought to be true
-  | 'permitted'     // Deontic: allowed to be true
-  | 'always'        // Temporal: true at all times
-  | 'eventually';   // Temporal: true at some time
+  | "necessary" // Box: necessarily true
+  | "possible" // Diamond: possibly true
+  | "contingent" // Could be either
+  | "impossible" // Cannot be true
+  | "known" // Epistemic: known to be true
+  | "believed" // Doxastic: believed to be true
+  | "obligatory" // Deontic: ought to be true
+  | "permitted" // Deontic: allowed to be true
+  | "always" // Temporal: true at all times
+  | "eventually"; // Temporal: true at some time
 
 /**
  * A Kripke frame (W, R)
@@ -151,12 +151,12 @@ export interface KripkeFrame {
  * Properties of a Kripke frame
  */
 export type KripkeProperty =
-  | 'reflexive'
-  | 'symmetric'
-  | 'transitive'
-  | 'euclidean'
-  | 'serial'
-  | 'convergent';
+  | "reflexive"
+  | "symmetric"
+  | "transitive"
+  | "euclidean"
+  | "serial"
+  | "convergent";
 
 /**
  * Type guard for Modal thoughts

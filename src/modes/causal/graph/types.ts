@@ -24,7 +24,7 @@ export interface GraphNode {
   description?: string;
 
   /** Node type */
-  type?: 'observed' | 'latent' | 'intervention' | 'outcome';
+  type?: "observed" | "latent" | "intervention" | "outcome";
 
   /** Position for layout (optional) */
   position?: { x: number; y: number };
@@ -44,7 +44,7 @@ export interface GraphEdge {
   to: string;
 
   /** Edge type */
-  type?: 'directed' | 'bidirected' | 'undirected';
+  type?: "directed" | "bidirected" | "undirected";
 
   /** Edge weight/strength (0-1) */
   weight?: number;
@@ -115,10 +115,10 @@ export interface PathEdge {
   to: string;
 
   /** Direction relative to path traversal */
-  direction: 'forward' | 'backward';
+  direction: "forward" | "backward";
 
   /** Original edge type */
-  edgeType: 'directed' | 'bidirected' | 'undirected';
+  edgeType: "directed" | "bidirected" | "undirected";
 }
 
 // ============================================================================
@@ -129,14 +129,14 @@ export interface PathEdge {
  * Centrality type
  */
 export type CentralityType =
-  | 'degree'
-  | 'in_degree'
-  | 'out_degree'
-  | 'betweenness'
-  | 'closeness'
-  | 'pagerank'
-  | 'eigenvector'
-  | 'katz';
+  | "degree"
+  | "in_degree"
+  | "out_degree"
+  | "betweenness"
+  | "closeness"
+  | "pagerank"
+  | "eigenvector"
+  | "katz";
 
 /**
  * Centrality measures for all nodes in a graph
@@ -282,7 +282,7 @@ export interface Intervention {
   value: number | string;
 
   /** Type of intervention */
-  type: 'atomic' | 'stochastic' | 'conditional';
+  type: "atomic" | "stochastic" | "conditional";
 
   /** Distribution for stochastic interventions */
   distribution?: {
@@ -296,7 +296,7 @@ export interface Intervention {
  */
 export interface ProbabilityDistribution {
   /** Distribution type */
-  type: 'point' | 'categorical' | 'continuous';
+  type: "point" | "categorical" | "continuous";
 
   /** For point: the value */
   value?: number;
@@ -328,7 +328,7 @@ export interface AdjustmentFormula {
   plainText: string;
 
   /** Type of adjustment (backdoor, frontdoor, etc.) */
-  type: 'backdoor' | 'frontdoor' | 'instrumental' | 'general';
+  type: "backdoor" | "frontdoor" | "instrumental" | "general";
 
   /** Whether this is a valid adjustment */
   isValid: boolean;
@@ -458,7 +458,7 @@ export interface QueryVariables {
  */
 export interface CausalQuery {
   /** Query type */
-  type: 'observational' | 'interventional' | 'counterfactual';
+  type: "observational" | "interventional" | "counterfactual";
 
   /** Variables involved */
   variables: QueryVariables;

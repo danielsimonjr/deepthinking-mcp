@@ -3,7 +3,7 @@
  * Phase 4 Task 9.1: Session search & query system types
  */
 
-import type { ThinkingSession, ThinkingMode } from '../types/index.js';
+import type { ThinkingSession, ThinkingMode } from "../types/index.js";
 
 /**
  * Search query parameters
@@ -95,31 +95,26 @@ export interface SearchQuery {
  * Fields to search in
  */
 export type SearchField =
-  | 'title'
-  | 'thoughts'
-  | 'metadata'
-  | 'author'
-  | 'domain'
-  | 'all';
+  "title" | "thoughts" | "metadata" | "author" | "domain" | "all";
 
 /**
  * Sort options
  */
 export interface SortOptions {
   field: SortField;
-  order: 'asc' | 'desc';
+  order: "asc" | "desc";
 }
 
 /**
  * Sort field
  */
 export type SortField =
-  | 'createdAt'
-  | 'updatedAt'
-  | 'thoughtCount'
-  | 'confidence'
-  | 'relevance'
-  | 'title';
+  | "createdAt"
+  | "updatedAt"
+  | "thoughtCount"
+  | "confidence"
+  | "relevance"
+  | "title";
 
 /**
  * Pagination options
@@ -208,7 +203,7 @@ export interface SearchStats {
   averageTokensPerSession: number;
   indexSize: number; // in bytes
   lastIndexed: Date;
-  indexHealth: 'healthy' | 'stale' | 'empty';
+  indexHealth: "healthy" | "stale" | "empty";
 }
 
 /**
@@ -218,7 +213,7 @@ export interface AdvancedQuery {
   /**
    * Boolean operator
    */
-  operator: 'AND' | 'OR' | 'NOT';
+  operator: "AND" | "OR" | "NOT";
 
   /**
    * Sub-queries

@@ -3,8 +3,12 @@
  * Sprint 4 Task 4.4: Enable taxonomy-based search classification
  */
 
-import type { Thought } from '../types/index.js';
-import { REASONING_TAXONOMY, type ReasoningType, type ReasoningCategory } from './reasoning-types.js';
+import type { Thought } from "../types/index.js";
+import {
+  REASONING_TAXONOMY,
+  type ReasoningType,
+  type ReasoningCategory,
+} from "./reasoning-types.js";
 
 /**
  * Classification result for a thought
@@ -57,7 +61,8 @@ export class TaxonomyClassifier {
       // Index name tokens
       const nameTokens = type.name.toLowerCase().split(/\s+/);
       for (const token of nameTokens) {
-        if (token.length > 3) { // Skip short words
+        if (token.length > 3) {
+          // Skip short words
           if (!index.has(token)) {
             index.set(token, new Set());
           }
@@ -77,14 +82,17 @@ export class TaxonomyClassifier {
     const tokens = this.tokenize(content);
 
     // Find matching reasoning types
-    const matches = new Map<string, { type: ReasoningType; score: number; keywords: string[] }>();
+    const matches = new Map<
+      string,
+      { type: ReasoningType; score: number; keywords: string[] }
+    >();
 
     // Score each reasoning type based on keyword matches
     for (const token of tokens) {
       const typeIds = this.keywordIndex.get(token);
       if (typeIds) {
         for (const typeId of typeIds) {
-          const type = this.taxonomy.find(t => t.id === typeId);
+          const type = this.taxonomy.find((t) => t.id === typeId);
           if (!type) continue;
 
           if (!matches.has(typeId)) {
@@ -104,13 +112,15 @@ export class TaxonomyClassifier {
     }
 
     // Sort by score
-    const sortedMatches = Array.from(matches.values())
-      .sort((a, b) => b.score - a.score);
+    const sortedMatches = Array.from(matches.values()).sort(
+      (a, b) => b.score - a.score,
+    );
 
     if (sortedMatches.length === 0) {
       // Default to practical reasoning if no matches
-      const defaultType = this.taxonomy.find(t => t.id === 'practical_common_sense')
-        || this.taxonomy[0];
+      const defaultType =
+        this.taxonomy.find((t) => t.id === "practical_common_sense") ||
+        this.taxonomy[0];
       return {
         primaryCategory: defaultType.category,
         primaryType: defaultType,
@@ -121,7 +131,7 @@ export class TaxonomyClassifier {
     }
 
     const primaryMatch = sortedMatches[0];
-    const secondaryTypes = sortedMatches.slice(1, 4).map(m => m.type);
+    const secondaryTypes = sortedMatches.slice(1, 4).map((m) => m.type);
 
     // Calculate confidence (0-1 scale)
     const maxScore = primaryMatch.score;
@@ -144,7 +154,7 @@ export class TaxonomyClassifier {
     return text
       .toLowerCase()
       .split(/\W+/)
-      .filter(token => token.length > 2);
+      .filter((token) => token.length > 2);
   }
 
   /**
@@ -152,12 +162,12 @@ export class TaxonomyClassifier {
    */
   private calculateKeywordScore(keyword: string, type: ReasoningType): number {
     // Exact keyword match
-    if (type.keywords.some(k => k.toLowerCase() === keyword)) {
+    if (type.keywords.some((k) => k.toLowerCase() === keyword)) {
       return 2.0;
     }
 
     // Alias match
-    if (type.aliases.some(a => a.toLowerCase() === keyword)) {
+    if (type.aliases.some((a) => a.toLowerCase() === keyword)) {
       return 1.5;
     }
 
@@ -176,14 +186,20 @@ export class TaxonomyClassifier {
     let score = 0;
 
     // Check for formal definitions or notation
-    if (type.formalDefinition && content.includes('∀') || content.includes('∃') || content.includes('⊢')) {
+    if (
+      (type.formalDefinition && content.includes("∀")) ||
+      content.includes("∃") ||
+      content.includes("⊢")
+    ) {
       score += 1.5;
     }
 
     // Check for category-specific patterns
     switch (type.category) {
-      case 'deductive':
-        if (/therefore|thus|hence|consequently|it follows that/i.test(content)) {
+      case "deductive":
+        if (
+          /therefore|thus|hence|consequently|it follows that/i.test(content)
+        ) {
           score += 1.0;
         }
         if (/premise|conclusion|valid|sound/i.test(content)) {
@@ -191,7 +207,7 @@ export class TaxonomyClassifier {
         }
         break;
 
-      case 'inductive':
+      case "inductive":
         if (/pattern|observe|generalize|probably|likely/i.test(content)) {
           score += 1.0;
         }
@@ -200,7 +216,7 @@ export class TaxonomyClassifier {
         }
         break;
 
-      case 'abductive':
+      case "abductive":
         if (/explain|best explanation|hypothesis|account for/i.test(content)) {
           score += 1.0;
         }
@@ -209,7 +225,7 @@ export class TaxonomyClassifier {
         }
         break;
 
-      case 'analogical':
+      case "analogical":
         if (/similar|like|analogous|compare|parallel/i.test(content)) {
           score += 1.0;
         }
@@ -218,7 +234,7 @@ export class TaxonomyClassifier {
         }
         break;
 
-      case 'causal':
+      case "causal":
         if (/cause|effect|because|due to|result/i.test(content)) {
           score += 1.0;
         }
@@ -227,7 +243,7 @@ export class TaxonomyClassifier {
         }
         break;
 
-      case 'mathematical':
+      case "mathematical":
         if (/proof|theorem|lemma|corollary|axiom/i.test(content)) {
           score += 1.0;
         }
@@ -236,7 +252,7 @@ export class TaxonomyClassifier {
         }
         break;
 
-      case 'scientific':
+      case "scientific":
         if (/experiment|hypothesis|test|observe|measure/i.test(content)) {
           score += 1.0;
         }
@@ -245,7 +261,7 @@ export class TaxonomyClassifier {
         }
         break;
 
-      case 'probabilistic':
+      case "probabilistic":
         if (/probability|chance|likelihood|odds|risk/i.test(content)) {
           score += 1.0;
         }
@@ -254,7 +270,7 @@ export class TaxonomyClassifier {
         }
         break;
 
-      case 'dialectical':
+      case "dialectical":
         if (/thesis|antithesis|synthesis|contradict/i.test(content)) {
           score += 1.0;
         }
@@ -263,7 +279,7 @@ export class TaxonomyClassifier {
         }
         break;
 
-      case 'practical':
+      case "practical":
         if (/practical|pragmatic|useful|apply|implement/i.test(content)) {
           score += 1.0;
         }
@@ -272,7 +288,7 @@ export class TaxonomyClassifier {
         }
         break;
 
-      case 'creative':
+      case "creative":
         if (/imagine|invent|create|novel|original/i.test(content)) {
           score += 1.0;
         }
@@ -281,7 +297,7 @@ export class TaxonomyClassifier {
         }
         break;
 
-      case 'critical':
+      case "critical":
         if (/critique|evaluate|assess|analyze|examine/i.test(content)) {
           score += 1.0;
         }
@@ -298,21 +314,21 @@ export class TaxonomyClassifier {
    * Get a reasoning type by ID
    */
   getType(typeId: string): ReasoningType | undefined {
-    return this.taxonomy.find(t => t.id === typeId);
+    return this.taxonomy.find((t) => t.id === typeId);
   }
 
   /**
    * Get all types in a category
    */
   getTypesByCategory(category: ReasoningCategory): ReasoningType[] {
-    return this.taxonomy.filter(t => t.category === category);
+    return this.taxonomy.filter((t) => t.category === category);
   }
 
   /**
    * Get all categories
    */
   getCategories(): ReasoningCategory[] {
-    return Array.from(new Set(this.taxonomy.map(t => t.category)));
+    return Array.from(new Set(this.taxonomy.map((t) => t.category)));
   }
 
   /**
@@ -330,19 +346,19 @@ export class TaxonomyClassifier {
       // Count by category
       stats.categories.set(
         type.category,
-        (stats.categories.get(type.category) || 0) + 1
+        (stats.categories.get(type.category) || 0) + 1,
       );
 
       // Count by difficulty
       stats.difficulties.set(
         type.difficulty,
-        (stats.difficulties.get(type.difficulty) || 0) + 1
+        (stats.difficulties.get(type.difficulty) || 0) + 1,
       );
 
       // Count by frequency
       stats.frequencies.set(
         type.usageFrequency,
-        (stats.frequencies.get(type.usageFrequency) || 0) + 1
+        (stats.frequencies.get(type.usageFrequency) || 0) + 1,
       );
     }
 

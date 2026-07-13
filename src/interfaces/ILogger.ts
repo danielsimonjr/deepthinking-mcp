@@ -21,7 +21,7 @@
  * ```
  */
 
-import type { LogLevel, LogEntry } from '../utils/logger-types.js';
+import type { LogLevel, LogEntry } from "../utils/logger-types.js";
 
 /**
  * Logger interface for dependency injection
@@ -115,7 +115,11 @@ export interface ILogger {
    * }
    * ```
    */
-  error(message: string, error?: Error, context?: Record<string, unknown>): void;
+  error(
+    message: string,
+    error?: Error,
+    context?: Record<string, unknown>,
+  ): void;
 
   /**
    * Get all log entries, optionally filtered by minimum level

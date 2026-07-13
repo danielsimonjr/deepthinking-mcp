@@ -5,13 +5,13 @@
  * Phase 13 Sprint 6: Refactored to use fluent builder classes
  */
 
-import type { FormalLogicThought } from '../../../types/index.js';
-import type { VisualExportOptions } from '../types.js';
-import { sanitizeId } from '../utils.js';
+import type { FormalLogicThought } from "../../../types/index.js";
+import type { VisualExportOptions } from "../types.js";
+import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
-import { DOTGraphBuilder } from '../utils/dot.js';
-import { MermaidGraphBuilder } from '../utils/mermaid.js';
-import { ASCIIDocBuilder } from '../utils/ascii.js';
+import { DOTGraphBuilder } from "../utils/dot.js";
+import { MermaidGraphBuilder } from "../utils/mermaid.js";
+import { ASCIIDocBuilder } from "../utils/ascii.js";
 import {
   generateSVGHeader,
   generateSVGFooter,
@@ -24,17 +24,13 @@ import {
   getNodeColor,
   DEFAULT_SVG_OPTIONS,
   type SVGNodePosition,
-} from '../utils/svg.js';
+} from "../utils/svg.js";
 import {
   generateGraphML,
   type GraphMLNode,
   type GraphMLEdge,
-} from '../utils/graphml.js';
-import {
-  generateTikZ,
-  type TikZNode,
-  type TikZEdge,
-} from '../utils/tikz.js';
+} from "../utils/graphml.js";
+import { generateTikZ, type TikZNode, type TikZEdge } from "../utils/tikz.js";
 import {
   generateHTMLHeader,
   generateHTMLFooter,
@@ -44,23 +40,20 @@ import {
   renderTable,
   renderBadge,
   renderProgressBar,
-} from '../utils/html.js';
-import {
-  sanitizeModelicaId,
-  escapeModelicaString,
-} from '../utils/modelica.js';
+} from "../utils/html.js";
+import { sanitizeModelicaId, escapeModelicaString } from "../utils/modelica.js";
 import {
   generateUmlDiagram,
   type UmlNode,
   type UmlEdge,
-} from '../utils/uml.js';
+} from "../utils/uml.js";
 import {
   createJsonGraph,
   addNode,
   addEdge,
   addMetric,
   serializeGraph,
-} from '../utils/json.js';
+} from "../utils/json.js";
 import {
   section,
   table,
@@ -68,36 +61,49 @@ import {
   keyValueSection,
   mermaidBlock,
   document as mdDocument,
-} from '../utils/markdown.js';
+} from "../utils/markdown.js";
 
 /**
  * Export formal logic proof tree to visual format
  */
-export function exportFormalLogicProof(thought: FormalLogicThought, options: VisualExportOptions): string {
-  const { format, colorScheme = 'default', includeLabels = true, includeMetrics = true } = options;
+export function exportFormalLogicProof(
+  thought: FormalLogicThought,
+  options: VisualExportOptions,
+): string {
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true,
+  } = options;
 
   switch (format) {
-    case 'mermaid':
-      return formalLogicToMermaid(thought, colorScheme, includeLabels, includeMetrics);
-    case 'dot':
+    case "mermaid":
+      return formalLogicToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics,
+      );
+    case "dot":
       return formalLogicToDOT(thought, includeLabels, includeMetrics);
-    case 'ascii':
+    case "ascii":
       return formalLogicToASCII(thought);
-    case 'svg':
+    case "svg":
       return formalLogicToSVG(thought, options);
-    case 'graphml':
+    case "graphml":
       return formalLogicToGraphML(thought, options);
-    case 'tikz':
+    case "tikz":
       return formalLogicToTikZ(thought, options);
-    case 'html':
+    case "html":
       return formalLogicToHTML(thought, options);
-    case 'modelica':
+    case "modelica":
       return formalLogicToModelica(thought, options);
-    case 'uml':
+    case "uml":
       return formalLogicToUML(thought, options);
-    case 'json':
+    case "json":
       return formalLogicToJSON(thought, options);
-    case 'markdown':
+    case "markdown":
       return formalLogicToMarkdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
@@ -108,10 +114,10 @@ function formalLogicToMermaid(
   thought: FormalLogicThought,
   colorScheme: string,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
-  const scheme = colorScheme as 'default' | 'pastel' | 'monochrome';
-  const builder = new MermaidGraphBuilder().setDirection('TD');
+  const scheme = colorScheme as "default" | "pastel" | "monochrome";
+  const builder = new MermaidGraphBuilder().setDirection("TD");
 
   // Add propositions to a subgraph
   if (thought.propositions && thought.propositions.length > 0) {
@@ -122,15 +128,15 @@ function formalLogicToMermaid(
       const label = includeLabels
         ? `${proposition.symbol}: ${proposition.statement.substring(0, 40)}...`
         : proposition.symbol;
-      const shape = proposition.type === 'atomic' ? 'rectangle' : 'subroutine';
+      const shape = proposition.type === "atomic" ? "rectangle" : "subroutine";
       builder.addNode({ id: propId, label, shape });
     }
-    builder.addSubgraph('Propositions', 'Propositions', propNodeIds);
+    builder.addSubgraph("Propositions", "Propositions", propNodeIds);
   }
 
   // Add proof steps and theorem
   if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
-    builder.addNode({ id: 'Theorem', label: 'Theorem', shape: 'rectangle' });
+    builder.addNode({ id: "Theorem", label: "Theorem", shape: "rectangle" });
 
     for (const step of thought.proof.steps) {
       const stepId = `Step${step.stepNumber}`;
@@ -138,7 +144,7 @@ function formalLogicToMermaid(
         ? `${step.stepNumber}. ${step.statement.substring(0, 40)}...`
         : `Step ${step.stepNumber}`;
 
-      builder.addNode({ id: stepId, label, shape: 'rectangle' });
+      builder.addNode({ id: stepId, label, shape: "rectangle" });
 
       if (step.referencesSteps && step.referencesSteps.length > 0) {
         for (const refStep of step.referencesSteps) {
@@ -148,12 +154,23 @@ function formalLogicToMermaid(
     }
 
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
-    builder.addEdge({ source: `Step${lastStep.stepNumber}`, target: 'Theorem' });
+    builder.addEdge({
+      source: `Step${lastStep.stepNumber}`,
+      target: "Theorem",
+    });
 
     if (includeMetrics) {
       const completeness = (thought.proof.completeness * 100).toFixed(0);
-      builder.addNode({ id: 'Completeness', label: `Completeness: ${completeness}%`, shape: 'rectangle' });
-      builder.addEdge({ source: 'Completeness', target: 'Theorem', style: 'dotted' });
+      builder.addNode({
+        id: "Completeness",
+        label: `Completeness: ${completeness}%`,
+        shape: "rectangle",
+      });
+      builder.addEdge({
+        source: "Completeness",
+        target: "Theorem",
+        style: "dotted",
+      });
     }
   }
 
@@ -163,7 +180,7 @@ function formalLogicToMermaid(
       const infId = sanitizeId(inference.id);
       const label = includeLabels ? inference.rule : infId;
 
-      builder.addNode({ id: infId, label, shape: 'hexagon' });
+      builder.addNode({ id: infId, label, shape: "hexagon" });
 
       if (inference.premises) {
         for (const premiseId of inference.premises) {
@@ -183,12 +200,12 @@ function formalLogicToMermaid(
 function formalLogicToDOT(
   thought: FormalLogicThought,
   includeLabels: boolean,
-  includeMetrics: boolean
+  includeMetrics: boolean,
 ): string {
   const builder = new DOTGraphBuilder()
-    .setGraphName('FormalLogic')
-    .setRankDir('TB')
-    .setNodeDefaults({ shape: 'box', style: 'rounded' });
+    .setGraphName("FormalLogic")
+    .setRankDir("TB")
+    .setNodeDefaults({ shape: "box", style: "rounded" });
 
   // Add propositions
   if (thought.propositions && thought.propositions.length > 0) {
@@ -197,7 +214,7 @@ function formalLogicToDOT(
       const label = includeLabels
         ? `${proposition.symbol}:\n${proposition.statement.substring(0, 40)}...`
         : proposition.symbol;
-      const shape = proposition.type === 'atomic' ? 'ellipse' : 'box';
+      const shape = proposition.type === "atomic" ? "ellipse" : "box";
       builder.addNode({ id: propId, label, shape });
     }
   }
@@ -205,10 +222,10 @@ function formalLogicToDOT(
   // Add theorem and proof steps
   if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
     builder.addNode({
-      id: 'Theorem',
+      id: "Theorem",
       label: `Theorem:\n${thought.proof.theorem.substring(0, 50)}...`,
-      shape: 'doubleoctagon',
-      style: ['bold']
+      shape: "doubleoctagon",
+      style: ["bold"],
     });
 
     for (const step of thought.proof.steps) {
@@ -216,7 +233,7 @@ function formalLogicToDOT(
       const label = includeLabels
         ? `${step.stepNumber}. ${step.statement.substring(0, 40)}...`
         : `Step ${step.stepNumber}`;
-      const ruleLabel = step.rule ? `\n(${step.rule})` : '';
+      const ruleLabel = step.rule ? `\n(${step.rule})` : "";
 
       builder.addNode({ id: stepId, label: label + ruleLabel });
 
@@ -228,11 +245,18 @@ function formalLogicToDOT(
     }
 
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
-    builder.addEdge({ source: `Step${lastStep.stepNumber}`, target: 'Theorem' });
+    builder.addEdge({
+      source: `Step${lastStep.stepNumber}`,
+      target: "Theorem",
+    });
 
     if (includeMetrics) {
       const completeness = (thought.proof.completeness * 100).toFixed(0);
-      builder.addNode({ id: 'Completeness', label: `Completeness: ${completeness}%`, shape: 'note' });
+      builder.addNode({
+        id: "Completeness",
+        label: `Completeness: ${completeness}%`,
+        shape: "note",
+      });
     }
   }
 
@@ -242,7 +266,7 @@ function formalLogicToDOT(
       const infId = sanitizeId(inference.id);
       const label = includeLabels ? inference.rule : infId;
 
-      builder.addNode({ id: infId, label, shape: 'diamond' });
+      builder.addNode({ id: infId, label, shape: "diamond" });
 
       if (inference.premises) {
         for (const premiseId of inference.premises) {
@@ -261,14 +285,14 @@ function formalLogicToDOT(
 
 function formalLogicToASCII(thought: FormalLogicThought): string {
   const builder = new ASCIIDocBuilder()
-    .addHeader('Formal Logic Proof', 'equals')
+    .addHeader("Formal Logic Proof", "equals")
     .addEmptyLine();
 
   // Propositions
   if (thought.propositions && thought.propositions.length > 0) {
-    builder.addSection('Propositions').addEmptyLine();
-    const propItems = thought.propositions.map(proposition => {
-      const typeMarker = proposition.type === 'atomic' ? '●' : '◆';
+    builder.addSection("Propositions").addEmptyLine();
+    const propItems = thought.propositions.map((proposition) => {
+      const typeMarker = proposition.type === "atomic" ? "●" : "◆";
       return `${typeMarker} ${proposition.symbol}: ${proposition.statement}`;
     });
     builder.addBulletList(propItems).addEmptyLine();
@@ -276,12 +300,12 @@ function formalLogicToASCII(thought: FormalLogicThought): string {
 
   // Logical inferences
   if (thought.logicalInferences && thought.logicalInferences.length > 0) {
-    builder.addSection('Inferences').addEmptyLine();
+    builder.addSection("Inferences").addEmptyLine();
     for (const inference of thought.logicalInferences) {
       builder.addText(`  [${inference.rule}]`);
-      builder.addText(`    Premises: ${inference.premises.join(', ')}`);
+      builder.addText(`    Premises: ${inference.premises.join(", ")}`);
       builder.addText(`    Conclusion: ${inference.conclusion}`);
-      builder.addText(`    Valid: ${inference.valid ? '✓' : '✗'}`);
+      builder.addText(`    Valid: ${inference.valid ? "✓" : "✗"}`);
     }
     builder.addEmptyLine();
   }
@@ -290,11 +314,13 @@ function formalLogicToASCII(thought: FormalLogicThought): string {
   if (thought.proof) {
     builder.addText(`Proof: ${thought.proof.theorem}`);
     builder.addText(`Technique: ${thought.proof.technique}`);
-    builder.addText(`Completeness: ${(thought.proof.completeness * 100).toFixed(0)}%`);
+    builder.addText(
+      `Completeness: ${(thought.proof.completeness * 100).toFixed(0)}%`,
+    );
     builder.addEmptyLine();
 
     if (thought.proof.steps && thought.proof.steps.length > 0) {
-      builder.addSection('Proof Steps').addEmptyLine();
+      builder.addSection("Proof Steps").addEmptyLine();
       for (const step of thought.proof.steps) {
         builder.addText(`  ${step.stepNumber}. ${step.statement}`);
         builder.addText(`     Justification: ${step.justification}`);
@@ -303,16 +329,22 @@ function formalLogicToASCII(thought: FormalLogicThought): string {
     }
 
     builder.addText(`Conclusion: ${thought.proof.conclusion}`);
-    builder.addText(`Valid: ${thought.proof.valid ? '✓' : '✗'}`);
+    builder.addText(`Valid: ${thought.proof.valid ? "✓" : "✗"}`);
   }
 
   // Truth table
   if (thought.truthTable) {
     builder.addEmptyLine();
-    builder.addSection('Truth Table').addEmptyLine();
-    builder.addText(`  Tautology: ${thought.truthTable.isTautology ? '✓' : '✗'}`);
-    builder.addText(`  Contradiction: ${thought.truthTable.isContradiction ? '✓' : '✗'}`);
-    builder.addText(`  Contingent: ${thought.truthTable.isContingent ? '✓' : '✗'}`);
+    builder.addSection("Truth Table").addEmptyLine();
+    builder.addText(
+      `  Tautology: ${thought.truthTable.isTautology ? "✓" : "✗"}`,
+    );
+    builder.addText(
+      `  Contradiction: ${thought.truthTable.isContradiction ? "✓" : "✗"}`,
+    );
+    builder.addText(
+      `  Contingent: ${thought.truthTable.isContingent ? "✓" : "✗"}`,
+    );
   }
 
   return builder.render();
@@ -321,9 +353,12 @@ function formalLogicToASCII(thought: FormalLogicThought): string {
 /**
  * Export formal logic proof tree to native SVG format
  */
-function formalLogicToSVG(thought: FormalLogicThought, options: VisualExportOptions): string {
+function formalLogicToSVG(
+  thought: FormalLogicThought,
+  options: VisualExportOptions,
+): string {
   const {
-    colorScheme = 'default',
+    colorScheme = "default",
     includeLabels = true,
     includeMetrics = true,
     svgWidth = DEFAULT_SVG_OPTIONS.width,
@@ -336,12 +371,18 @@ function formalLogicToSVG(thought: FormalLogicThought, options: VisualExportOpti
 
   // Propositions at the top
   if (thought.propositions) {
-    const propSpacing = Math.min(180, svgWidth / (thought.propositions.length + 1));
-    const propStartX = (svgWidth - (thought.propositions.length - 1) * propSpacing) / 2;
+    const propSpacing = Math.min(
+      180,
+      svgWidth / (thought.propositions.length + 1),
+    );
+    const propStartX =
+      (svgWidth - (thought.propositions.length - 1) * propSpacing) / 2;
     thought.propositions.forEach((prop, index) => {
       positions.set(prop.id, {
         id: prop.id,
-        label: includeLabels ? `${prop.symbol}: ${prop.statement.substring(0, 20)}...` : prop.symbol,
+        label: includeLabels
+          ? `${prop.symbol}: ${prop.statement.substring(0, 20)}...`
+          : prop.symbol,
         x: propStartX + index * propSpacing,
         y: 80,
         width: nodeWidth,
@@ -357,37 +398,39 @@ function formalLogicToSVG(thought: FormalLogicThought, options: VisualExportOpti
       const stepId = `Step${step.stepNumber}`;
       positions.set(stepId, {
         id: stepId,
-        label: includeLabels ? `${step.stepNumber}. ${step.statement.substring(0, 25)}...` : `Step ${step.stepNumber}`,
+        label: includeLabels
+          ? `${step.stepNumber}. ${step.statement.substring(0, 25)}...`
+          : `Step ${step.stepNumber}`,
         x: 150 + index * 180,
         y: 250,
         width: nodeWidth,
         height: nodeHeight,
-        type: 'step',
+        type: "step",
       });
     });
   }
 
   // Theorem at the bottom
   if (thought.proof) {
-    positions.set('Theorem', {
-      id: 'Theorem',
-      label: 'Theorem',
+    positions.set("Theorem", {
+      id: "Theorem",
+      label: "Theorem",
       x: svgWidth / 2,
       y: 420,
       width: nodeWidth,
       height: nodeHeight,
-      type: 'theorem',
+      type: "theorem",
     });
   }
 
-  let svg = generateSVGHeader(svgWidth, svgHeight, 'Formal Logic Proof');
+  let svg = generateSVGHeader(svgWidth, svgHeight, "Formal Logic Proof");
 
   // Render edges
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
 
   // Edges from steps to theorem
   if (thought.proof && thought.proof.steps) {
-    const theoremPos = positions.get('Theorem');
+    const theoremPos = positions.get("Theorem");
     for (const step of thought.proof.steps) {
       const stepPos = positions.get(`Step${step.stepNumber}`);
       if (stepPos && theoremPos) {
@@ -399,62 +442,70 @@ function formalLogicToSVG(thought: FormalLogicThought, options: VisualExportOpti
         for (const refStepNum of step.referencesSteps) {
           const refStepPos = positions.get(`Step${refStepNum}`);
           if (refStepPos && stepPos) {
-            svg += renderEdge(refStepPos, stepPos, { style: 'dashed' });
+            svg += renderEdge(refStepPos, stepPos, { style: "dashed" });
           }
         }
       }
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render nodes
   svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
 
-  const atomicColors = getNodeColor('primary', colorScheme);
-  const compoundColors = getNodeColor('secondary', colorScheme);
-  const stepColors = getNodeColor('neutral', colorScheme);
-  const theoremColors = getNodeColor('success', colorScheme);
+  const atomicColors = getNodeColor("primary", colorScheme);
+  const compoundColors = getNodeColor("secondary", colorScheme);
+  const stepColors = getNodeColor("neutral", colorScheme);
+  const theoremColors = getNodeColor("success", colorScheme);
 
   for (const [, pos] of positions) {
-    if (pos.type === 'theorem') {
+    if (pos.type === "theorem") {
       svg += renderStadiumNode(pos, theoremColors);
-    } else if (pos.type === 'step') {
+    } else if (pos.type === "step") {
       svg += renderRectNode(pos, stepColors);
-    } else if (pos.type === 'atomic') {
+    } else if (pos.type === "atomic") {
       svg += renderEllipseNode(pos, atomicColors);
     } else {
       svg += renderRectNode(pos, compoundColors);
     }
   }
-  svg += '\n  </g>';
+  svg += "\n  </g>";
 
   // Render metrics panel
   if (includeMetrics) {
     const metrics = [
-      { label: 'Propositions', value: thought.propositions?.length || 0 },
-      { label: 'Proof Steps', value: thought.proof?.steps?.length || 0 },
-      { label: 'Completeness', value: thought.proof ? `${(thought.proof.completeness * 100).toFixed(0)}%` : 'N/A' },
+      { label: "Propositions", value: thought.propositions?.length || 0 },
+      { label: "Proof Steps", value: thought.proof?.steps?.length || 0 },
+      {
+        label: "Completeness",
+        value: thought.proof
+          ? `${(thought.proof.completeness * 100).toFixed(0)}%`
+          : "N/A",
+      },
     ];
     svg += renderMetricsPanel(svgWidth - 180, svgHeight - 110, metrics);
   }
 
   // Render legend
   const legendItems = [
-    { label: 'Atomic', color: atomicColors, shape: 'ellipse' as const },
-    { label: 'Compound', color: compoundColors },
-    { label: 'Proof Step', color: stepColors },
-    { label: 'Theorem', color: theoremColors, shape: 'stadium' as const },
+    { label: "Atomic", color: atomicColors, shape: "ellipse" as const },
+    { label: "Compound", color: compoundColors },
+    { label: "Proof Step", color: stepColors },
+    { label: "Theorem", color: theoremColors, shape: "stadium" as const },
   ];
   svg += renderLegend(20, svgHeight - 130, legendItems);
 
-  svg += '\n' + generateSVGFooter();
+  svg += "\n" + generateSVGFooter();
   return svg;
 }
 
 /**
  * Export formal logic proof tree to GraphML format
  */
-function formalLogicToGraphML(thought: FormalLogicThought, options: VisualExportOptions): string {
+function formalLogicToGraphML(
+  thought: FormalLogicThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true } = options;
 
   const nodes: GraphMLNode[] = [];
@@ -469,7 +520,7 @@ function formalLogicToGraphML(thought: FormalLogicThought, options: VisualExport
         label: includeLabels
           ? `${proposition.symbol}: ${proposition.statement}`
           : proposition.symbol,
-        type: 'premise',
+        type: "premise",
         metadata: {
           propositionType: proposition.type,
           description: proposition.statement,
@@ -485,7 +536,7 @@ function formalLogicToGraphML(thought: FormalLogicThought, options: VisualExport
       nodes.push({
         id: infId,
         label: includeLabels ? inference.rule : infId,
-        type: 'inference',
+        type: "inference",
         metadata: {
           rule: inference.rule,
           valid: inference.valid,
@@ -500,7 +551,7 @@ function formalLogicToGraphML(thought: FormalLogicThought, options: VisualExport
             source: sanitizeId(premiseId),
             target: infId,
             directed: true,
-            metadata: { type: 'premise-to-inference' },
+            metadata: { type: "premise-to-inference" },
           });
         }
       }
@@ -511,7 +562,7 @@ function formalLogicToGraphML(thought: FormalLogicThought, options: VisualExport
         source: infId,
         target: sanitizeId(inference.conclusion),
         directed: true,
-        metadata: { type: 'inference-to-conclusion' },
+        metadata: { type: "inference-to-conclusion" },
       });
     }
   }
@@ -525,7 +576,7 @@ function formalLogicToGraphML(thought: FormalLogicThought, options: VisualExport
         label: includeLabels
           ? `${step.stepNumber}. ${step.statement}`
           : `Step ${step.stepNumber}`,
-        type: 'proof-step',
+        type: "proof-step",
         metadata: {
           stepNumber: step.stepNumber,
           justification: step.justification,
@@ -541,7 +592,7 @@ function formalLogicToGraphML(thought: FormalLogicThought, options: VisualExport
             source: `Step${refStep}`,
             target: stepId,
             directed: true,
-            metadata: { type: 'step-reference' },
+            metadata: { type: "step-reference" },
           });
         }
       }
@@ -549,9 +600,9 @@ function formalLogicToGraphML(thought: FormalLogicThought, options: VisualExport
 
     // Add theorem/conclusion node
     nodes.push({
-      id: 'Theorem',
-      label: includeLabels ? thought.proof.theorem : 'Theorem',
-      type: 'conclusion',
+      id: "Theorem",
+      label: includeLabels ? thought.proof.theorem : "Theorem",
+      type: "conclusion",
       metadata: {
         theorem: thought.proof.theorem,
         valid: thought.proof.valid,
@@ -560,18 +611,19 @@ function formalLogicToGraphML(thought: FormalLogicThought, options: VisualExport
     });
 
     // Connect last step to theorem
+    // (final use of edgeCount in this function - no increment needed)
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
     edges.push({
-      id: `e${edgeCount++}`,
+      id: `e${edgeCount}`,
       source: `Step${lastStep.stepNumber}`,
-      target: 'Theorem',
+      target: "Theorem",
       directed: true,
-      metadata: { type: 'step-to-theorem' },
+      metadata: { type: "step-to-theorem" },
     });
   }
 
   return generateGraphML(nodes, edges, {
-    graphName: 'Formal Logic Proof',
+    graphName: "Formal Logic Proof",
     directed: true,
     includeLabels,
   });
@@ -580,8 +632,11 @@ function formalLogicToGraphML(thought: FormalLogicThought, options: VisualExport
 /**
  * Export formal logic proof tree to TikZ format
  */
-function formalLogicToTikZ(thought: FormalLogicThought, options: VisualExportOptions): string {
-  const { includeLabels = true, colorScheme = 'default' } = options;
+function formalLogicToTikZ(
+  thought: FormalLogicThought,
+  options: VisualExportOptions,
+): string {
+  const { includeLabels = true, colorScheme = "default" } = options;
 
   const nodes: TikZNode[] = [];
   const edges: TikZEdge[] = [];
@@ -597,8 +652,8 @@ function formalLogicToTikZ(thought: FormalLogicThought, options: VisualExportOpt
           : proposition.symbol,
         x: index * 3,
         y: currentY,
-        type: 'premise',
-        shape: 'stadium',
+        type: "premise",
+        shape: "stadium",
       });
     });
     currentY -= 2.5;
@@ -613,8 +668,8 @@ function formalLogicToTikZ(thought: FormalLogicThought, options: VisualExportOpt
         label: includeLabels ? inference.rule : infId,
         x: index * 3,
         y: currentY,
-        type: 'inference',
-        shape: 'rectangle',
+        type: "inference",
+        shape: "rectangle",
       });
 
       // Create edges from premises to inference
@@ -649,8 +704,8 @@ function formalLogicToTikZ(thought: FormalLogicThought, options: VisualExportOpt
           : `Step ${step.stepNumber}`,
         x: index * 3,
         y: currentY,
-        type: 'neutral',
-        shape: 'rectangle',
+        type: "neutral",
+        shape: "rectangle",
       });
 
       // Create edges between referenced steps
@@ -660,7 +715,7 @@ function formalLogicToTikZ(thought: FormalLogicThought, options: VisualExportOpt
             source: `Step${refStep}`,
             target: stepId,
             directed: true,
-            style: 'dashed',
+            style: "dashed",
           });
         }
       }
@@ -669,25 +724,25 @@ function formalLogicToTikZ(thought: FormalLogicThought, options: VisualExportOpt
 
     // Add theorem/conclusion at the bottom with ellipse shape
     nodes.push({
-      id: 'Theorem',
-      label: includeLabels ? 'Theorem' : 'T',
+      id: "Theorem",
+      label: includeLabels ? "Theorem" : "T",
       x: (thought.proof.steps.length - 1) * 1.5,
       y: currentY,
-      type: 'conclusion',
-      shape: 'ellipse',
+      type: "conclusion",
+      shape: "ellipse",
     });
 
     // Connect last step to theorem
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
     edges.push({
       source: `Step${lastStep.stepNumber}`,
-      target: 'Theorem',
+      target: "Theorem",
       directed: true,
     });
   }
 
   return generateTikZ(nodes, edges, {
-    title: 'Formal Logic Proof',
+    title: "Formal Logic Proof",
     colorScheme,
     includeLabels,
   });
@@ -696,107 +751,137 @@ function formalLogicToTikZ(thought: FormalLogicThought, options: VisualExportOpt
 /**
  * Export formal logic proof tree to HTML format
  */
-function formalLogicToHTML(thought: FormalLogicThought, options: VisualExportOptions): string {
+function formalLogicToHTML(
+  thought: FormalLogicThought,
+  options: VisualExportOptions,
+): string {
   const {
     htmlStandalone = true,
-    htmlTitle = 'Formal Logic Analysis',
-    htmlTheme = 'light',
+    htmlTitle = "Formal Logic Analysis",
+    htmlTheme = "light",
     includeMetrics = true,
   } = options;
 
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme,
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>\n`;
 
   // Proof Overview
   if (thought.proof) {
-    const validBadge = thought.proof.valid ? renderBadge('VALID', 'success') : renderBadge('INVALID', 'danger');
+    const validBadge = thought.proof.valid
+      ? renderBadge("VALID", "success")
+      : renderBadge("INVALID", "danger");
     const proofContent = `
       <p><strong>Theorem:</strong> ${escapeHTML(thought.proof.theorem)}</p>
       <p><strong>Technique:</strong> ${escapeHTML(thought.proof.technique)}</p>
       <p><strong>Validity:</strong> ${validBadge}</p>
       <p><strong>Completeness:</strong> ${(thought.proof.completeness * 100).toFixed(0)}%</p>
-      ${renderProgressBar(thought.proof.completeness * 100, 'primary')}
+      ${renderProgressBar(thought.proof.completeness * 100, "primary")}
     `;
-    html += renderSection('Proof', proofContent, '📋');
+    html += renderSection("Proof", proofContent, "📋");
   }
 
   // Metrics
   if (includeMetrics) {
     html += '<div class="metrics-grid">\n';
-    html += renderMetricCard('Propositions', thought.propositions?.length || 0, 'primary');
-    html += renderMetricCard('Inferences', thought.logicalInferences?.length || 0, 'info');
-    html += renderMetricCard('Proof Steps', thought.proof?.steps?.length || 0, 'secondary');
-    html += renderMetricCard('Completeness', thought.proof ? `${(thought.proof.completeness * 100).toFixed(0)}%` : 'N/A', 'success');
-    html += '</div>\n';
+    html += renderMetricCard(
+      "Propositions",
+      thought.propositions?.length || 0,
+      "primary",
+    );
+    html += renderMetricCard(
+      "Inferences",
+      thought.logicalInferences?.length || 0,
+      "info",
+    );
+    html += renderMetricCard(
+      "Proof Steps",
+      thought.proof?.steps?.length || 0,
+      "secondary",
+    );
+    html += renderMetricCard(
+      "Completeness",
+      thought.proof
+        ? `${(thought.proof.completeness * 100).toFixed(0)}%`
+        : "N/A",
+      "success",
+    );
+    html += "</div>\n";
   }
 
   // Propositions
   if (thought.propositions && thought.propositions.length > 0) {
-    const propositionRows = thought.propositions.map(p => [
+    const propositionRows = thought.propositions.map((p) => [
       p.symbol,
       p.type,
       p.statement,
-      p.truthValue !== undefined ? String(p.truthValue) : 'N/A',
+      p.truthValue !== undefined ? String(p.truthValue) : "N/A",
     ]);
     const propositionsTable = renderTable(
-      ['Symbol', 'Type', 'Statement', 'Truth Value'],
+      ["Symbol", "Type", "Statement", "Truth Value"],
       propositionRows,
-      { caption: 'Propositions' }
+      { caption: "Propositions" },
     );
-    html += renderSection('Propositions', propositionsTable, '💭');
+    html += renderSection("Propositions", propositionsTable, "💭");
   }
 
   // Logical Inferences
   if (thought.logicalInferences && thought.logicalInferences.length > 0) {
-    let inferencesContent = '';
+    let inferencesContent = "";
     for (const inference of thought.logicalInferences) {
-      const validBadge = inference.valid ? renderBadge('VALID', 'success') : renderBadge('INVALID', 'danger');
+      const validBadge = inference.valid
+        ? renderBadge("VALID", "success")
+        : renderBadge("INVALID", "danger");
       inferencesContent += `
         <div class="card">
-          <div class="card-header">${inference.rule ? escapeHTML(inference.rule) : '-'} ${validBadge}</div>
-          <p><strong>Premises:</strong> ${inference.premises ? inference.premises.map(p => p ? escapeHTML(p) : '-').join(', ') : '-'}</p>
-          <p><strong>Conclusion:</strong> ${inference.conclusion ? escapeHTML(inference.conclusion) : '-'}</p>
+          <div class="card-header">${inference.rule ? escapeHTML(inference.rule) : "-"} ${validBadge}</div>
+          <p><strong>Premises:</strong> ${inference.premises ? inference.premises.map((p) => (p ? escapeHTML(p) : "-")).join(", ") : "-"}</p>
+          <p><strong>Conclusion:</strong> ${inference.conclusion ? escapeHTML(inference.conclusion) : "-"}</p>
         </div>
       `;
     }
-    html += renderSection('Logical Inferences', inferencesContent, '🔗');
+    html += renderSection("Logical Inferences", inferencesContent, "🔗");
   }
 
   // Proof Steps
   if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
-    let stepsContent = '<ol>';
+    let stepsContent = "<ol>";
     for (const step of thought.proof.steps) {
       stepsContent += `
         <li>
-          <strong>${step.statement ? escapeHTML(step.statement) : '-'}</strong>
-          <p><em>Justification:</em> ${step.justification ? escapeHTML(step.justification) : '-'}</p>
-          ${step.rule ? `<p><em>Rule:</em> ${renderBadge(step.rule, 'info')}</p>` : ''}
-          ${step.referencesSteps && step.referencesSteps.length > 0 ? `<p><em>References steps:</em> ${step.referencesSteps.join(', ')}</p>` : ''}
+          <strong>${step.statement ? escapeHTML(step.statement) : "-"}</strong>
+          <p><em>Justification:</em> ${step.justification ? escapeHTML(step.justification) : "-"}</p>
+          ${step.rule ? `<p><em>Rule:</em> ${renderBadge(step.rule, "info")}</p>` : ""}
+          ${step.referencesSteps && step.referencesSteps.length > 0 ? `<p><em>References steps:</em> ${step.referencesSteps.join(", ")}</p>` : ""}
         </li>
       `;
     }
-    stepsContent += '</ol>';
-    html += renderSection('Proof Steps', stepsContent, '📝');
+    stepsContent += "</ol>";
+    html += renderSection("Proof Steps", stepsContent, "📝");
   }
 
   // Conclusion
   if (thought.proof) {
-    const conclusionBadge = thought.proof.valid ? renderBadge('PROVEN', 'success') : renderBadge('NOT PROVEN', 'danger');
+    const conclusionBadge = thought.proof.valid
+      ? renderBadge("PROVEN", "success")
+      : renderBadge("NOT PROVEN", "danger");
     const conclusionContent = `
       <p>${conclusionBadge}</p>
-      <p>${thought.proof.conclusion ? escapeHTML(thought.proof.conclusion) : '-'}</p>
+      <p>${thought.proof.conclusion ? escapeHTML(thought.proof.conclusion) : "-"}</p>
     `;
-    html += renderSection('Conclusion', conclusionContent, '✅');
+    html += renderSection("Conclusion", conclusionContent, "✅");
   }
 
   // Truth Table (if present)
   if (thought.truthTable) {
     const truthTableContent = `
-      <p><strong>Tautology:</strong> ${thought.truthTable.isTautology ? '✓' : '✗'}</p>
-      <p><strong>Contradiction:</strong> ${thought.truthTable.isContradiction ? '✓' : '✗'}</p>
-      <p><strong>Contingent:</strong> ${thought.truthTable.isContingent ? '✓' : '✗'}</p>
+      <p><strong>Tautology:</strong> ${thought.truthTable.isTautology ? "✓" : "✗"}</p>
+      <p><strong>Contradiction:</strong> ${thought.truthTable.isContradiction ? "✓" : "✗"}</p>
+      <p><strong>Contingent:</strong> ${thought.truthTable.isContingent ? "✓" : "✗"}</p>
     `;
-    html += renderSection('Truth Table', truthTableContent, '📊');
+    html += renderSection("Truth Table", truthTableContent, "📊");
   }
 
   html += generateHTMLFooter(htmlStandalone);
@@ -806,34 +891,42 @@ function formalLogicToHTML(thought: FormalLogicThought, options: VisualExportOpt
 /**
  * Export formal logic proof tree to Modelica format
  */
-function formalLogicToModelica(thought: FormalLogicThought, options: VisualExportOptions): string {
+function formalLogicToModelica(
+  thought: FormalLogicThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
 
-  let modelica = 'package FormalLogicProof\n';
+  let modelica = "package FormalLogicProof\n";
   modelica += '  "Formal logic proof representation"\n\n';
 
   // Add propositions as Boolean parameters
   if (thought.propositions && thought.propositions.length > 0) {
-    modelica += '  // Logical Propositions\n';
+    modelica += "  // Logical Propositions\n";
     for (const proposition of thought.propositions) {
       const propId = sanitizeModelicaId(proposition.id);
       const symbol = proposition.symbol || proposition.id;
-      const statement = proposition.statement || '';
+      const statement = proposition.statement || "";
       const comment = includeLabels
         ? ` "${escapeModelicaString(symbol)}: ${escapeModelicaString(statement)}"`
-        : '';
-      const truthValue = proposition.truthValue !== undefined ? String(proposition.truthValue) : 'false';
+        : "";
+      const truthValue =
+        proposition.truthValue !== undefined
+          ? String(proposition.truthValue)
+          : "false";
       modelica += `  parameter Boolean ${propId} = ${truthValue}${comment};\n`;
     }
-    modelica += '\n';
+    modelica += "\n";
   }
 
   // Add inference rules as functions
   if (thought.logicalInferences && thought.logicalInferences.length > 0) {
-    modelica += '  // Inference Rules\n';
+    modelica += "  // Inference Rules\n";
     for (const inference of thought.logicalInferences) {
-      const ruleStr = inference.rule || 'Inference';
-      const ruleName = sanitizeModelicaId(ruleStr.replace(/[^a-zA-Z0-9]/g, '_'));
+      const ruleStr = inference.rule || "Inference";
+      const ruleName = sanitizeModelicaId(
+        ruleStr.replace(/[^a-zA-Z0-9]/g, "_"),
+      );
 
       modelica += `  function ${ruleName}\n`;
       modelica += `    "${escapeModelicaString(ruleStr)}"\n`;
@@ -841,18 +934,22 @@ function formalLogicToModelica(thought: FormalLogicThought, options: VisualExpor
       // Input parameters for premises
       if (inference.premises && inference.premises.length > 0) {
         for (let i = 0; i < inference.premises.length; i++) {
-          const premiseId = sanitizeModelicaId(inference.premises[i] || `premise${i + 1}`);
+          const premiseId = sanitizeModelicaId(
+            inference.premises[i] || `premise${i + 1}`,
+          );
           modelica += `    input Boolean premise${i + 1} "${escapeModelicaString(premiseId)}";\n`;
         }
       }
 
       // Output parameter for conclusion
-      modelica += `    output Boolean conclusion "${inference.conclusion ? escapeModelicaString(inference.conclusion) : ''}";\n`;
+      modelica += `    output Boolean conclusion "${inference.conclusion ? escapeModelicaString(inference.conclusion) : ""}";\n`;
       modelica += `  algorithm\n`;
 
       // Simple logical operation (all premises must be true)
       if (inference.premises && inference.premises.length > 0) {
-        const conditions = inference.premises.map((_, i) => `premise${i + 1}`).join(' and ');
+        const conditions = inference.premises
+          .map((_, i) => `premise${i + 1}`)
+          .join(" and ");
         modelica += `    conclusion := ${conditions};\n`;
       } else {
         modelica += `    conclusion := false;\n`;
@@ -864,15 +961,16 @@ function formalLogicToModelica(thought: FormalLogicThought, options: VisualExpor
 
   // Add proof steps as model components
   if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
-    modelica += '  // Proof Steps\n';
+    modelica += "  // Proof Steps\n";
     modelica += `  model ProofSequence\n`;
-    modelica += `    "${thought.proof.theorem ? escapeModelicaString(thought.proof.theorem) : ''}"\n\n`;
+    modelica += `    "${thought.proof.theorem ? escapeModelicaString(thought.proof.theorem) : ""}"\n\n`;
 
     for (const step of thought.proof.steps) {
       const stepId = sanitizeModelicaId(`Step${step.stepNumber}`);
-      const comment = includeLabels && step.statement
-        ? ` "${escapeModelicaString(step.statement)}"`
-        : '';
+      const comment =
+        includeLabels && step.statement
+          ? ` "${escapeModelicaString(step.statement)}"`
+          : "";
       modelica += `    parameter Boolean ${stepId} = true${comment};\n`;
 
       if (step.rule) {
@@ -883,10 +981,10 @@ function formalLogicToModelica(thought: FormalLogicThought, options: VisualExpor
       }
     }
 
-    modelica += '\n';
+    modelica += "\n";
 
     // Add theorem conclusion
-    const validStr = thought.proof.valid ? 'true' : 'false';
+    const validStr = thought.proof.valid ? "true" : "false";
     modelica += `    parameter Boolean theoremProven = ${validStr} "Theorem is proven";\n`;
 
     if (includeMetrics) {
@@ -899,7 +997,7 @@ function formalLogicToModelica(thought: FormalLogicThought, options: VisualExpor
 
   // Add metrics
   if (includeMetrics) {
-    modelica += '  // Proof Metrics\n';
+    modelica += "  // Proof Metrics\n";
     modelica += `  constant Integer propositionCount = ${thought.propositions?.length || 0};\n`;
     modelica += `  constant Integer inferenceCount = ${thought.logicalInferences?.length || 0};\n`;
     modelica += `  constant Integer proofStepCount = ${thought.proof?.steps?.length || 0};\n`;
@@ -911,14 +1009,17 @@ function formalLogicToModelica(thought: FormalLogicThought, options: VisualExpor
     }
   }
 
-  modelica += 'end FormalLogicProof;\n';
+  modelica += "end FormalLogicProof;\n";
   return modelica;
 }
 
 /**
  * Export formal logic proof tree to UML format
  */
-function formalLogicToUML(thought: FormalLogicThought, options: VisualExportOptions): string {
+function formalLogicToUML(
+  thought: FormalLogicThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true } = options;
 
   const nodes: UmlNode[] = [];
@@ -941,8 +1042,8 @@ function formalLogicToUML(thought: FormalLogicThought, options: VisualExportOpti
       nodes.push({
         id: propId,
         label: includeLabels ? proposition.symbol : propId,
-        shape: 'class',
-        stereotype: 'premise',
+        shape: "class",
+        stereotype: "premise",
         attributes,
       });
     }
@@ -961,8 +1062,8 @@ function formalLogicToUML(thought: FormalLogicThought, options: VisualExportOpti
       nodes.push({
         id: infId,
         label: includeLabels ? inference.rule : infId,
-        shape: 'class',
-        stereotype: 'inference',
+        shape: "class",
+        stereotype: "inference",
         attributes: [`valid: ${inference.valid}`],
         methods: operations,
       });
@@ -974,8 +1075,8 @@ function formalLogicToUML(thought: FormalLogicThought, options: VisualExportOpti
           edges.push({
             source: propId,
             target: infId,
-            type: 'dependency',
-            label: 'premise',
+            type: "dependency",
+            label: "premise",
           });
         }
       }
@@ -985,8 +1086,8 @@ function formalLogicToUML(thought: FormalLogicThought, options: VisualExportOpti
       edges.push({
         source: infId,
         target: conclusionId,
-        type: 'implementation',
-        label: 'derives',
+        type: "implementation",
+        label: "derives",
       });
     }
   }
@@ -1007,8 +1108,8 @@ function formalLogicToUML(thought: FormalLogicThought, options: VisualExportOpti
       nodes.push({
         id: stepId,
         label: includeLabels ? `Step ${step.stepNumber}` : stepId,
-        shape: 'class',
-        stereotype: 'proof-step',
+        shape: "class",
+        stereotype: "proof-step",
         attributes,
       });
 
@@ -1018,8 +1119,8 @@ function formalLogicToUML(thought: FormalLogicThought, options: VisualExportOpti
           edges.push({
             source: `Step${refStep}`,
             target: stepId,
-            type: 'dependency',
-            label: 'uses',
+            type: "dependency",
+            label: "uses",
           });
         }
       }
@@ -1027,10 +1128,10 @@ function formalLogicToUML(thought: FormalLogicThought, options: VisualExportOpti
 
     // Add theorem node
     nodes.push({
-      id: 'Theorem',
-      label: includeLabels ? 'Theorem' : 'T',
-      shape: 'class',
-      stereotype: 'conclusion',
+      id: "Theorem",
+      label: includeLabels ? "Theorem" : "T",
+      shape: "class",
+      stereotype: "conclusion",
       attributes: [
         `valid: ${thought.proof.valid}`,
         `completeness: ${(thought.proof.completeness * 100).toFixed(0)}%`,
@@ -1041,33 +1142,40 @@ function formalLogicToUML(thought: FormalLogicThought, options: VisualExportOpti
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
     edges.push({
       source: `Step${lastStep.stepNumber}`,
-      target: 'Theorem',
-      type: 'implementation',
-      label: 'proves',
+      target: "Theorem",
+      type: "implementation",
+      label: "proves",
     });
   }
 
   return generateUmlDiagram(nodes, edges, {
-    title: 'Formal Logic Proof',
-    diagramType: 'class',
+    title: "Formal Logic Proof",
+    diagramType: "class",
   });
 }
 
 /**
  * Export formal logic proof tree to JSON format
  */
-function formalLogicToJSON(thought: FormalLogicThought, options: VisualExportOptions): string {
+function formalLogicToJSON(
+  thought: FormalLogicThought,
+  options: VisualExportOptions,
+): string {
   const { includeLabels = true, includeMetrics = true } = options;
 
-  const graph = createJsonGraph('Formal Logic Proof', 'formal-logic', { includeMetrics });
+  const graph = createJsonGraph("Formal Logic Proof", "formal-logic", {
+    includeMetrics,
+  });
 
   // Add propositions as nodes
   if (thought.propositions && thought.propositions.length > 0) {
     for (const proposition of thought.propositions) {
       addNode(graph, {
         id: proposition.id,
-        label: includeLabels ? `${proposition.symbol}: ${proposition.statement}` : proposition.symbol,
-        type: 'premise',
+        label: includeLabels
+          ? `${proposition.symbol}: ${proposition.statement}`
+          : proposition.symbol,
+        type: "premise",
         metadata: {
           symbol: proposition.symbol,
           propositionType: proposition.type,
@@ -1089,7 +1197,7 @@ function formalLogicToJSON(thought: FormalLogicThought, options: VisualExportOpt
       addNode(graph, {
         id: infId,
         label: includeLabels ? inference.rule : infId,
-        type: 'inference',
+        type: "inference",
         metadata: {
           rule: inference.rule,
           valid: inference.valid,
@@ -1105,8 +1213,8 @@ function formalLogicToJSON(thought: FormalLogicThought, options: VisualExportOpt
             id: `edge_${edgeId++}`,
             source: premiseId,
             target: infId,
-            label: 'premise',
-            metadata: { type: 'premise-to-inference' },
+            label: "premise",
+            metadata: { type: "premise-to-inference" },
           });
         }
       }
@@ -1116,8 +1224,8 @@ function formalLogicToJSON(thought: FormalLogicThought, options: VisualExportOpt
         id: `edge_${edgeId++}`,
         source: infId,
         target: inference.conclusion,
-        label: 'derives',
-        metadata: { type: 'inference-to-conclusion' },
+        label: "derives",
+        metadata: { type: "inference-to-conclusion" },
       });
     }
   }
@@ -1129,8 +1237,10 @@ function formalLogicToJSON(thought: FormalLogicThought, options: VisualExportOpt
 
       addNode(graph, {
         id: stepId,
-        label: includeLabels ? `${step.stepNumber}. ${step.statement}` : `Step ${step.stepNumber}`,
-        type: 'proof-step',
+        label: includeLabels
+          ? `${step.stepNumber}. ${step.statement}`
+          : `Step ${step.stepNumber}`,
+        type: "proof-step",
         metadata: {
           stepNumber: step.stepNumber,
           statement: step.statement,
@@ -1147,8 +1257,8 @@ function formalLogicToJSON(thought: FormalLogicThought, options: VisualExportOpt
             id: `edge_${edgeId++}`,
             source: `Step${refStep}`,
             target: stepId,
-            label: 'uses',
-            metadata: { type: 'step-reference' },
+            label: "uses",
+            metadata: { type: "step-reference" },
           });
         }
       }
@@ -1156,9 +1266,9 @@ function formalLogicToJSON(thought: FormalLogicThought, options: VisualExportOpt
 
     // Add theorem node
     addNode(graph, {
-      id: 'Theorem',
-      label: includeLabels ? thought.proof.theorem : 'Theorem',
-      type: 'conclusion',
+      id: "Theorem",
+      label: includeLabels ? thought.proof.theorem : "Theorem",
+      type: "conclusion",
       metadata: {
         theorem: thought.proof.theorem,
         technique: thought.proof.technique,
@@ -1169,31 +1279,32 @@ function formalLogicToJSON(thought: FormalLogicThought, options: VisualExportOpt
     });
 
     // Connect last step to theorem
+    // (final use of edgeId in this function - no increment needed)
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
     addEdge(graph, {
-      id: `edge_${edgeId++}`,
+      id: `edge_${edgeId}`,
       source: `Step${lastStep.stepNumber}`,
-      target: 'Theorem',
-      label: 'proves',
-      metadata: { type: 'step-to-theorem' },
+      target: "Theorem",
+      label: "proves",
+      metadata: { type: "step-to-theorem" },
     });
   }
 
   // Add metrics
   if (includeMetrics) {
-    addMetric(graph, 'propositionCount', thought.propositions?.length || 0);
-    addMetric(graph, 'inferenceCount', thought.logicalInferences?.length || 0);
-    addMetric(graph, 'proofStepCount', thought.proof?.steps?.length || 0);
+    addMetric(graph, "propositionCount", thought.propositions?.length || 0);
+    addMetric(graph, "inferenceCount", thought.logicalInferences?.length || 0);
+    addMetric(graph, "proofStepCount", thought.proof?.steps?.length || 0);
 
     if (thought.proof) {
-      addMetric(graph, 'proofValid', thought.proof.valid);
-      addMetric(graph, 'proofCompleteness', thought.proof.completeness);
+      addMetric(graph, "proofValid", thought.proof.valid);
+      addMetric(graph, "proofCompleteness", thought.proof.completeness);
     }
 
     if (thought.truthTable) {
-      addMetric(graph, 'isTautology', thought.truthTable.isTautology);
-      addMetric(graph, 'isContradiction', thought.truthTable.isContradiction);
-      addMetric(graph, 'isContingent', thought.truthTable.isContingent);
+      addMetric(graph, "isTautology", thought.truthTable.isTautology);
+      addMetric(graph, "isContradiction", thought.truthTable.isContradiction);
+      addMetric(graph, "isContingent", thought.truthTable.isContingent);
     }
   }
 
@@ -1203,7 +1314,10 @@ function formalLogicToJSON(thought: FormalLogicThought, options: VisualExportOpt
 /**
  * Export formal logic proof tree to Markdown format
  */
-function formalLogicToMarkdown(thought: FormalLogicThought, options: VisualExportOptions): string {
+function formalLogicToMarkdown(
+  thought: FormalLogicThought,
+  options: VisualExportOptions,
+): string {
   const {
     markdownIncludeFrontmatter = false,
     markdownIncludeToc = false,
@@ -1216,81 +1330,85 @@ function formalLogicToMarkdown(thought: FormalLogicThought, options: VisualExpor
   // Proof Overview
   if (thought.proof) {
     const proofContent = keyValueSection({
-      'Theorem': thought.proof.theorem,
-      'Technique': thought.proof.technique,
-      'Valid': thought.proof.valid ? 'Yes' : 'No',
-      'Completeness': `${(thought.proof.completeness * 100).toFixed(0)}%`,
+      Theorem: thought.proof.theorem,
+      Technique: thought.proof.technique,
+      Valid: thought.proof.valid ? "Yes" : "No",
+      Completeness: `${(thought.proof.completeness * 100).toFixed(0)}%`,
     });
-    parts.push(section('Proof', proofContent));
+    parts.push(section("Proof", proofContent));
   }
 
   // Metrics
   if (includeMetrics) {
     const metricsContent = keyValueSection({
-      'Propositions': thought.propositions?.length || 0,
-      'Inferences': thought.logicalInferences?.length || 0,
-      'Proof Steps': thought.proof?.steps?.length || 0,
-      'Completeness': thought.proof ? `${(thought.proof.completeness * 100).toFixed(0)}%` : 'N/A',
+      Propositions: thought.propositions?.length || 0,
+      Inferences: thought.logicalInferences?.length || 0,
+      "Proof Steps": thought.proof?.steps?.length || 0,
+      Completeness: thought.proof
+        ? `${(thought.proof.completeness * 100).toFixed(0)}%`
+        : "N/A",
     });
-    parts.push(section('Metrics', metricsContent));
+    parts.push(section("Metrics", metricsContent));
   }
 
   // Propositions
   if (thought.propositions && thought.propositions.length > 0) {
-    const propositionRows = thought.propositions.map(p => [
+    const propositionRows = thought.propositions.map((p) => [
       p.symbol,
       p.type,
       p.statement,
-      p.truthValue !== undefined ? String(p.truthValue) : 'N/A',
+      p.truthValue !== undefined ? String(p.truthValue) : "N/A",
     ]);
     const propositionsTable = table(
-      ['Symbol', 'Type', 'Statement', 'Truth Value'],
-      propositionRows
+      ["Symbol", "Type", "Statement", "Truth Value"],
+      propositionRows,
     );
-    parts.push(section('Propositions', propositionsTable));
+    parts.push(section("Propositions", propositionsTable));
   }
 
   // Logical Inferences
   if (thought.logicalInferences && thought.logicalInferences.length > 0) {
-    const inferenceItems = thought.logicalInferences.map(inf =>
-      `**${inf.rule}** (${inf.valid ? 'Valid' : 'Invalid'})\n  - Premises: ${inf.premises.join(', ')}\n  - Conclusion: ${inf.conclusion}`
+    const inferenceItems = thought.logicalInferences.map(
+      (inf) =>
+        `**${inf.rule}** (${inf.valid ? "Valid" : "Invalid"})\n  - Premises: ${inf.premises.join(", ")}\n  - Conclusion: ${inf.conclusion}`,
     );
-    parts.push(section('Logical Inferences', list(inferenceItems)));
+    parts.push(section("Logical Inferences", list(inferenceItems)));
   }
 
   // Proof Steps
   if (thought.proof && thought.proof.steps && thought.proof.steps.length > 0) {
-    const stepItems = thought.proof.steps.map(step =>
-      `**${step.stepNumber}. ${step.statement}**\n  - Justification: ${step.justification}${step.rule ? `\n  - Rule: ${step.rule}` : ''}${step.referencesSteps && step.referencesSteps.length > 0 ? `\n  - References steps: ${step.referencesSteps.join(', ')}` : ''}`
+    const stepItems = thought.proof.steps.map(
+      (step) =>
+        `**${step.stepNumber}. ${step.statement}**\n  - Justification: ${step.justification}${step.rule ? `\n  - Rule: ${step.rule}` : ""}${step.referencesSteps && step.referencesSteps.length > 0 ? `\n  - References steps: ${step.referencesSteps.join(", ")}` : ""}`,
     );
-    parts.push(section('Proof Steps', list(stepItems)));
+    parts.push(section("Proof Steps", list(stepItems)));
   }
 
   // Conclusion
   if (thought.proof) {
-    const conclusionContent = `${thought.proof.conclusion}\n\n**Status:** ${thought.proof.valid ? 'PROVEN' : 'NOT PROVEN'}`;
-    parts.push(section('Conclusion', conclusionContent));
+    const conclusionContent = `${thought.proof.conclusion}\n\n**Status:** ${thought.proof.valid ? "PROVEN" : "NOT PROVEN"}`;
+    parts.push(section("Conclusion", conclusionContent));
   }
 
   // Truth Table
   if (thought.truthTable) {
     const truthTableContent = keyValueSection({
-      'Tautology': thought.truthTable.isTautology ? 'Yes' : 'No',
-      'Contradiction': thought.truthTable.isContradiction ? 'Yes' : 'No',
-      'Contingent': thought.truthTable.isContingent ? 'Yes' : 'No',
+      Tautology: thought.truthTable.isTautology ? "Yes" : "No",
+      Contradiction: thought.truthTable.isContradiction ? "Yes" : "No",
+      Contingent: thought.truthTable.isContingent ? "Yes" : "No",
     });
-    parts.push(section('Truth Table', truthTableContent));
+    parts.push(section("Truth Table", truthTableContent));
   }
 
   // Mermaid diagram
   if (markdownIncludeMermaid) {
-    const mermaidDiagram = formalLogicToMermaid(thought, 'default', true, true);
-    parts.push(section('Proof Tree Diagram', mermaidBlock(mermaidDiagram)));
+    const mermaidDiagram = formalLogicToMermaid(thought, "default", true, true);
+    parts.push(section("Proof Tree Diagram", mermaidBlock(mermaidDiagram)));
   }
 
-  return mdDocument('Formal Logic Analysis', parts.join('\n'), {
+  return mdDocument("Formal Logic Analysis", parts.join("\n"), {
     includeFrontmatter: markdownIncludeFrontmatter,
     includeTableOfContents: markdownIncludeToc,
-    metadata: { mode: 'formal-logic' },
+    metadata: { mode: "formal-logic" },
   });
 }

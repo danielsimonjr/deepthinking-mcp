@@ -16,7 +16,7 @@ import type {
   CentralityConfig,
   CentralityResult,
   CentralityType,
-} from '../types.js';
+} from "../types.js";
 
 // ============================================================================
 // GRAPH UTILITIES
@@ -27,7 +27,7 @@ import type {
  */
 function buildAdjacencyList(
   graph: CausalGraph,
-  directed = true
+  directed = true,
 ): { outgoing: Map<string, string[]>; incoming: Map<string, string[]> } {
   const outgoing = new Map<string, string[]>();
   const incoming = new Map<string, string[]>();
@@ -42,7 +42,7 @@ function buildAdjacencyList(
     incoming.get(edge.to)?.push(edge.from);
 
     // For undirected/bidirected edges, add both directions
-    if (!directed || edge.type === 'undirected' || edge.type === 'bidirected') {
+    if (!directed || edge.type === "undirected" || edge.type === "bidirected") {
       outgoing.get(edge.to)?.push(edge.from);
       incoming.get(edge.from)?.push(edge.to);
     }
@@ -60,8 +60,12 @@ function buildAdjacencyList(
  */
 export function computeDegreeCentrality(
   graph: CausalGraph,
-  normalize = true
-): { degree: Map<string, number>; inDegree: Map<string, number>; outDegree: Map<string, number> } {
+  normalize = true,
+): {
+  degree: Map<string, number>;
+  inDegree: Map<string, number>;
+  outDegree: Map<string, number>;
+} {
   const { outgoing, incoming } = buildAdjacencyList(graph);
   const n = graph.nodes.length;
   const normFactor = normalize && n > 1 ? n - 1 : 1;
@@ -91,7 +95,7 @@ export function computeDegreeCentrality(
  */
 export function computeBetweennessCentrality(
   graph: CausalGraph,
-  normalize = true
+  normalize = true,
 ): Map<string, number> {
   const { outgoing } = buildAdjacencyList(graph, false); // Undirected for betweenness
   const n = graph.nodes.length;
@@ -146,7 +150,8 @@ export function computeBetweennessCentrality(
     while (stack.length > 0) {
       const w = stack.pop()!;
       for (const v of pred.get(w)!) {
-        const contribution = (sigma.get(v)! / sigma.get(w)!) * (1 + delta.get(w)!);
+        const contribution =
+          (sigma.get(v)! / sigma.get(w)!) * (1 + delta.get(w)!);
         delta.set(v, delta.get(v)! + contribution);
       }
       if (w !== s.id) {
@@ -175,7 +180,7 @@ export function computeBetweennessCentrality(
  */
 export function computeClosenessCentrality(
   graph: CausalGraph,
-  normalize = true
+  normalize = true,
 ): Map<string, number> {
   const { outgoing } = buildAdjacencyList(graph, false);
   const n = graph.nodes.length;
@@ -213,7 +218,7 @@ export function computeClosenessCentrality(
     // Closeness = 1 / average distance
     if (reachable > 0 && totalDist > 0) {
       const cc = reachable / totalDist;
-      closeness.set(source.id, normalize && n > 1 ? cc * (n - 1) / n : cc);
+      closeness.set(source.id, normalize && n > 1 ? (cc * (n - 1)) / n : cc);
     } else {
       closeness.set(source.id, 0);
     }
@@ -233,7 +238,7 @@ export function computePageRank(
   graph: CausalGraph,
   dampingFactor = 0.85,
   maxIterations = 100,
-  tolerance = 1e-6
+  tolerance = 1e-6,
 ): Map<string, number> {
   const { outgoing } = buildAdjacencyList(graph);
   const n = graph.nodes.length;
@@ -260,7 +265,8 @@ export function computePageRank(
       const outDegree = neighbors.length;
 
       if (outDegree > 0) {
-        const contribution = (dampingFactor * pageRank.get(node.id)!) / outDegree;
+        const contribution =
+          (dampingFactor * pageRank.get(node.id)!) / outDegree;
         for (const neighbor of neighbors) {
           newPageRank.set(neighbor, newPageRank.get(neighbor)! + contribution);
         }
@@ -278,7 +284,7 @@ export function computePageRank(
     for (const node of graph.nodes) {
       maxDiff = Math.max(
         maxDiff,
-        Math.abs(newPageRank.get(node.id)! - pageRank.get(node.id)!)
+        Math.abs(newPageRank.get(node.id)! - pageRank.get(node.id)!),
       );
     }
 
@@ -302,7 +308,7 @@ export function computePageRank(
 export function computeEigenvectorCentrality(
   graph: CausalGraph,
   maxIterations = 100,
-  tolerance = 1e-6
+  tolerance = 1e-6,
 ): Map<string, number> {
   const { incoming } = buildAdjacencyList(graph, false);
   const n = graph.nodes.length;
@@ -344,7 +350,7 @@ export function computeEigenvectorCentrality(
     for (const node of graph.nodes) {
       maxDiff = Math.max(
         maxDiff,
-        Math.abs(newCentrality.get(node.id)! - centrality.get(node.id)!)
+        Math.abs(newCentrality.get(node.id)! - centrality.get(node.id)!),
       );
     }
 
@@ -370,7 +376,7 @@ export function computeKatzCentrality(
   alpha = 0.1,
   beta = 1.0,
   maxIterations = 100,
-  tolerance = 1e-6
+  tolerance = 1e-6,
 ): Map<string, number> {
   const { incoming } = buildAdjacencyList(graph);
   const n = graph.nodes.length;
@@ -399,7 +405,7 @@ export function computeKatzCentrality(
     for (const node of graph.nodes) {
       maxDiff = Math.max(
         maxDiff,
-        Math.abs(newCentrality.get(node.id)! - centrality.get(node.id)!)
+        Math.abs(newCentrality.get(node.id)! - centrality.get(node.id)!),
       );
     }
 
@@ -433,17 +439,17 @@ export function computeKatzCentrality(
  */
 export function computeAllCentrality(
   graph: CausalGraph,
-  config: CentralityConfig = {}
+  config: CentralityConfig = {},
 ): CentralityResult {
   const startTime = Date.now();
   const measures = config.measures || [
-    'degree',
-    'in_degree',
-    'out_degree',
-    'betweenness',
-    'closeness',
-    'pagerank',
-    'eigenvector',
+    "degree",
+    "in_degree",
+    "out_degree",
+    "betweenness",
+    "closeness",
+    "pagerank",
+    "eigenvector",
   ];
   const normalize = config.normalize ?? true;
 
@@ -459,68 +465,74 @@ export function computeAllCentrality(
 
   // Compute degree centralities
   if (
-    measures.includes('degree') ||
-    measures.includes('in_degree') ||
-    measures.includes('out_degree')
+    measures.includes("degree") ||
+    measures.includes("in_degree") ||
+    measures.includes("out_degree")
   ) {
-    const { degree, inDegree, outDegree } = computeDegreeCentrality(graph, normalize);
+    const { degree, inDegree, outDegree } = computeDegreeCentrality(
+      graph,
+      normalize,
+    );
     result.degree = degree;
     result.inDegree = inDegree;
     result.outDegree = outDegree;
   }
 
   // Compute betweenness
-  if (measures.includes('betweenness')) {
+  if (measures.includes("betweenness")) {
     result.betweenness = computeBetweennessCentrality(graph, normalize);
   }
 
   // Compute closeness
-  if (measures.includes('closeness')) {
+  if (measures.includes("closeness")) {
     result.closeness = computeClosenessCentrality(graph, normalize);
   }
 
   // Compute PageRank
-  if (measures.includes('pagerank')) {
+  if (measures.includes("pagerank")) {
     result.pageRank = computePageRank(
       graph,
       config.dampingFactor,
       config.maxIterations,
-      config.tolerance
+      config.tolerance,
     );
   }
 
   // Compute eigenvector
-  if (measures.includes('eigenvector')) {
+  if (measures.includes("eigenvector")) {
     result.eigenvector = computeEigenvectorCentrality(
       graph,
       config.maxIterations,
-      config.tolerance
+      config.tolerance,
     );
   }
 
   // Compute Katz (if requested)
-  if (measures.includes('katz')) {
+  if (measures.includes("katz")) {
     (result as any).katz = computeKatzCentrality(
       graph,
       undefined,
       undefined,
       config.maxIterations,
-      config.tolerance
+      config.tolerance,
     );
   }
 
   // Find top nodes for each measure
-  const topNodes = new Map<CentralityType, Array<{ nodeId: string; score: number }>>();
+  const topNodes = new Map<
+    CentralityType,
+    Array<{ nodeId: string; score: number }>
+  >();
   const topN = 5;
 
   const measureMaps: [CentralityType, Map<string, number>][] = [
-    ['degree', result.degree],
-    ['in_degree', result.inDegree],
-    ['out_degree', result.outDegree],
-    ['betweenness', result.betweenness],
-    ['closeness', result.closeness],
-    ['pagerank', result.pageRank],
-    ['eigenvector', result.eigenvector],
+    ["degree", result.degree],
+    ["in_degree", result.inDegree],
+    ["out_degree", result.outDegree],
+    ["betweenness", result.betweenness],
+    ["closeness", result.closeness],
+    ["pagerank", result.pageRank],
+    ["eigenvector", result.eigenvector],
   ];
 
   for (const [measureType, measureMap] of measureMaps) {
@@ -545,30 +557,35 @@ export function computeAllCentrality(
  */
 export function getMostCentralNode(
   graph: CausalGraph,
-  measure: CentralityType = 'pagerank'
+  measure: CentralityType = "pagerank",
 ): { nodeId: string; score: number } | null {
   let centralityMap: Map<string, number>;
 
   switch (measure) {
-    case 'degree':
-    case 'in_degree':
-    case 'out_degree':
+    case "degree":
+    case "in_degree":
+    case "out_degree":
       const { degree, inDegree, outDegree } = computeDegreeCentrality(graph);
-      centralityMap = measure === 'in_degree' ? inDegree : measure === 'out_degree' ? outDegree : degree;
+      centralityMap =
+        measure === "in_degree"
+          ? inDegree
+          : measure === "out_degree"
+            ? outDegree
+            : degree;
       break;
-    case 'betweenness':
+    case "betweenness":
       centralityMap = computeBetweennessCentrality(graph);
       break;
-    case 'closeness':
+    case "closeness":
       centralityMap = computeClosenessCentrality(graph);
       break;
-    case 'pagerank':
+    case "pagerank":
       centralityMap = computePageRank(graph);
       break;
-    case 'eigenvector':
+    case "eigenvector":
       centralityMap = computeEigenvectorCentrality(graph);
       break;
-    case 'katz':
+    case "katz":
       centralityMap = computeKatzCentrality(graph);
       break;
     default:

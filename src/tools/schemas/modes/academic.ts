@@ -5,14 +5,19 @@
  * Zod validation schema for synthesis, argumentation, critique, analysis modes
  */
 
-import { z } from 'zod';
-import { BaseThoughtSchema } from '../base.js';
-import { ConfidenceSchema } from '../shared.js';
+import { z } from "zod";
+import { BaseThoughtSchema } from "../base.js";
+import { ConfidenceSchema } from "../shared.js";
 
 /**
  * Academic mode enum
  */
-export const AcademicModeEnum = z.enum(['synthesis', 'argumentation', 'critique', 'analysis']);
+export const AcademicModeEnum = z.enum([
+  "synthesis",
+  "argumentation",
+  "critique",
+  "analysis",
+]);
 
 /**
  * Source schema for synthesis mode
@@ -37,7 +42,7 @@ const ThemeSchema = z.object({
   description: z.string().optional(),
   sourceIds: z.array(z.string()).optional(),
   strength: ConfidenceSchema.optional(),
-  consensus: z.enum(['strong', 'moderate', 'weak', 'contested']).optional(),
+  consensus: z.enum(["strong", "moderate", "weak", "contested"]).optional(),
 });
 
 /**
@@ -46,8 +51,18 @@ const ThemeSchema = z.object({
 const GapSchema = z.object({
   id: z.string(),
   description: z.string(),
-  type: z.enum(['empirical', 'theoretical', 'methodological', 'population', 'contextual']).optional(),
-  importance: z.enum(['critical', 'significant', 'moderate', 'minor']).optional(),
+  type: z
+    .enum([
+      "empirical",
+      "theoretical",
+      "methodological",
+      "population",
+      "contextual",
+    ])
+    .optional(),
+  importance: z
+    .enum(["critical", "significant", "moderate", "minor"])
+    .optional(),
 });
 
 /**
@@ -56,8 +71,8 @@ const GapSchema = z.object({
 const ClaimSchema = z.object({
   id: z.string(),
   statement: z.string(),
-  type: z.enum(['fact', 'value', 'policy', 'definition', 'cause']).optional(),
-  strength: z.enum(['strong', 'moderate', 'tentative']).optional(),
+  type: z.enum(["fact", "value", "policy", "definition", "cause"]).optional(),
+  strength: z.enum(["strong", "moderate", "tentative"]).optional(),
 });
 
 /**
@@ -65,7 +80,16 @@ const ClaimSchema = z.object({
  */
 const GroundsSchema = z.object({
   id: z.string(),
-  type: z.enum(['empirical', 'statistical', 'testimonial', 'analogical', 'logical', 'textual']).optional(),
+  type: z
+    .enum([
+      "empirical",
+      "statistical",
+      "testimonial",
+      "analogical",
+      "logical",
+      "textual",
+    ])
+    .optional(),
   content: z.string(),
   source: z.string().optional(),
   reliability: ConfidenceSchema.optional(),
@@ -77,7 +101,16 @@ const GroundsSchema = z.object({
 const WarrantSchema = z.object({
   id: z.string(),
   statement: z.string(),
-  type: z.enum(['generalization', 'analogy', 'causal', 'authority', 'principle', 'definition']).optional(),
+  type: z
+    .enum([
+      "generalization",
+      "analogy",
+      "causal",
+      "authority",
+      "principle",
+      "definition",
+    ])
+    .optional(),
   groundsIds: z.array(z.string()).optional(),
   claimId: z.string().optional(),
 });
@@ -88,8 +121,10 @@ const WarrantSchema = z.object({
 const RebuttalSchema = z.object({
   id: z.string(),
   objection: z.string(),
-  type: z.enum(['factual', 'logical', 'ethical', 'practical', 'definitional']).optional(),
-  strength: z.enum(['strong', 'moderate', 'weak']).optional(),
+  type: z
+    .enum(["factual", "logical", "ethical", "practical", "definitional"])
+    .optional(),
+  strength: z.enum(["strong", "moderate", "weak"]).optional(),
   response: z.string().optional(),
 });
 
@@ -112,7 +147,19 @@ const CodeSchema = z.object({
   id: z.string(),
   label: z.string(),
   definition: z.string().optional(),
-  type: z.enum(['descriptive', 'in_vivo', 'process', 'initial', 'focused', 'axial', 'theoretical', 'emotion', 'value']).optional(),
+  type: z
+    .enum([
+      "descriptive",
+      "in_vivo",
+      "process",
+      "initial",
+      "focused",
+      "axial",
+      "theoretical",
+      "emotion",
+      "value",
+    ])
+    .optional(),
   frequency: z.number().int().optional(),
   examples: z.array(z.string()).optional(),
 });
@@ -122,7 +169,16 @@ const CodeSchema = z.object({
  */
 const MemoSchema = z.object({
   id: z.string(),
-  type: z.enum(['analytical', 'theoretical', 'methodological', 'reflexive', 'code', 'operational']).optional(),
+  type: z
+    .enum([
+      "analytical",
+      "theoretical",
+      "methodological",
+      "reflexive",
+      "code",
+      "operational",
+    ])
+    .optional(),
   content: z.string(),
   relatedCodes: z.array(z.string()).optional(),
 });
@@ -153,23 +209,29 @@ export const AcademicSchema = BaseThoughtSchema.extend({
   suggestions: z.array(z.string()).optional(),
 
   // Analysis properties (qualitative)
-  methodology: z.enum([
-    'thematic_analysis',
-    'grounded_theory',
-    'discourse_analysis',
-    'content_analysis',
-    'phenomenological',
-    'narrative_analysis',
-    'framework_analysis',
-    'template_analysis',
-    'mixed_qualitative',
-  ]).optional(),
-  dataSources: z.array(z.object({
-    id: z.string(),
-    type: z.string(),
-    description: z.string().optional(),
-    participantId: z.string().optional(),
-  })).optional(),
+  methodology: z
+    .enum([
+      "thematic_analysis",
+      "grounded_theory",
+      "discourse_analysis",
+      "content_analysis",
+      "phenomenological",
+      "narrative_analysis",
+      "framework_analysis",
+      "template_analysis",
+      "mixed_qualitative",
+    ])
+    .optional(),
+  dataSources: z
+    .array(
+      z.object({
+        id: z.string(),
+        type: z.string(),
+        description: z.string().optional(),
+        participantId: z.string().optional(),
+      }),
+    )
+    .optional(),
   codes: z.array(CodeSchema).optional(),
   memos: z.array(MemoSchema).optional(),
   saturationReached: z.boolean().optional(),

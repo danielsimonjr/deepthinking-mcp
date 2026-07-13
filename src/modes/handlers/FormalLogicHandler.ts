@@ -8,9 +8,9 @@
  * - Logical fallacy detection
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode, FormalLogicThought } from '../../types/core.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode, FormalLogicThought } from "../../types/core.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -18,9 +18,14 @@ import {
   ModeEnhancements,
   validationSuccess,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
-type FormalLogicThoughtType = 'proposition_definition' | 'inference_derivation' | 'proof_construction' | 'satisfiability_check' | 'validity_verification';
+type FormalLogicThoughtType =
+  | "proposition_definition"
+  | "inference_derivation"
+  | "proof_construction"
+  | "satisfiability_check"
+  | "validity_verification";
 
 /**
  * FormalLogicHandler - Specialized handler for formal logic reasoning
@@ -33,21 +38,25 @@ type FormalLogicThoughtType = 'proposition_definition' | 'inference_derivation' 
  */
 export class FormalLogicHandler implements ModeHandler {
   readonly mode = ThinkingMode.FORMALLOGIC;
-  readonly modeName = 'Formal Logic';
-  readonly description = 'Propositional and predicate logic with inference validation';
+  readonly modeName = "Formal Logic";
+  readonly description =
+    "Propositional and predicate logic with inference validation";
 
   private readonly supportedThoughtTypes: FormalLogicThoughtType[] = [
-    'proposition_definition',
-    'inference_derivation',
-    'proof_construction',
-    'satisfiability_check',
-    'validity_verification',
+    "proposition_definition",
+    "inference_derivation",
+    "proof_construction",
+    "satisfiability_check",
+    "validity_verification",
   ];
 
   /**
    * Create a formal logic thought from input
    */
-  createThought(input: ThinkingToolInput, sessionId: string): FormalLogicThought {
+  createThought(
+    input: ThinkingToolInput,
+    sessionId: string,
+  ): FormalLogicThought {
     const inputAny = input as any;
 
     // Resolve thought type
@@ -84,10 +93,10 @@ export class FormalLogicHandler implements ModeHandler {
     if (!inputAny.propositions || inputAny.propositions.length === 0) {
       warnings.push(
         createValidationWarning(
-          'propositions',
-          'No propositions defined',
-          'Define the atomic propositions for your logical argument'
-        )
+          "propositions",
+          "No propositions defined",
+          "Define the atomic propositions for your logical argument",
+        ),
       );
     }
 
@@ -97,10 +106,10 @@ export class FormalLogicHandler implements ModeHandler {
         if (inf.valid === false) {
           warnings.push(
             createValidationWarning(
-              'logicalInferences',
+              "logicalInferences",
               `Inference "${inf.id}" is marked as invalid`,
-              'Review the inference rule application'
-            )
+              "Review the inference rule application",
+            ),
           );
         }
       }
@@ -108,22 +117,25 @@ export class FormalLogicHandler implements ModeHandler {
 
     // Check proof completeness
     if (inputAny.proof) {
-      if (inputAny.proof.completeness !== undefined && inputAny.proof.completeness < 1) {
+      if (
+        inputAny.proof.completeness !== undefined &&
+        inputAny.proof.completeness < 1
+      ) {
         warnings.push(
           createValidationWarning(
-            'proof',
+            "proof",
             `Proof is ${(inputAny.proof.completeness * 100).toFixed(0)}% complete`,
-            'Add missing proof steps to complete the derivation'
-          )
+            "Add missing proof steps to complete the derivation",
+          ),
         );
       }
       if (inputAny.proof.valid === false) {
         warnings.push(
           createValidationWarning(
-            'proof',
-            'Proof is marked as invalid',
-            'Review the logical steps for errors'
-          )
+            "proof",
+            "Proof is marked as invalid",
+            "Review the logical steps for errors",
+          ),
         );
       }
     }
@@ -137,16 +149,20 @@ export class FormalLogicHandler implements ModeHandler {
   getEnhancements(thought: FormalLogicThought): ModeEnhancements {
     const enhancements: ModeEnhancements = {
       suggestions: [],
-      relatedModes: [ThinkingMode.DEDUCTIVE, ThinkingMode.MATHEMATICS, ThinkingMode.FIRSTPRINCIPLES],
+      relatedModes: [
+        ThinkingMode.DEDUCTIVE,
+        ThinkingMode.MATHEMATICS,
+        ThinkingMode.FIRSTPRINCIPLES,
+      ],
       metrics: {},
       guidingQuestions: [],
       mentalModels: [
-        'Propositional Logic',
-        'Predicate Logic',
-        'Natural Deduction',
-        'Truth Tables',
-        'Proof by Contradiction',
-        'Logical Equivalences',
+        "Propositional Logic",
+        "Predicate Logic",
+        "Natural Deduction",
+        "Truth Tables",
+        "Proof by Contradiction",
+        "Logical Equivalences",
       ],
     };
 
@@ -165,41 +181,52 @@ export class FormalLogicHandler implements ModeHandler {
 
     // Stage-specific suggestions
     if (propositions.length === 0) {
-      enhancements.suggestions!.push('Start by defining atomic propositions');
+      enhancements.suggestions!.push("Start by defining atomic propositions");
     } else if (inferences.length === 0 && !proof) {
-      enhancements.suggestions!.push('Apply inference rules to derive new conclusions');
+      enhancements.suggestions!.push(
+        "Apply inference rules to derive new conclusions",
+      );
     } else if (proof && proof.completeness < 1) {
-      enhancements.suggestions!.push('Continue building the proof with additional steps');
+      enhancements.suggestions!.push(
+        "Continue building the proof with additional steps",
+      );
     }
 
     // Guiding questions
     enhancements.guidingQuestions = [
-      'Are all propositions clearly stated?',
-      'Which inference rule justifies each step?',
-      'Can the argument be formalized in symbolic logic?',
-      'Is the proof complete and valid?',
-      'What are the truth conditions for the conclusion?',
+      "Are all propositions clearly stated?",
+      "Which inference rule justifies each step?",
+      "Can the argument be formalized in symbolic logic?",
+      "Is the proof complete and valid?",
+      "What are the truth conditions for the conclusion?",
     ];
 
     // Add available inference rules as suggestions
     enhancements.suggestions!.push(
-      'Available inference rules: modus_ponens, modus_tollens, hypothetical_syllogism, disjunctive_syllogism, conjunction, simplification, addition, resolution'
+      "Available inference rules: modus_ponens, modus_tollens, hypothetical_syllogism, disjunctive_syllogism, conjunction, simplification, addition, resolution",
     );
 
     return enhancements;
   }
 
   supportsThoughtType(thoughtType: string): boolean {
-    return this.supportedThoughtTypes.includes(thoughtType as FormalLogicThoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType as FormalLogicThoughtType,
+    );
   }
 
   /**
    * Resolve thought type to valid FormalLogicThoughtType
    */
-  private resolveThoughtType(inputType: string | undefined): FormalLogicThoughtType {
-    if (inputType && this.supportedThoughtTypes.includes(inputType as FormalLogicThoughtType)) {
+  private resolveThoughtType(
+    inputType: string | undefined,
+  ): FormalLogicThoughtType {
+    if (
+      inputType &&
+      this.supportedThoughtTypes.includes(inputType as FormalLogicThoughtType)
+    ) {
       return inputType as FormalLogicThoughtType;
     }
-    return 'proposition_definition';
+    return "proposition_definition";
   }
 }

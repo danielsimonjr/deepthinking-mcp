@@ -11,19 +11,19 @@
  * A "deciban" is 1/10 of a ban (hence 10 decibans = 1 ban = factor of 10 in odds)
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Cryptanalytic thought types
  */
 export type CryptanalyticThoughtType =
-  | 'hypothesis_formation'     // Formulate cryptographic hypothesis
-  | 'evidence_accumulation'    // Accumulate evidence (decibans)
-  | 'frequency_analysis'       // Statistical frequency analysis
-  | 'key_elimination'          // Key space elimination
-  | 'banburismus'             // Turing's Banburismus technique
-  | 'crib_analysis'           // Known plaintext attack
-  | 'isomorphism_detection';  // Pattern matching
+  | "hypothesis_formation" // Formulate cryptographic hypothesis
+  | "evidence_accumulation" // Accumulate evidence (decibans)
+  | "frequency_analysis" // Statistical frequency analysis
+  | "key_elimination" // Key space elimination
+  | "banburismus" // Turing's Banburismus technique
+  | "crib_analysis" // Known plaintext attack
+  | "isomorphism_detection"; // Pattern matching
 
 /**
  * Evidence unit (Turing's deciban system)
@@ -44,7 +44,7 @@ export interface DecibanEvidence {
   likelihoodRatio: number;
 
   /** Source of this evidence */
-  source: 'frequency' | 'pattern' | 'crib' | 'statistical' | 'structural';
+  source: "frequency" | "pattern" | "crib" | "statistical" | "structural";
 
   /** Confidence in this measurement */
   confidence: number;
@@ -70,7 +70,7 @@ export interface EvidenceChain {
   oddsRatio: number;
 
   /** Conclusion based on threshold */
-  conclusion: 'confirmed' | 'refuted' | 'inconclusive';
+  conclusion: "confirmed" | "refuted" | "inconclusive";
 
   /** Threshold for confirmation (typically 20 decibans) */
   confirmationThreshold: number;
@@ -208,14 +208,14 @@ export interface CribAnalysis {
  * Cipher classification
  */
 export type CipherType =
-  | 'substitution_simple'      // Caesar, Atbash
-  | 'substitution_polyalphabetic'  // Vigenère
-  | 'substitution_polygraphic' // Playfair, Hill
-  | 'transposition'            // Rail fence, columnar
-  | 'rotor'                    // Enigma, SIGABA
-  | 'stream'                   // One-time pad, RC4
-  | 'block'                    // DES, AES
-  | 'unknown';
+  | "substitution_simple" // Caesar, Atbash
+  | "substitution_polyalphabetic" // Vigenère
+  | "substitution_polygraphic" // Playfair, Hill
+  | "transposition" // Rail fence, columnar
+  | "rotor" // Enigma, SIGABA
+  | "stream" // One-time pad, RC4
+  | "block" // DES, AES
+  | "unknown";
 
 /**
  * Cryptographic hypothesis
@@ -246,7 +246,7 @@ export interface CryptographicHypothesis {
   evidence: DecibanEvidence[];
 
   /** Status of the hypothesis */
-  status: 'active' | 'confirmed' | 'refuted' | 'superseded';
+  status: "active" | "confirmed" | "refuted" | "superseded";
 }
 
 /**
@@ -322,7 +322,9 @@ export interface CryptanalyticThought extends BaseThought {
 /**
  * Type guard for Cryptanalytic thoughts
  */
-export function isCryptanalyticThought(thought: BaseThought): thought is CryptanalyticThought {
+export function isCryptanalyticThought(
+  thought: BaseThought,
+): thought is CryptanalyticThought {
   return thought.mode === ThinkingMode.CRYPTANALYTIC;
 }
 
@@ -352,7 +354,10 @@ export function decibansToOdds(decibans: number): number {
 /**
  * Convert decibans to probability (assuming prior of 0.5)
  */
-export function decibansToProbability(decibans: number, priorProbability: number = 0.5): number {
+export function decibansToProbability(
+  decibans: number,
+  priorProbability: number = 0.5,
+): number {
   const priorOdds = priorProbability / (1 - priorProbability);
   const posteriorOdds = priorOdds * fromDecibans(decibans);
   return posteriorOdds / (1 + posteriorOdds);
@@ -370,7 +375,7 @@ export function accumulateEvidence(observations: DecibanEvidence[]): number {
  * IC = Σ(f_i × (f_i - 1)) / (N × (N - 1))
  */
 export function calculateIndexOfCoincidence(text: string): number {
-  const cleanText = text.toUpperCase().replace(/[^A-Z]/g, '');
+  const cleanText = text.toUpperCase().replace(/[^A-Z]/g, "");
   const n = cleanText.length;
   if (n <= 1) return 0;
 
@@ -403,10 +408,30 @@ export const LANGUAGE_IC: Record<string, number> = {
  * Standard English letter frequencies (for frequency analysis)
  */
 export const ENGLISH_FREQUENCIES: Record<string, number> = {
-  E: 0.127, T: 0.091, A: 0.082, O: 0.075, I: 0.070,
-  N: 0.067, S: 0.063, H: 0.061, R: 0.060, D: 0.043,
-  L: 0.040, C: 0.028, U: 0.028, M: 0.024, W: 0.024,
-  F: 0.022, G: 0.020, Y: 0.020, P: 0.019, B: 0.015,
-  V: 0.010, K: 0.008, J: 0.002, X: 0.002, Q: 0.001,
+  E: 0.127,
+  T: 0.091,
+  A: 0.082,
+  O: 0.075,
+  I: 0.07,
+  N: 0.067,
+  S: 0.063,
+  H: 0.061,
+  R: 0.06,
+  D: 0.043,
+  L: 0.04,
+  C: 0.028,
+  U: 0.028,
+  M: 0.024,
+  W: 0.024,
+  F: 0.022,
+  G: 0.02,
+  Y: 0.02,
+  P: 0.019,
+  B: 0.015,
+  V: 0.01,
+  K: 0.008,
+  J: 0.002,
+  X: 0.002,
+  Q: 0.001,
   Z: 0.001,
 };

@@ -4,7 +4,7 @@
  */
 
 // Base interface (BaseValidator is deprecated alias for ModeValidator)
-export type { ModeValidator, BaseValidator } from './base.js';
+export type { ModeValidator, BaseValidator } from "./base.js";
 
 // Validation utility functions (composition pattern)
 export {
@@ -16,34 +16,34 @@ export {
   validateConfidence,
   validateRequired,
   validateNonEmptyArray,
-} from './validation-utils.js';
+} from "./validation-utils.js";
 
 // Mode-specific validators
-export { SequentialValidator } from './modes/sequential.js';
-export { ShannonValidator } from './modes/shannon.js';
-export { MathematicsValidator } from './modes/mathematics.js';
-export { PhysicsValidator } from './modes/physics.js';
-export { HybridValidator } from './modes/hybrid.js';
-export { InductiveValidator } from './modes/inductive.js';
-export { DeductiveValidator } from './modes/deductive.js';
-export { AbductiveValidator } from './modes/abductive.js';
-export { CausalValidator } from './modes/causal.js';
-export { BayesianValidator } from './modes/bayesian.js';
-export { CounterfactualValidator } from './modes/counterfactual.js';
-export { AnalogicalValidator } from './modes/analogical.js';
-export { TemporalValidator } from './modes/temporal.js';
-export { HistoricalValidator } from './modes/historical.js';
-export { GameTheoryValidator } from './modes/gametheory.js';
-export { EvidentialValidator } from './modes/evidential.js';
-export { MetaValidator } from './modes/meta.js';
-export { ModalValidator } from './modes/modal.js';
-export { ConstraintValidator } from './modes/constraint.js';
-export { OptimizationValidator } from './modes/optimization.js';
-export { StochasticValidator } from './modes/stochastic.js';
-export { RecursiveValidator } from './modes/recursive.js';
-export { MetaReasoningValidator } from './modes/metareasoning.js';
-export { ComputabilityValidator } from './modes/computability.js';
-export { CryptanalyticValidator } from './modes/cryptanalytic.js';
+export { SequentialValidator } from "./modes/sequential.js";
+export { ShannonValidator } from "./modes/shannon.js";
+export { MathematicsValidator } from "./modes/mathematics.js";
+export { PhysicsValidator } from "./modes/physics.js";
+export { HybridValidator } from "./modes/hybrid.js";
+export { InductiveValidator } from "./modes/inductive.js";
+export { DeductiveValidator } from "./modes/deductive.js";
+export { AbductiveValidator } from "./modes/abductive.js";
+export { CausalValidator } from "./modes/causal.js";
+export { BayesianValidator } from "./modes/bayesian.js";
+export { CounterfactualValidator } from "./modes/counterfactual.js";
+export { AnalogicalValidator } from "./modes/analogical.js";
+export { TemporalValidator } from "./modes/temporal.js";
+export { HistoricalValidator } from "./modes/historical.js";
+export { GameTheoryValidator } from "./modes/gametheory.js";
+export { EvidentialValidator } from "./modes/evidential.js";
+export { MetaValidator } from "./modes/meta.js";
+export { ModalValidator } from "./modes/modal.js";
+export { ConstraintValidator } from "./modes/constraint.js";
+export { OptimizationValidator } from "./modes/optimization.js";
+export { StochasticValidator } from "./modes/stochastic.js";
+export { RecursiveValidator } from "./modes/recursive.js";
+export { MetaReasoningValidator } from "./modes/metareasoning.js";
+export { ComputabilityValidator } from "./modes/computability.js";
+export { CryptanalyticValidator } from "./modes/cryptanalytic.js";
 
 // Registry and factory (Sprint 9.3: lazy loading)
 export {
@@ -53,4 +53,4 @@ export {
   hasValidatorForMode,
   getSupportedModes,
   preloadValidators,
-} from './registry.js';
+} from "./registry.js";

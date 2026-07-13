@@ -3,32 +3,58 @@
  * Phase 15A Sprint 3: Uses composition with utility functions
  */
 
-import type { FirstPrinciplesThought, ValidationIssue } from '../../../types/index.js';
-import type { ValidationContext } from '../../validator.js';
-import type { ModeValidator } from '../base.js';
-import { IssueCategory, IssueSeverity } from '../../constants.js';
-import { validateCommon, validateRequired, validateNonEmptyArray, validateConfidence, validateNumberRange, validateProbability } from '../validation-utils.js';
+import type {
+  FirstPrinciplesThought,
+  ValidationIssue,
+} from "../../../types/index.js";
+import type { ValidationContext } from "../../validator.js";
+import type { ModeValidator } from "../base.js";
+import { IssueCategory, IssueSeverity } from "../../constants.js";
+import {
+  validateCommon,
+  validateRequired,
+  validateNonEmptyArray,
+  validateConfidence,
+  validateNumberRange,
+  validateProbability,
+} from "../validation-utils.js";
 
 /**
  * Validator for First-Principles reasoning mode
  */
 export class FirstPrinciplesValidator implements ModeValidator<FirstPrinciplesThought> {
   getMode(): string {
-    return 'firstprinciples';
+    return "firstprinciples";
   }
 
-  validate(thought: FirstPrinciplesThought, _context: ValidationContext): ValidationIssue[] {
+  validate(
+    thought: FirstPrinciplesThought,
+    _context: ValidationContext,
+  ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
     // Common validation
     issues.push(...validateCommon(thought));
 
     // Validate question using shared method
-    issues.push(...validateRequired(thought, thought.question?.trim(), 'Question', IssueCategory.STRUCTURAL));
+    issues.push(
+      ...validateRequired(
+        thought,
+        thought.question?.trim(),
+        "Question",
+        IssueCategory.STRUCTURAL,
+      ),
+    );
 
     // Validate principles using shared method (ERROR severity)
     issues.push(
-      ...validateNonEmptyArray(thought, thought.principles, 'Foundational principles', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
+      ...validateNonEmptyArray(
+        thought,
+        thought.principles,
+        "Foundational principles",
+        IssueCategory.STRUCTURAL,
+        IssueSeverity.ERROR,
+      ),
     );
 
     if (thought.principles && thought.principles.length > 0) {
@@ -41,7 +67,7 @@ export class FirstPrinciplesValidator implements ModeValidator<FirstPrinciplesTh
             severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Duplicate principle ID: ${principle.id}`,
-            suggestion: 'Ensure all principle IDs are unique',
+            suggestion: "Ensure all principle IDs are unique",
             category: IssueCategory.STRUCTURAL,
           });
         }
@@ -49,26 +75,43 @@ export class FirstPrinciplesValidator implements ModeValidator<FirstPrinciplesTh
 
         // Validate required fields
         issues.push(
-          ...validateRequired(thought, principle.statement?.trim(), `Principle ${principle.id} statement`, IssueCategory.STRUCTURAL)
+          ...validateRequired(
+            thought,
+            principle.statement?.trim(),
+            `Principle ${principle.id} statement`,
+            IssueCategory.STRUCTURAL,
+          ),
         );
         issues.push(
-          ...validateRequired(thought, principle.justification?.trim(), `Principle ${principle.id} justification`, IssueCategory.STRUCTURAL)
+          ...validateRequired(
+            thought,
+            principle.justification?.trim(),
+            `Principle ${principle.id} justification`,
+            IssueCategory.STRUCTURAL,
+          ),
         );
 
         // Validate confidence range using shared method
         issues.push(
-          ...validateConfidence(thought, principle.confidence, `Principle ${principle.id} confidence`)
+          ...validateConfidence(
+            thought,
+            principle.confidence,
+            `Principle ${principle.id} confidence`,
+          ),
         );
 
         // Validate dependencies exist
         if (principle.dependsOn) {
           for (const depId of principle.dependsOn) {
-            if (!principleIds.has(depId) && !thought.principles.some((p) => p.id === depId)) {
+            if (
+              !principleIds.has(depId) &&
+              !thought.principles.some((p) => p.id === depId)
+            ) {
               issues.push({
                 severity: IssueSeverity.ERROR,
                 thoughtNumber: thought.thoughtNumber,
                 description: `Principle ${principle.id} depends on non-existent principle ${depId}`,
-                suggestion: 'Ensure dependency references exist',
+                suggestion: "Ensure dependency references exist",
                 category: IssueCategory.LOGICAL,
               });
             }
@@ -79,7 +122,13 @@ export class FirstPrinciplesValidator implements ModeValidator<FirstPrinciplesTh
 
     // Validate derivation steps using shared method (ERROR severity)
     issues.push(
-      ...validateNonEmptyArray(thought, thought.derivationSteps, 'Derivation steps', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
+      ...validateNonEmptyArray(
+        thought,
+        thought.derivationSteps,
+        "Derivation steps",
+        IssueCategory.STRUCTURAL,
+        IssueSeverity.ERROR,
+      ),
     );
 
     if (thought.derivationSteps && thought.derivationSteps.length > 0) {
@@ -93,7 +142,7 @@ export class FirstPrinciplesValidator implements ModeValidator<FirstPrinciplesTh
             severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Duplicate step number: ${step.stepNumber}`,
-            suggestion: 'Ensure all step numbers are unique',
+            suggestion: "Ensure all step numbers are unique",
             category: IssueCategory.STRUCTURAL,
           });
         }
@@ -108,8 +157,8 @@ export class FirstPrinciplesValidator implements ModeValidator<FirstPrinciplesTh
             1,
             Infinity,
             IssueSeverity.ERROR,
-            IssueCategory.STRUCTURAL
-          )
+            IssueCategory.STRUCTURAL,
+          ),
         );
 
         // Validate principle reference
@@ -118,39 +167,71 @@ export class FirstPrinciplesValidator implements ModeValidator<FirstPrinciplesTh
             severity: IssueSeverity.ERROR,
             thoughtNumber: thought.thoughtNumber,
             description: `Step ${step.stepNumber} references non-existent principle ${step.principle}`,
-            suggestion: 'Ensure step references existing principles',
+            suggestion: "Ensure step references existing principles",
             category: IssueCategory.LOGICAL,
           });
         }
 
         // Validate inference
         issues.push(
-          ...validateRequired(thought, step.inference?.trim(), `Step ${step.stepNumber} inference`, IssueCategory.STRUCTURAL)
+          ...validateRequired(
+            thought,
+            step.inference?.trim(),
+            `Step ${step.stepNumber} inference`,
+            IssueCategory.STRUCTURAL,
+          ),
         );
 
         // Validate confidence range using shared method
         issues.push(
-          ...validateConfidence(thought, step.confidence, `Step ${step.stepNumber} confidence`)
+          ...validateConfidence(
+            thought,
+            step.confidence,
+            `Step ${step.stepNumber} confidence`,
+          ),
         );
       }
     }
 
     // Validate conclusion using shared method
-    issues.push(...validateRequired(thought, thought.conclusion, 'Conclusion', IssueCategory.STRUCTURAL));
+    issues.push(
+      ...validateRequired(
+        thought,
+        thought.conclusion,
+        "Conclusion",
+        IssueCategory.STRUCTURAL,
+      ),
+    );
 
     if (thought.conclusion) {
       // Validate conclusion statement
       issues.push(
-        ...validateRequired(thought, thought.conclusion.statement?.trim(), 'Conclusion statement', IssueCategory.STRUCTURAL)
+        ...validateRequired(
+          thought,
+          thought.conclusion.statement?.trim(),
+          "Conclusion statement",
+          IssueCategory.STRUCTURAL,
+        ),
       );
 
       // Validate derivation chain (ERROR severity)
       issues.push(
-        ...validateNonEmptyArray(thought, thought.conclusion.derivationChain, 'Derivation chain', IssueCategory.STRUCTURAL, IssueSeverity.ERROR)
+        ...validateNonEmptyArray(
+          thought,
+          thought.conclusion.derivationChain,
+          "Derivation chain",
+          IssueCategory.STRUCTURAL,
+          IssueSeverity.ERROR,
+        ),
       );
 
-      if (thought.conclusion.derivationChain && thought.conclusion.derivationChain.length > 0) {
-        const stepNumbers = new Set(thought.derivationSteps?.map((s) => s.stepNumber) || []);
+      if (
+        thought.conclusion.derivationChain &&
+        thought.conclusion.derivationChain.length > 0
+      ) {
+        const stepNumbers = new Set(
+          thought.derivationSteps?.map((s) => s.stepNumber) || [],
+        );
 
         for (const stepNum of thought.conclusion.derivationChain) {
           if (!stepNumbers.has(stepNum)) {
@@ -158,7 +239,7 @@ export class FirstPrinciplesValidator implements ModeValidator<FirstPrinciplesTh
               severity: IssueSeverity.ERROR,
               thoughtNumber: thought.thoughtNumber,
               description: `Conclusion references non-existent step ${stepNum}`,
-              suggestion: 'Ensure derivation chain references existing steps',
+              suggestion: "Ensure derivation chain references existing steps",
               category: IssueCategory.LOGICAL,
             });
           }
@@ -167,7 +248,11 @@ export class FirstPrinciplesValidator implements ModeValidator<FirstPrinciplesTh
 
       // Validate certainty range using shared method
       issues.push(
-        ...validateProbability(thought, thought.conclusion.certainty, 'Conclusion certainty')
+        ...validateProbability(
+          thought,
+          thought.conclusion.certainty,
+          "Conclusion certainty",
+        ),
       );
     }
 

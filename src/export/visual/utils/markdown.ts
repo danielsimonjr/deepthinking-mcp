@@ -14,18 +14,18 @@ export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 /**
  * Table alignment options
  */
-export type TableAlignment = 'left' | 'center' | 'right';
+export type TableAlignment = "left" | "center" | "right";
 
 /**
  * List style options
  */
-export type ListStyle = 'bullet' | 'numbered' | 'checkbox' | 'checkbox-checked';
+export type ListStyle = "bullet" | "numbered" | "checkbox" | "checkbox-checked";
 
 /**
  * Generate a Markdown heading
  */
 export function heading(text: string, level: HeadingLevel = 1): string {
-  const prefix = '#'.repeat(level);
+  const prefix = "#".repeat(level);
   return `${prefix} ${text}\n`;
 }
 
@@ -60,7 +60,7 @@ export function inlineCode(text: string): string {
 /**
  * Generate a code block
  */
-export function codeBlock(code: string, language: string = ''): string {
+export function codeBlock(code: string, language: string = ""): string {
   return `\`\`\`${language}\n${code}\n\`\`\`\n`;
 }
 
@@ -68,15 +68,15 @@ export function codeBlock(code: string, language: string = ''): string {
  * Generate a blockquote
  */
 export function blockquote(text: string): string {
-  const lines = text.split('\n');
-  return lines.map(line => `> ${line}`).join('\n') + '\n';
+  const lines = text.split("\n");
+  return lines.map((line) => `> ${line}`).join("\n") + "\n";
 }
 
 /**
  * Generate a horizontal rule
  */
 export function horizontalRule(): string {
-  return '\n---\n\n';
+  return "\n---\n\n";
 }
 
 /**
@@ -102,16 +102,20 @@ export function image(alt: string, url: string, title?: string): string {
 /**
  * Generate a list item
  */
-export function listItem(text: string, style: ListStyle = 'bullet', indent: number = 0): string {
-  const indentStr = '  '.repeat(indent);
+export function listItem(
+  text: string,
+  style: ListStyle = "bullet",
+  indent: number = 0,
+): string {
+  const indentStr = "  ".repeat(indent);
   switch (style) {
-    case 'numbered':
+    case "numbered":
       return `${indentStr}1. ${text}`;
-    case 'checkbox':
+    case "checkbox":
       return `${indentStr}- [ ] ${text}`;
-    case 'checkbox-checked':
+    case "checkbox-checked":
       return `${indentStr}- [x] ${text}`;
-    case 'bullet':
+    case "bullet":
     default:
       return `${indentStr}- ${text}`;
   }
@@ -120,33 +124,40 @@ export function listItem(text: string, style: ListStyle = 'bullet', indent: numb
 /**
  * Generate a list
  */
-export function list(items: string[], style: ListStyle = 'bullet'): string {
-  return items.map((item, index) => {
-    if (style === 'numbered') {
-      return `${index + 1}. ${item}`;
-    }
-    return listItem(item, style);
-  }).join('\n') + '\n';
+export function list(items: string[], style: ListStyle = "bullet"): string {
+  return (
+    items
+      .map((item, index) => {
+        if (style === "numbered") {
+          return `${index + 1}. ${item}`;
+        }
+        return listItem(item, style);
+      })
+      .join("\n") + "\n"
+  );
 }
 
 /**
  * Generate a nested list
  */
-export function nestedList(items: Array<{ text: string; children?: string[] }>, style: ListStyle = 'bullet'): string {
+export function nestedList(
+  items: Array<{ text: string; children?: string[] }>,
+  style: ListStyle = "bullet",
+): string {
   const lines: string[] = [];
   items.forEach((item, index) => {
-    if (style === 'numbered') {
+    if (style === "numbered") {
       lines.push(`${index + 1}. ${item.text}`);
     } else {
       lines.push(listItem(item.text, style));
     }
     if (item.children && item.children.length > 0) {
-      item.children.forEach(child => {
+      item.children.forEach((child) => {
         lines.push(listItem(child, style, 1));
       });
     }
   });
-  return lines.join('\n') + '\n';
+  return lines.join("\n") + "\n";
 }
 
 /**
@@ -154,13 +165,13 @@ export function nestedList(items: Array<{ text: string; children?: string[] }>, 
  */
 function getAlignmentSeparator(alignment: TableAlignment): string {
   switch (alignment) {
-    case 'center':
-      return ':---:';
-    case 'right':
-      return '---:';
-    case 'left':
+    case "center":
+      return ":---:";
+    case "right":
+      return "---:";
+    case "left":
     default:
-      return ':---';
+      return ":---";
   }
 }
 
@@ -168,7 +179,7 @@ function getAlignmentSeparator(alignment: TableAlignment): string {
  * Escape pipe characters in table cells
  */
 function escapeTableCell(text: string): string {
-  return text.replace(/\|/g, '\\|');
+  return text.replace(/\|/g, "\\|");
 }
 
 /**
@@ -177,41 +188,56 @@ function escapeTableCell(text: string): string {
 export function table(
   headers: string[],
   rows: string[][],
-  alignments?: TableAlignment[]
+  alignments?: TableAlignment[],
 ): string {
-  const aligns = alignments || headers.map(() => 'left' as TableAlignment);
+  const aligns = alignments || headers.map(() => "left" as TableAlignment);
 
   // Header row
-  const headerRow = '| ' + headers.map(escapeTableCell).join(' | ') + ' |';
+  const headerRow = "| " + headers.map(escapeTableCell).join(" | ") + " |";
 
   // Separator row
-  const separatorRow = '| ' + aligns.map(getAlignmentSeparator).join(' | ') + ' |';
+  const separatorRow =
+    "| " + aligns.map(getAlignmentSeparator).join(" | ") + " |";
 
   // Data rows
-  const dataRows = rows.map(row => {
+  const dataRows = rows.map((row) => {
     const cells = row.map(escapeTableCell);
     // Pad with empty cells if needed
     while (cells.length < headers.length) {
-      cells.push('');
+      cells.push("");
     }
-    return '| ' + cells.join(' | ') + ' |';
+    return "| " + cells.join(" | ") + " |";
   });
 
-  return [headerRow, separatorRow, ...dataRows].join('\n') + '\n';
+  return [headerRow, separatorRow, ...dataRows].join("\n") + "\n";
 }
 
 /**
  * Generate a definition list (using bold terms and indented definitions)
  */
-export function definitionList(items: Array<{ term: string; definition: string }>): string {
-  return items.map(item => `${bold(item.term)}\n: ${item.definition}`).join('\n\n') + '\n';
+export function definitionList(
+  items: Array<{ term: string; definition: string }>,
+): string {
+  return (
+    items
+      .map((item) => `${bold(item.term)}\n: ${item.definition}`)
+      .join("\n\n") + "\n"
+  );
 }
 
 /**
  * Generate a task list
  */
-export function taskList(items: Array<{ text: string; completed: boolean }>): string {
-  return items.map(item => listItem(item.text, item.completed ? 'checkbox-checked' : 'checkbox')).join('\n') + '\n';
+export function taskList(
+  items: Array<{ text: string; completed: boolean }>,
+): string {
+  return (
+    items
+      .map((item) =>
+        listItem(item.text, item.completed ? "checkbox-checked" : "checkbox"),
+      )
+      .join("\n") + "\n"
+  );
 }
 
 /**
@@ -224,27 +250,39 @@ export function collapsible(summary: string, content: string): string {
 /**
  * Generate a badge (GitHub-style)
  */
-export function badge(label: string, value: string, color: string = 'blue'): string {
-  const encodedLabel = encodeURIComponent(label.replace(/-/g, '--'));
-  const encodedValue = encodeURIComponent(value.replace(/-/g, '--'));
+export function badge(
+  label: string,
+  value: string,
+  color: string = "blue",
+): string {
+  const encodedLabel = encodeURIComponent(label.replace(/-/g, "--"));
+  const encodedValue = encodeURIComponent(value.replace(/-/g, "--"));
   return `![${label}](https://img.shields.io/badge/${encodedLabel}-${encodedValue}-${color})`;
 }
 
 /**
  * Generate a progress indicator
  */
-export function progressBar(value: number, max: number = 100, width: number = 20): string {
+export function progressBar(
+  value: number,
+  max: number = 100,
+  width: number = 20,
+): string {
   const percentage = Math.min(100, Math.max(0, (value / max) * 100));
   const filled = Math.round((percentage / 100) * width);
   const empty = width - filled;
-  const bar = '█'.repeat(filled) + '░'.repeat(empty);
+  const bar = "█".repeat(filled) + "░".repeat(empty);
   return `${bar} ${percentage.toFixed(0)}%`;
 }
 
 /**
  * Generate a metric display
  */
-export function metric(name: string, value: string | number, unit?: string): string {
+export function metric(
+  name: string,
+  value: string | number,
+  unit?: string,
+): string {
   const valueStr = unit ? `${value} ${unit}` : String(value);
   return `${bold(name)}: ${valueStr}`;
 }
@@ -252,41 +290,51 @@ export function metric(name: string, value: string | number, unit?: string): str
 /**
  * Generate a key-value section
  */
-export function keyValueSection(items: Record<string, string | number | boolean>): string {
-  return Object.entries(items)
-    .map(([key, value]) => `- ${bold(key)}: ${value}`)
-    .join('\n') + '\n';
+export function keyValueSection(
+  items: Record<string, string | number | boolean>,
+): string {
+  return (
+    Object.entries(items)
+      .map(([key, value]) => `- ${bold(key)}: ${value}`)
+      .join("\n") + "\n"
+  );
 }
 
 /**
  * Generate a Mermaid diagram block
  */
 export function mermaidBlock(diagram: string): string {
-  return codeBlock(diagram, 'mermaid');
+  return codeBlock(diagram, "mermaid");
 }
 
 /**
  * Generate a section with heading and content
  */
-export function section(title: string, content: string, level: HeadingLevel = 2): string {
-  return heading(title, level) + '\n' + content + '\n';
+export function section(
+  title: string,
+  content: string,
+  level: HeadingLevel = 2,
+): string {
+  return heading(title, level) + "\n" + content + "\n";
 }
 
 /**
  * Generate document frontmatter (YAML)
  */
-export function frontmatter(metadata: Record<string, string | number | boolean | string[]>): string {
-  const lines = ['---'];
+export function frontmatter(
+  metadata: Record<string, string | number | boolean | string[]>,
+): string {
+  const lines = ["---"];
   for (const [key, value] of Object.entries(metadata)) {
     if (Array.isArray(value)) {
       lines.push(`${key}:`);
-      value.forEach(v => lines.push(`  - ${v}`));
+      value.forEach((v) => lines.push(`  - ${v}`));
     } else {
-      lines.push(`${key}: ${typeof value === 'string' ? `"${value}"` : value}`);
+      lines.push(`${key}: ${typeof value === "string" ? `"${value}"` : value}`);
     }
   }
-  lines.push('---', '');
-  return lines.join('\n');
+  lines.push("---", "");
+  return lines.join("\n");
 }
 
 /**
@@ -299,9 +347,13 @@ export function document(
     includeFrontmatter?: boolean;
     metadata?: Record<string, string | number | boolean | string[]>;
     includeTableOfContents?: boolean;
-  } = {}
+  } = {},
 ): string {
-  const { includeFrontmatter = false, metadata = {}, includeTableOfContents = false } = options;
+  const {
+    includeFrontmatter = false,
+    metadata = {},
+    includeTableOfContents = false,
+  } = options;
 
   const parts: string[] = [];
 
@@ -309,7 +361,7 @@ export function document(
   if (includeFrontmatter) {
     const fm = {
       title,
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString().split("T")[0],
       ...metadata,
     };
     parts.push(frontmatter(fm));
@@ -320,24 +372,28 @@ export function document(
 
   // Table of contents placeholder
   if (includeTableOfContents) {
-    parts.push('\n## Table of Contents\n\n[TOC]\n');
+    parts.push("\n## Table of Contents\n\n[TOC]\n");
   }
 
   // Content
   parts.push(content);
 
-  return parts.join('\n');
+  return parts.join("\n");
 }
 
 /**
  * Generate a node representation for graphs
  */
-export function graphNode(id: string, label: string, properties?: Record<string, string>): string {
+export function graphNode(
+  id: string,
+  label: string,
+  properties?: Record<string, string>,
+): string {
   let result = `- ${bold(id)}: ${label}`;
   if (properties && Object.keys(properties).length > 0) {
     const props = Object.entries(properties)
       .map(([k, v]) => `${k}=${v}`)
-      .join(', ');
+      .join(", ");
     result += ` (${props})`;
   }
   return result;
@@ -346,9 +402,14 @@ export function graphNode(id: string, label: string, properties?: Record<string,
 /**
  * Generate an edge representation for graphs
  */
-export function graphEdge(from: string, to: string, label?: string, directed: boolean = true): string {
-  const arrow = directed ? '→' : '—';
-  const labelPart = label ? ` [${label}]` : '';
+export function graphEdge(
+  from: string,
+  to: string,
+  label?: string,
+  directed: boolean = true,
+): string {
+  const arrow = directed ? "→" : "—";
+  const labelPart = label ? ` [${label}]` : "";
   return `- ${from} ${arrow} ${to}${labelPart}`;
 }
 
@@ -357,9 +418,13 @@ export function graphEdge(from: string, to: string, label?: string, directed: bo
  */
 export function graph(
   title: string,
-  nodes: Array<{ id: string; label: string; properties?: Record<string, string> }>,
+  nodes: Array<{
+    id: string;
+    label: string;
+    properties?: Record<string, string>;
+  }>,
   edges: Array<{ from: string; to: string; label?: string }>,
-  options: { directed?: boolean } = {}
+  options: { directed?: boolean } = {},
 ): string {
   const { directed = true } = options;
 
@@ -368,29 +433,29 @@ export function graph(
   parts.push(heading(title, 3));
 
   if (nodes.length > 0) {
-    parts.push(heading('Nodes', 4));
-    nodes.forEach(node => {
+    parts.push(heading("Nodes", 4));
+    nodes.forEach((node) => {
       parts.push(graphNode(node.id, node.label, node.properties));
     });
-    parts.push('');
+    parts.push("");
   }
 
   if (edges.length > 0) {
-    parts.push(heading('Edges', 4));
-    edges.forEach(edge => {
+    parts.push(heading("Edges", 4));
+    edges.forEach((edge) => {
       parts.push(graphEdge(edge.from, edge.to, edge.label, directed));
     });
-    parts.push('');
+    parts.push("");
   }
 
-  return parts.join('\n');
+  return parts.join("\n");
 }
 
 /**
  * Escape special Markdown characters
  */
 export function escapeMarkdown(text: string): string {
-  return text.replace(/([\\`*_{}[\]()#+\-.!|])/g, '\\$1');
+  return text.replace(/([\\`*_{}[\]()#+\-.!|])/g, "\\$1");
 }
 
 /**
@@ -398,7 +463,7 @@ export function escapeMarkdown(text: string): string {
  */
 export function truncate(text: string, maxLength: number = 100): string {
   if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength - 3) + '...';
+  return text.slice(0, maxLength - 3) + "...";
 }
 
 // =============================================================================
@@ -430,7 +495,7 @@ export interface MarkdownBuilderOptions {
 export class MarkdownBuilder {
   private content: string[] = [];
   private options: MarkdownBuilderOptions = {};
-  private documentTitle: string = '';
+  private documentTitle: string = "";
 
   /**
    * Set or merge builder options
@@ -457,7 +522,9 @@ export class MarkdownBuilder {
    * @param metadata - Optional metadata to include
    * @returns this for chaining
    */
-  enableFrontmatter(metadata?: Record<string, string | number | boolean | string[]>): this {
+  enableFrontmatter(
+    metadata?: Record<string, string | number | boolean | string[]>,
+  ): this {
     this.options.includeFrontmatter = true;
     if (metadata) {
       this.options.metadata = { ...this.options.metadata, ...metadata };
@@ -491,7 +558,7 @@ export class MarkdownBuilder {
    * @returns this for chaining
    */
   addParagraph(text: string): this {
-    this.content.push(text + '\n');
+    this.content.push(text + "\n");
     return this;
   }
 
@@ -501,7 +568,7 @@ export class MarkdownBuilder {
    * @returns this for chaining
    */
   addBulletList(items: string[]): this {
-    this.content.push(list(items, 'bullet'));
+    this.content.push(list(items, "bullet"));
     return this;
   }
 
@@ -511,7 +578,7 @@ export class MarkdownBuilder {
    * @returns this for chaining
    */
   addNumberedList(items: string[]): this {
-    this.content.push(list(items, 'numbered'));
+    this.content.push(list(items, "numbered"));
     return this;
   }
 
@@ -543,7 +610,11 @@ export class MarkdownBuilder {
    * @param alignments - Optional column alignments
    * @returns this for chaining
    */
-  addTable(headers: string[], rows: string[][], alignments?: TableAlignment[]): this {
+  addTable(
+    headers: string[],
+    rows: string[][],
+    alignments?: TableAlignment[],
+  ): this {
     this.content.push(table(headers, rows, alignments));
     return this;
   }
@@ -575,7 +646,7 @@ export class MarkdownBuilder {
    * @returns this for chaining
    */
   addLink(text: string, url: string, title?: string): this {
-    this.content.push(link(text, url, title) + '\n');
+    this.content.push(link(text, url, title) + "\n");
     return this;
   }
 
@@ -587,7 +658,7 @@ export class MarkdownBuilder {
    * @returns this for chaining
    */
   addImage(alt: string, url: string, title?: string): this {
-    this.content.push(image(alt, url, title) + '\n');
+    this.content.push(image(alt, url, title) + "\n");
     return this;
   }
 
@@ -639,7 +710,11 @@ export class MarkdownBuilder {
    * @param level - Heading level (default: 2)
    * @returns this for chaining
    */
-  addSection(title: string, sectionContent: string, level: HeadingLevel = 2): this {
+  addSection(
+    title: string,
+    sectionContent: string,
+    level: HeadingLevel = 2,
+  ): this {
     this.content.push(section(title, sectionContent, level));
     return this;
   }
@@ -651,8 +726,8 @@ export class MarkdownBuilder {
    * @param color - Badge color (default: 'blue')
    * @returns this for chaining
    */
-  addBadge(label: string, value: string, color: string = 'blue'): this {
-    this.content.push(badge(label, value, color) + '\n');
+  addBadge(label: string, value: string, color: string = "blue"): this {
+    this.content.push(badge(label, value, color) + "\n");
     return this;
   }
 
@@ -664,7 +739,7 @@ export class MarkdownBuilder {
    * @returns this for chaining
    */
   addProgressBar(value: number, max: number = 100, width: number = 20): this {
-    this.content.push(progressBar(value, max, width) + '\n');
+    this.content.push(progressBar(value, max, width) + "\n");
     return this;
   }
 
@@ -675,7 +750,7 @@ export class MarkdownBuilder {
   reset(): this {
     this.content = [];
     this.options = {};
-    this.documentTitle = '';
+    this.documentTitle = "";
     return this;
   }
 
@@ -690,7 +765,7 @@ export class MarkdownBuilder {
     if (this.options.includeFrontmatter) {
       const fm = {
         title: this.documentTitle,
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString().split("T")[0],
         ...this.options.metadata,
       };
       parts.push(frontmatter(fm));
@@ -703,12 +778,12 @@ export class MarkdownBuilder {
 
     // Table of contents
     if (this.options.includeTableOfContents) {
-      parts.push('\n## Table of Contents\n\n[TOC]\n');
+      parts.push("\n## Table of Contents\n\n[TOC]\n");
     }
 
     // Content
-    parts.push(this.content.join('\n'));
+    parts.push(this.content.join("\n"));
 
-    return parts.join('\n');
+    return parts.join("\n");
   }
 }

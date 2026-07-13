@@ -1,0 +1,22 @@
+# Normalize all text files to LF in the repository AND in the working tree on
+# every platform.
+#
+# Without this, Windows checks out with core.autocrlf=true (the default on the
+# GitHub windows-latest runner), converting LF -> CRLF on checkout. Prettier's
+# `endOfLine` defaults to "lf", so `prettier --check src/` then rejects EVERY
+# file on Windows while passing on Linux/macOS. That mismatch was invisible
+# while the format gate carried `continue-on-error: true`; making the gate real
+# exposed it.
+#
+# `eol=lf` forces LF in the working tree too, so the local checkout, the repo,
+# and Prettier all agree on every OS.
+* text=auto eol=lf
+
+# Binary files must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

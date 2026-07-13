@@ -9,12 +9,12 @@
  */
 export function sanitizeUmlId(id: string): string {
   // Replace non-alphanumeric with underscores
-  let sanitized = id.replace(/[^a-zA-Z0-9_]/g, '_');
+  let sanitized = id.replace(/[^a-zA-Z0-9_]/g, "_");
   // Ensure it starts with a letter
   if (!/^[a-zA-Z]/.test(sanitized)) {
-    sanitized = 'id_' + sanitized;
+    sanitized = "id_" + sanitized;
   }
-  return sanitized || 'unnamed';
+  return sanitized || "unnamed";
 }
 
 /**
@@ -22,32 +22,32 @@ export function sanitizeUmlId(id: string): string {
  */
 export function escapeUml(str: string): string {
   return str
-    .replace(/\\/g, '\\\\')
+    .replace(/\\/g, "\\\\")
     .replace(/"/g, '\"')
-    .replace(/\n/g, '\\n')
-    .replace(/<(?![\/#])/g, '&lt;')
-    .replace(/(?<![\/#])>/g, '&gt;');
+    .replace(/\n/g, "\\n")
+    .replace(/<(?![\/#])/g, "&lt;")
+    .replace(/(?<![\/#])>/g, "&gt;");
 }
 
 /**
  * UML node types
  */
 export type UmlNodeShape =
-  | 'class'
-  | 'interface'
-  | 'abstract'
-  | 'entity'
-  | 'usecase'
-  | 'actor'
-  | 'component'
-  | 'node'
-  | 'database'
-  | 'rectangle'
-  | 'package'
-  | 'folder'
-  | 'cloud'
-  | 'state'
-  | 'activity';
+  | "class"
+  | "interface"
+  | "abstract"
+  | "entity"
+  | "usecase"
+  | "actor"
+  | "component"
+  | "node"
+  | "database"
+  | "rectangle"
+  | "package"
+  | "folder"
+  | "cloud"
+  | "state"
+  | "activity";
 
 /**
  * UML node definition
@@ -66,14 +66,14 @@ export interface UmlNode {
  * UML edge types
  */
 export type UmlEdgeType =
-  | 'association'
-  | 'dependency'
-  | 'inheritance'
-  | 'implementation'
-  | 'composition'
-  | 'aggregation'
-  | 'arrow'
-  | 'dashed';
+  | "association"
+  | "dependency"
+  | "inheritance"
+  | "implementation"
+  | "composition"
+  | "aggregation"
+  | "arrow"
+  | "dashed";
 
 /**
  * UML edge definition
@@ -91,10 +91,17 @@ export interface UmlEdge {
  * UML diagram options
  */
 export interface UmlOptions {
-  diagramType?: 'class' | 'component' | 'usecase' | 'activity' | 'state' | 'sequence' | 'object';
+  diagramType?:
+    | "class"
+    | "component"
+    | "usecase"
+    | "activity"
+    | "state"
+    | "sequence"
+    | "object";
   title?: string;
-  theme?: 'default' | 'sketchy' | 'blueprint' | 'plain';
-  direction?: 'left to right' | 'top to bottom';
+  theme?: "default" | "sketchy" | "blueprint" | "plain";
+  direction?: "left to right" | "top to bottom";
   scale?: number;
   includeLabels?: boolean;
   includeMetrics?: boolean;
@@ -105,15 +112,23 @@ export interface UmlOptions {
  */
 function getArrowSyntax(type?: UmlEdgeType): string {
   switch (type) {
-    case 'dependency': return '..>';
-    case 'inheritance': return '--|>';
-    case 'implementation': return '..|>';
-    case 'composition': return '*--';
-    case 'aggregation': return 'o--';
-    case 'dashed': return '..';
-    case 'arrow': return '-->';
-    case 'association':
-    default: return '--';
+    case "dependency":
+      return "..>";
+    case "inheritance":
+      return "--|>";
+    case "implementation":
+      return "..|>";
+    case "composition":
+      return "*--";
+    case "aggregation":
+      return "o--";
+    case "dashed":
+      return "..";
+    case "arrow":
+      return "-->";
+    case "association":
+    default:
+      return "--";
   }
 }
 
@@ -121,33 +136,37 @@ function getArrowSyntax(type?: UmlEdgeType): string {
  * Generate PlantUML header
  */
 export function generateUmlHeader(options: UmlOptions = {}): string {
-  const lines: string[] = ['@startuml'];
+  const lines: string[] = ["@startuml"];
 
   if (options.title) {
     lines.push(`title ${escapeUml(options.title)}`);
   }
 
-  if (options.theme && options.theme !== 'default') {
+  if (options.theme && options.theme !== "default") {
     lines.push(`!theme ${options.theme}`);
   }
 
   if (options.direction) {
-    lines.push(options.direction === 'left to right' ? 'left to right direction' : 'top to bottom direction');
+    lines.push(
+      options.direction === "left to right"
+        ? "left to right direction"
+        : "top to bottom direction",
+    );
   }
 
   if (options.scale) {
     lines.push(`scale ${options.scale}`);
   }
 
-  lines.push('');
-  return lines.join('\n');
+  lines.push("");
+  return lines.join("\n");
 }
 
 /**
  * Generate PlantUML footer
  */
 export function generateUmlFooter(): string {
-  return '@enduml\n';
+  return "@enduml\n";
 }
 
 /**
@@ -157,12 +176,12 @@ export function renderUmlNode(node: UmlNode): string {
   const lines: string[] = [];
   const id = sanitizeUmlId(node.id);
   const label = node.label || node.id;
-  const shape = node.shape || 'rectangle';
+  const shape = node.shape || "rectangle";
 
   switch (shape) {
-    case 'class':
-    case 'interface':
-    case 'abstract':
+    case "class":
+    case "interface":
+    case "abstract":
       lines.push(`${shape} "${escapeUml(label)}" as ${id} {`);
       if (node.attributes && node.attributes.length > 0) {
         for (const attr of node.attributes) {
@@ -170,63 +189,65 @@ export function renderUmlNode(node: UmlNode): string {
         }
       }
       if (node.methods && node.methods.length > 0) {
-        lines.push('  --');
+        lines.push("  --");
         for (const method of node.methods) {
           lines.push(`  ${escapeUml(method)}`);
         }
       }
-      lines.push('}');
+      lines.push("}");
       break;
 
-    case 'usecase':
+    case "usecase":
       lines.push(`usecase "${escapeUml(label)}" as ${id}`);
       break;
 
-    case 'actor':
+    case "actor":
       lines.push(`actor "${escapeUml(label)}" as ${id}`);
       break;
 
-    case 'component':
+    case "component":
       lines.push(`component "${escapeUml(label)}" as ${id}`);
       break;
 
-    case 'node':
+    case "node":
       lines.push(`node "${escapeUml(label)}" as ${id}`);
       break;
 
-    case 'database':
+    case "database":
       lines.push(`database "${escapeUml(label)}" as ${id}`);
       break;
 
-    case 'package':
+    case "package":
       lines.push(`package "${escapeUml(label)}" as ${id} {`);
-      lines.push('}');
+      lines.push("}");
       break;
 
-    case 'folder':
+    case "folder":
       lines.push(`folder "${escapeUml(label)}" as ${id}`);
       break;
 
-    case 'cloud':
+    case "cloud":
       lines.push(`cloud "${escapeUml(label)}" as ${id}`);
       break;
 
-    case 'state':
+    case "state":
       lines.push(`state "${escapeUml(label)}" as ${id}`);
       break;
 
-    case 'activity':
+    case "activity":
       lines.push(`:${escapeUml(label)};`);
       break;
 
-    case 'entity':
+    case "entity":
       lines.push(`entity "${escapeUml(label)}" as ${id}`);
       break;
 
-    case 'rectangle':
+    case "rectangle":
     default:
       if (node.stereotype) {
-        lines.push(`rectangle "${escapeUml(label)}" <<${escapeUml(node.stereotype)}>> as ${id}`);
+        lines.push(
+          `rectangle "${escapeUml(label)}" <<${escapeUml(node.stereotype)}>> as ${id}`,
+        );
       } else {
         lines.push(`rectangle "${escapeUml(label)}" as ${id}`);
       }
@@ -236,14 +257,14 @@ export function renderUmlNode(node: UmlNode): string {
   if (node.color) {
     const lastLine = lines.pop();
     if (lastLine) {
-      lines.push(lastLine.replace(/}$/, '') + ` #${node.color}`);
-      if (lastLine.endsWith('}')) {
-        lines.push('}');
+      lines.push(lastLine.replace(/}$/, "") + ` #${node.color}`);
+      if (lastLine.endsWith("}")) {
+        lines.push("}");
       }
     }
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -269,7 +290,7 @@ export function renderUmlEdge(edge: UmlEdge): string {
 export function generateUmlDiagram(
   nodes: UmlNode[],
   edges: UmlEdge[],
-  options: UmlOptions = {}
+  options: UmlOptions = {},
 ): string {
   const lines: string[] = [];
 
@@ -281,7 +302,7 @@ export function generateUmlDiagram(
     for (const node of nodes) {
       lines.push(renderUmlNode(node));
     }
-    lines.push('');
+    lines.push("");
   }
 
   // Render edges
@@ -290,39 +311,49 @@ export function generateUmlDiagram(
     for (const edge of edges) {
       lines.push(renderUmlEdge(edge));
     }
-    lines.push('');
+    lines.push("");
   }
 
   lines.push(generateUmlFooter());
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
  * Generate PlantUML class diagram
  */
 export function generateClassDiagram(
-  classes: Array<{ name: string; attributes?: string[]; methods?: string[]; stereotype?: string }>,
-  relationships: Array<{ source: string; target: string; type?: UmlEdgeType; label?: string }>,
-  options: UmlOptions = {}
+  classes: Array<{
+    name: string;
+    attributes?: string[];
+    methods?: string[];
+    stereotype?: string;
+  }>,
+  relationships: Array<{
+    source: string;
+    target: string;
+    type?: UmlEdgeType;
+    label?: string;
+  }>,
+  options: UmlOptions = {},
 ): string {
-  const nodes: UmlNode[] = classes.map(c => ({
+  const nodes: UmlNode[] = classes.map((c) => ({
     id: sanitizeUmlId(c.name),
     label: c.name,
-    shape: 'class',
+    shape: "class",
     stereotype: c.stereotype,
     attributes: c.attributes,
     methods: c.methods,
   }));
 
-  const edges: UmlEdge[] = relationships.map(r => ({
+  const edges: UmlEdge[] = relationships.map((r) => ({
     source: r.source,
     target: r.target,
-    type: r.type || 'association',
+    type: r.type || "association",
     label: r.label,
   }));
 
-  return generateUmlDiagram(nodes, edges, { ...options, diagramType: 'class' });
+  return generateUmlDiagram(nodes, edges, { ...options, diagramType: "class" });
 }
 
 /**
@@ -331,23 +362,26 @@ export function generateClassDiagram(
 export function generateComponentDiagram(
   components: Array<{ name: string; stereotype?: string }>,
   dependencies: Array<{ source: string; target: string; label?: string }>,
-  options: UmlOptions = {}
+  options: UmlOptions = {},
 ): string {
-  const nodes: UmlNode[] = components.map(c => ({
+  const nodes: UmlNode[] = components.map((c) => ({
     id: sanitizeUmlId(c.name),
     label: c.name,
-    shape: 'component',
+    shape: "component",
     stereotype: c.stereotype,
   }));
 
-  const edges: UmlEdge[] = dependencies.map(d => ({
+  const edges: UmlEdge[] = dependencies.map((d) => ({
     source: d.source,
     target: d.target,
-    type: 'dependency',
+    type: "dependency",
     label: d.label,
   }));
 
-  return generateUmlDiagram(nodes, edges, { ...options, diagramType: 'component' });
+  return generateUmlDiagram(nodes, edges, {
+    ...options,
+    diagramType: "component",
+  });
 }
 
 /**
@@ -356,13 +390,13 @@ export function generateComponentDiagram(
 export function generateActivityDiagram(
   activities: string[],
   currentActivity?: string,
-  options: UmlOptions = {}
+  options: UmlOptions = {},
 ): string {
   const lines: string[] = [];
 
-  lines.push(generateUmlHeader({ ...options, diagramType: 'activity' }));
+  lines.push(generateUmlHeader({ ...options, diagramType: "activity" }));
 
-  lines.push('start');
+  lines.push("start");
 
   for (const activity of activities) {
     const isCurrent = activity === currentActivity;
@@ -373,12 +407,12 @@ export function generateActivityDiagram(
     }
   }
 
-  lines.push('stop');
-  lines.push('');
+  lines.push("stop");
+  lines.push("");
 
   lines.push(generateUmlFooter());
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -388,11 +422,11 @@ export function generateStateDiagram(
   states: string[],
   transitions: Array<{ from: string; to: string; event?: string }>,
   currentState?: string,
-  options: UmlOptions = {}
+  options: UmlOptions = {},
 ): string {
   const lines: string[] = [];
 
-  lines.push(generateUmlHeader({ ...options, diagramType: 'state' }));
+  lines.push(generateUmlHeader({ ...options, diagramType: "state" }));
 
   // Define states
   for (const state of states) {
@@ -404,7 +438,7 @@ export function generateStateDiagram(
       lines.push(`state "${escapeUml(state)}" as ${id}`);
     }
   }
-  lines.push('');
+  lines.push("");
 
   // Initial state
   if (states.length > 0) {
@@ -413,14 +447,14 @@ export function generateStateDiagram(
 
   // Transitions
   for (const t of transitions) {
-    const label = t.event ? ` : ${escapeUml(t.event)}` : '';
+    const label = t.event ? ` : ${escapeUml(t.event)}` : "";
     lines.push(`${sanitizeUmlId(t.from)} --> ${sanitizeUmlId(t.to)}${label}`);
   }
 
-  lines.push('');
+  lines.push("");
   lines.push(generateUmlFooter());
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -430,33 +464,35 @@ export function generateUseCaseDiagram(
   actors: string[],
   useCases: string[],
   associations: Array<{ actor: string; useCase: string }>,
-  options: UmlOptions = {}
+  options: UmlOptions = {},
 ): string {
   const lines: string[] = [];
 
-  lines.push(generateUmlHeader({ ...options, diagramType: 'usecase' }));
+  lines.push(generateUmlHeader({ ...options, diagramType: "usecase" }));
 
   // Define actors
   for (const actor of actors) {
     lines.push(`actor "${escapeUml(actor)}" as ${sanitizeUmlId(actor)}`);
   }
-  lines.push('');
+  lines.push("");
 
   // Define use cases
   for (const uc of useCases) {
     lines.push(`usecase "${escapeUml(uc)}" as ${sanitizeUmlId(uc)}`);
   }
-  lines.push('');
+  lines.push("");
 
   // Associations
   for (const assoc of associations) {
-    lines.push(`${sanitizeUmlId(assoc.actor)} --> ${sanitizeUmlId(assoc.useCase)}`);
+    lines.push(
+      `${sanitizeUmlId(assoc.actor)} --> ${sanitizeUmlId(assoc.useCase)}`,
+    );
   }
 
-  lines.push('');
+  lines.push("");
   lines.push(generateUmlFooter());
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 // =============================================================================
@@ -467,15 +503,15 @@ export function generateUseCaseDiagram(
  * UML relation type for builder
  */
 export type UMLRelationType =
-  | 'association'
-  | 'dependency'
-  | 'inheritance'
-  | 'implementation'
-  | 'composition'
-  | 'aggregation'
-  | 'uses'
-  | 'includes'
-  | 'extends';
+  | "association"
+  | "dependency"
+  | "inheritance"
+  | "implementation"
+  | "composition"
+  | "aggregation"
+  | "uses"
+  | "includes"
+  | "extends";
 
 /**
  * UML class definition for builder
@@ -514,7 +550,7 @@ export interface UMLRelationDef {
  */
 export interface UMLNoteDef {
   text: string;
-  position?: 'top' | 'bottom' | 'left' | 'right';
+  position?: "top" | "bottom" | "left" | "right";
   attachTo?: string;
 }
 
@@ -522,10 +558,18 @@ export interface UMLNoteDef {
  * UMLBuilder options
  */
 export interface UMLBuilderOptions {
-  diagramType?: 'class' | 'component' | 'usecase' | 'activity' | 'state' | 'sequence' | 'object';
+  diagramType?:
+    | "class"
+    | "component"
+    | "usecase"
+    | "activity"
+    | "state"
+    | "sequence"
+    | "object";
   title?: string;
-  theme?: 'default' | 'sketchy' | 'blueprint' | 'plain' | 'cerulean' | 'reddress';
-  direction?: 'left to right' | 'top to bottom';
+  theme?:
+    "default" | "sketchy" | "blueprint" | "plain" | "cerulean" | "reddress";
+  direction?: "left to right" | "top to bottom";
   scale?: number;
   skinparam?: Record<string, string>;
 }
@@ -535,25 +579,25 @@ export interface UMLBuilderOptions {
  */
 function getRelationArrow(type: UMLRelationType): string {
   switch (type) {
-    case 'dependency':
-      return '..>';
-    case 'inheritance':
-      return '--|>';
-    case 'implementation':
-      return '..|>';
-    case 'composition':
-      return '*--';
-    case 'aggregation':
-      return 'o--';
-    case 'uses':
-      return '..>';
-    case 'includes':
-      return '..>';
-    case 'extends':
-      return '<|--';
-    case 'association':
+    case "dependency":
+      return "..>";
+    case "inheritance":
+      return "--|>";
+    case "implementation":
+      return "..|>";
+    case "composition":
+      return "*--";
+    case "aggregation":
+      return "o--";
+    case "uses":
+      return "..>";
+    case "includes":
+      return "..>";
+    case "extends":
+      return "<|--";
+    case "association":
     default:
-      return '--';
+      return "--";
   }
 }
 
@@ -606,7 +650,7 @@ export class UMLBuilder {
    * @param theme - The PlantUML theme name
    * @returns this for chaining
    */
-  setTheme(theme: UMLBuilderOptions['theme']): this {
+  setTheme(theme: UMLBuilderOptions["theme"]): this {
     this.options.theme = theme;
     return this;
   }
@@ -616,7 +660,7 @@ export class UMLBuilder {
    * @param direction - The layout direction
    * @returns this for chaining
    */
-  setDirection(direction: 'left to right' | 'top to bottom'): this {
+  setDirection(direction: "left to right" | "top to bottom"): this {
     this.options.direction = direction;
     return this;
   }
@@ -785,7 +829,7 @@ export class UMLBuilder {
     const lines: string[] = [];
 
     // Header
-    lines.push('@startuml');
+    lines.push("@startuml");
 
     // Title
     if (this.options.title) {
@@ -793,16 +837,16 @@ export class UMLBuilder {
     }
 
     // Theme
-    if (this.options.theme && this.options.theme !== 'default') {
+    if (this.options.theme && this.options.theme !== "default") {
       lines.push(`!theme ${this.options.theme}`);
     }
 
     // Direction
     if (this.options.direction) {
       lines.push(
-        this.options.direction === 'left to right'
-          ? 'left to right direction'
-          : 'top to bottom direction'
+        this.options.direction === "left to right"
+          ? "left to right direction"
+          : "top to bottom direction",
       );
     }
 
@@ -818,7 +862,7 @@ export class UMLBuilder {
       }
     }
 
-    lines.push('');
+    lines.push("");
 
     // Packages
     for (const pkg of this.packages) {
@@ -826,18 +870,22 @@ export class UMLBuilder {
       for (const content of pkg.content) {
         lines.push(`  ${content}`);
       }
-      lines.push('}');
-      lines.push('');
+      lines.push("}");
+      lines.push("");
     }
 
     // Classes
     if (this.classes.length > 0) {
       for (const cls of this.classes) {
-        const keyword = cls.abstract ? 'abstract class' : 'class';
-        const stereotype = cls.stereotype ? ` <<${escapeUml(cls.stereotype)}>>` : '';
+        const keyword = cls.abstract ? "abstract class" : "class";
+        const stereotype = cls.stereotype
+          ? ` <<${escapeUml(cls.stereotype)}>>`
+          : "";
         const safeId = sanitizeUmlId(cls.name);
 
-        lines.push(`${keyword} "${escapeUml(cls.name)}"${stereotype} as ${safeId} {`);
+        lines.push(
+          `${keyword} "${escapeUml(cls.name)}"${stereotype} as ${safeId} {`,
+        );
 
         // Members (attributes)
         if (cls.members && cls.members.length > 0) {
@@ -847,8 +895,13 @@ export class UMLBuilder {
         }
 
         // Divider between members and methods if both exist
-        if (cls.members && cls.members.length > 0 && cls.methods && cls.methods.length > 0) {
-          lines.push('  --');
+        if (
+          cls.members &&
+          cls.members.length > 0 &&
+          cls.methods &&
+          cls.methods.length > 0
+        ) {
+          lines.push("  --");
         }
 
         // Methods
@@ -858,18 +911,22 @@ export class UMLBuilder {
           }
         }
 
-        lines.push('}');
+        lines.push("}");
       }
-      lines.push('');
+      lines.push("");
     }
 
     // Interfaces
     if (this.interfaces.length > 0) {
       for (const iface of this.interfaces) {
-        const stereotype = iface.stereotype ? ` <<${escapeUml(iface.stereotype)}>>` : '';
+        const stereotype = iface.stereotype
+          ? ` <<${escapeUml(iface.stereotype)}>>`
+          : "";
         const safeId = sanitizeUmlId(iface.name);
 
-        lines.push(`interface "${escapeUml(iface.name)}"${stereotype} as ${safeId} {`);
+        lines.push(
+          `interface "${escapeUml(iface.name)}"${stereotype} as ${safeId} {`,
+        );
 
         if (iface.methods && iface.methods.length > 0) {
           for (const method of iface.methods) {
@@ -877,9 +934,9 @@ export class UMLBuilder {
           }
         }
 
-        lines.push('}');
+        lines.push("}");
       }
-      lines.push('');
+      lines.push("");
     }
 
     // Relations
@@ -896,21 +953,25 @@ export class UMLBuilder {
 
         lines.push(line);
       }
-      lines.push('');
+      lines.push("");
     }
 
     // Notes
     if (this.notes.length > 0) {
       for (const note of this.notes) {
-        const position = note.position || 'right';
+        const position = note.position || "right";
         if (note.attachTo) {
           const attachId = sanitizeUmlId(note.attachTo);
-          lines.push(`note ${position} of ${attachId}: ${escapeUml(note.text)}`);
+          lines.push(
+            `note ${position} of ${attachId}: ${escapeUml(note.text)}`,
+          );
         } else {
-          lines.push(`note "${escapeUml(note.text)}" as N${this.notes.indexOf(note)}`);
+          lines.push(
+            `note "${escapeUml(note.text)}" as N${this.notes.indexOf(note)}`,
+          );
         }
       }
-      lines.push('');
+      lines.push("");
     }
 
     // Raw lines
@@ -918,12 +979,12 @@ export class UMLBuilder {
       for (const raw of this.rawLines) {
         lines.push(raw);
       }
-      lines.push('');
+      lines.push("");
     }
 
     // Footer
-    lines.push('@enduml');
+    lines.push("@enduml");
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 }

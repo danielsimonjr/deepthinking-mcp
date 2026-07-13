@@ -8,8 +8,8 @@
  * - Solution quality assessment
  */
 
-import { randomUUID } from 'crypto';
-import { ThinkingMode } from '../../types/core.js';
+import { randomUUID } from "crypto";
+import { ThinkingMode } from "../../types/core.js";
 import type {
   OptimizationThought,
   OptimizationProblem,
@@ -18,8 +18,8 @@ import type {
   Objective,
   Solution,
   SensitivityAnalysis,
-} from '../../types/modes/optimization.js';
-import type { ThinkingToolInput } from '../../tools/thinking.js';
+} from "../../types/modes/optimization.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -28,38 +28,44 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
-} from './ModeHandler.js';
+} from "./ModeHandler.js";
 
 /**
  * Valid optimization thought types
  */
 const VALID_THOUGHT_TYPES = [
-  'problem_formulation',
-  'variable_definition',
-  'constraint_identification',
-  'objective_setting',
-  'solution_search',
-  'sensitivity_analysis',
+  "problem_formulation",
+  "variable_definition",
+  "constraint_identification",
+  "objective_setting",
+  "solution_search",
+  "sensitivity_analysis",
 ] as const;
 
-type OptimizationThoughtType = typeof VALID_THOUGHT_TYPES[number];
+type OptimizationThoughtType = (typeof VALID_THOUGHT_TYPES)[number];
 
 /**
  * Valid problem types
  */
 const VALID_PROBLEM_TYPES = [
-  'linear',
-  'nonlinear',
-  'integer',
-  'mixed_integer',
-  'constraint_satisfaction',
-  'multi_objective',
+  "linear",
+  "nonlinear",
+  "integer",
+  "mixed_integer",
+  "constraint_satisfaction",
+  "multi_objective",
 ] as const;
 
 /**
  * Valid solution types
  */
-const VALID_SOLUTION_TYPES = ['optimal', 'feasible', 'infeasible', 'unbounded', 'approximate'] as const;
+const VALID_SOLUTION_TYPES = [
+  "optimal",
+  "feasible",
+  "infeasible",
+  "unbounded",
+  "approximate",
+] as const;
 
 /**
  * OptimizationHandler - Specialized handler for optimization reasoning
@@ -72,8 +78,9 @@ const VALID_SOLUTION_TYPES = ['optimal', 'feasible', 'infeasible', 'unbounded', 
  */
 export class OptimizationHandler implements ModeHandler {
   readonly mode = ThinkingMode.OPTIMIZATION;
-  readonly modeName = 'Optimization Analysis';
-  readonly description = 'Constraint optimization, objective functions, and solution search';
+  readonly modeName = "Optimization Analysis";
+  readonly description =
+    "Constraint optimization, objective functions, and solution search";
 
   /**
    * Supported thought types for optimization mode
@@ -83,7 +90,10 @@ export class OptimizationHandler implements ModeHandler {
   /**
    * Create an optimization thought from input
    */
-  createThought(input: ThinkingToolInput, sessionId: string): OptimizationThought {
+  createThought(
+    input: ThinkingToolInput,
+    sessionId: string,
+  ): OptimizationThought {
     const inputAny = input as any;
 
     // Resolve thought type
@@ -100,9 +110,12 @@ export class OptimizationHandler implements ModeHandler {
       : undefined;
 
     // Process constraints
-    const optimizationConstraints = inputAny.optimizationConstraints || inputAny.constraints
-      ? (inputAny.optimizationConstraints || inputAny.constraints).map((c: any) => this.normalizeConstraint(c))
-      : undefined;
+    const optimizationConstraints =
+      inputAny.optimizationConstraints || inputAny.constraints
+        ? (inputAny.optimizationConstraints || inputAny.constraints).map(
+            (c: any) => this.normalizeConstraint(c),
+          )
+        : undefined;
 
     // Process objectives
     const objectives = inputAny.objectives
@@ -155,55 +168,69 @@ export class OptimizationHandler implements ModeHandler {
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT",
+        ),
       ]);
     }
 
     if (input.thoughtNumber > input.totalThoughts) {
       return validationFailure([
         createValidationError(
-          'thoughtNumber',
+          "thoughtNumber",
           `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
+          "INVALID_THOUGHT_NUMBER",
         ),
       ]);
     }
 
     // Validate thought type
-    if (inputAny.thoughtType && !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)) {
+    if (
+      inputAny.thoughtType &&
+      !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)
+    ) {
       warnings.push(
         createValidationWarning(
-          'thoughtType',
+          "thoughtType",
           `Unknown thought type: ${inputAny.thoughtType}`,
-          `Valid types: ${VALID_THOUGHT_TYPES.join(', ')}`
-        )
+          `Valid types: ${VALID_THOUGHT_TYPES.join(", ")}`,
+        ),
       );
     }
 
     // Validate problem type
-    if (inputAny.problem?.type && !VALID_PROBLEM_TYPES.includes(inputAny.problem.type)) {
+    if (
+      inputAny.problem?.type &&
+      !VALID_PROBLEM_TYPES.includes(inputAny.problem.type)
+    ) {
       warnings.push(
         createValidationWarning(
-          'problem.type',
+          "problem.type",
           `Unknown problem type: ${inputAny.problem.type}`,
-          `Valid types: ${VALID_PROBLEM_TYPES.join(', ')}`
-        )
+          `Valid types: ${VALID_PROBLEM_TYPES.join(", ")}`,
+        ),
       );
     }
 
     // Validate solution type
-    if (inputAny.solution?.type && !VALID_SOLUTION_TYPES.includes(inputAny.solution.type)) {
+    if (
+      inputAny.solution?.type &&
+      !VALID_SOLUTION_TYPES.includes(inputAny.solution.type)
+    ) {
       warnings.push(
         createValidationWarning(
-          'solution.type',
+          "solution.type",
           `Unknown solution type: ${inputAny.solution.type}`,
-          `Valid types: ${VALID_SOLUTION_TYPES.join(', ')}`
-        )
+          `Valid types: ${VALID_SOLUTION_TYPES.join(", ")}`,
+        ),
       );
     }
 
     // Validate constraints
-    const constraints = inputAny.optimizationConstraints || inputAny.constraints;
+    const constraints =
+      inputAny.optimizationConstraints || inputAny.constraints;
     if (constraints) {
       for (let i = 0; i < constraints.length; i++) {
         const c = constraints[i];
@@ -211,9 +238,9 @@ export class OptimizationHandler implements ModeHandler {
           warnings.push(
             createValidationWarning(
               `constraints[${i}].formula`,
-              'Constraint lacks formula',
-              'Specify the mathematical constraint expression'
-            )
+              "Constraint lacks formula",
+              "Specify the mathematical constraint expression",
+            ),
           );
         }
       }
@@ -228,9 +255,9 @@ export class OptimizationHandler implements ModeHandler {
           warnings.push(
             createValidationWarning(
               `objectives[${i}].formula`,
-              'Objective lacks formula',
-              'Specify the objective function'
-            )
+              "Objective lacks formula",
+              "Specify the objective function",
+            ),
           );
         }
         if (o.weight !== undefined) {
@@ -238,35 +265,39 @@ export class OptimizationHandler implements ModeHandler {
         }
       }
 
-      if (inputAny.objectives.length > 1 && Math.abs(totalWeight - 1) > 0.01 && totalWeight > 0) {
+      if (
+        inputAny.objectives.length > 1 &&
+        Math.abs(totalWeight - 1) > 0.01 &&
+        totalWeight > 0
+      ) {
         warnings.push(
           createValidationWarning(
-            'objectives',
+            "objectives",
             `Objective weights sum to ${totalWeight.toFixed(2)}, should be 1.0`,
-            'Normalize weights for multi-objective optimization'
-          )
+            "Normalize weights for multi-objective optimization",
+          ),
         );
       }
     }
 
     // Suggest missing components
-    if (!inputAny.variables && inputAny.thoughtType !== 'problem_formulation') {
+    if (!inputAny.variables && inputAny.thoughtType !== "problem_formulation") {
       warnings.push(
         createValidationWarning(
-          'variables',
-          'No decision variables defined',
-          'Define the variables to be optimized'
-        )
+          "variables",
+          "No decision variables defined",
+          "Define the variables to be optimized",
+        ),
       );
     }
 
-    if (!inputAny.objectives && inputAny.thoughtType === 'solution_search') {
+    if (!inputAny.objectives && inputAny.thoughtType === "solution_search") {
       warnings.push(
         createValidationWarning(
-          'objectives',
-          'Solution search without objectives',
-          'Define objective functions to optimize'
-        )
+          "objectives",
+          "Solution search without objectives",
+          "Define objective functions to optimize",
+        ),
       );
     }
 
@@ -283,7 +314,11 @@ export class OptimizationHandler implements ModeHandler {
   getEnhancements(thought: OptimizationThought): ModeEnhancements {
     const enhancements: ModeEnhancements = {
       suggestions: [],
-      relatedModes: [ThinkingMode.MATHEMATICS, ThinkingMode.ALGORITHMIC, ThinkingMode.ENGINEERING],
+      relatedModes: [
+        ThinkingMode.MATHEMATICS,
+        ThinkingMode.ALGORITHMIC,
+        ThinkingMode.ENGINEERING,
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -292,26 +327,26 @@ export class OptimizationHandler implements ModeHandler {
         objectiveCount: thought.objectives?.length || 0,
       },
       mentalModels: [
-        'Linear Programming',
-        'Constraint Satisfaction',
-        'Pareto Optimality',
-        'Sensitivity Analysis',
-        'Lagrangian Relaxation',
+        "Linear Programming",
+        "Constraint Satisfaction",
+        "Pareto Optimality",
+        "Sensitivity Analysis",
+        "Lagrangian Relaxation",
       ],
     };
 
     // Thought type-specific guidance
     switch (thought.thoughtType) {
-      case 'problem_formulation':
+      case "problem_formulation":
         enhancements.guidingQuestions!.push(
-          'What are we trying to optimize?',
-          'What constraints must be satisfied?',
-          'Is this a single or multi-objective problem?'
+          "What are we trying to optimize?",
+          "What constraints must be satisfied?",
+          "Is this a single or multi-objective problem?",
         );
         if (thought.problem) {
           enhancements.suggestions!.push(
             `Problem type: ${thought.problem.type}`,
-            `Approach: ${thought.problem.approach || 'not specified'}`
+            `Approach: ${thought.problem.approach || "not specified"}`,
           );
           if (thought.problem.complexity) {
             enhancements.metrics!.complexity = thought.problem.complexity;
@@ -319,100 +354,105 @@ export class OptimizationHandler implements ModeHandler {
         }
         break;
 
-      case 'variable_definition':
+      case "variable_definition":
         enhancements.guidingQuestions!.push(
-          'Are all decision variables identified?',
-          'What are the variable domains?',
-          'Are there any implicit variables?'
+          "Are all decision variables identified?",
+          "What are the variable domains?",
+          "Are there any implicit variables?",
         );
         if (thought.variables) {
-          const types = thought.variables.map(v => v.type);
+          const types = thought.variables.map((v) => v.type);
           const uniqueTypes = [...new Set(types)];
           enhancements.suggestions!.push(
-            `Variable types: ${uniqueTypes.join(', ')}`
+            `Variable types: ${uniqueTypes.join(", ")}`,
           );
         }
         break;
 
-      case 'constraint_identification':
+      case "constraint_identification":
         enhancements.guidingQuestions!.push(
-          'Are all constraints identified?',
-          'Which constraints are hard vs soft?',
-          'Are the constraints consistent?'
+          "Are all constraints identified?",
+          "Which constraints are hard vs soft?",
+          "Are the constraints consistent?",
         );
         if (thought.optimizationConstraints) {
-          const hard = thought.optimizationConstraints.filter(c => c.type === 'hard').length;
+          const hard = thought.optimizationConstraints.filter(
+            (c) => c.type === "hard",
+          ).length;
           const soft = thought.optimizationConstraints.length - hard;
           enhancements.suggestions!.push(
-            `Constraints: ${hard} hard, ${soft} soft`
+            `Constraints: ${hard} hard, ${soft} soft`,
           );
         }
         break;
 
-      case 'objective_setting':
+      case "objective_setting":
         enhancements.guidingQuestions!.push(
-          'Is the objective function well-defined?',
-          'Are there conflicting objectives?',
-          'How will trade-offs be handled?'
+          "Is the objective function well-defined?",
+          "Are there conflicting objectives?",
+          "How will trade-offs be handled?",
         );
         if (thought.objectives) {
-          const maxCount = thought.objectives.filter(o => o.type === 'maximize').length;
+          const maxCount = thought.objectives.filter(
+            (o) => o.type === "maximize",
+          ).length;
           const minCount = thought.objectives.length - maxCount;
           enhancements.suggestions!.push(
-            `Objectives: ${maxCount} maximize, ${minCount} minimize`
+            `Objectives: ${maxCount} maximize, ${minCount} minimize`,
           );
         }
         break;
 
-      case 'solution_search':
+      case "solution_search":
         enhancements.guidingQuestions!.push(
-          'Is the solution feasible?',
-          'Is the solution optimal or approximate?',
-          'What method was used to find it?'
+          "Is the solution feasible?",
+          "Is the solution optimal or approximate?",
+          "What method was used to find it?",
         );
         if (thought.solution) {
           enhancements.suggestions!.push(
-            `Solution type: ${thought.solution.type}`
+            `Solution type: ${thought.solution.type}`,
           );
           enhancements.metrics!.solutionQuality = thought.solution.quality;
 
-          if (thought.solution.type === 'infeasible') {
+          if (thought.solution.type === "infeasible") {
             enhancements.warnings!.push(
-              'Solution is infeasible - check constraint compatibility'
+              "Solution is infeasible - check constraint compatibility",
             );
-          } else if (thought.solution.type === 'unbounded') {
+          } else if (thought.solution.type === "unbounded") {
             enhancements.warnings!.push(
-              'Problem is unbounded - add missing constraints'
+              "Problem is unbounded - add missing constraints",
             );
           }
 
           if (thought.solution.guarantees) {
             enhancements.suggestions!.push(
-              `Guarantees: ${thought.solution.guarantees.join(', ')}`
+              `Guarantees: ${thought.solution.guarantees.join(", ")}`,
             );
           }
         }
         break;
 
-      case 'sensitivity_analysis':
+      case "sensitivity_analysis":
         enhancements.guidingQuestions!.push(
-          'How robust is the solution?',
-          'Which constraints are binding?',
-          'What are the shadow prices?'
+          "How robust is the solution?",
+          "Which constraints are binding?",
+          "What are the shadow prices?",
         );
         if (thought.analysis) {
           enhancements.metrics!.robustness = thought.analysis.robustness;
-          enhancements.metrics!.criticalConstraintCount = thought.analysis.criticalConstraints.length;
+          enhancements.metrics!.criticalConstraintCount =
+            thought.analysis.criticalConstraints.length;
 
           if (thought.analysis.robustness < 0.5) {
             enhancements.warnings!.push(
-              'Low solution robustness - small changes may significantly affect results'
+              "Low solution robustness - small changes may significantly affect results",
             );
           }
 
           if (thought.analysis.criticalConstraints.length > 0) {
             enhancements.suggestions!.push(
-              `Critical constraints: ${thought.analysis.criticalConstraints.length}`
+              `Critical constraints: ${thought.analysis.criticalConstraints.length}`,
             );
           }
         }
@@ -420,9 +460,12 @@ export class OptimizationHandler implements ModeHandler {
     }
 
     // Problem-specific suggestions
-    if (thought.problem?.type === 'multi_objective' && !thought.objectives?.some(o => o.weight !== undefined)) {
+    if (
+      thought.problem?.type === "multi_objective" &&
+      !thought.objectives?.some((o) => o.weight !== undefined)
+    ) {
       enhancements.warnings!.push(
-        'Multi-objective problem without weights - consider Pareto analysis'
+        "Multi-objective problem without weights - consider Pareto analysis",
       );
     }
 
@@ -433,17 +476,24 @@ export class OptimizationHandler implements ModeHandler {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType: string): boolean {
-    return this.supportedThoughtTypes.includes(thoughtType as OptimizationThoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType as OptimizationThoughtType,
+    );
   }
 
   /**
    * Resolve thought type from input
    */
-  private resolveThoughtType(inputType: string | undefined): OptimizationThoughtType {
-    if (inputType && VALID_THOUGHT_TYPES.includes(inputType as OptimizationThoughtType)) {
+  private resolveThoughtType(
+    inputType: string | undefined,
+  ): OptimizationThoughtType {
+    if (
+      inputType &&
+      VALID_THOUGHT_TYPES.includes(inputType as OptimizationThoughtType)
+    ) {
       return inputType as OptimizationThoughtType;
     }
-    return 'problem_formulation';
+    return "problem_formulation";
   }
 
   /**
@@ -452,9 +502,11 @@ export class OptimizationHandler implements ModeHandler {
   private normalizeProblem(problem: any): OptimizationProblem {
     return {
       id: problem.id || randomUUID(),
-      name: problem.name || '',
-      description: problem.description || '',
-      type: VALID_PROBLEM_TYPES.includes(problem.type) ? problem.type : 'linear',
+      name: problem.name || "",
+      description: problem.description || "",
+      type: VALID_PROBLEM_TYPES.includes(problem.type)
+        ? problem.type
+        : "linear",
       approach: problem.approach,
       complexity: problem.complexity,
     };
@@ -466,12 +518,16 @@ export class OptimizationHandler implements ModeHandler {
   private normalizeVariable(variable: any): DecisionVariable {
     return {
       id: variable.id || randomUUID(),
-      name: variable.name || '',
-      description: variable.description || '',
-      type: variable.type || 'continuous',
-      domain: variable.domain || { type: 'continuous', lowerBound: 0, upperBound: Infinity },
+      name: variable.name || "",
+      description: variable.description || "",
+      type: variable.type || "continuous",
+      domain: variable.domain || {
+        type: "continuous",
+        lowerBound: 0,
+        upperBound: Infinity,
+      },
       unit: variable.unit,
-      semantics: variable.semantics || '',
+      semantics: variable.semantics || "",
     };
   }
 
@@ -481,14 +537,14 @@ export class OptimizationHandler implements ModeHandler {
   private normalizeConstraint(constraint: any): Constraint {
     return {
       id: constraint.id || randomUUID(),
-      name: constraint.name || '',
-      description: constraint.description || '',
-      type: constraint.type || 'hard',
-      formula: constraint.formula || '',
+      name: constraint.name || "",
+      description: constraint.description || "",
+      type: constraint.type || "hard",
+      formula: constraint.formula || "",
       latex: constraint.latex,
       variables: constraint.variables || [],
       penalty: constraint.penalty,
-      rationale: constraint.rationale || '',
+      rationale: constraint.rationale || "",
       priority: constraint.priority,
     };
   }
@@ -499,10 +555,10 @@ export class OptimizationHandler implements ModeHandler {
   private normalizeObjective(objective: any): Objective {
     return {
       id: objective.id || randomUUID(),
-      name: objective.name || '',
-      description: objective.description || '',
-      type: objective.type || 'minimize',
-      formula: objective.formula || '',
+      name: objective.name || "",
+      description: objective.description || "",
+      type: objective.type || "minimize",
+      formula: objective.formula || "",
       latex: objective.latex,
       variables: objective.variables || [],
       weight: objective.weight,
@@ -515,11 +571,14 @@ export class OptimizationHandler implements ModeHandler {
   /**
    * Normalize solution
    */
-  private normalizeSolution(solution: any, constraints?: Constraint[]): Solution {
+  private normalizeSolution(
+    solution: any,
+    constraints?: Constraint[],
+  ): Solution {
     // Calculate constraint satisfaction if not provided
     let constraintSatisfaction = solution.constraintSatisfaction;
     if (!constraintSatisfaction && constraints) {
-      constraintSatisfaction = constraints.map(c => ({
+      constraintSatisfaction = constraints.map((c) => ({
         constraintId: c.id,
         satisfied: true, // Default assumption
         violation: undefined,
@@ -528,7 +587,9 @@ export class OptimizationHandler implements ModeHandler {
 
     return {
       id: solution.id || randomUUID(),
-      type: VALID_SOLUTION_TYPES.includes(solution.type) ? solution.type : 'feasible',
+      type: VALID_SOLUTION_TYPES.includes(solution.type)
+        ? solution.type
+        : "feasible",
       variableValues: solution.variableValues || {},
       objectiveValues: solution.objectiveValues || {},
       constraintSatisfaction: constraintSatisfaction || [],

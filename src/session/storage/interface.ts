@@ -5,7 +5,7 @@
  * file systems, databases, or other storage mechanisms.
  */
 
-import { ThinkingSession, SessionMetadata } from '../../types/index.js';
+import { ThinkingSession, SessionMetadata } from "../../types/index.js";
 
 /**
  * Session storage interface
@@ -90,7 +90,7 @@ export interface StorageStats {
   oldestSession?: Date;
   newestSession?: Date;
   averageSessionSize: number;
-  storageHealth: 'healthy' | 'warning' | 'critical';
+  storageHealth: "healthy" | "warning" | "critical";
 }
 
 /**

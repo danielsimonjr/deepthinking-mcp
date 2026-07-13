@@ -4,9 +4,9 @@
  * Phase 15: Aligned with JSON schema for complete validation
  */
 
-import { z } from 'zod';
-import { BaseThoughtSchema } from '../base.js';
-import { ConfidenceSchema } from '../shared.js';
+import { z } from "zod";
+import { BaseThoughtSchema } from "../base.js";
+import { ConfidenceSchema } from "../shared.js";
 
 const PlayerSchema = z.object({
   id: z.string(),
@@ -54,7 +54,7 @@ const SolutionSchema = z.object({
  * Strategic reasoning schema (Game Theory + Optimization)
  */
 export const StrategicSchema = BaseThoughtSchema.extend({
-  mode: z.enum(['gametheory', 'optimization']),
+  mode: z.enum(["gametheory", "optimization"]),
 
   // Game theory specific
   players: z.array(PlayerSchema).optional(),

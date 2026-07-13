@@ -58,7 +58,7 @@ export type {
   MultiModeAnalysisResponse,
   ModeAnalysisResult,
   ModeError,
-} from './combination-types.js';
+} from "./combination-types.js";
 
 // Presets
 export {
@@ -73,21 +73,21 @@ export {
   isValidPresetId,
   getPresetMetadata,
   listPresetIds,
-} from './presets.js';
+} from "./presets.js";
 
 // Merger
 export {
   InsightMerger,
   type MergeResult,
   type InsightMergerConfig,
-} from './merger.js';
+} from "./merger.js";
 
 // Conflict Resolver
 export {
   ConflictResolver,
   type ResolutionResult,
   type ConflictResolverConfig,
-} from './conflict-resolver.js';
+} from "./conflict-resolver.js";
 
 // Analyzer
 export {
@@ -96,4 +96,4 @@ export {
   type MultiModeAnalyzerConfig,
   type ProgressCallback,
   type AnalysisProgress,
-} from './analyzer.js';
+} from "./analyzer.js";

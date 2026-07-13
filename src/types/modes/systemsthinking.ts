@@ -3,7 +3,7 @@
  * Phase 4 (v3.2.0) - Systems analysis with feedback loops, stocks, flows, and leverage points
  */
 
-import { BaseThought, ThinkingMode } from '../core.js';
+import { BaseThought, ThinkingMode } from "../core.js";
 
 /**
  * Systems Thinking thought extends base thought with system dynamics
@@ -11,11 +11,11 @@ import { BaseThought, ThinkingMode } from '../core.js';
 export interface SystemsThinkingThought extends BaseThought {
   mode: ThinkingMode.SYSTEMSTHINKING;
   thoughtType:
-    | 'system_definition'
-    | 'component_analysis'
-    | 'feedback_identification'
-    | 'leverage_analysis'
-    | 'behavior_prediction';
+    | "system_definition"
+    | "component_analysis"
+    | "feedback_identification"
+    | "leverage_analysis"
+    | "behavior_prediction";
 
   system?: SystemDefinition;
   components?: SystemComponent[];
@@ -39,7 +39,8 @@ export interface SystemDefinition {
 /**
  * Type of system component
  */
-export type ComponentType = 'stock' | 'flow' | 'variable' | 'parameter' | 'delay';
+export type ComponentType =
+  "stock" | "flow" | "variable" | "parameter" | "delay";
 
 /**
  * System component (stock, flow, variable)
@@ -58,7 +59,7 @@ export interface SystemComponent {
 /**
  * Type of feedback loop
  */
-export type FeedbackType = 'reinforcing' | 'balancing';
+export type FeedbackType = "reinforcing" | "balancing";
 
 /**
  * Feedback loop in the system
@@ -69,10 +70,10 @@ export interface FeedbackLoop {
   type: FeedbackType;
   description: string;
   components: string[]; // Ordered list of component IDs in the loop
-  polarity: '+' | '-'; // Overall loop polarity
+  polarity: "+" | "-"; // Overall loop polarity
   strength: number; // 0-1, strength of the feedback
   delay?: number; // Time delay in the loop
-  dominance?: 'early' | 'middle' | 'late'; // When this loop dominates behavior
+  dominance?: "early" | "middle" | "late"; // When this loop dominates behavior
 }
 
 /**
@@ -82,7 +83,7 @@ export interface CausalLink {
   id: string;
   from: string; // Component ID
   to: string; // Component ID
-  polarity: '+' | '-'; // Positive or negative influence
+  polarity: "+" | "-"; // Positive or negative influence
   strength: number; // 0-1
   delay?: number; // Time delay
   description?: string;
@@ -98,7 +99,7 @@ export interface LeveragePoint {
   description: string;
   effectiveness: number; // 0-1, higher = more effective
   difficulty: number; // 0-1, higher = more difficult
-  type: 'parameter' | 'feedback' | 'structure' | 'goal' | 'paradigm';
+  type: "parameter" | "feedback" | "structure" | "goal" | "paradigm";
   interventionExamples: string[];
 }
 
@@ -109,7 +110,13 @@ export interface EmergentBehavior {
   id: string;
   name: string;
   description: string;
-  pattern: 'growth' | 'decline' | 'oscillation' | 'equilibrium' | 'chaos' | 'overshoot_collapse';
+  pattern:
+    | "growth"
+    | "decline"
+    | "oscillation"
+    | "equilibrium"
+    | "chaos"
+    | "overshoot_collapse";
   causes: string[]; // Component/loop IDs causing this behavior
   timeframe: string;
   unintendedConsequences?: string[];
@@ -134,13 +141,15 @@ export interface SystemDelay {
   from: string; // Component ID
   to: string; // Component ID
   delayTime: number;
-  type: 'information' | 'material' | 'perception';
+  type: "information" | "material" | "perception";
   impact: string;
 }
 
 /**
  * Type guard for Systems Thinking thoughts
  */
-export function isSystemsThinkingThought(thought: BaseThought): thought is SystemsThinkingThought {
-  return thought.mode === 'systemsthinking';
+export function isSystemsThinkingThought(
+  thought: BaseThought,
+): thought is SystemsThinkingThought {
+  return thought.mode === "systemsthinking";
 }

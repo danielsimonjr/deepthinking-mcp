@@ -5,34 +5,34 @@
  * common analysis scenarios.
  */
 
-import { ThinkingMode } from '../../types/core.js';
+import { ThinkingMode } from "../../types/core.js";
 import type {
   ModeCombination,
   MergeStrategy,
   WeightedMergeConfig,
   HierarchicalMergeConfig,
   DialecticalMergeConfig,
-} from './combination-types.js';
+} from "./combination-types.js";
 
 /**
  * Preset identifiers
  */
 export type PresetId =
-  | 'comprehensive_analysis'
-  | 'hypothesis_testing'
-  | 'decision_making'
-  | 'root_cause'
-  | 'future_planning';
+  | "comprehensive_analysis"
+  | "hypothesis_testing"
+  | "decision_making"
+  | "root_cause"
+  | "future_planning";
 
 /**
  * Comprehensive Analysis preset
  * Uses multiple modes to provide a thorough analysis from different perspectives
  */
 const comprehensiveAnalysis: ModeCombination = {
-  id: 'comprehensive_analysis',
-  name: 'Comprehensive Analysis',
+  id: "comprehensive_analysis",
+  name: "Comprehensive Analysis",
   description:
-    'Analyzes a problem from multiple perspectives using deductive, inductive, and abductive reasoning along with systems thinking',
+    "Analyzes a problem from multiple perspectives using deductive, inductive, and abductive reasoning along with systems thinking",
   modes: [
     ThinkingMode.DEDUCTIVE,
     ThinkingMode.INDUCTIVE,
@@ -40,9 +40,9 @@ const comprehensiveAnalysis: ModeCombination = {
     ThinkingMode.SYSTEMSTHINKING,
     ThinkingMode.FIRSTPRINCIPLES,
   ],
-  mergeStrategy: 'weighted',
+  mergeStrategy: "weighted",
   useCase:
-    'Use when you need a thorough understanding of a complex problem from multiple angles',
+    "Use when you need a thorough understanding of a complex problem from multiple angles",
   mergeConfig: {
     weights: new Map<ThinkingMode, number>([
       [ThinkingMode.DEDUCTIVE, 0.9],
@@ -54,7 +54,7 @@ const comprehensiveAnalysis: ModeCombination = {
     threshold: 0.5,
     defaultWeight: 0.6,
   } as WeightedMergeConfig,
-  tags: ['analysis', 'comprehensive', 'multi-perspective'],
+  tags: ["analysis", "comprehensive", "multi-perspective"],
 };
 
 /**
@@ -62,19 +62,19 @@ const comprehensiveAnalysis: ModeCombination = {
  * Combines scientific method with Bayesian updating for rigorous hypothesis evaluation
  */
 const hypothesisTesting: ModeCombination = {
-  id: 'hypothesis_testing',
-  name: 'Hypothesis Testing',
+  id: "hypothesis_testing",
+  name: "Hypothesis Testing",
   description:
-    'Evaluates hypotheses using scientific method, Bayesian reasoning, and evidential analysis',
+    "Evaluates hypotheses using scientific method, Bayesian reasoning, and evidential analysis",
   modes: [
     ThinkingMode.SCIENTIFICMETHOD,
     ThinkingMode.BAYESIAN,
     ThinkingMode.EVIDENTIAL,
     ThinkingMode.DEDUCTIVE,
   ],
-  mergeStrategy: 'hierarchical',
+  mergeStrategy: "hierarchical",
   useCase:
-    'Use when evaluating hypotheses with evidence, updating beliefs based on new data',
+    "Use when evaluating hypotheses with evidence, updating beliefs based on new data",
   mergeConfig: {
     primaryMode: ThinkingMode.SCIENTIFICMETHOD,
     supportingModes: [
@@ -85,7 +85,7 @@ const hypothesisTesting: ModeCombination = {
     allowOverride: true,
     overrideThreshold: 2,
   } as HierarchicalMergeConfig,
-  tags: ['scientific', 'hypothesis', 'evidence-based'],
+  tags: ["scientific", "hypothesis", "evidence-based"],
 };
 
 /**
@@ -93,19 +93,19 @@ const hypothesisTesting: ModeCombination = {
  * Uses game theory, optimization, and counterfactual reasoning for decision analysis
  */
 const decisionMaking: ModeCombination = {
-  id: 'decision_making',
-  name: 'Decision Making',
+  id: "decision_making",
+  name: "Decision Making",
   description:
-    'Analyzes decisions using game theory, optimization, and counterfactual analysis',
+    "Analyzes decisions using game theory, optimization, and counterfactual analysis",
   modes: [
     ThinkingMode.GAMETHEORY,
     ThinkingMode.OPTIMIZATION,
     ThinkingMode.COUNTERFACTUAL,
     ThinkingMode.BAYESIAN,
   ],
-  mergeStrategy: 'weighted',
+  mergeStrategy: "weighted",
   useCase:
-    'Use when making strategic decisions, evaluating options, or analyzing competitive scenarios',
+    "Use when making strategic decisions, evaluating options, or analyzing competitive scenarios",
   mergeConfig: {
     weights: new Map<ThinkingMode, number>([
       [ThinkingMode.GAMETHEORY, 0.9],
@@ -116,7 +116,7 @@ const decisionMaking: ModeCombination = {
     threshold: 0.6,
     defaultWeight: 0.5,
   } as WeightedMergeConfig,
-  tags: ['decision', 'strategy', 'optimization'],
+  tags: ["decision", "strategy", "optimization"],
 };
 
 /**
@@ -124,19 +124,19 @@ const decisionMaking: ModeCombination = {
  * Combines causal reasoning with systems thinking to identify root causes
  */
 const rootCause: ModeCombination = {
-  id: 'root_cause',
-  name: 'Root Cause Analysis',
+  id: "root_cause",
+  name: "Root Cause Analysis",
   description:
-    'Identifies root causes using causal inference, systems thinking, and first principles',
+    "Identifies root causes using causal inference, systems thinking, and first principles",
   modes: [
     ThinkingMode.CAUSAL,
     ThinkingMode.SYSTEMSTHINKING,
     ThinkingMode.FIRSTPRINCIPLES,
     ThinkingMode.ABDUCTIVE,
   ],
-  mergeStrategy: 'hierarchical',
+  mergeStrategy: "hierarchical",
   useCase:
-    'Use when diagnosing problems, finding root causes, or understanding causal chains',
+    "Use when diagnosing problems, finding root causes, or understanding causal chains",
   mergeConfig: {
     primaryMode: ThinkingMode.CAUSAL,
     supportingModes: [
@@ -147,7 +147,7 @@ const rootCause: ModeCombination = {
     allowOverride: false,
     overrideThreshold: 3,
   } as HierarchicalMergeConfig,
-  tags: ['causal', 'diagnosis', 'root-cause'],
+  tags: ["causal", "diagnosis", "root-cause"],
 };
 
 /**
@@ -155,26 +155,26 @@ const rootCause: ModeCombination = {
  * Uses temporal reasoning with counterfactual analysis for planning
  */
 const futurePlanning: ModeCombination = {
-  id: 'future_planning',
-  name: 'Future Planning',
+  id: "future_planning",
+  name: "Future Planning",
   description:
-    'Plans future scenarios using temporal reasoning, counterfactuals, and Bayesian prediction',
+    "Plans future scenarios using temporal reasoning, counterfactuals, and Bayesian prediction",
   modes: [
     ThinkingMode.TEMPORAL,
     ThinkingMode.COUNTERFACTUAL,
     ThinkingMode.BAYESIAN,
     ThinkingMode.OPTIMIZATION,
   ],
-  mergeStrategy: 'dialectical',
+  mergeStrategy: "dialectical",
   useCase:
-    'Use when planning for the future, scenario analysis, or forecasting',
+    "Use when planning for the future, scenario analysis, or forecasting",
   mergeConfig: {
     thesisMode: ThinkingMode.TEMPORAL,
     antithesisMode: ThinkingMode.COUNTERFACTUAL,
     synthesisModes: [ThinkingMode.BAYESIAN],
     preserveOriginals: true,
   } as DialecticalMergeConfig,
-  tags: ['planning', 'future', 'temporal', 'scenarios'],
+  tags: ["planning", "future", "temporal", "scenarios"],
 };
 
 /**
@@ -207,7 +207,7 @@ export function getAllPresets(): ModeCombination[] {
  */
 export function getPresetsByTag(tag: string): ModeCombination[] {
   return Object.values(PRESETS).filter((preset) =>
-    preset.tags?.includes(tag.toLowerCase())
+    preset.tags?.includes(tag.toLowerCase()),
   );
 }
 
@@ -215,17 +215,17 @@ export function getPresetsByTag(tag: string): ModeCombination[] {
  * Get presets containing a specific mode
  */
 export function getPresetsWithMode(mode: ThinkingMode): ModeCombination[] {
-  return Object.values(PRESETS).filter((preset) =>
-    preset.modes.includes(mode)
-  );
+  return Object.values(PRESETS).filter((preset) => preset.modes.includes(mode));
 }
 
 /**
  * Get presets using a specific merge strategy
  */
-export function getPresetsByStrategy(strategy: MergeStrategy): ModeCombination[] {
+export function getPresetsByStrategy(
+  strategy: MergeStrategy,
+): ModeCombination[] {
   return Object.values(PRESETS).filter(
-    (preset) => preset.mergeStrategy === strategy
+    (preset) => preset.mergeStrategy === strategy,
   );
 }
 
@@ -235,7 +235,7 @@ export function getPresetsByStrategy(strategy: MergeStrategy): ModeCombination[]
 export function combinePresets(
   presetIds: PresetId[],
   name: string,
-  mergeStrategy: MergeStrategy = 'union'
+  mergeStrategy: MergeStrategy = "union",
 ): ModeCombination {
   const modes = new Set<ThinkingMode>();
   const tags = new Set<string>();
@@ -249,13 +249,13 @@ export function combinePresets(
   }
 
   return {
-    id: `custom_${presetIds.join('_')}`,
+    id: `custom_${presetIds.join("_")}`,
     name,
-    description: `Custom combination of ${presetIds.join(', ')}`,
+    description: `Custom combination of ${presetIds.join(", ")}`,
     modes: [...modes],
     mergeStrategy,
-    useCase: 'Custom combination for specialized analysis',
-    tags: [...tags, 'custom'],
+    useCase: "Custom combination for specialized analysis",
+    tags: [...tags, "custom"],
   };
 }
 
@@ -269,14 +269,16 @@ export function isValidPresetId(id: string): id is PresetId {
 /**
  * Get preset metadata (without full config)
  */
-export function getPresetMetadata(id: PresetId): {
-  id: string;
-  name: string;
-  description: string;
-  modeCount: number;
-  strategy: MergeStrategy;
-  tags: string[];
-} | undefined {
+export function getPresetMetadata(id: PresetId):
+  | {
+      id: string;
+      name: string;
+      description: string;
+      modeCount: number;
+      strategy: MergeStrategy;
+      tags: string[];
+    }
+  | undefined {
   const preset = PRESETS[id];
   if (!preset) return undefined;
 

@@ -4,8 +4,8 @@
  * Merges insights from multiple reasoning modes using various strategies.
  */
 
-import { randomUUID } from 'crypto';
-import type { ThinkingMode } from '../../types/core.js';
+import { randomUUID } from "crypto";
+import type { ThinkingMode } from "../../types/core.js";
 import type {
   Insight,
   MergeStrategy,
@@ -14,7 +14,7 @@ import type {
   DialecticalMergeConfig,
   MergeStatistics,
   ConflictingInsight,
-} from './combination-types.js';
+} from "./combination-types.js";
 
 /**
  * Configuration for the merger
@@ -61,9 +61,7 @@ export class InsightMerger {
     insightsByMode: Map<ThinkingMode, Insight[]>,
     strategy: MergeStrategy,
     strategyConfig?:
-      | WeightedMergeConfig
-      | HierarchicalMergeConfig
-      | DialecticalMergeConfig
+      WeightedMergeConfig | HierarchicalMergeConfig | DialecticalMergeConfig,
   ): MergeResult {
     const startTime = Date.now();
     const allInsights = this.flattenInsights(insightsByMode);
@@ -71,28 +69,28 @@ export class InsightMerger {
     let result: MergeResult;
 
     switch (strategy) {
-      case 'union':
+      case "union":
         result = this.mergeUnion(allInsights);
         break;
-      case 'intersection':
+      case "intersection":
         result = this.mergeIntersection(insightsByMode);
         break;
-      case 'weighted':
+      case "weighted":
         result = this.mergeWeighted(
           insightsByMode,
-          strategyConfig as WeightedMergeConfig
+          strategyConfig as WeightedMergeConfig,
         );
         break;
-      case 'hierarchical':
+      case "hierarchical":
         result = this.mergeHierarchical(
           insightsByMode,
-          strategyConfig as HierarchicalMergeConfig
+          strategyConfig as HierarchicalMergeConfig,
         );
         break;
-      case 'dialectical':
+      case "dialectical":
         result = this.mergeDialectical(
           insightsByMode,
-          strategyConfig as DialecticalMergeConfig
+          strategyConfig as DialecticalMergeConfig,
         );
         break;
       default:
@@ -117,7 +115,7 @@ export class InsightMerger {
 
     // Filter by minimum confidence
     const filtered = unique.filter(
-      (i) => i.confidence >= this.config.minConfidence
+      (i) => i.confidence >= this.config.minConfidence,
     );
 
     // Detect conflicts among remaining insights
@@ -131,7 +129,7 @@ export class InsightMerger {
         totalBefore,
         filtered.length,
         duplicatesRemoved,
-        conflicts.length
+        conflicts.length,
       ),
     };
   }
@@ -140,7 +138,7 @@ export class InsightMerger {
    * Intersection merge: Only keep insights agreed upon by multiple modes
    */
   private mergeIntersection(
-    insightsByMode: Map<ThinkingMode, Insight[]>
+    insightsByMode: Map<ThinkingMode, Insight[]>,
   ): MergeResult {
     const allInsights = this.flattenInsights(insightsByMode);
     const totalBefore = allInsights.length;
@@ -167,7 +165,7 @@ export class InsightMerger {
 
     // Filter by confidence
     const filtered = intersected.filter(
-      (i) => i.confidence >= this.config.minConfidence
+      (i) => i.confidence >= this.config.minConfidence,
     );
 
     return {
@@ -177,7 +175,7 @@ export class InsightMerger {
         totalBefore,
         filtered.length,
         duplicatesRemoved,
-        0
+        0,
       ),
     };
   }
@@ -187,7 +185,7 @@ export class InsightMerger {
    */
   private mergeWeighted(
     insightsByMode: Map<ThinkingMode, Insight[]>,
-    config?: WeightedMergeConfig
+    config?: WeightedMergeConfig,
   ): MergeResult {
     const allInsights = this.flattenInsights(insightsByMode);
     const totalBefore = allInsights.length;
@@ -198,8 +196,7 @@ export class InsightMerger {
 
     // Apply weights to insight confidence
     const weightedInsights = allInsights.map((insight) => {
-      const weight =
-        config?.weights?.get(insight.sourceMode) ?? defaultWeight;
+      const weight = config?.weights?.get(insight.sourceMode) ?? defaultWeight;
       return {
         ...insight,
         confidence: insight.confidence * weight,
@@ -216,7 +213,7 @@ export class InsightMerger {
         // Combine weighted confidences
         const combinedConfidence = Math.min(
           1,
-          group.reduce((sum, i) => sum + i.confidence, 0) / group.length
+          group.reduce((sum, i) => sum + i.confidence, 0) / group.length,
         );
         const merged_insight = this.mergeInsightGroup(group);
         merged_insight.confidence = combinedConfidence;
@@ -240,7 +237,7 @@ export class InsightMerger {
         totalBefore,
         merged.length,
         duplicatesRemoved,
-        conflicts.length
+        conflicts.length,
       ),
     };
   }
@@ -250,7 +247,7 @@ export class InsightMerger {
    */
   private mergeHierarchical(
     insightsByMode: Map<ThinkingMode, Insight[]>,
-    config?: HierarchicalMergeConfig
+    config?: HierarchicalMergeConfig,
   ): MergeResult {
     const allInsights = this.flattenInsights(insightsByMode);
     const totalBefore = allInsights.length;
@@ -289,7 +286,7 @@ export class InsightMerger {
       } else if (config.allowOverride) {
         // Check if enough support to override
         const supportCount = supportingInsights.filter((s) =>
-          this.areSimilar(s, supporting)
+          this.areSimilar(s, supporting),
         ).length;
 
         if (supportCount >= config.overrideThreshold) {
@@ -307,7 +304,7 @@ export class InsightMerger {
               confidence: supporting.confidence,
               insightId: supporting.id,
             },
-            conflictType: 'confidence_mismatch',
+            conflictType: "confidence_mismatch",
             severity: Math.abs(similar.confidence - supporting.confidence),
           });
         }
@@ -319,7 +316,7 @@ export class InsightMerger {
 
     // Filter by confidence
     const filtered = result.filter(
-      (i) => i.confidence >= this.config.minConfidence
+      (i) => i.confidence >= this.config.minConfidence,
     );
 
     return {
@@ -329,7 +326,7 @@ export class InsightMerger {
         totalBefore,
         filtered.length,
         duplicatesRemoved,
-        conflicts.length
+        conflicts.length,
       ),
     };
   }
@@ -339,7 +336,7 @@ export class InsightMerger {
    */
   private mergeDialectical(
     insightsByMode: Map<ThinkingMode, Insight[]>,
-    config?: DialecticalMergeConfig
+    config?: DialecticalMergeConfig,
   ): MergeResult {
     const allInsights = this.flattenInsights(insightsByMode);
     const totalBefore = allInsights.length;
@@ -382,12 +379,16 @@ export class InsightMerger {
             confidence: antithesis.confidence,
             insightId: antithesis.id,
           },
-          conflictType: 'direct_contradiction',
+          conflictType: "direct_contradiction",
           severity: 0.8,
         });
 
         // Look for synthesis
-        const synthesis = this.findSynthesis(thesis, antithesis, synthesisInsights);
+        const synthesis = this.findSynthesis(
+          thesis,
+          antithesis,
+          synthesisInsights,
+        );
         if (synthesis) {
           result.push({
             ...synthesis,
@@ -396,7 +397,7 @@ export class InsightMerger {
               `And antithesis: "${antithesis.content.substring(0, 50)}..."`,
               ...(synthesis.evidence || []),
             ],
-            category: 'synthesis',
+            category: "synthesis",
           });
         } else {
           // Auto-generate synthesis
@@ -410,7 +411,7 @@ export class InsightMerger {
               `Antithesis: ${antithesis.content}`,
             ],
             timestamp: new Date(),
-            category: 'auto_synthesis',
+            category: "auto_synthesis",
           });
         }
 
@@ -418,11 +419,11 @@ export class InsightMerger {
         if (config.preserveOriginals) {
           result.push({
             ...thesis,
-            category: 'thesis',
+            category: "thesis",
           });
           result.push({
             ...antithesis,
-            category: 'antithesis',
+            category: "antithesis",
           });
         }
         duplicatesRemoved += 2;
@@ -435,7 +436,7 @@ export class InsightMerger {
     // Add remaining antithesis insights that didn't have matching thesis
     for (const antithesis of antithesisInsights) {
       const hasMatchingThesis = thesisInsights.some((t) =>
-        this.areContradicting(t, antithesis)
+        this.areContradicting(t, antithesis),
       );
       if (!hasMatchingThesis) {
         result.push(antithesis);
@@ -444,7 +445,7 @@ export class InsightMerger {
 
     // Filter by confidence
     const filtered = result.filter(
-      (i) => i.confidence >= this.config.minConfidence
+      (i) => i.confidence >= this.config.minConfidence,
     );
 
     return {
@@ -454,7 +455,7 @@ export class InsightMerger {
         totalBefore,
         filtered.length,
         duplicatesRemoved,
-        conflicts.length
+        conflicts.length,
       ),
     };
   }
@@ -466,7 +467,9 @@ export class InsightMerger {
   /**
    * Flatten insights from all modes into a single array
    */
-  private flattenInsights(insightsByMode: Map<ThinkingMode, Insight[]>): Insight[] {
+  private flattenInsights(
+    insightsByMode: Map<ThinkingMode, Insight[]>,
+  ): Insight[] {
     const all: Insight[] = [];
     for (const insights of insightsByMode.values()) {
       all.push(...insights);
@@ -528,7 +531,10 @@ export class InsightMerger {
    * Check if two insights are similar
    */
   private areSimilar(a: Insight, b: Insight): boolean {
-    return this.calculateSimilarity(a.content, b.content) >= this.config.similarityThreshold;
+    return (
+      this.calculateSimilarity(a.content, b.content) >=
+      this.config.similarityThreshold
+    );
   }
 
   /**
@@ -599,7 +605,7 @@ export class InsightMerger {
               confidence: insights[j].confidence,
               insightId: insights[j].id,
             },
-            conflictType: 'direct_contradiction',
+            conflictType: "direct_contradiction",
             severity: 0.7,
           });
         }
@@ -645,7 +651,7 @@ export class InsightMerger {
    */
   private findContradicting(
     insight: Insight,
-    candidates: Insight[]
+    candidates: Insight[],
   ): Insight | undefined {
     return candidates.find((c) => this.areContradicting(insight, c));
   }
@@ -656,12 +662,15 @@ export class InsightMerger {
   private findSynthesis(
     thesis: Insight,
     antithesis: Insight,
-    candidates: Insight[]
+    candidates: Insight[],
   ): Insight | undefined {
     // Look for an insight that references both or has high similarity to both
     return candidates.find((c) => {
       const simToThesis = this.calculateSimilarity(c.content, thesis.content);
-      const simToAntithesis = this.calculateSimilarity(c.content, antithesis.content);
+      const simToAntithesis = this.calculateSimilarity(
+        c.content,
+        antithesis.content,
+      );
       // A good synthesis should have moderate similarity to both
       return simToThesis > 0.3 && simToAntithesis > 0.3;
     });
@@ -674,7 +683,7 @@ export class InsightMerger {
     totalBefore: number,
     totalAfter: number,
     duplicatesRemoved: number,
-    conflictsDetected: number
+    conflictsDetected: number,
   ): MergeStatistics {
     return {
       totalInsightsBefore: totalBefore,
