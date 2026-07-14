@@ -4,7 +4,7 @@
  * Tests the file-based session persistence implementation
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { FileSessionStore } from '../../src/session/storage/file-store.js';
 import { ThinkingMode, ThinkingSession } from '../../src/types/index.js';
 import { promises as fs } from 'fs';
@@ -458,6 +458,60 @@ describe('FileSessionStore', () => {
         expect(loaded?.id).toBe(session.id);
       });
     });
+
+    it('should not lose sessions from the index under concurrent saves with slow disk I/O (reproduces CI data-loss bug)', async () => {
+      // Root cause: acquireExclusiveLock() in src/utils/file-lock.ts used to
+      // grant the lock to ANY caller in the same process whose lock-file
+      // instanceId matched the process-wide INSTANCE_ID constant. Since
+      // that constant is shared by every concurrent async caller in one
+      // process, the very first caller to write metadata/index.json.lock
+      // caused every other concurrent caller to be waved through too, with
+      // zero mutual exclusion. Those callers then raced read-modify-write on
+      // metadata/index.json, and whichever write happened to land last
+      // silently overwrote the others' additions.
+      //
+      // This is timing-dependent on real hardware, which is exactly why the
+      // upstream CI failure was intermittent (passed in isolation, failed
+      // under full-suite load). We force the exact same interleaving
+      // deterministically here:
+      //  1. Stagger each session's own file write with a random delay, so
+      //     the 10 concurrent saveSession() calls reach their metadata
+      //     update at scattered times (some see a near-empty in-memory
+      //     cache, some see a near-full one) instead of all landing in a
+      //     tight cluster.
+      //  2. Randomize the index.json write itself, so the completion order
+      //     of concurrent metadata writes can invert relative to how
+      //     complete each writer's snapshot was — the exact inversion that
+      //     silently drops entries when mutual exclusion is broken.
+      const originalWriteFile = fs.writeFile.bind(fs);
+      const spy = vi.spyOn(fs, 'writeFile').mockImplementation(async (file, data, options) => {
+        if (typeof file === 'string' && file.endsWith('index.json')) {
+          await new Promise((resolve) => setTimeout(resolve, Math.random() * 20));
+        } else if (
+          typeof file === 'string' &&
+          file.includes(`${path.sep}sessions${path.sep}`) &&
+          file.endsWith('.json')
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, Math.random() * 20));
+        }
+        return originalWriteFile(file as any, data as any, options as any);
+      });
+
+      try {
+        const sessions = Array.from({ length: 10 }, () => createTestSession());
+
+        await Promise.all(sessions.map((s) => store.saveSession(s)));
+
+        const allSessions = await store.listSessions();
+        expect(allSessions).toHaveLength(10);
+        const ids = new Set(allSessions.map((s) => s.id));
+        for (const session of sessions) {
+          expect(ids.has(session.id)).toBe(true);
+        }
+      } finally {
+        spy.mockRestore();
+      }
+    }, 20000);
   });
 
   describe('error handling', () => {

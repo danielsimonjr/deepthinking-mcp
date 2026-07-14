@@ -76,6 +76,76 @@ const DEFAULT_OPTIONS: Required<LockOptions> = {
 // Unique instance ID for this process
 const INSTANCE_ID = `${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
+// Monotonically increasing counter used to make per-attempt identifiers
+// (temp file names, shared-lock file names) unique even when multiple
+// concurrent async callers share the same process (and therefore the same
+// INSTANCE_ID). Without this, concurrent same-process attempts collide on
+// the same temp/lock file path and clobber each other (see nextAttemptId).
+let attemptCounter = 0;
+
+/**
+ * Generate an identifier that is unique per acquisition *attempt*, not just
+ * per process. `INSTANCE_ID` alone is NOT sufficient here: it is a single
+ * constant shared by every concurrent async caller within this process, so
+ * using it to name a temp file or shared-lock file causes concurrent
+ * in-process attempts to collide on the exact same path.
+ */
+function nextAttemptId(): string {
+  attemptCounter += 1;
+  return `${INSTANCE_ID}-${attemptCounter}`;
+}
+
+/**
+ * In-process mutual-exclusion queue, keyed by lock path.
+ *
+ * `acquireExclusiveLock` used to have NO mutual exclusion between concurrent
+ * async callers in the same process: it treated a lock file whose
+ * `instanceId` matched the process-wide `INSTANCE_ID` as already held by the
+ * caller ("re-entrant") and granted access immediately — but every
+ * concurrent caller in this process shares that same `INSTANCE_ID`, so the
+ * first caller to write the lock file caused every OTHER concurrent caller
+ * to be waved through too. That let concurrent writers race on
+ * read-modify-write of the protected file with zero serialization, silently
+ * dropping updates (e.g. FileSessionStore losing sessions from
+ * metadata/index.json under concurrent saves).
+ *
+ * `runExclusiveInProcess` serializes same-process attempts to acquire a
+ * given lock path: each attempt only starts once the previous same-process
+ * attempt has finished (successfully or not), so at most one same-process
+ * caller is ever inside the acquire-decide-write sequence for a given lock
+ * path at a time. This is in ADDITION to the cross-process file lock, not a
+ * replacement for it — cross-process callers still coordinate via the lock
+ * file itself (staleness detection, etc.).
+ */
+const inProcessLockQueues = new Map<string, Promise<unknown>>();
+
+function runExclusiveInProcess<T>(
+  key: string,
+  task: () => Promise<T>,
+): Promise<T> {
+  const previous = inProcessLockQueues.get(key) ?? Promise.resolve();
+  // Run `task` after the previous same-key attempt settles, regardless of
+  // whether it resolved or rejected — one attempt's failure/timeout must
+  // never permanently block the next attempt's turn.
+  const result = previous.then(task, task);
+  // Track a version of the promise that never rejects, so a failed attempt
+  // doesn't produce an unhandled rejection warning while still gating the
+  // next attempt in the queue.
+  const tracked = result.then(
+    () => undefined,
+    () => undefined,
+  );
+  inProcessLockQueues.set(key, tracked);
+  // Best-effort cleanup: once this is the last queued attempt for this key,
+  // remove the entry so the map doesn't grow without bound.
+  void tracked.then(() => {
+    if (inProcessLockQueues.get(key) === tracked) {
+      inProcessLockQueues.delete(key);
+    }
+  });
+  return result;
+}
+
 /**
  * Get the lock file path for a given file
  */
@@ -132,7 +202,11 @@ async function writeLockInfo(
   lockPath: string,
   lockInfo: LockInfo,
 ): Promise<boolean> {
-  const tempPath = `${lockPath}.${INSTANCE_ID}.tmp`;
+  // Unique PER ATTEMPT, not per process: two concurrent same-process
+  // attempts must never share a temp path, or one attempt's cleanup
+  // (`unlink` on EEXIST) can delete the temp file the other attempt is
+  // still trying to `rename` — which surfaces as EPERM/ENOENT on Windows.
+  const tempPath = `${lockPath}.${nextAttemptId()}.tmp`;
   try {
     // Write to temp file first
     await fs.writeFile(tempPath, JSON.stringify(lockInfo), { flag: "wx" });
@@ -162,12 +236,29 @@ async function writeLockInfo(
 
 /**
  * Acquire an exclusive lock on a file
+ *
+ * Serialized per lock path via `runExclusiveInProcess` so that concurrent
+ * same-process callers never both believe they hold the lock at once (see
+ * the comment on `inProcessLockQueues` for the bug this fixes). The
+ * cross-process file-lock protocol (staleness detection, atomic
+ * write+rename) is unchanged and still governs coordination between
+ * different processes/instances.
  */
 async function acquireExclusiveLock(
   filePath: string,
   options: Required<LockOptions>,
 ): Promise<() => Promise<void>> {
   const lockPath = getLockPath(filePath);
+  return runExclusiveInProcess(lockPath, () =>
+    acquireExclusiveLockAttempt(filePath, lockPath, options),
+  );
+}
+
+async function acquireExclusiveLockAttempt(
+  filePath: string,
+  lockPath: string,
+  options: Required<LockOptions>,
+): Promise<() => Promise<void>> {
   const sharedLockDir = getSharedLockDir(filePath);
   const startTime = Date.now();
 
@@ -176,15 +267,16 @@ async function acquireExclusiveLock(
     const existingLock = await readLockInfo(lockPath);
 
     if (existingLock) {
-      // Check if it's our own lock (re-entrant)
-      if (existingLock.instanceId === INSTANCE_ID) {
-        // Already hold the lock
-        return async () => {
-          await fs
-            .unlink(lockPath)
-            .catch((err) => handleUnlinkError(err, lockPath, "exclusive lock"));
-        };
-      }
+      // NOTE: there is intentionally no "is this our own lock" re-entrant
+      // short-circuit here. `instanceId` identifies a PROCESS, not a
+      // logical caller — every concurrent async caller in this process
+      // shares the same instanceId, so treating a same-instanceId lock as
+      // "already held by me" would grant the lock to unrelated concurrent
+      // callers too (the original bug). No call site in this codebase
+      // relies on genuine re-entrancy (nested acquisition of the same lock
+      // path within one logical call); if that's ever needed, it must be
+      // keyed on a real per-attempt owner token, not the process-wide
+      // instanceId.
 
       // Check if stale
       if (isLockStale(existingLock, options.staleThreshold)) {
@@ -266,7 +358,12 @@ async function acquireSharedLock(
 ): Promise<() => Promise<void>> {
   const exclusiveLockPath = getLockPath(filePath);
   const sharedLockDir = getSharedLockDir(filePath);
-  const sharedLockPath = path.join(sharedLockDir, `${INSTANCE_ID}.lock`);
+  // Unique PER ATTEMPT (per call to acquireSharedLock), not per process:
+  // otherwise concurrent same-process readers would all write to the exact
+  // same shared-lock file, and one reader releasing (unlinking) its "shared"
+  // lock would silently drop the others' too, letting an exclusive writer
+  // sneak in while they're still reading.
+  const sharedLockPath = path.join(sharedLockDir, `${nextAttemptId()}.lock`);
   const startTime = Date.now();
 
   while (Date.now() - startTime < options.timeout) {
