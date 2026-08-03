@@ -96,16 +96,26 @@ def extract_skill_version() -> str | None:
 
 def extract_claudemd_version() -> str | None:
     """
-    Return the version from `**Current version:** vX.Y.Z` in CLAUDE.md.
-    Returns None if the line is absent.
+    Return the version from CLAUDE.md's version intro line. Two conventions
+    are recognized:
+    - `**Current version:** vX.Y.Z` (the sibling deepthinking-plugin convention)
+    - `**Version**: X.Y.Z` (this repo's convention, e.g.
+      `**Version**: 9.1.3 | **Node**: >=18.0.0 | ...`)
+    Returns None if neither is present.
     """
     path = REPO_ROOT / "CLAUDE.md"
     if not path.exists():
         return None
     text = path.read_text(encoding="utf-8")
-    pattern = re.compile(r"\*\*Current version:\*\*\s+v(\d+\.\d+\.\d+)")
-    match = pattern.search(text)
-    return match.group(1) if match else None
+    patterns = [
+        re.compile(r"\*\*Current version:\*\*\s+v(\d+\.\d+\.\d+)"),
+        re.compile(r"\*\*Version\*\*:\s+v?(\d+\.\d+\.\d+)"),
+    ]
+    for pattern in patterns:
+        match = pattern.search(text)
+        if match:
+            return match.group(1)
+    return None
 
 
 def extract_architecture_version() -> str | None:

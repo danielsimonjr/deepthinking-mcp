@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 9.1.0 | **Last Updated**: 2025-12-31
+**Version**: 9.2.0 | **Last Updated**: 2026-08-03
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -102,6 +102,7 @@ The codebase is organized into the following modules:
 | Module | Import |
 |--------|--------|
 | `fs` | `* as fs` |
+| `os` | `* as os` |
 | `path` | `* as path` |
 
 **Internal Dependencies:**
@@ -114,7 +115,7 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `FileExporter`
 - Interfaces: `FileExportConfig`, `FileExportResult`, `BatchExportResult`, `ExportProgress`
-- Functions: `createFileExporter`
+- Functions: `resolveSandboxedOutputDir`, `createFileExporter`
 
 ---
 
@@ -945,7 +946,7 @@ The codebase is organized into the following modules:
 
 ## Entry Dependencies
 
-### `src/index.ts` - DeepThinking MCP Server (v9.1.0)
+### `src/index.ts` - DeepThinking MCP Server
 
 **External Dependencies:**
 | Package | Import |
@@ -2301,6 +2302,7 @@ The codebase is organized into the following modules:
 | `../interfaces/ILogger.js` | `ILogger` | Import |
 | `./storage/interface.js` | `SessionStorage` | Import |
 | `../cache/lru.js` | `LRUCache` | Import |
+| `../cache/types.js` | `CacheStats` | Import (type-only) |
 | `./SessionMetricsCalculator.js` | `SessionMetricsCalculator` | Import |
 | `./utils/logger.js` | `createLogger, LogLevel` | Import |
 | `./storage/file-store.js` | `FileSessionStore` | Import |
@@ -2339,6 +2341,7 @@ The codebase is organized into the following modules:
 | `./interface.js` | `SessionStorage, StorageStats, StorageConfig, DEFAULT_STORAGE_CONFIG` | Import |
 | `../../utils/logger.js` | `logger` | Import |
 | `../../utils/file-lock.js` | `withLock, withSharedLock, LockOptions` | Import |
+| `../../utils/sanitization.js` | `validateSessionId` | Import |
 
 **Exports:**
 - Classes: `FileSessionStore`
@@ -3280,6 +3283,7 @@ The codebase is organized into the following modules:
 |--------|--------|
 | `fs` | `promises` |
 | `path` | `* as path` |
+| `os` | `* as os` |
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -4094,7 +4098,7 @@ The codebase is organized into the following modules:
 |------|--------------|------------|
 | `index` | 1 files | 0 files |
 | `lru` | 1 files | 2 files |
-| `types` | 0 files | 1 files |
+| `types` | 0 files | 2 files |
 | `index` | 0 files | 2 files |
 | `file-exporter` | 2 files | 1 files |
 | `index` | 4 files | 0 files |
@@ -4301,19 +4305,19 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 237 |
 | Total Modules | 15 |
-| Total Lines of Code | 102467 |
-| Total Exports | 1275 |
+| Total Lines of Code | 115713 |
+| Total Exports | 1276 |
 | Total Re-exports | 571 |
 | Total Classes | 145 |
 | Total Interfaces | 536 |
-| Total Functions | 428 |
+| Total Functions | 429 |
 | Total Type Guards | 87 |
 | Total Enums | 3 |
-| Type-only Imports | 315 |
+| Type-only Imports | 316 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 57 |
 
 ---
 
-*Last Updated*: 2025-12-31
-*Version*: 9.1.0
+*Last Updated*: 2026-08-03
+*Version*: 9.2.0

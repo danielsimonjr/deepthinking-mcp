@@ -1,0 +1,58 @@
+name: Feature Request
+description: Propose a new reasoning mode, export format, MCP tool, or other enhancement.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing, check `docs/planning/` and `docs/analysis/REASONING_TYPES_GAP_ANALYSIS.md` —
+        your idea may already be tracked. For a brand-new reasoning mode, also skim
+        `docs/setup/ADDING_NEW_MODE.md` so the proposal accounts for the full surface area (type,
+        handler, validator, visual exporter, docs).
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: What kind of feature is this?
+      options:
+        - New reasoning mode
+        - New export format
+        - New MCP tool
+        - Enhancement to an existing mode/handler
+        - Session management / persistence
+        - Build / CI / developer tooling
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: What can't you do today that this would enable? Prefer a concrete use case over an abstract one.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: As much detail as you have — API shape, mode name, expected inputs/outputs, etc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you thought about, and why you didn't prefer them. Leave blank if none.
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd be willing to implement this myself with guidance (see CONTRIBUTING.md)
+          required: false

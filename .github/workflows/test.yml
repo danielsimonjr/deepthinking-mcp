@@ -70,6 +70,39 @@ jobs:
             test-results/
           retention-days: 30
 
+  python-suite:
+    name: Python Test Suite (artifact/schema/version consistency)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install Python dependencies
+        run: pip install jsonschema pytest
+
+      # These 186 files return correct process exit codes when invoked
+      # directly - they are NOT pytest-shaped (check_*/main() rather than
+      # test_* functions), so `pytest test` alone only collects 1 of 6 top-
+      # level scripts. Invoke each directly instead of rewriting them to fit
+      # pytest's collection shape.
+      - name: Run Python test/consistency suite
+        run: |
+          python test/harness.py
+          python test/test_artifact_consistency.py
+          python test/test_format_grammars.py
+          python test/test_skill_frontmatter.py
+          python test/test_skill_invariants.py
+          python test/test_version_consistency.py
+
+      - name: Run pytest-shaped suite (test_plugin_json.py)
+        run: python -m pytest test/test_plugin_json.py -v
+
   build:
     name: Build Package
     runs-on: ubuntu-latest

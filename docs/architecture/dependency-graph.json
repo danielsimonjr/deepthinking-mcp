@@ -1,17 +1,17 @@
 {
   "metadata": {
     "name": "deepthinking-mcp",
-    "version": "9.1.0",
-    "lastUpdated": "2025-12-31",
+    "version": "9.2.0",
+    "lastUpdated": "2026-08-03",
     "totalFiles": 237,
     "totalModules": 15,
-    "totalExports": 1275
+    "totalExports": 1276
   },
   "entryPoints": [
     {
       "file": "src/index.ts",
       "type": "main",
-      "description": "DeepThinking MCP Server (v9.1.0)"
+      "description": "DeepThinking MCP Server"
     }
   ],
   "modules": {
@@ -112,6 +112,12 @@
             ]
           },
           {
+            "module": "os",
+            "imports": [
+              "* as os"
+            ]
+          },
+          {
             "module": "path",
             "imports": [
               "* as path"
@@ -142,6 +148,7 @@
           }
         ],
         "exports": [
+          "resolveSandboxedOutputDir",
           "createFileExporter",
           "FileExporter"
         ],
@@ -155,6 +162,7 @@
           "ExportProgress"
         ],
         "functions": [
+          "resolveSandboxedOutputDir",
           "createFileExporter"
         ]
       },
@@ -185,7 +193,7 @@
               "exportScientificMethodExperiment",
               "exportOptimizationSolution",
               "exportFormalLogicProof",
-              "// Phase 8: Proof decomposition\r\n  exportProofDecomposition"
+              "// Phase 8: Proof decomposition\n  exportProofDecomposition"
             ],
             "reExport": true
           },
@@ -252,7 +260,7 @@
           "exportScientificMethodExperiment",
           "exportOptimizationSolution",
           "exportFormalLogicProof",
-          "// Phase 8: Proof decomposition\r\n  exportProofDecomposition",
+          "// Phase 8: Proof decomposition\n  exportProofDecomposition",
           "LaTeXExporter",
           "type LaTeXExportOptions",
           "type ExportFormatType",
@@ -298,7 +306,7 @@
           "exportScientificMethodExperiment",
           "exportOptimizationSolution",
           "exportFormalLogicProof",
-          "// Phase 8: Proof decomposition\r\n  exportProofDecomposition",
+          "// Phase 8: Proof decomposition\n  exportProofDecomposition",
           "LaTeXExporter",
           "type LaTeXExportOptions",
           "type ExportFormatType",
@@ -4429,7 +4437,7 @@
     },
     "entry": {
       "src/index.ts": {
-        "description": "DeepThinking MCP Server (v9.1.0)",
+        "description": "DeepThinking MCP Server",
         "externalDependencies": [
           {
             "package": "@modelcontextprotocol/sdk/server/index.js",
@@ -8635,7 +8643,7 @@
               "isScientificMethodThought",
               "isHistoricalThought",
               "HybridThought",
-              "// Sprint 1: Visual export integration types\r\n  SequentialThought",
+              "// Sprint 1: Visual export integration types\n  SequentialThought",
               "ShannonThought",
               "AbductiveThought",
               "CounterfactualThought",
@@ -8835,6 +8843,13 @@
             ]
           },
           {
+            "file": "../cache/types.js",
+            "imports": [
+              "CacheStats"
+            ],
+            "typeOnly": true
+          },
+          {
             "file": "./SessionMetricsCalculator.js",
             "imports": [
               "SessionMetricsCalculator"
@@ -8942,6 +8957,12 @@
               "withLock",
               "withSharedLock",
               "LockOptions"
+            ]
+          },
+          {
+            "file": "../../utils/sanitization.js",
+            "imports": [
+              "validateSessionId"
             ]
           }
         ],
@@ -12247,6 +12268,12 @@
             "imports": [
               "* as path"
             ]
+          },
+          {
+            "module": "os",
+            "imports": [
+              "* as os"
+            ]
           }
         ],
         "internalDependencies": [
@@ -12545,7 +12572,7 @@
           {
             "file": "./schema-utils.js",
             "imports": [
-              "// Primitive schemas\r\n  probabilitySchema",
+              "// Primitive schemas\n  probabilitySchema",
               "confidenceSchema",
               "progressSchema",
               "weightSchema",
@@ -12554,7 +12581,7 @@
               "nonEmptyStringSchema",
               "uuidSchema",
               "timestampSchema",
-              "// Composite schemas - Hypothesis & Evidence\r\n  hypothesisSchema",
+              "// Composite schemas - Hypothesis & Evidence\n  hypothesisSchema",
               "probabilityWithJustificationSchema",
               "probabilityWithCalculationSchema",
               "evidenceSchema",
@@ -12564,7 +12591,7 @@
               "type ProbabilityWithCalculation",
               "type EvidenceInput",
               "type EvidenceWithSupport",
-              "// Graph schemas\r\n  createNodeSchema",
+              "// Graph schemas\n  createNodeSchema",
               "createEdgeSchema",
               "nodeSchema",
               "weightedNodeSchema",
@@ -12576,48 +12603,48 @@
               "type EdgeInput",
               "type WeightedEdgeInput",
               "type CausalEdgeInput",
-              "// Temporal schemas\r\n  timePointSchema",
+              "// Temporal schemas\n  timePointSchema",
               "timeIntervalSchema",
               "temporalEventSchema",
               "type TimePointInput",
               "type TimeIntervalInput",
               "type TemporalEventInput",
-              "// Mathematical schemas\r\n  mathExpressionSchema",
+              "// Mathematical schemas\n  mathExpressionSchema",
               "valueWithUnitSchema",
               "measurementSchema",
               "type MathExpressionInput",
               "type ValueWithUnitInput",
               "type MeasurementInput",
-              "// Game Theory schemas\r\n  playerSchema",
+              "// Game Theory schemas\n  playerSchema",
               "strategySchema",
               "payoffSchema",
               "type PlayerInput",
               "type StrategyInput",
               "type PayoffInput",
-              "// Reasoning schemas\r\n  reasoningStepSchema",
+              "// Reasoning schemas\n  reasoningStepSchema",
               "propositionSchema",
               "inferenceRuleSchema",
               "type ReasoningStepInput",
               "type PropositionInput",
               "type InferenceRuleInput",
-              "// Optimization schemas\r\n  constraintSchema",
+              "// Optimization schemas\n  constraintSchema",
               "objectiveSchema",
               "solutionSchema",
               "type ConstraintInput",
               "type ObjectiveInput",
               "type SolutionInput",
-              "// Base schemas\r\n  baseThoughtSchema",
+              "// Base schemas\n  baseThoughtSchema",
               "sequentialThoughtExtensionSchema",
               "bayesianThoughtExtensionSchema",
               "type BaseThoughtInput",
-              "// Helpers\r\n  createRangeSchema",
+              "// Helpers\n  createRangeSchema",
               "createEnumSchema",
               "createOptionalStringWithDefault",
               "createOptionalNumberWithDefault",
               "createOptionalBooleanWithDefault",
               "uniqueIdArraySchema",
               "createGraphSchema",
-              "// Namespace export\r\n  SchemaUtils"
+              "// Namespace export\n  SchemaUtils"
             ],
             "reExport": true
           }
@@ -12652,7 +12679,7 @@
           "type BatchOperationInput",
           "validateInput",
           "safeValidateInput",
-          "// Primitive schemas\r\n  probabilitySchema",
+          "// Primitive schemas\n  probabilitySchema",
           "confidenceSchema",
           "progressSchema",
           "weightSchema",
@@ -12661,7 +12688,7 @@
           "nonEmptyStringSchema",
           "uuidSchema",
           "timestampSchema",
-          "// Composite schemas - Hypothesis & Evidence\r\n  hypothesisSchema",
+          "// Composite schemas - Hypothesis & Evidence\n  hypothesisSchema",
           "probabilityWithJustificationSchema",
           "probabilityWithCalculationSchema",
           "evidenceSchema",
@@ -12671,7 +12698,7 @@
           "type ProbabilityWithCalculation",
           "type EvidenceInput",
           "type EvidenceWithSupport",
-          "// Graph schemas\r\n  createNodeSchema",
+          "// Graph schemas\n  createNodeSchema",
           "createEdgeSchema",
           "nodeSchema",
           "weightedNodeSchema",
@@ -12683,48 +12710,48 @@
           "type EdgeInput",
           "type WeightedEdgeInput",
           "type CausalEdgeInput",
-          "// Temporal schemas\r\n  timePointSchema",
+          "// Temporal schemas\n  timePointSchema",
           "timeIntervalSchema",
           "temporalEventSchema",
           "type TimePointInput",
           "type TimeIntervalInput",
           "type TemporalEventInput",
-          "// Mathematical schemas\r\n  mathExpressionSchema",
+          "// Mathematical schemas\n  mathExpressionSchema",
           "valueWithUnitSchema",
           "measurementSchema",
           "type MathExpressionInput",
           "type ValueWithUnitInput",
           "type MeasurementInput",
-          "// Game Theory schemas\r\n  playerSchema",
+          "// Game Theory schemas\n  playerSchema",
           "strategySchema",
           "payoffSchema",
           "type PlayerInput",
           "type StrategyInput",
           "type PayoffInput",
-          "// Reasoning schemas\r\n  reasoningStepSchema",
+          "// Reasoning schemas\n  reasoningStepSchema",
           "propositionSchema",
           "inferenceRuleSchema",
           "type ReasoningStepInput",
           "type PropositionInput",
           "type InferenceRuleInput",
-          "// Optimization schemas\r\n  constraintSchema",
+          "// Optimization schemas\n  constraintSchema",
           "objectiveSchema",
           "solutionSchema",
           "type ConstraintInput",
           "type ObjectiveInput",
           "type SolutionInput",
-          "// Base schemas\r\n  baseThoughtSchema",
+          "// Base schemas\n  baseThoughtSchema",
           "sequentialThoughtExtensionSchema",
           "bayesianThoughtExtensionSchema",
           "type BaseThoughtInput",
-          "// Helpers\r\n  createRangeSchema",
+          "// Helpers\n  createRangeSchema",
           "createEnumSchema",
           "createOptionalStringWithDefault",
           "createOptionalNumberWithDefault",
           "createOptionalBooleanWithDefault",
           "uniqueIdArraySchema",
           "createGraphSchema",
-          "// Namespace export\r\n  SchemaUtils"
+          "// Namespace export\n  SchemaUtils"
         ],
         "reExported": [
           "IssueSeverity",
@@ -12756,7 +12783,7 @@
           "type BatchOperationInput",
           "validateInput",
           "safeValidateInput",
-          "// Primitive schemas\r\n  probabilitySchema",
+          "// Primitive schemas\n  probabilitySchema",
           "confidenceSchema",
           "progressSchema",
           "weightSchema",
@@ -12765,7 +12792,7 @@
           "nonEmptyStringSchema",
           "uuidSchema",
           "timestampSchema",
-          "// Composite schemas - Hypothesis & Evidence\r\n  hypothesisSchema",
+          "// Composite schemas - Hypothesis & Evidence\n  hypothesisSchema",
           "probabilityWithJustificationSchema",
           "probabilityWithCalculationSchema",
           "evidenceSchema",
@@ -12775,7 +12802,7 @@
           "type ProbabilityWithCalculation",
           "type EvidenceInput",
           "type EvidenceWithSupport",
-          "// Graph schemas\r\n  createNodeSchema",
+          "// Graph schemas\n  createNodeSchema",
           "createEdgeSchema",
           "nodeSchema",
           "weightedNodeSchema",
@@ -12787,48 +12814,48 @@
           "type EdgeInput",
           "type WeightedEdgeInput",
           "type CausalEdgeInput",
-          "// Temporal schemas\r\n  timePointSchema",
+          "// Temporal schemas\n  timePointSchema",
           "timeIntervalSchema",
           "temporalEventSchema",
           "type TimePointInput",
           "type TimeIntervalInput",
           "type TemporalEventInput",
-          "// Mathematical schemas\r\n  mathExpressionSchema",
+          "// Mathematical schemas\n  mathExpressionSchema",
           "valueWithUnitSchema",
           "measurementSchema",
           "type MathExpressionInput",
           "type ValueWithUnitInput",
           "type MeasurementInput",
-          "// Game Theory schemas\r\n  playerSchema",
+          "// Game Theory schemas\n  playerSchema",
           "strategySchema",
           "payoffSchema",
           "type PlayerInput",
           "type StrategyInput",
           "type PayoffInput",
-          "// Reasoning schemas\r\n  reasoningStepSchema",
+          "// Reasoning schemas\n  reasoningStepSchema",
           "propositionSchema",
           "inferenceRuleSchema",
           "type ReasoningStepInput",
           "type PropositionInput",
           "type InferenceRuleInput",
-          "// Optimization schemas\r\n  constraintSchema",
+          "// Optimization schemas\n  constraintSchema",
           "objectiveSchema",
           "solutionSchema",
           "type ConstraintInput",
           "type ObjectiveInput",
           "type SolutionInput",
-          "// Base schemas\r\n  baseThoughtSchema",
+          "// Base schemas\n  baseThoughtSchema",
           "sequentialThoughtExtensionSchema",
           "bayesianThoughtExtensionSchema",
           "type BaseThoughtInput",
-          "// Helpers\r\n  createRangeSchema",
+          "// Helpers\n  createRangeSchema",
           "createEnumSchema",
           "createOptionalStringWithDefault",
           "createOptionalNumberWithDefault",
           "createOptionalBooleanWithDefault",
           "uniqueIdArraySchema",
           "createGraphSchema",
-          "// Namespace export\r\n  SchemaUtils"
+          "// Namespace export\n  SchemaUtils"
         ]
       },
       "src/validation/schema-utils.ts": {
@@ -15697,19 +15724,19 @@
   "statistics": {
     "totalTypeScriptFiles": 237,
     "totalModules": 15,
-    "totalLinesOfCode": 102467,
-    "totalExports": 1275,
+    "totalLinesOfCode": 115713,
+    "totalExports": 1276,
     "totalClasses": 145,
     "totalInterfaces": 536,
-    "totalFunctions": 428,
+    "totalFunctions": 429,
     "totalTypeGuards": 87,
     "totalEnums": 3,
     "totalConstants": 144,
     "totalReExports": 571,
-    "totalTypeOnlyImports": 315,
+    "totalTypeOnlyImports": 316,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 57,
     "unusedFilesCount": 16,
-    "unusedExportsCount": 478
+    "unusedExportsCount": 479
   }
 }
